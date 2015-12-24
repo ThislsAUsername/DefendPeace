@@ -8,4 +8,9 @@ public class Unit {
 	public Commander CO;
 	public boolean isTurnOver;
 	public double HP;
+
+	public double getAtkStr(Unit target, boolean isCounter){
+		return 0;
+	}
+	public void applyDamage(Unit unit, boolean isCounter){}
 }

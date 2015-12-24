@@ -15,11 +15,6 @@ public class Commander {
 	public void doAbilityMinor(){}
 	public void doAbilityMajor(){}
 	
-	public double getAtkStr(Unit unit, Unit target, boolean isCounter){
-		return 0;
-	}
-	public void applyDamage(Unit unit, Unit target, boolean isCounter){}
-	
 	public void initTurn() {
 		for(int i = 0; i < modifiers.size(); i++) {
 			if (modifiers.get(i).done) {
