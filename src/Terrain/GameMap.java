@@ -2,7 +2,7 @@ package Terrain;
 
 public class GameMap {
 
-	public Tile[][] map;
+	private Tile[][] map;
 	public final int mapWidth;
 	public final int mapHeight;
 
