@@ -2,7 +2,7 @@ package CommandingOfficers.Modifiers;
 
 import CommandingOfficers.Commander;
 
-public class Modifier {
+public class COModifier {
 	public Commander target;
 	public boolean done = false;
 	private boolean applied = false;

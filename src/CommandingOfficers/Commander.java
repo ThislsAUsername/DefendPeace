@@ -4,13 +4,13 @@ import java.util.ArrayList;
 
 import Units.Unit;
 import Units.UnitModel;
-import CommandingOfficers.Modifiers.Modifier;
+import CommandingOfficers.Modifiers.COModifier;
 
 
 public class Commander {
 	public Unit[] units;
 	public UnitModel[] unitModels;
-	public ArrayList<Modifier> modifiers;
+	public ArrayList<COModifier> modifiers;
 	
 	public void doAbilityMinor(){}
 	public void doAbilityMajor(){}
