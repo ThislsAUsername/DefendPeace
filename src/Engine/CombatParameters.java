@@ -20,7 +20,7 @@ public class CombatParameters {
 	public CombatParameters(Unit pAttacker, Unit pDefender, double pTerrainDefenseLevel, boolean isCounter) {
 		attacker			= pAttacker;
 		defender			= pDefender;
-		baseDamage			= DamageChart.chart[attacker.model.type.ordinal()][defender.model.type.ordinal()];
+		baseDamage			= DamageChart.chart[defender.model.type.ordinal()][attacker.model.type.ordinal()];
 		attackFactor		= attacker.model.COStr;
 		attackerHP			= attacker.HP;
 		defenseFactor		= defender.model.CODef;
