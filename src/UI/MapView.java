@@ -12,41 +12,12 @@ public class MapView extends javax.swing.JPanel {
 	private static final long serialVersionUID = 1L;
 	
 	private GameInstance myGame;
-	private int cursorX = 0;
-	private int cursorY = 0;
 	
 	public static final int tileSizePx = 32;
 
 	public MapView(GameInstance game)
 	{
 		myGame = game;
-	}
-	
-	public void handleAction(InputHandler.InputAction action)
-	{
-		switch (action)
-		{
-		case UP:
-			cursorY -= 1;
-			if(cursorY < 0) cursorY = 0;
-			break;
-		case DOWN:
-			cursorY +=1;
-			if(cursorY >= myGame.gameMap.mapHeight) cursorY = myGame.gameMap.mapHeight - 1;
-			break;
-		case LEFT:
-			cursorX -= 1;
-			if(cursorX < 0) cursorX = 0;
-			break;
-		case RIGHT:
-			cursorX += 1;
-			if(cursorX >= myGame.gameMap.mapWidth) cursorX = myGame.gameMap.mapWidth - 1;
-			break;
-		case ENTER:
-			break;
-			default:
-				System.out.println("WARNING! MapView was given invalid action enum (" + action + ")");
-		}
 	}
 	
 	@Override
@@ -59,7 +30,7 @@ public class MapView extends javax.swing.JPanel {
 			{
 				if(myGame.gameMap.getTile(w,h) != null)
 				{
-					drawTile(g, myGame.gameMap.map[w][h], w*tileSizePx, h*tileSizePx);
+					drawTile(g, myGame.gameMap.getTile(w,h), w*tileSizePx, h*tileSizePx);
 				}
 				else
 				{
@@ -70,7 +41,7 @@ public class MapView extends javax.swing.JPanel {
 
 		// Draw the current cursor location.
 		g.setColor(new Color(253,171,77));
-		g.fillRect(cursorX*tileSizePx, cursorY*tileSizePx, tileSizePx, tileSizePx);
+		g.fillRect(myGame.getCursorX()*tileSizePx, myGame.getCursorY()*tileSizePx, tileSizePx, tileSizePx);
 	}
 	
 	private void drawTile(Graphics g, Tile tile, int x, int y)

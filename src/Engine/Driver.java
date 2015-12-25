@@ -21,9 +21,11 @@ public class Driver implements ActionListener{
 	// MenuView menuView;
 	MapView mapView;
 	// battleView battleView;
+	
+	MapController mapController;
 
 	// TODO: make this a GameView or some such when we get there.
-	private MapView activeView;
+	private MapController activeController;
 
 	public Driver()
 	{
@@ -34,13 +36,14 @@ public class Driver implements ActionListener{
 		GameInstance newGame = new GameInstance(map, cos);
 
 		mapView = new MapView(newGame);
+		mapController = new MapController(newGame);
 
-		activeView = mapView;
+		activeController = mapController;
 
 		gameWindow = new JFrame();
 		gameWindow.add(mapView);
 		gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		gameWindow.setSize(MapView.tileSizePx * 15,MapView.tileSizePx * 10);
+		gameWindow.setSize(MapView.tileSizePx * 15, MapView.tileSizePx * 10);
 		gameWindow.addKeyListener(new InputHandler(this));
 		gameWindow.setVisible(true);
 
@@ -60,7 +63,7 @@ public class Driver implements ActionListener{
 		if(action != InputHandler.InputAction.NO_ACTION)
 		{
 			// Pass the action on to the active game element.
-			activeView.handleAction(action);
+			activeController.handleAction(action);
 		}
 	}
 
