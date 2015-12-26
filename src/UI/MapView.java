@@ -3,8 +3,6 @@ package UI;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import javax.tools.JavaFileManager.Location;
-
 import Terrain.Environment;
 
 import Engine.GameInstance;
