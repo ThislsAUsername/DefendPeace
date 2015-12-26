@@ -1,5 +1,7 @@
 package Engine;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -36,6 +38,7 @@ public class Driver implements ActionListener{
 		GameInstance newGame = new GameInstance(map, cos);
 
 		mapView = new MapView(newGame);
+		mapView.setPreferredSize(new Dimension(MapView.tileSizePx * 15, MapView.tileSizePx * 10));
 		mapController = new MapController(newGame);
 
 		activeController = mapController;
@@ -43,8 +46,8 @@ public class Driver implements ActionListener{
 		gameWindow = new JFrame();
 		gameWindow.add(mapView);
 		gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		gameWindow.setSize(MapView.tileSizePx * 15, MapView.tileSizePx * 10);
 		gameWindow.addKeyListener(new InputHandler(this));
+		gameWindow.pack();
 		gameWindow.setVisible(true);
 
 		// Draw the screen at (ideally) 60fps.
