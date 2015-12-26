@@ -1,7 +1,7 @@
 package Units.MoveTypes;
 
-import Terrain.Tile.Terrains;
-import Terrain.Tile.Weathers;
+import Terrain.Environment.Terrains;
+import Terrain.Environment.Weathers;
 
 public class MoveType {
 	public int[][] moveCosts; // format is [weather][terrain]
