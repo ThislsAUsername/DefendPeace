@@ -1,5 +1,7 @@
 package Terrain;
 
+import Terrain.Tile.Weathers; // Eclipse was whining that it couldn't resolve this, and now it's whining that it's not used. *sigh*
+
 public class GameMap {
 
 	private Tile[][] map;
