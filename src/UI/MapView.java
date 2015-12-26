@@ -3,7 +3,7 @@ package UI;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import Terrain.Tile;
+import Terrain.Environment;
 
 import Engine.GameInstance;
 
@@ -28,9 +28,9 @@ public class MapView extends javax.swing.JPanel {
 		{
 			for(int h = 0; h < myGame.gameMap.mapHeight; ++h)
 			{
-				if(myGame.gameMap.getTile(w,h) != null)
+				if(myGame.gameMap.getLocation(w,h) != null)
 				{
-					drawTile(g, myGame.gameMap.getTile(w,h), w*tileSizePx, h*tileSizePx);
+					drawTile(g, myGame.gameMap.getLocation(w,h), w*tileSizePx, h*tileSizePx);
 				}
 				else
 				{
@@ -44,8 +44,9 @@ public class MapView extends javax.swing.JPanel {
 		g.fillRect(myGame.getCursorX()*tileSizePx, myGame.getCursorY()*tileSizePx, tileSizePx, tileSizePx);
 	}
 	
-	private void drawTile(Graphics g, Tile tile, int x, int y)
+	private void drawTile(Graphics g, Terrain.Location locus, int x, int y)
 	{
+		Environment tile = locus.getEnvironment();
 		Color tileColor = Color.black; // TODO: This will be a sprite eventually.
 		
 		switch(tile.terrainType)
