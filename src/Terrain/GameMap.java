@@ -1,17 +1,27 @@
 package Terrain;
 
+import java.awt.Color;
+
 public class GameMap {
 
 	private Location[][] map;
 	public final int mapWidth;
 	public final int mapHeight;
+	public CommandingOfficers.Commander[] commanders;
 
 	//TODO: We need a way to load/use multiple maps; either:
 	//  pass in a file name as a parameter here, or subclass
 	//  GameMap for each map you want, or have a static data
 	//  element with tile information for each available map
-	public GameMap()
+	public GameMap(CommandingOfficers.Commander[] COs)
 	{
+		commanders = COs;
+		// TODO: Remove this and/or make it actually good/work.
+//		for (int i = 0; i < commanders.length; i++) {
+//			commanders[i].myColor = new Color(i*100,i*100,i*100);
+//		}
+		commanders[0].myColor = Color.blue;
+		commanders[1].myColor = Color.red;
 		// for now, just make a 15x10 map of almost all plains.
 		mapWidth = 15;
 		mapHeight = 10;
@@ -35,16 +45,26 @@ public class GameMap {
 		map[1][8].setEnvironment(Environment.getTile(Environment.Terrains.HQ, Environment.Weathers.CLEAR));
 		map[1][7].setEnvironment(Environment.getTile(Environment.Terrains.FACTORY, Environment.Weathers.CLEAR));
 		map[2][7].setEnvironment(Environment.getTile(Environment.Terrains.FACTORY, Environment.Weathers.CLEAR));
+		map[1][8].setOwner(commanders[0]);
+		map[1][7].setOwner(commanders[0]);
+//		map[2][7].setOwner(commanders[0]);
 
 		map[13][1].setEnvironment(Environment.getTile(Environment.Terrains.HQ, Environment.Weathers.CLEAR));
 		map[13][2].setEnvironment(Environment.getTile(Environment.Terrains.FACTORY, Environment.Weathers.CLEAR));
 		map[12][2].setEnvironment(Environment.getTile(Environment.Terrains.FACTORY, Environment.Weathers.CLEAR));
+		map[13][1].setOwner(commanders[1]);
+		map[13][2].setOwner(commanders[1]);
+//		map[12][2].setOwner(commanders[1]);
 
 		// Add some cities and forests
 		map[1][4].setEnvironment(Environment.getTile(Environment.Terrains.CITY, Environment.Weathers.CLEAR));
 		map[2][5].setEnvironment(Environment.getTile(Environment.Terrains.CITY, Environment.Weathers.CLEAR));
 		map[13][5].setEnvironment(Environment.getTile(Environment.Terrains.CITY, Environment.Weathers.CLEAR));
 		map[12][4].setEnvironment(Environment.getTile(Environment.Terrains.CITY, Environment.Weathers.CLEAR));
+		map[1][4].setOwner(commanders[0]);
+//		map[2][5].setOwner(commanders[0]);
+		map[13][5].setOwner(commanders[1]);
+//		map[12][4].setOwner(commanders[1]);
 
 		map[3][5].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
 		map[6][5].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));

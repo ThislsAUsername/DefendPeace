@@ -31,10 +31,10 @@ public class Driver implements ActionListener{
 
 	public Driver()
 	{
-		GameMap map = new GameMap();
 		Commander co1 = new Commander();
 		Commander co2 = new Commander();
 		Commander[] cos = {co1, co2};
+		GameMap map = new GameMap(cos);
 		GameInstance newGame = new GameInstance(map, cos);
 
 		mapView = new MapView(newGame);

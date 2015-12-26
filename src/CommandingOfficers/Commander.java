@@ -1,5 +1,6 @@
 package CommandingOfficers;
 
+import java.awt.Color;
 import java.util.ArrayList;
 
 import Units.Unit;
@@ -11,6 +12,7 @@ public class Commander {
 	public Unit[] units;
 	public UnitModel[] unitModels;
 	public ArrayList<COModifier> modifiers;
+	public Color myColor;
 	
 	public void doAbilityMinor(){}
 	public void doAbilityMajor(){}

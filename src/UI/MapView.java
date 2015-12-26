@@ -55,10 +55,19 @@ public class MapView extends javax.swing.JPanel {
 			tileColor = new Color(186,255,124);
 			break;
 		case CITY:
-			tileColor = Color.GRAY;
+			if (locus.getOwner() != null) {
+				tileColor = locus.getOwner().myColor;
+			} else {
+				tileColor = Color.GRAY;
+			}
 			break;
 		case FACTORY:
-			tileColor = Color.DARK_GRAY; // TODO: Make this team color, if owned.
+			if (locus.getOwner() != null) {
+				tileColor = locus.getOwner().myColor;
+			} else {
+				tileColor = Color.DARK_GRAY;
+			}
+//			tileColor = Color.DARK_GRAY; // TODO: Make this team color, if owned.
 			break;
 		case FOREST:
 			tileColor = Color.GREEN;
@@ -67,7 +76,12 @@ public class MapView extends javax.swing.JPanel {
 			tileColor = Color.BLUE;
 			break;
 		case HQ:
-			tileColor = Color.RED; // TODO: Make this team color.
+			if (locus.getOwner() != null) {
+				tileColor = locus.getOwner().myColor;
+			} else {
+				tileColor = Color.RED;
+			}
+//			tileColor = Color.RED; // TODO: Make this team color.
 			break;
 		case MOUNTAIN:
 			tileColor = new Color(101,40,26);
