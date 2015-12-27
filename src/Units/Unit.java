@@ -1,7 +1,9 @@
 package Units;
 
+import Terrain.GameMap;
 import CommandingOfficers.Commander;
 import Engine.CombatParameters;
+import Engine.MapController;
 import Engine.DamageChart.UnitEnum;
 
 public class Unit {
@@ -37,4 +39,11 @@ public class Unit {
 	public static double getDefensePower(Unit unit, boolean isCounter) {
 		return 0;
 	}*/
+
+	public MapController.GameAction[] getPossibleActions(GameMap map)
+	{
+		// TODO - Actually look at the map to see what actions this unit can take from this location.
+		MapController.GameAction[] actions = {MapController.GameAction.ATTACK, MapController.GameAction.WAIT};
+		return actions;
+	}
 }
