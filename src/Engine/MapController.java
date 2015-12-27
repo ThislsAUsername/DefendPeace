@@ -98,7 +98,7 @@ public class MapController {
 				inputMode = InputMode.MOVEMENT;
 			}
 			else if(Environment.Terrains.FACTORY == loc.getEnvironment().terrainType
-					/*&& loc.getOwner() == myGame.activeCO*/)
+					&& loc.getOwner() == myGame.activeCO)
 			{
 				System.out.println("found a factory");
 				// TODO: Don't hard-code this. Also, is DamageChart the best place for UnitEnum?
