@@ -64,6 +64,10 @@ public class MapController {
 			default:
 				System.out.println("Invalid InputMode in MapController! " + inputMode);
 		}
+		myGame.currentMenu = null;
+		if (inputMode == InputMode.ACTIONMENU || inputMode == InputMode.PRODUCTION) {
+			myGame.currentMenu = actionMenu;
+		}
 	}
 	
 	/**
@@ -103,7 +107,8 @@ public class MapController {
 				System.out.println("found a factory");
 				// TODO: Don't hard-code this. Also, is DamageChart the best place for UnitEnum?
 				DamageChart.UnitEnum[] units = {DamageChart.UnitEnum.INFANTRY};
-				actionMenu = new GameMenu(units);
+				String[] labels = {"Infantry: " + myGame.activeCO.getUnitModel(DamageChart.UnitEnum.INFANTRY).moneyCost};
+				actionMenu = new GameMenu(units, labels);
 				inputMode = InputMode.PRODUCTION;
 			}
 			break;
@@ -165,7 +170,8 @@ public class MapController {
 			{
 				// Move the Unit to the location and display possible actions.
 				moveUnit(unitActor, myGame.getCursorX(), myGame.getCursorY());
-				actionMenu = new GameMenu(unitActor.getPossibleActions(myGame.gameMap));
+				String[] newStrings = {new String()};
+				actionMenu = new GameMenu(unitActor.getPossibleActions(myGame.gameMap),newStrings);
 				inputMode = InputMode.ACTIONMENU;
 			}
 			break;
@@ -291,11 +297,16 @@ public class MapController {
 		switch (input)
 		{
 		case ENTER:
-			System.out.println("creating unit");
 			DamageChart.UnitEnum unit = (DamageChart.UnitEnum)actionMenu.getSelectedAction();
 
-			Unit u = new Unit(myGame.activeCO, myGame.activeCO.getUnitModel(unit));
-			addNewUnit(u, myGame.getCursorX(), myGame.getCursorY());
+			if (myGame.activeCO.getUnitModel(unit).moneyCost <= myGame.activeCO.money) {
+				System.out.println("creating unit");
+				myGame.activeCO.money -= myGame.activeCO.getUnitModel(unit).moneyCost;
+				Unit u = new Unit(myGame.activeCO, myGame.activeCO.getUnitModel(unit));
+				addNewUnit(u, myGame.getCursorX(), myGame.getCursorY());
+			} else {
+				System.out.println("not enough money");
+				}
 			inputMode = InputMode.MAP;
 			break;
 		case BACK:

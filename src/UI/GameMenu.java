@@ -5,11 +5,13 @@ import Engine.MapController;
 public class GameMenu {
 	
 	private Enum options[];
+	public String[] labels;
 	int selectedOption = 0;
 	
-	public GameMenu(Enum[] options)
+	public GameMenu(Enum[] options, String[] labels)
 	{
 		this.options = options;
+		this.labels = labels;
 	}
 
 	public void handleMenuInput(InputHandler.InputAction action)
