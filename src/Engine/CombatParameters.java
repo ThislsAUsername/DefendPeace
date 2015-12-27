@@ -9,30 +9,16 @@ public class CombatParameters {
 	public Location[][] map;
 	public boolean isCounter, canCounter;
 	
-	public CombatParameters(Unit pAttacker, Unit pDefender, Location[][] pMap,  double pBaseDamage, double pAttackFactor, double pAttackerHP, double pDefenseFactor, double pDefenderHP, double pTerrainDefenseLevel, boolean isCounter, boolean canCounter) {
-		attacker			= pAttacker;
-		defender			= pDefender;
-		map 				= pMap;
-		baseDamage			= pBaseDamage;
-		attackFactor		= pAttackFactor;
-		attackerHP			= pAttackerHP;
-		defenseFactor		= pDefenseFactor;
-		defenderHP			= pDefenderHP;
-		terrainDefenseLevel	= pTerrainDefenseLevel;
-		this.isCounter 		= isCounter;
-		this.canCounter 	= canCounter;
-	}
-	
 	public CombatParameters(Unit pAttacker, Unit pDefender, Location[][] pMap, boolean isCounter, boolean canCounter) {
 		attacker		= pAttacker;
 		defender		= pDefender;
 		map 			= pMap;
 		this.isCounter	= isCounter;
 		this.canCounter = canCounter;
-		CalculateParameters();
+		calculateParameters();
 	}
 	
-	public double CalculateDamage() {
+	public double calculateDamage() {
 //		[B*ACO/100+R]*(AHP/10)*[(200-(DCO+DTR*DHP))/100]
 		double overallPower = (baseDamage*attackFactor/100/*+Random factor?*/)*(attackerHP/100);
 		double overallDefense = ((200-(defenseFactor+terrainDefenseLevel*defenderHP))/100);
@@ -42,7 +28,7 @@ public class CombatParameters {
 	/**
 	 * Makes the attacker the defender, inverts the counter flag, and recalculates the rest of the parameters.
 	 */
-	public void Swap() {
+	public void swap() {
 		if (!canCounter) {
 			System.out.println("Error in CombatParameters.Swap()! Attack is noted as being uncounterable, but swapping is happening.");
 		}
@@ -50,10 +36,10 @@ public class CombatParameters {
 		attacker = defender;
 		defender = temp;
 		isCounter = !isCounter;
-		CalculateParameters();
+		calculateParameters();
 	}
 	
-	private void CalculateParameters() {
+	private void calculateParameters() {
 		baseDamage			= DamageChart.chart[defender.model.type.ordinal()][attacker.model.type.ordinal()];
 		attackFactor		= attacker.model.COStr;
 		attackerHP			= attacker.HP;

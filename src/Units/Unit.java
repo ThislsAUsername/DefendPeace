@@ -18,7 +18,7 @@ public class Unit {
 		System.out.println("Creating a " + um.type);
 		CO = co;
 		model = um;
-		fuel = model.fuelMax;
+		fuel = model.maxFuel;
 		isTurnOver = false;
 		HP = model.maxHP;
 	}
