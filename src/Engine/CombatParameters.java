@@ -9,20 +9,6 @@ public class CombatParameters {
 	public Location[][] map;
 	public boolean isCounter, canCounter;
 	
-	public CombatParameters(Unit pAttacker, Unit pDefender, Location[][] pMap,  double pBaseDamage, double pAttackFactor, double pAttackerHP, double pDefenseFactor, double pDefenderHP, double pTerrainDefenseLevel, boolean isCounter, boolean canCounter) {
-		attacker			= pAttacker;
-		defender			= pDefender;
-		map 				= pMap;
-		baseDamage			= pBaseDamage;
-		attackFactor		= pAttackFactor;
-		attackerHP			= pAttackerHP;
-		defenseFactor		= pDefenseFactor;
-		defenderHP			= pDefenderHP;
-		terrainDefenseLevel	= pTerrainDefenseLevel;
-		this.isCounter 		= isCounter;
-		this.canCounter 	= canCounter;
-	}
-	
 	public CombatParameters(Unit pAttacker, Unit pDefender, Location[][] pMap, boolean isCounter, boolean canCounter) {
 		attacker		= pAttacker;
 		defender		= pDefender;
