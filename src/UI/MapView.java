@@ -50,10 +50,13 @@ public class MapView extends javax.swing.JPanel {
 			g.setColor(Color.cyan); // inner fill
 			g.fillRect(myGame.gameMap.mapWidth*tileSizePx/4+1, myGame.gameMap.mapHeight*tileSizePx/4+1, myGame.gameMap.mapWidth*tileSizePx/2-2, myGame.gameMap.mapHeight*tileSizePx/2-2);
 			g.setColor(new Color(253,171,77)); // selection
-			g.fillRect(myGame.gameMap.mapWidth*tileSizePx/4+1, (myGame.currentMenu.selectedOption)*tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4+4, myGame.gameMap.mapWidth*tileSizePx/2-2, tileSizePx/2);
+			g.fillRect(myGame.gameMap.mapWidth*tileSizePx/4+1, (myGame.currentMenu.selectedOption+1)*tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4+4, myGame.gameMap.mapWidth*tileSizePx/2-2, tileSizePx/2);
+			g.setColor(Color.MAGENTA);
+			String str = new String("Money: " + myGame.activeCO.money);
+			g.drawChars(str.toCharArray(), 0, str.length(), myGame.gameMap.mapWidth*tileSizePx/4+4, tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4);
 			g.setColor(Color.black);
 			for (int i = 0; i < myGame.currentMenu.labels.length; i++) {
-				g.drawChars(myGame.currentMenu.labels[i].toCharArray(), 0, myGame.currentMenu.labels[i].length(), myGame.gameMap.mapWidth*tileSizePx/4+4, (i+1)*tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4);
+				g.drawChars(myGame.currentMenu.labels[i].toCharArray(), 0, myGame.currentMenu.labels[i].length(), myGame.gameMap.mapWidth*tileSizePx/4+4, (i+2)*tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4);
 			}
 		}
 	}
