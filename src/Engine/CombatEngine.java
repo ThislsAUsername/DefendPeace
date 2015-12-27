@@ -17,13 +17,14 @@ public class CombatEngine {
 //			}
 //		}
 		
-		CombatParameters params = new CombatParameters(attacker, defender, map[defender.x][defender.y].getEnvironment().defLevel, false);
+		CombatParameters params = new CombatParameters(attacker, defender, map[defender.x][defender.y].getEnvironment().getDefLevel(), false);
 		for(int i = 0; i < modifiers.size(); i++) {
 			modifiers.get(i).alterCombat(params);
 		}
 		params.defender.HP -= params.CalculateDamage();
 		params.attacker.fire(params); // Lets the unit know that it has actually fired a shot.
 		params.Swap();
+		params.terrainDefenseLevel = map[attacker.x][attacker.y].getEnvironment().getDefLevel();
 		for(int i = 0; i < modifiers.size(); i++) {
 			modifiers.get(i).alterCombat(params);
 		}

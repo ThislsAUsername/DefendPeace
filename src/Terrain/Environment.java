@@ -10,7 +10,6 @@ public class Environment {
 
 	public final Terrains terrainType;
 	public final Weathers weatherType;
-	public final int defLevel;
 
 	private static Environment[][] tileInstances = new Environment[Terrains.values().length][Weathers.values().length];
 
@@ -21,42 +20,6 @@ public class Environment {
 	{
 		terrainType = tileType;
 		weatherType = weather;
-		// If there's a better way to do this, I'm all ears
-		switch(terrainType){
-		case PLAIN:
-			defLevel = 1;
-			break;
-		case FOREST:
-			defLevel = 2;
-			break;
-		case MOUNTAIN:
-			defLevel = 4;
-			break;
-		case ROAD:
-			defLevel = 0;
-			break;
-		case CITY:
-			defLevel = 3;
-			break;
-		case FACTORY:
-			defLevel = 4;
-			break;
-		case HQ:
-			defLevel = 5;
-			break;
-		case SHOAL:
-			defLevel = 0;
-			break;
-		case WATER:
-			defLevel = 1;
-			break;
-		case REEF:
-			defLevel = 2;
-			break;
-		default:
-			defLevel = -1;
-			break;
-		}
 	}
 
 	/**
@@ -73,5 +36,34 @@ public class Environment {
 		}
 
 		return tileInstances[terrain.ordinal()][weather.ordinal()];
+	}
+	
+	public int getDefLevel() {
+		// If there's a better way to do this, I'm all ears
+		switch(terrainType){
+		case PLAIN:
+			return 1;
+		case FOREST:
+			return 2;
+		case MOUNTAIN:
+			return 4;
+		case ROAD:
+			return 0;
+		case CITY:
+			return 3;
+		case FACTORY:
+			return 4;
+		case HQ:
+			return 5;
+		case SHOAL:
+			return 0;
+		case WATER:
+			return 1;
+		case REEF:
+			return 2;
+		default:
+			System.out.println("Error! Terrain type is invalid!");
+			return -1;
+		}
 	}
 }

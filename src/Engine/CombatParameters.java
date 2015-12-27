@@ -36,6 +36,7 @@ public class CombatParameters {
 	
 	/**
 	 * Makes the attacker the defender, inverts the counter flag, and recalculates the rest of the parameters.
+	 * NOTE: Terrain defense must be re-set manually.
 	 */
 	public void Swap() {
 		Unit temp = attacker;
