@@ -10,6 +10,16 @@ public class Unit {
 	public Commander CO;
 	public boolean isTurnOver;
 	public double HP;
+
+	public Unit(Commander co, UnitModel um)
+	{
+		System.out.println("Creating a " + um.type);
+		CO = co;
+		model = um;
+		fuel = model.fuelMax;
+		isTurnOver = false;
+		HP = model.maxHP;
+	}
 	
 	// allows the unit to choose its weapon
 	public UnitEnum getWeapon(UnitEnum target) {
