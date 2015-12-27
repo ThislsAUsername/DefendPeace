@@ -15,6 +15,7 @@ public class Commander {
 	public UnitModel[] unitModels;
 	public ArrayList<COModifier> modifiers;
 	public Color myColor;
+	public int money = 1000; // TODO set money for real
 	
 	public void doAbilityMinor(){}
 	public void doAbilityMajor(){}
@@ -27,6 +28,7 @@ public class Commander {
 	}
 
 	public void initTurn() {
+		money += 250; // TODO real income would be great
 		for(int i = 0; i < modifiers.size(); i++) {
 			if (modifiers.get(i).done) {
 				modifiers.remove(i);

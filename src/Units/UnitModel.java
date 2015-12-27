@@ -10,14 +10,16 @@ public class UnitModel {
 	public double COStr;
 	public double CODef;
 
+	public int moneyCost = 9001;
 	public int maxFuel;
 	public int idleFuelBurn;
 	public int movePower;
 	public MoveType propulsion;
 	
-	public UnitModel(String pName, UnitEnum pType, int pFuelMax, int pIdleFuelBurn, int pMovePower, MoveType pPropulsion) {
+	public UnitModel(String pName, UnitEnum pType, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower, MoveType pPropulsion) {
 		name 		 = pName;
 		type 		 = pType;
+		moneyCost	 = cost;
 		maxHP        = 100;
 		COStr        = 100;
 		CODef        = 100;

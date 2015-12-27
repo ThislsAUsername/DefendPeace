@@ -9,6 +9,6 @@ public class InfantryModel extends UnitModel {
 	private static final MoveType moveType = new FootStandard();
 
 	public InfantryModel() {
-		super("Infantry", UnitEnum.INFANTRY, 99, 0, 3, moveType);
+		super("Infantry", UnitEnum.INFANTRY, 300, 99, 0, 3, moveType);
 	}
 }
