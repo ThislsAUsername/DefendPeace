@@ -21,14 +21,14 @@ public class CombatEngine {
 		for(int i = 0; i < modifiers.size(); i++) {
 			modifiers.get(i).alterCombat(params);
 		}
-		params.defender.HP -= params.CalculateDamage();
+		params.defender.HP -= params.calculateDamage();
 		params.attacker.fire(params); // Lets the unit know that it has actually fired a shot.
 		if (canCounter) {
-			params.Swap();
+			params.swap();
 			for(int i = 0; i < modifiers.size(); i++) {
 				modifiers.get(i).alterCombat(params);
 			}
-			params.defender.HP -= params.CalculateDamage();
+			params.defender.HP -= params.calculateDamage();
 			params.attacker.fire(params);
 		}
 	}
