@@ -62,7 +62,7 @@ public class Environment {
 		case REEF:
 			return 2;
 		default:
-			System.out.println("Error! Terrain type is invalid!");
+			System.out.println("Error in getDefLevel! Terrain type is invalid! Returning -1 for great shenanigans.");
 			return -1;
 		}
 	}
