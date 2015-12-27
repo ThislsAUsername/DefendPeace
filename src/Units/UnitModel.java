@@ -10,7 +10,7 @@ public class UnitModel {
 	public double COStr;
 	public double CODef;
 
-	public int fuelMax;
+	public int maxFuel;
 	public int idleFuelBurn;
 	public int movePower;
 	public MoveType propulsion;
@@ -21,7 +21,7 @@ public class UnitModel {
 		maxHP        = 100;
 		COStr        = 100;
 		CODef        = 100;
-		fuelMax		 = pFuelMax;
+		maxFuel		 = pFuelMax;
 		idleFuelBurn = pIdleFuelBurn;
 		movePower    = pMovePower;
 		propulsion   = pPropulsion;
