@@ -9,7 +9,7 @@ public class InputHandler implements KeyListener {
 
 	Driver driver;
 	
-	public enum InputAction {NO_ACTION, UP, DOWN, LEFT, RIGHT, ENTER};
+	public enum InputAction {NO_ACTION, UP, DOWN, LEFT, RIGHT, ENTER, BACK};
 	
 	public InputHandler(Driver driver)
 	{
@@ -51,6 +51,10 @@ public class InputHandler implements KeyListener {
 		case KeyEvent.VK_ENTER:
 		case KeyEvent.VK_SPACE:
 			ia = InputAction.ENTER;
+			break;
+		case KeyEvent.VK_BACK_SPACE:
+		case KeyEvent.VK_ESCAPE:
+			ia = InputAction.BACK;
 			break;
 		}
 		return ia;

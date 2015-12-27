@@ -5,7 +5,7 @@ import Terrain.GameMap;
 public class GameInstance {
 	public Terrain.GameMap gameMap;
 	public CommandingOfficers.Commander[] commanders;
-	public int activeCO = 0;
+	public CommandingOfficers.Commander activeCO = null;
 	private int cursorX = 0;
 	private int cursorY = 0;
 
@@ -18,6 +18,7 @@ public class GameInstance {
 
 		gameMap = map;
 		commanders = cos;
+		activeCO = commanders[0];
 	}
 	
 	public int getCursorX()

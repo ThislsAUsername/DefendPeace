@@ -73,7 +73,7 @@ public class Driver implements ActionListener{
 		if(action != InputHandler.InputAction.NO_ACTION)
 		{
 			// Pass the action on to the active game element.
-			activeController.handleAction(action);
+			activeController.handleInput(action);
 		}
 	}
 

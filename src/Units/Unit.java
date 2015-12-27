@@ -1,7 +1,9 @@
 package Units;
 
+import Terrain.GameMap;
 import CommandingOfficers.Commander;
 import Engine.CombatParameters;
+import Engine.MapController;
 import Engine.DamageChart.UnitEnum;
 
 public class Unit {
@@ -10,6 +12,16 @@ public class Unit {
 	public Commander CO;
 	public boolean isTurnOver;
 	public double HP;
+
+	public Unit(Commander co, UnitModel um)
+	{
+		System.out.println("Creating a " + um.type);
+		CO = co;
+		model = um;
+		fuel = model.fuelMax;
+		isTurnOver = false;
+		HP = model.maxHP;
+	}
 	
 	// allows the unit to choose its weapon
 	public UnitEnum getWeapon(UnitEnum target) {
@@ -27,4 +39,11 @@ public class Unit {
 	public static double getDefensePower(Unit unit, boolean isCounter) {
 		return 0;
 	}*/
+
+	public MapController.GameAction[] getPossibleActions(GameMap map)
+	{
+		// TODO - Actually look at the map to see what actions this unit can take from this location.
+		MapController.GameAction[] actions = {MapController.GameAction.ATTACK, MapController.GameAction.WAIT};
+		return actions;
+	}
 }

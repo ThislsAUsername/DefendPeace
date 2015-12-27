@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 import Terrain.Environment;
+import Units.Unit;
 
 import Engine.GameInstance;
 
@@ -30,7 +31,7 @@ public class MapView extends javax.swing.JPanel {
 			{
 				if(myGame.gameMap.getLocation(w,h) != null)
 				{
-					drawTile(g, myGame.gameMap.getLocation(w,h), w*tileSizePx, h*tileSizePx);
+					drawLocation(g, myGame.gameMap.getLocation(w,h), w*tileSizePx, h*tileSizePx);
 				}
 				else
 				{
@@ -44,7 +45,7 @@ public class MapView extends javax.swing.JPanel {
 		g.fillRect(myGame.getCursorX()*tileSizePx, myGame.getCursorY()*tileSizePx, tileSizePx, tileSizePx);
 	}
 	
-	private void drawTile(Graphics g, Terrain.Location locus, int x, int y)
+	private void drawLocation(Graphics g, Terrain.Location locus, int x, int y)
 	{
 		Environment tile = locus.getEnvironment();
 		Color tileColor = Color.black; // TODO: This will be a sprite eventually.
@@ -101,5 +102,22 @@ public class MapView extends javax.swing.JPanel {
 		
 		g.setColor(tileColor);
 		g.fillRect(x, y, tileSizePx, tileSizePx);
+		
+		if(locus.getResident() != null)
+		{
+			drawUnit(g, locus.getResident());
+			
+		}
+	}
+	
+	private void drawUnit(Graphics g, Unit unit)
+	{
+		int health = (int)unit.HP;
+		int offset = (int)(tileSizePx * 0.25);
+		int length = tileSizePx - offset;
+		g.setColor(Color.BLACK);
+		g.fillRect(unit.x * tileSizePx + offset/2, unit.y * tileSizePx + offset/2, length, length);
+		g.setColor(unit.CO.myColor);
+		g.fillRect(unit.x * tileSizePx + (offset/2)+1, unit.y * tileSizePx + (offset/2)+1, length-2, length-2);
 	}
 }
