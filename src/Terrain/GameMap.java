@@ -16,12 +16,6 @@ public class GameMap {
 	public GameMap(CommandingOfficers.Commander[] COs)
 	{
 		commanders = COs;
-		// TODO: Remove this and/or make it actually good/work.
-//		for (int i = 0; i < commanders.length; i++) {
-//			commanders[i].myColor = new Color(i*100,i*100,i*100);
-//		}
-		commanders[0].myColor = Color.blue;
-		commanders[1].myColor = Color.red;
 		// for now, just make a 15x10 map of almost all plains.
 		mapWidth = 15;
 		mapHeight = 10;

@@ -1,6 +1,7 @@
 package Engine;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -34,6 +35,12 @@ public class Driver implements ActionListener{
 		Commander co1 = new Commander();
 		Commander co2 = new Commander();
 		Commander[] cos = {co1, co2};
+		// TODO: Remove this and/or make it actually good.
+//		for (int i = 0; i < commanders.length; i++) {
+//			commanders[i].myColor = new Color(i*100,i*100,i*100);
+//		}
+		cos[0].myColor = Color.pink;
+		cos[1].myColor = Color.cyan;
 		GameMap map = new GameMap(cos);
 		GameInstance newGame = new GameInstance(map, cos);
 
