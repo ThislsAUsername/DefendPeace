@@ -1,6 +1,7 @@
 package Engine;
 
 import Terrain.GameMap;
+import UI.GameMenu;
 
 public class GameInstance {
 	public Terrain.GameMap gameMap;
@@ -8,6 +9,9 @@ public class GameInstance {
 	public CommandingOfficers.Commander activeCO = null;
 	private int cursorX = 0;
 	private int cursorY = 0;
+	
+	// TODO this is a workaround to allow MapView to access MapController's menu. Probably should be better-implemented.
+	public GameMenu currentMenu;
 
 	public GameInstance(GameMap map, CommandingOfficers.Commander[] cos)
 	{

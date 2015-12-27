@@ -40,9 +40,22 @@ public class MapView extends javax.swing.JPanel {
 			}
 		}
 
-		// Draw the current cursor location.
-		g.setColor(new Color(253,171,77));
-		g.fillRect(myGame.getCursorX()*tileSizePx, myGame.getCursorY()*tileSizePx, tileSizePx, tileSizePx);
+		if (myGame.currentMenu == null) {
+			// Draw the current cursor location.
+			g.setColor(new Color(253,171,77));
+			g.fillRect(myGame.getCursorX()*tileSizePx, myGame.getCursorY()*tileSizePx, tileSizePx, tileSizePx);
+		} else {
+			g.setColor(Color.black); // outer border
+			g.fillRect(myGame.gameMap.mapWidth*tileSizePx/4, myGame.gameMap.mapHeight*tileSizePx/4, myGame.gameMap.mapWidth*tileSizePx/2, myGame.gameMap.mapHeight*tileSizePx/2);
+			g.setColor(Color.cyan); // inner fill
+			g.fillRect(myGame.gameMap.mapWidth*tileSizePx/4+1, myGame.gameMap.mapHeight*tileSizePx/4+1, myGame.gameMap.mapWidth*tileSizePx/2-2, myGame.gameMap.mapHeight*tileSizePx/2-2);
+			g.setColor(new Color(253,171,77)); // selection
+			g.fillRect(myGame.gameMap.mapWidth*tileSizePx/4+1, (myGame.currentMenu.selectedOption)*tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4+4, myGame.gameMap.mapWidth*tileSizePx/2-2, tileSizePx/2);
+			g.setColor(Color.black);
+			for (int i = 0; i < myGame.currentMenu.labels.length; i++) {
+				g.drawChars(myGame.currentMenu.labels[i].toCharArray(), 0, myGame.currentMenu.labels[i].length(), myGame.gameMap.mapWidth*tileSizePx/4+4, (i+1)*tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4);
+			}
+		}
 	}
 	
 	private void drawLocation(Graphics g, Terrain.Location locus, int x, int y)
