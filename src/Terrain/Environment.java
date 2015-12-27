@@ -37,4 +37,33 @@ public class Environment {
 
 		return tileInstances[terrain.ordinal()][weather.ordinal()];
 	}
+	
+	public int getDefLevel() {
+		// If there's a better way to do this, I'm all ears
+		switch(terrainType){
+		case PLAIN:
+			return 1;
+		case FOREST:
+			return 2;
+		case MOUNTAIN:
+			return 4;
+		case ROAD:
+			return 0;
+		case CITY:
+			return 3;
+		case FACTORY:
+			return 4;
+		case HQ:
+			return 5;
+		case SHOAL:
+			return 0;
+		case WATER:
+			return 1;
+		case REEF:
+			return 2;
+		default:
+			System.out.println("Error in getDefLevel! Terrain type is invalid! Returning -1 for great shenanigans.");
+			return -1;
+		}
+	}
 }
