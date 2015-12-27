@@ -3,11 +3,11 @@ package Units;
 import Units.MoveTypes.FootStandard;
 import Engine.DamageChart.UnitEnum;;
 
-public class Infantry extends UnitModel {
-	public Infantry() {
+public class InfantryModel extends UnitModel {
+	public InfantryModel() {
 		super("Infantry", UnitEnum.INFANTRY, 99, 0, 3, null);
 	}
-	public Infantry(FootStandard move) {
+	public InfantryModel(FootStandard move) {
 		super("Infantry", UnitEnum.INFANTRY, 99, 0, 3, move);
 	}
 }
