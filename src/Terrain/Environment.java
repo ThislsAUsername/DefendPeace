@@ -10,6 +10,7 @@ public class Environment {
 
 	public final Terrains terrainType;
 	public final Weathers weatherType;
+	public final int defLevel;
 
 	private static Environment[][] tileInstances = new Environment[Terrains.values().length][Weathers.values().length];
 
@@ -20,6 +21,42 @@ public class Environment {
 	{
 		terrainType = tileType;
 		weatherType = weather;
+		// If there's a better way to do this, I'm all ears
+		switch(terrainType){
+		case PLAIN:
+			defLevel = 1;
+			break;
+		case FOREST:
+			defLevel = 2;
+			break;
+		case MOUNTAIN:
+			defLevel = 4;
+			break;
+		case ROAD:
+			defLevel = 0;
+			break;
+		case CITY:
+			defLevel = 3;
+			break;
+		case FACTORY:
+			defLevel = 4;
+			break;
+		case HQ:
+			defLevel = 5;
+			break;
+		case SHOAL:
+			defLevel = 0;
+			break;
+		case WATER:
+			defLevel = 1;
+			break;
+		case REEF:
+			defLevel = 2;
+			break;
+		default:
+			defLevel = -1;
+			break;
+		}
 	}
 
 	/**
