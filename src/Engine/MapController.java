@@ -113,8 +113,12 @@ public class MapController {
 				}
 				for (int i = 0; i < inputGrid.length; i++) {
 					for (int j = 0; j < inputGrid[i].length; j++) {
-						if (Math.abs(unitActor.y-myGame.getCursorY())+Math.abs(unitActor.x-myGame.getCursorX()) <= unitActor.model.movePower) {
+						int dist = Math.abs(unitActor.y-j) + Math.abs(unitActor.x-i);
+						if (dist <= unitActor.model.movePower) {
 							inputGrid[i][j] = true;
+							if (dist == 0) {
+								inputGrid[i][j] = false;
+							}
 						}
 					}
 				}
@@ -125,7 +129,7 @@ public class MapController {
 			{
 				System.out.println("found a factory");
 				// TODO: Don't hard-code this. Also, is DamageChart the best place for UnitEnum?
-				DamageChart.UnitEnum[] units = {DamageChart.UnitEnum.INFANTRY};
+				DamageChart.UnitEnum[] units = {DamageChart.UnitEnum.INFANTRY, DamageChart.UnitEnum.MECH};
 				actionMenu = new GameMenu(units);
 				inputMode = InputMode.PRODUCTION;
 			}
@@ -149,8 +153,9 @@ public class MapController {
 		{
 		case UP:
 			myGame.moveCursorUp();
+//			System.out.println("inMoveableSpace = " + inMoveableSpace);
 			// Make sure we don't overshoot the reachable tiles by accident.
-			if(inMoveableSpace && upHeld && !inputGrid[myGame.getCursorX()][myGame.getCursorY()]);
+			if(inMoveableSpace && upHeld && !inputGrid[myGame.getCursorX()][myGame.getCursorY()])
 			{
 				myGame.moveCursorDown();
 			}
@@ -159,7 +164,7 @@ public class MapController {
 		case DOWN:
 			myGame.moveCursorDown();
 			// Make sure we don't overshoot the reachable space by accident.
-			if(inMoveableSpace && downHeld && !inputGrid[myGame.getCursorX()][myGame.getCursorY()]);
+			if(inMoveableSpace && downHeld && !inputGrid[myGame.getCursorX()][myGame.getCursorY()])
 			{
 				myGame.moveCursorUp();
 			}
@@ -168,7 +173,7 @@ public class MapController {
 		case LEFT:
 			myGame.moveCursorLeft();
 			// Make sure we don't overshoot the reachable space by accident.
-			if(inMoveableSpace && leftHeld && !inputGrid[myGame.getCursorX()][myGame.getCursorY()]);
+			if(inMoveableSpace && leftHeld && !inputGrid[myGame.getCursorX()][myGame.getCursorY()])
 			{
 				myGame.moveCursorRight();
 			}
@@ -177,7 +182,7 @@ public class MapController {
 		case RIGHT:
 			myGame.moveCursorRight();
 			// Make sure we don't overshoot the reachable space by accident.
-			if(inMoveableSpace && rightHeld && !inputGrid[myGame.getCursorX()][myGame.getCursorY()]);
+			if(inMoveableSpace && rightHeld && !inputGrid[myGame.getCursorX()][myGame.getCursorY()])
 			{
 				myGame.moveCursorLeft();
 			}
