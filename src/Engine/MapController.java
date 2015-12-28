@@ -107,16 +107,12 @@ public class MapController {
 						}
 					}
 				}
-				inputMode = InputMode.MOVEMENT;
+				changeInputMode(InputMode.MOVEMENT);
 			}
 			else if(Environment.Terrains.FACTORY == loc.getEnvironment().terrainType
 					&& loc.getOwner() == myGame.activeCO)
 			{
-				System.out.println("found a factory");
-				// TODO: Don't hard-code this. Also, is DamageChart the best place for UnitEnum?
-				DamageChart.UnitEnum[] units = {DamageChart.UnitEnum.INFANTRY, DamageChart.UnitEnum.MECH};
-				myGame.currentMenu = new GameMenu(GameMenu.MenuType.PRODUCTION, units);
-				inputMode = InputMode.PRODUCTION;
+				changeInputMode(InputMode.PRODUCTION);
 			}
 			break;
 		case BACK:
@@ -178,13 +174,12 @@ public class MapController {
 			{
 				// Move the Unit to the location and display possible actions.
 				moveUnit(unitActor, myGame.getCursorX(), myGame.getCursorY());
-				myGame.currentMenu = new GameMenu(GameMenu.MenuType.ACTION, unitActor.getPossibleActions(myGame.gameMap));
-				inputMode = InputMode.ACTIONMENU;
+				changeInputMode(InputMode.ACTIONMENU);
 			}
 			break;
 		case BACK:
 			unitActor = null;
-			inputMode = InputMode.MAP;
+			changeInputMode(InputMode.MAP);
 			break;
 		case NO_ACTION:
 			// TODO - figure out how to make this work correctly so we don't overshoot our reachable Locations on accident.
@@ -212,16 +207,33 @@ public class MapController {
 		{
 		case ENTER:
 			readyAction = (MapController.GameAction)myGame.currentMenu.getSelectedAction();
-			inputMode = InputMode.ACTION;
+			changeInputMode(InputMode.ACTION);
 			break;
 		case BACK:
-			myGame.currentMenu = null;
-			inputMode = InputMode.MOVEMENT;
+			changeInputMode(InputMode.MOVEMENT);
 			break;
 		case NO_ACTION:
 			break;
 			default:
 				myGame.currentMenu.handleMenuInput(input);
+		}
+		if(readyAction == MapController.GameAction.WAIT)
+		{
+			readyAction = null;
+			changeInputMode(InputMode.MAP);
+		}
+		if(readyAction == MapController.GameAction.LOAD)
+		{
+			// TODO: Figure out how to handle moving onto a space with a transport before loading. 
+			Unit transport = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
+	
+			if(null != transport /* && transport.hasCargoSpace() */)
+			{
+				// TODO: Load up
+				
+				readyAction = null;
+				changeInputMode(InputMode.MAP);
+			}
 		}
 	}
 
@@ -249,6 +261,7 @@ public class MapController {
 		case ENTER:
 			if(inActionableSpace && (null != readyAction))
 			{
+				boolean actionTaken = false;
 				// Do the thing.
 				switch(readyAction)
 				{
@@ -257,14 +270,7 @@ public class MapController {
 					if(unitTarget != null /* TODO && unitActor can target unitTarget*/)
 					{
 						//TODO: CombatEngine.resolveCombat(unitActor, unitTarget, myGame.gameMap);
-					}
-					break;
-				case LOAD:
-					Unit transport = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
-
-					if(null != transport /* && transport.hasCargoSpace() */)
-					{
-						// TODO: Load up
+						actionTaken = true;
 					}
 					break;
 				case UNLOAD:
@@ -272,19 +278,26 @@ public class MapController {
 					if(null == myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident())
 					{
 						// TODO: Drop off the carried unit at this location and remove it from unitActor's hold
+						actionTaken = true;
 					}
 					break;
 				case CANCEL:
 				case WAIT:
 					default:
 						System.out.println("WARNING! MapController.handleActionInput() was given invalid action enum (" + input + ")");
-						inputMode = InputMode.ACTIONMENU;
+						changeInputMode(InputMode.ACTIONMENU);
 				}
-				inputMode = InputMode.MAP;
+				
+				// Only switch back to map mode if we actually acted. 
+				if(actionTaken)
+				{
+					myGame.currentMenu = null;
+					changeInputMode(InputMode.MAP);
+				}
 			}
 			break;
 		case BACK:
-			inputMode = InputMode.ACTIONMENU;
+			changeInputMode(InputMode.ACTIONMENU);
 			break;
 		case NO_ACTION:
 			default:
@@ -298,7 +311,7 @@ public class MapController {
 		System.out.println("handleProduction");
 		if(myGame.currentMenu == null)
 		{
-			System.out.println("Error! MapController.handleProductionMenuInput() called when actionMenu is null!");
+			System.out.println("Error! MapController.handleProductionMenuInput() called when currentMenu is null!");
 		}
 
 		switch (input)
@@ -314,16 +327,47 @@ public class MapController {
 			} else {
 				System.out.println("not enough money");
 				}
-			inputMode = InputMode.MAP;
+			changeInputMode(InputMode.MAP);
 			break;
 		case BACK:
-			myGame.currentMenu = null;
-			inputMode = InputMode.MAP;
+			changeInputMode(InputMode.MAP);
 			break;
 		case NO_ACTION:
 			break;
 			default:
 				myGame.currentMenu.handleMenuInput(input);
+		}
+	}
+	
+	/**
+	 * Updates the InputMode and the GameInstance's current menu to keep them in sync.
+	 * 
+	 * NOTE: This function assumes that unitActor is set correctly before it is called.
+	 */
+	private void changeInputMode(InputMode input)
+	{
+		inputMode = input;
+		switch(inputMode)
+		{
+		case ACTION:
+			myGame.currentMenu = null;
+			break;
+		case ACTIONMENU:
+			myGame.currentMenu = new GameMenu(GameMenu.MenuType.ACTION, unitActor.getPossibleActions(myGame.gameMap));
+			break;
+		case MAP:
+			myGame.currentMenu = null;
+			break;
+		case MOVEMENT:
+			myGame.currentMenu = null;
+			break;
+		case PRODUCTION:
+			// TODO: Don't hard-code this. Also, is DamageChart the best place for UnitEnum?
+			DamageChart.UnitEnum[] units = {DamageChart.UnitEnum.INFANTRY, DamageChart.UnitEnum.MECH};
+			myGame.currentMenu = new GameMenu(GameMenu.MenuType.PRODUCTION, units);
+			break;
+			default:
+				System.out.println("WARNING! MapController.changeInputMode was given an invalid InputMode");
 		}
 	}
 
