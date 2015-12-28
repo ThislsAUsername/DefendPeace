@@ -20,10 +20,16 @@ public class GameMenu {
 		switch(action)
 		{ // TODO: this doesn't work, at least not for the ActionMenu
 		case UP:
-			selectedOption = (selectedOption > 0)? selectedOption-- : selectedOption;
+			if(selectedOption > 0)
+			{
+				selectedOption--;
+			}
 			break;
 		case DOWN:
-			selectedOption = (selectedOption < options.length-1)? selectedOption++ : selectedOption;
+			if(selectedOption < options.length-1)
+			{
+				selectedOption++;
+			}
 			break;
 		case LEFT:
 		case RIGHT:

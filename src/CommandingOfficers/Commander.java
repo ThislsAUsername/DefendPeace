@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 import Units.InfantryModel;
+import Units.MechModel;
 import Units.Unit;
 import Units.UnitModel;
 import CommandingOfficers.Modifiers.COModifier;
@@ -23,8 +24,9 @@ public class Commander {
 	public Commander()
 	{
 		// TODO Obviously we don't want to hard-code the UnitModel array.
-		unitModels = new UnitModel[1];
+		unitModels = new UnitModel[2];
 		unitModels[0] = new InfantryModel();
+		unitModels[1] = new MechModel();
 	}
 
 	public void initTurn() {
