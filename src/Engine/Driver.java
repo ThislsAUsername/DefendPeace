@@ -45,7 +45,6 @@ public class Driver implements ActionListener{
 		GameInstance newGame = new GameInstance(map, cos);
 
 		mapView = new MapView(newGame);
-		mapView.setPreferredSize(new Dimension(MapView.tileSizePx * 15, MapView.tileSizePx * 10));
 		mapController = new MapController(newGame);
 
 		activeController = mapController;

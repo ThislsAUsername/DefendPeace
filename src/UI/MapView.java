@@ -1,6 +1,7 @@
 package UI;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 
 import Terrain.Environment;
@@ -17,10 +18,13 @@ public class MapView extends javax.swing.JPanel {
 	private GameInstance myGame;
 	
 	public static final int tileSizePx = 32;
+	public static int mapViewWidth = tileSizePx * 15;
+	public static int mapViewHeight = tileSizePx * 10;
 
 	public MapView(GameInstance game)
 	{
 		myGame = game;
+		setPreferredSize(new Dimension(mapViewWidth, mapViewHeight));
 	}
 	
 	@Override
@@ -117,38 +121,43 @@ public class MapView extends javax.swing.JPanel {
 	}
 	
 	private void drawMenu(Graphics g) {
+		int menuBorderLeft = mapViewWidth/4;
+		int menuBorderTop = mapViewHeight/4;
+		int menuWidth = mapViewWidth / 2;
+		int menuHeight = mapViewHeight / 2;
+		
 		g.setColor(Color.black); // outer border
-		g.fillRect(myGame.gameMap.mapWidth*tileSizePx/4, myGame.gameMap.mapHeight*tileSizePx/4, myGame.gameMap.mapWidth*tileSizePx/2, myGame.gameMap.mapHeight*tileSizePx/2);
+		g.fillRect(menuBorderLeft, menuBorderTop, menuWidth, menuHeight);
 		g.setColor(Color.cyan); // inner fill
-		g.fillRect(myGame.gameMap.mapWidth*tileSizePx/4+1, myGame.gameMap.mapHeight*tileSizePx/4+1, myGame.gameMap.mapWidth*tileSizePx/2-2, myGame.gameMap.mapHeight*tileSizePx/2-2);
+		g.fillRect(menuBorderLeft+1, menuBorderTop+1, menuWidth-2, menuHeight-2);
 		String label;
 //		System.out.println("Current selection is: " + myGame.currentMenu.selectedOption);
 		switch (myGame.currentMenu.menuType) {
 		case PRODUCTION:
 			g.setColor(new Color(253,171,77)); // selection
-			g.fillRect(myGame.gameMap.mapWidth*tileSizePx/4+1, (myGame.currentMenu.selectedOption+1)*tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4+4, myGame.gameMap.mapWidth*tileSizePx/2-2, tileSizePx/2);
+			g.fillRect(menuBorderLeft+1, (myGame.currentMenu.selectedOption+1)*tileSizePx/2+menuBorderTop+4, menuWidth-2, tileSizePx/2);
 			g.setColor(Color.MAGENTA);
 			label = new String("Money: " + myGame.activeCO.money);
-			g.drawChars(label.toCharArray(), 0, label.length(), myGame.gameMap.mapWidth*tileSizePx/4+4, tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4);
+			g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, tileSizePx/2+menuBorderTop);
 			g.setColor(Color.black);
 			for (int i = 0; i < myGame.currentMenu.getNumChoices(); i++) {
 				label = myGame.currentMenu.getOptions()[i].toString()+ ": " + myGame.activeCO.getUnitModel((UnitEnum) myGame.currentMenu.getSelectedAction()).moneyCost;
-				g.drawChars(label.toCharArray(), 0, label.length(), myGame.gameMap.mapWidth*tileSizePx/4+4, (i+2)*tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4);
+				g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, (i+2)*tileSizePx/2+menuBorderTop);
 			}
 			break;
 		case ACTION:
 			g.setColor(new Color(253,171,77)); // selection
-			g.fillRect(myGame.gameMap.mapWidth*tileSizePx/4+1, (myGame.currentMenu.selectedOption)*tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4+4, myGame.gameMap.mapWidth*tileSizePx/2-2, tileSizePx/2);
+			g.fillRect(menuBorderLeft+1, (myGame.currentMenu.selectedOption)*tileSizePx/2+menuBorderTop+4, menuWidth-2, tileSizePx/2);
 			g.setColor(Color.black);
 			for (int i = 0; i < myGame.currentMenu.getNumChoices(); i++) {
 				label = myGame.currentMenu.getOptions()[i].toString();
-				g.drawChars(label.toCharArray(), 0, label.length(), myGame.gameMap.mapWidth*tileSizePx/4+4, (i+1)*tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4);
+				g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, (i+1)*tileSizePx/2+menuBorderTop);
 			}
 			break;
 		default:
 			g.setColor(Color.black);
 			label = new String("This is an undefined menu type. Thats... probably a problem.");
-			g.drawChars(label.toCharArray(), 0, label.length(), myGame.gameMap.mapWidth*tileSizePx/4+4, tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4);
+			g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, tileSizePx/2+menuBorderTop);
 			break;
 		}
 	}
