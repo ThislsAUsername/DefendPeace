@@ -6,6 +6,7 @@ import UI.GameMenu;
 public class GameInstance {
 	public Terrain.GameMap gameMap;
 	public CommandingOfficers.Commander[] commanders;
+	private int activeCoNum;
 	public CommandingOfficers.Commander activeCO = null;
 	private int cursorX = 0;
 	private int cursorY = 0;
@@ -22,7 +23,8 @@ public class GameInstance {
 
 		gameMap = map;
 		commanders = cos;
-		activeCO = commanders[0];
+		activeCoNum = 0;
+		activeCO = commanders[activeCoNum];
 	}
 	
 	public int getCursorX()
@@ -56,5 +58,14 @@ public class GameInstance {
 		cursorX += 1;
 		if(cursorX >= gameMap.mapWidth) cursorX = gameMap.mapWidth - 1;
 //		System.out.println("moveCursorRight");
+	}
+
+	public void turn() {
+		activeCoNum++;
+		if(activeCoNum > commanders.length - 1)
+		{
+			activeCoNum = 0;
+		}
+		activeCO = commanders[activeCoNum];
 	}
 }

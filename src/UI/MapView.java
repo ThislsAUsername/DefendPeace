@@ -154,9 +154,19 @@ public class MapView extends javax.swing.JPanel {
 				g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, (i+1)*tileSizePx/2+menuBorderTop);
 			}
 			break;
+		case METAACTION:
+			g.setColor(new Color(253,171,77)); // selection
+			g.fillRect(menuBorderLeft+1, (myGame.currentMenu.selectedOption)*tileSizePx/2+menuBorderTop+4, menuWidth-2, tileSizePx/2);
+			g.setColor(Color.black);
+			for (int i = 0; i < myGame.currentMenu.getNumChoices(); i++) {
+				label = myGame.currentMenu.getOptions()[i].toString();
+				g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, (i+1)*tileSizePx/2+menuBorderTop);
+			}
+			break;
 		default:
 			g.setColor(Color.black);
-			label = new String("This is an undefined menu type. Thats... probably a problem.");
+			System.out.println("WARNING! MapView.drawMenu was given an undefined MenuType!");
+			label = new String("WARNING! MapView.drawMenu was given an undefined MenuType!");
 			g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, tileSizePx/2+menuBorderTop);
 			break;
 		}

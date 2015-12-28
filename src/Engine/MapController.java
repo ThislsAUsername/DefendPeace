@@ -10,8 +10,9 @@ public class MapController {
 
 	private GameInstance myGame;
 	
-	private enum InputMode {MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION};
+	private enum InputMode {MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION};
 	public enum GameAction {ATTACK, LOAD, UNLOAD, WAIT, CANCEL};
+	public enum MetaAction {END_TURN};
 
 	private InputMode inputMode;
 
@@ -59,6 +60,9 @@ public class MapController {
 			break;
 		case PRODUCTION:
 			handleProductionMenuInput(input);
+			break;
+		case METAACTION:
+			handleMetaActionMenuInput(input);
 			break;
 			default:
 				System.out.println("Invalid InputMode in MapController! " + inputMode);
@@ -114,9 +118,14 @@ public class MapController {
 			{
 				changeInputMode(InputMode.PRODUCTION);
 			}
+			else
+			{
+				// Display end turn (save/quit?) options.
+				changeInputMode(InputMode.METAACTION);
+			}
 			break;
 		case BACK:
-			// TODO: display save/quit options or whatever.
+			// TODO: Figure out what to do here.
 			break;
 			default:
 				System.out.println("WARNING! MapController.handleMapInput() was given invalid input enum (" + input + ")");
@@ -339,6 +348,34 @@ public class MapController {
 		}
 	}
 	
+	private void handleMetaActionMenuInput(InputHandler.InputAction input)
+	{
+		if(myGame.currentMenu == null)
+		{
+			System.out.println("Error! MapController.handleMetaActionMenuInput() called when currentMenu is null!");
+		}
+
+		switch (input)
+		{
+		case ENTER:
+			MetaAction action = (MetaAction)myGame.currentMenu.getSelectedAction();
+
+			if(action == MetaAction.END_TURN)
+			{
+				myGame.turn();
+			}
+			changeInputMode(InputMode.MAP);
+			break;
+		case BACK:
+			changeInputMode(InputMode.MAP);
+			break;
+		case NO_ACTION:
+			break;
+			default:
+				myGame.currentMenu.handleMenuInput(input);
+		}
+	}
+	
 	/**
 	 * Updates the InputMode and the GameInstance's current menu to keep them in sync.
 	 * 
@@ -366,8 +403,12 @@ public class MapController {
 			DamageChart.UnitEnum[] units = {DamageChart.UnitEnum.INFANTRY, DamageChart.UnitEnum.MECH};
 			myGame.currentMenu = new GameMenu(GameMenu.MenuType.PRODUCTION, units);
 			break;
+		case METAACTION:
+			MetaAction[] actions = {MetaAction.END_TURN}; 
+			myGame.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, actions);
+			break;
 			default:
-				System.out.println("WARNING! MapController.changeInputMode was given an invalid InputMode");
+				System.out.println("WARNING! MapController.changeInputMode was given an invalid InputMode " + inputMode);
 		}
 	}
 

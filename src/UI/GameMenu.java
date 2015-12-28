@@ -5,7 +5,7 @@ import Engine.MapController;
 public class GameMenu {
 	
 	private Enum options[];
-	public enum MenuType {ACTION, PRODUCTION};
+	public enum MenuType {ACTION, PRODUCTION, METAACTION};
 	public final MenuType menuType;
 	int selectedOption = 0;
 	
