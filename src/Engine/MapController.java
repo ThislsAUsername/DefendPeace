@@ -64,9 +64,16 @@ public class MapController {
 			default:
 				System.out.println("Invalid InputMode in MapController! " + inputMode);
 		}
+		// TODO probably should revise this code...
 		myGame.currentMenu = null;
 		if (inputMode == InputMode.ACTIONMENU || inputMode == InputMode.PRODUCTION) {
 			myGame.currentMenu = actionMenu;
+			if (inputMode == InputMode.PRODUCTION) {
+				actionMenu.menuType = GameMenu.MenuType.PRODUCTION;
+			}
+			if (inputMode == InputMode.ACTIONMENU) {
+				actionMenu.menuType = GameMenu.MenuType.ACTION;
+			}
 		}
 	}
 	
@@ -99,6 +106,18 @@ public class MapController {
 			{
 				// Calculate movement options.
 				//findPossibleDestinations(Unit, myGame, inputGrid); TODO
+				for (int i = 0; i < inputGrid.length; i++) {
+					for (int j = 0; j < inputGrid[i].length; j++) {
+						inputGrid[i][j] = false;
+					}
+				}
+				for (int i = 0; i < inputGrid.length; i++) {
+					for (int j = 0; j < inputGrid[i].length; j++) {
+						if (Math.abs(unitActor.y-myGame.getCursorY())+Math.abs(unitActor.x-myGame.getCursorX()) <= unitActor.model.movePower) {
+							inputGrid[i][j] = true;
+						}
+					}
+				}
 				inputMode = InputMode.MOVEMENT;
 			}
 			else if(Environment.Terrains.FACTORY == loc.getEnvironment().terrainType
@@ -107,8 +126,7 @@ public class MapController {
 				System.out.println("found a factory");
 				// TODO: Don't hard-code this. Also, is DamageChart the best place for UnitEnum?
 				DamageChart.UnitEnum[] units = {DamageChart.UnitEnum.INFANTRY};
-				String[] labels = {"Infantry: " + myGame.activeCO.getUnitModel(DamageChart.UnitEnum.INFANTRY).moneyCost};
-				actionMenu = new GameMenu(units, labels);
+				actionMenu = new GameMenu(units);
 				inputMode = InputMode.PRODUCTION;
 			}
 			break;
@@ -170,8 +188,7 @@ public class MapController {
 			{
 				// Move the Unit to the location and display possible actions.
 				moveUnit(unitActor, myGame.getCursorX(), myGame.getCursorY());
-				String[] newStrings = {new String()};
-				actionMenu = new GameMenu(unitActor.getPossibleActions(myGame.gameMap),newStrings);
+				actionMenu = new GameMenu(unitActor.getPossibleActions(myGame.gameMap));
 				inputMode = InputMode.ACTIONMENU;
 			}
 			break;

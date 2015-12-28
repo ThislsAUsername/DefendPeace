@@ -6,6 +6,8 @@ import java.awt.Graphics;
 import Terrain.Environment;
 import Units.Unit;
 
+import Engine.DamageChart;
+import Engine.DamageChart.UnitEnum;
 import Engine.GameInstance;
 
 public class MapView extends javax.swing.JPanel {
@@ -45,19 +47,7 @@ public class MapView extends javax.swing.JPanel {
 			g.setColor(new Color(253,171,77));
 			g.fillRect(myGame.getCursorX()*tileSizePx, myGame.getCursorY()*tileSizePx, tileSizePx, tileSizePx);
 		} else {
-			g.setColor(Color.black); // outer border
-			g.fillRect(myGame.gameMap.mapWidth*tileSizePx/4, myGame.gameMap.mapHeight*tileSizePx/4, myGame.gameMap.mapWidth*tileSizePx/2, myGame.gameMap.mapHeight*tileSizePx/2);
-			g.setColor(Color.cyan); // inner fill
-			g.fillRect(myGame.gameMap.mapWidth*tileSizePx/4+1, myGame.gameMap.mapHeight*tileSizePx/4+1, myGame.gameMap.mapWidth*tileSizePx/2-2, myGame.gameMap.mapHeight*tileSizePx/2-2);
-			g.setColor(new Color(253,171,77)); // selection
-			g.fillRect(myGame.gameMap.mapWidth*tileSizePx/4+1, (myGame.currentMenu.selectedOption+1)*tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4+4, myGame.gameMap.mapWidth*tileSizePx/2-2, tileSizePx/2);
-			g.setColor(Color.MAGENTA);
-			String str = new String("Money: " + myGame.activeCO.money);
-			g.drawChars(str.toCharArray(), 0, str.length(), myGame.gameMap.mapWidth*tileSizePx/4+4, tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4);
-			g.setColor(Color.black);
-			for (int i = 0; i < myGame.currentMenu.labels.length; i++) {
-				g.drawChars(myGame.currentMenu.labels[i].toCharArray(), 0, myGame.currentMenu.labels[i].length(), myGame.gameMap.mapWidth*tileSizePx/4+4, (i+2)*tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4);
-			}
+			drawMenu(g);
 		}
 	}
 	
@@ -123,6 +113,43 @@ public class MapView extends javax.swing.JPanel {
 		{
 			drawUnit(g, locus.getResident());
 			
+		}
+	}
+	
+	private void drawMenu(Graphics g) {
+		g.setColor(Color.black); // outer border
+		g.fillRect(myGame.gameMap.mapWidth*tileSizePx/4, myGame.gameMap.mapHeight*tileSizePx/4, myGame.gameMap.mapWidth*tileSizePx/2, myGame.gameMap.mapHeight*tileSizePx/2);
+		g.setColor(Color.cyan); // inner fill
+		g.fillRect(myGame.gameMap.mapWidth*tileSizePx/4+1, myGame.gameMap.mapHeight*tileSizePx/4+1, myGame.gameMap.mapWidth*tileSizePx/2-2, myGame.gameMap.mapHeight*tileSizePx/2-2);
+		String label;
+//		System.out.println("Current selection is: " + myGame.currentMenu.selectedOption);
+		switch (myGame.currentMenu.menuType) {
+		case PRODUCTION:
+			g.setColor(new Color(253,171,77)); // selection
+			g.fillRect(myGame.gameMap.mapWidth*tileSizePx/4+1, (myGame.currentMenu.selectedOption+1)*tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4+4, myGame.gameMap.mapWidth*tileSizePx/2-2, tileSizePx/2);
+			g.setColor(Color.MAGENTA);
+			label = new String("Money: " + myGame.activeCO.money);
+			g.drawChars(label.toCharArray(), 0, label.length(), myGame.gameMap.mapWidth*tileSizePx/4+4, tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4);
+			g.setColor(Color.black);
+			for (int i = 0; i < myGame.currentMenu.getNumChoices(); i++) {
+				label = myGame.currentMenu.getOptions()[i].toString()+ ": " + myGame.activeCO.getUnitModel((UnitEnum) myGame.currentMenu.getSelectedAction()).moneyCost;
+				g.drawChars(label.toCharArray(), 0, label.length(), myGame.gameMap.mapWidth*tileSizePx/4+4, (i+2)*tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4);
+			}
+			break;
+		case ACTION:
+			g.setColor(new Color(253,171,77)); // selection
+			g.fillRect(myGame.gameMap.mapWidth*tileSizePx/4+1, (myGame.currentMenu.selectedOption)*tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4+4, myGame.gameMap.mapWidth*tileSizePx/2-2, tileSizePx/2);
+			g.setColor(Color.black);
+			for (int i = 0; i < myGame.currentMenu.getNumChoices(); i++) {
+				label = myGame.currentMenu.getOptions()[i].toString();
+				g.drawChars(label.toCharArray(), 0, label.length(), myGame.gameMap.mapWidth*tileSizePx/4+4, (i+1)*tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4);
+			}
+			break;
+		default:
+			g.setColor(Color.black);
+			label = new String("This is an undefined menu type. Thats... probably a problem.");
+			g.drawChars(label.toCharArray(), 0, label.length(), myGame.gameMap.mapWidth*tileSizePx/4+4, tileSizePx/2+myGame.gameMap.mapHeight*tileSizePx/4);
+			break;
 		}
 	}
 	
