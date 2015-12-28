@@ -141,7 +141,7 @@ public class MapView extends javax.swing.JPanel {
 			g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, tileSizePx/2+menuBorderTop);
 			g.setColor(Color.black);
 			for (int i = 0; i < myGame.currentMenu.getNumChoices(); i++) {
-				label = myGame.currentMenu.getOptions()[i].toString()+ ": " + myGame.activeCO.getUnitModel((UnitEnum) myGame.currentMenu.getSelectedAction()).moneyCost;
+				label = myGame.currentMenu.getOptions()[i].toString()+ ": " + myGame.activeCO.getUnitModel((UnitEnum) myGame.currentMenu.getOptions()[i]).moneyCost;
 				g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, (i+2)*tileSizePx/2+menuBorderTop);
 			}
 			break;
