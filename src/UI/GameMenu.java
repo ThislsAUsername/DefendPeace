@@ -6,11 +6,12 @@ public class GameMenu {
 	
 	private Enum options[];
 	public enum MenuType {ACTION, PRODUCTION};
-	public MenuType menuType;
+	public final MenuType menuType;
 	int selectedOption = 0;
 	
-	public GameMenu(Enum[] options)
+	public GameMenu(MenuType menuType, Enum[] options)
 	{
+		this.menuType = menuType;
 		this.options = options;
 	}
 

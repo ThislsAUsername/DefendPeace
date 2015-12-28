@@ -18,7 +18,6 @@ public class MapController {
 	// Grid used to flag spaces as actionable or not; used for movement/attack/unload/etc.
 	private boolean[][] inputGrid; // TODO - instead of maintaining a separate grid, maybe give Location a 'highlight' attribute?
 
-	GameMenu actionMenu = null;
 	Unit unitActor = null;
 
 	// MovementInput variables
@@ -64,17 +63,6 @@ public class MapController {
 			default:
 				System.out.println("Invalid InputMode in MapController! " + inputMode);
 		}
-		// TODO probably should revise this code...
-		myGame.currentMenu = null;
-		if (inputMode == InputMode.ACTIONMENU || inputMode == InputMode.PRODUCTION) {
-			myGame.currentMenu = actionMenu;
-			if (inputMode == InputMode.PRODUCTION) {
-				actionMenu.menuType = GameMenu.MenuType.PRODUCTION;
-			}
-			if (inputMode == InputMode.ACTIONMENU) {
-				actionMenu.menuType = GameMenu.MenuType.ACTION;
-			}
-		}
 	}
 	
 	/**
@@ -116,9 +104,6 @@ public class MapController {
 						int dist = Math.abs(unitActor.y-j) + Math.abs(unitActor.x-i);
 						if (dist <= unitActor.model.movePower) {
 							inputGrid[i][j] = true;
-							if (dist == 0) {
-								inputGrid[i][j] = false;
-							}
 						}
 					}
 				}
@@ -130,7 +115,7 @@ public class MapController {
 				System.out.println("found a factory");
 				// TODO: Don't hard-code this. Also, is DamageChart the best place for UnitEnum?
 				DamageChart.UnitEnum[] units = {DamageChart.UnitEnum.INFANTRY, DamageChart.UnitEnum.MECH};
-				actionMenu = new GameMenu(units);
+				myGame.currentMenu = new GameMenu(GameMenu.MenuType.PRODUCTION, units);
 				inputMode = InputMode.PRODUCTION;
 			}
 			break;
@@ -193,7 +178,7 @@ public class MapController {
 			{
 				// Move the Unit to the location and display possible actions.
 				moveUnit(unitActor, myGame.getCursorX(), myGame.getCursorY());
-				actionMenu = new GameMenu(unitActor.getPossibleActions(myGame.gameMap));
+				myGame.currentMenu = new GameMenu(GameMenu.MenuType.ACTION, unitActor.getPossibleActions(myGame.gameMap));
 				inputMode = InputMode.ACTIONMENU;
 			}
 			break;
@@ -218,25 +203,25 @@ public class MapController {
 	 */
 	private void handleActionMenuInput(InputHandler.InputAction input)
 	{
-		if(actionMenu == null)
+		if(myGame.currentMenu == null)
 		{
-			System.out.println("Error! MapController.handleActionMenuInput() called when actionMenu is null!");
+			System.out.println("Error! MapController.handleActionMenuInput() called when myGame.currentMenu is null!");
 		}
 
 		switch (input)
 		{
 		case ENTER:
-			readyAction = (MapController.GameAction)actionMenu.getSelectedAction();
+			readyAction = (MapController.GameAction)myGame.currentMenu.getSelectedAction();
 			inputMode = InputMode.ACTION;
 			break;
 		case BACK:
-			actionMenu = null;
+			myGame.currentMenu = null;
 			inputMode = InputMode.MOVEMENT;
 			break;
 		case NO_ACTION:
 			break;
 			default:
-				actionMenu.handleMenuInput(input);
+				myGame.currentMenu.handleMenuInput(input);
 		}
 	}
 
@@ -311,7 +296,7 @@ public class MapController {
 	private void handleProductionMenuInput(InputHandler.InputAction input)
 	{
 		System.out.println("handleProduction");
-		if(actionMenu == null)
+		if(myGame.currentMenu == null)
 		{
 			System.out.println("Error! MapController.handleProductionMenuInput() called when actionMenu is null!");
 		}
@@ -319,7 +304,7 @@ public class MapController {
 		switch (input)
 		{
 		case ENTER:
-			DamageChart.UnitEnum unit = (DamageChart.UnitEnum)actionMenu.getSelectedAction();
+			DamageChart.UnitEnum unit = (DamageChart.UnitEnum)myGame.currentMenu.getSelectedAction();
 
 			if (myGame.activeCO.getUnitModel(unit).moneyCost <= myGame.activeCO.money) {
 				System.out.println("creating unit");
@@ -332,13 +317,13 @@ public class MapController {
 			inputMode = InputMode.MAP;
 			break;
 		case BACK:
-			actionMenu = null;
+			myGame.currentMenu = null;
 			inputMode = InputMode.MAP;
 			break;
 		case NO_ACTION:
 			break;
 			default:
-				actionMenu.handleMenuInput(input);
+				myGame.currentMenu.handleMenuInput(input);
 		}
 	}
 
