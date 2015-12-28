@@ -37,20 +37,24 @@ public class GameInstance {
 	{
 		cursorY -= 1;
 		if(cursorY < 0) cursorY = 0;
+//		System.out.println("moveCursorUp");
 	}
 	public void moveCursorDown()
 	{
 		cursorY +=1;
 		if(cursorY >= gameMap.mapHeight) cursorY = gameMap.mapHeight - 1;
+//		System.out.println("moveCursorDown");
 	}
 	public void moveCursorLeft()
 	{
 		cursorX -= 1;
 		if(cursorX < 0) cursorX = 0;
+//		System.out.println("moveCursorLeft");
 	}
 	public void moveCursorRight()
 	{
 		cursorX += 1;
 		if(cursorX >= gameMap.mapWidth) cursorX = gameMap.mapWidth - 1;
+//		System.out.println("moveCursorRight");
 	}
 }
