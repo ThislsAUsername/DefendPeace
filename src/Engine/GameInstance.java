@@ -1,6 +1,7 @@
 package Engine;
 
 import Terrain.GameMap;
+import Terrain.Location;
 import UI.GameMenu;
 
 public class GameInstance {
@@ -34,6 +35,10 @@ public class GameInstance {
 	public int getCursorY()
 	{
 		return cursorY;
+	}
+	public Location getCursorLocation()
+	{
+		return gameMap.getLocation(cursorX, cursorY);
 	}
 	public void moveCursorUp()
 	{
