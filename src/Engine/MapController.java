@@ -198,7 +198,6 @@ public class MapController {
 		{
 		case ENTER:
 			readyAction = (MapController.GameAction)myGame.currentMenu.getSelectedAction();
-			changeInputMode(InputMode.ACTION);
 			break;
 		case BACK:
 			changeInputMode(InputMode.MOVEMENT);
@@ -208,12 +207,16 @@ public class MapController {
 			default:
 				myGame.currentMenu.handleMenuInput(input);
 		}
-		if(readyAction == MapController.GameAction.WAIT)
+		if(readyAction == MapController.GameAction.ATTACK)
+		{
+			changeInputMode(InputMode.ACTION);
+		}
+		else if(readyAction == MapController.GameAction.WAIT)
 		{
 			readyAction = null;
 			changeInputMode(InputMode.MAP);
 		}
-		if(readyAction == MapController.GameAction.LOAD)
+		else if(readyAction == MapController.GameAction.LOAD)
 		{
 			// TODO: Figure out how to handle moving onto a space with a transport before loading. 
 			Unit transport = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
@@ -378,9 +381,12 @@ public class MapController {
 			myGame.currentMenu = null;
 			break;
 		case ACTIONMENU:
+			myGame.gameMap.clearAllHighlights();
+			readyAction = null;
 			myGame.currentMenu = new GameMenu(GameMenu.MenuType.ACTION, unitActor.getPossibleActions(myGame.gameMap));
 			break;
 		case MAP:
+			myGame.gameMap.clearAllHighlights();
 			myGame.currentMenu = null;
 			break;
 		case MOVEMENT:
@@ -388,11 +394,13 @@ public class MapController {
 			myGame.currentMenu = null;
 			break;
 		case PRODUCTION:
+			myGame.gameMap.clearAllHighlights();
 			// TODO: Don't hard-code this. Also, is DamageChart the best place for UnitEnum?
 			DamageChart.UnitEnum[] units = {DamageChart.UnitEnum.INFANTRY, DamageChart.UnitEnum.MECH};
 			myGame.currentMenu = new GameMenu(GameMenu.MenuType.PRODUCTION, units);
 			break;
 		case METAACTION:
+			myGame.gameMap.clearAllHighlights();
 			MetaAction[] actions = {MetaAction.END_TURN}; 
 			myGame.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, actions);
 			break;

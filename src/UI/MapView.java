@@ -124,7 +124,19 @@ public class MapView extends javax.swing.JPanel {
 		if(locus.getResident() != null)
 		{
 			drawUnit(g, locus.getResident());
-			
+		}
+
+		if(locus.isHighlightSet())
+		{
+			if(locus.getResident() != null && locus.getResident().CO != myGame.activeCO)
+			{
+				g.setColor(HIGHLIGHT_ATTACK);
+			}
+			else
+			{
+				g.setColor(HIGHLIGHT_MOVE);
+			}
+			g.fillRect(x, y, tileSizePx, tileSizePx);
 		}
 	}
 	

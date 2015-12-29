@@ -114,4 +114,15 @@ public class GameMap {
 		}
 		return map[w][h];
 	}
+
+	public void clearAllHighlights()
+	{
+		for(int w = 0; w < mapWidth; ++w)
+		{
+			for(int h = 0; h < mapHeight; ++h)
+			{
+				map[w][h].setHighlight(false);
+			}
+		}
+	}
 }
