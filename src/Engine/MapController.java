@@ -97,20 +97,7 @@ public class MapController {
 			if(null != unitActor)
 			{
 				// Calculate movement options.
-				//findPossibleDestinations(Unit, myGame, inputGrid); TODO
-				for (int i = 0; i < inputGrid.length; i++) {
-					for (int j = 0; j < inputGrid[i].length; j++) {
-						inputGrid[i][j] = false;
-					}
-				}
-				for (int i = 0; i < inputGrid.length; i++) {
-					for (int j = 0; j < inputGrid[i].length; j++) {
-						int dist = Math.abs(unitActor.y-j) + Math.abs(unitActor.x-i);
-						if (dist <= unitActor.model.movePower) {
-							inputGrid[i][j] = true;
-						}
-					}
-				}
+				Utils.findPossibleDestinations(unitActor, myGame, inputGrid);
 				changeInputMode(InputMode.MOVEMENT);
 			}
 			else if(Environment.Terrains.FACTORY == loc.getEnvironment().terrainType
