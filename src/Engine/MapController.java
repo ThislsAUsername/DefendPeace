@@ -161,7 +161,7 @@ public class MapController {
 			rightHeld = true; // Set true after the check, so it is still possible to move out of the reachable tiles.
 			break;
 		case ENTER:
-			if(inMoveableSpace) // If the selected space is within the reachable area
+			if(inMoveableSpace && unitActor.CO == myGame.activeCO) // If the selected space is within the reachable area
 			{
 				// Move the Unit to the location and display possible actions.
 				moveUnit(unitActor, myGame.getCursorX(), myGame.getCursorY());
