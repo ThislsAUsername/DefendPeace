@@ -21,6 +21,18 @@ public class MapView extends javax.swing.JPanel {
 	public static int mapViewWidth = tileSizePx * 15;
 	public static int mapViewHeight = tileSizePx * 10;
 
+	public static final Color COLOR_PLAIN = new Color(186,255,124);
+	public static final Color COLOR_CITY = Color.GRAY;
+	public static final Color COLOR_FACTORY = Color.DARK_GRAY;
+	public static final Color COLOR_FOREST = Color.GREEN;
+	public static final Color COLOR_WATER = Color.BLUE;
+	public static final Color COLOR_MOUNTAIN = new Color(101,40,26);
+	public static final Color COLOR_REEF = new Color(212,144,56);
+	public static final Color COLOR_ROAD = Color.LIGHT_GRAY;
+	public static final Color COLOR_SHOAL = new Color(240,209,77);
+	public static final Color HIGHLIGHT_MOVE = new Color(255,255,255,160);
+	public static final Color HIGHLIGHT_ATTACK = new Color(255,0,0,160);
+
 	public MapView(GameInstance game)
 	{
 		myGame = game;
@@ -63,48 +75,44 @@ public class MapView extends javax.swing.JPanel {
 		switch(tile.terrainType)
 		{
 		case PLAIN:
-			tileColor = new Color(186,255,124);
+			tileColor = COLOR_PLAIN;
 			break;
 		case CITY:
 			if (locus.getOwner() != null) {
 				tileColor = locus.getOwner().myColor;
 			} else {
-				tileColor = Color.GRAY;
+				tileColor = COLOR_CITY;
 			}
 			break;
 		case FACTORY:
 			if (locus.getOwner() != null) {
 				tileColor = locus.getOwner().myColor;
 			} else {
-				tileColor = Color.DARK_GRAY;
+				tileColor = COLOR_FACTORY;
 			}
-//			tileColor = Color.DARK_GRAY; // TODO: Make this team color, if owned.
 			break;
 		case FOREST:
-			tileColor = Color.GREEN;
+			tileColor = COLOR_FOREST;
 			break;
 		case WATER:
-			tileColor = Color.BLUE;
+			tileColor = COLOR_WATER;
 			break;
 		case HQ:
 			if (locus.getOwner() != null) {
 				tileColor = locus.getOwner().myColor;
-			} else {
-				tileColor = Color.RED;
 			}
-//			tileColor = Color.RED; // TODO: Make this team color.
 			break;
 		case MOUNTAIN:
-			tileColor = new Color(101,40,26);
+			tileColor = COLOR_MOUNTAIN;
 			break;
 		case REEF:
-			tileColor = new Color(212,144,56);
+			tileColor = COLOR_REEF;
 			break;
 		case ROAD:
-			tileColor = Color.LIGHT_GRAY;
+			tileColor = COLOR_ROAD;
 			break;
 		case SHOAL:
-			tileColor = new Color(240,209,77);
+			tileColor = COLOR_SHOAL;
 			break;
 			default:
 				tileColor = Color.BLACK;
