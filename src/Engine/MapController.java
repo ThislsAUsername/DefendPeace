@@ -16,9 +16,6 @@ public class MapController {
 
 	private InputMode inputMode;
 
-	// Grid used to flag spaces as actionable or not; used for movement/attack/unload/etc.
-	private boolean[][] inputGrid; // TODO - instead of maintaining a separate grid, maybe give Location a 'highlight' attribute?
-
 	Unit unitActor = null;
 
 	// MovementInput variables
@@ -34,7 +31,6 @@ public class MapController {
 	{
 		myGame = game;
 		inputMode = InputMode.MAP;
-		inputGrid = new boolean[myGame.gameMap.mapWidth][myGame.gameMap.mapHeight];
 	}
 
 	/**
@@ -123,7 +119,7 @@ public class MapController {
 	 */
 	private void handleMovementInput(InputHandler.InputAction input)
 	{
-		boolean inMoveableSpace = inputGrid[myGame.getCursorX()][myGame.getCursorY()];
+		boolean inMoveableSpace = myGame.getCursorLocation().isHighlightSet();
 
 		switch (input)
 		{
@@ -131,7 +127,7 @@ public class MapController {
 			myGame.moveCursorUp();
 //			System.out.println("inMoveableSpace = " + inMoveableSpace);
 			// Make sure we don't overshoot the reachable tiles by accident.
-			if(inMoveableSpace && upHeld && !inputGrid[myGame.getCursorX()][myGame.getCursorY()])
+			if(inMoveableSpace && upHeld && !myGame.getCursorLocation().isHighlightSet())
 			{
 				myGame.moveCursorDown();
 			}
@@ -140,7 +136,7 @@ public class MapController {
 		case DOWN:
 			myGame.moveCursorDown();
 			// Make sure we don't overshoot the reachable space by accident.
-			if(inMoveableSpace && downHeld && !inputGrid[myGame.getCursorX()][myGame.getCursorY()])
+			if(inMoveableSpace && downHeld && !myGame.getCursorLocation().isHighlightSet())
 			{
 				myGame.moveCursorUp();
 			}
@@ -149,7 +145,7 @@ public class MapController {
 		case LEFT:
 			myGame.moveCursorLeft();
 			// Make sure we don't overshoot the reachable space by accident.
-			if(inMoveableSpace && leftHeld && !inputGrid[myGame.getCursorX()][myGame.getCursorY()])
+			if(inMoveableSpace && leftHeld && !myGame.getCursorLocation().isHighlightSet())
 			{
 				myGame.moveCursorRight();
 			}
@@ -158,7 +154,7 @@ public class MapController {
 		case RIGHT:
 			myGame.moveCursorRight();
 			// Make sure we don't overshoot the reachable space by accident.
-			if(inMoveableSpace && rightHeld && !inputGrid[myGame.getCursorX()][myGame.getCursorY()])
+			if(inMoveableSpace && rightHeld && !myGame.getCursorLocation().isHighlightSet())
 			{
 				myGame.moveCursorLeft();
 			}
@@ -237,7 +233,7 @@ public class MapController {
 	 */
 	private void handleActionInput(InputHandler.InputAction input)
 	{
-		boolean inActionableSpace = inputGrid[myGame.getCursorX()][myGame.getCursorY()];
+		boolean inActionableSpace = myGame.getCursorLocation().isHighlightSet();
 
 		switch (input)
 		{
@@ -264,13 +260,13 @@ public class MapController {
 					Unit unitTarget = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
 					if(unitTarget != null && DamageChart.chartDamage(unitActor, unitTarget) != 0)
 					{
-						Utils.findActionableLocations(unitTarget, null, myGame, inputGrid);
-						boolean canCounter = inputGrid[unitActor.x][unitActor.y] && DamageChart.chartDamage(unitTarget, unitActor) != 0;
+						Utils.findActionableLocations(unitTarget, null, myGame);
+						boolean canCounter = myGame.gameMap.getLocation(unitActor.x, unitActor.y).isHighlightSet() && DamageChart.chartDamage(unitTarget, unitActor) != 0;
 						CombatEngine.resolveCombat(unitActor, unitTarget, myGame.gameMap, canCounter);
 						actionTaken = true;
 						System.out.println("unitActor hp: " + unitActor.HP);
 						System.out.println("unitTarget hp: " + unitTarget.HP);
-						Utils.findActionableLocations(unitActor, null, myGame, inputGrid);
+						Utils.findActionableLocations(unitActor, null, myGame);
 					}
 					break;
 				case UNLOAD:
@@ -378,7 +374,7 @@ public class MapController {
 		switch(inputMode)
 		{
 		case ACTION:
-			Utils.findActionableLocations(unitActor, null, myGame, inputGrid);
+			Utils.findActionableLocations(unitActor, null, myGame);
 			myGame.currentMenu = null;
 			break;
 		case ACTIONMENU:
@@ -388,7 +384,7 @@ public class MapController {
 			myGame.currentMenu = null;
 			break;
 		case MOVEMENT:
-			Utils.findPossibleDestinations(unitActor, myGame, inputGrid);
+			Utils.findPossibleDestinations(unitActor, myGame);
 			myGame.currentMenu = null;
 			break;
 		case PRODUCTION:

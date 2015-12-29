@@ -8,6 +8,7 @@ public class Location {
 	private Environment environs = null;
 	private Commander owner = null;
 	private Unit resident = null;
+	private boolean highlightSet = false;
 //	public boolean isFogged = false;
 	
 	public Environment getEnvironment() {
@@ -32,6 +33,16 @@ public class Location {
 
 	public void setResident(Unit resident) {
 		this.resident = resident;
+	}
+	
+	public void setHighlight(boolean val)
+	{
+		highlightSet = val;
+	}
+	
+	public boolean isHighlightSet()
+	{
+		return highlightSet;
 	}
 	
 	public Location (Environment environment) {

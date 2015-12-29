@@ -8,39 +8,37 @@ import Units.Unit;
 public class Utils {
 	
 	/**
-	 * Sets inputGrid[x][y] = true if the Location is inside unit's range, and false otherwise
-	 * We assume that myGame.gameMap has the same dimensions as inputGrid
+	 * Sets the highlight for myGame.gameMap.getLocation(x, y) to true if unit can act on Location (x, y), and false otherwise.
 	 */
-	public static void findActionableLocations(Unit unit, MapController.GameAction action, GameInstance myGame, boolean[][] inputGrid)
+	public static void findActionableLocations(Unit unit, MapController.GameAction action, GameInstance myGame)
 	{
 		// set all locations to false/remaining move = 0
-		for (int i = 0; i < inputGrid.length; i++)
+		for (int i = 0; i < myGame.gameMap.mapWidth; i++)
 		{
-			for (int j = 0; j < inputGrid[i].length; j++)
+			for (int j = 0; j < myGame.gameMap.mapHeight; j++)
 			{
-				inputGrid[i][j] = false;
+				myGame.gameMap.getLocation(i, j).setHighlight(false);
 				int dist = Math.abs(unit.y-j) + Math.abs(unit.x-i);
 				if ((dist >= unit.model.minRange) && (dist <= unit.model.maxRange)/* handled elsewhere && (myGame.gameMap.getLocation(i, j).getResident() != null)*/)
 				{
-					inputGrid[i][j] = true;
+					myGame.gameMap.getLocation(i, j).setHighlight(true);
 				}
 			}
 		}
 	}
 	
 	/**
-	 * Sets inputGrid[x][y] = true if unit can reach that Location, and false otherwise
-	 * We assume that myGame.gameMap has the same dimensions as inputGrid
+	 * Sets the highlight for myGame.gameMap.getLocation(x, y) to true if unit can reach (x, y), and false otherwise.
 	 */
-	public static void findPossibleDestinations(Unit unit, GameInstance myGame, boolean[][] inputGrid)
+	public static void findPossibleDestinations(Unit unit, GameInstance myGame)
 	{
 		// set all locations to false/remaining move = 0
 		int[][] movesLeftGrid = new int[myGame.gameMap.mapWidth][myGame.gameMap.mapHeight];
-		for (int i = 0; i < inputGrid.length; i++)
+		for (int i = 0; i < myGame.gameMap.mapWidth; i++)
 		{
-			for (int j = 0; j < inputGrid[i].length; j++)
+			for (int j = 0; j < myGame.gameMap.mapHeight; j++)
 			{
-				inputGrid[i][j] = false;
+				myGame.gameMap.getLocation(i, j).setHighlight(false);
 				movesLeftGrid[i][j] = 0;
 			}
 		}
@@ -53,7 +51,7 @@ public class Utils {
 		while (!searchQueue.isEmpty())
 		{
 			SearchNode currentNode = searchQueue.poll();
-			inputGrid[currentNode.x][currentNode.y] = true;
+			myGame.gameMap.getLocation(currentNode.x, currentNode.y).setHighlight(true);
 			if (checkSpace(unit, myGame, currentNode, currentNode.x+1, currentNode.y, movesLeftGrid))
 			{
 				searchQueue.add(new SearchNode(currentNode.x+1, currentNode.y));
