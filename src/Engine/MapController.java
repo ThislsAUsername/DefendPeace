@@ -386,6 +386,11 @@ public class MapController {
 			myGame.currentMenu = new GameMenu(GameMenu.MenuType.ACTION, unitActor.getPossibleActions(myGame.gameMap));
 			break;
 		case MAP:
+			if(unitActor != null)
+			{
+				myGame.setCursorLocation(unitActor.x, unitActor.y);
+				unitActor = null; // We are now in MAP mode; no unit is selected.
+			}
 			myGame.gameMap.clearAllHighlights();
 			myGame.currentMenu = null;
 			break;

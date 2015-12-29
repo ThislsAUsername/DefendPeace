@@ -28,6 +28,16 @@ public class GameInstance {
 		activeCO = commanders[activeCoNum];
 	}
 	
+	public void setCursorLocation(int x, int y)
+	{
+		if(x < 0 || y < 0 || x > gameMap.mapWidth - 1 || y > gameMap.mapHeight - 1)
+		{
+			System.out.println("ERROR! GameInstance.setLocation() was given an out-of-bounds location. Ignoring.");
+			return;
+		}
+		cursorX = x;
+		cursorY = y;
+	}
 	public int getCursorX()
 	{
 		return cursorX;
