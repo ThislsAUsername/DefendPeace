@@ -1,15 +1,16 @@
 package Engine;
 
+import Terrain.GameMap;
 import Terrain.Location;
 import Units.Unit;
 
 public class CombatParameters {
 	public Unit attacker, defender;
 	public double baseDamage, attackFactor, attackerHP, defenseFactor, defenderHP, terrainDefenseLevel;
-	public Location[][] map;
+	public GameMap map;
 	public boolean isCounter, canCounter;
 	
-	public CombatParameters(Unit pAttacker, Unit pDefender, Location[][] pMap, boolean isCounter, boolean canCounter) {
+	public CombatParameters(Unit pAttacker, Unit pDefender, GameMap pMap, boolean isCounter, boolean canCounter) {
 		attacker		= pAttacker;
 		defender		= pDefender;
 		map 			= pMap;
@@ -45,6 +46,6 @@ public class CombatParameters {
 		attackerHP			= attacker.HP;
 		defenseFactor		= defender.model.CODef;
 		defenderHP			= defender.HP;
-		terrainDefenseLevel	= map[defender.x][defender.y].getEnvironment().getDefLevel();
+		terrainDefenseLevel	= map.getEnvironment(defender.x, defender.y).getDefLevel();
 	}
 }

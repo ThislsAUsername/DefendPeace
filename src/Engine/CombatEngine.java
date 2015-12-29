@@ -2,13 +2,14 @@ package Engine;
 
 import java.util.ArrayList;
 
+import Terrain.GameMap;
 import Terrain.Location;
 import Units.Unit;
 
 public class CombatEngine {
-	public static ArrayList<CombatModifier> modifiers;
+	public static ArrayList<CombatModifier> modifiers = new ArrayList<CombatModifier>();
 	
-	public static void ResolveCombat(Unit attacker, Unit defender, Location[][] map, boolean canCounter) {
+	public static void resolveCombat(Unit attacker, Unit defender, GameMap map, boolean canCounter) {
 		// TODO: make sure to clean up unneeded modifiers
 //		for(int i = 0; i < modifiers.size(); i++) {
 //			if (modifiers.get(i).done) {

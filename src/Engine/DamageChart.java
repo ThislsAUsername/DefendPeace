@@ -1,5 +1,7 @@
 package Engine;
 
+import Units.Unit;
+
 public class DamageChart {
 	public enum UnitEnum{INFANTRY, SNIPER, MORTAR, MECH, MECHZOOKA, COMMANDO, COMMANDOMISSILE};
 	
@@ -24,5 +26,7 @@ public class DamageChart {
 		// chart = new double[Units.values().length][Units.values().length];
 	}
 	
-//	public double 
+	public static double chartDamage(Unit attacker, Unit defender) {
+		return chart[defender.model.type.ordinal()][attacker.getWeapon(defender.model.type).ordinal()];
+	}
 }

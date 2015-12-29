@@ -11,6 +11,7 @@ public class UnitModel {
 	public double CODef;
 
 	public int moneyCost = 9001;
+	public int minRange = 1, maxRange = 1;
 	public int maxFuel;
 	public int idleFuelBurn;
 	public int movePower;

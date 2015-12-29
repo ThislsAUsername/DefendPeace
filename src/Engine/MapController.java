@@ -97,7 +97,6 @@ public class MapController {
 			if(null != unitActor)
 			{
 				// Calculate movement options.
-				Utils.findPossibleDestinations(unitActor, myGame, inputGrid);
 				changeInputMode(InputMode.MOVEMENT);
 			}
 			else if(Environment.Terrains.FACTORY == loc.getEnvironment().terrainType
@@ -263,10 +262,15 @@ public class MapController {
 				{
 				case ATTACK:
 					Unit unitTarget = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
-					if(unitTarget != null /* TODO && unitActor can target unitTarget*/)
+					if(unitTarget != null && DamageChart.chartDamage(unitActor, unitTarget) != 0)
 					{
-						//TODO: CombatEngine.resolveCombat(unitActor, unitTarget, myGame.gameMap);
+						Utils.findActionableLocations(unitTarget, null, myGame, inputGrid);
+						boolean canCounter = inputGrid[unitActor.x][unitActor.y] && DamageChart.chartDamage(unitTarget, unitActor) != 0;
+						CombatEngine.resolveCombat(unitActor, unitTarget, myGame.gameMap, canCounter);
 						actionTaken = true;
+						System.out.println("unitActor hp: " + unitActor.HP);
+						System.out.println("unitTarget hp: " + unitTarget.HP);
+						Utils.findActionableLocations(unitActor, null, myGame, inputGrid);
 					}
 					break;
 				case UNLOAD:
@@ -374,6 +378,7 @@ public class MapController {
 		switch(inputMode)
 		{
 		case ACTION:
+			Utils.findActionableLocations(unitActor, null, myGame, inputGrid);
 			myGame.currentMenu = null;
 			break;
 		case ACTIONMENU:
@@ -383,6 +388,7 @@ public class MapController {
 			myGame.currentMenu = null;
 			break;
 		case MOVEMENT:
+			Utils.findPossibleDestinations(unitActor, myGame, inputGrid);
 			myGame.currentMenu = null;
 			break;
 		case PRODUCTION:
