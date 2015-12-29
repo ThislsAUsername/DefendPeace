@@ -4,6 +4,12 @@ import Units.Unit;
 import CommandingOfficers.Commander;
 
 public class Location {
+
+	private Environment environs = null;
+	private Commander owner = null;
+	private Unit resident = null;
+//	public boolean isFogged = false;
+	
 	public Environment getEnvironment() {
 		return environs;
 	}
@@ -27,11 +33,6 @@ public class Location {
 	public void setResident(Unit resident) {
 		this.resident = resident;
 	}
-
-	private Environment environs;
-	private Commander owner;
-	private Unit resident;
-//	public boolean isFogged;
 	
 	public Location (Environment environment) {
 		environs = environment;
