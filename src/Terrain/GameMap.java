@@ -2,6 +2,9 @@ package Terrain;
 
 import java.awt.Color;
 
+import Units.InfantryModel;
+import Units.Unit;
+
 public class GameMap {
 
 	private Location[][] map;
@@ -62,8 +65,16 @@ public class GameMap {
 
 		map[3][5].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
 		map[6][5].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
+		Unit n = new Unit(commanders[0], new InfantryModel());
+		n.x = 6;
+		n.y = 5;
+		map[6][5].setResident(n);
 		map[11][4].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
 		map[8][4].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
+		Unit n2 = new Unit(commanders[1], new InfantryModel());
+		n2.x = 8;
+		n2.y = 4;
+		map[8][4].setResident(n2);
 
 		// Coupla shoals and reefs
 		map[1][1].setEnvironment(Environment.getTile(Environment.Terrains.SHOAL, Environment.Weathers.CLEAR));
