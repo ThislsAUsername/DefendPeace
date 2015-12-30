@@ -3,7 +3,7 @@ package Engine;
 import Units.Unit;
 
 public class DamageChart {
-	public enum UnitEnum{INFANTRY, SNIPER, MORTAR, MECH, MECHZOOKA, COMMANDO, COMMANDOMISSILE};
+	public enum UnitEnum{INFANTRY, SNIPER, MORTAR, MECH, MECHZOOKA, COMMANDO, COMMANDOMISSILE, APC};
 	
 	// format is [attacker][defender]
 //	public static double[][] chart = {{55, 55, 60, 50, 50, 42, 42},
@@ -21,7 +21,8 @@ public class DamageChart {
 									  {50, 60, 55, 55, 00, 60, 00},
 									  {50, 60, 55, 55, 00, 60, 00},
 									  {42, 55, 42, 42, 00, 55, 00},
-									  {42, 55, 42, 42, 00, 55, 00}};
+									  {42, 55, 42, 42, 00, 55, 00},
+									  {25, 30, 42, 30, 42, 35, 00}};
 	public DamageChart() {
 		// chart = new double[Units.values().length][Units.values().length];
 	}
