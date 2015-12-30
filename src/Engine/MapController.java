@@ -11,7 +11,7 @@ public class MapController {
 	private GameInstance myGame;
 	
 	private enum InputMode {MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION};
-	public enum GameAction {ATTACK, LOAD, UNLOAD, WAIT, CANCEL};
+	public enum GameAction {ATTACK, CAPTURE, LOAD, UNLOAD, WAIT, CANCEL};
 	public enum MetaAction {END_TURN};
 
 	private InputMode inputMode;
@@ -92,8 +92,11 @@ public class MapController {
 			// If there is a (TODO - still-active) Unit at location
 			if(null != unitActor)
 			{
-				// Calculate movement options.
-				changeInputMode(InputMode.MOVEMENT);
+				if(unitActor.isTurnOver == false)
+				{
+					// Calculate movement options.
+					changeInputMode(InputMode.MOVEMENT);
+				}
 			}
 			else if(Environment.Terrains.FACTORY == loc.getEnvironment().terrainType
 					&& loc.getOwner() == myGame.activeCO)
@@ -211,9 +214,17 @@ public class MapController {
 		{
 			changeInputMode(InputMode.ACTION);
 		}
+		else if(readyAction == MapController.GameAction.CAPTURE)
+		{
+			readyAction = null;
+			unitActor.isTurnOver = true;
+			myGame.gameMap.getLocation(unitActor.x, unitActor.y).capture((int) unitActor.HP);
+			changeInputMode(InputMode.MAP);
+		}
 		else if(readyAction == MapController.GameAction.WAIT)
 		{
 			readyAction = null;
+			unitActor.isTurnOver = true;
 			changeInputMode(InputMode.MAP);
 		}
 		else if(readyAction == MapController.GameAction.LOAD)
@@ -441,5 +452,6 @@ public class MapController {
 		myGame.gameMap.getLocation(x, y).setResident(unit);
 		unit.x = x;
 		unit.y = y;
+		myGame.activeCO.units.add(unit);
 	}
 }
