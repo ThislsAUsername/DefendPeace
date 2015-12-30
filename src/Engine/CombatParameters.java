@@ -22,7 +22,7 @@ public class CombatParameters {
 	public double calculateDamage() {
 //		[B*ACO/100+R]*(AHP/10)*[(200-(DCO+DTR*DHP))/100]
 		double overallPower = (baseDamage*attackFactor/100/*+Random factor?*/)*(attackerHP/100);
-		double overallDefense = ((200-(defenseFactor+terrainDefenseLevel*defenderHP))/100);
+		double overallDefense = ((200-(defenseFactor+terrainDefenseLevel*defenderHP/10))/100);
 		return overallPower*overallDefense;
 	}
 	
