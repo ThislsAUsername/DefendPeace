@@ -50,20 +50,29 @@ public class Utils {
 		// do search
 		while (!searchQueue.isEmpty())
 		{
+			// pull out the next search node
 			SearchNode currentNode = searchQueue.poll();
-			myGame.gameMap.getLocation(currentNode.x, currentNode.y).setHighlight(true);
+			// if the space is empty or holds the current unit, highlight
+			if (myGame.gameMap.getLocation(currentNode.x, currentNode.y).getResident() == null || myGame.gameMap.getLocation(currentNode.x, currentNode.y).getResident() == unit)
+			{
+				myGame.gameMap.getLocation(currentNode.x, currentNode.y).setHighlight(true);
+			}
+			// right
 			if (checkSpace(unit, myGame, currentNode, currentNode.x+1, currentNode.y, movesLeftGrid))
 			{
 				searchQueue.add(new SearchNode(currentNode.x+1, currentNode.y));
 			}
+			// left
 			if (checkSpace(unit, myGame, currentNode, currentNode.x-1, currentNode.y, movesLeftGrid))
 			{
 				searchQueue.add(new SearchNode(currentNode.x-1, currentNode.y));
 			}
+			// down
 			if (checkSpace(unit, myGame, currentNode, currentNode.x, currentNode.y+1, movesLeftGrid))
 			{
 				searchQueue.add(new SearchNode(currentNode.x, currentNode.y+1));
 			}
+			// up
 			if (checkSpace(unit, myGame, currentNode, currentNode.x, currentNode.y-1, movesLeftGrid))
 			{
 				searchQueue.add(new SearchNode(currentNode.x, currentNode.y-1));
@@ -73,9 +82,18 @@ public class Utils {
 	}
 	
 	private static boolean checkSpace(Unit unit, GameInstance myGame, SearchNode currentNode, int x, int y, int[][] movesLeftGrid) {
+		// if we're past the edges of the map
 		if (x < 0 || y < 0 || x >= myGame.gameMap.mapWidth || y >= myGame.gameMap.mapHeight)
 		{
 			return false;
+		}
+		// if there is a unit in that space
+		if (myGame.gameMap.getLocation(x, y).getResident() != null)
+		{	// if that unit is an enemy
+			if(myGame.gameMap.getLocation(x, y).getResident().CO != unit.CO)
+			{
+				return false;
+			}
 		}
 		// if we have more movepower left than the other route there does
 		boolean betterRoute = false;
