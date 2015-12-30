@@ -1,5 +1,7 @@
 package Units;
 
+import java.util.ArrayList;
+
 import Terrain.GameMap;
 import CommandingOfficers.Commander;
 import Engine.CombatParameters;
@@ -8,7 +10,7 @@ import Engine.DamageChart.UnitEnum;
 
 public class Unit {
 	public UnitModel model;
-	public int x, y, fuel;
+	public int x, y, movesLeft, fuel;
 	public Commander CO;
 	public boolean isTurnOver;
 	public double HP;
@@ -19,8 +21,15 @@ public class Unit {
 		CO = co;
 		model = um;
 		fuel = model.maxFuel;
-		isTurnOver = false;
+		isTurnOver = true;
 		HP = model.maxHP;
+	}
+	
+	public void initTurn()
+	{
+		isTurnOver = false;
+		fuel -= model.idleFuelBurn;
+		movesLeft = model.movePower;
 	}
 	
 	// allows the unit to choose its weapon
@@ -43,7 +52,27 @@ public class Unit {
 	public MapController.GameAction[] getPossibleActions(GameMap map)
 	{
 		// TODO - Actually look at the map to see what actions this unit can take from this location.
-		MapController.GameAction[] actions = {MapController.GameAction.ATTACK, MapController.GameAction.WAIT};
-		return actions;
+		ArrayList<MapController.GameAction> actions = new ArrayList<MapController.GameAction>();
+		for (int i = 0; i < model.possibleActions.length; i++) {
+			switch (model.possibleActions[i])
+			{
+			case ATTACK:
+				actions.add(MapController.GameAction.ATTACK);
+				break;
+			case CAPTURE:
+				if(map.getLocation(x, y).getOwner() != CO && map.getLocation(x, y).isCaptureable())
+				{
+					actions.add(MapController.GameAction.CAPTURE);
+				}
+				break;
+			case WAIT:
+				actions.add(MapController.GameAction.WAIT);
+				break;
+			default:
+				System.out.println("getPossibleActions: Invalid action in model's possibleActions["+i+"]: " + model.possibleActions[i]);
+			}
+		}
+		MapController.GameAction[] returned = new MapController.GameAction[0];
+		return actions.toArray(returned);
 	}
 }

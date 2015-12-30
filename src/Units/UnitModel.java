@@ -1,5 +1,6 @@
 package Units;
 
+import Engine.MapController;
 import Engine.DamageChart.UnitEnum;
 import Units.MoveTypes.MoveType;
 
@@ -9,6 +10,7 @@ public class UnitModel {
 	public double maxHP;
 	public double COStr;
 	public double CODef;
+	public MapController.GameAction[] possibleActions;
 
 	public int moneyCost = 9001;
 	public int minRange = 1, maxRange = 1;
