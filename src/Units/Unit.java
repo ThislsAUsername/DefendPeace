@@ -9,6 +9,7 @@ import Engine.MapController;
 import Engine.DamageChart.UnitEnum;
 
 public class Unit {
+	public Unit[] heldUnit;
 	public UnitModel model;
 	public int x, y, movesLeft, fuel;
 	public Commander CO;
@@ -23,6 +24,8 @@ public class Unit {
 		fuel = model.maxFuel;
 		isTurnOver = true;
 		HP = model.maxHP;
+		if (model.holdingCapacity > 0)
+			heldUnit = new Unit[model.holdingCapacity];
 	}
 	
 	public void initTurn()

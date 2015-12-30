@@ -3,6 +3,7 @@ package CommandingOfficers;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import Units.APCModel;
 import Units.InfantryModel;
 import Units.MechModel;
 import Units.Unit;
@@ -24,9 +25,10 @@ public class Commander {
 	public Commander()
 	{
 		// TODO Obviously we don't want to hard-code the UnitModel array.
-		unitModels = new UnitModel[2];
+		unitModels = new UnitModel[3];
 		unitModels[0] = new InfantryModel();
 		unitModels[1] = new MechModel();
+		unitModels[2] = new APCModel();
 		modifiers = new ArrayList<COModifier>();
 		units = new ArrayList<Unit>();
 	}

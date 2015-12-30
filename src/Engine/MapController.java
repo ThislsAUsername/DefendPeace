@@ -404,7 +404,7 @@ public class MapController {
 		case PRODUCTION:
 			myGame.gameMap.clearAllHighlights();
 			// TODO: Don't hard-code this. Also, is DamageChart the best place for UnitEnum?
-			DamageChart.UnitEnum[] units = {DamageChart.UnitEnum.INFANTRY, DamageChart.UnitEnum.MECH};
+			DamageChart.UnitEnum[] units = {DamageChart.UnitEnum.INFANTRY, DamageChart.UnitEnum.MECH, DamageChart.UnitEnum.APC};
 			myGame.currentMenu = new GameMenu(GameMenu.MenuType.PRODUCTION, units);
 			break;
 		case METAACTION:
