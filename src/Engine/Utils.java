@@ -44,7 +44,7 @@ public class Utils {
 		}
 		// set up our search
 		SearchNode root = new SearchNode(unit.x, unit.y);
-		movesLeftGrid[unit.x][unit.y] = Math.min(unit.model.movePower, unit.fuel);
+		movesLeftGrid[unit.x][unit.y] = Math.min(unit.movesLeft, unit.fuel);
 		Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(movesLeftGrid));
 		searchQueue.add(root);
 		// do search
