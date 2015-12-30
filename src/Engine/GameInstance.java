@@ -82,5 +82,6 @@ public class GameInstance {
 			activeCoNum = 0;
 		}
 		activeCO = commanders[activeCoNum];
+		activeCO.initTurn();
 	}
 }
