@@ -18,12 +18,6 @@ public class MapController {
 
 	Unit unitActor = null;
 
-	// MovementInput variables
-	static boolean upHeld = false;
-	static boolean downHeld = false;
-	static boolean leftHeld = false;
-	static boolean rightHeld = false;
-
 	// readied Action
 	GameAction readyAction = null;
 
@@ -130,38 +124,34 @@ public class MapController {
 			myGame.moveCursorUp();
 //			System.out.println("inMoveableSpace = " + inMoveableSpace);
 			// Make sure we don't overshoot the reachable tiles by accident.
-			if(inMoveableSpace && upHeld && !myGame.getCursorLocation().isHighlightSet())
+			if(inMoveableSpace && InputHandler.isUpHeld() && !myGame.getCursorLocation().isHighlightSet())
 			{
 				myGame.moveCursorDown();
 			}
-			upHeld = true; // Set true after the check, so it is still possible to move out of the reachable tiles.
 			break;
 		case DOWN:
 			myGame.moveCursorDown();
 			// Make sure we don't overshoot the reachable space by accident.
-			if(inMoveableSpace && downHeld && !myGame.getCursorLocation().isHighlightSet())
+			if(inMoveableSpace && InputHandler.isDownHeld() && !myGame.getCursorLocation().isHighlightSet())
 			{
 				myGame.moveCursorUp();
 			}
-			downHeld = true; // Set true after the check, so it is still possible to move out of the reachable tiles.
 			break;
 		case LEFT:
 			myGame.moveCursorLeft();
 			// Make sure we don't overshoot the reachable space by accident.
-			if(inMoveableSpace && leftHeld && !myGame.getCursorLocation().isHighlightSet())
+			if(inMoveableSpace && InputHandler.isLeftHeld() && !myGame.getCursorLocation().isHighlightSet())
 			{
 				myGame.moveCursorRight();
 			}
-			leftHeld = true; // Set true after the check, so it is still possible to move out of the reachable tiles.
 			break;
 		case RIGHT:
 			myGame.moveCursorRight();
 			// Make sure we don't overshoot the reachable space by accident.
-			if(inMoveableSpace && rightHeld && !myGame.getCursorLocation().isHighlightSet())
+			if(inMoveableSpace && InputHandler.isRightHeld() && !myGame.getCursorLocation().isHighlightSet())
 			{
 				myGame.moveCursorLeft();
 			}
-			rightHeld = true; // Set true after the check, so it is still possible to move out of the reachable tiles.
 			break;
 		case ENTER:
 			if(inMoveableSpace && unitActor.CO == myGame.activeCO) // If the selected space is within the reachable area
@@ -176,11 +166,6 @@ public class MapController {
 			changeInputMode(InputMode.MAP);
 			break;
 		case NO_ACTION:
-			// TODO - figure out how to make this work correctly so we don't overshoot our reachable Locations on accident.
-			upHeld = false;
-			downHeld = false;
-			leftHeld = false;
-			rightHeld = false;
 			break;
 			default:
 				System.out.println("WARNING! MapController.handleMovementInput() was given invalid input enum (" + input + ")");
