@@ -16,7 +16,9 @@ public class MapController {
 
 	private InputMode inputMode;
 
-	Unit unitActor = null;
+	private Unit unitActor = null;
+	private int cancelX = -1;
+	private int cancelY = -1;
 
 	// readied Action
 	GameAction readyAction = null;
@@ -157,7 +159,7 @@ public class MapController {
 			if(inMoveableSpace && unitActor.CO == myGame.activeCO) // If the selected space is within the reachable area
 			{
 				// Move the Unit to the location and display possible actions.
-				moveUnit(unitActor, myGame.getCursorX(), myGame.getCursorY());
+				considerMove(unitActor, myGame.getCursorX(), myGame.getCursorY());
 				changeInputMode(InputMode.ACTIONMENU);
 			}
 			break;
@@ -188,6 +190,7 @@ public class MapController {
 			readyAction = (MapController.GameAction)myGame.currentMenu.getSelectedAction();
 			break;
 		case BACK:
+			moveUnit(unitActor, cancelX, cancelY);
 			changeInputMode(InputMode.MOVEMENT);
 			break;
 		case NO_ACTION:
@@ -201,6 +204,7 @@ public class MapController {
 		}
 		else if(readyAction == MapController.GameAction.CAPTURE)
 		{
+			moveUnit(unitActor, unitActor.x, unitActor.y);
 			readyAction = null;
 			unitActor.isTurnOver = true;
 			myGame.gameMap.getLocation(unitActor.x, unitActor.y).capture((int) unitActor.HP);
@@ -208,6 +212,7 @@ public class MapController {
 		}
 		else if(readyAction == MapController.GameAction.WAIT)
 		{
+			moveUnit(unitActor, unitActor.x, unitActor.y);
 			readyAction = null;
 			unitActor.isTurnOver = true;
 			changeInputMode(InputMode.MAP);
@@ -259,6 +264,7 @@ public class MapController {
 					Unit unitTarget = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
 					if(unitTarget != null && DamageChart.chartDamage(unitActor, unitTarget) != 0)
 					{
+						moveUnit(unitActor, unitActor.x, unitActor.y);
 						Utils.findActionableLocations(unitTarget, null, myGame);
 						boolean canCounter = myGame.gameMap.getLocation(unitActor.x, unitActor.y).isHighlightSet() && DamageChart.chartDamage(unitTarget, unitActor) != 0;
 						CombatEngine.resolveCombat(unitActor, unitTarget, myGame.gameMap, canCounter);
@@ -272,6 +278,7 @@ public class MapController {
 					// TODO: If unitActor is carrying a unit.
 					if(null == myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident())
 					{
+						moveUnit(unitActor, unitActor.x, unitActor.y);
 						// TODO: Drop off the carried unit at this location and remove it from unitActor's hold
 						actionTaken = true;
 					}
@@ -409,6 +416,20 @@ public class MapController {
 				System.out.println("WARNING! MapController.changeInputMode was given an invalid InputMode " + inputMode);
 		}
 	}
+	
+
+	private void considerMove(Unit unit, int x, int y)
+	{
+		// Remove unit from the map
+		myGame.gameMap.getLocation(unit.x, unit.y).setResident(null);
+
+		// update our cancellation vars
+		cancelX = unit.x;
+		cancelY = unit.y;
+		// update Unit itself
+		unit.x = x;
+		unit.y = y;
+	}
 
 	private void moveUnit(Unit unit, int x, int y)
 	{
@@ -421,6 +442,9 @@ public class MapController {
 		myGame.gameMap.getLocation(unit.x, unit.y).setResident(null);
 		myGame.gameMap.getLocation(x, y).setResident(unit);
 
+		// update our cancellation vars
+		cancelX = -1;
+		cancelY = -1;
 		// update Unit itself
 		unit.x = x;
 		unit.y = y;
