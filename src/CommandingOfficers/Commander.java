@@ -3,6 +3,9 @@ package CommandingOfficers;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import Terrain.Environment;
+import Terrain.GameMap;
+import Terrain.Location;
 import Units.APCModel;
 import Units.InfantryModel;
 import Units.MechModel;
@@ -17,7 +20,9 @@ public class Commander {
 	public UnitModel[] unitModels;
 	public ArrayList<COModifier> modifiers;
 	public Color myColor;
-	public int money = 1000; // TODO set money for real
+	public static final int DEFAULTSTARTINGMONEY = 1000;
+	public int money = 0;
+	public int incomePerCity = 100;
 	
 	public void doAbilityMinor(){}
 	public void doAbilityMajor(){}
@@ -31,10 +36,25 @@ public class Commander {
 		unitModels[2] = new APCModel();
 		modifiers = new ArrayList<COModifier>();
 		units = new ArrayList<Unit>();
+		money = DEFAULTSTARTINGMONEY;
 	}
 
-	public void initTurn() {
-		money += 250; // TODO real income would be great
+	public void initTurn(GameMap map) {
+		// Accrue income for each city under your control.
+		int turnIncome = incomePerCity; // plus one for the HQ.
+		for(int w = 0; w < map.mapWidth; ++w)
+		{
+			for(int h = 0; h < map.mapHeight; ++h)
+			{
+				Location loc = map.getLocation(w, h);
+				if(loc.getEnvironment().terrainType == Environment.Terrains.CITY && loc.getOwner() == this)
+				{
+					turnIncome += incomePerCity;
+				}
+			}
+		}
+		money += turnIncome;
+
 		for(int i = 0; i < modifiers.size(); i++) {
 			if (modifiers.get(i).done) {
 				modifiers.remove(i);
