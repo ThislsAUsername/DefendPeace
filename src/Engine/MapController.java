@@ -295,6 +295,7 @@ public class MapController {
 				// Only switch back to map mode if we actually acted. 
 				if(actionTaken)
 				{
+					unitActor.isTurnOver = true;
 					myGame.currentMenu = null;
 					changeInputMode(InputMode.MAP);
 				}
