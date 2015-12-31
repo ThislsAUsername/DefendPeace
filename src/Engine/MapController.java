@@ -166,7 +166,6 @@ public class MapController {
 			}
 			break;
 		case BACK:
-			unitActor = null;
 			changeInputMode(InputMode.MAP);
 			break;
 		case NO_ACTION:
