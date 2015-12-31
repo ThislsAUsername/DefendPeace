@@ -32,6 +32,7 @@ public class MapView extends javax.swing.JPanel {
 	public static final Color COLOR_SHOAL = new Color(240,209,77);
 	public static final Color HIGHLIGHT_MOVE = new Color(255,255,255,160);
 	public static final Color HIGHLIGHT_ATTACK = new Color(255,0,0,160);
+	public static final Color COLOR_CURSOR = new Color(253,171,77,160);
 
 	public MapView(GameInstance game)
 	{
@@ -60,7 +61,7 @@ public class MapView extends javax.swing.JPanel {
 
 		if (myGame.currentMenu == null) {
 			// Draw the current cursor location.
-			g.setColor(new Color(253,171,77));
+			g.setColor(COLOR_CURSOR);
 			g.fillRect(myGame.getCursorX()*tileSizePx, myGame.getCursorY()*tileSizePx, tileSizePx, tileSizePx);
 		} else {
 			drawMenu(g);
@@ -154,7 +155,7 @@ public class MapView extends javax.swing.JPanel {
 //		System.out.println("Current selection is: " + myGame.currentMenu.selectedOption);
 		switch (myGame.currentMenu.menuType) {
 		case PRODUCTION:
-			g.setColor(new Color(253,171,77)); // selection
+			g.setColor(COLOR_CURSOR); // selection
 			g.fillRect(menuBorderLeft+1, (myGame.currentMenu.selectedOption+1)*tileSizePx/2+menuBorderTop+4, menuWidth-2, tileSizePx/2);
 			g.setColor(Color.MAGENTA);
 			label = new String("Money: " + myGame.activeCO.money);
@@ -166,7 +167,7 @@ public class MapView extends javax.swing.JPanel {
 			}
 			break;
 		case ACTION:
-			g.setColor(new Color(253,171,77)); // selection
+			g.setColor(COLOR_CURSOR); // selection
 			g.fillRect(menuBorderLeft+1, (myGame.currentMenu.selectedOption)*tileSizePx/2+menuBorderTop+4, menuWidth-2, tileSizePx/2);
 			g.setColor(Color.black);
 			for (int i = 0; i < myGame.currentMenu.getNumChoices(); i++) {
@@ -175,7 +176,7 @@ public class MapView extends javax.swing.JPanel {
 			}
 			break;
 		case METAACTION:
-			g.setColor(new Color(253,171,77)); // selection
+			g.setColor(COLOR_CURSOR); // selection
 			g.fillRect(menuBorderLeft+1, (myGame.currentMenu.selectedOption)*tileSizePx/2+menuBorderTop+4, menuWidth-2, tileSizePx/2);
 			g.setColor(Color.black);
 			for (int i = 0; i < myGame.currentMenu.getNumChoices(); i++) {
