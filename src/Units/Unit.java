@@ -15,7 +15,9 @@ import Units.UnitModel.UnitEnum;
 public class Unit {
 	public Vector<Unit> heldUnits;
 	public UnitModel model;
-	public int x, y, movesLeft, fuel;
+	public int x;
+	public int y;
+	public int fuel;
 	private int captureProgress;
 	private Location captureTarget;
 	public Commander CO;
@@ -40,7 +42,6 @@ public class Unit {
 	{
 		isTurnOver = false;
 		fuel -= model.idleFuelBurn;
-		movesLeft = model.movePower;
 		if (captureTarget != null && captureTarget.getResident() != this)
 		{
 			captureTarget = null;
@@ -58,7 +59,10 @@ public class Unit {
 	public void capture(Location target)
 	{
 		if (!target.isCaptureable())
+		{
+			System.out.println("ERROR`! Attempting to capture an uncapturable Location!");
 			return;
+		}
 		
 		if (target != captureTarget)
 		{
@@ -121,7 +125,7 @@ public class Unit {
 					actions.add(MapController.GameAction.WAIT);
 					break;
 				case LOAD:
-					// Handled in MapController
+					// Don't add - there's no unit there to board.
 					break;
 				case UNLOAD:
 					if (heldUnits.size() > 0) {
@@ -132,11 +136,17 @@ public class Unit {
 					System.out.println("getPossibleActions: Invalid action in model's possibleActions["+i+"]: " + model.possibleActions[i]);
 				}
 			}
-		} else
+		}
+		else // There is a unit in the space we are evaluating. Only Load actions are supported in this case.
 		{
 			actions.add(MapController.GameAction.LOAD);
 		}
 		MapController.GameAction[] returned = new MapController.GameAction[0];
 		return actions.toArray(returned);
+	}
+	
+	public boolean hasCargoSpace(UnitEnum type)
+	{
+		return (model.holdingCapacity > 0 && heldUnits.size() < model.holdingCapacity && model.holdables.contains(type));
 	}
 }

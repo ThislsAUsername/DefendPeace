@@ -31,7 +31,7 @@ public class MapView extends javax.swing.JPanel {
 	public static final Color COLOR_SHOAL = new Color(240,209,77);
 	public static final Color HIGHLIGHT_MOVE = new Color(255,255,255,160);
 	public static final Color HIGHLIGHT_ATTACK = new Color(255,0,0,160);
-	public static final Color COLOR_CURSOR = new Color(253,171,77,160);
+	public static final Color COLOR_CURSOR = new Color(253,171,77,200);
 	public static final Color COLOR_TIRED = new Color(128,128,128,160);
 
 	public MapView(GameInstance game)
