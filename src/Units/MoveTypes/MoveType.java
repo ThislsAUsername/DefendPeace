@@ -11,6 +11,6 @@ public class MoveType {
 		return moveCosts[weather.ordinal()][terrain.ordinal()];
 	}
 	public int getMoveCost(Environment tile){
-		return moveCosts[tile.weatherType.ordinal()][tile.terrainType.ordinal()];
+		return getMoveCost(tile.weatherType, tile.terrainType);
 	}
 }
