@@ -5,7 +5,6 @@ import java.util.Queue;
 
 import Terrain.GameMap;
 import Units.Unit;
-import Units.Weapons.Weapon;
 
 public class Utils {
 	
@@ -25,16 +24,13 @@ public class Utils {
 					Unit target = map.getLocation(i, j).getResident();
 					if (target != null && target.CO != unit.CO)
 					{
-						for (Weapon gun :unit.weapons) 
+						if (unit.getDamage(target) > 0)
 						{
-							if (gun.getDamage(unit.x, unit.y, target) > 0)
-							{
-								map.getLocation(i, j).setHighlight(true);
-							}
-							else
-							{
-								map.getLocation(i, j).setHighlight(false);
-							}
+							map.getLocation(i, j).setHighlight(true);
+						}
+						else
+						{
+							map.getLocation(i, j).setHighlight(false);
 						}
 					}
 				}

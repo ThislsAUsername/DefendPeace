@@ -11,7 +11,6 @@ import Engine.MapController;
 import Engine.Utils;
 import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
-import Units.Weapons.WeaponModel;
 
 public class Unit {
 	public Vector<Unit> heldUnits;
@@ -57,23 +56,6 @@ public class Unit {
 			captureTarget = null;
 			captureProgress = 0;
 		}
-	}
-	
-	/**
-	 * @return the weapon of choice
-	 */
-	public Weapon getWeapon(Unit target) {
-		if (weapons == null)
-			return null;
-		Weapon chosen = null;
-		for (int i = 0; i < weapons.length && chosen == null; i++)
-		{
-			if (weapons[i].getDamage(x, y, target) != 0)
-			{
-				chosen = weapons[i];
-			}
-		}
-		return chosen;
 	}
 
 	/**

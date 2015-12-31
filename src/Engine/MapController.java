@@ -5,7 +5,6 @@ import Terrain.Location;
 import UI.InputHandler;
 import UI.GameMenu;
 import Units.Unit;
-import Units.Weapons.Weapon;
 
 public class MapController {
 
