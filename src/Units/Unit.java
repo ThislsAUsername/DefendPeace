@@ -7,6 +7,7 @@ import java.util.Vector;
 import Terrain.GameMap;
 import CommandingOfficers.Commander;
 import Engine.CombatParameters;
+import Engine.DamageChart;
 import Engine.GameInstance;
 import Engine.MapController;
 import Engine.DamageChart.UnitEnum;
@@ -66,14 +67,21 @@ public class Unit {
 				switch (model.possibleActions[i])
 				{
 				case ATTACK:
+					// highlight the tiles in range, and check them for targets
 					Utils.findActionableLocations(this, MapController.GameAction.ATTACK, map);
-					// reset all locations, and set those in range
 					for (int w = 0; w < map.mapWidth; w++)
 					{
 						for (int h = 0; h < map.mapHeight; h++)
 						{
-							if (map.getLocation(w, h).isHighlightSet() && map.getLocation(w, h).getResident() != null && map.getLocation(w, h).getResident().CO != this.CO)
+							Unit target = map.getLocation(w, h).getResident();
+							if (map.getLocation(w, h).isHighlightSet() &&
+									target != null &&
+									target.CO != this.CO &&
+									DamageChart.chartDamage(this, target) > 0)
+							{
 								actions.add(MapController.GameAction.ATTACK);
+								break; // just need one target
+							}
 						}
 					}
 					map.clearAllHighlights();
