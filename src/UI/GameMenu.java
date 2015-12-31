@@ -18,7 +18,7 @@ public class GameMenu {
 	public void handleMenuInput(InputHandler.InputAction action)
 	{
 		switch(action)
-		{ // TODO: this doesn't work, at least not for the ActionMenu
+		{
 		case UP:
 			if(selectedOption > 0)
 			{

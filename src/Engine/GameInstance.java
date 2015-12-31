@@ -12,7 +12,6 @@ public class GameInstance {
 	private int cursorX = 0;
 	private int cursorY = 0;
 	
-	// TODO this is a workaround to allow MapView to access MapController's menu. Probably should be better-implemented.
 	public GameMenu currentMenu;
 
 	public GameInstance(GameMap map, CommandingOfficers.Commander[] cos)

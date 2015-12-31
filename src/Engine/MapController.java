@@ -89,7 +89,6 @@ public class MapController {
 			// See what is at the current cursor location, in precedence order of Unit, Building, Terrain.
 			Location loc = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY());
 			unitActor = loc.getResident();
-			// If there is a (TODO - still-active) Unit at location
 			if(null != unitActor)
 			{
 				// Calculate movement options.
@@ -107,7 +106,6 @@ public class MapController {
 			}
 			break;
 		case BACK:
-			// TODO: Figure out what to do here.
 			break;
 			default:
 				System.out.println("WARNING! MapController.handleMapInput() was given invalid input enum (" + input + ")");
@@ -173,7 +171,6 @@ public class MapController {
 			changeInputMode(InputMode.MAP);
 			break;
 		case NO_ACTION:
-			// TODO - figure out how to make this work correctly so we don't overshoot our reachable Locations on accident.
 			upHeld = false;
 			downHeld = false;
 			leftHeld = false;
@@ -218,12 +215,10 @@ public class MapController {
 		}
 		else if(readyAction == MapController.GameAction.LOAD)
 		{
-			// TODO: Figure out how to handle moving onto a space with a transport before loading. 
 			Unit transport = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
 	
 			if(null != transport /* && transport.hasCargoSpace() */)
 			{
-				// TODO: Load up
 				
 				readyAction = null;
 				changeInputMode(InputMode.MAP);
@@ -273,10 +268,8 @@ public class MapController {
 					}
 					break;
 				case UNLOAD:
-					// TODO: If unitActor is carrying a unit.
 					if(null == myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident())
 					{
-						// TODO: Drop off the carried unit at this location and remove it from unitActor's hold
 						actionTaken = true;
 					}
 					break;
