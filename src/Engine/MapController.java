@@ -88,10 +88,14 @@ public class MapController {
 			unitActor = loc.getResident();
 			if(null != unitActor)
 			{
-				if(unitActor.isTurnOver == false)
+				if(unitActor.isTurnOver == false || unitActor.CO != myGame.activeCO)
 				{
 					// Calculate movement options.
 					changeInputMode(InputMode.MOVEMENT);
+				}
+				else
+				{
+					changeInputMode(InputMode.METAACTION);
 				}
 			}
 			else if(Environment.Terrains.FACTORY == loc.getEnvironment().terrainType
@@ -163,7 +167,6 @@ public class MapController {
 			}
 			break;
 		case BACK:
-			unitActor = null;
 			changeInputMode(InputMode.MAP);
 			break;
 		case NO_ACTION:
@@ -221,7 +224,7 @@ public class MapController {
 		{
 			Unit transport = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
 	
-			if(null != transport /* && transport.hasCargoSpace() */) // Already checked!
+			if(null != transport && transport.hasCargoSpace(unitActor.model.type))
 			{
 				unitActor.x = -1;
 				unitActor.y = -1;
@@ -267,8 +270,16 @@ public class MapController {
 					{
 						placeUnit(unitActor, unitActor.x, unitActor.y);
 //						Utils.findActionableLocations(unitTarget, GameAction.ATTACK, myGame.gameMap);
-						boolean canCounter = myGame.gameMap.getLocation(unitActor.x, unitActor.y).isHighlightSet() && unitTarget.getDamage(unitActor) != 0;
+						boolean canCounter = unitTarget.getDamage(unitActor) != 0;
 						CombatEngine.resolveCombat(unitActor, unitTarget, myGame.gameMap, canCounter);
+						if(unitActor.HP <= 0)
+						{
+							removeUnit(unitActor);
+						}
+						if(unitTarget.HP <= 0)
+						{
+							removeUnit(unitTarget);
+						}
 						actionTaken = true;
 						System.out.println("unitActor hp: " + unitActor.HP);
 						System.out.println("unitTarget hp: " + unitTarget.HP);
@@ -385,12 +396,27 @@ public class MapController {
 		{
 		case ACTION:
 			Utils.findActionableLocations(unitActor, readyAction, myGame.gameMap);
+			boolean set = false;
+			for(int w = 0; w < myGame.gameMap.mapWidth; ++w)
+			{
+				for(int h = 0; h < myGame.gameMap.mapHeight; ++h)
+				{
+					if(myGame.gameMap.getLocation(w, h).isHighlightSet())
+					{
+						myGame.setCursorLocation(w, h);
+						set = true;
+						break;
+					}
+				}
+				if(set)break;
+			}
 			myGame.currentMenu = null;
 			break;
 		case ACTIONMENU:
 			myGame.gameMap.clearAllHighlights();
 			readyAction = null;
 			myGame.currentMenu = new GameMenu(GameMenu.MenuType.ACTION, unitActor.getPossibleActions(myGame.gameMap));
+			myGame.setCursorLocation(unitActor.x, unitActor.y);
 			break;
 		case MAP:
 			if(unitActor != null)
@@ -407,7 +433,6 @@ public class MapController {
 			break;
 		case PRODUCTION:
 			myGame.gameMap.clearAllHighlights();
-			// TODO: Also, is DamageChart the best place for UnitEnum?
 			myGame.currentMenu = new GameMenu(GameMenu.MenuType.PRODUCTION, myGame.activeCO.getShoppingList());
 			break;
 		case METAACTION:
@@ -464,5 +489,17 @@ public class MapController {
 		unit.x = x;
 		unit.y = y;
 		myGame.activeCO.units.add(unit);
+	}
+	
+	private void removeUnit(Unit u)
+	{
+		if(myGame.gameMap.getLocation(u.x, u.y).getResident() != u)
+		{
+			System.out.println("WARNING! Trying to remove a Unit that isn't where he claims to be.");
+		}
+		
+		u.CO.units.remove(u);
+		myGame.gameMap.getLocation(u.x, u.y).setResident(null);
+		u = null;
 	}
 }

@@ -11,17 +11,20 @@ import Engine.MapController;
 import Engine.Utils;
 import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
+import Units.Weapons.WeaponModel;
 
 public class Unit {
 	public Vector<Unit> heldUnits;
 	public UnitModel model;
-	public int x, y, movesLeft, fuel;
+	public int x;
+	public int y;
+	public int fuel;
 	private int captureProgress;
 	private Location captureTarget;
 	public Commander CO;
 	public boolean isTurnOver;
 	public double HP;
-	public Weapon[] guns;
+	public Weapon[] weapons;
 
 	public Unit(Commander co, UnitModel um)
 	{
@@ -33,6 +36,14 @@ public class Unit {
 		HP = model.maxHP;
 		captureProgress = 0;
 		captureTarget = null;
+		if (um.weaponModels != null)
+		{
+			weapons = new Weapon[um.weaponModels.length];
+			for (int i = 0; i < um.weaponModels.length; i++)
+			{
+				weapons[i] = new Weapon(um.weaponModels[i]);
+			}
+		}
 		if (model.holdingCapacity > 0)
 			heldUnits = new Vector<Unit>(model.holdingCapacity);
 	}
@@ -41,7 +52,6 @@ public class Unit {
 	{
 		isTurnOver = false;
 		fuel -= model.idleFuelBurn;
-		movesLeft = model.movePower;
 		if (captureTarget != null && captureTarget.getResident() != this)
 		{
 			captureTarget = null;
@@ -53,12 +63,14 @@ public class Unit {
 	 * @return the weapon of choice
 	 */
 	public Weapon getWeapon(Unit target) {
+		if (weapons == null)
+			return null;
 		Weapon chosen = null;
-		for (int i = 0; i < guns.length && chosen == null; i++)
+		for (int i = 0; i < weapons.length && chosen == null; i++)
 		{
-			if (guns[i].getDamage(x, y, target) != 0)
+			if (weapons[i].getDamage(x, y, target) != 0)
 			{
-				chosen = guns[i];
+				chosen = weapons[i];
 			}
 		}
 		return chosen;
@@ -68,12 +80,14 @@ public class Unit {
 	 * @return how much base damage the target would take if this unit tried to attack it
 	 */
 	public double getDamage(Unit target) {
+		if (weapons == null)
+			return 0;
 		Weapon chosen = null;
-		for (int i = 0; i < guns.length && chosen == null; i++)
+		for (int i = 0; i < weapons.length && chosen == null; i++)
 		{
-			if (guns[i].getDamage(x, y, target) != 0)
+			if (weapons[i].getDamage(x, y, target) != 0)
 			{
-				return guns[i].getDamage(x, y, target);
+				return weapons[i].getDamage(x, y, target);
 			}
 		}
 		return 0;
@@ -84,22 +98,25 @@ public class Unit {
 	{
 		UnitEnum target = params.defender.model.type;
 		int i = 0;
-		for (; i < guns.length; i++)
+		for (; i < weapons.length; i++)
 		{
-			if (guns[i].getDamage(target) != 0)
+			if (weapons[i].getDamage(target) != 0)
 			{
 				break;
 			}
 		}
-		if (i == guns.length)
+		if (i == weapons.length)
 			System.out.println("In "+model.name+"'s fire(): no valid weapon found");
-		guns[i].fire();
+		weapons[i].fire();
 	}
 	
 	public void capture(Location target)
 	{
 		if (!target.isCaptureable())
+		{
+			System.out.println("ERROR`! Attempting to capture an uncapturable Location!");
 			return;
+		}
 		
 		if (target != captureTarget)
 		{
@@ -139,11 +156,6 @@ public class Unit {
 					{
 						for (int h = 0; h < map.mapHeight; h++)
 						{
-							Unit target = map.getLocation(w, h).getResident();
-//							if (map.getLocation(w, h).isHighlightSet() &&
-//									target != null &&
-//									target.CO != this.CO &&
-//									getDamage(target) > 0)
 							if (map.getLocation(w, h).isHighlightSet())
 							{
 								actions.add(MapController.GameAction.ATTACK);
@@ -163,7 +175,7 @@ public class Unit {
 					actions.add(MapController.GameAction.WAIT);
 					break;
 				case LOAD:
-					// Handled in MapController
+					// Don't add - there's no unit there to board.
 					break;
 				case UNLOAD:
 					if (heldUnits.size() > 0) {
@@ -174,11 +186,17 @@ public class Unit {
 					System.out.println("getPossibleActions: Invalid action in model's possibleActions["+i+"]: " + model.possibleActions[i]);
 				}
 			}
-		} else
+		}
+		else // There is a unit in the space we are evaluating. Only Load actions are supported in this case.
 		{
 			actions.add(MapController.GameAction.LOAD);
 		}
 		MapController.GameAction[] returned = new MapController.GameAction[0];
 		return actions.toArray(returned);
+	}
+	
+	public boolean hasCargoSpace(UnitEnum type)
+	{
+		return (model.holdingCapacity > 0 && heldUnits.size() < model.holdingCapacity && model.holdables.contains(type));
 	}
 }

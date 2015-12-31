@@ -42,7 +42,7 @@ public class CombatParameters {
 	}
 	
 	private void calculateParameters() {
-		baseDamage			= attacker.getWeapon(defender).getDamage(defender);
+		baseDamage			= attacker.getDamage(defender);
 		attackFactor		= attacker.model.COStr;
 		attackerHP			= attacker.HP;
 		defenseFactor		= defender.model.CODef;
