@@ -7,8 +7,10 @@ import java.util.Vector;
 import Terrain.GameMap;
 import CommandingOfficers.Commander;
 import Engine.CombatParameters;
+import Engine.GameInstance;
 import Engine.MapController;
 import Engine.DamageChart.UnitEnum;
+import Engine.Utils;
 
 public class Unit {
 	public Vector<Unit> heldUnits;
@@ -64,7 +66,17 @@ public class Unit {
 				switch (model.possibleActions[i])
 				{
 				case ATTACK:
-					actions.add(MapController.GameAction.ATTACK);
+					Utils.findActionableLocations(this, MapController.GameAction.ATTACK, map);
+					// reset all locations, and set those in range
+					for (int w = 0; w < map.mapWidth; w++)
+					{
+						for (int h = 0; h < map.mapHeight; h++)
+						{
+							if (map.getLocation(w, h).isHighlightSet() && map.getLocation(w, h).getResident() != null && map.getLocation(w, h).getResident().CO != this.CO)
+								actions.add(MapController.GameAction.ATTACK);
+						}
+					}
+					map.clearAllHighlights();
 					break;
 				case CAPTURE:
 					if(map.getLocation(x, y).getOwner() != CO && map.getLocation(x, y).isCaptureable())
