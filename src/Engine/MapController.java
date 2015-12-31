@@ -206,7 +206,7 @@ public class MapController {
 			placeUnit(unitActor, unitActor.x, unitActor.y);
 			readyAction = null;
 			unitActor.isTurnOver = true;
-			myGame.gameMap.getLocation(unitActor.x, unitActor.y).capture((int) unitActor.HP);
+			unitActor.capture(myGame.gameMap.getLocation(unitActor.x, unitActor.y));
 			changeInputMode(InputMode.MAP);
 		}
 		else if(readyAction == MapController.GameAction.WAIT)

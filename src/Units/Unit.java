@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 import Terrain.GameMap;
+import Terrain.Location;
 import CommandingOfficers.Commander;
 import Engine.CombatParameters;
 import Engine.GameInstance;
@@ -16,6 +17,8 @@ public class Unit {
 	public Vector<Unit> heldUnits;
 	public UnitModel model;
 	public int x, y, movesLeft, fuel;
+	private int captureProgress;
+	private Location captureTarget;
 	public Commander CO;
 	public boolean isTurnOver;
 	public double HP;
@@ -28,6 +31,8 @@ public class Unit {
 		fuel = model.maxFuel;
 		isTurnOver = true;
 		HP = model.maxHP;
+		captureProgress = 0;
+		captureTarget = null;
 		if (model.holdingCapacity > 0)
 			heldUnits = new Vector<Unit>(model.holdingCapacity);
 	}
@@ -45,6 +50,24 @@ public class Unit {
 	}
 	// for the purpose of letting the unit know it has attacked.
 	public void fire(final CombatParameters params) {}
+	
+	public void capture(Location target)
+	{
+		if (!target.isCaptureable())
+			return;
+		
+		if (target != captureTarget)
+		{
+			captureTarget = target;
+			captureProgress = 0;
+		}
+		captureProgress += HP;
+		if (captureProgress >= 200)
+		{
+			target.setOwner(CO);
+			captureProgress = 0;
+		}
+	}
 
 	// Removed for the forseeable future; may be back
 /*	public static double getAttackPower(final CombatParameters params) {
@@ -58,7 +81,6 @@ public class Unit {
 
 	public MapController.GameAction[] getPossibleActions(GameMap map)
 	{
-		// TODO - Actually look at the map to see what actions this unit can take from this location.
 		ArrayList<MapController.GameAction> actions = new ArrayList<MapController.GameAction>();
 		if (map.getLocation(x, y).getResident() == null)
 		{
@@ -88,6 +110,7 @@ public class Unit {
 					actions.add(MapController.GameAction.WAIT);
 					break;
 				case LOAD:
+					// Handled elsewhere
 					break;
 				case UNLOAD:
 					if (heldUnits.size() > 0) {
