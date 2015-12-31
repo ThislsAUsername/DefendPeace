@@ -265,13 +265,13 @@ public class MapController {
 					if(unitTarget != null && DamageChart.chartDamage(unitActor, unitTarget) != 0)
 					{
 						placeUnit(unitActor, unitActor.x, unitActor.y);
-						Utils.findActionableLocations(unitTarget, null, myGame);
+						Utils.findActionableLocations(unitTarget, GameAction.ATTACK, myGame.gameMap);
 						boolean canCounter = myGame.gameMap.getLocation(unitActor.x, unitActor.y).isHighlightSet() && DamageChart.chartDamage(unitTarget, unitActor) != 0;
 						CombatEngine.resolveCombat(unitActor, unitTarget, myGame.gameMap, canCounter);
 						actionTaken = true;
 						System.out.println("unitActor hp: " + unitActor.HP);
 						System.out.println("unitTarget hp: " + unitTarget.HP);
-						Utils.findActionableLocations(unitActor, null, myGame);
+						Utils.findActionableLocations(unitActor, GameAction.ATTACK, myGame.gameMap);
 					}
 					break;
 				case UNLOAD:
@@ -382,7 +382,7 @@ public class MapController {
 		switch(inputMode)
 		{
 		case ACTION:
-			Utils.findActionableLocations(unitActor, readyAction, myGame);
+			Utils.findActionableLocations(unitActor, readyAction, myGame.gameMap);
 			myGame.currentMenu = null;
 			break;
 		case ACTIONMENU:
