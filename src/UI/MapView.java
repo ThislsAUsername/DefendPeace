@@ -33,6 +33,7 @@ public class MapView extends javax.swing.JPanel {
 	public static final Color HIGHLIGHT_MOVE = new Color(255,255,255,160);
 	public static final Color HIGHLIGHT_ATTACK = new Color(255,0,0,160);
 	public static final Color COLOR_CURSOR = new Color(253,171,77,160);
+	public static final Color COLOR_TIRED = new Color(128,128,128,160);
 
 	public MapView(GameInstance game)
 	{
@@ -202,6 +203,11 @@ public class MapView extends javax.swing.JPanel {
 		g.fillRect(unit.x * tileSizePx + offset/2, unit.y * tileSizePx + offset/2, length, length);
 		g.setColor(unit.CO.myColor);
 		g.fillRect(unit.x * tileSizePx + (offset/2)+1, unit.y * tileSizePx + (offset/2)+1, length-2, length-2);
+		if(unit.isTurnOver)
+		{
+			g.setColor(COLOR_TIRED);
+			g.fillRect(unit.x * tileSizePx + (offset/2)+1, unit.y * tileSizePx + (offset/2)+1, length-2, length-2);
+		}
 		g.setColor(Color.BLACK);
 		g.drawChars(health.toString().toCharArray(), 0, health.toString().length(), unit.x * tileSizePx + 8, unit.y*tileSizePx + (int)(tileSizePx*0.66));
 	}
