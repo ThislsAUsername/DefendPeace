@@ -2,15 +2,15 @@ package Units;
 
 import Units.MoveTypes.FootMech;
 import Units.MoveTypes.MoveType;
-import Engine.MapController;
+import Engine.MapController.GameAction;;
 
 public class MechModel extends UnitModel {
 
 	private static final MoveType moveType = new FootMech();
+	private static final GameAction[] actions = {GameAction.ATTACK, GameAction.CAPTURE, GameAction.WAIT};
 
 	public MechModel() {
-		super("Mech", Units.UnitModel.UnitEnum.MECH, 420, 99, 0, 2, moveType);
-		MapController.GameAction[] actions = {MapController.GameAction.ATTACK, MapController.GameAction.CAPTURE, MapController.GameAction.WAIT};
+		super("Mech", Units.UnitModel.UnitEnum.MECH, 420, 99, 0, 2, moveType, actions);
 		possibleActions = actions;
 	}
 }

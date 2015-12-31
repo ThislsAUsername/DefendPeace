@@ -2,7 +2,7 @@ package Units;
 
 import java.util.Vector;
 
-import Engine.MapController;
+import Engine.MapController.GameAction;
 import Units.MoveTypes.MoveType;
 
 public class UnitModel {
@@ -15,7 +15,7 @@ public class UnitModel {
 	public int idleFuelBurn;
 	public int movePower;
 	public MoveType propulsion;
-	public MapController.GameAction[] possibleActions;
+	public GameAction[] possibleActions;
 	
 	public double maxHP;
 	public int holdingCapacity;
@@ -26,7 +26,7 @@ public class UnitModel {
 	public int minRange = 1;
 	public int maxRange = 1;
 	
-	public UnitModel(String pName, UnitEnum pType, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower, MoveType pPropulsion) {
+	public UnitModel(String pName, UnitEnum pType, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower, MoveType pPropulsion, GameAction[] actions) {
 		name 		 = pName;
 		type 		 = pType;
 		moneyCost	 = cost;
@@ -34,6 +34,7 @@ public class UnitModel {
 		idleFuelBurn = pIdleFuelBurn;
 		movePower    = pMovePower;
 		propulsion   = pPropulsion;
+		possibleActions = actions;
 		
 		maxHP        = 100;
 		COStr        = 100;

@@ -4,15 +4,15 @@ import java.util.Vector;
 
 import Units.MoveTypes.MoveType;
 import Units.MoveTypes.Tread;
-import Engine.MapController;
+import Engine.MapController.GameAction;
 
 public class APCModel extends UnitModel {
 
 	private static final MoveType moveType = new Tread();
+	private static final GameAction[] actions = {GameAction.UNLOAD, GameAction.WAIT};
 
 	public APCModel() {
-		super("APC", UnitEnum.APC, 550, 42, 0, 5, moveType);
-		MapController.GameAction[] actions = {MapController.GameAction.UNLOAD, MapController.GameAction.WAIT};
+		super("APC", UnitEnum.APC, 550, 42, 0, 5, moveType, actions);
 		possibleActions = actions;
 		holdingCapacity = 1;
 		UnitEnum[] carryable = {Units.UnitModel.UnitEnum.INFANTRY, Units.UnitModel.UnitEnum.MECH};
