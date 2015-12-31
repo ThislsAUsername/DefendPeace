@@ -424,7 +424,6 @@ public class MapController {
 			break;
 		case PRODUCTION:
 			myGame.gameMap.clearAllHighlights();
-			// TODO: Also, is DamageChart the best place for UnitEnum?
 			myGame.currentMenu = new GameMenu(GameMenu.MenuType.PRODUCTION, myGame.activeCO.getShoppingList());
 			break;
 		case METAACTION:
