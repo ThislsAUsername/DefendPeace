@@ -87,7 +87,7 @@ public class MapController {
 			unitActor = loc.getResident();
 			if(null != unitActor)
 			{
-				if(unitActor.isTurnOver == false)
+				if(unitActor.isTurnOver == false || unitActor.CO != myGame.activeCO)
 				{
 					// Calculate movement options.
 					changeInputMode(InputMode.MOVEMENT);
