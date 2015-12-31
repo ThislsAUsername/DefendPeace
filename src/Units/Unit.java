@@ -15,7 +15,9 @@ import Units.UnitModel.UnitEnum;
 public class Unit {
 	public Vector<Unit> heldUnits;
 	public UnitModel model;
-	public int x, y, movesLeft, fuel;
+	public int x;
+	public int y;
+	public int fuel;
 	private int captureProgress;
 	private Location captureTarget;
 	public Commander CO;
@@ -40,7 +42,6 @@ public class Unit {
 	{
 		isTurnOver = false;
 		fuel -= model.idleFuelBurn;
-		movesLeft = model.movePower;
 		if (captureTarget != null && captureTarget.getResident() != this)
 		{
 			captureTarget = null;
