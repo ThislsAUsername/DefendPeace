@@ -43,6 +43,11 @@ public class Unit {
 		isTurnOver = false;
 		fuel -= model.idleFuelBurn;
 		movesLeft = model.movePower;
+		if (captureTarget != null && captureTarget.getResident() != this)
+		{
+			captureTarget = null;
+			captureProgress = 0;
+		}
 	}
 	
 	// allows the unit to choose its weapon
@@ -118,7 +123,7 @@ public class Unit {
 					actions.add(MapController.GameAction.WAIT);
 					break;
 				case LOAD:
-					// Handled elsewhere
+					// Handled in MapController
 					break;
 				case UNLOAD:
 					if (heldUnits.size() > 0) {
