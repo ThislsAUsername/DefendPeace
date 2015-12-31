@@ -92,6 +92,10 @@ public class MapController {
 					// Calculate movement options.
 					changeInputMode(InputMode.MOVEMENT);
 				}
+				else
+				{
+					changeInputMode(InputMode.METAACTION);
+				}
 			}
 			else if(Environment.Terrains.FACTORY == loc.getEnvironment().terrainType
 					&& loc.getOwner() == myGame.activeCO)
