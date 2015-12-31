@@ -11,38 +11,43 @@ public class Utils {
 	/**
 	 * Sets the highlight for myGame.gameMap.getLocation(x, y) to true if unit can act on Location (x, y), and false otherwise.
 	 */
-	// TODO: make it actually work with multiple actions
 	public static void findActionableLocations(Unit unit, MapController.GameAction action, GameMap map)
 	{
 		switch (action)
 		{
 		case ATTACK:
-			// reset all locations, and set those in range
+			// Set highlight for locations within weapon range, regardless of whether an enemy is present.
 			for (int i = 0; i < map.mapWidth; i++)
 			{
 				for (int j = 0; j < map.mapHeight; j++)
 				{
-					map.getLocation(i, j).setHighlight(false);
 					int dist = Math.abs(unit.y-j) + Math.abs(unit.x-i);
-					if ((dist >= unit.model.minRange) && (dist <= unit.model.maxRange)/* handled elsewhere && (myGame.gameMap.getLocation(i, j).getResident() != null)*/)
+					if ((dist >= unit.model.minRange) && (dist <= unit.model.maxRange))
 					{
 						map.getLocation(i, j).setHighlight(true);
+					}
+					else
+					{
+						map.getLocation(i, j).setHighlight(false);
 					}
 				}
 			}
 			break;
 		case UNLOAD:
-			// reset all locations, and set those passable by the passenger
+			// Set highlight for valid drop locations that can also support the passenger.
 			Unit passenger = unit.heldUnits.get(0);
 			for (int i = 0; i < map.mapWidth; i++)
 			{
 				for (int j = 0; j < map.mapHeight; j++)
 				{
-					map.getLocation(i, j).setHighlight(false);
 					int dist = Math.abs(unit.y-j) + Math.abs(unit.x-i);
 					if (dist == 1 && passenger.model.movePower >= passenger.model.propulsion.getMoveCost(map.getEnvironment(i, j)))
 					{
 						map.getLocation(i, j).setHighlight(true);
+					}
+					else
+					{
+						map.getLocation(i, j).setHighlight(false);
 					}
 				}
 			}
