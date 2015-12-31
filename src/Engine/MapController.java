@@ -387,6 +387,20 @@ public class MapController {
 		{
 		case ACTION:
 			Utils.findActionableLocations(unitActor, readyAction, myGame.gameMap);
+			boolean set = false;
+			for(int w = 0; w < myGame.gameMap.mapWidth; ++w)
+			{
+				for(int h = 0; h < myGame.gameMap.mapHeight; ++h)
+				{
+					if(myGame.gameMap.getLocation(w, h).isHighlightSet())
+					{
+						myGame.setCursorLocation(w, h);
+						set = true;
+						break;
+					}
+				}
+				if(set)break;
+			}
 			myGame.currentMenu = null;
 			break;
 		case ACTIONMENU:
