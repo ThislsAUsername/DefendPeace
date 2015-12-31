@@ -1,5 +1,6 @@
 package Units.MoveTypes;
 
+import Terrain.Environment;
 import Terrain.Environment.Terrains;
 import Terrain.Environment.Weathers;
 
@@ -8,5 +9,8 @@ public class MoveType {
 
 	public int getMoveCost(Weathers weather, Terrains terrain){
 		return moveCosts[weather.ordinal()][terrain.ordinal()];
+	}
+	public int getMoveCost(Environment tile){
+		return moveCosts[tile.weatherType.ordinal()][tile.terrainType.ordinal()];
 	}
 }

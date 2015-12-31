@@ -194,12 +194,14 @@ public class MapView extends javax.swing.JPanel {
 	
 	private void drawUnit(Graphics g, Unit unit)
 	{
-		int health = (int)unit.HP;
+		Integer health = (int)Math.ceil(unit.HP/10);
 		int offset = (int)(tileSizePx * 0.25);
 		int length = tileSizePx - offset;
 		g.setColor(Color.BLACK);
 		g.fillRect(unit.x * tileSizePx + offset/2, unit.y * tileSizePx + offset/2, length, length);
 		g.setColor(unit.CO.myColor);
 		g.fillRect(unit.x * tileSizePx + (offset/2)+1, unit.y * tileSizePx + (offset/2)+1, length-2, length-2);
+		g.setColor(Color.BLACK);
+		g.drawChars(health.toString().toCharArray(), 0, health.toString().length(), unit.x * tileSizePx + 8, unit.y*tileSizePx + (int)(tileSizePx*0.66));
 	}
 }

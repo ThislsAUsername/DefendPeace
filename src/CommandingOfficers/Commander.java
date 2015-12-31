@@ -3,6 +3,7 @@ package CommandingOfficers;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import Units.APCModel;
 import Units.InfantryModel;
 import Units.MechModel;
 import Units.Unit;
@@ -13,7 +14,7 @@ import Engine.DamageChart.UnitEnum;
 
 
 public class Commander {
-	public Unit[] units;
+	public ArrayList<Unit> units;
 	public UnitModel[] unitModels;
 	public ArrayList<COModifier> modifiers;
 	public Color myColor;
@@ -25,9 +26,12 @@ public class Commander {
 	public Commander()
 	{
 		// TODO Obviously we don't want to hard-code the UnitModel array.
-		unitModels = new UnitModel[2];
+		unitModels = new UnitModel[3];
 		unitModels[0] = new InfantryModel();
 		unitModels[1] = new MechModel();
+		unitModels[2] = new APCModel();
+		modifiers = new ArrayList<COModifier>();
+		units = new ArrayList<Unit>();
 	}
 
 	public void initTurn() {
@@ -39,6 +43,10 @@ public class Commander {
 		}
 		for(int i = 0; i < modifiers.size(); i++) {
 			modifiers.get(i).initTurn();
+		}
+		
+		for (int j = 0; j < units.size(); j++) {
+			units.get(j).initTurn();
 		}
 	}
 

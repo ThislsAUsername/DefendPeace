@@ -11,18 +11,14 @@ public class MapController {
 	private GameInstance myGame;
 	
 	private enum InputMode {MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION};
-	public enum GameAction {ATTACK, LOAD, UNLOAD, WAIT, CANCEL};
+	public enum GameAction {ATTACK, CAPTURE, LOAD, UNLOAD, WAIT, CANCEL};
 	public enum MetaAction {END_TURN};
 
 	private InputMode inputMode;
 
-	Unit unitActor = null;
-
-	// MovementInput variables
-	static boolean upHeld = false;
-	static boolean downHeld = false;
-	static boolean leftHeld = false;
-	static boolean rightHeld = false;
+	private Unit unitActor = null;
+	private int cancelX = -1;
+	private int cancelY = -1;
 
 	// readied Action
 	GameAction readyAction = null;
@@ -91,8 +87,11 @@ public class MapController {
 			unitActor = loc.getResident();
 			if(null != unitActor)
 			{
-				// Calculate movement options.
-				changeInputMode(InputMode.MOVEMENT);
+				if(unitActor.isTurnOver == false)
+				{
+					// Calculate movement options.
+					changeInputMode(InputMode.MOVEMENT);
+				}
 			}
 			else if(Environment.Terrains.FACTORY == loc.getEnvironment().terrainType
 					&& loc.getOwner() == myGame.activeCO)
@@ -125,44 +124,40 @@ public class MapController {
 			myGame.moveCursorUp();
 //			System.out.println("inMoveableSpace = " + inMoveableSpace);
 			// Make sure we don't overshoot the reachable tiles by accident.
-			if(inMoveableSpace && upHeld && !myGame.getCursorLocation().isHighlightSet())
+			if(inMoveableSpace && InputHandler.isUpHeld() && !myGame.getCursorLocation().isHighlightSet())
 			{
 				myGame.moveCursorDown();
 			}
-			upHeld = true; // Set true after the check, so it is still possible to move out of the reachable tiles.
 			break;
 		case DOWN:
 			myGame.moveCursorDown();
 			// Make sure we don't overshoot the reachable space by accident.
-			if(inMoveableSpace && downHeld && !myGame.getCursorLocation().isHighlightSet())
+			if(inMoveableSpace && InputHandler.isDownHeld() && !myGame.getCursorLocation().isHighlightSet())
 			{
 				myGame.moveCursorUp();
 			}
-			downHeld = true; // Set true after the check, so it is still possible to move out of the reachable tiles.
 			break;
 		case LEFT:
 			myGame.moveCursorLeft();
 			// Make sure we don't overshoot the reachable space by accident.
-			if(inMoveableSpace && leftHeld && !myGame.getCursorLocation().isHighlightSet())
+			if(inMoveableSpace && InputHandler.isLeftHeld() && !myGame.getCursorLocation().isHighlightSet())
 			{
 				myGame.moveCursorRight();
 			}
-			leftHeld = true; // Set true after the check, so it is still possible to move out of the reachable tiles.
 			break;
 		case RIGHT:
 			myGame.moveCursorRight();
 			// Make sure we don't overshoot the reachable space by accident.
-			if(inMoveableSpace && rightHeld && !myGame.getCursorLocation().isHighlightSet())
+			if(inMoveableSpace && InputHandler.isRightHeld() && !myGame.getCursorLocation().isHighlightSet())
 			{
 				myGame.moveCursorLeft();
 			}
-			rightHeld = true; // Set true after the check, so it is still possible to move out of the reachable tiles.
 			break;
 		case ENTER:
 			if(inMoveableSpace && unitActor.CO == myGame.activeCO) // If the selected space is within the reachable area
 			{
 				// Move the Unit to the location and display possible actions.
-				moveUnit(unitActor, myGame.getCursorX(), myGame.getCursorY());
+				considerMove(unitActor, myGame.getCursorX(), myGame.getCursorY());
 				changeInputMode(InputMode.ACTIONMENU);
 			}
 			break;
@@ -171,10 +166,6 @@ public class MapController {
 			changeInputMode(InputMode.MAP);
 			break;
 		case NO_ACTION:
-			upHeld = false;
-			downHeld = false;
-			leftHeld = false;
-			rightHeld = false;
 			break;
 			default:
 				System.out.println("WARNING! MapController.handleMovementInput() was given invalid input enum (" + input + ")");
@@ -197,6 +188,7 @@ public class MapController {
 			readyAction = (MapController.GameAction)myGame.currentMenu.getSelectedAction();
 			break;
 		case BACK:
+			placeUnit(unitActor, cancelX, cancelY);
 			changeInputMode(InputMode.MOVEMENT);
 			break;
 		case NO_ACTION:
@@ -204,21 +196,35 @@ public class MapController {
 			default:
 				myGame.currentMenu.handleMenuInput(input);
 		}
-		if(readyAction == MapController.GameAction.ATTACK)
+		if(readyAction == MapController.GameAction.ATTACK ||
+				readyAction == MapController.GameAction.UNLOAD)
 		{
 			changeInputMode(InputMode.ACTION);
 		}
+		else if(readyAction == MapController.GameAction.CAPTURE)
+		{
+			placeUnit(unitActor, unitActor.x, unitActor.y);
+			readyAction = null;
+			unitActor.isTurnOver = true;
+			myGame.gameMap.getLocation(unitActor.x, unitActor.y).capture((int) unitActor.HP);
+			changeInputMode(InputMode.MAP);
+		}
 		else if(readyAction == MapController.GameAction.WAIT)
 		{
+			placeUnit(unitActor, unitActor.x, unitActor.y);
 			readyAction = null;
+			unitActor.isTurnOver = true;
 			changeInputMode(InputMode.MAP);
 		}
 		else if(readyAction == MapController.GameAction.LOAD)
 		{
 			Unit transport = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
 	
-			if(null != transport /* && transport.hasCargoSpace() */)
+			if(null != transport /* && transport.hasCargoSpace() */) // Already checked!
 			{
+				unitActor.x = -1;
+				unitActor.y = -1;
+				transport.heldUnits.add(unitActor);
 				
 				readyAction = null;
 				changeInputMode(InputMode.MAP);
@@ -258,6 +264,7 @@ public class MapController {
 					Unit unitTarget = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
 					if(unitTarget != null && DamageChart.chartDamage(unitActor, unitTarget) != 0)
 					{
+						placeUnit(unitActor, unitActor.x, unitActor.y);
 						Utils.findActionableLocations(unitTarget, null, myGame);
 						boolean canCounter = myGame.gameMap.getLocation(unitActor.x, unitActor.y).isHighlightSet() && DamageChart.chartDamage(unitTarget, unitActor) != 0;
 						CombatEngine.resolveCombat(unitActor, unitTarget, myGame.gameMap, canCounter);
@@ -270,6 +277,11 @@ public class MapController {
 				case UNLOAD:
 					if(null == myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident())
 					{
+						Unit droppable = unitActor.heldUnits.get(0);
+						unitActor.heldUnits.remove(droppable);
+						placeUnit(droppable, myGame.getCursorX(), myGame.getCursorY());
+						droppable.isTurnOver = true;
+						placeUnit(unitActor, unitActor.x, unitActor.y);
 						actionTaken = true;
 					}
 					break;
@@ -370,7 +382,7 @@ public class MapController {
 		switch(inputMode)
 		{
 		case ACTION:
-			Utils.findActionableLocations(unitActor, null, myGame);
+			Utils.findActionableLocations(unitActor, readyAction, myGame);
 			myGame.currentMenu = null;
 			break;
 		case ACTIONMENU:
@@ -405,8 +417,22 @@ public class MapController {
 				System.out.println("WARNING! MapController.changeInputMode was given an invalid InputMode " + inputMode);
 		}
 	}
+	
 
-	private void moveUnit(Unit unit, int x, int y)
+	private void considerMove(Unit unit, int x, int y)
+	{
+		// Remove unit from the map
+		myGame.gameMap.getLocation(unit.x, unit.y).setResident(null);
+
+		// update our cancellation vars
+		cancelX = unit.x;
+		cancelY = unit.y;
+		// update Unit itself
+		unit.x = x;
+		unit.y = y;
+	}
+
+	private void placeUnit(Unit unit, int x, int y)
 	{
 		if(myGame.gameMap.getLocation(x, y).getResident() != null)
 		{
@@ -414,9 +440,11 @@ public class MapController {
 			return;
 		}
 		// Update map
-		myGame.gameMap.getLocation(unit.x, unit.y).setResident(null);
 		myGame.gameMap.getLocation(x, y).setResident(unit);
 
+		// update our cancellation vars
+		cancelX = -1;
+		cancelY = -1;
 		// update Unit itself
 		unit.x = x;
 		unit.y = y;
@@ -433,5 +461,6 @@ public class MapController {
 		myGame.gameMap.getLocation(x, y).setResident(unit);
 		unit.x = x;
 		unit.y = y;
+		myGame.activeCO.units.add(unit);
 	}
 }

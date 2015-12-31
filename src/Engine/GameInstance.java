@@ -25,6 +25,7 @@ public class GameInstance {
 		commanders = cos;
 		activeCoNum = 0;
 		activeCO = commanders[activeCoNum];
+		activeCO.initTurn();
 	}
 	
 	public void setCursorLocation(int x, int y)
@@ -81,5 +82,6 @@ public class GameInstance {
 			activeCoNum = 0;
 		}
 		activeCO = commanders[activeCoNum];
+		activeCO.initTurn();
 	}
 }
