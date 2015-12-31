@@ -11,7 +11,7 @@ import Engine.MapController;
 import Engine.DamageChart.UnitEnum;
 
 public class Unit {
-	public Vector<Unit> heldUnit;
+	public Vector<Unit> heldUnits;
 	public UnitModel model;
 	public int x, y, movesLeft, fuel;
 	public Commander CO;
@@ -27,7 +27,7 @@ public class Unit {
 		isTurnOver = true;
 		HP = model.maxHP;
 		if (model.holdingCapacity > 0)
-			heldUnit = new Vector<Unit>(model.holdingCapacity);
+			heldUnits = new Vector<Unit>(model.holdingCapacity);
 	}
 	
 	public void initTurn()
@@ -58,24 +58,37 @@ public class Unit {
 	{
 		// TODO - Actually look at the map to see what actions this unit can take from this location.
 		ArrayList<MapController.GameAction> actions = new ArrayList<MapController.GameAction>();
-		for (int i = 0; i < model.possibleActions.length; i++) {
-			switch (model.possibleActions[i])
-			{
-			case ATTACK:
-				actions.add(MapController.GameAction.ATTACK);
-				break;
-			case CAPTURE:
-				if(map.getLocation(x, y).getOwner() != CO && map.getLocation(x, y).isCaptureable())
+		if (map.getLocation(x, y).getResident() == null)
+		{
+			for (int i = 0; i < model.possibleActions.length; i++) {
+				switch (model.possibleActions[i])
 				{
-					actions.add(MapController.GameAction.CAPTURE);
+				case ATTACK:
+					actions.add(MapController.GameAction.ATTACK);
+					break;
+				case CAPTURE:
+					if(map.getLocation(x, y).getOwner() != CO && map.getLocation(x, y).isCaptureable())
+					{
+						actions.add(MapController.GameAction.CAPTURE);
+					}
+					break;
+				case WAIT:
+					actions.add(MapController.GameAction.WAIT);
+					break;
+				case LOAD:
+					break;
+				case UNLOAD:
+					if (heldUnits.size() > 0) {
+						actions.add(MapController.GameAction.UNLOAD);
+					}
+					break;
+				default:
+					System.out.println("getPossibleActions: Invalid action in model's possibleActions["+i+"]: " + model.possibleActions[i]);
 				}
-				break;
-			case WAIT:
-				actions.add(MapController.GameAction.WAIT);
-				break;
-			default:
-				System.out.println("getPossibleActions: Invalid action in model's possibleActions["+i+"]: " + model.possibleActions[i]);
 			}
+		} else
+		{
+			actions.add(MapController.GameAction.LOAD);
 		}
 		MapController.GameAction[] returned = new MapController.GameAction[0];
 		return actions.toArray(returned);

@@ -14,7 +14,7 @@ public class APCModel extends UnitModel {
 
 	public APCModel() {
 		super("APC", UnitEnum.APC, 550, 42, 0, 5, moveType);
-		MapController.GameAction[] actions = {MapController.GameAction.LOAD, MapController.GameAction.UNLOAD, MapController.GameAction.WAIT};
+		MapController.GameAction[] actions = {MapController.GameAction.UNLOAD, MapController.GameAction.WAIT};
 		possibleActions = actions;
 		holdingCapacity = 1;
 		UnitEnum[] carryable = {DamageChart.UnitEnum.INFANTRY, DamageChart.UnitEnum.MECH};

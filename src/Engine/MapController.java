@@ -85,7 +85,6 @@ public class MapController {
 			// See what is at the current cursor location, in precedence order of Unit, Building, Terrain.
 			Location loc = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY());
 			unitActor = loc.getResident();
-			// If there is a (TODO - still-active) Unit at location
 			if(null != unitActor)
 			{
 				if(unitActor.isTurnOver == false)
@@ -106,7 +105,6 @@ public class MapController {
 			}
 			break;
 		case BACK:
-			// TODO: Figure out what to do here.
 			break;
 			default:
 				System.out.println("WARNING! MapController.handleMapInput() was given invalid input enum (" + input + ")");
@@ -190,7 +188,7 @@ public class MapController {
 			readyAction = (MapController.GameAction)myGame.currentMenu.getSelectedAction();
 			break;
 		case BACK:
-			moveUnit(unitActor, cancelX, cancelY);
+			placeUnit(unitActor, cancelX, cancelY);
 			changeInputMode(InputMode.MOVEMENT);
 			break;
 		case NO_ACTION:
@@ -198,13 +196,14 @@ public class MapController {
 			default:
 				myGame.currentMenu.handleMenuInput(input);
 		}
-		if(readyAction == MapController.GameAction.ATTACK)
+		if(readyAction == MapController.GameAction.ATTACK ||
+				readyAction == MapController.GameAction.UNLOAD)
 		{
 			changeInputMode(InputMode.ACTION);
 		}
 		else if(readyAction == MapController.GameAction.CAPTURE)
 		{
-			moveUnit(unitActor, unitActor.x, unitActor.y);
+			placeUnit(unitActor, unitActor.x, unitActor.y);
 			readyAction = null;
 			unitActor.isTurnOver = true;
 			myGame.gameMap.getLocation(unitActor.x, unitActor.y).capture((int) unitActor.HP);
@@ -212,19 +211,20 @@ public class MapController {
 		}
 		else if(readyAction == MapController.GameAction.WAIT)
 		{
-			moveUnit(unitActor, unitActor.x, unitActor.y);
+			placeUnit(unitActor, unitActor.x, unitActor.y);
 			readyAction = null;
 			unitActor.isTurnOver = true;
 			changeInputMode(InputMode.MAP);
 		}
 		else if(readyAction == MapController.GameAction.LOAD)
 		{
-			// TODO: Figure out how to handle moving onto a space with a transport before loading. 
 			Unit transport = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
 	
-			if(null != transport /* && transport.hasCargoSpace() */)
+			if(null != transport /* && transport.hasCargoSpace() */) // Already checked!
 			{
-				// TODO: Load up
+				unitActor.x = -1;
+				unitActor.y = -1;
+				transport.heldUnits.add(unitActor);
 				
 				readyAction = null;
 				changeInputMode(InputMode.MAP);
@@ -264,7 +264,7 @@ public class MapController {
 					Unit unitTarget = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
 					if(unitTarget != null && DamageChart.chartDamage(unitActor, unitTarget) != 0)
 					{
-						moveUnit(unitActor, unitActor.x, unitActor.y);
+						placeUnit(unitActor, unitActor.x, unitActor.y);
 						Utils.findActionableLocations(unitTarget, null, myGame);
 						boolean canCounter = myGame.gameMap.getLocation(unitActor.x, unitActor.y).isHighlightSet() && DamageChart.chartDamage(unitTarget, unitActor) != 0;
 						CombatEngine.resolveCombat(unitActor, unitTarget, myGame.gameMap, canCounter);
@@ -275,11 +275,13 @@ public class MapController {
 					}
 					break;
 				case UNLOAD:
-					// TODO: If unitActor is carrying a unit.
 					if(null == myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident())
 					{
-						moveUnit(unitActor, unitActor.x, unitActor.y);
-						// TODO: Drop off the carried unit at this location and remove it from unitActor's hold
+						Unit droppable = unitActor.heldUnits.get(0);
+						unitActor.heldUnits.remove(droppable);
+						placeUnit(droppable, myGame.getCursorX(), myGame.getCursorY());
+						droppable.isTurnOver = true;
+						placeUnit(unitActor, unitActor.x, unitActor.y);
 						actionTaken = true;
 					}
 					break;
@@ -380,7 +382,7 @@ public class MapController {
 		switch(inputMode)
 		{
 		case ACTION:
-			Utils.findActionableLocations(unitActor, null, myGame);
+			Utils.findActionableLocations(unitActor, readyAction, myGame);
 			myGame.currentMenu = null;
 			break;
 		case ACTIONMENU:
@@ -431,7 +433,7 @@ public class MapController {
 		unit.y = y;
 	}
 
-	private void moveUnit(Unit unit, int x, int y)
+	private void placeUnit(Unit unit, int x, int y)
 	{
 		if(myGame.gameMap.getLocation(x, y).getResident() != null)
 		{
@@ -439,7 +441,6 @@ public class MapController {
 			return;
 		}
 		// Update map
-		myGame.gameMap.getLocation(unit.x, unit.y).setResident(null);
 		myGame.gameMap.getLocation(x, y).setResident(unit);
 
 		// update our cancellation vars

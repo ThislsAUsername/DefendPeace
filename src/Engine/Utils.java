@@ -10,18 +10,38 @@ public class Utils {
 	/**
 	 * Sets the highlight for myGame.gameMap.getLocation(x, y) to true if unit can act on Location (x, y), and false otherwise.
 	 */
+	// TODO: make it actually work with multiple actions
 	public static void findActionableLocations(Unit unit, MapController.GameAction action, GameInstance myGame)
 	{
-		// set all locations to false/remaining move = 0
-		for (int i = 0; i < myGame.gameMap.mapWidth; i++)
+		switch (action)
 		{
-			for (int j = 0; j < myGame.gameMap.mapHeight; j++)
+		case ATTACK:
+			// reset all locations, and set those in range
+			for (int i = 0; i < myGame.gameMap.mapWidth; i++)
 			{
-				myGame.gameMap.getLocation(i, j).setHighlight(false);
-				int dist = Math.abs(unit.y-j) + Math.abs(unit.x-i);
-				if ((dist >= unit.model.minRange) && (dist <= unit.model.maxRange)/* handled elsewhere && (myGame.gameMap.getLocation(i, j).getResident() != null)*/)
+				for (int j = 0; j < myGame.gameMap.mapHeight; j++)
 				{
-					myGame.gameMap.getLocation(i, j).setHighlight(true);
+					myGame.gameMap.getLocation(i, j).setHighlight(false);
+					int dist = Math.abs(unit.y-j) + Math.abs(unit.x-i);
+					if ((dist >= unit.model.minRange) && (dist <= unit.model.maxRange)/* handled elsewhere && (myGame.gameMap.getLocation(i, j).getResident() != null)*/)
+					{
+						myGame.gameMap.getLocation(i, j).setHighlight(true);
+					}
+				}
+			}
+		case UNLOAD:
+			// reset all locations, and set those passable by the passenger
+			Unit passenger = unit.heldUnits.get(0);
+			for (int i = 0; i < myGame.gameMap.mapWidth; i++)
+			{
+				for (int j = 0; j < myGame.gameMap.mapHeight; j++)
+				{
+					myGame.gameMap.getLocation(i, j).setHighlight(false);
+					int dist = Math.abs(unit.y-j) + Math.abs(unit.x-i);
+					if (dist == 1 && passenger.model.movePower >= passenger.model.propulsion.getMoveCost(myGame.gameMap.getEnvironment(i, j)))
+					{
+						myGame.gameMap.getLocation(i, j).setHighlight(true);
+					}
 				}
 			}
 		}
@@ -53,7 +73,14 @@ public class Utils {
 			// pull out the next search node
 			SearchNode currentNode = searchQueue.poll();
 			// if the space is empty or holds the current unit, highlight
-			if (myGame.gameMap.getLocation(currentNode.x, currentNode.y).getResident() == null || myGame.gameMap.getLocation(currentNode.x, currentNode.y).getResident() == unit)
+			Unit obstacle = myGame.gameMap.getLocation(currentNode.x, currentNode.y).getResident();
+			if (obstacle == null ||
+				obstacle == unit ||
+				(obstacle.CO == unit.CO &&
+					obstacle.model.holdingCapacity != 0 &&
+					obstacle.model.holdingCapacity > obstacle.heldUnits.size() &&
+					obstacle.model.holdables.contains(unit.model.type)
+				))
 			{
 				myGame.gameMap.getLocation(currentNode.x, currentNode.y).setHighlight(true);
 			}
