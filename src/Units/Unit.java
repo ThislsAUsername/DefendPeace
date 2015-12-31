@@ -1,6 +1,8 @@
 package Units;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import Terrain.GameMap;
 import CommandingOfficers.Commander;
@@ -9,7 +11,7 @@ import Engine.MapController;
 import Engine.DamageChart.UnitEnum;
 
 public class Unit {
-	public Unit[] heldUnit;
+	public Vector<Unit> heldUnit;
 	public UnitModel model;
 	public int x, y, movesLeft, fuel;
 	public Commander CO;
@@ -25,7 +27,7 @@ public class Unit {
 		isTurnOver = true;
 		HP = model.maxHP;
 		if (model.holdingCapacity > 0)
-			heldUnit = new Unit[model.holdingCapacity];
+			heldUnit = new Vector<Unit>(model.holdingCapacity);
 	}
 	
 	public void initTurn()

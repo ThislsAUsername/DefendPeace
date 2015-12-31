@@ -1,5 +1,7 @@
 package Units;
 
+import java.util.Vector;
+
 import Engine.MapController;
 import Engine.DamageChart.UnitEnum;
 import Units.MoveTypes.MoveType;
@@ -9,6 +11,7 @@ public class UnitModel {
 	public UnitEnum type;
 	public double maxHP;
 	public int holdingCapacity;
+	public Vector<UnitEnum> holdables;
 	public double COStr;
 	public double CODef;
 	public MapController.GameAction[] possibleActions;
@@ -33,10 +36,5 @@ public class UnitModel {
 		movePower    = pMovePower;
 		propulsion   = pPropulsion;
 		holdingCapacity = 0;
-	}
-	
-	public UnitModel(String pName, UnitEnum pType, int capacity, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower, MoveType pPropulsion) {
-		this(pName, pType, cost, pFuelMax, pIdleFuelBurn, pMovePower, pPropulsion);
-		holdingCapacity = capacity;
 	}
 }
