@@ -36,15 +36,13 @@ public class Location {
 	}
 	
 	/**
-	 * @return whether this property can be captured
-	 * Also increments the capture counter
+	 * @return true if this Location has an ownable environment, false else.
 	 */
 	public boolean isCaptureable()
 	{
-		if (environs.terrainType != Environment.Terrains.CITY && environs.terrainType != Environment.Terrains.FACTORY && environs.terrainType != Environment.Terrains.HQ) {
-			return false;
-		}
-		return true;
+		return (environs.terrainType == Environment.Terrains.CITY ||
+				environs.terrainType == Environment.Terrains.FACTORY ||
+				environs.terrainType == Environment.Terrains.HQ);
 	}
 	
 	public void setHighlight(boolean val)
