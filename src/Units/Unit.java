@@ -59,7 +59,10 @@ public class Unit {
 	public void capture(Location target)
 	{
 		if (!target.isCaptureable())
+		{
+			System.out.println("ERROR`! Attempting to capture an uncapturable Location!");
 			return;
+		}
 		
 		if (target != captureTarget)
 		{
