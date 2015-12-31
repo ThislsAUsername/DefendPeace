@@ -7,10 +7,10 @@ import Terrain.GameMap;
 import Terrain.Location;
 import CommandingOfficers.Commander;
 import Engine.CombatParameters;
-import Engine.DamageChart;
 import Engine.MapController;
 import Engine.Utils;
 import Units.UnitModel.UnitEnum;
+import Units.Weapons.Weapon;
 
 public class Unit {
 	public Vector<Unit> heldUnits;
@@ -21,6 +21,7 @@ public class Unit {
 	public Commander CO;
 	public boolean isTurnOver;
 	public double HP;
+	public Weapon[] guns;
 
 	public Unit(Commander co, UnitModel um)
 	{
@@ -48,12 +49,52 @@ public class Unit {
 		}
 	}
 	
-	// allows the unit to choose its weapon
-	public UnitEnum getWeapon(UnitEnum target) {
-		return model.type;
+	/**
+	 * @return the weapon of choice
+	 */
+	public Weapon getWeapon(Unit target) {
+		Weapon chosen = null;
+		for (int i = 0; i < guns.length && chosen == null; i++)
+		{
+			if (guns[i].getDamage(x, y, target) != 0)
+			{
+				chosen = guns[i];
+			}
+		}
+		return chosen;
 	}
+
+	/**
+	 * @return how much base damage the target would take if this unit tried to attack it
+	 */
+	public double getDamage(Unit target) {
+		Weapon chosen = null;
+		for (int i = 0; i < guns.length && chosen == null; i++)
+		{
+			if (guns[i].getDamage(x, y, target) != 0)
+			{
+				return guns[i].getDamage(x, y, target);
+			}
+		}
+		return 0;
+	}
+	
 	// for the purpose of letting the unit know it has attacked.
-	public void fire(final CombatParameters params) {}
+	public void fire(final CombatParameters params)
+	{
+		UnitEnum target = params.defender.model.type;
+		int i = 0;
+		for (; i < guns.length; i++)
+		{
+			if (guns[i].getDamage(target) != 0)
+			{
+				break;
+			}
+		}
+		if (i == guns.length)
+			System.out.println("In "+model.name+"'s fire(): no valid weapon found");
+		guns[i].fire();
+	}
 	
 	public void capture(Location target)
 	{
@@ -99,10 +140,11 @@ public class Unit {
 						for (int h = 0; h < map.mapHeight; h++)
 						{
 							Unit target = map.getLocation(w, h).getResident();
-							if (map.getLocation(w, h).isHighlightSet() &&
-									target != null &&
-									target.CO != this.CO &&
-									DamageChart.chartDamage(this, target) > 0)
+//							if (map.getLocation(w, h).isHighlightSet() &&
+//									target != null &&
+//									target.CO != this.CO &&
+//									getDamage(target) > 0)
+							if (map.getLocation(w, h).isHighlightSet())
 							{
 								actions.add(MapController.GameAction.ATTACK);
 								break; // just need one target

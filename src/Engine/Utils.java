@@ -5,6 +5,7 @@ import java.util.Queue;
 
 import Terrain.GameMap;
 import Units.Unit;
+import Units.Weapons.Weapon;
 
 public class Utils {
 	
@@ -24,9 +25,15 @@ public class Utils {
 				{
 					map.getLocation(i, j).setHighlight(false);
 					int dist = Math.abs(unit.y-j) + Math.abs(unit.x-i);
-					if ((dist >= unit.model.minRange) && (dist <= unit.model.maxRange)/* handled elsewhere && (myGame.gameMap.getLocation(i, j).getResident() != null)*/)
+					Unit target = map.getLocation(i, j).getResident();
+					for (Weapon gun :unit.guns) 
 					{
-						map.getLocation(i, j).setHighlight(true);
+						if (target != null &&
+							target.CO != unit.CO &&
+							unit.getDamage(target) > 0)
+						{
+							map.getLocation(i, j).setHighlight(true);
+						}
 					}
 				}
 			}

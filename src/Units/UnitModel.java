@@ -1,5 +1,6 @@
 package Units;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 import Engine.MapController.GameAction;
@@ -16,15 +17,12 @@ public class UnitModel {
 	public int movePower;
 	public MoveType propulsion;
 	public GameAction[] possibleActions;
-	
+
 	public double maxHP;
 	public int holdingCapacity;
 	public Vector<UnitEnum> holdables;
 	public double COStr;
 	public double CODef;
-
-	public int minRange = 1;
-	public int maxRange = 1;
 	
 	public UnitModel(String pName, UnitEnum pType, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower, MoveType pPropulsion, GameAction[] actions) {
 		name 		 = pName;
@@ -40,5 +38,8 @@ public class UnitModel {
 		COStr        = 100;
 		CODef        = 100;
 		holdingCapacity = 0;
+//		weapons = new ArrayList<UnitEnum>();
+//		weapons.add(pType);
+//		maxAmmos[0] = -1;
 	}
 }

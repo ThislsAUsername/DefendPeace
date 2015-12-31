@@ -5,6 +5,7 @@ import Terrain.Location;
 import UI.InputHandler;
 import UI.GameMenu;
 import Units.Unit;
+import Units.Weapons.Weapon;
 
 public class MapController {
 
@@ -262,16 +263,16 @@ public class MapController {
 				{
 				case ATTACK:
 					Unit unitTarget = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
-					if(unitTarget != null && DamageChart.chartDamage(unitActor, unitTarget) != 0)
+					if(unitTarget != null && unitActor.getDamage(unitTarget) != 0)
 					{
 						placeUnit(unitActor, unitActor.x, unitActor.y);
-						Utils.findActionableLocations(unitTarget, GameAction.ATTACK, myGame.gameMap);
-						boolean canCounter = myGame.gameMap.getLocation(unitActor.x, unitActor.y).isHighlightSet() && DamageChart.chartDamage(unitTarget, unitActor) != 0;
+//						Utils.findActionableLocations(unitTarget, GameAction.ATTACK, myGame.gameMap);
+						boolean canCounter = myGame.gameMap.getLocation(unitActor.x, unitActor.y).isHighlightSet() && unitTarget.getDamage(unitActor) != 0;
 						CombatEngine.resolveCombat(unitActor, unitTarget, myGame.gameMap, canCounter);
 						actionTaken = true;
 						System.out.println("unitActor hp: " + unitActor.HP);
 						System.out.println("unitTarget hp: " + unitTarget.HP);
-						Utils.findActionableLocations(unitActor, GameAction.ATTACK, myGame.gameMap);
+//						Utils.findActionableLocations(unitActor, GameAction.ATTACK, myGame.gameMap);
 					}
 					break;
 				case UNLOAD:

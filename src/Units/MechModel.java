@@ -12,5 +12,9 @@ public class MechModel extends UnitModel {
 	public MechModel() {
 		super("Mech", Units.UnitModel.UnitEnum.MECH, 420, 99, 0, 2, moveType, actions);
 		possibleActions = actions;
+//		weapons[0] = UnitEnum.MECHZOOKA;
+//		maxAmmos[0] = 2;
+//		weapons[1] = UnitEnum.MECH;
+//		maxAmmos[1] = -1;
 	}
 }
