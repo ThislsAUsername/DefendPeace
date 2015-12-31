@@ -394,6 +394,7 @@ public class MapController {
 			myGame.gameMap.clearAllHighlights();
 			readyAction = null;
 			myGame.currentMenu = new GameMenu(GameMenu.MenuType.ACTION, unitActor.getPossibleActions(myGame.gameMap));
+			myGame.setCursorLocation(unitActor.x, unitActor.y);
 			break;
 		case MAP:
 			if(unitActor != null)
