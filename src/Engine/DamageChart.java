@@ -3,26 +3,23 @@ package Engine;
 import Units.Unit;
 
 public class DamageChart {
-	public enum UnitEnum{INFANTRY, SNIPER, MORTAR, MECH, MECHZOOKA, COMMANDO, COMMANDOMISSILE, APC};
-	
-	// format is [attacker][defender]
-//	public static double[][] chart = {{55, 55, 60, 50, 50, 42, 42},
-//									  {55, 60, 55, 60, 60, 55, 55},
-//									  {60, 50, 70, 55, 55, 42, 42},
-//									  {60, 55, 75, 55, 55, 42, 42},
-//									  {00, 00, 00, 00, 00, 00, 00},
-//									  {65, 60, 80, 60, 60, 55, 55},
-//									  {00, 00, 00, 00, 00, 00, 00}};
+	public enum UnitEnum{INFANTRY, MECH, MECHZOOKA,APC};
+
 	// format is [defender][attacker]
-	// I want it this way because copying rows is easier than copying columns
-	public static double[][] chart = {{55, 55, 60, 60, 00, 65, 00},
-									  {55, 60, 50, 55, 00, 60, 00},
-									  {60, 55, 70, 75, 00, 80, 00},
-									  {50, 60, 55, 55, 00, 60, 00},
-									  {50, 60, 55, 55, 00, 60, 00},
-									  {42, 55, 42, 42, 00, 55, 00},
-									  {42, 55, 42, 42, 00, 55, 00},
-									  {25, 30, 42, 30, 42, 35, 00}};
+	// non-AW units in this version... UnitEnum{INFANTRY, SNIPER, MORTAR, MECH, MECHZOOKA, COMMANDO, COMMANDOMISSILE, APC};
+//	public static double[][] chart = {{55, 50, 60, 65, 00, 75, 0, 0},
+//									  {50, 45, 50, 60, 00, 70, 0, 0},
+//									  {60, 50, 70, 75, 00, 80, 0, 0},
+//									  {45, 50, 55, 55, 00, 60, 0, 0},
+//									  {45, 50, 55, 55, 00, 60, 0, 0},
+//									  {42, 55, 42, 42, 00, 55, 0, 0},
+//									  {42, 55, 42, 42, 00, 55, 0, 0},
+//									  { 7, 13, 42, 10, 55, 13, 0, 0}};
+	// format is [defender][attacker]
+	public static double[][] chart = {{55, 65, 00, 0},
+									  {45, 55, 00, 0},
+									  {45, 55, 00, 0},
+									  { 7, 10, 55, 0}};
 	public DamageChart() {
 		// chart = new double[Units.values().length][Units.values().length];
 	}
