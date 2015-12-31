@@ -143,4 +143,9 @@ public class Unit {
 		MapController.GameAction[] returned = new MapController.GameAction[0];
 		return actions.toArray(returned);
 	}
+	
+	public boolean hasCargoSpace(UnitEnum type)
+	{
+		return (model.holdingCapacity > 0 && heldUnits.size() < model.holdingCapacity && model.holdables.contains(type));
+	}
 }

@@ -220,7 +220,7 @@ public class MapController {
 		{
 			Unit transport = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
 	
-			if(null != transport /* && transport.hasCargoSpace() */) // Already checked!
+			if(null != transport && transport.hasCargoSpace(unitActor.model.type))
 			{
 				unitActor.x = -1;
 				unitActor.y = -1;

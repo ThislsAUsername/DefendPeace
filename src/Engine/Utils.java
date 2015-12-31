@@ -79,11 +79,7 @@ public class Utils {
 			Unit obstacle = myGame.gameMap.getLocation(currentNode.x, currentNode.y).getResident();
 			if (obstacle == null ||
 				obstacle == unit ||
-				(obstacle.CO == unit.CO &&
-					obstacle.model.holdingCapacity != 0 &&
-					obstacle.model.holdingCapacity > obstacle.heldUnits.size() &&
-					obstacle.model.holdables.contains(unit.model.type)
-				))
+				(obstacle.CO == unit.CO && obstacle.hasCargoSpace(unit.model.type) ) )
 			{
 				myGame.gameMap.getLocation(currentNode.x, currentNode.y).setHighlight(true);
 			}
