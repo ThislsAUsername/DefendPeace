@@ -125,7 +125,7 @@ public class Unit {
 					actions.add(MapController.GameAction.WAIT);
 					break;
 				case LOAD:
-					// Handled in MapController
+					// Don't add - there's no unit there to board.
 					break;
 				case UNLOAD:
 					if (heldUnits.size() > 0) {
@@ -136,7 +136,8 @@ public class Unit {
 					System.out.println("getPossibleActions: Invalid action in model's possibleActions["+i+"]: " + model.possibleActions[i]);
 				}
 			}
-		} else
+		}
+		else // There is a unit in the space we are evaluating. Only Load actions are supported in this case.
 		{
 			actions.add(MapController.GameAction.LOAD);
 		}
