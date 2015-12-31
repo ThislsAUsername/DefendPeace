@@ -203,7 +203,7 @@ public class MapView extends javax.swing.JPanel {
 		g.fillRect(unit.x * tileSizePx + offset/2, unit.y * tileSizePx + offset/2, length, length);
 		g.setColor(unit.CO.myColor);
 		g.fillRect(unit.x * tileSizePx + (offset/2)+1, unit.y * tileSizePx + (offset/2)+1, length-2, length-2);
-		if(unit.isTurnOver)
+		if(unit.isTurnOver && unit.CO == myGame.activeCO)
 		{
 			g.setColor(COLOR_TIRED);
 			g.fillRect(unit.x * tileSizePx + (offset/2)+1, unit.y * tileSizePx + (offset/2)+1, length-2, length-2);
