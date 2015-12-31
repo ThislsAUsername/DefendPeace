@@ -10,6 +10,7 @@ import Units.Unit;
 import Units.UnitModel;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.DamageChart;
+import Engine.DamageChart.UnitEnum;
 
 
 public class Commander {
@@ -63,5 +64,15 @@ public class Commander {
 		}
 
 		return um;
+	}
+	
+	public UnitEnum[] getShoppingList()
+	{ // TODO: will eventually need to take in terrainType so it can separate out air/ground/navy
+		ArrayList<UnitEnum> arrList = new ArrayList<UnitEnum>();
+			for (int i = 0; i < unitModels.length; i++) {
+				arrList.add(unitModels[i].type);
+			}
+		UnitEnum[] returned = new UnitEnum[0];
+		return arrList.toArray(returned);
 	}
 }

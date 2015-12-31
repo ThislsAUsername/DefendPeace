@@ -3,6 +3,7 @@ package Engine;
 import java.util.Comparator;
 import java.util.Queue;
 
+import Terrain.GameMap;
 import Units.Unit;
 
 public class Utils {
@@ -11,39 +12,41 @@ public class Utils {
 	 * Sets the highlight for myGame.gameMap.getLocation(x, y) to true if unit can act on Location (x, y), and false otherwise.
 	 */
 	// TODO: make it actually work with multiple actions
-	public static void findActionableLocations(Unit unit, MapController.GameAction action, GameInstance myGame)
+	public static void findActionableLocations(Unit unit, MapController.GameAction action, GameMap map)
 	{
 		switch (action)
 		{
 		case ATTACK:
 			// reset all locations, and set those in range
-			for (int i = 0; i < myGame.gameMap.mapWidth; i++)
+			for (int i = 0; i < map.mapWidth; i++)
 			{
-				for (int j = 0; j < myGame.gameMap.mapHeight; j++)
+				for (int j = 0; j < map.mapHeight; j++)
 				{
-					myGame.gameMap.getLocation(i, j).setHighlight(false);
+					map.getLocation(i, j).setHighlight(false);
 					int dist = Math.abs(unit.y-j) + Math.abs(unit.x-i);
 					if ((dist >= unit.model.minRange) && (dist <= unit.model.maxRange)/* handled elsewhere && (myGame.gameMap.getLocation(i, j).getResident() != null)*/)
 					{
-						myGame.gameMap.getLocation(i, j).setHighlight(true);
+						map.getLocation(i, j).setHighlight(true);
 					}
 				}
 			}
+			break;
 		case UNLOAD:
 			// reset all locations, and set those passable by the passenger
 			Unit passenger = unit.heldUnits.get(0);
-			for (int i = 0; i < myGame.gameMap.mapWidth; i++)
+			for (int i = 0; i < map.mapWidth; i++)
 			{
-				for (int j = 0; j < myGame.gameMap.mapHeight; j++)
+				for (int j = 0; j < map.mapHeight; j++)
 				{
-					myGame.gameMap.getLocation(i, j).setHighlight(false);
+					map.getLocation(i, j).setHighlight(false);
 					int dist = Math.abs(unit.y-j) + Math.abs(unit.x-i);
-					if (dist == 1 && passenger.model.movePower >= passenger.model.propulsion.getMoveCost(myGame.gameMap.getEnvironment(i, j)))
+					if (dist == 1 && passenger.model.movePower >= passenger.model.propulsion.getMoveCost(map.getEnvironment(i, j)))
 					{
-						myGame.gameMap.getLocation(i, j).setHighlight(true);
+						map.getLocation(i, j).setHighlight(true);
 					}
 				}
 			}
+			break;
 		}
 	}
 	

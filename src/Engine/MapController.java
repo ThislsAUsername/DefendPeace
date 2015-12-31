@@ -265,13 +265,13 @@ public class MapController {
 					if(unitTarget != null && DamageChart.chartDamage(unitActor, unitTarget) != 0)
 					{
 						placeUnit(unitActor, unitActor.x, unitActor.y);
-						Utils.findActionableLocations(unitTarget, null, myGame);
+						Utils.findActionableLocations(unitTarget, GameAction.ATTACK, myGame.gameMap);
 						boolean canCounter = myGame.gameMap.getLocation(unitActor.x, unitActor.y).isHighlightSet() && DamageChart.chartDamage(unitTarget, unitActor) != 0;
 						CombatEngine.resolveCombat(unitActor, unitTarget, myGame.gameMap, canCounter);
 						actionTaken = true;
 						System.out.println("unitActor hp: " + unitActor.HP);
 						System.out.println("unitTarget hp: " + unitTarget.HP);
-						Utils.findActionableLocations(unitActor, null, myGame);
+						Utils.findActionableLocations(unitActor, GameAction.ATTACK, myGame.gameMap);
 					}
 					break;
 				case UNLOAD:
@@ -383,7 +383,7 @@ public class MapController {
 		switch(inputMode)
 		{
 		case ACTION:
-			Utils.findActionableLocations(unitActor, readyAction, myGame);
+			Utils.findActionableLocations(unitActor, readyAction, myGame.gameMap);
 			myGame.currentMenu = null;
 			break;
 		case ACTIONMENU:
@@ -406,9 +406,8 @@ public class MapController {
 			break;
 		case PRODUCTION:
 			myGame.gameMap.clearAllHighlights();
-			// TODO: Don't hard-code this. Also, is DamageChart the best place for UnitEnum?
-			DamageChart.UnitEnum[] units = {DamageChart.UnitEnum.INFANTRY, DamageChart.UnitEnum.MECH, DamageChart.UnitEnum.APC};
-			myGame.currentMenu = new GameMenu(GameMenu.MenuType.PRODUCTION, units);
+			// TODO: Also, is DamageChart the best place for UnitEnum?
+			myGame.currentMenu = new GameMenu(GameMenu.MenuType.PRODUCTION, myGame.activeCO.getShoppingList());
 			break;
 		case METAACTION:
 			myGame.gameMap.clearAllHighlights();
