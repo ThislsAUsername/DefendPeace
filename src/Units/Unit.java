@@ -152,6 +152,7 @@ public class Unit {
 				case ATTACK:
 					// highlight the tiles in range, and check them for targets
 					Utils.findActionableLocations(this, MapController.GameAction.ATTACK, map);
+					boolean found = false;
 					for (int w = 0; w < map.mapWidth; w++)
 					{
 						for (int h = 0; h < map.mapHeight; h++)
@@ -159,9 +160,11 @@ public class Unit {
 							if (map.getLocation(w, h).isHighlightSet())
 							{
 								actions.add(MapController.GameAction.ATTACK);
+								found = true;
 								break; // just need one target
 							}
 						}
+						if (found) break;
 					}
 					map.clearAllHighlights();
 					break;
