@@ -8,7 +8,6 @@ public class Location {
 	private Environment environs = null;
 	private Commander owner = null;
 	private Unit resident = null;
-	private int captureLevel = 0;
 	private boolean highlightSet = false;
 //	public boolean isFogged = false;
 	
@@ -33,10 +32,6 @@ public class Location {
 	}
 
 	public void setResident(Unit resident) {
-		if (this.resident != resident)
-		{
-			captureLevel = 0;
-		}
 		this.resident = resident;
 	}
 	
@@ -50,18 +45,6 @@ public class Location {
 			return false;
 		}
 		return true;
-	}
-	public void capture(int HP)
-	{
-		if (!isCaptureable()) {
-			return;
-		}
-		captureLevel += HP;
-		if (captureLevel >= 200)
-		{
-			owner = resident.CO;
-			captureLevel = 0;
-		}
 	}
 	
 	public void setHighlight(boolean val)
