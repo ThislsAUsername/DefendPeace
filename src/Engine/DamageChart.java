@@ -3,7 +3,6 @@ package Engine;
 import Units.Unit;
 
 public class DamageChart {
-	public enum UnitEnum{INFANTRY, MECH, MECHZOOKA,APC};
 
 	// format is [defender][attacker]
 	// non-AW units in this version... UnitEnum{INFANTRY, SNIPER, MORTAR, MECH, MECHZOOKA, COMMANDO, COMMANDOMISSILE, APC};

@@ -3,10 +3,11 @@ package Units;
 import java.util.Vector;
 
 import Engine.MapController;
-import Engine.DamageChart.UnitEnum;
 import Units.MoveTypes.MoveType;
 
 public class UnitModel {
+	public enum UnitEnum{INFANTRY, MECH, MECHZOOKA, APC};
+	
 	public String name;
 	public UnitEnum type;
 	public double maxHP;

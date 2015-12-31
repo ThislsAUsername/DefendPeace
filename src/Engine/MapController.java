@@ -322,7 +322,7 @@ public class MapController {
 		switch (input)
 		{
 		case ENTER:
-			DamageChart.UnitEnum unit = (DamageChart.UnitEnum)myGame.currentMenu.getSelectedAction();
+			Units.UnitModel.UnitEnum unit = (Units.UnitModel.UnitEnum)myGame.currentMenu.getSelectedAction();
 
 			if (myGame.activeCO.getUnitModel(unit).moneyCost <= myGame.activeCO.money) {
 				System.out.println("creating unit");

@@ -4,9 +4,7 @@ import java.util.Vector;
 
 import Units.MoveTypes.MoveType;
 import Units.MoveTypes.Tread;
-import Engine.DamageChart;
 import Engine.MapController;
-import Engine.DamageChart.UnitEnum;;
 
 public class APCModel extends UnitModel {
 
@@ -17,7 +15,7 @@ public class APCModel extends UnitModel {
 		MapController.GameAction[] actions = {MapController.GameAction.UNLOAD, MapController.GameAction.WAIT};
 		possibleActions = actions;
 		holdingCapacity = 1;
-		UnitEnum[] carryable = {DamageChart.UnitEnum.INFANTRY, DamageChart.UnitEnum.MECH};
+		UnitEnum[] carryable = {Units.UnitModel.UnitEnum.INFANTRY, Units.UnitModel.UnitEnum.MECH};
 		holdables = new Vector<UnitEnum>(carryable.length);
 		for (int i = 0; i < holdables.capacity(); i++) {
 			holdables.add(carryable[i]);

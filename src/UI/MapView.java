@@ -6,9 +6,8 @@ import java.awt.Graphics;
 
 import Terrain.Environment;
 import Units.Unit;
+import Units.UnitModel.UnitEnum;
 
-import Engine.DamageChart;
-import Engine.DamageChart.UnitEnum;
 import Engine.GameInstance;
 
 public class MapView extends javax.swing.JPanel {

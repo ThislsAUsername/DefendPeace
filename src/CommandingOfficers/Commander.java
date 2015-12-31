@@ -9,8 +9,7 @@ import Units.MechModel;
 import Units.Unit;
 import Units.UnitModel;
 import CommandingOfficers.Modifiers.COModifier;
-import Engine.DamageChart;
-import Engine.DamageChart.UnitEnum;
+import Units.UnitModel.UnitEnum;
 
 
 public class Commander {
@@ -50,7 +49,7 @@ public class Commander {
 		}
 	}
 
-	public UnitModel getUnitModel(DamageChart.UnitEnum unitType)
+	public UnitModel getUnitModel(UnitEnum unitType)
 	{
 		UnitModel um = null;
 

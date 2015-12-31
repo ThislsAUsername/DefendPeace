@@ -1,6 +1,5 @@
 package Units;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -9,10 +8,9 @@ import Terrain.Location;
 import CommandingOfficers.Commander;
 import Engine.CombatParameters;
 import Engine.DamageChart;
-import Engine.GameInstance;
 import Engine.MapController;
-import Engine.DamageChart.UnitEnum;
 import Engine.Utils;
+import Units.UnitModel.UnitEnum;
 
 public class Unit {
 	public Vector<Unit> heldUnits;
