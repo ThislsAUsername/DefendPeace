@@ -271,6 +271,14 @@ public class MapController {
 						Utils.findActionableLocations(unitTarget, GameAction.ATTACK, myGame.gameMap);
 						boolean canCounter = myGame.gameMap.getLocation(unitActor.x, unitActor.y).isHighlightSet() && DamageChart.chartDamage(unitTarget, unitActor) != 0;
 						CombatEngine.resolveCombat(unitActor, unitTarget, myGame.gameMap, canCounter);
+						if(unitActor.HP <= 0)
+						{
+							removeUnit(unitActor);
+						}
+						if(unitTarget.HP <= 0)
+						{
+							removeUnit(unitTarget);
+						}
 						actionTaken = true;
 						System.out.println("unitActor hp: " + unitActor.HP);
 						System.out.println("unitTarget hp: " + unitTarget.HP);
@@ -480,5 +488,17 @@ public class MapController {
 		unit.x = x;
 		unit.y = y;
 		myGame.activeCO.units.add(unit);
+	}
+	
+	private void removeUnit(Unit u)
+	{
+		if(myGame.gameMap.getLocation(u.x, u.y).getResident() != u)
+		{
+			System.out.println("WARNING! Trying to remove a Unit that isn't where he claims to be.");
+		}
+		
+		u.CO.units.remove(u);
+		myGame.gameMap.getLocation(u.x, u.y).setResident(null);
+		u = null;
 	}
 }
