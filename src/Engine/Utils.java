@@ -21,14 +21,17 @@ public class Utils {
 			{
 				for (int j = 0; j < map.mapHeight; j++)
 				{
-					int dist = Math.abs(unit.y-j) + Math.abs(unit.x-i);
-					if ((dist >= unit.model.minRange) && (dist <= unit.model.maxRange))
+					Unit target = map.getLocation(i, j).getResident();
+					if (target != null && target.CO != unit.CO)
 					{
-						map.getLocation(i, j).setHighlight(true);
-					}
-					else
-					{
-						map.getLocation(i, j).setHighlight(false);
+						if (unit.getDamage(target) > 0)
+						{
+							map.getLocation(i, j).setHighlight(true);
+						}
+						else
+						{
+							map.getLocation(i, j).setHighlight(false);
+						}
 					}
 				}
 			}

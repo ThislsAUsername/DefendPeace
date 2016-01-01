@@ -12,7 +12,7 @@ public class APCModel extends UnitModel {
 	private static final GameAction[] actions = {GameAction.UNLOAD, GameAction.WAIT};
 
 	public APCModel() {
-		super("APC", UnitEnum.APC, 550, 42, 0, 5, moveType, actions);
+		super("APC", UnitEnum.APC, 550, 42, 0, 5, moveType, actions, null);
 		possibleActions = actions;
 		holdingCapacity = 1;
 		UnitEnum[] carryable = {Units.UnitModel.UnitEnum.INFANTRY, Units.UnitModel.UnitEnum.MECH};
