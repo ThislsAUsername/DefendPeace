@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
 
+import CommandingOfficers.CmdrStrong;
 import CommandingOfficers.Commander;
 import Terrain.GameMap;
 import UI.InputHandler;
@@ -32,7 +33,7 @@ public class Driver implements ActionListener{
 
 	public Driver()
 	{
-		Commander co1 = new Commander();
+		Commander co1 = new CmdrStrong();
 		Commander co2 = new Commander();
 		Commander[] cos = {co1, co2};
 		// TODO: Remove this and/or make it actually good.
