@@ -44,7 +44,9 @@ public class Utils {
 				for (int j = 0; j < map.mapHeight; j++)
 				{
 					int dist = Math.abs(unit.y-j) + Math.abs(unit.x-i);
-					if (dist == 1 && passenger.model.movePower >= passenger.model.propulsion.getMoveCost(map.getEnvironment(i, j)))
+					if (dist == 1 &&
+						passenger.model.movePower >= passenger.model.propulsion.getMoveCost(map.getEnvironment(i, j)) &&
+						map.getLocation(i, j).getResident() == null)
 					{
 						map.getLocation(i, j).setHighlight(true);
 					}
