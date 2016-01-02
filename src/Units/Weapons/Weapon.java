@@ -49,8 +49,8 @@ public class Weapon {
 	{
 	if (ammo > 0)
 		ammo--;
-	else
-		System.out.println("Warning, trying to fire an empty gun!");
+	else if (ammo == 0)
+		System.out.println("WARNING: trying to fire an empty gun!");
 	}
 	
 	/**
