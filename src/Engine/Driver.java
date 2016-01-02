@@ -12,6 +12,7 @@ import CommandingOfficers.Commander;
 import Terrain.GameMap;
 import UI.InputHandler;
 import UI.MapView;
+import Units.Weapons.Weapon;
 
 public class Driver implements ActionListener{
 
@@ -32,6 +33,7 @@ public class Driver implements ActionListener{
 
 	public Driver()
 	{
+		Weapon.readINIdata();
 		Commander co1 = new Commander();
 		Commander co2 = new Commander();
 		Commander[] cos = {co1, co2};

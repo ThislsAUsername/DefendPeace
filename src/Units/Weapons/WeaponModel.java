@@ -1,7 +1,12 @@
 package Units.Weapons;
 
 public abstract class WeaponModel {
-	protected enum WeaponType{INFANTRYMGUN, MECHMGUN, MECHROCKET};
+	protected enum WeaponType{INFANTRYMGUN, MECHZOOKA, MECHMGUN, RECONMGUN,
+							  TANKCANNON, TANKMGUN, MD_TANKCANNON, MD_TANKMGUN, NEOCANNON, NEOMGUN,
+							  ARTILLERYCANNON, ROCKETS, ANTI_AIRMGUN, MISSILES,
+							  FIGHTERMISSILES, BOMBERBOMBS, B_COPTERROCKETS, B_COPTERMGUN,
+							  BATTLESHIPCANNON, CRUISERTORPEDOES, CRUISERMGUN, SUBTORPEDOES};
+
 	public WeaponType type;
 	public int maxAmmo;
 	public int minRange;
