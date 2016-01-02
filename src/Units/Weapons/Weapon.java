@@ -22,7 +22,7 @@ public class Weapon {
 	public double getDamage(UnitModel.UnitEnum defender) {
 		if (ammo == 0 || defender == null)
 			return 0;
-		return damageChart[model.getIndex()][defender.ordinal()] * (model.dmgPercent/100d);
+		return damageChart[model.getIndex()][defender.ordinal()];
 	}
 	/**
 	 * @return returns its base damage against defender if the unit is in range,

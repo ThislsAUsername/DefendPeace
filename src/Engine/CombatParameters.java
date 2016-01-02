@@ -43,9 +43,9 @@ public class CombatParameters {
 	
 	private void calculateParameters() {
 		baseDamage			= attacker.getDamage(defender);
-		attackFactor		= attacker.model.COStr;
+		attackFactor		= attacker.model.getDamageRatio();
 		attackerHP			= attacker.HP;
-		defenseFactor		= defender.model.CODef;
+		defenseFactor		= defender.model.getDefenseRatio();
 		defenderHP			= defender.HP;
 		terrainDefenseLevel	= map.getEnvironment(defender.x, defender.y).getDefLevel();
 	}

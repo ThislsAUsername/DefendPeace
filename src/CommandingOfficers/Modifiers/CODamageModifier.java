@@ -1,7 +1,6 @@
 package CommandingOfficers.Modifiers;
 
 import Units.UnitModel;
-import Units.Weapons.WeaponModel;
 import CommandingOfficers.Commander;
 
 public class CODamageModifier implements COModifier
@@ -19,10 +18,7 @@ public class CODamageModifier implements COModifier
 		{
 			if(um.weaponModels != null)
 			{
-				for(WeaponModel wm : um.weaponModels)
-				{
-					wm.modifyDamageRatio(attackModifier);
-				}
+				um.modifyDamageRatio(attackModifier);
 			}
 		}
 	}
@@ -33,10 +29,7 @@ public class CODamageModifier implements COModifier
 		{
 			if(um.weaponModels != null)
 			{
-				for(WeaponModel wm : um.weaponModels)
-				{
-					wm.modifyDamageRatio(-attackModifier);
-				}
+				um.modifyDamageRatio(-attackModifier);
 			}
 		}
 	}
