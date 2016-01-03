@@ -1,9 +1,7 @@
 package Engine;
 
 import Terrain.GameMap;
-import Terrain.Location;
 import Units.Unit;
-import Units.Weapons.Weapon;
 
 public class CombatParameters {
 	public Unit attacker, defender;

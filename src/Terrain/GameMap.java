@@ -1,7 +1,5 @@
 package Terrain;
 
-import java.awt.Color;
-
 import Units.InfantryModel;
 import Units.Unit;
 

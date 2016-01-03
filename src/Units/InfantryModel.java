@@ -3,8 +3,6 @@ package Units;
 import Units.MoveTypes.FootStandard;
 import Units.MoveTypes.MoveType;
 import Units.Weapons.InfantryMGun;
-import Units.Weapons.MechMGun;
-import Units.Weapons.MechRocket;
 import Units.Weapons.WeaponModel;
 import Engine.MapController.GameAction;
 

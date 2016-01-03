@@ -1,19 +1,10 @@
 package Units.Weapons;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.StringBufferInputStream;
-import java.util.Scanner;
-import java.util.regex.Pattern;
-
 import Units.Unit;
 import Units.UnitModel;
 
 public class Weapon {
 	
-	private static boolean chartSet = false;
 	// format is [attacker][defender]
 	private static int[][] damageChart = {{55,		45,		12,		5,		1,		1,		14,		15,		25,		5,		25,		0,		0,		7,		30,		0,		0,		0,		0},
 										  {0,		0,		85,		55,		15,		15,		75,		70,		85,		65,		85,		0,		0,		0,		0,		0,		0,		0,		0},

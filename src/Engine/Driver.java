@@ -1,8 +1,6 @@
 package Engine;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -12,7 +10,6 @@ import CommandingOfficers.Commander;
 import Terrain.GameMap;
 import UI.InputHandler;
 import UI.MapView;
-import Units.Weapons.Weapon;
 
 public class Driver implements ActionListener{
 
