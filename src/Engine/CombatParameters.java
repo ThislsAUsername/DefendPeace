@@ -14,7 +14,9 @@ public class CombatParameters {
 		defender		= pDefender;
 		map 			= pMap;
 		this.isCounter	= isCounter;
-		canCounter = !isCounter && defender.getDamage(attacker) != 0;
+		// Only attacks at point-blank can be countered
+		int dist = Math.abs(attacker.x-defender.x) + Math.abs(attacker.y-defender.y);
+		canCounter = !isCounter && dist == 1 && defender.getDamage(attacker) != 0;
 		calculateParameters();
 	}
 	
