@@ -78,6 +78,13 @@ public class Driver implements ActionListener{
 	}
 
 	public static void main(String args[]) {
-		new Driver();
+	  // Run the test cases. If those all pass, launch the primary driver.
+	  if(!TestDriver.performTests())
+	  {
+      System.out.println("One or more tests failed!");
+      System.exit(0);
+	  }
+
+    new Driver();
 	}
 }
