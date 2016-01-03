@@ -173,7 +173,7 @@ public class GameAction
         break;
       case UNLOAD:
         // If we have cargo and the landing zone is empty, we drop the cargo.
-        if( !unitActor.heldUnits.isEmpty() && null == gameMap.getLocation(actX, actY).getResident() )
+        if( !unitActor.heldUnits.isEmpty() && gameMap.isLocationEmpty(unitActor, actX, actY) )
         {
           unitActor.isTurnOver = true;
           gameMap.moveUnit(unitActor, moveX, moveY);
