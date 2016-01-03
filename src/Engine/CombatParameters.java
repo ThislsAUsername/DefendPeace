@@ -9,12 +9,12 @@ public class CombatParameters {
 	public GameMap map;
 	public boolean isCounter, canCounter;
 	
-	public CombatParameters(Unit pAttacker, Unit pDefender, GameMap pMap, boolean isCounter, boolean canCounter) {
+	public CombatParameters(Unit pAttacker, Unit pDefender, GameMap pMap, boolean isCounter) {
 		attacker		= pAttacker;
 		defender		= pDefender;
 		map 			= pMap;
 		this.isCounter	= isCounter;
-		this.canCounter = canCounter;
+		canCounter = !isCounter && defender.getDamage(attacker) != 0;
 		calculateParameters();
 	}
 	
