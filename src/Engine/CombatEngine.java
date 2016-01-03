@@ -28,8 +28,11 @@ public class CombatEngine {
 			for(int i = 0; i < modifiers.size(); i++) {
 				modifiers.get(i).alterCombat(params);
 			}
-			params.defender.HP -= params.calculateDamage();
-			params.attacker.fire(params);
+			if (params.attackerHP > 0) // stops counterattacks from dead units unless a CombatModifier allows it
+			{
+				params.defender.HP -= params.calculateDamage();
+				params.attacker.fire(params);
+			}
 		}
 	}
 }
