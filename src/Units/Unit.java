@@ -3,12 +3,12 @@ package Units;
 import java.util.ArrayList;
 import java.util.Vector;
 
-import Terrain.GameMap;
-import Terrain.Location;
 import CommandingOfficers.Commander;
 import Engine.CombatParameters;
-import Engine.MapController;
+import Engine.GameAction;
 import Engine.Utils;
+import Terrain.GameMap;
+import Terrain.Location;
 import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
 
@@ -57,19 +57,27 @@ public class Unit {
 			captureProgress = 0;
 		}
 	}
+	
+  public double getDamage(Unit target)
+  {
+    return getDamage(target, x, y);
+  }
 
 	/**
 	 * @return how much base damage the target would take if this unit tried to attack it
 	 */
-	public double getDamage(Unit target) {
+	// TODO - Consider a canHitFrom function that could return true/false without doing damage calculations.
+	public double getDamage(Unit target, int xLoc, int yLoc)
+	{
 		if (weapons == null)
 			return 0;
 		Weapon chosen = null;
 		for (int i = 0; i < weapons.length && chosen == null; i++)
 		{
-			if (weapons[i].getDamage(x, y, target) != 0)
+		  double damage = weapons[i].getDamage(xLoc, yLoc, target); 
+			if( damage != 0)
 			{
-				return weapons[i].getDamage(x, y, target);
+				return damage;
 			}
 		}
 		return 0;
@@ -123,17 +131,18 @@ public class Unit {
 		return 0;
 	}*/
 
-	public MapController.GameAction[] getPossibleActions(GameMap map)
+	/** Compiles and returns a list of all actions this unit could perform on map from location (xLoc, yLoc). */
+	public GameAction.ActionType[] getPossibleActions(GameMap map, int xLoc, int yLoc)
 	{
-		ArrayList<MapController.GameAction> actions = new ArrayList<MapController.GameAction>();
-		if (map.getLocation(x, y).getResident() == null)
+		ArrayList<GameAction.ActionType> actions = new ArrayList<GameAction.ActionType>();
+		if( map.isLocationEmpty(this, xLoc, yLoc) )
 		{
 			for (int i = 0; i < model.possibleActions.length; i++) {
 				switch (model.possibleActions[i])
 				{
 				case ATTACK:
 					// highlight the tiles in range, and check them for targets
-					Utils.findActionableLocations(this, MapController.GameAction.ATTACK, map);
+					Utils.findActionableLocations(this, GameAction.ActionType.ATTACK, xLoc, yLoc, map);
 					boolean found = false;
 					for (int w = 0; w < map.mapWidth; w++)
 					{
@@ -141,9 +150,9 @@ public class Unit {
 						{
 							if (map.getLocation(w, h).isHighlightSet())
 							{
-								actions.add(MapController.GameAction.ATTACK);
+								actions.add(GameAction.ActionType.ATTACK);
 								found = true;
-								break; // just need one target
+								break; // We just need one target to know attacking is possible.
 							}
 						}
 						if (found) break;
@@ -151,20 +160,20 @@ public class Unit {
 					map.clearAllHighlights();
 					break;
 				case CAPTURE:
-					if(map.getLocation(x, y).getOwner() != CO && map.getLocation(x, y).isCaptureable())
+					if(map.getLocation(xLoc, yLoc).getOwner() != CO && map.getLocation(xLoc, yLoc).isCaptureable())
 					{
-						actions.add(MapController.GameAction.CAPTURE);
+						actions.add(GameAction.ActionType.CAPTURE);
 					}
 					break;
 				case WAIT:
-					actions.add(MapController.GameAction.WAIT);
+					actions.add(GameAction.ActionType.WAIT);
 					break;
 				case LOAD:
 					// Don't add - there's no unit there to board.
 					break;
 				case UNLOAD:
 					if (heldUnits.size() > 0) {
-						actions.add(MapController.GameAction.UNLOAD);
+						actions.add(GameAction.ActionType.UNLOAD);
 					}
 					break;
 				default:
@@ -174,9 +183,10 @@ public class Unit {
 		}
 		else // There is a unit in the space we are evaluating. Only Load actions are supported in this case.
 		{
-			actions.add(MapController.GameAction.LOAD);
+			actions.add(GameAction.ActionType.LOAD);
 		}
-		MapController.GameAction[] returned = new MapController.GameAction[0];
+		GameAction.ActionType[] returned = new GameAction.ActionType[0];
+		
 		return actions.toArray(returned);
 	}
 	
