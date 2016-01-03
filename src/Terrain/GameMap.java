@@ -1,7 +1,5 @@
 package Terrain;
 
-import java.awt.Color;
-
 import Units.InfantryModel;
 import Units.Unit;
 import Units.UnitModel;
@@ -108,12 +106,19 @@ public class GameMap {
 		map[8][3].setEnvironment(Environment.getTile(Environment.Terrains.ROAD, Environment.Weathers.CLEAR));
 		map[9][3].setEnvironment(Environment.getTile(Environment.Terrains.ROAD, Environment.Weathers.CLEAR));
 		map[10][3].setEnvironment(Environment.getTile(Environment.Terrains.ROAD, Environment.Weathers.CLEAR));
-
+	}
+	
+	/**
+	 * Returns true if (x,y) lies within the GameMap, false else.
+	 */
+	public boolean isLocationValid(int x, int y)
+	{
+	  return !(x < 0 || x >= mapWidth || y < 0 || y >= mapHeight);
 	}
 
 	public Environment getEnvironment(int w, int h)
 	{
-		if(w < 0 || w >= mapWidth || h < 0 || h >= mapHeight)
+		if(!isLocationValid(w, h))
 		{
 			System.out.println("Warning! Attempting to retrieve an invalid tile! (" + w + ", " + h + ")");
 			return null;
@@ -123,7 +128,7 @@ public class GameMap {
 
 	public Location getLocation(int w, int h)
 	{
-		if(w < 0 || w >= mapWidth || h < 0 || h >= mapHeight)
+		if(!isLocationValid(w, h))
 		{
 			System.out.println("Warning! Attempting to retrieve an invalid tile! (" + w + ", " + h + ")");
 			return null;
@@ -141,4 +146,69 @@ public class GameMap {
 			}
 		}
 	}
+	
+	/** Returns true if no unit is at the specified x and y coordinate, false else */
+	public boolean isLocationEmpty(int x, int y)
+	{
+	  return isLocationEmpty(null, x, y);
+	}
+	
+	/** Returns true if no unit (excluding 'unit') is in the specified Location. */
+	public boolean isLocationEmpty(Unit unit, int x, int y)
+	{
+	  boolean empty = true;
+	  if(isLocationValid(x, y))
+	  {
+	    if(getLocation(x, y).getResident() != null && getLocation(x, y).getResident() != unit)
+	    {
+	      empty = false;
+	    }
+	  }
+	  return empty;
+	}
+
+  public void addNewUnit(Unit unit, int x, int y)
+  {
+    if( getLocation(x, y).getResident() != null )
+    {
+      System.out.println("Error! Attempting to add a unit to an occupied Location!");
+      return;
+    }
+
+    getLocation(x, y).setResident(unit);
+    unit.x = x;
+    unit.y = y;
+  }
+
+  public void moveUnit(Unit unit, int x, int y)
+  {
+    if( !isLocationEmpty(unit, x, y) )
+    {
+      System.out.println("ERROR! Attempting to move unit to an occupied Location!");
+      return;
+    }
+    
+    // Update the map
+    Location priorLoc = getLocation(unit.x, unit.y);
+    if(null != priorLoc)
+    {
+      System.out.println("Setting " + x + ", " + y + " to null");
+      priorLoc.setResident(null);
+    }
+    getLocation(x, y).setResident(unit);
+
+    // Update the Unit
+    unit.x = x;
+    unit.y = y;
+  }
+
+  public void removeUnit(Unit u)
+  {
+    if( getLocation(u.x, u.y).getResident() != u )
+    {
+      System.out.println("WARNING! Trying to remove a Unit that isn't where he claims to be.");
+    }
+
+    getLocation(u.x, u.y).setResident(null);
+  }
 }

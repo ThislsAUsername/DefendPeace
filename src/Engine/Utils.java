@@ -9,14 +9,14 @@ import Units.Unit;
 public class Utils {
 	
 	/**
-	 * Sets the highlight for myGame.gameMap.getLocation(x, y) to true if unit can act on Location (x, y), and false otherwise.
+	 * Sets the highlight for myGame.gameMap.getLocation(x, y) to true if unit can do action from Location (x, y), and false otherwise.
 	 */
-	public static void findActionableLocations(Unit unit, MapController.GameAction action, GameMap map)
+	public static void findActionableLocations(Unit unit, GameAction.ActionType action, int xLoc, int yLoc, GameMap map)
 	{
 		switch (action)
 		{
 		case ATTACK:
-			// Set highlight for locations within weapon range, regardless of whether an enemy is present.
+			// Set highlight for locations containing an enemy that unit can shoot from (xLoc, yLoc).
 			for (int i = 0; i < map.mapWidth; i++)
 			{
 				for (int j = 0; j < map.mapHeight; j++)
@@ -24,7 +24,7 @@ public class Utils {
 					Unit target = map.getLocation(i, j).getResident();
 					if (target != null && target.CO != unit.CO)
 					{
-						if (unit.getDamage(target) > 0)
+						if (unit.getDamage(target, xLoc, yLoc) > 0)
 						{
 							map.getLocation(i, j).setHighlight(true);
 						}
@@ -43,10 +43,10 @@ public class Utils {
 			{
 				for (int j = 0; j < map.mapHeight; j++)
 				{
-					int dist = Math.abs(unit.y-j) + Math.abs(unit.x-i);
+					int dist = Math.abs(yLoc-j) + Math.abs(xLoc-i);
 					if (dist == 1 &&
 						passenger.model.movePower >= passenger.model.propulsion.getMoveCost(map.getEnvironment(i, j)) &&
-						map.getLocation(i, j).getResident() == null)
+						map.isLocationEmpty(unit, i, j) )
 					{
 						map.getLocation(i, j).setHighlight(true);
 					}
@@ -169,6 +169,5 @@ public class Utils {
 			int secondPow = movesLeftGrid[o2.x][o2.y];
 			return firstPow - secondPow;
 		}
-		
 	}
 }

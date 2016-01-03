@@ -6,179 +6,182 @@ import UI.InputHandler;
 import UI.GameMenu;
 import Units.Unit;
 
-public class MapController {
+public class MapController
+{
 
-	private GameInstance myGame;
-	
-	private enum InputMode {MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION};
-	public enum GameAction {ATTACK, CAPTURE, LOAD, UNLOAD, WAIT, CANCEL};
-	public enum MetaAction {END_TURN};
+  private GameInstance myGame;
 
-	private InputMode inputMode;
+  private enum InputMode {MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION};
+  public enum MetaAction {END_TURN};
 
-	private Unit unitActor = null;
-	private int cancelX = -1;
-	private int cancelY = -1;
+  private InputMode inputMode;
 
-	// readied Action
-	GameAction readyAction = null;
+  // readied Action
+  GameAction currentAction = null;
 
-	public MapController(GameInstance game)
-	{
-		myGame = game;
-		inputMode = InputMode.MAP;
-	}
+  public MapController(GameInstance game)
+  {
+    myGame = game;
+    inputMode = InputMode.MAP;
+  }
 
-	/**
-	 * When the GameMap is in focus, all user input is directed through this function. It is
-	 * redirected to a specific handler based on what actions the user is currently taking.
-	 */
-	public void handleInput(InputHandler.InputAction input)
-	{
-		System.out.println("handling " + input + " input in " + inputMode + " mode");
-		switch(inputMode)
-		{
-		case MAP:
-			handleMapInput(input);
-			break;
-		case MOVEMENT:
-			handleMovementInput(input);
-			break;
-		case ACTIONMENU:
-			handleActionMenuInput(input);
-			break;
-		case ACTION:
-			handleActionInput(input);
-			break;
-		case PRODUCTION:
-			handleProductionMenuInput(input);
-			break;
-		case METAACTION:
-			handleMetaActionMenuInput(input);
-			break;
-			default:
-				System.out.println("Invalid InputMode in MapController! " + inputMode);
-		}
-	}
-	
-	/**
-	 * When nothing is selected, user inputs go here. This is where the user can pan around the map, or
-	 * select a unit or a building to take some action.
-	 */
-	private void handleMapInput(InputHandler.InputAction input)
-	{
-		switch (input)
-		{
-		case UP:
-			myGame.moveCursorUp();
-			break;
-		case DOWN:
-			myGame.moveCursorDown();
-			break;
-		case LEFT:
-			myGame.moveCursorLeft();
-			break;
-		case RIGHT:
-			myGame.moveCursorRight();
-			break;
-		case ENTER:
-			// See what is at the current cursor location, in precedence order of Unit, Building, Terrain.
-			Location loc = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY());
-			unitActor = loc.getResident();
-			if(null != unitActor)
-			{
-				if(unitActor.isTurnOver == false || unitActor.CO != myGame.activeCO)
-				{
-					// Calculate movement options.
-					changeInputMode(InputMode.MOVEMENT);
-				}
-				else
-				{
-					changeInputMode(InputMode.METAACTION);
-				}
-			}
-			else if(Environment.Terrains.FACTORY == loc.getEnvironment().terrainType
-					&& loc.getOwner() == myGame.activeCO)
-			{
-				changeInputMode(InputMode.PRODUCTION);
-			}
-			else
-			{
-				// Display end turn (save/quit?) options.
-				changeInputMode(InputMode.METAACTION);
-			}
-			break;
-		case BACK:
-			break;
-			default:
-				System.out.println("WARNING! MapController.handleMapInput() was given invalid input enum (" + input + ")");
-		}
-	}
+  /**
+   * When the GameMap is in focus, all user input is directed through this function. It is
+   * redirected to a specific handler based on what actions the user is currently taking.
+   */
+  public void handleInput(InputHandler.InputAction input)
+  {
+    System.out.println("handling " + input + " input in " + inputMode + " mode");
+    switch (inputMode)
+    {
+      case MAP:
+        handleMapInput(input);
+        break;
+      case MOVEMENT:
+        handleMovementInput(input);
+        break;
+      case ACTIONMENU:
+        handleActionMenuInput(input);
+        break;
+      case ACTION:
+        handleActionInput(input);
+        break;
+      case PRODUCTION:
+        handleProductionMenuInput(input);
+        break;
+      case METAACTION:
+        handleMetaActionMenuInput(input);
+        break;
+      default:
+        System.out.println("Invalid InputMode in MapController! " + inputMode);
+    }
+  }
 
-	/**
-	 * When a unit is selected, user input flows through here to choose where the unit should move.
-	 */
-	private void handleMovementInput(InputHandler.InputAction input)
-	{
-		boolean inMoveableSpace = myGame.getCursorLocation().isHighlightSet();
+  /**
+   * When nothing is selected, user inputs go here. This is where the user can pan around the map,
+   * or select a unit or a building to take some action.
+   */
+  private void handleMapInput(InputHandler.InputAction input)
+  {
+    switch (input)
+    {
+      case UP:
+        myGame.moveCursorUp();
+        break;
+      case DOWN:
+        myGame.moveCursorDown();
+        break;
+      case LEFT:
+        myGame.moveCursorLeft();
+        break;
+      case RIGHT:
+        myGame.moveCursorRight();
+        break;
+      case ENTER:
+        // See what is at the current cursor location, in precedence order of Unit, Building, Terrain.
+        Location loc = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY());
+        Unit unitActor = loc.getResident();
+        if( null != unitActor )
+        {
+          if( unitActor.isTurnOver == false || unitActor.CO != myGame.activeCO )
+          {
+            currentAction = new GameAction(unitActor); // Start building a GameAction
+            
+            // Calculate movement options.
+            changeInputMode(InputMode.MOVEMENT);
+          }
+          else
+          {
+            changeInputMode(InputMode.METAACTION);
+          }
+        }
+        else if( Environment.Terrains.FACTORY == loc.getEnvironment().terrainType
+            && loc.getOwner() == myGame.activeCO )
+        {
+          changeInputMode(InputMode.PRODUCTION);
+        }
+        else
+        {
+          // Display end turn (save/quit?) options.
+          changeInputMode(InputMode.METAACTION);
+        }
+        break;
+      case BACK:
+        break;
+      default:
+        System.out.println("WARNING! MapController.handleMapInput() was given invalid input enum (" + input + ")");
+    }
+  }
 
-		switch (input)
-		{
-		case UP:
-			myGame.moveCursorUp();
-//			System.out.println("inMoveableSpace = " + inMoveableSpace);
-			// Make sure we don't overshoot the reachable tiles by accident.
-			if(inMoveableSpace && InputHandler.isUpHeld() && !myGame.getCursorLocation().isHighlightSet())
-			{
-				myGame.moveCursorDown();
-			}
-			break;
-		case DOWN:
-			myGame.moveCursorDown();
-			// Make sure we don't overshoot the reachable space by accident.
-			if(inMoveableSpace && InputHandler.isDownHeld() && !myGame.getCursorLocation().isHighlightSet())
-			{
-				myGame.moveCursorUp();
-			}
-			break;
-		case LEFT:
-			myGame.moveCursorLeft();
-			// Make sure we don't overshoot the reachable space by accident.
-			if(inMoveableSpace && InputHandler.isLeftHeld() && !myGame.getCursorLocation().isHighlightSet())
-			{
-				myGame.moveCursorRight();
-			}
-			break;
-		case RIGHT:
-			myGame.moveCursorRight();
-			// Make sure we don't overshoot the reachable space by accident.
-			if(inMoveableSpace && InputHandler.isRightHeld() && !myGame.getCursorLocation().isHighlightSet())
-			{
-				myGame.moveCursorLeft();
-			}
-			break;
-		case ENTER:
-			if(inMoveableSpace && unitActor.CO == myGame.activeCO) // If the selected space is within the reachable area
-			{
-				// Move the Unit to the location and display possible actions.
-				considerMove(unitActor, myGame.getCursorX(), myGame.getCursorY());
-				changeInputMode(InputMode.ACTIONMENU);
-			}
-			break;
-		case BACK:
-			changeInputMode(InputMode.MAP);
-			break;
-		case NO_ACTION:
-			break;
-			default:
-				System.out.println("WARNING! MapController.handleMovementInput() was given invalid input enum (" + input + ")");
-		}
-	}
+  /**
+   * When a unit is selected, user input flows through here to choose where the unit should move.
+   */
+  private void handleMovementInput(InputHandler.InputAction input)
+  {
+    boolean inMoveableSpace = myGame.getCursorLocation().isHighlightSet();
 
-	/**
-	 * Once a unit's movement has been chosen, user input goes here to select an action to perform.
-	 */
-	private void handleActionMenuInput(InputHandler.InputAction input)
+    switch (input)
+    {
+      case UP:
+        myGame.moveCursorUp();
+        // System.out.println("inMoveableSpace = " + inMoveableSpace);
+        // Make sure we don't overshoot the reachable tiles by accident.
+        if( inMoveableSpace && InputHandler.isUpHeld()
+            && !myGame.getCursorLocation().isHighlightSet() )
+        {
+          myGame.moveCursorDown();
+        }
+        break;
+      case DOWN:
+        myGame.moveCursorDown();
+        // Make sure we don't overshoot the reachable space by accident.
+        if( inMoveableSpace && InputHandler.isDownHeld()
+            && !myGame.getCursorLocation().isHighlightSet() )
+        {
+          myGame.moveCursorUp();
+        }
+        break;
+      case LEFT:
+        myGame.moveCursorLeft();
+        // Make sure we don't overshoot the reachable space by accident.
+        if( inMoveableSpace && InputHandler.isLeftHeld()
+            && !myGame.getCursorLocation().isHighlightSet() )
+        {
+          myGame.moveCursorRight();
+        }
+        break;
+      case RIGHT:
+        myGame.moveCursorRight();
+        // Make sure we don't overshoot the reachable space by accident.
+        if( inMoveableSpace && InputHandler.isRightHeld()
+            && !myGame.getCursorLocation().isHighlightSet() )
+        {
+          myGame.moveCursorLeft();
+        }
+        break;
+      case ENTER:
+        if( inMoveableSpace && currentAction.getActor().CO == myGame.activeCO ) // If the selected space is within
+                                                                 // the reachable area
+        {
+          // Move the Unit to the location and display possible actions.
+          currentAction.setMoveLocation(myGame.getCursorX(), myGame.getCursorY());
+          changeInputMode(InputMode.ACTIONMENU);
+        }
+        break;
+      case BACK:
+        changeInputMode(InputMode.MAP);
+        break;
+      case NO_ACTION:
+        break;
+      default:
+        System.out.println("WARNING! MapController.handleMovementInput() was given invalid input enum (" + input + ")");
+    }
+  }
+
+  /**
+   * Once a unit's movement has been chosen, user input goes here to select an action to perform.
+   */
+  private void handleActionMenuInput(InputHandler.InputAction input)
 	{
 		if(myGame.currentMenu == null)
 		{
@@ -188,10 +191,28 @@ public class MapController {
 		switch (input)
 		{
 		case ENTER:
-			readyAction = (MapController.GameAction)myGame.currentMenu.getSelectedAction();
+			currentAction.setActionType( (GameAction.ActionType) myGame.currentMenu.getSelectedAction() );
+
+	    // If the action is completely constructed, execute it, else get the missing info.
+	    if(currentAction.isComplete())
+	    {
+	      if(currentAction.execute(myGame))
+	      {
+	        changeInputMode(InputMode.MAP);
+	      }
+	      else
+	      {
+	        System.out.println("ERROR! Action failed to execute!");
+	        changeInputMode(InputMode.MAP); // try and reset;
+	      }
+	    }
+	    else
+	    {
+	      changeInputMode(InputMode.ACTION);
+	    }
+	    
 			break;
 		case BACK:
-			placeUnit(unitActor, cancelX, cancelY);
 			changeInputMode(InputMode.MOVEMENT);
 			break;
 		case NO_ACTION:
@@ -199,306 +220,197 @@ public class MapController {
 			default:
 				myGame.currentMenu.handleMenuInput(input);
 		}
-		if(readyAction == MapController.GameAction.ATTACK ||
-				readyAction == MapController.GameAction.UNLOAD)
-		{
-			changeInputMode(InputMode.ACTION);
-		}
-		else if(readyAction == MapController.GameAction.CAPTURE)
-		{
-			placeUnit(unitActor, unitActor.x, unitActor.y);
-			readyAction = null;
-			unitActor.isTurnOver = true;
-			unitActor.capture(myGame.gameMap.getLocation(unitActor.x, unitActor.y));
-			changeInputMode(InputMode.MAP);
-		}
-		else if(readyAction == MapController.GameAction.WAIT)
-		{
-			placeUnit(unitActor, unitActor.x, unitActor.y);
-			readyAction = null;
-			unitActor.isTurnOver = true;
-			changeInputMode(InputMode.MAP);
-		}
-		else if(readyAction == MapController.GameAction.LOAD)
-		{
-			Unit transport = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
-	
-			if(null != transport && transport.hasCargoSpace(unitActor.model.type))
-			{
-				unitActor.x = -1;
-				unitActor.y = -1;
-				transport.heldUnits.add(unitActor);
-				
-				readyAction = null;
-				changeInputMode(InputMode.MAP);
-			}
-		}
 	}
 
-	/**
-	 * Once an action has been chosen, we need to choose the action target, and then execute.
-	 */
-	private void handleActionInput(InputHandler.InputAction input)
-	{
-		boolean inActionableSpace = myGame.getCursorLocation().isHighlightSet();
+  /**
+   * Once an action has been chosen, we need to choose the action target, and then execute.
+   */
+  private void handleActionInput(InputHandler.InputAction input)
+  {
+    boolean inActionableSpace = myGame.getCursorLocation().isHighlightSet();
 
-		switch (input)
-		{
-		case UP:
-			myGame.moveCursorUp();
-			break;
-		case DOWN:
-			myGame.moveCursorDown();
-			break;
-		case LEFT:
-			myGame.moveCursorLeft();
-			break;
-		case RIGHT:
-			myGame.moveCursorRight();
-			break;
-		case ENTER:
-			if(inActionableSpace && (null != readyAction))
-			{
-				boolean actionTaken = false;
-				// Do the thing.
-				switch(readyAction)
-				{
-				case ATTACK:
-					Unit unitTarget = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
-					if(unitTarget != null && unitActor.getDamage(unitTarget) != 0)
-					{
-						placeUnit(unitActor, unitActor.x, unitActor.y);
-//						Utils.findActionableLocations(unitTarget, GameAction.ATTACK, myGame.gameMap);
-						boolean canCounter = unitTarget.getDamage(unitActor) != 0;
-						CombatEngine.resolveCombat(unitActor, unitTarget, myGame.gameMap, canCounter);
-						if(unitActor.HP <= 0)
-						{
-							removeUnit(unitActor);
-						}
-						if(unitTarget.HP <= 0)
-						{
-							removeUnit(unitTarget);
-						}
-						actionTaken = true;
-						System.out.println("unitActor hp: " + unitActor.HP);
-						System.out.println("unitTarget hp: " + unitTarget.HP);
-//						Utils.findActionableLocations(unitActor, GameAction.ATTACK, myGame.gameMap);
-					}
-					break;
-				case UNLOAD:
-					if(null == myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident())
-					{
-						Unit droppable = unitActor.heldUnits.get(0);
-						unitActor.heldUnits.remove(droppable);
-						placeUnit(droppable, myGame.getCursorX(), myGame.getCursorY());
-						droppable.isTurnOver = true;
-						placeUnit(unitActor, unitActor.x, unitActor.y);
-						actionTaken = true;
-					}
-					break;
-				case CANCEL:
-				case WAIT:
-					default:
-						System.out.println("WARNING! MapController.handleActionInput() was given invalid action enum (" + input + ")");
-						changeInputMode(InputMode.ACTIONMENU);
-				}
-				
-				// Only switch back to map mode if we actually acted. 
-				if(actionTaken)
-				{
-					unitActor.isTurnOver = true;
-					myGame.currentMenu = null;
-					changeInputMode(InputMode.MAP);
-				}
-			}
-			break;
-		case BACK:
-			changeInputMode(InputMode.ACTIONMENU);
-			break;
-		case NO_ACTION:
-			default:
-				System.out.println("WARNING! MapController.handleActionInput() was given invalid input enum (" + input + ")");
-		}
-	}
+    switch (input)
+    {
+      case UP:
+        myGame.moveCursorUp();
+        break;
+      case DOWN:
+        myGame.moveCursorDown();
+        break;
+      case LEFT:
+        myGame.moveCursorLeft();
+        break;
+      case RIGHT:
+        myGame.moveCursorRight();
+        break;
+      case ENTER:
+        if( inActionableSpace && (null != currentAction) )
+        {
+          currentAction.setActionLocation(myGame.getCursorX(), myGame.getCursorY());
+          
+          if(currentAction.isComplete())
+          {
+            // Do the thing.
+            if(currentAction.execute(myGame))
+            {
+              changeInputMode(InputMode.MAP);
+            }
+            else
+            {
+              System.out.println("ERROR! Action failed to execute!");
+              changeInputMode(InputMode.MAP); // try and reset;
+            }
+          }
+          else
+          {
+            System.out.println("WARNING! Action not constructed correctly!");
+            changeInputMode(InputMode.MAP); // try and reset;
+          }
+        }
+        break;
+      case BACK:
+        changeInputMode(InputMode.ACTIONMENU);
+        break;
+      case NO_ACTION:
+      default:
+        System.out
+            .println("WARNING! MapController.handleActionInput() was given invalid input enum ("
+                + input + ")");
+    }
+  }
 
-	/** We just selected a production building - what can it do? */
-	private void handleProductionMenuInput(InputHandler.InputAction input)
-	{
-		System.out.println("handleProduction");
-		if(myGame.currentMenu == null)
-		{
-			System.out.println("Error! MapController.handleProductionMenuInput() called when currentMenu is null!");
-		}
+  /** We just selected a production building - what can it do? */
+  private void handleProductionMenuInput(InputHandler.InputAction input)
+  {
+    System.out.println("handleProduction");
+    if( myGame.currentMenu == null )
+    {
+      System.out
+          .println("Error! MapController.handleProductionMenuInput() called when currentMenu is null!");
+    }
 
-		switch (input)
-		{
-		case ENTER:
-			Units.UnitModel.UnitEnum unit = (Units.UnitModel.UnitEnum)myGame.currentMenu.getSelectedAction();
+    switch (input)
+    {
+      case ENTER:
+        Units.UnitModel.UnitEnum unit = (Units.UnitModel.UnitEnum) myGame.currentMenu
+            .getSelectedAction();
 
-			if (myGame.activeCO.getUnitModel(unit).moneyCost <= myGame.activeCO.money) {
-				System.out.println("creating unit");
-				myGame.activeCO.money -= myGame.activeCO.getUnitModel(unit).moneyCost;
-				Unit u = new Unit(myGame.activeCO, myGame.activeCO.getUnitModel(unit));
-				addNewUnit(u, myGame.getCursorX(), myGame.getCursorY());
-			} else {
-				System.out.println("not enough money");
-				}
-			changeInputMode(InputMode.MAP);
-			break;
-		case BACK:
-			changeInputMode(InputMode.MAP);
-			break;
-		case NO_ACTION:
-			break;
-			default:
-				myGame.currentMenu.handleMenuInput(input);
-		}
-	}
-	
-	private void handleMetaActionMenuInput(InputHandler.InputAction input)
-	{
-		if(myGame.currentMenu == null)
-		{
-			System.out.println("Error! MapController.handleMetaActionMenuInput() called when currentMenu is null!");
-		}
+        if( myGame.activeCO.getUnitModel(unit).moneyCost <= myGame.activeCO.money )
+        {
+          System.out.println("creating unit");
+          myGame.activeCO.money -= myGame.activeCO.getUnitModel(unit).moneyCost;
+          Unit u = new Unit(myGame.activeCO, myGame.activeCO.getUnitModel(unit));
+          myGame.activeCO.units.add(u);
+          myGame.gameMap.addNewUnit(u, myGame.getCursorX(), myGame.getCursorY());
+        }
+        else
+        {
+          System.out.println("Not enough money.");
+        }
+        changeInputMode(InputMode.MAP);
+        break;
+      case BACK:
+        changeInputMode(InputMode.MAP);
+        break;
+      case NO_ACTION:
+        break;
+      default:
+        myGame.currentMenu.handleMenuInput(input);
+    }
+  }
 
-		switch (input)
-		{
-		case ENTER:
-			MetaAction action = (MetaAction)myGame.currentMenu.getSelectedAction();
+  private void handleMetaActionMenuInput(InputHandler.InputAction input)
+  {
+    if( myGame.currentMenu == null )
+    {
+      System.out
+          .println("Error! MapController.handleMetaActionMenuInput() called when currentMenu is null!");
+    }
 
-			if(action == MetaAction.END_TURN)
-			{
-				myGame.turn();
-			}
-			changeInputMode(InputMode.MAP);
-			break;
-		case BACK:
-			changeInputMode(InputMode.MAP);
-			break;
-		case NO_ACTION:
-			break;
-			default:
-				myGame.currentMenu.handleMenuInput(input);
-		}
-	}
-	
-	/**
-	 * Updates the InputMode and the GameInstance's current menu to keep them in sync.
-	 * 
-	 * NOTE: This function assumes that unitActor is set correctly before it is called.
-	 */
-	private void changeInputMode(InputMode input)
-	{
-		inputMode = input;
-		switch(inputMode)
-		{
-		case ACTION:
-			Utils.findActionableLocations(unitActor, readyAction, myGame.gameMap);
-			boolean set = false;
-			for(int w = 0; w < myGame.gameMap.mapWidth; ++w)
-			{
-				for(int h = 0; h < myGame.gameMap.mapHeight; ++h)
-				{
-					if(myGame.gameMap.getLocation(w, h).isHighlightSet())
-					{
-						myGame.setCursorLocation(w, h);
-						set = true;
-						break;
-					}
-				}
-				if(set)break;
-			}
-			myGame.currentMenu = null;
-			break;
-		case ACTIONMENU:
-			myGame.gameMap.clearAllHighlights();
-			readyAction = null;
-			myGame.currentMenu = new GameMenu(GameMenu.MenuType.ACTION, unitActor.getPossibleActions(myGame.gameMap));
-			myGame.setCursorLocation(unitActor.x, unitActor.y);
-			break;
-		case MAP:
-			if(unitActor != null)
-			{
-				myGame.setCursorLocation(unitActor.x, unitActor.y);
-				unitActor = null; // We are now in MAP mode; no unit is selected.
-			}
-			myGame.gameMap.clearAllHighlights();
-			myGame.currentMenu = null;
-			break;
-		case MOVEMENT:
-			Utils.findPossibleDestinations(unitActor, myGame);
-			myGame.currentMenu = null;
-			break;
-		case PRODUCTION:
-			myGame.gameMap.clearAllHighlights();
-			myGame.currentMenu = new GameMenu(GameMenu.MenuType.PRODUCTION, myGame.activeCO.getShoppingList());
-			break;
-		case METAACTION:
-			myGame.gameMap.clearAllHighlights();
-			MetaAction[] actions = {MetaAction.END_TURN}; 
-			myGame.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, actions);
-			break;
-			default:
-				System.out.println("WARNING! MapController.changeInputMode was given an invalid InputMode " + inputMode);
-		}
-	}
-	
+    switch (input)
+    {
+      case ENTER:
+        MetaAction action = (MetaAction) myGame.currentMenu.getSelectedAction();
 
-	private void considerMove(Unit unit, int x, int y)
-	{
-		// Remove unit from the map
-		myGame.gameMap.getLocation(unit.x, unit.y).setResident(null);
+        if( action == MetaAction.END_TURN )
+        {
+          myGame.turn();
+        }
+        changeInputMode(InputMode.MAP);
+        break;
+      case BACK:
+        changeInputMode(InputMode.MAP);
+        break;
+      case NO_ACTION:
+        break;
+      default:
+        myGame.currentMenu.handleMenuInput(input);
+    }
+  }
 
-		// update our cancellation vars
-		cancelX = unit.x;
-		cancelY = unit.y;
-		// update Unit itself
-		unit.x = x;
-		unit.y = y;
-	}
-
-	private void placeUnit(Unit unit, int x, int y)
-	{
-		if(myGame.gameMap.getLocation(x, y).getResident() != null)
-		{
-			System.out.println("Error! Attempting to move unit to an occupied Location!");
-			return;
-		}
-		// Update map
-		myGame.gameMap.getLocation(x, y).setResident(unit);
-
-		// update our cancellation vars
-		cancelX = -1;
-		cancelY = -1;
-		// update Unit itself
-		unit.x = x;
-		unit.y = y;
-	}
-
-	private void addNewUnit(Unit unit, int x, int y)
-	{
-		if(myGame.gameMap.getLocation(x, y).getResident() != null)
-		{
-			System.out.println("Error! Attempting to add a unit to an occupied Location!");
-			return;
-		}
-
-		myGame.gameMap.getLocation(x, y).setResident(unit);
-		unit.x = x;
-		unit.y = y;
-		myGame.activeCO.units.add(unit);
-	}
-	
-	private void removeUnit(Unit u)
-	{
-		if(myGame.gameMap.getLocation(u.x, u.y).getResident() != u)
-		{
-			System.out.println("WARNING! Trying to remove a Unit that isn't where he claims to be.");
-		}
-		
-		u.CO.units.remove(u);
-		myGame.gameMap.getLocation(u.x, u.y).setResident(null);
-		u = null;
-	}
+  /**
+   * Updates the InputMode and the GameInstance's current menu to keep them in sync.
+   * 
+   * NOTE: This function assumes that unitActor is set correctly before it is called.
+   */
+  private void changeInputMode(InputMode input)
+  {
+    inputMode = input;
+    switch (inputMode)
+    {
+      case ACTION:
+        Utils.findActionableLocations(currentAction.getActor(), currentAction.getActionType(), currentAction.getMoveX(), currentAction.getMoveY(), myGame.gameMap);
+        boolean set = false;
+        for( int w = 0; w < myGame.gameMap.mapWidth; ++w )
+        {
+          for( int h = 0; h < myGame.gameMap.mapHeight; ++h )
+          {
+            if( myGame.gameMap.getLocation(w, h).isHighlightSet() )
+            {
+              myGame.setCursorLocation(w, h);
+              set = true;
+              break;
+            }
+          }
+          if( set )
+            break;
+        }
+        myGame.currentMenu = null;
+        break;
+      case ACTIONMENU:
+        myGame.gameMap.clearAllHighlights();
+        myGame.currentMenu = new GameMenu(GameMenu.MenuType.ACTION,
+            currentAction.getActor().getPossibleActions(myGame.gameMap, currentAction.getMoveX(), currentAction.getMoveY()));
+        myGame.setCursorLocation(currentAction.getMoveX(), currentAction.getMoveY());
+        break;
+      case MAP:
+        currentAction = null;
+        myGame.currentMenu = null;
+        myGame.gameMap.clearAllHighlights();
+        
+//        if( unitActor != null )
+//        {
+//          myGame.setCursorLocation(unitActor.x, unitActor.y);
+//          unitActor = null; // We are now in MAP mode; no unit is selected.
+//        }
+        break;
+      case MOVEMENT:
+        Utils.findPossibleDestinations(currentAction.getActor(), myGame);
+        myGame.currentMenu = null;
+        break;
+      case PRODUCTION:
+        myGame.gameMap.clearAllHighlights();
+        myGame.currentMenu = new GameMenu(GameMenu.MenuType.PRODUCTION,
+            myGame.activeCO.getShoppingList());
+        break;
+      case METAACTION:
+        myGame.gameMap.clearAllHighlights();
+        MetaAction[] actions = { MetaAction.END_TURN };
+        myGame.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, actions);
+        break;
+      default:
+        System.out.println("WARNING! MapController.changeInputMode was given an invalid InputMode "
+            + inputMode);
+    }
+  }
 }

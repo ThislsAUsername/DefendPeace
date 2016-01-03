@@ -1,16 +1,16 @@
 package Units;
 
+import Engine.GameAction.ActionType;
 import Units.MoveTypes.FootMech;
 import Units.MoveTypes.MoveType;
 import Units.Weapons.MechMGun;
 import Units.Weapons.MechRocket;
 import Units.Weapons.WeaponModel;
-import Engine.MapController.GameAction;;
 
 public class MechModel extends UnitModel {
 
 	private static final MoveType moveType = new FootMech();
-	private static final GameAction[] actions = {GameAction.ATTACK, GameAction.CAPTURE, GameAction.WAIT};
+	private static final ActionType[] actions = {ActionType.ATTACK, ActionType.CAPTURE, ActionType.WAIT};
 	private static final WeaponModel[] weapons = {new MechRocket(), new MechMGun()};
 
 	public MechModel() {
