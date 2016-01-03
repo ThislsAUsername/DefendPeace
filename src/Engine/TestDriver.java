@@ -1,24 +1,23 @@
 package Engine;
 
-import java.awt.Color;
-
 import CommandingOfficers.CmdrStrong;
 import CommandingOfficers.Commander;
 import Terrain.GameMap;
-import UI.MapView;
 import Units.Unit;
 import Units.UnitModel.UnitEnum;
 
 /**
- * Instantiate this to run a bunch of tests,
+ * Provides a framework for automated regression-testing of game functionality.
  */
 public class TestDriver
 {
   private static Commander testCo1;
   private static Commander testCo2;
   private static GameMap testMap;
-  private static GameInstance testGame;
   
+  /** Initializes and runs all of the tests
+   * @return true if all tests pass, false else.
+   */
   public static boolean performTests()
   {
     testCo1 = new CmdrStrong();
@@ -27,7 +26,6 @@ public class TestDriver
     
     // TODO: This will have to change once GameMap doesn't build a default map.
     testMap = new GameMap(cos);
-    testGame = new GameInstance(testMap, cos);
     
     // Remove the default units. TODO: Remove this once there isn't a default map.
     testMap.getLocation(6, 5).setResident(null);
