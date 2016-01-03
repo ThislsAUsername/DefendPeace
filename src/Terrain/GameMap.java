@@ -116,21 +116,21 @@ public class GameMap {
 	  return !(x < 0 || x >= mapWidth || y < 0 || y >= mapHeight);
 	}
 
+	/** Returns the Environment of the specified tile, or null if that location does not exist. */
 	public Environment getEnvironment(int w, int h)
 	{
 		if(!isLocationValid(w, h))
 		{
-			System.out.println("Warning! Attempting to retrieve an invalid tile! (" + w + ", " + h + ")");
 			return null;
 		}
 		return map[w][h].getEnvironment();
 	}
 
+	/** Returns the Location at the specified location, or null if that Location does not exist. */
 	public Location getLocation(int w, int h)
 	{
 		if(!isLocationValid(w, h))
 		{
-			System.out.println("Warning! Attempting to retrieve an invalid tile! (" + w + ", " + h + ")");
 			return null;
 		}
 		return map[w][h];
@@ -192,7 +192,6 @@ public class GameMap {
     Location priorLoc = getLocation(unit.x, unit.y);
     if(null != priorLoc)
     {
-      System.out.println("Setting " + x + ", " + y + " to null");
       priorLoc.setResident(null);
     }
     getLocation(x, y).setResident(unit);
@@ -202,13 +201,19 @@ public class GameMap {
     unit.y = y;
   }
 
+  /** Removes the Unit from the map, if the map agrees with the Unit on its location. */ 
   public void removeUnit(Unit u)
   {
-    if( getLocation(u.x, u.y).getResident() != u )
+    if( isLocationValid(u.x, u.y) )
     {
-      System.out.println("WARNING! Trying to remove a Unit that isn't where he claims to be.");
+      if(getLocation(u.x, u.y).getResident() != u)
+      {
+        System.out.println("WARNING! Trying to remove a Unit that isn't where he claims to be.");
+      }
+      else
+      {
+        getLocation(u.x, u.y).setResident(null);
+      }
     }
-
-    getLocation(u.x, u.y).setResident(null);
   }
 }
