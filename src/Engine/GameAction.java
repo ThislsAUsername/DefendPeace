@@ -1,7 +1,12 @@
 package Engine;
 
+import Terrain.GameMap;
 import Units.Unit;
 
+/**
+ * Allows the building of an in-game action as a Unit, a location to move to, an ActionType, and an (optional) location to act on.
+ * Once fully constructed (as affirmed by isReadyToExecute()), a call to execute() will cause GameAction to perform the action.
+ */
 public class GameAction
 {
   public enum ActionType
@@ -63,7 +68,8 @@ public class GameAction
     actY = y;
   }
   
-  public boolean isComplete()
+  /** Returns true if this GameAction has all the information it needs to execute, false else. */
+  public boolean isReadyToExecute()
   {
     boolean ready = false;
     if(moveX >= 0 && moveY >= 0 && actionType != ActionType.INVALID)
@@ -83,28 +89,38 @@ public class GameAction
     return ready;
   }
   
-  public boolean execute(GameInstance game)
+  /**
+   * Performs the built-up action, using the passed-in GameMap.
+   * @return true if the action successfully executes, false if a problem occurs.
+   */
+  public boolean execute(GameMap gameMap)
   {
+    if(!isReadyToExecute())
+    {
+      System.out.println("ERROR! Attempting to execute an incomplete GameAction");
+      return false;
+    }
+    
     switch(actionType)
     {
       case ATTACK:
-        Unit unitTarget = game.gameMap.getLocation(actX, actY).getResident();
+        Unit unitTarget = gameMap.getLocation(actX, actY).getResident();
         
         if( unitTarget != null && unitActor.getDamage(unitTarget, moveX, moveY) != 0 )
         {
           unitActor.isTurnOver = true;
-          game.gameMap.moveUnit(unitActor, moveX, moveY);
+          gameMap.moveUnit(unitActor, moveX, moveY);
 
           boolean canCounter = unitTarget.getDamage(unitActor) != 0;
-          CombatEngine.resolveCombat(unitActor, unitTarget, game.gameMap, canCounter);
+          CombatEngine.resolveCombat(unitActor, unitTarget, gameMap, canCounter);
           if( unitActor.HP <= 0 )
           {
-            game.gameMap.removeUnit(unitActor);
+            gameMap.removeUnit(unitActor);
             unitActor.CO.units.remove(unitActor);
           }
           if( unitTarget.HP <= 0 )
           {
-            game.gameMap.removeUnit(unitTarget);
+            gameMap.removeUnit(unitTarget);
             unitTarget.CO.units.remove(unitTarget);
           }
           System.out.println("unitActor hp: " + unitActor.HP);
@@ -113,16 +129,16 @@ public class GameAction
         break;
       case CAPTURE:
         unitActor.isTurnOver = true;
-        game.gameMap.moveUnit(unitActor, moveX, moveY);
-        unitActor.capture(game.gameMap.getLocation(unitActor.x, unitActor.y));
+        gameMap.moveUnit(unitActor, moveX, moveY);
+        unitActor.capture(gameMap.getLocation(unitActor.x, unitActor.y));
         break;
       case LOAD:
-        Unit transport = game.gameMap.getLocation(game.getCursorX(), game.getCursorY()).getResident();
+        Unit transport = gameMap.getLocation(moveX, moveY).getResident();
         
         if(null != transport && transport.hasCargoSpace(unitActor.model.type))
         {
           unitActor.isTurnOver = true;
-          game.gameMap.removeUnit(unitActor);
+          gameMap.removeUnit(unitActor);
           unitActor.x = -1;
           unitActor.y = -1;
           transport.heldUnits.add(unitActor);
@@ -130,18 +146,18 @@ public class GameAction
         break;
       case UNLOAD:
         // If we have cargo and the landing zone is empty, we drop the cargo.
-        if( !unitActor.heldUnits.isEmpty() && null == game.gameMap.getLocation(game.getCursorX(), game.getCursorY()).getResident() )
+        if( !unitActor.heldUnits.isEmpty() && null == gameMap.getLocation(actX, actY).getResident() )
         {
           unitActor.isTurnOver = true;
-          game.gameMap.moveUnit(unitActor, moveX, moveY);
+          gameMap.moveUnit(unitActor, moveX, moveY);
           Unit droppable = unitActor.heldUnits.remove(0); // TODO: Account for multi-Unit transports 
-          game.gameMap.moveUnit(droppable, game.getCursorX(), game.getCursorY());
+          gameMap.moveUnit(droppable, actX, actY);
           droppable.isTurnOver = true;
         }
         break;
       case WAIT:
         unitActor.isTurnOver = true;
-        game.gameMap.moveUnit(unitActor, moveX, moveY);
+        gameMap.moveUnit(unitActor, moveX, moveY);
         break;
       case INVALID:
         default:

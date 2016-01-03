@@ -194,9 +194,9 @@ public class MapController
 			currentAction.setActionType( (GameAction.ActionType) myGame.currentMenu.getSelectedAction() );
 
 	    // If the action is completely constructed, execute it, else get the missing info.
-	    if(currentAction.isComplete())
+	    if(currentAction.isReadyToExecute())
 	    {
-	      if(currentAction.execute(myGame))
+	      if(currentAction.execute(myGame.gameMap))
 	      {
 	        changeInputMode(InputMode.MAP);
 	      }
@@ -248,10 +248,10 @@ public class MapController
         {
           currentAction.setActionLocation(myGame.getCursorX(), myGame.getCursorY());
           
-          if(currentAction.isComplete())
+          if(currentAction.isReadyToExecute())
           {
             // Do the thing.
-            if(currentAction.execute(myGame))
+            if(currentAction.execute(myGame.gameMap))
             {
               changeInputMode(InputMode.MAP);
             }
