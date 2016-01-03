@@ -2,14 +2,14 @@ package Units;
 
 import java.util.Vector;
 
+import Engine.GameAction.ActionType;
 import Units.MoveTypes.MoveType;
 import Units.MoveTypes.Tread;
-import Engine.MapController.GameAction;
 
 public class APCModel extends UnitModel {
 
 	private static final MoveType moveType = new Tread();
-	private static final GameAction[] actions = {GameAction.UNLOAD, GameAction.WAIT};
+	private static final ActionType[] actions = {ActionType.UNLOAD, ActionType.WAIT};
 
 	public APCModel() {
 		super("APC", UnitEnum.APC, 550, 42, 0, 5, moveType, actions, null);

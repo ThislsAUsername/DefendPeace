@@ -2,6 +2,7 @@ package Terrain;
 
 import Units.InfantryModel;
 import Units.Unit;
+import Units.UnitModel;
 
 public class GameMap {
 
@@ -63,7 +64,7 @@ public class GameMap {
 
 		map[3][5].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
 		map[6][5].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
-		Unit n = new Unit(commanders[0], new InfantryModel());
+		Unit n = new Unit(commanders[0], commanders[0].unitModels[UnitModel.UnitEnum.INFANTRY.ordinal()]);
 		n.x = 6;
 		n.y = 5;
 		n.isTurnOver = false;
@@ -71,7 +72,7 @@ public class GameMap {
 		commanders[0].units.add(n);
 		map[11][4].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
 		map[8][4].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
-		Unit n2 = new Unit(commanders[1], new InfantryModel());
+		Unit n2 = new Unit(commanders[1], commanders[1].unitModels[UnitModel.UnitEnum.INFANTRY.ordinal()]);
 		n2.x = 8;
 		n2.y = 4;
 		n2.isTurnOver = false;
@@ -105,24 +106,31 @@ public class GameMap {
 		map[8][3].setEnvironment(Environment.getTile(Environment.Terrains.ROAD, Environment.Weathers.CLEAR));
 		map[9][3].setEnvironment(Environment.getTile(Environment.Terrains.ROAD, Environment.Weathers.CLEAR));
 		map[10][3].setEnvironment(Environment.getTile(Environment.Terrains.ROAD, Environment.Weathers.CLEAR));
-
+	}
+	
+	/**
+	 * Returns true if (x,y) lies within the GameMap, false else.
+	 */
+	public boolean isLocationValid(int x, int y)
+	{
+	  return !(x < 0 || x >= mapWidth || y < 0 || y >= mapHeight);
 	}
 
+	/** Returns the Environment of the specified tile, or null if that location does not exist. */
 	public Environment getEnvironment(int w, int h)
 	{
-		if(w < 0 || w >= mapWidth || h < 0 || h >= mapHeight)
+		if(!isLocationValid(w, h))
 		{
-			System.out.println("Warning! Attempting to retrieve an invalid tile! (" + w + ", " + h + ")");
 			return null;
 		}
 		return map[w][h].getEnvironment();
 	}
 
+	/** Returns the Location at the specified location, or null if that Location does not exist. */
 	public Location getLocation(int w, int h)
 	{
-		if(w < 0 || w >= mapWidth || h < 0 || h >= mapHeight)
+		if(!isLocationValid(w, h))
 		{
-			System.out.println("Warning! Attempting to retrieve an invalid tile! (" + w + ", " + h + ")");
 			return null;
 		}
 		return map[w][h];
@@ -138,4 +146,74 @@ public class GameMap {
 			}
 		}
 	}
+	
+	/** Returns true if no unit is at the specified x and y coordinate, false else */
+	public boolean isLocationEmpty(int x, int y)
+	{
+	  return isLocationEmpty(null, x, y);
+	}
+	
+	/** Returns true if no unit (excluding 'unit') is in the specified Location. */
+	public boolean isLocationEmpty(Unit unit, int x, int y)
+	{
+	  boolean empty = true;
+	  if(isLocationValid(x, y))
+	  {
+	    if(getLocation(x, y).getResident() != null && getLocation(x, y).getResident() != unit)
+	    {
+	      empty = false;
+	    }
+	  }
+	  return empty;
+	}
+
+  public void addNewUnit(Unit unit, int x, int y)
+  {
+    if( getLocation(x, y).getResident() != null )
+    {
+      System.out.println("Error! Attempting to add a unit to an occupied Location!");
+      return;
+    }
+
+    getLocation(x, y).setResident(unit);
+    unit.x = x;
+    unit.y = y;
+  }
+
+  public void moveUnit(Unit unit, int x, int y)
+  {
+    if( !isLocationEmpty(unit, x, y) )
+    {
+      System.out.println("ERROR! Attempting to move unit to an occupied Location!");
+      return;
+    }
+    
+    // Update the map
+    Location priorLoc = getLocation(unit.x, unit.y);
+    if(null != priorLoc)
+    {
+      priorLoc.setResident(null);
+    }
+    getLocation(x, y).setResident(unit);
+
+    // Update the Unit
+    unit.x = x;
+    unit.y = y;
+  }
+
+  /** Removes the Unit from the map, if the map agrees with the Unit on its location. */ 
+  public void removeUnit(Unit u)
+  {
+    if( isLocationValid(u.x, u.y) )
+    {
+      if(getLocation(u.x, u.y).getResident() != u)
+      {
+        System.out.println("WARNING! Trying to remove a Unit that isn't where he claims to be.");
+      }
+      else
+      {
+        getLocation(u.x, u.y).setResident(null);
+      }
+    }
+  }
 }
