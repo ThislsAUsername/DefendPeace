@@ -24,12 +24,22 @@ public class GameAction
   
   public GameAction(Unit unit)
   {
+    this(unit, -1, -1, ActionType.INVALID, -1, -1);
+  }
+
+  public GameAction(Unit unit, int mx, int my, ActionType action)
+  {
+    this(unit, mx, my, action, -1, -1);
+  }
+
+  public GameAction(Unit unit, int mx, int my, ActionType action, int ax, int ay)
+  {
     unitActor = unit;
-    actionType = ActionType.INVALID;
-    moveX = -1;
-    moveY = -1;
-    actX = -1;
-    actY = -1;
+    actionType = action;
+    moveX = mx;
+    moveY = my;
+    actX = ax;
+    actY = ay;
   }
 
   public void setActionType(ActionType type)
@@ -84,6 +94,21 @@ public class GameAction
         {
           ready = true;
         }
+        else
+        {
+          System.out.println("Targeted ActionType cannot be executed without target location!");
+        }
+      }
+    }
+    else
+    {
+      if(actionType == ActionType.INVALID)
+      {
+        System.out.println("Invalid ActionType cannot be executed!");
+      }
+      else
+      {
+        System.out.println("GameAction with no move location cannot be executed!");
       }
     }
     return ready;
@@ -93,6 +118,8 @@ public class GameAction
    * Performs the built-up action, using the passed-in GameMap.
    * @return true if the action successfully executes, false if a problem occurs.
    */
+  // TODO: Should this validate that the GameAction is valid (e.g. we aren't trying
+  //  to move an Infantry unit 10 spaces)?
   public boolean execute(GameMap gameMap)
   {
     if(!isReadyToExecute())
@@ -146,7 +173,7 @@ public class GameAction
         break;
       case UNLOAD:
         // If we have cargo and the landing zone is empty, we drop the cargo.
-        if( !unitActor.heldUnits.isEmpty() && null == gameMap.getLocation(actX, actY).getResident() )
+        if( !unitActor.heldUnits.isEmpty() && gameMap.isLocationEmpty(unitActor, actX, actY) )
         {
           unitActor.isTurnOver = true;
           gameMap.moveUnit(unitActor, moveX, moveY);
