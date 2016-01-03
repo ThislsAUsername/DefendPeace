@@ -10,9 +10,7 @@ import Units.Unit;
 import Units.UnitModel.UnitEnum;
 
 /**
- * Instantiate this to run a bunch of tests, 
- * @author Christopher White
- *
+ * Instantiate this to run a bunch of tests,
  */
 public class TestDriver
 {
