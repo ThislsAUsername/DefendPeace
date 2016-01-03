@@ -74,7 +74,7 @@ public class GameMap {
 		commanders[0].units.add(n);
 		map[11][4].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
 		map[8][4].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
-		Unit n2 = new Unit(commanders[1], commanders[0].unitModels[UnitModel.UnitEnum.INFANTRY.ordinal()]);
+		Unit n2 = new Unit(commanders[1], commanders[1].unitModels[UnitModel.UnitEnum.INFANTRY.ordinal()]);
 		n2.x = 8;
 		n2.y = 4;
 		n2.isTurnOver = false;
