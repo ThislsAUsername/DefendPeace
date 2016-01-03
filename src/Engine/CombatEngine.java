@@ -3,7 +3,6 @@ package Engine;
 import java.util.ArrayList;
 
 import Terrain.GameMap;
-import Terrain.Location;
 import Units.Unit;
 
 public class CombatEngine {

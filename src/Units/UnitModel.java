@@ -7,7 +7,10 @@ import Units.MoveTypes.MoveType;
 import Units.Weapons.WeaponModel;
 
 public class UnitModel {
-	public enum UnitEnum{INFANTRY, MECH, APC};
+	public enum UnitEnum{INFANTRY, MECH, RECON, TANK, MD_TANK, NEOTANK,
+						 APC, ARTILLERY, ROCKETS, ANTI_AIR, MISSILES,
+						 FIGHTER, BOMBER, B_COPTER, T_COPTER,
+						 BATTLESHIP, CRUISER, LANDER, SUB};
 	
 	public String name;
 	public UnitEnum type;

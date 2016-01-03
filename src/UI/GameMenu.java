@@ -1,7 +1,5 @@
 package UI;
 
-import Engine.MapController;
-
 public class GameMenu {
 	
 	private Enum options[];
