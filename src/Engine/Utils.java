@@ -9,14 +9,14 @@ import Units.Unit;
 public class Utils {
 	
 	/**
-	 * Sets the highlight for myGame.gameMap.getLocation(x, y) to true if unit can do action from Location (x, y), and false otherwise.
+	 * Sets the highlight for myGame.gameMap.getLocation(x, y) to true if unit can act on Location (x, y) from (xLoc, yLoc), and false otherwise.
 	 */
 	public static void findActionableLocations(Unit unit, GameAction.ActionType action, int xLoc, int yLoc, GameMap map)
 	{
 		switch (action)
 		{
 		case ATTACK:
-			// Set highlight for locations containing an enemy that unit can shoot from (xLoc, yLoc).
+			// Set highlight for locations that contain an enemy that 'unit' can shoot from (xLoc, yLoc).
 			for (int i = 0; i < map.mapWidth; i++)
 			{
 				for (int j = 0; j < map.mapHeight; j++)

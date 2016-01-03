@@ -273,9 +273,7 @@ public class MapController
         break;
       case NO_ACTION:
       default:
-        System.out
-            .println("WARNING! MapController.handleActionInput() was given invalid input enum ("
-                + input + ")");
+        System.out.println("WARNING! MapController.handleActionInput() was given invalid input enum (" + input + ")");
     }
   }
 
@@ -285,15 +283,13 @@ public class MapController
     System.out.println("handleProduction");
     if( myGame.currentMenu == null )
     {
-      System.out
-          .println("Error! MapController.handleProductionMenuInput() called when currentMenu is null!");
+      System.out.println("Error! MapController.handleProductionMenuInput() called when currentMenu is null!");
     }
 
     switch (input)
     {
       case ENTER:
-        Units.UnitModel.UnitEnum unit = (Units.UnitModel.UnitEnum) myGame.currentMenu
-            .getSelectedAction();
+        Units.UnitModel.UnitEnum unit = (Units.UnitModel.UnitEnum) myGame.currentMenu.getSelectedAction();
 
         if( myGame.activeCO.getUnitModel(unit).moneyCost <= myGame.activeCO.money )
         {
@@ -323,8 +319,7 @@ public class MapController
   {
     if( myGame.currentMenu == null )
     {
-      System.out
-          .println("Error! MapController.handleMetaActionMenuInput() called when currentMenu is null!");
+      System.out.println("Error! MapController.handleMetaActionMenuInput() called when currentMenu is null!");
     }
 
     switch (input)
