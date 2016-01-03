@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import Units.InfantryModel;
 import Units.Unit;
+import Units.UnitModel;
 
 public class GameMap {
 
@@ -65,7 +66,7 @@ public class GameMap {
 
 		map[3][5].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
 		map[6][5].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
-		Unit n = new Unit(commanders[0], new InfantryModel());
+		Unit n = new Unit(commanders[0], commanders[0].unitModels[UnitModel.UnitEnum.INFANTRY.ordinal()]);
 		n.x = 6;
 		n.y = 5;
 		n.isTurnOver = false;
@@ -73,7 +74,7 @@ public class GameMap {
 		commanders[0].units.add(n);
 		map[11][4].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
 		map[8][4].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
-		Unit n2 = new Unit(commanders[1], new InfantryModel());
+		Unit n2 = new Unit(commanders[1], commanders[1].unitModels[UnitModel.UnitEnum.INFANTRY.ordinal()]);
 		n2.x = 8;
 		n2.y = 4;
 		n2.isTurnOver = false;

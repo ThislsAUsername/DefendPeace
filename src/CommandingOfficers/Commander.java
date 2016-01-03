@@ -55,13 +55,12 @@ public class Commander {
 		}
 		money += turnIncome;
 
-		for(int i = 0; i < modifiers.size(); i++) {
-			if (modifiers.get(i).done) {
-				modifiers.remove(i);
-			}
-		}
-		for(int i = 0; i < modifiers.size(); i++) {
-			modifiers.get(i).initTurn();
+		// Un-apply any modifiers that were activated last turn.
+		// TODO: If/when we have modifiers that last multiple turns, figure out how to handle them.
+		for(int i = modifiers.size() - 1; i >= 0; --i)
+		{
+			modifiers.get(i).revert(this);
+			modifiers.remove(i);
 		}
 		
 		for (int j = 0; j < units.size(); j++) {
