@@ -20,12 +20,6 @@ public class Driver implements ActionListener{
 	private javax.swing.Timer repaintTimer;
 	InputHandler inputHandler;
 
-	// MenuView menuView;
-	MapView mapView;
-	// battleView battleView;
-	
-	MapController mapController;
-
 	// TODO: make this a GameView or some such when we get there.
 	private MapController activeController;
 
@@ -43,8 +37,8 @@ public class Driver implements ActionListener{
 		GameMap map = new GameMap(cos);
 		GameInstance newGame = new GameInstance(map, cos);
 
-		mapView = new MapView(newGame);
-		mapController = new MapController(newGame);
+		MapView mapView = new MapView(newGame);
+		MapController mapController = new MapController(newGame, mapView);
 
 		activeController = mapController;
 
