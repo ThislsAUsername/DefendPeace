@@ -22,6 +22,9 @@ public class GameAction
   private int actX;
   private int actY;
   
+  // Record origin state for animation purposes.
+  private PriorState priorState = null;
+
   public GameAction(Unit unit)
   {
     this(unit, -1, -1, ActionType.INVALID, -1, -1);
@@ -70,6 +73,14 @@ public class GameAction
   public int getMoveY()
   {
     return moveY;
+  }
+  public int getActX()
+  {
+    return actX;
+  }
+  public int getActY()
+  {
+    return actY;
   }
   
   public void setActionLocation(int x, int y)
@@ -127,12 +138,16 @@ public class GameAction
       System.out.println("ERROR! Attempting to execute an incomplete GameAction");
       return false;
     }
-    
+
+    // Populate our PriorState so folks can backtrack later.
+    priorState = this.new PriorState((int)Math.ceil(unitActor.HP), unitActor.x, unitActor.y);
+
     switch(actionType)
     {
       case ATTACK:
         Unit unitTarget = gameMap.getLocation(actX, actY).getResident();
-        
+        priorState.setTargetHP((int)Math.ceil(unitTarget.HP));
+
         if( unitTarget != null && unitActor.getDamage(unitTarget, moveX, moveY) != 0 )
         {
           unitActor.isTurnOver = true;
@@ -161,7 +176,7 @@ public class GameAction
         break;
       case LOAD:
         Unit transport = gameMap.getLocation(moveX, moveY).getResident();
-        
+
         if(null != transport && transport.hasCargoSpace(unitActor.model.type))
         {
           unitActor.isTurnOver = true;
@@ -192,5 +207,33 @@ public class GameAction
     }
     
     return unitActor.isTurnOver;
+  }
+
+  public PriorState getPriorState()
+  {
+	  return priorState;
+  }
+
+  /**
+   * Records the state of affairs before the action was executed. This allows the animator to correctly portray events.
+   */
+  public class PriorState
+  {
+	  public final int actorHP;
+	  public final int actorX;
+	  public final int actorY;
+	  private int targetHP;
+
+	  public PriorState(int actorHP, int actorX, int actorY)
+	  {
+		  this.actorHP = actorHP;
+		  this.actorX = actorX;
+		  this.actorY = actorY;
+	  }
+
+	  public void setTargetHP(int hp)
+	  {
+		  targetHP = hp;
+	  }
   }
 }
