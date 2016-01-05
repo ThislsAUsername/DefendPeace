@@ -4,14 +4,15 @@ import Terrain.Environment;
 import Terrain.Location;
 import UI.InputHandler;
 import UI.GameMenu;
+import UI.MapView;
 import Units.Unit;
 
 public class MapController
 {
-
   private GameInstance myGame;
+  private MapView myView;
 
-  private enum InputMode {MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION};
+  private enum InputMode {MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION, ANIMATION};
   public enum MetaAction {END_TURN};
 
   private InputMode inputMode;
@@ -19,10 +20,13 @@ public class MapController
   // readied Action
   GameAction currentAction = null;
 
-  public MapController(GameInstance game)
+  public MapController(GameInstance game, MapView view)
   {
     myGame = game;
+    myView = view;
+    myView.setController(this);
     inputMode = InputMode.MAP;
+    myGame.setCursorLocation(6,5);
   }
 
   /**
@@ -51,6 +55,13 @@ public class MapController
         break;
       case METAACTION:
         handleMetaActionMenuInput(input);
+        break;
+      case ANIMATION:
+        if(input == InputHandler.InputAction.BACK || input == InputHandler.InputAction.ENTER);
+        {
+            // Tell the animation to cancel.
+            myView.cancelAnimation();
+        }
         break;
       default:
         System.out.println("Invalid InputMode in MapController! " + inputMode);
@@ -247,13 +258,15 @@ public class MapController
         if( inActionableSpace && (null != currentAction) )
         {
           currentAction.setActionLocation(myGame.getCursorX(), myGame.getCursorY());
-          
+
           if(currentAction.isReadyToExecute())
           {
             // Do the thing.
             if(currentAction.execute(myGame.gameMap))
             {
-              changeInputMode(InputMode.MAP);
+                // Kick it off to the animator.
+                changeInputMode(InputMode.ANIMATION);
+                myView.animate(currentAction);
             }
             else
             {
@@ -403,9 +416,17 @@ public class MapController
         MetaAction[] actions = { MetaAction.END_TURN };
         myGame.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, actions);
         break;
+      case ANIMATION:
+          myGame.gameMap.clearAllHighlights();
+          break;
       default:
         System.out.println("WARNING! MapController.changeInputMode was given an invalid InputMode "
             + inputMode);
     }
+  }
+
+  public void animationEnded()
+  {
+	  changeInputMode(InputMode.MAP);
   }
 }
