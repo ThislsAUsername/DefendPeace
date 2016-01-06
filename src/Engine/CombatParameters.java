@@ -9,11 +9,11 @@ public class CombatParameters {
 	public GameMap map;
 	public boolean isCounter, canCounter;
 	
-	public CombatParameters(Unit pAttacker, Unit pDefender, GameMap pMap, boolean isCounter) {
+	public CombatParameters(Unit pAttacker, Unit pDefender, GameMap pMap) {
 		attacker		= pAttacker;
 		defender		= pDefender;
 		map 			= pMap;
-		this.isCounter	= isCounter;
+		isCounter		= false;
 		// Only attacks at point-blank can be countered
 		int dist = Math.abs(attacker.x-defender.x) + Math.abs(attacker.y-defender.y);
 		canCounter = !isCounter && dist == 1 && defender.getDamage(attacker) != 0;

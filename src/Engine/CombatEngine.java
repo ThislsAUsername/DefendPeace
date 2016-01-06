@@ -17,7 +17,7 @@ public class CombatEngine {
 //			}
 //		}
 		
-		CombatParameters params = new CombatParameters(attacker, defender, map, false);
+		CombatParameters params = new CombatParameters(attacker, defender, map);
 		for(int i = 0; i < modifiers.size(); i++) {
 			modifiers.get(i).alterCombat(params);
 		}
