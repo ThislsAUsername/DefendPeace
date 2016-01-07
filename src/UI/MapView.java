@@ -21,6 +21,7 @@ public class MapView extends javax.swing.JPanel {
 	private GameInstance myGame;
 	
 	public GameMenu currentMenu;
+	public GameAction currentAction = null;
 
 	private MapArtist mapArtist;
 	private UnitArtist unitArtist;
@@ -30,7 +31,6 @@ public class MapView extends javax.swing.JPanel {
 	public static int mapViewWidth = tileSizePx * 15;
 	public static int mapViewHeight = tileSizePx * 10;
 
-	private GameAction animationAction = null;
 	private AnimationSequence animationSequence = null;
 
 	MapController myController = null;
@@ -58,29 +58,12 @@ public class MapView extends javax.swing.JPanel {
 		unitArtist.drawUnits(g);
 		mapArtist.drawHighlights(g);
 
-		if(animationAction != null && animationSequence == null)
-		{
-			switch(animationAction.getActionType())
-			{
-			case ATTACK:
-				animationSequence = new NobunagaBattleAnimation(animationAction);
-				break;
-			case CAPTURE:
-			case LOAD:
-			case WAIT:
-			case UNLOAD:
-				break;
-			case INVALID:
-				default:
-					System.out.println("WARNING! No action animation supported for type " + animationAction.getActionType());
-			}
-		}
-		else if(animationSequence != null)
+		if(animationSequence != null)
 		{
 			// Animate until it tells you it's done.
 			if(animationSequence.animate(g))
 			{
-				animationAction = null;
+				currentAction = null;
 				animationSequence = null;
 				myController.animationEnded();
 			}
@@ -97,15 +80,44 @@ public class MapView extends javax.swing.JPanel {
 
 	public void animate(GameAction action)
 	{
-		animationAction = action;
+		if(currentAction != null && currentAction != action)
+		{
+			// Typically, this will be called either for a player action (in which case currentAction
+			//  should have been populated through UI interaction, or for an AI action, in which case
+			//  currentAction will still be null (because AIs don't use UIs).
+			System.out.println("WARNING! Animating an unexpected action!");
+		}
+
+		currentAction = action;
+
+		if(animationSequence != null)
+		{
+			animationSequence.cancel();
+			animationSequence = null;
+		}
+
+		switch(currentAction.getActionType())
+		{
+		case ATTACK:
+			animationSequence = new NobunagaBattleAnimation(currentAction);
+			break;
+		case CAPTURE:
+		case LOAD:
+		case WAIT:
+		case UNLOAD:
+			break;
+		case INVALID:
+			default:
+				System.out.println("WARNING! No action animation supported for type " + currentAction.getActionType());
+		}
 	}
 	public boolean isAnimating()
 	{
-		return animationAction != null;
+		return animationSequence != null;
 	}
 	public void cancelAnimation()
 	{
-		if(animationAction != null)
+		if(animationSequence != null)
 		{
 			animationSequence.cancel();
 		}
