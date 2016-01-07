@@ -17,9 +17,6 @@ public class MapController
 
   private InputMode inputMode;
 
-  // readied Action
-  GameAction currentAction = null;
-
   public MapController(GameInstance game, MapView view)
   {
     myGame = game;
@@ -96,7 +93,7 @@ public class MapController
         {
           if( unitActor.isTurnOver == false || unitActor.CO != myGame.activeCO )
           {
-            currentAction = new GameAction(unitActor); // Start building a GameAction
+            myView.currentAction = new GameAction(unitActor); // Start building a GameAction
             
             // Calculate movement options.
             changeInputMode(InputMode.MOVEMENT);
@@ -171,11 +168,11 @@ public class MapController
         }
         break;
       case ENTER:
-        if( inMoveableSpace && currentAction.getActor().CO == myGame.activeCO ) // If the selected space is within
+        if( inMoveableSpace && myView.currentAction.getActor().CO == myGame.activeCO ) // If the selected space is within
                                                                  // the reachable area
         {
           // Move the Unit to the location and display possible actions.
-          currentAction.setMoveLocation(myGame.getCursorX(), myGame.getCursorY());
+        	myView.currentAction.setMoveLocation(myGame.getCursorX(), myGame.getCursorY());
           changeInputMode(InputMode.ACTIONMENU);
         }
         break;
@@ -202,12 +199,12 @@ public class MapController
 		switch (input)
 		{
 		case ENTER:
-			currentAction.setActionType( (GameAction.ActionType) myView.currentMenu.getSelectedAction() );
+			myView.currentAction.setActionType( (GameAction.ActionType) myView.currentMenu.getSelectedAction() );
 
 	    // If the action is completely constructed, execute it, else get the missing info.
-	    if(currentAction.isReadyToExecute())
+	    if(myView.currentAction.isReadyToExecute())
 	    {
-	      if(currentAction.execute(myGame.gameMap))
+	      if(myView.currentAction.execute(myGame.gameMap))
 	      {
 	        changeInputMode(InputMode.MAP);
 	      }
@@ -255,18 +252,18 @@ public class MapController
         myGame.moveCursorRight();
         break;
       case ENTER:
-        if( inActionableSpace && (null != currentAction) )
+        if( inActionableSpace && (null != myView.currentAction) )
         {
-          currentAction.setActionLocation(myGame.getCursorX(), myGame.getCursorY());
+        	myView.currentAction.setActionLocation(myGame.getCursorX(), myGame.getCursorY());
 
-          if(currentAction.isReadyToExecute())
+          if(myView.currentAction.isReadyToExecute())
           {
             // Do the thing.
-            if(currentAction.execute(myGame.gameMap))
+            if(myView.currentAction.execute(myGame.gameMap))
             {
                 // Kick it off to the animator.
                 changeInputMode(InputMode.ANIMATION);
-                myView.animate(currentAction);
+                myView.animate(myView.currentAction);
             }
             else
             {
@@ -367,7 +364,7 @@ public class MapController
     switch (inputMode)
     {
       case ACTION:
-        Utils.findActionableLocations(currentAction.getActor(), currentAction.getActionType(), currentAction.getMoveX(), currentAction.getMoveY(), myGame.gameMap);
+        Utils.findActionableLocations(myView.currentAction.getActor(), myView.currentAction.getActionType(), myView.currentAction.getMoveX(), myView.currentAction.getMoveY(), myGame.gameMap);
         boolean set = false;
         for( int w = 0; w < myGame.gameMap.mapWidth; ++w )
         {
@@ -388,11 +385,11 @@ public class MapController
       case ACTIONMENU:
         myGame.gameMap.clearAllHighlights();
         myView.currentMenu = new GameMenu(GameMenu.MenuType.ACTION,
-            currentAction.getActor().getPossibleActions(myGame.gameMap, currentAction.getMoveX(), currentAction.getMoveY()));
-        myGame.setCursorLocation(currentAction.getMoveX(), currentAction.getMoveY());
+        		myView.currentAction.getActor().getPossibleActions(myGame.gameMap, myView.currentAction.getMoveX(), myView.currentAction.getMoveY()));
+        myGame.setCursorLocation(myView.currentAction.getMoveX(), myView.currentAction.getMoveY());
         break;
       case MAP:
-        currentAction = null;
+    	  myView.currentAction = null;
         myView.currentMenu = null;
         myGame.gameMap.clearAllHighlights();
         
@@ -403,7 +400,7 @@ public class MapController
 //        }
         break;
       case MOVEMENT:
-        Utils.findPossibleDestinations(currentAction.getActor(), myGame);
+        Utils.findPossibleDestinations(myView.currentAction.getActor(), myGame);
         myView.currentMenu = null;
         break;
       case PRODUCTION:
