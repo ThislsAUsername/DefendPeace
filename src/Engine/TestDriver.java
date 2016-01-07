@@ -36,6 +36,7 @@ public class TestDriver
     
     passed &= validate(testMovement(), "Movement test failed");
     passed &= validate(testTransport(), "Transport test failed");
+    passed &= validate(testCounter(), "Counter test failed");
     
     return passed;
   }
@@ -75,6 +76,26 @@ public class TestDriver
     // Clean up
     testMap.removeUnit(cargo);
     testMap.removeUnit(apc);
+    
+    return result;
+  }
+  
+  private static boolean testCounter()
+  {
+    Unit mechA = addUnit(testMap, testCo1, UnitEnum.MECH, 1, 1);
+    Unit infB = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 1, 2);
+    
+    // make him git rekt first attack
+    infB.HP = 5;
+    
+    // make the attack
+    new GameAction(mechA, 1, 1, GameAction.ActionType.ATTACK, 1, 2).execute(testMap);
+    
+    boolean result = validate(Math.abs(mechA.HP - 100) < .1, "  attacker lost or gained health.");
+    result &= validate(testMap.getLocation(1, 2).getResident() == null, "  Defender didn't die.");
+    
+    // Clean up
+    testMap.removeUnit(mechA);
     
     return result;
   }

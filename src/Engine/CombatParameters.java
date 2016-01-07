@@ -9,19 +9,21 @@ public class CombatParameters {
 	public GameMap map;
 	public boolean isCounter, canCounter;
 	
-	public CombatParameters(Unit pAttacker, Unit pDefender, GameMap pMap, boolean isCounter, boolean canCounter) {
+	public CombatParameters(Unit pAttacker, Unit pDefender, GameMap pMap) {
 		attacker		= pAttacker;
 		defender		= pDefender;
 		map 			= pMap;
-		this.isCounter	= isCounter;
-		this.canCounter = canCounter;
+		isCounter		= false;
+		// Only attacks at point-blank can be countered
+		int dist = Math.abs(attacker.x-defender.x) + Math.abs(attacker.y-defender.y);
+		canCounter = !isCounter && dist == 1 && defender.getDamage(attacker) != 0;
 		calculateParameters();
 	}
 	
 	public double calculateDamage() {
 //		[B*ACO/100+R]*(AHP/10)*[(200-(DCO+DTR*DHP))/100]
-		double overallPower = (baseDamage*attackFactor/100/*+Random factor?*/)*(attackerHP/100);
-		double overallDefense = ((200-(defenseFactor+terrainDefenseLevel*defenderHP/10))/100);
+		double overallPower = (baseDamage*attackFactor/100/*+Random factor?*/)*Math.ceil(attackerHP/10)/10;
+		double overallDefense = ((200-(defenseFactor+terrainDefenseLevel*Math.ceil(defenderHP/10)))/100);
 		return overallPower*overallDefense;
 	}
 	
