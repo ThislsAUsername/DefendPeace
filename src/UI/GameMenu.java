@@ -5,7 +5,7 @@ public class GameMenu {
 	private Enum options[];
 	public enum MenuType {ACTION, PRODUCTION, METAACTION};
 	public final MenuType menuType;
-	int selectedOption = 0;
+	private int selectedOption = 0;
 	
 	public GameMenu(MenuType menuType, Enum[] options)
 	{
@@ -39,11 +39,25 @@ public class GameMenu {
 		}
 	}
 	
+	/**
+	 * @return The current index of the cursor within the menu.
+	 */
+	public int getSelectionNumber()
+	{
+		return selectedOption;
+	}
+	
+	/**
+	 * @return The enum currently highlighted by the menu cursor.
+	 */
 	public Enum getSelectedAction()
 	{
 		return options[selectedOption];
 	}
 	
+	/**
+	 * @return An Enum[] of the current menu options.
+	 */
 	public Enum[] getOptions()
 	{
 		return options;
