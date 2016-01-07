@@ -152,9 +152,7 @@ public class GameAction
         {
           unitActor.isTurnOver = true;
           gameMap.moveUnit(unitActor, moveX, moveY);
-
-          boolean canCounter = unitTarget.getDamage(unitActor) != 0;
-          CombatEngine.resolveCombat(unitActor, unitTarget, gameMap, canCounter);
+          CombatEngine.resolveCombat(unitActor, unitTarget, gameMap);
           if( unitActor.HP <= 0 )
           {
             gameMap.removeUnit(unitActor);
