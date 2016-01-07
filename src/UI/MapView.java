@@ -20,6 +20,8 @@ public class MapView extends javax.swing.JPanel {
 	
 	private GameInstance myGame;
 	
+	public GameMenu currentMenu;
+
 	private MapArtist mapArtist;
 	private UnitArtist unitArtist;
 	private MenuArtist menuArtist;
@@ -40,7 +42,7 @@ public class MapView extends javax.swing.JPanel {
 
 		unitArtist = new FillRectUnitArtist(myGame);
 		mapArtist = new FillRectMapArtist(myGame);
-		menuArtist = new FillRectMenuArtist(myGame);
+		menuArtist = new FillRectMenuArtist(myGame, this);
 	}
 
 	public void setController(MapController controller)
@@ -83,7 +85,7 @@ public class MapView extends javax.swing.JPanel {
 				myController.animationEnded();
 			}
 		}
-		else if (myGame.currentMenu == null)
+		else if (currentMenu == null)
 		{
 			mapArtist.drawCursor(g);
 		}

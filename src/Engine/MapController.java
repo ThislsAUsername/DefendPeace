@@ -194,15 +194,15 @@ public class MapController
    */
   private void handleActionMenuInput(InputHandler.InputAction input)
 	{
-		if(myGame.currentMenu == null)
+		if(myView.currentMenu == null)
 		{
-			System.out.println("Error! MapController.handleActionMenuInput() called when myGame.currentMenu is null!");
+			System.out.println("Error! MapController.handleActionMenuInput() called when myView.currentMenu is null!");
 		}
 
 		switch (input)
 		{
 		case ENTER:
-			currentAction.setActionType( (GameAction.ActionType) myGame.currentMenu.getSelectedAction() );
+			currentAction.setActionType( (GameAction.ActionType) myView.currentMenu.getSelectedAction() );
 
 	    // If the action is completely constructed, execute it, else get the missing info.
 	    if(currentAction.isReadyToExecute())
@@ -229,7 +229,7 @@ public class MapController
 		case NO_ACTION:
 			break;
 			default:
-				myGame.currentMenu.handleMenuInput(input);
+				myView.currentMenu.handleMenuInput(input);
 		}
 	}
 
@@ -294,7 +294,7 @@ public class MapController
   private void handleProductionMenuInput(InputHandler.InputAction input)
   {
     System.out.println("handleProduction");
-    if( myGame.currentMenu == null )
+    if( myView.currentMenu == null )
     {
       System.out.println("Error! MapController.handleProductionMenuInput() called when currentMenu is null!");
     }
@@ -302,7 +302,7 @@ public class MapController
     switch (input)
     {
       case ENTER:
-        Units.UnitModel.UnitEnum unit = (Units.UnitModel.UnitEnum) myGame.currentMenu.getSelectedAction();
+        Units.UnitModel.UnitEnum unit = (Units.UnitModel.UnitEnum) myView.currentMenu.getSelectedAction();
 
         if( myGame.activeCO.getUnitModel(unit).moneyCost <= myGame.activeCO.money )
         {
@@ -324,13 +324,13 @@ public class MapController
       case NO_ACTION:
         break;
       default:
-        myGame.currentMenu.handleMenuInput(input);
+        myView.currentMenu.handleMenuInput(input);
     }
   }
 
   private void handleMetaActionMenuInput(InputHandler.InputAction input)
   {
-    if( myGame.currentMenu == null )
+    if( myView.currentMenu == null )
     {
       System.out.println("Error! MapController.handleMetaActionMenuInput() called when currentMenu is null!");
     }
@@ -338,7 +338,7 @@ public class MapController
     switch (input)
     {
       case ENTER:
-        MetaAction action = (MetaAction) myGame.currentMenu.getSelectedAction();
+        MetaAction action = (MetaAction) myView.currentMenu.getSelectedAction();
 
         if( action == MetaAction.END_TURN )
         {
@@ -352,7 +352,7 @@ public class MapController
       case NO_ACTION:
         break;
       default:
-        myGame.currentMenu.handleMenuInput(input);
+        myView.currentMenu.handleMenuInput(input);
     }
   }
 
@@ -383,17 +383,17 @@ public class MapController
           if( set )
             break;
         }
-        myGame.currentMenu = null;
+        myView.currentMenu = null;
         break;
       case ACTIONMENU:
         myGame.gameMap.clearAllHighlights();
-        myGame.currentMenu = new GameMenu(GameMenu.MenuType.ACTION,
+        myView.currentMenu = new GameMenu(GameMenu.MenuType.ACTION,
             currentAction.getActor().getPossibleActions(myGame.gameMap, currentAction.getMoveX(), currentAction.getMoveY()));
         myGame.setCursorLocation(currentAction.getMoveX(), currentAction.getMoveY());
         break;
       case MAP:
         currentAction = null;
-        myGame.currentMenu = null;
+        myView.currentMenu = null;
         myGame.gameMap.clearAllHighlights();
         
 //        if( unitActor != null )
@@ -404,17 +404,17 @@ public class MapController
         break;
       case MOVEMENT:
         Utils.findPossibleDestinations(currentAction.getActor(), myGame);
-        myGame.currentMenu = null;
+        myView.currentMenu = null;
         break;
       case PRODUCTION:
         myGame.gameMap.clearAllHighlights();
-        myGame.currentMenu = new GameMenu(GameMenu.MenuType.PRODUCTION,
+        myView.currentMenu = new GameMenu(GameMenu.MenuType.PRODUCTION,
             myGame.activeCO.getShoppingList());
         break;
       case METAACTION:
         myGame.gameMap.clearAllHighlights();
         MetaAction[] actions = { MetaAction.END_TURN };
-        myGame.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, actions);
+        myView.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, actions);
         break;
       case ANIMATION:
           myGame.gameMap.clearAllHighlights();

@@ -14,12 +14,14 @@ public class FillRectMenuArtist implements MenuArtist
 	private int mapViewHeight = MapView.mapViewHeight;
 
 	GameInstance myGame;
+	MapView myView;
 
 	public static final Color COLOR_CURSOR = new Color(253,171,77,200);
 	
-	public FillRectMenuArtist(GameInstance game)
+	public FillRectMenuArtist(GameInstance game, MapView view)
 	{
 		myGame = game;
+		myView = view;
 	}
 	
 	@Override
@@ -35,34 +37,34 @@ public class FillRectMenuArtist implements MenuArtist
 		g.setColor(Color.cyan); // inner fill
 		g.fillRect(menuBorderLeft+1, menuBorderTop+1, menuWidth-2, menuHeight-2);
 		String label;
-		switch (myGame.currentMenu.menuType) {
+		switch (myView.currentMenu.menuType) {
 		case PRODUCTION:
 			g.setColor(COLOR_CURSOR);
-			g.fillRect(menuBorderLeft+1, (myGame.currentMenu.getSelectionNumber()+1)*tileSizePx/2+menuBorderTop+4, menuWidth-2, tileSizePx/2);
+			g.fillRect(menuBorderLeft+1, (myView.currentMenu.getSelectionNumber()+1)*tileSizePx/2+menuBorderTop+4, menuWidth-2, tileSizePx/2);
 			g.setColor(Color.MAGENTA);
 			label = new String("Money: " + myGame.activeCO.money);
 			g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, tileSizePx/2+menuBorderTop);
 			g.setColor(Color.black);
-			for (int i = 0; i < myGame.currentMenu.getNumChoices(); i++) {
-				label = myGame.currentMenu.getOptions()[i].toString()+ ": " + myGame.activeCO.getUnitModel((UnitEnum) myGame.currentMenu.getOptions()[i]).moneyCost;
+			for (int i = 0; i < myView.currentMenu.getNumChoices(); i++) {
+				label = myView.currentMenu.getOptions()[i].toString()+ ": " + myGame.activeCO.getUnitModel((UnitEnum) myView.currentMenu.getOptions()[i]).moneyCost;
 				g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, (i+2)*tileSizePx/2+menuBorderTop);
 			}
 			break;
 		case ACTION:
 			g.setColor(COLOR_CURSOR);
-			g.fillRect(menuBorderLeft+1, (myGame.currentMenu.getSelectionNumber())*tileSizePx/2+menuBorderTop+4, menuWidth-2, tileSizePx/2);
+			g.fillRect(menuBorderLeft+1, (myView.currentMenu.getSelectionNumber())*tileSizePx/2+menuBorderTop+4, menuWidth-2, tileSizePx/2);
 			g.setColor(Color.black);
-			for (int i = 0; i < myGame.currentMenu.getNumChoices(); i++) {
-				label = myGame.currentMenu.getOptions()[i].toString();
+			for (int i = 0; i < myView.currentMenu.getNumChoices(); i++) {
+				label = myView.currentMenu.getOptions()[i].toString();
 				g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, (i+1)*tileSizePx/2+menuBorderTop);
 			}
 			break;
 		case METAACTION:
 			g.setColor(COLOR_CURSOR);
-			g.fillRect(menuBorderLeft+1, (myGame.currentMenu.getSelectionNumber())*tileSizePx/2+menuBorderTop+4, menuWidth-2, tileSizePx/2);
+			g.fillRect(menuBorderLeft+1, (myView.currentMenu.getSelectionNumber())*tileSizePx/2+menuBorderTop+4, menuWidth-2, tileSizePx/2);
 			g.setColor(Color.black);
-			for (int i = 0; i < myGame.currentMenu.getNumChoices(); i++) {
-				label = myGame.currentMenu.getOptions()[i].toString();
+			for (int i = 0; i < myView.currentMenu.getNumChoices(); i++) {
+				label = myView.currentMenu.getOptions()[i].toString();
 				g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, (i+1)*tileSizePx/2+menuBorderTop);
 			}
 			break;
