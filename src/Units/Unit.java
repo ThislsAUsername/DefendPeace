@@ -56,7 +56,7 @@ public class Unit {
 			captureProgress = 0;
 		}
 		if (HP < 9.99) {
-			if (canRepairOn(locus) && locus.getOwner() == CO) {
+			if (model.canRepairOn(locus) && locus.getOwner() == CO) {
 				int cost = model.moneyCost * Math.min(10 - getHP(), 2)/10; // 1/10th the cost to repair fully
 				if (CO.money >= cost) {
 					CO.money -= cost;
@@ -67,14 +67,6 @@ public class Unit {
 				}
 			}
 		}
-	}
-	
-	public boolean canRepairOn(Location locus) {
-		Terrains environs = locus.getEnvironment().terrainType;
-		boolean compatible = environs == Terrains.CITY ||
-							 environs == Terrains.FACTORY ||
-							 environs == Terrains.HQ;
-		return compatible;
 	}
 
 	public double getDamage(Unit target) {
