@@ -13,6 +13,6 @@ public class InfantryModel extends UnitModel {
 	private static final WeaponModel[] weapons = {new InfantryMGun()};
 	
 	public InfantryModel() {
-		super("Infantry", Units.UnitModel.UnitEnum.INFANTRY, 300, 99, 0, 3, moveType, actions, weapons);
+		super("Infantry", Units.UnitModel.UnitEnum.INFANTRY, 1000, 99, 0, 3, moveType, actions, weapons);
 	}
 }

@@ -14,7 +14,7 @@ public class MechModel extends UnitModel {
 	private static final WeaponModel[] weapons = {new MechZooka(), new MechMGun()};
 
 	public MechModel() {
-		super("Mech", Units.UnitModel.UnitEnum.MECH, 420, 99, 0, 2, moveType, actions, weapons);
+		super("Mech", Units.UnitModel.UnitEnum.MECH, 2500, 99, 0, 2, moveType, actions, weapons);
 		possibleActions = actions;
 	}
 }

@@ -63,8 +63,8 @@ public class Commander {
 			modifiers.remove(i);
 		}
 		
-		for (int j = 0; j < units.size(); j++) {
-			units.get(j).initTurn();
+		for (Unit unit :units) {
+			unit.initTurn(map.getLocation(unit.x, unit.y));
 		}
 	}
 

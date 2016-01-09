@@ -7,6 +7,7 @@ import CommandingOfficers.Commander;
 import Engine.CombatParameters;
 import Engine.GameAction;
 import Engine.Utils;
+import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.UnitModel.UnitEnum;
@@ -46,27 +47,43 @@ public class Unit {
 		if (model.holdingCapacity > 0)
 			heldUnits = new Vector<Unit>(model.holdingCapacity);
 	}
-	
-	public void initTurn()
-	{
+
+	public void initTurn(Location locus) {
 		isTurnOver = false;
 		fuel -= model.idleFuelBurn;
-		if (captureTarget != null && captureTarget.getResident() != this)
-		{
+		if (captureTarget != null && captureTarget.getResident() != this) {
 			captureTarget = null;
 			captureProgress = 0;
 		}
+		if (HP < 9.99) {
+			if (canRepairOn(locus) && locus.getOwner() == CO) {
+				int cost = model.moneyCost * Math.min(10 - getHP(), 2)/10; // 1/10th the cost to repair fully
+				if (CO.money >= cost) {
+					CO.money -= cost;
+					alterHP(2);
+				} else if (CO.money >= model.moneyCost/10) {
+					CO.money -= model.moneyCost/10;
+					alterHP(1);
+				}
+			}
+		}
 	}
 	
-  public double getDamage(Unit target)
-  {
-    return getDamage(target, x, y);
-  }
+	public boolean canRepairOn(Location locus) {
+		Terrains environs = locus.getEnvironment().terrainType;
+		boolean compatible = environs == Terrains.CITY ||
+							 environs == Terrains.FACTORY ||
+							 environs == Terrains.HQ;
+		return compatible;
+	}
+
+	public double getDamage(Unit target) {
+		return getDamage(target, x, y);
+	}
 
 	/**
 	 * @return how much base damage the target would take if this unit tried to attack it
 	 */
-	// TODO - Consider a canHitFrom function that could return true/false without doing damage calculations.
 	public double getDamage(Unit target, int xLoc, int yLoc)
 	{
 		if (weapons == null)
