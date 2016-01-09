@@ -54,7 +54,7 @@ public class Environment {
 		case FACTORY:
 			return 4;
 		case HQ:
-			return 5;
+			return 4;
 		case SHOAL:
 			return 0;
 		case WATER:
