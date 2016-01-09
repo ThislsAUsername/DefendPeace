@@ -86,12 +86,12 @@ public class TestDriver
     Unit infB = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 1, 2);
     
     // make him git rekt first attack
-    infB.HP = 5;
+    infB.damageHP(9.5);
     
     // make the attack
     new GameAction(mechA, 1, 1, GameAction.ActionType.ATTACK, 1, 2).execute(testMap);
     
-    boolean result = validate(Math.abs(mechA.HP - 100) < .1, "  attacker lost or gained health.");
+    boolean result = validate(mechA.getHP() == 10, "  attacker lost or gained health.");
     result &= validate(testMap.getLocation(1, 2).getResident() == null, "  Defender didn't die.");
     
     // Clean up

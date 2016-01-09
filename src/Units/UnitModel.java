@@ -39,7 +39,7 @@ public class UnitModel {
 		possibleActions = actions;
 		weaponModels = weapons;
 		
-		maxHP        = 100;
+		maxHP        = 10;
 		COstr        = 100;
 		COdef        = 100;
 		holdingCapacity = 0;

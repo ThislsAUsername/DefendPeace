@@ -138,18 +138,18 @@ public class GameAction
           unitActor.isTurnOver = true;
           gameMap.moveUnit(unitActor, moveX, moveY);
           CombatEngine.resolveCombat(unitActor, unitTarget, gameMap);
-          if( unitActor.HP <= 0 )
+          if( unitActor.getHP() <= 0 )
           {
             gameMap.removeUnit(unitActor);
             unitActor.CO.units.remove(unitActor);
           }
-          if( unitTarget.HP <= 0 )
+          if( unitTarget.getHP() <= 0 )
           {
             gameMap.removeUnit(unitTarget);
             unitTarget.CO.units.remove(unitTarget);
           }
-          System.out.println("unitActor hp: " + unitActor.HP);
-          System.out.println("unitTarget hp: " + unitTarget.HP);
+          System.out.println("unitActor hp: " + unitActor.getPreciseHP());
+          System.out.println("unitTarget hp: " + unitTarget.getPreciseHP());
         }
         break;
       case CAPTURE:
