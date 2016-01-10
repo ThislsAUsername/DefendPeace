@@ -1,7 +1,9 @@
-package UI;
+package UI.Art.Animation;
 
 import java.awt.Color;
 import java.awt.Graphics;
+
+import UI.MapView;
 
 import Engine.GameAction;
 

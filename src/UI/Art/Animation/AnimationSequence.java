@@ -1,4 +1,4 @@
-package UI;
+package UI.Art.Animation;
 
 import java.awt.Graphics;
 
