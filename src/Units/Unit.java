@@ -7,7 +7,6 @@ import CommandingOfficers.Commander;
 import Engine.CombatParameters;
 import Engine.GameAction;
 import Engine.Utils;
-import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.UnitModel.UnitEnum;
@@ -55,14 +54,16 @@ public class Unit {
 			captureTarget = null;
 			captureProgress = 0;
 		}
-		if (HP < 9.99) {
+		if (HP < model.maxHP) {
 			if (model.canRepairOn(locus) && locus.getOwner() == CO) {
-				int cost = model.moneyCost * Math.min(10 - getHP(), 2)/10; // 1/10th the cost to repair fully
-				if (CO.money >= cost) {
-					CO.money -= cost;
+				int neededHP = Math.min(model.maxHP - getHP(), 2); // will be 0, 1, 2
+				double proportionalCost = model.moneyCost/model.maxHP;
+				if (CO.money >= neededHP * proportionalCost) {
+					CO.money -= neededHP * proportionalCost;
 					alterHP(2);
-				} else if (CO.money >= model.moneyCost/10) {
-					CO.money -= model.moneyCost/10;
+				} else if (CO.money >= proportionalCost) {
+					// case will only be used if neededHP is 2
+					CO.money -= proportionalCost;
 					alterHP(1);
 				}
 			}

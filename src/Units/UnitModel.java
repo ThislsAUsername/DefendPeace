@@ -25,7 +25,7 @@ public class UnitModel {
 	public Terrains[] healableHabs;
 	public WeaponModel[] weaponModels;
 
-	public double maxHP;
+	public int maxHP;
 	public int holdingCapacity;
 	public Vector<UnitEnum> holdables;
 	private int COstr;
