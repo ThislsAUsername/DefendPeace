@@ -22,7 +22,7 @@ public class Unit {
 	private Location captureTarget;
 	public Commander CO;
 	public boolean isTurnOver;
-	public double HP;
+	private double HP;
 	public Weapon[] weapons;
 
 	public Unit(Commander co, UnitModel um)
@@ -100,6 +100,20 @@ public class Unit {
 		weapons[i].fire();
 	}
 	
+	public int getHP() {
+		return (int) Math.ceil(HP);
+	}
+	public double getPreciseHP() {
+		return HP;
+	}
+
+	public void damageHP(double damage) {
+		HP -= damage;
+	}
+	public void alterHP(int change) {
+		HP = Math.max(1, Math.min(10, getHP() + change));
+	}
+
 	public void capture(Location target)
 	{
 		if (!target.isCaptureable())
@@ -113,8 +127,8 @@ public class Unit {
 			captureTarget = target;
 			captureProgress = 0;
 		}
-		captureProgress += HP;
-		if (captureProgress >= 200)
+		captureProgress += getHP();
+		if (captureProgress >= 20)
 		{
 			target.setOwner(CO);
 			captureProgress = 0;

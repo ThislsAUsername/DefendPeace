@@ -22,9 +22,9 @@ public class CombatParameters {
 	
 	public double calculateDamage() {
 //		[B*ACO/100+R]*(AHP/10)*[(200-(DCO+DTR*DHP))/100]
-		double overallPower = (baseDamage*attackFactor/100/*+Random factor?*/)*Math.ceil(attackerHP/10)/10;
-		double overallDefense = ((200-(defenseFactor+terrainDefenseLevel*Math.ceil(defenderHP/10)))/100);
-		return overallPower*overallDefense;
+		double overallPower = (baseDamage*attackFactor/100/*+Random factor?*/)*attackerHP/10;
+		double overallDefense = ((200-(defenseFactor+terrainDefenseLevel*defenderHP))/100);
+		return overallPower*overallDefense/10; // original formula was % damage, now it must be HP of damage
 	}
 	
 	/**
@@ -44,9 +44,9 @@ public class CombatParameters {
 	private void calculateParameters() {
 		baseDamage			= attacker.getDamage(defender);
 		attackFactor		= attacker.model.getDamageRatio();
-		attackerHP			= attacker.HP;
+		attackerHP			= attacker.getHP();
 		defenseFactor		= defender.model.getDefenseRatio();
-		defenderHP			= defender.HP;
+		defenderHP			= defender.getHP();
 		terrainDefenseLevel	= map.getEnvironment(defender.x, defender.y).getDefLevel();
 	}
 }
