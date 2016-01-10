@@ -22,7 +22,7 @@ public class Unit {
 	private Location captureTarget;
 	public Commander CO;
 	public boolean isTurnOver;
-	public double HP;
+	private double HP;
 	public Weapon[] weapons;
 
 	public Unit(Commander co, UnitModel um)
@@ -46,27 +46,37 @@ public class Unit {
 		if (model.holdingCapacity > 0)
 			heldUnits = new Vector<Unit>(model.holdingCapacity);
 	}
-	
-	public void initTurn()
-	{
+
+	public void initTurn(Location locus) {
 		isTurnOver = false;
 		fuel -= model.idleFuelBurn;
-		if (captureTarget != null && captureTarget.getResident() != this)
-		{
+		if (captureTarget != null && captureTarget.getResident() != this) {
 			captureTarget = null;
 			captureProgress = 0;
 		}
+		if (HP < model.maxHP) {
+			if (model.canRepairOn(locus) && locus.getOwner() == CO) {
+				int neededHP = Math.min(model.maxHP - getHP(), 2); // will be 0, 1, 2
+				double proportionalCost = model.moneyCost/model.maxHP;
+				if (CO.money >= neededHP * proportionalCost) {
+					CO.money -= neededHP * proportionalCost;
+					alterHP(2);
+				} else if (CO.money >= proportionalCost) {
+					// case will only be used if neededHP is 2
+					CO.money -= proportionalCost;
+					alterHP(1);
+				}
+			}
+		}
 	}
-	
-  public double getDamage(Unit target)
-  {
-    return getDamage(target, x, y);
-  }
+
+	public double getDamage(Unit target) {
+		return getDamage(target, x, y);
+	}
 
 	/**
 	 * @return how much base damage the target would take if this unit tried to attack it
 	 */
-	// TODO - Consider a canHitFrom function that could return true/false without doing damage calculations.
 	public double getDamage(Unit target, int xLoc, int yLoc)
 	{
 		if (weapons == null)
@@ -100,6 +110,20 @@ public class Unit {
 		weapons[i].fire();
 	}
 	
+	public int getHP() {
+		return (int) Math.ceil(HP);
+	}
+	public double getPreciseHP() {
+		return HP;
+	}
+
+	public void damageHP(double damage) {
+		HP -= damage;
+	}
+	public void alterHP(int change) {
+		HP = Math.max(1, Math.min(10, getHP() + change));
+	}
+
 	public void capture(Location target)
 	{
 		if (!target.isCaptureable())
@@ -113,8 +137,8 @@ public class Unit {
 			captureTarget = target;
 			captureProgress = 0;
 		}
-		captureProgress += HP;
-		if (captureProgress >= 200)
+		captureProgress += getHP();
+		if (captureProgress >= 20)
 		{
 			target.setOwner(CO);
 			captureProgress = 0;

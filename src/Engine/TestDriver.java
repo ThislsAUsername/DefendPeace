@@ -37,6 +37,7 @@ public class TestDriver
     passed &= validate(testMovement(), "Movement test failed");
     passed &= validate(testTransport(), "Transport test failed");
     passed &= validate(testCounter(), "Counter test failed");
+    passed &= validate(testHealing(), "Healing test failed");
     
     return passed;
   }
@@ -86,16 +87,47 @@ public class TestDriver
     Unit infB = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 1, 2);
     
     // make him git rekt first attack
-    infB.HP = 5;
+    infB.damageHP(9.5);
     
     // make the attack
     new GameAction(mechA, 1, 1, GameAction.ActionType.ATTACK, 1, 2).execute(testMap);
     
-    boolean result = validate(Math.abs(mechA.HP - 100) < .1, "  attacker lost or gained health.");
+    boolean result = validate(mechA.getPreciseHP() == 10, "  attacker lost or gained health.");
     result &= validate(testMap.getLocation(1, 2).getResident() == null, "  Defender didn't die.");
     
     // Clean up
     testMap.removeUnit(mechA);
+    
+    return result;
+  }
+  
+  private static boolean testHealing()
+  {
+    Unit victim = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 1, 4);
+    testCo1.money = 999; // 999\200 = 4, plus one healing after that = 5, plus another iteration to check poverty conditions = 6 iterations
+    int lastMoney, lastHP, iterations = 0; // tracking vars
+    boolean result = true; // start optimistic
+
+    while(true)
+    {
+    	iterations++;
+	    victim.damageHP(2.5); // hurt the victim
+	    lastMoney = testCo1.money; // track money
+	    lastHP = victim.getHP(); // track HP
+	    victim.initTurn(testMap.getLocation(1, 4)); // Make the unit try to heal itself
+	    // if the unit was healed or we were too poor, we're good
+	    result &= validate(victim.getHP() > lastHP || lastMoney < 100, "  Unit was not healed when he should have been.");
+	    // if the unit was healed AND we were too poor, that's bad
+	    result &= validate(!(victim.getHP() > lastHP && lastMoney < 100), "  Unit was healed when he should not have been.");
+	    if (victim.getHP() < 9) // Test continues until unit fails to heal itself due to monetary drain.
+	    	break;
+    }
+
+    // if the loop went the wrong number of times, that's bad
+    result &= validate(iterations == 6, "  Heal test iterated an improper number of times.");
+    
+    // Clean up
+    testMap.removeUnit(victim);
     
     return result;
   }

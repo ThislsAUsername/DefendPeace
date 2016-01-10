@@ -21,7 +21,7 @@ public class CombatEngine {
 		for(int i = 0; i < modifiers.size(); i++) {
 			modifiers.get(i).alterCombat(params);
 		}
-		params.defender.HP -= params.calculateDamage();
+		params.defender.damageHP(params.calculateDamage());
 		params.attacker.fire(params); // Lets the unit know that it has actually fired a shot.
 		if (params.canCounter) {
 			params.swap();
@@ -30,7 +30,7 @@ public class CombatEngine {
 			}
 			if (params.attackerHP > 0) // stops counterattacks from dead units unless a CombatModifier allows it
 			{
-				params.defender.HP -= params.calculateDamage();
+				params.defender.damageHP(params.calculateDamage());
 				params.attacker.fire(params);
 			}
 		}

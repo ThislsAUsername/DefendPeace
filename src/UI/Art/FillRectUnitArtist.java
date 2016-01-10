@@ -45,7 +45,7 @@ public class FillRectUnitArtist implements UnitArtist
 	
 	private void drawUnit(Graphics g, Unit unit)
 	{
-		Integer health = (int)Math.ceil(unit.HP/10);
+		Integer health = unit.getHP();
 		int offset = (int)(tileSizePx * 0.25);
 		int length = tileSizePx - offset;
 		g.setColor(Color.BLACK);
