@@ -9,10 +9,13 @@ import UI.Art.FillRectUnitArtist;
 import UI.Art.MapArtist;
 import UI.Art.MenuArtist;
 import UI.Art.UnitArtist;
+import UI.Art.Animation.AnimationSequence;
+import UI.Art.Animation.NobunagaBattleAnimation;
 
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.MapController;
+import Engine.Path;
 
 public class MapView extends javax.swing.JPanel {
 
@@ -22,6 +25,9 @@ public class MapView extends javax.swing.JPanel {
 	
 	public GameMenu currentMenu;
 	public GameAction currentAction = null;
+	public Path currentMovePath = null;
+
+	private double unitMoveSpeedMSPerTile = 100;
 
 	private MapArtist mapArtist;
 	private UnitArtist unitArtist;
@@ -40,7 +46,7 @@ public class MapView extends javax.swing.JPanel {
 		myGame = game;
 		setPreferredSize(new Dimension(mapViewWidth, mapViewHeight));
 
-		unitArtist = new FillRectUnitArtist(myGame);
+		unitArtist = new FillRectUnitArtist(myGame, this);
 		mapArtist = new FillRectMapArtist(myGame);
 		menuArtist = new FillRectMenuArtist(myGame, this);
 	}
@@ -78,6 +84,23 @@ public class MapView extends javax.swing.JPanel {
 		}
 	}
 
+	public void buildMovePath(int x, int y)
+	{
+		if(null == currentMovePath)
+		{
+			currentMovePath = new Path();
+		}
+
+		// TODO: If the move is a backtrack, remove a point instead of adding one.
+		currentMovePath.addWaypoint(x, y, unitMoveSpeedMSPerTile);
+
+		// If the currentAction now has a move position, animate going there.
+		if(currentAction.getMoveX() > -1 && currentAction.getMoveY() > -1)
+		{
+			currentMovePath.start();
+		}
+	}
+
 	public void animate(GameAction action)
 	{
 		if(currentAction != null && currentAction != action)
@@ -90,6 +113,7 @@ public class MapView extends javax.swing.JPanel {
 
 		currentAction = action;
 
+		// If we have a previous animation in progress, cancel it to start the new one.
 		if(animationSequence != null)
 		{
 			animationSequence.cancel();
@@ -109,6 +133,12 @@ public class MapView extends javax.swing.JPanel {
 		case INVALID:
 			default:
 				System.out.println("WARNING! No action animation supported for type " + currentAction.getActionType());
+		}
+
+		if(animationSequence == null)
+		{
+			// Animation for this action is not supported. Just let the controller know.
+			myController.animationEnded();
 		}
 	}
 	public boolean isAnimating()

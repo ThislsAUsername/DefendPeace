@@ -94,7 +94,7 @@ public class MapController
           if( unitActor.isTurnOver == false || unitActor.CO != myGame.activeCO )
           {
             myView.currentAction = new GameAction(unitActor); // Start building a GameAction
-            
+
             // Calculate movement options.
             changeInputMode(InputMode.MOVEMENT);
           }
@@ -131,6 +131,7 @@ public class MapController
     switch (input)
     {
       case UP:
+        myView.buildMovePath(myGame.getCursorX(), myGame.getCursorY());
         myGame.moveCursorUp();
         // System.out.println("inMoveableSpace = " + inMoveableSpace);
         // Make sure we don't overshoot the reachable tiles by accident.
@@ -141,6 +142,7 @@ public class MapController
         }
         break;
       case DOWN:
+        myView.buildMovePath(myGame.getCursorX(), myGame.getCursorY());
         myGame.moveCursorDown();
         // Make sure we don't overshoot the reachable space by accident.
         if( inMoveableSpace && InputHandler.isDownHeld()
@@ -150,6 +152,7 @@ public class MapController
         }
         break;
       case LEFT:
+        myView.buildMovePath(myGame.getCursorX(), myGame.getCursorY());
         myGame.moveCursorLeft();
         // Make sure we don't overshoot the reachable space by accident.
         if( inMoveableSpace && InputHandler.isLeftHeld()
@@ -159,6 +162,7 @@ public class MapController
         }
         break;
       case RIGHT:
+        myView.buildMovePath(myGame.getCursorX(), myGame.getCursorY());
         myGame.moveCursorRight();
         // Make sure we don't overshoot the reachable space by accident.
         if( inMoveableSpace && InputHandler.isRightHeld()
@@ -172,7 +176,8 @@ public class MapController
                                                                  // the reachable area
         {
           // Move the Unit to the location and display possible actions.
-        	myView.currentAction.setMoveLocation(myGame.getCursorX(), myGame.getCursorY());
+          myView.currentAction.setMoveLocation(myGame.getCursorX(), myGame.getCursorY());
+          myView.buildMovePath(myGame.getCursorX(), myGame.getCursorY());
           changeInputMode(InputMode.ACTIONMENU);
         }
         break;
@@ -389,7 +394,8 @@ public class MapController
         myGame.setCursorLocation(myView.currentAction.getMoveX(), myView.currentAction.getMoveY());
         break;
       case MAP:
-    	  myView.currentAction = null;
+        myView.currentAction = null;
+        myView.currentMovePath = null;
         myView.currentMenu = null;
         myGame.gameMap.clearAllHighlights();
         
@@ -401,7 +407,13 @@ public class MapController
         break;
       case MOVEMENT:
         Utils.findPossibleDestinations(myView.currentAction.getActor(), myGame);
+        if(null != myView.currentAction)
+        {
+            myView.currentAction.setMoveLocation(-1, -1); // No destination chosen yet.
+        }
+        myView.currentMovePath = null;
         myView.currentMenu = null;
+        myGame.setCursorLocation(myView.currentAction.getActor().x, myView.currentAction.getActor().y);
         break;
       case PRODUCTION:
         myGame.gameMap.clearAllHighlights();
