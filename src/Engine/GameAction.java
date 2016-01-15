@@ -140,13 +140,13 @@ public class GameAction
     }
 
     // Populate our PriorState so folks can backtrack later.
-    priorState = this.new PriorState((int)Math.ceil(unitActor.HP), unitActor.x, unitActor.y);
+    priorState = this.new PriorState((int)Math.ceil(unitActor.getHP()), unitActor.x, unitActor.y);
 
     switch(actionType)
     {
       case ATTACK:
         Unit unitTarget = gameMap.getLocation(actX, actY).getResident();
-        priorState.setTargetHP((int)Math.ceil(unitTarget.HP));
+        priorState.setTargetHP((int)Math.ceil(unitTarget.getHP()));
 
         if( unitTarget != null && unitActor.getDamage(unitTarget, moveX, moveY) != 0 )
         {
