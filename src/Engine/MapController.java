@@ -1,6 +1,9 @@
 package Engine;
 
+import java.util.ArrayList;
+
 import Terrain.Environment;
+import Terrain.GameMap;
 import Terrain.Location;
 import UI.InputHandler;
 import UI.GameMenu;
@@ -16,6 +19,8 @@ public class MapController
   public enum MetaAction {END_TURN};
 
   private InputMode inputMode;
+
+  private Path currentMovePath;
 
   public MapController(GameInstance game, MapView view)
   {
@@ -131,7 +136,7 @@ public class MapController
     switch (input)
     {
       case UP:
-        myView.buildMovePath(myGame.getCursorX(), myGame.getCursorY());
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         myGame.moveCursorUp();
         // System.out.println("inMoveableSpace = " + inMoveableSpace);
         // Make sure we don't overshoot the reachable tiles by accident.
@@ -142,7 +147,7 @@ public class MapController
         }
         break;
       case DOWN:
-        myView.buildMovePath(myGame.getCursorX(), myGame.getCursorY());
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         myGame.moveCursorDown();
         // Make sure we don't overshoot the reachable space by accident.
         if( inMoveableSpace && InputHandler.isDownHeld()
@@ -152,7 +157,7 @@ public class MapController
         }
         break;
       case LEFT:
-        myView.buildMovePath(myGame.getCursorX(), myGame.getCursorY());
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         myGame.moveCursorLeft();
         // Make sure we don't overshoot the reachable space by accident.
         if( inMoveableSpace && InputHandler.isLeftHeld()
@@ -162,7 +167,7 @@ public class MapController
         }
         break;
       case RIGHT:
-        myView.buildMovePath(myGame.getCursorX(), myGame.getCursorY());
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         myGame.moveCursorRight();
         // Make sure we don't overshoot the reachable space by accident.
         if( inMoveableSpace && InputHandler.isRightHeld()
@@ -176,8 +181,9 @@ public class MapController
                                                                  // the reachable area
         {
           // Move the Unit to the location and display possible actions.
-          myView.currentAction.setMoveLocation(myGame.getCursorX(), myGame.getCursorY());
-          myView.buildMovePath(myGame.getCursorX(), myGame.getCursorY());
+          buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
+          currentMovePath.start(); // start the unit running
+          myView.currentAction.setMovePath(currentMovePath);
           changeInputMode(InputMode.ACTIONMENU);
         }
         break;
@@ -359,9 +365,7 @@ public class MapController
   }
 
   /**
-   * Updates the InputMode and the GameInstance's current menu to keep them in sync.
-   * 
-   * NOTE: This function assumes that unitActor is set correctly before it is called.
+   * Updates the InputMode and the current menu to keep them in sync.
    */
   private void changeInputMode(InputMode input)
   {
@@ -395,7 +399,6 @@ public class MapController
         break;
       case MAP:
         myView.currentAction = null;
-        myView.currentMovePath = null;
         myView.currentMenu = null;
         myGame.gameMap.clearAllHighlights();
         
@@ -409,11 +412,11 @@ public class MapController
         Utils.findPossibleDestinations(myView.currentAction.getActor(), myGame);
         if(null != myView.currentAction)
         {
-            myView.currentAction.setMoveLocation(-1, -1); // No destination chosen yet.
+          myView.currentAction.setMovePath(null); // No destination chosen yet.
         }
-        myView.currentMovePath = null;
         myView.currentMenu = null;
         myGame.setCursorLocation(myView.currentAction.getActor().x, myView.currentAction.getActor().y);
+        currentMovePath = null;
         break;
       case PRODUCTION:
         myGame.gameMap.clearAllHighlights();
@@ -432,6 +435,19 @@ public class MapController
         System.out.println("WARNING! MapController.changeInputMode was given an invalid InputMode "
             + inputMode);
     }
+  }
+
+  public void buildMovePath(int x, int y, GameMap map)
+  {
+    if(null == currentMovePath)
+    {
+      currentMovePath = new Path();
+    }
+
+    // TODO: If the move is a backtrack, remove a point instead of adding one.
+    currentMovePath.addWaypoint(x, y, myView.getMapUnitMoveSpeed());
+
+    // TODO: If the move path goes beyond range or is overly complex, fix it.
   }
 
   public void animationEnded()

@@ -1,5 +1,7 @@
 package Engine;
 
+import java.util.ArrayList;
+
 import Terrain.GameMap;
 import Units.Unit;
 
@@ -17,6 +19,7 @@ public class GameAction
   private Unit unitActor = null;
   private ActionType actionType;
 
+  private Path movePath = null;
   private int moveX;
   private int moveY;
   private int actX;
@@ -35,6 +38,7 @@ public class GameAction
     this(unit, mx, my, action, -1, -1);
   }
 
+  // TODO: GameAction should accept a Path in the constructor, rather than mx and my.
   public GameAction(Unit unit, int mx, int my, ActionType action, int ax, int ay)
   {
     unitActor = unit;
@@ -60,12 +64,25 @@ public class GameAction
     return actionType;
   }
   
-  public void setMoveLocation(int x, int y)
+  public void setMovePath(Path path)
   {
-    moveX = x;
-    moveY = y;
+    movePath = path;
+    if(null != path && path.getPathLength() > 0)
+    {
+      moveX = (int)path.getEnd().xCoord;
+      moveY = (int)path.getEnd().yCoord;
+    }
+    else
+    {
+      moveX = -1;
+      moveY = -1;
+    }
   }
-  
+
+  public Path getMovePath()
+  {
+	  return movePath;
+  }
   public int getMoveX()
   {
     return moveX;
@@ -141,6 +158,8 @@ public class GameAction
 
     // Populate our PriorState so folks can backtrack later.
     priorState = this.new PriorState((int)Math.ceil(unitActor.getHP()), unitActor.x, unitActor.y);
+
+    // TODO: Move to the new location, checking for ambushes in fog of war.
 
     switch(actionType)
     {

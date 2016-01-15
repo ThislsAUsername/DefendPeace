@@ -25,7 +25,6 @@ public class MapView extends javax.swing.JPanel {
 	
 	public GameMenu currentMenu;
 	public GameAction currentAction = null;
-	public Path currentMovePath = null;
 
 	private double unitMoveSpeedMSPerTile = 100;
 
@@ -84,23 +83,6 @@ public class MapView extends javax.swing.JPanel {
 		}
 	}
 
-	public void buildMovePath(int x, int y)
-	{
-		if(null == currentMovePath)
-		{
-			currentMovePath = new Path();
-		}
-
-		// TODO: If the move is a backtrack, remove a point instead of adding one.
-		currentMovePath.addWaypoint(x, y, unitMoveSpeedMSPerTile);
-
-		// If the currentAction now has a move position, animate going there.
-		if(currentAction.getMoveX() > -1 && currentAction.getMoveY() > -1)
-		{
-			currentMovePath.start();
-		}
-	}
-
 	public void animate(GameAction action)
 	{
 		if(currentAction != null && currentAction != action)
@@ -151,5 +133,9 @@ public class MapView extends javax.swing.JPanel {
 		{
 			animationSequence.cancel();
 		}
+	}
+	public double getMapUnitMoveSpeed()
+	{
+		return unitMoveSpeedMSPerTile;
 	}
 }

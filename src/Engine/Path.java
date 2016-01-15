@@ -141,7 +141,28 @@ public class Path {
 
 		return new XYCoord(pathX, pathY);
 	}
-	
+
+	public int getPathLength()
+	{
+		return waypoints.size();
+	}
+
+	public XYCoord getEnd()
+	{
+		XYCoord ret;
+		if(waypoints.size() > 0)
+		{
+			PathNode p = waypoints.get(waypoints.size() - 1);
+			ret = new XYCoord(p.x, p.y);
+		}
+		else
+		{
+			ret = new XYCoord(-1, -1);
+		}
+
+		return ret;
+	}
+
 	private static class PathNode
 	{
 		public int x;

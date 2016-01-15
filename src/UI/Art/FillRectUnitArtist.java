@@ -58,18 +58,17 @@ public class FillRectUnitArtist implements UnitArtist
 		// Figure out where to draw the focused unit.
 		if(null != currentActor)
 		{
-			Path actorPath = myView.currentMovePath;
+			double drawX = currentActor.x;
+			double drawY = currentActor.y;
 
-			if(actorPath == null)
+			Path unitPath = myView.currentAction.getMovePath();
+			if(null != unitPath)
 			{
-				// No move command under consideration. Draw unit at current location.
-				drawUnit(g, currentActor);
+				XYCoord coord = unitPath.getPosition();
+				drawX = coord.xCoord;
+				drawY = coord.yCoord;
 			}
-			else
-			{
-				XYCoord pos = actorPath.getPosition();
-				drawUnit(g, currentActor, pos.xCoord, pos.yCoord);
-			}
+			drawUnit(g, currentActor, drawX, drawY);
 		}
 	}
 
