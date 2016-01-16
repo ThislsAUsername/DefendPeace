@@ -444,7 +444,17 @@ public class MapController
       currentMovePath = new Path();
     }
 
-    // TODO: If the move is a backtrack, remove a point instead of adding one.
+    // If the new point already exists on the path, cut the extraneous points out.
+    for(int i = 0; i < currentMovePath.getPathLength(); ++i)
+    {
+		if(currentMovePath.getWaypoint(i).x == x &&
+		   currentMovePath.getWaypoint(i).y == y)
+		{
+			currentMovePath.snip(i);
+			break;
+		}
+    }
+
     currentMovePath.addWaypoint(x, y, MapView.getMapUnitMoveSpeed());
 
     if(!Utils.isPathValid(myView.currentAction.getActor(), currentMovePath, myGame.gameMap))

@@ -182,4 +182,15 @@ public class Path {
 			this.timeMS = timeMS;
 		}
 	}
+
+	/**
+	 * The waypoint at the indicated index, and any that come after, are removed from the path.
+	 */
+	public void snip(int newLastPoint)
+	{
+		while(newLastPoint < waypoints.size())
+		{
+			waypoints.remove(waypoints.size()-1);
+		}
+	}
 }
