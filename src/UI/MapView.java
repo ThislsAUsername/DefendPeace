@@ -16,6 +16,7 @@ import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.MapController;
 import Engine.Path;
+import Engine.Path.PathNode;
 
 public class MapView extends javax.swing.JPanel {
 
@@ -76,6 +77,11 @@ public class MapView extends javax.swing.JPanel {
 		else if (currentMenu == null)
 		{
 			mapArtist.drawCursor(g);
+
+			if(myController.getContemplatedMove() != null)
+			{
+				mapArtist.drawMovePath(g, myController.getContemplatedMove());
+			}
 		}
 		else
 		{

@@ -183,6 +183,7 @@ public class MapController
           // Move the Unit to the location and display possible actions.
           currentMovePath.start(); // start the unit running
           myView.currentAction.setMovePath(currentMovePath);
+          currentMovePath = null;
           changeInputMode(InputMode.ACTIONMENU);
         }
         break;
@@ -462,6 +463,11 @@ public class MapController
       // The currently-built path is invalid. Try to generate a new one (may still return null).
       currentMovePath = Utils.findShortestPath(myView.currentAction.getActor(), x, y, myGame.gameMap);
     }
+  }
+
+  public Path getContemplatedMove()
+  {
+	  return currentMovePath;
   }
 
   public void animationEnded()
