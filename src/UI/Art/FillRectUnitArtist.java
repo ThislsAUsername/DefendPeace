@@ -3,7 +3,6 @@ package UI.Art;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.XYCoord;

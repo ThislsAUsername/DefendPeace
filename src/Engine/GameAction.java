@@ -1,7 +1,5 @@
 package Engine;
 
-import java.util.ArrayList;
-
 import Terrain.GameMap;
 import Units.Unit;
 

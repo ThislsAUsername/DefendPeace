@@ -2,7 +2,6 @@ package Engine;
 
 import Terrain.GameMap;
 import Terrain.Location;
-import UI.GameMenu;
 
 public class GameInstance {
 	public Terrain.GameMap gameMap;

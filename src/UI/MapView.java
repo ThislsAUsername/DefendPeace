@@ -15,8 +15,6 @@ import UI.Art.Animation.NobunagaBattleAnimation;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.MapController;
-import Engine.Path;
-import Engine.Path.PathNode;
 
 public class MapView extends javax.swing.JPanel {
 
