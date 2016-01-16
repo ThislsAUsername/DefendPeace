@@ -95,26 +95,9 @@ public class Utils {
 			{
 				myGame.gameMap.getLocation(currentNode.x, currentNode.y).setHighlight(true);
 			}
-			// right
-			if (checkSpace(unit, myGame.gameMap, currentNode, currentNode.x+1, currentNode.y, movesLeftGrid))
-			{
-				searchQueue.add(new SearchNode(currentNode.x+1, currentNode.y));
-			}
-			// left
-			if (checkSpace(unit, myGame.gameMap, currentNode, currentNode.x-1, currentNode.y, movesLeftGrid))
-			{
-				searchQueue.add(new SearchNode(currentNode.x-1, currentNode.y));
-			}
-			// down
-			if (checkSpace(unit, myGame.gameMap, currentNode, currentNode.x, currentNode.y+1, movesLeftGrid))
-			{
-				searchQueue.add(new SearchNode(currentNode.x, currentNode.y+1));
-			}
-			// up
-			if (checkSpace(unit, myGame.gameMap, currentNode, currentNode.x, currentNode.y-1, movesLeftGrid))
-			{
-				searchQueue.add(new SearchNode(currentNode.x, currentNode.y-1));
-			}
+
+      expandSearchNode(unit, myGame.gameMap, currentNode, searchQueue, movesLeftGrid);
+
 			currentNode = null;
 		}
 	}
@@ -218,26 +201,8 @@ public class Utils {
 				break;
 			}
 
-			// right
-			if (checkSpace(unit, map, currentNode, currentNode.x+1, currentNode.y, movesLeftGrid))
-			{
-				searchQueue.add(new SearchNode(currentNode.x+1, currentNode.y, currentNode));
-			}
-			// left
-			if (checkSpace(unit, map, currentNode, currentNode.x-1, currentNode.y, movesLeftGrid))
-			{
-				searchQueue.add(new SearchNode(currentNode.x-1, currentNode.y, currentNode));
-			}
-			// down
-			if (checkSpace(unit, map, currentNode, currentNode.x, currentNode.y+1, movesLeftGrid))
-			{
-				searchQueue.add(new SearchNode(currentNode.x, currentNode.y+1, currentNode));
-			}
-			// up
-			if (checkSpace(unit, map, currentNode, currentNode.x, currentNode.y-1, movesLeftGrid))
-			{
-				searchQueue.add(new SearchNode(currentNode.x, currentNode.y-1, currentNode));
-			}
+			expandSearchNode(unit, map, currentNode, searchQueue, movesLeftGrid); 
+
 			currentNode = null;
 		}
 
@@ -255,6 +220,30 @@ public class Utils {
 
 		return sPath;
 	}
+
+  private static void expandSearchNode(Unit unit, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue, int[][] movesLeftGrid)
+  {
+    // right
+    if (checkSpace(unit, map, currentNode, currentNode.x+1, currentNode.y, movesLeftGrid))
+    {
+      searchQueue.add(new SearchNode(currentNode.x+1, currentNode.y, currentNode));
+    }
+    // left
+    if (checkSpace(unit, map, currentNode, currentNode.x-1, currentNode.y, movesLeftGrid))
+    {
+      searchQueue.add(new SearchNode(currentNode.x-1, currentNode.y, currentNode));
+    }
+    // down
+    if (checkSpace(unit, map, currentNode, currentNode.x, currentNode.y+1, movesLeftGrid))
+    {
+      searchQueue.add(new SearchNode(currentNode.x, currentNode.y+1, currentNode));
+    }
+    // up
+    if (checkSpace(unit, map, currentNode, currentNode.x, currentNode.y-1, movesLeftGrid))
+    {
+      searchQueue.add(new SearchNode(currentNode.x, currentNode.y-1, currentNode));
+    }
+  }
 
 	/**
 	 * Utility class used for pathfinding. Optionally holds a
