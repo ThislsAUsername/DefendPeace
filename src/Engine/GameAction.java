@@ -17,11 +17,15 @@ public class GameAction
   private Unit unitActor = null;
   private ActionType actionType;
 
+  private Path movePath = null;
   private int moveX;
   private int moveY;
   private int actX;
   private int actY;
   
+  // Record origin state for animation purposes.
+  private PriorState priorState = null;
+
   public GameAction(Unit unit)
   {
     this(unit, -1, -1, ActionType.INVALID, -1, -1);
@@ -32,6 +36,7 @@ public class GameAction
     this(unit, mx, my, action, -1, -1);
   }
 
+  // TODO: GameAction should accept a Path in the constructor, rather than mx and my.
   public GameAction(Unit unit, int mx, int my, ActionType action, int ax, int ay)
   {
     unitActor = unit;
@@ -57,12 +62,25 @@ public class GameAction
     return actionType;
   }
   
-  public void setMoveLocation(int x, int y)
+  public void setMovePath(Path path)
   {
-    moveX = x;
-    moveY = y;
+    movePath = path;
+    if(null != path && path.getPathLength() > 0)
+    {
+      moveX = path.getEnd().x;
+      moveY = path.getEnd().y;
+    }
+    else
+    {
+      moveX = -1;
+      moveY = -1;
+    }
   }
-  
+
+  public Path getMovePath()
+  {
+	  return movePath;
+  }
   public int getMoveX()
   {
     return moveX;
@@ -70,6 +88,14 @@ public class GameAction
   public int getMoveY()
   {
     return moveY;
+  }
+  public int getActX()
+  {
+    return actX;
+  }
+  public int getActY()
+  {
+    return actY;
   }
   
   public void setActionLocation(int x, int y)
@@ -127,12 +153,18 @@ public class GameAction
       System.out.println("ERROR! Attempting to execute an incomplete GameAction");
       return false;
     }
-    
+
+    // Populate our PriorState so folks can backtrack later.
+    priorState = this.new PriorState((int)Math.ceil(unitActor.getHP()), unitActor.x, unitActor.y);
+
+    // TODO: Move to the new location, checking for ambushes in fog of war.
+
     switch(actionType)
     {
       case ATTACK:
         Unit unitTarget = gameMap.getLocation(actX, actY).getResident();
-        
+        priorState.setTargetHP((int)Math.ceil(unitTarget.getHP()));
+
         if( unitTarget != null && unitActor.getDamage(unitTarget, moveX, moveY) != 0 )
         {
           unitActor.isTurnOver = true;
@@ -159,7 +191,7 @@ public class GameAction
         break;
       case LOAD:
         Unit transport = gameMap.getLocation(moveX, moveY).getResident();
-        
+
         if(null != transport && transport.hasCargoSpace(unitActor.model.type))
         {
           unitActor.isTurnOver = true;
@@ -190,5 +222,33 @@ public class GameAction
     }
     
     return unitActor.isTurnOver;
+  }
+
+  public PriorState getPriorState()
+  {
+	  return priorState;
+  }
+
+  /**
+   * Records the state of affairs before the action was executed. This allows the animator to correctly portray events.
+   */
+  public class PriorState
+  {
+	  public final int actorHP;
+	  public final int actorX;
+	  public final int actorY;
+	  private int targetHP;
+
+	  public PriorState(int actorHP, int actorX, int actorY)
+	  {
+		  this.actorHP = actorHP;
+		  this.actorX = actorX;
+		  this.actorY = actorY;
+	  }
+
+	  public void setTargetHP(int hp)
+	  {
+		  targetHP = hp;
+	  }
   }
 }

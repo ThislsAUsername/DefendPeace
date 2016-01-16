@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 import Engine.GameInstance;
+import Engine.Path;
+import Engine.Path.PathNode;
 import Terrain.Environment;
 import Terrain.GameMap;
 import UI.MapView;
@@ -113,6 +115,16 @@ public class FillRectMapArtist implements MapArtist
 	{
 		g.setColor(COLOR_CURSOR);
 		g.fillRect(myGame.getCursorX()*tileSizePx, myGame.getCursorY()*tileSizePx, tileSizePx, tileSizePx);
+	}
+
+	@Override
+	public void drawMovePath(Graphics g, Path path)
+	{
+		g.setColor(COLOR_CURSOR);
+		for(PathNode p : path.getWaypoints())
+		{
+			g.fillRect(p.x*tileSizePx, p.y*tileSizePx, tileSizePx, tileSizePx);
+		}
 	}
 
 	@Override

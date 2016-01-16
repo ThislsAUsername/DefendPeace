@@ -1,28 +1,32 @@
 package Engine;
 
 import Terrain.Environment;
+import Terrain.GameMap;
 import Terrain.Location;
 import UI.InputHandler;
 import UI.GameMenu;
+import UI.MapView;
 import Units.Unit;
 
 public class MapController
 {
-
   private GameInstance myGame;
+  private MapView myView;
 
-  private enum InputMode {MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION};
+  private enum InputMode {MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION, ANIMATION};
   public enum MetaAction {END_TURN};
 
   private InputMode inputMode;
 
-  // readied Action
-  GameAction currentAction = null;
+  private Path currentMovePath;
 
-  public MapController(GameInstance game)
+  public MapController(GameInstance game, MapView view)
   {
     myGame = game;
+    myView = view;
+    myView.setController(this);
     inputMode = InputMode.MAP;
+    myGame.setCursorLocation(6,5);
   }
 
   /**
@@ -51,6 +55,13 @@ public class MapController
         break;
       case METAACTION:
         handleMetaActionMenuInput(input);
+        break;
+      case ANIMATION:
+        if(input == InputHandler.InputAction.BACK || input == InputHandler.InputAction.ENTER);
+        {
+            // Tell the animation to cancel.
+            myView.cancelAnimation();
+        }
         break;
       default:
         System.out.println("Invalid InputMode in MapController! " + inputMode);
@@ -85,8 +96,8 @@ public class MapController
         {
           if( unitActor.isTurnOver == false || unitActor.CO != myGame.activeCO )
           {
-            currentAction = new GameAction(unitActor); // Start building a GameAction
-            
+            myView.currentAction = new GameAction(unitActor); // Start building a GameAction
+
             // Calculate movement options.
             changeInputMode(InputMode.MOVEMENT);
           }
@@ -124,6 +135,7 @@ public class MapController
     {
       case UP:
         myGame.moveCursorUp();
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         // System.out.println("inMoveableSpace = " + inMoveableSpace);
         // Make sure we don't overshoot the reachable tiles by accident.
         if( inMoveableSpace && InputHandler.isUpHeld()
@@ -134,6 +146,7 @@ public class MapController
         break;
       case DOWN:
         myGame.moveCursorDown();
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         // Make sure we don't overshoot the reachable space by accident.
         if( inMoveableSpace && InputHandler.isDownHeld()
             && !myGame.getCursorLocation().isHighlightSet() )
@@ -143,6 +156,7 @@ public class MapController
         break;
       case LEFT:
         myGame.moveCursorLeft();
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         // Make sure we don't overshoot the reachable space by accident.
         if( inMoveableSpace && InputHandler.isLeftHeld()
             && !myGame.getCursorLocation().isHighlightSet() )
@@ -152,6 +166,7 @@ public class MapController
         break;
       case RIGHT:
         myGame.moveCursorRight();
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         // Make sure we don't overshoot the reachable space by accident.
         if( inMoveableSpace && InputHandler.isRightHeld()
             && !myGame.getCursorLocation().isHighlightSet() )
@@ -160,11 +175,13 @@ public class MapController
         }
         break;
       case ENTER:
-        if( inMoveableSpace && currentAction.getActor().CO == myGame.activeCO ) // If the selected space is within
+        if( inMoveableSpace && myView.currentAction.getActor().CO == myGame.activeCO ) // If the selected space is within
                                                                  // the reachable area
         {
           // Move the Unit to the location and display possible actions.
-          currentAction.setMoveLocation(myGame.getCursorX(), myGame.getCursorY());
+          currentMovePath.start(); // start the unit running
+          myView.currentAction.setMovePath(currentMovePath);
+          currentMovePath = null;
           changeInputMode(InputMode.ACTIONMENU);
         }
         break;
@@ -183,20 +200,20 @@ public class MapController
    */
   private void handleActionMenuInput(InputHandler.InputAction input)
 	{
-		if(myGame.currentMenu == null)
+		if(myView.currentMenu == null)
 		{
-			System.out.println("Error! MapController.handleActionMenuInput() called when myGame.currentMenu is null!");
+			System.out.println("Error! MapController.handleActionMenuInput() called when myView.currentMenu is null!");
 		}
 
 		switch (input)
 		{
 		case ENTER:
-			currentAction.setActionType( (GameAction.ActionType) myGame.currentMenu.getSelectedAction() );
+			myView.currentAction.setActionType( (GameAction.ActionType) myView.currentMenu.getSelectedAction() );
 
 	    // If the action is completely constructed, execute it, else get the missing info.
-	    if(currentAction.isReadyToExecute())
+	    if(myView.currentAction.isReadyToExecute())
 	    {
-	      if(currentAction.execute(myGame.gameMap))
+	      if(myView.currentAction.execute(myGame.gameMap))
 	      {
 	        changeInputMode(InputMode.MAP);
 	      }
@@ -218,7 +235,7 @@ public class MapController
 		case NO_ACTION:
 			break;
 			default:
-				myGame.currentMenu.handleMenuInput(input);
+				myView.currentMenu.handleMenuInput(input);
 		}
 	}
 
@@ -244,16 +261,18 @@ public class MapController
         myGame.moveCursorRight();
         break;
       case ENTER:
-        if( inActionableSpace && (null != currentAction) )
+        if( inActionableSpace && (null != myView.currentAction) )
         {
-          currentAction.setActionLocation(myGame.getCursorX(), myGame.getCursorY());
-          
-          if(currentAction.isReadyToExecute())
+          myView.currentAction.setActionLocation(myGame.getCursorX(), myGame.getCursorY());
+
+          if(myView.currentAction.isReadyToExecute())
           {
             // Do the thing.
-            if(currentAction.execute(myGame.gameMap))
+            if(myView.currentAction.execute(myGame.gameMap))
             {
-              changeInputMode(InputMode.MAP);
+                // Kick it off to the animator.
+                changeInputMode(InputMode.ANIMATION);
+                myView.animate(myView.currentAction);
             }
             else
             {
@@ -281,7 +300,7 @@ public class MapController
   private void handleProductionMenuInput(InputHandler.InputAction input)
   {
     System.out.println("handleProduction");
-    if( myGame.currentMenu == null )
+    if( myView.currentMenu == null )
     {
       System.out.println("Error! MapController.handleProductionMenuInput() called when currentMenu is null!");
     }
@@ -289,7 +308,7 @@ public class MapController
     switch (input)
     {
       case ENTER:
-        Units.UnitModel.UnitEnum unit = (Units.UnitModel.UnitEnum) myGame.currentMenu.getSelectedAction();
+        Units.UnitModel.UnitEnum unit = (Units.UnitModel.UnitEnum) myView.currentMenu.getSelectedAction();
 
         if( myGame.activeCO.getUnitModel(unit).moneyCost <= myGame.activeCO.money )
         {
@@ -311,13 +330,13 @@ public class MapController
       case NO_ACTION:
         break;
       default:
-        myGame.currentMenu.handleMenuInput(input);
+        myView.currentMenu.handleMenuInput(input);
     }
   }
 
   private void handleMetaActionMenuInput(InputHandler.InputAction input)
   {
-    if( myGame.currentMenu == null )
+    if( myView.currentMenu == null )
     {
       System.out.println("Error! MapController.handleMetaActionMenuInput() called when currentMenu is null!");
     }
@@ -325,7 +344,7 @@ public class MapController
     switch (input)
     {
       case ENTER:
-        MetaAction action = (MetaAction) myGame.currentMenu.getSelectedAction();
+        MetaAction action = (MetaAction) myView.currentMenu.getSelectedAction();
 
         if( action == MetaAction.END_TURN )
         {
@@ -339,14 +358,12 @@ public class MapController
       case NO_ACTION:
         break;
       default:
-        myGame.currentMenu.handleMenuInput(input);
+        myView.currentMenu.handleMenuInput(input);
     }
   }
 
   /**
-   * Updates the InputMode and the GameInstance's current menu to keep them in sync.
-   * 
-   * NOTE: This function assumes that unitActor is set correctly before it is called.
+   * Updates the InputMode and the current menu to keep them in sync.
    */
   private void changeInputMode(InputMode input)
   {
@@ -354,7 +371,7 @@ public class MapController
     switch (inputMode)
     {
       case ACTION:
-        Utils.findActionableLocations(currentAction.getActor(), currentAction.getActionType(), currentAction.getMoveX(), currentAction.getMoveY(), myGame.gameMap);
+        Utils.findActionableLocations(myView.currentAction.getActor(), myView.currentAction.getActionType(), myView.currentAction.getMoveX(), myView.currentAction.getMoveY(), myGame.gameMap);
         boolean set = false;
         for( int w = 0; w < myGame.gameMap.mapWidth; ++w )
         {
@@ -370,17 +387,18 @@ public class MapController
           if( set )
             break;
         }
-        myGame.currentMenu = null;
+        myView.currentMenu = null;
         break;
       case ACTIONMENU:
         myGame.gameMap.clearAllHighlights();
-        myGame.currentMenu = new GameMenu(GameMenu.MenuType.ACTION,
-            currentAction.getActor().getPossibleActions(myGame.gameMap, currentAction.getMoveX(), currentAction.getMoveY()));
-        myGame.setCursorLocation(currentAction.getMoveX(), currentAction.getMoveY());
+        myView.currentMenu = new GameMenu(GameMenu.MenuType.ACTION,
+        		myView.currentAction.getActor().getPossibleActions(myGame.gameMap, myView.currentAction.getMoveX(), myView.currentAction.getMoveY()));
+        myGame.setCursorLocation(myView.currentAction.getMoveX(), myView.currentAction.getMoveY());
         break;
       case MAP:
-        currentAction = null;
-        myGame.currentMenu = null;
+        myView.currentAction = null;
+        currentMovePath = null;
+        myView.currentMenu = null;
         myGame.gameMap.clearAllHighlights();
         
 //        if( unitActor != null )
@@ -390,22 +408,69 @@ public class MapController
 //        }
         break;
       case MOVEMENT:
-        Utils.findPossibleDestinations(currentAction.getActor(), myGame);
-        myGame.currentMenu = null;
+        Utils.findPossibleDestinations(myView.currentAction.getActor(), myGame);
+        if(null != myView.currentAction)
+        {
+          myView.currentAction.setMovePath(null); // No destination chosen yet.
+        }
+        myView.currentMenu = null;
+        myGame.setCursorLocation(myView.currentAction.getActor().x, myView.currentAction.getActor().y);
+        currentMovePath = null;
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.
         break;
       case PRODUCTION:
         myGame.gameMap.clearAllHighlights();
-        myGame.currentMenu = new GameMenu(GameMenu.MenuType.PRODUCTION,
+        myView.currentMenu = new GameMenu(GameMenu.MenuType.PRODUCTION,
             myGame.activeCO.getShoppingList());
         break;
       case METAACTION:
         myGame.gameMap.clearAllHighlights();
         MetaAction[] actions = { MetaAction.END_TURN };
-        myGame.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, actions);
+        myView.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, actions);
         break;
+      case ANIMATION:
+          myGame.gameMap.clearAllHighlights();
+          break;
       default:
         System.out.println("WARNING! MapController.changeInputMode was given an invalid InputMode "
             + inputMode);
     }
+  }
+
+  private void buildMovePath(int x, int y, GameMap map)
+  {
+    if(null == currentMovePath)
+    {
+      currentMovePath = new Path();
+    }
+
+    // If the new point already exists on the path, cut the extraneous points out.
+    for(int i = 0; i < currentMovePath.getPathLength(); ++i)
+    {
+		if(currentMovePath.getWaypoint(i).x == x &&
+		   currentMovePath.getWaypoint(i).y == y)
+		{
+			currentMovePath.snip(i);
+			break;
+		}
+    }
+
+    currentMovePath.addWaypoint(x, y, MapView.getMapUnitMoveSpeed());
+
+    if(!Utils.isPathValid(myView.currentAction.getActor(), currentMovePath, myGame.gameMap))
+    {
+      // The currently-built path is invalid. Try to generate a new one (may still return null).
+      currentMovePath = Utils.findShortestPath(myView.currentAction.getActor(), x, y, myGame.gameMap);
+    }
+  }
+
+  public Path getContemplatedMove()
+  {
+	  return currentMovePath;
+  }
+
+  public void animationEnded()
+  {
+	  changeInputMode(InputMode.MAP);
   }
 }

@@ -2,7 +2,6 @@ package Engine;
 
 import Terrain.GameMap;
 import Terrain.Location;
-import UI.GameMenu;
 
 public class GameInstance {
 	public Terrain.GameMap gameMap;
@@ -11,8 +10,6 @@ public class GameInstance {
 	public CommandingOfficers.Commander activeCO = null;
 	private int cursorX = 0;
 	private int cursorY = 0;
-	
-	public GameMenu currentMenu;
 
 	public GameInstance(GameMap map, CommandingOfficers.Commander[] cos)
 	{
