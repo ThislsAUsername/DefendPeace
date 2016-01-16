@@ -69,8 +69,8 @@ public class GameAction
     movePath = path;
     if(null != path && path.getPathLength() > 0)
     {
-      moveX = (int)path.getEnd().xCoord;
-      moveY = (int)path.getEnd().yCoord;
+      moveX = path.getEnd().x;
+      moveY = path.getEnd().y;
     }
     else
     {

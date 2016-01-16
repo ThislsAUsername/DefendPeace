@@ -27,12 +27,16 @@ public class Path {
 	public void addWaypoint(int x, int y, double timeMS)
 	{
 		waypoints.add(new PathNode(x, y, timeMS));
-		System.out.println("Added waypoint. Now at " + waypoints.size());
+	}
+
+	public ArrayList<PathNode> getWaypoints()
+	{
+		return waypoints;
 	}
 	
 	public void start()
 	{
-		System.out.println("Starting path with " + waypoints.size() + " waypoints");
+		//System.out.println("Starting path with " + waypoints.size() + " waypoints");
 		timeStarted = System.currentTimeMillis();
 		lastWaypointPassed = 0;
 		lastWaypointTime = timeStarted;
@@ -115,13 +119,11 @@ public class Path {
 			// Now we know our nextWaypoint; figure out where we are along the way.
 			if(atEnd)
 			{
-				System.out.println("At End");
 				pathX = waypoints.get(waypoints.size() - 1).x;
 				pathY = waypoints.get(waypoints.size() - 1).y;
 			}
 			else
 			{
-				System.out.println("Calculating position");
 				// We are still en route and not yet at the end. Find our actual location.
 				PathNode lastPt = waypoints.get(lastWaypointPassed);
 				PathNode nextPt = waypoints.get(lastWaypointPassed + 1);
@@ -131,11 +133,6 @@ public class Path {
 				
 				pathX = lastPt.x + (xdiff * progress);
 				pathY = lastPt.y + (ydiff * progress);
-				
-				System.out.println("waypoint: " + nextPt);
-				System.out.println("Progress: " + progress);
-				System.out.println(" pathX  : " + pathX);
-				System.out.println(" pathY  : " + pathY);
 			}
 		}
 
@@ -147,23 +144,32 @@ public class Path {
 		return waypoints.size();
 	}
 
-	public XYCoord getEnd()
+	public PathNode getWaypoint(int wpt)
 	{
-		XYCoord ret;
-		if(waypoints.size() > 0)
+		PathNode p = null;
+		if(waypoints.size() > wpt)
 		{
-			PathNode p = waypoints.get(waypoints.size() - 1);
-			ret = new XYCoord(p.x, p.y);
+			p = waypoints.get(wpt);
 		}
 		else
 		{
-			ret = new XYCoord(-1, -1);
+			System.out.println("WARNING! Attempting to get an invalid PathNode.");
 		}
-
-		return ret;
+		return p;
 	}
 
-	private static class PathNode
+	public PathNode getEnd()
+	{
+		PathNode p = null;
+		if( !waypoints.isEmpty() )
+		{
+			p = getWaypoint(waypoints.size() - 1);
+		}
+
+		return p;
+	}
+
+	public static class PathNode
 	{
 		public int x;
 		public int y;

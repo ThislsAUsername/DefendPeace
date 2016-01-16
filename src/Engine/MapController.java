@@ -136,8 +136,8 @@ public class MapController
     switch (input)
     {
       case UP:
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         myGame.moveCursorUp();
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         // System.out.println("inMoveableSpace = " + inMoveableSpace);
         // Make sure we don't overshoot the reachable tiles by accident.
         if( inMoveableSpace && InputHandler.isUpHeld()
@@ -147,8 +147,8 @@ public class MapController
         }
         break;
       case DOWN:
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         myGame.moveCursorDown();
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         // Make sure we don't overshoot the reachable space by accident.
         if( inMoveableSpace && InputHandler.isDownHeld()
             && !myGame.getCursorLocation().isHighlightSet() )
@@ -157,8 +157,8 @@ public class MapController
         }
         break;
       case LEFT:
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         myGame.moveCursorLeft();
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         // Make sure we don't overshoot the reachable space by accident.
         if( inMoveableSpace && InputHandler.isLeftHeld()
             && !myGame.getCursorLocation().isHighlightSet() )
@@ -167,8 +167,8 @@ public class MapController
         }
         break;
       case RIGHT:
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         myGame.moveCursorRight();
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         // Make sure we don't overshoot the reachable space by accident.
         if( inMoveableSpace && InputHandler.isRightHeld()
             && !myGame.getCursorLocation().isHighlightSet() )
@@ -181,7 +181,6 @@ public class MapController
                                                                  // the reachable area
         {
           // Move the Unit to the location and display possible actions.
-          buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
           currentMovePath.start(); // start the unit running
           myView.currentAction.setMovePath(currentMovePath);
           changeInputMode(InputMode.ACTIONMENU);
@@ -417,6 +416,7 @@ public class MapController
         myView.currentMenu = null;
         myGame.setCursorLocation(myView.currentAction.getActor().x, myView.currentAction.getActor().y);
         currentMovePath = null;
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.
         break;
       case PRODUCTION:
         myGame.gameMap.clearAllHighlights();
@@ -437,7 +437,7 @@ public class MapController
     }
   }
 
-  public void buildMovePath(int x, int y, GameMap map)
+  private void buildMovePath(int x, int y, GameMap map)
   {
     if(null == currentMovePath)
     {
@@ -445,9 +445,13 @@ public class MapController
     }
 
     // TODO: If the move is a backtrack, remove a point instead of adding one.
-    currentMovePath.addWaypoint(x, y, myView.getMapUnitMoveSpeed());
+    currentMovePath.addWaypoint(x, y, MapView.getMapUnitMoveSpeed());
 
-    // TODO: If the move path goes beyond range or is overly complex, fix it.
+    if(!Utils.isPathValid(myView.currentAction.getActor(), currentMovePath, myGame.gameMap))
+    {
+      // The currently-built path is invalid. Try to generate a new one (may still return null).
+      currentMovePath = Utils.findShortestPath(myView.currentAction.getActor(), x, y, myGame.gameMap);
+    }
   }
 
   public void animationEnded()
