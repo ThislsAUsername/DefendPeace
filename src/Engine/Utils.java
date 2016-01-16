@@ -158,7 +158,7 @@ public class Utils {
 		//System.out.println("Checking path validity. Length: " + (path.getPathLength()-1));
 		boolean canReach = true;
 
-		// Make sure waypoint 1 is under Unit.
+		// Make sure the first waypoint is under the Unit.
 		if(path.getPathLength() <= 0 || path.getWaypoint(0).x != unit.x || path.getWaypoint(0).y != unit.y)
 		{
 			canReach = false;

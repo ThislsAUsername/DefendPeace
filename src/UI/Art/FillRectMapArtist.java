@@ -120,6 +120,7 @@ public class FillRectMapArtist implements MapArtist
 	@Override
 	public void drawMovePath(Graphics g, Path path)
 	{
+		g.setColor(COLOR_CURSOR);
 		for(PathNode p : path.getWaypoints())
 		{
 			g.fillRect(p.x*tileSizePx, p.y*tileSizePx, tileSizePx, tileSizePx);

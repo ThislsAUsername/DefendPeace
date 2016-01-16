@@ -18,7 +18,7 @@ public class NobunagaBattleAnimation implements AnimationSequence
 	{
 		if(action.getActionType() != GameAction.ActionType.ATTACK)
 		{
-			System.out.println("ERROR! BattleAnimation give an incompatible GameAction - " + action.getActionType());
+			System.out.println("ERROR! BattleAnimation given an incompatible GameAction - " + action.getActionType());
 		}
 		
 		myAction = action;

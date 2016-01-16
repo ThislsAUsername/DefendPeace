@@ -265,7 +265,7 @@ public class MapController
       case ENTER:
         if( inActionableSpace && (null != myView.currentAction) )
         {
-        	myView.currentAction.setActionLocation(myGame.getCursorX(), myGame.getCursorY());
+          myView.currentAction.setActionLocation(myGame.getCursorX(), myGame.getCursorY());
 
           if(myView.currentAction.isReadyToExecute())
           {

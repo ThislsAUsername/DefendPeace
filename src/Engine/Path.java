@@ -4,8 +4,9 @@ import java.util.ArrayList;
 
 /**
  * Path stores a list of waypoints with associated times to reach them. Once all 
- *   waypoints are stored, call start() to begin the movement, and  from the current 
- *   time, and getCurrentPosition() at  
+ *   waypoints are stored, call start() to begin the movement. Subsequent calls
+ *   to get getCurrentPosition() will return the calculated intermediate point.
+ *
  *   NOTE: Path assumes that the first waypoint passed is the starting location.
  */
 public class Path {
@@ -59,17 +60,13 @@ public class Path {
 	}
 	
 	/**
-	 * Puts the Path back in a pre-start state to allow it to run again.
+	 * If path has not been started:
+	 *   return the location of the first waypoint.
+	 * If path has been started:
+	 *   return the position along the route, as calculated from the time start() was called.
+	 * If path has been completed:
+	 *   return the location of the last waypoint.
 	 */
-	public void clear()
-	{
-		timeStarted = -1;
-		lastWaypointPassed = -1;
-		lastWaypointTime = 0;
-		atEnd = false;
-		waypoints.clear();
-	}
-	
 	public XYCoord getPosition()
 	{
 		double pathX = -1;
