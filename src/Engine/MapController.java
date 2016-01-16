@@ -399,6 +399,7 @@ public class MapController
         break;
       case MAP:
         myView.currentAction = null;
+        currentMovePath = null;
         myView.currentMenu = null;
         myGame.gameMap.clearAllHighlights();
         
