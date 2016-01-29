@@ -1,10 +1,11 @@
-package UI.Art;
+package UI.Art.FillRectArtist;
 
 import java.awt.Color;
 import java.awt.Graphics;
 
 import Engine.GameInstance;
 import UI.MapView;
+import UI.Art.MenuArtist;
 import Units.UnitModel.UnitEnum;
 
 public class FillRectMenuArtist implements MenuArtist

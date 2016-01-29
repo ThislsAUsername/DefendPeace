@@ -1,4 +1,4 @@
-package UI.Art;
+package UI.Art.FillRectArtist;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -9,6 +9,7 @@ import Engine.XYCoord;
 import Terrain.GameMap;
 import Terrain.Location;
 import UI.MapView;
+import UI.Art.UnitArtist;
 import Units.Unit;
 
 public class FillRectUnitArtist implements UnitArtist

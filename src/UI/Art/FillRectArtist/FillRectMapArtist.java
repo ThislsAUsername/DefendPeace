@@ -1,4 +1,4 @@
-package UI.Art;
+package UI.Art.FillRectArtist;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -9,6 +9,7 @@ import Engine.Path.PathNode;
 import Terrain.Environment;
 import Terrain.GameMap;
 import UI.MapView;
+import UI.Art.MapArtist;
 
 public class FillRectMapArtist implements MapArtist
 {

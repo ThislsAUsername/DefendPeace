@@ -3,14 +3,14 @@ package UI;
 import java.awt.Dimension;
 import java.awt.Graphics;
 
-import UI.Art.FillRectMapArtist;
-import UI.Art.FillRectMenuArtist;
-import UI.Art.FillRectUnitArtist;
 import UI.Art.MapArtist;
 import UI.Art.MenuArtist;
 import UI.Art.UnitArtist;
 import UI.Art.Animation.AnimationSequence;
 import UI.Art.Animation.NobunagaBattleAnimation;
+import UI.Art.FillRectArtist.FillRectMapArtist;
+import UI.Art.FillRectArtist.FillRectMenuArtist;
+import UI.Art.FillRectArtist.FillRectUnitArtist;
 
 import Engine.GameAction;
 import Engine.GameInstance;
