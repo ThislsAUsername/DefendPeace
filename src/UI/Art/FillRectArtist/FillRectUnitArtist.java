@@ -14,7 +14,7 @@ import Units.Unit;
 
 public class FillRectUnitArtist implements UnitArtist
 {
-	private int tileSizePx = MapView.tileSizePx;
+	private int tileSizePx = MapView.getTileSize();
 	
 	private GameInstance myGame = null;
 	private GameMap gameMap = null;

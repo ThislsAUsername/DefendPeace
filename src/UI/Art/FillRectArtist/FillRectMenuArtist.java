@@ -10,7 +10,7 @@ import Units.UnitModel.UnitEnum;
 
 public class FillRectMenuArtist implements MenuArtist
 {
-	private int tileSizePx = MapView.tileSizePx;
+	private int tileSizePx = MapView.getTileSize();
 	private int mapViewWidth = MapView.mapViewWidth;
 	private int mapViewHeight = MapView.mapViewHeight;
 

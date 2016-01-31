@@ -13,7 +13,7 @@ import UI.Art.MapArtist;
 
 public class FillRectMapArtist implements MapArtist
 {
-	private final int tileSizePx = MapView.tileSizePx;
+	private final int tileSizePx = MapView.getTileSize();
 
 	public static final Color COLOR_PLAIN = new Color(186,255,124);
 	public static final Color COLOR_CITY = Color.GRAY;

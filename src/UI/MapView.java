@@ -31,9 +31,10 @@ public class MapView extends javax.swing.JPanel {
 	private UnitArtist unitArtist;
 	private MenuArtist menuArtist;
 	
-	public static final int tileSizePx = 32;
-	public static int mapViewWidth = tileSizePx * 15;
-	public static int mapViewHeight = tileSizePx * 10;
+	private static final int tileSizePx = 16;
+	private static int drawScale = 2;
+	public static int mapViewWidth = tileSizePx * drawScale * 15;
+	public static int mapViewHeight = tileSizePx * drawScale * 10;
 
 	private AnimationSequence animationSequence = null;
 
@@ -52,6 +53,11 @@ public class MapView extends javax.swing.JPanel {
 	public void setController(MapController controller)
 	{
 		myController = controller;
+	}
+
+	public static int getTileSize()
+	{
+		return tileSizePx * drawScale;
 	}
 
 	@Override
