@@ -11,6 +11,7 @@ import UI.Art.Animation.NobunagaBattleAnimation;
 import UI.Art.FillRectArtist.FillRectMapArtist;
 import UI.Art.FillRectArtist.FillRectMenuArtist;
 import UI.Art.FillRectArtist.FillRectUnitArtist;
+import UI.Art.SpriteArtist.SpriteMapArtist;
 
 import Engine.GameAction;
 import Engine.GameInstance;
@@ -46,7 +47,8 @@ public class MapView extends javax.swing.JPanel {
 		setPreferredSize(new Dimension(mapViewWidth, mapViewHeight));
 
 		unitArtist = new FillRectUnitArtist(myGame, this);
-		mapArtist = new FillRectMapArtist(myGame);
+		//mapArtist = new FillRectMapArtist(myGame);
+		mapArtist = new SpriteMapArtist(myGame);
 		menuArtist = new FillRectMenuArtist(myGame, this);
 	}
 
