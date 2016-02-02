@@ -15,11 +15,11 @@ public class FillRectMapArtist implements MapArtist
 {
 	private final int tileSizePx = MapView.getTileSize();
 
-	public static final Color COLOR_PLAIN = new Color(186,255,124);
+	public static final Color COLOR_GRASS = new Color(186,255,124);
 	public static final Color COLOR_CITY = Color.GRAY;
 	public static final Color COLOR_FACTORY = Color.DARK_GRAY;
 	public static final Color COLOR_FOREST = Color.GREEN;
-	public static final Color COLOR_WATER = Color.BLUE;
+	public static final Color COLOR_OCEAN = Color.BLUE;
 	public static final Color COLOR_MOUNTAIN = new Color(101,40,26);
 	public static final Color COLOR_REEF = new Color(212,144,56);
 	public static final Color COLOR_ROAD = Color.LIGHT_GRAY;
@@ -63,8 +63,8 @@ public class FillRectMapArtist implements MapArtist
 		
 		switch(tile.terrainType)
 		{
-		case PLAIN:
-			tileColor = COLOR_PLAIN;
+		case GRASS:
+			tileColor = COLOR_GRASS;
 			break;
 		case CITY:
 			if (locus.getOwner() != null) {
@@ -83,8 +83,8 @@ public class FillRectMapArtist implements MapArtist
 		case FOREST:
 			tileColor = COLOR_FOREST;
 			break;
-		case WATER:
-			tileColor = COLOR_WATER;
+		case OCEAN:
+			tileColor = COLOR_OCEAN;
 			break;
 		case HQ:
 			if (locus.getOwner() != null) {
