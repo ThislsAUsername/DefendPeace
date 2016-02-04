@@ -54,6 +54,14 @@ public class SpriteLibrary
 		{
 			spriteFile += "shoal_clear.png";
 		}
+		else if(Environment.Terrains.REEF == terrainType)
+		{
+			spriteFile += "reef_clear.png";
+		}
+		else if(Environment.Terrains.ROAD == terrainType)
+		{
+			spriteFile += "road_clear.png";
+		}
 		
 		try
 		{

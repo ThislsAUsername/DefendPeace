@@ -121,8 +121,8 @@ public class TerrainSpriteSet
 	{
 		int variation = (x+1)*(y)+x; // Used to vary the specific sprite version drawn at each place in a repeatable way.
 		
-		short dirIndex = 0; // For non-directional sprites, the first one is the only one.
-		if(terrainSprites.size() > 1) // If there is more than one image, we expect a full complement.
+		short dirIndex = 0;
+		if(terrainSprites.size() > 1) // We expect the size to be either 1 or 16.
 		{
 			// Figure out which neighbors tiles have the same terrain type as this one.
 			// NOTE: Simple directional tiles don't care about diagonal adjacency - To define
@@ -136,6 +136,7 @@ public class TerrainSpriteSet
 		// Normalize the index value just in case.
 		if(dirIndex >= terrainSprites.size())
 		{
+			// We could print a warning here, but there should have been one when the sprites were loaded.
 			dirIndex = (short)(dirIndex % terrainSprites.size());
 		}
 
