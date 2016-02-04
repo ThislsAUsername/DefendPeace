@@ -65,9 +65,9 @@ public class SpriteMapArtist implements MapArtist
 		Graphics g = baseMapImage.getGraphics();
 		
 		// Choose and draw all base sprites (grass, water, shallows).
-		for(int x = 0; x < map.mapWidth; ++x)
+		for(int y = 0; y < map.mapHeight; ++y) // Iterate horizontally to layer terrain correctly.
 		{
-			for(int y = 0; y < map.mapHeight; ++y)
+			for(int x = 0; x < map.mapWidth; ++x)
 			{
 				Environment.Terrains tileTerrain = map.getLocation(x, y).getEnvironment().terrainType;
 				
