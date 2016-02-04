@@ -31,11 +31,6 @@ public class SpriteLibrary
 		return spriteSetMap.get(terrain);
 	}
 	
-	private static void loadSpriteInfo() // TODO: Do we want/need some kind of descriptor file to define image/transition files?
-	{
-		
-	}
-	
 	/**
 	 * Loads the images and builds the TerrainSpriteSet for the terrain type passed in.
 	 * If we are unable to load the correct images for any reason, make a blank TerrainSpriteSet.
@@ -63,7 +58,7 @@ public class SpriteLibrary
 		try
 		{
 			System.out.println("INFO: Loading terrain sprites for " + terrainType);
-			ss = new TerrainSpriteSet(ImageIO.read(new File(spriteFile)), w, h);
+			ss = new TerrainSpriteSet(terrainType, ImageIO.read(new File(spriteFile)), w, h);
 		}
 		catch( IOException ioe )
 		{
@@ -76,7 +71,7 @@ public class SpriteLibrary
 		{
 			// Somehow we failed to initialize the sprite set. Create one with default settings
 			System.out.println("WARNING! Continuing with placeholders.");
-			ss = new TerrainSpriteSet(null, w, h);
+			ss = new TerrainSpriteSet(terrainType, null, w, h);
 		}
 		
 		spriteSetMap.put(terrainType, ss);

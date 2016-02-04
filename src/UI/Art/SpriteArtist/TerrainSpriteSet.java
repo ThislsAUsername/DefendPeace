@@ -9,15 +9,16 @@ import java.util.ArrayList;
 
 import Terrain.Environment;
 import Terrain.GameMap;
+import UI.MapView;
 
 /**
  * Responsible for storing and organizing all image data associated with a specific map tile type.
  */
 public class TerrainSpriteSet
 {
-	ArrayList<Sprite> terrainSprites;
+	private ArrayList<Sprite> terrainSprites;
 	//ArrayList<TileTransition> tileTransitions;
-	public final Environment.Terrains myTerrainType = Environment.Terrains.GRASS;
+	public final Environment.Terrains myTerrainType;
 
     public static final short NORTH = 0x1;
     public static final short EAST = 0x2;
@@ -35,8 +36,9 @@ public class TerrainSpriteSet
     // public static final short PLACEHOLDER14 = 0x2000;
     // public static final short PLACEHOLDER15 = 0x4000;
     
-    public TerrainSpriteSet(BufferedImage spriteSheet, int spriteWidth, int spriteHeight)
+    public TerrainSpriteSet(Environment.Terrains terrainType, BufferedImage spriteSheet, int spriteWidth, int spriteHeight)
     {
+        myTerrainType = terrainType;
     	terrainSprites = new ArrayList<Sprite>();
     	
     	if(spriteSheet == null)
@@ -137,9 +139,18 @@ public class TerrainSpriteSet
 			dirIndex = (short)(dirIndex % terrainSprites.size());
 		}
 
+		// Draw the base tile type, if needed.
+		Environment.Terrains baseTerrainType = getBaseTerrainType(myTerrainType);
+		if(baseTerrainType != myTerrainType)
+		{
+			System.out.println("Drawing " + baseTerrainType + " as base of " + myTerrainType);
+			TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet( baseTerrainType );
+			spriteSet.drawTile(g, map, x, y, scale);
+		}
+
 		//g.drawImage(terrainSprites.get(dirIndex).getFrame(variation), x, y, null);
-		BufferedImage frame = terrainSprites.get(dirIndex).getFrame(variation);
-		g.drawImage(frame, x, y, frame.getWidth()*scale, frame.getHeight()*scale, null);
+		BufferedImage frame = terrainSprites.get((dirIndex % terrainSprites.size())).getFrame(variation);
+		g.drawImage(frame, x*MapView.getTileSize(), y*MapView.getTileSize(), frame.getWidth()*scale, frame.getHeight()*scale, null);
 		
 		// TODO - make tile transitions happen.
 		// for(TileTransition tt : tileTransitions)
@@ -163,4 +174,38 @@ public class TerrainSpriteSet
     	}
     	return value;
     }
+
+	/**
+	 * Determines the base terrain type for the provided environment terrain type.
+	 * For example, FOREST is a tile type, but the trees sit on a plain, so for drawing
+	 * purposes (esp. terrain transitions), the base tile type of FOREST is actually PLAIN.
+	 */
+	private static Environment.Terrains getBaseTerrainType(Environment.Terrains terrainType)
+	{
+		Environment.Terrains baseTerrain = terrainType;
+		switch( baseTerrain )
+		{
+		case CITY:
+		case DUNES:
+		case FACTORY:
+		case FOREST:
+		case HQ:
+		case MOUNTAIN:
+		case GRASS:
+		case ROAD:
+			baseTerrain = Environment.Terrains.GRASS;
+			break;
+		case SHOAL:
+			baseTerrain = Environment.Terrains.SHOAL;
+			break;
+		case REEF:
+		case OCEAN:
+			baseTerrain = Environment.Terrains.OCEAN;
+			break;
+			default:
+				System.out.println("ERROR! [SpriteMapArtist.buildMapImage] Invalid terrain type " + baseTerrain);
+		}
+
+		return baseTerrain;
+	}
 }

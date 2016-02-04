@@ -60,40 +60,6 @@ public class SpriteMapArtist implements MapArtist
 		backupArtist.drawHighlights(g);
 	}
 	
-	/**
-	 * Determines the base terrain type for the provided environment terrain type.
-	 * For example, FOREST is a tile type, but the trees sit on a plain, so for drawing
-	 * purposes (esp. terrain transitions), the base tile type of FOREST is actually PLAIN. 
-	 */
-	private Environment.Terrains getBaseTerrainType(Environment.Terrains terrainType)
-	{
-		Environment.Terrains baseTerrain = terrainType;
-		switch( baseTerrain )
-		{
-		case CITY:
-		case DUNES:
-		case FACTORY:
-		case FOREST:
-		case HQ:
-		case MOUNTAIN:
-		case GRASS:
-		case ROAD:
-			baseTerrain = Environment.Terrains.GRASS;
-			break;
-		case SHOAL:
-			baseTerrain = Environment.Terrains.SHOAL;
-			break;
-		case REEF:
-		case OCEAN:
-			baseTerrain = Environment.Terrains.OCEAN;
-			break;
-			default:
-				System.out.println("ERROR! [SpriteMapArtist.buildMapImage] Invalid terrain type " + baseTerrain);
-		}
-		
-		return baseTerrain;
-	}
-	
 	private void buildMapImage(GameMap map)
 	{
 		Graphics g = baseMapImage.getGraphics();
@@ -105,11 +71,11 @@ public class SpriteMapArtist implements MapArtist
 			{
 				Environment.Terrains tileTerrain = map.getLocation(x, y).getEnvironment().terrainType;
 				
-				tileTerrain = getBaseTerrainType(tileTerrain);
+				//tileTerrain = getBaseTerrainType(tileTerrain);
 				
 				TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet( tileTerrain );
 				
-				spriteSet.drawTile(g, gameMap, x*MapView.getTileSize(), y*MapView.getTileSize(), SpriteLibrary.drawScale);
+				spriteSet.drawTile(g, gameMap, x, y, SpriteLibrary.drawScale);
 				//g.drawImage(spriteSet.chooseTileImage(gameMap, x, y), x*SpriteLibrary.spriteSize, y*SpriteLibrary.spriteSize, null);
 			}
 		}
