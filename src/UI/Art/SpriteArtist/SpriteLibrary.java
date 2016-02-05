@@ -14,7 +14,7 @@ import UI.MapView;
  */
 public class SpriteLibrary
 {
-	private static int baseSpriteSize = 16;
+	public static final int baseSpriteSize = 16; // TODO: no reason to define this here and in MapView (as tileSizePx).
 	public static int drawScale = MapView.getTileSize() / baseSpriteSize; // TODO: Should artists be initialized with this?
 	
 	// TODO: Account for weather?
@@ -42,25 +42,49 @@ public class SpriteLibrary
 		TerrainSpriteSet ss = null;
 		int w = baseSpriteSize;
 		int h = baseSpriteSize;
-		if(Environment.Terrains.GRASS == terrainType)
+		switch(terrainType)
 		{
+		case CITY:
+			spriteFile += "city_clear.png";
+			w = baseSpriteSize*2;
+			h = baseSpriteSize*2;
+			break;
+		case DUNES:
+			break;
+		case FACTORY:
+			spriteFile += "factory_clear.png";
+			w = baseSpriteSize*2;
+			h = baseSpriteSize*2;
+			break;
+		case FOREST:
+			spriteFile += "forest_clear.png";
+			w = baseSpriteSize*2;
+			h = baseSpriteSize*2;
+			break;
+		case GRASS:
 			spriteFile += "grass_clear.png";
-		}
-		else if(Environment.Terrains.OCEAN == terrainType)
-		{
+			break;
+		case HQ:
+			break;
+		case MOUNTAIN:
+			spriteFile += "mountain_clear.png";
+			w = baseSpriteSize*2;
+			h = baseSpriteSize*2;
+			break;
+		case OCEAN:
 			spriteFile += "sea_clear.png";
-		}
-		else if(Environment.Terrains.SHOAL == terrainType)
-		{
-			spriteFile += "shoal_clear.png";
-		}
-		else if(Environment.Terrains.REEF == terrainType)
-		{
+			break;
+		case REEF:
 			spriteFile += "reef_clear.png";
-		}
-		else if(Environment.Terrains.ROAD == terrainType)
-		{
+			break;
+		case ROAD:
 			spriteFile += "road_clear.png";
+			break;
+		case SHOAL:
+			spriteFile += "shoal_clear.png";
+			break;
+			default:
+			System.out.println("ERROR! [SpriteLibrary.loadTerrainSpriteSet] Unknown terrain type " + terrainType);
 		}
 		
 		try

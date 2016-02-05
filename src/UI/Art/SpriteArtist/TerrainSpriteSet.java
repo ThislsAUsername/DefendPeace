@@ -20,6 +20,9 @@ public class TerrainSpriteSet
 	//ArrayList<TileTransition> tileTransitions;
 	public final Environment.Terrains myTerrainType;
 
+	int drawOffsetx;
+	int drawOffsety;
+
     public static final short NORTH = 0x1;
     public static final short EAST = 0x2;
     public static final short SOUTH = 0x4;
@@ -41,6 +44,10 @@ public class TerrainSpriteSet
         myTerrainType = terrainType;
     	terrainSprites = new ArrayList<Sprite>();
     	
+        // We assume here that all sprites are sized in multiples of the base sprite size.
+        drawOffsetx = spriteWidth / SpriteLibrary.baseSpriteSize - 1;
+        drawOffsety = spriteHeight / SpriteLibrary.baseSpriteSize - 1;
+
     	if(spriteSheet == null)
     	{
     		// Just make a single frame of the specified size.
@@ -151,7 +158,7 @@ public class TerrainSpriteSet
 
 		//g.drawImage(terrainSprites.get(dirIndex).getFrame(variation), x, y, null);
 		BufferedImage frame = terrainSprites.get((dirIndex % terrainSprites.size())).getFrame(variation);
-		g.drawImage(frame, x*MapView.getTileSize(), y*MapView.getTileSize(), frame.getWidth()*scale, frame.getHeight()*scale, null);
+		g.drawImage(frame, (x-drawOffsetx)*MapView.getTileSize(), (y-drawOffsety)*MapView.getTileSize(), frame.getWidth()*scale, frame.getHeight()*scale, null);
 		
 		// TODO - make tile transitions happen.
 		// for(TileTransition tt : tileTransitions)
