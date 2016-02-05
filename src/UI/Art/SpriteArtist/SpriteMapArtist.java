@@ -38,7 +38,6 @@ public class SpriteMapArtist implements MapArtist
 	public void drawMap(Graphics g)
 	{
 		// TODO: Change what/where we draw based on camera location.
-		g.drawImage(baseMapImage, 0, 0, baseMapImage.getWidth()*SpriteLibrary.drawScale, baseMapImage.getHeight()*SpriteLibrary.drawScale, null);
 		g.drawImage(baseMapImage, 0, 0, null);
 	}
 
