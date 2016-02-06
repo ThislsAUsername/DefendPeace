@@ -68,14 +68,9 @@ public class SpriteMapArtist implements MapArtist
 		{
 			for(int x = 0; x < map.mapWidth; ++x)
 			{
-				Environment.Terrains tileTerrain = map.getLocation(x, y).getEnvironment().terrainType;
-				
-				//tileTerrain = getBaseTerrainType(tileTerrain);
-				
-				TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet( tileTerrain );
+				TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet( map.getLocation(x, y) );
 				
 				spriteSet.drawTile(g, gameMap, x, y, SpriteLibrary.drawScale);
-				//g.drawImage(spriteSet.chooseTileImage(gameMap, x, y), x*SpriteLibrary.spriteSize, y*SpriteLibrary.spriteSize, null);
 			}
 		}
 		

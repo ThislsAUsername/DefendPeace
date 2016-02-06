@@ -112,6 +112,14 @@ public class TerrainSpriteSet
     	System.out.println("INFO: Created TerrainSpriteSheet with " + terrainSprites.size() + " sprites.");
     }
     
+    public void colorize(Color[] oldColors, Color[] newColors)
+    {
+        for(Sprite s : terrainSprites)
+        {
+            s.colorize(oldColors, newColors);
+        }
+    }
+
     private void createDefaultBlankSprite(int w, int h)
     {
 		BufferedImage bi = new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
