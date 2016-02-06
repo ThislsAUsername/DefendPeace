@@ -215,7 +215,8 @@ public class MapController
 	    {
 	      if(myView.currentAction.execute(myGame.gameMap))
 	      {
-	        changeInputMode(InputMode.MAP);
+            changeInputMode(InputMode.ANIMATION);
+            myView.animate(myView.currentAction);
 	      }
 	      else
 	      {
