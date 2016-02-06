@@ -110,6 +110,7 @@ public class SpriteLibrary
 			spriteFile += "grass_clear.png";
 			break;
 		case HQ:
+			spriteFile += "hq_clear.png";
 			break;
 		case MOUNTAIN:
 			spriteFile += "mountain_clear.png";
