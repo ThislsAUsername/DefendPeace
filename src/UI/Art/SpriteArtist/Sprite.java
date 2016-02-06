@@ -9,12 +9,12 @@ import java.util.ArrayList;
  */
 public class Sprite
 {
-	ArrayList<BufferedImage> tileSprites;
+	ArrayList<BufferedImage> spriteImages;
 	
 	public Sprite(BufferedImage baseSprite)
 	{
-		tileSprites = new ArrayList<BufferedImage>();
-		tileSprites.add(baseSprite);
+		spriteImages = new ArrayList<BufferedImage>();
+		spriteImages.add(baseSprite);
 	}
 	
 	/**
@@ -23,18 +23,18 @@ public class Sprite
 	 */
 	public void addFrame(BufferedImage sprite)
 	{
-		tileSprites.add(sprite);
+		spriteImages.add(sprite);
 	}
 	
 	public BufferedImage getFrame(int index)
 	{
 		// Normalize the index if needed.
-		if(index >= tileSprites.size())
+		if(index >= spriteImages.size())
 		{
-			index = index % tileSprites.size();
+			index = index % spriteImages.size();
 		}
 		
-		return tileSprites.get(index);
+		return spriteImages.get(index);
 	}
 
 	/**
@@ -42,7 +42,7 @@ public class Sprite
 	 */
 	public void colorize(Color[] oldColors, Color[] newColors)
 	{
-		for(BufferedImage bi : tileSprites)
+		for(BufferedImage bi : spriteImages)
 		{
 			for(int x = 0; x < bi.getWidth(); ++x)
 			{
