@@ -142,6 +142,7 @@ public class Unit {
 		{
 			target.setOwner(CO);
 			captureProgress = 0;
+			target = null;
 		}
 	}
 
