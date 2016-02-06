@@ -9,4 +9,5 @@ public interface MapArtist {
 	public void drawCursor(Graphics g);
 	public void drawMovePath(Graphics g, Path p);
 	public void drawHighlights(Graphics g);
+	public void alertTileChanged(int tileX, int tileY);
 }

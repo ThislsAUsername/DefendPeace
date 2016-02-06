@@ -59,8 +59,16 @@ public class SpriteMapArtist implements MapArtist
 		backupArtist.drawHighlights(g);
 	}
 	
-	private void buildMapImage(GameMap map)
+	@Override
+	public void alertTileChanged(int x, int y)
 	{
+		// TODO: Only draw the tiles that need to change, rather than the whole map?
+		buildMapImage(gameMap);
+	}
+
+	public void buildMapImage(GameMap map)
+	{
+		System.out.println("Drawing map!");
 		Graphics g = baseMapImage.getGraphics();
 		
 		// Choose and draw all base sprites (grass, water, shallows).

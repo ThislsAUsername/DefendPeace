@@ -154,4 +154,11 @@ public class FillRectMapArtist implements MapArtist
 			}
 		}
 	}
+
+	@Override
+	public void alertTileChanged(int tileX, int tileY)
+	{
+		// Just to appease the compiler.
+		// This class redraws the entire map every frame, so this can be ignored.
+	}
 }
