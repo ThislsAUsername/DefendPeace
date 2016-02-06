@@ -72,7 +72,7 @@ public class TerrainSpriteSet
     				spriteNum++;
     			}
     			
-    			if(spriteNum != 1 && spriteNum != 15)
+                if(spriteNum != 1 && spriteNum != 16)
     			{
     				System.out.println("WARNING! TerrainSpriteSet detected a malformed sprite sheet!");
     				System.out.println("WARNING!   Found " + spriteNum + " " + spriteWidth + "x" + spriteHeight + " sprites in a "
