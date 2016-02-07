@@ -1,6 +1,7 @@
 package UI.Art.SpriteArtist;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,8 +52,8 @@ public class SpriteLibrary
 		SpriteSetKey spriteKey = SpriteSetKey.instance(terrain, null);
 		if(!spriteSetMap.containsKey(spriteKey))
 		{
-			// Go load it.
-			loadTerrainSpriteSet(spriteKey);
+			// Don't have it? Create it.
+			createTerrainSpriteSet(spriteKey);
 		}
 		// Now we must have an entry for that terrain type.
 		return spriteSetMap.get(spriteKey);
@@ -67,8 +68,8 @@ public class SpriteLibrary
 		SpriteSetKey spriteKey = SpriteSetKey.instance(loc.getEnvironment().terrainType, loc.getOwner());
 		if(!spriteSetMap.containsKey(spriteKey))
 		{
-			// Go load it.
-			loadTerrainSpriteSet(spriteKey);
+			// Don't have it? Create it.
+			createTerrainSpriteSet(spriteKey);
 		}
 		// Now we must have an entry for that terrain type.
 		return spriteSetMap.get(spriteKey);
@@ -79,85 +80,83 @@ public class SpriteLibrary
 	 * If we are unable to load the correct images for any reason, make a blank TerrainSpriteSet.
 	 * @param terrainType
 	 */
-	private static void loadTerrainSpriteSet(SpriteSetKey spriteKey)
+	private static void createTerrainSpriteSet(SpriteSetKey spriteKey)
 	{
 		Environment.Terrains terrainType = spriteKey.terrainKey;
 
-		String spriteFile = "res/tileset/";
 		TerrainSpriteSet ss = null;
 		int w = baseSpriteSize;
 		int h = baseSpriteSize;
 		switch(terrainType)
 		{
 		case CITY:
-			spriteFile += "city_clear.png";
-			w = baseSpriteSize*2;
-			h = baseSpriteSize*2;
+			ss = buildTerrainSpriteSet("res/tileset/city_clear.png", spriteKey, w*2, h*2);
 			break;
 		case DUNES:
 			break;
 		case FACTORY:
-			spriteFile += "factory_clear.png";
-			w = baseSpriteSize*2;
-			h = baseSpriteSize*2;
+			ss = buildTerrainSpriteSet("res/tileset/factory_clear.png", spriteKey, w*2, h*2);
 			break;
 		case FOREST:
-			spriteFile += "forest_clear.png";
-			w = baseSpriteSize*2;
-			h = baseSpriteSize*2;
+			ss = buildTerrainSpriteSet("res/tileset/forest_clear.png", spriteKey, w*2, h*2);
 			break;
 		case GRASS:
-			spriteFile += "grass_clear.png";
+			ss = buildTerrainSpriteSet("res/tileset/grass_clear.png", spriteKey, w, h);
 			break;
 		case HQ:
-			spriteFile += "hq_clear.png";
+			ss = buildTerrainSpriteSet("res/tileset/hq_clear.png", spriteKey, w*2, h*2);
 			break;
 		case MOUNTAIN:
-			spriteFile += "mountain_clear.png";
-			w = baseSpriteSize*2;
-			h = baseSpriteSize*2;
+			ss = buildTerrainSpriteSet("res/tileset/mountain_clear.png", spriteKey, w*2, h*2);
 			break;
 		case OCEAN:
-			spriteFile += "sea_clear.png";
+			ss = buildTerrainSpriteSet("res/tileset/sea_clear.png", spriteKey, w, h);
+			ss.addTileTransition(Environment.Terrains.GRASS, loadSpriteSheetFile("res/tileset/sea_grass_clear.png"), w, h);
 			break;
 		case REEF:
-			spriteFile += "reef_clear.png";
+			ss = buildTerrainSpriteSet("res/tileset/reef_clear.png", spriteKey, w, h);
 			break;
 		case ROAD:
-			spriteFile += "road_clear.png";
+			ss = buildTerrainSpriteSet("res/tileset/road_clear.png", spriteKey, w, h);
 			break;
 		case SHOAL:
-			spriteFile += "shoal_clear.png";
+			ss = buildTerrainSpriteSet("res/tileset/shoal_clear.png", spriteKey, w, h);
 			break;
 			default:
 			System.out.println("ERROR! [SpriteLibrary.loadTerrainSpriteSet] Unknown terrain type " + terrainType);
 		}
-		
+
+		spriteSetMap.put(spriteKey, ss);
+	}
+
+	private static TerrainSpriteSet buildTerrainSpriteSet(String spriteFile, SpriteSetKey spriteKey, int w, int h)
+	{
+		TerrainSpriteSet ss = null;
+
+		System.out.println("INFO: Loading terrain sprites for " + spriteKey.terrainKey);
+		ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile(spriteFile), w, h);
+
+		if(spriteKey.commanderKey != null)
+		{
+			ss.colorize(defaultMapColors, getColorPalette(spriteKey.commanderKey.myColor).mapBuildingColors);
+		}
+
+		return ss;
+	}
+
+	private static BufferedImage loadSpriteSheetFile(String filename)
+	{
+		BufferedImage bi = null;
 		try
 		{
-			System.out.println("INFO: Loading terrain sprites for " + terrainType);
-			ss = new TerrainSpriteSet(terrainType, ImageIO.read(new File(spriteFile)), w, h);
-
-			if(spriteKey.commanderKey != null)
-			{
-				ss.colorize(defaultMapColors, getColorPalette(spriteKey.commanderKey.myColor).mapBuildingColors);
-			}
+			bi = ImageIO.read(new File(filename));
 		}
-		catch( IOException ioe )
+		catch(IOException ioex)
 		{
-			System.out.println("WARNING! Exception while loading resource file '" + spriteFile + "'");
-			//ioe.printStackTrace();
-			ss = null; // Just in case it partially initialized or something.
+			System.out.println("WARNING! Exception loading resource file " + filename);
+			bi = null;
 		}
-		
-		if(ss == null)
-		{
-			// Somehow we failed to initialize the sprite set. Create one with default settings
-			System.out.println("WARNING! Continuing with placeholders.");
-			ss = new TerrainSpriteSet(terrainType, null, w, h);
-		}
-		
-		spriteSetMap.put(spriteKey, ss);
+		return bi;
 	}
 
 	private static ColorPalette getColorPalette(Color colorKey)

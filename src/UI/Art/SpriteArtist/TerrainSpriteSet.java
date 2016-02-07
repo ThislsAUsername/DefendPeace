@@ -2,7 +2,6 @@ package UI.Art.SpriteArtist;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
 import java.util.ArrayList;
@@ -17,7 +16,7 @@ import UI.MapView;
 public class TerrainSpriteSet
 {
 	private ArrayList<Sprite> terrainSprites;
-	//ArrayList<TileTransition> tileTransitions;
+	private ArrayList<TerrainSpriteSet> tileTransitions;
 	public final Environment.Terrains myTerrainType;
 
 	int drawOffsetx;
@@ -43,6 +42,7 @@ public class TerrainSpriteSet
     {
         myTerrainType = terrainType;
     	terrainSprites = new ArrayList<Sprite>();
+		tileTransitions = new ArrayList<TerrainSpriteSet>();
     	
         // We assume here that all sprites are sized in multiples of the base sprite size.
         drawOffsetx = spriteWidth / SpriteLibrary.baseSpriteSize - 1;
@@ -50,8 +50,11 @@ public class TerrainSpriteSet
 
     	if(spriteSheet == null)
     	{
+			System.out.println("WARNING! Continuing with placeholder images.");
     		// Just make a single frame of the specified size.
-    		createDefaultBlankSprite(spriteWidth, spriteHeight);
+			drawOffsetx = 0;
+			drawOffsety = 0;
+			createDefaultBlankSprite(SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize);
     	}
     	else
     	{
@@ -112,6 +115,11 @@ public class TerrainSpriteSet
     	System.out.println("INFO: Created TerrainSpriteSheet with " + terrainSprites.size() + " sprites.");
     }
     
+    public void addTileTransition(Environment.Terrains otherTerrain, BufferedImage spriteSheet, int spriteWidth, int spriteHeight)
+    {
+        tileTransitions.add(new TerrainSpriteSet(otherTerrain, spriteSheet, spriteWidth, spriteHeight));
+    }
+
     public void colorize(Color[] oldColors, Color[] newColors)
     {
         for(Sprite s : terrainSprites)
@@ -140,12 +148,11 @@ public class TerrainSpriteSet
 		if(terrainSprites.size() > 1) // We expect the size to be either 1 or 16.
 		{
 			// Figure out which neighbors tiles have the same terrain type as this one.
-			// NOTE: Simple directional tiles don't care about diagonal adjacency - To define
-			//   sprites based on diagonally-adjacent tiles, define a TileTransition for that terrain type.
-			dirIndex |= checkTileType(map, myTerrainType, x, y-1, NORTH);
-			dirIndex |= checkTileType(map, myTerrainType, x+1, y, EAST);
-			dirIndex |= checkTileType(map, myTerrainType, x, y+1, SOUTH);
-			dirIndex |= checkTileType(map, myTerrainType, x-1, y, WEST);
+			boolean assumeSameTileType = myTerrainType == map.getEnvironment(x, y).terrainType;
+			dirIndex |= checkTileType(map, myTerrainType, x, y-1, assumeSameTileType)? NORTH:0;
+			dirIndex |= checkTileType(map, myTerrainType, x+1, y, assumeSameTileType)? EAST:0;
+			dirIndex |= checkTileType(map, myTerrainType, x, y+1, assumeSameTileType)? SOUTH:0;
+			dirIndex |= checkTileType(map, myTerrainType, x-1, y, assumeSameTileType)? WEST:0;
 		}
 		
 		// Normalize the index value just in case.
@@ -168,27 +175,28 @@ public class TerrainSpriteSet
 		BufferedImage frame = terrainSprites.get((dirIndex % terrainSprites.size())).getFrame(variation);
 		g.drawImage(frame, (x-drawOffsetx)*MapView.getTileSize(), (y-drawOffsety)*MapView.getTileSize(), frame.getWidth()*scale, frame.getHeight()*scale, null);
 		
-		// TODO - make tile transitions happen.
-		// for(TileTransition tt : tileTransitions)
-		//{
-			// Draw any transition layers required.
-		//}
+		// TODO: Draw corner-only transitions.
+
+		for(TerrainSpriteSet tt : tileTransitions)
+		{
+			tt.drawTile(g, map, x, y, scale);
+		}
 	}
     
 	/**
-	 * If position (x, y) in map has TerrainType terrain, return value. Else return 0;
+	 * If position (x, y) in map has TerrainType terrain, return true. Else return false;
 	 * 
-	 * If position (x, y) is not a valid location (out of bounds) also return value. This has the effect
+	 * If position (x, y) is not a valid location (out of bounds), then return true IFF assumeTrue. This has the effect
 	 *   of allowing us to assume that tiles out of sight are whatever terrain we prefer - enabling us to
-	 *   draw roads that go off the map, etc.
+	 *   draw roads that go off the map, etc, but keep it from looking like there is always land across the
+	 *   water at the edge of the map due to unwanted cliff-face transitions.
 	 */
-    private short checkTileType(GameMap map, Environment.Terrains terrain, int x, int y, short value)
+    private boolean checkTileType(GameMap map, Environment.Terrains terrain, int x, int y, boolean assumeTrue)
     {
-    	if(map.isLocationValid(x, y) && (map.getEnvironment(x, y).terrainType != myTerrainType) )
-    	{
-    		value = 0;
-    	}
-    	return value;
+		return (map.isLocationValid(x, y) &&
+				  ((map.getEnvironment(x,y).terrainType == myTerrainType) || // Valid location, terrain types match.
+				  (getBaseTerrainType(map.getEnvironment(x,y).terrainType) == myTerrainType)) // Valid location, terrain base matches. 
+			    || (!map.isLocationValid(x,y) && assumeTrue) ); // Invalid location, but assuming true for that case.
     }
 
 	/**

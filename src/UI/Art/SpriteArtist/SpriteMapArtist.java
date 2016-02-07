@@ -81,7 +81,5 @@ public class SpriteMapArtist implements MapArtist
 				spriteSet.drawTile(g, gameMap, x, y, SpriteLibrary.drawScale);
 			}
 		}
-		
-		// Draw all map object sprites (e.g. trees, mountains, buildings).
 	}
 }
