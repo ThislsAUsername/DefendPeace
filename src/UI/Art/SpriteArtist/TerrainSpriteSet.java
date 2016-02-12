@@ -22,10 +22,16 @@ public class TerrainSpriteSet
 	int drawOffsetx;
 	int drawOffsety;
 
-    public static final short NORTH = 0x1;
-    public static final short EAST = 0x2;
-    public static final short SOUTH = 0x4;
-    public static final short WEST = 0x8;
+    // Keys to the sprite array - logical OR the four cardinals to get the corresponding sprite index.
+    // The four diagonal directions are just the index for that corner transition.
+    private static final short NORTH = 0x1;
+    private static final short EAST = 0x2;
+    private static final short SOUTH = 0x4;
+    private static final short WEST = 0x8;
+    private static final short NW = 16;
+    private static final short NE = 17;
+    private static final short SE = 18;
+    private static final short SW = 19;
     // public static final short PLACEHOLDER5 = 0x10;
     // public static final short PLACEHOLDER6 = 0x20;
     // public static final short PLACEHOLDER7 = 0x40;
@@ -62,28 +68,28 @@ public class TerrainSpriteSet
     		int xOffset = 0;
     		int yOffset = 0;
     		int spriteNum = 0;
-    		int maxSpriteNum = NORTH | EAST | SOUTH | WEST; // 16 possible sprites per terrain type (0-15).
+    		int maxSpriteIndex = (NORTH | EAST | SOUTH | WEST) + 4; // 20 possible sprites per terrain type (0-15, plus four corners).
     		
 			// Create the initial sprites    		
     		try
     		{
     			// Loop until we get as many sprites as we expect or run out of runway.
-    			while(spriteNum <= maxSpriteNum && ( (spriteNum+1)*spriteWidth <= spriteSheet.getWidth() ) )
+    			while(spriteNum <= maxSpriteIndex && ( (spriteNum+1)*spriteWidth <= spriteSheet.getWidth() ) )
     			{
     				terrainSprites.add(new Sprite(spriteSheet.getSubimage(xOffset, yOffset, spriteWidth, spriteHeight)));
     				xOffset += spriteWidth;
     				spriteNum++;
     			}
     			
-                if(spriteNum != 1 && spriteNum != 16)
+                if(spriteNum != 1 && spriteNum != 16 && spriteNum != 20)
     			{
     				System.out.println("WARNING! TerrainSpriteSet detected a malformed sprite sheet!");
     				System.out.println("WARNING!   Found " + spriteNum + " " + spriteWidth + "x" + spriteHeight + " sprites in a "
     						+ spriteSheet.getWidth() + "x" + spriteSheet.getHeight() + " spritesheet");
-    				System.out.println("WARNING!   (There should be 1 sprite or 16 in a terrain sprite sheet)");
+    				System.out.println("WARNING!   (There should be 1, 16, or 20 sprites in a terrain sprite sheet)");
     			}
 
-    			maxSpriteNum = spriteNum; // However many sprites we found, we won't find more than that on a second horizontal pass.
+    			maxSpriteIndex = spriteNum-1; // However many sprites we found, we won't find more than that on a second horizontal pass.
     			
 				// If this sprite has more vertical space, pull in alternate versions of the existing terrain tiles.
     			while(yOffset + spriteHeight <= spriteSheet.getHeight())
@@ -91,7 +97,7 @@ public class TerrainSpriteSet
         			xOffset = 0;
         			spriteNum = 0;
         			
-        			while(spriteNum <= maxSpriteNum && ( (spriteNum+1)*spriteWidth <= spriteSheet.getWidth() ) )
+        			while(spriteNum <= maxSpriteIndex && ( (spriteNum+1)*spriteWidth <= spriteSheet.getWidth() ) )
         			{
         				terrainSprites.get(spriteNum).addFrame(spriteSheet.getSubimage(xOffset, yOffset, spriteWidth, spriteHeight));
         				xOffset += spriteWidth;
@@ -145,16 +151,16 @@ public class TerrainSpriteSet
 		int variation = (x+1)*(y)+x; // Used to vary the specific sprite version drawn at each place in a repeatable way.
 		
 		short dirIndex = 0;
-		if(terrainSprites.size() > 1) // We expect the size to be either 1 or 16.
+		boolean assumeSameTileType = myTerrainType == map.getEnvironment(x, y).terrainType;
+		if(terrainSprites.size() > 1) // We expect the size to be either 1, 16, or 20.
 		{
 			// Figure out which neighbors tiles have the same terrain type as this one.
-			boolean assumeSameTileType = myTerrainType == map.getEnvironment(x, y).terrainType;
 			dirIndex |= checkTileType(map, myTerrainType, x, y-1, assumeSameTileType)? NORTH:0;
 			dirIndex |= checkTileType(map, myTerrainType, x+1, y, assumeSameTileType)? EAST:0;
 			dirIndex |= checkTileType(map, myTerrainType, x, y+1, assumeSameTileType)? SOUTH:0;
 			dirIndex |= checkTileType(map, myTerrainType, x-1, y, assumeSameTileType)? WEST:0;
 		}
-		
+
 		// Normalize the index value just in case.
 		if(dirIndex >= terrainSprites.size())
 		{
@@ -171,12 +177,38 @@ public class TerrainSpriteSet
 			spriteSet.drawTile(g, map, x, y, scale);
 		}
 
-		//g.drawImage(terrainSprites.get(dirIndex).getFrame(variation), x, y, null);
+		// Draw the current tile
 		BufferedImage frame = terrainSprites.get((dirIndex % terrainSprites.size())).getFrame(variation);
-		g.drawImage(frame, (x-drawOffsetx)*MapView.getTileSize(), (y-drawOffsety)*MapView.getTileSize(), frame.getWidth()*scale, frame.getHeight()*scale, null);
+		g.drawImage(frame, (x-drawOffsetx)*MapView.getTileSize(), (y-drawOffsety)*MapView.getTileSize(),
+				frame.getWidth()*scale, frame.getHeight()*scale, null);
 		
-		// TODO: Draw corner-only transitions.
+		// Handle drawing corner-case tile variations if needed.
+		if(terrainSprites.size() == 20)
+		{
+			// If we didn't have a N or W transition, then look in the NW position
+			if((dirIndex & (NORTH | WEST)) == 0 && checkTileType(map, myTerrainType, x-1, y-1, assumeSameTileType))
+			{
+				g.drawImage(terrainSprites.get(NW).getFrame(variation),	(x-drawOffsetx)*MapView.getTileSize(),
+						(y-drawOffsety)*MapView.getTileSize(), frame.getWidth()*scale, frame.getHeight()*scale, null);
+			}
+			if((dirIndex & (NORTH | EAST)) == 0 && checkTileType(map, myTerrainType, x+1, y-1, assumeSameTileType))
+			{
+				g.drawImage(terrainSprites.get(NE).getFrame(variation),	(x-drawOffsetx)*MapView.getTileSize(),
+						(y-drawOffsety)*MapView.getTileSize(), frame.getWidth()*scale, frame.getHeight()*scale, null);
+			}
+			if((dirIndex & (SOUTH | EAST)) == 0 && checkTileType(map, myTerrainType, x+1, y+1, assumeSameTileType))
+			{
+				g.drawImage(terrainSprites.get(SE).getFrame(variation),	(x-drawOffsetx)*MapView.getTileSize(),
+						(y-drawOffsety)*MapView.getTileSize(), frame.getWidth()*scale, frame.getHeight()*scale, null);
+			}
+			if((dirIndex & (SOUTH | WEST)) == 0 && checkTileType(map, myTerrainType, x-1, y+1, assumeSameTileType))
+			{
+				g.drawImage(terrainSprites.get(SW).getFrame(variation),	(x-drawOffsetx)*MapView.getTileSize(),
+						(y-drawOffsety)*MapView.getTileSize(), frame.getWidth()*scale, frame.getHeight()*scale, null);
+			}
+		}
 
+		// Draw any tile transitions that are needed.
 		for(TerrainSpriteSet tt : tileTransitions)
 		{
 			tt.drawTile(g, map, x, y, scale);
