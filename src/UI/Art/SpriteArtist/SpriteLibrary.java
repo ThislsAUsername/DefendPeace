@@ -121,6 +121,8 @@ public class SpriteLibrary
 			break;
 		case SHOAL:
 			ss = buildTerrainSpriteSet("res/tileset/shoal_clear.png", spriteKey, w, h);
+			ss.addTileTransition(Environment.Terrains.OCEAN, loadSpriteSheetFile("res/tileset/shoal_sea_clear.png"), w, h);
+			ss.addTileTransition(Environment.Terrains.GRASS, loadSpriteSheetFile("res/tileset/shoal_grass_clear.png"), w, h);
 			break;
 			default:
 			System.out.println("ERROR! [SpriteLibrary.loadTerrainSpriteSet] Unknown terrain type " + terrainType);
