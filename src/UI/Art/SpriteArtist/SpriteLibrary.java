@@ -22,15 +22,24 @@ public class SpriteLibrary
 	public static final int baseSpriteSize = 16; // TODO: no reason to define this here and in MapView (as tileSizePx).
 	public static int drawScale = MapView.getTileSize() / baseSpriteSize; // TODO: Should artists be initialized with this?
 	
-	private static Color[] defaultMapColors = { new Color(245, 245, 245),
-		new Color(200, 200, 200), new Color(160, 160, 160),
-		new Color(110, 110, 110), new Color(70, 70, 70)};
-	private static Color[] pinkMapBuildingColors = { new Color(255, 245, 245),
-		new Color(255, 210, 210), new Color(240, 160, 160),
-		new Color(155, 70, 70), new Color(255, 219, 74)	};
-	private static Color[] cyanMapBuildingColors = { new Color(237, 255, 255),
-		new Color(183, 255, 255), new Color(130, 216, 216),
-		new Color(77, 157, 157), new Color(255, 219, 74) };
+	private static Color[] defaultMapColors = {
+		new Color(110, 110, 110),
+		new Color(160, 160, 160),
+		new Color(200, 200, 200),
+		new Color(245, 245, 245),
+		new Color(70, 70, 70) };
+	private static Color[] pinkMapBuildingColors = {
+		new Color(190, 90, 90),
+		new Color(240, 140, 140),
+		new Color(250, 190, 190),
+		new Color(255, 245, 245),
+		new Color(255, 219, 74)	};
+	private static Color[] cyanMapBuildingColors = {
+		new Color(77, 157, 157),
+		new Color(130, 200, 200),
+		new Color(200, 230, 230),
+		new Color(245, 255, 255),
+		new Color(255, 219, 74) };
 
 	private static HashMap<Color, ColorPalette> colorPalettes = new HashMap<Color, ColorPalette>() {
 		private static final long serialVersionUID = 1L;
