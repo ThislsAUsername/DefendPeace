@@ -5,7 +5,7 @@ package Terrain;
  * Subsequent calls to retrieve that tile will receive the same copy.
  */
 public class Environment {
-	public enum Terrains{GRASS, FOREST, MOUNTAIN, DUNES, ROAD, CITY, FACTORY, HQ, SHOAL, OCEAN, REEF};
+	public enum Terrains{GRASS, FOREST, MOUNTAIN, DUNES, ROAD, CITY, FACTORY, HQ, SHOAL, SEA, REEF};
 	public enum Weathers{CLEAR, RAIN, SNOW, SANDSTORM};
 
 	public final Terrains terrainType;
@@ -57,7 +57,7 @@ public class Environment {
 			return 4;
 		case SHOAL:
 			return 0;
-		case OCEAN:
+		case SEA:
 			return 1;
 		case REEF:
 			return 2;

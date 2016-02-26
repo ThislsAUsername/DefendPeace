@@ -118,20 +118,20 @@ public class SpriteLibrary
 		case MOUNTAIN:
 			ss = buildTerrainSpriteSet("res/tileset/mountain_clear.png", spriteKey, w*2, h*2);
 			break;
-		case OCEAN:
+		case SEA:
 			ss = buildTerrainSpriteSet("res/tileset/sea_clear.png", spriteKey, w, h);
 			ss.addTileTransition(Environment.Terrains.GRASS, loadSpriteSheetFile("res/tileset/sea_grass_clear.png"), w, h);
 			break;
 		case REEF:
 			ss = buildTerrainSpriteSet("res/tileset/reef_clear.png", spriteKey, w, h);
-			ss.addTileTransition(Environment.Terrains.OCEAN, loadSpriteSheetFile("res/tileset/reef_sea_clear.png"), w, h);
+			ss.addTileTransition(Environment.Terrains.SEA, loadSpriteSheetFile("res/tileset/reef_sea_clear.png"), w, h);
 			break;
 		case ROAD:
 			ss = buildTerrainSpriteSet("res/tileset/road_clear.png", spriteKey, w, h);
 			break;
 		case SHOAL:
 			ss = buildTerrainSpriteSet("res/tileset/shoal_clear.png", spriteKey, w, h);
-			ss.addTileTransition(Environment.Terrains.OCEAN, loadSpriteSheetFile("res/tileset/shoal_sea_clear.png"), w, h);
+			ss.addTileTransition(Environment.Terrains.SEA, loadSpriteSheetFile("res/tileset/shoal_sea_clear.png"), w, h);
 			ss.addTileTransition(Environment.Terrains.GRASS, loadSpriteSheetFile("res/tileset/shoal_grass_clear.png"), w, h);
 			break;
 			default:

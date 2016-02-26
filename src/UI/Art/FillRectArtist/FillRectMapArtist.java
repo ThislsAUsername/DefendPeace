@@ -83,7 +83,7 @@ public class FillRectMapArtist implements MapArtist
 		case FOREST:
 			tileColor = COLOR_FOREST;
 			break;
-		case OCEAN:
+		case SEA:
 			tileColor = COLOR_OCEAN;
 			break;
 		case HQ:

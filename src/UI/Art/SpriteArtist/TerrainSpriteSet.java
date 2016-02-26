@@ -255,8 +255,8 @@ public class TerrainSpriteSet
 			baseTerrain = Environment.Terrains.SHOAL;
 			break;
 		case REEF:
-		case OCEAN:
-			baseTerrain = Environment.Terrains.OCEAN;
+		case SEA:
+			baseTerrain = Environment.Terrains.SEA;
 			break;
 			default:
 				System.out.println("ERROR! [SpriteMapArtist.buildMapImage] Invalid terrain type " + baseTerrain);
