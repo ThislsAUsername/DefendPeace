@@ -124,7 +124,7 @@ public class SpriteLibrary
 			break;
 		case REEF:
 			ss = buildTerrainSpriteSet("res/tileset/reef_clear.png", spriteKey, w, h);
-			ss.addTileTransition(Environment.Terrains.SEA, loadSpriteSheetFile("res/tileset/reef_sea_clear.png"), w, h);
+			ss.addTileTransition(Environment.Terrains.SEA, loadSpriteSheetFile("res/tileset/reef_clear.png"), w, h);
 			break;
 		case ROAD:
 			ss = buildTerrainSpriteSet("res/tileset/road_clear.png", spriteKey, w, h);
