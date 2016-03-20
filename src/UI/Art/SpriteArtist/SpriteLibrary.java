@@ -19,8 +19,8 @@ import UI.MapView;
  */
 public class SpriteLibrary
 {
-	public static final int baseSpriteSize = 16; // TODO: no reason to define this here and in MapView (as tileSizePx).
-	public static int drawScale = MapView.getTileSize() / baseSpriteSize; // TODO: Should artists be initialized with this?
+	// This is the physical size of a single map square in pixels.
+	public static final int baseSpriteSize = 16;
 	
 	private static Color[] defaultMapColors = {
 		new Color(110, 110, 110),

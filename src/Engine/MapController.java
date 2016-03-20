@@ -456,12 +456,12 @@ public class MapController
 		}
     }
 
-    currentMovePath.addWaypoint(x, y, MapView.getMapUnitMoveSpeed());
+    currentMovePath.addWaypoint(x, y, myView.getMapUnitMoveSpeed());
 
     if(!Utils.isPathValid(myView.currentAction.getActor(), currentMovePath, myGame.gameMap))
     {
       // The currently-built path is invalid. Try to generate a new one (may still return null).
-      currentMovePath = Utils.findShortestPath(myView.currentAction.getActor(), x, y, myGame.gameMap);
+      currentMovePath = Utils.findShortestPath(myView.currentAction.getActor(), x, y, myView.getMapUnitMoveSpeed(), myGame.gameMap);
     }
   }
 

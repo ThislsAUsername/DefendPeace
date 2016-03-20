@@ -13,7 +13,7 @@ import UI.Art.MapArtist;
 
 public class FillRectMapArtist implements MapArtist
 {
-	private final int tileSizePx = MapView.getTileSize();
+	private int tileSizePx;
 
 	public static final Color COLOR_GRASS = new Color(186,255,124);
 	public static final Color COLOR_CITY = Color.GRAY;
@@ -35,6 +35,12 @@ public class FillRectMapArtist implements MapArtist
 	{
 		myGame = game;
 		gameMap = game.gameMap;
+	}
+
+	@Override
+	public void setView(MapView view)
+	{
+		tileSizePx = view.getTileSize();
 	}
 
 	@Override

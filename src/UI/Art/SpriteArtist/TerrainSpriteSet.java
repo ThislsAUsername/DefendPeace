@@ -142,7 +142,7 @@ public class TerrainSpriteSet
 		big.fillRect(0, 0, w, h);
 		terrainSprites.add(new Sprite(bi));
     }
-    
+
 	/**
 	 * Draws the terrain at the indicated location, accounting for any defined tile transitions.  
 	 */
@@ -177,9 +177,11 @@ public class TerrainSpriteSet
 			spriteSet.drawTile(g, map, x, y, scale);
 		}
 
+		int tileSize = SpriteLibrary.baseSpriteSize * scale;
+
 		// Draw the current tile
 		BufferedImage frame = terrainSprites.get((dirIndex % terrainSprites.size())).getFrame(variation);
-		g.drawImage(frame, (x-drawOffsetx)*MapView.getTileSize(), (y-drawOffsety)*MapView.getTileSize(),
+		g.drawImage(frame, (x-drawOffsetx)*tileSize, (y-drawOffsety)*tileSize,
 				frame.getWidth()*scale, frame.getHeight()*scale, null);
 		
 		// Handle drawing corner-case tile variations if needed.
@@ -188,23 +190,23 @@ public class TerrainSpriteSet
 			// If we didn't have a N or W transition, then look in the NW position
 			if((dirIndex & (NORTH | WEST)) == 0 && checkTileType(map, myTerrainType, x-1, y-1, assumeSameTileType))
 			{
-				g.drawImage(terrainSprites.get(NW).getFrame(variation),	(x-drawOffsetx)*MapView.getTileSize(),
-						(y-drawOffsety)*MapView.getTileSize(), frame.getWidth()*scale, frame.getHeight()*scale, null);
+				g.drawImage(terrainSprites.get(NW).getFrame(variation),	(x-drawOffsetx)*tileSize,
+						(y-drawOffsety)*tileSize, frame.getWidth()*scale, frame.getHeight()*scale, null);
 			}
 			if((dirIndex & (NORTH | EAST)) == 0 && checkTileType(map, myTerrainType, x+1, y-1, assumeSameTileType))
 			{
-				g.drawImage(terrainSprites.get(NE).getFrame(variation),	(x-drawOffsetx)*MapView.getTileSize(),
-						(y-drawOffsety)*MapView.getTileSize(), frame.getWidth()*scale, frame.getHeight()*scale, null);
+				g.drawImage(terrainSprites.get(NE).getFrame(variation),	(x-drawOffsetx)*tileSize,
+						(y-drawOffsety)*tileSize, frame.getWidth()*scale, frame.getHeight()*scale, null);
 			}
 			if((dirIndex & (SOUTH | EAST)) == 0 && checkTileType(map, myTerrainType, x+1, y+1, assumeSameTileType))
 			{
-				g.drawImage(terrainSprites.get(SE).getFrame(variation),	(x-drawOffsetx)*MapView.getTileSize(),
-						(y-drawOffsety)*MapView.getTileSize(), frame.getWidth()*scale, frame.getHeight()*scale, null);
+				g.drawImage(terrainSprites.get(SE).getFrame(variation),	(x-drawOffsetx)*tileSize,
+						(y-drawOffsety)*tileSize, frame.getWidth()*scale, frame.getHeight()*scale, null);
 			}
 			if((dirIndex & (SOUTH | WEST)) == 0 && checkTileType(map, myTerrainType, x-1, y+1, assumeSameTileType))
 			{
-				g.drawImage(terrainSprites.get(SW).getFrame(variation),	(x-drawOffsetx)*MapView.getTileSize(),
-						(y-drawOffsety)*MapView.getTileSize(), frame.getWidth()*scale, frame.getHeight()*scale, null);
+				g.drawImage(terrainSprites.get(SW).getFrame(variation),	(x-drawOffsetx)*tileSize,
+						(y-drawOffsety)*tileSize, frame.getWidth()*scale, frame.getHeight()*scale, null);
 			}
 		}
 

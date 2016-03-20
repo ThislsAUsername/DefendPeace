@@ -16,8 +16,10 @@ public class SpriteMapArtist implements MapArtist
 {
 	private GameInstance myGame;
 	private GameMap gameMap;
-	
+
 	BufferedImage baseMapImage;
+
+	private int drawScale;
 
 	MapArtist backupArtist; // TODO: Make this obsolete.
 	
@@ -25,15 +27,24 @@ public class SpriteMapArtist implements MapArtist
 	{
 		myGame = game;
 		gameMap = game.gameMap;
-		
+	}
+
+	@Override
+	public void setView(MapView view)
+	{
+		drawScale = view.getTileSize() / SpriteLibrary.baseSpriteSize;
+
+		// TODO: make this obsolete.
 		backupArtist = new FillRectMapArtist(myGame);
+		backupArtist.setView(view);
 		
-		baseMapImage = new BufferedImage(gameMap.mapWidth*MapView.getTileSize(), 
-				gameMap.mapHeight*MapView.getTileSize(), BufferedImage.TYPE_INT_RGB);
+		baseMapImage = new BufferedImage(gameMap.mapWidth*view.getTileSize(),
+				gameMap.mapHeight*view.getTileSize(), BufferedImage.TYPE_INT_RGB);
 		
 		// Build base map image.
 		buildMapImage(gameMap);
 	}
+
 	@Override
 	public void drawMap(Graphics g)
 	{
@@ -78,7 +89,7 @@ public class SpriteMapArtist implements MapArtist
 			{
 				TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet( map.getLocation(x, y) );
 				
-				spriteSet.drawTile(g, gameMap, x, y, SpriteLibrary.drawScale);
+				spriteSet.drawTile(g, gameMap, x, y, drawScale);
 			}
 		}
 	}

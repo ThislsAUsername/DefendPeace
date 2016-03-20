@@ -10,19 +10,27 @@ import Units.UnitModel.UnitEnum;
 
 public class FillRectMenuArtist implements MenuArtist
 {
-	private int tileSizePx = MapView.getTileSize();
-	private int mapViewWidth = MapView.mapViewWidth;
-	private int mapViewHeight = MapView.mapViewHeight;
+	private int tileSizePx;
+	private int mapViewWidth;
+	private int mapViewHeight;
 
 	GameInstance myGame;
 	MapView myView;
 
 	public static final Color COLOR_CURSOR = new Color(253,171,77,200);
 	
-	public FillRectMenuArtist(GameInstance game, MapView view)
+	public FillRectMenuArtist(GameInstance game)
 	{
 		myGame = game;
+	}
+
+	@Override
+	public void setView(MapView view)
+	{
 		myView = view;
+		tileSizePx = view.getTileSize();
+		mapViewWidth = view.getViewWidth();
+		mapViewHeight = view.getViewHeight();
 	}
 	
 	@Override

@@ -166,8 +166,10 @@ public class Utils {
 	/**
 	 * Calculates and returns the shortest path for unit to take from its current location to map(x, y).
 	 * If no valid path is found, null is returned.
-	 */
-	public static Path findShortestPath(Unit unit, int x, int y, GameMap map)
+	 */ // TODO: I don't like needing wptTimeMs as a parameter here. Investigate removing (perhaps Path can key off of
+	    //       speed instead of time spent, and then the value would be path-wide instead of per-point, and could be
+	    //       kept as part of MapView instead of here?
+	public static Path findShortestPath(Unit unit, int x, int y, double wptTimeMs, GameMap map)
 	{
 		//System.out.println("Finding new path for " + unit.model.type + " from " + unit.x + ", " + unit.y + " to " + x + ", " + y);
 		// Set all locations to false/remaining move = 0
@@ -214,7 +216,7 @@ public class Utils {
 			for(int j = waypointList.size() - 1; j >= 0; --j)
 			{
 				//System.out.println("Waypoint " + waypointList.get(j).x + ", " + waypointList.get(j).y + " over " + map.getEnvironment(waypointList.get(j).x, waypointList.get(j).y).terrainType);
-				sPath.addWaypoint(waypointList.get(j).x, waypointList.get(j).y, MapView.getMapUnitMoveSpeed());
+				sPath.addWaypoint(waypointList.get(j).x, waypointList.get(j).y, wptTimeMs);
 			}
 		}
 

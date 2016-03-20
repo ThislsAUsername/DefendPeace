@@ -14,7 +14,7 @@ import Units.Unit;
 
 public class FillRectUnitArtist implements UnitArtist
 {
-	private int tileSizePx = MapView.getTileSize();
+	private int tileSizePx;
 	
 	private GameInstance myGame = null;
 	private GameMap gameMap = null;
@@ -22,11 +22,17 @@ public class FillRectUnitArtist implements UnitArtist
 	
 	public static final Color COLOR_TIRED = new Color(128,128,128,160);
 	
-	public FillRectUnitArtist(GameInstance game, MapView view)
+	public FillRectUnitArtist(GameInstance game)
 	{
 		myGame = game;
 		gameMap = myGame.gameMap;
+	}
+
+	@Override
+	public void setView(MapView view)
+	{
 		myView = view;
+		tileSizePx = view.getTileSize();
 	}
 	
 	public void drawUnits(Graphics g)

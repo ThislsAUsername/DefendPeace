@@ -11,6 +11,7 @@ import CommandingOfficers.Commander;
 import Terrain.GameMap;
 import UI.InputHandler;
 import UI.MapView;
+import UI.Art.SpriteArtist.SpriteMapView;
 
 public class Driver implements ActionListener{
 
@@ -37,7 +38,7 @@ public class Driver implements ActionListener{
 		GameMap map = new GameMap(cos);
 		GameInstance newGame = new GameInstance(map, cos);
 
-		MapView mapView = new MapView(newGame);
+		MapView mapView = new SpriteMapView(newGame);
 		MapController mapController = new MapController(newGame, mapView);
 
 		activeController = mapController;

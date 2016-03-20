@@ -8,48 +8,44 @@ import UI.Art.MenuArtist;
 import UI.Art.UnitArtist;
 import UI.Art.Animation.AnimationSequence;
 import UI.Art.Animation.NobunagaBattleAnimation;
-import UI.Art.FillRectArtist.FillRectMapArtist;
-import UI.Art.FillRectArtist.FillRectMenuArtist;
-import UI.Art.FillRectArtist.FillRectUnitArtist;
-import UI.Art.SpriteArtist.SpriteMapArtist;
 
 import Engine.GameAction;
-import Engine.GameInstance;
 import Engine.MapController;
 
-public class MapView extends javax.swing.JPanel {
+public abstract class MapView extends javax.swing.JPanel {
 
 	private static final long serialVersionUID = 1L;
-	
-	private GameInstance myGame;
 	
 	public GameMenu currentMenu;
 	public GameAction currentAction = null;
 
-	private static double unitMoveSpeedMSPerTile = 100;
+	private int unitMoveSpeedMSPerTile = 100;
 
 	private MapArtist mapArtist;
 	private UnitArtist unitArtist;
 	private MenuArtist menuArtist;
 	
-	private static final int tileSizePx = 16;
-	private static int drawScale = 2;
-	public static int mapViewWidth = tileSizePx * drawScale * 15;
-	public static int mapViewHeight = tileSizePx * drawScale * 10;
+	private final int tileSizePx = 16;
+	private int drawScale = 3;
+	private int mapViewWidth = tileSizePx * drawScale * 15;
+	private int mapViewHeight = tileSizePx * drawScale * 10;
 
 	private AnimationSequence animationSequence = null;
 
 	MapController myController = null;
 
-	public MapView(GameInstance game)
+	public MapView(MapArtist mapArt, UnitArtist unitArt, MenuArtist menuArt)
 	{
-		myGame = game;
+		// TODO: Move this down to the child classes?
 		setPreferredSize(new Dimension(mapViewWidth, mapViewHeight));
 
-		unitArtist = new FillRectUnitArtist(myGame, this);
-		//mapArtist = new FillRectMapArtist(myGame);
-		mapArtist = new SpriteMapArtist(myGame);
-		menuArtist = new FillRectMenuArtist(myGame, this);
+		mapArt.setView(this);
+		unitArt.setView(this);
+		menuArt.setView(this);
+
+		mapArtist = mapArt; // TODO: Perhaps mapArtist should determine mapViewHeight, etc.
+		unitArtist = unitArt;
+		menuArtist = menuArt;
 	}
 
 	public void setController(MapController controller)
@@ -57,9 +53,17 @@ public class MapView extends javax.swing.JPanel {
 		myController = controller;
 	}
 
-	public static int getTileSize()
+	public int getTileSize()
 	{
 		return tileSizePx * drawScale;
+	}
+	public int getViewWidth()
+	{
+		return mapViewWidth;
+	}
+	public int getViewHeight()
+	{
+		return mapViewHeight;
 	}
 
 	@Override
@@ -67,8 +71,8 @@ public class MapView extends javax.swing.JPanel {
 		super.paintComponent(g);
 		
 		mapArtist.drawMap(g);
-		unitArtist.drawUnits(g);
 		mapArtist.drawHighlights(g);
+		unitArtist.drawUnits(g);
 
 		if(animationSequence != null)
 		{
@@ -117,7 +121,7 @@ public class MapView extends javax.swing.JPanel {
 		switch(currentAction.getActionType())
 		{
 		case ATTACK:
-			animationSequence = new NobunagaBattleAnimation(currentAction);
+			animationSequence = new NobunagaBattleAnimation(currentAction, getTileSize());
 			break;
 		case CAPTURE:
 			// TODO: Only do alert if the capture is completed, not just partial.
@@ -148,7 +152,7 @@ public class MapView extends javax.swing.JPanel {
 			animationSequence.cancel();
 		}
 	}
-	public static double getMapUnitMoveSpeed()
+	public double getMapUnitMoveSpeed()
 	{
 		return unitMoveSpeedMSPerTile;
 	}

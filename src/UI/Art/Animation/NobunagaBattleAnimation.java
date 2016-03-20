@@ -13,8 +13,9 @@ public class NobunagaBattleAnimation implements AnimationSequence
 	GameAction myAction = null;
 	
 	private long endTime = 600;
+	private final int tileSize;
 	
-	public NobunagaBattleAnimation(GameAction action)
+	public NobunagaBattleAnimation(GameAction action, int tileSize)
 	{
 		if(action.getActionType() != GameAction.ActionType.ATTACK)
 		{
@@ -23,13 +24,13 @@ public class NobunagaBattleAnimation implements AnimationSequence
 		
 		myAction = action;
 		startTime = System.currentTimeMillis();
+		this.tileSize = tileSize;
 	}
 
 	@Override
 	public boolean animate(Graphics g)
 	{
 		long animTime = System.currentTimeMillis() - startTime;
-		int tileSize = MapView.getTileSize();
 
 		if(animTime > 500)
 		{
