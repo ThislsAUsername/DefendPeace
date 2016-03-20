@@ -20,14 +20,20 @@ public class Path {
 	
 	private boolean atEnd = false;
 	
-	public Path()
+	private double moveSpeedMsPerTile;
+
+	// TODO: Consider the merits of removing movespeed as a parameter, and allowing the MapArtist to
+	//   animate at whatever speed is appropriate. Or make speed node-specific again and have mapArtist
+	//   set the speed for each PathNode (e.g. go slower through trees than on roads, etc).
+	public Path(double moveSpeedMsPerTile)
 	{
 		waypoints = new ArrayList<PathNode>();
+		this.moveSpeedMsPerTile = moveSpeedMsPerTile;
 	}
-	
-	public void addWaypoint(int x, int y, double timeMS)
+
+	public void addWaypoint(int x, int y)
 	{
-		waypoints.add(new PathNode(x, y, timeMS));
+		waypoints.add(new PathNode(x, y));
 	}
 
 	public ArrayList<PathNode> getWaypoints()
@@ -35,6 +41,18 @@ public class Path {
 		return waypoints;
 	}
 	
+	/**
+	 * Remove any stored waypoints, returning this object to its just-initialized state.
+	 */
+	public void clear()
+	{
+		waypoints.clear();
+		lastWaypointPassed = -1;
+		lastWaypointTime = 0;
+		atEnd = false;
+		timeStarted = -1;
+	}
+
 	public void start()
 	{
 		//System.out.println("Starting path with " + waypoints.size() + " waypoints");
@@ -93,23 +111,19 @@ public class Path {
 		{
 			long currentTime = System.currentTimeMillis();
 			long waypointTime = currentTime - lastWaypointTime;	
-			PathNode nextWaypoint = waypoints.get(lastWaypointPassed+1);
-			
+			double nextWaypointTimeMs = moveSpeedMsPerTile;
+
 			// Make sure nextWaypoint is correct, accounting for if we just passed a point.
-			while(!atEnd && waypointTime > nextWaypoint.timeMS)
+			while(!atEnd && waypointTime > nextWaypointTimeMs)
 			{
 				lastWaypointPassed += 1;
 				lastWaypointTime = currentTime;
-				waypointTime -= nextWaypoint.timeMS;
+				waypointTime -= nextWaypointTimeMs;
 				
 				// If the new waypoint is the last one in the Path, raise a flag.
 				if(lastWaypointPassed == (waypoints.size() - 1))
 				{
 					atEnd = true;
-				}
-				else // Otherwise, just update nextWaypoint.
-				{
-					nextWaypoint = waypoints.get(lastWaypointPassed+1);
 				}
 			}
 			
@@ -126,7 +140,7 @@ public class Path {
 				PathNode nextPt = waypoints.get(lastWaypointPassed + 1);
 				double xdiff = nextPt.x - lastPt.x;
 				double ydiff = nextPt.y - lastPt.y;
-				double progress = waypointTime / nextPt.timeMS;
+				double progress = waypointTime / nextWaypointTimeMs;
 				
 				pathX = lastPt.x + (xdiff * progress);
 				pathY = lastPt.y + (ydiff * progress);
@@ -170,13 +184,11 @@ public class Path {
 	{
 		public int x;
 		public int y;
-		public double timeMS;
 		
-		public PathNode(int x, int y, double timeMS)
+		public PathNode(int x, int y)
 		{
 			this.x = x;
 			this.y = y;
-			this.timeMS = timeMS;
 		}
 	}
 

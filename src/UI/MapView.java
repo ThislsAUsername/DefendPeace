@@ -19,7 +19,7 @@ public abstract class MapView extends javax.swing.JPanel {
 	public GameMenu currentMenu;
 	public GameAction currentAction = null;
 
-	private int unitMoveSpeedMSPerTile = 100;
+	private int unitMoveSpeedMsPerTile = 100;
 
 	private MapArtist mapArtist;
 	private UnitArtist unitArtist;
@@ -154,6 +154,6 @@ public abstract class MapView extends javax.swing.JPanel {
 	}
 	public double getMapUnitMoveSpeed()
 	{
-		return unitMoveSpeedMSPerTile;
+		return unitMoveSpeedMsPerTile;
 	}
 }

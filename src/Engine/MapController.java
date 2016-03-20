@@ -442,7 +442,7 @@ public class MapController
   {
     if(null == currentMovePath)
     {
-      currentMovePath = new Path();
+      currentMovePath = new Path(myView.getMapUnitMoveSpeed());
     }
 
     // If the new point already exists on the path, cut the extraneous points out.
@@ -456,12 +456,12 @@ public class MapController
 		}
     }
 
-    currentMovePath.addWaypoint(x, y, myView.getMapUnitMoveSpeed());
+    currentMovePath.addWaypoint(x, y);
 
     if(!Utils.isPathValid(myView.currentAction.getActor(), currentMovePath, myGame.gameMap))
     {
       // The currently-built path is invalid. Try to generate a new one (may still return null).
-      currentMovePath = Utils.findShortestPath(myView.currentAction.getActor(), x, y, myView.getMapUnitMoveSpeed(), myGame.gameMap);
+      Utils.findShortestPath(myView.currentAction.getActor(), x, y, currentMovePath, myGame.gameMap);
     }
   }
 

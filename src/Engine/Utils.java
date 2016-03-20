@@ -164,12 +164,11 @@ public class Utils {
 	}
 
 	/**
-	 * Calculates and returns the shortest path for unit to take from its current location to map(x, y).
-	 * If no valid path is found, null is returned.
-	 */ // TODO: I don't like needing wptTimeMs as a parameter here. Investigate removing (perhaps Path can key off of
-	    //       speed instead of time spent, and then the value would be path-wide instead of per-point, and could be
-	    //       kept as part of MapView instead of here?
-	public static Path findShortestPath(Unit unit, int x, int y, double wptTimeMs, GameMap map)
+	 * Calculate the shortest path for unit to take from its current location to map(x, y), and populate
+	 * the path parameter with those waypoints.
+	 * If no valid path is found, the path will be returned empty.
+	 */
+	public static void findShortestPath(Unit unit, int x, int y, Path aPath, GameMap map)
 	{
 		//System.out.println("Finding new path for " + unit.model.type + " from " + unit.x + ", " + unit.y + " to " + x + ", " + y);
 		// Set all locations to false/remaining move = 0
@@ -208,19 +207,17 @@ public class Utils {
 			currentNode = null;
 		}
 
-		// Populate the Path object itself.
-		Path sPath = new Path();
+		// Clear and Populate the Path object.
+		aPath.clear();
 		// We added the waypoints to the list from end to beginning, so populate the Path in reverse order.
 		if(!waypointList.isEmpty())
 		{
 			for(int j = waypointList.size() - 1; j >= 0; --j)
 			{
 				//System.out.println("Waypoint " + waypointList.get(j).x + ", " + waypointList.get(j).y + " over " + map.getEnvironment(waypointList.get(j).x, waypointList.get(j).y).terrainType);
-				sPath.addWaypoint(waypointList.get(j).x, waypointList.get(j).y, wptTimeMs);
+				aPath.addWaypoint(waypointList.get(j).x, waypointList.get(j).y);
 			}
 		}
-
-		return sPath;
 	}
 
   private static void expandSearchNode(Unit unit, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue, int[][] movesLeftGrid)
