@@ -165,6 +165,7 @@ public class TerrainSpriteSet
 		if(dirIndex >= terrainSprites.size())
 		{
 			// We could print a warning here, but there should have been one when the sprites were loaded.
+			// At this point we are just preventing an ArrayOutOfBoundsException.
 			dirIndex = (short)(dirIndex % terrainSprites.size());
 		}
 
@@ -180,7 +181,7 @@ public class TerrainSpriteSet
 		int tileSize = SpriteLibrary.baseSpriteSize * scale;
 
 		// Draw the current tile
-		BufferedImage frame = terrainSprites.get((dirIndex % terrainSprites.size())).getFrame(variation);
+		BufferedImage frame = terrainSprites.get(dirIndex).getFrame(variation);
 		g.drawImage(frame, (x-drawOffsetx)*tileSize, (y-drawOffsety)*tileSize,
 				frame.getWidth()*scale, frame.getHeight()*scale, null);
 		
@@ -218,12 +219,13 @@ public class TerrainSpriteSet
 	}
     
 	/**
-	 * If position (x, y) in map has TerrainType terrain, return true. Else return false;
+	 * If position (x, y) is a valid location:
+	 *   Return true if (x, y) has TerrainType terrain, else return false;
 	 * 
-	 * If position (x, y) is not a valid location (out of bounds), then return true IFF assumeTrue. This has the effect
-	 *   of allowing us to assume that tiles out of sight are whatever terrain we prefer - enabling us to
-	 *   draw roads that go off the map, etc, but keep it from looking like there is always land across the
-	 *   water at the edge of the map due to unwanted cliff-face transitions.
+	 * If position (x, y) is not a valid location (out of bounds): Return the value of assumeTrue. This has
+	 *   the effect of allowing us to assume that tiles out of sight are whatever terrain we prefer - enabling
+	 *   us to draw roads that go off the map, etc, but keep it from looking like there is always land across
+	 *   the water at the edge of the map due to unwanted cliff-face transitions.
 	 */
     private boolean checkTileType(GameMap map, Environment.Terrains terrain, int x, int y, boolean assumeTrue)
     {
