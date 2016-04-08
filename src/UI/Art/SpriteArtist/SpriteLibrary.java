@@ -12,7 +12,6 @@ import javax.imageio.ImageIO;
 import CommandingOfficers.Commander;
 import Terrain.Environment;
 import Terrain.Location;
-import UI.MapView;
 
 /**
  * Responsible for loading all game images from disk. All methods are static, and resources are loaded the first time they are needed.
@@ -51,6 +50,10 @@ public class SpriteLibrary
 
 	// TODO: Account for weather?
 	private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
+
+	// Sprites to hold the images for drawing tentative moves on the map.
+	private static Sprite moveCursorLineSprite = null;
+	private static Sprite moveCursorArrowSprite = null;
 
 	/**
 	 * Retrieve (loading if needed) the sprites associated with the given terrain type. For ownable terrain types
@@ -169,6 +172,26 @@ public class SpriteLibrary
 			bi = null;
 		}
 		return bi;
+	}
+
+	public static Sprite getMoveCursorLineSprite()
+	{
+		if( moveCursorLineSprite == null )
+		{
+			moveCursorLineSprite = new Sprite(loadSpriteSheetFile("res/tileset/moveCursorLine.png"), baseSpriteSize, baseSpriteSize);
+		}
+
+		return moveCursorLineSprite;
+	}
+
+	public static Sprite getMoveCursorArrowSprite()
+	{
+		if( moveCursorArrowSprite == null )
+		{
+			moveCursorArrowSprite = new Sprite(loadSpriteSheetFile("res/tileset/moveCursorArrow.png"), baseSpriteSize, baseSpriteSize);
+		}
+
+		return moveCursorArrowSprite;
 	}
 
 	private static ColorPalette getColorPalette(Color colorKey)

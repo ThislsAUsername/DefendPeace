@@ -72,6 +72,10 @@ public abstract class MapView extends javax.swing.JPanel {
 		
 		mapArtist.drawMap(g);
 		mapArtist.drawHighlights(g);
+		if(myController.getContemplatedMove() != null)
+		{
+			mapArtist.drawMovePath(g, myController.getContemplatedMove());
+		}
 		unitArtist.drawUnits(g);
 
 		if(animationSequence != null)
@@ -87,11 +91,6 @@ public abstract class MapView extends javax.swing.JPanel {
 		else if (currentMenu == null)
 		{
 			mapArtist.drawCursor(g);
-
-			if(myController.getContemplatedMove() != null)
-			{
-				mapArtist.drawMovePath(g, myController.getContemplatedMove());
-			}
 		}
 		else
 		{

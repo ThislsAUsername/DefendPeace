@@ -60,7 +60,8 @@ public class TerrainSpriteSet
     		// Just make a single frame of the specified size.
 			drawOffsetx = 0;
 			drawOffsety = 0;
-			createDefaultBlankSprite(SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize);
+			// Create a new blank sprite image of the desired size.
+			terrainSprites.add(new Sprite(null, SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize));
     	}
     	else
     	{
@@ -114,8 +115,8 @@ public class TerrainSpriteSet
     			
     			terrainSprites.clear(); // Clear this in case of partially-created data.
 
-        		// Make a single frame of the specified size.
-    			createDefaultBlankSprite(spriteWidth, spriteHeight);
+				// Make a single blank frame of the specified size.
+				terrainSprites.add(new Sprite(null, spriteWidth, spriteHeight));
     		}
     	} // spriteSheet != null
     	System.out.println("INFO: Created TerrainSpriteSheet with " + terrainSprites.size() + " sprites.");
@@ -132,15 +133,6 @@ public class TerrainSpriteSet
         {
             s.colorize(oldColors, newColors);
         }
-    }
-
-    private void createDefaultBlankSprite(int w, int h)
-    {
-		BufferedImage bi = new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
-		Graphics big = bi.getGraphics();
-		big.setColor(Color.BLACK);
-		big.fillRect(0, 0, w, h);
-		terrainSprites.add(new Sprite(bi));
     }
 
 	/**
