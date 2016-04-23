@@ -10,7 +10,7 @@ import java.util.ArrayList;
  */
 public class Sprite
 {
-	ArrayList<BufferedImage> spriteImages;
+	private ArrayList<BufferedImage> spriteImages;
 	
 	public Sprite(BufferedImage baseSprite)
 	{
@@ -53,6 +53,37 @@ public class Sprite
 				spriteNum++;
 			}
 		}
+	}
+
+	/**
+	 * Sprite copy-constructor. Perform a deep-copy on each of the other sprite's frames.
+	 * @param other
+	 */
+	public Sprite(Sprite other)
+	{
+		spriteImages = new ArrayList<BufferedImage>();
+
+		if( null == other )
+		{
+			System.out.println("WARNING! [Sprite()] Continuing with placeholder image.");
+			// Just make a single blank frame of the specified size.
+			spriteImages.add(createDefaultBlankSprite(SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize));
+		}
+		else
+		{
+			for(int i = 0; i < other.numFrames(); ++i)
+			{
+				BufferedImage aFrame = other.getFrame(i);
+				BufferedImage myFrame = new BufferedImage(aFrame.getWidth(), aFrame.getHeight(), BufferedImage.TYPE_INT_ARGB);
+				myFrame.getGraphics().drawImage(aFrame, 0, 0, null);
+				spriteImages.add(myFrame);
+			}
+		}
+	}
+
+	public int numFrames()
+	{
+		return spriteImages.size();
 	}
 
 	/**
