@@ -4,7 +4,7 @@ import Engine.GameInstance;
 import UI.MapView;
 import UI.Art.SpriteArtist.SpriteMapArtist;
 import UI.Art.FillRectArtist.FillRectMenuArtist;
-import UI.Art.FillRectArtist.FillRectUnitArtist;
+import UI.Art.SpriteArtist.SpriteUnitArtist;
 
 public class SpriteMapView extends MapView
 {
@@ -12,6 +12,6 @@ public class SpriteMapView extends MapView
 
 	public SpriteMapView(GameInstance game)
 	{
-		super(new SpriteMapArtist(game), new FillRectUnitArtist(game), new FillRectMenuArtist(game));
+		super(new SpriteMapArtist(game), new SpriteUnitArtist(game), new FillRectMenuArtist(game));
 	}
 }

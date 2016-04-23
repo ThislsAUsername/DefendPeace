@@ -8,10 +8,10 @@ import java.awt.Color;
 public class ColorPalette
 {
 	//public final Color[] mapUnitColors;
-	public final Color[] mapBuildingColors;
+	public final Color[] paletteColors;
 	
 	public ColorPalette( Color[] mbColors )
 	{
-		mapBuildingColors = mbColors;
+		paletteColors = mbColors;
 	}
 }

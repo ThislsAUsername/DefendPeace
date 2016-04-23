@@ -12,6 +12,8 @@ import javax.imageio.ImageIO;
 import CommandingOfficers.Commander;
 import Terrain.Environment;
 import Terrain.Location;
+import Units.Unit;
+import Units.UnitModel;
 
 /**
  * Responsible for loading all game images from disk. All methods are static, and resources are loaded the first time they are needed.
@@ -21,35 +23,56 @@ public class SpriteLibrary
 	// This is the physical size of a single map square in pixels.
 	public static final int baseSpriteSize = 16;
 	
-	private static Color[] defaultMapColors = {
+	public static final Color[] defaultMapColors = {
+		new Color(70, 70, 70),
 		new Color(110, 110, 110),
 		new Color(160, 160, 160),
 		new Color(200, 200, 200),
-		new Color(245, 245, 245),
-		new Color(70, 70, 70) };
+		new Color(245, 245, 245) };
 	private static Color[] pinkMapBuildingColors = {
+		new Color(255, 219, 74),
 		new Color(190, 90, 90),
 		new Color(240, 140, 140),
 		new Color(250, 190, 190),
-		new Color(255, 245, 245),
-		new Color(255, 219, 74)	};
+		new Color(255, 245, 245)};
 	private static Color[] cyanMapBuildingColors = {
+		new Color(255, 219, 74),
 		new Color(77, 157, 157),
 		new Color(130, 200, 200),
 		new Color(200, 230, 230),
-		new Color(245, 255, 255),
-		new Color(255, 219, 74) };
+		new Color(245, 255, 255) };
+	private static Color[] pinkMapUnitColors = {
+		new Color(177, 62, 62),
+		new Color(255, 100, 100),
+		new Color(255, 136, 136),
+		new Color(255, 175, 175),
+		new Color(255, 230, 230) };
+	private static Color[] cyanMapUnitColors = {
+		new Color(0, 105, 105),
+		new Color(0, 170, 170),
+		new Color(0, 215, 215),
+		new Color(0, 255, 255),
+		new Color(195, 255, 255), };
 
-	private static HashMap<Color, ColorPalette> colorPalettes = new HashMap<Color, ColorPalette>() {
+	private static HashMap<Color, ColorPalette> buildingColorPalettes = new HashMap<Color, ColorPalette>() {
 		private static final long serialVersionUID = 1L;
 	{
 		// Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
 		put(Color.PINK, new ColorPalette(pinkMapBuildingColors));
 		put(Color.CYAN, new ColorPalette(cyanMapBuildingColors));
 	}};
+	private static HashMap<Color, ColorPalette> mapUnitColorPalettes = new HashMap<Color, ColorPalette>() {
+		private static final long serialVersionUID = 1L;
+	{
+		// Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
+		put(Color.PINK, new ColorPalette(pinkMapUnitColors));
+		put(Color.CYAN, new ColorPalette(cyanMapUnitColors));
+	}};
 
 	// TODO: Account for weather?
 	private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
+	// TODO: Consider templatizing the key types, and then combining these two maps.
+	private static HashMap<UnitSpriteSetKey, UnitSpriteSet> unitMapSpriteSetMap = new HashMap<UnitSpriteSetKey, UnitSpriteSet>();
 
 	// Sprites to hold the images for drawing tentative moves on the map.
 	private static Sprite moveCursorLineSprite = null;
@@ -153,7 +176,7 @@ public class SpriteLibrary
 
 		if(spriteKey.commanderKey != null)
 		{
-			ss.colorize(defaultMapColors, getColorPalette(spriteKey.commanderKey.myColor).mapBuildingColors);
+			ss.colorize(defaultMapColors, getBuildingColors(spriteKey.commanderKey.myColor).paletteColors);
 		}
 
 		return ss;
@@ -194,9 +217,14 @@ public class SpriteLibrary
 		return moveCursorArrowSprite;
 	}
 
-	private static ColorPalette getColorPalette(Color colorKey)
+	private static ColorPalette getBuildingColors(Color colorKey)
 	{
-		return colorPalettes.get(colorKey);
+		return buildingColorPalettes.get(colorKey);
+	}
+
+	private static ColorPalette getMapUnitColors(Color colorKey)
+	{
+		return mapUnitColorPalettes.get(colorKey);
 	}
 
 	private static class SpriteSetKey
@@ -229,5 +257,109 @@ public class SpriteLibrary
 			}
 			return key;
 		}
+	}
+
+	///////////////////////////////////////////////////////////////////
+	//  Below is code for dealing with unit sprites.
+	///////////////////////////////////////////////////////////////////
+
+	private static class UnitSpriteSetKey
+	{
+		public final UnitModel.UnitEnum unitTypeKey;
+		public final Commander commanderKey;
+		private static ArrayList<UnitSpriteSetKey> instances = new ArrayList<UnitSpriteSetKey>();
+
+		private UnitSpriteSetKey(UnitModel.UnitEnum unitType, Commander co)
+		{
+			unitTypeKey = unitType;
+			commanderKey = co;
+		}
+
+		public static UnitSpriteSetKey instance(UnitModel.UnitEnum unitType, Commander co)
+		{
+			UnitSpriteSetKey key = null;
+			for(int i = 0; i < instances.size(); ++i)
+			{
+				if(instances.get(i).unitTypeKey == unitType && instances.get(i).commanderKey == co)
+				{
+					key = instances.get(i);
+					break;
+				}
+			}
+			if(key == null)
+			{
+				key = new UnitSpriteSetKey(unitType, co);
+				instances.add(key);
+			}
+			return key;
+		}
+	}
+
+	public static UnitSpriteSet getUnitMapSpriteSet(Unit unit)
+	{
+		UnitSpriteSetKey key = UnitSpriteSetKey.instance(unit.model.type, unit.CO);
+		if( !unitMapSpriteSetMap.containsKey(key))
+		{
+			// We don't have it? Go load it.
+			createUnitMapSpriteSet(key);
+		}
+		// We either found it or created it; it had better be there.
+		return unitMapSpriteSetMap.get(key);
+	}
+
+	private static void createUnitMapSpriteSet(UnitSpriteSetKey key)
+	{
+		System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString());
+		String filestr = getUnitSpriteFilename(key.unitTypeKey);
+		UnitSpriteSet spriteSet = new UnitSpriteSet( loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize, getMapUnitColors(key.commanderKey.myColor) );
+		unitMapSpriteSetMap.put(key, spriteSet);
+	}
+
+	private static String getUnitSpriteFilename( UnitModel.UnitEnum unitType )
+	{
+		String spriteFile = "";
+		switch( unitType )
+		{
+		case ANTI_AIR:
+			break;
+		case APC:
+			spriteFile = "res/unit/apc_map.png";
+			break;
+		case ARTILLERY:
+		break;
+		case B_COPTER:
+		break;
+		case BATTLESHIP:
+		break;
+		case BOMBER:
+		break;
+		case CRUISER:
+		break;
+		case FIGHTER:
+		break;
+		case INFANTRY:
+			spriteFile = "res/unit/infantry_map.png";
+		break;
+		case LANDER:
+		break;
+		case MD_TANK:
+		break;
+		case MECH:
+			spriteFile = "res/unit/mech_map.png";
+		break;
+		case MISSILES:
+		break;
+		case RECON:
+		break;
+		case ROCKETS:
+		break;
+		case SUB:
+		break;
+		case T_COPTER:
+		break;
+		case TANK:
+		break;
+		}
+		return spriteFile;
 	}
 }

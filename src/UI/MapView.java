@@ -25,7 +25,7 @@ public abstract class MapView extends javax.swing.JPanel {
 	private UnitArtist unitArtist;
 	private MenuArtist menuArtist;
 	
-	private final int tileSizePx = 16;
+	private final int tileSizePx = 16; // TODO: Does this belong in MapView?
 	private int drawScale = 3;
 	private int mapViewWidth = tileSizePx * drawScale * 15;
 	private int mapViewHeight = tileSizePx * drawScale * 10;
