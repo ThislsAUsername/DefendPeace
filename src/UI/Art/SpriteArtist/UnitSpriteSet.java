@@ -121,7 +121,7 @@ public class UnitSpriteSet {
         }
     }
     
-    public void drawUnit( Graphics g, Commander activeCO, Unit u, /* int action,*/ int imageIndex, int drawX, int drawY, int drawScale )
+    public void drawUnit( Graphics g, Commander activeCO, Unit u, /* int action,*/ int imageIndex, int drawX, int drawY, int drawScale, boolean flipImage )
     {
     	BufferedImage frame = null;
     	
@@ -135,7 +135,15 @@ public class UnitSpriteSet {
     		frame = sprites[ACTION_IDLE/*action*/].getFrame(imageIndex);
     	}
 
-    	// Draw it.
-		g.drawImage(frame, drawX, drawY, frame.getWidth()*drawScale, frame.getHeight()*drawScale, null);
+		// Draw the unit, facing the appropriate direction.
+		if( flipImage )
+		{
+			g.drawImage(frame, drawX+( frame.getWidth()*drawScale ), drawY,
+					-frame.getWidth()*drawScale, frame.getHeight()*drawScale, null);
+		}
+		else
+		{
+			g.drawImage(frame, drawX, drawY, frame.getWidth()*drawScale, frame.getHeight()*drawScale, null);
+		}
     }
 }

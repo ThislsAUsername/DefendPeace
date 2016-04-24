@@ -12,7 +12,7 @@ import Units.Unit;
 public class SpriteUnitArtist implements UnitArtist
 {
 	private GameInstance myGame;
-	private MapView myView;
+	private SpriteMapView myView;
 	int drawScale;
 	
 	// Variables for controlling unit map animations.
@@ -28,7 +28,7 @@ public class SpriteUnitArtist implements UnitArtist
 	@Override
 	public void setView(MapView view)
 	{
-		myView = view;
+		myView = (SpriteMapView)view;
 		// Figure out how to scale the sprites we draw.
 		drawScale = view.getTileSize() / SpriteLibrary.baseSpriteSize;
 	}
@@ -55,7 +55,7 @@ public class SpriteUnitArtist implements UnitArtist
 						int drawX = myView.getTileSize() * w;
 						int drawY = myView.getTileSize() * h;
 						SpriteLibrary.getUnitMapSpriteSet(unit).drawUnit(g, myGame.activeCO, unit, /*currentAction,*/
-								currentAnimIndex, drawX, drawY, drawScale);
+								currentAnimIndex, drawX, drawY, drawScale, myView.getFlipUnitFacing(unit.CO));
 					}
 				}
 			}
