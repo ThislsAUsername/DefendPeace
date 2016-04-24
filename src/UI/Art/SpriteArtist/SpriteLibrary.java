@@ -118,6 +118,7 @@ public class SpriteLibrary
 	private static void createTerrainSpriteSet(SpriteSetKey spriteKey)
 	{
 		Environment.Terrains terrainType = spriteKey.terrainKey;
+		System.out.println("INFO: Loading terrain sprites for " + terrainType);
 
 		TerrainSpriteSet ss = null;
 		int w = baseSpriteSize;
@@ -125,38 +126,38 @@ public class SpriteLibrary
 		switch(terrainType)
 		{
 		case CITY:
-			ss = buildTerrainSpriteSet("res/tileset/city_clear.png", spriteKey, w*2, h*2);
+			ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/city_clear.png"), w*2, h*2);
 			break;
 		case DUNES:
 			break;
 		case FACTORY:
-			ss = buildTerrainSpriteSet("res/tileset/factory_clear.png", spriteKey, w*2, h*2);
+			ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/factory_clear.png"), w*2, h*2);
 			break;
 		case FOREST:
-			ss = buildTerrainSpriteSet("res/tileset/forest_clear.png", spriteKey, w*2, h*2);
+			ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/forest_clear.png"), w*2, h*2);
 			break;
 		case GRASS:
-			ss = buildTerrainSpriteSet("res/tileset/grass_clear.png", spriteKey, w, h);
+			ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/grass_clear.png"), w, h);
 			break;
 		case HQ:
-			ss = buildTerrainSpriteSet("res/tileset/hq_clear.png", spriteKey, w*2, h*2);
+			ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/hq_clear.png"), w*2, h*2);
 			break;
 		case MOUNTAIN:
-			ss = buildTerrainSpriteSet("res/tileset/mountain_clear.png", spriteKey, w*2, h*2);
+			ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/mountain_clear.png"), w*2, h*2);
 			break;
 		case SEA:
-			ss = buildTerrainSpriteSet("res/tileset/sea_clear.png", spriteKey, w, h);
+			ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/sea_clear.png"), w, h);
 			ss.addTileTransition(Environment.Terrains.GRASS, loadSpriteSheetFile("res/tileset/sea_grass_clear.png"), w, h);
 			break;
 		case REEF:
-			ss = buildTerrainSpriteSet("res/tileset/reef_clear.png", spriteKey, w, h);
+			ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/reef_clear.png"), w, h);
 			ss.addTileTransition(Environment.Terrains.SEA, loadSpriteSheetFile("res/tileset/reef_clear.png"), w, h);
 			break;
 		case ROAD:
-			ss = buildTerrainSpriteSet("res/tileset/road_clear.png", spriteKey, w, h);
+			ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/road_clear.png"), w, h);
 			break;
 		case SHOAL:
-			ss = buildTerrainSpriteSet("res/tileset/shoal_clear.png", spriteKey, w, h);
+			ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/shoal_clear.png"), w, h);
 			ss.addTileTransition(Environment.Terrains.SEA, loadSpriteSheetFile("res/tileset/shoal_sea_clear.png"), w, h);
 			ss.addTileTransition(Environment.Terrains.GRASS, loadSpriteSheetFile("res/tileset/shoal_grass_clear.png"), w, h);
 			break;
@@ -164,22 +165,11 @@ public class SpriteLibrary
 			System.out.println("ERROR! [SpriteLibrary.loadTerrainSpriteSet] Unknown terrain type " + terrainType);
 		}
 
-		spriteSetMap.put(spriteKey, ss);
-	}
-
-	private static TerrainSpriteSet buildTerrainSpriteSet(String spriteFile, SpriteSetKey spriteKey, int w, int h)
-	{
-		TerrainSpriteSet ss = null;
-
-		System.out.println("INFO: Loading terrain sprites for " + spriteKey.terrainKey);
-		ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile(spriteFile), w, h);
-
 		if(spriteKey.commanderKey != null)
 		{
 			ss.colorize(defaultMapColors, getBuildingColors(spriteKey.commanderKey.myColor).paletteColors);
 		}
-
-		return ss;
+		spriteSetMap.put(spriteKey, ss);
 	}
 
 	private static BufferedImage loadSpriteSheetFile(String filename)
