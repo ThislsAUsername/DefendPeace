@@ -42,16 +42,29 @@ public class UnitSpriteSet {
 		
 		try
 		{
-			while( height < spriteSheet.getHeight() && action <= ACTION_DIE )
+			if( null != spriteSheet )
 			{
-				Sprite spr = new Sprite( spriteSheet.getSubimage(0, h, spriteSheet.getWidth(), height), width, height);
-				sprites[action] = spr;
-				++action;
+				while( height < spriteSheet.getHeight() && action <= ACTION_DIE )
+				{
+					Sprite spr = new Sprite( spriteSheet.getSubimage(0, h, spriteSheet.getWidth(), height), width, height);
+					sprites[action] = spr;
+					++action;
+				}
+				if( action < ACTION_DIE )
+				{ // We didn't load all animations we wanted - our sprite set is incomplete. Default the rest to IDLE.
+					sprites[action] = sprites[ACTION_IDLE];
+					++action;
+				}
 			}
-			if( action < ACTION_DIE )
-			{ // We didn't load all animations we wanted - our sprite set is incomplete. Default the rest to IDLE.
-				sprites[action] = sprites[ACTION_IDLE];
-				++action;
+			else
+			{ // No sprite sheet provided? Just make stuff up.
+				System.out.println("WARNING! Continuing with placeholder images.");
+				sprites[ACTION_IDLE] = new Sprite(null, width, height);
+				for(int i = ACTION_IDLE+1; i <= ACTION_DIE; ++i)
+				{
+					sprites[i] = sprites[ACTION_IDLE];
+				}
+				turnDone = sprites[ACTION_IDLE];
 			}
 		}
 		catch(RasterFormatException rfe)
