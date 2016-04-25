@@ -77,6 +77,9 @@ public class SpriteLibrary
 	// Sprites to hold the images for drawing tentative moves on the map.
 	private static Sprite moveCursorLineSprite = null;
 	private static Sprite moveCursorArrowSprite = null;
+	
+	// HP numbers to overlay on map units when damaged.
+	private static Sprite mapUnitHPSprites = null;
 
 	/**
 	 * Retrieve (loading if needed) the sprites associated with the given terrain type. For ownable terrain types
@@ -351,5 +354,14 @@ public class SpriteLibrary
 		break;
 		}
 		return spriteFile;
+	}
+
+	public static Sprite getMapUnitHPSprites()
+	{
+		if( null == mapUnitHPSprites )
+		{
+			mapUnitHPSprites = new Sprite(loadSpriteSheetFile("res/unit/unit_hp.png"), 8, 8);
+		}
+		return mapUnitHPSprites;
 	}
 }
