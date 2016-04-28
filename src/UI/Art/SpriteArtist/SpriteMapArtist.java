@@ -156,13 +156,6 @@ public class SpriteMapArtist implements MapArtist
 	{
 		backupArtist.drawHighlights(g);
 	}
-	
-	@Override
-	public void alertTileChanged(int x, int y)
-	{
-		// TODO: Only draw the tiles that need to change, rather than the whole map?
-		buildMapImage();
-	}
 
 	private void buildMapImage()
 	{

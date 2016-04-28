@@ -123,8 +123,6 @@ public abstract class MapView extends javax.swing.JPanel {
 			currentAnimation = new NobunagaBattleAnimation(currentAction, getTileSize());
 			break;
 		case CAPTURE:
-			// TODO: Only do alert if the capture is completed, not just partial.
-			mapArtist.alertTileChanged(action.getActX(), action.getActY());
 		case LOAD:
 		case WAIT:
 		case UNLOAD:
