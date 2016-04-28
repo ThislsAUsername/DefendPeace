@@ -21,18 +21,18 @@ public abstract class MapView extends javax.swing.JPanel {
 
 	private int unitMoveSpeedMsPerTile = 100;
 
-	private MapArtist mapArtist;
-	private UnitArtist unitArtist;
-	private MenuArtist menuArtist;
+	protected MapArtist mapArtist;
+	protected UnitArtist unitArtist;
+	protected MenuArtist menuArtist;
 	
 	private final int tileSizePx = 16; // TODO: Does this belong in MapView?
 	private int drawScale = 3;
 	private int mapViewWidth = tileSizePx * drawScale * 15;
 	private int mapViewHeight = tileSizePx * drawScale * 10;
 
-	private AnimationSequence animationSequence = null;
+	protected AnimationSequence currentAnimation = null;
 
-	MapController myController = null;
+	protected MapController mapController = null;
 
 	public MapView(MapArtist mapArt, UnitArtist unitArt, MenuArtist menuArt)
 	{
@@ -50,7 +50,7 @@ public abstract class MapView extends javax.swing.JPanel {
 
 	public void setController(MapController controller)
 	{
-		myController = controller;
+		mapController = controller;
 	}
 
 	public int getTileSize()
@@ -72,20 +72,20 @@ public abstract class MapView extends javax.swing.JPanel {
 		
 		mapArtist.drawMap(g);
 		mapArtist.drawHighlights(g);
-		if(myController.getContemplatedMove() != null)
+		if(mapController.getContemplatedMove() != null)
 		{
-			mapArtist.drawMovePath(g, myController.getContemplatedMove());
+			mapArtist.drawMovePath(g, mapController.getContemplatedMove());
 		}
 		unitArtist.drawUnits(g);
 
-		if(animationSequence != null)
+		if(currentAnimation != null)
 		{
 			// Animate until it tells you it's done.
-			if(animationSequence.animate(g))
+			if(currentAnimation.animate(g))
 			{
 				currentAction = null;
-				animationSequence = null;
-				myController.animationEnded();
+				currentAnimation = null;
+				mapController.animationEnded();
 			}
 		}
 		else if (currentMenu == null)
@@ -111,16 +111,16 @@ public abstract class MapView extends javax.swing.JPanel {
 		currentAction = action;
 
 		// If we have a previous animation in progress, cancel it to start the new one.
-		if(animationSequence != null)
+		if(currentAnimation != null)
 		{
-			animationSequence.cancel();
-			animationSequence = null;
+			currentAnimation.cancel();
+			currentAnimation = null;
 		}
 
 		switch(currentAction.getActionType())
 		{
 		case ATTACK:
-			animationSequence = new NobunagaBattleAnimation(currentAction, getTileSize());
+			currentAnimation = new NobunagaBattleAnimation(currentAction, getTileSize());
 			break;
 		case CAPTURE:
 			// TODO: Only do alert if the capture is completed, not just partial.
@@ -134,21 +134,21 @@ public abstract class MapView extends javax.swing.JPanel {
 				System.out.println("WARNING! No action animation supported for type " + currentAction.getActionType());
 		}
 
-		if(animationSequence == null)
+		if(currentAnimation == null)
 		{
 			// Animation for this action is not supported. Just let the controller know.
-			myController.animationEnded();
+			mapController.animationEnded();
 		}
 	}
 	public boolean isAnimating()
 	{
-		return animationSequence != null;
+		return currentAnimation != null;
 	}
 	public void cancelAnimation()
 	{
-		if(animationSequence != null)
+		if(currentAnimation != null)
 		{
-			animationSequence.cancel();
+			currentAnimation.cancel();
 		}
 	}
 	public double getMapUnitMoveSpeed()

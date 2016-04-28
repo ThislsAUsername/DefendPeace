@@ -136,14 +136,93 @@ public class TerrainSpriteSet
     }
 
 	/**
-	 * Draws the terrain at the indicated location, accounting for any defined tile transitions.  
+	 * Draws the terrain at the indicated location, accounting for any defined tile transitions.
+	 * Does not draw terrain objects (buildings, trees, mountains, etc).
 	 */
-	public void drawTile(Graphics g, GameMap map, int x, int y, int scale)
+	public void drawTerrain(Graphics g, GameMap map, int x, int y, int scale)
 	{
-		int variation = (x+1)*(y)+x; // Used to vary the specific sprite version drawn at each place in a repeatable way.
-		
+		drawTile(g, map, x, y, scale, false);
+	}
+
+	/**
+	 * Draws any terrain object at the indicated location, accounting for any defined tile transitions.
+	 * Does not draw the underlying terrain (grass, water, etc).
+	 */
+	public void drawTerrainObject(Graphics g, GameMap map, int x, int y, int scale)
+	{
+		drawTile(g, map, x, y, scale, true);
+	}
+
+	private void drawTile(Graphics g, GameMap map, int x, int y, int scale, boolean shouldDrawTerrainObject)
+	{
+		// Draw the base tile type, if needed.
+		Environment.Terrains baseTerrainType = getBaseTerrainType(myTerrainType);
+		if(baseTerrainType != myTerrainType && !shouldDrawTerrainObject)
+		{
+			System.out.println("Drawing " + baseTerrainType + " as base of " + myTerrainType);
+			TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet( baseTerrainType );
+			spriteSet.drawTile(g, map, x, y, scale, shouldDrawTerrainObject);
+		}
+
+		if( ( shouldDrawTerrainObject && isTerrainObject(myTerrainType) ) || ( !shouldDrawTerrainObject && !isTerrainObject(myTerrainType) ) )
+		{ // We do want to draw the terrain object, and this tile type does represent a terrain object
+			int tileSize = SpriteLibrary.baseSpriteSize * scale;
+			int variation = (x+1)*(y)+x; // Used to vary the specific sprite version drawn at each place in a repeatable way.
+
+			boolean assumeSameTileType = myTerrainType == map.getEnvironment(x, y).terrainType;
+			short dirIndex = getTileImageIndex(map, x, y, assumeSameTileType);
+
+			// Draw the current tile
+			BufferedImage frame = terrainSprites.get(dirIndex).getFrame(variation);
+			g.drawImage(frame, (x-drawOffsetx)*tileSize, (y-drawOffsety)*tileSize,
+					frame.getWidth()*scale, frame.getHeight()*scale, null);
+
+			// Handle drawing corner-case tile variations if needed.
+			if(terrainSprites.size() == 20)
+			{
+				// If we didn't have a N or W transition, then look in the NW position
+				if((dirIndex & (NORTH | WEST)) == 0 && checkTileType(map, myTerrainType, x-1, y-1, assumeSameTileType))
+				{
+					g.drawImage(terrainSprites.get(NW).getFrame(variation),	(x-drawOffsetx)*tileSize,
+							(y-drawOffsety)*tileSize, frame.getWidth()*scale, frame.getHeight()*scale, null);
+				}
+				if((dirIndex & (NORTH | EAST)) == 0 && checkTileType(map, myTerrainType, x+1, y-1, assumeSameTileType))
+				{
+					g.drawImage(terrainSprites.get(NE).getFrame(variation),	(x-drawOffsetx)*tileSize,
+							(y-drawOffsety)*tileSize, frame.getWidth()*scale, frame.getHeight()*scale, null);
+				}
+				if((dirIndex & (SOUTH | EAST)) == 0 && checkTileType(map, myTerrainType, x+1, y+1, assumeSameTileType))
+				{
+					g.drawImage(terrainSprites.get(SE).getFrame(variation),	(x-drawOffsetx)*tileSize,
+							(y-drawOffsety)*tileSize, frame.getWidth()*scale, frame.getHeight()*scale, null);
+				}
+				if((dirIndex & (SOUTH | WEST)) == 0 && checkTileType(map, myTerrainType, x-1, y+1, assumeSameTileType))
+				{
+					g.drawImage(terrainSprites.get(SW).getFrame(variation),	(x-drawOffsetx)*tileSize,
+							(y-drawOffsety)*tileSize, frame.getWidth()*scale, frame.getHeight()*scale, null);
+				}
+			}
+
+			// Draw any tile transitions that are needed.
+			for(TerrainSpriteSet tt : tileTransitions)
+			{
+				tt.drawTerrain(g, map, x, y, scale);
+			}
+		}
+	}
+
+	/**
+	 * Given a map, a location, and rules for how to treat off-map adjacent spaces, this function
+	 * returns the index of the sprite subimage that should be chosen when drawing this tile.
+	 * @param map
+	 * @param x
+	 * @param y
+	 * @param assumeSameTileType
+	 * @return
+	 */
+	private short getTileImageIndex( GameMap map, int x, int y, boolean assumeSameTileType )
+	{
 		short dirIndex = 0;
-		boolean assumeSameTileType = myTerrainType == map.getEnvironment(x, y).terrainType;
 		if(terrainSprites.size() > 1) // We expect the size to be either 1, 16, or 20.
 		{
 			// Figure out which neighbors tiles have the same terrain type as this one.
@@ -160,56 +239,30 @@ public class TerrainSpriteSet
 			// At this point we are just preventing an ArrayOutOfBoundsException.
 			dirIndex = (short)(dirIndex % terrainSprites.size());
 		}
+		return dirIndex;
+	}
 
-		// Draw the base tile type, if needed.
-		Environment.Terrains baseTerrainType = getBaseTerrainType(myTerrainType);
-		if(baseTerrainType != myTerrainType)
+	private boolean isTerrainObject( Environment.Terrains terrainType )
+	{
+		switch( terrainType )
 		{
-			System.out.println("Drawing " + baseTerrainType + " as base of " + myTerrainType);
-			TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet( baseTerrainType );
-			spriteSet.drawTile(g, map, x, y, scale);
-		}
-
-		int tileSize = SpriteLibrary.baseSpriteSize * scale;
-
-		// Draw the current tile
-		BufferedImage frame = terrainSprites.get(dirIndex).getFrame(variation);
-		g.drawImage(frame, (x-drawOffsetx)*tileSize, (y-drawOffsety)*tileSize,
-				frame.getWidth()*scale, frame.getHeight()*scale, null);
-		
-		// Handle drawing corner-case tile variations if needed.
-		if(terrainSprites.size() == 20)
-		{
-			// If we didn't have a N or W transition, then look in the NW position
-			if((dirIndex & (NORTH | WEST)) == 0 && checkTileType(map, myTerrainType, x-1, y-1, assumeSameTileType))
-			{
-				g.drawImage(terrainSprites.get(NW).getFrame(variation),	(x-drawOffsetx)*tileSize,
-						(y-drawOffsety)*tileSize, frame.getWidth()*scale, frame.getHeight()*scale, null);
-			}
-			if((dirIndex & (NORTH | EAST)) == 0 && checkTileType(map, myTerrainType, x+1, y-1, assumeSameTileType))
-			{
-				g.drawImage(terrainSprites.get(NE).getFrame(variation),	(x-drawOffsetx)*tileSize,
-						(y-drawOffsety)*tileSize, frame.getWidth()*scale, frame.getHeight()*scale, null);
-			}
-			if((dirIndex & (SOUTH | EAST)) == 0 && checkTileType(map, myTerrainType, x+1, y+1, assumeSameTileType))
-			{
-				g.drawImage(terrainSprites.get(SE).getFrame(variation),	(x-drawOffsetx)*tileSize,
-						(y-drawOffsety)*tileSize, frame.getWidth()*scale, frame.getHeight()*scale, null);
-			}
-			if((dirIndex & (SOUTH | WEST)) == 0 && checkTileType(map, myTerrainType, x-1, y+1, assumeSameTileType))
-			{
-				g.drawImage(terrainSprites.get(SW).getFrame(variation),	(x-drawOffsetx)*tileSize,
-						(y-drawOffsety)*tileSize, frame.getWidth()*scale, frame.getHeight()*scale, null);
-			}
-		}
-
-		// Draw any tile transitions that are needed.
-		for(TerrainSpriteSet tt : tileTransitions)
-		{
-			tt.drawTile(g, map, x, y, scale);
+		case CITY:
+		case FACTORY:
+		case FOREST:
+		case HQ:
+		case MOUNTAIN:
+			return true;
+		case DUNES:
+		case GRASS:
+		case REEF:
+		case ROAD:
+		case SEA:
+		case SHOAL:
+			default:
+			return false;
 		}
 	}
-    
+
 	/**
 	 * If position (x, y) is a valid location:
 	 *   Return true if (x, y) has TerrainType terrain, else return false;

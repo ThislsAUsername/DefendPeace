@@ -42,14 +42,39 @@ public class SpriteMapArtist implements MapArtist
 				gameMap.mapHeight*view.getTileSize(), BufferedImage.TYPE_INT_RGB);
 		
 		// Build base map image.
-		buildMapImage(gameMap);
+		buildMapImage();
 	}
 
+	/**
+	 * Basic implementation to draw all terrain and all terrain objects at once.
+	 * We will let SpriteMapView orchestrate with finer control though, and this
+	 * function may not actually be used (except to prevent compiler errors).
+	 */
 	@Override
 	public void drawMap(Graphics g)
 	{
 		// TODO: Change what/where we draw based on camera location.
 		g.drawImage(baseMapImage, 0, 0, null);
+		for(int y = 0; y < gameMap.mapHeight; ++y)
+		{
+			for(int x = 0; x < gameMap.mapWidth; ++x)
+			{
+				drawTerrainObject(g, x, y);
+			}
+		}
+	}
+
+	public void drawBaseTerrain(Graphics g)
+	{
+		// TODO: Change what/where we draw based on camera location.
+		g.drawImage(baseMapImage, 0, 0, null);
+	}
+
+	public void drawTerrainObject(Graphics g, int x, int y)
+	{
+		TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet( gameMap.getLocation(x, y) );
+
+		spriteSet.drawTerrainObject(g, gameMap, x, y, drawScale);
 	}
 
 	@Override
@@ -136,21 +161,22 @@ public class SpriteMapArtist implements MapArtist
 	public void alertTileChanged(int x, int y)
 	{
 		// TODO: Only draw the tiles that need to change, rather than the whole map?
-		buildMapImage(gameMap);
+		buildMapImage();
 	}
 
-	public void buildMapImage(GameMap map)
+	private void buildMapImage()
 	{
+		System.out.println("building map image");
 		Graphics g = baseMapImage.getGraphics();
 		
 		// Choose and draw all base sprites (grass, water, shallows).
-		for(int y = 0; y < map.mapHeight; ++y) // Iterate horizontally to layer terrain correctly.
+		for(int y = 0; y < gameMap.mapHeight; ++y) // Iterate horizontally to layer terrain correctly.
 		{
-			for(int x = 0; x < map.mapWidth; ++x)
+			for(int x = 0; x < gameMap.mapWidth; ++x)
 			{
-				TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet( map.getLocation(x, y) );
+				TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet( gameMap.getLocation(x, y) );
 				
-				spriteSet.drawTile(g, gameMap, x, y, drawScale);
+				spriteSet.drawTerrain(g, gameMap, x, y, drawScale);
 			}
 		}
 	}

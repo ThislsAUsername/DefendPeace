@@ -83,7 +83,8 @@ public class FillRectUnitArtist implements UnitArtist
 		drawUnit(g, unit, unit.x, unit.y);
 	}
 
-	private void drawUnit(Graphics g, Unit unit, double x, double y)
+	@Override
+	public void drawUnit(Graphics g, Unit unit, double x, double y)
 	{
 		Integer health = unit.getHP();
 		int offset = (int)(tileSizePx * 0.25);

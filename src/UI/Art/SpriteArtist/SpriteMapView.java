@@ -1,5 +1,6 @@
 package UI.Art.SpriteArtist;
 
+import java.awt.Graphics;
 import java.util.HashMap;
 
 import CommandingOfficers.Commander;
@@ -10,6 +11,7 @@ import UI.MapView;
 import UI.Art.SpriteArtist.SpriteMapArtist;
 import UI.Art.FillRectArtist.FillRectMenuArtist;
 import UI.Art.SpriteArtist.SpriteUnitArtist;
+import Units.Unit;
 
 public class SpriteMapView extends MapView
 {
@@ -17,10 +19,13 @@ public class SpriteMapView extends MapView
 
 	private HashMap<Commander, Boolean> unitFacings;
 
+	private GameMap gameMap;
+
 	public SpriteMapView(GameInstance game)
 	{
 		super(new SpriteMapArtist(game), new SpriteUnitArtist(game), new FillRectMenuArtist(game));
 
+		gameMap = game.gameMap;
 		unitFacings = new HashMap<Commander, Boolean>();
 
 		// Locally store which direction each CO should be facing.
@@ -54,6 +59,63 @@ public class SpriteMapView extends MapView
 					unitFacings.put(co, x >= map.mapWidth/2);
 				}
 			}
+		}
+	}
+
+	@Override
+	protected void paintComponent(Graphics g)
+	{
+		super.paintComponent(g);
+
+		// Cast the MapArtist to the SpriteMapArtist it should be.
+		SpriteMapArtist sMapArtist = (SpriteMapArtist)mapArtist;
+
+		// Draw base terrain
+		sMapArtist.drawMap(g);
+
+		// Draw terrain objects and units in order so they overlap correctly.
+		for(int y = 0; y < gameMap.mapHeight; ++y)
+		{
+			for(int x = 0; x < gameMap.mapWidth; ++x)
+			{
+				// Draw any terrain object here, followed by any unit present.
+				sMapArtist.drawTerrainObject(g, x, y);
+				if(!gameMap.isLocationEmpty(x, y))
+				{
+					Unit u = gameMap.getLocation(x, y).getResident();
+					unitArtist.drawUnit(g, u, u.x, u.y);
+				}
+			}
+		}
+		// Draw Unit HP icons on top of everything, to make sure they are seen clearly.
+		((SpriteUnitArtist)unitArtist).drawUnitHPIcons(g);
+
+		// Apply any relevant map highlight.
+		// TODO: Move highlight underneath units? OR, change highlight to not matter.
+		sMapArtist.drawHighlights(g);
+
+		if(mapController.getContemplatedMove() != null)
+		{
+			sMapArtist.drawMovePath(g, mapController.getContemplatedMove());
+		}
+
+		if(currentAnimation != null)
+		{
+			// Animate until it tells you it's done.
+			if(currentAnimation.animate(g))
+			{
+				currentAction = null;
+				currentAnimation = null;
+				mapController.animationEnded();
+			}
+		}
+		else if (currentMenu == null)
+		{
+			sMapArtist.drawCursor(g);
+		}
+		else
+		{
+			menuArtist.drawMenu(g);
 		}
 	}
 }

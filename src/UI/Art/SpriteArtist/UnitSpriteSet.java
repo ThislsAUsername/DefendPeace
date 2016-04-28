@@ -121,7 +121,7 @@ public class UnitSpriteSet {
         }
     }
     
-    public void drawUnit( Graphics g, Commander activeCO, Unit u, /* int action,*/ int imageIndex, int drawX, int drawY, int drawScale, boolean flipImage )
+    private BufferedImage getUnitImage(Commander activeCO, Unit u, int imageIndex)
     {
     	BufferedImage frame = null;
     	
@@ -135,6 +135,13 @@ public class UnitSpriteSet {
     		frame = sprites[ACTION_IDLE/*action*/].getFrame(imageIndex);
     	}
 
+		return frame;
+    }
+
+    public void drawUnit( Graphics g, Commander activeCO, Unit u, /* int action,*/ int imageIndex, int drawX, int drawY, int drawScale, boolean flipImage )
+    {
+		BufferedImage frame = getUnitImage(activeCO, u, imageIndex);
+
 		// Draw the unit, facing the appropriate direction.
 		if( flipImage )
 		{
@@ -145,12 +152,17 @@ public class UnitSpriteSet {
 		{
 			g.drawImage(frame, drawX, drawY, frame.getWidth()*drawScale, frame.getHeight()*drawScale, null);
 		}
-		
+    }
+
+    public void drawUnitHP( Graphics g, Commander activeCO, Unit u, int drawX, int drawY, int drawScale )
+    {
+		int unitHeight = turnDone.getFrame(0).getHeight();
+
 		// Draw the unit's HP if it is below full health.
 		if( u.getHP() < 10 )
 		{
 			BufferedImage num = SpriteLibrary.getMapUnitHPSprites().getFrame(u.getHP());
-			g.drawImage(num, drawX, drawY+( (frame.getHeight()*drawScale) / 2 ),
+			g.drawImage(num, drawX, drawY+( (unitHeight*drawScale) / 2 ),
 					num.getWidth()*drawScale, num.getHeight()*drawScale, null);
 		}
     }
