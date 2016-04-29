@@ -8,9 +8,6 @@ import Engine.GameInstance;
 import Terrain.Environment;
 import Terrain.GameMap;
 import UI.MapView;
-import UI.Art.SpriteArtist.SpriteMapArtist;
-import UI.Art.FillRectArtist.FillRectMenuArtist;
-import UI.Art.SpriteArtist.SpriteUnitArtist;
 import Units.Unit;
 
 public class SpriteMapView extends MapView
@@ -23,7 +20,7 @@ public class SpriteMapView extends MapView
 
 	public SpriteMapView(GameInstance game)
 	{
-		super(new SpriteMapArtist(game), new SpriteUnitArtist(game), new FillRectMenuArtist(game));
+		super(new SpriteMapArtist(game), new SpriteUnitArtist(game), new SpriteMenuArtist(game));
 
 		gameMap = game.gameMap;
 		unitFacings = new HashMap<Commander, Boolean>();

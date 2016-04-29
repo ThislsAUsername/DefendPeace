@@ -63,7 +63,7 @@ public class GameMenu {
 		return options;
 	}
 	
-	public int getNumChoices()
+	public int getNumOptions()
 	{
 		return options.length;
 	}

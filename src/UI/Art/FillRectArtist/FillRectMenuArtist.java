@@ -54,7 +54,7 @@ public class FillRectMenuArtist implements MenuArtist
 			label = new String("Money: " + myGame.activeCO.money);
 			g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, tileSizePx/2+menuBorderTop);
 			g.setColor(Color.black);
-			for (int i = 0; i < myView.currentMenu.getNumChoices(); i++) {
+			for (int i = 0; i < myView.currentMenu.getNumOptions(); i++) {
 				label = myView.currentMenu.getOptions()[i].toString()+ ": " + myGame.activeCO.getUnitModel((UnitEnum) myView.currentMenu.getOptions()[i]).moneyCost;
 				g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, (i+2)*tileSizePx/2+menuBorderTop);
 			}
@@ -63,7 +63,7 @@ public class FillRectMenuArtist implements MenuArtist
 			g.setColor(COLOR_CURSOR);
 			g.fillRect(menuBorderLeft+1, (myView.currentMenu.getSelectionNumber())*tileSizePx/2+menuBorderTop+4, menuWidth-2, tileSizePx/2);
 			g.setColor(Color.black);
-			for (int i = 0; i < myView.currentMenu.getNumChoices(); i++) {
+			for (int i = 0; i < myView.currentMenu.getNumOptions(); i++) {
 				label = myView.currentMenu.getOptions()[i].toString();
 				g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, (i+1)*tileSizePx/2+menuBorderTop);
 			}
@@ -72,7 +72,7 @@ public class FillRectMenuArtist implements MenuArtist
 			g.setColor(COLOR_CURSOR);
 			g.fillRect(menuBorderLeft+1, (myView.currentMenu.getSelectionNumber())*tileSizePx/2+menuBorderTop+4, menuWidth-2, tileSizePx/2);
 			g.setColor(Color.black);
-			for (int i = 0; i < myView.currentMenu.getNumChoices(); i++) {
+			for (int i = 0; i < myView.currentMenu.getNumOptions(); i++) {
 				label = myView.currentMenu.getOptions()[i].toString();
 				g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, (i+1)*tileSizePx/2+menuBorderTop);
 			}

@@ -81,6 +81,9 @@ public class SpriteLibrary
 	// HP numbers to overlay on map units when damaged.
 	private static Sprite mapUnitHPSprites = null;
 
+	// Letters for writing in menus.
+	private static Sprite menuLetterSprites = null;
+
 	/**
 	 * Retrieve (loading if needed) the sprites associated with the given terrain type. For ownable terrain types
 	 * (e.g. cities), the unowned variant of the sprite will be returned.
@@ -363,5 +366,14 @@ public class SpriteLibrary
 			mapUnitHPSprites = new Sprite(loadSpriteSheetFile("res/unit/unit_hp.png"), 8, 8);
 		}
 		return mapUnitHPSprites;
+	}
+
+	public static Sprite getMenuLetters()
+	{
+		if( null == menuLetterSprites )
+		{
+			menuLetterSprites = new Sprite(loadSpriteSheetFile("res/tileset/letters.png"), 5, 6);
+		}
+		return menuLetterSprites;
 	}
 }
