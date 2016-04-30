@@ -76,6 +76,10 @@ public class SpriteMenuArtist implements MenuArtist
 			int drawX = myGame.getCursorX()*viewTileSize - (menuWidth/2 - viewTileSize/2);
 			int drawY = myGame.getCursorY()*viewTileSize - (menuHeight/2 - viewTileSize/2);
 
+			// Make sure the menu is fully contained in viewable space.
+			drawX = (drawX < 0)? 0 : (drawX > (myView.getViewWidth() - menuWidth))? (myView.getViewWidth() - menuWidth) : drawX;
+			drawY = (drawY < 0)? 0 : (drawY > (myView.getViewHeight() - menuHeight))? (myView.getViewHeight() - menuHeight) : drawY;
+
 			// Draw the nice box for our text.
 			drawMenuFrame(g, drawX, drawY, menuWidth, menuHeight);
 
