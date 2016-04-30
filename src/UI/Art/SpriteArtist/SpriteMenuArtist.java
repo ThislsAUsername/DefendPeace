@@ -28,14 +28,10 @@ public class SpriteMenuArtist implements MenuArtist
 	private int menuHBuffer; // Amount of visible menu to left and right of options;
 	private int menuVBuffer; // Amount of visible menu above and below menu options;
 
-	private FillRectMenuArtist backupArtist; // TODO: Get rid of this.
-
 	public SpriteMenuArtist(GameInstance game)
 	{
 		myGame = game;
 		currentMenu = null;
-
-		backupArtist = new FillRectMenuArtist(game);
 	}
 
 	@Override
@@ -49,8 +45,6 @@ public class SpriteMenuArtist implements MenuArtist
 		menuTextHeight = SpriteLibrary.getMenuLetters().getFrame(0).getHeight()*drawScale;
 		menuHBuffer = 3*drawScale; // Amount of visible menu to left and right of options;
 		menuVBuffer = 4*drawScale; // Amount of visible menu above and below menu options;
-
-		backupArtist.setView(view);
 	}
 
 	/**
