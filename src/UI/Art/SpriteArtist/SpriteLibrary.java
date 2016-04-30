@@ -83,6 +83,7 @@ public class SpriteLibrary
 
 	// Letters for writing in menus.
 	private static Sprite menuLetterSprites = null;
+	private static Sprite menuNumberSprites = null;
 
 	/**
 	 * Retrieve (loading if needed) the sprites associated with the given terrain type. For ownable terrain types
@@ -375,5 +376,14 @@ public class SpriteLibrary
 			menuLetterSprites = new Sprite(loadSpriteSheetFile("res/tileset/letters.png"), 5, 6);
 		}
 		return menuLetterSprites;
+	}
+
+	public static Sprite getMenuNumbers()
+	{
+		if( null == menuNumberSprites )
+		{
+			menuNumberSprites = new Sprite(loadSpriteSheetFile("res/tileset/numbers.png"), 5, 6);
+		}
+		return menuNumberSprites;
 	}
 }
