@@ -36,7 +36,7 @@ public class Sprite
 		{
 			System.out.println("WARNING! [Sprite()] Continuing with placeholder image.");
 			// Just make a single blank frame of the specified size.
-			spriteImages.add(createDefaultBlankSprite(SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize));
+			spriteImages.add(createDefaultBlankSprite(spriteWidthPx, spriteHeightPx));
 		}
 		else
 		{
