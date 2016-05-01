@@ -8,7 +8,6 @@ import Engine.GameInstance;
 import UI.GameMenu;
 import UI.MapView;
 import UI.Art.MenuArtist;
-import UI.Art.FillRectArtist.FillRectMenuArtist;
 import Units.UnitModel;
 import Units.UnitModel.UnitEnum;
 
@@ -92,7 +91,7 @@ public class SpriteMenuArtist implements MenuArtist
 			// Draw the actual menu text.
 			for(int txtY = drawY+menuVBuffer, i = 0; i < menu.getNumOptions(); ++i, txtY+=menuTextHeight+drawScale)
 			{
-				drawMenuText(g, menuStrings.get(i), drawX+menuHBuffer, txtY);
+				SpriteLibrary.drawMenuText(g, menuStrings.get(i), drawX+menuHBuffer, txtY, drawScale);
 			}
 		}
 	}
@@ -154,6 +153,7 @@ public class SpriteMenuArtist implements MenuArtist
 			}
 
 			// Pad the price with an extra space if it is only four digits.
+			// NOTE: This line assumes that all prices will be either four or five digits.
 			if(price < 10000) { sb.append(" "); }
 
 			// Append the actual cost of the item.
@@ -161,27 +161,6 @@ public class SpriteMenuArtist implements MenuArtist
 
 			// Plug the new string into the return list.
 			out.set(i, sb.toString());
-		}
-	}
-
-	private void drawMenuText(Graphics g, String text, int x, int y)
-	{
-		Sprite letterSprites = SpriteLibrary.getMenuLetters();
-		Sprite numberSprites = SpriteLibrary.getMenuNumbers();
-		text = text.toUpperCase(); // Menus only have capital letters.
-
-		for(int i = 0; i < text.length(); ++i, x+=menuTextWidth)
-		{
-			if(Character.isAlphabetic(text.charAt(i)))
-			{
-				int letterIndex = text.charAt(i) - 'A';
-				g.drawImage(letterSprites.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
-			}
-			else if(Character.isDigit(text.charAt(i)))
-			{
-				int letterIndex = text.charAt(i) - '0';
-				g.drawImage(numberSprites.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
-			}
 		}
 	}
 

@@ -1,6 +1,7 @@
 package UI.Art.SpriteArtist;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -84,6 +85,9 @@ public class SpriteLibrary
 	// Letters for writing in menus.
 	private static Sprite menuLetterSprites = null;
 	private static Sprite menuNumberSprites = null;
+
+	// Commander overlay backdrops (shows commander name and funds) for each Commanders in the game.
+	private static HashMap<Commander, Sprite> coOverlays = new HashMap<Commander, Sprite>();
 
 	/**
 	 * Retrieve (loading if needed) the sprites associated with the given terrain type. For ownable terrain types
@@ -369,6 +373,15 @@ public class SpriteLibrary
 		return mapUnitHPSprites;
 	}
 
+	///////////////////////////////////////////////////////////////////
+	//  Below is code for dealing with drawing in-game menus.
+	///////////////////////////////////////////////////////////////////
+
+	/**
+	 * Loads the alphabetic character image file if needed, and returns the resulting Sprite.
+	 * Letters are all capital, and are stored in order starting from 'A'.
+	 * @return A Sprite object containing the in-game menu font for letters.
+	 */
 	public static Sprite getMenuLetters()
 	{
 		if( null == menuLetterSprites )
@@ -378,6 +391,11 @@ public class SpriteLibrary
 		return menuLetterSprites;
 	}
 
+	/**
+	 * Loads the numeric character image file if needed, and returns the resulting Sprite.
+	 * Numbers are stored in order starting from 0.
+	 * @return A Sprite object containing the in-game menu font for numbers.
+	 */
 	public static Sprite getMenuNumbers()
 	{
 		if( null == menuNumberSprites )
@@ -385,5 +403,55 @@ public class SpriteLibrary
 			menuNumberSprites = new Sprite(loadSpriteSheetFile("res/tileset/numbers.png"), 5, 6);
 		}
 		return menuNumberSprites;
+	}
+
+	/**
+	 * Draws the provided text at the provided location, using the alphanumeric sprites for in-game menus.
+	 * @param g Graphics object to draw the text.
+	 * @param text Text to be drawn as sprited letters.
+	 * @param x X-coordinate of the top-left corner of the first letter to be drawn.
+	 * @param y Y-coordinate of the top-left corner of the first letter to be drawn.
+	 * @param scale Scaling factor to be applied when drawing.
+	 */
+	public static void drawMenuText(Graphics g, String text, int x, int y, int scale)
+	{
+		// We use getMenuLetters on the first call just to ensure they are loaded.
+		int menuTextWidth = getMenuLetters().getFrame(0).getWidth()*scale;
+		int menuTextHeight = menuLetterSprites.getFrame(0).getHeight()*scale;
+		text = text.toUpperCase(); // Menus only have capital letters.
+
+		for(int i = 0; i < text.length(); ++i, x+=menuTextWidth)
+		{
+			if(Character.isAlphabetic(text.charAt(i)))
+			{
+				int letterIndex = text.charAt(i) - 'A';
+				g.drawImage(menuLetterSprites.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+			}
+			else if(Character.isDigit(text.charAt(i)))
+			{
+				int letterIndex = text.charAt(i) - '0';
+				g.drawImage(getMenuNumbers().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+			}
+		}
+	}
+
+	/**
+	 * Returns the overlay image for the HUD, which serves as a backdrop for the commander
+	 * name and the currently-available funds.
+	 * @param co The Commander whose overlay we are drawing. This allows us to colorize it appropriately.
+	 * @param leftSide Whether we want the overlay image for the left-side corner (false is right side).
+	 */
+	public static BufferedImage getCoOverlay(Commander co, boolean leftSide)
+	{
+		if( !coOverlays.containsKey(co) )
+		{
+			// If we don't already have this overlay, go load and store it.
+			Sprite overlay = new Sprite(loadSpriteSheetFile("res/tileset/co_overlay.png"), 72, 20);
+			overlay.colorize(defaultMapColors, mapUnitColorPalettes.get(co.myColor).paletteColors);
+			coOverlays.put(co, overlay);
+		}
+		// Figure out which sub-image they want, and give it to them.
+		int index = ( leftSide )? 0 : 1;
+		return coOverlays.get(co).getFrame(index);
 	}
 }

@@ -153,4 +153,8 @@ public abstract class MapView extends javax.swing.JPanel {
 	{
 		return unitMoveSpeedMsPerTile;
 	}
+	public int getDrawScale()
+	{
+		return drawScale;
+	}
 }
