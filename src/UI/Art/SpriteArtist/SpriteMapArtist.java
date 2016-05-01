@@ -32,7 +32,7 @@ public class SpriteMapArtist implements MapArtist
 	@Override
 	public void setView(MapView view)
 	{
-		drawScale = view.getTileSize() / SpriteLibrary.baseSpriteSize;
+		drawScale = view.getDrawScale();
 
 		// TODO: make this obsolete.
 		backupArtist = new FillRectMapArtist(myGame);

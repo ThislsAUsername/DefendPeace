@@ -39,7 +39,7 @@ public class SpriteMenuArtist implements MenuArtist
 		myView = view;
 
 		// Figure out how to scale the sprites we draw.
-		drawScale = view.getTileSize() / SpriteLibrary.baseSpriteSize;
+		drawScale = myView.getDrawScale();
 		menuTextWidth = SpriteLibrary.getMenuLetters().getFrame(0).getWidth()*drawScale;
 		menuTextHeight = SpriteLibrary.getMenuLetters().getFrame(0).getHeight()*drawScale;
 		menuHBuffer = 3*drawScale; // Amount of visible menu to left and right of options;

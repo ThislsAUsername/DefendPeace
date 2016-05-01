@@ -29,8 +29,8 @@ public class SpriteUnitArtist implements UnitArtist
 	public void setView(MapView view)
 	{
 		myView = (SpriteMapView)view;
-		// Figure out how to scale the sprites we draw.
-		drawScale = view.getTileSize() / SpriteLibrary.baseSpriteSize;
+		// Get a convenient copy of the view's scaling factor.
+		drawScale = view.getDrawScale();
 	}
 
 	@Override
