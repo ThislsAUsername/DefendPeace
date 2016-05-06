@@ -15,7 +15,8 @@ public class SpriteMenuArtist implements MenuArtist
 {
 	private GameInstance myGame;
 	private MapView myView;
-	private GameMenu currentMenu;
+	private GameMenu myCurrentMenu;
+	private ArrayList<String> myCurrentMenuStrings;
 	private int drawScale;
 
 	private final Color MENUFRAMECOLOR = new Color(169, 118, 65);
@@ -30,7 +31,8 @@ public class SpriteMenuArtist implements MenuArtist
 	public SpriteMenuArtist(GameInstance game)
 	{
 		myGame = game;
-		currentMenu = null;
+		myCurrentMenu = null;
+		myCurrentMenuStrings = new ArrayList<String>();
 	}
 
 	@Override
@@ -54,21 +56,26 @@ public class SpriteMenuArtist implements MenuArtist
 	@Override
 	public void drawMenu(Graphics g)
 	{
-		GameMenu menu = myView.currentMenu;
-		if(menu != null)
+		GameMenu drawMenu = myView.currentMenu;
+		if(drawMenu != null)
 		{
-			ArrayList<String> menuStrings = new ArrayList<String>();
-			getMenuStrings(menu, menuStrings);
-
-			// Append prices if this is a PRODUCTION menu
-			if(menu.menuType == GameMenu.MenuType.PRODUCTION)
+			// Check if we need to build the menu options again.
+			if(myCurrentMenu != drawMenu)
 			{
-				appendProductionPrices(menu, menuStrings);
+				myCurrentMenu = drawMenu;
+				myCurrentMenuStrings.clear();
+				getMenuStrings(myCurrentMenu, myCurrentMenuStrings);
+
+				// Append prices if this is a PRODUCTION menu
+				if(myCurrentMenu.menuType == GameMenu.MenuType.PRODUCTION)
+				{
+					appendProductionPrices(myCurrentMenu, myCurrentMenuStrings);
+				}
 			}
 
 			// Find the dimensions of the menu we are drawing.
-			int menuWidth = getMenuTextWidthPx(menuStrings)+menuHBuffer*2;
-			int menuHeight = getMenuTextHeightPx(menuStrings)+menuVBuffer*2;
+			int menuWidth = getMenuTextWidthPx(myCurrentMenuStrings)+menuHBuffer*2;
+			int menuHeight = getMenuTextHeightPx(myCurrentMenuStrings)+menuVBuffer*2;
 
 			// Center the menu over the current action target location.
 			int viewTileSize = myView.getTileSize(); // Grab this value for convenience.
@@ -84,14 +91,14 @@ public class SpriteMenuArtist implements MenuArtist
 
 			// Draw the highlight for the currently-selected option.
 			// selY = drawY plus upper menu-frame buffer, plus (letter height, plus 1px-buffer, times number of options).
-			int selY = drawY + menuVBuffer + (menuTextHeight+drawScale)*menu.getSelectionNumber();
+			int selY = drawY + menuVBuffer + (menuTextHeight+drawScale)*myCurrentMenu.getSelectionNumber();
 			g.setColor(MENUHIGHLIGHTCOLOR);
 			g.fillRect(drawX, selY, menuWidth, menuTextHeight);
 
 			// Draw the actual menu text.
-			for(int txtY = drawY+menuVBuffer, i = 0; i < menu.getNumOptions(); ++i, txtY+=menuTextHeight+drawScale)
+			for(int txtY = drawY+menuVBuffer, i = 0; i < myCurrentMenu.getNumOptions(); ++i, txtY+=menuTextHeight+drawScale)
 			{
-				SpriteLibrary.drawMenuText(g, menuStrings.get(i), drawX+menuHBuffer, txtY, drawScale);
+				SpriteLibrary.drawMenuText(g, myCurrentMenuStrings.get(i), drawX+menuHBuffer, txtY, drawScale);
 			}
 		}
 	}
