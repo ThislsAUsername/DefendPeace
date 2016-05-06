@@ -42,9 +42,9 @@ public class UnitSpriteSet {
 		
 		try
 		{
-			if( null != spriteSheet )
+			if( null != spriteSheet && spriteSheet.getWidth() >= width && spriteSheet.getHeight() >= height )
 			{
-				while( height < spriteSheet.getHeight() && action <= ACTION_DIE )
+				while( height <= spriteSheet.getHeight() && action <= ACTION_DIE )
 				{
 					Sprite spr = new Sprite( spriteSheet.getSubimage(0, h, spriteSheet.getWidth(), height), width, height);
 					sprites[action] = spr;
@@ -80,7 +80,7 @@ public class UnitSpriteSet {
 				sprites[action] = defaultSprite;
 			}
 		}
-		
+
 		colorize(SpriteLibrary.defaultMapColors, coColors.paletteColors);
 		if(action > 0) // We at least got the IDLE sprites. Use those as the basis for the "already moved" sprites.
 		{
@@ -115,6 +115,7 @@ public class UnitSpriteSet {
 
     private void colorize(Color[] oldColors, Color[] newColors)
     {
+    	System.out.println("Colorizing sprite with " + sprites.length + " images:");
         for(Sprite s : sprites)
         {
             s.colorize(oldColors, newColors);
