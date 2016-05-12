@@ -5,11 +5,9 @@ import java.awt.Graphics;
 import Engine.GameInstance;
 import Terrain.GameMap;
 import Terrain.Location;
-import UI.MapView;
-import UI.Art.UnitArtist;
 import Units.Unit;
 
-public class SpriteUnitArtist implements UnitArtist
+public class SpriteUnitArtist
 {
 	private GameInstance myGame;
 	private SpriteMapView myView;
@@ -20,20 +18,15 @@ public class SpriteUnitArtist implements UnitArtist
 	private long lastIndexUpdateTime = 0;
 	private final double indexUpdateTime = 250;
 
-	public SpriteUnitArtist( GameInstance game )
+	public SpriteUnitArtist( GameInstance game, SpriteMapView view )
 	{
 		myGame = game;
-	}
-	
-	@Override
-	public void setView(MapView view)
-	{
-		myView = (SpriteMapView)view;
+
+		myView = view;
 		// Get a convenient copy of the view's scaling factor.
 		drawScale = view.getDrawScale();
 	}
 
-	@Override
 	public void drawUnits(Graphics g)
 	{
 		// Get an easy reference to the map.
@@ -88,7 +81,6 @@ public class SpriteUnitArtist implements UnitArtist
 	 * "Real" means that the specified x and y are that of the game's
 	 * underlying data model, not of the draw-space.
 	 */
-	@Override
 	public void drawUnit(Graphics g, Unit unit, double x, double y)
 	{
 		int drawX = (int)( myView.getTileSize() * x);
@@ -97,7 +89,7 @@ public class SpriteUnitArtist implements UnitArtist
 				currentAnimIndex, drawX, drawY, drawScale, myView.getFlipUnitFacing(unit.CO));
 	}
 
-	private int updateSpriteIndex()
+	public int updateSpriteIndex()
 	{
 		// Calculate the sprite index to use.
 		long thisTime = System.currentTimeMillis();

@@ -1,5 +1,7 @@
 package UI.Art.FillRectArtist;
 
+import java.awt.Graphics;
+
 import Engine.GameInstance;
 import UI.MapView;
 
@@ -7,8 +9,51 @@ public class FillRectMapView extends MapView
 {
 	private static final long serialVersionUID = 1L;
 
+	private FillRectMapArtist mapArtist;
+	private FillRectUnitArtist unitArtist;
+	private FillRectMenuArtist menuArtist;
+
 	public FillRectMapView( GameInstance game )
 	{
-		super(new FillRectMapArtist(game), new FillRectUnitArtist(game), new FillRectMenuArtist(game));
+		mapArtist = new FillRectMapArtist(game);
+		unitArtist = new FillRectUnitArtist(game);
+		menuArtist = new FillRectMenuArtist(game);
+		
+		mapArtist.setView(this);
+		unitArtist.setView(this);
+		menuArtist.setView(this);
+	}
+
+	@Override
+	protected void paintComponent(Graphics g)
+	{
+		super.paintComponent(g);
+		
+		mapArtist.drawMap(g);
+		mapArtist.drawHighlights(g);
+		if(mapController.getContemplatedMove() != null)
+		{
+			mapArtist.drawMovePath(g, mapController.getContemplatedMove());
+		}
+		unitArtist.drawUnits(g);
+
+		if(currentAnimation != null)
+		{
+			// Animate until it tells you it's done.
+			if(currentAnimation.animate(g))
+			{
+				currentAction = null;
+				currentAnimation = null;
+				mapController.animationEnded();
+			}
+		}
+		else if (currentMenu == null)
+		{
+			mapArtist.drawCursor(g);
+		}
+		else
+		{
+			menuArtist.drawMenu(g);
+		}
 	}
 }

@@ -7,11 +7,10 @@ import java.util.ArrayList;
 import Engine.GameInstance;
 import UI.GameMenu;
 import UI.MapView;
-import UI.Art.MenuArtist;
 import Units.UnitModel;
 import Units.UnitModel.UnitEnum;
 
-public class SpriteMenuArtist implements MenuArtist
+public class SpriteMenuArtist
 {
 	private GameInstance myGame;
 	private MapView myView;
@@ -28,16 +27,12 @@ public class SpriteMenuArtist implements MenuArtist
 	private int menuHBuffer; // Amount of visible menu to left and right of options;
 	private int menuVBuffer; // Amount of visible menu above and below menu options;
 
-	public SpriteMenuArtist(GameInstance game)
+	public SpriteMenuArtist(GameInstance game, SpriteMapView view)
 	{
 		myGame = game;
 		myCurrentMenu = null;
 		myCurrentMenuStrings = new ArrayList<String>();
-	}
 
-	@Override
-	public void setView(MapView view)
-	{
 		myView = view;
 
 		// Figure out how to scale the sprites we draw.
@@ -53,7 +48,6 @@ public class SpriteMenuArtist implements MenuArtist
 	 * @param g
 	 * @param menu
 	 */
-	@Override
 	public void drawMenu(Graphics g)
 	{
 		GameMenu drawMenu = myView.currentMenu;

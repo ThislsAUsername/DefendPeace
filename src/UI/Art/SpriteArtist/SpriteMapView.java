@@ -19,6 +19,10 @@ public class SpriteMapView extends MapView
 
 	private GameInstance myGame;
 
+	private SpriteMapArtist mapArtist;
+	private SpriteUnitArtist unitArtist;
+	private SpriteMenuArtist menuArtist;
+
 	// Overlay management variables.
 	private boolean overlayIsLeft = true;
 	private String overlayFundsString = "FUNDS     0";
@@ -26,7 +30,9 @@ public class SpriteMapView extends MapView
 
 	public SpriteMapView(GameInstance game)
 	{
-		super(new SpriteMapArtist(game), new SpriteUnitArtist(game), new SpriteMenuArtist(game));
+		mapArtist = new SpriteMapArtist(game, this);
+		unitArtist = new SpriteUnitArtist(game, this);
+		menuArtist = new SpriteMenuArtist(game, this);
 
 		myGame = game;
 		unitFacings = new HashMap<Commander, Boolean>();
@@ -70,19 +76,19 @@ public class SpriteMapView extends MapView
 	{
 		super.paintComponent(g);
 
-		// Cast the MapArtist to the SpriteMapArtist it should be.
-		SpriteMapArtist sMapArtist = (SpriteMapArtist)mapArtist;
-
 		// Draw base terrain
-		sMapArtist.drawMap(g);
+		mapArtist.drawMap(g);
 
+		// TODO: Should we combine unit and terrain object drawing in a single object,
+		// and move this whole double for loop inside a single call to e.g. drawMapObjects?
+		unitArtist.updateSpriteIndex();
 		// Draw terrain objects and units in order so they overlap correctly.
 		for(int y = 0; y < myGame.gameMap.mapHeight; ++y)
 		{
 			for(int x = 0; x < myGame.gameMap.mapWidth; ++x)
 			{
 				// Draw any terrain object here, followed by any unit present.
-				sMapArtist.drawTerrainObject(g, x, y);
+				mapArtist.drawTerrainObject(g, x, y);
 				if(!myGame.gameMap.isLocationEmpty(x, y))
 				{
 					Unit u = myGame.gameMap.getLocation(x, y).getResident();
@@ -95,11 +101,11 @@ public class SpriteMapView extends MapView
 
 		// Apply any relevant map highlight.
 		// TODO: Move highlight underneath units? OR, change highlight to not matter.
-		sMapArtist.drawHighlights(g);
+		mapArtist.drawHighlights(g);
 
 		if(mapController.getContemplatedMove() != null)
 		{
-			sMapArtist.drawMovePath(g, mapController.getContemplatedMove());
+			mapArtist.drawMovePath(g, mapController.getContemplatedMove());
 		}
 
 		if(currentAnimation != null)
@@ -114,7 +120,7 @@ public class SpriteMapView extends MapView
 		}
 		else if (currentMenu == null)
 		{
-			sMapArtist.drawCursor(g);
+			mapArtist.drawCursor(g);
 		}
 		else
 		{

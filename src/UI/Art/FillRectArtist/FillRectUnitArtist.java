@@ -9,10 +9,9 @@ import Engine.XYCoord;
 import Terrain.GameMap;
 import Terrain.Location;
 import UI.MapView;
-import UI.Art.UnitArtist;
 import Units.Unit;
 
-public class FillRectUnitArtist implements UnitArtist
+public class FillRectUnitArtist
 {
 	private int tileSizePx;
 	
@@ -28,7 +27,6 @@ public class FillRectUnitArtist implements UnitArtist
 		gameMap = myGame.gameMap;
 	}
 
-	@Override
 	public void setView(MapView view)
 	{
 		myView = view;
@@ -83,7 +81,6 @@ public class FillRectUnitArtist implements UnitArtist
 		drawUnit(g, unit, unit.x, unit.y);
 	}
 
-	@Override
 	public void drawUnit(Graphics g, Unit unit, double x, double y)
 	{
 		Integer health = unit.getHP();

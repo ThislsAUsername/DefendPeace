@@ -5,14 +5,13 @@ import java.awt.image.BufferedImage;
 
 import Terrain.GameMap;
 import UI.MapView;
-import UI.Art.MapArtist;
 import UI.Art.FillRectArtist.FillRectMapArtist;
 
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.Path.PathNode;
 
-public class SpriteMapArtist implements MapArtist
+public class SpriteMapArtist
 {
 	private GameInstance myGame;
 	private GameMap gameMap;
@@ -21,17 +20,13 @@ public class SpriteMapArtist implements MapArtist
 
 	private int drawScale;
 
-	MapArtist backupArtist; // TODO: Make this obsolete.
+	FillRectMapArtist backupArtist; // TODO: Make this obsolete.
 	
-	public SpriteMapArtist(GameInstance game)
+	public SpriteMapArtist(GameInstance game, MapView view)
 	{
 		myGame = game;
 		gameMap = game.gameMap;
-	}
 
-	@Override
-	public void setView(MapView view)
-	{
 		drawScale = view.getDrawScale();
 
 		// TODO: make this obsolete.
@@ -50,7 +45,6 @@ public class SpriteMapArtist implements MapArtist
 	 * We will let SpriteMapView orchestrate with finer control though, and this
 	 * function may not actually be used (except to prevent compiler errors).
 	 */
-	@Override
 	public void drawMap(Graphics g)
 	{
 		// TODO: Change what/where we draw based on camera location.
@@ -77,13 +71,11 @@ public class SpriteMapArtist implements MapArtist
 		spriteSet.drawTerrainObject(g, gameMap, x, y, drawScale);
 	}
 
-	@Override
 	public void drawCursor(Graphics g)
 	{
 		backupArtist.drawCursor(g);
 	}
 
-	@Override
 	public void drawMovePath(Graphics g, Path path)
 	{
 		int tileSize = SpriteLibrary.baseSpriteSize * drawScale;
@@ -151,7 +143,6 @@ public class SpriteMapArtist implements MapArtist
 		return actualDir;
 	}
 
-	@Override
 	public void drawHighlights(Graphics g)
 	{
 		backupArtist.drawHighlights(g);

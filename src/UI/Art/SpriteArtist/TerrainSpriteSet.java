@@ -8,7 +8,6 @@ import java.util.ArrayList;
 
 import Terrain.Environment;
 import Terrain.GameMap;
-import UI.MapView;
 
 /**
  * Responsible for storing and organizing all image data associated with a specific map tile type.

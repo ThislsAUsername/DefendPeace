@@ -5,10 +5,9 @@ import java.awt.Graphics;
 
 import Engine.GameInstance;
 import UI.MapView;
-import UI.Art.MenuArtist;
 import Units.UnitModel.UnitEnum;
 
-public class FillRectMenuArtist implements MenuArtist
+public class FillRectMenuArtist
 {
 	private int tileSizePx;
 	private int mapViewWidth;
@@ -24,7 +23,6 @@ public class FillRectMenuArtist implements MenuArtist
 		myGame = game;
 	}
 
-	@Override
 	public void setView(MapView view)
 	{
 		myView = view;
@@ -32,8 +30,7 @@ public class FillRectMenuArtist implements MenuArtist
 		mapViewWidth = view.getViewWidth();
 		mapViewHeight = view.getViewHeight();
 	}
-	
-	@Override
+
 	public void drawMenu(Graphics g)
 	{
 		int menuBorderLeft = mapViewWidth/4;

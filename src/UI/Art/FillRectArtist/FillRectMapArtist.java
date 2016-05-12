@@ -9,9 +9,8 @@ import Engine.Path.PathNode;
 import Terrain.Environment;
 import Terrain.GameMap;
 import UI.MapView;
-import UI.Art.MapArtist;
 
-public class FillRectMapArtist implements MapArtist
+public class FillRectMapArtist
 {
 	private int tileSizePx;
 
@@ -37,13 +36,11 @@ public class FillRectMapArtist implements MapArtist
 		gameMap = game.gameMap;
 	}
 
-	@Override
 	public void setView(MapView view)
 	{
 		tileSizePx = view.getTileSize();
 	}
 
-	@Override
 	public void drawMap(Graphics g)
 	{
 		for(int w = 0; w < gameMap.mapWidth; ++w)
@@ -65,7 +62,7 @@ public class FillRectMapArtist implements MapArtist
 	private void drawLocation(Graphics g, Terrain.Location locus, int x, int y)
 	{
 		Environment tile = locus.getEnvironment();
-		Color tileColor = Color.black; // TODO: This will be a sprite eventually.
+		Color tileColor = Color.black;
 		
 		switch(tile.terrainType)
 		{
@@ -117,14 +114,12 @@ public class FillRectMapArtist implements MapArtist
 		g.fillRect(x, y, tileSizePx, tileSizePx);
 	}
 
-	@Override
 	public void drawCursor(Graphics g)
 	{
 		g.setColor(COLOR_CURSOR);
 		g.fillRect(myGame.getCursorX()*tileSizePx, myGame.getCursorY()*tileSizePx, tileSizePx, tileSizePx);
 	}
 
-	@Override
 	public void drawMovePath(Graphics g, Path path)
 	{
 		g.setColor(COLOR_CURSOR);
@@ -134,7 +129,6 @@ public class FillRectMapArtist implements MapArtist
 		}
 	}
 
-	@Override
 	public void drawHighlights(Graphics g)
 	{
 		for(int w = 0; w < gameMap.mapWidth; ++w)

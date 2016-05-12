@@ -1,11 +1,6 @@
 package UI;
 
 import java.awt.Dimension;
-import java.awt.Graphics;
-
-import UI.Art.MapArtist;
-import UI.Art.MenuArtist;
-import UI.Art.UnitArtist;
 import UI.Art.Animation.AnimationSequence;
 import UI.Art.Animation.NobunagaBattleAnimation;
 
@@ -21,12 +16,8 @@ public abstract class MapView extends javax.swing.JPanel {
 
 	private int unitMoveSpeedMsPerTile = 100;
 
-	protected MapArtist mapArtist;
-	protected UnitArtist unitArtist;
-	protected MenuArtist menuArtist;
-	
 	private final int tileSizePx = 16; // TODO: Does this belong in MapView?
-	private int drawScale = 3;
+	private int drawScale = 2;
 	private int mapViewWidth = tileSizePx * drawScale * 15;
 	private int mapViewHeight = tileSizePx * drawScale * 10;
 
@@ -34,18 +25,10 @@ public abstract class MapView extends javax.swing.JPanel {
 
 	protected MapController mapController = null;
 
-	public MapView(MapArtist mapArt, UnitArtist unitArt, MenuArtist menuArt)
+	public MapView()
 	{
 		// TODO: Move this down to the child classes?
 		setPreferredSize(new Dimension(mapViewWidth, mapViewHeight));
-
-		mapArt.setView(this);
-		unitArt.setView(this);
-		menuArt.setView(this);
-
-		mapArtist = mapArt; // TODO: Perhaps mapArtist should determine mapViewHeight, etc.
-		unitArtist = unitArt;
-		menuArtist = menuArt;
 	}
 
 	public void setController(MapController controller)
@@ -64,38 +47,6 @@ public abstract class MapView extends javax.swing.JPanel {
 	public int getViewHeight()
 	{
 		return mapViewHeight;
-	}
-
-	@Override
-	protected void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		
-		mapArtist.drawMap(g);
-		mapArtist.drawHighlights(g);
-		if(mapController.getContemplatedMove() != null)
-		{
-			mapArtist.drawMovePath(g, mapController.getContemplatedMove());
-		}
-		unitArtist.drawUnits(g);
-
-		if(currentAnimation != null)
-		{
-			// Animate until it tells you it's done.
-			if(currentAnimation.animate(g))
-			{
-				currentAction = null;
-				currentAnimation = null;
-				mapController.animationEnded();
-			}
-		}
-		else if (currentMenu == null)
-		{
-			mapArtist.drawCursor(g);
-		}
-		else
-		{
-			menuArtist.drawMenu(g);
-		}
 	}
 
 	public void animate(GameAction action)
