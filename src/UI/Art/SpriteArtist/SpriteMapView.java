@@ -28,6 +28,11 @@ public class SpriteMapView extends MapView
 	private String overlayFundsString = "FUNDS     0";
 	private int overlayPreviousFunds = 0;
 
+	// Variables for controlling map animations.
+	private int currentAnimIndex = 0;
+	private long lastAnimIndexUpdateTime = 0;
+	private final double animIndexUpdateInterval = 250;
+
 	public SpriteMapView(GameInstance game)
 	{
 		mapArtist = new SpriteMapArtist(game, this);
@@ -77,27 +82,13 @@ public class SpriteMapView extends MapView
 		super.paintComponent(g);
 
 		// Draw base terrain
-		mapArtist.drawMap(g);
+		mapArtist.drawBaseTerrain(g);
 
-		// TODO: Should we combine unit and terrain object drawing in a single object,
-		// and move this whole double for loop inside a single call to e.g. drawMapObjects?
-		unitArtist.updateSpriteIndex();
-		// Draw terrain objects and units in order so they overlap correctly.
-		for(int y = 0; y < myGame.gameMap.mapHeight; ++y)
-		{
-			for(int x = 0; x < myGame.gameMap.mapWidth; ++x)
-			{
-				// Draw any terrain object here, followed by any unit present.
-				mapArtist.drawTerrainObject(g, x, y);
-				if(!myGame.gameMap.isLocationEmpty(x, y))
-				{
-					Unit u = myGame.gameMap.getLocation(x, y).getResident();
-					unitArtist.drawUnit(g, u, u.x, u.y);
-				}
-			}
-		}
+		// Draw units, buildings, trees, etc.
+		drawUnitsAndMapObjects(g);
+
 		// Draw Unit HP icons on top of everything, to make sure they are seen clearly.
-		((SpriteUnitArtist)unitArtist).drawUnitHPIcons(g);
+		unitArtist.drawUnitHPIcons(g);
 
 		// Apply any relevant map highlight.
 		// TODO: Move highlight underneath units? OR, change highlight to not matter.
@@ -129,6 +120,49 @@ public class SpriteMapView extends MapView
 
 		// Draw the Commander overlay with available funds.
 		drawCommanderOverlay(g);
+	}
+
+	/**
+	 * Increments the current map animation index, and draws all units and map objects in order
+	 *   from left to right, top to bottom, ensuring that they are layered correctly (near things
+	 *   things are always drawn on top of far things).
+	 */
+	private void drawUnitsAndMapObjects( Graphics g )
+	{
+		// Update the central sprite index so animations happen in sync.
+		updateSpriteIndex();
+
+		// Draw terrain objects and units in order so they overlap correctly.
+		for(int y = 0; y < myGame.gameMap.mapHeight; ++y)
+		{
+			for(int x = 0; x < myGame.gameMap.mapWidth; ++x)
+			{
+				// Draw any terrain object here, followed by any unit present.
+				mapArtist.drawTerrainObject(g, x, y);
+				if(!myGame.gameMap.isLocationEmpty(x, y))
+				{
+					Unit u = myGame.gameMap.getLocation(x, y).getResident();
+					unitArtist.drawUnit(g, u, u.x, u.y, currentAnimIndex);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Updates the index which determines the frame that is drawn for map animations.
+	 */
+	private void updateSpriteIndex()
+	{
+		// Calculate the sprite index to use.
+		long thisTime = System.currentTimeMillis();
+		long timeDiff = thisTime - lastAnimIndexUpdateTime;
+
+		// If it's time to update the sprite index... update the sprite index.
+		if(timeDiff > animIndexUpdateInterval)
+		{
+			currentAnimIndex++;
+			lastAnimIndexUpdateTime = thisTime;
+		}
 	}
 
 	/**

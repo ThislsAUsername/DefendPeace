@@ -40,24 +40,6 @@ public class SpriteMapArtist
 		buildMapImage();
 	}
 
-	/**
-	 * Basic implementation to draw all terrain and all terrain objects at once.
-	 * We will let SpriteMapView orchestrate with finer control though, and this
-	 * function may not actually be used (except to prevent compiler errors).
-	 */
-	public void drawMap(Graphics g)
-	{
-		// TODO: Change what/where we draw based on camera location.
-		g.drawImage(baseMapImage, 0, 0, null);
-		for(int y = 0; y < gameMap.mapHeight; ++y)
-		{
-			for(int x = 0; x < gameMap.mapWidth; ++x)
-			{
-				drawTerrainObject(g, x, y);
-			}
-		}
-	}
-
 	public void drawBaseTerrain(Graphics g)
 	{
 		// TODO: Change what/where we draw based on camera location.
