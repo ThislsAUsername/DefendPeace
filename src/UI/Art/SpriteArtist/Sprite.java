@@ -36,7 +36,7 @@ public class Sprite
 		{
 			System.out.println("WARNING! [Sprite()] Continuing with placeholder image.");
 			// Just make a single blank frame of the specified size.
-			spriteImages.add(createDefaultBlankSprite(spriteWidthPx, spriteHeightPx));
+			spriteImages.add(SpriteLibrary.createDefaultBlankSprite(spriteWidthPx, spriteHeightPx));
 		}
 		else
 		{
@@ -67,7 +67,7 @@ public class Sprite
 		{
 			System.out.println("WARNING! [Sprite()] Continuing with placeholder image.");
 			// Just make a single blank frame of the specified size.
-			spriteImages.add(createDefaultBlankSprite(SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize));
+			spriteImages.add(SpriteLibrary.createDefaultBlankSprite(SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize));
 		}
 		else
 		{
@@ -129,13 +129,4 @@ public class Sprite
 			}
 		}
 	}
-
-    private BufferedImage createDefaultBlankSprite(int w, int h)
-    {
-		BufferedImage bi = new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
-		Graphics big = bi.getGraphics();
-		big.setColor(Color.BLACK);
-		big.fillRect(0, 0, w, h);
-		return bi;
-    }
 }

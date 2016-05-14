@@ -89,6 +89,8 @@ public class SpriteLibrary
 	// Commander overlay backdrops (shows commander name and funds) for each Commanders in the game.
 	private static HashMap<Commander, Sprite> coOverlays = new HashMap<Commander, Sprite>();
 
+	private static BufferedImage actionCursor = null;
+
 	/**
 	 * Retrieve (loading if needed) the sprites associated with the given terrain type. For ownable terrain types
 	 * (e.g. cities), the unowned variant of the sprite will be returned.
@@ -453,5 +455,37 @@ public class SpriteLibrary
 		// Figure out which sub-image they want, and give it to them.
 		int index = ( leftSide )? 0 : 1;
 		return coOverlays.get(co).getFrame(index);
+	}
+
+	/**
+	 * Creates a new blank (all black) image of the given size. This is used to generate placeholder
+	 * assets on the fly when we fail to load resources from disk.
+	 * @param w Desired width of the placeholder image.
+	 * @param h Desired height of the placeholder image.
+	 * @return A new BufferedImage of the specified size, filled in with all black.
+	 */
+	public static BufferedImage createDefaultBlankSprite(int w, int h)
+	{
+		BufferedImage bi = new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
+		Graphics big = bi.getGraphics();
+		big.setColor(Color.BLACK);
+		big.fillRect(0, 0, w, h);
+		return bi;
+	}
+
+	/**
+	 * Get the image used to indicate the current action target.
+	 */
+	public static BufferedImage getActionCursor()
+	{
+		if( null == actionCursor )
+		{
+			actionCursor = loadSpriteSheetFile("res/tileset/cursor_action.png");
+			if( null == actionCursor )
+			{
+				actionCursor = createDefaultBlankSprite(baseSpriteSize, baseSpriteSize);
+			}
+		}
+		return actionCursor;
 	}
 }

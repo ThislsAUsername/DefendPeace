@@ -1,12 +1,15 @@
 package UI.Art.SpriteArtist;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 import Terrain.GameMap;
 import UI.MapView;
 import UI.Art.FillRectArtist.FillRectMapArtist;
+import Units.Unit;
 
+import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.Path.PathNode;
@@ -15,10 +18,12 @@ public class SpriteMapArtist
 {
 	private GameInstance myGame;
 	private GameMap gameMap;
+	private MapView myView;
 
 	BufferedImage baseMapImage;
 
 	private int drawScale;
+	private int tileSize;
 
 	FillRectMapArtist backupArtist; // TODO: Make this obsolete.
 	
@@ -26,16 +31,18 @@ public class SpriteMapArtist
 	{
 		myGame = game;
 		gameMap = game.gameMap;
+		myView = view;
 
-		drawScale = view.getDrawScale();
+		drawScale = myView.getDrawScale();
+		tileSize = SpriteLibrary.baseSpriteSize * drawScale;
 
 		// TODO: make this obsolete.
 		backupArtist = new FillRectMapArtist(myGame);
-		backupArtist.setView(view);
-		
-		baseMapImage = new BufferedImage(gameMap.mapWidth*view.getTileSize(),
-				gameMap.mapHeight*view.getTileSize(), BufferedImage.TYPE_INT_RGB);
-		
+		backupArtist.setView(myView);
+
+		baseMapImage = new BufferedImage(gameMap.mapWidth*myView.getTileSize(),
+				gameMap.mapHeight*myView.getTileSize(), BufferedImage.TYPE_INT_RGB);
+
 		// Build base map image.
 		buildMapImage();
 	}
@@ -55,12 +62,20 @@ public class SpriteMapArtist
 
 	public void drawCursor(Graphics g)
 	{
-		backupArtist.drawCursor(g);
+		GameAction action = myView.currentAction;
+		if(null == action || action.getActionType() == GameAction.ActionType.INVALID)
+		{
+			// Draw the default map cursor.
+			backupArtist.drawCursor(g);
+		}
+		else
+		{
+			drawSpriteCenteredOnLocation(g, SpriteLibrary.getActionCursor(), myGame.getCursorX(), myGame.getCursorY());
+		}
 	}
 
 	public void drawMovePath(Graphics g, Path path)
 	{
-		int tileSize = SpriteLibrary.baseSpriteSize * drawScale;
 		Sprite moveLineSprites = SpriteLibrary.getMoveCursorLineSprite();
 		Sprite moveArrowSprites = SpriteLibrary.getMoveCursorArrowSprite();
 
@@ -127,7 +142,21 @@ public class SpriteMapArtist
 
 	public void drawHighlights(Graphics g)
 	{
-		backupArtist.drawHighlights(g);
+		for(int w = 0; w < gameMap.mapWidth; ++w)
+		{
+			for(int h = 0; h < gameMap.mapHeight; ++h)
+			{
+				if(gameMap.isLocationValid(w,h))
+				{
+					Terrain.Location locus = gameMap.getLocation(w,h);
+					if(locus.isHighlightSet())
+					{
+						g.setColor(new Color(255,255,255,160));
+						g.fillRect(w*tileSize, h*tileSize, tileSize, tileSize);
+					}
+				}
+			}
+		}
 	}
 
 	private void buildMapImage()
@@ -145,5 +174,18 @@ public class SpriteMapArtist
 				spriteSet.drawTerrain(g, gameMap, x, y, drawScale);
 			}
 		}
+	}
+
+	private void drawSpriteCenteredOnLocation(Graphics g, BufferedImage image, int x, int y)
+	{
+		// Calculate the size to draw.
+		int drawWidth = image.getWidth()*drawScale;
+		int drawHeight = image.getHeight()*drawScale;
+
+		// Center the cursor over the targeted map square.
+		int drawX = x*tileSize - drawWidth/2 + tileSize/2;
+		int drawY = y*tileSize - drawHeight/2 + tileSize/2;
+
+		g.drawImage( image, drawX, drawY, drawWidth, drawHeight, null);
 	}
 }

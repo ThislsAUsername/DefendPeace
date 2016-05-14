@@ -395,6 +395,7 @@ public class MapController
         myView.currentMenu = new GameMenu(GameMenu.MenuType.ACTION,
         		myView.currentAction.getActor().getPossibleActions(myGame.gameMap, myView.currentAction.getMoveX(), myView.currentAction.getMoveY()));
         myGame.setCursorLocation(myView.currentAction.getMoveX(), myView.currentAction.getMoveY());
+        myView.currentAction.setActionType(GameAction.ActionType.INVALID); // We haven't chosen an action yet.
         break;
       case MAP:
         myView.currentAction = null;

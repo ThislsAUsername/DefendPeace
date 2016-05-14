@@ -91,7 +91,6 @@ public class SpriteMapView extends MapView
 		unitArtist.drawUnitHPIcons(g);
 
 		// Apply any relevant map highlight.
-		// TODO: Move highlight underneath units? OR, change highlight to not matter.
 		mapArtist.drawHighlights(g);
 
 		if(mapController.getContemplatedMove() != null)
@@ -171,8 +170,8 @@ public class SpriteMapView extends MapView
 	 */
 	private void drawCommanderOverlay(Graphics g)
 	{
-		// TODO: Switch overlay location based on cursor location
-		// on screen, rather than cursor location on map.
+		// TODO: Move CO overlay based on the cursor location on the screen,
+		// rather than the cursor location on the map.
 		if( !overlayIsLeft && myGame.getCursorX() > (myGame.gameMap.mapWidth-1)*3/5 )
 		{
 			overlayIsLeft = true;
