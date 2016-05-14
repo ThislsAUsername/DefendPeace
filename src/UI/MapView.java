@@ -1,6 +1,5 @@
 package UI;
 
-import java.awt.Dimension;
 import UI.Art.Animation.AnimationSequence;
 import UI.Art.Animation.NobunagaBattleAnimation;
 
@@ -16,38 +15,30 @@ public abstract class MapView extends javax.swing.JPanel {
 
 	private int unitMoveSpeedMsPerTile = 100;
 
-	private final int tileSizePx = 16; // TODO: Does this belong in MapView?
 	private int drawScale = 2;
-	private int mapViewWidth = tileSizePx * drawScale * 15;
-	private int mapViewHeight = tileSizePx * drawScale * 10;
 
 	protected AnimationSequence currentAnimation = null;
 
 	protected MapController mapController = null;
-
-	public MapView()
-	{
-		// TODO: Move this down to the child classes?
-		setPreferredSize(new Dimension(mapViewWidth, mapViewHeight));
-	}
 
 	public void setController(MapController controller)
 	{
 		mapController = controller;
 	}
 
-	public int getTileSize()
-	{
-		return tileSizePx * drawScale;
-	}
-	public int getViewWidth()
-	{
-		return mapViewWidth;
-	}
-	public int getViewHeight()
-	{
-		return mapViewHeight;
-	}
+	/**
+	 * @return The side-length in pixels of a single map square, taking drawScale into account.
+	 * NOTE: This assumes that all MapView subclasses will use a square-tile map representation.
+	 */
+	public abstract int getTileSize();
+	/**
+	 * @return The width in pixels of the entire map view.
+	 */
+	public abstract int getViewWidth();
+	/**
+	 * @return The height in pixels of the entire map view.
+	 */
+	public abstract int getViewHeight();
 
 	public void animate(GameAction action)
 	{

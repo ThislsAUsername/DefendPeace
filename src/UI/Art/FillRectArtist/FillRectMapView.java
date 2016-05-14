@@ -1,5 +1,6 @@
 package UI.Art.FillRectArtist;
 
+import java.awt.Dimension;
 import java.awt.Graphics;
 
 import Engine.GameInstance;
@@ -13,15 +14,42 @@ public class FillRectMapView extends MapView
 	private FillRectUnitArtist unitArtist;
 	private FillRectMenuArtist menuArtist;
 
+	private int baseTileSize = 16;
+	private int mapViewWidth;
+	private int mapViewHeight;
+
 	public FillRectMapView( GameInstance game )
 	{
+		mapViewWidth = baseTileSize * getDrawScale() * 15;
+		mapViewHeight = baseTileSize * getDrawScale() * 10;
+
 		mapArtist = new FillRectMapArtist(game);
 		unitArtist = new FillRectUnitArtist(game);
 		menuArtist = new FillRectMenuArtist(game);
-		
+
 		mapArtist.setView(this);
 		unitArtist.setView(this);
 		menuArtist.setView(this);
+
+		setPreferredSize(new Dimension(mapViewWidth, mapViewHeight));
+	}
+
+	@Override
+	public int getTileSize()
+	{
+		return baseTileSize * getDrawScale();
+	}
+
+	@Override
+	public int getViewWidth()
+	{
+		return mapViewWidth;
+	}
+
+	@Override
+	public int getViewHeight()
+	{
+		return mapViewHeight;
 	}
 
 	@Override

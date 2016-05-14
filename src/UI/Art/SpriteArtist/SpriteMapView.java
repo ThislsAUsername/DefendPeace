@@ -1,5 +1,6 @@
 package UI.Art.SpriteArtist;
 
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
@@ -33,6 +34,9 @@ public class SpriteMapView extends MapView
 	private long lastAnimIndexUpdateTime = 0;
 	private final double animIndexUpdateInterval = 250;
 
+	private int mapViewWidth;
+	private int mapViewHeight;
+
 	public SpriteMapView(GameInstance game)
 	{
 		mapArtist = new SpriteMapArtist(game, this);
@@ -47,6 +51,29 @@ public class SpriteMapView extends MapView
 		{
 			setCommanderUnitFacing(co, game.gameMap);
 		}
+
+		// By default, we will show a 15x10 chunk of the map.
+		mapViewWidth = SpriteLibrary.baseSpriteSize * getDrawScale() * 15;
+		mapViewHeight = SpriteLibrary.baseSpriteSize * getDrawScale() * 10;
+		setPreferredSize(new Dimension(mapViewWidth, mapViewHeight));
+	}
+
+	@Override
+	public int getTileSize()
+	{
+		return SpriteLibrary.baseSpriteSize * getDrawScale();
+	}
+
+	@Override
+	public int getViewWidth()
+	{
+		return mapViewWidth;
+	}
+
+	@Override
+	public int getViewHeight()
+	{
+		return mapViewHeight;
 	}
 
 	/** Returns whether the commander's map units should be flipped horizontally when drawn. */
