@@ -120,9 +120,23 @@ public class SpriteMapView extends MapView
 		// Apply any relevant map highlight.
 		mapArtist.drawHighlights(g);
 
+		// TODO: Consider moving the contemplated move inside of the action (in MapController)
+		//       to make the interface more consistent?
+		// Draw the movement arrow if the user is contemplating a move.
 		if(mapController.getContemplatedMove() != null)
 		{
 			mapArtist.drawMovePath(g, mapController.getContemplatedMove());
+		}
+		// Draw the movement arrow if the user is contemplating an action (but not once the action commences).
+		if(null != currentAction && null != currentAction.getMovePath() && null == currentAnimation)
+		{
+			mapArtist.drawMovePath(g, currentAction.getMovePath());
+		}
+		// Draw the acting unit so it's on top of everything.
+		if(null != currentAction) // && currentAnimation == null) // If the unit should animate when acting.
+		{
+			Unit u = currentAction.getActor();
+			unitArtist.drawUnit(g, u, u.x, u.y, currentAnimIndex);
 		}
 
 		if(currentAnimation != null)
@@ -168,7 +182,11 @@ public class SpriteMapView extends MapView
 				if(!myGame.gameMap.isLocationEmpty(x, y))
 				{
 					Unit u = myGame.gameMap.getLocation(x, y).getResident();
-					unitArtist.drawUnit(g, u, u.x, u.y, currentAnimIndex);
+					// If an action is being considered, draw the active unit later, not now.
+					if( (null == currentAction) || (u != currentAction.getActor()) )
+					{
+						unitArtist.drawUnit(g, u, u.x, u.y, currentAnimIndex);
+					}
 				}
 			}
 		}
