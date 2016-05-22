@@ -16,9 +16,7 @@ public class SpriteUnitArtist
 	public SpriteUnitArtist( GameInstance game, SpriteMapView view )
 	{
 		myGame = game;
-
 		myView = view;
-		// Get a convenient copy of the view's scaling factor.
 		drawScale = view.getDrawScale();
 	}
 

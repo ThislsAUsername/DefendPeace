@@ -35,7 +35,7 @@ public class SpriteMenuArtist
 
 		myView = view;
 
-		// Figure out how to scale the sprites we draw.
+		// Get the draw scale, and figure out the resulting "real" text size, etc.
 		drawScale = myView.getDrawScale();
 		menuTextWidth = SpriteLibrary.getMenuLetters().getFrame(0).getWidth()*drawScale;
 		menuTextHeight = SpriteLibrary.getMenuLetters().getFrame(0).getHeight()*drawScale;
@@ -45,8 +45,6 @@ public class SpriteMenuArtist
 
 	/**
 	 * Draw the menu, centered around the location of interest.
-	 * @param g
-	 * @param menu
 	 */
 	public void drawMenu(Graphics g)
 	{

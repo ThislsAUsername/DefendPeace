@@ -22,7 +22,7 @@ public class Sprite
 	 * Parses the provided sprite sheet into individual, like-sized frames, with the assumption
 	 * that the sprite images are arranged horizontally.
 	 * If the sprite sheet is taller than the provided height, the extra image space is ignored.
-	 * If the sprite sheet length does not divide evenly, then the final (too-short) section
+	 * If the sprite sheet width does not divide evenly, then the final (too-short) section
 	 * of the image will NOT be included as a separate frame.
 	 * @param spriteSheet The image to parse into frames.
 	 * @param spriteWidthPx The width of each frame in pixels.
@@ -40,12 +40,12 @@ public class Sprite
 		}
 		else
 		{
-			// Cut the sprite-sheet up.
+			// Start at the beginning of the sprite sheet.
 			int xOffset = 0;
 			int yOffset = 0;
 			int spriteNum = 0;
 
-			// Loop until we get as many sprites as we expect or run out of runway.
+			// Cut the sprite-sheet into individual frames.
 			while( (spriteNum+1)*spriteWidthPx <= spriteSheet.getWidth() )
 			{
 				spriteImages.add(spriteSheet.getSubimage(xOffset, yOffset, spriteWidthPx, spriteHeightPx));

@@ -165,7 +165,7 @@ public class SpriteMapView extends MapView
 	/**
 	 * Increments the current map animation index, and draws all units and map objects in order
 	 *   from left to right, top to bottom, ensuring that they are layered correctly (near things
-	 *   things are always drawn on top of far things).
+	 *   are always drawn on top of far things).
 	 */
 	private void drawUnitsAndMapObjects( Graphics g )
 	{

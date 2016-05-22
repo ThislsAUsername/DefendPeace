@@ -86,7 +86,7 @@ public class SpriteLibrary
 	private static Sprite menuLetterSprites = null;
 	private static Sprite menuNumberSprites = null;
 
-	// Commander overlay backdrops (shows commander name and funds) for each Commanders in the game.
+	// Commander overlay backdrops (shows commander name and funds) for each Commander in the game.
 	private static HashMap<Commander, Sprite> coOverlays = new HashMap<Commander, Sprite>();
 
 	private static BufferedImage actionCursor = null;
@@ -380,7 +380,8 @@ public class SpriteLibrary
 	///////////////////////////////////////////////////////////////////
 
 	/**
-	 * Loads the alphabetic character image file if needed, and returns the resulting Sprite.
+	 * Loads the alphabetic character image file (if not already loaded), and returns
+	 * the resulting Sprite, with each letter as its own frame.
 	 * Letters are all capital, and are stored in order starting from 'A'.
 	 * @return A Sprite object containing the in-game menu font for letters.
 	 */
@@ -395,7 +396,7 @@ public class SpriteLibrary
 
 	/**
 	 * Loads the numeric character image file if needed, and returns the resulting Sprite.
-	 * Numbers are stored in order starting from 0.
+	 * Numbers are stored in order starting from 0; each number is its own frame in the Sprite.
 	 * @return A Sprite object containing the in-game menu font for numbers.
 	 */
 	public static Sprite getMenuNumbers()

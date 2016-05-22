@@ -21,118 +21,110 @@ public class TerrainSpriteSet
 	int drawOffsetx;
 	int drawOffsety;
 
-    // Keys to the sprite array - logical OR the four cardinals to get the corresponding sprite index.
-    // The four diagonal directions are just the index for that corner transition.
-    private static final short NORTH = 0x1;
-    private static final short EAST = 0x2;
-    private static final short SOUTH = 0x4;
-    private static final short WEST = 0x8;
-    private static final short NW = 16;
-    private static final short NE = 17;
-    private static final short SE = 18;
-    private static final short SW = 19;
-    // public static final short PLACEHOLDER5 = 0x10;
-    // public static final short PLACEHOLDER6 = 0x20;
-    // public static final short PLACEHOLDER7 = 0x40;
-    // public static final short PLACEHOLDER8 = 0x80;
-    // public static final short PLACEHOLDER9 = 0x100;
-    // public static final short PLACEHOLDER10 = 0x200;
-    // public static final short PLACEHOLDER11 = 0x400;
-    // public static final short PLACEHOLDER12 = 0x800;
-    // public static final short PLACEHOLDER13 = 0x1000;
-    // public static final short PLACEHOLDER14 = 0x2000;
-    // public static final short PLACEHOLDER15 = 0x4000;
-    
-    public TerrainSpriteSet(Environment.Terrains terrainType, BufferedImage spriteSheet, int spriteWidth, int spriteHeight)
-    {
-        myTerrainType = terrainType;
-    	terrainSprites = new ArrayList<Sprite>();
-		tileTransitions = new ArrayList<TerrainSpriteSet>();
-    	
-        // We assume here that all sprites are sized in multiples of the base sprite size.
-        drawOffsetx = spriteWidth / SpriteLibrary.baseSpriteSize - 1;
-        drawOffsety = spriteHeight / SpriteLibrary.baseSpriteSize - 1;
+	// Keys to the sprite array - logical OR the four cardinals to get the corresponding sprite index.
+	// The four diagonal directions are just the index for that corner transition.
+	private static final short NORTH = 0x1;
+	private static final short EAST = 0x2;
+	private static final short SOUTH = 0x4;
+	private static final short WEST = 0x8;
+	private static final short NW = 16;
+	private static final short NE = 17;
+	private static final short SE = 18;
+	private static final short SW = 19;
 
-    	if(spriteSheet == null)
-    	{
+	public TerrainSpriteSet(Environment.Terrains terrainType, BufferedImage spriteSheet, int spriteWidth, int spriteHeight)
+	{
+		myTerrainType = terrainType;
+		terrainSprites = new ArrayList<Sprite>();
+		tileTransitions = new ArrayList<TerrainSpriteSet>();
+
+		// We assume here that all sprites are sized in multiples of the base sprite size.
+		drawOffsetx = spriteWidth / SpriteLibrary.baseSpriteSize - 1;
+		drawOffsety = spriteHeight / SpriteLibrary.baseSpriteSize - 1;
+
+		if(spriteSheet == null)
+		{
 			System.out.println("WARNING! Continuing with placeholder images.");
-    		// Just make a single frame of the specified size.
+			// Just make a single frame of the specified size.
 			drawOffsetx = 0;
 			drawOffsety = 0;
 			// Create a new blank sprite image of the desired size.
 			terrainSprites.add(new Sprite(null, SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize));
-    	}
-    	else
-    	{
-    		// Cut the sprite-sheet up and populate terrainSprites.
-    		int xOffset = 0;
-    		int yOffset = 0;
-    		int spriteNum = 0;
-    		int maxSpriteIndex = (NORTH | EAST | SOUTH | WEST) + 4; // 20 possible sprites per terrain type (0-15, plus four corners).
-    		
-			// Create the initial sprites    		
-    		try
-    		{
-    			// Loop until we get as many sprites as we expect or run out of runway.
-    			while(spriteNum <= maxSpriteIndex && ( (spriteNum+1)*spriteWidth <= spriteSheet.getWidth() ) )
-    			{
-    				terrainSprites.add(new Sprite(spriteSheet.getSubimage(xOffset, yOffset, spriteWidth, spriteHeight)));
-    				xOffset += spriteWidth;
-    				spriteNum++;
-    			}
-    			
-                if(spriteNum != 1 && spriteNum != 16 && spriteNum != 20)
-    			{
-    				System.out.println("WARNING! TerrainSpriteSet detected a malformed sprite sheet!");
-    				System.out.println("WARNING!   Found " + spriteNum + " " + spriteWidth + "x" + spriteHeight + " sprites in a "
-    						+ spriteSheet.getWidth() + "x" + spriteSheet.getHeight() + " spritesheet");
-    				System.out.println("WARNING!   (There should be 1, 16, or 20 sprites in a terrain sprite sheet)");
-    			}
+		}
+		else
+		{
+			// Cut the sprite-sheet up and populate terrainSprites.
+			int xOffset = 0;
+			int yOffset = 0;
+			int spriteNum = 0;
+			int maxSpriteIndex = (NORTH | EAST | SOUTH | WEST) + 4; // 20 possible sprites per terrain type (0-15, plus four corners).
 
-    			maxSpriteIndex = spriteNum-1; // However many sprites we found, we won't find more than that on a second horizontal pass.
-    			
+			// Loop through the sprite sheet and pull out all frames (first row), and all variations if provided (additional rows).
+			try
+			{
+				// Loop until we get as many sprites as we expect or run out of runway.
+				while(spriteNum <= maxSpriteIndex && ( (spriteNum+1)*spriteWidth <= spriteSheet.getWidth() ) )
+				{
+					terrainSprites.add(new Sprite(spriteSheet.getSubimage(xOffset, yOffset, spriteWidth, spriteHeight)));
+					xOffset += spriteWidth;
+					spriteNum++;
+				}
+
+				if(spriteNum != 1 && spriteNum != 16 && spriteNum != 20)
+				{
+					System.out.println("WARNING! TerrainSpriteSet detected a malformed sprite sheet!");
+					System.out.println("WARNING!   Found " + spriteNum + " " + spriteWidth + "x" + spriteHeight + " sprites in a "
+							+ spriteSheet.getWidth() + "x" + spriteSheet.getHeight() + " spritesheet");
+					System.out.println("WARNING!   (There should be 1, 16, or 20 sprites in a terrain sprite sheet)");
+				}
+
+				maxSpriteIndex = spriteNum-1; // However many sprites we found, we won't find more than that on a second horizontal pass.
+
 				// If this sprite has more vertical space, pull in alternate versions of the existing terrain tiles.
-    			while(yOffset + spriteHeight <= spriteSheet.getHeight())
-    			{
-        			xOffset = 0;
-        			spriteNum = 0;
-        			
-        			while(spriteNum <= maxSpriteIndex && ( (spriteNum+1)*spriteWidth <= spriteSheet.getWidth() ) )
-        			{
-        				terrainSprites.get(spriteNum).addFrame(spriteSheet.getSubimage(xOffset, yOffset, spriteWidth, spriteHeight));
-        				xOffset += spriteWidth;
-        				spriteNum++;
-        			}
+				while(yOffset + spriteHeight <= spriteSheet.getHeight())
+				{
+					xOffset = 0;
+					spriteNum = 0;
 
-        			yOffset += spriteHeight;
-    			}
-    		}
-    		catch(RasterFormatException RFE) // This occurs if we go off the end of the sprite sheet.
-    		{
-    			System.out.println("WARNING! RasterFormatException while loading Sprite. Attempting to continue.");
-    			//RFE.printStackTrace();
-    			
-    			terrainSprites.clear(); // Clear this in case of partially-created data.
+					while(spriteNum <= maxSpriteIndex && ( (spriteNum+1)*spriteWidth <= spriteSheet.getWidth() ) )
+					{
+						terrainSprites.get(spriteNum).addFrame(spriteSheet.getSubimage(xOffset, yOffset, spriteWidth, spriteHeight));
+						xOffset += spriteWidth;
+						spriteNum++;
+					}
+
+					yOffset += spriteHeight;
+				}
+			}
+			catch(RasterFormatException RFE) // This occurs if we go off the end of the sprite sheet.
+			{
+				System.out.println("WARNING! RasterFormatException while loading Sprite. Attempting to continue.");
+
+				terrainSprites.clear(); // Clear this in case of partially-created data.
 
 				// Make a single blank frame of the specified size.
 				terrainSprites.add(new Sprite(null, spriteWidth, spriteHeight));
-    		}
-    	} // spriteSheet != null
-    	System.out.println("INFO: Created TerrainSpriteSheet with " + terrainSprites.size() + " sprites.");
-    }
-    
-    public void addTileTransition(Environment.Terrains otherTerrain, BufferedImage spriteSheet, int spriteWidth, int spriteHeight)
-    {
-        tileTransitions.add(new TerrainSpriteSet(otherTerrain, spriteSheet, spriteWidth, spriteHeight));
-    }
+			}
+		} // spriteSheet != null
+		System.out.println("INFO: Created TerrainSpriteSheet with " + terrainSprites.size() + " sprites.");
+	}
 
-    public void colorize(Color[] oldColors, Color[] newColors)
-    {
-        for(Sprite s : terrainSprites)
-        {
-            s.colorize(oldColors, newColors);
-        }
-    }
+	/**
+	 * Tiles from 'spriteSheet' will be drawn on top of tiles from this sprite set when a tile is adjacent to one or more tiles
+	 * of type otherTerrain. This allows us to define smoother terrain transitions.
+	 */
+	public void addTileTransition(Environment.Terrains otherTerrain, BufferedImage spriteSheet, int spriteWidth, int spriteHeight)
+	{
+	    tileTransitions.add(new TerrainSpriteSet(otherTerrain, spriteSheet, spriteWidth, spriteHeight));
+	}
+
+	public void colorize(Color[] oldColors, Color[] newColors)
+	{
+	    for(Sprite s : terrainSprites)
+	    {
+	        s.colorize(oldColors, newColors);
+	    }
+	}
 
 	/**
 	 * Draws the terrain at the indicated location, accounting for any defined tile transitions.
@@ -271,13 +263,13 @@ public class TerrainSpriteSet
 	 *   us to draw roads that go off the map, etc, but keep it from looking like there is always land across
 	 *   the water at the edge of the map due to unwanted cliff-face transitions.
 	 */
-    private boolean checkTileType(GameMap map, Environment.Terrains terrain, int x, int y, boolean assumeTrue)
-    {
+	private boolean checkTileType(GameMap map, Environment.Terrains terrain, int x, int y, boolean assumeTrue)
+	{
 		return (map.isLocationValid(x, y) &&
 				  ((map.getEnvironment(x,y).terrainType == myTerrainType) || // Valid location, terrain types match.
 				  (getBaseTerrainType(map.getEnvironment(x,y).terrainType) == myTerrainType)) // Valid location, terrain base matches. 
 			    || (!map.isLocationValid(x,y) && assumeTrue) ); // Invalid location, but assuming true for that case.
-    }
+	}
 
 	/**
 	 * Determines the base terrain type for the provided environment terrain type.
