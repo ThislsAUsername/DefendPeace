@@ -1,7 +1,6 @@
 package UI.Art.SpriteArtist;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -14,6 +13,12 @@ public class Sprite
 	
 	public Sprite(BufferedImage baseSprite)
 	{
+		if( null == baseSprite )
+		{
+			System.out.println("WARNING! Sprite() given null image. Continuing with placeholder.");
+			// If we are given an invalid image, just use a default that should stick out like a sore thumb.
+			baseSprite = SpriteLibrary.createDefaultBlankSprite(SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize);
+		}
 		spriteImages = new ArrayList<BufferedImage>();
 		spriteImages.add(baseSprite);
 	}
@@ -32,9 +37,9 @@ public class Sprite
 	{
 		spriteImages = new ArrayList<BufferedImage>();
 
-		if( null == spriteSheet )
+		if( null == spriteSheet || spriteHeightPx > spriteSheet.getHeight() || spriteWidthPx > spriteSheet.getWidth() )
 		{
-			System.out.println("WARNING! [Sprite()] Continuing with placeholder image.");
+			System.out.println("WARNING! Sprite() given invalid sprite sheet. Creating placeholder image.");
 			// Just make a single blank frame of the specified size.
 			spriteImages.add(SpriteLibrary.createDefaultBlankSprite(spriteWidthPx, spriteHeightPx));
 		}
@@ -65,7 +70,7 @@ public class Sprite
 
 		if( null == other )
 		{
-			System.out.println("WARNING! [Sprite()] Continuing with placeholder image.");
+			System.out.println("WARNING! Sprite() given null Sprite. Creating placeholder image.");
 			// Just make a single blank frame of the specified size.
 			spriteImages.add(SpriteLibrary.createDefaultBlankSprite(SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize));
 		}
