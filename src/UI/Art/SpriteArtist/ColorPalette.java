@@ -7,10 +7,10 @@ import java.awt.Color;
  */
 public class ColorPalette
 {
-	public final Color[] paletteColors;
-	
-	public ColorPalette( Color[] mbColors )
-	{
-		paletteColors = mbColors;
-	}
+  public final Color[] paletteColors;
+
+  public ColorPalette(Color[] mbColors)
+  {
+    paletteColors = mbColors;
+  }
 }

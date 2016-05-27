@@ -1,5 +1,7 @@
 package Engine;
 
-public class CombatModifier {
-	public void alterCombat(CombatParameters params) {}
+public class CombatModifier
+{
+  public void alterCombat(CombatParameters params)
+  {}
 }

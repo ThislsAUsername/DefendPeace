@@ -1,9 +1,11 @@
 package Units.Weapons;
 
-public class MechZooka extends WeaponModel {
+public class MechZooka extends WeaponModel
+{
 
-	public MechZooka() {
-		super(WeaponType.MECHZOOKA, 3);
-	}
+  public MechZooka()
+  {
+    super(WeaponType.MECHZOOKA, 3);
+  }
 
 }
