@@ -3,6 +3,8 @@ package Engine;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.JFrame;
 
@@ -14,14 +16,13 @@ import UI.InputHandler;
 import UI.MapView;
 import UI.Art.SpriteArtist.SpriteMapView;
 
-public class Driver implements ActionListener
+public class Driver implements ActionListener, KeyListener
 {
 
   private static final long serialVersionUID = 1L;
 
   JFrame gameWindow;
   private javax.swing.Timer repaintTimer;
-  InputHandler inputHandler;
 
   // TODO: make this a GameView or some such when we get there.
   private MapController activeController;
@@ -48,7 +49,7 @@ public class Driver implements ActionListener
     gameWindow = new JFrame();
     gameWindow.add(mapView);
     gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    gameWindow.addKeyListener(new InputHandler(this));
+    gameWindow.addKeyListener(this);
     gameWindow.pack();
     gameWindow.setVisible(true);
 
@@ -64,13 +65,28 @@ public class Driver implements ActionListener
     gameWindow.repaint();
   }
 
-  public void inputCallback(InputHandler.InputAction action)
+  @Override
+  public void keyPressed(KeyEvent arg0)
   {
+    InputHandler.InputAction action = InputHandler.pressKey(arg0);
+
     if( action != InputHandler.InputAction.NO_ACTION )
     {
       // Pass the action on to the active game element.
       activeController.handleInput(action);
     }
+  }
+
+  @Override
+  public void keyReleased(KeyEvent arg0)
+  {
+    InputHandler.releaseKey(arg0);
+  }
+
+  @Override
+  public void keyTyped(KeyEvent arg0)
+  {
+    // Don't care.
   }
 
   public static void main(String args[])

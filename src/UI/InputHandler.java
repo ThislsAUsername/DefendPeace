@@ -1,15 +1,8 @@
 package UI;
 
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-
-import Engine.Driver;
-
-public class InputHandler implements KeyListener
+public class InputHandler
 {
-
-  Driver driver;
-
   public enum InputAction
   {
     NO_ACTION, UP, DOWN, LEFT, RIGHT, ENTER, BACK
@@ -21,16 +14,15 @@ public class InputHandler implements KeyListener
   static boolean leftHeld = false;
   static boolean rightHeld = false;
 
-  public InputHandler(Driver driver)
-  {
-    this.driver = driver;
-  }
+  /**
+   * No reason to make an instance of this class.
+   */
+  private InputHandler()
+  {}
 
-  @Override
-  public void keyPressed(KeyEvent key)
+  public static InputAction pressKey(KeyEvent key)
   {
     InputAction input = getActionFromKey(key);
-    driver.inputCallback(input);
     switch (input)
     {
       case UP:
@@ -46,6 +38,7 @@ public class InputHandler implements KeyListener
         rightHeld = true;
         break;
     }
+    return input;
   }
 
   /**
@@ -54,7 +47,7 @@ public class InputHandler implements KeyListener
    * @param event
    * @return
    */
-  private InputAction getActionFromKey(java.awt.event.KeyEvent event)
+  private static InputAction getActionFromKey(java.awt.event.KeyEvent event)
   {
     InputAction ia = InputAction.NO_ACTION;
     switch (event.getKeyCode())
@@ -87,8 +80,7 @@ public class InputHandler implements KeyListener
     return ia;
   }
 
-  @Override
-  public void keyReleased(KeyEvent e)
+  public static void releaseKey(KeyEvent e)
   {
     InputAction input = getActionFromKey(e);
     switch (input)
@@ -106,12 +98,6 @@ public class InputHandler implements KeyListener
         rightHeld = false;
         break;
     }
-  }
-
-  @Override
-  public void keyTyped(KeyEvent e)
-  {
-    // Don't care.
   }
 
   public static boolean isUpHeld()
