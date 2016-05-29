@@ -4,11 +4,11 @@ import UI.Art.Animation.AnimationSequence;
 import UI.Art.Animation.NobunagaBattleAnimation;
 
 import Engine.GameAction;
+import Engine.IView;
 import Engine.MapController;
 
-public abstract class MapView extends javax.swing.JPanel
+public abstract class MapView implements IView
 {
-
   private static final long serialVersionUID = 1L;
 
   public GameMenu currentMenu;

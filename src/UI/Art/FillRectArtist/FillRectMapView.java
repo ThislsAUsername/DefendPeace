@@ -30,8 +30,12 @@ public class FillRectMapView extends MapView
     mapArtist.setView(this);
     unitArtist.setView(this);
     menuArtist.setView(this);
+  }
 
-    setPreferredSize(new Dimension(mapViewWidth, mapViewHeight));
+  @Override
+  public Dimension getPreferredDimensions()
+  {
+    return new Dimension(mapViewWidth, mapViewHeight);
   }
 
   @Override
@@ -53,10 +57,8 @@ public class FillRectMapView extends MapView
   }
 
   @Override
-  protected void paintComponent(Graphics g)
+  public void render(Graphics g)
   {
-    super.paintComponent(g);
-
     mapArtist.drawMap(g);
     mapArtist.drawHighlights(g);
     if( mapController.getContemplatedMove() != null )

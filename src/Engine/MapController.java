@@ -8,7 +8,7 @@ import UI.GameMenu;
 import UI.MapView;
 import Units.Unit;
 
-public class MapController
+public class MapController implements IController
 {
   private GameInstance myGame;
   private MapView myView;
@@ -40,7 +40,8 @@ public class MapController
    * When the GameMap is in focus, all user input is directed through this function. It is
    * redirected to a specific handler based on what actions the user is currently taking.
    */
-  public void handleInput(InputHandler.InputAction input)
+  @Override
+  public boolean handleInput(InputHandler.InputAction input)
   {
     System.out.println("handling " + input + " input in " + inputMode + " mode");
     switch (inputMode)
@@ -73,6 +74,8 @@ public class MapController
       default:
         System.out.println("Invalid InputMode in MapController! " + inputMode);
     }
+
+    return false; // No way to end a game yet.
   }
 
   /**

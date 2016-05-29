@@ -55,7 +55,12 @@ public class SpriteMapView extends MapView
     // By default, we will show a 15x10 chunk of the map.
     mapViewWidth = SpriteLibrary.baseSpriteSize * getDrawScale() * 15;
     mapViewHeight = SpriteLibrary.baseSpriteSize * getDrawScale() * 10;
-    setPreferredSize(new Dimension(mapViewWidth, mapViewHeight));
+  }
+
+  @Override
+  public Dimension getPreferredDimensions()
+  {
+    return new Dimension(mapViewWidth, mapViewHeight);
   }
 
   @Override
@@ -103,10 +108,8 @@ public class SpriteMapView extends MapView
   }
 
   @Override
-  protected void paintComponent(Graphics g)
+  public void render(Graphics g)
   {
-    super.paintComponent(g);
-
     // Draw base terrain
     mapArtist.drawBaseTerrain(g);
 
