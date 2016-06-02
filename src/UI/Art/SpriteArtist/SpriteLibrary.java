@@ -73,6 +73,9 @@ public class SpriteLibrary
 
   private static BufferedImage actionCursor = null;
 
+  // Text images for main menu options.
+  private static Sprite menuOptionsSprite = null;
+
   /**
    * Retrieve (loading if needed) the sprites associated with the given terrain type. For ownable terrain types
    * (e.g. cities), the unowned variant of the sprite will be returned.
@@ -474,6 +477,18 @@ public class SpriteLibrary
   }
 
   /**
+   * If in is null, set it to a newly-generated blank image of default size. Return in.
+   */
+  public static BufferedImage createBlankImageIfNull(BufferedImage in)
+  {
+    if(null == in)
+    {
+      in = createDefaultBlankSprite(baseSpriteSize, baseSpriteSize);
+    }
+    return in;
+  }
+
+  /**
    * Get the image used to indicate the current action target.
    */
   public static BufferedImage getActionCursor()
@@ -487,5 +502,21 @@ public class SpriteLibrary
       }
     }
     return actionCursor;
+  }
+
+  /**
+   * Returns the image text for the different options in the main menu, as frames in a Sprite.
+   * The options shall be ordered within the Sprite to match the menuOptions array in MainController.
+   * @return
+   */
+  public static Sprite getMainMenuOptions()
+  {
+    if( null == menuOptionsSprite )
+    {
+      menuOptionsSprite = new Sprite(createBlankImageIfNull( loadSpriteSheetFile("res/ui/main/newgame.png") ));
+      menuOptionsSprite.addFrame(createBlankImageIfNull( loadSpriteSheetFile("res/ui/main/options.png") ));
+      menuOptionsSprite.addFrame(createBlankImageIfNull( loadSpriteSheetFile("res/ui/main/quit.png") ));
+    }
+    return menuOptionsSprite;
   }
 }

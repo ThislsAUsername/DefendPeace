@@ -32,14 +32,6 @@ public abstract class MapView implements IView
    * NOTE: This assumes that all MapView subclasses will use a square-tile map representation.
    */
   public abstract int getTileSize();
-  /**
-   * @return The width in pixels of the entire map view.
-   */
-  public abstract int getViewWidth();
-  /**
-   * @return The height in pixels of the entire map view.
-   */
-  public abstract int getViewHeight();
 
   public void animate(GameAction action)
   {
