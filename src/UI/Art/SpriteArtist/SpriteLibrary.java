@@ -422,6 +422,22 @@ public class SpriteLibrary
   }
 
   /**
+   * Draws the provided image, centered around x, y.
+   */
+  public static void drawImageCenteredOnPoint(Graphics g, BufferedImage image, int x, int y, int drawScale)
+  {
+    // Calculate the size to draw.
+    int drawWidth = image.getWidth() * drawScale;
+    int drawHeight = image.getHeight() * drawScale;
+
+    // Center the cursor over the targeted map square.
+    int drawX = x - drawWidth / 2;
+    int drawY = y - drawHeight / 2;
+
+    g.drawImage(image, drawX, drawY, drawWidth, drawHeight, null);
+  }
+
+  /**
    * Returns the overlay image for the HUD, which serves as a backdrop for the commander
    * name and the currently-available funds.
    * @param co The Commander whose overlay we are drawing. This allows us to colorize it appropriately.

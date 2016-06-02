@@ -69,7 +69,8 @@ public class SpriteMapArtist
     }
     else
     {
-      drawSpriteCenteredOnLocation(g, SpriteLibrary.getActionCursor(), myGame.getCursorX(), myGame.getCursorY());
+      SpriteLibrary.drawImageCenteredOnPoint(g, SpriteLibrary.getActionCursor(),
+          myGame.getCursorX() * tileSize + (tileSize / 2), myGame.getCursorY() * tileSize + (tileSize / 2), drawScale);
     }
   }
 
@@ -171,18 +172,5 @@ public class SpriteMapArtist
         spriteSet.drawTerrain(g, gameMap, x, y, drawScale);
       }
     }
-  }
-
-  private void drawSpriteCenteredOnLocation(Graphics g, BufferedImage image, int x, int y)
-  {
-    // Calculate the size to draw.
-    int drawWidth = image.getWidth() * drawScale;
-    int drawHeight = image.getHeight() * drawScale;
-
-    // Center the cursor over the targeted map square.
-    int drawX = x * tileSize - drawWidth / 2 + tileSize / 2;
-    int drawY = y * tileSize - drawHeight / 2 + tileSize / 2;
-
-    g.drawImage(image, drawX, drawY, drawWidth, drawHeight, null);
   }
 }
