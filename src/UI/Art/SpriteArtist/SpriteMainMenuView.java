@@ -15,7 +15,7 @@ public class SpriteMainMenuView implements IView
   // Note that menuBGColors must be defined to match MainController.menuOptions.
   private Color[] menuBGColors = {new Color(218,38,2), new Color(111,218,2), new Color(206,224,234)};
   int highestOption = menuBGColors.length - 1;
-  int drawScale = 1;
+  int drawScale = 2;
 
   private Dimension dimensions = new Dimension(240*drawScale, 160*drawScale);
   private int optionSeparationX = dimensions.width / 6; // So we can evenly space the seven visible options.
@@ -108,10 +108,11 @@ public class SpriteMainMenuView implements IView
     // Get the background color for this option and draw our fancy pattern.
     Color drawColor = menuBGColors[highlightedOption];
     g.setColor(drawColor);
-    g.fillRect(0, 0,  240, 68);
-    g.drawLine(0, 70, 240, 70);
-    g.drawLine(0, 89, 240, 89);
-    g.fillRect(0, 92, 240, 68);
+    int frameWidth = getViewWidth();
+    g.fillRect(0, 0,  frameWidth, 68*drawScale);
+    g.fillRect(0, 70*drawScale, frameWidth, drawScale);
+    g.fillRect(0, 89*drawScale, frameWidth, drawScale);
+    g.fillRect(0, 92*drawScale, frameWidth, 68*drawScale);
   }
 
   /**
@@ -151,7 +152,7 @@ public class SpriteMainMenuView implements IView
     // Only draw the image if it will actually show on the screen.
     if( y > -1*menuText.getHeight() && y < getViewHeight() + menuText.getHeight())
     {
-      SpriteLibrary.drawImageCenteredOnPoint(g, menuText, x, y, 1);
+      SpriteLibrary.drawImageCenteredOnPoint(g, menuText, x, y, drawScale);
     }
   }
 }
