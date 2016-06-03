@@ -31,7 +31,7 @@ public class Driver implements ActionListener, KeyListener
   private Driver()
   {
     // At game startup, we are at the main menu. Set up controller/viewer
-    MainController mc = new MainController();
+    MainUIController mc = new MainUIController();
     gameView = new GameViewProxy(new SpriteMainMenuView(mc));
     gameController = mc;
 

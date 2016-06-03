@@ -1,36 +1,39 @@
-package Engine;
+package UI;
 
 import java.awt.Color;
 
+import Terrain.GameMap;
+import UI.Art.SpriteArtist.SpriteMapView;
+import UI.InputHandler.InputAction;
 import CommandingOfficers.CmdrStrong;
 import CommandingOfficers.Commander;
-import Terrain.GameMap;
-import UI.InputHandler;
-import UI.Art.SpriteArtist.SpriteMapView;
+import Engine.Driver;
+import Engine.GameInstance;
+import Engine.IController;
+import Engine.MapController;
 
-public class MainController implements IController
+public class MainMenuController implements IController
 {
-  private static final long serialVersionUID = 5548786952371603112L;
-
-  private static final int NEW_GAME = 0;
-  private static final int OPTIONS = 1;
-  private static final int QUIT = 2;
+  // There are three options from the first game menu:
+  final int NEW_GAME = 0;
+  final int OPTIONS = 1;
+  final int QUIT = 2;
   // This list of menu options is mirrored by the Sprite of option images we get from SpriteLibrary.
-  private static final int[] menuOptions = {NEW_GAME, OPTIONS, QUIT};
+  final int[] menuOptions = {NEW_GAME, OPTIONS, QUIT};
+  final int highestOption = menuOptions[menuOptions.length-1];
+
   private int highlightedOption = 0;
-  private int highestOption = menuOptions[menuOptions.length-1];
 
   public int getHighlightedOption()
   {
     return highlightedOption;
   }
 
-  @Override // From IController
-  public boolean handleInput(InputHandler.InputAction action)
+  @Override
+  public boolean handleInput(InputAction action)
   {
-    boolean exitGame = false;
+    boolean exitMenu = false;
 
-    // We are in the main game menu.
     switch( action )
     {
       case ENTER:
@@ -62,7 +65,7 @@ public class MainController implements IController
             break;
           case QUIT:
             // Let the caller know we are done here.
-            exitGame = true;
+            exitMenu = true;
             break;
             default:
               System.out.println("WARNING! Invalid menu option chosen.");
@@ -80,6 +83,7 @@ public class MainController implements IController
           // Other actions (LEFT, RIGHT, BACK) not supported in the main menu.
     }
 
-    return exitGame;
+    return exitMenu;
   }
+
 }

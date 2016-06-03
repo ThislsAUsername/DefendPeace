@@ -6,11 +6,14 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 import Engine.IView;
-import Engine.MainController;
+import Engine.MainUIController;
 
+/**
+ * This class is responsible for drawing the main menu visible at game startup.
+ */
 public class SpriteMainMenuView implements IView
 {
-  MainController controller = null;
+  MainUIController controller = null;
 
   // Note that menuBGColors must be defined to match MainController.menuOptions.
   private Color[] menuBGColors = {new Color(218,38,2), new Color(111,218,2), new Color(206,224,234)};
@@ -23,7 +26,7 @@ public class SpriteMainMenuView implements IView
 
   private double animHighlightedOption = 0;
 
-  public SpriteMainMenuView( MainController control )
+  public SpriteMainMenuView( MainUIController control )
   {
     controller = control;
   }
