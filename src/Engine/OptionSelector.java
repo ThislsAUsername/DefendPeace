@@ -7,14 +7,31 @@ import UI.InputHandler.InputAction;
  */
 public class OptionSelector implements IController
 {
-  private final int numOptions;
-  private final int highestOption;
+  private int numOptions;
+  private int highestOption;
   private int highlightedOption;
 
+  /**
+   * Initializes the OptionSelector with num options.
+   * @param num The number of valid options. This is assumed to be >= 1.
+   */
   public OptionSelector(int num)
   {
     numOptions = num;
     highestOption = num-1;
+    highlightedOption = 0;
+  }
+
+  /**
+   * Allows for reinitializing the OptionSelector with new bounds. Sets the
+   * current index back to 0.
+   * @param num The number of valid options. This is assumed to be >= 1.
+   */
+  public void reset(int num)
+  {
+    numOptions = num;
+    highestOption = num-1;
+    highlightedOption = 0;
   }
 
   /**
@@ -46,15 +63,15 @@ public class OptionSelector implements IController
     switch( action )
     {
       case DOWN:
+      case RIGHT:
         highlightedOption--;
         break;
       case UP:
+      case LEFT:
         highlightedOption++;
         break;
       case BACK:
       case ENTER:
-      case LEFT:
-      case RIGHT:
       case NO_ACTION:
         break;
       default:
