@@ -52,8 +52,8 @@ public class SpriteMainMenuView implements IView
   @Override
   public void render(Graphics g)
   {
-    // Find out where we are.
-    int highlightedOption = controller.getHighlightedOption();
+    // Find out where we are in the absolute, to enable our fancy spinning animation.
+    int highlightedOption = controller.getOptionSelector().getSelectionAbsolute();
     
     // Draw background.
     drawMenuBG(g, highlightedOption);

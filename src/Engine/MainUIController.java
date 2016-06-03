@@ -12,15 +12,15 @@ public class MainUIController implements IController
   
   private MainMenuController mainMenu = new MainMenuController();
 
-  public int getHighlightedOption()
+  public OptionSelector getOptionSelector()
   {
-    int option = -1;
+    OptionSelector option = null;
     switch( currentSubMenu )
     {
       case GAME_SETUP:
         break;
       case MAIN:
-        option = mainMenu.getHighlightedOption();
+        option = mainMenu.getOptionSelector();
         break;
       case OPTIONS:
         break;

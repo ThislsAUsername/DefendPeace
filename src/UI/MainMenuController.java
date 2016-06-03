@@ -11,6 +11,7 @@ import Engine.Driver;
 import Engine.GameInstance;
 import Engine.IController;
 import Engine.MapController;
+import Engine.OptionSelector;
 
 public class MainMenuController implements IController
 {
@@ -20,13 +21,17 @@ public class MainMenuController implements IController
   final int QUIT = 2;
   // This list of menu options is mirrored by the Sprite of option images we get from SpriteLibrary.
   final int[] menuOptions = {NEW_GAME, OPTIONS, QUIT};
-  final int highestOption = menuOptions[menuOptions.length-1];
 
-  private int highlightedOption = 0;
+  private OptionSelector optionSelector = null;
 
-  public int getHighlightedOption()
+  public MainMenuController()
   {
-    return highlightedOption;
+    optionSelector = new OptionSelector(menuOptions.length);
+  }
+
+  public OptionSelector getOptionSelector()
+  {
+    return optionSelector;
   }
 
   @Override
@@ -38,9 +43,7 @@ public class MainMenuController implements IController
     {
       case ENTER:
         // Grab the current option and roll it back to within the valid range, then evaluate.
-        int chosenOption = highlightedOption;
-        for(;chosenOption < 0; chosenOption += menuOptions.length);
-        for(;chosenOption > highestOption; chosenOption -= menuOptions.length);
+        int chosenOption = optionSelector.getSelectionNormalized();
 
         switch( chosenOption )
         {
@@ -72,12 +75,9 @@ public class MainMenuController implements IController
         }
         break;
       case DOWN:
-        // Worry about normalizing when we actually hit enter.
-        highlightedOption--;
-        break;
       case UP:
-        // Worry about normalizing when we actually hit enter.
-        highlightedOption++;
+        // Pass Up/Down along to the OptionSelector.
+        optionSelector.handleInput(action);
         break;
         default:
           // Other actions (LEFT, RIGHT, BACK) not supported in the main menu.
