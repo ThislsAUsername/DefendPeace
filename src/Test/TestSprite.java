@@ -11,6 +11,16 @@ public class TestSprite extends TestCase
   public boolean runTest()
   {
     boolean testPassed = true;
+    // Make sure we can create a new Sprite in the way we expect.
+    testPassed &= validate(testConstructors(), " Sprite constructor problems found.");
+    // Make sure Sprite handles normalizing otherwise-invalid indices correctly.
+    testPassed &= validate(testIndexNormalization(), " Sprite is not normalizing indices correctly");
+    return testPassed;
+  }
+
+  private boolean testConstructors()
+  {
+    boolean testPassed = true;
 
     // Create an image from which to create a Sprite.
     BufferedImage image = new BufferedImage(24, 4, BufferedImage.TYPE_INT_ARGB);
@@ -71,4 +81,60 @@ public class TestSprite extends TestCase
     return testPassed;
   }
 
+  private boolean testIndexNormalization()
+  {
+    boolean testPassed = true;
+
+    // Make a few BufferedImages to use as frames in a Sprite.
+    BufferedImage frame0 = new BufferedImage(2, 2, BufferedImage.TYPE_INT_ARGB);
+    BufferedImage frame1 = new BufferedImage(3, 3, BufferedImage.TYPE_INT_ARGB);
+    BufferedImage frame2 = new BufferedImage(4, 4, BufferedImage.TYPE_INT_ARGB);
+    BufferedImage[] frames = {frame0, frame1, frame2};
+
+    // Sprite doesn't require all frames to be the same size, so we can use size to tell them apart.
+    Sprite spr = new Sprite(frame0);
+    spr.addFrame(frame1);
+    spr.addFrame(frame2);
+    int numFrames = spr.numFrames();
+
+    int index = 0;
+    int realIndex = 0;
+
+    try
+    {
+      for(; index < 100; ++index, ++realIndex)
+      {
+        if(realIndex > numFrames-1) realIndex -= numFrames; // Make sure this is always a valid index for our array.
+        BufferedImage test = spr.getFrame(index); // Use the increasingly large index, relying on Sprite to correctly wrap.
+        // Make sure the Sprite we get back has the dimensions we expect.
+        testPassed &= validate( test.getWidth() == frames[realIndex].getWidth(), new StringBuffer("  Wrong frame for index ").append(index).
+            append(". Expected frame ").append(realIndex).append(". (Expected width of ").append(frames[realIndex].getWidth()).
+            append(", but width of retrieved frame is ").append(test.getWidth()).toString());
+      }
+    }
+    catch( ArrayIndexOutOfBoundsException ex )
+    {
+      testPassed &= validate(false, "  Sprite is not normalizing large indices correctly.");
+    }
+    // Perform the test again, but going negative this time.
+    try
+    {
+      index = realIndex = 0;
+      for(; index > -100; --index, --realIndex)
+      {
+        if(realIndex < 0) realIndex += numFrames; // Make sure this is always a valid index for our array.
+        BufferedImage test = spr.getFrame(index); // Use the increasingly negative index, relying on Sprite to correctly wrap.
+        // Make sure the Sprite we get back is what we expect.
+        testPassed &= validate( test.getWidth() == frames[realIndex].getWidth(), new StringBuffer("  Wrong frame for index ").append(index).
+            append(". Expected frame ").append(realIndex).append(". (Expected width of ").append(frames[realIndex].getWidth()).
+            append(", but width of retrieved frame is ").append(test.getWidth()).toString());
+      }
+    }
+    catch( ArrayIndexOutOfBoundsException ex )
+    {
+      testPassed &= validate(false, "  Sprite is not normalizing small indices correctly.");
+    }
+
+    return testPassed;
+  }
 }
