@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 
 import Test.TestMain;
 import UI.InputHandler;
-import UI.Art.SpriteArtist.SpriteMainMenuView;
+import UI.Art.SpriteArtist.SpriteMainUIView;
 
 public class Driver implements ActionListener, KeyListener
 {
@@ -32,7 +32,7 @@ public class Driver implements ActionListener, KeyListener
   {
     // At game startup, we are at the main menu. Set up controller/viewer
     MainUIController mc = new MainUIController();
-    gameView = new GameViewProxy(new SpriteMainMenuView(mc));
+    gameView = new GameViewProxy(new SpriteMainUIView(mc));
     gameController = mc;
 
     gameWindow = new JFrame();

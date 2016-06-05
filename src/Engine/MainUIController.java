@@ -15,14 +15,13 @@ public class MainUIController implements IController
   public enum SubMenu { MAIN, GAME_SETUP, OPTIONS };
   private SubMenu currentSubMenuType = SubMenu.MAIN;
 
-  // There are three options from the first game menu:
+  // NOTE: This list of menu options is mirrored by the Sprite of option images we get from SpriteLibrary.
   final int NEW_GAME = 0;
   final int OPTIONS = 1;
   final int QUIT = 2;
-  // This list of menu options is mirrored by the Sprite of option images we get from SpriteLibrary.
-  final int[] mainMenuOptions = {NEW_GAME, OPTIONS, QUIT};
+  final int numMenuOptions = 3;
 
-  private OptionSelector optionSelector = new OptionSelector(mainMenuOptions.length);;
+  private OptionSelector optionSelector = new OptionSelector(numMenuOptions);;
 
   public SubMenu getSubMenuType()
   {
@@ -47,6 +46,7 @@ public class MainUIController implements IController
         {
           // If the subMenu was not MAIN, we go back to MAIN.
           currentSubMenuType = SubMenu.MAIN;
+          optionSelector.reset(numMenuOptions);
           exitGame = false;
         }
         break;
@@ -59,6 +59,7 @@ public class MainUIController implements IController
         {
           // If the subMenu was not MAIN, we go back to MAIN.
           currentSubMenuType = SubMenu.MAIN;
+          optionSelector.reset(numMenuOptions);
           exitGame = false;
         }
         break;

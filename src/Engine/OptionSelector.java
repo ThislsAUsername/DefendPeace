@@ -64,11 +64,11 @@ public class OptionSelector implements IController
     {
       case DOWN:
       case RIGHT:
-        highlightedOption--;
+        highlightedOption++;
         break;
       case UP:
       case LEFT:
-        highlightedOption++;
+        highlightedOption--;
         break;
       case BACK:
       case ENTER:

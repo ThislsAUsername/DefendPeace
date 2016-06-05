@@ -231,7 +231,7 @@ public class SpriteMapView extends MapView
     int drawScale = getDrawScale();
     int xTextOffset = 4 * drawScale; // Distance from the side of the view to the CO overlay text.
     int yTextOffset = 3 * drawScale; // Distance from the top of the view to the CO overlay text.
-    BufferedImage spriteA = SpriteLibrary.getMenuLetters().getFrame(0); // Convenient reference so we can check dimensions.
+    BufferedImage spriteA = SpriteLibrary.getLettersSmallCaps().getFrame(0); // Convenient reference so we can check dimensions.
     int textHeight = spriteA.getHeight() * drawScale;
 
     // Rebuild the funds string to draw if it has changed.
@@ -249,8 +249,8 @@ public class SpriteMapView extends MapView
     if( overlayIsLeft )
     { // Draw the overlay on the left side.
       g.drawImage(overlayImage, 0, 0, overlayImage.getWidth() * drawScale, overlayImage.getHeight() * drawScale, null);
-      SpriteLibrary.drawMenuText(g, coString, xTextOffset, yTextOffset, drawScale); // CO name
-      SpriteLibrary.drawMenuText(g, overlayFundsString, xTextOffset, textHeight + drawScale + yTextOffset, drawScale); // Funds
+      SpriteLibrary.drawTextSmallCaps(g, coString, xTextOffset, yTextOffset, drawScale); // CO name
+      SpriteLibrary.drawTextSmallCaps(g, overlayFundsString, xTextOffset, textHeight + drawScale + yTextOffset, drawScale); // Funds
     }
     else
     { // Draw the overlay on the right side.
@@ -258,8 +258,8 @@ public class SpriteMapView extends MapView
       int coNameXPos = getViewWidth() - spriteA.getWidth() * drawScale * coString.length() - xTextOffset;
       int fundsXPos = getViewWidth() - spriteA.getWidth() * drawScale * overlayFundsString.length() - xTextOffset;
       g.drawImage(overlayImage, xPos, 0, overlayImage.getWidth() * drawScale, overlayImage.getHeight() * drawScale, null);
-      SpriteLibrary.drawMenuText(g, coString, coNameXPos, yTextOffset, drawScale); // CO name
-      SpriteLibrary.drawMenuText(g, overlayFundsString, fundsXPos, textHeight + drawScale + yTextOffset, drawScale); // Funds
+      SpriteLibrary.drawTextSmallCaps(g, coString, coNameXPos, yTextOffset, drawScale); // CO name
+      SpriteLibrary.drawTextSmallCaps(g, overlayFundsString, fundsXPos, textHeight + drawScale + yTextOffset, drawScale); // Funds
     }
   }
 

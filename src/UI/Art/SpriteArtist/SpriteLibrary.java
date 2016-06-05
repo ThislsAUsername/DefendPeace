@@ -65,8 +65,13 @@ public class SpriteLibrary
   private static Sprite mapUnitHPSprites = null;
 
   // Letters for writing in menus.
-  private static Sprite menuLetterSprites = null;
-  private static Sprite menuNumberSprites = null;
+  private static Sprite letterSpritesUppercase= null;
+  private static Sprite letterSpritesLowercase= null;
+  private static Sprite numberSprites = null;
+
+  // Letters for writing in menus.
+  private static Sprite letterSpritesSmallCaps = null;
+  private static Sprite numberSpritesSmallCaps = null;
 
   // Commander overlay backdrops (shows commander name and funds) for each Commander in the game.
   private static HashMap<Commander, Sprite> coOverlays = new HashMap<Commander, Sprite>();
@@ -366,60 +371,146 @@ public class SpriteLibrary
   ///////////////////////////////////////////////////////////////////
 
   /**
-   * Loads the alphabetic character image file (if not already loaded), and returns
-   * the resulting Sprite, with each letter as its own frame.
-   * Letters are all capital, and are stored in order starting from 'A'.
-   * @return A Sprite object containing the in-game menu font for letters.
+   * Returns a Sprite containing every uppercase letter, one letter per frame. The image
+   * is loaded, and the Sprite is created, on the first call to this function, and simply
+   * returned thereafter. Letters are stored in order starting from 'A'.
+   * @return A Sprite object containing the in-game menu font for uppercase letters.
    */
-  public static Sprite getMenuLetters()
+  public static Sprite getLettersUppercase()
   {
-    if( null == menuLetterSprites )
+    if( null == letterSpritesUppercase )
     {
-      menuLetterSprites = new Sprite(loadSpriteSheetFile("res/tileset/letters.png"), 5, 6);
+      letterSpritesUppercase = new Sprite(loadSpriteSheetFile("res/ui/main/letters_uppercase.png"), 5, 11);
     }
-    return menuLetterSprites;
+    return letterSpritesUppercase;
   }
 
   /**
-   * Loads the numeric character image file if needed, and returns the resulting Sprite.
-   * Numbers are stored in order starting from 0; each number is its own frame in the Sprite.
+   * Returns a Sprite containing every lowercase letter, one letter per frame. The image
+   * is loaded, and the Sprite is created, on the first call to this function, and simply
+   * returned thereafter. Letters are stored in order starting from 'a'. 
+   * @return A Sprite object containing the in-game menu font for lowercase letters.
+   */
+  public static Sprite getLettersLowercase()
+  {
+    if( null == letterSpritesLowercase )
+    {
+      letterSpritesLowercase = new Sprite(loadSpriteSheetFile("res/ui/main/letters_lowercase.png"), 5, 11);
+    }
+    return letterSpritesLowercase;
+  }
+
+  /**
+   * Returns a Sprite containing the digits 0-9, one number per frame. The image
+   * is loaded, and the Sprite is created, on the first call to this function, and simply
+   * returned thereafter. Numbers are stored in order starting from 0.
    * @return A Sprite object containing the in-game menu font for numbers.
    */
-  public static Sprite getMenuNumbers()
+  public static Sprite getNumbers()
   {
-    if( null == menuNumberSprites )
+    if( null == numberSprites )
     {
-      menuNumberSprites = new Sprite(loadSpriteSheetFile("res/tileset/numbers.png"), 5, 6);
+      numberSprites = new Sprite(loadSpriteSheetFile("res/ui/main/numbers.png"), 5, 11);
     }
-    return menuNumberSprites;
+    return numberSprites;
   }
 
   /**
-   * Draws the provided text at the provided location, using the alphanumeric sprites for in-game menus.
+   * Returns a Sprite containing every small-uppercase letter, one letter per frame. The image
+   * is loaded, and the Sprite is created, on the first call to this function, and simply
+   * returned thereafter. Letters are all uppercase, and are stored in order starting from 'A'.
+   * @return A Sprite object containing the in-game menu font for small-caps letters.
+   */
+  public static Sprite getLettersSmallCaps()
+  {
+    if( null == letterSpritesSmallCaps )
+    {
+      letterSpritesSmallCaps = new Sprite(loadSpriteSheetFile("res/tileset/letters.png"), 5, 6);
+    }
+    return letterSpritesSmallCaps;
+  }
+
+  /**
+   * This function returns numbers which match the font returned from getSmallLetters().
+   * Returns a Sprite containing the digits 0-9, one number per frame. The image
+   * is loaded, and the Sprite is created, on the first call to this function, and simply
+   * returned thereafter. Numbers are stored in order starting from 0.
+   * @return A Sprite object containing the in-game menu font for small-caps numbers.
+   */
+  public static Sprite getNumbersSmallCaps()
+  {
+    if( null == numberSpritesSmallCaps )
+    {
+      numberSpritesSmallCaps = new Sprite(loadSpriteSheetFile("res/tileset/numbers.png"), 5, 6);
+    }
+    return numberSpritesSmallCaps;
+  }
+
+  /**
+   * Draws the provided text at the provided location, using the standard alphanumeric sprite set.
    * @param g Graphics object to draw the text.
    * @param text Text to be drawn as sprited letters.
    * @param x X-coordinate of the top-left corner of the first letter to be drawn.
    * @param y Y-coordinate of the top-left corner of the first letter to be drawn.
    * @param scale Scaling factor to be applied when drawing.
    */
-  public static void drawMenuText(Graphics g, String text, int x, int y, int scale)
+  public static void drawText(Graphics g, String text, int x, int y, int scale)
   {
-    // We use getMenuLetters on the first call just to ensure they are loaded.
-    int menuTextWidth = getMenuLetters().getFrame(0).getWidth() * scale;
-    int menuTextHeight = menuLetterSprites.getFrame(0).getHeight() * scale;
-    text = text.toUpperCase(); // Menus only have capital letters.
+    Sprite uppercase = getLettersUppercase();
+    Sprite lowercase = getLettersLowercase();
+    int menuTextWidth = uppercase.getFrame(0).getWidth() * scale;
+    int menuTextHeight = uppercase.getFrame(0).getHeight() * scale;
+
+    for( int i = 0; i < text.length(); ++i, x += menuTextWidth )
+    {
+      char thisChar = text.charAt(i);
+      if( Character.isAlphabetic(thisChar) )
+      {
+        if( Character.isUpperCase(thisChar))
+        {
+          int letterIndex = thisChar - 'A';
+          g.drawImage(uppercase.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null); 
+        }
+        else
+        {
+          int letterIndex = thisChar - 'a';
+          g.drawImage(lowercase.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null); 
+        }
+      }
+      else if( Character.isDigit(thisChar) )
+      {
+        int letterIndex = thisChar - '0';
+        g.drawImage(getNumbersSmallCaps().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+      }
+    }
+  }
+
+  /**
+   * Draws the provided text at the provided location, using the small-caps alphanumeric sprite set.
+   * @param g Graphics object to draw the text.
+   * @param text Text to be drawn as sprited letters.
+   * @param x X-coordinate of the top-left corner of the first letter to be drawn.
+   * @param y Y-coordinate of the top-left corner of the first letter to be drawn.
+   * @param scale Scaling factor to be applied when drawing.
+   */
+  public static void drawTextSmallCaps(Graphics g, String text, int x, int y, int scale)
+  {
+    Sprite smallCaps = getLettersSmallCaps();
+    int menuTextWidth = smallCaps.getFrame(0).getWidth() * scale;
+    int menuTextHeight = smallCaps.getFrame(0).getHeight() * scale;
+    text = text.toUpperCase(); // SmallCaps is all uppercase.
 
     for( int i = 0; i < text.length(); ++i, x += menuTextWidth )
     {
       if( Character.isAlphabetic(text.charAt(i)) )
       {
         int letterIndex = text.charAt(i) - 'A';
-        g.drawImage(menuLetterSprites.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+        g.drawImage(smallCaps.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
       }
       else if( Character.isDigit(text.charAt(i)) )
       {
         int letterIndex = text.charAt(i) - '0';
-        g.drawImage(getMenuNumbers().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+        g.drawImage(getNumbersSmallCaps().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
       }
     }
   }
