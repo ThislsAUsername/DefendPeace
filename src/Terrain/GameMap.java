@@ -1,112 +1,58 @@
 package Terrain;
 
-import Units.InfantryModel;
+import Engine.XYCoord;
+import Terrain.Maps.IMapBuilder;
 import Units.Unit;
-import Units.UnitModel;
 
 public class GameMap
 {
-
   private Location[][] map;
   public final int mapWidth;
   public final int mapHeight;
   public CommandingOfficers.Commander[] commanders;
 
-  //TODO: We need a way to load/use multiple maps; either:
-  //  pass in a file name as a parameter here, or subclass
-  //  GameMap for each map you want, or have a static data
-  //  element with tile information for each available map
-  public GameMap(CommandingOfficers.Commander[] COs)
+  public GameMap(CommandingOfficers.Commander[] COs, MapInfo mapInfo)
   {
     commanders = COs;
-    // for now, just make a 15x10 map of almost all plains.
-    mapWidth = 15;
-    mapHeight = 10;
+    mapWidth = mapInfo.getWidth();
+    mapHeight = mapInfo.getHeight();
     map = new Location[mapWidth][mapHeight];
-    for( int w = 0; w < mapWidth; ++w )
+
+    // Build the map locations based on the MapInfo data.
+    for(int y = 0; y < mapHeight; ++y)
     {
-      for( int h = 0; h < mapHeight; ++h )
+      for(int x = 0; x < mapWidth; ++x)
       {
-        // Make a ring of water around the edges, and the rest plains to start.
-        if( w == 0 || h == 0 || (w == mapWidth - 1) || (h == mapHeight - 1) )
+        // Create this Location using the MapInfo terrain.
+        map[x][y] = new Location(Environment.getTile(mapInfo.terrain[x][y], Environment.Weathers.CLEAR));
+      }
+    }
+
+    // Print a warning if the number of Commanders we have does not match the number the map expects.
+    if(COs.length != mapInfo.COProperties.length)
+    {
+      System.out.println("Warning! Wrong number of COs specified for map " + mapInfo.mapName);
+    }
+    // Assign properties according to MapInfo's direction.
+    for(int co = 0; co < mapInfo.COProperties.length && co < COs.length; ++co)
+    {
+      // Loop through all locations assigned to this CO by mapInfo.
+      for(int i = 0; i < mapInfo.COProperties[co].length; ++i)
+      {
+        // If the location can be owned, make the assignment.
+        XYCoord loc = mapInfo.COProperties[co][i];
+        int x = (int)loc.xCoord;
+        int y = (int)loc.yCoord;
+        if(map[x][y].isCaptureable())
         {
-          map[w][h] = new Location(Environment.getTile(Environment.Terrains.SEA, Environment.Weathers.CLEAR));
+          map[x][y].setOwner(COs[co]);
         }
         else
         {
-          map[w][h] = new Location(Environment.getTile(Environment.Terrains.GRASS, Environment.Weathers.CLEAR));
+          System.out.println("Warning! CO specified as owner of an uncapturable location in map " + mapInfo.mapName);
         }
       }
     }
-    // Throw down an HQ and a factory for each.
-    map[1][8].setEnvironment(Environment.getTile(Environment.Terrains.HQ, Environment.Weathers.CLEAR));
-    map[1][7].setEnvironment(Environment.getTile(Environment.Terrains.FACTORY, Environment.Weathers.CLEAR));
-    map[2][7].setEnvironment(Environment.getTile(Environment.Terrains.FACTORY, Environment.Weathers.CLEAR));
-    map[1][8].setOwner(commanders[0]);
-    map[1][7].setOwner(commanders[0]);
-    //		map[2][7].setOwner(commanders[0]);
-
-    map[13][1].setEnvironment(Environment.getTile(Environment.Terrains.HQ, Environment.Weathers.CLEAR));
-    map[13][2].setEnvironment(Environment.getTile(Environment.Terrains.FACTORY, Environment.Weathers.CLEAR));
-    map[12][2].setEnvironment(Environment.getTile(Environment.Terrains.FACTORY, Environment.Weathers.CLEAR));
-    map[13][1].setOwner(commanders[1]);
-    map[13][2].setOwner(commanders[1]);
-    //		map[12][2].setOwner(commanders[1]);
-
-    // Add some cities and forests
-    map[1][4].setEnvironment(Environment.getTile(Environment.Terrains.CITY, Environment.Weathers.CLEAR));
-    map[2][5].setEnvironment(Environment.getTile(Environment.Terrains.CITY, Environment.Weathers.CLEAR));
-    map[13][5].setEnvironment(Environment.getTile(Environment.Terrains.CITY, Environment.Weathers.CLEAR));
-    map[12][4].setEnvironment(Environment.getTile(Environment.Terrains.CITY, Environment.Weathers.CLEAR));
-    map[1][4].setOwner(commanders[0]);
-    //		map[2][5].setOwner(commanders[0]);
-    map[13][5].setOwner(commanders[1]);
-    //		map[12][4].setOwner(commanders[1]);
-
-    map[3][5].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
-    map[6][5].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
-    Unit n = new Unit(commanders[0], commanders[0].unitModels[UnitModel.UnitEnum.INFANTRY.ordinal()]);
-    n.x = 6;
-    n.y = 5;
-    n.isTurnOver = false;
-    map[6][5].setResident(n);
-    commanders[0].units.add(n);
-    map[11][4].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
-    map[8][4].setEnvironment(Environment.getTile(Environment.Terrains.FOREST, Environment.Weathers.CLEAR));
-    Unit n2 = new Unit(commanders[1], commanders[1].unitModels[UnitModel.UnitEnum.INFANTRY.ordinal()]);
-    n2.x = 8;
-    n2.y = 4;
-    n2.isTurnOver = false;
-    map[8][4].setResident(n2);
-    commanders[1].units.add(n2);
-
-    // Coupla shoals and reefs
-    map[1][1].setEnvironment(Environment.getTile(Environment.Terrains.SHOAL, Environment.Weathers.CLEAR));
-    map[13][8].setEnvironment(Environment.getTile(Environment.Terrains.SHOAL, Environment.Weathers.CLEAR));
-
-    map[5][0].setEnvironment(Environment.getTile(Environment.Terrains.REEF, Environment.Weathers.CLEAR));
-    map[9][0].setEnvironment(Environment.getTile(Environment.Terrains.REEF, Environment.Weathers.CLEAR));
-    map[10][9].setEnvironment(Environment.getTile(Environment.Terrains.REEF, Environment.Weathers.CLEAR));
-    map[6][9].setEnvironment(Environment.getTile(Environment.Terrains.REEF, Environment.Weathers.CLEAR));
-
-    // Mountains
-    map[3][2].setEnvironment(Environment.getTile(Environment.Terrains.MOUNTAIN, Environment.Weathers.CLEAR));
-    map[4][3].setEnvironment(Environment.getTile(Environment.Terrains.MOUNTAIN, Environment.Weathers.CLEAR));
-    map[10][6].setEnvironment(Environment.getTile(Environment.Terrains.MOUNTAIN, Environment.Weathers.CLEAR));
-    map[11][7].setEnvironment(Environment.getTile(Environment.Terrains.MOUNTAIN, Environment.Weathers.CLEAR));
-
-    // Finally, add a road.
-    map[4][6].setEnvironment(Environment.getTile(Environment.Terrains.ROAD, Environment.Weathers.CLEAR));
-    map[5][6].setEnvironment(Environment.getTile(Environment.Terrains.ROAD, Environment.Weathers.CLEAR));
-    map[6][6].setEnvironment(Environment.getTile(Environment.Terrains.ROAD, Environment.Weathers.CLEAR));
-    map[7][6].setEnvironment(Environment.getTile(Environment.Terrains.ROAD, Environment.Weathers.CLEAR));
-    map[7][5].setEnvironment(Environment.getTile(Environment.Terrains.ROAD, Environment.Weathers.CLEAR));
-    map[7][4].setEnvironment(Environment.getTile(Environment.Terrains.ROAD, Environment.Weathers.CLEAR));
-    map[7][3].setEnvironment(Environment.getTile(Environment.Terrains.ROAD, Environment.Weathers.CLEAR));
-    map[7][3].setEnvironment(Environment.getTile(Environment.Terrains.ROAD, Environment.Weathers.CLEAR));
-    map[8][3].setEnvironment(Environment.getTile(Environment.Terrains.ROAD, Environment.Weathers.CLEAR));
-    map[9][3].setEnvironment(Environment.getTile(Environment.Terrains.ROAD, Environment.Weathers.CLEAR));
-    map[10][3].setEnvironment(Environment.getTile(Environment.Terrains.ROAD, Environment.Weathers.CLEAR));
   }
 
   /**

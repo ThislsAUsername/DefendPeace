@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import Terrain.GameMap;
 import Terrain.MapInfo;
+import Terrain.MapLibrary;
 
 public class SpriteGameSetupMenuArtist
 {
@@ -59,8 +60,7 @@ public class SpriteGameSetupMenuArtist
     g.fillRect(0, selectedOptionYOffset, nameSectionWidth, menuOptionHeight);
 
     // Get the list of selectable maps (possibly specifying a filter (#players, etc).
-    ArrayList<MapInfo> mapInfos = new ArrayList<MapInfo>(); // = MapLibrary.getMapNames();
-    mapInfos.add(new MapInfo("Sample Map", null)); // TODO: replace this with real stuff.
+    ArrayList<MapInfo> mapInfos = MapLibrary.getMapList(); // = MapLibrary.getMapNames();
 
     // Display the names from the list, highlighting the one that is currently chosen.
     for(int i = 0; i < mapInfos.size(); ++i)

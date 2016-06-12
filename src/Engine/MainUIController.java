@@ -5,6 +5,7 @@ import java.awt.Color;
 import CommandingOfficers.CmdrStrong;
 import CommandingOfficers.Commander;
 import Terrain.GameMap;
+import Terrain.MapLibrary;
 import UI.InputHandler;
 import UI.Art.SpriteArtist.SpriteMapView;
 
@@ -84,7 +85,7 @@ public class MainUIController implements IController
         {
           case NEW_GAME:
             currentSubMenuType = SubMenu.GAME_SETUP;
-            optionSelector.reset(1); // TODO: Figure out how many map options there are.
+            optionSelector.reset(MapLibrary.getMapList().size());
           break;
           case OPTIONS:
             System.out.println("WARNING! Options menu not supported yet!");
@@ -119,18 +120,22 @@ public class MainUIController implements IController
     switch(action)
     {
       case ENTER:
-        // TODO: Move all this stuff where it belongs, whenever that exists.
+        // TODO: Move CO/color selection stuff to where it belongs, whenever that exists.
         Commander co1 = new CmdrStrong();
         Commander co2 = new Commander();
         Commander[] cos = { co1, co2 };
 
         cos[0].myColor = Color.pink;
         cos[1].myColor = Color.cyan;
-        GameMap map = new GameMap(cos);
+
+        // Build the new map and create the game instance.
+        GameMap map = new GameMap( cos, MapLibrary.getMapList().get( optionSelector.getSelectionNormalized() ) );
         GameInstance newGame = new GameInstance(map, cos);
 
         SpriteMapView smv = new SpriteMapView(newGame);
         MapController mapController = new MapController(newGame, smv);
+
+        // Mash the big red button and start the game.
         Driver.getInstance().changeGameState(mapController, smv);
         exitMenu = true;
         break;
