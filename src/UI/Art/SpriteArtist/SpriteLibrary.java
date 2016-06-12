@@ -30,10 +30,14 @@ public class SpriteLibrary
       new Color(250, 190, 190), new Color(255, 245, 245) };
   private static Color[] cyanMapBuildingColors = { new Color(255, 219, 74), new Color(77, 157, 157), new Color(130, 200, 200),
       new Color(200, 230, 230), new Color(245, 255, 255) };
+  private static Color[] orangeMapBuildingColors = { new Color(255, 237, 29), new Color(139, 77, 20), new Color(231, 139, 41),
+      new Color(243, 186, 121), new Color(255, 234, 204) };
   private static Color[] pinkMapUnitColors = { new Color(177, 62, 62), new Color(255, 100, 100), new Color(255, 136, 136),
       new Color(255, 175, 175), new Color(255, 230, 230) };
   private static Color[] cyanMapUnitColors = { new Color(0, 105, 105), new Color(0, 170, 170), new Color(0, 215, 215),
       new Color(0, 255, 255), new Color(195, 255, 255), };
+  private static Color[] orangeMapUnitColors = { new Color(163, 77, 0), new Color(252, 139, 7), new Color(255, 160, 65),
+      new Color(255, 186, 97), new Color(255, 225, 183), };
 
   private static HashMap<Color, ColorPalette> buildingColorPalettes = new HashMap<Color, ColorPalette>(){
     private static final long serialVersionUID = 1L;
@@ -41,6 +45,7 @@ public class SpriteLibrary
       // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
       put(Color.PINK, new ColorPalette(pinkMapBuildingColors));
       put(Color.CYAN, new ColorPalette(cyanMapBuildingColors));
+      put(Color.ORANGE, new ColorPalette(orangeMapBuildingColors));
     }
   };
   private static HashMap<Color, ColorPalette> mapUnitColorPalettes = new HashMap<Color, ColorPalette>(){
@@ -49,6 +54,7 @@ public class SpriteLibrary
       // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
       put(Color.PINK, new ColorPalette(pinkMapUnitColors));
       put(Color.CYAN, new ColorPalette(cyanMapUnitColors));
+      put(Color.ORANGE, new ColorPalette(orangeMapUnitColors));
     }
   };
 
@@ -65,8 +71,8 @@ public class SpriteLibrary
   private static Sprite mapUnitHPSprites = null;
 
   // Letters for writing in menus.
-  private static Sprite letterSpritesUppercase= null;
-  private static Sprite letterSpritesLowercase= null;
+  private static Sprite letterSpritesUppercase = null;
+  private static Sprite letterSpritesLowercase = null;
   private static Sprite numberSprites = null;
 
   // Letters for writing in menus.
@@ -466,15 +472,15 @@ public class SpriteLibrary
       char thisChar = text.charAt(i);
       if( Character.isAlphabetic(thisChar) )
       {
-        if( Character.isUpperCase(thisChar))
+        if( Character.isUpperCase(thisChar) )
         {
           int letterIndex = thisChar - 'A';
-          g.drawImage(uppercase.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null); 
+          g.drawImage(uppercase.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
         }
         else
         {
           int letterIndex = thisChar - 'a';
-          g.drawImage(lowercase.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null); 
+          g.drawImage(lowercase.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
         }
       }
       else if( Character.isDigit(thisChar) )
@@ -572,7 +578,7 @@ public class SpriteLibrary
    */
   public static BufferedImage createBlankImageIfNull(BufferedImage in)
   {
-    if(null == in)
+    if( null == in )
     {
       in = createDefaultBlankSprite(baseSpriteSize, baseSpriteSize);
     }
@@ -604,9 +610,9 @@ public class SpriteLibrary
   {
     if( null == menuOptionsSprite )
     {
-      menuOptionsSprite = new Sprite(createBlankImageIfNull( loadSpriteSheetFile("res/ui/main/newgame.png") ));
-      menuOptionsSprite.addFrame(createBlankImageIfNull( loadSpriteSheetFile("res/ui/main/options.png") ));
-      menuOptionsSprite.addFrame(createBlankImageIfNull( loadSpriteSheetFile("res/ui/main/quit.png") ));
+      menuOptionsSprite = new Sprite(createBlankImageIfNull(loadSpriteSheetFile("res/ui/main/newgame.png")));
+      menuOptionsSprite.addFrame(createBlankImageIfNull(loadSpriteSheetFile("res/ui/main/options.png")));
+      menuOptionsSprite.addFrame(createBlankImageIfNull(loadSpriteSheetFile("res/ui/main/quit.png")));
     }
     return menuOptionsSprite;
   }
