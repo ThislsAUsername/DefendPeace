@@ -84,7 +84,12 @@ public class SpriteMapView extends MapView
   /** Returns whether the commander's map units should be flipped horizontally when drawn. */
   public boolean getFlipUnitFacing(Commander co)
   {
-    return unitFacings.get(co);
+    boolean flip = false;
+    if(unitFacings.containsKey(co)) // Make sure we don't try to assign null to a boolean.
+    {
+      flip = unitFacings.get(co);
+    }
+    return flip;
   }
 
   /**
