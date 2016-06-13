@@ -10,8 +10,8 @@ public class Podracing extends IMapBuilder
   // Defines the terrain for this map. Each row is a vertical column of the map.
   private final static Environment.Terrains[][] terrainData =
    {{SE, SE, SE, SE, SE, SE, RF, SE, SE, SE}, // 0
-    {RF, SE, SE, FR, FC, FC, FR, SE, SE, SE}, // 1
-    {SE, SE, GR, FR, HQ, FC, FR, GR, SE, RF}, // 2
+    {RF, SE, SE, FR, HQ, FC, FR, SE, SE, SE}, // 1
+    {SE, SE, GR, FR, FC, FC, FR, GR, SE, RF}, // 2
     {SE, SE, CT, GR, GR, GR, GR, CT, SE, SE}, // 3
     {SE, RF, GR, CT, GR, GR, CT, GR, RF, SE}, // 4
     {SE, SE, RD, FR, SE, RF, FR, RD, SE, SE}, // 5

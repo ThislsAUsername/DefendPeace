@@ -24,7 +24,7 @@ public class SpannIsland extends IMapBuilder
     {SE, GR, HQ, RD, RD, RD, RD, GR, CT, SE}, // 12
     {SE, FC, FC, FC, GR, CT, SE, GR, CT, SE}, // 13
     {SE, SE, SE, SE, SE, SE, SE, SE, SE, SE}};// 14
-  private static XYCoord[] co1Props = { new XYCoord(1, 5), new XYCoord(1, 6), new XYCoord(2, 6), new XYCoord(2, 7), new XYCoord(2, 7) };
+  private static XYCoord[] co1Props = { new XYCoord(1, 5), new XYCoord(1, 6), new XYCoord(2, 6), new XYCoord(2, 7), new XYCoord(3, 7) };
   private static XYCoord[] co2Props = { new XYCoord(11, 1), new XYCoord(12, 2), new XYCoord(13, 1), new XYCoord(13, 2), new XYCoord(13, 3) };
   private static XYCoord[][] properties = { co1Props, co2Props };
   private static MapInfo info = new MapInfo(mapName, terrainData, properties);
