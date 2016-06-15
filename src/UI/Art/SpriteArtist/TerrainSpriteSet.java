@@ -14,6 +14,7 @@ import Terrain.GameMap;
  */
 public class TerrainSpriteSet
 {
+  /** List of Sprites, to allow for variations of the tile type. */
   private ArrayList<Sprite> terrainSprites;
   private ArrayList<TerrainSpriteSet> tileTransitions;
   public final Environment.Terrains myTerrainType;
@@ -107,6 +108,14 @@ public class TerrainSpriteSet
       }
     } // spriteSheet != null
     System.out.println("INFO: Created TerrainSpriteSheet with " + terrainSprites.size() + " sprites.");
+  }
+
+  /**
+   * Returns the Sprite for the first variation of this terrain type.
+   */
+  public Sprite getTerrainSprite()
+  {
+    return terrainSprites.get(0);
   }
 
   /**
@@ -299,7 +308,7 @@ public class TerrainSpriteSet
         baseTerrain = Environment.Terrains.SEA;
         break;
       default:
-        System.out.println("ERROR! [SpriteMapArtist.buildMapImage] Invalid terrain type " + baseTerrain);
+        System.out.println("ERROR! [TerrainSpriteSet.getBaseTerrainType] Invalid terrain type " + baseTerrain);
     }
 
     return baseTerrain;

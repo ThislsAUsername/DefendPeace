@@ -58,6 +58,8 @@ public class SpriteLibrary
     }
   };
 
+  public final static Color[] coColorList = { Color.PINK, Color.CYAN, Color.ORANGE };
+
   // TODO: Account for weather?
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
   // TODO: Consider templatizing the key types, and then combining these two maps.
@@ -486,7 +488,7 @@ public class SpriteLibrary
       else if( Character.isDigit(thisChar) )
       {
         int letterIndex = thisChar - '0';
-        g.drawImage(getNumbersSmallCaps().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+        g.drawImage(getNumbers().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
       }
     }
   }
