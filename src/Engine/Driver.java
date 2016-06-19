@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 
 import Test.TestMain;
 import UI.InputHandler;
+import UI.MainUIController;
 import UI.Art.SpriteArtist.SpriteMainUIView;
 
 public class Driver implements ActionListener, KeyListener

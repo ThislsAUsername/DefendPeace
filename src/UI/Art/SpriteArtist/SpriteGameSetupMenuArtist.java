@@ -10,6 +10,7 @@ import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.MapInfo;
 import Terrain.MapLibrary;
+import UI.GameSetupController;
 
 public class SpriteGameSetupMenuArtist
 {
@@ -33,7 +34,7 @@ public class SpriteGameSetupMenuArtist
     dimensions = d;
   }
 
-  public static void draw(Graphics g, int highlightedOption)
+  public static void draw(Graphics g, GameSetupController gameSetup)
   {
     if(null == dimensions )
     {
@@ -41,6 +42,8 @@ public class SpriteGameSetupMenuArtist
       System.out.println("Warning: SpriteGameSetupMenuArtist has no dimensions!");
       return;
     }
+
+    int highlightedOption = gameSetup.getSelectedOption();
 
     /////////////// Map selection pane ///////////////////////
     // Paint the whole area over in our background color.

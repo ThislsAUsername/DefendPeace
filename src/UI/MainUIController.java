@@ -1,13 +1,8 @@
-package Engine;
+package UI;
 
-import java.awt.Color;
-
-import CommandingOfficers.CmdrStrong;
-import CommandingOfficers.Commander;
-import Terrain.GameMap;
+import Engine.IController;
+import Engine.OptionSelector;
 import Terrain.MapLibrary;
-import UI.InputHandler;
-import UI.Art.SpriteArtist.SpriteMapView;
 
 public class MainUIController implements IController
 {
@@ -22,8 +17,10 @@ public class MainUIController implements IController
   final int QUIT = 2;
   final int numMenuOptions = 3;
 
-  private OptionSelector optionSelector = new OptionSelector(numMenuOptions);;
+  private OptionSelector optionSelector = new OptionSelector(numMenuOptions);
 
+  private GameSetupController gameSetup = new GameSetupController();
+  
   public SubMenu getSubMenuType()
   {
     return currentSubMenuType;
@@ -32,6 +29,11 @@ public class MainUIController implements IController
   public OptionSelector getOptionSelector()
   {
     return optionSelector;
+  }
+  
+  public GameSetupController getGameSetupController()
+  {
+    return gameSetup;
   }
 
   @Override // From IController
@@ -42,7 +44,8 @@ public class MainUIController implements IController
     switch( currentSubMenuType )
     {
       case GAME_SETUP:
-        exitGame = handleGameSetupMenuInput(action);
+        // Pass the input action along to the active sub-handler.
+        exitGame = gameSetup.handleInput(action);
         if(exitGame)
         {
           // If the subMenu was not MAIN, we go back to MAIN.
@@ -111,47 +114,6 @@ public class MainUIController implements IController
           // Other actions (LEFT, RIGHT, BACK) not supported in the main menu.
     }
 
-    return exitMenu;
-  }
-
-  private boolean handleGameSetupMenuInput(InputHandler.InputAction action)
-  {
-    boolean exitMenu = false;
-    switch(action)
-    {
-      case ENTER:
-        // TODO: Move CO/color selection stuff to where it belongs, whenever that exists.
-        Commander co1 = new CmdrStrong();
-        Commander co2 = new Commander();
-        Commander[] cos = { co1, co2 };
-
-        cos[0].myColor = Color.pink;
-        cos[1].myColor = Color.cyan;
-
-        // Build the new map and create the game instance.
-        GameMap map = new GameMap( cos, MapLibrary.getMapList().get( optionSelector.getSelectionNormalized() ) );
-        GameInstance newGame = new GameInstance(map, cos);
-
-        SpriteMapView smv = new SpriteMapView(newGame);
-        MapController mapController = new MapController(newGame, smv);
-
-        // Mash the big red button and start the game.
-        Driver.getInstance().changeGameState(mapController, smv);
-        exitMenu = true;
-        break;
-      case BACK:
-        exitMenu = true;
-        break;
-      case DOWN:
-      case UP:
-        optionSelector.handleInput(action);
-        break;
-      case LEFT:
-      case RIGHT:
-      case NO_ACTION:
-        default:
-          System.out.println("Warning: Unsupported input " + action + " in game setup menu.");
-    }
     return exitMenu;
   }
 }

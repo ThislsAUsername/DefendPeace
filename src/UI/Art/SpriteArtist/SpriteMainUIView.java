@@ -5,8 +5,9 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
+import UI.MainUIController;
+
 import Engine.IView;
-import Engine.MainUIController;
 
 /**
  * This class is responsible for drawing the main menu visible at game startup.
@@ -56,7 +57,7 @@ public class SpriteMainUIView implements IView
     switch(controller.getSubMenuType())
     {
       case GAME_SETUP:
-        SpriteGameSetupMenuArtist.draw(g, controller.getOptionSelector().getSelectionNormalized());
+        SpriteGameSetupMenuArtist.draw(g, controller.getGameSetupController());
         break;
       case MAIN:
         renderMainMenu(g);
