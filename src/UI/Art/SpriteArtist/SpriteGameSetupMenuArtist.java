@@ -7,15 +7,15 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import Terrain.Environment.Terrains;
-import Terrain.GameMap;
 import Terrain.MapInfo;
 import Terrain.MapLibrary;
 import UI.GameSetupController;
+import UI.InputHandler.InputAction;
 
 public class SpriteGameSetupMenuArtist
 {
   private static Dimension dimensions = null;
-  private static int drawScale = 3;
+  private static int drawScale = 2;
 
   private static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
   private static final Color MENUBGCOLOR = new Color(234, 204, 154);
@@ -29,12 +29,27 @@ public class SpriteGameSetupMenuArtist
   private static int nameSectionWidth =
       ((characterWidth+drawScale) * maxNameDisplayLength) + 3*drawScale;
 
+  private static MapInfo selectedMapInfo = null;
+
   public static void setDimensions(Dimension d)
   {
     dimensions = d;
+    SpriteCOSetupArtist.setDimensions(d);
   }
 
   public static void draw(Graphics g, GameSetupController gameSetup)
+  {
+    if(!gameSetup.inSubmenu())
+    { // Still in Game Setup. We draw.
+      drawMapSelectMenu(g, gameSetup);
+    }
+    else
+    { // Pass this along to the COSelectMenuArtist.
+      SpriteCOSetupArtist.draw(g, selectedMapInfo, gameSetup.getSubController());
+    }
+  }
+
+  private static void drawMapSelectMenu(Graphics g, GameSetupController gameSetup)
   {
     if(null == dimensions )
     {
@@ -98,8 +113,8 @@ public class SpriteGameSetupMenuArtist
     g.fillRect(nameSectionWidth, maxMiniMapHeight, dimensions.width-nameSectionWidth, drawScale);
 
     // Draw the mini-map representation of the highlighted map.
-    MapInfo mapInfo = mapInfos.get(highlightedOption);
-    BufferedImage miniMap = SpriteMiniMapArtist.getMapImage( mapInfo );
+    selectedMapInfo = mapInfos.get(highlightedOption);
+    BufferedImage miniMap = SpriteMiniMapArtist.getMapImage( selectedMapInfo );
 
     // Figure out how large to draw the minimap. We want to make it as large as possible, but still
     //   fit inside the available space (with a minimum scale factor of 1).
@@ -112,12 +127,12 @@ public class SpriteGameSetupMenuArtist
 
     /////////////// Map Information ///////////////////////]
     int buffer = 3*drawScale;
-    int numPlayers = mapInfo.COProperties.length; // Get the number of players the map supports
+    int numPlayers = selectedMapInfo.getNumCos(); // Get the number of players the map supports
     StringBuilder sb = new StringBuilder().append(numPlayers).append(" Players"); // Build a string to say that.
     SpriteLibrary.drawText(g, sb.toString(), nameSectionWidth+buffer, maxMiniMapHeight+buffer, drawScale);
 
     sb.setLength(0); // Clear so we can build the map dimensions string.
-    sb.append(mapInfo.getWidth()).append("x").append(mapInfo.getHeight());
+    sb.append(selectedMapInfo.getWidth()).append("x").append(selectedMapInfo.getHeight());
     int dimsDrawX = dimensions.width - (characterWidth*7) - drawScale;
     SpriteLibrary.drawText(g, sb.toString(), dimsDrawX, maxMiniMapHeight+buffer, drawScale);
 
@@ -131,7 +146,7 @@ public class SpriteGameSetupMenuArtist
     for(int i = 0; i < propertyTypes.length; ++i)
     {
       Terrains terrain = propertyTypes[i];
-      int num = countTiles(mapInfo, terrain);
+      int num = countTiles(selectedMapInfo, terrain);
       // Get the first image of the first variation of the specified terrain type.
       BufferedImage image = SpriteLibrary.getTerrainSpriteSet(terrain).getTerrainSprite().getFrame(0);
       // Draw it, with the number of times it occurs on the map.
@@ -174,15 +189,13 @@ public class SpriteGameSetupMenuArtist
       num = 99;
     }
 
-    boolean dd = num > 9; // Is this a double-digit number?
-
     // Get the number images, and grab the dimensions
     Sprite nums = SpriteLibrary.getMapUnitHPSprites();
     int numWidth = nums.getFrame(0).getWidth() * drawScale;
     int numHeight = nums.getFrame(0).getHeight() * drawScale;
 
     // Property sprites are 2 tiles by two tiles, and we want to be right- and
-    //   bottom-justified, so adjust sideways
+    //   bottom-justified, so we adjust sideways.
     int propSize = SpriteLibrary.baseSpriteSize*drawScale*2;
     x += propSize - numWidth; // right-justify
     y += propSize - numHeight; // Bottom-justify - no double-digit adjustment.

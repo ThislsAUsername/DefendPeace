@@ -11,6 +11,7 @@ import java.util.HashMap;
 import javax.imageio.ImageIO;
 
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderLibrary;
 import Terrain.Environment;
 import Terrain.Location;
 import Units.Unit;
@@ -532,7 +533,7 @@ public class SpriteLibrary
     int drawWidth = image.getWidth() * drawScale;
     int drawHeight = image.getHeight() * drawScale;
 
-    // Center the cursor over the targeted map square.
+    // Center over the target location.
     int drawX = x - drawWidth / 2;
     int drawY = y - drawHeight / 2;
 
@@ -617,5 +618,53 @@ public class SpriteLibrary
       menuOptionsSprite.addFrame(createBlankImageIfNull(loadSpriteSheetFile("res/ui/main/quit.png")));
     }
     return menuOptionsSprite;
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  //  Below is code for loading Commander sprite images.
+  ///////////////////////////////////////////////////////////////////
+
+  private static HashMap<CommanderLibrary.CommanderEnum, CommanderSpriteSet> coSpriteSets = new HashMap<CommanderLibrary.CommanderEnum, CommanderSpriteSet>();
+
+  public static CommanderSpriteSet getCommanderSprites( CommanderLibrary.CommanderEnum whichCo )
+  {
+    CommanderSpriteSet css = null;
+
+    if(!coSpriteSets.containsKey(whichCo))
+    {
+      // We don't have it, so we need to load it.
+      String baseFileName = getCommanderBaseSpriteName( whichCo );
+
+      BufferedImage body = createBlankImageIfNull(loadSpriteSheetFile(baseFileName + ".png"));
+      BufferedImage head = createBlankImageIfNull(loadSpriteSheetFile(baseFileName + "_face.png"));
+      BufferedImage eyes = createBlankImageIfNull(loadSpriteSheetFile(baseFileName + "_eyes.png"));
+
+      coSpriteSets.put(whichCo, new CommanderSpriteSet(body, head, eyes));
+    }
+
+    css = coSpriteSets.get(whichCo);
+
+    return css;
+  }
+
+  private static String getCommanderBaseSpriteName( CommanderLibrary.CommanderEnum whichCo )
+  {
+    String str = "res/co/";
+    switch(whichCo)
+    {
+      case LION:
+        str += "lion";
+        break;
+      case PATCH:
+        str += "patch";
+        break;
+      case STRONG:
+        str += "strong";
+        break;
+      case NOONE:
+        default:
+          // Not a real Commander. Gonna fall back to placeholder images.
+    }
+    return str;
   }
 }

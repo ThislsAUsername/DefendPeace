@@ -1,65 +1,79 @@
 package UI;
 
-import java.awt.Color;
-
-import Terrain.GameMap;
 import Terrain.MapLibrary;
-import UI.Art.SpriteArtist.SpriteMapView;
 import UI.InputHandler.InputAction;
-import CommandingOfficers.CmdrStrong;
-import CommandingOfficers.Commander;
-import Engine.Driver;
-import Engine.GameInstance;
 import Engine.IController;
-import Engine.MapController;
 import Engine.OptionSelector;
 
 public class GameSetupController implements IController
 {
   private OptionSelector optionSelector = new OptionSelector( MapLibrary.getMapList().size() );
+  private COSetupController coSelectMenu;
+
+  private boolean isInSubmenu = false;
 
   public int getSelectedOption()
   {
     return optionSelector.getSelectionNormalized();
   }
 
+  public boolean inSubmenu()
+  {
+    return isInSubmenu;
+  }
+
+  public COSetupController getSubController()
+  {
+    return coSelectMenu;
+  }
+
   @Override
   public boolean handleInput(InputAction action)
+  {
+    boolean exitMenu = false;
+
+    if(isInSubmenu)
+    {
+      exitMenu = coSelectMenu.handleInput(action);
+      if(exitMenu)
+      {
+        if(action == InputAction.BACK)
+        {
+          // BACK was chosen for the child menu. We take control again.
+          exitMenu = false;
+          isInSubmenu = false;
+        }
+      }
+    }
+    else
+    {
+      exitMenu = handleMapSelectInput(action);
+    }
+
+    return exitMenu;
+  }
+
+  private boolean handleMapSelectInput(InputAction action)
   {
     boolean exitMenu = false;
     switch(action)
     {
       case ENTER:
-        // TODO: Move CO/color selection stuff to where it belongs, whenever that exists.
-        Commander co1 = new CmdrStrong();
-        Commander co2 = new Commander();
-        Commander co3 = new Commander();
-        Commander[] cos = { co1, co2 };
-
-        cos[0].myColor = Color.pink;
-        cos[1].myColor = Color.cyan;
-        //cos[2].myColor = Color.orange;
-
-        // Build the new map and create the game instance.
-        GameMap map = new GameMap( cos, MapLibrary.getMapList().get( optionSelector.getSelectionNormalized() ) );
-        GameInstance newGame = new GameInstance(map, cos);
-
-        SpriteMapView smv = new SpriteMapView(newGame);
-        MapController mapController = new MapController(newGame, smv);
-
-        // Mash the big red button and start the game.
-        Driver.getInstance().changeGameState(mapController, smv);
-        exitMenu = true;
+        // Create the GameBuilder with the selected map, and transition to the CO select screen.
+        // If we go forward/back a few times, the old copies of these get replaced and garbage-collected.
+        GameBuilder gameBuilder = new GameBuilder( MapLibrary.getMapList().get( optionSelector.getSelectionNormalized() ) );
+        coSelectMenu = new COSetupController( gameBuilder );
+        isInSubmenu = true;
         break;
       case BACK:
         exitMenu = true;
         break;
       case DOWN:
       case UP:
-        optionSelector.handleInput(action);
-        break;
       case LEFT:
       case RIGHT:
+        optionSelector.handleInput(action);
+        break;
       case NO_ACTION:
         default:
           System.out.println("Warning: Unsupported input " + action + " in map select menu.");

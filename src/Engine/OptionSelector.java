@@ -23,15 +23,11 @@ public class OptionSelector implements IController
   }
 
   /**
-   * Allows for reinitializing the OptionSelector with new bounds. Sets the
-   * current index back to 0.
-   * @param num The number of valid options. This is assumed to be >= 1.
+   * Sets the highlighted option to the indicated number.
    */
-  public void reset(int num)
+  public void setSelectedOption(int num)
   {
-    numOptions = num;
-    highestOption = num-1;
-    highlightedOption = 0;
+    highlightedOption = num;
   }
 
   /**

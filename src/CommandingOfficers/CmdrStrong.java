@@ -7,6 +7,8 @@ import CommandingOfficers.Modifiers.COMovementModifier;
 
 public class CmdrStrong extends Commander
 {
+  private static final CommanderInfo coInfo = new CommanderInfo("Strong", CommanderLibrary.CommanderEnum.STRONG);
+
   public CmdrStrong()
   {
     super();
@@ -33,5 +35,10 @@ public class CmdrStrong extends Commander
     COModifier strongestMod = new CODamageModifier(40); // An extra 40% with the major ability active.
     strongestMod.apply(this);
     modifiers.add(strongestMod); // Add to the list so the modifier can be reverted next turn.
+  }
+
+  public static CommanderInfo getInfo()
+  {
+    return coInfo;
   }
 }

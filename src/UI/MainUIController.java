@@ -6,8 +6,6 @@ import Terrain.MapLibrary;
 
 public class MainUIController implements IController
 {
-  private static final long serialVersionUID = 5548786952371603112L;
-
   public enum SubMenu { MAIN, GAME_SETUP, OPTIONS };
   private SubMenu currentSubMenuType = SubMenu.MAIN;
 
@@ -50,7 +48,6 @@ public class MainUIController implements IController
         {
           // If the subMenu was not MAIN, we go back to MAIN.
           currentSubMenuType = SubMenu.MAIN;
-          optionSelector.reset(numMenuOptions);
           exitGame = false;
         }
         break;
@@ -63,7 +60,6 @@ public class MainUIController implements IController
         {
           // If the subMenu was not MAIN, we go back to MAIN.
           currentSubMenuType = SubMenu.MAIN;
-          optionSelector.reset(numMenuOptions);
           exitGame = false;
         }
         break;
@@ -88,7 +84,6 @@ public class MainUIController implements IController
         {
           case NEW_GAME:
             currentSubMenuType = SubMenu.GAME_SETUP;
-            optionSelector.reset(MapLibrary.getMapList().size());
           break;
           case OPTIONS:
             System.out.println("WARNING! Options menu not supported yet!");

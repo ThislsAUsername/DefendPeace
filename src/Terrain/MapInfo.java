@@ -24,4 +24,9 @@ public class MapInfo
   {
     return terrain[0].length;
   }
+
+  public int getNumCos()
+  {
+    return COProperties.length;
+  }
 }
