@@ -550,9 +550,21 @@ public class SpriteLibrary
   {
     if( !coOverlays.containsKey(co) )
     {
+      final int OVERLAY_WIDTH = 97;
+      final int OVERLAY_HEIGHT = 20;
+
       // If we don't already have this overlay, go load and store it.
-      Sprite overlay = new Sprite(loadSpriteSheetFile("res/tileset/co_overlay.png"), 72, 20);
+      Sprite overlay = new Sprite(loadSpriteSheetFile("res/tileset/co_overlay.png"), OVERLAY_WIDTH, OVERLAY_HEIGHT);
       overlay.colorize(defaultMapColors, mapUnitColorPalettes.get(co.myColor).paletteColors);
+
+      // Draw the Commander's mug on top of the overlay.
+      BufferedImage coMug = getCommanderSprites(co.coInfo.cmdrEnum).eyes;
+      int mugW = coMug.getWidth();
+      Graphics g = overlay.getFrame(0).getGraphics();
+      g.drawImage(coMug, mugW, 1, -mugW, coMug.getHeight(), null);
+      Graphics g1 = overlay.getFrame(1).getGraphics();
+      g1.drawImage(coMug, OVERLAY_WIDTH-mugW, 1, null);
+
       coOverlays.put(co, overlay);
     }
     // Figure out which sub-image they want, and give it to them.

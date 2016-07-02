@@ -234,7 +234,8 @@ public class SpriteMapView extends MapView
     }
 
     int drawScale = getDrawScale();
-    int xTextOffset = 4 * drawScale; // Distance from the side of the view to the CO overlay text.
+    int coEyesWidth = 25;
+    int xTextOffset = (4+coEyesWidth) * drawScale; // Distance from the side of the view to the CO overlay text.
     int yTextOffset = 3 * drawScale; // Distance from the top of the view to the CO overlay text.
     BufferedImage spriteA = SpriteLibrary.getLettersSmallCaps().getFrame(0); // Convenient reference so we can check dimensions.
     int textHeight = spriteA.getHeight() * drawScale;
