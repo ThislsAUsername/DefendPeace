@@ -18,6 +18,8 @@ public class SpriteCOSetupArtist
   private static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
   private static final Color MENUBGCOLOR = new Color(234, 204, 154);
 
+  private static double animHighlightedPlayer = 0;
+
   public static void setDimensions(Dimension d)
   {
     dimensions = d;
@@ -57,15 +59,23 @@ public class SpriteCOSetupArtist
     int numCOs = mapInfo.getNumCos();
     int highlightedPlayer = control.getHighlightedPlayer();
 
-    // Figure out where to draw the COs
+    // Figure out where to draw each player's CO portrait.
     int drawYCenter = ((dimensions.height - vspace) / 2) + vspace;
-    int coHighlightedPortraitXCenter = dimensions.width / 2; // Whichever player has focus will be centered.
+    int coHighlightedPortraitXCenter = dimensions.width / 2; // Whichever player has focus should be centered.
 
     double numCosOnScreen = 5.5; // Display 5 cos, and the edge of the portrait for any hanging off the screen edge.
     int xSpacing = (int)(dimensions.width / numCosOnScreen);
 
-    // Find where zero should be drawn.
-    int drawXCenter = coHighlightedPortraitXCenter - highlightedPlayer * xSpacing; 
+    // If we are moving from one option to another, calculate the intermediate draw location.
+    if( animHighlightedPlayer != highlightedPlayer )
+    {
+      double slide = SpriteUIUtils.calculateSlideAmount(animHighlightedPlayer, highlightedPlayer);
+      animHighlightedPlayer += slide;
+    }
+
+    // Find where the zeroth player CO should be drawn.
+    // Shift from the center location by the spacing times the number of the highlighted option.
+    int drawXCenter = (int)(coHighlightedPortraitXCenter - (animHighlightedPlayer * xSpacing)); 
 
     for(int i = 0; i < numCOs; ++i, drawXCenter += xSpacing)
     {
