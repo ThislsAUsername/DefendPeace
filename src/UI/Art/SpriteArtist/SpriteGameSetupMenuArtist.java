@@ -10,7 +10,6 @@ import Terrain.Environment.Terrains;
 import Terrain.MapInfo;
 import Terrain.MapLibrary;
 import UI.GameSetupController;
-import UI.InputHandler.InputAction;
 
 public class SpriteGameSetupMenuArtist
 {

@@ -17,8 +17,6 @@ import UI.Art.SpriteArtist.SpriteMainUIView;
 
 public class Driver implements ActionListener, KeyListener
 {
-  private static final long serialVersionUID = 1L;
-
   private static Driver gameDriver;
   private IController gameController;
   private GameViewProxy gameView;

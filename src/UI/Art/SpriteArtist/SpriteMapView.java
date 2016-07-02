@@ -14,8 +14,6 @@ import Units.Unit;
 
 public class SpriteMapView extends MapView
 {
-  private static final long serialVersionUID = 1L;
-
   private HashMap<Commander, Boolean> unitFacings;
 
   private GameInstance myGame;

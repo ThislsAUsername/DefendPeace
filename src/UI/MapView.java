@@ -9,8 +9,6 @@ import Engine.MapController;
 
 public abstract class MapView implements IView
 {
-  private static final long serialVersionUID = 1L;
-
   public GameMenu currentMenu;
   public GameAction currentAction = null;
 
