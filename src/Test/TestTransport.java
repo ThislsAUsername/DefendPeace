@@ -1,6 +1,6 @@
 package Test;
 
-import CommandingOfficers.CmdrStrong;
+import CommandingOfficers.CommanderStrong;
 import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Terrain.GameMap;
@@ -17,7 +17,7 @@ public class TestTransport extends TestCase
   /** Make two COs and a GameMap to use with this test case. */
   private void setupTest()
   {
-    testCo1 = new CmdrStrong();
+    testCo1 = new CommanderStrong();
     testCo2 = new Commander();
     Commander[] cos = { testCo1, testCo2 };
 

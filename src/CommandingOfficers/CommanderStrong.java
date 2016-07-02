@@ -5,11 +5,11 @@ import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 
-public class CmdrStrong extends Commander
+public class CommanderStrong extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Strong", CommanderLibrary.CommanderEnum.STRONG);
 
-  public CmdrStrong()
+  public CommanderStrong()
   {
     super();
 

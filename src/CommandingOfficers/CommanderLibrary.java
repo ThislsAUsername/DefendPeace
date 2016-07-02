@@ -33,11 +33,10 @@ public class CommanderLibrary
       case STRONG:
         co = new CommanderStrong();
         break;
-      case LION:
-        co = new CommanderStrong(); // TODO
+      case LION: // TODO
         break;
       case PATCH:
-        co = new CommanderStrong(); // TODO
+        co = new CommanderPatch(); // TODO
         break;
       case NOONE:
         default:
