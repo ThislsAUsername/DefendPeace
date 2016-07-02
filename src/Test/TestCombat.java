@@ -1,5 +1,6 @@
 package Test;
 
+import CommandingOfficers.CommanderPatch;
 import CommandingOfficers.CommanderStrong;
 import CommandingOfficers.Commander;
 import Engine.GameAction;
@@ -18,7 +19,7 @@ public class TestCombat extends TestCase
   private void setupTest()
   {
     testCo1 = new CommanderStrong();
-    testCo2 = new Commander();
+    testCo2 = new CommanderPatch();
     Commander[] cos = { testCo1, testCo2 };
 
     testMap = new GameMap(cos, MapLibrary.getByName("Firing Range"));

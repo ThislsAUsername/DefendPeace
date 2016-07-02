@@ -1,6 +1,7 @@
 package Test;
 
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderPatch;
 import Engine.XYCoord;
 import Terrain.Environment;
 import Terrain.GameMap;
@@ -16,7 +17,7 @@ public class TestHealing extends TestCase
   /** Make two COs and a GameMap to use with this test case. */
   private void setupTest()
   {
-    testCo1 = new Commander();
+    testCo1 = new CommanderPatch();
     Commander[] cos = { testCo1 };
     // Create a small map with a city to provide healing.
     Environment.Terrains[][] testLoc = {

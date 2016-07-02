@@ -16,6 +16,7 @@ import Units.UnitModel.UnitEnum;
 
 public class Commander
 {
+  public final CommanderInfo coInfo;
   public ArrayList<Unit> units;
   public UnitModel[] unitModels;
   public ArrayList<COModifier> modifiers;
@@ -29,8 +30,9 @@ public class Commander
   public void doAbilityMajor()
   {}
 
-  public Commander()
+  public Commander(CommanderInfo info)
   {
+    coInfo = info;
     // TODO Obviously we don't want to hard-code the UnitModel array.
     unitModels = new UnitModel[3];
     unitModels[0] = new InfantryModel();

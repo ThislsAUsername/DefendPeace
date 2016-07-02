@@ -9,7 +9,7 @@ public class CommanderPatch extends Commander
 
   public CommanderPatch()
   {
-    super();
+    super(coInfo);
 
     // TODO: Patch has a capture bonus of 1 day's income when he first takes a property.
     // TODO: Patch has a special unit - the Pirate ship.

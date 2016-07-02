@@ -11,7 +11,7 @@ public class CommanderStrong extends Commander
 
   public CommanderStrong()
   {
-    super();
+    super(coInfo);
 
     // Set Cmdr Strong up with a base damage buff and long-range APCs. These COModifiers are
     // not added to the modifers collection so they will not be reverted.

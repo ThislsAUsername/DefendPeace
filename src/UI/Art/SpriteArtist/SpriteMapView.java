@@ -246,7 +246,7 @@ public class SpriteMapView extends MapView
       overlayFundsString = buildFundsString(overlayPreviousFunds);
     }
 
-    String coString = "Cmdr Name"; // myGame.activeCO.toString();
+    String coString = myGame.activeCO.coInfo.name;
 
     // Choose left or right overlay image to draw.
     BufferedImage overlayImage = SpriteLibrary.getCoOverlay(myGame.activeCO, overlayIsLeft);
