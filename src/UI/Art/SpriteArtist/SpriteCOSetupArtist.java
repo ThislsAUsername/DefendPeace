@@ -33,6 +33,12 @@ public class SpriteCOSetupArtist
   private static long lastDrawTime = System.currentTimeMillis(); // Used to control shimmer drift.
   private static double shimmerPxPerMs = 0.03; // Controls the speed of shimmer movement.
 
+  // Polygons for arrows to indicate the focused player slot.
+  private static int[] upXPoints = {116*drawScale, 120*drawScale, 121*drawScale, 125*drawScale};
+  private static int[] upYPoints = {108*drawScale, 104*drawScale, 104*drawScale, 108*drawScale};
+  private static int[] dnXPoints = {116*drawScale, 120*drawScale, 121*drawScale, 125*drawScale};
+  private static int[] dnYPoints = {148*drawScale, 152*drawScale, 152*drawScale, 148*drawScale};
+
   public static void setDimensions(Dimension d)
   {
     dimensions = d;
@@ -68,6 +74,11 @@ public class SpriteCOSetupArtist
 
     // Draw the mini map.
     SpriteLibrary.drawImageCenteredOnPoint(g, miniMap, dimensions.width / 2, vspace / 2, mmScale);
+
+    // Draw little arrows so the user knows which player slot has focus.
+    g.setColor(MENUFRAMECOLOR);
+    g.fillPolygon(upXPoints, upYPoints, upXPoints.length);
+    g.fillPolygon(dnXPoints, dnYPoints, dnXPoints.length);
 
     /////////////////// CO Portraits ///////////////////////
     int numCOs = mapInfo.getNumCos();
