@@ -30,7 +30,7 @@ public class SpriteMapView extends MapView
   // Variables for controlling map animations.
   private int currentAnimIndex = 0;
   private long lastAnimIndexUpdateTime = 0;
-  private final double animIndexUpdateInterval = 250;
+  private final int animIndexUpdateInterval = 250;
 
   private int mapViewWidth;
   private int mapViewHeight;
