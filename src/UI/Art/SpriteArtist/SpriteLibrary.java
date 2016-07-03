@@ -434,7 +434,7 @@ public class SpriteLibrary
   {
     if( null == letterSpritesSmallCaps )
     {
-      letterSpritesSmallCaps = new Sprite(loadSpriteSheetFile("res/tileset/letters.png"), 5, 6);
+      letterSpritesSmallCaps = new Sprite(loadSpriteSheetFile("res/ui/letters.png"), 5, 6);
     }
     return letterSpritesSmallCaps;
   }
@@ -450,7 +450,7 @@ public class SpriteLibrary
   {
     if( null == numberSpritesSmallCaps )
     {
-      numberSpritesSmallCaps = new Sprite(loadSpriteSheetFile("res/tileset/numbers.png"), 5, 6);
+      numberSpritesSmallCaps = new Sprite(loadSpriteSheetFile("res/ui/numbers.png"), 5, 6);
     }
     return numberSpritesSmallCaps;
   }
@@ -554,7 +554,7 @@ public class SpriteLibrary
       final int OVERLAY_HEIGHT = 20;
 
       // If we don't already have this overlay, go load and store it.
-      Sprite overlay = new Sprite(loadSpriteSheetFile("res/tileset/co_overlay.png"), OVERLAY_WIDTH, OVERLAY_HEIGHT);
+      Sprite overlay = new Sprite(loadSpriteSheetFile("res/ui/co_overlay.png"), OVERLAY_WIDTH, OVERLAY_HEIGHT);
       overlay.colorize(defaultMapColors, mapUnitColorPalettes.get(co.myColor).paletteColors);
 
       // Draw the Commander's mug on top of the overlay.
