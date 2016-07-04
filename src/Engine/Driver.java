@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 import Test.TestMain;
 import UI.InputHandler;
 import UI.MainUIController;
-import UI.Art.SpriteArtist.SpriteMainUIView;
+import UI.Art.SpriteArtist.SpriteEngine;
 
 public class Driver implements ActionListener, KeyListener
 {
@@ -27,11 +27,14 @@ public class Driver implements ActionListener, KeyListener
   private IController oldController = null;
   private IView oldView = null;
 
+  public GraphicsEngine gameGraphics = null;
+
   private Driver()
   {
     // At game startup, we are at the main menu. Set up controller/viewer
     MainUIController mc = new MainUIController();
-    gameView = new GameViewProxy(new SpriteMainUIView(mc));
+    gameGraphics = new SpriteEngine(); // Choose graphics engine based on config file, etc?
+    gameView = new GameViewProxy(gameGraphics.getMainUIView(mc));
     gameController = mc;
 
     gameWindow = new JFrame();

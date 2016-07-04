@@ -73,11 +73,11 @@ public class COSetupController implements IController
         GameMap map = new GameMap( cos, gameBuilder.mapInfo );
         GameInstance newGame = new GameInstance(map, cos);
 
-        SpriteMapView smv = new SpriteMapView(newGame);
-        MapController mapController = new MapController(newGame, smv);
+        MapView mv = Driver.getInstance().gameGraphics.createMapView(newGame);
+        MapController mapController = new MapController(newGame, mv);
 
         // Mash the big red button and start the game.
-        Driver.getInstance().changeGameState(mapController, smv);
+        Driver.getInstance().changeGameState(mapController, mv);
         exitMenu = true;
         break;
       case BACK:
