@@ -9,10 +9,10 @@ public class InputHandler
   };
 
   // MovementInput variables
-  static boolean upHeld = false;
-  static boolean downHeld = false;
-  static boolean leftHeld = false;
-  static boolean rightHeld = false;
+  static short upHeld = 0;
+  static short downHeld = 0;
+  static short leftHeld = 0;
+  static short rightHeld = 0;
 
   /**
    * No reason to make an instance of this class.
@@ -26,16 +26,16 @@ public class InputHandler
     switch (input)
     {
       case UP:
-        upHeld = true;
+        upHeld++;
         break;
       case DOWN:
-        downHeld = true;
+        downHeld++;
         break;
       case LEFT:
-        leftHeld = true;
+        leftHeld++;
         break;
       case RIGHT:
-        rightHeld = true;
+        rightHeld++;
         break;
     }
     return input;
@@ -86,38 +86,38 @@ public class InputHandler
     switch (input)
     {
       case UP:
-        upHeld = false;
+        upHeld = 0;
         break;
       case DOWN:
-        downHeld = false;
+        downHeld = 0;
         break;
       case LEFT:
-        leftHeld = false;
+        leftHeld = 0;
         break;
       case RIGHT:
-        rightHeld = false;
+        rightHeld = 0;
         break;
     }
   }
 
   public static boolean isUpHeld()
   {
-    return upHeld;
+    return upHeld > 1;
   }
 
   public static boolean isDownHeld()
   {
-    return downHeld;
+    return downHeld > 1;
   }
 
   public static boolean isLeftHeld()
   {
-    return leftHeld;
+    return leftHeld > 1;
   }
 
   public static boolean isRightHeld()
   {
-    return rightHeld;
+    return rightHeld > 1;
   }
 
 }
