@@ -1,5 +1,6 @@
 package UI.Art.FillRectArtist;
 
+import UI.InputHandler.InputAction;
 import UI.MainUIController;
 import UI.MapView;
 import UI.Art.SpriteArtist.SpriteMainUIView;
@@ -26,4 +27,10 @@ public class FillRectEngine implements GraphicsEngine
     return new FillRectMapView(game);
   }
 
+  @Override
+  public boolean handleOptionsInput(InputAction action)
+  {
+    // FillRectEngine does not support any options.
+    return true;
+  }
 }

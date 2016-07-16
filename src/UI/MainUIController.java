@@ -1,5 +1,6 @@
 package UI;
 
+import Engine.Driver;
 import Engine.IController;
 import Engine.OptionSelector;
 import Terrain.MapLibrary;
@@ -55,6 +56,11 @@ public class MainUIController implements IController
         exitGame = handleMainMenuInput(action);
         break;
       case OPTIONS:
+        // Since different graphics engines could implement different available
+        //   options, we cannot handle this input directly. Instead, just feed
+        //   the user inputs to the graphics engine directly.
+        exitGame = Driver.getInstance().gameGraphics.handleOptionsInput(action);
+
         //exitGame = handleOptionsMenu(action);
         if(exitGame)
         {
@@ -86,7 +92,7 @@ public class MainUIController implements IController
             currentSubMenuType = SubMenu.GAME_SETUP;
           break;
           case OPTIONS:
-            System.out.println("WARNING! Options menu not supported yet!");
+            currentSubMenuType = SubMenu.OPTIONS;
             break;
           case QUIT:
             // Let the caller know we are done here.

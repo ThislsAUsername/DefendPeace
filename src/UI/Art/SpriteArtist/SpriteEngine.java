@@ -1,5 +1,6 @@
 package UI.Art.SpriteArtist;
 
+import UI.InputHandler.InputAction;
 import UI.MainUIController;
 import UI.MapView;
 import Engine.GameInstance;
@@ -18,5 +19,11 @@ public class SpriteEngine implements GraphicsEngine
   public MapView createMapView(GameInstance game)
   {
     return new SpriteMapView(game);
+  }
+
+  @Override
+  public boolean handleOptionsInput(InputAction action)
+  {
+    return SpriteOptions.handleOptionsInput(action);
   }
 }

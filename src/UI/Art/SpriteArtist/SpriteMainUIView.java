@@ -63,6 +63,7 @@ public class SpriteMainUIView implements IView
         renderMainMenu(g);
         break;
       case OPTIONS:
+        SpriteOptions.draw(g);
         break;
         default:
           System.out.println("Warning: Invalid menu type " + controller.getSubMenuType() + " in SpriteMainUIView.render().");
