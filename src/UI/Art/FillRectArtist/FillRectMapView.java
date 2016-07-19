@@ -8,20 +8,19 @@ import UI.MapView;
 
 public class FillRectMapView extends MapView
 {
-  private static final long serialVersionUID = 1L;
-
   private FillRectMapArtist mapArtist;
   private FillRectUnitArtist unitArtist;
   private FillRectMenuArtist menuArtist;
 
   private int baseTileSize = 16;
+  private int drawScale = 2;
   private int mapViewWidth;
   private int mapViewHeight;
 
   public FillRectMapView(GameInstance game)
   {
-    mapViewWidth = baseTileSize * getDrawScale() * 15;
-    mapViewHeight = baseTileSize * getDrawScale() * 10;
+    mapViewWidth = baseTileSize * drawScale * 15;
+    mapViewHeight = baseTileSize * drawScale * 10;
 
     mapArtist = new FillRectMapArtist(game);
     unitArtist = new FillRectUnitArtist(game);
@@ -41,7 +40,7 @@ public class FillRectMapView extends MapView
   @Override
   public int getTileSize()
   {
-    return baseTileSize * getDrawScale();
+    return baseTileSize * drawScale;
   }
 
   @Override

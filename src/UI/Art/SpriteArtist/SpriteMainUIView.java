@@ -19,36 +19,30 @@ public class SpriteMainUIView implements IView
   // Note that menuBGColors must be defined to match MainController.menuOptions.
   private Color[] menuBGColors = {new Color(218,38,2), new Color(111,218,2), new Color(206,224,234)};
   int highestOption = menuBGColors.length - 1;
-  int drawScale = 3;
-
-  private Dimension dimensions = new Dimension(240*drawScale, 160*drawScale);
-  private int optionSeparationX = dimensions.width / 6; // So we can evenly space the seven visible options.
-  private int optionSeparationY = dimensions.height / 6;
 
   private double animHighlightedOption = 0;
 
   public SpriteMainUIView( MainUIController control )
   {
     controller = control;
-    SpriteGameSetupMenuArtist.setDimensions(dimensions);
   }
 
   @Override
   public Dimension getPreferredDimensions()
   {
-    return dimensions;
+    return SpriteOptions.getScreenDimensions();
   }
 
   @Override
   public int getViewWidth()
   {
-    return dimensions.width;
+    return SpriteOptions.getScreenDimensions().width;
   }
 
   @Override
   public int getViewHeight()
   {
-    return dimensions.height;
+    return SpriteOptions.getScreenDimensions().height;
   }
 
   @Override
@@ -88,6 +82,9 @@ public class SpriteMainUIView implements IView
       double slide = SpriteUIUtils.calculateSlideAmount(animHighlightedOption, highlightedOption);
       animHighlightedOption += slide;
     }
+
+    int optionSeparationX = SpriteOptions.getScreenDimensions().width / 6; // So we can evenly space the seven visible options.
+    int optionSeparationY = SpriteOptions.getScreenDimensions().height / 6;
 
     // Figure out where to actually draw the currently-highlighted option. Note that this changes 
     //   immediately when up or down is pressed, and the new option becomes the basis for drawing.
@@ -131,6 +128,7 @@ public class SpriteMainUIView implements IView
     Color drawColor = menuBGColors[highlightedOption];
     g.setColor(drawColor);
     int frameWidth = getViewWidth();
+    int drawScale = SpriteOptions.getDrawScale();
     g.fillRect(0, 0,  frameWidth, 68*drawScale);
     g.fillRect(0, 70*drawScale, frameWidth, drawScale);
     g.fillRect(0, 89*drawScale, frameWidth, drawScale);
@@ -149,7 +147,7 @@ public class SpriteMainUIView implements IView
     // Only draw the image if it will actually show on the screen.
     if( y > -1*menuText.getHeight() && y < getViewHeight() + menuText.getHeight())
     {
-      SpriteLibrary.drawImageCenteredOnPoint(g, menuText, x, y, drawScale);
+      SpriteLibrary.drawImageCenteredOnPoint(g, menuText, x, y, SpriteOptions.getDrawScale());
     }
   }
 }

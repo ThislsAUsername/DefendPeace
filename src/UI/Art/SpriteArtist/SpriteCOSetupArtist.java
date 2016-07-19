@@ -12,9 +12,6 @@ import UI.COSetupController;
 
 public class SpriteCOSetupArtist
 {
-  private static Dimension dimensions = null;
-  private static int drawScale = 2;
-
   private static final Color BGCOLOR = new Color(234, 243, 255); // Light blue background.
   private static final Color BGSHIMMER= new Color(248, 248, 255); // Lighter blue shimmer effect.
   private static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
@@ -23,29 +20,19 @@ public class SpriteCOSetupArtist
   private static double animHighlightedPlayer = 0;
 
   // variables for background shimmer effect
-  private static int shimmerStretch = 160*drawScale; // TODO: This should really just be screen height.
-  private static int shimmerThickness = 25*drawScale;
-  private static int shimmerSpacing = 100*drawScale; // Distance between adjacent bands.
-  private static int[] xPoints = {0, shimmerStretch, shimmerStretch+shimmerThickness, shimmerThickness};
-  private static int[] yPoints = {shimmerStretch, 0, 0, shimmerStretch};
-  private static Polygon shimmerPoly = new Polygon(xPoints, yPoints, xPoints.length); // Shimmer shape to draw.
+  private static int shimmerScale = SpriteOptions.getDrawScale();
+  private static int shimmerStretch = 160*shimmerScale; // TODO: This should really just be screen height.
+  private static int shimmerThickness = 25*shimmerScale;
+  private static int shimmerSpacing = 100*shimmerScale; // Distance between adjacent bands.
   private static double shimmerBasePoint = -(shimmerStretch+shimmerSpacing); // Where to draw the first shimmer.
   private static long lastDrawTime = System.currentTimeMillis(); // Used to control shimmer drift.
   private static double shimmerPxPerMs = 0.03; // Controls the speed of shimmer movement.
 
-  // Polygons for arrows to indicate the focused player slot.
-  private static int[] upXPoints = {116*drawScale, 120*drawScale, 121*drawScale, 125*drawScale};
-  private static int[] upYPoints = {108*drawScale, 104*drawScale, 104*drawScale, 108*drawScale};
-  private static int[] dnXPoints = {116*drawScale, 120*drawScale, 121*drawScale, 125*drawScale};
-  private static int[] dnYPoints = {148*drawScale, 152*drawScale, 152*drawScale, 148*drawScale};
-
-  public static void setDimensions(Dimension d)
-  {
-    dimensions = d;
-  }
-
   public static void draw(Graphics g, MapInfo mapInfo, COSetupController control)
   {
+    // Get the draw space
+    Dimension dimensions = SpriteOptions.getScreenDimensions();
+
     ////////////////// Background /////////////////////////
     g.setColor(BGCOLOR);
     g.fillRect(0,0,dimensions.width, dimensions.height);
@@ -54,6 +41,7 @@ public class SpriteCOSetupArtist
     drawBGShimmer(g);
 
     /////////////////// MiniMap ////////////////////////
+    int drawScale = SpriteOptions.getDrawScale();
     BufferedImage miniMap = SpriteMiniMapArtist.getMapImage( mapInfo );
     // Figure out how large to draw the minimap. We aren't horizontally constrained, but we need
     // to fit the CO selection area below it. Make it as large as possible given those constraints.
@@ -75,10 +63,7 @@ public class SpriteCOSetupArtist
     // Draw the mini map.
     SpriteLibrary.drawImageCenteredOnPoint(g, miniMap, dimensions.width / 2, vspace / 2, mmScale);
 
-    // Draw little arrows so the user knows which player slot has focus.
-    g.setColor(MENUFRAMECOLOR);
-    g.fillPolygon(upXPoints, upYPoints, upXPoints.length);
-    g.fillPolygon(dnXPoints, dnYPoints, dnXPoints.length);
+    drawSelectorArrows(g);
 
     /////////////////// CO Portraits ///////////////////////
     int numCOs = mapInfo.getNumCos();
@@ -115,10 +100,26 @@ public class SpriteCOSetupArtist
     }
   }
 
+  private static void drawSelectorArrows(Graphics g)
+  {
+    int drawScale = SpriteOptions.getDrawScale();
+    // Polygons for arrows to indicate the focused player slot.
+    int[] upXPoints = {116*drawScale, 120*drawScale, 121*drawScale, 125*drawScale};
+    int[] upYPoints = {108*drawScale, 104*drawScale, 104*drawScale, 108*drawScale};
+    int[] dnXPoints = {116*drawScale, 120*drawScale, 121*drawScale, 125*drawScale};
+    int[] dnYPoints = {148*drawScale, 152*drawScale, 152*drawScale, 148*drawScale};
+
+    // Draw the arrows around the focused player slot.
+    g.setColor(MENUFRAMECOLOR);
+    g.fillPolygon(upXPoints, upYPoints, upXPoints.length);
+    g.fillPolygon(dnXPoints, dnYPoints, dnXPoints.length);
+  }
+
   private static void drawCoPortrait(Graphics g, int co, int color, int xCenter, int yCenter)
   {
     // Fetch CO portrait
     BufferedImage portrait = SpriteLibrary.getCommanderSprites( CommanderLibrary.getCommanderList().get(co).cmdrEnum ).head;
+    int drawScale = SpriteOptions.getDrawScale();
 
     int drawX = xCenter - ( (portrait.getWidth()*drawScale) / 2 );
     int drawY = yCenter - ( (portrait.getHeight()*drawScale) / 2);
@@ -144,6 +145,26 @@ public class SpriteCOSetupArtist
    */
   private static void drawBGShimmer(Graphics g)
   {
+    // Figure out the screen dimensions so we can draw the background correctly.
+    Dimension dimensions = SpriteOptions.getScreenDimensions();
+
+    // If the scale has changed since we last checked, reinitialize.
+    if(shimmerScale != SpriteOptions.getDrawScale())
+    {
+      shimmerScale = SpriteOptions.getDrawScale();
+      shimmerStretch = dimensions.height*shimmerScale;
+      shimmerThickness = 25*shimmerScale;
+      shimmerSpacing = 100*shimmerScale; // Distance between adjacent bands.
+      shimmerBasePoint = -(shimmerStretch+shimmerSpacing); // Where to draw the first shimmer.
+      lastDrawTime = System.currentTimeMillis(); // Used to control shimmer drift.
+      shimmerPxPerMs = 0.03; // Controls the speed of shimmer movement.
+    }
+
+    // Build the polygon we will use to draw the lighter bands in the background.
+    int[] xPoints = {0, shimmerStretch, shimmerStretch+shimmerThickness, shimmerThickness};
+    int[] yPoints = {shimmerStretch, 0, 0, shimmerStretch};
+    Polygon shimmerPoly = new Polygon(xPoints, yPoints, xPoints.length); // Shimmer shape to draw.
+
     // Make a copy of the base polygon and translate it to the first draw point.
     Polygon drawPoly = new Polygon(shimmerPoly.xpoints, shimmerPoly.ypoints, shimmerPoly.npoints);
     int currentDrawPoint = (int)shimmerBasePoint; // Get the basis point to the nearest pixel.

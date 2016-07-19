@@ -36,7 +36,7 @@ public class SpriteMenuArtist
     myView = view;
 
     // Get the draw scale, and figure out the resulting "real" text size, etc.
-    drawScale = myView.getDrawScale();
+    drawScale = SpriteOptions.getDrawScale();
     menuTextWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth() * drawScale;
     menuTextHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight() * drawScale;
     menuHBuffer = 3 * drawScale; // Amount of visible menu to left and right of options;

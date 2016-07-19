@@ -51,8 +51,8 @@ public class SpriteMapView extends MapView
     }
 
     // By default, we will show a 15x10 chunk of the map.
-    mapViewWidth = SpriteLibrary.baseSpriteSize * getDrawScale() * 15;
-    mapViewHeight = SpriteLibrary.baseSpriteSize * getDrawScale() * 10;
+    mapViewWidth = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * 15;
+    mapViewHeight = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * 10;
   }
 
   @Override
@@ -64,7 +64,7 @@ public class SpriteMapView extends MapView
   @Override
   public int getTileSize()
   {
-    return SpriteLibrary.baseSpriteSize * getDrawScale();
+    return SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale();
   }
 
   @Override
@@ -231,7 +231,7 @@ public class SpriteMapView extends MapView
       overlayIsLeft = false;
     }
 
-    int drawScale = getDrawScale();
+    int drawScale = SpriteOptions.getDrawScale();
     int coEyesWidth = 25;
     int xTextOffset = (4+coEyesWidth) * drawScale; // Distance from the side of the view to the CO overlay text.
     int yTextOffset = 3 * drawScale; // Distance from the top of the view to the CO overlay text.

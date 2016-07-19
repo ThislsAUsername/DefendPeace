@@ -17,7 +17,7 @@ public class SpriteUnitArtist
   {
     myGame = game;
     myView = view;
-    drawScale = view.getDrawScale();
+    drawScale = SpriteOptions.getDrawScale();
   }
 
   public void drawUnitHPIcons(Graphics g)

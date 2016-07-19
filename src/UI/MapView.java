@@ -12,9 +12,8 @@ public abstract class MapView implements IView
   public GameMenu currentMenu;
   public GameAction currentAction = null;
 
+  // TODO: This doesn't really belong here. The specific artist should handle this, ideally.
   private int unitMoveSpeedMsPerTile = 100;
-
-  private int drawScale = 2;
 
   protected AnimationSequence currentAnimation = null;
 
@@ -85,9 +84,5 @@ public abstract class MapView implements IView
   public double getMapUnitMoveSpeed()
   {
     return unitMoveSpeedMsPerTile;
-  }
-  public int getDrawScale()
-  {
-    return drawScale;
   }
 }

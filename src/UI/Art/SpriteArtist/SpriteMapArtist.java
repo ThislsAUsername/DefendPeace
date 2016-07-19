@@ -32,7 +32,7 @@ public class SpriteMapArtist
     gameMap = game.gameMap;
     myView = view;
 
-    drawScale = myView.getDrawScale();
+    drawScale = SpriteOptions.getDrawScale();
     tileSize = SpriteLibrary.baseSpriteSize * drawScale;
 
     // TODO: make this obsolete.

@@ -14,6 +14,7 @@ import Test.TestMain;
 import UI.InputHandler;
 import UI.MainUIController;
 import UI.Art.SpriteArtist.SpriteEngine;
+import UI.Art.SpriteArtist.SpriteOptions;
 
 public class Driver implements ActionListener, KeyListener
 {
@@ -68,7 +69,14 @@ public class Driver implements ActionListener, KeyListener
     oldController = gameController;
     gameController = newControl;
     gameView.setView(newView);
+    gameWindow.getContentPane().setSize(newView.getPreferredDimensions());
     gameWindow.pack(); // Resize the window to match the new view's preferences.
+  }
+
+  public void updateView()
+  {
+    gameWindow.getContentPane().setSize(SpriteOptions.getScreenDimensions());
+    gameWindow.pack();
   }
 
   @Override // From ActionListener

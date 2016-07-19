@@ -5,22 +5,25 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
+import Engine.Driver;
 import Engine.OptionSelector;
 import UI.InputHandler;
 
 public class SpriteOptions
 {
   // Define global settings.
+  private static final int WINDOWWIDTH_DEFAULT = 240;
+  private static final int WINDOWHEIGHT_DEFAULT = 160;
   private static final int DRAWSCALE_DEFAULT = 2;
   private static int drawScale = DRAWSCALE_DEFAULT;
+
+  private static Dimension dimensions = new Dimension(WINDOWWIDTH_DEFAULT*drawScale, WINDOWHEIGHT_DEFAULT*drawScale);
 
   // Set up configurable options.
   private static GraphicsOption drawScaleOption = new GraphicsOption("Draw Scale", 1, 6, DRAWSCALE_DEFAULT);
   private static GraphicsOption dummyOption = new GraphicsOption("Dummy option");
   private static GraphicsOption[] allOptions = {drawScaleOption, dummyOption};
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
-
-  private static Dimension dimensions = new Dimension(240*drawScale, 160*drawScale);
 
   private static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
   private static final Color MENUBGCOLOR = new Color(234, 204, 154);
@@ -32,6 +35,16 @@ public class SpriteOptions
   private static int graphicsOptionHeight = 0; // Set in initialize().
   private static BufferedImage optionNamePanel = null;
   private static BufferedImage optionSettingPanel = null;
+
+  public static Dimension getScreenDimensions()
+  {
+    return dimensions;
+  }
+
+  public static int getDrawScale()
+  {
+    return drawScale;
+  }
 
   private static void initialize()
   {
@@ -83,11 +96,6 @@ public class SpriteOptions
     return panel;
   }
 
-  public static int getDrawScale()
-  {
-    return drawScale;
-  }
-
   public static boolean handleOptionsInput(InputHandler.InputAction action)
   {
     boolean exitMenu = false;
@@ -123,6 +131,8 @@ public class SpriteOptions
   private static void applyConfigOptions()
   {
     drawScale = drawScaleOption.getSelectionNormalized();
+    dimensions.setSize(WINDOWWIDTH_DEFAULT*drawScale, WINDOWHEIGHT_DEFAULT*drawScale);
+    Driver.getInstance().updateView(); // Tell the driver to look at these settings again.
   }
 
   /**
@@ -131,6 +141,7 @@ public class SpriteOptions
   private static void resetConfigOptions()
   {
     drawScaleOption.setSelectedOption(drawScale);
+    highlightedOption.setSelectedOption(0);
   }
 
   //////////////////////////////////////////////////////////////////////
