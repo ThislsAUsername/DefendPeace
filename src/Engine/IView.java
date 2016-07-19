@@ -11,15 +11,6 @@ public interface IView
   public abstract Dimension getPreferredDimensions();
 
   /**
-   * @return The width in pixels of the entire view area.
-   */
-  public abstract int getViewWidth();
-  /**
-   * @return The height in pixels of the entire view area.
-   */
-  public abstract int getViewHeight();
-
-  /**
    * Renders the view using the specified graphics.
    */
   public void render(Graphics g);

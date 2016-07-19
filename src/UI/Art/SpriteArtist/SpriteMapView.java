@@ -67,18 +67,6 @@ public class SpriteMapView extends MapView
     return SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale();
   }
 
-  @Override
-  public int getViewWidth()
-  {
-    return mapViewWidth;
-  }
-
-  @Override
-  public int getViewHeight()
-  {
-    return mapViewHeight;
-  }
-
   /** Returns whether the commander's map units should be flipped horizontally when drawn. */
   public boolean getFlipUnitFacing(Commander co)
   {
@@ -258,9 +246,10 @@ public class SpriteMapView extends MapView
     }
     else
     { // Draw the overlay on the right side.
-      int xPos = getViewWidth() - overlayImage.getWidth() * drawScale;
-      int coNameXPos = getViewWidth() - spriteA.getWidth() * drawScale * coString.length() - xTextOffset;
-      int fundsXPos = getViewWidth() - spriteA.getWidth() * drawScale * overlayFundsString.length() - xTextOffset;
+      int screenWidth = SpriteOptions.getScreenDimensions().width;
+      int xPos = screenWidth - overlayImage.getWidth() * drawScale;
+      int coNameXPos = screenWidth - spriteA.getWidth() * drawScale * coString.length() - xTextOffset;
+      int fundsXPos = screenWidth - spriteA.getWidth() * drawScale * overlayFundsString.length() - xTextOffset;
       g.drawImage(overlayImage, xPos, 0, overlayImage.getWidth() * drawScale, overlayImage.getHeight() * drawScale, null);
       SpriteLibrary.drawTextSmallCaps(g, coString, coNameXPos, yTextOffset, drawScale); // CO name
       SpriteLibrary.drawTextSmallCaps(g, overlayFundsString, fundsXPos, textHeight + drawScale + yTextOffset, drawScale); // Funds

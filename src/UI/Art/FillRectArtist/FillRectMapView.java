@@ -43,13 +43,11 @@ public class FillRectMapView extends MapView
     return baseTileSize * drawScale;
   }
 
-  @Override
   public int getViewWidth()
   {
     return mapViewWidth;
   }
 
-  @Override
   public int getViewHeight()
   {
     return mapViewHeight;

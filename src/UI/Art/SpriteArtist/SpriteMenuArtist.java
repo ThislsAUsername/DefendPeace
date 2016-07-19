@@ -1,6 +1,7 @@
 package UI.Art.SpriteArtist;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.util.ArrayList;
 
@@ -75,8 +76,9 @@ public class SpriteMenuArtist
       int drawY = myGame.getCursorY() * viewTileSize - (menuHeight / 2 - viewTileSize / 2);
 
       // Make sure the menu is fully contained in viewable space.
-      drawX = (drawX < 0) ? 0 : (drawX > (myView.getViewWidth() - menuWidth)) ? (myView.getViewWidth() - menuWidth) : drawX;
-      drawY = (drawY < 0) ? 0 : (drawY > (myView.getViewHeight() - menuHeight)) ? (myView.getViewHeight() - menuHeight) : drawY;
+      Dimension dims = SpriteOptions.getScreenDimensions();
+      drawX = (drawX < 0) ? 0 : (drawX > (dims.width - menuWidth)) ? (dims.width - menuWidth) : drawX;
+      drawY = (drawY < 0) ? 0 : (drawY > (dims.height - menuHeight)) ? (dims.height - menuHeight) : drawY;
 
       // Draw the nice box for our text.
       drawMenuFrame(g, drawX, drawY, menuWidth, menuHeight);

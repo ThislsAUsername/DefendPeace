@@ -34,18 +34,6 @@ public class SpriteMainUIView implements IView
   }
 
   @Override
-  public int getViewWidth()
-  {
-    return SpriteOptions.getScreenDimensions().width;
-  }
-
-  @Override
-  public int getViewHeight()
-  {
-    return SpriteOptions.getScreenDimensions().height;
-  }
-
-  @Override
   public void render(Graphics g)
   {
     switch(controller.getSubMenuType())
@@ -73,8 +61,9 @@ public class SpriteMainUIView implements IView
     drawMenuBG(g, highlightedOption);
 
     // We start by assuming the highlighted option will be drawn centered.
-    int xCenter = getViewWidth() / 2;
-    int yCenter = getViewHeight() / 2;
+    Dimension dims = SpriteOptions.getScreenDimensions();
+    int xCenter = dims.width / 2;
+    int yCenter = dims.height / 2;
 
     // If we are moving from one highlighted option to another, calculate the intermediate draw location.
     if( animHighlightedOption != highlightedOption )
@@ -95,7 +84,7 @@ public class SpriteMainUIView implements IView
     int layer = 0; // We start by drawing all options 0 distance from the highlighted one.
     for(int drawY = yBasisLoc, drawX = xBasisLoc;
         // This check ensures that we keep going until we are off the visible screen.
-        (drawY > 0 && drawY < getViewHeight());
+        (drawY > 0 && drawY < dims.height);
         ++layer)
     {
       // Figure out how far from the basis to draw this option.
@@ -127,7 +116,7 @@ public class SpriteMainUIView implements IView
     // Get the background color for this option and draw our fancy pattern.
     Color drawColor = menuBGColors[highlightedOption];
     g.setColor(drawColor);
-    int frameWidth = getViewWidth();
+    int frameWidth = SpriteOptions.getScreenDimensions().width;
     int drawScale = SpriteOptions.getDrawScale();
     g.fillRect(0, 0,  frameWidth, 68*drawScale);
     g.fillRect(0, 70*drawScale, frameWidth, drawScale);
@@ -145,7 +134,7 @@ public class SpriteMainUIView implements IView
     BufferedImage menuText = SpriteLibrary.getMainMenuOptions().getFrame(option);
     
     // Only draw the image if it will actually show on the screen.
-    if( y > -1*menuText.getHeight() && y < getViewHeight() + menuText.getHeight())
+    if( y > -1*menuText.getHeight() && y < SpriteOptions.getScreenDimensions().height + menuText.getHeight())
     {
       SpriteLibrary.drawImageCenteredOnPoint(g, menuText, x, y, SpriteOptions.getDrawScale());
     }
