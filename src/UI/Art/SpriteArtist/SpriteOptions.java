@@ -24,6 +24,7 @@ public class SpriteOptions
   private static GraphicsOption dummyOption = new GraphicsOption("Dummy option");
   private static GraphicsOption[] allOptions = {drawScaleOption, dummyOption};
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
+  private static double animHighlightedOption = 0;
 
   private static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
   private static final Color MENUBGCOLOR = new Color(234, 204, 154);
@@ -35,6 +36,7 @@ public class SpriteOptions
   private static int graphicsOptionHeight = 0; // Set in initialize().
   private static BufferedImage optionNamePanel = null;
   private static BufferedImage optionSettingPanel = null;
+  private static BufferedImage optionArrows = null;
 
   public static Dimension getScreenDimensions()
   {
@@ -66,6 +68,18 @@ public class SpriteOptions
     graphicsOptionWidth = optionNamePanel.getWidth() + optionSettingPanel.getWidth()
         + letterWidth*3; // Plus some space for a buffer between panels.
     graphicsOptionHeight = optionNamePanel.getHeight();
+
+    // Make points to define the two selection arrows.
+    int[] lXPoints = {0, 5, 5, 0};
+    int[] lYPoints = {4, -1, 11, 5};
+    int[] rXPoints = {36, 41, 41, 36};
+    int[] rYPoints = {-1, 4, 5, 10};
+    // Build an image with the selection arrows.
+    optionArrows = new BufferedImage(44, 10, BufferedImage.TYPE_INT_ARGB);
+    Graphics ag = optionArrows.getGraphics();
+    ag.setColor(MENUFRAMECOLOR);
+    ag.fillPolygon(lXPoints, lYPoints, lXPoints.length);
+    ag.fillPolygon(rXPoints, rYPoints, rXPoints.length);
 
     initialized = true;
   }
@@ -159,6 +173,7 @@ public class SpriteOptions
     // Set up some initial parameters.
     int xDraw = (dimensions.width / 2) - ((drawScale * graphicsOptionWidth) / 2);
     int yDraw = drawScale * graphicsOptionHeight;
+    int firstOptionY = yDraw; // Hold onto this to draw the selector arrows.
     int ySpacing = drawScale * (graphicsOptionHeight + (optionNamePanel.getHeight() / 2));
     
     // Loop through and draw everything.
@@ -167,7 +182,18 @@ public class SpriteOptions
       drawGraphicsOption(g, xDraw, yDraw, allOptions[i]);
     }
 
-    // TODO: Draw arrows to show what option we are currently changing.
+    // If we are moving from one option to another, calculate the intermediate draw location.
+    if( animHighlightedOption != highlightedOption.getSelectionNormalized() )
+    {
+      double slide = SpriteUIUtils.calculateSlideAmount(animHighlightedOption, highlightedOption.getSelectionNormalized());
+      animHighlightedOption += slide;
+    }
+
+    // Draw the arrows around the highlighted option, animating movement when switching.
+    yDraw = firstOptionY + (int)(ySpacing * animHighlightedOption) + (3*drawScale); // +3 to center.
+    xDraw += (graphicsOptionWidth - optionSettingPanel.getWidth() - 8)*drawScale; // Subtract 5 to center the arrows around the option setting panel.
+
+    g.drawImage(optionArrows, xDraw, yDraw, optionArrows.getWidth()*drawScale, optionArrows.getHeight()*drawScale, null);
   }
 
   private static void drawGraphicsOption(Graphics g, int x, int y, GraphicsOption opt)
