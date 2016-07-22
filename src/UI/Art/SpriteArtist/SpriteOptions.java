@@ -156,6 +156,7 @@ public class SpriteOptions
   {
     drawScaleOption.setSelectedOption(drawScale);
     highlightedOption.setSelectedOption(0);
+    animHighlightedOption = 0;
   }
 
   //////////////////////////////////////////////////////////////////////
