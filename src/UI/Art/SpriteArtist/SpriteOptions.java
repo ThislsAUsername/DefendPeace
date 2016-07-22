@@ -165,6 +165,9 @@ public class SpriteOptions
 
   public static void draw(Graphics g)
   {
+    // Draw a fancy background.
+    DiagonalBlindsBG.draw(g);
+
     // Build the necessary images.
     if(!initialized)
     {
