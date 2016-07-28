@@ -5,7 +5,7 @@ import UI.InputHandler.InputAction;
 /**
  * Keeps track of the currently-highlighted option in a list.
  */
-public class OptionSelector implements IController
+public class OptionSelector
 {
   private int numOptions;
   private int highestOption;
@@ -53,8 +53,7 @@ public class OptionSelector implements IController
     return chosenOption;
   }
 
-  @Override
-  public boolean handleInput(InputAction action)
+  public void handleInput(InputAction action)
   {
     switch( action )
     {
@@ -73,6 +72,5 @@ public class OptionSelector implements IController
       default:
         System.out.println("Warning: Unexpected input received in OptionSelector.");
     }
-    return false; // OptionSelector isn't actually in control of anything, really.
   }
 }
