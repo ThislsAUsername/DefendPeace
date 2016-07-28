@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import Engine.Driver;
 import Engine.OptionSelector;
 import UI.InputHandler;
+import UI.InputHandler.InputAction;
 
 public class SpriteOptions
 {
@@ -28,6 +29,7 @@ public class SpriteOptions
 
   private static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
   private static final Color MENUBGCOLOR = new Color(234, 204, 154);
+  private static final Color MENUHIGHLIGHTCOLOR = new Color(246, 234, 210);
 
   private static boolean initialized = false;
   private static int letterWidth = SpriteLibrary.getLettersUppercase().getFrame(0).getWidth();
@@ -36,6 +38,7 @@ public class SpriteOptions
   private static int graphicsOptionHeight = 0; // Set in initialize().
   private static BufferedImage optionNamePanel = null;
   private static BufferedImage optionSettingPanel = null;
+  private static BufferedImage optionSettingPanelChanged = null;
   private static BufferedImage optionArrows = null;
 
   public static Dimension getScreenDimensions()
@@ -61,9 +64,10 @@ public class SpriteOptions
     }
 
     // This panel will hold the name of the option.
-    optionNamePanel = generateOptionPanel(maxNameLen);
+    optionNamePanel = generateOptionPanel(maxNameLen, MENUBGCOLOR);
     // This panel will hold the current setting for the option.
-    optionSettingPanel = generateOptionPanel(3); // All settings fit within 3 characters.
+    optionSettingPanel = generateOptionPanel(3, MENUBGCOLOR); // All settings fit within 3 characters.
+    optionSettingPanelChanged = generateOptionPanel(3, MENUHIGHLIGHTCOLOR);
 
     graphicsOptionWidth = optionNamePanel.getWidth() + optionSettingPanel.getWidth()
         + letterWidth*3; // Plus some space for a buffer between panels.
@@ -88,7 +92,7 @@ public class SpriteOptions
    * Build an image for a floating panel to hold the specified text length, and return it.
    * @param length The max text length intended to be shown on this panel.
    */
-  private static BufferedImage generateOptionPanel(int length)
+  private static BufferedImage generateOptionPanel(int length, Color fgColor)
   {
     int w = (2*textBuffer) + (letterWidth*length);
     int h = (textBuffer) + (SpriteLibrary.getLettersUppercase().getFrame(0).getHeight());
@@ -104,7 +108,7 @@ public class SpriteOptions
     g.fillRect(sw, sh, w, h);
 
     // Draw the writing surface.
-    g.setColor(MENUBGCOLOR);
+    g.setColor(fgColor);
     g.fillRect(0, 0, w, h);
 
     return panel;
@@ -147,6 +151,11 @@ public class SpriteOptions
     drawScale = drawScaleOption.getSelectionNormalized();
     dimensions.setSize(WINDOWWIDTH_DEFAULT*drawScale, WINDOWHEIGHT_DEFAULT*drawScale);
     Driver.getInstance().updateView(); // Tell the driver to look at these settings again.
+
+    for( GraphicsOption go : allOptions )
+    {
+      go.storeCurrentValue();
+    }
   }
 
   /**
@@ -154,7 +163,11 @@ public class SpriteOptions
    */
   private static void resetConfigOptions()
   {
-    drawScaleOption.setSelectedOption(drawScale);
+    for( GraphicsOption go : allOptions )
+    {
+      go.loseChanges();
+    }
+
     highlightedOption.setSelectedOption(0);
     animHighlightedOption = 0;
   }
@@ -210,7 +223,8 @@ public class SpriteOptions
     
     // Draw the setting panel and the setting value.
     x = x + drawScale * (optionNamePanel.getWidth()+(3*letterWidth));
-    g.drawImage(optionSettingPanel, x, y, optionSettingPanel.getWidth()*drawScale, optionSettingPanel.getHeight()*drawScale, null);
+    BufferedImage settingPanel = (opt.isChanged()) ? optionSettingPanelChanged : optionSettingPanel;
+    g.drawImage(settingPanel, x, y, settingPanel.getWidth()*drawScale, settingPanel.getHeight()*drawScale, null);
     SpriteLibrary.drawText(g, opt.getSettingValueText(), x+drawBuffer, y+drawBuffer, drawScale);
   }
 
@@ -219,6 +233,7 @@ public class SpriteOptions
     public final String optionName;
     public final int minOption;
     private final boolean isBoolean;
+    private int storedValue = 0;
     public GraphicsOption(String name, int min, int max, int defaultValue)
     {
       super(max - min);
@@ -226,6 +241,7 @@ public class SpriteOptions
       optionName = name;
       isBoolean = false;
       setSelectedOption(defaultValue);
+      storedValue = defaultValue;
     }
     public GraphicsOption(String name)
     {
@@ -256,6 +272,18 @@ public class SpriteOptions
         text = Integer.toString(getSelectionNormalized());
       }
       return text;
+    }
+    public void storeCurrentValue()
+    {
+      storedValue = getSelectionNormalized();
+    }
+    public boolean isChanged()
+    {
+      return ( storedValue != getSelectionNormalized() );
+    }
+    public void loseChanges()
+    {
+      setSelectedOption(storedValue);
     }
   }
 }
