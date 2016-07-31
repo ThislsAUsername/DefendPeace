@@ -1,7 +1,7 @@
 package Terrain;
 
 /**
- * Tile is a flyweight class - each Terrain/Weather combination is instantiated only once.
+ * Environment is a flyweight class - each Terrain/Weather combination is instantiated only once.
  * Subsequent calls to retrieve that tile will receive the same copy.
  */
 public class Environment

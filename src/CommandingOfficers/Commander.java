@@ -24,6 +24,8 @@ public class Commander
   public static final int DEFAULTSTARTINGMONEY = 1000;
   public int money = 0;
   public int incomePerCity = 100;
+  public boolean isDefeated = false;
+  public Location HQLocation = null;
 
   public void doAbilityMinor()
   {}

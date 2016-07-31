@@ -1,6 +1,8 @@
 package Engine;
 
+import CommandingOfficers.Commander;
 import Terrain.GameMap;
+import Terrain.Location;
 import Units.Unit;
 
 /**
@@ -22,6 +24,8 @@ public class GameAction
   private int moveY;
   private int actX;
   private int actY;
+
+  private Commander targetCO = null;
 
   // Record origin state for animation purposes.
   private PriorState priorState = null;
@@ -55,6 +59,17 @@ public class GameAction
   public Unit getActor()
   {
     return unitActor;
+  }
+
+  /**
+   * Get the Commander that owns the unit or property
+   * that is being targeted by this action. Will be null
+   * if the action has no target unit or property.
+   * @return
+   */
+  public Commander getTargetCO()
+  {
+    return targetCO;
   }
 
   public ActionType getActionType()
@@ -165,6 +180,7 @@ public class GameAction
       case ATTACK:
         Unit unitTarget = gameMap.getLocation(actX, actY).getResident();
         priorState.setTargetHP((int) Math.ceil(unitTarget.getHP()));
+        targetCO = unitTarget.CO;
 
         if( unitTarget != null && unitActor.getDamage(unitTarget, moveX, moveY) != 0 )
         {
@@ -186,6 +202,7 @@ public class GameAction
       case CAPTURE:
         unitActor.isTurnOver = true;
         gameMap.moveUnit(unitActor, moveX, moveY);
+        targetCO = gameMap.getLocation(unitActor.x, unitActor.y).getOwner();
         unitActor.capture(gameMap.getLocation(unitActor.x, unitActor.y));
         break;
       case LOAD:

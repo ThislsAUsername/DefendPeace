@@ -1,8 +1,10 @@
 package Engine;
 
+import CommandingOfficers.Commander;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.Environment.Terrains;
 import UI.InputHandler;
 import UI.GameMenu;
 import UI.MapView;
@@ -15,7 +17,7 @@ public class MapController implements IController
 
   private enum InputMode
   {
-    MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION, ANIMATION
+    MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION, ANIMATION, EXITGAME
   };
 
   public enum MetaAction
@@ -25,6 +27,8 @@ public class MapController implements IController
 
   private InputMode inputMode;
 
+  boolean isGameOver;
+
   private Path currentMovePath;
 
   public MapController(GameInstance game, MapView view)
@@ -33,6 +37,7 @@ public class MapController implements IController
     myView = view;
     myView.setController(this);
     inputMode = InputMode.MAP;
+    isGameOver = false;
     myGame.setCursorLocation(6, 5);
   }
 
@@ -44,6 +49,7 @@ public class MapController implements IController
   public boolean handleInput(InputHandler.InputAction input)
   {
     System.out.println("handling " + input + " input in " + inputMode + " mode");
+    boolean exitMap = false;
     switch (inputMode)
     {
       case MAP:
@@ -71,11 +77,18 @@ public class MapController implements IController
           myView.cancelAnimation();
         }
         break;
+      case EXITGAME:
+        // Once the game is over, wait for an ENTER or BACK input to return to the main menu.
+        if( input == InputHandler.InputAction.BACK || input == InputHandler.InputAction.ENTER )
+        {
+          exitMap = true;
+        }
+        break;
       default:
         System.out.println("Invalid InputMode in MapController! " + inputMode);
     }
 
-    return false; // No way to end a game yet.
+    return exitMap;
   }
 
   /**
@@ -218,16 +231,7 @@ public class MapController implements IController
         // If the action is completely constructed, execute it, else get the missing info.
         if( myView.currentAction.isReadyToExecute() )
         {
-          if( myView.currentAction.execute(myGame.gameMap) )
-          {
-            changeInputMode(InputMode.ANIMATION);
-            myView.animate(myView.currentAction);
-          }
-          else
-          {
-            System.out.println("ERROR! Action failed to execute!");
-            changeInputMode(InputMode.MAP); // try and reset;
-          }
+          executeGameAction( myView.currentAction );
         }
         else
         {
@@ -273,18 +277,7 @@ public class MapController implements IController
 
           if( myView.currentAction.isReadyToExecute() )
           {
-            // Do the thing.
-            if( myView.currentAction.execute(myGame.gameMap) )
-            {
-              // Kick it off to the animator.
-              changeInputMode(InputMode.ANIMATION);
-              myView.animate(myView.currentAction);
-            }
-            else
-            {
-              System.out.println("ERROR! Action failed to execute!");
-              changeInputMode(InputMode.MAP); // try and reset;
-            }
+            executeGameAction( myView.currentAction );
           }
           else
           {
@@ -438,6 +431,12 @@ public class MapController implements IController
       case ANIMATION:
         myGame.gameMap.clearAllHighlights();
         break;
+      case EXITGAME:
+        myView.currentAction = null;
+        myGame.gameMap.clearAllHighlights();
+        myView.currentMenu = null;
+        currentMovePath = null;
+        break;
       default:
         System.out.println("WARNING! MapController.changeInputMode was given an invalid InputMode " + inputMode);
     }
@@ -469,6 +468,110 @@ public class MapController implements IController
     }
   }
 
+  /**
+   * Execute the provided action and evaluate any aftermath.
+   */
+  private void executeGameAction(GameAction action)
+  {
+    // Do the thing.
+    if( action.execute(myGame.gameMap) )
+    {
+      // Check if there are any game-ending conditions.
+      switch( action.getActionType() )
+      {
+        case ATTACK:
+          // A fight happened. See if either CO is out of units.
+          if( action.getActor().CO.units.isEmpty() )
+          {
+            // CO is out of units. Too bad.
+            defeatCommander( action.getActor().CO );
+          }
+          // Now check for the defender.
+          if( action.getTargetCO().units.isEmpty() )
+          {
+            // CO is out of units. Too bad.
+            defeatCommander( action.getTargetCO() );
+          }
+          break;
+        case CAPTURE:
+          // Something was captured. Figure out who might be losing a property
+          Commander targetCO = action.getTargetCO();
+
+          // If the targetCO is non-null (the property being captured is non-neutral),
+          //  then verify whether the defending CO still owns his HQ.
+          if( targetCO != null && targetCO.HQLocation.getOwner() != targetCO )
+          {
+            // If targetCO no longer owns his HQ, too bad.
+            defeatCommander( targetCO );
+          }
+          break;
+        case INVALID:
+        case LOAD:
+        case UNLOAD:
+        case WAIT:
+          default:
+            // No potentially game-ending state can be reached with these actions.
+      }
+
+      // Count the number of COs that are left.
+      int activeNum = 0;
+      for( int i = 0; i < myGame.commanders.length; ++i)
+      {
+        if( !myGame.commanders[i].isDefeated )
+        {
+          activeNum++;
+        }
+      }
+
+      // If fewer than two COs yet survive, the game is over.
+      if(activeNum < 2)
+      {
+        isGameOver = true;
+      }
+
+      // Kick the action off to the animator.
+      changeInputMode(InputMode.ANIMATION);
+      myView.animate(myView.currentAction); // Set up the animation for this action.
+    }
+    else
+    {
+      System.out.println("ERROR! Action failed to execute!");
+      changeInputMode(InputMode.MAP); // try and reset;
+    }
+  }
+
+  private void defeatCommander(Commander defeatedCO)
+  {
+    // Set the flag so that we know he's toast.
+    defeatedCO.isDefeated = true;
+
+    // Loop through the map and clean up any of the defeated CO's assets.
+    GameMap map = myGame.gameMap;
+    for(int y = 0; y < map.mapHeight; ++y)
+    {
+      for(int x = 0; x < map.mapWidth; ++x)
+      {
+        Location loc = map.getLocation(x, y);
+
+        // Remove any units that remain.
+        if(loc.getResident() != null && loc.getResident().CO == defeatedCO)
+        {
+          loc.setResident(null);
+        }
+        defeatedCO.units.clear(); // Remove from the CO array too, just to be thorough.
+
+        // Downgrade the defeated commander's HQ to a city.
+        defeatedCO.HQLocation.setEnvironment(Environment.getTile(Terrains.CITY, defeatedCO.HQLocation.getEnvironment().weatherType));
+
+        // Release control of any buildings he owned.
+        if(loc.isCaptureable() && loc.getOwner() == defeatedCO)
+        {
+          loc.setOwner(null);
+        }
+      }
+    }
+  }
+
   public Path getContemplatedMove()
   {
     return currentMovePath;
@@ -476,6 +579,16 @@ public class MapController implements IController
 
   public void animationEnded()
   {
-    changeInputMode(InputMode.MAP);
+    if( isGameOver )
+    {
+      // The last action ended the game, and the animation just finished.
+      //  Now we wait for one more keypress before going back to the main menu.
+      changeInputMode( inputMode.EXITGAME );
+    }
+    else
+    {
+      // The animation for the last action just completed. Back to normal input mode.
+      changeInputMode(InputMode.MAP);
+    }
   }
 }

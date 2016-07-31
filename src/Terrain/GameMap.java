@@ -1,6 +1,7 @@
 package Terrain;
 
 import Engine.XYCoord;
+import Terrain.Environment.Terrains;
 import Terrain.Maps.IMapBuilder;
 import Units.Unit;
 
@@ -40,12 +41,28 @@ public class GameMap
       for(int i = 0; i < mapInfo.COProperties[co].length; ++i)
       {
         // If the location can be owned, make the assignment.
-        XYCoord loc = mapInfo.COProperties[co][i];
-        int x = (int)loc.xCoord;
-        int y = (int)loc.yCoord;
-        if(map[x][y].isCaptureable())
+        XYCoord coord = mapInfo.COProperties[co][i];
+        int x = (int)coord.xCoord;
+        int y = (int)coord.yCoord;
+        Location location = map[x][y];
+        if(location.isCaptureable())
         {
-          map[x][y].setOwner(COs[co]);
+          // Check if this location holds an HQ.
+          if( map[x][y].getEnvironment().terrainType == Terrains.HQ )
+          {
+            // If the CO has no HQ yet, assign this one.
+            if( COs[co].HQLocation == null )
+            {
+              System.out.println("Assigning HQ at " + x + ", " + y + " to " + COs[co]);
+              COs[co].HQLocation = location;
+            }
+            // If the CO does have an HQ, turn this location into a city.
+            else
+            {
+              location.setEnvironment(Environment.getTile(Terrains.CITY, location.getEnvironment().weatherType));
+            }
+          }
+          location.setOwner(COs[co]);
         }
         else
         {
