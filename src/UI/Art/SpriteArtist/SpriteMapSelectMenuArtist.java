@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import Terrain.Environment.Terrains;
 import Terrain.MapInfo;
 import Terrain.MapLibrary;
-import UI.GameSetupController;
+import UI.MapSelectController;
 
-public class SpriteGameSetupMenuArtist
+public class SpriteMapSelectMenuArtist
 {
   private static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
   private static final Color MENUBGCOLOR = new Color(234, 204, 154);
@@ -26,7 +26,7 @@ public class SpriteGameSetupMenuArtist
 
   private static MapInfo selectedMapInfo = null;
 
-  public static void draw(Graphics g, GameSetupController gameSetup)
+  public static void draw(Graphics g, MapSelectController gameSetup)
   {
     if(!gameSetup.inSubmenu())
     { // Still in Game Setup. We draw.
@@ -38,7 +38,7 @@ public class SpriteGameSetupMenuArtist
     }
   }
 
-  private static void drawMapSelectMenu(Graphics g, GameSetupController gameSetup)
+  private static void drawMapSelectMenu(Graphics g, MapSelectController gameSetup)
   {
     Dimension dimensions = SpriteOptions.getScreenDimensions();
 

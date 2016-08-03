@@ -18,7 +18,7 @@ public class MainUIController implements IController
 
   private OptionSelector optionSelector = new OptionSelector(numMenuOptions);
 
-  private GameSetupController gameSetup = new GameSetupController();
+  private MapSelectController gameSetup = new MapSelectController();
   
   public SubMenu getSubMenuType()
   {
@@ -30,7 +30,7 @@ public class MainUIController implements IController
     return optionSelector;
   }
   
-  public GameSetupController getGameSetupController()
+  public MapSelectController getGameSetupController()
   {
     return gameSetup;
   }

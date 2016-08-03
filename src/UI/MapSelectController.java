@@ -5,7 +5,7 @@ import UI.InputHandler.InputAction;
 import Engine.IController;
 import Engine.OptionSelector;
 
-public class GameSetupController implements IController
+public class MapSelectController implements IController
 {
   private OptionSelector optionSelector = new OptionSelector( MapLibrary.getMapList().size() );
   private COSetupController coSelectMenu;

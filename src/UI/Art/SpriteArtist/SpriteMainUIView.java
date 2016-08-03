@@ -39,7 +39,7 @@ public class SpriteMainUIView implements IView
     switch(controller.getSubMenuType())
     {
       case GAME_SETUP:
-        SpriteGameSetupMenuArtist.draw(g, controller.getGameSetupController());
+        SpriteMapSelectMenuArtist.draw(g, controller.getGameSetupController());
         break;
       case MAIN:
         renderMainMenu(g);
