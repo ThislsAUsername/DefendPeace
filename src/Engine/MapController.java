@@ -22,8 +22,9 @@ public class MapController implements IController
 
   public enum MetaAction
   {
-    END_TURN
+    QUIT_GAME, END_TURN
   };
+  private MetaAction[] metaActions = {MetaAction.QUIT_GAME, MetaAction.END_TURN};
 
   private InputMode inputMode;
 
@@ -348,8 +349,13 @@ public class MapController implements IController
         if( action == MetaAction.END_TURN )
         {
           myGame.turn();
+          changeInputMode(InputMode.MAP);
         }
-        changeInputMode(InputMode.MAP);
+        else if( action == MetaAction.QUIT_GAME)
+        {
+          isGameOver = true;
+          changeInputMode( InputMode.EXITGAME );
+        }
         break;
       case BACK:
         changeInputMode(InputMode.MAP);
@@ -425,8 +431,7 @@ public class MapController implements IController
         break;
       case METAACTION:
         myGame.gameMap.clearAllHighlights();
-        MetaAction[] actions = { MetaAction.END_TURN };
-        myView.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, actions);
+        myView.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, metaActions);
         break;
       case ANIMATION:
         myGame.gameMap.clearAllHighlights();
@@ -583,7 +588,7 @@ public class MapController implements IController
     {
       // The last action ended the game, and the animation just finished.
       //  Now we wait for one more keypress before going back to the main menu.
-      changeInputMode( inputMode.EXITGAME );
+      changeInputMode( InputMode.EXITGAME );
     }
     else
     {
