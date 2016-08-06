@@ -3,7 +3,6 @@ package UI.Art.SpriteArtist;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 
 import CommandingOfficers.CommanderLibrary;
@@ -17,8 +16,21 @@ public class SpriteCOSetupArtist
 
   private static double animHighlightedPlayer = 0;
 
+//  private static long lastDrawTime = 0;
+
+  private static COSetupController myControl = null;
+
   public static void draw(Graphics g, MapInfo mapInfo, COSetupController control)
   {
+    // If control has changed, we just entered a new CO setup screen. We don't want to
+    //   animate a menu transition based on the last time we were choosing COs, since
+    //   this class is static, but the CO select screen is not.
+    if(myControl != control)
+    {
+      animHighlightedPlayer = control.getHighlightedPlayer();
+      myControl = control;
+    }
+
     // Get the draw space
     Dimension dimensions = SpriteOptions.getScreenDimensions();
 
@@ -52,7 +64,7 @@ public class SpriteCOSetupArtist
 
     /////////////////// CO Portraits ///////////////////////
     int numCOs = mapInfo.getNumCos();
-    int highlightedPlayer = control.getHighlightedPlayer();
+    int highlightedPlayer = myControl.getHighlightedPlayer();
 
     // Figure out where to draw each player's CO portrait.
     int drawYCenter = ((dimensions.height - vspace) / 2) + vspace;
@@ -77,8 +89,8 @@ public class SpriteCOSetupArtist
       // Only draw CO portraits that will be on screen.
       if( Math.abs(highlightedPlayer - i) < Math.ceil(numCosOnScreen / 2))
       {
-        int co = control.getPlayerCo(i);
-        int col = control.getPlayerColor(i);
+        int co = myControl.getPlayerCo(i);
+        int col = myControl.getPlayerColor(i);
         // Draw the box, the color, and the CO portrait.
         drawCoPortrait(g, co, col, drawXCenter, drawYCenter);
       }
