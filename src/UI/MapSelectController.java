@@ -37,11 +37,18 @@ public class MapSelectController implements IController
       exitMenu = coSelectMenu.handleInput(action);
       if(exitMenu)
       {
+        isInSubmenu = false;
+
+        // If BACK was chosen for the child menu, then we take control again (if
+        // the child menu exited via entering a game, then action will be ENTER).
         if(action == InputAction.BACK)
         {
-          // BACK was chosen for the child menu. We take control again.
+          // Don't pass control back up the chain.
           exitMenu = false;
-          isInSubmenu = false;
+        }
+        else
+        {
+          optionSelector.setSelectedOption(0);
         }
       }
     }
@@ -49,7 +56,6 @@ public class MapSelectController implements IController
     {
       exitMenu = handleMapSelectInput(action);
     }
-
     return exitMenu;
   }
 
