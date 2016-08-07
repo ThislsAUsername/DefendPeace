@@ -17,7 +17,7 @@ public class SpriteMainUIView implements IView
   MainUIController controller = null;
 
   // Note that menuBGColors must be defined to match MainController.menuOptions.
-  private Color[] menuBGColors = {new Color(218,38,2), new Color(111,218,2), new Color(206,224,234)};
+  private Color[] menuBGColors = {new Color(218,38,2), new Color(30,218,2), new Color(206,224,234)};
   int highestOption = menuBGColors.length - 1;
 
   private double animHighlightedOption = 0;
