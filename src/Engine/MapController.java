@@ -17,7 +17,7 @@ public class MapController implements IController
 
   private enum InputMode
   {
-    MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION, ANIMATION, EXITGAME
+    MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION, CONFIRMEXIT, ANIMATION, EXITGAME
   };
 
   public enum MetaAction
@@ -25,6 +25,12 @@ public class MapController implements IController
     QUIT_GAME, END_TURN
   };
   private MetaAction[] metaActions = {MetaAction.QUIT_GAME, MetaAction.END_TURN};
+
+  private enum ConfirmExit
+  {
+    EXIT_TO_MAIN_MENU, QUIT_APPLICATION
+  };
+  private ConfirmExit[] confirmExitOptions = {ConfirmExit.EXIT_TO_MAIN_MENU, ConfirmExit.QUIT_APPLICATION};
 
   private InputMode inputMode;
 
@@ -70,6 +76,9 @@ public class MapController implements IController
         break;
       case METAACTION:
         handleMetaActionMenuInput(input);
+        break;
+      case CONFIRMEXIT:
+        handleConfirmExitMenuInput(input);
         break;
       case ANIMATION:
         if( input == InputHandler.InputAction.BACK || input == InputHandler.InputAction.ENTER )
@@ -353,12 +362,43 @@ public class MapController implements IController
         }
         else if( action == MetaAction.QUIT_GAME)
         {
-          isGameOver = true;
-          changeInputMode( InputMode.EXITGAME );
+          changeInputMode( InputMode.CONFIRMEXIT );
         }
         break;
       case BACK:
         changeInputMode(InputMode.MAP);
+        break;
+      case NO_ACTION:
+        break;
+      default:
+        myView.currentMenu.handleMenuInput(input);
+    }
+  }
+
+  private void handleConfirmExitMenuInput(InputHandler.InputAction input)
+  {
+    if( myView.currentMenu == null )
+    {
+      System.out.println("Error! MapController.handleMetaActionMenuInput() called when currentMenu is null!");
+    }
+
+    switch (input)
+    {
+      case ENTER:
+        ConfirmExit action = (ConfirmExit) myView.currentMenu.getSelectedAction();
+
+        if( action == ConfirmExit.EXIT_TO_MAIN_MENU )
+        {
+          isGameOver = true;
+          changeInputMode( InputMode.EXITGAME );
+        }
+        else if( action == ConfirmExit.QUIT_APPLICATION )
+        {
+          System.exit(0);
+        }
+        break;
+      case BACK:
+        changeInputMode(InputMode.METAACTION);
         break;
       case NO_ACTION:
         break;
@@ -432,6 +472,9 @@ public class MapController implements IController
       case METAACTION:
         myGame.gameMap.clearAllHighlights();
         myView.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, metaActions);
+        break;
+      case CONFIRMEXIT:
+        myView.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, confirmExitOptions);
         break;
       case ANIMATION:
         myGame.gameMap.clearAllHighlights();
