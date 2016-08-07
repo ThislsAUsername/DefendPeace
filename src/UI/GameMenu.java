@@ -1,5 +1,7 @@
 package UI;
 
+import Engine.OptionSelector;
+
 public class GameMenu
 {
 
@@ -11,12 +13,13 @@ public class GameMenu
   };
 
   public final MenuType menuType;
-  private int selectedOption = 0;
+  private OptionSelector optionSelector;
 
   public GameMenu(MenuType menuType, Enum[] options)
   {
     this.menuType = menuType;
     this.options = options;
+    optionSelector = new OptionSelector(options.length);
   }
 
   public void handleMenuInput(InputHandler.InputAction action)
@@ -24,16 +27,8 @@ public class GameMenu
     switch (action)
     {
       case UP:
-        if( selectedOption > 0 )
-        {
-          selectedOption--;
-        }
-        break;
       case DOWN:
-        if( selectedOption < options.length - 1 )
-        {
-          selectedOption++;
-        }
+        optionSelector.handleInput( action );
         break;
       case LEFT:
       case RIGHT:
@@ -50,7 +45,7 @@ public class GameMenu
    */
   public int getSelectionNumber()
   {
-    return selectedOption;
+    return optionSelector.getSelectionNormalized();
   }
 
   /**
@@ -58,7 +53,7 @@ public class GameMenu
    */
   public Enum getSelectedAction()
   {
-    return options[selectedOption];
+    return options[optionSelector.getSelectionNormalized()];
   }
 
   /**
