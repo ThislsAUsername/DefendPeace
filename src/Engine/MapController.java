@@ -5,6 +5,7 @@ import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.Environment.Terrains;
+import UI.CO_InfoMenu;
 import UI.InputHandler;
 import UI.GameMenu;
 import UI.MapView;
@@ -17,14 +18,14 @@ public class MapController implements IController
 
   private enum InputMode
   {
-    MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION, CONFIRMEXIT, ANIMATION, EXITGAME
+    MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION, CONFIRMEXIT, ANIMATION, EXITGAME, CO_INFO
   };
 
   public enum MetaAction
   {
-    QUIT_GAME, END_TURN
+    CO_INFO, QUIT_GAME, END_TURN
   };
-  private MetaAction[] metaActions = {MetaAction.QUIT_GAME, MetaAction.END_TURN};
+  private MetaAction[] metaActions = {MetaAction.CO_INFO, MetaAction.QUIT_GAME, MetaAction.END_TURN};
 
   private enum ConfirmExit
   {
@@ -38,6 +39,11 @@ public class MapController implements IController
 
   private Path currentMovePath;
 
+  // We use a different method for the CO Info menu than the others (MetaAction, etc) because
+  // it has two different axes of control, and because it has no actions that can result.
+  public boolean isInCoInfoMenu = false;
+  private CO_InfoMenu coInfoMenu;
+
   public MapController(GameInstance game, MapView view)
   {
     myGame = game;
@@ -46,6 +52,7 @@ public class MapController implements IController
     inputMode = InputMode.MAP;
     isGameOver = false;
     myGame.setCursorLocation(6, 5);
+    coInfoMenu = new CO_InfoMenu( myGame.commanders.length );
   }
 
   /**
@@ -79,6 +86,13 @@ public class MapController implements IController
         break;
       case CONFIRMEXIT:
         handleConfirmExitMenuInput(input);
+        break;
+      case CO_INFO:
+        if( coInfoMenu.handleInput( input ) )
+        {
+          isInCoInfoMenu = false;
+          changeInputMode( InputMode.METAACTION );
+        }
         break;
       case ANIMATION:
         if( input == InputHandler.InputAction.BACK || input == InputHandler.InputAction.ENTER )
@@ -355,7 +369,12 @@ public class MapController implements IController
       case ENTER:
         MetaAction action = (MetaAction) myView.currentMenu.getSelectedAction();
 
-        if( action == MetaAction.END_TURN )
+        if( action == MetaAction.CO_INFO )
+        {
+          isInCoInfoMenu = true;
+          changeInputMode( InputMode.CO_INFO );
+        }
+        else if( action == MetaAction.END_TURN )
         {
           myGame.turn();
           changeInputMode(InputMode.MAP);
@@ -484,6 +503,9 @@ public class MapController implements IController
         myGame.gameMap.clearAllHighlights();
         myView.currentMenu = null;
         currentMovePath = null;
+        break;
+      case CO_INFO:
+        // No action needed.
         break;
       default:
         System.out.println("WARNING! MapController.changeInputMode was given an invalid InputMode " + inputMode);
@@ -638,5 +660,10 @@ public class MapController implements IController
       // The animation for the last action just completed. Back to normal input mode.
       changeInputMode(InputMode.MAP);
     }
+  }
+
+  public CO_InfoMenu getCoInfoMenu()
+  {
+    return coInfoMenu;
   }
 }

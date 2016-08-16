@@ -7,8 +7,10 @@ import java.util.HashMap;
 
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
+import Engine.MapController;
 import Terrain.Environment;
 import Terrain.GameMap;
+import UI.CO_InfoMenu;
 import UI.MapView;
 import Units.Unit;
 
@@ -101,58 +103,79 @@ public class SpriteMapView extends MapView
   @Override
   public void render(Graphics g)
   {
-    // Draw base terrain
-    mapArtist.drawBaseTerrain(g);
-
-    // Draw units, buildings, trees, etc.
-    drawUnitsAndMapObjects(g);
-
-    // Draw Unit HP icons on top of everything, to make sure they are seen clearly.
-    unitArtist.drawUnitHPIcons(g);
-
-    // Apply any relevant map highlight.
-    mapArtist.drawHighlights(g);
-
-    // TODO: Consider moving the contemplated move inside of the action (in MapController)
-    //       to make the interface more consistent?
-    // Draw the movement arrow if the user is contemplating a move.
-    if( mapController.getContemplatedMove() != null )
+    // If we are in the CO_INFO menu, don't draw the map, etc.
+    if( mapController.isInCoInfoMenu )
     {
-      mapArtist.drawMovePath(g, mapController.getContemplatedMove());
-    }
-    // Draw the movement arrow if the user is contemplating an action (but not once the action commences).
-    if( null != currentAction && null != currentAction.getMovePath() && null == currentAnimation )
-    {
-      mapArtist.drawMovePath(g, currentAction.getMovePath());
-    }
-    // Draw the acting unit so it's on top of everything.
-    if( null != currentAction ) // && currentAnimation == null) // If the unit should animate when acting.
-    {
-      Unit u = currentAction.getActor();
-      unitArtist.drawUnit(g, u, u.x, u.y, currentAnimIndex);
-    }
+      // Get the CO info menu.
+      CO_InfoMenu menu = mapController.getCoInfoMenu();
 
-    if( currentAnimation != null )
-    {
-      // Animate until it tells you it's done.
-      if( currentAnimation.animate(g) )
-      {
-        currentAction = null;
-        currentAnimation = null;
-        mapController.animationEnded();
-      }
-    }
-    else if( currentMenu == null )
-    {
-      mapArtist.drawCursor(g);
+      // Get the current menu selections.
+      int co = menu.getCoSelection();
+      int page = menu.getPageSelection();
+
+      // TODO: Create the other CO info pages (powers, stats, etc).
+
+      // Draw the background.
+
+      // Draw the commander art.
+      g.drawImage(SpriteLibrary.getCommanderSprites(myGame.commanders[co].coInfo.cmdrEnum).body,
+          0, 0, mapViewWidth, mapViewHeight, null);
     }
     else
-    {
-      menuArtist.drawMenu(g);
-    }
+    { // No overlay is being shown - draw the map, units, etc.
+      // Draw base terrain
+      mapArtist.drawBaseTerrain(g);
 
-    // Draw the Commander overlay with available funds.
-    drawCommanderOverlay(g);
+      // Draw units, buildings, trees, etc.
+      drawUnitsAndMapObjects(g);
+
+      // Draw Unit HP icons on top of everything, to make sure they are seen clearly.
+      unitArtist.drawUnitHPIcons(g);
+
+      // Apply any relevant map highlight.
+      mapArtist.drawHighlights(g);
+
+      // TODO: Consider moving the contemplated move inside of the action (in MapController)
+      //       to make the interface more consistent?
+      // Draw the movement arrow if the user is contemplating a move.
+      if( mapController.getContemplatedMove() != null )
+      {
+        mapArtist.drawMovePath(g, mapController.getContemplatedMove());
+      }
+      // Draw the movement arrow if the user is contemplating an action (but not once the action commences).
+      if( null != currentAction && null != currentAction.getMovePath() && null == currentAnimation )
+      {
+        mapArtist.drawMovePath(g, currentAction.getMovePath());
+      }
+      // Draw the acting unit so it's on top of everything.
+      if( null != currentAction ) // && currentAnimation == null) // If the unit should animate when acting.
+      {
+        Unit u = currentAction.getActor();
+        unitArtist.drawUnit(g, u, u.x, u.y, currentAnimIndex);
+      }
+
+      if( currentAnimation != null )
+      {
+        // Animate until it tells you it's done.
+        if( currentAnimation.animate(g) )
+        {
+          currentAction = null;
+          currentAnimation = null;
+          mapController.animationEnded();
+        }
+      }
+      else if( currentMenu == null )
+      {
+        mapArtist.drawCursor(g);
+      }
+      else
+      {
+        menuArtist.drawMenu(g);
+      }
+
+      // Draw the Commander overlay with available funds.
+      drawCommanderOverlay(g);
+    } // End of case for no overlay menu.
   }
 
   /**
