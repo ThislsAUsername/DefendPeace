@@ -35,7 +35,7 @@ public class MapController implements IController
 
   private InputMode inputMode;
 
-  boolean isGameOver;
+  private boolean isGameOver;
 
   private Path currentMovePath;
 
@@ -85,7 +85,8 @@ public class MapController implements IController
         handleMetaActionMenuInput(input);
         break;
       case CONFIRMEXIT:
-        handleConfirmExitMenuInput(input);
+        // If they exit via menu, don't hang around for the victory animation.
+        exitMap = handleConfirmExitMenuInput(input);
         break;
       case CO_INFO:
         if( coInfoMenu.handleInput( input ) )
@@ -394,8 +395,9 @@ public class MapController implements IController
     }
   }
 
-  private void handleConfirmExitMenuInput(InputHandler.InputAction input)
+  private boolean handleConfirmExitMenuInput(InputHandler.InputAction input)
   {
+    boolean quitGame = false;
     if( myView.currentMenu == null )
     {
       System.out.println("Error! MapController.handleMetaActionMenuInput() called when currentMenu is null!");
@@ -408,11 +410,12 @@ public class MapController implements IController
 
         if( action == ConfirmExit.EXIT_TO_MAIN_MENU )
         {
-          isGameOver = true;
-          changeInputMode( InputMode.EXITGAME );
+          // Go back to the main menu.
+          quitGame = true;
         }
         else if( action == ConfirmExit.QUIT_APPLICATION )
         {
+          // Exit the application entirely.
           System.exit(0);
         }
         break;
@@ -424,6 +427,7 @@ public class MapController implements IController
       default:
         myView.currentMenu.handleMenuInput(input);
     }
+    return quitGame;
   }
 
   /**
