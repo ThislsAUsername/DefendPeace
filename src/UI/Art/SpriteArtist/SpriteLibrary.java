@@ -90,6 +90,10 @@ public class SpriteLibrary
   // Text images for main menu options.
   private static Sprite menuOptionsSprite = null;
 
+  // Victory/Defeat text for game end.
+  private static BufferedImage gameOverDefeatText = null;
+  private static BufferedImage gameOverVictoryText = null;
+
   /**
    * Retrieve (loading if needed) the sprites associated with the given terrain type. For ownable terrain types
    * (e.g. cities), the unowned variant of the sprite will be returned.
@@ -632,6 +636,23 @@ public class SpriteLibrary
     return menuOptionsSprite;
   }
 
+  public static BufferedImage getGameOverDefeatText()
+  {
+    if(null == gameOverDefeatText)
+    {
+      gameOverDefeatText = loadSpriteSheetFile("res/ui/defeat.png");
+    }
+    return gameOverDefeatText;
+  }
+
+  public static BufferedImage getGameOverVictoryText()
+  {
+    if(null == gameOverVictoryText)
+    {
+      gameOverVictoryText = loadSpriteSheetFile("res/ui/victory.png");
+    }
+    return gameOverVictoryText;
+  }
   ///////////////////////////////////////////////////////////////////
   //  Below is code for loading Commander sprite images.
   ///////////////////////////////////////////////////////////////////

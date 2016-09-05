@@ -85,4 +85,8 @@ public abstract class MapView implements IView
   {
     return unitMoveSpeedMsPerTile;
   }
+  public void gameIsOver()
+  {
+    // Do nothing by default. Subclasses can override.
+  }
 }

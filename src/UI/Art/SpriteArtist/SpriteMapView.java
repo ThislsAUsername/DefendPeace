@@ -307,4 +307,21 @@ public class SpriteMapView extends MapView
 
     return sb.toString();
   }
+
+  /**
+   * To be called once all but one faction has been eliminated.
+   * Animates the victory/defeat overlay.
+   */
+  public void gameIsOver()
+  {
+    if( currentAnimation != null )
+    {
+      // Delete the previous animation if one exists (which it shouldn't).
+      currentAnimation.cancel();
+      currentAnimation = null;
+    }
+
+    // Create a new animation to show the game results.
+    currentAnimation = new SpriteGameEndAnimation(myGame.commanders);
+  }
 }

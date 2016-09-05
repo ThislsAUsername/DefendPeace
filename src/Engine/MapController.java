@@ -653,11 +653,14 @@ public class MapController implements IController
 
   public void animationEnded()
   {
-    if( isGameOver )
+    if( isGameOver && inputMode != InputMode.EXITGAME )
     {
       // The last action ended the game, and the animation just finished.
       //  Now we wait for one more keypress before going back to the main menu.
       changeInputMode( InputMode.EXITGAME );
+
+      // Signal the view to animate the victory/defeat overlay.
+      myView.gameIsOver();
     }
     else
     {
