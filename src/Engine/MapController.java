@@ -62,7 +62,6 @@ public class MapController implements IController
   @Override
   public boolean handleInput(InputHandler.InputAction input)
   {
-    System.out.println("handling " + input + " input in " + inputMode + " mode");
     boolean exitMap = false;
     switch (inputMode)
     {
@@ -323,7 +322,6 @@ public class MapController implements IController
   /** We just selected a production building - what can it do? */
   private void handleProductionMenuInput(InputHandler.InputAction input)
   {
-    System.out.println("handleProduction");
     if( myView.currentMenu == null )
     {
       System.out.println("Error! MapController.handleProductionMenuInput() called when currentMenu is null!");
@@ -336,7 +334,6 @@ public class MapController implements IController
 
         if( myGame.activeCO.getUnitModel(unit).moneyCost <= myGame.activeCO.money )
         {
-          System.out.println("creating unit");
           myGame.activeCO.money -= myGame.activeCO.getUnitModel(unit).moneyCost;
           Unit u = new Unit(myGame.activeCO, myGame.activeCO.getUnitModel(unit));
           myGame.activeCO.units.add(u);
