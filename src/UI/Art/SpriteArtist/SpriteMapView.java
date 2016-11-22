@@ -7,7 +7,6 @@ import java.util.HashMap;
 
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
-import Engine.MapController;
 import Terrain.Environment;
 import Terrain.GameMap;
 import UI.CO_InfoMenu;

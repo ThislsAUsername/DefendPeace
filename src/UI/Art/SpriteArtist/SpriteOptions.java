@@ -8,7 +8,6 @@ import java.awt.image.BufferedImage;
 import Engine.Driver;
 import Engine.OptionSelector;
 import UI.InputHandler;
-import UI.InputHandler.InputAction;
 
 public class SpriteOptions
 {
