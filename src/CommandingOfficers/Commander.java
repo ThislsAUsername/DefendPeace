@@ -21,9 +21,9 @@ public class Commander
   public UnitModel[] unitModels;
   public ArrayList<COModifier> modifiers;
   public Color myColor;
-  public static final int DEFAULTSTARTINGMONEY = 1000;
+  public static final int DEFAULTSTARTINGMONEY = 10000;
   public int money = 0;
-  public int incomePerCity = 100;
+  public int incomePerCity = 1000;
   public boolean isDefeated = false;
   public Location HQLocation = null;
 
