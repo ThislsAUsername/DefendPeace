@@ -1,5 +1,7 @@
 package UI.Art.FillRectArtist;
 
+import java.awt.Dimension;
+
 import UI.InputHandler.InputAction;
 import UI.MainUIController;
 import UI.MapView;
@@ -32,5 +34,12 @@ public class FillRectEngine implements GraphicsEngine
   {
     // FillRectEngine does not support any options.
     return true;
+  }
+
+  @Override
+  public Dimension getScreenDimensions()
+  {
+    // TODO: hard-coding is bad.
+    return new Dimension(1280, 960);
   }
 }

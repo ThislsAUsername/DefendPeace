@@ -1,5 +1,7 @@
 package Engine;
 
+import java.awt.Dimension;
+
 import UI.InputHandler;
 import UI.MainUIController;
 import UI.MapView;
@@ -16,4 +18,9 @@ public interface GraphicsEngine
    * @return true if the input triggers the menu to exit.
    */
   public boolean handleOptionsInput(InputHandler.InputAction action);
+
+  /**
+   * @return The current dimensions of the game's drawing area.
+   */
+  public Dimension getScreenDimensions();
 }

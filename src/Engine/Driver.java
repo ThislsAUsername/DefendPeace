@@ -75,7 +75,7 @@ public class Driver implements ActionListener, KeyListener
 
   public void updateView()
   {
-    gameWindow.getContentPane().setSize(SpriteOptions.getScreenDimensions());
+    gameWindow.getContentPane().setSize(gameGraphics.getScreenDimensions());
     gameWindow.pack();
   }
 
