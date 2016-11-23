@@ -39,7 +39,7 @@ public class SpriteMiniMapArtist
    */
   public static BufferedImage getMapImage(MapInfo mapInfo)
   {
-    if( !mapImages.containsKey(mapImages) )
+    if( !mapImages.containsKey(mapInfo) )
     {
       // If we don't already have an image, generate and store it for later.
       mapImages.put(mapInfo, generateMapImage(mapInfo));
