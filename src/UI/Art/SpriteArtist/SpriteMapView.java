@@ -128,8 +128,8 @@ public class SpriteMapView extends MapView
       // Draw units, buildings, trees, etc.
       drawUnitsAndMapObjects(g);
 
-      // Draw Unit HP icons on top of everything, to make sure they are seen clearly.
-      unitArtist.drawUnitHPIcons(g);
+      // Draw Unit icons on top of everything, to make sure they are seen clearly.
+      unitArtist.drawUnitIcons(g);
 
       // Apply any relevant map highlight.
       mapArtist.drawHighlights(g);

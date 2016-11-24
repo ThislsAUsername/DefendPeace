@@ -157,7 +157,7 @@ public class UnitSpriteSet
     }
   }
 
-  public void drawUnitHP(Graphics g, Commander activeCO, Unit u, int drawX, int drawY, int drawScale)
+  public void drawUnitIcons(Graphics g, Commander activeCO, Unit u, int drawX, int drawY, int drawScale)
   {
     int unitHeight = turnDone.getFrame(0).getHeight();
 
@@ -167,6 +167,24 @@ public class UnitSpriteSet
       BufferedImage num = SpriteLibrary.getMapUnitHPSprites().getFrame(u.getHP());
       g.drawImage(num, drawX, drawY + ((unitHeight * drawScale) / 2), num.getWidth() * drawScale, num.getHeight() * drawScale,
           null);
+    }
+
+    // Draw the transport icon if the unit is holding another unit.
+    if( u.heldUnits != null && !u.heldUnits.isEmpty() )
+    {
+      // Get the icon and characterize the draw space.
+      BufferedImage cargoIcon = SpriteLibrary.getCargoIcon();
+      int iconX = drawX + ((unitHeight * drawScale) / 2);
+      int iconY = drawY + ((unitHeight * drawScale) / 2);
+      int iconW = cargoIcon.getWidth() * drawScale;
+      int iconH = cargoIcon.getHeight() * drawScale;
+
+      // Draw team-color background for the icon.
+      g.setColor( u.CO.myColor );
+      g.fillRect( iconX, iconY, iconW, iconH);
+
+      // Draw transport icon.
+      g.drawImage( cargoIcon, iconX, iconY, iconW, iconH, null );
     }
   }
 }

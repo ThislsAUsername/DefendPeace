@@ -20,7 +20,7 @@ public class SpriteUnitArtist
     drawScale = SpriteOptions.getDrawScale();
   }
 
-  public void drawUnitHPIcons(Graphics g)
+  public void drawUnitIcons(Graphics g)
   {
     // Get an easy reference to the map.
     GameMap gameMap = myGame.gameMap;
@@ -37,7 +37,7 @@ public class SpriteUnitArtist
             Unit unit = locus.getResident();
             int drawX = (int) (myView.getTileSize() * w);
             int drawY = (int) (myView.getTileSize() * h);
-            SpriteLibrary.getUnitMapSpriteSet(locus.getResident()).drawUnitHP(g, myGame.activeCO, unit, drawX, drawY, drawScale);
+            SpriteLibrary.getUnitMapSpriteSet(locus.getResident()).drawUnitIcons(g, myGame.activeCO, unit, drawX, drawY, drawScale);
           }
         }
       }
