@@ -145,7 +145,7 @@ public class Unit
   {
     if( !target.isCaptureable() )
     {
-      System.out.println("ERROR`! Attempting to capture an uncapturable Location!");
+      System.out.println("ERROR! Attempting to capture an uncapturable Location!");
       return;
     }
 
@@ -161,6 +161,17 @@ public class Unit
       captureProgress = 0;
       target = null;
     }
+  }
+
+  public void stopCapturing()
+  {
+    captureTarget = null;
+    captureProgress = 0;
+  }
+
+  public int getCaptureProgress()
+  {
+    return captureProgress;
   }
 
   // Removed for the forseeable future; may be back
