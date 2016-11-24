@@ -392,7 +392,7 @@ public class SpriteLibrary
   {
     if( null == mapUnitHPSprites )
     {
-      mapUnitHPSprites = new Sprite(loadSpriteSheetFile("res/unit/unit_hp.png"), 8, 8);
+      mapUnitHPSprites = new Sprite(loadSpriteSheetFile("res/unit/icon/hp.png"), 8, 8);
     }
     return mapUnitHPSprites;
   }
