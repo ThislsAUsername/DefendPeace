@@ -88,6 +88,9 @@ public class SpriteLibrary
   // Cargo icon for when transports are holding other units.
   private static BufferedImage mapUnitCargoIcon = null;
 
+  // Cargo icon for when transports are holding other units.
+  private static BufferedImage mapUnitCaptureIcon = null;
+
   // Letters for writing in menus.
   private static Sprite letterSpritesUppercase = null;
   private static Sprite letterSpritesLowercase = null;
@@ -401,6 +404,15 @@ public class SpriteLibrary
       mapUnitCargoIcon = loadSpriteSheetFile("res/unit/icon/cargo.png");
     }
     return mapUnitCargoIcon;
+  }
+
+  public static BufferedImage getCaptureIcon()
+  {
+    if( null == mapUnitCaptureIcon )
+    {
+      mapUnitCaptureIcon = loadSpriteSheetFile("res/unit/icon/capture.png");
+    }
+    return mapUnitCaptureIcon;
   }
 
   ///////////////////////////////////////////////////////////////////

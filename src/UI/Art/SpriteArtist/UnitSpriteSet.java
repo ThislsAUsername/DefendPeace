@@ -186,5 +186,23 @@ public class UnitSpriteSet
       // Draw transport icon.
       g.drawImage( cargoIcon, iconX, iconY, iconW, iconH, null );
     }
+
+    // Draw the capture icon if the unit is capturing a base.
+    if( u.getCaptureProgress() > 0 )
+    {
+      // Get the icon and characterize the draw space.
+      BufferedImage captureIcon = SpriteLibrary.getCaptureIcon();
+      int iconX = drawX + ((unitHeight * drawScale) / 2);
+      int iconY = drawY + ((unitHeight * drawScale) / 2);
+      int iconW = captureIcon.getWidth() * drawScale;
+      int iconH = captureIcon.getHeight() * drawScale;
+
+      // Draw team-color background for the icon.
+      g.setColor( u.CO.myColor );
+      g.fillRect( iconX, iconY, iconW, iconH);
+
+      // Draw transport icon.
+      g.drawImage( captureIcon, iconX, iconY, iconW, iconH, null );
+    }
   }
 }
