@@ -29,11 +29,11 @@ public class GameMap {
 				// Make a ring of water around the edges, and the rest plains to start.
 				if(w == 0 || h == 0 || (w == mapWidth - 1) || (h == mapHeight - 1) )
 				{
-					map[w][h] = new Location(Environment.getTile(Environment.Terrains.WATER, Environment.Weathers.CLEAR));
+					map[w][h] = new Location(Environment.getTile(Environment.Terrains.SEA, Environment.Weathers.CLEAR));
 				}
 				else
 				{
-					map[w][h] = new Location(Environment.getTile(Environment.Terrains.PLAIN, Environment.Weathers.CLEAR));
+					map[w][h] = new Location(Environment.getTile(Environment.Terrains.GRASS, Environment.Weathers.CLEAR));
 				}
 			}
 		}

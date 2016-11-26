@@ -215,7 +215,8 @@ public class MapController
 	    {
 	      if(myView.currentAction.execute(myGame.gameMap))
 	      {
-	        changeInputMode(InputMode.MAP);
+            changeInputMode(InputMode.ANIMATION);
+            myView.animate(myView.currentAction);
 	      }
 	      else
 	      {
@@ -394,6 +395,7 @@ public class MapController
         myView.currentMenu = new GameMenu(GameMenu.MenuType.ACTION,
         		myView.currentAction.getActor().getPossibleActions(myGame.gameMap, myView.currentAction.getMoveX(), myView.currentAction.getMoveY()));
         myGame.setCursorLocation(myView.currentAction.getMoveX(), myView.currentAction.getMoveY());
+        myView.currentAction.setActionType(GameAction.ActionType.INVALID); // We haven't chosen an action yet.
         break;
       case MAP:
         myView.currentAction = null;
@@ -441,7 +443,7 @@ public class MapController
   {
     if(null == currentMovePath)
     {
-      currentMovePath = new Path();
+      currentMovePath = new Path(myView.getMapUnitMoveSpeed());
     }
 
     // If the new point already exists on the path, cut the extraneous points out.
@@ -455,12 +457,12 @@ public class MapController
 		}
     }
 
-    currentMovePath.addWaypoint(x, y, MapView.getMapUnitMoveSpeed());
+    currentMovePath.addWaypoint(x, y);
 
     if(!Utils.isPathValid(myView.currentAction.getActor(), currentMovePath, myGame.gameMap))
     {
       // The currently-built path is invalid. Try to generate a new one (may still return null).
-      currentMovePath = Utils.findShortestPath(myView.currentAction.getActor(), x, y, myGame.gameMap);
+      Utils.findShortestPath(myView.currentAction.getActor(), x, y, currentMovePath, myGame.gameMap);
     }
   }
 

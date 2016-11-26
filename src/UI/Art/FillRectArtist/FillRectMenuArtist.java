@@ -1,4 +1,4 @@
-package UI.Art;
+package UI.Art.FillRectArtist;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -7,24 +7,30 @@ import Engine.GameInstance;
 import UI.MapView;
 import Units.UnitModel.UnitEnum;
 
-public class FillRectMenuArtist implements MenuArtist
+public class FillRectMenuArtist
 {
-	private int tileSizePx = MapView.tileSizePx;
-	private int mapViewWidth = MapView.mapViewWidth;
-	private int mapViewHeight = MapView.mapViewHeight;
+	private int tileSizePx;
+	private int mapViewWidth;
+	private int mapViewHeight;
 
 	GameInstance myGame;
 	MapView myView;
 
 	public static final Color COLOR_CURSOR = new Color(253,171,77,200);
 	
-	public FillRectMenuArtist(GameInstance game, MapView view)
+	public FillRectMenuArtist(GameInstance game)
 	{
 		myGame = game;
-		myView = view;
 	}
-	
-	@Override
+
+	public void setView(MapView view)
+	{
+		myView = view;
+		tileSizePx = view.getTileSize();
+		mapViewWidth = view.getViewWidth();
+		mapViewHeight = view.getViewHeight();
+	}
+
 	public void drawMenu(Graphics g)
 	{
 		int menuBorderLeft = mapViewWidth/4;
@@ -45,7 +51,7 @@ public class FillRectMenuArtist implements MenuArtist
 			label = new String("Money: " + myGame.activeCO.money);
 			g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, tileSizePx/2+menuBorderTop);
 			g.setColor(Color.black);
-			for (int i = 0; i < myView.currentMenu.getNumChoices(); i++) {
+			for (int i = 0; i < myView.currentMenu.getNumOptions(); i++) {
 				label = myView.currentMenu.getOptions()[i].toString()+ ": " + myGame.activeCO.getUnitModel((UnitEnum) myView.currentMenu.getOptions()[i]).moneyCost;
 				g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, (i+2)*tileSizePx/2+menuBorderTop);
 			}
@@ -54,7 +60,7 @@ public class FillRectMenuArtist implements MenuArtist
 			g.setColor(COLOR_CURSOR);
 			g.fillRect(menuBorderLeft+1, (myView.currentMenu.getSelectionNumber())*tileSizePx/2+menuBorderTop+4, menuWidth-2, tileSizePx/2);
 			g.setColor(Color.black);
-			for (int i = 0; i < myView.currentMenu.getNumChoices(); i++) {
+			for (int i = 0; i < myView.currentMenu.getNumOptions(); i++) {
 				label = myView.currentMenu.getOptions()[i].toString();
 				g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, (i+1)*tileSizePx/2+menuBorderTop);
 			}
@@ -63,7 +69,7 @@ public class FillRectMenuArtist implements MenuArtist
 			g.setColor(COLOR_CURSOR);
 			g.fillRect(menuBorderLeft+1, (myView.currentMenu.getSelectionNumber())*tileSizePx/2+menuBorderTop+4, menuWidth-2, tileSizePx/2);
 			g.setColor(Color.black);
-			for (int i = 0; i < myView.currentMenu.getNumChoices(); i++) {
+			for (int i = 0; i < myView.currentMenu.getNumOptions(); i++) {
 				label = myView.currentMenu.getOptions()[i].toString();
 				g.drawChars(label.toCharArray(), 0, label.length(), menuBorderLeft+4, (i+1)*tileSizePx/2+menuBorderTop);
 			}

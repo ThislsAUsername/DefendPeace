@@ -1,4 +1,4 @@
-package UI.Art;
+package UI.Art.FillRectArtist;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -11,9 +11,9 @@ import Terrain.Location;
 import UI.MapView;
 import Units.Unit;
 
-public class FillRectUnitArtist implements UnitArtist
+public class FillRectUnitArtist
 {
-	private int tileSizePx = MapView.tileSizePx;
+	private int tileSizePx;
 	
 	private GameInstance myGame = null;
 	private GameMap gameMap = null;
@@ -21,11 +21,16 @@ public class FillRectUnitArtist implements UnitArtist
 	
 	public static final Color COLOR_TIRED = new Color(128,128,128,160);
 	
-	public FillRectUnitArtist(GameInstance game, MapView view)
+	public FillRectUnitArtist(GameInstance game)
 	{
 		myGame = game;
 		gameMap = myGame.gameMap;
+	}
+
+	public void setView(MapView view)
+	{
 		myView = view;
+		tileSizePx = view.getTileSize();
 	}
 	
 	public void drawUnits(Graphics g)
@@ -76,7 +81,7 @@ public class FillRectUnitArtist implements UnitArtist
 		drawUnit(g, unit, unit.x, unit.y);
 	}
 
-	private void drawUnit(Graphics g, Unit unit, double x, double y)
+	public void drawUnit(Graphics g, Unit unit, double x, double y)
 	{
 		Integer health = unit.getHP();
 		int offset = (int)(tileSizePx * 0.25);

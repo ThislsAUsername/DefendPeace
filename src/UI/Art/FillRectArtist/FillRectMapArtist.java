@@ -1,4 +1,4 @@
-package UI.Art;
+package UI.Art.FillRectArtist;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -10,15 +10,15 @@ import Terrain.Environment;
 import Terrain.GameMap;
 import UI.MapView;
 
-public class FillRectMapArtist implements MapArtist
+public class FillRectMapArtist
 {
-	private final int tileSizePx = MapView.tileSizePx;
+	private int tileSizePx;
 
-	public static final Color COLOR_PLAIN = new Color(186,255,124);
+	public static final Color COLOR_GRASS = new Color(186,255,124);
 	public static final Color COLOR_CITY = Color.GRAY;
 	public static final Color COLOR_FACTORY = Color.DARK_GRAY;
 	public static final Color COLOR_FOREST = Color.GREEN;
-	public static final Color COLOR_WATER = Color.BLUE;
+	public static final Color COLOR_OCEAN = Color.BLUE;
 	public static final Color COLOR_MOUNTAIN = new Color(101,40,26);
 	public static final Color COLOR_REEF = new Color(212,144,56);
 	public static final Color COLOR_ROAD = Color.LIGHT_GRAY;
@@ -36,7 +36,11 @@ public class FillRectMapArtist implements MapArtist
 		gameMap = game.gameMap;
 	}
 
-	@Override
+	public void setView(MapView view)
+	{
+		tileSizePx = view.getTileSize();
+	}
+
 	public void drawMap(Graphics g)
 	{
 		for(int w = 0; w < gameMap.mapWidth; ++w)
@@ -58,12 +62,12 @@ public class FillRectMapArtist implements MapArtist
 	private void drawLocation(Graphics g, Terrain.Location locus, int x, int y)
 	{
 		Environment tile = locus.getEnvironment();
-		Color tileColor = Color.black; // TODO: This will be a sprite eventually.
+		Color tileColor = Color.black;
 		
 		switch(tile.terrainType)
 		{
-		case PLAIN:
-			tileColor = COLOR_PLAIN;
+		case GRASS:
+			tileColor = COLOR_GRASS;
 			break;
 		case CITY:
 			if (locus.getOwner() != null) {
@@ -82,8 +86,8 @@ public class FillRectMapArtist implements MapArtist
 		case FOREST:
 			tileColor = COLOR_FOREST;
 			break;
-		case WATER:
-			tileColor = COLOR_WATER;
+		case SEA:
+			tileColor = COLOR_OCEAN;
 			break;
 		case HQ:
 			if (locus.getOwner() != null) {
@@ -110,14 +114,12 @@ public class FillRectMapArtist implements MapArtist
 		g.fillRect(x, y, tileSizePx, tileSizePx);
 	}
 
-	@Override
 	public void drawCursor(Graphics g)
 	{
 		g.setColor(COLOR_CURSOR);
 		g.fillRect(myGame.getCursorX()*tileSizePx, myGame.getCursorY()*tileSizePx, tileSizePx, tileSizePx);
 	}
 
-	@Override
 	public void drawMovePath(Graphics g, Path path)
 	{
 		g.setColor(COLOR_CURSOR);
@@ -127,7 +129,6 @@ public class FillRectMapArtist implements MapArtist
 		}
 	}
 
-	@Override
 	public void drawHighlights(Graphics g)
 	{
 		for(int w = 0; w < gameMap.mapWidth; ++w)

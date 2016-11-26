@@ -13,8 +13,9 @@ public class NobunagaBattleAnimation implements AnimationSequence
 	GameAction myAction = null;
 	
 	private long endTime = 600;
+	private final int tileSize;
 	
-	public NobunagaBattleAnimation(GameAction action)
+	public NobunagaBattleAnimation(GameAction action, int tileSize)
 	{
 		if(action.getActionType() != GameAction.ActionType.ATTACK)
 		{
@@ -23,6 +24,7 @@ public class NobunagaBattleAnimation implements AnimationSequence
 		
 		myAction = action;
 		startTime = System.currentTimeMillis();
+		this.tileSize = tileSize;
 	}
 
 	@Override
@@ -38,25 +40,25 @@ public class NobunagaBattleAnimation implements AnimationSequence
 		{
 			// Flash 2 over defender
 			g.setColor(Color.WHITE);
-			g.fillRect(myAction.getActX()*MapView.tileSizePx, myAction.getActY()*MapView.tileSizePx, MapView.tileSizePx, MapView.tileSizePx);
+			g.fillRect(myAction.getActX()*tileSize, myAction.getActY()*tileSize, tileSize, tileSize);
 		}
 		else if(animTime > 300)
 		{
 			// Flash 4 over attacker.
 			g.setColor(Color.WHITE);
-			g.fillRect(myAction.getMoveX()*MapView.tileSizePx, myAction.getMoveY()*MapView.tileSizePx, MapView.tileSizePx, MapView.tileSizePx);
+			g.fillRect(myAction.getMoveX()*tileSize, myAction.getMoveY()*tileSize, tileSize, tileSize);
 		}
 		else if(animTime > 200)
 		{
 			// Flash 1 over defender
 			g.setColor(Color.WHITE);
-			g.fillRect(myAction.getActX()*MapView.tileSizePx, myAction.getActY()*MapView.tileSizePx, MapView.tileSizePx, MapView.tileSizePx);
+			g.fillRect(myAction.getActX()*tileSize, myAction.getActY()*tileSize, tileSize, tileSize);
 		}
 		else if(animTime > 100)
 		{
 			// Flash 3 over attacker
 			g.setColor(Color.WHITE);
-			g.fillRect(myAction.getMoveX()*MapView.tileSizePx, myAction.getMoveY()*MapView.tileSizePx, MapView.tileSizePx, MapView.tileSizePx);
+			g.fillRect(myAction.getMoveX()*tileSize, myAction.getMoveY()*tileSize, tileSize, tileSize);
 		}
 		return animTime > endTime;
 	}

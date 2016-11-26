@@ -1,91 +1,44 @@
 package UI;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
-
-import UI.Art.FillRectMapArtist;
-import UI.Art.FillRectMenuArtist;
-import UI.Art.FillRectUnitArtist;
-import UI.Art.MapArtist;
-import UI.Art.MenuArtist;
-import UI.Art.UnitArtist;
 import UI.Art.Animation.AnimationSequence;
 import UI.Art.Animation.NobunagaBattleAnimation;
 
 import Engine.GameAction;
-import Engine.GameInstance;
 import Engine.MapController;
 
-public class MapView extends javax.swing.JPanel {
+public abstract class MapView extends javax.swing.JPanel {
 
 	private static final long serialVersionUID = 1L;
-	
-	private GameInstance myGame;
 	
 	public GameMenu currentMenu;
 	public GameAction currentAction = null;
 
-	private static double unitMoveSpeedMSPerTile = 100;
+	private int unitMoveSpeedMsPerTile = 100;
 
-	private MapArtist mapArtist;
-	private UnitArtist unitArtist;
-	private MenuArtist menuArtist;
-	
-	public static final int tileSizePx = 32;
-	public static int mapViewWidth = tileSizePx * 15;
-	public static int mapViewHeight = tileSizePx * 10;
+	private int drawScale = 2;
 
-	private AnimationSequence animationSequence = null;
+	protected AnimationSequence currentAnimation = null;
 
-	MapController myController = null;
-
-	public MapView(GameInstance game)
-	{
-		myGame = game;
-		setPreferredSize(new Dimension(mapViewWidth, mapViewHeight));
-
-		unitArtist = new FillRectUnitArtist(myGame, this);
-		mapArtist = new FillRectMapArtist(myGame);
-		menuArtist = new FillRectMenuArtist(myGame, this);
-	}
+	protected MapController mapController = null;
 
 	public void setController(MapController controller)
 	{
-		myController = controller;
+		mapController = controller;
 	}
 
-	@Override
-	protected void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		
-		mapArtist.drawMap(g);
-		unitArtist.drawUnits(g);
-		mapArtist.drawHighlights(g);
-
-		if(animationSequence != null)
-		{
-			// Animate until it tells you it's done.
-			if(animationSequence.animate(g))
-			{
-				currentAction = null;
-				animationSequence = null;
-				myController.animationEnded();
-			}
-		}
-		else if (currentMenu == null)
-		{
-			mapArtist.drawCursor(g);
-
-			if(myController.getContemplatedMove() != null)
-			{
-				mapArtist.drawMovePath(g, myController.getContemplatedMove());
-			}
-		}
-		else
-		{
-			menuArtist.drawMenu(g);
-		}
-	}
+	/**
+	 * @return The side-length in pixels of a single map square, taking drawScale into account.
+	 * NOTE: This assumes that all MapView subclasses will use a square-tile map representation.
+	 */
+	public abstract int getTileSize();
+	/**
+	 * @return The width in pixels of the entire map view.
+	 */
+	public abstract int getViewWidth();
+	/**
+	 * @return The height in pixels of the entire map view.
+	 */
+	public abstract int getViewHeight();
 
 	public void animate(GameAction action)
 	{
@@ -100,16 +53,16 @@ public class MapView extends javax.swing.JPanel {
 		currentAction = action;
 
 		// If we have a previous animation in progress, cancel it to start the new one.
-		if(animationSequence != null)
+		if(currentAnimation != null)
 		{
-			animationSequence.cancel();
-			animationSequence = null;
+			currentAnimation.cancel();
+			currentAnimation = null;
 		}
 
 		switch(currentAction.getActionType())
 		{
 		case ATTACK:
-			animationSequence = new NobunagaBattleAnimation(currentAction);
+			currentAnimation = new NobunagaBattleAnimation(currentAction, getTileSize());
 			break;
 		case CAPTURE:
 		case LOAD:
@@ -121,25 +74,29 @@ public class MapView extends javax.swing.JPanel {
 				System.out.println("WARNING! No action animation supported for type " + currentAction.getActionType());
 		}
 
-		if(animationSequence == null)
+		if(currentAnimation == null)
 		{
 			// Animation for this action is not supported. Just let the controller know.
-			myController.animationEnded();
+			mapController.animationEnded();
 		}
 	}
 	public boolean isAnimating()
 	{
-		return animationSequence != null;
+		return currentAnimation != null;
 	}
 	public void cancelAnimation()
 	{
-		if(animationSequence != null)
+		if(currentAnimation != null)
 		{
-			animationSequence.cancel();
+			currentAnimation.cancel();
 		}
 	}
-	public static double getMapUnitMoveSpeed()
+	public double getMapUnitMoveSpeed()
 	{
-		return unitMoveSpeedMSPerTile;
+		return unitMoveSpeedMsPerTile;
+	}
+	public int getDrawScale()
+	{
+		return drawScale;
 	}
 }

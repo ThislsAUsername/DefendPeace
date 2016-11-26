@@ -5,7 +5,7 @@ package Terrain;
  * Subsequent calls to retrieve that tile will receive the same copy.
  */
 public class Environment {
-	public enum Terrains{PLAIN, FOREST, MOUNTAIN, DUNES, ROAD, CITY, FACTORY, HQ, SHOAL, WATER, REEF};
+	public enum Terrains{GRASS, FOREST, MOUNTAIN, DUNES, ROAD, CITY, FACTORY, HQ, SHOAL, SEA, REEF};
 	public enum Weathers{CLEAR, RAIN, SNOW, SANDSTORM};
 
 	public final Terrains terrainType;
@@ -41,7 +41,7 @@ public class Environment {
 	public int getDefLevel() {
 		// If there's a better way to do this, I'm all ears
 		switch(terrainType){
-		case PLAIN:
+		case GRASS:
 			return 1;
 		case FOREST:
 			return 2;
@@ -57,7 +57,7 @@ public class Environment {
 			return 4;
 		case SHOAL:
 			return 0;
-		case WATER:
+		case SEA:
 			return 1;
 		case REEF:
 			return 2;
