@@ -27,7 +27,6 @@ public class Unit {
 
 	public Unit(Commander co, UnitModel um)
 	{
-		System.out.println("Creating a " + um.type);
 		CO = co;
 		model = um;
 		fuel = model.maxFuel;

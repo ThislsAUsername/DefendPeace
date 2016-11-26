@@ -9,6 +9,7 @@ import javax.swing.JFrame;
 import CommandingOfficers.CmdrStrong;
 import CommandingOfficers.Commander;
 import Terrain.GameMap;
+import Test.TestMain;
 import UI.InputHandler;
 import UI.MapView;
 import UI.Art.SpriteArtist.SpriteMapView;
@@ -70,14 +71,15 @@ public class Driver implements ActionListener{
 		}
 	}
 
-	public static void main(String args[]) {
+	public static void main(String args[])
+	{
 	  // Run the test cases. If those all pass, launch the primary driver.
-	  if(!TestDriver.performTests())
+	  if(!new TestMain().runTest())
 	  {
-      System.out.println("One or more tests failed!");
-      System.exit(0);
+	      System.out.println("One or more tests failed!");
+	      System.exit(0);
 	  }
 
-    new Driver();
+	  new Driver();
 	}
 }

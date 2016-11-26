@@ -180,8 +180,6 @@ public class GameAction
             gameMap.removeUnit(unitTarget);
             unitTarget.CO.units.remove(unitTarget);
           }
-          System.out.println("unitActor hp: " + unitActor.getPreciseHP());
-          System.out.println("unitTarget hp: " + unitTarget.getPreciseHP());
         }
         break;
       case CAPTURE:
