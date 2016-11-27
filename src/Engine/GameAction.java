@@ -13,7 +13,7 @@ public class GameAction
   {
     INVALID, ATTACK, CAPTURE, LOAD, UNLOAD, WAIT
   };
-  
+
   private Unit unitActor = null;
   private ActionType actionType;
 
@@ -22,7 +22,7 @@ public class GameAction
   private int moveY;
   private int actX;
   private int actY;
-  
+
   // Record origin state for animation purposes.
   private PriorState priorState = null;
 
@@ -51,7 +51,7 @@ public class GameAction
   {
     actionType = type;
   }
-  
+
   public Unit getActor()
   {
     return unitActor;
@@ -61,11 +61,11 @@ public class GameAction
   {
     return actionType;
   }
-  
+
   public void setMovePath(Path path)
   {
     movePath = path;
-    if(null != path && path.getPathLength() > 0)
+    if( null != path && path.getPathLength() > 0 )
     {
       moveX = path.getEnd().x;
       moveY = path.getEnd().y;
@@ -79,7 +79,7 @@ public class GameAction
 
   public Path getMovePath()
   {
-	  return movePath;
+    return movePath;
   }
   public int getMoveX()
   {
@@ -97,26 +97,27 @@ public class GameAction
   {
     return actY;
   }
-  
+
   public void setActionLocation(int x, int y)
   {
     actX = x;
     actY = y;
   }
-  
+
   /** Returns true if this GameAction has all the information it needs to execute, false else. */
   public boolean isReadyToExecute()
   {
     boolean ready = false;
-    if(moveX >= 0 && moveY >= 0 && actionType != ActionType.INVALID)
+    if( moveX >= 0 && moveY >= 0 && actionType != ActionType.INVALID )
     {
-      if(actionType == ActionType.WAIT || actionType == ActionType.LOAD || actionType == ActionType.CAPTURE)
+      if( actionType == ActionType.WAIT || actionType == ActionType.LOAD || actionType == ActionType.CAPTURE )
       {
         ready = true;
       }
-      else // ActionType is Attack or Unload - needs a target
+      else
+      // ActionType is Attack or Unload - needs a target
       {
-        if(actX >= 0 && actY >= 0)
+        if( actX >= 0 && actY >= 0 )
         {
           ready = true;
         }
@@ -128,7 +129,7 @@ public class GameAction
     }
     else
     {
-      if(actionType == ActionType.INVALID)
+      if( actionType == ActionType.INVALID )
       {
         System.out.println("Invalid ActionType cannot be executed!");
       }
@@ -139,7 +140,7 @@ public class GameAction
     }
     return ready;
   }
-  
+
   /**
    * Performs the built-up action, using the passed-in GameMap.
    * @return true if the action successfully executes, false if a problem occurs.
@@ -148,22 +149,22 @@ public class GameAction
   //  to move an Infantry unit 10 spaces)?
   public boolean execute(GameMap gameMap)
   {
-    if(!isReadyToExecute())
+    if( !isReadyToExecute() )
     {
       System.out.println("ERROR! Attempting to execute an incomplete GameAction");
       return false;
     }
 
     // Populate our PriorState so folks can backtrack later.
-    priorState = this.new PriorState((int)Math.ceil(unitActor.getHP()), unitActor.x, unitActor.y);
+    priorState = this.new PriorState((int) Math.ceil(unitActor.getHP()), unitActor.x, unitActor.y);
 
     // TODO: Move to the new location, checking for ambushes in fog of war.
 
-    switch(actionType)
+    switch (actionType)
     {
       case ATTACK:
         Unit unitTarget = gameMap.getLocation(actX, actY).getResident();
-        priorState.setTargetHP((int)Math.ceil(unitTarget.getHP()));
+        priorState.setTargetHP((int) Math.ceil(unitTarget.getHP()));
 
         if( unitTarget != null && unitActor.getDamage(unitTarget, moveX, moveY) != 0 )
         {
@@ -190,7 +191,7 @@ public class GameAction
       case LOAD:
         Unit transport = gameMap.getLocation(moveX, moveY).getResident();
 
-        if(null != transport && transport.hasCargoSpace(unitActor.model.type))
+        if( null != transport && transport.hasCargoSpace(unitActor.model.type) )
         {
           unitActor.isTurnOver = true;
           gameMap.removeUnit(unitActor);
@@ -215,16 +216,16 @@ public class GameAction
         gameMap.moveUnit(unitActor, moveX, moveY);
         break;
       case INVALID:
-        default:
-          System.out.println("Attempting to execute an invalid GameAction!");
+      default:
+        System.out.println("Attempting to execute an invalid GameAction!");
     }
-    
+
     return unitActor.isTurnOver;
   }
 
   public PriorState getPriorState()
   {
-	  return priorState;
+    return priorState;
   }
 
   /**
@@ -232,21 +233,21 @@ public class GameAction
    */
   public class PriorState
   {
-	  public final int actorHP;
-	  public final int actorX;
-	  public final int actorY;
-	  private int targetHP;
+    public final int actorHP;
+    public final int actorX;
+    public final int actorY;
+    private int targetHP;
 
-	  public PriorState(int actorHP, int actorX, int actorY)
-	  {
-		  this.actorHP = actorHP;
-		  this.actorX = actorX;
-		  this.actorY = actorY;
-	  }
+    public PriorState(int actorHP, int actorX, int actorY)
+    {
+      this.actorHP = actorHP;
+      this.actorX = actorX;
+      this.actorY = actorY;
+    }
 
-	  public void setTargetHP(int hp)
-	  {
-		  targetHP = hp;
-	  }
+    public void setTargetHP(int hp)
+    {
+      targetHP = hp;
+    }
   }
 }

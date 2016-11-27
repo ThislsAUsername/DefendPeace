@@ -7,15 +7,15 @@ public class TestMain extends TestCase
 {
   public static void main(String[] args)
   {
-	  // Run the test cases and print the results.
-	  if(!new TestMain().runTest())
-	  {
-	      System.out.println("One or more tests failed!");
-	  }
-	  else
-	  {
-		  System.out.println("All tests passed!");
-	  }
+    // Run the test cases and print the results.
+    if( !new TestMain().runTest() )
+    {
+      System.out.println("One or more tests failed!");
+    }
+    else
+    {
+      System.out.println("All tests passed!");
+    }
   }
 
   @Override

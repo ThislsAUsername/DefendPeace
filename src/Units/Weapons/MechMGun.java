@@ -1,9 +1,11 @@
 package Units.Weapons;
 
-public class MechMGun extends WeaponModel {
+public class MechMGun extends WeaponModel
+{
 
-	public MechMGun() {
-		super(WeaponType.MECHMGUN);
-	}
+  public MechMGun()
+  {
+    super(WeaponType.MECHMGUN);
+  }
 
 }

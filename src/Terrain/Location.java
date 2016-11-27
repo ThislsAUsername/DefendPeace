@@ -3,61 +3,68 @@ package Terrain;
 import Units.Unit;
 import CommandingOfficers.Commander;
 
-public class Location {
+public class Location
+{
 
-	private Environment environs = null;
-	private Commander owner = null;
-	private Unit resident = null;
-	private boolean highlightSet = false;
-//	public boolean isFogged = false;
-	
-	public Environment getEnvironment() {
-		return environs;
-	}
+  private Environment environs = null;
+  private Commander owner = null;
+  private Unit resident = null;
+  private boolean highlightSet = false;
 
-	public void setEnvironment(Environment environment) {
-		this.environs = environment;
-	}
+  //	public boolean isFogged = false;
 
-	public Commander getOwner() {
-		return owner;
-	}
+  public Environment getEnvironment()
+  {
+    return environs;
+  }
 
-	public void setOwner(Commander owner) {
-		this.owner = owner;
-	}
+  public void setEnvironment(Environment environment)
+  {
+    this.environs = environment;
+  }
 
-	public Unit getResident() {
-		return resident;
-	}
+  public Commander getOwner()
+  {
+    return owner;
+  }
 
-	public void setResident(Unit resident) {
-		this.resident = resident;
-	}
-	
-	/**
-	 * @return true if this Location has an ownable environment, false else.
-	 */
-	public boolean isCaptureable()
-	{
-		return (environs.terrainType == Environment.Terrains.CITY ||
-				environs.terrainType == Environment.Terrains.FACTORY ||
-				environs.terrainType == Environment.Terrains.HQ);
-	}
-	
-	public void setHighlight(boolean val)
-	{
-		highlightSet = val;
-	}
-	
-	public boolean isHighlightSet()
-	{
-		return highlightSet;
-	}
-	
-	public Location (Environment environment) {
-		environs = environment;
-		owner = null;
-		resident = null;
-	}
+  public void setOwner(Commander owner)
+  {
+    this.owner = owner;
+  }
+
+  public Unit getResident()
+  {
+    return resident;
+  }
+
+  public void setResident(Unit resident)
+  {
+    this.resident = resident;
+  }
+
+  /**
+   * @return true if this Location has an ownable environment, false else.
+   */
+  public boolean isCaptureable()
+  {
+    return (environs.terrainType == Environment.Terrains.CITY || environs.terrainType == Environment.Terrains.FACTORY || environs.terrainType == Environment.Terrains.HQ);
+  }
+
+  public void setHighlight(boolean val)
+  {
+    highlightSet = val;
+  }
+
+  public boolean isHighlightSet()
+  {
+    return highlightSet;
+  }
+
+  public Location(Environment environment)
+  {
+    environs = environment;
+    owner = null;
+    resident = null;
+  }
 }

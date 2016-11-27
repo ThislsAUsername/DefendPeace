@@ -1,13 +1,14 @@
 package Engine;
 
-public class XYCoord {
+public class XYCoord
+{
 
-	public final double xCoord;
-	public final double yCoord;
-	
-	public XYCoord(double x, double y)
-	{
-		xCoord = x;
-		yCoord = y;
-	}
+  public final double xCoord;
+  public final double yCoord;
+
+  public XYCoord(double x, double y)
+  {
+    xCoord = x;
+    yCoord = y;
+  }
 }
