@@ -29,9 +29,14 @@ public class SpriteMapView extends MapView
   private int overlayPreviousFunds = 0;
 
   // Variables for controlling map animations.
-  private int currentAnimIndex = 0;
-  private long lastAnimIndexUpdateTime = 0;
+  private int animIndex = 0;
+  private long animIndexUpdateTime = 0;
   private final int animIndexUpdateInterval = 250;
+
+  // Separate animation speed for "active" things (e.g. units moving).
+  private int fastAnimIndex = 0;
+  private long fastAnimIndexUpdateTime = 0;
+  private final int fastAnimIndexUpdateInterval = 125;
 
   private int mapViewWidth;
   private int mapViewHeight;
@@ -142,7 +147,7 @@ public class SpriteMapView extends MapView
         mapArtist.drawMovePath(g, mapController.getContemplatedMove());
       }
       // Draw the movement arrow if the user is contemplating an action (but not once the action commences).
-      if( null != currentAction && null != currentAction.getMovePath() && null == currentAnimation )
+      else if( null != currentAction && null != currentAction.getMovePath() && null == currentAnimation )
       {
         mapArtist.drawMovePath(g, currentAction.getMovePath());
       }
@@ -150,7 +155,7 @@ public class SpriteMapView extends MapView
       if( null != currentAction ) // && currentAnimation == null) // If the unit should animate when acting.
       {
         Unit u = currentAction.getActor();
-        unitArtist.drawUnit(g, u, u.x, u.y, currentAnimIndex);
+        unitArtist.drawUnit(g, u, u.x, u.y, fastAnimIndex);
       }
 
       if( currentAnimation != null )
@@ -185,7 +190,7 @@ public class SpriteMapView extends MapView
   private void drawUnitsAndMapObjects(Graphics g)
   {
     // Update the central sprite index so animations happen in sync.
-    updateSpriteIndex();
+    updateAnimationIndices();
 
     // Draw terrain objects and units in order so they overlap correctly.
     for( int y = 0; y < myGame.gameMap.mapHeight; ++y )
@@ -200,7 +205,7 @@ public class SpriteMapView extends MapView
           // If an action is being considered, draw the active unit later, not now.
           if( (null == currentAction) || (u != currentAction.getActor()) )
           {
-            unitArtist.drawUnit(g, u, u.x, u.y, currentAnimIndex);
+            unitArtist.drawUnit(g, u, u.x, u.y, animIndex);
           }
         }
       }
@@ -210,17 +215,25 @@ public class SpriteMapView extends MapView
   /**
    * Updates the index which determines the frame that is drawn for map animations.
    */
-  private void updateSpriteIndex()
+  private void updateAnimationIndices()
   {
     // Calculate the sprite index to use.
     long thisTime = System.currentTimeMillis();
-    long timeDiff = thisTime - lastAnimIndexUpdateTime;
+    long animTimeDiff = thisTime - animIndexUpdateTime;
+    long fastAnimTimeDiff = thisTime - fastAnimIndexUpdateTime;
 
     // If it's time to update the sprite index... update the sprite index.
-    if( timeDiff > animIndexUpdateInterval )
+    if( animTimeDiff > animIndexUpdateInterval )
     {
-      currentAnimIndex++;
-      lastAnimIndexUpdateTime = thisTime;
+      animIndex++;
+      animIndexUpdateTime = thisTime;
+    }
+
+    // If it's time to update the fast sprite index... you know what to do.
+    if( fastAnimTimeDiff > fastAnimIndexUpdateInterval )
+    {
+      fastAnimIndex++;
+      fastAnimIndexUpdateTime = thisTime;
     }
   }
 
