@@ -147,7 +147,7 @@ public class SpriteLibrary
   /**
    * Loads the images and builds the TerrainSpriteSet for the terrain type passed in.
    * If we are unable to load the correct images for any reason, make a blank TerrainSpriteSet.
-   * @param terrainType
+   * @param spriteKey Specifies the terrain type and owner, so we can build the correct image.
    */
   private static void createTerrainSpriteSet(SpriteSetKey spriteKey)
   {

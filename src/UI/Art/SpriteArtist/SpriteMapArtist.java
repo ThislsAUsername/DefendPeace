@@ -109,8 +109,7 @@ public class SpriteMapArtist
 
   /**
    * Returns a short value representing the direction from 'before' to 'after'
-   * NOTE: It is assumed that 'before' and 'after' share a plane in common; i.e. they
-   *   will be cardinally oriented, no diagonals.
+   * NOTE: It is assumed that 'before' and 'after' will be cardinally oriented; no diagonals.
    */
   private short getMovePathDirection(PathNode before, PathNode after)
   {
@@ -157,9 +156,14 @@ public class SpriteMapArtist
     }
   }
 
+  /**
+   * Populates baseMapImage with an image of the map terrain only - it does not draw
+   * terrain objects, units, etc. This image would only need to change if the map itself
+   * was modified mid-game.
+   */
   private void buildMapImage()
   {
-    System.out.println("building map image");
+    // Get the Graphics object of the local map image, to use for drawing.
     Graphics g = baseMapImage.getGraphics();
 
     // Choose and draw all base sprites (grass, water, shallows).
@@ -167,8 +171,8 @@ public class SpriteMapArtist
     {
       for( int x = 0; x < gameMap.mapWidth; ++x )
       {
+        // Fetch the relevant sprite set for this terrain type and have it draw itself.
         TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(x, y));
-
         spriteSet.drawTerrain(g, gameMap, x, y, drawScale);
       }
     }

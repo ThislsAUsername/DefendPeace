@@ -10,7 +10,11 @@ import Terrain.Environment;
 import Terrain.GameMap;
 
 /**
- * Responsible for storing and organizing all image data associated with a specific map tile type.
+ * Responsible for storing and organizing all image data associated with a specific map tile type, and drawing the
+ * correct terrain subimage based on the map context.
+ * TerrainSpriteSet is recursive - it may contain additional TerrainSpriteSet members which define transition
+ * images for adjacent tiles of a different terrain type. For example, the SEA TerrainSpriteSet will contain a
+ * GRASS TerrainSpriteSet which defines an overlay image to be drawn when a SEA tile is adjacent to a GRASS tile.
  */
 public class TerrainSpriteSet
 {
@@ -164,16 +168,24 @@ public class TerrainSpriteSet
       spriteSet.drawTile(g, map, x, y, scale, shouldDrawTerrainObject);
     }
 
+    // Figure out if we need to draw this tile, based on this tile type and whether the caller
+    //   wishes to draw terrain objects or base terrain.
     if( (shouldDrawTerrainObject && isTerrainObject(myTerrainType))
         || (!shouldDrawTerrainObject && !isTerrainObject(myTerrainType)) )
-    { // We do want to draw the terrain object, and this tile type does represent a terrain object
+    {
+      // Either: we are only drawing terrain objects, and this tile type does represent a terrain object,
+      //     or: we are only drawing base terrain, and this tile type represents base terrain.
       int tileSize = SpriteLibrary.baseSpriteSize * scale;
       int variation = (x + 1) * (y) + x; // Used to vary the specific sprite version drawn at each place in a repeatable way.
 
+      // Figure out how to handle map-edge transitions; we only want to assume the "adjacent" off-map tile has the same type
+      //   as the current tile if the current tile type matches the TerrainSpriteSet type (that is, this TerrainSpriteSet does
+      //   not define a tile transition - it's the sprite for the actual terrain type of the current tile). This makes it so
+      //   that GRASS or SEA will continue off the edge of the map, and we don't get strange cliff walls at the edge of the map.
       boolean assumeSameTileType = myTerrainType == map.getEnvironment(x, y).terrainType;
       short dirIndex = getTileImageIndex(map, x, y, assumeSameTileType);
 
-      // Draw the current tile
+      // Draw the current tile.
       BufferedImage frame = terrainSprites.get(dirIndex).getFrame(variation);
       g.drawImage(frame, (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize, frame.getWidth() * scale, frame.getHeight()
           * scale, null);
