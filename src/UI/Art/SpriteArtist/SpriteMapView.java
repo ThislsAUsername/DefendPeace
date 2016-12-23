@@ -130,14 +130,17 @@ public class SpriteMapView extends MapView
       // Draw base terrain
       mapArtist.drawBaseTerrain(g);
 
+      // Update the central sprite indices so animations happen in sync.
+      updateAnimationIndices();
+
       // Draw units, buildings, trees, etc.
       drawUnitsAndMapObjects(g);
 
-      // Draw Unit icons on top of everything, to make sure they are seen clearly.
-      unitArtist.drawUnitIcons(g);
-
       // Apply any relevant map highlight.
       mapArtist.drawHighlights(g);
+
+      // Draw Unit icons on top of everything, to make sure they are seen clearly.
+      drawUnitIcons(g);
 
       // TODO: Consider moving the contemplated move inside of the action (in MapController)
       //       to make the interface more consistent?
@@ -156,6 +159,7 @@ public class SpriteMapView extends MapView
       {
         Unit u = currentAction.getActor();
         unitArtist.drawUnit(g, u, u.x, u.y, fastAnimIndex);
+        unitArtist.drawUnitIcons(g, u, u.x, u.y);
       }
 
       if( currentAnimation != null )
@@ -183,15 +187,14 @@ public class SpriteMapView extends MapView
   }
 
   /**
-   * Increments the current map animation index, and draws all units and map objects in order
-   *   from left to right, top to bottom, ensuring that they are layered correctly (near things
-   *   are always drawn on top of far things).
+   * Draws all units and map objects in order from left to right, top to bottom,
+   * to ensure that they are layered correctly (near things are drawn on top of far
+   * things, and units are drawn on top of terrain objects).
+   * NOTE: Does not draw the currently-active unit, if one exists; that will
+   * be drawn later so it is more visible, and so it can be animated.
    */
   private void drawUnitsAndMapObjects(Graphics g)
   {
-    // Update the central sprite index so animations happen in sync.
-    updateAnimationIndices();
-
     // Draw terrain objects and units in order so they overlap correctly.
     for( int y = 0; y < myGame.gameMap.mapHeight; ++y )
     {
@@ -206,6 +209,33 @@ public class SpriteMapView extends MapView
           if( (null == currentAction) || (u != currentAction.getActor()) )
           {
             unitArtist.drawUnit(g, u, u.x, u.y, animIndex);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Draws unit icons (HP, transport, etc) on top of units.
+   * NOTE: Does not draw the unit icon for the currently-active unit, if
+   * one is selected; this must be done separately.
+   */
+  public void drawUnitIcons(Graphics g)
+  {
+    // Get an easy reference to the map.
+    GameMap gameMap = myGame.gameMap;
+
+    for( int y = 0; y < gameMap.mapHeight; ++y )
+    {
+      for( int x = 0; x < gameMap.mapWidth; ++x )
+      {
+        if( !gameMap.isLocationEmpty(x, y) )
+        {
+          Unit u = myGame.gameMap.getLocation(x, y).getResident();
+          // If an action is being considered, draw the active unit later, not now.
+          if( (null == currentAction) || (u != currentAction.getActor()) )
+          {
+            unitArtist.drawUnitIcons(g, u, u.x, u.y);
           }
         }
       }
