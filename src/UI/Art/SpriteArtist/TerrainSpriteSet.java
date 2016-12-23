@@ -194,22 +194,22 @@ public class TerrainSpriteSet
       if( terrainSprites.size() == 20 )
       {
         // If we didn't have a N or W transition, then look in the NW position
-        if( (dirIndex & (NORTH | WEST)) == 0 && checkTileType(map, myTerrainType, x - 1, y - 1, assumeSameTileType) )
+        if( (dirIndex & (NORTH | WEST)) == 0 && checkTileType(map, x - 1, y - 1, assumeSameTileType) )
         {
           g.drawImage(terrainSprites.get(NW).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
               frame.getWidth() * scale, frame.getHeight() * scale, null);
         }
-        if( (dirIndex & (NORTH | EAST)) == 0 && checkTileType(map, myTerrainType, x + 1, y - 1, assumeSameTileType) )
+        if( (dirIndex & (NORTH | EAST)) == 0 && checkTileType(map, x + 1, y - 1, assumeSameTileType) )
         {
           g.drawImage(terrainSprites.get(NE).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
               frame.getWidth() * scale, frame.getHeight() * scale, null);
         }
-        if( (dirIndex & (SOUTH | EAST)) == 0 && checkTileType(map, myTerrainType, x + 1, y + 1, assumeSameTileType) )
+        if( (dirIndex & (SOUTH | EAST)) == 0 && checkTileType(map, x + 1, y + 1, assumeSameTileType) )
         {
           g.drawImage(terrainSprites.get(SE).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
               frame.getWidth() * scale, frame.getHeight() * scale, null);
         }
-        if( (dirIndex & (SOUTH | WEST)) == 0 && checkTileType(map, myTerrainType, x - 1, y + 1, assumeSameTileType) )
+        if( (dirIndex & (SOUTH | WEST)) == 0 && checkTileType(map, x - 1, y + 1, assumeSameTileType) )
         {
           g.drawImage(terrainSprites.get(SW).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
               frame.getWidth() * scale, frame.getHeight() * scale, null);
@@ -238,11 +238,11 @@ public class TerrainSpriteSet
     short dirIndex = 0;
     if( terrainSprites.size() > 1 ) // We expect the size to be either 1, 16, or 20.
     {
-      // Figure out which neighbors tiles have the same terrain type as this one.
-      dirIndex |= checkTileType(map, myTerrainType, x, y - 1, assumeSameTileType) ? NORTH : 0;
-      dirIndex |= checkTileType(map, myTerrainType, x + 1, y, assumeSameTileType) ? EAST : 0;
-      dirIndex |= checkTileType(map, myTerrainType, x, y + 1, assumeSameTileType) ? SOUTH : 0;
-      dirIndex |= checkTileType(map, myTerrainType, x - 1, y, assumeSameTileType) ? WEST : 0;
+      // Figure out which neighboring tiles have the same terrain type as this one.
+      dirIndex |= checkTileType(map, x, y - 1, assumeSameTileType) ? NORTH : 0;
+      dirIndex |= checkTileType(map, x + 1, y, assumeSameTileType) ? EAST : 0;
+      dirIndex |= checkTileType(map, x, y + 1, assumeSameTileType) ? SOUTH : 0;
+      dirIndex |= checkTileType(map, x - 1, y, assumeSameTileType) ? WEST : 0;
     }
 
     // Normalize the index value just in case.
@@ -285,7 +285,7 @@ public class TerrainSpriteSet
    *   us to draw roads that go off the map, etc, but keep it from looking like there is always land across
    *   the water at the edge of the map due to unwanted cliff-face transitions.
    */
-  private boolean checkTileType(GameMap map, Environment.Terrains terrain, int x, int y, boolean assumeTrue)
+  private boolean checkTileType(GameMap map, int x, int y, boolean assumeTrue)
   {
     return (map.isLocationValid(x, y) && ((map.getEnvironment(x, y).terrainType == myTerrainType) || // Valid location, terrain types match.
         (getBaseTerrainType(map.getEnvironment(x, y).terrainType) == myTerrainType)) // Valid location, terrain base matches. 
