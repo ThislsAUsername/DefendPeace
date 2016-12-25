@@ -48,13 +48,13 @@ public class Commander
   public void initTurn(GameMap map)
   {
     // Accrue income for each city under your control.
-    int turnIncome = incomePerCity; // plus one for the HQ.
+    int turnIncome = 0;
     for( int w = 0; w < map.mapWidth; ++w )
     {
       for( int h = 0; h < map.mapHeight; ++h )
       {
         Location loc = map.getLocation(w, h);
-        if( loc.getEnvironment().terrainType == Environment.Terrains.CITY && loc.getOwner() == this )
+        if( loc.isCaptureable() && loc.getOwner() == this )
         {
           turnIncome += incomePerCity;
         }
