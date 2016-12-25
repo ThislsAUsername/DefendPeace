@@ -145,6 +145,13 @@ public class GameMap
 
   public void moveUnit(Unit unit, int x, int y)
   {
+    if( unit.x == x && unit.y == y )
+    {
+      // We are not actually moving. Just return.
+      // This will happen e.g. if we attack an enemy that is already adjacent.
+      return;
+    }
+
     if( !isLocationEmpty(unit, x, y) )
     {
       System.out.println("ERROR! Attempting to move unit to an occupied Location!");
