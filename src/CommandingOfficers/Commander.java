@@ -62,7 +62,7 @@ public class Commander
     money += turnIncome;
 
     // Update any modifiers that were activated last turn, removing expired ones.
-    for( int i = 0; i < modifiers.size(); i++ )
+    for( int i = modifiers.size() - 1; i >= 0; --i )
     {
       modifiers.get(i).turn();
       if( modifiers.get(i).done )

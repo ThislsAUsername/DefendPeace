@@ -1,23 +1,21 @@
 package CommandingOfficers.Modifiers;
 
-import java.util.ArrayList;
-
 import Terrain.Environment;
 import Units.UnitModel;
 import CommandingOfficers.Commander;
 import Engine.Combat.CombatParameters;
 
-// Provides a damage boost either universally, on one terrain
+/** Provides a damage boost either universally, on one terrain */
 public class CODamageModifier extends COModifier
 {
   private int attackModifier = 0;
-  private Environment validTerrains = null;
+  private Environment requiredTerrain = null;
 
   public CODamageModifier(Commander user, int percentChange, Environment terrain)
   {
     super(user);
     attackModifier = percentChange;
-    validTerrains = terrain;
+    requiredTerrain = terrain;
   }
 
   public CODamageModifier(Commander user, int percentChange)
@@ -25,11 +23,11 @@ public class CODamageModifier extends COModifier
     super(user);
     attackModifier = percentChange;
   }
-  
+
   @Override
   public void alterCombat(CombatParameters params)
   {
-    if( params.attacker.CO == CO && validTerrains == params.attackTerrain )
+    if( params.attacker.CO == CO && requiredTerrain == params.attackTerrain )
     {
       params.attackFactor += attackModifier;
     }
@@ -38,7 +36,7 @@ public class CODamageModifier extends COModifier
   @Override
   public void apply()
   {
-    if( null == validTerrains )
+    if( null == requiredTerrain )
     {
       for( UnitModel um : CO.unitModels )
       {
@@ -53,7 +51,7 @@ public class CODamageModifier extends COModifier
   @Override
   public void revert()
   {
-    if( null == validTerrains )
+    if( null == requiredTerrain )
     {
       for( UnitModel um : CO.unitModels )
       {

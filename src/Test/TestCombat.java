@@ -5,7 +5,6 @@ import CommandingOfficers.CommanderStrong;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import Engine.GameAction;
-import Engine.Combat.CombatEngine;
 import Terrain.GameMap;
 import Terrain.MapLibrary;
 import Units.Unit;
