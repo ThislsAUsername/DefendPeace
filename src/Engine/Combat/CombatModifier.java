@@ -6,8 +6,15 @@ public class CombatModifier
 {
   public boolean done = false;
   public Commander CO = null;
+
   public void alterCombat(CombatParameters params)
   {}
-  public void turn()
-  {}
+  public void turn(Commander activeCO)
+  {
+    if( activeCO == CO )
+    {
+      done = true;
+    }
+  }
+
 }

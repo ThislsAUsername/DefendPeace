@@ -93,7 +93,7 @@ public class GameInstance
     
     for( int i = 0; i < CombatEngine.modifiers.size(); i++ )
     {
-      CombatEngine.modifiers.get(i).turn();
+      CombatEngine.modifiers.get(i).turn(activeCO);
       if( CombatEngine.modifiers.get(i).done )
       {
         CombatEngine.modifiers.remove(i);
