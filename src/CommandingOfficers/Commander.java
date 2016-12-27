@@ -41,6 +41,8 @@ public class Commander
     starsCurrent += change;
     // clamp it to the valid range
     starsCurrent = Math.max(0, Math.min(starsMax, starsCurrent));
+    // TODO: get a UI element for the CO power meter. And probably rename the variables
+    System.out.print(coInfo.name + " stars: " + starsCurrent);
   }
 
   public Commander(CommanderInfo info)
