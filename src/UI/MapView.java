@@ -4,19 +4,16 @@ import UI.Art.Animation.AnimationSequence;
 import UI.Art.Animation.NobunagaBattleAnimation;
 
 import Engine.GameAction;
+import Engine.IView;
 import Engine.MapController;
 
-public abstract class MapView extends javax.swing.JPanel
+public abstract class MapView implements IView
 {
-
-  private static final long serialVersionUID = 1L;
-
   public GameMenu currentMenu;
   public GameAction currentAction = null;
 
+  // TODO: This doesn't really belong here. The specific artist should handle this, ideally.
   private int unitMoveSpeedMsPerTile = 100;
-
-  private int drawScale = 2;
 
   protected AnimationSequence currentAnimation = null;
 
@@ -32,14 +29,6 @@ public abstract class MapView extends javax.swing.JPanel
    * NOTE: This assumes that all MapView subclasses will use a square-tile map representation.
    */
   public abstract int getTileSize();
-  /**
-   * @return The width in pixels of the entire map view.
-   */
-  public abstract int getViewWidth();
-  /**
-   * @return The height in pixels of the entire map view.
-   */
-  public abstract int getViewHeight();
 
   public void animate(GameAction action)
   {
@@ -96,8 +85,8 @@ public abstract class MapView extends javax.swing.JPanel
   {
     return unitMoveSpeedMsPerTile;
   }
-  public int getDrawScale()
+  public void gameIsOver()
   {
-    return drawScale;
+    // Do nothing by default. Subclasses can override.
   }
 }

@@ -7,15 +7,15 @@ import java.util.HashMap;
 
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
+import Engine.MapController;
 import Terrain.Environment;
 import Terrain.GameMap;
+import UI.CO_InfoMenu;
 import UI.MapView;
 import Units.Unit;
 
 public class SpriteMapView extends MapView
 {
-  private static final long serialVersionUID = 1L;
-
   private HashMap<Commander, Boolean> unitFacings;
 
   private GameInstance myGame;
@@ -32,7 +32,7 @@ public class SpriteMapView extends MapView
   // Variables for controlling map animations.
   private int currentAnimIndex = 0;
   private long lastAnimIndexUpdateTime = 0;
-  private final double animIndexUpdateInterval = 250;
+  private final int animIndexUpdateInterval = 250;
 
   private int mapViewWidth;
   private int mapViewHeight;
@@ -53,33 +53,31 @@ public class SpriteMapView extends MapView
     }
 
     // By default, we will show a 15x10 chunk of the map.
-    mapViewWidth = SpriteLibrary.baseSpriteSize * getDrawScale() * 15;
-    mapViewHeight = SpriteLibrary.baseSpriteSize * getDrawScale() * 10;
-    setPreferredSize(new Dimension(mapViewWidth, mapViewHeight));
+    mapViewWidth = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * 15;
+    mapViewHeight = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * 10;
+  }
+
+  @Override
+  public Dimension getPreferredDimensions()
+  {
+    return new Dimension(mapViewWidth, mapViewHeight);
   }
 
   @Override
   public int getTileSize()
   {
-    return SpriteLibrary.baseSpriteSize * getDrawScale();
-  }
-
-  @Override
-  public int getViewWidth()
-  {
-    return mapViewWidth;
-  }
-
-  @Override
-  public int getViewHeight()
-  {
-    return mapViewHeight;
+    return SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale();
   }
 
   /** Returns whether the commander's map units should be flipped horizontally when drawn. */
   public boolean getFlipUnitFacing(Commander co)
   {
-    return unitFacings.get(co);
+    boolean flip = false;
+    if(unitFacings.containsKey(co)) // Make sure we don't try to assign null to a boolean.
+    {
+      flip = unitFacings.get(co);
+    }
+    return flip;
   }
 
   /**
@@ -103,62 +101,81 @@ public class SpriteMapView extends MapView
   }
 
   @Override
-  protected void paintComponent(Graphics g)
+  public void render(Graphics g)
   {
-    super.paintComponent(g);
-
-    // Draw base terrain
-    mapArtist.drawBaseTerrain(g);
-
-    // Draw units, buildings, trees, etc.
-    drawUnitsAndMapObjects(g);
-
-    // Draw Unit HP icons on top of everything, to make sure they are seen clearly.
-    unitArtist.drawUnitHPIcons(g);
-
-    // Apply any relevant map highlight.
-    mapArtist.drawHighlights(g);
-
-    // TODO: Consider moving the contemplated move inside of the action (in MapController)
-    //       to make the interface more consistent?
-    // Draw the movement arrow if the user is contemplating a move.
-    if( mapController.getContemplatedMove() != null )
+    // If we are in the CO_INFO menu, don't draw the map, etc.
+    if( mapController.isInCoInfoMenu )
     {
-      mapArtist.drawMovePath(g, mapController.getContemplatedMove());
-    }
-    // Draw the movement arrow if the user is contemplating an action (but not once the action commences).
-    if( null != currentAction && null != currentAction.getMovePath() && null == currentAnimation )
-    {
-      mapArtist.drawMovePath(g, currentAction.getMovePath());
-    }
-    // Draw the acting unit so it's on top of everything.
-    if( null != currentAction ) // && currentAnimation == null) // If the unit should animate when acting.
-    {
-      Unit u = currentAction.getActor();
-      unitArtist.drawUnit(g, u, u.x, u.y, currentAnimIndex);
-    }
+      // Get the CO info menu.
+      CO_InfoMenu menu = mapController.getCoInfoMenu();
 
-    if( currentAnimation != null )
-    {
-      // Animate until it tells you it's done.
-      if( currentAnimation.animate(g) )
-      {
-        currentAction = null;
-        currentAnimation = null;
-        mapController.animationEnded();
-      }
-    }
-    else if( currentMenu == null )
-    {
-      mapArtist.drawCursor(g);
+      // Get the current menu selections.
+      int co = menu.getCoSelection();
+      int page = menu.getPageSelection();
+
+      // TODO: Create the other CO info pages (powers, stats, etc).
+
+      // Draw the background.
+
+      // Draw the commander art.
+      g.drawImage(SpriteLibrary.getCommanderSprites(myGame.commanders[co].coInfo.cmdrEnum).body,
+          0, 0, mapViewWidth, mapViewHeight, null);
     }
     else
-    {
-      menuArtist.drawMenu(g);
-    }
+    { // No overlay is being shown - draw the map, units, etc.
+      // Draw base terrain
+      mapArtist.drawBaseTerrain(g);
 
-    // Draw the Commander overlay with available funds.
-    drawCommanderOverlay(g);
+      // Draw units, buildings, trees, etc.
+      drawUnitsAndMapObjects(g);
+
+      // Draw Unit HP icons on top of everything, to make sure they are seen clearly.
+      unitArtist.drawUnitHPIcons(g);
+
+      // Apply any relevant map highlight.
+      mapArtist.drawHighlights(g);
+
+      // TODO: Consider moving the contemplated move inside of the action (in MapController)
+      //       to make the interface more consistent?
+      // Draw the movement arrow if the user is contemplating a move.
+      if( mapController.getContemplatedMove() != null )
+      {
+        mapArtist.drawMovePath(g, mapController.getContemplatedMove());
+      }
+      // Draw the movement arrow if the user is contemplating an action (but not once the action commences).
+      if( null != currentAction && null != currentAction.getMovePath() && null == currentAnimation )
+      {
+        mapArtist.drawMovePath(g, currentAction.getMovePath());
+      }
+      // Draw the acting unit so it's on top of everything.
+      if( null != currentAction ) // && currentAnimation == null) // If the unit should animate when acting.
+      {
+        Unit u = currentAction.getActor();
+        unitArtist.drawUnit(g, u, u.x, u.y, currentAnimIndex);
+      }
+
+      if( currentAnimation != null )
+      {
+        // Animate until it tells you it's done.
+        if( currentAnimation.animate(g) )
+        {
+          currentAction = null;
+          currentAnimation = null;
+          mapController.animationEnded();
+        }
+      }
+      else if( currentMenu == null )
+      {
+        mapArtist.drawCursor(g);
+      }
+      else
+      {
+        menuArtist.drawMenu(g);
+      }
+
+      // Draw the Commander overlay with available funds.
+      drawCommanderOverlay(g);
+    } // End of case for no overlay menu.
   }
 
   /**
@@ -225,10 +242,11 @@ public class SpriteMapView extends MapView
       overlayIsLeft = false;
     }
 
-    int drawScale = getDrawScale();
-    int xTextOffset = 4 * drawScale; // Distance from the side of the view to the CO overlay text.
+    int drawScale = SpriteOptions.getDrawScale();
+    int coEyesWidth = 25;
+    int xTextOffset = (4+coEyesWidth) * drawScale; // Distance from the side of the view to the CO overlay text.
     int yTextOffset = 3 * drawScale; // Distance from the top of the view to the CO overlay text.
-    BufferedImage spriteA = SpriteLibrary.getMenuLetters().getFrame(0); // Convenient reference so we can check dimensions.
+    BufferedImage spriteA = SpriteLibrary.getLettersSmallCaps().getFrame(0); // Convenient reference so we can check dimensions.
     int textHeight = spriteA.getHeight() * drawScale;
 
     // Rebuild the funds string to draw if it has changed.
@@ -238,7 +256,7 @@ public class SpriteMapView extends MapView
       overlayFundsString = buildFundsString(overlayPreviousFunds);
     }
 
-    String coString = "Cmdr Name"; // myGame.activeCO.toString();
+    String coString = myGame.activeCO.coInfo.name;
 
     // Choose left or right overlay image to draw.
     BufferedImage overlayImage = SpriteLibrary.getCoOverlay(myGame.activeCO, overlayIsLeft);
@@ -246,17 +264,18 @@ public class SpriteMapView extends MapView
     if( overlayIsLeft )
     { // Draw the overlay on the left side.
       g.drawImage(overlayImage, 0, 0, overlayImage.getWidth() * drawScale, overlayImage.getHeight() * drawScale, null);
-      SpriteLibrary.drawMenuText(g, coString, xTextOffset, yTextOffset, drawScale); // CO name
-      SpriteLibrary.drawMenuText(g, overlayFundsString, xTextOffset, textHeight + drawScale + yTextOffset, drawScale); // Funds
+      SpriteLibrary.drawTextSmallCaps(g, coString, xTextOffset, yTextOffset, drawScale); // CO name
+      SpriteLibrary.drawTextSmallCaps(g, overlayFundsString, xTextOffset, textHeight + drawScale + yTextOffset, drawScale); // Funds
     }
     else
     { // Draw the overlay on the right side.
-      int xPos = getViewWidth() - overlayImage.getWidth() * drawScale;
-      int coNameXPos = getViewWidth() - spriteA.getWidth() * drawScale * coString.length() - xTextOffset;
-      int fundsXPos = getViewWidth() - spriteA.getWidth() * drawScale * overlayFundsString.length() - xTextOffset;
+      int screenWidth = SpriteOptions.getScreenDimensions().width;
+      int xPos = screenWidth - overlayImage.getWidth() * drawScale;
+      int coNameXPos = screenWidth - spriteA.getWidth() * drawScale * coString.length() - xTextOffset;
+      int fundsXPos = screenWidth - spriteA.getWidth() * drawScale * overlayFundsString.length() - xTextOffset;
       g.drawImage(overlayImage, xPos, 0, overlayImage.getWidth() * drawScale, overlayImage.getHeight() * drawScale, null);
-      SpriteLibrary.drawMenuText(g, coString, coNameXPos, yTextOffset, drawScale); // CO name
-      SpriteLibrary.drawMenuText(g, overlayFundsString, fundsXPos, textHeight + drawScale + yTextOffset, drawScale); // Funds
+      SpriteLibrary.drawTextSmallCaps(g, coString, coNameXPos, yTextOffset, drawScale); // CO name
+      SpriteLibrary.drawTextSmallCaps(g, overlayFundsString, fundsXPos, textHeight + drawScale + yTextOffset, drawScale); // Funds
     }
   }
 
@@ -287,5 +306,22 @@ public class SpriteMapView extends MapView
     sb.append(Integer.toString(myGame.activeCO.money));
 
     return sb.toString();
+  }
+
+  /**
+   * To be called once all but one faction has been eliminated.
+   * Animates the victory/defeat overlay.
+   */
+  public void gameIsOver()
+  {
+    if( currentAnimation != null )
+    {
+      // Delete the previous animation if one exists (which it shouldn't).
+      currentAnimation.cancel();
+      currentAnimation = null;
+    }
+
+    // Create a new animation to show the game results.
+    currentAnimation = new SpriteGameEndAnimation(myGame.commanders);
   }
 }

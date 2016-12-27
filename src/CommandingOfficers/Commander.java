@@ -16,6 +16,7 @@ import Units.UnitModel.UnitEnum;
 
 public class Commander
 {
+  public final CommanderInfo coInfo;
   public ArrayList<Unit> units;
   public UnitModel[] unitModels;
   public ArrayList<COModifier> modifiers;
@@ -23,14 +24,17 @@ public class Commander
   public static final int DEFAULTSTARTINGMONEY = 1000;
   public int money = 0;
   public int incomePerCity = 100;
+  public boolean isDefeated = false;
+  public Location HQLocation = null;
 
   public void doAbilityMinor()
   {}
   public void doAbilityMajor()
   {}
 
-  public Commander()
+  public Commander(CommanderInfo info)
   {
+    coInfo = info;
     // TODO Obviously we don't want to hard-code the UnitModel array.
     unitModels = new UnitModel[3];
     unitModels[0] = new InfantryModel();

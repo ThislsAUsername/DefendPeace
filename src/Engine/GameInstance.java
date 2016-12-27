@@ -79,12 +79,18 @@ public class GameInstance
 
   public void turn()
   {
-    activeCoNum++;
-    if( activeCoNum > commanders.length - 1 )
+    // Find the next non-defeated CO.
+    do
     {
-      activeCoNum = 0;
-    }
-    activeCO = commanders[activeCoNum];
+      activeCoNum++;
+      if( activeCoNum > commanders.length - 1 )
+      {
+        activeCoNum = 0;
+      }
+      activeCO = commanders[activeCoNum];
+    } while( activeCO.isDefeated );
+
+    // Start the turn.
     activeCO.initTurn(gameMap);
   }
 }

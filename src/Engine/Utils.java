@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.Queue;
 
 import Terrain.GameMap;
-import UI.MapView;
 import Units.Unit;
 
 public class Utils

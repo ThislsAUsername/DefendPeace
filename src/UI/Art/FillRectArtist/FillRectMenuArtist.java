@@ -23,7 +23,7 @@ public class FillRectMenuArtist
     myGame = game;
   }
 
-  public void setView(MapView view)
+  public void setView(FillRectMapView view)
   {
     myView = view;
     tileSizePx = view.getTileSize();

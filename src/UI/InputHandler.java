@@ -1,51 +1,44 @@
 package UI;
 
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-
-import Engine.Driver;
-
-public class InputHandler implements KeyListener
+public class InputHandler
 {
-
-  Driver driver;
-
   public enum InputAction
   {
     NO_ACTION, UP, DOWN, LEFT, RIGHT, ENTER, BACK
   };
 
   // MovementInput variables
-  static boolean upHeld = false;
-  static boolean downHeld = false;
-  static boolean leftHeld = false;
-  static boolean rightHeld = false;
+  static short upHeld = 0;
+  static short downHeld = 0;
+  static short leftHeld = 0;
+  static short rightHeld = 0;
 
-  public InputHandler(Driver driver)
-  {
-    this.driver = driver;
-  }
+  /**
+   * No reason to make an instance of this class.
+   */
+  private InputHandler()
+  {}
 
-  @Override
-  public void keyPressed(KeyEvent key)
+  public static InputAction pressKey(KeyEvent key)
   {
     InputAction input = getActionFromKey(key);
-    driver.inputCallback(input);
     switch (input)
     {
       case UP:
-        upHeld = true;
+        upHeld++;
         break;
       case DOWN:
-        downHeld = true;
+        downHeld++;
         break;
       case LEFT:
-        leftHeld = true;
+        leftHeld++;
         break;
       case RIGHT:
-        rightHeld = true;
+        rightHeld++;
         break;
     }
+    return input;
   }
 
   /**
@@ -54,7 +47,7 @@ public class InputHandler implements KeyListener
    * @param event
    * @return
    */
-  private InputAction getActionFromKey(java.awt.event.KeyEvent event)
+  private static InputAction getActionFromKey(java.awt.event.KeyEvent event)
   {
     InputAction ia = InputAction.NO_ACTION;
     switch (event.getKeyCode())
@@ -87,51 +80,44 @@ public class InputHandler implements KeyListener
     return ia;
   }
 
-  @Override
-  public void keyReleased(KeyEvent e)
+  public static void releaseKey(KeyEvent e)
   {
     InputAction input = getActionFromKey(e);
     switch (input)
     {
       case UP:
-        upHeld = false;
+        upHeld = 0;
         break;
       case DOWN:
-        downHeld = false;
+        downHeld = 0;
         break;
       case LEFT:
-        leftHeld = false;
+        leftHeld = 0;
         break;
       case RIGHT:
-        rightHeld = false;
+        rightHeld = 0;
         break;
     }
   }
 
-  @Override
-  public void keyTyped(KeyEvent e)
-  {
-    // Don't care.
-  }
-
   public static boolean isUpHeld()
   {
-    return upHeld;
+    return upHeld > 1;
   }
 
   public static boolean isDownHeld()
   {
-    return downHeld;
+    return downHeld > 1;
   }
 
   public static boolean isLeftHeld()
   {
-    return leftHeld;
+    return leftHeld > 1;
   }
 
   public static boolean isRightHeld()
   {
-    return rightHeld;
+    return rightHeld > 1;
   }
 
 }

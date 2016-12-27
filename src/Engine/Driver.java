@@ -1,54 +1,47 @@
 package Engine;
 
-import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
-import CommandingOfficers.CmdrStrong;
-import CommandingOfficers.Commander;
-import Terrain.GameMap;
 import Test.TestMain;
 import UI.InputHandler;
-import UI.MapView;
-import UI.Art.SpriteArtist.SpriteMapView;
+import UI.MainUIController;
+import UI.Art.SpriteArtist.SpriteEngine;
+import UI.Art.SpriteArtist.SpriteOptions;
 
-public class Driver implements ActionListener
+public class Driver implements ActionListener, KeyListener
 {
+  private static Driver gameDriver;
+  private IController gameController;
+  private GameViewProxy gameView;
+  private JFrame gameWindow;
 
-  private static final long serialVersionUID = 1L;
-
-  JFrame gameWindow;
   private javax.swing.Timer repaintTimer;
-  InputHandler inputHandler;
 
-  // TODO: make this a GameView or some such when we get there.
-  private MapController activeController;
+  private IController oldController = null;
+  private IView oldView = null;
 
-  public Driver()
+  public GraphicsEngine gameGraphics = null;
+
+  private Driver()
   {
-    Commander co1 = new CmdrStrong();
-    Commander co2 = new Commander();
-    Commander[] cos = { co1, co2 };
-    // TODO: Remove this and/or make it actually good.
-    //		for (int i = 0; i < commanders.length; i++) {
-    //			commanders[i].myColor = new Color(i*100,i*100,i*100);
-    //		}
-    cos[0].myColor = Color.pink;
-    cos[1].myColor = Color.cyan;
-    GameMap map = new GameMap(cos);
-    GameInstance newGame = new GameInstance(map, cos);
-
-    MapView mapView = new SpriteMapView(newGame);
-    MapController mapController = new MapController(newGame, mapView);
-
-    activeController = mapController;
+    // At game startup, we are at the main menu. Set up controller/viewer
+    MainUIController mc = new MainUIController();
+    gameGraphics = new SpriteEngine(); // Choose graphics engine based on config file, etc?
+    gameView = new GameViewProxy(gameGraphics.getMainUIView(mc));
+    gameController = mc;
 
     gameWindow = new JFrame();
-    gameWindow.add(mapView);
+    gameWindow.add(gameView);
     gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    gameWindow.addKeyListener(new InputHandler(this));
+    gameWindow.addKeyListener(this);
     gameWindow.pack();
     gameWindow.setVisible(true);
 
@@ -57,20 +50,40 @@ public class Driver implements ActionListener
     repaintTimer.start();
   }
 
-  @Override
+  /** Get the one and only Driver */
+  public static Driver getInstance()
+  {
+    return gameDriver;
+  }
+
+  /**
+   * Update the current state of the game to a new controller and game viewer.
+   * The current controller/view are stored so that we can return to them once
+   * the new controller determines it is completed.
+   */
+  // TODO: Should oldController/view be a stack?
+  public void changeGameState(IController newControl, IView newView)
+  {
+    // Store off the old controller/view so we can return to them.
+    oldView = gameView.view;
+    oldController = gameController;
+    gameController = newControl;
+    gameView.setView(newView);
+    gameWindow.getContentPane().setSize(newView.getPreferredDimensions());
+    gameWindow.pack(); // Resize the window to match the new view's preferences.
+  }
+
+  public void updateView()
+  {
+    gameWindow.getContentPane().setSize(SpriteOptions.getScreenDimensions());
+    gameWindow.pack();
+  }
+
+  @Override // From ActionListener
   public void actionPerformed(ActionEvent arg0)
   {
     // Redraw the screen if needed.
     gameWindow.repaint();
-  }
-
-  public void inputCallback(InputHandler.InputAction action)
-  {
-    if( action != InputHandler.InputAction.NO_ACTION )
-    {
-      // Pass the action on to the active game element.
-      activeController.handleInput(action);
-    }
   }
 
   public static void main(String args[])
@@ -82,6 +95,78 @@ public class Driver implements ActionListener
       System.exit(0);
     }
 
-    new Driver();
+    gameDriver = new Driver();
+  }
+
+  @Override // From KeyListener
+  public void keyPressed(KeyEvent arg0)
+  {
+    InputHandler.InputAction action = InputHandler.pressKey(arg0);
+
+    if( action != InputHandler.InputAction.NO_ACTION )
+    {
+      // Pass the action on to the main game controller; if it says it's done, switch to previous state.
+      if(gameController.handleInput(action))
+      {
+        // Clean up old controller/view (hah) and reinstate the previous ones.
+        // If the top-level controller returns done, it's time to exit.
+        gameController = oldController;
+        gameView.setView(oldView);
+        oldController = null;
+        oldView = null;
+      }
+    }
+
+    if( null == gameController )
+    {
+      // We are done here. I would say clean up data or whatever, but this is Java.
+      System.exit(0);
+    }
+  }
+
+  @Override // From KeyListener
+  public void keyReleased(KeyEvent arg0)
+  {
+    InputHandler.releaseKey(arg0);
+  }
+
+  @Override // From KeyListener
+  public void keyTyped(KeyEvent arg0)
+  {
+    // Don't care.
+  }
+
+  /**
+   * GameViewProxy simply wraps the currently-active IView. This allows us to set a GameView into the
+   * game's JFrame a single time and then not have to worry about managing components; we simply switch
+   * out the renderer that the GameViewProxy/JPanel is using instead.
+   */
+  private static class GameViewProxy extends JPanel
+  {
+    private static final long serialVersionUID = 2373394816370307709L;
+
+    private IView view;
+    public GameViewProxy( IView v )
+    {
+      view = v;
+    }
+
+    public void setView( IView v )
+    {
+      view = v;
+    }
+
+    @Override // From JComponent
+    public void paintComponent(Graphics g)
+    {
+      // Draw whatever should be drawn.
+      view.render(g);
+    }
+
+    @Override // From JComponent
+    public Dimension getPreferredSize()
+    {
+      return view.getPreferredDimensions();
+    }
   }
 }

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import javax.imageio.ImageIO;
 
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderLibrary;
 import Terrain.Environment;
 import Terrain.Location;
 import Units.Unit;
@@ -30,10 +31,14 @@ public class SpriteLibrary
       new Color(250, 190, 190), new Color(255, 245, 245) };
   private static Color[] cyanMapBuildingColors = { new Color(255, 219, 74), new Color(77, 157, 157), new Color(130, 200, 200),
       new Color(200, 230, 230), new Color(245, 255, 255) };
+  private static Color[] orangeMapBuildingColors = { new Color(255, 237, 29), new Color(139, 77, 20), new Color(231, 139, 41),
+      new Color(243, 186, 121), new Color(255, 234, 204) };
   private static Color[] pinkMapUnitColors = { new Color(177, 62, 62), new Color(255, 100, 100), new Color(255, 136, 136),
       new Color(255, 175, 175), new Color(255, 230, 230) };
   private static Color[] cyanMapUnitColors = { new Color(0, 105, 105), new Color(0, 170, 170), new Color(0, 215, 215),
       new Color(0, 255, 255), new Color(195, 255, 255), };
+  private static Color[] orangeMapUnitColors = { new Color(163, 77, 0), new Color(252, 139, 7), new Color(255, 160, 65),
+      new Color(255, 186, 97), new Color(255, 225, 183), };
 
   private static HashMap<Color, ColorPalette> buildingColorPalettes = new HashMap<Color, ColorPalette>(){
     private static final long serialVersionUID = 1L;
@@ -41,6 +46,7 @@ public class SpriteLibrary
       // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
       put(Color.PINK, new ColorPalette(pinkMapBuildingColors));
       put(Color.CYAN, new ColorPalette(cyanMapBuildingColors));
+      put(Color.ORANGE, new ColorPalette(orangeMapBuildingColors));
     }
   };
   private static HashMap<Color, ColorPalette> mapUnitColorPalettes = new HashMap<Color, ColorPalette>(){
@@ -49,8 +55,11 @@ public class SpriteLibrary
       // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
       put(Color.PINK, new ColorPalette(pinkMapUnitColors));
       put(Color.CYAN, new ColorPalette(cyanMapUnitColors));
+      put(Color.ORANGE, new ColorPalette(orangeMapUnitColors));
     }
   };
+
+  public final static Color[] coColorList = { Color.PINK, Color.CYAN, Color.ORANGE };
 
   // TODO: Account for weather?
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
@@ -65,13 +74,25 @@ public class SpriteLibrary
   private static Sprite mapUnitHPSprites = null;
 
   // Letters for writing in menus.
-  private static Sprite menuLetterSprites = null;
-  private static Sprite menuNumberSprites = null;
+  private static Sprite letterSpritesUppercase = null;
+  private static Sprite letterSpritesLowercase = null;
+  private static Sprite numberSprites = null;
+
+  // Letters for writing in menus.
+  private static Sprite letterSpritesSmallCaps = null;
+  private static Sprite numberSpritesSmallCaps = null;
 
   // Commander overlay backdrops (shows commander name and funds) for each Commander in the game.
   private static HashMap<Commander, Sprite> coOverlays = new HashMap<Commander, Sprite>();
 
   private static BufferedImage actionCursor = null;
+
+  // Text images for main menu options.
+  private static Sprite menuOptionsSprite = null;
+
+  // Victory/Defeat text for game end.
+  private static BufferedImage gameOverDefeatText = null;
+  private static BufferedImage gameOverVictoryText = null;
 
   /**
    * Retrieve (loading if needed) the sprites associated with the given terrain type. For ownable terrain types
@@ -363,62 +384,164 @@ public class SpriteLibrary
   ///////////////////////////////////////////////////////////////////
 
   /**
-   * Loads the alphabetic character image file (if not already loaded), and returns
-   * the resulting Sprite, with each letter as its own frame.
-   * Letters are all capital, and are stored in order starting from 'A'.
-   * @return A Sprite object containing the in-game menu font for letters.
+   * Returns a Sprite containing every uppercase letter, one letter per frame. The image
+   * is loaded, and the Sprite is created, on the first call to this function, and simply
+   * returned thereafter. Letters are stored in order starting from 'A'.
+   * @return A Sprite object containing the in-game menu font for uppercase letters.
    */
-  public static Sprite getMenuLetters()
+  public static Sprite getLettersUppercase()
   {
-    if( null == menuLetterSprites )
+    if( null == letterSpritesUppercase )
     {
-      menuLetterSprites = new Sprite(loadSpriteSheetFile("res/tileset/letters.png"), 5, 6);
+      letterSpritesUppercase = new Sprite(loadSpriteSheetFile("res/ui/main/letters_uppercase.png"), 5, 11);
     }
-    return menuLetterSprites;
+    return letterSpritesUppercase;
   }
 
   /**
-   * Loads the numeric character image file if needed, and returns the resulting Sprite.
-   * Numbers are stored in order starting from 0; each number is its own frame in the Sprite.
+   * Returns a Sprite containing every lowercase letter, one letter per frame. The image
+   * is loaded, and the Sprite is created, on the first call to this function, and simply
+   * returned thereafter. Letters are stored in order starting from 'a'. 
+   * @return A Sprite object containing the in-game menu font for lowercase letters.
+   */
+  public static Sprite getLettersLowercase()
+  {
+    if( null == letterSpritesLowercase )
+    {
+      letterSpritesLowercase = new Sprite(loadSpriteSheetFile("res/ui/main/letters_lowercase.png"), 5, 11);
+    }
+    return letterSpritesLowercase;
+  }
+
+  /**
+   * Returns a Sprite containing the digits 0-9, one number per frame. The image
+   * is loaded, and the Sprite is created, on the first call to this function, and simply
+   * returned thereafter. Numbers are stored in order starting from 0.
    * @return A Sprite object containing the in-game menu font for numbers.
    */
-  public static Sprite getMenuNumbers()
+  public static Sprite getNumbers()
   {
-    if( null == menuNumberSprites )
+    if( null == numberSprites )
     {
-      menuNumberSprites = new Sprite(loadSpriteSheetFile("res/tileset/numbers.png"), 5, 6);
+      numberSprites = new Sprite(loadSpriteSheetFile("res/ui/main/numbers.png"), 5, 11);
     }
-    return menuNumberSprites;
+    return numberSprites;
   }
 
   /**
-   * Draws the provided text at the provided location, using the alphanumeric sprites for in-game menus.
+   * Returns a Sprite containing every small-uppercase letter, one letter per frame. The image
+   * is loaded, and the Sprite is created, on the first call to this function, and simply
+   * returned thereafter. Letters are all uppercase, and are stored in order starting from 'A'.
+   * @return A Sprite object containing the in-game menu font for small-caps letters.
+   */
+  public static Sprite getLettersSmallCaps()
+  {
+    if( null == letterSpritesSmallCaps )
+    {
+      letterSpritesSmallCaps = new Sprite(loadSpriteSheetFile("res/ui/letters.png"), 5, 6);
+    }
+    return letterSpritesSmallCaps;
+  }
+
+  /**
+   * This function returns numbers which match the font returned from getSmallLetters().
+   * Returns a Sprite containing the digits 0-9, one number per frame. The image
+   * is loaded, and the Sprite is created, on the first call to this function, and simply
+   * returned thereafter. Numbers are stored in order starting from 0.
+   * @return A Sprite object containing the in-game menu font for small-caps numbers.
+   */
+  public static Sprite getNumbersSmallCaps()
+  {
+    if( null == numberSpritesSmallCaps )
+    {
+      numberSpritesSmallCaps = new Sprite(loadSpriteSheetFile("res/ui/numbers.png"), 5, 6);
+    }
+    return numberSpritesSmallCaps;
+  }
+
+  /**
+   * Draws the provided text at the provided location, using the standard alphanumeric sprite set.
    * @param g Graphics object to draw the text.
    * @param text Text to be drawn as sprited letters.
    * @param x X-coordinate of the top-left corner of the first letter to be drawn.
    * @param y Y-coordinate of the top-left corner of the first letter to be drawn.
    * @param scale Scaling factor to be applied when drawing.
    */
-  public static void drawMenuText(Graphics g, String text, int x, int y, int scale)
+  public static void drawText(Graphics g, String text, int x, int y, int scale)
   {
-    // We use getMenuLetters on the first call just to ensure they are loaded.
-    int menuTextWidth = getMenuLetters().getFrame(0).getWidth() * scale;
-    int menuTextHeight = menuLetterSprites.getFrame(0).getHeight() * scale;
-    text = text.toUpperCase(); // Menus only have capital letters.
+    Sprite uppercase = getLettersUppercase();
+    Sprite lowercase = getLettersLowercase();
+    int menuTextWidth = uppercase.getFrame(0).getWidth() * scale;
+    int menuTextHeight = uppercase.getFrame(0).getHeight() * scale;
+
+    for( int i = 0; i < text.length(); ++i, x += menuTextWidth )
+    {
+      char thisChar = text.charAt(i);
+      if( Character.isAlphabetic(thisChar) )
+      {
+        if( Character.isUpperCase(thisChar) )
+        {
+          int letterIndex = thisChar - 'A';
+          g.drawImage(uppercase.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+        }
+        else
+        {
+          int letterIndex = thisChar - 'a';
+          g.drawImage(lowercase.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+        }
+      }
+      else if( Character.isDigit(thisChar) )
+      {
+        int letterIndex = thisChar - '0';
+        g.drawImage(getNumbers().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+      }
+    }
+  }
+
+  /**
+   * Draws the provided text at the provided location, using the small-caps alphanumeric sprite set.
+   * @param g Graphics object to draw the text.
+   * @param text Text to be drawn as sprited letters.
+   * @param x X-coordinate of the top-left corner of the first letter to be drawn.
+   * @param y Y-coordinate of the top-left corner of the first letter to be drawn.
+   * @param scale Scaling factor to be applied when drawing.
+   */
+  public static void drawTextSmallCaps(Graphics g, String text, int x, int y, int scale)
+  {
+    Sprite smallCaps = getLettersSmallCaps();
+    int menuTextWidth = smallCaps.getFrame(0).getWidth() * scale;
+    int menuTextHeight = smallCaps.getFrame(0).getHeight() * scale;
+    text = text.toUpperCase(); // SmallCaps is all uppercase.
 
     for( int i = 0; i < text.length(); ++i, x += menuTextWidth )
     {
       if( Character.isAlphabetic(text.charAt(i)) )
       {
         int letterIndex = text.charAt(i) - 'A';
-        g.drawImage(menuLetterSprites.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+        g.drawImage(smallCaps.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
       }
       else if( Character.isDigit(text.charAt(i)) )
       {
         int letterIndex = text.charAt(i) - '0';
-        g.drawImage(getMenuNumbers().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+        g.drawImage(getNumbersSmallCaps().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
       }
     }
+  }
+
+  /**
+   * Draws the provided image, centered around x, y.
+   */
+  public static void drawImageCenteredOnPoint(Graphics g, BufferedImage image, int x, int y, int drawScale)
+  {
+    // Calculate the size to draw.
+    int drawWidth = image.getWidth() * drawScale;
+    int drawHeight = image.getHeight() * drawScale;
+
+    // Center over the target location.
+    int drawX = x - drawWidth / 2;
+    int drawY = y - drawHeight / 2;
+
+    g.drawImage(image, drawX, drawY, drawWidth, drawHeight, null);
   }
 
   /**
@@ -431,9 +554,21 @@ public class SpriteLibrary
   {
     if( !coOverlays.containsKey(co) )
     {
+      final int OVERLAY_WIDTH = 97;
+      final int OVERLAY_HEIGHT = 20;
+
       // If we don't already have this overlay, go load and store it.
-      Sprite overlay = new Sprite(loadSpriteSheetFile("res/tileset/co_overlay.png"), 72, 20);
+      Sprite overlay = new Sprite(loadSpriteSheetFile("res/ui/co_overlay.png"), OVERLAY_WIDTH, OVERLAY_HEIGHT);
       overlay.colorize(defaultMapColors, mapUnitColorPalettes.get(co.myColor).paletteColors);
+
+      // Draw the Commander's mug on top of the overlay.
+      BufferedImage coMug = getCommanderSprites(co.coInfo.cmdrEnum).eyes;
+      int mugW = coMug.getWidth();
+      Graphics g = overlay.getFrame(0).getGraphics();
+      g.drawImage(coMug, mugW, 1, -mugW, coMug.getHeight(), null);
+      Graphics g1 = overlay.getFrame(1).getGraphics();
+      g1.drawImage(coMug, OVERLAY_WIDTH-mugW, 1, null);
+
       coOverlays.put(co, overlay);
     }
     // Figure out which sub-image they want, and give it to them.
@@ -458,6 +593,18 @@ public class SpriteLibrary
   }
 
   /**
+   * If in is null, set it to a newly-generated blank image of default size. Return in.
+   */
+  public static BufferedImage createBlankImageIfNull(BufferedImage in)
+  {
+    if( null == in )
+    {
+      in = createDefaultBlankSprite(baseSpriteSize, baseSpriteSize);
+    }
+    return in;
+  }
+
+  /**
    * Get the image used to indicate the current action target.
    */
   public static BufferedImage getActionCursor()
@@ -471,5 +618,86 @@ public class SpriteLibrary
       }
     }
     return actionCursor;
+  }
+
+  /**
+   * Returns the image text for the different options in the main menu, as frames in a Sprite.
+   * The options shall be ordered within the Sprite to match the menuOptions array in MainController.
+   * @return
+   */
+  public static Sprite getMainMenuOptions()
+  {
+    if( null == menuOptionsSprite )
+    {
+      menuOptionsSprite = new Sprite(createBlankImageIfNull(loadSpriteSheetFile("res/ui/main/newgame.png")));
+      menuOptionsSprite.addFrame(createBlankImageIfNull(loadSpriteSheetFile("res/ui/main/options.png")));
+      menuOptionsSprite.addFrame(createBlankImageIfNull(loadSpriteSheetFile("res/ui/main/quit.png")));
+    }
+    return menuOptionsSprite;
+  }
+
+  public static BufferedImage getGameOverDefeatText()
+  {
+    if(null == gameOverDefeatText)
+    {
+      gameOverDefeatText = loadSpriteSheetFile("res/ui/defeat.png");
+    }
+    return gameOverDefeatText;
+  }
+
+  public static BufferedImage getGameOverVictoryText()
+  {
+    if(null == gameOverVictoryText)
+    {
+      gameOverVictoryText = loadSpriteSheetFile("res/ui/victory.png");
+    }
+    return gameOverVictoryText;
+  }
+  ///////////////////////////////////////////////////////////////////
+  //  Below is code for loading Commander sprite images.
+  ///////////////////////////////////////////////////////////////////
+
+  private static HashMap<CommanderLibrary.CommanderEnum, CommanderSpriteSet> coSpriteSets = new HashMap<CommanderLibrary.CommanderEnum, CommanderSpriteSet>();
+
+  public static CommanderSpriteSet getCommanderSprites( CommanderLibrary.CommanderEnum whichCo )
+  {
+    CommanderSpriteSet css = null;
+
+    if(!coSpriteSets.containsKey(whichCo))
+    {
+      // We don't have it, so we need to load it.
+      String baseFileName = getCommanderBaseSpriteName( whichCo );
+
+      BufferedImage body = createBlankImageIfNull(loadSpriteSheetFile(baseFileName + ".png"));
+      BufferedImage head = createBlankImageIfNull(loadSpriteSheetFile(baseFileName + "_face.png"));
+      BufferedImage eyes = createBlankImageIfNull(loadSpriteSheetFile(baseFileName + "_eyes.png"));
+
+      coSpriteSets.put(whichCo, new CommanderSpriteSet(body, head, eyes));
+    }
+
+    css = coSpriteSets.get(whichCo);
+
+    return css;
+  }
+
+  private static String getCommanderBaseSpriteName( CommanderLibrary.CommanderEnum whichCo )
+  {
+    String str = "res/co/";
+    switch(whichCo)
+    {
+      case LION:
+        str += "lion";
+        break;
+      case PATCH:
+        str += "patch";
+        break;
+      case STRONG:
+        str += "strong";
+        break;
+      case NOONE:
+        default:
+          // Not a real Commander. Gonna fall back to placeholder images.
+    }
+    return str;
   }
 }

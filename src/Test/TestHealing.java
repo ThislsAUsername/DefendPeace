@@ -1,30 +1,32 @@
 package Test;
 
-import CommandingOfficers.CmdrStrong;
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderPatch;
+import Engine.XYCoord;
+import Terrain.Environment;
 import Terrain.GameMap;
+import Terrain.MapInfo;
 import Units.Unit;
 import Units.UnitModel.UnitEnum;
 
 public class TestHealing extends TestCase
 {
   private static Commander testCo1;
-  private static Commander testCo2;
   private static GameMap testMap;
 
   /** Make two COs and a GameMap to use with this test case. */
   private void setupTest()
   {
-    testCo1 = new CmdrStrong();
-    testCo2 = new Commander();
-    Commander[] cos = { testCo1, testCo2 };
+    testCo1 = new CommanderPatch();
+    Commander[] cos = { testCo1 };
+    // Create a small map with a city to provide healing.
+    Environment.Terrains[][] testLoc = {
+        {Environment.Terrains.CITY, Environment.Terrains.GRASS},
+        {Environment.Terrains.GRASS, Environment.Terrains.GRASS}};
+    XYCoord[] co1Props = { new XYCoord(0, 0) }; // Assign the city to our CO.
+    XYCoord[][] properties = { co1Props }; // Wrap with an array to match MapInfo interface.
 
-    // TODO: This will have to change once GameMap doesn't build a default map.
-    testMap = new GameMap(cos);
-
-    // Remove the default units. TODO: Remove this once there isn't a default map.
-    testMap.getLocation(6, 5).setResident(null);
-    testMap.getLocation(8, 4).setResident(null);
+    testMap = new GameMap(cos, new MapInfo("Healing Test", testLoc, properties));
   }
 
   @Override
@@ -38,7 +40,7 @@ public class TestHealing extends TestCase
   /** Make sure an Infantry unit heals correctly when passing time on an owned city. */
   private boolean testHealing()
   {
-    Unit victim = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 1, 4);
+    Unit victim = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 0, 0);
     // Assuming 200/turn for healing infantry: 999\200 = 4, plus one healing after that = 5,
     //    plus another iteration to check poverty conditions = 6 iterations
     testCo1.money = 999;
@@ -55,7 +57,7 @@ public class TestHealing extends TestCase
       victim.damageHP(2.5); // Hurt the victim.
       prevMoney = testCo1.money; // Track money.
       prevHP = victim.getHP(); // Track HP.
-      victim.initTurn(testMap.getLocation(1, 4)); // Make the unit try to heal itself.
+      victim.initTurn(testMap.getLocation(victim.x, victim.y)); // Make the unit try to heal itself.
 
       if( victim.getHP() > prevHP )
       { // If the unit was healed...

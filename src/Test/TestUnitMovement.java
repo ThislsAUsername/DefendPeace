@@ -1,9 +1,11 @@
 package Test;
 
-import CommandingOfficers.CmdrStrong;
+import CommandingOfficers.CommanderPatch;
+import CommandingOfficers.CommanderStrong;
 import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Terrain.GameMap;
+import Terrain.MapLibrary;
 import Units.Unit;
 import Units.UnitModel.UnitEnum;
 
@@ -16,16 +18,11 @@ public class TestUnitMovement extends TestCase
   /** Make two COs and a GameMap to use with this test case. */
   private void setupTest()
   {
-    testCo1 = new CmdrStrong();
-    testCo2 = new Commander();
+    testCo1 = new CommanderStrong();
+    testCo2 = new CommanderPatch();
     Commander[] cos = { testCo1, testCo2 };
 
-    // TODO: This will have to change once GameMap doesn't build a default map.
-    testMap = new GameMap(cos);
-
-    // Remove the default units. TODO: Remove this once there isn't a default map.
-    testMap.getLocation(6, 5).setResident(null);
-    testMap.getLocation(8, 4).setResident(null);
+    testMap = new GameMap(cos, MapLibrary.getByName("Firing Range"));
   }
 
   @Override

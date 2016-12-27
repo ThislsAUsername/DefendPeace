@@ -8,20 +8,19 @@ import UI.MapView;
 
 public class FillRectMapView extends MapView
 {
-  private static final long serialVersionUID = 1L;
-
   private FillRectMapArtist mapArtist;
   private FillRectUnitArtist unitArtist;
   private FillRectMenuArtist menuArtist;
 
   private int baseTileSize = 16;
+  private int drawScale = 2;
   private int mapViewWidth;
   private int mapViewHeight;
 
   public FillRectMapView(GameInstance game)
   {
-    mapViewWidth = baseTileSize * getDrawScale() * 15;
-    mapViewHeight = baseTileSize * getDrawScale() * 10;
+    mapViewWidth = baseTileSize * drawScale * 15;
+    mapViewHeight = baseTileSize * drawScale * 10;
 
     mapArtist = new FillRectMapArtist(game);
     unitArtist = new FillRectUnitArtist(game);
@@ -30,33 +29,33 @@ public class FillRectMapView extends MapView
     mapArtist.setView(this);
     unitArtist.setView(this);
     menuArtist.setView(this);
+  }
 
-    setPreferredSize(new Dimension(mapViewWidth, mapViewHeight));
+  @Override
+  public Dimension getPreferredDimensions()
+  {
+    return new Dimension(mapViewWidth, mapViewHeight);
   }
 
   @Override
   public int getTileSize()
   {
-    return baseTileSize * getDrawScale();
+    return baseTileSize * drawScale;
   }
 
-  @Override
   public int getViewWidth()
   {
     return mapViewWidth;
   }
 
-  @Override
   public int getViewHeight()
   {
     return mapViewHeight;
   }
 
   @Override
-  protected void paintComponent(Graphics g)
+  public void render(Graphics g)
   {
-    super.paintComponent(g);
-
     mapArtist.drawMap(g);
     mapArtist.drawHighlights(g);
     if( mapController.getContemplatedMove() != null )

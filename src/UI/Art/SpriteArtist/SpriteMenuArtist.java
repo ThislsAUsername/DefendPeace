@@ -1,6 +1,7 @@
 package UI.Art.SpriteArtist;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.util.ArrayList;
 
@@ -36,9 +37,9 @@ public class SpriteMenuArtist
     myView = view;
 
     // Get the draw scale, and figure out the resulting "real" text size, etc.
-    drawScale = myView.getDrawScale();
-    menuTextWidth = SpriteLibrary.getMenuLetters().getFrame(0).getWidth() * drawScale;
-    menuTextHeight = SpriteLibrary.getMenuLetters().getFrame(0).getHeight() * drawScale;
+    drawScale = SpriteOptions.getDrawScale();
+    menuTextWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth() * drawScale;
+    menuTextHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight() * drawScale;
     menuHBuffer = 3 * drawScale; // Amount of visible menu to left and right of options;
     menuVBuffer = 4 * drawScale; // Amount of visible menu above and below menu options;
   }
@@ -75,8 +76,9 @@ public class SpriteMenuArtist
       int drawY = myGame.getCursorY() * viewTileSize - (menuHeight / 2 - viewTileSize / 2);
 
       // Make sure the menu is fully contained in viewable space.
-      drawX = (drawX < 0) ? 0 : (drawX > (myView.getViewWidth() - menuWidth)) ? (myView.getViewWidth() - menuWidth) : drawX;
-      drawY = (drawY < 0) ? 0 : (drawY > (myView.getViewHeight() - menuHeight)) ? (myView.getViewHeight() - menuHeight) : drawY;
+      Dimension dims = SpriteOptions.getScreenDimensions();
+      drawX = (drawX < 0) ? 0 : (drawX > (dims.width - menuWidth)) ? (dims.width - menuWidth) : drawX;
+      drawY = (drawY < 0) ? 0 : (drawY > (dims.height - menuHeight)) ? (dims.height - menuHeight) : drawY;
 
       // Draw the nice box for our text.
       drawMenuFrame(g, drawX, drawY, menuWidth, menuHeight);
@@ -90,7 +92,7 @@ public class SpriteMenuArtist
       // Draw the actual menu text.
       for( int txtY = drawY + menuVBuffer, i = 0; i < myCurrentMenu.getNumOptions(); ++i, txtY += menuTextHeight + drawScale )
       {
-        SpriteLibrary.drawMenuText(g, myCurrentMenuStrings.get(i), drawX + menuHBuffer, txtY, drawScale);
+        SpriteLibrary.drawTextSmallCaps(g, myCurrentMenuStrings.get(i), drawX + menuHBuffer, txtY, drawScale);
       }
     }
   }

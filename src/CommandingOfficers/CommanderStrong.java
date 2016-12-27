@@ -5,11 +5,13 @@ import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 
-public class CmdrStrong extends Commander
+public class CommanderStrong extends Commander
 {
-  public CmdrStrong()
+  private static final CommanderInfo coInfo = new CommanderInfo("Strong", CommanderLibrary.CommanderEnum.STRONG);
+
+  public CommanderStrong()
   {
-    super();
+    super(coInfo);
 
     // Set Cmdr Strong up with a base damage buff and long-range APCs. These COModifiers are
     // not added to the modifers collection so they will not be reverted.
@@ -33,5 +35,10 @@ public class CmdrStrong extends Commander
     COModifier strongestMod = new CODamageModifier(40); // An extra 40% with the major ability active.
     strongestMod.apply(this);
     modifiers.add(strongestMod); // Add to the list so the modifier can be reverted next turn.
+  }
+
+  public static CommanderInfo getInfo()
+  {
+    return coInfo;
   }
 }

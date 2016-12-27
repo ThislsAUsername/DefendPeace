@@ -1,31 +1,48 @@
 package Engine;
 
+import CommandingOfficers.Commander;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.Environment.Terrains;
+import UI.CO_InfoMenu;
 import UI.InputHandler;
 import UI.GameMenu;
 import UI.MapView;
 import Units.Unit;
 
-public class MapController
+public class MapController implements IController
 {
   private GameInstance myGame;
   private MapView myView;
 
   private enum InputMode
   {
-    MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION, ANIMATION
+    MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION, CONFIRMEXIT, ANIMATION, EXITGAME, CO_INFO
   };
 
   public enum MetaAction
   {
-    END_TURN
+    CO_INFO, QUIT_GAME, END_TURN
   };
+  private MetaAction[] metaActions = {MetaAction.CO_INFO, MetaAction.QUIT_GAME, MetaAction.END_TURN};
+
+  private enum ConfirmExit
+  {
+    EXIT_TO_MAIN_MENU, QUIT_APPLICATION
+  };
+  private ConfirmExit[] confirmExitOptions = {ConfirmExit.EXIT_TO_MAIN_MENU, ConfirmExit.QUIT_APPLICATION};
 
   private InputMode inputMode;
 
+  private boolean isGameOver;
+
   private Path currentMovePath;
+
+  // We use a different method for the CO Info menu than the others (MetaAction, etc) because
+  // it has two different axes of control, and because it has no actions that can result.
+  public boolean isInCoInfoMenu = false;
+  private CO_InfoMenu coInfoMenu;
 
   public MapController(GameInstance game, MapView view)
   {
@@ -33,16 +50,20 @@ public class MapController
     myView = view;
     myView.setController(this);
     inputMode = InputMode.MAP;
+    isGameOver = false;
     myGame.setCursorLocation(6, 5);
+    coInfoMenu = new CO_InfoMenu( myGame.commanders.length );
   }
 
   /**
    * When the GameMap is in focus, all user input is directed through this function. It is
    * redirected to a specific handler based on what actions the user is currently taking.
    */
-  public void handleInput(InputHandler.InputAction input)
+  @Override
+  public boolean handleInput(InputHandler.InputAction input)
   {
     System.out.println("handling " + input + " input in " + inputMode + " mode");
+    boolean exitMap = false;
     switch (inputMode)
     {
       case MAP:
@@ -63,6 +84,17 @@ public class MapController
       case METAACTION:
         handleMetaActionMenuInput(input);
         break;
+      case CONFIRMEXIT:
+        // If they exit via menu, don't hang around for the victory animation.
+        exitMap = handleConfirmExitMenuInput(input);
+        break;
+      case CO_INFO:
+        if( coInfoMenu.handleInput( input ) )
+        {
+          isInCoInfoMenu = false;
+          changeInputMode( InputMode.METAACTION );
+        }
+        break;
       case ANIMATION:
         if( input == InputHandler.InputAction.BACK || input == InputHandler.InputAction.ENTER )
         {
@@ -70,9 +102,18 @@ public class MapController
           myView.cancelAnimation();
         }
         break;
+      case EXITGAME:
+        // Once the game is over, wait for an ENTER or BACK input to return to the main menu.
+        if( input == InputHandler.InputAction.BACK || input == InputHandler.InputAction.ENTER )
+        {
+          exitMap = true;
+        }
+        break;
       default:
         System.out.println("Invalid InputMode in MapController! " + inputMode);
     }
+
+    return exitMap;
   }
 
   /**
@@ -215,16 +256,7 @@ public class MapController
         // If the action is completely constructed, execute it, else get the missing info.
         if( myView.currentAction.isReadyToExecute() )
         {
-          if( myView.currentAction.execute(myGame.gameMap) )
-          {
-            changeInputMode(InputMode.ANIMATION);
-            myView.animate(myView.currentAction);
-          }
-          else
-          {
-            System.out.println("ERROR! Action failed to execute!");
-            changeInputMode(InputMode.MAP); // try and reset;
-          }
+          executeGameAction( myView.currentAction );
         }
         else
         {
@@ -270,18 +302,7 @@ public class MapController
 
           if( myView.currentAction.isReadyToExecute() )
           {
-            // Do the thing.
-            if( myView.currentAction.execute(myGame.gameMap) )
-            {
-              // Kick it off to the animator.
-              changeInputMode(InputMode.ANIMATION);
-              myView.animate(myView.currentAction);
-            }
-            else
-            {
-              System.out.println("ERROR! Action failed to execute!");
-              changeInputMode(InputMode.MAP); // try and reset;
-            }
+            executeGameAction( myView.currentAction );
           }
           else
           {
@@ -349,11 +370,20 @@ public class MapController
       case ENTER:
         MetaAction action = (MetaAction) myView.currentMenu.getSelectedAction();
 
-        if( action == MetaAction.END_TURN )
+        if( action == MetaAction.CO_INFO )
+        {
+          isInCoInfoMenu = true;
+          changeInputMode( InputMode.CO_INFO );
+        }
+        else if( action == MetaAction.END_TURN )
         {
           myGame.turn();
+          changeInputMode(InputMode.MAP);
         }
-        changeInputMode(InputMode.MAP);
+        else if( action == MetaAction.QUIT_GAME)
+        {
+          changeInputMode( InputMode.CONFIRMEXIT );
+        }
         break;
       case BACK:
         changeInputMode(InputMode.MAP);
@@ -363,6 +393,41 @@ public class MapController
       default:
         myView.currentMenu.handleMenuInput(input);
     }
+  }
+
+  private boolean handleConfirmExitMenuInput(InputHandler.InputAction input)
+  {
+    boolean quitGame = false;
+    if( myView.currentMenu == null )
+    {
+      System.out.println("Error! MapController.handleMetaActionMenuInput() called when currentMenu is null!");
+    }
+
+    switch (input)
+    {
+      case ENTER:
+        ConfirmExit action = (ConfirmExit) myView.currentMenu.getSelectedAction();
+
+        if( action == ConfirmExit.EXIT_TO_MAIN_MENU )
+        {
+          // Go back to the main menu.
+          quitGame = true;
+        }
+        else if( action == ConfirmExit.QUIT_APPLICATION )
+        {
+          // Exit the application entirely.
+          System.exit(0);
+        }
+        break;
+      case BACK:
+        changeInputMode(InputMode.METAACTION);
+        break;
+      case NO_ACTION:
+        break;
+      default:
+        myView.currentMenu.handleMenuInput(input);
+    }
+    return quitGame;
   }
 
   /**
@@ -429,11 +494,22 @@ public class MapController
         break;
       case METAACTION:
         myGame.gameMap.clearAllHighlights();
-        MetaAction[] actions = { MetaAction.END_TURN };
-        myView.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, actions);
+        myView.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, metaActions);
+        break;
+      case CONFIRMEXIT:
+        myView.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, confirmExitOptions);
         break;
       case ANIMATION:
         myGame.gameMap.clearAllHighlights();
+        break;
+      case EXITGAME:
+        myView.currentAction = null;
+        myGame.gameMap.clearAllHighlights();
+        myView.currentMenu = null;
+        currentMovePath = null;
+        break;
+      case CO_INFO:
+        // No action needed.
         break;
       default:
         System.out.println("WARNING! MapController.changeInputMode was given an invalid InputMode " + inputMode);
@@ -466,6 +542,110 @@ public class MapController
     }
   }
 
+  /**
+   * Execute the provided action and evaluate any aftermath.
+   */
+  private void executeGameAction(GameAction action)
+  {
+    // Do the thing.
+    if( action.execute(myGame.gameMap) )
+    {
+      // Check if there are any game-ending conditions.
+      switch( action.getActionType() )
+      {
+        case ATTACK:
+          // A fight happened. See if either CO is out of units.
+          if( action.getActor().CO.units.isEmpty() )
+          {
+            // CO is out of units. Too bad.
+            defeatCommander( action.getActor().CO );
+          }
+          // Now check for the defender.
+          if( action.getTargetCO().units.isEmpty() )
+          {
+            // CO is out of units. Too bad.
+            defeatCommander( action.getTargetCO() );
+          }
+          break;
+        case CAPTURE:
+          // Something was captured. Figure out who might be losing a property
+          Commander targetCO = action.getTargetCO();
+
+          // If the targetCO is non-null (the property being captured is non-neutral),
+          //  then verify whether the defending CO still owns his HQ.
+          if( targetCO != null && targetCO.HQLocation.getOwner() != targetCO )
+          {
+            // If targetCO no longer owns his HQ, too bad.
+            defeatCommander( targetCO );
+          }
+          break;
+        case INVALID:
+        case LOAD:
+        case UNLOAD:
+        case WAIT:
+          default:
+            // No potentially game-ending state can be reached with these actions.
+      }
+
+      // Count the number of COs that are left.
+      int activeNum = 0;
+      for( int i = 0; i < myGame.commanders.length; ++i)
+      {
+        if( !myGame.commanders[i].isDefeated )
+        {
+          activeNum++;
+        }
+      }
+
+      // If fewer than two COs yet survive, the game is over.
+      if(activeNum < 2)
+      {
+        isGameOver = true;
+      }
+
+      // Kick the action off to the animator.
+      changeInputMode(InputMode.ANIMATION);
+      myView.animate(myView.currentAction); // Set up the animation for this action.
+    }
+    else
+    {
+      System.out.println("ERROR! Action failed to execute!");
+      changeInputMode(InputMode.MAP); // try and reset;
+    }
+  }
+
+  private void defeatCommander(Commander defeatedCO)
+  {
+    // Set the flag so that we know he's toast.
+    defeatedCO.isDefeated = true;
+
+    // Loop through the map and clean up any of the defeated CO's assets.
+    GameMap map = myGame.gameMap;
+    for(int y = 0; y < map.mapHeight; ++y)
+    {
+      for(int x = 0; x < map.mapWidth; ++x)
+      {
+        Location loc = map.getLocation(x, y);
+
+        // Remove any units that remain.
+        if(loc.getResident() != null && loc.getResident().CO == defeatedCO)
+        {
+          loc.setResident(null);
+        }
+        defeatedCO.units.clear(); // Remove from the CO array too, just to be thorough.
+
+        // Downgrade the defeated commander's HQ to a city.
+        defeatedCO.HQLocation.setEnvironment(Environment.getTile(Terrains.CITY, defeatedCO.HQLocation.getEnvironment().weatherType));
+
+        // Release control of any buildings he owned.
+        if(loc.isCaptureable() && loc.getOwner() == defeatedCO)
+        {
+          loc.setOwner(null);
+        }
+      }
+    }
+  }
+
   public Path getContemplatedMove()
   {
     return currentMovePath;
@@ -473,6 +653,24 @@ public class MapController
 
   public void animationEnded()
   {
-    changeInputMode(InputMode.MAP);
+    if( isGameOver && inputMode != InputMode.EXITGAME )
+    {
+      // The last action ended the game, and the animation just finished.
+      //  Now we wait for one more keypress before going back to the main menu.
+      changeInputMode( InputMode.EXITGAME );
+
+      // Signal the view to animate the victory/defeat overlay.
+      myView.gameIsOver();
+    }
+    else
+    {
+      // The animation for the last action just completed. Back to normal input mode.
+      changeInputMode(InputMode.MAP);
+    }
+  }
+
+  public CO_InfoMenu getCoInfoMenu()
+  {
+    return coInfoMenu;
   }
 }
