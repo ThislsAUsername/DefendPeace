@@ -2,8 +2,9 @@ package Terrain;
 
 import java.util.ArrayList;
 
+import Terrain.Maps.CageMatch;
 import Terrain.Maps.FiringRange;
-import Terrain.Maps.Podracing;
+import Terrain.Maps.Triumvirate;
 import Terrain.Maps.SpannIsland;
 
 public class MapLibrary
@@ -24,7 +25,8 @@ public class MapLibrary
     availableMaps = new ArrayList<MapInfo>();
     availableMaps.add(FiringRange.getMapInfo());
     availableMaps.add(SpannIsland.getMapInfo());
-    availableMaps.add(Podracing.getMapInfo());
+    availableMaps.add(Triumvirate.getMapInfo());
+    availableMaps.add(CageMatch.getMapInfo());
   }
   
   public static MapInfo getByName(String mapName)

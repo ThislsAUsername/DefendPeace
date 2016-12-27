@@ -39,7 +39,7 @@ public class SpriteMiniMapArtist
    */
   public static BufferedImage getMapImage(MapInfo mapInfo)
   {
-    if( !mapImages.containsKey(mapImages) )
+    if( !mapImages.containsKey(mapInfo) )
     {
       // If we don't already have an image, generate and store it for later.
       mapImages.put(mapInfo, generateMapImage(mapInfo));
@@ -69,6 +69,20 @@ public class SpriteMiniMapArtist
     // Draw team colors for properties that are owned at the start.
     for(int co = 0; co < mapInfo.COProperties.length; ++co)
     {
+      Color coColor;
+      // Log a warning if SpriteLibrary doesn't have enough colors to support this map.
+      if( co >= SpriteLibrary.coColorList.length )
+      {
+        System.out.println("WARNING! '" + mapInfo.mapName + "' has more start locations than there are team colors!");
+
+        // But soldier onwards anyway.
+        coColor = Color.BLACK;
+      }
+      else
+      {
+        coColor = SpriteLibrary.coColorList[co];
+      }
+
       // Loop through all locations assigned to this CO by mapInfo.
       for(int i = 0; i < mapInfo.COProperties[co].length; ++i)
       {
@@ -76,7 +90,8 @@ public class SpriteMiniMapArtist
         XYCoord loc = mapInfo.COProperties[co][i];
         int x = (int)loc.xCoord;
         int y = (int)loc.yCoord;
-        g.setColor( SpriteLibrary.coColorList[co] );
+
+        g.setColor( coColor );
         g.fillRect(x, y, 1, 1);
       }
     }
