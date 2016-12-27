@@ -27,9 +27,9 @@ public class MapController implements IController
 
   public enum MetaAction
   {
-    CO_INFO, QUIT_GAME, END_TURN
+    CO_INFO, MINOR_POWER, MAJOR_POWER, QUIT_GAME, END_TURN
   };
-  private MetaAction[] metaActions = {MetaAction.CO_INFO, MetaAction.QUIT_GAME, MetaAction.END_TURN};
+  private MetaAction[] metaActions = {MetaAction.CO_INFO, MetaAction.MINOR_POWER, MetaAction.MAJOR_POWER, MetaAction.QUIT_GAME, MetaAction.END_TURN};
 
   private enum ConfirmExit
   {
@@ -380,6 +380,16 @@ public class MapController implements IController
         {
           isInCoInfoMenu = true;
           changeInputMode( InputMode.CO_INFO );
+        }
+        else if( action == MetaAction.MINOR_POWER)
+        {
+          myGame.activeCO.doAbilityMinor();
+          changeInputMode( InputMode.MAP );
+        }
+        else if( action == MetaAction.MAJOR_POWER)
+        {
+          myGame.activeCO.doAbilityMajor();
+          changeInputMode( InputMode.MAP );
         }
         else if( action == MetaAction.END_TURN )
         {
