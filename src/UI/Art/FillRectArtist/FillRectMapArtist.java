@@ -18,7 +18,7 @@ public class FillRectMapArtist
   public static final Color COLOR_CITY = Color.GRAY;
   public static final Color COLOR_FACTORY = Color.DARK_GRAY;
   public static final Color COLOR_FOREST = Color.GREEN;
-  public static final Color COLOR_OCEAN = Color.BLUE;
+  public static final Color COLOR_SEA = Color.BLUE;
   public static final Color COLOR_MOUNTAIN = new Color(101, 40, 26);
   public static final Color COLOR_REEF = new Color(212, 144, 56);
   public static final Color COLOR_ROAD = Color.LIGHT_GRAY;
@@ -93,7 +93,7 @@ public class FillRectMapArtist
         tileColor = COLOR_FOREST;
         break;
       case SEA:
-        tileColor = COLOR_OCEAN;
+        tileColor = COLOR_SEA;
         break;
       case HQ:
         if( locus.getOwner() != null )

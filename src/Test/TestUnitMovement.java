@@ -70,6 +70,7 @@ public class TestUnitMovement extends TestCase
     // Make sure the action didn't actually execute.
     boolean testPassed = validate(testMap.getLocation(4, 4).getResident() == mover, "    Infantry moved when he shouldn't have.");
     testPassed &= validate(4 == mover.x && 4 == mover.y, "    Infantry thinks he moved when he should not have.");
+    testPassed &= validate(testMap.getLocation(7, 6).getResident() == null, "    Target location has a resident when it should not.");
 
     // Clean up for the next test.
     testMap.removeUnit(mover);

@@ -10,7 +10,11 @@ import Terrain.Environment;
 import Terrain.GameMap;
 
 /**
- * Responsible for storing and organizing all image data associated with a specific map tile type.
+ * Responsible for storing and organizing all image data associated with a specific map tile type, and drawing the
+ * correct terrain subimage based on the map context.
+ * TerrainSpriteSet is recursive - it may contain additional TerrainSpriteSet members which define transition
+ * images for adjacent tiles of a different terrain type. For example, the SEA TerrainSpriteSet will contain a
+ * GRASS TerrainSpriteSet which defines an overlay image to be drawn when a SEA tile is adjacent to a GRASS tile.
  */
 public class TerrainSpriteSet
 {
@@ -164,16 +168,24 @@ public class TerrainSpriteSet
       spriteSet.drawTile(g, map, x, y, scale, shouldDrawTerrainObject);
     }
 
+    // Figure out if we need to draw this tile, based on this tile type and whether the caller
+    //   wishes to draw terrain objects or base terrain.
     if( (shouldDrawTerrainObject && isTerrainObject(myTerrainType))
         || (!shouldDrawTerrainObject && !isTerrainObject(myTerrainType)) )
-    { // We do want to draw the terrain object, and this tile type does represent a terrain object
+    {
+      // Either: we are only drawing terrain objects, and this tile type does represent a terrain object,
+      //     or: we are only drawing base terrain, and this tile type represents base terrain.
       int tileSize = SpriteLibrary.baseSpriteSize * scale;
       int variation = (x + 1) * (y) + x; // Used to vary the specific sprite version drawn at each place in a repeatable way.
 
+      // Figure out how to handle map-edge transitions; we only want to assume the "adjacent" off-map tile has the same type
+      //   as the current tile if the current tile type matches the TerrainSpriteSet type (that is, this TerrainSpriteSet does
+      //   not define a tile transition - it's the sprite for the actual terrain type of the current tile). This makes it so
+      //   that GRASS or SEA will continue off the edge of the map, and we don't get strange cliff walls at the edge of the map.
       boolean assumeSameTileType = myTerrainType == map.getEnvironment(x, y).terrainType;
       short dirIndex = getTileImageIndex(map, x, y, assumeSameTileType);
 
-      // Draw the current tile
+      // Draw the current tile.
       BufferedImage frame = terrainSprites.get(dirIndex).getFrame(variation);
       g.drawImage(frame, (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize, frame.getWidth() * scale, frame.getHeight()
           * scale, null);
@@ -182,22 +194,22 @@ public class TerrainSpriteSet
       if( terrainSprites.size() == 20 )
       {
         // If we didn't have a N or W transition, then look in the NW position
-        if( (dirIndex & (NORTH | WEST)) == 0 && checkTileType(map, myTerrainType, x - 1, y - 1, assumeSameTileType) )
+        if( (dirIndex & (NORTH | WEST)) == 0 && checkTileType(map, x - 1, y - 1, assumeSameTileType) )
         {
           g.drawImage(terrainSprites.get(NW).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
               frame.getWidth() * scale, frame.getHeight() * scale, null);
         }
-        if( (dirIndex & (NORTH | EAST)) == 0 && checkTileType(map, myTerrainType, x + 1, y - 1, assumeSameTileType) )
+        if( (dirIndex & (NORTH | EAST)) == 0 && checkTileType(map, x + 1, y - 1, assumeSameTileType) )
         {
           g.drawImage(terrainSprites.get(NE).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
               frame.getWidth() * scale, frame.getHeight() * scale, null);
         }
-        if( (dirIndex & (SOUTH | EAST)) == 0 && checkTileType(map, myTerrainType, x + 1, y + 1, assumeSameTileType) )
+        if( (dirIndex & (SOUTH | EAST)) == 0 && checkTileType(map, x + 1, y + 1, assumeSameTileType) )
         {
           g.drawImage(terrainSprites.get(SE).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
               frame.getWidth() * scale, frame.getHeight() * scale, null);
         }
-        if( (dirIndex & (SOUTH | WEST)) == 0 && checkTileType(map, myTerrainType, x - 1, y + 1, assumeSameTileType) )
+        if( (dirIndex & (SOUTH | WEST)) == 0 && checkTileType(map, x - 1, y + 1, assumeSameTileType) )
         {
           g.drawImage(terrainSprites.get(SW).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
               frame.getWidth() * scale, frame.getHeight() * scale, null);
@@ -226,11 +238,11 @@ public class TerrainSpriteSet
     short dirIndex = 0;
     if( terrainSprites.size() > 1 ) // We expect the size to be either 1, 16, or 20.
     {
-      // Figure out which neighbors tiles have the same terrain type as this one.
-      dirIndex |= checkTileType(map, myTerrainType, x, y - 1, assumeSameTileType) ? NORTH : 0;
-      dirIndex |= checkTileType(map, myTerrainType, x + 1, y, assumeSameTileType) ? EAST : 0;
-      dirIndex |= checkTileType(map, myTerrainType, x, y + 1, assumeSameTileType) ? SOUTH : 0;
-      dirIndex |= checkTileType(map, myTerrainType, x - 1, y, assumeSameTileType) ? WEST : 0;
+      // Figure out which neighboring tiles have the same terrain type as this one.
+      dirIndex |= checkTileType(map, x, y - 1, assumeSameTileType) ? NORTH : 0;
+      dirIndex |= checkTileType(map, x + 1, y, assumeSameTileType) ? EAST : 0;
+      dirIndex |= checkTileType(map, x, y + 1, assumeSameTileType) ? SOUTH : 0;
+      dirIndex |= checkTileType(map, x - 1, y, assumeSameTileType) ? WEST : 0;
     }
 
     // Normalize the index value just in case.
@@ -273,7 +285,7 @@ public class TerrainSpriteSet
    *   us to draw roads that go off the map, etc, but keep it from looking like there is always land across
    *   the water at the edge of the map due to unwanted cliff-face transitions.
    */
-  private boolean checkTileType(GameMap map, Environment.Terrains terrain, int x, int y, boolean assumeTrue)
+  private boolean checkTileType(GameMap map, int x, int y, boolean assumeTrue)
   {
     return (map.isLocationValid(x, y) && ((map.getEnvironment(x, y).terrainType == myTerrainType) || // Valid location, terrain types match.
         (getBaseTerrainType(map.getEnvironment(x, y).terrainType) == myTerrainType)) // Valid location, terrain base matches. 

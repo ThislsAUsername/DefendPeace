@@ -154,8 +154,9 @@ public class SpriteMapView extends MapView
       {
         mapArtist.drawMovePath(g, currentAction.getMovePath());
       }
-      // Draw the acting unit so it's on top of everything.
-      if( null != currentAction ) // && currentAnimation == null) // If the unit should animate when acting.
+
+      // Draw the currently-acting unit so it's on top of everything.
+      if( null != currentAction )
       {
         Unit u = currentAction.getActor();
         unitArtist.drawUnit(g, u, u.x, u.y, fastAnimIndex);
