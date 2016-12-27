@@ -1,7 +1,6 @@
 package Engine;
 
 import CommandingOfficers.Commander;
-import Engine.Combat.CombatEngine;
 import Terrain.GameMap;
 import Units.Unit;
 

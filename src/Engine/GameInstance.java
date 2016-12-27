@@ -1,6 +1,5 @@
 package Engine;
 
-import Engine.Combat.CombatEngine;
 import Terrain.GameMap;
 import Terrain.Location;
 
@@ -90,7 +89,7 @@ public class GameInstance
       }
       activeCO = commanders[activeCoNum];
     } while( activeCO.isDefeated );
-    
+
     // Start the turn.
     activeCO.initTurn(gameMap);
   }
