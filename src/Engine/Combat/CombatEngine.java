@@ -1,29 +1,31 @@
-package Engine;
+package Engine.Combat;
 
 import java.util.ArrayList;
 
+import CommandingOfficers.Modifiers.COModifier;
 import Terrain.GameMap;
 import Units.Unit;
 
 public class CombatEngine
 {
-  public static ArrayList<CombatModifier> modifiers = new ArrayList<CombatModifier>();
 
   public static void resolveCombat(Unit attacker, Unit defender, GameMap map)
   {
-    // TODO: make sure to clean up unneeded modifiers
-    //		for(int i = 0; i < modifiers.size(); i++) {
-    //			if (modifiers.get(i).done) {
-    //				modifiers.get(i).initTurn();
-    //				modifiers.remove(i);
-    //			}
-    //		}
-
     CombatParameters params = new CombatParameters(attacker, defender, map);
+    
+    // first do the attacker's modifiers
+    ArrayList<COModifier> modifiers = params.attacker.CO.modifiers;
     for( int i = 0; i < modifiers.size(); i++ )
     {
       modifiers.get(i).alterCombat(params);
     }
+    // then the defender's modifiers
+    modifiers = params.defender.CO.modifiers;
+    for( int i = 0; i < modifiers.size(); i++ )
+    {
+      modifiers.get(i).alterCombat(params);
+    }
+    
     params.defender.damageHP(params.calculateDamage());
     params.attacker.fire(params); // Lets the unit know that it has actually fired a shot.
     if( params.canCounter )

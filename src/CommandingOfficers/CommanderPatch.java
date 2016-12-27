@@ -23,8 +23,8 @@ public class CommanderPatch extends Commander
   public void doAbilityMajor()
   {
     // TODO: Patch gets a damage boost, and cash based on damage inflicted (40-50%?).
-    COModifier dmgMod = new CODamageModifier(25);
-    dmgMod.apply(this);
+    COModifier dmgMod = new CODamageModifier(this, 25);
+    dmgMod.apply();
     modifiers.add(dmgMod); // Add to the list so the modifier can be reverted next turn.
   }
 

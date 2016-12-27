@@ -3,7 +3,6 @@ package CommandingOfficers;
 import java.awt.Color;
 import java.util.ArrayList;
 
-import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.APCModel;
@@ -62,12 +61,15 @@ public class Commander
     }
     money += turnIncome;
 
-    // Un-apply any modifiers that were activated last turn.
-    // TODO: If/when we have modifiers that last multiple turns, figure out how to handle them.
+    // Update any modifiers that were activated last turn, removing expired ones.
     for( int i = modifiers.size() - 1; i >= 0; --i )
     {
-      modifiers.get(i).revert(this);
-      modifiers.remove(i);
+      modifiers.get(i).turn();
+      if( modifiers.get(i).done )
+      {
+        modifiers.get(i).revert();
+        modifiers.remove(i);
+      }
     }
 
     for( Unit unit : units )
