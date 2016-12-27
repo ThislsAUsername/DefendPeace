@@ -5,7 +5,7 @@ import CommandingOfficers.Commander;
 public class CombatModifier
 {
   public boolean done;
-  public Commander CO;
+  protected Commander CO;
   
   public CombatModifier(Commander user)
   {

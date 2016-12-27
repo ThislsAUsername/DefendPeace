@@ -27,15 +27,21 @@ public class MapController implements IController
 
   public enum MetaAction
   {
-    CO_INFO, QUIT_GAME, END_TURN
+    CO_INFO, MINOR_POWER, MAJOR_POWER, QUIT_GAME, END_TURN
   };
-  private MetaAction[] metaActions = {MetaAction.CO_INFO, MetaAction.QUIT_GAME, MetaAction.END_TURN};
+
+  // TODO: this is ugly, and probably unnecessary.
+  private MetaAction[] metaActions = { MetaAction.CO_INFO, MetaAction.QUIT_GAME, MetaAction.END_TURN };
+  private MetaAction[] metaMinorActions = { MetaAction.CO_INFO, MetaAction.MINOR_POWER, MetaAction.QUIT_GAME, MetaAction.END_TURN };
+  private MetaAction[] metaMajorActions = { MetaAction.CO_INFO, MetaAction.MINOR_POWER, MetaAction.MAJOR_POWER,
+      MetaAction.QUIT_GAME, MetaAction.END_TURN };
 
   private enum ConfirmExit
   {
     EXIT_TO_MAIN_MENU, QUIT_APPLICATION
   };
-  private ConfirmExit[] confirmExitOptions = {ConfirmExit.EXIT_TO_MAIN_MENU, ConfirmExit.QUIT_APPLICATION};
+
+  private ConfirmExit[] confirmExitOptions = { ConfirmExit.EXIT_TO_MAIN_MENU, ConfirmExit.QUIT_APPLICATION };
 
   private InputMode inputMode;
 
@@ -56,7 +62,7 @@ public class MapController implements IController
     inputMode = InputMode.MAP;
     isGameOver = false;
     myGame.setCursorLocation(6, 5);
-    coInfoMenu = new CO_InfoMenu( myGame.commanders.length );
+    coInfoMenu = new CO_InfoMenu(myGame.commanders.length);
   }
 
   /**
@@ -92,10 +98,10 @@ public class MapController implements IController
         exitMap = handleConfirmExitMenuInput(input);
         break;
       case CO_INFO:
-        if( coInfoMenu.handleInput( input ) )
+        if( coInfoMenu.handleInput(input) )
         {
           isInCoInfoMenu = false;
-          changeInputMode( InputMode.METAACTION );
+          changeInputMode(InputMode.METAACTION);
         }
         break;
       case ANIMATION:
@@ -116,7 +122,7 @@ public class MapController implements IController
         System.out.println("Invalid InputMode in MapController! " + inputMode);
     }
 
-    if (exitMap)
+    if( exitMap )
     {
       // re-initialize our list of CombatModifiers, so we know it will be empty for next game
       CombatEngine.modifiers = new ArrayList<CombatModifier>();
@@ -264,7 +270,7 @@ public class MapController implements IController
         // If the action is completely constructed, execute it, else get the missing info.
         if( myView.currentAction.isReadyToExecute() )
         {
-          executeGameAction( myView.currentAction );
+          executeGameAction(myView.currentAction);
         }
         else
         {
@@ -310,7 +316,7 @@ public class MapController implements IController
 
           if( myView.currentAction.isReadyToExecute() )
           {
-            executeGameAction( myView.currentAction );
+            executeGameAction(myView.currentAction);
           }
           else
           {
@@ -379,16 +385,26 @@ public class MapController implements IController
         if( action == MetaAction.CO_INFO )
         {
           isInCoInfoMenu = true;
-          changeInputMode( InputMode.CO_INFO );
+          changeInputMode(InputMode.CO_INFO);
+        }
+        else if( action == MetaAction.MINOR_POWER )
+        {
+          myGame.activeCO.doAbilityMinor();
+          changeInputMode(InputMode.MAP);
+        }
+        else if( action == MetaAction.MAJOR_POWER )
+        {
+          myGame.activeCO.doAbilityMajor();
+          changeInputMode(InputMode.MAP);
         }
         else if( action == MetaAction.END_TURN )
         {
           myGame.turn();
           changeInputMode(InputMode.MAP);
         }
-        else if( action == MetaAction.QUIT_GAME)
+        else if( action == MetaAction.QUIT_GAME )
         {
-          changeInputMode( InputMode.CONFIRMEXIT );
+          changeInputMode(InputMode.CONFIRMEXIT);
         }
         break;
       case BACK:
@@ -500,7 +516,26 @@ public class MapController implements IController
         break;
       case METAACTION:
         myGame.gameMap.clearAllHighlights();
-        myView.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, metaActions);
+
+        // assume no powers are ready
+        MetaAction[] currentActions = metaActions;
+
+        // if powers are available
+        if( myGame.activeCO.starsMax > 0 && !myGame.activeCO.powerActive )
+        {
+          // check if SCOP is up
+          if( myGame.activeCO.starsCurrent >= myGame.activeCO.starsMax )
+          {
+            currentActions = metaMajorActions;
+          }
+          // check if COP is up
+          else if( myGame.activeCO.starsCurrent >= myGame.activeCO.starsMinor )
+          {
+            currentActions = metaMinorActions;
+          }
+        }
+        // make a view with whatever set of actions is ready
+        myView.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, currentActions);
         break;
       case CONFIRMEXIT:
         myView.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, confirmExitOptions);
@@ -557,20 +592,20 @@ public class MapController implements IController
     if( action.execute(myGame.gameMap) )
     {
       // Check if there are any game-ending conditions.
-      switch( action.getActionType() )
+      switch (action.getActionType())
       {
         case ATTACK:
           // A fight happened. See if either CO is out of units.
           if( action.getActor().CO.units.isEmpty() )
           {
             // CO is out of units. Too bad.
-            defeatCommander( action.getActor().CO );
+            defeatCommander(action.getActor().CO);
           }
           // Now check for the defender.
           if( action.getTargetCO().units.isEmpty() )
           {
             // CO is out of units. Too bad.
-            defeatCommander( action.getTargetCO() );
+            defeatCommander(action.getTargetCO());
           }
           break;
         case CAPTURE:
@@ -582,20 +617,20 @@ public class MapController implements IController
           if( targetCO != null && targetCO.HQLocation.getOwner() != targetCO )
           {
             // If targetCO no longer owns his HQ, too bad.
-            defeatCommander( targetCO );
+            defeatCommander(targetCO);
           }
           break;
         case INVALID:
         case LOAD:
         case UNLOAD:
         case WAIT:
-          default:
-            // No potentially game-ending state can be reached with these actions.
+        default:
+          // No potentially game-ending state can be reached with these actions.
       }
 
       // Count the number of COs that are left.
       int activeNum = 0;
-      for( int i = 0; i < myGame.commanders.length; ++i)
+      for( int i = 0; i < myGame.commanders.length; ++i )
       {
         if( !myGame.commanders[i].isDefeated )
         {
@@ -604,7 +639,7 @@ public class MapController implements IController
       }
 
       // If fewer than two COs yet survive, the game is over.
-      if(activeNum < 2)
+      if( activeNum < 2 )
       {
         isGameOver = true;
       }
@@ -627,24 +662,25 @@ public class MapController implements IController
 
     // Loop through the map and clean up any of the defeated CO's assets.
     GameMap map = myGame.gameMap;
-    for(int y = 0; y < map.mapHeight; ++y)
+    for( int y = 0; y < map.mapHeight; ++y )
     {
-      for(int x = 0; x < map.mapWidth; ++x)
+      for( int x = 0; x < map.mapWidth; ++x )
       {
         Location loc = map.getLocation(x, y);
 
         // Remove any units that remain.
-        if(loc.getResident() != null && loc.getResident().CO == defeatedCO)
+        if( loc.getResident() != null && loc.getResident().CO == defeatedCO )
         {
           loc.setResident(null);
         }
         defeatedCO.units.clear(); // Remove from the CO array too, just to be thorough.
 
         // Downgrade the defeated commander's HQ to a city.
-        defeatedCO.HQLocation.setEnvironment(Environment.getTile(Terrains.CITY, defeatedCO.HQLocation.getEnvironment().weatherType));
+        defeatedCO.HQLocation.setEnvironment(Environment.getTile(Terrains.CITY,
+            defeatedCO.HQLocation.getEnvironment().weatherType));
 
         // Release control of any buildings he owned.
-        if(loc.isCaptureable() && loc.getOwner() == defeatedCO)
+        if( loc.isCaptureable() && loc.getOwner() == defeatedCO )
         {
           loc.setOwner(null);
         }
@@ -663,7 +699,7 @@ public class MapController implements IController
     {
       // The last action ended the game, and the animation just finished.
       //  Now we wait for one more keypress before going back to the main menu.
-      changeInputMode( InputMode.EXITGAME );
+      changeInputMode(InputMode.EXITGAME);
 
       // Signal the view to animate the victory/defeat overlay.
       myView.gameIsOver();

@@ -4,7 +4,7 @@ import CommandingOfficers.Commander;
 
 public class CombatDamageModifier extends CombatModifier
 {
-  public int boost;
+  private int boost;
   
   public CombatDamageModifier(Commander user, int ATKboost)
   {
