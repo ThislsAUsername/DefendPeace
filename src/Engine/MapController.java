@@ -1,10 +1,6 @@
 package Engine;
 
-import java.util.ArrayList;
-
 import CommandingOfficers.Commander;
-import Engine.Combat.CombatEngine;
-import Engine.Combat.CombatModifier;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -116,11 +112,6 @@ public class MapController implements IController
         System.out.println("Invalid InputMode in MapController! " + inputMode);
     }
 
-    if (exitMap)
-    {
-      // re-initialize our list of CombatModifiers, so we know it will be empty for next game
-      CombatEngine.modifiers = new ArrayList<CombatModifier>();
-    }
     return exitMap;
   }
 

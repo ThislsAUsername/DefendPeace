@@ -6,30 +6,31 @@ import Units.UnitModel;
 import Units.UnitModel.UnitEnum;
 import CommandingOfficers.Commander;
 
-public class COMovementModifier implements COModifier
+public class COMovementModifier extends COModifier
 {
   ArrayList<UnitModel.UnitEnum> typesToModify;
   private int rangeChange;
 
-  public COMovementModifier()
+  public COMovementModifier(Commander user)
   {
-    this(1);
+    this(user, 1);
   }
 
-  public COMovementModifier(int range)
+  public COMovementModifier(Commander user, int range)
   {
+    super(user);
     rangeChange = range;
     typesToModify = new ArrayList<UnitModel.UnitEnum>();
   }
 
   @Override
-  public void apply(Commander commander)
+  public void apply()
   {
-    for( UnitModel um : commander.unitModels )
+    for( UnitModel um : CO.unitModels )
     {
       if( typesToModify.contains(um.type) )
       {
-        um.movePower = um.movePower + 1;
+        um.movePower = um.movePower + rangeChange;
       }
     }
   }
@@ -40,10 +41,15 @@ public class COMovementModifier implements COModifier
   }
 
   @Override
-  public void revert(Commander commander)
+  public void revert()
   {
-    // TODO Auto-generated method stub
-
+    for( UnitModel um : CO.unitModels )
+    {
+      if( typesToModify.contains(um.type) )
+      {
+        um.movePower = um.movePower - rangeChange;
+      }
+    }
   }
 
 }

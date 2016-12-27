@@ -1,9 +1,31 @@
 package CommandingOfficers.Modifiers;
 
 import CommandingOfficers.Commander;
+import Engine.Combat.CombatParameters;
 
-public interface COModifier
+// COModifier provides static bonuses to units,
+// and also provides an interface for manipulating battles directly.
+public abstract class COModifier
 {
-  public abstract void apply(Commander commander);
-  public abstract void revert(Commander commander);
+  public boolean done;
+  protected Commander CO;
+  
+  public COModifier(Commander user)
+  {
+    done = false;
+    CO = user;
+  }
+
+  public void alterCombat(CombatParameters params)
+  {}
+  
+  public void turn()
+  {
+    done = true;
+  }
+  
+  public void apply()
+  {}
+  public void revert()
+  {}
 }

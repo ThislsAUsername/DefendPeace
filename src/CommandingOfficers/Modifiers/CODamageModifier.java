@@ -1,37 +1,66 @@
 package CommandingOfficers.Modifiers;
 
+import java.util.ArrayList;
+
+import Terrain.Environment;
 import Units.UnitModel;
 import CommandingOfficers.Commander;
+import Engine.Combat.CombatParameters;
 
-public class CODamageModifier implements COModifier
+// Provides a damage boost either universally, on one terrain
+public class CODamageModifier extends COModifier
 {
   private int attackModifier = 0;
+  private Environment validTerrains = null;
 
-  public CODamageModifier(int percentChange)
+  public CODamageModifier(Commander user, int percentChange, Environment terrain)
   {
+    super(user);
     attackModifier = percentChange;
+    validTerrains = terrain;
+  }
+
+  public CODamageModifier(Commander user, int percentChange)
+  {
+    super(user);
+    attackModifier = percentChange;
+  }
+  
+  @Override
+  public void alterCombat(CombatParameters params)
+  {
+    if( params.attacker.CO == CO && validTerrains == params.attackTerrain )
+    {
+      params.attackFactor += attackModifier;
+    }
   }
 
   @Override
-  public void apply(Commander commander)
+  public void apply()
   {
-    for( UnitModel um : commander.unitModels )
+    if( null == validTerrains )
     {
-      if( um.weaponModels != null )
+      for( UnitModel um : CO.unitModels )
       {
-        um.modifyDamageRatio(attackModifier);
+        if( um.weaponModels != null )
+        {
+          um.modifyDamageRatio(attackModifier);
+        }
       }
     }
   }
 
   @Override
-  public void revert(Commander commander)
+  public void revert()
   {
-    for( UnitModel um : commander.unitModels )
+    if( null == validTerrains )
     {
-      if( um.weaponModels != null )
+      for( UnitModel um : CO.unitModels )
       {
-        um.modifyDamageRatio(-attackModifier);
+        if( um.weaponModels != null )
+        {
+          um.modifyDamageRatio(-attackModifier);
+        }
       }
     }
   }

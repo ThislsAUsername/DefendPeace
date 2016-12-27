@@ -15,26 +15,27 @@ public class CommanderStrong extends Commander
 
     // Set Cmdr Strong up with a base damage buff and long-range APCs. These COModifiers are
     // not added to the modifers collection so they will not be reverted.
-    COModifier strongMod = new CODamageModifier(20); // Give us a nice base power boost.
-    strongMod.apply(this);
+    COModifier strongMod = new CODamageModifier(this, 20); // Give us a nice base power boost.
+    strongMod.apply();
 
-    COMovementModifier moveMod = new COMovementModifier();
+    COMovementModifier moveMod = new COMovementModifier(this);
     moveMod.addApplicableUnitType(UnitModel.UnitEnum.APC);
-    moveMod.apply(this);
+    moveMod.apply();
+    // both modifiers are permanent and don't require CombatEngine interaction, so we can just drop them
   }
 
   public void doAbilityMinor()
   {
-    COModifier strongerMod = new CODamageModifier(20); // Another 20% with the minor ability active.
-    strongerMod.apply(this);
-    modifiers.add(strongerMod); // Add to the list so the modifier can be reverted next turn.
+    COModifier strongerMod = new CODamageModifier(this, 20); // Another 20% with the minor ability active.
+    strongerMod.apply();
+    modifiers.add(strongerMod); // Add to the list
   }
 
   public void doAbilityMajor()
   {
-    COModifier strongestMod = new CODamageModifier(40); // An extra 40% with the major ability active.
-    strongestMod.apply(this);
-    modifiers.add(strongestMod); // Add to the list so the modifier can be reverted next turn.
+    COModifier strongestMod = new CODamageModifier(this, 40); // An extra 40% with the major ability active.
+    strongestMod.apply();
+    modifiers.add(strongestMod); // Add to the list
   }
 
   public static CommanderInfo getInfo()

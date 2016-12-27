@@ -3,10 +3,9 @@ package Test;
 import CommandingOfficers.CommanderPatch;
 import CommandingOfficers.CommanderStrong;
 import CommandingOfficers.Commander;
+import CommandingOfficers.Modifiers.CODamageModifier;
 import Engine.GameAction;
-import Engine.Combat.CombatDamageModifier;
 import Engine.Combat.CombatEngine;
-import Engine.Combat.CombatModifier;
 import Terrain.GameMap;
 import Terrain.MapLibrary;
 import Units.Unit;
@@ -46,8 +45,8 @@ public class TestCombat extends TestCase
     Unit infB = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 1, 2);
 
     // Make sure the infantry will die with one attack
-    CombatDamageModifier mod = new CombatDamageModifier(testCo1,500);
-    CombatEngine.modifiers.add(mod);
+    //infB.alterHP(-8);
+    testCo1.modifiers.add(new CODamageModifier(testCo1, 500, testMap.getEnvironment(1, 1)));
 
     // Execute inf- I mean, the action.
     new GameAction(mechA, 1, 1, GameAction.ActionType.ATTACK, 1, 2).execute(testMap);
@@ -58,7 +57,6 @@ public class TestCombat extends TestCase
 
     // Clean up
     testMap.removeUnit(mechA);
-    CombatEngine.modifiers.remove(mod);
 
     return testPassed;
   }
