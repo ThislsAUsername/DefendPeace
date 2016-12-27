@@ -41,7 +41,7 @@ public class TestCapture extends TestCase
     // No problems yet.
     boolean testPassed = true;
 
-    // Get a reference to a capturable propery.
+    // Get a reference to a capturable property.
     Location prop = testMap.getLocation(2, 2);
 
     // Make sure this location is capturable.
@@ -75,13 +75,13 @@ public class TestCapture extends TestCase
     Unit infB = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 1, 2); // Make an enemy adjacent to the city.
     infB.alterHP( -8 ); // Make sure he will die without retaliating.
     new GameAction(infA, 2, 2, GameAction.ActionType.ATTACK, 1, 2).execute( testMap ); // Bop him on the head.
-    testPassed &= validate( infA.getCaptureProgress() == 0, "    Infantry should stop capturing after ATTACK.");
+    testPassed &= validate( infA.getCaptureProgress() == 10, "    Infantry should not stop capturing after stationary ATTACK.");
 
     // See if we can actually capture this thing.
-    infA.alterHP( -1 ); // Make it take three attempts to capture the property.
+    infA.alterHP( -6 ); // Make it take three attempts to capture the property.
     captureAction.execute(testMap);
-    testPassed &= validate( infA.getCaptureProgress() == 9, "    Infantry has wrong capture progress (" +
-    		infA.getCaptureProgress() + " instead of 9)." );
+    testPassed &= validate( infA.getCaptureProgress() == 14, "    Infantry has wrong capture progress (" +
+        infA.getCaptureProgress() + " instead of 14)." );
     captureAction.execute(testMap);
     testPassed &= validate( infA.getCaptureProgress() == 18, "    Infantry has wrong capture progress (" +
         infA.getCaptureProgress() + " instead of 18)." );
