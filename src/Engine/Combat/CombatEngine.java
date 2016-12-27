@@ -11,13 +11,9 @@ public class CombatEngine
 
   public static void resolveCombat(Unit attacker, Unit defender, GameMap map)
   {
-    // TODO: make sure to clean up unneeded modifiers
-    //		for(int i = 0; i < modifiers.size(); i++) {
-    //			if (modifiers.get(i).done) {
-    //				modifiers.get(i).initTurn();
-    //				modifiers.remove(i);
-    //			}
-    //		}
+    // The list of modifiers is updated and culled every turn in GameInstance.
+    // It is emptied in MapController when exiting the map.
+    // TODO: Figure out a better way to handle their lifecycle?
 
     CombatParameters params = new CombatParameters(attacker, defender, map);
     for( int i = 0; i < modifiers.size(); i++ )
