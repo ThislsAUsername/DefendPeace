@@ -21,6 +21,9 @@ public class Commander
   public UnitModel[] unitModels;
   public ArrayList<COModifier> modifiers;
   public Color myColor;
+  public final int starsMinor;
+  public final int starsMax;
+  public double starsCurrent = 0;
   public static final int DEFAULTSTARTINGMONEY = 10000;
   public int money = 0;
   public int incomePerCity = 1000;
@@ -43,6 +46,8 @@ public class Commander
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
     money = DEFAULTSTARTINGMONEY;
+    starsMinor = -1;
+    starsMax = -1;
   }
 
   public void initTurn(GameMap map)
