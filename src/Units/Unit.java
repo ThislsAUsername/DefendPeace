@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 import CommandingOfficers.Commander;
-import Engine.CombatParameters;
 import Engine.GameAction;
 import Engine.Utils;
+import Engine.Combat.CombatParameters;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.UnitModel.UnitEnum;

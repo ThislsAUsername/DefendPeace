@@ -1,4 +1,4 @@
-package Engine;
+package Engine.Combat;
 
 import Terrain.GameMap;
 import Units.Unit;

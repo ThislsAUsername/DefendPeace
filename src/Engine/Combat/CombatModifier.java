@@ -1,4 +1,4 @@
-package Engine;
+package Engine.Combat;
 
 public class CombatModifier
 {
