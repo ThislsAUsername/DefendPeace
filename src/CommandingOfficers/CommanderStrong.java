@@ -16,6 +16,11 @@ public class CommanderStrong extends Commander
   {
     super(coInfo);
 
+    // TODO: Super alpha values. Need balance.
+    starsMinor = 3;
+    starsMax = 6;
+    starsCurrent = 6;
+
     // Set Cmdr Strong up with a base damage buff and long-range APCs. These COModifiers are
     // not added to the modifers collection so they will not be reverted.
     // COModifier strongMod = new CODamageModifier(20); // Give us a nice base power boost.
@@ -34,6 +39,8 @@ public class CommanderStrong extends Commander
     //COModifier strongerMod = new CODamageModifier(20); // Another 20% with the minor ability active.
     //strongerMod.apply(this);
     //modifiers.add(strongerMod); // Add to the list so the modifier can be reverted next turn.
+    starsCurrent -= starsMinor;
+    powerActive = true;
     strongMod.multiplyBoost(2);
   }
 
@@ -42,6 +49,8 @@ public class CommanderStrong extends Commander
     //COModifier strongestMod = new CODamageModifier(40); // An extra 40% with the major ability active.
     //strongestMod.apply(this);
     //modifiers.add(strongestMod); // Add to the list so the modifier can be reverted next turn.
+    starsCurrent = 0;
+    powerActive = true;
     strongMod.multiplyBoost(3);
   }
 

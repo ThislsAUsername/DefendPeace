@@ -521,7 +521,7 @@ public class MapController implements IController
         MetaAction[] currentActions = metaActions;
 
         // if powers are available
-        if( myGame.activeCO.starsMax > 0 )
+        if( myGame.activeCO.starsMax > 0 && !myGame.activeCO.powerActive )
         {
           // check if SCOP is up
           if( myGame.activeCO.starsCurrent >= myGame.activeCO.starsMax )

@@ -21,19 +21,27 @@ public class Commander
   public UnitModel[] unitModels;
   public ArrayList<COModifier> modifiers;
   public Color myColor;
-  public final int starsMinor;
-  public final int starsMax;
+  public int starsMinor;
+  public int starsMax;
   public double starsCurrent = 0;
   public static final int DEFAULTSTARTINGMONEY = 10000;
   public int money = 0;
   public int incomePerCity = 1000;
   public boolean isDefeated = false;
+  public boolean powerActive = false;
   public Location HQLocation = null;
 
   public void doAbilityMinor()
   {}
   public void doAbilityMajor()
   {}
+  
+  public void addStars(double change)
+  {
+    starsCurrent += change;
+    // clamp it to the valid range
+    starsCurrent = Math.max(0, Math.min(starsMax, starsCurrent));
+  }
 
   public Commander(CommanderInfo info)
   {
@@ -54,6 +62,7 @@ public class Commander
   {
     // Accrue income for each city under your control.
     int turnIncome = 0;
+    powerActive = false;
     for( int w = 0; w < map.mapWidth; ++w )
     {
       for( int h = 0; h < map.mapHeight; ++h )
