@@ -32,10 +32,16 @@ public class Commander
   public Location HQLocation = null;
 
   public void doAbilityMinor()
-  {}
+  {
+    starsCurrent -= starsMinor;
+    powerActive = true;
+  }
   public void doAbilityMajor()
-  {}
-  
+  {
+    starsCurrent = 0;
+    powerActive = true;
+  }
+
   public void addStars(double change)
   {
     starsCurrent += change;

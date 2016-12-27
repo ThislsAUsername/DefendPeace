@@ -23,7 +23,7 @@ public class CombatEngine
     double damage = params.calculateDamage();
     params.defender.damageHP(damage);
     // TODO: balance this
-    params.attacker.CO.addStars(damage*params.defender.model.moneyCost/10000);
+    params.attacker.CO.addStars(damage*params.defender.model.moneyCost/100000);
     params.attacker.fire(params); // Lets the unit know that it has actually fired a shot.
     if( params.canCounter )
     {

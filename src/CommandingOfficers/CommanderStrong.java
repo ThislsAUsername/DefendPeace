@@ -39,8 +39,7 @@ public class CommanderStrong extends Commander
     //COModifier strongerMod = new CODamageModifier(20); // Another 20% with the minor ability active.
     //strongerMod.apply(this);
     //modifiers.add(strongerMod); // Add to the list so the modifier can be reverted next turn.
-    starsCurrent -= starsMinor;
-    powerActive = true;
+    super.doAbilityMinor();
     strongMod.multiplyBoost(2);
   }
 
@@ -49,8 +48,7 @@ public class CommanderStrong extends Commander
     //COModifier strongestMod = new CODamageModifier(40); // An extra 40% with the major ability active.
     //strongestMod.apply(this);
     //modifiers.add(strongestMod); // Add to the list so the modifier can be reverted next turn.
-    starsCurrent = 0;
-    powerActive = true;
+    super.doAbilityMajor();
     strongMod.multiplyBoost(3);
   }
 
