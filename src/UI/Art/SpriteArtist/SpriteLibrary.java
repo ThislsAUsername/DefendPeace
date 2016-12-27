@@ -88,7 +88,7 @@ public class SpriteLibrary
   // Cargo icon for when transports are holding other units.
   private static BufferedImage mapUnitCargoIcon = null;
 
-  // Cargo icon for when units are capturing properties.
+  // Capture icon for when units are capturing properties.
   private static BufferedImage mapUnitCaptureIcon = null;
 
   // Letters for writing in menus.
