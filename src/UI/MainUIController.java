@@ -3,7 +3,6 @@ package UI;
 import Engine.Driver;
 import Engine.IController;
 import Engine.OptionSelector;
-import Terrain.MapLibrary;
 
 public class MainUIController implements IController
 {

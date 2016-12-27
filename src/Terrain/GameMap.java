@@ -2,7 +2,6 @@ package Terrain;
 
 import Engine.XYCoord;
 import Terrain.Environment.Terrains;
-import Terrain.Maps.IMapBuilder;
 import Units.Unit;
 
 public class GameMap

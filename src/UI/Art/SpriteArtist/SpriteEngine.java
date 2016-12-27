@@ -1,5 +1,7 @@
 package UI.Art.SpriteArtist;
 
+import java.awt.Dimension;
+
 import UI.InputHandler.InputAction;
 import UI.MainUIController;
 import UI.MapView;
@@ -25,5 +27,11 @@ public class SpriteEngine implements GraphicsEngine
   public boolean handleOptionsInput(InputAction action)
   {
     return SpriteOptions.handleOptionsInput(action);
+  }
+
+  @Override
+  public Dimension getScreenDimensions()
+  {
+    return SpriteOptions.getScreenDimensions();
   }
 }

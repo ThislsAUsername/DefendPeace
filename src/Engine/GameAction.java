@@ -2,7 +2,6 @@ package Engine;
 
 import CommandingOfficers.Commander;
 import Terrain.GameMap;
-import Terrain.Location;
 import Units.Unit;
 
 /**

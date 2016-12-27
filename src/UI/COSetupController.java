@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import Terrain.GameMap;
 import UI.Art.SpriteArtist.SpriteLibrary;
-import UI.Art.SpriteArtist.SpriteMapView;
 import UI.InputHandler.InputAction;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
