@@ -86,14 +86,10 @@ public class SpriteCOSetupArtist
 
     for(int i = 0; i < numCOs; ++i, drawXCenter += xSpacing)
     {
-      // Only draw CO portraits that will be on screen.
-      if( Math.abs(highlightedPlayer - i) < Math.ceil(numCosOnScreen / 2))
-      {
-        int co = myControl.getPlayerCo(i);
-        int col = myControl.getPlayerColor(i);
-        // Draw the box, the color, and the CO portrait.
-        drawCoPortrait(g, co, col, drawXCenter, drawYCenter);
-      }
+      int co = myControl.getPlayerCo(i);
+      int col = myControl.getPlayerColor(i);
+      // Draw the box, the color, and the CO portrait.
+      drawCoPortrait(g, co, col, drawXCenter, drawYCenter);
     }
   }
 
@@ -123,15 +119,19 @@ public class SpriteCOSetupArtist
     int drawW = portrait.getWidth() * drawScale;
     int drawH = portrait.getHeight() * drawScale;
 
-    // Draw frame box
-    g.setColor( MENUFRAMECOLOR );
-    g.fillRect(drawX - (2*drawScale), drawY - (2*drawScale), drawW + (4*drawScale), drawH + (4*drawScale));
+    // Only bother to draw it if it is onscreen.
+    if( (drawX+drawW > 0) && ( drawX < SpriteOptions.getScreenDimensions().getWidth() ) )
+    {
+      // Draw frame box
+      g.setColor( MENUFRAMECOLOR );
+      g.fillRect(drawX - (2*drawScale), drawY - (2*drawScale), drawW + (4*drawScale), drawH + (4*drawScale));
 
-    // Draw team color box, nested inside the frame box.
-    g.setColor( SpriteLibrary.coColorList[color] );
-    g.fillRect(drawX - drawScale, drawY - drawScale, drawW + (2*drawScale), drawH + (2*drawScale));
+      // Draw team color box, nested inside the frame box.
+      g.setColor( SpriteLibrary.coColorList[color] );
+      g.fillRect(drawX - drawScale, drawY - drawScale, drawW + (2*drawScale), drawH + (2*drawScale));
 
-    // Draw CO Portrait
-    g.drawImage(portrait, drawX, drawY, drawW, drawH, null);
+      // Draw CO Portrait
+      g.drawImage(portrait, drawX, drawY, drawW, drawH, null);
+    }
   }
 }

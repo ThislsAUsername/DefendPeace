@@ -49,29 +49,34 @@ public class Unit
 
   public void initTurn(Location locus)
   {
-    isTurnOver = false;
-    fuel -= model.idleFuelBurn;
-    if( captureTarget != null && captureTarget.getResident() != this )
+    // Only perform turn initialization for the unit if it is on the map.
+    //   Units that are e.g. in a transport don't burn fuel, etc.
+    if( null != locus )
     {
-      captureTarget = null;
-      captureProgress = 0;
-    }
-    if( HP < model.maxHP )
-    {
-      if( model.canRepairOn(locus) && locus.getOwner() == CO )
+      isTurnOver = false;
+      fuel -= model.idleFuelBurn;
+      if( captureTarget != null && captureTarget.getResident() != this )
       {
-        int neededHP = Math.min(model.maxHP - getHP(), 2); // will be 0, 1, 2
-        double proportionalCost = model.moneyCost / model.maxHP;
-        if( CO.money >= neededHP * proportionalCost )
+        captureTarget = null;
+        captureProgress = 0;
+      }
+      if( HP < model.maxHP )
+      {
+        if( model.canRepairOn(locus) && locus.getOwner() == CO )
         {
-          CO.money -= neededHP * proportionalCost;
-          alterHP(2);
-        }
-        else if( CO.money >= proportionalCost )
-        {
-          // case will only be used if neededHP is 2
-          CO.money -= proportionalCost;
-          alterHP(1);
+          int neededHP = Math.min(model.maxHP - getHP(), 2); // will be 0, 1, 2
+          double proportionalCost = model.moneyCost / model.maxHP;
+          if( CO.money >= neededHP * proportionalCost )
+          {
+            CO.money -= neededHP * proportionalCost;
+            alterHP(2);
+          }
+          else if( CO.money >= proportionalCost )
+          {
+            // case will only be used if neededHP is 2
+            CO.money -= proportionalCost;
+            alterHP(1);
+          }
         }
       }
     }
@@ -140,7 +145,7 @@ public class Unit
   {
     if( !target.isCaptureable() )
     {
-      System.out.println("ERROR`! Attempting to capture an uncapturable Location!");
+      System.out.println("ERROR! Attempting to capture an uncapturable Location!");
       return;
     }
 
@@ -156,6 +161,17 @@ public class Unit
       captureProgress = 0;
       target = null;
     }
+  }
+
+  public void stopCapturing()
+  {
+    captureTarget = null;
+    captureProgress = 0;
+  }
+
+  public int getCaptureProgress()
+  {
+    return captureProgress;
   }
 
   // Removed for the forseeable future; may be back

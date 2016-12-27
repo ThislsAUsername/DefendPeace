@@ -20,28 +20,17 @@ public class SpriteUnitArtist
     drawScale = SpriteOptions.getDrawScale();
   }
 
-  public void drawUnitHPIcons(Graphics g)
+  /**
+   * Draws any applicable unit icons for the unit, at the specified real location.
+   * "Real" means that the specified x and y are that of the game's
+   * underlying data model, not of the draw-space.
+   */
+  public void drawUnitIcons(Graphics g, Unit unit, double x, double y)
   {
-    // Get an easy reference to the map.
-    GameMap gameMap = myGame.gameMap;
-
-    for( int w = 0; w < gameMap.mapWidth; ++w )
-    {
-      for( int h = 0; h < gameMap.mapHeight; ++h )
-      {
-        if( gameMap.getLocation(w, h) != null )
-        {
-          Location locus = gameMap.getLocation(w, h);
-          if( locus.getResident() != null )
-          {
-            Unit unit = locus.getResident();
-            int drawX = (int) (myView.getTileSize() * w);
-            int drawY = (int) (myView.getTileSize() * h);
-            SpriteLibrary.getUnitMapSpriteSet(locus.getResident()).drawUnitHP(g, myGame.activeCO, unit, drawX, drawY, drawScale);
-          }
-        }
-      }
-    }
+    // Convert "real" location into a draw-space location, then draw icons.
+    int drawX = (int) (myView.getTileSize() * x);
+    int drawY = (int) (myView.getTileSize() * y);
+    SpriteLibrary.getUnitMapSpriteSet(unit).drawUnitIcons(g, myGame.activeCO, unit, drawX, drawY, drawScale);
   }
 
   /**
@@ -51,8 +40,11 @@ public class SpriteUnitArtist
    */
   public void drawUnit(Graphics g, Unit unit, double x, double y, int animIndex)
   {
+    // Convert "real" game-model location to a draw-space location.
     int drawX = (int) (myView.getTileSize() * x);
     int drawY = (int) (myView.getTileSize() * y);
+
+    // Draw the unit at the specified location.
     SpriteLibrary.getUnitMapSpriteSet(unit).drawUnit(g, myGame.activeCO, unit, /*currentAction,*/
     animIndex, drawX, drawY, drawScale, myView.getFlipUnitFacing(unit.CO));
   }

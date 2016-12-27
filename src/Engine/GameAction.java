@@ -200,7 +200,10 @@ public class GameAction
         break;
       case CAPTURE:
         unitActor.isTurnOver = true;
-        gameMap.moveUnit(unitActor, moveX, moveY);
+        if( unitActor.x != moveX || unitActor.y != moveY )
+        {
+          gameMap.moveUnit(unitActor, moveX, moveY);
+        }
         targetCO = gameMap.getLocation(unitActor.x, unitActor.y).getOwner();
         unitActor.capture(gameMap.getLocation(unitActor.x, unitActor.y));
         break;
@@ -211,8 +214,6 @@ public class GameAction
         {
           unitActor.isTurnOver = true;
           gameMap.removeUnit(unitActor);
-          unitActor.x = -1;
-          unitActor.y = -1;
           transport.heldUnits.add(unitActor);
         }
         break;
@@ -229,7 +230,12 @@ public class GameAction
         break;
       case WAIT:
         unitActor.isTurnOver = true;
-        gameMap.moveUnit(unitActor, moveX, moveY);
+
+        // Move the unit if needed.
+        if( unitActor.x != moveX || unitActor.y != moveY )
+        {
+          gameMap.moveUnit(unitActor, moveX, moveY);
+        }
         break;
       case INVALID:
       default:

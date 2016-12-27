@@ -159,7 +159,13 @@ public class GameMap
     }
     getLocation(x, y).setResident(unit);
 
-    // Update the Unit
+    // Reset capture progress, since we moved.
+    if( unit.getCaptureProgress() > 0 )
+    {
+      unit.stopCapturing();
+    }
+
+    // Update the Unit location.
     unit.x = x;
     unit.y = y;
   }
@@ -175,7 +181,18 @@ public class GameMap
       }
       else
       {
+        // Get the unit off the map.
         getLocation(u.x, u.y).setResident(null);
+
+        // Tell the unit he's off the map.
+        u.x = -1;
+        u.y = -1;
+
+        // Reset capture progress if needed.
+        if( u.getCaptureProgress() > 0 )
+        {
+          u.stopCapturing();
+        }
       }
     }
   }
