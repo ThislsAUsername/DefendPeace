@@ -4,8 +4,6 @@ import CommandingOfficers.Commander;
 
 public class CombatDamageModifier extends CombatModifier
 {
-  public boolean done;
-  public Commander CO;
   public int boost;
   
   public CombatDamageModifier(Commander user, int ATKboost)
@@ -21,5 +19,4 @@ public class CombatDamageModifier extends CombatModifier
       params.attackFactor += boost;
     }
   }
-
 }
