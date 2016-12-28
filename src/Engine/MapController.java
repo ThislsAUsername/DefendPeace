@@ -181,50 +181,56 @@ public class MapController implements IController
     {
       case UP:
         myGame.moveCursorUp();
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         // System.out.println("inMoveableSpace = " + inMoveableSpace);
         // Make sure we don't overshoot the reachable tiles by accident.
         if( inMoveableSpace && InputHandler.isUpHeld() && !myGame.getCursorLocation().isHighlightSet() )
         {
           myGame.moveCursorDown();
         }
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         break;
       case DOWN:
         myGame.moveCursorDown();
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         // Make sure we don't overshoot the reachable space by accident.
         if( inMoveableSpace && InputHandler.isDownHeld() && !myGame.getCursorLocation().isHighlightSet() )
         {
           myGame.moveCursorUp();
         }
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         break;
       case LEFT:
         myGame.moveCursorLeft();
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         // Make sure we don't overshoot the reachable space by accident.
         if( inMoveableSpace && InputHandler.isLeftHeld() && !myGame.getCursorLocation().isHighlightSet() )
         {
           myGame.moveCursorRight();
         }
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         break;
       case RIGHT:
         myGame.moveCursorRight();
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         // Make sure we don't overshoot the reachable space by accident.
         if( inMoveableSpace && InputHandler.isRightHeld() && !myGame.getCursorLocation().isHighlightSet() )
         {
           myGame.moveCursorLeft();
         }
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         break;
       case ENTER:
         if( inMoveableSpace && myView.currentAction.getActor().CO == myGame.activeCO ) // If the selected space is within
         // the reachable area
         {
-          // Move the Unit to the location and display possible actions.
-          currentMovePath.start(); // start the unit running
-          myView.currentAction.setMovePath(currentMovePath);
-          currentMovePath = null;
-          changeInputMode(InputMode.ACTIONMENU);
+          Unit obstacle = myGame.getCursorLocation().getResident();
+          // if it's empty, or there's a cargo-carrying unit there
+          if( null == obstacle || obstacle.CO == myGame.activeCO
+              && obstacle.hasCargoSpace(myView.currentAction.getActor().model.type) )
+          {
+            // Move the Unit to the location and display possible actions.
+            currentMovePath.start(); // start the unit running
+            myView.currentAction.setMovePath(currentMovePath);
+            currentMovePath = null;
+            changeInputMode(InputMode.ACTIONMENU);
+          }
         }
         break;
       case BACK:
