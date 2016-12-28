@@ -3,7 +3,6 @@ package CommandingOfficers;
 import java.awt.Color;
 import java.util.ArrayList;
 
-import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.APCModel;
@@ -12,6 +11,7 @@ import Units.MechModel;
 import Units.Unit;
 import Units.UnitModel;
 import CommandingOfficers.Modifiers.COModifier;
+import Engine.CombatParameters;
 import Units.UnitModel.UnitEnum;
 
 public class Commander
@@ -31,6 +31,14 @@ public class Commander
   {}
   public void doAbilityMajor()
   {}
+
+  /**
+   * Allows a Commander to inject modifications before evaluating a battle.
+   * Simple damage buffs, etc. can be accomplished via COModifiers, but effects
+   * that depend on circumstances that must be evaluated at combat time (e.g. a
+   * terrain-based firepower bonus) can be handled here.
+   */
+  public void applyCombatModifiers( CombatParameters params ) {}
 
   public Commander(CommanderInfo info)
   {
