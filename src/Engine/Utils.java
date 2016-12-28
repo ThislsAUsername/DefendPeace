@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.Queue;
 
 import Terrain.GameMap;
+import Terrain.Location;
 import Units.Unit;
 
 public class Utils
@@ -150,9 +151,13 @@ public class Utils
     // Index from 1 so we don't count the space the unit is on.
     for( int i = 1; canReach && (i < path.getPathLength()); ++i )
     {
-      //System.out.println("Moving over " + map.getEnvironment(path.getWaypoint(i).x, path.getWaypoint(i).y).terrainType);
-      movePower -= findMoveCost(unit, path.getWaypoint(i).x, path.getWaypoint(i).y, map);
-      if( movePower < 0 )
+      int wayX = path.getWaypoint(i).x;
+      int wayY = path.getWaypoint(i).y;
+      Location loc = map.getLocation(wayX, wayY);
+      Unit resident = loc.getResident();
+
+      movePower -= findMoveCost(unit, wayX, wayY, map);
+      if( movePower < 0 || (resident != null && resident.CO != unit.CO) )
       {
         canReach = false;
       }
