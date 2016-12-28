@@ -88,7 +88,7 @@ public class Utils
       SearchNode currentNode = searchQueue.poll();
       // if the space is empty or holds the current unit, highlight
       Unit obstacle = myGame.gameMap.getLocation(currentNode.x, currentNode.y).getResident();
-      if( obstacle == null || obstacle == unit || (obstacle.CO == unit.CO && obstacle.hasCargoSpace(unit.model.type)) )
+      if( obstacle == null || obstacle == unit || (obstacle.CO == unit.CO) )
       {
         myGame.gameMap.getLocation(currentNode.x, currentNode.y).setHighlight(true);
       }
@@ -152,10 +152,11 @@ public class Utils
     {
       //System.out.println("Moving over " + map.getEnvironment(path.getWaypoint(i).x, path.getWaypoint(i).y).terrainType);
       movePower -= findMoveCost(unit, path.getWaypoint(i).x, path.getWaypoint(i).y, map);
-      if( movePower < 0 )
+      if( movePower < 0 || !map.getLocation(path.getWaypoint(i).x, path.getWaypoint(i).y).isHighlightSet() )
       {
         canReach = false;
       }
+      
     }
 
     return canReach;
