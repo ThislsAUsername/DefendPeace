@@ -29,7 +29,7 @@ public class COMovementModifier implements COModifier
     {
       if( typesToModify.contains(um.type) )
       {
-        um.movePower = um.movePower + 1;
+        um.movePower = um.movePower + rangeChange;
       }
     }
   }
@@ -42,8 +42,13 @@ public class COMovementModifier implements COModifier
   @Override
   public void revert(Commander commander)
   {
-    // TODO Auto-generated method stub
-
+    for( UnitModel um : commander.unitModels )
+    {
+      if( typesToModify.contains(um.type) )
+      {
+        um.movePower = um.movePower - rangeChange;
+      }
+    }
   }
 
 }
