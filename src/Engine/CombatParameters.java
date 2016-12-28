@@ -1,5 +1,6 @@
 package Engine;
 
+import Terrain.Environment;
 import Terrain.GameMap;
 import Units.Unit;
 
@@ -7,6 +8,7 @@ public class CombatParameters
 {
   public Unit attacker, defender;
   public double baseDamage, attackFactor, attackerHP, defenseFactor, defenderHP, terrainDefenseLevel;
+  public Environment defenderTerrain, attackerTerrain;
   public GameMap map;
   public boolean isCounter, canCounter;
 
@@ -51,8 +53,10 @@ public class CombatParameters
     baseDamage = attacker.getDamage(defender);
     attackFactor = attacker.model.getDamageRatio();
     attackerHP = attacker.getHP();
+    attackerTerrain = map.getEnvironment(attacker.x, attacker.y);
     defenseFactor = defender.model.getDefenseRatio();
     defenderHP = defender.getHP();
     terrainDefenseLevel = map.getEnvironment(defender.x, defender.y).getDefLevel();
+    defenderTerrain = map.getEnvironment(defender.x, defender.y);
   }
 }
