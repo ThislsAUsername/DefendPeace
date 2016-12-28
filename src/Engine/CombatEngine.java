@@ -1,21 +1,14 @@
 package Engine;
 
-import java.util.ArrayList;
-
 import Terrain.GameMap;
 import Units.Unit;
 
 public class CombatEngine
 {
-  public static ArrayList<CombatModifier> modifiers = new ArrayList<CombatModifier>();
-
   public static void resolveCombat(Unit attacker, Unit defender, GameMap map)
   {
+    // Set up our combat scenario.
     CombatParameters params = new CombatParameters(attacker, defender, map);
-    for( int i = 0; i < modifiers.size(); i++ )
-    {
-      modifiers.get(i).alterCombat(params);
-    }
 
     // Last-minute adjustments.
     attacker.CO.applyCombatModifiers(params);
@@ -27,14 +20,10 @@ public class CombatEngine
     if( params.canCounter )
     {
       params.swap();
-      for( int i = 0; i < modifiers.size(); i++ )
-      {
-        modifiers.get(i).alterCombat(params);
-      }
 
       // TODO: Let the COs take another pass at modifying things?
 
-      if( params.attackerHP > 0 ) // stops counterattacks from dead units unless a CombatModifier allows it
+      if( params.attackerHP > 0 ) // stops counterattacks from dead units.
       {
         params.defender.damageHP(params.calculateDamage());
         params.attacker.fire(params);
