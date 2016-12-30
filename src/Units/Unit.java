@@ -185,7 +185,7 @@ public class Unit
   	}*/
 
   /** Compiles and returns a list of all actions this unit could perform on map from location (xLoc, yLoc). */
-  public GameAction.ActionType[] getPossibleActions(GameMap map, int xLoc, int yLoc)
+  public ArrayList<GameAction.ActionType> getPossibleActions(GameMap map, int xLoc, int yLoc)
   {
     ArrayList<GameAction.ActionType> actions = new ArrayList<GameAction.ActionType>();
     if( map.isLocationEmpty(this, xLoc, yLoc) )
@@ -243,9 +243,8 @@ public class Unit
     {
       actions.add(GameAction.ActionType.LOAD);
     }
-    GameAction.ActionType[] returned = new GameAction.ActionType[0];
 
-    return actions.toArray(returned);
+    return actions;
   }
 
   public boolean hasCargoSpace(UnitEnum type)

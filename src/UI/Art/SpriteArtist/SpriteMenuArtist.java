@@ -6,7 +6,7 @@ import java.awt.Graphics;
 import java.util.ArrayList;
 
 import Engine.GameInstance;
-import UI.GameMenu;
+import UI.InGameMenu;
 import UI.MapView;
 import Units.UnitModel;
 import Units.UnitModel.UnitEnum;
@@ -15,7 +15,7 @@ public class SpriteMenuArtist
 {
   private GameInstance myGame;
   private MapView myView;
-  private GameMenu myCurrentMenu;
+  private InGameMenu myCurrentMenu;
   private ArrayList<String> myCurrentMenuStrings;
   private int drawScale;
 
@@ -49,21 +49,15 @@ public class SpriteMenuArtist
    */
   public void drawMenu(Graphics g)
   {
-    GameMenu drawMenu = myView.currentMenu;
+    InGameMenu<? extends Object> drawMenu = myView.getCurrentGameMenu();
     if( drawMenu != null )
     {
       // Check if we need to build the menu options again.
-      if( myCurrentMenu != drawMenu )
+      if( myCurrentMenu != drawMenu || myCurrentMenuStrings.size() != drawMenu.getNumOptions() )
       {
         myCurrentMenu = drawMenu;
         myCurrentMenuStrings.clear();
         getMenuStrings(myCurrentMenu, myCurrentMenuStrings);
-
-        // Append prices if this is a PRODUCTION menu
-        if( myCurrentMenu.menuType == GameMenu.MenuType.PRODUCTION )
-        {
-          appendProductionPrices(myCurrentMenu, myCurrentMenuStrings);
-        }
       }
 
       // Find the dimensions of the menu we are drawing.
@@ -102,70 +96,12 @@ public class SpriteMenuArtist
    * @param menu
    * @param out
    */
-  private void getMenuStrings(GameMenu menu, ArrayList<String> out)
+  private void getMenuStrings(InGameMenu menu, ArrayList<String> out)
   {
     for( int i = 0; i < menu.getNumOptions(); ++i )
     {
-      String str = menu.getOptions()[i].toString();
+      String str = menu.getOptionString(i);
       out.add(str);
-    }
-  }
-
-  /**
-   * Preconditions:
-   * 1) 'menu' contains a list of only units that can be produced by myGame.activeCO.
-   * 2) 'out' is an ArrayList of Strings that align with the menu options.
-   * 'out' will be re-populated with strings of equal length containing the original
-   * names that it came with, with the prices appended.
-   * @param menu GameMenu with unit production options.
-   * @param out Parallel list of unit names as strings.
-   */
-  private void appendProductionPrices(GameMenu menu, ArrayList<String> out)
-  {
-    int maxLength = 0;
-    for( String s : out )
-    {
-      maxLength = (s.length() > maxLength) ? s.length() : maxLength;
-    }
-    maxLength++; // Plus 1 for a space between unit name and price.
-
-    // Modify each String to include the price at a set tab level.
-    StringBuilder sb = new StringBuilder();
-    for( int i = 0; i < menu.getOptions().length; ++i, sb.setLength(0) )
-    {
-      // Start with the production item name.
-      sb.append(out.get(i));
-
-      // Append spaces until this entry is the approved length.
-      for( ; sb.length() < maxLength; sb.append(" ") )
-        ;
-
-      // Get the price as a string.
-      int price = 0;
-      UnitModel model = myGame.activeCO.getUnitModel((UnitEnum) menu.getOptions()[i]);
-      if( null == model )
-      {
-        System.out.println("WARNING: Attempting to find a price for an unavailable unit!");
-        System.out.println("WARNING: Unit: " + menu.getOptions()[i].toString() + ", CO: " + myGame.activeCO.toString());
-        price = 99999;
-      }
-      else
-      {
-        price = model.moneyCost;
-      }
-
-      // Pad the price with an extra space if it is only four digits.
-      // NOTE: This line assumes that all prices will be either four or five digits.
-      if( price < 10000 )
-      {
-        sb.append(" ");
-      }
-
-      // Append the actual cost of the item.
-      sb.append(Integer.toString(price));
-
-      // Plug the new string into the return list.
-      out.set(i, sb.toString());
     }
   }
 

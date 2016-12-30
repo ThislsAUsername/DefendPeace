@@ -1,0 +1,120 @@
+package UI;
+
+import java.util.ArrayList;
+
+import Engine.OptionSelector;
+
+/**
+ * Provides a generic interface for an in-game menu. The template parameter can be used to
+ * make this class work with any type of options. Further flexibility can be achieved by
+ * subclassing (e.g. if you want custom formatting of the menu-option text).
+ * @param <T>
+ */
+public class InGameMenu<T>
+{
+  private ArrayList<T> menuOptions;
+
+  private OptionSelector optionSelector;
+
+  public InGameMenu(ArrayList<T> options)
+  {
+    menuOptions = new ArrayList<T>();
+    menuOptions.addAll(options);
+    optionSelector = new OptionSelector(menuOptions.size());
+  }
+
+  public InGameMenu(T[] options)
+  {
+    menuOptions = new ArrayList<T>();
+    for( int i = 0; i < options.length; ++i )
+    {
+      menuOptions.add( options[i] );
+    }
+    optionSelector = new OptionSelector(menuOptions.size());
+  }
+
+  /**
+   * Set the selection back to the first option.
+   */
+  public void zero()
+  {
+    optionSelector.setSelectedOption(0);
+  }
+
+  /**
+   * Re-initializes this object with the new set of options.
+   * @param newOptions
+   */
+  public void resetOptions(ArrayList<T> newOptions)
+  {
+    menuOptions.clear();
+    menuOptions.addAll(newOptions);
+    optionSelector.reset( menuOptions.size() );
+  }
+
+  /**
+   * Move UP or DOWN the menu options. The internal OptionSelector allows
+   * wrap-around if the index goes to far.
+   * @param action
+   */
+  public void handleMenuInput(InputHandler.InputAction action)
+  {
+    switch (action)
+    {
+      case UP:
+      case DOWN:
+        optionSelector.handleInput( action );
+        break;
+      case LEFT:
+      case RIGHT:
+      case ENTER:
+      case BACK:
+      case NO_ACTION:
+      default:
+        System.out.println("WARNING! gameMenu.handleMenuInput() was given invalid action enum (" + action + ")");
+    }
+  }
+
+  /**
+   * @return The index of the currently-selected menu item.
+   */
+  public int getSelectionNumber()
+  {
+    return optionSelector.getSelectionNormalized();
+  }
+
+  /**
+   * @return The object currently highlighted by the menu cursor.
+   */
+  public T getSelectedOption()
+  {
+    return menuOptions.get( optionSelector.getSelectionNormalized() );
+  }
+
+  /**
+   * @return The object at the specified index.
+   */
+  public T getOption( int index )
+  {
+    if( menuOptions.size() > index && index >= 0 )
+    {
+      return menuOptions.get( index );
+    }
+    // If index is not a valid option, give nothing back.
+    System.out.println("WARNING: Attempting to retrieve invalid index in InGameMenu.getOption().");
+    return null;
+  }
+
+  public int getNumOptions()
+  {
+    return menuOptions.size();
+  }
+
+  /**
+   * Returns a string representation of the specified menu option.
+   */
+  public String getOptionString( int index )
+  {
+    return menuOptions.get(index).toString();
+  }
+}

@@ -74,7 +74,7 @@ public class FillRectMapView extends MapView
         mapController.animationEnded();
       }
     }
-    else if( currentMenu == null )
+    else if( getCurrentGameMenu() == null )
     {
       mapArtist.drawCursor(g);
     }

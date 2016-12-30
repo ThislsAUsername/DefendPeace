@@ -100,14 +100,14 @@ public class Commander
     return um;
   }
 
-  public UnitEnum[] getShoppingList()
+  public ArrayList<UnitModel> getShoppingList()
   { // TODO: will eventually need to take in terrainType so it can separate out air/ground/navy
-    ArrayList<UnitEnum> arrList = new ArrayList<UnitEnum>();
+    ArrayList<UnitModel> arrList = new ArrayList<UnitModel>();
     for( int i = 0; i < unitModels.length; i++ )
     {
-      arrList.add(unitModels[i].type);
+      arrList.add(unitModels[i]);
     }
-    UnitEnum[] returned = new UnitEnum[0];
-    return arrList.toArray(returned);
+
+    return arrList;
   }
 }
