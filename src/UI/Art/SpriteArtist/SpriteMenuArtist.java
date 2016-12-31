@@ -8,14 +8,12 @@ import java.util.ArrayList;
 import Engine.GameInstance;
 import UI.InGameMenu;
 import UI.MapView;
-import Units.UnitModel;
-import Units.UnitModel.UnitEnum;
 
 public class SpriteMenuArtist
 {
   private GameInstance myGame;
   private MapView myView;
-  private InGameMenu myCurrentMenu;
+  private InGameMenu<? extends Object> myCurrentMenu;
   private ArrayList<String> myCurrentMenuStrings;
   private int drawScale;
 
@@ -96,7 +94,7 @@ public class SpriteMenuArtist
    * @param menu
    * @param out
    */
-  private void getMenuStrings(InGameMenu menu, ArrayList<String> out)
+  private void getMenuStrings(InGameMenu<? extends Object> menu, ArrayList<String> out)
   {
     for( int i = 0; i < menu.getNumOptions(); ++i )
     {
