@@ -51,7 +51,7 @@ public class SpriteMenuArtist
     if( drawMenu != null )
     {
       // Check if we need to build the menu options again.
-      if( myCurrentMenu != drawMenu || myCurrentMenuStrings.size() != drawMenu.getNumOptions() )
+      if( drawMenu.wasReset() || myCurrentMenu != drawMenu )
       {
         myCurrentMenu = drawMenu;
         myCurrentMenuStrings.clear();

@@ -16,11 +16,16 @@ public class InGameMenu<T>
 
   private OptionSelector optionSelector;
 
+  // Simply records whether this menu has been reset since the last time it was checked.
+  // Used to help the renderer figure out whether to regenerate the menu image.
+  private boolean wasReset;
+
   public InGameMenu(ArrayList<T> options)
   {
     menuOptions = new ArrayList<T>();
     menuOptions.addAll(options);
     optionSelector = new OptionSelector(menuOptions.size());
+    wasReset = true;
   }
 
   public InGameMenu(T[] options)
@@ -31,6 +36,7 @@ public class InGameMenu<T>
       menuOptions.add( options[i] );
     }
     optionSelector = new OptionSelector(menuOptions.size());
+    wasReset = true;
   }
 
   /**
@@ -50,6 +56,21 @@ public class InGameMenu<T>
     menuOptions.clear();
     menuOptions.addAll(newOptions);
     optionSelector.reset( menuOptions.size() );
+    wasReset = true;
+  }
+
+  /**
+   * Returns the value of wasReset, and unsets it. Intended to be checked before rendering,
+   * to determine whether the menu should be re-rendered, or just drawn.
+   * NOTE: This assumes there is only one consumer of this function.
+   *
+   * @return Returns true if wasReset() has been called before, false otherwise.
+   */
+  public boolean wasReset()
+  {
+    boolean oldValue = wasReset;
+    wasReset = false;
+    return oldValue;
   }
 
   /**
