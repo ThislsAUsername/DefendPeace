@@ -6,7 +6,6 @@ import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.Environment.Terrains;
 import UI.CO_InfoMenu;
-import UI.InGameCoAbilityMenu;
 import UI.InputHandler;
 import UI.InGameMenu;
 import UI.InGameProductionMenu;
@@ -574,7 +573,7 @@ public class MapController implements IController
         currentMenu = metaActionMenu;
         break;
       case CO_ABILITYMENU:
-        coAbilityMenu = new InGameCoAbilityMenu( myGame.activeCO.getReadyAbilities() );
+        coAbilityMenu = new InGameMenu<String>( myGame.activeCO.getReadyAbilities() );
         currentMenu = coAbilityMenu;
         break;
       case CONFIRMEXIT:
