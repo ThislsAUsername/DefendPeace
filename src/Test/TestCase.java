@@ -1,6 +1,9 @@
 package Test;
 
 import CommandingOfficers.Commander;
+import Engine.GameAction;
+import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventSequence;
 import Terrain.GameMap;
 import Units.Unit;
 import Units.UnitModel.UnitEnum;
@@ -51,5 +54,14 @@ public abstract class TestCase
     u.y = y;
     map.getLocation(x, y).setResident(u);
     return u;
+  }
+
+  protected static void performGameAction( GameAction action, GameMap map )
+  {
+    GameEventSequence sequence = action.getGameEvents( map );
+    for( GameEvent event : sequence )
+    {
+      event.performEvent( map );
+    }
   }
 }

@@ -1,20 +1,26 @@
 package UI;
 
-import UI.Art.Animation.AnimationSequence;
-import UI.Art.Animation.NobunagaBattleAnimation;
+import java.util.Queue;
+
+import UI.Art.Animation.GameAnimation;
 
 import Engine.GameAction;
 import Engine.IView;
 import Engine.MapController;
+import Engine.Combat.BattleSummary;
+import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventSequence;
 
 public abstract class MapView implements IView
 {
   public GameAction currentAction = null;
+  private Queue<GameEvent> eventsToAnimate = new GameEventSequence();
 
   // TODO: This doesn't really belong here. The specific artist should handle this, ideally.
   private int unitMoveSpeedMsPerTile = 100;
 
-  protected AnimationSequence currentAnimation = null;
+  protected GameAnimation currentAnimation = null;
 
   protected MapController mapController = null;
 
@@ -34,7 +40,19 @@ public abstract class MapView implements IView
    */
   public abstract int getTileSize();
 
-  public void animate(GameAction action)
+  /**
+   * Adds the new events to the queue so they can be animated.
+   */
+  public void animate( GameEventSequence newEvents )
+  {
+    eventsToAnimate.addAll( newEvents );
+  }
+
+  /**
+   * Orders the MapView to animate the MapEvents in the given GameAction.
+   */
+  @Deprecated
+  public void animate_old(GameAction action)
   {
     if( currentAction != null && currentAction != action )
     {
@@ -47,31 +65,25 @@ public abstract class MapView implements IView
     currentAction = action;
 
     // If we have a previous animation in progress, cancel it to start the new one.
+    // Note that this really shouldn't happen in practice, but we check for safety.
     if( currentAnimation != null )
     {
       currentAnimation.cancel();
+      eventsToAnimate.clear();
       currentAnimation = null;
     }
 
-    switch (currentAction.getActionType())
-    {
-      case ATTACK:
-        currentAnimation = new NobunagaBattleAnimation(currentAction, getTileSize());
-        break;
-      case CAPTURE:
-      case LOAD:
-      case WAIT:
-      case UNLOAD:
-        break;
-      case INVALID:
-      default:
-        System.out.println("WARNING! No action animation supported for type " + currentAction.getActionType());
-    }
+    // Add the list of mapEvents for animating later.
+    //eventsToAnimate.addAll( action.getMapEvents() );
+
+    // Get the first event and its animation.
+    GameEvent event = eventsToAnimate.peek();
+    currentAnimation = event.getEventAnimation( this );
 
     if( currentAnimation == null )
     {
       // Animation for this action is not supported. Just let the controller know.
-      mapController.animationEnded();
+      mapController.animationEnded( event, eventsToAnimate.isEmpty() );
     }
   }
   public boolean isAnimating()
@@ -92,5 +104,47 @@ public abstract class MapView implements IView
   public void gameIsOver()
   {
     // Do nothing by default. Subclasses can override.
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////
+  ///  The below methods implement the visitor pattern. MapView visits MapEvent so
+  ///    that MapEvent can invoke one of these methods to build the correct animation.
+  /////////////////////////////////////////////////////////////////////////////////////
+
+  public GameAnimation buildBattleAnimation( BattleSummary summary )
+  {
+    return null;
+  }
+  public GameAnimation buildCaptureAnimation()
+  {
+    return null;
+  }
+  public GameAnimation buildUnitCombineAnimation()
+  {
+    return null;
+  }
+  public GameAnimation buildUnitDieAnimation()
+  {
+    return null;
+  }
+  public GameAnimation buildGameOverAnimation()
+  {
+    return null;
+  }
+  public GameAnimation buildLoadAnimation()
+  {
+    return null;
+  }
+  public GameAnimation buildUnloadAnimation()
+  {
+    return null;
+  }
+  public GameAnimation buildMoveAnimation()
+  {
+    return null;
+  }
+  public GameAnimation buildCommanderDefeatAnimation( CommanderDefeatEvent event )
+  {
+    return null;
   }
 }

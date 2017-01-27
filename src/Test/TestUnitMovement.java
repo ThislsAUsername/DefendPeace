@@ -44,7 +44,8 @@ public class TestUnitMovement extends TestCase
     // Add a Unit and try to move it.
     Unit mover = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 4, 4);
     GameAction ga = new GameAction(mover, 6, 5, GameAction.ActionType.WAIT);
-    ga.execute(testMap);
+
+    performGameAction( ga, testMap );
 
     // Evaluate the test.    
     boolean testPassed = validate(testMap.getLocation(4, 4).getResident() == null, "    Infantry is still at the start point.");

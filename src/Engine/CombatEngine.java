@@ -1,34 +1,22 @@
 package Engine;
 
+import Engine.Combat.BattleSummary;
+import Terrain.Environment;
 import Terrain.GameMap;
 import Units.Unit;
 
 public class CombatEngine
 {
-  public static void resolveCombat(Unit attacker, Unit defender, GameMap map)
+  /**
+   * Static function to calculate the outcome of a battle between two units. It builds an
+   * object to represent the specific combat instance and returns the result it calculates.
+   */
+  public static BattleSummary calculateBattleResults( Unit attacker, Unit defender, GameMap map, int attackerX, int attackerY )
   {
     // Set up our combat scenario.
-    CombatParameters params = new CombatParameters(attacker, defender, map);
+    CombatParameters params = new CombatParameters(attacker, defender, map, attackerX, attackerY);
 
-    // Last-minute adjustments.
-    attacker.CO.applyCombatModifiers(params);
-    defender.CO.applyCombatModifiers(params);
-
-    // Start bullets (shells, missiles, whatever) flying.
-    params.defender.damageHP(params.calculateDamage());
-    params.attacker.fire(params); // Lets the unit know that it has actually fired a shot.
-    if( params.canCounter )
-    {
-      params.swap();
-
-      // TODO: Let the COs take another pass at modifying things?
-
-      if( params.attackerHP > 0 ) // stops counterattacks from dead units.
-      {
-        params.defender.damageHP(params.calculateDamage());
-        params.attacker.fire(params);
-      }
-    }
+    return params.calculateBattleResults();
   }
+
 }
-//getWeapon(pDefender.model.type);

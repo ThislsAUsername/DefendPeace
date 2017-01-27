@@ -7,10 +7,13 @@ import java.util.HashMap;
 
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
+import Engine.Combat.BattleSummary;
 import Terrain.Environment;
 import Terrain.GameMap;
 import UI.CO_InfoMenu;
 import UI.MapView;
+import UI.Art.Animation.GameAnimation;
+import UI.Art.Animation.NobunagaBattleAnimation;
 import Units.Unit;
 
 public class SpriteMapView extends MapView
@@ -185,6 +188,12 @@ public class SpriteMapView extends MapView
       // Draw the Commander overlay with available funds.
       drawCommanderOverlay(g);
     } // End of case for no overlay menu.
+  }
+
+  @Override // from MapView
+  public GameAnimation buildBattleAnimation( BattleSummary summary )
+  {
+    return new NobunagaBattleAnimation(getTileSize(), summary.attacker.x, summary.attacker.y, summary.defender.x, summary.defender.y);
   }
 
   /**

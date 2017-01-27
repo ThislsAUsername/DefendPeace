@@ -46,7 +46,7 @@ public class TestCombat extends TestCase
     infB.damageHP(7);
 
     // Execute inf- I mean, the action.
-    new GameAction(mechA, 1, 1, GameAction.ActionType.ATTACK, 1, 2).execute(testMap);
+    performGameAction( new GameAction(mechA, 1, 1, GameAction.ActionType.ATTACK, 1, 2), testMap );
 
     // Check that the mech is undamaged, and that the infantry is no longer with us.
     boolean testPassed = validate(mechA.getPreciseHP() == 10, "    Attacker lost or gained health.");

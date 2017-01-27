@@ -2,7 +2,7 @@ package UI.Art.Animation;
 
 import java.awt.Graphics;
 
-public interface AnimationSequence
+public interface GameAnimation
 {
   /**
    * Draw the next frame of the animation. Return true if the animation is complete, else false.

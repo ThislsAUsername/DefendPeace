@@ -107,9 +107,9 @@ public class Unit
   }
 
   // for the purpose of letting the unit know it has attacked.
-  public void fire(final CombatParameters params)
+  public void fire(final Unit defender)
   {
-    UnitEnum target = params.defender.model.type;
+    UnitEnum target = defender.model.type;
     int i = 0;
     for( ; i < weapons.length; i++ )
     {
@@ -146,6 +146,11 @@ public class Unit
     if( !target.isCaptureable() )
     {
       System.out.println("ERROR! Attempting to capture an uncapturable Location!");
+      return;
+    }
+    if( target.getOwner() == CO )
+    {
+      System.out.println("WARNING! Attempting to capture a property we own!");
       return;
     }
 
