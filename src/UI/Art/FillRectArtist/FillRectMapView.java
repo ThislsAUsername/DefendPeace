@@ -4,7 +4,12 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 
 import Engine.GameInstance;
+import Engine.Combat.BattleSummary;
+import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventQueue;
 import UI.MapView;
+import UI.Art.Animation.GameAnimation;
+import UI.Art.Animation.NobunagaBattleAnimation;
 
 public class FillRectMapView extends MapView
 {
@@ -16,6 +21,9 @@ public class FillRectMapView extends MapView
   private int drawScale = 2;
   private int mapViewWidth;
   private int mapViewHeight;
+
+  GameEventQueue eventSequence = null;
+  GameEvent currentEvent = null;
 
   public FillRectMapView(GameInstance game)
   {
@@ -29,6 +37,8 @@ public class FillRectMapView extends MapView
     mapArtist.setView(this);
     unitArtist.setView(this);
     menuArtist.setView(this);
+
+    eventSequence = new GameEventQueue();
   }
 
   @Override
@@ -62,16 +72,30 @@ public class FillRectMapView extends MapView
     {
       mapArtist.drawMovePath(g, mapController.getContemplatedMove());
     }
-    unitArtist.drawUnits(g);
+    unitArtist.drawUnits(g, mapController.getContemplatedAction());
+
+    // If we have a new event to animate, load the animation.
+    if( currentEvent != null && currentAnimation == null )
+    {
+      while( null == currentAnimation && !eventSequence.isEmpty() )
+      {
+        currentAnimation = currentEvent.getEventAnimation( this );
+        if( null == currentAnimation )
+        {
+          mapController.animationEnded( currentEvent, eventSequence.isEmpty() );
+          currentEvent = eventSequence.poll();
+        }
+      }
+    }
 
     if( currentAnimation != null )
     {
       // Animate until it tells you it's done.
       if( currentAnimation.animate(g) )
       {
-        currentAction = null;
+        mapController.animationEnded( currentEvent, eventSequence.isEmpty() );
         currentAnimation = null;
-        mapController.animationEnded();
+        currentEvent = eventSequence.poll(); // Load the next event into the hopper.
       }
     }
     else if( getCurrentGameMenu() == null )
@@ -82,5 +106,28 @@ public class FillRectMapView extends MapView
     {
       menuArtist.drawMenu(g);
     }
+  }
+
+  @Override
+  public void animate(GameEventQueue newEvents)
+  {
+    eventSequence = newEvents;
+
+    // Cancel any current animation.
+    if( null != currentAnimation )
+    {
+      currentAnimation.cancel();
+      currentAnimation = null;
+    }
+
+    // Pop the first new event.
+    if( !eventSequence.isEmpty() )
+    {
+      currentEvent = eventSequence.poll();
+    }
+  }
+  public GameAnimation buildBattleAnimation( BattleSummary summary )
+  {
+    return new NobunagaBattleAnimation(getTileSize(), summary.attacker.x, summary.attacker.y, summary.defender.x, summary.defender.y);
   }
 }

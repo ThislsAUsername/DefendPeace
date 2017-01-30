@@ -4,7 +4,7 @@ import CommandingOfficers.Commander;
 import Engine.GameEvents.BattleEvent;
 import Engine.GameEvents.CaptureEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
-import Engine.GameEvents.GameEventSequence;
+import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.LoadEvent;
 import Engine.GameEvents.MoveEvent;
 import Engine.GameEvents.UnitDieEvent;
@@ -153,9 +153,9 @@ public class GameAction
    * IF a GameAction is a castle, MapEvents are the bricks that compose it.
    * @return A MapEventSequence containing all MapEvents caused by this GameAction.
    */
-  public GameEventSequence getGameEvents( GameMap gameMap )
+  public GameEventQueue getGameEvents( GameMap gameMap )
   {
-    GameEventSequence sequence = new GameEventSequence();
+    GameEventQueue sequence = new GameEventQueue();
 
     // Make sure we have a path to our destination.
     if( movePath == null )
@@ -179,7 +179,8 @@ public class GameAction
         Unit unitTarget = gameMap.getLocation(actX, actY).getResident();
 
         // Make sure this is a valid battle before creating the event.
-        if( unitTarget != null && unitActor.getDamage(unitTarget, moveX, moveY) != 0 )
+        int range = Math.abs(moveX - unitTarget.x) + Math.abs(moveY - unitTarget.y);
+        if( unitTarget != null && (unitActor.getDamage(unitTarget, range) > 0) )
         {
           sequence.add( new MoveEvent(unitActor, movePath) );
           BattleEvent event = new BattleEvent(unitActor, unitTarget, moveX, moveY, gameMap);

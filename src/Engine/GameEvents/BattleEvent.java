@@ -45,9 +45,14 @@ public class BattleEvent implements GameEvent
     Unit attacker = battleInfo.attacker;
     Unit defender = battleInfo.defender;
     attacker.fire( defender ); // Lets the unit know that it has actually fired a shot.
-    defender.fire( attacker );
-    attacker.damageHP( battleInfo.attackerHPLoss );
     defender.damageHP( battleInfo.defenderHPLoss );
+
+    // Handle counter-attack if relevant.
+    if( battleInfo.attackerHPLoss > 0 )
+    {
+      defender.fire( attacker );
+      attacker.damageHP( battleInfo.attackerHPLoss );
+    }
 
     // TODO: Handle ammo.
 

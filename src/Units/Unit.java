@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 import CommandingOfficers.Commander;
-import Engine.CombatParameters;
 import Engine.GameAction;
 import Engine.Utils;
 import Terrain.GameMap;
@@ -82,22 +81,27 @@ public class Unit
     }
   }
 
+  /**
+   * @return the damage this unit can do to the target from its current location.
+   */
   public double getDamage(Unit target)
   {
-    return getDamage(target, x, y);
+    int range = Math.abs(x - target.x) + Math.abs(y - target.y);
+    return getDamage(target, range);
   }
 
   /**
-   * @return how much base damage the target would take if this unit tried to attack it
+   * @return the base damage this unit would do against the specified target,
+   * if this unit were 'range' spaces away from it.
    */
-  public double getDamage(Unit target, int xLoc, int yLoc)
+  public double getDamage(Unit target, int range )
   {
     if( weapons == null )
       return 0;
     Weapon chosen = null;
     for( int i = 0; i < weapons.length && chosen == null; i++ )
     {
-      double damage = weapons[i].getDamage(xLoc, yLoc, target);
+      double damage = weapons[i].getDamage(target, range);
       if( damage != 0 )
       {
         return damage;

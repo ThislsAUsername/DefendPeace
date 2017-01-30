@@ -10,7 +10,8 @@ public class CombatParameters
   private Unit attacker, defender;
   private final int attackerX, attackerY, defenderX, defenderY;
   private GameMap gameMap;
-  private boolean isCounter, canCounter;
+  private boolean canCounter;
+  int battleRange;
 
   /**
    * Set up the CombatParams object. Note that we assume the defender is where he thinks he is, but
@@ -27,13 +28,12 @@ public class CombatParameters
     defender = pDefender;
     this.attackerX = attackerX;
     this.attackerY = attackerY;
-    defenderX = defender.x; // This variable is technically not necessary, but this enables consistency with attackerX/Y.
+    defenderX = defender.x; // This variable is technically not necessary, but provides consistent names with attackerX/Y.
     defenderY = defender.y;
     gameMap = map;
-    isCounter = false;
     // Only attacks at point-blank range can be countered
-    int dist = Math.abs(attacker.x - defender.x) + Math.abs(attacker.y - defender.y);
-    canCounter = !isCounter && dist == 1 && defender.getDamage(attacker) != 0;
+    battleRange = Math.abs(attackerX - defenderX) + Math.abs(attackerY - defenderY);
+    canCounter = (battleRange == 1) && (defender.getDamage(attacker, battleRange) > 0);
   }
 
   /**
@@ -46,7 +46,7 @@ public class CombatParameters
     double attackerHPLoss = 0;
 
     // Set up our scenario.
-    BattleParams attackInstance = new BattleParams( attacker, defender, gameMap.getEnvironment(defenderX, defenderY) );
+    BattleParams attackInstance = new BattleParams( attacker, defender, battleRange, gameMap.getEnvironment(defenderX, defenderY) );
 
     // Last-minute adjustments.
     attacker.CO.applyCombatModifiers(this); // TODO: pass BattleParams instead?
@@ -58,7 +58,7 @@ public class CombatParameters
     if( canCounter && (defender.getHP() > defenderHPLoss) )
     {
       // New battle instance with defender counter-attacking.
-      BattleParams defendInstance = new BattleParams( defender, attacker, gameMap.getEnvironment(attackerX, attackerY) );
+      BattleParams defendInstance = new BattleParams( defender, attacker, battleRange, gameMap.getEnvironment(attackerX, attackerY) );
       defendInstance.attackerHP -= defenderHPLoss; // Account for the first attack's damage to the now-attacker.
 
       // TODO: Let the COs take another pass at modifying things?
@@ -83,9 +83,9 @@ public class CombatParameters
     public double defenseFactor;
     public double terrainDefense;
 
-    public BattleParams(Unit attacker, Unit defender, Environment battleground)
+    public BattleParams(Unit attacker, Unit defender, int range, Environment battleground)
     {
-      baseDamage = attacker.getDamage(defender);
+      baseDamage = attacker.getDamage(defender, range);
       attackFactor = attacker.model.getDamageRatio();
       attackerHP = attacker.getHP();
       defenseFactor = defender.model.getDefenseRatio();

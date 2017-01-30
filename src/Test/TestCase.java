@@ -3,7 +3,7 @@ package Test;
 import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.GameEvents.GameEvent;
-import Engine.GameEvents.GameEventSequence;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Units.Unit;
 import Units.UnitModel.UnitEnum;
@@ -58,7 +58,7 @@ public abstract class TestCase
 
   protected static void performGameAction( GameAction action, GameMap map )
   {
-    GameEventSequence sequence = action.getGameEvents( map );
+    GameEventQueue sequence = action.getGameEvents( map );
     for( GameEvent event : sequence )
     {
       event.performEvent( map );

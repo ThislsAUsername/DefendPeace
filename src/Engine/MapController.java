@@ -1,12 +1,10 @@
 package Engine;
 
-import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEvent;
-import Engine.GameEvents.GameEventSequence;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
-import Terrain.Environment.Terrains;
 import UI.CO_InfoMenu;
 import UI.InputHandler;
 import UI.InGameMenu;
@@ -19,6 +17,8 @@ public class MapController implements IController
 {
   private GameInstance myGame;
   private MapView myView;
+
+  private GameAction currentAction = null;
 
   // A few menus to control the in-game logical flow.
   private InGameMenu<UnitModel> productionMenu;
@@ -165,7 +165,7 @@ public class MapController implements IController
         {
           if( unitActor.isTurnOver == false || unitActor.CO != myGame.activeCO )
           {
-            myView.currentAction = new GameAction(unitActor); // Start building a GameAction
+            currentAction = new GameAction(unitActor); // Start building a GameAction
 
             // Calculate movement options.
             changeInputMode(InputMode.MOVEMENT);
@@ -245,12 +245,12 @@ public class MapController implements IController
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         break;
       case ENTER:
-        if( inMoveableSpace && myView.currentAction.getActor().CO == myGame.activeCO ) // If the selected space is within
+        if( inMoveableSpace && currentAction.getActor().CO == myGame.activeCO ) // If the selected space is within
         // the reachable area
         {
           // Move the Unit to the location and display possible actions.
           currentMovePath.start(); // start the unit running
-          myView.currentAction.setMovePath(currentMovePath);
+          currentAction.setMovePath(currentMovePath);
           currentMovePath = null;
           changeInputMode(InputMode.ACTIONMENU);
         }
@@ -279,12 +279,12 @@ public class MapController implements IController
     switch (input)
     {
       case ENTER:
-        myView.currentAction.setActionType( actionMenu.getSelectedOption() );
+        currentAction.setActionType( actionMenu.getSelectedOption() );
 
         // If the action is completely constructed, execute it, else get the missing info.
-        if( myView.currentAction.isReadyToExecute() )
+        if( currentAction.isReadyToExecute() )
         {
-          executeGameAction( myView.currentAction );
+          executeGameAction( currentAction );
         }
         else
         {
@@ -324,13 +324,13 @@ public class MapController implements IController
         myGame.moveCursorRight();
         break;
       case ENTER:
-        if( inActionableSpace && (null != myView.currentAction) )
+        if( inActionableSpace && (null != currentAction) )
         {
-          myView.currentAction.setActionLocation(myGame.getCursorX(), myGame.getCursorY());
+          currentAction.setActionLocation(myGame.getCursorX(), myGame.getCursorY());
 
-          if( myView.currentAction.isReadyToExecute() )
+          if( currentAction.isReadyToExecute() )
           {
-            executeGameAction( myView.currentAction );
+            executeGameAction( currentAction );
           }
           else
           {
@@ -507,8 +507,8 @@ public class MapController implements IController
     switch (inputMode)
     {
       case ACTION:
-        Utils.findActionableLocations(myView.currentAction.getActor(), myView.currentAction.getActionType(),
-            myView.currentAction.getMoveX(), myView.currentAction.getMoveY(), myGame.gameMap);
+        Utils.findActionableLocations(currentAction.getActor(), currentAction.getActionType(),
+            currentAction.getMoveX(), currentAction.getMoveY(), myGame.gameMap);
         boolean set = false;
         for( int w = 0; w < myGame.gameMap.mapWidth; ++w )
         {
@@ -528,14 +528,14 @@ public class MapController implements IController
         break;
       case ACTIONMENU:
         myGame.gameMap.clearAllHighlights();
-        actionMenu.resetOptions( myView.currentAction.getActor().getPossibleActions(
-            myGame.gameMap, myView.currentAction.getMoveX(), myView.currentAction.getMoveY()));
+        actionMenu.resetOptions( currentAction.getActor().getPossibleActions(
+            myGame.gameMap, currentAction.getMoveX(), currentAction.getMoveY()));
         currentMenu = actionMenu;
-        myGame.setCursorLocation(myView.currentAction.getMoveX(), myView.currentAction.getMoveY());
-        myView.currentAction.setActionType(GameAction.ActionType.INVALID); // We haven't chosen an action yet.
+        myGame.setCursorLocation(currentAction.getMoveX(), currentAction.getMoveY());
+        currentAction.setActionType(GameAction.ActionType.INVALID); // We haven't chosen an action yet.
         break;
       case MAP:
-        myView.currentAction = null;
+        currentAction = null;
         currentMovePath = null;
         currentMenu = null;
         myGame.gameMap.clearAllHighlights();
@@ -547,13 +547,13 @@ public class MapController implements IController
         //        }
         break;
       case MOVEMENT:
-        Utils.findPossibleDestinations(myView.currentAction.getActor(), myGame);
-        if( null != myView.currentAction )
+        Utils.findPossibleDestinations(currentAction.getActor(), myGame);
+        if( null != currentAction )
         {
-          myView.currentAction.setMovePath(null); // No destination chosen yet.
+          currentAction.setMovePath(null); // No destination chosen yet.
         }
         currentMenu = null;
-        myGame.setCursorLocation(myView.currentAction.getActor().x, myView.currentAction.getActor().y);
+        myGame.setCursorLocation(currentAction.getActor().x, currentAction.getActor().y);
         currentMovePath = null;
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.
         break;
@@ -586,7 +586,7 @@ public class MapController implements IController
         myGame.gameMap.clearAllHighlights();
         break;
       case EXITGAME:
-        myView.currentAction = null;
+        currentAction = null;
         myGame.gameMap.clearAllHighlights();
         currentMenu = null;
         currentMovePath = null;
@@ -618,10 +618,10 @@ public class MapController implements IController
 
     currentMovePath.addWaypoint(x, y);
 
-    if( !Utils.isPathValid(myView.currentAction.getActor(), currentMovePath, myGame.gameMap) )
+    if( !Utils.isPathValid(currentAction.getActor(), currentMovePath, myGame.gameMap) )
     {
       // The currently-built path is invalid. Try to generate a new one (may still return null).
-      Utils.findShortestPath(myView.currentAction.getActor(), x, y, currentMovePath, myGame.gameMap);
+      Utils.findShortestPath(currentAction.getActor(), x, y, currentMovePath, myGame.gameMap);
     }
   }
 
@@ -631,10 +631,15 @@ public class MapController implements IController
   private void executeGameAction(GameAction action)
   {
     // Compile the GameAction to its component events.
-    GameEventSequence events = action.getGameEvents( myGame.gameMap );
+    GameEventQueue events = action.getGameEvents( myGame.gameMap );
 
     // Send the events to the animator. They will be applied/executed in animationEnded().
     myView.animate(events);
+  }
+
+  public GameAction getContemplatedAction()
+  {
+    return currentAction;
   }
 
   public Path getContemplatedMove()
@@ -666,24 +671,6 @@ public class MapController implements IController
       }
     }
 
-    if( isGameOver && inputMode != InputMode.EXITGAME )
-    {
-      // The last action ended the game, and the animation just finished.
-      //  Now we wait for one more keypress before going back to the main menu.
-      changeInputMode( InputMode.EXITGAME );
-
-      // Signal the view to animate the victory/defeat overlay.
-      myView.gameIsOver();
-    }
-    else
-    {
-      // The animation for the last action just completed. Back to normal input mode.
-      changeInputMode(InputMode.MAP);
-    }
-  }
-
-  public void animationEnded()
-  {
     if( isGameOver && inputMode != InputMode.EXITGAME )
     {
       // The last action ended the game, and the animation just finished.

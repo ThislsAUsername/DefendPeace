@@ -66,7 +66,7 @@ public class TestUnitMovement extends TestCase
 
     // Make an action to move the unit 5 spaces away, and execute it.
     GameAction ga = new GameAction(mover, 7, 6, GameAction.ActionType.WAIT);
-    ga.execute(testMap);
+    performGameAction( ga, testMap);
 
     // Make sure the action didn't actually execute.
     boolean testPassed = validate(testMap.getLocation(4, 4).getResident() == mover, "    Infantry moved when he shouldn't have.");

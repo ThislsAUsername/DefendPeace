@@ -4,10 +4,14 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import java.util.Queue;
 
 import CommandingOfficers.Commander;
+import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.Combat.BattleSummary;
+import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.Environment;
 import Terrain.GameMap;
 import UI.CO_InfoMenu;
@@ -32,6 +36,7 @@ public class SpriteMapView extends MapView
   private int overlayPreviousFunds = 0;
 
   // Variables for controlling map animations.
+  protected Queue<GameEvent> eventsToAnimate = new GameEventQueue();
   private int animIndex = 0;
   private long animIndexUpdateTime = 0;
   private final int animIndexUpdateInterval = 250;
@@ -108,6 +113,41 @@ public class SpriteMapView extends MapView
   }
 
   @Override
+  public void animate( GameEventQueue newEvents )
+  {
+    System.out.println("DEBUG: Received " + newEvents.size() + " events to animate.");
+    eventsToAnimate.addAll( newEvents );
+
+    // If we aren't currently animating anything, load up the next animation.
+    if( null == currentAnimation )
+    {
+      loadNextEventAnimation();
+    }
+  }
+
+  /**
+   * Utility function to get the animation for the next animatable GameEvent
+   * in the GameEvent queue.
+   */
+  private void loadNextEventAnimation()
+  {
+    // Keep pulling events off the queue until we get one we can draw.
+    while( null == currentAnimation && !eventsToAnimate.isEmpty() )
+    {
+      GameEvent event = eventsToAnimate.peek();
+      if( null != event )
+      {
+        currentAnimation = event.getEventAnimation( this );
+        if( null == currentAnimation )
+        {
+          // There isn't an animation for this event. Just notify the controller.
+          mapController.animationEnded( eventsToAnimate.poll(), eventsToAnimate.isEmpty() );
+        }
+      }
+    }
+  }
+
+  @Override
   public void render(Graphics g)
   {
     // If we are in the CO_INFO menu, don't draw the map, etc.
@@ -145,8 +185,9 @@ public class SpriteMapView extends MapView
       // Draw Unit icons on top of everything, to make sure they are seen clearly.
       drawUnitIcons(g);
 
-      // TODO: Consider moving the contemplated move inside of the action (in MapController)
-      //       to make the interface more consistent?
+      // Get a reference to the current action being built, if one exists.
+      GameAction currentAction = mapController.getContemplatedAction();
+
       // Draw the movement arrow if the user is contemplating a move.
       if( mapController.getContemplatedMove() != null )
       {
@@ -159,7 +200,7 @@ public class SpriteMapView extends MapView
       }
 
       // Draw the currently-acting unit so it's on top of everything.
-      if( null != currentAction )
+      if( null != currentAction && currentAnimation == null )
       {
         Unit u = currentAction.getActor();
         unitArtist.drawUnit(g, u, u.x, u.y, fastAnimIndex);
@@ -171,14 +212,18 @@ public class SpriteMapView extends MapView
         // Animate until it tells you it's done.
         if( currentAnimation.animate(g) )
         {
-          currentAction = null;
           currentAnimation = null;
-          mapController.animationEnded();
+
+          // The animation is over; remove the corresponding event and notify the controller.
+          mapController.animationEnded( eventsToAnimate.poll(), eventsToAnimate.isEmpty() );
+
+          // Get the next event animation if one exists.
+          loadNextEventAnimation();
         }
       }
       else if( getCurrentGameMenu() == null )
       {
-        mapArtist.drawCursor(g);
+        mapArtist.drawCursor(g, currentAction);
       }
       else
       {
@@ -216,6 +261,7 @@ public class SpriteMapView extends MapView
         {
           Unit u = myGame.gameMap.getLocation(x, y).getResident();
           // If an action is being considered, draw the active unit later, not now.
+          GameAction currentAction = mapController.getContemplatedAction();
           if( (null == currentAction) || (u != currentAction.getActor()) )
           {
             unitArtist.drawUnit(g, u, u.x, u.y, animIndex);
@@ -243,6 +289,7 @@ public class SpriteMapView extends MapView
         {
           Unit u = myGame.gameMap.getLocation(x, y).getResident();
           // If an action is being considered, draw the active unit later, not now.
+          GameAction currentAction = mapController.getContemplatedAction();
           if( (null == currentAction) || (u != currentAction.getActor()) )
           {
             unitArtist.drawUnitIcons(g, u, u.x, u.y);

@@ -3,6 +3,7 @@ package UI.Art.FillRectArtist;
 import java.awt.Color;
 import java.awt.Graphics;
 
+import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.XYCoord;
@@ -33,13 +34,13 @@ public class FillRectUnitArtist
     tileSizePx = view.getTileSize();
   }
 
-  public void drawUnits(Graphics g)
+  public void drawUnits(Graphics g, GameAction currentAction)
   {
     // Get the currently-focused Unit, if there is one.
     Unit currentActor = null;
-    if( null != myView.currentAction )
+    if( null != currentAction )
     {
-      currentActor = myView.currentAction.getActor();
+      currentActor = currentAction.getActor();
     }
 
     // Draw all the units except for the one with focus.
@@ -65,7 +66,7 @@ public class FillRectUnitArtist
       double drawX = currentActor.x;
       double drawY = currentActor.y;
 
-      Path unitPath = myView.currentAction.getMovePath();
+      Path unitPath = currentAction.getMovePath();
       if( null != unitPath )
       {
         XYCoord coord = unitPath.getPosition();

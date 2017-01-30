@@ -1,7 +1,6 @@
 package Engine;
 
 import Engine.Combat.BattleSummary;
-import Terrain.Environment;
 import Terrain.GameMap;
 import Units.Unit;
 

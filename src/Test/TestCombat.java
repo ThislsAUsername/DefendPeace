@@ -32,6 +32,7 @@ public class TestCombat extends TestCase
 
     boolean testPassed = true;
     testPassed &= validate(testUnitDeath(), "  Unit death test failed.");
+    testPassed &= validate(testMoveAttack(), "  Move-Attack test failed.");
     return testPassed;
   }
 
@@ -54,6 +55,27 @@ public class TestCombat extends TestCase
 
     // Clean up
     testMap.removeUnit(mechA);
+
+    return testPassed;
+  }
+
+  /** Test that units can move and attack in one turn. */
+  private boolean testMoveAttack()
+  {
+    // Add our combatants
+    Unit mechA = addUnit(testMap, testCo1, UnitEnum.MECH, 1, 1);
+    Unit infB = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 1, 3);
+
+    // Execute inf- I mean, the action.
+    performGameAction( new GameAction(mechA, 1, 2, GameAction.ActionType.ATTACK, 1, 3), testMap );
+
+    // Check that the mech is undamaged, and that the infantry is no longer with us.
+    boolean testPassed = validate(infB.getHP() < 10, "    Defender took no damage.");
+    testPassed &= validate(mechA.getHP() < 10, "    Attacker took no damage.");
+
+    // Clean up
+    testMap.removeUnit(mechA);
+    testMap.removeUnit(infB);
 
     return testPassed;
   }
