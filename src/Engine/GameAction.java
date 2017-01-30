@@ -250,21 +250,26 @@ public class GameAction
       case LOAD:
       {
         // LOAD actions consist of
-        //   MOVE
         //   LOAD
 
-        // Move to the target location.
-        sequence.add( new MoveEvent(unitActor, movePath) );
-
+        // Get the proposed transport.
         Unit transport = gameMap.getLocation(moveX, moveY).getResident();
 
-        if( null != transport && transport.hasCargoSpace(unitActor.model.type) )
+        // double-check that the path is valid.
+        if( movePath != null
+            // unitActor is at path start
+            && gameMap.getLocation(movePath.getWaypoint(0).x, movePath.getWaypoint(0).y).getResident() == unitActor
+            // transport is at path end
+            && gameMap.getLocation(movePath.getEnd().x, movePath.getEnd().y).getResident() == transport
+            // Make sure the transport can do the job.
+            && null != transport && transport.hasCargoSpace(unitActor.model.type) )
         {
+          // Create the new LoadEvent.
           sequence.add( new LoadEvent( unitActor, transport ) );
         }
         else
         {
-          System.out.println("WARNING! " + transport.model.type + " cannot carry " + unitActor.model.type + "!");
+          System.out.println("WARNING! Problem encountered loading " + unitActor.model.type + " into " + transport.model.type + "!");
         }
         break;
       }
