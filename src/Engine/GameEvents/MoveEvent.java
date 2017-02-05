@@ -20,7 +20,7 @@ public class MoveEvent implements GameEvent
   @Override
   public GameAnimation getEventAnimation(MapView mapView)
   {
-    return mapView.buildMoveAnimation();
+    return mapView.buildMoveAnimation(unit, unitPath);
   }
 
   @Override

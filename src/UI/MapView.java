@@ -1,9 +1,11 @@
 package UI;
 
 import UI.Art.Animation.GameAnimation;
+import Units.Unit;
 
 import Engine.IView;
 import Engine.MapController;
+import Engine.Path;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
@@ -87,7 +89,7 @@ public abstract class MapView implements IView
   {
     return null;
   }
-  public GameAnimation buildMoveAnimation()
+  public GameAnimation buildMoveAnimation( Unit unit, Path movePath )
   {
     return null;
   }

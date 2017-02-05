@@ -9,6 +9,7 @@ import java.util.Queue;
 import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.GameInstance;
+import Engine.Path;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
@@ -233,6 +234,13 @@ public class SpriteMapView extends MapView
       // Draw the Commander overlay with available funds.
       drawCommanderOverlay(g);
     } // End of case for no overlay menu.
+  }
+
+  @Override // from MapView
+  public GameAnimation buildMoveAnimation( Unit unit, Path movePath )
+  {
+    return new NobunagaBattleAnimation(getTileSize(), movePath.getWaypoint(0).x, movePath.getWaypoint(0).y,
+        movePath.getEnd().x, movePath.getEnd().y);
   }
 
   @Override // from MapView
