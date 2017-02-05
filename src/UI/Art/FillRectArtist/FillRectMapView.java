@@ -95,7 +95,7 @@ public class FillRectMapView extends MapView
       {
         mapController.animationEnded( currentEvent, eventSequence.isEmpty() );
         currentAnimation = null;
-        currentEvent = eventSequence.poll(); // Load the next event into the hopper.
+        loadNextEventAnimation(); // Load the next event into the hopper.
       }
     }
     else if( getCurrentGameMenu() == null )
@@ -121,11 +121,31 @@ public class FillRectMapView extends MapView
     }
 
     // Pop the first new event.
-    if( !eventSequence.isEmpty() )
+    loadNextEventAnimation();
+  }
+
+  /**
+   * Utility function to get the animation for the next animatable GameEvent
+   * in the GameEvent queue.
+   */
+  private void loadNextEventAnimation()
+  {
+    // Keep pulling events off the queue until we get one we can draw.
+    while( null == currentAnimation && !eventSequence.isEmpty() )
     {
-      currentEvent = eventSequence.poll();
+      GameEvent event = eventSequence.peek();
+      if( null != event )
+      {
+        currentAnimation = event.getEventAnimation( this );
+        if( null == currentAnimation )
+        {
+          // There isn't an animation for this event. Just notify the controller.
+          mapController.animationEnded( eventSequence.poll(), eventSequence.isEmpty() );
+        }
+      }
     }
   }
+
   public GameAnimation buildBattleAnimation( BattleSummary summary )
   {
     return new NobunagaBattleAnimation(getTileSize(), summary.attacker.x, summary.attacker.y, summary.defender.x, summary.defender.y);
