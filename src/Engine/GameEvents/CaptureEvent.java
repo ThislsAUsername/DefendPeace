@@ -39,7 +39,7 @@ public class CaptureEvent implements GameEvent
   public boolean willCapture()
   {
     int finalCapAmt = priorCaptureAmount + captureAmount;
-    return finalCapAmt > 20;
+    return finalCapAmt >= 20;
   }
 
   /**
