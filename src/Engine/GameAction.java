@@ -9,6 +9,7 @@ import Engine.GameEvents.LoadEvent;
 import Engine.GameEvents.MoveEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.UnloadEvent;
+import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.Unit;
@@ -191,7 +192,7 @@ public class GameAction
             sequence.add( new UnitDieEvent( unitActor ) );
 
             // Since the attacker died, see if he has any friends left.
-            if( unitActor.CO.units. isEmpty() )
+            if( unitActor.CO.units.size() == 1 )
             {
               // CO is out of units. Too bad.
               sequence.add( new CommanderDefeatEvent( unitActor.CO ) );
@@ -202,7 +203,7 @@ public class GameAction
             sequence.add( new UnitDieEvent( unitTarget ) );
 
             // The defender died; check if the Commander is defeated.
-            if( unitTarget.CO.units.isEmpty() )
+            if( unitTarget.CO.units.size() == 1 )
             {
               // CO is out of units. Too bad.
               sequence.add( new CommanderDefeatEvent( unitTarget.CO ) );
@@ -232,11 +233,11 @@ public class GameAction
 
           if( capture.willCapture() ) // If this will succeed, check if the CO will lose as a result.
           {
-            Commander targetCO = gameMap.getLocation(unitActor.x, unitActor.y).getOwner();
-            if( targetCO != null && targetCO.HQLocation.getOwner() != targetCO )
+            // Check if capturing this property will cause someone's defeat.
+            if( loc.getEnvironment().terrainType == Terrains.HQ )
             {
-              // If targetCO no longer owns his HQ, too bad.
-              sequence.add( new CommanderDefeatEvent( targetCO ) );
+              // Someone is losing their big, comfy chair.
+              sequence.add( new CommanderDefeatEvent( loc.getOwner() ) );
             }
           }
         }

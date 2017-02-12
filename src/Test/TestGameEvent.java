@@ -11,6 +11,7 @@ import CommandingOfficers.CommanderStrong;
 import Engine.GameAction;
 import Engine.GameEvents.BattleEvent;
 import Engine.GameEvents.CaptureEvent;
+import Engine.GameEvents.CommanderDefeatEvent;
 
 public class TestGameEvent extends TestCase
 {
@@ -35,6 +36,7 @@ public class TestGameEvent extends TestCase
     boolean testPassed = true;
     testPassed &= validate( testBattleEvent(), "  BattleEvent test failed.");
     testPassed &= validate( testCaptureEvent(), "  CaptureEvent test failed.");
+    testPassed &= validate( testCommanderDefeatEvent(), "  CommanderDefeatEvent test failed."); // Put this one last because it alters the map.
     
     return testPassed;
   }
@@ -110,6 +112,75 @@ public class TestGameEvent extends TestCase
     // Clean up
     testMap.removeUnit(infA);
 
+    return testPassed;
+  }
+
+  private boolean testCommanderDefeatEvent()
+  {
+    boolean testPassed = true;
+
+    // Make sure our target CO is not defeated already.
+    testPassed &= validate( testCo2.isDefeated == false, "    testCo2 started out in defeat, but he should not be.");
+
+    // We loaded Firing Range, so we expect a city at location (2, 2)
+    Terrain.Location city = testMap.getLocation(10, 1);
+    // ... an HQ at location (13, 1)
+    Terrain.Location hq = testMap.getLocation(13, 1);
+    // ... and two factories at (13, 2) and (12, 2).
+    Terrain.Location fac1 = testMap.getLocation(13, 2);
+    Terrain.Location fac2 = testMap.getLocation(12, 2);
+
+    // Verify the map looks as we expect.
+    testPassed &= validate( city.getEnvironment().terrainType == Environment.Terrains.CITY, "    No city at (10, 1).");
+    city.setOwner( testCo2 );
+    testPassed &= validate( city.getOwner() == testCo2, "    City should belong to CO 2.");
+    testPassed &= validate( hq.getEnvironment().terrainType == Environment.Terrains.HQ, "    No HQ where expected.");
+    testPassed &= validate( hq.getOwner() == testCo2, "    HQ should belong to CO 2.");
+    testPassed &= validate( fac1.getEnvironment().terrainType == Environment.Terrains.FACTORY, "    Fac 1 is not where expected.");
+    testPassed &= validate( fac1.getOwner() == testCo2, "    Fac 1 should belong to CO 2.");
+    testPassed &= validate( fac2.getEnvironment().terrainType == Environment.Terrains.FACTORY, "    Fac 2 is not where expected.");
+    testPassed &= validate( fac2.getOwner() == testCo2, "    Fac 2 should belong to CO 2.");
+
+    // Grant some units to testCo2
+    Unit baddie1 = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 13, 1);
+    Unit baddie2 = addUnit(testMap, testCo2, UnitEnum.MECH, 12, 1);
+    Unit baddie3 = addUnit(testMap, testCo2, UnitEnum.APC, 13, 2);
+
+    // Verify the units were added correctly.
+    testPassed &= validate( testMap.getLocation(13, 1).getResident() == baddie1, "    Unit baddie1 is not where he belongs." );
+    testPassed &= validate( baddie1.x == 13 && baddie1.y == 1, "    Unit baddie1 doesn't know where he is.");
+    testPassed &= validate( testMap.getLocation(12, 1).getResident() == baddie2, "    Unit baddie2 is not where he belongs." );
+    testPassed &= validate( baddie2.x == 12 && baddie2.y == 1, "    Unit baddie2 doesn't know where he is.");
+    testPassed &= validate( testMap.getLocation(13, 2).getResident() == baddie3, "    Unit baddie3 is not where he belongs." );
+    testPassed &= validate( baddie3.x == 13 && baddie3.y == 2, "    Unit baddie3 doesn't know where he is.");
+
+    // Bring to pass this poor commander's defeat.
+    CommanderDefeatEvent event = new CommanderDefeatEvent(testCo2);
+    event.performEvent(testMap);
+
+    //================================ Validate post-conditions.
+
+    // All of testCo2's Units should be removed from the map.
+    testPassed &= validate( testMap.getLocation(13, 1).getResident() == null, "    Unit baddie1 was not removed from the map after defeat." );
+    testPassed &= validate( baddie1.x == -1 && baddie1.y == -1, "    Unit baddie1 still thinks he's on the map after defeat.");
+    testPassed &= validate( testMap.getLocation(12, 1).getResident() == null, "    Unit baddie2 was not removed from the map after defeat." );
+    testPassed &= validate( baddie2.x == -1 && baddie2.y == -1, "    Unit baddie2 still thinks he's on the map after defeat.");
+    testPassed &= validate( testMap.getLocation(13, 2).getResident() == null, "    Unit baddie3 was not removed from the map after defeat." );
+    testPassed &= validate( baddie3.x == -1 && baddie3.y == -1, "    Unit baddie3 still thinks he's on the map after defeat.");
+
+    // Ensure testCo2 no longer owns properties.
+    testPassed &= validate( city.getOwner() == null, "    City should no longer have an owner.");
+    testPassed &= validate( hq.getOwner() == null, "    HQ should no longer have an owner.");
+    testPassed &= validate( fac1.getOwner() == null, "    Fac 1 should no longer have an owner.");
+    testPassed &= validate( fac2.getOwner() == null, "    Fac 2 should no longer have an owner.");
+
+    // His former HQ should now be a mere city.
+    testPassed &= validate( hq.getEnvironment().terrainType == Environment.Terrains.CITY, "    HQ was not downgraded to city after defeat.");
+
+    // Confirm that yea, verily, testCo2 is truly defeated.
+    testPassed &= validate( true == testCo2.isDefeated, "    testCo2 does not think he is defeated (but he so is).");
+
+    // No cleanup should be required.
     return testPassed;
   }
 }
