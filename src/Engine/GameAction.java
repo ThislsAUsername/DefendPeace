@@ -165,6 +165,12 @@ public class GameAction
       Utils.findShortestPath(unitActor, moveX, moveY, movePath, gameMap);
     }
 
+    // If we couldn't come up with a valid path, then this is not a valid action.
+    if( movePath.getPathLength() < 1 )
+    {
+      return sequence;
+    }
+
     // TODO: Check for ambushes in fog of war.
 
     switch (actionType)

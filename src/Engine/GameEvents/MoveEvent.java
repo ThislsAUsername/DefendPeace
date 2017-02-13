@@ -26,10 +26,13 @@ public class MoveEvent implements GameEvent
   @Override
   public void performEvent(GameMap gameMap)
   {
-    gameMap.moveUnit(unit, unitPath.getEnd().x, unitPath.getEnd().y);
+    if( unitPath.getPathLength() > 1 )
+    {
+      gameMap.moveUnit(unit, unitPath.getEnd().x, unitPath.getEnd().y);
 
-    // Every unit action is preceded by a move (possibly to the same location),
-    // so we'll just set the "has moved" flag here. 
-    unit.isTurnOver = true;
+      // Every unit action is preceded by a move (possibly to the same location),
+      // so we'll just set the "has moved" flag here.
+      unit.isTurnOver = true;
+    }
   }
 }

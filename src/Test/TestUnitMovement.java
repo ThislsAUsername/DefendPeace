@@ -34,7 +34,7 @@ public class TestUnitMovement extends TestCase
     boolean testPassed = true;
     testPassed &= validate(testSimpleMovement(), "  Simple movement test failed.");
     // This test is currently not supported, but is slated for future consideration.
-    //testPassed &= validate(testOutOfRangeMovement(), "  Move out of range test failed.");
+    testPassed &= validate(testOutOfRangeMovement(), "  Move out of range test failed.");
     return testPassed;
   }
 
@@ -66,7 +66,7 @@ public class TestUnitMovement extends TestCase
 
     // Make an action to move the unit 5 spaces away, and execute it.
     GameAction ga = new GameAction(mover, 7, 6, GameAction.ActionType.WAIT);
-    performGameAction( ga, testMap);
+    performGameAction( ga, testMap );
 
     // Make sure the action didn't actually execute.
     boolean testPassed = validate(testMap.getLocation(4, 4).getResident() == mover, "    Infantry moved when he shouldn't have.");
