@@ -52,6 +52,7 @@ public class CaptureEvent implements GameEvent
   {
     // Only attempt to do the action if it is valid to do so.
     if( location.isCaptureable() &&
+        (location.getResident() == unit) &&
         (location.getOwner() != unit.CO) )
     {
       unit.capture(gameMap.getLocation(unit.x, unit.y));
