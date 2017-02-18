@@ -4,6 +4,7 @@ import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.MapLibrary;
 import Units.Unit;
+import Units.UnitModel;
 import Units.UnitModel.UnitEnum;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderPatch;
@@ -12,6 +13,8 @@ import Engine.GameAction;
 import Engine.GameEvents.BattleEvent;
 import Engine.GameEvents.CaptureEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.LoadEvent;
+import Engine.GameEvents.UnloadEvent;
 
 public class TestGameEvent extends TestCase
 {
@@ -36,6 +39,7 @@ public class TestGameEvent extends TestCase
     boolean testPassed = true;
     testPassed &= validate( testBattleEvent(), "  BattleEvent test failed.");
     testPassed &= validate( testCaptureEvent(), "  CaptureEvent test failed.");
+    testPassed &= validate( testLoadUnloadEvent(), "  LoadUnloadEvent test failed.");
     testPassed &= validate( testCommanderDefeatEvent(), "  CommanderDefeatEvent test failed."); // Put this one last because it alters the map.
     
     return testPassed;
@@ -60,7 +64,7 @@ public class TestGameEvent extends TestCase
 
     return testPassed;
   }
-  
+
   private boolean testCaptureEvent()
   {
     boolean testPassed = true;
@@ -111,6 +115,54 @@ public class TestGameEvent extends TestCase
 
     // Clean up
     testMap.removeUnit(infA);
+
+    return testPassed;
+  }
+
+  private boolean testLoadUnloadEvent()
+  {
+    boolean testPassed = true;
+
+    // Add some units.
+    Unit inf = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 2, 2);
+    Unit mech = addUnit(testMap, testCo1, UnitEnum.MECH, 2, 3);
+    Unit apc = addUnit(testMap, testCo1, UnitEnum.APC, 3, 2);
+
+    // Try to load the infantry onto the mech unit, and ensure it fails.
+    new LoadEvent(inf, mech).performEvent(testMap);
+    testPassed &= validate( testMap.getLocation(2, 2).getResident() == inf, "    Infantry should still be at (2, 2).");
+    testPassed &= validate( 2 == inf.x && 2 == inf.y, "    Infantry should still think he is at (2, 2).");
+    testPassed &= validate( mech.heldUnits == null, "    Mech should not have holding capacity.");
+
+    // Try to load the infantry into the APC, and make sure it works.
+    new LoadEvent(inf, apc).performEvent(testMap);
+    testPassed &= validate( testMap.getLocation(2, 2).getResident() == null, "   Infantry is still at his old map location.");
+    testPassed &= validate( -1 == inf.x && -1 == inf.y, "    Infantry does not think he is in the transport.");
+    testPassed &= validate( apc.heldUnits.size() == 1, "    APC is not holding 1 unit, but should be holding Infantry.");
+    testPassed &= validate( apc.heldUnits.get(0).model.type == UnitModel.UnitEnum.INFANTRY, "    Held unit is not type INFANTRY, but should be.");
+
+    // Now see if we can also load the mech into the APC; verify this fails.
+    new LoadEvent(mech, apc).performEvent(testMap);
+    testPassed &= validate( testMap.getLocation(2, 3).getResident() == mech, "    Mech should still be at (2, 3).");
+    testPassed &= validate( 2 == mech.x && 3 == mech.y, "    Mech does not think he is at (2, 3), but he should.");
+    testPassed &= validate( apc.heldUnits.size() == 1, "    APC should still only be holding 1 unit.");
+
+    // Unload the mech; this should fail, since he is not on the transport.
+    new UnloadEvent(apc, mech, 3, 3).performEvent(testMap);
+    testPassed &= validate( testMap.getLocation(3, 3).getResident() == null, "    Location (3, 3) should have no residents.");
+    testPassed &= validate( 2 == mech.x && 3 == mech.y, "    Mech thinks he has moved, but should still be at (2, 3).");
+    testPassed &= validate( apc.heldUnits.size() == 1, "    APC should still have one passenger.");
+
+    // Unload the infantry; this should succeed.
+    new UnloadEvent(apc, inf, 3, 3).performEvent(testMap);
+    testPassed &= validate( testMap.getLocation(3, 3).getResident() == inf, "    Infantry is not at the dropoff point.");
+    testPassed &= validate( apc.heldUnits.size() == 0, "    APC should have zero cargo, but heldUnits size is " + apc.heldUnits.size() );
+    testPassed &= validate( 3 == inf.x && 3 == inf.y, "    Infantry does not think he is at dropoff point.");
+
+    // Clean up
+    testMap.removeUnit(inf);
+    testMap.removeUnit(mech);
+    testMap.removeUnit(apc);
 
     return testPassed;
   }

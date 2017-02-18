@@ -1,6 +1,5 @@
 package Engine;
 
-import CommandingOfficers.Commander;
 import Engine.GameEvents.BattleEvent;
 import Engine.GameEvents.CaptureEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
@@ -292,7 +291,7 @@ public class GameAction
         // If we have cargo and the landing zone is empty, we drop the cargo.
         if( !unitActor.heldUnits.isEmpty() && gameMap.isLocationEmpty(unitActor, actX, actY) )
         {
-          Unit cargo = unitActor.heldUnits.remove(0); // TODO: Account for multi-Unit transports.
+          Unit cargo = unitActor.heldUnits.get(0); // TODO: Account for multi-Unit transports.
           sequence.add( new UnloadEvent( unitActor, cargo, actX, actY ) );
         }
         break;
