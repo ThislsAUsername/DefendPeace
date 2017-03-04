@@ -214,8 +214,6 @@ public class GameAction
               sequence.add( new CommanderDefeatEvent( unitTarget.CO ) );
             }
           }
-
-          //sequence.add( new UnitEndTurnEvent( unitActor ) );
         }
         break;
       }
