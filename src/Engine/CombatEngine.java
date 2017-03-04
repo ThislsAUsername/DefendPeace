@@ -13,7 +13,7 @@ public class CombatEngine
   public static BattleSummary calculateBattleResults( Unit attacker, Unit defender, GameMap map, int attackerX, int attackerY )
   {
     // Set up our combat scenario.
-    CombatParameters params = new CombatParameters(attacker, defender, map, attackerX, attackerY);
+    BattleInstance params = new BattleInstance(attacker, defender, map, attackerX, attackerY);
 
     return params.calculateBattleResults();
   }
