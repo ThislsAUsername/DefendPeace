@@ -16,6 +16,7 @@ import Engine.GameEvents.CaptureEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.LoadEvent;
 import Engine.GameEvents.MoveEvent;
+import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.UnloadEvent;
 
 public class TestGameEvent extends TestCase
@@ -43,6 +44,7 @@ public class TestGameEvent extends TestCase
     testPassed &= validate( testCaptureEvent(), "  CaptureEvent test failed.");
     testPassed &= validate( testLoadUnloadEvent(), "  LoadUnloadEvent test failed.");
     testPassed &= validate( testMoveEvent(), "  MoveEvent test failed.");
+    testPassed &= validate( testUnitDieEvent(), "  UnitDieEvent test failed.");
     testPassed &= validate( testCommanderDefeatEvent(), "  CommanderDefeatEvent test failed."); // Put this one last because it alters the map.
     
     return testPassed;
@@ -210,6 +212,32 @@ public class TestGameEvent extends TestCase
     testMap.removeUnit(inf);
     testMap.removeUnit(mech);
     testMap.removeUnit(apc);
+
+    return testPassed;
+  }
+
+  private boolean testUnitDieEvent()
+  {
+    boolean testPassed = true;
+
+    // Add some units.
+    Unit inf = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 2, 2);
+    Unit mech = addUnit(testMap, testCo1, UnitEnum.MECH, 2, 3);
+    mech.damageHP(5); // Just for some variation.
+
+    // Knock 'em dead.
+    new UnitDieEvent(inf).performEvent(testMap);
+    new UnitDieEvent(mech).performEvent(testMap);
+
+    // Make sure the pins are down.
+    testPassed &= validate( inf.getPreciseHP() == 0, "    Infantry still has health after dying.");
+    testPassed &= validate( inf.x == -1 && inf.y == -1, "    Infantry still thinks he is on the map after death.");
+    testPassed &= validate( testMap.getLocation(2, 2).getResident() == null, "    Infantry did not vacate his space after death.");
+    testPassed &= validate( mech.getPreciseHP() == 0, "    Mech still has health after dying.");
+    testPassed &= validate( mech.x == -1 && mech.y == -1, "    Mech still thinks he is on the map after death.");
+    testPassed &= validate( testMap.getLocation(2, 3).getResident() == null, "    Mech did not vacate his space after death.");
+
+    // No cleanup required.
 
     return testPassed;
   }

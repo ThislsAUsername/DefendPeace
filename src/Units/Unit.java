@@ -139,9 +139,15 @@ public class Unit
   public void damageHP(double damage)
   {
     HP -= damage;
+    if( HP < 0 )
+    {
+      HP = 0;
+    }
   }
   public void alterHP(int change)
   {
+    // Change the unit's health, but don't grant more
+    // than 10 HP, and don't drop HP to zero.
     HP = Math.max(1, Math.min(10, getHP() + change));
   }
 

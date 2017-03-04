@@ -23,6 +23,11 @@ public class UnitDieEvent implements GameEvent
   @Override
   public void performEvent(GameMap gameMap)
   {
+    // Set HP to 0. One could make a UnitDieEvent on a healthy
+    // unit, and we don't want any ambiguity after the fact.
+    unit.damageHP(unit.getHP()+1);
+
+    // Remove the Unit from the map and from the CO list.
     gameMap.removeUnit(unit);
     unit.CO.units.remove(unit);
   }
