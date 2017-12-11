@@ -97,6 +97,12 @@ public class Unit
     Weapon chosen = null;
     for( int i = 0; i < weapons.length && chosen == null; i++ )
     {
+      // If the weapon isn't mobile, we shouldn't be able to fire if we moved.
+      if( !weapons[i].model.mobile )
+      {
+        if( xLoc != x || yLoc != y )
+          continue;
+      }
       double damage = weapons[i].getDamage(xLoc, yLoc, target);
       if( damage != 0 )
       {
@@ -233,8 +239,8 @@ public class Unit
             }
             break;
           default:
-            System.out.println("getPossibleActions: Invalid action in model's possibleActions[" + i + "]: "
-                + model.possibleActions[i]);
+            System.out
+                .println("getPossibleActions: Invalid action in model's possibleActions[" + i + "]: " + model.possibleActions[i]);
         }
       }
     }
