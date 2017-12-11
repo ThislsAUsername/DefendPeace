@@ -9,7 +9,6 @@ import Engine.MapController;
 
 public abstract class MapView implements IView
 {
-  public GameMenu currentMenu;
   public GameAction currentAction = null;
 
   // TODO: This doesn't really belong here. The specific artist should handle this, ideally.
@@ -22,6 +21,11 @@ public abstract class MapView implements IView
   public void setController(MapController controller)
   {
     mapController = controller;
+  }
+
+  public InGameMenu<? extends Object> getCurrentGameMenu()
+  {
+    return mapController.getCurrentGameMenu();
   }
 
   /**

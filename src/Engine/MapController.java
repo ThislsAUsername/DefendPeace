@@ -7,14 +7,23 @@ import Terrain.Location;
 import Terrain.Environment.Terrains;
 import UI.CO_InfoMenu;
 import UI.InputHandler;
-import UI.GameMenu;
+import UI.InGameMenu;
+import UI.InGameProductionMenu;
 import UI.MapView;
 import Units.Unit;
+import Units.UnitModel;
 
 public class MapController implements IController
 {
   private GameInstance myGame;
   private MapView myView;
+
+  // A few menus to control the in-game logical flow.
+  private InGameMenu<UnitModel> productionMenu;
+  private InGameMenu<GameAction.ActionType> actionMenu;
+  private InGameMenu<MetaAction> metaActionMenu;
+  private InGameMenu<ConfirmExitEnum> confirmExitMenu;
+  private InGameMenu<? extends Object> currentMenu;
 
   private enum InputMode
   {
@@ -27,11 +36,11 @@ public class MapController implements IController
   };
   private MetaAction[] metaActions = {MetaAction.CO_INFO, MetaAction.QUIT_GAME, MetaAction.END_TURN};
 
-  private enum ConfirmExit
+  private enum ConfirmExitEnum
   {
     EXIT_TO_MAIN_MENU, QUIT_APPLICATION
   };
-  private ConfirmExit[] confirmExitOptions = {ConfirmExit.EXIT_TO_MAIN_MENU, ConfirmExit.QUIT_APPLICATION};
+  private ConfirmExitEnum[] confirmExitOptions = {ConfirmExitEnum.EXIT_TO_MAIN_MENU, ConfirmExitEnum.QUIT_APPLICATION};
 
   private InputMode inputMode;
 
@@ -49,6 +58,11 @@ public class MapController implements IController
     myGame = game;
     myView = view;
     myView.setController(this);
+    productionMenu = new InGameProductionMenu( myGame.commanders[0].getShoppingList() ); // Just init with a valid default.
+    GameAction.ActionType[] defaultAction = { GameAction.ActionType.WAIT }; // Again, just a valid default. Will be replaced when needed.
+    actionMenu = new InGameMenu<GameAction.ActionType>( defaultAction );
+    metaActionMenu = new InGameMenu<MetaAction>(metaActions);
+    confirmExitMenu = new InGameMenu<ConfirmExitEnum>(confirmExitOptions);
     inputMode = InputMode.MAP;
     isGameOver = false;
     myGame.setCursorLocation(6, 5);
@@ -170,6 +184,12 @@ public class MapController implements IController
     }
   }
 
+  /** Returns the currently-active in-game menu, or null if no menu is in use. */
+  public InGameMenu<? extends Object> getCurrentGameMenu()
+  {
+    return currentMenu;
+  }
+
   /**
    * When a unit is selected, user input flows through here to choose where the unit should move.
    */
@@ -242,15 +262,16 @@ public class MapController implements IController
    */
   private void handleActionMenuInput(InputHandler.InputAction input)
   {
-    if( myView.currentMenu == null )
+    if( currentMenu != actionMenu )
     {
-      System.out.println("Error! MapController.handleActionMenuInput() called when myView.currentMenu is null!");
+      System.out.println("ERROR! MapController.handleActionMenuInput() called with wrong menu active!");
+      return;
     }
 
     switch (input)
     {
       case ENTER:
-        myView.currentAction.setActionType((GameAction.ActionType) myView.currentMenu.getSelectedAction());
+        myView.currentAction.setActionType( actionMenu.getSelectedOption() );
 
         // If the action is completely constructed, execute it, else get the missing info.
         if( myView.currentAction.isReadyToExecute() )
@@ -269,7 +290,7 @@ public class MapController implements IController
       case NO_ACTION:
         break;
       default:
-        myView.currentMenu.handleMenuInput(input);
+        currentMenu.handleMenuInput(input);
     }
   }
 
@@ -322,20 +343,21 @@ public class MapController implements IController
   /** We just selected a production building - what can it do? */
   private void handleProductionMenuInput(InputHandler.InputAction input)
   {
-    if( myView.currentMenu == null )
+    if( currentMenu != productionMenu )
     {
-      System.out.println("Error! MapController.handleProductionMenuInput() called when currentMenu is null!");
+      System.out.println("ERROR! MapController.handleProductionMenuInput() called with wrong menu active!");
+      return;
     }
 
     switch (input)
     {
       case ENTER:
-        Units.UnitModel.UnitEnum unit = (Units.UnitModel.UnitEnum) myView.currentMenu.getSelectedAction();
+        Units.UnitModel model = productionMenu.getSelectedOption();
 
-        if( myGame.activeCO.getUnitModel(unit).moneyCost <= myGame.activeCO.money )
+        if( model.moneyCost <= myGame.activeCO.money )
         {
-          myGame.activeCO.money -= myGame.activeCO.getUnitModel(unit).moneyCost;
-          Unit u = new Unit(myGame.activeCO, myGame.activeCO.getUnitModel(unit));
+          myGame.activeCO.money -= model.moneyCost;
+          Unit u = new Unit(myGame.activeCO, model);
           myGame.activeCO.units.add(u);
           myGame.gameMap.addNewUnit(u, myGame.getCursorX(), myGame.getCursorY());
         }
@@ -351,21 +373,22 @@ public class MapController implements IController
       case NO_ACTION:
         break;
       default:
-        myView.currentMenu.handleMenuInput(input);
+        currentMenu.handleMenuInput(input);
     }
   }
 
   private void handleMetaActionMenuInput(InputHandler.InputAction input)
   {
-    if( myView.currentMenu == null )
+    if( currentMenu != metaActionMenu )
     {
-      System.out.println("Error! MapController.handleMetaActionMenuInput() called when currentMenu is null!");
+      System.out.println("ERROR! MapController.handleMetaActionMenuInput() called with wrong menu active!");
+      return;
     }
 
     switch (input)
     {
       case ENTER:
-        MetaAction action = (MetaAction) myView.currentMenu.getSelectedAction();
+        MetaAction action = metaActionMenu.getSelectedOption();
 
         if( action == MetaAction.CO_INFO )
         {
@@ -388,29 +411,30 @@ public class MapController implements IController
       case NO_ACTION:
         break;
       default:
-        myView.currentMenu.handleMenuInput(input);
+        currentMenu.handleMenuInput(input);
     }
   }
 
   private boolean handleConfirmExitMenuInput(InputHandler.InputAction input)
   {
     boolean quitGame = false;
-    if( myView.currentMenu == null )
+    if( currentMenu != confirmExitMenu )
     {
-      System.out.println("Error! MapController.handleMetaActionMenuInput() called when currentMenu is null!");
+      System.out.println("ERROR! MapController.handleMetaActionMenuInput() called with wrong menu active!");
+      return false;
     }
 
     switch (input)
     {
       case ENTER:
-        ConfirmExit action = (ConfirmExit) myView.currentMenu.getSelectedAction();
+        ConfirmExitEnum action = confirmExitMenu.getSelectedOption();
 
-        if( action == ConfirmExit.EXIT_TO_MAIN_MENU )
+        if( action == ConfirmExitEnum.EXIT_TO_MAIN_MENU )
         {
           // Go back to the main menu.
           quitGame = true;
         }
-        else if( action == ConfirmExit.QUIT_APPLICATION )
+        else if( action == ConfirmExitEnum.QUIT_APPLICATION )
         {
           // Exit the application entirely.
           System.exit(0);
@@ -422,7 +446,7 @@ public class MapController implements IController
       case NO_ACTION:
         break;
       default:
-        myView.currentMenu.handleMenuInput(input);
+        currentMenu.handleMenuInput(input);
     }
     return quitGame;
   }
@@ -453,19 +477,20 @@ public class MapController implements IController
           if( set )
             break;
         }
-        myView.currentMenu = null;
+        currentMenu = null;
         break;
       case ACTIONMENU:
         myGame.gameMap.clearAllHighlights();
-        myView.currentMenu = new GameMenu(GameMenu.MenuType.ACTION, myView.currentAction.getActor().getPossibleActions(
+        actionMenu.resetOptions( myView.currentAction.getActor().getPossibleActions(
             myGame.gameMap, myView.currentAction.getMoveX(), myView.currentAction.getMoveY()));
+        currentMenu = actionMenu;
         myGame.setCursorLocation(myView.currentAction.getMoveX(), myView.currentAction.getMoveY());
         myView.currentAction.setActionType(GameAction.ActionType.INVALID); // We haven't chosen an action yet.
         break;
       case MAP:
         myView.currentAction = null;
         currentMovePath = null;
-        myView.currentMenu = null;
+        currentMenu = null;
         myGame.gameMap.clearAllHighlights();
 
         //        if( unitActor != null )
@@ -480,21 +505,24 @@ public class MapController implements IController
         {
           myView.currentAction.setMovePath(null); // No destination chosen yet.
         }
-        myView.currentMenu = null;
+        currentMenu = null;
         myGame.setCursorLocation(myView.currentAction.getActor().x, myView.currentAction.getActor().y);
         currentMovePath = null;
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.
         break;
       case PRODUCTION:
         myGame.gameMap.clearAllHighlights();
-        myView.currentMenu = new GameMenu(GameMenu.MenuType.PRODUCTION, myGame.activeCO.getShoppingList());
+        productionMenu.resetOptions( myGame.activeCO.getShoppingList() );
+        currentMenu = productionMenu;
         break;
       case METAACTION:
         myGame.gameMap.clearAllHighlights();
-        myView.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, metaActions);
+        metaActionMenu.zero();
+        currentMenu = metaActionMenu;
         break;
       case CONFIRMEXIT:
-        myView.currentMenu = new GameMenu(GameMenu.MenuType.METAACTION, confirmExitOptions);
+        confirmExitMenu.zero();
+        currentMenu = confirmExitMenu;
         break;
       case ANIMATION:
         myGame.gameMap.clearAllHighlights();
@@ -502,7 +530,7 @@ public class MapController implements IController
       case EXITGAME:
         myView.currentAction = null;
         myGame.gameMap.clearAllHighlights();
-        myView.currentMenu = null;
+        currentMenu = null;
         currentMovePath = null;
         break;
       case CO_INFO:

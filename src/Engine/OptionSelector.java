@@ -23,6 +23,17 @@ public class OptionSelector
   }
 
   /**
+   * Re-initializes the OptionSelector with num options.
+   * @param newNum The number of valid options. This is assumed to be >= 1.
+   */
+  public void reset(int newNum)
+  {
+    numOptions = newNum;
+    highestOption = newNum-1;
+    highlightedOption = 0;
+  }
+
+  /**
    * Sets the highlighted option to the indicated number.
    */
   public void setSelectedOption(int num)
