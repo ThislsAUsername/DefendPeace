@@ -1,6 +1,9 @@
 package Test;
 
 import CommandingOfficers.Commander;
+import Engine.GameAction;
+import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Units.Unit;
 import Units.UnitModel.UnitEnum;
@@ -47,9 +50,16 @@ public abstract class TestCase
   {
     Unit u = new Unit(co, co.getUnitModel(type));
     map.addNewUnit(u, x, y);
-    u.x = x;
-    u.y = y;
-    map.getLocation(x, y).setResident(u);
+    co.units.add( u );
     return u;
+  }
+
+  protected static void performGameAction( GameAction action, GameMap map )
+  {
+    GameEventQueue sequence = action.getGameEvents( map );
+    for( GameEvent event : sequence )
+    {
+      event.performEvent( map );
+    }
   }
 }

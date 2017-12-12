@@ -6,12 +6,12 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
-import UI.Art.Animation.AnimationSequence;
+import UI.Art.Animation.GameAnimation;
 
 /**
  * Draws the end-of-battle victory/defeat overlay anmiation.
  */
-public class SpriteGameEndAnimation implements AnimationSequence
+public class SpriteGameEndAnimation implements GameAnimation
 {
   private ArrayList<GameResultPanel> panels;
 

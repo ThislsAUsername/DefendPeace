@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 import CommandingOfficers.Commander;
-import Engine.CombatParameters;
 import Engine.GameAction;
 import Engine.Utils;
 import Terrain.GameMap;
@@ -82,22 +81,27 @@ public class Unit
     }
   }
 
+  /**
+   * @return the damage this unit can do to the target from its current location.
+   */
   public double getDamage(Unit target)
   {
-    return getDamage(target, x, y);
+    int range = Math.abs(x - target.x) + Math.abs(y - target.y);
+    return getDamage(target, range);
   }
 
   /**
-   * @return how much base damage the target would take if this unit tried to attack it
+   * @return the base damage this unit would do against the specified target,
+   * if this unit were 'range' spaces away from it.
    */
-  public double getDamage(Unit target, int xLoc, int yLoc)
+  public double getDamage(Unit target, int range )
   {
     if( weapons == null )
       return 0;
     Weapon chosen = null;
     for( int i = 0; i < weapons.length && chosen == null; i++ )
     {
-      double damage = weapons[i].getDamage(xLoc, yLoc, target);
+      double damage = weapons[i].getDamage(target, range);
       if( damage != 0 )
       {
         return damage;
@@ -107,9 +111,9 @@ public class Unit
   }
 
   // for the purpose of letting the unit know it has attacked.
-  public void fire(final CombatParameters params)
+  public void fire(final Unit defender)
   {
-    UnitEnum target = params.defender.model.type;
+    UnitEnum target = defender.model.type;
     int i = 0;
     for( ; i < weapons.length; i++ )
     {
@@ -135,9 +139,15 @@ public class Unit
   public void damageHP(double damage)
   {
     HP -= damage;
+    if( HP < 0 )
+    {
+      HP = 0;
+    }
   }
   public void alterHP(int change)
   {
+    // Change the unit's health, but don't grant more
+    // than 10 HP, and don't drop HP to zero.
     HP = Math.max(1, Math.min(10, getHP() + change));
   }
 
@@ -146,6 +156,11 @@ public class Unit
     if( !target.isCaptureable() )
     {
       System.out.println("ERROR! Attempting to capture an uncapturable Location!");
+      return;
+    }
+    if( target.getOwner() == CO )
+    {
+      System.out.println("WARNING! Attempting to capture a property we own!");
       return;
     }
 

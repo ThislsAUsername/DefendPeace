@@ -1,20 +1,21 @@
 package UI;
 
-import UI.Art.Animation.AnimationSequence;
-import UI.Art.Animation.NobunagaBattleAnimation;
+import UI.Art.Animation.GameAnimation;
+import Units.Unit;
 
-import Engine.GameAction;
 import Engine.IView;
 import Engine.MapController;
+import Engine.Path;
+import Engine.Combat.BattleSummary;
+import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.GameEventQueue;
 
 public abstract class MapView implements IView
 {
-  public GameAction currentAction = null;
-
   // TODO: This doesn't really belong here. The specific artist should handle this, ideally.
   private int unitMoveSpeedMsPerTile = 100;
 
-  protected AnimationSequence currentAnimation = null;
+  protected GameAnimation currentAnimation = null;
 
   protected MapController mapController = null;
 
@@ -34,50 +35,11 @@ public abstract class MapView implements IView
    */
   public abstract int getTileSize();
 
-  public void animate(GameAction action)
-  {
-    if( currentAction != null && currentAction != action )
-    {
-      // Typically, this will be called either for a player action (in which case currentAction
-      //  should have been populated through UI interaction, or for an AI action, in which case
-      //  currentAction will still be null (because AIs don't use UIs).
-      System.out.println("WARNING! Animating an unexpected action!");
-    }
+  /**
+   * Adds the new events to the queue so they can be animated.
+   */
+  public abstract void animate( GameEventQueue newEvents );
 
-    currentAction = action;
-
-    // If we have a previous animation in progress, cancel it to start the new one.
-    if( currentAnimation != null )
-    {
-      currentAnimation.cancel();
-      currentAnimation = null;
-    }
-
-    switch (currentAction.getActionType())
-    {
-      case ATTACK:
-        currentAnimation = new NobunagaBattleAnimation(currentAction, getTileSize());
-        break;
-      case CAPTURE:
-      case LOAD:
-      case WAIT:
-      case UNLOAD:
-        break;
-      case INVALID:
-      default:
-        System.out.println("WARNING! No action animation supported for type " + currentAction.getActionType());
-    }
-
-    if( currentAnimation == null )
-    {
-      // Animation for this action is not supported. Just let the controller know.
-      mapController.animationEnded();
-    }
-  }
-  public boolean isAnimating()
-  {
-    return currentAnimation != null;
-  }
   public void cancelAnimation()
   {
     if( currentAnimation != null )
@@ -92,5 +54,47 @@ public abstract class MapView implements IView
   public void gameIsOver()
   {
     // Do nothing by default. Subclasses can override.
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////
+  ///  The below methods implement the visitor pattern. MapView visits MapEvent so
+  ///    that MapEvent can invoke one of these methods to build the correct animation.
+  /////////////////////////////////////////////////////////////////////////////////////
+
+  public GameAnimation buildBattleAnimation( BattleSummary summary )
+  {
+    return null;
+  }
+  public GameAnimation buildCaptureAnimation()
+  {
+    return null;
+  }
+  public GameAnimation buildUnitCombineAnimation()
+  {
+    return null;
+  }
+  public GameAnimation buildUnitDieAnimation()
+  {
+    return null;
+  }
+  public GameAnimation buildGameOverAnimation()
+  {
+    return null;
+  }
+  public GameAnimation buildLoadAnimation()
+  {
+    return null;
+  }
+  public GameAnimation buildUnloadAnimation()
+  {
+    return null;
+  }
+  public GameAnimation buildMoveAnimation( Unit unit, Path movePath )
+  {
+    return null;
+  }
+  public GameAnimation buildCommanderDefeatAnimation( CommanderDefeatEvent event )
+  {
+    return null;
   }
 }
