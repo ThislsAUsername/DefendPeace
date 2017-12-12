@@ -32,6 +32,7 @@ public class TestCombat extends TestCase
 
     boolean testPassed = true;
     testPassed &= validate(testUnitDeath(), "  Unit death test failed.");
+    testPassed &= validate(testIndirectAttacks(), "  Indirect combat test failed.");
     return testPassed;
   }
 
@@ -54,6 +55,35 @@ public class TestCombat extends TestCase
 
     // Clean up
     testMap.removeUnit(mechA);
+
+    return testPassed;
+  }
+
+  /** Test that weapon range works properly, and that immobile weapons cannot move and fire. */
+  private boolean testIndirectAttacks()
+  {
+    // Add our combatants
+    Unit mover = addUnit(testMap, testCo1, UnitEnum.ARTILLERY, 6, 5);
+    Unit victim = addUnit(testMap, testCo2, UnitEnum.ARTILLERY, 6, 6);
+    Unit shooter = addUnit(testMap, testCo2, UnitEnum.ARTILLERY, 6, 7);
+
+    // mover will attempt to shoot point blank.
+    new GameAction(mover, 6, 5, GameAction.ActionType.ATTACK, 6, 6).execute(testMap);
+    
+    // mover will attempt to move and fire.
+    new GameAction(mover, 6, 4, GameAction.ActionType.ATTACK, 6, 6).execute(testMap);
+
+    // shooter will shoot mover.
+    new GameAction(shooter, 6, 7, GameAction.ActionType.ATTACK, 6, 4).execute(testMap);
+
+    // Check that victim is undamaged, and mover *is* damaged.
+    boolean testPassed = validate(victim.getPreciseHP() == 10, "    Artillery did a direct attack or move and fire.");
+    testPassed &= validate(mover.getPreciseHP() != 10, "    Artillery cannot hit at range.");
+
+    // Clean up
+    testMap.removeUnit(mover);
+    testMap.removeUnit(victim);
+    testMap.removeUnit(shooter);
 
     return testPassed;
   }
