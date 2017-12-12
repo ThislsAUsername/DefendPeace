@@ -74,7 +74,7 @@ public class TestCombat extends TestCase
     new GameAction(mover, 6, 4, GameAction.ActionType.ATTACK, 6, 6).execute(testMap);
 
     // shooter will shoot mover.
-    new GameAction(shooter, 6, 7, GameAction.ActionType.ATTACK, 6, 4).execute(testMap);
+    new GameAction(shooter, 6, 7, GameAction.ActionType.ATTACK, 6, 5).execute(testMap);
 
     // Check that victim is undamaged, and mover *is* damaged.
     boolean testPassed = validate(victim.getPreciseHP() == 10, "    Artillery did a direct attack or move and fire.");
