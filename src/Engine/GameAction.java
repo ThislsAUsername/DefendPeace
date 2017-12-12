@@ -150,7 +150,7 @@ public class GameAction
 
   /**
    * Evaluate the action and construct the MapEvents necessary to render any changes in the game.
-   * IF a GameAction is a castle, MapEvents are the bricks that compose it.
+   * If a GameAction is a castle, MapEvents are the bricks that compose it.
    * @return A MapEventSequence containing all MapEvents caused by this GameAction.
    */
   public GameEventQueue getGameEvents( GameMap gameMap )
