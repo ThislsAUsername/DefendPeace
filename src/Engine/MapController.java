@@ -22,19 +22,21 @@ public class MapController implements IController
   private InGameMenu<UnitModel> productionMenu;
   private InGameMenu<GameAction.ActionType> actionMenu;
   private InGameMenu<MetaAction> metaActionMenu;
+  private InGameMenu<String> coAbilityMenu;
   private InGameMenu<ConfirmExitEnum> confirmExitMenu;
   private InGameMenu<? extends Object> currentMenu;
 
   private enum InputMode
   {
-    MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION, CONFIRMEXIT, ANIMATION, EXITGAME, CO_INFO
+    MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION, CO_ABILITYMENU, CONFIRMEXIT, ANIMATION, EXITGAME, CO_INFO
   };
 
   public enum MetaAction
   {
-    CO_INFO, QUIT_GAME, END_TURN
+    CO_INFO, CO_ABILITY, QUIT_GAME, END_TURN
   };
-  private MetaAction[] metaActions = {MetaAction.CO_INFO, MetaAction.QUIT_GAME, MetaAction.END_TURN};
+  private MetaAction[] metaActionsAbility = {MetaAction.CO_INFO, MetaAction.CO_ABILITY, MetaAction.QUIT_GAME, MetaAction.END_TURN};
+  private MetaAction[] metaActionsNoAbility = {MetaAction.CO_INFO, MetaAction.QUIT_GAME, MetaAction.END_TURN};
 
   private enum ConfirmExitEnum
   {
@@ -61,7 +63,8 @@ public class MapController implements IController
     productionMenu = new InGameProductionMenu( myGame.commanders[0].getShoppingList() ); // Just init with a valid default.
     GameAction.ActionType[] defaultAction = { GameAction.ActionType.WAIT }; // Again, just a valid default. Will be replaced when needed.
     actionMenu = new InGameMenu<GameAction.ActionType>( defaultAction );
-    metaActionMenu = new InGameMenu<MetaAction>(metaActions);
+    metaActionMenu = new InGameMenu<MetaAction>(metaActionsNoAbility);
+    coAbilityMenu = null;
     confirmExitMenu = new InGameMenu<ConfirmExitEnum>(confirmExitOptions);
     inputMode = InputMode.MAP;
     isGameOver = false;
@@ -96,6 +99,9 @@ public class MapController implements IController
         break;
       case METAACTION:
         handleMetaActionMenuInput(input);
+        break;
+      case CO_ABILITYMENU:
+        handleCoAbilityMenuInput(input);
         break;
       case CONFIRMEXIT:
         // If they exit via menu, don't hang around for the victory animation.
@@ -390,23 +396,62 @@ public class MapController implements IController
       case ENTER:
         MetaAction action = metaActionMenu.getSelectedOption();
 
-        if( action == MetaAction.CO_INFO )
+        // Nested switch statement woo!
+        switch( action )
         {
-          isInCoInfoMenu = true;
-          changeInputMode( InputMode.CO_INFO );
+          case CO_INFO:
+            isInCoInfoMenu = true;
+            changeInputMode( InputMode.CO_INFO );
+            break;
+          case CO_ABILITY:
+            changeInputMode( InputMode.CO_ABILITYMENU );
+            break;
+          case END_TURN:
+            myGame.turn();
+            changeInputMode(InputMode.MAP);
+            break;
+          case QUIT_GAME:
+            changeInputMode( InputMode.CONFIRMEXIT );
+            break;
+            default:
+              System.out.println( "WARNING! Unknown MetaActionEnum " + action );
         }
-        else if( action == MetaAction.END_TURN )
-        {
-          myGame.turn();
-          changeInputMode(InputMode.MAP);
-        }
-        else if( action == MetaAction.QUIT_GAME)
-        {
-          changeInputMode( InputMode.CONFIRMEXIT );
-        }
+
         break;
       case BACK:
         changeInputMode(InputMode.MAP);
+        break;
+      case NO_ACTION:
+        break;
+      default:
+        currentMenu.handleMenuInput(input);
+    }
+  }
+
+  private void handleCoAbilityMenuInput(InputHandler.InputAction input)
+  {
+    if( currentMenu != coAbilityMenu )
+    {
+      System.out.println("ERROR! MapController.handleCoAbilityMenuInput() called with wrong menu active!");
+      return;
+    }
+
+    switch (input)
+    {
+      case ENTER:
+        // Get the chosen ability and let it do its thing.
+        String abilityName = coAbilityMenu.getSelectedOption();
+        myGame.activeCO.doAbility( abilityName, myGame );
+
+        changeInputMode(InputMode.MAP);
+
+        //TODO: Figure out animating powers
+        //changeInputMode(InputMode.ANIMATION);
+        //myView.animate(???); // Set up the animation for this action.
+
+        break;
+      case BACK:
+        changeInputMode(InputMode.METAACTION);
         break;
       case NO_ACTION:
         break;
@@ -517,8 +562,19 @@ public class MapController implements IController
         break;
       case METAACTION:
         myGame.gameMap.clearAllHighlights();
-        metaActionMenu.zero();
+        if( myGame.activeCO.getReadyAbilities().size() > 0 )
+        {
+          metaActionMenu.resetOptions( metaActionsAbility );
+        }
+        else
+        {
+          metaActionMenu.resetOptions( metaActionsNoAbility );
+        }
         currentMenu = metaActionMenu;
+        break;
+      case CO_ABILITYMENU:
+        coAbilityMenu = new InGameMenu<String>( myGame.activeCO.getReadyAbilities() );
+        currentMenu = coAbilityMenu;
         break;
       case CONFIRMEXIT:
         confirmExitMenu.zero();
