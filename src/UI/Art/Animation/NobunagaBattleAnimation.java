@@ -2,24 +2,28 @@ package UI.Art.Animation;
 
 import java.awt.Color;
 import java.awt.Graphics;
+
+import Units.Unit;
 import Engine.GameAction;
 
-public class NobunagaBattleAnimation implements AnimationSequence
+public class NobunagaBattleAnimation implements GameAnimation
 {
   long startTime = 0;
-  GameAction myAction = null;
 
   private long endTime = 600;
   private final int tileSize;
 
-  public NobunagaBattleAnimation(GameAction action, int tileSize)
-  {
-    if( action.getActionType() != GameAction.ActionType.ATTACK )
-    {
-      System.out.println("ERROR! BattleAnimation given an incompatible GameAction - " + action.getActionType());
-    }
+  int attackerX = -1;
+  int attackerY = -1;
+  int defenderX = -1;
+  int defenderY = -1;
 
-    myAction = action;
+  public NobunagaBattleAnimation(int tileSize, int fromX, int fromY, int toX, int toY)
+  {
+    attackerX = fromX;
+    attackerY = fromY;
+    defenderX = toX;
+    defenderY = toY;
     startTime = System.currentTimeMillis();
     this.tileSize = tileSize;
   }
@@ -37,25 +41,25 @@ public class NobunagaBattleAnimation implements AnimationSequence
     {
       // Flash 2 over defender
       g.setColor(Color.WHITE);
-      g.fillRect(myAction.getActX() * tileSize, myAction.getActY() * tileSize, tileSize, tileSize);
+      g.fillRect(defenderX * tileSize, defenderY * tileSize, tileSize, tileSize);
     }
     else if( animTime > 300 )
     {
       // Flash 4 over attacker.
       g.setColor(Color.WHITE);
-      g.fillRect(myAction.getMoveX() * tileSize, myAction.getMoveY() * tileSize, tileSize, tileSize);
+      g.fillRect(attackerX * tileSize, attackerY * tileSize, tileSize, tileSize);
     }
     else if( animTime > 200 )
     {
       // Flash 1 over defender
       g.setColor(Color.WHITE);
-      g.fillRect(myAction.getActX() * tileSize, myAction.getActY() * tileSize, tileSize, tileSize);
+      g.fillRect(defenderX * tileSize, defenderY * tileSize, tileSize, tileSize);
     }
     else if( animTime > 100 )
     {
       // Flash 3 over attacker
       g.setColor(Color.WHITE);
-      g.fillRect(myAction.getMoveX() * tileSize, myAction.getMoveY() * tileSize, tileSize, tileSize);
+      g.fillRect(attackerX * tileSize, attackerY * tileSize, tileSize, tileSize);
     }
     return animTime > endTime;
   }

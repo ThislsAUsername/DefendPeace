@@ -51,6 +51,21 @@ public class InGameMenu<T>
    * Re-initializes this object with the new set of options.
    * @param newOptions
    */
+  public void resetOptions(T[] newOptions)
+  {
+    menuOptions.clear();
+    for( int i = 0; i < newOptions.length; ++i )
+    {
+      menuOptions.add( newOptions[i] );
+    }
+    optionSelector.reset( menuOptions.size() );
+    wasReset = true;
+  }
+
+  /**
+   * Re-initializes this object with the new set of options.
+   * @param newOptions
+   */
   public void resetOptions(ArrayList<T> newOptions)
   {
     menuOptions.clear();

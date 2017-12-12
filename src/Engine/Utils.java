@@ -27,7 +27,8 @@ public class Utils
             Unit target = map.getLocation(i, j).getResident();
             if( target != null && target.CO != unit.CO )
             {
-              if( unit.getDamage(target, xLoc, yLoc) > 0 )
+              int range = Math.abs(xLoc - target.x) + Math.abs(yLoc - target.y);
+              if( unit.getDamage(target, range) > 0 )
               {
                 map.getLocation(i, j).setHighlight(true);
               }
@@ -173,6 +174,14 @@ public class Utils
    */
   public static void findShortestPath(Unit unit, int x, int y, Path aPath, GameMap map)
   {
+    if( map.mapWidth < unit.x || map.mapHeight < unit.y || unit.x < 0 || unit.y < 0 )
+    {
+      // Unit is not in a valid place. No path can be found.
+      System.out.println("WARNING! Cannot find path for a unit that is not on the map.");
+      aPath.clear();
+      return;
+    }
+
     //System.out.println("Finding new path for " + unit.model.type + " from " + unit.x + ", " + unit.y + " to " + x + ", " + y);
     // Set all locations to false/remaining move = 0
     int[][] movesLeftGrid = new int[map.mapWidth][map.mapHeight];

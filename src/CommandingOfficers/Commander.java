@@ -13,6 +13,7 @@ import Units.Unit;
 import Units.UnitModel;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.CombatParameters;
+import Engine.GameInstance;
 import Units.UnitModel.UnitEnum;
 
 public class Commander
@@ -28,19 +29,6 @@ public class Commander
   public boolean isDefeated = false;
   public Location HQLocation = null;
 
-  public void doAbilityMinor()
-  {}
-  public void doAbilityMajor()
-  {}
-
-  /**
-   * Allows a Commander to inject modifications before evaluating a battle.
-   * Simple damage buffs, etc. can be accomplished via COModifiers, but effects
-   * that depend on circumstances that must be evaluated at combat time (e.g. a
-   * terrain-based firepower bonus) can be handled here.
-   */
-  public void applyCombatModifiers( CombatParameters params ) {}
-
   public Commander(CommanderInfo info)
   {
     coInfo = info;
@@ -53,6 +41,20 @@ public class Commander
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
     money = DEFAULTSTARTINGMONEY;
+  }
+
+  /**
+   * Allows a Commander to inject modifications before evaluating a battle.
+   * Simple damage buffs, etc. can be accomplished via COModifiers, but effects
+   * that depend on circumstances that must be evaluated at combat time (e.g. a
+   * terrain-based firepower bonus) can be handled here.
+   */
+  public void applyCombatModifiers( CombatParameters params ) {}
+
+  public void addCOModifier( COModifier mod )
+  {
+    mod.apply(this);
+    modifiers.add( mod ); // Add to the list so the modifier can be reverted next turn.
   }
 
   public void initTurn(GameMap map)
@@ -111,5 +113,17 @@ public class Commander
     }
 
     return arrList;
+  }
+
+  public ArrayList<String> getReadyAbilities()
+  {
+    System.out.println("WARNING! Calling getReadyAbilities on Commander base class!");
+    ArrayList<String> coas = new ArrayList<String>();
+    return coas;
+  }
+
+  public void doAbility( String abilityName, GameInstance game )
+  {
+    System.out.println("WARNING! Calling doAbility on Commander base class!");
   }
 }

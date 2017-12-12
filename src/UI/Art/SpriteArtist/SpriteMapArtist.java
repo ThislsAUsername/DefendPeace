@@ -59,10 +59,9 @@ public class SpriteMapArtist
     spriteSet.drawTerrainObject(g, gameMap, x, y, drawScale);
   }
 
-  public void drawCursor(Graphics g)
+  public void drawCursor(Graphics g, GameAction currentAction )
   {
-    GameAction action = myView.currentAction;
-    if( null == action || action.getActionType() == GameAction.ActionType.INVALID )
+    if( null == currentAction || currentAction.getActionType() == GameAction.ActionType.INVALID )
     {
       // Draw the default map cursor.
       backupArtist.drawCursor(g);

@@ -47,15 +47,15 @@ public class Weapon
       return 0;
     return damageChart[model.getIndex()][defender.ordinal()];
   }
+
   /**
    * @return returns its base damage against defender if the unit is in range,
    */
-  public double getDamage(int x, int y, Unit defender)
+  public double getDamage( Unit defender, int range )
   {
     if( defender != null )
     {
-      int dist = Math.abs(defender.y - y) + Math.abs(defender.x - x);
-      if( (dist >= model.minRange) && (dist <= model.maxRange) )
+      if( (range >= model.minRange) && (range <= model.maxRange) )
         return getDamage(defender.model.type);
     }
     return 0;
