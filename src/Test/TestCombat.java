@@ -4,6 +4,9 @@ import CommandingOfficers.CommanderPatch;
 import CommandingOfficers.CommanderStrong;
 import CommandingOfficers.Commander;
 import Engine.GameAction;
+import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.MapLibrary;
 import Units.Unit;
@@ -33,6 +36,7 @@ public class TestCombat extends TestCase
     boolean testPassed = true;
     testPassed &= validate(testUnitDeath(), "  Unit death test failed.");
     testPassed &= validate(testMoveAttack(), "  Move-Attack test failed.");
+    testPassed &= validate(testKillLastUnit(), "  Last-unit death test failed.");
     return testPassed;
   }
 
@@ -76,6 +80,41 @@ public class TestCombat extends TestCase
     // Clean up
     testMap.removeUnit(mechA);
     testMap.removeUnit(infB);
+    testCo1.units.clear();
+    testCo2.units.clear();
+
+    return testPassed;
+  }
+
+  /** Make sure we generate a CommanderDefeatEvent when killing the final unit for a CO. */
+  private boolean testKillLastUnit()
+  {
+    boolean testPassed = true;
+
+    // Add our combatants
+    Unit mechA = addUnit(testMap, testCo1, UnitEnum.MECH, 1, 1);
+    Unit infB = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 1, 2);
+
+    // Make sure the infantry will die with one attack
+    infB.damageHP(7);
+
+    // Create the attack action so we can predict the unit will die, and his CO will therefore be defeated.
+    GameAction battleAction = new GameAction(mechA, 1, 1, GameAction.ActionType.ATTACK, 1, 2);
+
+    // Extract the resulting GameEventQueue.
+    GameEventQueue events = battleAction.getGameEvents(testMap);
+
+    // Make sure a CommanderDefeatEvent was generated as a result (the actual event test is in TestGameEvent.java).
+    boolean hasDefeatEvent = false;
+    for( GameEvent event : events )
+    {
+      if( event instanceof CommanderDefeatEvent )
+      {
+        hasDefeatEvent = true;
+        break;
+      }
+    }
+    testPassed &= validate( hasDefeatEvent, "    No CommanderDefeatEvent generated when losing final unit!");
 
     return testPassed;
   }

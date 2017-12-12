@@ -4,6 +4,10 @@ import CommandingOfficers.CommanderPatch;
 import CommandingOfficers.CommanderStrong;
 import CommandingOfficers.Commander;
 import Engine.GameAction;
+import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventQueue;
+import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapLibrary;
@@ -33,6 +37,7 @@ public class TestCapture extends TestCase
 
     boolean testPassed = true;
     testPassed &= validate(testCapture(), "  Capture test failed.");
+    testPassed &= validate(testCaptureHQ(), "  HQ-Capture test failed.");
     return testPassed;
   }
 
@@ -47,7 +52,7 @@ public class TestCapture extends TestCase
     // Make sure this location is capturable.
     testPassed &= validate( prop.isCaptureable(), "    Unexpected terrain found! Test will be invalid." );
 
-    // Add a couple of units to run the tests.
+    // Add a unit to help run the tests.
     Unit infA = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 2, 2); // On the city.
 
     // Start capturing the city.
@@ -94,6 +99,43 @@ public class TestCapture extends TestCase
     // Clean up
     testMap.removeUnit(infA);
     testMap.removeUnit(infB);
+
+    return testPassed;
+  }
+
+  private boolean testCaptureHQ()
+  {
+    boolean testPassed = true;
+
+    setupTest(); // Reset test parameters to ensure it's all set up hunky-dory.
+
+    // We loaded Firing Range, so we expect an HQ for testCo2 at location (13, 1)
+    Terrain.Location hq = testMap.getLocation(13, 1);
+    testPassed &= validate( hq.getOwner() == testCo2, "    HQ at (13, 1) is not owned by testCo2, but should be.");
+    testPassed &= validate( hq.getEnvironment().terrainType == Environment.Terrains.HQ, "    HQ for testCo2 is not where expected.");
+
+    // Add a unit to help run the tests.
+    Unit mech = addUnit(testMap, testCo1, UnitEnum.MECH, 13, 1); // On the HQ, just to make this easy.
+
+    // Start capturing the HQ.
+    GameAction captureAction = new GameAction(mech, 13, 1, GameAction.ActionType.CAPTURE);
+    performGameAction(captureAction, testMap);
+
+    // Re-create the event so we can predict the HQ capture, but don't execute; we just want to see the resulting GameEventQueue.
+    captureAction = new GameAction(mech, 13, 1, GameAction.ActionType.CAPTURE);
+    GameEventQueue events = captureAction.getGameEvents(testMap);
+
+    // Make sure a CommanderDefeatEvent was generated as a result (the actual event test is in TestGameEvent.java).
+    boolean hasDefeatEvent = false;
+    for( GameEvent event : events )
+    {
+      if( event instanceof CommanderDefeatEvent )
+      {
+        hasDefeatEvent = true;
+        break;
+      }
+    }
+    testPassed &= validate( hasDefeatEvent, "    No CommanderDefeatEvent generated on HQ capture!");
 
     return testPassed;
   }

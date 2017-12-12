@@ -634,6 +634,7 @@ public class MapController implements IController
     GameEventQueue events = action.getGameEvents( myGame.gameMap );
 
     // Send the events to the animator. They will be applied/executed in animationEnded().
+    changeInputMode(InputMode.ANIMATION);
     myView.animate(events);
   }
 

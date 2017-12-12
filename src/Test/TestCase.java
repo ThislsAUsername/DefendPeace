@@ -50,9 +50,7 @@ public abstract class TestCase
   {
     Unit u = new Unit(co, co.getUnitModel(type));
     map.addNewUnit(u, x, y);
-    u.x = x;
-    u.y = y;
-    map.getLocation(x, y).setResident(u);
+    co.units.add( u );
     return u;
   }
 

@@ -29,10 +29,13 @@ public class UnloadEvent implements GameEvent
   @Override
   public void performEvent(GameMap gameMap)
   {
-    transport.isTurnOver = true;
-    transport.heldUnits.remove(cargo);
-    gameMap.moveUnit(cargo, dropX, dropY);
-    cargo.isTurnOver = true;
+    if( transport.heldUnits != null && transport.heldUnits.contains(cargo) &&
+        gameMap.getLocation(dropX, dropY).getResident() == null )
+    {
+      transport.heldUnits.remove(cargo);
+      gameMap.moveUnit(cargo, dropX, dropY);
+      cargo.isTurnOver = true;
+    }
   }
 
 }
