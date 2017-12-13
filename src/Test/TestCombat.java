@@ -68,27 +68,35 @@ public class TestCombat extends TestCase
   private boolean testIndirectAttacks()
   {
     // Add our combatants
-    Unit mover = addUnit(testMap, testCo1, UnitEnum.ARTILLERY, 6, 5);
-    Unit victim = addUnit(testMap, testCo2, UnitEnum.ARTILLERY, 6, 6);
-    Unit shooter = addUnit(testMap, testCo2, UnitEnum.ARTILLERY, 6, 7);
+    Unit offender = addUnit(testMap, testCo1, UnitEnum.ARTILLERY, 6, 5);
+    Unit defender = addUnit(testMap, testCo2, UnitEnum.MECH, 6, 6);
+    Unit victim = addUnit(testMap, testCo2, UnitEnum.ARTILLERY, 6, 7);
 
-    // mover will attempt to shoot point blank.
-    performGameAction( new GameAction(mover, 6, 5, GameAction.ActionType.ATTACK, 6, 6), testMap );
+    // offender will attempt to shoot point blank.
+    performGameAction( new GameAction(offender, 6, 5, GameAction.ActionType.ATTACK, 6, 6), testMap );
     
-    // mover will attempt to move and fire.
-    performGameAction( new GameAction(mover, 6, 4, GameAction.ActionType.ATTACK, 6, 6), testMap );
+    // offender will attempt to move and fire.
+    performGameAction( new GameAction(offender, 6, 4, GameAction.ActionType.ATTACK, 6, 6), testMap );
 
-    // shooter will shoot mover.
-    performGameAction( new GameAction(shooter, 6, 7, GameAction.ActionType.ATTACK, 6, 5), testMap );
+    // offender will shoot victim.
+    performGameAction( new GameAction(offender, 6, 5, GameAction.ActionType.ATTACK, 6, 7), testMap );
 
     // Check that victim is undamaged, and mover *is* damaged.
-    boolean testPassed = validate(victim.getPreciseHP() == 10, "    Artillery did a direct attack or move and fire.");
-    testPassed &= validate(mover.getPreciseHP() != 10, "    Artillery cannot hit at range.");
+    boolean testPassed = validate(defender.getPreciseHP() == 10, "    Artillery did a direct attack or move and fire.");
+    testPassed &= validate(victim.getPreciseHP() != 10, "    Artillery cannot hit at range.");
+    testPassed &= validate(offender.getPreciseHP() == 10, "    Artillery receives a counterattack from range.");
+
+    // defender will attack offender.
+    performGameAction( new GameAction(defender, 6, 6, GameAction.ActionType.ATTACK, 6, 5), testMap );
+    
+    // check that offender is damaged and defender is not.
+    testPassed &= validate(offender.getPreciseHP() != 10, "    Mech attack failed vs artillery.");
+    testPassed &= validate(defender.getPreciseHP() == 10, "    Mech receives a counterattack from artillery.");
 
     // Clean up
-    testMap.removeUnit(mover);
+    testMap.removeUnit(offender);
+    testMap.removeUnit(defender);
     testMap.removeUnit(victim);
-    testMap.removeUnit(shooter);
 
     return testPassed;
   }
