@@ -27,8 +27,7 @@ public class Utils
             Unit target = map.getLocation(i, j).getResident();
             if( target != null && target.CO != unit.CO )
             {
-              int range = Math.abs(xLoc - target.x) + Math.abs(yLoc - target.y);
-              if( unit.getDamage(target, range) > 0 )
+              if( unit.getDamage(target, xLoc, yLoc) > 0 )
               {
                 map.getLocation(i, j).setHighlight(true);
               }
