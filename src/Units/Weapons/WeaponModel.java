@@ -8,7 +8,7 @@ public abstract class WeaponModel
   };
 
   public WeaponType type;
-  public boolean mobile;
+  public boolean canFireAfterMoving;
   public int maxAmmo;
   public int minRange;
   public int maxRange;
@@ -19,11 +19,11 @@ public abstract class WeaponModel
     maxAmmo = ammo;
     if( minRange > 1 )
     {
-      mobile = false;
+      canFireAfterMoving = false;
     }
     else
     {
-      mobile = true;
+      canFireAfterMoving = true;
     }
     this.minRange = minRange;
     this.maxRange = maxRange;

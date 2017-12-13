@@ -102,19 +102,11 @@ public class Unit
   }
 
   /**
-   * @return the damage this unit can do to the target from its current location.
-   */
-  public double getDamage(Unit target)
-  {
-    return getDamage(target, x, y);
-  }
-
-  /**
    * @return the base damage this unit would do against the specified target,
    * if this unit were at location (xLoc,yLoc).
    * Chooses the first weapon on the list that can deal damage.
    */
-  public double getDamage(Unit target, int xLoc, int yLoc)
+  public double getBaseDamage(Unit target, int xLoc, int yLoc)
   {
     // if we have no weapons, we can't hurt things
     if( weapons == null )
@@ -122,7 +114,7 @@ public class Unit
     for( int i = 0; i < weapons.length; i++ )
     {
       // If the weapon isn't mobile, we shouldn't be able to fire if we moved.
-      if( !weapons[i].model.mobile )
+      if( !weapons[i].model.canFireAfterMoving )
       {
         if( xLoc != x || yLoc != y )
           continue;
