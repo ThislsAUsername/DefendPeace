@@ -72,26 +72,25 @@ public class TestCombat extends TestCase
     Unit defender = addUnit(testMap, testCo2, UnitEnum.MECH, 6, 6);
     Unit victim = addUnit(testMap, testCo2, UnitEnum.ARTILLERY, 6, 7);
 
-    // offender will attempt to shoot point blank.
+    // offender will attempt to shoot point blank. This should fail, since artillery cannot direct fire.
     performGameAction( new GameAction(offender, 6, 5, GameAction.ActionType.ATTACK, 6, 6), testMap );
+    boolean testPassed = validate(defender.getPreciseHP() == 10, "    Artillery dealt damage at range 1. Artillery range should be 2-3.");
     
-    // offender will attempt to move and fire.
+    // offender will attempt to move and fire. This should fail, since artillery cannot fire after moving.
     performGameAction( new GameAction(offender, 6, 4, GameAction.ActionType.ATTACK, 6, 6), testMap );
+    testPassed &= validate(defender.getPreciseHP() == 10, "    Artillery dealt damage despite moving before firing.");
 
     // offender will shoot victim.
     performGameAction( new GameAction(offender, 6, 5, GameAction.ActionType.ATTACK, 6, 7), testMap );
-
-    // Check that victim is undamaged, and mover *is* damaged.
-    boolean testPassed = validate(defender.getPreciseHP() == 10, "    Artillery did a direct attack or move and fire.");
-    testPassed &= validate(victim.getPreciseHP() != 10, "    Artillery cannot hit at range.");
-    testPassed &= validate(offender.getPreciseHP() == 10, "    Artillery receives a counterattack from range.");
+    testPassed &= validate(victim.getPreciseHP() != 10, "    Artillery failed to do damage at a range of 2, without moving.");
+    testPassed &= validate(offender.getPreciseHP() == 10, "    Artillery received a counterattack from a range of 2. Counterattacks should only be possible at range 1.");
 
     // defender will attack offender.
     performGameAction( new GameAction(defender, 6, 6, GameAction.ActionType.ATTACK, 6, 5), testMap );
     
     // check that offender is damaged and defender is not.
-    testPassed &= validate(offender.getPreciseHP() != 10, "    Mech attack failed vs artillery.");
-    testPassed &= validate(defender.getPreciseHP() == 10, "    Mech receives a counterattack from artillery.");
+    testPassed &= validate(offender.getPreciseHP() != 10, "    Mech failed to deal damage to adjacent artillery.");
+    testPassed &= validate(defender.getPreciseHP() == 10, "    Mech receives a counterattack from artillery at range 1. Artillery range should be 2-3.");
 
     // Clean up
     testMap.removeUnit(offender);
