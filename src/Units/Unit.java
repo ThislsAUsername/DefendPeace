@@ -82,9 +82,9 @@ public class Unit
   }
 
   /**
-   * @return how much the unit could possibly damage the given unit type
+   * @return how much the unit could possibly damage the given unit type at the given range
    */
-  public double canDamage(UnitModel target)
+  public double canDamage(UnitModel target, int range)
   {
     // if we have no weapons, we can't hurt things
     if( weapons == null )
@@ -92,7 +92,7 @@ public class Unit
     for( int i = 0; i < weapons.length; i++ )
     {
       // a simple check of the damage chart, ignoring range
-      double damage = weapons[i].getDamage(target.type);
+      double damage = weapons[i].getDamage(target, range);
       if( damage != 0 )
       {
         return damage;
@@ -128,7 +128,7 @@ public class Unit
           continue;
       }
       int range = Math.abs(xLoc - target.x) + Math.abs(yLoc - target.y);
-      double damage = weapons[i].getDamage(target, range);
+      double damage = weapons[i].getDamage(target.model, range);
       if( damage != 0 )
       {
         return damage;

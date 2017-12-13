@@ -51,12 +51,12 @@ public class Weapon
   /**
    * @return returns its base damage against defender if the unit is in range,
    */
-  public double getDamage( Unit defender, int range )
+  public double getDamage( UnitModel defender, int range )
   {
     if( defender != null )
     {
       if( (range >= model.minRange) && (range <= model.maxRange) )
-        return getDamage(defender.model.type);
+        return getDamage(defender.type);
     }
     return 0;
   }
