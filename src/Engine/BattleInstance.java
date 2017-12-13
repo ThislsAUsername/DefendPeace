@@ -5,7 +5,7 @@ import Terrain.Environment;
 import Terrain.GameMap;
 import Units.Unit;
 
-public class CombatParameters
+public class BattleInstance
 {
   private Unit attacker, defender;
   private final int attackerX, attackerY, defenderX, defenderY;
@@ -22,7 +22,7 @@ public class CombatParameters
    * @param attackerX
    * @param attackerY
    */
-  public CombatParameters(Unit pAttacker, Unit pDefender, GameMap map, int attackerX, int attackerY )
+  public BattleInstance(Unit pAttacker, Unit pDefender, GameMap map, int attackerX, int attackerY )
   {
     attacker = pAttacker;
     defender = pDefender;
