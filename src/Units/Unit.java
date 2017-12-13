@@ -82,31 +82,11 @@ public class Unit
   }
 
   /**
-   * @return how much the unit could possibly damage the given unit type at the given range
-   */
-  public double canDamage(UnitModel target, int range)
-  {
-    // if we have no weapons, we can't hurt things
-    if( weapons == null )
-      return 0;
-    for( int i = 0; i < weapons.length; i++ )
-    {
-      // a simple check of the damage chart, ignoring range
-      double damage = weapons[i].getDamage(target, range);
-      if( damage != 0 )
-      {
-        return damage;
-      }
-    }
-    return 0;
-  }
-
-  /**
    * @return the base damage this unit would do against the specified target,
-   * if this unit were at location (xLoc,yLoc).
+   * at the specified range, based on whether it will move before striking
    * Chooses the first weapon on the list that can deal damage.
    */
-  public double getBaseDamage(Unit target, int xLoc, int yLoc)
+  public double getBaseDamage(UnitModel target, int range, boolean moved)
   {
     // if we have no weapons, we can't hurt things
     if( weapons == null )
@@ -114,13 +94,11 @@ public class Unit
     for( int i = 0; i < weapons.length; i++ )
     {
       // If the weapon isn't mobile, we shouldn't be able to fire if we moved.
-      if( !weapons[i].model.canFireAfterMoving )
+      if( moved && !weapons[i].model.canFireAfterMoving )
       {
-        if( xLoc != x || yLoc != y )
-          continue;
+        continue;
       }
-      int range = Math.abs(xLoc - target.x) + Math.abs(yLoc - target.y);
-      double damage = weapons[i].getDamage(target.model, range);
+      double damage = weapons[i].getDamage(target, range);
       if( damage != 0 )
       {
         return damage;

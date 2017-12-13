@@ -16,6 +16,8 @@ public class Utils
    */
   public static void findActionableLocations(Unit unit, GameAction.ActionType action, int xLoc, int yLoc, GameMap map)
   {
+    // we need to know whether the unit moved or not for indirect units
+    boolean moved = unit.x != xLoc || unit.y != yLoc;
     switch (action)
     {
       case ATTACK:
@@ -27,7 +29,8 @@ public class Utils
             Unit target = map.getLocation(i, j).getResident();
             if( target != null && target.CO != unit.CO )
             {
-              if( unit.getBaseDamage(target, xLoc, yLoc) > 0 )
+              int range = Math.abs(xLoc - target.x) + Math.abs(yLoc - target.y);
+              if( unit.getBaseDamage(target.model, range, moved) > 0 )
               {
                 map.getLocation(i, j).setHighlight(true);
               }
