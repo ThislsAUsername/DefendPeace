@@ -47,8 +47,20 @@ public class SpriteMapView extends MapView
   private long fastAnimIndexUpdateTime = 0;
   private final int fastAnimIndexUpdateInterval = 125;
 
+  /** Width of the visible space in pixels. */
   private int mapViewWidth;
+  /** Height of the visible space in pixels. */
   private int mapViewHeight;
+
+  // The number of map tiles to draw. This corresponds to the size of the game window.
+  private int mapTilesToDrawX;
+  private int mapTilesToDrawY;
+  // Coordinates of the upper-left-most, currently visible map location.
+  private int mapViewX;
+  private int mapViewY;
+  // Coordinates of the draw view, with double precision. Will constantly move towards (mapViewX, mapViewY).
+  private double mapViewDrawX;
+  private double mapViewDrawY;
 
   public SpriteMapView(GameInstance game)
   {
@@ -66,8 +78,16 @@ public class SpriteMapView extends MapView
     }
 
     // By default, we will show a 15x10 chunk of the map.
-    mapViewWidth = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * 15;
-    mapViewHeight = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * 10;
+    mapTilesToDrawX = 15;
+    mapTilesToDrawY = 10;
+    // Start the view at the top-left by default.
+    mapViewX = 0;
+    mapViewY = 0;
+    mapViewDrawX = 0;
+    mapViewDrawY = 0;
+
+    mapViewWidth = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * mapTilesToDrawX;
+    mapViewHeight = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * mapTilesToDrawY;
   }
 
   @Override
@@ -171,8 +191,15 @@ public class SpriteMapView extends MapView
     }
     else
     { // No overlay is being shown - draw the map, units, etc.
-      // Draw base terrain
-      mapArtist.drawBaseTerrain(g);
+      // Make sure the view is centered where we want it.
+      adjustViewLocation();
+
+      // Draw the portion of the base terrain that is currently in-window.
+      int drawMultiplier = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale();
+      int drawX = (int)(mapViewDrawX * drawMultiplier);
+      int drawY = (int)(mapViewDrawY * drawMultiplier);
+      System.out.println("Drawing at " + drawX + ", " + drawY);
+      mapArtist.drawBaseTerrain(g, drawX, drawY, mapViewWidth, mapViewHeight);
 
       // Update the central sprite indices so animations happen in sync.
       updateAnimationIndices();
@@ -224,7 +251,9 @@ public class SpriteMapView extends MapView
       }
       else if( getCurrentGameMenu() == null )
       {
-        mapArtist.drawCursor(g, currentAction);
+        int cursorDrawX = myGame.getCursorX() - mapViewX;
+        int cursorDrawY = myGame.getCursorY() - mapViewY;
+        mapArtist.drawCursor(g, currentAction, cursorDrawX, cursorDrawY);
       }
       else
       {
@@ -234,6 +263,56 @@ public class SpriteMapView extends MapView
       // Draw the Commander overlay with available funds.
       drawCommanderOverlay(g);
     } // End of case for no overlay menu.
+  }
+
+  private void adjustViewLocation()
+  {
+    int curX = myGame.getCursorX();
+    int curY = myGame.getCursorY();
+    GameMap gameMap = myGame.gameMap;
+
+    // Maintain a 2-space buffer between the cursor and the edge of the visible map, when possible.
+    int buffer = 2; // Note the cursor takes up one space, so we will have to add 1 when checking the right/bottom border.
+    if( (mapViewX + mapTilesToDrawX) < (curX + buffer+1) )
+    {
+      System.out.println("moving view right");
+      mapViewX = curX - mapTilesToDrawX + buffer+1; // Move our view to keep the cursor in sight.
+      // Make sure we don't try to move the view off the map.
+      if( mapViewX + mapTilesToDrawX > gameMap.mapWidth ) mapViewX = gameMap.mapWidth - mapTilesToDrawX;
+    }
+    else if( (curX - buffer) < mapViewX )
+    {
+      System.out.println("moving view left");
+      mapViewX = curX - buffer;
+      if( mapViewX < 0 ) mapViewX = 0;
+    }
+
+    System.out.println("===========");
+    System.out.println("mvy: " + mapViewY);
+    System.out.println("cy : " + curY);
+    // Now do the y-axis.
+    if( (curY + buffer+1) >= (mapViewY + mapTilesToDrawY) )
+    {
+      System.out.println("moving view down");
+      mapViewY = curY - mapTilesToDrawY + buffer+1;
+      if( mapViewY + mapTilesToDrawY > gameMap.mapHeight ) mapViewY = gameMap.mapHeight - mapTilesToDrawY;
+    }
+    else if( (curY - buffer) < mapViewY )
+    {
+      System.out.println("moving view up");
+      mapViewY = curY - buffer;
+      if( mapViewY < 0 ) mapViewY = 0;
+    }
+
+    // Recalculate the precise draw location for the view.
+    if( mapViewDrawX != mapViewX )
+    {
+      mapViewDrawX += SpriteUIUtils.calculateSlideAmount(mapViewDrawX, mapViewX);
+    }
+    if( mapViewDrawY != mapViewY )
+    {
+      mapViewDrawY += SpriteUIUtils.calculateSlideAmount(mapViewDrawY, mapViewY);
+    }
   }
 
   @Override // from MapView
