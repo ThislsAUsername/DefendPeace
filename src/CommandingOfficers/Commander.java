@@ -11,7 +11,7 @@ import Units.MechModel;
 import Units.Unit;
 import Units.UnitModel;
 import CommandingOfficers.Modifiers.COModifier;
-import Engine.CombatParameters;
+import Engine.BattleInstance;
 import Engine.GameInstance;
 import Units.UnitModel.UnitEnum;
 
@@ -47,7 +47,7 @@ public class Commander
    * that depend on circumstances that must be evaluated at combat time (e.g. a
    * terrain-based firepower bonus) can be handled here.
    */
-  public void applyCombatModifiers( CombatParameters params ) {}
+  public void applyCombatModifiers( BattleInstance params ) {}
 
   public void addCOModifier( COModifier mod )
   {
