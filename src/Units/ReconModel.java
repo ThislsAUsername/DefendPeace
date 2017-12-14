@@ -2,10 +2,8 @@ package Units;
 
 import Engine.GameAction.ActionType;
 import Terrain.Environment.Terrains;
-import Units.MoveTypes.FootStandard;
 import Units.MoveTypes.MoveType;
 import Units.MoveTypes.Tires;
-import Units.Weapons.InfantryMGun;
 import Units.Weapons.ReconMGun;
 import Units.Weapons.WeaponModel;
 

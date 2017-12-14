@@ -1,6 +1,5 @@
 package Units.Weapons;
 
-import Units.Unit;
 import Units.UnitModel;
 
 public class Weapon

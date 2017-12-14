@@ -1,18 +1,10 @@
 package Units;
 
-import java.util.Vector;
-
 import Engine.GameAction.ActionType;
 import Terrain.Environment.Terrains;
 import Units.MoveTypes.MoveType;
 import Units.MoveTypes.Tread;
 import Units.Weapons.AntiAirMGun;
-import Units.Weapons.ArtilleryCannon;
-import Units.Weapons.InfantryMGun;
-import Units.Weapons.MechMGun;
-import Units.Weapons.MechZooka;
-import Units.Weapons.TankCannon;
-import Units.Weapons.TankMGun;
 import Units.Weapons.WeaponModel;
 
 public class AntiAirModel extends UnitModel
