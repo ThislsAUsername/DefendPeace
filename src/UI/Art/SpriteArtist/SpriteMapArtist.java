@@ -48,8 +48,8 @@ public class SpriteMapArtist
 
   public void drawBaseTerrain(Graphics g, int viewX, int viewY, int viewW, int viewH)
   {
-    // First four parameters are the dest x,y,w,h. Next four are the source coords.
-    g.drawImage(baseMapImage, 0, 0, viewW, viewH, viewX, viewY, viewX+viewW, viewY+viewH, null);
+    // First four coords are the dest x,y,x2,y2. Next four are the source coords.
+    g.drawImage(baseMapImage, viewX, viewY, viewX+viewW, viewY+viewH, viewX, viewY, viewX+viewW, viewY+viewH, null);
   }
 
   public void drawTerrainObject(Graphics g, int x, int y)

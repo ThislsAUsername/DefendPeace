@@ -27,6 +27,11 @@ public class SpriteMapView extends MapView
 
   private GameInstance myGame;
 
+  // Local map buffer to simplify drawing for sub-artists. Game assets are drawn
+  // onto their absolute locations on this image, and then the relevant portion
+  // of this image is drawn to the screen.
+  private BufferedImage mapImage = null;
+
   private SpriteMapArtist mapArtist;
   private SpriteUnitArtist unitArtist;
   private SpriteMenuArtist menuArtist;
@@ -64,6 +69,11 @@ public class SpriteMapView extends MapView
 
   public SpriteMapView(GameInstance game)
   {
+    // Create an initial image that can contain the entire map.
+    mapImage = SpriteLibrary.createDefaultBlankSprite(
+        SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * game.gameMap.mapWidth,
+        SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * game.gameMap.mapHeight);
+
     mapArtist = new SpriteMapArtist(game, this);
     unitArtist = new SpriteUnitArtist(game, this);
     menuArtist = new SpriteMenuArtist(game, this);
@@ -190,7 +200,13 @@ public class SpriteMapView extends MapView
           0, 0, mapViewWidth, mapViewHeight, null);
     }
     else
-    { // No overlay is being shown - draw the map, units, etc.
+    {
+      // We draw in two stages. First, we draw the map/units onto a canvas which is the size
+      // of the entire map; then we copy the visible section of that canvas onto the game window.
+      // This allows us to avoid extra calculations to place map objects within in the window.
+      Graphics mapGraphics = mapImage.getGraphics();
+
+      // No overlay is being shown - draw the map, units, etc.
       // Make sure the view is centered where we want it.
       adjustViewLocation();
 
@@ -199,19 +215,19 @@ public class SpriteMapView extends MapView
       int drawX = (int)(mapViewDrawX * drawMultiplier);
       int drawY = (int)(mapViewDrawY * drawMultiplier);
       System.out.println("Drawing at " + drawX + ", " + drawY);
-      mapArtist.drawBaseTerrain(g, drawX, drawY, mapViewWidth, mapViewHeight);
+      mapArtist.drawBaseTerrain(mapGraphics, drawX, drawY, mapViewWidth, mapViewHeight);
 
       // Update the central sprite indices so animations happen in sync.
       updateAnimationIndices();
 
       // Draw units, buildings, trees, etc.
-      drawUnitsAndMapObjects(g);
+      drawUnitsAndMapObjects(mapGraphics);
 
       // Apply any relevant map highlight.
-      mapArtist.drawHighlights(g);
+      mapArtist.drawHighlights(mapGraphics);
 
       // Draw Unit icons on top of everything, to make sure they are seen clearly.
-      drawUnitIcons(g);
+      drawUnitIcons(mapGraphics);
 
       // Get a reference to the current action being built, if one exists.
       GameAction currentAction = mapController.getContemplatedAction();
@@ -219,26 +235,26 @@ public class SpriteMapView extends MapView
       // Draw the movement arrow if the user is contemplating a move.
       if( mapController.getContemplatedMove() != null )
       {
-        mapArtist.drawMovePath(g, mapController.getContemplatedMove());
+        mapArtist.drawMovePath(mapGraphics, mapController.getContemplatedMove());
       }
       // Draw the movement arrow if the user is contemplating an action (but not once the action commences).
       else if( null != currentAction && null != currentAction.getMovePath() && null == currentAnimation )
       {
-        mapArtist.drawMovePath(g, currentAction.getMovePath());
+        mapArtist.drawMovePath(mapGraphics, currentAction.getMovePath());
       }
 
       // Draw the currently-acting unit so it's on top of everything.
       if( null != currentAction && currentAnimation == null )
       {
         Unit u = currentAction.getActor();
-        unitArtist.drawUnit(g, u, u.x, u.y, fastAnimIndex);
-        unitArtist.drawUnitIcons(g, u, u.x, u.y);
+        unitArtist.drawUnit(mapGraphics, u, u.x, u.y, fastAnimIndex);
+        unitArtist.drawUnitIcons(mapGraphics, u, u.x, u.y);
       }
 
       if( currentAnimation != null )
       {
         // Animate until it tells you it's done.
-        if( currentAnimation.animate(g) )
+        if( currentAnimation.animate(mapGraphics) )
         {
           currentAnimation = null;
 
@@ -251,14 +267,16 @@ public class SpriteMapView extends MapView
       }
       else if( getCurrentGameMenu() == null )
       {
-        int cursorDrawX = myGame.getCursorX() - mapViewX;
-        int cursorDrawY = myGame.getCursorY() - mapViewY;
-        mapArtist.drawCursor(g, currentAction, cursorDrawX, cursorDrawY);
+        mapArtist.drawCursor(mapGraphics, currentAction, myGame.getCursorX(), myGame.getCursorY());
       }
       else
       {
-        menuArtist.drawMenu(g);
+        menuArtist.drawMenu(mapGraphics, drawX, drawY);
       }
+
+      // Copy the map image into the window's graphics buffer.
+      // First four coords are the dest x,y,x2,y2. Next four are the source coords.
+      g.drawImage(mapImage, 0, 0, mapViewWidth, mapViewHeight, drawX, drawY, drawX+mapViewWidth, drawY+mapViewHeight, null);
 
       // Draw the Commander overlay with available funds.
       drawCommanderOverlay(g);
@@ -338,20 +356,26 @@ public class SpriteMapView extends MapView
   private void drawUnitsAndMapObjects(Graphics g)
   {
     // Draw terrain objects and units in order so they overlap correctly.
-    for( int y = 0; y < myGame.gameMap.mapHeight; ++y )
+    // Only bother iterating over the visible map space (plus a 1-square border).
+    for( int y = mapViewY-1; y < mapViewY+mapTilesToDrawY+1; ++y )
     {
-      for( int x = 0; x < myGame.gameMap.mapWidth; ++x )
+      for( int x = mapViewX-1; x < mapViewX+mapTilesToDrawX+1; ++x )
       {
-        // Draw any terrain object here, followed by any unit present.
-        mapArtist.drawTerrainObject(g, x, y);
-        if( !myGame.gameMap.isLocationEmpty(x, y) )
+        // Since we are trying to draw a ring of objects around the viewable space to
+        // ensure smooth scrolling, make sure we aren't running of the edge of the map.
+        if(myGame.gameMap.isLocationValid(x, y))
         {
-          Unit u = myGame.gameMap.getLocation(x, y).getResident();
-          // If an action is being considered, draw the active unit later, not now.
-          GameAction currentAction = mapController.getContemplatedAction();
-          if( (null == currentAction) || (u != currentAction.getActor()) )
+          // Draw any terrain object here, followed by any unit present.
+          mapArtist.drawTerrainObject(g, x, y);
+          if( !myGame.gameMap.isLocationEmpty(x, y) )
           {
-            unitArtist.drawUnit(g, u, u.x, u.y, animIndex);
+            Unit u = myGame.gameMap.getLocation(x, y).getResident();
+            // If an action is being considered, draw the active unit later, not now.
+            GameAction currentAction = mapController.getContemplatedAction();
+            if( (null == currentAction) || (u != currentAction.getActor()) )
+            {
+              unitArtist.drawUnit(g, u, u.x, u.y, animIndex);
+            }
           }
         }
       }
