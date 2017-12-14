@@ -1,9 +1,9 @@
 package Units.MoveTypes;
 
-public class Lander extends MoveType
+public class FloatLight extends MoveType
 {
 
-  public Lander()
+  public FloatLight()
   {
     // format is [weather][terrain]
     int[][] tempCosts = { { 99, 99, 99, 99, 99, 99, 99, 99, 1, 1, 2 }, { 99, 99, 99, 99, 99, 99, 99, 99, 1, 1, 2 },

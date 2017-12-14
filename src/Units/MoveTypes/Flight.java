@@ -1,9 +1,9 @@
 package Units.MoveTypes;
 
-public class AirMove extends MoveType
+public class Flight extends MoveType
 {
 
-  public AirMove()
+  public Flight()
   {
     // format is [weather][terrain]
     int[][] tempCosts = { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
