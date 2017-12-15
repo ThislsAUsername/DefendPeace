@@ -5,10 +5,17 @@ import java.util.ArrayList;
 
 import Terrain.GameMap;
 import Terrain.Location;
+import Units.AntiAirModel;
 import Units.APCModel;
 import Units.ArtilleryModel;
 import Units.InfantryModel;
+import Units.MDTankModel;
 import Units.MechModel;
+import Units.MobileSAMModel;
+import Units.NeotankModel;
+import Units.ReconModel;
+import Units.RocketsModel;
+import Units.TankModel;
 import Units.Unit;
 import Units.UnitModel;
 import CommandingOfficers.Modifiers.COModifier;
@@ -33,11 +40,18 @@ public class Commander
   {
     coInfo = info;
     // TODO Obviously we don't want to hard-code the UnitModel array.
-    unitModels = new UnitModel[4];
+    unitModels = new UnitModel[11];
     unitModels[0] = new InfantryModel();
     unitModels[1] = new MechModel();
     unitModels[2] = new APCModel();
     unitModels[3] = new ArtilleryModel();
+    unitModels[4] = new ReconModel();
+    unitModels[5] = new TankModel();
+    unitModels[6] = new MDTankModel();
+    unitModels[7] = new NeotankModel();
+    unitModels[8] = new RocketsModel();
+    unitModels[9] = new AntiAirModel();
+    unitModels[10] = new MobileSAMModel();
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
     money = DEFAULTSTARTINGMONEY;
