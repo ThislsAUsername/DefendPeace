@@ -1,9 +1,9 @@
 package Units.Weapons;
 
-public class SAMissiles extends WeaponModel
+public class MobileSAMWeapon extends WeaponModel
 {
 
-  public SAMissiles()
+  public MobileSAMWeapon()
   {
     super(WeaponType.MISSILES, 6, 3, 5);
   }

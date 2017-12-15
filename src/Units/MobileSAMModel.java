@@ -4,7 +4,7 @@ import Engine.GameAction.ActionType;
 import Terrain.Environment.Terrains;
 import Units.MoveTypes.MoveType;
 import Units.MoveTypes.Tires;
-import Units.Weapons.SAMissiles;
+import Units.Weapons.MobileSAMWeapon;
 import Units.Weapons.WeaponModel;
 
 public class MobileSAMModel extends UnitModel
@@ -13,7 +13,7 @@ public class MobileSAMModel extends UnitModel
   private static final MoveType moveType = new Tires();
   private static final ActionType[] actions = { ActionType.ATTACK, ActionType.WAIT };
   private static final Terrains[] healHabs = { Terrains.CITY, Terrains.FACTORY, Terrains.HQ };
-  private static final WeaponModel[] weapons = { new SAMissiles() };
+  private static final WeaponModel[] weapons = { new MobileSAMWeapon() };
 
   public MobileSAMModel()
   {
