@@ -214,7 +214,6 @@ public class SpriteMapView extends MapView
       int drawMultiplier = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale();
       int drawX = (int)(mapViewDrawX * drawMultiplier);
       int drawY = (int)(mapViewDrawY * drawMultiplier);
-      System.out.println("Drawing at " + drawX + ", " + drawY);
       mapArtist.drawBaseTerrain(mapGraphics, drawX, drawY, mapViewWidth, mapViewHeight);
 
       // Update the central sprite indices so animations happen in sync.
@@ -293,31 +292,24 @@ public class SpriteMapView extends MapView
     int buffer = 2; // Note the cursor takes up one space, so we will have to add 1 when checking the right/bottom border.
     if( (mapViewX + mapTilesToDrawX) < (curX + buffer+1) )
     {
-      System.out.println("moving view right");
       mapViewX = curX - mapTilesToDrawX + buffer+1; // Move our view to keep the cursor in sight.
       // Make sure we don't try to move the view off the map.
       if( mapViewX + mapTilesToDrawX > gameMap.mapWidth ) mapViewX = gameMap.mapWidth - mapTilesToDrawX;
     }
     else if( (curX - buffer) < mapViewX )
     {
-      System.out.println("moving view left");
       mapViewX = curX - buffer;
       if( mapViewX < 0 ) mapViewX = 0;
     }
 
-    System.out.println("===========");
-    System.out.println("mvy: " + mapViewY);
-    System.out.println("cy : " + curY);
     // Now do the y-axis.
     if( (curY + buffer+1) >= (mapViewY + mapTilesToDrawY) )
     {
-      System.out.println("moving view down");
       mapViewY = curY - mapTilesToDrawY + buffer+1;
       if( mapViewY + mapTilesToDrawY > gameMap.mapHeight ) mapViewY = gameMap.mapHeight - mapTilesToDrawY;
     }
     else if( (curY - buffer) < mapViewY )
     {
-      System.out.println("moving view up");
       mapViewY = curY - buffer;
       if( mapViewY < 0 ) mapViewY = 0;
     }
