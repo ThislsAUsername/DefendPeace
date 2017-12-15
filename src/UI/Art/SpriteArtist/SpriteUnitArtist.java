@@ -38,7 +38,7 @@ public class SpriteUnitArtist
    * "Real" means that the specified x and y are that of the game's
    * underlying data model, not of the draw-space.
    */
-  public void drawUnit(Graphics g, Unit unit, double x, double y, int animIndex)
+  public void drawUnit(Graphics g, Unit unit, int x, int y, int animIndex)
   {
     // Convert "real" game-model location to a draw-space location.
     int drawX = (int) (myView.getTileSize() * x);

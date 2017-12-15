@@ -27,6 +27,11 @@ public class SpriteMapView extends MapView
 
   private GameInstance myGame;
 
+  // Local map buffer to simplify drawing for sub-artists. Game assets are drawn
+  // onto their absolute locations on this image, and then the relevant portion
+  // of this image is drawn to the screen.
+  private BufferedImage mapImage = null;
+
   private SpriteMapArtist mapArtist;
   private SpriteUnitArtist unitArtist;
   private SpriteMenuArtist menuArtist;
@@ -47,11 +52,28 @@ public class SpriteMapView extends MapView
   private long fastAnimIndexUpdateTime = 0;
   private final int fastAnimIndexUpdateInterval = 125;
 
+  /** Width of the visible space in pixels. */
   private int mapViewWidth;
+  /** Height of the visible space in pixels. */
   private int mapViewHeight;
+
+  // The number of map tiles to draw. This corresponds to the size of the game window.
+  private int mapTilesToDrawX;
+  private int mapTilesToDrawY;
+  // Coordinates of the upper-left-most, currently visible map location.
+  private int mapViewX;
+  private int mapViewY;
+  // Coordinates of the draw view, with double precision. Will constantly move towards (mapViewX, mapViewY).
+  private double mapViewDrawX;
+  private double mapViewDrawY;
 
   public SpriteMapView(GameInstance game)
   {
+    // Create an initial image that can contain the entire map.
+    mapImage = SpriteLibrary.createDefaultBlankSprite(
+        SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * game.gameMap.mapWidth,
+        SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * game.gameMap.mapHeight);
+
     mapArtist = new SpriteMapArtist(game, this);
     unitArtist = new SpriteUnitArtist(game, this);
     menuArtist = new SpriteMenuArtist(game, this);
@@ -66,8 +88,16 @@ public class SpriteMapView extends MapView
     }
 
     // By default, we will show a 15x10 chunk of the map.
-    mapViewWidth = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * 15;
-    mapViewHeight = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * 10;
+    mapTilesToDrawX = 15;
+    mapTilesToDrawY = 10;
+    // Start the view at the top-left by default.
+    mapViewX = 0;
+    mapViewY = 0;
+    mapViewDrawX = 0;
+    mapViewDrawY = 0;
+
+    mapViewWidth = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * mapTilesToDrawX;
+    mapViewHeight = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * mapTilesToDrawY;
   }
 
   @Override
@@ -170,21 +200,33 @@ public class SpriteMapView extends MapView
           0, 0, mapViewWidth, mapViewHeight, null);
     }
     else
-    { // No overlay is being shown - draw the map, units, etc.
-      // Draw base terrain
-      mapArtist.drawBaseTerrain(g);
+    {
+      // We draw in two stages. First, we draw the map/units onto a canvas which is the size
+      // of the entire map; then we copy the visible section of that canvas onto the game window.
+      // This allows us to avoid extra calculations to place map objects within in the window.
+      Graphics mapGraphics = mapImage.getGraphics();
+
+      // No overlay is being shown - draw the map, units, etc.
+      // Make sure the view is centered where we want it.
+      adjustViewLocation();
+
+      // Draw the portion of the base terrain that is currently in-window.
+      int drawMultiplier = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale();
+      int drawX = (int)(mapViewDrawX * drawMultiplier);
+      int drawY = (int)(mapViewDrawY * drawMultiplier);
+      mapArtist.drawBaseTerrain(mapGraphics, drawX, drawY, mapViewWidth, mapViewHeight);
 
       // Update the central sprite indices so animations happen in sync.
       updateAnimationIndices();
 
       // Draw units, buildings, trees, etc.
-      drawUnitsAndMapObjects(g);
+      drawUnitsAndMapObjects(mapGraphics);
 
       // Apply any relevant map highlight.
-      mapArtist.drawHighlights(g);
+      mapArtist.drawHighlights(mapGraphics);
 
       // Draw Unit icons on top of everything, to make sure they are seen clearly.
-      drawUnitIcons(g);
+      drawUnitIcons(mapGraphics);
 
       // Get a reference to the current action being built, if one exists.
       GameAction currentAction = mapController.getContemplatedAction();
@@ -192,26 +234,26 @@ public class SpriteMapView extends MapView
       // Draw the movement arrow if the user is contemplating a move.
       if( mapController.getContemplatedMove() != null )
       {
-        mapArtist.drawMovePath(g, mapController.getContemplatedMove());
+        mapArtist.drawMovePath(mapGraphics, mapController.getContemplatedMove());
       }
       // Draw the movement arrow if the user is contemplating an action (but not once the action commences).
       else if( null != currentAction && null != currentAction.getMovePath() && null == currentAnimation )
       {
-        mapArtist.drawMovePath(g, currentAction.getMovePath());
+        mapArtist.drawMovePath(mapGraphics, currentAction.getMovePath());
       }
 
       // Draw the currently-acting unit so it's on top of everything.
       if( null != currentAction && currentAnimation == null )
       {
         Unit u = currentAction.getActor();
-        unitArtist.drawUnit(g, u, u.x, u.y, fastAnimIndex);
-        unitArtist.drawUnitIcons(g, u, u.x, u.y);
+        unitArtist.drawUnit(mapGraphics, u, u.x, u.y, fastAnimIndex);
+        unitArtist.drawUnitIcons(mapGraphics, u, u.x, u.y);
       }
 
       if( currentAnimation != null )
       {
         // Animate until it tells you it's done.
-        if( currentAnimation.animate(g) )
+        if( currentAnimation.animate(mapGraphics) )
         {
           currentAnimation = null;
 
@@ -224,16 +266,63 @@ public class SpriteMapView extends MapView
       }
       else if( getCurrentGameMenu() == null )
       {
-        mapArtist.drawCursor(g, currentAction);
+        mapArtist.drawCursor(mapGraphics, currentAction, myGame.getCursorX(), myGame.getCursorY());
       }
       else
       {
-        menuArtist.drawMenu(g);
+        menuArtist.drawMenu(mapGraphics, drawX, drawY);
       }
+
+      // Copy the map image into the window's graphics buffer.
+      // First four coords are the dest x,y,x2,y2. Next four are the source coords.
+      g.drawImage(mapImage, 0, 0, mapViewWidth, mapViewHeight, drawX, drawY, drawX+mapViewWidth, drawY+mapViewHeight, null);
 
       // Draw the Commander overlay with available funds.
       drawCommanderOverlay(g);
     } // End of case for no overlay menu.
+  }
+
+  private void adjustViewLocation()
+  {
+    int curX = myGame.getCursorX();
+    int curY = myGame.getCursorY();
+    GameMap gameMap = myGame.gameMap;
+
+    // Maintain a 2-space buffer between the cursor and the edge of the visible map, when possible.
+    int buffer = 2; // Note the cursor takes up one space, so we will have to add 1 when checking the right/bottom border.
+    if( (mapViewX + mapTilesToDrawX) < (curX + buffer+1) )
+    {
+      mapViewX = curX - mapTilesToDrawX + buffer+1; // Move our view to keep the cursor in sight.
+      // Make sure we don't try to move the view off the map.
+      if( mapViewX + mapTilesToDrawX > gameMap.mapWidth ) mapViewX = gameMap.mapWidth - mapTilesToDrawX;
+    }
+    else if( (curX - buffer) < mapViewX )
+    {
+      mapViewX = curX - buffer;
+      if( mapViewX < 0 ) mapViewX = 0;
+    }
+
+    // Now do the y-axis.
+    if( (curY + buffer+1) >= (mapViewY + mapTilesToDrawY) )
+    {
+      mapViewY = curY - mapTilesToDrawY + buffer+1;
+      if( mapViewY + mapTilesToDrawY > gameMap.mapHeight ) mapViewY = gameMap.mapHeight - mapTilesToDrawY;
+    }
+    else if( (curY - buffer) < mapViewY )
+    {
+      mapViewY = curY - buffer;
+      if( mapViewY < 0 ) mapViewY = 0;
+    }
+
+    // Recalculate the precise draw location for the view.
+    if( mapViewDrawX != mapViewX )
+    {
+      mapViewDrawX += SpriteUIUtils.calculateSlideAmount(mapViewDrawX, mapViewX);
+    }
+    if( mapViewDrawY != mapViewY )
+    {
+      mapViewDrawY += SpriteUIUtils.calculateSlideAmount(mapViewDrawY, mapViewY);
+    }
   }
 
   @Override // from MapView
@@ -259,20 +348,26 @@ public class SpriteMapView extends MapView
   private void drawUnitsAndMapObjects(Graphics g)
   {
     // Draw terrain objects and units in order so they overlap correctly.
-    for( int y = 0; y < myGame.gameMap.mapHeight; ++y )
+    // Only bother iterating over the visible map space (plus a 1-square border).
+    for( int y = mapViewY-1; y < mapViewY+mapTilesToDrawY+1; ++y )
     {
-      for( int x = 0; x < myGame.gameMap.mapWidth; ++x )
+      for( int x = mapViewX-1; x < mapViewX+mapTilesToDrawX+1; ++x )
       {
-        // Draw any terrain object here, followed by any unit present.
-        mapArtist.drawTerrainObject(g, x, y);
-        if( !myGame.gameMap.isLocationEmpty(x, y) )
+        // Since we are trying to draw a ring of objects around the viewable space to
+        // ensure smooth scrolling, make sure we aren't running of the edge of the map.
+        if(myGame.gameMap.isLocationValid(x, y))
         {
-          Unit u = myGame.gameMap.getLocation(x, y).getResident();
-          // If an action is being considered, draw the active unit later, not now.
-          GameAction currentAction = mapController.getContemplatedAction();
-          if( (null == currentAction) || (u != currentAction.getActor()) )
+          // Draw any terrain object here, followed by any unit present.
+          mapArtist.drawTerrainObject(g, x, y);
+          if( !myGame.gameMap.isLocationEmpty(x, y) )
           {
-            unitArtist.drawUnit(g, u, u.x, u.y, animIndex);
+            Unit u = myGame.gameMap.getLocation(x, y).getResident();
+            // If an action is being considered, draw the active unit later, not now.
+            GameAction currentAction = mapController.getContemplatedAction();
+            if( (null == currentAction) || (u != currentAction.getActor()) )
+            {
+              unitArtist.drawUnit(g, u, u.x, u.y, animIndex);
+            }
           }
         }
       }

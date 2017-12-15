@@ -45,7 +45,7 @@ public class SpriteMenuArtist
   /**
    * Draw the menu, centered around the location of interest.
    */
-  public void drawMenu(Graphics g)
+  public void drawMenu(Graphics g, int mapViewX, int mapViewY)
   {
     InGameMenu<? extends Object> drawMenu = myView.getCurrentGameMenu();
     if( drawMenu != null )
@@ -62,15 +62,15 @@ public class SpriteMenuArtist
       int menuWidth = getMenuTextWidthPx(myCurrentMenuStrings) + menuHBuffer * 2;
       int menuHeight = getMenuTextHeightPx(myCurrentMenuStrings) + menuVBuffer * 2;
 
-      // Center the menu over the current action target location.
+      // Center the menu over the current action target location, accounting for the position of the map view.
       int viewTileSize = myView.getTileSize(); // Grab this value for convenience.
-      int drawX = myGame.getCursorX() * viewTileSize - (menuWidth / 2 - viewTileSize / 2);
-      int drawY = myGame.getCursorY() * viewTileSize - (menuHeight / 2 - viewTileSize / 2);
+      int drawX = myGame.getCursorX() * viewTileSize - (menuWidth / 2 - viewTileSize / 2);// - mapViewX;
+      int drawY = myGame.getCursorY() * viewTileSize - (menuHeight / 2 - viewTileSize / 2);// - mapViewY;
 
       // Make sure the menu is fully contained in viewable space.
       Dimension dims = SpriteOptions.getScreenDimensions();
-      drawX = (drawX < 0) ? 0 : (drawX > (dims.width - menuWidth)) ? (dims.width - menuWidth) : drawX;
-      drawY = (drawY < 0) ? 0 : (drawY > (dims.height - menuHeight)) ? (dims.height - menuHeight) : drawY;
+      drawX = (drawX < mapViewX) ? mapViewX : (drawX > (mapViewX+dims.width - menuWidth)) ? (mapViewX+dims.width - menuWidth) : drawX;
+      drawY = (drawY < mapViewY) ? mapViewY : (drawY > (mapViewY+dims.height - menuHeight)) ? (mapViewY+dims.height - menuHeight) : drawY;
 
       // Draw the nice box for our text.
       drawMenuFrame(g, drawX, drawY, menuWidth, menuHeight);

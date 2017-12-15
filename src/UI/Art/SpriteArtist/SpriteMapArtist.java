@@ -33,23 +33,23 @@ public class SpriteMapArtist
     myView = view;
 
     drawScale = SpriteOptions.getDrawScale();
-    tileSize = SpriteLibrary.baseSpriteSize * drawScale;
+    tileSize = myView.getTileSize();
 
     // TODO: make this obsolete.
     backupArtist = new FillRectMapArtist(myGame);
     backupArtist.setView(myView);
 
-    baseMapImage = new BufferedImage(gameMap.mapWidth * myView.getTileSize(), gameMap.mapHeight * myView.getTileSize(),
+    baseMapImage = new BufferedImage(gameMap.mapWidth * tileSize, gameMap.mapHeight * tileSize,
         BufferedImage.TYPE_INT_RGB);
 
     // Build base map image.
     buildMapImage();
   }
 
-  public void drawBaseTerrain(Graphics g)
+  public void drawBaseTerrain(Graphics g, int viewX, int viewY, int viewW, int viewH)
   {
-    // TODO: Change what/where we draw based on camera location.
-    g.drawImage(baseMapImage, 0, 0, null);
+    // First four coords are the dest x,y,x2,y2. Next four are the source coords.
+    g.drawImage(baseMapImage, viewX, viewY, viewX+viewW, viewY+viewH, viewX, viewY, viewX+viewW, viewY+viewH, null);
   }
 
   public void drawTerrainObject(Graphics g, int x, int y)
@@ -59,12 +59,15 @@ public class SpriteMapArtist
     spriteSet.drawTerrainObject(g, gameMap, x, y, drawScale);
   }
 
-  public void drawCursor(Graphics g, GameAction currentAction )
+  public void drawCursor(Graphics g, GameAction currentAction, int drawX, int drawY )
   {
     if( null == currentAction || currentAction.getActionType() == GameAction.ActionType.INVALID )
     {
+      // TODO: Get an actual map cursor.
       // Draw the default map cursor.
-      backupArtist.drawCursor(g);
+      final Color COLOR_CURSOR = new Color(253, 171, 77, 200);
+      g.setColor(COLOR_CURSOR);
+      g.fillRect(drawX * tileSize, drawY * tileSize, tileSize, tileSize);
     }
     else
     {
