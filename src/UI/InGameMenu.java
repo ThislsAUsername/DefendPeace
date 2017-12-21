@@ -6,7 +6,7 @@ import Engine.OptionSelector;
 
 /**
  * Provides a generic interface for an in-game menu. The template parameter can be used to
- * make this class work with any type of options. Further flexibility can be achieved by
+ * make this class work with any type of option. Further flexibility can be achieved by
  * subclassing (e.g. if you want custom formatting of the menu-option text).
  * @param <T>
  */
@@ -90,7 +90,7 @@ public class InGameMenu<T>
 
   /**
    * Move UP or DOWN the menu options. The internal OptionSelector allows
-   * wrap-around if the index goes to far.
+   * wrap-around if the index goes too far.
    * @param action
    */
   public void handleMenuInput(InputHandler.InputAction action)

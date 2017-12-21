@@ -4,19 +4,19 @@ import java.util.Vector;
 
 import Engine.GameAction.ActionType;
 import Terrain.Environment.Terrains;
+import Units.MoveTypes.Flight;
 import Units.MoveTypes.MoveType;
-import Units.MoveTypes.Tread;
 
-public class APCModel extends UnitModel
+public class TCopterModel extends UnitModel
 {
 
-  private static final MoveType moveType = new Tread();
+  private static final MoveType moveType = new Flight();
   private static final ActionType[] actions = { ActionType.UNLOAD, ActionType.WAIT };
-  private static final Terrains[] healHabs = { Terrains.CITY, Terrains.FACTORY, Terrains.HQ };
+  private static final Terrains[] healHabs = { Terrains.AIRPORT };
 
-  public APCModel()
+  public TCopterModel()
   {
-    super("APC", UnitEnum.APC, 5000, 70, 0, 6, moveType, actions, healHabs, null);
+    super("T Copter", UnitEnum.T_COPTER, 5000, 99, 2, 6, moveType, actions, healHabs, null);
     holdingCapacity = 1;
     UnitEnum[] carryable = { Units.UnitModel.UnitEnum.INFANTRY, Units.UnitModel.UnitEnum.MECH };
     holdables = new Vector<UnitEnum>(carryable.length);

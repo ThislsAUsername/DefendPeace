@@ -82,25 +82,22 @@ public class Unit
   }
 
   /**
-   * @return the damage this unit can do to the target from its current location.
-   */
-  public double getDamage(Unit target)
-  {
-    int range = Math.abs(x - target.x) + Math.abs(y - target.y);
-    return getDamage(target, range);
-  }
-
-  /**
    * @return the base damage this unit would do against the specified target,
-   * if this unit were 'range' spaces away from it.
+   * at the specified range, based on whether it will move before striking
+   * Chooses the first weapon on the list that can deal damage.
    */
-  public double getDamage(Unit target, int range )
+  public double getBaseDamage(UnitModel target, int range, boolean moved)
   {
+    // if we have no weapons, we can't hurt things
     if( weapons == null )
       return 0;
-    Weapon chosen = null;
-    for( int i = 0; i < weapons.length && chosen == null; i++ )
+    for( int i = 0; i < weapons.length; i++ )
     {
+      // If the weapon isn't mobile, we shouldn't be able to fire if we moved.
+      if( moved && !weapons[i].model.canFireAfterMoving )
+      {
+        continue;
+      }
       double damage = weapons[i].getDamage(target, range);
       if( damage != 0 )
       {
@@ -248,8 +245,8 @@ public class Unit
             }
             break;
           default:
-            System.out.println("getPossibleActions: Invalid action in model's possibleActions[" + i + "]: "
-                + model.possibleActions[i]);
+            System.out
+                .println("getPossibleActions: Invalid action in model's possibleActions[" + i + "]: " + model.possibleActions[i]);
         }
       }
     }

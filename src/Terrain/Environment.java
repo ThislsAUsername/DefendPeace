@@ -8,7 +8,7 @@ public class Environment
 {
   public enum Terrains
   {
-    GRASS, FOREST, MOUNTAIN, DUNES, ROAD, CITY, FACTORY, HQ, SHOAL, SEA, REEF
+    GRASS, FOREST, MOUNTAIN, DUNES, ROAD, CITY, FACTORY, AIRPORT, SEAPORT, HQ, LAB, SHOAL, SEA, REEF
   };
 
   public enum Weathers

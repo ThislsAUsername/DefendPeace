@@ -8,9 +8,12 @@ public class IMapBuilder
   protected static final Terrains CT = Terrains.CITY;
   protected static final Terrains DN = Terrains.DUNES;
   protected static final Terrains FC = Terrains.FACTORY;
+  protected static final Terrains AP = Terrains.AIRPORT;
+  protected static final Terrains SP = Terrains.SEAPORT;
   protected static final Terrains FR = Terrains.FOREST;
   protected static final Terrains GR = Terrains.GRASS;
   protected static final Terrains HQ = Terrains.HQ;
+  protected static final Terrains LB = Terrains.LAB;
   protected static final Terrains MT = Terrains.MOUNTAIN;
   protected static final Terrains RF = Terrains.REEF;
   protected static final Terrains RD = Terrains.ROAD;

@@ -11,6 +11,7 @@ public class BattleInstance
   private final int attackerX, attackerY, defenderX, defenderY;
   private GameMap gameMap;
   private boolean canCounter;
+  private boolean attackerMoved;
   int battleRange;
 
   /**
@@ -31,9 +32,10 @@ public class BattleInstance
     defenderX = defender.x; // This variable is technically not necessary, but provides consistent names with attackerX/Y.
     defenderY = defender.y;
     gameMap = map;
+    attackerMoved = pAttacker.x != attackerX || pAttacker.y != attackerY;
     // Only attacks at point-blank range can be countered
     battleRange = Math.abs(attackerX - defenderX) + Math.abs(attackerY - defenderY);
-    canCounter = (battleRange == 1) && (defender.getDamage(attacker, battleRange) > 0);
+    canCounter = (battleRange == 1) && (defender.getBaseDamage(attacker.model, battleRange, false) > 0);
   }
 
   /**
@@ -46,7 +48,7 @@ public class BattleInstance
     double attackerHPLoss = 0;
 
     // Set up our scenario.
-    BattleParams attackInstance = new BattleParams( attacker, defender, battleRange, gameMap.getEnvironment(defenderX, defenderY) );
+    BattleParams attackInstance = new BattleParams( attacker, defender, battleRange, attackerMoved, gameMap.getEnvironment(defenderX, defenderY) );
 
     // Last-minute adjustments.
     attacker.CO.applyCombatModifiers(this); // TODO: pass BattleParams instead?
@@ -58,7 +60,7 @@ public class BattleInstance
     if( canCounter && (defender.getHP() > defenderHPLoss) )
     {
       // New battle instance with defender counter-attacking.
-      BattleParams defendInstance = new BattleParams( defender, attacker, battleRange, gameMap.getEnvironment(attackerX, attackerY) );
+      BattleParams defendInstance = new BattleParams( defender, attacker, battleRange, false, gameMap.getEnvironment(attackerX, attackerY) );
       defendInstance.attackerHP -= defenderHPLoss; // Account for the first attack's damage to the now-attacker.
 
       // TODO: Let the COs take another pass at modifying things?
@@ -83,9 +85,9 @@ public class BattleInstance
     public double defenseFactor;
     public double terrainDefense;
 
-    public BattleParams(Unit attacker, Unit defender, int range, Environment battleground)
+    public BattleParams(Unit attacker, Unit defender, int battleRange, boolean moved, Environment battleground)
     {
-      baseDamage = attacker.getDamage(defender, range);
+      baseDamage = attacker.getBaseDamage(defender.model, battleRange, moved);
       attackFactor = attacker.model.getDamageRatio();
       attackerHP = attacker.getHP();
       defenseFactor = defender.model.getDefenseRatio();

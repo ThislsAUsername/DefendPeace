@@ -25,7 +25,7 @@ public class COMovementModifier implements COModifier
   @Override
   public void apply(Commander commander)
   {
-    for( UnitModel um : commander.unitModels )
+    for( UnitModel um : commander.landModels )
     {
       if( typesToModify.contains(um.type) )
       {
@@ -42,7 +42,7 @@ public class COMovementModifier implements COModifier
   @Override
   public void revert(Commander commander)
   {
-    for( UnitModel um : commander.unitModels )
+    for( UnitModel um : commander.landModels )
     {
       if( typesToModify.contains(um.type) )
       {

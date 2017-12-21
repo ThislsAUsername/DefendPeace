@@ -4,10 +4,11 @@ public abstract class WeaponModel
 {
   protected enum WeaponType
   {
-    INFANTRYMGUN, MECHZOOKA, MECHMGUN, RECONMGUN, TANKCANNON, TANKMGUN, MD_TANKCANNON, MD_TANKMGUN, NEOCANNON, NEOMGUN, ARTILLERYCANNON, ROCKETS, ANTI_AIRMGUN, MISSILES, FIGHTERMISSILES, BOMBERBOMBS, B_COPTERROCKETS, B_COPTERMGUN, BATTLESHIPCANNON, CRUISERTORPEDOES, CRUISERMGUN, SUBTORPEDOES
+    INFANTRYMGUN, MECHZOOKA, MECHMGUN, RECONMGUN, TANKCANNON, TANKMGUN, MD_TANKCANNON, MD_TANKMGUN, NEOCANNON, NEOMGUN, ARTILLERYCANNON, ROCKETS, ANTI_AIRMGUN, MOBILESAM, FIGHTERMISSILES, BOMBERBOMBS, B_COPTERROCKETS, B_COPTERMGUN, BATTLESHIPCANNON, CRUISERTORPEDOES, CRUISERMGUN, SUBTORPEDOES
   };
 
   public WeaponType type;
+  public boolean canFireAfterMoving;
   public int maxAmmo;
   public int minRange;
   public int maxRange;
@@ -16,6 +17,14 @@ public abstract class WeaponModel
   {
     this.type = type;
     maxAmmo = ammo;
+    if( minRange > 1 )
+    {
+      canFireAfterMoving = false;
+    }
+    else
+    {
+      canFireAfterMoving = true;
+    }
     this.minRange = minRange;
     this.maxRange = maxRange;
   }

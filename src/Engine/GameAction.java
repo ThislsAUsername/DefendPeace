@@ -150,7 +150,7 @@ public class GameAction
 
   /**
    * Evaluate the action and construct the MapEvents necessary to render any changes in the game.
-   * IF a GameAction is a castle, MapEvents are the bricks that compose it.
+   * If a GameAction is a castle, MapEvents are the bricks that compose it.
    * @return A MapEventSequence containing all MapEvents caused by this GameAction.
    */
   public GameEventQueue getGameEvents( GameMap gameMap )
@@ -185,8 +185,9 @@ public class GameAction
         Unit unitTarget = gameMap.getLocation(actX, actY).getResident();
 
         // Make sure this is a valid battle before creating the event.
+        boolean moved = unitActor.x != moveX || unitActor.y != moveY;
         int range = Math.abs(moveX - unitTarget.x) + Math.abs(moveY - unitTarget.y);
-        if( unitTarget != null && (unitActor.getDamage(unitTarget, range) > 0) )
+        if( unitTarget != null && (unitActor.getBaseDamage(unitTarget.model, range, moved) > 0) )
         {
           sequence.add( new MoveEvent(unitActor, movePath) );
           BattleEvent event = new BattleEvent(unitActor, unitTarget, moveX, moveY, gameMap);

@@ -8,9 +8,9 @@ import UI.Art.Animation.GameAnimation;
 import Units.Unit;
 
 /**
- * AttackEvent handles a single battle event between two units. The outcome is
- * calculated as soon as the AttackEvent is created; the result is applied when
- * performEvent is called. The results can be fetched
+ * BattleEvent handles a single battle event between two units. The outcome is
+ * calculated as soon as the BattleEvent is created; the result is applied when
+ * performEvent is called. The results can be seen via the provided functions.
  */
 public class BattleEvent implements GameEvent
 {
