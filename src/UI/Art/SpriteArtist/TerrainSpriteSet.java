@@ -262,7 +262,10 @@ public class TerrainSpriteSet
       case CITY:
       case FACTORY:
       case FOREST:
+      case AIRPORT:
+      case SEAPORT:
       case HQ:
+      case LAB:
       case MOUNTAIN:
         return true;
       case DUNES:
@@ -305,8 +308,11 @@ public class TerrainSpriteSet
       case CITY:
       case DUNES:
       case FACTORY:
+      case AIRPORT:
+      case SEAPORT:
       case FOREST:
       case HQ:
+      case LAB:
       case MOUNTAIN:
       case GRASS:
       case ROAD:
