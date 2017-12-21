@@ -3,6 +3,7 @@ package CommandingOfficers;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.AntiAirModel;
@@ -31,7 +32,9 @@ public class Commander
 {
   public final CommanderInfo coInfo;
   public ArrayList<Unit> units;
-  public UnitModel[] unitModels;
+  public ArrayList<UnitModel> landModels;
+  public ArrayList<UnitModel> seaModels;
+  public ArrayList<UnitModel> airModels;
   public ArrayList<COModifier> modifiers;
   public Color myColor;
   public static final int DEFAULTSTARTINGMONEY = 10000;
@@ -44,22 +47,27 @@ public class Commander
   {
     coInfo = info;
     // TODO Obviously we don't want to hard-code the UnitModel array.
-    unitModels = new UnitModel[15];
-    unitModels[0] = new InfantryModel();
-    unitModels[1] = new MechModel();
-    unitModels[2] = new APCModel();
-    unitModels[3] = new ArtilleryModel();
-    unitModels[4] = new ReconModel();
-    unitModels[5] = new TankModel();
-    unitModels[6] = new MDTankModel();
-    unitModels[7] = new NeotankModel();
-    unitModels[8] = new RocketsModel();
-    unitModels[9] = new AntiAirModel();
-    unitModels[10] = new MobileSAMModel();
-    unitModels[11] = new LanderModel();
-    unitModels[12] = new CruiserModel();
-    unitModels[13] = new SubModel();
-    unitModels[14] = new BattleshipModel();
+    landModels = new ArrayList<UnitModel>(11);
+    landModels.add(new InfantryModel());
+    landModels.add(new MechModel());
+    landModels.add(new APCModel());
+    landModels.add(new ArtilleryModel());
+    landModels.add(new ReconModel());
+    landModels.add(new TankModel());
+    landModels.add(new MDTankModel());
+    landModels.add(new NeotankModel());
+    landModels.add(new RocketsModel());
+    landModels.add(new AntiAirModel());
+    landModels.add(new MobileSAMModel());
+
+    seaModels = new ArrayList<UnitModel>(4);
+    seaModels.add(new LanderModel());
+    seaModels.add(new CruiserModel());
+    seaModels.add(new SubModel());
+    seaModels.add(new BattleshipModel());
+
+    airModels = new ArrayList<UnitModel>(0);
+    
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
     money = DEFAULTSTARTINGMONEY;
@@ -114,11 +122,11 @@ public class Commander
   {
     UnitModel um = null;
 
-    for( int i = 0; i < unitModels.length; ++i )
+    for( int i = 0; i < landModels.size(); ++i )
     {
-      if( unitModels[i].type == unitType )
+      if( landModels.get(i).type == unitType )
       {
-        um = unitModels[i];
+        um = landModels.get(i);
         break;
       }
     }
@@ -128,13 +136,8 @@ public class Commander
 
   public ArrayList<UnitModel> getShoppingList()
   { // TODO: will eventually need to take in terrainType so it can separate out air/ground/navy
-    ArrayList<UnitModel> arrList = new ArrayList<UnitModel>();
-    for( int i = 0; i < unitModels.length; i++ )
-    {
-      arrList.add(unitModels[i]);
-    }
 
-    return arrList;
+    return landModels;
   }
 
   public ArrayList<String> getReadyAbilities()
