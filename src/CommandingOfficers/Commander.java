@@ -8,13 +8,17 @@ import Terrain.Location;
 import Units.AntiAirModel;
 import Units.APCModel;
 import Units.ArtilleryModel;
+import Units.BattleshipModel;
+import Units.CruiserModel;
 import Units.InfantryModel;
+import Units.LanderModel;
 import Units.MDTankModel;
 import Units.MechModel;
 import Units.MobileSAMModel;
 import Units.NeotankModel;
 import Units.ReconModel;
 import Units.RocketsModel;
+import Units.SubModel;
 import Units.TankModel;
 import Units.Unit;
 import Units.UnitModel;
@@ -40,7 +44,7 @@ public class Commander
   {
     coInfo = info;
     // TODO Obviously we don't want to hard-code the UnitModel array.
-    unitModels = new UnitModel[11];
+    unitModels = new UnitModel[15];
     unitModels[0] = new InfantryModel();
     unitModels[1] = new MechModel();
     unitModels[2] = new APCModel();
@@ -52,6 +56,10 @@ public class Commander
     unitModels[8] = new RocketsModel();
     unitModels[9] = new AntiAirModel();
     unitModels[10] = new MobileSAMModel();
+    unitModels[11] = new LanderModel();
+    unitModels[12] = new CruiserModel();
+    unitModels[13] = new SubModel();
+    unitModels[14] = new BattleshipModel();
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
     money = DEFAULTSTARTINGMONEY;

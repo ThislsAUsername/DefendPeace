@@ -384,7 +384,7 @@ public class SpriteLibrary
       case MECH:
         spriteFile = "res/unit/mech_map.png";
         break;
-      case MISSILES:
+      case MOBILESAM:
         break;
       case RECON:
         break;
