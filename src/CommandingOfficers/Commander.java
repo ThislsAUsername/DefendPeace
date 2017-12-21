@@ -9,8 +9,11 @@ import Terrain.Location;
 import Units.AntiAirModel;
 import Units.APCModel;
 import Units.ArtilleryModel;
+import Units.BCopterModel;
 import Units.BattleshipModel;
+import Units.BomberModel;
 import Units.CruiserModel;
+import Units.FighterModel;
 import Units.InfantryModel;
 import Units.LanderModel;
 import Units.MDTankModel;
@@ -20,6 +23,7 @@ import Units.NeotankModel;
 import Units.ReconModel;
 import Units.RocketsModel;
 import Units.SubModel;
+import Units.TCopterModel;
 import Units.TankModel;
 import Units.Unit;
 import Units.UnitModel;
@@ -67,7 +71,10 @@ public class Commander
     seaModels.add(new BattleshipModel());
 
     airModels = new ArrayList<UnitModel>(0);
-    airModels.add(new APCModel());
+    airModels.add(new TCopterModel());
+    airModels.add(new BCopterModel());
+    airModels.add(new FighterModel());
+    airModels.add(new BomberModel());
     
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
