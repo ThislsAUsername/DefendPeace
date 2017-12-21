@@ -86,8 +86,8 @@ def indexToTerrainCode(x):
 		33:  '  RF',#reef
 		34:  '  CT',#city
 		35:  '  FC',#base/factory
-		36:  '  XX',#airport
-		37:  '  XX',#port
+		36:  '  AP',#airport
+		37:  '  SP',#port
 		38:  ' 0CT',
 		39:  ' 0FC',
 		40:  ' 0XX',
@@ -144,16 +144,16 @@ def indexToTerrainCode(x):
 		114: '  XX',#VPipe seam
 		115: '  XX',#HPipe seam broken
 		116: '  XX',#VPipe seam broken
-		117: ' 8XX',#airport
+		117: ' 8AP',#airport
 		118: ' 8FC',#base/factory
 		119: ' 8CT',#city
 		120: ' 8HQ',#HQ
-		121: ' 8XX',#port
-		122: ' 9XX',
+		121: ' 8SP',#port
+		122: ' 9AP',
 		123: ' 9FC',
 		124: ' 9CT',
 		125: ' 9HQ',
-		126: ' 9XX',
+		126: ' 9SP',
 		127: ' 8XX',#Com Towers
 		128: ' 4XX',
 		129: ' 1XX',
@@ -165,45 +165,45 @@ def indexToTerrainCode(x):
 		135: ' 5XX',
 		136: ' 3XX',
 		137: ' 6XX',
-		138: ' 8XX',#Labs
-		139: ' 4XX',
-		140: ' 1XX',
-		141: ' 7XX',
-		142: ' 2XX',
-		143: ' 6XX',
-		144: ' 9XX',
-		145: '  XX',
-		146: ' 0XX',
-		147: ' 5XX',
-		148: ' 3XX',
-		149: '10XX',#airport
+		138: ' 8LB',#Labs
+		139: ' 4LB',
+		140: ' 1LB',
+		141: ' 7LB',
+		142: ' 2LB',
+		143: ' 6LB',
+		144: ' 9LB',
+		145: '  LB',
+		146: ' 0LB',
+		147: ' 5LB',
+		148: ' 3LB',
+		149: '10AP',#airport
 		150: '10FC',#base/factory
 		151: '10CT',#city
 		152: '10XX',#Com Tower
 		153: '10HQ',#HQ
-		154: '10XX',#lab
-		155: '10XX',#port
-		156: '11XX',
+		154: '10LB',#lab
+		155: '10SP',#port
+		156: '11AP',
 		157: '11FC',
 		158: '11CT',
 		159: '11XX',
 		160: '11HQ',
-		161: '11XX',
-		162: '11XX',
-		163: '12XX',
+		161: '11LB',
+		162: '11SP',
+		163: '12AP',
 		164: '12FC',
 		165: '12CT',
 		166: '12XX',
 		167: '12HQ',
-		168: '12XX',
-		169: '12XX',
-		170: '13XX',
+		168: '12LB',
+		169: '12SP',
+		170: '13AP',
 		171: '13FC',
 		172: '13CT',
 		173: '13XX',
 		174: '13HQ',
-		175: '13XX',
-		176: '13XX',
+		175: '13LB',
+		176: '13SP',
 	}.get(x, '  XX')    # '  XX' is default if x not found
 	
 	
