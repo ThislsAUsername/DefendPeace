@@ -67,6 +67,7 @@ public class Commander
     seaModels.add(new BattleshipModel());
 
     airModels = new ArrayList<UnitModel>(0);
+    airModels.add(new APCModel());
     
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
@@ -134,10 +135,17 @@ public class Commander
     return um;
   }
 
-  public ArrayList<UnitModel> getShoppingList()
+  public ArrayList<UnitModel> getShoppingList(Terrains buyLocation)
   { // TODO: will eventually need to take in terrainType so it can separate out air/ground/navy
-
-    return landModels;
+    switch(buyLocation)
+    {
+      case AIRPORT:
+        return airModels;
+      case SEAPORT:
+        return seaModels;
+      default:
+        return landModels;
+    }
   }
 
   public ArrayList<String> getReadyAbilities()

@@ -3,6 +3,7 @@ package Engine;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.Environment;
+import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.Location;
 import UI.CO_InfoMenu;
@@ -37,14 +38,17 @@ public class MapController implements IController
   {
     CO_INFO, CO_ABILITY, QUIT_GAME, END_TURN
   };
-  private MetaAction[] metaActionsAbility = {MetaAction.CO_INFO, MetaAction.CO_ABILITY, MetaAction.QUIT_GAME, MetaAction.END_TURN};
-  private MetaAction[] metaActionsNoAbility = {MetaAction.CO_INFO, MetaAction.QUIT_GAME, MetaAction.END_TURN};
+
+  private MetaAction[] metaActionsAbility = { MetaAction.CO_INFO, MetaAction.CO_ABILITY, MetaAction.QUIT_GAME,
+      MetaAction.END_TURN };
+  private MetaAction[] metaActionsNoAbility = { MetaAction.CO_INFO, MetaAction.QUIT_GAME, MetaAction.END_TURN };
 
   private enum ConfirmExitEnum
   {
     EXIT_TO_MAIN_MENU, QUIT_APPLICATION
   };
-  private ConfirmExitEnum[] confirmExitOptions = {ConfirmExitEnum.EXIT_TO_MAIN_MENU, ConfirmExitEnum.QUIT_APPLICATION};
+
+  private ConfirmExitEnum[] confirmExitOptions = { ConfirmExitEnum.EXIT_TO_MAIN_MENU, ConfirmExitEnum.QUIT_APPLICATION };
 
   private InputMode inputMode;
 
@@ -62,16 +66,16 @@ public class MapController implements IController
     myGame = game;
     myView = view;
     myView.setController(this);
-    productionMenu = new InGameProductionMenu( myGame.commanders[0].getShoppingList() ); // Just init with a valid default.
+    productionMenu = new InGameProductionMenu(myGame.commanders[0].getShoppingList(Terrains.FACTORY)); // Just init with a valid default.
     GameAction.ActionType[] defaultAction = { GameAction.ActionType.WAIT }; // Again, just a valid default. Will be replaced when needed.
-    actionMenu = new InGameMenu<GameAction.ActionType>( defaultAction );
+    actionMenu = new InGameMenu<GameAction.ActionType>(defaultAction);
     metaActionMenu = new InGameMenu<MetaAction>(metaActionsNoAbility);
     coAbilityMenu = null;
     confirmExitMenu = new InGameMenu<ConfirmExitEnum>(confirmExitOptions);
     inputMode = InputMode.MAP;
     isGameOver = false;
     myGame.setCursorLocation(6, 5);
-    coInfoMenu = new CO_InfoMenu( myGame.commanders.length );
+    coInfoMenu = new CO_InfoMenu(myGame.commanders.length);
   }
 
   /**
@@ -110,10 +114,10 @@ public class MapController implements IController
         exitMap = handleConfirmExitMenuInput(input);
         break;
       case CO_INFO:
-        if( coInfoMenu.handleInput( input ) )
+        if( coInfoMenu.handleInput(input) )
         {
           isInCoInfoMenu = false;
-          changeInputMode( InputMode.METAACTION );
+          changeInputMode(InputMode.METAACTION);
         }
         break;
       case ANIMATION:
@@ -175,7 +179,9 @@ public class MapController implements IController
             changeInputMode(InputMode.METAACTION);
           }
         }
-        else if( Environment.Terrains.FACTORY == loc.getEnvironment().terrainType && loc.getOwner() == myGame.activeCO )
+        else if( (Environment.Terrains.FACTORY == loc.getEnvironment().terrainType
+            || Environment.Terrains.AIRPORT == loc.getEnvironment().terrainType
+            || Environment.Terrains.SEAPORT == loc.getEnvironment().terrainType) && loc.getOwner() == myGame.activeCO )
         {
           changeInputMode(InputMode.PRODUCTION);
         }
@@ -279,12 +285,12 @@ public class MapController implements IController
     switch (input)
     {
       case ENTER:
-        currentAction.setActionType( actionMenu.getSelectedOption() );
+        currentAction.setActionType(actionMenu.getSelectedOption());
 
         // If the action is completely constructed, execute it, else get the missing info.
         if( currentAction.isReadyToExecute() )
         {
-          executeGameAction( currentAction );
+          executeGameAction(currentAction);
         }
         else
         {
@@ -330,7 +336,7 @@ public class MapController implements IController
 
           if( currentAction.isReadyToExecute() )
           {
-            executeGameAction( currentAction );
+            executeGameAction(currentAction);
           }
           else
           {
@@ -399,24 +405,24 @@ public class MapController implements IController
         MetaAction action = metaActionMenu.getSelectedOption();
 
         // Nested switch statement woo!
-        switch( action )
+        switch (action)
         {
           case CO_INFO:
             isInCoInfoMenu = true;
-            changeInputMode( InputMode.CO_INFO );
+            changeInputMode(InputMode.CO_INFO);
             break;
           case CO_ABILITY:
-            changeInputMode( InputMode.CO_ABILITYMENU );
+            changeInputMode(InputMode.CO_ABILITYMENU);
             break;
           case END_TURN:
             myGame.turn();
             changeInputMode(InputMode.MAP);
             break;
           case QUIT_GAME:
-            changeInputMode( InputMode.CONFIRMEXIT );
+            changeInputMode(InputMode.CONFIRMEXIT);
             break;
-            default:
-              System.out.println( "WARNING! Unknown MetaActionEnum " + action );
+          default:
+            System.out.println("WARNING! Unknown MetaActionEnum " + action);
         }
 
         break;
@@ -443,7 +449,7 @@ public class MapController implements IController
       case ENTER:
         // Get the chosen ability and let it do its thing.
         String abilityName = coAbilityMenu.getSelectedOption();
-        myGame.activeCO.doAbility( abilityName, myGame );
+        myGame.activeCO.doAbility(abilityName, myGame);
 
         changeInputMode(InputMode.MAP);
 
@@ -507,8 +513,8 @@ public class MapController implements IController
     switch (inputMode)
     {
       case ACTION:
-        Utils.findActionableLocations(currentAction.getActor(), currentAction.getActionType(),
-            currentAction.getMoveX(), currentAction.getMoveY(), myGame.gameMap);
+        Utils.findActionableLocations(currentAction.getActor(), currentAction.getActionType(), currentAction.getMoveX(),
+            currentAction.getMoveY(), myGame.gameMap);
         boolean set = false;
         for( int w = 0; w < myGame.gameMap.mapWidth; ++w )
         {
@@ -528,8 +534,8 @@ public class MapController implements IController
         break;
       case ACTIONMENU:
         myGame.gameMap.clearAllHighlights();
-        actionMenu.resetOptions( currentAction.getActor().getPossibleActions(
-            myGame.gameMap, currentAction.getMoveX(), currentAction.getMoveY()));
+        actionMenu.resetOptions(
+            currentAction.getActor().getPossibleActions(myGame.gameMap, currentAction.getMoveX(), currentAction.getMoveY()));
         currentMenu = actionMenu;
         myGame.setCursorLocation(currentAction.getMoveX(), currentAction.getMoveY());
         currentAction.setActionType(GameAction.ActionType.INVALID); // We haven't chosen an action yet.
@@ -559,23 +565,24 @@ public class MapController implements IController
         break;
       case PRODUCTION:
         myGame.gameMap.clearAllHighlights();
-        productionMenu.resetOptions( myGame.activeCO.getShoppingList() );
+        productionMenu.resetOptions(
+            myGame.activeCO.getShoppingList(myGame.gameMap.getEnvironment(myGame.getCursorX(), myGame.getCursorY()).terrainType));
         currentMenu = productionMenu;
         break;
       case METAACTION:
         myGame.gameMap.clearAllHighlights();
         if( myGame.activeCO.getReadyAbilities().size() > 0 )
         {
-          metaActionMenu.resetOptions( metaActionsAbility );
+          metaActionMenu.resetOptions(metaActionsAbility);
         }
         else
         {
-          metaActionMenu.resetOptions( metaActionsNoAbility );
+          metaActionMenu.resetOptions(metaActionsNoAbility);
         }
         currentMenu = metaActionMenu;
         break;
       case CO_ABILITYMENU:
-        coAbilityMenu = new InGameMenu<String>( myGame.activeCO.getReadyAbilities() );
+        coAbilityMenu = new InGameMenu<String>(myGame.activeCO.getReadyAbilities());
         currentMenu = coAbilityMenu;
         break;
       case CONFIRMEXIT:
@@ -631,7 +638,7 @@ public class MapController implements IController
   private void executeGameAction(GameAction action)
   {
     // Compile the GameAction to its component events.
-    GameEventQueue events = action.getGameEvents( myGame.gameMap );
+    GameEventQueue events = action.getGameEvents(myGame.gameMap);
 
     // Send the events to the animator. They will be applied/executed in animationEnded().
     changeInputMode(InputMode.ANIMATION);
@@ -648,7 +655,7 @@ public class MapController implements IController
     return currentMovePath;
   }
 
-  public void animationEnded( GameEvent event, boolean animEventQueueIsEmpty )
+  public void animationEnded(GameEvent event, boolean animEventQueueIsEmpty)
   {
     event.performEvent(myGame.gameMap);
 
@@ -657,7 +664,7 @@ public class MapController implements IController
     {
       // Count the number of COs that are left.
       int activeNum = 0;
-      for( int i = 0; i < myGame.commanders.length; ++i)
+      for( int i = 0; i < myGame.commanders.length; ++i )
       {
         if( !myGame.commanders[i].isDefeated )
         {
@@ -666,7 +673,7 @@ public class MapController implements IController
       }
 
       // If fewer than two COs yet survive, the game is over.
-      if(activeNum < 2)
+      if( activeNum < 2 )
       {
         isGameOver = true;
       }
@@ -676,7 +683,7 @@ public class MapController implements IController
     {
       // The last action ended the game, and the animation just finished.
       //  Now we wait for one more keypress before going back to the main menu.
-      changeInputMode( InputMode.EXITGAME );
+      changeInputMode(InputMode.EXITGAME);
 
       // Signal the view to animate the victory/defeat overlay.
       myView.gameIsOver();
