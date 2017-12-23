@@ -137,18 +137,18 @@ public class MapReader extends IMapBuilder
         return DN;
       case "FC":
         return FC;
-      //      case "AP":
-      //        return AP;
-      //      case "SP":
-      //        return SP;
+      case "AP":
+        return AP;
+      case "SP":
+        return SP;
       case "FR":
         return FR;
       case "GR":
         return GR;
       case "HQ":
         return HQ;
-      //      case "LB":
-      //        return LB;
+      case "LB":
+        return LB;
       case "MT":
         return MT;
       case "RF":
