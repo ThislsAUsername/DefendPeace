@@ -75,7 +75,8 @@ public class MapReader extends IMapBuilder
             {
               terrainData.add(new ArrayList<Environment.Terrains>());
             }
-            for( int yCoord = 0; scanner.hasNextLine(); line = scanner.nextLine() )
+            boolean moreLines = true;
+            for( int yCoord = 0; moreLines; yCoord++ )
             {
               for( int i = 0; i < line.length(); i += 4 )
               {
@@ -93,7 +94,9 @@ public class MapReader extends IMapBuilder
                 String terrainCode = "" + line.charAt(i + 2) + line.charAt(i + 3);
                 terrainData.get(i / 4).add(stringToCode(terrainCode));
               }
-              yCoord++;
+              moreLines = scanner.hasNextLine();
+              if (moreLines)
+                line = scanner.nextLine();
             }
             ArrayList<Environment.Terrains[]> terrainArrayArray = new ArrayList<Environment.Terrains[]>();
             for( int i = 0; i < terrainData.size(); i++ )
