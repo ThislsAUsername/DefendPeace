@@ -51,6 +51,9 @@ public class Commander
   {
     coInfo = info;
     // TODO Obviously we don't want to hard-code the UnitModel array.
+    
+    // Also TODO: It might still be better to have one unified unit model array, since wrangling multiple arrays is bothersome.
+    // However, that means we'd need an easy way to distinguish between land/sea/air units for various purposes.
     landModels = new ArrayList<UnitModel>(11);
     landModels.add(new InfantryModel());
     landModels.add(new MechModel());
@@ -143,7 +146,7 @@ public class Commander
   }
 
   public ArrayList<UnitModel> getShoppingList(Terrains buyLocation)
-  { // TODO: will eventually need to take in terrainType so it can separate out air/ground/navy
+  {
     switch(buyLocation)
     {
       case AIRPORT:
