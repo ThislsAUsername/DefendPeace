@@ -2,7 +2,6 @@ package Terrain.Maps;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -12,30 +11,6 @@ import Terrain.MapInfo;
 
 public class MapReader extends IMapBuilder
 {
-  private final static String mapName = "Spann Island";
-  // Defines the terrain for this map. Each row is a vertical column of the map.
-  private final static Environment.Terrains[][] terrainData = { { SE, SE, SE, SE, SE, SE, SE, SE, SE, SE }, // 0
-      { SE, SE, GR, CT, GR, FC, FC, SE, RF, SE }, // 1
-      { SE, GR, GR, CT, GR, RD, HQ, FC, SE, SE }, // 2
-      { SE, FR, FR, RD, RD, RD, GR, FC, SE, SE }, // 3
-      { SE, RD, RD, RD, GR, CT, GR, GR, MT, SE }, // 4
-      { SE, RD, FR, SE, SE, SE, GR, GR, CT, SE }, // 5
-      { SE, RD, SE, SE, SE, SE, GR, GR, MT, SE }, // 6
-      { SE, RD, GR, SE, SE, FR, FR, GR, FR, SE }, // 7
-      { SE, RD, RD, RD, RD, RD, FR, GR, CT, SE }, // 8
-      { SE, GR, CT, GR, CT, RD, GR, GR, GR, SE }, // 9
-      { SE, FR, GR, MT, MT, RD, SE, SE, RD, SE }, // 10
-      { SE, FC, GR, GR, CT, RD, SE, SE, GR, SE }, // 11
-      { SE, GR, HQ, RD, RD, RD, RD, GR, CT, SE }, // 12
-      { SE, FC, FC, FC, GR, CT, SE, GR, CT, SE }, // 13
-      { SE, SE, SE, SE, SE, SE, SE, SE, SE, SE } };// 14
-  private static XYCoord[] co1Props = { new XYCoord(1, 5), new XYCoord(1, 6), new XYCoord(2, 6), new XYCoord(2, 7),
-      new XYCoord(3, 7) };
-  private static XYCoord[] co2Props = { new XYCoord(11, 1), new XYCoord(12, 2), new XYCoord(13, 1), new XYCoord(13, 2),
-      new XYCoord(13, 3) };
-  private static XYCoord[][] properties = { co1Props, co2Props };
-  private static MapInfo info = new MapInfo(mapName, terrainData, properties);
-
   /**
    * Tells the MapReader to read in the maps.
    */
@@ -43,6 +18,8 @@ public class MapReader extends IMapBuilder
   {
     ArrayList<MapInfo> importMaps = new ArrayList<MapInfo>();
 
+    // This try{} is to safeguard us from exceptions if the res/map folder doesn't exist.
+    // If it fails, we don't need to do anything in the catch{} since we just won't have anything in our list.
     try
     {
       final File folder = new File("res/map");
@@ -54,50 +31,73 @@ public class MapReader extends IMapBuilder
         {
           try
           {
-            // System.out.println();
+            // We get the filename, and make it look nice for our map list.
             String mapName = fileEntry.getName();
+            // Mostly, we just don't want to try to interpret the python script as a map. That'd be bad.
             if( !mapName.contains(".map") )
               continue;
+            // underscores->spaces makes it pretty
             mapName = mapName.replaceAll("_", " ");
             mapName = mapName.replaceAll(".map", "");
-            System.out.println("Parsing map: " + mapName);
+            System.out.println("INFO: Parsing map: " + mapName);
+
+            // We need a list of who starts owning what properties. This is that list.
+            // Each arraylist contains coordinates, and which list it is denotes who owns that property.
+            ArrayList<ArrayList<XYCoord>> properties = new ArrayList<ArrayList<XYCoord>>();
+            // Will support 14 sides in the future, possibly more.
+            for( int i = 0; i < 4; i++ ) // TODO: add more sides
+            {
+              properties.add(new ArrayList<XYCoord>());
+            }
+
             Scanner scanner = new Scanner(fileEntry);
+            // We need the first line so we can pre-fill our terrain data array with the proper number of sub-arrays.
             String line = scanner.nextLine();
+
+            // The game's internal representation of the map is transposed from what we see.
+            // Thus, each subarray contains a column.
+            // Each row on the map consists of one value with the same index from each subarray.
             ArrayList<ArrayList<Environment.Terrains>> terrainData = new ArrayList<ArrayList<Environment.Terrains>>();
-
-            ArrayList<ArrayList<XYCoord>> properties = new ArrayList<ArrayList<XYCoord>>(4);
-            properties.add(new ArrayList<XYCoord>());
-            properties.add(new ArrayList<XYCoord>());
-            properties.add(new ArrayList<XYCoord>());
-            properties.add(new ArrayList<XYCoord>());
-
+            // The representation for each tile is 4 characters long, so we divide the length by 4 to get the map's width.
+            // Height will scale with how many lines of file there are.
             for( int i = 0; i < line.length() / 4; i++ )
             {
               terrainData.add(new ArrayList<Environment.Terrains>());
             }
+
+            // This boolean is broken out since yCoord makes sense as a for-loop-iterated variable.
             boolean moreLines = true;
+            // Here, we're iterating down the lines of the file, and thus up the y coordinate scale.
             for( int yCoord = 0; moreLines; yCoord++ )
             {
-              for( int i = 0; i < line.length(); i += 4 )
+              // Since we have the first line already when we enter here, we read in the next one at the end of this loop.
+              // The inner loop iterates over the x coordinates.
+              for( int xCoord = 0; xCoord * 4 < line.length(); xCoord++ )
               {
+                // I don't think we'll ever support 99 teams. That'd be absurd.
+                // 99 thus serves as a sentinel value, much like it does is movement costs.
                 int sideNumber = 99;
-                try
-                {
-                  sideNumber = Integer.parseInt(("" + line.charAt(i) + line.charAt(i + 1)).trim());
-                }
-                catch (NumberFormatException e)
-                {}
+                // Pull the side value out, so we can see if there's anything in it.
+                // Note to future self: substring()'s second parameter is non-inclusive.
+                String sideString = line.substring(xCoord * 4, xCoord * 4 + 2).trim();
+                // If so, we use the value.
+                if( sideString.length() > 0 )
+                  sideNumber = Integer.parseInt(sideString);
                 if( sideNumber < 4 ) // TODO: add more sides
                 {
-                  properties.get(sideNumber).add(new XYCoord(i / 4, yCoord));
+                  properties.get(sideNumber).add(new XYCoord(xCoord, yCoord));
                 }
-                String terrainCode = "" + line.charAt(i + 2) + line.charAt(i + 3);
-                terrainData.get(i / 4).add(stringToCode(terrainCode));
+                // Terrain code comes after side number, so we grab that as well.
+                String terrainCode = line.substring(xCoord * 4 + 2, xCoord * 4 + 4).trim();
+                // And we place a new square in the proper column.
+                terrainData.get(xCoord).add(stringToCode(terrainCode));
               }
+              // We need to know if there's more lines before we ask for another line, or there's gonna be a problem.
               moreLines = scanner.hasNextLine();
-              if (moreLines)
+              if( moreLines )
                 line = scanner.nextLine();
             }
+            // intermediate array to hold the flat arrays harvested from each column
             ArrayList<Environment.Terrains[]> terrainArrayArray = new ArrayList<Environment.Terrains[]>();
             for( int i = 0; i < terrainData.size(); i++ )
             {
@@ -106,9 +106,12 @@ public class MapReader extends IMapBuilder
             ArrayList<XYCoord[]> propertyArrayArray = new ArrayList<XYCoord[]>();
             for( int i = 0; i < properties.size(); i++ )
             {
+              // We don't want to tell the game that there's more players than there are, so we make sure to only send sides who own properties.
+              // This does lose the data of what each team was initially, but turn order should be preserved and I don't care beyond that.
               if( properties.get(i).size() > 0 )
                 propertyArrayArray.add(properties.get(i).toArray(new XYCoord[0]));
             }
+            // Finally, we make our map's container to put in importMaps.
             MapInfo info = new MapInfo(mapName, terrainArrayArray.toArray(new Environment.Terrains[0][0]),
                 propertyArrayArray.toArray(new XYCoord[0][0]));
             importMaps.add(info);
@@ -123,7 +126,9 @@ public class MapReader extends IMapBuilder
       }
     }
     catch (NullPointerException e)
-    {}
+    {
+      System.out.println("WARNING: res/maps directory does not exist.");
+    }
     return importMaps;
   }
 
@@ -165,10 +170,5 @@ public class MapReader extends IMapBuilder
       default:
         return GR;
     }
-  }
-
-  public static MapInfo getMapInfo()
-  {
-    return info;
   }
 }
