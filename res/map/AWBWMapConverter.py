@@ -7,24 +7,29 @@ import csv
 
 def convertFile(infile,outfile):
 	reader = csv.reader(infile)
+	# Fun fact: this used to write out to the file once for every loop iteration. That was... not exactly what you'd call efficient. This is... more so.
+	outstring = ""
 	for line in reader:
 		for num in line:
 			try:
 				num = int(num)
+			# Teleporter tiles are a blank value in AWBW, so having -1 is a desired behavior for if/when we implement those.
 			except ValueError:
 				num = -1
-			outfile.write(indexToTerrainCode(num))
-		outfile.write("\n")
+			outstring += indexToTerrainCode(num)
+		outstring += "\n"
+	outfile.write(outstring)
 	return
 
 def main(names):
 	for name in names:
 		try:
 			infile = open(name)
-			# split the file extension off, and replace it with .map
+			# Split the file extension off, and replace it with .map
 			outname = re.sub(r'\..*$','.map',name)
 			try:
-				print(outname)
+				# If someone's running it from shell, and it pukes, they'll at least know which map made it puke.
+				print("Now converting file:", name)
 				outfile = open(outname, 'w')
 				convertFile(infile,outfile)
 			except IOError:
@@ -34,20 +39,6 @@ def main(names):
 		finally:
 			infile.close()
 			outfile.close()
-
-
-#dictionary text generation
-def ugh():
-	for i in range(1,10):
-		print("\t\t",i,":   '  ',",sep="")
-	for i in range(10,38):
-		print("\t\t",i,":  '  ',",sep="")
-	for i in range(38,58):
-		print("\t\t",i,":  '',",sep="")
-	for i in range(81,100):
-		print("\t\t",i,":  '',",sep="")
-	for i in range(81,177):
-		print("\t\t",i,": '',",sep="")
 
 def indexToTerrainCode(x):
 	return {
@@ -209,9 +200,12 @@ def indexToTerrainCode(x):
 	
 
 if __name__ == "__main__":
-	if "-h" in sys.argv:
-		print("Takes in Advance Wars by Web map files, and outputs our own map format. \nFilename is the same, extension is '.map'.")
-	elif "--help" in sys.argv:
-		print("Takes in Advance Wars by Web map files, and outputs our own map format. \nFilename is the same, extension is '.map'.")
+	helpstring = "Takes in Advance Wars by Web map files, and outputs our own map format. \nFilename is the same, extension is '.map'.\nYou can input the filenames as command line arguments, or you can drag'n'drop the files you want to convert in your file browser."
+	if "-h" in sys.argv or "--help" in sys.argv:
+		print(helpstring)
+		input()
+	elif len(sys.argv) < 2:
+		print(helpstring)
+		input()
 	else:
 		main(sys.argv[1:])
