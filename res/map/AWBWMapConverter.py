@@ -7,7 +7,7 @@ import csv
 
 def convertFile(infile,outfile):
 	reader = csv.reader(infile)
-	# Fun fact: this used to write out to the file once for every loop iteration. That was... not exactly what you'd call efficient. This is... more so.
+	# We write all of our output text to an intermediate string, since that is much more efficient than directly appending to the file.
 	outstring = ""
 	for line in reader:
 		for num in line:

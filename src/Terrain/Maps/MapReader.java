@@ -54,7 +54,8 @@ public class MapReader extends IMapBuilder
             // We need the first line so we can pre-fill our terrain data array with the proper number of sub-arrays.
             String line = scanner.nextLine();
 
-            // The game's internal representation of the map is transposed from what we see.
+            // The game's internal representation of the map is transposed from the representation you'd see if you wrote out the array.
+            // This is so because that allows you to access mapArray[x][y], which is convenient for handling the map.
             // Thus, each subarray contains a column.
             // Each row on the map consists of one value with the same index from each subarray.
             ArrayList<ArrayList<Environment.Terrains>> terrainData = new ArrayList<ArrayList<Environment.Terrains>>();
@@ -127,16 +128,18 @@ public class MapReader extends IMapBuilder
     }
     catch (NullPointerException e)
     {
-      System.out.println("WARNING: res/maps directory does not exist.");
+      System.out.println("WARNING: res/map directory does not exist.");
     }
     return importMaps;
   }
 
   private static Environment.Terrains stringToCode(String input)
   {
-    // helpful regex:
-    // ^(..)$
-    // case "\1":\nreturn \1;
+    // Regex for generating the cases in this switch statement via a line-separated list of the terrain codes.
+    // In Notepad++, use the Find/Replace window in regex mode
+    // Find: ^(..)$
+    // Replace: case "\1":\nreturn \1;
+    // It won't output the correct indentation, but that's what autoformatting is for.
     switch (input)
     {
       case "CT":
