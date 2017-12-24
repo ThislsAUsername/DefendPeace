@@ -3,6 +3,7 @@ import sys
 import math
 import re
 import csv
+import glob
 
 
 def convertFile(infile,outfile):
@@ -26,7 +27,7 @@ def main(names):
 		try:
 			infile = open(name)
 			# Split the file extension off, and replace it with .map
-			outname = re.sub(r'\..*$','.map',name)
+			outname = re.sub(r'\..*$','.map',name).replace(' ', '_')
 			try:
 				# If someone's running it from shell, and it pukes, they'll at least know which map made it puke.
 				print("Now converting file:", name)
@@ -205,7 +206,8 @@ if __name__ == "__main__":
 		print(helpstring)
 		input()
 	elif len(sys.argv) < 2:
-		print(helpstring)
-		input()
+		filesToParse = glob.glob('*.txt')
+		print("No input given - processing all *.txt files:")
+		main(filesToParse)
 	else:
 		main(sys.argv[1:])
