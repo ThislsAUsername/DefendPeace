@@ -2,6 +2,7 @@ package Units.Weapons;
 
 import Units.UnitModel;
 import Units.Weapons.Damage.DamageStrategy;
+import Units.Weapons.Damage.DoRDamage;
 import Units.Weapons.Damage.StandardDamage;
 
 public class Weapon
@@ -9,7 +10,8 @@ public class Weapon
 
   public WeaponModel model;
   public int ammo;
-  public static DamageStrategy strategy = new StandardDamage();
+  public static DamageStrategy[] strategies = {new StandardDamage(), new DoRDamage()};
+  public static int currentStrategy = 0;
 
   public Weapon(WeaponModel model)
   {
@@ -24,7 +26,7 @@ public class Weapon
   {
     if( ammo == 0 || defender == null )
       return 0;
-    return strategy.getDamage(model, defender);
+    return strategies[currentStrategy].getDamage(model, defender);
   }
 
   /**

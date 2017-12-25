@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import Engine.Driver;
 import Engine.OptionSelector;
 import UI.InputHandler;
+import Units.Weapons.Weapon;
 
 public class SpriteOptions
 {
@@ -22,7 +23,8 @@ public class SpriteOptions
   // Set up configurable options.
   private static GraphicsOption drawScaleOption = new GraphicsOption("Draw Scale", 1, 6, DRAWSCALE_DEFAULT);
   private static GraphicsOption dummyOption = new GraphicsOption("Dummy option");
-  private static GraphicsOption[] allOptions = {drawScaleOption, dummyOption};
+  private static GraphicsOption damageStrategyOption = new GraphicsOption("Damage Strategy", 0, 2, 0);
+  private static GraphicsOption[] allOptions = {drawScaleOption, dummyOption, damageStrategyOption};
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
   private static double animHighlightedOption = 0;
 
@@ -149,6 +151,7 @@ public class SpriteOptions
   {
     drawScale = drawScaleOption.getSelectionNormalized();
     dimensions.setSize(WINDOWWIDTH_DEFAULT*drawScale, WINDOWHEIGHT_DEFAULT*drawScale);
+    Weapon.currentStrategy = damageStrategyOption.getSelectionNormalized();
     Driver.getInstance().updateView(); // Tell the driver to look at these settings again.
 
     for( GraphicsOption go : allOptions )
