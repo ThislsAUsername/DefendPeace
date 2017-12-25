@@ -1,6 +1,7 @@
 package Units.Weapons;
 
 import Units.UnitModel;
+import Units.Weapons.Damage.ChassisDamage;
 import Units.Weapons.Damage.DamageStrategy;
 import Units.Weapons.Damage.DoRDamage;
 import Units.Weapons.Damage.StandardDamage;
@@ -10,7 +11,7 @@ public class Weapon
 
   public WeaponModel model;
   public int ammo;
-  public static DamageStrategy[] strategies = {new StandardDamage(), new DoRDamage()};
+  public static DamageStrategy[] strategies = {new StandardDamage(), new DoRDamage(), new ChassisDamage()};
   public static int currentStrategy = 0;
 
   public Weapon(WeaponModel model)

@@ -23,7 +23,7 @@ public class SpriteOptions
   // Set up configurable options.
   private static GraphicsOption drawScaleOption = new GraphicsOption("Draw Scale", 1, 6, DRAWSCALE_DEFAULT);
   private static GraphicsOption dummyOption = new GraphicsOption("Dummy option");
-  private static GraphicsOption damageStrategyOption = new GraphicsOption("Damage Strategy", 0, 2, 0);
+  private static GraphicsOption damageStrategyOption = new GraphicsOption("Damage Strategy", 0, Weapon.strategies.length, 0);
   private static GraphicsOption[] allOptions = {drawScaleOption, dummyOption, damageStrategyOption};
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
   private static double animHighlightedOption = 0;
