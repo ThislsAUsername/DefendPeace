@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import Terrain.Maps.CageMatch;
 import Terrain.Maps.FiringRange;
+import Terrain.Maps.MapReader;
 import Terrain.Maps.Triumvirate;
 import Terrain.Maps.SpannIsland;
 
@@ -27,6 +28,7 @@ public class MapLibrary
     availableMaps.add(SpannIsland.getMapInfo());
     availableMaps.add(Triumvirate.getMapInfo());
     availableMaps.add(CageMatch.getMapInfo());
+    availableMaps.addAll(MapReader.readMapData());
   }
   
   public static MapInfo getByName(String mapName)
