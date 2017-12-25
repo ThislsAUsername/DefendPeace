@@ -35,8 +35,8 @@ public class StandardDamage extends DamageStrategy
   /**
    * @return returns its base damage against that unit type
    */
-  public double getDamage(WeaponModel attack, UnitModel.UnitEnum defender)
+  public double getDamage(WeaponModel attack, UnitModel defender)
   {
-    return damageChart[attack.getIndex()][defender.ordinal()];
+    return damageChart[attack.getIndex()][defender.type.ordinal()];
   }
 }

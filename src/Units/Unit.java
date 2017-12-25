@@ -110,7 +110,7 @@ public class Unit
   // for the purpose of letting the unit know it has attacked.
   public void fire(final Unit defender)
   {
-    UnitEnum target = defender.model.type;
+    UnitModel target = defender.model;
     int i = 0;
     for( ; i < weapons.length; i++ )
     {

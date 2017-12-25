@@ -8,5 +8,5 @@ public abstract class DamageStrategy
   /**
    * @return returns its base damage against that unit type
    */
-  public abstract double getDamage(WeaponModel attack, UnitModel.UnitEnum defender);
+  public abstract double getDamage(WeaponModel attack, UnitModel defender);
 }

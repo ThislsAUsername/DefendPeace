@@ -22,7 +22,7 @@ public class Weapon
   /**
    * @return returns its base damage against that unit type
    */
-  public double getDamage(UnitModel.UnitEnum defender)
+  public double getDamage(UnitModel defender)
   {
     if( ammo == 0 || defender == null )
       return 0;
@@ -37,7 +37,7 @@ public class Weapon
     if( defender != null )
     {
       if( (range >= model.minRange) && (range <= model.maxRange) )
-        return getDamage(defender.type);
+        return getDamage(defender);
     }
     return 0;
   }
