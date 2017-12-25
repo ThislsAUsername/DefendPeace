@@ -54,8 +54,7 @@ public class MapReader extends IMapBuilder
             // We need the first line so we can pre-fill our terrain data array with the proper number of sub-arrays.
             String line = scanner.nextLine();
 
-            // The game's internal representation of the map is transposed from the representation you'd see if you wrote out the array.
-            // This is so because that allows you to access mapArray[x][y], which is convenient for handling the map.
+            // Map tiles are accessed via mapArray[x][y]
             // Thus, each subarray contains a column.
             // Each row on the map consists of one value with the same index from each subarray.
             ArrayList<ArrayList<Environment.Terrains>> terrainData = new ArrayList<ArrayList<Environment.Terrains>>();
