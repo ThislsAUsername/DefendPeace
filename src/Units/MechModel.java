@@ -18,6 +18,6 @@ public class MechModel extends UnitModel
 
   public MechModel()
   {
-    super("Mech", Units.UnitModel.UnitEnum.MECH, 2500, 99, 0, 2, moveType, actions, healHabs, weapons);
+    super("Mech", Units.UnitModel.UnitEnum.MECH, ChassisEnum.TROOP, 2500, 99, 0, 2, moveType, actions, healHabs, weapons);
   }
 }

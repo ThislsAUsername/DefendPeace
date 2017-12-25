@@ -18,6 +18,6 @@ public class BCopterModel extends UnitModel
 
   public BCopterModel()
   {
-    super("B Copter", UnitEnum.B_COPTER, 9000, 99, 2, 6, moveType, actions, healHabs, weapons);
+    super("B Copter", UnitEnum.B_COPTER, ChassisEnum.AIR_LOW, 9000, 99, 2, 6, moveType, actions, healHabs, weapons);
   }
 }

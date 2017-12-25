@@ -18,7 +18,7 @@ public class LanderModel extends UnitModel
 
   public LanderModel()
   {
-    super("Lander", UnitEnum.LANDER, 12000, 99, 1, 6, moveType, actions, healHabs, null);
+    super("Lander", UnitEnum.LANDER, ChassisEnum.SHIP, 12000, 99, 1, 6, moveType, actions, healHabs, null);
     holdingCapacity = 2;
     UnitEnum[] carryable = { Units.UnitModel.UnitEnum.INFANTRY, Units.UnitModel.UnitEnum.MECH, Units.UnitModel.UnitEnum.APC,
         Units.UnitModel.UnitEnum.RECON, Units.UnitModel.UnitEnum.ARTILLERY, Units.UnitModel.UnitEnum.ANTI_AIR,

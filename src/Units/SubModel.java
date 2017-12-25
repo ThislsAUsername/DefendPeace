@@ -18,6 +18,6 @@ public class SubModel extends UnitModel
 
   public SubModel()
   {
-    super("Submarine", UnitEnum.SUB, 20000, 60, 1, 6, moveType, actions, healHabs, weapons);
+    super("Submarine", UnitEnum.SUB, ChassisEnum.SHIP, 20000, 60, 1, 6, moveType, actions, healHabs, weapons);
   }
 }

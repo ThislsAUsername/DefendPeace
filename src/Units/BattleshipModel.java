@@ -17,6 +17,6 @@ public class BattleshipModel extends UnitModel
 
   public BattleshipModel()
   {
-    super("Battleship", UnitEnum.BATTLESHIP, 28000, 99, 1, 5, moveType, actions, healHabs, weapons);
+    super("Battleship", UnitEnum.BATTLESHIP, ChassisEnum.SHIP, 28000, 99, 1, 5, moveType, actions, healHabs, weapons);
   }
 }

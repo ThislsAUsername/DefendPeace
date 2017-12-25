@@ -16,7 +16,7 @@ public class APCModel extends UnitModel
 
   public APCModel()
   {
-    super("APC", UnitEnum.APC, 5000, 70, 0, 6, moveType, actions, healHabs, null);
+    super("APC", UnitEnum.APC, ChassisEnum.TRUCK, 5000, 70, 0, 6, moveType, actions, healHabs, null);
     holdingCapacity = 1;
     UnitEnum[] carryable = { Units.UnitModel.UnitEnum.INFANTRY, Units.UnitModel.UnitEnum.MECH };
     holdables = new Vector<UnitEnum>(carryable.length);

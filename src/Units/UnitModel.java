@@ -15,8 +15,16 @@ public class UnitModel
     INFANTRY, MECH, RECON, TANK, MD_TANK, NEOTANK, APC, ARTILLERY, ROCKETS, ANTI_AIR, MOBILESAM, FIGHTER, BOMBER, B_COPTER, T_COPTER, BATTLESHIP, CRUISER, LANDER, SUB
   };
 
+  // NB: "Truck" is technically unnecessary, but I feel it may be useful for alternate damage systems.
+  // The rubric for what's a "truck" is whether the damage dealt to it by an infantry is >9%, not movetype.
+  public enum ChassisEnum
+  {
+    TROOP, TRUCK, TANK, SHIP, AIR_LOW, AIR_HIGH
+  };
+
   public String name;
   public UnitEnum type;
+  public ChassisEnum chassis;
   public int moneyCost = 9001;
   public int maxFuel;
   public int idleFuelBurn;
@@ -32,11 +40,12 @@ public class UnitModel
   private int COstr;
   private int COdef;
 
-  public UnitModel(String pName, UnitEnum pType, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower, MoveType pPropulsion,
+  public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower, MoveType pPropulsion,
       ActionType[] actions, Terrains[] healableTerrains, WeaponModel[] weapons)
   {
     name = pName;
     type = pType;
+    chassis = pChassis;
     moneyCost = cost;
     maxFuel = pFuelMax;
     idleFuelBurn = pIdleFuelBurn;

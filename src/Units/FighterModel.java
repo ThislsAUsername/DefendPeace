@@ -17,6 +17,6 @@ public class FighterModel extends UnitModel
 
   public FighterModel()
   {
-    super("Fighter", UnitEnum.FIGHTER, 20000, 99, 5, 9, moveType, actions, healHabs, weapons);
+    super("Fighter", UnitEnum.FIGHTER, ChassisEnum.AIR_HIGH, 20000, 99, 5, 9, moveType, actions, healHabs, weapons);
   }
 }
