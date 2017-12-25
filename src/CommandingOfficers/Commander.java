@@ -28,8 +28,8 @@ import Units.TankModel;
 import Units.Unit;
 import Units.UnitModel;
 import CommandingOfficers.Modifiers.COModifier;
-import Engine.BattleInstance;
 import Engine.GameInstance;
+import Engine.Combat.BattleInstance;
 import Units.UnitModel.UnitEnum;
 
 public class Commander

@@ -1,7 +1,7 @@
 package Engine.GameEvents;
 
-import Engine.CombatEngine;
 import Engine.Combat.BattleSummary;
+import Engine.Combat.CombatEngine;
 import Terrain.GameMap;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
