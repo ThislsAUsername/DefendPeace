@@ -41,11 +41,11 @@ public class SpriteLibrary
     new Color(222, 171, 240), new Color(255, 231, 255) };
 
   // Map Unit colors.
-  private static Color[] pinkMapUnitColors = { new Color(177, 62, 62), new Color(255, 100, 100), new Color(255, 136, 136),
+  private static Color[] pinkMapUnitColors = { new Color(177, 62, 62), new Color(234, 100, 100), new Color(255, 136, 136),
       new Color(255, 175, 175), new Color(255, 230, 230) };
   private static Color[] cyanMapUnitColors = { new Color(0, 105, 105), new Color(0, 170, 170), new Color(0, 215, 215),
       new Color(0, 255, 255), new Color(195, 255, 255), };
-  private static Color[] orangeMapUnitColors = { new Color(163, 77, 0), new Color(252, 139, 7), new Color(255, 160, 65),
+  private static Color[] orangeMapUnitColors = { new Color(163, 77, 0), new Color(234, 139, 7), new Color(255, 160, 65),
       new Color(255, 186, 97), new Color(255, 225, 183), };
   private static Color[] purpleMapUnitColors = { new Color(90, 56, 99), new Color(181, 73, 198), new Color(201, 98, 223),
     new Color(222, 171, 240), new Color(243, 210, 255), };
@@ -351,6 +351,7 @@ public class SpriteLibrary
         spriteFile = "res/unit/apc_map.png";
         break;
       case ARTILLERY:
+        spriteFile = "res/unit/artillery_map.png";
         break;
       case B_COPTER:
         break;
@@ -375,6 +376,7 @@ public class SpriteLibrary
       case MISSILES:
         break;
       case RECON:
+        spriteFile = "res/unit/recon_map.png";
         break;
       case ROCKETS:
         break;
