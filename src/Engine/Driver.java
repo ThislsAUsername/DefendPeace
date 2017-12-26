@@ -16,7 +16,6 @@ import Test.TestMain;
 import UI.InputHandler;
 import UI.MainUIController;
 import UI.Art.SpriteArtist.SpriteEngine;
-import UI.Art.SpriteArtist.SpriteOptions;
 
 public class Driver implements ActionListener, KeyListener
 {
@@ -50,6 +49,8 @@ public class Driver implements ActionListener, KeyListener
     // Draw the screen at (ideally) 60fps.
     repaintTimer = new javax.swing.Timer(16, this);
     repaintTimer.start();
+
+    gameView.init(); // This will enable the view proxy to start monitoring screen size changes.
   }
 
   /** Get the one and only Driver */
@@ -159,6 +160,10 @@ public class Driver implements ActionListener, KeyListener
     public GameViewProxy( IView v )
     {
       view = v;
+    }
+
+    public void init()
+    {
       addComponentListener(new ComponentAdapter(){
         @Override
         public void componentResized(ComponentEvent evt)

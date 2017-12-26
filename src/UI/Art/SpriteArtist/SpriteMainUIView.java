@@ -43,6 +43,7 @@ public class SpriteMainUIView implements IView
   {
     windowWidth = width;
     windowHeight = height;
+    SpriteOptions.setScreenDimensions(width, height);
   }
 
   @Override
