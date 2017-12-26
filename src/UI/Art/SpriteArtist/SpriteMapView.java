@@ -114,9 +114,26 @@ public class SpriteMapView extends MapView
     // The user wants to use a specific amount of screen. Figure out how many tiles to draw for them.
     mapViewWidth = width;
     mapViewHeight = height;
-    mapTilesToDrawX = mapViewWidth / (SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale());
-    mapTilesToDrawY = mapViewHeight / (SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale());
-    dimensionsChanged = true;
+    int tileSize = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale();
+    mapTilesToDrawX = mapViewWidth / tileSize;
+    mapTilesToDrawY = mapViewHeight / tileSize;
+
+    // Cap the view width/height to the dimensions of the map.
+    if( mapTilesToDrawX > myGame.gameMap.mapWidth )
+    {
+      mapTilesToDrawX = myGame.gameMap.mapWidth;
+      mapViewWidth = mapTilesToDrawX * tileSize;
+    }
+    if( mapTilesToDrawY > myGame.gameMap.mapHeight )
+    {
+      mapTilesToDrawY = myGame.gameMap.mapHeight;
+      mapViewHeight = mapTilesToDrawY * tileSize;
+    }
+
+    // Let SpriteOptions know we are changing things.
+    SpriteOptions.setScreenDimensions(mapViewWidth, mapViewHeight);
+
+    dimensionsChanged = true; // Let render() know that the window was resized.
   }
 
   @Override
