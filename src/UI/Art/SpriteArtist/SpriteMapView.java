@@ -402,12 +402,12 @@ public class SpriteMapView extends MapView
   private void drawUnitsAndMapObjects(Graphics g)
   {
     // Draw terrain objects and units in order so they overlap correctly.
-    // Only bother iterating over the visible map space (plus a 1-square border).
+    // Only bother iterating over the visible map space (plus a 2-square border).
     int drawY = (int)mapViewDrawY;
     int drawX = (int)mapViewDrawX;
-    for( int y = drawY-1; y < drawY+mapTilesToDrawY+1; ++y )
+    for( int y = drawY-1; y < drawY+mapTilesToDrawY+2; ++y )
     {
-      for( int x = drawX-1; x < drawX+mapTilesToDrawX+1; ++x )
+      for( int x = drawX-1; x < drawX+mapTilesToDrawX+2; ++x )
       {
         // Since we are trying to draw a ring of objects around the viewable space to
         // ensure smooth scrolling, make sure we aren't running off the edge of the map.
