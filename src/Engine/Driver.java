@@ -4,6 +4,8 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -14,7 +16,6 @@ import Test.TestMain;
 import UI.InputHandler;
 import UI.MainUIController;
 import UI.Art.SpriteArtist.SpriteEngine;
-import UI.Art.SpriteArtist.SpriteOptions;
 
 public class Driver implements ActionListener, KeyListener
 {
@@ -149,6 +150,13 @@ public class Driver implements ActionListener, KeyListener
     public GameViewProxy( IView v )
     {
       view = v;
+      addComponentListener(new ComponentAdapter(){
+        @Override
+        public void componentResized(ComponentEvent evt)
+        {
+          view.setPreferredDimensions(evt.getComponent().getWidth(), evt.getComponent().getHeight());
+        }
+      });
     }
 
     public void setView( IView v )

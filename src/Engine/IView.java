@@ -11,6 +11,12 @@ public interface IView
   public abstract Dimension getPreferredDimensions();
 
   /**
+   * Allows a user to request that the mapView adjust its size.
+   * The IView may or may not accept this request.
+   */
+  public abstract void setPreferredDimensions(int width, int height);
+
+  /**
    * Renders the view using the specified graphics.
    */
   public void render(Graphics g);
