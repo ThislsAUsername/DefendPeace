@@ -385,6 +385,7 @@ public class SpriteLibrary
       case T_COPTER:
         break;
       case TANK:
+        spriteFile = "res/unit/tank_map.png";
         break;
     }
     return spriteFile;
