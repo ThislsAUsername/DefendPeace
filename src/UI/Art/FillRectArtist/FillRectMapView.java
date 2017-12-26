@@ -48,6 +48,12 @@ public class FillRectMapView extends MapView
   }
 
   @Override
+  public void setPreferredDimensions(int width, int height)
+  {
+    // ignore!
+  }
+
+  @Override
   public int getTileSize()
   {
     return baseTileSize * drawScale;

@@ -10,10 +10,9 @@ public class DiagonalBlindsBG
   private static final Color COLOR_BG = new Color(234, 243, 255); // Light blue background.
   private static final Color COLOR_BLINDS= new Color(248, 248, 255); // Lighter blue blinds color effect.
   private static int shimmerScale = SpriteOptions.getDrawScale();
-  private static int shimmerStretch = SpriteOptions.getScreenDimensions().height*shimmerScale;
   private static int shimmerThickness = 25*shimmerScale;
   private static int shimmerSpacing = 100*shimmerScale; // Distance between adjacent bands.
-  private static double shimmerBasePoint = -(shimmerStretch+shimmerSpacing); // Where to draw the first band.
+  private static double shimmerBasePoint = -(SpriteOptions.getScreenDimensions().height+shimmerSpacing); // Where to draw the first band.
   private static long lastDrawTime = System.currentTimeMillis(); // Used to control drift.
   private static double shimmerPxPerMs = 0.03; // Controls the movement speed.
 
@@ -35,17 +34,16 @@ public class DiagonalBlindsBG
     if(shimmerScale != SpriteOptions.getDrawScale())
     {
       shimmerScale = SpriteOptions.getDrawScale();
-      shimmerStretch = dimensions.height*shimmerScale;
       shimmerThickness = 25*shimmerScale;
       shimmerSpacing = 100*shimmerScale; // Distance between adjacent bands.
-      shimmerBasePoint = -(shimmerStretch+shimmerSpacing); // Where to draw the first shimmer.
+      shimmerBasePoint = -(dimensions.height+shimmerSpacing); // Where to draw the first shimmer.
       lastDrawTime = System.currentTimeMillis(); // Used to control shimmer drift.
       shimmerPxPerMs = 0.03; // Controls the speed of shimmer movement.
     }
 
     // Build the polygon we will use to draw the lighter bands in the background.
-    int[] xPoints = {0, shimmerStretch, shimmerStretch+shimmerThickness, shimmerThickness};
-    int[] yPoints = {shimmerStretch, 0, 0, shimmerStretch};
+    int[] xPoints = {0, dimensions.height, dimensions.height+shimmerThickness, shimmerThickness};
+    int[] yPoints = {dimensions.height, 0, 0, dimensions.height};
     Polygon shimmerPoly = new Polygon(xPoints, yPoints, xPoints.length); // Shimmer shape to draw.
 
     // Make a copy of the base polygon and translate it to the first draw point.
@@ -74,7 +72,7 @@ public class DiagonalBlindsBG
 
     // Translate the basis point, bringing it back on-screen if needed.
     shimmerBasePoint -= dist;
-    if(shimmerBasePoint < -(shimmerStretch+shimmerSpacing))
+    if(shimmerBasePoint < -(dimensions.height+shimmerSpacing))
     {
       shimmerBasePoint += shimmerSpacing;
     }

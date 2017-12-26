@@ -45,6 +45,12 @@ public class SpriteOptions
     return dimensions;
   }
 
+  public static void setScreenDimensions(int width, int height)
+  {
+    dimensions.setSize(width, height);
+    Driver.getInstance().updateView(); // Tell the driver to look at these settings again.
+  }
+
   public static int getDrawScale()
   {
     return drawScale;
