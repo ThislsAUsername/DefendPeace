@@ -17,6 +17,6 @@ public class RocketsModel extends UnitModel
 
   public RocketsModel()
   {
-    super("Rockets", UnitEnum.ROCKETS, 15000, 50, 0, 5, moveType, actions, healHabs, weapons);
+    super("Rockets", UnitEnum.ROCKETS, ChassisEnum.TRUCK, 15000, 50, 0, 5, moveType, actions, healHabs, weapons);
   }
 }

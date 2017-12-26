@@ -17,6 +17,6 @@ public class BomberModel extends UnitModel
 
   public BomberModel()
   {
-    super("Bomber", UnitEnum.BOMBER, 22000, 99, 5, 7, moveType, actions, healHabs, weapons);
+    super("Bomber", UnitEnum.BOMBER, ChassisEnum.AIR_HIGH, 22000, 99, 5, 7, moveType, actions, healHabs, weapons);
   }
 }

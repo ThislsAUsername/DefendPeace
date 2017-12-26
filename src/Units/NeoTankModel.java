@@ -18,6 +18,6 @@ public class NeotankModel extends UnitModel
 
   public NeotankModel()
   {
-    super("Neotank", UnitEnum.NEOTANK, 22000, 99, 0, 6, moveType, actions, healHabs, weapons);
+    super("Neotank", UnitEnum.NEOTANK, ChassisEnum.TANK, 22000, 99, 0, 6, moveType, actions, healHabs, weapons);
   }
 }

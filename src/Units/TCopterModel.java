@@ -16,7 +16,7 @@ public class TCopterModel extends UnitModel
 
   public TCopterModel()
   {
-    super("T Copter", UnitEnum.T_COPTER, 5000, 99, 2, 6, moveType, actions, healHabs, null);
+    super("T Copter", UnitEnum.T_COPTER, ChassisEnum.AIR_LOW, 5000, 99, 2, 6, moveType, actions, healHabs, null);
     holdingCapacity = 1;
     UnitEnum[] carryable = { Units.UnitModel.UnitEnum.INFANTRY, Units.UnitModel.UnitEnum.MECH };
     holdables = new Vector<UnitEnum>(carryable.length);

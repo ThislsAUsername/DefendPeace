@@ -36,9 +36,7 @@ public class Commander
 {
   public final CommanderInfo coInfo;
   public ArrayList<Unit> units;
-  public ArrayList<UnitModel> landModels;
-  public ArrayList<UnitModel> seaModels;
-  public ArrayList<UnitModel> airModels;
+  public ArrayList<UnitModel> unitModels;
   public ArrayList<COModifier> modifiers;
   public Color myColor;
   public static final int DEFAULTSTARTINGMONEY = 10000;
@@ -50,31 +48,30 @@ public class Commander
   public Commander(CommanderInfo info)
   {
     coInfo = info;
+
     // TODO Obviously we don't want to hard-code the UnitModel array.
-    landModels = new ArrayList<UnitModel>(11);
-    landModels.add(new InfantryModel());
-    landModels.add(new MechModel());
-    landModels.add(new APCModel());
-    landModels.add(new ArtilleryModel());
-    landModels.add(new ReconModel());
-    landModels.add(new TankModel());
-    landModels.add(new MDTankModel());
-    landModels.add(new NeotankModel());
-    landModels.add(new RocketsModel());
-    landModels.add(new AntiAirModel());
-    landModels.add(new MobileSAMModel());
+    unitModels = new ArrayList<UnitModel>(19);
+    unitModels.add(new InfantryModel());
+    unitModels.add(new MechModel());
+    unitModels.add(new APCModel());
+    unitModels.add(new ArtilleryModel());
+    unitModels.add(new ReconModel());
+    unitModels.add(new TankModel());
+    unitModels.add(new MDTankModel());
+    unitModels.add(new NeotankModel());
+    unitModels.add(new RocketsModel());
+    unitModels.add(new AntiAirModel());
+    unitModels.add(new MobileSAMModel());
 
-    seaModels = new ArrayList<UnitModel>(4);
-    seaModels.add(new LanderModel());
-    seaModels.add(new CruiserModel());
-    seaModels.add(new SubModel());
-    seaModels.add(new BattleshipModel());
+    unitModels.add(new LanderModel());
+    unitModels.add(new CruiserModel());
+    unitModels.add(new SubModel());
+    unitModels.add(new BattleshipModel());
 
-    airModels = new ArrayList<UnitModel>(0);
-    airModels.add(new TCopterModel());
-    airModels.add(new BCopterModel());
-    airModels.add(new FighterModel());
-    airModels.add(new BomberModel());
+    unitModels.add(new TCopterModel());
+    unitModels.add(new BCopterModel());
+    unitModels.add(new FighterModel());
+    unitModels.add(new BomberModel());
     
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
@@ -130,11 +127,11 @@ public class Commander
   {
     UnitModel um = null;
 
-    for( int i = 0; i < landModels.size(); ++i )
+    for( int i = 0; i < unitModels.size(); ++i )
     {
-      if( landModels.get(i).type == unitType )
+      if( unitModels.get(i).type == unitType )
       {
-        um = landModels.get(i);
+        um = unitModels.get(i);
         break;
       }
     }
@@ -143,16 +140,36 @@ public class Commander
   }
 
   public ArrayList<UnitModel> getShoppingList(Terrains buyLocation)
-  { // TODO: will eventually need to take in terrainType so it can separate out air/ground/navy
+  {
+    ArrayList<UnitModel> shoppingList = new ArrayList<UnitModel>();
     switch(buyLocation)
     {
       case AIRPORT:
-        return airModels;
+        for( int i = 0; i < unitModels.size(); i++ )
+        {
+          UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
+          if (UnitModel.ChassisEnum.AIR_HIGH == chassis || UnitModel.ChassisEnum.AIR_LOW == chassis)
+            shoppingList.add(unitModels.get(i));
+        }
+        break;
       case SEAPORT:
-        return seaModels;
+        for( int i = 0; i < unitModels.size(); i++ )
+        {
+          UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
+          if (UnitModel.ChassisEnum.SHIP == chassis)
+            shoppingList.add(unitModels.get(i));
+        }
+        break;
       default:
-        return landModels;
+        for( int i = 0; i < unitModels.size(); i++ )
+        {
+          UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
+          if (UnitModel.ChassisEnum.TROOP == chassis || UnitModel.ChassisEnum.TRUCK == chassis || UnitModel.ChassisEnum.TANK == chassis)
+            shoppingList.add(unitModels.get(i));
+        }
+        break;
     }
+    return shoppingList;
   }
 
   public ArrayList<String> getReadyAbilities()

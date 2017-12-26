@@ -18,6 +18,6 @@ public class MDTankModel extends UnitModel
 
   public MDTankModel()
   {
-    super("Medium Tank", UnitEnum.MD_TANK, 16000, 50, 0, 5, moveType, actions, healHabs, weapons);
+    super("Medium Tank", UnitEnum.MD_TANK, ChassisEnum.TANK, 16000, 50, 0, 5, moveType, actions, healHabs, weapons);
   }
 }

@@ -18,6 +18,6 @@ public class TankModel extends UnitModel
 
   public TankModel()
   {
-    super("Tank", UnitEnum.TANK, 7000, 70, 0, 6, moveType, actions, healHabs, weapons);
+    super("Tank", UnitEnum.TANK, ChassisEnum.TANK, 7000, 70, 0, 6, moveType, actions, healHabs, weapons);
   }
 }

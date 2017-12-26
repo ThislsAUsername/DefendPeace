@@ -17,6 +17,6 @@ public class InfantryModel extends UnitModel
 
   public InfantryModel()
   {
-    super("Infantry", Units.UnitModel.UnitEnum.INFANTRY, 1000, 99, 0, 3, moveType, actions, healHabs, weapons);
+    super("Infantry", UnitEnum.INFANTRY, ChassisEnum.TROOP, 1000, 99, 0, 3, moveType, actions, healHabs, weapons);
   }
 }

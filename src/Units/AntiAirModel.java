@@ -17,6 +17,6 @@ public class AntiAirModel extends UnitModel
 
   public AntiAirModel()
   {
-    super("Anti-Air", UnitEnum.ANTI_AIR, 8000, 60, 0, 6, moveType, actions, healHabs, weapons);
+    super("Anti-Air", UnitEnum.ANTI_AIR, ChassisEnum.TANK, 8000, 60, 0, 6, moveType, actions, healHabs, weapons);
   }
 }

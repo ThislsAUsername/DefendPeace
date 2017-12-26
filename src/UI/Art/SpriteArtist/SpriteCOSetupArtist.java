@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 import CommandingOfficers.CommanderLibrary;
+import CommandingOfficers.CommanderLibrary.CommanderEnum;
 import Terrain.MapInfo;
 import UI.COSetupController;
 
@@ -40,35 +41,43 @@ public class SpriteCOSetupArtist
     /////////////////// MiniMap ////////////////////////
     int drawScale = SpriteOptions.getDrawScale();
     BufferedImage miniMap = SpriteMiniMapArtist.getMapImage( mapInfo );
-    // Figure out how large to draw the minimap. We aren't horizontally constrained, but we need
-    // to fit the CO selection area below it. Make it as large as possible given those constraints.
-    int vspace = 96*drawScale;
-    int mmWScale = dimensions.width / miniMap.getWidth();
-    int mmHScale = (vspace-4*drawScale) / miniMap.getHeight();
+
+    // Figure out how large to draw the minimap. Make it as large as possible, allowing
+    // space for the CO selection area below.
+    int COSelectionAreaHeight = SpriteLibrary.getCommanderSprites(CommanderEnum.STRONG).head.getHeight()*2*drawScale;
+    int minimapAreaHeight = dimensions.height - COSelectionAreaHeight;
+
+    // Figure out how large to draw the minimap. We want to make it as large as possible, but still
+    //   fit inside the available space (with a minimum scale factor of 1).
+    int maxMiniMapWidth = dimensions.width - 4; // Subtract 4 so we have room to draw a frame.
+    int maxMiniMapHeight = dimensions.height - COSelectionAreaHeight - 4;
+    int mmWScale = maxMiniMapWidth / miniMap.getWidth();
+    int mmHScale = maxMiniMapHeight / miniMap.getHeight();
     int mmScale = (mmWScale > mmHScale)? mmHScale : mmWScale;
+    if( mmScale > 10*drawScale) mmScale = 10*drawScale;
 
     // Draw a frame for the minimap.
     int mapWidth = miniMap.getWidth() * mmScale;
     int mapHeight = miniMap.getHeight() * mmScale;
     int mapLeft = (dimensions.width / 2) - (mapWidth / 2);
-    int mapTop = (vspace / 2) - (mapHeight / 2);
+    int mapTop = (minimapAreaHeight / 2) - (mapHeight / 2);
     g.setColor(MENUFRAMECOLOR);
     g.fillRect(mapLeft-(2*drawScale), mapTop-(2*drawScale), mapWidth+(4*drawScale), mapHeight+(4*drawScale));
     g.setColor(MENUBGCOLOR);
     g.fillRect(mapLeft-drawScale, mapTop-drawScale, mapWidth+(2*drawScale), mapHeight+(2*drawScale));
 
     // Draw the mini map.
-    SpriteLibrary.drawImageCenteredOnPoint(g, miniMap, dimensions.width / 2, vspace / 2, mmScale);
+    SpriteLibrary.drawImageCenteredOnPoint(g, miniMap, dimensions.width / 2, minimapAreaHeight / 2, mmScale);
 
-    drawSelectorArrows(g);
+    // Define the space to draw the list of player CO portraits.
+    int drawYCenter = ((dimensions.height - minimapAreaHeight) / 2) + minimapAreaHeight;
+    int coHighlightedPortraitXCenter = dimensions.width / 2; // Whichever player has focus should be centered.
+
+    drawSelectorArrows(g, dimensions.width / 2, drawYCenter);
 
     /////////////////// CO Portraits ///////////////////////
     int numCOs = mapInfo.getNumCos();
     int highlightedPlayer = myControl.getHighlightedPlayer();
-
-    // Figure out where to draw each player's CO portrait.
-    int drawYCenter = ((dimensions.height - vspace) / 2) + vspace;
-    int coHighlightedPortraitXCenter = dimensions.width / 2; // Whichever player has focus should be centered.
 
     double numCosOnScreen = 5.5; // Display 5 cos, and the edge of the portrait for any hanging off the screen edge.
     int xSpacing = (int)(dimensions.width / numCosOnScreen);
@@ -93,14 +102,16 @@ public class SpriteCOSetupArtist
     }
   }
 
-  private static void drawSelectorArrows(Graphics g)
+  private static void drawSelectorArrows(Graphics g, int xCenter, int yCenter)
   {
     int drawScale = SpriteOptions.getDrawScale();
-    // Polygons for arrows to indicate the focused player slot.
-    int[] upXPoints = {116*drawScale, 120*drawScale, 121*drawScale, 125*drawScale};
-    int[] upYPoints = {108*drawScale, 104*drawScale, 104*drawScale, 108*drawScale};
-    int[] dnXPoints = {116*drawScale, 120*drawScale, 121*drawScale, 125*drawScale};
-    int[] dnYPoints = {148*drawScale, 152*drawScale, 152*drawScale, 148*drawScale};
+    // Polygons for arrows to indicate the focused player slot. CO face images are 32x32, plus two pixels
+    // for the frame border, plus two pixels between the portrait frame and the arrows.
+    int yBuffer = SpriteLibrary.getCommanderSprites(CommanderEnum.STRONG).head.getHeight() / 2 + 4;
+    int[] upXPoints = {xCenter-(4*drawScale), xCenter, xCenter+drawScale, xCenter+(5*drawScale)};
+    int[] upYPoints = {yCenter-(yBuffer*drawScale), yCenter-((yBuffer+4)*drawScale), yCenter-((yBuffer+4)*drawScale), yCenter-(yBuffer*drawScale)};
+    int[] dnXPoints = {xCenter-(4*drawScale), xCenter, xCenter+drawScale, xCenter+(5*drawScale)};
+    int[] dnYPoints = {yCenter+(yBuffer*drawScale), yCenter+((yBuffer+4)*drawScale), yCenter+((yBuffer+4)*drawScale), yCenter+(yBuffer*drawScale)};
 
     // Draw the arrows around the focused player slot.
     g.setColor(MENUFRAMECOLOR);

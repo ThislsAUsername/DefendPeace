@@ -11,13 +11,14 @@ public class LanderModel extends UnitModel
 {
 
   private static final MoveType moveType = new FloatLight();
-  // TODO: limit the valid locations to unload
+  // TODO: Currently, transports can unload units wherever the transport happens to be, so long as there is valid terrain for the units to end up on.
+  // As the source material limits copters to land unloading and landers to shoals, it stands to reason we should support that limitation.
   private static final ActionType[] actions = { ActionType.UNLOAD, ActionType.WAIT };
   private static final Terrains[] healHabs = { Terrains.SEAPORT };
 
   public LanderModel()
   {
-    super("Lander", UnitEnum.LANDER, 12000, 99, 1, 6, moveType, actions, healHabs, null);
+    super("Lander", UnitEnum.LANDER, ChassisEnum.SHIP, 12000, 99, 1, 6, moveType, actions, healHabs, null);
     holdingCapacity = 2;
     UnitEnum[] carryable = { Units.UnitModel.UnitEnum.INFANTRY, Units.UnitModel.UnitEnum.MECH, Units.UnitModel.UnitEnum.APC,
         Units.UnitModel.UnitEnum.RECON, Units.UnitModel.UnitEnum.ARTILLERY, Units.UnitModel.UnitEnum.ANTI_AIR,

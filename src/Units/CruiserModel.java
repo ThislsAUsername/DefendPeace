@@ -18,6 +18,6 @@ public class CruiserModel extends UnitModel
 
   public CruiserModel()
   {
-    super("Cruiser", UnitEnum.CRUISER, 18000, 99, 1, 6, moveType, actions, healHabs, weapons);
+    super("Cruiser", UnitEnum.CRUISER, ChassisEnum.SHIP, 18000, 99, 1, 6, moveType, actions, healHabs, weapons);
   }
 }
