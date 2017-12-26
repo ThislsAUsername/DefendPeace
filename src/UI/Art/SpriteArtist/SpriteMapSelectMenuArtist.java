@@ -86,9 +86,15 @@ public class SpriteMapSelectMenuArtist
     }
 
     /////////////// MiniMap ///////////////////////
+    // The mini map and map info panes split the vertical space, so first define some boundaries.
+
+    // Calculate the map info pane height: numPlayers text height, plus property draw size (2x2)..
+    int sqSize = SpriteLibrary.baseSpriteSize*drawScale; // "1 tile" in pixels.
+    int MapInfoPaneDrawHeight = characterHeight*drawScale + (sqSize*2);
+
     // Figure out how large the map can be based on the border divisions.
     int maxMiniMapWidth = dimensions.width - nameSectionDrawWidth;
-    int maxMiniMapHeight = 123*drawScale;
+    int maxMiniMapHeight = dimensions.height - MapInfoPaneDrawHeight;
 
     // Find the center of the minimap display.
     int miniMapCenterX = nameSectionDrawWidth + (maxMiniMapWidth / 2);
@@ -107,12 +113,14 @@ public class SpriteMapSelectMenuArtist
     int mmWScale = maxMiniMapWidth / miniMap.getWidth();
     int mmHScale = maxMiniMapHeight / miniMap.getHeight();
     int mmScale = (mmWScale > mmHScale)? mmHScale : mmWScale;
+    if( mmScale > 10*drawScale ) mmScale = 10*drawScale;
 
     // Draw the mini map.
     SpriteLibrary.drawImageCenteredOnPoint(g, miniMap, miniMapCenterX, miniMapCenterY, mmScale);
 
-    /////////////// Map Information ///////////////////////]
+    /////////////// Map Information ///////////////////////
     int buffer = 3*drawScale;
+
     int numPlayers = selectedMapInfo.getNumCos(); // Get the number of players the map supports
     StringBuilder sb = new StringBuilder().append(numPlayers).append(" Players"); // Build a string to say that.
     SpriteLibrary.drawText(g, sb.toString(), nameSectionDrawWidth+buffer, maxMiniMapHeight+buffer, drawScale);
@@ -123,9 +131,9 @@ public class SpriteMapSelectMenuArtist
     SpriteLibrary.drawText(g, sb.toString(), dimsDrawX, maxMiniMapHeight+buffer, drawScale);
 
     // Draw the number of each type of property on this map.
-    int sqSize = SpriteLibrary.baseSpriteSize*drawScale; // Figure out how large "1 tile" is in pixels.
+
     int propsDrawX = nameSectionDrawWidth + (2*buffer) - sqSize; // Map name pane plus generous buffer, minus one square (building sprites are 2x2).
-    int propsDrawY = maxMiniMapHeight+buffer+(characterHeight*drawScale)+buffer - sqSize; // Map  pane plus "# players" string plus buffer, minus one sq.
+    int propsDrawY = maxMiniMapHeight+buffer+(characterHeight*drawScale)+buffer - (sqSize/2); // Map  pane plus "# players" string plus buffer, minus 1/2sq.
 
     // Define an array with all the property types we care to enumerate.
     Terrains[] propertyTypes = {Terrains.CITY, Terrains.FACTORY};
