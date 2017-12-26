@@ -489,13 +489,12 @@ public class SpriteMapView extends MapView
    */
   private void drawCommanderOverlay(Graphics g)
   {
-    // TODO: Move CO overlay based on the cursor location on the screen,
-    // rather than the cursor location on the map.
-    if( !overlayIsLeft && myGame.getCursorX() > (myGame.gameMap.mapWidth - 1) * 3 / 5 )
+    // Choose the CO overlay location based on the cursor location on the screen.
+    if( !overlayIsLeft && (myGame.getCursorX()-mapViewX) > (mapTilesToDrawX - 1) * 3 / 5 )
     {
       overlayIsLeft = true;
     }
-    if( overlayIsLeft && myGame.getCursorX() < myGame.gameMap.mapWidth * 2 / 5 )
+    if( overlayIsLeft && (myGame.getCursorX()-mapViewX) < mapTilesToDrawX * 2 / 5 )
     {
       overlayIsLeft = false;
     }
