@@ -74,7 +74,7 @@ public class SpriteMainUIView implements IView
 
     // We start by assuming the highlighted option will be drawn centered.
     int xCenter = windowWidth / 2;
-    int yCenter = SpriteOptions.getScreenDimensions().height / 2;
+    int yCenter = 80*SpriteOptions.getDrawScale();
 
     // If we are moving from one highlighted option to another, calculate the intermediate draw location.
     if( animHighlightedOption != highlightedOption )

@@ -16,6 +16,7 @@ import Test.TestMain;
 import UI.InputHandler;
 import UI.MainUIController;
 import UI.Art.SpriteArtist.SpriteEngine;
+import UI.Art.SpriteArtist.SpriteOptions;
 
 public class Driver implements ActionListener, KeyListener
 {
@@ -68,9 +69,16 @@ public class Driver implements ActionListener, KeyListener
     // Store off the old controller/view so we can return to them.
     oldView = gameView.view;
     oldController = gameController;
+
     gameController = newControl;
-    gameView.setView(newView);
-    gameWindow.getContentPane().setSize(newView.getPreferredDimensions());
+    // If the new View is valid (it may not be if we are returning to a
+    // previously-stored state), then request it keep our screen dimensions.
+    if( null != newView )
+    {
+      newView.setPreferredDimensions(gameView.getWidth(), gameView.getHeight());
+      gameView.setView(newView);
+      gameWindow.getContentPane().setSize(newView.getPreferredDimensions());
+    }
     gameWindow.pack(); // Resize the window to match the new view's preferences.
   }
 
@@ -109,10 +117,11 @@ public class Driver implements ActionListener, KeyListener
       // Pass the action on to the main game controller; if it says it's done, switch to previous state.
       if(gameController.handleInput(action))
       {
-        // Clean up old controller/view (hah) and reinstate the previous ones.
+        // Reinstate the previous controller/view.
         // If the top-level controller returns done, it's time to exit.
-        gameController = oldController;
-        gameView.setView(oldView);
+        changeGameState( oldController, oldView );
+
+        // We've switched back to these, now make sure we don't do it again (forever).
         oldController = null;
         oldView = null;
       }

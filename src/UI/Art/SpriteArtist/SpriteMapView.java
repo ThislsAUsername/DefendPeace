@@ -410,7 +410,7 @@ public class SpriteMapView extends MapView
       for( int x = drawX-1; x < drawX+mapTilesToDrawX+1; ++x )
       {
         // Since we are trying to draw a ring of objects around the viewable space to
-        // ensure smooth scrolling, make sure we aren't running of the edge of the map.
+        // ensure smooth scrolling, make sure we aren't running off the edge of the map.
         if(myGame.gameMap.isLocationValid(x, y))
         {
           // Draw any terrain object here, followed by any unit present.
