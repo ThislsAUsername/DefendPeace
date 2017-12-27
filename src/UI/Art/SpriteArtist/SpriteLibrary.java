@@ -168,8 +168,7 @@ public class SpriteLibrary
         ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/factory_clear.png"), w * 2, h * 2);
         break;
       case AIRPORT:
-        // TODO: get actual sprites for this
-        ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/hq_clear.png"), w * 2, h * 2);
+        ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/airport_clear.png"), w * 2, h * 2);
         break;
       case SEAPORT:
         ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/seaport_clear.png"), w * 2, h * 2);
