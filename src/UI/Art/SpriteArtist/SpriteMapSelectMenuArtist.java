@@ -136,7 +136,7 @@ public class SpriteMapSelectMenuArtist
     int propsDrawY = maxMiniMapHeight+buffer+(characterHeight*drawScale)+buffer - (sqSize/2); // Map  pane plus "# players" string plus buffer, minus 1/2sq.
 
     // Define an array with all the property types we care to enumerate.
-    Terrains[] propertyTypes = {Terrains.CITY, Terrains.FACTORY};
+    Terrains[] propertyTypes = {Terrains.CITY, Terrains.FACTORY, Terrains.AIRPORT, Terrains.SEAPORT};
     for(int i = 0; i < propertyTypes.length; ++i)
     {
       Terrains terrain = propertyTypes[i];
