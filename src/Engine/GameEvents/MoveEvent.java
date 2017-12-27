@@ -38,8 +38,13 @@ public class MoveEvent implements GameEvent
       Path.PathNode endpoint = unitPath.getEnd();
       Location loc = gameMap.getLocation(endpoint.x, endpoint.y);
 
+      // If the unit is already at the destination, we don't need to move it.
+      if(endpoint.x == unit.x && endpoint.y == unit.y)
+      {
+        unit.isTurnOver = true;
+      }
       // Make sure it is valid to move this unit to its destination.
-      if( loc.getResident() == null && unit.model.propulsion.getMoveCost(loc.getEnvironment()) < 99)
+      else if( loc.getResident() == null && unit.model.propulsion.getMoveCost(loc.getEnvironment()) < 99)
       {
         gameMap.moveUnit(unit, endpoint.x, endpoint.y);
 
