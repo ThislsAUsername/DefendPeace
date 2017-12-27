@@ -369,6 +369,7 @@ public class SpriteLibrary
       case LANDER:
         break;
       case MD_TANK:
+        spriteFile = "res/unit/mdtank_map.png";
         break;
       case MECH:
         spriteFile = "res/unit/mech_map.png";
