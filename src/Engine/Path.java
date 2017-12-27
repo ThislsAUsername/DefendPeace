@@ -2,6 +2,9 @@ package Engine;
 
 import java.util.ArrayList;
 
+import Terrain.GameMap;
+import Units.UnitModel;
+
 /**
  * Path stores a list of waypoints with associated times to reach them. Once all 
  *   waypoints are stored, call start() to begin the movement. Subsequent calls
@@ -155,6 +158,17 @@ public class Path
   public int getPathLength()
   {
     return waypoints.size();
+  }
+
+  public int getFuelCost(UnitModel model, GameMap map)
+  {
+    int cost = 0;
+    for (int i = 1; i < waypoints.size(); i++)
+    {
+      PathNode loc = waypoints.get(i);
+      cost += model.propulsion.getMoveCost(map.getEnvironment(loc.x, loc.y));
+    }
+    return cost;
   }
 
   public PathNode getWaypoint(int wpt)
