@@ -160,9 +160,13 @@ public class Path
     return waypoints.size();
   }
 
+  /**
+   * @return the amount of fuel it would cost to travel this path with the given unit type 
+  **/
   public int getFuelCost(UnitModel model, GameMap map)
   {
     int cost = 0;
+    // We iterate from 1 because the first waypoint is the unit's initial position.
     for (int i = 1; i < waypoints.size(); i++)
     {
       PathNode loc = waypoints.get(i);
