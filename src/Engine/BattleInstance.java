@@ -4,6 +4,7 @@ import Engine.Combat.BattleSummary;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Units.Unit;
+import Units.UnitModel.ChassisEnum;
 
 public class BattleInstance
 {
@@ -23,7 +24,7 @@ public class BattleInstance
    * @param attackerX
    * @param attackerY
    */
-  public BattleInstance(Unit pAttacker, Unit pDefender, GameMap map, int attackerX, int attackerY )
+  public BattleInstance(Unit pAttacker, Unit pDefender, GameMap map, int attackerX, int attackerY)
   {
     attacker = pAttacker;
     defender = pDefender;
@@ -48,7 +49,8 @@ public class BattleInstance
     double attackerHPLoss = 0;
 
     // Set up our scenario.
-    BattleParams attackInstance = new BattleParams( attacker, defender, battleRange, attackerMoved, gameMap.getEnvironment(defenderX, defenderY) );
+    BattleParams attackInstance = new BattleParams(attacker, defender, battleRange, attackerMoved,
+        gameMap.getEnvironment(defenderX, defenderY));
 
     // Last-minute adjustments.
     attacker.CO.applyCombatModifiers(this); // TODO: pass BattleParams instead?
@@ -60,7 +62,8 @@ public class BattleInstance
     if( canCounter && (defender.getHP() > defenderHPLoss) )
     {
       // New battle instance with defender counter-attacking.
-      BattleParams defendInstance = new BattleParams( defender, attacker, battleRange, false, gameMap.getEnvironment(attackerX, attackerY) );
+      BattleParams defendInstance = new BattleParams(defender, attacker, battleRange, false,
+          gameMap.getEnvironment(attackerX, attackerY));
       defendInstance.attackerHP -= defenderHPLoss; // Account for the first attack's damage to the now-attacker.
 
       // TODO: Let the COs take another pass at modifying things?
@@ -69,8 +72,8 @@ public class BattleInstance
     }
 
     // Build and return the BattleSummary.
-    return new BattleSummary( attacker, defender, gameMap.getEnvironment(attackerX, attackerY).terrainType,
-        gameMap.getEnvironment(defenderX, defenderY).terrainType, attackerHPLoss, defenderHPLoss );
+    return new BattleSummary(attacker, defender, gameMap.getEnvironment(attackerX, attackerY).terrainType,
+        gameMap.getEnvironment(defenderX, defenderY).terrainType, attackerHPLoss, defenderHPLoss);
   }
 
   /**
@@ -92,7 +95,13 @@ public class BattleInstance
       attackerHP = attacker.getHP();
       defenseFactor = defender.model.getDefenseRatio();
       defenderHP = defender.getHP();
-      terrainDefense = battleground.getDefLevel();
+      terrainDefense = 0;
+      // Air units shouldn't get terrain defense
+      if( ChassisEnum.AIR_HIGH != defender.model.chassis && ChassisEnum.AIR_LOW != defender.model.chassis )
+      {
+        // getDefLevel returns the number of terrain stars. Since we're using %Def, we need to multiply by 10. However, we do that when we multiply by HP in calculateDamage.
+        terrainDefense = battleground.getDefLevel();
+      }
     }
 
     public double calculateDamage()

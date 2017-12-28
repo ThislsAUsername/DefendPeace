@@ -182,6 +182,7 @@ public class TestGameEvent extends TestCase
     Unit apc = addUnit(testMap, testCo1, UnitEnum.APC, 3, 2);
 
     Path path = new Path(1.0); // TODO: Why do we have to provide a speed here?
+    path.addWaypoint(3, 3); // we need two waypoints to not break compatibility with MoveEvent, since it assumes the first waypoint isn't used.
     path.addWaypoint(7, 5); // A suitable place to move (should be the middle of the road in Firing Range).
 
     // Move the infantry - Note that MoveEvent does not verify that this is a valid move for the unit. This is
