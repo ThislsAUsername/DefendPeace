@@ -62,7 +62,13 @@ public class Environment
       case CITY:
         return 3;
       case FACTORY:
-        return 4;
+        return 3;
+      case SEAPORT:
+        return 3;
+      case AIRPORT:
+        return 3;
+      case LAB:
+        return 3;
       case HQ:
         return 4;
       case SHOAL:

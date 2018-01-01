@@ -260,6 +260,12 @@ public class MapController implements IController
           currentMovePath = null;
           changeInputMode(InputMode.ACTIONMENU);
         }
+        // if we're selecting an enemy unit, hitting enter again will drop that selection
+        if( currentAction.getActor().CO != myGame.activeCO )
+        {
+          // TODO: re-selecting the unit should do a threat range check?
+          changeInputMode(InputMode.MAP);
+        }
         break;
       case BACK:
         changeInputMode(InputMode.MAP);
