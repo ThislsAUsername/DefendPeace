@@ -29,26 +29,26 @@ public class SpriteLibrary
   private static final Color PURPLE = new Color(231, 123, 255 );
 
   // Map Building colors.
-  public static final Color[] defaultMapColors = { new Color(70, 70, 70), new Color(110, 110, 110), new Color(160, 160, 160),
-      new Color(200, 200, 200), new Color(245, 245, 245) };
-  private static Color[] pinkMapBuildingColors = { new Color(255, 219, 74), new Color(190, 90, 90), new Color(240, 140, 140),
+  public static final Color[] defaultMapColors = { new Color(40, 40, 40), new Color(70, 70, 70), new Color(110, 110, 110), new Color(160, 160, 160),
+      new Color(200, 200, 200), new Color(231, 231, 231) };
+  private static Color[] pinkMapBuildingColors = { new Color(142, 26, 26), new Color(255, 219, 74), new Color(190, 90, 90), new Color(240, 140, 140),
       new Color(250, 190, 190), new Color(255, 245, 245) };
-  private static Color[] cyanMapBuildingColors = { new Color(255, 219, 74), new Color(77, 157, 157), new Color(130, 200, 200),
+  private static Color[] cyanMapBuildingColors = { new Color(0, 105, 105), new Color(255, 219, 74), new Color(77, 157, 157), new Color(130, 200, 200),
       new Color(200, 230, 230), new Color(245, 255, 255) };
-  private static Color[] orangeMapBuildingColors = { new Color(255, 237, 29), new Color(139, 77, 20), new Color(231, 139, 41),
+  private static Color[] orangeMapBuildingColors = { new Color(130, 56, 0), new Color(255, 237, 29), new Color(139, 77, 20), new Color(231, 139, 41),
       new Color(243, 186, 121), new Color(255, 234, 204) };
-  private static Color[] purpleMapBuildingColors = { new Color(255, 207, 95), new Color(133, 65, 130), new Color(174, 115, 189),
+  private static Color[] purpleMapBuildingColors = { new Color(90, 14, 99), new Color(255, 207, 95), new Color(133, 65, 130), new Color(174, 115, 189),
     new Color(222, 171, 240), new Color(255, 231, 255) };
 
   // Map Unit colors.
-  private static Color[] pinkMapUnitColors = { new Color(177, 62, 62), new Color(234, 100, 100), new Color(255, 136, 136),
-      new Color(255, 175, 175), new Color(255, 230, 230) };
-  private static Color[] cyanMapUnitColors = { new Color(0, 105, 105), new Color(0, 170, 170), new Color(0, 215, 215),
-      new Color(0, 255, 255), new Color(195, 255, 255), };
-  private static Color[] orangeMapUnitColors = { new Color(163, 77, 0), new Color(234, 139, 7), new Color(255, 160, 65),
-      new Color(255, 186, 97), new Color(255, 225, 183), };
-  private static Color[] purpleMapUnitColors = { new Color(90, 56, 99), new Color(181, 73, 198), new Color(201, 98, 223),
-    new Color(222, 171, 240), new Color(243, 210, 255), };
+  private static Color[] pinkMapUnitColors = { new Color(142, 26, 26), new Color(199, 62, 62), new Color(248, 100, 100), new Color(255, 136, 136),
+      new Color(255, 175, 175), new Color(255, 201, 201) };
+  private static Color[] cyanMapUnitColors = { new Color(0, 105, 105), new Color(0, 170, 170), new Color(0, 215, 215), new Color(0, 245, 245),
+      new Color(121, 255, 255), new Color(195, 255, 255), };
+  private static Color[] orangeMapUnitColors = { new Color(130, 56, 0), new Color(204, 103, 7), new Color(245, 130, 14), new Color(255, 160, 30),
+      new Color(255, 186, 60), new Color(255, 225, 142), };
+  private static Color[] purpleMapUnitColors = { new Color(90, 14, 99), new Color(132, 41, 148), new Color(181, 62, 198), new Color(201, 98, 223),
+    new Color(231, 123, 255), new Color(243, 180, 255), };
 
   private static HashMap<Color, ColorPalette> buildingColorPalettes = new HashMap<Color, ColorPalette>(){
     private static final long serialVersionUID = 1L;
@@ -379,6 +379,7 @@ public class SpriteLibrary
       case LANDER:
         break;
       case MD_TANK:
+        spriteFile = "res/unit/mdtank_map.png";
         break;
       case MECH:
         spriteFile = "res/unit/mech_map.png";
@@ -395,6 +396,7 @@ public class SpriteLibrary
       case T_COPTER:
         break;
       case TANK:
+        spriteFile = "res/unit/tank_map.png";
         break;
     }
     return spriteFile;
