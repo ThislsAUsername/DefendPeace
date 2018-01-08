@@ -18,7 +18,7 @@ public class UnitModel
   // Subs are ships unless they're submerged.
   public enum ChassisEnum
   {
-    TROOP, TANK, SHIP, SUBMERGED, AIR_LOW, AIR_HIGH
+    TROOP, TANK, AIR_LOW, AIR_HIGH, SHIP, SUBMERGED
   };
 
   public String name;

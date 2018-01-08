@@ -7,30 +7,30 @@ public class ChassisDamage extends DamageStrategy
 {
 
   // format is [attacker][defender]
-  // defenders: TROOP, TANK, SHIP, SUBMERGED, AIR_LOW, AIR_HIGH
+  // defenders: TROOP, TANK, AIR_LOW, AIR_HIGH, SHIP, SUBMERGED
   private static int[][] damageChart = {
-      { 50,  5,  0,  0, 10,  0 }, // INFANTRYMGUN
-      {  0, 35,  0,  0,  0,  0 }, // MECHZOOKA
-      { 60,  8,  0,  0, 15,  0 }, // MECHMGUN
-      { 70,  5,  0,  0, 20,  0 }, // RECONMGUN
-      {  0, 45, 10,  0,  0,  0 }, // TANKCANNON
-      { 70,  5,  0,  0, 20,  0 }, // TANKMGUN
-      {  0, 60, 13,  0,  0,  0 }, // MD_TANKCANNON
-      { 85,  5,  0,  0, 25,  0 }, // MD_TANKMGUN
-      {  0, 80, 17,  0,  0,  0 }, // NEOCANNON
-      {100, 10,  0,  0, 40,  0 }, // NEOMGUN
-      { 90, 50, 55,  0,  0,  0 }, // ARTILLERYCANNON
-      { 95, 60, 65,  0,  0,  0 }, // ROCKETS
-      {105, 10,  0,  0,110, 70 }, // ANTI_AIRMGUN
-      {  0,  0,  0,  0,120,100 }, // MOBILESAM
-      {  0,  0,  0,  0,120, 60 }, // FIGHTERMISSILES
-      {115,100, 80,  0,  0,  0 }, // BOMBERBOMBS
-      {  0, 50, 25,  0,  0,  0 }, // B_COPTERROCKETS
-      { 70,  8,  0,  0, 70,  0 }, // B_COPTERMGUN
-      { 75, 65, 65,  0,  0,  0 }, // BATTLESHIPCANNON
-      {  0,  0, 65, 65,  0,  0 }, // CRUISERTORPEDOES
-      {  0,  0,  0,  0,120,105 }, // CRUISERMGUN
-      {  0,  0, 60, 60,  0,  0 }  // SUBTORPEDOES
+      { 55, 25, 30,  0,  0,  0 }, // INFANTRYMGUN
+      {  0, 85,  0,  0,  0,  0 }, // MECHZOOKA
+      { 65, 35, 35,  0,  0,  0 }, // MECHMGUN
+      { 70, 55, 55,  0,  0,  0 }, // RECONMGUN
+      { 25, 85,  0,  0, 10,  0 }, // TANKCANNON
+      { 75, 55, 40,  0,  0,  0 }, // TANKMGUN
+      { 30,105,  0,  0, 45,  0 }, // MD_TANKCANNON
+      {105, 55, 45,  0,  0,  0 }, // MD_TANKMGUN
+      { 35,125,  0,  0, 50,  0 }, // NEOCANNON
+      {125, 75, 55,  0,  0,  0 }, // NEOMGUN
+      { 90, 80,  0,  0, 65,  0 }, // ARTILLERYCANNON
+      { 95, 90,  0,  0, 85,  0 }, // ROCKETS
+      {105, 60,120, 75,  0,  0 }, // ANTI_AIRMGUN
+      {  0,  0,120,100,  0,  0 }, // MOBILESAM
+      {  0,  0,100,100,  0,  0 }, // FIGHTERMISSILES
+      {110,105,  0,  0, 95,  0 }, // BOMBERBOMBS
+      {  0, 65,  0,  0, 55,  0 }, // B_COPTERROCKETS
+      { 75, 35, 95,  0,  0,  0 }, // B_COPTERMGUN
+      { 95, 90,  0,  0, 95,  0 }, // BATTLESHIPCANNON
+      {  0,  0,  0,  0, 90, 90 }, // CRUISERTORPEDOES
+      {  0,  0,115, 65,  0,  0 }, // CRUISERMGUN
+      {  0,  0,  0,  0, 95, 55 }  // SUBTORPEDOES
       };
 
   /**
