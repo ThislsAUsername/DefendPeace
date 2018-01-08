@@ -15,11 +15,10 @@ public class UnitModel
     INFANTRY, MECH, RECON, TANK, MD_TANK, NEOTANK, APC, ARTILLERY, ROCKETS, ANTI_AIR, MOBILESAM, FIGHTER, BOMBER, B_COPTER, T_COPTER, BATTLESHIP, CRUISER, LANDER, SUB
   };
 
-  // NB: "Truck" is technically unnecessary, but I feel it may be useful for alternate damage systems.
-  // The rubric for what's a "truck" is whether the damage dealt to it by an infantry is >9%, not movetype.
+  // Subs are ships unless they're submerged.
   public enum ChassisEnum
   {
-    TROOP, TRUCK, TANK, SHIP, AIR_LOW, AIR_HIGH
+    TROOP, TANK, SHIP, SUBMERGED, AIR_LOW, AIR_HIGH
   };
 
   public String name;

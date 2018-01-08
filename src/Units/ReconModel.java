@@ -17,6 +17,6 @@ public class ReconModel extends UnitModel
 
   public ReconModel()
   {
-    super("Recon", Units.UnitModel.UnitEnum.RECON, ChassisEnum.TRUCK, 4000, 80, 0, 8, moveType, actions, healHabs, weapons);
+    super("Recon", Units.UnitModel.UnitEnum.RECON, ChassisEnum.TANK, 4000, 80, 0, 8, moveType, actions, healHabs, weapons);
   }
 }

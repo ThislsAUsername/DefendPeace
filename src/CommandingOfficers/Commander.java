@@ -164,7 +164,7 @@ public class Commander
         for( int i = 0; i < unitModels.size(); i++ )
         {
           UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
-          if (UnitModel.ChassisEnum.TROOP == chassis || UnitModel.ChassisEnum.TRUCK == chassis || UnitModel.ChassisEnum.TANK == chassis)
+          if (UnitModel.ChassisEnum.TROOP == chassis || UnitModel.ChassisEnum.TANK == chassis)
             shoppingList.add(unitModels.get(i));
         }
         break;
