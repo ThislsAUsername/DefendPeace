@@ -24,6 +24,7 @@ public class Unit
   public boolean isTurnOver;
   private double HP;
   public Weapon[] weapons;
+  private Weapon currentWeapon;
 
   public Unit(Commander co, UnitModel um)
   {
@@ -91,6 +92,7 @@ public class Unit
     // if we have no weapons, we can't hurt things
     if( weapons == null )
       return 0;
+    double maxDamage = 0;
     for( int i = 0; i < weapons.length; i++ )
     {
       // If the weapon isn't mobile, we shouldn't be able to fire if we moved.
@@ -98,30 +100,22 @@ public class Unit
       {
         continue;
       }
-      double damage = weapons[i].getDamage(target, range);
-      if( damage != 0 )
+      double currentDamage = weapons[i].getDamage(target, range);
+      if( maxDamage < currentDamage )
       {
-        return damage;
+        maxDamage = currentDamage;
+        currentWeapon = weapons[i];
       }
     }
-    return 0;
+    return maxDamage;
   }
 
   // for the purpose of letting the unit know it has attacked.
   public void fire(final Unit defender)
   {
-    UnitModel target = defender.model;
-    int i = 0;
-    for( ; i < weapons.length; i++ )
-    {
-      if( weapons[i].getDamage(target) != 0 )
-      {
-        break;
-      }
-    }
-    if( i == weapons.length )
+    if( null == currentWeapon )
       System.out.println("In " + model.name + "'s fire(): no valid weapon found");
-    weapons[i].fire();
+    currentWeapon.fire();
   }
 
   public int getHP()
