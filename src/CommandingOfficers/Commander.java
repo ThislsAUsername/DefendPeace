@@ -48,10 +48,8 @@ public class Commander
   public Commander(CommanderInfo info)
   {
     coInfo = info;
+
     // TODO Obviously we don't want to hard-code the UnitModel array.
-    
-    // Also TODO: It might still be better to have one unified unit model array, since wrangling multiple arrays is bothersome.
-    // However, that means we'd need an easy way to distinguish between land/sea/air units for various purposes.
     unitModels = new ArrayList<UnitModel>(19);
     unitModels.add(new InfantryModel());
     unitModels.add(new MechModel());

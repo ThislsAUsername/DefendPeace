@@ -67,6 +67,8 @@ public class SpriteMapView extends MapView
   private double mapViewDrawX;
   private double mapViewDrawY;
 
+  boolean dimensionsChanged = false; // If the window is resized, don't bother sliding the view into place; just snap.
+
   public SpriteMapView(GameInstance game)
   {
     // Create an initial image that can contain the entire map.
@@ -104,6 +106,34 @@ public class SpriteMapView extends MapView
   public Dimension getPreferredDimensions()
   {
     return new Dimension(mapViewWidth, mapViewHeight);
+  }
+
+  @Override
+  public void setPreferredDimensions(int width, int height)
+  {
+    // The user wants to use a specific amount of screen. Figure out how many tiles to draw for them.
+    mapViewWidth = width;
+    mapViewHeight = height;
+    int tileSize = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale();
+    mapTilesToDrawX = mapViewWidth / tileSize;
+    mapTilesToDrawY = mapViewHeight / tileSize;
+
+    // Cap the view width/height to the dimensions of the map.
+    if( mapTilesToDrawX > myGame.gameMap.mapWidth )
+    {
+      mapTilesToDrawX = myGame.gameMap.mapWidth;
+      mapViewWidth = mapTilesToDrawX * tileSize;
+    }
+    if( mapTilesToDrawY > myGame.gameMap.mapHeight )
+    {
+      mapTilesToDrawY = myGame.gameMap.mapHeight;
+      mapViewHeight = mapTilesToDrawY * tileSize;
+    }
+
+    // Let SpriteOptions know we are changing things.
+    SpriteOptions.setScreenDimensions(mapViewWidth, mapViewHeight);
+
+    dimensionsChanged = true; // Let render() know that the window was resized.
   }
 
   @Override
@@ -214,6 +244,15 @@ public class SpriteMapView extends MapView
       int drawMultiplier = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale();
       int drawX = (int)(mapViewDrawX * drawMultiplier);
       int drawY = (int)(mapViewDrawY * drawMultiplier);
+
+      // Make sure we specify draw coordinates that are valid per the underlying map image.
+      int maxDrawX = mapImage.getWidth() - mapViewWidth;
+      int maxDrawY = mapImage.getHeight() - mapViewHeight;
+      if( drawX > maxDrawX ) drawX = maxDrawX;
+      if( drawX < 0 ) drawX = 0;
+      if( drawY > maxDrawY ) drawY = maxDrawY;
+      if( drawY < 0 ) drawY = 0;
+
       mapArtist.drawBaseTerrain(mapGraphics, drawX, drawY, mapViewWidth, mapViewHeight);
 
       // Update the central sprite indices so animations happen in sync.
@@ -293,35 +332,50 @@ public class SpriteMapView extends MapView
     if( (mapViewX + mapTilesToDrawX) < (curX + buffer+1) )
     {
       mapViewX = curX - mapTilesToDrawX + buffer+1; // Move our view to keep the cursor in sight.
-      // Make sure we don't try to move the view off the map.
-      if( mapViewX + mapTilesToDrawX > gameMap.mapWidth ) mapViewX = gameMap.mapWidth - mapTilesToDrawX;
     }
     else if( (curX - buffer) < mapViewX )
     {
-      mapViewX = curX - buffer;
-      if( mapViewX < 0 ) mapViewX = 0;
+      mapViewX = curX - buffer; // Move our view to keep the cursor in sight.
     }
 
     // Now do the y-axis.
     if( (curY + buffer+1) >= (mapViewY + mapTilesToDrawY) )
     {
-      mapViewY = curY - mapTilesToDrawY + buffer+1;
-      if( mapViewY + mapTilesToDrawY > gameMap.mapHeight ) mapViewY = gameMap.mapHeight - mapTilesToDrawY;
+      mapViewY = curY - mapTilesToDrawY + buffer+1; // Move our view to keep the cursor in sight.
     }
     else if( (curY - buffer) < mapViewY )
     {
-      mapViewY = curY - buffer;
-      if( mapViewY < 0 ) mapViewY = 0;
+      mapViewY = curY - buffer; // Move our view to keep the cursor in sight.
     }
 
+    // Pin the view to the edge of the map (i.e., don't show dead
+    // space unless the window is larger than the map).
+    int maxViewX = gameMap.mapWidth - mapTilesToDrawX;
+    int maxViewY = gameMap.mapHeight - mapTilesToDrawY;
+    if( mapViewX > maxViewX ) mapViewX = maxViewX;
+    if( mapViewX < 0 ) mapViewX = 0;
+    if( mapViewY > maxViewY ) mapViewY = maxViewY;
+    if( mapViewY < 0 ) mapViewY = 0;
+
     // Recalculate the precise draw location for the view.
-    if( mapViewDrawX != mapViewX )
+    if( dimensionsChanged )
     {
-      mapViewDrawX += SpriteUIUtils.calculateSlideAmount(mapViewDrawX, mapViewX);
+      // If the window was resized, don't slide the view into
+      // place, just snap it to where it belongs.
+      dimensionsChanged = false;
+      mapViewDrawX = mapViewX;
+      mapViewDrawY = mapViewY;
     }
-    if( mapViewDrawY != mapViewY )
+    else
     {
-      mapViewDrawY += SpriteUIUtils.calculateSlideAmount(mapViewDrawY, mapViewY);
+      if( mapViewDrawX != mapViewX )
+      {
+        mapViewDrawX += SpriteUIUtils.calculateSlideAmount(mapViewDrawX, mapViewX);
+      }
+      if( mapViewDrawY != mapViewY )
+      {
+        mapViewDrawY += SpriteUIUtils.calculateSlideAmount(mapViewDrawY, mapViewY);
+      }
     }
   }
 
@@ -348,13 +402,15 @@ public class SpriteMapView extends MapView
   private void drawUnitsAndMapObjects(Graphics g)
   {
     // Draw terrain objects and units in order so they overlap correctly.
-    // Only bother iterating over the visible map space (plus a 1-square border).
-    for( int y = mapViewY-1; y < mapViewY+mapTilesToDrawY+1; ++y )
+    // Only bother iterating over the visible map space (plus a 2-square border).
+    int drawY = (int)mapViewDrawY;
+    int drawX = (int)mapViewDrawX;
+    for( int y = drawY-1; y < drawY+mapTilesToDrawY+2; ++y )
     {
-      for( int x = mapViewX-1; x < mapViewX+mapTilesToDrawX+1; ++x )
+      for( int x = drawX-1; x < drawX+mapTilesToDrawX+2; ++x )
       {
         // Since we are trying to draw a ring of objects around the viewable space to
-        // ensure smooth scrolling, make sure we aren't running of the edge of the map.
+        // ensure smooth scrolling, make sure we aren't running off the edge of the map.
         if(myGame.gameMap.isLocationValid(x, y))
         {
           // Draw any terrain object here, followed by any unit present.
@@ -433,13 +489,12 @@ public class SpriteMapView extends MapView
    */
   private void drawCommanderOverlay(Graphics g)
   {
-    // TODO: Move CO overlay based on the cursor location on the screen,
-    // rather than the cursor location on the map.
-    if( !overlayIsLeft && myGame.getCursorX() > (myGame.gameMap.mapWidth - 1) * 3 / 5 )
+    // Choose the CO overlay location based on the cursor location on the screen.
+    if( !overlayIsLeft && (myGame.getCursorX()-mapViewX) > (mapTilesToDrawX - 1) * 3 / 5 )
     {
       overlayIsLeft = true;
     }
-    if( overlayIsLeft && myGame.getCursorX() < myGame.gameMap.mapWidth * 2 / 5 )
+    if( overlayIsLeft && (myGame.getCursorX()-mapViewX) < mapTilesToDrawX * 2 / 5 )
     {
       overlayIsLeft = false;
     }

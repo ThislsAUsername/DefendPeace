@@ -309,7 +309,6 @@ public class TerrainSpriteSet
       case DUNES:
       case FACTORY:
       case AIRPORT:
-      case SEAPORT:
       case FOREST:
       case HQ:
       case LAB:
@@ -318,6 +317,7 @@ public class TerrainSpriteSet
       case ROAD:
         baseTerrain = Environment.Terrains.GRASS;
         break;
+      case SEAPORT:
       case SHOAL:
         baseTerrain = Environment.Terrains.SHOAL;
         break;

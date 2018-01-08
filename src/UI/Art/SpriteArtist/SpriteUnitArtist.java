@@ -3,8 +3,6 @@ package UI.Art.SpriteArtist;
 import java.awt.Graphics;
 
 import Engine.GameInstance;
-import Terrain.GameMap;
-import Terrain.Location;
 import Units.Unit;
 
 public class SpriteUnitArtist

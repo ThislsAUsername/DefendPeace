@@ -22,15 +22,28 @@ public class SpriteMainUIView implements IView
 
   private double animHighlightedOption = 0;
 
+  private int windowWidth;
+  private int windowHeight;
+
   public SpriteMainUIView( MainUIController control )
   {
     controller = control;
+    windowWidth = SpriteOptions.getScreenDimensions().width;
+    windowHeight = SpriteOptions.getScreenDimensions().height;
   }
 
   @Override
   public Dimension getPreferredDimensions()
   {
     return SpriteOptions.getScreenDimensions();
+  }
+
+  @Override
+  public void setPreferredDimensions(int width, int height)
+  {
+    windowWidth = width;
+    windowHeight = height;
+    SpriteOptions.setScreenDimensions(width, height);
   }
 
   @Override
@@ -61,9 +74,8 @@ public class SpriteMainUIView implements IView
     drawMenuBG(g, highlightedOption);
 
     // We start by assuming the highlighted option will be drawn centered.
-    Dimension dims = SpriteOptions.getScreenDimensions();
-    int xCenter = dims.width / 2;
-    int yCenter = dims.height / 2;
+    int xCenter = windowWidth / 2;
+    int yCenter = 80*SpriteOptions.getDrawScale();
 
     // If we are moving from one highlighted option to another, calculate the intermediate draw location.
     if( animHighlightedOption != highlightedOption )
@@ -72,8 +84,8 @@ public class SpriteMainUIView implements IView
       animHighlightedOption += slide;
     }
 
-    int optionSeparationX = SpriteOptions.getScreenDimensions().width / 6; // So we can evenly space the seven visible options.
-    int optionSeparationY = SpriteOptions.getScreenDimensions().height / 6;
+    int optionSeparationX = windowWidth / 6; // So we can evenly space the seven visible options.
+    int optionSeparationY = windowHeight / 6;
 
     // Figure out where to actually draw the currently-highlighted option. Note that this changes 
     //   immediately when up or down is pressed, and the new option becomes the basis for drawing.
@@ -84,7 +96,7 @@ public class SpriteMainUIView implements IView
     int layer = 0; // We start by drawing all options 0 distance from the highlighted one.
     for(int drawY = yBasisLoc, drawX = xBasisLoc;
         // This check ensures that we keep going until we are off the visible screen.
-        (drawY > 0 && drawY < dims.height);
+        layer < 4; // Each 'layer' is two menu options; one above and one below the currently-drawn ones.
         ++layer)
     {
       // Figure out how far from the basis to draw this option.
@@ -116,12 +128,12 @@ public class SpriteMainUIView implements IView
     // Get the background color for this option and draw our fancy pattern.
     Color drawColor = menuBGColors[highlightedOption];
     g.setColor(drawColor);
-    int frameWidth = SpriteOptions.getScreenDimensions().width;
+    int frameWidth = windowWidth;
     int drawScale = SpriteOptions.getDrawScale();
     g.fillRect(0, 0,  frameWidth, 68*drawScale);
     g.fillRect(0, 70*drawScale, frameWidth, drawScale);
     g.fillRect(0, 89*drawScale, frameWidth, drawScale);
-    g.fillRect(0, 92*drawScale, frameWidth, 68*drawScale);
+    g.fillRect(0, 92*drawScale, frameWidth, windowHeight - (92*drawScale));
   }
 
   /**
@@ -132,9 +144,9 @@ public class SpriteMainUIView implements IView
     // Get the correct image from SpriteLibrary, and then hand it back for drawing on location.
     // We don't need to bother normalizing option since Sprite.getFrame() handles that automagically.
     BufferedImage menuText = SpriteLibrary.getMainMenuOptions().getFrame(option);
-    
+
     // Only draw the image if it will actually show on the screen.
-    if( y > -1*menuText.getHeight() && y < SpriteOptions.getScreenDimensions().height + menuText.getHeight())
+    if( y > -1*menuText.getHeight() && y < windowHeight + menuText.getHeight())
     {
       SpriteLibrary.drawImageCenteredOnPoint(g, menuText, x, y, SpriteOptions.getDrawScale());
     }
