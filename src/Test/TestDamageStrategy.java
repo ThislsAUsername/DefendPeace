@@ -64,6 +64,7 @@ public class TestDamageStrategy extends TestCase
     unitModels.add(new LanderModel());
     unitModels.add(new SubModel());
 
+    // We build an array of weapons by taking each unit's weapons in turn.
     weaponModels = new ArrayList<WeaponModel>();
     for( UnitModel unit : unitModels )
     {
@@ -89,6 +90,11 @@ public class TestDamageStrategy extends TestCase
     return testPassed;
   }
 
+  /**
+   * The values in the output array denote how much extra damage each interaction has with the new system compared to the standard. Output can be negative.
+   * @param other: which damage strategy to compare
+   * @return an array comprising the difference between the two damage strategy results
+   */
   public int[][] getDeltas(DamageStrategy other)
   {
     int[][] deltas = new int[numWeaponModels][numUnitModels];
@@ -104,6 +110,10 @@ public class TestDamageStrategy extends TestCase
     return deltas;
   }
 
+  /**
+   * Uses getDeltas() to get the data it needs, then formats it decently for human consumption
+   * @return a string with the difference between the damage tables
+   */
   public String getDeltaString(DamageStrategy other)
   {
     String out = "Defenders: ";
