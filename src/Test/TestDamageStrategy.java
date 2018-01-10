@@ -85,7 +85,7 @@ public class TestDamageStrategy extends TestCase
 
     boolean testPassed = true;
     testPassed &= validate(true, "  Everything you know is wrong.");
-    System.out.println(getDeltaString(new StandardDamage()));
+//    System.out.println(getDeltaString(new StandardDamage()));
     return testPassed;
   }
 
