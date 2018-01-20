@@ -187,7 +187,7 @@ public class GameAction
         // Make sure this is a valid battle before creating the event.
         boolean moved = unitActor.x != moveX || unitActor.y != moveY;
         int range = Math.abs(moveX - unitTarget.x) + Math.abs(moveY - unitTarget.y);
-        if( unitTarget != null && (unitActor.getBaseDamage(unitTarget.model, range, moved) > 0) )
+        if( unitTarget != null && unitActor.canAttack(unitTarget.model, range, moved) )
         {
           sequence.add( new MoveEvent(unitActor, movePath) );
           BattleEvent event = new BattleEvent(unitActor, unitTarget, moveX, moveY, gameMap);
