@@ -30,7 +30,7 @@ public class Utils
             if( target != null && target.CO != unit.CO )
             {
               int range = Math.abs(xLoc - target.x) + Math.abs(yLoc - target.y);
-              if( unit.getBaseDamage(target.model, range, moved) > 0 )
+              if( unit.canAttack(target.model, range, moved) )
               {
                 map.getLocation(i, j).setHighlight(true);
               }

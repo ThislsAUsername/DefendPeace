@@ -24,7 +24,6 @@ public class Unit
   public boolean isTurnOver;
   private double HP;
   public Weapon[] weapons;
-  private Weapon currentWeapon;
 
   public Unit(Commander co, UnitModel um)
   {
@@ -83,39 +82,61 @@ public class Unit
   }
 
   /**
-   * @return the base damage this unit would do against the specified target,
-   * at the specified range, based on whether it will move before striking
-   * Chooses the first weapon on the list that can deal damage.
+   * @return whether or not this unit can attack the given unit type at the
+   * specified range, accounting for the possibility of moving first.
    */
-  public double getBaseDamage(UnitModel target, int range, boolean moved)
+  public boolean canAttack(UnitModel targetType, int range, boolean afterMoving)
   {
     // if we have no weapons, we can't hurt things
     if( weapons == null )
-      return 0;
+      return false;
+
+    boolean canHit = false;
+    for( int i = 0; i < weapons.length; i++ )
+    {
+      if( afterMoving && !weapons[i].model.canFireAfterMoving )
+      {
+        // If we are planning to move first, and the weapon
+        // can't shoot after moving, then move along.
+        continue;
+      }
+      if( weapons[i].getDamage(targetType, range) > 0 )
+      {
+        canHit = true;
+        break;
+      }
+    }
+    return canHit;
+  }
+
+  /**
+   * Select the weapon owned by this unit that can inflict the
+   * most damage against the chosen target
+   * @param target
+   * @param range
+   * @param afterMoving
+   * @return
+   */
+  public Weapon chooseWeapon(UnitModel targetType, int range, boolean afterMoving)
+  {
+    Weapon chosenWeapon = null;
     double maxDamage = 0;
     for( int i = 0; i < weapons.length; i++ )
     {
-      // If the weapon isn't mobile, we shouldn't be able to fire if we moved.
-      if( moved && !weapons[i].model.canFireAfterMoving )
+      Weapon currentWeapon = weapons[i];
+      // If the weapon isn't mobile, we cannot fire if we moved.
+      if( afterMoving && !currentWeapon.model.canFireAfterMoving )
       {
         continue;
       }
-      double currentDamage = weapons[i].getDamage(target, range);
-      if( maxDamage < currentDamage )
+      double currentDamage = currentWeapon.getDamage(targetType, range);
+      if( currentWeapon.getDamage(targetType, range) > maxDamage )
       {
+        chosenWeapon = currentWeapon;
         maxDamage = currentDamage;
-        currentWeapon = weapons[i];
       }
     }
-    return maxDamage;
-  }
-
-  // for the purpose of letting the unit know it has attacked.
-  public void fire(final Unit defender)
-  {
-    if( null == currentWeapon )
-      System.out.println("In " + model.name + "'s fire(): no valid weapon found");
-    currentWeapon.fire();
+    return chosenWeapon;
   }
 
   public int getHP()
