@@ -114,10 +114,10 @@ public class Unit
    * most damage against the chosen target
    * @param target
    * @param range
-   * @param moved
+   * @param afterMoving
    * @return
    */
-  public Weapon chooseWeapon(UnitModel targetType, int range, boolean moved)
+  public Weapon chooseWeapon(UnitModel targetType, int range, boolean afterMoving)
   {
     Weapon chosenWeapon = null;
     double maxDamage = 0;
@@ -125,7 +125,7 @@ public class Unit
     {
       Weapon currentWeapon = weapons[i];
       // If the weapon isn't mobile, we cannot fire if we moved.
-      if( moved && !currentWeapon.model.canFireAfterMoving )
+      if( afterMoving && !currentWeapon.model.canFireAfterMoving )
       {
         continue;
       }
