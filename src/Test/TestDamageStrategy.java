@@ -24,7 +24,6 @@ import Units.TankModel;
 import Units.UnitModel;
 import Units.UnitModel.UnitEnum;
 import Units.Weapons.WeaponModel;
-import Units.Weapons.Damage.ChassisDamage;
 import Units.Weapons.Damage.DamageStrategy;
 import Units.Weapons.Damage.StandardDamage;
 
