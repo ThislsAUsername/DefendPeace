@@ -3,7 +3,7 @@ package Units.Weapons.Damage;
 import Units.UnitModel;
 import Units.Weapons.WeaponModel;
 
-public class StandardDamage extends DamageStrategy
+public class BHRDamage extends DamageStrategy
 {
 
   // format is [attacker][defender]

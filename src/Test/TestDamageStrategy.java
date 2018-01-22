@@ -25,11 +25,11 @@ import Units.UnitModel;
 import Units.UnitModel.UnitEnum;
 import Units.Weapons.WeaponModel;
 import Units.Weapons.Damage.DamageStrategy;
-import Units.Weapons.Damage.StandardDamage;
+import Units.Weapons.Damage.BHRDamage;
 
 public class TestDamageStrategy extends TestCase
 {
-  private static DamageStrategy standardDamage = new StandardDamage();
+  private static DamageStrategy standardDamage = new BHRDamage();
   private static ArrayList<UnitModel> unitModels;
   private static ArrayList<WeaponModel> weaponModels;
   private static int numUnitModels = UnitModel.UnitEnum.values().length;
@@ -84,6 +84,8 @@ public class TestDamageStrategy extends TestCase
   {
     setupTest();
 
+    // This class is for characterizing damage strategies while we're figuring things out.
+    // We don't actually test anything, since the damage strategies we have are not supposed to be entirely comparable.
     boolean testPassed = true;
     testPassed &= validate(true, "  Everything you know is wrong.");
 //    System.out.println(getDeltaString(new StandardDamage()));
