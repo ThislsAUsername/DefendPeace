@@ -152,7 +152,7 @@ public class Path
       }
     }
 
-    return new XYCoord(pathX, pathY);
+    return new XYCoord((int) pathX, (int) pathY);
   }
 
   public int getPathLength()

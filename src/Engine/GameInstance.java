@@ -1,5 +1,7 @@
 package Engine;
 
+import java.util.HashMap;
+
 import Terrain.GameMap;
 import Terrain.Location;
 
@@ -11,6 +13,8 @@ public class GameInstance
   public CommandingOfficers.Commander activeCO = null;
   private int cursorX = 0;
   private int cursorY = 0;
+
+  HashMap<Integer, XYCoord> playerCursors = null;
 
   public GameInstance(GameMap map, CommandingOfficers.Commander[] cos)
   {
@@ -24,6 +28,22 @@ public class GameInstance
     activeCoNum = 0;
     activeCO = commanders[activeCoNum];
     activeCO.initTurn(gameMap);
+
+    // Set the initial cursor locations.
+    playerCursors = new HashMap<Integer, XYCoord>();
+    for( int i = 0; i < commanders.length; ++i )
+    {
+      if( commanders[i].HQLocation != null )
+      {
+        playerCursors.put(i, commanders[i].HQLocation);
+      }
+      else
+      {
+        System.out.println("Warning! Commander " + commanders[i].coInfo.name + " does not have an HQ location!");
+        playerCursors.put(i, new XYCoord(1, 1));
+      }
+    }
+    setCursorLocation(commanders[0].HQLocation.xCoord, commanders[0].HQLocation.yCoord);
   }
 
   public void setCursorLocation(int x, int y)
@@ -79,6 +99,9 @@ public class GameInstance
 
   public void turn()
   {
+    // Store the cursor location for the current CO.
+    playerCursors.put(activeCoNum, new XYCoord(cursorX, cursorY));
+
     // Find the next non-defeated CO.
     do
     {
@@ -89,6 +112,10 @@ public class GameInstance
       }
       activeCO = commanders[activeCoNum];
     } while( activeCO.isDefeated );
+
+    // Set the cursor to the new CO's last known cursor position.
+    cursorX = playerCursors.get(activeCoNum).xCoord;
+    cursorY = playerCursors.get(activeCoNum).yCoord;
 
     // Start the turn.
     activeCO.initTurn(gameMap);

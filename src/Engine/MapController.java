@@ -76,7 +76,6 @@ public class MapController implements IController
     confirmExitMenu = new InGameMenu<ConfirmExitEnum>(confirmExitOptions);
     inputMode = InputMode.MAP;
     isGameOver = false;
-    myGame.setCursorLocation(6, 5);
     coInfoMenu = new CO_InfoMenu(myGame.commanders.length);
     nextSelectedUnitIndex = 0;
   }

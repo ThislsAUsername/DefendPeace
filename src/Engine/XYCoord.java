@@ -3,10 +3,10 @@ package Engine;
 public class XYCoord
 {
 
-  public final double xCoord;
-  public final double yCoord;
+  public final int xCoord;
+  public final int yCoord;
 
-  public XYCoord(double x, double y)
+  public XYCoord(int x, int y)
   {
     xCoord = x;
     yCoord = y;
