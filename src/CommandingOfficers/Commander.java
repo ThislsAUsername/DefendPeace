@@ -3,11 +3,15 @@ package CommandingOfficers;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import CommandingOfficers.Modifiers.COModifier;
+import Engine.BattleInstance;
+import Engine.GameInstance;
+import Engine.XYCoord;
 import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.Location;
-import Units.AntiAirModel;
 import Units.APCModel;
+import Units.AntiAirModel;
 import Units.ArtilleryModel;
 import Units.BCopterModel;
 import Units.BattleshipModel;
@@ -43,7 +47,7 @@ public class Commander
   public int money = 0;
   public int incomePerCity = 1000;
   public boolean isDefeated = false;
-  public Location HQLocation = null;
+  public XYCoord HQLocation = null;
 
   public Commander(CommanderInfo info)
   {

@@ -41,8 +41,8 @@ public class GameMap
       {
         // If the location can be owned, make the assignment.
         XYCoord coord = mapInfo.COProperties[co][i];
-        int x = (int)coord.xCoord;
-        int y = (int)coord.yCoord;
+        int x = coord.xCoord;
+        int y = coord.yCoord;
         Location location = map[x][y];
         if(location.isCaptureable())
         {
@@ -53,7 +53,7 @@ public class GameMap
             if( COs[co].HQLocation == null )
             {
               System.out.println("Assigning HQ at " + x + ", " + y + " to " + COs[co]);
-              COs[co].HQLocation = location;
+              COs[co].HQLocation = new XYCoord(x, y);
             }
             // If the CO does have an HQ, turn this location into a city.
             else
@@ -66,6 +66,23 @@ public class GameMap
         else
         {
           System.out.println("Warning! CO specified as owner of an uncapturable location in map " + mapInfo.mapName);
+        }
+      }
+
+      // Warn if the CO still doesn't have a valid HQ.
+      if( COs[co].HQLocation == null )
+      {
+        System.out.println("Warning! CO does not have any HQ assigned!");
+
+        // We still need to set HQLocation to something, so just grab the first owned property.
+        if( mapInfo.COProperties[co].length > 0 )
+        {
+          COs[co].HQLocation = mapInfo.COProperties[co][0];
+        }
+        else
+        {
+          // This CO has no properties assigned at all. We don't support that kind of map at this point.
+          System.out.println("Warning! CO has no properties!");
         }
       }
     }
@@ -87,6 +104,12 @@ public class GameMap
       return null;
     }
     return map[w][h].getEnvironment();
+  }
+
+  /** Returns the Location at the specified location, or null if that Location does not exist. */
+  public Location getLocation(XYCoord location)
+  {
+    return getLocation(location.xCoord, location.yCoord);
   }
 
   /** Returns the Location at the specified location, or null if that Location does not exist. */
