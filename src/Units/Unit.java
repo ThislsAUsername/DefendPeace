@@ -259,6 +259,26 @@ public class Unit
               actions.add(GameAction.ActionType.UNLOAD);
             }
             break;
+          case RESUPPLY:
+            // Search for a unit in resupply range.
+            // Build an array of each adjacent location.
+            ArrayList<Location> locations = new ArrayList<Location>();
+            locations.add(map.getLocation(xLoc, yLoc - 1));
+            locations.add(map.getLocation(xLoc, yLoc + 1));
+            locations.add(map.getLocation(xLoc - 1, yLoc));
+            locations.add(map.getLocation(xLoc + 1, yLoc));
+
+            // For each location, see if there is a friendly unit to re-supply.
+            for( Location loc : locations )
+            {
+              Unit other = loc.getResident();
+              if( other != null && other.CO == CO )
+              {
+                actions.add(GameAction.ActionType.RESUPPLY);
+                break;
+              }
+            }
+            break;
           default:
             System.out
                 .println("getPossibleActions: Invalid action in model's possibleActions[" + i + "]: " + model.possibleActions[i]);

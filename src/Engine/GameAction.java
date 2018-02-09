@@ -21,7 +21,7 @@ public class GameAction
 {
   public enum ActionType
   {
-    INVALID, ATTACK, CAPTURE, LOAD, UNLOAD, WAIT
+    INVALID, ATTACK, CAPTURE, LOAD, RESUPPLY, UNLOAD, WAIT
   };
 
   private Unit unitActor = null;
@@ -117,7 +117,8 @@ public class GameAction
     boolean ready = false;
     if( moveX >= 0 && moveY >= 0 && actionType != ActionType.INVALID )
     {
-      if( actionType == ActionType.WAIT || actionType == ActionType.LOAD || actionType == ActionType.CAPTURE )
+      if( actionType == ActionType.WAIT || actionType == ActionType.LOAD || actionType == ActionType.CAPTURE
+          || actionType == ActionType.RESUPPLY )
       {
         ready = true;
       }
@@ -176,7 +177,7 @@ public class GameAction
     {
       case ATTACK:
       {
-        // ATTACK actions consist of
+        // ATTACK actions consists of
         //   MOVE
         //   BATTLE
         //   [DEATH]
@@ -220,7 +221,7 @@ public class GameAction
       }
       case CAPTURE:
       {
-        // CAPTURE actions consist of
+        // CAPTURE actions consists of
         //   MOVE
         //   CAPTURE
         //   [DEFEAT]
@@ -254,7 +255,7 @@ public class GameAction
       }
       case LOAD:
       {
-        // LOAD actions consist of
+        // LOAD actions consists of
         //   LOAD
 
         // Get the proposed transport.
@@ -278,9 +279,21 @@ public class GameAction
         }
         break;
       }
+      case RESUPPLY:
+      {
+        // RESUPPLY action consists of
+        //   MOVE
+        //   RESUPPLY
+
+        // Move to the target location.
+        sequence.add(new MoveEvent(unitActor, movePath));
+
+        // Use the TurnInitAction to add any resupply events to the sequence.
+        new TurnInitAction.ResupplyAction().initTurn(unitActor, gameMap, sequence);
+      }
       case UNLOAD:
       {
-        // UNLOAD actions consist of
+        // UNLOAD actions consists of
         //   MOVE (transport)
         //   UNLOAD
 
@@ -297,10 +310,10 @@ public class GameAction
       }
       case WAIT:
       {
-        // WAIT actions consist of
+        // WAIT actions consists of
         //   MOVE
 
-        // Move transport to the target location.
+        // Move to the target location.
         sequence.add( new MoveEvent(unitActor, movePath) );
         break;
       }

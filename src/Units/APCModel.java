@@ -13,7 +13,7 @@ public class APCModel extends UnitModel
 {
 
   private static final MoveType moveType = new Tread();
-  private static final ActionType[] actions = { ActionType.UNLOAD, ActionType.WAIT };
+  private static final ActionType[] actions = { ActionType.RESUPPLY, ActionType.UNLOAD, ActionType.WAIT };
   private static final Terrains[] healHabs = { Terrains.CITY, Terrains.FACTORY, Terrains.HQ };
 
   public APCModel()
