@@ -5,7 +5,9 @@ import java.util.Vector;
 
 import CommandingOfficers.Commander;
 import Engine.GameAction;
+import Engine.TurnInitAction;
 import Engine.Utils;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.UnitModel.UnitEnum;
@@ -24,6 +26,7 @@ public class Unit
   public boolean isTurnOver;
   private double HP;
   public Weapon[] weapons;
+  private ArrayList<TurnInitAction> turnInitActions;
 
   public Unit(Commander co, UnitModel um)
   {
@@ -34,20 +37,25 @@ public class Unit
     HP = model.maxHP;
     captureProgress = 0;
     captureTarget = null;
-    if( um.weaponModels != null )
+    if( model.weaponModels != null )
     {
-      weapons = new Weapon[um.weaponModels.length];
-      for( int i = 0; i < um.weaponModels.length; i++ )
+      weapons = new Weapon[model.weaponModels.length];
+      for( int i = 0; i < model.weaponModels.length; i++ )
       {
-        weapons[i] = new Weapon(um.weaponModels[i]);
+        weapons[i] = new Weapon(model.weaponModels[i]);
       }
     }
     if( model.holdingCapacity > 0 )
       heldUnits = new Vector<Unit>(model.holdingCapacity);
+
+    turnInitActions = new ArrayList<TurnInitAction>();
+    model.getTurnInitActions(turnInitActions);
   }
 
-  public void initTurn(Location locus)
+  public void initTurn(GameMap map, GameEventQueue events)
   {
+    Location locus = map.getLocation(x, y);
+
     // Only perform turn initialization for the unit if it is on the map.
     //   Units that are e.g. in a transport don't burn fuel, etc.
     if( null != locus )
@@ -59,6 +67,8 @@ public class Unit
         captureTarget = null;
         captureProgress = 0;
       }
+
+      // If the unit is not at max health, and is on a repair tile, heal it.
       if( HP < model.maxHP )
       {
         if( model.canRepairOn(locus) && locus.getOwner() == CO )
@@ -78,7 +88,12 @@ public class Unit
           }
         }
       }
-    }
+
+      for( TurnInitAction ta : turnInitActions )
+      {
+        ta.initTurn(this, map, events);
+      }
+    } // ~If location is valid.
   }
 
   /**
@@ -257,6 +272,26 @@ public class Unit
             if( heldUnits.size() > 0 )
             {
               actions.add(GameAction.ActionType.UNLOAD);
+            }
+            break;
+          case RESUPPLY:
+            // Search for a unit in resupply range.
+            // Build an array of each adjacent location.
+            ArrayList<Location> locations = new ArrayList<Location>();
+            locations.add(map.getLocation(xLoc, yLoc - 1));
+            locations.add(map.getLocation(xLoc, yLoc + 1));
+            locations.add(map.getLocation(xLoc - 1, yLoc));
+            locations.add(map.getLocation(xLoc + 1, yLoc));
+
+            // For each location, see if there is a friendly unit to re-supply.
+            for( Location loc : locations )
+            {
+              Unit other = loc.getResident();
+              if( other != null && other.CO == CO )
+              {
+                actions.add(GameAction.ActionType.RESUPPLY);
+                break;
+              }
             }
             break;
           default:

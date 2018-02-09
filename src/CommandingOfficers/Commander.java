@@ -4,9 +4,10 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 import CommandingOfficers.Modifiers.COModifier;
-import Engine.BattleInstance;
 import Engine.GameInstance;
 import Engine.XYCoord;
+import Engine.Combat.BattleInstance;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -31,9 +32,6 @@ import Units.TCopterModel;
 import Units.TankModel;
 import Units.Unit;
 import Units.UnitModel;
-import CommandingOfficers.Modifiers.COModifier;
-import Engine.GameInstance;
-import Engine.Combat.BattleInstance;
 import Units.UnitModel.UnitEnum;
 
 public class Commander
@@ -96,7 +94,7 @@ public class Commander
     modifiers.add( mod ); // Add to the list so the modifier can be reverted next turn.
   }
 
-  public void initTurn(GameMap map)
+  public void initTurn(GameMap map, GameEventQueue events)
   {
     // Accrue income for each city under your control.
     int turnIncome = 0;
@@ -121,9 +119,10 @@ public class Commander
       modifiers.remove(i);
     }
 
+    // Accumulate any turn-init events from units (e.g. re-supply).
     for( Unit unit : units )
     {
-      unit.initTurn(map.getLocation(unit.x, unit.y));
+      unit.initTurn(map, events);
     }
   }
 

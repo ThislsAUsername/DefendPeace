@@ -2,6 +2,7 @@ package Engine;
 
 import java.util.HashMap;
 
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
 
@@ -25,11 +26,9 @@ public class GameInstance
 
     gameMap = map;
     commanders = cos;
-    activeCoNum = 0;
-    activeCO = commanders[activeCoNum];
-    activeCO.initTurn(gameMap);
+    activeCoNum = -1; // No commander is active yet.
 
-    // Set the initial cursor locations.
+    // Set the initial cursor locations for each player.
     playerCursors = new HashMap<Integer, XYCoord>();
     for( int i = 0; i < commanders.length; ++i )
     {
@@ -43,7 +42,6 @@ public class GameInstance
         playerCursors.put(i, new XYCoord(1, 1));
       }
     }
-    setCursorLocation(commanders[0].HQLocation.xCoord, commanders[0].HQLocation.yCoord);
   }
 
   public void setCursorLocation(int x, int y)
@@ -97,7 +95,7 @@ public class GameInstance
     //		System.out.println("moveCursorRight");
   }
 
-  public void turn()
+  public void turn(GameEventQueue events)
   {
     // Store the cursor location for the current CO.
     playerCursors.put(activeCoNum, new XYCoord(cursorX, cursorY));
@@ -114,10 +112,11 @@ public class GameInstance
     } while( activeCO.isDefeated );
 
     // Set the cursor to the new CO's last known cursor position.
-    cursorX = playerCursors.get(activeCoNum).xCoord;
-    cursorY = playerCursors.get(activeCoNum).yCoord;
+    setCursorLocation(playerCursors.get(activeCoNum).xCoord, playerCursors.get(activeCoNum).yCoord);
 
-    // Start the turn.
-    activeCO.initTurn(gameMap);
+    // Initialize the next turn, recording any events that will occur.
+    activeCO.initTurn(gameMap, events);
+
+    // TODO: Add a turn-init event at the front.
   }
 }

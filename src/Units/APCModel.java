@@ -1,8 +1,10 @@
 package Units;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 import Engine.GameAction.ActionType;
+import Engine.TurnInitAction;
 import Terrain.Environment.Terrains;
 import Units.MoveTypes.MoveType;
 import Units.MoveTypes.Tread;
@@ -11,7 +13,7 @@ public class APCModel extends UnitModel
 {
 
   private static final MoveType moveType = new Tread();
-  private static final ActionType[] actions = { ActionType.UNLOAD, ActionType.WAIT };
+  private static final ActionType[] actions = { ActionType.RESUPPLY, ActionType.UNLOAD, ActionType.WAIT };
   private static final Terrains[] healHabs = { Terrains.CITY, Terrains.FACTORY, Terrains.HQ };
 
   public APCModel()
@@ -24,5 +26,11 @@ public class APCModel extends UnitModel
     {
       holdables.add(carryable[i]);
     }
+  }
+
+  @Override
+  public void getTurnInitActions(ArrayList<TurnInitAction> actions)
+  {
+    actions.add(new TurnInitAction.ResupplyAction());
   }
 }

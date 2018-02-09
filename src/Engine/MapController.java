@@ -78,6 +78,9 @@ public class MapController implements IController
     isGameOver = false;
     coInfoMenu = new CO_InfoMenu(myGame.commanders.length);
     nextSelectedUnitIndex = 0;
+
+    // Start the first turn.
+    startNextTurn();
   }
 
   /**
@@ -447,9 +450,7 @@ public class MapController implements IController
             changeInputMode(InputMode.CO_ABILITYMENU);
             break;
           case END_TURN:
-            nextSelectedUnitIndex = 0;
-            myGame.turn();
-            changeInputMode(InputMode.MAP);
+            startNextTurn();
             break;
           case QUIT_GAME:
             changeInputMode(InputMode.CONFIRMEXIT);
@@ -690,7 +691,10 @@ public class MapController implements IController
 
   public void animationEnded(GameEvent event, boolean animEventQueueIsEmpty)
   {
-    event.performEvent(myGame.gameMap);
+    if( null != event )
+    {
+      event.performEvent(myGame.gameMap);
+    }
 
     // If we are done animating the last action, check to see if the game is over.
     if( animEventQueueIsEmpty )
@@ -726,6 +730,15 @@ public class MapController implements IController
       // The animation for the last action just completed. Back to normal input mode.
       changeInputMode(InputMode.MAP);
     }
+  }
+
+  private void startNextTurn()
+  {
+    nextSelectedUnitIndex = 0;
+    GameEventQueue turnInitActions = new GameEventQueue();
+    myGame.turn(turnInitActions);
+    changeInputMode(InputMode.ANIMATION);
+    myView.animate(turnInitActions);
   }
 
   public CO_InfoMenu getCoInfoMenu()
