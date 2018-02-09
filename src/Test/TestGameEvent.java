@@ -254,17 +254,20 @@ public class TestGameEvent extends TestCase
     // Add some units.
     Unit apc = addUnit(testMap, testCo1, UnitEnum.APC, 2, 2);
     Unit mech = addUnit(testMap, testCo1, UnitEnum.MECH, 2, 3);
+    Unit recon = addUnit(testMap, testCo1, UnitEnum.RECON, 1, 8); // On the HQ
 
-    // Take the mech's assets.
+    // Take away ammo/fuel.
     int numWeapons = mech.weapons.length;
     for( int i = 0; i < numWeapons; ++i )
     {
       mech.weapons[i].ammo = 0;
     }
     mech.fuel = 0;
+    recon.fuel = 0;
 
-    // Double-check the mech is on empty.
+    // Double-check the units are out of bullets/gas.
     testPassed &= validate(mech.fuel == 0, "    Mech still has fuel, but shouldn't.");
+    testPassed &= validate(recon.fuel == 0, "    Recon still has fuel, but shouldn't.");
     for( int i = 0; i < numWeapons; ++i )
     {
       Weapon wpn = mech.weapons[i];
@@ -272,9 +275,10 @@ public class TestGameEvent extends TestCase
           + " ammo, but should be empty.");
     }
 
-    // Simulate a new turn for the APC; this should re-supply the mech.
+    // Simulate a new turn for the APC/Recon; the apc should re-supply the mech, and the recon should re-supply from the  HQ.
     GameEventQueue events = new GameEventQueue();
     apc.initTurn(testMap, events);
+    recon.initTurn(testMap, events);
     for( GameEvent event : events )
     {
       event.performEvent(testMap);
@@ -282,6 +286,7 @@ public class TestGameEvent extends TestCase
 
     // Make sure the mech has his mojo back.
     testPassed &= validate(mech.fuel == mech.model.maxFuel, "    Mech should have max fuel after resupply, but doesn't.");
+    testPassed &= validate(recon.fuel == recon.model.maxFuel, "    Recon should have max fuel after new turn, but doesn't.");
     for( int i = 0; i < numWeapons; ++i )
     {
       Weapon wpn = mech.weapons[i];
