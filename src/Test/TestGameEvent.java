@@ -252,8 +252,9 @@ public class TestGameEvent extends TestCase
     boolean testPassed = true;
 
     // Add some units.
-    Unit apc = addUnit(testMap, testCo1, UnitEnum.APC, 2, 2);
-    Unit mech = addUnit(testMap, testCo1, UnitEnum.MECH, 2, 3);
+    Unit apc = addUnit(testMap, testCo1, UnitEnum.APC, 1, 3);
+    Unit mech = addUnit(testMap, testCo1, UnitEnum.MECH, 1, 4);
+    Unit mech2 = addUnit(testMap, testCo1, UnitEnum.MECH, 3, 2);
     Unit recon = addUnit(testMap, testCo1, UnitEnum.RECON, 1, 8); // On the HQ
 
     // Take away ammo/fuel.
@@ -261,17 +262,23 @@ public class TestGameEvent extends TestCase
     for( int i = 0; i < numWeapons; ++i )
     {
       mech.weapons[i].ammo = 0;
+      mech2.weapons[i].ammo = 0;
     }
     mech.fuel = 0;
+    mech2.fuel = 0;
     recon.fuel = 0;
 
     // Double-check the units are out of bullets/gas.
     testPassed &= validate(mech.fuel == 0, "    Mech still has fuel, but shouldn't.");
+    testPassed &= validate(mech2.fuel == 0, "    Mech2 still has fuel, but shouldn't.");
     testPassed &= validate(recon.fuel == 0, "    Recon still has fuel, but shouldn't.");
     for( int i = 0; i < numWeapons; ++i )
     {
       Weapon wpn = mech.weapons[i];
-      testPassed &= validate((wpn.ammo == 0), "    Weapon " + wpn.model.toString() + "  still has " + wpn.ammo
+      testPassed &= validate((wpn.ammo == 0), "    Mech weapon " + wpn.model.toString() + "  still has " + wpn.ammo
+          + " ammo, but should be empty.");
+      Weapon wpn2 = mech2.weapons[i];
+      testPassed &= validate((wpn2.ammo == 0), "    Mech2 weapon " + wpn2.model.toString() + "  still has " + wpn2.ammo
           + " ammo, but should be empty.");
     }
 
@@ -284,14 +291,21 @@ public class TestGameEvent extends TestCase
       event.performEvent(testMap);
     }
 
+    // Give the APC a new GameAction to go resupply mech2.
+    GameAction resupplyAction = new GameAction(apc, 2, 2, GameAction.ActionType.RESUPPLY);
+    performGameAction(resupplyAction, testMap);
+
     // Make sure the mech has his mojo back.
-    testPassed &= validate(mech.fuel == mech.model.maxFuel, "    Mech should have max fuel after resupply, but doesn't.");
-    //testPassed &= validate(recon.fuel == recon.model.maxFuel, "    Recon should have max fuel after new turn, but doesn't.");
+    testPassed &= validate(mech.fuel == mech.model.maxFuel, "    Mech should have max fuel after turn init, but doesn't.");
+    testPassed &= validate(mech2.fuel == mech2.model.maxFuel, "    Mech2 should have max fuel after resupply, but doesn't.");
+    testPassed &= validate(recon.fuel == recon.model.maxFuel, "    Recon should have max fuel after new turn, but doesn't.");
     for( int i = 0; i < numWeapons; ++i )
     {
       Weapon wpn = mech.weapons[i];
       testPassed &= validate((wpn.ammo == wpn.model.maxAmmo),
           "    Mech weapon should have max ammo after resupply.");
+      Weapon wpn2 = mech2.weapons[i];
+      testPassed &= validate((wpn2.ammo == wpn2.model.maxAmmo), "    Mech2 weapon should have max ammo after resupply.");
     }
 
     // Clean up.
