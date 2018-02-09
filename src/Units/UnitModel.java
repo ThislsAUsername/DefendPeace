@@ -1,10 +1,12 @@
 package Units;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 import Engine.GameAction.ActionType;
-import Terrain.Location;
+import Engine.TurnInitAction;
 import Terrain.Environment.Terrains;
+import Terrain.Location;
 import Units.MoveTypes.MoveType;
 import Units.Weapons.WeaponModel;
 
@@ -99,4 +101,10 @@ public class UnitModel
     }
     return compatible;
   }
+
+  /** Provides a hook for inheritors to supply actions to a unit.
+   * @param actions Assumed to be non-null. Model actions will be added to it.
+   */
+  public void getTurnInitActions(ArrayList<TurnInitAction> actions)
+  {}
 }

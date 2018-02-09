@@ -184,6 +184,11 @@ public class SpriteMapView extends MapView
     {
       loadNextEventAnimation();
     }
+    if( null == currentAnimation )
+    {
+      // Nothing to animate. Release control.
+      mapController.animationEnded(null, true);
+    }
   }
 
   /**

@@ -1,8 +1,10 @@
 package Units;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 import Engine.GameAction.ActionType;
+import Engine.TurnInitAction;
 import Terrain.Environment.Terrains;
 import Units.MoveTypes.MoveType;
 import Units.MoveTypes.Tread;
@@ -24,5 +26,11 @@ public class APCModel extends UnitModel
     {
       holdables.add(carryable[i]);
     }
+  }
+
+  @Override
+  public void getTurnInitActions(ArrayList<TurnInitAction> actions)
+  {
+    actions.add(new TurnInitAction.ResupplyAction());
   }
 }

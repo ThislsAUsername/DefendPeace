@@ -1,11 +1,5 @@
 package Test;
 
-import Terrain.Environment;
-import Terrain.GameMap;
-import Terrain.MapLibrary;
-import Units.Unit;
-import Units.UnitModel;
-import Units.UnitModel.UnitEnum;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderPatch;
 import CommandingOfficers.CommanderStrong;
@@ -14,10 +8,19 @@ import Engine.Path;
 import Engine.GameEvents.BattleEvent;
 import Engine.GameEvents.CaptureEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.LoadEvent;
 import Engine.GameEvents.MoveEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.UnloadEvent;
+import Terrain.Environment;
+import Terrain.GameMap;
+import Terrain.MapLibrary;
+import Units.Unit;
+import Units.UnitModel;
+import Units.UnitModel.UnitEnum;
+import Units.Weapons.Weapon;
 
 public class TestGameEvent extends TestCase
 {
@@ -45,6 +48,7 @@ public class TestGameEvent extends TestCase
     testPassed &= validate( testLoadUnloadEvent(), "  LoadUnloadEvent test failed.");
     testPassed &= validate( testMoveEvent(), "  MoveEvent test failed.");
     testPassed &= validate( testUnitDieEvent(), "  UnitDieEvent test failed.");
+    testPassed &= validate(testResupplyEvent(), "  Resupply test failed.");
     testPassed &= validate( testCommanderDefeatEvent(), "  CommanderDefeatEvent test failed."); // Put this one last because it alters the map.
     
     return testPassed;
@@ -239,6 +243,55 @@ public class TestGameEvent extends TestCase
     testPassed &= validate( testMap.getLocation(2, 3).getResident() == null, "    Mech did not vacate his space after death.");
 
     // No cleanup required.
+
+    return testPassed;
+  }
+
+  boolean testResupplyEvent()
+  {
+    boolean testPassed = true;
+
+    // Add some units.
+    Unit apc = addUnit(testMap, testCo1, UnitEnum.APC, 2, 2);
+    Unit mech = addUnit(testMap, testCo1, UnitEnum.MECH, 2, 3);
+
+    // Take the mech's assets.
+    int numWeapons = mech.weapons.length;
+    for( int i = 0; i < numWeapons; ++i )
+    {
+      mech.weapons[i].ammo = 0;
+    }
+    mech.fuel = 0;
+
+    // Double-check the mech is on empty.
+    testPassed &= validate(mech.fuel == 0, "    Mech still has fuel, but shouldn't.");
+    for( int i = 0; i < numWeapons; ++i )
+    {
+      Weapon wpn = mech.weapons[i];
+      testPassed &= validate((wpn.ammo == 0), "    Weapon " + wpn.model.toString() + "  still has " + wpn.ammo
+          + " ammo, but should be empty.");
+    }
+
+    // Simulate a new turn for the APC; this should re-supply the mech.
+    GameEventQueue events = new GameEventQueue();
+    apc.initTurn(testMap, events);
+    for( GameEvent event : events )
+    {
+      event.performEvent(testMap);
+    }
+
+    // Make sure the mech has his mojo back.
+    testPassed &= validate(mech.fuel == mech.model.maxFuel, "    Mech should have max fuel after resupply, but doesn't.");
+    for( int i = 0; i < numWeapons; ++i )
+    {
+      Weapon wpn = mech.weapons[i];
+      testPassed &= validate((wpn.ammo == wpn.model.maxAmmo),
+          "    Mech weapon should have max ammo after resupply.");
+    }
+
+    // Clean up.
+    testMap.removeUnit(apc);
+    testMap.removeUnit(mech);
 
     return testPassed;
   }

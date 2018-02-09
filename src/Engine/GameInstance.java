@@ -1,5 +1,6 @@
 package Engine;
 
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
 
@@ -7,7 +8,7 @@ public class GameInstance
 {
   public Terrain.GameMap gameMap;
   public CommandingOfficers.Commander[] commanders;
-  private int activeCoNum;
+  private int nextActiveCoNum;
   public CommandingOfficers.Commander activeCO = null;
   private int cursorX = 0;
   private int cursorY = 0;
@@ -21,9 +22,7 @@ public class GameInstance
 
     gameMap = map;
     commanders = cos;
-    activeCoNum = 0;
-    activeCO = commanders[activeCoNum];
-    activeCO.initTurn(gameMap);
+    nextActiveCoNum = 0;
   }
 
   public void setCursorLocation(int x, int y)
@@ -77,20 +76,22 @@ public class GameInstance
     //		System.out.println("moveCursorRight");
   }
 
-  public void turn()
+  public void turn(GameEventQueue events)
   {
     // Find the next non-defeated CO.
     do
     {
-      activeCoNum++;
-      if( activeCoNum > commanders.length - 1 )
+      activeCO = commanders[nextActiveCoNum];
+      nextActiveCoNum++;
+      if( nextActiveCoNum > commanders.length - 1 )
       {
-        activeCoNum = 0;
+        nextActiveCoNum = 0;
       }
-      activeCO = commanders[activeCoNum];
     } while( activeCO.isDefeated );
 
-    // Start the turn.
-    activeCO.initTurn(gameMap);
+    // TODO: Add a turn-init event at the front.
+
+    // Initialize the next turn, recording any events that will occur.
+    activeCO.initTurn(gameMap, events);
   }
 }

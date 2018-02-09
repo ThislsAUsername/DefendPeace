@@ -7,9 +7,9 @@ import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.Location;
 import UI.CO_InfoMenu;
-import UI.InputHandler;
 import UI.InGameMenu;
 import UI.InGameProductionMenu;
+import UI.InputHandler;
 import UI.MapView;
 import Units.Unit;
 import Units.UnitModel;
@@ -76,6 +76,9 @@ public class MapController implements IController
     isGameOver = false;
     myGame.setCursorLocation(6, 5);
     coInfoMenu = new CO_InfoMenu(myGame.commanders.length);
+
+    // Start the first turn.
+    startNextTurn();
   }
 
   /**
@@ -421,8 +424,7 @@ public class MapController implements IController
             changeInputMode(InputMode.CO_ABILITYMENU);
             break;
           case END_TURN:
-            myGame.turn();
-            changeInputMode(InputMode.MAP);
+            startNextTurn();
             break;
           case QUIT_GAME:
             changeInputMode(InputMode.CONFIRMEXIT);
@@ -663,7 +665,10 @@ public class MapController implements IController
 
   public void animationEnded(GameEvent event, boolean animEventQueueIsEmpty)
   {
-    event.performEvent(myGame.gameMap);
+    if( null != event )
+    {
+      event.performEvent(myGame.gameMap);
+    }
 
     // If we are done animating the last action, check to see if the game is over.
     if( animEventQueueIsEmpty )
@@ -699,6 +704,14 @@ public class MapController implements IController
       // The animation for the last action just completed. Back to normal input mode.
       changeInputMode(InputMode.MAP);
     }
+  }
+
+  private void startNextTurn()
+  {
+    GameEventQueue turnInitActions = new GameEventQueue();
+    myGame.turn(turnInitActions);
+    changeInputMode(InputMode.ANIMATION);
+    myView.animate(turnInitActions);
   }
 
   public CO_InfoMenu getCoInfoMenu()
