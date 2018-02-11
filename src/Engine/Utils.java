@@ -26,9 +26,9 @@ public class Utils
 
     // Loop through all the valid x and y offsets, as dictated by the max range, and add valid spaces to our collection.
     System.out.println("Finding tiles in range " + minRange + "-" + maxRange + " of " + origin);
-    for( int xOff = -maxRange; xOff <= maxRange; ++xOff )
+    for( int yOff = -maxRange; yOff <= maxRange; ++yOff )
     {
-      for( int yOff = -maxRange; yOff <= maxRange; ++yOff )
+      for( int xOff = -maxRange; xOff <= maxRange; ++xOff )
       {
         int tilex = origin.xCoord + xOff;
         int tiley = origin.yCoord + yOff;
