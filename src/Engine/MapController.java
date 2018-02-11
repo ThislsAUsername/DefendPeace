@@ -254,7 +254,6 @@ public class MapController implements IController
     {
       case UP:
         myGame.moveCursorUp();
-        // System.out.println("inMoveableSpace = " + inMoveableSpace);
         // Make sure we don't overshoot the reachable tiles by accident.
         if( inMoveableSpace && InputHandler.isUpHeld() && !myGame.getCursorLocation().isHighlightSet() )
         {

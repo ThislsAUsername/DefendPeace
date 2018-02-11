@@ -249,10 +249,6 @@ public class Unit
             {
               // Evaluate this weapon for targets if it has ammo, and if either the weapon
               // is mobile or we don't care if it's mobile (because we aren't moving).
-              System.out.println("ammo  : " + wpn.ammo);
-              System.out.println("mobile: " + wpn.model.canFireAfterMoving);
-              System.out.println("moved : " + moved);
-              System.out.println("!moved || mobile: " + (!moved || wpn.model.canFireAfterMoving));
               if( wpn.ammo > 0 && (!moved || wpn.model.canFireAfterMoving) )
               {
                 ArrayList<XYCoord> locations = Utils.findTargetsInRange(map, CO, moveLocation, wpn);

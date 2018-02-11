@@ -25,23 +25,17 @@ public class Utils
     ArrayList<XYCoord> locations = new ArrayList<XYCoord>();
 
     // Loop through all the valid x and y offsets, as dictated by the max range, and add valid spaces to our collection.
-    System.out.println("Finding tiles in range " + minRange + "-" + maxRange + " of " + origin);
     for( int yOff = -maxRange; yOff <= maxRange; ++yOff )
     {
       for( int xOff = -maxRange; xOff <= maxRange; ++xOff )
       {
-        int tilex = origin.xCoord + xOff;
-        int tiley = origin.yCoord + yOff;
-        System.out.println("  Checking " + tilex + ", " + tiley);
         int currentRange = Math.abs(xOff) + Math.abs(yOff);
         if( currentRange < minRange || currentRange > maxRange )
         {
-          System.out.println("    Not in desired range");
           // This location is not in the desired range; move to the next.
           continue;
         }
 
-        System.out.println("    Adding.");
         // Add this location to the set.
         locations.add(new XYCoord(origin.xCoord + xOff, origin.yCoord + yOff));
       }
@@ -58,13 +52,6 @@ public class Utils
     ArrayList<XYCoord> targets = new ArrayList<XYCoord>();
     for( XYCoord loc : locations )
     {
-      System.out.println("  Target at " + loc + "?");
-      System.out.println("    has unit: " + (map.getLocation(loc).getResident() != null));
-      if( map.getLocation(loc).getResident() != null )
-      {
-        System.out.println("    is enemy: " + (map.getLocation(loc).getResident().CO != co));
-        System.out.println("    can hit: " + (weapon.getDamage(map.getLocation(loc).getResident().model) > 0));
-      }
       if( map.getLocation(loc).getResident() != null && // Someone is there.
           map.getLocation(loc).getResident().CO != co && // They are not friendly.
           weapon.getDamage(map.getLocation(loc).getResident().model) > 0 ) // We can shoot them.
@@ -81,7 +68,6 @@ public class Utils
     map.clearAllHighlights();
     for( XYCoord loc : locations )
     {
-      System.out.println("Highlighting " + loc);
       map.getLocation(loc).setHighlight(true);
     }
   }
