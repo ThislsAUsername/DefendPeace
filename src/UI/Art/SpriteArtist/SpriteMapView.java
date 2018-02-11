@@ -275,15 +275,10 @@ public class SpriteMapView extends MapView
       Unit currentActor = mapController.getContemplatedActor();
       Path currentPath = mapController.getContemplatedMove();
 
-      // Draw the movement arrow if the user is contemplating a move.
-      if( null != currentPath )
+      // Draw the movement arrow if the user is contemplating a move/action (but not once the action commences).
+      if( null != currentPath && null == currentAnimation )
       {
         mapArtist.drawMovePath(mapGraphics, mapController.getContemplatedMove());
-      }
-      // Draw the movement arrow if the user is contemplating an action (but not once the action commences).
-      else if( null != currentPath && null == currentAnimation )
-      {
-        mapArtist.drawMovePath(mapGraphics, currentPath);
       }
 
       // Draw the currently-acting unit so it's on top of everything.
