@@ -282,13 +282,30 @@ public class Unit
             actionSet.add(new GameActionSet(new GameAction.WaitAction(this, movePath), false));
             break;
           case LOAD:
-            // Don't add - there's no unit there to board.
+            // We only get to here if there is no unit at the end of the move path, which means there is
+            //   no transport in this space to board. LOAD actions are handled down below.
             break;
           case UNLOAD:
-            //            if( heldUnits.size() > 0 )
-            //            {
-            //              actions.add(GameAction.ActionType.UNLOAD);
-            //            }
+            if( heldUnits.size() > 0 )
+            {
+              ArrayList<GameAction> unloadActions = new ArrayList<GameAction>();
+
+              // TODO: This could get messy real quick for transports with more cargo space. Figure out a
+              //       better way to handle this case.
+              for( Unit cargo : heldUnits )
+              {
+                ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, moveLocation, cargo);
+                for( XYCoord loc : dropoffLocations )
+                {
+                  unloadActions.add(new GameAction.UnloadAction(this, movePath, cargo, loc));
+                }
+              }
+
+              if( !unloadActions.isEmpty() )
+              {
+                actionSet.add(new GameActionSet(unloadActions));
+              }
+            }
             break;
           case RESUPPLY:
             // Search for a unit in resupply range.
@@ -317,9 +334,9 @@ public class Unit
       }
     }
     else
-    // There is a unit in the space we are evaluating. Only Load actions are supported in this case.
     {
-      //  actions.add(GameAction.ActionType.LOAD);
+      // There is another unit in the tile at the end of movePath. Only LOAD actions are supported in this case.
+      actionSet.add(new GameActionSet(new GameAction.LoadAction(this, movePath), false));
     }
 
     return actionSet;

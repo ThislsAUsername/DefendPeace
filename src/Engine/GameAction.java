@@ -4,8 +4,10 @@ import Engine.GameEvents.BattleEvent;
 import Engine.GameEvents.CaptureEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.LoadEvent;
 import Engine.GameEvents.MoveEvent;
 import Engine.GameEvents.UnitDieEvent;
+import Engine.GameEvents.UnloadEvent;
 import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -229,4 +231,122 @@ public interface GameAction
       return GameAction.ActionType.WAIT;
     }
   } // ~WaitAction
+
+  // ===========  LoadAction  =================================
+  public static class LoadAction implements GameAction
+  {
+    private Unit passenger = null;
+    private Path movePath = null;
+    private XYCoord moveLoc = null;
+
+    public LoadAction(Unit actor, Path path)
+    {
+      passenger = actor;
+      movePath = path;
+      moveLoc = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+    }
+
+    @Override
+    public GameEventQueue getEvents(GameMap map)
+    {
+      // LOAD actions consist of
+      //   MOVE
+      //   LOAD
+      GameEventQueue eventSequence = new GameEventQueue();
+
+      // Find the transport unit.
+      Unit transport = map.getLocation(moveLoc).getResident();
+
+      if( null != transport )
+      {
+        // Move to the transport.
+        eventSequence.add(new MoveEvent(passenger, movePath));
+
+        // Get in the transport.
+        eventSequence.add(new LoadEvent(passenger, transport));
+      }
+      else
+      {
+        System.out.println("Failed to find transport to create LOAD event. Aborting.");
+        eventSequence.clear();
+      }
+
+      return eventSequence;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return moveLoc;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return moveLoc;
+    }
+
+    @Override
+    public ActionType getType()
+    {
+      return GameAction.ActionType.LOAD;
+    }
+  } // ~LoadAction
+
+  // ===========  UnloadAction  =================================
+  public static class UnloadAction implements GameAction
+  {
+    private Unit transport = null;
+    private Unit cargo = null;
+    private Path movePath = null;
+    private XYCoord moveLoc = null;
+    private XYCoord dropLoc = null;
+
+    public UnloadAction(Unit actor, Path path, Unit passenger, XYCoord dropLocation)
+    {
+      transport = actor;
+      cargo = passenger;
+      movePath = path;
+      moveLoc = new XYCoord(path.getEnd().x, path.getEnd().y);
+      dropLoc = dropLocation;
+    }
+
+    @Override
+    public GameEventQueue getEvents(GameMap map)
+    {
+      // UNLOAD actions consist of
+      //   MOVE (transport)
+      //   UNLOAD
+      GameEventQueue eventSequence = new GameEventQueue();
+
+      // Move transport to the target location.
+      eventSequence.add(new MoveEvent(transport, movePath));
+
+      // If we have cargo and the landing zone is empty, we drop the cargo.
+      if( !transport.heldUnits.isEmpty() && map.isLocationEmpty(transport, dropLoc) )
+      {
+        eventSequence.add(new UnloadEvent(transport, cargo, dropLoc));
+      }
+
+      return eventSequence;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return moveLoc;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return dropLoc;
+    }
+
+    @Override
+    public ActionType getType()
+    {
+      return GameAction.ActionType.UNLOAD;
+    }
+  } // ~UnloadAction
 }

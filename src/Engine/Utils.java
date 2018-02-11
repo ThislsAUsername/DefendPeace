@@ -62,6 +62,23 @@ public class Utils
     return targets;
   }
 
+  /** Returns a list of locations at distance 1 from transportLoc that cargo can move on. */
+  public static ArrayList<XYCoord> findUnloadLocations(GameMap map, XYCoord transportLoc, Unit cargo)
+  {
+    ArrayList<XYCoord> locations = findLocationsInRange(map, transportLoc, 1);
+    ArrayList<XYCoord> dropoffLocations = new ArrayList<XYCoord>();
+    for( XYCoord loc : locations )
+    {
+      // Add any location that is empty and supports movement of the cargo unit.
+      if( map.isLocationEmpty(loc)
+          && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
+      {
+        dropoffLocations.add(loc);
+      }
+    }
+    return dropoffLocations;
+  }
+
   /** Sets the highlight of all tiles in the provided list, and unsets the highlight on all others. */
   public static void highlightLocations(GameMap map, ArrayList<XYCoord> locations)
   {

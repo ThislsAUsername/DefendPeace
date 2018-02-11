@@ -1,5 +1,6 @@
 package Engine.GameEvents;
 
+import Engine.XYCoord;
 import Terrain.GameMap;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -9,15 +10,13 @@ public class UnloadEvent implements GameEvent
 {
   private final Unit transport;
   private final Unit cargo;
-  private final int dropX;
-  private final int dropY;
+  private final XYCoord dropLoc;
 
-  public UnloadEvent( Unit transport, Unit cargo, int dropX, int dropY )
+  public UnloadEvent(Unit transport, Unit cargo, XYCoord dropLoc)
   {
     this.transport = transport;
     this.cargo = cargo;
-    this.dropX = dropX;
-    this.dropY = dropY;
+    this.dropLoc = dropLoc;
   }
 
   @Override
@@ -29,11 +28,10 @@ public class UnloadEvent implements GameEvent
   @Override
   public void performEvent(GameMap gameMap)
   {
-    if( transport.heldUnits != null && transport.heldUnits.contains(cargo) &&
-        gameMap.getLocation(dropX, dropY).getResident() == null )
+    if( transport.heldUnits != null && transport.heldUnits.contains(cargo) && gameMap.getLocation(dropLoc).getResident() == null )
     {
       transport.heldUnits.remove(cargo);
-      gameMap.moveUnit(cargo, dropX, dropY);
+      gameMap.moveUnit(cargo, dropLoc.xCoord, dropLoc.yCoord);
       cargo.isTurnOver = true;
     }
   }

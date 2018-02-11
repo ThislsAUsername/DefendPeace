@@ -105,6 +105,11 @@ public class GameMap
   }
 
   /** Returns the Environment of the specified tile, or null if that location does not exist. */
+  public Environment getEnvironment(XYCoord coord)
+  {
+    return getEnvironment(coord.xCoord, coord.yCoord);
+  }
+  /** Returns the Environment of the specified tile, or null if that location does not exist. */
   public Environment getEnvironment(int w, int h)
   {
     if( !isLocationValid(w, h) )
