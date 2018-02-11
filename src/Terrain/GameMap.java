@@ -91,6 +91,14 @@ public class GameMap
   /**
    * Returns true if (x,y) lies within the GameMap, false else.
    */
+  public boolean isLocationValid(XYCoord coords)
+  {
+    return isLocationValid(coords.xCoord, coords.yCoord);
+  }
+
+  /**
+   * Returns true if (x,y) lies within the GameMap, false else.
+   */
   public boolean isLocationValid(int x, int y)
   {
     return !(x < 0 || x >= mapWidth || y < 0 || y >= mapHeight);
@@ -134,9 +142,21 @@ public class GameMap
   }
 
   /** Returns true if no unit is at the specified x and y coordinate, false else */
+  public boolean isLocationEmpty(XYCoord coords)
+  {
+    return isLocationEmpty(null, coords);
+  }
+
+  /** Returns true if no unit is at the specified x and y coordinate, false else */
   public boolean isLocationEmpty(int x, int y)
   {
     return isLocationEmpty(null, x, y);
+  }
+
+  /** Returns true if no unit (excluding 'unit') is in the specified Location. */
+  public boolean isLocationEmpty(Unit unit, XYCoord coords)
+  {
+    return isLocationEmpty(unit, coords.xCoord, coords.yCoord);
   }
 
   /** Returns true if no unit (excluding 'unit') is in the specified Location. */

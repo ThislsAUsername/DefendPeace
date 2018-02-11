@@ -4,64 +4,85 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Queue;
 
+import CommandingOfficers.Commander;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.Unit;
+import Units.Weapons.Weapon;
 
 public class Utils
 {
 
-  /**
-   * Sets the highlight for myGame.gameMap.getLocation(x, y) to true if unit can act on Location (x, y) from (xLoc, yLoc), and false otherwise.
-   */
-  public static void findActionableLocations(Unit unit, GameAction.ActionType action, int xLoc, int yLoc, GameMap map)
+  /** Returns a list of all locations less than or equal to maxRange tiles away from origin. */
+  public static ArrayList<XYCoord> findLocationsInRange(GameMap map, XYCoord origin, int maxRange)
   {
-    // we need to know whether the unit moved or not for indirect units
-    boolean moved = unit.x != xLoc || unit.y != yLoc;
-    switch (action)
+    return findLocationsInRange(map, origin, 0, maxRange);
+  }
+
+  /** Returns a list of all locations between minRange and maxRange of origin, inclusive. */
+  public static ArrayList<XYCoord> findLocationsInRange(GameMap map, XYCoord origin, int minRange, int maxRange)
+  {
+    ArrayList<XYCoord> locations = new ArrayList<XYCoord>();
+
+    // Loop through all the valid x and y offsets, as dictated by the max range, and add valid spaces to our collection.
+    System.out.println("Finding tiles in range " + minRange + "-" + maxRange + " of " + origin);
+    for( int xOff = -maxRange; xOff <= maxRange; ++xOff )
     {
-      case ATTACK:
-        // Set highlight for locations that contain an enemy that 'unit' can shoot from (xLoc, yLoc).
-        for( int i = 0; i < map.mapWidth; i++ )
+      for( int yOff = -maxRange; yOff <= maxRange; ++yOff )
+      {
+        int tilex = origin.xCoord + xOff;
+        int tiley = origin.yCoord + yOff;
+        System.out.println("  Checking " + tilex + ", " + tiley);
+        int currentRange = Math.abs(xOff) + Math.abs(yOff);
+        if( currentRange < minRange || currentRange > maxRange )
         {
-          for( int j = 0; j < map.mapHeight; j++ )
-          {
-            Unit target = map.getLocation(i, j).getResident();
-            if( target != null && target.CO != unit.CO )
-            {
-              int range = Math.abs(xLoc - target.x) + Math.abs(yLoc - target.y);
-              if( unit.canAttack(target.model, range, moved) )
-              {
-                map.getLocation(i, j).setHighlight(true);
-              }
-              else
-              {
-                map.getLocation(i, j).setHighlight(false);
-              }
-            }
-          }
+          System.out.println("    Not in desired range");
+          // This location is not in the desired range; move to the next.
+          continue;
         }
-        break;
-      case UNLOAD:
-        // Set highlight for valid drop locations that can also support the passenger.
-        Unit passenger = unit.heldUnits.get(0);
-        for( int i = 0; i < map.mapWidth; i++ )
-        {
-          for( int j = 0; j < map.mapHeight; j++ )
-          {
-            int dist = Math.abs(yLoc - j) + Math.abs(xLoc - i);
-            if( dist == 1 && passenger.model.movePower >= passenger.model.propulsion.getMoveCost(map.getEnvironment(i, j))
-                && map.isLocationEmpty(unit, i, j) )
-            {
-              map.getLocation(i, j).setHighlight(true);
-            }
-            else
-            {
-              map.getLocation(i, j).setHighlight(false);
-            }
-          }
-        }
-        break;
+
+        System.out.println("    Adding.");
+        // Add this location to the set.
+        locations.add(new XYCoord(origin.xCoord + xOff, origin.yCoord + yOff));
+      }
+    }
+
+    return locations;
+  }
+
+  /** Returns a list of locations of all enemy units that weapon could hit from attackerPosition. */
+  public static ArrayList<XYCoord> findTargetsInRange(GameMap map, Commander co, XYCoord attackerPosition, Weapon weapon)
+  {
+    ArrayList<XYCoord> locations = findLocationsInRange(map, attackerPosition, weapon.model.minRange,
+        weapon.model.maxRange);
+    ArrayList<XYCoord> targets = new ArrayList<XYCoord>();
+    for( XYCoord loc : locations )
+    {
+      System.out.println("  Target at " + loc + "?");
+      System.out.println("    has unit: " + (map.getLocation(loc).getResident() != null));
+      if( map.getLocation(loc).getResident() != null )
+      {
+        System.out.println("    is enemy: " + (map.getLocation(loc).getResident().CO != co));
+        System.out.println("    can hit: " + (weapon.getDamage(map.getLocation(loc).getResident().model) > 0));
+      }
+      if( map.getLocation(loc).getResident() != null && // Someone is there.
+          map.getLocation(loc).getResident().CO != co && // They are not friendly.
+          weapon.getDamage(map.getLocation(loc).getResident().model) > 0 ) // We can shoot them.
+      {
+        targets.add(loc);
+      }
+    }
+    return targets;
+  }
+
+  /** Sets the highlight of all tiles in the provided list, and unsets the highlight on all others. */
+  public static void highlightLocations(GameMap map, ArrayList<XYCoord> locations)
+  {
+    map.clearAllHighlights();
+    for( XYCoord loc : locations )
+    {
+      System.out.println("Highlighting " + loc);
+      map.getLocation(loc).setHighlight(true);
     }
   }
 

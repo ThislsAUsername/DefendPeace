@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Queue;
 
 import CommandingOfficers.Commander;
-import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.Combat.BattleSummary;
@@ -273,25 +272,25 @@ public class SpriteMapView extends MapView
       drawUnitIcons(mapGraphics);
 
       // Get a reference to the current action being built, if one exists.
-      GameAction currentAction = mapController.getContemplatedAction();
+      Unit currentActor = mapController.getContemplatedActor();
+      Path currentPath = mapController.getContemplatedMove();
 
       // Draw the movement arrow if the user is contemplating a move.
-      if( mapController.getContemplatedMove() != null )
+      if( null != currentPath )
       {
         mapArtist.drawMovePath(mapGraphics, mapController.getContemplatedMove());
       }
       // Draw the movement arrow if the user is contemplating an action (but not once the action commences).
-      else if( null != currentAction && null != currentAction.getMovePath() && null == currentAnimation )
+      else if( null != currentPath && null == currentAnimation )
       {
-        mapArtist.drawMovePath(mapGraphics, currentAction.getMovePath());
+        mapArtist.drawMovePath(mapGraphics, currentPath);
       }
 
       // Draw the currently-acting unit so it's on top of everything.
-      if( null != currentAction && currentAnimation == null )
+      if( null != currentActor && currentAnimation == null )
       {
-        Unit u = currentAction.getActor();
-        unitArtist.drawUnit(mapGraphics, u, u.x, u.y, fastAnimIndex);
-        unitArtist.drawUnitIcons(mapGraphics, u, u.x, u.y);
+        unitArtist.drawUnit(mapGraphics, currentActor, currentActor.x, currentActor.y, fastAnimIndex);
+        unitArtist.drawUnitIcons(mapGraphics, currentActor, currentActor.x, currentActor.y);
       }
 
       if( currentAnimation != null )
@@ -310,7 +309,7 @@ public class SpriteMapView extends MapView
       }
       else if( getCurrentGameMenu() == null )
       {
-        mapArtist.drawCursor(mapGraphics, currentAction, myGame.getCursorX(), myGame.getCursorY());
+        mapArtist.drawCursor(mapGraphics, currentActor, myGame.getCursorX(), myGame.getCursorY());
       }
       else
       {
@@ -422,12 +421,12 @@ public class SpriteMapView extends MapView
           mapArtist.drawTerrainObject(g, x, y);
           if( !myGame.gameMap.isLocationEmpty(x, y) )
           {
-            Unit u = myGame.gameMap.getLocation(x, y).getResident();
+            Unit resident = myGame.gameMap.getLocation(x, y).getResident();
             // If an action is being considered, draw the active unit later, not now.
-            GameAction currentAction = mapController.getContemplatedAction();
-            if( (null == currentAction) || (u != currentAction.getActor()) )
+            Unit currentActor = mapController.getContemplatedActor();
+            if( resident != currentActor )
             {
-              unitArtist.drawUnit(g, u, u.x, u.y, animIndex);
+              unitArtist.drawUnit(g, resident, resident.x, resident.y, animIndex);
             }
           }
         }
@@ -451,12 +450,12 @@ public class SpriteMapView extends MapView
       {
         if( !gameMap.isLocationEmpty(x, y) )
         {
-          Unit u = myGame.gameMap.getLocation(x, y).getResident();
+          Unit resident = myGame.gameMap.getLocation(x, y).getResident();
           // If an action is being considered, draw the active unit later, not now.
-          GameAction currentAction = mapController.getContemplatedAction();
-          if( (null == currentAction) || (u != currentAction.getActor()) )
+          Unit currentActor = mapController.getContemplatedActor();
+          if( resident != currentActor )
           {
-            unitArtist.drawUnitIcons(g, u, u.x, u.y);
+            unitArtist.drawUnitIcons(g, resident, resident.x, resident.y);
           }
         }
       }

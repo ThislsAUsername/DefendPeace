@@ -11,4 +11,15 @@ public class XYCoord
     xCoord = x;
     yCoord = y;
   }
+
+  public boolean equals(int x, int y)
+  {
+    return x == xCoord && y == yCoord;
+  }
+
+  @Override
+  public String toString()
+  {
+    return "(" + xCoord + ", " + yCoord + ")";
+  }
 }

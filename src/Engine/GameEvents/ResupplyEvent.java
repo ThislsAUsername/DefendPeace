@@ -31,7 +31,7 @@ public class ResupplyEvent implements GameEvent
     // Add ammunition.
     for( Weapon gun : target.weapons )
     {
-      gun.ammo = gun.model.maxAmmo;
+      gun.reload();
     }
   }
 }

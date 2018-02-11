@@ -5,8 +5,11 @@ import java.util.Vector;
 
 import CommandingOfficers.Commander;
 import Engine.GameAction;
+import Engine.GameActionSet;
+import Engine.Path;
 import Engine.TurnInitAction;
 import Engine.Utils;
+import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -226,73 +229,86 @@ public class Unit
   		return 0;
   	}*/
 
-  /** Compiles and returns a list of all actions this unit could perform on map from location (xLoc, yLoc). */
-  public ArrayList<GameAction.ActionType> getPossibleActions(GameMap map, int xLoc, int yLoc)
+  /** Compiles and returns a list of all actions this unit could perform on map after moving along movePath. */
+  public ArrayList<GameActionSet> getPossibleActions(GameMap map, Path movePath)
   {
-    ArrayList<GameAction.ActionType> actions = new ArrayList<GameAction.ActionType>();
-    if( map.isLocationEmpty(this, xLoc, yLoc) )
+    XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+    ArrayList<GameActionSet> actionSet = new ArrayList<GameActionSet>();
+    if( map.isLocationEmpty(this, moveLocation) )
     {
       for( int i = 0; i < model.possibleActions.length; i++ )
       {
         switch (model.possibleActions[i])
         {
           case ATTACK:
-            // highlight the tiles in range, and check them for targets
-            Utils.findActionableLocations(this, GameAction.ActionType.ATTACK, xLoc, yLoc, map);
-            boolean found = false;
-            for( int w = 0; w < map.mapWidth; w++ )
+          // Evaluate attack options.
+          {
+            boolean moved = !moveLocation.equals(x, y);
+            ArrayList<GameAction> attackOptions = new ArrayList<GameAction>();
+            for( Weapon wpn : weapons )
             {
-              for( int h = 0; h < map.mapHeight; h++ )
+              // Evaluate this weapon for targets if it has ammo, and if either the weapon
+              // is mobile or we don't care if it's mobile (because we aren't moving).
+              System.out.println("ammo  : " + wpn.ammo);
+              System.out.println("mobile: " + wpn.model.canFireAfterMoving);
+              System.out.println("moved : " + moved);
+              System.out.println("!moved || mobile: " + (!moved || wpn.model.canFireAfterMoving));
+              if( wpn.ammo > 0 && (!moved || wpn.model.canFireAfterMoving) )
               {
-                if( map.getLocation(w, h).isHighlightSet() )
+                ArrayList<XYCoord> locations = Utils.findTargetsInRange(map, CO, moveLocation, wpn);
+
+                for( XYCoord loc : locations )
                 {
-                  actions.add(GameAction.ActionType.ATTACK);
-                  found = true;
-                  break; // We just need one target to know attacking is possible.
+                  attackOptions.add(new GameAction.AttackAction(this, movePath, loc));
                 }
               }
-              if( found )
-                break;
+            } // ~Weapon loop
+
+            // Only add this action set if we actually have a target
+            if( !attackOptions.isEmpty() )
+            {
+              // Bundle our attack options into an action set and add it to our return collection.
+              actionSet.add(new GameActionSet(attackOptions));
             }
-            map.clearAllHighlights();
+          } // ~attack options
             break;
           case CAPTURE:
-            if( map.getLocation(xLoc, yLoc).getOwner() != CO && map.getLocation(xLoc, yLoc).isCaptureable() )
+            if( map.getLocation(moveLocation).getOwner() != CO && map.getLocation(moveLocation).isCaptureable() )
             {
-              actions.add(GameAction.ActionType.CAPTURE);
+              actionSet.add(new GameActionSet(new GameAction.CaptureAction(this, movePath), false));
             }
             break;
           case WAIT:
-            actions.add(GameAction.ActionType.WAIT);
+            actionSet.add(new GameActionSet(new GameAction.WaitAction(this, movePath), false));
             break;
           case LOAD:
             // Don't add - there's no unit there to board.
             break;
           case UNLOAD:
-            if( heldUnits.size() > 0 )
-            {
-              actions.add(GameAction.ActionType.UNLOAD);
-            }
+            //            if( heldUnits.size() > 0 )
+            //            {
+            //              actions.add(GameAction.ActionType.UNLOAD);
+            //            }
             break;
           case RESUPPLY:
             // Search for a unit in resupply range.
             // Build an array of each adjacent location.
-            ArrayList<Location> locations = new ArrayList<Location>();
-            locations.add(map.getLocation(xLoc, yLoc - 1));
-            locations.add(map.getLocation(xLoc, yLoc + 1));
-            locations.add(map.getLocation(xLoc - 1, yLoc));
-            locations.add(map.getLocation(xLoc + 1, yLoc));
-
-            // For each location, see if there is a friendly unit to re-supply.
-            for( Location loc : locations )
-            {
-              Unit other = loc.getResident();
-              if( other != null && other.CO == CO )
-              {
-                actions.add(GameAction.ActionType.RESUPPLY);
-                break;
-              }
-            }
+            //            ArrayList<Location> locations = new ArrayList<Location>();
+            //            locations.add(map.getLocation(xLoc, yLoc - 1));
+            //            locations.add(map.getLocation(xLoc, yLoc + 1));
+            //            locations.add(map.getLocation(xLoc - 1, yLoc));
+            //            locations.add(map.getLocation(xLoc + 1, yLoc));
+            //
+            //            // For each location, see if there is a friendly unit to re-supply.
+            //            for( Location loc : locations )
+            //            {
+            //              Unit other = loc.getResident();
+            //              if( other != null && other.CO == CO )
+            //              {
+            //                actions.add(GameAction.ActionType.RESUPPLY);
+            //                break;
+            //              }
+            //            }
             break;
           default:
             System.out
@@ -303,10 +319,10 @@ public class Unit
     else
     // There is a unit in the space we are evaluating. Only Load actions are supported in this case.
     {
-      actions.add(GameAction.ActionType.LOAD);
+      //  actions.add(GameAction.ActionType.LOAD);
     }
 
-    return actions;
+    return actionSet;
   }
 
   public boolean hasCargoSpace(UnitEnum type)

@@ -44,6 +44,10 @@ public class GameInstance
     }
   }
 
+  public void setCursorLocation(XYCoord loc)
+  {
+    setCursorLocation(loc.xCoord, loc.yCoord);
+  }
   public void setCursorLocation(int x, int y)
   {
     if( x < 0 || y < 0 || x > gameMap.mapWidth - 1 || y > gameMap.mapHeight - 1 )
