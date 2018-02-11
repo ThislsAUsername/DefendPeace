@@ -3,8 +3,8 @@ package Units;
 import java.util.ArrayList;
 import java.util.Vector;
 
+import Engine.GameAction;
 import Engine.GameAction.ActionType;
-import Engine.TurnInitAction;
 import Terrain.Environment.Terrains;
 import Terrain.Location;
 import Units.MoveTypes.MoveType;
@@ -101,9 +101,12 @@ public class UnitModel
     return compatible;
   }
 
-  /** Provides a hook for inheritors to supply actions to a unit.
-   * @param actions Assumed to be non-null. Model actions will be added to it.
+  /** Provides a hook for inheritors to supply turn-initialization actions to a unit.
+   * @param self Assumed to be a Unit of the model's type.
    */
-  public void getTurnInitActions(ArrayList<TurnInitAction> actions)
-  {}
+  public ArrayList<GameAction> getTurnInitActions(Unit self)
+  {
+    // Most Unit don't have any; specific UnitModel types can override.
+    return new ArrayList<GameAction>();
+  }
 }

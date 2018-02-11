@@ -3,8 +3,8 @@ package Units;
 import java.util.ArrayList;
 import java.util.Vector;
 
+import Engine.GameAction;
 import Engine.GameAction.ActionType;
-import Engine.TurnInitAction;
 import Terrain.Environment.Terrains;
 import Units.MoveTypes.MoveType;
 import Units.MoveTypes.Tread;
@@ -28,9 +28,14 @@ public class APCModel extends UnitModel
     }
   }
 
+  /**
+   * APCs re-supply any adjacent allies at the beginning of every turn. Make it so.
+   */
   @Override
-  public void getTurnInitActions(ArrayList<TurnInitAction> actions)
+  public ArrayList<GameAction> getTurnInitActions(Unit self)
   {
-    actions.add(new TurnInitAction.ResupplyAction());
+    ArrayList<GameAction> actions = new ArrayList<GameAction>(1);
+    actions.add(new GameAction.ResupplyAction(self));
+    return actions;
   }
 }

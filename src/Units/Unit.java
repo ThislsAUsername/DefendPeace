@@ -7,7 +7,6 @@ import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.Path;
-import Engine.TurnInitAction;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
@@ -29,7 +28,7 @@ public class Unit
   public boolean isTurnOver;
   private double HP;
   public Weapon[] weapons;
-  private ArrayList<TurnInitAction> turnInitActions;
+  private ArrayList<GameAction> turnInitActions;
 
   public Unit(Commander co, UnitModel um)
   {
@@ -51,8 +50,7 @@ public class Unit
     if( model.holdingCapacity > 0 )
       heldUnits = new Vector<Unit>(model.holdingCapacity);
 
-    turnInitActions = new ArrayList<TurnInitAction>();
-    model.getTurnInitActions(turnInitActions);
+    turnInitActions = model.getTurnInitActions(this);
   }
 
   public void initTurn(GameMap map, GameEventQueue events)
@@ -92,9 +90,9 @@ public class Unit
         }
       }
 
-      for( TurnInitAction ta : turnInitActions )
+      for( GameAction ga : turnInitActions )
       {
-        ta.initTurn(this, map, events);
+        events.addAll(ga.getEvents(map));
       }
     } // ~If location is valid.
   }
