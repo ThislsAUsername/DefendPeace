@@ -133,10 +133,14 @@ public class Unit
    * @param target
    * @param range
    * @param afterMoving
-   * @return
+   * @return The best weapon for that target, or null if no usable weapon exists.
    */
   public Weapon chooseWeapon(UnitModel targetType, int range, boolean afterMoving)
   {
+    // if we have no weapons, we can't hurt things
+    if( weapons == null )
+      return null;
+
     Weapon chosenWeapon = null;
     double maxDamage = 0;
     for( int i = 0; i < weapons.length; i++ )
