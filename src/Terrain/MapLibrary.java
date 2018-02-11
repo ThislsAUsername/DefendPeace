@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import Terrain.Maps.CageMatch;
 import Terrain.Maps.FiringRange;
 import Terrain.Maps.MapReader;
-import Terrain.Maps.Triumvirate;
 import Terrain.Maps.SpannIsland;
 import Terrain.Maps.TestingRange;
+import Terrain.Maps.Triumvirate;
 
 public class MapLibrary
 {
@@ -25,11 +25,11 @@ public class MapLibrary
   private static void loadMapInfos()
   {
     availableMaps = new ArrayList<MapInfo>();
+    availableMaps.add(TestingRange.getMapInfo());
     availableMaps.add(FiringRange.getMapInfo());
     availableMaps.add(SpannIsland.getMapInfo());
     availableMaps.add(Triumvirate.getMapInfo());
     availableMaps.add(CageMatch.getMapInfo());
-    availableMaps.add(TestingRange.getMapInfo());
     availableMaps.addAll(MapReader.readMapData());
   }
   
