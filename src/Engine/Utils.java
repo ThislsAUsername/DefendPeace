@@ -13,13 +13,13 @@ import Units.Weapons.Weapon;
 public class Utils
 {
 
-  /** Returns a list of all locations less than or equal to maxRange tiles away from origin. */
+  /** Returns a list of all locations between 1 and maxRange tiles away from origin, inclusive. */
   public static ArrayList<XYCoord> findLocationsInRange(GameMap map, XYCoord origin, int maxRange)
   {
-    return findLocationsInRange(map, origin, 0, maxRange);
+    return findLocationsInRange(map, origin, 1, maxRange);
   }
 
-  /** Returns a list of all locations between minRange and maxRange of origin, inclusive. */
+  /** Returns a list of all locations between minRange and maxRange tiles away from origin, inclusive. */
   public static ArrayList<XYCoord> findLocationsInRange(GameMap map, XYCoord origin, int minRange, int maxRange)
   {
     ArrayList<XYCoord> locations = new ArrayList<XYCoord>();
