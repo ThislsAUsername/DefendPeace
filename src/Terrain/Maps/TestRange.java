@@ -4,7 +4,7 @@ import Engine.XYCoord;
 import Terrain.Environment;
 import Terrain.MapInfo;
 
-public class TestingRange extends IMapBuilder
+public class TestRange extends IMapBuilder
 {
   private final static String mapName = "Test Range";
   // Defines the terrain for this map. Each row is a vertical column of the map.
