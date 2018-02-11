@@ -21,7 +21,7 @@ public interface GameAction
     INVALID, ATTACK, CAPTURE, LOAD, RESUPPLY, UNLOAD, WAIT
   }
 
-  public abstract void getEvents(GameMap map, GameEventQueue eventSequence);
+  public abstract GameEventQueue getEvents(GameMap map);
   public abstract XYCoord getMoveLocation();
   public abstract XYCoord getTargetLocation();
   public abstract ActionType getType();
@@ -49,13 +49,14 @@ public interface GameAction
     }
 
     @Override
-    public void getEvents(GameMap gameMap, GameEventQueue eventSequence)
+    public GameEventQueue getEvents(GameMap gameMap)
     {
       // ATTACK actions consist of
       //   MOVE
       //   BATTLE
       //   [DEATH]
       //   [DEFEAT]
+      GameEventQueue eventSequence = new GameEventQueue();
 
       Unit unitTarget = gameMap.getLocation(attackLocation).getResident();
 
@@ -90,6 +91,7 @@ public interface GameAction
           }
         }
       }
+      return eventSequence;
     }
 
     @Override
@@ -126,23 +128,23 @@ public interface GameAction
     }
 
     @Override
-    public void getEvents(GameMap map, GameEventQueue eventSequence)
+    public GameEventQueue getEvents(GameMap map)
     {
       // CAPTURE actions consist of
       //   MOVE
       //   CAPTURE
       //   [DEFEAT]
+      GameEventQueue eventSequence = new GameEventQueue();
 
-      GameEventQueue myEvents = new GameEventQueue();
       // Move to the target location.
-      myEvents.add(new MoveEvent(conquistador, movePath));
+      eventSequence.add(new MoveEvent(conquistador, movePath));
 
       // Attempt to capture.
       Location loc = map.getLocation(propertyLoc);
       if( loc.isCaptureable() && loc.getOwner() != conquistador.CO )
       {
         CaptureEvent capture = new CaptureEvent(conquistador, map.getLocation(propertyLoc));
-        myEvents.add(capture);
+        eventSequence.add(capture);
 
         if( capture.willCapture() ) // If this will succeed, check if the CO will lose as a result.
         {
@@ -150,17 +152,17 @@ public interface GameAction
           if( loc.getEnvironment().terrainType == Terrains.HQ )
           {
             // Someone is losing their big, comfy chair.
-            myEvents.add(new CommanderDefeatEvent(loc.getOwner()));
+            eventSequence.add(new CommanderDefeatEvent(loc.getOwner()));
           }
         }
       }
       else
       {
         System.out.println("ERROR! Attempting to capture invalid location!");
-        myEvents.clear();
+        eventSequence.clear();
       }
 
-      eventSequence.addAll(myEvents);
+      return eventSequence;
     }
 
     @Override
@@ -197,13 +199,16 @@ public interface GameAction
     }
 
     @Override
-    public void getEvents(GameMap map, GameEventQueue eventSequence)
+    public GameEventQueue getEvents(GameMap map)
     {
       // WAIT actions consist of
       //   MOVE
+      GameEventQueue eventSequence = new GameEventQueue();
 
       // Move to the target location.
       eventSequence.add(new MoveEvent(waiter, movePath));
+
+      return eventSequence;
     }
 
     @Override

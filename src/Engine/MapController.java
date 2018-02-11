@@ -670,8 +670,7 @@ public class MapController implements IController
   private void executeGameAction(GameAction action)
   {
     // Compile the GameAction to its component events.
-    GameEventQueue events = new GameEventQueue();
-    action.getEvents(myGame.gameMap, events);
+    GameEventQueue events = action.getEvents(myGame.gameMap);
 
     // Send the events to the animator. They will be applied/executed in animationEnded().
     changeInputMode(InputMode.ANIMATION);
