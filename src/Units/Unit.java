@@ -223,16 +223,6 @@ public class Unit
     return captureProgress;
   }
 
-  // Removed for the forseeable future; may be back
-  /*	public static double getAttackPower(final CombatParameters params) {
-  //		double output = model
-  //		return [B*ACO/100+R]*(AHP/10)*[(200-(DCO+DTR*DHP))/100] ;
-  		return 0;
-  	}
-  	public static double getDefensePower(Unit unit, boolean isCounter) {
-  		return 0;
-  	}*/
-
   /** Compiles and returns a list of all actions this unit could perform on map after moving along movePath. */
   public ArrayList<GameActionSet> getPossibleActions(GameMap map, Path movePath)
   {
