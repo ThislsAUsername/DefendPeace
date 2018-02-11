@@ -4,7 +4,6 @@ import Terrain.GameMap;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
-import Units.Weapons.Weapon;
 
 public class ResupplyEvent implements GameEvent
 {
@@ -25,13 +24,6 @@ public class ResupplyEvent implements GameEvent
   @Override
   public void performEvent(GameMap gameMap)
   {
-    // Top up fuel.
-    target.fuel = target.model.maxFuel;
-
-    // Add ammunition.
-    for( Weapon gun : target.weapons )
-    {
-      gun.reload();
-    }
+    target.resupply();
   }
 }

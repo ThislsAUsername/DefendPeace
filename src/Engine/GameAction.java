@@ -1,11 +1,14 @@
 package Engine;
 
+import java.util.ArrayList;
+
 import Engine.GameEvents.BattleEvent;
 import Engine.GameEvents.CaptureEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.LoadEvent;
 import Engine.GameEvents.MoveEvent;
+import Engine.GameEvents.ResupplyEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.UnloadEvent;
 import Terrain.Environment.Terrains;
@@ -349,4 +352,99 @@ public interface GameAction
       return GameAction.ActionType.UNLOAD;
     }
   } // ~UnloadAction
+
+  // ===========  ResupplyAction  =================================
+  // A resupply action will refill fuel and ammunition for any adjacent friendly units.
+  public static class ResupplyAction implements GameAction
+  {
+    private Unit unitActor = null;
+    private Path movePath = null;
+
+    /**
+     * Creates a resupply action to be executed from the unit's location.
+     * The location will update if the unit moves.
+     */
+    public ResupplyAction(Unit actor)
+    {
+      this(actor, null);
+    }
+
+    /**
+     * Creates a resupply action to be executed from the end of path.
+     * The location will not update if the unit moves.
+     * @param actor
+     * @param path
+     */
+    public ResupplyAction(Unit actor, Path path)
+    {
+      unitActor = actor;
+      movePath = path;
+    }
+
+    private XYCoord myLocation()
+    {
+      XYCoord loc;
+      if( movePath != null )
+      {
+        loc = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      }
+      else
+      {
+        loc = new XYCoord(unitActor.x, unitActor.y);
+      }
+      return loc;
+    }
+
+    @Override
+    public GameEventQueue getEvents(GameMap map)
+    {
+      // RESUPPLY actions consist of
+      //   [MOVE]
+      //   RESUPPLY
+      GameEventQueue eventSequence = new GameEventQueue();
+
+      // Figure out where we are acting.
+      XYCoord supplyLocation = myLocation();
+
+      // Add a move event if we need to move.
+      if( movePath != null )
+      {
+        eventSequence.add(new MoveEvent(unitActor, movePath));
+      }
+
+      // Get the adjacent map locations.
+      ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, supplyLocation, 1);
+
+      // For each location, see if there is a friendly unit to re-supply.
+      for( XYCoord loc : locations )
+      {
+        Unit other = map.getLocation(loc).getResident();
+        if( other != null && other.CO == unitActor.CO )
+        {
+          // Add a resupply event for this unit.
+          eventSequence.add(new ResupplyEvent(other));
+        }
+      }
+
+      return eventSequence;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return myLocation();
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return myLocation();
+    }
+
+    @Override
+    public ActionType getType()
+    {
+      return GameAction.ActionType.RESUPPLY;
+    }
+  } // ~ResupplyAction
 }

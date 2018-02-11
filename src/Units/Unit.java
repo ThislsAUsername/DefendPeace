@@ -309,23 +309,21 @@ public class Unit
             break;
           case RESUPPLY:
             // Search for a unit in resupply range.
-            // Build an array of each adjacent location.
-            //            ArrayList<Location> locations = new ArrayList<Location>();
-            //            locations.add(map.getLocation(xLoc, yLoc - 1));
-            //            locations.add(map.getLocation(xLoc, yLoc + 1));
-            //            locations.add(map.getLocation(xLoc - 1, yLoc));
-            //            locations.add(map.getLocation(xLoc + 1, yLoc));
-            //
-            //            // For each location, see if there is a friendly unit to re-supply.
-            //            for( Location loc : locations )
-            //            {
-            //              Unit other = loc.getResident();
-            //              if( other != null && other.CO == CO )
-            //              {
-            //                actions.add(GameAction.ActionType.RESUPPLY);
-            //                break;
-            //              }
-            //            }
+            ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, moveLocation, 1);
+
+            // For each location, see if there is a friendly unit to re-supply.
+            for( XYCoord loc : locations )
+            {
+              // If there's a friendly unit there who isn't us, we can resupply them.
+              Unit other = map.getLocation(loc).getResident();
+              if( other != null && other.CO == CO && other != this )
+              {
+                // We found at least one unit we can resupply. Since resupply actions aren't
+                // targeted, we can just add our action and break here.
+                actionSet.add(new GameActionSet(new GameAction.ResupplyAction(this, movePath), false));
+                break;
+              }
+            }
             break;
           default:
             System.out
@@ -345,5 +343,18 @@ public class Unit
   public boolean hasCargoSpace(UnitEnum type)
   {
     return (model.holdingCapacity > 0 && heldUnits.size() < model.holdingCapacity && model.holdables.contains(type));
+  }
+
+  /** Grant this unit full fuel and ammunition */
+  public void resupply()
+  {
+    fuel = model.maxFuel;
+    if( null != weapons )
+    {
+      for( Weapon wpn : weapons )
+      {
+        wpn.reload();
+      }
+    }
   }
 }
