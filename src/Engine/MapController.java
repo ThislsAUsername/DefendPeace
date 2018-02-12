@@ -591,18 +591,11 @@ public class MapController implements IController
         contemplatedAction.clear();
         currentMenu = null;
         myGame.gameMap.clearAllHighlights();
-
-        //        if( unitActor != null )
-        //        {
-        //          myGame.setCursorLocation(unitActor.x, unitActor.y);
-        //          unitActor = null; // We are now in MAP mode; no unit is selected.
-        //        }
         break;
       case MOVEMENT:
         Utils.findPossibleDestinations(contemplatedAction.actor, myGame);
         contemplatedAction.movePath = null;
         currentMenu = null;
-        myGame.setCursorLocation(contemplatedAction.actor.x, contemplatedAction.actor.y);
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.
         break;
       case PRODUCTION:
