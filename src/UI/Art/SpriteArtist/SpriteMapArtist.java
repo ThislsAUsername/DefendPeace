@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
+import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.Path.PathNode;
@@ -58,21 +59,21 @@ public class SpriteMapArtist
     spriteSet.drawTerrainObject(g, gameMap, x, y, drawScale);
   }
 
-  public void drawCursor(Graphics g, Unit unitActor, int drawX, int drawY)
+  public void drawCursor(Graphics g, Unit unitActor, GameAction currentAction, int drawX, int drawY)
   {
-    //    if( null == currentAction || currentAction.getType() == GameAction.ActionType.INVALID )
-    //    {
+    if( null == currentAction || currentAction.getType() == GameAction.ActionType.INVALID )
+    {
       // TODO: Get an actual map cursor.
       // Draw the default map cursor.
       final Color COLOR_CURSOR = new Color(253, 171, 77, 200);
       g.setColor(COLOR_CURSOR);
       g.fillRect(drawX * tileSize, drawY * tileSize, tileSize, tileSize);
-    //    }
-    //    else
-    //    {
-    //      SpriteLibrary.drawImageCenteredOnPoint(g, SpriteLibrary.getActionCursor(),
-    //          myGame.getCursorX() * tileSize + (tileSize / 2), myGame.getCursorY() * tileSize + (tileSize / 2), drawScale);
-    //    }
+    }
+    else
+    {
+      SpriteLibrary.drawImageCenteredOnPoint(g, SpriteLibrary.getActionCursor(), myGame.getCursorX() * tileSize + (tileSize / 2),
+          myGame.getCursorY() * tileSize + (tileSize / 2), drawScale);
+    }
   }
 
   public void drawMovePath(Graphics g, Path path)

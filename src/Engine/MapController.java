@@ -64,11 +64,13 @@ public class MapController implements IController
   {
     Unit actor = null;
     Path movePath = null;
+    GameAction action = null;
 
     public void clear()
     {
       actor = null;
       movePath = null;
+      action = null;
     }
   }
   ContemplatedAction contemplatedAction;
@@ -376,13 +378,19 @@ public class MapController implements IController
     {
       case UP:
       case LEFT:
+        // Select the previous possible action, set it into the contemplated action, and
+        //  update the cursor location to the action's target locatin.
         actionOptions.prev();
         myGame.setCursorLocation(actionOptions.getSelected().getTargetLocation());
+        contemplatedAction.action = actionOptions.getSelected();
         break;
       case DOWN:
       case RIGHT:
+        // Select the next possible action, set it into the contemplated action, and
+        //  update the cursor location to the action's target locatin.
         actionOptions.next();
         myGame.setCursorLocation(actionOptions.getSelected().getTargetLocation());
+        contemplatedAction.action = actionOptions.getSelected();
         break;
       case ENTER:
         GameAction action = actionOptions.getSelected();
@@ -566,8 +574,10 @@ public class MapController implements IController
         GameActionSet possibleActions = actionMenu.getSelectedOption();
         Utils.highlightLocations(myGame.gameMap, possibleActions.getTargetedLocations());
 
-        // Set the cursor to the first valid location.
+        // Set the contemplated action to the first possible action, and move the
+        //  cursor to the targeted location.
         myGame.setCursorLocation(possibleActions.getSelected().getTargetLocation());
+        contemplatedAction.action = possibleActions.getSelected();
         currentMenu = null;
         break;
       case ACTIONMENU: // Select which action to perform.
@@ -684,6 +694,11 @@ public class MapController implements IController
   public Path getContemplatedMove()
   {
     return contemplatedAction.movePath;
+  }
+
+  public GameAction getContemplatedAction()
+  {
+    return contemplatedAction.action;
   }
 
   public void animationEnded(GameEvent event, boolean animEventQueueIsEmpty)

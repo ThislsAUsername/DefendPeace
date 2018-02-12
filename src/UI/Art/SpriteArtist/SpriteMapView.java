@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Queue;
 
 import CommandingOfficers.Commander;
+import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.Combat.BattleSummary;
@@ -274,6 +275,7 @@ public class SpriteMapView extends MapView
       // Get a reference to the current action being built, if one exists.
       Unit currentActor = mapController.getContemplatedActor();
       Path currentPath = mapController.getContemplatedMove();
+      GameAction currentAction = mapController.getContemplatedAction();
 
       // Draw the movement arrow if the user is contemplating a move/action (but not once the action commences).
       if( null != currentPath && null == currentAnimation )
@@ -304,7 +306,7 @@ public class SpriteMapView extends MapView
       }
       else if( getCurrentGameMenu() == null )
       {
-        mapArtist.drawCursor(mapGraphics, currentActor, myGame.getCursorX(), myGame.getCursorY());
+        mapArtist.drawCursor(mapGraphics, currentActor, currentAction, myGame.getCursorX(), myGame.getCursorY());
       }
       else
       {
