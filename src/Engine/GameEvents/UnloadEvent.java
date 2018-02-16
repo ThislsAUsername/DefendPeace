@@ -12,6 +12,11 @@ public class UnloadEvent implements GameEvent
   private final Unit cargo;
   private final XYCoord dropLoc;
 
+  public UnloadEvent(Unit transport, Unit cargo, int dropX, int dropY)
+  {
+    this(transport, cargo, new XYCoord(dropX, dropY));
+  }
+
   public UnloadEvent(Unit transport, Unit cargo, XYCoord dropLoc)
   {
     this.transport = transport;

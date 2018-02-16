@@ -5,6 +5,7 @@ import CommandingOfficers.CommanderPatch;
 import CommandingOfficers.CommanderStrong;
 import Engine.GameAction;
 import Engine.Path;
+import Engine.Utils;
 import Engine.GameEvents.BattleEvent;
 import Engine.GameEvents.CaptureEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
@@ -102,9 +103,9 @@ public class TestGameEvent extends TestCase
     testPassed &= validate( infA.getCaptureProgress() == 15, "    Infantry capture progress is not 15." );
 
     // Move the unit; he should lose his capture progress.
-    GameAction moveAction = new GameAction(infA, 1, 2, GameAction.ActionType.WAIT);
+    GameAction moveAction = new GameAction.WaitAction(infA, Utils.findShortestPath(infA, 1, 2, testMap));
     performGameAction(moveAction, testMap);
-    GameAction moveAction2 = new GameAction(infA, 2, 2, GameAction.ActionType.WAIT);
+    GameAction moveAction2 = new GameAction.WaitAction(infA, Utils.findShortestPath(infA, 2, 2, testMap));
     performGameAction(moveAction2, testMap);
 
     // 5, 10, 15
@@ -292,10 +293,10 @@ public class TestGameEvent extends TestCase
     }
 
     // Give the APC a new GameAction to go resupply mech2.
-    GameAction resupplyAction = new GameAction(apc, 2, 2, GameAction.ActionType.RESUPPLY);
+    GameAction resupplyAction = new GameAction.ResupplyAction(apc, Utils.findShortestPath(apc, 2, 2, testMap));
     performGameAction(resupplyAction, testMap);
 
-    // Make sure the mech has his mojo back.
+    // Make sure the mechs got their mojo back.
     testPassed &= validate(mech.fuel == mech.model.maxFuel, "    Mech should have max fuel after turn init, but doesn't.");
     testPassed &= validate(mech2.fuel == mech2.model.maxFuel, "    Mech2 should have max fuel after resupply, but doesn't.");
     testPassed &= validate(recon.fuel == recon.model.maxFuel, "    Recon should have max fuel after new turn, but doesn't.");

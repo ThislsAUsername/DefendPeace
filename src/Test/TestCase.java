@@ -56,7 +56,7 @@ public abstract class TestCase
 
   protected static void performGameAction( GameAction action, GameMap map )
   {
-    GameEventQueue sequence = action.getGameEvents( map );
+    GameEventQueue sequence = action.getEvents(map);
     for( GameEvent event : sequence )
     {
       event.performEvent( map );

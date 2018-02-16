@@ -1,10 +1,12 @@
 package Test;
 
+import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderPatch;
 import CommandingOfficers.CommanderStrong;
-import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.Path;
+import Engine.Utils;
+import Engine.XYCoord;
 import Terrain.GameMap;
 import Terrain.MapLibrary;
 import Units.Unit;
@@ -44,14 +46,16 @@ public class TestUnitMovement extends TestCase
   {
     // Add a Unit and try to move it.
     Unit mover = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 4, 4);
-    GameAction ga = new GameAction(mover, 6, 5, GameAction.ActionType.WAIT);
+    XYCoord destination = new XYCoord(6, 5);
+    GameAction ga = new GameAction.WaitAction(mover, Utils.findShortestPath(mover, destination, testMap));
 
     performGameAction( ga, testMap );
 
     // Evaluate the test.    
     boolean testPassed = validate(testMap.getLocation(4, 4).getResident() == null, "    Infantry is still at the start point.");
-    testPassed &= validate(testMap.getLocation(6, 5).getResident() == mover, "    Infantry is not at the destination.");
-    testPassed &= validate((6 == mover.x) && (5 == mover.y), "    Infantry doesn't think he's at the destination.");
+    testPassed &= validate(testMap.getLocation(destination).getResident() == mover, "    Infantry is not at the destination.");
+    testPassed &= validate((destination.xCoord == mover.x) && (destination.yCoord == mover.y),
+        "    Infantry doesn't think he's at the destination.");
     testPassed &= validate(96 == mover.fuel, "    Infantry did not lose the proper amount of fuel.");
 
     // Clean up for the next test.
@@ -67,7 +71,7 @@ public class TestUnitMovement extends TestCase
     Unit mover = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 4, 4);
 
     // Make an action to move the unit 5 spaces away, and execute it.
-    GameAction ga = new GameAction(mover, 7, 6, GameAction.ActionType.WAIT);
+    GameAction ga = new GameAction.WaitAction(mover, Utils.findShortestPath(mover, 7, 6, testMap));
     performGameAction( ga, testMap );
 
     // Make sure the action didn't actually execute.

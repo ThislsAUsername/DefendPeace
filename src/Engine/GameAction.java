@@ -44,6 +44,11 @@ public interface GameAction
     private XYCoord attackLocation = null;
     private int attackRange = 0;
 
+    public AttackAction(Unit actor, Path path, int targetX, int targetY)
+    {
+      this(actor, path, new XYCoord(targetX, targetY));
+    }
+
     public AttackAction(Unit actor, Path path, XYCoord atkLoc)
     {
       attacker = actor;
@@ -304,6 +309,11 @@ public interface GameAction
     private Path movePath = null;
     private XYCoord moveLoc = null;
     private XYCoord dropLoc = null;
+
+    public UnloadAction(Unit actor, Path path, Unit passenger, int dropX, int dropY)
+    {
+      this(actor, path, passenger, new XYCoord(dropX, dropY));
+    }
 
     public UnloadAction(Unit actor, Path path, Unit passenger, XYCoord dropLocation)
     {

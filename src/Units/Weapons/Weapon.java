@@ -60,13 +60,8 @@ public class Weapon
    */
   public int reload()
   {
-    if( !model.hasInfiniteAmmo )
-    {
-      int difference = model.maxAmmo - ammo;
-      ammo = model.maxAmmo;
-      return difference;
-    }
-    else
-      return 0;
+    int difference = model.maxAmmo - ammo;
+    ammo = model.maxAmmo;
+    return difference;
   }
 }

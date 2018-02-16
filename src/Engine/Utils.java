@@ -196,16 +196,27 @@ public class Utils
   /**
    * Calculate the shortest path for unit to take from its current location to map(x, y), and populate
    * the path parameter with those waypoints.
-   * If no valid path is found, the path will be returned empty.
+   * If no valid path is found, an empty Path will be returned.
    */
-  public static void findShortestPath(Unit unit, int x, int y, Path aPath, GameMap map)
+  public static Path findShortestPath(Unit unit, XYCoord destination, GameMap map)
   {
+    return findShortestPath(unit, destination.xCoord, destination.yCoord, map);
+  }
+
+  /**
+   * Calculate the shortest path for unit to take from its current location to map(x, y), and populate
+   * the path parameter with those waypoints.
+   * If no valid path is found, an empty Path will be returned.
+   */
+  public static Path findShortestPath(Unit unit, int x, int y, GameMap map)
+  {
+    Path aPath = new Path(100);
     if( map.mapWidth < unit.x || map.mapHeight < unit.y || unit.x < 0 || unit.y < 0 )
     {
       // Unit is not in a valid place. No path can be found.
       System.out.println("WARNING! Cannot find path for a unit that is not on the map.");
       aPath.clear();
-      return;
+      return aPath;
     }
 
     //System.out.println("Finding new path for " + unit.model.type + " from " + unit.x + ", " + unit.y + " to " + x + ", " + y);
@@ -256,6 +267,8 @@ public class Utils
         aPath.addWaypoint(waypointList.get(j).x, waypointList.get(j).y);
       }
     }
+
+    return aPath;
   }
 
   private static void expandSearchNode(Unit unit, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue,

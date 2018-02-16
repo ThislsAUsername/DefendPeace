@@ -662,7 +662,7 @@ public class MapController implements IController
     if( !Utils.isPathValid(contemplatedAction.actor, contemplatedAction.movePath, myGame.gameMap) )
     {
       // The currently-built path is invalid. Try to generate a new one (may still return null).
-      Utils.findShortestPath(contemplatedAction.actor, x, y, contemplatedAction.movePath, myGame.gameMap);
+      contemplatedAction.movePath = Utils.findShortestPath(contemplatedAction.actor, x, y, myGame.gameMap);
     }
   }
 
