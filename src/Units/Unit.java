@@ -10,6 +10,7 @@ import Engine.Path;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.ResupplyEvent;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.UnitModel.UnitEnum;
@@ -76,9 +77,12 @@ public class Unit
       }
 
       // If the unit is not at max health, and is on a repair tile, heal it.
-      if( HP < model.maxHP )
+      if( model.canRepairOn(locus) && locus.getOwner() == CO )
       {
-        if( model.canRepairOn(locus) && locus.getOwner() == CO )
+        // Resupply is free; whether or not we can repair, go ahead and add the resupply event.
+        events.add(new ResupplyEvent(this));
+
+        if( HP < model.maxHP )
         {
           int neededHP = Math.min(model.maxHP - getHP(), 2); // will be 0, 1, 2
           double proportionalCost = model.moneyCost / model.maxHP;
