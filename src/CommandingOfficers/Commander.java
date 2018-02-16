@@ -94,6 +94,11 @@ public class Commander
     modifiers.add( mod ); // Add to the list so the modifier can be reverted next turn.
   }
 
+  /**
+   * Initialize all units and collect any turn-initialization events in the passed-in GameEventQueue. 
+   * @param map
+   * @param events
+   */
   public void initTurn(GameMap map, GameEventQueue events)
   {
     // Accrue income for each city under your control.

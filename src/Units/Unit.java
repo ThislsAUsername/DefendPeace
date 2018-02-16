@@ -53,6 +53,12 @@ public class Unit
     turnInitActions = model.getTurnInitActions(this);
   }
 
+  /**
+   * Ready this unit for the next turn. Any actions it performas as part of
+   * initialization should be added to the GameEventQueue argument.
+   * @param map
+   * @param events
+   */
   public void initTurn(GameMap map, GameEventQueue events)
   {
     Location locus = map.getLocation(x, y);
@@ -90,6 +96,7 @@ public class Unit
         }
       }
 
+      // Collect any turn-initialization actions for this unit.
       for( GameAction ga : turnInitActions )
       {
         events.addAll(ga.getEvents(map));

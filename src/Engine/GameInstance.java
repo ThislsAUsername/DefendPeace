@@ -99,6 +99,11 @@ public class GameInstance
     //		System.out.println("moveCursorRight");
   }
 
+  /**
+   * Activates the turn for the next available CO. Any turn-initialization events
+   * for this CO will be added to the events parameter.
+   * @param events
+   */
   public void turn(GameEventQueue events)
   {
     // Store the cursor location for the current CO.
