@@ -55,7 +55,7 @@ public class Unit
   }
 
   /**
-   * Ready this unit for the next turn. Any actions it performas as part of
+   * Ready this unit for the next turn. Any actions it performs as part of
    * initialization should be added to the GameEventQueue argument.
    * @param map
    * @param events
@@ -258,7 +258,7 @@ public class Unit
 
                 for( XYCoord loc : locations )
                 {
-                  attackOptions.add(new GameAction.AttackAction(this, movePath, loc));
+                  attackOptions.add(new GameAction.AttackAction(map, this, movePath, loc));
                 }
               }
             } // ~Weapon loop
@@ -274,11 +274,11 @@ public class Unit
           case CAPTURE:
             if( map.getLocation(moveLocation).getOwner() != CO && map.getLocation(moveLocation).isCaptureable() )
             {
-              actionSet.add(new GameActionSet(new GameAction.CaptureAction(this, movePath), false));
+              actionSet.add(new GameActionSet(new GameAction.CaptureAction(map, this, movePath), false));
             }
             break;
           case WAIT:
-            actionSet.add(new GameActionSet(new GameAction.WaitAction(this, movePath), false));
+            actionSet.add(new GameActionSet(new GameAction.WaitAction(map, this, movePath), false));
             break;
           case LOAD:
             // We only get to here if there is no unit at the end of the move path, which means there is
@@ -296,7 +296,7 @@ public class Unit
                 ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, moveLocation, cargo);
                 for( XYCoord loc : dropoffLocations )
                 {
-                  unloadActions.add(new GameAction.UnloadAction(this, movePath, cargo, loc));
+                  unloadActions.add(new GameAction.UnloadAction(map, this, movePath, cargo, loc));
                 }
               }
 
@@ -333,7 +333,7 @@ public class Unit
     else
     {
       // There is another unit in the tile at the end of movePath. Only LOAD actions are supported in this case.
-      actionSet.add(new GameActionSet(new GameAction.LoadAction(this, movePath), false));
+      actionSet.add(new GameActionSet(new GameAction.LoadAction(map, this, movePath), false));
     }
 
     return actionSet;

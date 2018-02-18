@@ -35,9 +35,37 @@ public class TestUnitMovement extends TestCase
     setupTest();
 
     boolean testPassed = true;
+    testPassed &= validate(testStayPut(), "  Stay-put test failed");
     testPassed &= validate(testSimpleMovement(), "  Simple movement test failed.");
     testPassed &= validate(testOutOfRangeMovement(), "  Move out of range test failed.");
     testPassed &= validate(testFuelCosts(), "  Fuel cost test failed.");
+    return testPassed;
+  }
+
+  private boolean testStayPut()
+  {
+    // Add a Unit and try to move it.
+    Unit mover = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 4, 4);
+    Path mvPath = Utils.findShortestPath(mover, 4, 4, testMap);
+
+    // A path from here to here should still have one path node.
+    boolean testPassed = (mvPath.getPathLength() == 1);
+
+    // Try to build a malformed action and make sure it doesn't work.
+    GameAction badUnit = new GameAction.WaitAction(testMap, null, mvPath);
+    testPassed &= validate(badUnit.getEvents(testMap).size() == 0, "    A WaitAction with a null unit should have no events!");
+    GameAction nullPath = new GameAction.WaitAction(testMap, mover, null);
+    testPassed &= validate(nullPath.getEvents(testMap).size() == 0, "    A WaitAction with a null path should have no events!");
+    GameAction emptyPath = new GameAction.WaitAction(testMap, mover, new Path(100));
+    testPassed &= validate(emptyPath.getEvents(testMap).size() == 0, "    A WaitAction with an empty path should have no events!");
+    GameAction nullMap = new GameAction.WaitAction(null, mover, mvPath);
+    testPassed &= validate(nullMap.getEvents(testMap).size() == 0, "    A WaitAction with a null map should have no events!");
+    GameAction okAction = new GameAction.WaitAction(testMap, mover, mvPath);
+    testPassed &= validate(okAction.getEvents(testMap).size() > 0, "   WaitAction should be valid but has no events!");
+
+    // clean up.
+    testMap.removeUnit(mover);
+
     return testPassed;
   }
 
@@ -47,7 +75,7 @@ public class TestUnitMovement extends TestCase
     // Add a Unit and try to move it.
     Unit mover = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 4, 4);
     XYCoord destination = new XYCoord(6, 5);
-    GameAction ga = new GameAction.WaitAction(mover, Utils.findShortestPath(mover, destination, testMap));
+    GameAction ga = new GameAction.WaitAction(testMap, mover, Utils.findShortestPath(mover, destination, testMap));
 
     performGameAction( ga, testMap );
 
@@ -69,16 +97,18 @@ public class TestUnitMovement extends TestCase
   {
     // Make a unit and add it to the map.
     Unit mover = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 4, 4);
+    mover.isTurnOver = false; // Make sure he's ready to go.
 
     // Make an action to move the unit 5 spaces away, and execute it.
-    GameAction ga = new GameAction.WaitAction(mover, Utils.findShortestPath(mover, 7, 6, testMap));
-    performGameAction( ga, testMap );
+    GameAction ga = new GameAction.WaitAction(testMap, mover, Utils.findShortestPath(mover, 7, 6, testMap));
+    performGameAction(ga, testMap);
 
     // Make sure the action didn't actually execute.
     boolean testPassed = validate(testMap.getLocation(4, 4).getResident() == mover, "    Infantry moved when he shouldn't have.");
     testPassed &= validate(4 == mover.x && 4 == mover.y, "    Infantry thinks he moved when he should not have.");
     testPassed &= validate(testMap.getLocation(7, 6).getResident() == null, "    Target location has a resident when it should not.");
     testPassed &= validate(99 == mover.fuel, "    Infantry lost fuel when attempting an invalid movement that should fail.");
+    testPassed &= validate(!mover.isTurnOver, "    Infantry turn ended even though action did not execute.");
 
     // Clean up for the next test.
     testMap.removeUnit(mover);
