@@ -238,9 +238,12 @@ public interface GameAction
       isValid &= null != actor;
       isValid &= (null != movePath) && (movePath.getPathLength() > 0);
       isValid &= (null != gameMap);
+      int goX = -1, goY = -1;
       if( isValid )
       {
-        isValid &= gameMap.isLocationEmpty(actor, actor.y, actor.y);
+        goX = movePath.getEnd().x;
+        goY = movePath.getEnd().y;
+        isValid &= gameMap.isLocationEmpty(actor, goX, goY);
       }
 
       // Generate events.
@@ -249,7 +252,8 @@ public interface GameAction
         // Move to the target location.
         waitEvents.add(new MoveEvent(actor, movePath));
 
-        waitLoc = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        // Store the destination for later.
+        waitLoc = new XYCoord(goX, goY);
       }
       else
       {
