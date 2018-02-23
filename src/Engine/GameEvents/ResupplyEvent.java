@@ -17,8 +17,7 @@ public class ResupplyEvent implements GameEvent
   @Override
   public GameAnimation getEventAnimation(MapView mapView)
   {
-    // TODO Auto-generated method stub
-    return null;
+    return mapView.buildResupplyAnimation(target);
   }
 
   @Override

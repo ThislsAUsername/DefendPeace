@@ -19,6 +19,7 @@ import UI.CO_InfoMenu;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import UI.Art.Animation.NobunagaBattleAnimation;
+import UI.Art.Animation.ResupplyAnimation;
 import Units.Unit;
 
 public class SpriteMapView extends MapView
@@ -381,6 +382,14 @@ public class SpriteMapView extends MapView
   }
 
   @Override // from MapView
+  public GameAnimation buildBattleAnimation(BattleSummary summary)
+  {
+    return new NobunagaBattleAnimation(getTileSize(), summary.attacker.x, summary.attacker.y, summary.defender.x,
+        summary.defender.y);
+  }
+
+  @Override
+  // from MapView
   public GameAnimation buildMoveAnimation( Unit unit, Path movePath )
   {
     return new NobunagaBattleAnimation(getTileSize(), movePath.getWaypoint(0).x, movePath.getWaypoint(0).y,
@@ -388,9 +397,9 @@ public class SpriteMapView extends MapView
   }
 
   @Override // from MapView
-  public GameAnimation buildBattleAnimation( BattleSummary summary )
+  public GameAnimation buildResupplyAnimation(Unit unit)
   {
-    return new NobunagaBattleAnimation(getTileSize(), summary.attacker.x, summary.attacker.y, summary.defender.x, summary.defender.y);
+    return new ResupplyAnimation(unit.x, unit.y);
   }
 
   /**
