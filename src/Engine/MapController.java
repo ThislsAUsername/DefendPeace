@@ -719,21 +719,21 @@ public class MapController implements IController
       {
         isGameOver = true;
       }
-    }
 
-    if( isGameOver && inputMode != InputMode.EXITGAME )
-    {
-      // The last action ended the game, and the animation just finished.
-      //  Now we wait for one more keypress before going back to the main menu.
-      changeInputMode(InputMode.EXITGAME);
+      if( isGameOver && inputMode != InputMode.EXITGAME )
+      {
+        // The last action ended the game, and the animation just finished.
+        //  Now we wait for one more keypress before going back to the main menu.
+        changeInputMode(InputMode.EXITGAME);
 
-      // Signal the view to animate the victory/defeat overlay.
-      myView.gameIsOver();
-    }
-    else
-    {
-      // The animation for the last action just completed. Back to normal input mode.
-      changeInputMode(InputMode.MAP);
+        // Signal the view to animate the victory/defeat overlay.
+        myView.gameIsOver();
+      }
+      else
+      {
+        // The animation for the last action just completed. Back to normal input mode.
+        changeInputMode(InputMode.MAP);
+      }
     }
   }
 
