@@ -7,7 +7,6 @@ import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameInstance;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
-import Engine.GameEvents.GameEventQueue;
 import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -95,11 +94,10 @@ public class Commander
   }
 
   /**
-   * Initialize all units and collect any turn-initialization events in the passed-in GameEventQueue. 
+   * Collect income and handle any COModifiers.
    * @param map
-   * @param events
    */
-  public void initTurn(GameMap map, GameEventQueue events)
+  public void initTurn(GameMap map)
   {
     // Accrue income for each city under your control.
     int turnIncome = 0;
@@ -122,12 +120,6 @@ public class Commander
     {
       modifiers.get(i).revert(this);
       modifiers.remove(i);
-    }
-
-    // Accumulate any turn-init events from units (e.g. re-supply).
-    for( Unit unit : units )
-    {
-      unit.initTurn(map, events);
     }
   }
 

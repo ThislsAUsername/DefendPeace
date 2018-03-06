@@ -518,8 +518,9 @@ public interface GameAction
         for( XYCoord loc : locations )
         {
           Unit other = map.getLocation(loc).getResident();
-          if( other != null && other.CO == unitActor.CO )
+          if( other != null && other.CO == unitActor.CO && !other.isFullySupplied() )
           {
+
             // Add a re-supply event for this unit.
             eventSequence.add(new ResupplyEvent(other));
           }

@@ -5,7 +5,6 @@ import CommandingOfficers.CommanderPatch;
 import CommandingOfficers.CommanderStrong;
 import Engine.GameAction;
 import Engine.Utils;
-import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.MapLibrary;
 import Units.Unit;
@@ -72,9 +71,8 @@ public class TestTransport extends TestCase
     // Calling init on the cargo caused a NPE before, so let's test that case.
     try
     {
-      GameEventQueue events = new GameEventQueue();
-      apc.initTurn(testMap, events);
-      cargo.initTurn(testMap, events);
+      apc.initTurn(testMap);
+      cargo.initTurn(testMap);
     }
     catch( NullPointerException npe )
     {

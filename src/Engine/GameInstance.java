@@ -2,7 +2,6 @@ package Engine;
 
 import java.util.HashMap;
 
-import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
 
@@ -100,11 +99,10 @@ public class GameInstance
   }
 
   /**
-   * Activates the turn for the next available CO. Any turn-initialization events
-   * for this CO will be added to the events parameter.
+   * Activates the turn for the next available CO.
    * @param events
    */
-  public void turn(GameEventQueue events)
+  public void turn()
   {
     // Store the cursor location for the current CO.
     playerCursors.put(activeCoNum, new XYCoord(cursorX, cursorY));
@@ -124,8 +122,6 @@ public class GameInstance
     setCursorLocation(playerCursors.get(activeCoNum).xCoord, playerCursors.get(activeCoNum).yCoord);
 
     // Initialize the next turn, recording any events that will occur.
-    activeCO.initTurn(gameMap, events);
-
-    // TODO: Add a turn-init event at the front.
+    activeCO.initTurn(gameMap);
   }
 }

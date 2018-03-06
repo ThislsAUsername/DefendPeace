@@ -1,5 +1,8 @@
 package Engine;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
+
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.Environment;
@@ -52,6 +55,7 @@ public class MapController implements IController
 
   private InputMode inputMode;
 
+  Queue<Unit> unitsToInit = null;
   private boolean isGameOver;
 
   // We use a different method for the CO Info menu than the others (MetaAction, etc) because
@@ -86,6 +90,7 @@ public class MapController implements IController
     coAbilityMenu = null;
     confirmExitMenu = new InGameMenu<ConfirmExitEnum>(confirmExitOptions);
     inputMode = InputMode.MAP;
+    unitsToInit = new ArrayDeque<Unit>();
     isGameOver = false;
     coInfoMenu = new CO_InfoMenu(myGame.commanders.length);
     nextSelectedUnitIndex = 0;
@@ -701,6 +706,14 @@ public class MapController implements IController
       event.performEvent(myGame.gameMap);
     }
 
+    if( animEventQueueIsEmpty && !unitsToInit.isEmpty() )
+    {
+      animEventQueueIsEmpty = false;
+      Unit u = unitsToInit.poll();
+      GameEventQueue events = u.initTurn(myGame.gameMap);
+      myView.animate(events);
+    }
+
     // If we are done animating the last action, check to see if the game is over.
     if( animEventQueueIsEmpty )
     {
@@ -740,8 +753,14 @@ public class MapController implements IController
   private void startNextTurn()
   {
     nextSelectedUnitIndex = 0;
+
+    // Tell the game a turn has changed. This will update the active CO.
     GameEventQueue turnInitActions = new GameEventQueue();
-    myGame.turn(turnInitActions);
+    myGame.turn();
+
+    // Add the CO's units to the queue so we can initialize them.
+    unitsToInit.addAll(myGame.activeCO.units);
+
     changeInputMode(InputMode.ANIMATION);
     myView.animate(turnInitActions);
   }

@@ -60,8 +60,7 @@ public class TestHealing extends TestCase
       prevMoney = testCo1.money; // Track money.
       prevHP = victim.getHP(); // Track HP.
 
-      GameEventQueue events = new GameEventQueue();
-      victim.initTurn(testMap, events); // Make the unit try to heal itself.
+      GameEventQueue events = victim.initTurn(testMap); // Make the unit try to heal itself.
       for( GameEvent event : events )
       {
         event.performEvent(testMap);

@@ -48,6 +48,11 @@ public class Unit
         weapons[i] = new Weapon(model.weaponModels[i]);
       }
     }
+    else
+    {
+      // Just make sure we don't crash if we try to iterate on this.
+      weapons = new Weapon[0];
+    }
     if( model.holdingCapacity > 0 )
       heldUnits = new Vector<Unit>(model.holdingCapacity);
 
@@ -60,8 +65,11 @@ public class Unit
    * @param map
    * @param events
    */
-  public void initTurn(GameMap map, GameEventQueue events)
+  public GameEventQueue initTurn(GameMap map)
   {
+    // Make a queue to return any init events.
+    GameEventQueue events = new GameEventQueue();
+
     Location locus = map.getLocation(x, y);
 
     // Only perform turn initialization for the unit if it is on the map.
@@ -80,7 +88,10 @@ public class Unit
       if( model.canRepairOn(locus) && locus.getOwner() == CO )
       {
         // Resupply is free; whether or not we can repair, go ahead and add the resupply event.
-        events.add(new ResupplyEvent(this));
+        if( !isFullySupplied() )
+        {
+          events.add(new ResupplyEvent(this));
+        }
 
         if( HP < model.maxHP )
         {
@@ -106,6 +117,8 @@ public class Unit
         events.addAll(ga.getEvents(map));
       }
     } // ~If location is valid.
+
+    return events;
   }
 
   /**
@@ -315,7 +328,7 @@ public class Unit
             {
               // If there's a friendly unit there who isn't us, we can resupply them.
               Unit other = map.getLocation(loc).getResident();
-              if( other != null && other.CO == CO && other != this )
+              if( other != null && other.CO == CO && other != this && !other.isFullySupplied() )
               {
                 // We found at least one unit we can resupply. Since resupply actions aren't
                 // targeted, we can just add our action and break here.
@@ -355,5 +368,20 @@ public class Unit
         wpn.reload();
       }
     }
+  }
+
+  /** Returns true if resupply would have zero effect on this unit. */
+  public boolean isFullySupplied()
+  {
+    boolean isFull = (model.maxFuel == fuel);
+    if( isFull )
+    {
+      // Check weapon ammo.
+      for( Weapon w : weapons )
+      {
+        isFull &= (w.model.maxAmmo == w.ammo);
+      }
+    }
+    return isFull;
   }
 }

@@ -285,8 +285,8 @@ public class TestGameEvent extends TestCase
 
     // Simulate a new turn for the APC/Recon; the apc should re-supply the mech, and the recon should re-supply from the  HQ.
     GameEventQueue events = new GameEventQueue();
-    apc.initTurn(testMap, events);
-    recon.initTurn(testMap, events);
+    events.addAll(apc.initTurn(testMap));
+    events.addAll(recon.initTurn(testMap));
     for( GameEvent event : events )
     {
       event.performEvent(testMap);
