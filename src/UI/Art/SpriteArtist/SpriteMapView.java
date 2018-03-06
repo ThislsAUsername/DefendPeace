@@ -285,7 +285,7 @@ public class SpriteMapView extends MapView
       }
 
       // Draw the currently-acting unit so it's on top of everything.
-      if( null != currentActor && currentAnimation == null )
+      if( null != currentActor )
       {
         unitArtist.drawUnit(mapGraphics, currentActor, currentActor.x, currentActor.y, fastAnimIndex);
         unitArtist.drawUnitIcons(mapGraphics, currentActor, currentActor.x, currentActor.y);
