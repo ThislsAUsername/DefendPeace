@@ -56,6 +56,11 @@ public class GameInstance
     cursorX = x;
     cursorY = y;
   }
+  public void setCursorLocation(XYCoord coord)
+  {
+    setCursorLocation(coord.xCoord, coord.yCoord);
+  }
+
   public int getCursorX()
   {
     return cursorX;
@@ -111,7 +116,7 @@ public class GameInstance
         activeCoNum = 0;
       }
       activeCO = commanders[activeCoNum];
-    } while( activeCO.isDefeated );
+    } while (activeCO.isDefeated);
 
     // Set the cursor to the new CO's last known cursor position.
     cursorX = playerCursors.get(activeCoNum).xCoord;

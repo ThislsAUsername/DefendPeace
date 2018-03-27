@@ -1,5 +1,7 @@
 package Engine;
 
+import java.util.ArrayList;
+
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.Environment;
@@ -166,7 +168,10 @@ public class MapController implements IController
       case SEEK: // Move the cursor to the next unit that is ready to move.
         boolean found = false;
         int tries = 0;
-        int maxTries = myGame.activeCO.units.size();
+        int numUnits = myGame.activeCO.units.size();
+        ArrayList<XYCoord> freeIndustries = Utils.findFreeIndustries(myGame.activeCO, myGame.gameMap);
+        int numFreeIndustries = freeIndustries.size();
+        int maxTries = numUnits + numFreeIndustries;
         while ((maxTries > 0) && !found && (tries < maxTries))
         {
           // Normalize the index to allow wrapping.
@@ -175,11 +180,19 @@ public class MapController implements IController
             nextSelectedUnitIndex = 0;
           }
 
-          // If we find a unit that is ready to go, move the cursor to it.
-          Unit nextUnit = myGame.activeCO.units.get(nextSelectedUnitIndex);
-          if( !nextUnit.isTurnOver )
+          if( nextSelectedUnitIndex < numUnits )
           {
-            myGame.setCursorLocation(nextUnit.x, nextUnit.y);
+            // If we find a unit that is ready to go, move the cursor to it.
+            Unit nextUnit = myGame.activeCO.units.get(nextSelectedUnitIndex);
+            if( !nextUnit.isTurnOver )
+            {
+              myGame.setCursorLocation(nextUnit.x, nextUnit.y);
+              found = true;
+            }
+          }
+          else
+          {
+            myGame.setCursorLocation(freeIndustries.get(nextSelectedUnitIndex - numUnits));
             found = true;
           }
           // Increment for the next loop cycle or SEEK input.
@@ -205,9 +218,7 @@ public class MapController implements IController
             changeInputMode(InputMode.METAACTION);
           }
         }
-        else if( (Environment.Terrains.FACTORY == loc.getEnvironment().terrainType
-            || Environment.Terrains.AIRPORT == loc.getEnvironment().terrainType
-            || Environment.Terrains.SEAPORT == loc.getEnvironment().terrainType) && loc.getOwner() == myGame.activeCO )
+        else if( (loc.isIndustry()) && loc.getOwner() == myGame.activeCO )
         {
           changeInputMode(InputMode.PRODUCTION);
         }

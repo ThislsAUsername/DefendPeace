@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Queue;
 
+import CommandingOfficers.Commander;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.Unit;
@@ -318,5 +319,36 @@ public class Utils
       int secondPow = movesLeftGrid[o2.x][o2.y] + ((hasDestination) ? secondDist : 0);
       return firstPow - secondPow;
     }
+  }
+
+  /**
+   * Returns a list of all vacant industries a commander owns
+   */
+  public static ArrayList<XYCoord> findFreeIndustries(Commander co, GameMap map)
+  {
+    ArrayList<XYCoord> industries = new ArrayList<XYCoord>();
+    // we don't want to bother if we're trying to find nobody's properties :v
+    if( null != co )
+    {
+      // Add all vacant, <co>-owned industries to the list
+      for( int i = 0; i < map.mapWidth; i++ )
+      {
+        for( int j = 0; j < map.mapHeight; j++ )
+        {
+          Location loc = map.getLocation(i, j);
+          Unit resident = loc.getResident();
+          // we only want industries we can act on, which means they need to be empty
+          // TODO: maybe calculate whether the CO has enough money to buy something at this industry
+          if( null == resident )
+          {
+            if( (loc.isIndustry()) && loc.getOwner() == co )
+            {
+              industries.add(new XYCoord(i, j));
+            }
+          }
+        }
+      }
+    }
+    return industries;
   }
 }

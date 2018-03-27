@@ -51,6 +51,16 @@ public class Location
     return (environs.terrainType == Environment.Terrains.CITY || environs.terrainType == Environment.Terrains.FACTORY || environs.terrainType == Environment.Terrains.AIRPORT || environs.terrainType == Environment.Terrains.SEAPORT || environs.terrainType == Environment.Terrains.HQ || environs.terrainType == Environment.Terrains.LAB);
   }
 
+  /**
+   * @return true if this Location has an industry, false else.
+   */
+  public boolean isIndustry()
+  {
+    return (environs.terrainType == Environment.Terrains.FACTORY ||
+        environs.terrainType == Environment.Terrains.AIRPORT ||
+        environs.terrainType == Environment.Terrains.SEAPORT);
+  }
+
   public void setHighlight(boolean val)
   {
     highlightSet = val;
