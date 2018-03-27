@@ -7,9 +7,9 @@ import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.Location;
 import UI.CO_InfoMenu;
-import UI.InputHandler;
 import UI.InGameMenu;
 import UI.InGameProductionMenu;
+import UI.InputHandler;
 import UI.MapView;
 import Units.Unit;
 import Units.UnitModel;
@@ -28,6 +28,8 @@ public class MapController implements IController
   private InGameMenu<String> coAbilityMenu;
   private InGameMenu<ConfirmExitEnum> confirmExitMenu;
   private InGameMenu<? extends Object> currentMenu;
+
+  private int nextSelectedUnitIndex;
 
   private enum InputMode
   {
@@ -74,8 +76,8 @@ public class MapController implements IController
     confirmExitMenu = new InGameMenu<ConfirmExitEnum>(confirmExitOptions);
     inputMode = InputMode.MAP;
     isGameOver = false;
-    myGame.setCursorLocation(6, 5);
     coInfoMenu = new CO_InfoMenu(myGame.commanders.length);
+    nextSelectedUnitIndex = 0;
   }
 
   /**
@@ -160,6 +162,30 @@ public class MapController implements IController
         break;
       case RIGHT:
         myGame.moveCursorRight();
+        break;
+      case SEEK: // Move the cursor to the next unit that is ready to move.
+        boolean found = false;
+        int tries = 0;
+        int maxTries = myGame.activeCO.units.size();
+        while ((maxTries > 0) && !found && (tries < maxTries))
+        {
+          // Normalize the index to allow wrapping.
+          if( nextSelectedUnitIndex >= maxTries )
+          {
+            nextSelectedUnitIndex = 0;
+          }
+
+          // If we find a unit that is ready to go, move the cursor to it.
+          Unit nextUnit = myGame.activeCO.units.get(nextSelectedUnitIndex);
+          if( !nextUnit.isTurnOver )
+          {
+            myGame.setCursorLocation(nextUnit.x, nextUnit.y);
+            found = true;
+          }
+          // Increment for the next loop cycle or SEEK input.
+          ++tries;
+          ++nextSelectedUnitIndex;
+        }
         break;
       case ENTER:
         // See what is at the current cursor location, in precedence order of Unit, Building, Terrain.
@@ -421,6 +447,7 @@ public class MapController implements IController
             changeInputMode(InputMode.CO_ABILITYMENU);
             break;
           case END_TURN:
+            nextSelectedUnitIndex = 0;
             myGame.turn();
             changeInputMode(InputMode.MAP);
             break;

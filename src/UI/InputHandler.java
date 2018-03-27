@@ -5,7 +5,7 @@ public class InputHandler
 {
   public enum InputAction
   {
-    NO_ACTION, UP, DOWN, LEFT, RIGHT, ENTER, BACK
+    NO_ACTION, UP, DOWN, LEFT, RIGHT, SEEK, ENTER, BACK
   };
 
   // MovementInput variables
@@ -75,6 +75,9 @@ public class InputHandler
       case KeyEvent.VK_BACK_SPACE:
       case KeyEvent.VK_ESCAPE:
         ia = InputAction.BACK;
+        break;
+      case KeyEvent.VK_Q:
+        ia = InputAction.SEEK;
         break;
     }
     return ia;
