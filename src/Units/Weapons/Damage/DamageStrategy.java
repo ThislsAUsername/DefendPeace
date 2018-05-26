@@ -3,10 +3,12 @@ package Units.Weapons.Damage;
 import Units.UnitModel;
 import Units.Weapons.WeaponModel;
 
-public abstract class DamageStrategy
+public interface DamageStrategy
 {
   /**
    * @return returns its base damage against that unit type
    */
-  public abstract double getDamage(WeaponModel attack, UnitModel defender);
+  public double getDamage(WeaponModel attack, UnitModel defender);
+  
+  public String getDescription();
 }

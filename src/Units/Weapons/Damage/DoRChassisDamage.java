@@ -3,7 +3,7 @@ package Units.Weapons.Damage;
 import Units.UnitModel;
 import Units.Weapons.WeaponModel;
 
-public class DoRChassisDamage extends DamageStrategy
+public class DoRChassisDamage implements DamageStrategy
 {
 
   // format is [attacker][defender]
@@ -54,5 +54,10 @@ public class DoRChassisDamage extends DamageStrategy
   public double getDamage(WeaponModel attack, UnitModel defender)
   {
     return damageChart[attack.getIndex()][defender.chassis.ordinal()];
+  }
+
+  public String getDescription()
+  {
+    return "DoR Chassis";
   }
 }

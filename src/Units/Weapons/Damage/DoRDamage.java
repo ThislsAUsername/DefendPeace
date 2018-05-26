@@ -3,7 +3,7 @@ package Units.Weapons.Damage;
 import Units.UnitModel;
 import Units.Weapons.WeaponModel;
 
-public class DoRDamage extends DamageStrategy
+public class DoRDamage implements DamageStrategy
 {
 
   // format is [attacker][defender]
@@ -40,5 +40,10 @@ public class DoRDamage extends DamageStrategy
   public double getDamage(WeaponModel attack, UnitModel defender)
   {
     return damageChart[attack.getIndex()][defender.type.ordinal()];
+  }
+
+  public String getDescription()
+  {
+    return "DoR";
   }
 }
