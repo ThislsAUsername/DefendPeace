@@ -13,6 +13,7 @@ public class Weapon
   public WeaponModel model;
   public int ammo;
   public static DamageStrategy[] strategies = {new BHRDamage(), new DSDamage(), new DoRDamage(), new ChassisDamage()};
+  public static String[] stratDescriptions = {strategies[0].getDescription(), strategies[1].getDescription(), strategies[2].getDescription(), strategies[3].getDescription()};
   public static int currentStrategy = 0;
 
   public Weapon(WeaponModel model)
