@@ -30,14 +30,15 @@ public class Utils
       for( int xOff = -maxRange; xOff <= maxRange; ++xOff )
       {
         int currentRange = Math.abs(xOff) + Math.abs(yOff);
-        if( currentRange < minRange || currentRange > maxRange )
+        XYCoord coord = new XYCoord(origin.xCoord + xOff, origin.yCoord + yOff);
+        if( currentRange < minRange || currentRange > maxRange || !map.isLocationValid(coord) )
         {
           // This location is not in the desired range; move to the next.
           continue;
         }
 
         // Add this location to the set.
-        locations.add(new XYCoord(origin.xCoord + xOff, origin.yCoord + yOff));
+        locations.add(coord);
       }
     }
 
