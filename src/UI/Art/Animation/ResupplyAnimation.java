@@ -34,11 +34,10 @@ public class ResupplyAnimation implements GameAnimation
     int menuTextHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight();
 
     /**
-     * We are gonna draw this:
+     * We are gonna draw this over the unit:
      *   ------------
      *   | RESUPPLY |
-     *   -----  -----
-     *        \/
+     *   ------------
      * But with cool pop up/pop down effects.
      */
     signWidth = ((menuTextWidth * SUPPLYTEXT.length()) + 4) * drawScale;

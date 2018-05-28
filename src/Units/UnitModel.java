@@ -106,7 +106,7 @@ public class UnitModel
    */
   public ArrayList<GameAction> getTurnInitActions(Unit self)
   {
-    // Most Unit don't have any; specific UnitModel types can override.
+    // Most Units don't have any; specific UnitModel types can override.
     return new ArrayList<GameAction>();
   }
 }

@@ -61,7 +61,7 @@ public class Unit
 
   /**
    * Ready this unit for the next turn. Any actions it performs as part of
-   * initialization should be added to the GameEventQueue argument.
+   * initialization will be returned in a GameEventQueue.
    * @param map
    * @param events
    */

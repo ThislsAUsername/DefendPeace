@@ -500,10 +500,7 @@ public interface GameAction
       {
         // Figure out where we are acting.
         supplyLocation = myLocation();
-      }
 
-      if( isValid )
-      {
         // Add a move event if we need to move.
         // Note that movePath being null is OK for ResupplyAction when it is being re-used.
         if( movePath != null )

@@ -334,7 +334,6 @@ public class MapController implements IController
     switch (input)
     {
       case ENTER:
-        //currentAction.setActionType(actionMenu.getSelectedOption());
         GameActionSet actionSet = actionMenu.getSelectedOption();
 
         // If the action type requires no target, there should only be one
