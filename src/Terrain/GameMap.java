@@ -11,8 +11,11 @@ public class GameMap
   public final int mapHeight;
   public CommandingOfficers.Commander[] commanders;
 
+  private boolean initOK = false;
+
   public GameMap(CommandingOfficers.Commander[] COs, MapInfo mapInfo)
   {
+    initOK = true;
     commanders = COs;
     mapWidth = mapInfo.getWidth();
     mapHeight = mapInfo.getHeight();
@@ -72,20 +75,19 @@ public class GameMap
       // Warn if the CO still doesn't have a valid HQ.
       if( COs[co].HQLocation == null )
       {
-        System.out.println("Warning! CO does not have any HQ assigned!");
-
-        // We still need to set HQLocation to something, so just grab the first owned property.
-        if( mapInfo.COProperties[co].length > 0 )
-        {
-          COs[co].HQLocation = mapInfo.COProperties[co][0];
-        }
-        else
-        {
-          // This CO has no properties assigned at all. We don't support that kind of map at this point.
-          System.out.println("Warning! CO has no properties!");
-        }
+        System.out.println("Warning! CO " + co + " does not have any HQ assigned!");
+        initOK = false;
+        break;
       }
     }
+  }
+
+  /**
+   * Used to check if the GameMap is ready to be played after constructing.
+   */
+  public boolean initOK()
+  {
+    return initOK;
   }
 
   /**
