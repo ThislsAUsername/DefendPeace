@@ -182,7 +182,7 @@ public interface GameAction
         if( capture.willCapture() ) // If this will succeed, check if the CO will lose as a result.
         {
           // Check if capturing this property will cause someone's defeat.
-          if( captureLocation.getEnvironment().terrainType == Terrains.HQ )
+          if( (captureLocation.getEnvironment().terrainType == Terrains.HQ) && (null != captureLocation.getOwner()) )
           {
             // Someone is losing their big, comfy chair.
             captureEvents.add(new CommanderDefeatEvent(captureLocation.getOwner()));
