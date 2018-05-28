@@ -118,20 +118,27 @@ public class FillRectMapView extends MapView
   @Override
   public void animate(GameEventQueue newEvents)
   {
-    eventSequence = newEvents;
-
-    // Cancel any current animation.
-    if( null != currentAnimation )
+    if( null != newEvents )
     {
-      currentAnimation.cancel();
-      currentAnimation = null;
+      eventSequence = newEvents;
+
+      // Cancel any current animation.
+      if( null != currentAnimation )
+      {
+        currentAnimation.cancel();
+        currentAnimation = null;
+      }
+
+      // Pop the first new event.
+      loadNextEventAnimation();
+
+      // If we can't animate any of the incoming events, just release control.
+      if( null == currentAnimation )
+      {
+        mapController.animationEnded(null, true);
+      }
     }
-
-    // Pop the first new event.
-    loadNextEventAnimation();
-
-    // If we can't animate any of the incoming events, just release control.
-    if( null == currentAnimation )
+    else
     {
       mapController.animationEnded(null, true);
     }

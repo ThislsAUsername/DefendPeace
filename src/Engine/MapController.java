@@ -754,14 +754,14 @@ public class MapController implements IController
     nextSelectedUnitIndex = 0;
 
     // Tell the game a turn has changed. This will update the active CO.
-    GameEventQueue turnInitActions = new GameEventQueue();
     myGame.turn();
 
     // Add the CO's units to the queue so we can initialize them.
     unitsToInit.addAll(myGame.activeCO.units);
 
+    // Kick off the animation cycle, which will animate/init each unit.
     changeInputMode(InputMode.ANIMATION);
-    myView.animate(turnInitActions);
+    myView.animate(null);
   }
 
   public CO_InfoMenu getCoInfoMenu()

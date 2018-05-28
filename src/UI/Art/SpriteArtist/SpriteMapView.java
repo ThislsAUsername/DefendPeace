@@ -177,17 +177,24 @@ public class SpriteMapView extends MapView
   @Override
   public void animate( GameEventQueue newEvents )
   {
-    System.out.println("DEBUG: Received " + newEvents.size() + " events to animate.");
-    eventsToAnimate.addAll( newEvents );
+    if( null != newEvents )
+    {
+      System.out.println("DEBUG: Received " + newEvents.size() + " events to animate.");
+      eventsToAnimate.addAll(newEvents);
 
-    // If we aren't currently animating anything, load up the next animation.
-    if( null == currentAnimation )
-    {
-      loadNextEventAnimation();
+      // If we aren't currently animating anything, load up the next animation.
+      if( null == currentAnimation )
+      {
+        loadNextEventAnimation();
+      }
+      if( null == currentAnimation )
+      {
+        // Nothing to animate. Release control.
+        mapController.animationEnded(null, true);
+      }
     }
-    if( null == currentAnimation )
+    else
     {
-      // Nothing to animate. Release control.
       mapController.animationEnded(null, true);
     }
   }
