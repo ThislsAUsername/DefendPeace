@@ -31,14 +31,11 @@ public class Utils
       {
         int currentRange = Math.abs(xOff) + Math.abs(yOff);
         XYCoord coord = new XYCoord(origin.xCoord + xOff, origin.yCoord + yOff);
-        if( currentRange < minRange || currentRange > maxRange || !map.isLocationValid(coord) )
+        if( currentRange >= minRange && currentRange <= maxRange && map.isLocationValid(coord) )
         {
-          // This location is not in the desired range; move to the next.
-          continue;
+          // Add this location to the set.
+          locations.add(coord);
         }
-
-        // Add this location to the set.
-        locations.add(coord);
       }
     }
 
