@@ -187,8 +187,8 @@ public class MapController implements IController
         boolean found = false;
         int tries = 0;
         int numUnits = myGame.activeCO.units.size();
-        ArrayList<XYCoord> freeIndustries = Utils.findFreeIndustries(myGame.activeCO, myGame.gameMap);
-        int numFreeIndustries = freeIndustries.size();
+        ArrayList<XYCoord> usableProperties = Utils.findFreeIndustries(myGame.activeCO, myGame.gameMap);
+        int numFreeIndustries = usableProperties.size();
         int maxTries = numUnits + numFreeIndustries;
         while ((maxTries > 0) && !found && (tries < maxTries))
         {
@@ -210,7 +210,7 @@ public class MapController implements IController
           }
           else
           {
-            myGame.setCursorLocation(freeIndustries.get(nextSelectedUnitIndex - numUnits));
+            myGame.setCursorLocation(usableProperties.get(nextSelectedUnitIndex - numUnits));
             found = true;
           }
           // Increment for the next loop cycle or SEEK input.

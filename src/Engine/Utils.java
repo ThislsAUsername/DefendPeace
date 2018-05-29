@@ -361,7 +361,7 @@ public class Utils
   public static ArrayList<XYCoord> findFreeIndustries(Commander co, GameMap map)
   {
     ArrayList<XYCoord> industries = new ArrayList<XYCoord>();
-    // we don't want to bother if we're trying to find nobody's properties :v
+    // We don't want to bother if we're trying to find nobody's properties :v
     if( null != co )
     {
       // Add all vacant, <co>-owned industries to the list
@@ -371,7 +371,7 @@ public class Utils
         {
           Location loc = map.getLocation(i, j);
           Unit resident = loc.getResident();
-          // we only want industries we can act on, which means they need to be empty
+          // We only want industries we can act on, which means they need to be empty
           // TODO: maybe calculate whether the CO has enough money to buy something at this industry
           if( null == resident )
           {
