@@ -236,7 +236,7 @@ public class MapController implements IController
             changeInputMode(InputMode.METAACTION);
           }
         }
-        else if( (loc.isIndustry()) && loc.getOwner() == myGame.activeCO )
+        else if( loc.getOwner() == myGame.activeCO && myGame.activeCO.getShoppingList(loc.getEnvironment().terrainType).size() > 0 )
         {
           changeInputMode(InputMode.PRODUCTION);
         }

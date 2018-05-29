@@ -45,8 +45,7 @@ public class Utils
   /** Returns a list of locations of all enemy units that weapon could hit from attackerPosition. */
   public static ArrayList<XYCoord> findTargetsInRange(GameMap map, Commander co, XYCoord attackerPosition, Weapon weapon)
   {
-    ArrayList<XYCoord> locations = findLocationsInRange(map, attackerPosition, weapon.model.minRange,
-        weapon.model.maxRange);
+    ArrayList<XYCoord> locations = findLocationsInRange(map, attackerPosition, weapon.model.minRange, weapon.model.maxRange);
     ArrayList<XYCoord> targets = new ArrayList<XYCoord>();
     for( XYCoord loc : locations )
     {
@@ -361,24 +360,20 @@ public class Utils
   public static ArrayList<XYCoord> findFreeIndustries(Commander co, GameMap map)
   {
     ArrayList<XYCoord> industries = new ArrayList<XYCoord>();
-    // We don't want to bother if we're trying to find nobody's properties :v
+    // We don't want to bother if we're trying to find nobody's properties
     if( null != co )
     {
       // Add all vacant, <co>-owned industries to the list
-      for( int i = 0; i < map.mapWidth; i++ )
+      for( Location loc : co.ownedProperties )
       {
-        for( int j = 0; j < map.mapHeight; j++ )
+        Unit resident = loc.getResident();
+        // We only want industries we can act on, which means they need to be empty
+        // TODO: maybe calculate whether the CO has enough money to buy something at this industry
+        if( null == resident && loc.getOwner() == co )
         {
-          Location loc = map.getLocation(i, j);
-          Unit resident = loc.getResident();
-          // We only want industries we can act on, which means they need to be empty
-          // TODO: maybe calculate whether the CO has enough money to buy something at this industry
-          if( null == resident )
+          if( co.getShoppingList(loc.getEnvironment().terrainType).size() > 0 )
           {
-            if( (loc.isIndustry()) && loc.getOwner() == co )
-            {
-              industries.add(new XYCoord(i, j));
-            }
+            industries.add(loc.getCoordinates());
           }
         }
       }
