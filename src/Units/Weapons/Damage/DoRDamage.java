@@ -44,6 +44,6 @@ public class DoRDamage implements DamageStrategy
 
   public String getDescription()
   {
-    return "DoR";
+    return "Days of Ruin";
   }
 }

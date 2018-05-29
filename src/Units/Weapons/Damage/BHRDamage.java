@@ -43,6 +43,6 @@ public class BHRDamage implements DamageStrategy
 
   public String getDescription()
   {
-    return "AW2";
+    return "Black Hole Rising";
   }
 }

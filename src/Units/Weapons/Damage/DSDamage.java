@@ -43,6 +43,6 @@ public class DSDamage implements DamageStrategy
 
   public String getDescription()
   {
-    return "AW3";
+    return "Dual Strike";
   }
 }
