@@ -1,5 +1,8 @@
 package Engine;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
+
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.Environment;
@@ -7,9 +10,9 @@ import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.Location;
 import UI.CO_InfoMenu;
-import UI.InputHandler;
 import UI.InGameMenu;
 import UI.InGameProductionMenu;
+import UI.InputHandler;
 import UI.MapView;
 import Units.Unit;
 import Units.UnitModel;
@@ -19,15 +22,15 @@ public class MapController implements IController
   private GameInstance myGame;
   private MapView myView;
 
-  private GameAction currentAction = null;
-
   // A few menus to control the in-game logical flow.
   private InGameMenu<UnitModel> productionMenu;
-  private InGameMenu<GameAction.ActionType> actionMenu;
+  private InGameMenu<GameActionSet> actionMenu;
   private InGameMenu<MetaAction> metaActionMenu;
   private InGameMenu<String> coAbilityMenu;
   private InGameMenu<ConfirmExitEnum> confirmExitMenu;
   private InGameMenu<? extends Object> currentMenu;
+
+  private int nextSelectedUnitIndex;
 
   private enum InputMode
   {
@@ -52,14 +55,29 @@ public class MapController implements IController
 
   private InputMode inputMode;
 
+  Queue<Unit> unitsToInit = null;
   private boolean isGameOver;
-
-  private Path currentMovePath;
 
   // We use a different method for the CO Info menu than the others (MetaAction, etc) because
   // it has two different axes of control, and because it has no actions that can result.
   public boolean isInCoInfoMenu = false;
   private CO_InfoMenu coInfoMenu;
+
+  /** Just a simple struct to hold the currently-selected unit and its tentative path. */
+  private class ContemplatedAction
+  {
+    Unit actor = null;
+    Path movePath = null;
+    GameAction action = null;
+
+    public void clear()
+    {
+      actor = null;
+      movePath = null;
+      action = null;
+    }
+  }
+  ContemplatedAction contemplatedAction;
 
   public MapController(GameInstance game, MapView view)
   {
@@ -67,15 +85,19 @@ public class MapController implements IController
     myView = view;
     myView.setController(this);
     productionMenu = new InGameProductionMenu(myGame.commanders[0].getShoppingList(Terrains.FACTORY)); // Just init with a valid default.
-    GameAction.ActionType[] defaultAction = { GameAction.ActionType.WAIT }; // Again, just a valid default. Will be replaced when needed.
-    actionMenu = new InGameMenu<GameAction.ActionType>(defaultAction);
+    actionMenu = null;
     metaActionMenu = new InGameMenu<MetaAction>(metaActionsNoAbility);
     coAbilityMenu = null;
     confirmExitMenu = new InGameMenu<ConfirmExitEnum>(confirmExitOptions);
     inputMode = InputMode.MAP;
+    unitsToInit = new ArrayDeque<Unit>();
     isGameOver = false;
-    myGame.setCursorLocation(6, 5);
     coInfoMenu = new CO_InfoMenu(myGame.commanders.length);
+    nextSelectedUnitIndex = 0;
+    contemplatedAction = new ContemplatedAction();
+
+    // Start the first turn.
+    startNextTurn();
   }
 
   /**
@@ -161,6 +183,30 @@ public class MapController implements IController
       case RIGHT:
         myGame.moveCursorRight();
         break;
+      case SEEK: // Move the cursor to the next unit that is ready to move.
+        boolean found = false;
+        int tries = 0;
+        int maxTries = myGame.activeCO.units.size();
+        while ((maxTries > 0) && !found && (tries < maxTries))
+        {
+          // Normalize the index to allow wrapping.
+          if( nextSelectedUnitIndex >= maxTries )
+          {
+            nextSelectedUnitIndex = 0;
+          }
+
+          // If we find a unit that is ready to go, move the cursor to it.
+          Unit nextUnit = myGame.activeCO.units.get(nextSelectedUnitIndex);
+          if( !nextUnit.isTurnOver )
+          {
+            myGame.setCursorLocation(nextUnit.x, nextUnit.y);
+            found = true;
+          }
+          // Increment for the next loop cycle or SEEK input.
+          ++tries;
+          ++nextSelectedUnitIndex;
+        }
+        break;
       case ENTER:
         // See what is at the current cursor location, in precedence order of Unit, Building, Terrain.
         Location loc = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY());
@@ -169,7 +215,7 @@ public class MapController implements IController
         {
           if( unitActor.isTurnOver == false || unitActor.CO != myGame.activeCO )
           {
-            currentAction = new GameAction(unitActor); // Start building a GameAction
+            contemplatedAction.actor = unitActor;
 
             // Calculate movement options.
             changeInputMode(InputMode.MOVEMENT);
@@ -215,7 +261,6 @@ public class MapController implements IController
     {
       case UP:
         myGame.moveCursorUp();
-        // System.out.println("inMoveableSpace = " + inMoveableSpace);
         // Make sure we don't overshoot the reachable tiles by accident.
         if( inMoveableSpace && InputHandler.isUpHeld() && !myGame.getCursorLocation().isHighlightSet() )
         {
@@ -251,17 +296,15 @@ public class MapController implements IController
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         break;
       case ENTER:
-        if( inMoveableSpace && currentAction.getActor().CO == myGame.activeCO ) // If the selected space is within
-        // the reachable area
+        // If the selected space is within the reachable area
+        if( inMoveableSpace && contemplatedAction.actor.CO == myGame.activeCO )
         {
           // Move the Unit to the location and display possible actions.
-          currentMovePath.start(); // start the unit running
-          currentAction.setMovePath(currentMovePath);
-          currentMovePath = null;
+          contemplatedAction.movePath.start(); // start the unit running
           changeInputMode(InputMode.ACTIONMENU);
         }
         // if we're selecting an enemy unit, hitting enter again will drop that selection
-        if( currentAction.getActor().CO != myGame.activeCO )
+        if( contemplatedAction.actor.CO != myGame.activeCO )
         {
           // TODO: re-selecting the unit should do a threat range check?
           changeInputMode(InputMode.MAP);
@@ -282,7 +325,7 @@ public class MapController implements IController
    */
   private void handleActionMenuInput(InputHandler.InputAction input)
   {
-    if( currentMenu != actionMenu )
+    if( currentMenu != actionMenu || null == actionMenu )
     {
       System.out.println("ERROR! MapController.handleActionMenuInput() called with wrong menu active!");
       return;
@@ -291,12 +334,13 @@ public class MapController implements IController
     switch (input)
     {
       case ENTER:
-        currentAction.setActionType(actionMenu.getSelectedOption());
+        GameActionSet actionSet = actionMenu.getSelectedOption();
 
-        // If the action is completely constructed, execute it, else get the missing info.
-        if( currentAction.isReadyToExecute() )
+        // If the action type requires no target, there should only be one
+        // GameAction in the set. Execute it.
+        if( !actionSet.isTargetRequired() )
         {
-          executeGameAction(currentAction);
+          executeGameAction(actionSet.getSelected());
         }
         else
         {
@@ -319,36 +363,49 @@ public class MapController implements IController
    */
   private void handleActionInput(InputHandler.InputAction input)
   {
-    boolean inActionableSpace = myGame.getCursorLocation().isHighlightSet();
+    if( null == actionMenu )
+    {
+      System.out.println("ERROR! MapController.handleActionInput() called with null action menu!");
+      return;
+    }
+
+    GameActionSet actionOptions = actionMenu.getSelectedOption();
+
+    if( !actionOptions.isTargetRequired() )
+    {
+      // If this option doesn't require a target, it should have been executed from handleActionMenuInput().
+      // This function is just for target selection/choosing one action from the set.
+      System.out.println("WARNING! Attempting to choose a target for a non-targetable action.");
+    }
 
     switch (input)
     {
       case UP:
-        myGame.moveCursorUp();
+      case LEFT:
+        // Select the previous possible action, set it into the contemplated action, and
+        //  update the cursor location to the action's target locatin.
+        actionOptions.prev();
+        myGame.setCursorLocation(actionOptions.getSelected().getTargetLocation());
+        contemplatedAction.action = actionOptions.getSelected();
         break;
       case DOWN:
-        myGame.moveCursorDown();
-        break;
-      case LEFT:
-        myGame.moveCursorLeft();
-        break;
       case RIGHT:
-        myGame.moveCursorRight();
+        // Select the next possible action, set it into the contemplated action, and
+        //  update the cursor location to the action's target locatin.
+        actionOptions.next();
+        myGame.setCursorLocation(actionOptions.getSelected().getTargetLocation());
+        contemplatedAction.action = actionOptions.getSelected();
         break;
       case ENTER:
-        if( inActionableSpace && (null != currentAction) )
+        GameAction action = actionOptions.getSelected();
+        if( null != action )
         {
-          currentAction.setActionLocation(myGame.getCursorX(), myGame.getCursorY());
-
-          if( currentAction.isReadyToExecute() )
-          {
-            executeGameAction(currentAction);
-          }
-          else
-          {
-            System.out.println("WARNING! Action not constructed correctly!");
-            changeInputMode(InputMode.MAP); // try and reset;
-          }
+          executeGameAction(action);
+        }
+        else
+        {
+          // Something went really wonky.
+          System.out.println("Attempting to execute a null GameAction! Ignoring.");
         }
         break;
       case BACK:
@@ -421,8 +478,7 @@ public class MapController implements IController
             changeInputMode(InputMode.CO_ABILITYMENU);
             break;
           case END_TURN:
-            myGame.turn();
-            changeInputMode(InputMode.MAP);
+            startNextTurn();
             break;
           case QUIT_GAME:
             changeInputMode(InputMode.CONFIRMEXIT);
@@ -518,55 +574,32 @@ public class MapController implements IController
     inputMode = input;
     switch (inputMode)
     {
-      case ACTION:
-        Utils.findActionableLocations(currentAction.getActor(), currentAction.getActionType(), currentAction.getMoveX(),
-            currentAction.getMoveY(), myGame.gameMap);
-        boolean set = false;
-        for( int w = 0; w < myGame.gameMap.mapWidth; ++w )
-        {
-          for( int h = 0; h < myGame.gameMap.mapHeight; ++h )
-          {
-            if( myGame.gameMap.getLocation(w, h).isHighlightSet() )
-            {
-              myGame.setCursorLocation(w, h);
-              set = true;
-              break;
-            }
-          }
-          if( set )
-            break;
-        }
+      case ACTION: // Provide a target for the chosen action.
+        GameActionSet possibleActions = actionMenu.getSelectedOption();
+        Utils.highlightLocations(myGame.gameMap, possibleActions.getTargetedLocations());
+
+        // Set the contemplated action to the first possible action, and move the
+        //  cursor to the targeted location.
+        myGame.setCursorLocation(possibleActions.getSelected().getTargetLocation());
+        contemplatedAction.action = possibleActions.getSelected();
         currentMenu = null;
         break;
-      case ACTIONMENU:
+      case ACTIONMENU: // Select which action to perform.
         myGame.gameMap.clearAllHighlights();
-        actionMenu.resetOptions(
-            currentAction.getActor().getPossibleActions(myGame.gameMap, currentAction.getMoveX(), currentAction.getMoveY()));
+        actionMenu = new InGameMenu<GameActionSet>(contemplatedAction.actor.getPossibleActions(myGame.gameMap,
+            contemplatedAction.movePath));
         currentMenu = actionMenu;
-        myGame.setCursorLocation(currentAction.getMoveX(), currentAction.getMoveY());
-        currentAction.setActionType(GameAction.ActionType.INVALID); // We haven't chosen an action yet.
+        myGame.setCursorLocation(contemplatedAction.movePath.getEnd().x, contemplatedAction.movePath.getEnd().y);
         break;
       case MAP:
-        currentAction = null;
-        currentMovePath = null;
+        contemplatedAction.clear();
         currentMenu = null;
         myGame.gameMap.clearAllHighlights();
-
-        //        if( unitActor != null )
-        //        {
-        //          myGame.setCursorLocation(unitActor.x, unitActor.y);
-        //          unitActor = null; // We are now in MAP mode; no unit is selected.
-        //        }
         break;
       case MOVEMENT:
-        Utils.findPossibleDestinations(currentAction.getActor(), myGame);
-        if( null != currentAction )
-        {
-          currentAction.setMovePath(null); // No destination chosen yet.
-        }
+        Utils.findPossibleDestinations(contemplatedAction.actor, myGame);
+        contemplatedAction.movePath = null;
         currentMenu = null;
-        myGame.setCursorLocation(currentAction.getActor().x, currentAction.getActor().y);
-        currentMovePath = null;
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.
         break;
       case PRODUCTION:
@@ -599,10 +632,9 @@ public class MapController implements IController
         myGame.gameMap.clearAllHighlights();
         break;
       case EXITGAME:
-        currentAction = null;
+        contemplatedAction.clear();
         myGame.gameMap.clearAllHighlights();
         currentMenu = null;
-        currentMovePath = null;
         break;
       case CO_INFO:
         // No action needed.
@@ -614,27 +646,27 @@ public class MapController implements IController
 
   private void buildMovePath(int x, int y, GameMap map)
   {
-    if( null == currentMovePath )
+    if( null == contemplatedAction.movePath )
     {
-      currentMovePath = new Path(myView.getMapUnitMoveSpeed());
+      contemplatedAction.movePath = new Path(myView.getMapUnitMoveSpeed());
     }
 
     // If the new point already exists on the path, cut the extraneous points out.
-    for( int i = 0; i < currentMovePath.getPathLength(); ++i )
+    for( int i = 0; i < contemplatedAction.movePath.getPathLength(); ++i )
     {
-      if( currentMovePath.getWaypoint(i).x == x && currentMovePath.getWaypoint(i).y == y )
+      if( contemplatedAction.movePath.getWaypoint(i).x == x && contemplatedAction.movePath.getWaypoint(i).y == y )
       {
-        currentMovePath.snip(i);
+        contemplatedAction.movePath.snip(i);
         break;
       }
     }
 
-    currentMovePath.addWaypoint(x, y);
+    contemplatedAction.movePath.addWaypoint(x, y);
 
-    if( !Utils.isPathValid(currentAction.getActor(), currentMovePath, myGame.gameMap) )
+    if( !Utils.isPathValid(contemplatedAction.actor, contemplatedAction.movePath, myGame.gameMap) )
     {
       // The currently-built path is invalid. Try to generate a new one (may still return null).
-      Utils.findShortestPath(currentAction.getActor(), x, y, currentMovePath, myGame.gameMap);
+      contemplatedAction.movePath = Utils.findShortestPath(contemplatedAction.actor, x, y, myGame.gameMap);
     }
   }
 
@@ -644,26 +676,42 @@ public class MapController implements IController
   private void executeGameAction(GameAction action)
   {
     // Compile the GameAction to its component events.
-    GameEventQueue events = action.getGameEvents(myGame.gameMap);
+    GameEventQueue events = action.getEvents(myGame.gameMap);
 
     // Send the events to the animator. They will be applied/executed in animationEnded().
     changeInputMode(InputMode.ANIMATION);
     myView.animate(events);
   }
 
-  public GameAction getContemplatedAction()
+  public Unit getContemplatedActor()
   {
-    return currentAction;
+    return contemplatedAction.actor;
   }
 
   public Path getContemplatedMove()
   {
-    return currentMovePath;
+    return contemplatedAction.movePath;
+  }
+
+  public GameAction getContemplatedAction()
+  {
+    return contemplatedAction.action;
   }
 
   public void animationEnded(GameEvent event, boolean animEventQueueIsEmpty)
   {
-    event.performEvent(myGame.gameMap);
+    if( null != event )
+    {
+      event.performEvent(myGame.gameMap);
+    }
+
+    if( animEventQueueIsEmpty && !unitsToInit.isEmpty() )
+    {
+      animEventQueueIsEmpty = false;
+      Unit u = unitsToInit.poll();
+      GameEventQueue events = u.initTurn(myGame.gameMap);
+      myView.animate(events);
+    }
 
     // If we are done animating the last action, check to see if the game is over.
     if( animEventQueueIsEmpty )
@@ -683,22 +731,37 @@ public class MapController implements IController
       {
         isGameOver = true;
       }
-    }
 
-    if( isGameOver && inputMode != InputMode.EXITGAME )
-    {
-      // The last action ended the game, and the animation just finished.
-      //  Now we wait for one more keypress before going back to the main menu.
-      changeInputMode(InputMode.EXITGAME);
+      if( isGameOver && inputMode != InputMode.EXITGAME )
+      {
+        // The last action ended the game, and the animation just finished.
+        //  Now we wait for one more keypress before going back to the main menu.
+        changeInputMode(InputMode.EXITGAME);
 
-      // Signal the view to animate the victory/defeat overlay.
-      myView.gameIsOver();
+        // Signal the view to animate the victory/defeat overlay.
+        myView.gameIsOver();
+      }
+      else
+      {
+        // The animation for the last action just completed. Back to normal input mode.
+        changeInputMode(InputMode.MAP);
+      }
     }
-    else
-    {
-      // The animation for the last action just completed. Back to normal input mode.
-      changeInputMode(InputMode.MAP);
-    }
+  }
+
+  private void startNextTurn()
+  {
+    nextSelectedUnitIndex = 0;
+
+    // Tell the game a turn has changed. This will update the active CO.
+    myGame.turn();
+
+    // Add the CO's units to the queue so we can initialize them.
+    unitsToInit.addAll(myGame.activeCO.units);
+
+    // Kick off the animation cycle, which will animate/init each unit.
+    changeInputMode(InputMode.ANIMATION);
+    myView.animate(null);
   }
 
   public CO_InfoMenu getCoInfoMenu()

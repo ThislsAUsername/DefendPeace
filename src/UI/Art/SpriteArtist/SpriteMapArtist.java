@@ -4,14 +4,14 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
-import Terrain.GameMap;
-import UI.MapView;
-import UI.Art.FillRectArtist.FillRectMapArtist;
-
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.Path.PathNode;
+import Terrain.GameMap;
+import UI.MapView;
+import UI.Art.FillRectArtist.FillRectMapArtist;
+import Units.Unit;
 
 public class SpriteMapArtist
 {
@@ -59,9 +59,9 @@ public class SpriteMapArtist
     spriteSet.drawTerrainObject(g, gameMap, x, y, drawScale);
   }
 
-  public void drawCursor(Graphics g, GameAction currentAction, int drawX, int drawY )
+  public void drawCursor(Graphics g, Unit unitActor, GameAction currentAction, int drawX, int drawY)
   {
-    if( null == currentAction || currentAction.getActionType() == GameAction.ActionType.INVALID )
+    if( null == currentAction || currentAction.getType() == GameAction.ActionType.INVALID )
     {
       // TODO: Get an actual map cursor.
       // Draw the default map cursor.
@@ -71,8 +71,8 @@ public class SpriteMapArtist
     }
     else
     {
-      SpriteLibrary.drawImageCenteredOnPoint(g, SpriteLibrary.getActionCursor(),
-          myGame.getCursorX() * tileSize + (tileSize / 2), myGame.getCursorY() * tileSize + (tileSize / 2), drawScale);
+      SpriteLibrary.drawImageCenteredOnPoint(g, SpriteLibrary.getActionCursor(), myGame.getCursorX() * tileSize + (tileSize / 2),
+          myGame.getCursorY() * tileSize + (tileSize / 2), drawScale);
     }
   }
 

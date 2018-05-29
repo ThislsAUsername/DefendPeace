@@ -78,7 +78,7 @@ public class FillRectMapView extends MapView
     {
       mapArtist.drawMovePath(g, mapController.getContemplatedMove());
     }
-    unitArtist.drawUnits(g, mapController.getContemplatedAction());
+    unitArtist.drawUnits(g, mapController.getContemplatedActor(), mapController.getContemplatedMove());
 
     // If we have a new event to animate, load the animation.
     if( currentEvent != null && currentAnimation == null )
@@ -100,6 +100,7 @@ public class FillRectMapView extends MapView
       if( currentAnimation.animate(g) )
       {
         mapController.animationEnded( currentEvent, eventSequence.isEmpty() );
+        currentEvent = null;
         currentAnimation = null;
         loadNextEventAnimation(); // Load the next event into the hopper.
       }
@@ -117,17 +118,30 @@ public class FillRectMapView extends MapView
   @Override
   public void animate(GameEventQueue newEvents)
   {
-    eventSequence = newEvents;
-
-    // Cancel any current animation.
-    if( null != currentAnimation )
+    if( null != newEvents )
     {
-      currentAnimation.cancel();
-      currentAnimation = null;
-    }
+      eventSequence = newEvents;
 
-    // Pop the first new event.
-    loadNextEventAnimation();
+      // Cancel any current animation.
+      if( null != currentAnimation )
+      {
+        currentAnimation.cancel();
+        currentAnimation = null;
+      }
+
+      // Pop the first new event.
+      loadNextEventAnimation();
+
+      // If we can't animate any of the incoming events, just release control.
+      if( null == currentAnimation )
+      {
+        mapController.animationEnded(null, true);
+      }
+    }
+    else
+    {
+      mapController.animationEnded(null, true);
+    }
   }
 
   /**
@@ -139,14 +153,14 @@ public class FillRectMapView extends MapView
     // Keep pulling events off the queue until we get one we can draw.
     while( null == currentAnimation && !eventSequence.isEmpty() )
     {
-      GameEvent event = eventSequence.peek();
-      if( null != event )
+      currentEvent = eventSequence.poll();
+      if( null != currentEvent )
       {
-        currentAnimation = event.getEventAnimation( this );
+        currentAnimation = currentEvent.getEventAnimation(this);
         if( null == currentAnimation )
         {
           // There isn't an animation for this event. Just notify the controller.
-          mapController.animationEnded( eventSequence.poll(), eventSequence.isEmpty() );
+          mapController.animationEnded(currentEvent, eventSequence.isEmpty());
         }
       }
     }

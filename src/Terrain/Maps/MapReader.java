@@ -38,7 +38,7 @@ public class MapReader extends IMapBuilder
               continue;
             // underscores->spaces makes it pretty
             mapName = mapName.replaceAll("_", " ");
-            mapName = mapName.replaceAll(".map", "");
+            mapName = mapName.replaceAll("\\.map", "");
             System.out.println("INFO: Parsing map: " + mapName);
 
             // We need a list of who starts owning what properties. This is that list.

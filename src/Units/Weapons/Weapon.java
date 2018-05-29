@@ -47,10 +47,13 @@ public class Weapon
 
   public void fire()
   {
-    if( ammo > 0 )
-      ammo--;
-    else if( ammo == 0 )
-      System.out.println("WARNING: trying to fire an empty gun!");
+    if( !model.hasInfiniteAmmo )
+    {
+      if( ammo > 0 )
+        ammo--;
+      else if( ammo == 0 )
+        System.out.println("WARNING: trying to fire an empty gun!");
+    }
   }
 
   /**

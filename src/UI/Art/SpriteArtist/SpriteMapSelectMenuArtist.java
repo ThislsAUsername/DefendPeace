@@ -61,9 +61,9 @@ public class SpriteMapSelectMenuArtist
 
     // Draw the highlight for the selected option.
     g.setColor(MENUHIGHLIGHTCOLOR);
-    int menuTextYStart = frameBorderHeight + drawScale; // Upper frame border plus 1 pixel buffer.
+    int menuTextYStart = frameBorderHeight;
     int menuOptionHeight = SpriteLibrary.getLettersUppercase().getFrame(0).getHeight()*drawScale;
-    int selectedOptionYOffset = menuTextYStart + highlightedOption * (menuOptionHeight+1);
+    int selectedOptionYOffset = menuTextYStart + highlightedOption * (menuOptionHeight + drawScale);
     g.fillRect(0, selectedOptionYOffset, nameSectionDrawWidth, menuOptionHeight);
 
     // Get the list of selectable maps (possibly specifying a filter (#players, etc).
@@ -73,7 +73,7 @@ public class SpriteMapSelectMenuArtist
     for(int i = 0; i < mapInfos.size(); ++i)
     {
       int drawX = 2; // Offset from the edge of the window slightly.
-      int drawY = menuTextYStart + i*(menuOptionHeight+drawScale); // +drawScale for a buffer between options.
+      int drawY = menuTextYStart + drawScale + i * (menuOptionHeight + drawScale); // +drawScale for a buffer between options.
 
       // Draw visible map names in the list.
       String str = mapInfos.get(i).mapName;

@@ -3,11 +3,15 @@ package CommandingOfficers;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import CommandingOfficers.Modifiers.COModifier;
+import Engine.GameInstance;
+import Engine.XYCoord;
+import Engine.Combat.BattleInstance;
 import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.Location;
-import Units.AntiAirModel;
 import Units.APCModel;
+import Units.AntiAirModel;
 import Units.ArtilleryModel;
 import Units.BCopterModel;
 import Units.BattleshipModel;
@@ -27,9 +31,6 @@ import Units.TCopterModel;
 import Units.TankModel;
 import Units.Unit;
 import Units.UnitModel;
-import CommandingOfficers.Modifiers.COModifier;
-import Engine.GameInstance;
-import Engine.Combat.BattleInstance;
 import Units.UnitModel.UnitEnum;
 
 public class Commander
@@ -43,7 +44,7 @@ public class Commander
   public int money = 0;
   public int incomePerCity = 1000;
   public boolean isDefeated = false;
-  public Location HQLocation = null;
+  public XYCoord HQLocation = null;
 
   public Commander(CommanderInfo info)
   {
@@ -92,6 +93,10 @@ public class Commander
     modifiers.add( mod ); // Add to the list so the modifier can be reverted next turn.
   }
 
+  /**
+   * Collect income and handle any COModifiers.
+   * @param map
+   */
   public void initTurn(GameMap map)
   {
     // Accrue income for each city under your control.
@@ -115,11 +120,6 @@ public class Commander
     {
       modifiers.get(i).revert(this);
       modifiers.remove(i);
-    }
-
-    for( Unit unit : units )
-    {
-      unit.initTurn(map.getLocation(unit.x, unit.y));
     }
   }
 

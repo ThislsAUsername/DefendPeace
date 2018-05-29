@@ -1,10 +1,12 @@
 package Units;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
+import Engine.GameAction;
 import Engine.GameAction.ActionType;
-import Terrain.Location;
 import Terrain.Environment.Terrains;
+import Terrain.Location;
 import Units.MoveTypes.MoveType;
 import Units.Weapons.WeaponModel;
 
@@ -97,5 +99,14 @@ public class UnitModel
       compatible |= environs == terrain;
     }
     return compatible;
+  }
+
+  /** Provides a hook for inheritors to supply turn-initialization actions to a unit.
+   * @param self Assumed to be a Unit of the model's type.
+   */
+  public ArrayList<GameAction> getTurnInitActions(Unit self)
+  {
+    // Most Units don't have any; specific UnitModel types can override.
+    return new ArrayList<GameAction>();
   }
 }

@@ -88,8 +88,8 @@ public class SpriteMiniMapArtist
       {
         // Draw the specified location in a new color.
         XYCoord loc = mapInfo.COProperties[co][i];
-        int x = (int)loc.xCoord;
-        int y = (int)loc.yCoord;
+        int x = loc.xCoord;
+        int y = loc.yCoord;
 
         g.setColor( coColor );
         g.fillRect(x, y, 1, 1);

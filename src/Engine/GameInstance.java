@@ -1,5 +1,7 @@
 package Engine;
 
+import java.util.HashMap;
+
 import Terrain.GameMap;
 import Terrain.Location;
 
@@ -12,6 +14,8 @@ public class GameInstance
   private int cursorX = 0;
   private int cursorY = 0;
 
+  HashMap<Integer, XYCoord> playerCursors = null;
+
   public GameInstance(GameMap map, CommandingOfficers.Commander[] cos)
   {
     if( cos.length < 2 )
@@ -21,11 +25,28 @@ public class GameInstance
 
     gameMap = map;
     commanders = cos;
-    activeCoNum = 0;
-    activeCO = commanders[activeCoNum];
-    activeCO.initTurn(gameMap);
+    activeCoNum = -1; // No commander is active yet.
+
+    // Set the initial cursor locations for each player.
+    playerCursors = new HashMap<Integer, XYCoord>();
+    for( int i = 0; i < commanders.length; ++i )
+    {
+      if( commanders[i].HQLocation != null )
+      {
+        playerCursors.put(i, commanders[i].HQLocation);
+      }
+      else
+      {
+        System.out.println("Warning! Commander " + commanders[i].coInfo.name + " does not have an HQ location!");
+        playerCursors.put(i, new XYCoord(1, 1));
+      }
+    }
   }
 
+  public void setCursorLocation(XYCoord loc)
+  {
+    setCursorLocation(loc.xCoord, loc.yCoord);
+  }
   public void setCursorLocation(int x, int y)
   {
     if( x < 0 || y < 0 || x > gameMap.mapWidth - 1 || y > gameMap.mapHeight - 1 )
@@ -77,8 +98,15 @@ public class GameInstance
     //		System.out.println("moveCursorRight");
   }
 
+  /**
+   * Activates the turn for the next available CO.
+   * @param events
+   */
   public void turn()
   {
+    // Store the cursor location for the current CO.
+    playerCursors.put(activeCoNum, new XYCoord(cursorX, cursorY));
+
     // Find the next non-defeated CO.
     do
     {
@@ -90,7 +118,10 @@ public class GameInstance
       activeCO = commanders[activeCoNum];
     } while( activeCO.isDefeated );
 
-    // Start the turn.
+    // Set the cursor to the new CO's last known cursor position.
+    setCursorLocation(playerCursors.get(activeCoNum).xCoord, playerCursors.get(activeCoNum).yCoord);
+
+    // Initialize the next turn, recording any events that will occur.
     activeCO.initTurn(gameMap);
   }
 }
