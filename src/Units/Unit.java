@@ -5,7 +5,12 @@ import java.util.Vector;
 
 import CommandingOfficers.Commander;
 import Engine.GameAction;
+import Engine.GameActionSet;
+import Engine.Path;
 import Engine.Utils;
+import Engine.XYCoord;
+import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.ResupplyEvent;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.UnitModel.UnitEnum;
@@ -24,6 +29,7 @@ public class Unit
   public boolean isTurnOver;
   private double HP;
   public Weapon[] weapons;
+  private ArrayList<GameAction> turnInitActions;
 
   public Unit(Commander co, UnitModel um)
   {
@@ -34,20 +40,38 @@ public class Unit
     HP = model.maxHP;
     captureProgress = 0;
     captureTarget = null;
-    if( um.weaponModels != null )
+    if( model.weaponModels != null )
     {
-      weapons = new Weapon[um.weaponModels.length];
-      for( int i = 0; i < um.weaponModels.length; i++ )
+      weapons = new Weapon[model.weaponModels.length];
+      for( int i = 0; i < model.weaponModels.length; i++ )
       {
-        weapons[i] = new Weapon(um.weaponModels[i]);
+        weapons[i] = new Weapon(model.weaponModels[i]);
       }
+    }
+    else
+    {
+      // Just make sure we don't crash if we try to iterate on this.
+      weapons = new Weapon[0];
     }
     if( model.holdingCapacity > 0 )
       heldUnits = new Vector<Unit>(model.holdingCapacity);
+
+    turnInitActions = model.getTurnInitActions(this);
   }
 
-  public void initTurn(Location locus)
+  /**
+   * Ready this unit for the next turn. Any actions it performs as part of
+   * initialization will be returned in a GameEventQueue.
+   * @param map
+   * @param events
+   */
+  public GameEventQueue initTurn(GameMap map)
   {
+    // Make a queue to return any init events.
+    GameEventQueue events = new GameEventQueue();
+
+    Location locus = map.getLocation(x, y);
+
     // Only perform turn initialization for the unit if it is on the map.
     //   Units that are e.g. in a transport don't burn fuel, etc.
     if( null != locus )
@@ -59,9 +83,17 @@ public class Unit
         captureTarget = null;
         captureProgress = 0;
       }
-      if( HP < model.maxHP )
+
+      // If the unit is not at max health, and is on a repair tile, heal it.
+      if( model.canRepairOn(locus) && locus.getOwner() == CO )
       {
-        if( model.canRepairOn(locus) && locus.getOwner() == CO )
+        // Resupply is free; whether or not we can repair, go ahead and add the resupply event.
+        if( !isFullySupplied() )
+        {
+          events.add(new ResupplyEvent(this));
+        }
+
+        if( HP < model.maxHP )
         {
           int neededHP = Math.min(model.maxHP - getHP(), 2); // will be 0, 1, 2
           double proportionalCost = model.moneyCost / model.maxHP;
@@ -78,50 +110,77 @@ public class Unit
           }
         }
       }
-    }
+
+      // Collect any turn-initialization actions for this unit.
+      for( GameAction ga : turnInitActions )
+      {
+        events.addAll(ga.getEvents(map));
+      }
+    } // ~If location is valid.
+
+    return events;
   }
 
   /**
-   * @return the base damage this unit would do against the specified target,
-   * at the specified range, based on whether it will move before striking
-   * Chooses the first weapon on the list that can deal damage.
+   * @return whether or not this unit can attack the given unit type at the
+   * specified range, accounting for the possibility of moving first.
    */
-  public double getBaseDamage(UnitModel target, int range, boolean moved)
+  public boolean canAttack(UnitModel targetType, int range, boolean afterMoving)
   {
     // if we have no weapons, we can't hurt things
     if( weapons == null )
-      return 0;
+      return false;
+
+    boolean canHit = false;
     for( int i = 0; i < weapons.length; i++ )
     {
-      // If the weapon isn't mobile, we shouldn't be able to fire if we moved.
-      if( moved && !weapons[i].model.canFireAfterMoving )
+      if( afterMoving && !weapons[i].model.canFireAfterMoving )
       {
+        // If we are planning to move first, and the weapon
+        // can't shoot after moving, then move along.
         continue;
       }
-      double damage = weapons[i].getDamage(target, range);
-      if( damage != 0 )
+      if( weapons[i].getDamage(targetType, range) > 0 )
       {
-        return damage;
-      }
-    }
-    return 0;
-  }
-
-  // for the purpose of letting the unit know it has attacked.
-  public void fire(final Unit defender)
-  {
-    UnitEnum target = defender.model.type;
-    int i = 0;
-    for( ; i < weapons.length; i++ )
-    {
-      if( weapons[i].getDamage(target) != 0 )
-      {
+        canHit = true;
         break;
       }
     }
-    if( i == weapons.length )
-      System.out.println("In " + model.name + "'s fire(): no valid weapon found");
-    weapons[i].fire();
+    return canHit;
+  }
+
+  /**
+   * Select the weapon owned by this unit that can inflict the
+   * most damage against the chosen target
+   * @param target
+   * @param range
+   * @param afterMoving
+   * @return The best weapon for that target, or null if no usable weapon exists.
+   */
+  public Weapon chooseWeapon(UnitModel targetType, int range, boolean afterMoving)
+  {
+    // if we have no weapons, we can't hurt things
+    if( weapons == null )
+      return null;
+
+    Weapon chosenWeapon = null;
+    double maxDamage = 0;
+    for( int i = 0; i < weapons.length; i++ )
+    {
+      Weapon currentWeapon = weapons[i];
+      // If the weapon isn't mobile, we cannot fire if we moved.
+      if( afterMoving && !currentWeapon.model.canFireAfterMoving )
+      {
+        continue;
+      }
+      double currentDamage = currentWeapon.getDamage(targetType, range);
+      if( currentWeapon.getDamage(targetType, range) > maxDamage )
+      {
+        chosenWeapon = currentWeapon;
+        maxDamage = currentDamage;
+      }
+    }
+    return chosenWeapon;
   }
 
   public int getHP()
@@ -186,62 +245,96 @@ public class Unit
     return captureProgress;
   }
 
-  // Removed for the forseeable future; may be back
-  /*	public static double getAttackPower(final CombatParameters params) {
-  //		double output = model
-  //		return [B*ACO/100+R]*(AHP/10)*[(200-(DCO+DTR*DHP))/100] ;
-  		return 0;
-  	}
-  	public static double getDefensePower(Unit unit, boolean isCounter) {
-  		return 0;
-  	}*/
-
-  /** Compiles and returns a list of all actions this unit could perform on map from location (xLoc, yLoc). */
-  public ArrayList<GameAction.ActionType> getPossibleActions(GameMap map, int xLoc, int yLoc)
+  /** Compiles and returns a list of all actions this unit could perform on map after moving along movePath. */
+  public ArrayList<GameActionSet> getPossibleActions(GameMap map, Path movePath)
   {
-    ArrayList<GameAction.ActionType> actions = new ArrayList<GameAction.ActionType>();
-    if( map.isLocationEmpty(this, xLoc, yLoc) )
+    XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+    ArrayList<GameActionSet> actionSet = new ArrayList<GameActionSet>();
+    if( map.isLocationEmpty(this, moveLocation) )
     {
       for( int i = 0; i < model.possibleActions.length; i++ )
       {
         switch (model.possibleActions[i])
         {
           case ATTACK:
-            // highlight the tiles in range, and check them for targets
-            Utils.findActionableLocations(this, GameAction.ActionType.ATTACK, xLoc, yLoc, map);
-            boolean found = false;
-            for( int w = 0; w < map.mapWidth; w++ )
+          // Evaluate attack options.
+          {
+            boolean moved = !moveLocation.equals(x, y);
+            ArrayList<GameAction> attackOptions = new ArrayList<GameAction>();
+            for( Weapon wpn : weapons )
             {
-              for( int h = 0; h < map.mapHeight; h++ )
+              // Evaluate this weapon for targets if it has ammo, and if either the weapon
+              // is mobile or we don't care if it's mobile (because we aren't moving).
+              if( wpn.ammo > 0 && (!moved || wpn.model.canFireAfterMoving) )
               {
-                if( map.getLocation(w, h).isHighlightSet() )
+                ArrayList<XYCoord> locations = Utils.findTargetsInRange(map, CO, moveLocation, wpn);
+
+                for( XYCoord loc : locations )
                 {
-                  actions.add(GameAction.ActionType.ATTACK);
-                  found = true;
-                  break; // We just need one target to know attacking is possible.
+                  attackOptions.add(new GameAction.AttackAction(map, this, movePath, loc));
                 }
               }
-              if( found )
-                break;
+            } // ~Weapon loop
+
+            // Only add this action set if we actually have a target
+            if( !attackOptions.isEmpty() )
+            {
+              // Bundle our attack options into an action set and add it to our return collection.
+              actionSet.add(new GameActionSet(attackOptions));
             }
-            map.clearAllHighlights();
+          } // ~attack options
             break;
           case CAPTURE:
-            if( map.getLocation(xLoc, yLoc).getOwner() != CO && map.getLocation(xLoc, yLoc).isCaptureable() )
+            if( map.getLocation(moveLocation).getOwner() != CO && map.getLocation(moveLocation).isCaptureable() )
             {
-              actions.add(GameAction.ActionType.CAPTURE);
+              actionSet.add(new GameActionSet(new GameAction.CaptureAction(map, this, movePath), false));
             }
             break;
           case WAIT:
-            actions.add(GameAction.ActionType.WAIT);
+            actionSet.add(new GameActionSet(new GameAction.WaitAction(map, this, movePath), false));
             break;
           case LOAD:
-            // Don't add - there's no unit there to board.
+            // We only get to here if there is no unit at the end of the move path, which means there is
+            //   no transport in this space to board. LOAD actions are handled down below.
             break;
           case UNLOAD:
             if( heldUnits.size() > 0 )
             {
-              actions.add(GameAction.ActionType.UNLOAD);
+              ArrayList<GameAction> unloadActions = new ArrayList<GameAction>();
+
+              // TODO: This could get messy real quick for transports with more cargo space. Figure out a
+              //       better way to handle this case.
+              for( Unit cargo : heldUnits )
+              {
+                ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, moveLocation, cargo);
+                for( XYCoord loc : dropoffLocations )
+                {
+                  unloadActions.add(new GameAction.UnloadAction(map, this, movePath, cargo, loc));
+                }
+              }
+
+              if( !unloadActions.isEmpty() )
+              {
+                actionSet.add(new GameActionSet(unloadActions));
+              }
+            }
+            break;
+          case RESUPPLY:
+            // Search for a unit in resupply range.
+            ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, moveLocation, 1);
+
+            // For each location, see if there is a friendly unit to re-supply.
+            for( XYCoord loc : locations )
+            {
+              // If there's a friendly unit there who isn't us, we can resupply them.
+              Unit other = map.getLocation(loc).getResident();
+              if( other != null && other.CO == CO && other != this && !other.isFullySupplied() )
+              {
+                // We found at least one unit we can resupply. Since resupply actions aren't
+                // targeted, we can just add our action and break here.
+                actionSet.add(new GameActionSet(new GameAction.ResupplyAction(this, movePath), false));
+                break;
+              }
             }
             break;
           default:
@@ -251,16 +344,44 @@ public class Unit
       }
     }
     else
-    // There is a unit in the space we are evaluating. Only Load actions are supported in this case.
     {
-      actions.add(GameAction.ActionType.LOAD);
+      // There is another unit in the tile at the end of movePath. Only LOAD actions are supported in this case.
+      actionSet.add(new GameActionSet(new GameAction.LoadAction(map, this, movePath), false));
     }
 
-    return actions;
+    return actionSet;
   }
 
   public boolean hasCargoSpace(UnitEnum type)
   {
     return (model.holdingCapacity > 0 && heldUnits.size() < model.holdingCapacity && model.holdables.contains(type));
+  }
+
+  /** Grant this unit full fuel and ammunition */
+  public void resupply()
+  {
+    fuel = model.maxFuel;
+    if( null != weapons )
+    {
+      for( Weapon wpn : weapons )
+      {
+        wpn.reload();
+      }
+    }
+  }
+
+  /** Returns true if resupply would have zero effect on this unit. */
+  public boolean isFullySupplied()
+  {
+    boolean isFull = (model.maxFuel == fuel);
+    if( isFull )
+    {
+      // Check weapon ammo.
+      for( Weapon w : weapons )
+      {
+        isFull &= (w.model.maxAmmo == w.ammo);
+      }
+    }
+    return isFull;
   }
 }

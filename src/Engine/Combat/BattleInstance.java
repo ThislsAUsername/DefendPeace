@@ -1,17 +1,18 @@
-package Engine;
+package Engine.Combat;
 
-import Engine.Combat.BattleSummary;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Units.Unit;
 import Units.UnitModel.ChassisEnum;
+import Units.Weapons.Weapon;
 
 public class BattleInstance
 {
   private Unit attacker, defender;
+  private Weapon attackerWeapon = null, defenderWeapon = null;
   private final int attackerX, attackerY, defenderX, defenderY;
   private GameMap gameMap;
-  private boolean canCounter;
+  private boolean canCounter = false;
   private boolean attackerMoved;
   int battleRange;
 
@@ -34,9 +35,17 @@ public class BattleInstance
     defenderY = defender.y;
     gameMap = map;
     attackerMoved = pAttacker.x != attackerX || pAttacker.y != attackerY;
-    // Only attacks at point-blank range can be countered
     battleRange = Math.abs(attackerX - defenderX) + Math.abs(attackerY - defenderY);
-    canCounter = (battleRange == 1) && (defender.getBaseDamage(attacker.model, battleRange, false) > 0);
+    attackerWeapon = attacker.chooseWeapon(defender.model, battleRange, attackerMoved);
+    // Only attacks at point-blank range can be countered
+    if( 1 == battleRange )
+    {
+      defenderWeapon = defender.chooseWeapon(attacker.model, battleRange, false);
+      if( null != defenderWeapon )
+      {
+        canCounter = true;
+      }
+    }
   }
 
   /**
@@ -49,8 +58,8 @@ public class BattleInstance
     double attackerHPLoss = 0;
 
     // Set up our scenario.
-    BattleParams attackInstance = new BattleParams(attacker, defender, battleRange, attackerMoved,
-        gameMap.getEnvironment(defenderX, defenderY));
+    BattleParams attackInstance = new BattleParams(attacker, attackerWeapon, defender, gameMap.getEnvironment(defenderX,
+        defenderY));
 
     // Last-minute adjustments.
     attacker.CO.applyCombatModifiers(this); // TODO: pass BattleParams instead?
@@ -62,8 +71,8 @@ public class BattleInstance
     if( canCounter && (defender.getHP() > defenderHPLoss) )
     {
       // New battle instance with defender counter-attacking.
-      BattleParams defendInstance = new BattleParams(defender, attacker, battleRange, false,
-          gameMap.getEnvironment(attackerX, attackerY));
+      BattleParams defendInstance = new BattleParams(defender, defenderWeapon, attacker, gameMap.getEnvironment(attackerX,
+          attackerY));
       defendInstance.attackerHP -= defenderHPLoss; // Account for the first attack's damage to the now-attacker.
 
       // TODO: Let the COs take another pass at modifying things?
@@ -72,7 +81,7 @@ public class BattleInstance
     }
 
     // Build and return the BattleSummary.
-    return new BattleSummary(attacker, defender, gameMap.getEnvironment(attackerX, attackerY).terrainType,
+    return new BattleSummary(attacker, attackerWeapon, defender, defenderWeapon, gameMap.getEnvironment(attackerX, attackerY).terrainType,
         gameMap.getEnvironment(defenderX, defenderY).terrainType, attackerHPLoss, defenderHPLoss);
   }
 
@@ -88,9 +97,9 @@ public class BattleInstance
     public double defenseFactor;
     public double terrainDefense;
 
-    public BattleParams(Unit attacker, Unit defender, int battleRange, boolean moved, Environment battleground)
+    public BattleParams(Unit attacker, Weapon attackerWeapon, Unit defender, Environment battleground)
     {
-      baseDamage = attacker.getBaseDamage(defender.model, battleRange, moved);
+      baseDamage = attackerWeapon.getDamage(defender.model);
       attackFactor = attacker.model.getDamageRatio();
       attackerHP = attacker.getHP();
       defenseFactor = defender.model.getDefenseRatio();

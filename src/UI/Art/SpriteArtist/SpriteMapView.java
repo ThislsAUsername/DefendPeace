@@ -19,6 +19,7 @@ import UI.CO_InfoMenu;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import UI.Art.Animation.NobunagaBattleAnimation;
+import UI.Art.Animation.ResupplyAnimation;
 import Units.Unit;
 
 public class SpriteMapView extends MapView
@@ -176,13 +177,25 @@ public class SpriteMapView extends MapView
   @Override
   public void animate( GameEventQueue newEvents )
   {
-    System.out.println("DEBUG: Received " + newEvents.size() + " events to animate.");
-    eventsToAnimate.addAll( newEvents );
-
-    // If we aren't currently animating anything, load up the next animation.
-    if( null == currentAnimation )
+    if( null != newEvents )
     {
-      loadNextEventAnimation();
+      System.out.println("DEBUG: Received " + newEvents.size() + " events to animate.");
+      eventsToAnimate.addAll(newEvents);
+
+      // If we aren't currently animating anything, load up the next animation.
+      if( null == currentAnimation )
+      {
+        loadNextEventAnimation();
+      }
+      if( null == currentAnimation )
+      {
+        // Nothing to animate. Release control.
+        mapController.animationEnded(null, true);
+      }
+    }
+    else
+    {
+      mapController.animationEnded(null, true);
     }
   }
 
@@ -268,25 +281,21 @@ public class SpriteMapView extends MapView
       drawUnitIcons(mapGraphics);
 
       // Get a reference to the current action being built, if one exists.
+      Unit currentActor = mapController.getContemplatedActor();
+      Path currentPath = mapController.getContemplatedMove();
       GameAction currentAction = mapController.getContemplatedAction();
 
-      // Draw the movement arrow if the user is contemplating a move.
-      if( mapController.getContemplatedMove() != null )
+      // Draw the movement arrow if the user is contemplating a move/action (but not once the action commences).
+      if( null != currentPath && null == currentAnimation )
       {
         mapArtist.drawMovePath(mapGraphics, mapController.getContemplatedMove());
       }
-      // Draw the movement arrow if the user is contemplating an action (but not once the action commences).
-      else if( null != currentAction && null != currentAction.getMovePath() && null == currentAnimation )
-      {
-        mapArtist.drawMovePath(mapGraphics, currentAction.getMovePath());
-      }
 
       // Draw the currently-acting unit so it's on top of everything.
-      if( null != currentAction && currentAnimation == null )
+      if( null != currentActor )
       {
-        Unit u = currentAction.getActor();
-        unitArtist.drawUnit(mapGraphics, u, u.x, u.y, fastAnimIndex);
-        unitArtist.drawUnitIcons(mapGraphics, u, u.x, u.y);
+        unitArtist.drawUnit(mapGraphics, currentActor, currentActor.x, currentActor.y, fastAnimIndex);
+        unitArtist.drawUnitIcons(mapGraphics, currentActor, currentActor.x, currentActor.y);
       }
 
       if( currentAnimation != null )
@@ -305,7 +314,7 @@ public class SpriteMapView extends MapView
       }
       else if( getCurrentGameMenu() == null )
       {
-        mapArtist.drawCursor(mapGraphics, currentAction, myGame.getCursorX(), myGame.getCursorY());
+        mapArtist.drawCursor(mapGraphics, currentActor, currentAction, myGame.getCursorX(), myGame.getCursorY());
       }
       else
       {
@@ -380,6 +389,14 @@ public class SpriteMapView extends MapView
   }
 
   @Override // from MapView
+  public GameAnimation buildBattleAnimation(BattleSummary summary)
+  {
+    return new NobunagaBattleAnimation(getTileSize(), summary.attacker.x, summary.attacker.y, summary.defender.x,
+        summary.defender.y);
+  }
+
+  @Override
+  // from MapView
   public GameAnimation buildMoveAnimation( Unit unit, Path movePath )
   {
     return new NobunagaBattleAnimation(getTileSize(), movePath.getWaypoint(0).x, movePath.getWaypoint(0).y,
@@ -387,9 +404,9 @@ public class SpriteMapView extends MapView
   }
 
   @Override // from MapView
-  public GameAnimation buildBattleAnimation( BattleSummary summary )
+  public GameAnimation buildResupplyAnimation(Unit unit)
   {
-    return new NobunagaBattleAnimation(getTileSize(), summary.attacker.x, summary.attacker.y, summary.defender.x, summary.defender.y);
+    return new ResupplyAnimation(unit.x, unit.y);
   }
 
   /**
@@ -417,12 +434,12 @@ public class SpriteMapView extends MapView
           mapArtist.drawTerrainObject(g, x, y);
           if( !myGame.gameMap.isLocationEmpty(x, y) )
           {
-            Unit u = myGame.gameMap.getLocation(x, y).getResident();
+            Unit resident = myGame.gameMap.getLocation(x, y).getResident();
             // If an action is being considered, draw the active unit later, not now.
-            GameAction currentAction = mapController.getContemplatedAction();
-            if( (null == currentAction) || (u != currentAction.getActor()) )
+            Unit currentActor = mapController.getContemplatedActor();
+            if( resident != currentActor )
             {
-              unitArtist.drawUnit(g, u, u.x, u.y, animIndex);
+              unitArtist.drawUnit(g, resident, resident.x, resident.y, animIndex);
             }
           }
         }
@@ -446,12 +463,12 @@ public class SpriteMapView extends MapView
       {
         if( !gameMap.isLocationEmpty(x, y) )
         {
-          Unit u = myGame.gameMap.getLocation(x, y).getResident();
+          Unit resident = myGame.gameMap.getLocation(x, y).getResident();
           // If an action is being considered, draw the active unit later, not now.
-          GameAction currentAction = mapController.getContemplatedAction();
-          if( (null == currentAction) || (u != currentAction.getActor()) )
+          Unit currentActor = mapController.getContemplatedActor();
+          if( resident != currentActor )
           {
-            unitArtist.drawUnitIcons(g, u, u.x, u.y);
+            unitArtist.drawUnitIcons(g, resident, resident.x, resident.y);
           }
         }
       }

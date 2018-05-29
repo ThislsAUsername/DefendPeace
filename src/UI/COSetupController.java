@@ -2,9 +2,6 @@ package UI;
 
 import java.util.ArrayList;
 
-import Terrain.GameMap;
-import UI.Art.SpriteArtist.SpriteLibrary;
-import UI.InputHandler.InputAction;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderLibrary;
@@ -13,6 +10,9 @@ import Engine.GameInstance;
 import Engine.IController;
 import Engine.MapController;
 import Engine.OptionSelector;
+import Terrain.GameMap;
+import UI.InputHandler.InputAction;
+import UI.Art.SpriteArtist.SpriteLibrary;
 
 /**
  * Controller for choosing COs and colors after the map has been chosen.
@@ -70,13 +70,16 @@ public class COSetupController implements IController
         // Build the CO list and the new map and create the game instance.
         Commander[] cos = gameBuilder.commanders.toArray(new Commander[gameBuilder.commanders.size()]);
         GameMap map = new GameMap( cos, gameBuilder.mapInfo );
-        GameInstance newGame = new GameInstance(map, cos);
+        if( map.initOK() )
+        {
+          GameInstance newGame = new GameInstance(map, cos);
 
-        MapView mv = Driver.getInstance().gameGraphics.createMapView(newGame);
-        MapController mapController = new MapController(newGame, mv);
+          MapView mv = Driver.getInstance().gameGraphics.createMapView(newGame);
+          MapController mapController = new MapController(newGame, mv);
 
-        // Mash the big red button and start the game.
-        Driver.getInstance().changeGameState(mapController, mv);
+          // Mash the big red button and start the game.
+          Driver.getInstance().changeGameState(mapController, mv);
+        }
         exitMenu = true;
         break;
       case BACK:

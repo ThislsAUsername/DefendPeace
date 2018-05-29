@@ -4,9 +4,9 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 import CommandingOfficers.Modifiers.COModifier;
-import Engine.BattleInstance;
 import Engine.GameInstance;
 import Engine.XYCoord;
+import Engine.Combat.BattleInstance;
 import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -93,6 +93,10 @@ public class Commander
     modifiers.add( mod ); // Add to the list so the modifier can be reverted next turn.
   }
 
+  /**
+   * Collect income and handle any COModifiers.
+   * @param map
+   */
   public void initTurn(GameMap map)
   {
     // Accrue income for each city under your control.
@@ -116,11 +120,6 @@ public class Commander
     {
       modifiers.get(i).revert(this);
       modifiers.remove(i);
-    }
-
-    for( Unit unit : units )
-    {
-      unit.initTurn(map.getLocation(unit.x, unit.y));
     }
   }
 
@@ -165,7 +164,7 @@ public class Commander
         for( int i = 0; i < unitModels.size(); i++ )
         {
           UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
-          if (UnitModel.ChassisEnum.TROOP == chassis || UnitModel.ChassisEnum.TRUCK == chassis || UnitModel.ChassisEnum.TANK == chassis)
+          if (UnitModel.ChassisEnum.TROOP == chassis || UnitModel.ChassisEnum.TANK == chassis)
             shoppingList.add(unitModels.get(i));
         }
         break;

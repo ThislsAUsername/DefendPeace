@@ -1,7 +1,7 @@
 package Engine.GameEvents;
 
-import Engine.CombatEngine;
 import Engine.Combat.BattleSummary;
+import Engine.Combat.CombatEngine;
 import Terrain.GameMap;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -44,17 +44,15 @@ public class BattleEvent implements GameEvent
     // Apply the battle results that we calculated previously.
     Unit attacker = battleInfo.attacker;
     Unit defender = battleInfo.defender;
-    attacker.fire( defender ); // Lets the unit know that it has actually fired a shot.
+    battleInfo.attackerWeapon.fire(); // expend ammo
     defender.damageHP( battleInfo.defenderHPLoss );
 
     // Handle counter-attack if relevant.
     if( battleInfo.attackerHPLoss > 0 )
     {
-      defender.fire( attacker );
+      battleInfo.defenderWeapon.fire();
       attacker.damageHP( battleInfo.attackerHPLoss );
     }
-
-    // TODO: Handle ammo.
 
     if( attacker.getHP() <= 0 )
     {

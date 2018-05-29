@@ -4,64 +4,86 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Queue;
 
+import CommandingOfficers.Commander;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.Unit;
+import Units.Weapons.Weapon;
 
 public class Utils
 {
 
-  /**
-   * Sets the highlight for myGame.gameMap.getLocation(x, y) to true if unit can act on Location (x, y) from (xLoc, yLoc), and false otherwise.
-   */
-  public static void findActionableLocations(Unit unit, GameAction.ActionType action, int xLoc, int yLoc, GameMap map)
+  /** Returns a list of all locations between 1 and maxRange tiles away from origin, inclusive. */
+  public static ArrayList<XYCoord> findLocationsInRange(GameMap map, XYCoord origin, int maxRange)
   {
-    // we need to know whether the unit moved or not for indirect units
-    boolean moved = unit.x != xLoc || unit.y != yLoc;
-    switch (action)
+    return findLocationsInRange(map, origin, 1, maxRange);
+  }
+
+  /** Returns a list of all locations between minRange and maxRange tiles away from origin, inclusive. */
+  public static ArrayList<XYCoord> findLocationsInRange(GameMap map, XYCoord origin, int minRange, int maxRange)
+  {
+    ArrayList<XYCoord> locations = new ArrayList<XYCoord>();
+
+    // Loop through all the valid x and y offsets, as dictated by the max range, and add valid spaces to our collection.
+    for( int yOff = -maxRange; yOff <= maxRange; ++yOff )
     {
-      case ATTACK:
-        // Set highlight for locations that contain an enemy that 'unit' can shoot from (xLoc, yLoc).
-        for( int i = 0; i < map.mapWidth; i++ )
+      for( int xOff = -maxRange; xOff <= maxRange; ++xOff )
+      {
+        int currentRange = Math.abs(xOff) + Math.abs(yOff);
+        XYCoord coord = new XYCoord(origin.xCoord + xOff, origin.yCoord + yOff);
+        if( currentRange >= minRange && currentRange <= maxRange && map.isLocationValid(coord) )
         {
-          for( int j = 0; j < map.mapHeight; j++ )
-          {
-            Unit target = map.getLocation(i, j).getResident();
-            if( target != null && target.CO != unit.CO )
-            {
-              int range = Math.abs(xLoc - target.x) + Math.abs(yLoc - target.y);
-              if( unit.getBaseDamage(target.model, range, moved) > 0 )
-              {
-                map.getLocation(i, j).setHighlight(true);
-              }
-              else
-              {
-                map.getLocation(i, j).setHighlight(false);
-              }
-            }
-          }
+          // Add this location to the set.
+          locations.add(coord);
         }
-        break;
-      case UNLOAD:
-        // Set highlight for valid drop locations that can also support the passenger.
-        Unit passenger = unit.heldUnits.get(0);
-        for( int i = 0; i < map.mapWidth; i++ )
-        {
-          for( int j = 0; j < map.mapHeight; j++ )
-          {
-            int dist = Math.abs(yLoc - j) + Math.abs(xLoc - i);
-            if( dist == 1 && passenger.model.movePower >= passenger.model.propulsion.getMoveCost(map.getEnvironment(i, j))
-                && map.isLocationEmpty(unit, i, j) )
-            {
-              map.getLocation(i, j).setHighlight(true);
-            }
-            else
-            {
-              map.getLocation(i, j).setHighlight(false);
-            }
-          }
-        }
-        break;
+      }
+    }
+
+    return locations;
+  }
+
+  /** Returns a list of locations of all enemy units that weapon could hit from attackerPosition. */
+  public static ArrayList<XYCoord> findTargetsInRange(GameMap map, Commander co, XYCoord attackerPosition, Weapon weapon)
+  {
+    ArrayList<XYCoord> locations = findLocationsInRange(map, attackerPosition, weapon.model.minRange,
+        weapon.model.maxRange);
+    ArrayList<XYCoord> targets = new ArrayList<XYCoord>();
+    for( XYCoord loc : locations )
+    {
+      if( map.getLocation(loc).getResident() != null && // Someone is there.
+          map.getLocation(loc).getResident().CO != co && // They are not friendly.
+          weapon.getDamage(map.getLocation(loc).getResident().model) > 0 ) // We can shoot them.
+      {
+        targets.add(loc);
+      }
+    }
+    return targets;
+  }
+
+  /** Returns a list of locations at distance 1 from transportLoc that cargo can move on. */
+  public static ArrayList<XYCoord> findUnloadLocations(GameMap map, XYCoord transportLoc, Unit cargo)
+  {
+    ArrayList<XYCoord> locations = findLocationsInRange(map, transportLoc, 1);
+    ArrayList<XYCoord> dropoffLocations = new ArrayList<XYCoord>();
+    for( XYCoord loc : locations )
+    {
+      // Add any location that is empty and supports movement of the cargo unit.
+      if( map.isLocationEmpty(loc)
+          && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
+      {
+        dropoffLocations.add(loc);
+      }
+    }
+    return dropoffLocations;
+  }
+
+  /** Sets the highlight of all tiles in the provided list, and unsets the highlight on all others. */
+  public static void highlightLocations(GameMap map, ArrayList<XYCoord> locations)
+  {
+    map.clearAllHighlights();
+    for( XYCoord loc : locations )
+    {
+      map.getLocation(loc).setHighlight(true);
     }
   }
 
@@ -172,16 +194,27 @@ public class Utils
   /**
    * Calculate the shortest path for unit to take from its current location to map(x, y), and populate
    * the path parameter with those waypoints.
-   * If no valid path is found, the path will be returned empty.
+   * If no valid path is found, an empty Path will be returned.
    */
-  public static void findShortestPath(Unit unit, int x, int y, Path aPath, GameMap map)
+  public static Path findShortestPath(Unit unit, XYCoord destination, GameMap map)
   {
+    return findShortestPath(unit, destination.xCoord, destination.yCoord, map);
+  }
+
+  /**
+   * Calculate the shortest path for unit to take from its current location to map(x, y), and populate
+   * the path parameter with those waypoints.
+   * If no valid path is found, an empty Path will be returned.
+   */
+  public static Path findShortestPath(Unit unit, int x, int y, GameMap map)
+  {
+    Path aPath = new Path(100);
     if( map.mapWidth < unit.x || map.mapHeight < unit.y || unit.x < 0 || unit.y < 0 )
     {
       // Unit is not in a valid place. No path can be found.
       System.out.println("WARNING! Cannot find path for a unit that is not on the map.");
       aPath.clear();
-      return;
+      return aPath;
     }
 
     //System.out.println("Finding new path for " + unit.model.type + " from " + unit.x + ", " + unit.y + " to " + x + ", " + y);
@@ -232,6 +265,8 @@ public class Utils
         aPath.addWaypoint(waypointList.get(j).x, waypointList.get(j).y);
       }
     }
+
+    return aPath;
   }
 
   private static void expandSearchNode(Unit unit, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue,

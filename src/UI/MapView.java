@@ -1,14 +1,13 @@
 package UI;
 
-import UI.Art.Animation.GameAnimation;
-import Units.Unit;
-
 import Engine.IView;
 import Engine.MapController;
 import Engine.Path;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
+import UI.Art.Animation.GameAnimation;
+import Units.Unit;
 
 public abstract class MapView implements IView
 {
@@ -82,6 +81,10 @@ public abstract class MapView implements IView
     return null;
   }
   public GameAnimation buildLoadAnimation()
+  {
+    return null;
+  }
+  public GameAnimation buildResupplyAnimation(Unit unit)
   {
     return null;
   }
