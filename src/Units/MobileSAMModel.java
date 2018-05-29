@@ -17,6 +17,6 @@ public class MobileSAMModel extends UnitModel
 
   public MobileSAMModel()
   {
-    super("Mobile SAM", UnitEnum.MOBILESAM, ChassisEnum.TRUCK, 12000, 50, 0, 4, moveType, actions, healHabs, weapons);
+    super("Mobile SAM", UnitEnum.MOBILESAM, ChassisEnum.TANK, 12000, 50, 0, 4, moveType, actions, healHabs, weapons);
   }
 }

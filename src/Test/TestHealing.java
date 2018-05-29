@@ -3,6 +3,8 @@ package Test;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderPatch;
 import Engine.XYCoord;
+import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.MapInfo;
@@ -57,7 +59,12 @@ public class TestHealing extends TestCase
       victim.damageHP(2.5); // Hurt the victim.
       prevMoney = testCo1.money; // Track money.
       prevHP = victim.getHP(); // Track HP.
-      victim.initTurn(testMap.getLocation(victim.x, victim.y)); // Make the unit try to heal itself.
+
+      GameEventQueue events = victim.initTurn(testMap); // Make the unit try to heal itself.
+      for( GameEvent event : events )
+      {
+        event.performEvent(testMap);
+      }
 
       if( victim.getHP() > prevHP )
       { // If the unit was healed...

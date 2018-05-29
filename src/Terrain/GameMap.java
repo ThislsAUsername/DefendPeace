@@ -11,8 +11,11 @@ public class GameMap
   public final int mapHeight;
   public CommandingOfficers.Commander[] commanders;
 
+  private boolean initOK = false;
+
   public GameMap(CommandingOfficers.Commander[] COs, MapInfo mapInfo)
   {
+    initOK = true;
     commanders = COs;
     mapWidth = mapInfo.getWidth();
     mapHeight = mapInfo.getHeight();
@@ -72,20 +75,27 @@ public class GameMap
       // Warn if the CO still doesn't have a valid HQ.
       if( COs[co].HQLocation == null )
       {
-        System.out.println("Warning! CO does not have any HQ assigned!");
-
-        // We still need to set HQLocation to something, so just grab the first owned property.
-        if( mapInfo.COProperties[co].length > 0 )
-        {
-          COs[co].HQLocation = mapInfo.COProperties[co][0];
-        }
-        else
-        {
-          // This CO has no properties assigned at all. We don't support that kind of map at this point.
-          System.out.println("Warning! CO has no properties!");
-        }
+        System.out.println("Warning! CO " + co + " does not have any HQ assigned!");
+        initOK = false;
+        break;
       }
     }
+  }
+
+  /**
+   * Used to check if the GameMap is ready to be played after constructing.
+   */
+  public boolean initOK()
+  {
+    return initOK;
+  }
+
+  /**
+   * Returns true if (x,y) lies within the GameMap, false else.
+   */
+  public boolean isLocationValid(XYCoord coords)
+  {
+    return isLocationValid(coords.xCoord, coords.yCoord);
   }
 
   /**
@@ -96,6 +106,11 @@ public class GameMap
     return !(x < 0 || x >= mapWidth || y < 0 || y >= mapHeight);
   }
 
+  /** Returns the Environment of the specified tile, or null if that location does not exist. */
+  public Environment getEnvironment(XYCoord coord)
+  {
+    return getEnvironment(coord.xCoord, coord.yCoord);
+  }
   /** Returns the Environment of the specified tile, or null if that location does not exist. */
   public Environment getEnvironment(int w, int h)
   {
@@ -134,9 +149,21 @@ public class GameMap
   }
 
   /** Returns true if no unit is at the specified x and y coordinate, false else */
+  public boolean isLocationEmpty(XYCoord coords)
+  {
+    return isLocationEmpty(null, coords);
+  }
+
+  /** Returns true if no unit is at the specified x and y coordinate, false else */
   public boolean isLocationEmpty(int x, int y)
   {
     return isLocationEmpty(null, x, y);
+  }
+
+  /** Returns true if no unit (excluding 'unit') is in the specified Location. */
+  public boolean isLocationEmpty(Unit unit, XYCoord coords)
+  {
+    return isLocationEmpty(unit, coords.xCoord, coords.yCoord);
   }
 
   /** Returns true if no unit (excluding 'unit') is in the specified Location. */

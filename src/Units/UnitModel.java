@@ -1,10 +1,12 @@
 package Units;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
+import Engine.GameAction;
 import Engine.GameAction.ActionType;
-import Terrain.Location;
 import Terrain.Environment.Terrains;
+import Terrain.Location;
 import Units.MoveTypes.MoveType;
 import Units.Weapons.WeaponModel;
 
@@ -15,11 +17,10 @@ public class UnitModel
     INFANTRY, MECH, RECON, TANK, MD_TANK, NEOTANK, APC, ARTILLERY, ROCKETS, ANTI_AIR, MOBILESAM, FIGHTER, BOMBER, B_COPTER, T_COPTER, BATTLESHIP, CRUISER, LANDER, SUB
   };
 
-  // NB: "Truck" is technically unnecessary, but I feel it may be useful for alternate damage systems.
-  // The rubric for what's a "truck" is whether the damage dealt to it by an infantry is >9%, not movetype.
+  // Subs are ships unless they're submerged.
   public enum ChassisEnum
   {
-    TROOP, TRUCK, TANK, SHIP, AIR_LOW, AIR_HIGH
+    TROOP, TANK, AIR_LOW, AIR_HIGH, SHIP, SUBMERGED
   };
 
   public String name;
@@ -98,5 +99,14 @@ public class UnitModel
       compatible |= environs == terrain;
     }
     return compatible;
+  }
+
+  /** Provides a hook for inheritors to supply turn-initialization actions to a unit.
+   * @param self Assumed to be a Unit of the model's type.
+   */
+  public ArrayList<GameAction> getTurnInitActions(Unit self)
+  {
+    // Most Units don't have any; specific UnitModel types can override.
+    return new ArrayList<GameAction>();
   }
 }

@@ -17,6 +17,6 @@ public class ArtilleryModel extends UnitModel
 
   public ArtilleryModel()
   {
-    super("Artillery", UnitEnum.ARTILLERY, ChassisEnum.TRUCK, 6000, 50, 0, 5, moveType, actions, healHabs, weapons);
+    super("Artillery", UnitEnum.ARTILLERY, ChassisEnum.TANK, 6000, 50, 0, 5, moveType, actions, healHabs, weapons);
   }
 }
