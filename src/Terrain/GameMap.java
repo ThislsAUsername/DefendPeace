@@ -1,5 +1,6 @@
 package Terrain;
 
+import CommandingOfficers.Commander;
 import Engine.XYCoord;
 import Terrain.Environment.Terrains;
 import Units.Unit;
@@ -31,7 +32,7 @@ public class GameMap
         Terrains environs = mapInfo.terrain[x][y];
         environs = (environs == Terrains.LAB) ? Terrains.HQ : environs;
         // Create this Location using the MapInfo terrain.
-        map[x][y] = new Location(Environment.getTile(environs, Environment.Weathers.CLEAR), new XYCoord(x, y));
+        map[x][y] = new Location(Environment.getTile(environs, Environment.Weathers.CLEAR));
       }
     }
 
@@ -83,6 +84,22 @@ public class GameMap
         initOK = false;
         break;
       }
+    }
+  }
+
+  public void setLocationOwner(XYCoord coord, Commander owner)
+  {
+    Location loc = map[coord.xCoord][coord.yCoord];
+
+    // Swap ownership of this location to the new owner.
+    if( null != loc.getOwner() )
+    {
+      loc.getOwner().ownedProperties.remove(coord);
+    }
+    if( null != owner )
+    {
+      loc.setOwner(owner);
+      owner.ownedProperties.add(coord);
     }
   }
 

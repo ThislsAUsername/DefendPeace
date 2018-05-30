@@ -38,7 +38,7 @@ public class Commander
   public final CommanderInfo coInfo;
   public ArrayList<Unit> units;
   public ArrayList<UnitModel> unitModels;
-  public ArrayList<Location> ownedProperties;
+  public ArrayList<XYCoord> ownedProperties;
   public ArrayList<COModifier> modifiers;
   public Color myColor;
   public static final int DEFAULTSTARTINGMONEY = 10000;
@@ -77,7 +77,7 @@ public class Commander
 
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
-    ownedProperties = new ArrayList<Location>();
+    ownedProperties = new ArrayList<XYCoord>();
     money = DEFAULTSTARTINGMONEY;
   }
 

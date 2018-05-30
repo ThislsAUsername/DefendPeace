@@ -2,7 +2,6 @@ package Terrain;
 
 import Units.Unit;
 import CommandingOfficers.Commander;
-import Engine.XYCoord;
 
 public class Location
 {
@@ -10,7 +9,6 @@ public class Location
   private Environment environs = null;
   private Commander owner = null;
   private Unit resident = null;
-  private final XYCoord coords;
   private boolean highlightSet = false;
 
   //	public boolean isFogged = false;
@@ -24,11 +22,6 @@ public class Location
   {
     this.environs = environment;
   }
-  
-  public XYCoord getCoordinates()
-  {
-    return coords;
-  }
 
   public Commander getOwner()
   {
@@ -37,17 +30,7 @@ public class Location
 
   public void setOwner(Commander owner)
   {
-    // remove ourselves from the previous owner's list, if one exists
-    if( null != this.owner )
-    {
-      this.owner.ownedProperties.remove(this);
-    }
     this.owner = owner;
-    // add ourselves to the new owner's list, if it exists
-    if( null != this.owner )
-    {
-      this.owner.ownedProperties.add(this);
-    }
   }
 
   public Unit getResident()
@@ -80,11 +63,10 @@ public class Location
     return highlightSet;
   }
 
-  public Location(Environment environment, XYCoord coordinates)
+  public Location(Environment environment)
   {
     environs = environment;
     owner = null;
     resident = null;
-    coords = coordinates;
   }
 }
