@@ -30,7 +30,7 @@ public class MapController implements IController
   private InGameMenu<ConfirmExitEnum> confirmExitMenu;
   private InGameMenu<? extends Object> currentMenu;
 
-  private int nextSelectedUnitIndex;
+  private int nextSeekIndex;
 
   private enum InputMode
   {
@@ -93,7 +93,7 @@ public class MapController implements IController
     unitsToInit = new ArrayDeque<Unit>();
     isGameOver = false;
     coInfoMenu = new CO_InfoMenu(myGame.commanders.length);
-    nextSelectedUnitIndex = 0;
+    nextSeekIndex = 0;
     contemplatedAction = new ContemplatedAction();
 
     // Start the first turn.
@@ -183,25 +183,25 @@ public class MapController implements IController
       case RIGHT:
         myGame.moveCursorRight();
         break;
-      case SEEK: // Move the cursor to the next unit that is ready to move.
+      case SEEK: // Move the cursor to either the next unit that is ready to move, or an owned usable property.
         boolean found = false;
         int tries = 0;
         int numUnits = myGame.activeCO.units.size();
-        ArrayList<XYCoord> usableProperties = Utils.findFreeIndustries(myGame.activeCO, myGame.gameMap);
+        ArrayList<XYCoord> usableProperties = Utils.findUsableProperties(myGame.activeCO, myGame.gameMap);
         int numFreeIndustries = usableProperties.size();
         int maxTries = numUnits + numFreeIndustries;
         while ((maxTries > 0) && !found && (tries < maxTries))
         {
           // Normalize the index to allow wrapping.
-          if( nextSelectedUnitIndex >= maxTries )
+          if( nextSeekIndex >= maxTries )
           {
-            nextSelectedUnitIndex = 0;
+            nextSeekIndex = 0;
           }
 
-          if( nextSelectedUnitIndex < numUnits )
+          if( nextSeekIndex < numUnits )
           {
             // If we find a unit that is ready to go, move the cursor to it.
-            Unit nextUnit = myGame.activeCO.units.get(nextSelectedUnitIndex);
+            Unit nextUnit = myGame.activeCO.units.get(nextSeekIndex);
             if( !nextUnit.isTurnOver )
             {
               myGame.setCursorLocation(nextUnit.x, nextUnit.y);
@@ -210,12 +210,12 @@ public class MapController implements IController
           }
           else
           {
-            myGame.setCursorLocation(usableProperties.get(nextSelectedUnitIndex - numUnits));
+            myGame.setCursorLocation(usableProperties.get(nextSeekIndex - numUnits));
             found = true;
           }
           // Increment for the next loop cycle or SEEK input.
           ++tries;
-          ++nextSelectedUnitIndex;
+          ++nextSeekIndex;
         }
         break;
       case ENTER:
@@ -760,7 +760,7 @@ public class MapController implements IController
 
   private void startNextTurn()
   {
-    nextSelectedUnitIndex = 0;
+    nextSeekIndex = 0;
 
     // Tell the game a turn has changed. This will update the active CO.
     myGame.turn();

@@ -357,7 +357,7 @@ public class Utils
   /**
    * Returns a list of all vacant industries a commander owns
    */
-  public static ArrayList<XYCoord> findFreeIndustries(Commander co, GameMap map)
+  public static ArrayList<XYCoord> findUsableProperties(Commander co, GameMap map)
   {
     ArrayList<XYCoord> industries = new ArrayList<XYCoord>();
     // We don't want to bother if we're trying to find nobody's properties

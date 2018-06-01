@@ -26,7 +26,7 @@ public class GameMap
     {
       for( int x = 0; x < mapWidth; ++x )
       {
-        // We set HQs to labs here because we don't yet support using labs as HQs
+        // We turn labs into HQs here because we don't yet support using labs as HQs
         // TODO: fix this 
         Terrains environs = mapInfo.terrain[x][y];
         environs = (environs == Terrains.LAB) ? Terrains.HQ : environs;
