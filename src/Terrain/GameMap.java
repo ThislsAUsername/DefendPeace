@@ -22,32 +22,36 @@ public class GameMap
     map = new Location[mapWidth][mapHeight];
 
     // Build the map locations based on the MapInfo data.
-    for(int y = 0; y < mapHeight; ++y)
+    for( int y = 0; y < mapHeight; ++y )
     {
-      for(int x = 0; x < mapWidth; ++x)
+      for( int x = 0; x < mapWidth; ++x )
       {
+        // We turn labs into HQs here because we don't yet support using labs as HQs
+        // TODO: fix this 
+        Terrains environs = mapInfo.terrain[x][y];
+        environs = (environs == Terrains.LAB) ? Terrains.HQ : environs;
         // Create this Location using the MapInfo terrain.
-        map[x][y] = new Location(Environment.getTile(mapInfo.terrain[x][y], Environment.Weathers.CLEAR));
+        map[x][y] = new Location(Environment.getTile(environs, Environment.Weathers.CLEAR), new XYCoord(x, y));
       }
     }
 
     // Print a warning if the number of Commanders we have does not match the number the map expects.
-    if(COs.length != mapInfo.COProperties.length)
+    if( COs.length != mapInfo.COProperties.length )
     {
       System.out.println("Warning! Wrong number of COs specified for map " + mapInfo.mapName);
     }
     // Assign properties according to MapInfo's direction.
-    for(int co = 0; co < mapInfo.COProperties.length && co < COs.length; ++co)
+    for( int co = 0; co < mapInfo.COProperties.length && co < COs.length; ++co )
     {
       // Loop through all locations assigned to this CO by mapInfo.
-      for(int i = 0; i < mapInfo.COProperties[co].length; ++i)
+      for( int i = 0; i < mapInfo.COProperties[co].length; ++i )
       {
         // If the location can be owned, make the assignment.
         XYCoord coord = mapInfo.COProperties[co][i];
         int x = coord.xCoord;
         int y = coord.yCoord;
         Location location = map[x][y];
-        if(location.isCaptureable())
+        if( location.isCaptureable() )
         {
           // Check if this location holds an HQ.
           if( map[x][y].getEnvironment().terrainType == Terrains.HQ )

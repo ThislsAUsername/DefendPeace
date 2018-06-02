@@ -1,11 +1,11 @@
 package Engine;
 
+import java.util.ArrayList;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.Environment;
 import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -30,7 +30,7 @@ public class MapController implements IController
   private InGameMenu<ConfirmExitEnum> confirmExitMenu;
   private InGameMenu<? extends Object> currentMenu;
 
-  private int nextSelectedUnitIndex;
+  private int nextSeekIndex;
 
   private enum InputMode
   {
@@ -93,7 +93,7 @@ public class MapController implements IController
     unitsToInit = new ArrayDeque<Unit>();
     isGameOver = false;
     coInfoMenu = new CO_InfoMenu(myGame.commanders.length);
-    nextSelectedUnitIndex = 0;
+    nextSeekIndex = 0;
     contemplatedAction = new ContemplatedAction();
 
     // Start the first turn.
@@ -183,28 +183,39 @@ public class MapController implements IController
       case RIGHT:
         myGame.moveCursorRight();
         break;
-      case SEEK: // Move the cursor to the next unit that is ready to move.
+      case SEEK: // Move the cursor to either the next unit that is ready to move, or an owned usable property.
         boolean found = false;
         int tries = 0;
-        int maxTries = myGame.activeCO.units.size();
+        int numUnits = myGame.activeCO.units.size();
+        ArrayList<XYCoord> usableProperties = Utils.findUsableProperties(myGame.activeCO, myGame.gameMap);
+        int numFreeIndustries = usableProperties.size();
+        int maxTries = numUnits + numFreeIndustries;
         while ((maxTries > 0) && !found && (tries < maxTries))
         {
           // Normalize the index to allow wrapping.
-          if( nextSelectedUnitIndex >= maxTries )
+          if( nextSeekIndex >= maxTries )
           {
-            nextSelectedUnitIndex = 0;
+            nextSeekIndex = 0;
           }
 
-          // If we find a unit that is ready to go, move the cursor to it.
-          Unit nextUnit = myGame.activeCO.units.get(nextSelectedUnitIndex);
-          if( !nextUnit.isTurnOver )
+          if( nextSeekIndex < numUnits )
           {
-            myGame.setCursorLocation(nextUnit.x, nextUnit.y);
+            // If we find a unit that is ready to go, move the cursor to it.
+            Unit nextUnit = myGame.activeCO.units.get(nextSeekIndex);
+            if( !nextUnit.isTurnOver )
+            {
+              myGame.setCursorLocation(nextUnit.x, nextUnit.y);
+              found = true;
+            }
+          }
+          else
+          {
+            myGame.setCursorLocation(usableProperties.get(nextSeekIndex - numUnits));
             found = true;
           }
           // Increment for the next loop cycle or SEEK input.
           ++tries;
-          ++nextSelectedUnitIndex;
+          ++nextSeekIndex;
         }
         break;
       case ENTER:
@@ -225,9 +236,7 @@ public class MapController implements IController
             changeInputMode(InputMode.METAACTION);
           }
         }
-        else if( (Environment.Terrains.FACTORY == loc.getEnvironment().terrainType
-            || Environment.Terrains.AIRPORT == loc.getEnvironment().terrainType
-            || Environment.Terrains.SEAPORT == loc.getEnvironment().terrainType) && loc.getOwner() == myGame.activeCO )
+        else if( loc.getOwner() == myGame.activeCO && myGame.activeCO.getShoppingList(loc.getEnvironment().terrainType).size() > 0 )
         {
           changeInputMode(InputMode.PRODUCTION);
         }
@@ -751,7 +760,7 @@ public class MapController implements IController
 
   private void startNextTurn()
   {
-    nextSelectedUnitIndex = 0;
+    nextSeekIndex = 0;
 
     // Tell the game a turn has changed. This will update the active CO.
     myGame.turn();

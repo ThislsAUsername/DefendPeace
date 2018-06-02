@@ -38,6 +38,7 @@ public class Commander
   public final CommanderInfo coInfo;
   public ArrayList<Unit> units;
   public ArrayList<UnitModel> unitModels;
+  public ArrayList<Location> ownedProperties;
   public ArrayList<COModifier> modifiers;
   public Color myColor;
   public static final int DEFAULTSTARTINGMONEY = 10000;
@@ -73,9 +74,10 @@ public class Commander
     unitModels.add(new BCopterModel());
     unitModels.add(new FighterModel());
     unitModels.add(new BomberModel());
-    
+
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
+    ownedProperties = new ArrayList<Location>();
     money = DEFAULTSTARTINGMONEY;
   }
 
@@ -85,12 +87,13 @@ public class Commander
    * that depend on circumstances that must be evaluated at combat time (e.g. a
    * terrain-based firepower bonus) can be handled here.
    */
-  public void applyCombatModifiers( BattleInstance params ) {}
+  public void applyCombatModifiers(BattleInstance params)
+  {}
 
-  public void addCOModifier( COModifier mod )
+  public void addCOModifier(COModifier mod)
   {
     mod.apply(this);
-    modifiers.add( mod ); // Add to the list so the modifier can be reverted next turn.
+    modifiers.add(mod); // Add to the list so the modifier can be reverted next turn.
   }
 
   /**
@@ -142,13 +145,13 @@ public class Commander
   public ArrayList<UnitModel> getShoppingList(Terrains buyLocation)
   {
     ArrayList<UnitModel> shoppingList = new ArrayList<UnitModel>();
-    switch(buyLocation)
+    switch (buyLocation)
     {
       case AIRPORT:
         for( int i = 0; i < unitModels.size(); i++ )
         {
           UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
-          if (UnitModel.ChassisEnum.AIR_HIGH == chassis || UnitModel.ChassisEnum.AIR_LOW == chassis)
+          if( UnitModel.ChassisEnum.AIR_HIGH == chassis || UnitModel.ChassisEnum.AIR_LOW == chassis )
             shoppingList.add(unitModels.get(i));
         }
         break;
@@ -156,17 +159,20 @@ public class Commander
         for( int i = 0; i < unitModels.size(); i++ )
         {
           UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
-          if (UnitModel.ChassisEnum.SHIP == chassis)
+          if( UnitModel.ChassisEnum.SHIP == chassis )
+            shoppingList.add(unitModels.get(i));
+        }
+        break;
+      case FACTORY:
+        for( int i = 0; i < unitModels.size(); i++ )
+        {
+          UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
+          if( UnitModel.ChassisEnum.TROOP == chassis || UnitModel.ChassisEnum.TANK == chassis )
             shoppingList.add(unitModels.get(i));
         }
         break;
       default:
-        for( int i = 0; i < unitModels.size(); i++ )
-        {
-          UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
-          if (UnitModel.ChassisEnum.TROOP == chassis || UnitModel.ChassisEnum.TANK == chassis)
-            shoppingList.add(unitModels.get(i));
-        }
+        // don't log anything since this will be hit frequently
         break;
     }
     return shoppingList;
@@ -179,7 +185,7 @@ public class Commander
     return coas;
   }
 
-  public void doAbility( String abilityName, GameInstance game )
+  public void doAbility(String abilityName, GameInstance game)
   {
     System.out.println("WARNING! Calling doAbility on Commander base class!");
   }
