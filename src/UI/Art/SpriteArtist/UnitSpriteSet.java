@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
 
 import CommandingOfficers.Commander;
+import UI.Art.SpriteArtist.SpriteUIUtils.ImageFrame;
 import Units.Unit;
 
 public class UnitSpriteSet
@@ -60,7 +61,7 @@ public class UnitSpriteSet
       else
       { // No sprite sheet provided? Just make stuff up.
         System.out.println("WARNING! Continuing with placeholder images.");
-        sprites[ACTION_IDLE] = new Sprite(null, width, height);
+        sprites[ACTION_IDLE] = new Sprite((BufferedImage)null, width, height);
         for( int i = ACTION_IDLE + 1; i <= ACTION_DIE; ++i )
         {
           sprites[i] = sprites[ACTION_IDLE];
@@ -72,7 +73,7 @@ public class UnitSpriteSet
     {
       // Something went wrong. Just make something up and hope nobody notices.
       // Use the IDLE action if it exists, otherwise we are going with a black rectangle.
-      Sprite defaultSprite = (action > ACTION_IDLE) ? sprites[ACTION_IDLE] : new Sprite(null, width, height);
+      Sprite defaultSprite = (action > ACTION_IDLE) ? sprites[ACTION_IDLE] : new Sprite((BufferedImage)null, width, height);
 
       System.out.println("WARNING: RasterFormatException in UnitSpriteSet constructor.");
       System.out.println("WARNING:   Attempting to continue.");
@@ -114,12 +115,95 @@ public class UnitSpriteSet
     }
   }
 
+  public UnitSpriteSet(ImageFrame[] spriteSet, int width, int height, ColorPalette coColors)
+  {
+    int action = ACTION_IDLE; // This variable relies on the ordering of the ACTION variables defined above.
+
+    try
+    {
+      if( null != spriteSet )
+      {
+          Sprite spr = new Sprite(spriteSet, width, height);
+          sprites[action] = spr;
+          ++action;
+        for(; action <= ACTION_DIE ;)
+        { // We didn't load all animations we wanted - our sprite set is incomplete. Default the rest to IDLE.
+          sprites[action] = sprites[ACTION_IDLE];
+          ++action;
+        }
+      }
+      else
+      { // No sprite sheet provided? Just make stuff up.
+        System.out.println("WARNING! Continuing with placeholder images.");
+        sprites[ACTION_IDLE] = new Sprite((BufferedImage)null, width, height);
+        for( int i = ACTION_IDLE + 1; i <= ACTION_DIE; ++i )
+        {
+          sprites[i] = sprites[ACTION_IDLE];
+        }
+        turnDone = sprites[ACTION_IDLE];
+      }
+    }
+    catch (RasterFormatException rfe)
+    {
+      // Something went wrong. Just make something up and hope nobody notices.
+      // Use the IDLE action if it exists, otherwise we are going with a black rectangle.
+      Sprite defaultSprite = (action > ACTION_IDLE) ? sprites[ACTION_IDLE] : new Sprite((BufferedImage)null, width, height);
+
+      System.out.println("WARNING: RasterFormatException in UnitSpriteSet constructor.");
+      System.out.println("WARNING:   Attempting to continue.");
+      for( ; action <= ACTION_DIE; ++action )
+      {
+        sprites[action] = defaultSprite;
+      }
+    }
+
+    colorize(coColors.paletteColors);
+    if( action > 0 ) // We at least got the IDLE sprites. Use those as the basis for the "already moved" sprites.
+    {
+      turnDone = new Sprite(sprites[0]); // Duplicate the IDLE sprite to make the TurnDone sprite.
+
+      // Get my color presets.
+      Color tiredColor = new Color(128, 128, 128, 160);
+
+      // Shade each frame so the unit can be grayed-out after moving.
+      for( int f = 0; f < turnDone.numFrames(); ++f )
+      {
+        BufferedImage frame = turnDone.getFrame(f);
+        Graphics g = frame.getGraphics();
+        g.setColor(tiredColor);
+
+        // Loop through each pixel and shade the non-transparent ones.
+        for( int y = 0; y < frame.getHeight(); ++y )
+        {
+          for( int x = 0; x < frame.getWidth(); ++x )
+          {
+            // Only shade pixels that are are not transparent.
+            if( frame.getRGB(x, y) != 0 )
+            {
+              // Yes, one pixel at a time.
+              g.fillRect(x, y, 1, 1);
+            }
+          }
+        }
+      }
+    }
+  }
+
   private void colorize(Color[] oldColors, Color[] newColors)
   {
     System.out.println("Colorizing sprite with " + sprites.length + " images:");
     for( Sprite s : sprites )
     {
       s.colorize(oldColors, newColors);
+    }
+  }
+
+  private void colorize(Color[] newColors)
+  {
+    System.out.println("Colorizing sprite with " + sprites.length + " images:");
+    for( Sprite s : sprites )
+    {
+      s.colorizeFromGray(newColors);
     }
   }
 

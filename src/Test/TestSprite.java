@@ -73,7 +73,7 @@ public class TestSprite extends TestCase
     testPassed &= validate(spr1.getFrame(0).getHeight() == SpriteLibrary.baseSpriteSize, "  Sprite has incorrect height.");
 
     // Test construction by passing in null.
-    spr1 = new Sprite(null, 3, 3);
+    spr1 = new Sprite((BufferedImage)null, 3, 3);
     testPassed &= validate(spr1.numFrames() == 1, "  Sprite has " + spr1.numFrames() + " frames; it should have 1.");
     testPassed &= validate(spr1.getFrame(0).getWidth() == 3, "  Sprite should have width 3.");
     testPassed &= validate(spr1.getFrame(0).getHeight() == 3, "  Sprite 2 should have height 3.");

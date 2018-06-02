@@ -1,8 +1,12 @@
 package UI.Art.SpriteArtist;
 
 import java.awt.Color;
+import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorConvertOp;
 import java.util.ArrayList;
+
+import UI.Art.SpriteArtist.SpriteUIUtils.ImageFrame;
 
 /**
  * Holds a collection of related images, e.g. an animation sequence.
@@ -60,6 +64,33 @@ public class Sprite
     }
   }
 
+  public Sprite(ImageFrame[] spriteSet, int spriteWidthPx, int spriteHeightPx)
+  {
+    spriteImages = new ArrayList<BufferedImage>();
+
+    if( null == spriteSet )
+    {
+      System.out.println("WARNING! Sprite() given invalid sprite sheet. Creating placeholder image.");
+      // Just make a single blank frame of the specified size.
+      spriteImages.add(SpriteLibrary.createDefaultBlankSprite(spriteWidthPx, spriteHeightPx));
+    }
+    else
+    {
+      ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
+      ColorConvertOp op = new ColorConvertOp(cs, null);
+      for( ImageFrame image : spriteSet )
+      {
+        if( null != image )
+        {
+          BufferedImage master = new BufferedImage(spriteWidthPx, spriteHeightPx, BufferedImage.TYPE_INT_ARGB);
+          master.getGraphics().drawImage(op.filter(image.getImage(), null), 0, 0, null);
+          //          master.getGraphics().drawImage(image.getImage(), 0, 0, null);
+          spriteImages.add(master);
+        }
+      }
+    }
+  }
+
   /**
    * Sprite copy-constructor. Perform a deep-copy on each of the other sprite's frames.
    * @param other
@@ -103,7 +134,8 @@ public class Sprite
   public BufferedImage getFrame(int index)
   {
     // Normalize the index if needed.
-    for(; index >= spriteImages.size() || index < 0; index += spriteImages.size() * ((index < 0)? 1:-1));
+    for( ; index >= spriteImages.size() || index < 0; index += spriteImages.size() * ((index < 0) ? 1 : -1) )
+      ;
     return spriteImages.get(index);
   }
 
@@ -146,6 +178,26 @@ public class Sprite
           if( oldColor.getRGB() == colorValue )
           {
             bi.setRGB(x, y, newColor.getRGB());
+          }
+        }
+      }
+    }
+  }
+  public void colorizeFromGray(Color[] newColors)
+  {
+    for( BufferedImage bi : spriteImages )
+    {
+      for( int x = 0; x < bi.getWidth(); ++x )
+      {
+        for( int y = 0; y < bi.getHeight(); ++y )
+        {
+          Color tint = new Color(bi.getRGB(x, y));
+          if( ((long) Integer.MAX_VALUE & bi.getRGB(x, y)) > 0 && tint.getRed() == tint.getGreen()
+              && tint.getGreen() == tint.getBlue() )
+          {
+            int val = tint.getBlue() / 50;
+            if( val > 0 )
+              bi.setRGB(x, y, newColors[val - 1].getRGB());
           }
         }
       }

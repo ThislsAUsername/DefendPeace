@@ -72,7 +72,7 @@ public class TerrainSpriteSet
       drawOffsetx = 0;
       drawOffsety = 0;
       // Create a new blank sprite image of the desired size.
-      terrainSprites.add(new Sprite(null, SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize));
+      terrainSprites.add(new Sprite((BufferedImage)null, SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize));
     }
     else
     {
@@ -126,7 +126,7 @@ public class TerrainSpriteSet
         terrainSprites.clear(); // Clear this in case of partially-created data.
 
         // Make a single blank frame of the specified size.
-        terrainSprites.add(new Sprite(null, spriteWidth, spriteHeight));
+        terrainSprites.add(new Sprite((BufferedImage)null, spriteWidth, spriteHeight));
       }
     } // spriteSheet != null
     System.out.println("INFO: Created TerrainSpriteSheet with " + terrainSprites.size() + " sprites.");

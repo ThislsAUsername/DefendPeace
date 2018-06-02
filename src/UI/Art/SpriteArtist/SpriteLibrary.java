@@ -9,11 +9,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+import javax.swing.ImageIcon;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderLibrary;
 import Terrain.Location;
 import Terrain.TerrainType;
+import UI.Art.SpriteArtist.SpriteUIUtils.ImageFrame;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -268,6 +272,25 @@ public class SpriteLibrary
     return bi;
   }
 
+  private static ImageFrame[] loadAnimation(String filename)
+  {
+    ImageFrame[] frames = null;
+    try
+    {
+      ImageReader reader = (ImageReader) ImageIO.getImageReadersByFormatName("gif").next();
+      ImageInputStream ciis = ImageIO.createImageInputStream(new File(filename));
+      reader.setInput(ciis, false);
+
+      frames = SpriteUIUtils.readGIF(reader, baseSpriteSize, baseSpriteSize);
+    }
+    catch (IOException ioex)
+    {
+      System.out.println("WARNING! Exception loading resource file " + filename);
+      frames = null;
+    }
+    return frames;
+  }
+
   public static Sprite getMoveCursorLineSprite()
   {
     if( moveCursorLineSprite == null )
@@ -381,8 +404,10 @@ public class SpriteLibrary
   private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
     System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString());
-    String filestr = getMapUnitSpriteFilename(key.unitTypeKey);
-    UnitSpriteSet spriteSet = new UnitSpriteSet(loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
+//    String filestr = getUnitSpriteFilename(key.unitTypeKey);
+    String filestr = ("res/unit/Cobalt Ice/ci"+key.unitTypeKey.toString()+".gif").replaceAll("\\_", "-");
+//    UnitSpriteSet spriteSet = new UnitSpriteSet(loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
+    UnitSpriteSet spriteSet = new UnitSpriteSet(loadAnimation(filestr), baseSpriteSize, baseSpriteSize,
         getMapUnitColors(key.commanderKey.myColor));
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
@@ -393,6 +418,7 @@ public class SpriteLibrary
     switch (unitType)
     {
       case ANTI_AIR:
+        spriteFile = "res/unit/PLinf.gif";
         break;
       case APC:
         spriteFile = "res/unit/apc_map.png";
