@@ -38,6 +38,7 @@ public class TestCapture extends TestCase
 
     boolean testPassed = true;
     testPassed &= validate(testCapture(), "  Capture test failed.");
+    testPassed &= validate(testFriendlyCapture(), "  Allied capture test failed.");
     testPassed &= validate(testCaptureHQ(), "  HQ-Capture test failed.");
     return testPassed;
   }
@@ -77,7 +78,7 @@ public class TestCapture extends TestCase
     performGameAction(new GameAction.WaitAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap)), testMap); // Wait on the city.
     testPassed &= validate( infA.getCaptureProgress() == 10, "    Infantry should not lose capture progress due to WAIT.");
 
-    // Make sure that attacking someone else resets capture progress.
+    // Make sure that attacking someone else does not reset capture progress.
     Unit infB = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 1, 2); // Make an enemy adjacent to the city.
     infB.alterHP( -8 ); // Make sure he will die without retaliating.
     performGameAction(new GameAction.AttackAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap), 1, 2), testMap); // Bop him on the head.
@@ -100,6 +101,48 @@ public class TestCapture extends TestCase
     // Clean up
     testMap.removeUnit(infA);
     testMap.removeUnit(infB);
+
+    return testPassed;
+  }
+
+  private boolean testFriendlyCapture()
+  {
+    // No problems yet.
+    boolean testPassed = true;
+
+    // Get a reference to a capturable property.
+    Location prop = testMap.getLocation(2, 2);
+
+    // Make sure this location is capturable.
+    testPassed &= validate( prop.isCaptureable(), "    Unexpected terrain found! Test will be invalid." );
+
+    // Make the participating COs friends
+    testCo1.team = 0;
+    testCo2.team = 0;
+    
+    // Set up for the test.
+    Unit infA = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 2, 2); // On the city.
+    prop.setOwner(testCo2);
+
+    // Start capturing the city.
+    GameAction captureAction = new GameAction.CaptureAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap));
+    performGameAction( captureAction, testMap );
+
+    for( int i = 0; i < 5; i++ )
+    {
+      performGameAction(captureAction, testMap);
+      testPassed &= validate(infA.getCaptureProgress() == 0,
+          "    Infantry has wrong capture progress (" + infA.getCaptureProgress() + " instead of 0).");
+    }
+    
+    // Verify that our friend still owns the property.
+    testPassed &= validate( prop.getOwner() == testCo2, "    Infantry captured allied territory.");
+
+    // Clean up
+    testMap.removeUnit(infA);
+    testCo1.team = -1;
+    testCo2.team = -1;
+    prop.setOwner(null);
 
     return testPassed;
   }

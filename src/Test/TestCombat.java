@@ -36,6 +36,7 @@ public class TestCombat extends TestCase
 
     boolean testPassed = true;
     testPassed &= validate(testUnitDeath(), "  Unit death test failed.");
+    testPassed &= validate(testTeamAttack(), "  Team attack test failed.");
     testPassed &= validate(testIndirectAttacks(), "  Indirect combat test failed.");
     testPassed &= validate(testMoveAttack(), "  Move-Attack test failed.");
     testPassed &= validate(testKillLastUnit(), "  Last-unit death test failed.");
@@ -62,6 +63,37 @@ public class TestCombat extends TestCase
 
     // Clean up
     testMap.removeUnit(mechA);
+
+    return testPassed;
+  }
+  
+  /** Test that units actually die, and don't counter-attack when they are killed. */
+  private boolean testTeamAttack()
+  {
+    // Add our combatants
+    Unit mechA = addUnit(testMap, testCo1, UnitEnum.MECH, 1, 1);
+    Unit infB = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 1, 2);
+    
+    // Make them friends
+    testCo1.team = 0;
+    testCo2.team = 0;
+
+    // Make sure the infantry will die with one attack
+    infB.damageHP(7);
+
+    // Hug the infantry in a friendly manner.
+    performGameAction(new GameAction.AttackAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2),
+        testMap);
+
+    // Check that the mech is undamaged, and that the infantry is still with us.
+    boolean testPassed = validate(mechA.getPreciseHP() == 10, "    Attacker lost or gained health.");
+    testPassed &= validate(testMap.getLocation(1, 2).getResident() != null, "    Defender died.");
+
+    // Clean up
+    testMap.removeUnit(mechA);
+    testMap.removeUnit(infB);
+    testCo1.team = -1;
+    testCo2.team = -1;
 
     return testPassed;
   }

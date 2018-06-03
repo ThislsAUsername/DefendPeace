@@ -77,6 +77,7 @@ public interface GameAction
 
         boolean moved = attacker.x != moveLocation.xCoord || attacker.y != moveLocation.yCoord;
         isValid &= (null != unitTarget) && attacker.canAttack(unitTarget.model, attackRange, moved);
+        isValid &= attacker.CO.isEnemy(unitTarget.CO);
       }
 
       // Generate GameEvents.
