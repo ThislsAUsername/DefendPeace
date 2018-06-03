@@ -214,9 +214,9 @@ public class Unit
       System.out.println("ERROR! Attempting to capture an uncapturable Location!");
       return;
     }
-    if( target.getOwner() == CO )
+    if( !CO.isEnemy(target.getOwner()) )
     {
-      System.out.println("WARNING! Attempting to capture a property we own!");
+      System.out.println("WARNING! Attempting to capture an allied property!");
       return;
     }
 
@@ -285,7 +285,7 @@ public class Unit
           } // ~attack options
             break;
           case CAPTURE:
-            if( map.getLocation(moveLocation).getOwner() != CO && map.getLocation(moveLocation).isCaptureable() )
+            if( CO.isEnemy(map.getLocation(moveLocation).getOwner()) && map.getLocation(moveLocation).isCaptureable() )
             {
               actionSet.add(new GameActionSet(new GameAction.CaptureAction(map, this, movePath), false));
             }

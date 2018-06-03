@@ -147,7 +147,7 @@ public class FillRectMapArtist
           Terrain.Location locus = gameMap.getLocation(w, h);
           if( locus.isHighlightSet() )
           {
-            if( locus.getResident() != null && locus.getResident().CO != myGame.activeCO )
+            if( locus.getResident() != null && locus.getResident().CO.isEnemy(myGame.activeCO) )
             {
               g.setColor(HIGHLIGHT_ATTACK);
             }

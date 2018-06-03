@@ -166,7 +166,7 @@ public interface GameAction
         movePathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
         captureLocation = map.getLocation(movePathEnd);
         isValid &= captureLocation.isCaptureable(); // Valid location
-        isValid &= captureLocation.getOwner() != actor.CO; // Valid CO
+        isValid &= actor.CO.isEnemy(captureLocation.getOwner()); // Valid CO
       }
 
       // Generate events
