@@ -18,6 +18,7 @@ public class SpriteMiniMapArtist
     private static final long serialVersionUID = 1L;
     {
       // Create a mapping of terrain types to colors, to help us draw the minimap.
+      put(Terrains.BRIDGE, new Color(189, 189, 189));
       put(Terrains.CITY, new Color(125, 125, 125));
       put(Terrains.DUNES, new Color(240, 210, 120));
       put(Terrains.FACTORY, new Color(125, 125, 125));
