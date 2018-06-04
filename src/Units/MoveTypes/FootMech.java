@@ -1,14 +1,15 @@
 package Units.MoveTypes;
 
-public class FootMech extends MoveType
-{
+import Terrain.Environment.Terrains;
+import Terrain.Environment.Weathers;
 
+public class FootMech extends MoveTypeLand
+{
   public FootMech()
   {
-    // format is [weather][terrain]
-    int[][] tempCosts = { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 }, { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 },
-        { 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 }, { 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 } };
-
-    moveCosts = tempCosts;
+    // Initialize the default land-based movement costs, then override specific values.
+    super();
+    moveCosts.get(Weathers.SNOW).put(Terrains.MOUNTAIN, 2);
+    moveCosts.get(Weathers.SANDSTORM).put(Terrains.DUNES, 2);
   }
 }

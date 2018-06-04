@@ -1,14 +1,15 @@
 package Units.MoveTypes;
 
-public class Flight extends MoveType
-{
+import Terrain.Environment.Terrains;
+import Terrain.Environment.Weathers;
 
+public class Flight extends MoveTypeAir
+{
   public Flight()
   {
-    // format is [weather][terrain]
-    int[][] tempCosts = { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-        { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 }, { 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
-
-    moveCosts = tempCosts;
+    // Initialize the default superclass movement costs, then override specific values.
+    super();
+    moveCosts.get(Weathers.SNOW).setAllMovementCosts(2);
+    moveCosts.get(Weathers.SANDSTORM).put(Terrains.DUNES, 3);
   }
 }
