@@ -67,7 +67,7 @@ public class TestCombat extends TestCase
     return testPassed;
   }
   
-  /** Test that units actually die, and don't counter-attack when they are killed. */
+  /** Test that attacking your friends doesn't work. */
   private boolean testTeamAttack()
   {
     // Add our combatants
