@@ -23,15 +23,6 @@ public class MoveType
     }
   }
 
-  /** Should be called by the constructor of any subclass to initialize everything. */
-  protected void setMoveCosts(MoveCostByTerrain clear, MoveCostByTerrain rainy, MoveCostByTerrain snowy, MoveCostByTerrain windy)
-  {
-    moveCosts.put(Weathers.CLEAR, clear);
-    moveCosts.put(Weathers.RAIN, rainy);
-    moveCosts.put(Weathers.SNOW, snowy);
-    moveCosts.put(Weathers.SANDSTORM, windy);
-  }
-
   /** Returns the cost to traverse terrain type 'terrain' while experiencing weather 'weather'. */
   public int getMoveCost(Weathers weather, Terrains terrain)
   {
