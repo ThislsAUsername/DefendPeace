@@ -9,7 +9,7 @@ public class FootMech extends MoveTypeLand
   {
     // Initialize the default land-based movement costs, then override specific values.
     super();
-    moveCosts.get(Weathers.SNOW).put(Terrains.MOUNTAIN, 2);
-    moveCosts.get(Weathers.SANDSTORM).put(Terrains.DUNES, 2);
+    setMoveCost(Weathers.SNOW, Terrains.MOUNTAIN, 2);
+    setMoveCost(Weathers.SANDSTORM, Terrains.DUNES, 2);
   }
 }

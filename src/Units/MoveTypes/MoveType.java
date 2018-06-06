@@ -16,9 +16,9 @@ public class MoveType
   public MoveType()
   {
     moveCosts = new EnumMap<Weathers, MoveCostByTerrain>(Weathers.class);
-    MoveCostByTerrain noMoving = new MoveCostByTerrain(Terrains.class, 99);
     for( Weathers w : Weathers.values() )
     {
+      MoveCostByTerrain noMoving = new MoveCostByTerrain(Terrains.class, 99);
       moveCosts.put(w, noMoving);
     }
   }
@@ -43,6 +43,21 @@ public class MoveType
   public int getMoveCost(Environment tile)
   {
     return getMoveCost(tile.weatherType, tile.terrainType);
+  }
+
+  /** Sets the cost to move through terrain during weather. */
+  protected void setMoveCost(Weathers weather, Terrains terrain, int cost)
+  {
+    moveCosts.get(weather).put(terrain, cost);
+  }
+
+  /** Set the move cost for this terrain for all weather conditions. Useful for marking a terrain as impassable. */
+  protected void setMoveCost(Terrains terrain, int cost)
+  {
+    for( Weathers w : Weathers.values() )
+    {
+      moveCosts.get(w).setMoveCost(terrain, cost);
+    }
   }
 
   /////////////////////////////////////////////////////////////////////////////

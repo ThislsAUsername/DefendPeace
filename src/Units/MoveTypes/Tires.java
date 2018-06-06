@@ -1,14 +1,32 @@
 package Units.MoveTypes;
 
-public class Tires extends MoveType
-{
+import Terrain.Environment.Terrains;
+import Terrain.Environment.Weathers;
 
+public class Tires extends MoveTypeLand
+{
   public Tires()
   {
-    // format is [weather][terrain]
-    int[][] tempCosts = { { 2, 3, 99, 3, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 }, { 3, 4, 99, 2, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 },
-        { 3, 3, 99, 3, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 }, { 2, 3, 99, 4, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 } };
+    // Initialize the default land-based movement costs, then override specific values.
+    super();
 
-    moveCosts = tempCosts;
+    // Wheels are no good for mountains; disable movement for all weather types.
+    setMoveCost(Terrains.MOUNTAIN, 99);
+
+    setMoveCost(Weathers.CLEAR, Terrains.GRASS, 2);
+    setMoveCost(Weathers.CLEAR, Terrains.FOREST, 3);
+    setMoveCost(Weathers.CLEAR, Terrains.DUNES, 3);
+
+    setMoveCost(Weathers.RAIN, Terrains.GRASS, 3);
+    setMoveCost(Weathers.RAIN, Terrains.FOREST, 4);
+    setMoveCost(Weathers.RAIN, Terrains.DUNES, 2);
+
+    setMoveCost(Weathers.SNOW, Terrains.GRASS, 3);
+    setMoveCost(Weathers.SNOW, Terrains.FOREST, 3);
+    setMoveCost(Weathers.SNOW, Terrains.DUNES, 2);
+
+    setMoveCost(Weathers.SANDSTORM, Terrains.GRASS, 2);
+    setMoveCost(Weathers.SANDSTORM, Terrains.FOREST, 3);
+    setMoveCost(Weathers.SANDSTORM, Terrains.DUNES, 4);
   }
 }

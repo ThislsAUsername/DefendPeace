@@ -1,14 +1,29 @@
 package Units.MoveTypes;
 
-public class Tread extends MoveType
-{
+import Terrain.Environment.Terrains;
+import Terrain.Environment.Weathers;
 
+public class Tread extends MoveTypeLand
+{
   public Tread()
   {
-    // format is [weather][terrain]
-    int[][] tempCosts = { { 1, 2, 99, 2, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 }, { 2, 3, 99, 1, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 },
-        { 2, 2, 99, 2, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 }, { 1, 2, 99, 3, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 } };
+    // Initialize the default land-based movement costs, then override specific values.
+    super();
 
-    moveCosts = tempCosts;
+    // Treads are no good for mountains; disable movement for all weather types.
+    setMoveCost(Terrains.MOUNTAIN, 99);
+
+    setMoveCost(Weathers.CLEAR, Terrains.FOREST, 2);
+    setMoveCost(Weathers.CLEAR, Terrains.DUNES, 2);
+
+    setMoveCost(Weathers.RAIN, Terrains.GRASS, 2);
+    setMoveCost(Weathers.RAIN, Terrains.FOREST, 3);
+
+    setMoveCost(Weathers.SNOW, Terrains.GRASS, 2);
+    setMoveCost(Weathers.SNOW, Terrains.FOREST, 2);
+    setMoveCost(Weathers.SNOW, Terrains.DUNES, 2);
+
+    setMoveCost(Weathers.SANDSTORM, Terrains.FOREST, 2);
+    setMoveCost(Weathers.SANDSTORM, Terrains.DUNES, 3);
   }
 }

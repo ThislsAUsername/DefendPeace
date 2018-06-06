@@ -11,17 +11,17 @@ public class FootStandard extends MoveTypeLand
     super();
 
     // Make adjustments to the base-class values.
-    moveCosts.get(Weathers.CLEAR).put(Terrains.MOUNTAIN, 2);
+    setMoveCost(Weathers.CLEAR, Terrains.MOUNTAIN, 2);
 
-    moveCosts.get(Weathers.RAIN).put(Terrains.DUNES, 3);
-    moveCosts.get(Weathers.RAIN).put(Terrains.MOUNTAIN, 3);
+    setMoveCost(Weathers.RAIN, Terrains.DUNES, 3);
+    setMoveCost(Weathers.RAIN, Terrains.MOUNTAIN, 3);
 
-    moveCosts.get(Weathers.SNOW).put(Terrains.FOREST, 2);
-    moveCosts.get(Weathers.SNOW).put(Terrains.GRASS, 2);
-    moveCosts.get(Weathers.SNOW).put(Terrains.MOUNTAIN, 4);
+    setMoveCost(Weathers.SNOW, Terrains.FOREST, 2);
+    setMoveCost(Weathers.SNOW, Terrains.GRASS, 2);
+    setMoveCost(Weathers.SNOW, Terrains.MOUNTAIN, 4);
 
-    moveCosts.get(Weathers.SANDSTORM).put(Terrains.DUNES, 3);
-    moveCosts.get(Weathers.SANDSTORM).put(Terrains.MOUNTAIN, 2);
-    moveCosts.get(Weathers.SANDSTORM).put(Terrains.SHOAL, 2);
+    setMoveCost(Weathers.SANDSTORM, Terrains.DUNES, 3);
+    setMoveCost(Weathers.SANDSTORM, Terrains.MOUNTAIN, 2);
+    setMoveCost(Weathers.SANDSTORM, Terrains.SHOAL, 2);
   }
 }

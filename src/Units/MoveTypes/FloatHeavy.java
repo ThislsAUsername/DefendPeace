@@ -1,14 +1,21 @@
 package Units.MoveTypes;
 
-public class FloatHeavy extends MoveType
-{
+import Terrain.Environment.Terrains;
+import Terrain.Environment.Weathers;
 
+public class FloatHeavy extends MoveTypeSea
+{
   public FloatHeavy()
   {
-    // format is [weather][terrain]
-    int[][] tempCosts = { { 99, 99, 99, 99, 99, 99, 99, 99, 1, 99, 99, 99, 1, 2 }, { 99, 99, 99, 99, 99, 99, 99, 99, 1, 99, 99, 99, 1, 2 },
-        { 99, 99, 99, 99, 99, 99, 99, 99, 1, 99, 99, 99, 2, 2 }, { 99, 99, 99, 99, 99, 99, 99, 99, 1, 99, 99, 99, 1, 2 } };
+    // Initialize the default sea-based movement costs, then override specific values.
+    super();
 
-    moveCosts = tempCosts;
+    // Heavier boats can't travel through shoals.
+    setMoveCost(Terrains.SHOAL, 99);
+
+    // Reefs are just a bit more difficult to move through in general.
+    setMoveCost(Terrains.REEF, 2);
+
+    setMoveCost(Weathers.SNOW, Terrains.SEA, 2);
   }
 }
