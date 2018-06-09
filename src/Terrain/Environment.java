@@ -1,5 +1,9 @@
 package Terrain;
 
+import java.util.ArrayList;
+
+import Terrain.Types.BaseTerrain;
+
 /**
  * Environment is a flyweight class - each Terrain/Weather combination is instantiated only once.
  * Subsequent calls to retrieve that tile will receive the same copy.
@@ -10,6 +14,8 @@ public class Environment
   {
     GRASS, FOREST, MOUNTAIN, DUNES, ROAD, BRIDGE, CITY, FACTORY, AIRPORT, SEAPORT, HQ, LAB, SHOAL, SEA, REEF
   };
+  
+  public static ArrayList<BaseTerrain> types = new ArrayList<BaseTerrain>();
 
   public enum Weathers
   {
