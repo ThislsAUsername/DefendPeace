@@ -13,12 +13,19 @@ public class City extends Lucrative
     healsLand = true;
     // baseIndex is base class's
   }
-  
+
   public static BaseTerrain getInstance()
   {
-    if (null == instance)
+    if( null == instance )
       instance = new City();
     return instance;
+  }
+
+  public static int getIndex()
+  {
+    if( null == instance )
+      getInstance();
+    return instance.index;
   }
 
 }

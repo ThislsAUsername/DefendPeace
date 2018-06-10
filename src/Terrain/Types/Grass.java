@@ -10,14 +10,22 @@ public class Grass extends BaseTerrain
   {
     defLevel = 1;
     miniColor = new Color(166, 253, 77);
-    baseIndex = getIndex();
+    isLand = true;
+    baseIndex = index;
   }
-  
+
   public static BaseTerrain getInstance()
   {
-    if (null == instance)
+    if( null == instance )
       instance = new Grass();
     return instance;
+  }
+
+  public static int getIndex()
+  {
+    if( null == instance )
+      getInstance();
+    return instance.index;
   }
 
 }

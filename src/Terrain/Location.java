@@ -65,9 +65,7 @@ public class Location
    */
   public boolean isCaptureable()
   {
-    return (environs.terrainType == Environment.Terrains.CITY || environs.terrainType == Environment.Terrains.FACTORY
-        || environs.terrainType == Environment.Terrains.AIRPORT || environs.terrainType == Environment.Terrains.SEAPORT
-        || environs.terrainType == Environment.Terrains.HQ || environs.terrainType == Environment.Terrains.LAB);
+    return environs.terrainType.isCapturable();
   }
 
   public void setHighlight(boolean val)

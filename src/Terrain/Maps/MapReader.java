@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import Engine.XYCoord;
-import Terrain.Environment;
 import Terrain.MapInfo;
+import Terrain.Types.BaseTerrain;
 
 public class MapReader extends IMapBuilder
 {
@@ -57,12 +57,12 @@ public class MapReader extends IMapBuilder
             // Map tiles are accessed via mapArray[x][y]
             // Thus, each subarray contains a column.
             // Each row on the map consists of one value with the same index from each subarray.
-            ArrayList<ArrayList<Environment.Terrains>> terrainData = new ArrayList<ArrayList<Environment.Terrains>>();
+            ArrayList<ArrayList<BaseTerrain>> terrainData = new ArrayList<ArrayList<BaseTerrain>>();
             // The representation for each tile is 4 characters long, so we divide the length by 4 to get the map's width.
             // Height will scale with how many lines of file there are.
             for( int i = 0; i < line.length() / 4; i++ )
             {
-              terrainData.add(new ArrayList<Environment.Terrains>());
+              terrainData.add(new ArrayList<BaseTerrain>());
             }
 
             // This boolean is broken out since yCoord makes sense as a for-loop-iterated variable.
@@ -98,10 +98,10 @@ public class MapReader extends IMapBuilder
                 line = scanner.nextLine();
             }
             // intermediate array to hold the flat arrays harvested from each column
-            ArrayList<Environment.Terrains[]> terrainArrayArray = new ArrayList<Environment.Terrains[]>();
+            ArrayList<BaseTerrain[]> terrainArrayArray = new ArrayList<BaseTerrain[]>();
             for( int i = 0; i < terrainData.size(); i++ )
             {
-              terrainArrayArray.add(terrainData.get(i).toArray(new Environment.Terrains[0]));
+              terrainArrayArray.add(terrainData.get(i).toArray(new BaseTerrain[0]));
             }
             ArrayList<XYCoord[]> propertyArrayArray = new ArrayList<XYCoord[]>();
             for( int i = 0; i < properties.size(); i++ )
@@ -112,7 +112,7 @@ public class MapReader extends IMapBuilder
                 propertyArrayArray.add(properties.get(i).toArray(new XYCoord[0]));
             }
             // Finally, we make our map's container to put in importMaps.
-            MapInfo info = new MapInfo(mapName, terrainArrayArray.toArray(new Environment.Terrains[0][0]),
+            MapInfo info = new MapInfo(mapName, terrainArrayArray.toArray(new BaseTerrain[0][0]),
                 propertyArrayArray.toArray(new XYCoord[0][0]));
             importMaps.add(info);
             scanner.close();
@@ -132,7 +132,7 @@ public class MapReader extends IMapBuilder
     return importMaps;
   }
 
-  private static Environment.Terrains stringToCode(String input)
+  private static BaseTerrain stringToCode(String input)
   {
     // Regex for generating the cases in this switch statement via a line-separated list of the terrain codes.
     // In Notepad++, use the Find/Replace window in regex mode
@@ -141,8 +141,6 @@ public class MapReader extends IMapBuilder
     // It won't output the correct indentation, but that's what autoformatting is for.
     switch (input)
     {
-      case "BR":
-        return BR;
       case "CT":
         return CT;
       case "DN":

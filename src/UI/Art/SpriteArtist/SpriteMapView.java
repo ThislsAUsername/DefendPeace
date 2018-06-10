@@ -162,16 +162,7 @@ public class SpriteMapView extends MapView
    */
   private void setCommanderUnitFacing(CommandingOfficers.Commander co, GameMap map)
   {
-    for( int x = 0; x < map.mapWidth; ++x )
-    {
-      for( int y = 0; y < map.mapHeight; ++y )
-      {
-        if( map.getEnvironment(x, y).terrainType == Environment.Terrains.HQ && map.getLocation(x, y).getOwner() == co )
-        {
-          unitFacings.put(co, x >= map.mapWidth / 2);
-        }
-      }
-    }
+    unitFacings.put(co, co.HQLocation.xCoord >= map.mapWidth / 2);
   }
 
   @Override

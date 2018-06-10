@@ -2,25 +2,22 @@ package Terrain.Types;
 
 import java.awt.Color;
 
-public class Seaport extends Lucrative
+public class Headquarters extends City
 {
-  private static Seaport instance;
+  private static Headquarters instance;
 
-  protected Seaport()
+  protected Headquarters()
   {
-    defLevel = 3;
-    // TODO: this is the Factory color
+    defLevel = 4;
     miniColor = new Color(125, 125, 125);
-    isSea = true;
-    isLand = true;
-    healsSea = true;
-    baseIndex = Shoal.getIndex();
+    sustainsSide = true;
+    // baseIndex is base class's
   }
 
   public static BaseTerrain getInstance()
   {
     if( null == instance )
-      instance = new Seaport();
+      instance = new Headquarters();
     return instance;
   }
 

@@ -2,7 +2,22 @@ package Terrain;
 
 import java.util.ArrayList;
 
+import Terrain.Types.Airport;
 import Terrain.Types.BaseTerrain;
+import Terrain.Types.Bridge;
+import Terrain.Types.City;
+import Terrain.Types.Dunes;
+import Terrain.Types.Factory;
+import Terrain.Types.Forest;
+import Terrain.Types.Grass;
+import Terrain.Types.Headquarters;
+import Terrain.Types.Lab;
+import Terrain.Types.Mountain;
+import Terrain.Types.Reef;
+import Terrain.Types.Road;
+import Terrain.Types.Sea;
+import Terrain.Types.Seaport;
+import Terrain.Types.Shoal;
 
 /**
  * Environment is a flyweight class - each Terrain/Weather combination is instantiated only once.
@@ -10,29 +25,25 @@ import Terrain.Types.BaseTerrain;
  */
 public class Environment
 {
-  public enum Terrains
-  {
-    GRASS, FOREST, MOUNTAIN, DUNES, ROAD, BRIDGE, CITY, FACTORY, AIRPORT, SEAPORT, HQ, LAB, SHOAL, SEA, REEF
-  };
   
-  public static ArrayList<BaseTerrain> types = new ArrayList<BaseTerrain>();
+  private static ArrayList<BaseTerrain> terrainTypes;
 
   public enum Weathers
   {
     CLEAR, RAIN, SNOW, SANDSTORM
   };
 
-  public final Terrains terrainType;
+  public final BaseTerrain terrainType;
   public final Weathers weatherType;
 
-  private static Environment[][] tileInstances = new Environment[Terrains.values().length][Weathers.values().length];
+  private static ArrayList<Environment[]> tileInstances= new ArrayList<Environment[]>();
 
   /**
    * Private constructor so that Tile can manage all of its flyweights.
    */
-  private Environment(Terrains tileType, Weathers weather)
+  private Environment(BaseTerrain typeIndex, Weathers weather)
   {
-    terrainType = tileType;
+    terrainType = typeIndex;
     weatherType = weather;
   }
 
@@ -40,54 +51,47 @@ public class Environment
    * Returns the Tile flyweight matching the input parameters, creating it first if needed.
    * @return
    */
-  public static Environment getTile(Terrains terrain, Weathers weather)
+  public static Environment getTile(BaseTerrain terrain, Weathers weather)
   {
+    // If we don't have that terrain yet, add it to the array
+    if(tileInstances.size() <= terrain.index)
+    {
+      for (int i = tileInstances.size(); i <= terrain.index; i++)
+        tileInstances.add(i, new Environment[Weathers.values().length]);
+    }
     // If we don't have the desired Tile built already, create it.
-    if( tileInstances[terrain.ordinal()][weather.ordinal()] == null )
+    if( tileInstances.get(terrain.index)[weather.ordinal()] == null )
     {
       System.out.println("Creating new Tile " + weather + ", " + terrain);
-      tileInstances[terrain.ordinal()][weather.ordinal()] = new Environment(terrain, weather);
+      tileInstances.get(terrain.index)[weather.ordinal()] = new Environment(terrain, weather);
     }
 
-    return tileInstances[terrain.ordinal()][weather.ordinal()];
+    return tileInstances.get(terrain.index)[weather.ordinal()];
   }
-
-  public int getDefLevel()
+  
+  public static ArrayList<BaseTerrain> getTerrainTypes()
   {
-    // If there's a better way to do this, I'm all ears
-    switch (terrainType)
+    if( null == terrainTypes )
     {
-      case GRASS:
-        return 1;
-      case FOREST:
-        return 2;
-      case MOUNTAIN:
-        return 4;
-      case ROAD:
-        return 0;
-      case BRIDGE:
-        return 0;
-      case CITY:
-        return 3;
-      case FACTORY:
-        return 3;
-      case SEAPORT:
-        return 3;
-      case AIRPORT:
-        return 3;
-      case LAB:
-        return 3;
-      case HQ:
-        return 4;
-      case SHOAL:
-        return 0;
-      case SEA:
-        return 1;
-      case REEF:
-        return 2;
-      default:
-        System.out.println("Error in getDefLevel! Terrain type is invalid! Returning -1 for great shenanigans.");
-        return -1;
+      terrainTypes = new ArrayList<BaseTerrain>();
+      // init base terrains first; their indexes should exist before the others' do
+      Grass.getInstance();
+      Sea.getInstance();
+      Shoal.getInstance();
+      
+      Airport.getInstance();
+      Bridge.getInstance();
+      City.getInstance();
+      Dunes.getInstance();
+      Factory.getInstance();
+      Forest.getInstance();
+      Headquarters.getInstance();
+      Lab.getInstance();
+      Mountain.getInstance();
+      Reef.getInstance();
+      Road.getInstance();
+      Seaport.getInstance();
     }
+    return terrainTypes;
   }
 }

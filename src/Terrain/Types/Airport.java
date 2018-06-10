@@ -14,12 +14,19 @@ public class Airport extends Lucrative
     healsAir = true;
     // baseIndex is base class's
   }
-  
+
   public static BaseTerrain getInstance()
   {
-    if (null == instance)
+    if( null == instance )
       instance = new Airport();
     return instance;
+  }
+
+  public static int getIndex()
+  {
+    if( null == instance )
+      getInstance();
+    return instance.index;
   }
 
 }

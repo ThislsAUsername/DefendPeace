@@ -1,23 +1,38 @@
 package Terrain.Maps;
 
-import Terrain.Environment.Terrains;
+import Terrain.Types.Airport;
+import Terrain.Types.BaseTerrain;
+import Terrain.Types.Bridge;
+import Terrain.Types.City;
+import Terrain.Types.Dunes;
+import Terrain.Types.Factory;
+import Terrain.Types.Forest;
+import Terrain.Types.Grass;
+import Terrain.Types.Headquarters;
+import Terrain.Types.Lab;
+import Terrain.Types.Mountain;
+import Terrain.Types.Reef;
+import Terrain.Types.Road;
+import Terrain.Types.Sea;
+import Terrain.Types.Seaport;
+import Terrain.Types.Shoal;
 
 public class IMapBuilder
 {
   // Convenient handles for the terrain types to shorten map definitions.
-  protected static final Terrains BR = Terrains.BRIDGE;
-  protected static final Terrains CT = Terrains.CITY;
-  protected static final Terrains DN = Terrains.DUNES;
-  protected static final Terrains FC = Terrains.FACTORY;
-  protected static final Terrains AP = Terrains.AIRPORT;
-  protected static final Terrains SP = Terrains.SEAPORT;
-  protected static final Terrains FR = Terrains.FOREST;
-  protected static final Terrains GR = Terrains.GRASS;
-  protected static final Terrains HQ = Terrains.HQ;
-  protected static final Terrains LB = Terrains.LAB;
-  protected static final Terrains MT = Terrains.MOUNTAIN;
-  protected static final Terrains RF = Terrains.REEF;
-  protected static final Terrains RD = Terrains.ROAD;
-  protected static final Terrains SH = Terrains.SHOAL;
-  protected static final Terrains SE = Terrains.SEA;
+  protected static final BaseTerrain BR = Bridge.getInstance();
+  protected static final BaseTerrain CT = City.getInstance();
+  protected static final BaseTerrain DN = Dunes.getInstance();
+  protected static final BaseTerrain FC = Factory.getInstance();
+  protected static final BaseTerrain AP = Airport.getInstance();
+  protected static final BaseTerrain SP = Seaport.getInstance();
+  protected static final BaseTerrain FR = Forest.getInstance();
+  protected static final BaseTerrain GR = Grass.getInstance();
+  protected static final BaseTerrain HQ = Headquarters.getInstance();
+  protected static final BaseTerrain LB = Lab.getInstance();
+  protected static final BaseTerrain MT = Mountain.getInstance();
+  protected static final BaseTerrain RF = Reef.getInstance();
+  protected static final BaseTerrain RD = Road.getInstance();
+  protected static final BaseTerrain SH = Shoal.getInstance();
+  protected static final BaseTerrain SE = Sea.getInstance();
 }

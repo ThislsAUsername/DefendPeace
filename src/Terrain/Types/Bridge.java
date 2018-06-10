@@ -10,13 +10,21 @@ public class Bridge extends Shoal
   {
     defLevel = 0;
     miniColor = new Color(189, 189, 189);
+    baseIndex = Shoal.getIndex();
   }
-  
+
   public static BaseTerrain getInstance()
   {
-    if (null == instance)
+    if( null == instance )
       instance = new Bridge();
     return instance;
+  }
+
+  public static int getIndex()
+  {
+    if( null == instance )
+      getInstance();
+    return instance.index;
   }
 
 }

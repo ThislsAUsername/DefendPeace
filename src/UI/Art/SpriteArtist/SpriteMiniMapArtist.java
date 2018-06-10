@@ -3,33 +3,26 @@ package UI.Art.SpriteArtist;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import Engine.XYCoord;
 import Terrain.Environment;
-import Terrain.Environment.Terrains;
 import Terrain.MapInfo;
+import Terrain.Types.BaseTerrain;
 
 public class SpriteMiniMapArtist
 {
   private static HashMap<MapInfo, BufferedImage> mapImages = new HashMap<MapInfo, BufferedImage>();
 
-  private static HashMap<Environment.Terrains, Color> terrainColors = new HashMap<Environment.Terrains, Color>(){
+  private static ArrayList<Color> terrainColors = new ArrayList<Color>(){
     private static final long serialVersionUID = 1L;
     {
       // Create a mapping of terrain types to colors, to help us draw the minimap.
-      put(Terrains.BRIDGE, new Color(189, 189, 189));
-      put(Terrains.CITY, new Color(125, 125, 125));
-      put(Terrains.DUNES, new Color(240, 210, 120));
-      put(Terrains.FACTORY, new Color(125, 125, 125));
-      put(Terrains.FOREST, new Color(46, 196, 24));
-      put(Terrains.GRASS, new Color(166, 253, 77));
-      put(Terrains.HQ, new Color(125, 125, 125));
-      put(Terrains.MOUNTAIN, new Color(153, 99, 67));
-      put(Terrains.REEF, new Color(218, 152, 112));
-      put(Terrains.ROAD, new Color(189, 189, 189));
-      put(Terrains.SEA, new Color(94, 184, 236));
-      put(Terrains.SHOAL, new Color(253, 224, 93));
+      for( BaseTerrain terrain : Environment.getTerrainTypes() )
+      {
+        add(terrain.getMiniColor());
+      }
     }
   };
 
@@ -62,7 +55,7 @@ public class SpriteMiniMapArtist
     {
       for(int x = 0; x < image.getWidth(); ++x)
       {
-        g.setColor( terrainColors.get(mapInfo.terrain[x][y]) );
+        g.setColor( terrainColors.get(mapInfo.terrain[x][y].index) );
         g.fillRect(x, y, 1, 1);
       }
     }

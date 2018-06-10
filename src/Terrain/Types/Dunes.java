@@ -10,14 +10,21 @@ public class Dunes extends Grass
   {
     defLevel = 1;
     miniColor = new Color(240, 210, 120);
-    // baseIndex is base class's
+    baseIndex = Grass.getIndex();
   }
-  
+
   public static BaseTerrain getInstance()
   {
-    if (null == instance)
+    if( null == instance )
       instance = new Dunes();
     return instance;
+  }
+
+  public static int getIndex()
+  {
+    if( null == instance )
+      getInstance();
+    return instance.index;
   }
 
 }

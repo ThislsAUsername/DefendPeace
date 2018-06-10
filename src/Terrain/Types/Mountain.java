@@ -10,14 +10,21 @@ public class Mountain extends Grass
   {
     defLevel = 4;
     miniColor = new Color(153, 99, 67);
-    // baseIndex is base class's
+    baseIndex = Grass.getIndex();
   }
-  
+
   public static BaseTerrain getInstance()
   {
-    if (null == instance)
+    if( null == instance )
       instance = new Mountain();
     return instance;
+  }
+
+  public static int getIndex()
+  {
+    if( null == instance )
+      getInstance();
+    return instance.index;
   }
 
 }

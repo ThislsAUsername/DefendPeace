@@ -109,7 +109,7 @@ public class BattleInstance
       if( ChassisEnum.AIR_HIGH != defender.model.chassis && ChassisEnum.AIR_LOW != defender.model.chassis )
       {
         // getDefLevel returns the number of terrain stars. Since we're using %Def, we need to multiply by 10. However, we do that when we multiply by HP in calculateDamage.
-        terrainDefense = battleground.getDefLevel();
+        terrainDefense = battleground.terrainType.getDefLevel();
       }
     }
 

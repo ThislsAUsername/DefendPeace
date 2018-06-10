@@ -1,14 +1,15 @@
 package Terrain.Maps;
 
 import Engine.XYCoord;
-import Terrain.Environment;
 import Terrain.MapInfo;
+import Terrain.Types.BaseTerrain;
 
 public class TestRange extends IMapBuilder
 {
   private final static String mapName = "Test Range";
   // Defines the terrain for this map. Each row is a vertical column of the map.
-  private final static Environment.Terrains[][] terrainData = { { SE, SE, SE, SE, SE, SE, SE, SE, SE, SE }, // 0
+  private final static BaseTerrain[][] terrainData = {
+      { SE, SE, SE, SE, SE, SE, SE, SE, SE, SE }, // 0
       { SE, SH, GR, GR, CT, SP, GR, FC, CT, SE }, // 1
       { SE, SH, CT, GR, GR, CT, GR, FC, GR, SE }, // 2
       { SE, GR, MT, GR, GR, FR, GR, GR, GR, SE }, // 3

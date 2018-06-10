@@ -4,11 +4,10 @@ import java.awt.Color;
 
 import Terrain.Environment;
 
-public class BaseTerrain
+public abstract class BaseTerrain
 {
-  private static int index = -1;
-  private static BaseTerrain instance;
   
+  public final int index;
   protected int baseIndex;
   protected int defLevel;
   protected float incomeMultiplier;
@@ -17,6 +16,8 @@ public class BaseTerrain
   protected Boolean capturable;
   protected Boolean sustainsSide;
   protected Boolean isCover;
+  protected Boolean isLand;
+  protected Boolean isSea;
   protected Boolean healsLand;
   protected Boolean healsSea;
   protected Boolean healsAir;
@@ -30,31 +31,28 @@ public class BaseTerrain
     capturable = false;
     sustainsSide = false;
     isCover = false;
+    isLand = false;
+    isSea = false;
     healsLand = false;
     healsSea = false;
     healsAir = false;
-    registerType(this);
-    baseIndex = index;
+    index = registerType();
   }
   
-  protected void registerType(BaseTerrain entity)
+  protected int registerType()
   {
-    Environment.types.add(entity);
-    index = Environment.types.size() - 1;
+    Environment.getTerrainTypes().add(this);
+    return Environment.getTerrainTypes().size() - 1;
   }
   
   public static BaseTerrain getInstance()
   {
-    if (null == instance)
-      instance = new BaseTerrain();
-    return instance;
+    return null;
   }
   
   public static int getIndex()
   {
-    if (null == instance)
-      getInstance();
-    return index;
+    return -1;
   }
   
   public int getBaseIndex()
@@ -95,6 +93,16 @@ public class BaseTerrain
   public Boolean isCover()
   {
     return isCover;
+  }
+  
+  public Boolean isLand()
+  {
+    return isLand;
+  }
+  
+  public Boolean isSea()
+  {
+    return isSea;
   }
   
   public Boolean healsLand()

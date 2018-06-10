@@ -14,12 +14,21 @@ public class Lab extends Ownable
     sustainsSide = true;
     // baseIndex is base class's
   }
-  
+
   public static BaseTerrain getInstance()
   {
-    if (null == instance)
+    if( null == instance )
       instance = new Lab();
     return instance;
+  }
+
+  private static int index = -1;
+
+  public static int getIndex()
+  {
+    if( null == instance )
+      getInstance();
+    return index;
   }
 
 }

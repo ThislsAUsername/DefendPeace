@@ -5,8 +5,9 @@ import java.util.Vector;
 
 import Engine.GameAction;
 import Engine.GameAction.ActionType;
-import Terrain.Environment.Terrains;
+import Terrain.Environment;
 import Terrain.Location;
+import Terrain.Types.BaseTerrain;
 import Units.MoveTypes.MoveType;
 import Units.Weapons.WeaponModel;
 
@@ -32,7 +33,7 @@ public class UnitModel
   public int movePower;
   public MoveType propulsion;
   public ActionType[] possibleActions;
-  public Terrains[] healableHabs;
+  public BaseTerrain[] healableHabs;
   public WeaponModel[] weaponModels;
 
   public int maxHP;
@@ -42,7 +43,7 @@ public class UnitModel
   private int COdef;
 
   public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower, MoveType pPropulsion,
-      ActionType[] actions, Terrains[] healableTerrains, WeaponModel[] weapons)
+      ActionType[] actions, boolean isLand, boolean isAir, boolean isSea, WeaponModel[] weapons)
   {
     name = pName;
     type = pType;
@@ -53,7 +54,16 @@ public class UnitModel
     movePower = pMovePower;
     propulsion = pPropulsion;
     possibleActions = actions;
-    healableHabs = healableTerrains;
+    ArrayList<BaseTerrain> healableTerrains = new ArrayList<BaseTerrain>();
+    for (BaseTerrain terrain : Environment.getTerrainTypes())
+    {
+      if( isAir  && terrain.healsAir() ||
+          isLand && terrain.healsLand() || 
+          isSea  && terrain.healsSea() )
+        healableTerrains.add(terrain);
+    }
+    healableHabs = new BaseTerrain[healableTerrains.size()];
+    healableHabs = healableTerrains.toArray(healableHabs);
     weaponModels = weapons;
 
     maxHP = 10;
@@ -92,9 +102,9 @@ public class UnitModel
 
   public boolean canRepairOn(Location locus)
   {
-    Terrains environs = locus.getEnvironment().terrainType;
+    BaseTerrain environs = locus.getEnvironment().terrainType;
     boolean compatible = false;
-    for( Terrains terrain : healableHabs )
+    for( BaseTerrain terrain : healableHabs )
     {
       compatible |= environs == terrain;
     }

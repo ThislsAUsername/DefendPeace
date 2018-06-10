@@ -1,7 +1,8 @@
 package Units.MoveTypes;
 
-import Terrain.Environment.Terrains;
 import Terrain.Environment.Weathers;
+import Terrain.Types.Dunes;
+import Terrain.Types.Mountain;
 
 public class FootMech extends MoveTypeLand
 {
@@ -9,7 +10,7 @@ public class FootMech extends MoveTypeLand
   {
     // Initialize the default land-based movement costs, then override specific values.
     super();
-    setMoveCost(Weathers.SNOW, Terrains.MOUNTAIN, 2);
-    setMoveCost(Weathers.SANDSTORM, Terrains.DUNES, 2);
+    setMoveCost(Weathers.SNOW, Mountain.getInstance(), 2);
+    setMoveCost(Weathers.SANDSTORM, Dunes.getInstance(), 2);
   }
 }
