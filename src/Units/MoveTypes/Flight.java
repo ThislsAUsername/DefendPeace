@@ -7,8 +7,7 @@ public class Flight extends MoveTypeAir
 {
   public Flight()
   {
-    // Initialize the default superclass movement costs, then override specific values.
-    super();
+    // Override specific move cost values.
     moveCosts.get(Weathers.SNOW).setAllMovementCosts(2);
     setMoveCost(Weathers.SANDSTORM, Terrains.DUNES, 3);
   }

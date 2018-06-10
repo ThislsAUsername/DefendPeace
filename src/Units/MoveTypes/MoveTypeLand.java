@@ -7,9 +7,6 @@ public class MoveTypeLand extends MoveType
 {
   public MoveTypeLand()
   {
-    // Initialize the superclass. This creates the weather-to-TerrainCost map.
-    super();
-
     // The superclass sets all costs to 99; we just need to set the land-based terrains to 1.
     moveCosts.get(Weathers.CLEAR).setAllLandCosts(1);
     moveCosts.get(Weathers.RAIN).setAllLandCosts(1);
