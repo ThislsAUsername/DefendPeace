@@ -13,7 +13,6 @@ import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.UnloadEvent;
 import Terrain.GameMap;
 import Terrain.Location;
-import Terrain.Types.Headquarters;
 import Units.Unit;
 
 /**
@@ -182,7 +181,7 @@ public interface GameAction
         if( capture.willCapture() ) // If this will succeed, check if the CO will lose as a result.
         {
           // Check if capturing this property will cause someone's defeat.
-          if( (captureLocation.getEnvironment().terrainType == Headquarters.getInstance()) && (null != captureLocation.getOwner()) )
+          if( (captureLocation.getEnvironment().terrainType.sustainsSide()) && (null != captureLocation.getOwner()) )
           {
             // Someone is losing their big, comfy chair.
             captureEvents.add(new CommanderDefeatEvent(captureLocation.getOwner()));

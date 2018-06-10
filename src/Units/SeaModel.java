@@ -14,6 +14,7 @@ public class SeaModel extends UnitModel
   public SeaModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower,
       ActionType[] actions, WeaponModel[] weapons)
   {
+    // Most sea units use FloatHeavy, and are sea-based
     super(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pMovePower, moveType, actions, false, true, false, weapons);
   }
 }

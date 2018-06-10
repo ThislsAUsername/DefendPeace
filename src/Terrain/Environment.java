@@ -36,14 +36,16 @@ public class Environment
   public final BaseTerrain terrainType;
   public final Weathers weatherType;
 
+  // ArrayList can dynamically expand to accomodate arbitrary terrains at runtime
+  // Thankfully, there's no plans to expand our list of weathers
   private static ArrayList<Environment[]> tileInstances= new ArrayList<Environment[]>();
 
   /**
    * Private constructor so that Tile can manage all of its flyweights.
    */
-  private Environment(BaseTerrain typeIndex, Weathers weather)
+  private Environment(BaseTerrain tileType, Weathers weather)
   {
-    terrainType = typeIndex;
+    terrainType = tileType;
     weatherType = weather;
   }
 
@@ -53,9 +55,9 @@ public class Environment
    */
   public static Environment getTile(BaseTerrain terrain, Weathers weather)
   {
-    // If we don't have that terrain yet, add it to the array
+    // If we don't have a slot for that terrain yet, expand the array to allow it
     if(tileInstances.size() <= terrain.index)
-    {
+    { // start iteration from current size to avoid excess elements
       for (int i = tileInstances.size(); i <= terrain.index; i++)
         tileInstances.add(i, new Environment[Weathers.values().length]);
     }

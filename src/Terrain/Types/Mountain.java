@@ -8,6 +8,7 @@ public class Mountain extends Grass
 
   protected Mountain()
   {
+    // TODO: Bonus to vision in fog?
     defLevel = 4;
     miniColor = new Color(153, 99, 67);
     baseIndex = Grass.getIndex();

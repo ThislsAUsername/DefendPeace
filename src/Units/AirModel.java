@@ -14,6 +14,7 @@ public class AirModel extends UnitModel
   public AirModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower,
       ActionType[] actions, WeaponModel[] weapons)
   {
+    // All air units use Flight, and... are air units, not land or sea
     super(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pMovePower, moveType, actions, false, true, false, weapons);
   }
 }

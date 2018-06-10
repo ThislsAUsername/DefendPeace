@@ -149,7 +149,7 @@ public class Commander
   public ArrayList<UnitModel> getShoppingList(BaseTerrain buyLocation)
   {
     ArrayList<UnitModel> shoppingList = new ArrayList<UnitModel>();
-    int index = Environment.getTerrainTypes().indexOf(buyLocation);
+    int index = buyLocation.index;
     if( index == Airport.getIndex() )
     {
       for( int i = 0; i < unitModels.size(); i++ )

@@ -12,7 +12,6 @@ import javax.imageio.ImageIO;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderLibrary;
-import Terrain.Environment;
 import Terrain.Location;
 import Terrain.Types.Airport;
 import Terrain.Types.BaseTerrain;
@@ -174,6 +173,8 @@ public class SpriteLibrary
     int w = baseSpriteSize;
     int h = baseSpriteSize;
 
+    // This is for sure kinda ugly, but not much more than the equivalent switch/case
+    // This *could* be moved into BaseTerrain, but I feel like perhaps that would be too close integration of model and view (though it'd make it nice and simple in the short term?)
     if( terrainType == Bridge.getInstance() )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/bridge_clear.png"), w, h);

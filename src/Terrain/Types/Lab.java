@@ -2,6 +2,10 @@ package Terrain.Types;
 
 import java.awt.Color;
 
+/**
+ *  Labs don't give income or heal anything.
+ *  They're arguably the most useless building you can capture.
+ */
 public class Lab extends Ownable
 {
   private static Lab instance;
