@@ -1,7 +1,11 @@
 package Units.MoveTypes;
 
-import Terrain.Environment.Terrains;
 import Terrain.Environment.Weathers;
+import Terrain.Types.Dunes;
+import Terrain.Types.Forest;
+import Terrain.Types.Grass;
+import Terrain.Types.Mountain;
+import Terrain.Types.Shoal;
 
 public class FootStandard extends MoveTypeLand
 {
@@ -11,17 +15,17 @@ public class FootStandard extends MoveTypeLand
     super();
 
     // Make adjustments to the base-class values.
-    setMoveCost(Weathers.CLEAR, Terrains.MOUNTAIN, 2);
+    setMoveCost(Weathers.CLEAR, Mountain.getInstance(), 2);
 
-    setMoveCost(Weathers.RAIN, Terrains.DUNES, 3);
-    setMoveCost(Weathers.RAIN, Terrains.MOUNTAIN, 3);
+    setMoveCost(Weathers.RAIN, Dunes.getInstance(), 3);
+    setMoveCost(Weathers.RAIN, Mountain.getInstance(), 3);
 
-    setMoveCost(Weathers.SNOW, Terrains.FOREST, 2);
-    setMoveCost(Weathers.SNOW, Terrains.GRASS, 2);
-    setMoveCost(Weathers.SNOW, Terrains.MOUNTAIN, 4);
+    setMoveCost(Weathers.SNOW, Forest.getInstance(), 2);
+    setMoveCost(Weathers.SNOW, Grass.getInstance(), 2);
+    setMoveCost(Weathers.SNOW, Mountain.getInstance(), 4);
 
-    setMoveCost(Weathers.SANDSTORM, Terrains.DUNES, 3);
-    setMoveCost(Weathers.SANDSTORM, Terrains.MOUNTAIN, 2);
-    setMoveCost(Weathers.SANDSTORM, Terrains.SHOAL, 2);
+    setMoveCost(Weathers.SANDSTORM, Dunes.getInstance(), 3);
+    setMoveCost(Weathers.SANDSTORM, Mountain.getInstance(), 2);
+    setMoveCost(Weathers.SANDSTORM, Shoal.getInstance(), 2);
   }
 }

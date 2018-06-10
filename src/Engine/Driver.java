@@ -12,6 +12,7 @@ import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import Terrain.Environment;
 import Test.TestMain;
 import UI.InputHandler;
 import UI.MainUIController;

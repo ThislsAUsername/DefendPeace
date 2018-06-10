@@ -62,60 +62,7 @@ public class FillRectMapArtist
   private void drawLocation(Graphics g, Terrain.Location locus, int x, int y)
   {
     Environment tile = locus.getEnvironment();
-    Color tileColor = Color.black;
-
-    switch (tile.terrainType)
-    {
-      case GRASS:
-        tileColor = COLOR_GRASS;
-        break;
-      case CITY:
-        if( locus.getOwner() != null )
-        {
-          tileColor = locus.getOwner().myColor;
-        }
-        else
-        {
-          tileColor = COLOR_CITY;
-        }
-        break;
-      case FACTORY:
-        if( locus.getOwner() != null )
-        {
-          tileColor = locus.getOwner().myColor;
-        }
-        else
-        {
-          tileColor = COLOR_FACTORY;
-        }
-        break;
-      case FOREST:
-        tileColor = COLOR_FOREST;
-        break;
-      case SEA:
-        tileColor = COLOR_SEA;
-        break;
-      case HQ:
-        if( locus.getOwner() != null )
-        {
-          tileColor = locus.getOwner().myColor;
-        }
-        break;
-      case MOUNTAIN:
-        tileColor = COLOR_MOUNTAIN;
-        break;
-      case REEF:
-        tileColor = COLOR_REEF;
-        break;
-      case ROAD:
-        tileColor = COLOR_ROAD;
-        break;
-      case SHOAL:
-        tileColor = COLOR_SHOAL;
-        break;
-      default:
-        tileColor = Color.BLACK;
-    }
+    Color tileColor = tile.terrainType.getMiniColor();
 
     g.setColor(tileColor);
     g.fillRect(x, y, tileSizePx, tileSizePx);

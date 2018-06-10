@@ -7,9 +7,13 @@ import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameInstance;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
-import Terrain.Environment.Terrains;
+import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.Types.Airport;
+import Terrain.Types.BaseTerrain;
+import Terrain.Types.Factory;
+import Terrain.Types.Seaport;
 import Units.APCModel;
 import Units.AntiAirModel;
 import Units.ArtilleryModel;
@@ -142,38 +146,40 @@ public class Commander
     return um;
   }
 
-  public ArrayList<UnitModel> getShoppingList(Terrains buyLocation)
+  public ArrayList<UnitModel> getShoppingList(BaseTerrain buyLocation)
   {
     ArrayList<UnitModel> shoppingList = new ArrayList<UnitModel>();
-    switch (buyLocation)
+    int index = buyLocation.index;
+    if( index == Airport.getIndex() )
     {
-      case AIRPORT:
-        for( int i = 0; i < unitModels.size(); i++ )
-        {
-          UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
-          if( UnitModel.ChassisEnum.AIR_HIGH == chassis || UnitModel.ChassisEnum.AIR_LOW == chassis )
-            shoppingList.add(unitModels.get(i));
-        }
-        break;
-      case SEAPORT:
-        for( int i = 0; i < unitModels.size(); i++ )
-        {
-          UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
-          if( UnitModel.ChassisEnum.SHIP == chassis )
-            shoppingList.add(unitModels.get(i));
-        }
-        break;
-      case FACTORY:
-        for( int i = 0; i < unitModels.size(); i++ )
-        {
-          UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
-          if( UnitModel.ChassisEnum.TROOP == chassis || UnitModel.ChassisEnum.TANK == chassis )
-            shoppingList.add(unitModels.get(i));
-        }
-        break;
-      default:
-        // don't log anything since this will be hit frequently
-        break;
+      for( int i = 0; i < unitModels.size(); i++ )
+      {
+        UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
+        if( UnitModel.ChassisEnum.AIR_HIGH == chassis || UnitModel.ChassisEnum.AIR_LOW == chassis )
+          shoppingList.add(unitModels.get(i));
+      }
+    }
+    else if( index == Seaport.getIndex() )
+    {
+      for( int i = 0; i < unitModels.size(); i++ )
+      {
+        UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
+        if( UnitModel.ChassisEnum.SHIP == chassis )
+          shoppingList.add(unitModels.get(i));
+      }
+    }
+    else if( index == Factory.getIndex() )
+    {
+      for( int i = 0; i < unitModels.size(); i++ )
+      {
+        UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
+        if( UnitModel.ChassisEnum.TROOP == chassis || UnitModel.ChassisEnum.TANK == chassis )
+          shoppingList.add(unitModels.get(i));
+      }
+    }
+    else
+    {
+      // don't log anything since this will be hit frequently
     }
     return shoppingList;
   }

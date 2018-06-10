@@ -1,7 +1,9 @@
 package Units.MoveTypes;
 
-import Terrain.Environment.Terrains;
 import Terrain.Environment.Weathers;
+import Terrain.Types.Reef;
+import Terrain.Types.Sea;
+import Terrain.Types.Shoal;
 
 public class FloatHeavy extends MoveTypeSea
 {
@@ -11,11 +13,11 @@ public class FloatHeavy extends MoveTypeSea
     super();
 
     // Heavier boats can't travel through shoals.
-    setMoveCost(Terrains.SHOAL, 99);
+    setMoveCost(Shoal.getInstance(), 99);
 
     // Reefs are just a bit more difficult to move through in general.
-    setMoveCost(Terrains.REEF, 2);
+    setMoveCost(Reef.getInstance(), 2);
 
-    setMoveCost(Weathers.SNOW, Terrains.SEA, 2);
+    setMoveCost(Weathers.SNOW, Sea.getInstance(), 2);
   }
 }
