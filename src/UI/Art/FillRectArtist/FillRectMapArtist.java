@@ -107,6 +107,7 @@ public class FillRectMapArtist
       case REEF:
         tileColor = COLOR_REEF;
         break;
+      case BRIDGE:
       case ROAD:
         tileColor = COLOR_ROAD;
         break;
