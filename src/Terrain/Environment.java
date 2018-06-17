@@ -8,7 +8,7 @@ public class Environment
 {
   public enum Terrains
   {
-    GRASS, FOREST, MOUNTAIN, DUNES, ROAD, CITY, FACTORY, AIRPORT, SEAPORT, HQ, LAB, SHOAL, SEA, REEF
+    GRASS, FOREST, MOUNTAIN, DUNES, ROAD, BRIDGE, CITY, FACTORY, AIRPORT, SEAPORT, HQ, LAB, SHOAL, SEA, REEF
   };
 
   public enum Weathers
@@ -58,6 +58,8 @@ public class Environment
       case MOUNTAIN:
         return 4;
       case ROAD:
+        return 0;
+      case BRIDGE:
         return 0;
       case CITY:
         return 3;

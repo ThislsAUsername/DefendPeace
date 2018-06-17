@@ -159,6 +159,10 @@ public class SpriteLibrary
     int h = baseSpriteSize;
     switch (terrainType)
     {
+      case BRIDGE:
+        ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/bridge_clear.png"), w, h);
+        ss.addTerrainAffinity(Environment.Terrains.GRASS); // No need to also add ROAD, since GRASS is the base of ROAD.
+        break;
       case CITY:
         ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/city_clear.png"), w * 2, h * 2);
         break;
@@ -178,6 +182,7 @@ public class SpriteLibrary
         break;
       case GRASS:
         ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/grass_clear.png"), w, h);
+        ss.addTileTransition(Environment.Terrains.BRIDGE, loadSpriteSheetFile("res/tileset/grass_bridge_clear.png"), w, h);
         break;
       case HQ:
         ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/hq_clear.png"), w * 2, h * 2);
@@ -192,6 +197,7 @@ public class SpriteLibrary
       case SEA:
         ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/sea_clear.png"), w, h);
         ss.addTileTransition(Environment.Terrains.GRASS, loadSpriteSheetFile("res/tileset/sea_grass_clear.png"), w, h);
+        ss.addTileTransition(Environment.Terrains.BRIDGE, loadSpriteSheetFile("res/tileset/sea_bridge_clear.png"), w, h);
         break;
       case REEF:
         ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/reef_clear.png"), w, h);
@@ -199,11 +205,15 @@ public class SpriteLibrary
         break;
       case ROAD:
         ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/road_clear.png"), w, h);
+        ss.addTerrainAffinity(Environment.Terrains.BRIDGE);
+        ss.addTerrainAffinity(Environment.Terrains.HQ);
+        ss.addTerrainAffinity(Environment.Terrains.FACTORY);
         break;
       case SHOAL:
         ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/shoal_clear.png"), w, h);
         ss.addTileTransition(Environment.Terrains.SEA, loadSpriteSheetFile("res/tileset/shoal_sea_clear.png"), w, h);
         ss.addTileTransition(Environment.Terrains.GRASS, loadSpriteSheetFile("res/tileset/shoal_grass_clear.png"), w, h);
+        ss.addTileTransition(Environment.Terrains.BRIDGE, loadSpriteSheetFile("res/tileset/sea_bridge_clear.png"), w, h);
         break;
       default:
         System.out.println("ERROR! [SpriteLibrary.loadTerrainSpriteSet] Unknown terrain type " + terrainType);

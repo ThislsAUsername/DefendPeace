@@ -1,14 +1,13 @@
 package Units.MoveTypes;
 
-public class FootMech extends MoveType
-{
+import Terrain.Environment.Terrains;
+import Terrain.Environment.Weathers;
 
+public class FootMech extends MoveTypeLand
+{
   public FootMech()
   {
-    // format is [weather][terrain]
-    int[][] tempCosts = { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 }, { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 },
-        { 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 }, { 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 } };
-
-    moveCosts = tempCosts;
+    setMoveCost(Weathers.SNOW, Terrains.MOUNTAIN, 2);
+    setMoveCost(Weathers.SANDSTORM, Terrains.DUNES, 2);
   }
 }

@@ -5,6 +5,7 @@ import Terrain.Environment.Terrains;
 public class IMapBuilder
 {
   // Convenient handles for the terrain types to shorten map definitions.
+  protected static final Terrains BR = Terrains.BRIDGE;
   protected static final Terrains CT = Terrains.CITY;
   protected static final Terrains DN = Terrains.DUNES;
   protected static final Terrains FC = Terrains.FACTORY;

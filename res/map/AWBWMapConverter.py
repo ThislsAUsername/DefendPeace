@@ -68,8 +68,8 @@ def indexToTerrainCode(x):
 		23:  '  RD',
 		24:  '  RD',
 		25:  '  RD',
-		26:  '  RD',#HBridge
-		27:  '  RD',#VBridge
+		26:  '  BR',#HBridge
+		27:  '  BR',#VBridge
 		28:  '  SE',#sea
 		29:  '  SH',#shoal
 		30:  '  SH',

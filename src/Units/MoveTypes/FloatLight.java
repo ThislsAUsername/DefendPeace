@@ -1,14 +1,15 @@
 package Units.MoveTypes;
 
-public class FloatLight extends MoveType
-{
+import Terrain.Environment.Terrains;
+import Terrain.Environment.Weathers;
 
+public class FloatLight extends MoveTypeSea
+{
   public FloatLight()
   {
-    // format is [weather][terrain]
-    int[][] tempCosts = { { 99, 99, 99, 99, 99, 99, 99, 99, 1, 99, 99, 1, 1, 2 }, { 99, 99, 99, 99, 99, 99, 99, 99, 1, 99, 99, 1, 1, 2 },
-        { 99, 99, 99, 99, 99, 99, 99, 99, 1, 99, 99, 1, 2, 2 }, { 99, 99, 99, 99, 99, 99, 99, 99, 1, 99, 99, 1, 1, 2 } };
+    // Reefs are just a bit more difficult to move through in general.
+    setMoveCost(Terrains.REEF, 2);
 
-    moveCosts = tempCosts;
+    setMoveCost(Weathers.SNOW, Terrains.SEA, 2);
   }
 }
