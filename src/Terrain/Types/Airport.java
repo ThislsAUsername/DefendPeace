@@ -21,12 +21,4 @@ public class Airport extends Lucrative
       instance = new Airport();
     return instance;
   }
-
-  public static int getIndex()
-  {
-    if( null == instance )
-      getInstance();
-    return instance.index;
-  }
-
 }

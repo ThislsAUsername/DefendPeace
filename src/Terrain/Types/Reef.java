@@ -11,7 +11,6 @@ public class Reef extends Sea
     defLevel = 2;
     miniColor = new Color(218, 152, 112);
     isCover = true;
-    baseIndex = Sea.getIndex();
   }
 
   public static BaseTerrain getInstance()
@@ -20,12 +19,4 @@ public class Reef extends Sea
       instance = new Reef();
     return instance;
   }
-
-  public static int getIndex()
-  {
-    if( null == instance )
-      getInstance();
-    return instance.index;
-  }
-
 }

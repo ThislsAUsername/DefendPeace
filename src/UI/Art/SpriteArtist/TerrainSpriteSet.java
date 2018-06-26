@@ -5,7 +5,10 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
 import java.util.ArrayList;
-import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import Terrain.Environment;
 import Terrain.GameMap;
@@ -40,6 +43,9 @@ public class TerrainSpriteSet
   private static final short NE = 17;
   private static final short SE = 18;
   private static final short SW = 19;
+
+  private static Map<BaseTerrain, BaseTerrain> terrainBases = null;
+  private static Set<BaseTerrain> terrainObjects = null;
 
   public TerrainSpriteSet(BaseTerrain terrainType, BufferedImage spriteSheet, int spriteWidth, int spriteHeight)
   {
@@ -189,8 +195,8 @@ public class TerrainSpriteSet
 
     // Figure out if we need to draw this tile, based on this tile type and whether the caller
     //   wishes to draw terrain objects or base terrain.
-    if( (shouldDrawTerrainObject && myTerrainType.isObject())
-        || (!shouldDrawTerrainObject && !myTerrainType.isObject()) )
+    if( (shouldDrawTerrainObject && isTerrainObject(myTerrainType))
+        || (!shouldDrawTerrainObject && !isTerrainObject(myTerrainType)) )
     {
       // Either: we are only drawing terrain objects, and this tile type does represent a terrain object,
       //     or: we are only drawing base terrain, and this tile type represents base terrain.
@@ -275,6 +281,24 @@ public class TerrainSpriteSet
     return dirIndex;
   }
 
+  /** Return true if this terrain type takes up more than one tile when drawn. */
+  private boolean isTerrainObject(BaseTerrain terrainType)
+  {
+    if( null == terrainObjects )
+    {
+      terrainObjects = new HashSet<BaseTerrain>();
+      terrainObjects.add(Environment.CITY);
+      terrainObjects.add(Environment.FACTORY);
+      terrainObjects.add(Environment.FOREST);
+      terrainObjects.add(Environment.AIRPORT);
+      terrainObjects.add(Environment.SEAPORT);
+      terrainObjects.add(Environment.HEADQUARTERS);
+      terrainObjects.add(Environment.LAB);
+      terrainObjects.add(Environment.MOUNTAIN);
+    }
+    return terrainObjects.contains(terrainType);
+  }
+
   /**
    * If position (x, y) is a valid location:
    *   Return true if (x, y) has myTerrainType terrain or is in the affinity list, else return false;
@@ -313,12 +337,37 @@ public class TerrainSpriteSet
   /**
    * Determines the base terrain type for the provided environment terrain type.
    * For example, FOREST is a tile type, but the trees sit on a plain, so for drawing
-   * purposes (esp. terrain transitions), the base tile type of FOREST is actually PLAIN.
+   * purposes (esp. terrain transitions), the base tile type of FOREST is actually GRASS.
    */
   private static BaseTerrain getBaseTerrainType(BaseTerrain terrain)
   {
-    int baseIndex = terrain.getBaseIndex();
+    if( null == terrainBases )
+    {
+      terrainBases = new HashMap<BaseTerrain, BaseTerrain>();
+      terrainBases.put(Environment.CITY, Environment.GRASS);
+      terrainBases.put(Environment.DUNES, Environment.GRASS);
+      terrainBases.put(Environment.FACTORY, Environment.GRASS);
+      terrainBases.put(Environment.AIRPORT, Environment.GRASS);
+      terrainBases.put(Environment.FOREST, Environment.GRASS);
+      terrainBases.put(Environment.HEADQUARTERS, Environment.GRASS);
+      terrainBases.put(Environment.LAB, Environment.GRASS);
+      terrainBases.put(Environment.MOUNTAIN, Environment.GRASS);
+      terrainBases.put(Environment.GRASS, Environment.GRASS);
+      terrainBases.put(Environment.ROAD, Environment.GRASS);
 
-    return Environment.getTerrainTypes().get(baseIndex);
+      terrainBases.put(Environment.BRIDGE, Environment.SHOAL);
+      terrainBases.put(Environment.SEAPORT, Environment.SHOAL);
+      terrainBases.put(Environment.SHOAL, Environment.SHOAL);
+
+      terrainBases.put(Environment.REEF, Environment.SEA);
+      terrainBases.put(Environment.SEA, Environment.SEA);
+
+      if( Environment.getTerrainTypes().length != terrainBases.size())
+      {
+        System.out.println("WARNING! TerrainSpriteSet terrains do not align with Environment!");
+      }
+    }
+
+    return terrainBases.get(terrain);
   }
 }

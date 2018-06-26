@@ -1,6 +1,7 @@
 package Terrain;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import Terrain.Types.Airport;
 import Terrain.Types.BaseTerrain;
@@ -26,7 +27,25 @@ import Terrain.Types.Shoal;
 public class Environment
 {
   
-  private static ArrayList<BaseTerrain> terrainTypes;
+  public static final BaseTerrain GRASS = Grass.getInstance();
+  public static final BaseTerrain SEA = Sea.getInstance();
+  public static final BaseTerrain SHOAL = Shoal.getInstance();
+  public static final BaseTerrain AIRPORT = Airport.getInstance();
+  public static final BaseTerrain BRIDGE = Bridge.getInstance();
+  public static final BaseTerrain CITY = City.getInstance();
+  public static final BaseTerrain DUNES = Dunes.getInstance();
+  public static final BaseTerrain FACTORY = Factory.getInstance();
+  public static final BaseTerrain FOREST = Forest.getInstance();
+  public static final BaseTerrain HEADQUARTERS = Headquarters.getInstance();
+  public static final BaseTerrain LAB = Lab.getInstance();
+  public static final BaseTerrain MOUNTAIN = Mountain.getInstance();
+  public static final BaseTerrain REEF = Reef.getInstance();
+  public static final BaseTerrain ROAD = Road.getInstance();
+  public static final BaseTerrain SEAPORT = Seaport.getInstance();
+
+  private static BaseTerrain[] Terrains = {
+    GRASS, SEA, SHOAL, AIRPORT, BRIDGE, CITY, DUNES, FACTORY, FOREST, HEADQUARTERS, LAB, MOUNTAIN, REEF, ROAD, SEAPORT
+  };
 
   public enum Weathers
   {
@@ -36,9 +55,8 @@ public class Environment
   public final BaseTerrain terrainType;
   public final Weathers weatherType;
 
-  // ArrayList can dynamically expand to accomodate arbitrary terrains at runtime
-  // Thankfully, there's no plans to expand our list of weathers
-  private static ArrayList<Environment[]> tileInstances= new ArrayList<Environment[]>();
+  // Maintain a list of all tile types types. Each type will be added the first time it is used.
+  private static Map<BaseTerrain, Environment[]> tileInstances= new HashMap<BaseTerrain, Environment[]>();
 
   /**
    * Private constructor so that Tile can manage all of its flyweights.
@@ -55,45 +73,24 @@ public class Environment
    */
   public static Environment getTile(BaseTerrain terrain, Weathers weather)
   {
-    // If we don't have a slot for that terrain yet, expand the array to allow it
-    if(tileInstances.size() <= terrain.index)
-    { // start iteration from current size to avoid excess elements
-      for (int i = tileInstances.size(); i <= terrain.index; i++)
-        tileInstances.add(i, new Environment[Weathers.values().length]);
-    }
-    // If we don't have the desired Tile built already, create it.
-    if( tileInstances.get(terrain.index)[weather.ordinal()] == null )
+    // Add a new Environment array for this terrain type if it's missing.
+    if( !tileInstances.containsKey(terrain) )
     {
-      System.out.println("Creating new Tile " + weather + ", " + terrain);
-      tileInstances.get(terrain.index)[weather.ordinal()] = new Environment(terrain, weather);
+      tileInstances.put(terrain, new Environment[Weathers.values().length]);
     }
 
-    return tileInstances.get(terrain.index)[weather.ordinal()];
+    // If we don't have the desired Tile built already, create it.
+    if( tileInstances.get(terrain)[weather.ordinal()] == null )
+    {
+      System.out.println("Creating new Tile " + weather + ", " + terrain);
+      tileInstances.get(terrain)[weather.ordinal()] = new Environment(terrain, weather);
+    }
+
+    return tileInstances.get(terrain)[weather.ordinal()];
   }
   
-  public static ArrayList<BaseTerrain> getTerrainTypes()
+  public static BaseTerrain[] getTerrainTypes()
   {
-    if( null == terrainTypes )
-    {
-      terrainTypes = new ArrayList<BaseTerrain>();
-      // init base terrains first; their indexes should exist before the others' do
-      Grass.getInstance();
-      Sea.getInstance();
-      Shoal.getInstance();
-      
-      Airport.getInstance();
-      Bridge.getInstance();
-      City.getInstance();
-      Dunes.getInstance();
-      Factory.getInstance();
-      Forest.getInstance();
-      Headquarters.getInstance();
-      Lab.getInstance();
-      Mountain.getInstance();
-      Reef.getInstance();
-      Road.getInstance();
-      Seaport.getInstance();
-    }
-    return terrainTypes;
+    return Terrains;
   }
 }

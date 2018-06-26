@@ -11,7 +11,6 @@ public class Sea extends BaseTerrain
     defLevel = 1;
     miniColor = new Color(94, 184, 236);
     isSea = true;
-    baseIndex = index;
   }
 
   public static BaseTerrain getInstance()
@@ -20,12 +19,4 @@ public class Sea extends BaseTerrain
       instance = new Sea();
     return instance;
   }
-
-  public static int getIndex()
-  {
-    if( null == instance )
-      getInstance();
-    return instance.index;
-  }
-
 }

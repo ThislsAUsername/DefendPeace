@@ -11,7 +11,6 @@ public class Mountain extends Grass
     // TODO: Bonus to vision in fog?
     defLevel = 4;
     miniColor = new Color(153, 99, 67);
-    baseIndex = Grass.getIndex();
   }
 
   public static BaseTerrain getInstance()
@@ -20,12 +19,4 @@ public class Mountain extends Grass
       instance = new Mountain();
     return instance;
   }
-
-  public static int getIndex()
-  {
-    if( null == instance )
-      getInstance();
-    return instance.index;
-  }
-
 }

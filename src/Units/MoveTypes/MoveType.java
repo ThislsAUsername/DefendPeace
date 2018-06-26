@@ -82,8 +82,6 @@ public class MoveType
     /** Set cost to traverse a specific terrain type. */
     public void setMoveCost(BaseTerrain t, int c)
     {
-      if( size() > t.index )
-        remove(t.index);
       put(t, c);
     }
 

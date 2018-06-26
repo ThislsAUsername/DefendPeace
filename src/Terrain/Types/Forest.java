@@ -11,7 +11,6 @@ public class Forest extends Grass
     defLevel = 3; // DoR forests are 3*
     miniColor = new Color(46, 196, 24);
     isCover = true;
-    baseIndex = Grass.getIndex();
   }
 
   public static BaseTerrain getInstance()
@@ -20,12 +19,4 @@ public class Forest extends Grass
       instance = new Forest();
     return instance;
   }
-
-  public static int getIndex()
-  {
-    if( null == instance )
-      getInstance();
-    return instance.index;
-  }
-
 }

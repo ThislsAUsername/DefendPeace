@@ -10,7 +10,6 @@ public class Road extends Grass
   {
     defLevel = 0;
     miniColor = new Color(189, 189, 189);
-    baseIndex = Grass.getIndex();
   }
 
   public static BaseTerrain getInstance()
@@ -19,12 +18,4 @@ public class Road extends Grass
       instance = new Road();
     return instance;
   }
-
-  public static int getIndex()
-  {
-    if( null == instance )
-      getInstance();
-    return instance.index;
-  }
-
 }

@@ -20,12 +20,4 @@ public class City extends Lucrative
       instance = new City();
     return instance;
   }
-
-  public static int getIndex()
-  {
-    if( null == instance )
-      getInstance();
-    return instance.index;
-  }
-
 }

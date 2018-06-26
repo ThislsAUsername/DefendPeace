@@ -20,12 +20,4 @@ public class Headquarters extends City
       instance = new Headquarters();
     return instance;
   }
-
-  public static int getIndex()
-  {
-    if( null == instance )
-      getInstance();
-    return instance.index;
-  }
-
 }

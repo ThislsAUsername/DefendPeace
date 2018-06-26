@@ -1,6 +1,8 @@
 package Units;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
 import Engine.GameAction;
@@ -33,7 +35,7 @@ public class UnitModel
   public int movePower;
   public MoveType propulsion;
   public ActionType[] possibleActions;
-  public BaseTerrain[] healableHabs;
+  public Set<BaseTerrain> healableHabs;
   public WeaponModel[] weaponModels;
 
   public int maxHP;
@@ -54,16 +56,14 @@ public class UnitModel
     movePower = pMovePower;
     propulsion = pPropulsion;
     possibleActions = actions;
-    ArrayList<BaseTerrain> healableTerrains = new ArrayList<BaseTerrain>();
+    healableHabs = new HashSet<BaseTerrain>();
     for (BaseTerrain terrain : Environment.getTerrainTypes())
     {
       if( isAir  && terrain.healsAir() ||
           isLand && terrain.healsLand() || 
           isSea  && terrain.healsSea() )
-        healableTerrains.add(terrain);
+        healableHabs.add(terrain);
     }
-    healableHabs = new BaseTerrain[healableTerrains.size()];
-    healableHabs = healableTerrains.toArray(healableHabs);
     weaponModels = weapons;
 
     maxHP = 10;
@@ -102,13 +102,7 @@ public class UnitModel
 
   public boolean canRepairOn(Location locus)
   {
-    BaseTerrain environs = locus.getEnvironment().terrainType;
-    boolean compatible = false;
-    for( BaseTerrain terrain : healableHabs )
-    {
-      compatible |= environs == terrain;
-    }
-    return compatible;
+    return healableHabs.contains( locus.getEnvironment().terrainType );
   }
 
   /** Provides a hook for inheritors to supply turn-initialization actions to a unit.

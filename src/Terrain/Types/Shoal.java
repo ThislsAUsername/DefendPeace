@@ -13,7 +13,6 @@ public class Shoal extends BaseTerrain
     miniColor = new Color(253, 224, 93);
     isSea = true;
     isLand = true;
-    baseIndex = index;
   }
 
   public static BaseTerrain getInstance()
@@ -22,12 +21,4 @@ public class Shoal extends BaseTerrain
       instance = new Shoal();
     return instance;
   }
-
-  public static int getIndex()
-  {
-    if( null == instance )
-      getInstance();
-    return instance.index;
-  }
-
 }

@@ -14,7 +14,6 @@ public class Seaport extends Lucrative
     isSea = true;
     isLand = true;
     healsSea = true;
-    baseIndex = Shoal.getIndex();
   }
 
   public static BaseTerrain getInstance()
@@ -23,12 +22,4 @@ public class Seaport extends Lucrative
       instance = new Seaport();
     return instance;
   }
-
-  public static int getIndex()
-  {
-    if( null == instance )
-      getInstance();
-    return instance.index;
-  }
-
 }
