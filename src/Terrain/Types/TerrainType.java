@@ -4,35 +4,17 @@ import java.awt.Color;
 
 public abstract class TerrainType
 {
-  protected int defLevel; // 1% damage reduction per HP, per unit of defense
-  protected float incomeMultiplier; // 1.0 for standard income
-  protected Color miniColor; // Minimap and FillRect color
-  protected Boolean isTerrainObject; // Whether this terrain type can meaningfully change state
-  protected Boolean capturable; // Whether someone can own and derive benefit from this property
-  protected Boolean sustainsSide; // Whether it counts as an HQ
-  protected Boolean isCover; // Whether it hides surface units in fog
-  protected Boolean isLand;
-  protected Boolean isSea;
-  protected Boolean healsLand;
-  protected Boolean healsSea;
-  protected Boolean healsAir;
-
-  /** Sets defaults, and adds the new terrain type to the array. */
-  protected TerrainType()
-  {
-    defLevel = -1;
-    incomeMultiplier = 0;
-    miniColor = new Color(0,0,0);
-    isTerrainObject = false;
-    capturable = false;
-    sustainsSide = false;
-    isCover = false;
-    isLand = false;
-    isSea = false;
-    healsLand = false;
-    healsSea = false;
-    healsAir = false;
-  }
+  protected int defLevel = -1; // Level of protection provided by this terrain type. Typically 0-4.
+  protected Color miniColor = new Color(0,0,0); // Predominant color of this terrain type. Here for convenience.
+  protected Boolean isCapturable = false; // Whether a Commander can take ownership of this property.
+  protected Boolean isProfitable = false; // Whether this terrain type grants income to its owner each turn.
+  protected Boolean sustainsSide = false; // Whether it counts as an HQ
+  protected Boolean isCover = false; // Whether it hides surface units in fog
+  protected Boolean isLand = false;
+  protected Boolean isSea = false;
+  protected Boolean healsLand = false;
+  protected Boolean healsSea = false;
+  protected Boolean healsAir = false;
 
   // Need to be overloaded for all concrete subclasses, individually
   // Static methods can't be abstract
@@ -48,12 +30,7 @@ public abstract class TerrainType
   {
     return defLevel;
   }
-  
-  public float getincomeMultiplier()
-  {
-    return incomeMultiplier;
-  }
-  
+
   public Color getMiniColor()
   {
     return miniColor;
@@ -61,7 +38,12 @@ public abstract class TerrainType
 
   public Boolean isCapturable()
   {
-    return capturable;
+    return isCapturable;
+  }
+
+  public Boolean isProfitable()
+  {
+    return isProfitable;
   }
   
   public Boolean sustainsSide()

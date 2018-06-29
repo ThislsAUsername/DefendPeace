@@ -2,7 +2,7 @@ package Terrain.Types;
 
 import java.awt.Color;
 
-public class Airport extends Lucrative
+public class Airport extends TerrainType
 {
   private static Airport instance;
 
@@ -12,7 +12,9 @@ public class Airport extends Lucrative
     // TODO: this is the Factory color
     miniColor = new Color(125, 125, 125);
     healsAir = true;
-    // baseIndex is base class's
+    isCapturable = true;
+    isProfitable = true;
+    isLand = true;
   }
 
   public static TerrainType getInstance()

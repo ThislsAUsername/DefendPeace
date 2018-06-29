@@ -12,9 +12,9 @@ import Engine.Combat.BattleInstance;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.Types.Airport;
-import Terrain.Types.TerrainType;
 import Terrain.Types.Factory;
 import Terrain.Types.Seaport;
+import Terrain.Types.TerrainType;
 import Units.APCModel;
 import Units.AntiAirModel;
 import Units.ArtilleryModel;
@@ -132,7 +132,7 @@ public class Commander
       for( int h = 0; h < map.mapHeight; ++h )
       {
         Location loc = map.getLocation(w, h);
-        if( loc.isCaptureable() && loc.getOwner() == this )
+        if( loc.isProfitable() && loc.getOwner() == this )
         {
           turnIncome += incomePerCity;
         }
@@ -168,7 +168,7 @@ public class Commander
   /** Get the list of units this commander can build from the given property type. */
   public ArrayList<UnitModel> getShoppingList(TerrainType buyLocation)
   {
-    return unitProductionByTerrain.get(buyLocation);
+    return (unitProductionByTerrain.get(buyLocation) != null) ? unitProductionByTerrain.get(buyLocation) : new ArrayList<UnitModel>();
   }
 
   public ArrayList<String> getReadyAbilities()

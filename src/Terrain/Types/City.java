@@ -2,16 +2,18 @@ package Terrain.Types;
 
 import java.awt.Color;
 
-public class City extends Lucrative
+public class City extends TerrainType
 {
   private static City instance;
 
   protected City()
   {
-    defLevel = 2; // DoR cities are 2*
+    defLevel = 2;
     miniColor = new Color(125, 125, 125);
     healsLand = true;
-    // baseIndex is base class's
+    isCapturable = true;
+    isProfitable = true;
+    isLand = true;
   }
 
   public static TerrainType getInstance()

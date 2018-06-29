@@ -8,7 +8,7 @@ public class Forest extends Grass
 
   protected Forest()
   {
-    defLevel = 3; // DoR forests are 3*
+    defLevel = 3;
     miniColor = new Color(46, 196, 24);
     isCover = true;
   }

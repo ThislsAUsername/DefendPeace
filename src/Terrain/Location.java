@@ -1,8 +1,8 @@
 package Terrain;
 
-import Units.Unit;
 import CommandingOfficers.Commander;
 import Engine.XYCoord;
+import Units.Unit;
 
 public class Location
 {
@@ -64,6 +64,12 @@ public class Location
    * @return true if this Location has an ownable environment, false else.
    */
   public boolean isCaptureable()
+  {
+    return environs.terrainType.isCapturable();
+  }
+
+  /** Return whether the terrain type in this location can generate income. */
+  public boolean isProfitable()
   {
     return environs.terrainType.isCapturable();
   }

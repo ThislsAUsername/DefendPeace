@@ -2,11 +2,7 @@ package Terrain.Types;
 
 import java.awt.Color;
 
-/**
- *  Labs don't give income or heal anything.
- *  They're arguably the most useless building you can capture.
- */
-public class Lab extends Ownable
+public class Lab extends TerrainType
 {
   private static Lab instance;
 
@@ -16,7 +12,8 @@ public class Lab extends Ownable
     // TODO: is HQ's color
     miniColor = new Color(125, 125, 125);
     sustainsSide = true;
-    // baseIndex is base class's
+    isCapturable = true;
+    isLand = true;
   }
 
   public static TerrainType getInstance()
@@ -25,14 +22,4 @@ public class Lab extends Ownable
       instance = new Lab();
     return instance;
   }
-
-  private static int index = -1;
-
-  public static int getIndex()
-  {
-    if( null == instance )
-      getInstance();
-    return index;
-  }
-
 }

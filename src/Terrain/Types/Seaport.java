@@ -2,7 +2,7 @@ package Terrain.Types;
 
 import java.awt.Color;
 
-public class Seaport extends Lucrative
+public class Seaport extends TerrainType
 {
   private static Seaport instance;
 
@@ -12,8 +12,10 @@ public class Seaport extends Lucrative
     // TODO: this is the Factory color
     miniColor = new Color(125, 125, 125);
     isSea = true;
-    isLand = true;
     healsSea = true;
+    isProfitable = true;
+    isCapturable = true;
+    isLand = true;
   }
 
   public static TerrainType getInstance()
