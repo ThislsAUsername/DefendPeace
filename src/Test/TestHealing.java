@@ -8,7 +8,7 @@ import Engine.GameEvents.GameEventQueue;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.MapInfo;
-import Terrain.Types.BaseTerrain;
+import Terrain.Types.TerrainType;
 import Terrain.Types.City;
 import Terrain.Types.Grass;
 import Units.Unit;
@@ -25,7 +25,7 @@ public class TestHealing extends TestCase
     testCo1 = new CommanderPatch();
     Commander[] cos = { testCo1 };
     // Create a small map with a city to provide healing.
-    BaseTerrain[][] testLoc = {
+    TerrainType[][] testLoc = {
         {City.getInstance(), Grass.getInstance()},
         {Grass.getInstance(), Grass.getInstance()}};
     XYCoord[] co1Props = { new XYCoord(0, 0) }; // Assign the city to our CO.

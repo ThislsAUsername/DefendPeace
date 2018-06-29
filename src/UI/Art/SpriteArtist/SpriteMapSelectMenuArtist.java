@@ -10,7 +10,7 @@ import Terrain.Environment;
 import Terrain.MapInfo;
 import Terrain.MapLibrary;
 import Terrain.Types.Airport;
-import Terrain.Types.BaseTerrain;
+import Terrain.Types.TerrainType;
 import Terrain.Types.City;
 import Terrain.Types.Factory;
 import Terrain.Types.Seaport;
@@ -141,10 +141,10 @@ public class SpriteMapSelectMenuArtist
     int propsDrawY = maxMiniMapHeight+buffer+(characterHeight*drawScale)+buffer - (sqSize/2); // Map  pane plus "# players" string plus buffer, minus 1/2sq.
 
     // Define an array with all the property types we care to enumerate.
-    BaseTerrain[] propertyTypes = {City.getInstance(), Factory.getInstance(), Airport.getInstance(), Seaport.getInstance()};
+    TerrainType[] propertyTypes = {City.getInstance(), Factory.getInstance(), Airport.getInstance(), Seaport.getInstance()};
     for(int i = 0; i < propertyTypes.length; ++i)
     {
-      BaseTerrain terrain = propertyTypes[i];
+      TerrainType terrain = propertyTypes[i];
       int num = countTiles(selectedMapInfo, terrain);
       // Get the first image of the first variation of the specified terrain type.
       BufferedImage image = SpriteLibrary.getTerrainSpriteSet(terrain).getTerrainSprite().getFrame(0);
@@ -161,7 +161,7 @@ public class SpriteMapSelectMenuArtist
   /**
    * Count and return the number of tiles of the provided type in the given MapInfo.
    */
-  private static int countTiles(MapInfo mapInfo, BaseTerrain tileType)
+  private static int countTiles(MapInfo mapInfo, TerrainType tileType)
   {
     int count = 0;
     for(int y = 0; y < mapInfo.getHeight(); ++y)

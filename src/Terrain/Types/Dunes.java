@@ -12,7 +12,7 @@ public class Dunes extends Grass
     miniColor = new Color(240, 210, 120);
   }
 
-  public static BaseTerrain getInstance()
+  public static TerrainType getInstance()
   {
     if( null == instance )
       instance = new Dunes();

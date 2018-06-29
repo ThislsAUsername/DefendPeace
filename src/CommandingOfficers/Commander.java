@@ -12,7 +12,7 @@ import Engine.Combat.BattleInstance;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.Types.Airport;
-import Terrain.Types.BaseTerrain;
+import Terrain.Types.TerrainType;
 import Terrain.Types.Factory;
 import Terrain.Types.Seaport;
 import Units.APCModel;
@@ -43,7 +43,7 @@ public class Commander
   public final CommanderInfo coInfo;
   public ArrayList<Unit> units;
   public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
-  public Map<BaseTerrain, ArrayList<UnitModel>> unitProductionByTerrain;
+  public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
   public ArrayList<Location> ownedProperties;
   public ArrayList<COModifier> modifiers;
   public Color myColor;
@@ -88,7 +88,7 @@ public class Commander
     airportModels.add(new BomberModel());
 
     // Dump these lists into a hashmap for easy reference later.
-    unitProductionByTerrain = new HashMap<BaseTerrain, ArrayList<UnitModel>>();
+    unitProductionByTerrain = new HashMap<TerrainType, ArrayList<UnitModel>>();
     unitProductionByTerrain.put(Factory.getInstance(), factoryModels);
     unitProductionByTerrain.put(Seaport.getInstance(), seaportModels);
     unitProductionByTerrain.put(Airport.getInstance(), airportModels);
@@ -166,7 +166,7 @@ public class Commander
   }
 
   /** Get the list of units this commander can build from the given property type. */
-  public ArrayList<UnitModel> getShoppingList(BaseTerrain buyLocation)
+  public ArrayList<UnitModel> getShoppingList(TerrainType buyLocation)
   {
     return unitProductionByTerrain.get(buyLocation);
   }

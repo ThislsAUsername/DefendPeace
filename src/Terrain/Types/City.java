@@ -14,7 +14,7 @@ public class City extends Lucrative
     // baseIndex is base class's
   }
 
-  public static BaseTerrain getInstance()
+  public static TerrainType getInstance()
   {
     if( null == instance )
       instance = new City();

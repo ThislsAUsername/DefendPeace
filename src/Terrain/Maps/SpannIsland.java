@@ -2,13 +2,13 @@ package Terrain.Maps;
 
 import Engine.XYCoord;
 import Terrain.MapInfo;
-import Terrain.Types.BaseTerrain;
+import Terrain.Types.TerrainType;
 
 public class SpannIsland extends IMapBuilder
 {
   private final static String mapName = "Spann Island";
   // Defines the terrain for this map. Each row is a vertical column of the map.
-  private final static BaseTerrain[][] terrainData =
+  private final static TerrainType[][] terrainData =
     { { SE, SE, SE, SE, SE, SE, SE, SE, SE, SE }, // 0
       { SE, SE, GR, CT, GR, FC, FC, SE, RF, SE }, // 1
       { SE, GR, GR, CT, GR, RD, HQ, FC, SE, SE }, // 2

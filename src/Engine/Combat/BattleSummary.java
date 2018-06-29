@@ -1,6 +1,6 @@
 package Engine.Combat;
 
-import Terrain.Types.BaseTerrain;
+import Terrain.Types.TerrainType;
 import Units.Unit;
 import Units.Weapons.Weapon;
 
@@ -13,12 +13,12 @@ public class BattleSummary
   public final Unit defender;
   public final Weapon attackerWeapon;
   public final Weapon defenderWeapon;
-  public final BaseTerrain attackerTerrain;
-  public final BaseTerrain defenderTerrain;
+  public final TerrainType attackerTerrain;
+  public final TerrainType defenderTerrain;
   public double attackerHPLoss;
   public double defenderHPLoss;
 
-  public BattleSummary(Unit atk, Weapon aw, Unit def, Weapon dw, BaseTerrain atkTerrain, BaseTerrain defTerrain, double atkHPLoss,
+  public BattleSummary(Unit atk, Weapon aw, Unit def, Weapon dw, TerrainType atkTerrain, TerrainType defTerrain, double atkHPLoss,
       double defHPLoss)
   {
     attacker = atk;

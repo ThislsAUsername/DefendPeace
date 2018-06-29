@@ -2,7 +2,7 @@ package Terrain.Types;
 
 import java.awt.Color;
 
-public class Grass extends BaseTerrain
+public class Grass extends TerrainType
 {
   private static Grass instance;
 
@@ -13,7 +13,7 @@ public class Grass extends BaseTerrain
     isLand = true;
   }
 
-  public static BaseTerrain getInstance()
+  public static TerrainType getInstance()
   {
     if( null == instance )
       instance = new Grass();

@@ -19,7 +19,7 @@ public class Lab extends Ownable
     // baseIndex is base class's
   }
 
-  public static BaseTerrain getInstance()
+  public static TerrainType getInstance()
   {
     if( null == instance )
       instance = new Lab();

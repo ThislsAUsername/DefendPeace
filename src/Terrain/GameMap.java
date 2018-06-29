@@ -1,7 +1,7 @@
 package Terrain;
 
 import Engine.XYCoord;
-import Terrain.Types.BaseTerrain;
+import Terrain.Types.TerrainType;
 import Terrain.Types.City;
 import Units.Unit;
 
@@ -27,7 +27,7 @@ public class GameMap
     {
       for( int x = 0; x < mapWidth; ++x )
       {
-        BaseTerrain terrain = mapInfo.terrain[x][y];
+        TerrainType terrain = mapInfo.terrain[x][y];
         // Create this Location using the MapInfo terrain.
         map[x][y] = new Location(Environment.getTile(terrain, Environment.Weathers.CLEAR), new XYCoord(x, y));
       }

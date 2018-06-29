@@ -2,7 +2,7 @@ package Terrain.Types;
 
 import java.awt.Color;
 
-public class Shoal extends BaseTerrain
+public class Shoal extends TerrainType
 {
 
   private static Shoal instance;
@@ -15,7 +15,7 @@ public class Shoal extends BaseTerrain
     isLand = true;
   }
 
-  public static BaseTerrain getInstance()
+  public static TerrainType getInstance()
   {
     if( null == instance )
       instance = new Shoal();

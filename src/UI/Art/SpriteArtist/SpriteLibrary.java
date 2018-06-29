@@ -14,7 +14,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderLibrary;
 import Terrain.Location;
 import Terrain.Types.Airport;
-import Terrain.Types.BaseTerrain;
+import Terrain.Types.TerrainType;
 import Terrain.Types.Bridge;
 import Terrain.Types.City;
 import Terrain.Types.Dunes;
@@ -131,7 +131,7 @@ public class SpriteLibrary
    * Retrieve (loading if needed) the sprites associated with the given terrain type. For ownable terrain types
    * (e.g. cities), the unowned variant of the sprite will be returned.
    */
-  public static TerrainSpriteSet getTerrainSpriteSet(BaseTerrain terrain)
+  public static TerrainSpriteSet getTerrainSpriteSet(TerrainType terrain)
   {
     SpriteSetKey spriteKey = SpriteSetKey.instance(terrain, null);
     if( !spriteSetMap.containsKey(spriteKey) )
@@ -166,7 +166,7 @@ public class SpriteLibrary
    */
   private static void createTerrainSpriteSet(SpriteSetKey spriteKey)
   {
-    BaseTerrain terrainType = spriteKey.terrainKey;
+    TerrainType terrainType = spriteKey.terrainKey;
     System.out.println("INFO: Loading terrain sprites for " + terrainType);
 
     TerrainSpriteSet ss = null;
@@ -304,17 +304,17 @@ public class SpriteLibrary
 
   private static class SpriteSetKey
   {
-    public final BaseTerrain terrainKey;
+    public final TerrainType terrainKey;
     public final Commander commanderKey;
     private static ArrayList<SpriteSetKey> instances = new ArrayList<SpriteSetKey>();
 
-    private SpriteSetKey(BaseTerrain terrain, Commander co)
+    private SpriteSetKey(TerrainType terrain, Commander co)
     {
       terrainKey = terrain;
       commanderKey = co;
     }
 
-    public static SpriteSetKey instance(BaseTerrain terrain, Commander co)
+    public static SpriteSetKey instance(TerrainType terrain, Commander co)
     {
       SpriteSetKey key = null;
       for( int i = 0; i < instances.size(); ++i )

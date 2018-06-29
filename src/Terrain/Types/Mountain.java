@@ -13,7 +13,7 @@ public class Mountain extends Grass
     miniColor = new Color(153, 99, 67);
   }
 
-  public static BaseTerrain getInstance()
+  public static TerrainType getInstance()
   {
     if( null == instance )
       instance = new Mountain();

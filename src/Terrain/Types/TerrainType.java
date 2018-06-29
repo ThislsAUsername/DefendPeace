@@ -2,7 +2,7 @@ package Terrain.Types;
 
 import java.awt.Color;
 
-public abstract class BaseTerrain
+public abstract class TerrainType
 {
   protected int defLevel; // 1% damage reduction per HP, per unit of defense
   protected float incomeMultiplier; // 1.0 for standard income
@@ -18,7 +18,7 @@ public abstract class BaseTerrain
   protected Boolean healsAir;
 
   /** Sets defaults, and adds the new terrain type to the array. */
-  protected BaseTerrain()
+  protected TerrainType()
   {
     defLevel = -1;
     incomeMultiplier = 0;
@@ -36,7 +36,7 @@ public abstract class BaseTerrain
 
   // Need to be overloaded for all concrete subclasses, individually
   // Static methods can't be abstract
-  public static BaseTerrain getInstance()
+  public static TerrainType getInstance()
   {
     return null;
   }

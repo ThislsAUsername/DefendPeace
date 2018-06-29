@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import Terrain.Types.Airport;
-import Terrain.Types.BaseTerrain;
+import Terrain.Types.TerrainType;
 import Terrain.Types.Bridge;
 import Terrain.Types.City;
 import Terrain.Types.Dunes;
@@ -27,23 +27,23 @@ import Terrain.Types.Shoal;
 public class Environment
 {
   
-  public static final BaseTerrain GRASS = Grass.getInstance();
-  public static final BaseTerrain SEA = Sea.getInstance();
-  public static final BaseTerrain SHOAL = Shoal.getInstance();
-  public static final BaseTerrain AIRPORT = Airport.getInstance();
-  public static final BaseTerrain BRIDGE = Bridge.getInstance();
-  public static final BaseTerrain CITY = City.getInstance();
-  public static final BaseTerrain DUNES = Dunes.getInstance();
-  public static final BaseTerrain FACTORY = Factory.getInstance();
-  public static final BaseTerrain FOREST = Forest.getInstance();
-  public static final BaseTerrain HEADQUARTERS = Headquarters.getInstance();
-  public static final BaseTerrain LAB = Lab.getInstance();
-  public static final BaseTerrain MOUNTAIN = Mountain.getInstance();
-  public static final BaseTerrain REEF = Reef.getInstance();
-  public static final BaseTerrain ROAD = Road.getInstance();
-  public static final BaseTerrain SEAPORT = Seaport.getInstance();
+  public static final TerrainType GRASS = Grass.getInstance();
+  public static final TerrainType SEA = Sea.getInstance();
+  public static final TerrainType SHOAL = Shoal.getInstance();
+  public static final TerrainType AIRPORT = Airport.getInstance();
+  public static final TerrainType BRIDGE = Bridge.getInstance();
+  public static final TerrainType CITY = City.getInstance();
+  public static final TerrainType DUNES = Dunes.getInstance();
+  public static final TerrainType FACTORY = Factory.getInstance();
+  public static final TerrainType FOREST = Forest.getInstance();
+  public static final TerrainType HEADQUARTERS = Headquarters.getInstance();
+  public static final TerrainType LAB = Lab.getInstance();
+  public static final TerrainType MOUNTAIN = Mountain.getInstance();
+  public static final TerrainType REEF = Reef.getInstance();
+  public static final TerrainType ROAD = Road.getInstance();
+  public static final TerrainType SEAPORT = Seaport.getInstance();
 
-  private static BaseTerrain[] Terrains = {
+  private static TerrainType[] Terrains = {
     GRASS, SEA, SHOAL, AIRPORT, BRIDGE, CITY, DUNES, FACTORY, FOREST, HEADQUARTERS, LAB, MOUNTAIN, REEF, ROAD, SEAPORT
   };
 
@@ -52,16 +52,16 @@ public class Environment
     CLEAR, RAIN, SNOW, SANDSTORM
   };
 
-  public final BaseTerrain terrainType;
+  public final TerrainType terrainType;
   public final Weathers weatherType;
 
   // Maintain a list of all tile types types. Each type will be added the first time it is used.
-  private static Map<BaseTerrain, Environment[]> tileInstances= new HashMap<BaseTerrain, Environment[]>();
+  private static Map<TerrainType, Environment[]> tileInstances= new HashMap<TerrainType, Environment[]>();
 
   /**
    * Private constructor so that Tile can manage all of its flyweights.
    */
-  private Environment(BaseTerrain tileType, Weathers weather)
+  private Environment(TerrainType tileType, Weathers weather)
   {
     terrainType = tileType;
     weatherType = weather;
@@ -71,7 +71,7 @@ public class Environment
    * Returns the Tile flyweight matching the input parameters, creating it first if needed.
    * @return
    */
-  public static Environment getTile(BaseTerrain terrain, Weathers weather)
+  public static Environment getTile(TerrainType terrain, Weathers weather)
   {
     // Add a new Environment array for this terrain type if it's missing.
     if( !tileInstances.containsKey(terrain) )
@@ -89,7 +89,7 @@ public class Environment
     return tileInstances.get(terrain)[weather.ordinal()];
   }
   
-  public static BaseTerrain[] getTerrainTypes()
+  public static TerrainType[] getTerrainTypes()
   {
     return Terrains;
   }

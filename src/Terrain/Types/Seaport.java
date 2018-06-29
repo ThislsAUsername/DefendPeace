@@ -16,7 +16,7 @@ public class Seaport extends Lucrative
     healsSea = true;
   }
 
-  public static BaseTerrain getInstance()
+  public static TerrainType getInstance()
   {
     if( null == instance )
       instance = new Seaport();

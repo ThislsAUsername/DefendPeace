@@ -2,13 +2,13 @@ package Terrain.Maps;
 
 import Engine.XYCoord;
 import Terrain.MapInfo;
-import Terrain.Types.BaseTerrain;
+import Terrain.Types.TerrainType;
 
 public class FiringRange extends IMapBuilder
 {
   private final static String mapName = "Firing Range";
   // Defines the terrain for this map. Each row is a vertical column of the map.
-  private final static BaseTerrain[][] terrainData =
+  private final static TerrainType[][] terrainData =
    {{SE, SE, SE, SE, SE, SE, SE, SE, SE, SE}, // 0
     {SE, SH, GR, GR, CT, GR, GR, FC, HQ, SE}, // 1
     {SE, SH, CT, GR, GR, CT, GR, FC, GR, SE}, // 2

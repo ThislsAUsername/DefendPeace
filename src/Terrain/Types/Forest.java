@@ -13,7 +13,7 @@ public class Forest extends Grass
     isCover = true;
   }
 
-  public static BaseTerrain getInstance()
+  public static TerrainType getInstance()
   {
     if( null == instance )
       instance = new Forest();

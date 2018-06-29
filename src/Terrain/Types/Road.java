@@ -12,7 +12,7 @@ public class Road extends Grass
     miniColor = new Color(189, 189, 189);
   }
 
-  public static BaseTerrain getInstance()
+  public static TerrainType getInstance()
   {
     if( null == instance )
       instance = new Road();

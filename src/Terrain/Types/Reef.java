@@ -13,7 +13,7 @@ public class Reef extends Sea
     isCover = true;
   }
 
-  public static BaseTerrain getInstance()
+  public static TerrainType getInstance()
   {
     if( null == instance )
       instance = new Reef();

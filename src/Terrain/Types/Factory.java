@@ -12,7 +12,7 @@ public class Factory extends City
     miniColor = new Color(125, 125, 125);
   }
 
-  public static BaseTerrain getInstance()
+  public static TerrainType getInstance()
   {
     if( null == instance )
       instance = new Factory();

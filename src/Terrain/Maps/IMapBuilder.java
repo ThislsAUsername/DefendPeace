@@ -1,7 +1,7 @@
 package Terrain.Maps;
 
 import Terrain.Types.Airport;
-import Terrain.Types.BaseTerrain;
+import Terrain.Types.TerrainType;
 import Terrain.Types.Bridge;
 import Terrain.Types.City;
 import Terrain.Types.Dunes;
@@ -20,19 +20,19 @@ import Terrain.Types.Shoal;
 public class IMapBuilder
 {
   // Convenient handles for the terrain types to shorten map definitions.
-  protected static final BaseTerrain BR = Bridge.getInstance();
-  protected static final BaseTerrain CT = City.getInstance();
-  protected static final BaseTerrain DN = Dunes.getInstance();
-  protected static final BaseTerrain FC = Factory.getInstance();
-  protected static final BaseTerrain AP = Airport.getInstance();
-  protected static final BaseTerrain SP = Seaport.getInstance();
-  protected static final BaseTerrain FR = Forest.getInstance();
-  protected static final BaseTerrain GR = Grass.getInstance();
-  protected static final BaseTerrain HQ = Headquarters.getInstance();
-  protected static final BaseTerrain LB = Lab.getInstance();
-  protected static final BaseTerrain MT = Mountain.getInstance();
-  protected static final BaseTerrain RF = Reef.getInstance();
-  protected static final BaseTerrain RD = Road.getInstance();
-  protected static final BaseTerrain SH = Shoal.getInstance();
-  protected static final BaseTerrain SE = Sea.getInstance();
+  protected static final TerrainType BR = Bridge.getInstance();
+  protected static final TerrainType CT = City.getInstance();
+  protected static final TerrainType DN = Dunes.getInstance();
+  protected static final TerrainType FC = Factory.getInstance();
+  protected static final TerrainType AP = Airport.getInstance();
+  protected static final TerrainType SP = Seaport.getInstance();
+  protected static final TerrainType FR = Forest.getInstance();
+  protected static final TerrainType GR = Grass.getInstance();
+  protected static final TerrainType HQ = Headquarters.getInstance();
+  protected static final TerrainType LB = Lab.getInstance();
+  protected static final TerrainType MT = Mountain.getInstance();
+  protected static final TerrainType RF = Reef.getInstance();
+  protected static final TerrainType RD = Road.getInstance();
+  protected static final TerrainType SH = Shoal.getInstance();
+  protected static final TerrainType SE = Sea.getInstance();
 }

@@ -9,7 +9,7 @@ import Engine.GameAction;
 import Engine.GameAction.ActionType;
 import Terrain.Environment;
 import Terrain.Location;
-import Terrain.Types.BaseTerrain;
+import Terrain.Types.TerrainType;
 import Units.MoveTypes.MoveType;
 import Units.Weapons.WeaponModel;
 
@@ -35,7 +35,7 @@ public class UnitModel
   public int movePower;
   public MoveType propulsion;
   public ActionType[] possibleActions;
-  public Set<BaseTerrain> healableHabs;
+  public Set<TerrainType> healableHabs;
   public WeaponModel[] weaponModels;
 
   public int maxHP;
@@ -56,8 +56,8 @@ public class UnitModel
     movePower = pMovePower;
     propulsion = pPropulsion;
     possibleActions = actions;
-    healableHabs = new HashSet<BaseTerrain>();
-    for (BaseTerrain terrain : Environment.getTerrainTypes())
+    healableHabs = new HashSet<TerrainType>();
+    for (TerrainType terrain : Environment.getTerrainTypes())
     {
       if( ((chassis == ChassisEnum.AIR_HIGH) || (chassis == ChassisEnum.AIR_LOW) && terrain.healsAir()) ||
           ((chassis == ChassisEnum.TANK) || (chassis == ChassisEnum.TROOP) && terrain.healsLand()) ||
