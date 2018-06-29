@@ -141,6 +141,8 @@ public class MapReader extends IMapBuilder
     // It won't output the correct indentation, but that's what autoformatting is for.
     switch (input)
     {
+      case "BR":
+        return BR;
       case "CT":
         return CT;
       case "DN":
