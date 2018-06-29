@@ -38,6 +38,7 @@ public abstract class TerrainType
   // Static methods can't be abstract
   public static TerrainType getInstance()
   {
+    System.out.println("WARNING: Calling getInstance() on TerrainType; returning null.");
     return null;
   }
 
