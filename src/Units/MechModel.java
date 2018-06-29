@@ -7,8 +7,12 @@ import Units.Weapons.MechMGun;
 import Units.Weapons.MechZooka;
 import Units.Weapons.WeaponModel;
 
-public class MechModel extends LandModel
+public class MechModel extends UnitModel
 {
+  private static final int UNIT_COST = 16000;
+  private static final int MAX_FUEL = 50;
+  private static final int IDLE_FUEL_BURN = 0;
+  private static final int MOVE_POWER = 5;
 
   private static final MoveType moveType = new FootMech();
   private static final ActionType[] actions = { ActionType.ATTACK, ActionType.CAPTURE, ActionType.WAIT };
@@ -16,6 +20,6 @@ public class MechModel extends LandModel
 
   public MechModel()
   {
-    super("Mech", Units.UnitModel.UnitEnum.MECH, ChassisEnum.TROOP, 2500, 99, 0, 2, moveType, actions, weapons);
+    super("Mech", Units.UnitModel.UnitEnum.MECH, ChassisEnum.TROOP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, MOVE_POWER, moveType, actions, weapons);
   }
 }

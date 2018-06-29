@@ -7,8 +7,12 @@ import Units.Weapons.TankCannon;
 import Units.Weapons.TankMGun;
 import Units.Weapons.WeaponModel;
 
-public class TankModel extends LandModel
+public class TankModel extends UnitModel
 {
+  private static final int UNIT_COST = 7000;
+  private static final int MAX_FUEL = 70;
+  private static final int IDLE_FUEL_BURN = 0;
+  private static final int MOVE_POWER = 6;
 
   private static final MoveType moveType = new Tread();
   private static final ActionType[] actions = { ActionType.ATTACK, ActionType.WAIT };
@@ -16,6 +20,6 @@ public class TankModel extends LandModel
 
   public TankModel()
   {
-    super("Tank", UnitEnum.TANK, ChassisEnum.TANK, 7000, 70, 0, 6, moveType, actions, weapons);
+    super("Tank", UnitEnum.TANK, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, MOVE_POWER, moveType, actions, weapons);
   }
 }

@@ -45,7 +45,7 @@ public class UnitModel
   private int COdef;
 
   public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower, MoveType pPropulsion,
-      ActionType[] actions, boolean isLand, boolean isAir, boolean isSea, WeaponModel[] weapons)
+      ActionType[] actions, WeaponModel[] weapons)
   {
     name = pName;
     type = pType;
@@ -59,9 +59,9 @@ public class UnitModel
     healableHabs = new HashSet<BaseTerrain>();
     for (BaseTerrain terrain : Environment.getTerrainTypes())
     {
-      if( isAir  && terrain.healsAir() ||
-          isLand && terrain.healsLand() || 
-          isSea  && terrain.healsSea() )
+      if( ((chassis == ChassisEnum.AIR_HIGH) || (chassis == ChassisEnum.AIR_LOW) && terrain.healsAir()) ||
+          ((chassis == ChassisEnum.TANK) || (chassis == ChassisEnum.TROOP) && terrain.healsLand()) ||
+          ((chassis == ChassisEnum.SHIP) || (chassis == ChassisEnum.SUBMERGED) && terrain.healsSea()) )
         healableHabs.add(terrain);
     }
     weaponModels = weapons;
