@@ -4,15 +4,15 @@ import java.awt.Color;
 
 public class Shoal extends TerrainType
 {
+  private static int flags = LAND | WATER | PROVIDES_COVER;
+  private static int defense = 1;
+  private static Color color = new Color(253, 224, 93);
 
   private static Shoal instance;
 
   protected Shoal()
   {
-    defLevel = 1;
-    miniColor = new Color(253, 224, 93);
-    isSea = true;
-    isLand = true;
+    super(flags, defense, color);
   }
 
   public static TerrainType getInstance()

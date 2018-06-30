@@ -4,18 +4,15 @@ import java.awt.Color;
 
 public class Seaport extends TerrainType
 {
+  private static int flags = LAND | WATER | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_SEA;
+  private static int defense = 3;
+  private static Color color = new Color(125, 125, 125); // TODO: define unique color for each building type?
+
   private static Seaport instance;
 
   protected Seaport()
   {
-    defLevel = 3;
-    // TODO: this is the Factory color
-    miniColor = new Color(125, 125, 125);
-    isSea = true;
-    healsSea = true;
-    isProfitable = true;
-    isCapturable = true;
-    isLand = true;
+    super(flags, defense, color);
   }
 
   public static TerrainType getInstance()

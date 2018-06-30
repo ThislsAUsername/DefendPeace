@@ -4,17 +4,26 @@ import java.awt.Color;
 
 public abstract class TerrainType
 {
-  protected int defLevel = -1; // Level of protection provided by this terrain type. Typically 0-4.
-  protected Color miniColor = new Color(0,0,0); // Predominant color of this terrain type. Here for convenience.
-  protected Boolean isCapturable = false; // Whether a Commander can take ownership of this property.
-  protected Boolean isProfitable = false; // Whether this terrain type grants income to its owner each turn.
-  protected Boolean sustainsSide = false; // Whether it counts as an HQ
-  protected Boolean isCover = false; // Whether it hides surface units in fog
-  protected Boolean isLand = false;
-  protected Boolean isSea = false;
-  protected Boolean healsLand = false;
-  protected Boolean healsSea = false;
-  protected Boolean healsAir = false;
+  // Protected constants to initialize/parse the attribute flags.
+  protected static final int LAND = 1;
+  protected static final int WATER = LAND << 1;
+  protected static final int CAPTURABLE = WATER << 1; // Whether a Commander can take ownership of this property.
+  protected static final int PROFITABLE = CAPTURABLE << 1; // Whether this terrain type grants income to its owner each turn.
+  protected static final int PROVIDES_COVER = PROFITABLE << 1; // Whether it hides surface units in fog
+  protected static final int HEALS_LAND = PROVIDES_COVER << 1;
+  protected static final int HEALS_SEA = HEALS_LAND << 1;
+  protected static final int HEALS_AIR = HEALS_SEA << 1;
+
+  private int mDefenseLevel = -1; // Level of protection provided by this terrain type. Typically 0-4.
+  private  Color mMainColor = null; // Predominant color of this terrain type. Here for convenience.
+  private int mAttributes = 0; // bitmask of binary tile characteristics.
+
+  protected TerrainType(int attributeFlags, int defense, Color mainColor)
+  {
+    mAttributes = attributeFlags;
+    mDefenseLevel = defense;
+    mMainColor = mainColor;
+  }
 
   // Need to be overloaded for all concrete subclasses, individually
   // Static methods can't be abstract
@@ -24,60 +33,53 @@ public abstract class TerrainType
     return null;
   }
 
-  // Beyond here is just boring getters.
-
   public int getDefLevel()
   {
-    return defLevel;
+    return mDefenseLevel;
   }
 
-  public Color getMiniColor()
+  public Color getMainColor()
   {
-    return miniColor;
+    return mMainColor;
   }
 
   public Boolean isCapturable()
   {
-    return isCapturable;
+    return 0 != (mAttributes & CAPTURABLE);
   }
 
   public Boolean isProfitable()
   {
-    return isProfitable;
+    return 0 != (mAttributes & PROFITABLE);
   }
-  
-  public Boolean sustainsSide()
-  {
-    return sustainsSide;
-  }
-  
+
   public Boolean isCover()
   {
-    return isCover;
+    return 0 != (mAttributes & PROVIDES_COVER);
   }
   
   public Boolean isLand()
   {
-    return isLand;
+    return 0 != (mAttributes & LAND);
   }
   
-  public Boolean isSea()
+  public Boolean isWater()
   {
-    return isSea;
+    return 0 != (mAttributes & WATER);
   }
   
   public Boolean healsLand()
   {
-    return healsLand;
+    return 0 != (mAttributes & HEALS_LAND);
   }
   
   public Boolean healsSea()
   {
-    return healsSea;
+    return 0 != (mAttributes & HEALS_SEA);
   }
   
   public Boolean healsAir()
   {
-    return healsAir;
+    return 0 != (mAttributes & HEALS_AIR);
   }
 }

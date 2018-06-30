@@ -109,7 +109,7 @@ public class MoveType
     {
       for( TerrainType terrain : Environment.getTerrainTypes() )
       {
-        if( terrain.isSea() )
+        if( terrain.isWater() )
           setMoveCost(terrain, moveCost);
       }
     }

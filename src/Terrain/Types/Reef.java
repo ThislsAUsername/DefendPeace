@@ -2,15 +2,17 @@ package Terrain.Types;
 
 import java.awt.Color;
 
-public class Reef extends Sea
+public class Reef extends TerrainType
 {
+  private static int flags = WATER | PROVIDES_COVER;
+  private static int defense = 2;
+  private static Color color = new Color(218, 152, 112);
+
   private static Reef instance;
 
   protected Reef()
   {
-    defLevel = 2;
-    miniColor = new Color(218, 152, 112);
-    isCover = true;
+    super(flags, defense, color);
   }
 
   public static TerrainType getInstance()

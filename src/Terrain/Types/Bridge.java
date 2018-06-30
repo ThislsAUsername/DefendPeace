@@ -2,14 +2,17 @@ package Terrain.Types;
 
 import java.awt.Color;
 
-public class Bridge extends Shoal
+public class Bridge extends TerrainType
 {
+  private static int flags = LAND | WATER;
+  private static int defense = 0;
+  private static Color color = new Color(189, 189, 189);
+
   private static Bridge instance;
 
   protected Bridge()
   {
-    defLevel = 0;
-    miniColor = new Color(189, 189, 189);
+    super(flags, defense, color);
   }
 
   public static TerrainType getInstance()

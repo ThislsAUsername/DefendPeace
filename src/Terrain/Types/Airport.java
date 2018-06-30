@@ -4,17 +4,15 @@ import java.awt.Color;
 
 public class Airport extends TerrainType
 {
+  private static int flags = LAND | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_AIR;
+  private static int defense = 3;
+  private static Color color = new Color(125, 125, 125); // TODO: define unique color for each building type?
+
   private static Airport instance;
 
   protected Airport()
   {
-    defLevel = 3;
-    // TODO: this is the Factory color
-    miniColor = new Color(125, 125, 125);
-    healsAir = true;
-    isCapturable = true;
-    isProfitable = true;
-    isLand = true;
+    super(flags, defense, color);
   }
 
   public static TerrainType getInstance()

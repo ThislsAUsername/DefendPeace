@@ -1,8 +1,8 @@
 package Terrain;
 
 import Engine.XYCoord;
-import Terrain.Types.TerrainType;
 import Terrain.Types.City;
+import Terrain.Types.TerrainType;
 import Units.Unit;
 
 public class GameMap
@@ -52,7 +52,7 @@ public class GameMap
         if( location.isCaptureable() )
         {
           // Check if this location holds an HQ.
-          if( map[x][y].getEnvironment().terrainType.sustainsSide() )
+          if( map[x][y].getEnvironment().terrainType == Environment.HEADQUARTERS )
           {
             // If the CO has no HQ yet, assign this one.
             if( COs[co].HQLocation == null )

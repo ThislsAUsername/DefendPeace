@@ -41,7 +41,7 @@ public class SpriteMiniMapArtist
     {
       for(int x = 0; x < image.getWidth(); ++x)
       {
-        g.setColor( mapInfo.terrain[x][y].getMiniColor() );
+        g.setColor( mapInfo.terrain[x][y].getMainColor() );
         g.fillRect(x, y, 1, 1);
       }
     }

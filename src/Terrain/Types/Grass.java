@@ -4,13 +4,15 @@ import java.awt.Color;
 
 public class Grass extends TerrainType
 {
+  private static int flags = LAND;
+  private static int defense = 1;
+  private static Color color = new Color(166, 253, 77);
+
   private static Grass instance;
 
   protected Grass()
   {
-    defLevel = 1;
-    miniColor = new Color(166, 253, 77);
-    isLand = true;
+    super(flags, defense, color);
   }
 
   public static TerrainType getInstance()
