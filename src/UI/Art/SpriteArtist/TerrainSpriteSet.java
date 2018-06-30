@@ -10,9 +10,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import Terrain.Environment;
 import Terrain.GameMap;
-import Terrain.Types.TerrainType;
+import Terrain.TerrainType;
 
 /**
  * Responsible for storing and organizing all image data associated with a specific map tile type, and drawing the
@@ -287,14 +286,14 @@ public class TerrainSpriteSet
     if( null == terrainObjects )
     {
       terrainObjects = new HashSet<TerrainType>();
-      terrainObjects.add(Environment.CITY);
-      terrainObjects.add(Environment.FACTORY);
-      terrainObjects.add(Environment.FOREST);
-      terrainObjects.add(Environment.AIRPORT);
-      terrainObjects.add(Environment.SEAPORT);
-      terrainObjects.add(Environment.HEADQUARTERS);
-      terrainObjects.add(Environment.LAB);
-      terrainObjects.add(Environment.MOUNTAIN);
+      terrainObjects.add(TerrainType.CITY);
+      terrainObjects.add(TerrainType.FACTORY);
+      terrainObjects.add(TerrainType.FOREST);
+      terrainObjects.add(TerrainType.AIRPORT);
+      terrainObjects.add(TerrainType.SEAPORT);
+      terrainObjects.add(TerrainType.HEADQUARTERS);
+      terrainObjects.add(TerrainType.LAB);
+      terrainObjects.add(TerrainType.MOUNTAIN);
     }
     return terrainObjects.contains(terrainType);
   }
@@ -344,25 +343,25 @@ public class TerrainSpriteSet
     if( null == terrainBases )
     {
       terrainBases = new HashMap<TerrainType, TerrainType>();
-      terrainBases.put(Environment.CITY, Environment.GRASS);
-      terrainBases.put(Environment.DUNES, Environment.GRASS);
-      terrainBases.put(Environment.FACTORY, Environment.GRASS);
-      terrainBases.put(Environment.AIRPORT, Environment.GRASS);
-      terrainBases.put(Environment.FOREST, Environment.GRASS);
-      terrainBases.put(Environment.HEADQUARTERS, Environment.GRASS);
-      terrainBases.put(Environment.LAB, Environment.GRASS);
-      terrainBases.put(Environment.MOUNTAIN, Environment.GRASS);
-      terrainBases.put(Environment.GRASS, Environment.GRASS);
-      terrainBases.put(Environment.ROAD, Environment.GRASS);
+      terrainBases.put(TerrainType.CITY, TerrainType.GRASS);
+      terrainBases.put(TerrainType.DUNES, TerrainType.GRASS);
+      terrainBases.put(TerrainType.FACTORY, TerrainType.GRASS);
+      terrainBases.put(TerrainType.AIRPORT, TerrainType.GRASS);
+      terrainBases.put(TerrainType.FOREST, TerrainType.GRASS);
+      terrainBases.put(TerrainType.HEADQUARTERS, TerrainType.GRASS);
+      terrainBases.put(TerrainType.LAB, TerrainType.GRASS);
+      terrainBases.put(TerrainType.MOUNTAIN, TerrainType.GRASS);
+      terrainBases.put(TerrainType.GRASS, TerrainType.GRASS);
+      terrainBases.put(TerrainType.ROAD, TerrainType.GRASS);
 
-      terrainBases.put(Environment.BRIDGE, Environment.SHOAL);
-      terrainBases.put(Environment.SEAPORT, Environment.SHOAL);
-      terrainBases.put(Environment.SHOAL, Environment.SHOAL);
+      terrainBases.put(TerrainType.BRIDGE, TerrainType.SHOAL);
+      terrainBases.put(TerrainType.SEAPORT, TerrainType.SHOAL);
+      terrainBases.put(TerrainType.SHOAL, TerrainType.SHOAL);
 
-      terrainBases.put(Environment.REEF, Environment.SEA);
-      terrainBases.put(Environment.SEA, Environment.SEA);
+      terrainBases.put(TerrainType.REEF, TerrainType.SEA);
+      terrainBases.put(TerrainType.SEA, TerrainType.SEA);
 
-      if( Environment.getTerrainTypes().length != terrainBases.size())
+      if( TerrainType.TerrainTypeList.length != terrainBases.size())
       {
         System.out.println("WARNING! TerrainSpriteSet terrains do not align with Environment!");
       }

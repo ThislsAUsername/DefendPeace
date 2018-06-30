@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
-import Terrain.Types.TerrainType;
+import Terrain.TerrainType;
 
 public class MoveType
 {
@@ -88,7 +88,7 @@ public class MoveType
     /** Helper function to set all movement costs to the same value. */
     public void setAllMovementCosts(int moveCost)
     {
-      for( TerrainType terrain : Environment.getTerrainTypes() )
+      for( TerrainType terrain : TerrainType.TerrainTypeList )
       {
         setMoveCost(terrain, moveCost);
       }
@@ -97,7 +97,7 @@ public class MoveType
     /** Set all ground tile types to the given move cost. */
     public void setAllLandCosts(int moveCost)
     {
-      for( TerrainType terrain : Environment.getTerrainTypes() )
+      for( TerrainType terrain : TerrainType.TerrainTypeList )
       {
         if( terrain.isLand() )
           setMoveCost(terrain, moveCost);
@@ -107,7 +107,7 @@ public class MoveType
     /** Set all ground tile types to the given move cost. */
     public void setAllSeaCosts(int moveCost)
     {
-      for( TerrainType terrain : Environment.getTerrainTypes() )
+      for( TerrainType terrain : TerrainType.TerrainTypeList )
       {
         if( terrain.isWater() )
           setMoveCost(terrain, moveCost);

@@ -2,7 +2,7 @@ package Terrain.Maps;
 
 import Engine.XYCoord;
 import Terrain.MapInfo;
-import Terrain.Types.TerrainType;
+import Terrain.TerrainType;
 
 public class TestRange extends IMapBuilder
 {

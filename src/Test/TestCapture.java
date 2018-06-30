@@ -8,11 +8,10 @@ import Engine.Utils;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapLibrary;
-import Terrain.Types.Headquarters;
+import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel.UnitEnum;
 
@@ -114,7 +113,7 @@ public class TestCapture extends TestCase
     // We loaded Firing Range, so we expect an HQ for testCo2 at location (13, 1)
     Terrain.Location hq = testMap.getLocation(13, 1);
     testPassed &= validate( hq.getOwner() == testCo2, "    HQ at (13, 1) is not owned by testCo2, but should be.");
-    testPassed &= validate( hq.getEnvironment().terrainType == Headquarters.getInstance(), "    HQ for testCo2 is not where expected.");
+    testPassed &= validate( hq.getEnvironment().terrainType == TerrainType.HEADQUARTERS, "    HQ for testCo2 is not where expected.");
 
     // Add a unit to help run the tests.
     Unit mech = addUnit(testMap, testCo1, UnitEnum.MECH, 13, 1); // On the HQ, just to make this easy.

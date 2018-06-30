@@ -1,6 +1,6 @@
 package Engine.Combat;
 
-import Terrain.Types.TerrainType;
+import Terrain.TerrainType;
 import Units.Unit;
 import Units.Weapons.Weapon;
 

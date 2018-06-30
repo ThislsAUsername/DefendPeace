@@ -13,22 +13,7 @@ import javax.imageio.ImageIO;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderLibrary;
 import Terrain.Location;
-import Terrain.Types.Airport;
-import Terrain.Types.TerrainType;
-import Terrain.Types.Bridge;
-import Terrain.Types.City;
-import Terrain.Types.Dunes;
-import Terrain.Types.Factory;
-import Terrain.Types.Forest;
-import Terrain.Types.Grass;
-import Terrain.Types.Headquarters;
-import Terrain.Types.Lab;
-import Terrain.Types.Mountain;
-import Terrain.Types.Reef;
-import Terrain.Types.Road;
-import Terrain.Types.Sea;
-import Terrain.Types.Seaport;
-import Terrain.Types.Shoal;
+import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -175,75 +160,75 @@ public class SpriteLibrary
 
     // This is for sure kinda ugly, but not much more than the equivalent switch/case
     // This *could* be moved into BaseTerrain, but I feel like perhaps that would be too close integration of model and view (though it'd make it nice and simple in the short term?)
-    if( terrainType == Bridge.getInstance() )
+    if( terrainType == TerrainType.BRIDGE )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/bridge_clear.png"), w, h);
-      ss.addTerrainAffinity(Grass.getInstance()); // No need to also add ROAD, since GRASS is the base of ROAD.
+      ss.addTerrainAffinity(TerrainType.GRASS); // No need to also add ROAD, since GRASS is the base of ROAD.
     }
-    else if( terrainType == City.getInstance() )
+    else if( terrainType == TerrainType.CITY )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/city_clear.png"), w * 2, h * 2);
     }
-    else if( terrainType == Dunes.getInstance() )
+    else if( terrainType == TerrainType.DUNES )
     {}
-    else if( terrainType == Factory.getInstance() )
+    else if( terrainType == TerrainType.FACTORY )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/factory_clear.png"), w * 2, h * 2);
     }
-    else if( terrainType == Airport.getInstance() )
+    else if( terrainType == TerrainType.AIRPORT )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/airport_clear.png"), w * 2, h * 2);
     }
-    else if( terrainType == Seaport.getInstance() )
+    else if( terrainType == TerrainType.SEAPORT )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/seaport_clear.png"), w * 2, h * 2);
     }
-    else if( terrainType == Forest.getInstance() )
+    else if( terrainType == TerrainType.FOREST )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/forest_clear.png"), w * 2, h * 2);
     }
-    else if( terrainType == Grass.getInstance() )
+    else if( terrainType == TerrainType.GRASS )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/grass_clear.png"), w, h);
-      ss.addTileTransition(Bridge.getInstance(), loadSpriteSheetFile("res/tileset/grass_bridge_clear.png"), w, h);
+      ss.addTileTransition(TerrainType.BRIDGE, loadSpriteSheetFile("res/tileset/grass_bridge_clear.png"), w, h);
     }
-    else if( terrainType == Headquarters.getInstance() )
+    else if( terrainType == TerrainType.HEADQUARTERS )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/hq_clear.png"), w * 2, h * 2);
     }
-    else if( terrainType == Lab.getInstance() )
+    else if( terrainType == TerrainType.LAB )
     {
       // TODO: get actual sprites for this
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/hq_clear.png"), w * 2, h * 2);
     }
-    else if( terrainType == Mountain.getInstance() )
+    else if( terrainType == TerrainType.MOUNTAIN )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/mountain_clear.png"), w * 2, h * 2);
     }
-    else if( terrainType == Sea.getInstance() )
+    else if( terrainType == TerrainType.SEA )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/sea_clear.png"), w, h);
-      ss.addTileTransition(Grass.getInstance(), loadSpriteSheetFile("res/tileset/sea_grass_clear.png"), w, h);
-      ss.addTileTransition(Bridge.getInstance(), loadSpriteSheetFile("res/tileset/sea_bridge_clear.png"), w, h);
+      ss.addTileTransition(TerrainType.GRASS, loadSpriteSheetFile("res/tileset/sea_grass_clear.png"), w, h);
+      ss.addTileTransition(TerrainType.BRIDGE, loadSpriteSheetFile("res/tileset/sea_bridge_clear.png"), w, h);
     }
-    else if( terrainType == Reef.getInstance() )
+    else if( terrainType == TerrainType.REEF )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/reef_clear.png"), w, h);
-      ss.addTileTransition(Sea.getInstance(), loadSpriteSheetFile("res/tileset/reef_clear.png"), w, h);
+      ss.addTileTransition(TerrainType.SEA, loadSpriteSheetFile("res/tileset/reef_clear.png"), w, h);
     }
-    else if( terrainType == Road.getInstance() )
+    else if( terrainType == TerrainType.ROAD )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/road_clear.png"), w, h);
-      ss.addTerrainAffinity(Bridge.getInstance());
-      ss.addTerrainAffinity(Headquarters.getInstance());
-      ss.addTerrainAffinity(Factory.getInstance());
+      ss.addTerrainAffinity(TerrainType.BRIDGE);
+      ss.addTerrainAffinity(TerrainType.HEADQUARTERS);
+      ss.addTerrainAffinity(TerrainType.FACTORY);
     }
-    else if( terrainType == Shoal.getInstance() )
+    else if( terrainType == TerrainType.SHOAL )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/shoal_clear.png"), w, h);
-      ss.addTileTransition(Sea.getInstance(), loadSpriteSheetFile("res/tileset/shoal_sea_clear.png"), w, h);
-      ss.addTileTransition(Grass.getInstance(), loadSpriteSheetFile("res/tileset/shoal_grass_clear.png"), w, h);
-      ss.addTileTransition(Bridge.getInstance(), loadSpriteSheetFile("res/tileset/sea_bridge_clear.png"), w, h);
+      ss.addTileTransition(TerrainType.SEA, loadSpriteSheetFile("res/tileset/shoal_sea_clear.png"), w, h);
+      ss.addTileTransition(TerrainType.GRASS, loadSpriteSheetFile("res/tileset/shoal_grass_clear.png"), w, h);
+      ss.addTileTransition(TerrainType.BRIDGE, loadSpriteSheetFile("res/tileset/sea_bridge_clear.png"), w, h);
     }
     else
     {

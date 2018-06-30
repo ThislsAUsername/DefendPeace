@@ -1,7 +1,6 @@
 package Terrain;
 
 import Engine.XYCoord;
-import Terrain.Types.TerrainType;
 
 public class MapInfo
 {

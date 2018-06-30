@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 import Engine.XYCoord;
 import Terrain.MapInfo;
-import Terrain.Types.TerrainType;
+import Terrain.TerrainType;
 
 public class MapReader extends IMapBuilder
 {

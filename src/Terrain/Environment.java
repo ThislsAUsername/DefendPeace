@@ -3,50 +3,12 @@ package Terrain;
 import java.util.HashMap;
 import java.util.Map;
 
-import Terrain.Types.Airport;
-import Terrain.Types.TerrainType;
-import Terrain.Types.Bridge;
-import Terrain.Types.City;
-import Terrain.Types.Dunes;
-import Terrain.Types.Factory;
-import Terrain.Types.Forest;
-import Terrain.Types.Grass;
-import Terrain.Types.Headquarters;
-import Terrain.Types.Lab;
-import Terrain.Types.Mountain;
-import Terrain.Types.Reef;
-import Terrain.Types.Road;
-import Terrain.Types.Sea;
-import Terrain.Types.Seaport;
-import Terrain.Types.Shoal;
-
 /**
  * Environment is a flyweight class - each Terrain/Weather combination is instantiated only once.
  * Subsequent calls to retrieve that tile will receive the same copy.
  */
 public class Environment
 {
-  
-  public static final TerrainType GRASS = Grass.getInstance();
-  public static final TerrainType SEA = Sea.getInstance();
-  public static final TerrainType SHOAL = Shoal.getInstance();
-  public static final TerrainType AIRPORT = Airport.getInstance();
-  public static final TerrainType BRIDGE = Bridge.getInstance();
-  public static final TerrainType CITY = City.getInstance();
-  public static final TerrainType DUNES = Dunes.getInstance();
-  public static final TerrainType FACTORY = Factory.getInstance();
-  public static final TerrainType FOREST = Forest.getInstance();
-  public static final TerrainType HEADQUARTERS = Headquarters.getInstance();
-  public static final TerrainType LAB = Lab.getInstance();
-  public static final TerrainType MOUNTAIN = Mountain.getInstance();
-  public static final TerrainType REEF = Reef.getInstance();
-  public static final TerrainType ROAD = Road.getInstance();
-  public static final TerrainType SEAPORT = Seaport.getInstance();
-
-  private static TerrainType[] Terrains = {
-    GRASS, SEA, SHOAL, AIRPORT, BRIDGE, CITY, DUNES, FACTORY, FOREST, HEADQUARTERS, LAB, MOUNTAIN, REEF, ROAD, SEAPORT
-  };
-
   public enum Weathers
   {
     CLEAR, RAIN, SNOW, SANDSTORM
@@ -87,10 +49,5 @@ public class Environment
     }
 
     return tileInstances.get(terrain)[weather.ordinal()];
-  }
-  
-  public static TerrainType[] getTerrainTypes()
-  {
-    return Terrains;
   }
 }

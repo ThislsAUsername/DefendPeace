@@ -7,9 +7,8 @@ import java.util.Vector;
 
 import Engine.GameAction;
 import Engine.GameAction.ActionType;
-import Terrain.Environment;
 import Terrain.Location;
-import Terrain.Types.TerrainType;
+import Terrain.TerrainType;
 import Units.MoveTypes.MoveType;
 import Units.Weapons.WeaponModel;
 
@@ -57,7 +56,7 @@ public class UnitModel
     propulsion = pPropulsion;
     possibleActions = actions;
     healableHabs = new HashSet<TerrainType>();
-    for (TerrainType terrain : Environment.getTerrainTypes())
+    for (TerrainType terrain : TerrainType.TerrainTypeList)
     {
       if( ((chassis == ChassisEnum.AIR_HIGH) || (chassis == ChassisEnum.AIR_LOW) && terrain.healsAir()) ||
           ((chassis == ChassisEnum.TANK) || (chassis == ChassisEnum.TROOP) && terrain.healsLand()) ||

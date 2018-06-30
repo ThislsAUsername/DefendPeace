@@ -1,8 +1,6 @@
 package Terrain;
 
 import Engine.XYCoord;
-import Terrain.Types.City;
-import Terrain.Types.TerrainType;
 import Units.Unit;
 
 public class GameMap
@@ -52,7 +50,7 @@ public class GameMap
         if( location.isCaptureable() )
         {
           // Check if this location holds an HQ.
-          if( map[x][y].getEnvironment().terrainType == Environment.HEADQUARTERS )
+          if( map[x][y].getEnvironment().terrainType == TerrainType.HEADQUARTERS )
           {
             // If the CO has no HQ yet, assign this one.
             if( COs[co].HQLocation == null )
@@ -63,7 +61,7 @@ public class GameMap
             // If the CO does have an HQ, turn this location into a city.
             else
             {
-              location.setEnvironment(Environment.getTile(City.getInstance(), location.getEnvironment().weatherType));
+              location.setEnvironment(Environment.getTile(TerrainType.CITY, location.getEnvironment().weatherType));
             }
           }
           location.setOwner(COs[co]);

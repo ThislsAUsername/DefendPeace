@@ -11,10 +11,7 @@ import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
 import Terrain.GameMap;
 import Terrain.Location;
-import Terrain.Types.Airport;
-import Terrain.Types.Factory;
-import Terrain.Types.Seaport;
-import Terrain.Types.TerrainType;
+import Terrain.TerrainType;
 import Units.APCModel;
 import Units.AntiAirModel;
 import Units.ArtilleryModel;
@@ -89,9 +86,9 @@ public class Commander
 
     // Dump these lists into a hashmap for easy reference later.
     unitProductionByTerrain = new HashMap<TerrainType, ArrayList<UnitModel>>();
-    unitProductionByTerrain.put(Factory.getInstance(), factoryModels);
-    unitProductionByTerrain.put(Seaport.getInstance(), seaportModels);
-    unitProductionByTerrain.put(Airport.getInstance(), airportModels);
+    unitProductionByTerrain.put(TerrainType.FACTORY, factoryModels);
+    unitProductionByTerrain.put(TerrainType.SEAPORT, seaportModels);
+    unitProductionByTerrain.put(TerrainType.AIRPORT, airportModels);
 
     // Compile one master list of everything we can build.
     unitModels.addAll(factoryModels);

@@ -6,14 +6,9 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import Terrain.Environment;
 import Terrain.MapInfo;
 import Terrain.MapLibrary;
-import Terrain.Types.Airport;
-import Terrain.Types.TerrainType;
-import Terrain.Types.City;
-import Terrain.Types.Factory;
-import Terrain.Types.Seaport;
+import Terrain.TerrainType;
 import UI.MapSelectController;
 
 public class SpriteMapSelectMenuArtist
@@ -141,7 +136,7 @@ public class SpriteMapSelectMenuArtist
     int propsDrawY = maxMiniMapHeight+buffer+(characterHeight*drawScale)+buffer - (sqSize/2); // Map  pane plus "# players" string plus buffer, minus 1/2sq.
 
     // Define an array with all the property types we care to enumerate.
-    TerrainType[] propertyTypes = {City.getInstance(), Factory.getInstance(), Airport.getInstance(), Seaport.getInstance()};
+    TerrainType[] propertyTypes = {TerrainType.CITY, TerrainType.FACTORY, TerrainType.AIRPORT, TerrainType.SEAPORT};
     for(int i = 0; i < propertyTypes.length; ++i)
     {
       TerrainType terrain = propertyTypes[i];
