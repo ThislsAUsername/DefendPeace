@@ -158,8 +158,7 @@ public class SpriteLibrary
     int w = baseSpriteSize;
     int h = baseSpriteSize;
 
-    // This is for sure kinda ugly, but not much more than the equivalent switch/case
-    // This *could* be moved into BaseTerrain, but I feel like perhaps that would be too close integration of model and view (though it'd make it nice and simple in the short term?)
+    // Load the appropriate images and define the necessary relationships for each tile type.
     if( terrainType == TerrainType.BRIDGE )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/bridge_clear.png"), w, h);
@@ -234,7 +233,8 @@ public class SpriteLibrary
     {
       System.out.println("ERROR! [SpriteLibrary.loadTerrainSpriteSet] Unknown terrain type " + terrainType);
     }
-    
+
+    // If this tile is owned by someone, fly their colors.
     if( spriteKey.commanderKey != null )
     {
       ss.colorize(defaultMapColors, getBuildingColors(spriteKey.commanderKey.myColor).paletteColors);
