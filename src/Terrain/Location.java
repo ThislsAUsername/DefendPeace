@@ -71,7 +71,7 @@ public class Location
   /** Return whether the terrain type in this location can generate income. */
   public boolean isProfitable()
   {
-    return environs.terrainType.isCapturable();
+    return environs.terrainType.isProfitable();
   }
 
   public void setHighlight(boolean val)
