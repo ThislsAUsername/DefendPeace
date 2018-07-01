@@ -40,7 +40,7 @@ public class TerrainType
   public Boolean healsAir() { return 0 != (mAttributes & HEALS_AIR); }
   
   ////////////////////////////////////////////////////////////////////////////////////////////
-  //// Publicly-accessible terrain Singleton instances.
+  //// Publicly-accessible terrain Flyweight instances.
   private static final int AIRPORT_FLAGS = LAND | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_AIR;
   private static final int AIRPORT_DEFENSE = 3;
   private static final Color AIRPORT_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?

@@ -17,7 +17,7 @@ public class Environment
   public final TerrainType terrainType;
   public final Weathers weatherType;
 
-  // Maintain a list of all tile types types. Each type will be added the first time it is used.
+  // Maintain a list of all tile types. Each type will be added the first time it is used.
   private static Map<TerrainType, Environment[]> tileInstances= new HashMap<TerrainType, Environment[]>();
 
   /**
