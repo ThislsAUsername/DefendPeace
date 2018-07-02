@@ -9,10 +9,10 @@ import Units.Weapons.WeaponModel;
 
 public class MechModel extends UnitModel
 {
-  private static final int UNIT_COST = 16000;
-  private static final int MAX_FUEL = 50;
+  private static final int UNIT_COST = 2500;
+  private static final int MAX_FUEL = 99;
   private static final int IDLE_FUEL_BURN = 0;
-  private static final int MOVE_POWER = 5;
+  private static final int MOVE_POWER = 2;
 
   private static final MoveType moveType = new FootMech();
   private static final ActionType[] actions = { ActionType.ATTACK, ActionType.CAPTURE, ActionType.WAIT };
