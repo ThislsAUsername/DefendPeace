@@ -1,22 +1,23 @@
 package Terrain.Maps;
 
-import Terrain.Environment.Terrains;
+import Terrain.TerrainType;
 
 public class IMapBuilder
 {
   // Convenient handles for the terrain types to shorten map definitions.
-  protected static final Terrains CT = Terrains.CITY;
-  protected static final Terrains DN = Terrains.DUNES;
-  protected static final Terrains FC = Terrains.FACTORY;
-  protected static final Terrains AP = Terrains.AIRPORT;
-  protected static final Terrains SP = Terrains.SEAPORT;
-  protected static final Terrains FR = Terrains.FOREST;
-  protected static final Terrains GR = Terrains.GRASS;
-  protected static final Terrains HQ = Terrains.HQ;
-  protected static final Terrains LB = Terrains.LAB;
-  protected static final Terrains MT = Terrains.MOUNTAIN;
-  protected static final Terrains RF = Terrains.REEF;
-  protected static final Terrains RD = Terrains.ROAD;
-  protected static final Terrains SH = Terrains.SHOAL;
-  protected static final Terrains SE = Terrains.SEA;
+  protected static final TerrainType BR = TerrainType.BRIDGE;
+  protected static final TerrainType CT = TerrainType.CITY;
+  protected static final TerrainType DN = TerrainType.DUNES;
+  protected static final TerrainType FC = TerrainType.FACTORY;
+  protected static final TerrainType AP = TerrainType.AIRPORT;
+  protected static final TerrainType SP = TerrainType.SEAPORT;
+  protected static final TerrainType FR = TerrainType.FOREST;
+  protected static final TerrainType GR = TerrainType.GRASS;
+  protected static final TerrainType HQ = TerrainType.HEADQUARTERS;
+  protected static final TerrainType LB = TerrainType.LAB;
+  protected static final TerrainType MT = TerrainType.MOUNTAIN;
+  protected static final TerrainType RF = TerrainType.REEF;
+  protected static final TerrainType RD = TerrainType.ROAD;
+  protected static final TerrainType SH = TerrainType.SHOAL;
+  protected static final TerrainType SE = TerrainType.SEA;
 }

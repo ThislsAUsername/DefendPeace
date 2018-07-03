@@ -1,14 +1,24 @@
 package Units.MoveTypes;
 
-public class FootStandard extends MoveType
-{
+import Terrain.Environment.Weathers;
+import Terrain.TerrainType;
 
+public class FootStandard extends MoveTypeLand
+{
   public FootStandard()
   {
-    // format is [weather][terrain]
-    int[][] tempCosts = { { 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 }, { 1, 1, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 },
-        { 2, 2, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 99, 99 }, { 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 2, 99, 99 } };
+    // Make adjustments to the base-class values.
+    setMoveCost(Weathers.CLEAR, TerrainType.MOUNTAIN, 2);
 
-    moveCosts = tempCosts;
+    setMoveCost(Weathers.RAIN, TerrainType.DUNES, 3);
+    setMoveCost(Weathers.RAIN, TerrainType.MOUNTAIN, 3);
+
+    setMoveCost(Weathers.SNOW, TerrainType.FOREST, 2);
+    setMoveCost(Weathers.SNOW, TerrainType.GRASS, 2);
+    setMoveCost(Weathers.SNOW, TerrainType.MOUNTAIN, 4);
+
+    setMoveCost(Weathers.SANDSTORM, TerrainType.DUNES, 3);
+    setMoveCost(Weathers.SANDSTORM, TerrainType.MOUNTAIN, 2);
+    setMoveCost(Weathers.SANDSTORM, TerrainType.SHOAL, 2);
   }
 }

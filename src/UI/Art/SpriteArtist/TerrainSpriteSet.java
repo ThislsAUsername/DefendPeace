@@ -5,9 +5,13 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import Terrain.Environment;
 import Terrain.GameMap;
+import Terrain.TerrainType;
 
 /**
  * Responsible for storing and organizing all image data associated with a specific map tile type, and drawing the
@@ -21,7 +25,9 @@ public class TerrainSpriteSet
   /** List of Sprites, to allow for variations of the tile type. */
   private ArrayList<Sprite> terrainSprites;
   private ArrayList<TerrainSpriteSet> tileTransitions;
-  public final Environment.Terrains myTerrainType;
+  private boolean isTransition = false;
+  public final TerrainType myTerrainType;
+  private ArrayList<TerrainType> myTerrainAffinities;
 
   int drawOffsetx;
   int drawOffsety;
@@ -37,11 +43,21 @@ public class TerrainSpriteSet
   private static final short SE = 18;
   private static final short SW = 19;
 
-  public TerrainSpriteSet(Environment.Terrains terrainType, BufferedImage spriteSheet, int spriteWidth, int spriteHeight)
+  private static Map<TerrainType, TerrainType> terrainBases = null;
+  private static Set<TerrainType> terrainObjects = null;
+
+  public TerrainSpriteSet(TerrainType terrainType, BufferedImage spriteSheet, int spriteWidth, int spriteHeight)
+  {
+    this(terrainType, spriteSheet, spriteWidth, spriteHeight, false);
+  }
+
+  public TerrainSpriteSet(TerrainType terrainType, BufferedImage spriteSheet, int spriteWidth, int spriteHeight, boolean isTransitionTileset)
   {
     myTerrainType = terrainType;
     terrainSprites = new ArrayList<Sprite>();
     tileTransitions = new ArrayList<TerrainSpriteSet>();
+    isTransition = isTransitionTileset;
+    myTerrainAffinities = new ArrayList<TerrainType>();
 
     // We assume here that all sprites are sized in multiples of the base sprite size.
     drawOffsetx = spriteWidth / SpriteLibrary.baseSpriteSize - 1;
@@ -126,9 +142,9 @@ public class TerrainSpriteSet
    * Tiles from 'spriteSheet' will be drawn on top of tiles from this sprite set when a tile is adjacent to one or more tiles
    * of type otherTerrain. This allows us to define smoother terrain transitions.
    */
-  public void addTileTransition(Environment.Terrains otherTerrain, BufferedImage spriteSheet, int spriteWidth, int spriteHeight)
+  public void addTileTransition(TerrainType otherTerrain, BufferedImage spriteSheet, int spriteWidth, int spriteHeight)
   {
-    tileTransitions.add(new TerrainSpriteSet(otherTerrain, spriteSheet, spriteWidth, spriteHeight));
+    tileTransitions.add(new TerrainSpriteSet(otherTerrain, spriteSheet, spriteWidth, spriteHeight, true));
   }
 
   public void colorize(Color[] oldColors, Color[] newColors)
@@ -137,6 +153,13 @@ public class TerrainSpriteSet
     {
       s.colorize(oldColors, newColors);
     }
+  }
+
+  /** Declares another terrain type to be "like" this one - it will be treated as the same type as this when tiling.
+      This allows e.g. letting roads and bridges merge seamlessly, and connecting roads to properties.               */
+  public void addTerrainAffinity(TerrainType otherTerrain)
+  {
+    myTerrainAffinities.add(otherTerrain);
   }
 
   /**
@@ -159,9 +182,10 @@ public class TerrainSpriteSet
 
   private void drawTile(Graphics g, GameMap map, int x, int y, int scale, boolean shouldDrawTerrainObject)
   {
-    // Draw the base tile type, if needed.
-    Environment.Terrains baseTerrainType = getBaseTerrainType(myTerrainType);
-    if( baseTerrainType != myTerrainType && !shouldDrawTerrainObject )
+    // Draw the base tile type, if needed. It's needed if we are not the base type, and if we are not drawing
+    //   a terrain object. If this object is holding transition tiles, we also don't want to (re)draw the base type.
+    TerrainType baseTerrainType = getBaseTerrainType(myTerrainType);
+    if( baseTerrainType != myTerrainType && !shouldDrawTerrainObject && !isTransition )
     {
       System.out.println("Drawing " + baseTerrainType + " as base of " + myTerrainType);
       TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(baseTerrainType);
@@ -219,6 +243,7 @@ public class TerrainSpriteSet
       // Draw any tile transitions that are needed.
       for( TerrainSpriteSet tt : tileTransitions )
       {
+        System.out.println("Drawing transition from " + tt.myTerrainType + " onto " + myTerrainType);
         tt.drawTerrain(g, map, x, y, scale);
       }
     }
@@ -255,33 +280,27 @@ public class TerrainSpriteSet
     return dirIndex;
   }
 
-  private boolean isTerrainObject(Environment.Terrains terrainType)
+  /** Return true if this terrain type takes up more than one tile when drawn. */
+  private boolean isTerrainObject(TerrainType terrainType)
   {
-    switch (terrainType)
+    if( null == terrainObjects )
     {
-      case CITY:
-      case FACTORY:
-      case FOREST:
-      case AIRPORT:
-      case SEAPORT:
-      case HQ:
-      case LAB:
-      case MOUNTAIN:
-        return true;
-      case DUNES:
-      case GRASS:
-      case REEF:
-      case ROAD:
-      case SEA:
-      case SHOAL:
-      default:
-        return false;
+      terrainObjects = new HashSet<TerrainType>();
+      terrainObjects.add(TerrainType.CITY);
+      terrainObjects.add(TerrainType.FACTORY);
+      terrainObjects.add(TerrainType.FOREST);
+      terrainObjects.add(TerrainType.AIRPORT);
+      terrainObjects.add(TerrainType.SEAPORT);
+      terrainObjects.add(TerrainType.HEADQUARTERS);
+      terrainObjects.add(TerrainType.LAB);
+      terrainObjects.add(TerrainType.MOUNTAIN);
     }
+    return terrainObjects.contains(terrainType);
   }
 
   /**
    * If position (x, y) is a valid location:
-   *   Return true if (x, y) has TerrainType terrain, else return false;
+   *   Return true if (x, y) has myTerrainType terrain or is in the affinity list, else return false;
    * 
    * If position (x, y) is not a valid location (out of bounds): Return the value of assumeTrue. This has
    *   the effect of allowing us to assume that tiles out of sight are whatever terrain we prefer - enabling
@@ -290,45 +309,64 @@ public class TerrainSpriteSet
    */
   private boolean checkTileType(GameMap map, int x, int y, boolean assumeTrue)
   {
-    return (map.isLocationValid(x, y) && ((map.getEnvironment(x, y).terrainType == myTerrainType) || // Valid location, terrain types match.
-        (getBaseTerrainType(map.getEnvironment(x, y).terrainType) == myTerrainType)) // Valid location, terrain base matches. 
-    || (!map.isLocationValid(x, y) && assumeTrue)); // Invalid location, but assuming true for that case.
+    boolean terrainTypesMatch = false;
+
+    if( map.isLocationValid(x, y) )
+    {
+      TerrainType otherTerrain = map.getEnvironment(x, y).terrainType;
+      TerrainType otherBase = getBaseTerrainType(otherTerrain);
+
+      if( (otherTerrain == myTerrainType) || // Terrain types match.
+          (otherBase == myTerrainType) || // Terrain bases match.
+          myTerrainAffinities.contains(otherTerrain) || // Affinity with other tile type.
+          myTerrainAffinities.contains(otherBase) ) // Affinity with other tile base type.
+      {
+        terrainTypesMatch = true;
+      }
+    }
+    else
+    {
+      // Invalid location; the provided value determines if we assume it would match.
+      terrainTypesMatch = assumeTrue;
+    }
+
+    return terrainTypesMatch;
   }
 
   /**
    * Determines the base terrain type for the provided environment terrain type.
    * For example, FOREST is a tile type, but the trees sit on a plain, so for drawing
-   * purposes (esp. terrain transitions), the base tile type of FOREST is actually PLAIN.
+   * purposes (esp. terrain transitions), the base tile type of FOREST is actually GRASS.
    */
-  private static Environment.Terrains getBaseTerrainType(Environment.Terrains terrainType)
+  private static TerrainType getBaseTerrainType(TerrainType terrain)
   {
-    Environment.Terrains baseTerrain = terrainType;
-    switch (baseTerrain)
+    if( null == terrainBases )
     {
-      case CITY:
-      case DUNES:
-      case FACTORY:
-      case AIRPORT:
-      case FOREST:
-      case HQ:
-      case LAB:
-      case MOUNTAIN:
-      case GRASS:
-      case ROAD:
-        baseTerrain = Environment.Terrains.GRASS;
-        break;
-      case SEAPORT:
-      case SHOAL:
-        baseTerrain = Environment.Terrains.SHOAL;
-        break;
-      case REEF:
-      case SEA:
-        baseTerrain = Environment.Terrains.SEA;
-        break;
-      default:
-        System.out.println("ERROR! [TerrainSpriteSet.getBaseTerrainType] Invalid terrain type " + baseTerrain);
+      terrainBases = new HashMap<TerrainType, TerrainType>();
+      terrainBases.put(TerrainType.CITY, TerrainType.GRASS);
+      terrainBases.put(TerrainType.DUNES, TerrainType.GRASS);
+      terrainBases.put(TerrainType.FACTORY, TerrainType.GRASS);
+      terrainBases.put(TerrainType.AIRPORT, TerrainType.GRASS);
+      terrainBases.put(TerrainType.FOREST, TerrainType.GRASS);
+      terrainBases.put(TerrainType.HEADQUARTERS, TerrainType.GRASS);
+      terrainBases.put(TerrainType.LAB, TerrainType.GRASS);
+      terrainBases.put(TerrainType.MOUNTAIN, TerrainType.GRASS);
+      terrainBases.put(TerrainType.GRASS, TerrainType.GRASS);
+      terrainBases.put(TerrainType.ROAD, TerrainType.GRASS);
+
+      terrainBases.put(TerrainType.BRIDGE, TerrainType.SHOAL);
+      terrainBases.put(TerrainType.SEAPORT, TerrainType.SHOAL);
+      terrainBases.put(TerrainType.SHOAL, TerrainType.SHOAL);
+
+      terrainBases.put(TerrainType.REEF, TerrainType.SEA);
+      terrainBases.put(TerrainType.SEA, TerrainType.SEA);
+
+      if( TerrainType.TerrainTypeList.length != terrainBases.size())
+      {
+        throw new RuntimeException("TerrainSpriteSet.terrainBases does not align with TerrainType.TerrainTypeList!");
+      }
     }
 
-    return baseTerrain;
+    return terrainBases.get(terrain);
   }
 }

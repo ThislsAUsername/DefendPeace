@@ -1,7 +1,6 @@
 package Terrain;
 
 import Engine.XYCoord;
-import Terrain.Environment.Terrains;
 import Units.Unit;
 
 public class GameMap
@@ -26,12 +25,9 @@ public class GameMap
     {
       for( int x = 0; x < mapWidth; ++x )
       {
-        // We turn labs into HQs here because we don't yet support using labs as HQs
-        // TODO: fix this 
-        Terrains environs = mapInfo.terrain[x][y];
-        environs = (environs == Terrains.LAB) ? Terrains.HQ : environs;
+        TerrainType terrain = mapInfo.terrain[x][y];
         // Create this Location using the MapInfo terrain.
-        map[x][y] = new Location(Environment.getTile(environs, Environment.Weathers.CLEAR), new XYCoord(x, y));
+        map[x][y] = new Location(Environment.getTile(terrain, Environment.Weathers.CLEAR), new XYCoord(x, y));
       }
     }
 
@@ -54,7 +50,7 @@ public class GameMap
         if( location.isCaptureable() )
         {
           // Check if this location holds an HQ.
-          if( map[x][y].getEnvironment().terrainType == Terrains.HQ )
+          if( map[x][y].getEnvironment().terrainType == TerrainType.HEADQUARTERS )
           {
             // If the CO has no HQ yet, assign this one.
             if( COs[co].HQLocation == null )
@@ -65,7 +61,7 @@ public class GameMap
             // If the CO does have an HQ, turn this location into a city.
             else
             {
-              location.setEnvironment(Environment.getTile(Terrains.CITY, location.getEnvironment().weatherType));
+              location.setEnvironment(Environment.getTile(TerrainType.CITY, location.getEnvironment().weatherType));
             }
           }
           location.setOwner(COs[co]);

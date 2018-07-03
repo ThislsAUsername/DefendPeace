@@ -1,12 +1,14 @@
 package Units;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
 import Engine.GameAction;
 import Engine.GameAction.ActionType;
-import Terrain.Environment.Terrains;
 import Terrain.Location;
+import Terrain.TerrainType;
 import Units.MoveTypes.MoveType;
 import Units.Weapons.WeaponModel;
 
@@ -32,7 +34,7 @@ public class UnitModel
   public int movePower;
   public MoveType propulsion;
   public ActionType[] possibleActions;
-  public Terrains[] healableHabs;
+  public Set<TerrainType> healableHabs;
   public WeaponModel[] weaponModels;
 
   public int maxHP;
@@ -42,7 +44,7 @@ public class UnitModel
   private int COdef;
 
   public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower, MoveType pPropulsion,
-      ActionType[] actions, Terrains[] healableTerrains, WeaponModel[] weapons)
+      ActionType[] actions, WeaponModel[] weapons)
   {
     name = pName;
     type = pType;
@@ -53,7 +55,14 @@ public class UnitModel
     movePower = pMovePower;
     propulsion = pPropulsion;
     possibleActions = actions;
-    healableHabs = healableTerrains;
+    healableHabs = new HashSet<TerrainType>();
+    for (TerrainType terrain : TerrainType.TerrainTypeList)
+    {
+      if( ((chassis == ChassisEnum.AIR_HIGH) || (chassis == ChassisEnum.AIR_LOW) && terrain.healsAir()) ||
+          ((chassis == ChassisEnum.TANK) || (chassis == ChassisEnum.TROOP) && terrain.healsLand()) ||
+          ((chassis == ChassisEnum.SHIP) || (chassis == ChassisEnum.SUBMERGED) && terrain.healsSea()) )
+        healableHabs.add(terrain);
+    }
     weaponModels = weapons;
 
     maxHP = 10;
@@ -92,13 +101,7 @@ public class UnitModel
 
   public boolean canRepairOn(Location locus)
   {
-    Terrains environs = locus.getEnvironment().terrainType;
-    boolean compatible = false;
-    for( Terrains terrain : healableHabs )
-    {
-      compatible |= environs == terrain;
-    }
-    return compatible;
+    return healableHabs.contains( locus.getEnvironment().terrainType );
   }
 
   /** Provides a hook for inheritors to supply turn-initialization actions to a unit.

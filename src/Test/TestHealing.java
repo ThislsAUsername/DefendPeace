@@ -5,9 +5,9 @@ import CommandingOfficers.CommanderPatch;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.MapInfo;
+import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel.UnitEnum;
 
@@ -22,9 +22,9 @@ public class TestHealing extends TestCase
     testCo1 = new CommanderPatch();
     Commander[] cos = { testCo1 };
     // Create a small map with a city to provide healing.
-    Environment.Terrains[][] testLoc = {
-        {Environment.Terrains.CITY, Environment.Terrains.GRASS},
-        {Environment.Terrains.GRASS, Environment.Terrains.GRASS}};
+    TerrainType[][] testLoc = {
+        {TerrainType.CITY, TerrainType.GRASS},
+        {TerrainType.GRASS, TerrainType.GRASS}};
     XYCoord[] co1Props = { new XYCoord(0, 0) }; // Assign the city to our CO.
     XYCoord[][] properties = { co1Props }; // Wrap with an array to match MapInfo interface.
 

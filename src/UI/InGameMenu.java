@@ -1,6 +1,7 @@
 package UI;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import Engine.OptionSelector;
 
@@ -20,7 +21,7 @@ public class InGameMenu<T>
   // Used to help the renderer figure out whether to regenerate the menu image.
   private boolean wasReset;
 
-  public InGameMenu(ArrayList<T> options)
+  public InGameMenu(Collection<T> options)
   {
     menuOptions = new ArrayList<T>();
     menuOptions.addAll(options);
@@ -51,12 +52,24 @@ public class InGameMenu<T>
    * Re-initializes this object with the new set of options.
    * @param newOptions
    */
+  public void resetOptions(Collection<T> newOptions)
+  {
+    menuOptions.clear();
+    menuOptions.addAll(newOptions);
+    optionSelector.reset( menuOptions.size() );
+    wasReset = true;
+  }
+
+  /**
+   * Re-initializes this object with the new set of options.
+   * @param newOptions
+   */
   public void resetOptions(T[] newOptions)
   {
     menuOptions.clear();
-    for( int i = 0; i < newOptions.length; ++i )
+    for( T t : newOptions )
     {
-      menuOptions.add( newOptions[i] );
+      menuOptions.add(t);
     }
     optionSelector.reset( menuOptions.size() );
     wasReset = true;

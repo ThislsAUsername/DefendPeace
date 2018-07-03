@@ -1,14 +1,14 @@
 package Engine;
 
-import java.util.ArrayList;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Queue;
 
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.TerrainType;
 import UI.CO_InfoMenu;
 import UI.InGameMenu;
 import UI.InGameProductionMenu;
@@ -84,7 +84,7 @@ public class MapController implements IController
     myGame = game;
     myView = view;
     myView.setController(this);
-    productionMenu = new InGameProductionMenu(myGame.commanders[0].getShoppingList(Terrains.FACTORY)); // Just init with a valid default.
+    productionMenu = new InGameProductionMenu(myGame.commanders[0].getShoppingList(TerrainType.FACTORY)); // Just init with a valid default.
     actionMenu = null;
     metaActionMenu = new InGameMenu<MetaAction>(metaActionsNoAbility);
     coAbilityMenu = null;

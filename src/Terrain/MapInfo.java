@@ -5,10 +5,10 @@ import Engine.XYCoord;
 public class MapInfo
 {
   public final String mapName;
-  public final Environment.Terrains[][] terrain;
+  public final TerrainType[][] terrain;
   public final XYCoord[][] COProperties;
 
-  public MapInfo(String name, Environment.Terrains[][] tiles, XYCoord[][] props)
+  public MapInfo(String name, TerrainType[][] tiles, XYCoord[][] props)
   {
     mapName = name;
     terrain = tiles;

@@ -2,9 +2,9 @@ package Engine.GameEvents;
 
 import CommandingOfficers.Commander;
 import Terrain.Environment;
-import Terrain.Environment.Terrains;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.TerrainType;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 
@@ -40,9 +40,9 @@ public class CommanderDefeatEvent implements GameEvent
 
     // Downgrade the defeated commander's HQ to a city, unless they don't have a proper HQ.
     Location HQLoc = gameMap.getLocation(defeatedCO.HQLocation);
-    if( HQLoc.getEnvironment().terrainType == Terrains.HQ )
+    if( HQLoc.getEnvironment().terrainType == TerrainType.HEADQUARTERS )
     {
-      HQLoc.setEnvironment(Environment.getTile(Terrains.CITY, HQLoc.getEnvironment().weatherType));
+      HQLoc.setEnvironment(Environment.getTile(TerrainType.CITY, HQLoc.getEnvironment().weatherType));
     }
 
     // Loop through the map and revoke all of the CO's properties.
