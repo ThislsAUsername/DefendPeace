@@ -50,7 +50,7 @@ public class Utils
     for( XYCoord loc : locations )
     {
       if( map.getLocation(loc).getResident() != null && // Someone is there.
-          map.getLocation(loc).getResident().CO != co && // They are not friendly.
+          map.getLocation(loc).getResident().CO.isEnemy(co) && // They are not friendly.
           weapon.getDamage(map.getLocation(loc).getResident().model) > 0 ) // We can shoot them.
       {
         targets.add(loc);
@@ -137,7 +137,7 @@ public class Utils
     // if there is a unit in that space
     if( myMap.getLocation(x, y).getResident() != null )
     { // if that unit is an enemy
-      if( myMap.getLocation(x, y).getResident().CO != unit.CO )
+      if( unit.CO.isEnemy(myMap.getLocation(x, y).getResident().CO) )
       {
         return false;
       }
@@ -181,7 +181,7 @@ public class Utils
       Unit resident = loc.getResident();
 
       movePower -= findMoveCost(unit, wayX, wayY, map);
-      if( movePower < 0 || (resident != null && resident.CO != unit.CO) )
+      if( movePower < 0 || (resident != null && resident.CO.isEnemy(unit.CO)) )
       {
         canReach = false;
       }

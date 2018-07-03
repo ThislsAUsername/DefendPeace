@@ -77,6 +77,7 @@ public interface GameAction
 
         boolean moved = attacker.x != moveLocation.xCoord || attacker.y != moveLocation.yCoord;
         isValid &= (null != unitTarget) && attacker.canAttack(unitTarget.model, attackRange, moved);
+        isValid &= attacker.CO.isEnemy(unitTarget.CO);
       }
 
       // Generate GameEvents.
@@ -166,7 +167,7 @@ public interface GameAction
         movePathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
         captureLocation = map.getLocation(movePathEnd);
         isValid &= captureLocation.isCaptureable(); // Valid location
-        isValid &= captureLocation.getOwner() != actor.CO; // Valid CO
+        isValid &= actor.CO.isEnemy(captureLocation.getOwner()); // Valid CO
       }
 
       // Generate events

@@ -17,7 +17,7 @@ public class CaptureEvent implements GameEvent
   {
     unit = u;
     location = loc;
-    if( null != location && location.isCaptureable() && location.getOwner() != unit.CO ) 
+    if( null != location && location.isCaptureable() && unit.CO.isEnemy(location.getOwner()) )
     {
       priorCaptureAmount = unit.getCaptureProgress();
       captureAmount = unit.getHP(); // TODO: Apply CO buffs.
@@ -53,7 +53,7 @@ public class CaptureEvent implements GameEvent
     // Only attempt to do the action if it is valid to do so.
     if( location.isCaptureable() &&
         (location.getResident() == unit) &&
-        (location.getOwner() != unit.CO) )
+        (unit.CO.isEnemy(location.getOwner())) )
     {
       unit.capture(gameMap.getLocation(unit.x, unit.y));
     }

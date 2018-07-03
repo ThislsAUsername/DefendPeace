@@ -308,7 +308,7 @@ public class MapController implements IController
         // If the selected space is within the reachable area
         if( inMoveableSpace && contemplatedAction.actor.CO == myGame.activeCO )
         {
-          // Move the Unit to the location and display possible actions.
+          // Select the location and display possible actions.
           contemplatedAction.movePath.start(); // start the unit running
           changeInputMode(InputMode.ACTIONMENU);
         }

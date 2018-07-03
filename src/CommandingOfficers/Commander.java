@@ -44,6 +44,7 @@ public class Commander
   public static final int DEFAULTSTARTINGMONEY = 10000;
   public int money = 0;
   public int incomePerCity = 1000;
+  public int team = -1;
   public boolean isDefeated = false;
   public XYCoord HQLocation = null;
 
@@ -124,6 +125,28 @@ public class Commander
       modifiers.get(i).revert(this);
       modifiers.remove(i);
     }
+  }
+  
+  /**
+   * @return whether these COs would like to kill each other
+   */
+  public boolean isEnemy(Commander other)
+  {
+    // If the other CO doesn't exist, we can't be friends.
+    if (other == null)
+      return true;
+    // If the other CO is us, we can't *not* be friends.
+    if (other == this)
+      return false;
+    // If we have no team, we have no friends.
+    if( team < 0 || other.team < 0 )
+      return true;
+    // If we have teams and we're on the same team...
+    // we're on the same team.
+    if( team == other.team )
+      return false;
+    // Otherwise, we hate each other.
+    return true;
   }
 
   public UnitModel getUnitModel(UnitEnum unitType)
