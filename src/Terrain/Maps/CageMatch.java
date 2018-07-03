@@ -2,13 +2,13 @@ package Terrain.Maps;
 
 import Engine.XYCoord;
 import Terrain.MapInfo;
-import Terrain.Types.BaseTerrain;
+import Terrain.TerrainType;
 
 public class CageMatch extends IMapBuilder
 {
   private final static String mapName = "Cage Match";
   // Defines the terrain for this map. Each row is a vertical column of the map.
-  private final static BaseTerrain[][] terrainData =
+  private final static TerrainType[][] terrainData =
    {{SE, SE, SE, SE, SE, SE, SE, SE, SE, SE, SE, SE, SE, SE, SE}, // 0
     {SE, SE, FC, FC, FR, GR, GR, MT, GR, GR, FR, FC, FC, SE, SE}, // 1
     {SE, FC, HQ, FR, CT, GR, GR, FC, GR, GR, CT, FR, HQ, FC, SE}, // 2

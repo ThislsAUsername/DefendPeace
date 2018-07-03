@@ -1,8 +1,8 @@
 package Terrain;
 
-import Units.Unit;
 import CommandingOfficers.Commander;
 import Engine.XYCoord;
+import Units.Unit;
 
 public class Location
 {
@@ -66,6 +66,12 @@ public class Location
   public boolean isCaptureable()
   {
     return environs.terrainType.isCapturable();
+  }
+
+  /** Return whether the terrain type in this location can generate income. */
+  public boolean isProfitable()
+  {
+    return environs.terrainType.isProfitable();
   }
 
   public void setHighlight(boolean val)

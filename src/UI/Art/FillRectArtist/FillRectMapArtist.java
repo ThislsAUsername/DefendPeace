@@ -62,7 +62,7 @@ public class FillRectMapArtist
   private void drawLocation(Graphics g, Terrain.Location locus, int x, int y)
   {
     Environment tile = locus.getEnvironment();
-    Color tileColor = tile.terrainType.getMiniColor();
+    Color tileColor = tile.terrainType.getMainColor();
 
     g.setColor(tileColor);
     g.fillRect(x, y, tileSizePx, tileSizePx);

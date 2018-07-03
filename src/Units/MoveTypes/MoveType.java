@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
-import Terrain.Types.BaseTerrain;
+import Terrain.TerrainType;
 
 public class MoveType
 {
@@ -25,7 +25,7 @@ public class MoveType
   }
 
   /** Returns the cost to traverse terrain type 'terrain' while experiencing weather 'weather'. */
-  public int getMoveCost(Weathers weather, BaseTerrain terrain)
+  public int getMoveCost(Weathers weather, TerrainType terrain)
   {
     Integer cost = 99;
     MoveCostByTerrain mcbw = moveCosts.get(weather);
@@ -47,13 +47,13 @@ public class MoveType
   }
 
   /** Sets the cost to move through terrain during weather. */
-  protected void setMoveCost(Weathers weather, BaseTerrain terrain, int cost)
+  protected void setMoveCost(Weathers weather, TerrainType terrain, int cost)
   {
     moveCosts.get(weather).put(terrain, cost);
   }
 
   /** Set the move cost for this terrain for all weather conditions. Useful for marking a terrain as impassable. */
-  protected void setMoveCost(BaseTerrain terrain, int cost)
+  protected void setMoveCost(TerrainType terrain, int cost)
   {
     for( Weathers w : Weathers.values() )
     {
@@ -63,7 +63,7 @@ public class MoveType
 
   /////////////////////////////////////////////////////////////////////////////
   /** Convenience class to allow easy manipulation of move costs. */
-  protected class MoveCostByTerrain extends HashMap<BaseTerrain, Integer>
+  protected class MoveCostByTerrain extends HashMap<TerrainType, Integer>
   {
     /** We don't actually serialize this map, but declaring this prevents a warning. */
     private static final long serialVersionUID = 2956827533548597328L;
@@ -80,17 +80,15 @@ public class MoveType
     }
 
     /** Set cost to traverse a specific terrain type. */
-    public void setMoveCost(BaseTerrain t, int c)
+    public void setMoveCost(TerrainType t, int c)
     {
-      if( size() > t.index )
-        remove(t.index);
       put(t, c);
     }
 
     /** Helper function to set all movement costs to the same value. */
     public void setAllMovementCosts(int moveCost)
     {
-      for( BaseTerrain terrain : Environment.getTerrainTypes() )
+      for( TerrainType terrain : TerrainType.TerrainTypeList )
       {
         setMoveCost(terrain, moveCost);
       }
@@ -99,7 +97,7 @@ public class MoveType
     /** Set all ground tile types to the given move cost. */
     public void setAllLandCosts(int moveCost)
     {
-      for( BaseTerrain terrain : Environment.getTerrainTypes() )
+      for( TerrainType terrain : TerrainType.TerrainTypeList )
       {
         if( terrain.isLand() )
           setMoveCost(terrain, moveCost);
@@ -109,9 +107,9 @@ public class MoveType
     /** Set all ground tile types to the given move cost. */
     public void setAllSeaCosts(int moveCost)
     {
-      for( BaseTerrain terrain : Environment.getTerrainTypes() )
+      for( TerrainType terrain : TerrainType.TerrainTypeList )
       {
-        if( terrain.isSea() )
+        if( terrain.isWater() )
           setMoveCost(terrain, moveCost);
       }
     }

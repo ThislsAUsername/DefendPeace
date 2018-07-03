@@ -8,15 +8,18 @@ import Engine.GameAction.ActionType;
 import Units.MoveTypes.MoveType;
 import Units.MoveTypes.Tread;
 
-public class APCModel extends LandModel
+public class APCModel extends UnitModel
 {
-
+  private static final int UNIT_COST = 5000;
+  private static final int MAX_FUEL = 70;
+  private static final int IDLE_FUEL_BURN = 0;
+  private static final int MOVE_POWER = 6;
   private static final MoveType moveType = new Tread();
   private static final ActionType[] actions = { ActionType.RESUPPLY, ActionType.UNLOAD, ActionType.WAIT };
 
   public APCModel()
   {
-    super("APC", UnitEnum.APC, ChassisEnum.TANK, 5000, 70, 0, 6, moveType, actions, null);
+    super("APC", UnitEnum.APC, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, MOVE_POWER, moveType, actions, null);
     holdingCapacity = 1;
     UnitEnum[] carryable = { Units.UnitModel.UnitEnum.INFANTRY, Units.UnitModel.UnitEnum.MECH };
     holdables = new Vector<UnitEnum>(carryable.length);

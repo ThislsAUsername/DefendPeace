@@ -3,28 +3,14 @@ package UI.Art.SpriteArtist;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import Engine.XYCoord;
-import Terrain.Environment;
 import Terrain.MapInfo;
-import Terrain.Types.BaseTerrain;
 
 public class SpriteMiniMapArtist
 {
   private static HashMap<MapInfo, BufferedImage> mapImages = new HashMap<MapInfo, BufferedImage>();
-
-  private static ArrayList<Color> terrainColors = new ArrayList<Color>(){
-    private static final long serialVersionUID = 1L;
-    {
-      // Create a mapping of terrain types to colors, to help us draw the minimap.
-      for( BaseTerrain terrain : Environment.getTerrainTypes() )
-      {
-        add(terrain.getMiniColor());
-      }
-    }
-  };
 
   /**
    * Retrieve a BufferedImage with a 1-pixel-per-tile representation of the provided MapInfo.
@@ -55,7 +41,7 @@ public class SpriteMiniMapArtist
     {
       for(int x = 0; x < image.getWidth(); ++x)
       {
-        g.setColor( terrainColors.get(mapInfo.terrain[x][y].index) );
+        g.setColor( mapInfo.terrain[x][y].getMainColor() );
         g.fillRect(x, y, 1, 1);
       }
     }

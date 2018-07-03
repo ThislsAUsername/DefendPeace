@@ -2,18 +2,16 @@ package CommandingOfficers;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameInstance;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
-import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
-import Terrain.Types.Airport;
-import Terrain.Types.BaseTerrain;
-import Terrain.Types.Factory;
-import Terrain.Types.Seaport;
+import Terrain.TerrainType;
 import Units.APCModel;
 import Units.AntiAirModel;
 import Units.ArtilleryModel;
@@ -41,7 +39,8 @@ public class Commander
 {
   public final CommanderInfo coInfo;
   public ArrayList<Unit> units;
-  public ArrayList<UnitModel> unitModels;
+  public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
+  public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
   public ArrayList<Location> ownedProperties;
   public ArrayList<COModifier> modifiers;
   public Color myColor;
@@ -55,29 +54,46 @@ public class Commander
   {
     coInfo = info;
 
-    // TODO Obviously we don't want to hard-code the UnitModel array.
-    unitModels = new ArrayList<UnitModel>(19);
-    unitModels.add(new InfantryModel());
-    unitModels.add(new MechModel());
-    unitModels.add(new APCModel());
-    unitModels.add(new ArtilleryModel());
-    unitModels.add(new ReconModel());
-    unitModels.add(new TankModel());
-    unitModels.add(new MDTankModel());
-    unitModels.add(new NeotankModel());
-    unitModels.add(new RocketsModel());
-    unitModels.add(new AntiAirModel());
-    unitModels.add(new MobileSAMModel());
+    // TODO We probably don't want to hard-code the buildable units.
+    ArrayList<UnitModel> factoryModels = new ArrayList<UnitModel>();
+    ArrayList<UnitModel> seaportModels = new ArrayList<UnitModel>();
+    ArrayList<UnitModel> airportModels = new ArrayList<UnitModel>();
 
-    unitModels.add(new LanderModel());
-    unitModels.add(new CruiserModel());
-    unitModels.add(new SubModel());
-    unitModels.add(new BattleshipModel());
+    // Define everything we can build from a Factory.
+    factoryModels.add(new InfantryModel());
+    factoryModels.add(new MechModel());
+    factoryModels.add(new APCModel());
+    factoryModels.add(new ArtilleryModel());
+    factoryModels.add(new ReconModel());
+    factoryModels.add(new TankModel());
+    factoryModels.add(new MDTankModel());
+    factoryModels.add(new NeotankModel());
+    factoryModels.add(new RocketsModel());
+    factoryModels.add(new AntiAirModel());
+    factoryModels.add(new MobileSAMModel());
 
-    unitModels.add(new TCopterModel());
-    unitModels.add(new BCopterModel());
-    unitModels.add(new FighterModel());
-    unitModels.add(new BomberModel());
+    // Record those units we can get from a Seaport.
+    seaportModels.add(new LanderModel());
+    seaportModels.add(new CruiserModel());
+    seaportModels.add(new SubModel());
+    seaportModels.add(new BattleshipModel());
+
+    // Inscribe those war machines obtainable from an Airport.
+    airportModels.add(new TCopterModel());
+    airportModels.add(new BCopterModel());
+    airportModels.add(new FighterModel());
+    airportModels.add(new BomberModel());
+
+    // Dump these lists into a hashmap for easy reference later.
+    unitProductionByTerrain = new HashMap<TerrainType, ArrayList<UnitModel>>();
+    unitProductionByTerrain.put(TerrainType.FACTORY, factoryModels);
+    unitProductionByTerrain.put(TerrainType.SEAPORT, seaportModels);
+    unitProductionByTerrain.put(TerrainType.AIRPORT, airportModels);
+
+    // Compile one master list of everything we can build.
+    unitModels.addAll(factoryModels);
+    unitModels.addAll(seaportModels);
+    unitModels.addAll(airportModels);
 
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
@@ -113,7 +129,7 @@ public class Commander
       for( int h = 0; h < map.mapHeight; ++h )
       {
         Location loc = map.getLocation(w, h);
-        if( loc.isCaptureable() && loc.getOwner() == this )
+        if( loc.isProfitable() && loc.getOwner() == this )
         {
           turnIncome += incomePerCity;
         }
@@ -134,11 +150,11 @@ public class Commander
   {
     UnitModel um = null;
 
-    for( int i = 0; i < unitModels.size(); ++i )
+    for( UnitModel iter : unitModels )
     {
-      if( unitModels.get(i).type == unitType )
+      if( iter.type == unitType )
       {
-        um = unitModels.get(i);
+        um = iter;
         break;
       }
     }
@@ -146,42 +162,10 @@ public class Commander
     return um;
   }
 
-  public ArrayList<UnitModel> getShoppingList(BaseTerrain buyLocation)
+  /** Get the list of units this commander can build from the given property type. */
+  public ArrayList<UnitModel> getShoppingList(TerrainType buyLocation)
   {
-    ArrayList<UnitModel> shoppingList = new ArrayList<UnitModel>();
-    int index = buyLocation.index;
-    if( index == Airport.getIndex() )
-    {
-      for( int i = 0; i < unitModels.size(); i++ )
-      {
-        UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
-        if( UnitModel.ChassisEnum.AIR_HIGH == chassis || UnitModel.ChassisEnum.AIR_LOW == chassis )
-          shoppingList.add(unitModels.get(i));
-      }
-    }
-    else if( index == Seaport.getIndex() )
-    {
-      for( int i = 0; i < unitModels.size(); i++ )
-      {
-        UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
-        if( UnitModel.ChassisEnum.SHIP == chassis )
-          shoppingList.add(unitModels.get(i));
-      }
-    }
-    else if( index == Factory.getIndex() )
-    {
-      for( int i = 0; i < unitModels.size(); i++ )
-      {
-        UnitModel.ChassisEnum chassis = unitModels.get(i).chassis;
-        if( UnitModel.ChassisEnum.TROOP == chassis || UnitModel.ChassisEnum.TANK == chassis )
-          shoppingList.add(unitModels.get(i));
-      }
-    }
-    else
-    {
-      // don't log anything since this will be hit frequently
-    }
-    return shoppingList;
+    return (unitProductionByTerrain.get(buyLocation) != null) ? unitProductionByTerrain.get(buyLocation) : new ArrayList<UnitModel>();
   }
 
   public ArrayList<String> getReadyAbilities()

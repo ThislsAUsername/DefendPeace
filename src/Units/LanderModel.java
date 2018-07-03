@@ -6,8 +6,12 @@ import Engine.GameAction.ActionType;
 import Units.MoveTypes.FloatLight;
 import Units.MoveTypes.MoveType;
 
-public class LanderModel extends SeaModel
+public class LanderModel extends UnitModel
 {
+  private static final int UNIT_COST = 12000;
+  private static final int MAX_FUEL = 99;
+  private static final int IDLE_FUEL_BURN = 1;
+  private static final int MOVE_POWER = 6;
 
   private static final MoveType moveType = new FloatLight();
   // TODO: Currently, transports can unload units wherever the transport happens to be, so long as there is valid terrain for the units to end up on.
@@ -16,8 +20,7 @@ public class LanderModel extends SeaModel
 
   public LanderModel()
   {
-    super("Lander", UnitEnum.LANDER, ChassisEnum.SHIP, 12000, 99, 1, 6, actions, null);
-    this.propulsion = moveType;
+    super("Lander", UnitEnum.LANDER, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, MOVE_POWER, moveType, actions, null);
     holdingCapacity = 2;
     UnitEnum[] carryable = { Units.UnitModel.UnitEnum.INFANTRY, Units.UnitModel.UnitEnum.MECH, Units.UnitModel.UnitEnum.APC,
         Units.UnitModel.UnitEnum.RECON, Units.UnitModel.UnitEnum.ARTILLERY, Units.UnitModel.UnitEnum.ANTI_AIR,

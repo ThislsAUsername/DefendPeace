@@ -1,15 +1,14 @@
 package Terrain;
 
 import Engine.XYCoord;
-import Terrain.Types.BaseTerrain;
 
 public class MapInfo
 {
   public final String mapName;
-  public final BaseTerrain[][] terrain;
+  public final TerrainType[][] terrain;
   public final XYCoord[][] COProperties;
 
-  public MapInfo(String name, BaseTerrain[][] tiles, XYCoord[][] props)
+  public MapInfo(String name, TerrainType[][] tiles, XYCoord[][] props)
   {
     mapName = name;
     terrain = tiles;

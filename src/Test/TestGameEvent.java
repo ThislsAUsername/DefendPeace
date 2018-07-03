@@ -15,12 +15,9 @@ import Engine.GameEvents.LoadEvent;
 import Engine.GameEvents.MoveEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.UnloadEvent;
-import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.MapLibrary;
-import Terrain.Types.City;
-import Terrain.Types.Factory;
-import Terrain.Types.Headquarters;
+import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModel.UnitEnum;
@@ -84,7 +81,7 @@ public class TestGameEvent extends TestCase
 
     // We loaded Firing Range, so we expect a city at location (2, 2)
     Terrain.Location city = testMap.getLocation(2, 2);
-    testPassed &= validate( city.getEnvironment().terrainType == City.getInstance(), "    No city at (2, 2).");
+    testPassed &= validate( city.getEnvironment().terrainType == TerrainType.CITY, "    No city at (2, 2).");
     testPassed &= validate( city.getOwner() == null, "    City should not be owned by any CO yet.");
 
     // Add a unit
@@ -335,14 +332,14 @@ public class TestGameEvent extends TestCase
     Terrain.Location fac2 = testMap.getLocation(12, 2);
 
     // Verify the map looks as we expect.
-    testPassed &= validate( city.getEnvironment().terrainType == City.getInstance(), "    No city at (10, 1).");
+    testPassed &= validate( city.getEnvironment().terrainType == TerrainType.CITY, "    No city at (10, 1).");
     city.setOwner( testCo2 );
     testPassed &= validate( city.getOwner() == testCo2, "    City should belong to CO 2.");
-    testPassed &= validate( hq.getEnvironment().terrainType == Headquarters.getInstance(), "    No HQ where expected.");
+    testPassed &= validate( hq.getEnvironment().terrainType == TerrainType.HEADQUARTERS, "    No HQ where expected.");
     testPassed &= validate( hq.getOwner() == testCo2, "    HQ should belong to CO 2.");
-    testPassed &= validate( fac1.getEnvironment().terrainType == Factory.getInstance(), "    Fac 1 is not where expected.");
+    testPassed &= validate( fac1.getEnvironment().terrainType == TerrainType.FACTORY, "    Fac 1 is not where expected.");
     testPassed &= validate( fac1.getOwner() == testCo2, "    Fac 1 should belong to CO 2.");
-    testPassed &= validate( fac2.getEnvironment().terrainType == Factory.getInstance(), "    Fac 2 is not where expected.");
+    testPassed &= validate( fac2.getEnvironment().terrainType == TerrainType.FACTORY, "    Fac 2 is not where expected.");
     testPassed &= validate( fac2.getOwner() == testCo2, "    Fac 2 should belong to CO 2.");
 
     // Grant some units to testCo2
@@ -379,7 +376,7 @@ public class TestGameEvent extends TestCase
     testPassed &= validate( fac2.getOwner() == null, "    Fac 2 should no longer have an owner.");
 
     // His former HQ should now be a mere city.
-    testPassed &= validate( hq.getEnvironment().terrainType == City.getInstance(), "    HQ was not downgraded to city after defeat.");
+    testPassed &= validate( hq.getEnvironment().terrainType == TerrainType.CITY, "    HQ was not downgraded to city after defeat.");
 
     // Confirm that yea, verily, testCo2 is truly defeated.
     testPassed &= validate( true == testCo2.isDefeated, "    testCo2 does not think he is defeated (but he so is).");
