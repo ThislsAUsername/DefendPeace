@@ -7,9 +7,6 @@ public class Tires extends MoveTypeLand
 {
   public Tires()
   {
-    // Initialize the default land-based movement costs, then override specific values.
-    super();
-
     // Wheels are no good for mountains; disable movement for all weather types.
     setMoveCost(TerrainType.MOUNTAIN, 99);
 

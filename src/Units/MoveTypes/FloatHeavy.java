@@ -7,9 +7,6 @@ public class FloatHeavy extends MoveTypeSea
 {
   public FloatHeavy()
   {
-    // Initialize the default sea-based movement costs, then override specific values.
-    super();
-
     // Heavier boats can't travel through shoals.
     setMoveCost(TerrainType.SHOAL, 99);
 

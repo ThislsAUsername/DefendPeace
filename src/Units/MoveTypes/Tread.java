@@ -7,9 +7,6 @@ public class Tread extends MoveTypeLand
 {
   public Tread()
   {
-    // Initialize the default land-based movement costs, then override specific values.
-    super();
-
     // Treads are no good for mountains; disable movement for all weather types.
     setMoveCost(TerrainType.MOUNTAIN, 99);
 

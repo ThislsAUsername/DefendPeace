@@ -7,10 +7,7 @@ public class MoveTypeAir extends MoveType
 {
   public MoveTypeAir()
   {
-    // Initialize the superclass. This creates the weather-to-TerrainCost map.
-    super();
-
-    // Air things aren't really affected by terrain default to 1 everywhere!
+    // Air things aren't really affected by terrain. Default to 1 everywhere!
     moveCosts.get(Weathers.CLEAR).setAllMovementCosts(1);
     moveCosts.get(Weathers.RAIN).setAllMovementCosts(1);
     moveCosts.get(Weathers.SNOW).setAllMovementCosts(1);

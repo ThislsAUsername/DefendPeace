@@ -7,9 +7,6 @@ public class MoveTypeSea extends MoveType
 {
   public MoveTypeSea()
   {
-    // Initialize the superclass. This creates the weather-to-TerrainCost map.
-    super();
-
     // The superclass sets all costs to 99; we just need to set the sea-based terrains to 1.
     moveCosts.get(Weathers.CLEAR).setAllSeaCosts(1);
     moveCosts.get(Weathers.RAIN).setAllSeaCosts(1);

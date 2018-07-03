@@ -7,9 +7,6 @@ public class FootStandard extends MoveTypeLand
 {
   public FootStandard()
   {
-    // Initialize the default land-based movement costs, then override specific values.
-    super();
-
     // Make adjustments to the base-class values.
     setMoveCost(Weathers.CLEAR, TerrainType.MOUNTAIN, 2);
 
