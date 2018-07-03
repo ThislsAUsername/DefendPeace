@@ -363,7 +363,7 @@ public class TerrainSpriteSet
 
       if( TerrainType.TerrainTypeList.length != terrainBases.size())
       {
-        System.out.println("WARNING! TerrainSpriteSet terrains do not align with Environment!");
+        throw new RuntimeException("TerrainSpriteSet.terrainBases does not align with TerrainType.TerrainTypeList!");
       }
     }
 
