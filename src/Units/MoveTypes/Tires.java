@@ -7,8 +7,9 @@ public class Tires extends MoveTypeLand
 {
   public Tires()
   {
-    // Wheels are no good for mountains; disable movement for all weather types.
+    // Wheels are no good for mountains or rivers; disable movement for all weather types.
     setMoveCost(TerrainType.MOUNTAIN, 99);
+    setMoveCost(TerrainType.RIVER, 99);
 
     setMoveCost(Weathers.CLEAR, TerrainType.GRASS, 2);
     setMoveCost(Weathers.CLEAR, TerrainType.FOREST, 3);

@@ -7,8 +7,9 @@ public class Tread extends MoveTypeLand
 {
   public Tread()
   {
-    // Treads are no good for mountains; disable movement for all weather types.
+    // Treads are no good for mountains or rivers; disable movement for all weather types.
     setMoveCost(TerrainType.MOUNTAIN, 99);
+    setMoveCost(TerrainType.RIVER, 99);
 
     setMoveCost(Weathers.CLEAR, TerrainType.FOREST, 2);
     setMoveCost(Weathers.CLEAR, TerrainType.DUNES, 2);

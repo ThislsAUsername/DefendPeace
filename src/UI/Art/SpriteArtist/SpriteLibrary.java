@@ -163,6 +163,7 @@ public class SpriteLibrary
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/bridge_clear.png"), w, h);
       ss.addTerrainAffinity(TerrainType.GRASS); // No need to also add ROAD, since GRASS is the base of ROAD.
+      ss.denyTerrainAffinity(TerrainType.RIVER); // RIVER has a base of GRASS, but we don't want bridge to tile with it.
     }
     else if( terrainType == TerrainType.CITY )
     {
@@ -209,11 +210,19 @@ public class SpriteLibrary
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/sea_clear.png"), w, h);
       ss.addTileTransition(TerrainType.GRASS, loadSpriteSheetFile("res/tileset/sea_grass_clear.png"), w, h);
       ss.addTileTransition(TerrainType.BRIDGE, loadSpriteSheetFile("res/tileset/sea_bridge_clear.png"), w, h);
+      ss.addTileTransition(TerrainType.RIVER, loadSpriteSheetFile("res/tileset/sea_river_clear.png"), w, h);
     }
     else if( terrainType == TerrainType.REEF )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/reef_clear.png"), w, h);
       ss.addTileTransition(TerrainType.SEA, loadSpriteSheetFile("res/tileset/reef_clear.png"), w, h);
+    }
+    else if( terrainType == TerrainType.RIVER )
+    {
+      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/river_clear.png"), w, h);
+      ss.addTileTransition(TerrainType.BRIDGE, loadSpriteSheetFile("res/tileset/sea_bridge_clear.png"), w, h);
+      ss.addTerrainAffinity(TerrainType.SHOAL);
+      ss.addTerrainAffinity(TerrainType.SEA);
     }
     else if( terrainType == TerrainType.ROAD )
     {
@@ -228,6 +237,7 @@ public class SpriteLibrary
       ss.addTileTransition(TerrainType.SEA, loadSpriteSheetFile("res/tileset/shoal_sea_clear.png"), w, h);
       ss.addTileTransition(TerrainType.GRASS, loadSpriteSheetFile("res/tileset/shoal_grass_clear.png"), w, h);
       ss.addTileTransition(TerrainType.BRIDGE, loadSpriteSheetFile("res/tileset/sea_bridge_clear.png"), w, h);
+      ss.addTileTransition(TerrainType.RIVER, loadSpriteSheetFile("res/tileset/shoal_river_clear.png"), w, h);
     }
     else
     {

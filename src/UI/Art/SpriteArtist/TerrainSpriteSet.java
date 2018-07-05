@@ -28,6 +28,7 @@ public class TerrainSpriteSet
   private boolean isTransition = false;
   public final TerrainType myTerrainType;
   private ArrayList<TerrainType> myTerrainAffinities;
+  private ArrayList<TerrainType> myTerrainNonAffinities;
 
   int drawOffsetx;
   int drawOffsety;
@@ -58,6 +59,7 @@ public class TerrainSpriteSet
     tileTransitions = new ArrayList<TerrainSpriteSet>();
     isTransition = isTransitionTileset;
     myTerrainAffinities = new ArrayList<TerrainType>();
+    myTerrainNonAffinities = new ArrayList<TerrainType>();
 
     // We assume here that all sprites are sized in multiples of the base sprite size.
     drawOffsetx = spriteWidth / SpriteLibrary.baseSpriteSize - 1;
@@ -160,6 +162,13 @@ public class TerrainSpriteSet
   public void addTerrainAffinity(TerrainType otherTerrain)
   {
     myTerrainAffinities.add(otherTerrain);
+  }
+
+  /** Declares another terrain type to be "unlike" this one - it will be treated as different than this type when tiling,
+      even if its base type has an affinity with this type (e.g. BRIDGE should tile with GRASS, but not with RIVER). */
+  public void denyTerrainAffinity(TerrainType otherTerrain)
+  {
+    myTerrainNonAffinities.add(otherTerrain);
   }
 
   /**
@@ -316,10 +325,12 @@ public class TerrainSpriteSet
       TerrainType otherTerrain = map.getEnvironment(x, y).terrainType;
       TerrainType otherBase = getBaseTerrainType(otherTerrain);
 
-      if( (otherTerrain == myTerrainType) || // Terrain types match.
-          (otherBase == myTerrainType) || // Terrain bases match.
-          myTerrainAffinities.contains(otherTerrain) || // Affinity with other tile type.
-          myTerrainAffinities.contains(otherBase) ) // Affinity with other tile base type.
+      if( ((otherTerrain == myTerrainType) // Terrain types match.
+          || (otherBase == myTerrainType) // Terrain bases match.
+          || myTerrainAffinities.contains(otherTerrain) // Affinity with other tile type.
+          || myTerrainAffinities.contains(otherBase)) // Affinity with other tile base type.
+          && !myTerrainNonAffinities.contains(otherTerrain) // No explicit denial of affinity.
+          )
       {
         terrainTypesMatch = true;
       }
@@ -352,6 +363,7 @@ public class TerrainSpriteSet
       terrainBases.put(TerrainType.LAB, TerrainType.GRASS);
       terrainBases.put(TerrainType.MOUNTAIN, TerrainType.GRASS);
       terrainBases.put(TerrainType.GRASS, TerrainType.GRASS);
+      terrainBases.put(TerrainType.RIVER, TerrainType.GRASS);
       terrainBases.put(TerrainType.ROAD, TerrainType.GRASS);
 
       terrainBases.put(TerrainType.BRIDGE, TerrainType.SHOAL);
