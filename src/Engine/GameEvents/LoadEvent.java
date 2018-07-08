@@ -23,6 +23,12 @@ public class LoadEvent implements GameEvent
   }
 
   @Override
+  public void sendToListener(GameEventListener listener)
+  {
+    listener.receiveLoadEvent( this );
+  }
+
+  @Override
   public void performEvent(GameMap gameMap)
   {
     if( null != unitTransport && unitTransport.hasCargoSpace(unitCargo.model.type) )

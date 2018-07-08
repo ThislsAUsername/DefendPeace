@@ -16,6 +16,13 @@ public interface GameEvent
   public GameAnimation getEventAnimation( MapView mapView );
 
   /**
+   * This function implements the visitor pattern interface to distribute events
+   * to the correct receivers in GameEventListener subclasses.
+   * @param listener The visitor who wishes to receive GameEvents.
+   */
+  public void sendToListener(GameEventListener listener);
+
+  /**
    * Hook for subclasses to implement the specific effects of each action type.
    * @param map
    */

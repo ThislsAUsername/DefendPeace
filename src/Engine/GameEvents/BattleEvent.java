@@ -39,6 +39,12 @@ public class BattleEvent implements GameEvent
   }
 
   @Override
+  public void sendToListener(GameEventListener listener)
+  {
+    listener.receiveBattleEvent( battleInfo );
+  }
+
+  @Override
   public void performEvent(GameMap gameMap)
   {
     // Apply the battle results that we calculated previously.

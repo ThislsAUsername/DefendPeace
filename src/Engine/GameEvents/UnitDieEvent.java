@@ -21,6 +21,12 @@ public class UnitDieEvent implements GameEvent
   }
 
   @Override
+  public void sendToListener(GameEventListener listener)
+  {
+    listener.receiveUnitDieEvent( this );
+  }
+
+  @Override
   public void performEvent(GameMap gameMap)
   {
     // Set HP to 0. One could make a UnitDieEvent on a healthy

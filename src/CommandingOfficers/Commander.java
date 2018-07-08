@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import CommandingOfficers.Modifiers.COModifier;
-import Engine.GameInstance;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
 import Terrain.GameMap;
@@ -50,6 +49,9 @@ public class Commander
   public int team = -1;
   public boolean isDefeated = false;
   public XYCoord HQLocation = null;
+  public double abilityPower = 0;
+
+  private ArrayList<CommanderAbility> myAbilities = null;
 
   public Commander(CommanderInfo info)
   {
@@ -100,6 +102,13 @@ public class Commander
     units = new ArrayList<Unit>();
     ownedProperties = new ArrayList<Location>();
     money = DEFAULTSTARTINGMONEY;
+
+    myAbilities = new ArrayList<CommanderAbility>();
+  }
+
+  protected void addCommanderAbility( CommanderAbility ca )
+  {
+    myAbilities.add(ca);
   }
 
   /**
@@ -191,15 +200,17 @@ public class Commander
     return (unitProductionByTerrain.get(buyLocation) != null) ? unitProductionByTerrain.get(buyLocation) : new ArrayList<UnitModel>();
   }
 
-  public ArrayList<String> getReadyAbilities()
+  /** Return an ArrayList containing every ability this Commander currently has the power to perform. */
+  public ArrayList<CommanderAbility> getReadyAbilities()
   {
-    System.out.println("WARNING! Calling getReadyAbilities on Commander base class!");
-    ArrayList<String> coas = new ArrayList<String>();
-    return coas;
-  }
-
-  public void doAbility(String abilityName, GameInstance game)
-  {
-    System.out.println("WARNING! Calling doAbility on Commander base class!");
+    ArrayList<CommanderAbility> ready = new ArrayList<CommanderAbility>();
+    for( CommanderAbility ca : myAbilities )
+    {
+      if( ca.getCost() <= abilityPower )
+      {
+        ready.add(ca);
+      }
+    }
+    return ready;
   }
 }

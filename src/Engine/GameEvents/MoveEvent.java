@@ -31,6 +31,12 @@ public class MoveEvent implements GameEvent
   }
 
   @Override
+  public void sendToListener(GameEventListener listener)
+  {
+    listener.receiveMoveEvent( this );
+  }
+
+  @Override
   public void performEvent(GameMap gameMap)
   {
     if( unitPath.getPathLength() > 0 ) // Make sure we have a destination.

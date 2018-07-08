@@ -66,6 +66,7 @@ public class BattleInstance
     defender.CO.applyCombatModifiers(this);
 
     double defenderHPLoss = attackInstance.calculateDamage();
+    if( defenderHPLoss > defender.getPreciseHP() ) defenderHPLoss = defender.getPreciseHP();
 
     // If the unit can counter, and wasn't killed in the initial volley, calculate return damage.
     if( canCounter && (defender.getHP() > defenderHPLoss) )
@@ -78,6 +79,7 @@ public class BattleInstance
       // TODO: Let the COs take another pass at modifying things?
 
       attackerHPLoss = defendInstance.calculateDamage();
+      if( attackerHPLoss > attacker.getPreciseHP() ) attackerHPLoss = attacker.getPreciseHP();
     }
 
     // Build and return the BattleSummary.

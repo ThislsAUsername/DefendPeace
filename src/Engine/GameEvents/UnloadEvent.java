@@ -31,6 +31,12 @@ public class UnloadEvent implements GameEvent
   }
 
   @Override
+  public void sendToListener(GameEventListener listener)
+  {
+    listener.receiveUnloadEvent( this );
+  }
+
+  @Override
   public void performEvent(GameMap gameMap)
   {
     if( transport.heldUnits != null && transport.heldUnits.contains(cargo) && gameMap.getLocation(dropLoc).getResident() == null )

@@ -21,6 +21,12 @@ public class ResupplyEvent implements GameEvent
   }
 
   @Override
+  public void sendToListener(GameEventListener listener)
+  {
+    listener.receiveResupplyEvent( this );
+  }
+
+  @Override
   public void performEvent(GameMap gameMap)
   {
     target.resupply();
