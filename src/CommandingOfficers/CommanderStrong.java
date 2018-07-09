@@ -1,10 +1,9 @@
 package CommandingOfficers;
 
-import java.util.ArrayList;
-
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
+import CommandingOfficers.Modifiers.UnitProductionModifier;
 import Engine.GameInstance;
 import Terrain.TerrainType;
 import Units.UnitModel;
@@ -17,12 +16,12 @@ public class CommanderStrong extends Commander
   {
     super(coInfo);
 
-    // Strong places a high value on the human element, so he allows infantry to be built from any production building.
-    unitProductionByTerrain.get(TerrainType.AIRPORT).add(getUnitModel(UnitModel.UnitEnum.INFANTRY));
-    unitProductionByTerrain.get(TerrainType.SEAPORT).add(getUnitModel(UnitModel.UnitEnum.INFANTRY));
-    unitProductionByTerrain.put(TerrainType.HEADQUARTERS, new ArrayList<UnitModel>());
-    unitProductionByTerrain.get(TerrainType.HEADQUARTERS).add(getUnitModel(UnitModel.UnitEnum.INFANTRY));
-    unitProductionByTerrain.put(TerrainType.CITY, new ArrayList<UnitModel>());
+    // Strong allows infantry to be built from any production building.
+    UnitModel infModel = getUnitModel(UnitModel.UnitEnum.INFANTRY);
+    UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, infModel);
+    upm.addProductionPair(TerrainType.SEAPORT, infModel);
+    upm.addProductionPair(TerrainType.HEADQUARTERS, infModel);
+    upm.apply(this); // Passive ability, so don't add it to the COModifier list; just apply it and forget it.
 
     // Set Strong up with a base damage buff and long-range APCs. These COModifiers are
     // not added to the modifiers collection so they will not be reverted.
@@ -62,9 +61,11 @@ public class CommanderStrong extends Commander
       myCommander.addCOModifier(damageMod);
 
       // Make bazookas buildable from all production buildings.
-//      myCommander.unitProductionByTerrain.get(TerrainType.AIRPORT).add(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
-//      myCommander.unitProductionByTerrain.get(TerrainType.SEAPORT).add(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
-//      myCommander.unitProductionByTerrain.get(TerrainType.HEADQUARTERS).add(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
+      UnitModel mechModel = myCommander.getUnitModel(UnitModel.UnitEnum.MECH);
+      UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, mechModel);
+      upm.addProductionPair(TerrainType.SEAPORT, mechModel);
+      upm.addProductionPair(TerrainType.HEADQUARTERS, mechModel);
+      myCommander.addCOModifier(upm);
 
       // Grant foot-soldiers and transports additional movement power.
       COMovementModifier moveMod = new COMovementModifier();
@@ -104,12 +105,15 @@ public class CommanderStrong extends Commander
     {
       myCommander.addCOModifier(damageMod);
 
-      // Make foot-soldiers from all production buildings.
-//      myCommander.unitProductionByTerrain.get(TerrainType.CITY).add(myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
-//      myCommander.unitProductionByTerrain.get(TerrainType.CITY).add(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
-//      myCommander.unitProductionByTerrain.get(TerrainType.AIRPORT).add(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
-//      myCommander.unitProductionByTerrain.get(TerrainType.SEAPORT).add(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
-//      myCommander.unitProductionByTerrain.get(TerrainType.HEADQUARTERS).add(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
+      // Make all foot-soldiers buildable from all production buildings.
+      UnitModel infModel = myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+      UnitModel mechModel = myCommander.getUnitModel(UnitModel.UnitEnum.MECH);
+      UnitProductionModifier upm = new UnitProductionModifier(TerrainType.CITY, infModel);
+      upm.addProductionPair(TerrainType.CITY, mechModel);
+      upm.addProductionPair(TerrainType.AIRPORT, mechModel);
+      upm.addProductionPair(TerrainType.SEAPORT, mechModel);
+      upm.addProductionPair(TerrainType.HEADQUARTERS, mechModel);
+      myCommander.addCOModifier(upm);
 
       // Grant foot-soldiers and transports two (2) additional movement power.
       COMovementModifier moveMod = new COMovementModifier(2);
