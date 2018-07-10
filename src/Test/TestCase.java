@@ -38,7 +38,7 @@ public abstract class TestCase
   /**
    * Convenience function to create a new unit, add it to the GameMap, and get it back in one line.
    * @param map The map to which we want to add the unit.
-   * @param co The Commander to whom the unit shall belon.
+   * @param co The Commander to whom the unit shall belong.
    * @param type The type of unit we are to construct.
    * @param x The X-location of the new unit.
    * @param y The Y-location of the new unit.

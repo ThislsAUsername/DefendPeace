@@ -4,15 +4,22 @@ import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderPatch;
+import CommandingOfficers.CommanderStrong;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
+import CommandingOfficers.Modifiers.UnitRemodelModifier;
+import Terrain.GameMap;
+import Terrain.MapLibrary;
 import Terrain.TerrainType;
+import Units.Unit;
 import Units.UnitModel;
 
 public class TestCOModifier extends TestCase
 {
-  private static Commander patch;
+  private static Commander strong = null;
+  private static Commander patch = null;
+  private static GameMap testMap = null;
 
   @Override
   public boolean runTest()
@@ -23,6 +30,7 @@ public class TestCOModifier extends TestCase
     testPassed &= validate(testDamageModifier(), "  Damage Modifier test failed!");
     testPassed &= validate(testMovementModifier(), "  Movement modifier test failed!");
     testPassed &= validate(testProductionModifier(), "  Production modifier test failed!");
+    testPassed &= validate(testUnitRemodelModifier(), "  Unit Remodel modifier test failed!");
     
     return testPassed;
   }
@@ -30,7 +38,11 @@ public class TestCOModifier extends TestCase
   /** Make two COs and a GameMap to use with this test case. */
   private void setupTest()
   {
+    strong = new CommanderStrong();
     patch = new CommanderPatch();
+    Commander[] cos = { strong, patch };
+
+    testMap = new GameMap(cos, MapLibrary.getByName("Firing Range"));
   }
 
   private boolean testDamageModifier()
@@ -109,6 +121,38 @@ public class TestCOModifier extends TestCase
     // Make sure it didn't also remove the ability to construct Infantry.
     testPassed &= validate( factoryModels.contains(inf), "    Factory can no longer build Infantry, though it should.");
     
+    return testPassed;
+  }
+
+  private boolean testUnitRemodelModifier()
+  {
+    boolean testPassed = true;
+
+    addUnit(testMap, patch, UnitModel.UnitEnum.INFANTRY, 2, 2);
+    addUnit(testMap, patch, UnitModel.UnitEnum.RECON, 2, 3);
+    Unit infantry = testMap.getLocation(2, 2).getResident();
+    Unit recon = testMap.getLocation(2, 3).getResident();
+
+    testPassed &= validate( infantry != null, "    Infantry is missing. Malformed test!");
+    testPassed &= validate( recon != null, "    Recon is missing. Malformed test!");
+
+    UnitModel infModel = patch.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+    UnitModel reconModel = patch.getUnitModel(UnitModel.UnitEnum.RECON);
+
+    testPassed &= validate( infantry.model == infModel, "    Infantry is not Infantry. Malformed test!");
+    testPassed &= validate( recon.model == reconModel, "    Recon is not Recon. Malformed test!");
+
+    // Turn our hapless infantryman into a lean, mean, driving machine. Make sure the Recon is still a Recon also.
+    UnitRemodelModifier remod = new UnitRemodelModifier(infModel, reconModel);
+    remod.apply(patch);
+    testPassed &= validate( infantry.model == reconModel, "    Infantry is not Recon after being turned into one.");
+    testPassed &= validate( recon.model == reconModel, "    Recon is not Recon, but it still should be.");
+
+    // OK, that was weird. Change him back. Please. Make sure nothing weird happened to the Recon in the process.
+    remod.revert(patch);
+    testPassed &= validate( infantry.model == infModel, "    Infantry is not Infantry after being changed back.");
+    testPassed &= validate( recon.model == reconModel, "    Recon is not Recon, though it should not have changed.");
+
     return testPassed;
   }
 }
