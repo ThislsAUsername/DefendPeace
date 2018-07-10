@@ -40,7 +40,7 @@ public class MoveType
     return cost.intValue();
   }
 
-  /** Returns the cost to traverse the given tile, accounting for its current terain and weather types. */
+  /** Returns the cost to traverse the given tile, accounting for its current terrain and weather types. */
   public int getMoveCost(Environment tile)
   {
     return getMoveCost(tile.weatherType, tile.terrainType);

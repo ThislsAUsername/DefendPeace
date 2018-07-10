@@ -165,6 +165,8 @@ public class MapReader extends IMapBuilder
         return MT;
       case "RF":
         return RF;
+      case "RV":
+        return RV;
       case "RD":
         return RD;
       case "SE":

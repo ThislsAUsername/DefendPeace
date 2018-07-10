@@ -96,6 +96,11 @@ public class TerrainType
   private static final Color REEF_COLOR = new Color(218, 152, 112);
   public static final TerrainType REEF = new TerrainType( REEF_FLAGS, REEF_DEFENSE, REEF_COLOR );
 
+  private static final int RIVER_FLAGS = LAND; // It's not really a WATER type, since boats can't go here.
+  private static final int RIVER_DEFENSE = 0;
+  private static final Color RIVER_COLOR = new Color(148, 219, 255);
+  public static final TerrainType RIVER = new TerrainType( RIVER_FLAGS, RIVER_DEFENSE, RIVER_COLOR );
+
   private static final int ROAD_FLAGS = LAND;
   private static final int ROAD_DEFENSE = 0;
   private static final Color ROAD_COLOR = new Color(189, 189, 189);
@@ -118,6 +123,6 @@ public class TerrainType
 
   // List of all terrain types.
   public static final TerrainType[] TerrainTypeList = {
-    AIRPORT, BRIDGE, CITY, DUNES, FACTORY, FOREST, GRASS, HEADQUARTERS, LAB, MOUNTAIN, REEF, ROAD, SEA, SEAPORT, SHOAL
+    AIRPORT, BRIDGE, CITY, DUNES, FACTORY, FOREST, GRASS, HEADQUARTERS, LAB, MOUNTAIN, REEF, RIVER, ROAD, SEA, SEAPORT, SHOAL
   };
 }
