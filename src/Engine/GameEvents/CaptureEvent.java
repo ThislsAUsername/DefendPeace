@@ -39,7 +39,7 @@ public class CaptureEvent implements GameEvent
   @Override
   public void sendToListener(GameEventListener listener)
   {
-    listener.receiveCaptureEvent( this );
+    listener.receiveCaptureEvent( unit, location );
   }
 
   public boolean willCapture()

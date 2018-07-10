@@ -3,6 +3,8 @@ package Engine.GameEvents;
 import java.util.HashSet;
 
 import Engine.Combat.BattleSummary;
+import Terrain.Location;
+import Units.Unit;
 
 /**
  * Subclasses can register to be notified of any supported event types. This class is both the event distributor,
@@ -41,7 +43,7 @@ public abstract class GameEventListener
 
   // The functions below should be overridden by subclasses for event types they care about.
   public void receiveBattleEvent(BattleSummary summary){};
-  public void receiveCaptureEvent(CaptureEvent event){};
+  public void receiveCaptureEvent(Unit unit, Location location){};
   public void receiveCommanderDefeatEvent(CommanderDefeatEvent event){};
   public void receiveLoadEvent(LoadEvent event){};
   public void receiveMoveEvent(MoveEvent event){};

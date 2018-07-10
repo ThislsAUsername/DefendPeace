@@ -5,6 +5,8 @@ import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameInstance;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
+import Terrain.Location;
+import Units.Unit;
 
 public class CommanderPatch extends Commander
 {
@@ -21,6 +23,8 @@ public class CommanderPatch extends Commander
   private static final double PILLAGE_INCOME = 0.5;
   private static final int PILLAGE_ATTACK_BUFF = 25;
 
+  private LootAbility myLootAbility = null;
+
   public CommanderPatch()
   {
     super(coInfo);
@@ -29,12 +33,35 @@ public class CommanderPatch extends Commander
     addCommanderAbility(new PatchAbility(this, PILLAGE_NAME, PILLAGE_COST, PILLAGE_INCOME, PILLAGE_ATTACK_BUFF));
 
     // Passive - Loot
-    // TODO: Patch has a capture bonus of 1 day's income when he first takes a property.
+    myLootAbility = new LootAbility(this);
+    GameEventListener.registerEventListener(myLootAbility);
   }
 
   public static CommanderInfo getInfo()
   {
     return coInfo;
+  }
+
+  /** LootAbility is a passive that grants its Commander a day's income immediately upon capturing a
+   *  property, so long as that property is one that generates income. */
+  private static class LootAbility extends GameEventListener
+  {
+    private Commander myCommander = null;
+
+    public LootAbility(Commander myCo)
+    {
+      myCommander = myCo;
+    }
+
+    @Override
+    public void receiveCaptureEvent(Unit unit, Location location)
+    {
+      if( unit.CO == myCommander && location.getOwner() == myCommander && location.isProfitable() )
+      {
+        // We just successfully captured a property. Loot the place!
+        myCommander.money += myCommander.incomePerCity;
+      }
+    }
   }
 
   /** PatchAbility gives Patch a damage bonus, and also grants
