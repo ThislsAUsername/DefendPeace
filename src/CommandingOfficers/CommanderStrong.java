@@ -1,20 +1,45 @@
 package CommandingOfficers;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
+import CommandingOfficers.Modifiers.UnitRemodelModifier;
 import Engine.GameInstance;
 import Terrain.TerrainType;
+import Units.APCModel;
+import Units.LanderModel;
+import Units.TCopterModel;
 import Units.UnitModel;
 
 public class CommanderStrong extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Strong", CommanderLibrary.CommanderEnum.STRONG);
+  private static Map<UnitModel.UnitEnum, UnitModel> highCapacityUnitModels;
 
   public CommanderStrong()
   {
     super(coInfo);
+
+    // Define "high-capacity" transport unit models, to be swapped in by his abilities.
+    if( null == highCapacityUnitModels )
+    {
+      UnitModel hcApc = new APCModel();
+      UnitModel hcLander = new LanderModel();
+      UnitModel hcCopter = new TCopterModel();
+      highCapacityUnitModels = new HashMap<UnitModel.UnitEnum, UnitModel>();
+      highCapacityUnitModels.put(hcApc.type, hcApc);
+      highCapacityUnitModels.put(hcLander.type, hcLander);
+      highCapacityUnitModels.put(hcCopter.type, hcCopter);
+      for( UnitModel um : highCapacityUnitModels.values() )
+      {
+        um.holdingCapacity += 1;
+      }
+      // TODO: other non-transport types?
+    }
 
     // Strong allows infantry to be built from any production building.
     UnitModel infModel = getUnitModel(UnitModel.UnitEnum.INFANTRY);
@@ -74,10 +99,13 @@ public class CommanderStrong extends Commander
       moveMod.addApplicableUnitType(UnitModel.UnitEnum.MECH);
       myCommander.addCOModifier(moveMod);
 
-      // TODO: Grant transports extra capacity
-      // myCommander.getUnitModel(UnitModel.UnitEnum.APC).holdingCapacity += 1;
-      // myCommander.getUnitModel(UnitModel.UnitEnum.T_COPTER).holdingCapacity += 1;
-      // myCommander.getUnitModel(UnitModel.UnitEnum.LANDER).holdingCapacity += 1;
+      // Grant transports extra capacity
+      UnitRemodelModifier urm = new UnitRemodelModifier();
+      for( UnitModel.UnitEnum type : highCapacityUnitModels.keySet() )
+      {
+        urm.addUnitRemodel(myCommander.getUnitModel(type), highCapacityUnitModels.get(type));
+      }
+      myCommander.addCOModifier(urm);
     }
   }
 
@@ -122,11 +150,13 @@ public class CommanderStrong extends Commander
       moveMod.addApplicableUnitType(UnitModel.UnitEnum.MECH);
       myCommander.addCOModifier(moveMod);
 
-      // TODO: Grant all transports extra cargo space, and let foot-soldiers hitch a ride on ground vehicles.
-      // myCommander.getUnitModel(UnitModel.UnitEnum.APC).holdingCapacity += 1;
-      // myCommander.getUnitModel(UnitModel.UnitEnum.T_COPTER).holdingCapacity += 1;
-      // myCommander.getUnitModel(UnitModel.UnitEnum.LANDER).holdingCapacity += 1;
-      // myCommander.getUnitModel(UnitModel.UnitEnum.RECON).holdingCapacity += 1;
+      // Grant all transports extra cargo space, and TODO: let foot-soldiers hitch a ride on ground vehicles.
+      UnitRemodelModifier urm = new UnitRemodelModifier();
+      for( UnitModel.UnitEnum type : highCapacityUnitModels.keySet() )
+      {
+        urm.addUnitRemodel(myCommander.getUnitModel(type), highCapacityUnitModels.get(type));
+      }
+      myCommander.addCOModifier(urm);
     }
   }
 

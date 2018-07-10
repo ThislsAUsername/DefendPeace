@@ -17,11 +17,16 @@ public class UnitRemodelModifier implements COModifier
   private Map<UnitModel, UnitModel> modelSwapBacks = null;
   private ArrayList<Unit> unitsChanged = null;
 
-  public UnitRemodelModifier(UnitModel oldModel, UnitModel newModel)
+  public UnitRemodelModifier()
   {
     modelSwaps = new HashMap<UnitModel, UnitModel>();
     modelSwapBacks = new HashMap<UnitModel, UnitModel>();
     unitsChanged = new ArrayList<Unit>();
+  }
+
+  public UnitRemodelModifier(UnitModel oldModel, UnitModel newModel)
+  {
+    this();
     addUnitRemodel(oldModel, newModel);
   }
 
