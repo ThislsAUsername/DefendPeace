@@ -147,6 +147,10 @@ public class TestCOModifier extends TestCase
     remod.apply(patch);
     testPassed &= validate( infantry.model == reconModel, "    Infantry is not Recon after being turned into one.");
     testPassed &= validate( recon.model == reconModel, "    Recon is not Recon, but it still should be.");
+    for( int i = 0; i < infantry.weapons.length; ++i )
+    {
+      testPassed &= validate( infantry.weapons[i].model == recon.weapons[i].model, "    Infantry weapons are not Recon weapons, though he is recon." );
+    }
 
     // OK, that was weird. Change him back. Please. Make sure nothing weird happened to the Recon in the process.
     remod.revert(patch);
