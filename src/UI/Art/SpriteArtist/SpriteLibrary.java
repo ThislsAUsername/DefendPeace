@@ -76,7 +76,7 @@ public class SpriteLibrary
   // TODO: Account for weather?
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
   // TODO: Consider templatizing the key types, and then combining these two maps.
-  private static HashMap<UnitSpriteSetKey, UnitSpriteSet> unitMapSpriteSetMap = new HashMap<UnitSpriteSetKey, UnitSpriteSet>();
+  private static HashMap<UnitSpriteSetKey, UnitSpriteSet> mapUnitSpriteSetMap = new HashMap<UnitSpriteSetKey, UnitSpriteSet>();
 
   // Sprites to hold the images for drawing tentative moves on the map.
   private static Sprite moveCursorLineSprite = null;
@@ -365,28 +365,28 @@ public class SpriteLibrary
     }
   }
 
-  public static UnitSpriteSet getUnitMapSpriteSet(Unit unit)
+  public static UnitSpriteSet getMapUnitSpriteSet(Unit unit)
   {
     UnitSpriteSetKey key = UnitSpriteSetKey.instance(unit.model.type, unit.CO);
-    if( !unitMapSpriteSetMap.containsKey(key) )
+    if( !mapUnitSpriteSetMap.containsKey(key) )
     {
       // We don't have it? Go load it.
-      createUnitMapSpriteSet(key);
+      createMapUnitSpriteSet(key);
     }
     // We either found it or created it; it had better be there.
-    return unitMapSpriteSetMap.get(key);
+    return mapUnitSpriteSetMap.get(key);
   }
 
-  private static void createUnitMapSpriteSet(UnitSpriteSetKey key)
+  private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
     System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString());
-    String filestr = getUnitSpriteFilename(key.unitTypeKey);
+    String filestr = getMapUnitSpriteFilename(key.unitTypeKey);
     UnitSpriteSet spriteSet = new UnitSpriteSet(loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
         getMapUnitColors(key.commanderKey.myColor));
-    unitMapSpriteSetMap.put(key, spriteSet);
+    mapUnitSpriteSetMap.put(key, spriteSet);
   }
 
-  private static String getUnitSpriteFilename(UnitModel.UnitEnum unitType)
+  private static String getMapUnitSpriteFilename(UnitModel.UnitEnum unitType)
   {
     String spriteFile = "";
     switch (unitType)

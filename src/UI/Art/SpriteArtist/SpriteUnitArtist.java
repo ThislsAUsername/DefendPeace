@@ -28,7 +28,7 @@ public class SpriteUnitArtist
     // Convert "real" location into a draw-space location, then draw icons.
     int drawX = (int) (myView.getTileSize() * x);
     int drawY = (int) (myView.getTileSize() * y);
-    SpriteLibrary.getUnitMapSpriteSet(unit).drawUnitIcons(g, myGame.activeCO, unit, drawX, drawY, drawScale);
+    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnitIcons(g, myGame.activeCO, unit, drawX, drawY, drawScale);
   }
 
   /**
@@ -43,7 +43,7 @@ public class SpriteUnitArtist
     int drawY = (int) (myView.getTileSize() * y);
 
     // Draw the unit at the specified location.
-    SpriteLibrary.getUnitMapSpriteSet(unit).drawUnit(g, myGame.activeCO, unit, /*currentAction,*/
+    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnit(g, myGame.activeCO, unit, /*currentAction,*/
     animIndex, drawX, drawY, drawScale, myView.getFlipUnitFacing(unit.CO));
   }
 }
