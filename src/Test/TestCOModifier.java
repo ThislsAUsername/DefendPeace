@@ -157,6 +157,19 @@ public class TestCOModifier extends TestCase
     testPassed &= validate( infantry.model == infModel, "    Infantry is not Infantry after being changed back.");
     testPassed &= validate( recon.model == reconModel, "    Recon is not Recon, though it should not have changed.");
 
+    // Another test! We must make sure that two units, after being transmogrified into the same thing, will return to their correct forms.
+    UnitModel mechModel = patch.getUnitModel(UnitModel.UnitEnum.MECH);
+    remod = new UnitRemodelModifier(infModel, mechModel);
+    remod.addUnitRemodel(reconModel, mechModel);
+    remod.apply(patch);
+    testPassed &= validate( infantry.model == mechModel, "    Infantry is not Mech after being changed.");
+    testPassed &= validate( recon.model == mechModel, "    Recon is not Mech after being changed.");
+
+    remod.revert(patch);
+    testPassed &= validate( infantry.model == infModel, "    Infantry is not Infantry after being unMeched.");
+    testPassed &= validate( recon.model == reconModel, "    Recon is not Recon after being unMeched.");
+
+
     return testPassed;
   }
 }

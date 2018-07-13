@@ -15,14 +15,14 @@ import Units.Weapons.Weapon;
 public class UnitRemodelModifier implements COModifier
 {
   private Map<UnitModel, UnitModel> modelSwaps = null;
-  private Map<UnitModel, UnitModel> modelSwapBacks = null;
+  private Map<Unit, UnitModel> modelSwapBacks = null;
   private ArrayList<Unit> unitsChanged = null;
   private Map<Unit, Weapon[]> unitWeapons = null;
 
   public UnitRemodelModifier()
   {
     modelSwaps = new HashMap<UnitModel, UnitModel>();
-    modelSwapBacks = new HashMap<UnitModel, UnitModel>();
+    modelSwapBacks = new HashMap<Unit, UnitModel>();
     unitsChanged = new ArrayList<Unit>();
     unitWeapons = new HashMap<Unit, Weapon[]>();
   }
@@ -37,7 +37,6 @@ public class UnitRemodelModifier implements COModifier
   public void addUnitRemodel(UnitModel oldModel, UnitModel newModel)
   {
     modelSwaps.put(oldModel, newModel);
-    modelSwapBacks.put(newModel, oldModel);
   }
 
   @Override
@@ -51,6 +50,7 @@ public class UnitRemodelModifier implements COModifier
         unitWeapons.put(unit, unit.weapons);
 
         // Swap the unit's identity and store it for later.
+        modelSwapBacks.put(unit, unit.model);
         unit.model = modelSwaps.get(unit.model);
 
         // Change out weapons.
@@ -66,11 +66,8 @@ public class UnitRemodelModifier implements COModifier
   {
     for( Unit unit : unitsChanged )
     {
-      if( modelSwapBacks.containsKey(unit.model) )
-      {
-        unit.model = modelSwapBacks.get(unit.model);
-        unit.weapons = unitWeapons.get(unit);
-      }
+      unit.model = modelSwapBacks.get(unit);
+      unit.weapons = unitWeapons.get(unit);
     }
   }
 
