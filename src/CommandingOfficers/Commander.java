@@ -52,6 +52,7 @@ public class Commander
   private double myAbilityPower = 0;
 
   private ArrayList<CommanderAbility> myAbilities = null;
+  private String myActiveAbilityName = "";
 
   public Commander(CommanderInfo info)
   {
@@ -132,6 +133,7 @@ public class Commander
    */
   public void initTurn(GameMap map)
   {
+    myActiveAbilityName = "";
     // Accrue income for each city under your control.
     int turnIncome = 0;
     for( int w = 0; w < map.mapWidth; ++w )
@@ -204,11 +206,14 @@ public class Commander
   public ArrayList<CommanderAbility> getReadyAbilities()
   {
     ArrayList<CommanderAbility> ready = new ArrayList<CommanderAbility>();
-    for( CommanderAbility ca : myAbilities )
+    if( myActiveAbilityName.isEmpty() )
     {
-      if( ca.getCost() <= myAbilityPower )
+      for( CommanderAbility ca : myAbilities )
       {
-        ready.add(ca);
+        if( ca.getCost() <= myAbilityPower )
+        {
+          ready.add(ca);
+        }
       }
     }
     return ready;
@@ -229,7 +234,20 @@ public class Commander
     return myAbilityPower;
   }
 
-  public void modifyAbilityPower(double amount)
+  public String getActiveAbilityName()
+  {
+    return myActiveAbilityName;
+  }
+
+  /** Lets the commander know that he's using an ability,
+   *  and accounts for the cost of using it. */
+  public void activateAbility(CommanderAbility ability)
+  {
+    modifyAbilityPower(-ability.getCost());
+    myActiveAbilityName = ability.myName;
+  }
+
+  protected void modifyAbilityPower(double amount)
   {
     myAbilityPower += amount;
     if( myAbilityPower < 0 ) myAbilityPower = 0;

@@ -26,9 +26,9 @@ public abstract class CommanderAbility
     return myName;
   }
   
-  /** Final method to account for power expenditure, and then call
-   * perform method do do the actual work. This just makes it so that
-   * subclasses don't have to all manually handle ability cost. */
+  /** Final method to do some bookkeeping, and then call
+   * perform() do do the actual work. This allows us to
+   * manage global Ability side-effects in one place. */
   public final void activate(GameInstance game)
   {
     if( myCommander.getAbilityPower() < myPowerCost )
@@ -36,7 +36,7 @@ public abstract class CommanderAbility
       System.out.println("WARNING!: Performing ability with insufficient ability power!");
     }
 
-    myCommander.modifyAbilityPower(-myPowerCost);
+    myCommander.activateAbility(this);
 
     // Increase the cost of this ability for next time to mitigate spam and
     // accommodate the presumably-growing battlefront.

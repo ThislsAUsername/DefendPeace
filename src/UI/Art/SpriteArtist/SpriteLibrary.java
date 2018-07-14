@@ -722,6 +722,21 @@ public class SpriteLibrary
   }
 
   /**
+   * Creates a new transparent image of the given size. This is used as
+   * a base for building generated image assets on the fly.
+   * @param w Desired width of the image.
+   * @param h Desired height of the image.
+   * @return A new transparent BufferedImage of the specified size.
+   */
+  public static BufferedImage createTransparentSprite(int w, int h)
+  {
+    BufferedImage bi = createDefaultBlankSprite(w, h);
+    Sprite spr = new Sprite(bi);
+    spr.colorize(Color.BLACK, new Color(0, 0, 0, 0));
+    return bi;
+  }
+
+  /**
    * If in is null, set it to a newly-generated blank image of default size. Return in.
    */
   public static BufferedImage createBlankImageIfNull(BufferedImage in)

@@ -3,6 +3,8 @@ package UI.Art.SpriteArtist;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.Map;
 
 import CommandingOfficers.Commander;
 
@@ -14,6 +16,8 @@ public class CommanderOverlayArtist
   private static long animIndexUpdateTime = 0;
   private static final int animIndexUpdateInterval = 8;
   
+  private static Map<String, Sprite> activeAbilityTextSprites = new HashMap<String, Sprite>();
+
   public static void drawCommanderOverlay(Graphics g, Commander commander, boolean overlayIsLeft)
   {
     updateAnimIndex();
@@ -36,7 +40,16 @@ public class CommanderOverlayArtist
 
     // Choose left or right overlay image to draw.
     BufferedImage overlayImage = SpriteLibrary.getCoOverlay(commander, overlayIsLeft);
-    BufferedImage powerBarImage = buildCoPowerBar(commander, commander.getAbilityCosts(), commander.getAbilityPower(), overlayIsLeft);
+    BufferedImage powerBarImage = null;
+    boolean trueIfBarFalseIfText = commander.getActiveAbilityName().isEmpty();
+    if( trueIfBarFalseIfText )
+    {
+      powerBarImage = buildCoPowerBar(commander, commander.getAbilityCosts(), commander.getAbilityPower(), overlayIsLeft);
+    }
+    else
+    {
+      powerBarImage = getActiveAbilityName(commander.getActiveAbilityName());
+    }
     final int POWERBAR_BUFFER = 3; // The distance from the top of the powerbar image frame to the top of the actual power bar (since the ability points are taller).
 
     if( overlayIsLeft )
@@ -56,7 +69,16 @@ public class CommanderOverlayArtist
       SpriteLibrary.drawTextSmallCaps(g, coString, coNameXPos, yTextOffset, drawScale); // CO name
       SpriteLibrary.drawTextSmallCaps(g, overlayFundsString, fundsXPos, textHeight + drawScale + yTextOffset, drawScale); // Funds
       int pbXPos = screenWidth - powerBarImage.getWidth() * drawScale;
-      g.drawImage( powerBarImage, pbXPos + (powerBarImage.getWidth() * drawScale), (overlayImage.getHeight() * drawScale) - (POWERBAR_BUFFER*drawScale), -powerBarImage.getWidth() * drawScale, powerBarImage.getHeight() * drawScale, null );
+      if( trueIfBarFalseIfText )
+      {
+        // We are drawing the power bar, and want to flip it horizontally.
+        g.drawImage( powerBarImage, pbXPos + (powerBarImage.getWidth() * drawScale), (overlayImage.getHeight() * drawScale) - (POWERBAR_BUFFER*drawScale), -powerBarImage.getWidth() * drawScale, powerBarImage.getHeight() * drawScale, null );
+      }
+      else
+      {
+        // We are drawing an ability name, and we don't want to flib it.
+        g.drawImage( powerBarImage, pbXPos, (overlayImage.getHeight() * drawScale) - (POWERBAR_BUFFER*drawScale), powerBarImage.getWidth() * drawScale, powerBarImage.getHeight() * drawScale, null );
+      }
     }
   }
 
@@ -123,12 +145,8 @@ public class CommanderOverlayArtist
     Sprite powerBarPieces = SpriteLibrary.getCoOverlayPowerBarAPs(co);
 
     // Make a new BufferedImage to hold the composited power bar, and set it all transparent to start.
-    BufferedImage bar = SpriteLibrary.createDefaultBlankSprite(powerBar.getWidth()+imageBufferW, powerBarPieces.getFrame(0).getHeight());
-    Sprite spr = new Sprite(bar);
-    Color[] black = {new Color(0,0,0)};
-    Color[] transparent = {new Color(0, 0, 0, 0)};
-    spr.colorize(black, transparent);
-    
+    BufferedImage bar = SpriteLibrary.createTransparentSprite(powerBar.getWidth()+imageBufferW, powerBarPieces.getFrame(0).getHeight());
+
     Graphics barGfx = bar.getGraphics();
     
     // Draw the actual bar.
@@ -168,5 +186,63 @@ public class CommanderOverlayArtist
     }
 
     return bar;
+  }
+
+  private static BufferedImage getActiveAbilityName(String abilityName)
+  {
+    // If we don't have this image yet, build it.
+    if( !activeAbilityTextSprites.containsKey(abilityName) )
+    {
+      // Define a new image to hold the name with a little wiggle room.
+      BufferedImage letterA = SpriteLibrary.getLettersSmallCaps().getFrame(0);
+      BufferedImage background = SpriteLibrary.createTransparentSprite((letterA.getWidth()*abilityName.length()) + 2, letterA.getHeight() + 2);
+      BufferedImage foreground = SpriteLibrary.createTransparentSprite((letterA.getWidth()*abilityName.length()) + 2, letterA.getHeight() + 2);
+      Graphics bgGfx = background.getGraphics();
+      Graphics fgGfx = foreground.getGraphics();
+
+      // Generate a shaped black background to hold the ability name.
+      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 0, 0, 1);
+      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 0, 1, 1);
+      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 0, 2, 1);
+      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 1, 0, 1);
+      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 1, 1, 1);
+      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 1, 2, 1);
+      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 2, 0, 1);
+      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 2, 1, 1);
+      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 2, 2, 1);
+
+      // Make an intermediate image of the center text, and recolor it to an intermediate value.
+      SpriteLibrary.drawTextSmallCaps(fgGfx, abilityName, 1, 1, 1);
+      Sprite fgSpr = new Sprite(foreground);
+      Color intermediate = new Color(99, 100, 101);
+      fgSpr.colorize(Color.BLACK, intermediate);
+
+      // Active abilities are exciting! Therefore, they must be displayed with flashy, scintillating colors!
+      // Let's build up a sprite sheet to spec, and then build a Sprite around it.
+      Color frameColors[] = {new Color(255, 0, 0),new Color(255, 127, 0),new Color(255, 255, 0),new Color(0, 255, 0),new Color(0, 0, 255),new Color(255, 0, 255)};
+      BufferedImage spriteSheet = SpriteLibrary.createTransparentSprite(background.getWidth()*frameColors.length, background.getHeight());
+      Graphics ssGfx = spriteSheet.getGraphics();
+      for( int i = 0; i < frameColors.length; ++i )
+      {
+        // This frame shall be this color.
+        Color color = frameColors[i];
+
+        // Draw the background image at the current offset.
+        ssGfx.drawImage(background, i*background.getWidth(), 0, null);
+
+        // Colorize the foreground image, and draw it onto the sprite sheet.
+        fgSpr.colorize(intermediate, color);
+        ssGfx.drawImage(fgSpr.getFrame(0), i*background.getWidth(), 0, null);
+
+        // Un-colorize the foreground so it's ready for the next loop iteration.
+        fgSpr.colorize(color, intermediate);
+      }
+
+      Sprite sprite = new Sprite(spriteSheet, background.getWidth(), background.getHeight());
+      activeAbilityTextSprites.put(abilityName, sprite);
+    }
+
+    // Return the current sub-image.
+    return activeAbilityTextSprites.get(abilityName).getFrame((animIndex/4));
   }
 }
