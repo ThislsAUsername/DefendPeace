@@ -524,7 +524,7 @@ public class SpriteMapView extends MapView
 
     // Choose left or right overlay image to draw.
     BufferedImage overlayImage = SpriteLibrary.getCoOverlay(myGame.activeCO, overlayIsLeft);
-    BufferedImage powerBarImage = SpriteLibrary.getCoPowerBar(myGame.activeCO, myGame.activeCO.getAbilityCosts(), myGame.activeCO.getAbilityPower(), overlayIsLeft);
+    BufferedImage powerBarImage = SpriteLibrary.getCoPowerBar(myGame.activeCO, myGame.activeCO.getAbilityCosts(), myGame.activeCO.getAbilityPower(), overlayIsLeft, animIndex);
     final int POWERBAR_BUFFER = 3; // The distance from the top of the powerbar image frame to the top of the actual power bar (since the ability points are taller).
 
     if( overlayIsLeft )

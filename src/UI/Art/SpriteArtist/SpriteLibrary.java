@@ -666,10 +666,11 @@ public class SpriteLibrary
   /**
    * Generate an ability-power bar for the given Commander at 1x size. The requester is responsible for applying any scale factors.
    */
-  public static BufferedImage getCoPowerBar(Commander co, int[] abilityPoints, double currentPower, boolean leftSide)
+  public static BufferedImage getCoPowerBar(Commander co, int[] abilityPoints, double currentPower, boolean leftSide, int animIndex)
   {
     final int POWERBAR_FRAME_WIDTH = 7;
     final int POWERBAR_FRAME_HEIGHT = 9;
+    animIndex = (animIndex/2) % 2;
 
     // If we don't already have an image, load and colorize one for this Commander.
     if( !coPowerBarPieces.containsKey(co) )
@@ -721,13 +722,13 @@ public class SpriteLibrary
     {
       int requiredPower = abilityPoints[i];
       double diff = requiredPower - currentPower;
-      BufferedImage segment = (diff > 1)? powerBarPieces.getFrame(0) // empty
-          : ((diff > 0.5)? powerBarPieces.getFrame(1)                // 1/3 full
-              : ((diff > 0)? powerBarPieces.getFrame(2)              // 2/3 full
-                  : powerBarPieces.getFrame(3)) );                   // filled
+      BufferedImage segment = (diff > 1) ? powerBarPieces.getFrame(0) // empty
+          : ((diff > 0.5) ? powerBarPieces.getFrame(1)                // 1/3 full
+              : ((diff > 0) ? powerBarPieces.getFrame(2)              // 2/3 full
+                  : ((animIndex == 0) ? powerBarPieces.getFrame(3)    // filled
+                      : powerBarPieces.getFrame(4))) );               // blinking
       int drawLoc = (requiredPower * 2) - imageBufferH - 3; // -3 to center the image around the power level.
       g.drawImage(segment, drawLoc, 0, null);
-      // TODO: blinking when abilities are available.
     }
 
     return bar;
