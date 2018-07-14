@@ -663,14 +663,34 @@ public class SpriteLibrary
     return coOverlays.get(co).getFrame(index);
   }
 
-  /**
-   * Generate an ability-power bar for the given Commander at 1x size. The requester is responsible for applying any scale factors.
-   */
-  public static BufferedImage getCoPowerBar(Commander co, int[] abilityPoints, double currentPower, boolean leftSide, int animIndex)
+  /** Draw and return an image with the CO's power bar. */
+  public static BufferedImage getCoOverlayPowerBar(Commander co, int maxAP, double currentAP)
+  {
+    final int powerDrawScaleW = 2;
+    BufferedImage bar = SpriteLibrary.createDefaultBlankSprite(maxAP*powerDrawScaleW, 5);
+    Graphics barGfx = bar.getGraphics();
+
+    // Get the CO's colors
+    Color[] palette = SpriteLibrary.mapUnitColorPalettes.get(co.myColor).paletteColors;
+
+    // Draw the bar
+    barGfx.setColor(Color.BLACK);               // Outside edge
+    barGfx.drawRect(0, 0, bar.getWidth(), 4);
+    barGfx.setColor(palette[5]);                // Inside - empty
+    barGfx.fillRect(0, 1, bar.getWidth(), 3);
+    barGfx.setColor(palette[2]);                // Inside - full
+    barGfx.drawLine(0, 1, (int)(Math.floor(currentAP) * powerDrawScaleW), 1);
+    barGfx.drawLine(0, 2, (int)(currentAP * powerDrawScaleW), 2);
+    barGfx.drawLine(0, 3, (int)(Math.ceil(currentAP * powerDrawScaleW)), 3);
+
+    return bar;
+  }
+
+  /** Return a Sprite with the various Ability Point images. */
+  public static Sprite getCoOverlayPowerBarAPs(Commander co)
   {
     final int POWERBAR_FRAME_WIDTH = 7;
     final int POWERBAR_FRAME_HEIGHT = 9;
-    animIndex = (animIndex/2) % 2;
 
     // If we don't already have an image, load and colorize one for this Commander.
     if( !coPowerBarPieces.containsKey(co) )
@@ -682,56 +702,7 @@ public class SpriteLibrary
 
       coPowerBarPieces.put(co, overlay);
     }
-
-    // Retrieve the power bar kit.
-    Sprite powerBarPieces = coPowerBarPieces.get(co);
-    final int powerDrawScaleH = 2;
-    final int imageBufferH = 2;
-
-    // Find the most expensive ability so we know how long to draw the bar.
-    int maxAP = 0;
-    for( int i = 0; i < abilityPoints.length; ++i )
-    {
-      maxAP = (maxAP < abilityPoints[i]) ? abilityPoints[i] : maxAP;
-    }
-
-    // Unfortunately, the power bar is a "some assembly required" kinda deal, so we have to put it together here.
-    // Create an image and make it transparent.
-    BufferedImage bar = createDefaultBlankSprite(maxAP*powerDrawScaleH+imageBufferH, POWERBAR_FRAME_HEIGHT);
-    Sprite spr = new Sprite(bar);
-    Color[] black = {new Color(0,0,0)};
-    Color[] transparent = {new Color(0, 0, 0, 0)};
-    spr.colorize(black, transparent);
-    Graphics g = bar.getGraphics();
-
-    // Get the CO's colors
-    Color[] palette = mapUnitColorPalettes.get(co.myColor).paletteColors;
-
-    // Draw the bar
-    g.setColor(Color.BLACK);               // Outside edge
-    g.drawRect(0, 2, bar.getWidth()-imageBufferH, 4);
-    g.setColor(palette[5]);                // Inside - empty
-    g.fillRect(0, 3, bar.getWidth()-imageBufferH, 3);
-    g.setColor(palette[2]);                // Inside - full
-    g.drawLine(0, 3, (int)(Math.floor(currentPower) * 2.0)-imageBufferH, 3);
-    g.drawLine(0, 4, (int)(currentPower * 2.0)-imageBufferH, 4);
-    g.drawLine(0, 5, (int)(Math.ceil(currentPower * 2.0))-imageBufferH, 5);
-
-    // Draw the ability points
-    for( int i = 0; i < abilityPoints.length; ++i )
-    {
-      int requiredPower = abilityPoints[i];
-      double diff = requiredPower - currentPower;
-      BufferedImage segment = (diff > 1) ? powerBarPieces.getFrame(0) // empty
-          : ((diff > 0.5) ? powerBarPieces.getFrame(1)                // 1/3 full
-              : ((diff > 0) ? powerBarPieces.getFrame(2)              // 2/3 full
-                  : ((animIndex == 0) ? powerBarPieces.getFrame(3)    // filled
-                      : powerBarPieces.getFrame(4))) );               // blinking
-      int drawLoc = (requiredPower * 2) - imageBufferH - 3; // -3 to center the image around the power level.
-      g.drawImage(segment, drawLoc, 0, null);
-    }
-
-    return bar;
+    return coPowerBarPieces.get(co);
   }
 
   /**
