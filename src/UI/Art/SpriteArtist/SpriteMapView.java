@@ -13,7 +13,6 @@ import Engine.Path;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.Environment;
 import Terrain.GameMap;
 import UI.CO_InfoMenu;
 import UI.MapView;
@@ -525,12 +524,15 @@ public class SpriteMapView extends MapView
 
     // Choose left or right overlay image to draw.
     BufferedImage overlayImage = SpriteLibrary.getCoOverlay(myGame.activeCO, overlayIsLeft);
+    BufferedImage powerBarImage = SpriteLibrary.getCoPowerBar(myGame.activeCO, myGame.activeCO.getAbilityCosts(), myGame.activeCO.getAbilityPower(), overlayIsLeft);
+    final int POWERBAR_BUFFER = 3; // The distance from the top of the powerbar image frame to the top of the actual power bar (since the ability points are taller).
 
     if( overlayIsLeft )
     { // Draw the overlay on the left side.
       g.drawImage(overlayImage, 0, 0, overlayImage.getWidth() * drawScale, overlayImage.getHeight() * drawScale, null);
       SpriteLibrary.drawTextSmallCaps(g, coString, xTextOffset, yTextOffset, drawScale); // CO name
       SpriteLibrary.drawTextSmallCaps(g, overlayFundsString, xTextOffset, textHeight + drawScale + yTextOffset, drawScale); // Funds
+      g.drawImage( powerBarImage, 0, (overlayImage.getHeight() * drawScale) - (POWERBAR_BUFFER*drawScale), powerBarImage.getWidth() * drawScale, powerBarImage.getHeight() * drawScale, null );
     }
     else
     { // Draw the overlay on the right side.
@@ -541,6 +543,8 @@ public class SpriteMapView extends MapView
       g.drawImage(overlayImage, xPos, 0, overlayImage.getWidth() * drawScale, overlayImage.getHeight() * drawScale, null);
       SpriteLibrary.drawTextSmallCaps(g, coString, coNameXPos, yTextOffset, drawScale); // CO name
       SpriteLibrary.drawTextSmallCaps(g, overlayFundsString, fundsXPos, textHeight + drawScale + yTextOffset, drawScale); // Funds
+      int pbXPos = screenWidth - powerBarImage.getWidth() * drawScale;
+      g.drawImage( powerBarImage, pbXPos + (powerBarImage.getWidth() * drawScale), (overlayImage.getHeight() * drawScale) - (POWERBAR_BUFFER*drawScale), -powerBarImage.getWidth() * drawScale, powerBarImage.getHeight() * drawScale, null );
     }
   }
 

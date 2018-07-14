@@ -14,12 +14,12 @@ public class CommanderPatch extends Commander
 
   // Variables to characterize Patch's abilities.
   private static final String PLUNDER_NAME = "Plunder";
-  private static final int PLUNDER_COST = 0;
+  private static final int PLUNDER_COST = 5;
   private static final double PLUNDER_INCOME = 0.25;
   private static final int PLUNDER_ATTACK_BUFF = 10;
 
   private static final String PILLAGE_NAME = "Pillage";
-  private static final int PILLAGE_COST = 0;
+  private static final int PILLAGE_COST = 10;
   private static final double PILLAGE_INCOME = 0.5;
   private static final int PILLAGE_ATTACK_BUFF = 25;
 

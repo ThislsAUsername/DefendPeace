@@ -15,7 +15,7 @@ public abstract class CommanderAbility
     myPowerCost = powerCost;
   }
 
-  public double getCost()
+  public int getCost()
   {
     return myPowerCost;
   }
@@ -31,16 +31,17 @@ public abstract class CommanderAbility
    * subclasses don't have to all manually handle ability cost. */
   public final void activate(GameInstance game)
   {
-    if( myCommander.abilityPower < myPowerCost )
+    if( myCommander.getAbilityPower() < myPowerCost )
     {
       System.out.println("WARNING!: Performing ability with insufficient ability power!");
     }
 
-    myCommander.abilityPower -= myPowerCost;
+    myCommander.modifyAbilityPower(-myPowerCost);
 
     // Increase the cost of this ability for next time to mitigate spam and
     // accommodate the presumably-growing battlefront.
-    myPowerCost += 4;
+    // Cost grows by at least one, and at most 10% of the current cost.
+    myPowerCost += Math.max(myPowerCost*0.1, 1);
     
     perform(game);
   }

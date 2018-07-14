@@ -68,7 +68,7 @@ public class CommanderStrong extends Commander
   private static class StrongArmAbility extends CommanderAbility
   {
     private static final String STRONGARM_NAME = "Strongarm";
-    private static final int STRONGARM_COST = 0;
+    private static final int STRONGARM_COST = 10;
     private static final int STRONGARM_BUFF = 20;
 
     COModifier damageMod = null;
@@ -116,7 +116,7 @@ public class CommanderStrong extends Commander
   private static class MobilizeAbility extends CommanderAbility
   {
     private static final String MOBILIZE_NAME = "Mobilize";
-    private static final int MOBILIZE_COST = 0;
+    private static final int MOBILIZE_COST = 20;
     private static final int MOBILIZE_BUFF = 40;
 
     COModifier damageMod = null;

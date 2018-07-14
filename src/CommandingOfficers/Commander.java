@@ -49,7 +49,7 @@ public class Commander
   public int team = -1;
   public boolean isDefeated = false;
   public XYCoord HQLocation = null;
-  public double abilityPower = 0;
+  private double myAbilityPower = 0;
 
   private ArrayList<CommanderAbility> myAbilities = null;
 
@@ -206,11 +206,41 @@ public class Commander
     ArrayList<CommanderAbility> ready = new ArrayList<CommanderAbility>();
     for( CommanderAbility ca : myAbilities )
     {
-      if( ca.getCost() <= abilityPower )
+      if( ca.getCost() <= myAbilityPower )
       {
         ready.add(ca);
       }
     }
     return ready;
+  }
+
+  public int[] getAbilityCosts()
+  {
+    int[] costs = new int[myAbilities.size()];
+    for( int i = 0; i < myAbilities.size(); ++i )
+    {
+      costs[i] = myAbilities.get(i).getCost();
+    }
+    return costs;
+  }
+
+  public double getAbilityPower()
+  {
+    return myAbilityPower;
+  }
+
+  public void modifyAbilityPower(double amount)
+  {
+    myAbilityPower += amount;
+    if( myAbilityPower < 0 ) myAbilityPower = 0;
+    double maxPower = 0;
+    for( CommanderAbility ca : myAbilities )
+    {
+      if( maxPower < ca.getCost() )
+      {
+        maxPower = ca.getCost();
+      }
+    }
+    if( myAbilityPower > maxPower ) myAbilityPower = maxPower;
   }
 }
