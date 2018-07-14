@@ -8,7 +8,7 @@ public abstract class CommanderAbility
   public final String myName;
   private int myPowerCost;
 
-  CommanderAbility(Commander commander, String abilityName, int powerCost)
+  public CommanderAbility(Commander commander, String abilityName, int powerCost)
   {
     myCommander = commander;
     myName = abilityName;
