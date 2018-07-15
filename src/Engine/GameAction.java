@@ -186,7 +186,9 @@ public interface GameAction
           if( (captureLocation.getEnvironment().terrainType == TerrainType.HEADQUARTERS) && (null != captureLocation.getOwner()) )
           {
             // Someone is losing their big, comfy chair.
-            captureEvents.add(new CommanderDefeatEvent(captureLocation.getOwner()));
+            CommanderDefeatEvent defeat = new CommanderDefeatEvent(captureLocation.getOwner());
+            defeat.setPropertyBeneficiary(actor.CO);
+            captureEvents.add(defeat);
           }
         }
       }

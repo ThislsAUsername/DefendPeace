@@ -11,10 +11,16 @@ import UI.Art.Animation.GameAnimation;
 public class CommanderDefeatEvent implements GameEvent
 {
   private final Commander defeatedCO;
+  private Commander beneficiaryCO = null;
 
   public CommanderDefeatEvent( Commander co )
   {
     defeatedCO = co;
+  }
+
+  public void setPropertyBeneficiary( Commander beneficiary )
+  {
+    beneficiaryCO = beneficiary;
   }
 
   @Override
@@ -55,7 +61,7 @@ public class CommanderDefeatEvent implements GameEvent
         // Release control of any buildings he owned.
         if(loc.isCaptureable() && loc.getOwner() == defeatedCO)
         {
-          loc.setOwner(null);
+          loc.setOwner(((null == beneficiaryCO) ? null : beneficiaryCO ));
         }
       } // ~width loop
     } // ~height loop
