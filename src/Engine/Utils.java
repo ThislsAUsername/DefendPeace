@@ -60,14 +60,14 @@ public class Utils
   }
 
   /** Returns a list of locations at distance 1 from transportLoc that cargo can move on. */
-  public static ArrayList<XYCoord> findUnloadLocations(GameMap map, XYCoord transportLoc, Unit cargo)
+  public static ArrayList<XYCoord> findUnloadLocations(GameMap map, Unit transport, XYCoord moveLoc, Unit cargo)
   {
-    ArrayList<XYCoord> locations = findLocationsInRange(map, transportLoc, 1);
+    ArrayList<XYCoord> locations = findLocationsInRange(map, moveLoc, 1);
     ArrayList<XYCoord> dropoffLocations = new ArrayList<XYCoord>();
     for( XYCoord loc : locations )
     {
       // Add any location that is empty and supports movement of the cargo unit.
-      if( map.isLocationEmpty(loc)
+      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport )
           && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
       {
         dropoffLocations.add(loc);
