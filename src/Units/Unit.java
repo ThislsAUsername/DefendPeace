@@ -306,7 +306,7 @@ public class Unit
               //       better way to handle this case.
               for( Unit cargo : heldUnits )
               {
-                ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, moveLocation, cargo);
+                ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, this, moveLocation, cargo);
                 for( XYCoord loc : dropoffLocations )
                 {
                   unloadActions.add(new GameAction.UnloadAction(map, this, movePath, cargo, loc));
