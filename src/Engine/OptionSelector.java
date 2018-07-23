@@ -50,6 +50,10 @@ public class OptionSelector
    */
   public int getSelectionAbsolute()
   {
+    if( numOptions < 1 )
+    {
+      throw new IndexOutOfBoundsException("OptionSelector has no options to select!");
+    }
     return highlightedOption;
   }
 
@@ -58,6 +62,10 @@ public class OptionSelector
    */
   public int getSelectionNormalized()
   {
+    if( numOptions < 1 )
+    {
+      throw new IndexOutOfBoundsException("OptionSelector has no options to select!");
+    }
     int chosenOption = highlightedOption;
     for(;chosenOption < 0; chosenOption += numOptions);
     for(;chosenOption > highestOption; chosenOption -= numOptions);
