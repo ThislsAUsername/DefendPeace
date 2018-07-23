@@ -26,11 +26,13 @@ public class MapController implements IController
 
   // A few menus to control the in-game logical flow.
   private InGameMenu<UnitModel> productionMenu;
-  private InGameMenu<GameActionSet> actionMenu;
+  private InGameMenu<String> actionMenu;
   private InGameMenu<MetaAction> metaActionMenu;
   private InGameMenu<CommanderAbility> coAbilityMenu;
   private InGameMenu<ConfirmExitEnum> confirmExitMenu;
   private InGameMenu<? extends Object> currentMenu;
+
+  private InputStateHandler myInputStateHandler = null;
 
   private int nextSeekIndex;
 
@@ -230,6 +232,9 @@ public class MapController implements IController
           {
             contemplatedAction.actor = unitActor;
 
+            myInputStateHandler = new InputStateHandler(myGame.gameMap, myGame.activeCO);
+            myInputStateHandler.select(contemplatedAction.actor);
+
             // Calculate movement options.
             changeInputMode(InputMode.MOVEMENT);
           }
@@ -249,6 +254,7 @@ public class MapController implements IController
         }
         break;
       case BACK:
+        myInputStateHandler = null;
         break;
       default:
         System.out.println("WARNING! MapController.handleMapInput() was given invalid input enum (" + input + ")");
@@ -312,6 +318,7 @@ public class MapController implements IController
         {
           // Select the location and display possible actions.
           contemplatedAction.movePath.start(); // start the unit running
+          myInputStateHandler.select(contemplatedAction.movePath);
           changeInputMode(InputMode.ACTIONMENU);
         }
         // if we're selecting an enemy unit, hitting enter again will drop that selection
@@ -323,6 +330,7 @@ public class MapController implements IController
         break;
       case BACK:
         changeInputMode(InputMode.MAP);
+        myInputStateHandler.back();
         break;
       case NO_ACTION:
         break;
@@ -345,18 +353,34 @@ public class MapController implements IController
     switch (input)
     {
       case ENTER:
-        GameActionSet actionSet = actionMenu.getSelectedOption();
+        // Pass the user's selection to the state handler.
+        String actionName = actionMenu.getSelectedOption();
+        InputStateHandler.InputMode newMode = myInputStateHandler.select(actionName);
 
-        // If the action type requires no target, there should only be one
-        // GameAction in the set. Execute it.
-        if( !actionSet.isTargetRequired() )
+        // If the new state has an action to execute, do that.
+        if( newMode == InputStateHandler.InputMode.ACTION_READY )
         {
-          executeGameAction(actionSet.getSelected());
+          executeGameAction(myInputStateHandler.getReadyAction());
+          myInputStateHandler.reset();
         }
         else
         {
+          if(newMode == InputStateHandler.InputMode.MENU_SELECT )
+          {
+            // perhaps move this into changeInputMode.
+          }
           changeInputMode(InputMode.ACTION);
         }
+//        // If the action type requires no target, there should only be one
+//        // GameAction in the set. Execute it.
+//        if( !actionSet.isTargetRequired() )
+//        {
+//          executeGameAction(actionSet.getSelected());
+//        }
+//        else
+//        {
+//          changeInputMode(InputMode.ACTION);
+//        }
 
         break;
       case BACK:
@@ -380,43 +404,62 @@ public class MapController implements IController
       return;
     }
 
-    GameActionSet actionOptions = actionMenu.getSelectedOption();
+    //GameActionSet actionOptions = actionMenu.getSelectedOption();
 
-    if( !actionOptions.isTargetRequired() )
+    //if( !actionOptions.isTargetRequired() )
+    if( myInputStateHandler.getCoordinateOptions().size() == 0)
     {
       // If this option doesn't require a target, it should have been executed from handleActionMenuInput().
       // This function is just for target selection/choosing one action from the set.
       System.out.println("WARNING! Attempting to choose a target for a non-targetable action.");
     }
 
+    ArrayList<XYCoord> targetLocations = myInputStateHandler.getCoordinateOptions();
+    OptionSelector actionOptions = new OptionSelector(targetLocations.size()); // TODO make this non-local.
+
     switch (input)
     {
       case UP:
       case LEFT:
-        // Select the previous possible action, set it into the contemplated action, and
-        //  update the cursor location to the action's target locatin.
-        actionOptions.prev();
-        myGame.setCursorLocation(actionOptions.getSelected().getTargetLocation());
-        contemplatedAction.action = actionOptions.getSelected();
-        break;
       case DOWN:
       case RIGHT:
+        // Select the previous possible action, set it into the contemplated action, and
+        //  update the cursor location to the action's target location.
+//        actionOptions.prev();
+//        myGame.setCursorLocation(actionOptions.getSelected().getTargetLocation());
+//        contemplatedAction.action = actionOptions.getSelected();
+//        break;
+//      case DOWN:
+//      case RIGHT:
         // Select the next possible action, set it into the contemplated action, and
-        //  update the cursor location to the action's target locatin.
-        actionOptions.next();
-        myGame.setCursorLocation(actionOptions.getSelected().getTargetLocation());
-        contemplatedAction.action = actionOptions.getSelected();
+        //  update the cursor location to the action's target location.
+//        actionOptions.next();
+//        myGame.setCursorLocation(actionOptions.getSelected().getTargetLocation());
+//        contemplatedAction.action = actionOptions.getSelected();
+
+        actionOptions.handleInput(input);
+        myGame.setCursorLocation(targetLocations.get(actionOptions.getSelectionNormalized()));
         break;
       case ENTER:
-        GameAction action = actionOptions.getSelected();
-        if( null != action )
+//        GameAction action = actionOptions.getSelected();
+//        if( null != action )
+//        {
+//          executeGameAction(action);
+//        }
+//        else
+//        {
+//          // Something went really wonky.
+//          System.out.println("Attempting to execute a null GameAction! Ignoring.");
+//        }
+        XYCoord actionLocation = targetLocations.get(actionOptions.getSelectionNormalized());
+        InputStateHandler.InputMode mode = myInputStateHandler.select(actionLocation);
+        if( (mode == InputStateHandler.InputMode.ACTION_READY) && (null != myInputStateHandler.getReadyAction()) )
         {
-          executeGameAction(action);
+          executeGameAction(myInputStateHandler.getReadyAction());
         }
-        else
+        else if( mode == InputStateHandler.InputMode.MENU_SELECT )
         {
-          // Something went really wonky.
-          System.out.println("Attempting to execute a null GameAction! Ignoring.");
+          // Perhaps move this logic into changeInputState?
         }
         break;
       case BACK:
@@ -586,19 +629,21 @@ public class MapController implements IController
     switch (inputMode)
     {
       case ACTION: // Provide a target for the chosen action.
-        GameActionSet possibleActions = actionMenu.getSelectedOption();
-        Utils.highlightLocations(myGame.gameMap, possibleActions.getTargetedLocations());
+        //GameActionSet possibleActions = actionMenu.getSelectedOption();
+        //Utils.highlightLocations(myGame.gameMap, possibleActions.getTargetedLocations());
+        ArrayList<XYCoord> coords = myInputStateHandler.getCoordinateOptions();
 
         // Set the contemplated action to the first possible action, and move the
         //  cursor to the targeted location.
-        myGame.setCursorLocation(possibleActions.getSelected().getTargetLocation());
-        contemplatedAction.action = possibleActions.getSelected();
+        myGame.setCursorLocation(coords.get(0));
+        //contemplatedAction.action = possibleActions.getSelected();
+        contemplatedAction.action = myInputStateHandler.getReadyAction();
         currentMenu = null;
         break;
       case ACTIONMENU: // Select which action to perform.
         myGame.gameMap.clearAllHighlights();
-        actionMenu = new InGameMenu<GameActionSet>(contemplatedAction.actor.getPossibleActions(myGame.gameMap,
-            contemplatedAction.movePath));
+        //actionMenu = new InGameMenu<GameActionSet>(contemplatedAction.actor.getPossibleActions(myGame.gameMap, contemplatedAction.movePath));
+        actionMenu = new InGameMenu<String>( myInputStateHandler.getMenuOptions() );
         currentMenu = actionMenu;
         myGame.setCursorLocation(contemplatedAction.movePath.getEnd().x, contemplatedAction.movePath.getEnd().y);
         break;

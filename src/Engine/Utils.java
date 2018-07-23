@@ -99,7 +99,6 @@ public class Utils
     {
       for( int j = 0; j < gameMap.mapHeight; j++ )
       {
-        gameMap.getLocation(i, j).setHighlight(false);
         movesLeftGrid[i][j] = 0;
       }
     }
@@ -117,7 +116,6 @@ public class Utils
       Unit obstacle = gameMap.getLocation(currentNode.x, currentNode.y).getResident();
       if( obstacle == null || obstacle == unit || (obstacle.CO == unit.CO && obstacle.hasCargoSpace(unit.model.type)) )
       {
-        gameMap.getLocation(currentNode.x, currentNode.y).setHighlight(true);
         reachableTiles.add(new XYCoord(currentNode.x, currentNode.y));
       }
 
