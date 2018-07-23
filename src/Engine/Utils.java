@@ -89,15 +89,17 @@ public class Utils
   /**
    * Sets the highlight for myGame.gameMap.getLocation(x, y) to true if unit can reach (x, y), and false otherwise.
    */
-  public static void findPossibleDestinations(Unit unit, GameInstance myGame)
+  public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap)
   {
+    ArrayList<XYCoord> reachableTiles = new ArrayList<XYCoord>();
+
     // set all locations to false/remaining move = 0
-    int[][] movesLeftGrid = new int[myGame.gameMap.mapWidth][myGame.gameMap.mapHeight];
-    for( int i = 0; i < myGame.gameMap.mapWidth; i++ )
+    int[][] movesLeftGrid = new int[gameMap.mapWidth][gameMap.mapHeight];
+    for( int i = 0; i < gameMap.mapWidth; i++ )
     {
-      for( int j = 0; j < myGame.gameMap.mapHeight; j++ )
+      for( int j = 0; j < gameMap.mapHeight; j++ )
       {
-        myGame.gameMap.getLocation(i, j).setHighlight(false);
+        gameMap.getLocation(i, j).setHighlight(false);
         movesLeftGrid[i][j] = 0;
       }
     }
@@ -112,16 +114,19 @@ public class Utils
       // pull out the next search node
       SearchNode currentNode = searchQueue.poll();
       // if the space is empty or holds the current unit, highlight
-      Unit obstacle = myGame.gameMap.getLocation(currentNode.x, currentNode.y).getResident();
+      Unit obstacle = gameMap.getLocation(currentNode.x, currentNode.y).getResident();
       if( obstacle == null || obstacle == unit || (obstacle.CO == unit.CO && obstacle.hasCargoSpace(unit.model.type)) )
       {
-        myGame.gameMap.getLocation(currentNode.x, currentNode.y).setHighlight(true);
+        gameMap.getLocation(currentNode.x, currentNode.y).setHighlight(true);
+        reachableTiles.add(new XYCoord(currentNode.x, currentNode.y));
       }
 
-      expandSearchNode(unit, myGame.gameMap, currentNode, searchQueue, movesLeftGrid);
+      expandSearchNode(unit, gameMap, currentNode, searchQueue, movesLeftGrid);
 
       currentNode = null;
     }
+
+    return reachableTiles;
   }
 
   /**

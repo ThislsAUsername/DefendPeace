@@ -608,7 +608,7 @@ public class MapController implements IController
         myGame.gameMap.clearAllHighlights();
         break;
       case MOVEMENT:
-        Utils.findPossibleDestinations(contemplatedAction.actor, myGame);
+        Utils.findPossibleDestinations(contemplatedAction.actor, myGame.gameMap);
         contemplatedAction.movePath = null;
         currentMenu = null;
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.
