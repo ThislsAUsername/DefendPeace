@@ -24,6 +24,21 @@ public class MoveType
     }
   }
 
+  public MoveType( MoveType other )
+  {
+    // Initialize
+    this();
+
+    // Copy all values from the other object.
+    for( Weathers w : moveCosts.keySet() )
+    {
+      for( TerrainType t : moveCosts.get(w).keySet() )
+      {
+        moveCosts.get(w).put(t, other.getMoveCost(w, t));
+      }
+    }
+  }
+
   /** Returns the cost to traverse terrain type 'terrain' while experiencing weather 'weather'. */
   public int getMoveCost(Weathers weather, TerrainType terrain)
   {

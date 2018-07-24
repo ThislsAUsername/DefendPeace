@@ -1,6 +1,6 @@
 package Units.Weapons;
 
-public abstract class WeaponModel
+public class WeaponModel
 {
   public enum WeaponType
   {
@@ -37,6 +37,10 @@ public abstract class WeaponModel
   protected WeaponModel(WeaponType type)
   {
     this(type, -1, 1, 1);
+  }
+  public WeaponModel(WeaponModel other)
+  {
+    this(other.type, other.maxAmmo, other.minRange, other.maxRange);
   }
 
   public int getIndex()
