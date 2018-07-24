@@ -10,9 +10,6 @@ import CommandingOfficers.Modifiers.UnitProductionModifier;
 import CommandingOfficers.Modifiers.UnitRemodelModifier;
 import Engine.GameInstance;
 import Terrain.TerrainType;
-import Units.APCModel;
-import Units.LanderModel;
-import Units.TCopterModel;
 import Units.UnitModel;
 
 public class CommanderStrong extends Commander
@@ -23,23 +20,6 @@ public class CommanderStrong extends Commander
   public CommanderStrong()
   {
     super(coInfo);
-
-    // Define "high-capacity" transport unit models, to be swapped in by his abilities.
-    if( null == highCapacityUnitModels )
-    {
-      UnitModel hcApc = new APCModel();
-      UnitModel hcLander = new LanderModel();
-      UnitModel hcCopter = new TCopterModel();
-      highCapacityUnitModels = new HashMap<UnitModel.UnitEnum, UnitModel>();
-      highCapacityUnitModels.put(hcApc.type, hcApc);
-      highCapacityUnitModels.put(hcLander.type, hcLander);
-      highCapacityUnitModels.put(hcCopter.type, hcCopter);
-      for( UnitModel um : highCapacityUnitModels.values() )
-      {
-        um.holdingCapacity += 1;
-      }
-      // TODO: other non-transport types?
-    }
 
     // Strong allows infantry to be built from any production building.
     UnitModel infModel = getUnitModel(UnitModel.UnitEnum.INFANTRY);
@@ -56,6 +36,23 @@ public class CommanderStrong extends Commander
     COMovementModifier moveMod = new COMovementModifier();
     moveMod.addApplicableUnitType(UnitModel.UnitEnum.APC);
     moveMod.apply(this);
+
+    // Define "high-capacity" transport unit models, to be swapped in by his abilities.
+    if( null == highCapacityUnitModels )
+    {
+      UnitModel hcApc = UnitModel.clone( getUnitModel(UnitModel.UnitEnum.APC));
+      UnitModel hcLander = UnitModel.clone( getUnitModel(UnitModel.UnitEnum.LANDER));
+      UnitModel hcCopter = UnitModel.clone( getUnitModel(UnitModel.UnitEnum.T_COPTER));
+      highCapacityUnitModels = new HashMap<UnitModel.UnitEnum, UnitModel>();
+      highCapacityUnitModels.put(hcApc.type, hcApc);
+      highCapacityUnitModels.put(hcLander.type, hcLander);
+      highCapacityUnitModels.put(hcCopter.type, hcCopter);
+      for( UnitModel um : highCapacityUnitModels.values() )
+      {
+        um.holdingCapacity += 1;
+      }
+      // TODO: other non-transport types?
+    }
 
     addCommanderAbility(new StrongArmAbility(this));
     addCommanderAbility(new MobilizeAbility(this));
