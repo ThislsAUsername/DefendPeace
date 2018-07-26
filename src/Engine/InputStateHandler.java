@@ -419,7 +419,7 @@ public class InputStateHandler
           {
             case ATTACK:
               // We need to select a target to attack.
-              //next = new SelectActionTarget(myStateData);
+              next = new SelectActionTarget(myStateData);
               break;
             case UNLOAD:
               // We need to select a unit to unload.
@@ -428,6 +428,59 @@ public class InputStateHandler
           }
         }
       }
+      return next;
+    }
+  }
+
+  /************************************************************
+   * Allows selecting an action's target.                     *
+   ************************************************************/
+  private static class SelectActionTarget extends State
+  {
+    public SelectActionTarget(StateData data)
+    {
+      super(data);
+    }
+
+    @Override
+    protected OptionSet initOptions()
+    {
+      // Set the target-location highlights.
+      myStateData.gameMap.clearAllHighlights();
+      ArrayList<XYCoord> targets = myStateData.actionSet.getTargetedLocations();
+      for( XYCoord targ : targets )
+      {
+        myStateData.gameMap.getLocation(targ).setHighlight(true);
+      }
+
+      // We can only attack the selected tiles, and they may be disjoint, so use constrained tile select.
+      return new OptionSet(InputMode.CONSTRAINED_TILE_SELECT, targets);
+    }
+
+    @Override
+    public State select(XYCoord targetLocation)
+    {
+      State next = this;
+
+      // Find the action that this target location belongs to.
+      // By virtue of the fact that GameActionSets should be homogenous, and it should be
+      // nonsensical to have two actions of the same type targeting the same location, this
+      // should be enough to uniquely identify the action we want.
+      for( int i = 0; i < myStateData.actionSet.getTargetedLocations().size(); ++i )
+      {
+        // If the selected target location corresponds to this action, keep it selected.
+        if( myStateData.actionSet.getSelected().getTargetLocation() == targetLocation )
+        {
+          // ActionReady will just choose whatever action is selected to perform, so no changes here.
+          next = new ActionReady(myStateData);
+          break;
+        }
+
+        // That wasn't it; move to the next one.
+        myStateData.actionSet.next();
+      }
+
+      // If we couldn't find an action for this location, return the current state.
       return next;
     }
   }

@@ -33,6 +33,7 @@ public class MapController implements IController
   private InGameMenu<? extends Object> currentMenu;
 
   private InputStateHandler myInputStateHandler = null;
+  OptionSelector myInputStateOptionSelector = null;
 
   private int nextSeekIndex;
 
@@ -99,6 +100,7 @@ public class MapController implements IController
     coInfoMenu = new CO_InfoMenu(myGame.commanders.length);
     nextSeekIndex = 0;
     contemplatedAction = new ContemplatedAction();
+    myInputStateOptionSelector = null;
 
     // Start the first turn.
     startNextTurn();
@@ -385,6 +387,7 @@ public class MapController implements IController
         break;
       case BACK:
         changeInputMode(InputMode.MOVEMENT);
+        myInputStateHandler.back();
         break;
       case NO_ACTION:
         break;
@@ -415,7 +418,6 @@ public class MapController implements IController
     }
 
     ArrayList<XYCoord> targetLocations = myInputStateHandler.getCoordinateOptions();
-    OptionSelector actionOptions = new OptionSelector(targetLocations.size()); // TODO make this non-local.
 
     switch (input)
     {
@@ -437,8 +439,8 @@ public class MapController implements IController
 //        myGame.setCursorLocation(actionOptions.getSelected().getTargetLocation());
 //        contemplatedAction.action = actionOptions.getSelected();
 
-        actionOptions.handleInput(input);
-        myGame.setCursorLocation(targetLocations.get(actionOptions.getSelectionNormalized()));
+        myInputStateOptionSelector.handleInput(input);
+        myGame.setCursorLocation(targetLocations.get(myInputStateOptionSelector.getSelectionNormalized()));
         break;
       case ENTER:
 //        GameAction action = actionOptions.getSelected();
@@ -451,7 +453,7 @@ public class MapController implements IController
 //          // Something went really wonky.
 //          System.out.println("Attempting to execute a null GameAction! Ignoring.");
 //        }
-        XYCoord actionLocation = targetLocations.get(actionOptions.getSelectionNormalized());
+        XYCoord actionLocation = targetLocations.get(myInputStateOptionSelector.getSelectionNormalized());
         InputStateHandler.InputMode mode = myInputStateHandler.select(actionLocation);
         if( (mode == InputStateHandler.InputMode.ACTION_READY) && (null != myInputStateHandler.getReadyAction()) )
         {
@@ -463,6 +465,7 @@ public class MapController implements IController
         }
         break;
       case BACK:
+        myInputStateHandler.back();
         changeInputMode(InputMode.ACTIONMENU);
         break;
       case NO_ACTION:
@@ -632,10 +635,11 @@ public class MapController implements IController
         //GameActionSet possibleActions = actionMenu.getSelectedOption();
         //Utils.highlightLocations(myGame.gameMap, possibleActions.getTargetedLocations());
         ArrayList<XYCoord> coords = myInputStateHandler.getCoordinateOptions();
+        myInputStateOptionSelector = new OptionSelector(coords.size());
 
         // Set the contemplated action to the first possible action, and move the
         //  cursor to the targeted location.
-        myGame.setCursorLocation(coords.get(0));
+        myGame.setCursorLocation(coords.get(myInputStateOptionSelector.getSelectionNormalized()));
         //contemplatedAction.action = possibleActions.getSelected();
         contemplatedAction.action = myInputStateHandler.getReadyAction();
         currentMenu = null;
