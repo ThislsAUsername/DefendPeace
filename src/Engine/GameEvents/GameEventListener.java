@@ -2,6 +2,7 @@ package Engine.GameEvents;
 
 import java.util.HashSet;
 
+import CommandingOfficers.Commander;
 import Engine.Combat.BattleSummary;
 import Terrain.Location;
 import Units.Unit;
@@ -49,6 +50,7 @@ public abstract class GameEventListener
 
   // The functions below should be overridden by subclasses for event types they care about.
   public void receiveBattleEvent(BattleSummary summary){};
+  public void receiveCreateUnitEvent(Unit unit){};
   public void receiveCaptureEvent(Unit unit, Location location){};
   public void receiveCommanderDefeatEvent(CommanderDefeatEvent event){};
   public void receiveLoadEvent(LoadEvent event){};

@@ -2,9 +2,11 @@ package Engine;
 
 import java.util.ArrayList;
 
+import CommandingOfficers.Commander;
 import Engine.GameEvents.BattleEvent;
 import Engine.GameEvents.CaptureEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.LoadEvent;
 import Engine.GameEvents.MoveEvent;
@@ -15,6 +17,7 @@ import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
+import Units.UnitModel;
 
 /**
  * Provides an interface for all in-game actions.
@@ -23,7 +26,7 @@ public interface GameAction
 {
   public enum ActionType
   {
-    INVALID, ATTACK, CAPTURE, LOAD, RESUPPLY, UNLOAD, WAIT
+    INVALID, ATTACK, CAPTURE, LOAD, RESUPPLY, UNLOAD, WAIT, UNITPRODUCTION
   }
 
   /**
@@ -141,6 +144,60 @@ public interface GameAction
       return GameAction.ActionType.ATTACK;
     }
   } // ~AttackAction
+
+  // ===========  UnitProductionAction  ==============================
+  public static class UnitProductionAction implements GameAction
+  {
+    private GameEventQueue buildEvents = null;
+    private final XYCoord buildLocation;
+
+    public UnitProductionAction(GameMap gameMap, Commander who, UnitModel what, XYCoord where)
+    {
+      // BUILDUNIT actions consist of
+      //   TODO: Consider introducing TRANSFERFUNDS for the fiscal part.
+      //   CREATEUNIT
+      buildEvents = new GameEventQueue();
+      buildLocation = where;
+      boolean isValid = true;
+      isValid &= (null != gameMap) && (null != who) && (null != what) && (null != where);
+      isValid &= (who.money >= what.moneyCost);
+
+      if( isValid )
+      {
+        //buildEvents.add(new TransferFundsEvent(who, what.moneyCost));
+        buildEvents.add(new CreateUnitEvent(who, what, where));
+      }
+      else
+      {
+        // We can't create this action. Leave the event queue empty.
+        System.out.println("WARNING! BuildUnitAction created with invalid arguments.");
+      }
+    }
+
+    @Override
+    public GameEventQueue getEvents(GameMap map)
+    {
+      return buildEvents;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return buildLocation;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return buildLocation;
+    }
+
+    @Override
+    public ActionType getType()
+    {
+      return GameAction.ActionType.UNITPRODUCTION;
+    }
+  } // ~UnitProductionAction
 
   // ===========  CaptureAction  ==============================
   public static class CaptureAction implements GameAction
