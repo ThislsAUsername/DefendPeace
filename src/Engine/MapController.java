@@ -19,7 +19,7 @@ import UI.MapView;
 import Units.Unit;
 import Units.UnitModel;
 
-public class MapController implements IController
+public class MapController implements IController, InputStateHandler.StateChangedCallback
 {
   private GameInstance myGame;
   private MapView myView;
@@ -103,7 +103,7 @@ public class MapController implements IController
     startNextTurn();
 
     // Initialize our game input handler.
-    myInputStateHandler = new InputStateHandler(myGame.gameMap, myGame.activeCO);
+    myInputStateHandler = new InputStateHandler(myGame.gameMap, myGame.activeCO, this);
     myInputStateOptionSelector = null;
   }
 
@@ -234,10 +234,9 @@ public class MapController implements IController
           {
             contemplatedAction.actor = unitActor;
 
-            myInputStateHandler = new InputStateHandler(myGame.gameMap, myGame.activeCO);
+            myInputStateHandler = new InputStateHandler(myGame.gameMap, myGame.activeCO, this);
             //myInputStateHandler.select(contemplatedAction.actor);
             myInputStateHandler.select(cursorCoords);
-            changeInputState();
 
             // Calculate movement options.
             //changeInputMode(InputMode.MOVEMENT);
@@ -251,7 +250,6 @@ public class MapController implements IController
         {
           XYCoord selectCoord = new XYCoord(myGame.getCursorX(), myGame.getCursorY());
           myInputStateHandler.select(selectCoord);
-          changeInputState();
           //changeInputMode(InputMode.PRODUCTION);
         }
         else
@@ -275,11 +273,9 @@ public class MapController implements IController
     {
       case ENTER:
         myInputStateHandler.select(new XYCoord(myGame.getCursorX(), myGame.getCursorY()));
-        changeInputState();
         break;
       case BACK:
         myInputStateHandler.back();
-        changeInputState();
         break;
       case UP:
       case LEFT:
@@ -360,7 +356,6 @@ public class MapController implements IController
           // Select the location and display possible actions.
           contemplatedAction.movePath.start(); // start the unit running
           myInputStateHandler.select(contemplatedAction.movePath);
-          changeInputState();
         }
         // if we're selecting an enemy unit, hitting enter again will drop that selection
         if( contemplatedAction.actor.CO != myGame.activeCO )
@@ -389,7 +384,6 @@ public class MapController implements IController
     {
       System.out.println("ERROR! MapController.handleActionMenuInput() called with no menu.");
       myInputStateHandler.back();
-      changeInputState();
       return;
     }
 
@@ -397,7 +391,6 @@ public class MapController implements IController
     {
       System.out.println("ERROR! MapController.handleActionMenuInput() called with no menu options!");
       myInputStateHandler.back();
-      changeInputState();
       return;
     }
 
@@ -406,20 +399,10 @@ public class MapController implements IController
       case ENTER:
         // Pass the user's selection to the state handler.
         String actionName = myInputStateHandler.getMenuOptions()[myInputStateOptionSelector.getSelectionNormalized()];
-        InputStateHandler.InputMode newMode = myInputStateHandler.select(actionName);
-
-        // If the new state has an action to execute, do that.
-        if( newMode == InputStateHandler.InputMode.ACTION_READY )
-        {
-          executeGameAction(myInputStateHandler.getReadyAction());
-          myInputStateHandler.reset();
-        }
-        changeInputState();
-
+        myInputStateHandler.select(actionName);
         break;
       case BACK:
         myInputStateHandler.back();
-        changeInputState();
         break;
       case NO_ACTION:
         break;
@@ -455,11 +438,9 @@ public class MapController implements IController
       case ENTER:
         XYCoord actionLocation = targetLocations.get(myInputStateOptionSelector.getSelectionNormalized());
         InputStateHandler.InputMode mode = myInputStateHandler.select(actionLocation);
-        changeInputState();
         break;
       case BACK:
         myInputStateHandler.back();
-        changeInputState();
         break;
       case NO_ACTION:
       default:
@@ -619,7 +600,8 @@ public class MapController implements IController
   /**
    * Updates context information to keep the input state in order.
    */
-  private void changeInputState()
+  @Override
+  public void onStateChange()
   {
     InputStateHandler.InputMode mode = myInputStateHandler.getInputMode();
     myInputStateOptionSelector = null;
@@ -640,8 +622,7 @@ public class MapController implements IController
         if( null != myInputStateHandler.getReadyAction() )
         {
           executeGameAction(myInputStateHandler.getReadyAction());
-          myInputStateHandler.reset();
-          changeInputState(); // Shh. If we don't mention this is recursive, maybe nobody will notice.
+          myInputStateHandler.reset(); // Will probably cause several indirectly-recursive calls to this function.
         }
         break;
       case PATH_SELECT:
@@ -766,12 +747,19 @@ public class MapController implements IController
    */
   private void executeGameAction(GameAction action)
   {
-    // Compile the GameAction to its component events.
-    GameEventQueue events = action.getEvents(myGame.gameMap);
+    if( null != action )
+    {
+      // Compile the GameAction to its component events.
+      GameEventQueue events = action.getEvents(myGame.gameMap);
 
-    // Send the events to the animator. They will be applied/executed in animationEnded().
-    changeInputMode(InputMode.ANIMATION);
-    myView.animate(events);
+      // Send the events to the animator. They will be applied/executed in animationEnded().
+      changeInputMode(InputMode.ANIMATION);
+      myView.animate(events);
+    }
+    else
+    {
+      System.out.println("WARNING! Attempting to execute null GameAction.");
+    }
   }
 
   public Unit getContemplatedActor()
@@ -851,7 +839,7 @@ public class MapController implements IController
     myGame.turn();
 
     // Reinitialize the InputStateHandler for the new turn.
-    myInputStateHandler = new InputStateHandler(myGame.gameMap, myGame.activeCO);
+    myInputStateHandler = new InputStateHandler(myGame.gameMap, myGame.activeCO, this);
 
     // Add the CO's units to the queue so we can initialize them.
     unitsToInit.addAll(myGame.activeCO.units);

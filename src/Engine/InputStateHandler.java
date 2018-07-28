@@ -16,14 +16,21 @@ public class InputStateHandler
 {
   private StateData myStateData = null;
   private Stack<State> myStateStack = null;
+  private StateChangedCallback myCallback = null;
 
   public enum InputMode { FREE_TILE_SELECT, PATH_SELECT, MENU_SELECT, CONSTRAINED_TILE_SELECT, ACTION_READY };
 
-  public InputStateHandler(GameMap map, Commander currentPlayer)
+  public InputStateHandler(GameMap map, Commander currentPlayer, StateChangedCallback callback)
   {
     myStateStack = new Stack<State>();
     myStateData = new StateData(map, currentPlayer);
     myStateStack.push(new DefaultState(myStateData));
+    myCallback = callback;
+  }
+
+  public InputStateHandler(GameMap map, Commander currentPlayer)
+  {
+    this(map, currentPlayer, null);
   }
 
   /**
@@ -31,18 +38,34 @@ public class InputStateHandler
    */
   public State back()
   {
-    State previousState = null;
+    State oldCurrentState = null;
+    State newCurrentState = null;
     if( !myStateStack.isEmpty() )
     {
-      previousState = myStateStack.pop();
+      oldCurrentState = myStateStack.pop();
     }
+    else
+    {
+      System.out.println("WARNING! InputStateHandler state stack is empty!");
+      oldCurrentState = new DefaultState(myStateData);
+    }
+
     // If the stack is now empty, put this guy back again.
     // The last one should be DefaultState.
     if( myStateStack.isEmpty() )
     {
-      myStateStack.push(previousState);
+      myStateStack.push(oldCurrentState);
     }
-    return previousState;
+
+    // Set newCurrentState to whatever is now at the top of th stack.
+    newCurrentState = peekCurrentState();
+
+    // If we are in a different state now than before, notify the callback.
+    if( oldCurrentState != newCurrentState )
+    {
+      myCallback.onStateChange();
+    }
+    return newCurrentState;
   }
 
   /**
@@ -111,6 +134,12 @@ public class InputStateHandler
     if(current != next)
     {
       myStateStack.push(next);
+
+      // Let the callback know we did something.
+      if( null != myCallback )
+      {
+        myCallback.onStateChange();
+      }
     }
   }
 
@@ -212,6 +241,14 @@ public class InputStateHandler
     {
       return myAction;
     }
+  }
+
+  /************************************************************
+   * Interface so classes can be notified of state changes.
+   ************************************************************/
+  public static interface StateChangedCallback
+  {
+    public void onStateChange();
   }
 
   /************************************************************
