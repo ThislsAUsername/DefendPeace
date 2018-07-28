@@ -38,7 +38,7 @@ public class MapController implements IController, InputStateHandler.StateChange
 
   private enum InputMode
   {
-    MAP, MOVEMENT, ACTIONMENU, ACTION, PRODUCTION, METAACTION, CO_ABILITYMENU, CONFIRMEXIT, ANIMATION, EXITGAME, CO_INFO
+    MAP, METAACTION, CO_ABILITYMENU, CONFIRMEXIT, ANIMATION, EXITGAME, CO_INFO
   };
 
   public enum MetaAction
@@ -412,79 +412,6 @@ public class MapController implements IController, InputStateHandler.StateChange
     }
   }
 
-  /**
-   * Once an action has been chosen, we need to choose the action target, and then execute.
-   */
-  private void handleActionInput(InputHandler.InputAction input)
-  {
-    if( myInputStateHandler.getCoordinateOptions().size() == 0)
-    {
-      // If this option doesn't require a target, it should have been executed from handleActionMenuInput().
-      // This function is just for target selection/choosing one action from the set.
-      System.out.println("WARNING! Attempting to choose a target for a non-targetable action.");
-    }
-
-    ArrayList<XYCoord> targetLocations = myInputStateHandler.getCoordinateOptions();
-
-    switch (input)
-    {
-      case UP:
-      case LEFT:
-      case DOWN:
-      case RIGHT:
-        myInputStateOptionSelector.handleInput(input);
-        myGame.setCursorLocation(targetLocations.get(myInputStateOptionSelector.getSelectionNormalized()));
-        break;
-      case ENTER:
-        XYCoord actionLocation = targetLocations.get(myInputStateOptionSelector.getSelectionNormalized());
-        InputStateHandler.InputMode mode = myInputStateHandler.select(actionLocation);
-        break;
-      case BACK:
-        myInputStateHandler.back();
-        break;
-      case NO_ACTION:
-      default:
-        System.out.println("WARNING! MapController.handleActionInput() was given invalid input enum (" + input + ")");
-    }
-  }
-
-  /** We just selected a production building - what can it do? */
-  private void handleProductionMenuInput(InputHandler.InputAction input)
-  {
-    if( currentMenu != productionMenu )
-    {
-      System.out.println("ERROR! MapController.handleProductionMenuInput() called with wrong menu active!");
-      return;
-    }
-
-    switch (input)
-    {
-      case ENTER:
-        Units.UnitModel model = productionMenu.getSelectedOption();
-
-        if( model.moneyCost <= myGame.activeCO.money )
-        {
-          myGame.activeCO.money -= model.moneyCost;
-          Unit u = new Unit(myGame.activeCO, model);
-          myGame.activeCO.units.add(u);
-          myGame.gameMap.addNewUnit(u, myGame.getCursorX(), myGame.getCursorY());
-        }
-        else
-        {
-          System.out.println("Not enough money.");
-        }
-        changeInputMode(InputMode.MAP);
-        break;
-      case BACK:
-        changeInputMode(InputMode.MAP);
-        break;
-      case NO_ACTION:
-        break;
-      default:
-        currentMenu.handleMenuInput(input);
-    }
-  }
-
   private void handleMetaActionMenuInput(InputHandler.InputAction input)
   {
     if( currentMenu != metaActionMenu )
@@ -644,41 +571,10 @@ public class MapController implements IController, InputStateHandler.StateChange
     inputMode = input;
     switch (inputMode)
     {
-      case ACTION: // Provide a target for the chosen action.
-        //GameActionSet possibleActions = actionMenu.getSelectedOption();
-        //Utils.highlightLocations(myGame.gameMap, possibleActions.getTargetedLocations());
-        ArrayList<XYCoord> coords = myInputStateHandler.getCoordinateOptions();
-        myInputStateOptionSelector = new OptionSelector(coords.size());
-
-        // Set the contemplated action to the first possible action, and move the
-        //  cursor to the targeted location.
-        myGame.setCursorLocation(coords.get(myInputStateOptionSelector.getSelectionNormalized()));
-        //contemplatedAction.action = possibleActions.getSelected();
-        contemplatedAction.action = myInputStateHandler.getReadyAction();
-        currentMenu = null;
-        break;
-      case ACTIONMENU: // Select which action to perform.
-        myGame.gameMap.clearAllHighlights();
-        //actionMenu = new InGameMenu<GameActionSet>(contemplatedAction.actor.getPossibleActions(myGame.gameMap, contemplatedAction.movePath));
-        currentMenu = new InGameMenu<String>( myInputStateHandler.getMenuOptions() );
-        myGame.setCursorLocation(contemplatedAction.movePath.getEnd().x, contemplatedAction.movePath.getEnd().y);
-        break;
       case MAP:
         contemplatedAction.clear();
         currentMenu = null;
         myGame.gameMap.clearAllHighlights();
-        break;
-      case MOVEMENT:
-        Utils.findPossibleDestinations(contemplatedAction.actor, myGame.gameMap);
-        contemplatedAction.movePath = null;
-        currentMenu = null;
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.
-        break;
-      case PRODUCTION:
-        myGame.gameMap.clearAllHighlights();
-        productionMenu.resetOptions(
-            myGame.activeCO.getShoppingList(myGame.gameMap.getEnvironment(myGame.getCursorX(), myGame.getCursorY()).terrainType));
-        currentMenu = productionMenu;
         break;
       case METAACTION:
         myGame.gameMap.clearAllHighlights();
