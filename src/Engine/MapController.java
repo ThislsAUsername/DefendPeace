@@ -26,14 +26,13 @@ public class MapController implements IController
 
   // A few menus to control the in-game logical flow.
   private InGameMenu<UnitModel> productionMenu;
-  private InGameMenu<String> actionMenu;
   private InGameMenu<MetaAction> metaActionMenu;
   private InGameMenu<CommanderAbility> coAbilityMenu;
   private InGameMenu<ConfirmExitEnum> confirmExitMenu;
   private InGameMenu<? extends Object> currentMenu;
 
   private InputStateHandler myInputStateHandler = null;
-  OptionSelector myInputStateOptionSelector = null;
+  private OptionSelector myInputStateOptionSelector = null;
 
   private int nextSeekIndex;
 
@@ -90,7 +89,6 @@ public class MapController implements IController
     myView = view;
     myView.setController(this);
     productionMenu = new InGameProductionMenu(myGame.commanders[0].getShoppingList(TerrainType.FACTORY)); // Just init with a valid default.
-    actionMenu = null;
     metaActionMenu = new InGameMenu<MetaAction>(metaActionsNoAbility);
     coAbilityMenu = null;
     confirmExitMenu = new InGameMenu<ConfirmExitEnum>(confirmExitOptions);
@@ -100,10 +98,13 @@ public class MapController implements IController
     coInfoMenu = new CO_InfoMenu(myGame.commanders.length);
     nextSeekIndex = 0;
     contemplatedAction = new ContemplatedAction();
-    myInputStateOptionSelector = null;
 
     // Start the first turn.
     startNextTurn();
+
+    // Initialize our game input handler.
+    myInputStateHandler = new InputStateHandler(myGame.gameMap, myGame.activeCO);
+    myInputStateOptionSelector = null;
   }
 
   /**
@@ -114,66 +115,64 @@ public class MapController implements IController
   public boolean handleInput(InputHandler.InputAction input)
   {
     boolean exitMap = false;
-    switch (inputMode)
+
+    InputStateHandler.InputMode mode = myInputStateHandler.getInputMode();
+
+    if( InputMode.METAACTION == inputMode )
     {
-      case MAP:
-        handleMapInput(input);
+      handleMetaActionMenuInput(input);
+    }
+    else if( InputMode.CO_INFO == inputMode )
+    {
+      if( coInfoMenu.handleInput(input) )
+      {
+        isInCoInfoMenu = false;
+        changeInputMode(InputMode.METAACTION);
+      }
+    }
+    else if( InputMode.CONFIRMEXIT == inputMode )
+    {
+      // If they exit via menu, don't hang around for the victory animation.
+      exitMap = handleConfirmExitMenuInput(input);
+    }
+    else if( InputMode.EXITGAME == inputMode )
+    {
+      // Once the game is over, wait for an ENTER or BACK input to return to the main menu.
+      if( input == InputHandler.InputAction.BACK || input == InputHandler.InputAction.ENTER )
+      {
+        exitMap = true;
+      }
+    }
+    else switch( mode )
+    {
+      case FREE_TILE_SELECT:
+        System.out.println("handling free tile select.");
+        handleFreeTileSelect(input);
         break;
-      case MOVEMENT:
+      case PATH_SELECT:
+        System.out.println("handling path select.");
         handleMovementInput(input);
         break;
-      case ACTIONMENU:
+      case MENU_SELECT:
+        System.out.println("handling menu select.");
         handleActionMenuInput(input);
         break;
-      case ACTION:
-        handleActionInput(input);
+      case CONSTRAINED_TILE_SELECT:
+        System.out.println("handling constrained tile select.");
+        handleConstrainedTileSelect(input);
         break;
-      case PRODUCTION:
-        handleProductionMenuInput(input);
-        break;
-      case METAACTION:
-        handleMetaActionMenuInput(input);
-        break;
-      case CO_ABILITYMENU:
-        handleCoAbilityMenuInput(input);
-        break;
-      case CONFIRMEXIT:
-        // If they exit via menu, don't hang around for the victory animation.
-        exitMap = handleConfirmExitMenuInput(input);
-        break;
-      case CO_INFO:
-        if( coInfoMenu.handleInput(input) )
-        {
-          isInCoInfoMenu = false;
-          changeInputMode(InputMode.METAACTION);
-        }
-        break;
-      case ANIMATION:
-        if( input == InputHandler.InputAction.BACK || input == InputHandler.InputAction.ENTER )
-        {
-          // Tell the animation to cancel.
-          myView.cancelAnimation();
-        }
-        break;
-      case EXITGAME:
-        // Once the game is over, wait for an ENTER or BACK input to return to the main menu.
-        if( input == InputHandler.InputAction.BACK || input == InputHandler.InputAction.ENTER )
-        {
-          exitMap = true;
-        }
-        break;
+      case ACTION_READY:
       default:
-        System.out.println("Invalid InputMode in MapController! " + inputMode);
+        System.out.println("Invalid InputStateHandler mode in MapController! " + mode);
     }
 
     return exitMap;
   }
 
   /**
-   * When nothing is selected, user inputs go here. This is where the user can pan around the map,
-   * or select a unit or a building to take some action.
+   * Allow a user to move the cursor freely around the map, and to select any tile.
    */
-  private void handleMapInput(InputHandler.InputAction input)
+  private void handleFreeTileSelect(InputHandler.InputAction input)
   {
     switch (input)
     {
@@ -226,7 +225,8 @@ public class MapController implements IController
         break;
       case ENTER:
         // See what is at the current cursor location, in precedence order of Unit, Building, Terrain.
-        Location loc = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY());
+        XYCoord cursorCoords = new XYCoord(myGame.getCursorX(), myGame.getCursorY());
+        Location loc = myGame.gameMap.getLocation(cursorCoords);
         Unit unitActor = loc.getResident();
         if( null != unitActor )
         {
@@ -235,10 +235,12 @@ public class MapController implements IController
             contemplatedAction.actor = unitActor;
 
             myInputStateHandler = new InputStateHandler(myGame.gameMap, myGame.activeCO);
-            myInputStateHandler.select(contemplatedAction.actor);
+            //myInputStateHandler.select(contemplatedAction.actor);
+            myInputStateHandler.select(cursorCoords);
+            changeInputState();
 
             // Calculate movement options.
-            changeInputMode(InputMode.MOVEMENT);
+            //changeInputMode(InputMode.MOVEMENT);
           }
           else
           {
@@ -247,7 +249,10 @@ public class MapController implements IController
         }
         else if( loc.getOwner() == myGame.activeCO && myGame.activeCO.getShoppingList(loc.getEnvironment().terrainType).size() > 0 )
         {
-          changeInputMode(InputMode.PRODUCTION);
+          XYCoord selectCoord = new XYCoord(myGame.getCursorX(), myGame.getCursorY());
+          myInputStateHandler.select(selectCoord);
+          changeInputState();
+          //changeInputMode(InputMode.PRODUCTION);
         }
         else
         {
@@ -256,10 +261,44 @@ public class MapController implements IController
         }
         break;
       case BACK:
-        myInputStateHandler = null;
+        myInputStateHandler.back();
         break;
       default:
         System.out.println("WARNING! MapController.handleMapInput() was given invalid input enum (" + input + ")");
+    }
+  }
+
+  /** Force the user to select one map tile from the InputStateHandler's selection. */
+  private void handleConstrainedTileSelect(InputHandler.InputAction input)
+  {
+    switch(input)
+    {
+      case ENTER:
+        myInputStateHandler.select(new XYCoord(myGame.getCursorX(), myGame.getCursorY()));
+        changeInputState();
+        break;
+      case BACK:
+        myInputStateHandler.back();
+        changeInputState();
+        break;
+      case UP:
+      case LEFT:
+      case DOWN:
+      case RIGHT:
+        if( myInputStateHandler.getCoordinateOptions().size() == 0)
+        {
+          // If this option doesn't require a target, it should have been executed from handleActionMenuInput().
+          // This function is just for target selection/choosing one action from the set.
+          System.out.println("WARNING! Attempting to choose a target for a non-targetable action.");
+        }
+
+        ArrayList<XYCoord> targetLocations = myInputStateHandler.getCoordinateOptions();
+        myInputStateOptionSelector.handleInput(input);
+        myGame.setCursorLocation(targetLocations.get(myInputStateOptionSelector.getSelectionNormalized()));
+        break;
+      case NO_ACTION:
+      case SEEK:     // Seek does nothing in this input state.
+      default:
     }
   }
 
@@ -315,13 +354,13 @@ public class MapController implements IController
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         break;
       case ENTER:
-        // If the selected space is within the reachable area
-        if( inMoveableSpace && contemplatedAction.actor.CO == myGame.activeCO )
+        // If this is a unit we can control.
+        if( contemplatedAction.actor.CO == myGame.activeCO )
         {
           // Select the location and display possible actions.
           contemplatedAction.movePath.start(); // start the unit running
           myInputStateHandler.select(contemplatedAction.movePath);
-          changeInputMode(InputMode.ACTIONMENU);
+          changeInputState();
         }
         // if we're selecting an enemy unit, hitting enter again will drop that selection
         if( contemplatedAction.actor.CO != myGame.activeCO )
@@ -346,9 +385,19 @@ public class MapController implements IController
    */
   private void handleActionMenuInput(InputHandler.InputAction input)
   {
-    if( currentMenu != actionMenu || null == actionMenu )
+    if( null == currentMenu )
     {
-      System.out.println("ERROR! MapController.handleActionMenuInput() called with wrong menu active!");
+      System.out.println("ERROR! MapController.handleActionMenuInput() called with no menu.");
+      myInputStateHandler.back();
+      changeInputState();
+      return;
+    }
+
+    if( null == myInputStateHandler.getMenuOptions() )
+    {
+      System.out.println("ERROR! MapController.handleActionMenuInput() called with no menu options!");
+      myInputStateHandler.back();
+      changeInputState();
       return;
     }
 
@@ -356,7 +405,7 @@ public class MapController implements IController
     {
       case ENTER:
         // Pass the user's selection to the state handler.
-        String actionName = actionMenu.getSelectedOption();
+        String actionName = myInputStateHandler.getMenuOptions()[myInputStateOptionSelector.getSelectionNormalized()];
         InputStateHandler.InputMode newMode = myInputStateHandler.select(actionName);
 
         // If the new state has an action to execute, do that.
@@ -365,33 +414,17 @@ public class MapController implements IController
           executeGameAction(myInputStateHandler.getReadyAction());
           myInputStateHandler.reset();
         }
-        else
-        {
-          if(newMode == InputStateHandler.InputMode.MENU_SELECT )
-          {
-            // perhaps move this into changeInputMode.
-          }
-          changeInputMode(InputMode.ACTION);
-        }
-//        // If the action type requires no target, there should only be one
-//        // GameAction in the set. Execute it.
-//        if( !actionSet.isTargetRequired() )
-//        {
-//          executeGameAction(actionSet.getSelected());
-//        }
-//        else
-//        {
-//          changeInputMode(InputMode.ACTION);
-//        }
+        changeInputState();
 
         break;
       case BACK:
-        changeInputMode(InputMode.MOVEMENT);
         myInputStateHandler.back();
+        changeInputState();
         break;
       case NO_ACTION:
         break;
       default:
+        myInputStateOptionSelector.handleInput(input);
         currentMenu.handleMenuInput(input);
     }
   }
@@ -401,15 +434,6 @@ public class MapController implements IController
    */
   private void handleActionInput(InputHandler.InputAction input)
   {
-    if( null == actionMenu )
-    {
-      System.out.println("ERROR! MapController.handleActionInput() called with null action menu!");
-      return;
-    }
-
-    //GameActionSet actionOptions = actionMenu.getSelectedOption();
-
-    //if( !actionOptions.isTargetRequired() )
     if( myInputStateHandler.getCoordinateOptions().size() == 0)
     {
       // If this option doesn't require a target, it should have been executed from handleActionMenuInput().
@@ -425,48 +449,17 @@ public class MapController implements IController
       case LEFT:
       case DOWN:
       case RIGHT:
-        // Select the previous possible action, set it into the contemplated action, and
-        //  update the cursor location to the action's target location.
-//        actionOptions.prev();
-//        myGame.setCursorLocation(actionOptions.getSelected().getTargetLocation());
-//        contemplatedAction.action = actionOptions.getSelected();
-//        break;
-//      case DOWN:
-//      case RIGHT:
-        // Select the next possible action, set it into the contemplated action, and
-        //  update the cursor location to the action's target location.
-//        actionOptions.next();
-//        myGame.setCursorLocation(actionOptions.getSelected().getTargetLocation());
-//        contemplatedAction.action = actionOptions.getSelected();
-
         myInputStateOptionSelector.handleInput(input);
         myGame.setCursorLocation(targetLocations.get(myInputStateOptionSelector.getSelectionNormalized()));
         break;
       case ENTER:
-//        GameAction action = actionOptions.getSelected();
-//        if( null != action )
-//        {
-//          executeGameAction(action);
-//        }
-//        else
-//        {
-//          // Something went really wonky.
-//          System.out.println("Attempting to execute a null GameAction! Ignoring.");
-//        }
         XYCoord actionLocation = targetLocations.get(myInputStateOptionSelector.getSelectionNormalized());
         InputStateHandler.InputMode mode = myInputStateHandler.select(actionLocation);
-        if( (mode == InputStateHandler.InputMode.ACTION_READY) && (null != myInputStateHandler.getReadyAction()) )
-        {
-          executeGameAction(myInputStateHandler.getReadyAction());
-        }
-        else if( mode == InputStateHandler.InputMode.MENU_SELECT )
-        {
-          // Perhaps move this logic into changeInputState?
-        }
+        changeInputState();
         break;
       case BACK:
         myInputStateHandler.back();
-        changeInputMode(InputMode.ACTIONMENU);
+        changeInputState();
         break;
       case NO_ACTION:
       default:
@@ -624,6 +617,45 @@ public class MapController implements IController
   }
 
   /**
+   * Updates context information to keep the input state in order.
+   */
+  private void changeInputState()
+  {
+    InputStateHandler.InputMode mode = myInputStateHandler.getInputMode();
+    myInputStateOptionSelector = null;
+    currentMenu = null;
+
+    switch( mode )
+    {
+      case CONSTRAINED_TILE_SELECT:
+        myInputStateOptionSelector = new OptionSelector(myInputStateHandler.getCoordinateOptions().size());
+        myGame.setCursorLocation(myInputStateHandler.getCoordinateOptions().get(myInputStateOptionSelector.getSelectionNormalized()));
+        break;
+      case MENU_SELECT:
+        myInputStateOptionSelector = new OptionSelector(myInputStateHandler.getMenuOptions().length);
+        currentMenu = new InGameMenu<>(myInputStateHandler.getMenuOptions());
+        break;
+      case ACTION_READY:
+        System.out.println("handling ready action.");
+        if( null != myInputStateHandler.getReadyAction() )
+        {
+          executeGameAction(myInputStateHandler.getReadyAction());
+          myInputStateHandler.reset();
+          changeInputState(); // Shh. If we don't mention this is recursive, maybe nobody will notice.
+        }
+        break;
+      case PATH_SELECT:
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.
+        break;
+      case FREE_TILE_SELECT:
+        // This state doesn't require any special handling.
+        break;
+        default:
+          System.out.println("WARNING! Attempting to enter unknown input mode " + mode);
+    }
+  }
+
+  /**
    * Updates the InputMode and the current menu to keep them in sync.
    */
   private void changeInputMode(InputMode input)
@@ -647,8 +679,7 @@ public class MapController implements IController
       case ACTIONMENU: // Select which action to perform.
         myGame.gameMap.clearAllHighlights();
         //actionMenu = new InGameMenu<GameActionSet>(contemplatedAction.actor.getPossibleActions(myGame.gameMap, contemplatedAction.movePath));
-        actionMenu = new InGameMenu<String>( myInputStateHandler.getMenuOptions() );
-        currentMenu = actionMenu;
+        currentMenu = new InGameMenu<String>( myInputStateHandler.getMenuOptions() );
         myGame.setCursorLocation(contemplatedAction.movePath.getEnd().x, contemplatedAction.movePath.getEnd().y);
         break;
       case MAP:
@@ -818,6 +849,9 @@ public class MapController implements IController
 
     // Tell the game a turn has changed. This will update the active CO.
     myGame.turn();
+
+    // Reinitialize the InputStateHandler for the new turn.
+    myInputStateHandler = new InputStateHandler(myGame.gameMap, myGame.activeCO);
 
     // Add the CO's units to the queue so we can initialize them.
     unitsToInit.addAll(myGame.activeCO.units);

@@ -5,10 +5,12 @@ import java.util.Stack;
 
 import CommandingOfficers.Commander;
 import Terrain.GameMap;
+import Terrain.Location;
 import Units.Unit;
+import Units.UnitModel;
 
 /************************************************************
- * 
+ * Handles converting user input into game actions.
  ************************************************************/
 public class InputStateHandler
 {
@@ -43,21 +45,6 @@ public class InputStateHandler
     return previousState;
   }
 
-  /**
-   * Choose the passed-in option for the current state, triggering a transition to the
-   * next state. If no transition is possible, the state will not change.
-   * @param unit - The unit being selected.
-   * @return The OptionSet for the next (and now current) state.
-   */
-  @Deprecated // Try to move this into select(XYCoord)
-  public OptionSet select(Unit unit)
-  {
-    State current = peekCurrentState();
-    State next = current.select(unit);
-    pushNextState(current, next);
-    return next.getOptions();
-  }
-  
   /**
    * Choose the passed-in option for the current state, triggering a transition to the
    * next state. If no transition is possible, the state will not change.
@@ -139,6 +126,12 @@ public class InputStateHandler
     return peekCurrentState().getOptions().myMenuOptions;
   }
 
+  /** @return The currently-recommended input mode. */
+  public InputMode getInputMode()
+  {
+    return peekCurrentState().getOptions().inputMode;
+  }
+
   /** @return The current set of coordinates from which to choose, or null we are not selecting a location. */
   public ArrayList<XYCoord> getCoordinateOptions()
   {
@@ -156,6 +149,7 @@ public class InputStateHandler
     public Unit unitActor = null;
     public GameActionSet actionSet = null;
     public Path path = null;
+    public ArrayList<? extends Object> menuOptions = null; // Just require a toString().
     public StateData(GameMap map, Commander co)
     {
       gameMap = map;
@@ -180,6 +174,11 @@ public class InputStateHandler
     private ArrayList<XYCoord> myCoords = null;
     private String[] myMenuOptions = null;
     private GameAction myAction = null;
+
+    public OptionSet()
+    {
+      inputMode = InputMode.FREE_TILE_SELECT;
+    }
 
     public OptionSet(InputMode mode, ArrayList<XYCoord> coords)
     {
@@ -279,16 +278,29 @@ public class InputStateHandler
     @Override
     protected OptionSet initOptions()
     {
-      // Compile a list of the locations of every unit owned by this CO.
-      ArrayList<XYCoord> coords = new ArrayList<XYCoord>(myStateData.commander.units.size());
-      for( Unit u : myStateData.commander.units )
-      {
-        coords.add( new XYCoord(u.x, u.y) );
-      }
-      return new OptionSet(InputMode.FREE_TILE_SELECT, coords);
+      // Use the default OptionSet constructor, which allows free tile selection.
+      return new OptionSet();
     }
-    
+
     @Override
+    public State select(XYCoord coord)
+    {
+      State next = this;
+      Location loc = myStateData.gameMap.getLocation(coord);
+      Unit resident = loc.getResident();
+      if( null != resident && resident.CO == myStateData.commander )
+      {
+        next = select(resident);
+      }
+      else if( (loc.getOwner() == myStateData.commander) && myStateData.commander.getShoppingList(loc.getEnvironment().terrainType).size() > 0 )
+      {
+        ArrayList<UnitModel> buildables = myStateData.commander.getShoppingList(loc.getEnvironment().terrainType);
+        myStateData.menuOptions = buildables;
+        next = new SelectUnitProduction(myStateData, buildables, coord);
+      }
+      return next;
+    }
+
     public State select(Unit unit)
     {
       State next = this;
@@ -306,6 +318,58 @@ public class InputStateHandler
         if( unit == null ) System.out.println("  Unit is null.");
         if( unit.isTurnOver ) System.out.println("  Unit has already moved.");
       }
+      return next;
+    }
+  }
+
+  /************************************************************
+   * Presents options for building a unit.                    *
+   ************************************************************/
+  private static class SelectUnitProduction extends State
+  {
+    private ArrayList<UnitModel> myUnitModels = null;
+    private XYCoord myProductionLocation = null;
+
+    public SelectUnitProduction(StateData data, ArrayList<UnitModel> buildables, XYCoord buildLocation)
+    {
+      super(data);
+      myUnitModels = buildables;
+      myProductionLocation = buildLocation;
+    }
+
+    @Override
+    protected OptionSet initOptions()
+    {
+      OptionSet options = null;
+      if( null != myStateData.menuOptions )
+      {
+        String[] modelStrings = new String[myStateData.menuOptions.size()];
+        for( int i = 0; i < myStateData.menuOptions.size(); ++i )
+        {
+          modelStrings[i] = myStateData.menuOptions.get(i).toString();
+        }
+        options = new OptionSet(modelStrings);
+      }
+      return options;
+    }
+
+    @Override
+    public State select(String option)
+    {
+      State next = this;
+
+      if( null != option && null != myUnitModels )
+      {
+        for( UnitModel model : myUnitModels )
+        {
+          if( option.equals(model.toString()))
+          {
+            myStateData.actionSet = new GameActionSet(new GameAction.UnitProductionAction(myStateData.gameMap, myStateData.commander, model, myProductionLocation), false);
+            next = new ActionReady(myStateData);
+          }
+        }
+      }
+
       return next;
     }
   }
@@ -469,7 +533,7 @@ public class InputStateHandler
       for( int i = 0; i < myStateData.actionSet.getTargetedLocations().size(); ++i )
       {
         // If the selected target location corresponds to this action, keep it selected.
-        if( myStateData.actionSet.getSelected().getTargetLocation() == targetLocation )
+        if( targetLocation.equals(myStateData.actionSet.getSelected().getTargetLocation()) )
         {
           // ActionReady will just choose whatever action is selected to perform, so no changes here.
           next = new ActionReady(myStateData);
