@@ -1,6 +1,8 @@
 package Engine;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 import CommandingOfficers.Commander;
@@ -43,6 +45,7 @@ public class InputStateHandler
     if( !myStateStack.isEmpty() )
     {
       oldCurrentState = myStateStack.pop();
+      oldCurrentState.back(); // Undo any StateData changes.
     }
     else
     {
@@ -181,6 +184,7 @@ public class InputStateHandler
     public GameActionSet actionSet = null;
     public Path path = null;
     public ArrayList<? extends Object> menuOptions = null; // Just require a toString().
+    public Map<Unit, XYCoord> unitLocationMap = null; // Used to map units to unload locations.
     public StateData(GameMap map, Commander co)
     {
       gameMap = map;
@@ -297,6 +301,8 @@ public class InputStateHandler
     {
       return this;
     }
+    /** Undo any StateData changes. */
+    public void back(){}
   }
 
   /************************************************************
@@ -600,18 +606,30 @@ public class InputStateHandler
     protected OptionSet initOptions()
     {
       // Collect the names of all units held by unitActor.
-      Unit[] cargoes = new Unit[myStateData.unitActor.heldUnits.size()];
+      ArrayList<Unit> cargoes = new ArrayList<Unit>();
       for( int i = 0; i < myStateData.unitActor.heldUnits.size(); ++i )
       {
-        cargoes[i] = myStateData.unitActor.heldUnits.get(i);
+        // Don't include the unit if it's already set to be unloaded.
+        if( (null == myStateData.unitLocationMap) || !myStateData.unitLocationMap.containsKey(myStateData.unitActor.heldUnits.get(i)) )
+        {
+          cargoes.add( myStateData.unitActor.heldUnits.get(i) );
+        }
       }
-      return new OptionSet(cargoes);
+      Unit[] cargoArray = new Unit[cargoes.size()];
+      cargoes.toArray(cargoArray);
+      return new OptionSet(cargoArray);
     }
 
     @Override
     public State select(Object option)
     {
       State next = this;
+
+      // Add a unitLocationMap to our state if we don't have one already.
+      if( null == myStateData.unitLocationMap )
+      {
+        myStateData.unitLocationMap = new HashMap<Unit, XYCoord>();
+      }
 
       for( Unit cargo : myStateData.unitActor.heldUnits )
       {
@@ -632,16 +650,17 @@ public class InputStateHandler
   {
     Unit myCargo = null;
 
-    public SelectCargoDropLocation(StateData data, Unit cargo)
+    public SelectCargoDropLocation(StateData data, Unit newDrop)
     {
       super(data);
-      myCargo = cargo;
+      myCargo = newDrop;
     }
 
     @Override
     protected OptionSet initOptions()
     {
       ArrayList<XYCoord> dropoffLocations = myStateData.actionSet.getTargetedLocations();
+      dropoffLocations.removeAll(myStateData.unitLocationMap.values()); // Remove any drop locations that are already reserved.
       return new OptionSet(InputMode.CONSTRAINED_TILE_SELECT, dropoffLocations);
     }
 
@@ -652,14 +671,33 @@ public class InputStateHandler
 
       if( myStateData.actionSet.getTargetedLocations().contains(location) )
       {
-        GameAction ga = new GameAction.UnloadAction(myStateData.gameMap, myStateData.unitActor, myStateData.path, myCargo, location);
+        // Add the new dropoff to myStateData.
+        myStateData.unitLocationMap.put(myCargo, location);
 
-        // Override the current ActionSet with a new one, since we just redefined it.
-        myStateData.actionSet = new GameActionSet( ga, true );
-        next = new ActionReady(myStateData);
+        // If we have the ability to unload another unit as well, go forward to SelectCargo.
+        if( myStateData.unitActor.heldUnits.size() > myStateData.unitLocationMap.size() // More units we could unload.
+            && getOptions().getCoordinateOptions().size() > myStateData.unitLocationMap.size() ) // More spaces to drop them in.
+        {
+          next = new SelectCargo(myStateData);
+        }
+        else
+        {
+          // Since we can't drop any additional units, build the GameAction and move to ActionReady.
+          GameAction ga = new GameAction.UnloadAction(myStateData.gameMap, myStateData.unitActor, myStateData.path, myStateData.unitLocationMap);
+
+          // Override the current ActionSet with a new one, since we just redefined it.
+          myStateData.actionSet = new GameActionSet( ga, true );
+          next = new ActionReady(myStateData);
+        }
       }
 
       return next;
+    }
+
+    @Override
+    public void back()
+    {
+      myStateData.unitLocationMap.remove(myCargo);
     }
   }
 

@@ -1,6 +1,8 @@
 package Engine;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import CommandingOfficers.Commander;
 import Engine.GameEvents.BattleEvent;
@@ -419,8 +421,9 @@ public interface GameAction
   // ===========  UnloadAction  =================================
   public static class UnloadAction implements GameAction
   {
+    Map<Unit, XYCoord> myDropoffs = null;
     private XYCoord moveLoc = null;
-    private XYCoord dropLoc = null;
+    private XYCoord firstDropLoc = null;
     private GameEventQueue unloadEvents = null;
 
     public UnloadAction(GameMap gameMap, Unit actor, Path path, Unit passenger, int dropX, int dropY)
@@ -428,19 +431,28 @@ public interface GameAction
       this(gameMap, actor, path, passenger, new XYCoord(dropX, dropY));
     }
 
-    public UnloadAction(GameMap gameMap, Unit transport, Path movePath, Unit passenger, XYCoord dropLocation)
+    public UnloadAction(GameMap gameMap, Unit transport, Path movePath, final Unit passenger, final XYCoord dropLocation)
+    {
+      this(gameMap, transport, movePath, new HashMap<Unit, XYCoord>(){
+          private static final long serialVersionUID = 1L;
+          {
+            this.put(passenger, dropLocation);
+          }
+        });
+    }
+
+    public UnloadAction(GameMap gameMap, Unit transport, Path movePath, Map<Unit, XYCoord> dropoffs)
     {
       // UNLOAD actions consist of
       //   MOVE (transport)
       //   UNLOAD
       unloadEvents = new GameEventQueue();
-      dropLoc = dropLocation;
+      myDropoffs = new HashMap<Unit, XYCoord>();
 
       // Validate input.
       boolean isValid = true;
       isValid &= null != transport;
-      isValid &= null != passenger;
-      isValid &= null != dropLoc;
+      isValid &= null != dropoffs;
       isValid &= movePath.getPathLength() > 0;
       isValid &= null != gameMap;
       if( isValid )
@@ -448,7 +460,12 @@ public interface GameAction
         isValid &= !transport.heldUnits.isEmpty();
         moveLoc = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
         isValid &= gameMap.isLocationEmpty(transport, moveLoc); // Move location is unoccupied.
-        isValid &= gameMap.isLocationEmpty(transport, dropLoc); // Drop location is unoccupied.
+        myDropoffs.putAll(dropoffs);
+        for( Unit unit : myDropoffs.keySet() )
+        {
+          isValid &= gameMap.isLocationEmpty(transport, myDropoffs.get(unit)); // Drop locations are unoccupied.
+          firstDropLoc = (null == firstDropLoc)? myDropoffs.get(unit) : firstDropLoc;
+        }
       }
 
       // Generate events.
@@ -457,8 +474,11 @@ public interface GameAction
         // Move transport to the target location.
         unloadEvents.add(new MoveEvent(transport, movePath));
 
-        // Debark the passenger.
-        unloadEvents.add(new UnloadEvent(transport, passenger, dropLoc));
+        // Debark the passengers.
+        for( Unit unit : myDropoffs.keySet() )
+        {
+          unloadEvents.add(new UnloadEvent(transport, unit, myDropoffs.get(unit)));
+        }
       }
       else
       {
@@ -482,7 +502,7 @@ public interface GameAction
     @Override
     public XYCoord getTargetLocation()
     {
-      return dropLoc;
+      return firstDropLoc;
     }
 
     @Override

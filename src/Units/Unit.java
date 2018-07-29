@@ -384,4 +384,10 @@ public class Unit
     }
     return isFull;
   }
+
+  @Override
+  public String toString()
+  {
+    return model.toString();
+  }
 }
