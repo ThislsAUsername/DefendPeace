@@ -459,6 +459,12 @@ public class InputStateHandler
       }
       return next;
     }
+
+    @Override
+    public void back()
+    {
+      myStateData.path = null;
+    }
   }
 
   /************************************************************
@@ -534,6 +540,12 @@ public class InputStateHandler
         }
       }
       return next;
+    }
+
+    @Override
+    public void back()
+    {
+      myStateData.actionSet = null;
     }
   }
 
@@ -640,6 +652,12 @@ public class InputStateHandler
       }
 
       return next;
+    }
+
+    @Override
+    public void back()
+    {
+      myStateData.unitLocationMap = null;
     }
   }
 
