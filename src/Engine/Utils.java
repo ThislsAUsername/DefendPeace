@@ -164,6 +164,11 @@ public class Utils
 
   public static boolean isPathValid(Unit unit, Path path, GameMap map)
   {
+    if( (null == path) || (null == unit) )
+    {
+      return false;
+    }
+
     //System.out.println("Checking path validity. Length: " + (path.getPathLength()-1));
     boolean canReach = true;
 

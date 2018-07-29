@@ -15,6 +15,7 @@ import UI.CO_InfoMenu;
 import UI.InGameMenu;
 import UI.InGameProductionMenu;
 import UI.InputHandler;
+import UI.InputHandler.InputAction;
 import UI.MapView;
 import Units.Unit;
 import Units.UnitModel;
@@ -141,6 +142,13 @@ public class MapController implements IController, InputStateHandler.StateChange
       if( input == InputHandler.InputAction.BACK || input == InputHandler.InputAction.ENTER )
       {
         exitMap = true;
+      }
+    }
+    else if( InputMode.ANIMATION == inputMode )
+    {
+      if( InputAction.BACK == input || InputAction.ENTER == input )
+      {
+        myView.cancelAnimation();
       }
     }
     else switch( mode )
@@ -398,8 +406,7 @@ public class MapController implements IController, InputStateHandler.StateChange
     {
       case ENTER:
         // Pass the user's selection to the state handler.
-        String actionName = myInputStateHandler.getMenuOptions()[myInputStateOptionSelector.getSelectionNormalized()];
-        myInputStateHandler.select(actionName);
+        myInputStateHandler.select(myInputStateHandler.getMenuOptions()[myInputStateOptionSelector.getSelectionNormalized()]);
         break;
       case BACK:
         myInputStateHandler.back();

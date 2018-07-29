@@ -74,7 +74,7 @@ public class InputStateHandler
    * @param option - The chosen menu option, from among those provided by OptionSet.getMenuOptions().
    * @return The OptionSet for the next (and now current) state.
    */
-  public InputMode select(String option)
+  public InputMode select(Object option)
   {
     State current = peekCurrentState();
     State next = current.select(option);
@@ -113,7 +113,9 @@ public class InputStateHandler
   public InputMode reset()
   {
     // Unwind the stack, all the way back to the starting state.
-    while(myStateStack.size() > 1) back();
+    myStateStack.clear();
+    myStateData = new StateData(myStateData.gameMap, myStateData.commander);
+    myStateStack.push(new DefaultState(myStateData));
     return peekCurrentState().getOptions().inputMode;
   }
 
@@ -150,9 +152,9 @@ public class InputStateHandler
   }
 
   /** @return The currently-valid menu-option strings, or null if no menu is active. */
-  public String[] getMenuOptions()
+  public Object[] getMenuOptions()
   {
-    return peekCurrentState().getOptions().myMenuOptions;
+    return peekCurrentState().getOptions().getMenuOptions();
   }
 
   /** @return The currently-recommended input mode. */
@@ -201,7 +203,7 @@ public class InputStateHandler
   {
     public final InputMode inputMode;
     private ArrayList<XYCoord> myCoords = null;
-    private String[] myMenuOptions = null;
+    private Object[] myMenuOptions = null;
     private GameAction myAction = null;
 
     public OptionSet()
@@ -215,7 +217,7 @@ public class InputStateHandler
       myCoords = coords;
     }
 
-    public OptionSet(String[] menuOptions)
+    public OptionSet(Object[] menuOptions)
     {
       inputMode = InputMode.MENU_SELECT;
       myMenuOptions = menuOptions;
@@ -227,7 +229,7 @@ public class InputStateHandler
       myAction = action;
     }
 
-    public String[] getMenuOptions()
+    public Object[] getMenuOptions()
     {
       return myMenuOptions;
     }
@@ -283,15 +285,11 @@ public class InputStateHandler
 
     // Default implementations of select() will just keep us
     // in the same state. Subclasses will define transitions.
-    public State select(Unit unit)
-    {
-      return this;
-    }
     public State select(Path path)
     {
       return null;
     }
-    public State select(String option)
+    public State select(Object option)
     {
       return this;
     }
@@ -391,7 +389,7 @@ public class InputStateHandler
     }
 
     @Override
-    public State select(String option)
+    public State select(Object option)
     {
       State next = this;
 
@@ -487,7 +485,7 @@ public class InputStateHandler
     }
 
     @Override
-    public State select(String menuOption)
+    public State select(Object menuOption)
     {
       State next = this;
       GameActionSet chosenSet = null;
@@ -495,7 +493,7 @@ public class InputStateHandler
       {
         for(GameActionSet set : myUnitActions)
         {
-          if( set.toString().equals(menuOption))
+          if( set.toString().equals(menuOption) )
           {
             chosenSet = set;
             break;
@@ -524,7 +522,7 @@ public class InputStateHandler
               break;
             case UNLOAD:
               // We need to select a unit to unload.
-              //next = new SelectCargo(myStateData);
+              next = new SelectCargo(myStateData);
               break;
           }
         }
@@ -567,6 +565,8 @@ public class InputStateHandler
       // By virtue of the fact that GameActionSets should be homogenous, and it should be
       // nonsensical to have two actions of the same type targeting the same location, this
       // should be enough to uniquely identify the action we want.
+      // Well OK, UNLOAD action sets can have different actions with the same target location.
+      //   Fortunately, we don't handle those here.
       for( int i = 0; i < myStateData.actionSet.getTargetedLocations().size(); ++i )
       {
         // If the selected target location corresponds to this action, keep it selected.
@@ -582,6 +582,83 @@ public class InputStateHandler
       }
 
       // If we couldn't find an action for this location, return the current state.
+      return next;
+    }
+  }
+
+  /************************************************************
+   * State to choose which Unit will be kicked off the bus.   *
+   ************************************************************/
+  private static class SelectCargo extends State
+  {
+    public SelectCargo(StateData data)
+    {
+      super(data);
+    }
+
+    @Override
+    protected OptionSet initOptions()
+    {
+      // Collect the names of all units held by unitActor.
+      Unit[] cargoes = new Unit[myStateData.unitActor.heldUnits.size()];
+      for( int i = 0; i < myStateData.unitActor.heldUnits.size(); ++i )
+      {
+        cargoes[i] = myStateData.unitActor.heldUnits.get(i);
+      }
+      return new OptionSet(cargoes);
+    }
+
+    @Override
+    public State select(Object option)
+    {
+      State next = this;
+
+      for( Unit cargo : myStateData.unitActor.heldUnits )
+      {
+        if(cargo == option)
+        {
+          next = new SelectCargoDropLocation(myStateData, cargo);
+        }
+      }
+
+      return next;
+    }
+  }
+
+  /************************************************************
+   * State to choose where to drop the unit.                  *
+   ************************************************************/
+  private static class SelectCargoDropLocation extends State
+  {
+    Unit myCargo = null;
+
+    public SelectCargoDropLocation(StateData data, Unit cargo)
+    {
+      super(data);
+      myCargo = cargo;
+    }
+
+    @Override
+    protected OptionSet initOptions()
+    {
+      ArrayList<XYCoord> dropoffLocations = myStateData.actionSet.getTargetedLocations();
+      return new OptionSet(InputMode.CONSTRAINED_TILE_SELECT, dropoffLocations);
+    }
+
+    @Override
+    public State select(XYCoord location)
+    {
+      State next = this;
+
+      if( myStateData.actionSet.getTargetedLocations().contains(location) )
+      {
+        GameAction ga = new GameAction.UnloadAction(myStateData.gameMap, myStateData.unitActor, myStateData.path, myCargo, location);
+
+        // Override the current ActionSet with a new one, since we just redefined it.
+        myStateData.actionSet = new GameActionSet( ga, true );
+        next = new ActionReady(myStateData);
+      }
+
       return next;
     }
   }

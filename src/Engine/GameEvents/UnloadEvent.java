@@ -45,6 +45,13 @@ public class UnloadEvent implements GameEvent
       gameMap.moveUnit(cargo, dropLoc.xCoord, dropLoc.yCoord);
       cargo.isTurnOver = true;
     }
+    else
+    {
+      System.out.println("WARNING! Failed to unload unit due to preconditions not being met:");
+      if( transport.heldUnits == null ) System.out.println("          Transport unit is empty.");
+      if( !transport.heldUnits.contains(cargo) ) System.out.println("          Unit to debark is not on transport.");
+      if( gameMap.getLocation(dropLoc).getResident() != null ) System.out.println("          Unload location is not empty.");
+    }
   }
 
 }
