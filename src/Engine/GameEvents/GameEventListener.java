@@ -41,6 +41,12 @@ public abstract class GameEventListener
     eventListeners.remove(listener);
   }
 
+  /** Convenience function so a listener can unregister themselves. */
+  public void unregister()
+  {
+    GameEventListener.unregisterEventListener(this);
+  }
+
   // The functions below should be overridden by subclasses for event types they care about.
   public void receiveBattleEvent(BattleSummary summary){};
   public void receiveCaptureEvent(Unit unit, Location location){};
