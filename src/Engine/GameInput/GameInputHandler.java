@@ -24,14 +24,14 @@ import Units.UnitModel;
 public class GameInputHandler
 {
   private StateData myStateData = null;
-  private Stack<State> myStateStack = null;
+  private Stack<GameInputState> myStateStack = null;
   private StateChangedCallback myCallback = null;
 
   public enum InputMode { FREE_TILE_SELECT, PATH_SELECT, MENU_SELECT, CONSTRAINED_TILE_SELECT, ACTION_READY };
 
   public GameInputHandler(GameMap map, Commander currentPlayer, StateChangedCallback callback)
   {
-    myStateStack = new Stack<State>();
+    myStateStack = new Stack<GameInputState>();
     myStateData = new StateData(map, currentPlayer);
     myStateStack.push(new DefaultState(myStateData));
     myCallback = callback;
@@ -45,10 +45,10 @@ public class GameInputHandler
   /**
    * Back up to the previous state.
    */
-  public State back()
+  public GameInputState back()
   {
-    State oldCurrentState = null;
-    State newCurrentState = null;
+    GameInputState oldCurrentState = null;
+    GameInputState newCurrentState = null;
     if( !myStateStack.isEmpty() )
     {
       oldCurrentState = myStateStack.pop();
@@ -86,8 +86,8 @@ public class GameInputHandler
    */
   public InputMode select(Object option)
   {
-    State current = peekCurrentState();
-    State next = current.select(option);
+    GameInputState current = peekCurrentState();
+    GameInputState next = current.select(option);
     pushNextState(current, next);
     return next.getOptions().inputMode;
   }
@@ -100,8 +100,8 @@ public class GameInputHandler
    */
   public InputMode select(XYCoord coord)
   {
-    State current = peekCurrentState();
-    State next = current.select(coord);
+    GameInputState current = peekCurrentState();
+    GameInputState next = current.select(coord);
     pushNextState(current, next);
     return next.getOptions().inputMode;
   }
@@ -114,8 +114,8 @@ public class GameInputHandler
    */
   public InputMode select(Path path)
   {
-    State current = peekCurrentState();
-    State next = current.select(path);
+    GameInputState current = peekCurrentState();
+    GameInputState next = current.select(path);
     pushNextState(current, next);
     return next.getOptions().inputMode;
   }
@@ -130,7 +130,7 @@ public class GameInputHandler
   }
 
   /** Get the current state, but don't pop it off the stack. */
-  private State peekCurrentState()
+  private GameInputState peekCurrentState()
   {
     if( myStateStack.isEmpty() )
     {
@@ -141,7 +141,7 @@ public class GameInputHandler
   }
 
   /** Push next onto the state stack if it is not the same object as current. */
-  private void pushNextState(State current, State next)
+  private void pushNextState(GameInputState current, GameInputState next)
   {
     if(current != next)
     {
@@ -267,14 +267,14 @@ public class GameInputHandler
   /************************************************************
    * Abstract base class for all input states.                *
    ************************************************************/
-  private static abstract class State
+  private static abstract class GameInputState
   {
     /** The current GameActionBuilder state data,
      *  shared with all State instances. */
     protected final StateData myStateData;
     protected final OptionSet myOptions;
 
-    public State(StateData data)
+    public GameInputState(StateData data)
     {
       myStateData = data;
       myOptions = initOptions();
@@ -296,15 +296,15 @@ public class GameInputHandler
 
     // Default implementations of select() will just keep us
     // in the same state. Subclasses will define transitions.
-    public State select(Path path)
+    public GameInputState select(Path path)
     {
       return null;
     }
-    public State select(Object option)
+    public GameInputState select(Object option)
     {
       return this;
     }
-    public State select(XYCoord coord)
+    public GameInputState select(XYCoord coord)
     {
       return this;
     }
@@ -316,7 +316,7 @@ public class GameInputHandler
    * State for before any user input has been received, or    *
    * immediately after reset() has been called.               *
    ************************************************************/
-  private static class DefaultState extends State
+  private static class DefaultState extends GameInputState
   {
     public DefaultState(StateData data)
     {
@@ -331,9 +331,9 @@ public class GameInputHandler
     }
 
     @Override
-    public State select(XYCoord coord)
+    public GameInputState select(XYCoord coord)
     {
-      State next = this;
+      GameInputState next = this;
       Location loc = myStateData.gameMap.getLocation(coord);
       Unit resident = loc.getResident();
       if( null != resident && resident.CO == myStateData.commander )
@@ -349,9 +349,9 @@ public class GameInputHandler
       return next;
     }
 
-    public State select(Unit unit)
+    public GameInputState select(Unit unit)
     {
-      State next = this;
+      GameInputState next = this;
       if( unit != null
           && (!unit.isTurnOver    // If it's our unit and it's ready to go.
               // || unit.CO != myStateData.commander // Also allow checking the move radius of others' units.
@@ -373,7 +373,7 @@ public class GameInputHandler
   /************************************************************
    * Presents options for building a unit.                    *
    ************************************************************/
-  private static class SelectUnitProduction extends State
+  private static class SelectUnitProduction extends GameInputState
   {
     private ArrayList<UnitModel> myUnitModels = null;
     private XYCoord myProductionLocation = null;
@@ -402,9 +402,9 @@ public class GameInputHandler
     }
 
     @Override
-    public State select(Object option)
+    public GameInputState select(Object option)
     {
-      State next = this;
+      GameInputState next = this;
 
       if( null != option && null != myUnitModels )
       {
@@ -425,7 +425,7 @@ public class GameInputHandler
   /************************************************************
    * State to allow choosing a unit's path.                   *
    ************************************************************/
-  private static class SelectMoveLocation extends State
+  private static class SelectMoveLocation extends GameInputState
   {
     public SelectMoveLocation(StateData data)
     {
@@ -446,9 +446,9 @@ public class GameInputHandler
     }
 
     @Override
-    public State select(Path path)
+    public GameInputState select(Path path)
     {
-      State next = this;
+      GameInputState next = this;
       if( myOptions.getCoordinateOptions().contains(new XYCoord(path.getEnd().x, path.getEnd().y))
           && Utils.isPathValid(myStateData.unitActor, path, myStateData.gameMap) )
       {
@@ -477,7 +477,7 @@ public class GameInputHandler
   /************************************************************
    * State to allow selecting an action for a unit.           *
    ************************************************************/
-  private static class SelectUnitAction extends State
+  private static class SelectUnitAction extends GameInputState
   {
     // Don't provide a default value, or it will override the value
     // set by the call to initOptions() in the super-constructor.
@@ -504,9 +504,9 @@ public class GameInputHandler
     }
 
     @Override
-    public State select(Object menuOption)
+    public GameInputState select(Object menuOption)
     {
-      State next = this;
+      GameInputState next = this;
       GameActionSet chosenSet = null;
       if( null != menuOption )
       {
@@ -559,7 +559,7 @@ public class GameInputHandler
   /************************************************************
    * Allows selecting an action's target.                     *
    ************************************************************/
-  private static class SelectActionTarget extends State
+  private static class SelectActionTarget extends GameInputState
   {
     public SelectActionTarget(StateData data)
     {
@@ -582,9 +582,9 @@ public class GameInputHandler
     }
 
     @Override
-    public State select(XYCoord targetLocation)
+    public GameInputState select(XYCoord targetLocation)
     {
-      State next = this;
+      GameInputState next = this;
 
       // Find the action that this target location belongs to.
       // By virtue of the fact that GameActionSets should be homogenous, and it should be
@@ -614,7 +614,7 @@ public class GameInputHandler
   /************************************************************
    * State to choose which Unit will be kicked off the bus.   *
    ************************************************************/
-  private static class SelectCargo extends State
+  private static class SelectCargo extends GameInputState
   {
     public SelectCargo(StateData data)
     {
@@ -645,9 +645,9 @@ public class GameInputHandler
     }
 
     @Override
-    public State select(Object option)
+    public GameInputState select(Object option)
     {
-      State next = this;
+      GameInputState next = this;
 
       // Add a unitLocationMap to our state if we don't have one already.
       if( null == myStateData.unitLocationMap )
@@ -685,7 +685,7 @@ public class GameInputHandler
   /************************************************************
    * State to choose where to drop the unit.                  *
    ************************************************************/
-  private static class SelectCargoDropLocation extends State
+  private static class SelectCargoDropLocation extends GameInputState
   {
     Unit myCargo = null;
 
@@ -704,9 +704,9 @@ public class GameInputHandler
     }
 
     @Override
-    public State select(XYCoord location)
+    public GameInputState select(XYCoord location)
     {
-      State next = this;
+      GameInputState next = this;
 
       if( myStateData.actionSet.getTargetedLocations().contains(location) )
       {
@@ -743,7 +743,7 @@ public class GameInputHandler
   /************************************************************
    * Terminal state - just provides the selected action.      *
    ************************************************************/
-  private static class ActionReady extends State
+  private static class ActionReady extends GameInputState
   {
     public ActionReady(StateData data)
     {
