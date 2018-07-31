@@ -11,15 +11,12 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameInput.GameInputHandler;
 import Terrain.GameMap;
 import Terrain.Location;
-import Terrain.TerrainType;
 import UI.CO_InfoMenu;
 import UI.InGameMenu;
-import UI.InGameProductionMenu;
 import UI.InputHandler;
 import UI.InputHandler.InputAction;
 import UI.MapView;
 import Units.Unit;
-import Units.UnitModel;
 
 public class MapController implements IController, GameInputHandler.StateChangedCallback
 {
@@ -27,7 +24,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
   private MapView myView;
 
   // A few menus to control the in-game logical flow.
-  private InGameMenu<UnitModel> productionMenu;
   private InGameMenu<MetaAction> metaActionMenu;
   private InGameMenu<CommanderAbility> coAbilityMenu;
   private InGameMenu<ConfirmExitEnum> confirmExitMenu;
@@ -90,7 +86,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
     myGame = game;
     myView = view;
     myView.setController(this);
-    productionMenu = new InGameProductionMenu(myGame.commanders[0].getShoppingList(TerrainType.FACTORY)); // Just init with a valid default.
     metaActionMenu = new InGameMenu<MetaAction>(metaActionsNoAbility);
     coAbilityMenu = null;
     confirmExitMenu = new InGameMenu<ConfirmExitEnum>(confirmExitOptions);
