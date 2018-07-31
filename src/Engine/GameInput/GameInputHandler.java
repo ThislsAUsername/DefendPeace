@@ -1,4 +1,4 @@
-package Engine;
+package Engine.GameInput;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,6 +6,13 @@ import java.util.Map;
 import java.util.Stack;
 
 import CommandingOfficers.Commander;
+import Engine.GameAction;
+import Engine.GameActionSet;
+import Engine.Path;
+import Engine.Utils;
+import Engine.XYCoord;
+import Engine.GameAction.UnitProductionAction;
+import Engine.GameAction.UnloadAction;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.Unit;
@@ -14,7 +21,7 @@ import Units.UnitModel;
 /************************************************************
  * Handles converting user input into game actions.
  ************************************************************/
-public class InputStateHandler
+public class GameInputHandler
 {
   private StateData myStateData = null;
   private Stack<State> myStateStack = null;
@@ -22,7 +29,7 @@ public class InputStateHandler
 
   public enum InputMode { FREE_TILE_SELECT, PATH_SELECT, MENU_SELECT, CONSTRAINED_TILE_SELECT, ACTION_READY };
 
-  public InputStateHandler(GameMap map, Commander currentPlayer, StateChangedCallback callback)
+  public GameInputHandler(GameMap map, Commander currentPlayer, StateChangedCallback callback)
   {
     myStateStack = new Stack<State>();
     myStateData = new StateData(map, currentPlayer);
@@ -30,7 +37,7 @@ public class InputStateHandler
     myCallback = callback;
   }
 
-  public InputStateHandler(GameMap map, Commander currentPlayer)
+  public GameInputHandler(GameMap map, Commander currentPlayer)
   {
     this(map, currentPlayer, null);
   }

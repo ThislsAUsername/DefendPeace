@@ -8,6 +8,7 @@ import CommandingOfficers.CommanderAbility;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameInput.GameInputHandler;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -20,7 +21,7 @@ import UI.MapView;
 import Units.Unit;
 import Units.UnitModel;
 
-public class MapController implements IController, InputStateHandler.StateChangedCallback
+public class MapController implements IController, GameInputHandler.StateChangedCallback
 {
   private GameInstance myGame;
   private MapView myView;
@@ -32,7 +33,7 @@ public class MapController implements IController, InputStateHandler.StateChange
   private InGameMenu<ConfirmExitEnum> confirmExitMenu;
   private InGameMenu<? extends Object> currentMenu;
 
-  private InputStateHandler myInputStateHandler = null;
+  private GameInputHandler myInputStateHandler = null;
   private OptionSelector myInputStateOptionSelector = null;
 
   private int nextSeekIndex;
@@ -104,7 +105,7 @@ public class MapController implements IController, InputStateHandler.StateChange
     startNextTurn();
 
     // Initialize our game input handler.
-    myInputStateHandler = new InputStateHandler(myGame.gameMap, myGame.activeCO, this);
+    myInputStateHandler = new GameInputHandler(myGame.gameMap, myGame.activeCO, this);
     myInputStateOptionSelector = null;
   }
 
@@ -117,7 +118,7 @@ public class MapController implements IController, InputStateHandler.StateChange
   {
     boolean exitMap = false;
 
-    InputStateHandler.InputMode mode = myInputStateHandler.getInputMode();
+    GameInputHandler.InputMode mode = myInputStateHandler.getInputMode();
 
     if( InputMode.METAACTION == inputMode )
     {
@@ -242,7 +243,7 @@ public class MapController implements IController, InputStateHandler.StateChange
           {
             contemplatedAction.actor = unitActor;
 
-            myInputStateHandler = new InputStateHandler(myGame.gameMap, myGame.activeCO, this);
+            myInputStateHandler = new GameInputHandler(myGame.gameMap, myGame.activeCO, this);
             //myInputStateHandler.select(contemplatedAction.actor);
             myInputStateHandler.select(cursorCoords);
 
@@ -537,7 +538,7 @@ public class MapController implements IController, InputStateHandler.StateChange
   @Override
   public void onStateChange()
   {
-    InputStateHandler.InputMode mode = myInputStateHandler.getInputMode();
+    GameInputHandler.InputMode mode = myInputStateHandler.getInputMode();
     myInputStateOptionSelector = null;
     currentMenu = null;
 
@@ -742,7 +743,7 @@ public class MapController implements IController, InputStateHandler.StateChange
     myGame.turn();
 
     // Reinitialize the InputStateHandler for the new turn.
-    myInputStateHandler = new InputStateHandler(myGame.gameMap, myGame.activeCO, this);
+    myInputStateHandler = new GameInputHandler(myGame.gameMap, myGame.activeCO, this);
 
     // Add the CO's units to the queue so we can initialize them.
     unitsToInit.addAll(myGame.activeCO.units);
