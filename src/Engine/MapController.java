@@ -70,13 +70,13 @@ public class MapController implements IController, GameInputHandler.StateChanged
   {
     Unit actor = null;
     Path movePath = null;
-    GameAction action = null;
+    boolean aiming = false;
 
     public void clear()
     {
       actor = null;
       movePath = null;
-      action = null;
+      aiming = false;
     }
   }
   ContemplatedAction contemplatedAction;
@@ -542,10 +542,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case CONSTRAINED_TILE_SELECT:
         myInputStateOptionSelector = new OptionSelector(myInputStateHandler.getCoordinateOptions().size());
         myGame.setCursorLocation(myInputStateHandler.getCoordinateOptions().get(myInputStateOptionSelector.getSelectionNormalized()));
+        contemplatedAction.aiming = true;
         break;
       case MENU_SELECT:
         myInputStateOptionSelector = new OptionSelector(myInputStateHandler.getMenuOptions().length);
         currentMenu = new InGameMenu<>(myInputStateHandler.getMenuOptions());
+        contemplatedAction.aiming = false;
         break;
       case ACTION_READY:
         System.out.println("handling ready action.");
@@ -554,6 +556,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
           executeGameAction(myInputStateHandler.getReadyAction());
           myInputStateHandler.reset(); // Will probably cause several indirectly-recursive calls to this function.
         }
+        contemplatedAction.aiming = false;
         break;
       case PATH_SELECT:
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.
@@ -671,9 +674,9 @@ public class MapController implements IController, GameInputHandler.StateChanged
     return contemplatedAction.movePath;
   }
 
-  public GameAction getContemplatedAction()
+  public boolean isTargeting()
   {
-    return contemplatedAction.action;
+    return contemplatedAction.aiming;
   }
 
   public void animationEnded(GameEvent event, boolean animEventQueueIsEmpty)

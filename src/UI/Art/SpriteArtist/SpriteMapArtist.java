@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
-import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.Path.PathNode;
@@ -59,9 +58,9 @@ public class SpriteMapArtist
     spriteSet.drawTerrainObject(g, gameMap, x, y, drawScale);
   }
 
-  public void drawCursor(Graphics g, Unit unitActor, GameAction currentAction, int drawX, int drawY)
+  public void drawCursor(Graphics g, Unit unitActor, boolean isTargeting, int drawX, int drawY)
   {
-    if( null == currentAction || currentAction.getType() == GameAction.ActionType.INVALID )
+    if( !isTargeting )
     {
       // TODO: Get an actual map cursor.
       // Draw the default map cursor.
