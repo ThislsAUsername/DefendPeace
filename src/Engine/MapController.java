@@ -113,45 +113,54 @@ public class MapController implements IController, GameInputHandler.StateChanged
   {
     boolean exitMap = false;
 
+    switch(inputMode)
+    {
+      case ANIMATION:
+        if( InputAction.BACK == input || InputAction.ENTER == input )
+        {
+          myView.cancelAnimation();
+        }
+        break;
+      case CO_ABILITYMENU:
+        handleCoAbilityMenuInput(input);
+        break;
+      case CO_INFO:
+        if( coInfoMenu.handleInput(input) )
+        {
+          isInCoInfoMenu = false;
+          changeInputMode(InputMode.METAACTION);
+        }
+        break;
+      case CONFIRMEXIT:
+        // If they exit via menu, don't hang around for the victory animation.
+        exitMap = handleConfirmExitMenuInput(input);
+        break;
+      case EXITGAME:
+        // Once the game is over, wait for an ENTER or BACK input to return to the main menu.
+        if( input == InputHandler.InputAction.BACK || input == InputHandler.InputAction.ENTER )
+        {
+          exitMap = true;
+        }
+        break;
+      case METAACTION:
+        handleMetaActionMenuInput(input);
+        break;
+      case MAP:
+      default:
+        handleGameInput(input);
+    }
+
+    return exitMap;
+  }
+
+  /**
+   * Use the GameInputHandler to make sense of the user's input.
+   */
+  private void handleGameInput(InputHandler.InputAction input)
+  {
     GameInputHandler.InputType mode = myInputStateHandler.getInputType();
 
-    if( InputMode.METAACTION == inputMode )
-    {
-      handleMetaActionMenuInput(input);
-    }
-    else if( InputMode.CO_INFO == inputMode )
-    {
-      if( coInfoMenu.handleInput(input) )
-      {
-        isInCoInfoMenu = false;
-        changeInputMode(InputMode.METAACTION);
-      }
-    }
-    else if( InputMode.CONFIRMEXIT == inputMode )
-    {
-      // If they exit via menu, don't hang around for the victory animation.
-      exitMap = handleConfirmExitMenuInput(input);
-    }
-    else if( InputMode.EXITGAME == inputMode )
-    {
-      // Once the game is over, wait for an ENTER or BACK input to return to the main menu.
-      if( input == InputHandler.InputAction.BACK || input == InputHandler.InputAction.ENTER )
-      {
-        exitMap = true;
-      }
-    }
-    else if( InputMode.ANIMATION == inputMode )
-    {
-      if( InputAction.BACK == input || InputAction.ENTER == input )
-      {
-        myView.cancelAnimation();
-      }
-    }
-    else if( InputMode.CO_ABILITYMENU == inputMode )
-    {
-      handleCoAbilityMenuInput(input);
-    }
-    else switch( mode )
+    switch( mode )
     {
       case FREE_TILE_SELECT:
         System.out.println("handling free tile select.");
@@ -173,8 +182,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
       default:
         System.out.println("Invalid InputStateHandler mode in MapController! " + mode);
     }
-
-    return exitMap;
   }
 
   /**
