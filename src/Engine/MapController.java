@@ -147,6 +147,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
         myView.cancelAnimation();
       }
     }
+    else if( InputMode.CO_ABILITYMENU == inputMode )
+    {
+      handleCoAbilityMenuInput(input);
+    }
     else switch( mode )
     {
       case FREE_TILE_SELECT:
