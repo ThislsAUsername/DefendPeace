@@ -18,7 +18,7 @@ public class GameInputHandler
   private Stack<GameInputState> myStateStack = null;
   private StateChangedCallback myCallback = null;
 
-  public enum InputMode { FREE_TILE_SELECT, PATH_SELECT, MENU_SELECT, CONSTRAINED_TILE_SELECT, ACTION_READY };
+  public enum InputType { FREE_TILE_SELECT, PATH_SELECT, MENU_SELECT, CONSTRAINED_TILE_SELECT, ACTION_READY };
 
   public GameInputHandler(GameMap map, Commander currentPlayer, StateChangedCallback callback)
   {
@@ -75,7 +75,7 @@ public class GameInputHandler
    * @param option - The chosen menu option, from among those provided by OptionSet.getMenuOptions().
    * @return The OptionSet for the next (and now current) state.
    */
-  public InputMode select(Object option)
+  public InputType select(Object option)
   {
     GameInputState current = peekCurrentState();
     GameInputState next = current.select(option);
@@ -89,7 +89,7 @@ public class GameInputHandler
    * @param option - The chosen coordinate, drawn from those given by OptionSet.getCoordinateOptions().
    * @return The OptionSet for the next (and now current) state.
    */
-  public InputMode select(XYCoord coord)
+  public InputType select(XYCoord coord)
   {
     GameInputState current = peekCurrentState();
     GameInputState next = current.select(coord);
@@ -103,7 +103,7 @@ public class GameInputHandler
    * @param option - The chosen coordinate, drawn from those given by OptionSet.getCoordinateOptions().
    * @return The OptionSet for the next (and now current) state.
    */
-  public InputMode select(Path path)
+  public InputType select(Path path)
   {
     GameInputState current = peekCurrentState();
     GameInputState next = current.select(path);
@@ -111,7 +111,7 @@ public class GameInputHandler
     return next.getOptions().inputMode;
   }
 
-  public InputMode reset()
+  public InputType reset()
   {
     // Unwind the stack, all the way back to the starting state.
     myStateStack.clear();
@@ -159,7 +159,7 @@ public class GameInputHandler
   }
 
   /** @return The currently-recommended input mode. */
-  public InputMode getInputMode()
+  public InputType getInputType()
   {
     return peekCurrentState().getOptions().inputMode;
   }

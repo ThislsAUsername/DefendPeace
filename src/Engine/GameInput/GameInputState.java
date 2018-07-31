@@ -8,7 +8,7 @@ import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.Path;
 import Engine.XYCoord;
-import Engine.GameInput.GameInputHandler.InputMode;
+import Engine.GameInput.GameInputHandler.InputType;
 import Terrain.GameMap;
 import Units.Unit;
 
@@ -93,17 +93,17 @@ class StateData
  ************************************************************/
 class OptionSet
 {
-  public final InputMode inputMode;
+  public final InputType inputMode;
   private ArrayList<XYCoord> myCoords = null;
   private Object[] myMenuOptions = null;
   private GameAction myAction = null;
 
   public OptionSet()
   {
-    inputMode = InputMode.FREE_TILE_SELECT;
+    inputMode = InputType.FREE_TILE_SELECT;
   }
 
-  public OptionSet(InputMode mode, ArrayList<XYCoord> coords)
+  public OptionSet(InputType mode, ArrayList<XYCoord> coords)
   {
     inputMode = mode;
     myCoords = coords;
@@ -111,13 +111,13 @@ class OptionSet
 
   public OptionSet(Object[] menuOptions)
   {
-    inputMode = InputMode.MENU_SELECT;
+    inputMode = InputType.MENU_SELECT;
     myMenuOptions = menuOptions;
   }
 
   public OptionSet(GameAction action)
   {
-    inputMode = InputMode.ACTION_READY;
+    inputMode = InputType.ACTION_READY;
     myAction = action;
   }
 

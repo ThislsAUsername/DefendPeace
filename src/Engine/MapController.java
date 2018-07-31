@@ -118,7 +118,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   {
     boolean exitMap = false;
 
-    GameInputHandler.InputMode mode = myInputStateHandler.getInputMode();
+    GameInputHandler.InputType mode = myInputStateHandler.getInputType();
 
     if( InputMode.METAACTION == inputMode )
     {
@@ -538,7 +538,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   @Override
   public void onStateChange()
   {
-    GameInputHandler.InputMode mode = myInputStateHandler.getInputMode();
+    GameInputHandler.InputType mode = myInputStateHandler.getInputType();
     myInputStateOptionSelector = null;
     currentMenu = null;
 

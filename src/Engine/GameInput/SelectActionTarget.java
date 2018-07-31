@@ -3,7 +3,7 @@ package Engine.GameInput;
 import java.util.ArrayList;
 
 import Engine.XYCoord;
-import Engine.GameInput.GameInputHandler.InputMode;
+import Engine.GameInput.GameInputHandler.InputType;
 
 /************************************************************
  * Allows selecting an action's target.                     *
@@ -27,7 +27,7 @@ class SelectActionTarget extends GameInputState
     }
 
     // We can only attack the selected tiles, and they may be disjoint, so use constrained tile select.
-    return new OptionSet(InputMode.CONSTRAINED_TILE_SELECT, targets);
+    return new OptionSet(InputType.CONSTRAINED_TILE_SELECT, targets);
   }
 
   @Override

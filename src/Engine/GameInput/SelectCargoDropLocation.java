@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.XYCoord;
-import Engine.GameInput.GameInputHandler.InputMode;
+import Engine.GameInput.GameInputHandler.InputType;
 import Units.Unit;
 
 /************************************************************
@@ -26,7 +26,7 @@ class SelectCargoDropLocation extends GameInputState
   {
     ArrayList<XYCoord> dropoffLocations = myStateData.actionSet.getTargetedLocations();
     dropoffLocations.removeAll(myStateData.unitLocationMap.values()); // Remove any drop locations that are already reserved.
-    return new OptionSet(InputMode.CONSTRAINED_TILE_SELECT, dropoffLocations);
+    return new OptionSet(InputType.CONSTRAINED_TILE_SELECT, dropoffLocations);
   }
 
   @Override

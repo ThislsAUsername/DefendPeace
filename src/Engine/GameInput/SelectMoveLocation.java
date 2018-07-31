@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import Engine.Path;
 import Engine.Utils;
 import Engine.XYCoord;
-import Engine.GameInput.GameInputHandler.InputMode;
+import Engine.GameInput.GameInputHandler.InputType;
 
 /************************************************************
  * State to allow choosing a unit's path.                   *
@@ -27,7 +27,7 @@ class SelectMoveLocation extends GameInputState
       myStateData.gameMap.getLocation(xy.xCoord, xy.yCoord).setHighlight(true);
     }
     // Build and return our OptionSet.
-    return new OptionSet(InputMode.PATH_SELECT, moveLocations);
+    return new OptionSet(InputType.PATH_SELECT, moveLocations);
   }
 
   @Override
