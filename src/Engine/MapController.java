@@ -376,6 +376,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         if( contemplatedAction.actor.CO != myGame.activeCO )
         {
           // TODO: re-selecting the unit should do a threat range check?
+          myInputStateHandler.select(contemplatedAction.movePath);
           changeInputMode(InputMode.MAP);
         }
         break;

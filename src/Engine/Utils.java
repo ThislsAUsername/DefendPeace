@@ -215,6 +215,11 @@ public class Utils
    */
   public static Path findShortestPath(Unit unit, int x, int y, GameMap map)
   {
+    if( null == unit || null == map )
+    {
+      return null;
+    }
+
     Path aPath = new Path(100);
     if( map.mapWidth < unit.x || map.mapHeight < unit.y || unit.x < 0 || unit.y < 0 )
     {

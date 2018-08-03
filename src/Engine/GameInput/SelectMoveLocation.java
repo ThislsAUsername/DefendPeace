@@ -34,7 +34,17 @@ class SelectMoveLocation extends GameInputState
   public GameInputState select(Path path)
   {
     GameInputState next = this;
-    if( myOptions.getCoordinateOptions().contains(new XYCoord(path.getEnd().x, path.getEnd().y))
+    if( myStateData.unitActor.CO != myStateData.commander )
+    {
+      // We'll be changing state, so unset the map highlights.
+      for( XYCoord xy : myOptions.getCoordinateOptions() )
+      {
+        myStateData.gameMap.getLocation(xy.xCoord, xy.yCoord).setHighlight(false);
+      }
+
+      next = null;
+    }
+    else if( myOptions.getCoordinateOptions().contains(new XYCoord(path.getEnd().x, path.getEnd().y))
         && Utils.isPathValid(myStateData.unitActor, path, myStateData.gameMap) )
     {
       // The path ends on a valid move location, and is traversable by the unit. Store it.

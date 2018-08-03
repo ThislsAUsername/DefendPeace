@@ -31,7 +31,7 @@ class DefaultState extends GameInputState
     GameInputState next = this;
     Location loc = myStateData.gameMap.getLocation(coord);
     Unit resident = loc.getResident();
-    if( null != resident && resident.CO == myStateData.commander )
+    if( null != resident )
     {
       next = select(resident);
     }
@@ -49,8 +49,8 @@ class DefaultState extends GameInputState
     GameInputState next = this;
     if( unit != null
         && (!unit.isTurnOver    // If it's our unit and it's ready to go.
-            // || unit.CO != myStateData.commander // Also allow checking the move radius of others' units.
-            ) )
+            || unit.CO != myStateData.commander // Also allow checking the move radius of others' units.
+            ))
     {
       myStateData.unitActor = unit;
       next = new SelectMoveLocation(myStateData);
