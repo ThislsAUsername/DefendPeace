@@ -18,13 +18,7 @@ class SelectActionTarget extends GameInputState
   @Override
   protected OptionSet initOptions()
   {
-    // Set the target-location highlights.
-    myStateData.gameMap.clearAllHighlights();
     ArrayList<XYCoord> targets = myStateData.actionSet.getTargetedLocations();
-    for( XYCoord targ : targets )
-    {
-      myStateData.gameMap.getLocation(targ).setHighlight(true);
-    }
 
     // We can only attack the selected tiles, and they may be disjoint, so use constrained tile select.
     return new OptionSet(InputType.CONSTRAINED_TILE_SELECT, targets);

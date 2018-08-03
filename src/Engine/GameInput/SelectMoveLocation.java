@@ -20,13 +20,8 @@ class SelectMoveLocation extends GameInputState
   @Override
   protected OptionSet initOptions()
   {
-    // Get valid move locations and highlight the relevant map tiles.
+    // Get valid move locations and return our OptionSet.
     ArrayList<XYCoord> moveLocations = Utils.findPossibleDestinations(myStateData.unitActor, myStateData.gameMap);
-    for( XYCoord xy : moveLocations )
-    {
-      myStateData.gameMap.getLocation(xy.xCoord, xy.yCoord).setHighlight(true);
-    }
-    // Build and return our OptionSet.
     return new OptionSet(InputType.PATH_SELECT, moveLocations);
   }
 
@@ -36,12 +31,7 @@ class SelectMoveLocation extends GameInputState
     GameInputState next = this;
     if( myStateData.unitActor.CO != myStateData.commander )
     {
-      // We'll be changing state, so unset the map highlights.
-      for( XYCoord xy : myOptions.getCoordinateOptions() )
-      {
-        myStateData.gameMap.getLocation(xy.xCoord, xy.yCoord).setHighlight(false);
-      }
-
+      // Tell the handler to go back to the previous state.
       next = null;
     }
     else if( myOptions.getCoordinateOptions().contains(new XYCoord(path.getEnd().x, path.getEnd().y))
@@ -49,12 +39,6 @@ class SelectMoveLocation extends GameInputState
     {
       // The path ends on a valid move location, and is traversable by the unit. Store it.
       myStateData.path = path;
-
-      // We'll be changing state, so unset the map highlights.
-      for( XYCoord xy : myOptions.getCoordinateOptions() )
-      {
-        myStateData.gameMap.getLocation(xy.xCoord, xy.yCoord).setHighlight(false);
-      }
 
       // Construct the next state instance.
       next = new SelectUnitAction(myStateData);

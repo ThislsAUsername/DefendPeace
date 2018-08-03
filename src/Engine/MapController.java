@@ -546,13 +546,21 @@ public class MapController implements IController, GameInputHandler.StateChanged
   public void onStateChange()
   {
     GameInputHandler.InputType mode = myInputStateHandler.getInputType();
+    myGame.gameMap.clearAllHighlights();
     myInputStateOptionSelector = null;
     currentMenu = null;
 
     switch( mode )
     {
       case CONSTRAINED_TILE_SELECT:
-        myInputStateOptionSelector = new OptionSelector(myInputStateHandler.getCoordinateOptions().size());
+        // Set the target-location highlights.
+        ArrayList<XYCoord> targets = myInputStateHandler.getCoordinateOptions();
+        for( XYCoord targ : targets )
+        {
+          myGame.gameMap.getLocation(targ).setHighlight(true);
+        }
+        // Create an option selector to keep track of where we are.
+        myInputStateOptionSelector = new OptionSelector(targets.size());
         myGame.setCursorLocation(myInputStateHandler.getCoordinateOptions().get(myInputStateOptionSelector.getSelectionNormalized()));
         contemplatedAction.aiming = true;
         break;
@@ -571,6 +579,13 @@ public class MapController implements IController, GameInputHandler.StateChanged
         contemplatedAction.aiming = false;
         break;
       case PATH_SELECT:
+        // Highlight all possible destinations.
+        ArrayList<XYCoord> moveLocations = myInputStateHandler.getCoordinateOptions();
+        for( XYCoord xy : moveLocations )
+        {
+          myGame.gameMap.getLocation(xy.xCoord, xy.yCoord).setHighlight(true);
+        }
+
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.
         break;
       case FREE_TILE_SELECT:
