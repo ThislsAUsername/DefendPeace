@@ -31,35 +31,20 @@ class DefaultState extends GameInputState
     GameInputState next = this;
     Location loc = myStateData.gameMap.getLocation(coord);
     Unit resident = loc.getResident();
-    if( null != resident )
+    if( null != resident
+        && (!resident.isTurnOver    // If it's our unit and the unit ready to go.
+        || resident.CO != myStateData.commander // Also allow checking the move radius of others' units.
+        ))
     {
-      next = select(resident);
+      // We selected a unit.
+      myStateData.unitActor = resident;
+      next = new SelectMoveLocation(myStateData);
     }
     else if( (loc.getOwner() == myStateData.commander) && myStateData.commander.getShoppingList(loc.getEnvironment().terrainType).size() > 0 )
     {
       ArrayList<UnitModel> buildables = myStateData.commander.getShoppingList(loc.getEnvironment().terrainType);
       myStateData.menuOptions = buildables;
       next = new SelectUnitProduction(myStateData, buildables, coord);
-    }
-    return next;
-  }
-
-  public GameInputState select(Unit unit)
-  {
-    GameInputState next = this;
-    if( unit != null
-        && (!unit.isTurnOver    // If it's our unit and it's ready to go.
-            || unit.CO != myStateData.commander // Also allow checking the move radius of others' units.
-            ))
-    {
-      myStateData.unitActor = unit;
-      next = new SelectMoveLocation(myStateData);
-    }
-    else
-    {
-      System.out.println("Invalid unit selected.");
-      if( unit == null ) System.out.println("  Unit is null.");
-      if( unit.isTurnOver ) System.out.println("  Unit has already moved.");
     }
     return next;
   }
