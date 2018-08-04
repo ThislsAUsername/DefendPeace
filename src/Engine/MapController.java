@@ -574,7 +574,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         if( null != myGameInputHandler.getReadyAction() )
         {
           executeGameAction(myGameInputHandler.getReadyAction());
-          myGameInputHandler.reset(); // Will probably cause several indirectly-recursive calls to this function.
+          myGameInputHandler.reset();
         }
         contemplatedAction.aiming = false;
         break;
