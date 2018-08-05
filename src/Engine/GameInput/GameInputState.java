@@ -98,9 +98,9 @@ class OptionSet
   private Object[] myMenuOptions = null;
   private GameAction myAction = null;
 
-  public OptionSet()
+  public OptionSet(InputType type)
   {
-    inputMode = InputType.FREE_TILE_SELECT;
+    inputMode = type;
   }
 
   public OptionSet(InputType mode, ArrayList<XYCoord> coords)
