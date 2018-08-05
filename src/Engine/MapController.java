@@ -9,6 +9,7 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameInput.GameInputHandler;
 import Terrain.GameMap;
+import Terrain.Location;
 import UI.CO_InfoMenu;
 import UI.InGameMenu;
 import UI.InputHandler;
@@ -32,11 +33,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
   private enum InputMode
   {
     MAP, ANIMATION, EXITGAME
-  };
-
-  public enum MetaAction
-  {
-    CO_INFO, CO_ABILITY, QUIT_GAME, END_TURN
   };
 
   private InputMode inputMode;
@@ -205,8 +201,17 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
         break;
       case ENTER:
-        // Pass the current cursor location to the GameInputHandler.
+        // Get the current location.
         XYCoord cursorCoords = new XYCoord(myGame.getCursorX(), myGame.getCursorY());
+        Location loc = myGame.gameMap.getLocation(cursorCoords);
+
+        // If there is a unit that is is ready to move, or if it is someone else's, then record it so we can build the move path.
+        if( null != loc.getResident() && ((loc.getResident().CO == myGame.activeCO && !loc.getResident().isTurnOver) || (loc.getResident().CO != myGame.activeCO)))
+        {
+          contemplatedAction.actor = loc.getResident();
+        }
+
+        // Pass the current cursor location to the GameInputHandler.
         myGameInputHandler.select(cursorCoords);
         break;
       case BACK:
@@ -398,8 +403,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
         if( null != myGameInputHandler.getReadyAction() )
         {
           executeGameAction(myGameInputHandler.getReadyAction());
-          myGameInputHandler.reset();
         }
+        myGameInputHandler.reset();
         contemplatedAction.aiming = false;
         break;
       case PATH_SELECT:

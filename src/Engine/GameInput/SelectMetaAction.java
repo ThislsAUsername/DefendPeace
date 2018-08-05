@@ -44,7 +44,7 @@ public class SelectMetaAction extends GameInputState
     }
     else if( MetaAction.CO_ABILITY == option )
     {
-      
+      next = new SelectCOAbility(myStateData);
     }
     else if( MetaAction.END_TURN == option )
     {

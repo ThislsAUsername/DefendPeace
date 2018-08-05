@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderAbility;
 import Engine.GameEvents.BattleEvent;
 import Engine.GameEvents.CaptureEvent;
+import Engine.GameEvents.CommanderAbilityEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEventQueue;
@@ -28,7 +30,7 @@ public interface GameAction
 {
   public enum ActionType
   {
-    INVALID, ATTACK, CAPTURE, LOAD, RESUPPLY, UNLOAD, WAIT, UNITPRODUCTION
+    INVALID, ATTACK, CAPTURE, LOAD, RESUPPLY, UNLOAD, WAIT, UNITPRODUCTION, OTHER
   }
 
   /**
@@ -628,4 +630,44 @@ public interface GameAction
       return GameAction.ActionType.RESUPPLY;
     }
   } // ~ResupplyAction
+
+  // ===========  AbilityAction  =================================
+  public static class AbilityAction implements GameAction
+  {
+    private GameEventQueue abilityEvents = null;
+
+    public AbilityAction(CommanderAbility ability)
+    {
+      // ABILITY actions consist of
+      //   ABILITY
+      abilityEvents = new GameEventQueue();
+      abilityEvents.add(new CommanderAbilityEvent(ability));
+    }
+
+    @Override
+    public GameEventQueue getEvents(GameMap map)
+    {
+      return abilityEvents;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return null;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return null;
+    }
+
+    @Override
+    public ActionType getType()
+    {
+      // Use OTHER, just because it doesn't correspond to a normal unit-based
+      // action with an actor, target location, etc.
+      return GameAction.ActionType.OTHER;
+    }
+  } // ~AbilityAction
 }
