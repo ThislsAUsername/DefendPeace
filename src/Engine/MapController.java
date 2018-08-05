@@ -32,7 +32,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   private enum InputMode
   {
-    MAP, ANIMATION, EXITGAME
+    INPUT, ANIMATION, EXITGAME
   };
 
   private InputMode inputMode;
@@ -66,7 +66,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     myGame = game;
     myView = view;
     myView.setController(this);
-    inputMode = InputMode.MAP;
+    inputMode = InputMode.INPUT;
     unitsToInit = new ArrayDeque<Unit>();
     isGameOver = false;
     coInfoMenu = new CO_InfoMenu(myGame.commanders.length);
@@ -104,9 +104,11 @@ public class MapController implements IController, GameInputHandler.StateChanged
           exitMap = true;
         }
         break;
-      case MAP:
-      default:
+      case INPUT:
         exitMap = handleGameInput(input);
+        break;
+      default:
+        System.out.println("WARNING! Received invalid InputAction " + input);
     }
 
     return exitMap;
@@ -249,12 +251,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
     }
   }
 
-  /** Returns the currently-active in-game menu, or null if no menu is in use. */
-  public InGameMenu<? extends Object> getCurrentGameMenu()
-  {
-    return currentMenu;
-  }
-
   /**
    * When a unit is selected, user input flows through here to choose where the unit should move.
    */
@@ -301,23 +297,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         break;
       case ENTER:
-        // If this is a unit we can control.
-        if( contemplatedAction.actor.CO == myGame.activeCO )
-        {
-          // Select the location and display possible actions.
-          contemplatedAction.movePath.start(); // start the unit running
-          myGameInputHandler.select(contemplatedAction.movePath);
-        }
-        // if we're selecting an enemy unit, hitting enter again will drop that selection
-        if( contemplatedAction.actor.CO != myGame.activeCO )
-        {
-          // TODO: re-selecting the unit should do a threat range check?
-          myGameInputHandler.select(contemplatedAction.movePath);
-          changeInputMode(InputMode.MAP);
-        }
+        myGameInputHandler.select(contemplatedAction.movePath);
         break;
       case BACK:
-        changeInputMode(InputMode.MAP);
+        changeInputMode(InputMode.INPUT);
         myGameInputHandler.back();
         break;
       case NO_ACTION:
@@ -437,25 +420,13 @@ public class MapController implements IController, GameInputHandler.StateChanged
    */
   private void changeInputMode(InputMode input)
   {
+    // Assign the new input mode.
     inputMode = input;
-    switch (inputMode)
-    {
-      case MAP:
-        contemplatedAction.clear();
-        currentMenu = null;
-        myGame.gameMap.clearAllHighlights();
-        break;
-      case ANIMATION:
-        myGame.gameMap.clearAllHighlights();
-        break;
-      case EXITGAME:
-        contemplatedAction.clear();
-        myGame.gameMap.clearAllHighlights();
-        currentMenu = null;
-        break;
-      default:
-        System.out.println("WARNING! MapController.changeInputMode was given an invalid InputMode " + inputMode);
-    }
+
+    // If we are changing input mode, whether to or from commanding a unit, we can
+    //   be sure we don't have a valid action right now.
+    contemplatedAction.clear();
+    currentMenu = null;
   }
 
   private void buildMovePath(int x, int y, GameMap map)
@@ -502,21 +473,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
     {
       System.out.println("WARNING! Attempting to execute null GameAction.");
     }
-  }
-
-  public Unit getContemplatedActor()
-  {
-    return contemplatedAction.actor;
-  }
-
-  public Path getContemplatedMove()
-  {
-    return contemplatedAction.movePath;
-  }
-
-  public boolean isTargeting()
-  {
-    return contemplatedAction.aiming;
   }
 
   public void animationEnded(GameEvent event, boolean animEventQueueIsEmpty)
@@ -568,7 +524,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       else
       {
         // The animation for the last action just completed. Back to normal input mode.
-        changeInputMode(InputMode.MAP);
+        changeInputMode(InputMode.INPUT);
       }
     }
   }
@@ -589,6 +545,27 @@ public class MapController implements IController, GameInputHandler.StateChanged
     // Kick off the animation cycle, which will animate/init each unit.
     changeInputMode(InputMode.ANIMATION);
     myView.animate(null);
+  }
+
+  public Unit getContemplatedActor()
+  {
+    return contemplatedAction.actor;
+  }
+
+  public Path getContemplatedMove()
+  {
+    return contemplatedAction.movePath;
+  }
+
+  public boolean isTargeting()
+  {
+    return contemplatedAction.aiming;
+  }
+
+  /** Returns the currently-active in-game menu, or null if no menu is in use. */
+  public InGameMenu<? extends Object> getCurrentGameMenu()
+  {
+    return currentMenu;
   }
 
   public CO_InfoMenu getCoInfoMenu()
