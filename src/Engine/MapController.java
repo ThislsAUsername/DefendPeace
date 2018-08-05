@@ -127,7 +127,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         break;
       case PATH_SELECT:
         System.out.println("handling path select.");
-        handleMovementInput(input);
+        handlePathSelect(input);
         break;
       case MENU_SELECT:
         System.out.println("handling menu select.");
@@ -262,7 +262,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   /**
    * When a unit is selected, user input flows through here to choose where the unit should move.
    */
-  private void handleMovementInput(InputHandler.InputAction input)
+  private void handlePathSelect(InputHandler.InputAction input)
   {
     boolean inMoveableSpace = myGame.getCursorLocation().isHighlightSet();
 
