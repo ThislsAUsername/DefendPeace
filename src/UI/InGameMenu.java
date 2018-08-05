@@ -133,6 +133,14 @@ public class InGameMenu<T>
   }
 
   /**
+   * @return Sets the menu highlight to the indicated index.
+   */
+  public void setSelectionNumber(int index)
+  {
+    optionSelector.setSelectedOption(index);
+  }
+
+  /**
    * @return The object currently highlighted by the menu cursor.
    */
   public T getSelectedOption()

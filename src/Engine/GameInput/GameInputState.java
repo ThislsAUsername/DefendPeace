@@ -6,6 +6,7 @@ import java.util.Map;
 import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.GameActionSet;
+import Engine.OptionSelector;
 import Engine.Path;
 import Engine.XYCoord;
 import Engine.GameInput.GameInputHandler.InputType;
@@ -21,11 +22,13 @@ abstract class GameInputState
    *  shared with all State instances. */
   protected final StateData myStateData;
   protected final OptionSet myOptions;
+  protected final OptionSelector mySelector;
 
   public GameInputState(StateData data)
   {
     myStateData = data;
     myOptions = initOptions();
+    mySelector = buildSelector();
   }
 
   /** Forces each subclass to create an OptionSet.
@@ -40,6 +43,32 @@ abstract class GameInputState
   public OptionSet getOptions()
   {
     return myOptions;
+  }
+
+  private OptionSelector buildSelector()
+  {
+    OptionSelector selector = null;
+    switch(myOptions.inputMode)
+    {
+      case CONSTRAINED_TILE_SELECT:
+        selector = new OptionSelector(myOptions.getCoordinateOptions().size());
+        break;
+      case MENU_SELECT:
+        selector = new OptionSelector(myOptions.getMenuOptions().length);
+        break;
+      case ACTION_READY:
+      case END_TURN:
+      case FREE_TILE_SELECT:
+      case LEAVE_MAP:
+      case PATH_SELECT:
+        default:
+    }
+    return selector;
+  }
+
+  public OptionSelector getOptionSelector()
+  {
+    return mySelector;
   }
 
   // Default implementations of select() will just keep us

@@ -78,7 +78,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     // Initialize our game input handler.
     myGameInputHandler = new GameInputHandler(myGame.gameMap, myGame.activeCO, this);
-    myGameInputOptionSelector = null;
   }
 
   /**
@@ -375,8 +374,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
   public void onStateChange()
   {
     GameInputHandler.InputType mode = myGameInputHandler.getInputType();
+    myGameInputOptionSelector = myGameInputHandler.getOptionSelector();
     myGame.gameMap.clearAllHighlights();
-    myGameInputOptionSelector = null;
     currentMenu = null;
 
     switch( mode )
@@ -389,13 +388,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
           myGame.gameMap.getLocation(targ).setHighlight(true);
         }
         // Create an option selector to keep track of where we are.
-        myGameInputOptionSelector = new OptionSelector(targets.size());
         myGame.setCursorLocation(myGameInputHandler.getCoordinateOptions().get(myGameInputOptionSelector.getSelectionNormalized()));
         contemplatedAction.aiming = true;
         break;
       case MENU_SELECT:
-        myGameInputOptionSelector = new OptionSelector(myGameInputHandler.getMenuOptions().length);
         currentMenu = new InGameMenu<>(myGameInputHandler.getMenuOptions());
+        currentMenu.setSelectionNumber(myGameInputOptionSelector.getSelectionNormalized());
         contemplatedAction.aiming = false;
         break;
       case ACTION_READY:

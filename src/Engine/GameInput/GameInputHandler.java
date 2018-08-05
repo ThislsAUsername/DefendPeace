@@ -5,6 +5,7 @@ import java.util.Stack;
 
 import CommandingOfficers.Commander;
 import Engine.GameAction;
+import Engine.OptionSelector;
 import Engine.Path;
 import Engine.XYCoord;
 import Terrain.GameMap;
@@ -169,6 +170,12 @@ public class GameInputHandler
   public InputType getInputType()
   {
     return peekCurrentState().getOptions().inputMode;
+  }
+
+  /** @return The OptionSelector for the current state, or null if it does not provide options. */
+  public OptionSelector getOptionSelector()
+  {
+    return peekCurrentState().getOptionSelector();
   }
 
   /** @return The current set of coordinates from which to choose, or null we are not selecting a location. */
