@@ -8,7 +8,7 @@ import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import CommandingOfficers.Modifiers.UnitRemodelModifier;
-import Engine.GameInstance;
+import Terrain.GameMap;
 import Terrain.TerrainType;
 import Units.UnitModel;
 
@@ -78,7 +78,7 @@ public class CommanderStrong extends Commander
     }
 
     @Override
-    protected void perform(GameInstance game)
+    protected void perform(GameMap gameMap)
     {
       myCommander.addCOModifier(damageMod);
 
@@ -126,7 +126,7 @@ public class CommanderStrong extends Commander
     }
 
     @Override
-    protected void perform(GameInstance game)
+    protected void perform(GameMap gameMap)
     {
       myCommander.addCOModifier(damageMod);
 

@@ -522,7 +522,7 @@ public class MapController implements IController
       case ENTER:
         // Get the chosen ability and let it do its thing.
         CommanderAbility ability = coAbilityMenu.getSelectedOption();
-        ability.activate(myGame);
+        ability.activate(myGame.gameMap);
 
         changeInputMode(InputMode.MAP);
 

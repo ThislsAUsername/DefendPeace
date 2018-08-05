@@ -1,6 +1,6 @@
 package CommandingOfficers;
 
-import Engine.GameInstance;
+import Terrain.GameMap;
 
 public abstract class CommanderAbility
 {
@@ -29,7 +29,7 @@ public abstract class CommanderAbility
   /** Final method to do some bookkeeping, and then call
    * perform() do do the actual work. This allows us to
    * manage global Ability side-effects in one place. */
-  public final void activate(GameInstance game)
+  public final void activate(GameMap gameMap)
   {
     if( myCommander.getAbilityPower() < myPowerCost )
     {
@@ -43,9 +43,9 @@ public abstract class CommanderAbility
     // Cost grows by at least one, and at most 10% of the current cost.
     myPowerCost += Math.max(myPowerCost*0.1, 1);
     
-    perform(game);
+    perform(gameMap);
   }
 
   /** Subclasses will override this method to enact the ability's effects. */
-  protected abstract void perform(GameInstance game);
+  protected abstract void perform(GameMap gameMap);
 }
