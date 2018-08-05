@@ -392,6 +392,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
         contemplatedAction.aiming = true;
         break;
       case MENU_SELECT:
+        if( null != contemplatedAction.movePath )
+        {
+          myGame.setCursorLocation(contemplatedAction.movePath.getEnd().x, contemplatedAction.movePath.getEnd().y);
+        }
         currentMenu = new InGameMenu<>(myGameInputHandler.getMenuOptions());
         currentMenu.setSelectionNumber(myGameInputOptionSelector.getSelectionNormalized());
         contemplatedAction.aiming = false;
@@ -406,6 +410,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
         contemplatedAction.aiming = false;
         break;
       case PATH_SELECT:
+        if( null != contemplatedAction.actor )
+        {
+          myGame.setCursorLocation(contemplatedAction.actor.x, contemplatedAction.actor.y);
+        }
         // Highlight all possible destinations.
         ArrayList<XYCoord> moveLocations = myGameInputHandler.getCoordinateOptions();
         for( XYCoord xy : moveLocations )
