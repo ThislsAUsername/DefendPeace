@@ -122,19 +122,15 @@ public class MapController implements IController, GameInputHandler.StateChanged
     switch( mode )
     {
       case FREE_TILE_SELECT:
-        System.out.println("handling free tile select.");
         handleFreeTileSelect(input);
         break;
       case PATH_SELECT:
-        System.out.println("handling path select.");
         handlePathSelect(input);
         break;
       case MENU_SELECT:
-        System.out.println("handling menu select.");
         handleActionMenuInput(input);
         break;
       case CONSTRAINED_TILE_SELECT:
-        System.out.println("handling constrained tile select.");
         handleConstrainedTileSelect(input);
         break;
       case ACTION_READY:
@@ -401,7 +397,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
         contemplatedAction.aiming = false;
         break;
       case ACTION_READY:
-        System.out.println("handling ready action.");
         if( null != myGameInputHandler.getReadyAction() )
         {
           executeGameAction(myGameInputHandler.getReadyAction());
