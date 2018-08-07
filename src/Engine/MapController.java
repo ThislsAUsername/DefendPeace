@@ -105,7 +105,14 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
         break;
       case INPUT:
-        exitMap = handleGameInput(input);
+        if( isInCoInfoMenu && coInfoMenu.handleInput(input) )
+        {
+          isInCoInfoMenu = false;
+        }
+        else
+        {
+          exitMap = handleGameInput(input);
+        }
         break;
       default:
         System.out.println("WARNING! Received invalid InputAction " + input);
@@ -410,6 +417,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case LEAVE_MAP:
         // Handled as a special case in handleGameInput().
         break;
+      case CO_INFO:
+        isInCoInfoMenu = true;
+        changeInputMode(InputMode.INPUT);
+        break;
         default:
           System.out.println("WARNING! Attempting to enter unknown input mode " + mode);
     }
@@ -425,10 +436,15 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     // If we are changing input mode, whether to or from commanding a unit, we can
     //   be sure we don't have a valid action right now.
+    myGameInputHandler.reset();
     contemplatedAction.clear();
     currentMenu = null;
   }
 
+  /**
+   * Constructs a unit's movement path, one tile at a time, as the user moves the cursor around the map.
+   * If the current movement path is impossible, it will attempt to regenerate a path from scratch.
+   */
   private void buildMovePath(int x, int y, GameMap map)
   {
     if( null == contemplatedAction.movePath )

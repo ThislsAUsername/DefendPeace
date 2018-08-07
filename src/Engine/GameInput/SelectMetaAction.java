@@ -36,7 +36,7 @@ public class SelectMetaAction extends GameInputState
     GameInputState next = this;
     if( MetaAction.CO_INFO == option )
     {
-      
+      next = new OpenCoInfoMenu(myStateData);
     }
     else if( MetaAction.QUIT_GAME == option )
     {
