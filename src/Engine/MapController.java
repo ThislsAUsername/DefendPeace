@@ -307,8 +307,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
         myGameInputHandler.select(contemplatedAction.movePath);
         break;
       case BACK:
-        changeInputMode(InputMode.INPUT);
         myGameInputHandler.back();
+        contemplatedAction.movePath = null;
         break;
       case NO_ACTION:
         break;
@@ -359,12 +359,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
   @Override
   public void onStateChange()
   {
-    GameInputHandler.InputType mode = myGameInputHandler.getInputType();
+    GameInputHandler.InputType inputType = myGameInputHandler.getInputType();
     myGameInputOptionSelector = myGameInputHandler.getOptionSelector();
     myGame.gameMap.clearAllHighlights();
     currentMenu = null;
 
-    switch( mode )
+    switch( inputType )
     {
       case CONSTRAINED_TILE_SELECT:
         // Set the target-location highlights.
@@ -419,10 +419,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
         break;
       case CO_INFO:
         isInCoInfoMenu = true;
-        changeInputMode(InputMode.INPUT);
+        myGameInputHandler.reset(); // CO_INFO is a terminal state. Reset the input handler.
         break;
         default:
-          System.out.println("WARNING! Attempting to enter unknown input mode " + mode);
+          System.out.println("WARNING! Attempting to switch to unknown input type " + inputType);
     }
   }
 
