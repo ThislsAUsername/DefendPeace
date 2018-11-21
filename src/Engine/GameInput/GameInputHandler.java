@@ -80,7 +80,7 @@ public class GameInputHandler
   {
     GameInputState current = peekCurrentState();
     GameInputState next = current.select(option);
-    pushNextState(current, next);
+    pushNextState(next);
     return peekCurrentState().getOptions().inputMode;
   }
 
@@ -94,7 +94,7 @@ public class GameInputHandler
   {
     GameInputState current = peekCurrentState();
     GameInputState next = current.select(coord);
-    pushNextState(current, next);
+    pushNextState(next);
     return peekCurrentState().getOptions().inputMode;
   }
 
@@ -108,7 +108,7 @@ public class GameInputHandler
   {
     GameInputState current = peekCurrentState();
     GameInputState next = current.select(path);
-    pushNextState(current, next);
+    pushNextState(next);
     return peekCurrentState().getOptions().inputMode;
   }
 
@@ -133,10 +133,11 @@ public class GameInputHandler
   }
 
   /** Push next onto the state stack if it is not the same object as current. */
-  private void pushNextState(GameInputState current, GameInputState next)
+  private void pushNextState(GameInputState next)
   {
     // States should return themselves if they receive invalid input; a next
     // state of null is equivalent to a back() command.
+    GameInputState current = peekCurrentState();
     if(null == next)
     {
       back();
