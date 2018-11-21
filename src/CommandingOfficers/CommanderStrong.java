@@ -25,7 +25,6 @@ public class CommanderStrong extends Commander
     UnitModel infModel = getUnitModel(UnitModel.UnitEnum.INFANTRY);
     UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, infModel);
     upm.addProductionPair(TerrainType.SEAPORT, infModel);
-    upm.addProductionPair(TerrainType.HEADQUARTERS, infModel);
     upm.apply(this); // Passive ability, so don't add it to the COModifier list; just apply it and forget it.
 
     // Set Strong up with a base damage buff and long-range APCs. These COModifiers are
@@ -82,10 +81,12 @@ public class CommanderStrong extends Commander
     {
       myCommander.addCOModifier(damageMod);
 
-      // Make bazookas buildable from all production buildings.
+      // Make infantry and bazookas buildable from all production buildings and the HQ.
+      UnitModel infModel = myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY);
       UnitModel mechModel = myCommander.getUnitModel(UnitModel.UnitEnum.MECH);
       UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, mechModel);
       upm.addProductionPair(TerrainType.SEAPORT, mechModel);
+      upm.addProductionPair(TerrainType.HEADQUARTERS, infModel);
       upm.addProductionPair(TerrainType.HEADQUARTERS, mechModel);
       myCommander.addCOModifier(upm);
 
@@ -132,13 +133,14 @@ public class CommanderStrong extends Commander
     {
       myCommander.addCOModifier(damageMod);
 
-      // Make all foot-soldiers buildable from all production buildings.
+      // Make all foot-soldiers buildable from all buildings.
       UnitModel infModel = myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY);
       UnitModel mechModel = myCommander.getUnitModel(UnitModel.UnitEnum.MECH);
       UnitProductionModifier upm = new UnitProductionModifier(TerrainType.CITY, infModel);
       upm.addProductionPair(TerrainType.CITY, mechModel);
       upm.addProductionPair(TerrainType.AIRPORT, mechModel);
       upm.addProductionPair(TerrainType.SEAPORT, mechModel);
+      upm.addProductionPair(TerrainType.HEADQUARTERS, infModel);
       upm.addProductionPair(TerrainType.HEADQUARTERS, mechModel);
       myCommander.addCOModifier(upm);
 
