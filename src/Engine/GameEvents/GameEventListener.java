@@ -34,6 +34,12 @@ public abstract class GameEventListener
     eventListeners.add(listener);
   }
 
+  /** Convenience function to sign this listener up to receive GameEvents. */
+  public final void registerForEvents()
+  {
+    GameEventListener.registerEventListener(this);
+  }
+
   /** Unregister this listener. Call this when a listener is no longer needed, so the JVM knows
    *  it can clean up the object. */
   public static void unregisterEventListener(GameEventListener listener)
@@ -42,7 +48,7 @@ public abstract class GameEventListener
   }
 
   /** Convenience function so a listener can unregister themselves. */
-  public void unregister()
+  public final void unregister()
   {
     GameEventListener.unregisterEventListener(this);
   }
