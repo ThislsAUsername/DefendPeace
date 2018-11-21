@@ -33,7 +33,7 @@ public class CommanderOverlayArtist
     if( previousOverlayFunds != commander.money )
     {
       previousOverlayFunds = commander.money;
-      overlayFundsString = buildFundsString(commander);
+      overlayFundsString = String.format("FUNDS %5d", commander.money);
     }
 
     String coString = commander.coInfo.name;
@@ -96,35 +96,6 @@ public class CommanderOverlayArtist
     } 
   }
 
-  /**
-   * Constructs a fixed-width (padded as needed) 11-character string to be drawn in the commander overlay.
-   * @param funds The number to convert to an HUD overlay funds string.
-   * @return A string of the form "FUNDS XXXXX" where X is either a space or a digit.
-   */
-  private static String buildFundsString(Commander cmdr)
-  {
-    StringBuilder sb = new StringBuilder("FUNDS ");
-    if( cmdr.money < 10000 ) // Fewer than 5 digits
-    {
-      sb.append(" ");
-    }
-    if( cmdr.money < 1000 ) // Fewer than 4 digits
-    {
-      sb.append(" ");
-    }
-    if( cmdr.money < 100 ) // Fewer than 3 digits
-    {
-      sb.append(" ");
-    }
-    if( cmdr.money < 10 ) // Fewer than 2 digits. You poor.
-    {
-      sb.append(" ");
-    }
-    sb.append(Integer.toString(cmdr.money));
-
-    return sb.toString();
-  }
-  
   /**
    * Generate an ability-power bar for the given Commander at 1x size. The requester is responsible for applying any scale factors.
    */
