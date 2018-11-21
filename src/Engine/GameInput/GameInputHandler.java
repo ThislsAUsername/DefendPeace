@@ -59,7 +59,7 @@ public class GameInputHandler
       myStateStack.push(oldCurrentState);
     }
 
-    // Set newCurrentState to whatever is now at the top of th stack.
+    // Set newCurrentState to whatever is now at the top of the stack.
     newCurrentState = peekCurrentState();
 
     // If we are in a different state now than before, notify the callback.
