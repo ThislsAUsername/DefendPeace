@@ -66,6 +66,7 @@ class SelectCargo extends GameInputState
       if(cargo == option)
       {
         next = new SelectCargoDropLocation(myStateData, cargo);
+        break;
       }
     }
 
