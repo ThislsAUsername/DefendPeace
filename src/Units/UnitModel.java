@@ -72,6 +72,7 @@ public class UnitModel
     COstr = 100;
     COdef = 100;
     holdingCapacity = 0;
+    holdables = new Vector<UnitEnum>();
   }
 
   /**
@@ -82,6 +83,7 @@ public class UnitModel
    */
   public static UnitModel clone( UnitModel other )
   {
+    // Make a copy of the weapons used by the other model.
     WeaponModel[] weaponModels = null;
     if(other.weaponModels != null )
     {
@@ -91,8 +93,19 @@ public class UnitModel
         weaponModels[i] = new WeaponModel(other.weaponModels[i]);
       }
     }
-    return new UnitModel(other.name, other.type, other.chassis, other.moneyCost, other.maxFuel, other.idleFuelBurn,
+
+    // Create a new model with the given attributes.
+    UnitModel newModel = new UnitModel(other.name, other.type, other.chassis, other.moneyCost, other.maxFuel, other.idleFuelBurn,
         other.movePower, new MoveType(other.propulsion), other.possibleActions, weaponModels);
+
+    // Duplicate the other model's transporting abilities.
+    newModel.holdingCapacity = other.holdingCapacity;
+    for( UnitEnum ue : other.holdables )
+    {
+      newModel.holdables.add(ue);
+    }
+
+    return newModel;
   }
 
   /**

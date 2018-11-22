@@ -25,7 +25,6 @@ public class CommanderStrong extends Commander
     UnitModel infModel = getUnitModel(UnitModel.UnitEnum.INFANTRY);
     UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, infModel);
     upm.addProductionPair(TerrainType.SEAPORT, infModel);
-    upm.addProductionPair(TerrainType.HEADQUARTERS, infModel);
     upm.apply(this); // Passive ability, so don't add it to the COModifier list; just apply it and forget it.
 
     // Set Strong up with a base damage buff and long-range APCs. These COModifiers are
@@ -34,7 +33,7 @@ public class CommanderStrong extends Commander
     strongMod.apply(this);
 
     COMovementModifier moveMod = new COMovementModifier();
-    moveMod.addApplicableUnitType(UnitModel.UnitEnum.APC);
+    moveMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.APC));
     moveMod.apply(this);
 
     // Define "high-capacity" transport unit models, to be swapped in by his abilities.
@@ -82,18 +81,22 @@ public class CommanderStrong extends Commander
     {
       myCommander.addCOModifier(damageMod);
 
-      // Make bazookas buildable from all production buildings.
+      // Make infantry and bazookas buildable from all production buildings and the HQ.
+      UnitModel infModel = myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY);
       UnitModel mechModel = myCommander.getUnitModel(UnitModel.UnitEnum.MECH);
       UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, mechModel);
       upm.addProductionPair(TerrainType.SEAPORT, mechModel);
+      upm.addProductionPair(TerrainType.HEADQUARTERS, infModel);
       upm.addProductionPair(TerrainType.HEADQUARTERS, mechModel);
       myCommander.addCOModifier(upm);
 
       // Grant foot-soldiers and transports additional movement power.
       COMovementModifier moveMod = new COMovementModifier();
-      moveMod.addApplicableUnitType(UnitModel.UnitEnum.APC);
-      moveMod.addApplicableUnitType(UnitModel.UnitEnum.INFANTRY);
-      moveMod.addApplicableUnitType(UnitModel.UnitEnum.MECH);
+      System.out.println("Adding Strongarm unit models");
+      // Use the high-capacity APC since we are swapping that model out for this turn.
+      moveMod.addApplicableUnitModel(highCapacityUnitModels.get(UnitModel.UnitEnum.APC));
+      moveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
+      moveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
       myCommander.addCOModifier(moveMod);
 
       // Grant transports extra capacity
@@ -130,21 +133,24 @@ public class CommanderStrong extends Commander
     {
       myCommander.addCOModifier(damageMod);
 
-      // Make all foot-soldiers buildable from all production buildings.
+      // Make all foot-soldiers buildable from all buildings.
       UnitModel infModel = myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY);
       UnitModel mechModel = myCommander.getUnitModel(UnitModel.UnitEnum.MECH);
       UnitProductionModifier upm = new UnitProductionModifier(TerrainType.CITY, infModel);
       upm.addProductionPair(TerrainType.CITY, mechModel);
       upm.addProductionPair(TerrainType.AIRPORT, mechModel);
       upm.addProductionPair(TerrainType.SEAPORT, mechModel);
+      upm.addProductionPair(TerrainType.HEADQUARTERS, infModel);
       upm.addProductionPair(TerrainType.HEADQUARTERS, mechModel);
       myCommander.addCOModifier(upm);
 
       // Grant foot-soldiers and transports two (2) additional movement power.
       COMovementModifier moveMod = new COMovementModifier(2);
-      moveMod.addApplicableUnitType(UnitModel.UnitEnum.APC);
-      moveMod.addApplicableUnitType(UnitModel.UnitEnum.INFANTRY);
-      moveMod.addApplicableUnitType(UnitModel.UnitEnum.MECH);
+      System.out.println("Adding Mobilize unit models");
+      // Use the high-capacity APC since we are swapping that model out for this turn.
+      moveMod.addApplicableUnitModel(highCapacityUnitModels.get(UnitModel.UnitEnum.APC));
+      moveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
+      moveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
       myCommander.addCOModifier(moveMod);
 
       // Grant all transports extra cargo space, and TODO: let foot-soldiers hitch a ride on ground vehicles.

@@ -78,7 +78,7 @@ public class TestCOModifier extends TestCase
     // Apply a movement modifier and re-check.
     int MOVEMOD = 3;
     COMovementModifier moveMod = new COMovementModifier(MOVEMOD);
-    moveMod.addApplicableUnitType(UnitModel.UnitEnum.INFANTRY);
+    moveMod.addApplicableUnitModel(patch.getUnitModel(UnitModel.UnitEnum.INFANTRY));
     moveMod.apply(patch);
     int newMove = inf.movePower;
     testPassed &= validate( (newMove - startMove) == MOVEMOD, "    Movement modifier did not apply as expected!");
