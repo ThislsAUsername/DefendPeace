@@ -179,7 +179,7 @@ public class GameInputHandler
     return peekCurrentState().getOptionSelector();
   }
 
-  /** @return The current set of coordinates from which to choose, or null we are not selecting a location. */
+  /** @return The current set of coordinates from which to choose, or null if we are not selecting a location. */
   public ArrayList<XYCoord> getCoordinateOptions()
   {
     return peekCurrentState().getOptions().getCoordinateOptions();
