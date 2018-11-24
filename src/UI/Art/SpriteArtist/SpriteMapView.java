@@ -13,7 +13,6 @@ import Engine.Path;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.Environment;
 import Terrain.GameMap;
 import UI.CO_InfoMenu;
 import UI.MapView;
@@ -39,8 +38,6 @@ public class SpriteMapView extends MapView
 
   // Overlay management variables.
   private boolean overlayIsLeft = true;
-  private String overlayFundsString = "FUNDS     0";
-  private int overlayPreviousFunds = 0;
 
   // Variables for controlling map animations.
   protected Queue<GameEvent> eventsToAnimate = new GameEventQueue();
@@ -507,70 +504,7 @@ public class SpriteMapView extends MapView
       overlayIsLeft = false;
     }
 
-    int drawScale = SpriteOptions.getDrawScale();
-    int coEyesWidth = 25;
-    int xTextOffset = (4+coEyesWidth) * drawScale; // Distance from the side of the view to the CO overlay text.
-    int yTextOffset = 3 * drawScale; // Distance from the top of the view to the CO overlay text.
-    BufferedImage spriteA = SpriteLibrary.getLettersSmallCaps().getFrame(0); // Convenient reference so we can check dimensions.
-    int textHeight = spriteA.getHeight() * drawScale;
-
-    // Rebuild the funds string to draw if it has changed.
-    if( overlayPreviousFunds != myGame.activeCO.money )
-    {
-      overlayPreviousFunds = myGame.activeCO.money;
-      overlayFundsString = buildFundsString(overlayPreviousFunds);
-    }
-
-    String coString = myGame.activeCO.coInfo.name;
-
-    // Choose left or right overlay image to draw.
-    BufferedImage overlayImage = SpriteLibrary.getCoOverlay(myGame.activeCO, overlayIsLeft);
-
-    if( overlayIsLeft )
-    { // Draw the overlay on the left side.
-      g.drawImage(overlayImage, 0, 0, overlayImage.getWidth() * drawScale, overlayImage.getHeight() * drawScale, null);
-      SpriteLibrary.drawTextSmallCaps(g, coString, xTextOffset, yTextOffset, drawScale); // CO name
-      SpriteLibrary.drawTextSmallCaps(g, overlayFundsString, xTextOffset, textHeight + drawScale + yTextOffset, drawScale); // Funds
-    }
-    else
-    { // Draw the overlay on the right side.
-      int screenWidth = SpriteOptions.getScreenDimensions().width;
-      int xPos = screenWidth - overlayImage.getWidth() * drawScale;
-      int coNameXPos = screenWidth - spriteA.getWidth() * drawScale * coString.length() - xTextOffset;
-      int fundsXPos = screenWidth - spriteA.getWidth() * drawScale * overlayFundsString.length() - xTextOffset;
-      g.drawImage(overlayImage, xPos, 0, overlayImage.getWidth() * drawScale, overlayImage.getHeight() * drawScale, null);
-      SpriteLibrary.drawTextSmallCaps(g, coString, coNameXPos, yTextOffset, drawScale); // CO name
-      SpriteLibrary.drawTextSmallCaps(g, overlayFundsString, fundsXPos, textHeight + drawScale + yTextOffset, drawScale); // Funds
-    }
-  }
-
-  /**
-   * Constructs a fixed-width (padded as needed) 11-character string to be drawn in the commander overlay.
-   * @param funds The number to convert to an HUD overlay funds string.
-   * @return A string of the form "FUNDS XXXXX" where X is either a space or a digit.
-   */
-  private String buildFundsString(int funds)
-  {
-    StringBuilder sb = new StringBuilder("FUNDS ");
-    if( myGame.activeCO.money < 10000 ) // Fewer than 5 digits
-    {
-      sb.append(" ");
-    }
-    if( myGame.activeCO.money < 1000 ) // Fewer than 4 digits
-    {
-      sb.append(" ");
-    }
-    if( myGame.activeCO.money < 100 ) // Fewer than 3 digits
-    {
-      sb.append(" ");
-    }
-    if( myGame.activeCO.money < 10 ) // Fewer than 2 digits. You poor.
-    {
-      sb.append(" ");
-    }
-    sb.append(Integer.toString(myGame.activeCO.money));
-
-    return sb.toString();
+    CommanderOverlayArtist.drawCommanderOverlay(g, myGame.activeCO, overlayIsLeft);
   }
 
   /**

@@ -76,7 +76,7 @@ public class SpriteLibrary
   // TODO: Account for weather?
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
   // TODO: Consider templatizing the key types, and then combining these two maps.
-  private static HashMap<UnitSpriteSetKey, UnitSpriteSet> unitMapSpriteSetMap = new HashMap<UnitSpriteSetKey, UnitSpriteSet>();
+  private static HashMap<UnitSpriteSetKey, UnitSpriteSet> mapUnitSpriteSetMap = new HashMap<UnitSpriteSetKey, UnitSpriteSet>();
 
   // Sprites to hold the images for drawing tentative moves on the map.
   private static Sprite moveCursorLineSprite = null;
@@ -102,6 +102,7 @@ public class SpriteLibrary
 
   // Commander overlay backdrops (shows commander name and funds) for each Commander in the game.
   private static HashMap<Commander, Sprite> coOverlays = new HashMap<Commander, Sprite>();
+  private static HashMap<Commander, Sprite> coPowerBarPieces = new HashMap<Commander, Sprite>();
 
   private static BufferedImage actionCursor = null;
 
@@ -365,28 +366,28 @@ public class SpriteLibrary
     }
   }
 
-  public static UnitSpriteSet getUnitMapSpriteSet(Unit unit)
+  public static UnitSpriteSet getMapUnitSpriteSet(Unit unit)
   {
     UnitSpriteSetKey key = UnitSpriteSetKey.instance(unit.model.type, unit.CO);
-    if( !unitMapSpriteSetMap.containsKey(key) )
+    if( !mapUnitSpriteSetMap.containsKey(key) )
     {
       // We don't have it? Go load it.
-      createUnitMapSpriteSet(key);
+      createMapUnitSpriteSet(key);
     }
     // We either found it or created it; it had better be there.
-    return unitMapSpriteSetMap.get(key);
+    return mapUnitSpriteSetMap.get(key);
   }
 
-  private static void createUnitMapSpriteSet(UnitSpriteSetKey key)
+  private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
     System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString());
-    String filestr = getUnitSpriteFilename(key.unitTypeKey);
+    String filestr = getMapUnitSpriteFilename(key.unitTypeKey);
     UnitSpriteSet spriteSet = new UnitSpriteSet(loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
         getMapUnitColors(key.commanderKey.myColor));
-    unitMapSpriteSetMap.put(key, spriteSet);
+    mapUnitSpriteSetMap.put(key, spriteSet);
   }
 
-  private static String getUnitSpriteFilename(UnitModel.UnitEnum unitType)
+  private static String getMapUnitSpriteFilename(UnitModel.UnitEnum unitType)
   {
     String spriteFile = "";
     switch (unitType)
@@ -662,6 +663,48 @@ public class SpriteLibrary
     return coOverlays.get(co).getFrame(index);
   }
 
+  /** Draw and return an image with the CO's power bar. */
+  public static BufferedImage getCoOverlayPowerBar(Commander co, int maxAP, double currentAP)
+  {
+    final int powerDrawScaleW = 2;
+    BufferedImage bar = SpriteLibrary.createDefaultBlankSprite(maxAP*powerDrawScaleW, 5);
+    Graphics barGfx = bar.getGraphics();
+
+    // Get the CO's colors
+    Color[] palette = SpriteLibrary.mapUnitColorPalettes.get(co.myColor).paletteColors;
+
+    // Draw the bar
+    barGfx.setColor(Color.BLACK);               // Outside edge
+    barGfx.drawRect(0, 0, bar.getWidth(), 4);
+    barGfx.setColor(palette[5]);                // Inside - empty
+    barGfx.fillRect(0, 1, bar.getWidth(), 3);
+    barGfx.setColor(palette[2]);                // Inside - full
+    barGfx.drawLine(0, 1, (int)(Math.floor(currentAP) * powerDrawScaleW), 1);
+    barGfx.drawLine(0, 2, (int)(currentAP * powerDrawScaleW), 2);
+    barGfx.drawLine(0, 3, (int)(Math.ceil(currentAP * powerDrawScaleW)), 3);
+
+    return bar;
+  }
+
+  /** Return a Sprite with the various Ability Point images. */
+  public static Sprite getCoOverlayPowerBarAPs(Commander co)
+  {
+    final int POWERBAR_FRAME_WIDTH = 7;
+    final int POWERBAR_FRAME_HEIGHT = 9;
+
+    // If we don't already have an image, load and colorize one for this Commander.
+    if( !coPowerBarPieces.containsKey(co) )
+    {
+      // Image should be: empty bar, full bar, empty point, 1/3 point, 2/3 point, full point, large point.
+      // Image should be: empty point, 1/3 point, 2/3 point, full point, large point.
+      Sprite overlay = new Sprite(loadSpriteSheetFile("res/ui/powerbar_pieces.png"), POWERBAR_FRAME_WIDTH, POWERBAR_FRAME_HEIGHT);
+      overlay.colorize(defaultMapColors, mapUnitColorPalettes.get(co.myColor).paletteColors);
+
+      coPowerBarPieces.put(co, overlay);
+    }
+    return coPowerBarPieces.get(co);
+  }
+
   /**
    * Creates a new blank (all black) image of the given size. This is used to generate placeholder
    * assets on the fly when we fail to load resources from disk.
@@ -675,6 +718,21 @@ public class SpriteLibrary
     Graphics big = bi.getGraphics();
     big.setColor(Color.BLACK);
     big.fillRect(0, 0, w, h);
+    return bi;
+  }
+
+  /**
+   * Creates a new transparent image of the given size. This is used as
+   * a base for building generated image assets on the fly.
+   * @param w Desired width of the image.
+   * @param h Desired height of the image.
+   * @return A new transparent BufferedImage of the specified size.
+   */
+  public static BufferedImage createTransparentSprite(int w, int h)
+  {
+    BufferedImage bi = createDefaultBlankSprite(w, h);
+    Sprite spr = new Sprite(bi);
+    spr.colorize(Color.BLACK, new Color(0, 0, 0, 0));
     return bi;
   }
 

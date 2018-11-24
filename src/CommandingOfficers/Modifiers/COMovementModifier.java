@@ -2,13 +2,12 @@ package CommandingOfficers.Modifiers;
 
 import java.util.ArrayList;
 
-import Units.UnitModel;
-import Units.UnitModel.UnitEnum;
 import CommandingOfficers.Commander;
+import Units.UnitModel;
 
 public class COMovementModifier implements COModifier
 {
-  ArrayList<UnitModel.UnitEnum> typesToModify;
+  ArrayList<UnitModel> modelsToModify;
   private int rangeChange;
 
   public COMovementModifier()
@@ -19,35 +18,37 @@ public class COMovementModifier implements COModifier
   public COMovementModifier(int range)
   {
     rangeChange = range;
-    typesToModify = new ArrayList<UnitModel.UnitEnum>();
+    modelsToModify = new ArrayList<UnitModel>();
   }
 
   @Override
   public void apply(Commander commander)
   {
-    for( UnitModel um : commander.unitModels )
+    for( UnitModel um : modelsToModify)
     {
-      if( typesToModify.contains(um.type) )
-      {
-        um.movePower = um.movePower + rangeChange;
-      }
+      um.movePower = um.movePower + rangeChange;
     }
   }
 
-  public void addApplicableUnitType(UnitEnum type)
+  public void addApplicableUnitModel(UnitModel model)
   {
-    typesToModify.add(type);
+    if( model != null )
+    {
+      modelsToModify.add(model);
+    }
+    else
+    {
+      System.out.println("Attempting to add null model to COMovementModifier!");
+      throw new NullPointerException(); // Make sure this oversight doesn't go unnoticed.
+    }
   }
 
   @Override
   public void revert(Commander commander)
   {
-    for( UnitModel um : commander.unitModels )
+    for( UnitModel um : modelsToModify )
     {
-      if( typesToModify.contains(um.type) )
-      {
-        um.movePower = um.movePower - rangeChange;
-      }
+      um.movePower = um.movePower - rangeChange;
     }
   }
 

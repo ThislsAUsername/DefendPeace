@@ -36,6 +36,12 @@ public class CaptureEvent implements GameEvent
     return mapView.buildCaptureAnimation();
   }
 
+  @Override
+  public void sendToListener(GameEventListener listener)
+  {
+    listener.receiveCaptureEvent( unit, location );
+  }
+
   public boolean willCapture()
   {
     int finalCapAmt = priorCaptureAmount + captureAmount;

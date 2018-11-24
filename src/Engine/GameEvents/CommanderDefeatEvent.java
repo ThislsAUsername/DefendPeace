@@ -24,6 +24,12 @@ public class CommanderDefeatEvent implements GameEvent
   }
 
   @Override
+  public void sendToListener(GameEventListener listener)
+  {
+    listener.receiveCommanderDefeatEvent( this );
+  }
+
+  @Override
   public void performEvent(GameMap gameMap)
   {
     // Set the flag so that we know he's toast.

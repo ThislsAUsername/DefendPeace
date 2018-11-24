@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import CommandingOfficers.Modifiers.COModifier;
-import Engine.GameInstance;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
 import Terrain.GameMap;
@@ -50,6 +49,10 @@ public class Commander
   public int team = -1;
   public boolean isDefeated = false;
   public XYCoord HQLocation = null;
+  private double myAbilityPower = 0;
+
+  private ArrayList<CommanderAbility> myAbilities = null;
+  private String myActiveAbilityName = "";
 
   public Commander(CommanderInfo info)
   {
@@ -100,6 +103,13 @@ public class Commander
     units = new ArrayList<Unit>();
     ownedProperties = new ArrayList<Location>();
     money = DEFAULTSTARTINGMONEY;
+
+    myAbilities = new ArrayList<CommanderAbility>();
+  }
+
+  protected void addCommanderAbility( CommanderAbility ca )
+  {
+    myAbilities.add(ca);
   }
 
   /**
@@ -123,6 +133,7 @@ public class Commander
    */
   public void initTurn(GameMap map)
   {
+    myActiveAbilityName = "";
     // Accrue income for each city under your control.
     int turnIncome = 0;
     for( int w = 0; w < map.mapWidth; ++w )
@@ -191,15 +202,63 @@ public class Commander
     return (unitProductionByTerrain.get(buyLocation) != null) ? unitProductionByTerrain.get(buyLocation) : new ArrayList<UnitModel>();
   }
 
-  public ArrayList<String> getReadyAbilities()
+  /** Return an ArrayList containing every ability this Commander currently has the power to perform. */
+  public ArrayList<CommanderAbility> getReadyAbilities()
   {
-    System.out.println("WARNING! Calling getReadyAbilities on Commander base class!");
-    ArrayList<String> coas = new ArrayList<String>();
-    return coas;
+    ArrayList<CommanderAbility> ready = new ArrayList<CommanderAbility>();
+    if( myActiveAbilityName.isEmpty() )
+    {
+      for( CommanderAbility ca : myAbilities )
+      {
+        if( ca.getCost() <= myAbilityPower )
+        {
+          ready.add(ca);
+        }
+      }
+    }
+    return ready;
   }
 
-  public void doAbility(String abilityName, GameInstance game)
+  public int[] getAbilityCosts()
   {
-    System.out.println("WARNING! Calling doAbility on Commander base class!");
+    int[] costs = new int[myAbilities.size()];
+    for( int i = 0; i < myAbilities.size(); ++i )
+    {
+      costs[i] = myAbilities.get(i).getCost();
+    }
+    return costs;
+  }
+
+  public double getAbilityPower()
+  {
+    return myAbilityPower;
+  }
+
+  public String getActiveAbilityName()
+  {
+    return myActiveAbilityName;
+  }
+
+  /** Lets the commander know that he's using an ability,
+   *  and accounts for the cost of using it. */
+  public void activateAbility(CommanderAbility ability)
+  {
+    modifyAbilityPower(-ability.getCost());
+    myActiveAbilityName = ability.myName;
+  }
+
+  protected void modifyAbilityPower(double amount)
+  {
+    myAbilityPower += amount;
+    if( myAbilityPower < 0 ) myAbilityPower = 0;
+    double maxPower = 0;
+    for( CommanderAbility ca : myAbilities )
+    {
+      if( maxPower < ca.getCost() )
+      {
+        maxPower = ca.getCost();
+      }
+    }
+    if( myAbilityPower > maxPower ) myAbilityPower = maxPower;
   }
 }

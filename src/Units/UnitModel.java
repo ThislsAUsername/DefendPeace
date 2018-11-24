@@ -12,6 +12,9 @@ import Terrain.TerrainType;
 import Units.MoveTypes.MoveType;
 import Units.Weapons.WeaponModel;
 
+/**
+ * Defines the invariant characteristics of a unit. One UnitModel can be shared across many instances of that Unit type.
+ */
 public class UnitModel
 {
   public enum UnitEnum
@@ -69,6 +72,37 @@ public class UnitModel
     COstr = 100;
     COdef = 100;
     holdingCapacity = 0;
+    holdables = new Vector<UnitEnum>();
+  }
+
+  /**
+   * Copy-constructor. Does a deep-copy on 'other' to allow easy creation of
+   * unit types that are similar to exiting types.
+   * @param other The UnitModel to clone.
+   * @return The UnitModel clone.
+   */
+  public static UnitModel clone( UnitModel other )
+  {
+    // Make a copy of the weapons used by the other model.
+    WeaponModel[] weaponModels = null;
+    if(other.weaponModels != null )
+    {
+      weaponModels = new WeaponModel[other.weaponModels.length];
+      for( int i = 0; i < weaponModels.length; ++i )
+      {
+        weaponModels[i] = new WeaponModel(other.weaponModels[i]);
+      }
+    }
+
+    // Create a new model with the given attributes.
+    UnitModel newModel = new UnitModel(other.name, other.type, other.chassis, other.moneyCost, other.maxFuel, other.idleFuelBurn,
+        other.movePower, new MoveType(other.propulsion), other.possibleActions, weaponModels);
+
+    // Duplicate the other model's transporting abilities.
+    newModel.holdingCapacity = other.holdingCapacity;
+    newModel.holdables.addAll(other.holdables);
+
+    return newModel;
   }
 
   /**

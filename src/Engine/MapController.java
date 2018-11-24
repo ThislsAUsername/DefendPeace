@@ -4,7 +4,9 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Queue;
 
+import CommandingOfficers.CommanderAbility;
 import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -26,7 +28,7 @@ public class MapController implements IController
   private InGameMenu<UnitModel> productionMenu;
   private InGameMenu<GameActionSet> actionMenu;
   private InGameMenu<MetaAction> metaActionMenu;
-  private InGameMenu<String> coAbilityMenu;
+  private InGameMenu<CommanderAbility> coAbilityMenu;
   private InGameMenu<ConfirmExitEnum> confirmExitMenu;
   private InGameMenu<? extends Object> currentMenu;
 
@@ -519,8 +521,8 @@ public class MapController implements IController
     {
       case ENTER:
         // Get the chosen ability and let it do its thing.
-        String abilityName = coAbilityMenu.getSelectedOption();
-        myGame.activeCO.doAbility(abilityName, myGame);
+        CommanderAbility ability = coAbilityMenu.getSelectedOption();
+        ability.activate(myGame.gameMap);
 
         changeInputMode(InputMode.MAP);
 
@@ -630,7 +632,7 @@ public class MapController implements IController
         currentMenu = metaActionMenu;
         break;
       case CO_ABILITYMENU:
-        coAbilityMenu = new InGameMenu<String>(myGame.activeCO.getReadyAbilities());
+        coAbilityMenu = new InGameMenu<CommanderAbility>(myGame.activeCO.getReadyAbilities());
         currentMenu = coAbilityMenu;
         break;
       case CONFIRMEXIT:
@@ -712,6 +714,9 @@ public class MapController implements IController
     if( null != event )
     {
       event.performEvent(myGame.gameMap);
+
+      // Now that the event has been completed, let the world know.
+      GameEventListener.publishEvent(event);
     }
 
     if( animEventQueueIsEmpty && !unitsToInit.isEmpty() )

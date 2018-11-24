@@ -130,4 +130,25 @@ public class Sprite
       }
     }
   }
+
+  /**
+   * For every image contained in this sprite, change each oldColor pixel to newColor.
+   */
+  public void colorize(Color oldColor, Color newColor)
+  {
+    for( BufferedImage bi : spriteImages )
+    {
+      for( int x = 0; x < bi.getWidth(); ++x )
+      {
+        for( int y = 0; y < bi.getHeight(); ++y )
+        {
+          int colorValue = bi.getRGB(x, y);
+          if( oldColor.getRGB() == colorValue )
+          {
+            bi.setRGB(x, y, newColor.getRGB());
+          }
+        }
+      }
+    }
+  }
 }
