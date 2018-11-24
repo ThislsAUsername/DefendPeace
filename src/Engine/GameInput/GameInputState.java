@@ -48,7 +48,7 @@ abstract class GameInputState
   private OptionSelector buildSelector()
   {
     OptionSelector selector = null;
-    switch(myOptions.inputMode)
+    switch(myOptions.inputType)
     {
       case CONSTRAINED_TILE_SELECT:
         selector = new OptionSelector(myOptions.getCoordinateOptions().size());
@@ -122,31 +122,31 @@ class StateData
  ************************************************************/
 class OptionSet
 {
-  public final InputType inputMode;
+  public final InputType inputType;
   private ArrayList<XYCoord> myCoords = null;
   private Object[] myMenuOptions = null;
   private GameAction myAction = null;
 
   public OptionSet(InputType type)
   {
-    inputMode = type;
+    inputType = type;
   }
 
-  public OptionSet(InputType mode, ArrayList<XYCoord> coords)
+  public OptionSet(InputType type, ArrayList<XYCoord> coords)
   {
-    inputMode = mode;
+    inputType = type;
     myCoords = coords;
   }
 
   public OptionSet(Object[] menuOptions)
   {
-    inputMode = InputType.MENU_SELECT;
+    inputType = InputType.MENU_SELECT;
     myMenuOptions = menuOptions;
   }
 
   public OptionSet(GameAction action)
   {
-    inputMode = InputType.ACTION_READY;
+    inputType = InputType.ACTION_READY;
     myAction = action;
   }
 

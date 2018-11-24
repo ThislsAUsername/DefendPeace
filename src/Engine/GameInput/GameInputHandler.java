@@ -29,11 +29,6 @@ public class GameInputHandler
     myCallback = callback;
   }
 
-  public GameInputHandler(GameMap map, Commander currentPlayer)
-  {
-    this(map, currentPlayer, null);
-  }
-
   /**
    * Back up to the previous state.
    */
@@ -81,7 +76,7 @@ public class GameInputHandler
     GameInputState current = peekCurrentState();
     GameInputState next = current.select(option);
     pushNextState(next);
-    return peekCurrentState().getOptions().inputMode;
+    return peekCurrentState().getOptions().inputType;
   }
 
   /**
@@ -95,7 +90,7 @@ public class GameInputHandler
     GameInputState current = peekCurrentState();
     GameInputState next = current.select(coord);
     pushNextState(next);
-    return peekCurrentState().getOptions().inputMode;
+    return peekCurrentState().getOptions().inputType;
   }
 
   /**
@@ -109,7 +104,7 @@ public class GameInputHandler
     GameInputState current = peekCurrentState();
     GameInputState next = current.select(path);
     pushNextState(next);
-    return peekCurrentState().getOptions().inputMode;
+    return peekCurrentState().getOptions().inputType;
   }
 
   public InputType reset()
@@ -118,7 +113,7 @@ public class GameInputHandler
     myStateStack.clear();
     myStateData = new StateData(myStateData.gameMap, myStateData.commander);
     myStateStack.push(new DefaultState(myStateData));
-    return peekCurrentState().getOptions().inputMode;
+    return peekCurrentState().getOptions().inputType;
   }
 
   /** Get the current state, but don't pop it off the stack. */
@@ -170,7 +165,7 @@ public class GameInputHandler
   /** @return The currently-recommended input mode. */
   public InputType getInputType()
   {
-    return peekCurrentState().getOptions().inputMode;
+    return peekCurrentState().getOptions().inputType;
   }
 
   /** @return The OptionSelector for the current state, or null if it does not provide options. */
