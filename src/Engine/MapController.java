@@ -4,6 +4,9 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Queue;
 
+import AI.InfantrySpamAI;
+import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderLibrary.CommanderEnum;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -74,6 +77,14 @@ public class MapController implements IController, GameInputHandler.StateChanged
     coInfoMenu = new CO_InfoMenu(myGame.commanders.length);
     nextSeekIndex = 0;
     contemplatedAction = new ContemplatedAction();
+
+    for( Commander co : myGame.commanders )
+    {
+      if( co.coInfo.cmdrEnum == CommanderEnum.PATCH )
+      {
+        co.setAIController(new InfantrySpamAI( co ) );
+      }
+    }
 
     // Start the first turn.
     startNextTurn();
@@ -445,14 +456,32 @@ public class MapController implements IController, GameInputHandler.StateChanged
    */
   private void changeInputMode(InputMode input)
   {
+    System.out.println("Moving to InputMode " + input );
     // Assign the new input mode.
     inputMode = input;
 
-    // If we are changing input mode, whether to or from commanding a unit, we can
-    //   be sure we don't have a valid action right now.
+    // If we are changing input modes, we
+    // know we don't have a valid action right now.
     myGameInputHandler.reset();
     contemplatedAction.clear();
     currentMenu = null;
+
+    if( myGame.activeCO.isAI() && input == InputMode.INPUT )
+    {
+      GameAction aiAction = myGame.activeCO.getNextAIAction(myGame.gameMap);
+      if( aiAction != null )
+      {
+        // TODO: this extends the call stack by a few for each action the AI performs, due to
+        // execute->animate->onStateChange->changeInputMode indirect loop. This means the number of
+        // actions an AI player can perform is limited by the amount of virtual memory available.
+        // This isn't likely to cause problems except for extremely large games, but it feels bad.
+        executeGameAction(aiAction);
+      }
+      else
+      {
+        startNextTurn();
+      }
+    }
   }
 
   /**
