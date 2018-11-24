@@ -76,6 +76,9 @@ class SelectCargo extends GameInputState
   @Override
   public void back()
   {
-    myStateData.unitLocationMap = null;
+    if( myStateData.unitLocationMap.isEmpty() )
+    {
+      myStateData.unitLocationMap = null;
+    }
   }
 }
