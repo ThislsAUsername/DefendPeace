@@ -75,7 +75,7 @@ abstract class GameInputState
   // in the same state. Subclasses will define transitions.
   public GameInputState select(Path path)
   {
-    return null;
+    return this;
   }
   public GameInputState select(Object option)
   {
