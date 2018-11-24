@@ -39,6 +39,7 @@ public class COMovementModifier implements COModifier
     else
     {
       System.out.println("Attempting to add null model to COMovementModifier!");
+      throw new NullPointerException(); // Make sure this oversight doesn't go unnoticed.
     }
   }
 
