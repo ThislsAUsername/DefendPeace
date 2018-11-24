@@ -92,7 +92,7 @@ public class CommanderStrong extends Commander
 
       // Grant foot-soldiers and transports additional movement power.
       COMovementModifier moveMod = new COMovementModifier();
-      System.out.println("Adding Strongarm unit models");
+
       // Use the high-capacity APC since we are swapping that model out for this turn.
       moveMod.addApplicableUnitModel(highCapacityUnitModels.get(UnitModel.UnitEnum.APC));
       moveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
@@ -146,7 +146,7 @@ public class CommanderStrong extends Commander
 
       // Grant foot-soldiers and transports two (2) additional movement power.
       COMovementModifier moveMod = new COMovementModifier(2);
-      System.out.println("Adding Mobilize unit models");
+
       // Use the high-capacity APC since we are swapping that model out for this turn.
       moveMod.addApplicableUnitModel(highCapacityUnitModels.get(UnitModel.UnitEnum.APC));
       moveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
