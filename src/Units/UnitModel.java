@@ -100,10 +100,7 @@ public class UnitModel
 
     // Duplicate the other model's transporting abilities.
     newModel.holdingCapacity = other.holdingCapacity;
-    for( UnitEnum ue : other.holdables )
-    {
-      newModel.holdables.add(ue);
-    }
+    newModel.holdables.addAll(other.holdables);
 
     return newModel;
   }
