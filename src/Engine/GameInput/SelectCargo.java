@@ -13,6 +13,7 @@ import Units.Unit;
  ************************************************************/
 class SelectCargo extends GameInputState
 {
+  private static final String DONE_OPTION = "DONE";
   public SelectCargo(StateData data)
   {
     super(data);
@@ -34,7 +35,7 @@ class SelectCargo extends GameInputState
     if( null != myStateData.unitLocationMap && myStateData.unitLocationMap.size() > 0 )
     {
       // If at least one unit is being offboarded already, offer a "DONE" option so we aren't forced to unload everything.
-      cargoes.add("DONE");
+      cargoes.add(DONE_OPTION);
     }
     Object[] cargoArray = new Object[cargoes.size()];
     cargoes.toArray(cargoArray);
@@ -52,7 +53,7 @@ class SelectCargo extends GameInputState
       myStateData.unitLocationMap = new HashMap<Unit, XYCoord>();
     }
 
-    if( option.equals("DONE") )
+    if( option.equals(DONE_OPTION) )
     {
       // Since we don't want to drop any additional units, build the GameAction and move to ActionReady.
       GameAction ga = new GameAction.UnloadAction(myStateData.gameMap, myStateData.unitActor, myStateData.path, myStateData.unitLocationMap);
