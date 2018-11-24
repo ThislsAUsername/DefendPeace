@@ -61,7 +61,7 @@ public class CommanderDefeatEvent implements GameEvent
         // Release control of any buildings he owned.
         if(loc.isCaptureable() && loc.getOwner() == defeatedCO)
         {
-          loc.setOwner(((null == beneficiaryCO) ? null : beneficiaryCO ));
+          loc.setOwner(beneficiaryCO);
         }
       } // ~width loop
     } // ~height loop
