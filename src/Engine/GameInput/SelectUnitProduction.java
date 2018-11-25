@@ -28,12 +28,7 @@ class SelectUnitProduction extends GameInputState
     OptionSet options = null;
     if( null != myStateData.menuOptions )
     {
-      String[] modelStrings = new String[myStateData.menuOptions.size()];
-      for( int i = 0; i < myStateData.menuOptions.size(); ++i )
-      {
-        modelStrings[i] = myStateData.menuOptions.get(i).toString();
-      }
-      options = new OptionSet(modelStrings);
+      options = new OptionSet(myStateData.menuOptions.toArray());
     }
     return options;
   }
@@ -47,7 +42,7 @@ class SelectUnitProduction extends GameInputState
     {
       for( UnitModel model : myUnitModels )
       {
-        if( option.equals(model.toString()))
+        if( option == model )
         {
           myStateData.actionSet = new GameActionSet(new GameAction.UnitProductionAction(myStateData.gameMap, myStateData.commander, model, myProductionLocation), false);
           next = new ActionReady(myStateData);

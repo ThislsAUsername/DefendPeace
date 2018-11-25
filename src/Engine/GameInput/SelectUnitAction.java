@@ -24,25 +24,23 @@ class SelectUnitAction extends GameInputState
     // Get the set of actions this unit could perform from the target location.
     myUnitActions = myStateData.unitActor.getPossibleActions(myStateData.gameMap, myStateData.path);
 
-    // Create our new menu options.
-    String[] options = new String[myUnitActions.size()];
-    for(int i = 0; i < myUnitActions.size(); ++i)
-    {
-      options[i] = myUnitActions.get(i).toString();
-    }
-    return new OptionSet(options);
+    return new OptionSet( myUnitActions.toArray() );
   }
 
   @Override
   public GameInputState select(Object menuOption)
   {
     GameInputState next = this;
+
+    // Find the set in myUnitActions. We iterate because it
+    // 1) allows us to avoid a cast, and
+    // 2) ensures that the provided menuOption is actually one we support.
     GameActionSet chosenSet = null;
     if( null != menuOption )
     {
       for(GameActionSet set : myUnitActions)
       {
-        if( set.toString().equals(menuOption) )
+        if( set == menuOption )
         {
           chosenSet = set;
           break;
