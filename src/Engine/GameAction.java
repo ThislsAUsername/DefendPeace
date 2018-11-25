@@ -641,7 +641,10 @@ public interface GameAction
       // ABILITY actions consist of
       //   ABILITY
       abilityEvents = new GameEventQueue();
-      abilityEvents.add(new CommanderAbilityEvent(ability));
+      if( null != ability )
+      {
+        abilityEvents.add(new CommanderAbilityEvent(ability));
+      }
     }
 
     @Override
