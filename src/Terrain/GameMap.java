@@ -95,7 +95,7 @@ public class GameMap
    */
   public boolean isLocationValid(XYCoord coords)
   {
-    return isLocationValid(coords.xCoord, coords.yCoord);
+    return (coords != null) && isLocationValid(coords.xCoord, coords.yCoord);
   }
 
   /**
