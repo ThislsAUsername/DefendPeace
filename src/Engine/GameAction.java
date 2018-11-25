@@ -30,7 +30,7 @@ public interface GameAction
 {
   public enum ActionType
   {
-    INVALID, ATTACK, CAPTURE, LOAD, RESUPPLY, UNLOAD, WAIT, UNITPRODUCTION, OTHER
+    ATTACK, CAPTURE, LOAD, RESUPPLY, UNLOAD, WAIT, UNITPRODUCTION, OTHER
   }
 
   /**
