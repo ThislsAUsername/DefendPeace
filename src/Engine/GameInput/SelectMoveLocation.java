@@ -29,12 +29,9 @@ class SelectMoveLocation extends GameInputState
   public GameInputState select(Path path)
   {
     GameInputState next = this;
-    if( myStateData.unitActor.CO != myStateData.commander )
-    {
-      // Tell the handler to go back to the previous state.
-      next = null;
-    }
-    else if( myOptions.getCoordinateOptions().contains(new XYCoord(path.getEnd().x, path.getEnd().y))
+    // The input is valid if the unit belongs to the active commander and the chosen path is valid.
+    if( (myStateData.unitActor.CO == myStateData.commander) && (null != path) && (path.getPathLength() > 0)
+        && myOptions.getCoordinateOptions().contains(new XYCoord(path.getEnd().x, path.getEnd().y))
         && Utils.isPathValid(myStateData.unitActor, path, myStateData.gameMap) )
     {
       // The path ends on a valid move location, and is traversable by the unit. Store it.
