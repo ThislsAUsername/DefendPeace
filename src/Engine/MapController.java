@@ -22,9 +22,11 @@ public class MapController implements IController, GameInputHandler.StateChanged
   private GameInstance myGame;
   private MapView myView;
 
-  // A few menus to control the in-game logical flow.
+  // A menu to display options to the player.
   private InGameMenu<? extends Object> currentMenu;
 
+  // A GameInputHandler to convert inputs into player actions, and
+  // a reference to the current GameInputState's OptionSelector.
   private GameInputHandler myGameInputHandler = null;
   private OptionSelector myGameInputOptionSelector = null;
 
@@ -83,6 +85,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   /**
    * When the GameMap is in focus, all user input is directed through this function. It is
    * redirected to a specific handler based on what actions the user is currently taking.
+   * @return True if the game is over, false otherwise.
    */
   @Override
   public boolean handleInput(InputHandler.InputAction input)
@@ -208,11 +211,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
         // Get the current location.
         XYCoord cursorCoords = new XYCoord(myGame.getCursorX(), myGame.getCursorY());
         Location loc = myGame.gameMap.getLocation(cursorCoords);
+        Unit actor = loc.getResident();
 
         // If there is a unit that is is ready to move, or if it is someone else's, then record it so we can build the move path.
-        if( null != loc.getResident() && ((loc.getResident().CO == myGame.activeCO && !loc.getResident().isTurnOver) || (loc.getResident().CO != myGame.activeCO)))
+        if( null != actor && ((actor.CO == myGame.activeCO && !actor.isTurnOver) || (actor.CO != myGame.activeCO)))
         {
-          contemplatedAction.actor = loc.getResident();
+          contemplatedAction.actor = actor;
         }
 
         // Pass the current cursor location to the GameInputHandler.
@@ -329,7 +333,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       return;
     }
 
-    if( null == myGameInputHandler.getMenuOptions() )
+    if( null == myGameInputHandler.getMenuOptions() || 0 == myGameInputHandler.getMenuOptions().length )
     {
       System.out.println("ERROR! MapController.handleActionMenuInput() called with no menu options!");
       myGameInputHandler.back();
