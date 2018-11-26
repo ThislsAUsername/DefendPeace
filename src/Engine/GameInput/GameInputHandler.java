@@ -130,10 +130,14 @@ public class GameInputHandler
   /** Push next onto the state stack if it is not the same object as current. */
   private void pushNextState(GameInputState next)
   {
-    // States will return themselves if they receive invalid input,
-    // so make sure we don't push the same state twice.
+    // States should return themselves if they receive invalid input; a next
+    // state of null is equivalent to a back() command.
     GameInputState current = peekCurrentState();
-    if(current != next)
+    if(null == next)
+    {
+      back();
+    }
+    else if(current != next)
     {
       // Push the next state if it's valid.
       myStateStack.push(next);
