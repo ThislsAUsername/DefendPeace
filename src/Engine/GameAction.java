@@ -73,7 +73,7 @@ public interface GameAction
       // Validate input.
       boolean isValid = true;
       isValid &= attacker != null;
-      isValid &= (null != gameMap) && (null != attackLocation) && (gameMap.isLocationValid(attackLocation));
+      isValid &= (null != gameMap) && (gameMap.isLocationValid(attackLocation));
       isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       if( isValid )
       {
