@@ -73,7 +73,7 @@ abstract class GameInputState<T>
 
   // Default implementations of select() will just keep us
   // in the same state. Subclasses will define transitions.
-  public GameInputState<?> select(T path)
+  public GameInputState<?> select(T option)
   {
     return this;
   }
