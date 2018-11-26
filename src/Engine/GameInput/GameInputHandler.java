@@ -72,6 +72,7 @@ public class GameInputHandler
    */
   public <T> InputType select(T option)
   {
+    @SuppressWarnings("unchecked")
     GameInputState<T> current = (GameInputState<T>) peekCurrentState();
     GameInputState<?> next = current.select(option);
     pushNextState(next);

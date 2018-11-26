@@ -3,7 +3,7 @@ package Engine.GameInput;
 /************************************************************
  * Terminal state - just provides the selected action.      *
  ************************************************************/
-class ActionReady extends GameInputState
+class ActionReady extends GameInputState<Object>
 {
   public ActionReady(StateData data)
   {

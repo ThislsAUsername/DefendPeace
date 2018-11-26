@@ -5,7 +5,7 @@ import Engine.GameInput.GameInputHandler.InputType;
 /**
  * Terminal state that just tells MapController to switch to the CO info menu.
  */
-public class OpenCoInfoMenu extends GameInputState
+public class OpenCoInfoMenu extends GameInputState<Object>
 {
   public OpenCoInfoMenu(StateData data)
   {

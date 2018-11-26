@@ -1,7 +1,7 @@
 package Engine.GameInput;
 
 /** A terminal state that indicates the game is over, no win or lose. */
-public class ExitToMainMenu extends GameInputState
+public class ExitToMainMenu extends GameInputState<Object>
 {
   public ExitToMainMenu(StateData data)
   {

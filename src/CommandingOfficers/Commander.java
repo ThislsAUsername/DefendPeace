@@ -133,7 +133,6 @@ public class Commander
    */
   public void initTurn(GameMap map)
   {
-    modifyAbilityPower(20);
     myActiveAbilityName = "";
     // Accrue income for each city under your control.
     int turnIncome = 0;

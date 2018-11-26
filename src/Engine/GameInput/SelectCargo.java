@@ -11,7 +11,7 @@ import Units.Unit;
 /************************************************************
  * State to choose which Unit will be kicked off the bus.   *
  ************************************************************/
-class SelectCargo extends GameInputState
+class SelectCargo extends GameInputState<Object>
 {
   private static final String DONE_OPTION = "DONE";
   public SelectCargo(StateData data)
@@ -43,9 +43,9 @@ class SelectCargo extends GameInputState
   }
 
   @Override
-  public GameInputState select(Object option)
+  public GameInputState<?> select(Object option)
   {
-    GameInputState next = this;
+    GameInputState<?> next = this;
 
     // Add a unitLocationMap to our state if we don't have one already.
     if( null == myStateData.unitLocationMap )

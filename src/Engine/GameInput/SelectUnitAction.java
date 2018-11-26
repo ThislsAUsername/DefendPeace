@@ -7,7 +7,7 @@ import Engine.GameActionSet;
 /************************************************************
  * State to allow selecting an action for a unit.           *
  ************************************************************/
-class SelectUnitAction extends GameInputState
+class SelectUnitAction extends GameInputState<Object>
 {
   // Don't provide a default value, or it will override the value
   // set by the call to initOptions() in the super-constructor.
@@ -24,13 +24,13 @@ class SelectUnitAction extends GameInputState
     // Get the set of actions this unit could perform from the target location.
     myUnitActions = myStateData.unitActor.getPossibleActions(myStateData.gameMap, myStateData.path);
 
-    return new OptionSet( myUnitActions.toArray() );
+    return new OptionSet(myUnitActions.toArray());
   }
 
   @Override
-  public GameInputState select(Object menuOption)
+  public GameInputState<?> select(Object menuOption)
   {
-    GameInputState next = this;
+    GameInputState<?> next = this;
 
     // Find the set in myUnitActions. We iterate because it
     // 1) allows us to avoid a cast, and
@@ -38,7 +38,7 @@ class SelectUnitAction extends GameInputState
     GameActionSet chosenSet = null;
     if( null != menuOption )
     {
-      for(GameActionSet set : myUnitActions)
+      for( GameActionSet set : myUnitActions )
       {
         if( set == menuOption )
         {
@@ -61,7 +61,7 @@ class SelectUnitAction extends GameInputState
       else
       {
         // We need more input before an action is ready; What kind of input depends on the type of action.
-        switch(chosenSet.getSelected().getType())
+        switch (chosenSet.getSelected().getType())
         {
           case ATTACK:
             // We need to select a target to attack.
@@ -70,6 +70,8 @@ class SelectUnitAction extends GameInputState
           case UNLOAD:
             // We need to select a unit to unload.
             next = new SelectCargo(myStateData);
+            break;
+          default:
             break;
         }
       }
