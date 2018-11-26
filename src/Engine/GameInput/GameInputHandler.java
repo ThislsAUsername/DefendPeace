@@ -97,7 +97,7 @@ public class GameInputHandler
    * Choose the passed-in option for the current state, triggering a transition to the
    * next state. If no transition is possible, the state will not change.
    * @param option - The chosen coordinate, drawn from those given by OptionSet.getCoordinateOptions().
-   * @return The OptionSet for the next (and now current) state.
+   * @return The InputType for the next (and now current) state.
    */
   public InputType select(Path path)
   {

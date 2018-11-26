@@ -308,7 +308,13 @@ public class MapController implements IController, GameInputHandler.StateChanged
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
         break;
       case ENTER:
-        myGameInputHandler.select(contemplatedAction.movePath);
+        GameInputHandler.InputType type = myGameInputHandler.select(contemplatedAction.movePath);
+        // If the next state has an InputType of FREE_TILE_SELECT, then we actually moved back()
+        // instead of forward to the action-select state. Clear the path so we can rebuild it.
+        if( type == GameInputHandler.InputType.FREE_TILE_SELECT )
+        {
+          contemplatedAction.movePath = null;
+        }
         break;
       case BACK:
         myGameInputHandler.back();
