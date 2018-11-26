@@ -1,10 +1,16 @@
 package Engine;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderAbility;
 import Engine.GameEvents.BattleEvent;
 import Engine.GameEvents.CaptureEvent;
+import Engine.GameEvents.CommanderAbilityEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.LoadEvent;
 import Engine.GameEvents.MoveEvent;
@@ -15,6 +21,7 @@ import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
+import Units.UnitModel;
 
 /**
  * Provides an interface for all in-game actions.
@@ -23,7 +30,7 @@ public interface GameAction
 {
   public enum ActionType
   {
-    INVALID, ATTACK, CAPTURE, LOAD, RESUPPLY, UNLOAD, WAIT
+    ATTACK, CAPTURE, LOAD, RESUPPLY, UNLOAD, WAIT, UNITPRODUCTION, OTHER
   }
 
   /**
@@ -66,7 +73,7 @@ public interface GameAction
       // Validate input.
       boolean isValid = true;
       isValid &= attacker != null;
-      isValid &= (null != gameMap) && (null != attackLocation) && (gameMap.isLocationValid(attackLocation));
+      isValid &= (null != gameMap) && (gameMap.isLocationValid(attackLocation));
       isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       if( isValid )
       {
@@ -141,6 +148,60 @@ public interface GameAction
       return GameAction.ActionType.ATTACK;
     }
   } // ~AttackAction
+
+  // ===========  UnitProductionAction  ==============================
+  public static class UnitProductionAction implements GameAction
+  {
+    private GameEventQueue buildEvents = null;
+    private final XYCoord buildLocation;
+
+    public UnitProductionAction(GameMap gameMap, Commander who, UnitModel what, XYCoord where)
+    {
+      // BUILDUNIT actions consist of
+      //   TODO: Consider introducing TRANSFERFUNDS for the fiscal part.
+      //   CREATEUNIT
+      buildEvents = new GameEventQueue();
+      buildLocation = where;
+      boolean isValid = true;
+      isValid &= (null != gameMap) && (null != who) && (null != what) && (null != where);
+      isValid &= (who.money >= what.moneyCost);
+
+      if( isValid )
+      {
+        //buildEvents.add(new TransferFundsEvent(who, what.moneyCost));
+        buildEvents.add(new CreateUnitEvent(who, what, where));
+      }
+      else
+      {
+        // We can't create this action. Leave the event queue empty.
+        System.out.println("WARNING! BuildUnitAction created with invalid arguments.");
+      }
+    }
+
+    @Override
+    public GameEventQueue getEvents(GameMap map)
+    {
+      return buildEvents;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return buildLocation;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return buildLocation;
+    }
+
+    @Override
+    public ActionType getType()
+    {
+      return GameAction.ActionType.UNITPRODUCTION;
+    }
+  } // ~UnitProductionAction
 
   // ===========  CaptureAction  ==============================
   public static class CaptureAction implements GameAction
@@ -364,8 +425,9 @@ public interface GameAction
   // ===========  UnloadAction  =================================
   public static class UnloadAction implements GameAction
   {
+    Map<Unit, XYCoord> myDropoffs = null;
     private XYCoord moveLoc = null;
-    private XYCoord dropLoc = null;
+    private XYCoord firstDropLoc = null;
     private GameEventQueue unloadEvents = null;
 
     public UnloadAction(GameMap gameMap, Unit actor, Path path, Unit passenger, int dropX, int dropY)
@@ -373,19 +435,28 @@ public interface GameAction
       this(gameMap, actor, path, passenger, new XYCoord(dropX, dropY));
     }
 
-    public UnloadAction(GameMap gameMap, Unit transport, Path movePath, Unit passenger, XYCoord dropLocation)
+    public UnloadAction(GameMap gameMap, Unit transport, Path movePath, final Unit passenger, final XYCoord dropLocation)
+    {
+      this(gameMap, transport, movePath, new HashMap<Unit, XYCoord>(){
+          private static final long serialVersionUID = 1L;
+          {
+            this.put(passenger, dropLocation);
+          }
+        });
+    }
+
+    public UnloadAction(GameMap gameMap, Unit transport, Path movePath, Map<Unit, XYCoord> dropoffs)
     {
       // UNLOAD actions consist of
       //   MOVE (transport)
       //   UNLOAD
       unloadEvents = new GameEventQueue();
-      dropLoc = dropLocation;
+      myDropoffs = new HashMap<Unit, XYCoord>();
 
       // Validate input.
       boolean isValid = true;
       isValid &= null != transport;
-      isValid &= null != passenger;
-      isValid &= null != dropLoc;
+      isValid &= null != dropoffs;
       isValid &= movePath.getPathLength() > 0;
       isValid &= null != gameMap;
       if( isValid )
@@ -393,7 +464,12 @@ public interface GameAction
         isValid &= !transport.heldUnits.isEmpty();
         moveLoc = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
         isValid &= gameMap.isLocationEmpty(transport, moveLoc); // Move location is unoccupied.
-        isValid &= gameMap.isLocationEmpty(transport, dropLoc); // Drop location is unoccupied.
+        myDropoffs.putAll(dropoffs);
+        for( Unit unit : myDropoffs.keySet() )
+        {
+          isValid &= gameMap.isLocationEmpty(transport, myDropoffs.get(unit)); // Drop locations are unoccupied.
+          firstDropLoc = (null == firstDropLoc)? myDropoffs.get(unit) : firstDropLoc;
+        }
       }
 
       // Generate events.
@@ -402,8 +478,11 @@ public interface GameAction
         // Move transport to the target location.
         unloadEvents.add(new MoveEvent(transport, movePath));
 
-        // Debark the passenger.
-        unloadEvents.add(new UnloadEvent(transport, passenger, dropLoc));
+        // Debark the passengers.
+        for( Unit unit : myDropoffs.keySet() )
+        {
+          unloadEvents.add(new UnloadEvent(transport, unit, myDropoffs.get(unit)));
+        }
       }
       else
       {
@@ -427,7 +506,7 @@ public interface GameAction
     @Override
     public XYCoord getTargetLocation()
     {
-      return dropLoc;
+      return firstDropLoc;
     }
 
     @Override
@@ -553,4 +632,47 @@ public interface GameAction
       return GameAction.ActionType.RESUPPLY;
     }
   } // ~ResupplyAction
+
+  // ===========  AbilityAction  =================================
+  public static class AbilityAction implements GameAction
+  {
+    private GameEventQueue abilityEvents = null;
+
+    public AbilityAction(CommanderAbility ability)
+    {
+      // ABILITY actions consist of
+      //   ABILITY
+      abilityEvents = new GameEventQueue();
+      if( null != ability )
+      {
+        abilityEvents.add(new CommanderAbilityEvent(ability));
+      }
+    }
+
+    @Override
+    public GameEventQueue getEvents(GameMap map)
+    {
+      return abilityEvents;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return null;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return null;
+    }
+
+    @Override
+    public ActionType getType()
+    {
+      // Use OTHER, just because it doesn't correspond to a normal unit-based
+      // action with an actor, target location, etc.
+      return GameAction.ActionType.OTHER;
+    }
+  } // ~AbilityAction
 }

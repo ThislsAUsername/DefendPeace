@@ -1,10 +1,13 @@
 package Test;
 
+import java.util.ArrayList;
+
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderPatch;
 import CommandingOfficers.CommanderStrong;
 import Engine.GameAction;
 import Engine.Utils;
+import Engine.XYCoord;
 import Terrain.GameMap;
 import Terrain.MapLibrary;
 import Units.Unit;
@@ -54,6 +57,10 @@ public class TestTransport extends TestCase
     performGameAction(new GameAction.UnloadAction(testMap, apc, Utils.findShortestPath(apc, 7, 3, testMap), cargo, 7, 4), testMap);
     testPassed &= validate(testMap.getLocation(7, 4).getResident() == cargo, "    Cargo was not dropped off correctly.");
     testPassed &= validate(apc.heldUnits.isEmpty(), "    APC is not empty when it should be.");
+
+    // Make sure the unit knows it can unload to its own position.
+    ArrayList<XYCoord> unloadLocs = Utils.findUnloadLocations( testMap, apc, new XYCoord(7, 4), cargo);
+    testPassed &= validate(unloadLocs.contains(new XYCoord(apc.x, apc.y) ), "    APC doesn't know it can unload to its own position.");
 
     // Make sure we can unload a unit on the apc's current location.
     performGameAction(new GameAction.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 7, 3, testMap)), testMap);

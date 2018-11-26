@@ -146,4 +146,10 @@ public class UnitModel
     // Most Units don't have any; specific UnitModel types can override.
     return new ArrayList<GameAction>();
   }
+
+  @Override
+  public String toString()
+  {
+    return name;
+  }
 }

@@ -60,14 +60,14 @@ public class Utils
   }
 
   /** Returns a list of locations at distance 1 from transportLoc that cargo can move on. */
-  public static ArrayList<XYCoord> findUnloadLocations(GameMap map, XYCoord transportLoc, Unit cargo)
+  public static ArrayList<XYCoord> findUnloadLocations(GameMap map, Unit transport, XYCoord moveLoc, Unit cargo)
   {
-    ArrayList<XYCoord> locations = findLocationsInRange(map, transportLoc, 1);
+    ArrayList<XYCoord> locations = findLocationsInRange(map, moveLoc, 1);
     ArrayList<XYCoord> dropoffLocations = new ArrayList<XYCoord>();
     for( XYCoord loc : locations )
     {
       // Add any location that is empty and supports movement of the cargo unit.
-      if( map.isLocationEmpty(loc)
+      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport )
           && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
       {
         dropoffLocations.add(loc);
@@ -89,15 +89,16 @@ public class Utils
   /**
    * Sets the highlight for myGame.gameMap.getLocation(x, y) to true if unit can reach (x, y), and false otherwise.
    */
-  public static void findPossibleDestinations(Unit unit, GameInstance myGame)
+  public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap)
   {
+    ArrayList<XYCoord> reachableTiles = new ArrayList<XYCoord>();
+
     // set all locations to false/remaining move = 0
-    int[][] movesLeftGrid = new int[myGame.gameMap.mapWidth][myGame.gameMap.mapHeight];
-    for( int i = 0; i < myGame.gameMap.mapWidth; i++ )
+    int[][] movesLeftGrid = new int[gameMap.mapWidth][gameMap.mapHeight];
+    for( int i = 0; i < gameMap.mapWidth; i++ )
     {
-      for( int j = 0; j < myGame.gameMap.mapHeight; j++ )
+      for( int j = 0; j < gameMap.mapHeight; j++ )
       {
-        myGame.gameMap.getLocation(i, j).setHighlight(false);
         movesLeftGrid[i][j] = 0;
       }
     }
@@ -112,16 +113,18 @@ public class Utils
       // pull out the next search node
       SearchNode currentNode = searchQueue.poll();
       // if the space is empty or holds the current unit, highlight
-      Unit obstacle = myGame.gameMap.getLocation(currentNode.x, currentNode.y).getResident();
+      Unit obstacle = gameMap.getLocation(currentNode.x, currentNode.y).getResident();
       if( obstacle == null || obstacle == unit || (obstacle.CO == unit.CO && obstacle.hasCargoSpace(unit.model.type)) )
       {
-        myGame.gameMap.getLocation(currentNode.x, currentNode.y).setHighlight(true);
+        reachableTiles.add(new XYCoord(currentNode.x, currentNode.y));
       }
 
-      expandSearchNode(unit, myGame.gameMap, currentNode, searchQueue, movesLeftGrid);
+      expandSearchNode(unit, gameMap, currentNode, searchQueue, movesLeftGrid);
 
       currentNode = null;
     }
+
+    return reachableTiles;
   }
 
   /**
@@ -161,6 +164,11 @@ public class Utils
 
   public static boolean isPathValid(Unit unit, Path path, GameMap map)
   {
+    if( (null == path) || (null == unit) )
+    {
+      return false;
+    }
+
     //System.out.println("Checking path validity. Length: " + (path.getPathLength()-1));
     boolean canReach = true;
 
@@ -207,6 +215,11 @@ public class Utils
    */
   public static Path findShortestPath(Unit unit, int x, int y, GameMap map)
   {
+    if( null == unit || null == map )
+    {
+      return null;
+    }
+
     Path aPath = new Path(100);
     if( map.mapWidth < unit.x || map.mapHeight < unit.y || unit.x < 0 || unit.y < 0 )
     {
