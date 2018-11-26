@@ -6,7 +6,6 @@ import java.util.Stack;
 import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.OptionSelector;
-import Engine.Path;
 import Engine.XYCoord;
 import Terrain.GameMap;
 
@@ -16,14 +15,14 @@ import Terrain.GameMap;
 public class GameInputHandler
 {
   private StateData myStateData = null;
-  private Stack<GameInputState> myStateStack = null;
+  private Stack<GameInputState<?>> myStateStack = null;
   private StateChangedCallback myCallback = null;
 
   public enum InputType { FREE_TILE_SELECT, PATH_SELECT, MENU_SELECT, CONSTRAINED_TILE_SELECT, ACTION_READY, END_TURN, LEAVE_MAP, CO_INFO };
 
   public GameInputHandler(GameMap map, Commander currentPlayer, StateChangedCallback callback)
   {
-    myStateStack = new Stack<GameInputState>();
+    myStateStack = new Stack<GameInputState<?>>();
     myStateData = new StateData(map, currentPlayer);
     myStateStack.push(new DefaultState(myStateData));
     myCallback = callback;
@@ -32,10 +31,10 @@ public class GameInputHandler
   /**
    * Back up to the previous state.
    */
-  public GameInputState back()
+  public GameInputState<?> back()
   {
-    GameInputState oldCurrentState = null;
-    GameInputState newCurrentState = null;
+    GameInputState<?> oldCurrentState = null;
+    GameInputState<?> newCurrentState = null;
     if( !myStateStack.isEmpty() )
     {
       oldCurrentState = myStateStack.pop();
@@ -71,38 +70,10 @@ public class GameInputHandler
    * @param option - The chosen menu option, from among those provided by OptionSet.getMenuOptions().
    * @return The OptionSet for the next (and now current) state.
    */
-  public InputType select(Object option)
+  public <T> InputType select(T option)
   {
-    GameInputState current = peekCurrentState();
-    GameInputState next = current.select(option);
-    pushNextState(next);
-    return peekCurrentState().getOptions().inputType;
-  }
-
-  /**
-   * Choose the passed-in option for the current state, triggering a transition to the
-   * next state. If no transition is possible, the state will not change.
-   * @param option - The chosen coordinate, drawn from those given by OptionSet.getCoordinateOptions().
-   * @return The OptionSet for the next (and now current) state.
-   */
-  public InputType select(XYCoord coord)
-  {
-    GameInputState current = peekCurrentState();
-    GameInputState next = current.select(coord);
-    pushNextState(next);
-    return peekCurrentState().getOptions().inputType;
-  }
-
-  /**
-   * Choose the passed-in option for the current state, triggering a transition to the
-   * next state. If no transition is possible, the state will not change.
-   * @param option - The chosen coordinate, drawn from those given by OptionSet.getCoordinateOptions().
-   * @return The InputType for the next (and now current) state.
-   */
-  public InputType select(Path path)
-  {
-    GameInputState current = peekCurrentState();
-    GameInputState next = current.select(path);
+    GameInputState<T> current = (GameInputState<T>) peekCurrentState();
+    GameInputState<?> next = current.select(option);
     pushNextState(next);
     return peekCurrentState().getOptions().inputType;
   }
@@ -117,7 +88,7 @@ public class GameInputHandler
   }
 
   /** Get the current state, but don't pop it off the stack. */
-  private GameInputState peekCurrentState()
+  private GameInputState<?> peekCurrentState()
   {
     if( myStateStack.isEmpty() )
     {
@@ -128,11 +99,11 @@ public class GameInputHandler
   }
 
   /** Push next onto the state stack if it is not the same object as current. */
-  private void pushNextState(GameInputState next)
+  private void pushNextState(GameInputState<?> next)
   {
     // States should return themselves if they receive invalid input; a next
     // state of null is equivalent to a back() command.
-    GameInputState current = peekCurrentState();
+    GameInputState<?> current = peekCurrentState();
     if(null == next)
     {
       back();

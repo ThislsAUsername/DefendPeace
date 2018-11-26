@@ -11,7 +11,7 @@ import Units.Unit;
 /************************************************************
  * State to choose where to drop the unit.                  *
  ************************************************************/
-class SelectCargoDropLocation extends GameInputState
+class SelectCargoDropLocation extends GameInputState<XYCoord>
 {
   Unit myCargo = null;
 
@@ -30,9 +30,9 @@ class SelectCargoDropLocation extends GameInputState
   }
 
   @Override
-  public GameInputState select(XYCoord location)
+  public GameInputState<?> select(XYCoord location)
   {
-    GameInputState next = this;
+    GameInputState<?> next = this;
 
     if( myStateData.actionSet.getTargetedLocations().contains(location) )
     {

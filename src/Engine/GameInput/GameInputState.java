@@ -16,7 +16,7 @@ import Units.Unit;
 /************************************************************
  * Abstract base class for all input states.                *
  ************************************************************/
-abstract class GameInputState
+abstract class GameInputState<T>
 {
   /** The current GameActionBuilder state data,
    *  shared with all State instances. */
@@ -73,18 +73,11 @@ abstract class GameInputState
 
   // Default implementations of select() will just keep us
   // in the same state. Subclasses will define transitions.
-  public GameInputState select(Path path)
+  public GameInputState<?> select(T path)
   {
     return this;
   }
-  public GameInputState select(Object option)
-  {
-    return this;
-  }
-  public GameInputState select(XYCoord coord)
-  {
-    return this;
-  }
+  
   /** Undo any StateData changes. */
   public void back(){}
 }
