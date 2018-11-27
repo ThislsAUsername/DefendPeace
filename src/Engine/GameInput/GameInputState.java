@@ -75,7 +75,7 @@ abstract class GameInputState<T>
   // in the same state. Subclasses will define transitions.
   public GameInputState<?> select(T option)
   {
-    return this;
+    throw new UnsupportedOperationException("Called base GameInputState.select() with input type " + option.getClass());
   }
   
   /** Undo any StateData changes. */
