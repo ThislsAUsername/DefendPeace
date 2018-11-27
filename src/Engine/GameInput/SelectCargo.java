@@ -11,7 +11,7 @@ import Units.Unit;
 /************************************************************
  * State to choose which Unit will be kicked off the bus.   *
  ************************************************************/
-class SelectCargo extends GameInputState<Object>
+class SelectCargo extends GameInputState<Object> // Object, not Unit, because "DONE" is a valid option
 {
   private static final String DONE_OPTION = "DONE";
   public SelectCargo(StateData data)

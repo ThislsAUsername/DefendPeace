@@ -1,8 +1,8 @@
 package Engine.GameInput;
 
-public class ConfirmExit extends GameInputState<Object>
+public class ConfirmExit extends GameInputState<ConfirmExit.ConfirmExitEnum>
 {
-  private enum ConfirmExitEnum
+  enum ConfirmExitEnum
   {
     LEAVE_MAP, EXIT_GAME
   };
@@ -19,7 +19,7 @@ public class ConfirmExit extends GameInputState<Object>
   }
 
   @Override
-  public GameInputState<?> select(Object option)
+  public GameInputState<?> select(ConfirmExit.ConfirmExitEnum option)
   {
     GameInputState<?> next = this;
     

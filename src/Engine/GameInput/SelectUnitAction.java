@@ -7,7 +7,7 @@ import Engine.GameActionSet;
 /************************************************************
  * State to allow selecting an action for a unit.           *
  ************************************************************/
-class SelectUnitAction extends GameInputState<Object>
+class SelectUnitAction extends GameInputState<GameActionSet>
 {
   // Don't provide a default value, or it will override the value
   // set by the call to initOptions() in the super-constructor.
@@ -28,7 +28,7 @@ class SelectUnitAction extends GameInputState<Object>
   }
 
   @Override
-  public GameInputState<?> select(Object menuOption)
+  public GameInputState<?> select(GameActionSet menuOption)
   {
     GameInputState<?> next = this;
 

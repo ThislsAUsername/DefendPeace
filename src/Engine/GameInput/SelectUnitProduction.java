@@ -10,7 +10,7 @@ import Units.UnitModel;
 /************************************************************
  * Presents options for building a unit.                    *
  ************************************************************/
-class SelectUnitProduction extends GameInputState<Object>
+class SelectUnitProduction extends GameInputState<UnitModel>
 {
   private ArrayList<UnitModel> myUnitModels = null;
   private XYCoord myProductionLocation = null;
@@ -34,7 +34,7 @@ class SelectUnitProduction extends GameInputState<Object>
   }
 
   @Override
-  public GameInputState<?> select(Object option)
+  public GameInputState<?> select(UnitModel option)
   {
     GameInputState<?> next = this;
 

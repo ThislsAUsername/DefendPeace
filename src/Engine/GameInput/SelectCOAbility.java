@@ -4,7 +4,7 @@ import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
 
-public class SelectCOAbility extends GameInputState<Object>
+public class SelectCOAbility extends GameInputState<CommanderAbility>
 {
   public SelectCOAbility(StateData data)
   {
@@ -18,7 +18,7 @@ public class SelectCOAbility extends GameInputState<Object>
   }
 
   @Override
-  public GameInputState<?> select(Object option)
+  public GameInputState<?> select(CommanderAbility option)
   {
     GameInputState<?> next = this;
 
