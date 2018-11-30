@@ -8,6 +8,8 @@ import java.util.Map;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
+import Engine.Combat.BattleSummary;
+import Engine.GameEvents.GameEventListener;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -34,7 +36,7 @@ import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModel.UnitEnum;
 
-public class Commander
+public class Commander extends GameEventListener
 {
   public final CommanderInfo coInfo;
   public ArrayList<Unit> units;
@@ -44,6 +46,8 @@ public class Commander
   public ArrayList<COModifier> modifiers;
   public Color myColor;
   public static final int DEFAULTSTARTINGMONEY = 10000;
+  public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
+  public static final int CHARGERATIO_HP = 90; // quantity of HP damage dealt to equal 1 unit of power charge
   public int money = 0;
   public int incomePerCity = 1000;
   public int team = -1;
@@ -107,7 +111,7 @@ public class Commander
     myAbilities = new ArrayList<CommanderAbility>();
   }
 
-  protected void addCommanderAbility( CommanderAbility ca )
+  protected void addCommanderAbility(CommanderAbility ca)
   {
     myAbilities.add(ca);
   }
@@ -157,17 +161,17 @@ public class Commander
       modifiers.remove(i);
     }
   }
-  
+
   /**
    * @return whether these COs would like to kill each other
    */
   public boolean isEnemy(Commander other)
   {
     // If the other CO doesn't exist, we can't be friends.
-    if (other == null)
+    if( other == null )
       return true;
     // If the other CO is us, we can't *not* be friends.
-    if (other == this)
+    if( other == this )
       return false;
     // If we have no team, we have no friends.
     if( team < 0 || other.team < 0 )
@@ -199,7 +203,8 @@ public class Commander
   /** Get the list of units this commander can build from the given property type. */
   public ArrayList<UnitModel> getShoppingList(TerrainType buyLocation)
   {
-    return (unitProductionByTerrain.get(buyLocation) != null) ? unitProductionByTerrain.get(buyLocation) : new ArrayList<UnitModel>();
+    return (unitProductionByTerrain.get(buyLocation) != null) ? unitProductionByTerrain.get(buyLocation)
+        : new ArrayList<UnitModel>();
   }
 
   /** Return an ArrayList containing every ability this Commander currently has the power to perform. */
@@ -250,7 +255,8 @@ public class Commander
   protected void modifyAbilityPower(double amount)
   {
     myAbilityPower += amount;
-    if( myAbilityPower < 0 ) myAbilityPower = 0;
+    if( myAbilityPower < 0 )
+      myAbilityPower = 0;
     double maxPower = 0;
     for( CommanderAbility ca : myAbilities )
     {
@@ -259,6 +265,47 @@ public class Commander
         maxPower = ca.getCost();
       }
     }
-    if( myAbilityPower > maxPower ) myAbilityPower = maxPower;
+    if( myAbilityPower > maxPower )
+      myAbilityPower = maxPower;
+  }
+
+  /**
+   * Track battles that happen, and get ability power based on combat this CO is in.
+   */
+  public void receiveBattleEvent(final BattleSummary summary)
+  {
+    // We only care who the units belong to, not who picked the fight. 
+    Unit minion = null;
+    double myHPLoss = -10;
+    Unit enemy = null;
+    double myHPDealt = -10;
+    if( this == summary.attacker.CO )
+    {
+      minion = summary.attacker;
+      myHPLoss = summary.attackerHPLoss;
+      enemy = summary.defender;
+      myHPDealt = summary.defenderHPLoss;
+    }
+    if( this == summary.defender.CO )
+    {
+      minion = summary.defender;
+      myHPLoss = summary.defenderHPLoss;
+      enemy = summary.attacker;
+      myHPDealt = summary.attackerHPLoss;
+    }
+
+    // Do nothing if we're not involved
+    if( minion != null && enemy != null )
+    {
+      double power = 0;
+      // Add up the funds value of the damage done to both participants.
+      power += myHPLoss / minion.model.maxHP * minion.model.moneyCost;
+      // The damage we deal is worth half as much as the damage we take, to help powers be a comeback mechanic.
+      power += myHPDealt / enemy.model.maxHP * enemy.model.moneyCost / 2;
+      power /= CHARGERATIO_FUNDS; // Turn funds into units of power
+      power += myHPDealt / CHARGERATIO_HP; // Add power based on HP damage dealt; rewards aggressiveness.
+
+      modifyAbilityPower(power);
+    }
   }
 }
