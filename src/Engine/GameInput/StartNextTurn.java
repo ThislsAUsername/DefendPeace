@@ -1,7 +1,7 @@
 package Engine.GameInput;
 
 /** A terminal state that signals it's time to begin the next turn. */
-public class StartNextTurn extends GameInputState
+public class StartNextTurn extends GameInputState<Object>
 {
   public StartNextTurn(StateData data)
   {

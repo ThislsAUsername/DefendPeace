@@ -12,7 +12,7 @@ import Units.UnitModel;
  * State for before any user input has been received, or    *
  * immediately after reset() has been called.               *
  ************************************************************/
-class DefaultState extends GameInputState
+class DefaultState extends GameInputState<XYCoord>
 {
   public DefaultState(StateData data)
   {
@@ -27,9 +27,9 @@ class DefaultState extends GameInputState
   }
 
   @Override
-  public GameInputState select(XYCoord coord)
+  public GameInputState<?> select(XYCoord coord)
   {
-    GameInputState next = this;
+    GameInputState<?> next = this;
     Location loc = myStateData.gameMap.getLocation(coord);
     Unit resident = loc.getResident();
     if( null != resident

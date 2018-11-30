@@ -1,8 +1,8 @@
 package Engine.GameInput;
 
-public class SelectMetaAction extends GameInputState
+public class SelectMetaAction extends GameInputState<SelectMetaAction.MetaAction>
 {
-  private enum MetaAction
+  enum MetaAction
   {
     CO_INFO, CO_ABILITY, QUIT_GAME, END_TURN
   }
@@ -31,9 +31,9 @@ public class SelectMetaAction extends GameInputState
   }
 
   @Override
-  public GameInputState select(Object option)
+  public GameInputState<?> select(SelectMetaAction.MetaAction option)
   {
-    GameInputState next = this;
+    GameInputState<?> next = this;
     if( MetaAction.CO_INFO == option )
     {
       next = new OpenCoInfoMenu(myStateData);

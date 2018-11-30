@@ -4,7 +4,7 @@ import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
 
-public class SelectCOAbility extends GameInputState
+public class SelectCOAbility extends GameInputState<CommanderAbility>
 {
   public SelectCOAbility(StateData data)
   {
@@ -18,9 +18,9 @@ public class SelectCOAbility extends GameInputState
   }
 
   @Override
-  public GameInputState select(Object option)
+  public GameInputState<?> select(CommanderAbility option)
   {
-    GameInputState next = this;
+    GameInputState<?> next = this;
 
     // Find the chosen ability and activate it.
     for( CommanderAbility ca : myStateData.commander.getReadyAbilities() )

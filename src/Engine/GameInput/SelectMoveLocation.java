@@ -10,7 +10,7 @@ import Engine.GameInput.GameInputHandler.InputType;
 /************************************************************
  * State to allow choosing a unit's path.                   *
  ************************************************************/
-class SelectMoveLocation extends GameInputState
+class SelectMoveLocation extends GameInputState<Path>
 {
   public SelectMoveLocation(StateData data)
   {
@@ -26,9 +26,9 @@ class SelectMoveLocation extends GameInputState
   }
 
   @Override
-  public GameInputState select(Path path)
+  public GameInputState<?> select(Path path)
   {
-    GameInputState next = this;
+    GameInputState<?> next = this;
     if( myStateData.unitActor.CO != myStateData.commander )
     {
       // Tell the handler to go back to the previous state.
