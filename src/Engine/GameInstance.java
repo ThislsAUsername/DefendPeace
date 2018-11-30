@@ -2,21 +2,23 @@ package Engine;
 
 import java.util.HashMap;
 
+import CommandingOfficers.Commander;
+import Engine.GameEvents.GameEventListener;
 import Terrain.GameMap;
 import Terrain.Location;
 
 public class GameInstance
 {
   public Terrain.GameMap gameMap;
-  public CommandingOfficers.Commander[] commanders;
+  public Commander[] commanders;
   private int activeCoNum;
-  public CommandingOfficers.Commander activeCO = null;
+  public Commander activeCO = null;
   private int cursorX = 0;
   private int cursorY = 0;
 
   HashMap<Integer, XYCoord> playerCursors = null;
 
-  public GameInstance(GameMap map, CommandingOfficers.Commander[] cos)
+  public GameInstance(GameMap map, Commander[] cos)
   {
     if( cos.length < 2 )
     {
@@ -40,6 +42,7 @@ public class GameInstance
         System.out.println("Warning! Commander " + commanders[i].coInfo.name + " does not have an HQ location!");
         playerCursors.put(i, new XYCoord(1, 1));
       }
+      GameEventListener.registerEventListener(commanders[i]);
     }
   }
 
@@ -124,5 +127,16 @@ public class GameInstance
 
     // Initialize the next turn, recording any events that will occur.
     activeCO.initTurn(gameMap);
+  }
+
+  /**
+   * Does any needed cleanup at the end of the game
+   */
+  public void endGame()
+  {
+    for( Commander co : commanders )
+    {
+      GameEventListener.unregisterEventListener(co);
+    }
   }
 }

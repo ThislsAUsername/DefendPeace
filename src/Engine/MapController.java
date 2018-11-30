@@ -121,6 +121,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
         System.out.println("WARNING! Received invalid InputAction " + input);
     }
 
+    if( exitMap )
+    {
+      myGame.endGame();
+    }
     return exitMap;
   }
 
