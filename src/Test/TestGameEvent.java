@@ -6,9 +6,11 @@ import CommandingOfficers.CommanderStrong;
 import Engine.GameAction;
 import Engine.Path;
 import Engine.Utils;
+import Engine.XYCoord;
 import Engine.GameEvents.BattleEvent;
 import Engine.GameEvents.CaptureEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.LoadEvent;
@@ -46,10 +48,11 @@ public class TestGameEvent extends TestCase
     boolean testPassed = true;
     testPassed &= validate( testBattleEvent(), "  BattleEvent test failed.");
     testPassed &= validate( testCaptureEvent(), "  CaptureEvent test failed.");
+    testPassed &= validate( testCreateUnitEvent(), "  CreateUnitEvent test failed.");
     testPassed &= validate( testLoadUnloadEvent(), "  LoadUnloadEvent test failed.");
     testPassed &= validate( testMoveEvent(), "  MoveEvent test failed.");
     testPassed &= validate( testUnitDieEvent(), "  UnitDieEvent test failed.");
-    testPassed &= validate(testResupplyEvent(), "  Resupply test failed.");
+    testPassed &= validate( testResupplyEvent(), "  Resupply test failed.");
     testPassed &= validate( testCommanderDefeatEvent(), "  CommanderDefeatEvent test failed."); // Put this one last because it alters the map.
     
     return testPassed;
@@ -125,6 +128,31 @@ public class TestGameEvent extends TestCase
 
     // Clean up
     testMap.removeUnit(infA);
+
+    return testPassed;
+  }
+
+  private boolean testCreateUnitEvent()
+  {
+    boolean testPassed = true;
+
+    XYCoord coords = new XYCoord(13, 8);
+    int startFunds = testCo1.money;
+    CreateUnitEvent event = new CreateUnitEvent(testCo1, testCo1.getUnitModel(UnitEnum.INFANTRY), coords);
+
+    testPassed &= validate(testMap.getLocation(coords).getResident() == null, "    Location is already occupied.");
+
+    event.performEvent(testMap);
+
+    Unit resident = testMap.getLocation(coords).getResident();
+    testPassed &= validate(resident != null, "    Failed to create a unit.");
+    testPassed &= validate(resident.model.type == UnitEnum.INFANTRY, "    Unit created with wrong type.");
+    testPassed &= validate(resident.CO == testCo1, "    Unit created with wrong type.");
+    // TODO: Consider moving cost into a new TransferFundsEvent.
+    testPassed &= validate(testCo1.money == (startFunds - resident.model.moneyCost), "    Unit cost not accounted correctly.");
+
+    // Clean up.
+    testMap.removeUnit(resident);
 
     return testPassed;
   }

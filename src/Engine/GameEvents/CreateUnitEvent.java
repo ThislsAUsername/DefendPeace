@@ -50,6 +50,7 @@ public class CreateUnitEvent implements GameEvent
   {
     if( null != myNewUnit )
     {
+      myCommander.money -= myNewUnit.model.moneyCost;
       myCommander.units.add(myNewUnit);
       gameMap.addNewUnit(myNewUnit, myBuildCoords.xCoord, myBuildCoords.yCoord);
     }
