@@ -165,6 +165,7 @@ public interface GameAction
       boolean isValid = true;
       isValid &= (null != gameMap) && (null != who) && (null != what) && (null != where);
       isValid &= (who.money >= what.moneyCost);
+      isValid &= (null == gameMap.getLocation(where).getResident());
 
       if( isValid )
       {
