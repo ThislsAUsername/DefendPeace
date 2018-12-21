@@ -132,10 +132,33 @@ public class MapController implements IController, GameInputHandler.StateChanged
         System.out.println("WARNING! Received invalid InputAction " + input);
     }
 
+    // If an AI CO is now in control (due to the previous player
+    // ending their turn), do the AI actions here.
+    if( myGame.activeCO.isAI() && inputMode == InputMode.INPUT )
+    {
+      GameAction aiAction = null;
+      do
+      {
+        aiAction = myGame.activeCO.getNextAIAction(myGame.gameMap);
+        if( aiAction != null )
+        {
+          if( !executeGameAction(aiAction) )
+          {
+            // If aiAction fails to execute, the AI's turn is over. We don't want
+            // to waste time getting more actions if it can't build them properly.
+            System.out.println("WARNING! AI Action " + aiAction.toString() + " Failed to execute!");
+            break;
+          }
+        }
+      } while( aiAction != null ); // The AI can return a null action to end its turn.
+      startNextTurn();
+    }
+
     if( exitMap )
     {
       myGame.endGame();
     }
+
     return exitMap;
   }
 
@@ -465,23 +488,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
     myGameInputHandler.reset();
     contemplatedAction.clear();
     currentMenu = null;
-
-    if( myGame.activeCO.isAI() && input == InputMode.INPUT )
-    {
-      GameAction aiAction = myGame.activeCO.getNextAIAction(myGame.gameMap);
-      if( aiAction != null )
-      {
-        // TODO: this extends the call stack by a few for each action the AI performs, due to
-        // execute->animate->onStateChange->changeInputMode indirect loop. This means the number of
-        // actions an AI player can perform is limited by the amount of virtual memory available.
-        // This isn't likely to cause problems except for extremely large games, but it feels bad.
-        executeGameAction(aiAction);
-      }
-      else
-      {
-        startNextTurn();
-      }
-    }
   }
 
   /**
@@ -517,21 +523,27 @@ public class MapController implements IController, GameInputHandler.StateChanged
   /**
    * Execute the provided action and evaluate any aftermath.
    */
-  private void executeGameAction(GameAction action)
+  private boolean executeGameAction(GameAction action)
   {
+    boolean actionOK = false; // Not sure if it's a well-formed action yet.
     if( null != action )
     {
       // Compile the GameAction to its component events.
       GameEventQueue events = action.getEvents(myGame.gameMap);
 
-      // Send the events to the animator. They will be applied/executed in animationEnded().
-      changeInputMode(InputMode.ANIMATION);
-      myView.animate(events);
+      if( events.size() > 0 )
+      {
+        actionOK = true; // Invalid actions don't produce events.
+        // Send the events to the animator. They will be applied/executed in animationEnded().
+        changeInputMode(InputMode.ANIMATION);
+        myView.animate(events);
+      }
     }
     else
     {
       System.out.println("WARNING! Attempting to execute null GameAction.");
     }
+    return actionOK;
   }
 
   public void animationEnded(GameEvent event, boolean animEventQueueIsEmpty)
