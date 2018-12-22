@@ -78,14 +78,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
     nextSeekIndex = 0;
     contemplatedAction = new ContemplatedAction();
 
-    for( Commander co : myGame.commanders )
-    {
-      if( co.coInfo.cmdrEnum == CommanderEnum.PATCH )
-      {
-        co.setAIController(new InfantrySpamAI( co ) );
-      }
-    }
-
     // Start the first turn.
     startNextTurn();
 
