@@ -126,7 +126,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     // If an AI CO is now in control (due to the previous player
     // ending their turn), do the AI actions here.
-    if( myGame.activeCO.isAI() && inputMode == InputMode.INPUT )
+    while( myGame.activeCO.isAI() && inputMode == InputMode.INPUT )
     {
       GameAction aiAction = null;
       do
