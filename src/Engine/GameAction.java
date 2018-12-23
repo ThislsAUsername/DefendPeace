@@ -72,7 +72,7 @@ public interface GameAction
 
       // Validate input.
       boolean isValid = true;
-      isValid &= attacker != null;
+      isValid &= attacker != null && !attacker.isTurnOver;
       isValid &= (null != gameMap) && (gameMap.isLocationValid(attackLocation));
       isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       if( isValid )
@@ -164,8 +164,14 @@ public interface GameAction
       buildLocation = where;
       boolean isValid = true;
       isValid &= (null != gameMap) && (null != who) && (null != what) && (null != where);
-      isValid &= (who.money >= what.moneyCost);
-      isValid &= (null == gameMap.getLocation(where).getResident());
+      if( isValid )
+      {
+        Location site = gameMap.getLocation(where);
+        isValid &= (null == site.getResident());
+        isValid &= site.getOwner() == who;
+        isValid &= (who.money >= what.moneyCost);
+        isValid &= who.getShoppingList(site.getEnvironment().terrainType).contains(what);
+      }
 
       if( isValid )
       {
@@ -221,7 +227,7 @@ public interface GameAction
 
       // Validate input
       boolean isValid = true;
-      isValid &= null != actor; // Valid unit
+      isValid &= null != actor && !actor.isTurnOver; // Valid unit
       isValid &= null != map; // Valid map
       isValid &= (null != movePath) && (movePath.getPathLength() > 0); // Valid path
       if( isValid )
@@ -230,6 +236,7 @@ public interface GameAction
         captureLocation = map.getLocation(movePathEnd);
         isValid &= captureLocation.isCaptureable(); // Valid location
         isValid &= actor.CO.isEnemy(captureLocation.getOwner()); // Valid CO
+        isValid &= ((captureLocation.getResident() == null) || (captureLocation.getResident() == actor));
       }
 
       // Generate events
@@ -300,7 +307,7 @@ public interface GameAction
 
       // Validate input.
       boolean isValid = true;
-      isValid &= null != actor;
+      isValid &= null != actor && !actor.isTurnOver;
       isValid &= (null != movePath) && (movePath.getPathLength() > 0);
       isValid &= (null != gameMap);
       int goX = -1, goY = -1;
@@ -367,6 +374,7 @@ public interface GameAction
 
       // Validate input
       boolean isValid = true;
+      isValid &= (null != passenger) && !passenger.isTurnOver;
       isValid &= (null != movePath) && (movePath.getPathLength() > 0);
       isValid &= (null != gameMap);
       Unit transport = null;
@@ -456,8 +464,8 @@ public interface GameAction
 
       // Validate input.
       boolean isValid = true;
-      isValid &= null != transport;
-      isValid &= null != dropoffs;
+      isValid &= null != transport && !transport.isTurnOver;
+      isValid &= null != dropoffs && !dropoffs.isEmpty();
       isValid &= movePath.getPathLength() > 0;
       isValid &= null != gameMap;
       if( isValid )
@@ -576,7 +584,7 @@ public interface GameAction
 
       // Validate action.
       boolean isValid = true;
-      isValid &= unitActor != null;
+      isValid &= unitActor != null && !unitActor.isTurnOver;
       // Unit can move between executions of this action, so verify it's still on the map.
       isValid &= (null != map) && map.isLocationValid(unitActor.x, unitActor.y);
       if( isValid )
@@ -643,9 +651,11 @@ public interface GameAction
     {
       // ABILITY actions consist of
       //   ABILITY
-      abilityEvents = new GameEventQueue();
-      if( null != ability )
+      boolean isValid = null != ability;
+      isValid &= ability.myCommander.getReadyAbilities().contains(ability);
+      if( isValid )
       {
+        abilityEvents = new GameEventQueue();
         abilityEvents.add(new CommanderAbilityEvent(ability));
       }
     }
