@@ -5,8 +5,8 @@ import Terrain.GameMap;
 
 public interface AIController
 {
-  /** Called once when the game begins. */
-  public void initialize(GameMap gameMap);
+  /** Called at the beginning of each turn. */
+  public void initTurn(GameMap gameMap);
 
   /**
    * This is called during an AIPlayer's turn to request the player's actions.

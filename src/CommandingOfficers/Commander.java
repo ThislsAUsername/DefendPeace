@@ -164,6 +164,11 @@ public class Commander extends GameEventListener
       modifiers.get(i).revert(this);
       modifiers.remove(i);
     }
+
+    if( null != aiController )
+    {
+      aiController.initTurn(map);
+    }
   }
 
   /**

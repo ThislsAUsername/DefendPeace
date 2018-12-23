@@ -393,4 +393,38 @@ public class Utils
     }
     return industries;
   }
+
+  /**
+   * Compare XYCoords based on how far they are from myCenter.
+   * XYCoords closer to myCenter will be "less than" XYCoords that are farther away.
+   */
+  public static class ManhattanDistanceComparator implements Comparator<XYCoord>
+  {
+    XYCoord myCenter;
+
+    public ManhattanDistanceComparator(XYCoord center)
+    {
+      myCenter = center;
+    }
+
+    @Override
+    public int compare(XYCoord xy1, XYCoord xy2)
+    {
+      int xy1Dist = Math.abs(xy1.xCoord - myCenter.xCoord) + Math.abs(xy1.yCoord - myCenter.yCoord);
+      int xy2Dist = Math.abs(xy2.xCoord - myCenter.xCoord) + Math.abs(xy2.yCoord - myCenter.yCoord);
+
+      return xy1Dist - xy2Dist;
+    }
+  }
+
+  /**
+   * Sorts the mapLocations array by distance from the 'center' coordinate.
+   * @param center
+   * @param mapLocations
+   */
+  public static void sortLocationsByDistance(XYCoord center, ArrayList<XYCoord> mapLocations)
+  {
+    ManhattanDistanceComparator mdc = new ManhattanDistanceComparator(center);
+    mapLocations.sort(mdc);
+  }
 }
