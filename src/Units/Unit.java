@@ -388,6 +388,6 @@ public class Unit
   @Override
   public String toString()
   {
-    return model.toString();
+    return String.format("%s at %s", model, new XYCoord(x, y));
   }
 }

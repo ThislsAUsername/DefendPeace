@@ -125,4 +125,26 @@ public class TerrainType
   public static final TerrainType[] TerrainTypeList = {
     AIRPORT, BRIDGE, CITY, DUNES, FACTORY, FOREST, GRASS, HEADQUARTERS, LAB, MOUNTAIN, REEF, RIVER, ROAD, SEA, SEAPORT, SHOAL
   };
+
+  @Override
+  public String toString()
+  {
+    if( this == AIRPORT ) { return "AIRPORT"; }
+    if( this == BRIDGE ) { return "BRIDGE"; }
+    if( this == CITY ) { return "CITY"; }
+    if( this == DUNES ) { return "DUNES"; }
+    if( this == FACTORY ) { return "FACTORY"; }
+    if( this == FOREST ) { return "FOREST"; }
+    if( this == GRASS ) { return "GRASS"; }
+    if( this == HEADQUARTERS ) { return "HEADQUARTERS"; }
+    if( this == LAB ) { return "LAB"; }
+    if( this == MOUNTAIN ) { return "MOUNTAIN"; }
+    if( this == REEF ) { return "REEF"; }
+    if( this == RIVER ) { return "RIVER"; }
+    if( this == ROAD ) { return "ROAD"; }
+    if( this == SEA ) { return "SEA"; }
+    if( this == SEAPORT ) { return "SEAPORT"; }
+    if( this == SHOAL ) { return "SHOAL"; }
+    return "UNKNOWN";
+  }
 }

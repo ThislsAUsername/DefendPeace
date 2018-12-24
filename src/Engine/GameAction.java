@@ -52,22 +52,24 @@ public interface GameAction
     private XYCoord moveLocation = null;
     private XYCoord attackLocation = null;
     private GameEventQueue attackEvents = null;
+    private Unit attacker;
+    private Unit defender;
 
     public AttackAction(GameMap gameMap, Unit actor, Path path, int targetX, int targetY)
     {
       this(gameMap, actor, path, new XYCoord(targetX, targetY));
     }
 
-    public AttackAction(GameMap gameMap, Unit attacker, Path movePath, XYCoord atkLoc)
+    public AttackAction(GameMap gameMap, Unit actor, Path movePath, XYCoord atkLoc)
     {
       // ATTACK actions consist of
       //   MOVE
       //   BATTLE
       //   [DEATH]
       //   [DEFEAT]
+      attacker = actor;
       attackEvents = new GameEventQueue();
       attackLocation = atkLoc;
-      Unit unitTarget = null;
       int attackRange = -1;
 
       // Validate input.
@@ -78,20 +80,20 @@ public interface GameAction
       if( isValid )
       {
         moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
-        unitTarget = gameMap.getLocation(attackLocation).getResident();
+        defender = gameMap.getLocation(attackLocation).getResident();
         attackRange = Math.abs(moveLocation.xCoord - attackLocation.xCoord)
             + Math.abs(moveLocation.yCoord - attackLocation.yCoord);
 
         boolean moved = attacker.x != moveLocation.xCoord || attacker.y != moveLocation.yCoord;
-        isValid &= (null != unitTarget) && attacker.canAttack(unitTarget.model, attackRange, moved);
-        isValid &= attacker.CO.isEnemy(unitTarget.CO);
+        isValid &= (null != defender) && attacker.canAttack(defender.model, attackRange, moved);
+        isValid &= attacker.CO.isEnemy(defender.CO);
       }
 
       // Generate GameEvents.
       if( isValid )
       {
         attackEvents.add(new MoveEvent(attacker, movePath));
-        BattleEvent event = new BattleEvent(attacker, unitTarget, moveLocation.xCoord, moveLocation.yCoord, gameMap);
+        BattleEvent event = new BattleEvent(attacker, defender, moveLocation.xCoord, moveLocation.yCoord, gameMap);
         attackEvents.add(event);
 
         if( event.attackerDies() )
@@ -107,13 +109,13 @@ public interface GameAction
         }
         if( event.defenderDies() )
         {
-          attackEvents.add(new UnitDieEvent(unitTarget));
+          attackEvents.add(new UnitDieEvent(defender));
 
           // The defender died; check if the Commander is defeated.
-          if( unitTarget.CO.units.size() == 1 )
+          if( defender.CO.units.size() == 1 )
           {
             // CO is out of units. Too bad.
-            attackEvents.add(new CommanderDefeatEvent(unitTarget.CO));
+            attackEvents.add(new CommanderDefeatEvent(defender.CO));
           }
         }
       }
@@ -147,6 +149,13 @@ public interface GameAction
     {
       return GameAction.ActionType.ATTACK;
     }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Attack %s with %s after moving to %s]",
+          defender, attacker, moveLocation );
+    }
   } // ~AttackAction
 
   // ===========  UnitProductionAction  ==============================
@@ -154,6 +163,7 @@ public interface GameAction
   {
     private GameEventQueue buildEvents = null;
     private final XYCoord buildLocation;
+    private UnitModel modelToBuild;
 
     public UnitProductionAction(GameMap gameMap, Commander who, UnitModel what, XYCoord where)
     {
@@ -162,6 +172,7 @@ public interface GameAction
       //   CREATEUNIT
       buildEvents = new GameEventQueue();
       buildLocation = where;
+      modelToBuild = what;
       boolean isValid = true;
       isValid &= (null != gameMap) && (null != who) && (null != what) && (null != where);
       if( isValid )
@@ -208,6 +219,12 @@ public interface GameAction
     {
       return GameAction.ActionType.UNITPRODUCTION;
     }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Produce %s at %s]", modelToBuild, buildLocation);
+    }
   } // ~UnitProductionAction
 
   // ===========  CaptureAction  ==============================
@@ -215,13 +232,16 @@ public interface GameAction
   {
     private XYCoord movePathEnd = null;
     private GameEventQueue captureEvents = null;
+    private Unit actor = null;
+    private Terrain.TerrainType propertyType;
 
-    public CaptureAction(GameMap map, Unit actor, Path movePath)
+    public CaptureAction(GameMap map, Unit unit, Path movePath)
     {
       // CAPTURE actions consist of
       //   MOVE
       //   CAPTURE
       //   [DEFEAT]
+      actor = unit;
       captureEvents = new GameEventQueue();
       Location captureLocation = null;
 
@@ -242,6 +262,9 @@ public interface GameAction
       // Generate events
       if( isValid )
       {
+        // Store terrain type for posterity.
+        propertyType = captureLocation.getEnvironment().terrainType;
+
         // Move to the target location.
         captureEvents.add(new MoveEvent(actor, movePath));
 
@@ -291,6 +314,12 @@ public interface GameAction
     {
       return GameAction.ActionType.CAPTURE;
     }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Capture %s at %s with %s]", propertyType, movePathEnd, actor);
+    }
   } // ~CaptureAction
 
   // ===========  WaitAction  =================================
@@ -298,11 +327,13 @@ public interface GameAction
   {
     private XYCoord waitLoc = null;
     private GameEventQueue waitEvents = null;
+    private Unit actor = null;
 
-    public WaitAction(GameMap gameMap, Unit actor, Path movePath)
+    public WaitAction(GameMap gameMap, Unit unit, Path movePath)
     {
       // WAIT actions consist of
       //   MOVE
+      actor = unit;
       waitEvents = new GameEventQueue();
 
       // Validate input.
@@ -357,6 +388,12 @@ public interface GameAction
     {
       return GameAction.ActionType.WAIT;
     }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Move %s to %s]", actor, waitLoc);
+    }
   } // ~WaitAction
 
   // ===========  LoadAction  =================================
@@ -364,12 +401,15 @@ public interface GameAction
   {
     private XYCoord pathEnd = null;
     private GameEventQueue loadEvents = null;
+    private Unit passenger;
+    private Unit transport;
 
-    public LoadAction(GameMap gameMap, Unit passenger, Path movePath)
+    public LoadAction(GameMap gameMap, Unit actor, Path movePath)
     {
       // LOAD actions consist of
       //   MOVE
       //   LOAD
+      passenger = actor;
       loadEvents = new GameEventQueue();
 
       // Validate input
@@ -377,7 +417,7 @@ public interface GameAction
       isValid &= (null != passenger) && !passenger.isTurnOver;
       isValid &= (null != movePath) && (movePath.getPathLength() > 0);
       isValid &= (null != gameMap);
-      Unit transport = null;
+      transport = null;
       if( isValid )
       {
         pathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
@@ -429,6 +469,12 @@ public interface GameAction
     {
       return GameAction.ActionType.LOAD;
     }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Load %s into %s]", passenger, transport);
+    }
   } // ~LoadAction
 
   // ===========  UnloadAction  =================================
@@ -438,6 +484,7 @@ public interface GameAction
     private XYCoord moveLoc = null;
     private XYCoord firstDropLoc = null;
     private GameEventQueue unloadEvents = null;
+    private Unit actor = null;
 
     public UnloadAction(GameMap gameMap, Unit actor, Path path, Unit passenger, int dropX, int dropY)
     {
@@ -459,6 +506,7 @@ public interface GameAction
       // UNLOAD actions consist of
       //   MOVE (transport)
       //   UNLOAD
+      actor = transport;
       unloadEvents = new GameEventQueue();
       myDropoffs = new HashMap<Unit, XYCoord>();
 
@@ -522,6 +570,12 @@ public interface GameAction
     public ActionType getType()
     {
       return GameAction.ActionType.UNLOAD;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Unload from %s]", actor);
     }
   } // ~UnloadAction
 
@@ -640,6 +694,12 @@ public interface GameAction
     {
       return GameAction.ActionType.RESUPPLY;
     }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Resupply units adjacent to %s with %s]", myLocation(), unitActor);
+    }
   } // ~ResupplyAction
 
   // ===========  AbilityAction  =================================
@@ -684,6 +744,12 @@ public interface GameAction
       // Use OTHER, just because it doesn't correspond to a normal unit-based
       // action with an actor, target location, etc.
       return GameAction.ActionType.OTHER;
+    }
+
+    @Override
+    public String toString()
+    {
+      return "[Perform CO Ability]";
     }
   } // ~AbilityAction
 }
