@@ -27,6 +27,9 @@ public class InfantrySpamAI implements AIController
 
   private ArrayList<XYCoord> unownedProperties;
 
+  private StringBuffer logger = new StringBuffer();
+  private int turnNum = 0;
+
   public InfantrySpamAI(Commander co)
   {
     myCo = co;
@@ -35,7 +38,9 @@ public class InfantrySpamAI implements AIController
   @Override
   public void initTurn(GameMap gameMap)
   {
-    System.out.println("\n[ISAI.initTurn]");
+    turnNum++;
+    logger.append(String.format("[======== ISAI initializing turn %s for %s =========]\n", turnNum, myCo));
+
     // Make sure we don't have any hang-ons from last time.
     actions.clear();
     
@@ -57,18 +62,18 @@ public class InfantrySpamAI implements AIController
   @Override
   public void endTurn()
   {
+    logger.append(String.format("[======== ISAI ending turn %s for %s =========]\n", turnNum, myCo));
+    System.out.println(logger.toString());
+    logger = new StringBuffer();
   }
 
   @Override
   public GameAction getNextAction(GameMap gameMap)
   {
-    System.out.println("\n[ISAI.getNextAction] enter");
     // Handle actions for each unit the CO owns.
     for( Unit unit : myCo.units )
     {
       if( unit.isTurnOver ) continue; // No actions for stale units.
-
-      System.out.println(String.format("[ISAI.getNextAction] Considering %s at %s", unit, new XYCoord(unit.x, unit.y)));
       boolean foundAction = false;
 
       // Find the possible destinations.
@@ -150,7 +155,8 @@ public class InfantrySpamAI implements AIController
     }
 
     // Return the next action, or null if actions is empty.
-    return actions.poll();
+    GameAction nextAction = actions.poll();
+    logger.append(String.format("  Action: %s\n", nextAction));
+    return nextAction;
   }
-
 }
