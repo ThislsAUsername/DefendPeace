@@ -252,8 +252,11 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case BACK:
         myGameInputHandler.back();
         break;
+      case NO_ACTION:
+        // No action means do nothing. Done.
+        break;
       default:
-        System.out.println("WARNING! MapController.handleMapInput() was given invalid input enum (" + input + ")");
+        System.out.println("WARNING! MapController.handleFreeTileSelect() was given invalid input enum (" + input + ")");
     }
   }
 
