@@ -361,9 +361,9 @@ public class Utils
       int firstDist = Math.abs(o1.x - xDest) + Math.abs(o1.y - yDest);
       int secondDist = Math.abs(o2.x - xDest) + Math.abs(o2.y - yDest);
 
-      int firstPow = movesLeftGrid[o1.x][o1.y] + ((hasDestination) ? firstDist : 0);
-      int secondPow = movesLeftGrid[o2.x][o2.y] + ((hasDestination) ? secondDist : 0);
-      return firstPow - secondPow;
+      int firstPow = movesLeftGrid[o1.x][o1.y] - ((hasDestination) ? firstDist : 0);
+      int secondPow = movesLeftGrid[o2.x][o2.y] - ((hasDestination) ? secondDist : 0);
+      return secondPow - firstPow;
     }
   }
 
