@@ -135,6 +135,11 @@ public class Commander extends GameEventListener
     modifiers.add(mod); // Add to the list so the modifier can be reverted next turn.
   }
 
+  public void endTurn()
+  {
+    if( aiController != null ) aiController.endTurn();
+  }
+
   /**
    * Collect income and handle any COModifiers.
    * @param map

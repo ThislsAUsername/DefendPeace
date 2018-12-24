@@ -55,6 +55,11 @@ public class InfantrySpamAI implements AIController
   }
 
   @Override
+  public void endTurn()
+  {
+  }
+
+  @Override
   public GameAction getNextAction(GameMap gameMap)
   {
     System.out.println("\n[ISAI.getNextAction] enter");

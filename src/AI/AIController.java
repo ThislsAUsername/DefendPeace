@@ -8,6 +8,9 @@ public interface AIController
   /** Called at the beginning of each turn. */
   public void initTurn(GameMap gameMap);
 
+  /** Called at the end of each turn. */
+  public void endTurn();
+
   /**
    * This is called during an AIPlayer's turn to request the player's actions.
    * @param gameMap The current state of the game.
