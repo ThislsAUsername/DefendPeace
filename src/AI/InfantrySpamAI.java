@@ -81,7 +81,6 @@ public class InfantrySpamAI implements AIController
           // See if we have the option to attack.
           if( actionSet.getSelected().getType() == GameAction.ActionType.ATTACK )
           {
-            System.out.println(String.format("[ISAI.getNextAction] Attacking with %s to %s", unit, actionSet.getSelected().getTargetLocation()));
             actions.offer(actionSet.getSelected() );
             foundAction = true;
             break;
@@ -90,7 +89,6 @@ public class InfantrySpamAI implements AIController
           // Otherwise, see if we have the option to capture.
           if( actionSet.getSelected().getType() == GameAction.ActionType.CAPTURE )
           {
-            System.out.println(String.format("[ISAI.getNextAction] Capturing %s with %s", actionSet.getSelected().getTargetLocation(), unit));
             actions.offer(actionSet.getSelected() );
             foundAction = true;
             break;
@@ -119,7 +117,7 @@ public class InfantrySpamAI implements AIController
         Path movePath = Utils.findShortestPath(unit, destination, gameMap);
         GameAction move = new GameAction.WaitAction(gameMap, unit, movePath);
         actions.offer(move);
-        System.out.println(String.format("[ISAI.getNextAction] Moving %s to %s", unit, destination));
+        break;
       }
     }
 
@@ -139,7 +137,6 @@ public class InfantrySpamAI implements AIController
             if( !units.isEmpty() && units.get(0).moneyCost <= myCo.money )
             {
               GameAction action = new GameAction.UnitProductionAction(gameMap, myCo, units.get(0), loc.getCoordinates());
-              System.out.println(String.format("Producing %s at %s", units.get(0).toString(), loc.getCoordinates()));
               actions.offer( action );
             }
           }

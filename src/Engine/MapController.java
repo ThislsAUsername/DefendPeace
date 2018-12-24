@@ -111,39 +111,36 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
         break;
       case INPUT:
-        if( isInCoInfoMenu && coInfoMenu.handleInput(input) )
+        if( myGame.activeCO.isAI() )
         {
-          isInCoInfoMenu = false;
+          GameAction aiAction = myGame.activeCO.getNextAIAction(myGame.gameMap);
+          boolean endAITurn = false;
+          if( aiAction != null )
+          {
+            if( !executeGameAction(aiAction) )
+            {
+              // If aiAction fails to execute, the AI's turn is over. We don't want
+              // to waste time getting more actions if it can't build them properly.
+              endAITurn = true;
+            }
+          }
+          else { endAITurn = true; } // The AI can return a null action to signal the end of its turn.
+          if( endAITurn) startNextTurn();
         }
-        else
+        else // Human control
         {
-          exitMap = handleGameInput(input);
+          if( isInCoInfoMenu && coInfoMenu.handleInput(input) )
+          {
+            isInCoInfoMenu = false;
+          }
+          else
+          {
+            exitMap = handleGameInput(input);
+          }
         }
         break;
       default:
         System.out.println("WARNING! Received invalid InputAction " + input);
-    }
-
-    // If an AI CO is now in control (due to the previous player
-    // ending their turn), do the AI actions here.
-    while( myGame.activeCO.isAI() && inputMode == InputMode.INPUT )
-    {
-      GameAction aiAction = null;
-      do
-      {
-        aiAction = myGame.activeCO.getNextAIAction(myGame.gameMap);
-        if( aiAction != null )
-        {
-          if( !executeGameAction(aiAction) )
-          {
-            // If aiAction fails to execute, the AI's turn is over. We don't want
-            // to waste time getting more actions if it can't build them properly.
-            System.out.println("WARNING! AI Action " + aiAction.toString() + " Failed to execute!");
-            break;
-          }
-        }
-      } while( aiAction != null ); // The AI can return a null action to end its turn.
-      startNextTurn();
     }
 
     if( exitMap )

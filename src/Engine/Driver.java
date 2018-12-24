@@ -17,6 +17,7 @@ import Test.TestMain;
 import UI.InputHandler;
 import UI.MainUIController;
 import UI.Art.SpriteArtist.SpriteEngine;
+import UI.InputHandler.InputAction;
 
 public class Driver implements ActionListener, KeyListener
 {
@@ -95,6 +96,9 @@ public class Driver implements ActionListener, KeyListener
   {
     // Redraw the screen if needed.
     gameWindow.repaint();
+
+    // Just let them know we are still here.
+    gameController.handleInput(InputAction.NO_ACTION);
   }
 
   public static void main(String args[])
