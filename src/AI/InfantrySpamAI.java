@@ -100,9 +100,9 @@ public class InfantrySpamAI implements AIController
 
       // If no attack/capture actions are available now, just move towards a non-allied building.
       Utils.sortLocationsByDistance( new XYCoord(unit.x, unit.y), unownedProperties);
-      XYCoord goal = unownedProperties.get(0);
-      if( goal != null ) // Sanity check - it shouldn't be, unless this function is called after we win.
+      if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
       {
+        XYCoord goal = unownedProperties.get(0);
         // Check to make sure we haven't capture this since we last checked.
         while(gameMap.getLocation(goal).getOwner() == myCo )
         {
