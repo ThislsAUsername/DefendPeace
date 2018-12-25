@@ -26,6 +26,7 @@ public class InfantrySpamAI implements AIController
   private Commander myCo = null;
 
   private ArrayList<XYCoord> unownedProperties;
+  private ArrayList<XYCoord> capturingProperties;
 
   private StringBuffer logger = new StringBuffer();
   private int turnNum = 0;
@@ -55,6 +56,14 @@ public class InfantrySpamAI implements AIController
         {
           unownedProperties.add(loc);
         }
+      }
+    }
+    capturingProperties = new ArrayList<XYCoord>();
+    for( Unit unit : myCo.units )
+    {
+      if( unit.getCaptureProgress() > 0 )
+      {
+        capturingProperties.add(unit.getCaptureTargetCoords());
       }
     }
   }
@@ -100,6 +109,7 @@ public class InfantrySpamAI implements AIController
           if( actionSet.getSelected().getType() == GameAction.ActionType.CAPTURE )
           {
             actions.offer(actionSet.getSelected() );
+            capturingProperties.add(coord);
             foundAction = true;
             break;
           }
@@ -113,8 +123,8 @@ public class InfantrySpamAI implements AIController
       if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
       {
         XYCoord goal = unownedProperties.get(0);
-        // Check to make sure we haven't capture this since we last checked.
-        while(gameMap.getLocation(goal).getOwner() == myCo )
+        // Check to make sure we haven't captured this since we last checked.
+        while(gameMap.getLocation(goal).getOwner() == myCo || capturingProperties.contains(goal))
         {
           unownedProperties.remove(goal);
           goal = unownedProperties.get(0);
