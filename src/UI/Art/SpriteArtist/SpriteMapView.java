@@ -305,40 +305,43 @@ public class SpriteMapView extends MapView
       else if( getCurrentGameMenu() == null )
       {
         mapArtist.drawCursor(mapGraphics, currentActor, isTargeting, myGame.getCursorX(), myGame.getCursorY());
-        if( isTargeting )
+        if( isTargeting && null != currentPath )
         {
           Unit target = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
           int dist = Math.abs(target.x - currentPath.getEnd().x) + Math.abs(target.y - currentPath.getEnd().y);
-          if( null != target && null != currentPath
-              && currentActor.canAttack(target.model, dist, currentPath.getPathLength() > 1) )
+          if( null != target && currentActor.canAttack(target.model, dist, currentPath.getPathLength() > 1) )
           {
-            int damage = (int) (10*CombatEngine.calculateBattleResults( currentActor, target, myGame.gameMap, currentPath.getEnd().x, currentPath.getEnd().y).defenderHPLoss);
-            String numbers = damage+"%";
-            
+            // grab the two most significant digits and convert to %
+            int damage = (int) (10 * CombatEngine.calculateBattleResults(currentActor, target, myGame.gameMap,
+                currentPath.getEnd().x, currentPath.getEnd().y).defenderHPLoss);
+            String damageText = damage + "%";
+
+            // yes, most of this is 100% copied from ResupplyAnimation
             int drawScale = SpriteOptions.getDrawScale();
             int tileSize = SpriteLibrary.baseSpriteSize * drawScale;
             int tileCenterX = (target.x * tileSize) + (tileSize / 2);
-            int tileCenterY = (target.y * tileSize) - (tileSize / 4);
+            int tileCenterY = (target.y * tileSize) - (tileSize / 4); // this line is not; we draw above the target square, rather than in the center
             int menuTextWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth();
             int menuTextHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight();
-            int signWidth = ((menuTextWidth * numbers.length()) + 4) * drawScale;
+            int signWidth = ((menuTextWidth * damageText.length()) + 4) * drawScale;
             int signHeight = (menuTextHeight + 4) * drawScale;
 
             XYCoord signTopLeft = new XYCoord(tileCenterX - signWidth / 2, tileCenterY - signHeight / 2);
-            
+
+            // yaaaay laziness
             int x = signTopLeft.xCoord;
             int y = signTopLeft.yCoord;
             int w = signWidth;
             int h = signHeight;
-            Color[] colors = SpriteLibrary.getMapUnitColors(currentActor.CO.myColor).paletteColors; 
+            Color[] colors = SpriteLibrary.getMapUnitColors(currentActor.CO.myColor).paletteColors;
             mapGraphics.setColor(colors[2]); // frame
             mapGraphics.fillRect(x, y, w, h);
             mapGraphics.setColor(colors[5]); // highlight
             mapGraphics.fillRect(x + 1, y + 1, w - 1, h - 1);
             mapGraphics.setColor(colors[4]); // BG
             mapGraphics.fillRect(x + 1, y + 1, w - 2, h - 2);
-            SpriteLibrary.drawTextSmallCaps(mapGraphics, numbers, signTopLeft.xCoord + 2 * drawScale, signTopLeft.yCoord + 2 * drawScale,
-                drawScale);
+            SpriteLibrary.drawTextSmallCaps(mapGraphics, damageText, signTopLeft.xCoord + 2 * drawScale,
+                signTopLeft.yCoord + 2 * drawScale, drawScale);
           }
         }
       }
