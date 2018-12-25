@@ -293,7 +293,7 @@ public class SpriteLibrary
     return buildingColorPalettes.get(colorKey);
   }
 
-  private static ColorPalette getMapUnitColors(Color colorKey)
+  public static ColorPalette getMapUnitColors(Color colorKey)
   {
     return mapUnitColorPalettes.get(colorKey);
   }
