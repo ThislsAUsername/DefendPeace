@@ -28,18 +28,19 @@ public class CommanderBear_Bull extends Commander
     incomeBase = incomePerCity;
     // we start in Bear mode, so swap to it at the start
     isBull = true;
-    swapD2Ds();
+    swapD2Ds(true);
 
     addCommanderAbility(new UpDownTurnAbility(this));
     addCommanderAbility(new BustBoomAbility(this));
   }
 
-  public void swapD2Ds()
+  public void swapD2Ds(boolean setIncome)
   {
     if( isBull )
     {
       isBull = false;
-      incomePerCity = (int) (incomeBase * BEAR_MOD);
+      if( setIncome )
+        incomePerCity = (int) (incomeBase * BEAR_MOD);
       for( UnitModel um : unitModels )
       {
         um.COcost = BEAR_MOD;
@@ -48,7 +49,8 @@ public class CommanderBear_Bull extends Commander
     else
     {
       isBull = true;
-      incomePerCity = (int) (incomeBase * BULL_MOD);
+      if( setIncome )
+        incomePerCity = (int) (incomeBase * BULL_MOD);
       for( UnitModel um : unitModels )
       {
         um.COcost = BULL_MOD;
@@ -59,13 +61,15 @@ public class CommanderBear_Bull extends Commander
   /**
    * Down/UpTurn swaps D2Ds for this turn.
    * All units on a property you own take 3HP mass damage and you gain the funds value of that HP.
+   * Bear: Gives you a fast injection of funds based on 1.2x your liquidated units' HP value. Should probably build before using.
+   * Bull: Having units on properties when you use it is poor due to the 0.9x liquidation price, however, the discount should be welcome.
    */
   private static class UpDownTurnAbility extends CommanderAbility implements COModifier
   {
     private static final String UPTURN_NAME = "UpTurn";
     private static final String DOWNTURN_NAME = "DownTurn";
     private static final int DOWNUPTURN_COST = 3;
-    private static final int DOWNUPTURN_DAMAGE = -3;
+    private static final int DOWNUPTURN_LIQUIDATION = -3;
     CommanderBear_Bull COcast;
 
     UpDownTurnAbility(Commander commander)
@@ -92,7 +96,7 @@ public class CommanderBear_Bull extends Commander
     public void apply(Commander commander)
     {
       CommanderBear_Bull cmdr = (CommanderBear_Bull) commander;
-      cmdr.swapD2Ds();
+      cmdr.swapD2Ds(false);
       // Damage is dealt after swapping D2Ds so it's actually useful to Bear
       for( Location loc : cmdr.ownedProperties )
       {
@@ -101,7 +105,7 @@ public class CommanderBear_Bull extends Commander
           Unit victim = loc.getResident();
           if( null != victim )
           {
-            double delta = victim.alterHP(DOWNUPTURN_DAMAGE);
+            double delta = victim.alterHP(DOWNUPTURN_LIQUIDATION);
             cmdr.money += (-1 * delta * victim.model.getCost()) / 10;
           }
         }
@@ -112,7 +116,7 @@ public class CommanderBear_Bull extends Commander
     public void revert(Commander commander)
     {
       CommanderBear_Bull cmdr = (CommanderBear_Bull) commander;
-      cmdr.swapD2Ds();
+      cmdr.swapD2Ds(true);
     }
   }
 
@@ -165,7 +169,7 @@ public class CommanderBear_Bull extends Commander
     {
       // Next turn, we swap D2Ds permanently
       CommanderBear_Bull cmdr = (CommanderBear_Bull) commander;
-      cmdr.swapD2Ds();
+      cmdr.swapD2Ds(true);
     }
   }
 
