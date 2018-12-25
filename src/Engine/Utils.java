@@ -384,7 +384,7 @@ public class Utils
         // TODO: maybe calculate whether the CO has enough money to buy something at this industry
         if( null == resident && loc.getOwner() == co )
         {
-          if( co.getShoppingList(loc.getEnvironment().terrainType).size() > 0 )
+          if( co.getShoppingList(loc).size() > 0 )
           {
             industries.add(loc.getCoordinates());
           }

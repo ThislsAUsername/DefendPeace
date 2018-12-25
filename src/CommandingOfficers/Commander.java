@@ -201,9 +201,9 @@ public class Commander extends GameEventListener
   }
 
   /** Get the list of units this commander can build from the given property type. */
-  public ArrayList<UnitModel> getShoppingList(TerrainType buyLocation)
+  public ArrayList<UnitModel> getShoppingList(Location buyLocation)
   {
-    return (unitProductionByTerrain.get(buyLocation) != null) ? unitProductionByTerrain.get(buyLocation)
+    return (unitProductionByTerrain.get(buyLocation.getEnvironment().terrainType) != null) ? unitProductionByTerrain.get(buyLocation.getEnvironment().terrainType)
         : new ArrayList<UnitModel>();
   }
 
