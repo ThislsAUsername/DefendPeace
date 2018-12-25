@@ -137,7 +137,7 @@ public class TestGameEvent extends TestCase
     boolean testPassed = true;
 
     XYCoord coords = new XYCoord(13, 8);
-    int startFunds = testCo1.money;
+    int startFunds = testCo1.money = 9001;
     CreateUnitEvent event = new CreateUnitEvent(testCo1, testCo1.getUnitModel(UnitEnum.INFANTRY), coords);
 
     testPassed &= validate(testMap.getLocation(coords).getResident() == null, "    Location is already occupied.");
@@ -149,7 +149,7 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(resident.model.type == UnitEnum.INFANTRY, "    Unit created with wrong type.");
     testPassed &= validate(resident.CO == testCo1, "    Unit created with wrong type.");
     // TODO: Consider moving cost into a new TransferFundsEvent.
-    testPassed &= validate(testCo1.money == (startFunds - resident.model.moneyCost), "    Unit cost not accounted correctly.");
+    testPassed &= validate(testCo1.money == (startFunds - resident.model.getCost()), "    Unit cost not accounted correctly.");
 
     // Clean up.
     testMap.removeUnit(resident);

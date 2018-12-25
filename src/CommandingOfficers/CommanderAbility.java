@@ -5,7 +5,7 @@ import Terrain.GameMap;
 public abstract class CommanderAbility
 {
   public final Commander myCommander;
-  public final String myName;
+  protected String myName;
   private int myPowerCost;
 
   public CommanderAbility(Commander commander, String abilityName, int powerCost)
