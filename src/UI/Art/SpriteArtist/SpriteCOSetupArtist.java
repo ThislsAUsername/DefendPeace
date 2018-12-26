@@ -6,7 +6,6 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 import CommandingOfficers.CommanderLibrary;
-import CommandingOfficers.CommanderLibrary.CommanderEnum;
 import Engine.XYCoord;
 import Terrain.MapInfo;
 import UI.COSetupController;
@@ -45,7 +44,7 @@ public class SpriteCOSetupArtist
 
     // Figure out how large to draw the minimap. Make it as large as possible, allowing
     // space for the CO selection area below.
-    int COSelectionAreaHeight = SpriteLibrary.getCommanderSprites(CommanderEnum.STRONG).head.getHeight()*2*drawScale;
+    int COSelectionAreaHeight = SpriteLibrary.getCommanderSprites("strong").head.getHeight()*2*drawScale;
     int minimapAreaHeight = dimensions.height - COSelectionAreaHeight;
 
     // Figure out how large to draw the minimap. We want to make it as large as possible, but still
@@ -121,7 +120,7 @@ public class SpriteCOSetupArtist
     int drawScale = SpriteOptions.getDrawScale();
     // Polygons for arrows to indicate the focused player slot. CO face images are 32x32, plus two pixels
     // for the frame border, plus two pixels between the portrait frame and the arrows.
-    int yBuffer = SpriteLibrary.getCommanderSprites(CommanderEnum.STRONG).head.getHeight() / 2 + 4;
+    int yBuffer = SpriteLibrary.getCommanderSprites("strong").head.getHeight() / 2 + 4;
     int[] upXPoints = {xCenter-(4*drawScale), xCenter, xCenter+drawScale, xCenter+(5*drawScale)};
     int[] upYPoints = {yCenter-(yBuffer*drawScale), yCenter-((yBuffer+4)*drawScale), yCenter-((yBuffer+4)*drawScale), yCenter-(yBuffer*drawScale)};
     int[] dnXPoints = {xCenter-(4*drawScale), xCenter, xCenter+drawScale, xCenter+(5*drawScale)};
@@ -136,7 +135,7 @@ public class SpriteCOSetupArtist
   private static void drawCoPortrait(Graphics g, int co, int color, int xCenter, int yCenter)
   {
     // Fetch CO portrait
-    BufferedImage portrait = SpriteLibrary.getCommanderSprites( CommanderLibrary.getCommanderList().get(co).cmdrEnum ).head;
+    BufferedImage portrait = SpriteLibrary.getCommanderSprites( CommanderLibrary.getCommanderList().get(co).name ).head;
     int drawScale = SpriteOptions.getDrawScale();
 
     int drawX = xCenter - ( (portrait.getWidth()*drawScale) / 2 );

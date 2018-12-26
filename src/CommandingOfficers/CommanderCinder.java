@@ -17,7 +17,15 @@ import Units.UnitModel;
  */
 public class CommanderCinder extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Cinder", CommanderLibrary.CommanderEnum.CINDER);
+  private static final CommanderInfo coInfo = new CommanderInfo("Cinder", new instantiator());  
+  private static class instantiator implements COMaker
+  {
+    @Override
+    public Commander create()
+    {
+      return new CommanderCinder();
+    }
+  }
 
   private static final double COST_MOD_PER_BUILD = 1.2;
 

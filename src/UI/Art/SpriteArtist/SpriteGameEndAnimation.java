@@ -93,7 +93,7 @@ public class SpriteGameEndAnimation implements GameAnimation
       yPos = hPos;
 
       // Get the CO eyes image and the VICTORY/DEFEAT text.
-      BufferedImage coMug = SpriteLibrary.getCommanderSprites(cmdr.coInfo.cmdrEnum).eyes;
+      BufferedImage coMug = SpriteLibrary.getCommanderSprites(cmdr.coInfo.name).eyes;
       BufferedImage resultText = (cmdr.isDefeated)? SpriteLibrary.getGameOverDefeatText() : SpriteLibrary.getGameOverVictoryText();
 
       // Make a panel image large enough to fill the screen horizontally, and frame the CO portrait vertically.

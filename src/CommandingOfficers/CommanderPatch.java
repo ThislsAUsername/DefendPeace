@@ -10,7 +10,15 @@ import Units.Unit;
 
 public class CommanderPatch extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Patch", CommanderLibrary.CommanderEnum.PATCH);
+  private static final CommanderInfo coInfo = new CommanderInfo("Patch", new instantiator());  
+  private static class instantiator implements COMaker
+  {
+    @Override
+    public Commander create()
+    {
+      return new CommanderPatch();
+    }
+  }
 
   // Variables to characterize Patch's abilities.
   private static final String PLUNDER_NAME = "Plunder";
