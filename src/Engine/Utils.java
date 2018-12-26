@@ -259,8 +259,11 @@ public class Utils
     ArrayList<SearchNode> waypointList = new ArrayList<SearchNode>();
 
     // Find optimal route.
-    while (!searchQueue.isEmpty())
+    int MAX_ITERATIONS = 300; // Put a limit on the number of nodes we can expand.
+    int iters = 0;
+    while (!searchQueue.isEmpty() && (iters < MAX_ITERATIONS))
     {
+      iters++;
       // Retrieve the next search node.
       SearchNode currentNode = searchQueue.poll();
 
