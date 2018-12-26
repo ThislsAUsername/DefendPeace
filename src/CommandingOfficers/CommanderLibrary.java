@@ -33,6 +33,7 @@ public class CommanderLibrary
     commanderList.add( BMGrit.getInfo() );
     commanderList.add( BMOlaf.getInfo() );
     commanderList.add( BMSasha.getInfo() );
+    commanderList.add( GEEagle.getInfo() );
   }
 
   public static Commander makeCommander( CommanderInfo info, Color color, String faction )

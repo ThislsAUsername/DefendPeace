@@ -98,6 +98,10 @@ public class OSSami extends Commander
       infPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
       infPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
       myCommander.addCOModifier(infPowerMod);
+      COMovementModifier infmoveMod = new COMovementModifier(1);
+      infmoveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
+      infmoveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
+      myCommander.addCOModifier(infmoveMod);
     }
   }
 
@@ -124,6 +128,10 @@ public class OSSami extends Commander
       infPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
       infPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
       myCommander.addCOModifier(infPowerMod);
+      COMovementModifier infmoveMod = new COMovementModifier(2);
+      infmoveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
+      infmoveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
+      myCommander.addCOModifier(infmoveMod);
     }
 
     @Override // COModifier interface.
