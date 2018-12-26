@@ -32,6 +32,7 @@ public class CommanderLibrary
     commanderList.add( BMColin.getInfo() );
     commanderList.add( BMGrit.getInfo() );
     commanderList.add( BMOlaf.getInfo() );
+    commanderList.add( BMSasha.getInfo() );
   }
 
   public static Commander makeCommander( CommanderInfo info, Color color, String faction )

@@ -1,13 +1,6 @@
 package CommandingOfficers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import CommandingOfficers.Modifiers.COModifier;
-import Engine.Utils;
-import Engine.XYCoord;
-import Engine.Combat.BattleSummary;
-import Engine.GameEvents.GameEventListener;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.GameMap;
