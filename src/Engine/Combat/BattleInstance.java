@@ -118,7 +118,7 @@ public class BattleInstance
     public double calculateDamage()
     {
       //    [B*ACO/100+R]*(AHP/10)*[(200-(DCO+DTR*DHP))/100]
-      double overallPower = (baseDamage * attackFactor / 100/*+Random factor?*/) * attackerHP / 10;
+      double overallPower = (baseDamage * attackFactor / 100 + (int)(Math.random()*10)) * attackerHP / 10;
       double overallDefense = ((200 - (defenseFactor + terrainDefense * defenderHP)) / 100);
       return overallPower * overallDefense / 10; // original formula was % damage, now it must be HP of damage
     }

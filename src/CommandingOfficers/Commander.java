@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import CommandingOfficers.Modifiers.CODamageModifier;
+import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
@@ -47,7 +49,7 @@ public class Commander extends GameEventListener
   public Color myColor;
   public String factionName = DEFAULT_SPRITE_KEY;
   public static final String DEFAULT_SPRITE_KEY = "default";
-  public static final int DEFAULTSTARTINGMONEY = 10000;
+  public static final int DEFAULTSTARTINGMONEY = 0;
   public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
   public static final int CHARGERATIO_HP = 90; // quantity of HP damage dealt to equal 1 unit of power charge
   public int money = 0;
@@ -252,6 +254,9 @@ public class Commander extends GameEventListener
   {
     modifyAbilityPower(-ability.getCost());
     myActiveAbilityName = ability.myName;
+    // default power charge
+    addCOModifier(new CODamageModifier(10));
+    addCOModifier(new CODefenseModifier(10));
   }
 
   protected void modifyAbilityPower(double amount)
