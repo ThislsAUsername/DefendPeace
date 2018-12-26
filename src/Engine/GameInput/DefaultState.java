@@ -45,7 +45,7 @@ class DefaultState extends GameInputState<XYCoord>
     {
       // We are considering a new unit purchase.
       ArrayList<UnitModel> buildables = myStateData.commander.getShoppingList(loc.getEnvironment().terrainType);
-      myStateData.menuOptions = buildables;
+      myStateData.menuOptions = SelectUnitProduction.buildDisplayStrings(buildables);
       next = new SelectUnitProduction(myStateData, buildables, coord);
     }
     else
