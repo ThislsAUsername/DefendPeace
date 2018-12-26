@@ -119,7 +119,7 @@ public class Utils
         reachableTiles.add(new XYCoord(currentNode.x, currentNode.y));
       }
 
-      expandSearchNode(unit, gameMap, currentNode, searchQueue, movesLeftGrid);
+      expandSearchNode(unit, gameMap, currentNode, searchQueue, movesLeftGrid, false);
 
       currentNode = null;
     }
@@ -130,7 +130,7 @@ public class Utils
   /**
    * Determines whether the Location (x, y), can be added to the search queue.
    */
-  private static boolean checkSpace(Unit unit, GameMap myMap, SearchNode currentNode, int x, int y, int[][] movesLeftGrid)
+  private static boolean checkSpace(Unit unit, GameMap myMap, SearchNode currentNode, int x, int y, int[][] movesLeftGrid, boolean ignoreUnits)
   {
     // if we're past the edges of the map
     if( x < 0 || y < 0 || x >= myMap.mapWidth || y >= myMap.mapHeight )
@@ -138,7 +138,7 @@ public class Utils
       return false;
     }
     // if there is a unit in that space
-    if( myMap.getLocation(x, y).getResident() != null )
+    if( !ignoreUnits && (myMap.getLocation(x, y).getResident() != null) )
     { // if that unit is an enemy
       if( unit.CO.isEnemy(myMap.getLocation(x, y).getResident().CO) )
       {
@@ -278,7 +278,7 @@ public class Utils
         break;
       }
 
-      expandSearchNode(unit, map, currentNode, searchQueue, movesLeftGrid);
+      expandSearchNode(unit, map, currentNode, searchQueue, movesLeftGrid, theoretical);
 
       currentNode = null;
     }
@@ -299,25 +299,25 @@ public class Utils
   }
 
   private static void expandSearchNode(Unit unit, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue,
-      int[][] movesLeftGrid)
+      int[][] movesLeftGrid, boolean ignoreUnits)
   {
     // right
-    if( checkSpace(unit, map, currentNode, currentNode.x + 1, currentNode.y, movesLeftGrid) )
+    if( checkSpace(unit, map, currentNode, currentNode.x + 1, currentNode.y, movesLeftGrid, ignoreUnits) )
     {
       searchQueue.add(new SearchNode(currentNode.x + 1, currentNode.y, currentNode));
     }
     // left
-    if( checkSpace(unit, map, currentNode, currentNode.x - 1, currentNode.y, movesLeftGrid) )
+    if( checkSpace(unit, map, currentNode, currentNode.x - 1, currentNode.y, movesLeftGrid, ignoreUnits) )
     {
       searchQueue.add(new SearchNode(currentNode.x - 1, currentNode.y, currentNode));
     }
     // down
-    if( checkSpace(unit, map, currentNode, currentNode.x, currentNode.y + 1, movesLeftGrid) )
+    if( checkSpace(unit, map, currentNode, currentNode.x, currentNode.y + 1, movesLeftGrid, ignoreUnits) )
     {
       searchQueue.add(new SearchNode(currentNode.x, currentNode.y + 1, currentNode));
     }
     // up
-    if( checkSpace(unit, map, currentNode, currentNode.x, currentNode.y - 1, movesLeftGrid) )
+    if( checkSpace(unit, map, currentNode, currentNode.x, currentNode.y - 1, movesLeftGrid, ignoreUnits) )
     {
       searchQueue.add(new SearchNode(currentNode.x, currentNode.y - 1, currentNode));
     }
