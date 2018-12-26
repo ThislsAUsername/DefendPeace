@@ -1,15 +1,15 @@
 package CommandingOfficers;
 
 import java.awt.Color;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.XYCoord;
-import Engine.Combat.BattleInstance;
+import Engine.Combat.BattleInstance.BattleParams;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
 import Terrain.GameMap;
@@ -45,13 +45,13 @@ public class Commander extends GameEventListener
   public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
   public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
   public ArrayList<Location> ownedProperties;
-  public ArrayList<COModifier> modifiers;
+  public ArrayDeque<COModifier> modifiers;
   public Color myColor;
   public String factionName = DEFAULT_SPRITE_KEY;
   public static final String DEFAULT_SPRITE_KEY = "default";
   public static final int DEFAULTSTARTINGMONEY = 0;
   public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
-  public static final int CHARGERATIO_HP = 90; // quantity of HP damage dealt to equal 1 unit of power charge
+  //  public static final int CHARGERATIO_HP = 90; // quantity of HP damage dealt to equal 1 unit of power charge
   public int money = 0;
   public int incomePerCity = 1000;
   public int team = -1;
@@ -107,7 +107,7 @@ public class Commander extends GameEventListener
     unitModels.addAll(seaportModels);
     unitModels.addAll(airportModels);
 
-    modifiers = new ArrayList<COModifier>();
+    modifiers = new ArrayDeque<COModifier>();
     units = new ArrayList<Unit>();
     ownedProperties = new ArrayList<Location>();
     money = DEFAULTSTARTINGMONEY;
@@ -126,13 +126,13 @@ public class Commander extends GameEventListener
    * that depend on circumstances that must be evaluated at combat time (e.g. a
    * terrain-based firepower bonus) can be handled here.
    */
-  public void applyCombatModifiers(BattleInstance params)
+  public void applyCombatModifiers(BattleParams params, GameMap map)
   {}
 
   public void addCOModifier(COModifier mod)
   {
     mod.apply(this);
-    modifiers.add(mod); // Add to the list so the modifier can be reverted next turn.
+    modifiers.offer(mod); // Add to the list so the modifier can be reverted next turn.
   }
 
   /**
@@ -156,13 +156,13 @@ public class Commander extends GameEventListener
       }
     }
     money += turnIncome;
+    modifyAbilityPower(40);
 
     // Un-apply any modifiers that were activated last turn.
     // TODO: If/when we have modifiers that last multiple turns, figure out how to handle them.
-    for( int i = modifiers.size() - 1; i >= 0; --i )
+    while(!modifiers.isEmpty())
     {
-      modifiers.get(i).revert(this);
-      modifiers.remove(i);
+      modifiers.poll().revert(this);
     }
   }
 
@@ -207,8 +207,8 @@ public class Commander extends GameEventListener
   /** Get the list of units this commander can build from the given property type. */
   public ArrayList<UnitModel> getShoppingList(Location buyLocation)
   {
-    return (unitProductionByTerrain.get(buyLocation.getEnvironment().terrainType) != null) ? unitProductionByTerrain.get(buyLocation.getEnvironment().terrainType)
-        : new ArrayList<UnitModel>();
+    return (unitProductionByTerrain.get(buyLocation.getEnvironment().terrainType) != null)
+        ? unitProductionByTerrain.get(buyLocation.getEnvironment().terrainType) : new ArrayList<UnitModel>();
   }
 
   /** Return an ArrayList containing every ability this Commander currently has the power to perform. */
@@ -310,7 +310,7 @@ public class Commander extends GameEventListener
       // The damage we deal is worth half as much as the damage we take, to help powers be a comeback mechanic.
       power += myHPDealt / enemy.model.maxHP * enemy.model.getCost() / 2;
       power /= CHARGERATIO_FUNDS; // Turn funds into units of power
-      power += myHPDealt / CHARGERATIO_HP; // Add power based on HP damage dealt; rewards aggressiveness.
+      //      power += myHPDealt / CHARGERATIO_HP; // Add power based on HP damage dealt; rewards aggressiveness.
 
       modifyAbilityPower(power);
     }

@@ -14,10 +14,10 @@ import Units.Weapons.Weapon;
  *  There are definitely no plans to use this to make werewolves. */
 public class UnitRemodelModifier implements COModifier
 {
-  private Map<UnitModel, UnitModel> modelSwaps = null;
-  private Map<Unit, UnitModel> modelSwapBacks = null;
-  private ArrayList<Unit> unitsChanged = null;
-  private Map<Unit, Weapon[]> unitWeapons = null;
+  protected Map<UnitModel, UnitModel> modelSwaps = null;
+  protected Map<Unit, UnitModel> modelSwapBacks = null;
+  protected ArrayList<Unit> unitsChanged = null;
+  protected Map<Unit, Weapon[]> unitWeapons = null;
 
   public UnitRemodelModifier()
   {

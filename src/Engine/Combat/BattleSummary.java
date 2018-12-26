@@ -16,10 +16,11 @@ public class BattleSummary
   public final TerrainType attackerTerrain;
   public final TerrainType defenderTerrain;
   public double attackerHPLoss;
+  public double attackerLuck;
   public double defenderHPLoss;
 
   public BattleSummary(Unit atk, Weapon aw, Unit def, Weapon dw, TerrainType atkTerrain, TerrainType defTerrain, double atkHPLoss,
-      double defHPLoss)
+      double defHPLoss, double luck)
   {
     attacker = atk;
     defender = def;
@@ -29,5 +30,6 @@ public class BattleSummary
     defenderTerrain = defTerrain;
     attackerHPLoss = atkHPLoss;
     defenderHPLoss = defHPLoss;
+    attackerLuck = luck;
   }
 }

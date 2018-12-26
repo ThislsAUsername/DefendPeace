@@ -23,6 +23,10 @@ public class CommanderLibrary
     commanderList.add( CommanderPatch.getInfo() );
     commanderList.add( CommanderBear_Bull.getInfo() );
     commanderList.add( CommanderCinder.getInfo() );
+    commanderList.add( Andy.getInfo() );
+    commanderList.add( Hachi.getInfo() );
+    commanderList.add( Jake.getInfo() );
+    commanderList.add( Max.getInfo() );
   }
 
   public static Commander makeCommander( CommanderInfo info, Color color, String faction )
