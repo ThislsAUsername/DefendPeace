@@ -27,6 +27,7 @@ public class CommanderLibrary
     commanderList.add( Hachi.getInfo() );
     commanderList.add( Jake.getInfo() );
     commanderList.add( Max.getInfo() );
+    commanderList.add( Sami.getInfo() );
   }
 
   public static Commander makeCommander( CommanderInfo info, Color color, String faction )

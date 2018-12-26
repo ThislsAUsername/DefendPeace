@@ -24,9 +24,6 @@ import Units.Weapons.WeaponModel;
 public class Max extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Max", new instantiator());
-  
-  public int directBuff = 20;
-
   private static class instantiator implements COMaker
   {
     @Override
@@ -35,6 +32,8 @@ public class Max extends Commander
       return new Max();
     }
   }
+  
+  public int directBuff = 20;
 
   public Max()
   {

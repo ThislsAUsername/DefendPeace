@@ -23,9 +23,6 @@ import Units.UnitModel.ChassisEnum;
 public class Jake extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Jake", new instantiator());
-
-  private int plainsBuff = 10;
-
   private static class instantiator implements COMaker
   {
     @Override
@@ -34,6 +31,8 @@ public class Jake extends Commander
       return new Jake();
     }
   }
+  
+  private int plainsBuff = 10;
 
   public Jake()
   {
