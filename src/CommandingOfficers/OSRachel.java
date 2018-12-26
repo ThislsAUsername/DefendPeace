@@ -1,30 +1,14 @@
 package CommandingOfficers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.COModifier;
-import CommandingOfficers.Modifiers.COMovementModifier;
-import CommandingOfficers.Modifiers.IndirectRangeBoostModifier;
-import Engine.XYCoord;
-import Engine.Combat.BattleInstance;
 import Engine.Combat.BattleInstance.BattleParams;
-import Engine.Combat.BattleSummary;
 import Engine.Combat.CaptureUnitValueFinder;
 import Engine.Combat.CostValueFinder;
 import Engine.Combat.HPValueFinder;
 import Engine.Combat.MassStrikeUtils;
-import Engine.GameEvents.GameEventListener;
 import Terrain.GameMap;
-import Terrain.Location;
-import Terrain.TerrainType;
 import Units.Unit;
-import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
 
-public class Rachel extends Commander
+public class OSRachel extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Rachel", new instantiator());
 
@@ -33,13 +17,13 @@ public class Rachel extends Commander
     @Override
     public Commander create()
     {
-      return new Rachel();
+      return new OSRachel();
     }
   }
 
   private int luckMax = 10;
 
-  public Rachel()
+  public OSRachel()
   {
     super(coInfo);
 
@@ -84,12 +68,12 @@ public class Rachel extends Commander
     private static final String NAME = "Lucky Lass";
     private static final int COST = 3;
     private static final int VALUE = 40;
-    Rachel COcast;
+    OSRachel COcast;
 
     LuckyLass(Commander commander)
     {
       super(commander, NAME, COST);
-      COcast = (Rachel) commander;
+      COcast = (OSRachel) commander;
     }
 
     @Override

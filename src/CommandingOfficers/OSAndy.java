@@ -1,20 +1,12 @@
 package CommandingOfficers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
-import Engine.XYCoord;
-import Engine.Combat.BattleSummary;
-import Engine.GameEvents.GameEventListener;
 import Terrain.GameMap;
-import Terrain.Location;
 import Units.Unit;
 import Units.UnitModel;
 
-public class Andy extends Commander
+public class OSAndy extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Andy", new instantiator());
 
@@ -23,11 +15,11 @@ public class Andy extends Commander
     @Override
     public Commander create()
     {
-      return new Andy();
+      return new OSAndy();
     }
   }
 
-  public Andy()
+  public OSAndy()
   {
     super(coInfo);
 

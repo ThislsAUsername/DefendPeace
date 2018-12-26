@@ -1,27 +1,14 @@
 package CommandingOfficers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
-import CommandingOfficers.Modifiers.IndirectRangeBoostModifier;
-import Engine.XYCoord;
-import Engine.Combat.BattleInstance;
 import Engine.Combat.BattleInstance.BattleParams;
-import Engine.Combat.BattleSummary;
-import Engine.GameEvents.GameEventListener;
 import Terrain.GameMap;
-import Terrain.Location;
-import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
 import Units.Weapons.WeaponModel;
 
-public class Max extends Commander
+public class OSMax extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Max", new instantiator());
   private static class instantiator implements COMaker
@@ -29,13 +16,13 @@ public class Max extends Commander
     @Override
     public Commander create()
     {
-      return new Max();
+      return new OSMax();
     }
   }
   
   public int directBuff = 20;
 
-  public Max()
+  public OSMax()
   {
     super(coInfo);
 
@@ -95,12 +82,12 @@ public class Max extends Commander
     private static final String NAME = "Max Force";
     private static final int COST = 3;
     private static final int VALUE = 10;
-    Max COcast;
+    OSMax COcast;
 
     MaxForce(Commander commander)
     {
       super(commander, NAME, COST);
-      COcast = (Max) commander;
+      COcast = (OSMax) commander;
     }
 
     @Override
@@ -124,12 +111,12 @@ public class Max extends Commander
     private static final String NAME = "Max Blast";
     private static final int COST = 6;
     private static final int VALUE = 30;
-    Max COcast;
+    OSMax COcast;
 
     MaxBlast(Commander commander)
     {
       super(commander, NAME, COST);
-      COcast = (Max) commander;
+      COcast = (OSMax) commander;
     }
 
     @Override

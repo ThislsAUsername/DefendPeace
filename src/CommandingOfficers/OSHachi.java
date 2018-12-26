@@ -1,23 +1,12 @@
 package CommandingOfficers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.COModifier;
-import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
-import Engine.XYCoord;
-import Engine.Combat.BattleSummary;
-import Engine.GameEvents.GameEventListener;
 import Terrain.GameMap;
-import Terrain.Location;
 import Terrain.TerrainType;
-import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
 
-public class Hachi extends Commander
+public class OSHachi extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Hachi", new instantiator());
 
@@ -26,11 +15,11 @@ public class Hachi extends Commander
     @Override
     public Commander create()
     {
-      return new Hachi();
+      return new OSHachi();
     }
   }
 
-  public Hachi()
+  public OSHachi()
   {
     super(coInfo);
 

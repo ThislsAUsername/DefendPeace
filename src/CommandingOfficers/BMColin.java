@@ -4,7 +4,7 @@ import CommandingOfficers.Modifiers.CODamageModifier;
 import Terrain.GameMap;
 import Units.UnitModel;
 
-public class Colin extends Commander
+public class BMColin extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Colin", new instantiator());
 
@@ -13,11 +13,11 @@ public class Colin extends Commander
     @Override
     public Commander create()
     {
-      return new Colin();
+      return new BMColin();
     }
   }
 
-  public Colin()
+  public BMColin()
   {
     super(coInfo);
 
@@ -41,12 +41,12 @@ public class Colin extends Commander
     private static final String NAME = "Gold Rush";
     private static final int COST = 2;
     private static final double VALUE = 1.5;
-    Colin COcast;
+    BMColin COcast;
 
     GoldRush(Commander commander)
     {
       super(commander, NAME, COST);
-      COcast = (Colin) commander;
+      COcast = (BMColin) commander;
     }
 
     @Override
@@ -61,12 +61,12 @@ public class Colin extends Commander
     private static final String NAME = "Power of Money";
     private static final int COST = 6;
     private static final double VALUE = 3.333/1000;
-    Colin COcast;
+    BMColin COcast;
 
     PowerOfMoney(Commander commander)
     {
       super(commander, NAME, COST);
-      COcast = (Colin) commander;
+      COcast = (BMColin) commander;
     }
 
     @Override

@@ -1,13 +1,8 @@
 package CommandingOfficers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitTypeDamageModifier;
-import Engine.XYCoord;
-import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -16,7 +11,7 @@ import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
 import Units.Weapons.WeaponModel;
 
-public class Sami extends Commander
+public class OSSami extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Sami", new instantiator());
 
@@ -25,11 +20,11 @@ public class Sami extends Commander
     @Override
     public Commander create()
     {
-      return new Sami();
+      return new OSSami();
     }
   }
 
-  public Sami()
+  public OSSami()
   {
     super(coInfo);
 

@@ -1,18 +1,10 @@
 package CommandingOfficers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
-import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.IndirectRangeBoostModifier;
-import Engine.XYCoord;
-import Engine.Combat.BattleInstance;
 import Engine.Combat.BattleInstance.BattleParams;
-import Engine.Combat.BattleSummary;
-import Engine.GameEvents.GameEventListener;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -20,7 +12,7 @@ import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
 
-public class Jake extends Commander
+public class OSJake extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Jake", new instantiator());
   private static class instantiator implements COMaker
@@ -28,13 +20,13 @@ public class Jake extends Commander
     @Override
     public Commander create()
     {
-      return new Jake();
+      return new OSJake();
     }
   }
   
   private int plainsBuff = 10;
 
-  public Jake()
+  public OSJake()
   {
     super(coInfo);
 
@@ -77,12 +69,12 @@ public class Jake extends Commander
     private static final String NAME = "Beat Down";
     private static final int COST = 3;
     private static final int VALUE = 10;
-    Jake COcast;
+    OSJake COcast;
 
     BeatDown(Commander commander)
     {
       super(commander, NAME, COST);
-      COcast = (Jake) commander;
+      COcast = (OSJake) commander;
     }
 
     @Override
@@ -100,12 +92,12 @@ public class Jake extends Commander
     private static final String NAME = "Block Rock";
     private static final int COST = 6;
     private static final int VALUE = 30;
-    Jake COcast;
+    OSJake COcast;
 
     BlockRock(Commander commander)
     {
       super(commander, NAME, COST);
-      COcast = (Jake) commander;
+      COcast = (OSJake) commander;
     }
 
     @Override

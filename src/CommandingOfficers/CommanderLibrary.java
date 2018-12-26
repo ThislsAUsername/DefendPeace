@@ -23,13 +23,14 @@ public class CommanderLibrary
     commanderList.add( CommanderPatch.getInfo() );
     commanderList.add( CommanderBear_Bull.getInfo() );
     commanderList.add( CommanderCinder.getInfo() );
-    commanderList.add( Andy.getInfo() );
-    commanderList.add( Hachi.getInfo() );
-    commanderList.add( Jake.getInfo() );
-    commanderList.add( Max.getInfo() );
-    commanderList.add( Rachel.getInfo() );
-    commanderList.add( Sami.getInfo() );
-    commanderList.add( Colin.getInfo() );
+    commanderList.add( OSAndy.getInfo() );
+    commanderList.add( OSHachi.getInfo() );
+    commanderList.add( OSJake.getInfo() );
+    commanderList.add( OSMax.getInfo() );
+    commanderList.add( OSRachel.getInfo() );
+    commanderList.add( OSSami.getInfo() );
+    commanderList.add( BMColin.getInfo() );
+    commanderList.add( BMGrit.getInfo() );
   }
 
   public static Commander makeCommander( CommanderInfo info, Color color, String faction )
