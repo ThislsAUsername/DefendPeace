@@ -103,8 +103,11 @@ public class CommanderCinder extends Commander
     {
       for( Unit unit : myCommander.units )
       {
-        unit.alterHP(SEAR_WOUND);
-        unit.isTurnOver = false;
+        if( unit.isTurnOver ) // don't penalize units who haven't moved yet 
+        {
+          unit.alterHP(SEAR_WOUND);
+          unit.isTurnOver = false;
+        }
       }
     }
   }
@@ -116,14 +119,14 @@ public class CommanderCinder extends Commander
   {
     private static final String WITCHFIRE_NAME = "Witchfire";
     private static final int WITCHFIRE_COST = 9;
-    private static final int WITCHFIRE_WOUND = -1;
+    private static final int WITCHFIRE_HP_COST = 1;
     private WitchFireListener listener;
 
     WitchFireAbility(Commander commander)
     {
       // as we start in Bear form, UpTurn is the correct starting name
       super(commander, WITCHFIRE_NAME, WITCHFIRE_COST);
-      listener = new WitchFireListener(commander, WITCHFIRE_WOUND);
+      listener = new WitchFireListener(commander, WITCHFIRE_HP_COST);
     }
 
     @Override
@@ -150,30 +153,39 @@ public class CommanderCinder extends Commander
     private Commander myCommander = null;
     private final int refreshCost;
 
-    public WitchFireListener(Commander myCo, int refreshWound)
+    public WitchFireListener(Commander myCo, int HPCost)
     {
       myCommander = myCo;
-      refreshCost = refreshWound;
+      refreshCost = HPCost;
     }
 
     @Override
     public void receiveBattleEvent(BattleSummary battleInfo)
     {
       // Determine if we were part of this fight. If so, refresh at our own expense
+      Unit minion = null;
       if( battleInfo.attacker.CO == myCommander )
       {
-        if( battleInfo.attacker.getPreciseHP() > 0 )
-        {
-          battleInfo.attacker.alterHP(refreshCost);
-          battleInfo.attacker.isTurnOver = false;
-        }
+        minion = battleInfo.attacker;
       }
       else if( battleInfo.defender.CO == myCommander )
       {
-        if( battleInfo.defender.getPreciseHP() > 0 )
+        minion = battleInfo.defender;
+      }
+
+      if( null != minion )
+      {
+        if( minion.getPreciseHP() > Math.abs(refreshCost) )
         {
-          battleInfo.defender.alterHP(refreshCost);
-          battleInfo.defender.isTurnOver = false;
+          minion.alterHP(-1 * refreshCost);
+          minion.isTurnOver = false;
+        }
+        else
+        {
+          minion.damageHP(refreshCost);
+          // TODO: aaaaaaaaaa we can't delete the unit here
+          // gameMap.removeUnit(attacker);
+          // attacker.CO.units.remove(attacker);
         }
       }
     }
