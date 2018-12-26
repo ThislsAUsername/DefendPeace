@@ -7,17 +7,23 @@ public abstract class CommanderAbility
   public final Commander myCommander;
   protected String myName;
   private int myPowerCost;
+  public final int baseCost;
 
   public CommanderAbility(Commander commander, String abilityName, int powerCost)
   {
     myCommander = commander;
     myName = abilityName;
     myPowerCost = powerCost;
+    baseCost = myPowerCost;
   }
 
   public int getCost()
   {
     return myPowerCost;
+  }
+  public void increaseCost(int input)
+  {
+    myPowerCost += input;
   }
 
   @Override
@@ -37,11 +43,6 @@ public abstract class CommanderAbility
     }
 
     myCommander.activateAbility(this);
-
-    // Increase the cost of this ability for next time to mitigate spam and
-    // accommodate the presumably-growing battlefront.
-    // Cost grows by at least one, and at most 10% of the current cost.
-    myPowerCost += Math.max(myPowerCost*0.1, 1);
     
     perform(gameMap);
   }

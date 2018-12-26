@@ -80,7 +80,12 @@ public class Andy extends Commander
         unit.alterHP(VALUE);
       }
       myCommander.addCOModifier(new CODamageModifier(10));
-      myCommander.addCOModifier(new COMovementModifier(1));
+      COMovementModifier moveMod = new COMovementModifier(1);
+      for(UnitModel um : myCommander.unitModels)
+      {
+        moveMod.addApplicableUnitModel(um);
+      }
+      myCommander.addCOModifier(moveMod);
     }
   }
 }

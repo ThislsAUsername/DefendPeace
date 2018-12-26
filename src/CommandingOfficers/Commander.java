@@ -160,7 +160,7 @@ public class Commander extends GameEventListener
 
     // Un-apply any modifiers that were activated last turn.
     // TODO: If/when we have modifiers that last multiple turns, figure out how to handle them.
-    while(!modifiers.isEmpty())
+    while (!modifiers.isEmpty())
     {
       modifiers.poll().revert(this);
     }
@@ -253,6 +253,11 @@ public class Commander extends GameEventListener
   public void activateAbility(CommanderAbility ability)
   {
     modifyAbilityPower(-ability.getCost());
+
+    for( CommanderAbility ca : myAbilities )
+    {
+      ca.increaseCost((int) (ca.baseCost * 1.2 / 9));
+    }
     // default power boost
     addCOModifier(new CODamageModifier(10));
     addCOModifier(new CODefenseModifier(10));
@@ -275,7 +280,7 @@ public class Commander extends GameEventListener
     if( myAbilityPower > maxPower )
       myAbilityPower = maxPower;
   }
-  
+
   public int getRepairPower()
   {
     return 2;
