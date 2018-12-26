@@ -67,7 +67,7 @@ public class Utils
     for( XYCoord loc : locations )
     {
       // Add any location that is empty and supports movement of the cargo unit.
-      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
+      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport )
           && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
       {
         dropoffLocations.add(loc);
@@ -94,18 +94,19 @@ public class Utils
     ArrayList<XYCoord> reachableTiles = new ArrayList<XYCoord>();
 
     // set all locations to false/remaining move = 0
-    int[][] movesLeftGrid = new int[gameMap.mapWidth][gameMap.mapHeight];
+    int[][] costGrid = new int[gameMap.mapWidth][gameMap.mapHeight];
     for( int i = 0; i < gameMap.mapWidth; i++ )
     {
       for( int j = 0; j < gameMap.mapHeight; j++ )
       {
-        movesLeftGrid[i][j] = 0;
+        costGrid[i][j] = -1;
       }
     }
+
     // set up our search
     SearchNode root = new SearchNode(unit.x, unit.y);
-    movesLeftGrid[unit.x][unit.y] = Math.min(unit.model.movePower, unit.fuel);
-    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(movesLeftGrid));
+    costGrid[unit.x][unit.y] = 0;
+    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(costGrid));
     searchQueue.add(root);
     // do search
     while (!searchQueue.isEmpty())
@@ -119,7 +120,7 @@ public class Utils
         reachableTiles.add(new XYCoord(currentNode.x, currentNode.y));
       }
 
-      expandSearchNode(unit, gameMap, currentNode, searchQueue, movesLeftGrid, false);
+      expandSearchNode(unit, gameMap, currentNode, searchQueue, costGrid, false);
 
       currentNode = null;
     }
@@ -129,32 +130,30 @@ public class Utils
 
   /**
    * Determines whether the Location (x, y), can be added to the search queue.
+   * @param theoretical If set, this function will ignore move-power limitations and enemy-unit presence.
    */
-  private static boolean checkSpace(Unit unit, GameMap myMap, SearchNode currentNode, int x, int y, int[][] movesLeftGrid, boolean ignoreUnits)
+  private static boolean checkSpace(Unit unit, GameMap myMap, SearchNode currentNode, XYCoord coord,
+    int[][] costGrid, boolean ignoreUnits)
   {
     // if we're past the edges of the map
-    if( x < 0 || y < 0 || x >= myMap.mapWidth || y >= myMap.mapHeight )
+    if( !myMap.isLocationValid(coord) )
     {
       return false;
     }
     // if there is a unit in that space
-    if( !ignoreUnits && (myMap.getLocation(x, y).getResident() != null) )
+    if( !ignoreUnits && (myMap.getLocation(coord).getResident() != null) )
     { // if that unit is an enemy
-      if( unit.CO.isEnemy(myMap.getLocation(x, y).getResident().CO) )
+      if( unit.CO.isEnemy(myMap.getLocation(coord).getResident().CO) )
       {
         return false;
       }
     }
-    // if we have more movepower left than the other route there does
-    boolean betterRoute = false;
-    final int moveLeft = movesLeftGrid[currentNode.x][currentNode.y];
-    int moveCost = findMoveCost(unit, x, y, myMap);
-    if( moveLeft - moveCost >= movesLeftGrid[x][y] )
+    // if this unit can't traverse that terrain.
+    if( findMoveCost(unit, coord.xCoord, coord.yCoord, myMap) == 99 )
     {
-      betterRoute = true;
-      movesLeftGrid[x][y] = moveLeft - moveCost;
+      return false;
     }
-    return betterRoute;
+    return true;
   }
 
   private static int findMoveCost(Unit unit, int x, int y, GameMap map)
@@ -231,7 +230,7 @@ public class Utils
     }
 
     Path aPath = new Path(100);
-    if( map.mapWidth < unit.x || map.mapHeight < unit.y || unit.x < 0 || unit.y < 0 )
+    if( !map.isLocationValid(x, y) )
     {
       // Unit is not in a valid place. No path can be found.
       System.out.println("WARNING! Cannot find path for a unit that is not on the map.");
@@ -239,31 +238,26 @@ public class Utils
       return aPath;
     }
 
-    //System.out.println("Finding new path for " + unit.model.type + " from " + unit.x + ", " + unit.y + " to " + x + ", " + y);
-    // Set all locations to false/remaining move = 0
-    int[][] movesLeftGrid = new int[map.mapWidth][map.mapHeight];
+    int[][] costGrid = new int[map.mapWidth][map.mapHeight];
     for( int i = 0; i < map.mapWidth; i++ )
     {
       for( int j = 0; j < map.mapHeight; j++ )
       {
-        movesLeftGrid[i][j] = (theoretical) ? -99 : 0;
+        costGrid[i][j] = -1;
       }
     }
 
     // Set up search parameters.
     SearchNode root = new SearchNode(unit.x, unit.y);
-    movesLeftGrid[unit.x][unit.y] = Math.min(unit.model.movePower, unit.fuel);
-    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(movesLeftGrid, x, y));
+    costGrid[unit.x][unit.y] = 0;
+    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(costGrid, x, y));
     searchQueue.add(root);
 
     ArrayList<SearchNode> waypointList = new ArrayList<SearchNode>();
 
     // Find optimal route.
-    int MAX_ITERATIONS = 300; // Put a limit on the number of nodes we can expand.
-    int iters = 0;
-    while (!searchQueue.isEmpty() && (iters < MAX_ITERATIONS))
+    while (!searchQueue.isEmpty())
     {
-      iters++;
       // Retrieve the next search node.
       SearchNode currentNode = searchQueue.poll();
 
@@ -281,7 +275,7 @@ public class Utils
         break;
       }
 
-      expandSearchNode(unit, map, currentNode, searchQueue, movesLeftGrid, theoretical);
+      expandSearchNode(unit, map, currentNode, searchQueue, costGrid, theoretical);
 
       currentNode = null;
     }
@@ -301,28 +295,41 @@ public class Utils
     return aPath;
   }
 
+  /**
+   * Look at the nodes adjacent to currentNode; if there are any we can reach that we haven't found yet, or that we
+   * can reach more economically than previously discovered, update the cost grid and enqueue the node.
+   * @param theoretical If set, don't limit range using move power, and don't worry about other Units in the way.
+   */
   private static void expandSearchNode(Unit unit, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue,
-      int[][] movesLeftGrid, boolean ignoreUnits)
+      int[][] costGrid, boolean theoretical)
   {
-    // right
-    if( checkSpace(unit, map, currentNode, currentNode.x + 1, currentNode.y, movesLeftGrid, ignoreUnits) )
+    XYCoord[] coordsToCheck = {new XYCoord(currentNode.x + 1, currentNode.y),
+                               new XYCoord(currentNode.x - 1, currentNode.y),
+                               new XYCoord(currentNode.x, currentNode.y + 1),
+                               new XYCoord(currentNode.x, currentNode.y - 1)};
+
+    for( XYCoord next : coordsToCheck )
     {
-      searchQueue.add(new SearchNode(currentNode.x + 1, currentNode.y, currentNode));
-    }
-    // left
-    if( checkSpace(unit, map, currentNode, currentNode.x - 1, currentNode.y, movesLeftGrid, ignoreUnits) )
-    {
-      searchQueue.add(new SearchNode(currentNode.x - 1, currentNode.y, currentNode));
-    }
-    // down
-    if( checkSpace(unit, map, currentNode, currentNode.x, currentNode.y + 1, movesLeftGrid, ignoreUnits) )
-    {
-      searchQueue.add(new SearchNode(currentNode.x, currentNode.y + 1, currentNode));
-    }
-    // up
-    if( checkSpace(unit, map, currentNode, currentNode.x, currentNode.y - 1, movesLeftGrid, ignoreUnits) )
-    {
-      searchQueue.add(new SearchNode(currentNode.x, currentNode.y - 1, currentNode));
+      // Check that we could potentially move into this space.
+      if( checkSpace( unit, map, currentNode, next, costGrid, theoretical ) )
+      {
+        // If we can move there for less cost than previously discovered,
+        // then update the cost grid and re-queue the next node.
+        int costSoFar = costGrid[currentNode.x][currentNode.y];
+        int moveCost = findMoveCost(unit, next.xCoord, next.yCoord, map);
+        int newNextCost = costSoFar + moveCost;
+        int oldNextCost = costGrid[next.xCoord][next.yCoord];
+
+        // If we are playing "What if" then don't worry too much about move cost.
+        int movePower = Math.min(unit.model.movePower, unit.fuel) - costSoFar;
+        boolean canMove = (theoretical) ? true : (moveCost <= movePower);
+
+        if( canMove && ((newNextCost < oldNextCost) || (oldNextCost == -1)) ) // -1 means it hasn't been set yet.
+        {
+          costGrid[next.xCoord][next.yCoord] = newNextCost;
+          searchQueue.add(new SearchNode(next, currentNode));
+        }
+      }
     }
   }
 
@@ -340,11 +347,19 @@ public class Utils
       this(x, y, null);
     }
 
+    public SearchNode(XYCoord coord, SearchNode parent)
+    {
+      this(coord.xCoord, coord.yCoord, parent);
+    }
     public SearchNode(int x, int y, SearchNode parent)
     {
       this.x = x;
       this.y = y;
       this.parent = parent;
+    }
+    public String toString()
+    {
+      return String.format("(%s, %s)", x, y);
     }
   }
 
@@ -354,22 +369,22 @@ public class Utils
    */
   private static class SearchNodeComparator implements Comparator<SearchNode>
   {
-    int[][] movesLeftGrid;
+    int[][] costGrid;
     private final boolean hasDestination;
     private int xDest;
     private int yDest;
 
-    public SearchNodeComparator(int[][] movesLeftGrid)
+    public SearchNodeComparator(int[][] costGrid)
     {
-      this.movesLeftGrid = movesLeftGrid;
+      this.costGrid = costGrid;
       hasDestination = false;
       xDest = 0;
       yDest = 0;
     }
 
-    public SearchNodeComparator(int[][] movesLeftGrid, int x, int y)
+    public SearchNodeComparator(int[][] costGrid, int x, int y)
     {
-      this.movesLeftGrid = movesLeftGrid;
+      this.costGrid = costGrid;
       hasDestination = true;
       xDest = x;
       yDest = y;
@@ -381,9 +396,9 @@ public class Utils
       int firstDist = Math.abs(o1.x - xDest) + Math.abs(o1.y - yDest);
       int secondDist = Math.abs(o2.x - xDest) + Math.abs(o2.y - yDest);
 
-      int firstPow = movesLeftGrid[o1.x][o1.y] - ((hasDestination) ? firstDist : 0);
-      int secondPow = movesLeftGrid[o2.x][o2.y] - ((hasDestination) ? secondDist : 0);
-      return secondPow - firstPow;
+      int firstPow = costGrid[o1.x][o1.y] - ((hasDestination) ? firstDist : 0);
+      int secondPow = costGrid[o2.x][o2.y] - ((hasDestination) ? secondDist : 0);
+      return firstPow - secondPow;
     }
   }
 
@@ -446,5 +461,41 @@ public class Utils
   {
     ManhattanDistanceComparator mdc = new ManhattanDistanceComparator(center);
     mapLocations.sort(mdc);
+  }
+
+  /**
+   * Compare XYCoords based on how much time it would take myUnit to reach them on the given map.
+   * XYCoords closer to myCenter will be "less than" XYCoords that are farther away.
+   */
+  public static class TravelDistanceComparator implements Comparator<XYCoord>
+  {
+    Unit myUnit;
+    GameMap myMap;
+
+    public TravelDistanceComparator(Unit unit, GameMap map)
+    {
+      myUnit = unit;
+      myMap = map;
+    }
+
+    @Override
+    public int compare(XYCoord xy1, XYCoord xy2)
+    {
+      int xy1Dist = findShortestPath(myUnit, xy1, myMap).getPathLength();
+      int xy2Dist = findShortestPath(myUnit, xy2, myMap).getPathLength();
+
+      return xy1Dist - xy2Dist;
+    }
+  }
+
+  /**
+   * Sorts the mapLocations array by distance from the 'center' coordinate.
+   * @param center
+   * @param mapLocations
+   */
+  public static void sortLocationsByTravelTime(Unit unit, ArrayList<XYCoord> mapLocations, GameMap map)
+  {
+    TravelDistanceComparator tdc = new TravelDistanceComparator(unit, map);
+    mapLocations.sort(tdc);
   }
 }
