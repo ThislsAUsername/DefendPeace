@@ -6,8 +6,8 @@ public abstract class CommanderAbility
 {
   public final Commander myCommander;
   protected String myName;
-  private int myPowerCost;
-  public final int baseCost;
+  private double myPowerCost;
+  public final double baseCost;
 
   public CommanderAbility(Commander commander, String abilityName, int powerCost)
   {
@@ -17,11 +17,11 @@ public abstract class CommanderAbility
     baseCost = myPowerCost;
   }
 
-  public int getCost()
+  public double getCost()
   {
     return myPowerCost;
   }
-  public void increaseCost(int input)
+  public void increaseCost(double input)
   {
     myPowerCost += input;
   }

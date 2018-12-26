@@ -228,9 +228,9 @@ public class Commander extends GameEventListener
     return ready;
   }
 
-  public int[] getAbilityCosts()
+  public double[] getAbilityCosts()
   {
-    int[] costs = new int[myAbilities.size()];
+    double[] costs = new double[myAbilities.size()];
     for( int i = 0; i < myAbilities.size(); ++i )
     {
       costs[i] = myAbilities.get(i).getCost();
@@ -256,7 +256,7 @@ public class Commander extends GameEventListener
 
     for( CommanderAbility ca : myAbilities )
     {
-      ca.increaseCost((int) (ca.baseCost * 1.2 / 9));
+      ca.increaseCost(ca.baseCost * 1.2 / 9);
     }
     // default power boost
     addCOModifier(new CODamageModifier(10));
