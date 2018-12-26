@@ -52,7 +52,7 @@ public class InfantrySpamAI implements AIController
       for( int y = 0; y < gameMap.mapHeight; ++y )
       {
         XYCoord loc = new XYCoord(x, y);
-        if( gameMap.getLocation(loc).isCaptureable() && gameMap.getLocation(loc).getOwner() != myCo )
+        if( gameMap.getLocation(loc).isCaptureable() && myCo.isEnemy(gameMap.getLocation(loc).getOwner()) )
         {
           unownedProperties.add(loc);
         }
@@ -74,6 +74,12 @@ public class InfantrySpamAI implements AIController
     log(String.format("[======== ISAI ending turn %s for %s =========]", turnNum, myCo));
     System.out.println(logger.toString());
     logger = new StringBuffer();
+  }
+
+  private void log(String message)
+  {
+    System.out.println(message);
+    logger.append(message).append('\n');
   }
 
   @Override
@@ -122,16 +128,44 @@ public class InfantrySpamAI implements AIController
       Utils.sortLocationsByDistance( new XYCoord(unit.x, unit.y), unownedProperties);
       if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
       {
-        XYCoord goal = unownedProperties.get(0);
-        // Check to make sure we haven't captured this since we last checked.
-        while(gameMap.getLocation(goal).getOwner() == myCo || capturingProperties.contains(goal))
+        log(String.format("  Seeking a property to send %s after", unit.toStringWithLocation()));
+        int index = 0;
+        XYCoord goal = null;
+        Path path = null;
+        boolean validTarget = false;
+
+        // Loop until we find a valid property to go capture or run out of options.
+        do
         {
-          unownedProperties.remove(goal);
-          goal = unownedProperties.get(0);
+          goal = unownedProperties.get(index++);
+          path = Utils.findShortestPath(unit, goal, gameMap, true);
+          validTarget = (myCo.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
+                      && !capturingProperties.contains(goal)                // We aren't already capturing it.
+                      && (path.getPathLength() > 0));                       // We can reach it.
+          log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
+        } while( !validTarget && (index < unownedProperties.size()) );      // Loop until we run out of properties to check.
+
+        if( path.getPathLength() == 0)
+        {
+          log("    Failed to find a path to a capturable property. Waiting");
+          // We couldn't find a valid move point (are we on an island?). Just give up.
+          GameAction wait = new GameAction.WaitAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
+          actions.offer(wait);
+          break;
         }
 
-        // Sort my possible move locations by distance from the goal, choose
-        // the closest one, and build a GameAction to move there.
+        log(String.format("    Selected %s at %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal));
+
+        // Choose the point on the path just out of our range as our 'goal', and try to move there.
+        // This will allow us to navigate around large obstacles that require us to move away
+        // from our intended long-term goal.
+        path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
+        goal = new XYCoord(path.getEnd().x, path.getEnd().y); // Set the last location as our goal.
+
+        log(String.format("    Intermediate waypoint: %s", goal));
+
+        // Sort my currently-reachable move locations by distance from the goal,
+        // and build a GameAction to move to the closest one.
         Utils.sortLocationsByDistance(goal, destinations);
         XYCoord destination = destinations.get(0);
         Path movePath = Utils.findShortestPath(unit, destination, gameMap);
@@ -168,11 +202,5 @@ public class InfantrySpamAI implements AIController
     GameAction nextAction = actions.poll();
     log(String.format("  Action: %s", nextAction));
     return nextAction;
-  }
-
-  private void log(String message)
-  {
-    //System.out.println(message);
-    logger.append(message).append('\n');
   }
 }
