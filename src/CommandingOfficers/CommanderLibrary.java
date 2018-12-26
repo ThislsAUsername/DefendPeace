@@ -34,6 +34,10 @@ public class CommanderLibrary
     commanderList.add( BMOlaf.getInfo() );
     commanderList.add( BMSasha.getInfo() );
     commanderList.add( GEEagle.getInfo() );
+    commanderList.add( GEJess.getInfo() );
+    commanderList.add( YCGrimm.getInfo() );
+    commanderList.add( YCKanbei.getInfo() );
+    commanderList.add( YCSensei.getInfo() );
   }
 
   public static Commander makeCommander( CommanderInfo info, Color color, String faction )

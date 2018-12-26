@@ -1,21 +1,15 @@
 package CommandingOfficers;
 
-import CommandingOfficers.Modifiers.COModifier;
-import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitTypeDamageModifier;
 import CommandingOfficers.Modifiers.UnitTypeDefenseModifier;
-import Engine.GameEvents.GameEventListener;
 import Terrain.GameMap;
-import Terrain.Location;
 import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
-import Units.Weapons.WeaponModel;
 
 public class GEEagle extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Eagle", new instantiator());
-
   private static class instantiator implements COMaker
   {
     @Override
@@ -50,18 +44,6 @@ public class GEEagle extends Commander
   public static CommanderInfo getInfo()
   {
     return coInfo;
-  }
-
-  @Override
-  public void receiveCaptureEvent(Unit unit, Location location)
-  {
-    if( this == unit.CO && this != location.getOwner() )
-    {
-      double halfHP = unit.getPreciseHP() / 2;
-      unit.damageHP(halfHP);
-      unit.capture(location);
-      unit.damageHP(-halfHP);
-    }
   }
 
   private static class LightningDrive extends CommanderAbility
