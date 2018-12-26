@@ -67,7 +67,7 @@ public class Utils
     for( XYCoord loc : locations )
     {
       // Add any location that is empty and supports movement of the cargo unit.
-      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport )
+      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
           && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
       {
         dropoffLocations.add(loc);
@@ -198,22 +198,32 @@ public class Utils
     return canReach;
   }
 
-  /**
-   * Calculate the shortest path for unit to take from its current location to map(x, y), and populate
-   * the path parameter with those waypoints.
-   * If no valid path is found, an empty Path will be returned.
-   */
+  /** Alias for {@link #findShortestPath(Unit, int, int, GameMap, boolean) findShortestPath(Unit, int, int, GameMap, boolean)} **/
+  public static Path findShortestPath(Unit unit, XYCoord destination, GameMap map, boolean theoretical)
+  {
+    return findShortestPath(unit, destination.xCoord, destination.yCoord, map, theoretical);
+  }
+  /** Alias for {@link #findShortestPath(Unit, int, int, GameMap, boolean) findShortestPath(Unit, int, int, GameMap, boolean=false)} **/
   public static Path findShortestPath(Unit unit, XYCoord destination, GameMap map)
   {
-    return findShortestPath(unit, destination.xCoord, destination.yCoord, map);
+    return findShortestPath(unit, destination.xCoord, destination.yCoord, map, false);
   }
-
-  /**
-   * Calculate the shortest path for unit to take from its current location to map(x, y), and populate
-   * the path parameter with those waypoints.
-   * If no valid path is found, an empty Path will be returned.
-   */
+  /** Alias for {@link #findShortestPath(Unit, int, int, GameMap, boolean) findShortestPath(Unit, int, int, GameMap, boolean=false)} **/
   public static Path findShortestPath(Unit unit, int x, int y, GameMap map)
+  {
+    return findShortestPath(unit, x, y, map, false);
+  }
+  /**
+   * Calculate and return the shortest path for unit to take from its current location to map(x, y).
+   * The Path will avoid non-allied units unless `theoretical` is true.
+   * If no valid path is found, an empty Path will be returned.
+   * @param unit The unit under consideration. The Unit's current location will be the starting point for the path,
+   *             and the unit's move-power will limit the path length.
+   * @param destination The desired endpoint for the Path.
+   * @param map The current GameMap referenced by the Path returned.
+   * @param theoretical If true, ignores other Units and move-power limitations.
+   */
+  public static Path findShortestPath(Unit unit, int x, int y, GameMap map, boolean theoretical)
   {
     if( null == unit || null == map )
     {
@@ -232,6 +242,13 @@ public class Utils
     //System.out.println("Finding new path for " + unit.model.type + " from " + unit.x + ", " + unit.y + " to " + x + ", " + y);
     // Set all locations to false/remaining move = 0
     int[][] movesLeftGrid = new int[map.mapWidth][map.mapHeight];
+    for( int i = 0; i < map.mapWidth; i++ )
+    {
+      for( int j = 0; j < map.mapHeight; j++ )
+      {
+        movesLeftGrid[i][j] = (theoretical) ? -99 : 0;
+      }
+    }
 
     // Set up search parameters.
     SearchNode root = new SearchNode(unit.x, unit.y);
