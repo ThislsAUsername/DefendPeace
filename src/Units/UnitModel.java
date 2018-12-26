@@ -47,8 +47,8 @@ public class UnitModel
   private int COdef;
   public double COcost = 1.0;
 
-  public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower, MoveType pPropulsion,
-      ActionType[] actions, WeaponModel[] weapons)
+  public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower,
+      MoveType pPropulsion, ActionType[] actions, WeaponModel[] weapons)
   {
     name = pName;
     type = pType;
@@ -60,14 +60,21 @@ public class UnitModel
     propulsion = pPropulsion;
     possibleActions = actions;
     healableHabs = new HashSet<TerrainType>();
-    for (TerrainType terrain : TerrainType.TerrainTypeList)
+    for( TerrainType terrain : TerrainType.TerrainTypeList )
     {
-      if( ((chassis == ChassisEnum.AIR_HIGH) || (chassis == ChassisEnum.AIR_LOW) && terrain.healsAir()) ||
-          ((chassis == ChassisEnum.TANK) || (chassis == ChassisEnum.TROOP) && terrain.healsLand()) ||
-          ((chassis == ChassisEnum.SHIP) || (chassis == ChassisEnum.SUBMERGED) && terrain.healsSea()) )
+      if( ((chassis == ChassisEnum.AIR_HIGH) || (chassis == ChassisEnum.AIR_LOW) && terrain.healsAir())
+          || ((chassis == ChassisEnum.TANK) || (chassis == ChassisEnum.TROOP) && terrain.healsLand())
+          || ((chassis == ChassisEnum.SHIP) || (chassis == ChassisEnum.SUBMERGED) && terrain.healsSea()) )
         healableHabs.add(terrain);
     }
-    weaponModels = weapons;
+    if( weapons != null )
+    {
+      weaponModels = new WeaponModel[weapons.length];
+      for( int i = 0; i < weapons.length; i++ )
+      {
+        weaponModels[i] = new WeaponModel(weapons[i]);
+      }
+    }
 
     maxHP = 10;
     COstr = 100;
@@ -82,11 +89,11 @@ public class UnitModel
    * @param other The UnitModel to clone.
    * @return The UnitModel clone.
    */
-  public static UnitModel clone( UnitModel other )
+  public static UnitModel clone(UnitModel other)
   {
     // Make a copy of the weapons used by the other model.
     WeaponModel[] weaponModels = null;
-    if(other.weaponModels != null )
+    if( other.weaponModels != null )
     {
       weaponModels = new WeaponModel[other.weaponModels.length];
       for( int i = 0; i < weaponModels.length; ++i )
@@ -105,10 +112,10 @@ public class UnitModel
 
     return newModel;
   }
-  
+
   public int getCost()
   {
-    return (int) (moneyCost*COcost);
+    return (int) (moneyCost * COcost);
   }
 
   /**
@@ -141,7 +148,7 @@ public class UnitModel
 
   public boolean canRepairOn(Location locus)
   {
-    return healableHabs.contains( locus.getEnvironment().terrainType );
+    return healableHabs.contains(locus.getEnvironment().terrainType);
   }
 
   /** Provides a hook for inheritors to supply turn-initialization actions to a unit.

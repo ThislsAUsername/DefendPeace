@@ -84,7 +84,7 @@ public class Max extends Commander
 
     if( null != minion )
     {
-      if( params.range == 1 )
+      if( params.combatRef.battleRange == 1 )
       {
         params.attackFactor += directBuff;
       }

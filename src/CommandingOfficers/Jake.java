@@ -65,7 +65,7 @@ public class Jake extends Commander
 
     if( null != minion )
     {
-      Location loc = map.getLocation(minion.x, minion.y);
+      Location loc = map.getLocation(params.combatRef.attackerX, params.combatRef.attackerY);
       if( loc != null && loc.getEnvironment().terrainType == TerrainType.GRASS )
       {
         params.attackFactor += plainsBuff;

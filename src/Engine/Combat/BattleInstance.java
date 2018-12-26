@@ -10,11 +10,11 @@ public class BattleInstance
 {
   private Unit attacker, defender;
   private Weapon attackerWeapon = null, defenderWeapon = null;
-  private final int attackerX, attackerY, defenderX, defenderY;
+  public final int attackerX, attackerY, defenderX, defenderY;
   private GameMap gameMap;
-  private boolean canCounter = false;
-  private boolean attackerMoved;
-  int battleRange;
+  public boolean canCounter = false;
+  public boolean attackerMoved;
+  public int battleRange;
 
   /**
    * Set up the CombatParams object. Note that we assume the defender is where he thinks he is, but
@@ -59,7 +59,7 @@ public class BattleInstance
 
     // Set up our scenario.
     BattleParams attackInstance = new BattleParams(attacker, attackerWeapon, defender, gameMap.getEnvironment(defenderX,
-        defenderY), false, battleRange);
+        defenderY), false, this);
 
     // Last-minute adjustments.
     attacker.CO.applyCombatModifiers(attackInstance,gameMap);
@@ -73,7 +73,7 @@ public class BattleInstance
     {
       // New battle instance with defender counter-attacking.
       BattleParams defendInstance = new BattleParams(defender, defenderWeapon, attacker, gameMap.getEnvironment(attackerX,
-          attackerY), true, battleRange);
+          attackerY), true, this);
       defendInstance.attackerHP -= defenderHPLoss; // Account for the first attack's damage to the now-attacker.
 
       attacker.CO.applyCombatModifiers(attackInstance,gameMap);
@@ -102,14 +102,14 @@ public class BattleInstance
     public double terrainDefense;
     public boolean isCounter;
     public double luckDamage;
-    public int range;
+    public BattleInstance combatRef;
 
-    public BattleParams(Unit attacker, Weapon attackerWeapon, Unit defender, Environment battleground, boolean isCounter, int range)
+    public BattleParams(Unit attacker, Weapon attackerWeapon, Unit defender, Environment battleground, boolean isCounter, BattleInstance ref)
     {
       this.attacker = attacker;
       this.defender = defender;
       this.isCounter = isCounter;
-      this.range = range;
+      this.combatRef = ref;
       baseDamage = attackerWeapon.getDamage(defender.model);
       attackFactor = attacker.model.getDamageRatio();
       attackerHP = attacker.getHP();

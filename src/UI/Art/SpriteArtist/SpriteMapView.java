@@ -312,8 +312,9 @@ public class SpriteMapView extends MapView
           if( null != target && currentActor.canAttack(target.model, dist, currentPath.getPathLength() > 1) )
           {
             // grab the two most significant digits and convert to %
-            int damage = (int) (10 * CombatEngine.calculateBattleResults(currentActor, target, myGame.gameMap,
-                currentPath.getEnd().x, currentPath.getEnd().y).defenderHPLoss);
+            BattleSummary summary = CombatEngine.calculateBattleResults(currentActor, target, myGame.gameMap,
+                currentPath.getEnd().x, currentPath.getEnd().y);
+            int damage = (int) (10 * (summary.defenderHPLoss - summary.attackerLuck));
             String damageText = damage + "%";
 
             // yes, most of this is 100% copied from ResupplyAnimation
