@@ -397,6 +397,11 @@ public class Unit
   @Override
   public String toString()
   {
+    return model.toString();
+  }
+
+  public String toStringWithLocation()
+  {
     return String.format("%s at %s", model, new XYCoord(x, y));
   }
 }

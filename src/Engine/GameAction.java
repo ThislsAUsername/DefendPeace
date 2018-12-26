@@ -154,7 +154,7 @@ public interface GameAction
     public String toString()
     {
       return String.format("[Attack %s with %s after moving to %s]",
-          defender, attacker, moveLocation );
+          defender.toStringWithLocation(), attacker.toStringWithLocation(), moveLocation );
     }
   } // ~AttackAction
 
@@ -318,7 +318,7 @@ public interface GameAction
     @Override
     public String toString()
     {
-      return String.format("[Capture %s at %s with %s]", propertyType, movePathEnd, actor);
+      return String.format("[Capture %s at %s with %s]", propertyType, movePathEnd, actor.toStringWithLocation());
     }
   } // ~CaptureAction
 
@@ -392,7 +392,7 @@ public interface GameAction
     @Override
     public String toString()
     {
-      return String.format("[Move %s to %s]", actor, waitLoc);
+      return String.format("[Move %s to %s]", actor.toStringWithLocation(), waitLoc);
     }
   } // ~WaitAction
 
@@ -473,7 +473,7 @@ public interface GameAction
     @Override
     public String toString()
     {
-      return String.format("[Load %s into %s]", passenger, transport);
+      return String.format("[Load %s into %s]", passenger.toStringWithLocation(), transport.toStringWithLocation());
     }
   } // ~LoadAction
 
@@ -575,7 +575,7 @@ public interface GameAction
     @Override
     public String toString()
     {
-      return String.format("[Unload from %s]", actor);
+      return String.format("[Unload from %s]", actor.toStringWithLocation());
     }
   } // ~UnloadAction
 
@@ -698,7 +698,7 @@ public interface GameAction
     @Override
     public String toString()
     {
-      return String.format("[Resupply units adjacent to %s with %s]", myLocation(), unitActor);
+      return String.format("[Resupply units adjacent to %s with %s]", myLocation(), unitActor.toStringWithLocation());
     }
   } // ~ResupplyAction
 
