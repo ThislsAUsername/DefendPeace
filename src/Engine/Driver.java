@@ -95,9 +95,6 @@ public class Driver implements ActionListener, KeyListener
   {
     // Redraw the screen if needed.
     gameWindow.repaint();
-
-    // Just let them know we are still here.
-    gameController.handleInput(InputAction.NO_ACTION);
   }
 
   public static void main(String args[])

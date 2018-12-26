@@ -111,32 +111,13 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
         break;
       case INPUT:
-        if( myGame.activeCO.isAI() )
+        if( isInCoInfoMenu && coInfoMenu.handleInput(input) )
         {
-          GameAction aiAction = myGame.activeCO.getNextAIAction(myGame.gameMap);
-          boolean endAITurn = false;
-          if( aiAction != null )
-          {
-            if( !executeGameAction(aiAction) )
-            {
-              // If aiAction fails to execute, the AI's turn is over. We don't want
-              // to waste time getting more actions if it can't build them properly.
-              endAITurn = true;
-            }
-          }
-          else { endAITurn = true; } // The AI can return a null action to signal the end of its turn.
-          if( endAITurn) startNextTurn();
+          isInCoInfoMenu = false;
         }
-        else // Human control
+        else
         {
-          if( isInCoInfoMenu && coInfoMenu.handleInput(input) )
-          {
-            isInCoInfoMenu = false;
-          }
-          else
-          {
-            exitMap = handleGameInput(input);
-          }
+          exitMap = handleGameInput(input);
         }
         break;
       default:
@@ -586,8 +567,29 @@ public class MapController implements IController, GameInputHandler.StateChanged
       }
       else
       {
-        // The animation for the last action just completed. Back to normal input mode.
-        changeInputMode(InputMode.INPUT);
+        // The animation for the last action just completed. If an AI is in control,
+        // fetch the next action. Otherwise, return control to the player.
+        if( myGame.activeCO.isAI() )
+        {
+          GameAction aiAction = myGame.activeCO.getNextAIAction(myGame.gameMap);
+          boolean endAITurn = false;
+          if( aiAction != null )
+          {
+            if( !executeGameAction(aiAction) )
+            {
+              // If aiAction fails to execute, the AI's turn is over. We don't want
+              // to waste time getting more actions if it can't build them properly.
+              endAITurn = true;
+            }
+          }
+          else { endAITurn = true; } // The AI can return a null action to signal the end of its turn.
+          if( endAITurn) startNextTurn();
+        }
+        else
+        {
+          // Back to normal input mode.
+          changeInputMode(InputMode.INPUT);
+        }
       }
     }
   }
