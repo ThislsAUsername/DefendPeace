@@ -25,7 +25,7 @@ public class CommanderLibrary
     commanderList.add( CommanderPatch.getInfo() );
   }
 
-  public static Commander makeCommander( CommanderInfo info, Color color )
+  public static Commander makeCommander( CommanderInfo info, Color color, String faction )
   {
     Commander co = null;
     switch (info.cmdrEnum)
@@ -44,6 +44,7 @@ public class CommanderLibrary
     }
 
     co.myColor = color;
+    co.factionName = faction;
 
     return co;
   }

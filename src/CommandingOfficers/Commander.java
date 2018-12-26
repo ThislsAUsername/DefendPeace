@@ -45,6 +45,8 @@ public class Commander extends GameEventListener
   public ArrayList<Location> ownedProperties;
   public ArrayList<COModifier> modifiers;
   public Color myColor;
+  public String factionName = DEFAULT_SPRITE_KEY;
+  public static final String DEFAULT_SPRITE_KEY = "default";
   public static final int DEFAULTSTARTINGMONEY = 10000;
   public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
   public static final int CHARGERATIO_HP = 90; // quantity of HP damage dealt to equal 1 unit of power charge

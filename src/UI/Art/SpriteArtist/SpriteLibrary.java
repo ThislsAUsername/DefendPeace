@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -17,6 +19,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderLibrary;
 import Terrain.Location;
 import Terrain.TerrainType;
+import UI.COSetupController;
 import UI.Art.SpriteArtist.SpriteUIUtils.ImageFrame;
 import Units.Unit;
 import Units.UnitModel;
@@ -30,29 +33,29 @@ public class SpriteLibrary
   public static final int baseSpriteSize = 16;
 
   // Define extra colors as needed.
-  private static final Color PURPLE = new Color(231, 123, 255 );
+  private static final Color PURPLE = new Color(231, 123, 255);
 
   // Map Building colors.
-  public static final Color[] defaultMapColors = { new Color(40, 40, 40), new Color(70, 70, 70), new Color(110, 110, 110), new Color(160, 160, 160),
-      new Color(200, 200, 200), new Color(231, 231, 231) };
-  private static Color[] pinkMapBuildingColors = { new Color(142, 26, 26), new Color(255, 219, 74), new Color(190, 90, 90), new Color(240, 140, 140),
-      new Color(250, 190, 190), new Color(255, 245, 245) };
-  private static Color[] cyanMapBuildingColors = { new Color(0, 105, 105), new Color(255, 219, 74), new Color(77, 157, 157), new Color(130, 200, 200),
-      new Color(200, 230, 230), new Color(245, 255, 255) };
-  private static Color[] orangeMapBuildingColors = { new Color(130, 56, 0), new Color(255, 237, 29), new Color(139, 77, 20), new Color(231, 139, 41),
-      new Color(243, 186, 121), new Color(255, 234, 204) };
-  private static Color[] purpleMapBuildingColors = { new Color(90, 14, 99), new Color(255, 207, 95), new Color(133, 65, 130), new Color(174, 115, 189),
-    new Color(222, 171, 240), new Color(255, 231, 255) };
+  public static final Color[] defaultMapColors = { new Color(40, 40, 40), new Color(70, 70, 70), new Color(110, 110, 110),
+      new Color(160, 160, 160), new Color(200, 200, 200), new Color(231, 231, 231) };
+  private static Color[] pinkMapBuildingColors = { new Color(142, 26, 26), new Color(255, 219, 74), new Color(190, 90, 90),
+      new Color(240, 140, 140), new Color(250, 190, 190), new Color(255, 245, 245) };
+  private static Color[] cyanMapBuildingColors = { new Color(0, 105, 105), new Color(255, 219, 74), new Color(77, 157, 157),
+      new Color(130, 200, 200), new Color(200, 230, 230), new Color(245, 255, 255) };
+  private static Color[] orangeMapBuildingColors = { new Color(130, 56, 0), new Color(255, 237, 29), new Color(139, 77, 20),
+      new Color(231, 139, 41), new Color(243, 186, 121), new Color(255, 234, 204) };
+  private static Color[] purpleMapBuildingColors = { new Color(90, 14, 99), new Color(255, 207, 95), new Color(133, 65, 130),
+      new Color(174, 115, 189), new Color(222, 171, 240), new Color(255, 231, 255) };
 
   // Map Unit colors.
-  private static Color[] pinkMapUnitColors = { new Color(142, 26, 26), new Color(199, 62, 62), new Color(248, 100, 100), new Color(255, 136, 136),
-      new Color(255, 175, 175), new Color(255, 201, 201) };
-  private static Color[] cyanMapUnitColors = { new Color(0, 105, 105), new Color(0, 170, 170), new Color(0, 215, 215), new Color(0, 245, 245),
-      new Color(121, 255, 255), new Color(195, 255, 255), };
-  private static Color[] orangeMapUnitColors = { new Color(130, 56, 0), new Color(204, 103, 7), new Color(245, 130, 14), new Color(255, 160, 30),
-      new Color(255, 186, 60), new Color(255, 225, 142), };
-  private static Color[] purpleMapUnitColors = { new Color(90, 14, 99), new Color(132, 41, 148), new Color(181, 62, 198), new Color(201, 98, 223),
-    new Color(231, 123, 255), new Color(243, 180, 255), };
+  private static Color[] pinkMapUnitColors = { new Color(142, 26, 26), new Color(199, 62, 62), new Color(248, 100, 100),
+      new Color(255, 136, 136), new Color(255, 175, 175), new Color(255, 201, 201) };
+  private static Color[] cyanMapUnitColors = { new Color(0, 105, 105), new Color(0, 170, 170), new Color(0, 215, 215),
+      new Color(0, 245, 245), new Color(121, 255, 255), new Color(195, 255, 255), };
+  private static Color[] orangeMapUnitColors = { new Color(130, 56, 0), new Color(204, 103, 7), new Color(245, 130, 14),
+      new Color(255, 160, 30), new Color(255, 186, 60), new Color(255, 225, 142), };
+  private static Color[] purpleMapUnitColors = { new Color(90, 14, 99), new Color(132, 41, 148), new Color(181, 62, 198),
+      new Color(201, 98, 223), new Color(231, 123, 255), new Color(243, 180, 255), };
 
   private static HashMap<Color, ColorPalette> buildingColorPalettes = new HashMap<Color, ColorPalette>(){
     private static final long serialVersionUID = 1L;
@@ -81,6 +84,8 @@ public class SpriteLibrary
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
   // TODO: Consider templatizing the key types, and then combining these two maps.
   private static HashMap<UnitSpriteSetKey, UnitSpriteSet> mapUnitSpriteSetMap = new HashMap<UnitSpriteSetKey, UnitSpriteSet>();
+
+  private static Pattern factionNameToKey = Pattern.compile("(.).*\\s(.).*");
 
   // Sprites to hold the images for drawing tentative moves on the map.
   private static Sprite moveCursorLineSprite = null;
@@ -403,66 +408,30 @@ public class SpriteLibrary
 
   private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
+      String faction = key.commanderKey.factionName;
     System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString());
-//    String filestr = getUnitSpriteFilename(key.unitTypeKey);
-    String filestr = ("res/unit/Cobalt Ice/ci"+key.unitTypeKey.toString()+".gif").replaceAll("\\_", "-");
-//    UnitSpriteSet spriteSet = new UnitSpriteSet(loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
-    UnitSpriteSet spriteSet = new UnitSpriteSet(loadAnimation(filestr), baseSpriteSize, baseSpriteSize,
-        getMapUnitColors(key.commanderKey.myColor));
-    mapUnitSpriteSetMap.put(key, spriteSet);
-  }
-
-  private static String getMapUnitSpriteFilename(UnitModel.UnitEnum unitType)
-  {
-    String spriteFile = "";
-    switch (unitType)
+    String filestr;
+    UnitSpriteSet spriteSet;
+    if( Commander.DEFAULT_SPRITE_KEY == faction )
     {
-      case ANTI_AIR:
-        spriteFile = "res/unit/PLinf.gif";
-        break;
-      case APC:
-        spriteFile = "res/unit/apc_map.png";
-        break;
-      case ARTILLERY:
-        spriteFile = "res/unit/artillery_map.png";
-        break;
-      case B_COPTER:
-        break;
-      case BATTLESHIP:
-        break;
-      case BOMBER:
-        break;
-      case CRUISER:
-        break;
-      case FIGHTER:
-        break;
-      case INFANTRY:
-        spriteFile = "res/unit/infantry_map.png";
-        break;
-      case LANDER:
-        break;
-      case MD_TANK:
-        spriteFile = "res/unit/mdtank_map.png";
-        break;
-      case MECH:
-        spriteFile = "res/unit/mech_map.png";
-        break;
-      case MOBILESAM:
-        break;
-      case RECON:
-        spriteFile = "res/unit/recon_map.png";
-        break;
-      case ROCKETS:
-        break;
-      case SUB:
-        break;
-      case T_COPTER:
-        break;
-      case TANK:
-        spriteFile = "res/unit/tank_map.png";
-        break;
+      filestr = "res/unit/" + key.unitTypeKey.toString() + "_map.png";
+      spriteSet = new UnitSpriteSet(loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
+          getMapUnitColors(key.commanderKey.myColor));
     }
-    return spriteFile;
+    else
+    {
+      Matcher matcher = factionNameToKey.matcher(faction);
+      String facAbbrev;
+      // if the faction is a real faction, pull out the first two initials, otherwise use the whole faction as key
+      if( matcher.find() )
+        facAbbrev = (matcher.group(1) + matcher.group(2)).toLowerCase();
+      else
+        facAbbrev = faction;
+      filestr = ("res/unit/"+ faction + "/" + facAbbrev + key.unitTypeKey.toString() + ".gif");//.replaceAll("\\_", "-")
+      spriteSet = new UnitSpriteSet(loadAnimation(filestr), baseSpriteSize, baseSpriteSize,
+          getMapUnitColors(key.commanderKey.myColor));
+    }
+    mapUnitSpriteSetMap.put(key, spriteSet);
   }
 
   public static Sprite getMapUnitHPSprites()
@@ -680,7 +649,7 @@ public class SpriteLibrary
       Graphics g = overlay.getFrame(0).getGraphics();
       g.drawImage(coMug, mugW, 1, -mugW, coMug.getHeight(), null);
       Graphics g1 = overlay.getFrame(1).getGraphics();
-      g1.drawImage(coMug, OVERLAY_WIDTH-mugW, 1, null);
+      g1.drawImage(coMug, OVERLAY_WIDTH - mugW, 1, null);
 
       coOverlays.put(co, overlay);
     }
@@ -693,21 +662,21 @@ public class SpriteLibrary
   public static BufferedImage getCoOverlayPowerBar(Commander co, int maxAP, double currentAP)
   {
     final int powerDrawScaleW = 2;
-    BufferedImage bar = SpriteLibrary.createDefaultBlankSprite(maxAP*powerDrawScaleW, 5);
+    BufferedImage bar = SpriteLibrary.createDefaultBlankSprite(maxAP * powerDrawScaleW, 5);
     Graphics barGfx = bar.getGraphics();
 
     // Get the CO's colors
     Color[] palette = SpriteLibrary.mapUnitColorPalettes.get(co.myColor).paletteColors;
 
     // Draw the bar
-    barGfx.setColor(Color.BLACK);               // Outside edge
+    barGfx.setColor(Color.BLACK); // Outside edge
     barGfx.drawRect(0, 0, bar.getWidth(), 4);
-    barGfx.setColor(palette[5]);                // Inside - empty
+    barGfx.setColor(palette[5]); // Inside - empty
     barGfx.fillRect(0, 1, bar.getWidth(), 3);
-    barGfx.setColor(palette[2]);                // Inside - full
-    barGfx.drawLine(0, 1, (int)(Math.floor(currentAP) * powerDrawScaleW), 1);
-    barGfx.drawLine(0, 2, (int)(currentAP * powerDrawScaleW), 2);
-    barGfx.drawLine(0, 3, (int)(Math.ceil(currentAP * powerDrawScaleW)), 3);
+    barGfx.setColor(palette[2]); // Inside - full
+    barGfx.drawLine(0, 1, (int) (Math.floor(currentAP) * powerDrawScaleW), 1);
+    barGfx.drawLine(0, 2, (int) (currentAP * powerDrawScaleW), 2);
+    barGfx.drawLine(0, 3, (int) (Math.ceil(currentAP * powerDrawScaleW)), 3);
 
     return bar;
   }
@@ -808,7 +777,7 @@ public class SpriteLibrary
 
   public static BufferedImage getGameOverDefeatText()
   {
-    if(null == gameOverDefeatText)
+    if( null == gameOverDefeatText )
     {
       gameOverDefeatText = loadSpriteSheetFile("res/ui/defeat.png");
     }
@@ -817,7 +786,7 @@ public class SpriteLibrary
 
   public static BufferedImage getGameOverVictoryText()
   {
-    if(null == gameOverVictoryText)
+    if( null == gameOverVictoryText )
     {
       gameOverVictoryText = loadSpriteSheetFile("res/ui/victory.png");
     }
@@ -829,14 +798,14 @@ public class SpriteLibrary
 
   private static HashMap<CommanderLibrary.CommanderEnum, CommanderSpriteSet> coSpriteSets = new HashMap<CommanderLibrary.CommanderEnum, CommanderSpriteSet>();
 
-  public static CommanderSpriteSet getCommanderSprites( CommanderLibrary.CommanderEnum whichCo )
+  public static CommanderSpriteSet getCommanderSprites(CommanderLibrary.CommanderEnum whichCo)
   {
     CommanderSpriteSet css = null;
 
-    if(!coSpriteSets.containsKey(whichCo))
+    if( !coSpriteSets.containsKey(whichCo) )
     {
       // We don't have it, so we need to load it.
-      String baseFileName = getCommanderBaseSpriteName( whichCo );
+      String baseFileName = getCommanderBaseSpriteName(whichCo);
 
       BufferedImage body = createBlankImageIfNull(loadSpriteSheetFile(baseFileName + ".png"));
       BufferedImage head = createBlankImageIfNull(loadSpriteSheetFile(baseFileName + "_face.png"));
@@ -850,10 +819,10 @@ public class SpriteLibrary
     return css;
   }
 
-  private static String getCommanderBaseSpriteName( CommanderLibrary.CommanderEnum whichCo )
+  private static String getCommanderBaseSpriteName(CommanderLibrary.CommanderEnum whichCo)
   {
     String str = "res/co/";
-    switch(whichCo)
+    switch (whichCo)
     {
       case LION:
         str += "lion";
@@ -865,8 +834,8 @@ public class SpriteLibrary
         str += "strong";
         break;
       case NOONE:
-        default:
-          // Not a real Commander. Gonna fall back to placeholder images.
+      default:
+        // Not a real Commander. Gonna fall back to placeholder images.
     }
     return str;
   }

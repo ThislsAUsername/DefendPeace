@@ -77,14 +77,14 @@ public class Sprite
     else
     {
       ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
-      ColorConvertOp op = new ColorConvertOp(cs, null);
+      //      ColorConvertOp op = new ColorConvertOp(cs, null);
       for( ImageFrame image : spriteSet )
       {
         if( null != image )
         {
           BufferedImage master = new BufferedImage(spriteWidthPx, spriteHeightPx, BufferedImage.TYPE_INT_ARGB);
-          master.getGraphics().drawImage(op.filter(image.getImage(), null), 0, 0, null);
-          //          master.getGraphics().drawImage(image.getImage(), 0, 0, null);
+          //          master.getGraphics().drawImage(op.filter(image.getImage(), null), 0, 0, null);
+          master.getGraphics().drawImage(image.getImage(), 0, 0, null);
           spriteImages.add(master);
         }
       }
@@ -183,24 +183,25 @@ public class Sprite
       }
     }
   }
+
   public void colorizeFromGray(Color[] newColors)
   {
-    for( BufferedImage bi : spriteImages )
-    {
-      for( int x = 0; x < bi.getWidth(); ++x )
-      {
-        for( int y = 0; y < bi.getHeight(); ++y )
-        {
-          Color tint = new Color(bi.getRGB(x, y));
-          if( ((long) Integer.MAX_VALUE & bi.getRGB(x, y)) > 0 && tint.getRed() == tint.getGreen()
-              && tint.getGreen() == tint.getBlue() )
-          {
-            int val = tint.getBlue() / 50;
-            if( val > 0 )
-              bi.setRGB(x, y, newColors[val - 1].getRGB());
-          }
-        }
-      }
-    }
+    //    for( BufferedImage bi : spriteImages )
+    //    {
+    //      for( int x = 0; x < bi.getWidth(); ++x )
+    //      {
+    //        for( int y = 0; y < bi.getHeight(); ++y )
+    //        {
+    //          Color tint = new Color(bi.getRGB(x, y));
+    //          if( ((long) Integer.MAX_VALUE & bi.getRGB(x, y)) > 0 && tint.getRed() == tint.getGreen()
+    //              && tint.getGreen() == tint.getBlue() )
+    //          {
+    //            int val = tint.getBlue() / 50;
+    //            if( val > 0 )
+    //              bi.setRGB(x, y, newColors[val - 1].getRGB());
+    //          }
+    //        }
+    //      }
+    //    }
   }
 }

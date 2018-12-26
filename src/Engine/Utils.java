@@ -1,12 +1,17 @@
 package Engine;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Queue;
+import java.util.Scanner;
 
 import CommandingOfficers.Commander;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.MapInfo;
+import Terrain.TerrainType;
 import Units.Unit;
 import Units.Weapons.Weapon;
 
@@ -67,7 +72,7 @@ public class Utils
     for( XYCoord loc : locations )
     {
       // Add any location that is empty and supports movement of the cargo unit.
-      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport )
+      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
           && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
       {
         dropoffLocations.add(loc);
@@ -392,5 +397,38 @@ public class Utils
       }
     }
     return industries;
+  }
+
+  public static String[] fetchFactionNames()
+  {
+    ArrayList<String> importFactions = new ArrayList<String>();
+
+    importFactions.add(Commander.DEFAULT_SPRITE_KEY);
+
+    // This try{} is to safeguard us from exceptions if the res/unit folder doesn't exist.
+    // If it fails, we don't need to do anything in the catch{} since we just won't have anything in our list.
+    try
+    {
+      final File folder = new File("res/unit");
+
+      for( final File fileEntry : folder.listFiles() )
+      {
+        if( fileEntry.isDirectory() )
+        {
+          String factionName = fileEntry.getName();
+          // Faction names always have spaces
+          if( factionName.contains(" ") )
+          {
+            importFactions.add(factionName);
+          }
+        }
+      }
+    }
+    catch (NullPointerException e)
+    {
+      System.out.println("WARNING: res/map directory does not exist.");
+    }
+
+    return importFactions.toArray(new String[importFactions.size()]);
   }
 }

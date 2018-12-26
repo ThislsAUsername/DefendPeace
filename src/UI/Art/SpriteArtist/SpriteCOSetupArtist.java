@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 
 import CommandingOfficers.CommanderLibrary;
 import CommandingOfficers.CommanderLibrary.CommanderEnum;
+import Engine.XYCoord;
 import Terrain.MapInfo;
 import UI.COSetupController;
 
@@ -99,6 +100,19 @@ public class SpriteCOSetupArtist
       int col = myControl.getPlayerColor(i);
       // Draw the box, the color, and the CO portrait.
       drawCoPortrait(g, co, col, drawXCenter, drawYCenter);
+
+      String faction = COSetupController.spriteSetKeys[myControl.getPlayerFaction(i)];
+      
+      int menuTextWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth();
+      int menuTextHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight();
+
+      int signWidth = ((menuTextWidth * faction.length()) + 4) * drawScale;
+      int signHeight = (menuTextHeight + 4) * drawScale;
+      
+      XYCoord signTopLeft = new XYCoord(drawXCenter - signWidth / 2, drawYCenter + COSelectionAreaHeight/4 + drawScale*5 - signHeight / 2);
+      
+      SpriteLibrary.drawTextSmallCaps(g, faction, signTopLeft.xCoord + 2 * drawScale, signTopLeft.yCoord + 2 * drawScale,
+          drawScale);
     }
   }
 
@@ -111,7 +125,7 @@ public class SpriteCOSetupArtist
     int[] upXPoints = {xCenter-(4*drawScale), xCenter, xCenter+drawScale, xCenter+(5*drawScale)};
     int[] upYPoints = {yCenter-(yBuffer*drawScale), yCenter-((yBuffer+4)*drawScale), yCenter-((yBuffer+4)*drawScale), yCenter-(yBuffer*drawScale)};
     int[] dnXPoints = {xCenter-(4*drawScale), xCenter, xCenter+drawScale, xCenter+(5*drawScale)};
-    int[] dnYPoints = {yCenter+(yBuffer*drawScale), yCenter+((yBuffer+4)*drawScale), yCenter+((yBuffer+4)*drawScale), yCenter+(yBuffer*drawScale)};
+    int[] dnYPoints = {yCenter+(yBuffer*drawScale)+ drawScale*3, yCenter+((yBuffer+4)*drawScale)+ drawScale*3, yCenter+((yBuffer+4)*drawScale)+ drawScale*3, yCenter+(yBuffer*drawScale)+ drawScale*3};
 
     // Draw the arrows around the focused player slot.
     g.setColor(MENUFRAMECOLOR);

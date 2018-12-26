@@ -10,6 +10,7 @@ import Engine.GameInstance;
 import Engine.IController;
 import Engine.MapController;
 import Engine.OptionSelector;
+import Engine.Utils;
 import Terrain.GameMap;
 import UI.InputHandler.InputAction;
 import UI.Art.SpriteArtist.SpriteLibrary;
@@ -27,6 +28,8 @@ public class COSetupController implements IController
   private GameBuilder gameBuilder = null;
   OptionSelector[] coSelectors;
   OptionSelector[] colorSelectors;
+  OptionSelector[] spriteSelectors;
+  public static String[] spriteSetKeys;
 
   public COSetupController( GameBuilder builder )
   {
@@ -37,6 +40,9 @@ public class COSetupController implements IController
     // One entry of two numbers for each player, for Commander and color.
     coSelectors = new OptionSelector[numCos];
     colorSelectors = new OptionSelector[numCos];
+    spriteSelectors = new OptionSelector[numCos];
+    
+    spriteSetKeys = Utils.fetchFactionNames();
 
     // Start by making default CO/color selections.
     for(int co = 0; co < numCos; ++co)
@@ -44,11 +50,13 @@ public class COSetupController implements IController
       // Set up our option selection framework for CO and color choices.
       coSelectors[co] = new OptionSelector(CommanderLibrary.getCommanderList().size());
       colorSelectors[co] = new OptionSelector(SpriteLibrary.coColorList.length);
+      spriteSelectors[co] = new OptionSelector(spriteSetKeys.length);
 
       // Defaulting to the first available CO, and assigning colors in sequence.
       // TODO: Consider changing this to sequential or random COs once we have enough.
       coSelectors[co].setSelectedOption(0); // Commander choice
       colorSelectors[co].setSelectedOption(co); // Color choice
+      spriteSelectors[co].setSelectedOption(0); // sprite set choice
     }
   }
 
@@ -64,7 +72,7 @@ public class COSetupController implements IController
         for(int i = 0; i < coSelectors.length; ++i)
         {
           gameBuilder.addCO(CommanderLibrary.makeCommander(coList.get(coSelectors[i].getSelectionNormalized()),
-              SpriteLibrary.coColorList[colorSelectors[i].getSelectionNormalized()]));
+              SpriteLibrary.coColorList[colorSelectors[i].getSelectionNormalized()], spriteSetKeys[spriteSelectors[i].getSelectionNormalized()]));
         }
 
         // Build the CO list and the new map and create the game instance.
@@ -94,6 +102,9 @@ public class COSetupController implements IController
       case RIGHT:
         playerSelector.handleInput(action);
         break;
+      case SEEK:
+        spriteSelectors[playerSelector.getSelectionNormalized()].handleInput(InputAction.RIGHT);
+        break;
       case NO_ACTION:
         default:
           System.out.println("Warning: Unsupported input " + action + " in CO setup menu.");
@@ -114,5 +125,10 @@ public class COSetupController implements IController
   public int getPlayerColor(int p)
   {
     return colorSelectors[p].getSelectionNormalized();
+  }
+
+  public int getPlayerFaction(int p)
+  {
+    return spriteSelectors[p].getSelectionNormalized();
   }
 }
