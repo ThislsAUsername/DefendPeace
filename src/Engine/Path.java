@@ -210,6 +210,11 @@ public class Path
       this.x = x;
       this.y = y;
     }
+    @Override
+    public String toString()
+    {
+      return String.format("(%s, %s)", x, y);
+    }
   }
 
   /**
@@ -221,5 +226,18 @@ public class Path
     {
       waypoints.remove(waypoints.size() - 1);
     }
+  }
+
+  @Override
+  public String toString()
+  {
+    StringBuffer sb = new StringBuffer("[");
+    for( PathNode xyc : waypoints )
+    {
+      sb.append(xyc);
+      if( xyc != getEnd() ) sb.append(", ");
+    }
+    sb.append("]");
+    return sb.toString();
   }
 }
