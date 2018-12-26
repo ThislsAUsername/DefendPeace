@@ -40,7 +40,7 @@ public class InfantrySpamAI implements AIController
   public void initTurn(GameMap gameMap)
   {
     turnNum++;
-    logger.append(String.format("[======== ISAI initializing turn %s for %s =========]\n", turnNum, myCo));
+    log(String.format("[======== ISAI initializing turn %s for %s =========]", turnNum, myCo));
 
     // Make sure we don't have any hang-ons from last time.
     actions.clear();
@@ -71,7 +71,7 @@ public class InfantrySpamAI implements AIController
   @Override
   public void endTurn()
   {
-    logger.append(String.format("[======== ISAI ending turn %s for %s =========]\n", turnNum, myCo));
+    log(String.format("[======== ISAI ending turn %s for %s =========]", turnNum, myCo));
     System.out.println(logger.toString());
     logger = new StringBuffer();
   }
@@ -166,7 +166,13 @@ public class InfantrySpamAI implements AIController
 
     // Return the next action, or null if actions is empty.
     GameAction nextAction = actions.poll();
-    logger.append(String.format("  Action: %s\n", nextAction));
+    log(String.format("  Action: %s", nextAction));
     return nextAction;
+  }
+
+  private void log(String message)
+  {
+    //System.out.println(message);
+    logger.append(message).append('\n');
   }
 }
