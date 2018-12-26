@@ -145,7 +145,7 @@ public class InfantrySpamAI implements AIController
           log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
         } while( !validTarget && (index < unownedProperties.size()) );      // Loop until we run out of properties to check.
 
-        if( path.getPathLength() == 0)
+        if( !validTarget )
         {
           log("    Failed to find a path to a capturable property. Waiting");
           // We couldn't find a valid move point (are we on an island?). Just give up.
