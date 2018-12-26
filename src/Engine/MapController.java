@@ -579,6 +579,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
             {
               // If aiAction fails to execute, the AI's turn is over. We don't want
               // to waste time getting more actions if it can't build them properly.
+              System.out.println("WARNING! AI Action " + aiAction.toString() + " Failed to execute!");
               endAITurn = true;
             }
           }
