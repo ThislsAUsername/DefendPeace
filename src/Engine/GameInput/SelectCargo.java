@@ -77,7 +77,7 @@ class SelectCargo extends GameInputState<Object> // Object, not Unit, because "D
   @Override
   public void back()
   {
-    if( myStateData.unitLocationMap.isEmpty() )
+    if( null != myStateData.unitLocationMap && myStateData.unitLocationMap.isEmpty() )
     {
       myStateData.unitLocationMap = null;
     }
