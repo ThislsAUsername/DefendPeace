@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class CommanderLibrary
 {
-  public enum CommanderEnum { STRONG, LION, PATCH, NOONE };
+  public enum CommanderEnum { STRONG, LION, BEAR_BULL, PATCH, CINDER, NOONE };
   
   private static ArrayList<CommanderInfo> commanderList = null;
 
@@ -23,6 +23,8 @@ public class CommanderLibrary
     commanderList = new ArrayList<CommanderInfo>();
     commanderList.add( CommanderStrong.getInfo() );
     commanderList.add( CommanderPatch.getInfo() );
+    commanderList.add( CommanderBear_Bull.getInfo() );
+    commanderList.add( CommanderCinder.getInfo() );
   }
 
   public static Commander makeCommander( CommanderInfo info, Color color, String faction )
@@ -35,8 +37,14 @@ public class CommanderLibrary
         break;
       case LION: // TODO
         break;
+      case BEAR_BULL:
+        co = new CommanderBear_Bull();
+        break;
       case PATCH:
         co = new CommanderPatch(); // TODO
+        break;
+      case CINDER:
+        co = new CommanderCinder();
         break;
       case NOONE:
         default:

@@ -164,7 +164,7 @@ public interface GameAction
       buildLocation = where;
       boolean isValid = true;
       isValid &= (null != gameMap) && (null != who) && (null != what) && (null != where);
-      isValid &= (who.money >= what.moneyCost);
+      isValid &= (who.money >= what.getCost());
 
       if( isValid )
       {

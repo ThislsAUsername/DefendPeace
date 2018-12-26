@@ -205,9 +205,9 @@ public class Commander extends GameEventListener
   }
 
   /** Get the list of units this commander can build from the given property type. */
-  public ArrayList<UnitModel> getShoppingList(TerrainType buyLocation)
+  public ArrayList<UnitModel> getShoppingList(Location buyLocation)
   {
-    return (unitProductionByTerrain.get(buyLocation) != null) ? unitProductionByTerrain.get(buyLocation)
+    return (unitProductionByTerrain.get(buyLocation.getEnvironment().terrainType) != null) ? unitProductionByTerrain.get(buyLocation.getEnvironment().terrainType)
         : new ArrayList<UnitModel>();
   }
 
@@ -253,10 +253,10 @@ public class Commander extends GameEventListener
   public void activateAbility(CommanderAbility ability)
   {
     modifyAbilityPower(-ability.getCost());
-    myActiveAbilityName = ability.myName;
-    // default power charge
+    // default power boost
     addCOModifier(new CODamageModifier(10));
     addCOModifier(new CODefenseModifier(10));
+    myActiveAbilityName = ability.toString();
   }
 
   protected void modifyAbilityPower(double amount)
@@ -306,9 +306,9 @@ public class Commander extends GameEventListener
     {
       double power = 0;
       // Add up the funds value of the damage done to both participants.
-      power += myHPLoss / minion.model.maxHP * minion.model.moneyCost;
+      power += myHPLoss / minion.model.maxHP * minion.model.getCost();
       // The damage we deal is worth half as much as the damage we take, to help powers be a comeback mechanic.
-      power += myHPDealt / enemy.model.maxHP * enemy.model.moneyCost / 2;
+      power += myHPDealt / enemy.model.maxHP * enemy.model.getCost() / 2;
       power /= CHARGERATIO_FUNDS; // Turn funds into units of power
       power += myHPDealt / CHARGERATIO_HP; // Add power based on HP damage dealt; rewards aggressiveness.
 
