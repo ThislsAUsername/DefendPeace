@@ -275,6 +275,11 @@ public class Commander extends GameEventListener
     if( myAbilityPower > maxPower )
       myAbilityPower = maxPower;
   }
+  
+  public int getRepairPower()
+  {
+    return 2;
+  }
 
   /**
    * Track battles that happen, and get ability power based on combat this CO is in.

@@ -95,19 +95,15 @@ public class Unit
 
         if( HP < model.maxHP )
         {
-          int neededHP = Math.min(model.maxHP - getHP(), 2); // will be 0, 1, 2
+          int neededHP = Math.min(model.maxHP - getHP(), CO.getRepairPower()); // will be 0, 1, 2
           double proportionalCost = model.getCost() / model.maxHP;
-          if( CO.money >= neededHP * proportionalCost )
+          int repairedHP = neededHP;
+          while (CO.money < repairedHP * proportionalCost)
           {
-            CO.money -= neededHP * proportionalCost;
-            alterHP(2);
+            repairedHP--;
           }
-          else if( CO.money >= proportionalCost )
-          {
-            // case will only be used if neededHP is 2
-            CO.money -= proportionalCost;
-            alterHP(1);
-          }
+          CO.money -= repairedHP * proportionalCost;
+          alterHP(repairedHP);
         }
       }
 
@@ -206,6 +202,8 @@ public class Unit
     // Change the unit's health, but don't grant more
     // than 10 HP, and don't drop HP to zero.
     HP = Math.max(1, Math.min(10, getHP() + change));
+    if( HP > 9 )
+      HP = 10;
     return HP - before;
   }
 

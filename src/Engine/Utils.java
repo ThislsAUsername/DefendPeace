@@ -398,7 +398,7 @@ public class Utils
     }
     return industries;
   }
-
+  
   public static String[] fetchFactionNames()
   {
     ArrayList<String> importFactions = new ArrayList<String>();

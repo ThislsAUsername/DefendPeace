@@ -101,6 +101,7 @@ public class BattleInstance
     public double defenseFactor;
     public double terrainDefense;
     public boolean isCounter;
+    public double luckMax = 10;
     public double luckDamage;
     public BattleInstance combatRef;
 
@@ -129,7 +130,7 @@ public class BattleInstance
       //    [B*ACO/100+R]*(AHP/10)*[(200-(DCO+DTR*DHP))/100]
       double overallPower = (baseDamage * attackFactor / 100) * attackerHP / 10;
       double overallDefense = ((200 - (defenseFactor + terrainDefense * defenderHP)) / 100);
-      luckDamage = (int)(Math.random()*10) * (attackerHP / 10) * (overallDefense / 10);
+      luckDamage = (int)(Math.random()*luckMax) * (attackerHP / 10) * (overallDefense / 10);
       return overallPower * overallDefense / 10 + luckDamage; // original formula was % damage, now it must be HP of damage
     }
   }
