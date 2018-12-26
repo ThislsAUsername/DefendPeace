@@ -8,7 +8,7 @@ import Units.Weapons.WeaponModel;
 
 public class BomberModel extends UnitModel
 {
-  private static final int UNIT_COST = 2200;
+  private static final int UNIT_COST = 22000;
   private static final int MAX_FUEL = 99;
   private static final int IDLE_FUEL_BURN = 5;
   private static final int VISION_RANGE = 2;
