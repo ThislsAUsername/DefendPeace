@@ -8,6 +8,10 @@ import Engine.GameEvents.GameEventQueue;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
+import Terrain.Environment;
+import Terrain.GameMap;
+import Terrain.Location;
+import Terrain.Environment.Weathers;
 
 public class GameInstance
 {
@@ -119,14 +123,18 @@ public class GameInstance
    */
   public GameEventQueue turn()
   {
+    GameEventQueue events = new GameEventQueue();
+    
     // Store the cursor location for the current CO.
     playerCursors.put(activeCoNum, new XYCoord(cursorX, cursorY));
+    int coTurns = 0;
 
     if( null != activeCO) activeCO.endTurn();
 
     // Find the next non-defeated CO.
     do
     {
+      coTurns++;
       activeCoNum++;
       if( activeCoNum > commanders.length - 1 )
       {
@@ -135,9 +143,30 @@ public class GameInstance
       activeCO = commanders[activeCoNum];
     } while (activeCO.isDefeated);
 
+    // Set weather conditions based on forecast
+    for( int i = 0; i < gameMap.mapWidth; i++ )
+    {
+      for( int j = 0; j < gameMap.mapHeight; j++ )
+      {
+        Location loc = gameMap.getLocation(i, j);
+        for( int turns = 0; turns < coTurns; turns++ )
+        {
+          if( loc.forecast.isEmpty() )
+          {
+            loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, Weathers.CLEAR));
+            break;
+          }
+          else
+          {
+            loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, loc.forecast.poll()));
+          }
+        }
+      }
+    }
+
     // Set the cursor to the new CO's last known cursor position.
     setCursorLocation(playerCursors.get(activeCoNum).xCoord, playerCursors.get(activeCoNum).yCoord);
-
+    
     // Initialize the next turn, recording any events that will occur.
     return activeCO.initTurn(gameMap);
   }

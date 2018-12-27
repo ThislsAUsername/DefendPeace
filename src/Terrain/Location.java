@@ -1,7 +1,10 @@
 package Terrain;
 
+import java.util.ArrayDeque;
+
 import CommandingOfficers.Commander;
 import Engine.XYCoord;
+import Terrain.Environment.Weathers;
 import Units.Unit;
 
 public class Location
@@ -11,6 +14,7 @@ public class Location
   private Unit resident = null;
   private final XYCoord coords;
   private boolean highlightSet = false;
+  public ArrayDeque<Weathers> forecast = new ArrayDeque<>();
 
   public Environment getEnvironment()
   {
@@ -87,5 +91,18 @@ public class Location
     owner = null;
     resident = null;
     coords = coordinates;
+  }
+  
+  public void setForecast(Weathers w, int duration)
+  {
+    setEnvironment(Environment.getTile(getEnvironment().terrainType, w));
+    for( int turns = 0; turns < duration; turns++ )
+    {
+      forecast.poll();
+    }
+    for( int turns = 0; turns < duration; turns++ )
+    {
+      forecast.push(w);
+    }
   }
 }
