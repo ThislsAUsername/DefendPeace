@@ -2,41 +2,50 @@ package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.COModifier;
 import Terrain.Environment;
-import Terrain.Environment.Weathers;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
+import Terrain.Environment.Weathers;
 import Units.Unit;
 import Units.UnitModel;
+import Units.UnitModel.ChassisEnum;
 
-public class BMOlaf extends Commander
+public class GEDrake extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Olaf", new instantiator());
-
+  private static final CommanderInfo coInfo = new CommanderInfo("Drake", new instantiator());
   private static class instantiator implements COMaker
   {
     @Override
     public Commander create()
     {
-      return new BMOlaf();
+      return new GEDrake();
     }
   }
 
-  public BMOlaf()
+  public GEDrake()
   {
     super(coInfo);
 
     for( UnitModel um : unitModels )
     {
+      if( um.chassis == ChassisEnum.AIR_HIGH || um.chassis == ChassisEnum.AIR_LOW )
+      {
+        um.modifyDamageRatio(20);
+      }
+      if( um.chassis == ChassisEnum.SHIP || um.chassis == ChassisEnum.SUBMERGED )
+      {
+        um.movePower += 1;
+        um.modifyDefenseRatio(25);
+      }
+
       for( TerrainType terrain : TerrainType.TerrainTypeList )
       {
-        um.propulsion.setMoveCost(Weathers.RAIN, terrain, um.propulsion.getMoveCost(Weathers.SNOW, terrain));
-        um.propulsion.setMoveCost(Weathers.SNOW, terrain, um.propulsion.getMoveCost(Weathers.CLEAR, terrain));
+        um.propulsion.setMoveCost(Weathers.RAIN, terrain, um.propulsion.getMoveCost(Weathers.CLEAR, terrain));
       }
     }
 
-    addCommanderAbility(new Blizzard(this));
-    addCommanderAbility(new WinterFury(this));
+    addCommanderAbility(new Tsunami(this));
+    addCommanderAbility(new Typhoon(this));
   }
 
   public static CommanderInfo getInfo()
@@ -44,13 +53,14 @@ public class BMOlaf extends Commander
     return coInfo;
   }
 
-  private static class Blizzard extends CommanderAbility implements COModifier
+
+  private static class Tsunami extends CommanderAbility implements COModifier
   {
-    private static final String NAME = "Blizzard";
-    private static final int COST = 3;
+    private static final String NAME = "Tsunami";
+    private static final int COST = 4;
     GameMap map;
 
-    Blizzard(Commander commander)
+    Tsunami(Commander commander)
     {
       super(commander, NAME, COST);
     }
@@ -70,32 +80,28 @@ public class BMOlaf extends Commander
         for( int j = 0; j < map.mapHeight; j++ )
         {
           Location loc = map.getLocation(i, j);
-          loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, Weathers.SNOW));
+          Unit victim = loc.getResident();
+          if( victim != null && myCommander.isEnemy(victim.CO) )
+          {
+            victim.alterHP(-1);
+            victim.fuel /= 2;
+          }
         }
       }
     }
 
     @Override
     public void revert(Commander commander)
-    {
-      for( int i = 0; i < map.mapWidth; i++ )
-      {
-        for( int j = 0; j < map.mapHeight; j++ )
-        {
-          Location loc = map.getLocation(i, j);
-          loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, Weathers.CLEAR));
-        }
-      }
-    }
+    {}
   }
 
-  private static class WinterFury extends CommanderAbility implements COModifier
+  private static class Typhoon extends CommanderAbility implements COModifier
   {
-    private static final String NAME = "Winter Fury";
+    private static final String NAME = "Typhoon";
     private static final int COST = 7;
     GameMap map;
 
-    WinterFury(Commander commander)
+    Typhoon(Commander commander)
     {
       // as we start in Bear form, UpTurn is the correct starting name
       super(commander, NAME, COST);
@@ -116,11 +122,12 @@ public class BMOlaf extends Commander
         for( int j = 0; j < map.mapHeight; j++ )
         {
           Location loc = map.getLocation(i, j);
-          loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, Weathers.SNOW));
+          loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, Weathers.RAIN));
           Unit victim = loc.getResident();
           if( victim != null && myCommander.isEnemy(victim.CO) )
           {
             victim.alterHP(-2);
+            victim.fuel /= 2;
           }
         }
       }
