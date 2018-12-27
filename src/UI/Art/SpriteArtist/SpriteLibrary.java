@@ -659,22 +659,27 @@ public class SpriteLibrary
   public static BufferedImage getCoOverlayPowerBar(Commander co, int maxAP, double currentAP)
   {
     final int powerDrawScaleW = 2;
-    BufferedImage bar = SpriteLibrary.createDefaultBlankSprite(maxAP * powerDrawScaleW, 5);
-    Graphics barGfx = bar.getGraphics();
+    BufferedImage bar = null;
+    if( maxAP > 0 )
+    {
+      bar = SpriteLibrary.createDefaultBlankSprite(maxAP * powerDrawScaleW, 5);
+      Graphics barGfx = bar.getGraphics();
 
-    // Get the CO's colors
-    Color[] palette = SpriteLibrary.mapUnitColorPalettes.get(co.myColor).paletteColors;
+      // Get the CO's colors
+      Color[] palette = SpriteLibrary.mapUnitColorPalettes.get(co.myColor).paletteColors;
 
-    // Draw the bar
-    barGfx.setColor(Color.BLACK); // Outside edge
-    barGfx.drawRect(0, 0, bar.getWidth(), 4);
-    barGfx.setColor(palette[5]); // Inside - empty
-    barGfx.fillRect(0, 1, bar.getWidth(), 3);
-    barGfx.setColor(palette[2]); // Inside - full
-    barGfx.drawLine(0, 1, (int) (Math.floor(currentAP) * powerDrawScaleW), 1);
-    barGfx.drawLine(0, 2, (int) (currentAP * powerDrawScaleW), 2);
-    barGfx.drawLine(0, 3, (int) (Math.ceil(currentAP * powerDrawScaleW)), 3);
-
+      // Draw the bar
+      barGfx.setColor(Color.BLACK); // Outside edge
+      barGfx.drawRect(0, 0, bar.getWidth(), 4);
+      barGfx.setColor(palette[5]); // Inside - empty
+      barGfx.fillRect(0, 1, bar.getWidth(), 3);
+      barGfx.setColor(palette[2]); // Inside - full
+      barGfx.drawLine(0, 1, (int) (Math.floor(currentAP) * powerDrawScaleW), 1);
+      barGfx.drawLine(0, 2, (int) (currentAP * powerDrawScaleW), 2);
+      barGfx.drawLine(0, 3, (int) (Math.ceil(currentAP * powerDrawScaleW)), 3);
+    }
+    else
+      bar = SpriteLibrary.createDefaultBlankSprite(3, 5);
     return bar;
   }
 
