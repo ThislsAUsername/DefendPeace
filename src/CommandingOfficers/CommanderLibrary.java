@@ -53,6 +53,11 @@ public class CommanderLibrary
     commanderList.add( BWBrennerBasic.getInfo() );
     commanderList.add( BWBrennerComp.getInfo() );
     commanderList.add( BWBrennerCS.getInfo() );
+    commanderList.add( BWIsabellaBasic.getInfo() );
+    commanderList.add( BWIsabellaCS.getInfo() );
+    commanderList.add( BWLinCS.getInfo() );
+    commanderList.add( BWWillCS.getInfo() );
+    commanderList.add( BWWillBasic.getInfo() );
   }
 
   public static Commander makeCommander( CommanderInfo info, Color color, String faction )
