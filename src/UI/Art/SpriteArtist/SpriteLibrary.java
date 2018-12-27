@@ -99,6 +99,7 @@ public class SpriteLibrary
   // Letters for writing in menus.
   private static Sprite letterSpritesSmallCaps = null;
   private static Sprite numberSpritesSmallCaps = null;
+  private static Sprite symbolSpritesSmallCaps = null;
 
   // Commander overlay backdrops (shows commander name and funds) for each Commander in the game.
   private static HashMap<Commander, Sprite> coOverlays = new HashMap<Commander, Sprite>();
@@ -547,6 +548,23 @@ public class SpriteLibrary
   }
 
   /**
+   * This function returns the sprite sheet for symbol characters that go along with
+   * the letter sprites from getLettersSmallCaps().
+   * Returns a Sprite containing the digits 0-9, one number per frame. The image
+   * is loaded, and the Sprite is created, on the first call to this function, and simply
+   * returned thereafter. Numbers are stored in order starting from 0.
+   * @return A Sprite object containing the in-game menu font for small-caps numbers.
+   */
+  public static Sprite getSymbolsSmallCaps()
+  {
+    if( null == symbolSpritesSmallCaps )
+    {
+      symbolSpritesSmallCaps = new Sprite(loadSpriteSheetFile("res/ui/symbols.png"), 5, 6);
+    }
+    return symbolSpritesSmallCaps;
+  }
+
+  /**
    * Draws the provided text at the provided location, using the standard alphanumeric sprite set.
    * @param g Graphics object to draw the text.
    * @param text Text to be drawn as sprited letters.
@@ -611,6 +629,15 @@ public class SpriteLibrary
       {
         int letterIndex = text.charAt(i) - '0';
         g.drawImage(getNumbersSmallCaps().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+      }
+      else // Assume symbolic
+      {
+        final String charKey = "%./-~,;:!?";
+        int symbolIndex = charKey.indexOf(text.charAt(i));
+        if( symbolIndex >= 0 )
+        {
+          g.drawImage(getSymbolsSmallCaps().getFrame(symbolIndex), x, y, menuTextWidth, menuTextHeight, null);
+        }
       }
     }
   }
