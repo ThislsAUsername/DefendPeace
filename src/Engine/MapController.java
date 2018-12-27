@@ -4,9 +4,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Queue;
 
-import AI.InfantrySpamAI;
-import CommandingOfficers.Commander;
-import CommandingOfficers.CommanderLibrary.CommanderEnum;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
