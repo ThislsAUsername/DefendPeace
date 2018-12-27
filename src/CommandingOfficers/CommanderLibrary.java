@@ -73,6 +73,9 @@ public class CommanderLibrary
 
     commanderList.add( IDSCaulderD2D.getInfo() );
     commanderList.add( IDSCaulderSCOP.getInfo() );
+    commanderList.add( IDSPennyCS.getInfo() );
+    commanderList.add( IDSPennyRNG.getInfo() );
+    commanderList.add( IDSPennyBasic.getInfo() );
     commanderList.add( IDSTabithaCS.getInfo() );
     commanderList.add( IDSTabithaBasic.getInfo() );
 
