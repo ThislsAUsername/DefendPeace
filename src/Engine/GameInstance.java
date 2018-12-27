@@ -111,6 +111,8 @@ public class GameInstance
     // Store the cursor location for the current CO.
     playerCursors.put(activeCoNum, new XYCoord(cursorX, cursorY));
 
+    if( null != activeCO) activeCO.endTurn();
+
     // Find the next non-defeated CO.
     do
     {

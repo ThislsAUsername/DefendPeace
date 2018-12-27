@@ -4,9 +4,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Queue;
 
-import AI.InfantrySpamAI;
-import CommandingOfficers.Commander;
-import CommandingOfficers.CommanderLibrary.CommanderEnum;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -124,28 +121,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
         System.out.println("WARNING! Received invalid InputAction " + input);
     }
 
-    // If an AI CO is now in control (due to the previous player
-    // ending their turn), do the AI actions here.
-    while( myGame.activeCO.isAI() && inputMode == InputMode.INPUT )
-    {
-      GameAction aiAction = null;
-      do
-      {
-        aiAction = myGame.activeCO.getNextAIAction(myGame.gameMap);
-        if( aiAction != null )
-        {
-          if( !executeGameAction(aiAction) )
-          {
-            // If aiAction fails to execute, the AI's turn is over. We don't want
-            // to waste time getting more actions if it can't build them properly.
-            System.out.println("WARNING! AI Action " + aiAction.toString() + " Failed to execute!");
-            break;
-          }
-        }
-      } while( aiAction != null ); // The AI can return a null action to end its turn.
-      startNextTurn();
-    }
-
     if( exitMap )
     {
       myGame.endGame();
@@ -255,8 +230,11 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case BACK:
         myGameInputHandler.back();
         break;
+      case NO_ACTION:
+        // No action means do nothing. Done.
+        break;
       default:
-        System.out.println("WARNING! MapController.handleMapInput() was given invalid input enum (" + input + ")");
+        System.out.println("WARNING! MapController.handleFreeTileSelect() was given invalid input enum (" + input + ")");
     }
   }
 
@@ -586,8 +564,30 @@ public class MapController implements IController, GameInputHandler.StateChanged
       }
       else
       {
-        // The animation for the last action just completed. Back to normal input mode.
-        changeInputMode(InputMode.INPUT);
+        // The animation for the last action just completed. If an AI is in control,
+        // fetch the next action. Otherwise, return control to the player.
+        if( myGame.activeCO.isAI() )
+        {
+          GameAction aiAction = myGame.activeCO.getNextAIAction(myGame.gameMap);
+          boolean endAITurn = false;
+          if( aiAction != null )
+          {
+            if( !executeGameAction(aiAction) )
+            {
+              // If aiAction fails to execute, the AI's turn is over. We don't want
+              // to waste time getting more actions if it can't build them properly.
+              System.out.println("WARNING! AI Action " + aiAction.toString() + " Failed to execute!");
+              endAITurn = true;
+            }
+          }
+          else { endAITurn = true; } // The AI can return a null action to signal the end of its turn.
+          if( endAITurn) startNextTurn();
+        }
+        else
+        {
+          // Back to normal input mode.
+          changeInputMode(InputMode.INPUT);
+        }
       }
     }
   }
