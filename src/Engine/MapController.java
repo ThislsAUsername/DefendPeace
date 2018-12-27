@@ -125,6 +125,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     {
       myGame.endGame();
     }
+
     return exitMap;
   }
 
@@ -229,8 +230,11 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case BACK:
         myGameInputHandler.back();
         break;
+      case NO_ACTION:
+        // No action means do nothing. Done.
+        break;
       default:
-        System.out.println("WARNING! MapController.handleMapInput() was given invalid input enum (" + input + ")");
+        System.out.println("WARNING! MapController.handleFreeTileSelect() was given invalid input enum (" + input + ")");
     }
   }
 
@@ -445,11 +449,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
    */
   private void changeInputMode(InputMode input)
   {
+    System.out.println("Moving to InputMode " + input );
     // Assign the new input mode.
     inputMode = input;
 
-    // If we are changing input mode, whether to or from commanding a unit, we can
-    //   be sure we don't have a valid action right now.
+    // If we are changing input modes, we
+    // know we don't have a valid action right now.
     myGameInputHandler.reset();
     contemplatedAction.clear();
     currentMenu = null;
@@ -488,21 +493,27 @@ public class MapController implements IController, GameInputHandler.StateChanged
   /**
    * Execute the provided action and evaluate any aftermath.
    */
-  private void executeGameAction(GameAction action)
+  private boolean executeGameAction(GameAction action)
   {
+    boolean actionOK = false; // Not sure if it's a well-formed action yet.
     if( null != action )
     {
       // Compile the GameAction to its component events.
       GameEventQueue events = action.getEvents(myGame.gameMap);
 
-      // Send the events to the animator. They will be applied/executed in animationEnded().
-      changeInputMode(InputMode.ANIMATION);
-      myView.animate(events);
+      if( events.size() > 0 )
+      {
+        actionOK = true; // Invalid actions don't produce events.
+        // Send the events to the animator. They will be applied/executed in animationEnded().
+        changeInputMode(InputMode.ANIMATION);
+        myView.animate(events);
+      }
     }
     else
     {
       System.out.println("WARNING! Attempting to execute null GameAction.");
     }
+    return actionOK;
   }
 
   public void animationEnded(GameEvent event, boolean animEventQueueIsEmpty)
@@ -553,8 +564,30 @@ public class MapController implements IController, GameInputHandler.StateChanged
       }
       else
       {
-        // The animation for the last action just completed. Back to normal input mode.
-        changeInputMode(InputMode.INPUT);
+        // The animation for the last action just completed. If an AI is in control,
+        // fetch the next action. Otherwise, return control to the player.
+        if( myGame.activeCO.isAI() )
+        {
+          GameAction aiAction = myGame.activeCO.getNextAIAction(myGame.gameMap);
+          boolean endAITurn = false;
+          if( aiAction != null )
+          {
+            if( !executeGameAction(aiAction) )
+            {
+              // If aiAction fails to execute, the AI's turn is over. We don't want
+              // to waste time getting more actions if it can't build them properly.
+              System.out.println("WARNING! AI Action " + aiAction.toString() + " Failed to execute!");
+              endAITurn = true;
+            }
+          }
+          else { endAITurn = true; } // The AI can return a null action to signal the end of its turn.
+          if( endAITurn) startNextTurn();
+        }
+        else
+        {
+          // Back to normal input mode.
+          changeInputMode(InputMode.INPUT);
+        }
       }
     }
   }

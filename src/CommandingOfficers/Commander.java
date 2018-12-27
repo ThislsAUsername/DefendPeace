@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import AI.AIController;
 import CommandingOfficers.Modifiers.COModifier;
+import Engine.GameAction;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
 import Engine.Combat.BattleSummary;
@@ -57,6 +59,8 @@ public class Commander extends GameEventListener
 
   private ArrayList<CommanderAbility> myAbilities = null;
   private String myActiveAbilityName = "";
+
+  private AIController aiController = null;
 
   public Commander(CommanderInfo info)
   {
@@ -131,6 +135,11 @@ public class Commander extends GameEventListener
     modifiers.add(mod); // Add to the list so the modifier can be reverted next turn.
   }
 
+  public void endTurn()
+  {
+    if( aiController != null ) aiController.endTurn();
+  }
+
   /**
    * Collect income and handle any COModifiers.
    * @param map
@@ -159,6 +168,11 @@ public class Commander extends GameEventListener
     {
       modifiers.get(i).revert(this);
       modifiers.remove(i);
+    }
+
+    if( null != aiController )
+    {
+      aiController.initTurn(map);
     }
   }
 
@@ -307,5 +321,24 @@ public class Commander extends GameEventListener
 
       modifyAbilityPower(power);
     }
+  }
+
+  public void setAIController(AIController ai)
+  {
+    aiController = ai;
+  }
+
+  public boolean isAI()
+  {
+    return (aiController != null);
+  }
+
+  public GameAction getNextAIAction(GameMap gameMap)
+  {
+    if( aiController != null )
+    {
+      return aiController.getNextAction(gameMap);
+    }
+    return null;
   }
 }

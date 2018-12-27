@@ -34,7 +34,7 @@ public class MapReader extends IMapBuilder
             // We get the filename, and make it look nice for our map list.
             String mapName = fileEntry.getName();
             // Mostly, we just don't want to try to interpret the python script as a map. That'd be bad.
-            if( !mapName.contains(".map") )
+            if( !mapName.endsWith(".map") )
               continue;
             // underscores->spaces makes it pretty
             mapName = mapName.replaceAll("_", " ");

@@ -244,6 +244,15 @@ public class Unit
   {
     return captureProgress;
   }
+  public XYCoord getCaptureTargetCoords()
+  {
+    XYCoord target = null;
+    if( null != captureTarget )
+    {
+      target = captureTarget.getCoordinates();
+    }
+    return target;
+  }
 
   /** Compiles and returns a list of all actions this unit could perform on map after moving along movePath. */
   public ArrayList<GameActionSet> getPossibleActions(GameMap map, Path movePath)
@@ -389,5 +398,10 @@ public class Unit
   public String toString()
   {
     return model.toString();
+  }
+
+  public String toStringWithLocation()
+  {
+    return String.format("%s at %s", model, new XYCoord(x, y));
   }
 }

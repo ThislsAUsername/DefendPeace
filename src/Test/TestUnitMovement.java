@@ -52,14 +52,19 @@ public class TestUnitMovement extends TestCase
     boolean testPassed = (mvPath.getPathLength() == 1);
 
     // Try to build a malformed action and make sure it doesn't work.
+    mover.initTurn(testMap);
     GameAction badUnit = new GameAction.WaitAction(testMap, null, mvPath);
     testPassed &= validate(badUnit.getEvents(testMap).size() == 0, "    A WaitAction with a null unit should have no events!");
+    mover.initTurn(testMap);
     GameAction nullPath = new GameAction.WaitAction(testMap, mover, null);
     testPassed &= validate(nullPath.getEvents(testMap).size() == 0, "    A WaitAction with a null path should have no events!");
+    mover.initTurn(testMap);
     GameAction emptyPath = new GameAction.WaitAction(testMap, mover, new Path(100));
     testPassed &= validate(emptyPath.getEvents(testMap).size() == 0, "    A WaitAction with an empty path should have no events!");
+    mover.initTurn(testMap);
     GameAction nullMap = new GameAction.WaitAction(null, mover, mvPath);
     testPassed &= validate(nullMap.getEvents(testMap).size() == 0, "    A WaitAction with a null map should have no events!");
+    mover.initTurn(testMap);
     GameAction okAction = new GameAction.WaitAction(testMap, mover, mvPath);
     testPassed &= validate(okAction.getEvents(testMap).size() > 0, "   WaitAction should be valid but has no events!");
 
@@ -74,12 +79,13 @@ public class TestUnitMovement extends TestCase
   {
     // Add a Unit and try to move it.
     Unit mover = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 4, 4);
+    mover.initTurn(testMap); // Make sure he's ready to go.
     XYCoord destination = new XYCoord(6, 5);
     GameAction ga = new GameAction.WaitAction(testMap, mover, Utils.findShortestPath(mover, destination, testMap));
 
     performGameAction( ga, testMap );
 
-    // Evaluate the test.    
+    // Evaluate the test.
     boolean testPassed = validate(testMap.getLocation(4, 4).getResident() == null, "    Infantry is still at the start point.");
     testPassed &= validate(testMap.getLocation(destination).getResident() == mover, "    Infantry is not at the destination.");
     testPassed &= validate((destination.xCoord == mover.x) && (destination.yCoord == mover.y),
