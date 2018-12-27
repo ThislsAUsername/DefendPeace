@@ -14,7 +14,15 @@ public class CombatEngine
     // Set up our combat scenario.
     BattleInstance params = new BattleInstance(attacker, defender, map, attackerX, attackerY);
 
-    return params.calculateBattleResults();
+    return params.calculateBattleResults(false);
+  }
+  
+  public static BattleSummary checkDamage( Unit attacker, Unit defender, GameMap map, int attackerX, int attackerY )
+  {
+    // Set up our combat scenario.
+    BattleInstance params = new BattleInstance(attacker, defender, map, attackerX, attackerY);
+
+    return params.calculateBattleResults(true);
   }
 
 }

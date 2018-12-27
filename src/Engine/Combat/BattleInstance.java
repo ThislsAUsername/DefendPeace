@@ -53,39 +53,42 @@ public class BattleInstance
    * NOTE: This will not actually apply the damage taken; this is done later in BattleEvent.
    * @return A BattleSummary object containing all relevant details from this combat instance.
    */
-  public BattleSummary calculateBattleResults()
+  public BattleSummary calculateBattleResults(boolean isSim)
   {
     double attackerHPLoss = 0;
 
     // Set up our scenario.
-    BattleParams attackInstance = new BattleParams(attacker, attackerWeapon, defender, gameMap.getEnvironment(defenderX,
-        defenderY), false, this);
+    BattleParams attackInstance = new BattleParams(attacker, attackerWeapon, defender,
+        gameMap.getEnvironment(defenderX, defenderY), false, this);
 
     // Last-minute adjustments.
-    attacker.CO.applyCombatModifiers(attackInstance,gameMap);
-    defender.CO.applyCombatModifiers(attackInstance,gameMap);
+    attacker.CO.applyCombatModifiers(attackInstance, gameMap);
+    defender.CO.applyCombatModifiers(attackInstance, gameMap);
 
-    double defenderHPLoss = attackInstance.calculateDamage();
-    if( defenderHPLoss > defender.getPreciseHP() ) defenderHPLoss = defender.getPreciseHP();
+    double defenderHPLoss = attackInstance.calculateDamage(isSim);
+    if( defenderHPLoss > defender.getPreciseHP() && !isSim )
+      defenderHPLoss = defender.getPreciseHP();
 
     // If the unit can counter, and wasn't killed in the initial volley, calculate return damage.
     if( canCounter && (defender.getHP() > defenderHPLoss) )
     {
       // New battle instance with defender counter-attacking.
-      BattleParams defendInstance = new BattleParams(defender, defenderWeapon, attacker, gameMap.getEnvironment(attackerX,
-          attackerY), true, this);
+      BattleParams defendInstance = new BattleParams(defender, defenderWeapon, attacker,
+          gameMap.getEnvironment(attackerX, attackerY), true, this);
       defendInstance.attackerHP -= defenderHPLoss; // Account for the first attack's damage to the now-attacker.
 
-      attacker.CO.applyCombatModifiers(attackInstance,gameMap);
-      defender.CO.applyCombatModifiers(attackInstance,gameMap);
+      defender.CO.applyCombatModifiers(defendInstance, gameMap);
+      attacker.CO.applyCombatModifiers(defendInstance, gameMap);
 
-      attackerHPLoss = defendInstance.calculateDamage();
-      if( attackerHPLoss > attacker.getPreciseHP() ) attackerHPLoss = attacker.getPreciseHP();
+      attackerHPLoss = defendInstance.calculateDamage(isSim);
+      if( attackerHPLoss > attacker.getPreciseHP() && !isSim )
+        attackerHPLoss = attacker.getPreciseHP();
     }
 
     // Build and return the BattleSummary.
-    return new BattleSummary(attacker, attackerWeapon, defender, defenderWeapon, gameMap.getEnvironment(attackerX, attackerY).terrainType,
-        gameMap.getEnvironment(defenderX, defenderY).terrainType, attackerHPLoss, defenderHPLoss, attackInstance.luckDamage);
+    return new BattleSummary(attacker, attackerWeapon, defender, defenderWeapon,
+        gameMap.getEnvironment(attackerX, attackerY).terrainType, gameMap.getEnvironment(defenderX, defenderY).terrainType,
+        attackerHPLoss, defenderHPLoss, attackInstance.luckDamage);
   }
 
   /**
@@ -105,7 +108,8 @@ public class BattleInstance
     public double luckDamage;
     public BattleInstance combatRef;
 
-    public BattleParams(Unit attacker, Weapon attackerWeapon, Unit defender, Environment battleground, boolean isCounter, BattleInstance ref)
+    public BattleParams(Unit attacker, Weapon attackerWeapon, Unit defender, Environment battleground, boolean isCounter,
+        BattleInstance ref)
     {
       this.attacker = attacker;
       this.defender = defender;
@@ -125,12 +129,15 @@ public class BattleInstance
       }
     }
 
-    public double calculateDamage()
+    public double calculateDamage(boolean isSim)
     {
       //    [B*ACO/100+R]*(AHP/10)*[(200-(DCO+DTR*DHP))/100]
       double overallPower = (baseDamage * attackFactor / 100) * attackerHP / 10;
       double overallDefense = ((200 - (defenseFactor + terrainDefense * defenderHP)) / 100);
-      luckDamage = (int)(Math.random()*luckMax) * (attackerHP / 10) * (overallDefense / 10);
+      if( isSim )
+        luckDamage = 0;
+      else
+        luckDamage = (int) (Math.random() * luckMax) * (attackerHP / 10) * (overallDefense / 10);
       return overallPower * overallDefense / 10 + luckDamage; // original formula was % damage, now it must be HP of damage
     }
   }
