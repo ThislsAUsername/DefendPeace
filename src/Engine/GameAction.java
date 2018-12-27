@@ -706,17 +706,19 @@ public interface GameAction
   public static class AbilityAction implements GameAction
   {
     private GameEventQueue abilityEvents = null;
+    private CommanderAbility myAbility;
 
     public AbilityAction(CommanderAbility ability)
     {
       // ABILITY actions consist of
       //   ABILITY
-      boolean isValid = null != ability;
-      isValid &= ability.myCommander.getReadyAbilities().contains(ability);
+      myAbility = ability;
+      boolean isValid = null != myAbility;
+      isValid &= myAbility.myCommander.getReadyAbilities().contains(myAbility);
       if( isValid )
       {
         abilityEvents = new GameEventQueue();
-        abilityEvents.add(new CommanderAbilityEvent(ability));
+        abilityEvents.add(new CommanderAbilityEvent(myAbility));
       }
     }
 
@@ -749,7 +751,7 @@ public interface GameAction
     @Override
     public String toString()
     {
-      return "[Perform CO Ability]";
+      return String.format("[Perform CO Ability %s]", myAbility);
     }
   } // ~AbilityAction
 }
