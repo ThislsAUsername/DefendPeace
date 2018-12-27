@@ -69,7 +69,7 @@ public class CommanderBear_Bull extends Commander
     private static final String UPTURN_NAME = "UpTurn";
     private static final String DOWNTURN_NAME = "DownTurn";
     private static final int DOWNUPTURN_COST = 3;
-    private static final int DOWNUPTURN_LIQUIDATION = -3;
+    private static final int DOWNUPTURN_LIQUIDATION = 3;
     CommanderBear_Bull COcast;
 
     UpDownTurnAbility(Commander commander)
@@ -105,8 +105,8 @@ public class CommanderBear_Bull extends Commander
           Unit victim = loc.getResident();
           if( null != victim )
           {
-            double delta = victim.alterHP(DOWNUPTURN_LIQUIDATION);
-            cmdr.money += (-1 * delta * victim.model.getCost()) / 10;
+            double delta = victim.alterHP(-1*DOWNUPTURN_LIQUIDATION); // Remove some of the unit's HP
+            cmdr.money += (-1 * delta * victim.model.getCost()) / 10; // ...and turn it into moolah
           }
         }
       }
@@ -135,7 +135,7 @@ public class CommanderBear_Bull extends Commander
 
     BustBoomAbility(Commander commander)
     {
-      // as we start in Bear form, UpTurn is the correct starting name
+      // as we start in Bear form, Boom is the correct starting name
       super(commander, BOOM_NAME, BOOMBUST_COST);
       COcast = (CommanderBear_Bull) commander;
     }
@@ -164,7 +164,7 @@ public class CommanderBear_Bull extends Commander
       }
     }
 
-    @Override
+    @Override // COModifier interface.
     public void revert(Commander commander)
     {
       // Next turn, we swap D2Ds permanently
