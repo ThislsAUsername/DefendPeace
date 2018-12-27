@@ -5,15 +5,9 @@ import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
-import Units.MoveTypes.OlafFlight;
-import Units.MoveTypes.OlafFloatHeavy;
-import Units.MoveTypes.OlafFloatLight;
-import Units.MoveTypes.OlafFootMech;
-import Units.MoveTypes.OlafFootStandard;
-import Units.MoveTypes.OlafTires;
-import Units.MoveTypes.OlafTread;
 
 public class BMOlaf extends Commander
 {
@@ -34,30 +28,12 @@ public class BMOlaf extends Commander
 
     for( UnitModel um : unitModels )
     {
-      switch (um.chassis)
+      for( TerrainType terrain : TerrainType.TerrainTypeList )
       {
-        case AIR_HIGH:
-        case AIR_LOW:
-          um.propulsion = new OlafFlight();
-          break;
-        case SHIP:
-          um.propulsion = new OlafFloatHeavy();
-          break;
-        case TANK:
-          um.propulsion = new OlafTread();
-          break;
-        default:
-          break;
+        um.propulsion.setMoveCost(Weathers.RAIN, terrain, um.propulsion.getMoveCost(Weathers.SNOW, terrain));
+        um.propulsion.setMoveCost(Weathers.SNOW, terrain, um.propulsion.getMoveCost(Weathers.CLEAR, terrain));
       }
     }
-    getUnitModel(UnitModel.UnitEnum.INFANTRY).propulsion = new OlafFootStandard();
-    getUnitModel(UnitModel.UnitEnum.MECH).propulsion = new OlafFootMech();
-
-    getUnitModel(UnitModel.UnitEnum.RECON).propulsion = new OlafTires();
-    getUnitModel(UnitModel.UnitEnum.ROCKETS).propulsion = new OlafTires();
-    getUnitModel(UnitModel.UnitEnum.MOBILESAM).propulsion = new OlafTires();
-
-    getUnitModel(UnitModel.UnitEnum.LANDER).propulsion = new OlafFloatLight();
 
     addCommanderAbility(new Blizzard(this));
     addCommanderAbility(new WinterFury(this));
