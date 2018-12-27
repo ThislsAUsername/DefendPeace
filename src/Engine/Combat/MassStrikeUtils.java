@@ -21,7 +21,7 @@ public class MassStrikeUtils
         XYCoord currentTarget = new XYCoord(i, j);
         int currentValue = 0;
 
-        ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, currentTarget, maxRange);
+        ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, currentTarget, 0, maxRange);
         for( XYCoord loc : locations )
         {
           Unit found = map.getLocation(loc).getResident();
@@ -32,7 +32,7 @@ public class MassStrikeUtils
         }
         if( currentValue > maxValue )
         {
-          currentValue = maxValue;
+          maxValue = currentValue;
           maxTarget = currentTarget;
         }
       }
