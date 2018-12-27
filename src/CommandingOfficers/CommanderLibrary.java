@@ -38,6 +38,11 @@ public class CommanderLibrary
     commanderList.add( YCGrimm.getInfo() );
     commanderList.add( YCKanbei.getInfo() );
     commanderList.add( YCSensei.getInfo() );
+    commanderList.add( BHAdder.getInfo() );
+    commanderList.add( BHHawke.getInfo() );
+    commanderList.add( BHKindle.getInfo() );
+    commanderList.add( BHLash.getInfo() );
+    commanderList.add( BHSturm.getInfo() );
   }
 
   public static Commander makeCommander( CommanderInfo info, Color color, String faction )
