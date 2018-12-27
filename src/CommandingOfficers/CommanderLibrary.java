@@ -50,14 +50,25 @@ public class CommanderLibrary
     commanderList.add( BHSturm.getInfo() );
     commanderList.add( BHVB.getInfo() );
 
-    commanderList.add( BWBrennerBasic.getInfo() );
-    commanderList.add( BWBrennerComp.getInfo() );
     commanderList.add( BWBrennerCS.getInfo() );
-    commanderList.add( BWIsabellaBasic.getInfo() );
+    commanderList.add( BWBrennerComp.getInfo() );
+    commanderList.add( BWBrennerBasic.getInfo() );
     commanderList.add( BWIsabellaCS.getInfo() );
+    commanderList.add( BWIsabellaBasic.getInfo() );
     commanderList.add( BWLinCS.getInfo() );
     commanderList.add( BWWillCS.getInfo() );
     commanderList.add( BWWillBasic.getInfo() );
+
+    commanderList.add( LAForsythe.getInfo() );
+    commanderList.add( LAGageCS.getInfo() );
+    commanderList.add( LAGageBasic.getInfo() );
+    commanderList.add( LATasha1star.getInfo() );
+    commanderList.add( LATashaLame.getInfo() );
+    commanderList.add( LATasha40A.getInfo() );
+    commanderList.add( LATashaBasic.getInfo() );
+
+    commanderList.add( RAWaylonCS.getInfo() );
+    commanderList.add( RAWaylonBasic.getInfo() );
   }
 
   public static Commander makeCommander( CommanderInfo info, Color color, String faction )
