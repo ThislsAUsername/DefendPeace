@@ -549,10 +549,8 @@ public class SpriteLibrary
 
   /**
    * This function returns the sprite sheet for symbol characters that go along with
-   * the letter sprites from getLettersSmallCaps().
-   * Returns a Sprite containing the digits 0-9, one number per frame. The image
-   * is loaded, and the Sprite is created, on the first call to this function, and simply
-   * returned thereafter. Numbers are stored in order starting from 0.
+   * the letter sprites from getLettersSmallCaps(). The image is loaded on the first
+   * call to this function, and simply returned thereafter.
    * @return A Sprite object containing the in-game menu font for small-caps numbers.
    */
   public static Sprite getSymbolsSmallCaps()
