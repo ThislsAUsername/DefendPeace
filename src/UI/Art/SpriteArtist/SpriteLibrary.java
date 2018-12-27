@@ -630,7 +630,7 @@ public class SpriteLibrary
       }
       else // Assume symbolic
       {
-        final String charKey = "%./-~,;:!?";
+        final String charKey = "%./-~,;:!?‽&()";
         int symbolIndex = charKey.indexOf(text.charAt(i));
         if( symbolIndex >= 0 )
         {
