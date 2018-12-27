@@ -156,7 +156,6 @@ public class Commander extends GameEventListener
       }
     }
     money += turnIncome;
-    modifyAbilityPower(40);
 
     // Un-apply any modifiers that were activated last turn.
     // TODO: If/when we have modifiers that last multiple turns, figure out how to handle them.

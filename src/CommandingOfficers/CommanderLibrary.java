@@ -69,6 +69,13 @@ public class CommanderLibrary
 
     commanderList.add( RAWaylonCS.getInfo() );
     commanderList.add( RAWaylonBasic.getInfo() );
+
+    commanderList.add( IDSCaulderD2D.getInfo() );
+    commanderList.add( IDSCaulderSCOP.getInfo() );
+    commanderList.add( IDSTabithaCS.getInfo() );
+    commanderList.add( IDSTabithaBasic.getInfo() );
+
+    commanderList.add( TheBeast.getInfo() );
   }
 
   public static Commander makeCommander( CommanderInfo info, Color color, String faction )

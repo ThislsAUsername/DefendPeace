@@ -6,7 +6,7 @@ import Units.Unit;
 
 public class BWBrennerCS extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Brenner\nC/S", new instantiator());
+  private static final CommanderInfo coInfo = new CommanderInfo("Brenner\nCS", new instantiator());
   private static class instantiator implements COMaker
   {
     @Override
