@@ -311,7 +311,7 @@ public class Commander extends GameEventListener
     }
 
     // Do nothing if we're not involved
-    if( minion != null && enemy != null )
+    if( minion != null && enemy != null && "" == myActiveAbilityName )
     {
       double power = 0;
       // Add up the funds value of the damage done to both participants.
