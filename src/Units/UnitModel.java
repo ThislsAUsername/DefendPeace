@@ -57,7 +57,7 @@ public class UnitModel
     maxFuel = pFuelMax;
     idleFuelBurn = pIdleFuelBurn;
     movePower = pMovePower;
-    propulsion = pPropulsion;
+    propulsion = new MoveType(pPropulsion);
     possibleActions = actions;
     healableHabs = new HashSet<TerrainType>();
     for( TerrainType terrain : TerrainType.TerrainTypeList )

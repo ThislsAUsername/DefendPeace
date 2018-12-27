@@ -62,13 +62,13 @@ public class MoveType
   }
 
   /** Sets the cost to move through terrain during weather. */
-  protected void setMoveCost(Weathers weather, TerrainType terrain, int cost)
+  public void setMoveCost(Weathers weather, TerrainType terrain, int cost)
   {
     moveCosts.get(weather).put(terrain, cost);
   }
 
   /** Set the move cost for this terrain for all weather conditions. Useful for marking a terrain as impassable. */
-  protected void setMoveCost(TerrainType terrain, int cost)
+  public void setMoveCost(TerrainType terrain, int cost)
   {
     for( Weathers w : Weathers.values() )
     {
