@@ -7,19 +7,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-import javax.swing.ImageIcon;
-
 import CommandingOfficers.Commander;
-import CommandingOfficers.CommanderLibrary;
 import Terrain.Location;
 import Terrain.TerrainType;
-import UI.COSetupController;
 import UI.Art.SpriteArtist.SpriteUIUtils.ImageFrame;
 import Units.Unit;
 import Units.UnitModel;
@@ -408,7 +405,7 @@ public class SpriteLibrary
 
   private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
-      String faction = key.commanderKey.factionName;
+    String faction = key.commanderKey.factionName;
     System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString());
     String filestr;
     UnitSpriteSet spriteSet;
@@ -427,7 +424,7 @@ public class SpriteLibrary
         facAbbrev = (matcher.group(1) + matcher.group(2)).toLowerCase();
       else
         facAbbrev = faction;
-      filestr = ("res/unit/"+ faction + "/" + facAbbrev + key.unitTypeKey.toString() + ".gif");//.replaceAll("\\_", "-")
+      filestr = ("res/unit/" + faction + "/" + facAbbrev + key.unitTypeKey.toString() + ".gif");//.replaceAll("\\_", "-")
       spriteSet = new UnitSpriteSet(loadAnimation(filestr), baseSpriteSize, baseSpriteSize,
           getMapUnitColors(key.commanderKey.myColor));
     }
@@ -807,11 +804,20 @@ public class SpriteLibrary
       // We don't have it, so we need to load it.
 
       BufferedImage body = SpriteLibrary.createTransparentSprite(32, 32);
-      SpriteLibrary.drawTextSmallCaps(body.getGraphics(), whichCo, 0, 8, 1);
       BufferedImage head = SpriteLibrary.createTransparentSprite(38, 32);
-      SpriteLibrary.drawTextSmallCaps(head.getGraphics(), whichCo, 0, 8, 1);
       BufferedImage eyes = SpriteLibrary.createTransparentSprite(32, 18);
-//      SpriteLibrary.drawTextSmallCaps(eyes.getGraphics(), whichCo, 0, 8, 1);
+
+      Scanner scanner = new Scanner(whichCo);
+      int offset = 3;
+      while (scanner.hasNextLine())
+      {
+        offset += 8;
+        String line = scanner.nextLine();
+        SpriteLibrary.drawTextSmallCaps(body.getGraphics(), line, 0, offset, 1);
+        SpriteLibrary.drawTextSmallCaps(head.getGraphics(), line, 0, offset, 1);
+      }
+      scanner.close();
+      //      SpriteLibrary.drawTextSmallCaps(eyes.getGraphics(), whichCo, 0, 8, 1);
 
       coSpriteSets.put(whichCo, new CommanderSpriteSet(body, head, eyes));
     }
