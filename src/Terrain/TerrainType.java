@@ -52,7 +52,7 @@ public class TerrainType
   public static final TerrainType BRIDGE = new TerrainType( BRIDGE_FLAGS, BRIDGE_DEFENSE, BRIDGE_COLOR);
 
   private static final int CITY_FLAGS = LAND | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_LAND;
-  private static final int CITY_DEFENSE = 2;
+  private static final int CITY_DEFENSE = 3;
   private static final Color CITY_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
   public static final TerrainType CITY = new TerrainType( CITY_FLAGS, CITY_DEFENSE, CITY_COLOR );
 
@@ -67,7 +67,7 @@ public class TerrainType
   public static final TerrainType FACTORY = new TerrainType( FACTORY_FLAGS, FACTORY_DEFENSE, FACTORY_COLOR );
 
   private static final int FOREST_FLAGS = LAND | PROVIDES_COVER;
-  private static final int FOREST_DEFENSE = 3;
+  private static final int FOREST_DEFENSE = 2;
   private static final Color FOREST_COLOR = new Color(46, 196, 24);
   public static final TerrainType FOREST = new TerrainType( FOREST_FLAGS, FOREST_DEFENSE, FOREST_COLOR );
 
@@ -107,7 +107,7 @@ public class TerrainType
   public static final TerrainType ROAD = new TerrainType( ROAD_FLAGS, ROAD_DEFENSE, ROAD_COLOR );
 
   private static final int WATER_FLAGS = WATER;
-  private static final int WATER_DEFENSE = 1;
+  private static final int WATER_DEFENSE = 0;
   private static final Color WATER_COLOR = new Color(94, 184, 236);
   public static final TerrainType SEA = new TerrainType( WATER_FLAGS, WATER_DEFENSE, WATER_COLOR );
 
@@ -117,7 +117,7 @@ public class TerrainType
   public static final TerrainType SEAPORT = new TerrainType( SEAPORT_FLAGS, SEAPORT_DEFENSE, SEAPORT_COLOR );
 
   private static final int SHOAL_FLAGS = LAND | WATER | PROVIDES_COVER;
-  private static final int SHOAL_DEFENSE = 1;
+  private static final int SHOAL_DEFENSE = 0;
   private static final Color SHOAL_COLOR = new Color(253, 224, 93);
   public static final TerrainType SHOAL = new TerrainType( SHOAL_FLAGS, SHOAL_DEFENSE, SHOAL_COLOR );
 
