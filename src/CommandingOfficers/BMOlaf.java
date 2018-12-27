@@ -32,32 +32,32 @@ public class BMOlaf extends Commander
   {
     super(coInfo);
 
-        for( UnitModel um : unitModels )
-        {
-          switch (um.chassis)
-          {
-            case AIR_HIGH:
-            case AIR_LOW:
-              um.propulsion = new OlafFlight();
-              break;
-            case SHIP:
-              um.propulsion = new OlafFloatHeavy();
-              break;
-            case TANK:
-              um.propulsion = new OlafTread();
-            break;
-            default:
-              break;
-          }
-        }
-        getUnitModel(UnitModel.UnitEnum.INFANTRY).propulsion = new OlafFootStandard();
-        getUnitModel(UnitModel.UnitEnum.MECH).propulsion = new OlafFootMech();
+    for( UnitModel um : unitModels )
+    {
+      switch (um.chassis)
+      {
+        case AIR_HIGH:
+        case AIR_LOW:
+          um.propulsion = new OlafFlight();
+          break;
+        case SHIP:
+          um.propulsion = new OlafFloatHeavy();
+          break;
+        case TANK:
+          um.propulsion = new OlafTread();
+          break;
+        default:
+          break;
+      }
+    }
+    getUnitModel(UnitModel.UnitEnum.INFANTRY).propulsion = new OlafFootStandard();
+    getUnitModel(UnitModel.UnitEnum.MECH).propulsion = new OlafFootMech();
 
-        getUnitModel(UnitModel.UnitEnum.RECON).propulsion = new OlafTires();
-        getUnitModel(UnitModel.UnitEnum.ROCKETS).propulsion = new OlafTires();
-        getUnitModel(UnitModel.UnitEnum.MOBILESAM).propulsion = new OlafTires();
+    getUnitModel(UnitModel.UnitEnum.RECON).propulsion = new OlafTires();
+    getUnitModel(UnitModel.UnitEnum.ROCKETS).propulsion = new OlafTires();
+    getUnitModel(UnitModel.UnitEnum.MOBILESAM).propulsion = new OlafTires();
 
-        getUnitModel(UnitModel.UnitEnum.LANDER).propulsion = new OlafFloatLight();
+    getUnitModel(UnitModel.UnitEnum.LANDER).propulsion = new OlafFloatLight();
 
     addCommanderAbility(new Blizzard(this));
     addCommanderAbility(new WinterFury(this));
@@ -74,7 +74,7 @@ public class BMOlaf extends Commander
   private static class Blizzard extends CommanderAbility implements COModifier
   {
     private static final String NAME = "Blizzard";
-    private static final int COST = 5;
+    private static final int COST = 3;
     GameMap map;
 
     Blizzard(Commander commander)
@@ -122,7 +122,7 @@ public class BMOlaf extends Commander
   private static class WinterFury extends CommanderAbility implements COModifier
   {
     private static final String NAME = "Winter Fury";
-    private static final int COST = 9;
+    private static final int COST = 7;
     GameMap map;
 
     WinterFury(Commander commander)

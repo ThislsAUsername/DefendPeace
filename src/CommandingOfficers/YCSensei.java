@@ -2,14 +2,11 @@ package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitTypeDamageModifier;
-import CommandingOfficers.Modifiers.UnitTypeDefenseModifier;
 import Engine.GameEvents.CreateUnitEvent;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
-import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
 
 public class YCSensei extends Commander
 {
