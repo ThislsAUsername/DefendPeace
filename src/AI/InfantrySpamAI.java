@@ -86,7 +86,6 @@ public class InfantrySpamAI implements AIController
 
   private void log(String message)
   {
-    System.out.println(message);
     logger.append(message).append('\n');
   }
 
