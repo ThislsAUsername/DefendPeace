@@ -1,7 +1,6 @@
 package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.COModifier;
-import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -48,7 +47,6 @@ public class BMOlaf extends Commander
   {
     private static final String NAME = "Blizzard";
     private static final int COST = 3;
-    GameMap map;
 
     Blizzard(Commander commander)
     {
@@ -58,43 +56,31 @@ public class BMOlaf extends Commander
     @Override
     protected void perform(GameMap gameMap)
     {
-      map = gameMap;
-      myCommander.addCOModifier(this);
+      for( int i = 0; i < gameMap.mapWidth; i++ )
+      {
+        for( int j = 0; j < gameMap.mapHeight; j++ )
+        {
+          Location loc = gameMap.getLocation(i, j);
+          int duration = gameMap.commanders.length-1;
+          loc.setForecast(Weathers.SNOW, duration);
+        }
+      }
     }
 
     @Override // COModifier interface.
     public void apply(Commander commander)
-    {
-      for( int i = 0; i < map.mapWidth; i++ )
-      {
-        for( int j = 0; j < map.mapHeight; j++ )
-        {
-          Location loc = map.getLocation(i, j);
-          loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, Weathers.SNOW));
-        }
-      }
-    }
+    {}
 
     @Override
     public void revert(Commander commander)
-    {
-      for( int i = 0; i < map.mapWidth; i++ )
-      {
-        for( int j = 0; j < map.mapHeight; j++ )
-        {
-          Location loc = map.getLocation(i, j);
-          loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, Weathers.CLEAR));
-        }
-      }
-    }
+    {}
   }
 
-  private static class WinterFury extends CommanderAbility implements COModifier
+  private static class WinterFury extends CommanderAbility
   {
     private static final String NAME = "Winter Fury";
     private static final int COST = 7;
-    GameMap map;
-
+    
     WinterFury(Commander commander)
     {
       // as we start in Bear form, UpTurn is the correct starting name
@@ -104,37 +90,17 @@ public class BMOlaf extends Commander
     @Override
     protected void perform(GameMap gameMap)
     {
-      map = gameMap;
-      myCommander.addCOModifier(this);
-    }
-
-    @Override // COModifier interface.
-    public void apply(Commander commander)
-    {
-      for( int i = 0; i < map.mapWidth; i++ )
+      for( int i = 0; i < gameMap.mapWidth; i++ )
       {
-        for( int j = 0; j < map.mapHeight; j++ )
+        for( int j = 0; j < gameMap.mapHeight; j++ )
         {
-          Location loc = map.getLocation(i, j);
-          loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, Weathers.SNOW));
+          Location loc = gameMap.getLocation(i, j);
+          loc.setForecast(Weathers.SNOW, gameMap.commanders.length-1);
           Unit victim = loc.getResident();
           if( victim != null && myCommander.isEnemy(victim.CO) )
           {
             victim.alterHP(-2);
           }
-        }
-      }
-    }
-
-    @Override
-    public void revert(Commander commander)
-    {
-      for( int i = 0; i < map.mapWidth; i++ )
-      {
-        for( int j = 0; j < map.mapHeight; j++ )
-        {
-          Location loc = map.getLocation(i, j);
-          loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, Weathers.CLEAR));
         }
       }
     }

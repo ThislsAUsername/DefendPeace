@@ -1,7 +1,6 @@
 package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.COModifier;
-import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -95,7 +94,7 @@ public class GEDrake extends Commander
     {}
   }
 
-  private static class Typhoon extends CommanderAbility implements COModifier
+  private static class Typhoon extends CommanderAbility
   {
     private static final String NAME = "Typhoon";
     private static final int COST = 7;
@@ -110,38 +109,18 @@ public class GEDrake extends Commander
     @Override
     protected void perform(GameMap gameMap)
     {
-      map = gameMap;
-      myCommander.addCOModifier(this);
-    }
-
-    @Override // COModifier interface.
-    public void apply(Commander commander)
-    {
       for( int i = 0; i < map.mapWidth; i++ )
       {
         for( int j = 0; j < map.mapHeight; j++ )
         {
           Location loc = map.getLocation(i, j);
-          loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, Weathers.RAIN));
+          loc.setForecast(Weathers.RAIN, gameMap.commanders.length-1);
           Unit victim = loc.getResident();
           if( victim != null && myCommander.isEnemy(victim.CO) )
           {
             victim.alterHP(-2);
             victim.fuel /= 2;
           }
-        }
-      }
-    }
-
-    @Override
-    public void revert(Commander commander)
-    {
-      for( int i = 0; i < map.mapWidth; i++ )
-      {
-        for( int j = 0; j < map.mapHeight; j++ )
-        {
-          Location loc = map.getLocation(i, j);
-          loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, Weathers.CLEAR));
         }
       }
     }
