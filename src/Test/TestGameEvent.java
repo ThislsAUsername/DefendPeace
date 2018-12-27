@@ -106,8 +106,10 @@ public class TestGameEvent extends TestCase
     testPassed &= validate( infA.getCaptureProgress() == 15, "    Infantry capture progress is not 15." );
 
     // Move the unit; he should lose his capture progress.
+    infA.initTurn(testMap);
     GameAction moveAction = new GameAction.WaitAction(testMap, infA, Utils.findShortestPath(infA, 1, 2, testMap));
     performGameAction(moveAction, testMap);
+    infA.initTurn(testMap);
     GameAction moveAction2 = new GameAction.WaitAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap));
     performGameAction(moveAction2, testMap);
 

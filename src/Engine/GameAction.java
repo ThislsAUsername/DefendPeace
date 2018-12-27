@@ -52,46 +52,48 @@ public interface GameAction
     private XYCoord moveLocation = null;
     private XYCoord attackLocation = null;
     private GameEventQueue attackEvents = null;
+    private Unit attacker;
+    private Unit defender;
 
     public AttackAction(GameMap gameMap, Unit actor, Path path, int targetX, int targetY)
     {
       this(gameMap, actor, path, new XYCoord(targetX, targetY));
     }
 
-    public AttackAction(GameMap gameMap, Unit attacker, Path movePath, XYCoord atkLoc)
+    public AttackAction(GameMap gameMap, Unit actor, Path movePath, XYCoord atkLoc)
     {
       // ATTACK actions consist of
       //   MOVE
       //   BATTLE
       //   [DEATH]
       //   [DEFEAT]
+      attacker = actor;
       attackEvents = new GameEventQueue();
       attackLocation = atkLoc;
-      Unit unitTarget = null;
       int attackRange = -1;
 
       // Validate input.
       boolean isValid = true;
-      isValid &= attacker != null;
+      isValid &= attacker != null && !attacker.isTurnOver;
       isValid &= (null != gameMap) && (gameMap.isLocationValid(attackLocation));
       isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       if( isValid )
       {
         moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
-        unitTarget = gameMap.getLocation(attackLocation).getResident();
+        defender = gameMap.getLocation(attackLocation).getResident();
         attackRange = Math.abs(moveLocation.xCoord - attackLocation.xCoord)
             + Math.abs(moveLocation.yCoord - attackLocation.yCoord);
 
         boolean moved = attacker.x != moveLocation.xCoord || attacker.y != moveLocation.yCoord;
-        isValid &= (null != unitTarget) && attacker.canAttack(unitTarget.model, attackRange, moved);
-        isValid &= attacker.CO.isEnemy(unitTarget.CO);
+        isValid &= (null != defender) && attacker.canAttack(defender.model, attackRange, moved);
+        isValid &= attacker.CO.isEnemy(defender.CO);
       }
 
       // Generate GameEvents.
       if( isValid )
       {
         attackEvents.add(new MoveEvent(attacker, movePath));
-        BattleEvent event = new BattleEvent(attacker, unitTarget, moveLocation.xCoord, moveLocation.yCoord, gameMap);
+        BattleEvent event = new BattleEvent(attacker, defender, moveLocation.xCoord, moveLocation.yCoord, gameMap);
         attackEvents.add(event);
 
         if( event.attackerDies() )
@@ -107,13 +109,13 @@ public interface GameAction
         }
         if( event.defenderDies() )
         {
-          attackEvents.add(new UnitDieEvent(unitTarget));
+          attackEvents.add(new UnitDieEvent(defender));
 
           // The defender died; check if the Commander is defeated.
-          if( unitTarget.CO.units.size() == 1 )
+          if( defender.CO.units.size() == 1 )
           {
             // CO is out of units. Too bad.
-            attackEvents.add(new CommanderDefeatEvent(unitTarget.CO));
+            attackEvents.add(new CommanderDefeatEvent(defender.CO));
           }
         }
       }
@@ -147,6 +149,13 @@ public interface GameAction
     {
       return GameAction.ActionType.ATTACK;
     }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Attack %s with %s after moving to %s]",
+          defender.toStringWithLocation(), attacker.toStringWithLocation(), moveLocation );
+    }
   } // ~AttackAction
 
   // ===========  UnitProductionAction  ==============================
@@ -154,6 +163,7 @@ public interface GameAction
   {
     private GameEventQueue buildEvents = null;
     private final XYCoord buildLocation;
+    private UnitModel modelToBuild;
 
     public UnitProductionAction(GameMap gameMap, Commander who, UnitModel what, XYCoord where)
     {
@@ -162,9 +172,17 @@ public interface GameAction
       //   CREATEUNIT
       buildEvents = new GameEventQueue();
       buildLocation = where;
+      modelToBuild = what;
       boolean isValid = true;
       isValid &= (null != gameMap) && (null != who) && (null != what) && (null != where);
-      isValid &= (who.money >= what.getCost());
+      if( isValid )
+      {
+        Location site = gameMap.getLocation(where);
+        isValid &= (null == site.getResident());
+        isValid &= site.getOwner() == who;
+        isValid &= (who.money >= what.getCost());
+        isValid &= who.getShoppingList(site).contains(what);
+      }
 
       if( isValid )
       {
@@ -201,6 +219,12 @@ public interface GameAction
     {
       return GameAction.ActionType.UNITPRODUCTION;
     }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Produce %s at %s]", modelToBuild, buildLocation);
+    }
   } // ~UnitProductionAction
 
   // ===========  CaptureAction  ==============================
@@ -208,19 +232,22 @@ public interface GameAction
   {
     private XYCoord movePathEnd = null;
     private GameEventQueue captureEvents = null;
+    private Unit actor = null;
+    private Terrain.TerrainType propertyType;
 
-    public CaptureAction(GameMap map, Unit actor, Path movePath)
+    public CaptureAction(GameMap map, Unit unit, Path movePath)
     {
       // CAPTURE actions consist of
       //   MOVE
       //   CAPTURE
       //   [DEFEAT]
+      actor = unit;
       captureEvents = new GameEventQueue();
       Location captureLocation = null;
 
       // Validate input
       boolean isValid = true;
-      isValid &= null != actor; // Valid unit
+      isValid &= null != actor && !actor.isTurnOver; // Valid unit
       isValid &= null != map; // Valid map
       isValid &= (null != movePath) && (movePath.getPathLength() > 0); // Valid path
       if( isValid )
@@ -229,11 +256,15 @@ public interface GameAction
         captureLocation = map.getLocation(movePathEnd);
         isValid &= captureLocation.isCaptureable(); // Valid location
         isValid &= actor.CO.isEnemy(captureLocation.getOwner()); // Valid CO
+        isValid &= ((captureLocation.getResident() == null) || (captureLocation.getResident() == actor));
       }
 
       // Generate events
       if( isValid )
       {
+        // Store terrain type for posterity.
+        propertyType = captureLocation.getEnvironment().terrainType;
+
         // Move to the target location.
         captureEvents.add(new MoveEvent(actor, movePath));
 
@@ -283,6 +314,12 @@ public interface GameAction
     {
       return GameAction.ActionType.CAPTURE;
     }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Capture %s at %s with %s]", propertyType, movePathEnd, actor.toStringWithLocation());
+    }
   } // ~CaptureAction
 
   // ===========  WaitAction  =================================
@@ -290,16 +327,18 @@ public interface GameAction
   {
     private XYCoord waitLoc = null;
     private GameEventQueue waitEvents = null;
+    private Unit actor = null;
 
-    public WaitAction(GameMap gameMap, Unit actor, Path movePath)
+    public WaitAction(GameMap gameMap, Unit unit, Path movePath)
     {
       // WAIT actions consist of
       //   MOVE
+      actor = unit;
       waitEvents = new GameEventQueue();
 
       // Validate input.
       boolean isValid = true;
-      isValid &= null != actor;
+      isValid &= null != actor && !actor.isTurnOver;
       isValid &= (null != movePath) && (movePath.getPathLength() > 0);
       isValid &= (null != gameMap);
       int goX = -1, goY = -1;
@@ -349,6 +388,12 @@ public interface GameAction
     {
       return GameAction.ActionType.WAIT;
     }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Move %s to %s]", actor.toStringWithLocation(), waitLoc);
+    }
   } // ~WaitAction
 
   // ===========  LoadAction  =================================
@@ -356,19 +401,23 @@ public interface GameAction
   {
     private XYCoord pathEnd = null;
     private GameEventQueue loadEvents = null;
+    private Unit passenger;
+    private Unit transport;
 
-    public LoadAction(GameMap gameMap, Unit passenger, Path movePath)
+    public LoadAction(GameMap gameMap, Unit actor, Path movePath)
     {
       // LOAD actions consist of
       //   MOVE
       //   LOAD
+      passenger = actor;
       loadEvents = new GameEventQueue();
 
       // Validate input
       boolean isValid = true;
+      isValid &= (null != passenger) && !passenger.isTurnOver;
       isValid &= (null != movePath) && (movePath.getPathLength() > 0);
       isValid &= (null != gameMap);
-      Unit transport = null;
+      transport = null;
       if( isValid )
       {
         pathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
@@ -420,6 +469,12 @@ public interface GameAction
     {
       return GameAction.ActionType.LOAD;
     }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Load %s into %s]", passenger.toStringWithLocation(), transport.toStringWithLocation());
+    }
   } // ~LoadAction
 
   // ===========  UnloadAction  =================================
@@ -429,6 +484,7 @@ public interface GameAction
     private XYCoord moveLoc = null;
     private XYCoord firstDropLoc = null;
     private GameEventQueue unloadEvents = null;
+    private Unit actor = null;
 
     public UnloadAction(GameMap gameMap, Unit actor, Path path, Unit passenger, int dropX, int dropY)
     {
@@ -450,13 +506,14 @@ public interface GameAction
       // UNLOAD actions consist of
       //   MOVE (transport)
       //   UNLOAD
+      actor = transport;
       unloadEvents = new GameEventQueue();
       myDropoffs = new HashMap<Unit, XYCoord>();
 
       // Validate input.
       boolean isValid = true;
-      isValid &= null != transport;
-      isValid &= null != dropoffs;
+      isValid &= null != transport && !transport.isTurnOver;
+      isValid &= null != dropoffs && !dropoffs.isEmpty();
       isValid &= movePath.getPathLength() > 0;
       isValid &= null != gameMap;
       if( isValid )
@@ -513,6 +570,12 @@ public interface GameAction
     public ActionType getType()
     {
       return GameAction.ActionType.UNLOAD;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Unload from %s]", actor.toStringWithLocation());
     }
   } // ~UnloadAction
 
@@ -575,7 +638,7 @@ public interface GameAction
 
       // Validate action.
       boolean isValid = true;
-      isValid &= unitActor != null;
+      isValid &= unitActor != null && !unitActor.isTurnOver;
       // Unit can move between executions of this action, so verify it's still on the map.
       isValid &= (null != map) && map.isLocationValid(unitActor.x, unitActor.y);
       if( isValid )
@@ -631,21 +694,31 @@ public interface GameAction
     {
       return GameAction.ActionType.RESUPPLY;
     }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Resupply units adjacent to %s with %s]", myLocation(), unitActor.toStringWithLocation());
+    }
   } // ~ResupplyAction
 
   // ===========  AbilityAction  =================================
   public static class AbilityAction implements GameAction
   {
     private GameEventQueue abilityEvents = null;
+    private CommanderAbility myAbility;
 
     public AbilityAction(CommanderAbility ability)
     {
       // ABILITY actions consist of
       //   ABILITY
-      abilityEvents = new GameEventQueue();
-      if( null != ability )
+      myAbility = ability;
+      boolean isValid = null != myAbility;
+      isValid &= myAbility.myCommander.getReadyAbilities().contains(myAbility);
+      if( isValid )
       {
-        abilityEvents.add(new CommanderAbilityEvent(ability));
+        abilityEvents = new GameEventQueue();
+        abilityEvents.add(new CommanderAbilityEvent(myAbility));
       }
     }
 
@@ -673,6 +746,12 @@ public interface GameAction
       // Use OTHER, just because it doesn't correspond to a normal unit-based
       // action with an actor, target location, etc.
       return GameAction.ActionType.OTHER;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Perform CO Ability %s]", myAbility);
     }
   } // ~AbilityAction
 }

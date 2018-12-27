@@ -58,6 +58,7 @@ public class TestCapture extends TestCase
     Unit infA = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 2, 2); // On the city.
 
     // Start capturing the city.
+    infA.initTurn(testMap);
     GameAction captureAction = new GameAction.CaptureAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap));
     performGameAction( captureAction, testMap );
 
@@ -69,18 +70,22 @@ public class TestCapture extends TestCase
     testPassed &= validate( infA.getCaptureProgress() == 10, "    Infantry is not capturing, but should be.");
 
     // Ensure that moving resets the capture counter.
+    infA.initTurn(testMap);
     performGameAction(new GameAction.WaitAction(testMap, infA, Utils.findShortestPath(infA, 2, 3, testMap)), testMap);
     testPassed &= validate( infA.getCaptureProgress() == 0, "    Infantry is still capturing after moving.");
 
     // Make sure we can WAIT, and resume capturing.
+    infA.initTurn(testMap);
     performGameAction(new GameAction.WaitAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap)), testMap); // Move back onto the city.
     performGameAction( captureAction, testMap );
+    infA.initTurn(testMap);
     performGameAction(new GameAction.WaitAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap)), testMap); // Wait on the city.
     testPassed &= validate( infA.getCaptureProgress() == 10, "    Infantry should not lose capture progress due to WAIT.");
 
     // Make sure that attacking someone else does not reset capture progress.
     Unit infB = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 1, 2); // Make an enemy adjacent to the city.
     infB.alterHP( -8 ); // Make sure he will die without retaliating.
+    infA.initTurn(testMap);
     performGameAction(new GameAction.AttackAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap), 1, 2), testMap); // Bop him on the head.
     testPassed &= validate( infA.getCaptureProgress() == 10, "    Infantry should not stop capturing after stationary ATTACK.");
 
@@ -125,6 +130,7 @@ public class TestCapture extends TestCase
     prop.setOwner(testCo2);
 
     // Start capturing the city.
+    infA.initTurn(testMap);
     GameAction captureAction = new GameAction.CaptureAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap));
     performGameAction( captureAction, testMap );
 
@@ -162,10 +168,12 @@ public class TestCapture extends TestCase
     Unit mech = addUnit(testMap, testCo1, UnitEnum.MECH, 13, 1); // On the HQ, just to make this easy.
 
     // Start capturing the HQ.
+    mech.initTurn(testMap);
     GameAction captureAction = new GameAction.CaptureAction(testMap, mech, Utils.findShortestPath(mech, 13, 1, testMap));
     performGameAction(captureAction, testMap);
 
     // Re-create the event so we can predict the HQ capture, but don't execute; we just want to see the resulting GameEventQueue.
+    mech.initTurn(testMap);
     captureAction = new GameAction.CaptureAction(testMap, mech, Utils.findShortestPath(mech, 13, 1, testMap));
     GameEventQueue events = captureAction.getEvents(testMap);
 
