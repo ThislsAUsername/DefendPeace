@@ -49,6 +49,10 @@ public class CommanderLibrary
     commanderList.add( BHLash.getInfo() );
     commanderList.add( BHSturm.getInfo() );
     commanderList.add( BHVB.getInfo() );
+
+    commanderList.add( BWBrennerBasic.getInfo() );
+    commanderList.add( BWBrennerComp.getInfo() );
+    commanderList.add( BWBrennerCS.getInfo() );
   }
 
   public static Commander makeCommander( CommanderInfo info, Color color, String faction )
