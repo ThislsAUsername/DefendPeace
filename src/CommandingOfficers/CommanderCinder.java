@@ -103,11 +103,12 @@ public class CommanderCinder extends Commander
     {
       for( Unit unit : myCommander.units )
       {
-        if( unit.isTurnOver ) // don't penalize units who haven't moved yet 
+        if( unit.isTurnOver )
         {
-          unit.alterHP(SEAR_WOUND);
-          unit.isTurnOver = false;
+          unit.resupply(); // the missing HP has to go somewhere...
         }
+        unit.alterHP(SEAR_WOUND);
+        unit.isTurnOver = false;
       }
     }
   }
@@ -124,7 +125,6 @@ public class CommanderCinder extends Commander
 
     WitchFireAbility(Commander commander)
     {
-      // as we start in Bear form, UpTurn is the correct starting name
       super(commander, WITCHFIRE_NAME, WITCHFIRE_COST);
       listener = new WitchFireListener(commander, WITCHFIRE_HP_COST);
     }
@@ -168,14 +168,10 @@ public class CommanderCinder extends Commander
       {
         minion = battleInfo.attacker;
       }
-      else if( battleInfo.defender.CO == myCommander )
-      {
-        minion = battleInfo.defender;
-      }
 
       if( null != minion )
       {
-        if( minion.getPreciseHP() > Math.abs(refreshCost) )
+        if( minion.getPreciseHP() > Math.abs(refreshCost * 2) )
         {
           minion.alterHP(-1 * refreshCost);
           minion.isTurnOver = false;
@@ -183,7 +179,7 @@ public class CommanderCinder extends Commander
         else
         {
           minion.damageHP(refreshCost);
-          // TODO: aaaaaaaaaa we can't delete the unit here
+          // TODO: It'd be cool if we could kill the unit here, so Cinder can eke out maximal use without cheating.
           // gameMap.removeUnit(attacker);
           // attacker.CO.units.remove(attacker);
         }
