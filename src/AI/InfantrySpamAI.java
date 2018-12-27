@@ -126,7 +126,6 @@ public class InfantrySpamAI implements AIController
 
       // If no attack/capture actions are available now, just move towards a non-allied building.
       Utils.sortLocationsByDistance( new XYCoord(unit.x, unit.y), unownedProperties);
-      //Utils.sortLocationsByTravelTime(unit, unownedProperties, gameMap);
       if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
       {
         log(String.format("  Seeking a property to send %s after", unit.toStringWithLocation()));
