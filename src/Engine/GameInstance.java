@@ -4,8 +4,10 @@ import java.util.HashMap;
 
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
+import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.Environment.Weathers;
 
 public class GameInstance
 {
@@ -110,10 +112,12 @@ public class GameInstance
   {
     // Store the cursor location for the current CO.
     playerCursors.put(activeCoNum, new XYCoord(cursorX, cursorY));
+    int weatherIters = 0;
 
     // Find the next non-defeated CO.
     do
     {
+      weatherIters++;
       activeCoNum++;
       if( activeCoNum > commanders.length - 1 )
       {
@@ -127,6 +131,26 @@ public class GameInstance
 
     // Initialize the next turn, recording any events that will occur.
     activeCO.initTurn(gameMap);
+
+    for( int i = 0; i < gameMap.mapWidth; i++ )
+    {
+      for( int j = 0; j < gameMap.mapHeight; j++ )
+      {
+        Location loc = gameMap.getLocation(i, j);
+        for( int turns = 0; turns < weatherIters; turns++ )
+        {
+          if( loc.forecast.isEmpty() )
+          {
+            loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, Weathers.CLEAR));
+            break;
+          }
+          else
+          {
+            loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, loc.forecast.poll()));
+          }
+        }
+      }
+    }
   }
 
   /**
