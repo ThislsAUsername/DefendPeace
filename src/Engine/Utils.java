@@ -99,7 +99,7 @@ public class Utils
     {
       for( int j = 0; j < gameMap.mapHeight; j++ )
       {
-        costGrid[i][j] = -1;
+        costGrid[i][j] = Integer.MAX_VALUE;
       }
     }
 
@@ -132,8 +132,7 @@ public class Utils
    * Determines whether the Location (x, y), can be added to the search queue.
    * @param theoretical If set, this function will ignore move-power limitations and enemy-unit presence.
    */
-  private static boolean checkSpace(Unit unit, GameMap myMap, SearchNode currentNode, XYCoord coord,
-    int[][] costGrid, boolean ignoreUnits)
+  private static boolean checkSpace(Unit unit, GameMap myMap, SearchNode currentNode, XYCoord coord, boolean ignoreUnits)
   {
     // if we're past the edges of the map
     if( !myMap.isLocationValid(coord) )
@@ -243,7 +242,7 @@ public class Utils
     {
       for( int j = 0; j < map.mapHeight; j++ )
       {
-        costGrid[i][j] = -1;
+        costGrid[i][j] = Integer.MAX_VALUE;
       }
     }
 
@@ -311,7 +310,7 @@ public class Utils
     for( XYCoord next : coordsToCheck )
     {
       // Check that we could potentially move into this space.
-      if( checkSpace( unit, map, currentNode, next, costGrid, theoretical ) )
+      if( checkSpace( unit, map, currentNode, next, theoretical ) )
       {
         // If we can move there for less cost than previously discovered,
         // then update the cost grid and re-queue the next node.
@@ -324,7 +323,7 @@ public class Utils
         int movePower = Math.min(unit.model.movePower, unit.fuel) - costSoFar;
         boolean canMove = (theoretical) ? true : (moveCost <= movePower);
 
-        if( canMove && ((newNextCost < oldNextCost) || (oldNextCost == -1)) ) // -1 means it hasn't been set yet.
+        if( canMove && (newNextCost < oldNextCost) )
         {
           costGrid[next.xCoord][next.yCoord] = newNextCost;
           searchQueue.add(new SearchNode(next, currentNode));
@@ -396,9 +395,9 @@ public class Utils
       int firstDist = Math.abs(o1.x - xDest) + Math.abs(o1.y - yDest);
       int secondDist = Math.abs(o2.x - xDest) + Math.abs(o2.y - yDest);
 
-      int firstPow = costGrid[o1.x][o1.y] - ((hasDestination) ? firstDist : 0);
-      int secondPow = costGrid[o2.x][o2.y] - ((hasDestination) ? secondDist : 0);
-      return firstPow - secondPow;
+      int firstCostEstimate = costGrid[o1.x][o1.y] + ((hasDestination) ? firstDist : 0);
+      int secondCostEstimate = costGrid[o2.x][o2.y] + ((hasDestination) ? secondDist : 0);
+      return firstCostEstimate - secondCostEstimate;
     }
   }
 
