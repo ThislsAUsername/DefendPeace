@@ -40,18 +40,19 @@ public class MassStrikeUtils
     return maxTarget;
   }
 
-  public static void missileStrike(GameMap map, XYCoord targetPosition)
+  public static ArrayList<Unit> missileStrike(GameMap map, XYCoord targetPosition)
   {
-    damageStrike(map, 3, targetPosition, 2);
+    return damageStrike(map, 3, targetPosition, 2);
   }
-  public static void damageStrike(GameMap map, int power, XYCoord targetPosition, int maxRange)
+  public static ArrayList<Unit> damageStrike(GameMap map, int power, XYCoord targetPosition, int maxRange)
   {
-    damageStrike(map, power, targetPosition, 0, maxRange, null, true);
+    return damageStrike(map, power, targetPosition, 0, maxRange, null, true);
   }
-  public static void damageStrike(GameMap map, int power, XYCoord targetPosition, int minRange, int maxRange, Commander co,
-      boolean selfHarm)
+  public static ArrayList<Unit> damageStrike(GameMap map, int power, XYCoord targetPosition, int minRange, int maxRange,
+      Commander co, boolean selfHarm)
   {
     ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, targetPosition, minRange, maxRange);
+    ArrayList<Unit> victimList = new ArrayList<>();
     for( XYCoord loc : locations )
     {
       Unit victim = map.getLocation(loc).getResident();
@@ -59,7 +60,9 @@ public class MassStrikeUtils
           (selfHarm || victim.CO.isEnemy(co)) ) // It's not friendly enough to spare.
       {
         victim.alterHP(-power);
+        victimList.add(victim);
       }
     }
+    return victimList;
   }
 }

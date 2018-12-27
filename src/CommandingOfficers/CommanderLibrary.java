@@ -23,26 +23,32 @@ public class CommanderLibrary
     commanderList.add( CommanderPatch.getInfo() );
     commanderList.add( CommanderBear_Bull.getInfo() );
     commanderList.add( CommanderCinder.getInfo() );
+    
     commanderList.add( OSAndy.getInfo() );
     commanderList.add( OSHachi.getInfo() );
     commanderList.add( OSJake.getInfo() );
     commanderList.add( OSMax.getInfo() );
     commanderList.add( OSRachel.getInfo() );
     commanderList.add( OSSami.getInfo() );
+    
     commanderList.add( BMColin.getInfo() );
     commanderList.add( BMGrit.getInfo() );
     commanderList.add( BMOlaf.getInfo() );
     commanderList.add( BMSasha.getInfo() );
+    
     commanderList.add( GEEagle.getInfo() );
     commanderList.add( GEJess.getInfo() );
+    
     commanderList.add( YCGrimm.getInfo() );
     commanderList.add( YCKanbei.getInfo() );
     commanderList.add( YCSensei.getInfo() );
+    
     commanderList.add( BHAdder.getInfo() );
     commanderList.add( BHHawke.getInfo() );
     commanderList.add( BHKindle.getInfo() );
     commanderList.add( BHLash.getInfo() );
     commanderList.add( BHSturm.getInfo() );
+    commanderList.add( BHVB.getInfo() );
   }
 
   public static Commander makeCommander( CommanderInfo info, Color color, String faction )

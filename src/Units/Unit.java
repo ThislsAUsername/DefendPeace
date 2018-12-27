@@ -27,6 +27,7 @@ public class Unit
   private Location captureTarget;
   public Commander CO;
   public boolean isTurnOver;
+  public boolean isStunned;
   private double HP;
   public Weapon[] weapons;
   private ArrayList<GameAction> turnInitActions;
@@ -76,7 +77,13 @@ public class Unit
     //   Units that are e.g. in a transport don't burn fuel, etc.
     if( null != locus )
     {
-      isTurnOver = false;
+      if( isStunned )
+      {
+        isTurnOver = true;
+        isStunned = false;
+      }
+      else
+        isTurnOver = false;
       fuel -= model.idleFuelBurn;
       if( captureTarget != null && captureTarget.getResident() != this )
       {
@@ -95,7 +102,7 @@ public class Unit
 
         if( HP < model.maxHP )
         {
-          int neededHP = Math.min(model.maxHP - getHP(), CO.getRepairPower()); // will be 0, 1, 2
+          int neededHP = Math.min(model.maxHP - getHP(), CO.getRepairPower());
           double proportionalCost = model.getCost() / model.maxHP;
           int repairedHP = neededHP;
           while (CO.money < repairedHP * proportionalCost)
