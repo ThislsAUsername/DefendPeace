@@ -76,6 +76,12 @@ public class CommanderCinder extends Commander
     super.initTurn(map);
   }
 
+  public void endTurn()
+  {
+    setPrices(0);
+    super.endTurn();
+  }
+
   public void setPrices(int repetitons)
   {
     for( UnitModel um : unitModels )
