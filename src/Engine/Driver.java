@@ -16,7 +16,6 @@ import Test.TestMain;
 import UI.InputHandler;
 import UI.MainUIController;
 import UI.Art.SpriteArtist.SpriteEngine;
-import UI.InputHandler.InputAction;
 
 public class Driver implements ActionListener, KeyListener
 {

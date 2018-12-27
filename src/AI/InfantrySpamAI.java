@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Queue;
 
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.Path;
@@ -66,6 +67,13 @@ public class InfantrySpamAI implements AIController
         capturingProperties.add(unit.getCaptureTargetCoords());
       }
     }
+
+    // If the CO has enough AP, preload the CommanderAbilityAction.
+    ArrayList<CommanderAbility> abilities = myCo.getReadyAbilities();
+    if( abilities.size() > 0 )
+    {
+      actions.offer(new GameAction.AbilityAction(abilities.get(0)));
+    }
   }
 
   @Override
@@ -78,13 +86,18 @@ public class InfantrySpamAI implements AIController
 
   private void log(String message)
   {
-    //System.out.println(message);
     logger.append(message).append('\n');
   }
 
   @Override
   public GameAction getNextAction(GameMap gameMap)
   {
+    // If we have more actions ready, don't bother calculating stuff.
+    if( !actions.isEmpty() )
+    {
+      return actions.poll();
+    }
+
     // Handle actions for each unit the CO owns.
     for( Unit unit : myCo.units )
     {
