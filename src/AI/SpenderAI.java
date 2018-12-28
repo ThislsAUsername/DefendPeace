@@ -158,9 +158,8 @@ public class SpenderAI implements AIController
       }
       else
       {
-        travelQueue.offer(unit);
+        travelQueue.offer(unit); // if we can't do anything useful right now, consider just moving towards a useful destination
       }
-
     }
 
     Queue<Unit> waitQueue = new ArrayDeque<Unit>();
@@ -259,6 +258,7 @@ public class SpenderAI implements AIController
       }
       int budget = myCo.money;
       Map<Location, UnitModel> purchases = new HashMap<>();
+      // Now that we know where and what we can buy, let's make some initial selections.
       for( Entry<Location, ArrayList<UnitModel>> locShopList : shoppingLists.entrySet() )
       {
         ArrayList<UnitModel> units = locShopList.getValue();
