@@ -96,215 +96,219 @@ public class SpenderAI implements AIController
   @Override
   public GameAction getNextAction(GameMap gameMap)
   {
-    // If we have more actions ready, don't bother calculating stuff.
-    if( !actions.isEmpty() )
+    GameAction nextAction = null;
+    do
     {
-      return actions.poll();
-    }
-    else if( unitQueue.isEmpty() )
-    {
-      stateChange = false; // There's been no gamestate change since we last iterated through all the units, since we're about to do just that
-      for( Unit unit : myCo.units )
+      // If we have more actions ready, don't bother calculating stuff.
+      if( !actions.isEmpty() )
       {
-        if( unit.isTurnOver )
-          continue; // No actions for stale units.
-        unitQueue.offer(unit);
+        return actions.poll();
       }
-    }
-
-    Queue<Unit> travelQueue = new ArrayDeque<Unit>();
-    // Handle actions for each unit the CO owns.
-    while (!unitQueue.isEmpty())
-    {
-      Unit unit = unitQueue.poll();
-      boolean foundAction = false;
-
-      // Find the possible destinations.
-      ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
-
-      for( XYCoord coord : destinations )
+      else if( unitQueue.isEmpty() )
       {
-        // Figure out how to get here.
-        Path movePath = Utils.findShortestPath(unit, coord, gameMap);
-
-        // Figure out what I can do here.
-        ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath);
-        for( GameActionSet actionSet : actionSets )
+        stateChange = false; // There's been no gamestate change since we last iterated through all the units, since we're about to do just that
+        for( Unit unit : myCo.units )
         {
-          // See if we have the option to attack.
-          if( actionSet.getSelected().getType() == GameAction.ActionType.ATTACK )
-          {
-            actions.offer(actionSet.getSelected());
-            foundAction = true;
-            break;
-          }
-
-          // Otherwise, see if we have the option to capture.
-          if( actionSet.getSelected().getType() == GameAction.ActionType.CAPTURE )
-          {
-            actions.offer(actionSet.getSelected());
-            capturingProperties.add(coord);
-            foundAction = true;
-            break;
-          }
+          if( unit.isTurnOver )
+            continue; // No actions for stale units.
+          unitQueue.offer(unit);
         }
-        if( foundAction )
-          break; // Only allow one action per unit.
       }
-      if( foundAction )
-      {
-        stateChange = true;
-        break; // Only one action per getNextAction() call, to avoid overlap.
-      }
-      else
-      {
-        travelQueue.offer(unit); // if we can't do anything useful right now, consider just moving towards a useful destination
-      }
-    }
 
-    Queue<Unit> waitQueue = new ArrayDeque<Unit>();
-
-    // If no attack/capture actions are available now, just move towards a non-allied building.
-    if( actions.isEmpty() && !stateChange )
-    {
-      while (!travelQueue.isEmpty())
+      Queue<Unit> travelQueue = new ArrayDeque<Unit>();
+      // Handle actions for each unit the CO owns.
+      while (!unitQueue.isEmpty())
       {
-        Unit unit = travelQueue.poll();
+        Unit unit = unitQueue.poll();
+        boolean foundAction = false;
 
         // Find the possible destinations.
         ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
 
-        Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), unownedProperties);
-        if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
+        for( XYCoord coord : destinations )
         {
-          log(String.format("  Seeking a property to send %s after", unit.toStringWithLocation()));
-          int index = 0;
-          XYCoord goal = null;
-          Path path = null;
-          boolean validTarget = false;
+          // Figure out how to get here.
+          Path movePath = Utils.findShortestPath(unit, coord, gameMap);
 
-          // Loop until we find a valid property to go capture or run out of options.
-          do
+          // Figure out what I can do here.
+          ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath);
+          for( GameActionSet actionSet : actionSets )
           {
-            goal = unownedProperties.get(index++);
-            path = Utils.findShortestPath(unit, goal, gameMap, true);
-            validTarget = (myCo.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
-                && !capturingProperties.contains(goal) // We aren't already capturing it.
-                && (path.getPathLength() > 0)); // We can reach it.
-            log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal,
-                (validTarget ? "Yes" : "No")));
-          } while (!validTarget && (index < unownedProperties.size())); // Loop until we run out of properties to check.
+            // See if we have the option to attack.
+            if( actionSet.getSelected().getType() == GameAction.ActionType.ATTACK )
+            {
+              actions.offer(actionSet.getSelected());
+              foundAction = true;
+              break;
+            }
 
-          if( !validTarget )
-          {
-            // if this unit can't go anywhere useful, consider having it just wait
-            waitQueue.offer(unit);
+            // Otherwise, see if we have the option to capture.
+            if( actionSet.getSelected().getType() == GameAction.ActionType.CAPTURE )
+            {
+              actions.offer(actionSet.getSelected());
+              capturingProperties.add(coord);
+              foundAction = true;
+              break;
+            }
           }
-          else
+          if( foundAction )
+            break; // Only allow one action per unit.
+        }
+        if( foundAction )
+        {
+          stateChange = true;
+          break; // Only one action per getNextAction() call, to avoid overlap.
+        }
+        else
+        {
+          travelQueue.offer(unit); // if we can't do anything useful right now, consider just moving towards a useful destination
+        }
+      }
+
+      Queue<Unit> waitQueue = new ArrayDeque<Unit>();
+
+      // If no attack/capture actions are available now, just move towards a non-allied building.
+      if( actions.isEmpty() && !stateChange )
+      {
+        while (!travelQueue.isEmpty())
+        {
+          Unit unit = travelQueue.poll();
+
+          // Find the possible destinations.
+          ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
+
+          Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), unownedProperties);
+          if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
           {
-            log(String.format("    Selected %s at %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal));
+            log(String.format("  Seeking a property to send %s after", unit.toStringWithLocation()));
+            int index = 0;
+            XYCoord goal = null;
+            Path path = null;
+            boolean validTarget = false;
 
-            // Choose the point on the path just out of our range as our 'goal', and try to move there.
-            // This will allow us to navigate around large obstacles that require us to move away
-            // from our intended long-term goal.
-            path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
-            goal = new XYCoord(path.getEnd().x, path.getEnd().y); // Set the last location as our goal.
+            // Loop until we find a valid property to go capture or run out of options.
+            do
+            {
+              goal = unownedProperties.get(index++);
+              path = Utils.findShortestPath(unit, goal, gameMap, true);
+              validTarget = (myCo.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
+                  && !capturingProperties.contains(goal) // We aren't already capturing it.
+                  && (path.getPathLength() > 0)); // We can reach it.
+              log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal,
+                  (validTarget ? "Yes" : "No")));
+            } while (!validTarget && (index < unownedProperties.size())); // Loop until we run out of properties to check.
 
-            log(String.format("    Intermediate waypoint: %s", goal));
+            if( !validTarget )
+            {
+              // if this unit can't go anywhere useful, consider having it just wait
+              waitQueue.offer(unit);
+            }
+            else
+            {
+              log(String.format("    Selected %s at %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal));
 
-            // Sort my currently-reachable move locations by distance from the goal,
-            // and build a GameAction to move to the closest one.
-            Utils.sortLocationsByDistance(goal, destinations);
-            XYCoord destination = destinations.get(0);
-            Path movePath = Utils.findShortestPath(unit, destination, gameMap);
-            GameAction move = new GameAction.WaitAction(gameMap, unit, movePath);
-            actions.offer(move);
-            stateChange = true;
-            break;
+              // Choose the point on the path just out of our range as our 'goal', and try to move there.
+              // This will allow us to navigate around large obstacles that require us to move away
+              // from our intended long-term goal.
+              path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
+              goal = new XYCoord(path.getEnd().x, path.getEnd().y); // Set the last location as our goal.
+
+              log(String.format("    Intermediate waypoint: %s", goal));
+
+              // Sort my currently-reachable move locations by distance from the goal,
+              // and build a GameAction to move to the closest one.
+              Utils.sortLocationsByDistance(goal, destinations);
+              XYCoord destination = destinations.get(0);
+              Path movePath = Utils.findShortestPath(unit, destination, gameMap);
+              GameAction move = new GameAction.WaitAction(gameMap, unit, movePath);
+              actions.offer(move);
+              stateChange = true;
+              break;
+            }
           }
         }
       }
-    }
 
-    // If we can't even move towards an objective, *then* we wait.
-    if( actions.isEmpty() && !stateChange )
-    {
-      while (!waitQueue.isEmpty())
+      // If we can't even move towards an objective, *then* we wait.
+      if( actions.isEmpty() && !stateChange )
       {
-        Unit unit = waitQueue.poll();
-        log("    Failed to find a path to a capturable property. Waiting");
-        GameAction wait = new GameAction.WaitAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
-        actions.offer(wait);
-        break;
-      }
-    }
-
-    // We will add all build commands at once, since they can't conflict.
-    if( actions.isEmpty() )
-    {
-      Map<Location, ArrayList<UnitModel>> shoppingLists = new HashMap<>();
-      for( Location loc : myCo.ownedProperties )
-      {
-        // I like combat units that are useful, so we skip ports for now
-        if( loc.getEnvironment().terrainType != TerrainType.SEAPORT && loc.getResident() == null )
+        while (!waitQueue.isEmpty())
         {
-          ArrayList<UnitModel> units = myCo.getShoppingList(loc.getEnvironment().terrainType);
-          // Only add to the list if we could actually buy something here.
-          if( !units.isEmpty() && units.get(0).moneyCost <= myCo.money )
-          {
-            shoppingLists.put(loc, units);
-          }
+          Unit unit = waitQueue.poll();
+          log("    Failed to find a path to a capturable property. Waiting");
+          GameAction wait = new GameAction.WaitAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
+          actions.offer(wait);
+          break;
         }
       }
-      int budget = myCo.money;
-      Map<Location, UnitModel> purchases = new HashMap<>();
-      // Now that we know where and what we can buy, let's make some initial selections.
-      for( Entry<Location, ArrayList<UnitModel>> locShopList : shoppingLists.entrySet() )
+
+      // We will add all build commands at once, since they can't conflict.
+      if( actions.isEmpty() )
       {
-        ArrayList<UnitModel> units = locShopList.getValue();
-        for( UnitModel unit : units )
+        Map<Location, ArrayList<UnitModel>> shoppingLists = new HashMap<>();
+        for( Location loc : myCo.ownedProperties )
         {
-          // I only want combat units, since I don't understand transports
-          if( unit.weaponModels != null && unit.weaponModels.length > 0 && unit.moneyCost <= budget )
+          // I like combat units that are useful, so we skip ports for now
+          if( loc.getEnvironment().terrainType != TerrainType.SEAPORT && loc.getResident() == null )
           {
-            budget -= unit.moneyCost;
-            purchases.put(locShopList.getKey(), unit);
-            break;
+            ArrayList<UnitModel> units = myCo.getShoppingList(loc.getEnvironment().terrainType);
+            // Only add to the list if we could actually buy something here.
+            if( !units.isEmpty() && units.get(0).moneyCost <= myCo.money )
+            {
+              shoppingLists.put(loc, units);
+            }
           }
         }
-      }
-      Queue<Entry<Location, ArrayList<UnitModel>>> upgradables = new ArrayDeque<>();
-      upgradables.addAll(shoppingLists.entrySet());
-      // I want the most expensive single unit I can get, but I also want to spend as much money as possible
-      while (!upgradables.isEmpty())
-      {
-        Entry<Location, ArrayList<UnitModel>> locShopList = upgradables.poll();
-        ArrayList<UnitModel> units = locShopList.getValue();
-        UnitModel currentPurchase = purchases.get(locShopList.getKey());
-        if( null != currentPurchase )
+        int budget = myCo.money;
+        Map<Location, UnitModel> purchases = new HashMap<>();
+        // Now that we know where and what we can buy, let's make some initial selections.
+        for( Entry<Location, ArrayList<UnitModel>> locShopList : shoppingLists.entrySet() )
         {
-          budget += currentPurchase.moneyCost;
+          ArrayList<UnitModel> units = locShopList.getValue();
           for( UnitModel unit : units )
           {
-            if( budget > unit.moneyCost && unit.moneyCost > currentPurchase.moneyCost )
-              currentPurchase = unit;
+            // I only want combat units, since I don't understand transports
+            if( unit.weaponModels != null && unit.weaponModels.length > 0 && unit.moneyCost <= budget )
+            {
+              budget -= unit.moneyCost;
+              purchases.put(locShopList.getKey(), unit);
+              break;
+            }
           }
-          // once we've found the most expensive thing we can buy here, record that
-          budget -= currentPurchase.moneyCost;
-          purchases.put(locShopList.getKey(), currentPurchase);
+        }
+        Queue<Entry<Location, ArrayList<UnitModel>>> upgradables = new ArrayDeque<>();
+        upgradables.addAll(shoppingLists.entrySet());
+        // I want the most expensive single unit I can get, but I also want to spend as much money as possible
+        while (!upgradables.isEmpty())
+        {
+          Entry<Location, ArrayList<UnitModel>> locShopList = upgradables.poll();
+          ArrayList<UnitModel> units = locShopList.getValue();
+          UnitModel currentPurchase = purchases.get(locShopList.getKey());
+          if( null != currentPurchase )
+          {
+            budget += currentPurchase.moneyCost;
+            for( UnitModel unit : units )
+            {
+              if( budget > unit.moneyCost && unit.moneyCost > currentPurchase.moneyCost )
+                currentPurchase = unit;
+            }
+            // once we've found the most expensive thing we can buy here, record that
+            budget -= currentPurchase.moneyCost;
+            purchases.put(locShopList.getKey(), currentPurchase);
+          }
+        }
+        // once we're satisfied with all our selections, put in the orders
+        for( Entry<Location, UnitModel> lineItem : purchases.entrySet() )
+        {
+          GameAction action = new GameAction.UnitProductionAction(gameMap, myCo, lineItem.getValue(),
+              lineItem.getKey().getCoordinates());
+          actions.offer(action);
         }
       }
-      // once we're satisfied with all our selections, put in the orders
-      for( Entry<Location, UnitModel> lineItem : purchases.entrySet() )
-      {
-        GameAction action = new GameAction.UnitProductionAction(gameMap, myCo, lineItem.getValue(),
-            lineItem.getKey().getCoordinates());
-        actions.offer(action);
-      }
-    }
 
-    // Return the next action, or null if actions is empty.
-    GameAction nextAction = actions.poll();
+      // Return the next action, or null if actions is empty.
+      nextAction = actions.poll();
+    } while (nextAction != null || !stateChange);
     log(String.format("  Action: %s", nextAction));
     return nextAction;
   }
