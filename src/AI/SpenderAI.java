@@ -2,6 +2,9 @@ package AI;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 
 import CommandingOfficers.Commander;
@@ -99,7 +102,7 @@ public class SpenderAI implements AIController
     {
       return actions.poll();
     }
-    else if (unitQueue.isEmpty())
+    else if( unitQueue.isEmpty() )
     {
       stateChange = false; // There's been no gamestate change since we last iterated through all the units, since we're about to do just that
       for( Unit unit : myCo.units )
@@ -112,7 +115,7 @@ public class SpenderAI implements AIController
 
     Queue<Unit> travelQueue = new ArrayDeque<Unit>();
     // Handle actions for each unit the CO owns.
-    while( !unitQueue.isEmpty() )
+    while (!unitQueue.isEmpty())
     {
       Unit unit = unitQueue.poll();
       boolean foundAction = false;
@@ -149,11 +152,13 @@ public class SpenderAI implements AIController
         if( foundAction )
           break; // Only allow one action per unit.
       }
-      if( foundAction ){
+      if( foundAction )
+      {
         stateChange = true;
         break; // Only one action per getNextAction() call, to avoid overlap.
       }
-      else {
+      else
+      {
         travelQueue.offer(unit);
       }
 
@@ -162,15 +167,15 @@ public class SpenderAI implements AIController
     Queue<Unit> waitQueue = new ArrayDeque<Unit>();
 
     // If no attack/capture actions are available now, just move towards a non-allied building.
-    if (actions.isEmpty() && !stateChange)
+    if( actions.isEmpty() && !stateChange )
     {
-      while( !travelQueue.isEmpty())
+      while (!travelQueue.isEmpty())
       {
         Unit unit = travelQueue.poll();
-        
+
         // Find the possible destinations.
         ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
-        
+
         Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), unownedProperties);
         if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
         {
@@ -197,34 +202,36 @@ public class SpenderAI implements AIController
             // if this unit can't go anywhere useful, consider having it just wait
             waitQueue.offer(unit);
           }
+          else
+          {
+            log(String.format("    Selected %s at %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal));
 
-          log(String.format("    Selected %s at %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal));
+            // Choose the point on the path just out of our range as our 'goal', and try to move there.
+            // This will allow us to navigate around large obstacles that require us to move away
+            // from our intended long-term goal.
+            path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
+            goal = new XYCoord(path.getEnd().x, path.getEnd().y); // Set the last location as our goal.
 
-          // Choose the point on the path just out of our range as our 'goal', and try to move there.
-          // This will allow us to navigate around large obstacles that require us to move away
-          // from our intended long-term goal.
-          path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
-          goal = new XYCoord(path.getEnd().x, path.getEnd().y); // Set the last location as our goal.
+            log(String.format("    Intermediate waypoint: %s", goal));
 
-          log(String.format("    Intermediate waypoint: %s", goal));
-
-          // Sort my currently-reachable move locations by distance from the goal,
-          // and build a GameAction to move to the closest one.
-          Utils.sortLocationsByDistance(goal, destinations);
-          XYCoord destination = destinations.get(0);
-          Path movePath = Utils.findShortestPath(unit, destination, gameMap);
-          GameAction move = new GameAction.WaitAction(gameMap, unit, movePath);
-          actions.offer(move);
-          stateChange = true;
-          break;
+            // Sort my currently-reachable move locations by distance from the goal,
+            // and build a GameAction to move to the closest one.
+            Utils.sortLocationsByDistance(goal, destinations);
+            XYCoord destination = destinations.get(0);
+            Path movePath = Utils.findShortestPath(unit, destination, gameMap);
+            GameAction move = new GameAction.WaitAction(gameMap, unit, movePath);
+            actions.offer(move);
+            stateChange = true;
+            break;
+          }
         }
       }
     }
 
     // If we can't even move towards an objective, *then* we wait.
-    if (actions.isEmpty() && !stateChange)
+    if( actions.isEmpty() && !stateChange )
     {
-      while( !waitQueue.isEmpty())
+      while (!waitQueue.isEmpty())
       {
         Unit unit = waitQueue.poll();
         log("    Failed to find a path to a capturable property. Waiting");
@@ -234,24 +241,36 @@ public class SpenderAI implements AIController
       }
     }
 
-    // Finally, build more infantry. We will add all build commands at once, since they can't conflict.
+    // We will add all build commands at once, since they can't conflict.
     if( actions.isEmpty() )
     {
-      // Create a list of actions to build infantry on every open factory, then return these actions until done.
-      for( int i = 0; i < gameMap.mapWidth; i++ )
+      Map<Location, ArrayList<UnitModel>> shoppingLists = new HashMap<>();
+      for( Location loc : myCo.ownedProperties )
       {
-        for( int j = 0; j < gameMap.mapHeight; j++ )
+        // I like combat units that are useful, so we skip ports for now
+        if( loc.getEnvironment().terrainType != TerrainType.SEAPORT && loc.getResident() == null )
         {
-          Location loc = gameMap.getLocation(i, j);
-          // If this terrain belongs to me, and I can build something on it, and I have the money, do so.
-          if( loc.getEnvironment().terrainType == TerrainType.FACTORY && loc.getOwner() == myCo && loc.getResident() == null )
+          ArrayList<UnitModel> units = myCo.getShoppingList(loc.getEnvironment().terrainType);
+          // Only add to the list if we could actually buy something here.
+          if( !units.isEmpty() && units.get(0).moneyCost <= myCo.money )
           {
-            ArrayList<UnitModel> units = myCo.getShoppingList(loc.getEnvironment().terrainType);
-            if( !units.isEmpty() && units.get(0).moneyCost <= myCo.money )
-            {
-              GameAction action = new GameAction.UnitProductionAction(gameMap, myCo, units.get(0), loc.getCoordinates());
-              actions.offer(action);
-            }
+            shoppingLists.put(loc, units);
+          }
+        }
+      }
+      int budget = myCo.money;
+      for( Entry<Location, ArrayList<UnitModel>> locShopList : shoppingLists.entrySet() )
+      {
+        ArrayList<UnitModel> units = locShopList.getValue();
+        for( UnitModel unit : units )
+        {
+          // I only want combat units, since I don't understand transports
+          if( unit.weaponModels != null && unit.weaponModels.length > 0 && unit.moneyCost <= budget )
+          {
+            budget -= unit.moneyCost;
+            GameAction action = new GameAction.UnitProductionAction(gameMap, myCo, unit, locShopList.getKey().getCoordinates());
+            actions.offer(action);
+            break;
           }
         }
       }
