@@ -251,7 +251,7 @@ public class SpenderAI implements AIController
       }
 
       // We will add all build commands at once, since they can't conflict.
-      if( actions.isEmpty() )
+      if( actions.isEmpty() && !stateChange)
       {
         Map<Location, ArrayList<UnitModel>> shoppingLists = new HashMap<>();
         for( Location loc : myCo.ownedProperties )
