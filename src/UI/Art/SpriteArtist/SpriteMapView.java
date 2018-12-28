@@ -64,8 +64,8 @@ public class SpriteMapView extends MapView
   private int mapViewX;
   private int mapViewY;
   // Coordinates of the draw view, with double precision. Will constantly move towards (mapViewX, mapViewY).
-  private double mapViewDrawX;
-  private double mapViewDrawY;
+  private static double mapViewDrawX;
+  private static double mapViewDrawY;
 
   boolean dimensionsChanged = false; // If the window is resized, don't bother sliding the view into place; just snap.
 
@@ -316,38 +316,14 @@ public class SpriteMapView extends MapView
                 currentPath.getEnd().x, currentPath.getEnd().y).defenderHPLoss);
             String damageText = damage + "%";
 
-            // yes, most of this is 100% copied from ResupplyAnimation
-            int drawScale = SpriteOptions.getDrawScale();
-            int tileSize = SpriteLibrary.baseSpriteSize * drawScale;
-            int tileCenterX = (target.x * tileSize) + (tileSize / 2);
-            int tileCenterY = (target.y * tileSize) - (tileSize / 4); // this line is not; we draw above the target square, rather than in the center
-            int menuTextWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth();
-            int menuTextHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight();
-            int signWidth = ((menuTextWidth * damageText.length()) + 4) * drawScale;
-            int signHeight = (menuTextHeight + 4) * drawScale;
-
-            XYCoord signTopLeft = new XYCoord(tileCenterX - signWidth / 2, tileCenterY - signHeight / 2);
-
-            // yaaaay laziness
-            int x = signTopLeft.xCoord;
-            int y = signTopLeft.yCoord;
-            int w = signWidth;
-            int h = signHeight;
             Color[] colors = SpriteLibrary.getMapUnitColors(currentActor.CO.myColor).paletteColors;
-            mapGraphics.setColor(colors[2]); // frame
-            mapGraphics.fillRect(x, y, w, h);
-            mapGraphics.setColor(colors[5]); // highlight
-            mapGraphics.fillRect(x + 1, y + 1, w - 1, h - 1);
-            mapGraphics.setColor(colors[4]); // BG
-            mapGraphics.fillRect(x + 1, y + 1, w - 2, h - 2);
-            SpriteLibrary.drawTextSmallCaps(mapGraphics, damageText, signTopLeft.xCoord + 2 * drawScale,
-                signTopLeft.yCoord + 2 * drawScale, drawScale);
+            SpriteUIUtils.drawTextFrame(mapGraphics, colors[4], colors[2], damageText, target.x, target.y-0.9);
           }
         }
       }
       else
       {
-        menuArtist.drawMenu(mapGraphics, drawX, drawY);
+        menuArtist.drawMenu(mapGraphics);
       }
 
       // Copy the map image into the window's graphics buffer.
@@ -563,5 +539,10 @@ public class SpriteMapView extends MapView
 
     // Create a new animation to show the game results.
     currentAnimation = new SpriteGameEndAnimation(myGame.commanders);
+  }
+  
+  public static XYCoord getVisualOrigin()
+  {
+    return new XYCoord((int)mapViewDrawX, (int)mapViewDrawY);
   }
 }
