@@ -220,10 +220,18 @@ public class SpenderAI implements AIController
               Utils.sortLocationsByDistance(goal, destinations);
               XYCoord destination = destinations.get(0);
               Path movePath = Utils.findShortestPath(unit, destination, gameMap);
-              GameAction move = new GameAction.WaitAction(gameMap, unit, movePath);
-              actions.offer(move);
-              stateChange = true;
-              break;
+              if( movePath.getPathLength() > 1 ) // We only want to try to travel if we can actually go somewhere
+              {
+                GameAction move = new GameAction.WaitAction(gameMap, unit, movePath);
+                actions.offer(move);
+                stateChange = true;
+                break;
+              }
+              else
+              {
+                // if this unit can't go anywhere useful, consider having it just wait
+                waitQueue.offer(unit);
+              }
             }
           }
         }
@@ -289,7 +297,9 @@ public class SpenderAI implements AIController
             budget += currentPurchase.moneyCost;
             for( UnitModel unit : units )
             {
-              if( budget > unit.moneyCost && unit.moneyCost > currentPurchase.moneyCost )
+              // I want expensive units, but they have to have guns
+              if( budget > unit.moneyCost && unit.moneyCost > currentPurchase.moneyCost && unit.weaponModels != null
+                  && unit.weaponModels.length > 0 )
                 currentPurchase = unit;
             }
             // once we've found the most expensive thing we can buy here, record that
