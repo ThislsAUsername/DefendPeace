@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
-
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
@@ -259,6 +258,7 @@ public class SpenderAI implements AIController
         }
       }
       int budget = myCo.money;
+      Map<Location, UnitModel> purchases = new HashMap<>();
       for( Entry<Location, ArrayList<UnitModel>> locShopList : shoppingLists.entrySet() )
       {
         ArrayList<UnitModel> units = locShopList.getValue();
@@ -268,11 +268,35 @@ public class SpenderAI implements AIController
           if( unit.weaponModels != null && unit.weaponModels.length > 0 && unit.moneyCost <= budget )
           {
             budget -= unit.moneyCost;
-            GameAction action = new GameAction.UnitProductionAction(gameMap, myCo, unit, locShopList.getKey().getCoordinates());
-            actions.offer(action);
+            purchases.put(locShopList.getKey(), unit);
             break;
           }
         }
+      }
+      Queue<Entry<Location, ArrayList<UnitModel>>> upgradables = new ArrayDeque<>();
+      upgradables.addAll(shoppingLists.entrySet());
+      // I want the most expensive single unit I can get, but I also want to spend as much money as possible
+      while (!upgradables.isEmpty())
+      {
+        Entry<Location, ArrayList<UnitModel>> locShopList = upgradables.poll();
+        ArrayList<UnitModel> units = locShopList.getValue();
+        UnitModel currentPurchase = purchases.get(locShopList.getKey());
+        budget += currentPurchase.moneyCost;
+        for( UnitModel unit : units )
+        {
+          if( budget > unit.moneyCost && unit.moneyCost > currentPurchase.moneyCost )
+            currentPurchase = unit;
+        }
+        // once we've found the most expensive thing we can buy here, record that
+        budget -= currentPurchase.moneyCost;
+        purchases.put(locShopList.getKey(), currentPurchase);
+      }
+      // once we're satisfied with all our selections, put in the orders
+      for( Entry<Location, UnitModel> lineItem : purchases.entrySet() )
+      {
+        GameAction action = new GameAction.UnitProductionAction(gameMap, myCo, lineItem.getValue(),
+            lineItem.getKey().getCoordinates());
+        actions.offer(action);
       }
     }
 
