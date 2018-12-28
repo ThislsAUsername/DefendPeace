@@ -308,7 +308,7 @@ public class SpenderAI implements AIController
 
       // Return the next action, or null if actions is empty.
       nextAction = actions.poll();
-    } while (nextAction != null || !stateChange);
+    } while (nextAction == null && stateChange); // we don't want to end early, so if the state changed and we don't have an action yet, try again
     log(String.format("  Action: %s", nextAction));
     return nextAction;
   }
