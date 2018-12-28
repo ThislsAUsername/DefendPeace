@@ -177,7 +177,6 @@ public class CommanderCinder extends Commander
         {
           minion.alterHP(-refreshCost);
           minion.isTurnOver = false;
-          // TODO: It'd be cool if we could kill the unit here, so Cinder can eke out maximal use without cheating.
         }
       }
     }
