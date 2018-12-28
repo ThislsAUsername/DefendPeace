@@ -18,11 +18,13 @@ import Units.Unit;
 import Units.UnitModel;
 
 /**
- *  Just build tons of Infantry and try to rush the opponent.
+ *  This AI's intent is to just spend all of its resources, action economy included
  */
 public class SpenderAI implements AIController
 {
   Queue<GameAction> actions = new ArrayDeque<GameAction>();
+  Queue<Unit> unitQueue = new ArrayDeque<Unit>();
+  boolean stateChange;
 
   private Commander myCo = null;
 
@@ -41,11 +43,11 @@ public class SpenderAI implements AIController
   public void initTurn(GameMap gameMap)
   {
     turnNum++;
-    log(String.format("[======== ISAI initializing turn %s for %s =========]", turnNum, myCo));
+    log(String.format("[======== SpAI initializing turn %s for %s =========]", turnNum, myCo));
 
     // Make sure we don't have any hang-ons from last time.
     actions.clear();
-    
+
     // Create a list of every property we don't own, but want to.
     unownedProperties = new ArrayList<XYCoord>();
     for( int x = 0; x < gameMap.mapWidth; ++x )
@@ -79,7 +81,7 @@ public class SpenderAI implements AIController
   @Override
   public void endTurn()
   {
-    log(String.format("[======== ISAI ending turn %s for %s =========]", turnNum, myCo));
+    log(String.format("[======== SpAI ending turn %s for %s =========]", turnNum, myCo));
     System.out.println(logger.toString());
     logger = new StringBuffer();
   }
@@ -97,11 +99,22 @@ public class SpenderAI implements AIController
     {
       return actions.poll();
     }
-
-    // Handle actions for each unit the CO owns.
-    for( Unit unit : myCo.units )
+    else if (unitQueue.isEmpty())
     {
-      if( unit.isTurnOver ) continue; // No actions for stale units.
+      stateChange = false; // There's been no gamestate change since we last iterated through all the units, since we're about to do just that
+      for( Unit unit : myCo.units )
+      {
+        if( unit.isTurnOver )
+          continue; // No actions for stale units.
+        unitQueue.offer(unit);
+      }
+    }
+
+    Queue<Unit> travelQueue = new ArrayDeque<Unit>();
+    // Handle actions for each unit the CO owns.
+    while( !unitQueue.isEmpty() )
+    {
+      Unit unit = unitQueue.poll();
       boolean foundAction = false;
 
       // Find the possible destinations.
@@ -119,71 +132,104 @@ public class SpenderAI implements AIController
           // See if we have the option to attack.
           if( actionSet.getSelected().getType() == GameAction.ActionType.ATTACK )
           {
-            actions.offer(actionSet.getSelected() );
+            actions.offer(actionSet.getSelected());
             foundAction = true;
             break;
           }
-          
+
           // Otherwise, see if we have the option to capture.
           if( actionSet.getSelected().getType() == GameAction.ActionType.CAPTURE )
           {
-            actions.offer(actionSet.getSelected() );
+            actions.offer(actionSet.getSelected());
             capturingProperties.add(coord);
             foundAction = true;
             break;
           }
         }
-        if(foundAction)break; // Only allow one action per unit.
+        if( foundAction )
+          break; // Only allow one action per unit.
       }
-      if(foundAction)break; // Only one action per getNextAction() call, to avoid overlap.
+      if( foundAction ){
+        stateChange = true;
+        break; // Only one action per getNextAction() call, to avoid overlap.
+      }
+      else {
+        travelQueue.offer(unit);
+      }
 
-      // If no attack/capture actions are available now, just move towards a non-allied building.
-      Utils.sortLocationsByDistance( new XYCoord(unit.x, unit.y), unownedProperties);
-      if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
+    }
+
+    Queue<Unit> waitQueue = new ArrayDeque<Unit>();
+
+    // If no attack/capture actions are available now, just move towards a non-allied building.
+    if (actions.isEmpty() && !stateChange)
+    {
+      while( !travelQueue.isEmpty())
       {
-        log(String.format("  Seeking a property to send %s after", unit.toStringWithLocation()));
-        int index = 0;
-        XYCoord goal = null;
-        Path path = null;
-        boolean validTarget = false;
-
-        // Loop until we find a valid property to go capture or run out of options.
-        do
+        Unit unit = travelQueue.poll();
+        
+        // Find the possible destinations.
+        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
+        
+        Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), unownedProperties);
+        if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
         {
-          goal = unownedProperties.get(index++);
-          path = Utils.findShortestPath(unit, goal, gameMap, true);
-          validTarget = (myCo.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
-                      && !capturingProperties.contains(goal)                // We aren't already capturing it.
-                      && (path.getPathLength() > 0));                       // We can reach it.
-          log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
-        } while( !validTarget && (index < unownedProperties.size()) );      // Loop until we run out of properties to check.
+          log(String.format("  Seeking a property to send %s after", unit.toStringWithLocation()));
+          int index = 0;
+          XYCoord goal = null;
+          Path path = null;
+          boolean validTarget = false;
 
-        if( !validTarget )
-        {
-          log("    Failed to find a path to a capturable property. Waiting");
-          // We couldn't find a valid move point (are we on an island?). Just give up.
-          GameAction wait = new GameAction.WaitAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
-          actions.offer(wait);
+          // Loop until we find a valid property to go capture or run out of options.
+          do
+          {
+            goal = unownedProperties.get(index++);
+            path = Utils.findShortestPath(unit, goal, gameMap, true);
+            validTarget = (myCo.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
+                && !capturingProperties.contains(goal) // We aren't already capturing it.
+                && (path.getPathLength() > 0)); // We can reach it.
+            log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal,
+                (validTarget ? "Yes" : "No")));
+          } while (!validTarget && (index < unownedProperties.size())); // Loop until we run out of properties to check.
+
+          if( !validTarget )
+          {
+            // if this unit can't go anywhere useful, consider having it just wait
+            waitQueue.offer(unit);
+          }
+
+          log(String.format("    Selected %s at %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal));
+
+          // Choose the point on the path just out of our range as our 'goal', and try to move there.
+          // This will allow us to navigate around large obstacles that require us to move away
+          // from our intended long-term goal.
+          path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
+          goal = new XYCoord(path.getEnd().x, path.getEnd().y); // Set the last location as our goal.
+
+          log(String.format("    Intermediate waypoint: %s", goal));
+
+          // Sort my currently-reachable move locations by distance from the goal,
+          // and build a GameAction to move to the closest one.
+          Utils.sortLocationsByDistance(goal, destinations);
+          XYCoord destination = destinations.get(0);
+          Path movePath = Utils.findShortestPath(unit, destination, gameMap);
+          GameAction move = new GameAction.WaitAction(gameMap, unit, movePath);
+          actions.offer(move);
+          stateChange = true;
           break;
         }
+      }
+    }
 
-        log(String.format("    Selected %s at %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal));
-
-        // Choose the point on the path just out of our range as our 'goal', and try to move there.
-        // This will allow us to navigate around large obstacles that require us to move away
-        // from our intended long-term goal.
-        path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
-        goal = new XYCoord(path.getEnd().x, path.getEnd().y); // Set the last location as our goal.
-
-        log(String.format("    Intermediate waypoint: %s", goal));
-
-        // Sort my currently-reachable move locations by distance from the goal,
-        // and build a GameAction to move to the closest one.
-        Utils.sortLocationsByDistance(goal, destinations);
-        XYCoord destination = destinations.get(0);
-        Path movePath = Utils.findShortestPath(unit, destination, gameMap);
-        GameAction move = new GameAction.WaitAction(gameMap, unit, movePath);
-        actions.offer(move);
+    // If we can't even move towards an objective, *then* we wait.
+    if (actions.isEmpty() && !stateChange)
+    {
+      while( !waitQueue.isEmpty())
+      {
+        Unit unit = waitQueue.poll();
+        log("    Failed to find a path to a capturable property. Waiting");
+        GameAction wait = new GameAction.WaitAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
+        actions.offer(wait);
         break;
       }
     }
@@ -194,7 +240,7 @@ public class SpenderAI implements AIController
       // Create a list of actions to build infantry on every open factory, then return these actions until done.
       for( int i = 0; i < gameMap.mapWidth; i++ )
       {
-        for( int j = 0; j < gameMap.mapHeight; j++)
+        for( int j = 0; j < gameMap.mapHeight; j++ )
         {
           Location loc = gameMap.getLocation(i, j);
           // If this terrain belongs to me, and I can build something on it, and I have the money, do so.
@@ -204,7 +250,7 @@ public class SpenderAI implements AIController
             if( !units.isEmpty() && units.get(0).moneyCost <= myCo.money )
             {
               GameAction action = new GameAction.UnitProductionAction(gameMap, myCo, units.get(0), loc.getCoordinates());
-              actions.offer( action );
+              actions.offer(action);
             }
           }
         }
