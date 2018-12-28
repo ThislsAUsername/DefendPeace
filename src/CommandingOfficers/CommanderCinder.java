@@ -168,26 +168,16 @@ public class CommanderCinder extends Commander
     @Override
     public void receiveBattleEvent(BattleSummary battleInfo)
     {
-      // Determine if we were part of this fight. If so, refresh at our own expense
-      Unit minion = null;
-      if( battleInfo.attacker.CO == myCommander )
+      // Determine if we were part of this fight. If so, refresh at our own expense.
+      Unit minion = battleInfo.attacker;
+      if( minion.CO == myCommander )
       {
-        minion = battleInfo.attacker;
-      }
-
-      if( null != minion )
-      {
-        if( minion.getPreciseHP() > Math.abs(refreshCost * 2) )
+        int hp = minion.getHP();
+        if( hp > refreshCost )
         {
-          minion.alterHP(-1 * refreshCost);
+          minion.alterHP(-refreshCost);
           minion.isTurnOver = false;
-        }
-        else
-        {
-          minion.damageHP(refreshCost);
           // TODO: It'd be cool if we could kill the unit here, so Cinder can eke out maximal use without cheating.
-          // gameMap.removeUnit(attacker);
-          // attacker.CO.units.remove(attacker);
         }
       }
     }
