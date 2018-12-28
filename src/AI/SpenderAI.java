@@ -281,15 +281,18 @@ public class SpenderAI implements AIController
         Entry<Location, ArrayList<UnitModel>> locShopList = upgradables.poll();
         ArrayList<UnitModel> units = locShopList.getValue();
         UnitModel currentPurchase = purchases.get(locShopList.getKey());
-        budget += currentPurchase.moneyCost;
-        for( UnitModel unit : units )
+        if( null != currentPurchase )
         {
-          if( budget > unit.moneyCost && unit.moneyCost > currentPurchase.moneyCost )
-            currentPurchase = unit;
+          budget += currentPurchase.moneyCost;
+          for( UnitModel unit : units )
+          {
+            if( budget > unit.moneyCost && unit.moneyCost > currentPurchase.moneyCost )
+              currentPurchase = unit;
+          }
+          // once we've found the most expensive thing we can buy here, record that
+          budget -= currentPurchase.moneyCost;
+          purchases.put(locShopList.getKey(), currentPurchase);
         }
-        // once we've found the most expensive thing we can buy here, record that
-        budget -= currentPurchase.moneyCost;
-        purchases.put(locShopList.getKey(), currentPurchase);
       }
       // once we're satisfied with all our selections, put in the orders
       for( Entry<Location, UnitModel> lineItem : purchases.entrySet() )
