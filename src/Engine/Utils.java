@@ -1,6 +1,7 @@
 package Engine;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Queue;
 
@@ -459,7 +460,7 @@ public class Utils
   public static void sortLocationsByDistance(XYCoord center, ArrayList<XYCoord> mapLocations)
   {
     ManhattanDistanceComparator mdc = new ManhattanDistanceComparator(center);
-    mapLocations.sort(mdc);
+    Collections.sort(mapLocations, mdc);
   }
 
   /**
@@ -495,6 +496,6 @@ public class Utils
   public static void sortLocationsByTravelTime(Unit unit, ArrayList<XYCoord> mapLocations, GameMap map)
   {
     TravelDistanceComparator tdc = new TravelDistanceComparator(unit, map);
-    mapLocations.sort(tdc);
+    Collections.sort(mapLocations, tdc);
   }
 }
