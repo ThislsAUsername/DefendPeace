@@ -7,6 +7,8 @@ import CommandingOfficers.Modifiers.COModifier;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.UnitDieEvent;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.Unit;
@@ -22,6 +24,8 @@ public class CommanderCinder extends Commander
   private static final double COST_MOD_PER_BUILD = 1.2;
 
   private HashMap<XYCoord, Integer> buildCounts = new HashMap<>();
+
+  private GameEventQueue pollEvents = new GameEventQueue();
 
   public CommanderCinder()
   {
@@ -76,10 +80,18 @@ public class CommanderCinder extends Commander
     super.initTurn(map);
   }
 
+  @Override
   public void endTurn()
   {
     setPrices(0);
     super.endTurn();
+  }
+
+  @Override
+  public void pollForEvents(GameEventQueue eventsOut)
+  {
+    eventsOut.addAll(pollEvents);
+    pollEvents.clear();
   }
 
   public void setPrices(int repetitons)
@@ -177,6 +189,14 @@ public class CommanderCinder extends Commander
         {
           minion.alterHP(-refreshCost);
           minion.isTurnOver = false;
+        }
+        else
+        {
+          // Guess he's not gonna make it.
+          // TODO: Maybe add a debuff event/animation here as well.
+          UnitDieEvent event = new UnitDieEvent(minion);
+          CommanderCinder Cinder = (CommanderCinder)myCommander;
+          Cinder.pollEvents.add(event);
         }
       }
     }

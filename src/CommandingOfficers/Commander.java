@@ -12,6 +12,7 @@ import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -175,6 +176,12 @@ public class Commander extends GameEventListener
       aiController.initTurn(map);
     }
   }
+
+  /**
+   * This is called after every GameAction, and between turns, and allows Commanders to inject
+   * events that don't arise via normal gameplay. Most Commanders should not need to override this.
+   */
+  public void pollForEvents(GameEventQueue eventsOut) {}
 
   /**
    * @return whether these COs would like to kill each other
