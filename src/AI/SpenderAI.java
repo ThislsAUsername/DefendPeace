@@ -18,6 +18,7 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
+import Units.UnitModel.ChassisEnum;
 
 /**
  *  This AI's intent is to just spend all of its resources, action economy included
@@ -177,7 +178,6 @@ public class SpenderAI implements AIController
           // Find the possible destinations.
           ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
 
-          Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), unownedProperties);
           if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
           {
             log(String.format("  Seeking a property to send %s after", unit.toStringWithLocation()));
@@ -185,11 +185,27 @@ public class SpenderAI implements AIController
             XYCoord goal = null;
             Path path = null;
             boolean validTarget = false;
+            ArrayList<XYCoord> validTargets = new ArrayList<>();
 
+            if( unit.model.chassis == ChassisEnum.TROOP ) // Technically a hack, but we don't have vehicles that can capture... yet.
+            {
+              validTargets.addAll(unownedProperties);
+            }
+            else
+            {
+              for( XYCoord coord : unownedProperties )
+              {
+                if( gameMap.getEnvironment(coord).terrainType == TerrainType.HEADQUARTERS ) // should we have an attribute for this?
+                {
+                  validTargets.add(coord);
+                }
+              }
+            }
             // Loop until we find a valid property to go capture or run out of options.
+            Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), validTargets);
             do
             {
-              goal = unownedProperties.get(index++);
+              goal = validTargets.get(index++);
               path = Utils.findShortestPath(unit, goal, gameMap, true);
               validTarget = (myCo.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
                   && !capturingProperties.contains(goal) // We aren't already capturing it.
@@ -251,7 +267,7 @@ public class SpenderAI implements AIController
       }
 
       // We will add all build commands at once, since they can't conflict.
-      if( actions.isEmpty() && !stateChange)
+      if( actions.isEmpty() && !stateChange )
       {
         Map<Location, ArrayList<UnitModel>> shoppingLists = new HashMap<>();
         for( Location loc : myCo.ownedProperties )
