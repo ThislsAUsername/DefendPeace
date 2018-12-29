@@ -9,6 +9,7 @@ import java.util.Queue;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
+import Engine.GameAction.ActionType;
 import Engine.GameActionSet;
 import Engine.Path;
 import Engine.Utils;
@@ -18,7 +19,6 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
 
 /**
  *  This AI's intent is to just spend all of its resources, action economy included
@@ -187,7 +187,16 @@ public class SpenderAI implements AIController
             boolean validTarget = false;
             ArrayList<XYCoord> validTargets = new ArrayList<>();
 
-            if( unit.model.chassis == ChassisEnum.TROOP ) // Technically a hack, but we don't have vehicles that can capture... yet.
+            boolean canCapture = false;
+            for( ActionType i : unit.model.possibleActions )
+            {
+              if( i == ActionType.CAPTURE )
+              {
+                canCapture = true;
+                break;
+              }
+            }
+            if( canCapture )
             {
               validTargets.addAll(unownedProperties);
             }
