@@ -535,15 +535,18 @@ public class MapController implements IController, GameInputHandler.StateChanged
       myView.animate(events);
     }
 
-    for( Commander co : myGame.commanders )
+    if( animEventQueueIsEmpty )
     {
-      GameEventQueue events = new GameEventQueue();
-      co.pollForEvents(events);
-      if( !events.isEmpty() )
+      for( Commander co : myGame.commanders )
       {
-        animEventQueueIsEmpty = false;
-        myView.animate(events);
-        break; // We'll get the next commander the next time we hit this block.
+        GameEventQueue events = new GameEventQueue();
+        co.pollForEvents(events);
+        if( !events.isEmpty() )
+        {
+          animEventQueueIsEmpty = false;
+          myView.animate(events);
+          break; // We'll get the next commander the next time we hit this block.
+        }
       }
     }
 
