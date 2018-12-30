@@ -37,28 +37,28 @@ public class SpriteUIUtils
     return slide * sign;
   }
 
-  public static void drawBasicTextFrame(Graphics g, String item, double mapX, double mapY)
+  public static void drawBasicTextFrame(Graphics g, String item, double mapX, double mapY, int hBuffer, int vBuffer)
   {
-    drawTextFrame(g, SpriteMenuArtist.MENUBGCOLOR, SpriteMenuArtist.MENUFRAMECOLOR, item, mapX, mapY);
+    drawTextFrame(g, SpriteMenuArtist.MENUBGCOLOR, SpriteMenuArtist.MENUFRAMECOLOR, item, mapX, mapY, hBuffer, vBuffer);
   }
-  public static void drawTextFrame(Graphics g, Color bg, Color frame, String item, double mapX, double mapY)
+  public static void drawTextFrame(Graphics g, Color bg, Color frame, String item, double mapX, double mapY, int hBuffer, int vBuffer)
   {
     ArrayList<String> items = new ArrayList<String>();
     items.add(item);
-    drawTextMenu(g, bg, frame, bg, items, 0, mapX, mapY);
+    drawTextMenu(g, bg, frame, bg, items, 0, mapX, mapY, hBuffer, vBuffer);
   }
   public static void drawBasicTextMenu(Graphics g, ArrayList<String> items, int selection, double mapX, double mapY)
   {
     drawTextMenu(g, SpriteMenuArtist.MENUBGCOLOR, SpriteMenuArtist.MENUFRAMECOLOR, SpriteMenuArtist.MENUHIGHLIGHTCOLOR, items,
-        selection, mapX, mapY);
+        selection, mapX, mapY, SpriteMenuArtist.menuHBuffer, SpriteMenuArtist.menuVBuffer);
   }
-  public static void drawTextMenu(Graphics g, Color bg, Color frame, Color focus, ArrayList<String> items, int selection, double mapX, double mapY)
+  public static void drawTextMenu(Graphics g, Color bg, Color frame, Color focus, ArrayList<String> items, int selection, double mapX, double mapY, int hBuffer, int vBuffer)
   {
     {
       XYCoord visualOrigin = SpriteMapView.getVisualOrigin();
       // Find the dimensions of the menu we are drawing.
-      int menuWidth = getMenuTextWidthPx(items) + SpriteMenuArtist.menuHBuffer * 2;
-      int menuHeight = getMenuTextHeightPx(items) + SpriteMenuArtist.menuVBuffer * 2;
+      int menuWidth = getMenuTextWidthPx(items) + hBuffer * 2;
+      int menuHeight = getMenuTextHeightPx(items) + vBuffer * 2;
 
       // Center the menu over the current action target location, accounting for the position of the map view.
       int viewTileSize = getTileSize(); // Grab this value for convenience.
@@ -73,20 +73,20 @@ public class SpriteUIUtils
           : (drawY > (visualOrigin.yCoord + dims.height - menuHeight)) ? (visualOrigin.yCoord + dims.height - menuHeight) : drawY;
 
       // Draw the nice box for our text.
-      drawMenuFrame(g, bg, frame, drawX, drawY, menuWidth, menuHeight);
+      drawMenuFrame(g, bg, frame, drawX, drawY, menuWidth, menuHeight, vBuffer);
 
       // Draw the highlight for the currently-selected option.
       // selY = drawY plus upper menu-frame buffer, plus (letter height, plus 1px-buffer, times number of options).
-      int selY = drawY + SpriteMenuArtist.menuVBuffer
+      int selY = drawY + vBuffer
           + (SpriteMenuArtist.menuTextHeight + SpriteOptions.getDrawScale()) * selection;
       g.setColor(focus);
       g.fillRect(drawX, selY, menuWidth, SpriteMenuArtist.menuTextHeight);
 
       // Draw the actual menu text.
-      for( int txtY = drawY + SpriteMenuArtist.menuVBuffer, i = 0; i < items.size(); ++i, txtY += SpriteMenuArtist.menuTextHeight
+      for( int txtY = drawY + vBuffer, i = 0; i < items.size(); ++i, txtY += SpriteMenuArtist.menuTextHeight
           + SpriteOptions.getDrawScale() )
       {
-        SpriteLibrary.drawTextSmallCaps(g, items.get(i), drawX + SpriteMenuArtist.menuHBuffer, txtY,
+        SpriteLibrary.drawTextSmallCaps(g, items.get(i), drawX + hBuffer, txtY,
             SpriteOptions.getDrawScale());
       }
     }
@@ -106,9 +106,9 @@ public class SpriteUIUtils
     }
   }
 
-  public static void drawMenuFrame(Graphics g, Color bg, Color frame, int x, int y, int w, int h)
+  public static void drawMenuFrame(Graphics g, Color bg, Color frame, int x, int y, int w, int h, int vBuffer)
   {
-    int menuFrameHeight = SpriteMenuArtist.menuVBuffer / 2; // Upper and lower bit can look framed.
+    int menuFrameHeight = vBuffer / 2; // Upper and lower bit can look framed.
 
     g.setColor(bg);
     g.fillRect(x, y, w, h); // Main menu body;

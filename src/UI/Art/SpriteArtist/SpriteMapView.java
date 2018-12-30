@@ -317,7 +317,7 @@ public class SpriteMapView extends MapView
             String damageText = damage + "%";
 
             Color[] colors = SpriteLibrary.getMapUnitColors(currentActor.CO.myColor).paletteColors;
-            SpriteUIUtils.drawTextFrame(mapGraphics, colors[4], colors[2], damageText, target.x, target.y-0.9);
+            SpriteUIUtils.drawTextFrame(mapGraphics, colors[4], colors[2], damageText, target.x, target.y-0.8, 2*SpriteOptions.getDrawScale(),2*SpriteOptions.getDrawScale());
           }
         }
       }

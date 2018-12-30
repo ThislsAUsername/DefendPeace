@@ -40,7 +40,7 @@ public class SpriteMenuArtist
     menuTextWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth() * drawScale;
     menuTextHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight() * drawScale;
     menuHBuffer = 3 * drawScale; // Amount of visible menu to left and right of options;
-    menuVBuffer = 3 * drawScale; // Amount of visible menu above and below menu options;
+    menuVBuffer = 4 * drawScale; // Amount of visible menu above and below menu options;
   }
 
   /**
