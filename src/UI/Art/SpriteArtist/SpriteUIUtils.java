@@ -41,7 +41,8 @@ public class SpriteUIUtils
   {
     drawTextFrame(g, SpriteMenuArtist.MENUBGCOLOR, SpriteMenuArtist.MENUFRAMECOLOR, item, mapX, mapY, hBuffer, vBuffer);
   }
-  public static void drawTextFrame(Graphics g, Color bg, Color frame, String item, double mapX, double mapY, int hBuffer, int vBuffer)
+  public static void drawTextFrame(Graphics g, Color bg, Color frame, String item, double mapX, double mapY, int hBuffer,
+      int vBuffer)
   {
     ArrayList<String> items = new ArrayList<String>();
     items.add(item);
@@ -52,7 +53,8 @@ public class SpriteUIUtils
     drawTextMenu(g, SpriteMenuArtist.MENUBGCOLOR, SpriteMenuArtist.MENUFRAMECOLOR, SpriteMenuArtist.MENUHIGHLIGHTCOLOR, items,
         selection, mapX, mapY, SpriteMenuArtist.menuHBuffer, SpriteMenuArtist.menuVBuffer);
   }
-  public static void drawTextMenu(Graphics g, Color bg, Color frame, Color focus, ArrayList<String> items, int selection, double mapX, double mapY, int hBuffer, int vBuffer)
+  public static void drawTextMenu(Graphics g, Color bg, Color frame, Color focus, ArrayList<String> items, int selection,
+      double mapX, double mapY, int hBuffer, int vBuffer)
   {
     {
       XYCoord visualOrigin = SpriteMapView.getVisualOrigin();
@@ -77,17 +79,15 @@ public class SpriteUIUtils
 
       // Draw the highlight for the currently-selected option.
       // selY = drawY plus upper menu-frame buffer, plus (letter height, plus 1px-buffer, times number of options).
-      int selY = drawY + vBuffer
-          + (SpriteMenuArtist.menuTextHeight + SpriteOptions.getDrawScale()) * selection;
+      int selY = drawY + vBuffer + (SpriteMenuArtist.menuTextHeight + SpriteOptions.getDrawScale()) * selection;
       g.setColor(focus);
       g.fillRect(drawX, selY, menuWidth, SpriteMenuArtist.menuTextHeight);
 
+      int drawScale = SpriteOptions.getDrawScale();
       // Draw the actual menu text.
-      for( int txtY = drawY + vBuffer, i = 0; i < items.size(); ++i, txtY += SpriteMenuArtist.menuTextHeight
-          + SpriteOptions.getDrawScale() )
+      for( int txtY = drawY + vBuffer, i = 0; i < items.size(); ++i, txtY += SpriteMenuArtist.menuTextHeight + drawScale )
       {
-        SpriteLibrary.drawTextSmallCaps(g, items.get(i), drawX + hBuffer, txtY,
-            SpriteOptions.getDrawScale());
+        SpriteLibrary.drawTextSmallCaps(g, items.get(i), drawX + hBuffer, txtY, drawScale);
       }
     }
   }
