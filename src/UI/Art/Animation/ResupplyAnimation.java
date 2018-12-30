@@ -77,13 +77,15 @@ public class ResupplyAnimation implements GameAnimation
       int width = (int) (signWidth * percent);
       int height = (int) (signHeight * percent);
 
-      SpriteUIUtils.drawTextFrame(g, MENUBGCOLOR, MENUFRAMECOLOR, "", mapLocation.xCoord, mapLocation.yCoord,width,2* drawScale+height-signHeight);
+      SpriteUIUtils.drawTextFrame(g, MENUBGCOLOR, MENUFRAMECOLOR, "", mapLocation.xCoord, mapLocation.yCoord, width / 2,
+          2 * drawScale + height - signHeight);
 
     }
     else if( animTime < signUpEnd )
     {
       // The sign is legible.
-      SpriteUIUtils.drawTextFrame(g, MENUBGCOLOR, MENUFRAMECOLOR, SUPPLYTEXT, mapLocation.xCoord, mapLocation.yCoord, 2* drawScale,2* drawScale);
+      SpriteUIUtils.drawTextFrame(g, MENUBGCOLOR, MENUFRAMECOLOR, SUPPLYTEXT, mapLocation.xCoord, mapLocation.yCoord,
+          2 * drawScale, 2 * drawScale);
     }
     else if( animTime < signGone )
     {
@@ -92,7 +94,8 @@ public class ResupplyAnimation implements GameAnimation
       int width = (int) (signWidth * percent);
       int height = (int) (signHeight * percent);
 
-      SpriteUIUtils.drawTextFrame(g, MENUBGCOLOR, MENUFRAMECOLOR, "", mapLocation.xCoord, mapLocation.yCoord,width,2* drawScale+height-signHeight);
+      SpriteUIUtils.drawTextFrame(g, MENUBGCOLOR, MENUFRAMECOLOR, "", mapLocation.xCoord, mapLocation.yCoord, width / 2,
+          2 * drawScale + height - signHeight);
     }
 
     return animTime > signGone;
