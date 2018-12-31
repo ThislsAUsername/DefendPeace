@@ -17,14 +17,14 @@ public class UnitRemodelModifier implements COModifier
   private Map<UnitModel, UnitModel> modelSwaps = null;
   private Map<Unit, UnitModel> modelSwapBacks = null;
   private ArrayList<Unit> unitsChanged = null;
-  private Map<Unit, Weapon[]> unitWeapons = null;
+  private Map<Unit, ArrayList<Weapon>> unitWeapons = null;
 
   public UnitRemodelModifier()
   {
     modelSwaps = new HashMap<UnitModel, UnitModel>();
     modelSwapBacks = new HashMap<Unit, UnitModel>();
     unitsChanged = new ArrayList<Unit>();
-    unitWeapons = new HashMap<Unit, Weapon[]>();
+    unitWeapons = new HashMap<Unit, ArrayList<Weapon>>();
   }
 
   public UnitRemodelModifier(UnitModel oldModel, UnitModel newModel)
@@ -75,16 +75,16 @@ public class UnitRemodelModifier implements COModifier
   {
     if( model.weaponModels != null )
     {
-      unit.weapons = new Weapon[model.weaponModels.size()];
+      unit.weapons = new ArrayList<Weapon>();
       for( int i = 0; i < model.weaponModels.size(); i++ )
       {
-        unit.weapons[i] = new Weapon(model.weaponModels.get(i));
+        unit.weapons.add(new Weapon(model.weaponModels.get(i)));
       }
     }
     else
     {
       // Just make sure we don't crash if we try to iterate on this.
-      unit.weapons = new Weapon[0];
+      unit.weapons = new ArrayList<Weapon>();
     }
   }
 }

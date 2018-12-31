@@ -16,6 +16,7 @@ import Terrain.GameMap;
 import Terrain.Location;
 import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
+import Units.Weapons.WeaponModel;
 
 public class Unit
 {
@@ -29,7 +30,7 @@ public class Unit
   public Commander CO;
   public boolean isTurnOver;
   private double HP;
-  public Weapon[] weapons;
+  public ArrayList<Weapon> weapons;
   private ArrayList<GameAction> turnInitActions;
 
   public Unit(Commander co, UnitModel um)
@@ -43,16 +44,16 @@ public class Unit
     captureTarget = null;
     if( model.weaponModels != null )
     {
-      weapons = new Weapon[model.weaponModels.size()];
-      for( int i = 0; i < model.weaponModels.size(); i++ )
+      weapons = new ArrayList<Weapon>();
+      for( WeaponModel weapType : model.weaponModels )
       {
-        weapons[i] = new Weapon(model.weaponModels.get(i));
+        weapons.add(new Weapon(weapType));
       }
     }
     else
     {
       // Just make sure we don't crash if we try to iterate on this.
-      weapons = new Weapon[0];
+      weapons = new ArrayList<Weapon>();
     }
     if( model.holdingCapacity > 0 )
       heldUnits = new Vector<Unit>(model.holdingCapacity);
@@ -133,15 +134,15 @@ public class Unit
       return false;
 
     boolean canHit = false;
-    for( int i = 0; i < weapons.length; i++ )
+    for( Weapon weapon : weapons )
     {
-      if( afterMoving && !weapons[i].model.canFireAfterMoving )
+      if( afterMoving && !weapon.model.canFireAfterMoving )
       {
         // If we are planning to move first, and the weapon
         // can't shoot after moving, then move along.
         continue;
       }
-      if( weapons[i].getDamage(targetType, range) > 0 )
+      if( weapon.getDamage(targetType, range) > 0 )
       {
         canHit = true;
         break;
@@ -166,18 +167,17 @@ public class Unit
 
     Weapon chosenWeapon = null;
     double maxDamage = 0;
-    for( int i = 0; i < weapons.length; i++ )
+    for( Weapon weapon : weapons )
     {
-      Weapon currentWeapon = weapons[i];
       // If the weapon isn't mobile, we cannot fire if we moved.
-      if( afterMoving && !currentWeapon.model.canFireAfterMoving )
+      if( afterMoving && !weapon.model.canFireAfterMoving )
       {
         continue;
       }
-      double currentDamage = currentWeapon.getDamage(targetType, range);
-      if( currentWeapon.getDamage(targetType, range) > maxDamage )
+      double currentDamage = weapon.getDamage(targetType, range);
+      if( weapon.getDamage(targetType, range) > maxDamage )
       {
-        chosenWeapon = currentWeapon;
+        chosenWeapon = weapon;
         maxDamage = currentDamage;
       }
     }
