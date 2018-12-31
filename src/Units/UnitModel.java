@@ -35,6 +35,8 @@ public class UnitModel
   public int maxFuel;
   public int idleFuelBurn;
   public int movePower;
+  public int vision;
+  public boolean piercingVision = false;
   public MoveType propulsion;
   public ArrayList<ActionType> possibleActions = new ArrayList<ActionType>();
   public Set<TerrainType> healableHabs;
@@ -46,10 +48,10 @@ public class UnitModel
   private int COstr;
   private int COdef;
 
-  public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower,
+  public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion, ActionType[] actions, WeaponModel[] weapons)
   {
-    this(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pMovePower, pPropulsion);
+    this(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion);
 
     for( ActionType action : actions )
     {
@@ -61,15 +63,15 @@ public class UnitModel
     }
   }
 
-  public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower,
+  public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion, ArrayList<ActionType> actions, ArrayList<WeaponModel> weapons)
   {
-    this(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pMovePower, pPropulsion);
+    this(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion);
     possibleActions = actions;
     weaponModels = weapons;
   }
 
-  private UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower,
+  private UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion)
   {
     name = pName;
@@ -78,6 +80,7 @@ public class UnitModel
     moneyCost = cost;
     maxFuel = pFuelMax;
     idleFuelBurn = pIdleFuelBurn;
+    vision = pVision;
     movePower = pMovePower;
     propulsion = pPropulsion;
     healableHabs = new HashSet<TerrainType>();
@@ -116,7 +119,7 @@ public class UnitModel
     }
 
     // Create a new model with the given attributes.
-    UnitModel newModel = new UnitModel(other.name, other.type, other.chassis, other.moneyCost, other.maxFuel, other.idleFuelBurn,
+    UnitModel newModel = new UnitModel(other.name, other.type, other.chassis, other.moneyCost, other.maxFuel, other.idleFuelBurn, other.vision,
         other.movePower, new MoveType(other.propulsion), other.possibleActions, weaponModels);
 
     // Duplicate the other model's transporting abilities.

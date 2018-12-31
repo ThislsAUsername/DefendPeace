@@ -12,6 +12,7 @@ public class LanderModel extends UnitModel
   private static final int UNIT_COST = 12000;
   private static final int MAX_FUEL = 99;
   private static final int IDLE_FUEL_BURN = 1;
+  private static final int VISION_RANGE = 1;
   private static final int MOVE_POWER = 6;
 
   private static final MoveType moveType = new FloatLight();
@@ -21,7 +22,7 @@ public class LanderModel extends UnitModel
 
   public LanderModel()
   {
-    super("Lander", UnitEnum.LANDER, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, MOVE_POWER, moveType, actions, new WeaponModel[0]);
+    super("Lander", UnitEnum.LANDER, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType, actions, new WeaponModel[0]);
     holdingCapacity = 2;
     UnitEnum[] carryable = { Units.UnitModel.UnitEnum.INFANTRY, Units.UnitModel.UnitEnum.MECH, Units.UnitModel.UnitEnum.APC,
         Units.UnitModel.UnitEnum.RECON, Units.UnitModel.UnitEnum.ARTILLERY, Units.UnitModel.UnitEnum.ANTI_AIR,

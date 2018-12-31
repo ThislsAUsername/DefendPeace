@@ -11,6 +11,7 @@ public class BattleshipModel extends UnitModel
   private static final int UNIT_COST = 28000;
   private static final int MAX_FUEL = 99;
   private static final int IDLE_FUEL_BURN = 1;
+  private static final int VISION_RANGE = 2;
   private static final int MOVE_POWER = 5;
 
   private static final MoveType moveType = new FloatHeavy();
@@ -19,6 +20,6 @@ public class BattleshipModel extends UnitModel
 
   public BattleshipModel()
   {
-    super("Battleship", UnitEnum.BATTLESHIP, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, MOVE_POWER, moveType, actions, weapons);
+    super("Battleship", UnitEnum.BATTLESHIP, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType, actions, weapons);
   }
 }
