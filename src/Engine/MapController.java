@@ -4,6 +4,8 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Queue;
 
+import AI.SpenderAI;
+import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -75,6 +77,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     nextSeekIndex = 0;
     contemplatedAction = new ContemplatedAction();
 
+    for (Commander co : myGame.commanders){co.setAIController(new SpenderAI(co));}
     // Start the first turn.
     startNextTurn();
 

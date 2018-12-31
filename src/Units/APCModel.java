@@ -7,6 +7,7 @@ import Engine.GameAction;
 import Engine.GameAction.ActionType;
 import Units.MoveTypes.MoveType;
 import Units.MoveTypes.Tread;
+import Units.Weapons.WeaponModel;
 
 public class APCModel extends UnitModel
 {
@@ -19,7 +20,7 @@ public class APCModel extends UnitModel
 
   public APCModel()
   {
-    super("APC", UnitEnum.APC, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, MOVE_POWER, moveType, actions, null);
+    super("APC", UnitEnum.APC, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, MOVE_POWER, moveType, actions, new WeaponModel[0]);
     holdingCapacity = 1;
     UnitEnum[] carryable = { Units.UnitModel.UnitEnum.INFANTRY, Units.UnitModel.UnitEnum.MECH };
     holdables = new Vector<UnitEnum>(carryable.length);

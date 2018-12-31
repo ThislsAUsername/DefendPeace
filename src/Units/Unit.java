@@ -9,6 +9,7 @@ import Engine.GameActionSet;
 import Engine.Path;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.GameAction.ActionType;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.ResupplyEvent;
 import Terrain.GameMap;
@@ -42,10 +43,10 @@ public class Unit
     captureTarget = null;
     if( model.weaponModels != null )
     {
-      weapons = new Weapon[model.weaponModels.length];
-      for( int i = 0; i < model.weaponModels.length; i++ )
+      weapons = new Weapon[model.weaponModels.size()];
+      for( int i = 0; i < model.weaponModels.size(); i++ )
       {
-        weapons[i] = new Weapon(model.weaponModels[i]);
+        weapons[i] = new Weapon(model.weaponModels.get(i));
       }
     }
     else
@@ -261,9 +262,9 @@ public class Unit
     ArrayList<GameActionSet> actionSet = new ArrayList<GameActionSet>();
     if( map.isLocationEmpty(this, moveLocation) )
     {
-      for( int i = 0; i < model.possibleActions.length; i++ )
+      for( ActionType at : model.possibleActions)
       {
-        switch (model.possibleActions[i])
+        switch (at)
         {
           case ATTACK:
           // Evaluate attack options.
@@ -348,7 +349,7 @@ public class Unit
             break;
           default:
             System.out
-                .println("getPossibleActions: Invalid action in model's possibleActions[" + i + "]: " + model.possibleActions[i]);
+                .println("getPossibleActions: Invalid action in model's possibleActions: " + at);
         }
       }
     }

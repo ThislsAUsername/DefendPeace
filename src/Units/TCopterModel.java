@@ -5,6 +5,7 @@ import java.util.Vector;
 import Engine.GameAction.ActionType;
 import Units.MoveTypes.Flight;
 import Units.MoveTypes.MoveType;
+import Units.Weapons.WeaponModel;
 
 public class TCopterModel extends UnitModel
 {
@@ -18,7 +19,7 @@ public class TCopterModel extends UnitModel
 
   public TCopterModel()
   {
-    super("T Copter", UnitEnum.T_COPTER, ChassisEnum.AIR_LOW, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, MOVE_POWER, moveType, actions, null);
+    super("T Copter", UnitEnum.T_COPTER, ChassisEnum.AIR_LOW, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, MOVE_POWER, moveType, actions, new WeaponModel[0]);
     holdingCapacity = 1;
     UnitEnum[] carryable = { Units.UnitModel.UnitEnum.INFANTRY, Units.UnitModel.UnitEnum.MECH };
     holdables = new Vector<UnitEnum>(carryable.length);

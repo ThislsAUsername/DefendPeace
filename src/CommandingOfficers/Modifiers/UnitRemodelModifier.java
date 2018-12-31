@@ -75,10 +75,10 @@ public class UnitRemodelModifier implements COModifier
   {
     if( model.weaponModels != null )
     {
-      unit.weapons = new Weapon[model.weaponModels.length];
-      for( int i = 0; i < model.weaponModels.length; i++ )
+      unit.weapons = new Weapon[model.weaponModels.size()];
+      for( int i = 0; i < model.weaponModels.size(); i++ )
       {
-        unit.weapons[i] = new Weapon(model.weaponModels[i]);
+        unit.weapons[i] = new Weapon(model.weaponModels.get(i));
       }
     }
     else

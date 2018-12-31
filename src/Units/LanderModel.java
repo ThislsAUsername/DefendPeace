@@ -5,6 +5,7 @@ import java.util.Vector;
 import Engine.GameAction.ActionType;
 import Units.MoveTypes.FloatLight;
 import Units.MoveTypes.MoveType;
+import Units.Weapons.WeaponModel;
 
 public class LanderModel extends UnitModel
 {
@@ -20,7 +21,7 @@ public class LanderModel extends UnitModel
 
   public LanderModel()
   {
-    super("Lander", UnitEnum.LANDER, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, MOVE_POWER, moveType, actions, null);
+    super("Lander", UnitEnum.LANDER, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, MOVE_POWER, moveType, actions, new WeaponModel[0]);
     holdingCapacity = 2;
     UnitEnum[] carryable = { Units.UnitModel.UnitEnum.INFANTRY, Units.UnitModel.UnitEnum.MECH, Units.UnitModel.UnitEnum.APC,
         Units.UnitModel.UnitEnum.RECON, Units.UnitModel.UnitEnum.ARTILLERY, Units.UnitModel.UnitEnum.ANTI_AIR,

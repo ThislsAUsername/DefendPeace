@@ -187,16 +187,7 @@ public class SpenderAI implements AIController
             boolean validTarget = false;
             ArrayList<XYCoord> validTargets = new ArrayList<>();
 
-            boolean canCapture = false;
-            for( ActionType i : unit.model.possibleActions )
-            {
-              if( i == ActionType.CAPTURE )
-              {
-                canCapture = true;
-                break;
-              }
-            }
-            if( canCapture )
+            if( unit.model.possibleActions.contains(ActionType.CAPTURE) )
             {
               validTargets.addAll(unownedProperties);
             }
@@ -301,7 +292,7 @@ public class SpenderAI implements AIController
           for( UnitModel unit : units )
           {
             // I only want combat units, since I don't understand transports
-            if( unit.weaponModels != null && unit.weaponModels.length > 0 && unit.moneyCost <= budget )
+            if( unit.weaponModels != null && unit.weaponModels.size() > 0 && unit.moneyCost <= budget )
             {
               budget -= unit.moneyCost;
               purchases.put(locShopList.getKey(), unit);
@@ -324,7 +315,7 @@ public class SpenderAI implements AIController
             {
               // I want expensive units, but they have to have guns
               if( budget > unit.moneyCost && unit.moneyCost > currentPurchase.moneyCost && unit.weaponModels != null
-                  && unit.weaponModels.length > 0 )
+                  && unit.weaponModels.size() > 0 )
                 currentPurchase = unit;
             }
             // once we've found the most expensive thing we can buy here, record that
