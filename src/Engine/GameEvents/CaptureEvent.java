@@ -1,6 +1,6 @@
 package Engine.GameEvents;
 
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.Location;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -54,7 +54,7 @@ public class CaptureEvent implements GameEvent
    * until we change this by introducing new, game-breaking mechanics).
    */
   @Override
-  public void performEvent(GameMap gameMap)
+  public void performEvent(MapMaster gameMap)
   {
     // Only attempt to do the action if it is valid to do so.
     if( location.isCaptureable() &&

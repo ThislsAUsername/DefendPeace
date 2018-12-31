@@ -35,7 +35,7 @@ public class TestDamageStrategy extends TestCase
   private static int numUnitModels = UnitModel.UnitEnum.values().length;
   private static int numWeaponModels = WeaponModel.WeaponType.values().length;
 
-  /** Make two COs and a GameMap to use with this test case. */
+  /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
   {
     // TODO Obviously we don't want to hard-code the UnitModel array.

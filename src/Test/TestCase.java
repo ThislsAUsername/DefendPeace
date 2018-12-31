@@ -4,7 +4,7 @@ import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel.UnitEnum;
 
@@ -36,7 +36,7 @@ public abstract class TestCase
   }
 
   /**
-   * Convenience function to create a new unit, add it to the GameMap, and get it back in one line.
+   * Convenience function to create a new unit, add it to the MapMaster, and get it back in one line.
    * @param map The map to which we want to add the unit.
    * @param co The Commander to whom the unit shall belong.
    * @param type The type of unit we are to construct.
@@ -46,7 +46,7 @@ public abstract class TestCase
    * 
    * NOTE: This function does not take into account existing units, so beware stomping.
    */
-  protected static Unit addUnit(GameMap map, Commander co, UnitEnum type, int x, int y)
+  protected static Unit addUnit(MapMaster map, Commander co, UnitEnum type, int x, int y)
   {
     Unit u = new Unit(co, co.getUnitModel(type));
     map.addNewUnit(u, x, y);
@@ -54,7 +54,7 @@ public abstract class TestCase
     return u;
   }
 
-  protected static void performGameAction( GameAction action, GameMap map )
+  protected static void performGameAction( GameAction action, MapMaster map )
   {
     GameEventQueue sequence = action.getEvents(map);
     for( GameEvent event : sequence )

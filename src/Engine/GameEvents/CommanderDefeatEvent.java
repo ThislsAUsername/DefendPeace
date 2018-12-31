@@ -2,7 +2,7 @@ package Engine.GameEvents;
 
 import CommandingOfficers.Commander;
 import Terrain.Environment;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.Location;
 import Terrain.TerrainType;
 import UI.MapView;
@@ -36,7 +36,7 @@ public class CommanderDefeatEvent implements GameEvent
   }
 
   @Override
-  public void performEvent(GameMap gameMap)
+  public void performEvent(MapMaster gameMap)
   {
     // Set the flag so that we know he's toast.
     defeatedCO.isDefeated = true;

@@ -1,6 +1,6 @@
 package Engine.GameEvents;
 
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 
@@ -26,5 +26,5 @@ public interface GameEvent
    * Hook for subclasses to implement the specific effects of each action type.
    * @param map
    */
-  public void performEvent( GameMap gameMap );
+  public void performEvent( MapMaster gameMap );
 }

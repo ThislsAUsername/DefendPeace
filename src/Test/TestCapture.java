@@ -8,7 +8,7 @@ import Engine.Utils;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.Location;
 import Terrain.MapLibrary;
 import Terrain.TerrainType;
@@ -19,16 +19,16 @@ public class TestCapture extends TestCase
 {
   private static Commander testCo1;
   private static Commander testCo2;
-  private static GameMap testMap;
+  private static MapMaster testMap;
 
-  /** Make two COs and a GameMap to use with this test case. */
+  /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
   {
     testCo1 = new CommanderStrong();
     testCo2 = new CommanderPatch();
     Commander[] cos = { testCo1, testCo2 };
 
-    testMap = new GameMap(cos, MapLibrary.getByName("Firing Range"));
+    testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
   }
 
   @Override

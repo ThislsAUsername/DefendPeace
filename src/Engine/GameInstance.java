@@ -4,12 +4,12 @@ import java.util.HashMap;
 
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.Location;
 
 public class GameInstance
 {
-  public Terrain.GameMap gameMap;
+  public Terrain.MapMaster gameMap;
   public Commander[] commanders;
   private int activeCoNum;
   public Commander activeCO = null;
@@ -18,7 +18,7 @@ public class GameInstance
 
   HashMap<Integer, XYCoord> playerCursors = null;
 
-  public GameInstance(GameMap map, Commander[] cos)
+  public GameInstance(MapMaster map, Commander[] cos)
   {
     if( cos.length < 2 )
     {

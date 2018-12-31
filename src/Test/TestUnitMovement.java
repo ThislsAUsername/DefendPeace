@@ -7,7 +7,7 @@ import Engine.GameAction;
 import Engine.Path;
 import Engine.Utils;
 import Engine.XYCoord;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.MapLibrary;
 import Units.Unit;
 import Units.UnitModel.UnitEnum;
@@ -16,22 +16,22 @@ public class TestUnitMovement extends TestCase
 {
   private static Commander testCo1;
   private static Commander testCo2;
-  private static GameMap testMap;
+  private static MapMaster testMap;
 
-  /** Make two COs and a GameMap to use with this test case. */
+  /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
   {
     testCo1 = new CommanderStrong();
     testCo2 = new CommanderPatch();
     Commander[] cos = { testCo1, testCo2 };
 
-    testMap = new GameMap(cos, MapLibrary.getByName("Firing Range"));
+    testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
   }
 
   @Override
   public boolean runTest()
   {
-    // Create a CO and a GameMap.
+    // Create a CO and a MapMaster.
     setupTest();
 
     boolean testPassed = true;

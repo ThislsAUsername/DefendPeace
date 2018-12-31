@@ -1,7 +1,7 @@
 package Engine.GameEvents;
 
 import Engine.Path;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.Location;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -37,7 +37,7 @@ public class MoveEvent implements GameEvent
   }
 
   @Override
-  public void performEvent(GameMap gameMap)
+  public void performEvent(MapMaster gameMap)
   {
     if( unitPath.getPathLength() > 0 ) // Make sure we have a destination.
     {

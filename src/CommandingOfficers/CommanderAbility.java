@@ -1,6 +1,7 @@
 package CommandingOfficers;
 
 import Terrain.GameMap;
+import Terrain.MapMaster;
 
 public abstract class CommanderAbility
 {
@@ -29,7 +30,7 @@ public abstract class CommanderAbility
   /** Final method to do some bookkeeping, and then call
    * perform() do do the actual work. This allows us to
    * manage global Ability side-effects in one place. */
-  public final void activate(GameMap gameMap)
+  public final void activate(MapMaster gameMap)
   {
     if( myCommander.getAbilityPower() < myPowerCost )
     {
@@ -47,5 +48,5 @@ public abstract class CommanderAbility
   }
 
   /** Subclasses will override this method to enact the ability's effects. */
-  protected abstract void perform(GameMap gameMap);
+  protected abstract void perform(MapMaster gameMap);
 }

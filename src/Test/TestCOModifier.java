@@ -9,7 +9,7 @@ import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import CommandingOfficers.Modifiers.UnitRemodelModifier;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.MapLibrary;
 import Terrain.TerrainType;
 import Units.Unit;
@@ -19,7 +19,7 @@ public class TestCOModifier extends TestCase
 {
   private static Commander strong = null;
   private static Commander patch = null;
-  private static GameMap testMap = null;
+  private static MapMaster testMap = null;
 
   @Override
   public boolean runTest()
@@ -35,14 +35,14 @@ public class TestCOModifier extends TestCase
     return testPassed;
   }
 
-  /** Make two COs and a GameMap to use with this test case. */
+  /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
   {
     strong = new CommanderStrong();
     patch = new CommanderPatch();
     Commander[] cos = { strong, patch };
 
-    testMap = new GameMap(cos, MapLibrary.getByName("Firing Range"));
+    testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
   }
 
   private boolean testDamageModifier()

@@ -1,7 +1,7 @@
 package Engine.GameEvents;
 
 import CommandingOfficers.CommanderAbility;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 
@@ -27,7 +27,7 @@ public class CommanderAbilityEvent implements GameEvent
   }
 
   @Override
-  public void performEvent(GameMap gameMap)
+  public void performEvent(MapMaster gameMap)
   {
     myAbility.activate(gameMap);
   }

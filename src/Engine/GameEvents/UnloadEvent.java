@@ -1,7 +1,7 @@
 package Engine.GameEvents;
 
 import Engine.XYCoord;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
@@ -37,7 +37,7 @@ public class UnloadEvent implements GameEvent
   }
 
   @Override
-  public void performEvent(GameMap gameMap)
+  public void performEvent(MapMaster gameMap)
   {
     if( transport.heldUnits != null && transport.heldUnits.contains(cargo) && gameMap.getLocation(dropLoc).getResident() == null )
     {
