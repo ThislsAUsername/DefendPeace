@@ -77,7 +77,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
     nextSeekIndex = 0;
     contemplatedAction = new ContemplatedAction();
 
-    for (Commander co : myGame.commanders){co.setAIController(new SpenderAI(co));}
     // Start the first turn.
     startNextTurn();
 
