@@ -19,7 +19,7 @@ public class CreateUnitEvent implements GameEvent
     myBuildCoords = coords;
 
     // TODO: Consider breaking the fiscal part into its own event.
-    if( model.moneyCost <= commander.money )
+    if( model.getCost() <= commander.money )
     {
       myNewUnit = new Unit(myCommander, model);
     }
@@ -50,7 +50,7 @@ public class CreateUnitEvent implements GameEvent
   {
     if( null != myNewUnit )
     {
-      myCommander.money -= myNewUnit.model.moneyCost;
+      myCommander.money -= myNewUnit.model.getCost();
       myCommander.units.add(myNewUnit);
       gameMap.addNewUnit(myNewUnit, myBuildCoords.xCoord, myBuildCoords.yCoord);
     }

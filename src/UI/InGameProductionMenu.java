@@ -72,7 +72,7 @@ public class InGameProductionMenu extends InGameMenu<UnitModel>
       }
       else
       {
-        price = model.moneyCost;
+        price = model.getCost();
       }
 
       // Pad the price with an extra space if it is only four digits.

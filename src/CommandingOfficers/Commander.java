@@ -12,6 +12,7 @@ import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -47,7 +48,7 @@ public class Commander extends GameEventListener
   public ArrayList<Location> ownedProperties;
   public ArrayList<COModifier> modifiers;
   public Color myColor;
-  public static final int DEFAULTSTARTINGMONEY = 10000;
+  public static final int DEFAULTSTARTINGMONEY = 0;
   public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
   public static final int CHARGERATIO_HP = 90; // quantity of HP damage dealt to equal 1 unit of power charge
   public int money = 0;
@@ -177,6 +178,12 @@ public class Commander extends GameEventListener
   }
 
   /**
+   * This is called after every GameAction, and between turns, and allows Commanders to inject
+   * events that don't arise via normal gameplay. Most Commanders should not need to override this.
+   */
+  public void pollForEvents(GameEventQueue eventsOut) {}
+
+  /**
    * @return whether these COs would like to kill each other
    */
   public boolean isEnemy(Commander other)
@@ -215,9 +222,9 @@ public class Commander extends GameEventListener
   }
 
   /** Get the list of units this commander can build from the given property type. */
-  public ArrayList<UnitModel> getShoppingList(TerrainType buyLocation)
+  public ArrayList<UnitModel> getShoppingList(Location buyLocation)
   {
-    return (unitProductionByTerrain.get(buyLocation) != null) ? unitProductionByTerrain.get(buyLocation)
+    return (unitProductionByTerrain.get(buyLocation.getEnvironment().terrainType) != null) ? unitProductionByTerrain.get(buyLocation.getEnvironment().terrainType)
         : new ArrayList<UnitModel>();
   }
 
@@ -263,7 +270,7 @@ public class Commander extends GameEventListener
   public void activateAbility(CommanderAbility ability)
   {
     modifyAbilityPower(-ability.getCost());
-    myActiveAbilityName = ability.myName;
+    myActiveAbilityName = ability.toString();
   }
 
   protected void modifyAbilityPower(double amount)
@@ -313,9 +320,9 @@ public class Commander extends GameEventListener
     {
       double power = 0;
       // Add up the funds value of the damage done to both participants.
-      power += myHPLoss / minion.model.maxHP * minion.model.moneyCost;
+      power += myHPLoss / minion.model.maxHP * minion.model.getCost();
       // The damage we deal is worth half as much as the damage we take, to help powers be a comeback mechanic.
-      power += myHPDealt / enemy.model.maxHP * enemy.model.moneyCost / 2;
+      power += myHPDealt / enemy.model.maxHP * enemy.model.getCost() / 2;
       power /= CHARGERATIO_FUNDS; // Turn funds into units of power
       power += myHPDealt / CHARGERATIO_HP; // Add power based on HP damage dealt; rewards aggressiveness.
 
