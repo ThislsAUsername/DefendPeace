@@ -74,7 +74,7 @@ public class AIUtils
    * @param gameMap The map to search for units.
    * @return An ArrayList with the XYCoord of every unit not allied with myCo.
    */
-  public static ArrayList<XYCoord> getEnemyUnitLocations(Commander myCo, GameMap gameMap)
+  public static ArrayList<XYCoord> findEnemyUnits(Commander myCo, GameMap gameMap)
   {
     ArrayList<XYCoord> unitLocs = new ArrayList<XYCoord>();
     for( int x = 0; x < gameMap.mapWidth; ++x )
@@ -113,5 +113,18 @@ public class AIUtils
       move = new GameAction.WaitAction(gameMap, unit, Utils.findShortestPath(unit, validMoves.get(0), gameMap)); // Move to best option.
     }
     return move;
+  }
+
+  public static ArrayList<XYCoord> findResupplyPoints(Unit unit)
+  {
+    ArrayList<XYCoord> coords = new ArrayList<XYCoord>();
+    for( Location loc : unit.CO.ownedProperties )
+    {
+      if( unit.model.canRepairOn(loc) )
+      {
+        coords.add(loc.getCoordinates());
+      }
+    }
+    return coords;
   }
 }

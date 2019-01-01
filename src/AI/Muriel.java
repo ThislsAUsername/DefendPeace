@@ -212,6 +212,42 @@ public class Muriel implements AIController
         break;
       }
 
+      // If we are out of ammo or low on fuel, go resupply.
+      if( unit.weapons != null && unit.weapons.length > 0 )
+      {
+        boolean shouldResupply = false;
+        for( Weapon weap : unit.weapons )
+        {
+          if(weap.ammo == 0)
+          {
+            shouldResupply = true;
+          }
+        }
+        if( unit.fuel < (unit.model.maxFuel/4.0) )
+        {
+          shouldResupply = true;
+        }
+        if( shouldResupply )
+        {
+          ArrayList<XYCoord> stations = AIUtils.findResupplyPoints(unit);
+          Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), stations);
+          for( XYCoord coord : stations )
+          {
+            // Go to the nearest unoccupied friendly space.
+            if( gameMap.getLocation(coord).getResident() == null )
+            {
+              queuedActions.offer(AIUtils.moveTowardLocation(unit, stations.get(0), gameMap));
+              break;
+            }
+          }
+          if( !queuedActions.isEmpty() )
+          {
+            // Make sure we don't inadvertently plan two actions for this unit.
+            break;
+          }
+        }
+      }
+
       // Otherwise, look for attack/capture options.
       Map<XYCoord, ArrayList<GameActionSet> > immediateActions = AIUtils.getAvailableUnitActions(unit, gameMap);
       Set<XYCoord> immediateMoveLocations = immediateActions.keySet();
@@ -261,7 +297,7 @@ public class Muriel implements AIController
       if( queuedActions.isEmpty() && unit.model.hasActionType(ActionType.ATTACK) )
       {
         log(String.format("Seeking attack target for %s", unit.toStringWithLocation()));
-        ArrayList<XYCoord> enemyLocations = AIUtils.getEnemyUnitLocations(myCo, gameMap); // Get enemy locations.
+        ArrayList<XYCoord> enemyLocations = AIUtils.findEnemyUnits(myCo, gameMap); // Get enemy locations.
         Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), enemyLocations); // Sort them by accessibility.
         GameAction move = null;
         for(int i = 0; i < enemyLocations.size(); ++i)
