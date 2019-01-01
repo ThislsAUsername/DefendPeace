@@ -86,6 +86,7 @@ public class TheBeast extends Commander
   @Override
   public void receiveBattleEvent(BattleSummary battleInfo)
   {
+    super.receiveBattleEvent(battleInfo);
     // Determine if we were part of this fight. If so, refresh at our own expense
     Unit minion = null;
     Unit victim = null;

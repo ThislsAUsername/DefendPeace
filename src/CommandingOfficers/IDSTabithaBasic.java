@@ -68,6 +68,7 @@ public class IDSTabithaBasic extends Commander
   @Override
   public void receiveBattleEvent(BattleSummary battleInfo)
   {
+    super.receiveBattleEvent(battleInfo);
     // Determine if we were part of this fight.
     if( COU == null && battleInfo.attacker.CO == this )
     {

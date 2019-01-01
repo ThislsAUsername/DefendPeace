@@ -122,6 +122,7 @@ public class Commander extends GameEventListener
     money = DEFAULTSTARTINGMONEY;
 
     myAbilities = new ArrayList<CommanderAbility>();
+    new CODamageModifier(10).apply(this);
   }
 
   protected void addCommanderAbility(CommanderAbility ca)
