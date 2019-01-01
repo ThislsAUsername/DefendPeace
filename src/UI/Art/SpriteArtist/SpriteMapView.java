@@ -405,6 +405,7 @@ public class SpriteMapView extends MapView
    */
   private void drawUnitsAndMapObjects(Graphics g)
   {
+    GameMap gameMap = myGame.activeCO.myView;
     // Draw terrain objects and units in order so they overlap correctly.
     // Only bother iterating over the visible map space (plus a 2-square border).
     int drawY = (int)mapViewDrawY;
@@ -415,13 +416,13 @@ public class SpriteMapView extends MapView
       {
         // Since we are trying to draw a ring of objects around the viewable space to
         // ensure smooth scrolling, make sure we aren't running off the edge of the map.
-        if(myGame.gameMap.isLocationValid(x, y))
+        if(gameMap.isLocationValid(x, y))
         {
           // Draw any terrain object here, followed by any unit present.
           mapArtist.drawTerrainObject(g, x, y);
-          if( !myGame.gameMap.isLocationEmpty(x, y) )
+          if( !gameMap.isLocationEmpty(x, y) )
           {
-            Unit resident = myGame.gameMap.getLocation(x, y).getResident();
+            Unit resident = gameMap.getLocation(x, y).getResident();
             // If an action is being considered, draw the active unit later, not now.
             Unit currentActor = mapController.getContemplatedActor();
             if( resident != currentActor )
@@ -442,7 +443,7 @@ public class SpriteMapView extends MapView
   public void drawUnitIcons(Graphics g)
   {
     // Get an easy reference to the map.
-    GameMap gameMap = myGame.gameMap;
+    GameMap gameMap = myGame.activeCO.myView;
 
     for( int y = 0; y < gameMap.mapHeight; ++y )
     {

@@ -67,25 +67,25 @@ public class MapWindow extends GameMap
   /** Returns true if no unit is at the specified x and y coordinate, false else */
   public boolean isLocationEmpty(XYCoord coords)
   {
-    return master.isLocationEmpty(null, coords);
+    return isLocationFogged(coords) || master.isLocationEmpty(null, coords);
   }
 
   /** Returns true if no unit is at the specified x and y coordinate, false else */
   public boolean isLocationEmpty(int x, int y)
   {
-    return master.isLocationEmpty(null, x, y);
+    return isLocationFogged(x, y) || master.isLocationEmpty(null, x, y);
   }
 
   /** Returns true if no unit (excluding 'unit') is in the specified Location. */
   public boolean isLocationEmpty(Unit unit, XYCoord coords)
   {
-    return master.isLocationEmpty(unit, coords.xCoord, coords.yCoord);
+    return isLocationFogged(coords) || master.isLocationEmpty(unit, coords.xCoord, coords.yCoord);
   }
 
   /** Returns true if no unit (excluding 'unit') is in the specified Location. */
   public boolean isLocationEmpty(Unit unit, int x, int y)
   {
-    return master.isLocationEmpty(unit, x, y);
+    return isLocationFogged(x, y) || master.isLocationEmpty(unit, x, y);
   }
 
   /**
