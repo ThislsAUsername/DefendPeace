@@ -293,7 +293,7 @@ public class SpenderAI implements AIController
           for( UnitModel unit : units )
           {
             // I only want combat units, since I don't understand transports
-            if( unit.weaponModels != null && unit.weaponModels.size() > 0 && unit.getCost() <= budget )
+            if( unit.weaponModels.isEmpty() && unit.getCost() <= budget )
             {
               budget -= unit.getCost();
               purchases.put(locShopList.getKey(), unit);
@@ -315,8 +315,7 @@ public class SpenderAI implements AIController
             for( UnitModel unit : units )
             {
               // I want expensive units, but they have to have guns
-              if( budget > unit.getCost() && unit.getCost() > currentPurchase.getCost() && unit.weaponModels != null
-                  && unit.weaponModels.size() > 0 )
+              if( budget > unit.getCost() && unit.getCost() > currentPurchase.getCost() && unit.weaponModels.isEmpty() )
                 currentPurchase = unit;
             }
             // once we've found the most expensive thing we can buy here, record that

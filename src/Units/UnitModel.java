@@ -36,7 +36,7 @@ public class UnitModel
   public int idleFuelBurn;
   public int movePower;
   public int vision;
-  public boolean piercingVision = false;
+  public boolean piercingVision = false; // Determines whether this unit can see into cover
   public MoveType propulsion;
   public ArrayList<ActionType> possibleActions = new ArrayList<ActionType>();
   public Set<TerrainType> healableHabs;
