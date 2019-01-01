@@ -176,7 +176,7 @@ public class Commander extends GameEventListener
 
     if( null != aiController )
     {
-      aiController.initTurn(map);
+      aiController.initTurn(myView);
     }
   }
 
