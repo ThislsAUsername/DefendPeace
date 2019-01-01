@@ -15,7 +15,6 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameAction.ActionType;
-import Engine.GameActionSet;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
@@ -126,13 +125,15 @@ public class Muriel implements AIController
           if( otherDamage == 0 ) invRatio = 0;
           if( myDamage != 0 && otherDamage == 0 ) ratio = Double.MAX_VALUE;
           if( myDamage == 0 && otherDamage != 0 ) invRatio = Double.MAX_VALUE;
-          double myCostRatio = ratio / (myModel.moneyCost/1000);
-          double otherCostRatio = invRatio / (otherModel.moneyCost/1000);
+          double myCostRatio = ratio * ((double)otherModel.moneyCost / myModel.moneyCost);
+          double otherCostRatio = invRatio * ((double)myModel.moneyCost / otherModel.moneyCost);
           myUnitEffectMap.put(new UnitModelPair(myModel, otherModel), new UnitMatchupAndMetaInfo(ratio, myCostRatio));
           myUnitEffectMap.put(new UnitModelPair(otherModel, myModel), new UnitMatchupAndMetaInfo(invRatio, otherCostRatio));
 
           StringBuffer buffer = new StringBuffer();
-          buffer.append(myUnit).append(" vs ").append(otherUnit).append(": ").append(myDamage).append("/").append(otherDamage);
+          buffer.append(myUnit).append(" vs ").append(otherUnit).append(": ").append(myDamage).append("/").append(otherDamage).append(" costRatio: ").append(myCostRatio);
+          buffer.append("\n    ").append(String.format("(%s / %s) / (%s / %s)", myDamage, myModel.moneyCost, otherDamage, otherModel.moneyCost));
+          buffer.append("recalc: ").append((myDamage / myModel.moneyCost) / (otherDamage / otherModel.moneyCost));
           System.out.println(buffer);
         }
       }
@@ -207,7 +208,7 @@ public class Muriel implements AIController
       // If we are capturing something, finish what we started.
       if( unit.getCaptureProgress() > 0 )
       {
-        log(String.format("%s is already capturing; continue", unit.toStringWithLocation()));
+        log(String.format("%s is currently capturing; continue", unit.toStringWithLocation()));
         queuedActions.offer(new GameAction.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
         break;
       }
@@ -220,11 +221,13 @@ public class Muriel implements AIController
         {
           if(weap.ammo == 0)
           {
+            log(String.format("%s is out of ammo.", unit));
             shouldResupply = true;
           }
         }
         if( unit.fuel < (unit.model.maxFuel/4.0) )
         {
+          log(String.format("%s is low on fuel.", unit));
           shouldResupply = true;
         }
         if( shouldResupply )
@@ -236,6 +239,7 @@ public class Muriel implements AIController
             // Go to the nearest unoccupied friendly space.
             if( gameMap.getLocation(coord).getResident() == null )
             {
+              log(String.format("  Heading towards %s to resupply", stations.get(0)));
               queuedActions.offer(AIUtils.moveTowardLocation(unit, stations.get(0), gameMap));
               break;
             }
@@ -248,50 +252,52 @@ public class Muriel implements AIController
         }
       }
 
-      // Otherwise, look for attack/capture options.
-      Map<XYCoord, ArrayList<GameActionSet> > immediateActions = AIUtils.getAvailableUnitActions(unit, gameMap);
-      Set<XYCoord> immediateMoveLocations = immediateActions.keySet();
-      for( XYCoord moveTile : immediateMoveLocations )
+      // Find all the things we can do from here.
+      Map<ActionType, ArrayList<GameAction> > unitActionsByType = AIUtils.getAvailableUnitActionsByType(unit, gameMap);
+
+      //////////////////////////////////////////////////////////////////
+      // Look for advantageous attack actions.
+      ArrayList<GameAction> attackActions = unitActionsByType.get(ActionType.ATTACK);
+      GameAction maxCarnageAction = null;
+      double maxDamageValue = 0;
+      for( GameAction action : attackActions )
       {
-        for( GameActionSet actionSet : immediateActions.get( moveTile ) )
+        // Sift through all attack actions we can perform.
+        XYCoord targetLoc = action.getTargetLocation();
+        Unit target = gameMap.getLocation(targetLoc).getResident();
+        Environment environment = gameMap.getEnvironment(targetLoc);
+
+        // Calculate the cost of the damage we can do.
+        BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, true), target, environment);
+        double damageValue = (target.model.moneyCost/10) * params.calculateDamage();
+
+        // Check the combat effectiveness of our unit vs the potential target.
+        UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(unit.model, target.model));
+
+        // Find the attack that causes the most monetary damage, provided it's at least a halfway decent idea.
+        if( (damageValue > maxDamageValue) && (umami.damageRatio > 0.5) )
         {
-          // See if we have the option to attack.
-          if( actionSet.getSelected().getType() == GameAction.ActionType.ATTACK )
-          {
-            // Make a list of everything we can attack.
-            ArrayList<UnitModel> targetModels = new ArrayList<UnitModel>();
-            ArrayList<XYCoord> targetLocs = actionSet.getTargetedLocations();
-            for( XYCoord target : targetLocs )
-            {
-              targetModels.add(gameMap.getLocation(target).getResident().model);
-            }
-            // Sort the target UnitModels by effectiveness against me.
-            Collections.sort(targetModels, new UnitMatchupComparator(unit.model, myUnitEffectMap, UnitMatchupComparator.ComparisonType.DAMAGE_RATIO));
-            UnitModel bestTargetModel = targetModels.get(0);
-            UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(unit.model, bestTargetModel));
-
-            // Only follow through with the attack if it's at least a halfway decent idea.
-            if( umami.damageRatio > 0.5 )
-            {
-              // Rotate the actionSet to the attack action corresponding to the UnitType we wish to whack.
-              while( gameMap.getLocation(actionSet.getSelected().getTargetLocation()).getResident().model != bestTargetModel ) actionSet.next();
-              queuedActions.offer(actionSet.getSelected());
-              break;
-            }
-          }
-
-          // See if we have the option to capture.
-          if( actionSet.getSelected().getType() == GameAction.ActionType.CAPTURE )
-          {
-            queuedActions.offer(actionSet.getSelected() );
-            nonAlliedProperties.remove(moveTile);
-            break;
-          }
+          log(String.format("  Considering to attack %s with %s with ratio %s", target, unit.toStringWithLocation(), umami.damageRatio));
+          maxDamageValue = damageValue;
+          maxCarnageAction = action;
         }
-        if( !queuedActions.isEmpty() ) break; // One action per getNextAction call, to avoid conflicts.
       }
-      if( !queuedActions.isEmpty() ) break; // One action per getNextAction call, to avoid conflicts.
+      if( maxCarnageAction != null)
+      {
+        queuedActions.offer(maxCarnageAction);
+        break; // Find one action per invocation to avoid overlap.
+      }
 
+      //////////////////////////////////////////////////////////////////
+      // See if there's something to capture (but only if we are moderately healthy).
+      ArrayList<GameAction> captureActions = unitActionsByType.get(ActionType.CAPTURE);
+      if( !captureActions.isEmpty() && unit.getHP() >= 7 )
+      {
+        queuedActions.offer(captureActions.get(0));
+        break; // One action per call to this function.
+      }
+
+      //////////////////////////////////////////////////////////////////
       // We didn't find an immediate ATTACK or CAPTURE action we can do.
       // Things that can capture; go find something to capture.
       if( unit.model.hasActionType(ActionType.CAPTURE) )
@@ -309,8 +315,10 @@ public class Muriel implements AIController
             break;
           }
         }
+        if( !queuedActions.isEmpty() ) break; // One action per invocation.
       }
 
+      //////////////////////////////////////////////////////////////////
       // Everyone else, go hunting.
       if( queuedActions.isEmpty() && unit.model.hasActionType(ActionType.ATTACK) )
       {
@@ -329,6 +337,7 @@ public class Muriel implements AIController
             break;
           }
         }
+        if( !queuedActions.isEmpty() ) break; // One action per invocation.
       }
 
       if( queuedActions.isEmpty() )
@@ -353,17 +362,8 @@ public class Muriel implements AIController
 
   private void queueUnitProductionActions(GameMap gameMap)
   {
-    // A short overview of what follows:
-    // 1) Simulate combat between my forces and the enemy, assuming unfavorable unit matchups,
-    //    and eliminating their least expensive units first.
-    // 2) If there are enemies left after simulating combat, build units to counter the most
-    //    expensive ones, and simulate combat based on those matchups.
-    // 3) Repeat (2) until out of cash or all enemies are accounted for.
-    // 4) Spend or stockpile remaining money as desired.
-
     log("Evaluating Production needs");
     int budget = myCo.money;
-    log(String.format("Current budget: %s", budget));
 
     // Get a count of enemy forces.
     Map<UnitModel, Double> enemyUnitCounts = new HashMap<UnitModel, Double>();
@@ -478,7 +478,6 @@ public class Muriel implements AIController
     {
       Location loc = CPI.getLocationToBuild(infModel);
       shoppingCart.add(new PurchaseOrder(loc, infModel));
-      log(String.format("Adding purchase order for %s at %s", infModel, loc.getCoordinates()));
       CPI.removeBuildLocation(loc);
     }
 

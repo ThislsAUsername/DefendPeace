@@ -3,9 +3,11 @@ package AI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import CommandingOfficers.Commander;
 import Engine.GameAction;
+import Engine.GameAction.ActionType;
 import Engine.GameActionSet;
 import Engine.Path;
 import Engine.Utils;
@@ -17,7 +19,7 @@ import Units.Unit;
 public class AIUtils
 {
   /**
-   * Figure out all actions unit can perform this turn.
+   * Figure out all actions unit can perform this turn, and organizes them by location.
    * @param unit The unit under consideration.
    * @param gameMap The world in which the Unit lives.
    * @return a Map of XYCoord to ArrayList<GameActionSet>. Each XYCoord will have a GameActionSet for
@@ -43,6 +45,38 @@ public class AIUtils
     }
 
     return actions;
+  }
+
+  /**
+   * Finds all actions available to unit, and organizes them by type instead of by location.
+   * @param unit The unit under consideration.
+   * @param gameMap The world in which the Unit lives.
+   * @return a Map of ActionType to ArrayList<GameAction>.
+   */
+  public static Map<ActionType, ArrayList<GameAction> > getAvailableUnitActionsByType(Unit unit, GameMap gameMap)
+  {
+    // Create the ActionType-indexed map, and ensure we don't have any null pointers.
+    Map<ActionType, ArrayList<GameAction> > actionsByType = new HashMap<ActionType, ArrayList<GameAction> >();
+    for( ActionType atype : ActionType.values() )
+    {
+      actionsByType.put(atype, new ArrayList<GameAction>());
+    }
+
+    // First collect the actions by location.
+    Map<XYCoord, ArrayList<GameActionSet> > actionsByLoc = getAvailableUnitActions(unit, gameMap);
+
+    // Now re-map them by type, irrespective of location.
+    for( Entry<XYCoord, ArrayList<GameActionSet>> entry : actionsByLoc.entrySet() )
+    {
+      for( GameActionSet actionSet : entry.getValue() )
+      {
+        ActionType type = actionSet.getSelected().getType();
+
+        // Add these actions to the correct map bucket.
+        actionsByType.get(type).addAll(actionSet.getGameActions());
+      }
+    }
+    return actionsByType;
   }
 
   /**
