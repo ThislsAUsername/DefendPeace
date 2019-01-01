@@ -37,4 +37,10 @@ public class UnitDieEvent implements GameEvent
     gameMap.removeUnit(unit);
     unit.CO.units.remove(unit);
   }
+  
+  @Override // there's no known way for this to fail after the GameAction is constructed
+  public boolean shouldPreempt(MapMaster gameMap )
+  {
+    return false;
+  }
 }

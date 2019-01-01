@@ -72,4 +72,10 @@ public class CommanderDefeatEvent implements GameEvent
       } // ~width loop
     } // ~height loop
   } // ~performEvent
+  
+  @Override // there's no known way for this to fail after the GameAction is constructed
+  public boolean shouldPreempt(MapMaster gameMap )
+  {
+    return false;
+  }
 }

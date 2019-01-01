@@ -41,4 +41,10 @@ public class LoadEvent implements GameEvent
       System.out.println("WARNING! Cannot load " + unitCargo.model.type + " onto " + unitTransport.model.type );
     }
   }
+  
+  @Override // there's no known way for this to fail after the GameAction is constructed
+  public boolean shouldPreempt(MapMaster gameMap )
+  {
+    return false;
+  }
 }

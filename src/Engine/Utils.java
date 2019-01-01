@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Queue;
 
 import CommandingOfficers.Commander;
+import Engine.Path.PathNode;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.Unit;
@@ -534,5 +535,20 @@ public class Utils
     }
 
     return locations;
+  }
+
+  public static boolean pathCollides(GameMap map, Unit unit, Path path)
+  {
+    boolean result = false;
+    for( PathNode point : path.getWaypoints() )
+    {
+      Unit obstacle = map.getLocation(point.x, point.y).getResident(map);
+      if( null != obstacle && unit.CO.isEnemy(obstacle.CO) )
+      {
+        result = true;
+        break;
+      }
+    }
+    return result;
   }
 }

@@ -27,4 +27,9 @@ public interface GameEvent
    * @param map
    */
   public void performEvent( MapMaster gameMap );
+  
+  /**
+   * Hook for implementers to let the event queuer know that this event will not end as planned, so following events should be dropped
+   */
+  public boolean shouldPreempt(MapMaster gameMap );
 }

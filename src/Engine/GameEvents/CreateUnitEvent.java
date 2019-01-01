@@ -59,4 +59,10 @@ public class CreateUnitEvent implements GameEvent
       System.out.println("Warning! Attempting to build unit with insufficient funds.");
     }
   }
+  
+  @Override // there's no known way for this to fail after the GameAction is constructed
+  public boolean shouldPreempt(MapMaster gameMap )
+  {
+    return false;
+  }
 }

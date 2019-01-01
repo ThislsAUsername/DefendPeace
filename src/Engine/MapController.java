@@ -505,10 +505,17 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
       if( events.size() > 0 )
       {
+        GameEventQueue usedEvents = new GameEventQueue();
+        for (GameEvent event : events)
+        {
+          usedEvents.add(event);
+          if (event.shouldPreempt(myGame.gameMap))
+            break;
+        }
         actionOK = true; // Invalid actions don't produce events.
         // Send the events to the animator. They will be applied/executed in animationEnded().
         changeInputMode(InputMode.ANIMATION);
-        myView.animate(events);
+        myView.animate(usedEvents);
       }
     }
     else
