@@ -122,7 +122,7 @@ public class TerrainType
   public static final TerrainType ROAD = new TerrainType( ROAD_FLAGS, ROAD_DEFENSE, ROAD_COLOR, ROAD_NAME );
 
   private static final int WATER_FLAGS = WATER;
-  private static final int WATER_DEFENSE = 1;
+  private static final int WATER_DEFENSE = 0;
   private static final Color WATER_COLOR = new Color(94, 184, 236);
   private static final String SEA_NAME = "SEA";
   public static final TerrainType SEA = new TerrainType( WATER_FLAGS, WATER_DEFENSE, WATER_COLOR, SEA_NAME );
@@ -133,8 +133,8 @@ public class TerrainType
   private static final String SEAPORT_NAME = "SEAPORT";
   public static final TerrainType SEAPORT = new TerrainType( SEAPORT_FLAGS, SEAPORT_DEFENSE, SEAPORT_COLOR, SEAPORT_NAME );
 
-  private static final int SHOAL_FLAGS = LAND | WATER | PROVIDES_COVER;
-  private static final int SHOAL_DEFENSE = 1;
+  private static final int SHOAL_FLAGS = LAND | WATER;
+  private static final int SHOAL_DEFENSE = 0;
   private static final Color SHOAL_COLOR = new Color(253, 224, 93);
   private static final String SHOAL_NAME = "SHOAL";
   public static final TerrainType SHOAL = new TerrainType( SHOAL_FLAGS, SHOAL_DEFENSE, SHOAL_COLOR, SHOAL_NAME );
