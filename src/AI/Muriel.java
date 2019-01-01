@@ -180,15 +180,6 @@ public class Muriel implements AIController
     System.out.println(message);
     logger.append(message).append('\n');
   }
-  private void log(Map<UnitModel, Double> unitCounts)
-  {
-    StringBuffer temp = new StringBuffer();
-    for( Entry<UnitModel, Double> entry : unitCounts.entrySet() )
-    {
-      temp.append(entry.getKey()).append("x").append(entry.getValue()).append(", ");
-    }
-    log(temp.toString());
-  }
 
   @Override
   public GameAction getNextAction(GameMap gameMap)
@@ -524,88 +515,6 @@ public class Muriel implements AIController
     }
   }
 
-  /**
-   * Simulate combat between two hypothetical forces. Assumes bad unit matchups for "my" player.
-   * All inputs are liable to be modified as UnitModels are removed from play.
-   * @param myQuantity Map of UnitModel to quantity (how many of that unit are in play).
-   * @param enemyModels Ordered list of enemy UnitModels. Engagements will be evaluated in this order.
-   * @param enemyQuantity Map of UnitModel to quantity for the enemy forces.
-   */
-  public void simulateCombat(Map<UnitModel, Double> myQuantity, ArrayList<UnitModel> enemyModels, Map<UnitModel, Double> enemyQuantity)
-  {
-    // Collect my own models as well.
-    ArrayList<UnitModel> myModels = new ArrayList<UnitModel>();
-    myModels.addAll(myQuantity.keySet());
-
-    if( !enemyModels.isEmpty() && !myModels.isEmpty() ) log("===== Simulating combat =====");
-
-    // Keep on simulating fights until one army or the other is expended.
-    while( !enemyModels.isEmpty() && !myModels.isEmpty() )
-    {
-      // Sort my models by badness vs this enemy type.
-      UnitModel enemyModel = enemyModels.get(0);
-      if( !enemyModel.hasDirectFireWeapon() )
-      {
-        // We currently ignore indirect-fire units for combat estimates.
-        enemyModels.remove(enemyModel);
-        enemyQuantity.remove(enemyModel);
-        continue;
-      }
-      Collections.sort(myModels, new UnitMatchupComparator(enemyModel, myUnitEffectMap, UnitMatchupComparator.ComparisonType.DAMAGE_RATIO) );
-
-      // Grab the least effective model we have vs enemyModel and figure out how much
-      // damage we can do with the numbers we have, assuming only the enemyModel and myModel
-      // numbers as participants.
-      UnitModel myModel = myModels.get(0);
-      if( !myModel.hasDirectFireWeapon() )
-      {
-        // We currently ignore indirect-fire units for combat estimates.
-        myQuantity.remove(enemyModel);
-        continue;
-      }
-      UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(myModel, enemyModel));
-      double enemyQuant = enemyQuantity.get(enemyModel);      // How many baddies?
-      double myQuant = myQuantity.get(myModel);               // How many goodies?
-      double myEffectiveQuant = myQuant * umami.damageRatio;  // How many of their guys do my guys equal?
-      double diffResult = enemyQuant - myEffectiveQuant;      // How much did I knock their numbers down?
-      double enemyLeft = (diffResult < 0) ? 0 : diffResult;   // How many of them are left?
-      double myEffectiveLeft = (diffResult < 0) ? -diffResult : 0;
-      double myLeft = myEffectiveLeft*(1.0/umami.damageRatio); // How many of mine?
-
-      log("Forces:");
-      log("  Mine");
-      log(myQuantity);
-      log("  Enemy");
-      log(enemyQuantity);
-      log(String.format("  Pitting my %sx%s against enemy %sx%s", myModel, myQuant, enemyModel, enemyQuant));
-      log(String.format("  %s of my %s are worth %s of their %s", myQuant, myModel, myEffectiveQuant, enemyModel));
-      log(String.format("  Their numbers are knocked down to %s", diffResult));
-      log(String.format("  Remains: I have %s and enemy has %s", myLeft, enemyLeft));
-
-      // Update stored amounts based on results.
-      if( 0 == enemyLeft )
-      {
-        log(String.format("Removing enemy model %s", enemyModel));
-        enemyQuantity.remove(enemyModel); // That enemy type is completely accounted for.
-        enemyModels.remove(enemyModel);
-      }
-      else
-      {
-        enemyQuantity.put(enemyModel, enemyLeft); // Didn't account for all enemies of this type; store the remainder.
-      }
-      if( 0 == myLeft )
-      {
-        log(String.format("Removing my %s", myModel));
-        myQuantity.remove(myModel); // Ran out of units of this type; hope we have some other unit model to fill the gap.
-        myModels.remove(myModel);
-      }
-      else
-      {
-        myQuantity.put(myModel, myLeft); // Didn't need all of my guys of this type to counter their guys; bring on whatever's next.
-      }
-    }
-  }
-
   private static class CommanderProductionInfo
   {
     Commander myCo;
@@ -714,34 +623,6 @@ public class Muriel implements AIController
     {
       double diff = entry1.getValue() - entry2.getValue();
       return (int)(diff*10); // Multiply by 10 since we return an int, but don't want to lose the decimal-level discrimination.
-    }
-  }
-
-  /**
-   * Sort units by price, in ascending or descending order as specified.
-   * By default, ascending order is assumed.
-   */
-  private static class UnitModelValueComparator implements Comparator<UnitModel>
-  {
-    public enum Ordering { ASCENDING, DESCENDING };
-    private Ordering ordering;
-
-    public UnitModelValueComparator()
-    {
-      this(Ordering.ASCENDING);
-    }
-
-    public UnitModelValueComparator( Ordering direction )
-    {
-      ordering = direction;
-    }
-
-    @Override
-    public int compare(UnitModel um1, UnitModel um2)
-    {
-      int ret = um1.moneyCost - um2.moneyCost;
-      if( ordering == Ordering.DESCENDING ) ret = -ret;
-      return ret;
     }
   }
 
