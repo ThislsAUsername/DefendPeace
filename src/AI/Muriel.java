@@ -15,6 +15,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameAction.ActionType;
+import Engine.GameActionSet;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
@@ -213,10 +214,23 @@ public class Muriel implements AIController
         break;
       }
 
-      // If we are out of ammo or low on fuel, go resupply.
+      //////////////////////////////////////////////////////////////////
+      // Figure out if we should go resupply.
+      boolean shouldResupply = false;
+      // If we are low on fuel.
+      if( unit.fuel < (unit.model.maxFuel/4.0) )
+      {
+        log(String.format("%s is low on fuel.", unit));
+        shouldResupply = true;
+      }
+      // If we are low on HP, go heal.
+      if( unit.getHP() < 6 ) // Arbitrary threshold
+      {
+        shouldResupply = true;
+      }
+      // If we are out of ammo.
       if( unit.weapons != null && unit.weapons.length > 0 )
       {
-        boolean shouldResupply = false;
         for( Weapon weap : unit.weapons )
         {
           if(weap.ammo == 0)
@@ -225,32 +239,54 @@ public class Muriel implements AIController
             shouldResupply = true;
           }
         }
-        if( unit.fuel < (unit.model.maxFuel/4.0) )
+      }
+      if( shouldResupply )
+      {
+        ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
+        Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), stations);
+        for( XYCoord coord : stations )
         {
-          log(String.format("%s is low on fuel.", unit));
-          shouldResupply = true;
-        }
-        if( shouldResupply )
-        {
-          ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
-          Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), stations);
-          for( XYCoord coord : stations )
+          Location station = gameMap.getLocation(coord);
+          // Go to the nearest unoccupied friendly space, but don't gum up the production lines.
+          if( station.getResident() == null && (station.getEnvironment().terrainType != TerrainType.FACTORY) )
           {
-            // Go to the nearest unoccupied friendly space.
-            if( gameMap.getLocation(coord).getResident() == null )
-            {
-              log(String.format("  Heading towards %s to resupply", coord));
-              queuedActions.offer(AIUtils.moveTowardLocation(unit, coord, gameMap));
-              break;
-            }
-          }
-          if( !queuedActions.isEmpty() )
-          {
-            // Break so we don't inadvertently plan two actions for this unit.
+            log(String.format("  Heading towards %s to resupply", coord));
+            queuedActions.offer(AIUtils.moveTowardLocation(unit, coord, gameMap));
             break;
           }
         }
+        if( !queuedActions.isEmpty() )
+        {
+          // Break so we don't inadvertently plan two actions for this unit.
+          break;
+        }
       }
+
+      //////////////////////////////////////////////////////////////////
+      // If we are currently healing, stick around, unless that would stem the tide of reinforcements.
+      Location loc = gameMap.getLocation(unit.x, unit.y);
+      if( unit.getHP() <= 8 && unit.model.canRepairOn(loc) && (loc.getEnvironment().terrainType != TerrainType.FACTORY) )
+      {
+        ArrayList<GameActionSet> actionSet = unit.getPossibleActions(gameMap, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
+        for( GameActionSet set : actionSet )
+        {
+          // Go ahead and attack someone as long as we don't have to move.
+          if( set.getSelected().getType() == ActionType.ATTACK )
+          {
+            for( GameAction action : set.getGameActions() )
+            {
+              Unit other = gameMap.getLocation(action.getTargetLocation()).getResident();
+              if( myUnitEffectMap.get(new UnitModelPair( unit.model, other.model )).damageRatio > 0.5 )
+              {
+                queuedActions.offer(action);
+                break;
+              }
+            }
+          }
+          if( !queuedActions.isEmpty() ) break; // One action per invocation.
+        }
+        if( !queuedActions.isEmpty() ) break; // One action per invocation.
+      } // ~Continue repairing if in a depot.
 
       // Find all the things we can do from here.
       Map<ActionType, ArrayList<GameAction> > unitActionsByType = AIUtils.getAvailableUnitActionsByType(unit, gameMap);
@@ -307,8 +343,8 @@ public class Muriel implements AIController
         for(int i = 0; i < nonAlliedProperties.size(); ++i)
         {
           XYCoord coord = nonAlliedProperties.get(i);
-          GameAction move = AIUtils.moveTowardLocation(unit, coord, gameMap);
-          if( null != move )
+          GameAction move = AIUtils.moveTowardLocation(unit, coord, gameMap); // Try to move there, but try not to sit on a factory.
+          if( null != move && (gameMap.getLocation(move.getMoveLocation()).getEnvironment().terrainType != TerrainType.FACTORY) )
           {
             log(String.format("  Found %s at %s", gameMap.getLocation(coord).getEnvironment().terrainType, coord));
             queuedActions.offer(move);
@@ -329,8 +365,8 @@ public class Muriel implements AIController
         for(int i = 0; i < enemyLocations.size(); ++i)
         {
           XYCoord coord = enemyLocations.get(i);
-          move = AIUtils.moveTowardLocation(unit, coord, gameMap);
-          if( null != move )
+          move = AIUtils.moveTowardLocation(unit, coord, gameMap); // Try to move there, but try not to sit on a factory.
+          if( null != move && (gameMap.getLocation(move.getMoveLocation()).getEnvironment().terrainType != TerrainType.FACTORY))
           {
             log(String.format("  Found %s", gameMap.getLocation(coord).getResident().toStringWithLocation()));
             queuedActions.offer(move);
