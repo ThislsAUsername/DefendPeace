@@ -139,6 +139,7 @@ public class Commander extends GameEventListener
   public void endTurn()
   {
     if( aiController != null ) aiController.endTurn();
+    myView.resetFog();
   }
 
   /**
@@ -147,6 +148,7 @@ public class Commander extends GameEventListener
    */
   public void initTurn(GameMap map)
   {
+    myView.resetFog();
     myActiveAbilityName = "";
     // Accrue income for each city under your control.
     int turnIncome = 0;

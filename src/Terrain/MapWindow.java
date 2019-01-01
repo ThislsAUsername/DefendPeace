@@ -1,6 +1,7 @@
 package Terrain;
 
 import CommandingOfficers.Commander;
+import Engine.Utils;
 import Engine.XYCoord;
 import Units.Unit;
 
@@ -8,7 +9,7 @@ public class MapWindow extends GameMap
 {
   MapMaster master;
   Commander viewer;
-  private boolean[][] fogMap;
+  private boolean[][] isFogged;
   public CommandingOfficers.Commander[] commanders;
 
   public MapWindow(MapMaster pMaster, Commander pViewer)
@@ -17,7 +18,7 @@ public class MapWindow extends GameMap
     master = pMaster;
     viewer = pViewer;
     commanders = master.commanders;
-    fogMap = new boolean[mapWidth][mapHeight];
+    isFogged = new boolean[mapWidth][mapHeight];
   }
 
   /**
@@ -97,6 +98,26 @@ public class MapWindow extends GameMap
   }
   public boolean isLocationFogged(int x, int y)
   {
-    return (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) ? true : fogMap[x][y];
+    return (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) ? true : isFogged[x][y];
+  }
+
+  public void resetFog()
+  {
+    // assume everything is fogged
+    for( int y = 0; y < mapHeight; ++y )
+    {
+      for( int x = 0; x < mapWidth; ++x )
+      {
+        isFogged[x][y] = true;
+      }
+    }
+    // then reveal what we should see
+    for( Unit unit : viewer.units )
+    {
+      for( XYCoord coord : Utils.findVisibleLocations(this, unit) )
+      {
+        isFogged[coord.xCoord][coord.yCoord] = false;
+      }
+    }
   }
 }

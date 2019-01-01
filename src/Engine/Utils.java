@@ -68,7 +68,7 @@ public class Utils
     for( XYCoord loc : locations )
     {
       // Add any location that is empty and supports movement of the cargo unit.
-      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport )
+      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
           && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
       {
         dropoffLocations.add(loc);
@@ -303,15 +303,13 @@ public class Utils
   private static void expandSearchNode(Unit unit, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue,
       int[][] costGrid, boolean theoretical)
   {
-    XYCoord[] coordsToCheck = {new XYCoord(currentNode.x + 1, currentNode.y),
-                               new XYCoord(currentNode.x - 1, currentNode.y),
-                               new XYCoord(currentNode.x, currentNode.y + 1),
-                               new XYCoord(currentNode.x, currentNode.y - 1)};
+    XYCoord[] coordsToCheck = { new XYCoord(currentNode.x + 1, currentNode.y), new XYCoord(currentNode.x - 1, currentNode.y),
+        new XYCoord(currentNode.x, currentNode.y + 1), new XYCoord(currentNode.x, currentNode.y - 1) };
 
     for( XYCoord next : coordsToCheck )
     {
       // Check that we could potentially move into this space.
-      if( checkSpace( unit, map, currentNode, next, theoretical ) )
+      if( checkSpace(unit, map, currentNode, next, theoretical) )
       {
         // If we can move there for less cost than previously discovered,
         // then update the cost grid and re-queue the next node.
@@ -497,5 +495,33 @@ public class Utils
   {
     TravelDistanceComparator tdc = new TravelDistanceComparator(unit, map);
     Collections.sort(mapLocations, tdc);
+  }
+
+  /** Returns a list of all locations between minRange and maxRange tiles away from origin, inclusive. */
+  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer)
+  {
+    ArrayList<XYCoord> locations = new ArrayList<XYCoord>();
+    int range = viewer.model.vision;
+
+    // Loop through all the valid x and y offsets, as dictated by the max range, and add valid spaces to our collection.
+    for( int yOff = -range; yOff <= range; ++yOff )
+    {
+      for( int xOff = -range; xOff <= range; ++xOff )
+      {
+        int currentRange = Math.abs(xOff) + Math.abs(yOff);
+        XYCoord coord = new XYCoord(viewer.x + xOff, viewer.y + yOff);
+        if( currentRange <= range && map.isLocationValid(coord) )
+        {
+          // If we're adjacent, or we can see through cover, or it's *not* cover, we can see into it.
+          if( currentRange < 2 || viewer.model.piercingVision || !map.getEnvironment(coord).terrainType.isCover() )
+          {
+            // Add this location to the set.
+            locations.add(coord);
+          }
+        }
+      }
+    }
+
+    return locations;
   }
 }

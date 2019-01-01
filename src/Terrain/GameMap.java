@@ -56,4 +56,10 @@ public abstract class GameMap
    */
   public abstract boolean isLocationFogged(XYCoord coord);
   public abstract boolean isLocationFogged(int x, int y);
+
+  /**
+   * Resets fog, if applicable
+   */
+  public void resetFog()
+  {}
 }
