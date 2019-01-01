@@ -9,14 +9,21 @@ public class TerrainType
   private  Color mMainColor = null; // Predominant color of this terrain type. Here for convenience.
   private int mAttributes = 0;      // bitmask of binary tile characteristics.
   private String mName;             // Human-readable name of the terrain type.
+  private int mVisionBoost = 0;     // How much this terrain enhances the vision of surface units on it.
 
   // Generic constructor.
   private TerrainType(int attributeFlags, int defense, Color mainColor, String name)
+  {
+    this(attributeFlags, defense, mainColor, name, 0);
+  }
+  
+  private TerrainType(int attributeFlags, int defense, Color mainColor, String name, int visionBoost)
   {
     mAttributes = attributeFlags;
     mDefenseLevel = defense;
     mMainColor = mainColor;
     mName = name;
+    mVisionBoost = visionBoost;
   }
   
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,6 +38,7 @@ public class TerrainType
   private static final int HEALS_AIR = HEALS_SEA << 1;
 
   public int getDefLevel() { return mDefenseLevel; }
+  public int getVisionBoost() { return mVisionBoost; }
   public Color getMainColor() { return mMainColor; }
   public Boolean isCapturable() { return 0 != (mAttributes & CAPTURABLE); }
   public Boolean isProfitable() { return 0 != (mAttributes & PROFITABLE); }
@@ -101,7 +109,8 @@ public class TerrainType
   private static final int MOUNTAIN_DEFENSE = 4;
   private static final Color MOUNTAIN_COLOR = new Color(153, 99, 67);
   private static final String MOUNTAIN_NAME = "MOUNTAIN";
-  public static final TerrainType MOUNTAIN = new TerrainType( MOUNTAIN_FLAGS, MOUNTAIN_DEFENSE, MOUNTAIN_COLOR, MOUNTAIN_NAME );
+  private static final int MOUNTAIN_VISION  = 3;
+  public static final TerrainType MOUNTAIN = new TerrainType( MOUNTAIN_FLAGS, MOUNTAIN_DEFENSE, MOUNTAIN_COLOR, MOUNTAIN_NAME, MOUNTAIN_VISION );
 
   private static final int REEF_FLAGS = WATER | PROVIDES_COVER;
   private static final int REEF_DEFENSE = 2;

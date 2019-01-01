@@ -10,6 +10,7 @@ import Engine.Path.PathNode;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.Unit;
+import Units.UnitModel.ChassisEnum;
 import Units.Weapons.Weapon;
 
 public class Utils
@@ -501,11 +502,17 @@ public class Utils
   /** Returns a list of all locations between minRange and maxRange tiles away from origin, inclusive. */
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer)
   {
-    return findVisibleLocations(map, new XYCoord(viewer.x, viewer.y), viewer.model.vision, viewer.model.piercingVision);
+    return findVisibleLocations(map, viewer, viewer.x, viewer.y);
   }
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, int x, int y)
   {
-    return findVisibleLocations(map, new XYCoord(x, y), viewer.model.vision, viewer.model.piercingVision);
+    int range = viewer.model.vision;
+    // if it's a surface unit, give it the boost the terrain would provide
+    if( viewer.model.chassis == ChassisEnum.TROOP || viewer.model.chassis == ChassisEnum.TANK
+        || viewer.model.chassis == ChassisEnum.SHIP )
+      range += map.getEnvironment(x, y).terrainType.getVisionBoost();
+    
+    return findVisibleLocations(map, new XYCoord(x, y), range, viewer.model.piercingVision);
   }
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, XYCoord origin, int range)
   {
