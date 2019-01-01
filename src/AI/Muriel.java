@@ -143,7 +143,7 @@ public class Muriel implements AIController
   public void initTurn(GameMap gameMap)
   {
     turnNum++;
-    log(String.format("[======== WorkingName initializing turn %s for %s =========]", turnNum, myCo));
+    log(String.format("[======== Muriel initializing turn %s for %s =========]", turnNum, myCo));
 
     // Make a list of properties we want to claim.
     nonAlliedProperties = AIUtils.findNonAlliedProperties(myCo, gameMap);
@@ -169,7 +169,7 @@ public class Muriel implements AIController
   @Override
   public void endTurn()
   {
-    log(String.format("[======== WorkingName ending turn %s for %s =========]", turnNum, myCo));
+    log(String.format("[======== Muriel ending turn %s for %s =========]", turnNum, myCo));
     System.out.println(logger);
     logger = new StringBuffer();
   }
@@ -242,7 +242,7 @@ public class Muriel implements AIController
           }
           if( !queuedActions.isEmpty() )
           {
-            // Make sure we don't inadvertently plan two actions for this unit.
+            // Break so we don't inadvertently plan two actions for this unit.
             break;
           }
         }
@@ -251,22 +251,40 @@ public class Muriel implements AIController
       // Otherwise, look for attack/capture options.
       Map<XYCoord, ArrayList<GameActionSet> > immediateActions = AIUtils.getAvailableUnitActions(unit, gameMap);
       Set<XYCoord> immediateMoveLocations = immediateActions.keySet();
-      for( XYCoord coord : immediateMoveLocations )
+      for( XYCoord moveTile : immediateMoveLocations )
       {
-        for( GameActionSet actionSet : immediateActions.get( coord ) )
+        for( GameActionSet actionSet : immediateActions.get( moveTile ) )
         {
           // See if we have the option to attack.
           if( actionSet.getSelected().getType() == GameAction.ActionType.ATTACK )
           {
-            queuedActions.offer(actionSet.getSelected() );
-            break;
+            // Make a list of everything we can attack.
+            ArrayList<UnitModel> targetModels = new ArrayList<UnitModel>();
+            ArrayList<XYCoord> targetLocs = actionSet.getTargetedLocations();
+            for( XYCoord target : targetLocs )
+            {
+              targetModels.add(gameMap.getLocation(target).getResident().model);
+            }
+            // Sort the target UnitModels by effectiveness against me.
+            Collections.sort(targetModels, new UnitMatchupComparator(unit.model, myUnitEffectMap, UnitMatchupComparator.ComparisonType.DAMAGE_RATIO));
+            UnitModel bestTargetModel = targetModels.get(0);
+            UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(unit.model, bestTargetModel));
+
+            // Only follow through with the attack if it's at least a halfway decent idea.
+            if( umami.damageRatio > 0.5 )
+            {
+              // Rotate the actionSet to the attack action corresponding to the UnitType we wish to whack.
+              while( gameMap.getLocation(actionSet.getSelected().getTargetLocation()).getResident().model != bestTargetModel ) actionSet.next();
+              queuedActions.offer(actionSet.getSelected());
+              break;
+            }
           }
 
           // See if we have the option to capture.
           if( actionSet.getSelected().getType() == GameAction.ActionType.CAPTURE )
           {
             queuedActions.offer(actionSet.getSelected() );
-            nonAlliedProperties.remove(coord);
+            nonAlliedProperties.remove(moveTile);
             break;
           }
         }
