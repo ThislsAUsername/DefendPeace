@@ -424,7 +424,7 @@ public class SpriteLibrary
         facAbbrev = (matcher.group(1) + matcher.group(2)).toLowerCase();
       else
         facAbbrev = faction;
-      filestr = ("res/unit/" + faction + "/" + facAbbrev + key.unitTypeKey.toString() + ".gif");//.replaceAll("\\_", "-")
+      filestr = ("res/unit/" + faction + "/" + facAbbrev + key.unitTypeKey.toString() + ".gif").replaceAll("\\_", "-");
       spriteSet = new UnitSpriteSet(loadAnimation(filestr), baseSpriteSize, baseSpriteSize,
           getMapUnitColors(key.commanderKey.myColor));
     }
