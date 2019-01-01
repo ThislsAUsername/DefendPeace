@@ -92,8 +92,8 @@ public class TestUnitMovement extends TestCase
     performGameAction(ga, testMap);
 
     // Evaluate the test.
-    boolean testPassed = validate(testMap.getLocation(4, 4).getResident() == null, "    Infantry is still at the start point.");
-    testPassed &= validate(testMap.getLocation(destination).getResident() == mover, "    Infantry is not at the destination.");
+    boolean testPassed = validate(testMap.getLocation(4, 4).getResident(testMap) == null, "    Infantry is still at the start point.");
+    testPassed &= validate(testMap.getLocation(destination).getResident(testMap) == mover, "    Infantry is not at the destination.");
     testPassed &= validate((destination.xCoord == mover.x) && (destination.yCoord == mover.y),
         "    Infantry doesn't think he's at the destination.");
     testPassed &= validate(96 == mover.fuel, "    Infantry did not lose the proper amount of fuel.");
@@ -116,9 +116,9 @@ public class TestUnitMovement extends TestCase
     performGameAction(ga, testMap);
 
     // Make sure the action didn't actually execute.
-    boolean testPassed = validate(testMap.getLocation(4, 4).getResident() == mover, "    Infantry moved when he shouldn't have.");
+    boolean testPassed = validate(testMap.getLocation(4, 4).getResident(testMap) == mover, "    Infantry moved when he shouldn't have.");
     testPassed &= validate(4 == mover.x && 4 == mover.y, "    Infantry thinks he moved when he should not have.");
-    testPassed &= validate(testMap.getLocation(7, 6).getResident() == null,
+    testPassed &= validate(testMap.getLocation(7, 6).getResident(testMap) == null,
         "    Target location has a resident when it should not.");
     testPassed &= validate(99 == mover.fuel, "    Infantry lost fuel when attempting an invalid movement that should fail.");
     testPassed &= validate(!mover.isTurnOver, "    Infantry turn ended even though action did not execute.");

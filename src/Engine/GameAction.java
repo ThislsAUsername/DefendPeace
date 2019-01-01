@@ -80,7 +80,7 @@ public interface GameAction
       if( isValid )
       {
         moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
-        defender = gameMap.getLocation(attackLocation).getResident();
+        defender = gameMap.getLocation(attackLocation).getResident(gameMap);
         attackRange = Math.abs(moveLocation.xCoord - attackLocation.xCoord)
             + Math.abs(moveLocation.yCoord - attackLocation.yCoord);
 
@@ -178,7 +178,7 @@ public interface GameAction
       if( isValid )
       {
         Location site = gameMap.getLocation(where);
-        isValid &= (null == site.getResident());
+        isValid &= (null == site.getResident(gameMap));
         isValid &= site.getOwner() == who;
         isValid &= (who.money >= what.moneyCost);
         isValid &= who.getShoppingList(site.getEnvironment().terrainType).contains(what);
@@ -256,7 +256,7 @@ public interface GameAction
         captureLocation = map.getLocation(movePathEnd);
         isValid &= captureLocation.isCaptureable(); // Valid location
         isValid &= actor.CO.isEnemy(captureLocation.getOwner()); // Valid CO
-        isValid &= ((captureLocation.getResident() == null) || (captureLocation.getResident() == actor));
+        isValid &= ((captureLocation.getResident(map) == null) || (captureLocation.getResident(map) == actor));
       }
 
       // Generate events
@@ -426,7 +426,7 @@ public interface GameAction
         if( isValid )
         {
           // Find the transport unit.
-          transport = gameMap.getLocation(pathEnd).getResident();
+          transport = gameMap.getLocation(pathEnd).getResident(gameMap);
           isValid &= (null != transport) && transport.hasCargoSpace(passenger.model.type);
         }
       }
@@ -659,7 +659,7 @@ public interface GameAction
         // For each location, see if there is a friendly unit to re-supply.
         for( XYCoord loc : locations )
         {
-          Unit other = map.getLocation(loc).getResident();
+          Unit other = map.getLocation(loc).getResident(map);
           if( other != null && other.CO == unitActor.CO && !other.isFullySupplied() )
           {
 

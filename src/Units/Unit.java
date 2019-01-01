@@ -80,7 +80,7 @@ public class Unit
     {
       isTurnOver = false;
       fuel -= model.idleFuelBurn;
-      if( captureTarget != null && captureTarget.getResident() != this )
+      if( captureTarget != null && captureTarget.getResident(map) != this )
       {
         captureTarget = null;
         captureProgress = 0;
@@ -337,7 +337,7 @@ public class Unit
             for( XYCoord loc : locations )
             {
               // If there's a friendly unit there who isn't us, we can resupply them.
-              Unit other = map.getLocation(loc).getResident();
+              Unit other = map.getLocation(loc).getResident(map);
               if( other != null && other.CO == CO && other != this && !other.isFullySupplied() )
               {
                 // We found at least one unit we can resupply. Since resupply actions aren't

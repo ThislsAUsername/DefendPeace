@@ -31,7 +31,7 @@ class DefaultState extends GameInputState<XYCoord>
   {
     GameInputState<?> next = this;
     Location loc = myStateData.gameMap.getLocation(coord);
-    Unit resident = loc.getResident();
+    Unit resident = loc.getResident(myStateData.gameMap);
     if( null != resident
         && (!resident.isTurnOver    // If it's our unit and the unit is ready to go.
         || resident.CO != myStateData.commander // Also allow checking the move radius of others' units.

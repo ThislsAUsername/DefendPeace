@@ -58,11 +58,11 @@ public class TestTransport extends TestCase
     // Try a basic load/move/unload order.
     cargo.initTurn(testMap); // Get him ready.
     performGameAction(new GameAction.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 4, 2, testMap)), testMap);
-    testPassed &= validate(testMap.getLocation(4, 2).getResident() != cargo, "    Cargo is still on the map.");
+    testPassed &= validate(testMap.getLocation(4, 2).getResident(testMap) != cargo, "    Cargo is still on the map.");
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC is not holding a unit.");
     apc.initTurn(testMap); // Get him ready.
     performGameAction(new GameAction.UnloadAction(testMap, apc, Utils.findShortestPath(apc, 7, 3, testMap), cargo, 7, 4), testMap);
-    testPassed &= validate(testMap.getLocation(7, 4).getResident() == cargo, "    Cargo was not dropped off correctly.");
+    testPassed &= validate(testMap.getLocation(7, 4).getResident(testMap) == cargo, "    Cargo was not dropped off correctly.");
     testPassed &= validate(apc.heldUnits.isEmpty(), "    APC is not empty when it should be.");
 
     // Make sure the unit knows it can unload to its own position.
@@ -74,15 +74,15 @@ public class TestTransport extends TestCase
     apc.initTurn(testMap);
     performGameAction(new GameAction.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 7, 3, testMap)), testMap);
     performGameAction(new GameAction.UnloadAction(testMap, apc, Utils.findShortestPath(apc, 7, 4, testMap), cargo, 7, 3), testMap);
-    testPassed &= validate(testMap.getLocation(7, 4).getResident() == apc, "    APC is not where it belongs.");
-    testPassed &= validate(testMap.getLocation(7, 3).getResident() == cargo, "    Cargo is not at dropoff location");
+    testPassed &= validate(testMap.getLocation(7, 4).getResident(testMap) == apc, "    APC is not where it belongs.");
+    testPassed &= validate(testMap.getLocation(7, 3).getResident(testMap) == cargo, "    Cargo is not at dropoff location");
 
     // Try to init a damaged unit inside the transport.
     cargo.alterHP(-5);
     testPassed &= validate( cargo.getHP() == 5, "    Cargo has the wrong amount of HP(" + cargo.getHP() + ")");
     cargo.initTurn(testMap);
     performGameAction(new GameAction.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 7, 4, testMap)), testMap);
-    testPassed &= validate(testMap.getLocation(7, 4).getResident() != cargo, "    Cargo is not in the APC.");
+    testPassed &= validate(testMap.getLocation(7, 4).getResident(testMap) != cargo, "    Cargo is not in the APC.");
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC has the wrong cargo size (");
 
     // Calling init on the cargo caused a NPE before, so let's test that case.

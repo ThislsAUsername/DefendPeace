@@ -130,8 +130,8 @@ public class TestCOModifier extends TestCase
 
     addUnit(testMap, patch, UnitModel.UnitEnum.INFANTRY, 2, 2);
     addUnit(testMap, patch, UnitModel.UnitEnum.RECON, 2, 3);
-    Unit infantry = testMap.getLocation(2, 2).getResident();
-    Unit recon = testMap.getLocation(2, 3).getResident();
+    Unit infantry = testMap.getLocation(2, 2).getResident(testMap);
+    Unit recon = testMap.getLocation(2, 3).getResident(testMap);
 
     testPassed &= validate( infantry != null, "    Infantry is missing. Malformed test!");
     testPassed &= validate( recon != null, "    Recon is missing. Malformed test!");

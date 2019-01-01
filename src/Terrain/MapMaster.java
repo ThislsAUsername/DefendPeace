@@ -169,7 +169,7 @@ public class MapMaster extends GameMap
     boolean empty = true;
     if( isLocationValid(x, y) )
     {
-      if( getLocation(x, y).getResident() != null && getLocation(x, y).getResident() != unit )
+      if( getLocation(x, y).getResident(this) != null && getLocation(x, y).getResident(this) != unit )
       {
         empty = false;
       }
@@ -179,7 +179,7 @@ public class MapMaster extends GameMap
 
   public void addNewUnit(Unit unit, int x, int y)
   {
-    if( getLocation(x, y).getResident() != null )
+    if( getLocation(x, y).getResident(this) != null )
     {
       System.out.println("Error! Attempting to add a unit to an occupied Location!");
       return;
@@ -229,7 +229,7 @@ public class MapMaster extends GameMap
   {
     if( isLocationValid(u.x, u.y) )
     {
-      if( getLocation(u.x, u.y).getResident() != u )
+      if( getLocation(u.x, u.y).getResident(this) != u )
       {
         System.out.println("WARNING! Trying to remove a Unit that isn't where he claims to be.");
       }

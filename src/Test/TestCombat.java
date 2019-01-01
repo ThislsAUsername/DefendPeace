@@ -65,7 +65,7 @@ public class TestCombat extends TestCase
 
     // Check that the mech is undamaged, and that the infantry is no longer with us.
     boolean testPassed = validate(mechA.getPreciseHP() == 10, "    Attacker lost or gained health.");
-    testPassed &= validate(testMap.getLocation(1, 2).getResident() == null, "    Defender is still on the map.");
+    testPassed &= validate(testMap.getLocation(1, 2).getResident(testMap) == null, "    Defender is still on the map.");
 
     // Clean up
     testMap.removeUnit(mechA);
@@ -93,7 +93,7 @@ public class TestCombat extends TestCase
 
     // Check that the mech is undamaged, and that the infantry is still with us.
     boolean testPassed = validate(mechA.getPreciseHP() == 10, "    Attacker lost or gained health.");
-    testPassed &= validate(testMap.getLocation(1, 2).getResident() != null, "    Defender died.");
+    testPassed &= validate(testMap.getLocation(1, 2).getResident(testMap) != null, "    Defender died.");
 
     // Clean up
     testMap.removeUnit(mechA);

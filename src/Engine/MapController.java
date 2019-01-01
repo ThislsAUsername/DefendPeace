@@ -81,7 +81,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     startNextTurn();
 
     // Initialize our game input handler.
-    myGameInputHandler = new GameInputHandler(myGame.gameMap, myGame.activeCO, this);
+    myGameInputHandler = new GameInputHandler(myGame.activeCO.myView, myGame.activeCO, this);
   }
 
   /**
@@ -218,7 +218,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         // Get the current location.
         XYCoord cursorCoords = new XYCoord(myGame.getCursorX(), myGame.getCursorY());
         Location loc = myGame.gameMap.getLocation(cursorCoords);
-        Unit actor = loc.getResident();
+        Unit actor = loc.getResident(myGame.activeCO.myView);
 
         // If there is a unit that is is ready to move, or if it is someone else's, then record it so we can build the move path.
         if( null != actor && ((actor.CO == myGame.activeCO && !actor.isTurnOver) || (actor.CO != myGame.activeCO)))
@@ -288,7 +288,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorDown();
         }
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
         break;
       case DOWN:
         myGame.moveCursorDown();
@@ -297,7 +297,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorUp();
         }
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
         break;
       case LEFT:
         myGame.moveCursorLeft();
@@ -306,7 +306,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorRight();
         }
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
         break;
       case RIGHT:
         myGame.moveCursorRight();
@@ -315,7 +315,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorLeft();
         }
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
         break;
       case ENTER:
         GameInputHandler.InputType type = myGameInputHandler.select(contemplatedAction.movePath);
@@ -485,10 +485,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     contemplatedAction.movePath.addWaypoint(x, y);
 
-    if( !Utils.isPathValid(contemplatedAction.actor, contemplatedAction.movePath, myGame.gameMap) )
+    if( !Utils.isPathValid(contemplatedAction.actor, contemplatedAction.movePath, map) )
     {
       // The currently-built path is invalid. Try to generate a new one (may still return null).
-      contemplatedAction.movePath = Utils.findShortestPath(contemplatedAction.actor, x, y, myGame.gameMap);
+      contemplatedAction.movePath = Utils.findShortestPath(contemplatedAction.actor, x, y, map);
     }
   }
 
@@ -602,7 +602,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     myGame.turn();
 
     // Reinitialize the InputStateHandler for the new turn.
-    myGameInputHandler = new GameInputHandler(myGame.gameMap, myGame.activeCO, this);
+    myGameInputHandler = new GameInputHandler(myGame.activeCO.myView, myGame.activeCO, this);
 
     // Add the CO's units to the queue so we can initialize them.
     unitsToInit.addAll(myGame.activeCO.units);

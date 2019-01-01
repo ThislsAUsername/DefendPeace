@@ -50,9 +50,14 @@ public class Location
     }
   }
 
-  public Unit getResident()
+  public Unit getResident(GameMap map)
   {
-    return resident;
+    Unit result = null;
+    if( !map.isLocationFogged(coords) )
+    {
+      result = resident;
+    }
+    return result;
   }
 
   public void setResident(Unit resident)
