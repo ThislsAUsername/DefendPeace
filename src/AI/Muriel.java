@@ -172,12 +172,12 @@ public class Muriel implements AIController
   public void endTurn()
   {
     log(String.format("[======== Muriel ending turn %s for %s =========]", turnNum, myCo));
-    System.out.println(logger);
     logger = new StringBuffer();
   }
 
   private void log(String message)
   {
+    System.out.println(message);
     logger.append(message).append('\n');
   }
   private void log(Map<UnitModel, Double> unitCounts)
