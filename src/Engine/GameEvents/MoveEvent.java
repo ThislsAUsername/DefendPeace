@@ -1,6 +1,9 @@
 package Engine.GameEvents;
 
+import CommandingOfficers.Commander;
 import Engine.Path;
+import Engine.Utils;
+import Engine.XYCoord;
 import Terrain.MapMaster;
 import Terrain.Location;
 import UI.MapView;
@@ -60,6 +63,12 @@ public class MoveEvent implements GameEvent
         // Every unit action begins with a (potentially 0-distance) move,
         // so we'll just set the "has moved" flag here.
         unit.isTurnOver = true;
+
+        // reveal fog as applicable
+        for( Commander co : gameMap.commanders )
+        {
+          co.myView.revealFog(unit, unitPath);
+        }
       }
       else
       {

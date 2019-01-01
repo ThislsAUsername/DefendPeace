@@ -1,6 +1,8 @@
 package Terrain;
 
 import CommandingOfficers.Commander;
+import Engine.Path;
+import Engine.Path.PathNode;
 import Engine.Utils;
 import Engine.XYCoord;
 import Units.Unit;
@@ -112,11 +114,31 @@ public class MapWindow extends GameMap
       }
     }
     // then reveal what we should see
-    for( Unit unit : viewer.units )
+    for( Commander co : commanders )
     {
-      for( XYCoord coord : Utils.findVisibleLocations(this, unit) )
+      if( !viewer.isEnemy(co) )
       {
-        isFogged[coord.xCoord][coord.yCoord] = false;
+        for( Unit unit : co.units )
+        {
+          for( XYCoord coord : Utils.findVisibleLocations(this, unit) )
+          {
+            isFogged[coord.xCoord][coord.yCoord] = false;
+          }
+        }
+      }
+    }
+  }
+
+  public void revealFog(Unit scout, Path movepath)
+  {
+    if( !viewer.isEnemy(scout.CO) )
+    {
+      for( PathNode node : movepath.getWaypoints() )
+      {
+        for( XYCoord coord : Utils.findVisibleLocations(this, scout, node.x, node.y) )
+        {
+          isFogged[coord.xCoord][coord.yCoord] = false;
+        }
       }
     }
   }

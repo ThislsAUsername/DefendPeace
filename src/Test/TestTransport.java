@@ -9,6 +9,7 @@ import Engine.GameAction;
 import Engine.Utils;
 import Engine.XYCoord;
 import Terrain.MapMaster;
+import Terrain.MapWindow;
 import Terrain.MapLibrary;
 import Units.Unit;
 import Units.UnitModel.UnitEnum;
@@ -27,6 +28,10 @@ public class TestTransport extends TestCase
     Commander[] cos = { testCo1, testCo2 };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
+    for( Commander co : cos )
+    {
+      co.myView = new MapWindow(testMap, co);
+    }
   }
 
   @Override

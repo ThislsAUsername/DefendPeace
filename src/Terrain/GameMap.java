@@ -1,5 +1,6 @@
 package Terrain;
 
+import Engine.Path;
 import Engine.XYCoord;
 import Units.Unit;
 
@@ -61,5 +62,11 @@ public abstract class GameMap
    * Resets fog, if applicable
    */
   public void resetFog()
+  {}
+
+  /**
+   * Reveals fog along the movement path, if applicable
+   */
+  public void revealFog(Unit scout, Path movepath)
   {}
 }

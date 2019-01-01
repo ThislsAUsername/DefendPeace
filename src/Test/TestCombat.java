@@ -9,6 +9,7 @@ import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
+import Terrain.MapWindow;
 import Terrain.MapLibrary;
 import Units.Unit;
 import Units.UnitModel.UnitEnum;
@@ -27,6 +28,10 @@ public class TestCombat extends TestCase
     Commander[] cos = { testCo1, testCo2 };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
+    for( Commander co : cos )
+    {
+      co.myView = new MapWindow(testMap, co);
+    }
   }
 
   @Override

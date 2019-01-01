@@ -500,6 +500,14 @@ public class Utils
   /** Returns a list of all locations between minRange and maxRange tiles away from origin, inclusive. */
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer)
   {
+    return findVisibleLocations(map, viewer, new XYCoord(viewer.x, viewer.y));
+  }
+  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, int x, int y)
+  {
+    return findVisibleLocations(map, viewer, new XYCoord(x, y));
+  }
+  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, XYCoord origin)
+  {
     ArrayList<XYCoord> locations = new ArrayList<XYCoord>();
     int range = viewer.model.vision;
 
@@ -509,7 +517,7 @@ public class Utils
       for( int xOff = -range; xOff <= range; ++xOff )
       {
         int currentRange = Math.abs(xOff) + Math.abs(yOff);
-        XYCoord coord = new XYCoord(viewer.x + xOff, viewer.y + yOff);
+        XYCoord coord = new XYCoord(origin.xCoord + xOff, origin.yCoord + yOff);
         if( currentRange <= range && map.isLocationValid(coord) )
         {
           // If we're adjacent, or we can see through cover, or it's *not* cover, we can see into it.
