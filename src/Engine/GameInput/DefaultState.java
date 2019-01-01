@@ -41,10 +41,10 @@ class DefaultState extends GameInputState<XYCoord>
       myStateData.unitActor = resident;
       next = new SelectMoveLocation(myStateData);
     }
-    else if( (null == resident) && (loc.getOwner() == myStateData.commander) && myStateData.commander.getShoppingList(loc.getEnvironment().terrainType).size() > 0 )
+    else if( (null == resident) && (loc.getOwner() == myStateData.commander) && myStateData.commander.getShoppingList(loc).size() > 0 )
     {
       // We are considering a new unit purchase.
-      ArrayList<UnitModel> buildables = myStateData.commander.getShoppingList(loc.getEnvironment().terrainType);
+      ArrayList<UnitModel> buildables = myStateData.commander.getShoppingList(loc);
       myStateData.menuOptions = buildables;
       next = new SelectUnitProduction(myStateData, buildables, coord);
     }

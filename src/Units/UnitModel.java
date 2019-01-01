@@ -31,7 +31,7 @@ public class UnitModel
   public String name;
   public UnitEnum type;
   public ChassisEnum chassis;
-  public int moneyCost = 9001;
+  private int moneyCost = 9001;
   public int maxFuel;
   public int idleFuelBurn;
   public int movePower;
@@ -47,6 +47,7 @@ public class UnitModel
   public Vector<UnitEnum> holdables;
   private int COstr;
   private int COdef;
+  public double COcost = 1.0;
 
   public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion, ActionType[] actions, WeaponModel[] weapons)
@@ -119,7 +120,7 @@ public class UnitModel
     }
 
     // Create a new model with the given attributes.
-    UnitModel newModel = new UnitModel(other.name, other.type, other.chassis, other.moneyCost, other.maxFuel, other.idleFuelBurn, other.vision,
+    UnitModel newModel = new UnitModel(other.name, other.type, other.chassis, other.getCost(), other.maxFuel, other.idleFuelBurn, other.vision,
         other.movePower, new MoveType(other.propulsion), other.possibleActions, weaponModels);
 
     // Duplicate the other model's transporting abilities.
@@ -127,6 +128,11 @@ public class UnitModel
     newModel.holdables.addAll(other.holdables);
 
     return newModel;
+  }
+  
+  public int getCost()
+  {
+    return (int) (moneyCost*COcost);
   }
 
   /**

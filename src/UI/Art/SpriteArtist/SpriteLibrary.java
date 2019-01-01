@@ -841,6 +841,7 @@ public class SpriteLibrary
       case NOONE:
         default:
           // Not a real Commander. Gonna fall back to placeholder images.
+          str += "placeholder";
     }
     return str;
   }

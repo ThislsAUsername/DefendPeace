@@ -180,8 +180,8 @@ public interface GameAction
         Location site = gameMap.getLocation(where);
         isValid &= (null == site.getResident(gameMap));
         isValid &= site.getOwner() == who;
-        isValid &= (who.money >= what.moneyCost);
-        isValid &= who.getShoppingList(site.getEnvironment().terrainType).contains(what);
+        isValid &= (who.money >= what.getCost());
+        isValid &= who.getShoppingList(site).contains(what);
       }
 
       if( isValid )

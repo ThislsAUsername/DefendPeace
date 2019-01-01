@@ -4,7 +4,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Queue;
 
-import AI.SpenderAI;
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
@@ -541,6 +540,21 @@ public class MapController implements IController, GameInputHandler.StateChanged
       Unit u = unitsToInit.poll();
       GameEventQueue events = u.initTurn(myGame.gameMap);
       myView.animate(events);
+    }
+
+    if( animEventQueueIsEmpty )
+    {
+      for( Commander co : myGame.commanders )
+      {
+        GameEventQueue events = new GameEventQueue();
+        co.pollForEvents(events);
+        if( !events.isEmpty() )
+        {
+          animEventQueueIsEmpty = false;
+          myView.animate(events);
+          break; // We'll get the next commander the next time we hit this block.
+        }
+      }
     }
 
     // If we are done animating the last action, check to see if the game is over.

@@ -276,9 +276,9 @@ public class SpenderAI implements AIController
           // I like combat units that are useful, so we skip ports for now
           if( loc.getEnvironment().terrainType != TerrainType.SEAPORT && loc.getResident(gameMap) == null )
           {
-            ArrayList<UnitModel> units = myCo.getShoppingList(loc.getEnvironment().terrainType);
+            ArrayList<UnitModel> units = myCo.getShoppingList(loc);
             // Only add to the list if we could actually buy something here.
-            if( !units.isEmpty() && units.get(0).moneyCost <= myCo.money )
+            if( !units.isEmpty() && units.get(0).getCost() <= myCo.money )
             {
               shoppingLists.put(loc, units);
             }
@@ -293,9 +293,9 @@ public class SpenderAI implements AIController
           for( UnitModel unit : units )
           {
             // I only want combat units, since I don't understand transports
-            if( unit.weaponModels != null && unit.weaponModels.size() > 0 && unit.moneyCost <= budget )
+            if( unit.weaponModels != null && unit.weaponModels.size() > 0 && unit.getCost() <= budget )
             {
-              budget -= unit.moneyCost;
+              budget -= unit.getCost();
               purchases.put(locShopList.getKey(), unit);
               break;
             }
@@ -311,16 +311,16 @@ public class SpenderAI implements AIController
           UnitModel currentPurchase = purchases.get(locShopList.getKey());
           if( null != currentPurchase )
           {
-            budget += currentPurchase.moneyCost;
+            budget += currentPurchase.getCost();
             for( UnitModel unit : units )
             {
               // I want expensive units, but they have to have guns
-              if( budget > unit.moneyCost && unit.moneyCost > currentPurchase.moneyCost && unit.weaponModels != null
+              if( budget > unit.getCost() && unit.getCost() > currentPurchase.getCost() && unit.weaponModels != null
                   && unit.weaponModels.size() > 0 )
                 currentPurchase = unit;
             }
             // once we've found the most expensive thing we can buy here, record that
-            budget -= currentPurchase.moneyCost;
+            budget -= currentPurchase.getCost();
             purchases.put(locShopList.getKey(), currentPurchase);
           }
         }

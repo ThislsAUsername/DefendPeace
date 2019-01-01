@@ -136,12 +136,12 @@ public class CommanderPatch extends Commander
       if( battleInfo.attacker.CO == myCommander )
       {
         hpLoss = battleInfo.defenderHPLoss;
-        unitCost = battleInfo.defender.model.moneyCost;
+        unitCost = battleInfo.defender.model.getCost();
       }
       else if( battleInfo.defender.CO == myCommander )
       {
         hpLoss = battleInfo.attackerHPLoss;
-        unitCost = battleInfo.attacker.model.moneyCost;
+        unitCost = battleInfo.attacker.model.getCost();
       }
 
       // Do the necessary math, then round to the nearest int.

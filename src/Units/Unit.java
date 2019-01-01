@@ -98,7 +98,7 @@ public class Unit
         if( HP < model.maxHP )
         {
           int neededHP = Math.min(model.maxHP - getHP(), 2); // will be 0, 1, 2
-          double proportionalCost = model.moneyCost / model.maxHP;
+          double proportionalCost = model.getCost() / model.maxHP;
           if( CO.money >= neededHP * proportionalCost )
           {
             CO.money -= neededHP * proportionalCost;
@@ -201,11 +201,13 @@ public class Unit
       HP = 0;
     }
   }
-  public void alterHP(int change)
+  public double alterHP(int change)
   {
+    double before = HP;
     // Change the unit's health, but don't grant more
     // than 10 HP, and don't drop HP to zero.
     HP = Math.max(1, Math.min(10, getHP() + change));
+    return HP - before;
   }
 
   public void capture(Location target)
