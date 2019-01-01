@@ -149,16 +149,21 @@ public class AIUtils
     return move;
   }
 
-  public static ArrayList<XYCoord> findResupplyPoints(Unit unit)
+  /**
+   * Return a list of all friendly territories at which a unit can resupply and repair.
+   * @param unit
+   * @return
+   */
+  public static ArrayList<XYCoord> findRepairDepots(Unit unit)
   {
-    ArrayList<XYCoord> coords = new ArrayList<XYCoord>();
+    ArrayList<XYCoord> stations = new ArrayList<XYCoord>();
     for( Location loc : unit.CO.ownedProperties )
     {
       if( unit.model.canRepairOn(loc) )
       {
-        coords.add(loc.getCoordinates());
+        stations.add(loc.getCoordinates());
       }
     }
-    return coords;
+    return stations;
   }
 }

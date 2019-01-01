@@ -232,15 +232,15 @@ public class Muriel implements AIController
         }
         if( shouldResupply )
         {
-          ArrayList<XYCoord> stations = AIUtils.findResupplyPoints(unit);
+          ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
           Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), stations);
           for( XYCoord coord : stations )
           {
             // Go to the nearest unoccupied friendly space.
             if( gameMap.getLocation(coord).getResident() == null )
             {
-              log(String.format("  Heading towards %s to resupply", stations.get(0)));
-              queuedActions.offer(AIUtils.moveTowardLocation(unit, stations.get(0), gameMap));
+              log(String.format("  Heading towards %s to resupply", coord));
+              queuedActions.offer(AIUtils.moveTowardLocation(unit, coord, gameMap));
               break;
             }
           }
