@@ -347,7 +347,7 @@ public class Commander extends GameEventListener
   {
     if( aiController != null )
     {
-      return aiController.getNextAction(gameMap);
+      return aiController.getNextAction(myView);
     }
     return null;
   }
