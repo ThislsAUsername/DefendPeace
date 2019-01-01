@@ -500,16 +500,19 @@ public class Utils
   /** Returns a list of all locations between minRange and maxRange tiles away from origin, inclusive. */
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer)
   {
-    return findVisibleLocations(map, viewer, new XYCoord(viewer.x, viewer.y));
+    return findVisibleLocations(map, new XYCoord(viewer.x, viewer.y), viewer.model.vision, viewer.model.piercingVision);
   }
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, int x, int y)
   {
-    return findVisibleLocations(map, viewer, new XYCoord(x, y));
+    return findVisibleLocations(map, new XYCoord(x, y), viewer.model.vision, viewer.model.piercingVision);
   }
-  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, XYCoord origin)
+  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, XYCoord origin, int range)
+  {
+    return findVisibleLocations(map, origin, range, false);
+  }
+  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, XYCoord origin, int range, boolean piercing)
   {
     ArrayList<XYCoord> locations = new ArrayList<XYCoord>();
-    int range = viewer.model.vision;
 
     // Loop through all the valid x and y offsets, as dictated by the max range, and add valid spaces to our collection.
     for( int yOff = -range; yOff <= range; ++yOff )
@@ -521,7 +524,7 @@ public class Utils
         if( currentRange <= range && map.isLocationValid(coord) )
         {
           // If we're adjacent, or we can see through cover, or it's *not* cover, we can see into it.
-          if( currentRange < 2 || viewer.model.piercingVision || !map.getEnvironment(coord).terrainType.isCover() )
+          if( currentRange < 2 || piercing || !map.getEnvironment(coord).terrainType.isCover() )
           {
             // Add this location to the set.
             locations.add(coord);

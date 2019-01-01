@@ -125,6 +125,13 @@ public class MapWindow extends GameMap
             isFogged[coord.xCoord][coord.yCoord] = false;
           }
         }
+        for( Location loc : co.ownedProperties )
+        {
+          for( XYCoord coord : Utils.findVisibleLocations(this, loc.getCoordinates(), Environment.PROPERTY_VISION_RANGE) )
+          {
+            isFogged[coord.xCoord][coord.yCoord] = false;
+          }
+        }
       }
     }
   }

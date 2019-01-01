@@ -9,6 +9,8 @@ import java.util.Map;
  */
 public class Environment
 {
+  public static final int PROPERTY_VISION_RANGE = 2; 
+  
   public enum Weathers
   {
     CLEAR, RAIN, SNOW, SANDSTORM
