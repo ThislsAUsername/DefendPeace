@@ -9,17 +9,14 @@ public class MapWindow extends GameMap
   MapMaster master;
   Commander viewer;
   private boolean[][] fogMap;
-  public final int mapWidth;
-  public final int mapHeight;
   public CommandingOfficers.Commander[] commanders;
 
   public MapWindow(MapMaster pMaster, Commander pViewer)
   {
+    super(pMaster.mapWidth, pMaster.mapHeight);
     master = pMaster;
     viewer = pViewer;
     commanders = master.commanders;
-    mapWidth = master.mapWidth;
-    mapHeight = master.mapHeight;
     fogMap = new boolean[mapWidth][mapHeight];
   }
 
@@ -92,8 +89,12 @@ public class MapWindow extends GameMap
   }
 
   /**
-   * Returns true if (x,y) lies outside the GameMap.
+   * Returns true if the location lies outside the GameMap.
    */
+  public boolean isLocationFogged(XYCoord coord)
+  {
+    return isLocationFogged(coord.xCoord, coord.yCoord);
+  }
   public boolean isLocationFogged(int x, int y)
   {
     return (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) ? true : fogMap[x][y];

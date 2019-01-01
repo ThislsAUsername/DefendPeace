@@ -15,7 +15,6 @@ import Units.Unit;
 public class SpriteMapArtist
 {
   private GameInstance myGame;
-  private GameMap gameMap;
   private MapView myView;
 
   BufferedImage baseMapImage;
@@ -28,7 +27,7 @@ public class SpriteMapArtist
   public SpriteMapArtist(GameInstance game, MapView view)
   {
     myGame = game;
-    gameMap = game.gameMap;
+    GameMap gameMap = myGame.gameMap;
     myView = view;
 
     drawScale = SpriteOptions.getDrawScale();
@@ -38,8 +37,7 @@ public class SpriteMapArtist
     backupArtist = new FillRectMapArtist(myGame);
     backupArtist.setView(myView);
 
-    baseMapImage = new BufferedImage(gameMap.mapWidth * tileSize, gameMap.mapHeight * tileSize,
-        BufferedImage.TYPE_INT_RGB);
+    baseMapImage = new BufferedImage(gameMap.mapWidth * tileSize, gameMap.mapHeight * tileSize, BufferedImage.TYPE_INT_RGB);
 
     // Build base map image.
     buildMapImage();
@@ -48,14 +46,21 @@ public class SpriteMapArtist
   public void drawBaseTerrain(Graphics g, int viewX, int viewY, int viewW, int viewH)
   {
     // First four coords are the dest x,y,x2,y2. Next four are the source coords.
-    g.drawImage(baseMapImage, viewX, viewY, viewX+viewW, viewY+viewH, viewX, viewY, viewX+viewW, viewY+viewH, null);
+    g.drawImage(baseMapImage, viewX, viewY, viewX + viewW, viewY + viewH, viewX, viewY, viewX + viewW, viewY + viewH, null);
   }
 
   public void drawTerrainObject(Graphics g, int x, int y)
   {
+    GameMap gameMap = myGame.activeCO.myView;
     TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(x, y));
 
     spriteSet.drawTerrainObject(g, gameMap, x, y, drawScale);
+    
+    if( gameMap.isLocationFogged(x, y) )
+    {
+      g.setColor(new Color(128, 128, 128, 160));
+      g.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+    }
   }
 
   public void drawCursor(Graphics g, Unit unitActor, boolean isTargeting, int drawX, int drawY)
@@ -140,6 +145,7 @@ public class SpriteMapArtist
 
   public void drawHighlights(Graphics g)
   {
+    GameMap gameMap = myGame.activeCO.myView;
     for( int w = 0; w < gameMap.mapWidth; ++w )
     {
       for( int h = 0; h < gameMap.mapHeight; ++h )
@@ -164,6 +170,7 @@ public class SpriteMapArtist
    */
   private void buildMapImage()
   {
+    GameMap gameMap = myGame.gameMap;
     // Get the Graphics object of the local map image, to use for drawing.
     Graphics g = baseMapImage.getGraphics();
 

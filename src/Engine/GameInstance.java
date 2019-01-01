@@ -5,6 +5,7 @@ import java.util.HashMap;
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
 import Terrain.MapMaster;
+import Terrain.MapWindow;
 import Terrain.Location;
 
 public class GameInstance
@@ -35,6 +36,7 @@ public class GameInstance
     {
       if( commanders[i].HQLocation != null )
       {
+        commanders[i].myView = new MapWindow(map, commanders[i]);
         playerCursors.put(i, commanders[i].HQLocation);
       }
       else

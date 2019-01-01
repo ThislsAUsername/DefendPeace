@@ -6,18 +6,15 @@ import Units.Unit;
 public class MapMaster extends GameMap
 {
   private Location[][] map;
-  public final int mapWidth;
-  public final int mapHeight;
   public CommandingOfficers.Commander[] commanders;
 
   private boolean initOK = false;
 
   public MapMaster(CommandingOfficers.Commander[] COs, MapInfo mapInfo)
   {
+    super(mapInfo.getWidth(), mapInfo.getHeight());
     initOK = true;
     commanders = COs;
-    mapWidth = mapInfo.getWidth();
-    mapHeight = mapInfo.getHeight();
     map = new Location[mapWidth][mapHeight];
 
     // Build the map locations based on the MapInfo data.
@@ -252,5 +249,18 @@ public class MapMaster extends GameMap
         }
       }
     }
+  }
+  
+  /**
+   * Returns true if the location lies outside the GameMap.
+   * False otherwise
+   */
+  public boolean isLocationFogged(XYCoord coord)
+  {
+    return isLocationFogged(coord.xCoord, coord.yCoord);
+  }
+  public boolean isLocationFogged(int x, int y)
+  {
+    return (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) ? true : false;
   }
 }

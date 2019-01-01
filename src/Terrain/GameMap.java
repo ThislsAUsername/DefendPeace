@@ -5,10 +5,16 @@ import Units.Unit;
 
 public abstract class GameMap
 {
-  public int mapWidth;
-  public int mapHeight;
+  public final int mapWidth;
+  public final int mapHeight;
   public CommandingOfficers.Commander[] commanders;
 
+  public GameMap(int w, int h)
+  {
+    mapWidth = w;
+    mapHeight = h;
+  }
+  
   /**
    * Returns true if (x,y) lies within the GameMap, false else.
    */
@@ -44,4 +50,10 @@ public abstract class GameMap
 
   /** Returns true if no unit (excluding 'unit') is in the specified Location. */
   public abstract boolean isLocationEmpty(Unit unit, int x, int y);
+
+  /**
+   * Returns true if the location lies outside the GameMap.
+   */
+  public abstract boolean isLocationFogged(XYCoord coord);
+  public abstract boolean isLocationFogged(int x, int y);
 }

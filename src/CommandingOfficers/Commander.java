@@ -41,6 +41,7 @@ import Units.UnitModel.UnitEnum;
 public class Commander extends GameEventListener
 {
   public final CommanderInfo coInfo;
+  public GameMap myView;
   public ArrayList<Unit> units;
   public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
   public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
