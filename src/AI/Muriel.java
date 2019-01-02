@@ -272,7 +272,7 @@ public class Muriel implements AIController
             for( GameAction action : set.getGameActions() )
             {
               Unit other = gameMap.getLocation(action.getTargetLocation()).getResident();
-              if( myUnitEffectMap.get(new UnitModelPair( unit.model, other.model )).costEffectivenessRatio > COST_EFFECTIVENESS_THRESHOLD )
+              if( shouldAttack(unit, other, gameMap) )
               {
                 log(String.format("  May as well try to shoot %s since I'm here anyway", other));
                 queuedActions.offer(action);
@@ -309,11 +309,8 @@ public class Muriel implements AIController
         BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, true), target, environment);
         double damageValue = (target.model.moneyCost/10) * params.calculateDamage();
 
-        // Check the combat effectiveness of our unit vs the potential target.
-        UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(unit.model, target.model));
-
         // Find the attack that causes the most monetary damage, provided it's at least a halfway decent idea.
-        if( (damageValue > maxDamageValue) && (umami.costEffectivenessRatio > COST_EFFECTIVENESS_THRESHOLD) )
+        if( (damageValue > maxDamageValue) && shouldAttack(unit, target, gameMap) )
         {
           maxDamageValue = damageValue;
           maxCarnageAction = action;
@@ -366,7 +363,13 @@ public class Muriel implements AIController
         for(int i = 0; i < enemyLocations.size(); ++i)
         {
           XYCoord coord = enemyLocations.get(i);
-          move = AIUtils.moveTowardLocation(unit, coord, gameMap); // Try to move there, but try not to sit on a factory.
+          Unit target = gameMap.getLocation(coord).getResident();
+
+          // Only chase this unit if we will be effective against it. Don't check shouldAttack here, because we can't actually attack yet.
+          if( myUnitEffectMap.get(new UnitModelPair(unit.model, target.model)).costEffectivenessRatio < COST_EFFECTIVENESS_THRESHOLD ) continue;
+
+          // Try to move towards the enemy, but avoid blocking a factory.
+          move = AIUtils.moveTowardLocation(unit, coord, gameMap);
           if( null != move && (gameMap.getLocation(move.getMoveLocation()).getEnvironment().terrainType != TerrainType.FACTORY))
           {
             log(String.format("  Found %s", gameMap.getLocation(coord).getResident().toStringWithLocation()));
@@ -395,6 +398,18 @@ public class Muriel implements AIController
     GameAction action = queuedActions.poll();
     log(String.format("  Action: %s", action));
     return action;
+  }
+
+  private boolean shouldAttack(Unit unit, Unit target, GameMap gameMap)
+  {
+    // Calculate the cost of the damage we can do.
+    BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, true), target, gameMap.getLocation(target.x, target.y).getEnvironment());
+    double damage = params.calculateDamage();
+    UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(unit.model, target.model));
+
+    // This attack is a good idea if our cost effectiveness is in the acceptable range, or if we can at least half-kill them.
+    // The second check is needed because one glass cannon may not have a great overall ratio against another; whoever hits first wins, e.g. Mech vs Anti-Air.
+    return (umami.costEffectivenessRatio > COST_EFFECTIVENESS_THRESHOLD) || (damage > (target.getHP() / 2.0));
   }
 
   private void queueUnitProductionActions(GameMap gameMap)
