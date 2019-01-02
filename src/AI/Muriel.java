@@ -287,6 +287,7 @@ public class Muriel implements AIController
           // We didn't find someone adjacent to smash, so just sit tight for now.
           queuedActions.offer(new GameAction.WaitAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
         }
+        break;
       } // ~Continue repairing if in a depot.
 
       // Find all the things we can do from here.
