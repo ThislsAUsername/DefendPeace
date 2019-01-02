@@ -10,7 +10,6 @@ import java.util.Queue;
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.Path;
-import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Engine.GameEvents.GameEvent;
@@ -64,8 +63,8 @@ public class SpriteMapView extends MapView
   private int mapViewX;
   private int mapViewY;
   // Coordinates of the draw view, with double precision. Will constantly move towards (mapViewX, mapViewY).
-  private static double mapViewDrawX;
-  private static double mapViewDrawY;
+  private double mapViewDrawX;
+  private double mapViewDrawY;
 
   boolean dimensionsChanged = false; // If the window is resized, don't bother sliding the view into place; just snap.
 
@@ -316,14 +315,22 @@ public class SpriteMapView extends MapView
                 currentPath.getEnd().x, currentPath.getEnd().y).defenderHPLoss);
             String damageText = damage + "%";
 
+            // Build a display of the expected damage.
             Color[] colors = SpriteLibrary.getMapUnitColors(currentActor.CO.myColor).paletteColors;
-            SpriteUIUtils.drawTextFrame(mapGraphics, colors[4], colors[2], damageText, target.x, target.y-0.8, 2*SpriteOptions.getDrawScale(),2*SpriteOptions.getDrawScale());
+            BufferedImage dmgImage = SpriteUIUtils.makeTextFrame(colors[4], colors[2], damageText, 2*SpriteOptions.getDrawScale(),2*SpriteOptions.getDrawScale());
+
+            // Draw the damage estimate directly above the unit being targeted.
+            int drawScale = SpriteOptions.getDrawScale();
+            int tileSize = SpriteLibrary.baseSpriteSize * drawScale;
+            int estimateX = (target.x * tileSize) + (tileSize / 2);
+            int estimateY = (target.y * tileSize) - dmgImage.getHeight() / 2;
+            SpriteLibrary.drawImageCenteredOnPoint(mapGraphics, dmgImage, estimateX, estimateY, 1);
           }
         }
       }
       else
       {
-        menuArtist.drawMenu(mapGraphics);
+        menuArtist.drawMenu(mapGraphics, mapViewX, mapViewY);
       }
 
       // Copy the map image into the window's graphics buffer.
@@ -539,10 +546,5 @@ public class SpriteMapView extends MapView
 
     // Create a new animation to show the game results.
     currentAnimation = new SpriteGameEndAnimation(myGame.commanders);
-  }
-  
-  public static XYCoord getVisualOrigin()
-  {
-    return new XYCoord((int)mapViewDrawX, (int)mapViewDrawY);
   }
 }

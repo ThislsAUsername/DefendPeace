@@ -2,6 +2,7 @@ package UI.Art.Animation;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 
 import Engine.XYCoord;
 import UI.Art.SpriteArtist.SpriteLibrary;
@@ -68,8 +69,12 @@ public class ResupplyAnimation implements GameAnimation
     final long signGone = 600;
 
     int drawScale = SpriteOptions.getDrawScale();
+    int tileSize = SpriteLibrary.baseSpriteSize * drawScale;
+    int tileCenterX = (mapLocation.xCoord * tileSize) + (tileSize / 2);
+    int tileCenterY = (mapLocation.yCoord * tileSize) + (tileSize / 2);
 
     // Show the menu expanding from nothing, then disappearing
+    BufferedImage menu = null;
     if( animTime < signUpBegin )
     {
       // The sign is popping into existence.
@@ -77,14 +82,13 @@ public class ResupplyAnimation implements GameAnimation
       int width = (int) (signWidth * percent);
       int height = (int) (signHeight * percent);
 
-      SpriteUIUtils.drawTextFrame(g, MENUBGCOLOR, MENUFRAMECOLOR, mapLocation.xCoord, mapLocation.yCoord, width / 2,
-        height / 2);
+      menu = SpriteUIUtils.makeTextFrame(MENUBGCOLOR, MENUFRAMECOLOR, width / 2, height / 2);
     }
     else if( animTime < signUpEnd )
     {
       // The sign is legible.
-      SpriteUIUtils.drawTextFrame(g, MENUBGCOLOR, MENUFRAMECOLOR, SUPPLYTEXT, mapLocation.xCoord, mapLocation.yCoord,
-          2 * drawScale, 2 * drawScale);
+      menu = SpriteUIUtils.makeTextFrame(MENUBGCOLOR, MENUFRAMECOLOR,
+          SUPPLYTEXT, 2 * drawScale, 2 * drawScale);
     }
     else if( animTime < signGone )
     {
@@ -93,9 +97,9 @@ public class ResupplyAnimation implements GameAnimation
       int width = (int) (signWidth * percent);
       int height = (int) (signHeight * percent);
 
-      SpriteUIUtils.drawTextFrame(g, MENUBGCOLOR, MENUFRAMECOLOR, mapLocation.xCoord, mapLocation.yCoord, width / 2,
-          height / 2);
+      menu = SpriteUIUtils.makeTextFrame(MENUBGCOLOR, MENUFRAMECOLOR, width / 2, height / 2);
     }
+    SpriteLibrary.drawImageCenteredOnPoint(g, menu, tileCenterX, tileCenterY, drawScale);
 
     return animTime > signGone;
   }
