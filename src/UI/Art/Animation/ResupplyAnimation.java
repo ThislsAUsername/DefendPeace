@@ -77,9 +77,8 @@ public class ResupplyAnimation implements GameAnimation
       int width = (int) (signWidth * percent);
       int height = (int) (signHeight * percent);
 
-      SpriteUIUtils.drawTextFrame(g, MENUBGCOLOR, MENUFRAMECOLOR, "", mapLocation.xCoord, mapLocation.yCoord, width / 2,
-          2 * drawScale + height - signHeight);
-
+      SpriteUIUtils.drawTextFrame(g, MENUBGCOLOR, MENUFRAMECOLOR, mapLocation.xCoord, mapLocation.yCoord, width / 2,
+        height / 2);
     }
     else if( animTime < signUpEnd )
     {
@@ -94,8 +93,8 @@ public class ResupplyAnimation implements GameAnimation
       int width = (int) (signWidth * percent);
       int height = (int) (signHeight * percent);
 
-      SpriteUIUtils.drawTextFrame(g, MENUBGCOLOR, MENUFRAMECOLOR, "", mapLocation.xCoord, mapLocation.yCoord, width / 2,
-          2 * drawScale + height - signHeight);
+      SpriteUIUtils.drawTextFrame(g, MENUBGCOLOR, MENUFRAMECOLOR, mapLocation.xCoord, mapLocation.yCoord, width / 2,
+          height / 2);
     }
 
     return animTime > signGone;

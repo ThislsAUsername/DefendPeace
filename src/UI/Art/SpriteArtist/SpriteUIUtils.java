@@ -36,6 +36,10 @@ public class SpriteUIUtils
     return slide * sign;
   }
 
+  public static void drawTextFrame(Graphics g, Color bg, Color frame, double mapX, double mapY, int hBuffer, int vBuffer)
+  {
+    drawTextMenu(g, bg, frame, bg, new ArrayList<String>(), 0, mapX, mapY, hBuffer, vBuffer);
+  }
   public static void drawTextFrame(Graphics g, Color bg, Color frame, String item, double mapX, double mapY, int hBuffer,
       int vBuffer)
   {
@@ -53,8 +57,8 @@ public class SpriteUIUtils
       int drawScale = SpriteOptions.getDrawScale();
       int menuTextWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth() * drawScale;
       int menuTextHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight() * drawScale;
-      int menuWidth = getMenuTextWidthPx(items, menuTextWidth) + hBuffer * 2;
-      int menuHeight = getMenuTextHeightPx(items, menuTextHeight) + vBuffer * 2;
+      int menuWidth = (( items.isEmpty() ) ? 0 : getMenuTextWidthPx(items, menuTextWidth)) + hBuffer * 2;
+      int menuHeight = (( items.isEmpty() ) ? 0 : getMenuTextHeightPx(items, menuTextHeight)) + vBuffer * 2;
 
       // Center the menu over the current action target location, accounting for the position of the map view.
       int viewTileSize = getTileSize(); // Grab this value for convenience.
