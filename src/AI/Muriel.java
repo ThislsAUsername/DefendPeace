@@ -131,11 +131,7 @@ public class Muriel implements AIController
           myUnitEffectMap.put(new UnitModelPair(myModel, otherModel), new UnitMatchupAndMetaInfo(ratio, myCostRatio));
           myUnitEffectMap.put(new UnitModelPair(otherModel, myModel), new UnitMatchupAndMetaInfo(invRatio, otherCostRatio));
 
-          StringBuffer buffer = new StringBuffer();
-          buffer.append(myUnit).append(" vs ").append(otherUnit).append(": ").append(myDamage).append("/").append(otherDamage).append(" costRatio: ").append(myCostRatio);
-          buffer.append("\n    ").append(String.format("(%s / %s) / (%s / %s)", myDamage, myModel.moneyCost, otherDamage, otherModel.moneyCost));
-          buffer.append("recalc: ").append((myDamage / myModel.moneyCost) / (otherDamage / otherModel.moneyCost));
-          System.out.println(buffer);
+          System.out.println(String.format("%s vs %s: %s/%s costRatio: %s", myUnit, otherUnit, myDamage, otherDamage, myCostRatio));
         }
       }
     }
