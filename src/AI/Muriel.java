@@ -255,6 +255,7 @@ public class Muriel implements AIController
       Location loc = gameMap.getLocation(unit.x, unit.y);
       if( unit.getHP() <= 8 && unit.model.canRepairOn(loc) && (loc.getEnvironment().terrainType != TerrainType.FACTORY) )
       {
+        log(String.format("%s is damaged and on a repair tile. Will continue to repair for now.", unit.toStringWithLocation()));
         ArrayList<GameActionSet> actionSet = unit.getPossibleActions(gameMap, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
         for( GameActionSet set : actionSet )
         {
@@ -266,6 +267,7 @@ public class Muriel implements AIController
               Unit other = gameMap.getLocation(action.getTargetLocation()).getResident();
               if( myUnitEffectMap.get(new UnitModelPair( unit.model, other.model )).costEffectivenessRatio > COST_EFFECTIVENESS_THRESHOLD )
               {
+                log(String.format("  May as well try to shoot %s since I'm here anyway", other));
                 queuedActions.offer(action);
                 break;
               }
@@ -273,7 +275,11 @@ public class Muriel implements AIController
           }
           if( !queuedActions.isEmpty() ) break; // One action per invocation.
         }
-        if( !queuedActions.isEmpty() ) break; // One action per invocation.
+        if( queuedActions.isEmpty() )
+        {
+          // We didn't find someone adjacent to smash, so just sit tight for now.
+          queuedActions.offer(new GameAction.WaitAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
+        }
       } // ~Continue repairing if in a depot.
 
       // Find all the things we can do from here.
@@ -436,14 +442,13 @@ public class Muriel implements AIController
       UnitModel enemyToCounter = enemyModels.get(0);
       enemyModels.remove(enemyToCounter);
       double enemyNumber = enemyUnitCounts.get(enemyToCounter);
+      log(String.format("Need a counter for %sx%s", enemyToCounter, enemyNumber));
+      log(String.format("Remaining budget: %s", budget));
 
       // Get our possible options for countermeasures.
       ArrayList<UnitModel> availableUnitModels = new ArrayList<UnitModel>(CPI.availableUnitModels);
       while( !availableUnitModels.isEmpty() )
       {
-        log(String.format("Need a counter for %sx%s", enemyToCounter, enemyNumber));
-        log(String.format("Remaining budget: %s", budget));
-
         // Sort my available models by their cost-effectiveness against this enemy type.
         Collections.sort(availableUnitModels, new UnitMatchupComparator(enemyToCounter, myUnitEffectMap, UnitMatchupComparator.ComparisonType.COST_RATIO));
         Collections.reverse(availableUnitModels); // Best/highest cost ratio first.
