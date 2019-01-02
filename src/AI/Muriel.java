@@ -43,6 +43,7 @@ public class Muriel implements AIController
   private ArrayList<Commander> enemyCos = null;
   
   private UnitEffectivenessMap myUnitEffectMap;
+  private final double COST_EFFECTIVENESS_THRESHOLD = 0.75;
 
   private ArrayList<XYCoord> nonAlliedProperties; // set from AIUtils.
 
@@ -263,7 +264,7 @@ public class Muriel implements AIController
             for( GameAction action : set.getGameActions() )
             {
               Unit other = gameMap.getLocation(action.getTargetLocation()).getResident();
-              if( myUnitEffectMap.get(new UnitModelPair( unit.model, other.model )).damageRatio > 0.5 )
+              if( myUnitEffectMap.get(new UnitModelPair( unit.model, other.model )).costEffectivenessRatio > COST_EFFECTIVENESS_THRESHOLD )
               {
                 queuedActions.offer(action);
                 break;
@@ -298,9 +299,8 @@ public class Muriel implements AIController
         UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(unit.model, target.model));
 
         // Find the attack that causes the most monetary damage, provided it's at least a halfway decent idea.
-        if( (damageValue > maxDamageValue) && (umami.damageRatio > 0.5) )
+        if( (damageValue > maxDamageValue) && (umami.costEffectivenessRatio > COST_EFFECTIVENESS_THRESHOLD) )
         {
-          log(String.format("  Considering to attack %s with %s with ratio %s", target, unit.toStringWithLocation(), umami.damageRatio));
           maxDamageValue = damageValue;
           maxCarnageAction = action;
         }
@@ -453,10 +453,10 @@ public class Muriel implements AIController
         availableUnitModels.remove(idealCounter); // Make sure we don't try to build two rounds of the same thing in one turn.
         UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(idealCounter, enemyToCounter));
         log(String.format("  %s has cost ratio %s", idealCounter, umami.costEffectivenessRatio));
-        if( umami.costEffectivenessRatio < 1 )
+        if( umami.costEffectivenessRatio < COST_EFFECTIVENESS_THRESHOLD )
         {
-          log("  Cost ratio too low; skipping this option");
-          continue; // If ratio is less than 1, we are losing money by using this as a counter.
+          log("    too low; skipping this option");
+          continue;
         }
 
         // Figure out how many of idealCounter we want, and how many we can actually build.
