@@ -50,11 +50,25 @@ public class SpriteMenuArtist
       {
         myCurrentMenu = drawMenu;
         myCurrentMenuStrings.clear();
-        SpriteUIUtils.getMenuStrings(myCurrentMenu, myCurrentMenuStrings);
+        getMenuStrings(myCurrentMenu, myCurrentMenuStrings);
       }
 
       SpriteUIUtils.drawTextMenu(g, MENUBGCOLOR, MENUFRAMECOLOR, MENUHIGHLIGHTCOLOR,
           myCurrentMenuStrings, myCurrentMenu.getSelectionNumber(), myGame.getCursorX(), myGame.getCursorY(), menuHBuffer, menuVBuffer);
+    }
+  }
+
+  /**
+   * Populate 'out' with the string versions of the options available through 'menu'.
+   * @param menu
+   * @param out
+   */
+  private static void getMenuStrings(InGameMenu<? extends Object> menu, ArrayList<String> out)
+  {
+    for( int i = 0; i < menu.getNumOptions(); ++i )
+    {
+      String str = menu.getOptionString(i);
+      out.add(str);
     }
   }
 }

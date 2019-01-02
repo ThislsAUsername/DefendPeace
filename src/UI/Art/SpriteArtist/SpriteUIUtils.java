@@ -6,7 +6,6 @@ import java.awt.Graphics;
 import java.util.ArrayList;
 
 import Engine.XYCoord;
-import UI.InGameMenu;
 
 public class SpriteUIUtils
 {
@@ -83,20 +82,6 @@ public class SpriteUIUtils
       {
         SpriteLibrary.drawTextSmallCaps(g, items.get(i), drawX + hBuffer, txtY, drawScale);
       }
-    }
-  }
-
-  /**
-   * Populate 'out' with the string versions of the options available through 'menu'.
-   * @param menu
-   * @param out
-   */
-  public static void getMenuStrings(InGameMenu<? extends Object> menu, ArrayList<String> out)
-  {
-    for( int i = 0; i < menu.getNumOptions(); ++i )
-    {
-      String str = menu.getOptionString(i);
-      out.add(str);
     }
   }
 
