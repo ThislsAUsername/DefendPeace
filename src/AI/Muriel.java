@@ -208,12 +208,13 @@ public class Muriel implements AIController
       // If we are low on fuel.
       if( unit.fuel < (unit.model.maxFuel/4.0) )
       {
-        log(String.format("%s is low on fuel.", unit));
+        log(String.format("%s is low on fuel.", unit.toStringWithLocation()));
         shouldResupply = true;
       }
       // If we are low on HP, go heal.
       if( unit.getHP() < 6 ) // Arbitrary threshold
       {
+        log(String.format("%s is damaged (%s HP).", unit.toStringWithLocation(), unit.getHP()));
         shouldResupply = true;
       }
       // If we are out of ammo.
@@ -223,7 +224,7 @@ public class Muriel implements AIController
         {
           if(weap.ammo == 0)
           {
-            log(String.format("%s is out of ammo.", unit));
+            log(String.format("%s is out of ammo.", unit.toStringWithLocation()));
             shouldResupply = true;
           }
         }
@@ -238,16 +239,22 @@ public class Muriel implements AIController
           // Go to the nearest unoccupied friendly space, but don't gum up the production lines.
           if( station.getResident() == null && (station.getEnvironment().terrainType != TerrainType.FACTORY) )
           {
-            log(String.format("  Heading towards %s to resupply", coord));
-            queuedActions.offer(AIUtils.moveTowardLocation(unit, coord, gameMap));
-            break;
+            // Plot a course towards a repair station, but only apply the action if it moves us.
+            // If a unit is stuck on the front lines and can't get away past reinforcements, just gotta knuckle up.
+            GameAction goHome = AIUtils.moveTowardLocation(unit, coord, gameMap);
+            if( !goHome.getMoveLocation().equals(new XYCoord(unit.x, unit.y)) )
+            {
+              log(String.format("  Heading towards %s to resupply", coord));
+              queuedActions.offer(goHome);
+              break;
+            }
+            else
+            {
+              log(String.format("  Can't find a way to move towards resupply station at %s", coord));
+            }
           }
         }
-        if( !queuedActions.isEmpty() )
-        {
-          // Break so we don't inadvertently plan two actions for this unit.
-          break;
-        }
+        if( !queuedActions.isEmpty() ) break; // Break so we don't inadvertently plan two actions for this unit.
       }
 
       //////////////////////////////////////////////////////////////////
