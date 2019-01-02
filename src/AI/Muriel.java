@@ -460,8 +460,8 @@ public class Muriel implements AIController
         }
 
         // Figure out how many of idealCounter we want, and how many we can actually build.
-        int numberToBuy = (int)Math.ceil((enemyNumber / umami.damageRatio) + 0.5); // This is the number we would buy ideally.
-        if( numberToBuy == 0 ) numberToBuy = 1; // Zero indicates this unit would be overkill; consider leaving at zero.
+        int numberToBuy = (int)Math.ceil((enemyNumber / umami.damageRatio)); // This is the number we would buy ideally.
+        if( numberToBuy == 0 ) numberToBuy = 1;
         log(String.format("  Would like to build %s of them", numberToBuy));
         int maxBuildable = CPI.getNumFacilitiesFor(idealCounter);
         log(String.format("  Facilities available: %s", maxBuildable));
