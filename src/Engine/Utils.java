@@ -514,7 +514,7 @@ public class Utils
         || viewer.model.chassis == ChassisEnum.SHIP )
       range += map.getEnvironment(x, y).terrainType.getVisionBoost();
     
-    return findVisibleLocations(map, new XYCoord(x, y), range, viewer.model.piercingVision);
+    return findVisibleLocations(map, new XYCoord(x, y), range, viewer.model.visionIgnoresCover);
   }
   /** Returns a list of all locations visible to a unit at origin that could see range tiles. */
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, XYCoord origin, int range)
