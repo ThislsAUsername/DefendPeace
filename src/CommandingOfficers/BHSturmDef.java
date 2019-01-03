@@ -12,20 +12,20 @@ import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import Units.UnitModel;
 
-public class BHSturm extends Commander
+public class BHSturmDef extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Sturm", new instantiator());
+  private static final CommanderInfo coInfo = new CommanderInfo("Sturm\nDefense", new instantiator());
 
   private static class instantiator implements COMaker
   {
     @Override
     public Commander create()
     {
-      return new BHSturm();
+      return new BHSturmDef();
     }
   }
 
-  public BHSturm()
+  public BHSturmDef()
   {
     super(coInfo);
 

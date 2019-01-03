@@ -48,7 +48,8 @@ public class CommanderLibrary
     commanderList.add( BHHawke.getInfo() );
     commanderList.add( BHKindle.getInfo() );
     commanderList.add( BHLash.getInfo() );
-    commanderList.add( BHSturm.getInfo() );
+    commanderList.add( BHSturmAtt.getInfo() );
+    commanderList.add( BHSturmDef.getInfo() );
     commanderList.add( BHVB.getInfo() );
 
     commanderList.add( BWBrennerCS.getInfo() );
