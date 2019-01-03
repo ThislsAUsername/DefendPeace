@@ -53,13 +53,26 @@ public class MapWindow extends GameMap
   /** Returns the Location at the specified location, or null if that Location does not exist. */
   public Location getLocation(XYCoord location)
   {
-    return master.getLocation(location);
+    return getLocation(location.xCoord, location.yCoord);
   }
 
   /** Returns the Location at the specified location, or null if that Location does not exist. */
-  public Location getLocation(int w, int h)
+  public Location getLocation(int x, int y)
   {
-    return master.getLocation(w, h);
+    XYCoord coord = new XYCoord(x, y);
+    Location masterLoc = master.getLocation(coord);
+    Location returnLoc = masterLoc;
+    if( isLocationFogged(coord) )
+    {
+      returnLoc = new Location(returnLoc.getEnvironment(), coord);
+
+      // Make sure we can always identify the owner of a Headquarters.
+      if( masterLoc.getEnvironment().terrainType == TerrainType.HEADQUARTERS )
+      {
+        returnLoc.setOwner( masterLoc.getOwner() );
+      }
+    }
+    return returnLoc;
   }
 
   public void clearAllHighlights()

@@ -6,14 +6,11 @@ import Units.Unit;
 
 public class Location
 {
-
   private Environment environs = null;
   private Commander owner = null;
   private Unit resident = null;
   private final XYCoord coords;
   private boolean highlightSet = false;
-
-  //	public boolean isFogged = false;
 
   public Environment getEnvironment()
   {
@@ -52,12 +49,7 @@ public class Location
 
   public Unit getResident(GameMap map)
   {
-    Unit result = null;
-    if( !map.isLocationFogged(coords) )
-    {
-      result = resident;
-    }
-    return result;
+    return resident;
   }
 
   public void setResident(Unit resident)
