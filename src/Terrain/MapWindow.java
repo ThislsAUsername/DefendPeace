@@ -65,6 +65,7 @@ public class MapWindow extends GameMap
     if( isLocationFogged(coord) )
     {
       returnLoc = new Location(returnLoc.getEnvironment(), coord);
+      returnLoc.setHighlight(masterLoc.isHighlightSet());
 
       // Make sure we can always identify the owner of a Headquarters.
       if( masterLoc.getEnvironment().terrainType == TerrainType.HEADQUARTERS )
