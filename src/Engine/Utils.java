@@ -504,6 +504,7 @@ public class Utils
   {
     return findVisibleLocations(map, viewer, viewer.x, viewer.y);
   }
+  /** Returns a list of all locations that would be visible to the unit if it were at (x, y). */
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, int x, int y)
   {
     int range = viewer.model.visionRange;
@@ -514,10 +515,12 @@ public class Utils
     
     return findVisibleLocations(map, new XYCoord(x, y), range, viewer.model.piercingVision);
   }
+  /** Returns a list of all locations visible to a unit at origin that could see range tiles. */
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, XYCoord origin, int range)
   {
     return findVisibleLocations(map, origin, range, false);
   }
+  /** Returns a list of all visible locations within range of origin, ignoring cover effects. */
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, XYCoord origin, int range, boolean piercing)
   {
     ArrayList<XYCoord> locations = new ArrayList<XYCoord>();
