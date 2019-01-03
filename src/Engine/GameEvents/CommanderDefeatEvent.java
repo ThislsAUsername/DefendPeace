@@ -2,8 +2,8 @@ package Engine.GameEvents;
 
 import CommandingOfficers.Commander;
 import Terrain.Environment;
-import Terrain.MapMaster;
 import Terrain.Location;
+import Terrain.MapMaster;
 import Terrain.TerrainType;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -72,10 +72,4 @@ public class CommanderDefeatEvent implements GameEvent
       } // ~width loop
     } // ~height loop
   } // ~performEvent
-  
-  @Override // there's no known way for this to fail after the GameAction is constructed
-  public boolean shouldPreempt(MapMaster gameMap )
-  {
-    return false;
-  }
 }

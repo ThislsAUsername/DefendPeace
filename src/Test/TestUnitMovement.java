@@ -7,9 +7,9 @@ import Engine.GameAction;
 import Engine.Path;
 import Engine.Utils;
 import Engine.XYCoord;
+import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
-import Terrain.MapLibrary;
 import Units.Unit;
 import Units.UnitModel.UnitEnum;
 
@@ -58,20 +58,20 @@ public class TestUnitMovement extends TestCase
 
     // Try to build a malformed action and make sure it doesn't work.
     mover.initTurn(testMap);
-    GameAction badUnit = new GameAction.WaitAction(testMap, null, mvPath);
+    GameAction badUnit = new GameAction.WaitAction(null, mvPath);
     testPassed &= validate(badUnit.getEvents(testMap).size() == 0, "    A WaitAction with a null unit should have no events!");
     mover.initTurn(testMap);
-    GameAction nullPath = new GameAction.WaitAction(testMap, mover, null);
+    GameAction nullPath = new GameAction.WaitAction(mover, null);
     testPassed &= validate(nullPath.getEvents(testMap).size() == 0, "    A WaitAction with a null path should have no events!");
     mover.initTurn(testMap);
-    GameAction emptyPath = new GameAction.WaitAction(testMap, mover, new Path(100));
+    GameAction emptyPath = new GameAction.WaitAction(mover, new Path(100));
     testPassed &= validate(emptyPath.getEvents(testMap).size() == 0,
         "    A WaitAction with an empty path should have no events!");
     mover.initTurn(testMap);
-    GameAction nullMap = new GameAction.WaitAction(null, mover, mvPath);
-    testPassed &= validate(nullMap.getEvents(testMap).size() == 0, "    A WaitAction with a null map should have no events!");
+    GameAction nullMap = new GameAction.WaitAction(mover, mvPath);
+    testPassed &= validate(nullMap.getEvents(null).size() == 0, "    A WaitAction with a null map should have no events!");
     mover.initTurn(testMap);
-    GameAction okAction = new GameAction.WaitAction(testMap, mover, mvPath);
+    GameAction okAction = new GameAction.WaitAction(mover, mvPath);
     testPassed &= validate(okAction.getEvents(testMap).size() > 0, "   WaitAction should be valid but has no events!");
 
     // clean up.
@@ -87,7 +87,7 @@ public class TestUnitMovement extends TestCase
     Unit mover = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 4, 4);
     mover.initTurn(testMap); // Make sure he's ready to go.
     XYCoord destination = new XYCoord(6, 5);
-    GameAction ga = new GameAction.WaitAction(testMap, mover, Utils.findShortestPath(mover, destination, testMap));
+    GameAction ga = new GameAction.WaitAction(mover, Utils.findShortestPath(mover, destination, testMap));
 
     performGameAction(ga, testMap);
 
@@ -112,7 +112,7 @@ public class TestUnitMovement extends TestCase
     mover.isTurnOver = false; // Make sure he's ready to go.
 
     // Make an action to move the unit 5 spaces away, and execute it.
-    GameAction ga = new GameAction.WaitAction(testMap, mover, Utils.findShortestPath(mover, 7, 6, testMap));
+    GameAction ga = new GameAction.WaitAction(mover, Utils.findShortestPath(mover, 7, 6, testMap));
     performGameAction(ga, testMap);
 
     // Make sure the action didn't actually execute.

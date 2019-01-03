@@ -2,10 +2,8 @@ package Engine.GameEvents;
 
 import CommandingOfficers.Commander;
 import Engine.Path;
-import Engine.Utils;
-import Engine.XYCoord;
-import Terrain.MapMaster;
 import Terrain.Location;
+import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
@@ -44,7 +42,6 @@ public class MoveEvent implements GameEvent
   {
     if( unitPath.getPathLength() > 0 ) // Make sure we have a destination.
     {
-      unitPath.snipCollision(gameMap, unit); // make sure we only go as far as we can go
       Path.PathNode endpoint = unitPath.getEnd();
       Location loc = gameMap.getLocation(endpoint.x, endpoint.y);
       int fuelBurn = unitPath.getFuelCost(unit.model, gameMap);
@@ -76,11 +73,5 @@ public class MoveEvent implements GameEvent
         System.out.println("WARNING! Unable to move " + unit.model.type + " to (" + endpoint.x + ", " + endpoint.y + ")");
       }
     }
-  }
-
-  @Override
-  public boolean shouldPreempt(MapMaster gameMap)
-  {
-    return Utils.pathCollides(gameMap, unit, unitPath);
   }
 }

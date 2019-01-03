@@ -49,30 +49,36 @@ public interface GameAction
   // ===========  AttackAction  ===============================
   public static class AttackAction implements GameAction
   {
+    private Path movePath;
     private XYCoord moveLocation = null;
     private XYCoord attackLocation = null;
-    private GameEventQueue attackEvents = null;
     private Unit attacker;
     private Unit defender;
 
-    public AttackAction(GameMap gameMap, Unit actor, Path path, int targetX, int targetY)
+    public AttackAction(Unit actor, Path path, int targetX, int targetY)
     {
-      this(gameMap, actor, path, new XYCoord(targetX, targetY));
+      this(actor, path, new XYCoord(targetX, targetY));
     }
 
-    public AttackAction(GameMap gameMap, Unit actor, Path movePath, XYCoord atkLoc)
+    public AttackAction(Unit actor, Path path, XYCoord atkLoc)
+    {
+      movePath = path;
+      attacker = actor;
+      attackLocation = atkLoc;
+    }
+
+    @Override
+    public GameEventQueue getEvents(GameMap gameMap)
     {
       // ATTACK actions consist of
       //   MOVE
       //   BATTLE
       //   [DEATH]
       //   [DEFEAT]
-      attacker = actor;
-      attackEvents = new GameEventQueue();
-      attackLocation = atkLoc;
-      int attackRange = -1;
+      GameEventQueue attackEvents = new GameEventQueue();
 
       // Validate input.
+      int attackRange = -1;
       boolean isValid = true;
       isValid &= attacker != null && !attacker.isTurnOver;
       isValid &= (null != gameMap) && (gameMap.isLocationValid(attackLocation));
@@ -89,46 +95,39 @@ public interface GameAction
         isValid &= attacker.CO.isEnemy(defender.CO);
       }
 
-      // Generate GameEvents.
       if( isValid )
       {
-        attackEvents.add(new MoveEvent(attacker, movePath));
-        BattleEvent event = new BattleEvent(attacker, defender, moveLocation.xCoord, moveLocation.yCoord, gameMap);
-        attackEvents.add(event);
-
-        if( event.attackerDies() )
+        if( Utils.enqueueMoveEvent(gameMap, attacker, movePath, attackEvents) )
         {
-          attackEvents.add(new UnitDieEvent(attacker));
+          // No surprises in the fog. Resolve combat.
+          attackEvents.add(new MoveEvent(attacker, movePath));
+          BattleEvent event = new BattleEvent(attacker, defender, moveLocation.xCoord, moveLocation.yCoord, gameMap);
+          attackEvents.add(event);
 
-          // Since the attacker died, see if he has any friends left.
-          if( attacker.CO.units.size() == 1 )
+          if( event.attackerDies() )
           {
-            // CO is out of units. Too bad.
-            attackEvents.add(new CommanderDefeatEvent(attacker.CO));
+            attackEvents.add(new UnitDieEvent(attacker));
+
+            // Since the attacker died, see if he has any friends left.
+            if( attacker.CO.units.size() == 1 )
+            {
+              // CO is out of units. Too bad.
+              attackEvents.add(new CommanderDefeatEvent(attacker.CO));
+            }
           }
-        }
-        if( event.defenderDies() )
-        {
-          attackEvents.add(new UnitDieEvent(defender));
-
-          // The defender died; check if the Commander is defeated.
-          if( defender.CO.units.size() == 1 )
+          if( event.defenderDies() )
           {
-            // CO is out of units. Too bad.
-            attackEvents.add(new CommanderDefeatEvent(defender.CO));
+            attackEvents.add(new UnitDieEvent(defender));
+
+            // The defender died; check if the Commander is defeated.
+            if( defender.CO.units.size() == 1 )
+            {
+              // CO is out of units. Too bad.
+              attackEvents.add(new CommanderDefeatEvent(defender.CO));
+            }
           }
         }
       }
-      else
-      {
-        // We can't create this action. Leave the event queue empty.
-        System.out.println("WARNING! AttackAction created with invalid arguments.");
-      }
-    }
-
-    @Override
-    public GameEventQueue getEvents(GameMap gameMap)
-    {
       return attackEvents;
     }
 
@@ -161,18 +160,26 @@ public interface GameAction
   // ===========  UnitProductionAction  ==============================
   public static class UnitProductionAction implements GameAction
   {
-    private GameEventQueue buildEvents = null;
-    private final XYCoord buildLocation;
-    private UnitModel modelToBuild;
+    private final XYCoord where;
+    private final Commander who;
+    private final UnitModel what;
 
-    public UnitProductionAction(GameMap gameMap, Commander who, UnitModel what, XYCoord where)
+    public UnitProductionAction(Commander who, UnitModel what, XYCoord where)
+    {
+      this.where = where;
+      this.who = who;
+      this.what = what;
+    }
+
+    @Override
+    public GameEventQueue getEvents(GameMap gameMap)
     {
       // BUILDUNIT actions consist of
       //   TODO: Consider introducing TRANSFERFUNDS for the fiscal part.
       //   CREATEUNIT
-      buildEvents = new GameEventQueue();
-      buildLocation = where;
-      modelToBuild = what;
+      GameEventQueue buildEvents = new GameEventQueue();
+
+      // Validate events.
       boolean isValid = true;
       isValid &= (null != gameMap) && (null != who) && (null != what) && (null != where);
       if( isValid )
@@ -194,24 +201,19 @@ public interface GameAction
         // We can't create this action. Leave the event queue empty.
         System.out.println("WARNING! BuildUnitAction created with invalid arguments.");
       }
-    }
-
-    @Override
-    public GameEventQueue getEvents(GameMap map)
-    {
       return buildEvents;
     }
 
     @Override
     public XYCoord getMoveLocation()
     {
-      return buildLocation;
+      return where;
     }
 
     @Override
     public XYCoord getTargetLocation()
     {
-      return buildLocation;
+      return where;
     }
 
     @Override
@@ -223,29 +225,43 @@ public interface GameAction
     @Override
     public String toString()
     {
-      return String.format("[Produce %s at %s]", modelToBuild, buildLocation);
+      return String.format("[Produce %s at %s]", what, where);
     }
   } // ~UnitProductionAction
 
   // ===========  CaptureAction  ==============================
   public static class CaptureAction implements GameAction
   {
-    private XYCoord movePathEnd = null;
-    private GameEventQueue captureEvents = null;
     private Unit actor = null;
-    private Terrain.TerrainType propertyType;
+    private Path movePath;
+    private XYCoord movePathEnd;
+    private TerrainType propertyType;
 
-    public CaptureAction(GameMap map, Unit unit, Path movePath)
+    public CaptureAction(GameMap gameMap, Unit unit, Path path)
+    {
+      actor = unit;
+      movePath = path;
+      if( (null != path) && path.getPathLength() > 0 )
+      {
+        movePathEnd = new XYCoord(path.getEnd().x, path.getEnd().y);
+      }
+      if( (null != gameMap) && gameMap.isLocationValid(movePathEnd))
+      {
+        propertyType = gameMap.getLocation(movePathEnd).getEnvironment().terrainType;
+      }
+    }
+
+    @Override
+    public GameEventQueue getEvents(GameMap map)
     {
       // CAPTURE actions consist of
       //   MOVE
       //   CAPTURE
       //   [DEFEAT]
-      actor = unit;
-      captureEvents = new GameEventQueue();
-      Location captureLocation = null;
+      GameEventQueue captureEvents = new GameEventQueue();
 
       // Validate input
+      Location captureLocation = null;
       boolean isValid = true;
       isValid &= null != actor && !actor.isTurnOver; // Valid unit
       isValid &= null != map; // Valid map
@@ -262,38 +278,26 @@ public interface GameAction
       // Generate events
       if( isValid )
       {
-        // Store terrain type for posterity.
-        propertyType = captureLocation.getEnvironment().terrainType;
-
         // Move to the target location.
-        captureEvents.add(new MoveEvent(actor, movePath));
-
-        // Attempt to capture.
-        CaptureEvent capture = new CaptureEvent(actor, map.getLocation(movePathEnd));
-        captureEvents.add(capture);
-
-        if( capture.willCapture() ) // If this will succeed, check if the CO will lose as a result.
+        if( Utils.enqueueMoveEvent(map, actor, movePath, captureEvents))
         {
-          // Check if capturing this property will cause someone's defeat.
-          if( (captureLocation.getEnvironment().terrainType == TerrainType.HEADQUARTERS) && (null != captureLocation.getOwner()) )
+          // Attempt to capture.
+          CaptureEvent capture = new CaptureEvent(actor, map.getLocation(movePathEnd));
+          captureEvents.add(capture);
+
+          if( capture.willCapture() ) // If this will succeed, check if the CO will lose as a result.
           {
-            // Someone is losing their big, comfy chair.
-            CommanderDefeatEvent defeat = new CommanderDefeatEvent(captureLocation.getOwner());
-            defeat.setPropertyBeneficiary(actor.CO);
-            captureEvents.add(defeat);
+            // Check if capturing this property will cause someone's defeat.
+            if( (propertyType == TerrainType.HEADQUARTERS) && (null != captureLocation.getOwner()) )
+            {
+              // Someone is losing their big, comfy chair.
+              CommanderDefeatEvent defeat = new CommanderDefeatEvent(captureLocation.getOwner());
+              defeat.setPropertyBeneficiary(actor.CO);
+              captureEvents.add(defeat);
+            }
           }
         }
       }
-      else
-      {
-        // We can't create this action. Leave the event queue empty.
-        System.out.println("WARNING! Capture action was created incorrectly.");
-      }
-    }
-
-    @Override
-    public GameEventQueue getEvents(GameMap map)
-    {
       return captureEvents;
     }
 
@@ -325,49 +329,39 @@ public interface GameAction
   // ===========  WaitAction  =================================
   public static class WaitAction implements GameAction
   {
+    private Path movePath;
     private XYCoord waitLoc = null;
-    private GameEventQueue waitEvents = null;
     private Unit actor = null;
 
-    public WaitAction(GameMap gameMap, Unit unit, Path movePath)
+    public WaitAction(Unit unit, Path path)
+    {
+      actor = unit;
+      movePath = path;
+      if( (null != path) && (path.getPathLength() > 0) )
+      {
+        // Store the destination for later.
+        waitLoc = new XYCoord(path.getEnd().x, path.getEnd().y);
+      }
+    }
+
+    @Override
+    public GameEventQueue getEvents(GameMap gameMap)
     {
       // WAIT actions consist of
       //   MOVE
-      actor = unit;
-      waitEvents = new GameEventQueue();
+      GameEventQueue waitEvents = new GameEventQueue();
 
       // Validate input.
       boolean isValid = true;
       isValid &= null != actor && !actor.isTurnOver;
       isValid &= (null != movePath) && (movePath.getPathLength() > 0);
       isValid &= (null != gameMap);
-      int goX = -1, goY = -1;
-      if( isValid )
-      {
-        goX = movePath.getEnd().x;
-        goY = movePath.getEnd().y;
-        isValid &= gameMap.isLocationEmpty(actor, goX, goY);
-      }
 
       // Generate events.
       if( isValid )
       {
-        // Move to the target location.
-        waitEvents.add(new MoveEvent(actor, movePath));
-
-        // Store the destination for later.
-        waitLoc = new XYCoord(goX, goY);
+        Utils.enqueueMoveEvent(gameMap, actor, movePath, waitEvents);
       }
-      else
-      {
-        // We can't create this action. Leave the event queue empty.
-        System.out.println("WARNING! WaitAction was initialized incorrectly.");
-      }
-    }
-
-    @Override
-    public GameEventQueue getEvents(GameMap map)
-    {
       return waitEvents;
     }
 
@@ -399,25 +393,38 @@ public interface GameAction
   // ===========  LoadAction  =================================
   public static class LoadAction implements GameAction
   {
-    private XYCoord pathEnd = null;
-    private GameEventQueue loadEvents = null;
     private Unit passenger;
+    Path movePath;
+    private XYCoord pathEnd = null;
     private Unit transport;
 
-    public LoadAction(GameMap gameMap, Unit actor, Path movePath)
+    public LoadAction(GameMap gameMap, Unit actor, Path path)
+    {
+      passenger = actor;
+      movePath = path;
+      if( (null != movePath) && (movePath.getPathLength() > 0 ))
+      {
+        pathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        if( (null != gameMap) && gameMap.isLocationValid(pathEnd) )
+        {
+          transport = gameMap.getLocation(pathEnd).getResident(gameMap);
+        }
+      }
+    }
+
+    @Override
+    public GameEventQueue getEvents(GameMap gameMap)
     {
       // LOAD actions consist of
       //   MOVE
       //   LOAD
-      passenger = actor;
-      loadEvents = new GameEventQueue();
+      GameEventQueue loadEvents = new GameEventQueue();
 
       // Validate input
       boolean isValid = true;
       isValid &= (null != passenger) && !passenger.isTurnOver;
       isValid &= (null != movePath) && (movePath.getPathLength() > 0);
       isValid &= (null != gameMap);
-      transport = null;
       if( isValid )
       {
         pathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
@@ -431,24 +438,16 @@ public interface GameAction
         }
       }
 
+      // Create events.
       if( isValid )
       {
-        // Move to the transport.
-        loadEvents.add(new MoveEvent(passenger, movePath));
-
-        // Get in the transport.
-        loadEvents.add(new LoadEvent(passenger, transport));
+        // Move to the transport, if we don't get blocked.
+        if( Utils.enqueueMoveEvent(gameMap, passenger, movePath, loadEvents) )
+        {
+          // Get in the transport.
+          loadEvents.add(new LoadEvent(passenger, transport));
+        }
       }
-      else
-      {
-        // We can't create this action. Leave the event queue empty.
-        System.out.println("WARNING! Failed to create a valid LOAD event.");
-      }
-    }
-
-    @Override
-    public GameEventQueue getEvents(GameMap map)
-    {
       return loadEvents;
     }
 
@@ -480,20 +479,20 @@ public interface GameAction
   // ===========  UnloadAction  =================================
   public static class UnloadAction implements GameAction
   {
-    Map<Unit, XYCoord> myDropoffs = null;
-    private XYCoord moveLoc = null;
-    private XYCoord firstDropLoc = null;
-    private GameEventQueue unloadEvents = null;
-    private Unit actor = null;
+    private Unit actor;
+    private Path movePath;
+    private XYCoord moveLoc;
+    private Map<Unit, XYCoord> myDropoffs;
+    private XYCoord firstDropLoc;
 
     public UnloadAction(GameMap gameMap, Unit actor, Path path, Unit passenger, int dropX, int dropY)
     {
-      this(gameMap, actor, path, passenger, new XYCoord(dropX, dropY));
+      this(actor, path, passenger, new XYCoord(dropX, dropY));
     }
 
-    public UnloadAction(GameMap gameMap, Unit transport, Path movePath, final Unit passenger, final XYCoord dropLocation)
+    public UnloadAction(Unit transport, Path movePath, final Unit passenger, final XYCoord dropLocation)
     {
-      this(gameMap, transport, movePath, new HashMap<Unit, XYCoord>(){
+      this(transport, movePath, new HashMap<Unit, XYCoord>(){
           private static final long serialVersionUID = 1L;
           {
             this.put(passenger, dropLocation);
@@ -501,30 +500,48 @@ public interface GameAction
         });
     }
 
-    public UnloadAction(GameMap gameMap, Unit transport, Path movePath, Map<Unit, XYCoord> dropoffs)
+    public UnloadAction(Unit transport, Path path, Map<Unit, XYCoord> dropoffs)
+    {
+      actor = transport;
+      movePath = path;
+      myDropoffs = dropoffs;
+
+      // Grab the move location and the first drop location to support getMoveLocation and getTargetLocation.
+      if( (null != movePath) && (movePath.getPathLength() > 0 ))
+      {
+        moveLoc = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      }
+      if( !myDropoffs.isEmpty() )
+      {
+        for( XYCoord coord : myDropoffs.values() )
+        {
+          firstDropLoc = coord;
+          break;
+        }
+      }
+    }
+
+    @Override
+    public GameEventQueue getEvents(GameMap gameMap)
     {
       // UNLOAD actions consist of
       //   MOVE (transport)
       //   UNLOAD
-      actor = transport;
-      unloadEvents = new GameEventQueue();
-      myDropoffs = new HashMap<Unit, XYCoord>();
+      //   [UNLOAD]*
+      GameEventQueue unloadEvents = new GameEventQueue();
 
       // Validate input.
       boolean isValid = true;
-      isValid &= null != transport && !transport.isTurnOver;
-      isValid &= null != dropoffs && !dropoffs.isEmpty();
+      isValid &= null != actor && !actor.isTurnOver;
+      isValid &= null != myDropoffs && !myDropoffs.isEmpty();
       isValid &= movePath.getPathLength() > 0;
       isValid &= null != gameMap;
       if( isValid )
       {
-        isValid &= !transport.heldUnits.isEmpty();
-        moveLoc = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
-        isValid &= gameMap.isLocationEmpty(transport, moveLoc); // Move location is unoccupied.
-        myDropoffs.putAll(dropoffs);
+        isValid &= !actor.heldUnits.isEmpty();
         for( Unit unit : myDropoffs.keySet() )
         {
-          isValid &= gameMap.isLocationEmpty(transport, myDropoffs.get(unit)); // Drop locations are unoccupied.
+          isValid &= gameMap.isLocationEmpty(actor, myDropoffs.get(unit)); // Drop locations are unoccupied.
           firstDropLoc = (null == firstDropLoc)? myDropoffs.get(unit) : firstDropLoc;
         }
       }
@@ -532,25 +549,25 @@ public interface GameAction
       // Generate events.
       if( isValid )
       {
-        // Move transport to the target location.
-        unloadEvents.add(new MoveEvent(transport, movePath));
-
-        // Debark the passengers.
-        for( Unit unit : myDropoffs.keySet() )
+        // Attempt to move the transport to the target location.
+        if( Utils.enqueueMoveEvent(gameMap, actor, movePath, unloadEvents) )
         {
-          unloadEvents.add(new UnloadEvent(transport, unit, myDropoffs.get(unit)));
+          // Debark the passengers. If a unit can't land, stop unloading.
+          for( Unit unit : myDropoffs.keySet() )
+          {
+            XYCoord dropXY = myDropoffs.get(unit);
+            if( gameMap.isLocationEmpty(actor, dropXY) )
+            {
+              unloadEvents.add(new UnloadEvent(actor, unit, myDropoffs.get(unit)));
+            }
+            else
+            {
+              // Hah, last guy got stuck in the chute. Everyone else is trapped behind them still. Bummer.
+              break;
+            }
+          }
         }
       }
-      else
-      {
-        // We can't create this action. Leave the event queue empty.
-        System.out.println("WARNING! UNLOAD event initialized incorrectly.");
-      }
-    }
-
-    @Override
-    public GameEventQueue getEvents(GameMap map)
-    {
       return unloadEvents;
     }
 
@@ -608,9 +625,7 @@ public interface GameAction
 
       // Resupply action is a bit different from other actions. It can be used as
       // a unit's turn, but it can also be triggered by an APC during the turn-
-      // initialization phase (and re-executed each turn). Since its precise
-      // effects depend on its circumstances, we wait until the call to
-      // getEvents() to generate the events.
+      // initialization phase (and re-executed each turn).
     }
 
     private XYCoord myLocation()

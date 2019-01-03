@@ -44,7 +44,7 @@ class SelectUnitProduction extends GameInputState<UnitModel>
       {
         if( option == model )
         {
-          myStateData.actionSet = new GameActionSet(new GameAction.UnitProductionAction(myStateData.gameMap, myStateData.commander, model, myProductionLocation), false);
+          myStateData.actionSet = new GameActionSet(new GameAction.UnitProductionAction(myStateData.commander, model, myProductionLocation), false);
           next = new ActionReady(myStateData);
         }
       }

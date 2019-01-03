@@ -53,16 +53,4 @@ public class UnloadEvent implements GameEvent
       if( gameMap.getLocation(dropLoc).getResident(gameMap) != null ) System.out.println("          Unload location is not empty.");
     }
   }
-  
-  @Override
-  public boolean shouldPreempt(MapMaster gameMap )
-  {
-    boolean result = false;
-    Unit obstacle = gameMap.getLocation(dropLoc).getResident(gameMap);
-    if( null != obstacle && transport.CO.isEnemy(obstacle.CO) )
-    {
-      result = true;
-    }
-    return result;
-  }
 }

@@ -31,10 +31,4 @@ public class ResupplyEvent implements GameEvent
   {
     target.resupply();
   }
-  
-  @Override // there's no known way for this to fail after the GameAction is constructed
-  public boolean shouldPreempt(MapMaster gameMap )
-  {
-    return false;
-  }
 }

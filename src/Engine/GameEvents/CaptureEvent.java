@@ -1,7 +1,7 @@
 package Engine.GameEvents;
 
-import Terrain.MapMaster;
 import Terrain.Location;
+import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
@@ -63,11 +63,5 @@ public class CaptureEvent implements GameEvent
     {
       unit.capture(gameMap.getLocation(unit.x, unit.y));
     }
-  }
-  
-  @Override // there's no known way for this to fail after the GameAction is constructed
-  public boolean shouldPreempt(MapMaster gameMap )
-  {
-    return false;
   }
 }

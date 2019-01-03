@@ -239,7 +239,7 @@ public class SpenderAI implements AIController
               Path movePath = Utils.findShortestPath(unit, destination, gameMap);
               if( movePath.getPathLength() > 1 ) // We only want to try to travel if we can actually go somewhere
               {
-                GameAction move = new GameAction.WaitAction(gameMap, unit, movePath);
+                GameAction move = new GameAction.WaitAction(unit, movePath);
                 actions.offer(move);
                 stateChange = true;
                 break;
@@ -261,7 +261,7 @@ public class SpenderAI implements AIController
         {
           Unit unit = waitQueue.poll();
           log("    Failed to find a path to a capturable property. Waiting");
-          GameAction wait = new GameAction.WaitAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
+          GameAction wait = new GameAction.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
           actions.offer(wait);
           break;
         }
@@ -326,7 +326,7 @@ public class SpenderAI implements AIController
         // once we're satisfied with all our selections, put in the orders
         for( Entry<Location, UnitModel> lineItem : purchases.entrySet() )
         {
-          GameAction action = new GameAction.UnitProductionAction(gameMap, myCo, lineItem.getValue(),
+          GameAction action = new GameAction.UnitProductionAction(myCo, lineItem.getValue(),
               lineItem.getKey().getCoordinates());
           actions.offer(action);
         }

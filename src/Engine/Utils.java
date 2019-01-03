@@ -7,6 +7,7 @@ import java.util.Queue;
 
 import CommandingOfficers.Commander;
 import Engine.Path.PathNode;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.Unit;
@@ -226,7 +227,7 @@ public class Utils
    */
   public static Path findShortestPath(Unit unit, int x, int y, GameMap map, boolean theoretical)
   {
-    if( null == unit || null == map )
+    if( null == unit || null == map || !map.isLocationValid(unit.x, unit.y) )
     {
       return null;
     }
@@ -560,5 +561,26 @@ public class Utils
       }
     }
     return result;
+  }
+
+  /**
+   * Evaluates the proposed move, creates a MoveEvent describing it, and adds that event to eventQueu
+   * If the move passes over an obstacle, the resulting MoveEvent will have its path shortened accordingly.
+   * @param gameMap The world in which the action is to take place.
+   * @param unit The unit who is to move.
+   * @param movePath The complete sequence of steps the unit proposes to take.
+   * @param eventQueue Will be given the new MoveEvent.
+   * @return true if the move is created as specified, false if the path was shortened.
+   */
+  public static boolean enqueueMoveEvent(GameMap gameMap, Unit unit, Path movePath, GameEventQueue eventQueue)
+  {
+    boolean originalPathOK = true;
+    if( Utils.pathCollides(gameMap, unit, movePath) )
+    {
+      movePath.snipCollision(gameMap, unit);
+      originalPathOK = false;
+    }
+    eventQueue.add(new Engine.GameEvents.MoveEvent(unit, movePath));
+    return originalPathOK;
   }
 }

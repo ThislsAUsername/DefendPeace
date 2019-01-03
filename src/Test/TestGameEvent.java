@@ -17,9 +17,9 @@ import Engine.GameEvents.LoadEvent;
 import Engine.GameEvents.MoveEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.UnloadEvent;
+import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
-import Terrain.MapLibrary;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
@@ -112,10 +112,10 @@ public class TestGameEvent extends TestCase
 
     // Move the unit; he should lose his capture progress.
     infA.initTurn(testMap);
-    GameAction moveAction = new GameAction.WaitAction(testMap, infA, Utils.findShortestPath(infA, 1, 2, testMap));
+    GameAction moveAction = new GameAction.WaitAction(infA, Utils.findShortestPath(infA, 1, 2, testMap));
     performGameAction(moveAction, testMap);
     infA.initTurn(testMap);
-    GameAction moveAction2 = new GameAction.WaitAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap));
+    GameAction moveAction2 = new GameAction.WaitAction(infA, Utils.findShortestPath(infA, 2, 2, testMap));
     performGameAction(moveAction2, testMap);
 
     // 5, 10, 15

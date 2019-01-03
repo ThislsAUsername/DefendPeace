@@ -162,7 +162,7 @@ public class InfantrySpamAI implements AIController
         {
           log("    Failed to find a path to a capturable property. Waiting");
           // We couldn't find a valid move point (are we on an island?). Just give up.
-          GameAction wait = new GameAction.WaitAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
+          GameAction wait = new GameAction.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
           actions.offer(wait);
           break;
         }
@@ -182,7 +182,7 @@ public class InfantrySpamAI implements AIController
         Utils.sortLocationsByDistance(goal, destinations);
         XYCoord destination = destinations.get(0);
         Path movePath = Utils.findShortestPath(unit, destination, gameMap);
-        GameAction move = new GameAction.WaitAction(gameMap, unit, movePath);
+        GameAction move = new GameAction.WaitAction(unit, movePath);
         actions.offer(move);
         break;
       }
@@ -203,7 +203,7 @@ public class InfantrySpamAI implements AIController
             ArrayList<UnitModel> units = myCo.getShoppingList(loc);
             if( !units.isEmpty() && units.get(0).getCost() <= myCo.money )
             {
-              GameAction action = new GameAction.UnitProductionAction(gameMap, myCo, units.get(0), loc.getCoordinates());
+              GameAction action = new GameAction.UnitProductionAction(myCo, units.get(0), loc.getCoordinates());
               actions.offer( action );
             }
           }

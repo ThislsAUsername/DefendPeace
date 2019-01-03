@@ -5,11 +5,11 @@ import java.util.Vector;
 
 import CommandingOfficers.Commander;
 import Engine.GameAction;
+import Engine.GameAction.ActionType;
 import Engine.GameActionSet;
 import Engine.Path;
 import Engine.Utils;
 import Engine.XYCoord;
-import Engine.GameAction.ActionType;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.ResupplyEvent;
 import Terrain.GameMap;
@@ -283,7 +283,7 @@ public class Unit
 
                 for( XYCoord loc : locations )
                 {
-                  attackOptions.add(new GameAction.AttackAction(map, this, movePath, loc));
+                  attackOptions.add(new GameAction.AttackAction(this, movePath, loc));
                 }
               }
             } // ~Weapon loop
@@ -303,7 +303,7 @@ public class Unit
             }
             break;
           case WAIT:
-            actionSet.add(new GameActionSet(new GameAction.WaitAction(map, this, movePath), false));
+            actionSet.add(new GameActionSet(new GameAction.WaitAction(this, movePath), false));
             break;
           case LOAD:
             // We only get to here if there is no unit at the end of the move path, which means there is
@@ -321,7 +321,7 @@ public class Unit
                 ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, this, moveLocation, cargo);
                 for( XYCoord loc : dropoffLocations )
                 {
-                  unloadActions.add(new GameAction.UnloadAction(map, this, movePath, cargo, loc));
+                  unloadActions.add(new GameAction.UnloadAction(this, movePath, cargo, loc));
                 }
               }
 
