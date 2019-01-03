@@ -37,11 +37,13 @@ public class IDSTabithaCS extends Commander
   }
   
   private Unit COU;
+  private int COUBoost;
 
   @Override
   public void initTurn(GameMap map)
   {
     this.COU = null;
+    COUBoost = 35;
     super.initTurn(map);
   }
 
@@ -53,7 +55,7 @@ public class IDSTabithaCS extends Commander
       Unit minion = params.attacker;
 
       if( null == COU || minion == COU )
-        params.attackFactor += 35;
+        params.attackFactor += COUBoost;
     }
 
     if( params.defender.CO == this )
@@ -61,7 +63,7 @@ public class IDSTabithaCS extends Commander
       Unit minion = params.defender;
 
       if( null == COU || minion == COU )
-        params.defenseFactor += 35;
+        params.defenseFactor += COUBoost;
     }
 
   }
@@ -82,15 +84,18 @@ public class IDSTabithaCS extends Commander
     private static final String NAME = "Firestorm";
     private static final int COST = 6;
     private static final int POWER = 4;
+    IDSTabithaCS COcast;
 
     Firestorm(Commander commander)
     {
       super(commander, NAME, COST);
+      COcast = (IDSTabithaCS) commander;
     }
 
     @Override
     protected void perform(MapMaster gameMap)
     {
+      COcast.COUBoost -= 10;
       MassStrikeUtils.damageStrike(gameMap, POWER,
           MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true)), 2);
     }
@@ -112,18 +117,7 @@ public class IDSTabithaCS extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      // make our COU an enemy unit so we can't stack buffs
-      for( Commander co : gameMap.commanders )
-      {
-        if (myCommander.isEnemy(co))
-        {
-          for (Unit lol : co.units)
-          {
-            COcast.COU = lol;
-            break;
-          }
-        }
-      }
+      COcast.COUBoost = 0;
       myCommander.addCOModifier(new CODamageModifier(25));
       myCommander.addCOModifier(new CODefenseModifier(25));
       MassStrikeUtils.damageStrike(gameMap, POWER,
