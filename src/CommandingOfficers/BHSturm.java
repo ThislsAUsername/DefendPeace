@@ -9,6 +9,7 @@ import Engine.Combat.CostValueFinder;
 import Engine.Combat.MassStrikeUtils;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
+import Terrain.Environment.Weathers;
 import Units.UnitModel;
 
 public class BHSturm extends Commander
@@ -28,32 +29,44 @@ public class BHSturm extends Commander
   {
     super(coInfo);
 
-    PerfectMoveModifier moveMod = new PerfectMoveModifier();
-    Collection<UnitModel> perfects = moveMod.init(this).values();
-
-    unitModels.clear();
-    unitModels.addAll(perfects);
+    // legacy code left in for ~reasons~
+//    PerfectMoveModifier moveMod = new PerfectMoveModifier();
+//    Collection<UnitModel> perfects = moveMod.init(this).values();
+//
+//    unitModels.clear();
+//    unitModels.addAll(perfects);
 
     // we need to mess with our shopping list as well, since we've replaced all our unit models
-    unitProductionByTerrain.get(TerrainType.FACTORY).clear();
-    unitProductionByTerrain.get(TerrainType.SEAPORT).clear();
-    unitProductionByTerrain.get(TerrainType.AIRPORT).clear();
+//    unitProductionByTerrain.get(TerrainType.FACTORY).clear();
+//    unitProductionByTerrain.get(TerrainType.SEAPORT).clear();
+//    unitProductionByTerrain.get(TerrainType.AIRPORT).clear();
+//    for( UnitModel um : unitModels )
+//    {
+//      switch (um.chassis)
+//      {
+//        case AIR_HIGH:
+//        case AIR_LOW:
+//          unitProductionByTerrain.get(TerrainType.AIRPORT).add(um);
+//          break;
+//        case SHIP:
+//        case SUBMERGED:
+//          unitProductionByTerrain.get(TerrainType.SEAPORT).add(um);
+//          break;
+//        case TANK:
+//        case TROOP:
+//          unitProductionByTerrain.get(TerrainType.FACTORY).add(um);
+//          break;
+//      }
+//    }
     for( UnitModel um : unitModels )
     {
-      switch (um.chassis)
+      for( TerrainType terrain : TerrainType.TerrainTypeList )
       {
-        case AIR_HIGH:
-        case AIR_LOW:
-          unitProductionByTerrain.get(TerrainType.AIRPORT).add(um);
-          break;
-        case SHIP:
-        case SUBMERGED:
-          unitProductionByTerrain.get(TerrainType.SEAPORT).add(um);
-          break;
-        case TANK:
-        case TROOP:
-          unitProductionByTerrain.get(TerrainType.FACTORY).add(um);
-          break;
+        if( um.propulsion.getMoveCost(Weathers.CLEAR, terrain) < 99 )
+        {
+          um.propulsion.setMoveCost(Weathers.CLEAR, terrain, 1);
+          um.propulsion.setMoveCost(Weathers.RAIN, terrain, 1);
+        }
       }
     }
 
