@@ -422,7 +422,7 @@ public class SpriteMapView extends MapView
           mapArtist.drawTerrainObject(g, x, y);
           if( !gameMap.isLocationEmpty(x, y) )
           {
-            Unit resident = gameMap.getLocation(x, y).getResident(gameMap);
+            Unit resident = gameMap.getLocation(x, y).getResident();
             // If an action is being considered, draw the active unit later, not now.
             Unit currentActor = mapController.getContemplatedActor();
             if( resident != currentActor )
@@ -451,7 +451,7 @@ public class SpriteMapView extends MapView
       {
         if( !gameMap.isLocationEmpty(x, y) )
         {
-          Unit resident = myGame.gameMap.getLocation(x, y).getResident(gameMap);
+          Unit resident = myGame.gameMap.getLocation(x, y).getResident();
           // If an action is being considered, draw the active unit later, not now.
           Unit currentActor = mapController.getContemplatedActor();
           if( resident != currentActor )

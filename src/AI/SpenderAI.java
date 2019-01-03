@@ -274,7 +274,7 @@ public class SpenderAI implements AIController
         for( Location loc : myCo.ownedProperties )
         {
           // I like combat units that are useful, so we skip ports for now
-          if( loc.getEnvironment().terrainType != TerrainType.SEAPORT && loc.getResident(gameMap) == null )
+          if( loc.getEnvironment().terrainType != TerrainType.SEAPORT && loc.getResident() == null )
           {
             ArrayList<UnitModel> units = myCo.getShoppingList(loc);
             // Only add to the list if we could actually buy something here.

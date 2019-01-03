@@ -217,7 +217,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         // Get the current location.
         XYCoord cursorCoords = new XYCoord(myGame.getCursorX(), myGame.getCursorY());
         Location loc = myGame.gameMap.getLocation(cursorCoords);
-        Unit actor = loc.getResident(myGame.activeCO.myView);
+        Unit actor = loc.getResident();
 
         // If there is a unit that is is ready to move, or if it is someone else's, then record it so we can build the move path.
         if( null != actor && ((actor.CO == myGame.activeCO && !actor.isTurnOver) || (actor.CO != myGame.activeCO)))

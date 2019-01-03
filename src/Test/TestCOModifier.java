@@ -9,8 +9,8 @@ import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import CommandingOfficers.Modifiers.UnitRemodelModifier;
-import Terrain.MapMaster;
 import Terrain.MapLibrary;
+import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
@@ -130,8 +130,8 @@ public class TestCOModifier extends TestCase
 
     addUnit(testMap, patch, UnitModel.UnitEnum.INFANTRY, 2, 2);
     addUnit(testMap, patch, UnitModel.UnitEnum.RECON, 2, 3);
-    Unit infantry = testMap.getLocation(2, 2).getResident(testMap);
-    Unit recon = testMap.getLocation(2, 3).getResident(testMap);
+    Unit infantry = testMap.getLocation(2, 2).getResident();
+    Unit recon = testMap.getLocation(2, 3).getResident();
 
     testPassed &= validate( infantry != null, "    Infantry is missing. Malformed test!");
     testPassed &= validate( recon != null, "    Recon is missing. Malformed test!");

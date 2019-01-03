@@ -198,7 +198,7 @@ public class InfantrySpamAI implements AIController
         {
           Location loc = gameMap.getLocation(i, j);
           // If this terrain belongs to me, and I can build something on it, and I have the money, do so.
-          if( loc.getEnvironment().terrainType == TerrainType.FACTORY && loc.getOwner() == myCo && loc.getResident(gameMap) == null )
+          if( loc.getEnvironment().terrainType == TerrainType.FACTORY && loc.getOwner() == myCo && loc.getResident() == null )
           {
             ArrayList<UnitModel> units = myCo.getShoppingList(loc);
             if( !units.isEmpty() && units.get(0).getCost() <= myCo.money )

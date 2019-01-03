@@ -52,7 +52,7 @@ public class MoveEvent implements GameEvent
         unit.isTurnOver = true;
       }
       // Make sure it is valid to move this unit to its destination.
-      else if( loc.getResident(gameMap) == null && unit.model.propulsion.getMoveCost(loc.getEnvironment()) < 99 )
+      else if( loc.getResident() == null && unit.model.propulsion.getMoveCost(loc.getEnvironment()) < 99 )
       {
         gameMap.moveUnit(unit, endpoint.x, endpoint.y);
 

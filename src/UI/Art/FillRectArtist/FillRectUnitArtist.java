@@ -44,9 +44,9 @@ public class FillRectUnitArtist
         {
           Location locus = gameMap.getLocation(w, h);
           // Draw all units except for the currently-selected one, if there is one.
-          if( locus.getResident(gameMap) != null && locus.getResident(gameMap) != currentActor )
+          if( locus.getResident() != null && locus.getResident() != currentActor )
           {
-            drawUnit(g, locus.getResident(gameMap));
+            drawUnit(g, locus.getResident());
           }
         }
       }

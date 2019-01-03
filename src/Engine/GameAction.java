@@ -86,7 +86,7 @@ public interface GameAction
       if( isValid )
       {
         moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
-        defender = gameMap.getLocation(attackLocation).getResident(gameMap);
+        defender = gameMap.getLocation(attackLocation).getResident();
         attackRange = Math.abs(moveLocation.xCoord - attackLocation.xCoord)
             + Math.abs(moveLocation.yCoord - attackLocation.yCoord);
 
@@ -185,7 +185,7 @@ public interface GameAction
       if( isValid )
       {
         Location site = gameMap.getLocation(where);
-        isValid &= (null == site.getResident(gameMap));
+        isValid &= (null == site.getResident());
         isValid &= site.getOwner() == who;
         isValid &= (who.money >= what.getCost());
         isValid &= who.getShoppingList(site).contains(what);
@@ -272,7 +272,7 @@ public interface GameAction
         captureLocation = map.getLocation(movePathEnd);
         isValid &= captureLocation.isCaptureable(); // Valid location
         isValid &= actor.CO.isEnemy(captureLocation.getOwner()); // Valid CO
-        isValid &= ((captureLocation.getResident(map) == null) || (captureLocation.getResident(map) == actor));
+        isValid &= ((captureLocation.getResident() == null) || (captureLocation.getResident() == actor));
       }
 
       // Generate events
@@ -407,7 +407,7 @@ public interface GameAction
         pathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
         if( (null != gameMap) && gameMap.isLocationValid(pathEnd) )
         {
-          transport = gameMap.getLocation(pathEnd).getResident(gameMap);
+          transport = gameMap.getLocation(pathEnd).getResident();
         }
       }
     }
@@ -433,7 +433,7 @@ public interface GameAction
         if( isValid )
         {
           // Find the transport unit.
-          transport = gameMap.getLocation(pathEnd).getResident(gameMap);
+          transport = gameMap.getLocation(pathEnd).getResident();
           isValid &= (null != transport) && transport.hasCargoSpace(passenger.model.type);
         }
       }
@@ -674,7 +674,7 @@ public interface GameAction
         // For each location, see if there is a friendly unit to re-supply.
         for( XYCoord loc : locations )
         {
-          Unit other = map.getLocation(loc).getResident(map);
+          Unit other = map.getLocation(loc).getResident();
           if( other != null && other.CO == unitActor.CO && !other.isFullySupplied() )
           {
 

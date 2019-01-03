@@ -47,7 +47,7 @@ public class Location
     }
   }
 
-  public Unit getResident(GameMap map)
+  public Unit getResident()
   {
     return resident;
   }

@@ -53,9 +53,9 @@ public class Utils
     ArrayList<XYCoord> targets = new ArrayList<XYCoord>();
     for( XYCoord loc : locations )
     {
-      if( map.getLocation(loc).getResident(map) != null && // Someone is there.
-          map.getLocation(loc).getResident(map).CO.isEnemy(co) && // They are not friendly.
-          weapon.getDamage(map.getLocation(loc).getResident(map).model) > 0 ) // We can shoot them.
+      if( map.getLocation(loc).getResident() != null && // Someone is there.
+          map.getLocation(loc).getResident().CO.isEnemy(co) && // They are not friendly.
+          weapon.getDamage(map.getLocation(loc).getResident().model) > 0 ) // We can shoot them.
       {
         targets.add(loc);
       }
@@ -71,7 +71,7 @@ public class Utils
     for( XYCoord loc : locations )
     {
       // Add any location that is empty and supports movement of the cargo unit.
-      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident(map) == transport)
+      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
           && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
       {
         dropoffLocations.add(loc);
@@ -118,7 +118,7 @@ public class Utils
       // pull out the next search node
       SearchNode currentNode = searchQueue.poll();
       // if the space is empty or holds the current unit, highlight
-      Unit obstacle = gameMap.getLocation(currentNode.x, currentNode.y).getResident(gameMap);
+      Unit obstacle = gameMap.getLocation(currentNode.x, currentNode.y).getResident();
       if( obstacle == null || obstacle == unit || (obstacle.CO == unit.CO && obstacle.hasCargoSpace(unit.model.type)) )
       {
         reachableTiles.add(new XYCoord(currentNode.x, currentNode.y));
@@ -144,9 +144,9 @@ public class Utils
       return false;
     }
     // if there is a unit in that space
-    if( !ignoreUnits && (myMap.getLocation(coord).getResident(myMap) != null) )
+    if( !ignoreUnits && (myMap.getLocation(coord).getResident() != null) )
     { // if that unit is an enemy
-      if( unit.CO.isEnemy(myMap.getLocation(coord).getResident(myMap).CO) )
+      if( unit.CO.isEnemy(myMap.getLocation(coord).getResident().CO) )
       {
         return false;
       }
@@ -188,7 +188,7 @@ public class Utils
       int wayX = path.getWaypoint(i).x;
       int wayY = path.getWaypoint(i).y;
       Location loc = map.getLocation(wayX, wayY);
-      Unit resident = loc.getResident(map);
+      Unit resident = loc.getResident();
 
       movePower -= findMoveCost(unit, wayX, wayY, map);
       if( movePower < 0 || (resident != null && resident.CO.isEnemy(unit.CO)) )
@@ -415,7 +415,7 @@ public class Utils
       // Add all vacant, <co>-owned industries to the list
       for( Location loc : co.ownedProperties )
       {
-        Unit resident = loc.getResident(map);
+        Unit resident = loc.getResident();
         // We only want industries we can act on, which means they need to be empty
         // TODO: maybe calculate whether the CO has enough money to buy something at this industry
         if( null == resident && loc.getOwner() == co )
@@ -553,7 +553,7 @@ public class Utils
     boolean result = false;
     for( PathNode point : path.getWaypoints() )
     {
-      Unit obstacle = map.getLocation(point.x, point.y).getResident(map);
+      Unit obstacle = map.getLocation(point.x, point.y).getResident();
       if( null != obstacle && unit.CO.isEnemy(obstacle.CO) )
       {
         result = true;

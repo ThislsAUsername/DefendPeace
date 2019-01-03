@@ -39,7 +39,7 @@ public class UnloadEvent implements GameEvent
   @Override
   public void performEvent(MapMaster gameMap)
   {
-    if( transport.heldUnits != null && transport.heldUnits.contains(cargo) && gameMap.getLocation(dropLoc).getResident(gameMap) == null )
+    if( transport.heldUnits != null && transport.heldUnits.contains(cargo) && gameMap.getLocation(dropLoc).getResident() == null )
     {
       transport.heldUnits.remove(cargo);
       gameMap.moveUnit(cargo, dropLoc.xCoord, dropLoc.yCoord);
@@ -50,7 +50,7 @@ public class UnloadEvent implements GameEvent
       System.out.println("WARNING! Failed to unload unit due to preconditions not being met:");
       if( transport.heldUnits == null ) System.out.println("          Transport unit is empty.");
       if( !transport.heldUnits.contains(cargo) ) System.out.println("          Unit to debark is not on transport.");
-      if( gameMap.getLocation(dropLoc).getResident(gameMap) != null ) System.out.println("          Unload location is not empty.");
+      if( gameMap.getLocation(dropLoc).getResident() != null ) System.out.println("          Unload location is not empty.");
     }
   }
 }

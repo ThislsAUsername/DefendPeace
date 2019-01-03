@@ -1,7 +1,6 @@
 package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.COModifier;
-import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -103,7 +102,7 @@ public class CommanderBear_Bull extends Commander
       {
         if( loc.getOwner() == myCommander )
         {
-          Unit victim = loc.getResident(cmdr.myView);
+          Unit victim = loc.getResident();
           if( null != victim )
           {
             double delta = victim.alterHP(-1*DOWNUPTURN_LIQUIDATION); // Remove some of the unit's HP
