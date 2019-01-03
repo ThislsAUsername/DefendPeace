@@ -1,5 +1,6 @@
 package UI.Art.SpriteArtist;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -10,6 +11,7 @@ import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.Combat.BattleSummary;
+import Engine.Combat.CombatEngine;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
@@ -302,10 +304,33 @@ public class SpriteMapView extends MapView
       else if( getCurrentGameMenu() == null )
       {
         mapArtist.drawCursor(mapGraphics, currentActor, isTargeting, myGame.getCursorX(), myGame.getCursorY());
+        if( isTargeting && null != currentPath )
+        {
+          Unit target = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
+          int dist = Math.abs(target.x - currentPath.getEnd().x) + Math.abs(target.y - currentPath.getEnd().y);
+          if( null != target && currentActor.canAttack(target.model, dist, currentPath.getPathLength() > 1) )
+          {
+            // grab the two most significant digits and convert to %
+            int damage = (int) (10 * CombatEngine.calculateBattleResults(currentActor, target, myGame.gameMap,
+                currentPath.getEnd().x, currentPath.getEnd().y).defenderHPLoss);
+            String damageText = damage + "%";
+
+            // Build a display of the expected damage.
+            Color[] colors = SpriteLibrary.getMapUnitColors(currentActor.CO.myColor).paletteColors;
+            BufferedImage dmgImage = SpriteUIUtils.makeTextFrame(colors[4], colors[2], damageText, 2*SpriteOptions.getDrawScale(),2*SpriteOptions.getDrawScale());
+
+            // Draw the damage estimate directly above the unit being targeted.
+            int drawScale = SpriteOptions.getDrawScale();
+            int tileSize = SpriteLibrary.baseSpriteSize * drawScale;
+            int estimateX = (target.x * tileSize) + (tileSize / 2);
+            int estimateY = (target.y * tileSize) - dmgImage.getHeight() / 2;
+            SpriteLibrary.drawImageCenteredOnPoint(mapGraphics, dmgImage, estimateX, estimateY, 1);
+          }
+        }
       }
       else
       {
-        menuArtist.drawMenu(mapGraphics, drawX, drawY);
+        menuArtist.drawMenu(mapGraphics, mapViewX, mapViewY);
       }
 
       // Copy the map image into the window's graphics buffer.
