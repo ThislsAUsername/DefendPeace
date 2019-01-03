@@ -136,6 +136,17 @@ public class MapWindow extends GameMap
     }
   }
 
+  public void revealFog(Unit scout)
+  {
+    if( !viewer.isEnemy(scout.CO) )
+    {
+      for( XYCoord coord : Utils.findVisibleLocations(this, scout, scout.x, scout.y) )
+      {
+        isFogged[coord.xCoord][coord.yCoord] = false;
+      }
+    }
+  }
+
   public void revealFog(Unit scout, Path movepath)
   {
     if( !viewer.isEnemy(scout.CO) )

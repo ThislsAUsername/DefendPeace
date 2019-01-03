@@ -53,6 +53,7 @@ public class CreateUnitEvent implements GameEvent
       myCommander.money -= myNewUnit.model.getCost();
       myCommander.units.add(myNewUnit);
       gameMap.addNewUnit(myNewUnit, myBuildCoords.xCoord, myBuildCoords.yCoord);
+      myCommander.myView.revealFog(myNewUnit);
     }
     else
     {
