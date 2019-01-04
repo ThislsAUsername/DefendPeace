@@ -35,7 +35,7 @@ public class UnitModel
   public int maxFuel;
   public int idleFuelBurn;
   public int movePower;
-  public int vision;
+  public int visionRange;
   public boolean piercingVision = false; // Determines whether this unit can see into cover
   public MoveType propulsion;
   public ArrayList<ActionType> possibleActions = new ArrayList<ActionType>();
@@ -81,7 +81,7 @@ public class UnitModel
     moneyCost = cost;
     maxFuel = pFuelMax;
     idleFuelBurn = pIdleFuelBurn;
-    vision = pVision;
+    visionRange = pVision;
     movePower = pMovePower;
     propulsion = pPropulsion;
     healableHabs = new HashSet<TerrainType>();
@@ -120,7 +120,7 @@ public class UnitModel
     }
 
     // Create a new model with the given attributes.
-    UnitModel newModel = new UnitModel(other.name, other.type, other.chassis, other.getCost(), other.maxFuel, other.idleFuelBurn, other.vision,
+    UnitModel newModel = new UnitModel(other.name, other.type, other.chassis, other.getCost(), other.maxFuel, other.idleFuelBurn, other.visionRange,
         other.movePower, new MoveType(other.propulsion), other.possibleActions, weaponModels);
 
     // Duplicate the other model's transporting abilities.

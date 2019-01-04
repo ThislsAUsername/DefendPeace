@@ -499,14 +499,14 @@ public class Utils
     Collections.sort(mapLocations, tdc);
   }
 
-  /** Returns a list of all locations between minRange and maxRange tiles away from origin, inclusive. */
+  /** Returns a list of all locations visible to the unit at its current location. */
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer)
   {
     return findVisibleLocations(map, viewer, viewer.x, viewer.y);
   }
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, int x, int y)
   {
-    int range = viewer.model.vision;
+    int range = viewer.model.visionRange;
     // if it's a surface unit, give it the boost the terrain would provide
     if( viewer.model.chassis == ChassisEnum.TROOP || viewer.model.chassis == ChassisEnum.TANK
         || viewer.model.chassis == ChassisEnum.SHIP )
