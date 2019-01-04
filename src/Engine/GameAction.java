@@ -538,11 +538,6 @@ public interface GameAction
       if( isValid )
       {
         isValid &= !actor.heldUnits.isEmpty();
-        for( Unit unit : myDropoffs.keySet() )
-        {
-          isValid &= gameMap.isLocationEmpty(actor, myDropoffs.get(unit)); // Drop locations are unoccupied.
-          firstDropLoc = (null == firstDropLoc)? myDropoffs.get(unit) : firstDropLoc;
-        }
       }
 
       // Generate events.
