@@ -146,8 +146,9 @@ public class MapWindow extends GameMap
             lastOwnerSeen[coord.xCoord][coord.yCoord] = master.getLocation(coord).getOwner();
           }
         }
-        for( Location loc : co.ownedProperties )
+        for( XYCoord xyc : co.ownedProperties )
         {
+          Location loc = master.getLocation(xyc);
           for( XYCoord coord : Utils.findVisibleLocations(this, loc.getCoordinates(), Environment.PROPERTY_VISION_RANGE) )
           {
             isFogged[coord.xCoord][coord.yCoord] = false;

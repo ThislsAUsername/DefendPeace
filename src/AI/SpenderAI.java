@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
+
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
@@ -85,12 +86,12 @@ public class SpenderAI implements AIController
   public void endTurn()
   {
     log(String.format("[======== SpAI ending turn %s for %s =========]", turnNum, myCo));
-    System.out.println(logger.toString());
     logger = new StringBuffer();
   }
 
   private void log(String message)
   {
+    System.out.println(message);
     logger.append(message).append('\n');
   }
 
@@ -103,7 +104,9 @@ public class SpenderAI implements AIController
       // If we have more actions ready, don't bother calculating stuff.
       if( !actions.isEmpty() )
       {
-        return actions.poll();
+        GameAction action = actions.poll();
+        log("  Action: " + action);
+        return action;
       }
       else if( unitQueue.isEmpty() )
       {
@@ -271,8 +274,9 @@ public class SpenderAI implements AIController
       if( actions.isEmpty() && !stateChange )
       {
         Map<Location, ArrayList<UnitModel>> shoppingLists = new HashMap<>();
-        for( Location loc : myCo.ownedProperties )
+        for( XYCoord xyc : myCo.ownedProperties )
         {
+          Location loc = gameMap.getLocation(xyc);
           // I like combat units that are useful, so we skip ports for now
           if( loc.getEnvironment().terrainType != TerrainType.SEAPORT && loc.getResident() == null )
           {

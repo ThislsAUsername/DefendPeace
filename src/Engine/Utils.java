@@ -413,8 +413,9 @@ public class Utils
     if( null != co )
     {
       // Add all vacant, <co>-owned industries to the list
-      for( Location loc : co.ownedProperties )
+      for( XYCoord xyc : co.ownedProperties )
       {
+        Location loc = map.getLocation(xyc);
         Unit resident = loc.getResident();
         // We only want industries we can act on, which means they need to be empty
         // TODO: maybe calculate whether the CO has enough money to buy something at this industry

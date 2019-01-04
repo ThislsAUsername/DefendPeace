@@ -73,8 +73,9 @@ public class CommanderCinder extends Commander
   @Override
   public void initTurn(GameMap map)
   {
-    for( Location loc : ownedProperties )
+    for( XYCoord xyc : ownedProperties )
     {
+      Location loc = map.getLocation(xyc);
       buildCounts.put(loc.getCoordinates(), 0);
     }
     setPrices(0);

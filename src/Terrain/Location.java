@@ -37,13 +37,13 @@ public class Location
     // remove ourselves from the previous owner's list, if one exists
     if( null != this.owner )
     {
-      this.owner.ownedProperties.remove(this);
+      this.owner.ownedProperties.remove(coords);
     }
     this.owner = owner;
     // add ourselves to the new owner's list, if it exists
     if( null != this.owner )
     {
-      this.owner.ownedProperties.add(this);
+      this.owner.ownedProperties.add(coords);
     }
   }
 
