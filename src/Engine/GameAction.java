@@ -272,7 +272,6 @@ public interface GameAction
         captureLocation = map.getLocation(movePathEnd);
         isValid &= captureLocation.isCaptureable(); // Valid location
         isValid &= actor.CO.isEnemy(captureLocation.getOwner()); // Valid CO
-        isValid &= ((captureLocation.getResident() == null) || (captureLocation.getResident() == actor));
       }
 
       // Generate events
