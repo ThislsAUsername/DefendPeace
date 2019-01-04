@@ -508,13 +508,19 @@ public class Utils
   /** Returns a list of all locations that would be visible to the unit if it were at (x, y). */
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, int x, int y)
   {
-    int range = viewer.model.visionRange;
-    // if it's a surface unit, give it the boost the terrain would provide
-    if( viewer.model.chassis == ChassisEnum.TROOP || viewer.model.chassis == ChassisEnum.TANK
-        || viewer.model.chassis == ChassisEnum.SHIP )
-      range += map.getEnvironment(x, y).terrainType.getVisionBoost();
+    ArrayList<XYCoord> viewables = new ArrayList<XYCoord>();
+
+    if( map.isLocationValid(x, y) )
+    {
+      int range = viewer.model.visionRange;
+      // if it's a surface unit, give it the boost the terrain would provide
+      if( viewer.model.chassis == ChassisEnum.TROOP || viewer.model.chassis == ChassisEnum.TANK
+          || viewer.model.chassis == ChassisEnum.SHIP )
+        range += map.getEnvironment(x, y).terrainType.getVisionBoost();
+      viewables.addAll(findVisibleLocations(map, new XYCoord(x, y), range, viewer.model.visionIgnoresCover));
+    }
     
-    return findVisibleLocations(map, new XYCoord(x, y), range, viewer.model.visionIgnoresCover);
+    return viewables;
   }
   /** Returns a list of all locations visible to a unit at origin that could see range tiles. */
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, XYCoord origin, int range)
