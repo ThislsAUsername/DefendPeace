@@ -13,6 +13,7 @@ public class MapWindow extends GameMap
   Commander viewer;
   private boolean[][] isFogged;
   public CommandingOfficers.Commander[] commanders;
+  private Commander[][] lastOwnerSeen;
 
   public MapWindow(MapMaster pMaster, Commander pViewer)
   {
@@ -21,6 +22,16 @@ public class MapWindow extends GameMap
     viewer = pViewer;
     commanders = master.commanders;
     isFogged = new boolean[mapWidth][mapHeight];
+
+    // We start with knowledge of what properties everyone starts with.
+    lastOwnerSeen = new Commander[mapWidth][mapHeight];
+    for( int w = 0; w < pMaster.mapWidth; ++w )
+    {
+      for( int h = 0; h < pMaster.mapHeight; ++h )
+      {
+        lastOwnerSeen[w][h] = pMaster.getLocation(w, h).getOwner();
+      }
+    }
   }
 
   /**
@@ -66,12 +77,7 @@ public class MapWindow extends GameMap
     {
       returnLoc = new Location(returnLoc.getEnvironment(), coord);
       returnLoc.setHighlight(masterLoc.isHighlightSet());
-
-      // Make sure we can always identify the owner of a Headquarters.
-      if( masterLoc.getEnvironment().terrainType == TerrainType.HEADQUARTERS )
-      {
-        returnLoc.setOwner( masterLoc.getOwner() );
-      }
+      returnLoc.setOwner( lastOwnerSeen[x][y] );
     }
     return returnLoc;
   }
@@ -137,6 +143,7 @@ public class MapWindow extends GameMap
           for( XYCoord coord : Utils.findVisibleLocations(this, unit) )
           {
             isFogged[coord.xCoord][coord.yCoord] = false;
+            lastOwnerSeen[coord.xCoord][coord.yCoord] = master.getLocation(coord).getOwner();
           }
         }
         for( Location loc : co.ownedProperties )
@@ -144,6 +151,7 @@ public class MapWindow extends GameMap
           for( XYCoord coord : Utils.findVisibleLocations(this, loc.getCoordinates(), Environment.PROPERTY_VISION_RANGE) )
           {
             isFogged[coord.xCoord][coord.yCoord] = false;
+            lastOwnerSeen[coord.xCoord][coord.yCoord] = master.getLocation(coord).getOwner();
           }
         }
       }
@@ -157,6 +165,7 @@ public class MapWindow extends GameMap
       for( XYCoord coord : Utils.findVisibleLocations(this, scout, scout.x, scout.y) )
       {
         isFogged[coord.xCoord][coord.yCoord] = false;
+        lastOwnerSeen[coord.xCoord][coord.yCoord] = master.getLocation(coord).getOwner();
       }
     }
   }
@@ -170,6 +179,7 @@ public class MapWindow extends GameMap
         for( XYCoord coord : Utils.findVisibleLocations(this, scout, node.x, node.y) )
         {
           isFogged[coord.xCoord][coord.yCoord] = false;
+          lastOwnerSeen[coord.xCoord][coord.yCoord] = master.getLocation(coord).getOwner();
         }
       }
     }
