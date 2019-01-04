@@ -283,7 +283,7 @@ public class Unit
 
                 for( XYCoord loc : locations )
                 {
-                  attackOptions.add(new GameAction.AttackAction(this, movePath, loc));
+                  attackOptions.add(new GameAction.AttackAction(map, this, movePath, loc));
                 }
               }
             } // ~Weapon loop

@@ -60,7 +60,7 @@ public class TestCombat extends TestCase
     infB.damageHP(7);
 
     // Execute inf- I mean, the action.
-    performGameAction(new GameAction.AttackAction(mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2),
+    performGameAction(new GameAction.AttackAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2),
         testMap);
 
     // Check that the mech is undamaged, and that the infantry is no longer with us.
@@ -88,7 +88,7 @@ public class TestCombat extends TestCase
     infB.damageHP(7);
 
     // Hug the infantry in a friendly manner.
-    performGameAction(new GameAction.AttackAction(mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2),
+    performGameAction(new GameAction.AttackAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2),
         testMap);
 
     // Check that the mech is undamaged, and that the infantry is still with us.
@@ -114,26 +114,26 @@ public class TestCombat extends TestCase
 
     // offender will attempt to shoot point blank. This should fail, since artillery cannot direct fire.
     offender.initTurn(testMap); // Make sure he is ready to move.
-    performGameAction(new GameAction.AttackAction(offender, Utils.findShortestPath(offender, 6, 5, testMap), 6, 6),
+    performGameAction(new GameAction.AttackAction(testMap, offender, Utils.findShortestPath(offender, 6, 5, testMap), 6, 6),
         testMap);
     boolean testPassed = validate(defender.getPreciseHP() == 10, "    Artillery dealt damage at range 1. Artillery range should be 2-3.");
     
     // offender will attempt to move and fire. This should fail, since artillery cannot fire after moving.
     offender.initTurn(testMap);
-    performGameAction(new GameAction.AttackAction(offender, Utils.findShortestPath(offender, 6, 4, testMap), 6, 6),
+    performGameAction(new GameAction.AttackAction(testMap, offender, Utils.findShortestPath(offender, 6, 4, testMap), 6, 6),
         testMap);
     testPassed &= validate(defender.getPreciseHP() == 10, "    Artillery dealt damage despite moving before firing.");
 
     // offender will shoot victim.
     offender.initTurn(testMap); // Make sure he is ready to move.
-    performGameAction(new GameAction.AttackAction(offender, Utils.findShortestPath(offender, 6, 5, testMap), 6, 7),
+    performGameAction(new GameAction.AttackAction(testMap, offender, Utils.findShortestPath(offender, 6, 5, testMap), 6, 7),
         testMap);
     testPassed &= validate(victim.getPreciseHP() != 10, "    Artillery failed to do damage at a range of 2, without moving.");
     testPassed &= validate(offender.getPreciseHP() == 10, "    Artillery received a counterattack from a range of 2. Counterattacks should only be possible at range 1.");
 
     // defender will attack offender.
     defender.initTurn(testMap); // Make sure he is ready to move.
-    performGameAction(new GameAction.AttackAction(defender, Utils.findShortestPath(defender, 6, 6, testMap), 6, 5),
+    performGameAction(new GameAction.AttackAction(testMap, defender, Utils.findShortestPath(defender, 6, 6, testMap), 6, 5),
         testMap);
     
     // check that offender is damaged and defender is not.
@@ -157,7 +157,7 @@ public class TestCombat extends TestCase
 
     // Execute inf- I mean, the action.
     mechA.initTurn(testMap); // Make sure he is ready to move.
-    performGameAction(new GameAction.AttackAction(mechA, Utils.findShortestPath(mechA, 1, 2, testMap), 1, 3), testMap);
+    performGameAction(new GameAction.AttackAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 2, testMap), 1, 3), testMap);
 
     // Check that the mech is undamaged, and that the infantry is no longer with us.
     boolean testPassed = validate(infB.getHP() < 10, "    Defender took no damage.");
@@ -186,7 +186,7 @@ public class TestCombat extends TestCase
 
     // Create the attack action so we can predict the unit will die, and his CO will therefore be defeated.
     mechA.initTurn(testMap); // Make sure he is ready to act.
-    GameAction battleAction = new GameAction.AttackAction(mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2);
+    GameAction battleAction = new GameAction.AttackAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2);
 
     // Extract the resulting GameEventQueue.
     GameEventQueue events = battleAction.getEvents(testMap);

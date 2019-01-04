@@ -93,7 +93,7 @@ public class TestCapture extends TestCase
     Unit infB = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 1, 2); // Make an enemy adjacent to the city.
     infB.alterHP( -8 ); // Make sure he will die without retaliating.
     infA.initTurn(testMap);
-    performGameAction(new GameAction.AttackAction(infA, Utils.findShortestPath(infA, 2, 2, testMap), 1, 2), testMap); // Bop him on the head.
+    performGameAction(new GameAction.AttackAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap), 1, 2), testMap); // Bop him on the head.
     testPassed &= validate( infA.getCaptureProgress() == 10, "    Infantry should not stop capturing after stationary ATTACK.");
 
     // See if we can actually capture this thing.

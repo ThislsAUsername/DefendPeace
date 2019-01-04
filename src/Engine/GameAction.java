@@ -55,16 +55,24 @@ public interface GameAction
     private Unit attacker;
     private Unit defender;
 
-    public AttackAction(Unit actor, Path path, int targetX, int targetY)
+    public AttackAction(GameMap gameMap, Unit actor, Path path, int targetX, int targetY)
     {
-      this(actor, path, new XYCoord(targetX, targetY));
+      this(gameMap, actor, path, new XYCoord(targetX, targetY));
     }
 
-    public AttackAction(Unit actor, Path path, XYCoord atkLoc)
+    public AttackAction(GameMap gameMap, Unit actor, Path path, XYCoord atkLoc)
     {
       movePath = path;
       attacker = actor;
       attackLocation = atkLoc;
+      if( null != path && (path.getEnd() != null) )
+      {
+        moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        if((null != atkLoc) && (null != gameMap) && gameMap.isLocationValid(atkLoc))
+        {
+          defender = gameMap.getLocation(atkLoc).getResident();
+        }
+      }
     }
 
     @Override
@@ -100,7 +108,6 @@ public interface GameAction
         if( Utils.enqueueMoveEvent(gameMap, attacker, movePath, attackEvents) )
         {
           // No surprises in the fog. Resolve combat.
-          attackEvents.add(new MoveEvent(attacker, movePath));
           BattleEvent event = new BattleEvent(attacker, defender, moveLocation.xCoord, moveLocation.yCoord, gameMap);
           attackEvents.add(event);
 
