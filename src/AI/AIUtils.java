@@ -66,9 +66,9 @@ public class AIUtils
     Map<XYCoord, ArrayList<GameActionSet> > actionsByLoc = getAvailableUnitActions(unit, gameMap);
 
     // Now re-map them by type, irrespective of location.
-    for( Entry<XYCoord, ArrayList<GameActionSet>> entry : actionsByLoc.entrySet() )
+    for( ArrayList<GameActionSet> actionSets : actionsByLoc.values() )
     {
-      for( GameActionSet actionSet : entry.getValue() )
+      for( GameActionSet actionSet : actionSets )
       {
         ActionType type = actionSet.getSelected().getType();
 
