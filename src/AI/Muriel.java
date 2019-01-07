@@ -189,6 +189,39 @@ public class Muriel implements AIController
       }
 
       //////////////////////////////////////////////////////////////////
+      // If we are currently healing, stick around, unless that would stem the tide of reinforcements.
+      Location loc = gameMap.getLocation(unit.x, unit.y);
+      if( (unit.getHP() <= 8) && unit.model.canRepairOn(loc) && (loc.getEnvironment().terrainType != TerrainType.FACTORY) )
+      {
+        log(String.format("%s is damaged and on a repair tile. Will continue to repair for now.", unit.toStringWithLocation()));
+        ArrayList<GameActionSet> actionSet = unit.getPossibleActions(gameMap, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
+        for( GameActionSet set : actionSet )
+        {
+          // Go ahead and attack someone as long as we don't have to move.
+          if( set.getSelected().getType() == ActionType.ATTACK )
+          {
+            for( GameAction action : set.getGameActions() )
+            {
+              Unit other = gameMap.getLocation(action.getTargetLocation()).getResident();
+              if( shouldAttack(unit, other, gameMap) )
+              {
+                log(String.format("  May as well try to shoot %s since I'm here anyway", other));
+                queuedActions.offer(action);
+                break;
+              }
+            }
+          }
+          if( !queuedActions.isEmpty() ) break; // One action per invocation.
+        }
+        if( queuedActions.isEmpty() )
+        {
+          // We didn't find someone adjacent to smash, so just sit tight for now.
+          queuedActions.offer(new GameAction.WaitAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
+        }
+        break;
+      } // ~Continue repairing if in a depot.
+
+      //////////////////////////////////////////////////////////////////
       // Figure out if we should go resupply.
       boolean shouldResupply = false;
       // If we are low on fuel.
@@ -242,39 +275,6 @@ public class Muriel implements AIController
         }
         if( !queuedActions.isEmpty() ) break; // Break so we don't inadvertently plan two actions for this unit.
       }
-
-      //////////////////////////////////////////////////////////////////
-      // If we are currently healing, stick around, unless that would stem the tide of reinforcements.
-      Location loc = gameMap.getLocation(unit.x, unit.y);
-      if( unit.getHP() <= 8 && unit.model.canRepairOn(loc) && (loc.getEnvironment().terrainType != TerrainType.FACTORY) )
-      {
-        log(String.format("%s is damaged and on a repair tile. Will continue to repair for now.", unit.toStringWithLocation()));
-        ArrayList<GameActionSet> actionSet = unit.getPossibleActions(gameMap, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
-        for( GameActionSet set : actionSet )
-        {
-          // Go ahead and attack someone as long as we don't have to move.
-          if( set.getSelected().getType() == ActionType.ATTACK )
-          {
-            for( GameAction action : set.getGameActions() )
-            {
-              Unit other = gameMap.getLocation(action.getTargetLocation()).getResident();
-              if( shouldAttack(unit, other, gameMap) )
-              {
-                log(String.format("  May as well try to shoot %s since I'm here anyway", other));
-                queuedActions.offer(action);
-                break;
-              }
-            }
-          }
-          if( !queuedActions.isEmpty() ) break; // One action per invocation.
-        }
-        if( queuedActions.isEmpty() )
-        {
-          // We didn't find someone adjacent to smash, so just sit tight for now.
-          queuedActions.offer(new GameAction.WaitAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
-        }
-        break;
-      } // ~Continue repairing if in a depot.
 
       // Find all the things we can do from here.
       Map<ActionType, ArrayList<GameAction> > unitActionsByType = AIUtils.getAvailableUnitActionsByType(unit, gameMap);
