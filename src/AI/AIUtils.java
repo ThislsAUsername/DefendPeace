@@ -19,7 +19,7 @@ import Units.Unit;
 public class AIUtils
 {
   /**
-   * Figure out all actions unit can perform this turn, and organizes them by location.
+   * Finds all actions available to unit, and organizes them by location.
    * @param unit The unit under consideration.
    * @param gameMap The world in which the Unit lives.
    * @return a Map of XYCoord to ArrayList<GameActionSet>. Each XYCoord will have a GameActionSet for
