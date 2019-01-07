@@ -431,10 +431,8 @@ public class Muriel implements AIController
       return;
     }
 
-    // Order the enemy units by model.cost (not number), lowest first.
-    ArrayList<UnitModel> enemyModels = new ArrayList<UnitModel>();
-
     // Sort enemy units by cardinality. We will attempt to build counters for the most numerous first.
+    ArrayList<UnitModel> enemyModels = new ArrayList<UnitModel>();
     ArrayList<Entry<UnitModel, Double>> entryArray = new ArrayList<Entry<UnitModel, Double>>(enemyUnitCounts.entrySet());
     Collections.sort(entryArray, new UnitQuantityComparator());
     for( Entry<UnitModel, Double> ent : entryArray )
