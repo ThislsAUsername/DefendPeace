@@ -65,24 +65,10 @@ public class Muriel implements AIController
     }
 
     // Figure out what I and everyone else can build.
-    for( UnitModel.UnitEnum modelEnum : UnitModel.UnitEnum.values() )
+    myUnitModels = myCo.unitModels;
+    for( Commander oCo : enemyCos )
     {
-      // Direct-fire UnitModels at my disposal.
-      UnitModel model = myCo.getUnitModel(modelEnum);
-      if( model != null )
-      {
-        myUnitModels.add(model);
-      }
-
-      // Direct-fire UnitModels for everyone else.
-      for( Commander oCo : enemyCos )
-      {
-        model = oCo.getUnitModel(modelEnum);
-        if( model != null )
-        {
-          otherUnitModels.get(oCo).add(model);
-        }
-      }
+      otherUnitModels.put(oCo, oCo.unitModels);
     }
 
     // Figure out unit matchups.
