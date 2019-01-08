@@ -479,9 +479,9 @@ public class Muriel implements AIController
         // Figure out how many of idealCounter we want, and how many we can actually build.
         int numberToBuy = (int)Math.ceil((enemyNumber / umami.damageRatio)); // This is the number we would buy ideally.
         if( numberToBuy == 0 ) numberToBuy = 1;
-        log(String.format("  Would like to build %s of them", numberToBuy));
+        log(String.format("    Would like to build %s of them", numberToBuy));
         int maxBuildable = CPI.getNumFacilitiesFor(idealCounter);
-        log(String.format("  Facilities available: %s", maxBuildable));
+        log(String.format("    Facilities available: %s", maxBuildable));
         if( numberToBuy > maxBuildable ) numberToBuy = maxBuildable; // This is the number we have production for right now.
         int totalCost = numberToBuy * idealCounter.moneyCost;
 
@@ -496,7 +496,7 @@ public class Muriel implements AIController
         if( numberToBuy > 0 )
         {
           // Go place orders.
-          log(String.format("  I can build %s %s, for a cost of %s", numberToBuy, idealCounter, totalCost));
+          log(String.format("    I can build %s %s, for a cost of %s", numberToBuy, idealCounter, totalCost));
           for( int i = 0; i < numberToBuy; ++i )
           {
             Location loc = CPI.getLocationToBuild(idealCounter);
@@ -508,7 +508,7 @@ public class Muriel implements AIController
           // This break means we will build at most one type of unit per turn to counter each enemy type.
           break;
         }
-        else {log(String.format("  %s cost %s, I have %s (witholding %s).", idealCounter, idealCounter.moneyCost, budget, costBuffer));}
+        else {log(String.format("    %s cost %s, I have %s (witholding %s).", idealCounter, idealCounter.moneyCost, budget, costBuffer));}
       } // ~while( !availableUnitModels.isEmpty() )
     } // ~while( !enemyModels.isEmpty() && !CPI.availableUnitModels.isEmpty())
 
