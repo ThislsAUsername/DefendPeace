@@ -92,12 +92,12 @@ public class BattleInstance
    */
   public static class BattleParams
   {
-    private double baseDamage;
-    private double attackerHP;
-    private double attackFactor;
-    private double defenderHP;
-    private double defenseFactor;
-    private double terrainDefense;
+    public double baseDamage;
+    public double attackerHP;
+    public double attackFactor;
+    public double defenderHP;
+    public double defenseFactor;
+    public double terrainDefense;
 
     public BattleParams(Unit attacker, Weapon attackerWeapon, Unit defender, Environment battleground)
     {
