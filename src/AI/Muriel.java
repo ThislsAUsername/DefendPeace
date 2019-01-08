@@ -436,7 +436,8 @@ public class Muriel implements AIController
       return;
     }
 
-    // Sort enemy units by cardinality. We will attempt to build counters for the most numerous first.
+    // Sort enemy units by cardinality. We will attempt to build counters for the least numerous first.
+    // The most numerous enemies are probably cheap, and also countered by whatever we build for the narrow case.
     ArrayList<UnitModel> enemyModels = new ArrayList<UnitModel>();
     ArrayList<Entry<UnitModel, Double>> entryArray = new ArrayList<Entry<UnitModel, Double>>(enemyUnitCounts.entrySet());
     Collections.sort(entryArray, new UnitQuantityComparator());
@@ -449,7 +450,7 @@ public class Muriel implements AIController
     ArrayList<PurchaseOrder> shoppingCart = new ArrayList<PurchaseOrder>();
     while( !enemyModels.isEmpty() && !CPI.availableUnitModels.isEmpty())
     {
-      // Find the first (most numerous) enemy UnitModel, and remove it. Even if we can't find an adequate counter,
+      // Find the first (least numerous) enemy UnitModel, and remove it. Even if we can't find an adequate counter,
       // there is not reason to consider it again on the next iteration.
       UnitModel enemyToCounter = enemyModels.get(0);
       enemyModels.remove(enemyToCounter);
