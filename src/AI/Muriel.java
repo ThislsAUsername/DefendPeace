@@ -314,7 +314,9 @@ public class Muriel implements AIController
       ArrayList<GameAction> captureActions = unitActionsByType.get(ActionType.CAPTURE);
       if( !captureActions.isEmpty() && unit.getHP() >= 7 )
       {
-        queuedActions.offer(captureActions.get(0));
+        GameAction capture = captureActions.get(0);
+        queuedActions.offer(capture);
+        nonAlliedProperties.remove(capture.getTargetLocation());
         break; // One action per call to this function.
       }
 
