@@ -323,8 +323,8 @@ public class Muriel implements AIController
 
       //////////////////////////////////////////////////////////////////
       // We didn't find an immediate ATTACK or CAPTURE action we can do.
-      // Things that can capture; go find something to capture.
-      if( unit.model.hasActionType(ActionType.CAPTURE) )
+      // Things that can capture; go find something to capture, if you are moderately healthy.
+      if( unit.model.hasActionType(ActionType.CAPTURE) && (unit.getHP() >= 7) )
       {
         log(String.format("Seeking capture target for %s", unit.toStringWithLocation()));
         XYCoord unitCoords = new XYCoord(unit.x, unit.y);
