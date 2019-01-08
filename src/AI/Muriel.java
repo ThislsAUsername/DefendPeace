@@ -296,7 +296,6 @@ public class Muriel implements AIController
         BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, true), target, environment);
         double hpDamage = Math.min(params.calculateDamage(), target.getPreciseHP());
         double damageValue = (target.model.moneyCost/10) * hpDamage;
-        log(String.format("  Attack option: %s for %s damage=%s funds", action, hpDamage, damageValue));
 
         // Find the attack that causes the most monetary damage, provided it's at least a halfway decent idea.
         if( (damageValue > maxDamageValue) && shouldAttack(unit, target, gameMap) )
