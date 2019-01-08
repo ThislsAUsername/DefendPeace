@@ -191,7 +191,7 @@ public class Muriel implements AIController
       //////////////////////////////////////////////////////////////////
       // If we are currently healing, stick around, unless that would stem the tide of reinforcements.
       Location loc = gameMap.getLocation(unit.x, unit.y);
-      if( (unit.getHP() <= 8) && unit.model.canRepairOn(loc) && (loc.getEnvironment().terrainType != TerrainType.FACTORY) )
+      if( (unit.getHP() <= 8) && unit.model.canRepairOn(loc) && (loc.getEnvironment().terrainType != TerrainType.FACTORY) && (loc.getOwner() == unit.CO) )
       {
         log(String.format("%s is damaged and on a repair tile. Will continue to repair for now.", unit.toStringWithLocation()));
         ArrayList<GameActionSet> actionSet = unit.getPossibleActions(gameMap, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
@@ -251,7 +251,8 @@ public class Muriel implements AIController
       if( shouldResupply )
       {
         ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
-        Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), stations);
+        XYCoord unitCoords = new XYCoord(unit.x, unit.y);
+        Utils.sortLocationsByDistance(unitCoords, stations);
         for( XYCoord coord : stations )
         {
           Location station = gameMap.getLocation(coord);
@@ -261,7 +262,7 @@ public class Muriel implements AIController
             // Plot a course towards a repair station, but only apply the action if it moves us.
             // If a unit is stuck on the front lines and can't get away past reinforcements, just gotta knuckle up.
             GameAction goHome = AIUtils.moveTowardLocation(unit, coord, gameMap);
-            if( !goHome.getMoveLocation().equals(new XYCoord(unit.x, unit.y)) )
+            if( !goHome.getMoveLocation().equals(unitCoords) )
             {
               log(String.format("  Heading towards %s to resupply", coord));
               queuedActions.offer(goHome);
@@ -323,12 +324,13 @@ public class Muriel implements AIController
       if( unit.model.hasActionType(ActionType.CAPTURE) )
       {
         log(String.format("Seeking capture target for %s", unit.toStringWithLocation()));
-        Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), nonAlliedProperties);
+        XYCoord unitCoords = new XYCoord(unit.x, unit.y);
+        Utils.sortLocationsByDistance(unitCoords, nonAlliedProperties);
         for(int i = 0; i < nonAlliedProperties.size(); ++i)
         {
           XYCoord coord = nonAlliedProperties.get(i);
-          GameAction move = AIUtils.moveTowardLocation(unit, coord, gameMap); // Try to move there, but try not to sit on a factory.
-          if( null != move && (gameMap.getLocation(move.getMoveLocation()).getEnvironment().terrainType != TerrainType.FACTORY) )
+          GameAction move = AIUtils.moveTowardLocation(unit, coord, gameMap); // Try to move there, but try not to sit on a factory, and don't just sit still.
+          if( null != move && (gameMap.getLocation(move.getMoveLocation()).getEnvironment().terrainType != TerrainType.FACTORY) && !unitCoords.equals(move.getMoveLocation()))
           {
             log(String.format("  Found %s at %s", gameMap.getLocation(coord).getEnvironment().terrainType, coord));
             queuedActions.offer(move);
