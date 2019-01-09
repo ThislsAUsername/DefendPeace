@@ -65,7 +65,7 @@ public abstract class GameMap
   {}
 
   /**
-   * Reveals fog along the given unit, if applicable
+   * Reveals fog around the given unit, if applicable
    */
   public void revealFog(Unit scout)
   {}
