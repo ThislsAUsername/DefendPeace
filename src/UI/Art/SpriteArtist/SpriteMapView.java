@@ -168,7 +168,6 @@ public class SpriteMapView extends MapView
   {
     if( null != newEvents )
     {
-      System.out.println("DEBUG: Received " + newEvents.size() + " events to animate.");
       eventsToAnimate.addAll(newEvents);
 
       // If we aren't currently animating anything, load up the next animation.

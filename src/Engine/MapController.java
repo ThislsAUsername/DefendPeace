@@ -450,7 +450,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
    */
   private void changeInputMode(InputMode input)
   {
-    System.out.println("Moving to InputMode " + input );
     // Assign the new input mode.
     inputMode = input;
 
