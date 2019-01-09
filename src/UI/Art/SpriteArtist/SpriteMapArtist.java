@@ -22,6 +22,9 @@ public class SpriteMapArtist
   private int drawScale;
   private int tileSize;
 
+  private Color FOG_COLOR = new Color(128, 128, 128, 160);
+  private Color HIGHLIGHT_COLOR = new Color(255, 255, 255, 160);
+
   FillRectMapArtist backupArtist; // TODO: Make this obsolete.
 
   public SpriteMapArtist(GameInstance game, MapView view)
@@ -58,7 +61,7 @@ public class SpriteMapArtist
     
     if( gameMap.isLocationFogged(x, y) )
     {
-      g.setColor(new Color(128, 128, 128, 160));
+      g.setColor(FOG_COLOR);
       g.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
     }
   }
@@ -155,7 +158,7 @@ public class SpriteMapArtist
           Terrain.Location locus = gameMap.getLocation(w, h);
           if( locus.isHighlightSet() )
           {
-            g.setColor(new Color(255, 255, 255, 160));
+            g.setColor(HIGHLIGHT_COLOR);
             g.fillRect(w * tileSize, h * tileSize, tileSize, tileSize);
           }
         }
