@@ -19,6 +19,8 @@ public class GameInstance
 
   HashMap<Integer, XYCoord> playerCursors = null;
 
+  private boolean isFogEnabled;
+
   public GameInstance(MapMaster map, Commander[] cos)
   {
     if( cos.length < 2 )
@@ -36,7 +38,7 @@ public class GameInstance
     {
       if( commanders[i].HQLocation != null )
       {
-        commanders[i].myView = new MapWindow(map, commanders[i]);
+        commanders[i].myView = new MapWindow(map, commanders[i], isFogEnabled);
         playerCursors.put(i, commanders[i].HQLocation);
       }
       else
@@ -46,6 +48,11 @@ public class GameInstance
       }
       GameEventListener.registerEventListener(commanders[i]);
     }
+  }
+
+  public boolean isFogEnabled()
+  {
+    return isFogEnabled;
   }
 
   public void setCursorLocation(XYCoord loc)

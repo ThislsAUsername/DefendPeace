@@ -11,16 +11,23 @@ public class MapWindow extends GameMap
 {
   MapMaster master;
   Commander viewer;
+  boolean isFogEnabled;
   private boolean[][] isFogged;
   public CommandingOfficers.Commander[] commanders;
   private Commander[][] lastOwnerSeen;
 
   public MapWindow(MapMaster pMaster, Commander pViewer)
   {
+    this( pMaster, pViewer, false);
+  }
+
+  public MapWindow(MapMaster pMaster, Commander pViewer, boolean fog)
+  {
     super(pMaster.mapWidth, pMaster.mapHeight);
     master = pMaster;
     viewer = pViewer;
     commanders = master.commanders;
+    isFogEnabled = fog;
     isFogged = new boolean[mapWidth][mapHeight];
 
     // We start with knowledge of what properties everyone starts with.
@@ -120,7 +127,7 @@ public class MapWindow extends GameMap
   }
   public boolean isLocationFogged(int x, int y)
   {
-    return (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) ? true : isFogged[x][y];
+    return isFogEnabled && ((x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) ? true : isFogged[x][y]);
   }
 
   public void resetFog()
