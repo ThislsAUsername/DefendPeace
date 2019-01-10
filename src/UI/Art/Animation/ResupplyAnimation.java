@@ -74,7 +74,7 @@ public class ResupplyAnimation implements GameAnimation
     int tileCenterY = (mapLocation.yCoord * tileSize) + (tileSize / 2);
 
     // Show the menu expanding from nothing, then disappearing
-    BufferedImage menu = null;
+    BufferedImage menu = SpriteLibrary.createTransparentSprite(tileSize, tileSize);
     if( animTime < signUpBegin )
     {
       // The sign is popping into existence.
@@ -99,7 +99,7 @@ public class ResupplyAnimation implements GameAnimation
 
       menu = SpriteUIUtils.makeTextFrame(MENUBGCOLOR, MENUFRAMECOLOR, width / 2, height / 2);
     }
-    SpriteLibrary.drawImageCenteredOnPoint(g, menu, tileCenterX, tileCenterY, drawScale);
+    SpriteLibrary.drawImageCenteredOnPoint(g, menu, tileCenterX, tileCenterY, 1); // image generation accounts for drawscale, so don't scale image
 
     return animTime > signGone;
   }
