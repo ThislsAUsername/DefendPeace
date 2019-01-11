@@ -42,7 +42,7 @@ public class SpriteMapArtist
 
     baseMapImage = new BufferedImage(gameMap.mapWidth * tileSize, gameMap.mapHeight * tileSize, BufferedImage.TYPE_INT_RGB);
 
-    // This nice little hack will semi-randomly decide whether you are playing this game with fog.
+    // This nice little hack will semi-randomly decide what color fog is used for this game.
     // It switches every 10 seconds, so two games started 10 seconds apart will have different fog settings.
     String strTime = Long.toString(System.currentTimeMillis());
     if( Integer.parseInt(new String() + (strTime.charAt(strTime.length()-5))) %2 == 0 )
