@@ -267,11 +267,6 @@ public class SpriteMapView extends MapView
       if( drawY > maxDrawY ) drawY = maxDrawY;
       if( drawY < 0 ) drawY = 0;
 
-      mapArtist.drawBaseTerrain(mapGraphics, drawX, drawY, mapViewWidth, mapViewHeight);
-
-      // Update the central sprite indices so animations happen in sync.
-      updateAnimationIndices();
-
       // Here are the fog-drawing rules. If there are:
       //   zero humans - spectating - draw everything the current player sees.
       //   one human - player vs ai - draw everything the human player could see.
@@ -285,6 +280,11 @@ public class SpriteMapView extends MapView
       }
       // Don't let humans peek in on what the AI is doing.
       boolean drawFogEverywhere = myGame.isFogEnabled() && (numHumans > 1) && (myGame.activeCO.isAI());
+
+      mapArtist.drawBaseTerrain(mapGraphics, gameMap, drawX, drawY, mapViewWidth, mapViewHeight, drawFogEverywhere);
+
+      // Update the central sprite indices so animations happen in sync.
+      updateAnimationIndices();
 
       // Draw units, buildings, trees, etc.
       drawUnitsAndMapObjects(mapGraphics, gameMap, drawFogEverywhere);
