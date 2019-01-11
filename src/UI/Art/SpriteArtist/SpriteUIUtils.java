@@ -56,7 +56,11 @@ public class SpriteUIUtils
     int menuHeight = (( items.isEmpty() ) ? 0 : getMenuTextHeightPx(items, menuTextHeight)) + vBuffer * 2;
 
     // Build our image.
-    BufferedImage menuImage = SpriteLibrary.createDefaultBlankSprite(menuWidth, menuHeight);
+    BufferedImage menuImage = null;
+    if( menuWidth == 0 || menuHeight == 0 )
+      menuImage = SpriteLibrary.createDefaultBlankSprite(1, 1); // zero-dimensioned images aren't kosher
+    else
+      menuImage = SpriteLibrary.createDefaultBlankSprite(menuWidth, menuHeight);
     Graphics g = menuImage.getGraphics();
 
     // Draw the nice box for our text.
