@@ -216,7 +216,7 @@ public class Muriel implements AIController
         if( queuedActions.isEmpty() )
         {
           // We didn't find someone adjacent to smash, so just sit tight for now.
-          queuedActions.offer(new GameAction.WaitAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
+          queuedActions.offer(new GameAction.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
         }
         break;
       } // ~Continue repairing if in a depot.
@@ -237,7 +237,7 @@ public class Muriel implements AIController
         shouldResupply = true;
       }
       // If we are out of ammo.
-      if( unit.weapons != null && unit.weapons.length > 0 )
+      if( unit.weapons != null && unit.weapons.size() > 0 )
       {
         for( Weapon weap : unit.weapons )
         {
@@ -376,7 +376,7 @@ public class Muriel implements AIController
         // Couldn't find any capture or attack actions. This unit is
         // either a transport, or stranded on an island somewhere.
         log(String.format("Could not find an action for %s. Waiting", unit.toStringWithLocation()));
-        queuedActions.offer(new GameAction.WaitAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
+        queuedActions.offer(new GameAction.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
       }
     } // ~Unit action loop
 
@@ -525,7 +525,7 @@ public class Muriel implements AIController
     // Convert our PurchaseOrders into GameActions.
     for( PurchaseOrder order : shoppingCart )
     {
-      queuedActions.offer(new GameAction.UnitProductionAction(gameMap, myCo, order.model, order.location.getCoordinates()));
+      queuedActions.offer(new GameAction.UnitProductionAction(myCo, order.model, order.location.getCoordinates()));
     }
   }
 
@@ -546,8 +546,9 @@ public class Muriel implements AIController
       propertyCounts = new HashMap<Terrain.TerrainType, Integer>();
       modelToTerrainMap = new HashMap<UnitModel, TerrainType>();
 
-      for( Location loc : co.ownedProperties )
+      for( XYCoord xyc : co.ownedProperties )
       {
+        Location loc = co.myView.getLocation(xyc);
         if( gameMap.isLocationEmpty(loc.getCoordinates()))
         {
           ArrayList<UnitModel> models = co.getShoppingList(loc);

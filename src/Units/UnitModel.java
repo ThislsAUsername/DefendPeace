@@ -183,7 +183,7 @@ public class UnitModel
   public boolean hasDirectFireWeapon()
   {
     boolean hasDirect = false;
-    if(weaponModels != null && weaponModels.length > 0)
+    if(weaponModels != null && weaponModels.size() > 0)
     {
       for( WeaponModel wm : weaponModels )
       {
