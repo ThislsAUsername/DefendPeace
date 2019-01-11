@@ -192,18 +192,31 @@ public class SpriteMapView extends MapView
    */
   private void loadNextEventAnimation()
   {
+    // Here are the fog-drawing rules. If there are:
+    //   zero humans - spectating - draw everything the current player sees.
+    //   one human - player vs ai - draw everything the human player could see.
+    //   2+ humans - player vs player - draw what the current player sees, IFF the player is human.
+    GameMap gameMap = myGame.activeCO.myView; // Start by assuming zero humans.
+    int numHumans = countHumanPlayers(myGame);
+    if( 1 == numHumans )
+    {
+      // Since there is only one human, always use the human's vision to determine what is drawn.
+      gameMap = getHumanPlayerMap(myGame);
+    }
+    // Don't let humans peek in on what the AI is doing.
+    boolean drawFogEverywhere = myGame.isFogEnabled() && (numHumans > 1) && (myGame.activeCO.isAI());
+
     // Keep pulling events off the queue until we get one we can draw.
     while( null == currentAnimation && !eventsToAnimate.isEmpty() )
     {
       GameEvent event = eventsToAnimate.peek();
-      if( null != event )
+      currentAnimation = event.getEventAnimation( this );
+      boolean isEventHidden = !(null == event.getStartPoint()) && gameMap.isLocationFogged(event.getStartPoint()) && gameMap.isLocationFogged(event.getEndPoint());
+      if( null == currentAnimation || isEventHidden || drawFogEverywhere )
       {
-        currentAnimation = event.getEventAnimation( this );
-        if( null == currentAnimation )
-        {
-          // There isn't an animation for this event. Just notify the controller.
-          mapController.animationEnded( eventsToAnimate.poll(), eventsToAnimate.isEmpty() );
-        }
+        currentAnimation = null;
+        // There isn't an animation for this event, or it's happening out of view. Just notify the controller.
+        mapController.animationEnded( eventsToAnimate.poll(), eventsToAnimate.isEmpty() );
       }
     }
   }

@@ -1,5 +1,6 @@
 package Engine.GameEvents;
 
+import Engine.XYCoord;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -36,5 +37,17 @@ public class UnitDieEvent implements GameEvent
     // Remove the Unit from the map and from the CO list.
     gameMap.removeUnit(unit);
     unit.CO.units.remove(unit);
+  }
+
+  @Override
+  public XYCoord getStartPoint()
+  {
+    return new XYCoord(unit.x, unit.y);
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return new XYCoord(unit.x, unit.y);
   }
 }

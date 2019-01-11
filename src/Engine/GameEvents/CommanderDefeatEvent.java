@@ -1,6 +1,7 @@
 package Engine.GameEvents;
 
 import CommandingOfficers.Commander;
+import Engine.XYCoord;
 import Terrain.Environment;
 import Terrain.Location;
 import Terrain.MapMaster;
@@ -72,4 +73,16 @@ public class CommanderDefeatEvent implements GameEvent
       } // ~width loop
     } // ~height loop
   } // ~performEvent
+
+  @Override
+  public XYCoord getStartPoint()
+  {
+    return null;
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return null;
+  }
 }

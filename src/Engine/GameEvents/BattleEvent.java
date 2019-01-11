@@ -1,5 +1,6 @@
 package Engine.GameEvents;
 
+import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Terrain.GameMap;
@@ -16,11 +17,13 @@ import Units.Unit;
 public class BattleEvent implements GameEvent
 {
   private final BattleSummary battleInfo;
+  private final XYCoord defenderCoords;
 
   public BattleEvent(Unit attacker, Unit defender, int attackerX, int attackerY, GameMap map)
   {
     // Calculate the result of the battle immediately. This will allow us to plan the animation.
     battleInfo = CombatEngine.calculateBattleResults(attacker, defender, map, attackerX, attackerY);
+    defenderCoords = new XYCoord(defender.x, defender.y);
   }
 
   public boolean attackerDies()
@@ -71,5 +74,17 @@ public class BattleEvent implements GameEvent
       gameMap.removeUnit(defender);
       defender.CO.units.remove(defender);
     }
+  }
+
+  @Override
+  public XYCoord getStartPoint()
+  {
+    return defenderCoords;
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return defenderCoords;
   }
 }

@@ -53,4 +53,16 @@ public class UnloadEvent implements GameEvent
       if( gameMap.getLocation(dropLoc).getResident() != null ) System.out.println("          Unload location is not empty.");
     }
   }
+
+  @Override
+  public XYCoord getStartPoint()
+  {
+    return new XYCoord(transport.x, transport.y);
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return dropLoc;
+  }
 }

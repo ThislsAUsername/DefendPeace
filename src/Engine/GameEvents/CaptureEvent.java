@@ -1,5 +1,6 @@
 package Engine.GameEvents;
 
+import Engine.XYCoord;
 import Terrain.Location;
 import Terrain.MapMaster;
 import UI.MapView;
@@ -63,5 +64,17 @@ public class CaptureEvent implements GameEvent
     {
       unit.capture(gameMap.getLocation(unit.x, unit.y));
     }
+  }
+
+  @Override
+  public XYCoord getStartPoint()
+  {
+    return (null != location) ? location.getCoordinates() : null;
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return (null != location) ? location.getCoordinates() : null;
   }
 }

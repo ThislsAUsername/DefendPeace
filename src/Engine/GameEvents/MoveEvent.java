@@ -2,6 +2,7 @@ package Engine.GameEvents;
 
 import CommandingOfficers.Commander;
 import Engine.Path;
+import Engine.XYCoord;
 import Terrain.Location;
 import Terrain.MapMaster;
 import UI.MapView;
@@ -73,5 +74,17 @@ public class MoveEvent implements GameEvent
         System.out.println("WARNING! Unable to move " + unit.model.type + " to (" + endpoint.x + ", " + endpoint.y + ")");
       }
     }
+  }
+
+  @Override
+  public XYCoord getStartPoint()
+  {
+    return new XYCoord(unitPath.getWaypoint(0).x, unitPath.getWaypoint(0).y);
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return new XYCoord(unitPath.getEnd().x, unitPath.getEnd().y);
   }
 }

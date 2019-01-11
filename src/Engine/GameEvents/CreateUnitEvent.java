@@ -60,4 +60,16 @@ public class CreateUnitEvent implements GameEvent
       System.out.println("Warning! Attempting to build unit with insufficient funds.");
     }
   }
+
+  @Override
+  public XYCoord getStartPoint()
+  {
+    return myBuildCoords;
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return myBuildCoords;
+  }
 }
