@@ -22,8 +22,8 @@ public class SpriteMapArtist
   private int drawScale;
   private int tileSize;
 
-  private Color FOG_COLOR = new Color(128, 128, 128, 160);
-  private Color HIGHLIGHT_COLOR = new Color(255, 255, 255, 160);
+  private Color FOG_COLOR;
+  private Color HIGHLIGHT_COLOR;
 
   FillRectMapArtist backupArtist; // TODO: Make this obsolete.
 
@@ -41,6 +41,20 @@ public class SpriteMapArtist
     backupArtist.setView(myView);
 
     baseMapImage = new BufferedImage(gameMap.mapWidth * tileSize, gameMap.mapHeight * tileSize, BufferedImage.TYPE_INT_RGB);
+
+    // This nice little hack will semi-randomly decide whether you are playing this game with fog.
+    // It switches every 10 seconds, so two games started 10 seconds apart will have different fog settings.
+    String strTime = Long.toString(System.currentTimeMillis());
+    if( Integer.parseInt(new String() + (strTime.charAt(strTime.length()-5))) %2 == 0 )
+    {
+      FOG_COLOR = new Color(255, 255, 255, 200); // white
+      HIGHLIGHT_COLOR = new Color(128, 128, 255, 112); // bluish
+    }
+    else
+    {
+      FOG_COLOR = new Color(72, 72, 96, 200); // dark blue
+      HIGHLIGHT_COLOR = new Color(255, 255, 255, 160); // white
+    }
 
     // Build base map image.
     buildMapImage();
