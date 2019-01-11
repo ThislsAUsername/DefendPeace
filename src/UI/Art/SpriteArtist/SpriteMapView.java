@@ -258,14 +258,28 @@ public class SpriteMapView extends MapView
       // Update the central sprite indices so animations happen in sync.
       updateAnimationIndices();
 
+      // Here are the fog-drawing rules. If there are:
+      //   zero humans - spectating - draw everything the current player sees.
+      //   one human - player vs ai - draw everything the human player could see.
+      //   2+ humans - player vs player - draw what the current player sees, IFF the player is human.
+      GameMap gameMap = myGame.activeCO.myView; // Start by assuming zero humans.
+      int numHumans = countHumanPlayers(myGame);
+      if( 1 == numHumans )
+      {
+        // Since there is only one human, always use the human's vision to determine what is drawn.
+        gameMap = getHumanPlayerMap(myGame);
+      }
+      // Don't let humans peek in on what the AI is doing.
+      boolean drawFogEverywhere = myGame.isFogEnabled() && (numHumans > 1) && (myGame.activeCO.isAI());
+
       // Draw units, buildings, trees, etc.
-      drawUnitsAndMapObjects(mapGraphics);
+      drawUnitsAndMapObjects(mapGraphics, gameMap, drawFogEverywhere);
 
       // Apply any relevant map highlight.
       mapArtist.drawHighlights(mapGraphics);
 
       // Draw Unit icons on top of everything, to make sure they are seen clearly.
-      drawUnitIcons(mapGraphics);
+      if( !drawFogEverywhere) drawUnitIcons(mapGraphics, gameMap);
 
       // Get a reference to the current action being built, if one exists.
       Unit currentActor = mapController.getContemplatedActor();
@@ -403,9 +417,8 @@ public class SpriteMapView extends MapView
    * NOTE: Does not draw the currently-active unit, if one exists; that will
    * be drawn later so it is more visible, and so it can be animated.
    */
-  private void drawUnitsAndMapObjects(Graphics g)
+  private void drawUnitsAndMapObjects(Graphics g, GameMap gameMap, boolean drawFogEverywhere)
   {
-    GameMap gameMap = myGame.activeCO.myView;
     // Draw terrain objects and units in order so they overlap correctly.
     // Only bother iterating over the visible map space (plus a 2-square border).
     int drawY = (int)mapViewDrawY;
@@ -418,9 +431,9 @@ public class SpriteMapView extends MapView
         // ensure smooth scrolling, make sure we aren't running off the edge of the map.
         if(gameMap.isLocationValid(x, y))
         {
-          // Draw any terrain object here, followed by any unit present.
-          mapArtist.drawTerrainObject(g, x, y);
-          if( !gameMap.isLocationEmpty(x, y) )
+          // Draw any terrain object here, followed by any unit present (provided it's not under fog).
+          mapArtist.drawTerrainObject(g, gameMap, x, y, drawFogEverywhere);
+          if( !gameMap.isLocationEmpty(x, y) && !drawFogEverywhere )
           {
             Unit resident = gameMap.getLocation(x, y).getResident();
             // If an action is being considered, draw the active unit later, not now.
@@ -440,18 +453,15 @@ public class SpriteMapView extends MapView
    * NOTE: Does not draw the unit icon for the currently-active unit, if
    * one is selected; this must be done separately.
    */
-  public void drawUnitIcons(Graphics g)
+  public void drawUnitIcons(Graphics g, GameMap gameMap)
   {
-    // Get an easy reference to the map.
-    GameMap gameMap = myGame.activeCO.myView;
-
     for( int y = 0; y < gameMap.mapHeight; ++y )
     {
       for( int x = 0; x < gameMap.mapWidth; ++x )
       {
         if( !gameMap.isLocationEmpty(x, y) )
         {
-          Unit resident = myGame.gameMap.getLocation(x, y).getResident();
+          Unit resident = gameMap.getLocation(x, y).getResident();
           // If an action is being considered, draw the active unit later, not now.
           Unit currentActor = mapController.getContemplatedActor();
           if( resident != currentActor )
@@ -505,6 +515,41 @@ public class SpriteMapView extends MapView
     }
 
     CommanderOverlayArtist.drawCommanderOverlay(g, myGame.activeCO, overlayIsLeft);
+  }
+
+  /**
+   * Returns a count of the number of still-living human players in the game.
+   */
+  private int countHumanPlayers(GameInstance myGame)
+  {
+    int humans = 0;
+
+    for( Commander co : myGame.commanders )
+    {
+      if( !co.isDefeated && !co.isAI() )
+      {
+        humans++;
+      }
+    }
+    return humans;
+  }
+
+  /**
+   * Returns the map owned by the first human Commander found.
+   * Intended to be used when there is only one human player.
+   */
+  private GameMap getHumanPlayerMap(GameInstance myGame)
+  {
+    GameMap map = null;
+
+    for( Commander co : myGame.commanders )
+    {
+      if( !co.isDefeated && !co.isAI() )
+      {
+        map = co.myView;
+      }
+    }
+    return map;
   }
 
   /**

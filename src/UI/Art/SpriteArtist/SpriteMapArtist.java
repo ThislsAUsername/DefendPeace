@@ -52,14 +52,13 @@ public class SpriteMapArtist
     g.drawImage(baseMapImage, viewX, viewY, viewX + viewW, viewY + viewH, viewX, viewY, viewX + viewW, viewY + viewH, null);
   }
 
-  public void drawTerrainObject(Graphics g, int x, int y)
+  public void drawTerrainObject(Graphics g, GameMap gameMap, int x, int y, boolean drawFogAnyway)
   {
-    GameMap gameMap = myGame.activeCO.myView;
     TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(x, y));
 
     spriteSet.drawTerrainObject(g, gameMap, x, y, drawScale);
     
-    if( gameMap.isLocationFogged(x, y) )
+    if( gameMap.isLocationFogged(x, y) || drawFogAnyway )
     {
       g.setColor(FOG_COLOR);
       g.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
