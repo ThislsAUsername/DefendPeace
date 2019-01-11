@@ -19,6 +19,7 @@ import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.UnloadEvent;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
@@ -37,7 +38,7 @@ public interface GameAction
    * Returns a GameEventQueue with the events that make up this action. If the action
    * was constructed incorrectly, this should return an empty GameEventQueue.
    */
-  public abstract GameEventQueue getEvents(GameMap map);
+  public abstract GameEventQueue getEvents(MapMaster map);
   public abstract XYCoord getMoveLocation();
   public abstract XYCoord getTargetLocation();
   public abstract ActionType getType();
@@ -76,7 +77,7 @@ public interface GameAction
     }
 
     @Override
-    public GameEventQueue getEvents(GameMap gameMap)
+    public GameEventQueue getEvents(MapMaster gameMap)
     {
       // ATTACK actions consist of
       //   MOVE
@@ -179,7 +180,7 @@ public interface GameAction
     }
 
     @Override
-    public GameEventQueue getEvents(GameMap gameMap)
+    public GameEventQueue getEvents(MapMaster gameMap)
     {
       // BUILDUNIT actions consist of
       //   TODO: Consider introducing TRANSFERFUNDS for the fiscal part.
@@ -259,7 +260,7 @@ public interface GameAction
     }
 
     @Override
-    public GameEventQueue getEvents(GameMap map)
+    public GameEventQueue getEvents(MapMaster map)
     {
       // CAPTURE actions consist of
       //   MOVE
@@ -351,7 +352,7 @@ public interface GameAction
     }
 
     @Override
-    public GameEventQueue getEvents(GameMap gameMap)
+    public GameEventQueue getEvents(MapMaster gameMap)
     {
       // WAIT actions consist of
       //   MOVE
@@ -419,7 +420,7 @@ public interface GameAction
     }
 
     @Override
-    public GameEventQueue getEvents(GameMap gameMap)
+    public GameEventQueue getEvents(MapMaster gameMap)
     {
       // LOAD actions consist of
       //   MOVE
@@ -528,7 +529,7 @@ public interface GameAction
     }
 
     @Override
-    public GameEventQueue getEvents(GameMap gameMap)
+    public GameEventQueue getEvents(MapMaster gameMap)
     {
       // UNLOAD actions consist of
       //   MOVE (transport)
@@ -644,7 +645,7 @@ public interface GameAction
     }
 
     @Override
-    public GameEventQueue getEvents(GameMap map)
+    public GameEventQueue getEvents(MapMaster map)
     {
       // RESUPPLY actions consist of
       //   [MOVE]
@@ -739,7 +740,7 @@ public interface GameAction
     }
 
     @Override
-    public GameEventQueue getEvents(GameMap map)
+    public GameEventQueue getEvents(MapMaster map)
     {
       return abilityEvents;
     }

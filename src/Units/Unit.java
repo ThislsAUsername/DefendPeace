@@ -14,6 +14,7 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.ResupplyEvent;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.MapMaster;
 import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
 import Units.Weapons.WeaponModel;
@@ -67,7 +68,7 @@ public class Unit
    * @param map
    * @param events
    */
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     // Make a queue to return any init events.
     GameEventQueue events = new GameEventQueue();

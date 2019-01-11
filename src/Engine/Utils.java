@@ -10,6 +10,7 @@ import Engine.Path.PathNode;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel.ChassisEnum;
 import Units.Weapons.Weapon;
@@ -579,7 +580,7 @@ public class Utils
    * @param eventQueue Will be given the new MoveEvent.
    * @return true if the move is created as specified, false if the path was shortened.
    */
-  public static boolean enqueueMoveEvent(GameMap gameMap, Unit unit, Path movePath, GameEventQueue eventQueue)
+  public static boolean enqueueMoveEvent(MapMaster gameMap, Unit unit, Path movePath, GameEventQueue eventQueue)
   {
     boolean originalPathOK = true;
     if( Utils.pathCollides(gameMap, unit, movePath) )
