@@ -216,7 +216,7 @@ public class SpenderAI implements AIController
                   && (path.getPathLength() > 0)); // We can reach it.
               log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal,
                   (validTarget ? "Yes" : "No")));
-            } while (!validTarget && (index < unownedProperties.size())); // Loop until we run out of properties to check.
+            } while (!validTarget && (index < validTargets.size())); // Loop until we run out of properties to check.
 
             if( !validTarget )
             {
