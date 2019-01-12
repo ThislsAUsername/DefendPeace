@@ -554,18 +554,13 @@ public interface GameAction
         // Attempt to move the transport to the target location.
         if( Utils.enqueueMoveEvent(gameMap, actor, movePath, unloadEvents) )
         {
-          // Debark the passengers. If a unit can't land, stop unloading.
+          // Debark the passengers. Unload all passengers you can, regardless of order.
           for( Unit unit : myDropoffs.keySet() )
           {
             XYCoord dropXY = myDropoffs.get(unit);
             if( gameMap.isLocationEmpty(actor, dropXY) )
             {
               unloadEvents.add(new UnloadEvent(actor, unit, myDropoffs.get(unit)));
-            }
-            else
-            {
-              // Hah, last guy got stuck in the chute. Everyone else is trapped behind them still. Bummer.
-              break;
             }
           }
         }
