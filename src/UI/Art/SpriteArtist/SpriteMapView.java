@@ -18,6 +18,7 @@ import Terrain.GameMap;
 import UI.CO_InfoMenu;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
+import UI.Art.Animation.NoAnimation;
 import UI.Art.Animation.NobunagaBattleAnimation;
 import UI.Art.Animation.ResupplyAnimation;
 import Units.Unit;
@@ -213,10 +214,14 @@ public class SpriteMapView extends MapView
       GameEvent event = eventsToAnimate.peek();
       currentAnimation = event.getEventAnimation( this );
       boolean isEventHidden = !(null == event.getStartPoint()) && gameMap.isLocationFogged(event.getStartPoint()) && gameMap.isLocationFogged(event.getEndPoint());
-      if( null == currentAnimation || isEventHidden || drawFogEverywhere )
+      if( null != currentAnimation && (isEventHidden || drawFogEverywhere) )
       {
-        currentAnimation = null;
-        // There isn't an animation for this event, or it's happening out of view. Just notify the controller.
+        // If we want to animate something, but it shouldn't be shown, animate nothing instead.
+        currentAnimation = new NoAnimation();
+      }
+      if( null == currentAnimation )
+      {
+        // There isn't an animation for this event. Just notify the controller.
         mapController.animationEnded( eventsToAnimate.poll(), eventsToAnimate.isEmpty() );
       }
     }
