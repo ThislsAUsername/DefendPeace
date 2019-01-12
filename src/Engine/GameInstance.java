@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
+import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
@@ -11,6 +12,7 @@ import Terrain.MapWindow;
 public class GameInstance
 {
   public Terrain.MapMaster gameMap;
+  public GameMap foggedMap;
   public Commander[] commanders;
   private int activeCoNum;
   public Commander activeCO = null;
@@ -29,6 +31,8 @@ public class GameInstance
     }
 
     gameMap = map;
+    foggedMap = new MapWindow(map, null, isFogEnabled);
+    foggedMap.resetFog();
     commanders = cos;
     activeCoNum = -1; // No commander is active yet.
 
@@ -149,5 +153,40 @@ public class GameInstance
     {
       GameEventListener.unregisterEventListener(co);
     }
+  }
+
+  /**
+   * Returns a count of the number of still-living human players in the game.
+   */
+  public int countHumanPlayers()
+  {
+    int humans = 0;
+
+    for( Commander co : commanders )
+    {
+      if( !co.isDefeated && !co.isAI() )
+      {
+        humans++;
+      }
+    }
+    return humans;
+  }
+
+  /**
+   * Returns the map owned by the first human Commander found.
+   * Intended to be used when there is only one human player.
+   */
+  public GameMap getHumanPlayerMap()
+  {
+    GameMap map = null;
+
+    for( Commander co : commanders )
+    {
+      if( !co.isDefeated && !co.isAI() )
+      {
+        map = co.myView;
+      }
+    }
+    return map;
   }
 }

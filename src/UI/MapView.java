@@ -6,6 +6,7 @@ import Engine.Path;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
+import Terrain.GameMap;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
 
@@ -17,6 +18,8 @@ public abstract class MapView implements IView
   protected GameAnimation currentAnimation = null;
 
   protected MapController mapController = null;
+  
+  public GameMap gameMap = null; // The current map to use for drawing. Game logic should set this as appropriate. 
 
   public void setController(MapController controller)
   {

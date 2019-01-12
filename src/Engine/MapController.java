@@ -62,6 +62,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       aiming = false;
     }
   }
+
   ContemplatedAction contemplatedAction;
 
   public MapController(GameInstance game, MapView view)
@@ -93,7 +94,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   {
     boolean exitMap = false;
 
-    switch(inputMode)
+    switch (inputMode)
     {
       case ANIMATION:
         if( InputAction.BACK == input || InputAction.ENTER == input )
@@ -137,7 +138,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   {
     GameInputHandler.InputType mode = myGameInputHandler.getInputType();
 
-    switch( mode )
+    switch (mode)
     {
       case FREE_TILE_SELECT:
         handleFreeTileSelect(input);
@@ -220,7 +221,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         Unit actor = loc.getResident();
 
         // If there is a unit that is is ready to move, or if it is someone else's, then record it so we can build the move path.
-        if( null != actor && ((actor.CO == myGame.activeCO && !actor.isTurnOver) || (actor.CO != myGame.activeCO)))
+        if( null != actor && ((actor.CO == myGame.activeCO && !actor.isTurnOver) || (actor.CO != myGame.activeCO)) )
         {
           contemplatedAction.actor = actor;
         }
@@ -242,7 +243,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   /** Force the user to select one map tile from the InputStateHandler's selection. */
   private void handleConstrainedTileSelect(InputHandler.InputAction input)
   {
-    switch(input)
+    switch (input)
     {
       case ENTER:
         myGameInputHandler.select(new XYCoord(myGame.getCursorX(), myGame.getCursorY()));
@@ -254,7 +255,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case LEFT:
       case DOWN:
       case RIGHT:
-        if( myGameInputHandler.getCoordinateOptions().size() == 0)
+        if( myGameInputHandler.getCoordinateOptions().size() == 0 )
         {
           // If this option doesn't require a target, it should have been executed from handleActionMenuInput().
           // This function is just for target selection/choosing one action from the set.
@@ -266,7 +267,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         myGame.setCursorLocation(targetLocations.get(myGameInputOptionSelector.getSelectionNormalized()));
         break;
       case NO_ACTION:
-      case SEEK:     // Seek does nothing in this input state.
+      case SEEK: // Seek does nothing in this input state.
       default:
     }
   }
@@ -383,7 +384,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     myGame.gameMap.clearAllHighlights();
     currentMenu = null;
 
-    switch( inputType )
+    switch (inputType)
     {
       case CONSTRAINED_TILE_SELECT:
         // Set the target-location highlights.
@@ -393,7 +394,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
           myGame.gameMap.getLocation(targ).setHighlight(true);
         }
         // Create an option selector to keep track of where we are.
-        myGame.setCursorLocation(myGameInputHandler.getCoordinateOptions().get(myGameInputOptionSelector.getSelectionNormalized()));
+        myGame
+            .setCursorLocation(myGameInputHandler.getCoordinateOptions().get(myGameInputOptionSelector.getSelectionNormalized()));
         contemplatedAction.aiming = true;
         break;
       case MENU_SELECT:
@@ -440,8 +442,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
         isInCoInfoMenu = true;
         myGameInputHandler.reset(); // CO_INFO is a terminal state. Reset the input handler.
         break;
-        default:
-          System.out.println("WARNING! Attempting to switch to unknown input type " + inputType);
+      default:
+        System.out.println("WARNING! Attempting to switch to unknown input type " + inputType);
     }
   }
 
@@ -595,8 +597,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
               endAITurn = true;
             }
           }
-          else { endAITurn = true; } // The AI can return a null action to signal the end of its turn.
-          if( endAITurn) startNextTurn();
+          else
+          {
+            endAITurn = true;
+          } // The AI can return a null action to signal the end of its turn.
+          if( endAITurn )
+            startNextTurn();
         }
         else
         {
@@ -622,6 +628,31 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     // Kick off the animation cycle, which will animate/init each unit.
     changeInputMode(InputMode.ANIMATION);
+
+    // Here are the fog-drawing rules. If there are:
+    //   zero humans - spectating - draw everything the current player sees.
+    //   one human - player vs ai - draw everything the human player could see.
+    //   2+ humans - player vs player - draw what the current player sees, IFF the player is human.
+    if( !myGame.activeCO.isAI() )
+    {
+      // Humans need to see what they can see
+      myView.gameMap = myGame.activeCO.myView;
+    }
+    else // If it's not a human, figure out how much to show.
+    {
+      int numHumans = myGame.countHumanPlayers();
+      if( 1 == numHumans )
+      {
+        // Since there is only one human, always use the human's vision to determine what is drawn.
+        myView.gameMap = myGame.getHumanPlayerMap();
+      }
+      if( myGame.isFogEnabled() && (numHumans > 1) )
+      {
+        // Hide everything during the AI's turn so the playing field is level.
+        myView.gameMap = myGame.foggedMap;
+      }
+    }
+
     myView.animate(null);
   }
 
