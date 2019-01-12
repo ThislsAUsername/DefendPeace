@@ -58,12 +58,8 @@ public class InfantrySpamAI implements AIController
       }
     }
 
-    // If the CO has enough AP, preload the CommanderAbilityAction.
-    ArrayList<CommanderAbility> abilities = myCo.getReadyAbilities();
-    if( abilities.size() > 0 )
-    {
-      actions.offer(new GameAction.AbilityAction(abilities.get(0)));
-    }
+    // Check for a turn-kickoff power
+    AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_TURN_START);
   }
 
   @Override
@@ -176,6 +172,12 @@ public class InfantrySpamAI implements AIController
       }
     }
 
+    // Check for an available buying enhancement power
+    if( actions.isEmpty() )
+    {
+      AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_PRE_BUY);
+    }
+    
     // Finally, build more infantry. We will add all build commands at once, since they can't conflict.
     if( actions.isEmpty() )
     {
@@ -197,6 +199,12 @@ public class InfantrySpamAI implements AIController
           }
         }
       }
+    }
+
+    // Check for a turn-ending power
+    if( actions.isEmpty() )
+    {
+      AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_TURN_END);
     }
 
     // Return the next action, or null if actions is empty.

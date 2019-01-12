@@ -3,9 +3,10 @@ package AI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Queue;
 
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameAction.ActionType;
 import Engine.GameActionSet;
@@ -166,5 +167,25 @@ public class AIUtils
       }
     }
     return stations;
+  }
+  
+  /**
+   * Find a usable ability that has all specified flags, and add it to the provided queue.
+   */
+  public static CommanderAbility queueCromulentAbility(Queue<GameAction> q, Commander co, int flags)
+  {
+    CommanderAbility retVal = null;
+    ArrayList<CommanderAbility> abilities = co.getReadyAbilities();
+    for( CommanderAbility ab : abilities )
+    {
+      if( flags == (ab.AIflags & flags) )
+      {
+        retVal = ab;
+        if (null != q)
+          q.offer(new GameAction.AbilityAction(ab));
+        break;
+      }
+    }
+    return retVal;
   }
 }

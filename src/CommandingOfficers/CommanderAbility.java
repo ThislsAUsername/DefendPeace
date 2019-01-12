@@ -1,13 +1,16 @@
 package CommandingOfficers;
 
-import Terrain.GameMap;
 import Terrain.MapMaster;
 
 public abstract class CommanderAbility
 {
+  public static final int PHASE_TURN_START = 1;
+  public static final int PHASE_PRE_BUY = PHASE_TURN_START << 1;
+  public static final int PHASE_TURN_END = PHASE_PRE_BUY << 1;
   public final Commander myCommander;
   protected String myName;
   private int myPowerCost;
+  public int AIflags = PHASE_TURN_START;
 
   public CommanderAbility(Commander commander, String abilityName, int powerCost)
   {
