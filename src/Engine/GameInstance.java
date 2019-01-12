@@ -12,7 +12,6 @@ import Terrain.MapWindow;
 public class GameInstance
 {
   public Terrain.MapMaster gameMap;
-  public GameMap foggedMap;
   public Commander[] commanders;
   private int activeCoNum;
   public Commander activeCO = null;
@@ -31,8 +30,6 @@ public class GameInstance
     }
 
     gameMap = map;
-    foggedMap = new MapWindow(map, null, isFogEnabled);
-    foggedMap.resetFog();
     commanders = cos;
     activeCoNum = -1; // No commander is active yet.
 

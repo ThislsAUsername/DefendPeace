@@ -9,6 +9,7 @@ import Engine.Combat.BattleSummary;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
+import Terrain.MapWindow;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
 
@@ -20,6 +21,8 @@ public abstract class MapView implements IView
   protected GameAnimation currentAnimation = null;
 
   protected MapController mapController = null;
+  
+  protected GameMap foggedMap;
 
   public void setController(MapController controller)
   {
@@ -124,7 +127,12 @@ public abstract class MapView implements IView
       if( myGame.isFogEnabled() && (numHumans > 1) )
       {
         // Hide everything during the AI's turn so the playing field is level.
-        gameMap = myGame.foggedMap;
+        if( null == foggedMap )
+        {
+          foggedMap = new MapWindow(myGame.gameMap, null, myGame.isFogEnabled());
+          foggedMap.resetFog();
+        }
+        gameMap = foggedMap;
       }
     }
     return gameMap;
