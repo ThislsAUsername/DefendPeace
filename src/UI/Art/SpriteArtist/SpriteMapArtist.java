@@ -69,8 +69,8 @@ public class SpriteMapArtist
     // Draw fog effects.
     int numTilesY = (viewY + viewH) / tileSize;
     int numTilesX = (viewX + viewW) / tileSize;
-    for( int y = viewY / tileSize; y < numTilesY; ++y )
-      for( int x = viewX / tileSize; x < numTilesX; ++x )
+    for( int y = viewY / tileSize; y < numTilesY+1; ++y )
+      for( int x = viewX / tileSize; x < numTilesX+1; ++x )
       {
         if( gameMap.isLocationFogged(x, y) )
         {
