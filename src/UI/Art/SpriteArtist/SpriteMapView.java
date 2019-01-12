@@ -205,7 +205,7 @@ public class SpriteMapView extends MapView
           && gameMap.isLocationFogged(event.getEndPoint());
       if( null == currentAnimation || isEventHidden )
       {
-        // If we want to animate something, but it shouldn't be shown, animate nothing instead.
+        // If we want to animate something hidden, or we don't have anything to animate, animate nothing instead.
         currentAnimation = new NoAnimation();
       }
     }
