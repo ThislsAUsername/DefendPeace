@@ -203,15 +203,10 @@ public class SpriteMapView extends MapView
       currentAnimation = event.getEventAnimation(this);
       boolean isEventHidden = !(null == event.getStartPoint()) && gameMap.isLocationFogged(event.getStartPoint())
           && gameMap.isLocationFogged(event.getEndPoint());
-      if( null != currentAnimation && (isEventHidden) )
+      if( null == currentAnimation || isEventHidden )
       {
         // If we want to animate something, but it shouldn't be shown, animate nothing instead.
         currentAnimation = new NoAnimation();
-      }
-      if( null == currentAnimation )
-      {
-        // There isn't an animation for this event. Just notify the controller.
-        mapController.animationEnded(eventsToAnimate.poll(), eventsToAnimate.isEmpty());
       }
     }
   }
