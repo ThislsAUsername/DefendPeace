@@ -142,12 +142,11 @@ public class Muriel implements AIController
       }
     }
 
-    // If the CO has enough AP, preload the CommanderAbilityAction.
-    ArrayList<CommanderAbility> abilities = myCo.getReadyAbilities();
-    if( abilities.size() > 0 )
+    // Check for a turn-kickoff power
+    CommanderAbility ability = AIUtils.queueCromulentAbility(queuedActions, myCo, CommanderAbility.PHASE_TURN_START);
+    if( null != ability )
     {
-      log("Activating " + abilities.get(0));
-      queuedActions.offer(new GameAction.AbilityAction(abilities.get(0)));
+      log("Activating " + ability);
     }
   }
 
@@ -380,10 +379,30 @@ public class Muriel implements AIController
       }
     } // ~Unit action loop
 
+    // Check for an available buying enhancement power
+    if( queuedActions.isEmpty() )
+    {
+      CommanderAbility ability = AIUtils.queueCromulentAbility(queuedActions, myCo, CommanderAbility.PHASE_PRE_BUY);
+      if( null != ability )
+      {
+        log("Activating " + ability);
+      }
+    }
+    
     // If we don't have anything else to do, build units.
     if( queuedActions.isEmpty() )
     {
       queueUnitProductionActions(gameMap);
+    }
+    
+    // Check for a turn-ending power
+    if( queuedActions.isEmpty() )
+    {
+      CommanderAbility ability = AIUtils.queueCromulentAbility(queuedActions, myCo, CommanderAbility.PHASE_TURN_END);
+      if( null != ability )
+      {
+        log("Activating " + ability);
+      }
     }
 
     GameAction action = queuedActions.poll();
