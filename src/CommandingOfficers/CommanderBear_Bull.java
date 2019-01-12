@@ -15,7 +15,16 @@ import Units.UnitModel;
  */
 public class CommanderBear_Bull extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Bear&Bull", CommanderLibrary.CommanderEnum.BEAR_BULL);
+  private static final CommanderInfo coInfo = new CommanderInfo("Bear&Bull", new instantiator());  
+  private static class instantiator implements COMaker
+  {
+    @Override
+    public Commander create()
+    {
+      return new CommanderBear_Bull();
+    }
+  }
+  
   private final int incomeBase;
   public boolean isBull;
 
