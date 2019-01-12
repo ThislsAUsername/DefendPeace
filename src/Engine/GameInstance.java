@@ -155,39 +155,4 @@ public class GameInstance
       GameEventListener.unregisterEventListener(co);
     }
   }
-
-  /**
-   * Returns a count of the number of still-living human players in the game.
-   */
-  public int countHumanPlayers()
-  {
-    int humans = 0;
-
-    for( Commander co : commanders )
-    {
-      if( !co.isDefeated && !co.isAI() )
-      {
-        humans++;
-      }
-    }
-    return humans;
-  }
-
-  /**
-   * Returns the map owned by the first human Commander found.
-   * Intended to be used when there is only one human player.
-   */
-  public GameMap getHumanPlayerMap()
-  {
-    GameMap map = null;
-
-    for( Commander co : commanders )
-    {
-      if( !co.isDefeated && !co.isAI() )
-      {
-        map = co.myView;
-      }
-    }
-    return map;
-  }
 }

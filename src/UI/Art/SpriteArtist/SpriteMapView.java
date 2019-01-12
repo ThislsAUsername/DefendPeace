@@ -194,6 +194,7 @@ public class SpriteMapView extends MapView
    */
   private void loadNextEventAnimation()
   {
+    GameMap gameMap = getDrawableMap(myGame);
 
     // Keep pulling events off the queue until we get one we can draw.
     while (null == currentAnimation && !eventsToAnimate.isEmpty())
@@ -218,6 +219,7 @@ public class SpriteMapView extends MapView
   @Override
   public void render(Graphics g)
   {
+    GameMap gameMap = getDrawableMap(myGame);
     // If we are in the CO_INFO menu, don't draw the map, etc.
     if( mapController.isInCoInfoMenu )
     {
@@ -354,6 +356,7 @@ public class SpriteMapView extends MapView
 
   private void adjustViewLocation()
   {
+    GameMap gameMap = getDrawableMap(myGame);
     int curX = myGame.getCursorX();
     int curY = myGame.getCursorY();
 

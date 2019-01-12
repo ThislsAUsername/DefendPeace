@@ -394,8 +394,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
           myGame.gameMap.getLocation(targ).setHighlight(true);
         }
         // Create an option selector to keep track of where we are.
-        myGame
-            .setCursorLocation(myGameInputHandler.getCoordinateOptions().get(myGameInputOptionSelector.getSelectionNormalized()));
+        myGame.setCursorLocation(myGameInputHandler.getCoordinateOptions().get(myGameInputOptionSelector.getSelectionNormalized()));
         contemplatedAction.aiming = true;
         break;
       case MENU_SELECT:
@@ -628,30 +627,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     // Kick off the animation cycle, which will animate/init each unit.
     changeInputMode(InputMode.ANIMATION);
-
-    // Here are the fog-drawing rules. If there are:
-    //   zero humans - spectating - draw everything the current player sees.
-    //   one human - player vs ai - draw everything the human player could see.
-    //   2+ humans - player vs player - draw what the current player sees, IFF the player is human.
-    if( !myGame.activeCO.isAI() )
-    {
-      // Humans need to see what they can see
-      myView.gameMap = myGame.activeCO.myView;
-    }
-    else // If it's not a human, figure out how much to show.
-    {
-      int numHumans = myGame.countHumanPlayers();
-      if( 1 == numHumans )
-      {
-        // Since there is only one human, always use the human's vision to determine what is drawn.
-        myView.gameMap = myGame.getHumanPlayerMap();
-      }
-      if( myGame.isFogEnabled() && (numHumans > 1) )
-      {
-        // Hide everything during the AI's turn so the playing field is level.
-        myView.gameMap = myGame.foggedMap;
-      }
-    }
 
     myView.animate(null);
   }

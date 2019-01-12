@@ -1,5 +1,7 @@
 package UI;
 
+import CommandingOfficers.Commander;
+import Engine.GameInstance;
 import Engine.IView;
 import Engine.MapController;
 import Engine.Path;
@@ -18,8 +20,6 @@ public abstract class MapView implements IView
   protected GameAnimation currentAnimation = null;
 
   protected MapController mapController = null;
-  
-  public GameMap gameMap = null; // The current map to use for drawing. Game logic should set this as appropriate. 
 
   public void setController(MapController controller)
   {
@@ -102,5 +102,66 @@ public abstract class MapView implements IView
   public GameAnimation buildCommanderDefeatAnimation( CommanderDefeatEvent event )
   {
     return null;
+  }
+
+  protected GameMap getDrawableMap(GameInstance myGame)
+  {
+    // Here are the fog-drawing rules. If there are:
+    //   zero humans - spectating - draw everything the current player sees.
+    //   one human - player vs ai - draw everything the human player could see.
+    //   2+ humans - player vs player - draw what the current player sees, IFF the player is human.
+
+    // Humans need to see what they can see.
+    GameMap gameMap = myGame.activeCO.myView;
+    if( myGame.activeCO.isAI() ) // If it's not a human, figure out what to show.
+    {
+      int numHumans = countHumanPlayers(myGame);
+      if( 1 == numHumans )
+      {
+        // Since there is only one human, always use the human's vision to determine what is drawn.
+        gameMap = getHumanPlayerMap(myGame);
+      }
+      if( myGame.isFogEnabled() && (numHumans > 1) )
+      {
+        // Hide everything during the AI's turn so the playing field is level.
+        gameMap = myGame.foggedMap;
+      }
+    }
+    return gameMap;
+  }
+
+  /**
+   * Returns a count of the number of still-living human players in the game.
+   */
+  protected int countHumanPlayers(GameInstance myGame)
+  {
+    int humans = 0;
+
+    for( Commander co : myGame.commanders )
+    {
+      if( !co.isDefeated && !co.isAI() )
+      {
+        humans++;
+      }
+    }
+    return humans;
+  }
+
+  /**
+   * Returns the map owned by the first human Commander found.
+   * Intended to be used when there is only one human player.
+   */
+  protected GameMap getHumanPlayerMap(GameInstance myGame)
+  {
+    GameMap map = null;
+
+    for( Commander co : myGame.commanders )
+    {
+      if( !co.isDefeated && !co.isAI() )
+      {
+        map = co.myView;
+      }
+    }
+    return map;
   }
 }
