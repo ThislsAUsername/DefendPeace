@@ -382,7 +382,7 @@ public class Muriel implements AIController
     // Check for an available buying enhancement power
     if( queuedActions.isEmpty() )
     {
-      CommanderAbility ability = AIUtils.queueCromulentAbility(queuedActions, myCo, CommanderAbility.PHASE_PRE_BUY);
+      CommanderAbility ability = AIUtils.queueCromulentAbility(queuedActions, myCo, CommanderAbility.PHASE_BUY);
       if( null != ability )
       {
         log("Activating " + ability);

@@ -175,7 +175,7 @@ public class InfantrySpamAI implements AIController
     // Check for an available buying enhancement power
     if( actions.isEmpty() )
     {
-      AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_PRE_BUY);
+      AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_BUY);
     }
     
     // Finally, build more infantry. We will add all build commands at once, since they can't conflict.

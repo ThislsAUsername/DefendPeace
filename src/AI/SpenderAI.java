@@ -244,7 +244,7 @@ public class SpenderAI implements AIController
       // Check for an available buying enhancement power
       if( actions.isEmpty() && !stateChange )
       {
-        AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_PRE_BUY);
+        AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_BUY);
       }
 
       // We will add all build commands at once, since they can't conflict.
