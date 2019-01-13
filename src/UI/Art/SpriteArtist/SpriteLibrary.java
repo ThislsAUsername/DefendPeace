@@ -394,6 +394,7 @@ public class SpriteLibrary
     switch (unitType)
     {
       case ANTI_AIR:
+        spriteFile = "res/unit/antiair_map.png";
         break;
       case APC:
         spriteFile = "res/unit/apc_map.png";
@@ -423,11 +424,13 @@ public class SpriteLibrary
         spriteFile = "res/unit/mech_map.png";
         break;
       case MOBILESAM:
+        spriteFile = "res/unit/mobilesam_map.png";
         break;
       case RECON:
         spriteFile = "res/unit/recon_map.png";
         break;
       case ROCKETS:
+        spriteFile = "res/unit/rockets_map.png";
         break;
       case SUB:
         break;
