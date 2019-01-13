@@ -29,19 +29,12 @@ public class BMGrit extends Commander
 
     for( UnitModel um : unitModels )
     {
-      if( um.weaponModels != null )
+      for( WeaponModel pewpew : um.weaponModels )
       {
-        boolean debuff = true;
-        for( WeaponModel pewpew : um.weaponModels )
+        if( pewpew.maxRange > 1 )
         {
-          if( pewpew.maxRange > 1 )
-          {
-            pewpew.maxRange += 1;
-            debuff = false;
-          }
+          pewpew.maxRange += 1;
         }
-        if (debuff && um.chassis != ChassisEnum.TROOP)
-          um.modifyDamageRatio(-20);
       }
     }
 
@@ -71,7 +64,11 @@ public class BMGrit extends Commander
 
     if( null != minion )
     {
-      if( params.combatRef.battleRange > 1 )
+      if( params.combatRef.battleRange == 1 && minion.model.chassis != ChassisEnum.TROOP )
+      {
+        params.attackFactor -= 20;
+      }
+      else if ( params.combatRef.battleRange > 1 )
       {
         params.attackFactor += indirectBuff;
       }

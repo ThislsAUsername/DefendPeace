@@ -27,19 +27,16 @@ public class BWWillBasic extends Commander
     {
       if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )
       {
-        if( um.weaponModels != null )
+        boolean buff = true;
+        for( WeaponModel pewpew : um.weaponModels )
         {
-          boolean buff = false;
-          for( WeaponModel pewpew : um.weaponModels )
+          if( pewpew.maxRange > 1 )
           {
-            if( pewpew.canFireAfterMoving )
-            {
-              buff = true;
-            }
+            buff = false;
           }
-          if( buff )
-            um.modifyDamageRatio(20);
         }
+        if( buff )
+          um.modifyDamageRatio(20);
       }
     }
 
