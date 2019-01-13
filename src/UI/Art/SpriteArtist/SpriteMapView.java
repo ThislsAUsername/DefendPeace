@@ -230,7 +230,7 @@ public class SpriteMapView extends MapView
       // Draw the background.
 
       // Draw the commander art.
-      g.drawImage(SpriteLibrary.getCommanderSprites(myGame.commanders[co].coInfo.cmdrEnum).body, 0, 0, mapViewWidth,
+      g.drawImage(SpriteLibrary.getCommanderSprites(myGame.commanders[co].coInfo.name).body, 0, 0, mapViewWidth,
           mapViewHeight, null);
     }
     else

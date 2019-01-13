@@ -14,7 +14,16 @@ import Units.UnitModel;
 
 public class CommanderStrong extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Strong", CommanderLibrary.CommanderEnum.STRONG);
+  private static final CommanderInfo coInfo = new CommanderInfo("Strong", new instantiator());  
+  private static class instantiator implements COMaker
+  {
+    @Override
+    public Commander create()
+    {
+      return new CommanderStrong();
+    }
+  }
+  
   private static Map<UnitModel.UnitEnum, UnitModel> highCapacityUnitModels;
 
   public CommanderStrong()
