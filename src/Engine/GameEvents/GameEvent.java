@@ -1,5 +1,6 @@
 package Engine.GameEvents;
 
+import Engine.XYCoord;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -27,9 +28,20 @@ public interface GameEvent
    * @param map
    */
   public void performEvent( MapMaster gameMap );
-  
+
   /**
-   * Hook for implementers to let the event queuer know that this event will not end as planned, so following events should be dropped
+   * Returns where the action begins for this event. This is primarily used by
+   * the animator to decide whether to animate this event when fog of war is enabled.
+   * Events with only one relevant location should return the same point from getEndPoint().
+   * Events that are not location-bound (e.g. Commander abilities) should just return null.
    */
-  public boolean shouldPreempt(MapMaster gameMap );
+  public XYCoord getStartPoint();
+
+  /**
+   * Returns where the action ends for this event. This is primarily used by
+   * the animator to decide whether to animate this event when fog of war is enabled.
+   * Events with only one relevant location should return the same point from getStartPoint().
+   * Events that are not location-bound (e.g. Commander abilities) should just return null.
+   */
+  public XYCoord getEndPoint();
 }

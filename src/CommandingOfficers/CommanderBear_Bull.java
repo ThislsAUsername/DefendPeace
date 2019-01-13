@@ -1,7 +1,7 @@
 package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.COModifier;
-import Terrain.GameMap;
+import Engine.XYCoord;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -15,7 +15,16 @@ import Units.UnitModel;
  */
 public class CommanderBear_Bull extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Bear&Bull", CommanderLibrary.CommanderEnum.BEAR_BULL);
+  private static final CommanderInfo coInfo = new CommanderInfo("Bear&Bull", new instantiator());  
+  private static class instantiator implements COMaker
+  {
+    @Override
+    public Commander create()
+    {
+      return new CommanderBear_Bull();
+    }
+  }
+  
   private final int incomeBase;
   public boolean isBull;
 
@@ -91,6 +100,21 @@ public class CommanderBear_Bull extends Commander
     protected void perform(MapMaster gameMap)
     {
       myCommander.addCOModifier(this);
+
+      // Damage is dealt after swapping D2Ds so it's actually useful to Bear
+      for( XYCoord xyc : myCommander.ownedProperties )
+      {
+        Location loc = gameMap.getLocation(xyc);
+        if( loc.getOwner() == myCommander )
+        {
+          Unit victim = loc.getResident();
+          if( null != victim )
+          {
+            double delta = victim.alterHP(-1*DOWNUPTURN_LIQUIDATION); // Remove some of the unit's HP
+            myCommander.money += (-1 * delta * victim.model.getCost()) / 10; // ...and turn it into moolah
+          }
+        }
+      }
     }
 
     @Override // COModifier interface.
@@ -98,19 +122,6 @@ public class CommanderBear_Bull extends Commander
     {
       CommanderBear_Bull cmdr = (CommanderBear_Bull) commander;
       cmdr.swapD2Ds(false);
-      // Damage is dealt after swapping D2Ds so it's actually useful to Bear
-      for( Location loc : cmdr.ownedProperties )
-      {
-        if( loc.getOwner() == myCommander )
-        {
-          Unit victim = loc.getResident(cmdr.myView);
-          if( null != victim )
-          {
-            double delta = victim.alterHP(-1*DOWNUPTURN_LIQUIDATION); // Remove some of the unit's HP
-            cmdr.money += (-1 * delta * victim.model.getCost()) / 10; // ...and turn it into moolah
-          }
-        }
-      }
     }
 
     @Override

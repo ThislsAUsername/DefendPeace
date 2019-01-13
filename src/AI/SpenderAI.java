@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
+
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
@@ -73,24 +74,20 @@ public class SpenderAI implements AIController
       }
     }
 
-    // If the CO has enough AP, preload the CommanderAbilityAction.
-    ArrayList<CommanderAbility> abilities = myCo.getReadyAbilities();
-    if( abilities.size() > 0 )
-    {
-      actions.offer(new GameAction.AbilityAction(abilities.get(0)));
-    }
+    // Check for a turn-kickoff power
+    AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_TURN_START);
   }
 
   @Override
   public void endTurn()
   {
     log(String.format("[======== SpAI ending turn %s for %s =========]", turnNum, myCo));
-    System.out.println(logger.toString());
     logger = new StringBuffer();
   }
 
   private void log(String message)
   {
+    System.out.println(message);
     logger.append(message).append('\n');
   }
 
@@ -103,7 +100,9 @@ public class SpenderAI implements AIController
       // If we have more actions ready, don't bother calculating stuff.
       if( !actions.isEmpty() )
       {
-        return actions.poll();
+        GameAction action = actions.poll();
+        log("  Action: " + action);
+        return action;
       }
       else if( unitQueue.isEmpty() )
       {
@@ -166,8 +165,6 @@ public class SpenderAI implements AIController
         }
       }
 
-      Queue<Unit> waitQueue = new ArrayDeque<Unit>();
-
       // If no attack/capture actions are available now, just move towards a non-allied building.
       if( actions.isEmpty() && !stateChange )
       {
@@ -213,14 +210,9 @@ public class SpenderAI implements AIController
                   && (path.getPathLength() > 0)); // We can reach it.
               log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal,
                   (validTarget ? "Yes" : "No")));
-            } while (!validTarget && (index < unownedProperties.size())); // Loop until we run out of properties to check.
+            } while (!validTarget && (index < validTargets.size())); // Loop until we run out of properties to check.
 
-            if( !validTarget )
-            {
-              // if this unit can't go anywhere useful, consider having it just wait
-              waitQueue.offer(unit);
-            }
-            else
+            if( validTarget )
             {
               log(String.format("    Selected %s at %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal));
 
@@ -239,42 +231,31 @@ public class SpenderAI implements AIController
               Path movePath = Utils.findShortestPath(unit, destination, gameMap);
               if( movePath.getPathLength() > 1 ) // We only want to try to travel if we can actually go somewhere
               {
-                GameAction move = new GameAction.WaitAction(gameMap, unit, movePath);
+                GameAction move = new GameAction.WaitAction(unit, movePath);
                 actions.offer(move);
                 stateChange = true;
                 break;
-              }
-              else
-              {
-                // if this unit can't go anywhere useful, consider having it just wait
-                waitQueue.offer(unit);
               }
             }
           }
         }
       }
 
-      // If we can't even move towards an objective, *then* we wait.
+      // Check for an available buying enhancement power
       if( actions.isEmpty() && !stateChange )
       {
-        while (!waitQueue.isEmpty())
-        {
-          Unit unit = waitQueue.poll();
-          log("    Failed to find a path to a capturable property. Waiting");
-          GameAction wait = new GameAction.WaitAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
-          actions.offer(wait);
-          break;
-        }
+        AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_BUY);
       }
 
       // We will add all build commands at once, since they can't conflict.
       if( actions.isEmpty() && !stateChange )
       {
         Map<Location, ArrayList<UnitModel>> shoppingLists = new HashMap<>();
-        for( Location loc : myCo.ownedProperties )
+        for( XYCoord xyc : myCo.ownedProperties )
         {
+          Location loc = gameMap.getLocation(xyc);
           // I like combat units that are useful, so we skip ports for now
-          if( loc.getEnvironment().terrainType != TerrainType.SEAPORT && loc.getResident(gameMap) == null )
+          if( loc.getEnvironment().terrainType != TerrainType.SEAPORT && loc.getResident() == null )
           {
             ArrayList<UnitModel> units = myCo.getShoppingList(loc);
             // Only add to the list if we could actually buy something here.
@@ -326,10 +307,16 @@ public class SpenderAI implements AIController
         // once we're satisfied with all our selections, put in the orders
         for( Entry<Location, UnitModel> lineItem : purchases.entrySet() )
         {
-          GameAction action = new GameAction.UnitProductionAction(gameMap, myCo, lineItem.getValue(),
+          GameAction action = new GameAction.UnitProductionAction(myCo, lineItem.getValue(),
               lineItem.getKey().getCoordinates());
           actions.offer(action);
         }
+      }
+
+      // Check for a turn-ending power
+      if( actions.isEmpty() && !stateChange )
+      {
+        AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_TURN_END);
       }
 
       // Return the next action, or null if actions is empty.

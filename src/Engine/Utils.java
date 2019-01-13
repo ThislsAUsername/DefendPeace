@@ -7,8 +7,10 @@ import java.util.Queue;
 
 import CommandingOfficers.Commander;
 import Engine.Path.PathNode;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel.ChassisEnum;
 import Units.Weapons.Weapon;
@@ -52,9 +54,9 @@ public class Utils
     ArrayList<XYCoord> targets = new ArrayList<XYCoord>();
     for( XYCoord loc : locations )
     {
-      if( map.getLocation(loc).getResident(map) != null && // Someone is there.
-          map.getLocation(loc).getResident(map).CO.isEnemy(co) && // They are not friendly.
-          weapon.getDamage(map.getLocation(loc).getResident(map).model) > 0 ) // We can shoot them.
+      if( map.getLocation(loc).getResident() != null && // Someone is there.
+          map.getLocation(loc).getResident().CO.isEnemy(co) && // They are not friendly.
+          weapon.getDamage(map.getLocation(loc).getResident().model) > 0 ) // We can shoot them.
       {
         targets.add(loc);
       }
@@ -70,7 +72,7 @@ public class Utils
     for( XYCoord loc : locations )
     {
       // Add any location that is empty and supports movement of the cargo unit.
-      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident(map) == transport)
+      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
           && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
       {
         dropoffLocations.add(loc);
@@ -117,7 +119,7 @@ public class Utils
       // pull out the next search node
       SearchNode currentNode = searchQueue.poll();
       // if the space is empty or holds the current unit, highlight
-      Unit obstacle = gameMap.getLocation(currentNode.x, currentNode.y).getResident(gameMap);
+      Unit obstacle = gameMap.getLocation(currentNode.x, currentNode.y).getResident();
       if( obstacle == null || obstacle == unit || (obstacle.CO == unit.CO && obstacle.hasCargoSpace(unit.model.type)) )
       {
         reachableTiles.add(new XYCoord(currentNode.x, currentNode.y));
@@ -143,9 +145,9 @@ public class Utils
       return false;
     }
     // if there is a unit in that space
-    if( !ignoreUnits && (myMap.getLocation(coord).getResident(myMap) != null) )
+    if( !ignoreUnits && (myMap.getLocation(coord).getResident() != null) )
     { // if that unit is an enemy
-      if( unit.CO.isEnemy(myMap.getLocation(coord).getResident(myMap).CO) )
+      if( unit.CO.isEnemy(myMap.getLocation(coord).getResident().CO) )
       {
         return false;
       }
@@ -187,7 +189,7 @@ public class Utils
       int wayX = path.getWaypoint(i).x;
       int wayY = path.getWaypoint(i).y;
       Location loc = map.getLocation(wayX, wayY);
-      Unit resident = loc.getResident(map);
+      Unit resident = loc.getResident();
 
       movePower -= findMoveCost(unit, wayX, wayY, map);
       if( movePower < 0 || (resident != null && resident.CO.isEnemy(unit.CO)) )
@@ -226,7 +228,7 @@ public class Utils
    */
   public static Path findShortestPath(Unit unit, int x, int y, GameMap map, boolean theoretical)
   {
-    if( null == unit || null == map )
+    if( null == unit || null == map || !map.isLocationValid(unit.x, unit.y) )
     {
       return null;
     }
@@ -412,9 +414,10 @@ public class Utils
     if( null != co )
     {
       // Add all vacant, <co>-owned industries to the list
-      for( Location loc : co.ownedProperties )
+      for( XYCoord xyc : co.ownedProperties )
       {
-        Unit resident = loc.getResident(map);
+        Location loc = map.getLocation(xyc);
+        Unit resident = loc.getResident();
         // We only want industries we can act on, which means they need to be empty
         // TODO: maybe calculate whether the CO has enough money to buy something at this industry
         if( null == resident && loc.getOwner() == co )
@@ -504,20 +507,29 @@ public class Utils
   {
     return findVisibleLocations(map, viewer, viewer.x, viewer.y);
   }
+  /** Returns a list of all locations that would be visible to the unit if it were at (x, y). */
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, int x, int y)
   {
-    int range = viewer.model.visionRange;
-    // if it's a surface unit, give it the boost the terrain would provide
-    if( viewer.model.chassis == ChassisEnum.TROOP || viewer.model.chassis == ChassisEnum.TANK
-        || viewer.model.chassis == ChassisEnum.SHIP )
-      range += map.getEnvironment(x, y).terrainType.getVisionBoost();
+    ArrayList<XYCoord> viewables = new ArrayList<XYCoord>();
+
+    if( map.isLocationValid(x, y) )
+    {
+      int range = viewer.model.visionRange;
+      // if it's a surface unit, give it the boost the terrain would provide
+      if( viewer.model.chassis == ChassisEnum.TROOP || viewer.model.chassis == ChassisEnum.TANK
+          || viewer.model.chassis == ChassisEnum.SHIP )
+        range += map.getEnvironment(x, y).terrainType.getVisionBoost();
+      viewables.addAll(findVisibleLocations(map, new XYCoord(x, y), range, viewer.model.visionIgnoresCover));
+    }
     
-    return findVisibleLocations(map, new XYCoord(x, y), range, viewer.model.piercingVision);
+    return viewables;
   }
+  /** Returns a list of all locations visible to a unit at origin that could see range tiles. */
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, XYCoord origin, int range)
   {
     return findVisibleLocations(map, origin, range, false);
   }
+  /** Returns a list of all visible locations within range of origin, ignoring cover effects. */
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, XYCoord origin, int range, boolean piercing)
   {
     ArrayList<XYCoord> locations = new ArrayList<XYCoord>();
@@ -549,7 +561,7 @@ public class Utils
     boolean result = false;
     for( PathNode point : path.getWaypoints() )
     {
-      Unit obstacle = map.getLocation(point.x, point.y).getResident(map);
+      Unit obstacle = map.getLocation(point.x, point.y).getResident();
       if( null != obstacle && unit.CO.isEnemy(obstacle.CO) )
       {
         result = true;
@@ -557,5 +569,26 @@ public class Utils
       }
     }
     return result;
+  }
+
+  /**
+   * Evaluates the proposed move, creates a MoveEvent describing it, and adds that event to eventQueu
+   * If the move passes over an obstacle, the resulting MoveEvent will have its path shortened accordingly.
+   * @param gameMap The world in which the action is to take place.
+   * @param unit The unit who is to move.
+   * @param movePath The complete sequence of steps the unit proposes to take.
+   * @param eventQueue Will be given the new MoveEvent.
+   * @return true if the move is created as specified, false if the path was shortened.
+   */
+  public static boolean enqueueMoveEvent(MapMaster gameMap, Unit unit, Path movePath, GameEventQueue eventQueue)
+  {
+    boolean originalPathOK = true;
+    if( Utils.pathCollides(gameMap, unit, movePath) )
+    {
+      movePath.snipCollision(gameMap, unit);
+      originalPathOK = false;
+    }
+    eventQueue.add(new Engine.GameEvents.MoveEvent(unit, movePath));
+    return originalPathOK;
   }
 }

@@ -53,16 +53,23 @@ public class CreateUnitEvent implements GameEvent
       myCommander.money -= myNewUnit.model.getCost();
       myCommander.units.add(myNewUnit);
       gameMap.addNewUnit(myNewUnit, myBuildCoords.xCoord, myBuildCoords.yCoord);
+      myCommander.myView.revealFog(myNewUnit);
     }
     else
     {
       System.out.println("Warning! Attempting to build unit with insufficient funds.");
     }
   }
-  
-  @Override // there's no known way for this to fail after the GameAction is constructed
-  public boolean shouldPreempt(MapMaster gameMap )
+
+  @Override
+  public XYCoord getStartPoint()
   {
-    return false;
+    return myBuildCoords;
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return myBuildCoords;
   }
 }

@@ -64,6 +64,11 @@ public class GameActionSet
     selector.handleInput(InputAction.LEFT);
   }
 
+  public ArrayList<GameAction> getGameActions()
+  {
+    return actionOptions;
+  }
+
   public String toString()
   {
     if( !actionOptions.isEmpty() )

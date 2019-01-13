@@ -2,10 +2,9 @@ package Engine.GameEvents;
 
 import CommandingOfficers.Commander;
 import Engine.Path;
-import Engine.Utils;
 import Engine.XYCoord;
-import Terrain.MapMaster;
 import Terrain.Location;
+import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
@@ -44,7 +43,6 @@ public class MoveEvent implements GameEvent
   {
     if( unitPath.getPathLength() > 0 ) // Make sure we have a destination.
     {
-      unitPath.snipCollision(gameMap, unit); // make sure we only go as far as we can go
       Path.PathNode endpoint = unitPath.getEnd();
       Location loc = gameMap.getLocation(endpoint.x, endpoint.y);
       int fuelBurn = unitPath.getFuelCost(unit.model, gameMap);
@@ -55,7 +53,7 @@ public class MoveEvent implements GameEvent
         unit.isTurnOver = true;
       }
       // Make sure it is valid to move this unit to its destination.
-      else if( loc.getResident(gameMap) == null && unit.model.propulsion.getMoveCost(loc.getEnvironment()) < 99 )
+      else if( loc.getResident() == null && unit.model.propulsion.getMoveCost(loc.getEnvironment()) < 99 )
       {
         gameMap.moveUnit(unit, endpoint.x, endpoint.y);
 
@@ -79,8 +77,14 @@ public class MoveEvent implements GameEvent
   }
 
   @Override
-  public boolean shouldPreempt(MapMaster gameMap)
+  public XYCoord getStartPoint()
   {
-    return Utils.pathCollides(gameMap, unit, unitPath);
+    return new XYCoord(unitPath.getWaypoint(0).x, unitPath.getWaypoint(0).y);
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return new XYCoord(unitPath.getEnd().x, unitPath.getEnd().y);
   }
 }

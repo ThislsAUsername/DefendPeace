@@ -3,7 +3,9 @@ package CommandingOfficers;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import AI.AIController;
 import CommandingOfficers.Modifiers.COModifier;
@@ -46,7 +48,7 @@ public class Commander extends GameEventListener
   public ArrayList<Unit> units;
   public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
   public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
-  public ArrayList<Location> ownedProperties;
+  public Set<XYCoord> ownedProperties;
   public ArrayList<COModifier> modifiers;
   public Color myColor;
   public static final int DEFAULTSTARTINGMONEY = 0;
@@ -111,7 +113,7 @@ public class Commander extends GameEventListener
 
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
-    ownedProperties = new ArrayList<Location>();
+    ownedProperties = new HashSet<XYCoord>();
     money = DEFAULTSTARTINGMONEY;
 
     myAbilities = new ArrayList<CommanderAbility>();

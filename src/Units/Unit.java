@@ -5,15 +5,16 @@ import java.util.Vector;
 
 import CommandingOfficers.Commander;
 import Engine.GameAction;
+import Engine.GameAction.ActionType;
 import Engine.GameActionSet;
 import Engine.Path;
 import Engine.Utils;
 import Engine.XYCoord;
-import Engine.GameAction.ActionType;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.ResupplyEvent;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.MapMaster;
 import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
 import Units.Weapons.WeaponModel;
@@ -67,7 +68,7 @@ public class Unit
    * @param map
    * @param events
    */
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     // Make a queue to return any init events.
     GameEventQueue events = new GameEventQueue();
@@ -80,7 +81,7 @@ public class Unit
     {
       isTurnOver = false;
       fuel -= model.idleFuelBurn;
-      if( captureTarget != null && captureTarget.getResident(map) != this )
+      if( captureTarget != null && captureTarget.getResident() != this )
       {
         captureTarget = null;
         captureProgress = 0;
@@ -303,7 +304,7 @@ public class Unit
             }
             break;
           case WAIT:
-            actionSet.add(new GameActionSet(new GameAction.WaitAction(map, this, movePath), false));
+            actionSet.add(new GameActionSet(new GameAction.WaitAction(this, movePath), false));
             break;
           case LOAD:
             // We only get to here if there is no unit at the end of the move path, which means there is
@@ -321,7 +322,7 @@ public class Unit
                 ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, this, moveLocation, cargo);
                 for( XYCoord loc : dropoffLocations )
                 {
-                  unloadActions.add(new GameAction.UnloadAction(map, this, movePath, cargo, loc));
+                  unloadActions.add(new GameAction.UnloadAction(this, movePath, cargo, loc));
                 }
               }
 
@@ -339,7 +340,7 @@ public class Unit
             for( XYCoord loc : locations )
             {
               // If there's a friendly unit there who isn't us, we can resupply them.
-              Unit other = map.getLocation(loc).getResident(map);
+              Unit other = map.getLocation(loc).getResident();
               if( other != null && other.CO == CO && other != this && !other.isFullySupplied() )
               {
                 // We found at least one unit we can resupply. Since resupply actions aren't

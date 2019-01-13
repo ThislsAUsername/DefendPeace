@@ -62,6 +62,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       aiming = false;
     }
   }
+
   ContemplatedAction contemplatedAction;
 
   public MapController(GameInstance game, MapView view)
@@ -93,7 +94,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   {
     boolean exitMap = false;
 
-    switch(inputMode)
+    switch (inputMode)
     {
       case ANIMATION:
         if( InputAction.BACK == input || InputAction.ENTER == input )
@@ -137,7 +138,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   {
     GameInputHandler.InputType mode = myGameInputHandler.getInputType();
 
-    switch( mode )
+    switch (mode)
     {
       case FREE_TILE_SELECT:
         handleFreeTileSelect(input);
@@ -217,10 +218,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
         // Get the current location.
         XYCoord cursorCoords = new XYCoord(myGame.getCursorX(), myGame.getCursorY());
         Location loc = myGame.gameMap.getLocation(cursorCoords);
-        Unit actor = loc.getResident(myGame.activeCO.myView);
+        Unit actor = loc.getResident();
 
         // If there is a unit that is is ready to move, or if it is someone else's, then record it so we can build the move path.
-        if( null != actor && ((actor.CO == myGame.activeCO && !actor.isTurnOver) || (actor.CO != myGame.activeCO)))
+        if( null != actor && ((actor.CO == myGame.activeCO && !actor.isTurnOver) || (actor.CO != myGame.activeCO)) )
         {
           contemplatedAction.actor = actor;
         }
@@ -242,7 +243,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   /** Force the user to select one map tile from the InputStateHandler's selection. */
   private void handleConstrainedTileSelect(InputHandler.InputAction input)
   {
-    switch(input)
+    switch (input)
     {
       case ENTER:
         myGameInputHandler.select(new XYCoord(myGame.getCursorX(), myGame.getCursorY()));
@@ -254,7 +255,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case LEFT:
       case DOWN:
       case RIGHT:
-        if( myGameInputHandler.getCoordinateOptions().size() == 0)
+        if( myGameInputHandler.getCoordinateOptions().size() == 0 )
         {
           // If this option doesn't require a target, it should have been executed from handleActionMenuInput().
           // This function is just for target selection/choosing one action from the set.
@@ -266,7 +267,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         myGame.setCursorLocation(targetLocations.get(myGameInputOptionSelector.getSelectionNormalized()));
         break;
       case NO_ACTION:
-      case SEEK:     // Seek does nothing in this input state.
+      case SEEK: // Seek does nothing in this input state.
       default:
     }
   }
@@ -383,7 +384,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     myGame.gameMap.clearAllHighlights();
     currentMenu = null;
 
-    switch( inputType )
+    switch (inputType)
     {
       case CONSTRAINED_TILE_SELECT:
         // Set the target-location highlights.
@@ -440,8 +441,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
         isInCoInfoMenu = true;
         myGameInputHandler.reset(); // CO_INFO is a terminal state. Reset the input handler.
         break;
-        default:
-          System.out.println("WARNING! Attempting to switch to unknown input type " + inputType);
+      default:
+        System.out.println("WARNING! Attempting to switch to unknown input type " + inputType);
     }
   }
 
@@ -450,7 +451,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
    */
   private void changeInputMode(InputMode input)
   {
-    System.out.println("Moving to InputMode " + input );
     // Assign the new input mode.
     inputMode = input;
 
@@ -504,17 +504,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
       if( events.size() > 0 )
       {
-        GameEventQueue usedEvents = new GameEventQueue();
-        for (GameEvent event : events)
-        {
-          usedEvents.add(event);
-          if (event.shouldPreempt(myGame.gameMap))
-            break;
-        }
         actionOK = true; // Invalid actions don't produce events.
         // Send the events to the animator. They will be applied/executed in animationEnded().
         changeInputMode(InputMode.ANIMATION);
-        myView.animate(usedEvents);
+        myView.animate(events);
       }
     }
     else
@@ -603,8 +596,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
               endAITurn = true;
             }
           }
-          else { endAITurn = true; } // The AI can return a null action to signal the end of its turn.
-          if( endAITurn) startNextTurn();
+          else
+          {
+            endAITurn = true;
+          } // The AI can return a null action to signal the end of its turn.
+          if( endAITurn )
+            startNextTurn();
         }
         else
         {
@@ -630,6 +627,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     // Kick off the animation cycle, which will animate/init each unit.
     changeInputMode(InputMode.ANIMATION);
+
     myView.animate(null);
   }
 

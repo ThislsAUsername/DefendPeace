@@ -6,14 +6,11 @@ import Units.Unit;
 
 public class Location
 {
-
   private Environment environs = null;
   private Commander owner = null;
   private Unit resident = null;
   private final XYCoord coords;
   private boolean highlightSet = false;
-
-  //	public boolean isFogged = false;
 
   public Environment getEnvironment()
   {
@@ -40,24 +37,19 @@ public class Location
     // remove ourselves from the previous owner's list, if one exists
     if( null != this.owner )
     {
-      this.owner.ownedProperties.remove(this);
+      this.owner.ownedProperties.remove(coords);
     }
     this.owner = owner;
     // add ourselves to the new owner's list, if it exists
     if( null != this.owner )
     {
-      this.owner.ownedProperties.add(this);
+      this.owner.ownedProperties.add(coords);
     }
   }
 
-  public Unit getResident(GameMap map)
+  public Unit getResident()
   {
-    Unit result = null;
-    if( !map.isLocationFogged(coords) )
-    {
-      result = resident;
-    }
-    return result;
+    return resident;
   }
 
   public void setResident(Unit resident)

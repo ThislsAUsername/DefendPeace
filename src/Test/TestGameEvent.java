@@ -17,9 +17,9 @@ import Engine.GameEvents.LoadEvent;
 import Engine.GameEvents.MoveEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.UnloadEvent;
+import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
-import Terrain.MapLibrary;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
@@ -112,10 +112,10 @@ public class TestGameEvent extends TestCase
 
     // Move the unit; he should lose his capture progress.
     infA.initTurn(testMap);
-    GameAction moveAction = new GameAction.WaitAction(testMap, infA, Utils.findShortestPath(infA, 1, 2, testMap));
+    GameAction moveAction = new GameAction.WaitAction(infA, Utils.findShortestPath(infA, 1, 2, testMap));
     performGameAction(moveAction, testMap);
     infA.initTurn(testMap);
-    GameAction moveAction2 = new GameAction.WaitAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap));
+    GameAction moveAction2 = new GameAction.WaitAction(infA, Utils.findShortestPath(infA, 2, 2, testMap));
     performGameAction(moveAction2, testMap);
 
     // 5, 10, 15
@@ -150,11 +150,11 @@ public class TestGameEvent extends TestCase
     int startFunds = testCo1.money = 9001;
     CreateUnitEvent event = new CreateUnitEvent(testCo1, testCo1.getUnitModel(UnitEnum.INFANTRY), coords);
 
-    testPassed &= validate(testMap.getLocation(coords).getResident(testMap) == null, "    Location is already occupied.");
+    testPassed &= validate(testMap.getLocation(coords).getResident() == null, "    Location is already occupied.");
 
     event.performEvent(testMap);
 
-    Unit resident = testMap.getLocation(coords).getResident(testMap);
+    Unit resident = testMap.getLocation(coords).getResident();
     testPassed &= validate(resident != null, "    Failed to create a unit.");
     testPassed &= validate(resident.model.type == UnitEnum.INFANTRY, "    Unit created with wrong type.");
     testPassed &= validate(resident.CO == testCo1, "    Unit created with wrong type.");
@@ -178,13 +178,13 @@ public class TestGameEvent extends TestCase
 
     // Try to load the infantry onto the mech unit, and ensure it fails.
     new LoadEvent(inf, mech).performEvent(testMap);
-    testPassed &= validate(testMap.getLocation(2, 2).getResident(testMap) == inf, "    Infantry should still be at (2, 2).");
+    testPassed &= validate(testMap.getLocation(2, 2).getResident() == inf, "    Infantry should still be at (2, 2).");
     testPassed &= validate(2 == inf.x && 2 == inf.y, "    Infantry should still think he is at (2, 2).");
     testPassed &= validate(mech.heldUnits == null, "    Mech should not have holding capacity.");
 
     // Try to load the infantry into the APC, and make sure it works.
     new LoadEvent(inf, apc).performEvent(testMap);
-    testPassed &= validate(testMap.getLocation(2, 2).getResident(testMap) == null, "   Infantry is still at his old map location.");
+    testPassed &= validate(testMap.getLocation(2, 2).getResident() == null, "   Infantry is still at his old map location.");
     testPassed &= validate(-1 == inf.x && -1 == inf.y, "    Infantry does not think he is in the transport.");
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC is not holding 1 unit, but should be holding Infantry.");
     testPassed &= validate(apc.heldUnits.get(0).model.type == UnitModel.UnitEnum.INFANTRY,
@@ -192,19 +192,19 @@ public class TestGameEvent extends TestCase
 
     // Now see if we can also load the mech into the APC; verify this fails.
     new LoadEvent(mech, apc).performEvent(testMap);
-    testPassed &= validate(testMap.getLocation(2, 3).getResident(testMap) == mech, "    Mech should still be at (2, 3).");
+    testPassed &= validate(testMap.getLocation(2, 3).getResident() == mech, "    Mech should still be at (2, 3).");
     testPassed &= validate(2 == mech.x && 3 == mech.y, "    Mech does not think he is at (2, 3), but he should.");
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC should still only be holding 1 unit.");
 
     // Unload the mech; this should fail, since he is not on the transport.
     new UnloadEvent(apc, mech, 3, 3).performEvent(testMap);
-    testPassed &= validate(testMap.getLocation(3, 3).getResident(testMap) == null, "    Location (3, 3) should have no residents.");
+    testPassed &= validate(testMap.getLocation(3, 3).getResident() == null, "    Location (3, 3) should have no residents.");
     testPassed &= validate(2 == mech.x && 3 == mech.y, "    Mech thinks he has moved, but should still be at (2, 3).");
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC should still have one passenger.");
 
     // Unload the infantry; this should succeed.
     new UnloadEvent(apc, inf, 3, 3).performEvent(testMap);
-    testPassed &= validate(testMap.getLocation(3, 3).getResident(testMap) == inf, "    Infantry is not at the dropoff point.");
+    testPassed &= validate(testMap.getLocation(3, 3).getResident() == inf, "    Infantry is not at the dropoff point.");
     testPassed &= validate(apc.heldUnits.size() == 0,
         "    APC should have zero cargo, but heldUnits size is " + apc.heldUnits.size());
     testPassed &= validate(3 == inf.x && 3 == inf.y, "    Infantry does not think he is at dropoff point.");
@@ -234,25 +234,25 @@ public class TestGameEvent extends TestCase
     // expected to happen in GameAction, which is typically responsible for creating MoveEvents.
     new MoveEvent(inf, path).performEvent(testMap); // Move the infantry 8 spaces, woo!
     testPassed &= validate(7 == inf.x && 5 == inf.y, "    Infantry should think he is at (7, 5) after moving.");
-    testPassed &= validate(testMap.getLocation(7, 5).getResident(testMap) == inf, "    Infantry is not at (7, 5) after moving.");
+    testPassed &= validate(testMap.getLocation(7, 5).getResident() == inf, "    Infantry is not at (7, 5) after moving.");
 
     path.addWaypoint(7, 6); // New endpoint.
     new MoveEvent(mech, path).performEvent(testMap);
     testPassed &= validate(7 == mech.x && 6 == mech.y, "    Mech should think he is at (7, 6) after moving.");
-    testPassed &= validate(testMap.getLocation(7, 6).getResident(testMap) == mech, "    Mech is not at (7, 6) after moving.");
+    testPassed &= validate(testMap.getLocation(7, 6).getResident() == mech, "    Mech is not at (7, 6) after moving.");
 
     path.addWaypoint(7, 0); // New endpoint over water.
     new MoveEvent(mech, path).performEvent(testMap); // This should not execute. Water is bad for grunts.
     testPassed &= validate(7 == mech.x && 6 == mech.y, "    Mech does not think he is at (7, 6), but should.");
-    testPassed &= validate(testMap.getLocation(7, 6).getResident(testMap) == mech, "    Mech is not still at (7, 6), but should be.");
-    testPassed &= validate(testMap.getLocation(7, 0).getResident(testMap) == null, "    Location (7, 0) should still be empty.");
+    testPassed &= validate(testMap.getLocation(7, 6).getResident() == mech, "    Mech is not still at (7, 6), but should be.");
+    testPassed &= validate(testMap.getLocation(7, 0).getResident() == null, "    Location (7, 0) should still be empty.");
 
     path.addWaypoint(7, 5); // New endpoint to move apc over infantry.
     new MoveEvent(apc, path).performEvent(testMap); // This should not execute. Treads are bad for grunts.
     testPassed &= validate(7 == inf.x && 5 == inf.y, "    Infantry should still think he is at (7, 5).");
-    testPassed &= validate(testMap.getLocation(7, 5).getResident(testMap) == inf, "    Infantry should still be at (7, 5).");
+    testPassed &= validate(testMap.getLocation(7, 5).getResident() == inf, "    Infantry should still be at (7, 5).");
     testPassed &= validate(3 == apc.x && 2 == apc.y, "    APC should still think it is at (3, 2).");
-    testPassed &= validate(testMap.getLocation(3, 2).getResident(testMap) == apc, "    APC should still be at (3, 2)");
+    testPassed &= validate(testMap.getLocation(3, 2).getResident() == apc, "    APC should still be at (3, 2)");
 
     // Clean up.
     testMap.removeUnit(inf);
@@ -278,10 +278,10 @@ public class TestGameEvent extends TestCase
     // Make sure the pins are down.
     testPassed &= validate(inf.getPreciseHP() == 0, "    Infantry still has health after dying.");
     testPassed &= validate(inf.x == -1 && inf.y == -1, "    Infantry still thinks he is on the map after death.");
-    testPassed &= validate(testMap.getLocation(2, 2).getResident(testMap) == null, "    Infantry did not vacate his space after death.");
+    testPassed &= validate(testMap.getLocation(2, 2).getResident() == null, "    Infantry did not vacate his space after death.");
     testPassed &= validate(mech.getPreciseHP() == 0, "    Mech still has health after dying.");
     testPassed &= validate(mech.x == -1 && mech.y == -1, "    Mech still thinks he is on the map after death.");
-    testPassed &= validate(testMap.getLocation(2, 3).getResident(testMap) == null, "    Mech did not vacate his space after death.");
+    testPassed &= validate(testMap.getLocation(2, 3).getResident() == null, "    Mech did not vacate his space after death.");
 
     // No cleanup required.
 
@@ -387,11 +387,11 @@ public class TestGameEvent extends TestCase
     Unit baddie3 = addUnit(testMap, testCo2, UnitEnum.APC, 13, 2);
 
     // Verify the units were added correctly.
-    testPassed &= validate(testMap.getLocation(13, 1).getResident(testMap) == baddie1, "    Unit baddie1 is not where he belongs.");
+    testPassed &= validate(testMap.getLocation(13, 1).getResident() == baddie1, "    Unit baddie1 is not where he belongs.");
     testPassed &= validate(baddie1.x == 13 && baddie1.y == 1, "    Unit baddie1 doesn't know where he is.");
-    testPassed &= validate(testMap.getLocation(12, 1).getResident(testMap) == baddie2, "    Unit baddie2 is not where he belongs.");
+    testPassed &= validate(testMap.getLocation(12, 1).getResident() == baddie2, "    Unit baddie2 is not where he belongs.");
     testPassed &= validate(baddie2.x == 12 && baddie2.y == 1, "    Unit baddie2 doesn't know where he is.");
-    testPassed &= validate(testMap.getLocation(13, 2).getResident(testMap) == baddie3, "    Unit baddie3 is not where he belongs.");
+    testPassed &= validate(testMap.getLocation(13, 2).getResident() == baddie3, "    Unit baddie3 is not where he belongs.");
     testPassed &= validate(baddie3.x == 13 && baddie3.y == 2, "    Unit baddie3 doesn't know where he is.");
 
     // Bring to pass this poor commander's defeat.
@@ -401,13 +401,13 @@ public class TestGameEvent extends TestCase
     //================================ Validate post-conditions.
 
     // All of testCo2's Units should be removed from the map.
-    testPassed &= validate(testMap.getLocation(13, 1).getResident(testMap) == null,
+    testPassed &= validate(testMap.getLocation(13, 1).getResident() == null,
         "    Unit baddie1 was not removed from the map after defeat.");
     testPassed &= validate(baddie1.x == -1 && baddie1.y == -1, "    Unit baddie1 still thinks he's on the map after defeat.");
-    testPassed &= validate(testMap.getLocation(12, 1).getResident(testMap) == null,
+    testPassed &= validate(testMap.getLocation(12, 1).getResident() == null,
         "    Unit baddie2 was not removed from the map after defeat.");
     testPassed &= validate(baddie2.x == -1 && baddie2.y == -1, "    Unit baddie2 still thinks he's on the map after defeat.");
-    testPassed &= validate(testMap.getLocation(13, 2).getResident(testMap) == null,
+    testPassed &= validate(testMap.getLocation(13, 2).getResident() == null,
         "    Unit baddie3 was not removed from the map after defeat.");
     testPassed &= validate(baddie3.x == -1 && baddie3.y == -1, "    Unit baddie3 still thinks he's on the map after defeat.");
 

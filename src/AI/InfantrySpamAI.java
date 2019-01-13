@@ -2,6 +2,7 @@ package AI;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Queue;
 
 import CommandingOfficers.Commander;
@@ -47,18 +48,7 @@ public class InfantrySpamAI implements AIController
     actions.clear();
     
     // Create a list of every property we don't own, but want to.
-    unownedProperties = new ArrayList<XYCoord>();
-    for( int x = 0; x < gameMap.mapWidth; ++x )
-    {
-      for( int y = 0; y < gameMap.mapHeight; ++y )
-      {
-        XYCoord loc = new XYCoord(x, y);
-        if( gameMap.getLocation(loc).isCaptureable() && myCo.isEnemy(gameMap.getLocation(loc).getOwner()) )
-        {
-          unownedProperties.add(loc);
-        }
-      }
-    }
+    unownedProperties = AIUtils.findNonAlliedProperties(myCo, gameMap);
     capturingProperties = new ArrayList<XYCoord>();
     for( Unit unit : myCo.units )
     {
@@ -68,12 +58,8 @@ public class InfantrySpamAI implements AIController
       }
     }
 
-    // If the CO has enough AP, preload the CommanderAbilityAction.
-    ArrayList<CommanderAbility> abilities = myCo.getReadyAbilities();
-    if( abilities.size() > 0 )
-    {
-      actions.offer(new GameAction.AbilityAction(abilities.get(0)));
-    }
+    // Check for a turn-kickoff power
+    AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_TURN_START);
   }
 
   @Override
@@ -104,16 +90,13 @@ public class InfantrySpamAI implements AIController
       if( unit.isTurnOver ) continue; // No actions for stale units.
       boolean foundAction = false;
 
-      // Find the possible destinations.
-      ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
+      // Find the possible unit actions.
+      Map<XYCoord, ArrayList<GameActionSet> > possibleActions = AIUtils.getAvailableUnitActions(unit, gameMap);
 
-      for( XYCoord coord : destinations )
+      for( XYCoord coord : possibleActions.keySet() )
       {
-        // Figure out how to get here.
-        Path movePath = Utils.findShortestPath(unit, coord, gameMap);
-
         // Figure out what I can do here.
-        ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath);
+        ArrayList<GameActionSet> actionSets = possibleActions.get(coord);
         for( GameActionSet actionSet : actionSets )
         {
           // See if we have the option to attack.
@@ -162,7 +145,7 @@ public class InfantrySpamAI implements AIController
         {
           log("    Failed to find a path to a capturable property. Waiting");
           // We couldn't find a valid move point (are we on an island?). Just give up.
-          GameAction wait = new GameAction.WaitAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
+          GameAction wait = new GameAction.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
           actions.offer(wait);
           break;
         }
@@ -179,15 +162,22 @@ public class InfantrySpamAI implements AIController
 
         // Sort my currently-reachable move locations by distance from the goal,
         // and build a GameAction to move to the closest one.
+        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
         Utils.sortLocationsByDistance(goal, destinations);
         XYCoord destination = destinations.get(0);
         Path movePath = Utils.findShortestPath(unit, destination, gameMap);
-        GameAction move = new GameAction.WaitAction(gameMap, unit, movePath);
+        GameAction move = new GameAction.WaitAction(unit, movePath);
         actions.offer(move);
         break;
       }
     }
 
+    // Check for an available buying enhancement power
+    if( actions.isEmpty() )
+    {
+      AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_BUY);
+    }
+    
     // Finally, build more infantry. We will add all build commands at once, since they can't conflict.
     if( actions.isEmpty() )
     {
@@ -198,17 +188,23 @@ public class InfantrySpamAI implements AIController
         {
           Location loc = gameMap.getLocation(i, j);
           // If this terrain belongs to me, and I can build something on it, and I have the money, do so.
-          if( loc.getEnvironment().terrainType == TerrainType.FACTORY && loc.getOwner() == myCo && loc.getResident(gameMap) == null )
+          if( loc.getEnvironment().terrainType == TerrainType.FACTORY && loc.getOwner() == myCo && loc.getResident() == null )
           {
             ArrayList<UnitModel> units = myCo.getShoppingList(loc);
             if( !units.isEmpty() && units.get(0).getCost() <= myCo.money )
             {
-              GameAction action = new GameAction.UnitProductionAction(gameMap, myCo, units.get(0), loc.getCoordinates());
+              GameAction action = new GameAction.UnitProductionAction(myCo, units.get(0), loc.getCoordinates());
               actions.offer( action );
             }
           }
         }
       }
+    }
+
+    // Check for a turn-ending power
+    if( actions.isEmpty() )
+    {
+      AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_TURN_END);
     }
 
     // Return the next action, or null if actions is empty.

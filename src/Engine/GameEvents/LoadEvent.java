@@ -1,5 +1,6 @@
 package Engine.GameEvents;
 
+import Engine.XYCoord;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -41,10 +42,16 @@ public class LoadEvent implements GameEvent
       System.out.println("WARNING! Cannot load " + unitCargo.model.type + " onto " + unitTransport.model.type );
     }
   }
-  
-  @Override // there's no known way for this to fail after the GameAction is constructed
-  public boolean shouldPreempt(MapMaster gameMap )
+
+  @Override
+  public XYCoord getStartPoint()
   {
-    return false;
+    return new XYCoord(unitCargo.x, unitCargo.y);
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return new XYCoord(unitTransport.x, unitTransport.y);
   }
 }

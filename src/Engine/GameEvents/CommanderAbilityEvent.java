@@ -1,6 +1,7 @@
 package Engine.GameEvents;
 
 import CommandingOfficers.CommanderAbility;
+import Engine.XYCoord;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -31,10 +32,16 @@ public class CommanderAbilityEvent implements GameEvent
   {
     myAbility.activate(gameMap);
   }
-  
-  @Override // there's no known way for this to fail after the GameAction is constructed
-  public boolean shouldPreempt(MapMaster gameMap )
+
+  @Override
+  public XYCoord getStartPoint()
   {
-    return false;
+    return null;
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return null;
   }
 }

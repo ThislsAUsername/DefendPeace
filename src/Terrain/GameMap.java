@@ -65,6 +65,12 @@ public abstract class GameMap
   {}
 
   /**
+   * Reveals fog around the given unit, if applicable
+   */
+  public void revealFog(Unit scout)
+  {}
+
+  /**
    * Reveals fog along the movement path, if applicable
    */
   public void revealFog(Unit scout, Path movepath)

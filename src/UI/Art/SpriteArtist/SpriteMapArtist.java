@@ -22,6 +22,9 @@ public class SpriteMapArtist
   private int drawScale;
   private int tileSize;
 
+  private Color FOG_COLOR;
+  private Color HIGHLIGHT_COLOR;
+
   FillRectMapArtist backupArtist; // TODO: Make this obsolete.
 
   public SpriteMapArtist(GameInstance game, MapView view)
@@ -39,28 +42,50 @@ public class SpriteMapArtist
 
     baseMapImage = new BufferedImage(gameMap.mapWidth * tileSize, gameMap.mapHeight * tileSize, BufferedImage.TYPE_INT_RGB);
 
+    // This nice little hack will semi-randomly decide what color fog is used for this game.
+    // It switches every 10 seconds, so two games started 10 seconds apart will have different fog settings.
+    String strTime = Long.toString(System.currentTimeMillis());
+    if( Integer.parseInt(new String() + (strTime.charAt(strTime.length() - 5))) % 2 == 0 )
+    {
+      FOG_COLOR = new Color(255, 255, 255, 200); // white
+      HIGHLIGHT_COLOR = new Color(128, 128, 255, 112); // bluish
+    }
+    else
+    {
+      FOG_COLOR = new Color(72, 72, 96, 200); // dark blue
+      HIGHLIGHT_COLOR = new Color(255, 255, 255, 160); // white
+    }
+    TerrainSpriteSet.setFogColor(FOG_COLOR);
+
     // Build base map image.
     buildMapImage();
   }
 
-  public void drawBaseTerrain(Graphics g, int viewX, int viewY, int viewW, int viewH)
+  public void drawBaseTerrain(Graphics g, GameMap gameMap, int viewX, int viewY, int viewW, int viewH)
   {
     // First four coords are the dest x,y,x2,y2. Next four are the source coords.
     g.drawImage(baseMapImage, viewX, viewY, viewX + viewW, viewY + viewH, viewX, viewY, viewX + viewW, viewY + viewH, null);
+
+    // Draw fog effects.
+    int numTilesY = (viewY + viewH) / tileSize;
+    int numTilesX = (viewX + viewW) / tileSize;
+    for( int y = viewY / tileSize; y < numTilesY+1; ++y )
+      for( int x = viewX / tileSize; x < numTilesX+1; ++x )
+      {
+        if( gameMap.isLocationFogged(x, y) )
+        {
+          g.setColor(FOG_COLOR);
+          g.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+        }
+      }
   }
 
-  public void drawTerrainObject(Graphics g, int x, int y)
+  public void drawTerrainObject(Graphics g, GameMap gameMap, int x, int y)
   {
-    GameMap gameMap = myGame.activeCO.myView;
     TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(x, y));
 
-    spriteSet.drawTerrainObject(g, gameMap, x, y, drawScale);
-    
-    if( gameMap.isLocationFogged(x, y) )
-    {
-      g.setColor(new Color(128, 128, 128, 160));
-      g.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
-    }
+    boolean drawFog = gameMap.isLocationFogged(x, y);
+    spriteSet.drawTerrainObject(g, gameMap, x, y, drawScale, drawFog);
   }
 
   public void drawCursor(Graphics g, Unit unitActor, boolean isTargeting, int drawX, int drawY)
@@ -155,7 +180,7 @@ public class SpriteMapArtist
           Terrain.Location locus = gameMap.getLocation(w, h);
           if( locus.isHighlightSet() )
           {
-            g.setColor(new Color(255, 255, 255, 160));
+            g.setColor(HIGHLIGHT_COLOR);
             g.fillRect(w * tileSize, h * tileSize, tileSize, tileSize);
           }
         }
@@ -181,7 +206,7 @@ public class SpriteMapArtist
       {
         // Fetch the relevant sprite set for this terrain type and have it draw itself.
         TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(x, y));
-        spriteSet.drawTerrain(g, gameMap, x, y, drawScale);
+        spriteSet.drawTerrain(g, gameMap, x, y, drawScale, false);
       }
     }
   }

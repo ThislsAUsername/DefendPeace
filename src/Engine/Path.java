@@ -2,7 +2,6 @@ package Engine;
 
 import java.util.ArrayList;
 
-import Engine.Path.PathNode;
 import Terrain.GameMap;
 import Units.Unit;
 import Units.UnitModel;
@@ -235,7 +234,7 @@ public class Path
     for( int i = 0; i < waypoints.size(); i++)
     {
       PathNode point = waypoints.get(i);
-      Unit obstacle = map.getLocation(point.x, point.y).getResident(map);
+      Unit obstacle = map.getLocation(point.x, point.y).getResident();
       if( null != obstacle && unit.CO.isEnemy(obstacle.CO) )
       {
         snip(i);

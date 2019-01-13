@@ -31,7 +31,7 @@ class DefaultState extends GameInputState<XYCoord>
   {
     GameInputState<?> next = this;
     Location loc = myStateData.gameMap.getLocation(coord);
-    Unit resident = loc.getResident(myStateData.gameMap);
+    Unit resident = loc.getResident();
     if( null != resident
         && (!resident.isTurnOver    // If it's our unit and the unit is ready to go.
         || resident.CO != myStateData.commander // Also allow checking the move radius of others' units.
@@ -45,7 +45,7 @@ class DefaultState extends GameInputState<XYCoord>
     {
       // We are considering a new unit purchase.
       ArrayList<UnitModel> buildables = myStateData.commander.getShoppingList(loc);
-      myStateData.menuOptions = buildables;
+      myStateData.menuOptions = SelectUnitProduction.buildDisplayStrings(buildables);
       next = new SelectUnitProduction(myStateData, buildables, coord);
     }
     else

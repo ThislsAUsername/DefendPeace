@@ -36,7 +36,7 @@ public class UnitModel
   public int idleFuelBurn;
   public int movePower;
   public int visionRange;
-  public boolean piercingVision = false; // Determines whether this unit can see into cover
+  public boolean visionIgnoresCover = false;
   public MoveType propulsion;
   public ArrayList<ActionType> possibleActions = new ArrayList<ActionType>();
   public Set<TerrainType> healableHabs;
@@ -87,9 +87,9 @@ public class UnitModel
     healableHabs = new HashSet<TerrainType>();
     for( TerrainType terrain : TerrainType.TerrainTypeList )
     {
-      if( ((chassis == ChassisEnum.AIR_HIGH) || (chassis == ChassisEnum.AIR_LOW) && terrain.healsAir())
-          || ((chassis == ChassisEnum.TANK) || (chassis == ChassisEnum.TROOP) && terrain.healsLand())
-          || ((chassis == ChassisEnum.SHIP) || (chassis == ChassisEnum.SUBMERGED) && terrain.healsSea()) )
+      if( (((chassis == ChassisEnum.AIR_HIGH) || (chassis == ChassisEnum.AIR_LOW)) && terrain.healsAir()) ||
+          (((chassis == ChassisEnum.TANK) || (chassis == ChassisEnum.TROOP)) && terrain.healsLand()) ||
+          (((chassis == ChassisEnum.SHIP) || (chassis == ChassisEnum.SUBMERGED)) && terrain.healsSea()) )
         healableHabs.add(terrain);
     }
 
@@ -177,9 +177,43 @@ public class UnitModel
     return new ArrayList<GameAction>();
   }
 
+  /**
+   * @return True if this UnitModel has at least one weapon with a minimum range of 1.
+   */
+  public boolean hasDirectFireWeapon()
+  {
+    boolean hasDirect = false;
+    if(weaponModels != null && weaponModels.size() > 0)
+    {
+      for( WeaponModel wm : weaponModels )
+      {
+        if( wm.minRange == 1 )
+        {
+          hasDirect = true;
+          break;
+        }
+      }
+    }
+    return hasDirect;
+  }
+
   @Override
   public String toString()
   {
     return name;
+  }
+
+  public boolean hasActionType(ActionType actionType)
+  {
+    boolean hasAction = false;
+    for( ActionType at : possibleActions )
+    {
+      if( at == actionType )
+      {
+        hasAction = true;
+        break;
+      }
+    }
+    return hasAction;
   }
 }

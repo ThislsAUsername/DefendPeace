@@ -5,7 +5,7 @@ public class NeoMGun extends WeaponModel
 
   public NeoMGun()
   {
-    super(WeaponType.NEOMGUN, 9);
+    super(WeaponType.NEOMGUN);
   }
 
 }

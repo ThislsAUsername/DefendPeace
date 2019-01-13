@@ -10,17 +10,35 @@ import Units.Unit;
 public class MapWindow extends GameMap
 {
   MapMaster master;
-  Commander viewer;
+  Commander viewer; // can be null
+  boolean isFogEnabled;
   private boolean[][] isFogged;
   public CommandingOfficers.Commander[] commanders;
+  private Commander[][] lastOwnerSeen;
 
   public MapWindow(MapMaster pMaster, Commander pViewer)
+  {
+    this( pMaster, pViewer, false);
+  }
+
+  public MapWindow(MapMaster pMaster, Commander pViewer, boolean fog)
   {
     super(pMaster.mapWidth, pMaster.mapHeight);
     master = pMaster;
     viewer = pViewer;
     commanders = master.commanders;
+    isFogEnabled = fog;
     isFogged = new boolean[mapWidth][mapHeight];
+
+    // We start with knowledge of what properties everyone starts with.
+    lastOwnerSeen = new Commander[mapWidth][mapHeight];
+    for( int w = 0; w < pMaster.mapWidth; ++w )
+    {
+      for( int h = 0; h < pMaster.mapHeight; ++h )
+      {
+        lastOwnerSeen[w][h] = pMaster.getLocation(w, h).getOwner();
+      }
+    }
   }
 
   /**
@@ -53,13 +71,22 @@ public class MapWindow extends GameMap
   /** Returns the Location at the specified location, or null if that Location does not exist. */
   public Location getLocation(XYCoord location)
   {
-    return master.getLocation(location);
+    return getLocation(location.xCoord, location.yCoord);
   }
 
   /** Returns the Location at the specified location, or null if that Location does not exist. */
-  public Location getLocation(int w, int h)
+  public Location getLocation(int x, int y)
   {
-    return master.getLocation(w, h);
+    XYCoord coord = new XYCoord(x, y);
+    Location masterLoc = master.getLocation(coord);
+    Location returnLoc = masterLoc;
+    if( isLocationFogged(coord) )
+    {
+      returnLoc = new Location(returnLoc.getEnvironment(), coord);
+      returnLoc.setHighlight(masterLoc.isHighlightSet());
+      returnLoc.setOwner( lastOwnerSeen[x][y] );
+    }
+    return returnLoc;
   }
 
   public void clearAllHighlights()
@@ -100,7 +127,7 @@ public class MapWindow extends GameMap
   }
   public boolean isLocationFogged(int x, int y)
   {
-    return (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) ? true : isFogged[x][y];
+    return isFogEnabled && ((x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) ? true : isFogged[x][y]);
   }
 
   public void resetFog()
@@ -114,6 +141,8 @@ public class MapWindow extends GameMap
       }
     }
     // then reveal what we should see
+    if (null == viewer)
+      return;
     for( Commander co : commanders )
     {
       if( !viewer.isEnemy(co) )
@@ -123,21 +152,40 @@ public class MapWindow extends GameMap
           for( XYCoord coord : Utils.findVisibleLocations(this, unit) )
           {
             isFogged[coord.xCoord][coord.yCoord] = false;
+            lastOwnerSeen[coord.xCoord][coord.yCoord] = master.getLocation(coord).getOwner();
           }
         }
-        for( Location loc : co.ownedProperties )
+        for( XYCoord xyc : co.ownedProperties )
         {
+          Location loc = master.getLocation(xyc);
           for( XYCoord coord : Utils.findVisibleLocations(this, loc.getCoordinates(), Environment.PROPERTY_VISION_RANGE) )
           {
             isFogged[coord.xCoord][coord.yCoord] = false;
+            lastOwnerSeen[coord.xCoord][coord.yCoord] = master.getLocation(coord).getOwner();
           }
         }
       }
     }
   }
 
+  public void revealFog(Unit scout)
+  {
+    if (null == viewer)
+      return;
+    if( !viewer.isEnemy(scout.CO) )
+    {
+      for( XYCoord coord : Utils.findVisibleLocations(this, scout, scout.x, scout.y) )
+      {
+        isFogged[coord.xCoord][coord.yCoord] = false;
+        lastOwnerSeen[coord.xCoord][coord.yCoord] = master.getLocation(coord).getOwner();
+      }
+    }
+  }
+
   public void revealFog(Unit scout, Path movepath)
   {
+    if (null == viewer)
+      return;
     if( !viewer.isEnemy(scout.CO) )
     {
       for( PathNode node : movepath.getWaypoints() )
@@ -145,6 +193,7 @@ public class MapWindow extends GameMap
         for( XYCoord coord : Utils.findVisibleLocations(this, scout, node.x, node.y) )
         {
           isFogged[coord.xCoord][coord.yCoord] = false;
+          lastOwnerSeen[coord.xCoord][coord.yCoord] = master.getLocation(coord).getOwner();
         }
       }
     }
