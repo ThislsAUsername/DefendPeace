@@ -1,8 +1,10 @@
 package Engine.GameEvents;
 
+import CommandingOfficers.Commander;
 import Engine.Path;
-import Terrain.GameMap;
+import Engine.XYCoord;
 import Terrain.Location;
+import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
@@ -33,11 +35,11 @@ public class MoveEvent implements GameEvent
   @Override
   public void sendToListener(GameEventListener listener)
   {
-    listener.receiveMoveEvent( this );
+    listener.receiveMoveEvent(this);
   }
 
   @Override
-  public void performEvent(GameMap gameMap)
+  public void performEvent(MapMaster gameMap)
   {
     if( unitPath.getPathLength() > 0 ) // Make sure we have a destination.
     {
@@ -54,17 +56,35 @@ public class MoveEvent implements GameEvent
       else if( loc.getResident() == null && unit.model.propulsion.getMoveCost(loc.getEnvironment()) < 99 )
       {
         gameMap.moveUnit(unit, endpoint.x, endpoint.y);
-        
+
         unit.fuel -= fuelBurn;
 
         // Every unit action begins with a (potentially 0-distance) move,
         // so we'll just set the "has moved" flag here.
         unit.isTurnOver = true;
+
+        // reveal fog as applicable
+        for( Commander co : gameMap.commanders )
+        {
+          co.myView.revealFog(unit, unitPath);
+        }
       }
       else
       {
         System.out.println("WARNING! Unable to move " + unit.model.type + " to (" + endpoint.x + ", " + endpoint.y + ")");
       }
     }
+  }
+
+  @Override
+  public XYCoord getStartPoint()
+  {
+    return new XYCoord(unitPath.getWaypoint(0).x, unitPath.getWaypoint(0).y);
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return new XYCoord(unitPath.getEnd().x, unitPath.getEnd().y);
   }
 }

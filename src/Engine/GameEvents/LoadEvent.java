@@ -1,6 +1,7 @@
 package Engine.GameEvents;
 
-import Terrain.GameMap;
+import Engine.XYCoord;
+import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
@@ -29,7 +30,7 @@ public class LoadEvent implements GameEvent
   }
 
   @Override
-  public void performEvent(GameMap gameMap)
+  public void performEvent(MapMaster gameMap)
   {
     if( null != unitTransport && unitTransport.hasCargoSpace(unitCargo.model.type) )
     {
@@ -40,5 +41,17 @@ public class LoadEvent implements GameEvent
     {
       System.out.println("WARNING! Cannot load " + unitCargo.model.type + " onto " + unitTransport.model.type );
     }
+  }
+
+  @Override
+  public XYCoord getStartPoint()
+  {
+    return new XYCoord(unitCargo.x, unitCargo.y);
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return new XYCoord(unitTransport.x, unitTransport.y);
   }
 }

@@ -45,7 +45,7 @@ abstract class GameInputState<T>
     return myOptions;
   }
 
-  private OptionSelector buildSelector()
+  protected OptionSelector buildSelector()
   {
     OptionSelector selector = null;
     switch(myOptions.inputType)

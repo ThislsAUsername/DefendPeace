@@ -6,10 +6,12 @@ import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.MapMaster;
+import Terrain.MapWindow;
 
 public class GameInstance
 {
-  public Terrain.GameMap gameMap;
+  public Terrain.MapMaster gameMap;
   public Commander[] commanders;
   private int activeCoNum;
   public Commander activeCO = null;
@@ -18,7 +20,9 @@ public class GameInstance
 
   HashMap<Integer, XYCoord> playerCursors = null;
 
-  public GameInstance(GameMap map, Commander[] cos)
+  private boolean isFogEnabled;
+
+  public GameInstance(MapMaster map, Commander[] cos)
   {
     if( cos.length < 2 )
     {
@@ -35,6 +39,8 @@ public class GameInstance
     {
       if( commanders[i].HQLocation != null )
       {
+        commanders[i].myView = new MapWindow(map, commanders[i], isFogEnabled);
+        commanders[i].myView.resetFog();
         playerCursors.put(i, commanders[i].HQLocation);
       }
       else
@@ -44,6 +50,11 @@ public class GameInstance
       }
       GameEventListener.registerEventListener(commanders[i]);
     }
+  }
+
+  public boolean isFogEnabled()
+  {
+    return isFogEnabled;
   }
 
   public void setCursorLocation(XYCoord loc)

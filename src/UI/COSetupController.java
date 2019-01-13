@@ -10,7 +10,7 @@ import Engine.GameInstance;
 import Engine.IController;
 import Engine.MapController;
 import Engine.OptionSelector;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import UI.InputHandler.InputAction;
 import UI.Art.SpriteArtist.SpriteLibrary;
 
@@ -69,7 +69,7 @@ public class COSetupController implements IController
 
         // Build the CO list and the new map and create the game instance.
         Commander[] cos = gameBuilder.commanders.toArray(new Commander[gameBuilder.commanders.size()]);
-        GameMap map = new GameMap( cos, gameBuilder.mapInfo );
+        MapMaster map = new MapMaster( cos, gameBuilder.mapInfo );
         if( map.initOK() )
         {
           GameInstance newGame = new GameInstance(map, cos);

@@ -1,12 +1,16 @@
 package CommandingOfficers;
 
-import Terrain.GameMap;
+import Terrain.MapMaster;
 
 public abstract class CommanderAbility
 {
+  public static final int PHASE_TURN_START = 1;
+  public static final int PHASE_BUY = PHASE_TURN_START << 1;
+  public static final int PHASE_TURN_END = PHASE_BUY << 1;
   public final Commander myCommander;
   protected String myName;
   private int myPowerCost;
+  public int AIFlags = PHASE_TURN_START;
 
   public CommanderAbility(Commander commander, String abilityName, int powerCost)
   {
@@ -29,7 +33,7 @@ public abstract class CommanderAbility
   /** Final method to do some bookkeeping, and then call
    * perform() do do the actual work. This allows us to
    * manage global Ability side-effects in one place. */
-  public final void activate(GameMap gameMap)
+  public final void activate(MapMaster gameMap)
   {
     if( myCommander.getAbilityPower() < myPowerCost )
     {
@@ -47,5 +51,5 @@ public abstract class CommanderAbility
   }
 
   /** Subclasses will override this method to enact the ability's effects. */
-  protected abstract void perform(GameMap gameMap);
+  protected abstract void perform(MapMaster gameMap);
 }

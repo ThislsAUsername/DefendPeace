@@ -3,7 +3,9 @@ package CommandingOfficers;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import AI.AIController;
 import CommandingOfficers.Modifiers.COModifier;
@@ -42,10 +44,11 @@ import Units.UnitModel.UnitEnum;
 public class Commander extends GameEventListener
 {
   public final CommanderInfo coInfo;
+  public GameMap myView;
   public ArrayList<Unit> units;
   public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
   public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
-  public ArrayList<Location> ownedProperties;
+  public Set<XYCoord> ownedProperties;
   public ArrayList<COModifier> modifiers;
   public Color myColor;
   public static final int DEFAULTSTARTINGMONEY = 0;
@@ -110,7 +113,7 @@ public class Commander extends GameEventListener
 
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
-    ownedProperties = new ArrayList<Location>();
+    ownedProperties = new HashSet<XYCoord>();
     money = DEFAULTSTARTINGMONEY;
 
     myAbilities = new ArrayList<CommanderAbility>();
@@ -139,6 +142,7 @@ public class Commander extends GameEventListener
   public void endTurn()
   {
     if( aiController != null ) aiController.endTurn();
+    myView.resetFog();
   }
 
   /**
@@ -147,6 +151,7 @@ public class Commander extends GameEventListener
    */
   public void initTurn(GameMap map)
   {
+    myView.resetFog();
     myActiveAbilityName = "";
     // Accrue income for each city under your control.
     int turnIncome = 0;
@@ -173,7 +178,7 @@ public class Commander extends GameEventListener
 
     if( null != aiController )
     {
-      aiController.initTurn(map);
+      aiController.initTurn(myView);
     }
   }
 
@@ -344,7 +349,7 @@ public class Commander extends GameEventListener
   {
     if( aiController != null )
     {
-      return aiController.getNextAction(gameMap);
+      return aiController.getNextAction(myView);
     }
     return null;
   }

@@ -9,14 +9,21 @@ public class TerrainType
   private  Color mMainColor = null; // Predominant color of this terrain type. Here for convenience.
   private int mAttributes = 0;      // bitmask of binary tile characteristics.
   private String mName;             // Human-readable name of the terrain type.
+  private int mVisionBoost = 0;     // How much this terrain enhances the vision of surface units on it.
 
   // Generic constructor.
   private TerrainType(int attributeFlags, int defense, Color mainColor, String name)
+  {
+    this(attributeFlags, defense, mainColor, name, 0);
+  }
+  
+  private TerrainType(int attributeFlags, int defense, Color mainColor, String name, int visionBoost)
   {
     mAttributes = attributeFlags;
     mDefenseLevel = defense;
     mMainColor = mainColor;
     mName = name;
+    mVisionBoost = visionBoost;
   }
   
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,6 +38,7 @@ public class TerrainType
   private static final int HEALS_AIR = HEALS_SEA << 1;
 
   public int getDefLevel() { return mDefenseLevel; }
+  public int getVisionBoost() { return mVisionBoost; }
   public Color getMainColor() { return mMainColor; }
   public Boolean isCapturable() { return 0 != (mAttributes & CAPTURABLE); }
   public Boolean isProfitable() { return 0 != (mAttributes & PROFITABLE); }
@@ -101,7 +109,8 @@ public class TerrainType
   private static final int MOUNTAIN_DEFENSE = 4;
   private static final Color MOUNTAIN_COLOR = new Color(153, 99, 67);
   private static final String MOUNTAIN_NAME = "MOUNTAIN";
-  public static final TerrainType MOUNTAIN = new TerrainType( MOUNTAIN_FLAGS, MOUNTAIN_DEFENSE, MOUNTAIN_COLOR, MOUNTAIN_NAME );
+  private static final int MOUNTAIN_VISION  = 3;
+  public static final TerrainType MOUNTAIN = new TerrainType( MOUNTAIN_FLAGS, MOUNTAIN_DEFENSE, MOUNTAIN_COLOR, MOUNTAIN_NAME, MOUNTAIN_VISION );
 
   private static final int REEF_FLAGS = WATER | PROVIDES_COVER;
   private static final int REEF_DEFENSE = 2;
@@ -122,7 +131,7 @@ public class TerrainType
   public static final TerrainType ROAD = new TerrainType( ROAD_FLAGS, ROAD_DEFENSE, ROAD_COLOR, ROAD_NAME );
 
   private static final int WATER_FLAGS = WATER;
-  private static final int WATER_DEFENSE = 1;
+  private static final int WATER_DEFENSE = 0;
   private static final Color WATER_COLOR = new Color(94, 184, 236);
   private static final String SEA_NAME = "SEA";
   public static final TerrainType SEA = new TerrainType( WATER_FLAGS, WATER_DEFENSE, WATER_COLOR, SEA_NAME );
@@ -133,8 +142,8 @@ public class TerrainType
   private static final String SEAPORT_NAME = "SEAPORT";
   public static final TerrainType SEAPORT = new TerrainType( SEAPORT_FLAGS, SEAPORT_DEFENSE, SEAPORT_COLOR, SEAPORT_NAME );
 
-  private static final int SHOAL_FLAGS = LAND | WATER | PROVIDES_COVER;
-  private static final int SHOAL_DEFENSE = 1;
+  private static final int SHOAL_FLAGS = LAND | WATER;
+  private static final int SHOAL_DEFENSE = 0;
   private static final Color SHOAL_COLOR = new Color(253, 224, 93);
   private static final String SHOAL_NAME = "SHOAL";
   public static final TerrainType SHOAL = new TerrainType( SHOAL_FLAGS, SHOAL_DEFENSE, SHOAL_COLOR, SHOAL_NAME );

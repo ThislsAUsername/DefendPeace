@@ -12,6 +12,7 @@ public class NeotankModel extends UnitModel
   private static final int UNIT_COST = 22000;
   private static final int MAX_FUEL = 99;
   private static final int IDLE_FUEL_BURN = 0;
+  private static final int VISION_RANGE = 1;
   private static final int MOVE_POWER = 6;
 
   private static final MoveType moveType = new Tread();
@@ -20,6 +21,6 @@ public class NeotankModel extends UnitModel
 
   public NeotankModel()
   {
-    super("Neotank", UnitEnum.NEOTANK, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, MOVE_POWER, moveType, actions, weapons);
+    super("Neotank", UnitEnum.NEOTANK, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType, actions, weapons);
   }
 }

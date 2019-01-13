@@ -8,13 +8,22 @@ import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import CommandingOfficers.Modifiers.UnitRemodelModifier;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.UnitModel;
 
 public class CommanderStrong extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Strong", CommanderLibrary.CommanderEnum.STRONG);
+  private static final CommanderInfo coInfo = new CommanderInfo("Strong", new instantiator());  
+  private static class instantiator implements COMaker
+  {
+    @Override
+    public Commander create()
+    {
+      return new CommanderStrong();
+    }
+  }
+  
   private static Map<UnitModel.UnitEnum, UnitModel> highCapacityUnitModels;
 
   public CommanderStrong()
@@ -77,7 +86,7 @@ public class CommanderStrong extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       myCommander.addCOModifier(damageMod);
 
@@ -129,7 +138,7 @@ public class CommanderStrong extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       myCommander.addCOModifier(damageMod);
 

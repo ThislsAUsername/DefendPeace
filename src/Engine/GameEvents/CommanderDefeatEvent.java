@@ -1,9 +1,10 @@
 package Engine.GameEvents;
 
 import CommandingOfficers.Commander;
+import Engine.XYCoord;
 import Terrain.Environment;
-import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.MapMaster;
 import Terrain.TerrainType;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -36,7 +37,7 @@ public class CommanderDefeatEvent implements GameEvent
   }
 
   @Override
-  public void performEvent(GameMap gameMap)
+  public void performEvent(MapMaster gameMap)
   {
     // Set the flag so that we know he's toast.
     defeatedCO.isDefeated = true;
@@ -72,4 +73,16 @@ public class CommanderDefeatEvent implements GameEvent
       } // ~width loop
     } // ~height loop
   } // ~performEvent
+
+  @Override
+  public XYCoord getStartPoint()
+  {
+    return null;
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return null;
+  }
 }

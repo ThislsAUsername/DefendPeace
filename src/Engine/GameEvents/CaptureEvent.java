@@ -1,8 +1,8 @@
 package Engine.GameEvents;
 
 import Engine.XYCoord;
-import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
@@ -56,7 +56,7 @@ public class CaptureEvent implements GameEvent
    * until we change this by introducing new, game-breaking mechanics).
    */
   @Override
-  public void performEvent(GameMap gameMap)
+  public void performEvent(MapMaster gameMap)
   {
     // Only attempt to do the action if it is valid to do so.
     if( location.isCaptureable() &&
@@ -65,5 +65,17 @@ public class CaptureEvent implements GameEvent
     {
       unit.capture(gameMap.getLocation(unit.x, unit.y));
     }
+  }
+
+  @Override
+  public XYCoord getStartPoint()
+  {
+    return (null != location) ? location.getCoordinates() : null;
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return (null != location) ? location.getCoordinates() : null;
   }
 }

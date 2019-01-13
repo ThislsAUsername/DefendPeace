@@ -6,9 +6,13 @@ import java.util.Comparator;
 import java.util.Queue;
 
 import CommandingOfficers.Commander;
+import Engine.Path.PathNode;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.MapMaster;
 import Units.Unit;
+import Units.UnitModel.ChassisEnum;
 import Units.Weapons.Weapon;
 
 public class Utils
@@ -68,7 +72,7 @@ public class Utils
     for( XYCoord loc : locations )
     {
       // Add any location that is empty and supports movement of the cargo unit.
-      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport )
+      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
           && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
       {
         dropoffLocations.add(loc);
@@ -224,7 +228,7 @@ public class Utils
    */
   public static Path findShortestPath(Unit unit, int x, int y, GameMap map, boolean theoretical)
   {
-    if( null == unit || null == map )
+    if( null == unit || null == map || !map.isLocationValid(unit.x, unit.y) )
     {
       return null;
     }
@@ -303,15 +307,13 @@ public class Utils
   private static void expandSearchNode(Unit unit, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue,
       int[][] costGrid, boolean theoretical)
   {
-    XYCoord[] coordsToCheck = {new XYCoord(currentNode.x + 1, currentNode.y),
-                               new XYCoord(currentNode.x - 1, currentNode.y),
-                               new XYCoord(currentNode.x, currentNode.y + 1),
-                               new XYCoord(currentNode.x, currentNode.y - 1)};
+    XYCoord[] coordsToCheck = { new XYCoord(currentNode.x + 1, currentNode.y), new XYCoord(currentNode.x - 1, currentNode.y),
+        new XYCoord(currentNode.x, currentNode.y + 1), new XYCoord(currentNode.x, currentNode.y - 1) };
 
     for( XYCoord next : coordsToCheck )
     {
       // Check that we could potentially move into this space.
-      if( checkSpace( unit, map, currentNode, next, theoretical ) )
+      if( checkSpace(unit, map, currentNode, next, theoretical) )
       {
         // If we can move there for less cost than previously discovered,
         // then update the cost grid and re-queue the next node.
@@ -412,8 +414,9 @@ public class Utils
     if( null != co )
     {
       // Add all vacant, <co>-owned industries to the list
-      for( Location loc : co.ownedProperties )
+      for( XYCoord xyc : co.ownedProperties )
       {
+        Location loc = map.getLocation(xyc);
         Unit resident = loc.getResident();
         // We only want industries we can act on, which means they need to be empty
         // TODO: maybe calculate whether the CO has enough money to buy something at this industry
@@ -497,5 +500,95 @@ public class Utils
   {
     TravelDistanceComparator tdc = new TravelDistanceComparator(unit, map);
     Collections.sort(mapLocations, tdc);
+  }
+
+  /** Returns a list of all locations visible to the unit at its current location. */
+  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer)
+  {
+    return findVisibleLocations(map, viewer, viewer.x, viewer.y);
+  }
+  /** Returns a list of all locations that would be visible to the unit if it were at (x, y). */
+  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, int x, int y)
+  {
+    ArrayList<XYCoord> viewables = new ArrayList<XYCoord>();
+
+    if( map.isLocationValid(x, y) )
+    {
+      int range = viewer.model.visionRange;
+      // if it's a surface unit, give it the boost the terrain would provide
+      if( viewer.model.chassis == ChassisEnum.TROOP || viewer.model.chassis == ChassisEnum.TANK
+          || viewer.model.chassis == ChassisEnum.SHIP )
+        range += map.getEnvironment(x, y).terrainType.getVisionBoost();
+      viewables.addAll(findVisibleLocations(map, new XYCoord(x, y), range, viewer.model.visionIgnoresCover));
+    }
+    
+    return viewables;
+  }
+  /** Returns a list of all locations visible to a unit at origin that could see range tiles. */
+  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, XYCoord origin, int range)
+  {
+    return findVisibleLocations(map, origin, range, false);
+  }
+  /** Returns a list of all visible locations within range of origin, ignoring cover effects. */
+  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, XYCoord origin, int range, boolean piercing)
+  {
+    ArrayList<XYCoord> locations = new ArrayList<XYCoord>();
+
+    // Loop through all the valid x and y offsets, as dictated by the max range, and add valid spaces to our collection.
+    for( int yOff = -range; yOff <= range; ++yOff )
+    {
+      for( int xOff = -range; xOff <= range; ++xOff )
+      {
+        int currentRange = Math.abs(xOff) + Math.abs(yOff);
+        XYCoord coord = new XYCoord(origin.xCoord + xOff, origin.yCoord + yOff);
+        if( currentRange <= range && map.isLocationValid(coord) )
+        {
+          // If we're adjacent, or we can see through cover, or it's *not* cover, we can see into it.
+          if( currentRange < 2 || piercing || !map.getEnvironment(coord).terrainType.isCover() )
+          {
+            // Add this location to the set.
+            locations.add(coord);
+          }
+        }
+      }
+    }
+
+    return locations;
+  }
+
+  public static boolean pathCollides(GameMap map, Unit unit, Path path)
+  {
+    boolean result = false;
+    for( PathNode point : path.getWaypoints() )
+    {
+      Unit obstacle = map.getLocation(point.x, point.y).getResident();
+      if( null != obstacle && unit.CO.isEnemy(obstacle.CO) )
+      {
+        result = true;
+        break;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Evaluates the proposed move, creates a MoveEvent describing it, and adds that event to eventQueu
+   * If the move passes over an obstacle, the resulting MoveEvent will have its path shortened accordingly.
+   * @param gameMap The world in which the action is to take place.
+   * @param unit The unit who is to move.
+   * @param movePath The complete sequence of steps the unit proposes to take.
+   * @param eventQueue Will be given the new MoveEvent.
+   * @return true if the move is created as specified, false if the path was shortened.
+   */
+  public static boolean enqueueMoveEvent(MapMaster gameMap, Unit unit, Path movePath, GameEventQueue eventQueue)
+  {
+    boolean originalPathOK = true;
+    if( Utils.pathCollides(gameMap, unit, movePath) )
+    {
+      movePath.snipCollision(gameMap, unit);
+      originalPathOK = false;
+    }
+    eventQueue.add(new Engine.GameEvents.MoveEvent(unit, movePath));
+    return originalPathOK;
   }
 }

@@ -10,15 +10,18 @@ import Units.UnitModel;
 /************************************************************
  * Presents options for building a unit.                    *
  ************************************************************/
-class SelectUnitProduction extends GameInputState<UnitModel>
+class SelectUnitProduction extends GameInputState<String>
 {
+  private ArrayList<String> myStrings;
   private ArrayList<UnitModel> myUnitModels = null;
   private XYCoord myProductionLocation = null;
 
+  @SuppressWarnings("unchecked")
   public SelectUnitProduction(StateData data, ArrayList<UnitModel> buildables, XYCoord buildLocation)
   {
     super(data);
     myUnitModels = buildables;
+    myStrings = (ArrayList<String>) data.menuOptions;
     myProductionLocation = buildLocation;
   }
 
@@ -34,17 +37,18 @@ class SelectUnitProduction extends GameInputState<UnitModel>
   }
 
   @Override
-  public GameInputState<?> select(UnitModel option)
+  public GameInputState<?> select(String option)
   {
     GameInputState<?> next = this;
 
     if( null != option && null != myUnitModels )
     {
-      for( UnitModel model : myUnitModels )
+      for( String buyable : myStrings )
       {
-        if( option == model )
-        {
-          myStateData.actionSet = new GameActionSet(new GameAction.UnitProductionAction(myStateData.gameMap, myStateData.commander, model, myProductionLocation), false);
+        if( option == buyable )
+          {
+          UnitModel model = myUnitModels.get(myStrings.indexOf(buyable));
+          myStateData.actionSet = new GameActionSet(new GameAction.UnitProductionAction(myStateData.commander, model, myProductionLocation), false);
           next = new ActionReady(myStateData);
         }
       }
@@ -52,4 +56,61 @@ class SelectUnitProduction extends GameInputState<UnitModel>
 
     return next;
   }
+
+  /**
+   * Returns a list of strings of equal length containing the names of each unit with their respective prices.
+   */
+  public static ArrayList<String> buildDisplayStrings(ArrayList<UnitModel> models)
+  {
+    ArrayList<String> menuStrings = new ArrayList<>();
+    int maxNameLength = 0;
+    int maxPriceLength = 0;
+
+    // Start by getting just the unit names.
+    for(UnitModel model : models)
+    {
+      // Store each string and record the max length.
+      String str = model.type.toString();
+      menuStrings.add( str );
+      maxNameLength = Math.max(maxNameLength, str.length());
+      maxPriceLength = Math.max(maxPriceLength, Integer.toString(model.getCost()).length());
+    }
+
+    maxNameLength++; // Add 1 for a space between unit name and price.
+
+    // Modify each String to include the price at a set tab level.
+    StringBuilder sb = new StringBuilder();
+    for( int i = 0; i < models.size(); ++i, sb.setLength(0) )
+    {
+      // Start with the production item name.
+      sb.append( menuStrings.get(i) );
+
+      // Get the price as a string.
+      String price = "";
+      UnitModel model = models.get(i);
+      if( null == model )
+      {
+        System.out.println("WARNING: null UnitModel encountered in production menu! Skipping.");
+        continue;
+      }
+      else
+      {
+        price = Integer.toString(model.getCost());
+      }
+
+      // Find the difference between the max length and current length
+      int neededSpace = maxNameLength + maxPriceLength - price.length() - sb.length();
+      // Append spaces until this entry is the approved length.
+      for( int j = 0; j < neededSpace; ++j )
+        sb.append(" ");
+
+      // Append the actual cost of the item.
+      sb.append(price);
+
+      // Plug the new string into the return list.
+      menuStrings.set(i, sb.toString());
+    }
+    return menuStrings;
+  }
+  
 }

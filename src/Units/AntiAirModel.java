@@ -11,6 +11,7 @@ public class AntiAirModel extends UnitModel
   private static final int UNIT_COST = 8000;
   private static final int MAX_FUEL = 60;
   private static final int IDLE_FUEL_BURN = 0;
+  private static final int VISION_RANGE = 2;
   private static final int MOVE_POWER = 6;
   private static final MoveType moveType = new Tread();
   private static final ActionType[] actions = { ActionType.ATTACK, ActionType.WAIT };
@@ -18,6 +19,6 @@ public class AntiAirModel extends UnitModel
 
   public AntiAirModel()
   {
-    super("Anti-Air", UnitEnum.ANTI_AIR, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, MOVE_POWER, moveType, actions, weapons);
+    super("Anti-Air", UnitEnum.ANTI_AIR, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType, actions, weapons);
   }
 }

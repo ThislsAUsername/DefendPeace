@@ -11,6 +11,7 @@ public class InfantryModel extends UnitModel
   private static final int UNIT_COST = 1000;
   private static final int MAX_FUEL = 99;
   private static final int IDLE_FUEL_BURN = 0;
+  private static final int VISION_RANGE = 2;
   private static final int MOVE_POWER = 3;
 
   private static final MoveType moveType = new FootStandard();
@@ -19,6 +20,6 @@ public class InfantryModel extends UnitModel
 
   public InfantryModel()
   {
-    super("Infantry", UnitEnum.INFANTRY, ChassisEnum.TROOP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, MOVE_POWER, moveType, actions, weapons);
+    super("Infantry", UnitEnum.INFANTRY, ChassisEnum.TROOP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType, actions, weapons);
   }
 }

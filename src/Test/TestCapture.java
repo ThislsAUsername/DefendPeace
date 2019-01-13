@@ -8,9 +8,10 @@ import Engine.Utils;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapLibrary;
+import Terrain.MapMaster;
+import Terrain.MapWindow;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel.UnitEnum;
@@ -19,16 +20,20 @@ public class TestCapture extends TestCase
 {
   private static Commander testCo1;
   private static Commander testCo2;
-  private static GameMap testMap;
+  private static MapMaster testMap;
 
-  /** Make two COs and a GameMap to use with this test case. */
+  /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
   {
     testCo1 = new CommanderStrong();
     testCo2 = new CommanderPatch();
     Commander[] cos = { testCo1, testCo2 };
 
-    testMap = new GameMap(cos, MapLibrary.getByName("Firing Range"));
+    testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
+    for( Commander co : cos )
+    {
+      co.myView = new MapWindow(testMap, co);
+    }
   }
 
   @Override
@@ -66,20 +71,22 @@ public class TestCapture extends TestCase
     testPassed &= validate( infA.getCaptureProgress() == 10, "    Infantry does not register capture progress.");
     infA.stopCapturing();
     testPassed &= validate( infA.getCaptureProgress() == 0, "    Infantry should not register capture progress.");
+    infA.initTurn(testMap);
     performGameAction( captureAction, testMap );
     testPassed &= validate( infA.getCaptureProgress() == 10, "    Infantry is not capturing, but should be.");
 
     // Ensure that moving resets the capture counter.
     infA.initTurn(testMap);
-    performGameAction(new GameAction.WaitAction(testMap, infA, Utils.findShortestPath(infA, 2, 3, testMap)), testMap);
+    performGameAction(new GameAction.WaitAction(infA, Utils.findShortestPath(infA, 2, 3, testMap)), testMap);
     testPassed &= validate( infA.getCaptureProgress() == 0, "    Infantry is still capturing after moving.");
 
     // Make sure we can WAIT, and resume capturing.
     infA.initTurn(testMap);
-    performGameAction(new GameAction.WaitAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap)), testMap); // Move back onto the city.
+    performGameAction(new GameAction.WaitAction(infA, Utils.findShortestPath(infA, 2, 2, testMap)), testMap); // Move back onto the city.
+    infA.initTurn(testMap);
     performGameAction( captureAction, testMap );
     infA.initTurn(testMap);
-    performGameAction(new GameAction.WaitAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap)), testMap); // Wait on the city.
+    performGameAction(new GameAction.WaitAction(infA, Utils.findShortestPath(infA, 2, 2, testMap)), testMap); // Wait on the city.
     testPassed &= validate( infA.getCaptureProgress() == 10, "    Infantry should not lose capture progress due to WAIT.");
 
     // Make sure that attacking someone else does not reset capture progress.
@@ -91,13 +98,16 @@ public class TestCapture extends TestCase
 
     // See if we can actually capture this thing.
     infA.alterHP( -6 ); // Make it take three attempts to capture the property.
+    infA.initTurn(testMap);
     performGameAction( captureAction, testMap );
     testPassed &= validate( infA.getCaptureProgress() == 14, "    Infantry has wrong capture progress (" +
         infA.getCaptureProgress() + " instead of 14)." );
+    infA.initTurn(testMap);
     performGameAction( captureAction, testMap );
     testPassed &= validate( infA.getCaptureProgress() == 18, "    Infantry has wrong capture progress (" +
         infA.getCaptureProgress() + " instead of 18)." );
 
+    infA.initTurn(testMap);
     performGameAction( captureAction, testMap );
     // Verify that we now own the property, and that capture progress is reset.
     testPassed &= validate( prop.getOwner() == infA.CO, "    Infantry failed to capture the property.");

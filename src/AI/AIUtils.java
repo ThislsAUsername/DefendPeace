@@ -3,9 +3,10 @@ package AI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Queue;
 
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameAction.ActionType;
 import Engine.GameActionSet;
@@ -144,7 +145,7 @@ public class AIUtils
       path.snip(unit.model.movePower+1); // Trim the path so we don't try to walk through walls.
       ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap); // Find the valid moves we can make.
       Utils.sortLocationsByDistance(new XYCoord(path.getEnd().x, path.getEnd().y), validMoves); // Sort moves based on intermediate destination. 
-      move = new GameAction.WaitAction(gameMap, unit, Utils.findShortestPath(unit, validMoves.get(0), gameMap)); // Move to best option.
+      move = new GameAction.WaitAction(unit, Utils.findShortestPath(unit, validMoves.get(0), gameMap)); // Move to best option.
     }
     return move;
   }
@@ -157,13 +158,34 @@ public class AIUtils
   public static ArrayList<XYCoord> findRepairDepots(Unit unit)
   {
     ArrayList<XYCoord> stations = new ArrayList<XYCoord>();
-    for( Location loc : unit.CO.ownedProperties )
+    for( XYCoord xyc : unit.CO.ownedProperties )
     {
+      Location loc = unit.CO.myView.getLocation(xyc);
       if( unit.model.canRepairOn(loc) )
       {
         stations.add(loc.getCoordinates());
       }
     }
     return stations;
+  }
+  
+  /**
+   * Find a usable ability that has all specified flags, and add it to the provided queue.
+   */
+  public static CommanderAbility queueCromulentAbility(Queue<GameAction> q, Commander co, int flags)
+  {
+    CommanderAbility retVal = null;
+    ArrayList<CommanderAbility> abilities = co.getReadyAbilities();
+    for( CommanderAbility ab : abilities )
+    {
+      if( flags == (ab.AIFlags & flags) )
+      {
+        retVal = ab;
+        if (null != q)
+          q.offer(new GameAction.AbilityAction(ab));
+        break;
+      }
+    }
+    return retVal;
   }
 }

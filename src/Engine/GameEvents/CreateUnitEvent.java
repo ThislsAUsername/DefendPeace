@@ -2,7 +2,7 @@ package Engine.GameEvents;
 
 import CommandingOfficers.Commander;
 import Engine.XYCoord;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
@@ -46,17 +46,30 @@ public class CreateUnitEvent implements GameEvent
   }
 
   @Override
-  public void performEvent(GameMap gameMap)
+  public void performEvent(MapMaster gameMap)
   {
     if( null != myNewUnit )
     {
       myCommander.money -= myNewUnit.model.getCost();
       myCommander.units.add(myNewUnit);
       gameMap.addNewUnit(myNewUnit, myBuildCoords.xCoord, myBuildCoords.yCoord);
+      myCommander.myView.revealFog(myNewUnit);
     }
     else
     {
       System.out.println("Warning! Attempting to build unit with insufficient funds.");
     }
+  }
+
+  @Override
+  public XYCoord getStartPoint()
+  {
+    return myBuildCoords;
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return myBuildCoords;
   }
 }

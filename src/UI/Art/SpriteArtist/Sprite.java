@@ -2,6 +2,7 @@ package UI.Art.SpriteArtist;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 
 /**
@@ -147,6 +148,27 @@ public class Sprite
           {
             bi.setRGB(x, y, newColor.getRGB());
           }
+        }
+      }
+    }
+  }
+
+  /**
+   * Convert any non-transparent pixels in this Sprite to the given maskColor.
+   */
+  public void convertToMask(Color maskColor)
+  {
+    for( BufferedImage bi : spriteImages )
+    {
+      WritableRaster raster = bi.getRaster();
+      double mask[] = {maskColor.getRed(), maskColor.getGreen(), maskColor.getBlue(), maskColor.getAlpha() };
+      for( int x = 0; x < bi.getWidth(); ++x )
+      {
+        for( int y = 0; y < bi.getHeight(); ++y )
+        {
+          double[] pixel = new double[4];
+          raster.getPixel(x, y, pixel);
+          if( pixel[3] != 0 ) raster.setPixel(x, y, mask);
         }
       }
     }

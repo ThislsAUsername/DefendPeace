@@ -5,7 +5,7 @@ public class TankMGun extends WeaponModel
 
   public TankMGun()
   {
-    super(WeaponType.TANKMGUN, 9);
+    super(WeaponType.TANKMGUN);
   }
 
 }

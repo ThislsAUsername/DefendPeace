@@ -674,7 +674,7 @@ public class SpriteLibrary
       overlay.colorize(defaultMapColors, mapUnitColorPalettes.get(co.myColor).paletteColors);
 
       // Draw the Commander's mug on top of the overlay.
-      BufferedImage coMug = getCommanderSprites(co.coInfo.cmdrEnum).eyes;
+      BufferedImage coMug = getCommanderSprites(co.coInfo.name).eyes;
       int mugW = coMug.getWidth();
       Graphics g = overlay.getFrame(0).getGraphics();
       g.drawImage(coMug, mugW, 1, -mugW, coMug.getHeight(), null);
@@ -826,20 +826,26 @@ public class SpriteLibrary
   //  Below is code for loading Commander sprite images.
   ///////////////////////////////////////////////////////////////////
 
-  private static HashMap<CommanderLibrary.CommanderEnum, CommanderSpriteSet> coSpriteSets = new HashMap<CommanderLibrary.CommanderEnum, CommanderSpriteSet>();
+  private static HashMap<String, CommanderSpriteSet> coSpriteSets = new HashMap<String, CommanderSpriteSet>();
 
-  public static CommanderSpriteSet getCommanderSprites( CommanderLibrary.CommanderEnum whichCo )
+  public static CommanderSpriteSet getCommanderSprites( String whichCo )
   {
     CommanderSpriteSet css = null;
 
     if(!coSpriteSets.containsKey(whichCo))
     {
       // We don't have it, so we need to load it.
-      String baseFileName = getCommanderBaseSpriteName( whichCo );
+      String baseFileName = "res/co/" + whichCo;
+      String basePlaceholder = "res/co/placeholder";
 
-      BufferedImage body = createBlankImageIfNull(loadSpriteSheetFile(baseFileName + ".png"));
-      BufferedImage head = createBlankImageIfNull(loadSpriteSheetFile(baseFileName + "_face.png"));
-      BufferedImage eyes = createBlankImageIfNull(loadSpriteSheetFile(baseFileName + "_eyes.png"));
+      // Find out if the images exist. If they don't, use placeholders.
+      String bodyString = ((new File(baseFileName + ".png").isFile())? baseFileName : basePlaceholder) + ".png";
+      String headString = ((new File(baseFileName + "_face.png").isFile())? baseFileName : basePlaceholder) + "_face.png";
+      String eyesString = ((new File(baseFileName + "_eyes.png").isFile())? baseFileName : basePlaceholder) + "_eyes.png";
+
+      BufferedImage body = createBlankImageIfNull(loadSpriteSheetFile(bodyString));
+      BufferedImage head = createBlankImageIfNull(loadSpriteSheetFile(headString));
+      BufferedImage eyes = createBlankImageIfNull(loadSpriteSheetFile(eyesString));
 
       coSpriteSets.put(whichCo, new CommanderSpriteSet(body, head, eyes));
     }
@@ -847,27 +853,5 @@ public class SpriteLibrary
     css = coSpriteSets.get(whichCo);
 
     return css;
-  }
-
-  private static String getCommanderBaseSpriteName( CommanderLibrary.CommanderEnum whichCo )
-  {
-    String str = "res/co/";
-    switch(whichCo)
-    {
-      case LION:
-        str += "lion";
-        break;
-      case PATCH:
-        str += "patch";
-        break;
-      case STRONG:
-        str += "strong";
-        break;
-      case NOONE:
-        default:
-          // Not a real Commander. Gonna fall back to placeholder images.
-          str += "placeholder";
-    }
-    return str;
   }
 }
