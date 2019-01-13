@@ -136,6 +136,7 @@ public class CommanderCinder extends Commander
     SearAbility(Commander commander)
     {
       super(commander, SEAR_NAME, SEAR_COST);
+      AIFlags = PHASE_TURN_END;
     }
 
     @Override
