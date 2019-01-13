@@ -178,7 +178,7 @@ public class AIUtils
     ArrayList<CommanderAbility> abilities = co.getReadyAbilities();
     for( CommanderAbility ab : abilities )
     {
-      if( flags == (ab.AIflags & flags) )
+      if( flags == (ab.AIFlags & flags) )
       {
         retVal = ab;
         if (null != q)
