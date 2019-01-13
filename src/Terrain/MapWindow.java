@@ -10,7 +10,7 @@ import Units.Unit;
 public class MapWindow extends GameMap
 {
   MapMaster master;
-  Commander viewer;
+  Commander viewer; // can be null
   boolean isFogEnabled;
   private boolean[][] isFogged;
   public CommandingOfficers.Commander[] commanders;
@@ -141,6 +141,8 @@ public class MapWindow extends GameMap
       }
     }
     // then reveal what we should see
+    if (null == viewer)
+      return;
     for( Commander co : commanders )
     {
       if( !viewer.isEnemy(co) )
@@ -168,6 +170,8 @@ public class MapWindow extends GameMap
 
   public void revealFog(Unit scout)
   {
+    if (null == viewer)
+      return;
     if( !viewer.isEnemy(scout.CO) )
     {
       for( XYCoord coord : Utils.findVisibleLocations(this, scout, scout.x, scout.y) )
@@ -180,6 +184,8 @@ public class MapWindow extends GameMap
 
   public void revealFog(Unit scout, Path movepath)
   {
+    if (null == viewer)
+      return;
     if( !viewer.isEnemy(scout.CO) )
     {
       for( PathNode node : movepath.getWaypoints() )

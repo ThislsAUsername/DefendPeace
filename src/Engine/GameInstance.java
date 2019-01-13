@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
+import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
@@ -39,6 +40,7 @@ public class GameInstance
       if( commanders[i].HQLocation != null )
       {
         commanders[i].myView = new MapWindow(map, commanders[i], isFogEnabled);
+        commanders[i].myView.resetFog();
         playerCursors.put(i, commanders[i].HQLocation);
       }
       else
