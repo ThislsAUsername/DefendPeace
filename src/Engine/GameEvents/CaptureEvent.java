@@ -1,5 +1,6 @@
 package Engine.GameEvents;
 
+import Engine.XYCoord;
 import Terrain.GameMap;
 import Terrain.Location;
 import UI.MapView;
@@ -17,9 +18,10 @@ public class CaptureEvent implements GameEvent
   {
     unit = u;
     location = loc;
+    XYCoord unitXY = new XYCoord(u.x, u.y);
     if( null != location && location.isCaptureable() && unit.CO.isEnemy(location.getOwner()) )
     {
-      priorCaptureAmount = unit.getCaptureProgress();
+      priorCaptureAmount = (unitXY.equals(location.getCoordinates()) ? unit.getCaptureProgress() : 0);
       captureAmount = unit.getHP(); // TODO: Apply CO buffs.
     }
     else
