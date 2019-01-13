@@ -403,6 +403,7 @@ public class SpriteLibrary
         spriteFile = "res/unit/artillery_map.png";
         break;
       case B_COPTER:
+        spriteFile = "res/unit/bcopter_map.png";
         break;
       case BATTLESHIP:
         break;
