@@ -34,7 +34,7 @@ public class BMGrit extends Commander
         boolean debuff = true;
         for( WeaponModel pewpew : um.weaponModels )
         {
-          if( !pewpew.canFireAfterMoving )
+          if( pewpew.maxRange > 1 )
           {
             pewpew.maxRange += 1;
             debuff = false;

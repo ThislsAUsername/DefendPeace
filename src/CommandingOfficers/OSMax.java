@@ -31,17 +31,13 @@ public class OSMax extends Commander
     {
       if( um.weaponModels != null )
       {
-        boolean debuff = false;
         for( WeaponModel pewpew : um.weaponModels )
         {
-          if( !pewpew.canFireAfterMoving )
+          if( pewpew.maxRange > 1 )
           {
             pewpew.maxRange -= 1;
-            debuff = true;
           }
         }
-        if (debuff)
-          um.modifyDamageRatio(-10);
       }
     }
 
@@ -71,9 +67,13 @@ public class OSMax extends Commander
 
     if( null != minion )
     {
-      if( params.combatRef.battleRange == 1 )
+      if( params.combatRef.battleRange == 1 && minion.model.chassis != ChassisEnum.TROOP )
       {
         params.attackFactor += directBuff;
+      }
+      else if ( params.combatRef.battleRange > 1 )
+      {
+        params.attackFactor -= 10;
       }
     }
   }
@@ -99,7 +99,7 @@ public class OSMax extends Commander
 
       for( UnitModel um : COcast.unitModels )
       {
-        if( um.chassis != ChassisEnum.TROOP && um.getDamageRatio() > 100)
+        if( um.chassis != ChassisEnum.TROOP && um.hasDirectFireWeapon() )
           moveMod.addApplicableUnitModel(um);
       }
 
@@ -129,7 +129,7 @@ public class OSMax extends Commander
 
       for( UnitModel um : COcast.unitModels )
       {
-        if( um.chassis != ChassisEnum.TROOP && um.getDamageRatio() > 100)
+        if( um.chassis != ChassisEnum.TROOP && um.hasDirectFireWeapon() )
           moveMod.addApplicableUnitModel(um);
       }
 

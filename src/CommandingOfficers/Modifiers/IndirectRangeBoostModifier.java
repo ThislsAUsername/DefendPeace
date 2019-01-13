@@ -28,7 +28,7 @@ public class IndirectRangeBoostModifier extends UnitRemodelModifier implements C
       {
         for( WeaponModel pewpew : newModel.weaponModels )
         {
-          if( !pewpew.canFireAfterMoving )
+          if( pewpew.maxRange > 1 )
           {
             pewpew.maxRange += boost;
             remodel = true;
