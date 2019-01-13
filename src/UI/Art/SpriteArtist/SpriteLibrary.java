@@ -436,6 +436,7 @@ public class SpriteLibrary
       case SUB:
         break;
       case T_COPTER:
+        spriteFile = "res/unit/tcopter_map.png";
         break;
       case TANK:
         spriteFile = "res/unit/tank_map.png";
