@@ -45,7 +45,7 @@ public class SpriteMapArtist
     // This nice little hack will semi-randomly decide what color fog is used for this game.
     // It switches every 10 seconds, so two games started 10 seconds apart will have different fog settings.
     String strTime = Long.toString(System.currentTimeMillis());
-    if( Integer.parseInt(new String() + (strTime.charAt(strTime.length()-5))) %2 == 0 )
+    if( Integer.parseInt(new String() + (strTime.charAt(strTime.length() - 5))) % 2 == 0 )
     {
       FOG_COLOR = new Color(255, 255, 255, 200); // white
       HIGHLIGHT_COLOR = new Color(128, 128, 255, 112); // bluish
@@ -61,31 +61,30 @@ public class SpriteMapArtist
     buildMapImage();
   }
 
-  public void drawBaseTerrain(Graphics g, GameMap gameMap, int viewX, int viewY, int viewW, int viewH, boolean drawFogEverywhere)
+  public void drawBaseTerrain(Graphics g, GameMap gameMap, int viewX, int viewY, int viewW, int viewH)
   {
     // First four coords are the dest x,y,x2,y2. Next four are the source coords.
-    g.drawImage(baseMapImage, viewX, viewY, viewX + viewW, viewY + viewH,
-                              viewX, viewY, viewX + viewW, viewY + viewH, null);
+    g.drawImage(baseMapImage, viewX, viewY, viewX + viewW, viewY + viewH, viewX, viewY, viewX + viewW, viewY + viewH, null);
 
     // Draw fog effects.
-    int numTilesY = (viewY+viewH)/tileSize;
-    int numTilesX = (viewX+viewW)/tileSize;
-    for( int y = viewY/tileSize; y < numTilesY; ++y )
-      for( int x = viewX/tileSize; x < numTilesX; ++x )
+    int numTilesY = (viewY + viewH) / tileSize;
+    int numTilesX = (viewX + viewW) / tileSize;
+    for( int y = viewY / tileSize; y < numTilesY+1; ++y )
+      for( int x = viewX / tileSize; x < numTilesX+1; ++x )
       {
-        if( drawFogEverywhere || gameMap.isLocationFogged(x, y))
+        if( gameMap.isLocationFogged(x, y) )
         {
           g.setColor(FOG_COLOR);
-          g.fillRect(x*tileSize, y*tileSize, tileSize, tileSize);
+          g.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
         }
       }
   }
 
-  public void drawTerrainObject(Graphics g, GameMap gameMap, int x, int y, boolean drawFogAnyway)
+  public void drawTerrainObject(Graphics g, GameMap gameMap, int x, int y)
   {
     TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(x, y));
 
-    boolean drawFog = (gameMap.isLocationFogged(x, y) || drawFogAnyway);
+    boolean drawFog = gameMap.isLocationFogged(x, y);
     spriteSet.drawTerrainObject(g, gameMap, x, y, drawScale, drawFog);
   }
 

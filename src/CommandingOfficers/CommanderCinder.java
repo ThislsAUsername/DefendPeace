@@ -20,7 +20,15 @@ import Units.UnitModel;
  */
 public class CommanderCinder extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Cinder", CommanderLibrary.CommanderEnum.CINDER);
+  private static final CommanderInfo coInfo = new CommanderInfo("Cinder", new instantiator());  
+  private static class instantiator implements COMaker
+  {
+    @Override
+    public Commander create()
+    {
+      return new CommanderCinder();
+    }
+  }
 
   private static final double COST_MOD_PER_BUILD = 1.2;
 
@@ -73,11 +81,23 @@ public class CommanderCinder extends Commander
   @Override
   public void initTurn(GameMap map)
   {
-    for( XYCoord xyc : ownedProperties )
+    // If we haven't initialized our buildable locations yet, do so.
+    if( buildCounts.size() < 1 )
     {
-      Location loc = map.getLocation(xyc);
-      buildCounts.put(loc.getCoordinates(), 0);
+      for( int x = 0; x < map.mapWidth; ++x )
+        for( int y = 0; y < map.mapHeight; ++y )
+        {
+          Location loc = map.getLocation(x, y);
+          if( loc.isCaptureable() ) // if we can't capture it, we can't build from it
+            buildCounts.put(loc.getCoordinates(), 0);
+        }
     }
+    else // If we're initialized already, just reset our build counts
+      for( XYCoord xyc : buildCounts.keySet() )
+      {
+        buildCounts.put(xyc, 0);
+      }
+
     setPrices(0);
     super.initTurn(map);
   }
@@ -116,6 +136,7 @@ public class CommanderCinder extends Commander
     SearAbility(Commander commander)
     {
       super(commander, SEAR_NAME, SEAR_COST);
+      AIFlags = PHASE_TURN_END;
     }
 
     @Override

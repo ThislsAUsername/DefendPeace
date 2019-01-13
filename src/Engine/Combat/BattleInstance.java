@@ -90,7 +90,7 @@ public class BattleInstance
   /**
    * Utility struct used to facilitate calculating battle results.
    */
-  private class BattleParams
+  public static class BattleParams
   {
     public double baseDamage;
     public double attackerHP;
