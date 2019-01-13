@@ -13,7 +13,7 @@ import Units.Unit;
  */
 public class TheBeast extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("The Beast", new instantiator());
+  private static final CommanderInfo coInfo = new CommanderInfo("The Beast\nLevels", new instantiator());
 
   private static class instantiator implements COMaker
   {

@@ -1,10 +1,7 @@
 package CommandingOfficers;
 
-import java.util.Collection;
-
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
-import CommandingOfficers.Modifiers.PerfectMoveModifier;
 import Engine.Combat.CostValueFinder;
 import Engine.Combat.MassStrikeUtils;
 import Terrain.MapMaster;
@@ -12,20 +9,20 @@ import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import Units.UnitModel;
 
-public class BHSturmDef extends Commander
+public class BHSturm extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Sturm\nDefense", new instantiator());
+  private static final CommanderInfo coInfo = new CommanderInfo("Sturm", new instantiator());
 
   private static class instantiator implements COMaker
   {
     @Override
     public Commander create()
     {
-      return new BHSturmDef();
+      return new BHSturm();
     }
   }
 
-  public BHSturmDef()
+  public BHSturm()
   {
     super(coInfo);
 
