@@ -51,7 +51,8 @@ public class BHVB extends Commander
     protected void perform(MapMaster gameMap)
     {
       ArrayList<Unit> victimList = MassStrikeUtils.damageStrike(gameMap, POWER,
-          MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true)), 2);
+          MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, false)),
+          0, 2, myCommander, true);
       for( Unit victim : victimList )
       {
         victim.isStunned = true;
