@@ -48,7 +48,7 @@ class SelectCargoDropLocation extends GameInputState<XYCoord>
       else
       {
         // Since we can't drop any additional units, build the GameAction and move to ActionReady.
-        GameAction ga = new GameAction.UnloadAction(myStateData.gameMap, myStateData.unitActor, myStateData.path, myStateData.unitLocationMap);
+        GameAction ga = new GameAction.UnloadAction(myStateData.unitActor, myStateData.path, myStateData.unitLocationMap);
 
         // Override the current ActionSet with a new one, since we just redefined it.
         myStateData.actionSet = new GameActionSet( ga, true );

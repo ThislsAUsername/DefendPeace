@@ -12,14 +12,16 @@ import Units.UnitModel;
  ************************************************************/
 class SelectUnitProduction extends GameInputState<String>
 {
-  private static ArrayList<String> menuStrings;
+  private ArrayList<String> myStrings;
   private ArrayList<UnitModel> myUnitModels = null;
   private XYCoord myProductionLocation = null;
 
+  @SuppressWarnings("unchecked")
   public SelectUnitProduction(StateData data, ArrayList<UnitModel> buildables, XYCoord buildLocation)
   {
     super(data);
     myUnitModels = buildables;
+    myStrings = (ArrayList<String>) data.menuOptions;
     myProductionLocation = buildLocation;
   }
 
@@ -41,12 +43,12 @@ class SelectUnitProduction extends GameInputState<String>
 
     if( null != option && null != myUnitModels )
     {
-      for( String buyable : menuStrings )
+      for( String buyable : myStrings )
       {
         if( option == buyable )
           {
-          UnitModel model = myUnitModels.get(menuStrings.indexOf(buyable));
-          myStateData.actionSet = new GameActionSet(new GameAction.UnitProductionAction(myStateData.gameMap, myStateData.commander, model, myProductionLocation), false);
+          UnitModel model = myUnitModels.get(myStrings.indexOf(buyable));
+          myStateData.actionSet = new GameActionSet(new GameAction.UnitProductionAction(myStateData.commander, model, myProductionLocation), false);
           next = new ActionReady(myStateData);
         }
       }
@@ -56,24 +58,25 @@ class SelectUnitProduction extends GameInputState<String>
   }
 
   /**
-   * After execution, menuStrings will be (re)populated with strings of equal length
-   * containing the names of each unit with their respective prices.
+   * Returns a list of strings of equal length containing the names of each unit with their respective prices.
    */
   public static ArrayList<String> buildDisplayStrings(ArrayList<UnitModel> models)
   {
-    menuStrings = new ArrayList<>();
-    int maxLength = 0;
+    ArrayList<String> menuStrings = new ArrayList<>();
+    int maxNameLength = 0;
+    int maxPriceLength = 0;
 
     // Start by getting just the unit names.
-    for(int i = 0; i < models.size(); ++i)
+    for(UnitModel model : models)
     {
       // Store each string and record the max length.
-      String str = models.get(i).type.toString();
+      String str = model.type.toString();
       menuStrings.add( str );
-      maxLength = (str.length() > maxLength) ? str.length() : maxLength;
+      maxNameLength = Math.max(maxNameLength, str.length());
+      maxPriceLength = Math.max(maxPriceLength, Integer.toString(model.getCost()).length());
     }
 
-    maxLength++; // Add 1 for a space between unit name and price.
+    maxNameLength++; // Add 1 for a space between unit name and price.
 
     // Modify each String to include the price at a set tab level.
     StringBuilder sb = new StringBuilder();
@@ -82,11 +85,8 @@ class SelectUnitProduction extends GameInputState<String>
       // Start with the production item name.
       sb.append( menuStrings.get(i) );
 
-      // Append spaces until this entry is the approved length.
-      for( ; sb.length() < maxLength; sb.append(" ") );
-
       // Get the price as a string.
-      int price = 0;
+      String price = "";
       UnitModel model = models.get(i);
       if( null == model )
       {
@@ -95,18 +95,17 @@ class SelectUnitProduction extends GameInputState<String>
       }
       else
       {
-        price = model.getCost();
+        price = Integer.toString(model.getCost());
       }
 
-      // Pad the price with an extra space if it is only four digits.
-      // NOTE: This line assumes that all prices will be either four or five digits.
-      if( price < 10000 )
-      {
+      // Find the difference between the max length and current length
+      int neededSpace = maxNameLength + maxPriceLength - price.length() - sb.length();
+      // Append spaces until this entry is the approved length.
+      for( int j = 0; j < neededSpace; ++j )
         sb.append(" ");
-      }
 
       // Append the actual cost of the item.
-      sb.append( Integer.toString(price) );
+      sb.append(price);
 
       // Plug the new string into the return list.
       menuStrings.set(i, sb.toString());

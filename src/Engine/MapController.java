@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Queue;
 
+import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -61,6 +62,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       aiming = false;
     }
   }
+
   ContemplatedAction contemplatedAction;
 
   public MapController(GameInstance game, MapView view)
@@ -79,7 +81,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     startNextTurn();
 
     // Initialize our game input handler.
-    myGameInputHandler = new GameInputHandler(myGame.gameMap, myGame.activeCO, this);
+    myGameInputHandler = new GameInputHandler(myGame.activeCO.myView, myGame.activeCO, this);
   }
 
   /**
@@ -92,7 +94,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   {
     boolean exitMap = false;
 
-    switch(inputMode)
+    switch (inputMode)
     {
       case ANIMATION:
         if( InputAction.BACK == input || InputAction.ENTER == input )
@@ -125,6 +127,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     {
       myGame.endGame();
     }
+
     return exitMap;
   }
 
@@ -135,7 +138,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   {
     GameInputHandler.InputType mode = myGameInputHandler.getInputType();
 
-    switch( mode )
+    switch (mode)
     {
       case FREE_TILE_SELECT:
         handleFreeTileSelect(input);
@@ -218,7 +221,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         Unit actor = loc.getResident();
 
         // If there is a unit that is is ready to move, or if it is someone else's, then record it so we can build the move path.
-        if( null != actor && ((actor.CO == myGame.activeCO && !actor.isTurnOver) || (actor.CO != myGame.activeCO)))
+        if( null != actor && ((actor.CO == myGame.activeCO && !actor.isTurnOver) || (actor.CO != myGame.activeCO)) )
         {
           contemplatedAction.actor = actor;
         }
@@ -229,15 +232,18 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case BACK:
         myGameInputHandler.back();
         break;
+      case NO_ACTION:
+        // No action means do nothing. Done.
+        break;
       default:
-        System.out.println("WARNING! MapController.handleMapInput() was given invalid input enum (" + input + ")");
+        System.out.println("WARNING! MapController.handleFreeTileSelect() was given invalid input enum (" + input + ")");
     }
   }
 
   /** Force the user to select one map tile from the InputStateHandler's selection. */
   private void handleConstrainedTileSelect(InputHandler.InputAction input)
   {
-    switch(input)
+    switch (input)
     {
       case ENTER:
         myGameInputHandler.select(new XYCoord(myGame.getCursorX(), myGame.getCursorY()));
@@ -249,7 +255,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case LEFT:
       case DOWN:
       case RIGHT:
-        if( myGameInputHandler.getCoordinateOptions().size() == 0)
+        if( myGameInputHandler.getCoordinateOptions().size() == 0 )
         {
           // If this option doesn't require a target, it should have been executed from handleActionMenuInput().
           // This function is just for target selection/choosing one action from the set.
@@ -261,7 +267,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         myGame.setCursorLocation(targetLocations.get(myGameInputOptionSelector.getSelectionNormalized()));
         break;
       case NO_ACTION:
-      case SEEK:     // Seek does nothing in this input state.
+      case SEEK: // Seek does nothing in this input state.
       default:
     }
   }
@@ -282,7 +288,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorDown();
         }
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
         break;
       case DOWN:
         myGame.moveCursorDown();
@@ -291,7 +297,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorUp();
         }
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
         break;
       case LEFT:
         myGame.moveCursorLeft();
@@ -300,7 +306,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorRight();
         }
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
         break;
       case RIGHT:
         myGame.moveCursorRight();
@@ -309,7 +315,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorLeft();
         }
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap);
+        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
         break;
       case ENTER:
         GameInputHandler.InputType type = myGameInputHandler.select(contemplatedAction.movePath);
@@ -378,7 +384,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     myGame.gameMap.clearAllHighlights();
     currentMenu = null;
 
-    switch( inputType )
+    switch (inputType)
     {
       case CONSTRAINED_TILE_SELECT:
         // Set the target-location highlights.
@@ -435,8 +441,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
         isInCoInfoMenu = true;
         myGameInputHandler.reset(); // CO_INFO is a terminal state. Reset the input handler.
         break;
-        default:
-          System.out.println("WARNING! Attempting to switch to unknown input type " + inputType);
+      default:
+        System.out.println("WARNING! Attempting to switch to unknown input type " + inputType);
     }
   }
 
@@ -448,8 +454,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
     // Assign the new input mode.
     inputMode = input;
 
-    // If we are changing input mode, whether to or from commanding a unit, we can
-    //   be sure we don't have a valid action right now.
+    // If we are changing input modes, we
+    // know we don't have a valid action right now.
     myGameInputHandler.reset();
     contemplatedAction.clear();
     currentMenu = null;
@@ -478,31 +484,37 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     contemplatedAction.movePath.addWaypoint(x, y);
 
-    if( !Utils.isPathValid(contemplatedAction.actor, contemplatedAction.movePath, myGame.gameMap) )
+    if( !Utils.isPathValid(contemplatedAction.actor, contemplatedAction.movePath, map) )
     {
       // The currently-built path is invalid. Try to generate a new one (may still return null).
-      contemplatedAction.movePath = Utils.findShortestPath(contemplatedAction.actor, x, y, myGame.gameMap);
+      contemplatedAction.movePath = Utils.findShortestPath(contemplatedAction.actor, x, y, map);
     }
   }
 
   /**
    * Execute the provided action and evaluate any aftermath.
    */
-  private void executeGameAction(GameAction action)
+  private boolean executeGameAction(GameAction action)
   {
+    boolean actionOK = false; // Not sure if it's a well-formed action yet.
     if( null != action )
     {
       // Compile the GameAction to its component events.
       GameEventQueue events = action.getEvents(myGame.gameMap);
 
-      // Send the events to the animator. They will be applied/executed in animationEnded().
-      changeInputMode(InputMode.ANIMATION);
-      myView.animate(events);
+      if( events.size() > 0 )
+      {
+        actionOK = true; // Invalid actions don't produce events.
+        // Send the events to the animator. They will be applied/executed in animationEnded().
+        changeInputMode(InputMode.ANIMATION);
+        myView.animate(events);
+      }
     }
     else
     {
       System.out.println("WARNING! Attempting to execute null GameAction.");
     }
+    return actionOK;
   }
 
   public void animationEnded(GameEvent event, boolean animEventQueueIsEmpty)
@@ -521,6 +533,21 @@ public class MapController implements IController, GameInputHandler.StateChanged
       Unit u = unitsToInit.poll();
       GameEventQueue events = u.initTurn(myGame.gameMap);
       myView.animate(events);
+    }
+
+    if( animEventQueueIsEmpty )
+    {
+      for( Commander co : myGame.commanders )
+      {
+        GameEventQueue events = new GameEventQueue();
+        co.pollForEvents(events);
+        if( !events.isEmpty() )
+        {
+          animEventQueueIsEmpty = false;
+          myView.animate(events);
+          break; // We'll get the next commander the next time we hit this block.
+        }
+      }
     }
 
     // If we are done animating the last action, check to see if the game is over.
@@ -553,8 +580,34 @@ public class MapController implements IController, GameInputHandler.StateChanged
       }
       else
       {
-        // The animation for the last action just completed. Back to normal input mode.
-        changeInputMode(InputMode.INPUT);
+        // The animation for the last action just completed. If an AI is in control,
+        // fetch the next action. Otherwise, return control to the player.
+        if( myGame.activeCO.isAI() )
+        {
+          GameAction aiAction = myGame.activeCO.getNextAIAction(myGame.gameMap);
+          boolean endAITurn = false;
+          if( aiAction != null )
+          {
+            if( !executeGameAction(aiAction) )
+            {
+              // If aiAction fails to execute, the AI's turn is over. We don't want
+              // to waste time getting more actions if it can't build them properly.
+              System.out.println("WARNING! AI Action " + aiAction.toString() + " Failed to execute!");
+              endAITurn = true;
+            }
+          }
+          else
+          {
+            endAITurn = true;
+          } // The AI can return a null action to signal the end of its turn.
+          if( endAITurn )
+            startNextTurn();
+        }
+        else
+        {
+          // Back to normal input mode.
+          changeInputMode(InputMode.INPUT);
+        }
       }
     }
   }
@@ -567,13 +620,14 @@ public class MapController implements IController, GameInputHandler.StateChanged
     myGame.turn();
 
     // Reinitialize the InputStateHandler for the new turn.
-    myGameInputHandler = new GameInputHandler(myGame.gameMap, myGame.activeCO, this);
+    myGameInputHandler = new GameInputHandler(myGame.activeCO.myView, myGame.activeCO, this);
 
     // Add the CO's units to the queue so we can initialize them.
     unitsToInit.addAll(myGame.activeCO.units);
 
     // Kick off the animation cycle, which will animate/init each unit.
     changeInputMode(InputMode.ANIMATION);
+
     myView.animate(null);
   }
 

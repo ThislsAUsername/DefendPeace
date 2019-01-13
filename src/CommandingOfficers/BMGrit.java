@@ -3,6 +3,7 @@ package CommandingOfficers;
 import CommandingOfficers.Modifiers.IndirectRangeBoostModifier;
 import Engine.Combat.BattleInstance.BattleParams;
 import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
@@ -91,7 +92,7 @@ public class BMGrit extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       COcast.indirectBuff += VALUE;
       IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(1);
@@ -114,7 +115,7 @@ public class BMGrit extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       COcast.indirectBuff += VALUE;
       IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(2);

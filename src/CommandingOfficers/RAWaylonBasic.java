@@ -1,7 +1,7 @@
 package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.UnitTypeDefenseModifier;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
 
@@ -49,7 +49,7 @@ public class RAWaylonBasic extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       UnitTypeDefenseModifier airDefMod = new UnitTypeDefenseModifier(power);
       for( UnitModel um : myCommander.unitModels )

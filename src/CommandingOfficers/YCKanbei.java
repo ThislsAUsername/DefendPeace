@@ -4,6 +4,7 @@ import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.Combat.BattleInstance.BattleParams;
 import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -76,7 +77,7 @@ public class YCKanbei extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       myCommander.addCOModifier(new CODamageModifier(VALUE));
     }
@@ -95,7 +96,7 @@ public class YCKanbei extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       myCommander.addCOModifier(new CODamageModifier(10));
       myCommander.addCOModifier(new CODefenseModifier(20));

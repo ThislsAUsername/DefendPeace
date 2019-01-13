@@ -2,6 +2,7 @@ package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
@@ -54,7 +55,7 @@ public class OSHachi extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       for( UnitModel um : myCommander.unitModels )
       {
@@ -75,7 +76,7 @@ public class OSHachi extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       UnitProductionModifier upm = new UnitProductionModifier(TerrainType.CITY,
           myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));

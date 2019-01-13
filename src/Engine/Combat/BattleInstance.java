@@ -70,7 +70,7 @@ public class BattleInstance
       defenderHPLoss = defender.getPreciseHP();
 
     // If the unit can counter, and wasn't killed in the initial volley, calculate return damage.
-    if( canCounter && (defender.getHP() > defenderHPLoss) )
+    if( canCounter && (defender.getPreciseHP() > defenderHPLoss) )
     {
       // New battle instance with defender counter-attacking.
       BattleParams defendInstance = new BattleParams(defender, defenderWeapon, attacker,
@@ -94,7 +94,7 @@ public class BattleInstance
   /**
    * Utility struct used to facilitate calculating battle results.
    */
-  public class BattleParams
+  public static class BattleParams
   {
     public final Unit attacker, defender;
     public double baseDamage;

@@ -11,6 +11,7 @@ public class MobileSAMModel extends UnitModel
   private static final int UNIT_COST = 12000;
   private static final int MAX_FUEL = 50;
   private static final int IDLE_FUEL_BURN = 0;
+  private static final int VISION_RANGE = 5;
   private static final int MOVE_POWER = 4;
 
   private static final MoveType moveType = new Tires();
@@ -19,6 +20,6 @@ public class MobileSAMModel extends UnitModel
 
   public MobileSAMModel()
   {
-    super("Mobile SAM", UnitEnum.MOBILESAM, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, MOVE_POWER, moveType, actions, weapons);
+    super("Mobile SAM", UnitEnum.MOBILESAM, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType, actions, weapons);
   }
 }

@@ -2,10 +2,12 @@ package UI.Art.Animation;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 
 import Engine.XYCoord;
 import UI.Art.SpriteArtist.SpriteLibrary;
 import UI.Art.SpriteArtist.SpriteOptions;
+import UI.Art.SpriteArtist.SpriteUIUtils;
 
 public class ResupplyAnimation implements GameAnimation
 {
@@ -40,18 +42,8 @@ public class ResupplyAnimation implements GameAnimation
      *   ------------
      * But with cool pop up/pop down effects.
      */
-    signWidth = ((menuTextWidth * SUPPLYTEXT.length()) + 4) * drawScale;
-    signHeight = (menuTextHeight + 4) * drawScale;
-  }
-
-  private void drawSign(Graphics g, int x, int y, int w, int h)
-  {
-    g.setColor(MENUFRAMECOLOR);
-    g.fillRect(x, y, w, h);
-    g.setColor(MENUHIGHLIGHTCOLOR);
-    g.fillRect(x + 1, y + 1, w - 1, h - 1);
-    g.setColor(MENUBGCOLOR);
-    g.fillRect(x + 1, y + 1, w - 2, h - 2);
+    signWidth = ((menuTextWidth * SUPPLYTEXT.length())) * drawScale;
+    signHeight = (menuTextHeight) * drawScale;
   }
 
   @Override
@@ -82,25 +74,21 @@ public class ResupplyAnimation implements GameAnimation
     int tileCenterY = (mapLocation.yCoord * tileSize) + (tileSize / 2);
 
     // Show the menu expanding from nothing, then disappearing
+    BufferedImage menu = SpriteLibrary.createTransparentSprite(tileSize, tileSize);
     if( animTime < signUpBegin )
     {
       // The sign is popping into existence.
       double percent = (double) animTime / signUpBegin;
       int width = (int) (signWidth * percent);
       int height = (int) (signHeight * percent);
-      XYCoord signTopLeft = new XYCoord(tileCenterX - width / 2, tileCenterY - height / 2);
 
-      drawSign(g, signTopLeft.xCoord, signTopLeft.yCoord, width, height);
-
+      menu = SpriteUIUtils.makeTextFrame(MENUBGCOLOR, MENUFRAMECOLOR, width / 2, height / 2);
     }
     else if( animTime < signUpEnd )
     {
       // The sign is legible.
-      XYCoord signTopLeft = new XYCoord(tileCenterX - signWidth / 2, tileCenterY - signHeight / 2);
-
-      drawSign(g, signTopLeft.xCoord, signTopLeft.yCoord, signWidth, signHeight);
-      SpriteLibrary.drawTextSmallCaps(g, SUPPLYTEXT, signTopLeft.xCoord + 2 * drawScale, signTopLeft.yCoord + 2 * drawScale,
-          drawScale);
+      menu = SpriteUIUtils.makeTextFrame(MENUBGCOLOR, MENUFRAMECOLOR,
+          SUPPLYTEXT, 2 * drawScale, 2 * drawScale);
     }
     else if( animTime < signGone )
     {
@@ -108,10 +96,10 @@ public class ResupplyAnimation implements GameAnimation
       double percent = 1 - ((double) (animTime - signUpEnd) / (signGone - signUpEnd));
       int width = (int) (signWidth * percent);
       int height = (int) (signHeight * percent);
-      XYCoord signTopLeft = new XYCoord(tileCenterX - width / 2, tileCenterY - height / 2);
 
-      drawSign(g, signTopLeft.xCoord, signTopLeft.yCoord, width, height);
+      menu = SpriteUIUtils.makeTextFrame(MENUBGCOLOR, MENUFRAMECOLOR, width / 2, height / 2);
     }
+    SpriteLibrary.drawImageCenteredOnPoint(g, menu, tileCenterX, tileCenterY, 1); // image generation accounts for drawscale, so don't scale image
 
     return animTime > signGone;
   }

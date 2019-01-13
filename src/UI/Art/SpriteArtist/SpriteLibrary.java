@@ -105,6 +105,7 @@ public class SpriteLibrary
   // Letters for writing in menus.
   private static Sprite letterSpritesSmallCaps = null;
   private static Sprite numberSpritesSmallCaps = null;
+  private static Sprite symbolSpritesSmallCaps = null;
 
   // Commander overlay backdrops (shows commander name and funds) for each Commander in the game.
   private static HashMap<Commander, Sprite> coOverlays = new HashMap<Commander, Sprite>();
@@ -539,6 +540,21 @@ public class SpriteLibrary
   }
 
   /**
+   * This function returns the sprite sheet for symbol characters that go along with
+   * the letter sprites from getLettersSmallCaps(). The image is loaded on the first
+   * call to this function, and simply returned thereafter.
+   * @return A Sprite object containing the in-game menu font for small-caps numbers.
+   */
+  public static Sprite getSymbolsSmallCaps()
+  {
+    if( null == symbolSpritesSmallCaps )
+    {
+      symbolSpritesSmallCaps = new Sprite(loadSpriteSheetFile("res/ui/symbols.png"), 5, 6);
+    }
+    return symbolSpritesSmallCaps;
+  }
+
+  /**
    * Draws the provided text at the provided location, using the standard alphanumeric sprite set.
    * @param g Graphics object to draw the text.
    * @param text Text to be drawn as sprited letters.
@@ -603,6 +619,15 @@ public class SpriteLibrary
       {
         int letterIndex = text.charAt(i) - '0';
         g.drawImage(getNumbersSmallCaps().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+      }
+      else // Assume symbolic
+      {
+        final String charKey = "%./-~,;:!?‽&()";
+        int symbolIndex = charKey.indexOf(text.charAt(i));
+        if( symbolIndex >= 0 )
+        {
+          g.drawImage(getSymbolsSmallCaps().getFrame(symbolIndex), x, y, menuTextWidth, menuTextHeight, null);
+        }
       }
     }
   }
@@ -798,16 +823,15 @@ public class SpriteLibrary
   //  Below is code for loading Commander sprite images.
   ///////////////////////////////////////////////////////////////////
 
-  private static HashMap<String, CommanderSpriteSet> coSpriteSets = new HashMap<>();
+  private static HashMap<String, CommanderSpriteSet> coSpriteSets = new HashMap<String, CommanderSpriteSet>();
 
-  public static CommanderSpriteSet getCommanderSprites(String whichCo)
+  public static CommanderSpriteSet getCommanderSprites( String whichCo )
   {
     CommanderSpriteSet css = null;
 
     if( !coSpriteSets.containsKey(whichCo) )
     {
       // We don't have it, so we need to load it.
-
       BufferedImage body = SpriteLibrary.createTransparentSprite(32, 32);
       BufferedImage head = SpriteLibrary.createTransparentSprite(38, 32);
       BufferedImage eyes = SpriteLibrary.createTransparentSprite(32, 18);
@@ -823,6 +847,19 @@ public class SpriteLibrary
       }
       scanner.close();
       //      SpriteLibrary.drawTextSmallCaps(eyes.getGraphics(), whichCo, 0, 8, 1);
+//=======
+//      String baseFileName = "res/co/" + whichCo;
+//      String basePlaceholder = "res/co/placeholder";
+//
+//      // Find out if the images exist. If they don't, use placeholders.
+//      String bodyString = ((new File(baseFileName + ".png").isFile())? baseFileName : basePlaceholder) + ".png";
+//      String headString = ((new File(baseFileName + "_face.png").isFile())? baseFileName : basePlaceholder) + "_face.png";
+//      String eyesString = ((new File(baseFileName + "_eyes.png").isFile())? baseFileName : basePlaceholder) + "_eyes.png";
+//
+//      BufferedImage body = createBlankImageIfNull(loadSpriteSheetFile(bodyString));
+//      BufferedImage head = createBlankImageIfNull(loadSpriteSheetFile(headString));
+//      BufferedImage eyes = createBlankImageIfNull(loadSpriteSheetFile(eyesString));
+//>>>>>>> master
 
       coSpriteSets.put(whichCo, new CommanderSpriteSet(body, head, eyes));
     }

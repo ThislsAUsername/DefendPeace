@@ -7,8 +7,12 @@ import CommandingOfficers.Modifiers.COModifier;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.UnitDieEvent;
+import Terrain.MapMaster;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -30,6 +34,8 @@ public class CommanderCinder extends Commander
   private static final double COST_MOD_PER_BUILD = 1.2;
 
   private HashMap<XYCoord, Integer> buildCounts = new HashMap<>();
+
+  private GameEventQueue pollEvents = new GameEventQueue();
 
   public CommanderCinder()
   {
@@ -76,12 +82,39 @@ public class CommanderCinder extends Commander
   @Override
   public void initTurn(GameMap map)
   {
-    for( Location loc : ownedProperties )
+    // If we haven't initialized our buildable locations yet, do so.
+    if( buildCounts.size() < 1 )
     {
-      buildCounts.put(loc.getCoordinates(), 0);
+      for( int x = 0; x < map.mapWidth; ++x )
+        for( int y = 0; y < map.mapHeight; ++y )
+        {
+          Location loc = map.getLocation(x, y);
+          if( loc.isCaptureable() ) // if we can't capture it, we can't build from it
+            buildCounts.put(loc.getCoordinates(), 0);
+        }
     }
+    else // If we're initialized already, just reset our build counts
+      for( XYCoord xyc : buildCounts.keySet() )
+      {
+        buildCounts.put(xyc, 0);
+      }
+
     setPrices(0);
     super.initTurn(map);
+  }
+
+  @Override
+  public void endTurn()
+  {
+    setPrices(0);
+    super.endTurn();
+  }
+
+  @Override
+  public void pollForEvents(GameEventQueue eventsOut)
+  {
+    eventsOut.addAll(pollEvents);
+    pollEvents.clear();
   }
 
   public void setPrices(int repetitons)
@@ -104,18 +137,20 @@ public class CommanderCinder extends Commander
     SearAbility(Commander commander)
     {
       super(commander, SEAR_NAME, SEAR_COST);
+      AIFlags = PHASE_TURN_END;
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       for( Unit unit : myCommander.units )
       {
-        if( unit.isTurnOver ) // don't penalize units who haven't moved yet 
+        if( unit.isTurnOver )
         {
-          unit.alterHP(SEAR_WOUND);
-          unit.isTurnOver = false;
+          unit.resupply(); // the missing HP has to go somewhere...
         }
+        unit.alterHP(SEAR_WOUND);
+        unit.isTurnOver = false;
       }
     }
   }
@@ -132,13 +167,12 @@ public class CommanderCinder extends Commander
 
     WitchFireAbility(Commander commander)
     {
-      // as we start in Bear form, UpTurn is the correct starting name
       super(commander, WITCHFIRE_NAME, WITCHFIRE_COST);
       listener = new WitchFireListener(commander, WITCHFIRE_HP_COST);
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       myCommander.addCOModifier(this);
     }
@@ -170,30 +204,23 @@ public class CommanderCinder extends Commander
     @Override
     public void receiveBattleEvent(BattleSummary battleInfo)
     {
-      // Determine if we were part of this fight. If so, refresh at our own expense
-      Unit minion = null;
-      if( battleInfo.attacker.CO == myCommander )
+      // Determine if we were part of this fight. If so, refresh at our own expense.
+      Unit minion = battleInfo.attacker;
+      if( minion.CO == myCommander )
       {
-        minion = battleInfo.attacker;
-      }
-      else if( battleInfo.defender.CO == myCommander )
-      {
-        minion = battleInfo.defender;
-      }
-
-      if( null != minion )
-      {
-        if( minion.getPreciseHP() > Math.abs(refreshCost) )
+        int hp = minion.getHP();
+        if( hp > refreshCost )
         {
-          minion.alterHP(-1 * refreshCost);
+          minion.alterHP(-refreshCost);
           minion.isTurnOver = false;
         }
         else
         {
-          minion.damageHP(refreshCost);
-          // TODO: aaaaaaaaaa we can't delete the unit here
-          // gameMap.removeUnit(attacker);
-          // attacker.CO.units.remove(attacker);
+          // Guess he's not gonna make it.
+          // TODO: Maybe add a debuff event/animation here as well.
+          UnitDieEvent event = new UnitDieEvent(minion);
+          CommanderCinder Cinder = (CommanderCinder)myCommander;
+          Cinder.pollEvents.add(event);
         }
       }
     }

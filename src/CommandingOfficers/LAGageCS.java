@@ -1,7 +1,7 @@
 package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.IndirectRangeBoostModifier;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
 import Units.Weapons.WeaponModel;
@@ -68,7 +68,7 @@ public class LAGageCS extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(VALUE);
       rangeBoost.init(COcast);
@@ -90,7 +90,7 @@ public class LAGageCS extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(VALUE);
       rangeBoost.init(COcast);

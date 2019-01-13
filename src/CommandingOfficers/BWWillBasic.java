@@ -1,7 +1,7 @@
 package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.COMovementModifier;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
 import Units.Weapons.WeaponModel;
@@ -62,7 +62,7 @@ public class BWWillBasic extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       COMovementModifier moveMod = new COMovementModifier(2);
       for( UnitModel um : myCommander.unitModels )

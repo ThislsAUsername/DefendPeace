@@ -1,7 +1,7 @@
 package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.COModifier;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.Location;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
@@ -57,7 +57,7 @@ public class GEDrake extends Commander
   {
     private static final String NAME = "Tsunami";
     private static final int COST = 4;
-    GameMap map;
+    MapMaster map;
 
     Tsunami(Commander commander)
     {
@@ -65,7 +65,7 @@ public class GEDrake extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       map = gameMap;
       myCommander.addCOModifier(this);
@@ -98,7 +98,7 @@ public class GEDrake extends Commander
   {
     private static final String NAME = "Typhoon";
     private static final int COST = 7;
-    GameMap map;
+    MapMaster map;
 
     Typhoon(Commander commander)
     {
@@ -107,7 +107,7 @@ public class GEDrake extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       for( int i = 0; i < map.mapWidth; i++ )
       {

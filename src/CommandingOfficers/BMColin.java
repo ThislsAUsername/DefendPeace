@@ -1,7 +1,7 @@
 package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.UnitModel;
 
 public class BMColin extends Commander
@@ -50,7 +50,7 @@ public class BMColin extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       COcast.money *= VALUE;
     }
@@ -70,7 +70,7 @@ public class BMColin extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       COcast.addCOModifier(new CODamageModifier((int) (COcast.money*VALUE)));
     }

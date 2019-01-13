@@ -3,6 +3,7 @@ package CommandingOfficers;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import Engine.Combat.BattleInstance.BattleParams;
 import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
@@ -91,7 +92,7 @@ public class OSMax extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       COcast.directBuff += VALUE;
       COMovementModifier moveMod = new COMovementModifier(1);
@@ -120,7 +121,7 @@ public class OSMax extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       COcast.directBuff += VALUE;
 

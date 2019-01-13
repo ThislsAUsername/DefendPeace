@@ -1,7 +1,7 @@
 package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.Location;
 import Units.Unit;
 
@@ -44,7 +44,7 @@ public class BHHawke extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       for( int i = 0; i < gameMap.mapWidth; i++ )
       {
@@ -76,7 +76,7 @@ public class BHHawke extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       for( int i = 0; i < gameMap.mapWidth; i++ )
       {

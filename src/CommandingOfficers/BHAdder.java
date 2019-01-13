@@ -1,7 +1,7 @@
 package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.COMovementModifier;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.UnitModel;
 
 public class BHAdder extends Commander
@@ -41,7 +41,7 @@ public class BHAdder extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       COMovementModifier moveMod = new COMovementModifier(1);
       for(UnitModel um : myCommander.unitModels)
@@ -63,7 +63,7 @@ public class BHAdder extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       COMovementModifier moveMod = new COMovementModifier(2);
       for(UnitModel um : myCommander.unitModels)

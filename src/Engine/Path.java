@@ -3,6 +3,7 @@ package Engine;
 import java.util.ArrayList;
 
 import Terrain.GameMap;
+import Units.Unit;
 import Units.UnitModel;
 
 /**
@@ -210,6 +211,11 @@ public class Path
       this.x = x;
       this.y = y;
     }
+    @Override
+    public String toString()
+    {
+      return String.format("(%s, %s)", x, y);
+    }
   }
 
   /**
@@ -221,5 +227,32 @@ public class Path
     {
       waypoints.remove(waypoints.size() - 1);
     }
+  }
+
+  public void snipCollision(GameMap map, Unit unit)
+  {
+    for( int i = 0; i < waypoints.size(); i++)
+    {
+      PathNode point = waypoints.get(i);
+      Unit obstacle = map.getLocation(point.x, point.y).getResident();
+      if( null != obstacle && unit.CO.isEnemy(obstacle.CO) )
+      {
+        snip(i);
+        break;
+      }
+    }
+  }
+
+  @Override
+  public String toString()
+  {
+    StringBuffer sb = new StringBuffer("[");
+    for( PathNode xyc : waypoints )
+    {
+      sb.append(xyc);
+      if( xyc != getEnd() ) sb.append(", ");
+    }
+    sb.append("]");
+    return sb.toString();
   }
 }

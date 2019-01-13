@@ -7,7 +7,7 @@ import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.PerfectMoveModifier;
 import Engine.Combat.CostValueFinder;
 import Engine.Combat.MassStrikeUtils;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.UnitModel;
 
@@ -81,7 +81,7 @@ public class BHSturm extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       MassStrikeUtils.damageStrike(gameMap, POWER,
           MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true)), 2);
@@ -100,7 +100,7 @@ public class BHSturm extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       MassStrikeUtils.damageStrike(gameMap, POWER,
           MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true)), 2);

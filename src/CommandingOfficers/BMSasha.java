@@ -3,7 +3,7 @@ package CommandingOfficers;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 
 public class BMSasha extends Commander
 {
@@ -51,7 +51,7 @@ public class BMSasha extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       for( Commander co : gameMap.commanders )
       {
@@ -81,7 +81,7 @@ public class BMSasha extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       // Register this class as a COModifier, so we can deactivate one turn from now.
       myCommander.addCOModifier(this);

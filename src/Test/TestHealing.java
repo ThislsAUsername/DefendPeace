@@ -5,7 +5,7 @@ import CommandingOfficers.CommanderPatch;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.MapInfo;
 import Terrain.TerrainType;
 import Units.Unit;
@@ -14,9 +14,9 @@ import Units.UnitModel.UnitEnum;
 public class TestHealing extends TestCase
 {
   private static Commander testCo1;
-  private static GameMap testMap;
+  private static MapMaster testMap;
 
-  /** Make two COs and a GameMap to use with this test case. */
+  /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
   {
     testCo1 = new CommanderPatch();
@@ -28,7 +28,7 @@ public class TestHealing extends TestCase
     XYCoord[] co1Props = { new XYCoord(0, 0) }; // Assign the city to our CO.
     XYCoord[][] properties = { co1Props }; // Wrap with an array to match MapInfo interface.
 
-    testMap = new GameMap(cos, new MapInfo("Healing Test", testLoc, properties));
+    testMap = new MapMaster(cos, new MapInfo("Healing Test", testLoc, properties));
   }
 
   @Override

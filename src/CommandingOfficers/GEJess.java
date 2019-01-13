@@ -2,7 +2,7 @@ package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitTypeDamageModifier;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
@@ -56,7 +56,7 @@ public class GEJess extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       for (Unit unit : myCommander.units)
       {
@@ -89,7 +89,7 @@ public class GEJess extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       for (Unit unit : myCommander.units)
       {

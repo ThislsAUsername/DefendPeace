@@ -5,7 +5,7 @@ import java.util.Map;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.IndirectRangeBoostModifier;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.UnitModel;
 
 public class BWIsabellaCS extends Commander
@@ -49,7 +49,7 @@ public class BWIsabellaCS extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(VALUE);
 
@@ -85,7 +85,7 @@ public class BWIsabellaCS extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(VALUE);
 

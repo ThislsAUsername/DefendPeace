@@ -85,6 +85,7 @@ public class CommanderLibrary
   public static Commander makeCommander( CommanderInfo info, Color color, String faction )
   {
     Commander co = info.maker.create();
+
     co.myColor = color;
     co.factionName = faction;
 

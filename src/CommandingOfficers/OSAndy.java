@@ -2,7 +2,7 @@ package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -44,7 +44,7 @@ public class OSAndy extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       for( Unit unit : myCommander.units )
       {
@@ -65,7 +65,7 @@ public class OSAndy extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       for( Unit unit : myCommander.units )
       {

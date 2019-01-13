@@ -1,6 +1,6 @@
 package CommandingOfficers;
 
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
 
@@ -49,7 +49,7 @@ public class BWLinCS extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       // add vision +1 and piercing vision to land units
     }
@@ -67,7 +67,7 @@ public class BWLinCS extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       // add vision +2 and piercing vision to land units
     }

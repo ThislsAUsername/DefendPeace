@@ -1,7 +1,7 @@
 package CommandingOfficers;
 
 import Terrain.Environment.Weathers;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.Location;
 import Terrain.TerrainType;
 import Units.UnitModel;
@@ -53,7 +53,7 @@ public class IDSPennyRNG extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       for( int i = 0; i < gameMap.mapWidth; i++ )
       {
@@ -78,7 +78,7 @@ public class IDSPennyRNG extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       for( int i = 0; i < gameMap.mapWidth; i++ )
       {

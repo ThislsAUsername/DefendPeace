@@ -1,7 +1,9 @@
 package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
+import Engine.XYCoord;
 import Engine.Combat.BattleInstance.BattleParams;
+import Terrain.MapMaster;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -73,7 +75,7 @@ public class BHKindle extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       COcast.urbanBuff = 80;
       for( int i = 0; i < gameMap.mapWidth; i++ )
@@ -102,13 +104,14 @@ public class BHKindle extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       COcast.urbanBuff = 130;
 
       int cityCount = 0;
-      for( Location loc : COcast.ownedProperties )
+      for( XYCoord xyc : COcast.ownedProperties )
       {
+        Location loc = gameMap.getLocation(xyc);
         if( loc.getEnvironment().terrainType == TerrainType.CITY )
           cityCount++;
       }

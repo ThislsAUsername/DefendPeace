@@ -7,6 +7,7 @@ import Engine.Combat.CostValueFinder;
 import Engine.Combat.MassStrikeUtils;
 import Engine.Combat.BattleInstance.BattleParams;
 import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.Unit;
 
 public class IDSTabithaBasic extends Commander
@@ -88,7 +89,7 @@ public class IDSTabithaBasic extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       // make our COU an enemy unit so we can't stack buffs
       for( Commander co : gameMap.commanders )

@@ -6,6 +6,7 @@ import Engine.Combat.CostValueFinder;
 import Engine.Combat.HPValueFinder;
 import Engine.Combat.MassStrikeUtils;
 import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.Unit;
 
 public class OSRachel extends Commander
@@ -77,7 +78,7 @@ public class OSRachel extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       COcast.luckMax = VALUE;
     }
@@ -94,7 +95,7 @@ public class OSRachel extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       // inf, cost, HP in order
       // deets: https://discordapp.com/channels/313453805150928906/314370192098459649/392908214913597442

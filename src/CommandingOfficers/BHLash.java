@@ -2,6 +2,7 @@ package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.PerfectMoveModifier;
 import Engine.Combat.BattleInstance.BattleParams;
+import Terrain.MapMaster;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.UnitModel.ChassisEnum;
@@ -76,7 +77,7 @@ public class BHLash extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       COcast.addCOModifier(moveMod);
     }
@@ -98,7 +99,7 @@ public class BHLash extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       COcast.addCOModifier(moveMod);
       COcast.starMult = 2;

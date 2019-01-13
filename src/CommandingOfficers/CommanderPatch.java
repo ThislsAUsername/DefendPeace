@@ -4,7 +4,7 @@ import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.Location;
 import Units.Unit;
 
@@ -91,7 +91,7 @@ public class CommanderPatch extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       // Register this class as a COModifier, so we can deactivate one turn from now.
       myCommander.addCOModifier(this);

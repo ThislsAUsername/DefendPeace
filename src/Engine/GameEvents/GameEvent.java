@@ -1,6 +1,7 @@
 package Engine.GameEvents;
 
-import Terrain.GameMap;
+import Engine.XYCoord;
+import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 
@@ -26,5 +27,21 @@ public interface GameEvent
    * Hook for subclasses to implement the specific effects of each action type.
    * @param map
    */
-  public void performEvent( GameMap gameMap );
+  public void performEvent( MapMaster gameMap );
+
+  /**
+   * Returns where the action begins for this event. This is primarily used by
+   * the animator to decide whether to animate this event when fog of war is enabled.
+   * Events with only one relevant location should return the same point from getEndPoint().
+   * Events that are not location-bound (e.g. Commander abilities) should just return null.
+   */
+  public XYCoord getStartPoint();
+
+  /**
+   * Returns where the action ends for this event. This is primarily used by
+   * the animator to decide whether to animate this event when fog of war is enabled.
+   * Events with only one relevant location should return the same point from getStartPoint().
+   * Events that are not location-bound (e.g. Commander abilities) should just return null.
+   */
+  public XYCoord getEndPoint();
 }

@@ -2,7 +2,7 @@ package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.UnitTypeDamageModifier;
 import CommandingOfficers.Modifiers.UnitTypeDefenseModifier;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
@@ -57,7 +57,7 @@ public class GEEagle extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       UnitTypeDamageModifier airPowerMod = new UnitTypeDamageModifier(5);
       airPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.B_COPTER));
@@ -86,7 +86,7 @@ public class GEEagle extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       for( Unit unit : myCommander.units )
       {

@@ -1,7 +1,8 @@
 package Engine.GameEvents;
 
-import Terrain.GameMap;
+import Engine.XYCoord;
 import Terrain.Location;
+import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
@@ -17,9 +18,10 @@ public class CaptureEvent implements GameEvent
   {
     unit = u;
     location = loc;
+    XYCoord unitXY = new XYCoord(u.x, u.y);
     if( null != location && location.isCaptureable() && unit.CO.isEnemy(location.getOwner()) )
     {
-      priorCaptureAmount = unit.getCaptureProgress();
+      priorCaptureAmount = (unitXY.equals(location.getCoordinates()) ? unit.getCaptureProgress() : 0);
       captureAmount = unit.getHP(); // TODO: Apply CO buffs.
     }
     else
@@ -54,7 +56,7 @@ public class CaptureEvent implements GameEvent
    * until we change this by introducing new, game-breaking mechanics).
    */
   @Override
-  public void performEvent(GameMap gameMap)
+  public void performEvent(MapMaster gameMap)
   {
     // Only attempt to do the action if it is valid to do so.
     if( location.isCaptureable() &&
@@ -63,5 +65,17 @@ public class CaptureEvent implements GameEvent
     {
       unit.capture(gameMap.getLocation(unit.x, unit.y));
     }
+  }
+
+  @Override
+  public XYCoord getStartPoint()
+  {
+    return (null != location) ? location.getCoordinates() : null;
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return (null != location) ? location.getCoordinates() : null;
   }
 }

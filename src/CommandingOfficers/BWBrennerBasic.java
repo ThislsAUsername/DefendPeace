@@ -1,7 +1,7 @@
 package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.CODefenseModifier;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.Unit;
 
 public class BWBrennerBasic extends Commander
@@ -42,7 +42,7 @@ public class BWBrennerBasic extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       for( Unit unit : myCommander.units )
       {

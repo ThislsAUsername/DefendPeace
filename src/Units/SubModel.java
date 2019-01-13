@@ -11,6 +11,7 @@ public class SubModel extends UnitModel
   private static final int UNIT_COST = 20000;
   private static final int MAX_FUEL = 60;
   private static final int IDLE_FUEL_BURN = 1;
+  private static final int VISION_RANGE = 5;
   private static final int MOVE_POWER = 6;
 
   // TODO: add submerge
@@ -20,6 +21,6 @@ public class SubModel extends UnitModel
 
   public SubModel()
   {
-    super("Submarine", UnitEnum.SUB, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, MOVE_POWER, moveType, actions, weapons);
+    super("Submarine", UnitEnum.SUB, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType, actions, weapons);
   }
 }

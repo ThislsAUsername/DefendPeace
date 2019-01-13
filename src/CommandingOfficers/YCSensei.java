@@ -2,8 +2,9 @@ package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitTypeDamageModifier;
+import Engine.XYCoord;
 import Engine.GameEvents.CreateUnitEvent;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.Location;
 import Terrain.TerrainType;
 import Units.UnitModel;
@@ -68,11 +69,12 @@ public class YCSensei extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       UnitModel spawn = myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY);
-      for( Location loc : myCommander.ownedProperties )
+      for( XYCoord xyc : myCommander.ownedProperties )
       {
+        Location loc = gameMap.getLocation(xyc);
         if( loc.getEnvironment().terrainType == TerrainType.CITY && loc.getResident() == null)
         {
           CreateUnitEvent cue = new CreateUnitEvent(myCommander,spawn,loc.getCoordinates());
@@ -100,11 +102,12 @@ public class YCSensei extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       UnitModel spawn = myCommander.getUnitModel(UnitModel.UnitEnum.MECH);
-      for( Location loc : myCommander.ownedProperties )
+      for( XYCoord xyc : myCommander.ownedProperties )
       {
+        Location loc = gameMap.getLocation(xyc);
         if( loc.getEnvironment().terrainType == TerrainType.CITY && loc.getResident() == null)
         {
           CreateUnitEvent cue = new CreateUnitEvent(myCommander,spawn,loc.getCoordinates());

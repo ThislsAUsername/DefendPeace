@@ -4,7 +4,7 @@ import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitTypeDamageModifier;
 import Engine.GameEvents.GameEventListener;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.Location;
 import Units.Unit;
 import Units.UnitModel;
@@ -91,7 +91,7 @@ public class OSSami extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       // Grant foot-soldiers additional firepower.
       UnitTypeDamageModifier infPowerMod = new UnitTypeDamageModifier(POWER);
@@ -120,7 +120,7 @@ public class OSSami extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       myCommander.addCOModifier(this);
       // Grant foot-soldiers additional firepower.

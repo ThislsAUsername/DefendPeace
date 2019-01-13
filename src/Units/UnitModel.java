@@ -35,10 +35,12 @@ public class UnitModel
   public int maxFuel;
   public int idleFuelBurn;
   public int movePower;
+  public int visionRange;
+  public boolean visionIgnoresCover = false;
   public MoveType propulsion;
-  public ActionType[] possibleActions;
+  public ArrayList<ActionType> possibleActions = new ArrayList<ActionType>();
   public Set<TerrainType> healableHabs;
-  public WeaponModel[] weaponModels;
+  public ArrayList<WeaponModel> weaponModels = new ArrayList<WeaponModel>();
 
   public int maxHP;
   public int holdingCapacity;
@@ -47,8 +49,31 @@ public class UnitModel
   private int COdef;
   public double COcost = 1.0;
 
-  public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pMovePower,
+  public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion, ActionType[] actions, WeaponModel[] weapons)
+  {
+    this(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion);
+
+    for( ActionType action : actions )
+    {
+      possibleActions.add(action);
+    }
+    for( WeaponModel action : weapons )
+    {
+      weaponModels.add(action);
+    }
+  }
+
+  public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
+      MoveType pPropulsion, ArrayList<ActionType> actions, ArrayList<WeaponModel> weapons)
+  {
+    this(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion);
+    possibleActions = actions;
+    weaponModels = weapons;
+  }
+
+  private UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
+      MoveType pPropulsion)
   {
     name = pName;
     type = pType;
@@ -56,24 +81,16 @@ public class UnitModel
     moneyCost = cost;
     maxFuel = pFuelMax;
     idleFuelBurn = pIdleFuelBurn;
+    visionRange = pVision;
     movePower = pMovePower;
-    propulsion = new MoveType(pPropulsion);
-    possibleActions = actions;
+    propulsion = pPropulsion;
     healableHabs = new HashSet<TerrainType>();
     for( TerrainType terrain : TerrainType.TerrainTypeList )
     {
-      if( ((chassis == ChassisEnum.AIR_HIGH) || (chassis == ChassisEnum.AIR_LOW) && terrain.healsAir())
-          || ((chassis == ChassisEnum.TANK) || (chassis == ChassisEnum.TROOP) && terrain.healsLand())
-          || ((chassis == ChassisEnum.SHIP) || (chassis == ChassisEnum.SUBMERGED) && terrain.healsSea()) )
+      if( (((chassis == ChassisEnum.AIR_HIGH) || (chassis == ChassisEnum.AIR_LOW)) && terrain.healsAir()) ||
+          (((chassis == ChassisEnum.TANK) || (chassis == ChassisEnum.TROOP)) && terrain.healsLand()) ||
+          (((chassis == ChassisEnum.SHIP) || (chassis == ChassisEnum.SUBMERGED)) && terrain.healsSea()) )
         healableHabs.add(terrain);
-    }
-    if( weapons != null )
-    {
-      weaponModels = new WeaponModel[weapons.length];
-      for( int i = 0; i < weapons.length; i++ )
-      {
-        weaponModels[i] = new WeaponModel(weapons[i]);
-      }
     }
 
     maxHP = 10;
@@ -92,18 +109,18 @@ public class UnitModel
   public static UnitModel clone(UnitModel other)
   {
     // Make a copy of the weapons used by the other model.
-    WeaponModel[] weaponModels = null;
+    ArrayList<WeaponModel> weaponModels = null;
     if( other.weaponModels != null )
     {
-      weaponModels = new WeaponModel[other.weaponModels.length];
-      for( int i = 0; i < weaponModels.length; ++i )
+      weaponModels = new ArrayList<WeaponModel>();
+      for( WeaponModel weapon : other.weaponModels )
       {
-        weaponModels[i] = new WeaponModel(other.weaponModels[i]);
+        weaponModels.add(new WeaponModel(weapon));
       }
     }
 
     // Create a new model with the given attributes.
-    UnitModel newModel = new UnitModel(other.name, other.type, other.chassis, other.getCost(), other.maxFuel, other.idleFuelBurn,
+    UnitModel newModel = new UnitModel(other.name, other.type, other.chassis, other.getCost(), other.maxFuel, other.idleFuelBurn, other.visionRange,
         other.movePower, new MoveType(other.propulsion), other.possibleActions, weaponModels);
 
     // Duplicate the other model's transporting abilities.
@@ -160,9 +177,43 @@ public class UnitModel
     return new ArrayList<GameAction>();
   }
 
+  /**
+   * @return True if this UnitModel has at least one weapon with a minimum range of 1.
+   */
+  public boolean hasDirectFireWeapon()
+  {
+    boolean hasDirect = false;
+    if(weaponModels != null && weaponModels.size() > 0)
+    {
+      for( WeaponModel wm : weaponModels )
+      {
+        if( wm.minRange == 1 )
+        {
+          hasDirect = true;
+          break;
+        }
+      }
+    }
+    return hasDirect;
+  }
+
   @Override
   public String toString()
   {
     return name;
+  }
+
+  public boolean hasActionType(ActionType actionType)
+  {
+    boolean hasAction = false;
+    for( ActionType at : possibleActions )
+    {
+      if( at == actionType )
+      {
+        hasAction = true;
+        break;
+      }
+    }
+    return hasAction;
   }
 }

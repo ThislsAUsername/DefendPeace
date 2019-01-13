@@ -5,6 +5,7 @@ import java.util.HashMap;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.BattleInstance.BattleParams;
 import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.Unit;
 
 /*
@@ -121,7 +122,7 @@ public class TheBeast extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       for (Unit unit : COcast.units)
       {

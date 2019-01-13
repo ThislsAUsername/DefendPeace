@@ -5,6 +5,7 @@ import java.util.Map;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.IndirectRangeBoostModifier;
 import Engine.Combat.BattleInstance.BattleParams;
+import Terrain.MapMaster;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -78,7 +79,7 @@ public class OSJake extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       COcast.plainsBuff += VALUE;
       IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(1);
@@ -101,7 +102,7 @@ public class OSJake extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       COcast.plainsBuff += VALUE;
       IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(1);

@@ -8,8 +8,9 @@ import Engine.Utils;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.GameMap;
 import Terrain.MapLibrary;
+import Terrain.MapMaster;
+import Terrain.MapWindow;
 import Units.Unit;
 import Units.UnitModel.UnitEnum;
 
@@ -17,16 +18,20 @@ public class TestCombat extends TestCase
 {
   private static Commander testCo1;
   private static Commander testCo2;
-  private static GameMap testMap;
+  private static MapMaster testMap;
 
-  /** Make two COs and a GameMap to use with this test case. */
+  /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
   {
     testCo1 = new CommanderStrong();
     testCo2 = new CommanderPatch();
     Commander[] cos = { testCo1, testCo2 };
 
-    testMap = new GameMap(cos, MapLibrary.getByName("Firing Range"));
+    testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
+    for( Commander co : cos )
+    {
+      co.myView = new MapWindow(testMap, co);
+    }
   }
 
   @Override
@@ -49,6 +54,7 @@ public class TestCombat extends TestCase
     // Add our combatants
     Unit mechA = addUnit(testMap, testCo1, UnitEnum.MECH, 1, 1);
     Unit infB = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 1, 2);
+    mechA.initTurn(testMap); // Make sure he is ready to move.
 
     // Make sure the infantry will die with one attack
     infB.damageHP(7);
@@ -107,22 +113,26 @@ public class TestCombat extends TestCase
     Unit victim = addUnit(testMap, testCo2, UnitEnum.ARTILLERY, 6, 7);
 
     // offender will attempt to shoot point blank. This should fail, since artillery cannot direct fire.
+    offender.initTurn(testMap); // Make sure he is ready to move.
     performGameAction(new GameAction.AttackAction(testMap, offender, Utils.findShortestPath(offender, 6, 5, testMap), 6, 6),
         testMap);
     boolean testPassed = validate(defender.getPreciseHP() == 10, "    Artillery dealt damage at range 1. Artillery range should be 2-3.");
     
     // offender will attempt to move and fire. This should fail, since artillery cannot fire after moving.
+    offender.initTurn(testMap);
     performGameAction(new GameAction.AttackAction(testMap, offender, Utils.findShortestPath(offender, 6, 4, testMap), 6, 6),
         testMap);
     testPassed &= validate(defender.getPreciseHP() == 10, "    Artillery dealt damage despite moving before firing.");
 
     // offender will shoot victim.
+    offender.initTurn(testMap); // Make sure he is ready to move.
     performGameAction(new GameAction.AttackAction(testMap, offender, Utils.findShortestPath(offender, 6, 5, testMap), 6, 7),
         testMap);
     testPassed &= validate(victim.getPreciseHP() != 10, "    Artillery failed to do damage at a range of 2, without moving.");
     testPassed &= validate(offender.getPreciseHP() == 10, "    Artillery received a counterattack from a range of 2. Counterattacks should only be possible at range 1.");
 
     // defender will attack offender.
+    defender.initTurn(testMap); // Make sure he is ready to move.
     performGameAction(new GameAction.AttackAction(testMap, defender, Utils.findShortestPath(defender, 6, 6, testMap), 6, 5),
         testMap);
     
@@ -146,6 +156,7 @@ public class TestCombat extends TestCase
     Unit infB = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 1, 3);
 
     // Execute inf- I mean, the action.
+    mechA.initTurn(testMap); // Make sure he is ready to move.
     performGameAction(new GameAction.AttackAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 2, testMap), 1, 3), testMap);
 
     // Check that the mech is undamaged, and that the infantry is no longer with us.
@@ -174,6 +185,7 @@ public class TestCombat extends TestCase
     infB.damageHP(7);
 
     // Create the attack action so we can predict the unit will die, and his CO will therefore be defeated.
+    mechA.initTurn(testMap); // Make sure he is ready to act.
     GameAction battleAction = new GameAction.AttackAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2);
 
     // Extract the resulting GameEventQueue.

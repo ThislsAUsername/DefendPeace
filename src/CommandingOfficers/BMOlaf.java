@@ -2,7 +2,7 @@ package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.COModifier;
 import Terrain.Environment.Weathers;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
@@ -54,7 +54,7 @@ public class BMOlaf extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       for( int i = 0; i < gameMap.mapWidth; i++ )
       {
@@ -88,7 +88,7 @@ public class BMOlaf extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       for( int i = 0; i < gameMap.mapWidth; i++ )
       {

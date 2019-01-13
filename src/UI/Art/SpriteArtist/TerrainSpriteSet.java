@@ -24,6 +24,9 @@ public class TerrainSpriteSet
 {
   /** List of Sprites, to allow for variations of the tile type. */
   private ArrayList<Sprite> terrainSprites;
+  private ArrayList<Sprite> fogTerrainSprites;
+  private static Color FOG_COLOR = null;
+  private Color myFogColor = null;
   private ArrayList<TerrainSpriteSet> tileTransitions;
   private boolean isTransition = false;
   public final TerrainType myTerrainType;
@@ -175,21 +178,21 @@ public class TerrainSpriteSet
    * Draws the terrain at the indicated location, accounting for any defined tile transitions.
    * Does not draw terrain objects (buildings, trees, mountains, etc).
    */
-  public void drawTerrain(Graphics g, GameMap map, int x, int y, int scale)
+  public void drawTerrain(Graphics g, GameMap map, int x, int y, int scale, boolean drawFog)
   {
-    drawTile(g, map, x, y, scale, false);
+    drawTile(g, map, x, y, scale, drawFog, false);
   }
 
   /**
    * Draws any terrain object at the indicated location, accounting for any defined tile transitions.
    * Does not draw the underlying terrain (grass, water, etc).
    */
-  public void drawTerrainObject(Graphics g, GameMap map, int x, int y, int scale)
+  public void drawTerrainObject(Graphics g, GameMap map, int x, int y, int scale, boolean drawFog)
   {
-    drawTile(g, map, x, y, scale, true);
+    drawTile(g, map, x, y, scale, drawFog, true);
   }
 
-  private void drawTile(Graphics g, GameMap map, int x, int y, int scale, boolean shouldDrawTerrainObject)
+  private void drawTile(Graphics g, GameMap map, int x, int y, int scale, boolean drawFog, boolean shouldDrawTerrainObject)
   {
     // Draw the base tile type, if needed. It's needed if we are not the base type, and if we are not drawing
     //   a terrain object. If this object is holding transition tiles, we also don't want to (re)draw the base type.
@@ -198,7 +201,7 @@ public class TerrainSpriteSet
     {
       System.out.println("Drawing " + baseTerrainType + " as base of " + myTerrainType);
       TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(baseTerrainType);
-      spriteSet.drawTile(g, map, x, y, scale, shouldDrawTerrainObject);
+      spriteSet.drawTile(g, map, x, y, scale, drawFog, shouldDrawTerrainObject);
     }
 
     // Figure out if we need to draw this tile, based on this tile type and whether the caller
@@ -253,7 +256,16 @@ public class TerrainSpriteSet
       for( TerrainSpriteSet tt : tileTransitions )
       {
         System.out.println("Drawing transition from " + tt.myTerrainType + " onto " + myTerrainType);
-        tt.drawTerrain(g, map, x, y, scale);
+        tt.drawTerrain(g, map, x, y, scale, false);
+      }
+
+      // Draw the fog overlay if requested.
+      if( drawFog )
+      {
+        if( (null == fogTerrainSprites) || (FOG_COLOR != myFogColor) ) buildFogSprites();
+        BufferedImage fogFrame = fogTerrainSprites.get(dirIndex).getFrame(variation);
+        g.drawImage(fogFrame, (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize, frame.getWidth() * scale, frame.getHeight()
+            * scale, null);
       }
     }
   }
@@ -380,5 +392,24 @@ public class TerrainSpriteSet
     }
 
     return terrainBases.get(terrain);
+  }
+
+  /** Change the color used by all TerrainSpriteSets. */
+  public static void setFogColor(Color color)
+  {
+    FOG_COLOR = color;
+  }
+
+  /** Build a set of fog-colored image masks so we can draw precise fog effects. */
+  private void buildFogSprites()
+  {
+    myFogColor = FOG_COLOR;
+    fogTerrainSprites = new ArrayList<Sprite>();
+    for( Sprite s : terrainSprites )
+    {
+      Sprite ns = new Sprite(s);
+      ns.convertToMask(myFogColor);
+      fogTerrainSprites.add(ns);
+    }
   }
 }

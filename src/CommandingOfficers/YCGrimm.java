@@ -2,7 +2,7 @@ package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 
 public class YCGrimm extends Commander
 {
@@ -45,7 +45,7 @@ public class YCGrimm extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       myCommander.addCOModifier(new CODamageModifier(VALUE));
     }
@@ -63,7 +63,7 @@ public class YCGrimm extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       myCommander.addCOModifier(new CODamageModifier(VALUE));
     }

@@ -1,18 +1,18 @@
 package Engine;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Queue;
-import java.util.Scanner;
-
 import CommandingOfficers.Commander;
+import Engine.Path.PathNode;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
-import Terrain.MapInfo;
-import Terrain.TerrainType;
+import Terrain.MapMaster;
 import Units.Unit;
+import Units.UnitModel.ChassisEnum;
 import Units.Weapons.Weapon;
 
 public class Utils
@@ -99,18 +99,19 @@ public class Utils
     ArrayList<XYCoord> reachableTiles = new ArrayList<XYCoord>();
 
     // set all locations to false/remaining move = 0
-    int[][] movesLeftGrid = new int[gameMap.mapWidth][gameMap.mapHeight];
+    int[][] costGrid = new int[gameMap.mapWidth][gameMap.mapHeight];
     for( int i = 0; i < gameMap.mapWidth; i++ )
     {
       for( int j = 0; j < gameMap.mapHeight; j++ )
       {
-        movesLeftGrid[i][j] = 0;
+        costGrid[i][j] = Integer.MAX_VALUE;
       }
     }
+
     // set up our search
     SearchNode root = new SearchNode(unit.x, unit.y);
-    movesLeftGrid[unit.x][unit.y] = Math.min(unit.model.movePower, unit.fuel);
-    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(movesLeftGrid));
+    costGrid[unit.x][unit.y] = 0;
+    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(costGrid));
     searchQueue.add(root);
     // do search
     while (!searchQueue.isEmpty())
@@ -124,7 +125,7 @@ public class Utils
         reachableTiles.add(new XYCoord(currentNode.x, currentNode.y));
       }
 
-      expandSearchNode(unit, gameMap, currentNode, searchQueue, movesLeftGrid);
+      expandSearchNode(unit, gameMap, currentNode, searchQueue, costGrid, false);
 
       currentNode = null;
     }
@@ -134,32 +135,29 @@ public class Utils
 
   /**
    * Determines whether the Location (x, y), can be added to the search queue.
+   * @param theoretical If set, this function will ignore move-power limitations and enemy-unit presence.
    */
-  private static boolean checkSpace(Unit unit, GameMap myMap, SearchNode currentNode, int x, int y, int[][] movesLeftGrid)
+  private static boolean checkSpace(Unit unit, GameMap myMap, SearchNode currentNode, XYCoord coord, boolean ignoreUnits)
   {
     // if we're past the edges of the map
-    if( x < 0 || y < 0 || x >= myMap.mapWidth || y >= myMap.mapHeight )
+    if( !myMap.isLocationValid(coord) )
     {
       return false;
     }
     // if there is a unit in that space
-    if( myMap.getLocation(x, y).getResident() != null )
+    if( !ignoreUnits && (myMap.getLocation(coord).getResident() != null) )
     { // if that unit is an enemy
-      if( unit.CO.isEnemy(myMap.getLocation(x, y).getResident().CO) )
+      if( unit.CO.isEnemy(myMap.getLocation(coord).getResident().CO) )
       {
         return false;
       }
     }
-    // if we have more movepower left than the other route there does
-    boolean betterRoute = false;
-    final int moveLeft = movesLeftGrid[currentNode.x][currentNode.y];
-    int moveCost = findMoveCost(unit, x, y, myMap);
-    if( moveLeft - moveCost >= movesLeftGrid[x][y] )
+    // if this unit can't traverse that terrain.
+    if( findMoveCost(unit, coord.xCoord, coord.yCoord, myMap) == 99 )
     {
-      betterRoute = true;
-      movesLeftGrid[x][y] = moveLeft - moveCost;
+      return false;
     }
-    return betterRoute;
+    return true;
   }
 
   private static int findMoveCost(Unit unit, int x, int y, GameMap map)
@@ -203,30 +201,40 @@ public class Utils
     return canReach;
   }
 
-  /**
-   * Calculate the shortest path for unit to take from its current location to map(x, y), and populate
-   * the path parameter with those waypoints.
-   * If no valid path is found, an empty Path will be returned.
-   */
+  /** Alias for {@link #findShortestPath(Unit, int, int, GameMap, boolean) findShortestPath(Unit, int, int, GameMap, boolean)} **/
+  public static Path findShortestPath(Unit unit, XYCoord destination, GameMap map, boolean theoretical)
+  {
+    return findShortestPath(unit, destination.xCoord, destination.yCoord, map, theoretical);
+  }
+  /** Alias for {@link #findShortestPath(Unit, int, int, GameMap, boolean) findShortestPath(Unit, int, int, GameMap, boolean=false)} **/
   public static Path findShortestPath(Unit unit, XYCoord destination, GameMap map)
   {
-    return findShortestPath(unit, destination.xCoord, destination.yCoord, map);
+    return findShortestPath(unit, destination.xCoord, destination.yCoord, map, false);
   }
-
-  /**
-   * Calculate the shortest path for unit to take from its current location to map(x, y), and populate
-   * the path parameter with those waypoints.
-   * If no valid path is found, an empty Path will be returned.
-   */
+  /** Alias for {@link #findShortestPath(Unit, int, int, GameMap, boolean) findShortestPath(Unit, int, int, GameMap, boolean=false)} **/
   public static Path findShortestPath(Unit unit, int x, int y, GameMap map)
   {
-    if( null == unit || null == map )
+    return findShortestPath(unit, x, y, map, false);
+  }
+  /**
+   * Calculate and return the shortest path for unit to take from its current location to map(x, y).
+   * The Path will avoid non-allied units unless `theoretical` is true.
+   * If no valid path is found, an empty Path will be returned.
+   * @param unit The unit under consideration. The Unit's current location will be the starting point for the path,
+   *             and the unit's move-power will limit the path length.
+   * @param destination The desired endpoint for the Path.
+   * @param map The current GameMap referenced by the Path returned.
+   * @param theoretical If true, ignores other Units and move-power limitations.
+   */
+  public static Path findShortestPath(Unit unit, int x, int y, GameMap map, boolean theoretical)
+  {
+    if( null == unit || null == map || !map.isLocationValid(unit.x, unit.y) )
     {
       return null;
     }
 
     Path aPath = new Path(100);
-    if( map.mapWidth < unit.x || map.mapHeight < unit.y || unit.x < 0 || unit.y < 0 )
+    if( !map.isLocationValid(x, y) )
     {
       // Unit is not in a valid place. No path can be found.
       System.out.println("WARNING! Cannot find path for a unit that is not on the map.");
@@ -234,14 +242,19 @@ public class Utils
       return aPath;
     }
 
-    //System.out.println("Finding new path for " + unit.model.type + " from " + unit.x + ", " + unit.y + " to " + x + ", " + y);
-    // Set all locations to false/remaining move = 0
-    int[][] movesLeftGrid = new int[map.mapWidth][map.mapHeight];
+    int[][] costGrid = new int[map.mapWidth][map.mapHeight];
+    for( int i = 0; i < map.mapWidth; i++ )
+    {
+      for( int j = 0; j < map.mapHeight; j++ )
+      {
+        costGrid[i][j] = Integer.MAX_VALUE;
+      }
+    }
 
     // Set up search parameters.
     SearchNode root = new SearchNode(unit.x, unit.y);
-    movesLeftGrid[unit.x][unit.y] = Math.min(unit.model.movePower, unit.fuel);
-    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(movesLeftGrid, x, y));
+    costGrid[unit.x][unit.y] = 0;
+    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(costGrid, x, y));
     searchQueue.add(root);
 
     ArrayList<SearchNode> waypointList = new ArrayList<SearchNode>();
@@ -266,7 +279,7 @@ public class Utils
         break;
       }
 
-      expandSearchNode(unit, map, currentNode, searchQueue, movesLeftGrid);
+      expandSearchNode(unit, map, currentNode, searchQueue, costGrid, theoretical);
 
       currentNode = null;
     }
@@ -286,28 +299,39 @@ public class Utils
     return aPath;
   }
 
+  /**
+   * Look at the nodes adjacent to currentNode; if there are any we can reach that we haven't found yet, or that we
+   * can reach more economically than previously discovered, update the cost grid and enqueue the node.
+   * @param theoretical If set, don't limit range using move power, and don't worry about other Units in the way.
+   */
   private static void expandSearchNode(Unit unit, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue,
-      int[][] movesLeftGrid)
+      int[][] costGrid, boolean theoretical)
   {
-    // right
-    if( checkSpace(unit, map, currentNode, currentNode.x + 1, currentNode.y, movesLeftGrid) )
+    XYCoord[] coordsToCheck = { new XYCoord(currentNode.x + 1, currentNode.y), new XYCoord(currentNode.x - 1, currentNode.y),
+        new XYCoord(currentNode.x, currentNode.y + 1), new XYCoord(currentNode.x, currentNode.y - 1) };
+
+    for( XYCoord next : coordsToCheck )
     {
-      searchQueue.add(new SearchNode(currentNode.x + 1, currentNode.y, currentNode));
-    }
-    // left
-    if( checkSpace(unit, map, currentNode, currentNode.x - 1, currentNode.y, movesLeftGrid) )
-    {
-      searchQueue.add(new SearchNode(currentNode.x - 1, currentNode.y, currentNode));
-    }
-    // down
-    if( checkSpace(unit, map, currentNode, currentNode.x, currentNode.y + 1, movesLeftGrid) )
-    {
-      searchQueue.add(new SearchNode(currentNode.x, currentNode.y + 1, currentNode));
-    }
-    // up
-    if( checkSpace(unit, map, currentNode, currentNode.x, currentNode.y - 1, movesLeftGrid) )
-    {
-      searchQueue.add(new SearchNode(currentNode.x, currentNode.y - 1, currentNode));
+      // Check that we could potentially move into this space.
+      if( checkSpace(unit, map, currentNode, next, theoretical) )
+      {
+        // If we can move there for less cost than previously discovered,
+        // then update the cost grid and re-queue the next node.
+        int costSoFar = costGrid[currentNode.x][currentNode.y];
+        int moveCost = findMoveCost(unit, next.xCoord, next.yCoord, map);
+        int newNextCost = costSoFar + moveCost;
+        int oldNextCost = costGrid[next.xCoord][next.yCoord];
+
+        // If we are playing "What if" then don't worry too much about move cost.
+        int movePower = Math.min(unit.model.movePower, unit.fuel) - costSoFar;
+        boolean canMove = (theoretical) ? true : (moveCost <= movePower);
+
+        if( canMove && (newNextCost < oldNextCost) )
+        {
+          costGrid[next.xCoord][next.yCoord] = newNextCost;
+          searchQueue.add(new SearchNode(next, currentNode));
+        }
+      }
     }
   }
 
@@ -325,11 +349,19 @@ public class Utils
       this(x, y, null);
     }
 
+    public SearchNode(XYCoord coord, SearchNode parent)
+    {
+      this(coord.xCoord, coord.yCoord, parent);
+    }
     public SearchNode(int x, int y, SearchNode parent)
     {
       this.x = x;
       this.y = y;
       this.parent = parent;
+    }
+    public String toString()
+    {
+      return String.format("(%s, %s)", x, y);
     }
   }
 
@@ -339,22 +371,22 @@ public class Utils
    */
   private static class SearchNodeComparator implements Comparator<SearchNode>
   {
-    int[][] movesLeftGrid;
+    int[][] costGrid;
     private final boolean hasDestination;
     private int xDest;
     private int yDest;
 
-    public SearchNodeComparator(int[][] movesLeftGrid)
+    public SearchNodeComparator(int[][] costGrid)
     {
-      this.movesLeftGrid = movesLeftGrid;
+      this.costGrid = costGrid;
       hasDestination = false;
       xDest = 0;
       yDest = 0;
     }
 
-    public SearchNodeComparator(int[][] movesLeftGrid, int x, int y)
+    public SearchNodeComparator(int[][] costGrid, int x, int y)
     {
-      this.movesLeftGrid = movesLeftGrid;
+      this.costGrid = costGrid;
       hasDestination = true;
       xDest = x;
       yDest = y;
@@ -366,9 +398,9 @@ public class Utils
       int firstDist = Math.abs(o1.x - xDest) + Math.abs(o1.y - yDest);
       int secondDist = Math.abs(o2.x - xDest) + Math.abs(o2.y - yDest);
 
-      int firstPow = movesLeftGrid[o1.x][o1.y] - ((hasDestination) ? firstDist : 0);
-      int secondPow = movesLeftGrid[o2.x][o2.y] - ((hasDestination) ? secondDist : 0);
-      return secondPow - firstPow;
+      int firstCostEstimate = costGrid[o1.x][o1.y] + ((hasDestination) ? firstDist : 0);
+      int secondCostEstimate = costGrid[o2.x][o2.y] + ((hasDestination) ? secondDist : 0);
+      return firstCostEstimate - secondCostEstimate;
     }
   }
 
@@ -382,8 +414,9 @@ public class Utils
     if( null != co )
     {
       // Add all vacant, <co>-owned industries to the list
-      for( Location loc : co.ownedProperties )
+      for( XYCoord xyc : co.ownedProperties )
       {
+        Location loc = map.getLocation(xyc);
         Unit resident = loc.getResident();
         // We only want industries we can act on, which means they need to be empty
         // TODO: maybe calculate whether the CO has enough money to buy something at this industry
@@ -430,5 +463,165 @@ public class Utils
     }
 
     return importFactions.toArray(new String[importFactions.size()]);
+  }
+
+  /**
+   * Compare XYCoords based on how far they are from myCenter.
+   * XYCoords closer to myCenter will be "less than" XYCoords that are farther away.
+   */
+  public static class ManhattanDistanceComparator implements Comparator<XYCoord>
+  {
+    XYCoord myCenter;
+
+    public ManhattanDistanceComparator(XYCoord center)
+    {
+      myCenter = center;
+    }
+
+    @Override
+    public int compare(XYCoord xy1, XYCoord xy2)
+    {
+      int xy1Dist = Math.abs(xy1.xCoord - myCenter.xCoord) + Math.abs(xy1.yCoord - myCenter.yCoord);
+      int xy2Dist = Math.abs(xy2.xCoord - myCenter.xCoord) + Math.abs(xy2.yCoord - myCenter.yCoord);
+
+      return xy1Dist - xy2Dist;
+    }
+  }
+
+  /**
+   * Sorts the mapLocations array by distance from the 'center' coordinate.
+   * @param center
+   * @param mapLocations
+   */
+  public static void sortLocationsByDistance(XYCoord center, ArrayList<XYCoord> mapLocations)
+  {
+    ManhattanDistanceComparator mdc = new ManhattanDistanceComparator(center);
+    Collections.sort(mapLocations, mdc);
+  }
+
+  /**
+   * Compare XYCoords based on how much time it would take myUnit to reach them on the given map.
+   * XYCoords closer to myCenter will be "less than" XYCoords that are farther away.
+   */
+  public static class TravelDistanceComparator implements Comparator<XYCoord>
+  {
+    Unit myUnit;
+    GameMap myMap;
+
+    public TravelDistanceComparator(Unit unit, GameMap map)
+    {
+      myUnit = unit;
+      myMap = map;
+    }
+
+    @Override
+    public int compare(XYCoord xy1, XYCoord xy2)
+    {
+      int xy1Dist = findShortestPath(myUnit, xy1, myMap).getPathLength();
+      int xy2Dist = findShortestPath(myUnit, xy2, myMap).getPathLength();
+
+      return xy1Dist - xy2Dist;
+    }
+  }
+
+  /**
+   * Sorts the mapLocations array by distance from the 'center' coordinate.
+   * @param center
+   * @param mapLocations
+   */
+  public static void sortLocationsByTravelTime(Unit unit, ArrayList<XYCoord> mapLocations, GameMap map)
+  {
+    TravelDistanceComparator tdc = new TravelDistanceComparator(unit, map);
+    Collections.sort(mapLocations, tdc);
+  }
+
+  /** Returns a list of all locations visible to the unit at its current location. */
+  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer)
+  {
+    return findVisibleLocations(map, viewer, viewer.x, viewer.y);
+  }
+  /** Returns a list of all locations that would be visible to the unit if it were at (x, y). */
+  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, int x, int y)
+  {
+    ArrayList<XYCoord> viewables = new ArrayList<XYCoord>();
+
+    if( map.isLocationValid(x, y) )
+    {
+      int range = viewer.model.visionRange;
+      // if it's a surface unit, give it the boost the terrain would provide
+      if( viewer.model.chassis == ChassisEnum.TROOP || viewer.model.chassis == ChassisEnum.TANK
+          || viewer.model.chassis == ChassisEnum.SHIP )
+        range += map.getEnvironment(x, y).terrainType.getVisionBoost();
+      viewables.addAll(findVisibleLocations(map, new XYCoord(x, y), range, viewer.model.visionIgnoresCover));
+    }
+    
+    return viewables;
+  }
+  /** Returns a list of all locations visible to a unit at origin that could see range tiles. */
+  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, XYCoord origin, int range)
+  {
+    return findVisibleLocations(map, origin, range, false);
+  }
+  /** Returns a list of all visible locations within range of origin, ignoring cover effects. */
+  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, XYCoord origin, int range, boolean piercing)
+  {
+    ArrayList<XYCoord> locations = new ArrayList<XYCoord>();
+
+    // Loop through all the valid x and y offsets, as dictated by the max range, and add valid spaces to our collection.
+    for( int yOff = -range; yOff <= range; ++yOff )
+    {
+      for( int xOff = -range; xOff <= range; ++xOff )
+      {
+        int currentRange = Math.abs(xOff) + Math.abs(yOff);
+        XYCoord coord = new XYCoord(origin.xCoord + xOff, origin.yCoord + yOff);
+        if( currentRange <= range && map.isLocationValid(coord) )
+        {
+          // If we're adjacent, or we can see through cover, or it's *not* cover, we can see into it.
+          if( currentRange < 2 || piercing || !map.getEnvironment(coord).terrainType.isCover() )
+          {
+            // Add this location to the set.
+            locations.add(coord);
+          }
+        }
+      }
+    }
+
+    return locations;
+  }
+
+  public static boolean pathCollides(GameMap map, Unit unit, Path path)
+  {
+    boolean result = false;
+    for( PathNode point : path.getWaypoints() )
+    {
+      Unit obstacle = map.getLocation(point.x, point.y).getResident();
+      if( null != obstacle && unit.CO.isEnemy(obstacle.CO) )
+      {
+        result = true;
+        break;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Evaluates the proposed move, creates a MoveEvent describing it, and adds that event to eventQueu
+   * If the move passes over an obstacle, the resulting MoveEvent will have its path shortened accordingly.
+   * @param gameMap The world in which the action is to take place.
+   * @param unit The unit who is to move.
+   * @param movePath The complete sequence of steps the unit proposes to take.
+   * @param eventQueue Will be given the new MoveEvent.
+   * @return true if the move is created as specified, false if the path was shortened.
+   */
+  public static boolean enqueueMoveEvent(MapMaster gameMap, Unit unit, Path movePath, GameEventQueue eventQueue)
+  {
+    boolean originalPathOK = true;
+    if( Utils.pathCollides(gameMap, unit, movePath) )
+    {
+      movePath.snipCollision(gameMap, unit);
+      originalPathOK = false;
+    }
+    eventQueue.add(new Engine.GameEvents.MoveEvent(unit, movePath));
+    return originalPathOK;
   }
 }

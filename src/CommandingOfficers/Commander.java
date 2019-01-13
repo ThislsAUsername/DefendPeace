@@ -4,14 +4,20 @@ import java.awt.Color;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
+import java.util.Set;
+
+import AI.AIController;
 import CommandingOfficers.Modifiers.COModifier;
+import Engine.GameAction;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -41,10 +47,11 @@ import Units.UnitModel.UnitEnum;
 public class Commander extends GameEventListener
 {
   public final CommanderInfo coInfo;
+  public GameMap myView;
   public ArrayList<Unit> units;
   public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
   public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
-  public ArrayList<Location> ownedProperties;
+  public Set<XYCoord> ownedProperties;
   public ArrayDeque<COModifier> modifiers;
   public Color myColor;
   public String factionName = DEFAULT_SPRITE_KEY;
@@ -61,6 +68,8 @@ public class Commander extends GameEventListener
 
   private ArrayList<CommanderAbility> myAbilities = null;
   private String myActiveAbilityName = "";
+
+  private AIController aiController = null;
 
   public Commander(CommanderInfo info)
   {
@@ -109,7 +118,7 @@ public class Commander extends GameEventListener
 
     modifiers = new ArrayDeque<COModifier>();
     units = new ArrayList<Unit>();
-    ownedProperties = new ArrayList<Location>();
+    ownedProperties = new HashSet<XYCoord>();
     money = DEFAULTSTARTINGMONEY;
 
     myAbilities = new ArrayList<CommanderAbility>();
@@ -135,12 +144,19 @@ public class Commander extends GameEventListener
     modifiers.offer(mod); // Add to the list so the modifier can be reverted next turn.
   }
 
+  public void endTurn()
+  {
+    if( aiController != null ) aiController.endTurn();
+    myView.resetFog();
+  }
+
   /**
    * Collect income and handle any COModifiers.
    * @param map
    */
   public void initTurn(GameMap map)
   {
+    myView.resetFog();
     myActiveAbilityName = "";
     // Accrue income for each city under your control.
     int turnIncome = 0;
@@ -163,7 +179,18 @@ public class Commander extends GameEventListener
     {
       modifiers.poll().revert(this);
     }
+
+    if( null != aiController )
+    {
+      aiController.initTurn(myView);
+    }
   }
+
+  /**
+   * This is called after every GameAction, and between turns, and allows Commanders to inject
+   * events that don't arise via normal gameplay. Most Commanders should not need to override this.
+   */
+  public void pollForEvents(GameEventQueue eventsOut) {}
 
   /**
    * @return whether these COs would like to kill each other
@@ -323,5 +350,24 @@ public class Commander extends GameEventListener
 
       modifyAbilityPower(power);
     }
+  }
+
+  public void setAIController(AIController ai)
+  {
+    aiController = ai;
+  }
+
+  public boolean isAI()
+  {
+    return (aiController != null);
+  }
+
+  public GameAction getNextAIAction(GameMap gameMap)
+  {
+    if( aiController != null )
+    {
+      return aiController.getNextAction(myView);
+    }
+    return null;
   }
 }

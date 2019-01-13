@@ -2,7 +2,7 @@ package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.Unit;
 
 public class IDSCaulderSCOP extends Commander
@@ -41,7 +41,7 @@ public class IDSCaulderSCOP extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       myCommander.addCOModifier(new CODamageModifier(40));
       myCommander.addCOModifier(new CODefenseModifier(25));

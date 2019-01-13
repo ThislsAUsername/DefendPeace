@@ -5,7 +5,7 @@ import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.Combat.CostValueFinder;
 import Engine.Combat.MassStrikeUtils;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.Unit;
 
 public class BHVB extends Commander
@@ -48,7 +48,7 @@ public class BHVB extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       ArrayList<Unit> victimList = MassStrikeUtils.damageStrike(gameMap, POWER,
           MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true)), 2);

@@ -1,7 +1,7 @@
 package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.COMovementModifier;
-import Terrain.GameMap;
+import Terrain.MapMaster;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
 
@@ -50,7 +50,7 @@ public class LATashaLame extends Commander
     }
 
     @Override
-    protected void perform(GameMap gameMap)
+    protected void perform(MapMaster gameMap)
     {
       COMovementModifier airMoveMod = new COMovementModifier(power);
       for( UnitModel um : myCommander.unitModels )

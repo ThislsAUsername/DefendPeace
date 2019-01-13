@@ -5,6 +5,7 @@ import java.util.Vector;
 
 import CommandingOfficers.Commander;
 import Engine.GameAction;
+import Engine.GameAction.ActionType;
 import Engine.GameActionSet;
 import Engine.Path;
 import Engine.Utils;
@@ -13,8 +14,10 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.ResupplyEvent;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.MapMaster;
 import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
+import Units.Weapons.WeaponModel;
 
 public class Unit
 {
@@ -29,7 +32,7 @@ public class Unit
   public boolean isTurnOver;
   public boolean isStunned;
   private double HP;
-  public Weapon[] weapons;
+  public ArrayList<Weapon> weapons;
   private ArrayList<GameAction> turnInitActions;
 
   public Unit(Commander co, UnitModel um)
@@ -43,16 +46,16 @@ public class Unit
     captureTarget = null;
     if( model.weaponModels != null )
     {
-      weapons = new Weapon[model.weaponModels.length];
-      for( int i = 0; i < model.weaponModels.length; i++ )
+      weapons = new ArrayList<Weapon>();
+      for( WeaponModel weapType : model.weaponModels )
       {
-        weapons[i] = new Weapon(model.weaponModels[i]);
+        weapons.add(new Weapon(weapType));
       }
     }
     else
     {
       // Just make sure we don't crash if we try to iterate on this.
-      weapons = new Weapon[0];
+      weapons = new ArrayList<Weapon>();
     }
     if( model.holdingCapacity > 0 )
       heldUnits = new Vector<Unit>(model.holdingCapacity);
@@ -66,7 +69,7 @@ public class Unit
    * @param map
    * @param events
    */
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     // Make a queue to return any init events.
     GameEventQueue events = new GameEventQueue();
@@ -135,15 +138,15 @@ public class Unit
       return false;
 
     boolean canHit = false;
-    for( int i = 0; i < weapons.length; i++ )
+    for( Weapon weapon : weapons )
     {
-      if( afterMoving && !weapons[i].model.canFireAfterMoving )
+      if( afterMoving && !weapon.model.canFireAfterMoving )
       {
         // If we are planning to move first, and the weapon
         // can't shoot after moving, then move along.
         continue;
       }
-      if( weapons[i].getDamage(targetType, range) > 0 )
+      if( weapon.getDamage(targetType, range) > 0 )
       {
         canHit = true;
         break;
@@ -168,18 +171,17 @@ public class Unit
 
     Weapon chosenWeapon = null;
     double maxDamage = 0;
-    for( int i = 0; i < weapons.length; i++ )
+    for( Weapon weapon : weapons )
     {
-      Weapon currentWeapon = weapons[i];
       // If the weapon isn't mobile, we cannot fire if we moved.
-      if( afterMoving && !currentWeapon.model.canFireAfterMoving )
+      if( afterMoving && !weapon.model.canFireAfterMoving )
       {
         continue;
       }
-      double currentDamage = currentWeapon.getDamage(targetType, range);
-      if( currentWeapon.getDamage(targetType, range) > maxDamage )
+      double currentDamage = weapon.getDamage(targetType, range);
+      if( weapon.getDamage(targetType, range) > maxDamage )
       {
-        chosenWeapon = currentWeapon;
+        chosenWeapon = weapon;
         maxDamage = currentDamage;
       }
     }
@@ -251,6 +253,15 @@ public class Unit
   {
     return captureProgress;
   }
+  public XYCoord getCaptureTargetCoords()
+  {
+    XYCoord target = null;
+    if( null != captureTarget )
+    {
+      target = captureTarget.getCoordinates();
+    }
+    return target;
+  }
 
   /** Compiles and returns a list of all actions this unit could perform on map after moving along movePath. */
   public ArrayList<GameActionSet> getPossibleActions(GameMap map, Path movePath)
@@ -259,9 +270,9 @@ public class Unit
     ArrayList<GameActionSet> actionSet = new ArrayList<GameActionSet>();
     if( map.isLocationEmpty(this, moveLocation) )
     {
-      for( int i = 0; i < model.possibleActions.length; i++ )
+      for( ActionType at : model.possibleActions)
       {
-        switch (model.possibleActions[i])
+        switch (at)
         {
           case ATTACK:
           // Evaluate attack options.
@@ -298,7 +309,7 @@ public class Unit
             }
             break;
           case WAIT:
-            actionSet.add(new GameActionSet(new GameAction.WaitAction(map, this, movePath), false));
+            actionSet.add(new GameActionSet(new GameAction.WaitAction(this, movePath), false));
             break;
           case LOAD:
             // We only get to here if there is no unit at the end of the move path, which means there is
@@ -316,7 +327,7 @@ public class Unit
                 ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, this, moveLocation, cargo);
                 for( XYCoord loc : dropoffLocations )
                 {
-                  unloadActions.add(new GameAction.UnloadAction(map, this, movePath, cargo, loc));
+                  unloadActions.add(new GameAction.UnloadAction(this, movePath, cargo, loc));
                 }
               }
 
@@ -346,7 +357,7 @@ public class Unit
             break;
           default:
             System.out
-                .println("getPossibleActions: Invalid action in model's possibleActions[" + i + "]: " + model.possibleActions[i]);
+                .println("getPossibleActions: Invalid action in model's possibleActions: " + at);
         }
       }
     }
@@ -396,5 +407,10 @@ public class Unit
   public String toString()
   {
     return model.toString();
+  }
+
+  public String toStringWithLocation()
+  {
+    return String.format("%s at %s", model, new XYCoord(x, y));
   }
 }
