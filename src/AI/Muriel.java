@@ -554,7 +554,7 @@ public class Muriel implements AIController
     Set<UnitModel> availableUnitModels;
     Set<Location> availableProperties;
     Map<Terrain.TerrainType, Integer> propertyCounts;
-    Map<UnitModel, TerrainType> modelToTerrainMap;
+    Map<UnitModel, Set<TerrainType>> modelToTerrainMap;
 
     public CommanderProductionInfo(Commander co, GameMap gameMap)
     {
@@ -563,7 +563,7 @@ public class Muriel implements AIController
       availableUnitModels = new HashSet<UnitModel>();
       availableProperties = new HashSet<Location>();
       propertyCounts = new HashMap<Terrain.TerrainType, Integer>();
-      modelToTerrainMap = new HashMap<UnitModel, TerrainType>();
+      modelToTerrainMap = new HashMap<UnitModel, Set<TerrainType>>();
 
       for( XYCoord xyc : co.ownedProperties )
       {
@@ -584,10 +584,11 @@ public class Muriel implements AIController
           }
 
           // Store a mapping from UnitModel to the TerrainType that can produce it.
-          // NOTE: This code currently assumes only one TerrainType can produce each type of UnitModel.
           for( UnitModel m : models )
           {
-            modelToTerrainMap.put(m, loc.getEnvironment().terrainType );
+            if( modelToTerrainMap.get(m) == null )
+              modelToTerrainMap.put(m, new HashSet<TerrainType>());
+            modelToTerrainMap.get(m).add( loc.getEnvironment().terrainType );
           }
         }
       }
@@ -595,11 +596,11 @@ public class Muriel implements AIController
 
     public Location getLocationToBuild(UnitModel model)
     {
-      TerrainType desiredTerrain = modelToTerrainMap.get(model);
+      Set<TerrainType> desiredTerrains = modelToTerrainMap.get(model);
       Location location = null;
       for( Location loc : availableProperties )
       {
-        if( loc.getEnvironment().terrainType == desiredTerrain )
+        if( desiredTerrains.contains(loc.getEnvironment().terrainType) )
         {
           location = loc;
           break;
@@ -624,7 +625,14 @@ public class Muriel implements AIController
 
     public int getNumFacilitiesFor(UnitModel model)
     {
-      int num = (modelToTerrainMap.containsKey(model)) ? propertyCounts.get(modelToTerrainMap.get(model)) : 0;
+      int num = 0;
+      if( modelToTerrainMap.containsKey(model) )
+      {
+        for( TerrainType terrain : modelToTerrainMap.get(model) )
+        {
+          num += propertyCounts.get(terrain);
+        }
+      }
       return num;
     }
   }
