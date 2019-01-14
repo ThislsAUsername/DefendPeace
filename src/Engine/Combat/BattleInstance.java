@@ -71,8 +71,8 @@ public class BattleInstance
         defender, gameMap.getEnvironment(defenderX, defenderY), false, this);
 
     // Last-minute adjustments.
-    attacker.CO.applyCombatModifiers(attackInstance);
-    defender.CO.applyCombatModifiers(attackInstance);
+    attacker.CO.applyCombatModifiers(attackInstance, true);
+    defender.CO.applyCombatModifiers(attackInstance, false);
 
     double defenderHPLoss = attackInstance.calculateDamage();
     if( !isSim && defenderHPLoss > defender.getPreciseHP() ) defenderHPLoss = defender.getPreciseHP();
@@ -86,8 +86,8 @@ public class BattleInstance
       defendInstance.attackerHP -= defenderHPLoss; // Account for the first attack's damage to the now-attacker.
 
       // Modifications apply "attacker first", and the defender is now the attacker.
-      defender.CO.applyCombatModifiers(attackInstance);
-      attacker.CO.applyCombatModifiers(attackInstance);
+      defender.CO.applyCombatModifiers(attackInstance, true);
+      attacker.CO.applyCombatModifiers(attackInstance, false);
 
       attackerHPLoss = defendInstance.calculateDamage();
       if( !isSim && attackerHPLoss > attacker.getPreciseHP() ) attackerHPLoss = attacker.getPreciseHP();
@@ -105,17 +105,20 @@ public class BattleInstance
    */
   public static class BattleParams
   {
+    public final Unit attacker, defender; 
+    public final BattleInstance combatRef; // strictly for reference
     public double baseDamage;
     public double attackerHP;
     public double attackFactor;
     public double defenderHP;
     public double defenseFactor;
     public double terrainDefense;
-    public final BattleInstance combatRef; // strictly for reference
     public final boolean isCounter;
 
     public BattleParams(Unit attacker, Weapon attackerWeapon, Unit defender, Environment battleground, boolean isCounter, final BattleInstance ref)
     {
+      this.attacker = attacker;
+      this.defender = defender;
       baseDamage = attackerWeapon.getDamage(defender.model);
       attackFactor = attacker.model.getDamageRatio();
       attackerHP = attacker.getHP();
