@@ -5,11 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
-import java.util.Set;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
@@ -447,7 +445,7 @@ public class Muriel implements AIController
     }
 
     // Figure out what unit types we can purchase with our available properties.
-    CommanderProductionInfo CPI = new CommanderProductionInfo(myCo, gameMap);
+    AIUtils.CommanderProductionInfo CPI = new AIUtils.CommanderProductionInfo(myCo, gameMap);
 
     if( CPI.availableProperties.isEmpty() )
     {
@@ -546,95 +544,6 @@ public class Muriel implements AIController
     for( PurchaseOrder order : shoppingCart )
     {
       queuedActions.offer(new GameAction.UnitProductionAction(myCo, order.model, order.location.getCoordinates()));
-    }
-  }
-
-  private static class CommanderProductionInfo
-  {
-    Commander myCo;
-    Set<UnitModel> availableUnitModels;
-    Set<Location> availableProperties;
-    Map<Terrain.TerrainType, Integer> propertyCounts;
-    Map<UnitModel, Set<TerrainType>> modelToTerrainMap;
-
-    public CommanderProductionInfo(Commander co, GameMap gameMap)
-    {
-      // Figure out what unit types we can purchase with our available properties.
-      myCo = co;
-      availableUnitModels = new HashSet<UnitModel>();
-      availableProperties = new HashSet<Location>();
-      propertyCounts = new HashMap<Terrain.TerrainType, Integer>();
-      modelToTerrainMap = new HashMap<UnitModel, Set<TerrainType>>();
-
-      for( XYCoord xyc : co.ownedProperties )
-      {
-        Location loc = co.myView.getLocation(xyc);
-        if( gameMap.isLocationEmpty(loc.getCoordinates()))
-        {
-          ArrayList<UnitModel> models = co.getShoppingList(loc);
-          availableUnitModels.addAll(models);
-          availableProperties.add(loc);
-          TerrainType terrain = loc.getEnvironment().terrainType;
-          if( propertyCounts.containsKey(terrain))
-          {
-            propertyCounts.put(terrain, propertyCounts.get(loc.getEnvironment().terrainType)+1);
-          }
-          else
-          {
-            propertyCounts.put(terrain, 1);
-          }
-
-          // Store a mapping from UnitModel to the TerrainType that can produce it.
-          for( UnitModel m : models )
-          {
-            if( modelToTerrainMap.get(m) == null )
-              modelToTerrainMap.put(m, new HashSet<TerrainType>());
-            modelToTerrainMap.get(m).add( loc.getEnvironment().terrainType );
-          }
-        }
-      }
-    }
-
-    public Location getLocationToBuild(UnitModel model)
-    {
-      Set<TerrainType> desiredTerrains = modelToTerrainMap.get(model);
-      Location location = null;
-      for( Location loc : availableProperties )
-      {
-        if( desiredTerrains.contains(loc.getEnvironment().terrainType) )
-        {
-          location = loc;
-          break;
-        }
-      }
-      return location;
-    }
-
-    public void removeBuildLocation(Location loc)
-    {
-      availableProperties.remove(loc);
-      TerrainType terrain = loc.getEnvironment().terrainType;
-      if( propertyCounts.containsKey(terrain) )
-      {
-        propertyCounts.put(terrain, propertyCounts.get(terrain) - 1);
-        if( propertyCounts.get(terrain) == 0 )
-        {
-          availableUnitModels.removeAll(myCo.getShoppingList(loc));
-        }
-      }
-    }
-
-    public int getNumFacilitiesFor(UnitModel model)
-    {
-      int num = 0;
-      if( modelToTerrainMap.containsKey(model) )
-      {
-        for( TerrainType terrain : modelToTerrainMap.get(model) )
-        {
-          num += propertyCounts.get(terrain);
-        }
-      }
-      return num;
     }
   }
 
