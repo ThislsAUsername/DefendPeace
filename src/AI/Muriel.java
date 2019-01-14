@@ -508,6 +508,7 @@ public class Muriel implements AIController
         // Calculate a cost buffer to ensure we have enough money left so that no factories sit idle.
         UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
         int costBuffer = (CPI.getNumFacilitiesFor(infModel)-1) * infModel.getCost(); // The -1 assumes we will build this unit from a factory. Possibly untrue.
+        if( 0 > costBuffer ) costBuffer = 0; // No granting ourselves extra moolah.
         while( totalCost > (budget - costBuffer) ) // This finds how many we can afford.
         {
           totalCost -= idealCounter.getCost();
