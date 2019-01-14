@@ -25,11 +25,19 @@ public class BattleEvent implements GameEvent
     defenderCoords = new XYCoord(defender.x, defender.y);
   }
 
+  public Unit getAttacker()
+  {
+    return battleInfo.attacker;
+  }
   public boolean attackerDies()
   {
     return battleInfo.attacker.getPreciseHP() - battleInfo.attackerHPLoss <= 0;
   }
 
+  public Unit getDefender()
+  {
+    return battleInfo.defender;
+  }
   public boolean defenderDies()
   {
     return battleInfo.defender.getPreciseHP() - battleInfo.defenderHPLoss <= 0;
@@ -61,17 +69,6 @@ public class BattleEvent implements GameEvent
     {
       battleInfo.defenderWeapon.fire();
       attacker.damageHP( battleInfo.attackerHPLoss );
-    }
-
-    if( attacker.getHP() <= 0 )
-    {
-      gameMap.removeUnit(attacker);
-      attacker.CO.units.remove(attacker);
-    }
-    if( defender.getHP() <= 0 )
-    {
-      gameMap.removeUnit(defender);
-      defender.CO.units.remove(defender);
     }
   }
 
