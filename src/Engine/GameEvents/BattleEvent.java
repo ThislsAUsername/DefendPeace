@@ -3,7 +3,6 @@ package Engine.GameEvents;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
-import Terrain.GameMap;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -19,7 +18,7 @@ public class BattleEvent implements GameEvent
   private final BattleSummary battleInfo;
   private final XYCoord defenderCoords;
 
-  public BattleEvent(Unit attacker, Unit defender, int attackerX, int attackerY, GameMap map)
+  public BattleEvent(Unit attacker, Unit defender, int attackerX, int attackerY, MapMaster map)
   {
     // Calculate the result of the battle immediately. This will allow us to plan the animation.
     battleInfo = CombatEngine.calculateBattleResults(attacker, defender, map, attackerX, attackerY);
