@@ -14,6 +14,9 @@ import Engine.Utils;
 import Terrain.GameMap;
 import UI.InputHandler.InputAction;
 import UI.Art.SpriteArtist.SpriteLibrary;
+import UI.Art.SpriteArtist.SpriteLibrary.UnitSpriteSetKey;
+import Units.UnitModel;
+import Units.UnitModel.UnitEnum;
 
 /**
  * Controller for choosing COs and colors after the map has been chosen.
@@ -71,8 +74,13 @@ public class COSetupController implements IController
         // We have locked in our selection. Stuff it into the GameBuilder and then kick off the game.
         for(int i = 0; i < coSelectors.length; ++i)
         {
-          gameBuilder.addCO(CommanderLibrary.makeCommander(coList.get(coSelectors[i].getSelectionNormalized()),
-              SpriteLibrary.coColorList[colorSelectors[i].getSelectionNormalized()], spriteSetKeys[spriteSelectors[i].getSelectionNormalized()]));
+          Commander co = CommanderLibrary.makeCommander(coList.get(coSelectors[i].getSelectionNormalized()),
+              SpriteLibrary.coColorList[colorSelectors[i].getSelectionNormalized()], spriteSetKeys[spriteSelectors[i].getSelectionNormalized()]);
+          gameBuilder.addCO(co);
+          for (UnitEnum ue : UnitModel.UnitEnum.values()) {
+          UnitSpriteSetKey key = UnitSpriteSetKey.instance(ue, co);
+          SpriteLibrary.createMapUnitSpriteSet(key);
+          }
         }
 
         // Build the CO list and the new map and create the game instance.

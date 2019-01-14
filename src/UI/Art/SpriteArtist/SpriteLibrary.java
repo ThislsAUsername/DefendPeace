@@ -362,7 +362,7 @@ public class SpriteLibrary
   //  Below is code for dealing with unit sprites.
   ///////////////////////////////////////////////////////////////////
 
-  private static class UnitSpriteSetKey
+  public static class UnitSpriteSetKey
   {
     public final UnitModel.UnitEnum unitTypeKey;
     public final Commander commanderKey;
@@ -406,7 +406,7 @@ public class SpriteLibrary
     return mapUnitSpriteSetMap.get(key);
   }
 
-  private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
+  public static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
       String faction = key.commanderKey.factionName;
     System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString());
@@ -427,11 +427,111 @@ public class SpriteLibrary
         facAbbrev = (matcher.group(1) + matcher.group(2)).toLowerCase();
       else
         facAbbrev = faction;
-      filestr = ("res/unit/"+ faction + "/" + facAbbrev + key.unitTypeKey.toString() + ".gif").replaceAll("\\_", "-");
-      spriteSet = new UnitSpriteSet(loadAnimation(filestr), baseSpriteSize, baseSpriteSize,
-          getMapUnitColors(key.commanderKey.myColor));
+      filestr = ("res/unit/" + faction + "/" + facAbbrev + key.unitTypeKey.toString().toLowerCase() + ".gif").replaceAll("\\_", "-");
+      ImageFrame[] frames = loadAnimation(filestr);
+      spriteSet = new UnitSpriteSet(frames, baseSpriteSize, baseSpriteSize, getMapUnitColors(key.commanderKey.myColor));
+      try
+      {
+        String fileOutStr = ("res/unit/grey/" + faction + "/" + key.unitTypeKey.toString().toLowerCase() + "_map.png").replaceAll("\\-","");
+        ImageIO.write(joinBufferedImage(paintItGray(frames), baseSpriteSize, baseSpriteSize), "png", new File(fileOutStr));
+      }
+      catch (IOException e)
+      {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     }
     mapUnitSpriteSetMap.put(key, spriteSet);
+  }
+
+  /**
+   * Code kinda-not-really stolen from https://stackoverflow.com/questions/20826216/copy-two-bufferedimages-into-one-image-side-by-side
+   * join two BufferedImage
+   * you can add a orientation parameter to control direction
+   * you can use a array to join more BufferedImage
+   */
+  public static BufferedImage joinBufferedImage(ImageFrame[] frames, int w, int h)
+  {
+    //do some calculations first
+    int offset = 0;
+    int width = frames.length * (w + offset);
+    int height = h;
+    //create a new buffer and draw two image into the new image
+    BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    Graphics g = newImage.getGraphics();
+    boolean flipImage = false;
+    for( int i = 0; i < frames.length; i++ )
+    {
+      if( flipImage )
+        g.drawImage(frames[i].getImage(), w + i * (w + offset), 0, -w, h, null);
+      else
+        g.drawImage(frames[i].getImage(), i * (w + offset), 0, null);
+    }
+    return newImage;
+  }
+
+  // Hunams
+  static Color skinlight = new Color(248,216,128);
+  static Color skinligh2 = new Color(251,219,133);
+  static Color skindark = new Color(216,128,80);
+  
+  // CI
+  static Color beaklight = new Color(255,240,0);
+  static Color beakdark = new Color(255,160,0);
+  static Color beakdar2 = new Color(138,87,1);
+  
+  // BH
+  static Color visor = new Color(168,216,224);
+  
+  // JS
+  static Color plume1 = new Color(255,62,62);
+  static Color plume2 = new Color(142,32,32);
+  static Color plume3 = new Color(215,54,54);
+  public static ImageFrame[] paintItGray(ImageFrame[] frames)
+  {
+    for( ImageFrame frame : frames )
+    {
+      BufferedImage bi = frame.getImage();
+      for( int x = 0; x < bi.getWidth(); ++x )
+      {
+        for( int y = 0; y < bi.getHeight(); ++y )
+        {
+          Color tint = new Color(bi.getRGB(x, y));
+          boolean setGray = true;
+          int R = tint.getRed();
+          int G = tint.getGreen();
+          int B = tint.getBlue();
+          if ( // if it's a banned color...
+              tint.equals(skinlight) || 
+              tint.equals(skinligh2) || 
+              tint.equals(skindark) ||
+              tint.equals(beaklight) ||
+              tint.equals(beakdark) ||
+              tint.equals(beakdar2) ||
+              tint.equals(visor) ||
+              // or JS's plume
+//              tint.equals(plume1) ||
+//              tint.equals(plume2) ||
+//              tint.equals(plume3) ||
+              // ...or grey
+              (
+              Math.abs(R - G) < 30 &&
+              Math.abs(R - B) < 30 &&
+              Math.abs(G - B) < 30
+              )
+             ) // don't recolor it
+            setGray = false;
+          
+          if( setGray && (Long.MAX_VALUE & bi.getRGB(x, y)) > 0 )
+          {
+            int val = (( R + G + B )/3 +40) / 50;
+            if( val > 0 )
+              bi.setRGB(x, y, defaultMapColors[val - 1].getRGB());
+          }
+        }
+      }
+    }
+    return frames;
   }
 
   public static Sprite getMapUnitHPSprites()
