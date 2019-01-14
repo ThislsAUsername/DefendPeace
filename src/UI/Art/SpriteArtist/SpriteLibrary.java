@@ -408,10 +408,12 @@ public class SpriteLibrary
       case BATTLESHIP:
         break;
       case BOMBER:
+        spriteFile = "res/unit/bomber_map.png";
         break;
       case CRUISER:
         break;
       case FIGHTER:
+        spriteFile = "res/unit/fighter_map.png";
         break;
       case INFANTRY:
         spriteFile = "res/unit/infantry_map.png";
