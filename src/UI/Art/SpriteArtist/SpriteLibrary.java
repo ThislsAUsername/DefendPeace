@@ -390,54 +390,9 @@ public class SpriteLibrary
 
   private static String getMapUnitSpriteFilename(UnitModel.UnitEnum unitType)
   {
-    String spriteFile = "";
-    switch (unitType)
-    {
-      case ANTI_AIR:
-        break;
-      case APC:
-        spriteFile = "res/unit/apc_map.png";
-        break;
-      case ARTILLERY:
-        spriteFile = "res/unit/artillery_map.png";
-        break;
-      case B_COPTER:
-        break;
-      case BATTLESHIP:
-        break;
-      case BOMBER:
-        break;
-      case CRUISER:
-        break;
-      case FIGHTER:
-        break;
-      case INFANTRY:
-        spriteFile = "res/unit/infantry_map.png";
-        break;
-      case LANDER:
-        break;
-      case MD_TANK:
-        spriteFile = "res/unit/mdtank_map.png";
-        break;
-      case MECH:
-        spriteFile = "res/unit/mech_map.png";
-        break;
-      case MOBILESAM:
-        break;
-      case RECON:
-        spriteFile = "res/unit/recon_map.png";
-        break;
-      case ROCKETS:
-        break;
-      case SUB:
-        break;
-      case T_COPTER:
-        break;
-      case TANK:
-        spriteFile = "res/unit/tank_map.png";
-        break;
-    }
-    return spriteFile;
+    StringBuffer spriteFile = new StringBuffer();
+    spriteFile.append("res/unit/").append(unitType.toString().toLowerCase()).append("_map.png");
+    return spriteFile.toString();
   }
 
   public static Sprite getMapUnitHPSprites()
