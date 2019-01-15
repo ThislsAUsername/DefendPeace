@@ -27,7 +27,6 @@ public class BattleInstance
   /**
    * Set up the CombatParams object. Note that we assume the defender is where he thinks he is, but
    * the attacker may move before attacking, so we take that coordinate explicitly.
-   * @param isSim 
    */
   public BattleInstance(Unit pAttacker, Unit pDefender, GameMap map, int attackerX, int attackerY, boolean isSim)
   {

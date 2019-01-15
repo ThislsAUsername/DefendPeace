@@ -38,9 +38,6 @@ public class CommanderVenge extends Commander
   {
     super(coInfo);
 
-    // Retraux has +10 defense to mitigate enemy firststrikes, synergizing with the Vengeance boost
-    new CODefenseModifier(10).apply(this);
-
     addCommanderAbility(new IronWill(this));
     addCommanderAbility(new Retribution(this));
   }
@@ -65,24 +62,24 @@ public class CommanderVenge extends Commander
   }
 
   @Override
-  public void changeCombatContext(BattleInstance params)
+  public void changeCombatContext(BattleInstance instance)
   {
     // If we're swapping, and we can counter, and we're on the defensive, do the swap.
-    if (counterFirst && params.canCounter && this == params.defender.CO )
+    if (counterFirst && instance.canCounter && this == instance.defender.CO )
     {
       // Store our unit. Since defenders don't move, we have defenderX/Y already.
-      Unit minion = params.defender;
-      Weapon myWeapon = params.defenderWeapon;
+      Unit minion = instance.defender;
+      Weapon myWeapon = instance.defenderWeapon;
       
-      params.defender = params.attacker;
-      params.defenderWeapon = params.attackerWeapon;
-      params.defenderX = params.attackerX;
-      params.defenderY = params.attackerY;
+      instance.defender = instance.attacker;
+      instance.defenderWeapon = instance.attackerWeapon;
+      instance.defenderX = instance.attackerX;
+      instance.defenderY = instance.attackerY;
       
-      params.attacker = minion;
-      params.attackerWeapon = myWeapon;
-      params.attackerX = minion.x;
-      params.attackerY = minion.y;
+      instance.attacker = minion;
+      instance.attackerWeapon = myWeapon;
+      instance.attackerX = minion.x;
+      instance.attackerY = minion.y;
     }
   }
 
@@ -123,7 +120,7 @@ public class CommanderVenge extends Commander
   {
     private static final String NAME = "Iron Will";
     private static final int COST = 3;
-    private static final int IRONWILL_BUFF = 20; // Get a nice defense boost, since we can't counter-attack if we're dead.
+    private static final int IRONWILL_BUFF = 30; // Get a nice defense boost, since we can't counter-attack if we're dead.
     COModifier defenseMod = null;
     CommanderVenge COcast;
 

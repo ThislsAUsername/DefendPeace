@@ -134,7 +134,7 @@ public class Commander extends GameEventListener
    * changeCombatContext() allows the CO to tweak the BattleInstance itself,
    * to allow for drastic changes to the combat like counterattacking first or at 2+ range.
    */
-  public void changeCombatContext(BattleInstance params)
+  public void changeCombatContext(BattleInstance instance)
   {}
   /**
    * Allows a Commander to inject modifications that must be evaluated at combat time
