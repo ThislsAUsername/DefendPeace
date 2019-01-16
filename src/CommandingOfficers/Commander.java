@@ -140,7 +140,7 @@ public class Commander extends GameEventListener
    * Allows a Commander to inject modifications that must be evaluated at combat time
    * @param striking - lets the Commander know if it's dealing or taking damage 
    */
-  public void applyCombatModifiers(BattleParams params, boolean striking)
+  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
   {}
 
   public void addCOModifier(COModifier mod)

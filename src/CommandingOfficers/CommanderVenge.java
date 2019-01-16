@@ -84,9 +84,9 @@ public class CommanderVenge extends Commander
   }
 
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean striking)
+  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
   {
-    if( striking ) // only boost while I'm attacking
+    if( amITheAttacker )
     {
       if( counterAtFullPower && params.isCounter )
       {
