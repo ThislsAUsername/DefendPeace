@@ -12,6 +12,7 @@ import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
+import Engine.Combat.BattleInstance.BattleParams;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -125,12 +126,21 @@ public class Commander extends GameEventListener
   }
 
   /**
-   * Allows a Commander to inject modifications before evaluating a battle.
+   * These functions Allow a Commander to inject modifications before evaluating a battle.
    * Simple damage buffs, etc. can be accomplished via COModifiers, but effects
    * that depend on circumstances that must be evaluated at combat time (e.g. a
    * terrain-based firepower bonus) can be handled here.
+   * applyCombatModifiers() will serve for most combat changes, like the above example.
+   * changeCombatContext() allows the CO to tweak the BattleInstance itself,
+   * to allow for drastic changes to the combat like counterattacking first or at 2+ range.
    */
-  public void applyCombatModifiers(BattleInstance params)
+  public void changeCombatContext(BattleInstance instance)
+  {}
+  /**
+   * Allows a Commander to inject modifications that must be evaluated at combat time
+   * @param striking - lets the Commander know if it's dealing or taking damage 
+   */
+  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
   {}
 
   public void addCOModifier(COModifier mod)
