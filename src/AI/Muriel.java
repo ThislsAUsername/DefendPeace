@@ -426,10 +426,12 @@ public class Muriel implements AIController
     int budget = myCo.money;
 
     // Get a count of enemy forces.
+    Map<Commander, ArrayList<Unit> > unitLists = AIUtils.getUnitsByCommander(gameMap);
+    unitLists.remove(myCo); // Don't worry about our guys.
     Map<UnitModel, Double> enemyUnitCounts = new HashMap<UnitModel, Double>();
-    for( Commander co : enemyCos )
+    for( Commander co : unitLists.keySet() )
     {
-      for( Unit u : co.units )
+      for( Unit u : unitLists.get(co) )
       {
         if( !u.model.hasDirectFireWeapon() ) continue; // Only handle direct-fire units for now.
         // Count how many of each model of enemy units are in play.
