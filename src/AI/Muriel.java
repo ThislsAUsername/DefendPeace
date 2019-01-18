@@ -425,9 +425,17 @@ public class Muriel implements AIController
     log("Evaluating Production needs");
     int budget = myCo.money;
 
+    // Figure out what unit types we can purchase with our available properties.
+    AIUtils.CommanderProductionInfo CPI = new AIUtils.CommanderProductionInfo(myCo, gameMap);
+
+    if( CPI.availableProperties.isEmpty() )
+    {
+      log("No properties available to build.");
+      return;
+    }
+
     // Get a count of enemy forces.
-    Map<Commander, ArrayList<Unit> > unitLists = AIUtils.getUnitsByCommander(gameMap);
-    unitLists.remove(myCo); // Don't worry about our guys.
+    Map<Commander, ArrayList<Unit> > unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
     Map<UnitModel, Double> enemyUnitCounts = new HashMap<UnitModel, Double>();
     for( Commander co : unitLists.keySet() )
     {
