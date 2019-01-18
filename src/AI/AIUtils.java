@@ -131,6 +131,27 @@ public class AIUtils
   }
 
   /**
+   * Creates a map of COs to the units they control, based on what can be seen in the passed-in map.
+   */
+  public static Map<Commander, ArrayList<Unit> > getUnitsByCommander(GameMap gameMap)
+  {
+    Map<Commander, ArrayList<Unit> > unitMap = new HashMap<Commander, ArrayList<Unit> >();
+
+    for( int x = 0; x < gameMap.mapWidth; ++x )
+      for( int y = 0; y < gameMap.mapHeight; ++y )
+      {
+        Unit resident = gameMap.getLocation(x, y).getResident();
+        if( null != resident )
+        {
+          if( !unitMap.containsKey(resident.CO) ) unitMap.put(resident.CO, new ArrayList<Unit>());
+          unitMap.get(resident.CO).add(resident);
+        }
+      }
+
+    return unitMap;
+  }
+
+  /**
    * Create and return a GameAction.WaitAction that will move unit towards destination, around
    * any intervening obstacles. If no possible route exists, return false.
    * @param unit The unit we want to move.
