@@ -116,7 +116,7 @@ public class Muriel implements AIController
           myUnitEffectMap.put(new UnitModelPair(myModel, otherModel), new UnitMatchupAndMetaInfo(ratio, myCostRatio));
           myUnitEffectMap.put(new UnitModelPair(otherModel, myModel), new UnitMatchupAndMetaInfo(invRatio, otherCostRatio));
 
-          System.out.println(String.format("%s vs %s: %s/%s costRatio: %s", myUnit, otherUnit, myDamage, otherDamage, myCostRatio));
+          System.out.println(String.format("%s vs %s: %s/%s, damageRatio: %s, costRatio: %s", myUnit, otherUnit, myDamage, otherDamage, ratio, myCostRatio));
         }
       }
     }
@@ -453,36 +453,78 @@ public class Muriel implements AIController
         }
       }
     }
-
-    // Figure out what unit types we can purchase with our available properties.
-    AIUtils.CommanderProductionInfo CPI = new AIUtils.CommanderProductionInfo(myCo, gameMap);
-
-    if( CPI.availableProperties.isEmpty() )
+    // Count up my own army men.
+    Map<UnitModel, Double> myUnitCounts = new HashMap<UnitModel, Double>();
+    for( Unit u : myCo.units )
     {
-      log("No properties available to build.");
-      return;
+      if( !u.model.hasDirectFireWeapon() ) continue; // Only handle direct-fire units for now.
+      // Count how many of each model I have.
+      if( myUnitCounts.containsKey(u.model))
+      {
+        myUnitCounts.put(u.model, myUnitCounts.get(u.model) + (u.getHP() / 10) );
+      }
+      else
+      {
+        myUnitCounts.put(u.model, u.getHP() / 10.0 );
+      }
+    }
+    log("My Forces:");
+    for( UnitModel um : myUnitCounts.keySet() )
+    {
+      log(String.format("  %sx%s", um, myUnitCounts.get(um)));
+    }
+    log("Enemy Forces:");
+    for( UnitModel um : enemyUnitCounts.keySet() )
+    {
+      log(String.format("  %sx%s", um, enemyUnitCounts.get(um)));
     }
 
-    // Sort enemy units by cardinality. We will attempt to build counters for the least numerous first.
-    // The most numerous enemies are probably cheap, and also countered by whatever we build for the narrow case.
-    ArrayList<UnitModel> enemyModels = new ArrayList<UnitModel>();
-    ArrayList<Entry<UnitModel, Double>> entryArray = new ArrayList<Entry<UnitModel, Double>>(enemyUnitCounts.entrySet());
-    Collections.sort(entryArray, new UnitQuantityComparator());
-    for( Entry<UnitModel, Double> ent : entryArray )
+    // Build a map of how threatened I am by each enemy unit type.
+    // Map value is (enemy unit counts - my stopping power vs that type).
+    for( UnitModel um : myUnitCounts.keySet() )
     {
-      enemyModels.add(ent.getKey());
+      for( UnitModel em : enemyUnitCounts.keySet() )
+      {
+        double myCount = myUnitCounts.get(um);
+        double enemyCount = enemyUnitCounts.get(em);
+        UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(um, em));
+        double myStoppingPower = umami.damageRatio * myCount; // I can stop THIS MANY of those things with what I have.
+        double effectiveThreat = enemyCount - myStoppingPower; // A positive result means I can't handle all of them.
+        enemyUnitCounts.put(em, effectiveThreat);
+      }
     }
 
-    // Try to purchase units that will counter the most-represented enemies.
+    // Try to purchase units that will counter the enemies I am least equipped to fight.
     ArrayList<PurchaseOrder> shoppingCart = new ArrayList<PurchaseOrder>();
-    while( !enemyModels.isEmpty() && !CPI.availableUnitModels.isEmpty())
+    boolean orderedSomething = true;
+    while( (budget > 0) && (enemyUnitCounts.size() > 0) && !CPI.availableUnitModels.isEmpty() && orderedSomething )
     {
-      // Find the first (least numerous) enemy UnitModel, and remove it. Even if we can't find an adequate counter,
-      // there is not reason to consider it again on the next iteration.
-      UnitModel enemyToCounter = enemyModels.get(0);
-      enemyModels.remove(enemyToCounter);
-      double enemyNumber = enemyUnitCounts.get(enemyToCounter);
-      log(String.format("Need a counter for %sx%s", enemyToCounter, enemyNumber));
+      orderedSomething = false; // If we fail to find something to build, don't keep trying forever.
+
+      // If we are low on grunts, make sure we save money to build more.
+      UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+      int costBuffer = 0;
+      if( !myUnitCounts.containsKey(infModel) || (myUnitCounts.get(infModel) < (myCo.units.size() * 0.2)) ) // If we have less than 20% infantry, make sure we can build some more.
+      {
+        int gruntsWanted = (int)Math.ceil(myCo.units.size() * 0.2);
+        int gruntFacilities = CPI.getNumFacilitiesFor(infModel)-1; // The -1 assumes we are about to build from a factory. Possibly untrue.
+        costBuffer = (int)Math.min(gruntFacilities, gruntsWanted) * infModel.getCost();
+        log(String.format("    low on Infantry: witholding %s for possible extra grunts", costBuffer));
+      }
+
+      // Sort enemy units by the effective threat they provide to our current forces, and build counters for the most dangerous first.
+      ArrayList<Entry<UnitModel, Double>> entryArray = new ArrayList<Entry<UnitModel, Double>>(enemyUnitCounts.entrySet());
+      Collections.sort(entryArray, new UnitQuantityComparator());
+      Collections.reverse(entryArray); // Largest/most dangerous first.
+      log("Threat catalogue:");
+      for( Entry<UnitModel, Double> ent : entryArray )
+      {
+        log(String.format("  %s, %s", ent.getKey(), ent.getValue()));
+      }
+
+      // Grab the first enemy unit type, and try to build something that will counter it.
+      UnitModel enemyToCounter = entryArray.get(0).getKey();
+      System.out.println("Want to counter " + enemyToCounter);
       log(String.format("Remaining budget: %s", budget));
 
       // Get our possible options for countermeasures.
@@ -493,9 +535,9 @@ public class Muriel implements AIController
         Collections.sort(availableUnitModels, new UnitMatchupComparator(enemyToCounter, myUnitEffectMap, UnitMatchupComparator.ComparisonType.COST_RATIO));
         Collections.reverse(availableUnitModels); // Best/highest cost ratio first.
 
-        // Grab the best counter.
+        // Grab the best counter and remove it from our list of models.
         UnitModel idealCounter = availableUnitModels.get(0);
-        availableUnitModels.remove(idealCounter); // Make sure we don't try to build two rounds of the same thing in one turn.
+        availableUnitModels.remove(idealCounter);
         UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(idealCounter, enemyToCounter));
         log(String.format("  %s has cost ratio %s", idealCounter, umami.costEffectivenessRatio));
         if( umami.costEffectivenessRatio < COST_EFFECTIVENESS_THRESHOLD )
@@ -504,42 +546,32 @@ public class Muriel implements AIController
           continue;
         }
 
-        // Figure out how many of idealCounter we want, and how many we can actually build.
-        int numberToBuy = (int)Math.ceil((enemyNumber / umami.damageRatio)); // This is the number we would buy ideally.
-        if( numberToBuy == 0 ) numberToBuy = 1;
-        log(String.format("    Would like to build %s of them", numberToBuy));
+        // Figure out if we can afford the desired unit type.
         int maxBuildable = CPI.getNumFacilitiesFor(idealCounter);
         log(String.format("    Facilities available: %s", maxBuildable));
-        if( numberToBuy > maxBuildable ) numberToBuy = maxBuildable; // This is the number we have production for right now.
-        int totalCost = numberToBuy * idealCounter.getCost();
-
-        // Calculate a cost buffer to ensure we have enough money left so that no factories sit idle.
-        UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
-        int costBuffer = (CPI.getNumFacilitiesFor(infModel)-1) * infModel.getCost(); // The -1 assumes we will build this unit from a factory. Possibly untrue.
-        if( 0 > costBuffer ) costBuffer = 0; // No granting ourselves extra moolah.
-        while( totalCost > (budget - costBuffer) ) // This finds how many we can afford.
-        {
-          totalCost -= idealCounter.getCost();
-          numberToBuy--;
-        }
-        if( numberToBuy > 0 )
+        int cost = idealCounter.getCost();
+        if( cost <= (budget - costBuffer))
         {
           // Go place orders.
-          log(String.format("    I can build %s %s, for a cost of %s", numberToBuy, idealCounter, totalCost));
-          for( int i = 0; i < numberToBuy; ++i )
+          log(String.format("    I can build a %s for a cost of %s", idealCounter, cost));
+          Location loc = CPI.getLocationToBuild(idealCounter);
+          shoppingCart.add(new PurchaseOrder(loc, idealCounter));
+          budget -= idealCounter.getCost();
+          CPI.removeBuildLocation(loc);
+          orderedSomething = true;
+
+          // We found something useful to build; update our estimate of how well we match up.
+          for( UnitModel em : enemyUnitCounts.keySet() )
           {
-            Location loc = CPI.getLocationToBuild(idealCounter);
-            shoppingCart.add(new PurchaseOrder(loc, idealCounter));
-            budget -= idealCounter.getCost();
-            CPI.removeBuildLocation(loc);
+            UnitMatchupAndMetaInfo matchup = myUnitEffectMap.get(new UnitModelPair(idealCounter, em));
+            double oldQuant = enemyUnitCounts.get(em);
+            enemyUnitCounts.put(em, oldQuant - matchup.damageRatio);
           }
-          // We found a counter for this enemy UnitModel; break and go to the next type.
-          // This break means we will build at most one type of unit per turn to counter each enemy type.
-          break;
+          break; // Loop around, re-sort the enemies by strength, and figure out what to build next.
         }
         else {log(String.format("    %s cost %s, I have %s (witholding %s).", idealCounter, idealCounter.getCost(), budget, costBuffer));}
       } // ~while( !availableUnitModels.isEmpty() )
-    } // ~while( !enemyModels.isEmpty() && !CPI.availableUnitModels.isEmpty())
+    } // ~while( still choosing units to build )
 
     // Build infantry from any remaining facilities.
     UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
@@ -547,6 +579,7 @@ public class Muriel implements AIController
     {
       Location loc = CPI.getLocationToBuild(infModel);
       shoppingCart.add(new PurchaseOrder(loc, infModel));
+      budget -= infModel.getCost();
       CPI.removeBuildLocation(loc);
     }
 
