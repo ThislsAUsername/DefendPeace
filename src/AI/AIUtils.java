@@ -1,6 +1,7 @@
 package AI;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -20,6 +21,7 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
+import Units.Weapons.Weapon;
 
 public class AIUtils
 {
@@ -213,6 +215,35 @@ public class AIUtils
     }
     return retVal;
   }
+  
+  /**
+   * @param damageThreshhold % damage required to "threaten"
+   * @return The area threatened by the unit, against the specified target type
+   */
+  public static ArrayList<XYCoord> findThreatenedArea(GameMap gameMap, Unit unit, UnitModel target, double damageThreshhold)
+  {
+    XYCoord origin = new XYCoord(unit.x, unit.y);
+    ArrayList<XYCoord> shootableTiles = new ArrayList<XYCoord>();
+    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
+    for( Weapon wep : unit.weapons )
+    {
+      if( wep.ammo > 0 && wep.getDamage(target) * (unit.getHP() * 0.1) > damageThreshhold )
+      {
+        if( !wep.model.canFireAfterMoving )
+        {
+          shootableTiles.addAll(Utils.findLocationsInRange(gameMap, origin, wep.model.minRange, wep.model.maxRange));
+        }
+        else
+        {
+          for( XYCoord dest : destinations )
+          {
+            shootableTiles.addAll(Utils.findLocationsInRange(gameMap, dest, wep.model.minRange, wep.model.maxRange));
+          }
+        }
+      }
+    }
+    return shootableTiles;
+  }
 
   /**
    * Keeps track of a commander's production facilities. When created, it will automatically catalog
@@ -320,6 +351,29 @@ public class AIUtils
         }
       }
       return num;
+    }
+  }
+
+  /**
+   * Compares SearchNodes based on the amount of movePower they possess, and optionally
+   *   the remaining distance to a destination.
+   */
+  public static class UnitCostComparator implements Comparator<Unit>
+  {
+    boolean sortAscending;
+
+    public UnitCostComparator(boolean sortAscending)
+    {
+      this.sortAscending = sortAscending;
+    }
+
+    @Override
+    public int compare(Unit o1, Unit o2)
+    {
+      int diff = o2.model.getCost()*o2.getHP() - o1.model.getCost()*o1.getHP();
+      if (sortAscending)
+        diff *= -1;
+      return diff;
     }
   }
 }
