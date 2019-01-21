@@ -436,7 +436,7 @@ public class Utils
   {
     ArrayList<String> importFactions = new ArrayList<String>();
 
-    importFactions.add(Commander.DEFAULT_SPRITE_KEY);
+//    importFactions.add(Commander.DEFAULT_SPRITE_KEY);
 
     // This try{} is to safeguard us from exceptions if the res/unit folder doesn't exist.
     // If it fails, we don't need to do anything in the catch{} since we just won't have anything in our list.
