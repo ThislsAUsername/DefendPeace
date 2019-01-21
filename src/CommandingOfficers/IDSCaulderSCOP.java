@@ -2,12 +2,13 @@ package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
+import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
 
 public class IDSCaulderSCOP extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Caulder\nSCOP", new instantiator());
+  private static final CommanderInfo coInfo = new CommanderInfo("Caulder\n2&SCOP", new instantiator());
 
   private static class instantiator implements COMaker
   {
@@ -30,10 +31,34 @@ public class IDSCaulderSCOP extends Commander
     return coInfo;
   }
 
+  @Override
+  public void initTurn(GameMap map)
+  {
+    super.initTurn(map);
+
+    for( Unit unit : units )
+    {
+      double HP = unit.getPreciseHP();
+      double maxHP = unit.model.maxHP;
+      if( HP < maxHP )
+      {
+        int neededHP = (int) Math.min(maxHP - unit.getHP(), 2);
+        double proportionalCost = unit.model.getCost() / maxHP;
+        int repairedHP = neededHP;
+        while (money < repairedHP * proportionalCost)
+        {
+          repairedHP--;
+        }
+        money -= repairedHP * proportionalCost;
+        unit.alterHP(repairedHP);
+      }
+    }
+  }
+
   private static class SupremeBoost extends CommanderAbility
   {
     private static final String NAME = "Supreme Boost";
-    private static final int COST = 5;
+    private static final int COST = 8;
 
     SupremeBoost(Commander commander)
     {
@@ -45,23 +70,6 @@ public class IDSCaulderSCOP extends Commander
     {
       myCommander.addCOModifier(new CODamageModifier(40));
       myCommander.addCOModifier(new CODefenseModifier(25));
-      for( Unit unit : myCommander.units )
-      {
-        double HP = unit.getPreciseHP();
-        double maxHP = unit.model.maxHP;
-        if( HP < maxHP )
-        {
-          int neededHP = (int) Math.min(maxHP - unit.getHP(), 5);
-          double proportionalCost = unit.model.getCost() / maxHP;
-          int repairedHP = neededHP;
-          while (myCommander.money < repairedHP * proportionalCost)
-          {
-            repairedHP--;
-          }
-          myCommander.money -= repairedHP * proportionalCost;
-          unit.alterHP(repairedHP);
-        }
-      }
     }
   }
 }
