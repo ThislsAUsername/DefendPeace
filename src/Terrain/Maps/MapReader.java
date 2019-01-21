@@ -5,12 +5,14 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.TreeMap;
 
 import Engine.XYCoord;
 import Terrain.MapInfo;
 import Terrain.TerrainType;
+import Units.UnitModel;
 
 public class MapReader extends IMapBuilder
 {
@@ -102,24 +104,61 @@ public class MapReader extends IMapBuilder
               // We need to know if there's more lines before we ask for another line, or there's gonna be a problem.
               moreLines = scanner.hasNextLine();
               if( moreLines )
+              {
                 line = scanner.nextLine();
+                if (terrainData.size()*4 > line.length())
+                  moreLines = false;
+              }
             }
+            
             // intermediate array to hold the flat arrays harvested from each column
             ArrayList<TerrainType[]> terrainArrayArray = new ArrayList<TerrainType[]>();
             for( int i = 0; i < terrainData.size(); i++ )
             {
               terrainArrayArray.add(terrainData.get(i).toArray(new TerrainType[0]));
             }
+            ArrayList<Integer> factionList = new ArrayList<Integer>(); 
             ArrayList<XYCoord[]> propertyArrayArray = new ArrayList<XYCoord[]>();
-            for( ArrayList<XYCoord> coordSet : landOwnershipMap.values() )
+            for( Entry<Integer, ArrayList<XYCoord>> ownerEntry : landOwnershipMap.entrySet() )
             {
               // We don't want to tell the game that there's more players than there are, so we make sure to only send sides who own properties.
               // This does lose the data of what each team was initially, but turn order should be preserved and I don't care beyond that.
-                propertyArrayArray.add(coordSet.toArray(new XYCoord[0]));
+              propertyArrayArray.add(ownerEntry.getValue().toArray(new XYCoord[0]));
+              factionList.add(ownerEntry.getKey());
             }
+            
+            // now that we've parsed the map, try to parse any units
+            ArrayList<Map<XYCoord,UnitModel.UnitEnum>> units = new ArrayList<Map<XYCoord,UnitModel.UnitEnum>>();
+            for (int i = 0; i < numSides; ++i)
+            {
+              units.add(new HashMap<XYCoord,UnitModel.UnitEnum>());
+            }
+            // we'll assume there's a useless line between the map and any units because I'm ~lazy~
+            while (scanner.hasNextLine())
+            {
+              line = scanner.nextLine();
+              String[] unitTokens = line.split(",");
+              // team, unit type, x, y
+              if (unitTokens.length == 4)
+              {
+                try
+                {
+                  int team = Integer.parseInt(unitTokens[0].trim());
+                  UnitModel.UnitEnum type = UnitModel.UnitEnum.valueOf(unitTokens[1].trim());
+                  int x = Integer.parseInt(unitTokens[2].trim());
+                  int y = Integer.parseInt(unitTokens[3].trim());
+                  units.get(factionList.indexOf(team)).put(new XYCoord(x, y), type);
+                }
+                catch (Exception e)
+                {
+                  System.out.println("Caught exception while parsing units: " + e.getMessage());
+                }
+              }
+            }
+            
             // Finally, we make our map's container to put in importMaps.
             MapInfo info = new MapInfo(mapName, terrainArrayArray.toArray(new TerrainType[0][0]),
-                propertyArrayArray.toArray(new XYCoord[0][0]));
+                propertyArrayArray.toArray(new XYCoord[0][0]), units);
             importMaps.add(info);
             scanner.close();
           }
