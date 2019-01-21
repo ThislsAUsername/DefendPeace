@@ -23,6 +23,7 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
+import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
 import Units.Weapons.WeaponModel;
 
@@ -39,9 +40,10 @@ public class WallyAI implements AIController
   private Commander myCo = null;
 
   // % damage dealable to feel "threatened"
-  private static final int THREAT_THRESHHOLD = 42;
+  private static final int INDIRECT_THREAT_THRESHHOLD = 0;
+  private static final int DIRECT_THREAT_THRESHHOLD = 13;
   private static final double AGGRO_FUNDS_WEIGHT = 1.5;
-  private static final double RANGE_WEIGHT = 0.05;
+  private static final double RANGE_WEIGHT = 0.07;
 
   private ArrayList<XYCoord> unownedProperties;
   private ArrayList<XYCoord> capturingProperties;
@@ -148,7 +150,7 @@ public class WallyAI implements AIController
       while (actions.isEmpty() && !unitQueue.isEmpty())
       {
         Unit unit = unitQueue.poll();
-        if( !unit.model.hasImmobileWeapon() )
+        if( (gameMap.getEnvironment(unit.x, unit.y).terrainType == TerrainType.FACTORY) || !unit.model.hasImmobileWeapon() )
         {
           tempQueue.offer(unit);
           continue;
@@ -232,7 +234,7 @@ public class WallyAI implements AIController
                     break;
                 }
                 // Check that we could potentially move into this space. Also we're scared of fog
-                else if( !gameMap.isLocationFogged(xyc) )
+                else if( (gameMap.getEnvironment(xyc).terrainType != TerrainType.FACTORY) && !gameMap.isLocationFogged(xyc) )
                   neededAttacks.put(xyc, null);
               }
               if( findAssaultKills(gameMap, neededAttacks, target, damage) >= target.getPreciseHP() )
@@ -300,11 +302,22 @@ public class WallyAI implements AIController
       while (actions.isEmpty() && !unitQueue.isEmpty())
       {
         Unit unit = unitQueue.poll();
+        XYCoord position = new XYCoord(unit.x, unit.y);
+        
+        if (unit.getCaptureProgress() > 0)
+        {
+          actions.offer(new GameAction.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, position, gameMap)));
+          capturingProperties.add(position);
+          break;
+        }
 
         boolean foundAction = false;
 
         // Find the possible destinations.
         ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
+        // sort by furthest away, good for capturing
+        Utils.sortLocationsByDistance(position, destinations);
+        Collections.reverse(destinations);
 
         for( XYCoord coord : destinations )
         {
@@ -332,7 +345,7 @@ public class WallyAI implements AIController
                   log(String.format("    He plans to deal %s HP damage for a net gain of %s funds", damage, (target.model.getCost() * damage - unit.model.getCost() * unit.getHP())/10));
                   goForIt = true;
                 }
-                else if( isSafe(gameMap, threatMap, unit, ga.getMoveLocation(), THREAT_THRESHHOLD) )
+                else if( (gameMap.getEnvironment(unit.x, unit.y).terrainType != TerrainType.FACTORY) && isSafe(gameMap, threatMap, unit, ga.getMoveLocation()) )
                 {
                   log(String.format("  %s thinks it's safe to attack %s", unit.toStringWithLocation(), target.toStringWithLocation()));
                   goForIt = true;
@@ -488,10 +501,11 @@ public class WallyAI implements AIController
     return nextAction;
   }
 
-  private boolean isSafe(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc, int threshhold)
+  private boolean isSafe(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc)
   {
     Double threat = threatMap.get(myCo.getUnitModel(unit.model.type)).get(xyc);
-    return ( null == threat || threshhold > threat);
+    int threshhold = unit.model.hasDirectFireWeapon() ? DIRECT_THREAT_THRESHHOLD : INDIRECT_THREAT_THRESHHOLD;
+    return (null == threat || threshhold > threat);
   }
 
   /**
@@ -500,9 +514,13 @@ public class WallyAI implements AIController
   private boolean canWallHere(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc)
   {
     // if we're safe, we're safe
-    if( isSafe(gameMap, threatMap, unit, xyc, THREAT_THRESHHOLD) )
+    if( isSafe(gameMap, threatMap, unit, xyc) )
       return true;
+    // don't stand on a factory or in danger for no good reason
+    if( gameMap.getEnvironment(xyc).terrainType == TerrainType.FACTORY || !unit.model.hasDirectFireWeapon())
+      return false;
 
+    // TODO: Determine whether the ally actually needs a wall there. Mechs walling for Tanks vs inf is... silly.
     // if we'd be a nice wall for a worthy ally, we can pretend we're safe there also
     XYCoord[] adjacentCoords = { new XYCoord(xyc.xCoord + 1, xyc.yCoord), new XYCoord(xyc.xCoord - 1, xyc.yCoord),
         new XYCoord(xyc.xCoord, xyc.yCoord + 1), new XYCoord(xyc.xCoord, xyc.yCoord - 1) };
@@ -512,7 +530,7 @@ public class WallyAI implements AIController
       if( loc != null )
       {
         Unit resident = loc.getResident();
-        if( resident != null && !myCo.isEnemy(resident.CO)
+        if( resident != null && !myCo.isEnemy(resident.CO) 
             && resident.model.getCost() * resident.getHP() > unit.model.getCost() * unit.getHP() )
         {
           return true;
@@ -618,6 +636,9 @@ public class WallyAI implements AIController
       return;
     }
 
+    // We like Recons too much. Don't buy them. Their movement is deceptively high.
+    CPI.availableUnitModels.remove(myCo.getUnitModel(UnitEnum.RECON));
+
     // Sort enemy units by cardinality. We will attempt to build counters for the least numerous first.
     // The most numerous enemies are probably cheap, and also countered by whatever we build for the narrow case.
     ArrayList<UnitModel> enemyModels = new ArrayList<UnitModel>();
@@ -661,7 +682,7 @@ public class WallyAI implements AIController
           log(String.format("  buy %s?", idealCounter));
 
           // Figure out how many of idealCounter we want, and how many we can actually build.
-          int numberToBuy = 3;
+          int numberToBuy = 2;
           log(String.format("    Would like to build %s of them", numberToBuy));
           int maxBuildable = CPI.getNumFacilitiesFor(idealCounter);
           log(String.format("    Facilities available: %s", maxBuildable));

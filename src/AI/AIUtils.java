@@ -217,7 +217,6 @@ public class AIUtils
   }
   
   /**
-   * @param damageThreshhold % damage required to "threaten"
    * @return The area threatened by the unit, against the specified target type
    */
   public static Map<XYCoord, Double> findThreatPower(GameMap gameMap, Unit unit, UnitModel target)
