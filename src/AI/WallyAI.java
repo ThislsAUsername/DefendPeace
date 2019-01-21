@@ -42,10 +42,9 @@ public class WallyAI implements AIController
   private Commander myCo = null;
 
   // % damage dealable to feel "threatened"
-  private static final int THREAT_THRESHHOLD = 10;
-  private static final double AGGRO_FUNDS_WEIGHT = 2.5;
-  private static final double AGGRO_HP_FRACTION = 0.5;
-  private static final double RANGE_WEIGHT = 0.01;
+  private static final int THREAT_THRESHHOLD = 42;
+  private static final double AGGRO_FUNDS_WEIGHT = 1.5;
+  private static final double RANGE_WEIGHT = 0.05;
 
   private ArrayList<XYCoord> unownedProperties;
   private ArrayList<XYCoord> capturingProperties;
@@ -148,7 +147,7 @@ public class WallyAI implements AIController
       }
 
       Queue<Unit> tempQueue = new ArrayDeque<Unit>();
-      // Siege attacks
+      // Evaluate siege attacks
       while (actions.isEmpty() && !unitQueue.isEmpty())
       {
         Unit unit = unitQueue.poll();
@@ -241,6 +240,7 @@ public class WallyAI implements AIController
               }
               if( findAssaultKills(gameMap, neededAttacks, target, damage) >= target.getPreciseHP() )
               {
+                log(String.format("  Gonna try to kill %s, who has %s HP", target.toStringWithLocation(), target.getHP()));
                 double damageSum = 0;
                 for( XYCoord xyc : neededAttacks.keySet() )
                 {
@@ -250,6 +250,7 @@ public class WallyAI implements AIController
                     damageSum += CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
                     actions.offer(new GameAction.AttackAction(gameMap, unit, Utils.findShortestPath(unit, xyc, gameMap), target.x, target.y));
                     unitQueue.remove(unit);
+                    log(String.format("    %s brings the damage total to %s", unit.toStringWithLocation(), damageSum));
                     if (damageSum >= target.getPreciseHP())
                       break;
                   }
@@ -318,8 +319,21 @@ public class WallyAI implements AIController
                 Unit target = loc.getResident();
                 double damage = CombatEngine.simulateBattleResults(unit, target, gameMap, ga.getMoveLocation().xCoord,
                     ga.getMoveLocation().yCoord).defenderHPLoss;
-                if( target.model.getCost() * damage * AGGRO_FUNDS_WEIGHT > unit.model.getCost() * unit.getHP() ||
-                    damage > target.getPreciseHP()*AGGRO_HP_FRACTION)
+                
+                boolean goForIt = false;
+                if( target.model.getCost() * damage * AGGRO_FUNDS_WEIGHT > unit.model.getCost() * unit.getHP() )
+                {
+                  log(String.format("  %s is going aggro on %s", unit.toStringWithLocation(), target.toStringWithLocation()));
+                  log(String.format("    He plans to deal %s HP damage for a net gain of %s funds", damage, (target.model.getCost() * damage - unit.model.getCost() * unit.getHP())/10));
+                  goForIt = true;
+                }
+                else if( !threatMap.get(myCo.getUnitModel(unit.model.type)).contains(ga.getMoveLocation()) )
+                {
+                  log(String.format("  %s thinks it's safe to attack %s", unit.toStringWithLocation(), target.toStringWithLocation()));
+                  goForIt = true;
+                }
+
+                if( goForIt )
                 {
                   actions.offer(ga);
                   foundAction = true;
@@ -366,7 +380,7 @@ public class WallyAI implements AIController
 
           if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
           {
-            log(String.format("  Seeking a property to send %s after", unit.toStringWithLocation()));
+//            log(String.format("  Seeking a property to send %s after", unit.toStringWithLocation()));
             int index = 0;
             XYCoord goal = null;
             Path path = null;
@@ -397,8 +411,8 @@ public class WallyAI implements AIController
               validTarget = (myCo.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
                   && !capturingProperties.contains(goal) // We aren't already capturing it.
                   && (path.getPathLength() > 0)); // We can reach it.
-              log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal,
-                  (validTarget ? "Yes" : "No")));
+//              log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal,
+//                  (validTarget ? "Yes" : "No")));
             } while (!validTarget && (index < validTargets.size())); // Loop until we run out of properties to check.
 
             if( validTarget )
@@ -411,7 +425,7 @@ public class WallyAI implements AIController
               path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
               goal = new XYCoord(path.getEnd().x, path.getEnd().y); // Set the last location as our goal.
 
-              log(String.format("    Intermediate waypoint: %s", goal));
+//              log(String.format("    Intermediate waypoint: %s", goal));
 
               // Sort my currently-reachable move locations by distance from the goal,
               // and build a GameAction to move to the closest one.
@@ -420,8 +434,10 @@ public class WallyAI implements AIController
               // try to get somewhere safe
               for( XYCoord xyc : destinations )
               {
+                log(String.format("    is it safe to go to %s?", xyc));
                 if( isSafe(gameMap, threatMap, unit, xyc) )
                 {
+                  log(String.format("    Yes"));
                   destination = xyc;
                   break;
                 }
@@ -677,6 +693,7 @@ public class WallyAI implements AIController
     } // ~while( !enemyModels.isEmpty() && !CPI.availableUnitModels.isEmpty())
 
     // Build infantry from any remaining facilities.
+    log("Building infantry to fill out my production");
     UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
     while ((budget >= infModel.getCost()) && (CPI.availableUnitModels.contains(infModel)))
     {
