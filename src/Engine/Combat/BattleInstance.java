@@ -1,5 +1,10 @@
 package Engine.Combat;
 
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import Terrain.Environment;
 import Terrain.GameMap;
 import Units.Unit;
@@ -8,21 +13,19 @@ import Units.Weapons.Weapon;
 
 /**
  * BattleInstance provides COs with two levels of control of what goes on in combat:
- * changeCombatContext(), which takes in the BattleInstance itself and allows the COs to fiddle with just about anything.
+ * changeCombatContext(), which takes in a CombatContext and allows the COs to fiddle with just about anything.
  * applyCombatModifiers(), which is for directly modifying a unit's firepower in a given attack.
- * All variables are public so that the COs can actually modify them.
  */
 public class BattleInstance
 {
-  public Unit attacker, defender;
-  public Weapon attackerWeapon = null, defenderWeapon = null;
-  public int attackerX, attackerY, defenderX, defenderY;
-  public final GameMap gameMap; // for reference, not weirdness
-  public boolean canCounter = false;
-  public boolean attackerMoved;
+  private final Unit attacker, defender;
+  private final Weapon attackerWeapon, defenderWeapon;
+  private final int attackerX, attackerY, defenderX, defenderY;
+  private final GameMap gameMap;
+  private final boolean attackerMoved;
   /** Determines whether to cap damage at the HP of the victim in question */
-  public final boolean isSim;
-  int battleRange;
+  private final boolean isSim;
+  private final int battleRange;
 
   /**
    * Set up the CombatParams object. Note that we assume the defender is where he thinks he is, but
@@ -45,10 +48,10 @@ public class BattleInstance
     if( 1 == battleRange )
     {
       defenderWeapon = defender.chooseWeapon(attacker.model, battleRange, false);
-      if( null != defenderWeapon )
-      {
-        canCounter = true;
-      }
+    }
+    else
+    {
+      defenderWeapon = null;
     }
   }
 
@@ -59,42 +62,85 @@ public class BattleInstance
    */
   public BattleSummary calculateBattleResults()
   {
+    CombatContext context = new CombatContext(gameMap, attacker, attackerWeapon, defender, defenderWeapon, battleRange, attackerX, attackerY);
+    Map<Unit, Entry<Weapon,Double>> unitDamageMap = new HashMap<Unit, Entry<Weapon,Double>>();
+    unitDamageMap.put(attacker, new AbstractMap.SimpleEntry<Weapon,Double>(attackerWeapon, 0.0));
+    unitDamageMap.put(defender, new AbstractMap.SimpleEntry<Weapon,Double>(attackerWeapon, 0.0));
+    
     // let the COs fool around with anything they want...
-    attacker.CO.changeCombatContext(this);
-    defender.CO.changeCombatContext(this);
+    attacker.CO.changeCombatContext(context);
+    defender.CO.changeCombatContext(context);
+    
+    // From here on in, use context variables only (Easy way to confirm: delete BattleInstance's variable block and see what gets marked as an error)
     
     double attackerHPLoss = 0;
 
     // Set up our scenario.
-    BattleParams attackInstance = new BattleParams(attacker, attackerWeapon,
-        defender, gameMap.getEnvironment(defenderX, defenderY), false, this);
+    BattleParams attackInstance = new BattleParams(context, false);
 
     // Last-minute adjustments.
-    attacker.CO.applyCombatModifiers(attackInstance, true);
-    defender.CO.applyCombatModifiers(attackInstance, false);
+    context.attacker.CO.applyCombatModifiers(attackInstance, true);
+    context.defender.CO.applyCombatModifiers(attackInstance, false);
 
     double defenderHPLoss = attackInstance.calculateDamage();
-    if( !isSim && defenderHPLoss > defender.getPreciseHP() ) defenderHPLoss = defender.getPreciseHP();
+    unitDamageMap.put(context.attacker, new AbstractMap.SimpleEntry<Weapon,Double>(context.attackerWeapon, defenderHPLoss));
+    if( !isSim && defenderHPLoss > context.defender.getPreciseHP() ) defenderHPLoss = context.defender.getPreciseHP();
 
     // If the unit can counter, and wasn't killed in the initial volley, calculate return damage.
-    if( canCounter && (defender.getPreciseHP() > defenderHPLoss) )
+    if( context.canCounter && (context.defender.getPreciseHP() > defenderHPLoss) )
     {
       // New battle instance with defender counter-attacking.
-      BattleParams defendInstance = new BattleParams(defender, defenderWeapon,
-          attacker, gameMap.getEnvironment(attackerX, attackerY), true, this);
+      BattleParams defendInstance = new BattleParams(context, true);
       defendInstance.attackerHP -= defenderHPLoss; // Account for the first attack's damage to the now-attacker.
 
       // Modifications apply "attacker first", and the defender is now the attacker.
-      defender.CO.applyCombatModifiers(attackInstance, true);
-      attacker.CO.applyCombatModifiers(attackInstance, false);
+      context.defender.CO.applyCombatModifiers(attackInstance, true);
+      context.attacker.CO.applyCombatModifiers(attackInstance, false);
 
       attackerHPLoss = defendInstance.calculateDamage();
-      if( !isSim && attackerHPLoss > attacker.getPreciseHP() ) attackerHPLoss = attacker.getPreciseHP();
+      unitDamageMap.put(context.defender, new AbstractMap.SimpleEntry<Weapon,Double>(context.defenderWeapon, attackerHPLoss));
+      if( !isSim && attackerHPLoss > context.attacker.getPreciseHP() ) attackerHPLoss = context.attacker.getPreciseHP();
     }
-
-    // Build and return the BattleSummary.
-    return new BattleSummary(attacker, attackerWeapon, defender, defenderWeapon, gameMap.getEnvironment(attackerX, attackerY).terrainType,
-        gameMap.getEnvironment(defenderX, defenderY).terrainType, attackerHPLoss, defenderHPLoss);
+    
+    // Calculations complete. We are setting up our BattleSummary, so go back to using known-accurate info
+    return new BattleSummary(attacker, unitDamageMap.get(attacker).getKey(),
+                             defender, unitDamageMap.get(defender).getKey(), 
+                             gameMap.getEnvironment(attackerX, attackerY).terrainType,
+                             gameMap.getEnvironment(defenderX, defenderY).terrainType, 
+                             unitDamageMap.get(defender).getValue(), unitDamageMap.get(attacker).getValue());
+  }
+  
+  /**
+   * CombatContext exists to allow COs to modify any crazy thing they want about a combat, without the BattleInstance itself mutating.
+   */
+  public static class CombatContext
+  {
+    public Unit attacker, defender;
+    public Weapon attackerWeapon = null, defenderWeapon = null;
+    public int attackerX, attackerY, defenderX, defenderY;
+    public final GameMap gameMap; // for reference, not weirdness
+    public boolean canCounter = false;
+    public boolean attackerMoved;
+    public int battleRange;
+    
+    public CombatContext(GameMap map, Unit pAttacker, Weapon attackerWep, Unit pDefender, Weapon defenderWep, int pBattleRange, int attackerX, int attackerY)
+    {
+      attacker = pAttacker;
+      defender = pDefender;
+      this.attackerX = attackerX;
+      this.attackerY = attackerY;
+      defenderX = defender.x; // This variable is technically not necessary, but provides consistent names with attackerX/Y.
+      defenderY = defender.y;
+      gameMap = map;
+      attackerMoved = pAttacker.x != attackerX || pAttacker.y != attackerY;
+      battleRange = pBattleRange;
+      attackerWeapon = attackerWep;
+      defenderWeapon = defenderWep;
+      if( null != defenderWeapon )
+      {
+        canCounter = true;
+      }
+    }
   }
 
   /**
@@ -105,7 +151,7 @@ public class BattleInstance
   public static class BattleParams
   {
     public final Unit attacker, defender; 
-    public final BattleInstance combatRef; // strictly for reference
+    public final CombatContext combatRef; // strictly for reference
     public double baseDamage;
     public double attackerHP;
     public double attackFactor;
@@ -114,7 +160,12 @@ public class BattleInstance
     public double terrainDefense;
     public final boolean isCounter;
 
-    public BattleParams(Unit attacker, Weapon attackerWeapon, Unit defender, Environment battleground, boolean isCounter, final BattleInstance ref)
+    public BattleParams(final CombatContext ref, boolean isCounter)
+    {
+      this(ref.attacker, ref.attackerWeapon, ref.defender,ref.gameMap.getEnvironment(ref.defenderX, ref.defenderY), isCounter, ref);
+    }
+
+    public BattleParams(Unit attacker, Weapon attackerWeapon, Unit defender, Environment battleground, boolean isCounter, final CombatContext ref)
     {
       this.attacker = attacker;
       this.defender = defender;
