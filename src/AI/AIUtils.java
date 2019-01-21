@@ -220,24 +220,26 @@ public class AIUtils
    * @param damageThreshhold % damage required to "threaten"
    * @return The area threatened by the unit, against the specified target type
    */
-  public static ArrayList<XYCoord> findThreatenedArea(GameMap gameMap, Unit unit, UnitModel target, double damageThreshhold)
+  public static Map<XYCoord, Double> findThreatPower(GameMap gameMap, Unit unit, UnitModel target)
   {
     XYCoord origin = new XYCoord(unit.x, unit.y);
-    ArrayList<XYCoord> shootableTiles = new ArrayList<XYCoord>();
+    Map<XYCoord, Double> shootableTiles = new HashMap<XYCoord, Double>();
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
     for( Weapon wep : unit.weapons )
     {
-      if( wep.ammo > 0 && wep.getDamage(target) * (unit.getHP() * 0.1) > damageThreshhold )
+      if( wep.ammo > 0 )
       {
         if( !wep.model.canFireAfterMoving )
         {
-          shootableTiles.addAll(Utils.findLocationsInRange(gameMap, origin, wep.model.minRange, wep.model.maxRange));
+          for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, wep.model.minRange, wep.model.maxRange))
+            shootableTiles.put(xyc, wep.getDamage(target) * (unit.getHP() * 0.1));
         }
         else
         {
           for( XYCoord dest : destinations )
           {
-            shootableTiles.addAll(Utils.findLocationsInRange(gameMap, dest, wep.model.minRange, wep.model.maxRange));
+            for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, wep.model.minRange, wep.model.maxRange))
+              shootableTiles.put(xyc, wep.getDamage(target) * (unit.getHP() * 0.1));
           }
         }
       }

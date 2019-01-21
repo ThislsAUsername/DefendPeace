@@ -5,13 +5,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.Set;
-
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
@@ -271,20 +268,28 @@ public class WallyAI implements AIController
       }
 
       // Figure out where we don't wanna go
-      Map<UnitModel, Set<XYCoord>> threatMap = new HashMap<UnitModel, Set<XYCoord>>();
+      Map<UnitModel, Map<XYCoord, Double>> threatMap = new HashMap<UnitModel, Map<XYCoord, Double>>();
       if( actions.isEmpty() )
       {
         Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getUnitsByCommander(gameMap);
         for( UnitModel um : myCo.unitModels )
         {
-          threatMap.put(um, new HashSet<XYCoord>());
+          threatMap.put(um, new HashMap<XYCoord, Double>());
           for( Commander co : unitLists.keySet() )
           {
             if( myCo.isEnemy(co) )
             {
               for( Unit threat : unitLists.get(co) )
               {
-                threatMap.get(um).addAll(AIUtils.findThreatenedArea(gameMap, threat, um, THREAT_THRESHHOLD));
+                // add each new threat to the existing threats
+                Map<XYCoord, Double> threatArea = threatMap.get(um);
+                for( Entry<XYCoord, Double> newThreat : AIUtils.findThreatPower(gameMap, threat, um).entrySet() )
+                {
+                  if( null == threatArea.get(newThreat.getKey()) )
+                    threatArea.put(newThreat.getKey(), newThreat.getValue());
+                  else
+                    threatArea.put(newThreat.getKey(), newThreat.getValue() + threatArea.get(newThreat.getKey()));
+                }
               }
             }
           }
@@ -327,7 +332,7 @@ public class WallyAI implements AIController
                   log(String.format("    He plans to deal %s HP damage for a net gain of %s funds", damage, (target.model.getCost() * damage - unit.model.getCost() * unit.getHP())/10));
                   goForIt = true;
                 }
-                else if( !threatMap.get(myCo.getUnitModel(unit.model.type)).contains(ga.getMoveLocation()) )
+                else if( isSafe(gameMap, threatMap, unit, ga.getMoveLocation(), THREAT_THRESHHOLD) )
                 {
                   log(String.format("  %s thinks it's safe to attack %s", unit.toStringWithLocation(), target.toStringWithLocation()));
                   goForIt = true;
@@ -346,7 +351,7 @@ public class WallyAI implements AIController
 
             // Only consider capturing if we can sit still or go somewhere safe.
             if( actionSet.getSelected().getType() == GameAction.ActionType.CAPTURE
-                && (coord.getDistance(unit.x, unit.y) == 0 || isSafe(gameMap, threatMap, unit, coord) ) )
+                && (coord.getDistance(unit.x, unit.y) == 0 || canWallHere(gameMap, threatMap, unit, coord) ) )
             {
               actions.offer(actionSet.getSelected());
               capturingProperties.add(coord);
@@ -435,7 +440,7 @@ public class WallyAI implements AIController
               for( XYCoord xyc : destinations )
               {
                 log(String.format("    is it safe to go to %s?", xyc));
-                if( isSafe(gameMap, threatMap, unit, xyc) )
+                if( canWallHere(gameMap, threatMap, unit, xyc) )
                 {
                   log(String.format("    Yes"));
                   destination = xyc;
@@ -483,13 +488,19 @@ public class WallyAI implements AIController
     return nextAction;
   }
 
+  private boolean isSafe(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc, int threshhold)
+  {
+    Double threat = threatMap.get(myCo.getUnitModel(unit.model.type)).get(xyc);
+    return ( null == threat || threshhold > threat);
+  }
+
   /**
    * @return whether it's safe or a good place to wall
    */
-  private boolean isSafe(GameMap gameMap, Map<UnitModel, Set<XYCoord>> threatMap, Unit unit, XYCoord xyc)
+  private boolean canWallHere(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc)
   {
     // if we're safe, we're safe
-    if( !threatMap.get(myCo.getUnitModel(unit.model.type)).contains(xyc) )
+    if( isSafe(gameMap, threatMap, unit, xyc, THREAT_THRESHHOLD) )
       return true;
 
     // if we'd be a nice wall for a worthy ally, we can pretend we're safe there also
