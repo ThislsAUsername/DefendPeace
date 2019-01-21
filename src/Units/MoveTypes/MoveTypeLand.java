@@ -1,5 +1,6 @@
 package Units.MoveTypes;
 
+import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 
 /** MoveTypeLand has a move cost of 1 for all land-based terrain types. */
@@ -12,5 +13,6 @@ public class MoveTypeLand extends MoveType
     moveCosts.get(Weathers.RAIN).setAllLandCosts(1);
     moveCosts.get(Weathers.SNOW).setAllLandCosts(1);
     moveCosts.get(Weathers.SANDSTORM).setAllLandCosts(1);
+    setMoveCost(TerrainType.PIPE, 99);
   }
 }

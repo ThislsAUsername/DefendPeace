@@ -177,6 +177,14 @@ public class SpriteLibrary
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/city_clear.png"), w * 2, h * 2);
     }
+    else if( terrainType == TerrainType.PIPE )
+    {
+      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/pipe_clear.png"), w, h);
+    }
+    else if( terrainType == TerrainType.SILO )
+    {
+      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/silo_clear.png"), w, h);
+    }
     else if( terrainType == TerrainType.DUNES )
     {}
     else if( terrainType == TerrainType.FACTORY )
