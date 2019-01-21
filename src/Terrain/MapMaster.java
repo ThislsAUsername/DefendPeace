@@ -73,11 +73,14 @@ public class MapMaster extends GameMap
         }
       }
       
-      Map<XYCoord, UnitEnum> unitSet = mapInfo.mapUnits.get(co);
-      for( Entry<XYCoord, UnitEnum> unitEntry : unitSet.entrySet() )
+      if( mapInfo.mapUnits.size() > co )
       {
-        Unit unit = new Unit(commanders[co], commanders[co].getUnitModel(unitEntry.getValue()));
-        addNewUnit(unit, unitEntry.getKey().xCoord, unitEntry.getKey().yCoord);
+        Map<XYCoord, UnitEnum> unitSet = mapInfo.mapUnits.get(co);
+        for( Entry<XYCoord, UnitEnum> unitEntry : unitSet.entrySet() )
+        {
+          Unit unit = new Unit(commanders[co], commanders[co].getUnitModel(unitEntry.getValue()));
+          addNewUnit(unit, unitEntry.getKey().xCoord, unitEntry.getKey().yCoord);
+        }
       }
 
       // Warn if the CO still doesn't have a valid HQ.
