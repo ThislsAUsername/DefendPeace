@@ -176,7 +176,7 @@ public class WallyAI implements AIController
             for( GameAction action : actionSet.getGameActions() )
             {
               Unit target = gameMap.getLocation(action.getTargetLocation()).getResident();
-              double damage = CombatEngine.simulateBattleResults(unit, target, gameMap, unit.x, unit.y).defenderHPLoss;
+              double damage = target.model.getCost() * Math.min(target.getPreciseHP(), CombatEngine.simulateBattleResults(unit, target, gameMap, unit.x, unit.y).defenderHPLoss);
               if( damage > bestDamage )
               {
                 bestDamage = damage;
@@ -187,6 +187,7 @@ public class WallyAI implements AIController
         }
         if( null != bestAttack )
         {
+          log(String.format("%s is shooting %s", unit.toStringWithLocation(), gameMap.getLocation(bestAttack.getTargetLocation()).getResident()));
           actions.offer(bestAttack);
           stateChange = true;
           break;
@@ -476,8 +477,8 @@ public class WallyAI implements AIController
       return true;
 
     // if we'd be a nice wall for a worthy ally, we can pretend we're safe there also
-    XYCoord[] adjacentCoords = { new XYCoord(unit.x + 1, unit.y), new XYCoord(unit.x - 1, unit.y),
-        new XYCoord(unit.x, unit.y + 1), new XYCoord(unit.x, unit.y - 1) };
+    XYCoord[] adjacentCoords = { new XYCoord(xyc.xCoord + 1, xyc.yCoord), new XYCoord(xyc.xCoord - 1, xyc.yCoord),
+        new XYCoord(xyc.xCoord, xyc.yCoord + 1), new XYCoord(xyc.xCoord, xyc.yCoord - 1) };
     for( XYCoord coord : adjacentCoords )
     {
       Location loc = gameMap.getLocation(coord);
