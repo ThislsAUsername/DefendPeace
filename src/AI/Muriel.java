@@ -2,10 +2,10 @@ package AI;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
@@ -43,7 +43,9 @@ public class Muriel implements AIController
   private ArrayList<Commander> enemyCos = null;
   
   private UnitEffectivenessMap myUnitEffectMap;
-  private final double COST_EFFECTIVENESS_THRESHOLD = 0.75;
+  private final double COST_EFFECTIVENESS_MIN = 0.75;
+  private final double COST_EFFECTIVENESS_HIGH = 1.25;
+  private final double INFANTRY_PROPORTION = 0.5;
 
   private ArrayList<XYCoord> nonAlliedProperties; // set from AIUtils.
 
@@ -356,7 +358,7 @@ public class Muriel implements AIController
           Unit target = gameMap.getLocation(coord).getResident();
 
           // Only chase this unit if we will be effective against it. Don't check shouldAttack here, because we can't actually attack yet.
-          if( myUnitEffectMap.get(new UnitModelPair(unit.model, target.model)).costEffectivenessRatio < COST_EFFECTIVENESS_THRESHOLD ) continue;
+          if( myUnitEffectMap.get(new UnitModelPair(unit.model, target.model)).costEffectivenessRatio < COST_EFFECTIVENESS_MIN ) continue;
 
           // Try to move towards the enemy, but avoid blocking a factory.
           move = AIUtils.moveTowardLocation(unit, coord, gameMap);
@@ -419,13 +421,14 @@ public class Muriel implements AIController
 
     // This attack is a good idea if our cost effectiveness is in the acceptable range, or if we can at least half-kill them.
     // The second check is needed because one glass cannon may not have a great overall ratio against another; whoever hits first wins, e.g. Mech vs Anti-Air.
-    return (umami.costEffectivenessRatio > COST_EFFECTIVENESS_THRESHOLD) || (damage > (target.getHP() / 2.0));
+    return (umami.costEffectivenessRatio > COST_EFFECTIVENESS_MIN) || (damage > (target.getHP() / 2.0));
   }
 
   private void queueUnitProductionActions(GameMap gameMap)
   {
-    log("Evaluating Production needs");
     int budget = myCo.money;
+    log("Evaluating Production needs");
+    log("Budget: " + budget);
 
     // Figure out what unit types we can purchase with our available properties.
     AIUtils.CommanderProductionInfo CPI = new AIUtils.CommanderProductionInfo(myCo, gameMap);
@@ -447,7 +450,7 @@ public class Muriel implements AIController
         // Count how many of each model of enemy units are in play.
         if( enemyUnitCounts.containsKey(u.model))
         {
-          enemyUnitCounts.put(u.model, enemyUnitCounts.get(u.model) + (u.getHP() / 10) );
+          enemyUnitCounts.put(u.model, enemyUnitCounts.get(u.model) + (u.getHP() / 10.0) );
         }
         else
         {
@@ -463,7 +466,7 @@ public class Muriel implements AIController
       // Count how many of each model I have.
       if( myUnitCounts.containsKey(u.model))
       {
-        myUnitCounts.put(u.model, myUnitCounts.get(u.model) + (u.getHP() / 10) );
+        myUnitCounts.put(u.model, myUnitCounts.get(u.model) + (u.getHP() / 10.0) );
       }
       else
       {
@@ -487,92 +490,153 @@ public class Muriel implements AIController
     }
 
     // Build a map of how threatened I am by each enemy unit type.
-    // Map value is (enemy unit counts - my stopping power vs that type).
-    Map<UnitModel, Double> enemyUnitStrengths = new HashMap<UnitModel, Double>();
-    for( UnitModel um : myUnitCounts.keySet() )
+    // Larger values will represent a greater threat.
+    Queue<ModelValuePair> enemyUnitStrengths = new PriorityQueue<ModelValuePair>();
+    for( UnitModel em : enemyUnitCounts.keySet() )
     {
-      for( UnitModel em : enemyUnitCounts.keySet() )
+      double effectiveThreat = enemyUnitCounts.get(em); // Start with how many of them there are.
+      for( UnitModel um : myUnitCounts.keySet() )
       {
         double myCount = myUnitCounts.get(um);
-        double enemyCount = enemyUnitCounts.get(em);
         UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(um, em));
         double myStoppingPower = umami.damageRatio * myCount; // I can stop THIS MANY of those things with what I have.
-        double effectiveThreat = enemyCount - myStoppingPower; // A positive result means I can't handle all of them.
-        enemyUnitStrengths.put(em, effectiveThreat);
+        effectiveThreat -= myStoppingPower; // Subtract my effective weight with this type from their number.
       }
+      enemyUnitStrengths.offer(new ModelValuePair(em, effectiveThreat)); // If effectiveThreat is still positive, I can't handle all of them.
     }
 
     // Try to purchase units that will counter the enemies I am least equipped to fight.
+    // We should place one order per iteration of this loop.
     ArrayList<PurchaseOrder> shoppingCart = new ArrayList<PurchaseOrder>();
     boolean orderedSomething = true;
     while( (budget > 0) && (enemyUnitCounts.size() > 0) && !CPI.availableUnitModels.isEmpty() && orderedSomething )
     {
       orderedSomething = false; // If we fail to find something to build, don't keep trying forever.
 
-      // If we are low on grunts, make sure we save money to build more.
-      UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
-      int costBuffer = 0;
-      if( !myUnitCounts.containsKey(infModel) || (myUnitCounts.get(infModel) < (myCo.units.size() * 0.2)) ) // If we have less than 20% infantry, make sure we can build some more.
-      {
-        int gruntsWanted = (int)Math.ceil(myCo.units.size() * 0.2);
-        int gruntFacilities = CPI.getNumFacilitiesFor(infModel)-1; // The -1 assumes we are about to build from a factory. Possibly untrue.
-        costBuffer = (int)Math.min(gruntFacilities, gruntsWanted) * infModel.getCost();
-        log(String.format("    low on Infantry: witholding %s for possible extra grunts", costBuffer));
-      }
-
       // Sort enemy units by the effective threat they provide to our current forces, and build counters for the most dangerous first.
-      ArrayList<Entry<UnitModel, Double>> entryArray = new ArrayList<Entry<UnitModel, Double>>(enemyUnitCounts.entrySet());
-      Collections.sort(entryArray, new UnitQuantityComparator());
-      Collections.reverse(entryArray); // Largest/most dangerous first.
-      log("Threat catalogue:");
-      for( Entry<UnitModel, Double> ent : entryArray )
+      log("Threat ratings:");
+      Iterator<ModelValuePair> enemyTypeIter = enemyUnitStrengths.iterator();
+      while( enemyTypeIter.hasNext() )
       {
-        log(String.format("  %s, %s", ent.getKey(), ent.getValue()));
+        ModelValuePair enemyMVP = enemyTypeIter.next();
+        log(String.format("  %s: %s", enemyMVP.model, enemyMVP.value));
       }
 
       // Grab the first enemy unit type, and try to build something that will counter it.
-      UnitModel enemyToCounter = entryArray.get(0).getKey();
-      System.out.println("Want to counter " + enemyToCounter);
-      log(String.format("Remaining budget: %s", budget));
+      UnitModel enemyToCounter = enemyUnitStrengths.peek().model;
+      log("Want to counter " + enemyToCounter);
+      log(String.format("  Remaining budget: %s", budget));
 
-      // Get our possible options for countermeasures, and collect all with a good enough cost ratio:
-      ArrayList<UnitModel> availableUnitModels = new ArrayList<UnitModel>(CPI.availableUnitModels);
-      HashSet<UnitModel> counters = new HashSet<UnitModel>();
-      for( UnitModel counter : availableUnitModels )
+      // If we are low on grunts, make sure we save money to build more.
+      UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+      int costBuffer = 0;
+      if( !myUnitCounts.containsKey(infModel) || (myUnitCounts.get(infModel) < (myCo.units.size() * INFANTRY_PROPORTION)) )
       {
+        int gruntsWanted = (int)Math.ceil(myCo.units.size() * INFANTRY_PROPORTION);
+        int gruntFacilities = CPI.getNumFacilitiesFor(infModel)-1; // The -1 assumes we are about to build from a factory. Possibly untrue.
+        costBuffer = (int)Math.min(gruntFacilities, gruntsWanted) * infModel.getCost();
+        log(String.format("  Low on Infantry: witholding %s for possible extra grunts", costBuffer));
+      }
+
+      // Make a list of possible counters: types with a good cost effectiveness vs enemyToCounter.
+      log("  Viable counters:");
+      HashSet<UnitModel> counters = new HashSet<UnitModel>();
+      for( UnitModel counter : CPI.availableUnitModels )
+      {
+        if( myCo.money < counter.getCost() ) continue; // If we can't afford it, don't bother.
         UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(counter, enemyToCounter));
-        if( umami.costEffectivenessRatio >= COST_EFFECTIVENESS_THRESHOLD )
+        if( umami.costEffectivenessRatio >= COST_EFFECTIVENESS_MIN )
         {
-          log(String.format("  %s has cost ratio %s", counter, umami.costEffectivenessRatio));
+          log(String.format("    %s has cost ratio %s", counter, umami.costEffectivenessRatio));
           counters.add(counter);
         }
       }
 
-      if( counters.isEmpty() ) break; // We can't build anything useful. Bah, humbug.
-
-      // Calculate the overall goodness for each possible counter; keep the best.
-      Queue<ModelValuePair> sortedCounters = new PriorityQueue<ModelValuePair>(counters.size());
-      for( UnitModel counter : counters )
+      if( counters.isEmpty() )
       {
-        double goodness = 0;
-        // Overall goodness of each option is it's effectiveness vs each enemy unit type, times the density of that enemy type.
-        // This lets us choose a counter for enemyToCounter that will provide maximum general usefulness.
-        for( UnitModel enemy : enemyUnitCounts.keySet() )
-        {
-          UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(counter, enemy));
-          double percent = (enemyUnitCounts.get(enemy)*10) / enemyArmyHP;
-          double thisGoodness = umami.costEffectivenessRatio * percent;
-          log(String.format("    goodness vs %s: %s (%s * %s)", enemy, thisGoodness, umami.costEffectivenessRatio, percent));
-          goodness += thisGoodness;
-        }
-        log(String.format("  %s has overall goodness %s", counter, goodness));
-
-        sortedCounters.offer(new ModelValuePair(counter, goodness));
+        log("  No suitable counters identified.");
+        enemyUnitStrengths.remove(enemyToCounter);
+        continue; // We can't build anything useful. Bah, humbug.
       }
 
-      while( !sortedCounters.isEmpty() )
+      // Sort the possible counters by how good they are against the enemy force composition in
+      // general; we want units that are good against more than just enemyToCounter, if possible.
+      log("  Initial scoring:");
+      Queue<ModelValuePair> counterScores = new PriorityQueue<ModelValuePair>(counters.size());
+      for(UnitModel counter : counters)
       {
-        UnitModel idealCounter = sortedCounters.poll().model;
+        int score = 0;
+        for( Commander enemyCo : unitLists.keySet() )
+        {
+          for( Unit enemyUnit : unitLists.get(enemyCo) )
+          {
+            UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(counter, enemyUnit.model));
+            if( umami.costEffectivenessRatio >= COST_EFFECTIVENESS_MIN ) score++; // Plus one if it's worth building.
+            if( umami.costEffectivenessRatio >= COST_EFFECTIVENESS_HIGH ) score++; // An extra bump in score if they are very good vs this type.
+            if( umami.costEffectivenessRatio < COST_EFFECTIVENESS_MIN ) score--; // Discount if my counter is countered.
+          }
+        }
+        log(String.format("    %s has counter score %s", counter, score));
+        counterScores.offer(new ModelValuePair(counter, score));
+      }
+
+      // Loop through my counters for enemyToCounter, in order of how generally applicable they are.
+      // This second pass will allow us to break any ties and populate orderedCounters.
+      ArrayList<UnitModel> orderedCounters = new ArrayList<UnitModel>();
+      while( !counterScores.isEmpty() )
+      {
+        // Collect all units tied with the highest counter score (of those still in counterScores).
+        // If equalCounters ends up with more than one entry, then each model it contains can counter
+        // the same proportion of the enemy force, to some extent. Below we distinguish by "how well".
+        HashSet<UnitModel> equalCounters = new HashSet<UnitModel>();
+        ModelValuePair bestCounter = counterScores.poll();
+        equalCounters.add(bestCounter.model);
+        while( !counterScores.isEmpty() && (bestCounter.value == counterScores.peek().value) ) equalCounters.add(counterScores.poll().model);
+
+        // Sort equalCounters into counterScoresFine, based on a weighted goodness metric.
+        // If equalCounters has only one entry, there's really no reason to calculate the goodness metric.
+        if( equalCounters.size() > 1 )
+        {
+          log("  Breaking ties");
+          Queue<ModelValuePair> counterScoresFine = new PriorityQueue<ModelValuePair>(counters.size());
+          for( UnitModel counter : equalCounters )
+          {
+            // Overall goodness of each option is it's effectiveness vs each enemy unit type, times the density of that enemy type.
+            // This lets us make fine distinctions between units that are equally applicable, broadly speaking.
+            //log(String.format("    Evaluating %s", counter));
+            double goodness = 0;
+            for( UnitModel enemy : enemyUnitCounts.keySet() )
+            {
+              UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(counter, enemy));
+              double percent = (enemyUnitCounts.get(enemy)*10) / enemyArmyHP;
+              double thisGoodness = umami.costEffectivenessRatio * percent;
+              //log(String.format("      goodness vs %s: %s (%s * %s)", enemy, thisGoodness, umami.costEffectivenessRatio, percent));
+              goodness += thisGoodness;
+            }
+            log(String.format("    %s has weighted goodness %s", counter, goodness));
+
+            counterScoresFine.offer(new ModelValuePair(counter, goodness));
+          }
+
+          // Unload our finely-evaluated counters into a list.
+          while(!counterScoresFine.isEmpty())
+          {
+            log(String.format("  Adding %s to shopping list", counterScoresFine.peek().model));
+            orderedCounters.add(counterScoresFine.poll().model);
+          }
+        }
+        else
+        {
+          log(String.format("  Adding %s to shopping list", bestCounter.model));
+          orderedCounters.add(bestCounter.model);
+        }
+      }
+
+      // Go through the list and see what we can build, in order.
+      Iterator<UnitModel> modelIter = orderedCounters.iterator();
+      UnitModel idealCounter = modelIter.next();
+      for( ; modelIter.hasNext(); idealCounter = modelIter.next() )
+      {
         log(String.format("  Would like to build %s", idealCounter));
 
         // Figure out if we can afford the desired unit type.
@@ -590,11 +654,12 @@ public class Muriel implements AIController
           orderedSomething = true;
 
           // We found something useful to build; update our estimate of how well we match up.
-          for( UnitModel em : enemyUnitStrengths.keySet() )
+          Iterator<ModelValuePair> eusIter = enemyUnitStrengths.iterator();
+          while(eusIter.hasNext())
           {
-            UnitMatchupAndMetaInfo matchup = myUnitEffectMap.get(new UnitModelPair(idealCounter, em));
-            double oldStrength = enemyUnitStrengths.get(em);
-            enemyUnitStrengths.put(em, oldStrength - matchup.damageRatio);
+            ModelValuePair enemyStrength = eusIter.next();
+            UnitMatchupAndMetaInfo matchup = myUnitEffectMap.get(new UnitModelPair(idealCounter, enemyStrength.model));
+            enemyStrength.value = enemyStrength.value - matchup.damageRatio; // Subtract this unit's strength from theirs.
           }
           break; // Loop around, re-sort the enemies by strength, and figure out what to build next.
         }
@@ -648,10 +713,10 @@ public class Muriel implements AIController
     }
 
     @Override
-    /** If this has a higher value, we want it to come before (be less than) other. */
+    /** If this has a higher value, we want this to come before other. */
     public int compareTo(ModelValuePair other)
     {
-      return (int)(other.value - value)*100;
+      return (int)((other.value - value)*100);
     }
   }
 
