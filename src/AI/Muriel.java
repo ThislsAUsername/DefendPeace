@@ -89,7 +89,7 @@ public class Muriel implements AIController
           if( null != myWeapon )
           {
             BattleInstance.BattleParams params = new BattleInstance.BattleParams(myUnit, myWeapon,
-                otherUnit, Environment.getTile(TerrainType.ROAD, Weathers.CLEAR));
+                otherUnit, Environment.getTile(TerrainType.ROAD, Weathers.CLEAR), false, null);
             myDamage = params.calculateDamage();
           }
 
@@ -99,7 +99,7 @@ public class Muriel implements AIController
           if( null != otherWeapon )
           {
             BattleInstance.BattleParams params = new BattleInstance.BattleParams(otherUnit, otherWeapon,
-                myUnit, Environment.getTile(TerrainType.ROAD, Weathers.CLEAR));
+                myUnit, Environment.getTile(TerrainType.ROAD, Weathers.CLEAR), false, null);
             otherDamage = params.calculateDamage();
           }
 
@@ -294,7 +294,7 @@ public class Muriel implements AIController
         Environment environment = gameMap.getEnvironment(targetLoc);
 
         // Calculate the cost of the damage we can do.
-        BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, true), target, environment);
+        BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, true), target, environment, false, null);
         double hpDamage = Math.min(params.calculateDamage(), target.getPreciseHP());
         double damageValue = (target.model.getCost()/10) * hpDamage;
 
@@ -415,7 +415,7 @@ public class Muriel implements AIController
   private boolean shouldAttack(Unit unit, Unit target, GameMap gameMap)
   {
     // Calculate the cost of the damage we can do.
-    BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, true), target, gameMap.getLocation(target.x, target.y).getEnvironment());
+    BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, true), target, gameMap.getLocation(target.x, target.y).getEnvironment(), false, null);
     double damage = params.calculateDamage();
     UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(unit.model, target.model));
 

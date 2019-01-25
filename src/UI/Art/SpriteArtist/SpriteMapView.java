@@ -310,29 +310,10 @@ public class SpriteMapView extends MapView
       else if( getCurrentGameMenu() == null )
       {
         mapArtist.drawCursor(mapGraphics, currentActor, isTargeting, myGame.getCursorX(), myGame.getCursorY());
-        if( isTargeting && null != currentPath )
+        Unit target = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
+        if( isTargeting && null != currentPath && null != target)
         {
-          Unit target = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
-          int dist = Math.abs(target.x - currentPath.getEnd().x) + Math.abs(target.y - currentPath.getEnd().y);
-          if( null != target && currentActor.canAttack(target.model, dist, currentPath.getPathLength() > 1) )
-          {
-            // grab the two most significant digits and convert to %
-            int damage = (int) (10 * CombatEngine.calculateBattleResults(currentActor, target, myGame.gameMap,
-                currentPath.getEnd().x, currentPath.getEnd().y).defenderHPLoss);
-            String damageText = damage + "%";
-
-            // Build a display of the expected damage.
-            Color[] colors = SpriteLibrary.getMapUnitColors(currentActor.CO.myColor).paletteColors;
-            BufferedImage dmgImage = SpriteUIUtils.makeTextFrame(colors[4], colors[2], damageText,
-                2 * SpriteOptions.getDrawScale(), 2 * SpriteOptions.getDrawScale());
-
-            // Draw the damage estimate directly above the unit being targeted.
-            int drawScale = SpriteOptions.getDrawScale();
-            int tileSize = SpriteLibrary.baseSpriteSize * drawScale;
-            int estimateX = (target.x * tileSize) + (tileSize / 2);
-            int estimateY = (target.y * tileSize) - dmgImage.getHeight() / 2;
-            SpriteLibrary.drawImageCenteredOnPoint(mapGraphics, dmgImage, estimateX, estimateY, 1);
-          }
+          drawDamagePreviewSet(mapGraphics, currentActor, currentPath, target);
         }
       }
       else
@@ -493,6 +474,42 @@ public class SpriteMapView extends MapView
         }
       }
     }
+  }
+  
+  /**
+   * Draws the predicted damage for both attacker and defender, as applicable.
+   */
+  public void drawDamagePreviewSet(Graphics g, Unit currentActor, Path currentPath, Unit target)
+  {
+    int dist = Math.abs(target.x - currentPath.getEnd().x) + Math.abs(target.y - currentPath.getEnd().y);
+    if( currentActor.canAttack(target.model, dist, currentPath.getPathLength() > 1) )
+    {
+      // find out how it would go
+      BattleSummary summary = CombatEngine.simulateBattleResults(currentActor, target, getDrawableMap(myGame),
+          currentPath.getEnd().x, currentPath.getEnd().y);
+      // draw any damage done, with the color of the one dealing the damage
+      if( summary.attackerHPLoss > 0 )
+        drawDamagePreview(g, summary.attackerHPLoss, summary.defender.CO, summary.attacker.x, summary.attacker.y);
+      if( summary.defenderHPLoss > 0 )
+        drawDamagePreview(g, summary.defenderHPLoss, summary.attacker.CO, summary.defender.x, summary.defender.y);
+    }
+  }
+  public void drawDamagePreview(Graphics g, double damage, Commander attacker, int x, int y)
+  {
+    // grab the two most significant digits and convert to %
+    String damageText = (int) (damage*10) + "%";
+
+    // Build a display of the expected damage.
+    Color[] colors = SpriteLibrary.getMapUnitColors(attacker.myColor).paletteColors;
+    BufferedImage dmgImage = SpriteUIUtils.makeTextFrame(colors[4], colors[2], damageText,
+        2 * SpriteOptions.getDrawScale(), 2 * SpriteOptions.getDrawScale());
+
+    // Draw the damage estimate directly above the unit being targeted.
+    int drawScale = SpriteOptions.getDrawScale();
+    int tileSize = SpriteLibrary.baseSpriteSize * drawScale;
+    int estimateX = (x * tileSize) + (tileSize / 2);
+    int estimateY = (y * tileSize) - dmgImage.getHeight() / 2;
+    SpriteLibrary.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY, 1);
   }
 
   /**
