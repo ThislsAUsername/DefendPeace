@@ -34,7 +34,7 @@ public class WallyAI implements AIController
 {
   Queue<GameAction> actions = new ArrayDeque<GameAction>();
   // sort our units by expense first, we want them to hit first
-  Queue<Unit> unitQueue = new PriorityQueue<Unit>(new AIUtils.UnitCostComparator(false));
+  Queue<Unit> unitQueue = new PriorityQueue<Unit>(11, new AIUtils.UnitCostComparator(false));
   boolean stateChange;
 
   private Commander myCo = null;
@@ -208,7 +208,7 @@ public class WallyAI implements AIController
       {
         boolean foundKill = false;
         // Get a count of enemy forces.
-        Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getUnitsByCommander(gameMap);
+        Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
         for( Commander co : unitLists.keySet() )
         {
           // log(String.format("Hunting CO %s's units", co.coInfo.name));
@@ -273,7 +273,7 @@ public class WallyAI implements AIController
       Map<UnitModel, Map<XYCoord, Double>> threatMap = new HashMap<UnitModel, Map<XYCoord, Double>>();
       if( actions.isEmpty() )
       {
-        Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getUnitsByCommander(gameMap);
+        Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
         for( UnitModel um : myCo.unitModels )
         {
           threatMap.put(um, new HashMap<XYCoord, Double>());
@@ -560,7 +560,7 @@ public class WallyAI implements AIController
         continue;
 
       // Attack with the cheapest assault units, if possible.
-      Queue<Unit> assaultQueue = new PriorityQueue<Unit>(new AIUtils.UnitCostComparator(true));
+      Queue<Unit> assaultQueue = new PriorityQueue<Unit>(11, new AIUtils.UnitCostComparator(true));
       assaultQueue.addAll(unitQueue);
       while (!assaultQueue.isEmpty())
       {
@@ -606,7 +606,7 @@ public class WallyAI implements AIController
     int budget = myCo.money;
 
     // Get a count of enemy forces.
-    Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getUnitsByCommander(gameMap);
+    Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
     Map<UnitModel, Double> enemyUnitCounts = new HashMap<UnitModel, Double>();
     for( Commander co : unitLists.keySet() )
     {
