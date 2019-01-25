@@ -527,6 +527,12 @@ public class Muriel implements AIController
       log("Want to counter " + enemyToCounter);
       log(String.format("  Remaining budget: %s", budget));
 
+      // If we have a lot of cash on hand, don't worry about cost effectiveness - just maximize damage instead.
+      // If we ever collect more than twice our income in funds, we just aren't spending fast enough. Fix that.
+      int incomePerTurn = myCo.ownedProperties.size() * myCo.incomePerCity;
+      boolean useDamageRatio = (myCo.money > (incomePerTurn*2)); // Rich people can afford to think differently.
+      if(useDamageRatio) log("  High funds - sorting units by damage ratio instead of cost effectiveness.");
+
       // If we are low on grunts, make sure we save money to build more.
       UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
       int costBuffer = 0;
@@ -571,9 +577,18 @@ public class Muriel implements AIController
           for( Unit enemyUnit : unitLists.get(enemyCo) )
           {
             UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(counter, enemyUnit.model));
-            if( umami.costEffectivenessRatio >= COST_EFFECTIVENESS_MIN ) score++; // Plus one if it's worth building.
-            if( umami.costEffectivenessRatio >= COST_EFFECTIVENESS_HIGH ) score++; // An extra bump in score if they are very good vs this type.
-            if( umami.costEffectivenessRatio < COST_EFFECTIVENESS_MIN ) score--; // Discount if my counter is countered.
+            if( useDamageRatio )
+            {
+              if( umami.damageRatio >= 1.0 ) score++; // Plus one if it's worth building.
+              if( umami.damageRatio >= 1.5 ) score++; // An extra bump in score if they are very good vs this type.
+              if( umami.damageRatio < 0.8 ) score--; // Discount if my counter is countered.
+            }
+            else
+            {
+              if( umami.costEffectivenessRatio >= COST_EFFECTIVENESS_MIN ) score++; // Plus one if it's worth building.
+              if( umami.costEffectivenessRatio >= COST_EFFECTIVENESS_HIGH ) score++; // An extra bump in score if they are very good vs this type.
+              if( umami.costEffectivenessRatio < COST_EFFECTIVENESS_MIN ) score--; // Discount if my counter is countered.
+            }
           }
         }
         log(String.format("    %s has counter score %s", counter, score));
@@ -609,7 +624,7 @@ public class Muriel implements AIController
             {
               UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(counter, enemy));
               double percent = (enemyUnitCounts.get(enemy)*10) / enemyArmyHP;
-              double thisGoodness = umami.costEffectivenessRatio * percent;
+              double thisGoodness = (useDamageRatio) ? (umami.damageRatio * percent) : (umami.costEffectivenessRatio * percent);
               //log(String.format("      goodness vs %s: %s (%s * %s)", enemy, thisGoodness, umami.costEffectivenessRatio, percent));
               goodness += thisGoodness;
             }
