@@ -1,7 +1,11 @@
 package Terrain;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
 import Engine.XYCoord;
 import Units.Unit;
+import Units.UnitModel.UnitEnum;
 
 public class MapMaster extends GameMap
 {
@@ -66,6 +70,17 @@ public class MapMaster extends GameMap
         else
         {
           System.out.println("Warning! CO specified as owner of an uncapturable location in map " + mapInfo.mapName);
+        }
+      }
+      
+      if( mapInfo.mapUnits.size() > co )
+      {
+        Map<XYCoord, UnitEnum> unitSet = mapInfo.mapUnits.get(co);
+        for( Entry<XYCoord, UnitEnum> unitEntry : unitSet.entrySet() )
+        {
+          Unit unit = new Unit(commanders[co], commanders[co].getUnitModel(unitEntry.getValue()));
+          addNewUnit(unit, unitEntry.getKey().xCoord, unitEntry.getKey().yCoord);
+          commanders[co].units.add(unit);
         }
       }
 
