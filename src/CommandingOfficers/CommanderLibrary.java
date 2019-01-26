@@ -77,6 +77,7 @@ public class CommanderLibrary
 //    commanderList.add( IDSPennyRNG.getInfo() );
 //    commanderList.add( IDSPennyBasic.getInfo() );
     commanderList.add( IDSTabithaCS.getInfo() );
+    commanderList.add( IDSTabithaDef.getInfo() );
 //    commanderList.add( IDSTabithaBasic.getInfo() );
 
 //    commanderList.add( LADavis.getInfo() );

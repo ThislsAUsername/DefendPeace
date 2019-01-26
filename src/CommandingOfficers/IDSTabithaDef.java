@@ -10,20 +10,20 @@ import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
 
-public class IDSTabithaCS extends Commander
+public class IDSTabithaDef extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Tabitha\nCS", new instantiator());
+  private static final CommanderInfo coInfo = new CommanderInfo("Tabitha\nDef", new instantiator());
 
   private static class instantiator implements COMaker
   {
     @Override
     public Commander create()
     {
-      return new IDSTabithaCS();
+      return new IDSTabithaDef();
     }
   }
 
-  public IDSTabithaCS()
+  public IDSTabithaDef()
   {
     super(coInfo);
 
@@ -45,14 +45,6 @@ public class IDSTabithaCS extends Commander
     this.COU = null;
     COUBoost = 35;
     super.initTurn(map);
-  }
-  
-  @Override
-  public void endTurn()
-  {
-    super.endTurn();
-    if (null == COU)
-      COUBoost = 0;
   }
 
   @Override
@@ -92,12 +84,12 @@ public class IDSTabithaCS extends Commander
     private static final String NAME = "Firestorm";
     private static final int COST = 6;
     private static final int POWER = 4;
-    IDSTabithaCS COcast;
+    IDSTabithaDef COcast;
 
     Firestorm(Commander commander)
     {
       super(commander, NAME, COST);
-      COcast = (IDSTabithaCS) commander;
+      COcast = (IDSTabithaDef) commander;
     }
 
     @Override
@@ -116,12 +108,12 @@ public class IDSTabithaCS extends Commander
     private static final String NAME = "Apocolypse";
     private static final int COST = 10;
     private static final int POWER = 8;
-    IDSTabithaCS COcast;
+    IDSTabithaDef COcast;
 
     Apocolypse(Commander commander)
     {
       super(commander, NAME, COST);
-      COcast = (IDSTabithaCS) commander;
+      COcast = (IDSTabithaDef) commander;
     }
 
     @Override
