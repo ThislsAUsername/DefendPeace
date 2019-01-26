@@ -9,14 +9,16 @@ public abstract class CommanderAbility
   public static final int PHASE_TURN_END = PHASE_BUY << 1;
   public final Commander myCommander;
   protected String myName;
-  private int myPowerCost;
+  public final double numDiscretes; // Ability cost in a chunky form. Can serve as a reference to the "original cost" of the ability.
+  private int myPowerCost; // Ability cost in funds. Increases with each use.
   public int AIFlags = PHASE_TURN_START;
 
-  public CommanderAbility(Commander commander, String abilityName, int powerCost)
+  public CommanderAbility(Commander commander, String abilityName, double powerCost)
   {
     myCommander = commander;
     myName = abilityName;
-    myPowerCost = powerCost;
+    numDiscretes = powerCost;
+    myPowerCost = (int) (Commander.CHARGERATIO_FUNDS*powerCost);
   }
 
   public int getCost()

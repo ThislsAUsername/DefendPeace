@@ -101,6 +101,7 @@ public class CommanderOverlayArtist
    */
   public static BufferedImage buildCoPowerBar(Commander co, int[] abilityPoints, double currentPower, boolean leftSide)
   {
+    final double powerDrawScaleW = 4.0/Commander.CHARGERATIO_FUNDS;
     int slowAnimIndex = (animIndex/32) % 2;
 
     // Find the most expensive ability so we know how long to draw the bar.
@@ -112,7 +113,7 @@ public class CommanderOverlayArtist
     final int imageBufferW = 2;
 
     // Unfortunately, the power bar is a "some assembly required" kinda deal, so we have to put it together here.
-    BufferedImage powerBar = SpriteLibrary.getCoOverlayPowerBar(co, maxAP, co.getAbilityPower());
+    BufferedImage powerBar = SpriteLibrary.getCoOverlayPowerBar(co, maxAP, currentPower, powerDrawScaleW);
     Sprite powerBarPieces = SpriteLibrary.getCoOverlayPowerBarAPs(co);
 
     // Make a new BufferedImage to hold the composited power bar, and set it all transparent to start.
@@ -128,14 +129,14 @@ public class CommanderOverlayArtist
     for( int i = 0; i < abilityPoints.length; ++i )
     {
       int requiredPower = abilityPoints[i];
-      double diff = requiredPower - currentPower;
+      double diff = (requiredPower - currentPower)/Commander.CHARGERATIO_FUNDS;
       atLeastOne |= (diff < 0);
       BufferedImage segment = (diff > 1) ? powerBarPieces.getFrame(0)  // empty
           : ((diff > 0.5) ? powerBarPieces.getFrame(1)                 // 1/3 full
               : ((diff > 0) ? powerBarPieces.getFrame(2)               // 2/3 full
                   : ((slowAnimIndex == 0) ? powerBarPieces.getFrame(3) // filled
                       : powerBarPieces.getFrame(4))) );                // blinking
-      int drawLoc = (requiredPower * 2) - imageBufferW - 3; // -3 to center the image around the power level.
+      int drawLoc = ((int) (requiredPower*powerDrawScaleW)) - imageBufferW - 3; // -3 to center the image around the power level.
       barGfx.drawImage(segment, drawLoc, 0, null);
     }
     
