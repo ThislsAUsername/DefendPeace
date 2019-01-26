@@ -288,7 +288,7 @@ public class Commander extends GameEventListener
     myActiveAbilityName = ability.toString();
   }
 
-  protected void modifyAbilityPower(double amount)
+  public void modifyAbilityPower(double amount)
   {
     myAbilityPower += amount;
     if( myAbilityPower < 0 )

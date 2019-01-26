@@ -45,6 +45,7 @@ public class TestCombatMods extends TestCase
 
     boolean testPassed = true;
     testPassed &= validate(testBasicMod(), "  Basic combat mod test failed.");
+    testPassed &= validate(testRetribution(), "  Venge's Retribution combat mod test failed.");
     
     cinder.unregister();
     venge.unregister();
@@ -82,6 +83,48 @@ public class TestCombatMods extends TestCase
     testMap.removeUnit(infPassive);
     testMap.removeUnit(bait);
     testMap.removeUnit(meaty);
+
+    return testPassed;
+  }
+
+  /** Test that combat works as a black box, but that Venge gets his way all the same. */
+  private boolean testRetribution()
+  {
+    // Add our test subjects
+    Unit infA = addUnit(testMap, cinder, UnitEnum.INFANTRY, 7, 3);
+    Unit infB = addUnit(testMap, venge, UnitEnum.INFANTRY, 7, 5);
+    
+    // Check our damage for each first strike pre-power...
+    BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
+    BattleSummary normalBA = CombatEngine.simulateBattleResults(infB, infA, testMap, 7, 4);
+
+    venge.modifyAbilityPower(42); // juice up
+    venge.getReadyAbilities().get(1).activate(testMap); // activate Retribution
+    
+    // ...and after power
+    BattleSummary retribAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
+    BattleSummary retribBA = CombatEngine.simulateBattleResults(infB, infA, testMap, 7, 4);
+    
+    // Check that Venge's Retribution works properly without breaking things (other than balance)
+    boolean testPassed = true;
+    
+    // First, check the logic of A->B
+    testPassed &= validate(normalAB.defenderHPLoss > normalAB.attackerHPLoss, "    First strike didn't work properly for Cinder.");
+
+    testPassed &= validate(retribAB.attacker == infA, "    infA attacked, but isn't the attacker.");
+    testPassed &= validate(retribAB.defender == infB, "    infB was attacked, but isn't the defender.");
+    testPassed &= validate(retribAB.defenderHPLoss < retribAB.attackerHPLoss, "    Cinder got first strike when Retribution should have stolen it.");
+
+    // Now do B->A
+    testPassed &= validate(normalBA.defenderHPLoss > normalBA.attackerHPLoss, "    First strike didn't work properly for Venge.");
+
+    testPassed &= validate(retribBA.attacker == infB, "    infB attacked, but isn't the attacker.");
+    testPassed &= validate(retribBA.defender == infA, "    infA was attacked, but isn't the defender.");
+    testPassed &= validate(retribBA.defenderHPLoss > retribBA.attackerHPLoss, "    Retribution somehow deprived Venge of first strike?");
+
+    // Clean up
+    testMap.removeUnit(infA);
+    testMap.removeUnit(infB);
 
     return testPassed;
   }
