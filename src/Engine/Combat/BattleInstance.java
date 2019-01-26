@@ -76,7 +76,7 @@ public class BattleInstance
     double attackerHPLoss = 0;
 
     // Set up our scenario.
-    BattleParams attackInstance = new BattleParams(context, false);
+    BattleParams attackInstance = BattleParams.getAttack(context);
 
     // Last-minute adjustments.
     context.attacker.CO.applyCombatModifiers(attackInstance, true);
@@ -90,7 +90,7 @@ public class BattleInstance
     if( context.canCounter && (context.defender.getPreciseHP() > defenderHPLoss) )
     {
       // New battle instance with defender counter-attacking.
-      BattleParams defendInstance = new BattleParams(context, true);
+      BattleParams defendInstance = BattleParams.getCounterAttack(context);
       defendInstance.attackerHP -= defenderHPLoss; // Account for the first attack's damage to the now-attacker.
 
       // Modifications apply "attacker first", and the defender is now the attacker.
@@ -160,9 +160,13 @@ public class BattleInstance
     public double terrainDefense;
     public final boolean isCounter;
 
-    public BattleParams(final CombatContext ref, boolean isCounter)
+    public static BattleParams getAttack(final CombatContext ref)
     {
-      this(ref.attacker, ref.attackerWeapon, ref.defender,ref.gameMap.getEnvironment(ref.defenderX, ref.defenderY), isCounter, ref);
+      return new BattleParams(ref.attacker, ref.attackerWeapon, ref.defender, ref.gameMap.getEnvironment(ref.defenderX, ref.defenderY), false, ref);
+    }
+    public static BattleParams getCounterAttack(final CombatContext ref)
+    {
+      return new BattleParams(ref.defender, ref.defenderWeapon, ref.attacker, ref.gameMap.getEnvironment(ref.attackerX, ref.attackerY), true, ref);
     }
 
     public BattleParams(Unit attacker, Weapon attackerWeapon, Unit defender, Environment battleground, boolean isCounter, final CombatContext ref)
