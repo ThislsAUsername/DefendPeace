@@ -95,7 +95,9 @@ public class IDSTabithaCS extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      COcast.COUBoost -= 10;
+      COcast.COUBoost -= 20;
+      myCommander.addCOModifier(new CODamageModifier(10));
+      myCommander.addCOModifier(new CODefenseModifier(10));
       MassStrikeUtils.damageStrike(gameMap, POWER,
           MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true)), 2);
     }

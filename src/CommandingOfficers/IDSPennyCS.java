@@ -60,7 +60,7 @@ public class IDSPennyCS extends Commander
         for( int j = 0; j < gameMap.mapHeight; j++ )
         {
           Location loc = gameMap.getLocation(i, j);
-          loc.setForecast(Weathers.SNOW, gameMap.commanders.length - 1);
+          loc.setForecast(Weathers.RAIN, gameMap.commanders.length - 1);
         }
       }
     }
@@ -85,7 +85,7 @@ public class IDSPennyCS extends Commander
         for( int j = 0; j < gameMap.mapHeight; j++ )
         {
           Location loc = gameMap.getLocation(i, j);
-          loc.setForecast(Weathers.RAIN, gameMap.commanders.length * 3 - 1);
+          loc.setForecast(Weathers.SNOW, gameMap.commanders.length * 3 - 1);
         }
       }
     }
