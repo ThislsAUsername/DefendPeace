@@ -94,8 +94,8 @@ public class BattleInstance
       defendInstance.attackerHP -= defenderHPLoss; // Account for the first attack's damage to the now-attacker.
 
       // Modifications apply "attacker first", and the defender is now the attacker.
-      context.defender.CO.applyCombatModifiers(attackInstance, true);
-      context.attacker.CO.applyCombatModifiers(attackInstance, false);
+      context.defender.CO.applyCombatModifiers(defendInstance, true);
+      context.attacker.CO.applyCombatModifiers(defendInstance, false);
 
       attackerHPLoss = defendInstance.calculateDamage();
       unitDamageMap.put(context.defender, new AbstractMap.SimpleEntry<Weapon,Double>(context.defenderWeapon, attackerHPLoss));
