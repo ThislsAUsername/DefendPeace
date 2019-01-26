@@ -63,9 +63,11 @@ public class BattleInstance
   public BattleSummary calculateBattleResults()
   {
     CombatContext context = new CombatContext(gameMap, attacker, attackerWeapon, defender, defenderWeapon, battleRange, attackerX, attackerY);
+    
+    // If the attacker and defender get swapped, we want to still give a coherent BattleSummary.
     Map<Unit, Entry<Weapon,Double>> unitDamageMap = new HashMap<Unit, Entry<Weapon,Double>>();
     unitDamageMap.put(attacker, new AbstractMap.SimpleEntry<Weapon,Double>(attackerWeapon, 0.0));
-    unitDamageMap.put(defender, new AbstractMap.SimpleEntry<Weapon,Double>(attackerWeapon, 0.0));
+    unitDamageMap.put(defender, new AbstractMap.SimpleEntry<Weapon,Double>(defenderWeapon, 0.0));
     
     // let the COs fool around with anything they want...
     attacker.CO.changeCombatContext(context);
