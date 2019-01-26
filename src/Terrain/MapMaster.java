@@ -80,6 +80,7 @@ public class MapMaster extends GameMap
         {
           Unit unit = new Unit(commanders[co], commanders[co].getUnitModel(unitEntry.getValue()));
           addNewUnit(unit, unitEntry.getKey().xCoord, unitEntry.getKey().yCoord);
+          commanders[co].units.add(unit);
         }
       }
 
