@@ -1,10 +1,13 @@
 package CommandingOfficers;
 
+import CommandingOfficers.Modifiers.CODefenseModifier;
+import CommandingOfficers.Modifiers.COVisionModifier;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.Combat.BattleInstance.CombatContext;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
+import Units.UnitModel;
 import Units.Weapons.Weapon;
 
 public class IDSCyrus extends Commander
@@ -25,6 +28,11 @@ public class IDSCyrus extends Commander
   public IDSCyrus()
   {
     super(coInfo);
+    
+    for( UnitModel um : unitModels )
+    {
+      um.visionRange += 1;
+    }
 
     addCommanderAbility(new Courageous(this));
     addCommanderAbility(new Retribution(this));
@@ -91,6 +99,7 @@ public class IDSCyrus extends Commander
     protected void perform(MapMaster gameMap)
     {
       COcast.terrainDrain = 2;
+      COcast.addCOModifier(new COVisionModifier(1));
     }
   }
 
@@ -111,6 +120,7 @@ public class IDSCyrus extends Commander
     {
       COcast.counterFirst = true;
       COcast.terrainDrain = 3;
+      COcast.addCOModifier(new COVisionModifier(2));
     }
   }
   
