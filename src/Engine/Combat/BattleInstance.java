@@ -162,6 +162,7 @@ public class BattleInstance
     public double terrainDefense;
     public final boolean isCounter;
     public double luckMax = 10;
+    public double dispersion = 0;
 
     public static BattleParams getAttack(final CombatContext ref)
     {
@@ -199,8 +200,11 @@ public class BattleInstance
       double overallDefense = ((200 - (defenseFactor + terrainDefense * defenderHP)) / 100);
       double luckDamage = 0;
       if( ! isSim )
-        luckDamage = (int) (Math.random() * luckMax) * (attackerHP / 10) * (overallDefense / 10);
-      return overallPower * overallDefense / 10 + luckDamage; // original formula was % damage, now it must be HP of damage
+      {
+        luckDamage = (int) (Math.random() * luckMax) * (attackerHP / 10);
+        luckDamage -= (int) (Math.random() * dispersion) * (attackerHP / 10);
+      }
+      return (overallPower + luckDamage) * overallDefense / 10 ; // original formula was % damage, now it must be HP of damage
     }
   }
 }

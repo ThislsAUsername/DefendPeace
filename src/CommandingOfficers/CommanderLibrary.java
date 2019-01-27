@@ -81,6 +81,7 @@ public class CommanderLibrary
     commanderList.add( IDSTabithaCS.getInfo() );
     commanderList.add( IDSTabithaDef.getInfo() );
 //    commanderList.add( IDSTabithaBasic.getInfo() );
+    commanderList.add( IDSCyrus.getInfo() );
 
 //    commanderList.add( LADavis.getInfo() );
     commanderList.add( TheBeastSturm.getInfo() );
