@@ -82,8 +82,9 @@ public class SpriteLibrary
   private static Sprite moveCursorLineSprite = null;
   private static Sprite moveCursorArrowSprite = null;
 
-  // HP numbers to overlay on map units when damaged.
+  // Numbers and letters to overlay on map units.
   private static Sprite mapUnitHPSprites = null;
+  private static Sprite mapUnitLetterSprites = null;
 
   // Cargo icon for when transports are holding other units.
   private static BufferedImage mapUnitCargoIcon = null;
@@ -402,6 +403,15 @@ public class SpriteLibrary
       mapUnitHPSprites = new Sprite(loadSpriteSheetFile("res/unit/icon/hp.png"), 8, 8);
     }
     return mapUnitHPSprites;
+  }
+
+  public static Sprite getMapUnitLetterSprites()
+  {
+    if( null == mapUnitLetterSprites )
+    {
+      mapUnitLetterSprites = new Sprite(loadSpriteSheetFile("res/unit/icon/alphabet.png"), 8, 8);
+    }
+    return mapUnitLetterSprites;
   }
 
   public static BufferedImage getCargoIcon()
