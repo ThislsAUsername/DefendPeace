@@ -143,6 +143,11 @@ public class MapWindow extends GameMap
     // then reveal what we should see
     if (null == viewer)
       return;
+    revealFog();
+  }
+  
+  public void revealFog()
+  {
     for( Commander co : commanders )
     {
       if( !viewer.isEnemy(co) )
@@ -165,8 +170,7 @@ public class MapWindow extends GameMap
           }
         }
       }
-    }
-  }
+    }}
 
   public void revealFog(Unit scout)
   {

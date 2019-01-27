@@ -65,6 +65,12 @@ public abstract class GameMap
   {}
 
   /**
+   * Reveals fog based on current unit/building positions, if applicable
+   */
+  public void revealFog()
+  {}
+
+  /**
    * Reveals fog around the given unit, if applicable
    */
   public void revealFog(Unit scout)

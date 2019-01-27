@@ -1,5 +1,6 @@
 package CommandingOfficers;
 
+import CommandingOfficers.Modifiers.COVisionModifier;
 import Terrain.MapMaster;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
@@ -31,6 +32,7 @@ public class BWLinCS extends Commander
 
     addCommanderAbility(new Scout(this));
     addCommanderAbility(new NightVision(this));
+    modifyAbilityPower(40);
   }
 
   public static CommanderInfo getInfo()
@@ -52,6 +54,14 @@ public class BWLinCS extends Commander
     protected void perform(MapMaster gameMap)
     {
       // add vision +1 and piercing vision to land units
+      COVisionModifier sightMod = new COVisionModifier(1);
+      for( UnitModel um : myCommander.unitModels )
+      {
+        if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )
+          sightMod.addApplicableUnitModel(um);
+      }
+      myCommander.addCOModifier(sightMod);
+      myCommander.myView.revealFog();
     }
   }
 
@@ -62,7 +72,6 @@ public class BWLinCS extends Commander
 
     NightVision(Commander commander)
     {
-      // as we start in Bear form, UpTurn is the correct starting name
       super(commander, NAME, COST);
     }
 
@@ -70,6 +79,14 @@ public class BWLinCS extends Commander
     protected void perform(MapMaster gameMap)
     {
       // add vision +2 and piercing vision to land units
+      COVisionModifier sightMod = new COVisionModifier(2);
+      for( UnitModel um : myCommander.unitModels )
+      {
+        if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )
+          sightMod.addApplicableUnitModel(um);
+      }
+      myCommander.addCOModifier(sightMod);
+      myCommander.myView.revealFog();
     }
   }
 }

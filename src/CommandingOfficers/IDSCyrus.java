@@ -104,6 +104,7 @@ public class IDSCyrus extends Commander
         sightMod.addApplicableUnitModel(um);
       }
       myCommander.addCOModifier(sightMod);
+      myCommander.myView.revealFog();
     }
   }
 
@@ -130,6 +131,7 @@ public class IDSCyrus extends Commander
         sightMod.addApplicableUnitModel(um);
       }
       myCommander.addCOModifier(sightMod);
+      myCommander.myView.revealFog();
     }
   }
   
