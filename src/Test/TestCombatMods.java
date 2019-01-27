@@ -107,6 +107,8 @@ public class TestCombatMods extends TestCase
     
     // Check that Venge's Retribution works properly without breaking things (other than balance)
     boolean testPassed = true;
+    testPassed &= validate(infB.model.getDamageRatio() > 110, "    Retribution didn't buff offense.");
+    testPassed &= validate(infB.model.getDefenseRatio() < 100, "    Retribution didn't reduce defense.");
     
     // First, check the logic of A->B
     testPassed &= validate(normalAB.defenderHPLoss > normalAB.attackerHPLoss, "    First strike didn't work properly for Cinder.");
@@ -117,6 +119,8 @@ public class TestCombatMods extends TestCase
 
     // Now do B->A
     testPassed &= validate(normalBA.defenderHPLoss > normalBA.attackerHPLoss, "    First strike didn't work properly for Venge.");
+    
+    testPassed &= validate(normalBA.defenderHPLoss < retribBA.defenderHPLoss, "    Venge didn't deal more damage with buffed offense.");
 
     testPassed &= validate(retribBA.attacker == infB, "    infB attacked, but isn't the attacker.");
     testPassed &= validate(retribBA.defender == infA, "    infA was attacked, but isn't the defender.");
