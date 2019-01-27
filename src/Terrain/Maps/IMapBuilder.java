@@ -7,7 +7,7 @@ public class IMapBuilder
   // Convenient handles for the terrain types to shorten map definitions.
   protected static final TerrainType BR = TerrainType.BRIDGE;
   protected static final TerrainType CT = TerrainType.CITY;
-  protected static final TerrainType PI = TerrainType.PIPE;
+  protected static final TerrainType PI = TerrainType.PILLAR;
   protected static final TerrainType SU = TerrainType.SILO;
   protected static final TerrainType DN = TerrainType.DUNES;
   protected static final TerrainType FC = TerrainType.FACTORY;

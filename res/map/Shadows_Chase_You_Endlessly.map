@@ -1,0 +1,27 @@
+  RF  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  MT  FR  MT
+  SE  SH  MT  MT  SE  CT  GR  XX  GR  GR  GR  CT  GR  MT  SH  SE  CT  GR  GR
+  SE  SP  MT  CT  SE  FR  GR  GR  AP  GR  FR  GR  GR  GR  GR  SE  SE  GR  CT
+  SE  SE  BR  SE  SE  SE  GR  SE  GR  CT  GR  GR  FR  GR  CT  SE  SE  BR  SE
+  SE  SE  BR  SE  SE  SE  SH  SE  SH  SE  SH  SH  CT  GR  SE  SE  SH  BR  GR
+  FR  CT  BR  SE  GR  GR  SH  SH  SH  SE  SE  SE  SH  SH  SE  SH  RD  RD  CT
+  GR  GR  GR  GR 2FC  GR  CT  GR  FR  MT  FR  GR  SH  SH  SE  CT  RD  FR  FR
+  MT  GR  FR  GR  RD  RD  RD  FR  MT  FR  GR  GR  RD  RD  RD  RD  RD  GR  MT
+  FR  MT  MT  CT  GR  GR  RD  CT  FR  FR  GR  CT  RD  FR  FR  GR 1FC  GR  GR
+  CT  GR  FR  MT  GR  FR  FR  RD  GR  GR  GR  GR  RD 1HQ  GR  GR  GR  GR  CT
+  RD  RD  RD  RD  CT  MT  MT  RD  RD  RD  CT  FR  RD  RD  RD  CT  GR  GR  GR
+  FR  GR  FR  MT  RD  GR  CT  MT  GR  RD  GR  MT  CT  GR  RD  MT  FR  GR  FR
+  GR  GR  GR  CT  RD  RD  RD  FR  CT  RD  RD  RD  MT  MT  CT  RD  RD  RD  RD
+  CT  GR  GR  GR  GR 2HQ  RD  GR  GR  GR  GR  RD  FR  FR  GR  MT  FR  GR  CT
+  GR  GR 2FC  GR  FR  FR  RD  CT  GR  FR  FR  CT  RD  GR  GR  CT  MT  MT  FR
+  MT  GR  RD  RD  RD  RD  RD  GR  GR  FR  MT  FR  RD  RD  RD  GR  FR  GR  MT
+  FR  FR  RD  CT  SE  SH  SH  GR  FR  MT  FR  GR  CT  GR 1FC  GR  GR  GR  GR
+  CT  RD  RD  SH  SE  SH  SH  SE  SE  SE  SH  SH  SH  GR  GR  SE  BR  CT  FR
+  GR  BR  SH  SE  SE  GR  CT  SH  SH  SE  SH  SE  SH  SE  SE  SE  BR  SE  SE
+  SE  BR  SE  SE  CT  GR  FR  GR  GR  CT  GR  SE  GR  SE  SE  SE  BR  SE  SE
+  CT  GR  SE  SE  GR  GR  GR  GR  FR  GR  AP  GR  GR  FR  SE  CT  MT  SP  SE
+  GR  GR  CT  SE  SH  MT  GR  CT  GR  GR  GR  XX  GR  CT  SE  MT  MT  SH  SE
+  MT  FR  MT  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  RF
+team, unit type, x, y
+2, INFANTRY, 4, 6
+2, LANDER, 1, 2
+1, LANDER, 17, 20
