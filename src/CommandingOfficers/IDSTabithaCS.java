@@ -38,6 +38,15 @@ public class IDSTabithaCS extends Commander
   
   private Unit COU;
   private int COUBoost;
+  
+  @Override
+  public char getSymbol(Unit unit)
+  {
+    if (unit == COU)
+      return 'T';
+    
+    return super.getSymbol(unit);
+  }
 
   @Override
   public void initTurn(GameMap map)

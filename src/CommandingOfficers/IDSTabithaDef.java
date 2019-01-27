@@ -40,6 +40,15 @@ public class IDSTabithaDef extends Commander
   private int COUBoost;
 
   @Override
+  public char getSymbol(Unit unit)
+  {
+    if (unit == COU)
+      return 'T';
+    
+    return super.getSymbol(unit);
+  }
+
+  @Override
   public void initTurn(GameMap map)
   {
     this.COU = null;
