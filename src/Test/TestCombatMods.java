@@ -102,18 +102,18 @@ public class TestCombatMods extends TestCase
     venge.getReadyAbilities().get(0).activate(testMap); // activate Iron WIll
     
     // ...and after power
-    BattleSummary retribAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
+    BattleSummary ironAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
     
-    // Check that Venge's Retribution works properly without breaking things (other than balance)
+    // Check that Venge's Iron Will works properly without breaking things (other than balance)
     boolean testPassed = true;
-    testPassed &= validate(infB.model.getDefenseRatio() > 100, "    Retribution didn't buff defense.");
+    testPassed &= validate(infB.model.getDefenseRatio() > 100, "    Iron Will didn't buff defense.");
     
     // First, check the logic of A->B
     testPassed &= validate(normalAB.defenderHPLoss > normalAB.attackerHPLoss, "    First strike didn't work properly for Cinder.");
 
-    testPassed &= validate(retribAB.attacker == infA, "    infA attacked, but isn't the attacker.");
-    testPassed &= validate(retribAB.defender == infB, "    infB was attacked, but isn't the defender.");
-    testPassed &= validate(retribAB.defenderHPLoss < retribAB.attackerHPLoss, "    Venge didn't defend better, or didn't get IronWill's buff.");
+    testPassed &= validate(ironAB.attacker == infA, "    infA attacked, but isn't the attacker.");
+    testPassed &= validate(ironAB.defender == infB, "    infB was attacked, but isn't the defender.");
+    testPassed &= validate(ironAB.defenderHPLoss < ironAB.attackerHPLoss, "    Venge didn't defend better, or didn't get Iron Will's buff.");
 
     // Clean up
     testMap.removeUnit(infA);
