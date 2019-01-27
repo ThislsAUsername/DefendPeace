@@ -132,8 +132,9 @@ public class AIUtils
 
   /**
    * Creates a map of COs to the units they control, based on what can be seen in the passed-in map.
+   * Units owned by myCommander are ignored - they can be trivially accessed via Commander.units
    */
-  public static Map<Commander, ArrayList<Unit> > getUnitsByCommander(GameMap gameMap)
+  public static Map<Commander, ArrayList<Unit> > getEnemyUnitsByCommander(Commander myCommander, GameMap gameMap)
   {
     Map<Commander, ArrayList<Unit> > unitMap = new HashMap<Commander, ArrayList<Unit> >();
 
@@ -141,7 +142,7 @@ public class AIUtils
       for( int y = 0; y < gameMap.mapHeight; ++y )
       {
         Unit resident = gameMap.getLocation(x, y).getResident();
-        if( null != resident )
+        if( (null != resident) && (myCommander != resident.CO) )
         {
           if( !unitMap.containsKey(resident.CO) ) unitMap.put(resident.CO, new ArrayList<Unit>());
           unitMap.get(resident.CO).add(resident);
