@@ -252,6 +252,15 @@ public class UnitSpriteSet
       g.drawImage(num, drawX, drawY + ((unitHeight * drawScale) / 2), num.getWidth() * drawScale, num.getHeight() * drawScale,
           null);
     }
+    
+    // Draw a Commander-defined symbol, if applicable.
+    char symbol = activeCO.getSymbol(u);
+    if( '\0' != symbol) // optimization; the null char is invisible
+    {
+      BufferedImage num = SpriteLibrary.getColoredMapTextSprites(activeCO.myColor).get(symbol);
+      // draw in the upper right corner
+      g.drawImage(num, drawX + ((unitHeight * drawScale) / 2), drawY, num.getWidth() * drawScale, num.getHeight() * drawScale, null);
+    }
 
     // Draw the transport icon if the unit is holding another unit.
     if( u.heldUnits != null && !u.heldUnits.isEmpty() )
