@@ -3,6 +3,7 @@ package Test;
 import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -60,6 +61,7 @@ public abstract class TestCase
     for( GameEvent event : sequence )
     {
       event.performEvent( map );
+      GameEventListener.publishEvent(event);
     }
   }
 }

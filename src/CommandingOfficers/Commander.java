@@ -11,8 +11,8 @@ import AI.AIController;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
 import Engine.XYCoord;
-import Engine.Combat.BattleInstance;
 import Engine.Combat.BattleInstance.BattleParams;
+import Engine.Combat.BattleInstance.CombatContext;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -134,7 +134,7 @@ public class Commander extends GameEventListener
    * changeCombatContext() allows the CO to tweak the BattleInstance itself,
    * to allow for drastic changes to the combat like counterattacking first or at 2+ range.
    */
-  public void changeCombatContext(BattleInstance instance)
+  public void changeCombatContext(CombatContext instance)
   {}
   /**
    * Allows a Commander to inject modifications that must be evaluated at combat time
@@ -288,7 +288,7 @@ public class Commander extends GameEventListener
     myActiveAbilityName = ability.toString();
   }
 
-  protected void modifyAbilityPower(double amount)
+  public void modifyAbilityPower(double amount)
   {
     myAbilityPower += amount;
     if( myAbilityPower < 0 )
