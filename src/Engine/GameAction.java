@@ -114,24 +114,24 @@ public interface GameAction
 
           if( event.attackerDies() )
           {
-            attackEvents.add(new UnitDieEvent(attacker));
+            attackEvents.add(new UnitDieEvent(event.getAttacker()));
 
             // Since the attacker died, see if he has any friends left.
             if( attacker.CO.units.size() == 1 )
             {
               // CO is out of units. Too bad.
-              attackEvents.add(new CommanderDefeatEvent(attacker.CO));
+              attackEvents.add(new CommanderDefeatEvent(event.getAttacker().CO));
             }
           }
           if( event.defenderDies() )
           {
-            attackEvents.add(new UnitDieEvent(defender));
+            attackEvents.add(new UnitDieEvent(event.getDefender()));
 
             // The defender died; check if the Commander is defeated.
             if( defender.CO.units.size() == 1 )
             {
               // CO is out of units. Too bad.
-              attackEvents.add(new CommanderDefeatEvent(defender.CO));
+              attackEvents.add(new CommanderDefeatEvent(event.getDefender().CO));
             }
           }
         }

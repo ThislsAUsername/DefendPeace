@@ -42,7 +42,8 @@ public class GEJavier extends Commander
     super.initTurn(map);
   }
 
-  public void applyCombatModifiers(BattleParams params, GameMap map)
+  @Override
+  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
   {
     if( params.defender.CO == this )
     {

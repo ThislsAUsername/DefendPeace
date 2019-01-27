@@ -43,12 +43,13 @@ public class BHLash extends Commander
     super.initTurn(map);
   }
 
-  public void applyCombatModifiers(BattleParams params, GameMap map)
+  @Override
+  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
   {
     if( params.attacker.CO == this && params.attacker.model.chassis != ChassisEnum.AIR_HIGH
         && params.attacker.model.chassis != ChassisEnum.AIR_LOW )
     {
-      Location loc = map.getLocation(params.combatRef.attackerX, params.combatRef.attackerY);
+      Location loc = params.combatRef.gameMap.getLocation(params.combatRef.attackerX, params.combatRef.attackerY);
       if( loc != null && loc.isCaptureable() )
       {
         params.attackFactor += starBuff * loc.getEnvironment().terrainType.getDefLevel() * starMult;

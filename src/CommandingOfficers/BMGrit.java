@@ -54,7 +54,8 @@ public class BMGrit extends Commander
     super.initTurn(map);
   }
 
-  public void applyCombatModifiers(BattleParams params, GameMap map)
+  @Override
+  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
   {
     Unit minion = null;
     if( params.attacker.CO == this )

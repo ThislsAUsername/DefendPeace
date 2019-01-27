@@ -47,7 +47,8 @@ public class OSJake extends Commander
     super.initTurn(map);
   }
 
-  public void applyCombatModifiers(BattleParams params, GameMap map)
+  @Override
+  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
   {
     Unit minion = null;
     if( params.attacker.CO == this )
@@ -57,7 +58,7 @@ public class OSJake extends Commander
 
     if( null != minion )
     {
-      Location loc = map.getLocation(params.combatRef.attackerX, params.combatRef.attackerY);
+      Location loc = params.combatRef.gameMap.getLocation(params.combatRef.attackerX, params.combatRef.attackerY);
       if( loc != null && loc.getEnvironment().terrainType == TerrainType.GRASS )
       {
         params.attackFactor += plainsBuff;

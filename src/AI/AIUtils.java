@@ -2,8 +2,10 @@ package AI;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
@@ -15,7 +17,9 @@ import Engine.Utils;
 import Engine.XYCoord;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.TerrainType;
 import Units.Unit;
+import Units.UnitModel;
 
 public class AIUtils
 {
@@ -127,6 +131,27 @@ public class AIUtils
   }
 
   /**
+   * Creates a map of COs to the units they control, based on what can be seen in the passed-in map.
+   */
+  public static Map<Commander, ArrayList<Unit> > getUnitsByCommander(GameMap gameMap)
+  {
+    Map<Commander, ArrayList<Unit> > unitMap = new HashMap<Commander, ArrayList<Unit> >();
+
+    for( int x = 0; x < gameMap.mapWidth; ++x )
+      for( int y = 0; y < gameMap.mapHeight; ++y )
+      {
+        Unit resident = gameMap.getLocation(x, y).getResident();
+        if( null != resident )
+        {
+          if( !unitMap.containsKey(resident.CO) ) unitMap.put(resident.CO, new ArrayList<Unit>());
+          unitMap.get(resident.CO).add(resident);
+        }
+      }
+
+    return unitMap;
+  }
+
+  /**
    * Create and return a GameAction.WaitAction that will move unit towards destination, around
    * any intervening obstacles. If no possible route exists, return false.
    * @param unit The unit we want to move.
@@ -187,5 +212,114 @@ public class AIUtils
       }
     }
     return retVal;
+  }
+
+  /**
+   * Keeps track of a commander's production facilities. When created, it will automatically catalog
+   * all available facilities, and all units that can be built. It is then easy to ask whether it is
+   * possible to build a given type of unit, or find a location to do so.
+   * Once a purchase has been scheduled, removeBuildLocation() will remove a given facility from any
+   * further consideration.
+   */
+  public static class CommanderProductionInfo
+  {
+    public Commander myCo;
+    public Set<UnitModel> availableUnitModels;
+    public Set<Location> availableProperties;
+    public Map<Terrain.TerrainType, Integer> propertyCounts;
+    public Map<UnitModel, Set<TerrainType>> modelToTerrainMap;
+
+    /**
+     * Build a model of the production capabilities for a given Commander.
+     * Could be used for your own, or your opponent's.
+     */
+    public CommanderProductionInfo(Commander co, GameMap gameMap)
+    {
+      // Figure out what unit types we can purchase with our available properties.
+      myCo = co;
+      availableUnitModels = new HashSet<UnitModel>();
+      availableProperties = new HashSet<Location>();
+      propertyCounts = new HashMap<Terrain.TerrainType, Integer>();
+      modelToTerrainMap = new HashMap<UnitModel, Set<TerrainType>>();
+
+      for( XYCoord xyc : co.ownedProperties )
+      {
+        Location loc = co.myView.getLocation(xyc);
+        if( gameMap.isLocationEmpty(loc.getCoordinates()))
+        {
+          ArrayList<UnitModel> models = co.getShoppingList(loc);
+          availableUnitModels.addAll(models);
+          availableProperties.add(loc);
+          TerrainType terrain = loc.getEnvironment().terrainType;
+          if( propertyCounts.containsKey(terrain))
+          {
+            propertyCounts.put(terrain, propertyCounts.get(loc.getEnvironment().terrainType)+1);
+          }
+          else
+          {
+            propertyCounts.put(terrain, 1);
+          }
+
+          // Store a mapping from UnitModel to the TerrainType that can produce it.
+          for( UnitModel m : models )
+          {
+            if( modelToTerrainMap.get(m) == null )
+              modelToTerrainMap.put(m, new HashSet<TerrainType>());
+            modelToTerrainMap.get(m).add( loc.getEnvironment().terrainType );
+          }
+        }
+      }
+    }
+
+    /**
+     * Return a location that can build the given unitModel, or null if none remains.
+     */
+    public Location getLocationToBuild(UnitModel model)
+    {
+      Set<TerrainType> desiredTerrains = modelToTerrainMap.get(model);
+      Location location = null;
+      for( Location loc : availableProperties )
+      {
+        if( desiredTerrains.contains(loc.getEnvironment().terrainType) )
+        {
+          location = loc;
+          break;
+        }
+      }
+      return location;
+    }
+
+    /**
+     * Remove the given location from further consideration, even if it is still available.
+     */
+    public void removeBuildLocation(Location loc)
+    {
+      availableProperties.remove(loc);
+      TerrainType terrain = loc.getEnvironment().terrainType;
+      if( propertyCounts.containsKey(terrain) )
+      {
+        propertyCounts.put(terrain, propertyCounts.get(terrain) - 1);
+        if( propertyCounts.get(terrain) == 0 )
+        {
+          availableUnitModels.removeAll(myCo.getShoppingList(loc));
+        }
+      }
+    }
+
+    /**
+     * Returns the number of facilities that can produce units of the given type.
+     */
+    public int getNumFacilitiesFor(UnitModel model)
+    {
+      int num = 0;
+      if( modelToTerrainMap.containsKey(model) )
+      {
+        for( TerrainType terrain : modelToTerrainMap.get(model) )
+        {
+          num += propertyCounts.get(terrain);
+        }
+      }
+      return num;
+    }
   }
 }

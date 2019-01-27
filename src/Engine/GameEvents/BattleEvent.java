@@ -3,7 +3,6 @@ package Engine.GameEvents;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
-import Terrain.GameMap;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -19,18 +18,26 @@ public class BattleEvent implements GameEvent
   private final BattleSummary battleInfo;
   private final XYCoord defenderCoords;
 
-  public BattleEvent(Unit attacker, Unit defender, int attackerX, int attackerY, GameMap map)
+  public BattleEvent(Unit attacker, Unit defender, int attackerX, int attackerY, MapMaster map)
   {
     // Calculate the result of the battle immediately. This will allow us to plan the animation.
     battleInfo = CombatEngine.calculateBattleResults(attacker, defender, map, attackerX, attackerY);
     defenderCoords = new XYCoord(defender.x, defender.y);
   }
 
+  public Unit getAttacker()
+  {
+    return battleInfo.attacker;
+  }
   public boolean attackerDies()
   {
     return battleInfo.attacker.getPreciseHP() - battleInfo.attackerHPLoss <= 0;
   }
 
+  public Unit getDefender()
+  {
+    return battleInfo.defender;
+  }
   public boolean defenderDies()
   {
     return battleInfo.defender.getPreciseHP() - battleInfo.defenderHPLoss <= 0;
@@ -62,17 +69,6 @@ public class BattleEvent implements GameEvent
     {
       battleInfo.defenderWeapon.fire();
       attacker.damageHP( battleInfo.attackerHPLoss );
-    }
-
-    if( attacker.getHP() <= 0 )
-    {
-      gameMap.removeUnit(attacker);
-      attacker.CO.units.remove(attacker);
-    }
-    if( defender.getHP() <= 0 )
-    {
-      gameMap.removeUnit(defender);
-      defender.CO.units.remove(defender);
     }
   }
 

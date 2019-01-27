@@ -21,6 +21,7 @@ public class CommanderLibrary
     commanderList = new ArrayList<CommanderInfo>();
     commanderList.add( CommanderStrong.getInfo() );
     commanderList.add( CommanderPatch.getInfo() );
+    commanderList.add( CommanderVenge.getInfo() );
     commanderList.add( CommanderBear_Bull.getInfo() );
     commanderList.add( CommanderCinder.getInfo() );
     

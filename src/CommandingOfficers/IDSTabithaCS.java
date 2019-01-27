@@ -56,7 +56,7 @@ public class IDSTabithaCS extends Commander
   }
 
   @Override
-  public void applyCombatModifiers(BattleParams params, GameMap map)
+  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
   {
     if( params.attacker.CO == this )
     {

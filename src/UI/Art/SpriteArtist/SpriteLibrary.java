@@ -440,6 +440,13 @@ public class SpriteLibrary
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
 
+  private static String getMapUnitSpriteFilename(UnitModel.UnitEnum unitType)
+  {
+    StringBuffer spriteFile = new StringBuffer();
+    spriteFile.append("res/unit/").append(unitType.toString().toLowerCase()).append("_map.png");
+    return spriteFile.toString();
+  }
+
   public static Sprite getMapUnitHPSprites()
   {
     if( null == mapUnitHPSprites )
