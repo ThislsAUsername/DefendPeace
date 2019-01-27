@@ -42,6 +42,7 @@ public class TestCombatMods extends TestCase
 
     boolean testPassed = true;
     testPassed &= validate(testBasicMod(), "  Basic combat mod test failed.");
+    testPassed &= validate(testIronWill(), "  Venge's Iron Will combat mod test failed.");
     testPassed &= validate(testRetribution(), "  Venge's Retribution combat mod test failed.");
     
     cinder.unregister();
@@ -85,6 +86,41 @@ public class TestCombatMods extends TestCase
   }
 
   /** Test that combat works as a black box, but that Venge gets his way all the same. */
+  private boolean testIronWill()
+  {
+    // Add our test subjects
+    Unit infA = addUnit(testMap, cinder, UnitEnum.INFANTRY, 7, 3);
+    Unit infB = addUnit(testMap, venge, UnitEnum.INFANTRY, 7, 5);
+    
+    // Check our damage for each first strike pre-power...
+    BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
+
+    venge.modifyAbilityPower(42); // juice up
+    venge.getReadyAbilities().get(0).activate(testMap); // activate Iron WIll
+    
+    // ...and after power
+    BattleSummary ironAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
+    
+    // Check that Venge's Iron Will works properly without breaking things (other than balance)
+    boolean testPassed = true;
+    testPassed &= validate(infB.model.getDefenseRatio() > 100, "    Iron Will didn't buff defense.");
+    
+    // First, check the logic of A->B
+    testPassed &= validate(normalAB.defenderHPLoss > normalAB.attackerHPLoss, "    First strike didn't work properly for Cinder.");
+
+    testPassed &= validate(ironAB.attacker == infA, "    infA attacked, but isn't the attacker.");
+    testPassed &= validate(ironAB.defender == infB, "    infB was attacked, but isn't the defender.");
+    testPassed &= validate(ironAB.defenderHPLoss < ironAB.attackerHPLoss, "    Venge didn't defend better, or didn't get Iron Will's buff.");
+
+    // Clean up
+    testMap.removeUnit(infA);
+    testMap.removeUnit(infB);
+    venge.initTurn(testMap);
+
+    return testPassed;
+  }
+
+  /** Test that combat works as a black box, but that Venge gets his way all the same. */
   private boolean testRetribution()
   {
     // Add our test subjects
@@ -104,6 +140,8 @@ public class TestCombatMods extends TestCase
     
     // Check that Venge's Retribution works properly without breaking things (other than balance)
     boolean testPassed = true;
+    testPassed &= validate(infB.model.getDamageRatio() > 110, "    Retribution didn't buff offense.");
+    testPassed &= validate(infB.model.getDefenseRatio() < 100, "    Retribution didn't reduce defense.");
     
     // First, check the logic of A->B
     testPassed &= validate(normalAB.defenderHPLoss > normalAB.attackerHPLoss, "    First strike didn't work properly for Cinder.");
@@ -114,6 +152,8 @@ public class TestCombatMods extends TestCase
 
     // Now do B->A
     testPassed &= validate(normalBA.defenderHPLoss > normalBA.attackerHPLoss, "    First strike didn't work properly for Venge.");
+    
+    testPassed &= validate(normalBA.defenderHPLoss < retribBA.defenderHPLoss, "    Venge didn't deal more damage with buffed offense.");
 
     testPassed &= validate(retribBA.attacker == infB, "    infB attacked, but isn't the attacker.");
     testPassed &= validate(retribBA.defender == infA, "    infA was attacked, but isn't the defender.");
@@ -122,6 +162,7 @@ public class TestCombatMods extends TestCase
     // Clean up
     testMap.removeUnit(infA);
     testMap.removeUnit(infB);
+    venge.initTurn(testMap);
 
     return testPassed;
   }
