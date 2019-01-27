@@ -25,7 +25,7 @@ public class LATasha1star extends Commander
     {
       if( um.chassis == ChassisEnum.AIR_HIGH || um.chassis == ChassisEnum.AIR_LOW )
       {
-        um.modifyDamageRatio(30);
+        um.modifyDamageRatio(40);
         um.modifyDefenseRatio(15);
       }
     }

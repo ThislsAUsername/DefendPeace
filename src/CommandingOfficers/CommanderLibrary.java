@@ -39,6 +39,7 @@ public class CommanderLibrary
     commanderList.add( GEEagle.getInfo() );
     commanderList.add( GEJess.getInfo() );
     commanderList.add( GEDrake.getInfo() );
+    commanderList.add( GEJavier.getInfo() );
     
     commanderList.add( YCGrimm.getInfo() );
     commanderList.add( YCKanbei.getInfo() );
