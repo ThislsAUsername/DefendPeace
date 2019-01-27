@@ -70,10 +70,12 @@ public class InputHandler
         break;
       case KeyEvent.VK_ENTER:
       case KeyEvent.VK_SPACE:
+      case KeyEvent.VK_Z:
         ia = InputAction.ENTER;
         break;
       case KeyEvent.VK_BACK_SPACE:
       case KeyEvent.VK_ESCAPE:
+      case KeyEvent.VK_X:
         ia = InputAction.BACK;
         break;
       case KeyEvent.VK_Q:
