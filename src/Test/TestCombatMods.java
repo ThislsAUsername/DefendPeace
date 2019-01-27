@@ -45,6 +45,7 @@ public class TestCombatMods extends TestCase
 
     boolean testPassed = true;
     testPassed &= validate(testBasicMod(), "  Basic combat mod test failed.");
+    testPassed &= validate(testIronWill(), "  Venge's Iron Will combat mod test failed.");
     testPassed &= validate(testRetribution(), "  Venge's Retribution combat mod test failed.");
     
     cinder.unregister();
@@ -83,6 +84,41 @@ public class TestCombatMods extends TestCase
     testMap.removeUnit(infPassive);
     testMap.removeUnit(bait);
     testMap.removeUnit(meaty);
+
+    return testPassed;
+  }
+
+  /** Test that combat works as a black box, but that Venge gets his way all the same. */
+  private boolean testIronWill()
+  {
+    // Add our test subjects
+    Unit infA = addUnit(testMap, cinder, UnitEnum.INFANTRY, 7, 3);
+    Unit infB = addUnit(testMap, venge, UnitEnum.INFANTRY, 7, 5);
+    
+    // Check our damage for each first strike pre-power...
+    BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
+
+    venge.modifyAbilityPower(42); // juice up
+    venge.getReadyAbilities().get(0).activate(testMap); // activate Iron WIll
+    
+    // ...and after power
+    BattleSummary retribAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
+    
+    // Check that Venge's Retribution works properly without breaking things (other than balance)
+    boolean testPassed = true;
+    testPassed &= validate(infB.model.getDefenseRatio() > 100, "    Retribution didn't buff defense.");
+    
+    // First, check the logic of A->B
+    testPassed &= validate(normalAB.defenderHPLoss > normalAB.attackerHPLoss, "    First strike didn't work properly for Cinder.");
+
+    testPassed &= validate(retribAB.attacker == infA, "    infA attacked, but isn't the attacker.");
+    testPassed &= validate(retribAB.defender == infB, "    infB was attacked, but isn't the defender.");
+    testPassed &= validate(retribAB.defenderHPLoss < retribAB.attackerHPLoss, "    Venge didn't defend better, or didn't get IronWill's buff.");
+
+    // Clean up
+    testMap.removeUnit(infA);
+    testMap.removeUnit(infB);
+    venge.initTurn(testMap);
 
     return testPassed;
   }
@@ -129,6 +165,7 @@ public class TestCombatMods extends TestCase
     // Clean up
     testMap.removeUnit(infA);
     testMap.removeUnit(infB);
+    venge.initTurn(testMap);
 
     return testPassed;
   }
