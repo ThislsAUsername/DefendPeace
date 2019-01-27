@@ -1,6 +1,5 @@
 package CommandingOfficers;
 
-import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COVisionModifier;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.Combat.BattleInstance.CombatContext;
@@ -99,7 +98,12 @@ public class IDSCyrus extends Commander
     protected void perform(MapMaster gameMap)
     {
       COcast.terrainDrain = 2;
-      COcast.addCOModifier(new COVisionModifier(1));
+      COVisionModifier sightMod = new COVisionModifier(1);
+      for(UnitModel um : myCommander.unitModels)
+      {
+        sightMod.addApplicableUnitModel(um);
+      }
+      myCommander.addCOModifier(sightMod);
     }
   }
 
@@ -120,7 +124,12 @@ public class IDSCyrus extends Commander
     {
       COcast.counterFirst = true;
       COcast.terrainDrain = 3;
-      COcast.addCOModifier(new COVisionModifier(2));
+      COVisionModifier sightMod = new COVisionModifier(2);
+      for(UnitModel um : myCommander.unitModels)
+      {
+        sightMod.addApplicableUnitModel(um);
+      }
+      myCommander.addCOModifier(sightMod);
     }
   }
   
