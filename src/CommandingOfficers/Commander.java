@@ -260,9 +260,9 @@ public class Commander extends GameEventListener
     return ready;
   }
 
-  public int[] getAbilityCosts()
+  public double[] getAbilityCosts()
   {
-    int[] costs = new int[myAbilities.size()];
+    double[] costs = new double[myAbilities.size()];
     for( int i = 0; i < myAbilities.size(); ++i )
     {
       costs[i] = myAbilities.get(i).getCost();
@@ -341,6 +341,9 @@ public class Commander extends GameEventListener
       power += myHPDealt / enemy.model.maxHP * enemy.model.getCost() / 2;
       // Add power based on HP damage dealt; rewards aggressiveness.
       power += myHPDealt * CHARGERATIO_HP;
+      
+      // Convert funds to ability power units
+      power /= CHARGERATIO_FUNDS;
 
       modifyAbilityPower(power);
     }

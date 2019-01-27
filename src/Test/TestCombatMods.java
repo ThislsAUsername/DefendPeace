@@ -131,7 +131,7 @@ public class TestCombatMods extends TestCase
     BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
     BattleSummary normalBA = CombatEngine.simulateBattleResults(infB, infA, testMap, 7, 4);
 
-    venge.modifyAbilityPower(Commander.CHARGERATIO_FUNDS*42); // juice up
+    venge.modifyAbilityPower(42); // juice up
     venge.getReadyAbilities().get(1).activate(testMap); // activate Retribution
     
     // ...and after power

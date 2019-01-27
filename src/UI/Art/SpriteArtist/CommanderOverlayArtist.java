@@ -99,13 +99,13 @@ public class CommanderOverlayArtist
   /**
    * Generate an ability-power bar for the given Commander at 1x size. The requester is responsible for applying any scale factors.
    */
-  public static BufferedImage buildCoPowerBar(Commander co, int[] abilityPoints, double currentPower, boolean leftSide)
+  public static BufferedImage buildCoPowerBar(Commander co, double[] abilityPoints, double currentPower, boolean leftSide)
   {
-    final double powerDrawScaleW = 4.0/Commander.CHARGERATIO_FUNDS;
+    final double powerDrawScaleW = 2.0;
     int slowAnimIndex = (animIndex/32) % 2;
 
     // Find the most expensive ability so we know how long to draw the bar.
-    int maxAP = 0;
+    double maxAP = 0;
     for( int i = 0; i < abilityPoints.length; ++i )
     {
       maxAP = (maxAP < abilityPoints[i]) ? abilityPoints[i] : maxAP;
@@ -128,8 +128,8 @@ public class CommanderOverlayArtist
     boolean atLeastOne = false;
     for( int i = 0; i < abilityPoints.length; ++i )
     {
-      int requiredPower = abilityPoints[i];
-      double diff = (requiredPower - currentPower)/Commander.CHARGERATIO_FUNDS;
+      double requiredPower = abilityPoints[i];
+      double diff = requiredPower - currentPower;
       atLeastOne |= (diff < 0);
       BufferedImage segment = (diff > 1) ? powerBarPieces.getFrame(0)  // empty
           : ((diff > 0.5) ? powerBarPieces.getFrame(1)                 // 1/3 full

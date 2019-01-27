@@ -644,9 +644,9 @@ public class SpriteLibrary
   }
 
   /** Draw and return an image with the CO's power bar. */
-  public static BufferedImage getCoOverlayPowerBar(Commander co, int maxAP, double currentAP, double powerDrawScaleW)
+  public static BufferedImage getCoOverlayPowerBar(Commander co, double maxAP, double currentAP, double pixelsPerPowerUnit)
   {
-    BufferedImage bar = SpriteLibrary.createDefaultBlankSprite((int) (maxAP*powerDrawScaleW), 5);
+    BufferedImage bar = SpriteLibrary.createDefaultBlankSprite((int) (maxAP*pixelsPerPowerUnit), 5);
     Graphics barGfx = bar.getGraphics();
 
     // Get the CO's colors
@@ -658,9 +658,9 @@ public class SpriteLibrary
     barGfx.setColor(palette[5]);                // Inside - empty
     barGfx.fillRect(0, 1, bar.getWidth(), 3);
     barGfx.setColor(palette[2]);                // Inside - full
-    barGfx.drawLine(0, 1, (int)(Math.floor(currentAP) * powerDrawScaleW), 1);
-    barGfx.drawLine(0, 2, (int)(currentAP * powerDrawScaleW), 2);
-    barGfx.drawLine(0, 3, (int)(Math.ceil(currentAP * powerDrawScaleW)), 3);
+    barGfx.drawLine(0, 1, (int)(Math.floor(currentAP) * pixelsPerPowerUnit), 1);
+    barGfx.drawLine(0, 2, (int)(currentAP * pixelsPerPowerUnit), 2);
+    barGfx.drawLine(0, 3, (int)(Math.ceil(currentAP * pixelsPerPowerUnit)), 3);
 
     return bar;
   }
