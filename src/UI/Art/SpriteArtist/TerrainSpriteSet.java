@@ -315,6 +315,7 @@ public class TerrainSpriteSet
       terrainObjects.add(TerrainType.HEADQUARTERS);
       terrainObjects.add(TerrainType.LAB);
       terrainObjects.add(TerrainType.MOUNTAIN);
+      terrainObjects.add(TerrainType.PILLAR);
     }
     return terrainObjects.contains(terrainType);
   }
@@ -377,7 +378,7 @@ public class TerrainSpriteSet
       terrainBases.put(TerrainType.GRASS, TerrainType.GRASS);
       terrainBases.put(TerrainType.RIVER, TerrainType.GRASS);
       terrainBases.put(TerrainType.ROAD, TerrainType.GRASS);
-      terrainBases.put(TerrainType.PIPE, TerrainType.GRASS);
+      terrainBases.put(TerrainType.PILLAR, TerrainType.GRASS);
       terrainBases.put(TerrainType.SILO, TerrainType.GRASS);
 
       terrainBases.put(TerrainType.BRIDGE, TerrainType.SHOAL);

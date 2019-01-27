@@ -71,15 +71,15 @@ public class TerrainType
   
   private static final int SILO_FLAGS = LAND;
   private static final int SILO_DEFENSE = 3;
-  private static final Color SILO_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
+  private static final Color SILO_COLOR = new Color(155, 155, 255);
   private static final String SILO_NAME = "SILO";
   public static final TerrainType SILO = new TerrainType( SILO_FLAGS, SILO_DEFENSE, SILO_COLOR, SILO_NAME );
   
-  private static final int PIPE_FLAGS = 0;
-  private static final int PIPE_DEFENSE = 0;
-  private static final Color PIPE_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
-  private static final String PIPE_NAME = "PIPE";
-  public static final TerrainType PIPE = new TerrainType( PIPE_FLAGS, PIPE_DEFENSE, PIPE_COLOR, PIPE_NAME );
+  private static final int PILLAR_FLAGS = 0;
+  private static final int PILLAR_DEFENSE = 0;
+  private static final Color PILLAR_COLOR = new Color(144, 104, 120);
+  private static final String PILLAR_NAME = "PILLAR";
+  public static final TerrainType PILLAR = new TerrainType( PILLAR_FLAGS, PILLAR_DEFENSE, PILLAR_COLOR, PILLAR_NAME );
 
   private static final int DUNES_FLAGS = LAND;
   private static final int DUNES_DEFENSE = 1;
@@ -162,7 +162,7 @@ public class TerrainType
 
   // List of all terrain types.
   public static final TerrainType[] TerrainTypeList = {
-    AIRPORT, BRIDGE, CITY, SILO, PIPE, DUNES, FACTORY, FOREST, GRASS, HEADQUARTERS, LAB, MOUNTAIN, REEF, RIVER, ROAD, SEA, SEAPORT, SHOAL
+    AIRPORT, BRIDGE, CITY, SILO, PILLAR, DUNES, FACTORY, FOREST, GRASS, HEADQUARTERS, LAB, MOUNTAIN, REEF, RIVER, ROAD, SEA, SEAPORT, SHOAL
   };
 
   @Override

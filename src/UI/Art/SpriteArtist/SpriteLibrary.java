@@ -171,9 +171,9 @@ public class SpriteLibrary
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/city_clear.png"), w * 2, h * 2);
     }
-    else if( terrainType == TerrainType.PIPE )
+    else if( terrainType == TerrainType.PILLAR )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/pipe_clear.png"), w, h);
+      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/pillar_clear.png"), w * 2, h * 2);
     }
     else if( terrainType == TerrainType.SILO )
     {
