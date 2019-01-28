@@ -418,7 +418,7 @@ public class SpriteLibrary
     UnitSpriteSet spriteSet;
     if( Commander.DEFAULT_SPRITE_KEY == faction )
     {
-      filestr = "res/unit/" + key.unitTypeKey.toString() + "_map.png";
+      filestr = "res/unit/" + key.unitTypeKey.toString().replaceAll("\\_", "-") + "_map.png";
       spriteSet = new UnitSpriteSet(loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
           getMapUnitColors(key.commanderKey.myColor));
     }
@@ -488,6 +488,9 @@ public class SpriteLibrary
   static Color skinligh2 = new Color(251,219,133);
   static Color skindark = new Color(216,128,80);
   
+  // Acid Rain
+  static Color ARskinlight = new Color(248,216,128);
+  
   // CI
   static Color beaklight = new Color(255,240,0);
   static Color beakdark = new Color(255,160,0);
@@ -534,6 +537,7 @@ public class SpriteLibrary
               tint.equals(skinlight) || 
               tint.equals(skinligh2) || 
               tint.equals(skindark) ||
+              tint.equals(ARskinlight) || 
               tint.equals(beaklight) ||
               tint.equals(beakdark) ||
               tint.equals(beakdar2) ||
