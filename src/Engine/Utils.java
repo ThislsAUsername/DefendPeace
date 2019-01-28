@@ -482,7 +482,7 @@ public class Utils
       String filestr = fileEntry.getName();
       if( !fileEntry.isDirectory() && filestr.contains(".gif") )
       {
-        String unitName = filestr.replace(facAbbrev, "").replace(".gif", "");
+        String unitName = filestr.replaceFirst(facAbbrev, "").replace(".gif", "");
         System.out.println("  " + unitName);
         ImageFrame[] frames = SpriteLibrary.loadAnimation(facInPath+"/"+filestr);
         try
