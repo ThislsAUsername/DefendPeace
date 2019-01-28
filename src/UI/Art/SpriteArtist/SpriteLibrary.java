@@ -17,6 +17,7 @@ import javax.swing.ImageIcon;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderLibrary;
+import Engine.XYCoord;
 import Terrain.Location;
 import Terrain.TerrainType;
 import UI.COSetupController;
@@ -480,6 +481,7 @@ public class SpriteLibrary
   {
     for( ImageFrame frame : frames )
     {
+      ArrayList<XYCoord> targets = new ArrayList<>();
       BufferedImage bi = frame.getImage();
       for( int x = 0; x < bi.getWidth(); ++x )
       {
@@ -510,14 +512,24 @@ public class SpriteLibrary
               )
              ) // don't recolor it
             setGray = false;
-          
+
           if( setGray && (Long.MAX_VALUE & bi.getRGB(x, y)) > 0 )
           {
-            int val = (( R + G + B )/3 +40) / 50;
-            if( val > 0 )
-              bi.setRGB(x, y, defaultMapColors[val - 1].getRGB());
+            targets.add(new XYCoord(x, y));
           }
         }
+      }
+      
+      for( XYCoord xyc : targets )
+      {
+        Color tint = new Color(bi.getRGB(xyc.xCoord, xyc.yCoord));
+        int R = tint.getRed();
+        int G = tint.getGreen();
+        int B = tint.getBlue();
+
+        int val = ((R + G + B) / 3 + 40) / 50;
+        if( val > 0 )
+          bi.setRGB(xyc.xCoord, xyc.yCoord, defaultMapColors[val - 1].getRGB());
       }
     }
     return frames;
