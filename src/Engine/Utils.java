@@ -450,6 +450,7 @@ public class Utils
       if( fileEntry.isDirectory() )
       {
         String faction = fileEntry.getName();
+        System.out.println("Now painting faction:\n" + faction);
         // Faction names always have spaces
         if( faction.contains(" ") )
         {
@@ -477,6 +478,7 @@ public class Utils
       if( !fileEntry.isDirectory() && filestr.contains(".gif") )
       {
         String unitName = filestr.replace(facAbbrev, "").replace(".gif", "");
+        System.out.println("  " + unitName);
         ImageFrame[] frames = SpriteLibrary.loadAnimation(facInPath+"/"+filestr);
         try
         {

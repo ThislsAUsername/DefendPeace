@@ -481,7 +481,9 @@ public class SpriteLibrary
   {
     for( ImageFrame frame : frames )
     {
-      ArrayList<XYCoord> targets = new ArrayList<>();
+      ArrayList<XYCoord> pixelsToRecolor = new ArrayList<>();
+      int avgBrightnessTotal = 0; 
+      
       BufferedImage bi = frame.getImage();
       for( int x = 0; x < bi.getWidth(); ++x )
       {
@@ -513,14 +515,25 @@ public class SpriteLibrary
              ) // don't recolor it
             setGray = false;
 
+          // Also, ignore transparent pixels
           if( setGray && (Long.MAX_VALUE & bi.getRGB(x, y)) > 0 )
           {
-            targets.add(new XYCoord(x, y));
+            pixelsToRecolor.add(new XYCoord(x, y));
+            avgBrightnessTotal += (R + G + B)/3;
           }
         }
       }
-      
-      for( XYCoord xyc : targets )
+
+      if( pixelsToRecolor.size() == 0 )
+      {
+        System.out.println("    no pixels to recolor");
+      }
+      else
+      {
+        int avgBrightness = avgBrightnessTotal / pixelsToRecolor.size();
+        System.out.println("    Frame brightness average: " + avgBrightness);
+      }
+      for( XYCoord xyc : pixelsToRecolor )
       {
         Color tint = new Color(bi.getRGB(xyc.xCoord, xyc.yCoord));
         int R = tint.getRed();
