@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -511,6 +512,9 @@ public class SpriteLibrary
     }
     avgGrey /= defaultMapColors.length;
     
+    Map<ImageFrame, ArrayList<XYCoord>> imageRecolorInfo = new HashMap<>();
+    ArrayList<Integer> avgBrightnesses = new ArrayList<>();
+    
     for( ImageFrame frame : frames )
     {
       ArrayList<XYCoord> pixelsToRecolor = new ArrayList<>();
@@ -556,8 +560,6 @@ public class SpriteLibrary
         }
       }
 
-      int adjustment = 0; 
-      
       if( pixelsToRecolor.size() == 0 )
       {
         System.out.println("    no pixels to recolor");
@@ -565,9 +567,27 @@ public class SpriteLibrary
       else
       {
         int avgBrightness = avgBrightnessTotal / pixelsToRecolor.size();
-        adjustment += avgGrey - avgBrightness;
-        System.out.println("    Adjusting frame brightness by: " + adjustment);
+        avgBrightnesses.add(avgBrightness);
+        System.out.println("    Average frame brightness: " + avgBrightness);
       }
+      imageRecolorInfo.put(frame, pixelsToRecolor);
+    }
+
+    int adjustment = 0, total = 0;
+    for( int avg : avgBrightnesses )
+    {
+      total += avg;
+    }
+    if( avgBrightnesses.size() > 0 )
+    {
+      adjustment += avgGrey - (total / avgBrightnesses.size());
+      System.out.println("    Adjusting frame brightness by: " + adjustment);
+    }
+
+    for (ImageFrame frame : imageRecolorInfo.keySet())
+    {
+      ArrayList<XYCoord> pixelsToRecolor = imageRecolorInfo.get(frame);
+      BufferedImage bi = frame.getImage();
       
       for( XYCoord xyc : pixelsToRecolor )
       {
