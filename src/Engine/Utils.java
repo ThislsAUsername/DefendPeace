@@ -464,27 +464,33 @@ public class Utils
         }
       }
     }
-    }
+  }
   
   public static void paintFaction(String facInPath, String facOutPath, String facAbbrev, boolean flip)
   {
+    final File folder = new File(facInPath);
     new File(facOutPath).mkdirs();
-    for (UnitEnum ue : UnitModel.UnitEnum.values())
+
+    for( final File fileEntry : folder.listFiles() )
     {
-      String filestr = (facInPath + "/" + facAbbrev + ue.toString().toLowerCase() + ".gif").replaceAll("\\_", "-");
-      ImageFrame[] frames = SpriteLibrary.loadAnimation(filestr);
-      try
+      String filestr = fileEntry.getName();
+      if( !fileEntry.isDirectory() && filestr.contains(".gif") )
       {
-        String fileOutStr = (facOutPath + "/" + ue.toString().toLowerCase() + "_map.png").replaceAll("\\-", "");
-        ImageIO.write(
-            SpriteLibrary.joinBufferedImage(SpriteLibrary.paintItGray(frames), SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize, flip)
-            , "png", new File(fileOutStr));
-      }
-      catch (IOException e)
-      {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        String unitName = filestr.replace(facAbbrev, "").replace(".gif", "");
+        ImageFrame[] frames = SpriteLibrary.loadAnimation(facInPath+"/"+filestr);
+        try
+        {
+          String fileOutStr = (facOutPath + "/" + unitName + "_map.png").replaceAll("\\-", "");
+          ImageIO.write(
+              SpriteLibrary.joinBufferedImage(SpriteLibrary.paintItGray(frames), SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize, flip),
+              "png", new File(fileOutStr));
+        }
+        catch (IOException e)
+        {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
       }
     }
-    }
+  }
 }
