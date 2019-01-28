@@ -2,17 +2,26 @@ package Engine;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Queue;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+
+import javax.imageio.ImageIO;
 
 import CommandingOfficers.Commander;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapInfo;
 import Terrain.TerrainType;
+import UI.Art.SpriteArtist.SpriteLibrary;
+import UI.Art.SpriteArtist.UnitSpriteSet;
+import UI.Art.SpriteArtist.SpriteUIUtils.ImageFrame;
 import Units.Unit;
+import Units.UnitModel;
+import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
 
 public class Utils
@@ -409,17 +418,17 @@ public class Utils
     // If it fails, we don't need to do anything in the catch{} since we just won't have anything in our list.
     try
     {
-      final File folder = new File("res/unit");
+      final File folder = new File("res/unit/");
 
       for( final File fileEntry : folder.listFiles() )
       {
         if( fileEntry.isDirectory() )
         {
-          String factionName = fileEntry.getName();
+          String faction = fileEntry.getName();
           // Faction names always have spaces
-          if( factionName.contains(" ") )
+          if( faction.contains(" ") )
           {
-            importFactions.add(factionName);
+            importFactions.add(faction);
           }
         }
       }
@@ -431,4 +440,51 @@ public class Utils
 
     return importFactions.toArray(new String[importFactions.size()]);
   }
+
+  public static void paintAllFactions(String inPath, String outPath, boolean flip)
+  {
+    final File folder = new File(inPath);
+
+    for( final File fileEntry : folder.listFiles() )
+    {
+      if( fileEntry.isDirectory() )
+      {
+        String faction = fileEntry.getName();
+        // Faction names always have spaces
+        if( faction.contains(" ") )
+        {
+          Matcher matcher = SpriteLibrary.factionNameToKey.matcher(faction);
+          String facAbbrev;
+          // if the faction is a real faction, pull out the first two initials, otherwise use the whole faction as key
+          if( matcher.find() )
+            facAbbrev = (matcher.group(1) + matcher.group(2)).toLowerCase();
+          else
+            facAbbrev = faction;
+          paintFaction(inPath + faction, outPath + faction, facAbbrev, flip);
+        }
+      }
+    }
+    }
+  
+  public static void paintFaction(String facInPath, String facOutPath, String facAbbrev, boolean flip)
+  {
+    new File(facOutPath).mkdirs();
+    for (UnitEnum ue : UnitModel.UnitEnum.values())
+    {
+      String filestr = (facInPath + "/" + facAbbrev + ue.toString().toLowerCase() + ".gif").replaceAll("\\_", "-");
+      ImageFrame[] frames = SpriteLibrary.loadAnimation(filestr);
+      try
+      {
+        String fileOutStr = (facOutPath + "/" + ue.toString().toLowerCase() + "_map.png").replaceAll("\\-", "");
+        ImageIO.write(
+            SpriteLibrary.joinBufferedImage(SpriteLibrary.paintItGray(frames), SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize, flip)
+            , "png", new File(fileOutStr));
+      }
+      catch (IOException e)
+      {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+    }
 }

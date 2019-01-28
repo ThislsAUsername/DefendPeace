@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.imageio.ImageReader;
-import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.metadata.IIOMetadataNode;
 
 import org.w3c.dom.NamedNodeMap;

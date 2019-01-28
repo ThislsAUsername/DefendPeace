@@ -85,7 +85,7 @@ public class SpriteLibrary
   // TODO: Consider templatizing the key types, and then combining these two maps.
   private static HashMap<UnitSpriteSetKey, UnitSpriteSet> mapUnitSpriteSetMap = new HashMap<UnitSpriteSetKey, UnitSpriteSet>();
 
-  private static Pattern factionNameToKey = Pattern.compile("(.).*\\s(.).*");
+  public static Pattern factionNameToKey = Pattern.compile("(.).*\\s(.).*");
 
   // Sprites to hold the images for drawing tentative moves on the map.
   private static Sprite moveCursorLineSprite = null;
@@ -277,7 +277,7 @@ public class SpriteLibrary
     return bi;
   }
 
-  private static ImageFrame[] loadAnimation(String filename)
+  public static ImageFrame[] loadAnimation(String filename)
   {
     ImageFrame[] frames = null;
     try
@@ -430,16 +430,6 @@ public class SpriteLibrary
       filestr = ("res/unit/" + faction + "/" + facAbbrev + key.unitTypeKey.toString().toLowerCase() + ".gif").replaceAll("\\_", "-");
       ImageFrame[] frames = loadAnimation(filestr);
       spriteSet = new UnitSpriteSet(frames, baseSpriteSize, baseSpriteSize, getMapUnitColors(key.commanderKey.myColor));
-      try
-      {
-        String fileOutStr = ("res/unit/grey/" + faction + "/" + key.unitTypeKey.toString().toLowerCase() + "_map.png").replaceAll("\\-","");
-        ImageIO.write(joinBufferedImage(paintItGray(frames), baseSpriteSize, baseSpriteSize), "png", new File(fileOutStr));
-      }
-      catch (IOException e)
-      {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
     }
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
@@ -450,7 +440,7 @@ public class SpriteLibrary
    * you can add a orientation parameter to control direction
    * you can use a array to join more BufferedImage
    */
-  public static BufferedImage joinBufferedImage(ImageFrame[] frames, int w, int h)
+  public static BufferedImage joinBufferedImage(ImageFrame[] frames, int w, int h, boolean flipImage)
   {
     //do some calculations first
     int offset = 0;
@@ -459,7 +449,6 @@ public class SpriteLibrary
     //create a new buffer and draw two image into the new image
     BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
     Graphics g = newImage.getGraphics();
-    boolean flipImage = false;
     for( int i = 0; i < frames.length; i++ )
     {
       if( flipImage )
@@ -510,9 +499,9 @@ public class SpriteLibrary
               tint.equals(beakdar2) ||
               tint.equals(visor) ||
               // or JS's plume
-//              tint.equals(plume1) ||
-//              tint.equals(plume2) ||
-//              tint.equals(plume3) ||
+              tint.equals(plume1) ||
+              tint.equals(plume2) ||
+              tint.equals(plume3) ||
               // ...or grey
               (
               Math.abs(R - G) < 30 &&

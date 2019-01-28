@@ -34,6 +34,12 @@ public class Driver implements ActionListener, KeyListener
 
   private Driver()
   {
+    String base = "res/unit/";
+    String baseR = "res/unit/flippers/";
+    String baseG = "res/unit/grey/";
+    Utils.paintAllFactions(base,baseG,false);
+    Utils.paintAllFactions(baseR,baseG,true);
+    
     // At game startup, we are at the main menu. Set up controller/viewer
     MainUIController mc = new MainUIController();
     gameGraphics = new SpriteEngine(); // Choose graphics engine based on config file, etc?
