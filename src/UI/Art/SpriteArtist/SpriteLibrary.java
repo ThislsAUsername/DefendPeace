@@ -501,6 +501,16 @@ public class SpriteLibrary
   static Color plume3 = new Color(215,54,54);
   public static ImageFrame[] paintItGray(ImageFrame[] frames, Set<Color> palette)
   {
+    int avgGrey = 0;
+    for( Color g : defaultMapColors )
+    {
+      int R = g.getRed();
+      int G = g.getGreen();
+      int B = g.getBlue();
+      avgGrey += (R + G + B) / 3;
+    }
+    avgGrey /= defaultMapColors.length;
+    
     for( ImageFrame frame : frames )
     {
       ArrayList<XYCoord> pixelsToRecolor = new ArrayList<>();
@@ -546,6 +556,8 @@ public class SpriteLibrary
         }
       }
 
+      int adjustment = 0; 
+      
       if( pixelsToRecolor.size() == 0 )
       {
         System.out.println("    no pixels to recolor");
@@ -553,7 +565,8 @@ public class SpriteLibrary
       else
       {
         int avgBrightness = avgBrightnessTotal / pixelsToRecolor.size();
-        System.out.println("    Frame brightness average: " + avgBrightness);
+        adjustment += avgGrey - avgBrightness;
+        System.out.println("    Adjusting frame brightness by: " + adjustment);
       }
       
       for( XYCoord xyc : pixelsToRecolor )
@@ -564,9 +577,10 @@ public class SpriteLibrary
         int G = tint.getGreen();
         int B = tint.getBlue();
 
-        int val = ((R + G + B) / 3 + 40) / 50;
-        if( val > 0 )
-          bi.setRGB(xyc.xCoord, xyc.yCoord, defaultMapColors[val - 1].getRGB());
+        int adjustedHue = (R + G + B) / 3 + adjustment;
+        int index = (int) (adjustedHue / (255.0 / defaultMapColors.length));
+        index = Math.max(0, Math.min(defaultMapColors.length - 1, index));
+        bi.setRGB(xyc.xCoord, xyc.yCoord, defaultMapColors[index].getRGB());
       }
     }
     return frames;
