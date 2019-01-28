@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -460,6 +462,26 @@ public class SpriteLibrary
     return newImage;
   }
 
+  public static BufferedImage createPaletteImage(Set<Color> palette, int w, int h)
+  {
+    //do some calculations first
+    int offset = 0;
+    int width = palette.size() * (w + offset);
+    int height = h;
+    //create a new buffer and draw two image into the new image
+    BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    Graphics g = newImage.getGraphics();
+    
+    Iterator<Color> iter = palette.iterator();
+    
+    for( int i = 0; i < palette.size(); i++ )
+    {
+      g.setColor(iter.next());
+      g.fillRect(i * (w + offset), 0, w, h);
+    }
+    return newImage;
+  }
+
   // Hunams
   static Color skinlight = new Color(248,216,128);
   static Color skinligh2 = new Color(251,219,133);
@@ -477,7 +499,7 @@ public class SpriteLibrary
   static Color plume1 = new Color(255,62,62);
   static Color plume2 = new Color(142,32,32);
   static Color plume3 = new Color(215,54,54);
-  public static ImageFrame[] paintItGray(ImageFrame[] frames)
+  public static ImageFrame[] paintItGray(ImageFrame[] frames, Set<Color> palette)
   {
     for( ImageFrame frame : frames )
     {
@@ -533,9 +555,11 @@ public class SpriteLibrary
         int avgBrightness = avgBrightnessTotal / pixelsToRecolor.size();
         System.out.println("    Frame brightness average: " + avgBrightness);
       }
+      
       for( XYCoord xyc : pixelsToRecolor )
       {
         Color tint = new Color(bi.getRGB(xyc.xCoord, xyc.yCoord));
+        palette.add(tint);
         int R = tint.getRed();
         int G = tint.getGreen();
         int B = tint.getBlue();

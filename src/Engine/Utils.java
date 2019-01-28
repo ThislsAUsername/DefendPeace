@@ -1,12 +1,15 @@
 package Engine;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Queue;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.regex.Matcher;
 
 import javax.imageio.ImageIO;
@@ -472,6 +475,8 @@ public class Utils
     final File folder = new File(facInPath);
     new File(facOutPath).mkdirs();
 
+    Set<Color> palette = new HashSet<>();
+
     for( final File fileEntry : folder.listFiles() )
     {
       String filestr = fileEntry.getName();
@@ -484,7 +489,7 @@ public class Utils
         {
           String fileOutStr = (facOutPath + "/" + unitName + "_map.png").replaceAll("\\-", "");
           ImageIO.write(
-              SpriteLibrary.joinBufferedImage(SpriteLibrary.paintItGray(frames), SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize, flip),
+              SpriteLibrary.joinBufferedImage(SpriteLibrary.paintItGray(frames, palette), SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize, flip),
               "png", new File(fileOutStr));
         }
         catch (IOException e)
@@ -493,6 +498,17 @@ public class Utils
           e.printStackTrace();
         }
       }
+    }
+
+    try
+    {
+      String fileOutStr = (facOutPath + "/palette.png");
+      ImageIO.write(SpriteLibrary.createPaletteImage(palette, 3, 3), "png", new File(fileOutStr));
+    }
+    catch (IOException e)
+    {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
   }
 }
