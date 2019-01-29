@@ -418,25 +418,13 @@ public class SpriteLibrary
     System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString());
     String filestr;
     UnitSpriteSet spriteSet;
-    if( Commander.DEFAULT_SPRITE_KEY == faction )
+    filestr = "res/unit/" + key.unitTypeKey.toString().replaceAll("\\_", "") + "_map.png";
+    if( Commander.DEFAULT_SPRITE_KEY != faction )
     {
-      filestr = "res/unit/" + key.unitTypeKey.toString().replaceAll("\\_", "-") + "_map.png";
-      spriteSet = new UnitSpriteSet(loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
-          getMapUnitColors(key.commanderKey.myColor));
+      filestr = ("res/unit/grey/" + faction + "/" + key.unitTypeKey.toString().toLowerCase()).replaceAll("\\_", "")+ "_map.png";
     }
-    else
-    {
-      Matcher matcher = factionNameToKey.matcher(faction);
-      String facAbbrev;
-      // if the faction is a real faction, pull out the first two initials, otherwise use the whole faction as key
-      if( matcher.find() )
-        facAbbrev = (matcher.group(1) + matcher.group(2)).toLowerCase();
-      else
-        facAbbrev = faction;
-      filestr = ("res/unit/" + faction + "/" + facAbbrev + key.unitTypeKey.toString().toLowerCase() + ".gif").replaceAll("\\_", "-");
-      ImageFrame[] frames = loadAnimation(filestr);
-      spriteSet = new UnitSpriteSet(frames, baseSpriteSize, baseSpriteSize, getMapUnitColors(key.commanderKey.myColor));
-    }
+    spriteSet = new UnitSpriteSet(loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
+        getMapUnitColors(key.commanderKey.myColor));
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
 
@@ -467,9 +455,9 @@ public class SpriteLibrary
 
   public static BufferedImage createPaletteImage(Set<Color> paletteSet, int w, int h)
   {
-    Color[] palette = paletteSet.toArray(new Color[0]);
+    ArrayList<Color> palette = new ArrayList<Color>(paletteSet);
 
-    Arrays.sort(palette, new Comparator<Color>()
+    palette.sort(new Comparator<Color>()
     {
       @Override
       public int compare(Color o1, Color o2)
@@ -480,16 +468,16 @@ public class SpriteLibrary
 
     //do some calculations first
     int offset = 0;
-    int width = palette.length * (w + offset);
+    int width = palette.size() * (w + offset);
     int height = h;
-    //create a new buffer and draw two image into the new image
+
     BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
     Graphics g = newImage.getGraphics();
-
-    for( int i = 0; i < palette.length; i++ )
+    
+    for( int x = 0; x < palette.size(); x++ )
     {
-      g.setColor(palette[i]);
-      g.fillRect(i * (w + offset), 0, w, h);
+      g.setColor(palette.get(x));
+      g.fillRect(x * (w + offset), 0, w, h);
     }
     return newImage;
   }

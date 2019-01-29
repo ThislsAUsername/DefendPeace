@@ -77,10 +77,6 @@ public class COSetupController implements IController
           Commander co = CommanderLibrary.makeCommander(coList.get(coSelectors[i].getSelectionNormalized()),
               SpriteLibrary.coColorList[colorSelectors[i].getSelectionNormalized()], spriteSetKeys[spriteSelectors[i].getSelectionNormalized()]);
           gameBuilder.addCO(co);
-          for (UnitEnum ue : UnitModel.UnitEnum.values()) {
-          UnitSpriteSetKey key = UnitSpriteSetKey.instance(ue, co);
-          SpriteLibrary.createMapUnitSpriteSet(key);
-          }
         }
 
         // Build the CO list and the new map and create the game instance.

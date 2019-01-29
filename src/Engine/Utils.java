@@ -411,35 +411,11 @@ public class Utils
     return industries;
   }
 
+  static ArrayList<String> importFactions = new ArrayList<String>();
   public static String[] fetchFactionNames()
   {
-    ArrayList<String> importFactions = new ArrayList<String>();
 
-    importFactions.add(Commander.DEFAULT_SPRITE_KEY);
-
-    // This try{} is to safeguard us from exceptions if the res/unit folder doesn't exist.
-    // If it fails, we don't need to do anything in the catch{} since we just won't have anything in our list.
-    try
-    {
-      final File folder = new File("res/unit/");
-
-      for( final File fileEntry : folder.listFiles() )
-      {
-        if( fileEntry.isDirectory() )
-        {
-          String faction = fileEntry.getName();
-          // Faction names always have spaces
-          if( faction.contains(" ") )
-          {
-            importFactions.add(faction);
-          }
-        }
-      }
-    }
-    catch (NullPointerException e)
-    {
-      System.out.println("WARNING: res/map directory does not exist.");
-    }
+//    importFactions.add(Commander.DEFAULT_SPRITE_KEY);
 
     return importFactions.toArray(new String[importFactions.size()]);
   }
@@ -457,6 +433,7 @@ public class Utils
         // Faction names always have spaces
         if( faction.contains(" ") )
         {
+          importFactions.add(faction);
           Matcher matcher = SpriteLibrary.factionNameToKey.matcher(faction);
           String facAbbrev;
           // if the faction is a real faction, pull out the first two initials, otherwise use the whole faction as key
@@ -470,7 +447,7 @@ public class Utils
           try
           {
             String fileOutStr = ("res/unit/grey/" + matcher.group(1) +".png");
-            ImageIO.write(SpriteLibrary.createPaletteImage(palette, 1, 1), "png", new File(fileOutStr));
+            ImageIO.write(SpriteLibrary.createPaletteImage(palette, 77, 77), "png", new File(fileOutStr));
           }
           catch (IOException e)
           {
