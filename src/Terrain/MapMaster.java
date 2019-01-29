@@ -33,9 +33,11 @@ public class MapMaster extends GameMap
     }
 
     // Print a warning if the number of Commanders we have does not match the number the map expects.
-    if( COs.length != mapInfo.COProperties.length )
+    if( COs.length != mapInfo.COProperties.length ||
+      ( mapInfo.mapUnits.size() > 0 && COs.length != mapInfo.mapUnits.size() ) )
     {
       System.out.println("Warning! Wrong number of COs specified for map " + mapInfo.mapName);
+      initOK = false;
     }
     // Assign properties according to MapInfo's direction.
     for( int co = 0; co < mapInfo.COProperties.length && co < COs.length; ++co )
@@ -72,7 +74,7 @@ public class MapMaster extends GameMap
           System.out.println("Warning! CO specified as owner of an uncapturable location in map " + mapInfo.mapName);
         }
       }
-      
+
       if( mapInfo.mapUnits.size() > co )
       {
         Map<XYCoord, UnitEnum> unitSet = mapInfo.mapUnits.get(co);
