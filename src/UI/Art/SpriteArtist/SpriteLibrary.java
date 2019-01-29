@@ -466,6 +466,32 @@ public class SpriteLibrary
       }
     });
 
+    // Delete colors until we get to the proper number
+    int lastColor = Color.black.getRed() + Color.black.getGreen() + Color.black.getBlue();
+    int diff = 10;
+    int i = 0;
+    while (palette.size() > 6)
+    {
+      for( ; i < palette.size(); i++ )
+      {
+        Color c = palette.get(i);
+        if( diff < Math.abs(lastColor - c.getRed() - c.getGreen() - c.getBlue()) )
+        {
+          lastColor = c.getRGB();
+        }
+        else
+        {
+          palette.remove(i);
+          break;
+        }
+      }
+      if( i >= palette.size() )
+      {
+        i = 0;
+        diff++;
+      }
+    }
+
     //do some calculations first
     int offset = 0;
     int width = palette.size() * (w + offset);
@@ -547,9 +573,9 @@ public class SpriteLibrary
               tint.equals(plume3) ||
               // ...or grey
               (
-              Math.abs(R - G) < 30 &&
-              Math.abs(R - B) < 30 &&
-              Math.abs(G - B) < 30
+              Math.abs(R - G) < 20 &&
+              Math.abs(R - B) < 20 &&
+              Math.abs(G - B) < 20
               )
              ) // don't recolor it
             setGray = false;
