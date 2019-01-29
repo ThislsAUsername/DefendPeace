@@ -461,16 +461,28 @@ public class Utils
           String facAbbrev;
           // if the faction is a real faction, pull out the first two initials, otherwise use the whole faction as key
           if( matcher.find() )
-            facAbbrev = (matcher.group(1) + matcher.group(2)).toLowerCase();
+            facAbbrev = (("" + matcher.group(1).charAt(0)) + matcher.group(2).charAt(0)).toLowerCase();
           else
             facAbbrev = faction;
-          paintFaction(inPath + faction, outPath + faction, facAbbrev, flip);
+          
+          Set<Color> palette = paintFaction(inPath + faction, outPath + faction, facAbbrev, flip);
+
+          try
+          {
+            String fileOutStr = ("res/unit/grey/" + matcher.group(1) +".png");
+            ImageIO.write(SpriteLibrary.createPaletteImage(palette, 1, 1), "png", new File(fileOutStr));
+          }
+          catch (IOException e)
+          {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
         }
       }
     }
   }
   
-  public static void paintFaction(String facInPath, String facOutPath, String facAbbrev, boolean flip)
+  public static Set<Color> paintFaction(String facInPath, String facOutPath, String facAbbrev, boolean flip)
   {
     final File folder = new File(facInPath);
     new File(facOutPath).mkdirs();
@@ -500,15 +512,6 @@ public class Utils
       }
     }
 
-    try
-    {
-      String fileOutStr = (facOutPath + "/" + facAbbrev + "palette.png");
-      ImageIO.write(SpriteLibrary.createPaletteImage(palette, 3, 3), "png", new File(fileOutStr));
-    }
-    catch (IOException e)
-    {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    return palette;
   }
 }

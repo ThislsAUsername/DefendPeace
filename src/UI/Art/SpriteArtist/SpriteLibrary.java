@@ -6,6 +6,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -89,7 +91,7 @@ public class SpriteLibrary
   // TODO: Consider templatizing the key types, and then combining these two maps.
   private static HashMap<UnitSpriteSetKey, UnitSpriteSet> mapUnitSpriteSetMap = new HashMap<UnitSpriteSetKey, UnitSpriteSet>();
 
-  public static Pattern factionNameToKey = Pattern.compile("(.).*\\s(.).*");
+  public static Pattern factionNameToKey = Pattern.compile("(.+)\\s(.+)");
 
   // Sprites to hold the images for drawing tentative moves on the map.
   private static Sprite moveCursorLineSprite = null;
@@ -463,21 +465,30 @@ public class SpriteLibrary
     return newImage;
   }
 
-  public static BufferedImage createPaletteImage(Set<Color> palette, int w, int h)
+  public static BufferedImage createPaletteImage(Set<Color> paletteSet, int w, int h)
   {
+    Color[] palette = paletteSet.toArray(new Color[0]);
+
+    Arrays.sort(palette, new Comparator<Color>()
+    {
+      @Override
+      public int compare(Color o1, Color o2)
+      {
+        return o1.getRGB() - o2.getRGB();
+      }
+    });
+
     //do some calculations first
     int offset = 0;
-    int width = palette.size() * (w + offset);
+    int width = palette.length * (w + offset);
     int height = h;
     //create a new buffer and draw two image into the new image
     BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
     Graphics g = newImage.getGraphics();
-    
-    Iterator<Color> iter = palette.iterator();
-    
-    for( int i = 0; i < palette.size(); i++ )
+
+    for( int i = 0; i < palette.length; i++ )
     {
-      g.setColor(iter.next());
+      g.setColor(palette[i]);
       g.fillRect(i * (w + offset), 0, w, h);
     }
     return newImage;
