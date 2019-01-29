@@ -502,7 +502,7 @@ public class Utils
 
     try
     {
-      String fileOutStr = (facOutPath + "/palette.png");
+      String fileOutStr = (facOutPath + "/" + facAbbrev + "palette.png");
       ImageIO.write(SpriteLibrary.createPaletteImage(palette, 3, 3), "png", new File(fileOutStr));
     }
     catch (IOException e)
