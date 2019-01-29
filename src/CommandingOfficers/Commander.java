@@ -54,7 +54,7 @@ public class Commander extends GameEventListener
   public Color myColor;
   public static final int DEFAULTSTARTINGMONEY = 0;
   public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
-  public static final int CHARGERATIO_HP = 90; // quantity of HP damage dealt to equal 1 unit of power charge
+  public static final int CHARGERATIO_HP = 100; // Funds value of 1 HP damage dealt, for the purpose of power charge
   public int money = 0;
   public int incomePerCity = 1000;
   public int team = -1;
@@ -260,9 +260,9 @@ public class Commander extends GameEventListener
     return ready;
   }
 
-  public int[] getAbilityCosts()
+  public double[] getAbilityCosts()
   {
-    int[] costs = new int[myAbilities.size()];
+    double[] costs = new double[myAbilities.size()];
     for( int i = 0; i < myAbilities.size(); ++i )
     {
       costs[i] = myAbilities.get(i).getCost();
@@ -333,13 +333,17 @@ public class Commander extends GameEventListener
     // Do nothing if we're not involved
     if( minion != null && enemy != null )
     {
-      double power = 0;
+      double power = 0; // value in funds of the charge we're getting
+      
       // Add up the funds value of the damage done to both participants.
       power += myHPLoss / minion.model.maxHP * minion.model.getCost();
       // The damage we deal is worth half as much as the damage we take, to help powers be a comeback mechanic.
       power += myHPDealt / enemy.model.maxHP * enemy.model.getCost() / 2;
-      power /= CHARGERATIO_FUNDS; // Turn funds into units of power
-      power += myHPDealt / CHARGERATIO_HP; // Add power based on HP damage dealt; rewards aggressiveness.
+      // Add power based on HP damage dealt; rewards aggressiveness.
+      power += myHPDealt * CHARGERATIO_HP;
+      
+      // Convert funds to ability power units
+      power /= CHARGERATIO_FUNDS;
 
       modifyAbilityPower(power);
     }
