@@ -2,12 +2,10 @@ package AI;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -649,8 +647,7 @@ public class Muriel implements AIController
 
       // Go through the list and see what we can build, in order.
       Iterator<UnitModel> modelIter = orderedCounters.iterator();
-      UnitModel idealCounter = modelIter.next();
-      for( ; modelIter.hasNext(); idealCounter = modelIter.next() )
+      for( UnitModel idealCounter = modelIter.next(); modelIter.hasNext(); idealCounter = modelIter.next() )
       {
         log(String.format("  Would like to build %s", idealCounter));
 
@@ -732,63 +729,6 @@ public class Muriel implements AIController
     public int compareTo(ModelValuePair other)
     {
       return (int)((other.value - value)*100);
-    }
-  }
-
-  /**
-   * Sort units by quantity in ascending order.
-   */
-  private static class UnitQuantityComparator implements Comparator<Entry<UnitModel, Double>>
-  {
-    @Override
-    public int compare(Entry<UnitModel, Double> entry1, Entry<UnitModel, Double> entry2)
-    {
-      double diff = entry1.getValue() - entry2.getValue();
-      return (int)(diff*10); // Multiply by 10 since we return an int, but don't want to lose the decimal-level discrimination.
-    }
-  }
-
-  /**
-   * Arrange UnitModels according to their effectiveness against a configured UnitModel.
-   * UnitModels that will be worse against 
-   */
-  private static class UnitMatchupComparator implements Comparator<UnitModel>
-  {
-    /**
-     *  DAMAGE_RATIO will sort based on how effective each unitType is against targetType.
-     *  COST_RATIO will sort based on how cost-effective each unitType is against targetType.
-     *  One is more useful if you have fielded units; the other is more useful if you still need to build them.
-     */
-    public enum ComparisonType { DAMAGE_RATIO, COST_RATIO };
-
-    UnitModel targetModel;
-    UnitEffectivenessMap myUem;
-    ComparisonType myComparisonType;
-
-    public UnitMatchupComparator(UnitModel targetType, UnitEffectivenessMap uem, ComparisonType compareType)
-    {
-      targetModel = targetType;
-      myUem = uem;
-      myComparisonType = compareType;
-    }
-
-    @Override
-    public int compare(UnitModel model1, UnitModel model2)
-    {
-      double eff1 = 0;
-      double eff2 = 0;
-      if( myComparisonType == ComparisonType.DAMAGE_RATIO )
-      {
-        eff1 = myUem.get(new UnitModelPair(model1, targetModel)).damageRatio;
-        eff2 = myUem.get(new UnitModelPair(model2, targetModel)).damageRatio;
-      }
-      else if( myComparisonType == ComparisonType.COST_RATIO )
-      {
-        eff1 = myUem.get(new UnitModelPair(model1, targetModel)).costEffectivenessRatio;
-        eff2 = myUem.get(new UnitModelPair(model2, targetModel)).costEffectivenessRatio;
-      }
-
-      return (eff1 < eff2)? -1 : ((eff1 > eff2)? 1 : 0);
     }
   }
 
