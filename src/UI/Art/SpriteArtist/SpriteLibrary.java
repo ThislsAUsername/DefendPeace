@@ -452,32 +452,58 @@ public class SpriteLibrary
     }
     return newImage;
   }
+  
+  public static double getGreyDiff(Color c)
+  {
+    int R = c.getRed();
+    int G = c.getGreen();
+    int B = c.getBlue();
+    int total = R + G + B;
+    double avg = total/3.0;
+    double totalDiff = Math.abs(R-avg) +Math.abs(G-avg) +Math.abs(B-avg);
+    return avg*100/(totalDiff+1);
+    }
+  
+  // stolen from https://stackoverflow.com/questions/11456981/sorting-list-by-color-java
+  public static double colorDistance(Color c1, Color c2) {
+    double rmean = (c1.getRed() + c2.getRed()) / 2;
+    int r = c1.getRed() - c2.getRed();
+    int g = c1.getGreen() - c2.getGreen();
+    int b = c1.getBlue() - c2.getBlue();
+    double weightR = 2 + rmean / 256;
+    double weightG = 4.0;
+    double weightB = 2 + (255 - rmean) / 256;
+    return Math.sqrt(weightR * r * r + weightG * g * g + weightB * b * b);
+}
 
   public static BufferedImage createPaletteImage(Set<Color> paletteSet, int w, int h)
   {
     ArrayList<Color> palette = new ArrayList<Color>(paletteSet);
 
+    // sort by greyness, so we cull the grayest things first
     palette.sort(new Comparator<Color>()
     {
       @Override
       public int compare(Color o1, Color o2)
       {
-        return o1.getRGB() - o2.getRGB();
+        double o1Diff = getGreyDiff(o1);
+        double o2Diff = getGreyDiff(o2);
+        return (int) (o1Diff - o2Diff);
       }
     });
 
     // Delete colors until we get to the proper number
-    int lastColor = Color.black.getRed() + Color.black.getGreen() + Color.black.getBlue();
-    int diff = 10;
+    Color lastColor = Color.black;
+    int diff = 1;
     int i = 0;
     while (palette.size() > 6)
     {
       for( ; i < palette.size(); i++ )
       {
         Color c = palette.get(i);
-        if( diff < Math.abs(lastColor - c.getRed() - c.getGreen() - c.getBlue()) )
+        if( diff < colorDistance(lastColor, c) )
         {
-          lastColor = c.getRGB();
+          lastColor = c;
         }
         else
         {
@@ -491,8 +517,17 @@ public class SpriteLibrary
         diff++;
       }
     }
-
-    //do some calculations first
+    
+    // sort by brightness
+    palette.sort(new Comparator<Color>()
+    {
+      @Override
+      public int compare(Color o1, Color o2)
+      {
+        return (int) (colorDistance(o1, Color.black) - colorDistance(o2, Color.black));
+      }
+    });
+    
     int offset = 0;
     int width = palette.size() * (w + offset);
     int height = h;
