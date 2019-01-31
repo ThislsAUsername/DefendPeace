@@ -663,8 +663,12 @@ public class SpriteLibrary
 
         int adjustedHue = (R + G + B) / 3 + adjustment;
         int index = (int) (adjustedHue / (255.0 / defaultMapColors.length));
-        index = Math.max(0, Math.min(defaultMapColors.length - 1, index));
-        bi.setRGB(xyc.xCoord, xyc.yCoord, defaultMapColors[index].getRGB());
+        if (index < 0)
+          bi.setRGB(xyc.xCoord, xyc.yCoord, Color.black.getRGB());
+        else if (index >= defaultMapColors.length - 1)
+          bi.setRGB(xyc.xCoord, xyc.yCoord, Color.white.getRGB());
+        else
+          bi.setRGB(xyc.xCoord, xyc.yCoord, defaultMapColors[index].getRGB());
       }
     }
     return frames;
