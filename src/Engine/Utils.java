@@ -433,7 +433,6 @@ public class Utils
         // Faction names always have spaces
         if( faction.contains(" ") )
         {
-          importFactions.add(faction);
           Matcher matcher = SpriteLibrary.factionNameToKey.matcher(faction);
           String facAbbrev;
           // if the faction is a real faction, pull out the first two initials, otherwise use the whole faction as key
@@ -441,12 +440,13 @@ public class Utils
             facAbbrev = (("" + matcher.group(1).charAt(0)) + matcher.group(2).charAt(0)).toLowerCase();
           else
             facAbbrev = faction;
-          
-          Set<Color> palette = paintFaction(inPath + faction, outPath + faction, facAbbrev, flip);
+
+          importFactions.add(matcher.group(2));
+          Set<Color> palette = paintFaction(inPath + faction, outPath + matcher.group(2), facAbbrev, flip);
 
           try
           {
-            String fileOutStr = ("res/unit/grey/" + matcher.group(1) +".png");
+            String fileOutStr = (outPath + matcher.group(1) +".png");
             ImageIO.write(SpriteLibrary.createPaletteImage(palette, 77, 77), "png", new File(fileOutStr));
           }
           catch (IOException e)

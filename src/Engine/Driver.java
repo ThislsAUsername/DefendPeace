@@ -20,6 +20,10 @@ import UI.Art.SpriteArtist.SpriteEngine;
 
 public class Driver implements ActionListener, KeyListener
 {
+  public static String baseUnitPath = "res/unit/";
+  public static String baseFlipperUnitPath = "res/unit/flippers/";
+  public static String baseFactionPath = "res/unit/factions/";
+  
   private static Driver gameDriver;
   private IController gameController;
   private GameViewProxy gameView;
@@ -34,11 +38,8 @@ public class Driver implements ActionListener, KeyListener
 
   private Driver()
   {
-    String base = "res/unit/";
-    String baseR = "res/unit/flippers/";
-    String baseG = "res/unit/grey/";
-    Utils.paintAllFactions(base,baseG,false);
-    Utils.paintAllFactions(baseR,baseG,true);
+    Utils.paintAllFactions(baseUnitPath,baseFactionPath,false);
+    Utils.paintAllFactions(baseFlipperUnitPath,baseFactionPath,true);
     
     // At game startup, we are at the main menu. Set up controller/viewer
     MainUIController mc = new MainUIController();

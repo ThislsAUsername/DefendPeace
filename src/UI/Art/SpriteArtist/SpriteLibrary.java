@@ -22,6 +22,7 @@ import javax.swing.ImageIcon;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderLibrary;
+import Engine.Driver;
 import Engine.XYCoord;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -421,7 +422,7 @@ public class SpriteLibrary
     filestr = "res/unit/" + key.unitTypeKey.toString().replaceAll("\\_", "") + "_map.png";
     if( Commander.DEFAULT_SPRITE_KEY != faction )
     {
-      filestr = ("res/unit/grey/" + faction + "/" + key.unitTypeKey.toString().toLowerCase()).replaceAll("\\_", "")+ "_map.png";
+      filestr = (Driver.baseFactionPath + faction + "/" + key.unitTypeKey.toString().toLowerCase()).replaceAll("\\_", "")+ "_map.png";
     }
     spriteSet = new UnitSpriteSet(loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
         getMapUnitColors(key.commanderKey.myColor));
@@ -665,7 +666,7 @@ public class SpriteLibrary
         int index = (int) (adjustedHue / (255.0 / defaultMapColors.length));
         if (index < 0)
           bi.setRGB(xyc.xCoord, xyc.yCoord, Color.black.getRGB());
-        else if (index >= defaultMapColors.length - 1)
+        else if (index >= defaultMapColors.length)
           bi.setRGB(xyc.xCoord, xyc.yCoord, Color.white.getRGB());
         else
           bi.setRGB(xyc.xCoord, xyc.yCoord, defaultMapColors[index].getRGB());
