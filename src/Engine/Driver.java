@@ -22,7 +22,7 @@ public class Driver implements ActionListener, KeyListener
 {
   public static String baseUnitPath = "res/unit/";
   public static String baseFlipperUnitPath = "res/unit/flippers/";
-  public static String baseFactionPath = "res/unit/factions/";
+  public static String baseFactionPath = "res/unit/faction/";
   
   private static Driver gameDriver;
   private IController gameController;

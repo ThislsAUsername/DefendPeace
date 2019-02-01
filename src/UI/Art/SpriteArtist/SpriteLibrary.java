@@ -505,7 +505,7 @@ public class SpriteLibrary
     Color lastColor = Color.black;
     int diff = 1;
     int i = 0;
-    while (palette.size() > 6)
+    while (palette.size() > defaultMapColors.length)
     {
       for( ; i < palette.size(); i++ )
       {

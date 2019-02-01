@@ -447,7 +447,7 @@ public class Utils
           try
           {
             String fileOutStr = (outPath + matcher.group(1) +".png");
-            ImageIO.write(SpriteLibrary.createPaletteImage(palette, 77, 77), "png", new File(fileOutStr));
+            ImageIO.write(SpriteLibrary.createPaletteImage(palette, 1, 1), "png", new File(fileOutStr));
           }
           catch (IOException e)
           {
