@@ -157,18 +157,24 @@ public class SpriteCOSetupArtist
       g.fillRect(drawX - drawScale, drawY - drawScale, drawW + (2*drawScale), drawH + (2*drawScale));
 
       // draw the CO's color selection
-      BufferedImage colorFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), "lawl", 2, 2);
+      BufferedImage colorFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), "lawl", 2*drawScale, 2*drawScale);
       XYCoord colorOffset = getChoiceOffset(OptionList.COLOR, drawH, drawScale);
       SpriteLibrary.drawImageCenteredOnPoint(g, colorFrame, xCenter+colorOffset.xCoord, yCenter+colorOffset.yCoord, 1);
       
       // draw the team selection
       String team = (info.getCurrentTeam() > -1)? Integer.toString(info.getCurrentTeam()+1) : "N/A"; // convert to human-readable teams 
-      BufferedImage teamFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), team, 7, 2);
+      BufferedImage teamFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), team, 3*drawScale, 2*drawScale);
       XYCoord teamOffset = getChoiceOffset(OptionList.TEAM, drawH, drawScale);
       SpriteLibrary.drawImageCenteredOnPoint(g, teamFrame, xCenter+teamOffset.xCoord, yCenter+teamOffset.yCoord, 1);
 
       // Draw CO Portrait
       SpriteLibrary.drawImageCenteredOnPoint(g, portrait, xCenter, yCenter, drawScale);
+      
+      // draw the CO name TODO: fix this
+      BufferedImage nameFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), info.getCurrentCO().name, 2*drawScale, 2*drawScale);
+      SpriteLibrary.drawImageCenteredOnPoint(g, nameFrame,
+          xCenter+drawW/2+SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth()*EXPECTED_TEXT_LENGTH,
+          yCenter+drawH/2 + 5*drawScale, 1);
 
       if (drawArrows)
       {
