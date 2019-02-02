@@ -101,19 +101,25 @@ public class SpriteCOSetupArtist
       // Draw the box, the color, and the CO portrait.
       drawCoPortrait(g, co, col, drawXCenter, drawYCenter);
 
+      String colorN = SpriteLibrary.getColorName(SpriteLibrary.getCOColors()[col]);
       String faction = COSetupController.spriteSetKeys[myControl.getPlayerFaction(i)];
-      
-      int menuTextWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth();
-      int menuTextHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight();
 
-      int signWidth = ((menuTextWidth * faction.length()) + 4) * drawScale;
-      int signHeight = (menuTextHeight + 4) * drawScale;
-      
-      XYCoord signTopLeft = new XYCoord(drawXCenter - signWidth / 2, drawYCenter + COSelectionAreaHeight/4 + drawScale*5 - signHeight / 2);
-      
-      SpriteLibrary.drawTextSmallCaps(g, faction, signTopLeft.xCoord + 2 * drawScale, signTopLeft.yCoord + 2 * drawScale,
-          drawScale);
+      drawOffsetText(g, colorN, drawXCenter, drawYCenter, -COSelectionAreaHeight*5/12, drawScale);
+      drawOffsetText(g, faction, drawXCenter, drawYCenter, COSelectionAreaHeight/4, drawScale);
     }
+  }
+  
+  private static void drawOffsetText(Graphics g, String text, int drawXCenter, int drawYCenter, int yOffset, int drawScale)
+  {
+    int menuTextWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth();
+    int menuTextHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight();
+
+    int signWidth = ((menuTextWidth * text.length())) * drawScale;
+    int signHeight = (menuTextHeight) * drawScale;
+    
+    XYCoord signTopLeft = new XYCoord(drawXCenter - signWidth / 2, drawYCenter + yOffset + drawScale*5 - signHeight / 2);
+    
+    SpriteLibrary.drawTextSmallCaps(g, text, signTopLeft.xCoord, signTopLeft.yCoord, drawScale);
   }
 
   private static void drawSelectorArrows(Graphics g, int xCenter, int yCenter)
@@ -123,7 +129,7 @@ public class SpriteCOSetupArtist
     // for the frame border, plus two pixels between the portrait frame and the arrows.
     int yBuffer = SpriteLibrary.getCommanderSprites(CommanderEnum.STRONG).head.getHeight() / 2 + 4;
     int[] upXPoints = {xCenter-(4*drawScale), xCenter, xCenter+drawScale, xCenter+(5*drawScale)};
-    int[] upYPoints = {yCenter-(yBuffer*drawScale), yCenter-((yBuffer+4)*drawScale), yCenter-((yBuffer+4)*drawScale), yCenter-(yBuffer*drawScale)};
+    int[] upYPoints = {yCenter-(yBuffer*drawScale)- drawScale*3, yCenter-((yBuffer+4)*drawScale)- drawScale*3, yCenter-((yBuffer+4)*drawScale)- drawScale*3, yCenter-(yBuffer*drawScale)- drawScale*3};
     int[] dnXPoints = {xCenter-(4*drawScale), xCenter, xCenter+drawScale, xCenter+(5*drawScale)};
     int[] dnYPoints = {yCenter+(yBuffer*drawScale)+ drawScale*3, yCenter+((yBuffer+4)*drawScale)+ drawScale*3, yCenter+((yBuffer+4)*drawScale)+ drawScale*3, yCenter+(yBuffer*drawScale)+ drawScale*3};
 
@@ -152,7 +158,7 @@ public class SpriteCOSetupArtist
       g.fillRect(drawX - (2*drawScale), drawY - (2*drawScale), drawW + (4*drawScale), drawH + (4*drawScale));
 
       // Draw team color box, nested inside the frame box.
-      g.setColor( SpriteLibrary.coColorList[color] );
+      g.setColor( SpriteLibrary.getCOColors()[color] );
       g.fillRect(drawX - drawScale, drawY - drawScale, drawW + (2*drawScale), drawH + (2*drawScale));
 
       // Draw CO Portrait

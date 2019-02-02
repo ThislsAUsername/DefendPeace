@@ -52,7 +52,7 @@ public class COSetupController implements IController
     {
       // Set up our option selection framework for CO and color choices.
       coSelectors[co] = new OptionSelector(CommanderLibrary.getCommanderList().size());
-      colorSelectors[co] = new OptionSelector(SpriteLibrary.coColorList.length);
+      colorSelectors[co] = new OptionSelector(SpriteLibrary.getCOColors().length);
       spriteSelectors[co] = new OptionSelector(spriteSetKeys.length);
 
       // Defaulting to the first available CO, and assigning colors in sequence.
@@ -75,7 +75,7 @@ public class COSetupController implements IController
         for(int i = 0; i < coSelectors.length; ++i)
         {
           Commander co = CommanderLibrary.makeCommander(coList.get(coSelectors[i].getSelectionNormalized()),
-              SpriteLibrary.coColorList[colorSelectors[i].getSelectionNormalized()], spriteSetKeys[spriteSelectors[i].getSelectionNormalized()]);
+              SpriteLibrary.getCOColors()[colorSelectors[i].getSelectionNormalized()], spriteSetKeys[spriteSelectors[i].getSelectionNormalized()]);
           gameBuilder.addCO(co);
         }
 

@@ -442,18 +442,18 @@ public class Utils
             facAbbrev = faction;
 
           importFactions.add(matcher.group(2));
-          Set<Color> palette = paintFaction(inPath + faction, outPath + matcher.group(2), facAbbrev, flip);
+//          Set<Color> palette = paintFaction(inPath + faction, outPath + matcher.group(2), facAbbrev, flip);
 
-          try
-          {
-            String fileOutStr = (outPath + matcher.group(1) +".png");
-            ImageIO.write(SpriteLibrary.createPaletteImage(palette, 1, 1), "png", new File(fileOutStr));
-          }
-          catch (IOException e)
-          {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
+//          try
+//          {
+//            String fileOutStr = (outPath + matcher.group(1) +".png");
+//            ImageIO.write(SpriteLibrary.createPaletteImage(palette, 1, 1), "png", new File(fileOutStr));
+//          }
+//          catch (IOException e)
+//          {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//          }
         }
       }
     }

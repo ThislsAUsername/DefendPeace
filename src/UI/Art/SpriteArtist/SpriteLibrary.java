@@ -64,28 +64,15 @@ public class SpriteLibrary
   private static Color[] purpleMapUnitColors = { new Color(90, 14, 99), new Color(132, 41, 148), new Color(181, 62, 198),
       new Color(201, 98, 223), new Color(231, 123, 255), new Color(243, 180, 255), };
 
-  private static HashMap<Color, ColorPalette> buildingColorPalettes = new HashMap<Color, ColorPalette>(){
-    private static final long serialVersionUID = 1L;
-    {
-      // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
-      put(Color.PINK, new ColorPalette(pinkMapBuildingColors));
-      put(Color.CYAN, new ColorPalette(cyanMapBuildingColors));
-      put(Color.ORANGE, new ColorPalette(orangeMapBuildingColors));
-      put(PURPLE, new ColorPalette(purpleMapBuildingColors));
-    }
-  };
-  private static HashMap<Color, ColorPalette> mapUnitColorPalettes = new HashMap<Color, ColorPalette>(){
-    private static final long serialVersionUID = 1L;
-    {
-      // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
-      put(Color.PINK, new ColorPalette(pinkMapUnitColors));
-      put(Color.CYAN, new ColorPalette(cyanMapUnitColors));
-      put(Color.ORANGE, new ColorPalette(orangeMapUnitColors));
-      put(PURPLE, new ColorPalette(purpleMapUnitColors));
-    }
-  };
-
-  public static final Color[] coColorList = { Color.PINK, Color.CYAN, Color.ORANGE, PURPLE };
+  private static HashMap<Color, ColorPalette> buildingColorPalettes;
+  private static HashMap<Color, ColorPalette> mapUnitColorPalettes;
+  private static HashMap<Color, String> colorNames;
+  
+  public static Color[] getCOColors()
+  {
+    initColors();
+    return mapUnitColorPalettes.keySet().toArray(new Color[0]);
+  }
 
   // TODO: Account for weather?
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
@@ -330,15 +317,77 @@ public class SpriteLibrary
 
     return moveCursorArrowSprite;
   }
+  
+  private static void initColors()
+  {
+    if (null == mapUnitColorPalettes )
+    {
+      buildingColorPalettes = new HashMap<Color, ColorPalette>();
+      mapUnitColorPalettes = new HashMap<Color, ColorPalette>();
+      colorNames = new HashMap<Color, String>();
+      
+    // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
+      buildingColorPalettes.put(Color.PINK, new ColorPalette(pinkMapBuildingColors));
+      buildingColorPalettes.put(Color.CYAN, new ColorPalette(cyanMapBuildingColors));
+      buildingColorPalettes.put(Color.ORANGE, new ColorPalette(orangeMapBuildingColors));
+      buildingColorPalettes.put(PURPLE, new ColorPalette(purpleMapBuildingColors));
+
+      mapUnitColorPalettes.put(Color.PINK, new ColorPalette(pinkMapUnitColors));
+      mapUnitColorPalettes.put(Color.CYAN, new ColorPalette(cyanMapUnitColors));
+      mapUnitColorPalettes.put(Color.ORANGE, new ColorPalette(orangeMapUnitColors));
+      mapUnitColorPalettes.put(PURPLE, new ColorPalette(purpleMapUnitColors));
+
+      colorNames.put(Color.PINK, "salmon");
+      colorNames.put(Color.CYAN, "cyan");
+      colorNames.put(Color.ORANGE, "citrus");
+      colorNames.put(PURPLE, "sparking");
+
+    final File folder = new File("res/unit/faction");
+
+    for( final File fileEntry : folder.listFiles() )
+    {
+      if( !fileEntry.isDirectory() )
+      {
+        String colorName = fileEntry.getAbsolutePath();
+        if( colorName.contains(".png") )
+        {
+          BufferedImage bi = loadSpriteSheetFile(colorName);
+          Color key = new Color(bi.getRGB(defaultMapColors.length-1, 0));
+          Color[] cUnits = new Color[defaultMapColors.length];
+          Color[] cStructs = new Color[defaultMapColors.length];
+          for (int i = 0; i < defaultMapColors.length; i++)
+          {
+            Color c = new Color(bi.getRGB(i, 0));
+            if (getGreyDiff(c) > getGreyDiff(key))
+              key = c;
+            cUnits[i] = c;
+            cStructs[i] = new Color(c.getRed()*9/10,c.getGreen()*9/10,c.getBlue()*9/10);
+          }
+          buildingColorPalettes.put(key, new ColorPalette(cStructs));
+          mapUnitColorPalettes.put(key, new ColorPalette(cUnits));
+          colorNames.put(key, fileEntry.getName().replace(".png", ""));
+        }
+      }
+    }
+    }
+  }
 
   private static ColorPalette getBuildingColors(Color colorKey)
   {
+    initColors();
     return buildingColorPalettes.get(colorKey);
   }
 
   private static ColorPalette getMapUnitColors(Color colorKey)
   {
+    initColors();
     return mapUnitColorPalettes.get(colorKey);
+  }
+
+  public static String getColorName(Color colorKey)
+  {
+    initColors();
+    return colorNames.get(colorKey);
   }
 
   private static class SpriteSetKey
@@ -490,42 +539,42 @@ public class SpriteLibrary
     ArrayList<Color> palette = new ArrayList<Color>(paletteSet);
 
     // sort by greyness, so we cull the grayest things first
-    palette.sort(new Comparator<Color>()
-    {
-      @Override
-      public int compare(Color o1, Color o2)
-      {
-        double o1Diff = getGreyDiff(o1);
-        double o2Diff = getGreyDiff(o2);
-        return (int) (o1Diff - o2Diff);
-      }
-    });
-
-    // Delete colors until we get to the proper number
-    Color lastColor = Color.black;
-    int diff = 1;
-    int i = 0;
-    while (palette.size() > defaultMapColors.length)
-    {
-      for( ; i < palette.size(); i++ )
-      {
-        Color c = palette.get(i);
-        if( diff < colorDistance(lastColor, c) )
-        {
-          lastColor = c;
-        }
-        else
-        {
-          palette.remove(i);
-          break;
-        }
-      }
-      if( i >= palette.size() )
-      {
-        i = 0;
-        diff++;
-      }
-    }
+//    palette.sort(new Comparator<Color>()
+//    {
+//      @Override
+//      public int compare(Color o1, Color o2)
+//      {
+//        double o1Diff = getGreyDiff(o1);
+//        double o2Diff = getGreyDiff(o2);
+//        return (int) (o1Diff - o2Diff);
+//      }
+//    });
+//
+//    // Delete colors until we get to the proper number
+//    Color lastColor = Color.black;
+//    int diff = 1;
+//    int i = 0;
+//    while (palette.size() > defaultMapColors.length)
+//    {
+//      for( ; i < palette.size(); i++ )
+//      {
+//        Color c = palette.get(i);
+//        if( diff < colorDistance(lastColor, c) )
+//        {
+//          lastColor = c;
+//        }
+//        else
+//        {
+//          palette.remove(i);
+//          break;
+//        }
+//      }
+//      if( i >= palette.size() )
+//      {
+//        i = 0;
+//        diff++;
+//      }
+//    }
     
     // sort by brightness
     palette.sort(new Comparator<Color>()
@@ -620,6 +669,17 @@ public class SpriteLibrary
               Math.abs(R - G) < 20 &&
               Math.abs(R - B) < 20 &&
               Math.abs(G - B) < 20
+              )
+              //or black/white
+              || (
+              R < 20 &&
+              G < 20 &&
+              B < 20
+              ) ||
+              (
+              R > 230 &&
+              G > 230 &&
+              B > 230
               )
              ) // don't recolor it
             setGray = false;
