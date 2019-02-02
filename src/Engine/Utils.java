@@ -423,6 +423,7 @@ public class Utils
   public static void paintAllFactions(String inPath, String outPath, boolean flip)
   {
     final File folder = new File(inPath);
+    importFactions.add(Commander.DEFAULT_SPRITE_KEY);
 
     for( final File fileEntry : folder.listFiles() )
     {

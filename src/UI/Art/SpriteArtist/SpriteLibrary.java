@@ -344,6 +344,7 @@ public class SpriteLibrary
 
     final File folder = new File("res/unit/faction");
 
+    if (folder.canRead())
     for( final File fileEntry : folder.listFiles() )
     {
       if( !fileEntry.isDirectory() )
