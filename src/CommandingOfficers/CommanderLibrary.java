@@ -1,7 +1,8 @@
 package CommandingOfficers;
 
-import java.awt.Color;
 import java.util.ArrayList;
+
+import UI.COSetupInfo;
 
 public class CommanderLibrary
 {  
@@ -26,11 +27,15 @@ public class CommanderLibrary
     commanderList.add( CommanderCinder.getInfo() );
   }
 
-  public static Commander makeCommander( CommanderInfo info, Color color )
+  public static Commander makeCommander( COSetupInfo info )
   {
-    Commander co = info.maker.create();
+    Commander co = info.getCurrentCO().maker.create();
 
-    co.myColor = color;
+    co.myColor = info.getCurrentColor();
+    
+    co.team = info.getCurrentTeam();
+    
+    // TODO: AI and faction
 
     return co;
   }

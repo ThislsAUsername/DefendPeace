@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
+import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderLibrary;
 import CommandingOfficers.CommanderStrong;
 import Terrain.MapInfo;
@@ -95,10 +96,8 @@ public class SpriteCOSetupArtist
 
     for(int i = 0; i < numCOs; ++i, drawXCenter += xSpacing)
     {
-      int co = myControl.getPlayerCo(i);
-      int col = myControl.getPlayerColor(i);
       // Draw the box, the color, and the CO portrait.
-      drawCoPortrait(g, co, col, drawXCenter, drawYCenter);
+      drawCoPortrait(g, myControl.getPlayerCo(i), myControl.getPlayerColor(i), drawXCenter, drawYCenter);
     }
   }
 
@@ -119,10 +118,10 @@ public class SpriteCOSetupArtist
     g.fillPolygon(dnXPoints, dnYPoints, dnXPoints.length);
   }
 
-  private static void drawCoPortrait(Graphics g, int co, int color, int xCenter, int yCenter)
+  private static void drawCoPortrait(Graphics g, CommanderInfo co, Color color, int xCenter, int yCenter)
   {
     // Fetch CO portrait
-    BufferedImage portrait = SpriteLibrary.getCommanderSprites( CommanderLibrary.getCommanderList().get(co).name ).head;
+    BufferedImage portrait = SpriteLibrary.getCommanderSprites( co.name ).head;
     int drawScale = SpriteOptions.getDrawScale();
 
     int drawX = xCenter - ( (portrait.getWidth()*drawScale) / 2 );
@@ -138,7 +137,7 @@ public class SpriteCOSetupArtist
       g.fillRect(drawX - (2*drawScale), drawY - (2*drawScale), drawW + (4*drawScale), drawH + (4*drawScale));
 
       // Draw team color box, nested inside the frame box.
-      g.setColor( SpriteLibrary.coColorList[color] );
+      g.setColor( color );
       g.fillRect(drawX - drawScale, drawY - drawScale, drawW + (2*drawScale), drawH + (2*drawScale));
 
       // Draw CO Portrait

@@ -1,5 +1,6 @@
 package UI;
 
+import java.awt.Color;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
@@ -25,8 +26,7 @@ public class COSetupController implements IController
   // This optionSelector determines which player's Commander we are choosing.
   private OptionSelector playerSelector;
   private GameBuilder gameBuilder = null;
-  OptionSelector[] coSelectors;
-  OptionSelector[] colorSelectors;
+  COSetupInfo[] coSelectors;
 
   public COSetupController( GameBuilder builder )
   {
@@ -35,20 +35,13 @@ public class COSetupController implements IController
     int numCos = gameBuilder.mapInfo.getNumCos();
     playerSelector = new OptionSelector(numCos);
     // One entry of two numbers for each player, for Commander and color.
-    coSelectors = new OptionSelector[numCos];
-    colorSelectors = new OptionSelector[numCos];
+    coSelectors = new COSetupInfo[numCos];
 
     // Start by making default CO/color selections.
     for(int co = 0; co < numCos; ++co)
     {
-      // Set up our option selection framework for CO and color choices.
-      coSelectors[co] = new OptionSelector(CommanderLibrary.getCommanderList().size());
-      colorSelectors[co] = new OptionSelector(SpriteLibrary.coColorList.length);
-
-      // Defaulting to the first available CO, and assigning colors in sequence.
-      // TODO: Consider changing this to sequential or random COs once we have enough.
-      coSelectors[co].setSelectedOption(0); // Commander choice
-      colorSelectors[co].setSelectedOption(co); // Color choice
+      // Set up our option selection framework
+      coSelectors[co] = new COSetupInfo(numCos, co, CommanderLibrary.getCommanderList(), SpriteLibrary.coColorList);
     }
   }
 
@@ -59,12 +52,10 @@ public class COSetupController implements IController
     switch(action)
     {
       case ENTER:
-        ArrayList<CommanderInfo> coList = CommanderLibrary.getCommanderList();
         // We have locked in our selection. Stuff it into the GameBuilder and then kick off the game.
         for(int i = 0; i < coSelectors.length; ++i)
         {
-          gameBuilder.addCO(CommanderLibrary.makeCommander(coList.get(coSelectors[i].getSelectionNormalized()),
-              SpriteLibrary.coColorList[colorSelectors[i].getSelectionNormalized()]));
+          gameBuilder.addCO(CommanderLibrary.makeCommander(coSelectors[i]));
         }
 
         // Build the CO list and the new map and create the game instance.
@@ -87,12 +78,12 @@ public class COSetupController implements IController
         break;
       case DOWN:
       case UP:
-        //coSelectors.get(playerSelector.getSelectionNormalized()).handleInput(action);
-        coSelectors[playerSelector.getSelectionNormalized()].handleInput(action);
+        coSelectors[playerSelector.getSelectionNormalized()].getCurrentOption().handleInput(action);
         break;
       case LEFT:
       case RIGHT:
-        playerSelector.handleInput(action);
+        if( coSelectors[playerSelector.getSelectionNormalized()].pickOption(action) )
+          playerSelector.handleInput(action);
         break;
       case NO_ACTION:
         break;
@@ -107,13 +98,13 @@ public class COSetupController implements IController
     return playerSelector.getSelectionNormalized();
   }
 
-  public int getPlayerCo(int p)
+  public CommanderInfo getPlayerCo(int p)
   {
-    return coSelectors[p].getSelectionNormalized();
+    return coSelectors[p].getCurrentCO();
   }
 
-  public int getPlayerColor(int p)
+  public Color getPlayerColor(int p)
   {
-    return colorSelectors[p].getSelectionNormalized();
+    return coSelectors[p].getCurrentColor();
   }
 }
