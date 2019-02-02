@@ -97,6 +97,11 @@ public class COSetupController implements IController
   {
     return playerSelector.getSelectionNormalized();
   }
+  
+  public COSetupInfo getPlayerInfo(int p)
+  {
+    return coSelectors[p];
+  }
 
   public CommanderInfo getPlayerCo(int p)
   {

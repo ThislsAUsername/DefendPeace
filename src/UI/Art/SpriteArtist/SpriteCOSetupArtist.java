@@ -8,13 +8,19 @@ import java.awt.image.BufferedImage;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderLibrary;
 import CommandingOfficers.CommanderStrong;
+import Engine.XYCoord;
 import Terrain.MapInfo;
 import UI.COSetupController;
+import UI.COSetupInfo;
+import UI.COSetupInfo.OptionList;
 
 public class SpriteCOSetupArtist
 {
   private static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
   private static final Color MENUBGCOLOR = new Color(234, 204, 154);
+  
+  // how long we think color, faction, and AI name can reasonably get
+  private static final int EXPECTED_TEXT_LENGTH = 12;
 
   private static double animHighlightedPlayer = 0;
 
@@ -22,6 +28,16 @@ public class SpriteCOSetupArtist
 
   private static COSetupController myControl = null;
 
+  /**
+   * (We want to, eventually) Draw a thing like this, for each player:
+   * +------------------+ +---------+ +---------+
+   * |                  | |  Color  | | Faction |
+   * |                  | +---------+ +---------+
+   * |        CO        | +---------+ +---------+
+   * |                  | |  Team   | | AI Name |
+   * |                  | +---------+ +---------+
+   * +------------------+ 
+   */
   public static void draw(Graphics g, MapInfo mapInfo, COSetupController control)
   {
     // If control has changed, we just entered a new CO setup screen. We don't want to
@@ -74,14 +90,14 @@ public class SpriteCOSetupArtist
     int drawYCenter = ((dimensions.height - minimapAreaHeight) / 2) + minimapAreaHeight;
     int coHighlightedPortraitXCenter = dimensions.width / 2; // Whichever player has focus should be centered.
 
-    drawSelectorArrows(g, dimensions.width / 2, drawYCenter);
-
     /////////////////// CO Portraits ///////////////////////
     int numCOs = mapInfo.getNumCos();
     int highlightedPlayer = myControl.getHighlightedPlayer();
 
-    double numCosOnScreen = 5.5; // Display 5 cos, and the edge of the portrait for any hanging off the screen edge.
-    int xSpacing = (int)(dimensions.width / numCosOnScreen);
+    int xSpacing = (int)(
+        SpriteLibrary.getCommanderSprites(CommanderStrong.getInfo().name).head.getWidth()/2 + 
+        SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth()*EXPECTED_TEXT_LENGTH + // TODO: adjust for the new elements
+        6)*drawScale; // 6 total buffer, to put 2 between each pair of panels
 
     // If we are moving from one option to another, calculate the intermediate draw location.
     if( animHighlightedPlayer != highlightedPlayer )
@@ -97,16 +113,15 @@ public class SpriteCOSetupArtist
     for(int i = 0; i < numCOs; ++i, drawXCenter += xSpacing)
     {
       // Draw the box, the color, and the CO portrait.
-      drawCoPortrait(g, myControl.getPlayerCo(i), myControl.getPlayerColor(i), drawXCenter, drawYCenter);
+      drawCoInfo(g, myControl.getPlayerInfo(i), drawXCenter, drawYCenter, i == highlightedPlayer);
     }
   }
 
-  private static void drawSelectorArrows(Graphics g, int xCenter, int yCenter)
+  private static void drawSelectorArrows(Graphics g, int xCenter, int yCenter, int yBuffer)
   {
     int drawScale = SpriteOptions.getDrawScale();
     // Polygons for arrows to indicate the focused player slot. CO face images are 32x32, plus two pixels
     // for the frame border, plus two pixels between the portrait frame and the arrows.
-    int yBuffer = SpriteLibrary.getCommanderSprites(CommanderStrong.getInfo().name).head.getHeight() / 2 + 4;
     int[] upXPoints = {xCenter-(4*drawScale), xCenter, xCenter+drawScale, xCenter+(5*drawScale)};
     int[] upYPoints = {yCenter-(yBuffer*drawScale), yCenter-((yBuffer+4)*drawScale), yCenter-((yBuffer+4)*drawScale), yCenter-(yBuffer*drawScale)};
     int[] dnXPoints = {xCenter-(4*drawScale), xCenter, xCenter+drawScale, xCenter+(5*drawScale)};
@@ -118,10 +133,10 @@ public class SpriteCOSetupArtist
     g.fillPolygon(dnXPoints, dnYPoints, dnXPoints.length);
   }
 
-  private static void drawCoPortrait(Graphics g, CommanderInfo co, Color color, int xCenter, int yCenter)
+  private static void drawCoInfo(Graphics g, COSetupInfo info, int xCenter, int yCenter, boolean drawArrows)
   {
     // Fetch CO portrait
-    BufferedImage portrait = SpriteLibrary.getCommanderSprites( co.name ).head;
+    BufferedImage portrait = SpriteLibrary.getCommanderSprites( info.getCurrentCO().name ).head;
     int drawScale = SpriteOptions.getDrawScale();
 
     int drawX = xCenter - ( (portrait.getWidth()*drawScale) / 2 );
@@ -137,11 +152,69 @@ public class SpriteCOSetupArtist
       g.fillRect(drawX - (2*drawScale), drawY - (2*drawScale), drawW + (4*drawScale), drawH + (4*drawScale));
 
       // Draw team color box, nested inside the frame box.
-      g.setColor( color );
+      Color c = info.getCurrentColor();
+      g.setColor( c );
       g.fillRect(drawX - drawScale, drawY - drawScale, drawW + (2*drawScale), drawH + (2*drawScale));
 
+      // draw the CO's color selection
+      BufferedImage colorFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), "lawl", 2, 2);
+      XYCoord colorOffset = getChoiceOffset(OptionList.COLOR, drawH, drawScale);
+      SpriteLibrary.drawImageCenteredOnPoint(g, colorFrame, xCenter+colorOffset.xCoord, yCenter+colorOffset.yCoord, 1);
+      
+      // draw the team selection
+      String team = (info.getCurrentTeam() > -1)? Integer.toString(info.getCurrentTeam()+1) : "N/A"; // convert to human-readable teams 
+      BufferedImage teamFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), team, 7, 2);
+      XYCoord teamOffset = getChoiceOffset(OptionList.TEAM, drawH, drawScale);
+      SpriteLibrary.drawImageCenteredOnPoint(g, teamFrame, xCenter+teamOffset.xCoord, yCenter+teamOffset.yCoord, 1);
+
       // Draw CO Portrait
-      g.drawImage(portrait, drawX, drawY, drawW, drawH, null);
+      SpriteLibrary.drawImageCenteredOnPoint(g, portrait, xCenter, yCenter, drawScale);
+
+      if (drawArrows)
+      {
+        XYCoord arrowOffset = getChoiceOffset(OptionList.values()[info.getSelectionNormalized()], drawH, drawScale);
+        int yBuffer;
+        if( OptionList.COMMANDER == OptionList.values()[info.getSelectionNormalized()] )
+          yBuffer = SpriteLibrary.getCommanderSprites(CommanderStrong.getInfo().name).head.getHeight() / 2 + 4;
+        else
+          yBuffer = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight() / 2 + 2;
+
+        drawSelectorArrows(g, xCenter + arrowOffset.xCoord, yCenter + arrowOffset.yCoord, yBuffer);
+      }
     }
+  }
+  
+  private static XYCoord getChoiceOffset(OptionList option, int imageHeight, int drawScale)
+  {
+    int x,y;
+    int textWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth();
+    int textHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight();
+
+    switch (option)
+    {
+      case COLOR:
+        x = (2 + textWidth*EXPECTED_TEXT_LENGTH/2)*drawScale;
+        y = -imageHeight/2 + textHeight*drawScale/2;
+        break;
+      case FACTION:
+        x = (4 + textWidth*3*EXPECTED_TEXT_LENGTH/2)*drawScale;
+        y = -imageHeight/2 + textHeight*drawScale/2;
+        break;
+      case TEAM:
+        x = (2 + textWidth*EXPECTED_TEXT_LENGTH/2)*drawScale;
+        y = textHeight*drawScale/2;
+        break;
+      case AI:
+        x = (4 + textWidth*3*EXPECTED_TEXT_LENGTH/2)*drawScale;
+        y = textHeight*drawScale/2;
+        break;
+      case COMMANDER: // fall-through
+      default:
+        x = 0;
+        y = 0;
+        break;
+    }
+    
+    return new XYCoord(x,y);
   }
 }

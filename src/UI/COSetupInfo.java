@@ -13,6 +13,7 @@ import UI.InputHandler.InputAction;
  */
 public class COSetupInfo extends OptionSelector
 {
+  // TODO: fiddle with order once they're all in so the UI can make more sense
   public enum OptionList { COMMANDER, COLOR, TEAM, AI, FACTION };
 
   final CommanderInfo[] COTypes;
