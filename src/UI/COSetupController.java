@@ -3,6 +3,7 @@ package UI;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import AI.AILibrary;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderLibrary;
@@ -41,7 +42,7 @@ public class COSetupController implements IController
     for(int co = 0; co < numCos; ++co)
     {
       // Set up our option selection framework
-      coSelectors[co] = new COSetupInfo(numCos, co, CommanderLibrary.getCommanderList(), SpriteLibrary.getCOColors(), SpriteLibrary.getFactionNames());
+      coSelectors[co] = new COSetupInfo(numCos, co, CommanderLibrary.getCommanderList(), SpriteLibrary.getCOColors(), SpriteLibrary.getFactionNames(), AILibrary.getAIList());
     }
   }
 

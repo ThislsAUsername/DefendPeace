@@ -36,7 +36,7 @@ public class CommanderLibrary
     
     co.team = info.getCurrentTeam();
     
-    // TODO: AI
+    co.setAIController(info.getCurrentAI().create(co));
 
     return co;
   }

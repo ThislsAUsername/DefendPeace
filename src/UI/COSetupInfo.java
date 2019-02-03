@@ -3,6 +3,7 @@ package UI;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import AI.AIMaker;
 import CommandingOfficers.CommanderInfo;
 import Engine.OptionSelector;
 import UI.InputHandler.InputAction;
@@ -27,11 +28,13 @@ public class COSetupInfo extends OptionSelector
 
   final OptionSelector currentTeam;
 
-  // TODO: AI and faction
+  final AIMaker[] AIs;
+  final OptionSelector currentAI;
 
-  public COSetupInfo(int numPlayers, int thisPlayer, ArrayList<CommanderInfo> COTypeList, Color[] colorList, String[] factionList)
+  public COSetupInfo(int numPlayers, int thisPlayer, ArrayList<CommanderInfo> COTypeList, Color[] colorList, String[] factionList, ArrayList<AIMaker> AIList)
   {
-    super(4); // we don't do AI... yet
+    super(OptionList.values().length);
+    
     COTypes = COTypeList.toArray(new CommanderInfo[0]);
     currentCO = new OptionSelector(COTypes.length);
     currentCO.setSelectedOption(0);
@@ -48,6 +51,10 @@ public class COSetupInfo extends OptionSelector
 
     currentTeam = new OptionSelector(numPlayers);
     currentTeam.setSelectedOption(0); // 0 should be interpreted as "no team"
+
+    AIs = AIList.toArray(new AIMaker[0]);
+    currentAI = new OptionSelector(AIs.length);
+    currentAI.setSelectedOption(0); // default to human
   }
 
   /**
@@ -82,6 +89,7 @@ public class COSetupInfo extends OptionSelector
       case TEAM:
         return currentTeam;
       case AI:
+        return currentAI;
       default:
         return currentCO; // just pretend there's nothing weird going on, and hope nobody notices
     }
@@ -105,5 +113,10 @@ public class COSetupInfo extends OptionSelector
   public int getCurrentTeam()
   {
     return currentTeam.getSelectionNormalized() - 1; // -1 means "no team"
+  }
+  
+  public AIMaker getCurrentAI()
+  {
+    return AIs[currentAI.getSelectionNormalized()];
   }
 }

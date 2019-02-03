@@ -170,6 +170,12 @@ public class SpriteCOSetupArtist
       BufferedImage teamFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), team, 3*drawScale, 2*drawScale);
       XYCoord teamOffset = getChoiceOffset(OptionList.TEAM, drawW/2, drawH/2, drawScale);
       SpriteLibrary.drawImageCenteredOnPoint(g, teamFrame, xCenter+teamOffset.xCoord, yCenter+teamOffset.yCoord, 1);
+      
+      // draw the AI selection
+      String AI = info.getCurrentAI().getName(); 
+      BufferedImage AIFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), AI, 3*drawScale, 2*drawScale);
+      XYCoord AIOffset = getChoiceOffset(OptionList.AI, drawW/2, drawH/2, drawScale);
+      SpriteLibrary.drawImageCenteredOnPoint(g, AIFrame, xCenter+AIOffset.xCoord, yCenter+AIOffset.yCoord, 1);
 
       // Draw CO Portrait
       SpriteLibrary.drawImageCenteredOnPoint(g, portrait, xCenter, yCenter, drawScale);
