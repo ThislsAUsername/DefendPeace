@@ -13,7 +13,6 @@ public class MapWindow extends GameMap
   Commander viewer; // can be null
   boolean isFogEnabled;
   private boolean[][] isFogged;
-  public CommandingOfficers.Commander[] commanders;
   private Commander[][] lastOwnerSeen;
 
   public MapWindow(MapMaster pMaster, Commander pViewer)
