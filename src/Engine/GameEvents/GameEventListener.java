@@ -2,7 +2,6 @@ package Engine.GameEvents;
 
 import java.util.HashSet;
 
-import CommandingOfficers.Commander;
 import Engine.Combat.BattleSummary;
 import Terrain.Location;
 import Units.Unit;

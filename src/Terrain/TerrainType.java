@@ -60,8 +60,8 @@ public class TerrainType
   private static final int BRIDGE_FLAGS = LAND | WATER;
   private static final int BRIDGE_DEFENSE = 0;
   private static final Color BRIDGE_COLOR = new Color(189, 189, 189);
-  private static final String WATER_NAME = "WATER";
-  public static final TerrainType BRIDGE = new TerrainType( BRIDGE_FLAGS, BRIDGE_DEFENSE, BRIDGE_COLOR, WATER_NAME );
+  private static final String BRIDGE_NAME = "BRIDGE";
+  public static final TerrainType BRIDGE = new TerrainType( BRIDGE_FLAGS, BRIDGE_DEFENSE, BRIDGE_COLOR, BRIDGE_NAME );
 
   private static final int CITY_FLAGS = LAND | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_LAND;
   private static final int CITY_DEFENSE = 2;
@@ -130,11 +130,11 @@ public class TerrainType
   private static final String ROAD_NAME = "ROAD";
   public static final TerrainType ROAD = new TerrainType( ROAD_FLAGS, ROAD_DEFENSE, ROAD_COLOR, ROAD_NAME );
 
-  private static final int WATER_FLAGS = WATER;
-  private static final int WATER_DEFENSE = 0;
-  private static final Color WATER_COLOR = new Color(94, 184, 236);
+  private static final int SEA_FLAGS = WATER;
+  private static final int SEA_DEFENSE = 0;
+  private static final Color SEA_COLOR = new Color(94, 184, 236);
   private static final String SEA_NAME = "SEA";
-  public static final TerrainType SEA = new TerrainType( WATER_FLAGS, WATER_DEFENSE, WATER_COLOR, SEA_NAME );
+  public static final TerrainType SEA = new TerrainType( SEA_FLAGS, SEA_DEFENSE, SEA_COLOR, SEA_NAME );
 
   private static final int SEAPORT_FLAGS = LAND | WATER | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_SEA;
   private static final int SEAPORT_DEFENSE = 3;
