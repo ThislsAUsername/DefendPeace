@@ -56,7 +56,7 @@ public class COSetupController implements IController
         // We have locked in our selection. Stuff it into the GameBuilder and then kick off the game.
         for(int i = 0; i < coSelectors.length; ++i)
         {
-          gameBuilder.addCO(CommanderLibrary.makeCommander(coSelectors[i]));
+          gameBuilder.addCO(coSelectors[i].makeCommander());
         }
 
         // Build the CO list and the new map and create the game instance.
@@ -79,7 +79,7 @@ public class COSetupController implements IController
         break;
       case DOWN:
       case UP:
-        coSelectors[playerSelector.getSelectionNormalized()].getCurrentOption().handleInput(action);
+        coSelectors[playerSelector.getSelectionNormalized()].getCurrentOptionSelector().handleInput(action);
         break;
       case LEFT:
       case RIGHT:

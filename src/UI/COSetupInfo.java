@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 import AI.AIMaker;
+import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import Engine.OptionSelector;
 import UI.InputHandler.InputAction;
@@ -76,7 +77,7 @@ public class COSetupInfo extends OptionSelector
     return false;
   }
 
-  public OptionSelector getCurrentOption()
+  public OptionSelector getCurrentOptionSelector()
   {
     switch (OptionList.values()[this.getSelectionNormalized()])
     {
@@ -118,5 +119,19 @@ public class COSetupInfo extends OptionSelector
   public AIMaker getCurrentAI()
   {
     return AIs[currentAI.getSelectionNormalized()];
+  }
+
+  public Commander makeCommander()
+  {
+    Commander co = getCurrentCO().maker.create();
+
+    co.myColor = getCurrentColor();
+    co.factionName = getCurrentFaction();
+    
+    co.team = getCurrentTeam();
+    
+    co.setAIController(getCurrentAI().create(co));
+
+    return co;
   }
 }
