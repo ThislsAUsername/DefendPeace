@@ -50,28 +50,15 @@ public class SpriteLibrary
   private static Color[] purpleMapUnitColors = { new Color(90, 14, 99), new Color(132, 41, 148), new Color(181, 62, 198), new Color(201, 98, 223),
     new Color(231, 123, 255), new Color(243, 180, 255), };
 
-  private static HashMap<Color, ColorPalette> buildingColorPalettes = new HashMap<Color, ColorPalette>(){
-    private static final long serialVersionUID = 1L;
-    {
-      // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
-      put(Color.PINK, new ColorPalette(pinkMapBuildingColors));
-      put(Color.CYAN, new ColorPalette(cyanMapBuildingColors));
-      put(Color.ORANGE, new ColorPalette(orangeMapBuildingColors));
-      put(PURPLE, new ColorPalette(purpleMapBuildingColors));
-    }
-  };
-  private static HashMap<Color, ColorPalette> mapUnitColorPalettes = new HashMap<Color, ColorPalette>(){
-    private static final long serialVersionUID = 1L;
-    {
-      // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
-      put(Color.PINK, new ColorPalette(pinkMapUnitColors));
-      put(Color.CYAN, new ColorPalette(cyanMapUnitColors));
-      put(Color.ORANGE, new ColorPalette(orangeMapUnitColors));
-      put(PURPLE, new ColorPalette(purpleMapUnitColors));
-    }
-  };
+  private static HashMap<Color, ColorPalette> buildingColorPalettes;
+  private static HashMap<Color, ColorPalette> mapUnitColorPalettes;
+  private static HashMap<Color, String> colorNames;
 
-  public static final Color[] coColorList = { Color.PINK, Color.CYAN, Color.ORANGE, PURPLE };
+  public static Color[] getCOColors()
+  {
+    initColors();
+    return mapUnitColorPalettes.keySet().toArray(new Color[0]);
+  }
 
   // TODO: Account for weather?
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
@@ -288,15 +275,86 @@ public class SpriteLibrary
 
     return moveCursorArrowSprite;
   }
-
-  private static ColorPalette getBuildingColors(Color colorKey)
+  
+  /**
+   * Sets up the available palettes for use.
+   * Reads in the first 6 colors on each row.
+   * Top colors are buildings, bottom are units.
+   * The key color is the last color on the top row.
+   */
+  private static void initColors()
   {
+    if (null == mapUnitColorPalettes )
+    {
+      buildingColorPalettes = new HashMap<Color, ColorPalette>();
+      mapUnitColorPalettes = new HashMap<Color, ColorPalette>();
+      colorNames = new HashMap<Color, String>();
+
+      // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
+      buildingColorPalettes.put(Color.PINK, new ColorPalette(pinkMapBuildingColors));
+      buildingColorPalettes.put(Color.CYAN, new ColorPalette(cyanMapBuildingColors));
+      buildingColorPalettes.put(Color.ORANGE, new ColorPalette(orangeMapBuildingColors));
+      buildingColorPalettes.put(PURPLE, new ColorPalette(purpleMapBuildingColors));
+
+      mapUnitColorPalettes.put(Color.PINK, new ColorPalette(pinkMapUnitColors));
+      mapUnitColorPalettes.put(Color.CYAN, new ColorPalette(cyanMapUnitColors));
+      mapUnitColorPalettes.put(Color.ORANGE, new ColorPalette(orangeMapUnitColors));
+      mapUnitColorPalettes.put(PURPLE, new ColorPalette(purpleMapUnitColors));
+
+      // Throw some color names in there for the defaults
+      // toString() is not user-friendly
+      colorNames.put(Color.PINK, "salmon");
+      colorNames.put(Color.CYAN, "cyan");
+      colorNames.put(Color.ORANGE, "citrus");
+      colorNames.put(PURPLE, "sparking");
+
+      final File folder = new File("res/unit/faction");
+
+      if (folder.canRead())
+      {
+        for( final File fileEntry : folder.listFiles() )
+        {
+          if( !fileEntry.isDirectory() )
+          {
+            String colorName = fileEntry.getAbsolutePath();
+            if( colorName.contains(".png") )
+            {
+              BufferedImage bi = loadSpriteSheetFile(colorName);
+              // Grab the last color on the first row as our "banner" color
+              Color key = new Color(bi.getRGB(bi.getWidth() - 1, 0));
+              Color[] cUnits = new Color[defaultMapColors.length];
+              Color[] cStructs = new Color[defaultMapColors.length];
+              for( int i = 0; i < defaultMapColors.length; i++ )
+              {
+                cUnits[i] = new Color(bi.getRGB(i, 0));
+                cStructs[i] = new Color(bi.getRGB(i, 1));
+              }
+              buildingColorPalettes.put(key, new ColorPalette(cStructs));
+              mapUnitColorPalettes.put(key, new ColorPalette(cUnits));
+              colorNames.put(key, fileEntry.getName().replace(".png", ""));
+            }
+          }
+        }
+      }
+    }
+  }
+
+  public static ColorPalette getBuildingColors(Color colorKey)
+  {
+    initColors();
     return buildingColorPalettes.get(colorKey);
   }
 
   public static ColorPalette getMapUnitColors(Color colorKey)
   {
+    initColors();
     return mapUnitColorPalettes.get(colorKey);
+  }
+
+  public static String getColorName(Color colorKey)
+  {
+    initColors();
+    return colorNames.get(colorKey);
   }
 
   private static class SpriteSetKey
