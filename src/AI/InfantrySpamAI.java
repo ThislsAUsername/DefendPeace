@@ -9,6 +9,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
+import Engine.GameInstance;
 import Engine.Path;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -23,6 +24,22 @@ import Units.UnitModel;
  */
 public class InfantrySpamAI implements AIController
 {
+  private static class instantiator implements AIMaker
+  {
+    @Override
+    public AIController create(GameInstance gi, Commander co)
+    {
+      return new InfantrySpamAI(co);
+    }
+
+    @Override
+    public String getName()
+    {
+      return "ISAI";
+    }
+  }
+  public static final AIMaker info = new instantiator();
+  
   Queue<GameAction> actions = new ArrayDeque<GameAction>();
 
   private Commander myCo = null;

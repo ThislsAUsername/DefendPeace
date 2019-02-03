@@ -14,6 +14,7 @@ import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameAction.ActionType;
 import Engine.GameActionSet;
+import Engine.GameInstance;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
@@ -31,6 +32,22 @@ import Units.Weapons.Weapon;
  */
 public class Muriel implements AIController
 {
+  private static class instantiator implements AIMaker
+  {
+    @Override
+    public AIController create(GameInstance gi, Commander co)
+    {
+      return new Muriel(co, gi.commanders);
+    }
+
+    @Override
+    public String getName()
+    {
+      return "Muriel";
+    }
+  }
+  public static final AIMaker info = new instantiator();
+  
   private Queue<GameAction> queuedActions = new ArrayDeque<GameAction>();
 
   private Commander myCo = null;
