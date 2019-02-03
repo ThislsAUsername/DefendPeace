@@ -30,7 +30,7 @@ public class SpenderAI implements AIController
   private static class instantiator implements AIMaker
   {
     @Override
-    public AIController create(GameInstance gi, Commander co)
+    public AIController create(Commander co)
     {
       return new SpenderAI(co);
     }

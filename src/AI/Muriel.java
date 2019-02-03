@@ -35,9 +35,9 @@ public class Muriel implements AIController
   private static class instantiator implements AIMaker
   {
     @Override
-    public AIController create(GameInstance gi, Commander co)
+    public AIController create(Commander co)
     {
-      return new Muriel(co, gi.commanders);
+      return new Muriel(co);
     }
 
     @Override
@@ -64,10 +64,13 @@ public class Muriel implements AIController
 
   private ArrayList<XYCoord> nonAlliedProperties; // set from AIUtils.
 
-  public Muriel(Commander co, Commander[] allCos )
+  public Muriel(Commander co)
   {
     myCo = co;
+  }
 
+  private void init(Commander[] allCos)
+  {
     // Initialize UnitModel collections.
     ArrayList<UnitModel> myUnitModels = new ArrayList<UnitModel>();
     enemyCos = new ArrayList<Commander>();
@@ -144,6 +147,8 @@ public class Muriel implements AIController
   @Override
   public void initTurn(GameMap gameMap)
   {
+    if (null == enemyCos)
+      init(gameMap.commanders);
     turnNum++;
     log(String.format("[======== Muriel initializing turn %s for %s =========]", turnNum, myCo));
 

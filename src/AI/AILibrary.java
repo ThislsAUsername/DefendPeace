@@ -30,7 +30,7 @@ public class AILibrary
   public static class NotAnAI implements AIMaker
   {
     @Override
-    public AIController create(GameInstance gi, Commander co)
+    public AIController create(Commander co)
     {
       return null;
     }
