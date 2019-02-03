@@ -19,6 +19,7 @@ import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
+import UI.Art.SpriteArtist.SpriteLibrary;
 import Units.APCModel;
 import Units.AntiAirModel;
 import Units.ArtilleryModel;
@@ -52,6 +53,7 @@ public class Commander extends GameEventListener
   public Set<XYCoord> ownedProperties;
   public ArrayList<COModifier> modifiers;
   public Color myColor;
+  public String factionName = SpriteLibrary.DEFAULT_SPRITE_KEY;
   public static final int DEFAULTSTARTINGMONEY = 0;
   public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
   public static final int CHARGERATIO_HP = 100; // Funds value of 1 HP damage dealt, for the purpose of power charge

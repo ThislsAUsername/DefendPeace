@@ -24,6 +24,8 @@ public class SpriteLibrary
 {
   // This is the physical size of a single map square in pixels.
   public static final int baseSpriteSize = 16;
+  
+  public static final String DEFAULT_SPRITE_KEY = "DEFAULT";
 
   // Define extra colors as needed.
   private static final Color PURPLE = new Color(231, 123, 255 );
@@ -53,10 +55,11 @@ public class SpriteLibrary
   private static HashMap<Color, ColorPalette> buildingColorPalettes;
   private static HashMap<Color, ColorPalette> mapUnitColorPalettes;
   private static HashMap<Color, String> colorNames;
+  private static ArrayList<String> factionNames;
 
   public static Color[] getCOColors()
   {
-    initColors();
+    initResources();
     return mapUnitColorPalettes.keySet().toArray(new Color[0]);
   }
 
@@ -282,13 +285,14 @@ public class SpriteLibrary
    * Top colors are buildings, bottom are units.
    * The key color is the last color on the top row.
    */
-  private static void initColors()
+  private static void initResources()
   {
     if (null == mapUnitColorPalettes )
     {
       buildingColorPalettes = new HashMap<Color, ColorPalette>();
       mapUnitColorPalettes = new HashMap<Color, ColorPalette>();
       colorNames = new HashMap<Color, String>();
+      factionNames = new ArrayList<String>();
 
       // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
       buildingColorPalettes.put(Color.PINK, new ColorPalette(pinkMapBuildingColors));
@@ -308,12 +312,16 @@ public class SpriteLibrary
       colorNames.put(Color.ORANGE, "citrus");
       colorNames.put(PURPLE, "sparking");
 
+      // We want to be able to use the normal units, as well as any others
+      factionNames.add(DEFAULT_SPRITE_KEY);
+
       final File folder = new File("res/unit/faction");
 
       if (folder.canRead())
       {
         for( final File fileEntry : folder.listFiles() )
         {
+          // If it's a file, we assume it's a palette
           if( !fileEntry.isDirectory() )
           {
             String colorName = fileEntry.getAbsolutePath();
@@ -334,6 +342,10 @@ public class SpriteLibrary
               colorNames.put(key, fileEntry.getName().replace(".png", ""));
             }
           }
+          else // If it's a directory, we assume it's a set of map sprites, i.e. a faction.
+          {
+            factionNames.add(fileEntry.getName());
+          }
         }
       }
     }
@@ -341,20 +353,26 @@ public class SpriteLibrary
 
   public static ColorPalette getBuildingColors(Color colorKey)
   {
-    initColors();
+    initResources();
     return buildingColorPalettes.get(colorKey);
   }
 
   public static ColorPalette getMapUnitColors(Color colorKey)
   {
-    initColors();
+    initResources();
     return mapUnitColorPalettes.get(colorKey);
   }
 
   public static String getColorName(Color colorKey)
   {
-    initColors();
+    initResources();
     return colorNames.get(colorKey);
+  }
+
+  public static String[] getFactionNames()
+  {
+    initResources();
+    return factionNames.toArray(new String[0]);
   }
 
   private static class SpriteSetKey
@@ -439,17 +457,21 @@ public class SpriteLibrary
 
   private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
-    System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString());
-    String filestr = getMapUnitSpriteFilename(key.unitTypeKey);
+    String faction = key.commanderKey.factionName;
+    System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString() + " in faction " + faction);
+    String filestr = getMapUnitSpriteFilename(key.unitTypeKey, DEFAULT_SPRITE_KEY != faction);
     UnitSpriteSet spriteSet = new UnitSpriteSet(loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
         getMapUnitColors(key.commanderKey.myColor));
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
 
-  private static String getMapUnitSpriteFilename(UnitModel.UnitEnum unitType)
+  private static String getMapUnitSpriteFilename(UnitModel.UnitEnum unitType, boolean isFaction)
   {
     StringBuffer spriteFile = new StringBuffer();
-    spriteFile.append("res/unit/").append(unitType.toString().toLowerCase()).append("_map.png");
+    spriteFile.append("res/unit/");
+    if( isFaction )
+      spriteFile.append("faction/");
+    spriteFile.append(unitType.toString().toLowerCase()).append("_map.png");
     return spriteFile.toString();
   }
 
