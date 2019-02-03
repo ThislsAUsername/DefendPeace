@@ -32,10 +32,11 @@ public class CommanderLibrary
     Commander co = info.getCurrentCO().maker.create();
 
     co.myColor = info.getCurrentColor();
+    co.factionName = info.getCurrentFaction();
     
     co.team = info.getCurrentTeam();
     
-    // TODO: AI and faction
+    // TODO: AI
 
     return co;
   }

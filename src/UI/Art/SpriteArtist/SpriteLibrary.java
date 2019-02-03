@@ -459,18 +459,18 @@ public class SpriteLibrary
   {
     String faction = key.commanderKey.factionName;
     System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString() + " in faction " + faction);
-    String filestr = getMapUnitSpriteFilename(key.unitTypeKey, DEFAULT_SPRITE_KEY != faction);
+    String filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction);
     UnitSpriteSet spriteSet = new UnitSpriteSet(loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
         getMapUnitColors(key.commanderKey.myColor));
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
 
-  private static String getMapUnitSpriteFilename(UnitModel.UnitEnum unitType, boolean isFaction)
+  private static String getMapUnitSpriteFilename(UnitModel.UnitEnum unitType, String faction)
   {
     StringBuffer spriteFile = new StringBuffer();
     spriteFile.append("res/unit/");
-    if( isFaction )
-      spriteFile.append("faction/");
+    if( DEFAULT_SPRITE_KEY != faction )
+      spriteFile.append("faction/").append(faction).append("/");
     spriteFile.append(unitType.toString().toLowerCase()).append("_map.png");
     return spriteFile.toString();
   }

@@ -5,8 +5,6 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
-import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderLibrary;
 import CommandingOfficers.CommanderStrong;
 import Engine.XYCoord;
 import Terrain.MapInfo;
@@ -20,7 +18,7 @@ public class SpriteCOSetupArtist
   private static final Color MENUBGCOLOR = new Color(234, 204, 154);
   
   // how long we think color, faction, and AI name can reasonably get
-  private static final int EXPECTED_TEXT_LENGTH = 12;
+  private static final int EXPECTED_TEXT_LENGTH = 8;
   private static final int CO_ELEM_BUFFER = 6;
 
   private static double animHighlightedPlayer = 0;
@@ -37,7 +35,7 @@ public class SpriteCOSetupArtist
    * |        CO        | +---------+ +---------+
    * |                  | |  Team   | | AI Name |
    * |                  | +---------+ +---------+
-   * +------------------+ 
+   * +------------------+           CO
    */
   public static void draw(Graphics g, MapInfo mapInfo, COSetupController control)
   {
@@ -97,8 +95,8 @@ public class SpriteCOSetupArtist
 
     int xSpacing = (int)(
         SpriteLibrary.getCommanderSprites(CommanderStrong.getInfo().name).head.getWidth() + 
-        SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth()*EXPECTED_TEXT_LENGTH + // TODO: adjust for the new elements
-        CO_ELEM_BUFFER*2)*drawScale;
+        SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth()*EXPECTED_TEXT_LENGTH*2 +
+        CO_ELEM_BUFFER*3)*drawScale;
 
     // If we are moving from one option to another, calculate the intermediate draw location.
     if( animHighlightedPlayer != highlightedPlayer )
@@ -161,6 +159,11 @@ public class SpriteCOSetupArtist
       BufferedImage colorFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), SpriteLibrary.getColorName(c), 2*drawScale, 2*drawScale);
       XYCoord colorOffset = getChoiceOffset(OptionList.COLOR, drawW/2, drawH/2, drawScale);
       SpriteLibrary.drawImageCenteredOnPoint(g, colorFrame, xCenter+colorOffset.xCoord, yCenter+colorOffset.yCoord, 1);
+
+      // draw the CO's faction selection
+      BufferedImage factionFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), info.getCurrentFaction(), 2*drawScale, 2*drawScale);
+      XYCoord factionOffset = getChoiceOffset(OptionList.FACTION, drawW/2, drawH/2, drawScale);
+      SpriteLibrary.drawImageCenteredOnPoint(g, factionFrame, xCenter+factionOffset.xCoord, yCenter+factionOffset.yCoord, 1);
       
       // draw the team selection
       String team = (info.getCurrentTeam() > -1)? Integer.toString(info.getCurrentTeam()+1) : "N/A"; // convert to human-readable teams 
@@ -171,10 +174,10 @@ public class SpriteCOSetupArtist
       // Draw CO Portrait
       SpriteLibrary.drawImageCenteredOnPoint(g, portrait, xCenter, yCenter, drawScale);
       
-      // draw the CO name TODO: fix this
+      // draw the CO name
       BufferedImage nameFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), info.getCurrentCO().name, 2*drawScale, 2*drawScale);
       SpriteLibrary.drawImageCenteredOnPoint(g, nameFrame,
-          xCenter+drawW/2+(CO_ELEM_BUFFER + SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth()*EXPECTED_TEXT_LENGTH/2)*drawScale,
+          xCenter+drawW/2 + (CO_ELEM_BUFFER*3/2 + SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth()*EXPECTED_TEXT_LENGTH)*drawScale,
           yCenter+drawH/2 + 3*drawScale, 1);
 
       if (drawArrows)

@@ -14,7 +14,7 @@ import UI.InputHandler.InputAction;
 public class COSetupInfo extends OptionSelector
 {
   // TODO: fiddle with order once they're all in so the UI can make more sense
-  public enum OptionList { COMMANDER, COLOR, TEAM, AI, FACTION };
+  public enum OptionList { COMMANDER, COLOR, FACTION, TEAM, AI };
 
   final CommanderInfo[] COTypes;
   final OptionSelector currentCO;
@@ -22,13 +22,16 @@ public class COSetupInfo extends OptionSelector
   final Color[] colors;
   final OptionSelector currentColor;
 
+  final String[] factions;
+  final OptionSelector currentFaction;
+
   final OptionSelector currentTeam;
 
   // TODO: AI and faction
 
-  public COSetupInfo(int numPlayers, int thisPlayer, ArrayList<CommanderInfo> COTypeList, Color[] colorList)
+  public COSetupInfo(int numPlayers, int thisPlayer, ArrayList<CommanderInfo> COTypeList, Color[] colorList, String[] factionList)
   {
-    super(3); // we don't do AI or faction... yet
+    super(4); // we don't do AI... yet
     COTypes = COTypeList.toArray(new CommanderInfo[0]);
     currentCO = new OptionSelector(COTypes.length);
     currentCO.setSelectedOption(0);
@@ -38,6 +41,10 @@ public class COSetupInfo extends OptionSelector
     colors = colorList;
     currentColor = new OptionSelector(colors.length);
     currentColor.setSelectedOption(thisPlayer);
+
+    factions = factionList;
+    currentFaction = new OptionSelector(factions.length);
+    currentFaction.setSelectedOption(thisPlayer);
 
     currentTeam = new OptionSelector(numPlayers);
     currentTeam.setSelectedOption(0); // 0 should be interpreted as "no team"
@@ -70,10 +77,11 @@ public class COSetupInfo extends OptionSelector
         return currentCO;
       case COLOR:
         return currentColor;
+      case FACTION:
+        return currentFaction;
       case TEAM:
         return currentTeam;
       case AI:
-      case FACTION:
       default:
         return currentCO; // just pretend there's nothing weird going on, and hope nobody notices
     }
@@ -87,6 +95,11 @@ public class COSetupInfo extends OptionSelector
   public Color getCurrentColor()
   {
     return colors[currentColor.getSelectionNormalized()];
+  }
+  
+  public String getCurrentFaction()
+  {
+    return factions[currentFaction.getSelectionNormalized()];
   }
   
   public int getCurrentTeam()
