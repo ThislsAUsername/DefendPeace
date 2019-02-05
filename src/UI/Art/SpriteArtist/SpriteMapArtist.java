@@ -48,7 +48,7 @@ public class SpriteMapArtist
     // This nice little hack will semi-randomly decide what color fog is used for this game.
     // It switches every 10 seconds, so two games started 10 seconds apart will have different fog settings.
     String strTime = Long.toString(System.currentTimeMillis());
-    if( myGame.isFogEnabled() || (Integer.parseInt(new String() + (strTime.charAt(strTime.length() - 5))) % 2 == 0) )
+    if( !myGame.isFogEnabled() || (Integer.parseInt(new String() + (strTime.charAt(strTime.length() - 5))) % 2 == 0) )
     {
       FOG_COLOR = new Color(72, 72, 96, 200); // dark blue
       HIGHLIGHT_COLOR = new Color(255, 255, 255, 160); // white
