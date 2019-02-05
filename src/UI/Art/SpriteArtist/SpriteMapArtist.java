@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.Path.PathNode;
+import Engine.XYCoord;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.MapChangeEvent;
 import Terrain.GameMap;
@@ -216,6 +217,17 @@ public class SpriteMapArtist
     }
   }
 
+  private void redrawBaseTile(XYCoord coord)
+  {
+    GameMap gameMap = myGame.gameMap;
+    // Get the Graphics object of the local map image, to use for drawing.
+    Graphics g = baseMapImage.getGraphics();
+
+    // Fetch the relevant sprite set for this terrain type and have it draw itself.
+    TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(coord.xCoord, coord.yCoord));
+    spriteSet.drawTerrain(g, gameMap, coord.xCoord, coord.yCoord, drawScale, false);
+  }
+
   private static class MapImageUpdater extends GameEventListener
   {
     SpriteMapArtist myArtist;
@@ -227,7 +239,9 @@ public class SpriteMapArtist
     @Override
     public void receiveMapChangeEvent(MapChangeEvent event)
     {
-      myArtist.buildMapImage();
+      XYCoord xyc = event.getStartPoint();
+      if( null != xyc ) myArtist.redrawBaseTile(xyc); // Redraw one tile if that's all that changed.
+      else myArtist.buildMapImage(); // Redraw the whole map if we have to.
     }
   }
 }
