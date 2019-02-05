@@ -63,4 +63,5 @@ public abstract class GameEventListener
   public void receiveResupplyEvent(ResupplyEvent event){};
   public void receiveUnitDieEvent(UnitDieEvent event){};
   public void receiveUnloadEvent(UnloadEvent event){};
+  public void receiveMapChangeEvent(MapChangeEvent event){};
 }

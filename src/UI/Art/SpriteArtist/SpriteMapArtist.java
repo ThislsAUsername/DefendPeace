@@ -7,6 +7,8 @@ import java.awt.image.BufferedImage;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.Path.PathNode;
+import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.MapChangeEvent;
 import Terrain.GameMap;
 import UI.MapView;
 import UI.Art.FillRectArtist.FillRectMapArtist;
@@ -18,6 +20,7 @@ public class SpriteMapArtist
   private MapView myView;
 
   BufferedImage baseMapImage;
+  MapImageUpdater baseMapImageUpdater;
 
   private int drawScale;
   private int tileSize;
@@ -59,6 +62,8 @@ public class SpriteMapArtist
 
     // Build base map image.
     buildMapImage();
+    baseMapImageUpdater = new MapImageUpdater(this);
+    GameEventListener.registerEventListener(baseMapImageUpdater);
   }
 
   public void drawBaseTerrain(Graphics g, GameMap gameMap, int viewX, int viewY, int viewW, int viewH)
@@ -208,6 +213,21 @@ public class SpriteMapArtist
         TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(x, y));
         spriteSet.drawTerrain(g, gameMap, x, y, drawScale, false);
       }
+    }
+  }
+
+  private static class MapImageUpdater extends GameEventListener
+  {
+    SpriteMapArtist myArtist;
+    MapImageUpdater(SpriteMapArtist artist)
+    {
+      myArtist = artist;
+    }
+
+    @Override
+    public void receiveMapChangeEvent(MapChangeEvent event)
+    {
+      myArtist.buildMapImage();
     }
   }
 }
