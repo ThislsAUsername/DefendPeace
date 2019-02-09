@@ -454,11 +454,14 @@ public class MapController implements IController, GameInputHandler.StateChanged
     // Assign the new input mode.
     inputMode = input;
 
-    // If we are changing input modes, we
-    // know we don't have a valid action right now.
-    myGameInputHandler.reset();
-    contemplatedAction.clear();
-    currentMenu = null;
+    if( null != myGameInputHandler )
+    {
+      // If we are changing input modes, we
+      // know we don't have a valid action right now.
+      myGameInputHandler.reset();
+      contemplatedAction.clear();
+      currentMenu = null;
+    }
   }
 
   /**
@@ -617,7 +620,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
     nextSeekIndex = 0;
 
     // Tell the game a turn has changed. This will update the active CO.
-    myGame.turn();
+    GameEventQueue turnEvents = myGame.turn();
+    myView.animate(turnEvents);
 
     // Reinitialize the InputStateHandler for the new turn.
     myGameInputHandler = new GameInputHandler(myGame.activeCO.myView, myGame.activeCO, this);

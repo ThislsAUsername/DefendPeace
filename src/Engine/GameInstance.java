@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
-import Terrain.GameMap;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
@@ -117,7 +117,7 @@ public class GameInstance
    * Activates the turn for the next available CO.
    * @param events
    */
-  public void turn()
+  public GameEventQueue turn()
   {
     // Store the cursor location for the current CO.
     playerCursors.put(activeCoNum, new XYCoord(cursorX, cursorY));
@@ -139,7 +139,7 @@ public class GameInstance
     setCursorLocation(playerCursors.get(activeCoNum).xCoord, playerCursors.get(activeCoNum).yCoord);
 
     // Initialize the next turn, recording any events that will occur.
-    activeCO.initTurn(gameMap);
+    return activeCO.initTurn(gameMap);
   }
 
   /**

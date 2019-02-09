@@ -79,7 +79,7 @@ public class CommanderCinder extends Commander
    * Purchase price problems reset at the start of turn.
    */
   @Override
-  public void initTurn(GameMap map)
+  public GameEventQueue initTurn(GameMap map)
   {
     // If we haven't initialized our buildable locations yet, do so.
     if( buildCounts.size() < 1 )
@@ -99,7 +99,7 @@ public class CommanderCinder extends Commander
       }
 
     setPrices(0);
-    super.initTurn(map);
+    return super.initTurn(map);
   }
 
   @Override
