@@ -11,7 +11,6 @@ import java.util.HashMap;
 import javax.imageio.ImageIO;
 
 import CommandingOfficers.Commander;
-import CommandingOfficers.CommanderLibrary;
 import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
@@ -175,9 +174,9 @@ public class SpriteLibrary
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/pillar_clear.png"), w * 2, h * 2);
     }
-    else if( terrainType == TerrainType.SILO )
+    else if( terrainType == TerrainType.BUNKER )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/silo_clear.png"), w, h);
+      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/silo_clear.png"), w*2, h*2);
     }
     else if( terrainType == TerrainType.DUNES )
     {}
