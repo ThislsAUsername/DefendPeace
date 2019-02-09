@@ -39,6 +39,12 @@ public class MapMaster extends GameMap
       System.out.println("Warning! Wrong number of COs specified for map " + mapInfo.mapName);
       initOK = false;
     }
+    if( (mapInfo.mapUnits.size() > 0) && (mapInfo.mapUnits.size() != COs.length ) )
+    {
+      System.out.println("Warning! Wrong number of unit arrays specified for map " + mapInfo.mapName);
+      System.out.println(String.format("         Expected zero or %s; received %s", COs.length, mapInfo.mapUnits.size()));
+    }
+
     // Assign properties according to MapInfo's direction.
     for( int co = 0; co < mapInfo.COProperties.length && co < COs.length; ++co )
     {
@@ -75,7 +81,7 @@ public class MapMaster extends GameMap
         }
       }
 
-      if( mapInfo.mapUnits.size() > co )
+      if( !mapInfo.mapUnits.isEmpty() )
       {
         Map<XYCoord, UnitEnum> unitSet = mapInfo.mapUnits.get(co);
         for( Entry<XYCoord, UnitEnum> unitEntry : unitSet.entrySet() )
