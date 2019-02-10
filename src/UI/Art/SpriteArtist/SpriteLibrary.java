@@ -176,7 +176,7 @@ public class SpriteLibrary
     }
     else if( terrainType == TerrainType.BUNKER )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/silo_clear.png"), w*2, h*2);
+      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/bunker_clear.png"), w*2, h*2);
     }
     else if( terrainType == TerrainType.DUNES )
     {}
