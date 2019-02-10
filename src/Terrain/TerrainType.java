@@ -57,7 +57,7 @@ public class TerrainType
   private static final String AIRPORT_NAME = "AIRPORT";
   public static final TerrainType AIRPORT = new TerrainType( AIRPORT_FLAGS, AIRPORT_DEFENSE, AIRPORT_COLOR, AIRPORT_NAME);
 
-  private static final int BRIDGE_FLAGS = LAND | WATER;
+  private static final int BRIDGE_FLAGS = LAND;
   private static final int BRIDGE_DEFENSE = 0;
   private static final Color BRIDGE_COLOR = new Color(189, 189, 189);
   private static final String WATER_NAME = "WATER";

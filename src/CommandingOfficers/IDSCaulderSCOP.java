@@ -70,6 +70,23 @@ public class IDSCaulderSCOP extends Commander
     {
       myCommander.addCOModifier(new CODamageModifier(40));
       myCommander.addCOModifier(new CODefenseModifier(25));
+      for( Unit unit : myCommander.units )
+      {
+        double HP = unit.getPreciseHP();
+        double maxHP = unit.model.maxHP;
+        if( HP < maxHP )
+        {
+          int neededHP = (int) Math.min(maxHP - unit.getHP(), 3);
+          double proportionalCost = unit.model.getCost() / maxHP;
+          int repairedHP = neededHP;
+          while (myCommander.money < repairedHP * proportionalCost)
+          {
+            repairedHP--;
+          }
+          myCommander.money -= repairedHP * proportionalCost;
+          unit.alterHP(repairedHP);
+        }
+      }
     }
   }
 }
