@@ -621,7 +621,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     // Tell the game a turn has changed. This will update the active CO.
     GameEventQueue turnEvents = myGame.turn();
-    myView.animate(turnEvents);
 
     // Reinitialize the InputStateHandler for the new turn.
     myGameInputHandler = new GameInputHandler(myGame.activeCO.myView, myGame.activeCO, this);
@@ -630,6 +629,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     unitsToInit.addAll(myGame.activeCO.units);
 
     // Kick off the animation cycle, which will animate/init each unit.
+    myView.animate(turnEvents);
     changeInputMode(InputMode.ANIMATION);
 
     myView.animate(null);
