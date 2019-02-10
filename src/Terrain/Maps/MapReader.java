@@ -220,7 +220,7 @@ public class MapReader extends IMapBuilder
         return SH;
       case "PI":
         return PI;
-      case "SU":
+      case "BK":
         return BK;
       case "SR":
         return SR;
