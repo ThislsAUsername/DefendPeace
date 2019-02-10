@@ -188,7 +188,8 @@ public class CommanderAve extends Commander
         // Get the leaf; only noted with at least SNOW_THRESHOLD are able to be expanded.
         XYCoord leaf = leafStack.pop();
         roots.add(leaf); // We are processing this node and don't want to revisit it.
-        disconnected.remove(leaf); // Don't later consider this tile for melting.
+        disconnected.remove(leaf); // Don't consider this tile for melting later.
+        log(String.format("Tile %s is connected", leaf));
 
         if( oldSnowMap[leaf.xCoord][leaf.yCoord] <= SNOW_THRESHOLD )
         {
@@ -264,7 +265,7 @@ public class CommanderAve extends Commander
             snowToSpread -= payment;
             snowMap[coord.xCoord][coord.yCoord] += payment;
             if( (oldSnowMap[coord.xCoord][coord.yCoord] < SNOW_THRESHOLD) 
-                && (snowMap[coord.xCoord][coord.yCoord] > SNOW_THRESHOLD) )
+                && (snowMap[coord.xCoord][coord.yCoord] >= SNOW_THRESHOLD) )
             {
               Environment newEnvi = Environment.getTile(gameMap.getEnvironment(coord).terrainType, Weathers.SNOW);
               GameEvent event = new MapChangeEvent(coord, newEnvi);
@@ -285,6 +286,13 @@ public class CommanderAve extends Commander
       log(getSnowMapAsString());
       log("---------- FINISHED current set of leaves -------------------" );
     } // ~while( !leaves.isEmpty() )
+
+    // If we run out of iterations, make sure we record that the
+    // last set of "next tiles" is still connected.
+    for( XYCoord front : frontier )
+    {
+      disconnected.remove(front);
+    }
 
     // Any tiles that are no longer being fed snow will melt over time.
     for(XYCoord dis : disconnected )

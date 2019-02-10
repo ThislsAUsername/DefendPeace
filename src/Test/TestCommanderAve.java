@@ -45,7 +45,7 @@ public class TestCommanderAve extends TestCase
     boolean testPassed = true;
 
     testPassed &= validate(testSnowSpread(), "  Snow spread test failed!");
-    testPassed &= validate(testCapture(), "  Snow spread test failed!");
+    testPassed &= validate(testCapture(), "  Capture test failed!");
     testPassed &= validate(testGlacio(), "  Glacio test failed!");
 
     return testPassed;
