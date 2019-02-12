@@ -20,4 +20,7 @@ public interface IView
    * Renders the view using the specified graphics.
    */
   public void render(Graphics g);
+
+  /** Do any post-action cleanup, free resources, etc. */
+  public abstract void cleanup();
 }

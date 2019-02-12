@@ -151,4 +151,10 @@ public class SpriteMainUIView implements IView
       SpriteLibrary.drawImageCenteredOnPoint(g, menuText, x, y, SpriteOptions.getDrawScale());
     }
   }
+
+  @Override
+  public void cleanup()
+  {
+    // No cleanup required.
+  }
 }
