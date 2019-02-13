@@ -21,7 +21,7 @@ import Terrain.Location;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
-import Units.MoveTypes.FootMech;
+import Units.UnitModel;
 
 /**
  * Commander Ave (AH-vey) loves the cold, and her power allows her to inexorably, if slowly,
@@ -64,6 +64,19 @@ public class CommanderAve extends Commander
   public CommanderAve()
   {
     super(coInfo);
+
+    // Ave's units are fine in the snow, but not in the trees.
+    for( UnitModel um : unitModels )
+    {
+      for( TerrainType terrain : TerrainType.TerrainTypeList )
+      {
+        um.propulsion.setMoveCost(Weathers.SNOW, terrain, um.propulsion.getMoveCost(Weathers.CLEAR, terrain));
+      }
+      for( Weathers weather : Weathers.values() )
+      {
+        um.propulsion.setMoveCost(weather, TerrainType.FOREST, um.propulsion.getMoveCost(weather, TerrainType.FOREST)+1);
+      }
+    }
 
     addCommanderAbility(new GlacioAbility(this));
     CitySnowifier snowifier = new CitySnowifier(this);
@@ -501,19 +514,6 @@ public class CommanderAve extends Commander
         XYCoord where = location.getCoordinates();
         Ave.snowMap[where.xCoord][where.yCoord] += SNOW_THRESHOLD;
       }
-    }
-  }
-
-  ////////////////////////////////////////////////////////////////////////////////////////////
-
-  private static class AveMech extends FootMech
-  {
-    public AveMech()
-    {
-      // Initialize the default land-based movement costs, then override specific values.
-      super();
-      setMoveCost(Weathers.SNOW, TerrainType.MOUNTAIN, 1);
-      setMoveCost(TerrainType.FOREST, 2);
     }
   }
 }

@@ -60,7 +60,7 @@ public class UnitModel
     }
     for( WeaponModel action : weapons )
     {
-      weaponModels.add(action);
+      weaponModels.add(new WeaponModel(action));
     }
   }
 
@@ -83,7 +83,7 @@ public class UnitModel
     idleFuelBurn = pIdleFuelBurn;
     visionRange = pVision;
     movePower = pMovePower;
-    propulsion = pPropulsion;
+    propulsion = new MoveType(pPropulsion);
     healableHabs = new HashSet<TerrainType>();
     for( TerrainType terrain : TerrainType.TerrainTypeList )
     {
