@@ -48,6 +48,7 @@ public class CommanderAve extends Commander
   public static final int SNOW_PER_TURN = 400;
   public static final int SNOW_MELT_RATE = 100;
   private int MAX_SNOW_SPREAD_RANGE = 5;
+  private CitySnowifier snowifier;
 
   private static final CommanderInfo coInfo = new CommanderInfo("Ave", new instantiator());  
   private static class instantiator implements COMaker
@@ -79,7 +80,7 @@ public class CommanderAve extends Commander
     }
 
     addCommanderAbility(new GlacioAbility(this));
-    CitySnowifier snowifier = new CitySnowifier(this);
+    snowifier = new CitySnowifier(this);
     GameEventListener.registerEventListener(snowifier);
   }
 
@@ -508,7 +509,7 @@ public class CommanderAve extends Commander
     @Override
     public void receiveCaptureEvent(Unit unit, Location location)
     {
-      if( unit.CO == Ave && (unit.getCaptureProgress() >= 10) )
+      if( unit.CO == Ave && (location.getOwner() == Ave) )
       {
         // Just mark the tile as "snowy" until the next turnInit(), since we can't do a MapChangeEvent from here.
         XYCoord where = location.getCoordinates();
