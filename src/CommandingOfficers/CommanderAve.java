@@ -10,6 +10,7 @@ import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -104,6 +105,19 @@ public class CommanderAve extends Commander
 
     if(snowLoggingEnabled) log("[Commander Ave.initTurn] Snow Map: \n" + getSnowMapAsString());
     return returnEvents;
+  }
+
+  /** Ave's units take less cover from forests. */
+  @Override
+  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  {
+    if( params.defender.CO == this // We are defending, in a FOREST
+        && (params.combatRef.gameMap.getEnvironment(params.defender.x, params.defender.y).terrainType == TerrainType.FOREST)
+        && (params.defender.model.chassis != UnitModel.ChassisEnum.AIR_HIGH)  // And our unit is actually on the ground.
+        && (params.defender.model.chassis != UnitModel.ChassisEnum.AIR_LOW))
+    {
+      params.terrainDefense--;
+    }
   }
 
   private boolean snowLoggingEnabled = false;
