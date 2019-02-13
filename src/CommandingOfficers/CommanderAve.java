@@ -277,7 +277,7 @@ public class CommanderAve extends Commander
             log("    moving " + payment + " snow to " + coord);
             snowToSpread -= payment;
             snowMap[coord.xCoord][coord.yCoord] += payment;
-            if( (oldSnowMap[coord.xCoord][coord.yCoord] < SNOW_THRESHOLD) 
+            if( (gameMap.getEnvironment(coord).weatherType != Weathers.SNOW)
                 && (snowMap[coord.xCoord][coord.yCoord] >= SNOW_THRESHOLD) )
             {
               Environment newEnvi = Environment.getTile(gameMap.getEnvironment(coord).terrainType, Weathers.SNOW);
@@ -314,7 +314,7 @@ public class CommanderAve extends Commander
       snowMap[dis.xCoord][dis.yCoord] = (oldVal - SNOW_MELT_RATE < 0)? 0 : oldVal - SNOW_MELT_RATE;
       log("Snow at " + dis + " melting from " + oldVal + " to " + snowMap[dis.xCoord][dis.yCoord]);
       
-      if( (oldVal > SNOW_THRESHOLD) && snowMap[dis.xCoord][dis.yCoord] < SNOW_THRESHOLD )
+      if( (gameMap.getEnvironment(dis).weatherType == Weathers.SNOW) && snowMap[dis.xCoord][dis.yCoord] < SNOW_THRESHOLD )
       {
         Environment newEnvi = Environment.getTile(gameMap.getEnvironment(dis).terrainType, Weathers.CLEAR);
         GameEvent event = new MapChangeEvent(dis, newEnvi);
