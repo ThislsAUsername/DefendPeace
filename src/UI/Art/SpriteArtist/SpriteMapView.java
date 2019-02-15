@@ -290,7 +290,7 @@ public class SpriteMapView extends MapView
       if( null != currentActor )
       {
         unitArtist.drawUnit(mapGraphics, currentActor, currentActor.x, currentActor.y, fastAnimIndex);
-        unitArtist.drawUnitIcons(mapGraphics, currentActor, currentActor.x, currentActor.y);
+        unitArtist.drawUnitIcons(mapGraphics, currentActor, currentActor.x, animIndex, currentActor.y);
       }
 
       if( currentAnimation != null )
@@ -469,7 +469,7 @@ public class SpriteMapView extends MapView
           Unit currentActor = mapController.getContemplatedActor();
           if( resident != currentActor )
           {
-            unitArtist.drawUnitIcons(g, resident, resident.x, resident.y);
+            unitArtist.drawUnitIcons(g, resident, resident.x, resident.y, animIndex);
           }
         }
       }

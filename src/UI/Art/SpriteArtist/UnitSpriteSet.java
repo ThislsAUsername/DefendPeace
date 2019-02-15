@@ -4,6 +4,9 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import CommandingOfficers.Commander;
 import Units.Unit;
@@ -157,7 +160,7 @@ public class UnitSpriteSet
     }
   }
 
-  public void drawUnitIcons(Graphics g, Commander activeCO, Unit u, int drawX, int drawY, int drawScale)
+  public void drawUnitIcons(Graphics g, Commander[] COs, Unit u, int animIndex, int drawX, int drawY, int drawScale)
   {
     int unitHeight = turnDone.getFrame(0).getHeight();
 
@@ -169,13 +172,26 @@ public class UnitSpriteSet
           null);
     }
     
-    // Draw a Commander-defined symbol, if applicable.
-    char symbol = activeCO.getSymbol(u);
-    if( '\0' != symbol) // optimization; the null char is invisible
+    // Collect all the Commanders' desired symbols
+    // This is ripe for optimization, possibly, but tracking the data and keeping it updated is probably more effort than it's worth.
+    Map<Commander, Character> coSymbols = new HashMap<Commander, Character>();
+    for( Commander co : COs )
     {
-      BufferedImage num = SpriteLibrary.getColoredMapTextSprites(activeCO.myColor).get(symbol);
+      char symbol = co.getCustomSymbol(u);
+      if( '\0' != symbol ) // null char is our sentry value
+      {
+        coSymbols.put(co, Character.toUpperCase(symbol));
+      }
+    }
+
+    // Draw one of them, based on our animation index
+    if( !coSymbols.isEmpty() )
+    {
+      @SuppressWarnings("unchecked") // Can't create an array of generic Entries to pass into toArray(), so we have to cast after the fact
+      Entry<Commander, Character> entry = (Entry<Commander, Character>) coSymbols.entrySet().toArray()[animIndex%coSymbols.size()];
+      BufferedImage symbol = SpriteLibrary.getColoredMapTextSprites(entry.getKey().myColor).get(entry.getValue());
       // draw in the upper right corner
-      g.drawImage(num, drawX + ((unitHeight * drawScale) / 2), drawY, num.getWidth() * drawScale, num.getHeight() * drawScale, null);
+      g.drawImage(symbol, drawX + ((unitHeight * drawScale) / 2), drawY, symbol.getWidth() * drawScale, symbol.getHeight() * drawScale, null);
     }
 
     // Draw the transport icon if the unit is holding another unit.

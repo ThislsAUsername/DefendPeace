@@ -62,17 +62,13 @@ public class CommanderVenge extends Commander
   }
 
   @Override
-  public char getSymbol(Unit unit)
+  public char getCustomSymbol(Unit unit)
   {
-    // If the unit belongs to someone else, let the owner print something.
-    if (this != unit.CO && '\0' != unit.CO.getSymbol(unit))
-      return unit.CO.getSymbol(unit);
-    
     // If we can get a vengeance boost against this unit, let our player know.
     if (aggressors.contains(unit))
       return 'V';
     
-    return '\0';
+    return super.getCustomSymbol(unit);
   }
 
   @Override
