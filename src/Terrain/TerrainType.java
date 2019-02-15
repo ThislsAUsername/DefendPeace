@@ -69,11 +69,11 @@ public class TerrainType
   private static final String CITY_NAME = "CITY";
   public static final TerrainType CITY = new TerrainType( CITY_FLAGS, CITY_DEFENSE, CITY_COLOR, CITY_NAME );
   
-  private static final int SILO_FLAGS = LAND;
-  private static final int SILO_DEFENSE = 3;
-  private static final Color SILO_COLOR = new Color(155, 155, 255);
-  private static final String SILO_NAME = "SILO";
-  public static final TerrainType SILO = new TerrainType( SILO_FLAGS, SILO_DEFENSE, SILO_COLOR, SILO_NAME );
+  private static final int BUNKER_FLAGS = LAND;
+  private static final int BUNKER_DEFENSE = 3;
+  private static final Color BUNKER_COLOR = new Color(155, 155, 255);
+  private static final String BUNKER_NAME = "BUNKER";
+  public static final TerrainType BUNKER = new TerrainType( BUNKER_FLAGS, BUNKER_DEFENSE, BUNKER_COLOR, BUNKER_NAME );
   
   private static final int PILLAR_FLAGS = 0;
   private static final int PILLAR_DEFENSE = 0;
@@ -162,7 +162,7 @@ public class TerrainType
 
   // List of all terrain types.
   public static final TerrainType[] TerrainTypeList = {
-    AIRPORT, BRIDGE, CITY, SILO, PILLAR, DUNES, FACTORY, FOREST, GRASS, HEADQUARTERS, LAB, MOUNTAIN, REEF, RIVER, ROAD, SEA, SEAPORT, SHOAL
+    AIRPORT, BRIDGE, CITY, BUNKER, PILLAR, DUNES, FACTORY, FOREST, GRASS, HEADQUARTERS, LAB, MOUNTAIN, REEF, RIVER, ROAD, SEA, SEAPORT, SHOAL
   };
 
   @Override

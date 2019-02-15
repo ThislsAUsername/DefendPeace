@@ -379,7 +379,7 @@ public class TerrainSpriteSet
       terrainBases.put(TerrainType.RIVER, TerrainType.GRASS);
       terrainBases.put(TerrainType.ROAD, TerrainType.GRASS);
       terrainBases.put(TerrainType.PILLAR, TerrainType.GRASS);
-      terrainBases.put(TerrainType.SILO, TerrainType.GRASS);
+      terrainBases.put(TerrainType.BUNKER, TerrainType.GRASS);
 
       terrainBases.put(TerrainType.BRIDGE, TerrainType.SHOAL);
       terrainBases.put(TerrainType.SEAPORT, TerrainType.SHOAL);

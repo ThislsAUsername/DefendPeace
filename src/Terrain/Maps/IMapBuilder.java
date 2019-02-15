@@ -8,7 +8,7 @@ public class IMapBuilder
   protected static final TerrainType BR = TerrainType.BRIDGE;
   protected static final TerrainType CT = TerrainType.CITY;
   protected static final TerrainType PI = TerrainType.PILLAR;
-  protected static final TerrainType SU = TerrainType.SILO;
+  protected static final TerrainType BK = TerrainType.BUNKER;
   protected static final TerrainType DN = TerrainType.DUNES;
   protected static final TerrainType FC = TerrainType.FACTORY;
   protected static final TerrainType AP = TerrainType.AIRPORT;
@@ -24,6 +24,6 @@ public class IMapBuilder
   protected static final TerrainType SE = TerrainType.SEA;
   
   protected static final TerrainType LB = TerrainType.HEADQUARTERS; // lab -> HQ
-  protected static final TerrainType SR = TerrainType.SILO; // full silo, but empty because lol
-  protected static final TerrainType TW = TerrainType.SILO; // tower
+  protected static final TerrainType SR = TerrainType.BUNKER; // full silo, but empty because lol
+  protected static final TerrainType TW = TerrainType.BUNKER; // tower
 }
