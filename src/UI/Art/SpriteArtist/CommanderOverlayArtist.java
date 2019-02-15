@@ -99,12 +99,13 @@ public class CommanderOverlayArtist
   /**
    * Generate an ability-power bar for the given Commander at 1x size. The requester is responsible for applying any scale factors.
    */
-  public static BufferedImage buildCoPowerBar(Commander co, int[] abilityPoints, double currentPower, boolean leftSide)
+  public static BufferedImage buildCoPowerBar(Commander co, double[] abilityPoints, double currentPower, boolean leftSide)
   {
+    final double pixelsPerPowerUnit = 3.0;
     int slowAnimIndex = (animIndex/32) % 2;
 
     // Find the most expensive ability so we know how long to draw the bar.
-    int maxAP = 0;
+    double maxAP = 0;
     for( int i = 0; i < abilityPoints.length; ++i )
     {
       maxAP = (maxAP < abilityPoints[i]) ? abilityPoints[i] : maxAP;
@@ -112,7 +113,7 @@ public class CommanderOverlayArtist
     final int imageBufferW = 2;
 
     // Unfortunately, the power bar is a "some assembly required" kinda deal, so we have to put it together here.
-    BufferedImage powerBar = SpriteLibrary.getCoOverlayPowerBar(co, maxAP, co.getAbilityPower());
+    BufferedImage powerBar = SpriteLibrary.getCoOverlayPowerBar(co, maxAP, currentPower, pixelsPerPowerUnit);
     Sprite powerBarPieces = SpriteLibrary.getCoOverlayPowerBarAPs(co);
 
     // Make a new BufferedImage to hold the composited power bar, and set it all transparent to start.
@@ -127,7 +128,7 @@ public class CommanderOverlayArtist
     boolean atLeastOne = false;
     for( int i = 0; i < abilityPoints.length; ++i )
     {
-      int requiredPower = abilityPoints[i];
+      double requiredPower = abilityPoints[i];
       double diff = requiredPower - currentPower;
       atLeastOne |= (diff < 0);
       BufferedImage segment = (diff > 1) ? powerBarPieces.getFrame(0)  // empty
@@ -135,7 +136,7 @@ public class CommanderOverlayArtist
               : ((diff > 0) ? powerBarPieces.getFrame(2)               // 2/3 full
                   : ((slowAnimIndex == 0) ? powerBarPieces.getFrame(3) // filled
                       : powerBarPieces.getFrame(4))) );                // blinking
-      int drawLoc = (requiredPower * 2) - imageBufferW - 3; // -3 to center the image around the power level.
+      int drawLoc = ((int) (requiredPower*pixelsPerPowerUnit)) - imageBufferW - 3; // -3 to center the image around the power level.
       barGfx.drawImage(segment, drawLoc, 0, null);
     }
     

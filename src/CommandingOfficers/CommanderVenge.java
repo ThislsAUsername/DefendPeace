@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COModifier;
-import Engine.Combat.BattleInstance;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.BattleInstance.BattleParams;
+import Engine.Combat.BattleInstance.CombatContext;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -72,7 +72,7 @@ public class CommanderVenge extends Commander
   }
 
   @Override
-  public void changeCombatContext(BattleInstance instance)
+  public void changeCombatContext(CombatContext instance)
   {
     // If we're swapping, and we can counter, and we're on the defensive, do the swap.
     if (counterFirst && instance.canCounter && this == instance.defender.CO )
