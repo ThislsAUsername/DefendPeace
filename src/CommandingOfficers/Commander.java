@@ -237,10 +237,11 @@ public class Commander extends GameEventListener
   }
   
   /**
-   * Returns a character to be displayed on the unit while the map is seen from your perspective.
+   * Returns a character to be displayed on the unit.
    * Primary usage should be pieces of info that aren't otherwise immediately apparent from the map.
+   * Our rendering only supports alphanumeric values at this time.
    */
-  public char getCustomSymbol(Unit unit)
+  public char getUnitMarking(Unit unit)
   {
     // We don't have anything useful to print, so don't.
     return '\0';

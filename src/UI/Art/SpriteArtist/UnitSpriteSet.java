@@ -177,7 +177,7 @@ public class UnitSpriteSet
     Map<Commander, Character> coSymbols = new HashMap<Commander, Character>();
     for( Commander co : COs )
     {
-      char symbol = co.getCustomSymbol(u);
+      char symbol = co.getUnitMarking(u);
       if( '\0' != symbol ) // null char is our sentry value
       {
         coSymbols.put(co, Character.toUpperCase(symbol));

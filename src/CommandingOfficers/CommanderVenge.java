@@ -62,13 +62,13 @@ public class CommanderVenge extends Commander
   }
 
   @Override
-  public char getCustomSymbol(Unit unit)
+  public char getUnitMarking(Unit unit)
   {
     // If we can get a vengeance boost against this unit, let our player know.
     if (aggressors.contains(unit))
       return 'V';
     
-    return super.getCustomSymbol(unit);
+    return super.getUnitMarking(unit);
   }
 
   @Override
