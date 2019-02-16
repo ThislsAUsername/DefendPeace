@@ -307,6 +307,7 @@ public class TerrainSpriteSet
     if( null == terrainObjects )
     {
       terrainObjects = new HashSet<TerrainType>();
+      terrainObjects.add(TerrainType.BUNKER);
       terrainObjects.add(TerrainType.CITY);
       terrainObjects.add(TerrainType.FACTORY);
       terrainObjects.add(TerrainType.FOREST);
