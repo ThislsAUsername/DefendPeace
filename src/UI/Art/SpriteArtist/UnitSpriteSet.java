@@ -4,10 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import java.util.ArrayList;
 import CommandingOfficers.Commander;
 import Units.Unit;
 
@@ -172,24 +169,22 @@ public class UnitSpriteSet
           null);
     }
     
-    // Collect all the Commanders' desired symbols
-    // This is ripe for optimization, possibly, but tracking the data and keeping it updated is probably more effort than it's worth.
-    Map<Commander, Character> coSymbols = new HashMap<Commander, Character>();
+    // Collect all the Commanders who desire to mark this unit
+    ArrayList<Commander> markers = new ArrayList<Commander>();
     for( Commander co : COs )
     {
       char symbol = co.getUnitMarking(u);
       if( '\0' != symbol ) // null char is our sentry value
       {
-        coSymbols.put(co, Character.toUpperCase(symbol));
+        markers.add(co);
       }
     }
 
     // Draw one of them, based on our animation index
-    if( !coSymbols.isEmpty() )
+    if( !markers.isEmpty() )
     {
-      @SuppressWarnings("unchecked") // Can't create an array of generic Entries to pass into toArray(), so we have to cast after the fact
-      Entry<Commander, Character> entry = (Entry<Commander, Character>) coSymbols.entrySet().toArray()[animIndex%coSymbols.size()];
-      BufferedImage symbol = SpriteLibrary.getColoredMapTextSprites(entry.getKey().myColor).get(entry.getValue());
+      Commander co = markers.get(animIndex%markers.size());
+      BufferedImage symbol = SpriteLibrary.getColoredMapTextSprites(co.myColor).get(co.getUnitMarking(u));
       // draw in the upper right corner
       g.drawImage(symbol, drawX + ((unitHeight * drawScale) / 2), drawY, symbol.getWidth() * drawScale, symbol.getHeight() * drawScale, null);
     }
