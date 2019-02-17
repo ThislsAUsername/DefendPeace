@@ -19,6 +19,8 @@ public class UnitSpriteSet
   public final int ACTION_MOVESOUTH = 3;
   public final int ACTION_MOVEWEST = 4;
   public final int ACTION_DIE = 5;
+  
+  public final int ANIM_FRAMES_PER_MARK = 3; 
 
   Sprite turnDone;
 
@@ -183,7 +185,7 @@ public class UnitSpriteSet
     // Draw one of them, based on our animation index
     if( !markers.isEmpty() )
     {
-      Commander co = markers.get(animIndex%markers.size());
+      Commander co = markers.get((animIndex%(markers.size()*ANIM_FRAMES_PER_MARK))/ANIM_FRAMES_PER_MARK);
       BufferedImage symbol = SpriteLibrary.getColoredMapTextSprites(co.myColor).get(co.getUnitMarking(u));
       // draw in the upper right corner
       g.drawImage(symbol, drawX + ((unitHeight * drawScale) / 2), drawY, symbol.getWidth() * drawScale, symbol.getHeight() * drawScale, null);
