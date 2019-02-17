@@ -290,7 +290,7 @@ public class SpriteMapView extends MapView
       if( null != currentActor )
       {
         unitArtist.drawUnit(mapGraphics, currentActor, currentActor.x, currentActor.y, fastAnimIndex);
-        unitArtist.drawUnitIcons(mapGraphics, currentActor, currentActor.x, animIndex, currentActor.y);
+        unitArtist.drawUnitIcons(mapGraphics, currentActor, currentActor.x, currentActor.y, animIndex);
       }
 
       if( currentAnimation != null )
