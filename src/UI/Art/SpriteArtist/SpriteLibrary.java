@@ -12,7 +12,6 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import CommandingOfficers.Commander;
-import CommandingOfficers.CommanderLibrary;
 import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
@@ -173,6 +172,14 @@ public class SpriteLibrary
     else if( terrainType == TerrainType.CITY )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/city_clear.png"), w * 2, h * 2);
+    }
+    else if( terrainType == TerrainType.PILLAR )
+    {
+      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/pillar_clear.png"), w * 2, h * 2);
+    }
+    else if( terrainType == TerrainType.BUNKER )
+    {
+      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/bunker_clear.png"), w*2, h*2);
     }
     else if( terrainType == TerrainType.DUNES )
     {}
