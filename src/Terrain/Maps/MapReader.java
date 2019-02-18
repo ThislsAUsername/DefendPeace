@@ -86,12 +86,9 @@ public class MapReader extends IMapBuilder
                 {
                   if( null == landOwnershipMap.get(faction) )
                   {
-                    if( numSides < 4 ) // TODO: add more sides
-                    {
-                      numSides++;
-                      landOwnershipMap.put(faction, new ArrayList<XYCoord>());
-                      landOwnershipMap.get(faction).add(new XYCoord(xCoord, yCoord));
-                    }
+                    numSides++;
+                    landOwnershipMap.put(faction, new ArrayList<XYCoord>());
+                    landOwnershipMap.get(faction).add(new XYCoord(xCoord, yCoord));
                   }
                   else
                     landOwnershipMap.get(faction).add(new XYCoord(xCoord, yCoord));
