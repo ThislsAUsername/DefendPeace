@@ -1,6 +1,5 @@
 package CommandingOfficers;
 
-import java.awt.Color;
 import java.util.ArrayList;
 
 public class CommanderLibrary
@@ -86,15 +85,5 @@ public class CommanderLibrary
 //    commanderList.add( LADavis.getInfo() );
     commanderList.add( TheBeastSturm.getInfo() );
 //    commanderList.add( TheBeast.getInfo() );
-  }
-
-  public static Commander makeCommander( CommanderInfo info, Color color, String faction )
-  {
-    Commander co = info.maker.create();
-
-    co.myColor = color;
-    co.factionName = faction;
-
-    return co;
   }
 }

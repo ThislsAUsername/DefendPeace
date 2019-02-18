@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Map;
 
@@ -29,6 +28,8 @@ public class SpriteLibrary
 {
   // This is the physical size of a single map square in pixels.
   public static final int baseSpriteSize = 16;
+  
+  public static final String DEFAULT_SPRITE_KEY = "DEFAULT";
 
   // Define extra colors as needed.
   private static final Color PURPLE = new Color(231, 123, 255);
@@ -55,28 +56,16 @@ public class SpriteLibrary
   private static Color[] purpleMapUnitColors = { new Color(90, 14, 99), new Color(132, 41, 148), new Color(181, 62, 198),
       new Color(201, 98, 223), new Color(231, 123, 255), new Color(243, 180, 255), };
 
-  private static HashMap<Color, ColorPalette> buildingColorPalettes = new HashMap<Color, ColorPalette>(){
-    private static final long serialVersionUID = 1L;
-    {
-      // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
-      put(Color.PINK, new ColorPalette(pinkMapBuildingColors));
-      put(Color.CYAN, new ColorPalette(cyanMapBuildingColors));
-      put(Color.ORANGE, new ColorPalette(orangeMapBuildingColors));
-      put(PURPLE, new ColorPalette(purpleMapBuildingColors));
-    }
-  };
-  private static HashMap<Color, ColorPalette> mapUnitColorPalettes = new HashMap<Color, ColorPalette>(){
-    private static final long serialVersionUID = 1L;
-    {
-      // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
-      put(Color.PINK, new ColorPalette(pinkMapUnitColors));
-      put(Color.CYAN, new ColorPalette(cyanMapUnitColors));
-      put(Color.ORANGE, new ColorPalette(orangeMapUnitColors));
-      put(PURPLE, new ColorPalette(purpleMapUnitColors));
-    }
-  };
+  private static HashMap<Color, ColorPalette> buildingColorPalettes;
+  private static HashMap<Color, ColorPalette> mapUnitColorPalettes;
+  private static HashMap<Color, String> colorNames;
+  private static ArrayList<String> factionNames;
 
-  public static final Color[] coColorList = { Color.PINK, Color.CYAN, Color.ORANGE, PURPLE };
+  public static Color[] getCOColors()
+  {
+    initResources();
+    return mapUnitColorPalettes.keySet().toArray(new Color[0]);
+  }
 
   // TODO: Account for weather?
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
@@ -324,15 +313,101 @@ public class SpriteLibrary
 
     return moveCursorArrowSprite;
   }
-
-  private static ColorPalette getBuildingColors(Color colorKey)
+  
+  /**
+   * Sets up the available palettes for use.
+   * Reads in the first 6 colors on each row.
+   * Top colors are buildings, bottom are units.
+   * The key color is the last color on the top row.
+   */
+  private static void initResources()
   {
+    if (null == mapUnitColorPalettes )
+    {
+      buildingColorPalettes = new HashMap<Color, ColorPalette>();
+      mapUnitColorPalettes = new HashMap<Color, ColorPalette>();
+      colorNames = new HashMap<Color, String>();
+      factionNames = new ArrayList<String>();
+
+      // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
+      buildingColorPalettes.put(Color.PINK, new ColorPalette(pinkMapBuildingColors));
+      buildingColorPalettes.put(Color.CYAN, new ColorPalette(cyanMapBuildingColors));
+      buildingColorPalettes.put(Color.ORANGE, new ColorPalette(orangeMapBuildingColors));
+      buildingColorPalettes.put(PURPLE, new ColorPalette(purpleMapBuildingColors));
+
+      mapUnitColorPalettes.put(Color.PINK, new ColorPalette(pinkMapUnitColors));
+      mapUnitColorPalettes.put(Color.CYAN, new ColorPalette(cyanMapUnitColors));
+      mapUnitColorPalettes.put(Color.ORANGE, new ColorPalette(orangeMapUnitColors));
+      mapUnitColorPalettes.put(PURPLE, new ColorPalette(purpleMapUnitColors));
+
+      // Throw some color names in there for the defaults
+      // toString() is not user-friendly
+      colorNames.put(Color.PINK, "salmon");
+      colorNames.put(Color.CYAN, "cyan");
+      colorNames.put(Color.ORANGE, "citrus");
+      colorNames.put(PURPLE, "sparking");
+
+      // We want to be able to use the normal units, as well as any others
+      factionNames.add(DEFAULT_SPRITE_KEY);
+
+      final File folder = new File("res/unit/faction");
+
+      if (folder.canRead())
+      {
+        for( final File fileEntry : folder.listFiles() )
+        {
+          // If it's a file, we assume it's a palette
+          if( !fileEntry.isDirectory() )
+          {
+            String colorName = fileEntry.getAbsolutePath();
+            if( colorName.contains(".png") )
+            {
+              BufferedImage bi = loadSpriteSheetFile(colorName);
+              // Grab the last color on the first row as our "banner" color
+              Color key = new Color(bi.getRGB(bi.getWidth() - 1, 0));
+              Color[] cUnits = new Color[defaultMapColors.length];
+              Color[] cStructs = new Color[defaultMapColors.length];
+              for( int i = 0; i < defaultMapColors.length; i++ )
+              {
+                cUnits[i] = new Color(bi.getRGB(i, 0));
+                cStructs[i] = new Color(bi.getRGB(i, 1));
+              }
+              buildingColorPalettes.put(key, new ColorPalette(cStructs));
+              mapUnitColorPalettes.put(key, new ColorPalette(cUnits));
+              colorNames.put(key, fileEntry.getName().replace(".png", ""));
+            }
+          }
+          else // If it's a directory, we assume it's a set of map sprites, i.e. a faction.
+          {
+            factionNames.add(fileEntry.getName());
+          }
+        }
+      }
+    }
+  }
+
+  public static ColorPalette getBuildingColors(Color colorKey)
+  {
+    initResources();
     return buildingColorPalettes.get(colorKey);
   }
 
   public static ColorPalette getMapUnitColors(Color colorKey)
   {
+    initResources();
     return mapUnitColorPalettes.get(colorKey);
+  }
+
+  public static String getColorName(Color colorKey)
+  {
+    initResources();
+    return colorNames.get(colorKey);
+  }
+
+  public static String[] getFactionNames()
+  {
+    initResources();
+    return factionNames.toArray(new String[0]);
   }
 
   private static class SpriteSetKey
@@ -418,35 +493,20 @@ public class SpriteLibrary
   private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
     String faction = key.commanderKey.factionName;
-    System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString());
-    String filestr;
-    UnitSpriteSet spriteSet;
-    if( Commander.DEFAULT_SPRITE_KEY == faction )
-    {
-      filestr = "res/unit/" + key.unitTypeKey.toString() + "_map.png";
-      spriteSet = new UnitSpriteSet(loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
-          getMapUnitColors(key.commanderKey.myColor));
-    }
-    else
-    {
-      Matcher matcher = factionNameToKey.matcher(faction);
-      String facAbbrev;
-      // if the faction is a real faction, pull out the first two initials, otherwise use the whole faction as key
-      if( matcher.find() )
-        facAbbrev = (matcher.group(1) + matcher.group(2)).toLowerCase();
-      else
-        facAbbrev = faction;
-      filestr = ("res/unit/" + faction + "/" + facAbbrev + key.unitTypeKey.toString() + ".gif").replaceAll("\\_", "-");
-      spriteSet = new UnitSpriteSet(loadAnimation(filestr), baseSpriteSize, baseSpriteSize,
-          getMapUnitColors(key.commanderKey.myColor));
-    }
+    System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString() + " in faction " + faction);
+    String filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction);
+    UnitSpriteSet spriteSet = new UnitSpriteSet(loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
+        getMapUnitColors(key.commanderKey.myColor));
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
 
-  private static String getMapUnitSpriteFilename(UnitModel.UnitEnum unitType)
+  private static String getMapUnitSpriteFilename(UnitModel.UnitEnum unitType, String faction)
   {
     StringBuffer spriteFile = new StringBuffer();
-    spriteFile.append("res/unit/").append(unitType.toString().toLowerCase()).append("_map.png");
+    spriteFile.append("res/unit/");
+    if( DEFAULT_SPRITE_KEY != faction )
+      spriteFile.append("faction/").append(faction).append("/");
+    spriteFile.append(unitType.toString().toLowerCase()).append("_map.png");
     return spriteFile.toString();
   }
 
@@ -744,13 +804,12 @@ public class SpriteLibrary
   }
 
   /** Draw and return an image with the CO's power bar. */
-  public static BufferedImage getCoOverlayPowerBar(Commander co, int maxAP, double currentAP)
+  public static BufferedImage getCoOverlayPowerBar(Commander co, double maxAP, double currentAP, double pixelsPerPowerUnit)
   {
-    final int powerDrawScaleW = 2;
     BufferedImage bar = null;
     if( maxAP > 0 )
     {
-      bar = SpriteLibrary.createDefaultBlankSprite(maxAP * powerDrawScaleW, 5);
+      bar = SpriteLibrary.createDefaultBlankSprite((int) (maxAP * pixelsPerPowerUnit), 5);
       Graphics barGfx = bar.getGraphics();
 
       // Get the CO's colors
@@ -762,9 +821,9 @@ public class SpriteLibrary
       barGfx.setColor(palette[5]); // Inside - empty
       barGfx.fillRect(0, 1, bar.getWidth(), 3);
       barGfx.setColor(palette[2]); // Inside - full
-      barGfx.drawLine(0, 1, (int) (Math.floor(currentAP) * powerDrawScaleW), 1);
-      barGfx.drawLine(0, 2, (int) (currentAP * powerDrawScaleW), 2);
-      barGfx.drawLine(0, 3, (int) (Math.ceil(currentAP * powerDrawScaleW)), 3);
+      barGfx.drawLine(0, 1, (int) (Math.floor(currentAP) * pixelsPerPowerUnit), 1);
+      barGfx.drawLine(0, 2, (int) (currentAP * pixelsPerPowerUnit), 2);
+      barGfx.drawLine(0, 3, (int) (Math.ceil(currentAP * pixelsPerPowerUnit)), 3);
     }
     else
       bar = SpriteLibrary.createDefaultBlankSprite(3, 5);
@@ -895,34 +954,32 @@ public class SpriteLibrary
     if( !coSpriteSets.containsKey(whichCo) )
     {
       // We don't have it, so we need to load it.
-      BufferedImage body = SpriteLibrary.createTransparentSprite(32, 32);
-      BufferedImage head = SpriteLibrary.createTransparentSprite(38, 32);
-      BufferedImage eyes = SpriteLibrary.createTransparentSprite(32, 18);
+      String baseFileName = "res/co/" + whichCo;
+      String basePlaceholder = "res/co/placeholder";
 
-      Scanner scanner = new Scanner(whichCo);
-      int offset = 3;
-      while (scanner.hasNextLine())
-      {
-        offset += 8;
-        String line = scanner.nextLine();
-        SpriteLibrary.drawTextSmallCaps(body.getGraphics(), line, 0, offset, 1);
-        SpriteLibrary.drawTextSmallCaps(head.getGraphics(), line, 0, offset, 1);
-      }
-      scanner.close();
-      //      SpriteLibrary.drawTextSmallCaps(eyes.getGraphics(), whichCo, 0, 8, 1);
-//=======
-//      String baseFileName = "res/co/" + whichCo;
-//      String basePlaceholder = "res/co/placeholder";
+      // Find out if the images exist. If they don't, use placeholders.
+      String bodyString = ((new File(baseFileName + ".png").isFile())? baseFileName : basePlaceholder) + ".png";
+      String headString = ((new File(baseFileName + "_face.png").isFile())? baseFileName : basePlaceholder) + "_face.png";
+      String eyesString = ((new File(baseFileName + "_eyes.png").isFile())? baseFileName : basePlaceholder) + "_eyes.png";
+
+      BufferedImage body = createBlankImageIfNull(loadSpriteSheetFile(bodyString));
+      BufferedImage head = createBlankImageIfNull(loadSpriteSheetFile(headString));
+      BufferedImage eyes = createBlankImageIfNull(loadSpriteSheetFile(eyesString));
+
+//      BufferedImage body = SpriteLibrary.createTransparentSprite(32, 32);
+//      BufferedImage head = SpriteLibrary.createTransparentSprite(38, 32);
+//      BufferedImage eyes = SpriteLibrary.createTransparentSprite(32, 18);
 //
-//      // Find out if the images exist. If they don't, use placeholders.
-//      String bodyString = ((new File(baseFileName + ".png").isFile())? baseFileName : basePlaceholder) + ".png";
-//      String headString = ((new File(baseFileName + "_face.png").isFile())? baseFileName : basePlaceholder) + "_face.png";
-//      String eyesString = ((new File(baseFileName + "_eyes.png").isFile())? baseFileName : basePlaceholder) + "_eyes.png";
-//
-//      BufferedImage body = createBlankImageIfNull(loadSpriteSheetFile(bodyString));
-//      BufferedImage head = createBlankImageIfNull(loadSpriteSheetFile(headString));
-//      BufferedImage eyes = createBlankImageIfNull(loadSpriteSheetFile(eyesString));
-//>>>>>>> master
+//      Scanner scanner = new Scanner(whichCo);
+//      int offset = 3;
+//      while (scanner.hasNextLine())
+//      {
+//        offset += 8;
+//        String line = scanner.nextLine();
+//        SpriteLibrary.drawTextSmallCaps(body.getGraphics(), line, 0, offset, 1);
+//        SpriteLibrary.drawTextSmallCaps(head.getGraphics(), line, 0, offset, 1);
+//      }
+//      scanner.close();
 
       coSpriteSets.put(whichCo, new CommanderSpriteSet(body, head, eyes));
     }

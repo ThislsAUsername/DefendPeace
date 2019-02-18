@@ -22,6 +22,7 @@ import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
+import UI.Art.SpriteArtist.SpriteLibrary;
 import Units.APCModel;
 import Units.AntiAirModel;
 import Units.ArtilleryModel;
@@ -55,11 +56,10 @@ public class Commander extends GameEventListener
   public Set<XYCoord> ownedProperties;
   public ArrayDeque<COModifier> modifiers;
   public Color myColor;
-  public String factionName = DEFAULT_SPRITE_KEY;
-  public static final String DEFAULT_SPRITE_KEY = "default";
+  public String factionName = SpriteLibrary.DEFAULT_SPRITE_KEY;
   public static final int DEFAULTSTARTINGMONEY = 0;
   public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
-  //  public static final int CHARGERATIO_HP = 90; // quantity of HP damage dealt to equal 1 unit of power charge
+  public static final int CHARGERATIO_HP = 0; // Funds value of 1 HP damage dealt, for the purpose of power charge
   public int money = 0;
   public int incomePerCity = 1000;
   public int team = -1;
@@ -307,7 +307,7 @@ public class Commander extends GameEventListener
 
     for( CommanderAbility ca : myAbilities )
     {
-      ca.increaseCost(ca.baseCost * 1.2 / 9);
+      ca.increaseCost(ca.baseCost * 0.2);
     }
     // default power boost
     addCOModifier(new CODamageModifier(10));
@@ -365,13 +365,17 @@ public class Commander extends GameEventListener
     // Do nothing if we're not involved
     if( minion != null && enemy != null && "" == myActiveAbilityName )
     {
-      double power = 0;
+      double power = 0; // value in funds of the charge we're getting
+      
       // Add up the funds value of the damage done to both participants.
       power += myHPLoss / minion.model.maxHP * minion.model.getCost();
       // The damage we deal is worth half as much as the damage we take, to help powers be a comeback mechanic.
       power += myHPDealt / enemy.model.maxHP * enemy.model.getCost() / 2;
-      power /= CHARGERATIO_FUNDS; // Turn funds into units of power
-      //      power += myHPDealt / CHARGERATIO_HP; // Add power based on HP damage dealt; rewards aggressiveness.
+      // Add power based on HP damage dealt; rewards aggressiveness.
+      power += myHPDealt * CHARGERATIO_HP;
+      
+      // Convert funds to ability power units
+      power /= CHARGERATIO_FUNDS;
 
       modifyAbilityPower(power);
     }

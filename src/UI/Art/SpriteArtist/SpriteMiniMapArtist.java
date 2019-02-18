@@ -51,7 +51,7 @@ public class SpriteMiniMapArtist
     {
       Color coColor;
       // Log a warning if SpriteLibrary doesn't have enough colors to support this map.
-      if( co >= SpriteLibrary.coColorList.length )
+      if( co >= SpriteLibrary.getCOColors().length )
       {
         System.out.println("WARNING! '" + mapInfo.mapName + "' has more start locations than there are team colors!");
 
@@ -60,7 +60,7 @@ public class SpriteMiniMapArtist
       }
       else
       {
-        coColor = SpriteLibrary.coColorList[co];
+        coColor = SpriteLibrary.getCOColors()[co];
       }
 
       // Loop through all locations assigned to this CO by mapInfo.

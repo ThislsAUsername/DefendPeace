@@ -12,6 +12,7 @@ import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameAction.ActionType;
 import Engine.GameActionSet;
+import Engine.GameInstance;
 import Engine.Path;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -26,6 +27,22 @@ import Units.UnitModel;
  */
 public class SpenderAI implements AIController
 {
+  private static class instantiator implements AIMaker
+  {
+    @Override
+    public AIController create(Commander co)
+    {
+      return new SpenderAI(co);
+    }
+
+    @Override
+    public String getName()
+    {
+      return "Spender";
+    }
+  }
+  public static final AIMaker info = new instantiator();
+  
   Queue<GameAction> actions = new ArrayDeque<GameAction>();
   Queue<Unit> unitQueue = new ArrayDeque<Unit>();
   boolean stateChange;

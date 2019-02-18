@@ -11,9 +11,10 @@ public abstract class CommanderAbility
   protected String myName;
   private double myPowerCost;
   public final double baseCost;
+
   public int AIFlags = PHASE_TURN_START;
 
-  public CommanderAbility(Commander commander, String abilityName, int powerCost)
+  public CommanderAbility(Commander commander, String abilityName, double powerCost)
   {
     myCommander = commander;
     myName = abilityName;
