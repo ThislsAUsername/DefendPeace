@@ -2,6 +2,7 @@ package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -32,9 +33,9 @@ public class IDSCaulderSCOP extends Commander
   }
 
   @Override
-  public void initTurn(GameMap map)
+  public GameEventQueue initTurn(GameMap map)
   {
-    super.initTurn(map);
+    GameEventQueue ret = super.initTurn(map);
 
     for( Unit unit : units )
     {
@@ -53,6 +54,8 @@ public class IDSCaulderSCOP extends Commander
         unit.alterHP(repairedHP);
       }
     }
+    
+    return ret;
   }
 
   private static class SupremeBoost extends CommanderAbility

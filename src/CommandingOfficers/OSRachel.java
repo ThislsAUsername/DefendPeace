@@ -5,6 +5,7 @@ import Engine.Combat.CaptureUnitValueFinder;
 import Engine.Combat.CostValueFinder;
 import Engine.Combat.HPValueFinder;
 import Engine.Combat.MassStrikeUtils;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -44,10 +45,10 @@ public class OSRachel extends Commander
   }
 
   @Override
-  public void initTurn(GameMap map)
+  public GameEventQueue initTurn(GameMap map)
   {
     this.luckMax = 10;
-    super.initTurn(map);
+    return super.initTurn(map);
   }
 
   @Override

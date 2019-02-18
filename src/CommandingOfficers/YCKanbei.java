@@ -3,6 +3,7 @@ package CommandingOfficers;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.Combat.BattleInstance.BattleParams;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -21,7 +22,7 @@ public class YCKanbei extends Commander
     }
   }
 
-  private double counterBoost = 1;
+  private double counterMult = 1;
 
   public YCKanbei()
   {
@@ -44,10 +45,10 @@ public class YCKanbei extends Commander
   }
 
   @Override
-  public void initTurn(GameMap map)
+  public GameEventQueue initTurn(GameMap map)
   {
-    counterBoost = 1;
-    super.initTurn(map);
+    counterMult = 1;
+    return super.initTurn(map);
   }
 
   @Override
@@ -62,7 +63,7 @@ public class YCKanbei extends Commander
     if( null != minion && params.isCounter )
     {
       // it's a multiplier according to the damage calc
-      params.attackFactor *= counterBoost;
+      params.attackFactor *= counterMult;
     }
   }
 
@@ -101,7 +102,7 @@ public class YCKanbei extends Commander
     {
       myCommander.addCOModifier(new CODamageModifier(10));
       myCommander.addCOModifier(new CODefenseModifier(20));
-      COcast.counterBoost = 1.5;
+      COcast.counterMult = 1.5;
     }
   }
 }

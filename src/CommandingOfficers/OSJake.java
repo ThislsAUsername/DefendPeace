@@ -5,6 +5,7 @@ import java.util.Map;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.IndirectRangeBoostModifier;
 import Engine.Combat.BattleInstance.BattleParams;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -41,10 +42,10 @@ public class OSJake extends Commander
   }
 
   @Override
-  public void initTurn(GameMap map)
+  public GameEventQueue initTurn(GameMap map)
   {
     this.plainsBuff = 10;
-    super.initTurn(map);
+    return super.initTurn(map);
   }
 
   @Override

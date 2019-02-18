@@ -5,6 +5,8 @@ import java.util.HashMap;
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
 import Terrain.Environment;
+import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.MapChangeEvent;
 import Terrain.Location;
 import Terrain.Environment.Weathers;
 import Terrain.MapMaster;
@@ -23,15 +25,15 @@ public class GameInstance
 
   private boolean isFogEnabled;
 
-  public GameInstance(MapMaster map, Commander[] cos)
+  public GameInstance(MapMaster map)
   {
-    if( cos.length < 2 )
+    if( map.commanders.length < 2 )
     {
       System.out.println("WARNING! Creating a game with fewer than two commanders.");
     }
 
     gameMap = map;
-    commanders = cos;
+    commanders = map.commanders;
     activeCoNum = -1; // No commander is active yet.
 
     // Set the initial cursor locations for each player.
@@ -118,18 +120,20 @@ public class GameInstance
    * Activates the turn for the next available CO.
    * @param events
    */
-  public void turn()
+  public GameEventQueue turn()
   {
+    GameEventQueue events = new GameEventQueue();
+    
     // Store the cursor location for the current CO.
     playerCursors.put(activeCoNum, new XYCoord(cursorX, cursorY));
-    int weatherIters = 0;
+    int coTurns = 0;
 
     if( null != activeCO) activeCO.endTurn();
 
     // Find the next non-defeated CO.
     do
     {
-      weatherIters++;
+      coTurns++;
       activeCoNum++;
       if( activeCoNum > commanders.length - 1 )
       {
@@ -138,18 +142,14 @@ public class GameInstance
       activeCO = commanders[activeCoNum];
     } while (activeCO.isDefeated);
 
-    // Set the cursor to the new CO's last known cursor position.
-    setCursorLocation(playerCursors.get(activeCoNum).xCoord, playerCursors.get(activeCoNum).yCoord);
-
-    // Initialize the next turn, recording any events that will occur.
-    activeCO.initTurn(gameMap);
-
+    // Set weather conditions based on forecast
+    events.push(new MapChangeEvent());
     for( int i = 0; i < gameMap.mapWidth; i++ )
     {
       for( int j = 0; j < gameMap.mapHeight; j++ )
       {
         Location loc = gameMap.getLocation(i, j);
-        for( int turns = 0; turns < weatherIters; turns++ )
+        for( int turns = 0; turns < coTurns; turns++ )
         {
           if( loc.forecast.isEmpty() )
           {
@@ -163,6 +163,13 @@ public class GameInstance
         }
       }
     }
+
+    // Set the cursor to the new CO's last known cursor position.
+    setCursorLocation(playerCursors.get(activeCoNum).xCoord, playerCursors.get(activeCoNum).yCoord);
+    
+    events.addAll(activeCO.initTurn(gameMap));
+    
+    return events;
   }
 
   /**

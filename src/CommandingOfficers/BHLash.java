@@ -2,6 +2,7 @@ package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.PerfectMoveModifier;
 import Engine.Combat.BattleInstance.BattleParams;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -37,10 +38,10 @@ public class BHLash extends Commander
   }
 
   @Override
-  public void initTurn(GameMap map)
+  public GameEventQueue initTurn(GameMap map)
   {
     starMult = 1;
-    super.initTurn(map);
+    return super.initTurn(map);
   }
 
   @Override

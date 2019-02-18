@@ -3,6 +3,7 @@ package CommandingOfficers;
 import CommandingOfficers.Modifiers.COVisionModifier;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.Combat.BattleInstance.CombatContext;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -43,11 +44,11 @@ public class IDSCyrus extends Commander
   }
 
   @Override
-  public void initTurn(GameMap map)
+  public GameEventQueue initTurn(GameMap map)
   {
-    super.initTurn(map);
     terrainDrain = 1;
     counterFirst = false;
+    return super.initTurn(map);
   }
 
   @Override

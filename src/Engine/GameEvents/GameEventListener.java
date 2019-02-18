@@ -1,8 +1,9 @@
 package Engine.GameEvents;
 
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.Set;
+import java.util.WeakHashMap;
 
-import CommandingOfficers.Commander;
 import Engine.Combat.BattleSummary;
 import Terrain.Location;
 import Units.Unit;
@@ -16,7 +17,7 @@ import Units.Unit;
 public abstract class GameEventListener
 {
   /** Static list of all event subscribers */
-  private static HashSet<GameEventListener> eventListeners = new HashSet<GameEventListener>();
+  private static Set<GameEventListener> eventListeners = Collections.newSetFromMap(new WeakHashMap<GameEventListener, Boolean>());
 
   /** Pass event along to every listener we still have. */
   public static void publishEvent(GameEvent event)
@@ -64,4 +65,5 @@ public abstract class GameEventListener
   public void receiveResupplyEvent(ResupplyEvent event){};
   public void receiveUnitDieEvent(UnitDieEvent event){};
   public void receiveUnloadEvent(UnloadEvent event){};
+  public void receiveMapChangeEvent(MapChangeEvent event){};
 }

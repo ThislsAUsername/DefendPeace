@@ -70,7 +70,7 @@ public class MapWindow extends GameMap
   /** Returns the Location at the specified location, or null if that Location does not exist. */
   public Location getLocation(XYCoord location)
   {
-    return getLocation(location.xCoord, location.yCoord);
+    return master.getLocation(location);
   }
 
   /** Returns the Location at the specified location, or null if that Location does not exist. */

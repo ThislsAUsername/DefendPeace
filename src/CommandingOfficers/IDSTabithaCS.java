@@ -5,6 +5,7 @@ import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CostValueFinder;
 import Engine.Combat.MassStrikeUtils;
+import Engine.GameEvents.GameEventQueue;
 import Engine.Combat.BattleInstance.BattleParams;
 import Terrain.GameMap;
 import Terrain.MapMaster;
@@ -49,11 +50,11 @@ public class IDSTabithaCS extends Commander
   }
 
   @Override
-  public void initTurn(GameMap map)
+  public GameEventQueue initTurn(GameMap map)
   {
     this.COU = null;
     COUBoost = 35;
-    super.initTurn(map);
+    return super.initTurn(map);
   }
   
   @Override

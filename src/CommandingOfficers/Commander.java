@@ -165,7 +165,7 @@ public class Commander extends GameEventListener
    * Collect income and handle any COModifiers.
    * @param map
    */
-  public void initTurn(GameMap map)
+  public GameEventQueue initTurn(GameMap map)
   {
     myView.resetFog();
     myActiveAbilityName = "";
@@ -195,6 +195,8 @@ public class Commander extends GameEventListener
     {
       aiController.initTurn(myView);
     }
+
+    return new GameEventQueue();
   }
 
   /**

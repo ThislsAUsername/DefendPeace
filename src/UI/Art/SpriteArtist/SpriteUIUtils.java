@@ -13,6 +13,11 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import java.awt.Graphics;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 
 public class SpriteUIUtils
 {
@@ -151,6 +156,29 @@ public class SpriteUIUtils
     {
       return disposal;
     }
+  }
+
+  /**
+   * Loads the image at the given file location and returns it as a BufferedImage.
+   * @param filename The full file-path to an image on disk.
+   * @return The file as a BufferedImage, or null if the file cannot be read.
+   */
+  public static BufferedImage loadSpriteSheetFile(String filename)
+  {
+    BufferedImage bi = null;
+    try
+    {
+      File imgFile = new File(filename);
+      if( imgFile.exists() && !imgFile.isDirectory() )
+        bi = ImageIO.read(imgFile);
+      else System.out.println("WARNING! Resource file " + filename + " does not exist.");
+    }
+    catch (IOException ioex)
+    {
+      System.out.println("WARNING! Exception loading resource file " + filename);
+      bi = null;
+    }
+    return bi;
   }
 
   public static BufferedImage makeTextFrame(Color bg, Color frame, int hBuffer, int vBuffer)

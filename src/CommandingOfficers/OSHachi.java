@@ -1,6 +1,7 @@
 package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.UnitProductionModifier;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
@@ -29,13 +30,13 @@ public class OSHachi extends Commander
   }
 
   @Override
-  public void initTurn(GameMap map)
+  public GameEventQueue initTurn(GameMap map)
   {
     for( UnitModel um : unitModels )
     {
       um.COcost = 0.9;
     }
-    super.initTurn(map);
+    return super.initTurn(map);
   }
 
   public static CommanderInfo getInfo()

@@ -2,6 +2,7 @@ package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.COMovementModifier;
 import Engine.Combat.BattleInstance.BattleParams;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -51,10 +52,10 @@ public class OSMax extends Commander
   }
 
   @Override
-  public void initTurn(GameMap map)
+  public GameEventQueue initTurn(GameMap map)
   {
     this.directBuff = 20;
-    super.initTurn(map);
+    return super.initTurn(map);
   }
 
   @Override
