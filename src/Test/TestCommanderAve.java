@@ -4,6 +4,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAve;
 import CommandingOfficers.CommanderPatch;
 import Engine.GameAction;
+import Engine.GameInstance;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEvent;
@@ -19,9 +20,10 @@ import Units.UnitModel.UnitEnum;
 
 public class TestCommanderAve extends TestCase
 {
-  private static Commander Patch;
-  private static CommanderAve Ave;
-  private static MapMaster testMap;
+  private Commander Patch;
+  private CommanderAve Ave;
+  private MapMaster testMap;
+  private GameInstance game;
 
   private void setupTest()
   {
@@ -35,6 +37,7 @@ public class TestCommanderAve extends TestCase
     {
       co.myView = new MapWindow(testMap, co);
     }
+    game = new GameInstance(testMap);
   }
 
   @Override
@@ -48,6 +51,7 @@ public class TestCommanderAve extends TestCase
     testPassed &= validate(testCapture(), "  Capture test failed!");
     testPassed &= validate(testGlacio(), "  Glacio test failed!");
 
+    game.endGame();
     return testPassed;
   }
 
@@ -120,7 +124,7 @@ public class TestCommanderAve extends TestCase
     testMap.getLocation(snowCity).setOwner(null);
     for( int i = 1; i < maxIters; ++i )
     {
-      GameEventQueue turnEvents = Ave.initTurn(testMap);
+      GameEventQueue turnEvents = game.turn();
       for(GameEvent event: turnEvents) event.performEvent(testMap);
       Environment cityEnv = testMap.getEnvironment(snowCity); 
       if( cityEnv.weatherType != Weathers.SNOW )

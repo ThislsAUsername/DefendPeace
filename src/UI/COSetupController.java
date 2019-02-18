@@ -72,7 +72,7 @@ public class COSetupController implements IController
         MapMaster map = new MapMaster( cos, gameBuilder.mapInfo );
         if( map.initOK() )
         {
-          GameInstance newGame = new GameInstance(map, cos);
+          GameInstance newGame = new GameInstance(map);
 
           MapView mv = Driver.getInstance().gameGraphics.createMapView(newGame);
           MapController mapController = new MapController(newGame, mv);

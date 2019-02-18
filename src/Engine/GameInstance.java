@@ -5,6 +5,7 @@ import java.util.HashMap;
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.MapChangeEvent;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
@@ -26,15 +27,15 @@ public class GameInstance
 
   private boolean isFogEnabled;
 
-  public GameInstance(MapMaster map, Commander[] cos)
+  public GameInstance(MapMaster map)
   {
-    if( cos.length < 2 )
+    if( map.commanders.length < 2 )
     {
       System.out.println("WARNING! Creating a game with fewer than two commanders.");
     }
 
     gameMap = map;
-    commanders = cos;
+    commanders = map.commanders;
     activeCoNum = -1; // No commander is active yet.
 
     // Set the initial cursor locations for each player.
@@ -144,6 +145,7 @@ public class GameInstance
     } while (activeCO.isDefeated);
 
     // Set weather conditions based on forecast
+    events.push(new MapChangeEvent());
     for( int i = 0; i < gameMap.mapWidth; i++ )
     {
       for( int j = 0; j < gameMap.mapHeight; j++ )
@@ -167,8 +169,10 @@ public class GameInstance
     // Set the cursor to the new CO's last known cursor position.
     setCursorLocation(playerCursors.get(activeCoNum).xCoord, playerCursors.get(activeCoNum).yCoord);
     
+    events.addAll(activeCO.initTurn(gameMap));
+    
     // Initialize the next turn, recording any events that will occur.
-    return activeCO.initTurn(gameMap);
+    return events;
   }
 
   /**

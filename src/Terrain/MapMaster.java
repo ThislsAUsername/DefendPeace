@@ -121,7 +121,9 @@ public class MapMaster extends GameMap
   /** Returns the Location at the specified location, or null if that Location does not exist. */
   public Location getLocation(XYCoord location)
   {
-    return getLocation(location.xCoord, location.yCoord);
+    if (null != location)
+      return getLocation(location.xCoord, location.yCoord);
+    return null;
   }
 
   /** Returns the Location at the specified location, or null if that Location does not exist. */
