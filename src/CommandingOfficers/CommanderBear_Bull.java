@@ -15,7 +15,7 @@ import Units.UnitModel;
  */
 public class CommanderBear_Bull extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Bear&Bull", new instantiator());  
+  private static final CommanderInfo coInfo = new CommanderInfo("Baron Bull", new instantiator());  
   private static class instantiator implements COMaker
   {
     @Override

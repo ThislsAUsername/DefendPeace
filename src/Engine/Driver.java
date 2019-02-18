@@ -40,6 +40,7 @@ public class Driver implements ActionListener, KeyListener
     gameController = mc;
 
     gameWindow = new JFrame();
+    gameWindow.setTitle("Defend Peace");
     gameWindow.add(gameView);
     gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     gameWindow.addKeyListener(this);
