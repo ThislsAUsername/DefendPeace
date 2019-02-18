@@ -1,6 +1,9 @@
 package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.COModifier;
+import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.MapChangeEvent;
 import Terrain.MapMaster;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -53,11 +56,10 @@ public class GEDrake extends Commander
   }
 
 
-  private static class Tsunami extends CommanderAbility implements COModifier
+  private static class Tsunami extends CommanderAbility
   {
     private static final String NAME = "Tsunami";
     private static final int COST = 4;
-    MapMaster map;
 
     Tsunami(Commander commander)
     {
@@ -67,18 +69,11 @@ public class GEDrake extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      map = gameMap;
-      myCommander.addCOModifier(this);
-    }
-
-    @Override // COModifier interface.
-    public void apply(Commander commander)
-    {
-      for( int i = 0; i < map.mapWidth; i++ )
+      for( int i = 0; i < gameMap.mapWidth; i++ )
       {
-        for( int j = 0; j < map.mapHeight; j++ )
+        for( int j = 0; j < gameMap.mapHeight; j++ )
         {
-          Location loc = map.getLocation(i, j);
+          Location loc = gameMap.getLocation(i, j);
           Unit victim = loc.getResident();
           if( victim != null && myCommander.isEnemy(victim.CO) )
           {
@@ -88,32 +83,26 @@ public class GEDrake extends Commander
         }
       }
     }
-
-    @Override
-    public void revert(Commander commander)
-    {}
   }
 
   private static class Typhoon extends CommanderAbility
   {
     private static final String NAME = "Typhoon";
     private static final int COST = 7;
-    MapMaster map;
 
     Typhoon(Commander commander)
     {
-      // as we start in Bear form, UpTurn is the correct starting name
       super(commander, NAME, COST);
     }
 
     @Override
     protected void perform(MapMaster gameMap)
     {
-      for( int i = 0; i < map.mapWidth; i++ )
+      for( int i = 0; i < gameMap.mapWidth; i++ )
       {
-        for( int j = 0; j < map.mapHeight; j++ )
+        for( int j = 0; j < gameMap.mapHeight; j++ )
         {
-          Location loc = map.getLocation(i, j);
+          Location loc = gameMap.getLocation(i, j);
           loc.setForecast(Weathers.RAIN, gameMap.commanders.length-1);
           Unit victim = loc.getResident();
           if( victim != null && myCommander.isEnemy(victim.CO) )
@@ -123,6 +112,9 @@ public class GEDrake extends Commander
           }
         }
       }
+      GameEvent event = new MapChangeEvent();
+      event.performEvent(gameMap);
+      GameEventListener.publishEvent(event);
     }
   }
 }

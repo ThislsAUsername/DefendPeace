@@ -2,6 +2,9 @@ package CommandingOfficers;
 
 import Terrain.Environment.Weathers;
 import Terrain.MapMaster;
+import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.MapChangeEvent;
 import Terrain.Location;
 import Terrain.TerrainType;
 import Units.UnitModel;
@@ -63,6 +66,9 @@ public class IDSPennyCS extends Commander
           loc.setForecast(Weathers.RAIN, gameMap.commanders.length - 1);
         }
       }
+      GameEvent event = new MapChangeEvent();
+      event.performEvent(gameMap);
+      GameEventListener.publishEvent(event);
     }
   }
 
@@ -88,6 +94,9 @@ public class IDSPennyCS extends Commander
           loc.setForecast(Weathers.SNOW, gameMap.commanders.length * 3 - 1);
         }
       }
+      GameEvent event = new MapChangeEvent();
+      event.performEvent(gameMap);
+      GameEventListener.publishEvent(event);
     }
   }
 }

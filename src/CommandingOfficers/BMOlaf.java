@@ -1,6 +1,9 @@
 package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.COModifier;
+import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.MapChangeEvent;
 import Terrain.Environment.Weathers;
 import Terrain.MapMaster;
 import Terrain.Location;
@@ -65,6 +68,9 @@ public class BMOlaf extends Commander
           loc.setForecast(Weathers.SNOW, duration);
         }
       }
+      GameEvent event = new MapChangeEvent();
+      event.performEvent(gameMap);
+      GameEventListener.publishEvent(event);
     }
 
     @Override // COModifier interface.
@@ -103,6 +109,9 @@ public class BMOlaf extends Commander
           }
         }
       }
+      GameEvent event = new MapChangeEvent();
+      event.performEvent(gameMap);
+      GameEventListener.publishEvent(event);
     }
   }
 }
