@@ -7,7 +7,7 @@ import Units.UnitModel.ChassisEnum;
 
 public class LATasha1star extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Tasha\n1star", new instantiator());
+  private static final CommanderInfo coInfo = new CommanderInfo("Tasha", new instantiator());
   private static class instantiator implements COMaker
   {
     @Override

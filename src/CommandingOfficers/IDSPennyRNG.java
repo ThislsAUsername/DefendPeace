@@ -8,7 +8,7 @@ import Units.UnitModel;
 
 public class IDSPennyRNG extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Penny\nRNG", new instantiator());
+  private static final CommanderInfo coInfo = new CommanderInfo("Penny RNG", new instantiator());
 
   private static class instantiator implements COMaker
   {

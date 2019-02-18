@@ -8,7 +8,7 @@ import Units.UnitModel;
 
 public class IDSPennyCS extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Penny\nCS", new instantiator());
+  private static final CommanderInfo coInfo = new CommanderInfo("Penny", new instantiator());
 
   private static class instantiator implements COMaker
   {

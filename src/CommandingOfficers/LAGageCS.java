@@ -8,7 +8,7 @@ import Units.Weapons.WeaponModel;
 
 public class LAGageCS extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Gage\nCS", new instantiator());
+  private static final CommanderInfo coInfo = new CommanderInfo("Gage", new instantiator());
 
   private static class instantiator implements COMaker
   {

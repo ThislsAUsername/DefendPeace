@@ -9,7 +9,7 @@ import Units.UnitModel.ChassisEnum;
 
 public class LADavis extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Davis\nAW1Eagle", new instantiator());
+  private static final CommanderInfo coInfo = new CommanderInfo("Davis AW1Eagle", new instantiator());
   private static class instantiator implements COMaker
   {
     @Override

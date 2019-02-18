@@ -7,7 +7,7 @@ import Units.UnitModel.ChassisEnum;
 
 public class BWLinCS extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Lin\nCS", new instantiator());
+  private static final CommanderInfo coInfo = new CommanderInfo("Lin CS", new instantiator());
 
   private static class instantiator implements COMaker
   {

@@ -8,7 +8,7 @@ import Units.Unit;
 
 public class IDSCaulderSCOP extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Caulder\n2&SCOP", new instantiator());
+  private static final CommanderInfo coInfo = new CommanderInfo("Caulder", new instantiator());
 
   private static class instantiator implements COMaker
   {

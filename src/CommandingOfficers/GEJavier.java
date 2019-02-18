@@ -8,7 +8,7 @@ import Terrain.MapMaster;
 
 public class GEJavier extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Javier\n1T", new instantiator());
+  private static final CommanderInfo coInfo = new CommanderInfo("Javier 1T", new instantiator());
   private static class instantiator implements COMaker
   {
     @Override

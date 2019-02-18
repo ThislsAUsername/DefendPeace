@@ -4,29 +4,24 @@ import java.util.HashMap;
 
 import Engine.Combat.BattleSummary;
 import Engine.Combat.BattleInstance.BattleParams;
-import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
 
-/*
- * Cinder is based on getting an edge in the action economy, at the cost of unit health.
- */
-public class TheBeast extends Commander
+public class DaysOfRuin extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("The Beast\nLevels", new instantiator());
-
+  private static final CommanderInfo coInfo = new CommanderInfo("Days of Ruin", new instantiator());
   private static class instantiator implements COMaker
   {
     @Override
     public Commander create()
     {
-      return new TheBeast();
+      return new DaysOfRuin();
     }
   }
 
   private HashMap<Unit, Integer> killCounts = new HashMap<>();
 
-  public TheBeast()
+  public DaysOfRuin()
   {
     super(coInfo);
     
@@ -36,6 +31,23 @@ public class TheBeast extends Commander
   public static CommanderInfo getInfo()
   {
     return coInfo;
+  }
+
+
+  @Override
+  public char getUnitMarking(Unit unit)
+  {
+    if (killCounts.containsKey(unit))
+    {
+      int level = killCounts.get(unit);
+      if( level > 2 )
+        return 'V';
+      if( level > 1 )
+        return '2';
+      if( level > 0 )
+        return 'I';
+    }
+    return super.getUnitMarking(unit);
   }
 
   public int getVetPower(int level)
@@ -114,12 +126,12 @@ public class TheBeast extends Commander
   {
     private static final String NAME = "Gwar Har Har!";
     private static final int COST = 5;
-    TheBeast COcast;
+    DaysOfRuin COcast;
 
     GwarHarHar(Commander commander)
     {
       super(commander, NAME, COST);
-      COcast = (TheBeast) commander;
+      COcast = (DaysOfRuin) commander;
     }
 
     @Override

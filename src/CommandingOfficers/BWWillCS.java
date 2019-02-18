@@ -8,8 +8,7 @@ import Units.Weapons.WeaponModel;
 
 public class BWWillCS extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Will\nCS", new instantiator());
-
+  private static final CommanderInfo coInfo = new CommanderInfo("Will", new instantiator());
   private static class instantiator implements COMaker
   {
     @Override

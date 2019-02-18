@@ -12,7 +12,7 @@ import Units.Unit;
 
 public class IDSTabithaDef extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Tabitha\nDef", new instantiator());
+  private static final CommanderInfo coInfo = new CommanderInfo("Tabitha def", new instantiator());
 
   private static class instantiator implements COMaker
   {

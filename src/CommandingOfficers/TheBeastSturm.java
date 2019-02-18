@@ -11,7 +11,7 @@ import Units.UnitModel;
 
 public class TheBeastSturm extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("The Beast\nSturm", new instantiator());
+  private static final CommanderInfo coInfo = new CommanderInfo("The Beast", new instantiator());
 
   private static class instantiator implements COMaker
   {
