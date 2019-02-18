@@ -30,7 +30,7 @@ public class RAWaylonCS extends Commander
       }
     }
 
-    addCommanderAbility(new AirDefBonus(this, "Wingman", 3, 25));
+    addCommanderAbility(new AirDefBonus(this, "Wingman", 2, 25));
     addCommanderAbility(new AirDefBonus(this, "Bad Company", 6, 50));
   }
 
