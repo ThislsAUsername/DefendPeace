@@ -83,8 +83,16 @@ public class COSetupController implements IController
         break;
       case LEFT:
       case RIGHT:
+        // If we're at the edge of one of our option sets, switch to a new CO
         if( coSelectors[playerSelector.getSelectionNormalized()].pickOption(action) )
+        {
           playerSelector.handleInput(action);
+          // Reset the selector to the beginning or end, for selection continuity
+          if (UI.InputHandler.InputAction.LEFT == action)
+            coSelectors[playerSelector.getSelectionNormalized()].setSelectedOption(COSetupInfo.OptionList.values().length-1);
+          else
+            coSelectors[playerSelector.getSelectionNormalized()].setSelectedOption(0);
+        }
         break;
       case NO_ACTION:
         break;
