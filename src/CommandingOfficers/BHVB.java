@@ -37,16 +37,12 @@ public class BHVB extends Commander
   }
 
   @Override
-  public char getSymbol(Unit unit)
+  public char getUnitMarking(Unit unit)
   {
-    // If the unit belongs to someone else, let the owner print something.
-    if (this != unit.CO && '\0' != unit.CO.getSymbol(unit))
-      return unit.CO.getSymbol(unit);
-    
     if (unit.isStunned)
       return 'S';
     
-    return '\0';
+    return super.getUnitMarking(unit);
   }
 
   private static class ExMachina extends CommanderAbility

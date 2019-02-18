@@ -40,12 +40,12 @@ public class IDSTabithaDef extends Commander
   private int COUBoost;
 
   @Override
-  public char getSymbol(Unit unit)
+  public char getUnitMarking(Unit unit)
   {
     if (unit == COU)
       return 'T';
     
-    return super.getSymbol(unit);
+    return super.getUnitMarking(unit);
   }
 
   @Override
