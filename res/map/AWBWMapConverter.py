@@ -131,7 +131,7 @@ def indexToTerrainCode(x):
 		109: '  PI',
 		110: '  PI',
 		111: '  SR',#silo (SR, for Silo Ready)
-		112: '  SU',#used silo
+		112: '  BK',#used silo
 		113: '  XX',#HPipe seam
 		114: '  XX',#VPipe seam
 		115: '  XX',#HPipe seam broken

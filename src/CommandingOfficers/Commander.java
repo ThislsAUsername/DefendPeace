@@ -242,15 +242,12 @@ public class Commander extends GameEventListener
   }
   
   /**
-   * Returns a character to be displayed on the unit while the map is seen from your perspective.
+   * Returns a character to be displayed on the unit.
    * Primary usage should be pieces of info that aren't otherwise immediately apparent from the map.
+   * Our rendering only supports alphanumeric values at this time.
    */
-  public char getSymbol(Unit unit)
+  public char getUnitMarking(Unit unit)
   {
-    // If the unit belongs to someone else, let the owner print something.
-    if (this != unit.CO)
-      return unit.CO.getSymbol(unit);
-    
     // We don't have anything useful to print, so don't.
     return '\0';
   }

@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
-
+import java.util.ArrayList;
 import CommandingOfficers.Commander;
 import UI.Art.SpriteArtist.SpriteUIUtils.ImageFrame;
 import Units.Unit;
@@ -20,6 +20,8 @@ public class UnitSpriteSet
   public final int ACTION_MOVESOUTH = 3;
   public final int ACTION_MOVEWEST = 4;
   public final int ACTION_DIE = 5;
+  
+  public final int ANIM_FRAMES_PER_MARK = 3; 
 
   Sprite turnDone;
 
@@ -241,7 +243,7 @@ public class UnitSpriteSet
     }
   }
 
-  public void drawUnitIcons(Graphics g, Commander activeCO, Unit u, int drawX, int drawY, int drawScale)
+  public void drawUnitIcons(Graphics g, Commander[] COs, Unit u, int animIndex, int drawX, int drawY, int drawScale)
   {
     int unitHeight = turnDone.getFrame(0).getHeight();
 
@@ -253,13 +255,24 @@ public class UnitSpriteSet
           null);
     }
     
-    // Draw a Commander-defined symbol, if applicable.
-    char symbol = activeCO.getSymbol(u);
-    if( '\0' != symbol) // optimization; the null char is invisible
+    // Collect all the Commanders who desire to mark this unit
+    ArrayList<Commander> markers = new ArrayList<Commander>();
+    for( Commander co : COs )
     {
-      BufferedImage num = SpriteLibrary.getColoredMapTextSprites(activeCO.myColor).get(symbol);
+      char symbol = co.getUnitMarking(u);
+      if( '\0' != symbol ) // null char is our sentry value
+      {
+        markers.add(co);
+      }
+    }
+
+    // Draw one of them, based on our animation index
+    if( !markers.isEmpty() )
+    {
+      Commander co = markers.get((animIndex%(markers.size()*ANIM_FRAMES_PER_MARK))/ANIM_FRAMES_PER_MARK);
+      BufferedImage symbol = SpriteLibrary.getColoredMapTextSprites(co.myColor).get(co.getUnitMarking(u));
       // draw in the upper right corner
-      g.drawImage(num, drawX + ((unitHeight * drawScale) / 2), drawY, num.getWidth() * drawScale, num.getHeight() * drawScale, null);
+      g.drawImage(symbol, drawX + ((unitHeight * drawScale) / 2), drawY, symbol.getWidth() * drawScale, symbol.getHeight() * drawScale, null);
     }
 
     // Draw the transport icon if the unit is holding another unit.

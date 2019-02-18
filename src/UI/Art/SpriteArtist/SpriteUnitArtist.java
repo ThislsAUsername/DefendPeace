@@ -23,12 +23,12 @@ public class SpriteUnitArtist
    * "Real" means that the specified x and y are that of the game's
    * underlying data model, not of the draw-space.
    */
-  public void drawUnitIcons(Graphics g, Unit unit, double x, double y)
+  public void drawUnitIcons(Graphics g, Unit unit, double x, double y, int animIndex)
   {
     // Convert "real" location into a draw-space location, then draw icons.
     int drawX = (int) (myView.getTileSize() * x);
     int drawY = (int) (myView.getTileSize() * y);
-    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnitIcons(g, myGame.activeCO, unit, drawX, drawY, drawScale);
+    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnitIcons(g, myGame.commanders, unit, animIndex, drawX, drawY, drawScale);
   }
 
   /**
