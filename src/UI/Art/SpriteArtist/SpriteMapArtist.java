@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.Path.PathNode;
+import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
@@ -225,9 +226,15 @@ public class SpriteMapArtist
     // Get the Graphics object of the local map image, to use for drawing.
     Graphics g = baseMapImage.getGraphics();
 
-    // Fetch the relevant sprite set for this terrain type and have it draw itself.
-    TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(coord.xCoord, coord.yCoord));
-    spriteSet.drawTerrain(g, gameMap, coord.xCoord, coord.yCoord, drawScale, false);
+    for( XYCoord drawCoord : Utils.findLocationsInRange(gameMap, coord, 0, 1) )
+    {
+      if( gameMap.isLocationValid(drawCoord) )
+      {
+        // Fetch the relevant sprite set for this terrain type and have it draw itself.
+        TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(drawCoord.xCoord, drawCoord.yCoord));
+        spriteSet.drawTerrain(g, gameMap, drawCoord.xCoord, drawCoord.yCoord, drawScale, false);
+      }
+    }
   }
 
   private static class MapImageUpdater extends GameEventListener
