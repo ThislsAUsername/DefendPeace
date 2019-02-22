@@ -442,7 +442,9 @@ public class CommanderAve extends Commander
           if((tileEnvi.weatherType != Weathers.SNOW) || (tileEnvi.terrainType == TerrainType.FOREST))
           {
             // Destroy any forests. Big hail, man.
-            GameEvent hailEvent = new MapChangeEvent(coord, Environment.getTile(TerrainType.GRASS, Weathers.SNOW));
+            TerrainType newTerrain = (loc.getEnvironment().terrainType == TerrainType.FOREST)
+                ? TerrainType.GRASS : loc.getEnvironment().terrainType;
+            GameEvent hailEvent = new MapChangeEvent(coord, Environment.getTile(newTerrain, Weathers.SNOW));
             glacioEvents.add(hailEvent);
           }
 
