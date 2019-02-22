@@ -3,13 +3,15 @@ package UI.Art.SpriteArtist;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.Path.PathNode;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventListener;
-import Engine.GameEvents.MapChangeEvent;
+import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
+import Terrain.Environment.Weathers;
 import Terrain.GameMap;
 import UI.MapView;
 import UI.Art.FillRectArtist.FillRectMapArtist;
@@ -237,11 +239,18 @@ public class SpriteMapArtist
     }
 
     @Override
-    public void receiveMapChangeEvent(MapChangeEvent event)
+    public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges)
     {
-      XYCoord xyc = event.getStartPoint();
-      if( null != xyc ) myArtist.redrawBaseTile(xyc); // Redraw one tile if that's all that changed.
-      else myArtist.buildMapImage(); // Redraw the whole map if we have to.
+      for( EnvironmentAssignment ea : terrainChanges )
+      {
+        if( null != ea.where ) myArtist.redrawBaseTile(ea.where); // Redraw one tile if that's all that changed.
+      }
+    }
+
+    @Override
+    public void receiveWeatherChangeEvent(Weathers weather, int duration)
+    {
+      myArtist.buildMapImage(); // Redraw the whole map.
     }
   }
 }

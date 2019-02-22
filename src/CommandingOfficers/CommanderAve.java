@@ -137,16 +137,21 @@ public class CommanderAve extends Commander
   private void addSnow(double amount, GameMap gameMap, GameEventQueue outEvents)
   {
     log("============ Adding snow ========================================");
+    ArrayList<MapChangeEvent.EnvironmentAssignment> tiles = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
     for( XYCoord xyc : ownedProperties )
     {
       // Boost the amount of snow power this property has.
       snowMap[xyc.xCoord][xyc.yCoord] += amount;
       if( gameMap.getEnvironment(xyc).weatherType != Weathers.SNOW )
       {
-        Environment newEnvi = Environment.getTile(gameMap.getEnvironment(xyc).terrainType, Weathers.SNOW);
-        GameEvent event = new MapChangeEvent(xyc, newEnvi, 2);
-        outEvents.add(event);
+        Environment envi = Environment.getTile(gameMap.getEnvironment(xyc).terrainType, Weathers.SNOW);
+        tiles.add(new MapChangeEvent.EnvironmentAssignment(xyc, envi, 2));
       }
+    }
+    if( !tiles.isEmpty())
+    {
+      GameEvent event = new MapChangeEvent(tiles);
+      outEvents.add(event);
     }
   }
 
@@ -309,12 +314,17 @@ public class CommanderAve extends Commander
         } // while snowToSpread > 0
       } // !while( !leafIter.hasNext() )
 
-      // apply our snow durations
+      // Generate snow where needed.
+      ArrayList<MapChangeEvent.EnvironmentAssignment> tiles = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
       for (XYCoord coord : toSnow)
       {
         Environment newEnvi = Environment.getTile(gameMap.getEnvironment(coord).terrainType, Weathers.SNOW);
         int duration = 1 + snowMap[coord.xCoord][coord.yCoord] / SNOW_MELT_RATE; // Snow starts melting next turn, not this turn
-        GameEvent event = new MapChangeEvent(coord, newEnvi, duration);
+        tiles.add(new MapChangeEvent.EnvironmentAssignment(coord, newEnvi, duration));
+      }
+      if( !tiles.isEmpty())
+      {
+        GameEvent event = new MapChangeEvent(tiles);
         outEvents.add(event);
       }
       
@@ -432,10 +442,8 @@ public class CommanderAve extends Commander
           if((tileEnvi.weatherType != Weathers.SNOW) || (tileEnvi.terrainType == TerrainType.FOREST))
           {
             // Destroy any forests. Big hail, man.
-            TerrainType newTerrain = (loc.getEnvironment().terrainType == TerrainType.FOREST) ? TerrainType.GRASS : loc.getEnvironment().terrainType;
-            Environment newEnvi = Environment.getTile(newTerrain, Weathers.SNOW);
-            GameEvent event = new MapChangeEvent(coord, newEnvi, 1);
-            glacioEvents.add(event);
+            GameEvent hailEvent = new MapChangeEvent(coord, Environment.getTile(TerrainType.GRASS, Weathers.SNOW));
+            glacioEvents.add(hailEvent);
           }
 
           // Damage each enemy nearby.

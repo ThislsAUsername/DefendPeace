@@ -1,18 +1,17 @@
 package Engine;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
+import Terrain.Environment;
+import Terrain.Environment.Weathers;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
-import Terrain.Environment;
-import Terrain.GameMap;
-import Terrain.Location;
-import Terrain.Environment.Weathers;
 
 public class GameInstance
 {
@@ -145,25 +144,35 @@ public class GameInstance
     } while (activeCO.isDefeated);
 
     // Set weather conditions based on forecast
-    events.push(new MapChangeEvent());
+    ArrayList<MapChangeEvent.EnvironmentAssignment> weatherChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
     for( int i = 0; i < gameMap.mapWidth; i++ )
     {
       for( int j = 0; j < gameMap.mapHeight; j++ )
       {
         Location loc = gameMap.getLocation(i, j);
-        for( int turns = 0; turns < coTurns; turns++ )
+        if( loc.forecast.isEmpty() )
         {
-          if( loc.forecast.isEmpty() )
+          if( loc.getEnvironment().weatherType != Weathers.CLEAR )
           {
-            loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, Weathers.CLEAR));
+            weatherChanges.add(new MapChangeEvent.EnvironmentAssignment(loc.getCoordinates(), Environment.getTile(loc.getEnvironment().terrainType, Weathers.CLEAR)));
             break;
           }
-          else
+        }
+        else
+        {
+          Weathers weather = loc.getEnvironment().weatherType;
+          for( int turns = 0; turns < coTurns; turns++ )
           {
-            loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, loc.forecast.poll()));
+            weather = loc.forecast.poll();
           }
+          if( null == weather ) weather = Weathers.CLEAR;
+          weatherChanges.add(new MapChangeEvent.EnvironmentAssignment(loc.getCoordinates(), Environment.getTile(loc.getEnvironment().terrainType, weather)));
         }
       }
+    }
+    if( !weatherChanges.isEmpty() )
+    {
+      events.add(new MapChangeEvent(weatherChanges));
     }
 
     // Set the cursor to the new CO's last known cursor position.

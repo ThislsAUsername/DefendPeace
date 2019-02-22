@@ -1,5 +1,7 @@
 package Engine.GameEvents;
 
+import java.util.ArrayList;
+
 import Engine.XYCoord;
 import Terrain.Environment;
 import Terrain.Location;
@@ -8,32 +10,23 @@ import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 
 /**
- * This event changes the environment (terrain type, weather, or both) of a map tile.
+ * This event changes the TerrainType of one or more map tiles.
  */
 public class MapChangeEvent implements GameEvent
 {
-  private XYCoord where;
-  private Environment myEnvironment;
-  private int turns;
+  private ArrayList<EnvironmentAssignment> changes;
 
-  /** For when you just want to redraw the map */
-  public MapChangeEvent()
+  /** Simple constructor for changing a single tile */
+  public MapChangeEvent(XYCoord location, Environment envi)
   {
-    this(null, null, 0);
+    changes = new ArrayList<EnvironmentAssignment>();
+    changes.add(new EnvironmentAssignment(location, envi));
   }
 
-  /** For changing terrain type */
-  public MapChangeEvent(XYCoord location, Environment newTile)
+  /** Allows changing a set of tiles all at once. */
+  public MapChangeEvent(ArrayList<EnvironmentAssignment> envChanges)
   {
-    this(location, newTile, 0);
-  }
-
-  /** For changing weather */
-  public MapChangeEvent(XYCoord location, Environment newTile, int duration)
-  {
-    where = location;
-    myEnvironment = newTile;
-    turns = duration;
+    changes = envChanges;
   }
 
   @Override
@@ -45,30 +38,56 @@ public class MapChangeEvent implements GameEvent
   @Override
   public void sendToListener(GameEventListener listener)
   {
-    listener.receiveMapChangeEvent(this);
+    listener.receiveTerrainChangeEvent(changes);
   }
 
   @Override
   public void performEvent(MapMaster gameMap)
   {
-    Location loc = gameMap.getLocation(where);
-    if( null != loc )
+    for( EnvironmentAssignment ea : changes )
     {
-      loc.setEnvironment(myEnvironment);
-      if (turns > 0)
-        loc.setForecast(myEnvironment.weatherType, (gameMap.commanders.length * turns) - 1);
+      Location loc = gameMap.getLocation(ea.where);
+      if( null != loc )
+      {
+        loc.setEnvironment(ea.environment);
+        loc.setForecast(ea.environment.weatherType, ea.duration);
+      }
     }
   }
 
   @Override
   public XYCoord getStartPoint()
   {
-    return where;
+    return changes.get(0).where;
   }
 
   @Override
   public XYCoord getEndPoint()
   {
-    return where;
+    return changes.get(0).where;
+  }
+
+  public static class EnvironmentAssignment
+  {
+    public final XYCoord where;
+    public final Environment environment;
+    public final int duration;
+
+    public EnvironmentAssignment(XYCoord xyc, Environment envi)
+    {
+      this(xyc, envi, 0);
+    }
+
+    /**
+     * @param xyc The location whose Environment is changing.
+     * @param envi The new TerrainType and weather to apply.
+     * @param forecastDuration The duration over which the weather type will persist.
+     */
+    public EnvironmentAssignment(XYCoord xyc, Environment envi, int forecastDuration)
+    {
+      where = xyc;
+      environment = envi;
+      duration = forecastDuration;
+    }
   }
 }
