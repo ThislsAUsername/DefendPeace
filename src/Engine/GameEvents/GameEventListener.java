@@ -59,7 +59,7 @@ public abstract class GameEventListener
   }
 
   // The functions below should be overridden by subclasses for event types they care about.
-  // As a rule, we should avoid passing the actual event to he receive hooks when possible.
+  // As a rule, we should avoid passing the actual event to the receive hooks when possible.
   public void receiveBattleEvent(BattleSummary summary){};
   public void receiveCreateUnitEvent(Unit unit){};
   public void receiveCaptureEvent(Unit unit, Location location){};
