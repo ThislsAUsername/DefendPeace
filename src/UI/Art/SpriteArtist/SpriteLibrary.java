@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -81,8 +82,10 @@ public class SpriteLibrary
   private static Sprite moveCursorLineSprite = null;
   private static Sprite moveCursorArrowSprite = null;
 
-  // HP numbers to overlay on map units when damaged.
+  // Numbers and letters to overlay on map units.
   private static Sprite mapUnitHPSprites = null;
+  private static Sprite mapUnitLetterSprites = null;
+  private static Map<Color,Map<Character,BufferedImage>> mapUnitTextSprites = null;
 
   // Cargo icon for when transports are holding other units.
   private static BufferedImage mapUnitCargoIcon = null;
@@ -409,6 +412,51 @@ public class SpriteLibrary
       mapUnitHPSprites = new Sprite(loadSpriteSheetFile("res/unit/icon/hp.png"), 8, 8);
     }
     return mapUnitHPSprites;
+  }
+
+  public static Sprite getMapUnitLetterSprites()
+  {
+    if( null == mapUnitLetterSprites )
+    {
+      mapUnitLetterSprites = new Sprite(loadSpriteSheetFile("res/unit/icon/alphabet.png"), 8, 8);
+    }
+    return mapUnitLetterSprites;
+  }
+
+  public static Map<Character,BufferedImage> getColoredMapTextSprites(Color color)
+  {
+    if( null == mapUnitTextSprites )
+    {
+      mapUnitTextSprites = new HashMap<Color,Map<Character,BufferedImage>>();
+    }
+    if( null == mapUnitTextSprites.get(color) )
+    {
+      Map<Character,BufferedImage> colorMap = new HashMap<Character,BufferedImage>();
+
+      // Colorize the characters...
+      Sprite letters = new Sprite(getMapUnitLetterSprites());
+      letters.colorize(Color.WHITE, color);
+      // ...and put them into our map
+      for (char ch = 'A'; ch <= 'Z'; ch++)
+      {
+        int letterIndex = ch - 'A';
+        colorMap.put(ch, letters.getFrame(letterIndex));
+      }
+      
+      // Do the same for numbers
+      Sprite numbers = new Sprite(getMapUnitHPSprites());
+      numbers.colorize(Color.WHITE, color);
+      for (char ch = '0'; ch <= '9'; ch++)
+      {
+        int letterIndex = ch - '0';
+        colorMap.put(ch, numbers.getFrame(letterIndex));
+      }
+      
+      // Put our new map into the general collection, so we don't have to do this again
+      mapUnitTextSprites.put(color, colorMap);
+    }
+    
+    return mapUnitTextSprites.get(color);
   }
 
   public static BufferedImage getCargoIcon()
