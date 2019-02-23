@@ -18,7 +18,7 @@ public class GlobalWeatherEvent implements GameEvent
   /** Changes the whole map to the given weather. */
   public GlobalWeatherEvent(Weathers newWeather)
   {
-    this(newWeather, 0);
+    this(newWeather, 1);
   }
 
   /** Changes the weather for the given number of rounds. */
