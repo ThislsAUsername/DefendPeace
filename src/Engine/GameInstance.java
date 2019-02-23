@@ -155,7 +155,6 @@ public class GameInstance
           if( loc.getEnvironment().weatherType != Weathers.CLEAR )
           {
             weatherChanges.add(new MapChangeEvent.EnvironmentAssignment(loc.getCoordinates(), Environment.getTile(loc.getEnvironment().terrainType, Weathers.CLEAR)));
-            break;
           }
         }
         else

@@ -10,7 +10,7 @@ import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 
 /**
- * This event changes the TerrainType of one or more map tiles.
+ * This event changes the TerrainType and/or Weather of one or more map tiles.
  */
 public class MapChangeEvent implements GameEvent
 {
@@ -50,7 +50,8 @@ public class MapChangeEvent implements GameEvent
       if( null != loc )
       {
         loc.setEnvironment(ea.environment);
-        loc.setForecast(ea.environment.weatherType, ea.duration);
+        if( ea.duration > 0 )
+          loc.setForecast(ea.environment.weatherType, (gameMap.commanders.length * ea.duration) - 1);
       }
     }
   }
@@ -81,7 +82,7 @@ public class MapChangeEvent implements GameEvent
     /**
      * @param xyc The location whose Environment is changing.
      * @param envi The new TerrainType and weather to apply.
-     * @param forecastDuration The duration over which the weather type will persist.
+     * @param forecastDuration The number of rounds for the weather should persist.
      */
     public EnvironmentAssignment(XYCoord xyc, Environment envi, int forecastDuration)
     {

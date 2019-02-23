@@ -226,14 +226,13 @@ public class SpriteMapArtist
     // Get the Graphics object of the local map image, to use for drawing.
     Graphics g = baseMapImage.getGraphics();
 
+    // If this tile changes, it might necessitate terrain transition changes
+    // in adjacent tiles, so find and redraw the adjacent tiles as well.
     for( XYCoord drawCoord : Utils.findLocationsInRange(gameMap, coord, 0, 1) )
     {
-      if( gameMap.isLocationValid(drawCoord) )
-      {
-        // Fetch the relevant sprite set for this terrain type and have it draw itself.
-        TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(drawCoord.xCoord, drawCoord.yCoord));
-        spriteSet.drawTerrain(g, gameMap, drawCoord.xCoord, drawCoord.yCoord, drawScale, false);
-      }
+      // Fetch the relevant sprite set for this terrain type and have it draw itself.
+      TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(drawCoord.xCoord, drawCoord.yCoord));
+      spriteSet.drawTerrain(g, gameMap, drawCoord.xCoord, drawCoord.yCoord, drawScale, false);
     }
   }
 
@@ -250,7 +249,7 @@ public class SpriteMapArtist
     {
       for( EnvironmentAssignment ea : terrainChanges )
       {
-        if( null != ea.where ) myArtist.redrawBaseTile(ea.where); // Redraw one tile if that's all that changed.
+        if( null != ea.where ) myArtist.redrawBaseTile(ea.where); // Redraw each tile that changed.
       }
     }
 

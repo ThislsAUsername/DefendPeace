@@ -15,13 +15,13 @@ public class GlobalWeatherEvent implements GameEvent
   private Weathers weather;
   private int duration;
 
-  /** Changes the whole map to the given weather for the rest of this turn. */
+  /** Changes the whole map to the given weather. */
   public GlobalWeatherEvent(Weathers newWeather)
   {
     this(newWeather, 0);
   }
 
-  /** Changes the weather for the given number of turns, not counting the current turn. */
+  /** Changes the weather for the given number of rounds. */
   public GlobalWeatherEvent(Weathers newWeather, int forecastDuration)
   {
     weather = newWeather;
