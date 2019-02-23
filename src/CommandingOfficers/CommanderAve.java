@@ -314,20 +314,6 @@ public class CommanderAve extends Commander
         } // while snowToSpread > 0
       } // !while( !leafIter.hasNext() )
 
-      // Generate snow where needed.
-      ArrayList<MapChangeEvent.EnvironmentAssignment> tiles = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
-      for (XYCoord coord : toSnow)
-      {
-        Environment newEnvi = Environment.getTile(gameMap.getEnvironment(coord).terrainType, Weathers.SNOW);
-        int duration = 1 + snowMap[coord.xCoord][coord.yCoord] / SNOW_MELT_RATE; // Snow starts melting next turn, not this turn
-        tiles.add(new MapChangeEvent.EnvironmentAssignment(coord, newEnvi, duration));
-      }
-      if( !tiles.isEmpty())
-      {
-        GameEvent event = new MapChangeEvent(tiles);
-        outEvents.add(event);
-      }
-      
       log(getSnowMapAsString());
       log("---------- FINISHED current set of leaves -------------------" );
     } // ~while( !leaves.isEmpty() )
@@ -344,7 +330,23 @@ public class CommanderAve extends Commander
     {
       int oldVal = snowMap[dis.xCoord][dis.yCoord];
       snowMap[dis.xCoord][dis.yCoord] = (oldVal - SNOW_MELT_RATE < 0)? 0 : oldVal - SNOW_MELT_RATE;
-      log("Snow at " + dis + " melting from " + oldVal + " to " + snowMap[dis.xCoord][dis.yCoord]);
+      if( snowLoggingEnabled ) log("Snow at " + dis + " melting from " + oldVal + " to " + snowMap[dis.xCoord][dis.yCoord]);
+    }
+
+    // Update weather forecast.
+    ArrayList<MapChangeEvent.EnvironmentAssignment> tiles = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
+    for (XYCoord coord : toSnow)
+    {
+      Environment newEnvi = Environment.getTile(gameMap.getEnvironment(coord).terrainType, Weathers.SNOW);
+      int duration = snowMap[coord.xCoord][coord.yCoord] / SNOW_MELT_RATE;
+      if( coord.xCoord == 8 && coord.yCoord == 0 )
+        System.out.println(String.format("tile %s has depth %s; setting duration to %s", coord, snowMap[coord.xCoord][coord.yCoord], duration));
+      tiles.add(new MapChangeEvent.EnvironmentAssignment(coord, newEnvi, duration));
+    }
+    if( !tiles.isEmpty())
+    {
+      GameEvent event = new MapChangeEvent(tiles);
+      outEvents.add(event);
     }
   }
 
@@ -424,6 +426,7 @@ public class CommanderAve extends Commander
 
       // Change terrain to snow around each of Ave's units, and damage trees and enemies.
       HashSet<XYCoord> tilesSeen = new HashSet<XYCoord>();
+      ArrayList<MapChangeEvent.EnvironmentAssignment> tileChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
       for( Unit unit : myCommander.units )
       {
         // Two-tile radius of effect around each unit.
@@ -444,8 +447,7 @@ public class CommanderAve extends Commander
             // Destroy any forests. Big hail, man.
             TerrainType newTerrain = (loc.getEnvironment().terrainType == TerrainType.FOREST)
                 ? TerrainType.GRASS : loc.getEnvironment().terrainType;
-            GameEvent hailEvent = new MapChangeEvent(coord, Environment.getTile(newTerrain, Weathers.SNOW));
-            glacioEvents.add(hailEvent);
+            tileChanges.add(new MapChangeEvent.EnvironmentAssignment(coord, Environment.getTile(newTerrain, Weathers.SNOW), 1));
           }
 
           // Damage each enemy nearby.
@@ -455,6 +457,7 @@ public class CommanderAve extends Commander
           }
         }
       }
+      glacioEvents.add(new MapChangeEvent(tileChanges));
 
       // Do all of our terrain alterations.
       while(!glacioEvents.isEmpty())
