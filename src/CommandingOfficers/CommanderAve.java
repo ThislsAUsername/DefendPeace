@@ -93,7 +93,6 @@ public class CommanderAve extends Commander
     // Initialize our snow tracker if needed.
     if( null == snowMap )
     {
-      System.out.println("First time init: adding one snow");
       // Start by initializing owned properties to SNOW_THRESHOLD
       snowMap = new int[gameMap.mapWidth][gameMap.mapHeight];
       addSnow(SNOW_THRESHOLD, gameMap, returnEvents);
@@ -339,8 +338,6 @@ public class CommanderAve extends Commander
     {
       Environment newEnvi = Environment.getTile(gameMap.getEnvironment(coord).terrainType, Weathers.SNOW);
       int duration = snowMap[coord.xCoord][coord.yCoord] / SNOW_MELT_RATE;
-      if( coord.xCoord == 8 && coord.yCoord == 0 )
-        System.out.println(String.format("tile %s has depth %s; setting duration to %s", coord, snowMap[coord.xCoord][coord.yCoord], duration));
       tiles.add(new MapChangeEvent.EnvironmentAssignment(coord, newEnvi, duration));
     }
     if( !tiles.isEmpty())
