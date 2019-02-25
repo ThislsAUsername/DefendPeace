@@ -74,6 +74,7 @@ public class CommanderLibrary
 
 //    commanderList.add( LADavis.getInfo() );
     commanderList.add( TheBeastSturm.getInfo() );
-    commanderList.add( DaysOfRuin.getInfo() );
+//    commanderList.add( DaysOfRuin.getInfo() );
+    commanderList.add( DavisLevels.getInfo() );
   }
 }
