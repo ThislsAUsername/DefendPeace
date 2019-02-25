@@ -42,8 +42,8 @@ public class BWWillCS extends Commander
       }
     }
 
-    addCommanderAbility(new RallyCry(this));
-    addCommanderAbility(new ANewEra(this));
+    addCommanderAbility(new GoFast(this, "Rally Cry", 2, 1));
+    addCommanderAbility(new GoFast(this, "A New Era", 5, 2));
   }
 
   public static CommanderInfo getInfo()
@@ -51,45 +51,38 @@ public class BWWillCS extends Commander
     return coInfo;
   }
 
-  private static class RallyCry extends CommanderAbility
+  private static class GoFast extends CommanderAbility
   {
-    private static final String NAME = "Rally Cry";
-    private static final int COST = 2;
+    private final int power;
 
-    RallyCry(Commander commander)
+    GoFast(Commander commander, String name, int cost, int oomph)
     {
-      super(commander, NAME, COST);
+      super(commander, name, cost);
+      power = oomph;
     }
 
     @Override
     protected void perform(MapMaster gameMap)
     {
-      COMovementModifier moveMod = new COMovementModifier(1);
+      COMovementModifier moveMod = new COMovementModifier(power);
       for( UnitModel um : myCommander.unitModels )
       {
-        moveMod.addApplicableUnitModel(um);
-      }
-      myCommander.addCOModifier(moveMod);
-    }
-  }
-
-  private static class ANewEra extends CommanderAbility
-  {
-    private static final String NAME = "A New Era";
-    private static final int COST = 5;
-
-    ANewEra(Commander commander)
-    {
-      super(commander, NAME, COST);
-    }
-
-    @Override
-    protected void perform(MapMaster gameMap)
-    {
-      COMovementModifier moveMod = new COMovementModifier(2);
-      for( UnitModel um : myCommander.unitModels )
-      {
-        moveMod.addApplicableUnitModel(um);
+        if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )
+        {
+          if( um.weaponModels != null )
+          {
+            boolean buff = false;
+            for( WeaponModel pewpew : um.weaponModels )
+            {
+              if( pewpew.canFireAfterMoving )
+              {
+                buff = true;
+              }
+            }
+            if( buff )
+              moveMod.addApplicableUnitModel(um);
+          }
+        }
       }
       myCommander.addCOModifier(moveMod);
     }
