@@ -1,10 +1,13 @@
 package Engine.GameEvents;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 import Engine.Combat.BattleSummary;
+import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
+import Terrain.Environment.Weathers;
 import Terrain.Location;
 import Units.Unit;
 
@@ -56,6 +59,7 @@ public abstract class GameEventListener
   }
 
   // The functions below should be overridden by subclasses for event types they care about.
+  // As a rule, we should avoid passing the actual event to the receive hooks when possible.
   public void receiveBattleEvent(BattleSummary summary){};
   public void receiveCreateUnitEvent(Unit unit){};
   public void receiveCaptureEvent(Unit unit, Location location){};
@@ -65,5 +69,6 @@ public abstract class GameEventListener
   public void receiveResupplyEvent(ResupplyEvent event){};
   public void receiveUnitDieEvent(UnitDieEvent event){};
   public void receiveUnloadEvent(UnloadEvent event){};
-  public void receiveMapChangeEvent(MapChangeEvent event){};
+  public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){};
+  public void receiveWeatherChangeEvent(Weathers weather, int duration){};
 }

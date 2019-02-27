@@ -13,7 +13,7 @@ public class Environment
   
   public enum Weathers
   {
-    CLEAR, RAIN, SNOW, SANDSTORM
+    CLEAR, SNOW, RAIN, SANDSTORM
   };
 
   public final TerrainType terrainType;
