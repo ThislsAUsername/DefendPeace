@@ -98,11 +98,11 @@ public class Location
     setEnvironment(Environment.getTile(getEnvironment().terrainType, w));
     for( int turns = 0; turns < duration; turns++ )
     {
-      forecast.poll();
+      forecast.pollFirst();
     }
     for( int turns = 0; turns < duration; turns++ )
     {
-      forecast.push(w);
+      forecast.addFirst(w);
     }
   }
 }

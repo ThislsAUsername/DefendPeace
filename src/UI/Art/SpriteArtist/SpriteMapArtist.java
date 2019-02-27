@@ -3,13 +3,16 @@ package UI.Art.SpriteArtist;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.Path.PathNode;
+import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventListener;
-import Engine.GameEvents.MapChangeEvent;
+import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
+import Terrain.Environment.Weathers;
 import Terrain.GameMap;
 import UI.MapView;
 import UI.Art.FillRectArtist.FillRectMapArtist;
@@ -223,9 +226,14 @@ public class SpriteMapArtist
     // Get the Graphics object of the local map image, to use for drawing.
     Graphics g = baseMapImage.getGraphics();
 
-    // Fetch the relevant sprite set for this terrain type and have it draw itself.
-    TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(coord.xCoord, coord.yCoord));
-    spriteSet.drawTerrain(g, gameMap, coord.xCoord, coord.yCoord, drawScale, false);
+    // If this tile changes, it might necessitate terrain transition changes
+    // in adjacent tiles, so find and redraw the adjacent tiles as well.
+    for( XYCoord drawCoord : Utils.findLocationsInRange(gameMap, coord, 0, 1) )
+    {
+      // Fetch the relevant sprite set for this terrain type and have it draw itself.
+      TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(drawCoord.xCoord, drawCoord.yCoord));
+      spriteSet.drawTerrain(g, gameMap, drawCoord.xCoord, drawCoord.yCoord, drawScale, false);
+    }
   }
 
   private static class MapImageUpdater extends GameEventListener
@@ -237,11 +245,18 @@ public class SpriteMapArtist
     }
 
     @Override
-    public void receiveMapChangeEvent(MapChangeEvent event)
+    public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges)
     {
-      XYCoord xyc = event.getStartPoint();
-      if( null != xyc ) myArtist.redrawBaseTile(xyc); // Redraw one tile if that's all that changed.
-      else myArtist.buildMapImage(); // Redraw the whole map if we have to.
+      for( EnvironmentAssignment ea : terrainChanges )
+      {
+        if( null != ea.where ) myArtist.redrawBaseTile(ea.where); // Redraw each tile that changed.
+      }
+    }
+
+    @Override
+    public void receiveWeatherChangeEvent(Weathers weather, int duration)
+    {
+      myArtist.buildMapImage(); // Redraw the whole map.
     }
   }
 }
