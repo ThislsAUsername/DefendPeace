@@ -48,7 +48,8 @@ public class CommanderAve extends Commander
   public static final int SNOW_THRESHOLD = 100; // Big numbers for integer math.
   public static final int SNOW_PER_TURN = 400;
   public static final int SNOW_MELT_RATE = 100;
-  private int MAX_SNOW_SPREAD_RANGE = 5;
+  public static final int MAX_SNOW_SPREAD_RANGE = 5;
+  private int MAX_SNOW_DEPTH = 500;
   private CitySnowifier snowifier;
 
   private static final CommanderInfo coInfo = new CommanderInfo("Ave", new instantiator());  
@@ -218,7 +219,7 @@ public class CommanderAve extends Commander
         while( stackIter.hasNext() ) stackBuf.append(stackIter.next()).append(" ");
         log(stackBuf.toString());
 
-        // Get the leaf; only noted with at least SNOW_THRESHOLD are able to be expanded.
+        // Get the leaf; only nodes with at least SNOW_THRESHOLD are able to be expanded.
         XYCoord leaf = leafStack.pop();
         roots.add(leaf); // We are processing this node and don't want to revisit it.
         disconnected.remove(leaf); // Don't consider this tile for melting later.
@@ -237,11 +238,7 @@ public class CommanderAve extends Commander
         snowMap[leaf.xCoord][leaf.yCoord] = SNOW_THRESHOLD;
 
         // Collect the adjacent tiles that can collect snow from leaf.
-        XYCoord adjUp = new XYCoord(leaf.xCoord, leaf.yCoord-1);
-        XYCoord adjDown = new XYCoord(leaf.xCoord, leaf.yCoord+1);
-        XYCoord adjLeft = new XYCoord(leaf.xCoord-1, leaf.yCoord);
-        XYCoord adjRight = new XYCoord(leaf.xCoord+1, leaf.yCoord);
-        XYCoord[] potentials = {adjUp, adjDown, adjLeft, adjRight};
+        ArrayList<XYCoord> potentials = Utils.findLocationsInRange(gameMap, leaf, 1);
 
         log("Expanding leaf " + leaf);
         log("  snow to spread: " + snowToSpread);
@@ -251,7 +248,7 @@ public class CommanderAve extends Commander
         PriorityQueue<SnowPail> workingSet = new PriorityQueue<SnowPail>();
         workingSet.offer(new SnowPail(leaf, SNOW_THRESHOLD));
         for( XYCoord pot : potentials )
-          if( gameMap.isLocationValid(pot) )
+          if( gameMap.isLocationValid(pot) && !roots.contains(pot) && !leafStack.contains(pot) )
           {
             SnowPail neighbor = new SnowPail(pot, oldSnowMap[pot.xCoord][pot.yCoord]);
             workingSet.offer(neighbor);
@@ -260,27 +257,42 @@ public class CommanderAve extends Commander
 
         // This will hold the tiles we are spreading snow to.
         HashSet<XYCoord> shallowTiles = new HashSet<XYCoord>();
-        while( (snowToSpread > 0) && (!workingSet.isEmpty()) )
+        while( (snowToSpread > 0) )
         {
           log("Snow to spread: " + snowToSpread);
           // Pull out the most empty tiles still in the working set.
-          double mostShallow = workingSet.peek().snowDepth;
-          log(" most shallow: " + mostShallow);
-          while( !workingSet.isEmpty() && (workingSet.peek().snowDepth == mostShallow) )
+          double mostShallow = 0;
+          double nextMostShallow = 0;
+          if( !workingSet.isEmpty() )
           {
-            log(" adding " + workingSet.peek().snowCoord + " to working set");
-            shallowTiles.add(workingSet.poll().snowCoord);
+            mostShallow = workingSet.peek().snowDepth;
+            while( !workingSet.isEmpty() && (workingSet.peek().snowDepth == mostShallow) )
+            {
+              log(" adding " + workingSet.peek().snowCoord + " to working set");
+              shallowTiles.add(workingSet.poll().snowCoord);
+            }
+            nextMostShallow = (workingSet.isEmpty()) ? mostShallow+snowToSpread : workingSet.peek().snowDepth;
+            if( nextMostShallow > MAX_SNOW_DEPTH ) nextMostShallow = MAX_SNOW_DEPTH; // Keep snow under the limit.
           }
-          double nextMostShallow = (workingSet.isEmpty()) ? mostShallow+snowToSpread : workingSet.peek().snowDepth;
+          else
+          {
+            mostShallow = snowMap[leaf.xCoord][leaf.yCoord];
+            if( mostShallow == MAX_SNOW_DEPTH )
+              shallowTiles.remove(leaf); // If leaf is max depth, just push extra to other unprocessed tiles.
+            nextMostShallow = mostShallow + snowToSpread;
+          }
+          log(" most shallow: " + mostShallow);
           log(" next most shallow: " + nextMostShallow);
 
           // Add snow to the minimum tiles in equal measure until they reach the next minimum depth.
           int numShallowTiles = shallowTiles.size(); // The number of equally-empty tiles.
-          if( numShallowTiles > snowToSpread )
+          if( (numShallowTiles > snowToSpread) || (0 == numShallowTiles) )
           {
             snowToSpread = 0; // Not enough left to matter.
             continue;
           }
+
+          // Find the amount of snow required to bring the shallowest tile in our current set up to the level of the next.
           double difference = nextMostShallow - mostShallow;
           double debt = difference * numShallowTiles;
           double payment = 0;
@@ -300,7 +312,7 @@ public class CommanderAve extends Commander
             if( (snowMap[coord.xCoord][coord.yCoord] >= SNOW_THRESHOLD) )
             {
               toSnow.add(coord);
-              log(String.format("Setting environment of %s to SNOW", coord));
+              log(String.format("Ensuring %s is SNOW", coord));
             }
 
             // Add coord to the frontier if it's not already in the current set of leaves so we can expand it next.
@@ -321,6 +333,8 @@ public class CommanderAve extends Commander
     // last set of "next tiles" is still connected.
     for( XYCoord front : frontier )
     {
+      if( snowMap[front.xCoord][front.yCoord] > MAX_SNOW_DEPTH )
+        snowMap[front.xCoord][front.yCoord] = MAX_SNOW_DEPTH;
       disconnected.remove(front);
     }
 
@@ -345,6 +359,9 @@ public class CommanderAve extends Commander
       GameEvent event = new MapChangeEvent(tiles);
       outEvents.add(event);
     }
+
+    log("---------- FINAL state after relevel -------------------" );
+    log(getSnowMapAsString());
   }
 
   public int[][] getSnowMapClone()
@@ -388,18 +405,15 @@ public class CommanderAve extends Commander
     private static final int GLACIO_COST = 15;
     private static final int GLACIO_BUFF = 10; // Standard 10
     private static final int GLACIO_MAX_SNOW_SPREAD_RANGE = 10;
-    private static final int GLACIO_SNOW_MULTIPLIER = 4;
 
     CommanderAve Ave;
     COModifier damageMod = null;
-    COModifier snowSpreadMod = null;
 
     GlacioAbility(CommanderAve commander)
     {
       super(commander, GLACIO_NAME, GLACIO_COST);
       Ave = commander;
       damageMod = new CODamageModifier(GLACIO_BUFF);
-      snowSpreadMod = new SnowSpreadDistanceModifier(Ave, GLACIO_MAX_SNOW_SPREAD_RANGE);
     }
 
     @Override
@@ -407,23 +421,44 @@ public class CommanderAve extends Commander
     {
       // Normal CO-power boost.
       myCommander.addCOModifier(damageMod);
-      myCommander.addCOModifier(snowSpreadMod);
 
       // Keep track of any tiles that change to snow.
       GameEventQueue glacioEvents = new GameEventQueue();
+      ArrayList<MapChangeEvent.EnvironmentAssignment> tileChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
 
-      // Add extra snow to any tile that already has snow, plus extra on owned buildings.
-      for( int x = 0; x < Ave.snowMap.length; ++x )
-        for( int y = 0; y < Ave.snowMap[0].length; ++y )
+      // Make sure any tile within range of Ave's property is snowed. Instant full snow coverage.
+      HashSet<XYCoord> tilesInRange = new HashSet<XYCoord>();
+      for( XYCoord prop : Ave.ownedProperties )
+      {
+        System.out.println(String.format("Deep from %s to %s", 0, CommanderAve.MAX_SNOW_SPREAD_RANGE));
+        tilesInRange.addAll(Utils.findLocationsInRange(gameMap, prop, 0, CommanderAve.MAX_SNOW_SPREAD_RANGE));
+      }
+      for( XYCoord tile : tilesInRange )
+      {
+        Ave.snowMap[tile.xCoord][tile.yCoord] = Ave.MAX_SNOW_DEPTH;
+        if( gameMap.getEnvironment(tile).weatherType != Weathers.SNOW )
         {
-          Ave.snowMap[x][y] *= GLACIO_SNOW_MULTIPLIER;
+          tileChanges.add(new MapChangeEvent.EnvironmentAssignment(tile, Environment.getTile(gameMap.getEnvironment(tile).terrainType, Weathers.SNOW), 1));
         }
-      Ave.addSnow(SNOW_PER_TURN*GLACIO_SNOW_MULTIPLIER, gameMap, glacioEvents);
-      Ave.relevelSnow(gameMap, glacioEvents);
+      }
+      // Add a shallower ring of snow around Ave's core domain.
+      tilesInRange.clear();
+      for( XYCoord prop : Ave.ownedProperties )
+      {
+        System.out.println(String.format("Shallow from %s to %s", CommanderAve.MAX_SNOW_SPREAD_RANGE+1, GLACIO_MAX_SNOW_SPREAD_RANGE));
+        tilesInRange.addAll(Utils.findLocationsInRange(gameMap, prop, CommanderAve.MAX_SNOW_SPREAD_RANGE+1, GLACIO_MAX_SNOW_SPREAD_RANGE));
+      }
+      for( XYCoord tile : tilesInRange )
+      {
+        Ave.snowMap[tile.xCoord][tile.yCoord] = CommanderAve.SNOW_THRESHOLD;
+        if( gameMap.getEnvironment(tile).weatherType != Weathers.SNOW )
+        {
+          tileChanges.add(new MapChangeEvent.EnvironmentAssignment(tile, Environment.getTile(gameMap.getEnvironment(tile).terrainType, Weathers.SNOW), 1));
+        }
+      }
 
       // Change terrain to snow around each of Ave's units, and damage trees and enemies.
       HashSet<XYCoord> tilesSeen = new HashSet<XYCoord>();
-      ArrayList<MapChangeEvent.EnvironmentAssignment> tileChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
       for( Unit unit : myCommander.units )
       {
         // Two-tile radius of effect around each unit.
@@ -487,38 +522,6 @@ public class CommanderAve extends Commander
     {
       // Sort them shallowest first.
       return snowDepth - other.snowDepth;
-    }
-  }
-
-  private static class SnowSpreadDistanceModifier implements COModifier
-  {
-    CommanderAve Ave;
-    private int newDistance;
-    private int oldDistance;
-
-    public SnowSpreadDistanceModifier(CommanderAve cmdr, int newDist)
-    {
-      Ave = cmdr;
-      oldDistance = Ave.MAX_SNOW_SPREAD_RANGE;
-      newDistance = newDist;
-    }
-
-    @Override
-    public void apply(Commander commander)
-    {
-      if( commander == Ave )
-      {
-        Ave.MAX_SNOW_SPREAD_RANGE = newDistance;
-      }
-    }
-
-    @Override
-    public void revert(Commander commander)
-    {
-      if( commander == Ave )
-      {
-        Ave.MAX_SNOW_SPREAD_RANGE = oldDistance;
-      }
     }
   }
 
