@@ -216,4 +216,24 @@ public class UnitModel
     }
     return hasAction;
   }
+
+  public boolean isSurfaceUnit()
+  {
+    return (ChassisEnum.SHIP == chassis) || (ChassisEnum.TANK == chassis) || (ChassisEnum.TROOP == chassis);
+  }
+
+  public boolean isAirUnit()
+  {
+    return (ChassisEnum.AIR_HIGH == chassis) || (ChassisEnum.AIR_LOW == chassis);
+  }
+
+  public boolean isLandUnit()
+  {
+    return (ChassisEnum.TANK == chassis) || (ChassisEnum.TROOP == chassis);
+  }
+
+  public boolean isSeaUnit()
+  {
+    return (ChassisEnum.SHIP == chassis) || (ChassisEnum.SUBMERGED == chassis);
+  }
 }

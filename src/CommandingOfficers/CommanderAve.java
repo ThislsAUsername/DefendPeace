@@ -113,8 +113,7 @@ public class CommanderAve extends Commander
   {
     if( params.defender.CO == this // We are defending, in a FOREST
         && (params.combatRef.gameMap.getEnvironment(params.defender.x, params.defender.y).terrainType == TerrainType.FOREST)
-        && (params.defender.model.chassis != UnitModel.ChassisEnum.AIR_HIGH)  // And our unit is actually on the ground.
-        && (params.defender.model.chassis != UnitModel.ChassisEnum.AIR_LOW))
+        && (params.defender.model.isLandUnit()))  // And our unit is actually on the ground.
     {
       params.terrainDefense--;
     }
