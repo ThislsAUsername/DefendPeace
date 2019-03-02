@@ -414,6 +414,7 @@ public class CommanderAve extends Commander
       super(commander, GLACIO_NAME, GLACIO_COST);
       Ave = commander;
       damageMod = new CODamageModifier(GLACIO_BUFF);
+      AIFlags = PHASE_TURN_START | PHASE_TURN_END;
     }
 
     @Override
