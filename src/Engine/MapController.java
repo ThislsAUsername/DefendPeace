@@ -461,6 +461,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         startNextTurn();
         break;
       case LEAVE_MAP:
+      case SAVE_AND_QUIT:
         // Handled as a special case in handleGameInput().
         break;
       case CO_INFO:

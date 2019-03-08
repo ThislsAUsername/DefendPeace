@@ -1,6 +1,7 @@
 package CommandingOfficers;
 
 import java.awt.Color;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,8 +46,10 @@ import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModel.UnitEnum;
 
-public class Commander extends GameEventListener
+public class Commander extends GameEventListener implements Serializable
 {
+  private static final long serialVersionUID = -6740892333060450105L;
+  
   public final CommanderInfo coInfo;
   public GameMap myView;
   public ArrayList<Unit> units;

@@ -20,6 +20,8 @@ import Units.UnitModel;
  */
 public class CommanderCinder extends Commander
 {
+  private static final long serialVersionUID = 4938851182463546620L;
+
   private static final CommanderInfo coInfo = new CommanderInfo("Cinder", new instantiator());  
   private static class instantiator implements COMaker
   {
