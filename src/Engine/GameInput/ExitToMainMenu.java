@@ -3,12 +3,11 @@ package Engine.GameInput;
 /** A terminal state that indicates the game is over, no win or lose. */
 public class ExitToMainMenu extends GameInputState<Object>
 {
-  final boolean shouldSaveGame;
-  
   public ExitToMainMenu(StateData data, boolean save)
   {
     super(data);
-    shouldSaveGame = save;
+    if (save)
+      myOptions = new OptionSet(GameInputHandler.InputType.SAVE_AND_QUIT);
   }
 
   @Override
