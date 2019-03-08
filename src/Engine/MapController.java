@@ -1,5 +1,9 @@
 package Engine;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Queue;
@@ -156,8 +160,32 @@ public class MapController implements IController, GameInputHandler.StateChanged
       default:
         System.out.println("Invalid InputStateHandler mode in MapController! " + mode);
     }
+    
+    // If we want to save, save.
+    if (mode == GameInputHandler.InputType.SAVE_AND_QUIT)
+    {
+      String filename = "save\\" + myGame.toString() + ".svp"; // "svp" for "SaVe Peace"
+      new File("save\\").mkdirs(); // make sure we don't freak out if the directory's not there
+  
+      try
+      {
+        FileOutputStream file = new FileOutputStream(filename);
+        ObjectOutputStream out = new ObjectOutputStream(file);
 
-    return myGameInputHandler.getInputType() == GameInputHandler.InputType.LEAVE_MAP;
+        // Method for serialization of object
+        out.writeObject(myGame);
+
+        out.close();
+        file.close();
+      }
+
+      catch (IOException ex)
+      {
+        System.out.println(ex.toString());
+      }
+    }
+
+    return myGameInputHandler.shouldLeaveMap();
   }
 
   /**
