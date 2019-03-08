@@ -1,6 +1,7 @@
 package Engine;
 
 import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.HashMap;
 
 import CommandingOfficers.Commander;
@@ -13,8 +14,10 @@ import Terrain.Location;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
 
-public class GameInstance
+public class GameInstance implements Serializable
 {
+  private static final long serialVersionUID = -2961286039214471155L;
+  
   public Terrain.MapMaster gameMap;
   public Commander[] commanders;
   private int activeCoNum;
@@ -192,5 +195,21 @@ public class GameInstance
     {
       GameEventListener.unregisterEventListener(co);
     }
+  }
+  
+  /**
+   * Just concatenates the names of all the COs involved
+   * TODO: get fancy and actually split the teams out
+   */
+  @Override
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+    for( Commander co : commanders )
+    {
+      sb.append(co.coInfo.name).append("_");
+    }
+    sb.setLength(sb.length()-1);
+    return sb.toString();
   }
 }
