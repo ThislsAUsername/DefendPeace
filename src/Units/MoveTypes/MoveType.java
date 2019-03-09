@@ -147,7 +147,7 @@ public class MoveType implements Serializable
      * @param stream
      * @throws IOException
      */
-    private void writeObject(ObjectOutputStream stream) throws IOException
+    public void writeObject(ObjectOutputStream stream) throws IOException
     {
       for( TerrainType terrain : TerrainType.TerrainTypeList )
       {
@@ -161,13 +161,46 @@ public class MoveType implements Serializable
      * @param stream
      * @throws IOException
      */
-    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException
+    public void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException
     {
-      moveCosts = new EnumMap<Weathers, MoveCostByTerrain>(Weathers.class);
       for( TerrainType terrain : TerrainType.TerrainTypeList )
       {
         put(terrain, stream.readInt());
       }
     }
+  } //~MoveCostByTerrain
+  
+  /**
+   * Private method, same signature as in Serializable interface
+   * Manifests as a flattened 2D array of integers; for each weather, for each terrain, what is my move cost? 
+   *
+   * @param stream
+   * @throws IOException
+   */
+  private void writeObject(ObjectOutputStream stream) throws IOException {
+      stream.defaultWriteObject();
+      for( Weathers w : Weathers.values() )
+      {
+        moveCosts.get(w).writeObject(stream);
+      }
+  }
+
+  /**
+   * Private method, same signature as in Serializable interface
+   *
+   * @param stream
+   * @throws IOException
+   */
+  private void readObject(ObjectInputStream stream)
+          throws IOException, ClassNotFoundException {
+      stream.defaultReadObject();
+      
+      moveCosts = new EnumMap<Weathers, MoveCostByTerrain>(Weathers.class);
+      for( Weathers w : Weathers.values() )
+      {
+        MoveCostByTerrain noMoving = new MoveCostByTerrain(99);
+        noMoving.readObject(stream); // initialize the values from our serialized file
+        moveCosts.put(w, noMoving);
+      }
   }
 }
