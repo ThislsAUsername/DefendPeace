@@ -87,6 +87,10 @@ public class IDSTabithaDef extends Commander
     {
       COU = battleInfo.attacker;
     }
+    if( COU == null && battleInfo.defender.CO == this )
+    {
+      COU = battleInfo.defender;
+    }
   }
 
   private static class Firestorm extends CommanderAbility
