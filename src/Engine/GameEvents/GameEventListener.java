@@ -1,6 +1,9 @@
 package Engine.GameEvents;
 
 import java.util.ArrayList;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
@@ -73,4 +76,34 @@ public abstract class GameEventListener implements Serializable
   public void receiveUnloadEvent(UnloadEvent event){};
   public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){};
   public void receiveWeatherChangeEvent(Weathers weather, int duration){};
+  public void receiveMapChangeEvent(MapChangeEvent event){};
+  
+  /**
+   * Private method, same signature as in Serializable interface
+   * Saves whether the listener is registered, as the registered listeners array is static
+   *
+   * @param stream
+   * @throws IOException
+   */
+  private void writeObject(ObjectOutputStream stream) throws IOException
+  {
+    stream.defaultWriteObject();
+
+    stream.writeBoolean(eventListeners.contains(this));
+  }
+
+  /**
+   * Private method, same signature as in Serializable interface
+   *
+   * @param stream
+   * @throws IOException
+   */
+  private void readObject(ObjectInputStream stream)
+          throws IOException, ClassNotFoundException
+  {
+    stream.defaultReadObject();
+
+    if (stream.readBoolean())
+      registerEventListener(this);
+  }
 }
