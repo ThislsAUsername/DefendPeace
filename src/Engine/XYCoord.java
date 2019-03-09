@@ -1,6 +1,8 @@
 package Engine;
 
-public class XYCoord
+import java.io.Serializable;
+
+public class XYCoord implements Serializable
 {
 
   public final int xCoord;
