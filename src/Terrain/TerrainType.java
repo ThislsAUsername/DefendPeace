@@ -70,6 +70,18 @@ public class TerrainType
   private static final Color CITY_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
   private static final String CITY_NAME = "CITY";
   public static final TerrainType CITY = new TerrainType( CITY_FLAGS, CITY_DEFENSE, CITY_COLOR, CITY_NAME );
+  
+  private static final int BUNKER_FLAGS = LAND;
+  private static final int BUNKER_DEFENSE = 3;
+  private static final Color BUNKER_COLOR = new Color(155, 155, 255);
+  private static final String BUNKER_NAME = "BUNKER";
+  public static final TerrainType BUNKER = new TerrainType( BUNKER_FLAGS, BUNKER_DEFENSE, BUNKER_COLOR, BUNKER_NAME );
+  
+  private static final int PILLAR_FLAGS = 0;
+  private static final int PILLAR_DEFENSE = 0;
+  private static final Color PILLAR_COLOR = new Color(144, 104, 120);
+  private static final String PILLAR_NAME = "PILLAR";
+  public static final TerrainType PILLAR = new TerrainType( PILLAR_FLAGS, PILLAR_DEFENSE, PILLAR_COLOR, PILLAR_NAME );
 
   private static final int DUNES_FLAGS = LAND;
   private static final int DUNES_DEFENSE = 1;
@@ -153,9 +165,8 @@ public class TerrainType
   // List of all terrain types.
   public static final ArrayList<TerrainType> TerrainTypeList =
       new ArrayList<TerrainType>(Arrays.asList(
-          AIRPORT, BRIDGE, CITY, DUNES, FACTORY, FOREST, GRASS, HEADQUARTERS, LAB, MOUNTAIN, REEF, RIVER, ROAD, SEA, SEAPORT, SHOAL
+          AIRPORT, BRIDGE, CITY, BUNKER, PILLAR, DUNES, FACTORY, FOREST, GRASS, HEADQUARTERS, LAB, MOUNTAIN, REEF, RIVER, ROAD, SEA, SEAPORT, SHOAL
           ));
-
 
   @Override
   public String toString()

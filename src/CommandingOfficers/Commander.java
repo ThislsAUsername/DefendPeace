@@ -249,6 +249,17 @@ public class Commander extends GameEventListener implements Serializable
 
     return um;
   }
+  
+  /**
+   * Returns a character to be displayed on the unit.
+   * Primary usage should be pieces of info that aren't otherwise immediately apparent from the map.
+   * Our rendering only supports alphanumeric values at this time.
+   */
+  public char getUnitMarking(Unit unit)
+  {
+    // We don't have anything useful to print, so don't.
+    return '\0';
+  }
 
   /** Get the list of units this commander can build from the given property type. */
   public ArrayList<UnitModel> getShoppingList(Location buyLocation)
