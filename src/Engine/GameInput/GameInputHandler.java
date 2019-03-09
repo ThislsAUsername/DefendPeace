@@ -18,7 +18,7 @@ public class GameInputHandler
   private Stack<GameInputState<?>> myStateStack = null;
   private StateChangedCallback myCallback = null;
 
-  public enum InputType { FREE_TILE_SELECT, PATH_SELECT, MENU_SELECT, CONSTRAINED_TILE_SELECT, ACTION_READY, END_TURN, SAVE_AND_QUIT, LEAVE_MAP, CO_INFO };
+  public enum InputType { FREE_TILE_SELECT, PATH_SELECT, MENU_SELECT, CONSTRAINED_TILE_SELECT, ACTION_READY, END_TURN, SAVE, LEAVE_MAP, CO_INFO };
 
   public GameInputHandler(GameMap map, Commander currentPlayer, StateChangedCallback callback)
   {
@@ -155,7 +155,7 @@ public class GameInputHandler
   public boolean shouldLeaveMap()
   {
     InputType action = getInputType();
-    return action == InputType.LEAVE_MAP || action == InputType.SAVE_AND_QUIT; 
+    return action == InputType.LEAVE_MAP; 
   }
 
   /************************************************************

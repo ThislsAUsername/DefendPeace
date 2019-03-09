@@ -166,31 +166,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
       default:
         System.out.println("Invalid InputStateHandler mode in MapController! " + mode);
     }
-    
-    // If we want to save, save.
-    if (myGameInputHandler.getInputType() == GameInputHandler.InputType.SAVE_AND_QUIT)
-    {
-      String filename = "save/" + myGame.toString() + ".svp"; // "svp" for "SaVe Peace"
-      new File("save/").mkdirs(); // make sure we don't freak out if the directory's not there
-
-      System.out.println(String.format("Now saving to %s", filename));
-      try
-      {
-        FileOutputStream file = new FileOutputStream(filename);
-        ObjectOutputStream out = new ObjectOutputStream(file);
-
-        // Method for serialization of object
-        out.writeObject(myGame);
-
-        out.close();
-        file.close();
-      }
-
-      catch (IOException ex)
-      {
-        System.out.println(ex.toString());
-      }
-    }
 
     return myGameInputHandler.shouldLeaveMap();
   }
@@ -470,8 +445,29 @@ public class MapController implements IController, GameInputHandler.StateChanged
         startNextTurn();
         break;
       case LEAVE_MAP:
-      case SAVE_AND_QUIT:
         // Handled as a special case in handleGameInput().
+        break;
+      case SAVE:
+        String filename = "save/" + myGame.toString() + ".svp"; // "svp" for "SaVe Peace"
+        new File("save/").mkdirs(); // make sure we don't freak out if the directory's not there
+
+        System.out.println(String.format("Now saving to %s", filename));
+        try
+        {
+          FileOutputStream file = new FileOutputStream(filename);
+          ObjectOutputStream out = new ObjectOutputStream(file);
+
+          // Method for serialization of object
+          out.writeObject(myGame);
+
+          out.close();
+          file.close();
+        }
+        catch (IOException ex)
+        {
+          System.out.println(ex.toString());
+        }
+        myGameInputHandler.reset(); // CO_INFO is a terminal state. Reset the input handler.
         break;
       case CO_INFO:
         isInCoInfoMenu = true;
