@@ -1,5 +1,9 @@
 package Engine.GameEvents;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -14,7 +18,7 @@ import Units.Unit;
  * override those receive functions they care about.
  * We use the visitor pattern to call the correct event function whenever an event is distributed.
  */
-public abstract class GameEventListener
+public abstract class GameEventListener implements Serializable
 {
   /** Static list of all event subscribers */
   private static Set<GameEventListener> eventListeners = Collections.newSetFromMap(new WeakHashMap<GameEventListener, Boolean>());
@@ -66,4 +70,31 @@ public abstract class GameEventListener
   public void receiveUnitDieEvent(UnitDieEvent event){};
   public void receiveUnloadEvent(UnloadEvent event){};
   public void receiveMapChangeEvent(MapChangeEvent event){};
+
+  /**
+   * Private method, same signature as in Serializable interface
+   * Saves whether the listener is registered, as the registered listeners array is static
+   *
+   * @param stream
+   * @throws IOException
+   */
+  private void writeObject(ObjectOutputStream stream) throws IOException {
+    stream.defaultWriteObject();
+
+    stream.writeBoolean(eventListeners.contains(this));
+  }
+
+  /**
+   * Private method, same signature as in Serializable interface
+   *
+   * @param stream
+   * @throws IOException
+   */
+  private void readObject(ObjectInputStream stream)
+          throws IOException, ClassNotFoundException {
+    stream.defaultReadObject();
+
+    if (stream.readBoolean())
+      registerEventListener(this);
+  }
 }

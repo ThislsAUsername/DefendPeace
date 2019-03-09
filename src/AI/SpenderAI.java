@@ -43,6 +43,11 @@ public class SpenderAI implements AIController
   }
   public static final AIMaker info = new instantiator();
   
+  public AIMaker getAIInfo()
+  {
+    return info;
+  }
+  
   Queue<GameAction> actions = new ArrayDeque<GameAction>();
   Queue<Unit> unitQueue = new ArrayDeque<Unit>();
   boolean stateChange;

@@ -2,6 +2,10 @@ package CommandingOfficers;
 
 import java.awt.Color;
 import java.util.ArrayDeque;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +15,8 @@ import CommandingOfficers.Modifiers.CODefenseModifier;
 import java.util.Set;
 
 import AI.AIController;
+import AI.AILibrary;
+import AI.AIMaker;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
 import Engine.XYCoord;
@@ -46,13 +52,15 @@ import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModel.UnitEnum;
 
-public class Commander extends GameEventListener
+public class Commander extends GameEventListener implements Serializable
 {
+  private static final long serialVersionUID = -6740892333060450105L;
+  
   public final CommanderInfo coInfo;
   public GameMap myView;
   public ArrayList<Unit> units;
   public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
-  public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
+  public transient Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
   public Set<XYCoord> ownedProperties;
   public ArrayDeque<COModifier> modifiers;
   public Color myColor;
@@ -70,7 +78,9 @@ public class Commander extends GameEventListener
   private ArrayList<CommanderAbility> myAbilities = null;
   private String myActiveAbilityName = "";
 
-  private AIController aiController = null;
+  // The AI has to be effectively stateless anyway (to be able to adapt to whatever scenario it finds itself in on map start),
+  //   so may as well not require them to care about serializing their contents.
+  private transient AIController aiController = null;
 
   public Commander(CommanderInfo info)
   {
@@ -397,5 +407,66 @@ public class Commander extends GameEventListener
       return aiController.getNextAction(myView);
     }
     return null;
+  }
+
+  /**
+   * Private method, same signature as in Serializable interface
+   *
+   * @param stream
+   * @throws IOException
+   */
+  private void writeObject(ObjectOutputStream stream) throws IOException {
+    stream.defaultWriteObject();
+
+    // save our index into the AILibrary
+    if( null == aiController )
+      stream.writeInt(0); // Humans live at index 0 of the AI array. That sounds philosophical.
+    else
+    {
+      for( AIMaker AI : AILibrary.getAIList() )
+      {
+        if( AI.getName().equalsIgnoreCase(aiController.getAIInfo().getName()) )
+          stream.writeInt(AILibrary.getAIList().indexOf(AI));
+      }
+    }
+
+    // Write out our shopping list as a flattened 2D array of booleans; for each terrain, for all unit types, can I build it?
+    // This is probably inefficient use of space, but just look at all this not-caring I can do!
+    for( TerrainType terrain : TerrainType.TerrainTypeList )
+    {
+      for( UnitEnum ue : UnitModel.UnitEnum.values() )
+      {
+        ArrayList<UnitModel> shoppingList = (unitProductionByTerrain.get(terrain) != null) ? unitProductionByTerrain.get(terrain)
+            : new ArrayList<UnitModel>();
+        stream.writeBoolean(shoppingList.contains(getUnitModel(ue)));
+      }
+    }
+  }
+
+  /**
+   * Private method, same signature as in Serializable interface
+   *
+   * @param stream
+   * @throws IOException
+   */
+  private void readObject(ObjectInputStream stream)
+          throws IOException, ClassNotFoundException {
+    stream.defaultReadObject();
+
+    // use our AI index to get back where we were before
+    aiController = AILibrary.getAIList().get(stream.readInt()).create(this);
+
+    // rebuild our shopping list
+    unitProductionByTerrain = new HashMap<TerrainType, ArrayList<UnitModel>>();
+    for( TerrainType terrain : TerrainType.TerrainTypeList )
+    {
+      ArrayList<UnitModel> shoppingList = new ArrayList<UnitModel>();
+      for( UnitEnum ue : UnitModel.UnitEnum.values() )
+      {
+        if( stream.readBoolean() )
+          shoppingList.add(getUnitModel(ue));
+      }
+      unitProductionByTerrain.put(terrain, shoppingList);
+    }
   }
 }

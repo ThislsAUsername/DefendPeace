@@ -1,5 +1,9 @@
 package Engine;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Queue;
@@ -67,6 +71,11 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   public MapController(GameInstance game, MapView view)
   {
+    this(game,view,true);
+  }
+
+  public MapController(GameInstance game, MapView view, boolean initGame)
+  {
     myGame = game;
     myView = view;
     myView.setController(this);
@@ -77,8 +86,9 @@ public class MapController implements IController, GameInputHandler.StateChanged
     nextSeekIndex = 0;
     contemplatedAction = new ContemplatedAction();
 
-    // Start the first turn.
-    startNextTurn();
+    if( initGame )
+      // Start the first turn.
+      startNextTurn();
 
     // Initialize our game input handler.
     myGameInputHandler = new GameInputHandler(myGame.activeCO.myView, myGame.activeCO, this);
@@ -157,7 +167,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         System.out.println("Invalid InputStateHandler mode in MapController! " + mode);
     }
 
-    return myGameInputHandler.getInputType() == GameInputHandler.InputType.LEAVE_MAP;
+    return myGameInputHandler.shouldLeaveMap();
   }
 
   /**
@@ -436,6 +446,28 @@ public class MapController implements IController, GameInputHandler.StateChanged
         break;
       case LEAVE_MAP:
         // Handled as a special case in handleGameInput().
+        break;
+      case SAVE:
+        String filename = "save/" + myGame.toString() + ".svp"; // "svp" for "SaVe Peace"
+        new File("save/").mkdirs(); // make sure we don't freak out if the directory's not there
+
+        System.out.println(String.format("Now saving to %s", filename));
+        try
+        {
+          FileOutputStream file = new FileOutputStream(filename);
+          ObjectOutputStream out = new ObjectOutputStream(file);
+
+          // Method for serialization of object
+          out.writeObject(myGame);
+
+          out.close();
+          file.close();
+        }
+        catch (IOException ex)
+        {
+          System.out.println(ex.toString());
+        }
+        myGameInputHandler.reset(); // CO_INFO is a terminal state. Reset the input handler.
         break;
       case CO_INFO:
         isInCoInfoMenu = true;

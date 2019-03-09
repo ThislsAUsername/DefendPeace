@@ -10,6 +10,8 @@ import Units.Unit;
 
 public class CommanderPatch extends Commander
 {
+  private static final long serialVersionUID = -543799935457360451L;
+  
   private static final CommanderInfo coInfo = new CommanderInfo("Patch", new instantiator());  
   private static class instantiator implements COMaker
   {

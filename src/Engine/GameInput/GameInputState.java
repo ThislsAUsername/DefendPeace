@@ -21,8 +21,8 @@ abstract class GameInputState<T>
   /** The current GameActionBuilder state data,
    *  shared with all State instances. */
   protected final StateData myStateData;
-  protected final OptionSet myOptions;
-  protected final OptionSelector mySelector;
+  protected OptionSet myOptions;
+  protected OptionSelector mySelector;
 
   public GameInputState(StateData data)
   {

@@ -1,5 +1,6 @@
 package Units;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -19,7 +20,7 @@ import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
 import Units.Weapons.WeaponModel;
 
-public class Unit
+public class Unit implements Serializable
 {
   public Vector<Unit> heldUnits;
   public UnitModel model;

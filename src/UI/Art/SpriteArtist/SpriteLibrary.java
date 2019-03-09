@@ -475,7 +475,7 @@ public class SpriteLibrary
   {
     StringBuffer spriteFile = new StringBuffer();
     spriteFile.append("res/unit/");
-    if( DEFAULT_SPRITE_KEY != faction )
+    if( !DEFAULT_SPRITE_KEY.equalsIgnoreCase(faction) )
       spriteFile.append("faction/").append(faction).append("/");
     spriteFile.append(unitType.toString().toLowerCase()).append("_map.png");
     return spriteFile.toString();
@@ -889,6 +889,7 @@ public class SpriteLibrary
     if( null == menuOptionsSprite )
     {
       menuOptionsSprite = new Sprite(createBlankImageIfNull(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/newgame.png")));
+      menuOptionsSprite.addFrame(createBlankImageIfNull(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/continue.png")));
       menuOptionsSprite.addFrame(createBlankImageIfNull(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/options.png")));
       menuOptionsSprite.addFrame(createBlankImageIfNull(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/quit.png")));
     }
