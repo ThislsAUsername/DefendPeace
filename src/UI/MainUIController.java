@@ -106,7 +106,7 @@ public class MainUIController implements IController
                 // Look for files with our extension
                 if( !fileEntry.isDirectory() && filename.endsWith(".svp") )
                 {
-                  oldGame = GameInstance.loadSave(filename);
+                  oldGame = GameInstance.loadSave(fileEntry.getAbsolutePath());
                   break; // just load the first one we find
                 }
               }

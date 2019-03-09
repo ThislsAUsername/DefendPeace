@@ -1,5 +1,9 @@
 package Units.MoveTypes;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.HashMap;
 
@@ -7,12 +11,12 @@ import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.TerrainType;
 
-public class MoveType
+public class MoveType implements Serializable
 {
   protected final Integer IMPASSABLE = 99;
 
   // A 2-layer map. Map Weathers to a mapping of Terrains-to-cost.
-  protected EnumMap<Weathers, MoveCostByTerrain> moveCosts;
+  protected transient EnumMap<Weathers, MoveCostByTerrain> moveCosts;
 
   /** Default constructor to prohibit movement. This will make it obvious fairly
       quickly if a subclass fails to initialize properly.                         */
@@ -134,6 +138,35 @@ public class MoveType
       {
         if( terrain.isWater() )
           setMoveCost(terrain, moveCost);
+      }
+    }
+
+    /**
+     * Private method, same signature as in Serializable interface
+     *
+     * @param stream
+     * @throws IOException
+     */
+    private void writeObject(ObjectOutputStream stream) throws IOException
+    {
+      for( TerrainType terrain : TerrainType.TerrainTypeList )
+      {
+        stream.writeInt(get(terrain));
+      }
+    }
+
+    /**
+     * Private method, same signature as in Serializable interface
+     *
+     * @param stream
+     * @throws IOException
+     */
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException
+    {
+      moveCosts = new EnumMap<Weathers, MoveCostByTerrain>(Weathers.class);
+      for( TerrainType terrain : TerrainType.TerrainTypeList )
+      {
+        put(terrain, stream.readInt());
       }
     }
   }
