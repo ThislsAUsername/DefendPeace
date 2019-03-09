@@ -102,11 +102,11 @@ public class MainUIController implements IController
             {
               for( final File fileEntry : folder.listFiles() )
               {
-                String filename = fileEntry.getName();
+                String filename = fileEntry.getAbsolutePath();
                 // Look for files with our extension
                 if( !fileEntry.isDirectory() && filename.endsWith(".svp") )
                 {
-                  oldGame = GameInstance.loadSave(fileEntry.getAbsolutePath());
+                  oldGame = GameInstance.loadSave(filename);
                   break; // just load the first one we find
                 }
               }
