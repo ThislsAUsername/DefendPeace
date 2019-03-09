@@ -1,7 +1,10 @@
 package UI;
 
+import java.io.File;
 import Engine.Driver;
+import Engine.GameInstance;
 import Engine.IController;
+import Engine.MapController;
 import Engine.OptionSelector;
 
 public class MainUIController implements IController
@@ -11,9 +14,10 @@ public class MainUIController implements IController
 
   // NOTE: This list of menu options is mirrored by the Sprite of option images we get from SpriteLibrary.
   final int NEW_GAME = 0;
-  final int OPTIONS = 1;
-  final int QUIT = 2;
-  final int numMenuOptions = 3;
+  final int CONTINUE = 1;
+  final int OPTIONS = 2;
+  final int QUIT = 3;
+  final int numMenuOptions = 4;
 
   private OptionSelector optionSelector = new OptionSelector(numMenuOptions);
 
@@ -90,6 +94,33 @@ public class MainUIController implements IController
           case NEW_GAME:
             currentSubMenuType = SubMenu.GAME_SETUP;
           break;
+          case CONTINUE: // TODO: make a menu to let you pick your save file
+            GameInstance oldGame = null;
+
+            final File folder = new File("save/");
+            if( folder.canRead() )
+            {
+              for( final File fileEntry : folder.listFiles() )
+              {
+                String filename = fileEntry.getName();
+                // Look for files with our extension
+                if( !fileEntry.isDirectory() && filename.endsWith(".svp") )
+                {
+                  oldGame = GameInstance.loadSave(filename);
+                  break; // just load the first one we find
+                }
+              }
+            }
+
+            if( null != oldGame )
+            {
+              MapView mv = Driver.getInstance().gameGraphics.createMapView(oldGame);
+              MapController mapController = new MapController(oldGame, mv, false);
+
+              // Mash the big red button and start the game.
+              Driver.getInstance().changeGameState(mapController, mv);
+            }
+            break;
           case OPTIONS:
             currentSubMenuType = SubMenu.OPTIONS;
             break;
