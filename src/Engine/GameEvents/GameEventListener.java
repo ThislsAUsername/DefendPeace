@@ -1,6 +1,7 @@
 package Engine.GameEvents;
 
 import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -17,7 +18,7 @@ import Units.Unit;
  * override those receive functions they care about.
  * We use the visitor pattern to call the correct event function whenever an event is distributed.
  */
-public abstract class GameEventListener
+public abstract class GameEventListener implements Serializable
 {
   /** Static list of all event subscribers */
   private static Set<GameEventListener> eventListeners = Collections.newSetFromMap(new WeakHashMap<GameEventListener, Boolean>());

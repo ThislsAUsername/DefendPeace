@@ -1,6 +1,8 @@
 package Units.Weapons;
 
-public class WeaponModel
+import java.io.Serializable;
+
+public class WeaponModel implements Serializable
 {
   public enum WeaponType
   {

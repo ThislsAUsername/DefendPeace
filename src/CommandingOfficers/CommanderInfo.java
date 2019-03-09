@@ -1,6 +1,8 @@
 package CommandingOfficers;
 
-public class CommanderInfo
+import java.io.Serializable;
+
+public class CommanderInfo implements Serializable
 {
   public final String name;
   public final COMaker maker;

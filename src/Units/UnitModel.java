@@ -3,6 +3,7 @@ package Units;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,7 +19,7 @@ import Units.Weapons.WeaponModel;
 /**
  * Defines the invariant characteristics of a unit. One UnitModel can be shared across many instances of that Unit type.
  */
-public class UnitModel
+public class UnitModel implements Serializable
 {
   public enum UnitEnum
   {
