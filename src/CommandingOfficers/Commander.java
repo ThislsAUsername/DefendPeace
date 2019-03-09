@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 
 import AI.AIController;
+import AI.AILibrary;
+import AI.AIMaker;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
 import Engine.XYCoord;
@@ -75,7 +77,9 @@ public class Commander extends GameEventListener implements Serializable
   private ArrayList<CommanderAbility> myAbilities = null;
   private String myActiveAbilityName = "";
 
-  private AIController aiController = null;
+  // The AI has to be effectively stateless anyway (to be able to adapt to whatever scenario it finds itself in on map start),
+  //   so may as well not require them to care about serializing their contents.
+  private transient AIController aiController = null;
 
   public Commander(CommanderInfo info)
   {
@@ -399,16 +403,31 @@ public class Commander extends GameEventListener implements Serializable
    */
   private void writeObject(ObjectOutputStream stream) throws IOException
   {
-      stream.defaultWriteObject();
-      
-      for( TerrainType terrain : TerrainType.TerrainTypeList )
+    stream.defaultWriteObject();
+
+    // save our index into the AILibrary
+    if( null == aiController )
+      stream.writeInt(0); // Humans live at index 0 of the AI array. That sounds philosophical.
+    else
+    {
+      for( AIMaker AI : AILibrary.getAIList() )
       {
-        for( UnitEnum ue : UnitModel.UnitEnum.values() ) {
-          ArrayList<UnitModel> shoppingList = (unitProductionByTerrain.get(terrain) != null) ? unitProductionByTerrain.get(terrain)
-              : new ArrayList<UnitModel>();
-          stream.writeBoolean(shoppingList.contains(getUnitModel(ue)));
-        }
+        if( AI.getName().equalsIgnoreCase(aiController.getAIInfo().getName()) )
+          stream.writeInt(AILibrary.getAIList().indexOf(AI));
       }
+    }
+
+    // Write out our shopping list as a flattened 2D array of booleans; for each terrain, for all unit types, can I build it?
+    // This is probably inefficient use of space, but just look at all this not-caring I can do!
+    for( TerrainType terrain : TerrainType.TerrainTypeList )
+    {
+      for( UnitEnum ue : UnitModel.UnitEnum.values() )
+      {
+        ArrayList<UnitModel> shoppingList = (unitProductionByTerrain.get(terrain) != null) ? unitProductionByTerrain.get(terrain)
+            : new ArrayList<UnitModel>();
+        stream.writeBoolean(shoppingList.contains(getUnitModel(ue)));
+      }
+    }
   }
 
   /**
@@ -417,19 +436,24 @@ public class Commander extends GameEventListener implements Serializable
    * @param stream
    * @throws IOException
    */
-  private void readObject(ObjectInputStream stream)
-          throws IOException, ClassNotFoundException {
-      stream.defaultReadObject();
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException
+  {
+    stream.defaultReadObject();
 
-      unitProductionByTerrain = new HashMap<TerrainType, ArrayList<UnitModel>>();
-      for( TerrainType terrain : TerrainType.TerrainTypeList )
+    // use our AI index to get back where we were before
+    aiController = AILibrary.getAIList().get(stream.readInt()).create(this);
+
+    // rebuild our shopping list
+    unitProductionByTerrain = new HashMap<TerrainType, ArrayList<UnitModel>>();
+    for( TerrainType terrain : TerrainType.TerrainTypeList )
+    {
+      ArrayList<UnitModel> shoppingList = new ArrayList<UnitModel>();
+      for( UnitEnum ue : UnitModel.UnitEnum.values() )
       {
-        ArrayList<UnitModel> shoppingList = new ArrayList<UnitModel>();
-        for( UnitEnum ue : UnitModel.UnitEnum.values() ) {
-          if( stream.readBoolean() )
-            shoppingList.add(getUnitModel(ue));
-        }
-        unitProductionByTerrain.put(terrain, shoppingList);
+        if( stream.readBoolean() )
+          shoppingList.add(getUnitModel(ue));
       }
+      unitProductionByTerrain.put(terrain, shoppingList);
+    }
   }
 }

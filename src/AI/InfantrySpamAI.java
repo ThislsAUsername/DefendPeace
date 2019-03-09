@@ -40,6 +40,11 @@ public class InfantrySpamAI implements AIController
   }
   public static final AIMaker info = new instantiator();
   
+  public AIMaker getAIInfo()
+  {
+    return info;
+  }
+  
   Queue<GameAction> actions = new ArrayDeque<GameAction>();
 
   private Commander myCo = null;
