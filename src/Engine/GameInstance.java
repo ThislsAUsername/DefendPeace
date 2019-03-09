@@ -1,11 +1,12 @@
 package Engine;
 
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
-import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
@@ -170,5 +171,28 @@ public class GameInstance implements Serializable
     }
     sb.setLength(sb.length()-1);
     return sb.toString();
+  }
+  
+  public static GameInstance loadSave(String filename)
+  {
+    System.out.println(String.format("Deserializing game data from %s", filename));
+    
+    GameInstance load = null;
+    try
+    {
+      FileInputStream file = new FileInputStream(filename);
+      ObjectInputStream in = new ObjectInputStream(file);
+
+      load = (GameInstance) in.readObject();
+
+      in.close();
+      file.close();
+    }
+    catch (Exception ex)
+    {
+      System.out.println(ex.toString());
+    }
+
+    return load;
   }
 }
