@@ -71,6 +71,11 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   public MapController(GameInstance game, MapView view)
   {
+    this(game,view,true);
+  }
+
+  public MapController(GameInstance game, MapView view, boolean initGame)
+  {
     myGame = game;
     myView = view;
     myView.setController(this);
@@ -81,8 +86,9 @@ public class MapController implements IController, GameInputHandler.StateChanged
     nextSeekIndex = 0;
     contemplatedAction = new ContemplatedAction();
 
-    // Start the first turn.
-    startNextTurn();
+    if( initGame )
+      // Start the first turn.
+      startNextTurn();
 
     // Initialize our game input handler.
     myGameInputHandler = new GameInputHandler(myGame.activeCO.myView, myGame.activeCO, this);
@@ -162,11 +168,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
     }
     
     // If we want to save, save.
-    if (mode == GameInputHandler.InputType.SAVE_AND_QUIT)
+    if (myGameInputHandler.getInputType() == GameInputHandler.InputType.SAVE_AND_QUIT)
     {
-      String filename = "save\\" + myGame.toString() + ".svp"; // "svp" for "SaVe Peace"
-      new File("save\\").mkdirs(); // make sure we don't freak out if the directory's not there
-  
+      String filename = "save/" + myGame.toString() + ".svp"; // "svp" for "SaVe Peace"
+      new File("save/").mkdirs(); // make sure we don't freak out if the directory's not there
+
+      System.out.println(String.format("Now saving to %s", filename));
       try
       {
         FileOutputStream file = new FileOutputStream(filename);
