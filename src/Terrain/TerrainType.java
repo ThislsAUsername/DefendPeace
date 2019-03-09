@@ -1,6 +1,8 @@
 package Terrain;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class TerrainType
 {
@@ -149,9 +151,11 @@ public class TerrainType
   public static final TerrainType SHOAL = new TerrainType( SHOAL_FLAGS, SHOAL_DEFENSE, SHOAL_COLOR, SHOAL_NAME );
 
   // List of all terrain types.
-  public static final TerrainType[] TerrainTypeList = {
-    AIRPORT, BRIDGE, CITY, DUNES, FACTORY, FOREST, GRASS, HEADQUARTERS, LAB, MOUNTAIN, REEF, RIVER, ROAD, SEA, SEAPORT, SHOAL
-  };
+  public static final ArrayList<TerrainType> TerrainTypeList =
+      new ArrayList<TerrainType>(Arrays.asList(
+          AIRPORT, BRIDGE, CITY, DUNES, FACTORY, FOREST, GRASS, HEADQUARTERS, LAB, MOUNTAIN, REEF, RIVER, ROAD, SEA, SEAPORT, SHOAL
+          ));
+
 
   @Override
   public String toString()

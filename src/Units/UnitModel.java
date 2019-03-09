@@ -1,5 +1,8 @@
 package Units;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,7 +42,7 @@ public class UnitModel
   public boolean visionIgnoresCover = false;
   public MoveType propulsion;
   public ArrayList<ActionType> possibleActions = new ArrayList<ActionType>();
-  public Set<TerrainType> healableHabs;
+  public transient Set<TerrainType> healableHabs;
   public ArrayList<WeaponModel> weaponModels = new ArrayList<WeaponModel>();
 
   public int maxHP;
@@ -215,5 +218,38 @@ public class UnitModel
       }
     }
     return hasAction;
+  }
+
+  /**
+   * Private method, same signature as in Serializable interface
+   *
+   * @param stream
+   * @throws IOException
+   */
+  private void writeObject(ObjectOutputStream stream) throws IOException {
+      stream.defaultWriteObject();
+      
+      for( TerrainType terrain : TerrainType.TerrainTypeList )
+      {
+        stream.writeBoolean(healableHabs.contains(terrain));
+      }
+  }
+
+  /**
+   * Private method, same signature as in Serializable interface
+   *
+   * @param stream
+   * @throws IOException
+   */
+  private void readObject(ObjectInputStream stream)
+          throws IOException, ClassNotFoundException {
+      stream.defaultReadObject();
+
+      healableHabs = new HashSet<TerrainType>();
+      for( TerrainType terrain : TerrainType.TerrainTypeList )
+      {
+        if( stream.readBoolean() )
+          healableHabs.add(terrain);
+      }
   }
 }

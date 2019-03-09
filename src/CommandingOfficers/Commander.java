@@ -1,6 +1,9 @@
 package CommandingOfficers;
 
 import java.awt.Color;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +55,7 @@ public class Commander extends GameEventListener implements Serializable
   public GameMap myView;
   public ArrayList<Unit> units;
   public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
-  public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
+  public transient Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
   public Set<XYCoord> ownedProperties;
   public ArrayList<COModifier> modifiers;
   public Color myColor;
@@ -373,5 +376,46 @@ public class Commander extends GameEventListener implements Serializable
       return aiController.getNextAction(myView);
     }
     return null;
+  }
+
+  /**
+   * Private method, same signature as in Serializable interface
+   *
+   * @param stream
+   * @throws IOException
+   */
+  private void writeObject(ObjectOutputStream stream) throws IOException {
+      stream.defaultWriteObject();
+      
+      for( TerrainType terrain : TerrainType.TerrainTypeList )
+      {
+        for( UnitEnum ue : UnitModel.UnitEnum.values() ) {
+          ArrayList<UnitModel> shoppingList = (unitProductionByTerrain.get(terrain) != null) ? unitProductionByTerrain.get(terrain)
+              : new ArrayList<UnitModel>();
+          stream.writeBoolean(shoppingList.contains(getUnitModel(ue)));
+        }
+      }
+  }
+
+  /**
+   * Private method, same signature as in Serializable interface
+   *
+   * @param stream
+   * @throws IOException
+   */
+  private void readObject(ObjectInputStream stream)
+          throws IOException, ClassNotFoundException {
+      stream.defaultReadObject();
+
+      unitProductionByTerrain = new HashMap<TerrainType, ArrayList<UnitModel>>();
+      for( TerrainType terrain : TerrainType.TerrainTypeList )
+      {
+        ArrayList<UnitModel> shoppingList = new ArrayList<UnitModel>();
+        for( UnitEnum ue : UnitModel.UnitEnum.values() ) {
+          if( stream.readBoolean() )
+            shoppingList.add(getUnitModel(ue));
+        }
+        unitProductionByTerrain.put(terrain, shoppingList);
+      }
   }
 }

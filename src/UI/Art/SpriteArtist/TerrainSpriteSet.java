@@ -469,7 +469,7 @@ public class TerrainSpriteSet
       terrainBases.put(TerrainType.REEF, TerrainType.SEA);
       terrainBases.put(TerrainType.SEA, TerrainType.SEA);
 
-      if( TerrainType.TerrainTypeList.length != terrainBases.size())
+      if( TerrainType.TerrainTypeList.size() != terrainBases.size())
       {
         throw new RuntimeException("TerrainSpriteSet.terrainBases does not align with TerrainType.TerrainTypeList!");
       }
