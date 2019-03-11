@@ -109,7 +109,7 @@ public class IDSTabithaDef extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      COcast.COUBoost -= 20;
+      COcast.COUBoost -= 10;
       myCommander.addCOModifier(new CODamageModifier(10));
       myCommander.addCOModifier(new CODefenseModifier(10));
       MassStrikeUtils.damageStrike(gameMap, POWER,
@@ -134,8 +134,8 @@ public class IDSTabithaDef extends Commander
     protected void perform(MapMaster gameMap)
     {
       COcast.COUBoost = 0;
-      myCommander.addCOModifier(new CODamageModifier(25));
-      myCommander.addCOModifier(new CODefenseModifier(25));
+      myCommander.addCOModifier(new CODamageModifier(35));
+      myCommander.addCOModifier(new CODefenseModifier(35));
       MassStrikeUtils.damageStrike(gameMap, POWER,
           MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true)), 2);
     }
