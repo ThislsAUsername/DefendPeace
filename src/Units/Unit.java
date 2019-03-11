@@ -33,7 +33,6 @@ public class Unit implements Serializable
   public boolean isTurnOver;
   private double HP;
   public ArrayList<Weapon> weapons;
-  private ArrayList<GameAction> turnInitActions;
 
   public Unit(Commander co, UnitModel um)
   {
@@ -59,8 +58,6 @@ public class Unit implements Serializable
     }
     if( model.holdingCapacity > 0 )
       heldUnits = new Vector<Unit>(model.holdingCapacity);
-
-    turnInitActions = model.getTurnInitActions(this);
   }
 
   /**
@@ -116,7 +113,7 @@ public class Unit implements Serializable
       }
 
       // Collect any turn-initialization actions for this unit.
-      for( GameAction ga : turnInitActions )
+      for( GameAction ga : model.getTurnInitActions(this) )
       {
         events.addAll(ga.getEvents(map));
       }
