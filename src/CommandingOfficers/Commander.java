@@ -102,7 +102,7 @@ public class Commander extends GameEventListener implements Serializable
     factoryModels.add(new NeotankModel());
     factoryModels.add(new RocketsModel());
     factoryModels.add(new AntiAirModel());
-//    factoryModels.add(new MobileSAMModel());
+    factoryModels.add(new MobileSAMModel());
 
     // Record those units we can get from a Seaport.
     seaportModels.add(new LanderModel());
