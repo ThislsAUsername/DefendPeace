@@ -372,7 +372,7 @@ public class Commander extends GameEventListener implements Serializable
     }
 
     // Do nothing if we're not involved
-    if( minion != null && enemy != null && "" == myActiveAbilityName )
+    if( minion != null && enemy != null && myActiveAbilityName.equalsIgnoreCase("") )
     {
       double power = 0; // value in funds of the charge we're getting
       
