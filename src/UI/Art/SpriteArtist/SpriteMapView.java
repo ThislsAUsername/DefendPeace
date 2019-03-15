@@ -201,9 +201,9 @@ public class SpriteMapView extends MapView
     {
       GameEvent event = eventsToAnimate.peek();
       currentAnimation = event.getEventAnimation(this);
-//      boolean isEventHidden = !(null == event.getStartPoint()) && gameMap.isLocationFogged(event.getStartPoint())
-//          && gameMap.isLocationFogged(event.getEndPoint());
-//      if( null == currentAnimation || isEventHidden )
+      boolean isEventHidden = !(null == event.getStartPoint()) && gameMap.isLocationFogged(event.getStartPoint())
+          && gameMap.isLocationFogged(event.getEndPoint());
+      if( null == currentAnimation || isEventHidden )
       {
         // If we want to animate something hidden, or we don't have anything to animate, animate nothing instead.
         currentAnimation = new NoAnimation();
@@ -403,8 +403,9 @@ public class SpriteMapView extends MapView
   // from MapView
   public GameAnimation buildMoveAnimation(Unit unit, Path movePath)
   {
-    return new NobunagaBattleAnimation(getTileSize(), movePath.getWaypoint(0).x, movePath.getWaypoint(0).y, movePath.getEnd().x,
-        movePath.getEnd().y);
+    return null;
+//    return new NobunagaBattleAnimation(getTileSize(), movePath.getWaypoint(0).x, movePath.getWaypoint(0).y, movePath.getEnd().x,
+//        movePath.getEnd().y);
   }
 
   @Override // from MapView
