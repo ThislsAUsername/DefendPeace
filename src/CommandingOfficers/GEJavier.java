@@ -81,7 +81,7 @@ public class GEJavier extends Commander
   {
     private static final String NAME = "Tower of Power";
     private static final int COST = 6;
-    private static final int VALUE = 40;
+    private static final int VALUE = 60;
     GEJavier COcast;
 
     TowerOfPower(Commander commander)
