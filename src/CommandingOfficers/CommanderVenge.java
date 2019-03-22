@@ -22,7 +22,7 @@ public class CommanderVenge extends Commander
   private static final long serialVersionUID = -8207164779284734879L;
   
   private static final CommanderInfo coInfo = new CommanderInfo("Venge", new instantiator());
-  private static class instantiator implements COMaker
+  private static class instantiator extends COMaker
   {
     @Override
     public Commander create()

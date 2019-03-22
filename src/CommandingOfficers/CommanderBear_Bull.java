@@ -18,7 +18,7 @@ public class CommanderBear_Bull extends Commander
   private static final long serialVersionUID = -3048055535977630509L;
   
   private static final CommanderInfo coInfo = new CommanderInfo("Bear&Bull", new instantiator());  
-  private static class instantiator implements COMaker
+  private static class instantiator extends COMaker
   {
     @Override
     public Commander create()
