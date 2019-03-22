@@ -1,8 +1,42 @@
 package CommandingOfficers;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
-public interface COMaker extends Serializable
+public abstract class COMaker implements Serializable
 {
-  Commander create();
+  public ArrayList<InfoPage> infoPages;
+
+  public COMaker()
+  {
+    infoPages = new ArrayList<InfoPage>();
+    infoPages.add(new InfoPage(InfoPage.PageType.CO_HEADERS));
+    infoPages.add(new InfoPage(InfoPage.PageType.GAME_STATUS));
+  }
+
+  public abstract Commander create();
+
+  public static class InfoPage implements Serializable
+  {
+    public enum PageType {
+      CO_HEADERS, GAME_STATUS, BASIC
+    }
+
+    public final PageType pageType;
+    public final String info;
+
+    public InfoPage(PageType type)
+    {
+      this(type, "");
+    }
+    public InfoPage(String textContents)
+    {
+      this(PageType.BASIC, textContents);
+    }
+    public InfoPage(PageType type, String textContents)
+    {
+      pageType = type;
+      info = textContents;
+    }
+  }
 }

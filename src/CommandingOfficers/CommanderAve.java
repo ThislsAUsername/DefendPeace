@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Stack;
 
+import CommandingOfficers.COMaker.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.Utils;
@@ -31,7 +32,7 @@ import Units.UnitModel;
  * 
  * Passive:
  *    Ave generates snow around all owned properties, which spreads over time.
- *    Her units take a movement and defense penalty in forests.
+ *    Her units move normally in snow, but take a movement and defense penalty in forests.
  * 
  * Glacio:
  *    Boosts the snow-aura around her buildings;
@@ -52,8 +53,29 @@ public class CommanderAve extends Commander
   private CitySnowifier snowifier;
 
   private static final CommanderInfo coInfo = new CommanderInfo("Ave", new instantiator());  
-  private static class instantiator implements COMaker
+  private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Commander Ave (AH-vey) loves the cold, and her power allows her to inexorably, if slowly,\r\n" + 
+          "grind her opponents down beneath a wall of ever-encroaching ice.\r\n" + 
+          "Despite pernicious rumors to the contrary, she has nothing against Christmas."));
+      infoPages.add(new InfoPage(
+          "Passive:\r\n" + 
+          "- Ave generates snow around all owned properties, which spreads over time.\r\n" + 
+          "- Her units move normally in snow, but take a movement and defense penalty in forests."));
+      infoPages.add(new InfoPage(
+          "Glacio ("+GlacioAbility.GLACIO_COST+"):\r\n" + 
+          "Boosts the snow-aura around her buildings;\r\n" + 
+          "Hail falls in a two-space radius around her units,\r\n" + 
+          "- changing the weather in those tiles to snow,\r\n" + 
+          "- damaging enemies for up to 2HP, and\r\n" + 
+          "- destroying any forests (reducing them to grass)."));
+      infoPages.add(new InfoPage(
+          "Likes: Sleigh rides, Hot Chocolate\r\n" + 
+          "Dislikes: Jungles, Large Cats"));
+    }
     @Override
     public Commander create()
     {

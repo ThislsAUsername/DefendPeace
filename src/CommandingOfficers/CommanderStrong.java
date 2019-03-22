@@ -17,7 +17,7 @@ public class CommanderStrong extends Commander
   private static final long serialVersionUID = -3762678175296290654L;
   
   private static final CommanderInfo coInfo = new CommanderInfo("Strong", new instantiator());  
-  private static class instantiator implements COMaker
+  private static class instantiator extends COMaker
   {
     @Override
     public Commander create()
