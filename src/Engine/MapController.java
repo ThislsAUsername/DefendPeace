@@ -82,7 +82,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     inputMode = InputMode.INPUT;
     unitsToInit = new ArrayDeque<Unit>();
     isGameOver = false;
-    coInfoMenu = new CO_InfoMenu(myGame.commanders.length);
+    coInfoMenu = new CO_InfoMenu(myGame.commanders);
     nextSeekIndex = 0;
     contemplatedAction = new ContemplatedAction();
 
