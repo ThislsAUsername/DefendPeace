@@ -67,8 +67,8 @@ public class SpriteMenuArtist
 
       // Make sure the menu is fully contained in viewable space.
       Dimension dims = SpriteOptions.getScreenDimensions();
-      drawX = (drawX < mapViewX) ? mapViewX : (drawX > (mapViewX+dims.width - menuWidth)) ? (mapViewX+dims.width - menuWidth) : drawX;
-      drawY = (drawY < mapViewY) ? mapViewY : (drawY > (mapViewY+dims.height - menuHeight)) ? (mapViewY+dims.height - menuHeight) : drawY;
+      drawX = (drawX < mapViewX*viewTileSize) ? mapViewX : (drawX > (mapViewX*viewTileSize + dims.width - menuWidth)) ?   (mapViewX * viewTileSize+dims.width - menuWidth) : drawX;
+      drawY = (drawY < mapViewY*viewTileSize) ? mapViewY : (drawY > (mapViewY*viewTileSize + dims.height - menuHeight)) ? (mapViewY * viewTileSize+dims.height - menuHeight) : drawY;
 
       g.drawImage(menu, drawX, drawY, null);
     }
