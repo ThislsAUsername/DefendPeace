@@ -334,6 +334,8 @@ public class SpriteMapView extends MapView
     // justify bottom/right
     g.drawImage(COPic, mapViewWidth - COPic.getWidth()*drawScale, mapViewHeight - COPic.getHeight()*drawScale,
         COPic.getWidth()*drawScale, COPic.getHeight()*drawScale, null);
+
+    CommanderOverlayArtist.drawCommanderOverlay(g, myGame.commanders[co], false);
     
     // add the actual info
     g.setColor(SpriteUIUtils.MENUFRAMECOLOR);
@@ -345,12 +347,24 @@ public class SpriteMapView extends MapView
     switch (myGame.commanders[co].coInfo.maker.infoPages.get(page).pageType)
     {
       case CO_HEADERS:
+        int overlayHeight = 30*drawScale;
+        int heightOffset = 0;
+        for (Commander CO : myGame.commanders)
+        {
+          BufferedImage overlayPic = SpriteLibrary.createTransparentSprite(100*drawScale, overlayHeight);
+          CommanderOverlayArtist.drawCommanderOverlay(overlayPic.getGraphics(), CO, true);
+          g.drawImage(overlayPic,2*paneOuterBuffer, 2*paneOuterBuffer + heightOffset, null);
+          heightOffset += overlayHeight;
+        }
         break;
       case GAME_STATUS:
+        String status = "TBD";
+        BufferedImage statusText = SpriteUIUtils.paintTextNormalized(status, paneHSize-paneOuterBuffer);
+        g.drawImage(statusText,3*paneOuterBuffer, 3*paneOuterBuffer, null);
         break;
       case BASIC:
-        BufferedImage text = SpriteUIUtils.paintTextNormalized(myGame.commanders[co].coInfo.maker.infoPages.get(page).info, paneHSize-paneOuterBuffer);
-        g.drawImage(text,3*paneOuterBuffer, 3*paneOuterBuffer, null);
+        BufferedImage infoText = SpriteUIUtils.paintTextNormalized(myGame.commanders[co].coInfo.maker.infoPages.get(page).info, paneHSize-paneOuterBuffer);
+        g.drawImage(infoText,3*paneOuterBuffer, 3*paneOuterBuffer, null);
         break;
     }
   }
