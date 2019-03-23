@@ -209,20 +209,7 @@ public class SpriteMapView extends MapView
     // If we are in the CO_INFO menu, don't draw the map, etc.
     if( mapController.isInCoInfoMenu )
     {
-      // Get the CO info menu.
-      CO_InfoMenu menu = mapController.getCoInfoMenu();
-
-      // Get the current menu selections.
-      int co = menu.getCoSelection();
-      int page = menu.getPageSelection();
-
-      // TODO: Create the other CO info pages (powers, stats, etc).
-
-      // Draw the background.
-
-      // Draw the commander art.
-      g.drawImage(SpriteLibrary.getCommanderSprites(myGame.commanders[co].coInfo.name).body, 0, 0, mapViewWidth,
-          mapViewHeight, null);
+      drawCOInfoMenu(g);
     }
     else
     {
@@ -326,6 +313,25 @@ public class SpriteMapView extends MapView
       // Draw the Commander overlay with available funds.
       drawCommanderOverlay(g);
     } // End of case for no overlay menu.
+  }
+
+  private void drawCOInfoMenu(Graphics g)
+  {
+    // Get the CO info menu.
+    CO_InfoMenu menu = mapController.getCoInfoMenu();
+    int drawScale = SpriteOptions.getDrawScale();
+
+    // Get the current menu selections.
+    int co = menu.getCoSelection();
+    int page = menu.getPageSelection();
+
+    // Draw the commander art. (the caller draws our background, so we don't have to)
+    BufferedImage COPic = SpriteLibrary.getCommanderSprites(myGame.commanders[co].coInfo.name).body;
+    // justify bottom/right
+    g.drawImage(COPic, mapViewWidth - COPic.getWidth()*drawScale, mapViewHeight - COPic.getHeight()*drawScale,
+        COPic.getWidth()*drawScale, COPic.getHeight()*drawScale, null);
+    
+    // TODO: add the actual info
   }
 
   private void adjustViewLocation()
