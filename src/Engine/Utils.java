@@ -508,6 +508,41 @@ public class Utils
     TravelDistanceComparator tdc = new TravelDistanceComparator(unit, map);
     Collections.sort(mapLocations, tdc);
   }
+  
+
+  /** Returns a string describing the game statistics of a given CO */
+  public static String getGameStatusData(GameMap map, Commander viewed)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    int income = 0;
+    int unitCount = 0;
+    int unitFunds = 0;
+    for( int w = 0; w < map.mapWidth; ++w )
+    {
+      for( int h = 0; h < map.mapHeight; ++h )
+      {
+        Location loc = map.getLocation(w, h);
+        if( loc.isProfitable() && loc.getOwner() == viewed )
+        {
+          income += viewed.incomePerCity;
+        }
+        Unit resident = loc.getResident();
+        if( null != resident && resident.CO == viewed )
+        {
+          unitCount++;
+          unitFunds += resident.model.getCost() * resident.getHP() / resident.model.maxHP;
+        }
+      }
+    }
+
+    sb.append("Income:     ").append(income)   .append("\n");
+    sb.append("Unit count: ").append(unitCount).append("\n");
+    sb.append("Unit funds: ").append(unitFunds).append("\n");
+
+    return sb.toString();
+  }
+  
 
   /** Returns a list of all locations visible to the unit at its current location. */
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer)
