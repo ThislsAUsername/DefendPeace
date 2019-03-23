@@ -48,7 +48,7 @@ public class CommanderAve extends Commander
   public static final int SNOW_THRESHOLD = 100; // Big numbers for integer math.
   public static final int SNOW_PER_TURN = 400;
   public static final int SNOW_MELT_RATE = 100;
-  public static final int MAX_SNOW_SPREAD_RANGE = 5;
+  private int MAX_SNOW_SPREAD_RANGE = 2;
   private int MAX_SNOW_DEPTH = 500;
   private CitySnowifier snowifier;
 
@@ -81,7 +81,9 @@ public class CommanderAve extends Commander
       }
     }
 
+    addCommanderAbility(new NixAbility(this));
     addCommanderAbility(new GlacioAbility(this));
+    addCommanderAbility(new OblidoAbility(this));
     snowifier = new CitySnowifier(this);
     GameEventListener.registerEventListener(snowifier);
   }
@@ -393,17 +395,73 @@ public class CommanderAve extends Commander
   }
 
   /**
+   * Nix permanently increases the range of Ave's passive snow effect,
+   * and converts all spaces within that range to snow.
+   */
+  private static class NixAbility extends CommanderAbility
+  {
+    private static final String NIX_NAME = "Nix";
+    private static final int NIX_COST = 1;
+    private static final int NIX_BUFF = 10; // Standard 10
+
+    private int numActivations = 0;
+
+    CommanderAve Ave;
+    COModifier damageMod = null;
+
+    NixAbility(CommanderAve commander)
+    {
+      super(commander, NIX_NAME, NIX_COST);
+      Ave = commander;
+      damageMod = new CODamageModifier(NIX_BUFF);
+      AIFlags = PHASE_TURN_START | PHASE_TURN_END;
+    }
+
+    @Override
+    protected void perform(MapMaster gameMap)
+    {
+      // Override default cost-increase behavior to make this get more expensive faster.
+      numActivations++;
+      myPowerCost = 1 + (numActivations*3);
+
+      // Increase Ave's sphere of influence.
+      Ave.MAX_SNOW_SPREAD_RANGE++;
+
+      // Buff units.
+      damageMod.apply(Ave);
+
+      // Drop snow everywhere inside her range.
+      ArrayList<MapChangeEvent.EnvironmentAssignment> snowTiles = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
+      HashSet<XYCoord> tiles = Utils.findLocationsNearProperties(gameMap, Ave, Ave.MAX_SNOW_SPREAD_RANGE);
+      for( XYCoord coord : tiles )
+      {
+        if( Ave.snowMap[coord.xCoord][coord.yCoord] < CommanderAve.SNOW_THRESHOLD )
+        {
+          Ave.snowMap[coord.xCoord][coord.yCoord] = CommanderAve.SNOW_THRESHOLD;
+          if( gameMap.getEnvironment(coord).weatherType != Weathers.SNOW )
+          {
+            snowTiles.add(new MapChangeEvent.EnvironmentAssignment(coord, Environment.getTile(gameMap.getEnvironment(coord).terrainType, Weathers.SNOW), 1));
+          }
+        }
+      }
+
+      // Do all of our terrain alterations.
+      new MapChangeEvent(snowTiles).performEvent(gameMap);
+    }
+  }
+
+  /**
    *  Boosts the snow-aura around her buildings, and allows it to (briefly) extend further than normal.
    *  Deposits snow in a two-space around all of her units.
-   *  Enemies within this radius are damaged for up to 2HP.
-   *  Forests within this radius are destroyed (turned to grass).
+   *  Enemies within 2 spaces of one of Ave's units or buildings are frozen for one turn.
    */
   private static class GlacioAbility extends CommanderAbility
   {
     private static final String GLACIO_NAME = "Glacio";
-    private static final int GLACIO_COST = 15;
+    private static final int GLACIO_COST = 8;
     private static final int GLACIO_BUFF = 10; // Standard 10
-    private static final int GLACIO_MAX_SNOW_SPREAD_RANGE = 10;
+    private static final int GLACIO_SNOW_SPREAD = 3;
+    private static final int GLACIO_FREEZE_RANGE = 2;
 
     CommanderAve Ave;
     COModifier damageMod = null;
@@ -423,72 +481,38 @@ public class CommanderAve extends Commander
       myCommander.addCOModifier(damageMod);
 
       // Keep track of any tiles that change to snow.
-      GameEventQueue glacioEvents = new GameEventQueue();
       ArrayList<MapChangeEvent.EnvironmentAssignment> tileChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
 
-      // Make sure any tile within range of Ave's property is snowed. Instant full snow coverage.
-      HashSet<XYCoord> tilesInRange = new HashSet<XYCoord>();
-      for( XYCoord prop : Ave.ownedProperties )
+      // Add snow in an expanded range around Ave's areas.
+      int maxSnowRange = Ave.MAX_SNOW_SPREAD_RANGE + GLACIO_SNOW_SPREAD;
+      HashSet<XYCoord> tilesInRange = Utils.findLocationsNearProperties(gameMap, Ave, maxSnowRange);
+      tilesInRange.addAll(Utils.findLocationsNearUnits(gameMap, Ave, GLACIO_SNOW_SPREAD));
+      for( XYCoord coord : tilesInRange )
       {
-        System.out.println(String.format("Deep from %s to %s", 0, CommanderAve.MAX_SNOW_SPREAD_RANGE));
-        tilesInRange.addAll(Utils.findLocationsInRange(gameMap, prop, 0, CommanderAve.MAX_SNOW_SPREAD_RANGE));
-      }
-      for( XYCoord tile : tilesInRange )
-      {
-        Ave.snowMap[tile.xCoord][tile.yCoord] = Ave.MAX_SNOW_DEPTH;
-        if( gameMap.getEnvironment(tile).weatherType != Weathers.SNOW )
+        if( Ave.snowMap[coord.xCoord][coord.yCoord] < CommanderAve.SNOW_THRESHOLD )
         {
-          tileChanges.add(new MapChangeEvent.EnvironmentAssignment(tile, Environment.getTile(gameMap.getEnvironment(tile).terrainType, Weathers.SNOW), 1));
-        }
-      }
-      // Add a shallower ring of snow around Ave's core domain.
-      tilesInRange.clear();
-      for( XYCoord prop : Ave.ownedProperties )
-      {
-        System.out.println(String.format("Shallow from %s to %s", CommanderAve.MAX_SNOW_SPREAD_RANGE+1, GLACIO_MAX_SNOW_SPREAD_RANGE));
-        tilesInRange.addAll(Utils.findLocationsInRange(gameMap, prop, CommanderAve.MAX_SNOW_SPREAD_RANGE+1, GLACIO_MAX_SNOW_SPREAD_RANGE));
-      }
-      for( XYCoord tile : tilesInRange )
-      {
-        Ave.snowMap[tile.xCoord][tile.yCoord] = CommanderAve.SNOW_THRESHOLD;
-        if( gameMap.getEnvironment(tile).weatherType != Weathers.SNOW )
-        {
-          tileChanges.add(new MapChangeEvent.EnvironmentAssignment(tile, Environment.getTile(gameMap.getEnvironment(tile).terrainType, Weathers.SNOW), 1));
-        }
-      }
-
-      // Change terrain to snow around each of Ave's units, and damage trees and enemies.
-      HashSet<XYCoord> tilesSeen = new HashSet<XYCoord>();
-      for( Unit unit : myCommander.units )
-      {
-        // Two-tile radius of effect around each unit.
-        ArrayList<XYCoord> tiles = Utils.findLocationsInRange(gameMap, new XYCoord(unit.x, unit.y), 0, 2);
-        for( XYCoord coord : tiles )
-        {
-          // Don't Glacio the same tile twice.
-          if( tilesSeen.contains(coord) ) continue;
-          tilesSeen.add(coord);
-
-          // Add snow around friendlies.
-          Location loc = gameMap.getLocation(coord);
-
-          // Turn the spaces around each unit to snow.
-          Environment tileEnvi = loc.getEnvironment();
-          if((tileEnvi.weatherType != Weathers.SNOW) || (tileEnvi.terrainType == TerrainType.FOREST))
+          Ave.snowMap[coord.xCoord][coord.yCoord] = CommanderAve.SNOW_THRESHOLD;
+          if( gameMap.getEnvironment(coord).weatherType != Weathers.SNOW )
           {
-            // Destroy any forests. Big hail, man.
-            TerrainType newTerrain = (loc.getEnvironment().terrainType == TerrainType.FOREST)
-                ? TerrainType.GRASS : loc.getEnvironment().terrainType;
-            tileChanges.add(new MapChangeEvent.EnvironmentAssignment(coord, Environment.getTile(newTerrain, Weathers.SNOW), 1));
-          }
-
-          // Damage each enemy nearby.
-          if( null != loc.getResident() && myCommander.isEnemy(loc.getResident().CO) )
-          {
-            loc.getResident().alterHP(-2);
+            tileChanges.add(new MapChangeEvent.EnvironmentAssignment(coord, Environment.getTile(gameMap.getEnvironment(coord).terrainType, Weathers.SNOW), 1));
           }
         }
       }
+
+      // Freeze enemies around each of Ave's units or buildings.
+      tilesInRange = Utils.findLocationsNearUnits(gameMap, Ave, GLACIO_FREEZE_RANGE);
+      tilesInRange.addAll(Utils.findLocationsNearProperties(gameMap, Ave, GLACIO_FREEZE_RANGE));
+      for( XYCoord coord : tilesInRange )
+      {
+        // Freeze each nearby enemy.
+        Location loc = gameMap.getLocation(coord);
+        if( null != loc.getResident() && myCommander.isEnemy(loc.getResident().CO) )
+        {
+          // TODO: Apply Freezing.
+        }
+      }
+
+      GameEventQueue glacioEvents = new GameEventQueue();
       glacioEvents.add(new MapChangeEvent(tileChanges));
 
       // Do all of our terrain alterations.
@@ -500,6 +524,67 @@ public class CommanderAve extends Commander
       }
     }
   } // ~Glacio
+
+  /**
+   *  Destroys forests and does 2 HP of damage to all enemies within a 2-space radius around Ave's units and buildings.
+   *  Enemies within this radius are damaged for up to 2HP.
+   *  Forests within this radius are destroyed (turned to grass).
+   */
+  private static class OblidoAbility extends CommanderAbility
+  {
+    private static final String OBLIDO_NAME = "Oblido";
+    private static final int OBLIDO_COST = 8;
+    private static final int OBLIDO_BUFF = 20;
+    private static final int OBLIDO_RANGE = 2;
+
+    CommanderAve Ave;
+    COModifier damageMod = null;
+
+    OblidoAbility(CommanderAve commander)
+    {
+      super(commander, OBLIDO_NAME, OBLIDO_COST);
+      Ave = commander;
+      damageMod = new CODamageModifier(OBLIDO_BUFF);
+      AIFlags = PHASE_TURN_START | PHASE_TURN_END;
+    }
+
+    @Override
+    protected void perform(MapMaster gameMap)
+    {
+      // Apply CO unit buffs.
+      myCommander.addCOModifier(damageMod);
+
+      // Keep track of any tiles that change.
+      ArrayList<MapChangeEvent.EnvironmentAssignment> tileChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
+
+      // Change terrain to snow around each of Ave's units and buildings, and damage trees and enemies.
+      HashSet<XYCoord> affectedTiles = Utils.findLocationsNearProperties(gameMap, Ave, OBLIDO_RANGE);
+      affectedTiles.addAll(Utils.findLocationsNearUnits(gameMap, Ave, OBLIDO_RANGE));
+
+      // Smash things. Don't add snow though.
+      for( XYCoord coord : affectedTiles )
+      {
+        // Add snow around friendlies.
+        Location loc = gameMap.getLocation(coord);
+
+        // Destroy any forests. Big hail, man.
+        Environment tileEnvi = loc.getEnvironment();
+        if(tileEnvi.terrainType == TerrainType.FOREST)
+        {
+          tileChanges.add(new MapChangeEvent.EnvironmentAssignment(coord, Environment.getTile(TerrainType.GRASS, loc.getEnvironment().weatherType), 1));
+        }
+
+        // Damage each enemy nearby.
+        if( null != loc.getResident() && myCommander.isEnemy(loc.getResident().CO) )
+        {
+          loc.getResident().alterHP(-2);
+        }
+      }
+
+      GameEvent event = new MapChangeEvent(tileChanges);
+      event.performEvent(gameMap);
+    }
+  } // Oblido
 
   public static CommanderInfo getInfo()
   {

@@ -9,7 +9,7 @@ public abstract class CommanderAbility
   public static final int PHASE_TURN_END = PHASE_BUY << 1;
   public final Commander myCommander;
   protected String myName;
-  private double myPowerCost;
+  protected double myPowerCost;
   public int AIFlags = PHASE_TURN_START;
 
   public CommanderAbility(Commander commander, String abilityName, double powerCost)

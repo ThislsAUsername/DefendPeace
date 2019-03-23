@@ -3,6 +3,7 @@ package Engine;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Queue;
 
 import CommandingOfficers.Commander;
@@ -590,5 +591,25 @@ public class Utils
     }
     eventQueue.add(new Engine.GameEvents.MoveEvent(unit, movePath));
     return originalPathOK;
+  }
+
+  public static HashSet<XYCoord> findLocationsNearProperties(GameMap gameMap, Commander cmdr, int range)
+  {
+    HashSet<XYCoord> tilesInRange = new HashSet<XYCoord>();
+    for( XYCoord prop : cmdr.ownedProperties )
+    {
+      tilesInRange.addAll(Utils.findLocationsInRange(gameMap, prop, 0, range));
+    }
+    return tilesInRange;
+  }
+
+  public static HashSet<XYCoord> findLocationsNearUnits(GameMap gameMap, Commander cmdr, int range)
+  {
+    HashSet<XYCoord> tilesInRange = new HashSet<XYCoord>();
+    for( Unit unit : cmdr.units )
+    {
+      tilesInRange.addAll(Utils.findLocationsInRange(gameMap, new XYCoord(unit.x, unit.y), 0, range));
+    }
+    return tilesInRange;
   }
 }
