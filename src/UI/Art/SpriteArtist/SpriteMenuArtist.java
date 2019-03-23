@@ -18,10 +18,6 @@ public class SpriteMenuArtist
   private ArrayList<String> myCurrentMenuStrings;
   private int drawScale;
 
-  private final Color MENUFRAMECOLOR = new Color(169, 118, 65);
-  private final Color MENUBGCOLOR = new Color(234, 204, 154);
-  private final Color MENUHIGHLIGHTCOLOR = new Color(246, 234, 210);
-
   private int menuHBuffer; // Amount of visible menu to left and right of options;
   private int menuVBuffer; // Amount of visible menu above and below menu options;
 
@@ -55,7 +51,7 @@ public class SpriteMenuArtist
         getMenuStrings(myCurrentMenu, myCurrentMenuStrings);
       }
 
-      BufferedImage menu = SpriteUIUtils.makeTextMenu(MENUBGCOLOR, MENUFRAMECOLOR, MENUHIGHLIGHTCOLOR,
+      BufferedImage menu = SpriteUIUtils.makeTextMenu(SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR, SpriteUIUtils.MENUHIGHLIGHTCOLOR,
           myCurrentMenuStrings, myCurrentMenu.getSelectionNumber(), menuHBuffer, menuVBuffer);
       int menuWidth = menu.getWidth();
       int menuHeight = menu.getHeight();

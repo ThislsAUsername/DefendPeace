@@ -11,6 +11,10 @@ import javax.imageio.ImageIO;
 
 public class SpriteUIUtils
 {
+  public static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
+  public static final Color MENUBGCOLOR = new Color(234, 204, 154);
+  public static final Color MENUHIGHLIGHTCOLOR = new Color(246, 234, 210);
+  
   /**
    * Calculate the distance to move an image make it look like it slides quickly into place instead of
    * just snapping at each button-press. Distance moved per frame is proportional to distance from goal location.
