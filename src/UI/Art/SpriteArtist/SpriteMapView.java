@@ -10,6 +10,7 @@ import java.util.Queue;
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.Path;
+import Engine.Utils;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Engine.GameEvents.GameEvent;
@@ -357,7 +358,7 @@ public class SpriteMapView extends MapView
         }
         break;
       case GAME_STATUS:
-        String status = "TBD";
+        String status = Utils.getGameStatusData(getDrawableMap(myGame), myGame.commanders[co]);
         BufferedImage statusText = SpriteUIUtils.paintTextNormalized(status, paneHSize-paneOuterBuffer);
         g.drawImage(statusText,3*paneOuterBuffer, 3*paneOuterBuffer, null);
         break;
