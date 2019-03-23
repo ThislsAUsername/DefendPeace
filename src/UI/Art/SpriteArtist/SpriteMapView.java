@@ -320,6 +320,10 @@ public class SpriteMapView extends MapView
     // Get the CO info menu.
     CO_InfoMenu menu = mapController.getCoInfoMenu();
     int drawScale = SpriteOptions.getDrawScale();
+    
+    int paneOuterBuffer = 4*drawScale; // sets both outer border and frame border size
+    int paneHSize = (int) (mapViewWidth*0.7) - paneOuterBuffer*4; // width of the BG color area
+    int paneVSize = (int) (mapViewHeight   ) - paneOuterBuffer*4; // height ""
 
     // Get the current menu selections.
     int co = menu.getCoSelection();
@@ -331,7 +335,24 @@ public class SpriteMapView extends MapView
     g.drawImage(COPic, mapViewWidth - COPic.getWidth()*drawScale, mapViewHeight - COPic.getHeight()*drawScale,
         COPic.getWidth()*drawScale, COPic.getHeight()*drawScale, null);
     
-    // TODO: add the actual info
+    // add the actual info
+    g.setColor(SpriteUIUtils.MENUFRAMECOLOR);
+    g.fillRect(  paneOuterBuffer,   paneOuterBuffer, paneHSize + 2*paneOuterBuffer, paneVSize + 2*paneOuterBuffer);
+    g.setColor(SpriteUIUtils.MENUBGCOLOR);
+    g.fillRect(2*paneOuterBuffer, 2*paneOuterBuffer, paneHSize                    , paneVSize                    );
+    
+    // TODO: consider drawing this all as one big image, so the user can scroll smoothly through it regardless of screen size
+    switch (myGame.commanders[co].coInfo.maker.infoPages.get(page).pageType)
+    {
+      case CO_HEADERS:
+        break;
+      case GAME_STATUS:
+        break;
+      case BASIC:
+        BufferedImage text = SpriteUIUtils.paintTextNormalized(myGame.commanders[co].coInfo.maker.infoPages.get(page).info, paneHSize-paneOuterBuffer);
+        g.drawImage(text,3*paneOuterBuffer, 3*paneOuterBuffer, null);
+        break;
+    }
   }
 
   private void adjustViewLocation()
