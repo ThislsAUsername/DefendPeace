@@ -25,6 +25,25 @@ public class CommanderCinder extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Cinder", new instantiator());  
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Commander Cinder trades unit health for a better action economy.\n" +
+          "An efficient and merciless commander.\n"));
+      infoPages.add(new InfoPage(
+          "Passive:\n" + 
+          "- Units are built at 8 HP, but can act immediately.\n" +
+          "- Building on a base that has produced this turn already incurs a fee of 1000 funds per build you have already done there this turn.\n"));
+      infoPages.add(new InfoPage(
+          SearAbility.SEAR_NAME+" "+SearAbility.SEAR_COST+"x:\n" +
+          "Removes "+SearAbility.SEAR_WOUND+" HP from each of Cinder's units.\n" +
+          "Units that had not acted yet have their supplies restored.\n" +
+          "Units are refreshed and may act again.\n"));
+      infoPages.add(new InfoPage(
+          WitchFireAbility.WITCHFIRE_NAME+" "+WitchFireAbility.WITCHFIRE_COST+"x:\n" +
+          "After any unit attacks, it will lose "+WitchFireAbility.WITCHFIRE_HP_COST+" HP and be refreshed.\n" +
+          "This may be done repeatedly, but it can kill Cinder's own units.\n"));
+    }
     @Override
     public Commander create()
     {
@@ -32,7 +51,7 @@ public class CommanderCinder extends Commander
     }
   }
 
-  private static final double COST_MOD_PER_BUILD = 1.2;
+  private static final double PREMIUM_PER_BUILD = 1000;
 
   private HashMap<XYCoord, Integer> buildCounts = new HashMap<>();
 
@@ -122,7 +141,11 @@ public class CommanderCinder extends Commander
   {
     for( UnitModel um : unitModels )
     {
-      um.COcost = Math.pow(COST_MOD_PER_BUILD, repetitons);
+      um.COcost = 1.0;
+    }
+    for( UnitModel um : unitModels )
+    {
+      um.COcost = (1.0 + repetitons*PREMIUM_PER_BUILD/um.getCost());
     }
   }
 
