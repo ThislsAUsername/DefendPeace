@@ -31,16 +31,16 @@ public class CommanderVenge extends Commander
           "Attacking Venge is not always difficult, but you may not like the consequences.\n"));
       infoPages.add(new InfoPage(
           "Passive:\n" + 
-          "- After being attacked, Venge gets a bonus of "+VENGEANCE_BOOST+" attack against the unit that picked the fight.\n" +
+          "- After being attacked, Venge gets a bonus of "+VENGEANCE_BOOST+"% attack against the unit that picked the fight.\n" +
           "- Units that Venge can get vengeance on are marked with a V.\n"));
       infoPages.add(new InfoPage(
-          IronWill.NAME+" "+IronWill.COST+"x:\n" +
-          "Gives a defense boost of "+IronWill.IRONWILL_BUFF+"\n" +
+          IronWill.NAME+" ("+IronWill.COST+"):\n" +
+          "Gives a defense boost of "+IronWill.IRONWILL_BUFF+"%\n" +
           "Units now deal counterattacks as if they had not taken damage from the hit.\n"));
       infoPages.add(new InfoPage(
-          Retribution.NAME+" "+Retribution.COST+"x:\n" +
-          "Gives an attack boost of "+Retribution.RETRIBUTION_BUFF+"\n" +
-          "Gives a defense penalty of "+Retribution.RETRIBUTION_NERF+"\n" +
+          Retribution.NAME+" ("+Retribution.COST+"):\n" +
+          "Gives an attack boost of "+Retribution.RETRIBUTION_BUFF+"%\n" +
+          "Gives a defense penalty of "+Retribution.RETRIBUTION_NERF+"%\n" +
           "Units now counterattack before they are hit.\n"));
     }
     @Override

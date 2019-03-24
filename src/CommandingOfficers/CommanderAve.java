@@ -58,7 +58,7 @@ public class CommanderAve extends Commander
     public instantiator()
     {
       infoPages.add(new InfoPage(
-          "Commander Ave (AH-vey) loves the cold, and her power allows her to inexorably, if slowly," + 
+          "Commander Ave (AH-vey) loves the cold, and her power allows her to inexorably, if slowly, " + 
           "grind her opponents down beneath a wall of ever-encroaching ice.\r\n" + 
           "Despite pernicious rumors to the contrary, she has nothing against Christmas."));
       infoPages.add(new InfoPage(
@@ -66,7 +66,7 @@ public class CommanderAve extends Commander
           "- Ave generates snow around all owned properties, which spreads over time.\r\n" + 
           "- Her units move normally in snow, but take a movement and defense penalty in forests."));
       infoPages.add(new InfoPage(
-          "Glacio "+GlacioAbility.GLACIO_COST+"x:\r\n" + 
+          "Glacio ("+GlacioAbility.GLACIO_COST+"):\r\n" + 
           "Boosts the snow-aura around her buildings;\r\n" + 
           "Hail falls in a two-space radius around her units,\r\n" + 
           "- changing the weather in those tiles to snow,\r\n" + 
