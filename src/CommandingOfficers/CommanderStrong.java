@@ -35,21 +35,21 @@ public class CommanderStrong extends Commander
           "That's it.\n"));
       infoPages.add(new InfoPage(
           "Passive:\n" + 
-          "- Strong gets an attack bonus of 20 on all units.\n" +
-          "- Strong can build infantry from air and sea ports\n" +
+          "- Strong gets an attack bonus of 20% on all units.\n" +
+          "- Strong can build infantry from air/sea ports\n" +
           "- Strong's APCs move 1 space further than average.\n"));
       infoPages.add(new InfoPage(
-          "Strongarm "+StrongArmAbility.STRONGARM_COST+"x:\n" +
-          "Gives an attack boost of "+StrongArmAbility.STRONGARM_BUFF+"\n" +
-          "Grants all units one extra point of movement\n" +
+          "Strongarm ("+StrongArmAbility.STRONGARM_COST+"):\n" +
+          "Gives an attack boost of "+StrongArmAbility.STRONGARM_BUFF+"%\n" +
+          "Grants footsoldiers and APCs one extra point of movement\n" +
           "Allows Strong to put an extra unit into any transport\n" +
-          "Allows Strong to build inf and mechs on air and sea ports as well as the HQ.\n"));
+          "Allows Strong to build inf and mechs on air/sea ports as well as the HQ.\n"));
       infoPages.add(new InfoPage(
           "Mobilize "+MobilizeAbility.MOBILIZE_COST+"x:\n" + 
-          "Gives an attack boost of "+MobilizeAbility.MOBILIZE_BUFF+"\n" +
-          "Grants all units two extra points of movement\n" +
+          "Gives an attack boost of "+MobilizeAbility.MOBILIZE_BUFF+"%\n" +
+          "Grants footsoldiers and APCs two extra points of movement\n" +
           "Allows Strong to put an extra unit into any transport\n" +
-          "Allows Strong to build inf and mechs on air and sea ports as well as the HQ.\n"));
+          "Allows Strong to build inf and mechs on air/sea ports as well as the HQ.\n"));
     }
     @Override
     public Commander create()

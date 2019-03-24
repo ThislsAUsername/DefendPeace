@@ -35,12 +35,12 @@ public class CommanderCinder extends Commander
           "- Units are built at 8 HP, but can act immediately.\n" +
           "- Building on a base that has produced this turn already incurs a fee of 1000 funds per build you have already done there this turn.\n"));
       infoPages.add(new InfoPage(
-          SearAbility.SEAR_NAME+" "+SearAbility.SEAR_COST+"x:\n" +
+          SearAbility.SEAR_NAME+" ("+SearAbility.SEAR_COST+"):\n" +
           "Removes "+SearAbility.SEAR_WOUND+" HP from each of Cinder's units.\n" +
-          "Units that had not acted yet have their supplies restored.\n" +
+          "Units that had not yet acted have their supplies restored.\n" +
           "Units are refreshed and may act again.\n"));
       infoPages.add(new InfoPage(
-          WitchFireAbility.WITCHFIRE_NAME+" "+WitchFireAbility.WITCHFIRE_COST+"x:\n" +
+          WitchFireAbility.WITCHFIRE_NAME+" ("+WitchFireAbility.WITCHFIRE_COST+"):\n" +
           "After any unit attacks, it will lose "+WitchFireAbility.WITCHFIRE_HP_COST+" HP and be refreshed.\n" +
           "This may be done repeatedly, but it can kill Cinder's own units.\n"));
     }

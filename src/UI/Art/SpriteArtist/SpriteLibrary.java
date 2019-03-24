@@ -24,6 +24,8 @@ public class SpriteLibrary
   // This is the physical size of a single map square in pixels.
   public static final int baseSpriteSize = 16;
 
+  static final String charKey = "%./-~,;:!?'&()";
+
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
   private static HashMap<UnitSpriteSetKey, UnitSpriteSet> mapUnitSpriteSetMap = new HashMap<UnitSpriteSetKey, UnitSpriteSet>();
 
@@ -49,6 +51,7 @@ public class SpriteLibrary
   private static Sprite letterSpritesUppercase = null;
   private static Sprite letterSpritesLowercase = null;
   private static Sprite numberSprites = null;
+  private static Sprite symbolSprites = null;
 
   // Letters for writing in menus.
   private static Sprite letterSpritesSmallCaps = null;
@@ -475,6 +478,21 @@ public class SpriteLibrary
   }
 
   /**
+   * This function returns the sprite sheet for symbol characters that go along with
+   * the standard letter sprites. The image is loaded on the first
+   * call to this function, and simply returned thereafter.
+   * @return A Sprite object containing the in-game menu font for normal symbols.
+   */
+  public static Sprite getSymbols()
+  {
+    if( null == symbolSprites )
+    {
+      symbolSprites = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/symbols.png"), 5, 11);
+    }
+    return symbolSprites;
+  }
+
+  /**
    * Returns a Sprite containing every small-uppercase letter, one letter per frame. The image
    * is loaded, and the Sprite is created, on the first call to this function, and simply
    * returned thereafter. Letters are all uppercase, and are stored in order starting from 'A'.
@@ -509,7 +527,7 @@ public class SpriteLibrary
    * This function returns the sprite sheet for symbol characters that go along with
    * the letter sprites from getLettersSmallCaps(). The image is loaded on the first
    * call to this function, and simply returned thereafter.
-   * @return A Sprite object containing the in-game menu font for small-caps numbers.
+   * @return A Sprite object containing the in-game menu font for small-caps symbols.
    */
   public static Sprite getSymbolsSmallCaps()
   {
@@ -556,6 +574,14 @@ public class SpriteLibrary
         int letterIndex = thisChar - '0';
         g.drawImage(getNumbers().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
       }
+      else // Assume symbolic
+      {
+        int symbolIndex = charKey.indexOf(text.charAt(i));
+        if( symbolIndex >= 0 )
+        {
+          g.drawImage(getSymbols().getFrame(symbolIndex), x, y, menuTextWidth, menuTextHeight, null);
+        }
+      }
     }
   }
 
@@ -588,7 +614,6 @@ public class SpriteLibrary
       }
       else // Assume symbolic
       {
-        final String charKey = "%./-~,;:!?‽&()";
         int symbolIndex = charKey.indexOf(text.charAt(i));
         if( symbolIndex >= 0 )
         {
