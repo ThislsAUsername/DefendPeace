@@ -90,7 +90,7 @@ public class SpriteUIUtils
     // Build our image.
     BufferedImage menuImage = null;
     if( menuWidth == 0 || menuHeight == 0 )
-      menuImage = SpriteLibrary.createDefaultBlankSprite(1, 1); // zero-dimensioned images aren't kosher
+      return SpriteLibrary.createDefaultBlankSprite(1, 1); // zero-dimensioned images aren't kosher
     else
       menuImage = SpriteLibrary.createDefaultBlankSprite(menuWidth, menuHeight);
     Graphics g = menuImage.getGraphics();
@@ -119,38 +119,38 @@ public class SpriteUIUtils
    */
   public static BufferedImage paintTextNormalized(String prose, int reqWidth)
   {
-    // Find the dimensions of the menu we are drawing.
+    // Figure out how big our text is.
     int drawScale = SpriteOptions.getDrawScale();
-    int menuTextWidth = SpriteLibrary.getLettersUppercase().getFrame(0).getWidth() * drawScale;
-    int menuTextHeight = SpriteLibrary.getLettersUppercase().getFrame(0).getHeight() * drawScale;
+    int characterWidth = SpriteLibrary.getLettersUppercase().getFrame(0).getWidth() * drawScale;
+    int characterHeight = SpriteLibrary.getLettersUppercase().getFrame(0).getHeight() * drawScale;
 
     ArrayList<String> lines = new ArrayList<String>();
     // Unload our prose into the lines it already has
-    lines.addAll(Arrays.asList(prose.split("\\R")));
+    lines.addAll(Arrays.asList(prose.split("\\R"))); // \R matches all newline formats, yay convenience
 
     for( int i = 0; i < lines.size(); ++i ) // basic for, since we care about indices
     {
       String line = lines.get(i);
-      if( line.length() * menuTextWidth <= reqWidth ) // if the line's short enough already, don't split it further
+      if( line.length() * characterWidth <= reqWidth ) // if the line's short enough already, don't split it further
         continue;
 
       // TODO: check for word boundaries
       lines.remove(i);
-      lines.add(i, line.substring(reqWidth / menuTextWidth)); // put in the second half
-      lines.add(i, line.substring(0, reqWidth / menuTextWidth)); // and then the first half behind it
+      lines.add(i, line.substring(reqWidth / characterWidth)); // put in the second half
+      lines.add(i, line.substring(0, reqWidth / characterWidth)); // and then the first half behind it
     }
 
-    int totalTextHeight = ((lines.isEmpty()) ? 0 : getMenuTextHeightPx(lines, menuTextHeight));
+    int totalTextHeight = ((lines.isEmpty()) ? 0 : getMenuTextHeightPx(lines, characterHeight));
     // Build our image.
     BufferedImage menuImage = null;
     if( reqWidth == 0 || totalTextHeight == 0 )
-      menuImage = SpriteLibrary.createDefaultBlankSprite(1, 1); // zero-dimensioned images aren't kosher
+      return SpriteLibrary.createDefaultBlankSprite(1, 1); // zero-dimensioned images aren't kosher
     else
       menuImage = SpriteLibrary.createTransparentSprite(reqWidth, totalTextHeight);
     Graphics g = menuImage.getGraphics();
 
     // Draw the actual text.
-    for( int txtY = 0, i = 0; i < lines.size(); ++i, txtY += menuTextHeight + drawScale )
+    for( int txtY = 0, i = 0; i < lines.size(); ++i, txtY += characterHeight + drawScale )
     {
       SpriteLibrary.drawText(g, lines.get(i), 0, txtY, drawScale);
     }
