@@ -564,10 +564,8 @@ public class CommanderAve extends Commander
       // Smash things. Don't add snow though.
       for( XYCoord coord : affectedTiles )
       {
-        // Add snow around friendlies.
-        Location loc = gameMap.getLocation(coord);
-
         // Destroy any forests. Big hail, man.
+        Location loc = gameMap.getLocation(coord);
         Environment tileEnvi = loc.getEnvironment();
         if(tileEnvi.terrainType == TerrainType.FOREST)
         {
