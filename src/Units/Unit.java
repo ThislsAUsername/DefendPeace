@@ -30,6 +30,7 @@ public class Unit
   private Location captureTarget;
   public Commander CO;
   public boolean isTurnOver;
+  public boolean isStunned;
   private double HP;
   public ArrayList<Weapon> weapons;
   private ArrayList<GameAction> turnInitActions;
@@ -79,7 +80,13 @@ public class Unit
     //   Units that are e.g. in a transport don't burn fuel, etc.
     if( null != locus )
     {
-      isTurnOver = false;
+      if( isStunned )
+      {
+        isTurnOver = true;
+        isStunned = false;
+      }
+      else
+        isTurnOver = false;
       fuel -= model.idleFuelBurn;
       if( captureTarget != null && captureTarget.getResident() != this )
       {
