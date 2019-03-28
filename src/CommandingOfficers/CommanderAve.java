@@ -458,7 +458,7 @@ public class CommanderAve extends Commander
   private static class GlacioAbility extends CommanderAbility
   {
     private static final String GLACIO_NAME = "Glacio";
-    private static final int GLACIO_COST = 8;
+    private static final int GLACIO_COST = 6;
     private static final int GLACIO_BUFF = 10; // Standard 10
     private static final int GLACIO_SNOW_SPREAD = 3;
     private static final int GLACIO_FREEZE_RANGE = 2;
@@ -508,7 +508,7 @@ public class CommanderAve extends Commander
         Location loc = gameMap.getLocation(coord);
         if( null != loc.getResident() && myCommander.isEnemy(loc.getResident().CO) )
         {
-          // TODO: Apply Freezing.
+          loc.getResident().isStunned = true;
         }
       }
 
