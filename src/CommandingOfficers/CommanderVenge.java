@@ -65,6 +65,16 @@ public class CommanderVenge extends Commander
   }
 
   @Override
+  public char getUnitMarking(Unit unit)
+  {
+    // If we can get a vengeance boost against this unit, let our player know.
+    if (aggressors.contains(unit))
+      return 'V';
+    
+    return super.getUnitMarking(unit);
+  }
+
+  @Override
   public void changeCombatContext(CombatContext instance)
   {
     // If we're swapping, and we can counter, and we're on the defensive, do the swap.
