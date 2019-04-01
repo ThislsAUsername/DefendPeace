@@ -446,7 +446,9 @@ public class CommanderAve extends Commander
       }
 
       // Do all of our terrain alterations.
-      new MapChangeEvent(snowTiles).performEvent(gameMap);
+      MapChangeEvent event = new MapChangeEvent(snowTiles);
+      event.performEvent(gameMap);
+      GameEventListener.publishEvent(event);
     }
   }
 
@@ -581,6 +583,7 @@ public class CommanderAve extends Commander
 
       GameEvent event = new MapChangeEvent(tileChanges);
       event.performEvent(gameMap);
+      GameEventListener.publishEvent(event);
     }
   } // Oblido
 
