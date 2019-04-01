@@ -85,6 +85,9 @@ public class SpriteLibrary
   // Cargo icon for when transports are holding other units.
   private static BufferedImage mapUnitCargoIcon = null;
 
+  // Stun icon for when units are unable to move.
+  private static BufferedImage mapUnitStunIcon = null;
+
   // Capture icon for when units are capturing properties.
   private static BufferedImage mapUnitCaptureIcon = null;
 
@@ -454,6 +457,15 @@ public class SpriteLibrary
       mapUnitCargoIcon = SpriteUIUtils.loadSpriteSheetFile("res/unit/icon/cargo.png");
     }
     return mapUnitCargoIcon;
+  }
+
+  public static BufferedImage getStunIcon()
+  {
+    if( null == mapUnitStunIcon )
+    {
+      mapUnitStunIcon = SpriteUIUtils.loadSpriteSheetFile("res/unit/icon/stun.png");
+    }
+    return mapUnitStunIcon;
   }
 
   public static BufferedImage getCaptureIcon()
