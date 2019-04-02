@@ -515,9 +515,12 @@ public class Utils
   {
     StringBuilder sb = new StringBuilder();
 
+    // map state
     int income = 0;
     int unitCount = 0;
+    int vehCount = 0;
     int unitFunds = 0;
+    
     for( int w = 0; w < map.mapWidth; ++w )
     {
       for( int h = 0; h < map.mapHeight; ++h )
@@ -531,14 +534,33 @@ public class Utils
         if( null != resident && resident.CO == viewed )
         {
           unitCount++;
+          if (resident.model.chassis != ChassisEnum.TROOP)
+            vehCount++;
           unitFunds += resident.model.getCost() * resident.getHP() / resident.model.maxHP;
         }
       }
     }
 
-    sb.append("Income:     ").append(income)   .append("\n");
-    sb.append("Unit count: ").append(unitCount).append("\n");
-    sb.append("Unit funds: ").append(unitFunds).append("\n");
+    sb.append("Income:         ").append(income).append("\n");
+    sb.append("Unit count:     ").append(unitCount).append("\n");
+    sb.append("Vehicle count:  ").append(vehCount).append("\n");
+    sb.append("Unit funds:     ").append(unitFunds).append("\n");
+
+    // ability stats
+    double[] abilityCosts = viewed.getAbilityCosts();
+    if (abilityCosts.length > 0)
+    {
+      double abilityPower = viewed.getAbilityPower();
+      double untilNextPower = abilityCosts[abilityCosts.length - 1]; // init to our biggest cost, so we can only go down
+      for( double cost : abilityCosts ) // find the cheapest cost that we can't afford
+      {
+        if( cost >= abilityPower )
+          untilNextPower = Math.min(untilNextPower, cost - abilityPower);
+      }
+
+      sb.append("Ability Power:  ").append((int) (abilityPower * Commander.CHARGERATIO_FUNDS)).append("\n");
+      sb.append("Next Ability:   ").append((int) (untilNextPower*Commander.CHARGERATIO_FUNDS)).append("\n");
+    }
 
     return sb.toString();
   }
