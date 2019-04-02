@@ -18,18 +18,18 @@ public class CommanderPatch extends Commander
     public instantiator()
     {
       infoPages.add(new InfoPage(
-          "Commander Patch is a pirate, who does piratey things like looting and plundering\n"));
+          "Commander Patch is a pirate, who does piratey things like lootin' and plunderin'\n"));
       infoPages.add(new InfoPage(
           "Passive:\n" + 
           "- Patch gets a turn's worth of income from any property he captures\n"));
       infoPages.add(new InfoPage(
-          "Plunder "+PLUNDER_COST+"x:\n" + 
-          "Gives an attack boost of "+PLUNDER_ATTACK_BUFF+"\n" + 
-          "Gives one quarter of the value of any funds damage Patch deals.\n"));
+          "Plunder ("+PLUNDER_COST+"):\n" + 
+          "Gives an attack boost of "+PLUNDER_ATTACK_BUFF+"%\n" + 
+          "Gives "+PLUNDER_INCOME+"x of the value of any funds damage Patch deals.\n"));
       infoPages.add(new InfoPage(
-          "Plunder "+PILLAGE_COST+"x:\n" + 
-          "Gives an attack boost of "+PILLAGE_ATTACK_BUFF+"\n" + 
-          "Gives one half of the value of any funds damage Patch deals.\n"));
+          "Plunder ("+PILLAGE_COST+"):\n" + 
+          "Gives an attack boost of "+PILLAGE_ATTACK_BUFF+"%\n" + 
+          "Gives "+PILLAGE_INCOME+"x the value of any funds damage Patch deals.\n"));
     }
     @Override
     public Commander create()
