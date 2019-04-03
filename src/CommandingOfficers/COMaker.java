@@ -10,8 +10,6 @@ public abstract class COMaker implements Serializable
   public COMaker()
   {
     infoPages = new ArrayList<InfoPage>();
-    infoPages.add(new InfoPage(InfoPage.PageType.CO_HEADERS));
-    infoPages.add(new InfoPage(InfoPage.PageType.GAME_STATUS));
   }
 
   public abstract Commander create();
