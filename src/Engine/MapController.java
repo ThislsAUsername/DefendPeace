@@ -464,7 +464,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         Driver.getInstance().changeGameState(coStatsMenu, statsView);
         break;
       case CO_INFO:
-        CO_InfoController coInfoMenu = new CO_InfoController(myGame.commanders);
+        CO_InfoController coInfoMenu = new CO_InfoController(myGame);
         IView infoView = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
 
         myGameInputHandler.reset(); // CO_INFO is a terminal state. Reset the input handler.
