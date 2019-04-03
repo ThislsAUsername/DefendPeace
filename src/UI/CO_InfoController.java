@@ -7,14 +7,14 @@ import Engine.GameInstance;
 import Engine.IController;
 import Engine.OptionSelector;
 
-public class CO_InfoMenu implements IController
+public class CO_InfoController implements InfoController
 {
   private GameInstance myGame;
   
   private OptionSelector coOptionSelector;
   private OptionSelector[] pageSelectors;
 
-  public CO_InfoMenu( GameInstance game )
+  public CO_InfoController( GameInstance game )
   {
     myGame = game;
     
@@ -26,6 +26,10 @@ public class CO_InfoMenu implements IController
     }
   }
 
+  /* (non-Javadoc)
+   * @see UI.CO_InfoController#handleInput(UI.InputHandler.InputAction)
+   */
+  @Override
   public boolean handleInput( InputAction action )
   {
     boolean goBack = false;
@@ -58,16 +62,28 @@ public class CO_InfoMenu implements IController
     return goBack;
   }
 
+  /* (non-Javadoc)
+   * @see UI.CO_InfoController#getSelectedCO()
+   */
+  @Override
   public Commander getSelectedCO()
   {
     return myGame.commanders[coOptionSelector.getSelectionNormalized()];
   }
 
-  public InfoPage getPageSelection()
+  /* (non-Javadoc)
+   * @see UI.CO_InfoController#getPageSelection()
+   */
+  @Override
+  public InfoPage getSelectedPage()
   {
     return getSelectedCO().coInfo.maker.infoPages.get(pageSelectors[coOptionSelector.getSelectionNormalized()].getSelectionNormalized());
   }
   
+  /* (non-Javadoc)
+   * @see UI.CO_InfoController#getGame()
+   */
+  @Override
   public GameInstance getGame()
   {
     return myGame;

@@ -19,7 +19,7 @@ import Engine.Combat.CombatEngine;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
-import UI.CO_InfoMenu;
+import UI.InfoController;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import UI.Art.Animation.NoAnimation;
@@ -29,7 +29,7 @@ import Units.Unit;
 
 public class SpriteInfoView extends MapView // extend MapView for getDrawableMap()
 {
-  private CO_InfoMenu myControl;
+  private InfoController myControl;
   
   /** Width of the visible space in pixels. */
   private int mapViewWidth;
@@ -38,7 +38,7 @@ public class SpriteInfoView extends MapView // extend MapView for getDrawableMap
 
   boolean dimensionsChanged = false; // If the window is resized, don't bother sliding the view into place; just snap.
 
-  public SpriteInfoView(CO_InfoMenu control)
+  public SpriteInfoView(InfoController control)
   {
     Dimension dims = Driver.getInstance().gameGraphics.getScreenDimensions();
     mapViewWidth = dims.width;
@@ -78,7 +78,7 @@ public class SpriteInfoView extends MapView // extend MapView for getDrawableMap
 
     // Get the current menu selections.
     Commander co = myControl.getSelectedCO();
-    InfoPage page = myControl.getPageSelection();
+    InfoPage page = myControl.getSelectedPage();
 
     // Draw the commander art. (the caller draws our background, so we don't have to)
     BufferedImage COPic = SpriteLibrary.getCommanderSprites(co.coInfo.name).body;

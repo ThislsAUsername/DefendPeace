@@ -15,7 +15,7 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameInput.GameInputHandler;
 import Terrain.GameMap;
 import Terrain.Location;
-import UI.CO_InfoMenu;
+import UI.CO_InfoController;
 import UI.InGameMenu;
 import UI.InputHandler;
 import UI.InputHandler.InputAction;
@@ -455,7 +455,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         myGameInputHandler.reset(); // SAVE is a terminal state. Reset the input handler.
         break;
       case CO_INFO:
-        CO_InfoMenu coInfoMenu = new CO_InfoMenu(myGame);
+        CO_InfoController coInfoMenu = new CO_InfoController(myGame);
         IView mv = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
 
         // Mash the big red button and start the game.
