@@ -2,6 +2,8 @@ package UI;
 
 import UI.InputHandler.InputAction;
 
+import java.util.ArrayList;
+
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.COMaker.InfoPage;
@@ -11,20 +13,21 @@ import Engine.OptionSelector;
 public class GameStatsController implements InfoController
 {
   private GameInstance myGame;
+  private ArrayList<InfoPage> infoPages;
   
   private OptionSelector coOptionSelector;
-  private OptionSelector[] pageSelectors;
+  private OptionSelector pageSelector;
 
   public GameStatsController( GameInstance game )
   {
     myGame = game;
+
+    infoPages = new ArrayList<InfoPage>();
+    infoPages.add(new InfoPage(InfoPage.PageType.CO_HEADERS));
+    infoPages.add(new InfoPage(InfoPage.PageType.GAME_STATUS));
     
     coOptionSelector = new OptionSelector(myGame.commanders.length);
-    pageSelectors = new OptionSelector[myGame.commanders.length];
-    for( int i = 0; i < myGame.commanders.length; ++i )
-    {
-      pageSelectors[i] = new OptionSelector(myGame.commanders[i].coInfo.maker.infoPages.size());
-    }
+    pageSelector = new OptionSelector(infoPages.size());
   }
 
   @Override
@@ -41,16 +44,13 @@ public class GameStatsController implements InfoController
       case LEFT:
       case RIGHT:
         // Left/Right changes which sub-page has focus.
-        pageSelectors[coOptionSelector.getSelectionNormalized()].handleInput(action);
+        pageSelector.handleInput(action);
         break;
       case ENTER:
       case BACK:
         // Reset the selectors and leave this menu.
         coOptionSelector.setSelectedOption(0);
-        for( int i = 0; i < pageSelectors.length; ++i )
-        {
-          pageSelectors[i].setSelectedOption(0);
-        }
+        pageSelector.setSelectedOption(0);
         goBack = true;
         break;
       case NO_ACTION:
@@ -69,7 +69,7 @@ public class GameStatsController implements InfoController
   @Override
   public InfoPage getSelectedPage()
   {
-    return getSelectedCO().coInfo.maker.infoPages.get(pageSelectors[coOptionSelector.getSelectionNormalized()].getSelectionNormalized());
+    return infoPages.get(pageSelector.getSelectionNormalized());
   }
   
   @Override
