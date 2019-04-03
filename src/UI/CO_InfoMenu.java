@@ -2,20 +2,27 @@ package UI;
 
 import UI.InputHandler.InputAction;
 import CommandingOfficers.Commander;
+import CommandingOfficers.COMaker.InfoPage;
+import Engine.GameInstance;
+import Engine.IController;
 import Engine.OptionSelector;
 
-public class CO_InfoMenu
+public class CO_InfoMenu implements IController
 {
+  private GameInstance myGame;
+  
   private OptionSelector coOptionSelector;
   private OptionSelector[] pageSelectors;
 
-  public CO_InfoMenu( Commander[] COs )
+  public CO_InfoMenu( GameInstance game )
   {
-    coOptionSelector = new OptionSelector(COs.length);
-    pageSelectors = new OptionSelector[COs.length];
-    for( int i = 0; i < COs.length; ++i )
+    myGame = game;
+    
+    coOptionSelector = new OptionSelector(myGame.commanders.length);
+    pageSelectors = new OptionSelector[myGame.commanders.length];
+    for( int i = 0; i < myGame.commanders.length; ++i )
     {
-      pageSelectors[i] = new OptionSelector(COs[i].coInfo.maker.infoPages.size());
+      pageSelectors[i] = new OptionSelector(myGame.commanders[i].coInfo.maker.infoPages.size());
     }
   }
 
@@ -51,13 +58,18 @@ public class CO_InfoMenu
     return goBack;
   }
 
-  public int getCoSelection()
+  public Commander getSelectedCO()
   {
-    return coOptionSelector.getSelectionNormalized();
+    return myGame.commanders[coOptionSelector.getSelectionNormalized()];
   }
 
-  public int getPageSelection()
+  public InfoPage getPageSelection()
   {
-    return pageSelectors[coOptionSelector.getSelectionNormalized()].getSelectionNormalized();
+    return getSelectedCO().coInfo.maker.infoPages.get(pageSelectors[coOptionSelector.getSelectionNormalized()].getSelectionNormalized());
+  }
+  
+  public GameInstance getGame()
+  {
+    return myGame;
   }
 }

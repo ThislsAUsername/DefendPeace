@@ -3,8 +3,10 @@ package UI.Art.FillRectArtist;
 import java.awt.Dimension;
 
 import UI.InputHandler.InputAction;
+import UI.CO_InfoMenu;
 import UI.MainUIController;
 import UI.MapView;
+import UI.Art.SpriteArtist.SpriteInfoView;
 import UI.Art.SpriteArtist.SpriteMainUIView;
 import Engine.GameInstance;
 import Engine.GraphicsEngine;
@@ -41,5 +43,11 @@ public class FillRectEngine implements GraphicsEngine
   {
     // TODO: hard-coding is bad.
     return new Dimension(1280, 960);
+  }
+
+  @Override
+  public IView createInfoView(CO_InfoMenu control)
+  {
+    return new SpriteInfoView(control);
   }
 }
