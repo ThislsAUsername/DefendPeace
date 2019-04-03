@@ -1,10 +1,11 @@
 package UI;
 
 import UI.InputHandler.InputAction;
+
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.COMaker.InfoPage;
 import Engine.GameInstance;
-import Engine.IController;
 import Engine.OptionSelector;
 
 public class GameStatsController implements InfoController
@@ -26,9 +27,6 @@ public class GameStatsController implements InfoController
     }
   }
 
-  /* (non-Javadoc)
-   * @see UI.CO_InfoController#handleInput(UI.InputHandler.InputAction)
-   */
   @Override
   public boolean handleInput( InputAction action )
   {
@@ -62,30 +60,27 @@ public class GameStatsController implements InfoController
     return goBack;
   }
 
-  /* (non-Javadoc)
-   * @see UI.CO_InfoController#getSelectedCO()
-   */
   @Override
   public Commander getSelectedCO()
   {
     return myGame.commanders[coOptionSelector.getSelectionNormalized()];
   }
 
-  /* (non-Javadoc)
-   * @see UI.CO_InfoController#getPageSelection()
-   */
   @Override
   public InfoPage getSelectedPage()
   {
     return getSelectedCO().coInfo.maker.infoPages.get(pageSelectors[coOptionSelector.getSelectionNormalized()].getSelectionNormalized());
   }
   
-  /* (non-Javadoc)
-   * @see UI.CO_InfoController#getGame()
-   */
   @Override
   public GameInstance getGame()
   {
     return myGame;
+  }
+
+  @Override
+  public CommanderInfo getSelectedCOInfo()
+  {
+    return getSelectedCO().coInfo;
   }
 }

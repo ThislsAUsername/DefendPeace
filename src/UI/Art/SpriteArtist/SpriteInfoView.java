@@ -80,13 +80,14 @@ public class SpriteInfoView extends MapView // extend MapView for getDrawableMap
     Commander co = myControl.getSelectedCO();
     InfoPage page = myControl.getSelectedPage();
 
-    // Draw the commander art. (the caller draws our background, so we don't have to)
-    BufferedImage COPic = SpriteLibrary.getCommanderSprites(co.coInfo.name).body;
+    // Draw the commander art.
+    BufferedImage COPic = SpriteLibrary.getCommanderSprites(myControl.getSelectedCOInfo().name).body;
     // justify bottom/right
     g.drawImage(COPic, mapViewWidth - COPic.getWidth()*drawScale, mapViewHeight - COPic.getHeight()*drawScale,
         COPic.getWidth()*drawScale, COPic.getHeight()*drawScale, null);
 
-    CommanderOverlayArtist.drawCommanderOverlay(g, co, false);
+    if (null != co)
+      CommanderOverlayArtist.drawCommanderOverlay(g, co, false);
     
     // add the actual info
     g.setColor(SpriteUIUtils.MENUFRAMECOLOR);
@@ -94,7 +95,7 @@ public class SpriteInfoView extends MapView // extend MapView for getDrawableMap
     g.setColor(SpriteUIUtils.MENUBGCOLOR);
     g.fillRect(2*paneOuterBuffer, 2*paneOuterBuffer, paneHSize                    , paneVSize                    );
     
-    // TODO: consider drawing this all as one big image, so the user can scroll smoothly through it regardless of screen size
+    // TODO: consider drawing all pages as one big image, so the user can scroll smoothly through it regardless of screen size
     switch (page.pageType)
     {
       case CO_HEADERS:
@@ -109,9 +110,12 @@ public class SpriteInfoView extends MapView // extend MapView for getDrawableMap
         }
         break;
       case GAME_STATUS:
-        String status = Utils.getGameStatusData(getDrawableMap(myControl.getGame()), co);
-        BufferedImage statusText = SpriteUIUtils.paintTextNormalized(status, paneHSize-paneOuterBuffer);
-        g.drawImage(statusText,3*paneOuterBuffer, 3*paneOuterBuffer, null);
+        if( null != co )
+        {
+          String status = Utils.getGameStatusData(getDrawableMap(myControl.getGame()), co);
+          BufferedImage statusText = SpriteUIUtils.paintTextNormalized(status, paneHSize - paneOuterBuffer);
+          g.drawImage(statusText, 3 * paneOuterBuffer, 3 * paneOuterBuffer, null);
+        }
         break;
       case BASIC:
         BufferedImage infoText = SpriteUIUtils.paintTextNormalized(page.info, paneHSize-paneOuterBuffer);

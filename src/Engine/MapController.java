@@ -455,7 +455,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         myGameInputHandler.reset(); // SAVE is a terminal state. Reset the input handler.
         break;
       case CO_INFO:
-        CO_InfoController coInfoMenu = new CO_InfoController(myGame);
+        CO_InfoController coInfoMenu = new CO_InfoController(myGame.commanders);
         IView mv = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
 
         // Mash the big red button and start the game.

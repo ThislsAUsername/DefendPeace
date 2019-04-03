@@ -2,33 +2,50 @@ package UI;
 
 import UI.InputHandler.InputAction;
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderInfo;
+
+import java.util.ArrayList;
+
 import CommandingOfficers.COMaker.InfoPage;
 import Engine.GameInstance;
-import Engine.IController;
 import Engine.OptionSelector;
 
 public class CO_InfoController implements InfoController
 {
-  private GameInstance myGame;
+  private ArrayList<CommanderInfo> coInfos;
   
   private OptionSelector coOptionSelector;
   private OptionSelector[] pageSelectors;
 
-  public CO_InfoController( GameInstance game )
+  public CO_InfoController( Commander[] cos )
   {
-    myGame = game;
+    ArrayList<CommanderInfo> infos = new ArrayList<CommanderInfo>();
     
-    coOptionSelector = new OptionSelector(myGame.commanders.length);
-    pageSelectors = new OptionSelector[myGame.commanders.length];
-    for( int i = 0; i < myGame.commanders.length; ++i )
+    for( Commander co : cos )
     {
-      pageSelectors[i] = new OptionSelector(myGame.commanders[i].coInfo.maker.infoPages.size());
+      infos.add(co.coInfo);
     }
+    
+    init(infos);
   }
 
-  /* (non-Javadoc)
-   * @see UI.CO_InfoController#handleInput(UI.InputHandler.InputAction)
-   */
+  public CO_InfoController( ArrayList<CommanderInfo> infos )
+  {
+    init(infos);
+  }
+  
+  private void init( ArrayList<CommanderInfo> infos )
+  {
+    coInfos = infos;
+    
+    coOptionSelector = new OptionSelector(coInfos.size());
+    pageSelectors = new OptionSelector[coInfos.size()];
+    for( int i = 0; i < coInfos.size(); ++i )
+    {
+      pageSelectors[i] = new OptionSelector(coInfos.get(i).maker.infoPages.size());
+    }
+  }
+  
   @Override
   public boolean handleInput( InputAction action )
   {
@@ -62,30 +79,27 @@ public class CO_InfoController implements InfoController
     return goBack;
   }
 
-  /* (non-Javadoc)
-   * @see UI.CO_InfoController#getSelectedCO()
-   */
   @Override
   public Commander getSelectedCO()
   {
-    return myGame.commanders[coOptionSelector.getSelectionNormalized()];
+    return null;
   }
 
-  /* (non-Javadoc)
-   * @see UI.CO_InfoController#getPageSelection()
-   */
   @Override
   public InfoPage getSelectedPage()
   {
-    return getSelectedCO().coInfo.maker.infoPages.get(pageSelectors[coOptionSelector.getSelectionNormalized()].getSelectionNormalized());
+    return getSelectedCOInfo().maker.infoPages.get(pageSelectors[coOptionSelector.getSelectionNormalized()].getSelectionNormalized());
   }
   
-  /* (non-Javadoc)
-   * @see UI.CO_InfoController#getGame()
-   */
   @Override
   public GameInstance getGame()
   {
-    return myGame;
+    return null;
+  }
+
+  @Override
+  public CommanderInfo getSelectedCOInfo()
+  {
+    return coInfos.get(coOptionSelector.getSelectionNormalized());
   }
 }
