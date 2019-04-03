@@ -86,6 +86,8 @@ public class SpriteCOSetupArtist
     // Draw the mini map.
     SpriteLibrary.drawImageCenteredOnPoint(g, miniMap, dimensions.width / 2, minimapAreaHeight / 2, mmScale);
 
+    g.drawImage(SpriteUIUtils.makeTextFrame("Hit Q to see CO info", 3*drawScale, 2*drawScale), 0, 0, null);
+    
     // Define the space to draw the list of player CO portraits.
     int drawYCenter = ((dimensions.height - minimapAreaHeight) / 2) + minimapAreaHeight;
     int coHighlightedPortraitXCenter = dimensions.width / 2; // Whichever player has focus should be centered.

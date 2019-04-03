@@ -66,6 +66,10 @@ public class SpriteUIUtils
     return bi;
   }
 
+  public static BufferedImage makeTextFrame(String item, int hBuffer, int vBuffer)
+  {
+    return makeTextFrame(MENUBGCOLOR, MENUFRAMECOLOR, item, hBuffer, vBuffer);
+  }
   public static BufferedImage makeTextFrame(Color bg, Color frame, int hBuffer, int vBuffer)
   {
     return makeTextMenu(bg, frame, bg, new ArrayList<String>(), 0, hBuffer, vBuffer);
