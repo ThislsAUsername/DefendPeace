@@ -3,6 +3,7 @@ package UI.Art.SpriteArtist;
 import java.awt.Dimension;
 
 import UI.InputHandler.InputAction;
+import UI.CO_InfoMenu;
 import UI.MainUIController;
 import UI.MapView;
 import Engine.GameInstance;
@@ -33,5 +34,11 @@ public class SpriteEngine implements GraphicsEngine
   public Dimension getScreenDimensions()
   {
     return SpriteOptions.getScreenDimensions();
+  }
+
+  @Override
+  public IView createInfoView(CO_InfoMenu control)
+  {
+    return new SpriteInfoView(control);
   }
 }

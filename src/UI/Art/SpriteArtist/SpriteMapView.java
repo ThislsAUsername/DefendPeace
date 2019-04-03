@@ -10,13 +10,11 @@ import java.util.Queue;
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.Path;
-import Engine.Utils;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
-import UI.CO_InfoMenu;
 import UI.MapView;
 import UI.UIUtils;
 import UI.Art.Animation.GameAnimation;
@@ -207,13 +205,7 @@ public class SpriteMapView extends MapView
     GameMap gameMap = getDrawableMap(myGame);
     
     DiagonalBlindsBG.draw(g);
-    // If we are in the CO_INFO menu, don't draw the map, etc.
-    if( mapController.isInCoInfoMenu )
-    {
-      drawCOInfoMenu(g);
-    }
-    else
-    {
+
       // We draw in two stages. First, we draw the map/units onto a canvas which is the size
       // of the entire map; then we copy the visible section of that canvas onto the game window.
       // This allows us to avoid extra calculations to place map objects within in the window.
@@ -313,61 +305,6 @@ public class SpriteMapView extends MapView
 
       // Draw the Commander overlay with available funds.
       drawCommanderOverlay(g);
-    } // End of case for no overlay menu.
-  }
-
-  private void drawCOInfoMenu(Graphics g)
-  {
-    // Get the CO info menu.
-    CO_InfoMenu menu = mapController.getCoInfoMenu();
-    int drawScale = SpriteOptions.getDrawScale();
-    
-    int paneOuterBuffer = 4*drawScale; // sets both outer border and frame border size
-    int paneHSize = (int) (mapViewWidth*0.7) - paneOuterBuffer*4; // width of the BG color area
-    int paneVSize = (int) (mapViewHeight   ) - paneOuterBuffer*4; // height ""
-
-    // Get the current menu selections.
-    int co = menu.getCoSelection();
-    int page = menu.getPageSelection();
-
-    // Draw the commander art. (the caller draws our background, so we don't have to)
-    BufferedImage COPic = SpriteLibrary.getCommanderSprites(myGame.commanders[co].coInfo.name).body;
-    // justify bottom/right
-    g.drawImage(COPic, mapViewWidth - COPic.getWidth()*drawScale, mapViewHeight - COPic.getHeight()*drawScale,
-        COPic.getWidth()*drawScale, COPic.getHeight()*drawScale, null);
-
-    CommanderOverlayArtist.drawCommanderOverlay(g, myGame.commanders[co], false);
-    
-    // add the actual info
-    g.setColor(SpriteUIUtils.MENUFRAMECOLOR);
-    g.fillRect(  paneOuterBuffer,   paneOuterBuffer, paneHSize + 2*paneOuterBuffer, paneVSize + 2*paneOuterBuffer);
-    g.setColor(SpriteUIUtils.MENUBGCOLOR);
-    g.fillRect(2*paneOuterBuffer, 2*paneOuterBuffer, paneHSize                    , paneVSize                    );
-    
-    // TODO: consider drawing this all as one big image, so the user can scroll smoothly through it regardless of screen size
-    switch (myGame.commanders[co].coInfo.maker.infoPages.get(page).pageType)
-    {
-      case CO_HEADERS:
-        int overlayHeight = 30*drawScale;
-        int heightOffset = 0;
-        for (Commander CO : myGame.commanders)
-        {
-          BufferedImage overlayPic = SpriteLibrary.createTransparentSprite(100*drawScale, overlayHeight);
-          CommanderOverlayArtist.drawCommanderOverlay(overlayPic.getGraphics(), CO, true);
-          g.drawImage(overlayPic,2*paneOuterBuffer, 2*paneOuterBuffer + heightOffset, null);
-          heightOffset += overlayHeight;
-        }
-        break;
-      case GAME_STATUS:
-        String status = Utils.getGameStatusData(getDrawableMap(myGame), myGame.commanders[co]);
-        BufferedImage statusText = SpriteUIUtils.paintTextNormalized(status, paneHSize-paneOuterBuffer);
-        g.drawImage(statusText,3*paneOuterBuffer, 3*paneOuterBuffer, null);
-        break;
-      case BASIC:
-        BufferedImage infoText = SpriteUIUtils.paintTextNormalized(myGame.commanders[co].coInfo.maker.infoPages.get(page).info, paneHSize-paneOuterBuffer);
-        g.drawImage(infoText,3*paneOuterBuffer, 3*paneOuterBuffer, null);
-        break;
-    }
   }
 
   private void adjustViewLocation()

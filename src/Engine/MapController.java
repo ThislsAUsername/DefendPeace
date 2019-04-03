@@ -47,11 +47,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
   Queue<Unit> unitsToInit = null;
   private boolean isGameOver;
 
-  // We use a different method for the CO Info menu than the others (MetaAction, etc) because
-  // it has two different axes of control, and because it has no actions that can result.
-  public boolean isInCoInfoMenu = false;
-  private CO_InfoMenu coInfoMenu;
-
   /** Just a simple struct to hold the currently-selected unit and its tentative path. */
   private class ContemplatedAction
   {
@@ -82,7 +77,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
     inputMode = InputMode.INPUT;
     unitsToInit = new ArrayDeque<Unit>();
     isGameOver = false;
-    coInfoMenu = new CO_InfoMenu(myGame.commanders);
     nextSeekIndex = 0;
     contemplatedAction = new ContemplatedAction();
 
@@ -120,14 +114,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
         break;
       case INPUT:
-        if( isInCoInfoMenu && coInfoMenu.handleInput(input) )
-        {
-          isInCoInfoMenu = false;
-        }
-        else
-        {
           exitMap = handleGameInput(input);
-        }
         break;
       default:
         System.out.println("WARNING! Received invalid InputAction " + input);
@@ -465,10 +452,14 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           System.out.println(ex.toString());
         }
-        myGameInputHandler.reset(); // CO_INFO is a terminal state. Reset the input handler.
+        myGameInputHandler.reset(); // SAVE is a terminal state. Reset the input handler.
         break;
       case CO_INFO:
-        isInCoInfoMenu = true;
+        CO_InfoMenu coInfoMenu = new CO_InfoMenu(myGame);
+        IView mv = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
+
+        // Mash the big red button and start the game.
+        Driver.getInstance().changeGameState(coInfoMenu, mv);
         myGameInputHandler.reset(); // CO_INFO is a terminal state. Reset the input handler.
         break;
       default:
@@ -684,10 +675,5 @@ public class MapController implements IController, GameInputHandler.StateChanged
   public InGameMenu<? extends Object> getCurrentGameMenu()
   {
     return currentMenu;
-  }
-
-  public CO_InfoMenu getCoInfoMenu()
-  {
-    return coInfoMenu;
   }
 }
