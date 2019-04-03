@@ -13,15 +13,17 @@ import Engine.OptionSelector;
 public class CO_InfoController implements InfoController
 {
   private ArrayList<CommanderInfo> coInfos;
+  private GameInstance myGame;
   
   private OptionSelector coOptionSelector;
   private OptionSelector[] pageSelectors;
 
-  public CO_InfoController( Commander[] cos )
+  public CO_InfoController( GameInstance game )
   {
+    myGame = game;
     ArrayList<CommanderInfo> infos = new ArrayList<CommanderInfo>();
     
-    for( Commander co : cos )
+    for( Commander co : myGame.commanders )
     {
       infos.add(co.coInfo);
     }
@@ -82,7 +84,9 @@ public class CO_InfoController implements InfoController
   @Override
   public Commander getSelectedCO()
   {
-    return null;
+    if (null == myGame)
+      return null;
+    return myGame.commanders[coOptionSelector.getSelectionNormalized()];
   }
 
   @Override
@@ -94,7 +98,7 @@ public class CO_InfoController implements InfoController
   @Override
   public GameInstance getGame()
   {
-    return null;
+    return myGame;
   }
 
   @Override
