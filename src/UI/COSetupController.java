@@ -10,6 +10,7 @@ import CommandingOfficers.CommanderLibrary;
 import Engine.Driver;
 import Engine.GameInstance;
 import Engine.IController;
+import Engine.IView;
 import Engine.MapController;
 import Engine.OptionSelector;
 import Terrain.MapMaster;
@@ -93,6 +94,20 @@ public class COSetupController implements IController
           else
             coSelectors[playerSelector.getSelectionNormalized()].setSelectedOption(0);
         }
+        break;
+      case SEEK: // Display the CO Info menu so we can window-shop
+        ArrayList<CommanderInfo> infos = new ArrayList<CommanderInfo>();
+        
+        for( COSetupInfo selector : coSelectors )
+        {
+          infos.add(selector.getCurrentCO());
+        }
+        
+        CO_InfoController coInfoMenu = new CO_InfoController(infos);
+        IView infoView = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
+
+        // Give the new controller/view the floor
+        Driver.getInstance().changeGameState(coInfoMenu, infoView);
         break;
       case NO_ACTION:
         break;
