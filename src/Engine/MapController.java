@@ -16,6 +16,7 @@ import Engine.GameInput.GameInputHandler;
 import Terrain.GameMap;
 import Terrain.Location;
 import UI.CO_InfoController;
+import UI.GameStatsController;
 import UI.InGameMenu;
 import UI.InputHandler;
 import UI.InputHandler.InputAction;
@@ -454,13 +455,21 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
         myGameInputHandler.reset(); // SAVE is a terminal state. Reset the input handler.
         break;
+      case CO_STATS:
+        GameStatsController coStatsMenu = new GameStatsController(myGame);
+        IView statsView = Driver.getInstance().gameGraphics.createInfoView(coStatsMenu);
+
+        myGameInputHandler.reset(); // CO_INFO is a terminal state. Reset the input handler.
+        // Give the new controller/view the floor
+        Driver.getInstance().changeGameState(coStatsMenu, statsView);
+        break;
       case CO_INFO:
         CO_InfoController coInfoMenu = new CO_InfoController(myGame.commanders);
-        IView mv = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
+        IView infoView = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
 
-        // Mash the big red button and start the game.
-        Driver.getInstance().changeGameState(coInfoMenu, mv);
         myGameInputHandler.reset(); // CO_INFO is a terminal state. Reset the input handler.
+        // Give the new controller/view the floor
+        Driver.getInstance().changeGameState(coInfoMenu, infoView);
         break;
       default:
         System.out.println("WARNING! Attempting to switch to unknown input type " + inputType);
