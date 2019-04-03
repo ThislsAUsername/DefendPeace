@@ -2,8 +2,8 @@ package UI.Art.SpriteArtist;
 
 import java.awt.Dimension;
 
+import UI.InfoController;
 import UI.InputHandler.InputAction;
-import UI.CO_InfoMenu;
 import UI.MainUIController;
 import UI.MapView;
 import Engine.GameInstance;
@@ -37,7 +37,7 @@ public class SpriteEngine implements GraphicsEngine
   }
 
   @Override
-  public IView createInfoView(CO_InfoMenu control)
+  public IView createInfoView(InfoController control)
   {
     return new SpriteInfoView(control);
   }

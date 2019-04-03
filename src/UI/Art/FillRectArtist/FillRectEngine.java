@@ -2,8 +2,8 @@ package UI.Art.FillRectArtist;
 
 import java.awt.Dimension;
 
+import UI.InfoController;
 import UI.InputHandler.InputAction;
-import UI.CO_InfoMenu;
 import UI.MainUIController;
 import UI.MapView;
 import UI.Art.SpriteArtist.SpriteInfoView;
@@ -46,7 +46,7 @@ public class FillRectEngine implements GraphicsEngine
   }
 
   @Override
-  public IView createInfoView(CO_InfoMenu control)
+  public IView createInfoView(InfoController control)
   {
     return new SpriteInfoView(control);
   }

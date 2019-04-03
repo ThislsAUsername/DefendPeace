@@ -2,7 +2,7 @@ package Engine;
 
 import java.awt.Dimension;
 
-import UI.CO_InfoMenu;
+import UI.InfoController;
 import UI.InputHandler;
 import UI.MainUIController;
 import UI.MapView;
@@ -11,7 +11,7 @@ public interface GraphicsEngine
 {
   public IView getMainUIView(MainUIController control);
   public MapView createMapView(GameInstance game);
-  public IView createInfoView(CO_InfoMenu control);
+  public IView createInfoView(InfoController control);
 
   /**
    * Handles user input when configuring graphics options made available by
