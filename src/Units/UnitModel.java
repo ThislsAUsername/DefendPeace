@@ -201,6 +201,26 @@ public class UnitModel implements Serializable
     return hasDirect;
   }
 
+  /**
+   * @return True if this UnitModel has at least one weapon that cannot fire after moving.
+   */
+  public boolean hasImmobileWeapon()
+  {
+    boolean hasSiege = false;
+    if(weaponModels != null && weaponModels.size() > 0)
+    {
+      for( WeaponModel wm : weaponModels )
+      {
+        if( !wm.canFireAfterMoving )
+        {
+          hasSiege = true;
+          break;
+        }
+      }
+    }
+    return hasSiege;
+  }
+
   @Override
   public String toString()
   {
