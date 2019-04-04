@@ -4,9 +4,9 @@ public class SelectMetaAction extends GameInputState<SelectMetaAction.MetaAction
 {
   enum MetaAction
   {
-    CO_INFO, SAVE_GAME, CO_ABILITY, QUIT_GAME, END_TURN
+    CO_STATS, CO_INFO, SAVE_GAME, CO_ABILITY, QUIT_GAME, END_TURN
   }
-  private static final MetaAction[] NO_ABILITY = {MetaAction.CO_INFO, MetaAction.SAVE_GAME, MetaAction.QUIT_GAME, MetaAction.END_TURN};
+  private static final MetaAction[] NO_ABILITY = {MetaAction.CO_STATS, MetaAction.CO_INFO, MetaAction.SAVE_GAME, MetaAction.QUIT_GAME, MetaAction.END_TURN};
 
   public SelectMetaAction(StateData data)
   {
@@ -34,6 +34,10 @@ public class SelectMetaAction extends GameInputState<SelectMetaAction.MetaAction
   public GameInputState<?> select(SelectMetaAction.MetaAction option)
   {
     GameInputState<?> next = this;
+    if( MetaAction.CO_STATS == option )
+    {
+      next = new OpenCoStatsMenu(myStateData);
+    }
     if( MetaAction.CO_INFO == option )
     {
       next = new OpenCoInfoMenu(myStateData);

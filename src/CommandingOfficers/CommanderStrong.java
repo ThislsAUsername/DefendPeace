@@ -3,6 +3,7 @@ package CommandingOfficers;
 import java.util.HashMap;
 import java.util.Map;
 
+import CommandingOfficers.COMaker.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
@@ -17,8 +18,31 @@ public class CommanderStrong extends Commander
   private static final long serialVersionUID = -3762678175296290654L;
   
   private static final CommanderInfo coInfo = new CommanderInfo("Strong", new instantiator());  
-  private static class instantiator implements COMaker
+  private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Commander Strong is real strong.\n" +
+          "That's it.\n"));
+      infoPages.add(new InfoPage(
+          "Passive:\n" + 
+          "- Strong gets an attack bonus of 20% on all units\n" +
+          "- Strong can build infantry from air/sea ports\n" +
+          "- Strong's APCs move 1 space further than average\n"));
+      infoPages.add(new InfoPage(
+          "Strongarm ("+StrongArmAbility.STRONGARM_COST+"):\n" +
+          "Gives an attack boost of "+StrongArmAbility.STRONGARM_BUFF+"%\n" +
+          "Grants footsoldiers and APCs one extra point of movement\n" +
+          "Allows Strong to put an extra unit into any transport\n" +
+          "Allows Strong to build inf and mechs on air/sea ports as well as the HQ\n"));
+      infoPages.add(new InfoPage(
+          "Mobilize ("+MobilizeAbility.MOBILIZE_COST+"):\n" + 
+          "Gives an attack boost of "+MobilizeAbility.MOBILIZE_BUFF+"%\n" +
+          "Grants footsoldiers and APCs two extra points of movement\n" +
+          "Allows Strong to put an extra unit into any transport\n" +
+          "Allows Strong to build inf and mechs on air/sea ports as well as the HQ\n"));
+    }
     @Override
     public Commander create()
     {

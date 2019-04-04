@@ -12,7 +12,7 @@ import Units.UnitModel;
 public class YCSensei extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Sensei", new instantiator());
-  private static class instantiator implements COMaker
+  private static class instantiator extends COMaker
   {
     @Override
     public Commander create()

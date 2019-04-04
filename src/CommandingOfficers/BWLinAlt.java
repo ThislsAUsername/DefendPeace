@@ -10,7 +10,7 @@ import Units.UnitModel.ChassisEnum;
 public class BWLinAlt extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Lin_Alt", new instantiator());
-  private static class instantiator implements COMaker
+  private static class instantiator extends COMaker
   {
     @Override
     public Commander create()

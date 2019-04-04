@@ -9,7 +9,7 @@ import Units.Weapons.WeaponModel;
 public class BWWill15 extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Will 15", new instantiator());
-  private static class instantiator implements COMaker
+  private static class instantiator extends COMaker
   {
     @Override
     public Commander create()

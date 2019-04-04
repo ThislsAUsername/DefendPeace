@@ -19,10 +19,6 @@ public class ResupplyAnimation implements GameAnimation
   private int signWidth = 0;
   private int signHeight = 0;
 
-  private final Color MENUFRAMECOLOR = new Color(169, 118, 65);
-  private final Color MENUBGCOLOR = new Color(234, 204, 154);
-  private final Color MENUHIGHLIGHTCOLOR = new Color(246, 234, 210);
-
   public ResupplyAnimation(XYCoord mapLocation)
   {
     this(mapLocation.xCoord, mapLocation.yCoord);
@@ -82,12 +78,12 @@ public class ResupplyAnimation implements GameAnimation
       int width = (int) (signWidth * percent);
       int height = (int) (signHeight * percent);
 
-      menu = SpriteUIUtils.makeTextFrame(MENUBGCOLOR, MENUFRAMECOLOR, width / 2, height / 2);
+      menu = SpriteUIUtils.makeTextFrame(SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR, width / 2, height / 2);
     }
     else if( animTime < signUpEnd )
     {
       // The sign is legible.
-      menu = SpriteUIUtils.makeTextFrame(MENUBGCOLOR, MENUFRAMECOLOR,
+      menu = SpriteUIUtils.makeTextFrame(SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR,
           SUPPLYTEXT, 2 * drawScale, 2 * drawScale);
     }
     else if( animTime < signGone )
@@ -97,7 +93,7 @@ public class ResupplyAnimation implements GameAnimation
       int width = (int) (signWidth * percent);
       int height = (int) (signHeight * percent);
 
-      menu = SpriteUIUtils.makeTextFrame(MENUBGCOLOR, MENUFRAMECOLOR, width / 2, height / 2);
+      menu = SpriteUIUtils.makeTextFrame(SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR, width / 2, height / 2);
     }
     SpriteLibrary.drawImageCenteredOnPoint(g, menu, tileCenterX, tileCenterY, 1); // image generation accounts for drawscale, so don't scale image
 

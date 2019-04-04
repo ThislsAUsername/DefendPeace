@@ -15,7 +15,6 @@ import Engine.Combat.CombatEngine;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
-import UI.CO_InfoMenu;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import UI.Art.Animation.NoAnimation;
@@ -118,18 +117,6 @@ public class SpriteMapView extends MapView
     mapTilesToDrawX = mapViewWidth / tileSize;
     mapTilesToDrawY = mapViewHeight / tileSize;
 
-    // Cap the view width/height to the dimensions of the map.
-    if( mapTilesToDrawX > myGame.gameMap.mapWidth )
-    {
-      mapTilesToDrawX = myGame.gameMap.mapWidth;
-      mapViewWidth = mapTilesToDrawX * tileSize;
-    }
-    if( mapTilesToDrawY > myGame.gameMap.mapHeight )
-    {
-      mapTilesToDrawY = myGame.gameMap.mapHeight;
-      mapViewHeight = mapTilesToDrawY * tileSize;
-    }
-
     // Let SpriteOptions know we are changing things.
     SpriteOptions.setScreenDimensions(mapViewWidth, mapViewHeight);
 
@@ -215,26 +202,9 @@ public class SpriteMapView extends MapView
   public void render(Graphics g)
   {
     GameMap gameMap = getDrawableMap(myGame);
-    // If we are in the CO_INFO menu, don't draw the map, etc.
-    if( mapController.isInCoInfoMenu )
-    {
-      // Get the CO info menu.
-      CO_InfoMenu menu = mapController.getCoInfoMenu();
+    
+    DiagonalBlindsBG.draw(g);
 
-      // Get the current menu selections.
-      int co = menu.getCoSelection();
-      int page = menu.getPageSelection();
-
-      // TODO: Create the other CO info pages (powers, stats, etc).
-
-      // Draw the background.
-
-      // Draw the commander art.
-      g.drawImage(SpriteLibrary.getCommanderSprites(myGame.commanders[co].coInfo.name).body, 0, 0, mapViewWidth,
-          mapViewHeight, null);
-    }
-    else
-    {
       // We draw in two stages. First, we draw the map/units onto a canvas which is the size
       // of the entire map; then we copy the visible section of that canvas onto the game window.
       // This allows us to avoid extra calculations to place map objects within in the window.
@@ -320,14 +290,20 @@ public class SpriteMapView extends MapView
       {
         menuArtist.drawMenu(mapGraphics, mapViewX, mapViewY);
       }
+      
+      // When we draw the map, we want to center it if it's smaller than the view dimensions
+      int deltaX = 0, deltaY = 0;
+      if (mapViewWidth > mapImage.getWidth())
+        deltaX = (mapViewWidth - mapImage.getWidth())/2;
+      if (mapViewHeight > mapImage.getHeight())
+        deltaY = (mapViewHeight - mapImage.getHeight())/2;
 
       // Copy the map image into the window's graphics buffer.
-      // First four coords are the dest x,y,x2,y2. Next four are the source coords.
-      g.drawImage(mapImage, 0, 0, mapViewWidth, mapViewHeight, drawX, drawY, drawX + mapViewWidth, drawY + mapViewHeight, null);
+      // First four coords are the dest x,y,x2,y2. Next four are the source coords.      
+      g.drawImage(mapImage, deltaX, deltaY, deltaX + mapViewWidth, deltaY + mapViewHeight, drawX, drawY, drawX + mapViewWidth, drawY + mapViewHeight, null);
 
       // Draw the Commander overlay with available funds.
       drawCommanderOverlay(g);
-    } // End of case for no overlay menu.
   }
 
   private void adjustViewLocation()

@@ -15,7 +15,7 @@ public class BMOlaf extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Olaf", new instantiator());
 
-  private static class instantiator implements COMaker
+  private static class instantiator extends COMaker
   {
     @Override
     public Commander create()

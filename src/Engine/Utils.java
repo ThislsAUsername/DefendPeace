@@ -69,15 +69,16 @@ public class Utils
   {
     ArrayList<XYCoord> locations = findLocationsInRange(map, moveLoc, 1);
     ArrayList<XYCoord> dropoffLocations = new ArrayList<XYCoord>();
-    for( XYCoord loc : locations )
-    {
-      // Add any location that is empty and supports movement of the cargo unit.
-      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
-          && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
+    if( cargo.model.propulsion.canTraverse(map.getEnvironment(moveLoc)) )
+      for( XYCoord loc : locations )
       {
-        dropoffLocations.add(loc);
+        // Add any location that is empty and supports movement of the cargo unit.
+        if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
+            && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
+        {
+          dropoffLocations.add(loc);
+        }
       }
-    }
     return dropoffLocations;
   }
 
@@ -534,6 +535,63 @@ public class Utils
     TravelDistanceComparator tdc = new TravelDistanceComparator(unit, map);
     Collections.sort(mapLocations, tdc);
   }
+  
+
+  /** Returns a string describing the game statistics of a given CO */
+  public static String getGameStatusData(GameMap map, Commander viewed)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    // map state
+    int income = 0;
+    int unitCount = 0;
+    int vehCount = 0;
+    int unitFunds = 0;
+    
+    for( int w = 0; w < map.mapWidth; ++w )
+    {
+      for( int h = 0; h < map.mapHeight; ++h )
+      {
+        Location loc = map.getLocation(w, h);
+        if( loc.isProfitable() && loc.getOwner() == viewed )
+        {
+          income += viewed.incomePerCity;
+        }
+        Unit resident = loc.getResident();
+        if( null != resident && resident.CO == viewed )
+        {
+          unitCount++;
+          if (resident.model.chassis != ChassisEnum.TROOP)
+            vehCount++;
+          unitFunds += resident.model.getCost() * resident.getHP() / resident.model.maxHP;
+        }
+      }
+    }
+
+    sb.append("Income:         ").append(income).append("\n");
+    sb.append("Unit count:     ").append(unitCount).append("\n");
+    sb.append("Vehicle count:  ").append(vehCount).append("\n");
+    sb.append("Unit funds:     ").append(unitFunds).append("\n");
+
+    // ability stats
+    double[] abilityCosts = viewed.getAbilityCosts();
+    if (abilityCosts.length > 0)
+    {
+      double abilityPower = viewed.getAbilityPower();
+      double untilNextPower = abilityCosts[abilityCosts.length - 1]; // init to our biggest cost, so we can only go down
+      for( double cost : abilityCosts ) // find the cheapest cost that we can't afford
+      {
+        if( cost >= abilityPower )
+          untilNextPower = Math.min(untilNextPower, cost - abilityPower);
+      }
+
+      sb.append("Ability Power:  ").append((int) (abilityPower * Commander.CHARGERATIO_FUNDS)).append("\n");
+      sb.append("Next Ability:   ").append((int) (untilNextPower*Commander.CHARGERATIO_FUNDS)).append("\n");
+    }
+
+    return sb.toString();
+  }
+  
 
   /** Returns a list of all locations visible to the unit at its current location. */
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer)
@@ -605,7 +663,7 @@ public class Utils
   }
 
   /**
-   * Evaluates the proposed move, creates a MoveEvent describing it, and adds that event to eventQueu
+   * Evaluates the proposed move, creates a MoveEvent describing it, and adds that event to eventQueue
    * If the move passes over an obstacle, the resulting MoveEvent will have its path shortened accordingly.
    * @param gameMap The world in which the action is to take place.
    * @param unit The unit who is to move.

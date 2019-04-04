@@ -13,7 +13,7 @@ public class BHSturm extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Sturm", new instantiator());
 
-  private static class instantiator implements COMaker
+  private static class instantiator extends COMaker
   {
     @Override
     public Commander create()

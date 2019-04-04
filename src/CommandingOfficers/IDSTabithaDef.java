@@ -15,7 +15,7 @@ public class IDSTabithaDef extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Tabitha def", new instantiator());
 
-  private static class instantiator implements COMaker
+  private static class instantiator extends COMaker
   {
     @Override
     public Commander create()

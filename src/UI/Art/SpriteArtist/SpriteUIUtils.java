@@ -16,11 +16,16 @@ import java.awt.Graphics;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
 public class SpriteUIUtils
 {
+  public static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
+  public static final Color MENUBGCOLOR = new Color(234, 204, 154);
+  public static final Color MENUHIGHLIGHTCOLOR = new Color(246, 234, 210);
+  
   /**
    * Calculate the distance to move an image make it look like it slides quickly into place instead of
    * just snapping at each button-press. Distance moved per frame is proportional to distance from goal location.
@@ -181,6 +186,10 @@ public class SpriteUIUtils
     return bi;
   }
 
+  public static BufferedImage makeTextFrame(String item, int hBuffer, int vBuffer)
+  {
+    return makeTextFrame(MENUBGCOLOR, MENUFRAMECOLOR, item, hBuffer, vBuffer);
+  }
   public static BufferedImage makeTextFrame(Color bg, Color frame, int hBuffer, int vBuffer)
   {
     return makeTextMenu(bg, frame, bg, new ArrayList<String>(), 0, hBuffer, vBuffer);
@@ -205,7 +214,7 @@ public class SpriteUIUtils
     // Build our image.
     BufferedImage menuImage = null;
     if( menuWidth == 0 || menuHeight == 0 )
-      menuImage = SpriteLibrary.createDefaultBlankSprite(1, 1); // zero-dimensioned images aren't kosher
+      return SpriteLibrary.createDefaultBlankSprite(1, 1); // zero-dimensioned images aren't kosher
     else
       menuImage = SpriteLibrary.createDefaultBlankSprite(menuWidth, menuHeight);
     Graphics g = menuImage.getGraphics();
@@ -223,6 +232,51 @@ public class SpriteUIUtils
     for( int txtY = vBuffer, i = 0; i < items.size(); ++i, txtY += menuTextHeight + drawScale )
     {
       SpriteLibrary.drawTextSmallCaps(g, items.get(i), hBuffer, txtY, drawScale);
+    }
+
+    return menuImage;
+  }
+
+  /**
+   * Returns an image with the input string printed within the specified width, in normal text.
+   * @param reqWidth: Actual UI size in pixels that you want to fit the text into.
+   */
+  public static BufferedImage paintTextNormalized(String prose, int reqWidth)
+  {
+    // Figure out how big our text is.
+    int drawScale = SpriteOptions.getDrawScale();
+    int characterWidth = SpriteLibrary.getLettersUppercase().getFrame(0).getWidth() * drawScale;
+    int characterHeight = SpriteLibrary.getLettersUppercase().getFrame(0).getHeight() * drawScale;
+
+    ArrayList<String> lines = new ArrayList<String>();
+    // Unload our prose into the lines it already has
+    lines.addAll(Arrays.asList(prose.split("\\R"))); // \R matches all newline formats, yay convenience
+
+    for( int i = 0; i < lines.size(); ++i ) // basic for, since we care about indices
+    {
+      String line = lines.get(i);
+      if( line.length() * characterWidth <= reqWidth ) // if the line's short enough already, don't split it further
+        continue;
+
+      // TODO: check for word boundaries
+      lines.remove(i);
+      lines.add(i, line.substring(reqWidth / characterWidth)); // put in the second half
+      lines.add(i, line.substring(0, reqWidth / characterWidth)); // and then the first half behind it
+    }
+
+    int totalTextHeight = ((lines.isEmpty()) ? 0 : getMenuTextHeightPx(lines, characterHeight));
+    // Build our image.
+    BufferedImage menuImage = null;
+    if( reqWidth == 0 || totalTextHeight == 0 )
+      return SpriteLibrary.createDefaultBlankSprite(1, 1); // zero-dimensioned images aren't kosher
+    else
+      menuImage = SpriteLibrary.createTransparentSprite(reqWidth, totalTextHeight);
+    Graphics g = menuImage.getGraphics();
+
+    // Draw the actual text.
+    for( int txtY = 0, i = 0; i < lines.size(); ++i, txtY += characterHeight + drawScale )
+    {
+      SpriteLibrary.drawText(g, lines.get(i), 0, txtY, drawScale);
     }
 
     return menuImage;

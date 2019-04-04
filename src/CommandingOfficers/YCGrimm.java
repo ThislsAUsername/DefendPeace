@@ -8,7 +8,7 @@ public class YCGrimm extends Commander
 {
   private static final CommanderInfo coInfo = new CommanderInfo("Grimm", new instantiator());
 
-  private static class instantiator implements COMaker
+  private static class instantiator extends COMaker
   {
     @Override
     public Commander create()
