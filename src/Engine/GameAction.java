@@ -546,6 +546,10 @@ public interface GameAction
       if( isValid )
       {
         isValid &= !actor.heldUnits.isEmpty();
+        for( Unit cargo : myDropoffs.keySet() ) // Make sure the cargo can go where we want to put it.
+        {
+          isValid &= cargo.model.propulsion.canTraverse(gameMap.getEnvironment(myDropoffs.get(cargo)));
+        }
       }
 
       // Generate events.
