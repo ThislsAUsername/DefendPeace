@@ -69,15 +69,16 @@ public class Utils
   {
     ArrayList<XYCoord> locations = findLocationsInRange(map, moveLoc, 1);
     ArrayList<XYCoord> dropoffLocations = new ArrayList<XYCoord>();
-    for( XYCoord loc : locations )
-    {
-      // Add any location that is empty and supports movement of the cargo unit.
-      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
-          && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
+    if( cargo.model.propulsion.canTraverse(map.getEnvironment(moveLoc)) )
+      for( XYCoord loc : locations )
       {
-        dropoffLocations.add(loc);
+        // Add any location that is empty and supports movement of the cargo unit.
+        if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
+            && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
+        {
+          dropoffLocations.add(loc);
+        }
       }
-    }
     return dropoffLocations;
   }
 
