@@ -216,7 +216,11 @@ public class UnitSpriteSet
       int iconW = stunIcon.getWidth() * drawScale;
       int iconH = stunIcon.getHeight() * drawScale;
 
-      // Draw transport icon.
+      // Draw team-color background for the icon.
+      g.setColor( u.CO.myColor );
+      g.fillRect( drawX+drawScale, drawY+drawScale, iconW-(2*drawScale), iconH-(2*drawScale));
+
+      // Draw stun icon.
       g.drawImage( stunIcon, drawX, drawY, iconW, iconH, null );
     }
 
