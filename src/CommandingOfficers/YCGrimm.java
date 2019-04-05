@@ -10,6 +10,14 @@ public class YCGrimm extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Grimm\r\n" + 
+          "  Units gain +30% attack, but lose -20% defense\r\n" + 
+          "Knucklebuster -- Offensive boost by +20%\r\n" + 
+          "Haymaker -- Offensive Boost by +50%"));
+    }
     @Override
     public Commander create()
     {

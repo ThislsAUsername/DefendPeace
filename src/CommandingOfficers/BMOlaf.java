@@ -17,6 +17,14 @@ public class BMOlaf extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Olaf\r\n" + 
+          "  Unaffected by snow, but rain affects him as much as snow would for others\r\n" + 
+          "Blizzard -- Changes the weather to Snow (1 day)\r\n" + 
+          "Winter Fury -- Enemy units lose 2 HP (to a minimum of 1); changes the weather to Snow (1 day)"));
+    }
     @Override
     public Commander create()
     {

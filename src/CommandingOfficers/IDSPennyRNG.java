@@ -2,6 +2,7 @@ package CommandingOfficers;
 
 import Terrain.Environment.Weathers;
 import Terrain.MapMaster;
+import CommandingOfficers.COMaker.InfoPage;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.MapChangeEvent;
@@ -15,6 +16,12 @@ public class IDSPennyRNG extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Hey, you're not allowed to see this...\n"
+          + "Get out of here with your shenanigans!"));
+    }
     @Override
     public Commander create()
     {

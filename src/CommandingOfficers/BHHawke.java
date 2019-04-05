@@ -11,6 +11,14 @@ public class BHHawke extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Hawke\r\n" + 
+          "  Units gain +10% attack\r\n" + 
+          "Black Wave -- All enemey units lose -1 HP, and your own units gain +1 HP\r\n" + 
+          "Black Storm -- All enemy units lose -2 HP, and your own units gain +2 HP"));
+    }
     @Override
     public Commander create()
     {

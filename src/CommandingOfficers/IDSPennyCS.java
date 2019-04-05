@@ -15,6 +15,15 @@ public class IDSPennyCS extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "--PENNY--\r\n" + 
+          "Units are unaffected by weather.\r\n" + 
+          "xxxXXXXX\r\n" + 
+          "STORMFRONT: Changes the weather to Rain for one day.\r\n" + 
+          "ENIGMA: Changes the weather to Snow for three days."));
+    }
     @Override
     public Commander create()
     {

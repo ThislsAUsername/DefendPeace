@@ -10,6 +10,15 @@ public class RAWaylonCS extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Waylon", new instantiator());
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "--WAYLON--\r\n" + 
+          "Air units gain +20% firepower and +25% defense.\r\n"
+          + "xxXXXX\n" + 
+          "WINGMAN: All air units gain +25% defense.\r\n" + 
+          "BAD COMPANY: All air units gain +50% defense."));
+    }
     @Override
     public Commander create()
     {

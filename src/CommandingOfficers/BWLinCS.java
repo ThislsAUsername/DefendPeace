@@ -1,5 +1,7 @@
 package CommandingOfficers;
 
+import CommandingOfficers.Modifiers.CODamageModifier;
+import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COVisionModifier;
 import Terrain.MapMaster;
 import Units.UnitModel;
@@ -10,6 +12,15 @@ public class BWLinCS extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Lin", new instantiator());
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "--LIN--\r\n" + 
+          "Ground units gain +10% firepower.\r\n" + 
+          "xxXXX\r\n" + 
+          "SCOUT: All ground units get 120/120 stats, +1 vision, and can see into hiding places.\r\n" + 
+          "NIGHT VISION: All ground units get 130/130 stats, +2 vision, and can see into hiding places."));
+    }
     @Override
     public Commander create()
     {
@@ -60,6 +71,8 @@ public class BWLinCS extends Commander
       }
       myCommander.addCOModifier(sightMod);
       myCommander.myView.revealFog();
+      
+      myCommander.addCOModifier(new CODefenseModifier(10));
     }
   }
 
@@ -85,6 +98,9 @@ public class BWLinCS extends Commander
       }
       myCommander.addCOModifier(sightMod);
       myCommander.myView.revealFog();
+      
+      myCommander.addCOModifier(new CODamageModifier(10));
+      myCommander.addCOModifier(new CODefenseModifier(20));
     }
   }
 }

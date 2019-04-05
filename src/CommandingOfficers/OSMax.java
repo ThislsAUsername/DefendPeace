@@ -15,6 +15,14 @@ public class OSMax extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Max", new instantiator());
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Max\r\n" + 
+          "  Direct units gain +20% attack. Indirect units lose -10% attack, and have -1 range\r\n" + 
+          "Max Force -- Direct units gain +1 Movement and their power increases by +10%\r\n" + 
+          "Max Blast -- Direct Units gain +2 Movement and their power increases by +30%"));
+    }
     @Override
     public Commander create()
     {

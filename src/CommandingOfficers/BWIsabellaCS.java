@@ -13,6 +13,15 @@ public class BWIsabellaCS extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Isabella", new instantiator());
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "--ISABELLA--\r\n" + 
+          "Units gain +10% firepower.\r\n" + 
+          "xxxXXXX\r\n" + 
+          "DEEP STRIKE: All units gain +1 movement; all indirects also gain +1 range.\r\n" + 
+          "OVERLORD: All units gain +2 movement; all indirects also gain +2 range."));
+    }
     @Override
     public Commander create()
     {

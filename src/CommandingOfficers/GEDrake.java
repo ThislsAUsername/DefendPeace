@@ -1,5 +1,6 @@
 package CommandingOfficers;
 
+import CommandingOfficers.COMaker.InfoPage;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
@@ -17,6 +18,14 @@ public class GEDrake extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Drake", new instantiator());
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Drake\r\n" + 
+          "  Naval units gain +1 movement and +25% defense, aircraft lose -20% attack. Unaffected by rain (except vision), more likely to rain in random weather\r\n" + 
+          "Tsunami -- All enemy units lose 1 HP (to a minimum of 1). Enemy units lose half their fuel\r\n" + 
+          "Typhoon -- All enemy units lose 2 HP (to a minimum of 1) and half their fuel. Weather changes to Rain (1 day)"));
+    }
     @Override
     public Commander create()
     {

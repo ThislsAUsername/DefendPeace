@@ -13,6 +13,14 @@ public class IDSCaulderSCOP extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "--CAULDER--\r\n" + 
+          "All damaged units are repaired for +2 HP every turn (liable for costs).\r\n" + 
+          "XXXXX XXXXX\r\n" + 
+          "SUPREME BOOST: All units gain +40% firepower, +25% defense, and are repaired for +3 HP (liable for costs)."));
+    }
     @Override
     public Commander create()
     {
@@ -61,7 +69,7 @@ public class IDSCaulderSCOP extends Commander
   private static class SupremeBoost extends CommanderAbility
   {
     private static final String NAME = "Supreme Boost";
-    private static final int COST = 8;
+    private static final int COST = 10;
 
     SupremeBoost(Commander commander)
     {

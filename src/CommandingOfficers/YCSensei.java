@@ -14,6 +14,14 @@ public class YCSensei extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Sensei", new instantiator());
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Sensei\r\n" + 
+          "  Copters gain +50% attack, footsoldiers gain +40% attack, but all other non-air units lose -10% attack. Transports gain +1 movement\r\n" + 
+          "Copter Command -- Copters' strength is increased by +15%; 9 HP Infantry units are placed on every owned, empty city\r\n" + 
+          "Airborne Assault -- Copters' strength is increased by +15%; 9 HP Mech units are placed on every owned, empty city"));
+    }
     @Override
     public Commander create()
     {

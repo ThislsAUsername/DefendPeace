@@ -10,6 +10,15 @@ public class LATasha1star extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Tasha", new instantiator());
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "--TASHA--\r\n" + 
+          "Air units gain +40% firepower and +15% defense.\r\n" + 
+          "xXXXX\r\n" + 
+          "SONIC BOOM: All air units gain +1 movement.\r\n" + 
+          "FOX ONE: All air units gain +2 movement."));
+    }
     @Override
     public Commander create()
     {

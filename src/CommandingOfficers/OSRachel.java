@@ -16,6 +16,14 @@ public class OSRachel extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Rachel\r\n" + 
+          "  +1 HP for repairs (liable for costs)\r\n" + 
+          "Lucky Lass -- Improves Luck (0-40%)\r\n" + 
+          "Covering Fire -- Three 2-range missiles strike the opponents' greatest accumulation of footsoldier HP, unit funds value, and unit HP (in that order)."));
+    }
     @Override
     public Commander create()
     {

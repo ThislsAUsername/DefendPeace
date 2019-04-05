@@ -15,6 +15,14 @@ public class BHKindle extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Kindle", new instantiator());
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Kindle\r\n" + 
+          "  Units' (even aircraft) attack power is increased by +40% while on urban terrain (HQs, bases, (air-)ports, cities, labs, and comtowers only)\r\n" + 
+          "Urban Blight -- -3HP to all enemy units on urban terrain; Urban bonus increased to +80%\r\n" + 
+          "High Society -- Urban bonus increased to +130%, and attack power boosted by +3% for every city owned"));
+    }
     @Override
     public Commander create()
     {

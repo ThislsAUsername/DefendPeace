@@ -14,6 +14,14 @@ public class BHLash extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Lash\r\n" + 
+          "  Attack power is boosted by +10% for every terrain star (note: aircraft are unaffected by terrain)\r\n" + 
+          "Terrain Tactics -- Movement cost for all terrain is reduced to 1 (except in snow)\r\n" + 
+          "Prime Tactics -- Doubles terrain stars; Movement cost over all terrain is reduced to 1 (except in snow)"));
+    }
     @Override
     public Commander create()
     {

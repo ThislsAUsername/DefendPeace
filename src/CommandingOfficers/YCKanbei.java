@@ -15,6 +15,14 @@ public class YCKanbei extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "   Kanbei\r\n" + 
+          "  Units cost +20% more to build, but gain +30% attack and defense\r\n" + 
+          "Morale Boost -- Unit attack is increased by +10%\r\n" + 
+          "Samurai Spirit -- Boosts attack by 10%, defense by 20%, and his counterattacks do 50% more damage"));
+    }
     @Override
     public Commander create()
     {

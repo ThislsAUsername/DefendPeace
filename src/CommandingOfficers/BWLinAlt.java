@@ -12,6 +12,15 @@ public class BWLinAlt extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Lin_Alt", new instantiator());
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "--LIN--\r\n" + 
+          "Ground units gain +5/5 stats\r\n" + 
+          "xxXXX\r\n" + 
+          "SCOUT: All ground units get 120/120 stats, +1 vision, and can see into hiding places.\r\n" + 
+          "NIGHT VISION: All ground units get 130/130 stats, +2 vision, and can see into hiding places."));
+    }
     @Override
     public Commander create()
     {

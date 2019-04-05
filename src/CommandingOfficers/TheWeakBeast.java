@@ -9,60 +9,31 @@ import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import Units.UnitModel;
 
-public class BHSturm extends Commander
+public class TheWeakBeast extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Sturm", new instantiator());
+  private static final CommanderInfo coInfo = new CommanderInfo("Weak Beast", new instantiator());
 
   private static class instantiator extends COMaker
   {
     public instantiator()
     {
       infoPages.add(new InfoPage(
-          "Sturm\r\n" + 
-          "  Terrain cost is 1 on all terrain (except in snow). Units lose -20% attack, but gain +20% defense\r\n" + 
-          "Meteor Strike -- A 2 Range missile hits the accumulation of the opponent's most expensive units and deals 4 HP damage\r\n" + 
-          "Meteor Strike II -- A 2 Range missile hits the accumulation of the opponent's most expensive units and deals 8 HP damage"));
+          "--Weak BEAST--\r\n" + 
+          "Terrain cost is 1 on all terrain (except in snow). Units gain +20% firepower, but lose -20% defense.\r\n" + 
+          "SWARM, ROACHES!: A 2-range missile hits the accumulation of the opponent's most expensive units and deals 4 HP damage.\r\n" + 
+          "GWAR HAR HAR!: A 2-range missile hits the accumulation of the opponent's most expensive units and deals 8 HP damage."));
     }
     @Override
     public Commander create()
     {
-      return new BHSturm();
+      return new TheWeakBeast();
     }
   }
 
-  public BHSturm()
+  public TheWeakBeast()
   {
     super(coInfo);
 
-    // legacy code left in for ~reasons~
-//    PerfectMoveModifier moveMod = new PerfectMoveModifier();
-//    Collection<UnitModel> perfects = moveMod.init(this).values();
-//
-//    unitModels.clear();
-//    unitModels.addAll(perfects);
-
-    // we need to mess with our shopping list as well, since we've replaced all our unit models
-//    unitProductionByTerrain.get(TerrainType.FACTORY).clear();
-//    unitProductionByTerrain.get(TerrainType.SEAPORT).clear();
-//    unitProductionByTerrain.get(TerrainType.AIRPORT).clear();
-//    for( UnitModel um : unitModels )
-//    {
-//      switch (um.chassis)
-//      {
-//        case AIR_HIGH:
-//        case AIR_LOW:
-//          unitProductionByTerrain.get(TerrainType.AIRPORT).add(um);
-//          break;
-//        case SHIP:
-//        case SUBMERGED:
-//          unitProductionByTerrain.get(TerrainType.SEAPORT).add(um);
-//          break;
-//        case TANK:
-//        case TROOP:
-//          unitProductionByTerrain.get(TerrainType.FACTORY).add(um);
-//          break;
-//      }
-//    }
     for( UnitModel um : unitModels )
     {
       for( TerrainType terrain : TerrainType.TerrainTypeList )
@@ -75,8 +46,8 @@ public class BHSturm extends Commander
       }
     }
 
-    new CODamageModifier(-20).apply(this);
-    new CODefenseModifier(20).apply(this);
+    new CODamageModifier(20).apply(this);
+    new CODefenseModifier(-20).apply(this);
 
     addCommanderAbility(new MeteorStrike(this));
     addCommanderAbility(new MeatierStrike(this));
@@ -89,7 +60,7 @@ public class BHSturm extends Commander
 
   private static class MeteorStrike extends CommanderAbility
   {
-    private static final String NAME = "Meteor Strike";
+    private static final String NAME = "Roach Swarm";
     private static final int COST = 6;
     private static final int POWER = 4;
 
@@ -108,7 +79,7 @@ public class BHSturm extends Commander
 
   private static class MeatierStrike extends CommanderAbility
   {
-    private static final String NAME = "Meatier Strike";
+    private static final String NAME = "Gwar Har Har";
     private static final int COST = 10;
     private static final int POWER = 8;
 

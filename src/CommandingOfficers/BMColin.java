@@ -10,6 +10,14 @@ public class BMColin extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Colin\r\n" + 
+          "  Units cost -20% less to build, but lose -10% attack\r\n" + 
+          "Gold Rush -- Funds are multiplied by 1.5\r\n" + 
+          "Power of Money -- Unit attack percentage increases by (3 * Funds/1000)%"));
+    }
     @Override
     public Commander create()
     {

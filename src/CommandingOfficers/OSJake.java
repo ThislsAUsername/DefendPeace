@@ -19,6 +19,14 @@ public class OSJake extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Jake", new instantiator());
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Jake\r\n" + 
+          "  Units (even aircraft) gain +10% attack power on plains\r\n" + 
+          "Beat Down -- Land indirects gain +1 Range; Plains bonus increased by +10%\r\n" + 
+          "Block Rock -- Land indirects gain +1 Range; Plains bonus increased by +30%; Vehicles gain +2 Movement\r\n"));
+    }
     @Override
     public Commander create()
     {

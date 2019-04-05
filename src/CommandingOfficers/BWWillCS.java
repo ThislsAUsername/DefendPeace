@@ -11,6 +11,15 @@ public class BWWillCS extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Will", new instantiator());
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "--WILL--\r\n" + 
+          "All ground direct units (including foot soldiers) gain +20% firepower.\r\n" + 
+          "xxXXX\r\n" + 
+          "RALLY CRY: All ground direct units gain +1 movement\r\n" + 
+          "A NEW ERA: All ground direct units gain +2 movement"));
+    }
     @Override
     public Commander create()
     {

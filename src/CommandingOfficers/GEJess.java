@@ -13,6 +13,14 @@ public class GEJess extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Jess\r\n" + 
+          "  Vehicles gain +10% attack, but all other units (including footsoldiers) lose -10% attack\r\n" + 
+          "Turbo Charge -- All units resupply; vehicles gain +10% attack and +1 Movement\r\n" + 
+          "Overdrive -- All units resupply; vehicles gain +30% attack +2 Movement"));
+    }
     @Override
     public Commander create()
     {

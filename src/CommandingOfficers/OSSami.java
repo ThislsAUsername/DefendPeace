@@ -17,6 +17,14 @@ public class OSSami extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Sami\r\n" + 
+          "  Footsoldiers gain +30% attack and capture buildings 50% faster (rounded down), other direct units lose -10% attack. Transports gain +1 movement\r\n" + 
+          "Double Time -- Footsoldiers gain +20% power and +1 Movement\r\n" + 
+          "Victory March -- Footsoldiers gain +40% power, +2 Movement, and capture any building in one turn (even with 1 HP)"));
+    }
     @Override
     public Commander create()
     {

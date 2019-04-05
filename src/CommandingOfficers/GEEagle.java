@@ -12,6 +12,14 @@ public class GEEagle extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Eagle", new instantiator());
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Eagle\r\n" + 
+          "  Air units gain +15% attack, +10% defense and consume -2 fuel per day. Naval units lose -30% attack\r\n" + 
+          "Lightning Drive -- Boosts Air unit attack by 5% and defense by 10%\r\n" + 
+          "Lightning Strike -- Boosts Air unit attack by 5% and defense by 10%. All non-footsoldier units may move and fire again even if built this turn (use this power after moving!)"));
+    }
     @Override
     public Commander create()
     {

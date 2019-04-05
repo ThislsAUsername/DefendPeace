@@ -10,6 +10,13 @@ public class BHAdder extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Adder\r\n" + 
+          "  Sideslip -- +1 Movement to all units\r\n" + 
+          "Sidewinder -- +2 Movement to all units"));
+    }
     @Override
     public Commander create()
     {

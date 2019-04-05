@@ -12,6 +12,14 @@ public class GEJavier extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Javier 1T", new instantiator());
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Javier\r\n" + 
+          "  Units gain +20% defense against indirect units. +10% defense\r\n" + 
+          "Tower Shield -- Extra defense against indirects (+20%); +10/10 stats\r\n" + 
+          "Tower of Power -- Even more defense against indirects (+60%); +20/20 stats"));
+    }
     @Override
     public Commander create()
     {

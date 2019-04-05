@@ -12,6 +12,14 @@ public class OSAndy extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Andy\n"
+          + "Doesn't understand airports.\n"
+          + "Hyper Repair -- Andy's units gain +2 HP\r\n" + 
+          "Hyper Upgrade -- Andy's units gain +5HP, +10% firepower and +1 Movement"));
+    }
     @Override
     public Commander create()
     {

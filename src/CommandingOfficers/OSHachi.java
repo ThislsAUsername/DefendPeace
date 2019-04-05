@@ -14,6 +14,14 @@ public class OSHachi extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Hachi\r\n" + 
+          "  Units cost -10% less to build\r\n" + 
+          "Barter -- Units cost -50% to build\r\n" + 
+          "Merchant Union -- Units cost -50% and ground units can deploy from cities"));
+    }
     @Override
     public Commander create()
     {

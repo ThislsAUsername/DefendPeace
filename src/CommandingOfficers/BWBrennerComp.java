@@ -9,6 +9,15 @@ public class BWBrennerComp extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Brenner", new instantiator());
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "--BRENNER--\r\n" + 
+          "Units gain +10% defense.\r\n" + 
+          "xxxxXXXX\r\n" + 
+          "REINFORCE: All units gain +3 HP.\r\n" + 
+          "LIFELINE: All units gain +6 HP."));
+    }
     @Override
     public Commander create()
     {

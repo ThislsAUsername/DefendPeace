@@ -58,7 +58,6 @@ public class CommanderLibrary
     commanderList.add( BWLinCS.getInfo() );
     commanderList.add( BWLinAlt.getInfo() );
     commanderList.add( BWWillCS.getInfo() );
-    commanderList.add( BWWill15.getInfo() );
 
     commanderList.add( LAForsythe.getInfo() );
     commanderList.add( LAGageCS.getInfo() );
@@ -70,12 +69,11 @@ public class CommanderLibrary
     commanderList.add( IDSPennyCS.getInfo() );
 //    commanderList.add( IDSPennyRNG.getInfo() );
     commanderList.add( IDSTabithaCS.getInfo() );
-    commanderList.add( IDSTabithaDef.getInfo() );
     commanderList.add( IDSCyrus.getInfo() );
 
 //    commanderList.add( LADavis.getInfo() );
     commanderList.add( TheBeastSturm.getInfo() );
-//    commanderList.add( DaysOfRuin.getInfo() );
+    commanderList.add( TheWeakBeast.getInfo() );
     commanderList.add( DavisLevels.getInfo() );
   }
 }

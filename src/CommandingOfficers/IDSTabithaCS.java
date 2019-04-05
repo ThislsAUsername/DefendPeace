@@ -17,6 +17,15 @@ public class IDSTabithaCS extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "--TABITHA--\r\n" + 
+          "The first unit that attacks is given a \"Mega Boost\" of +50% firepower and +35% defense; this power-up lasts until the player's next turn.\r\n" + 
+          "xxxxxxXXXX\r\n" + 
+          "FIRESTORM: A 2-range missile hits the opponent's largest mass of units and deals 4 HP damage; all units gain +10/10.\r\n" + 
+          "APOCALYPSE: A 2-range missile hits the opponent's largest mass of units and deals 8 HP damage; all units gain +35/35."));
+    }
     @Override
     public Commander create()
     {

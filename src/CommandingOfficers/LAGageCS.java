@@ -12,6 +12,15 @@ public class LAGageCS extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "--GAGE--\r\n" + 
+          "Naval units and indirects gain +20% firepower and +10% defense.\r\n" + 
+          "xxXXX\r\n" + 
+          "LONG SHOT: All indirects gain +1 range.\r\n" + 
+          "LONG BARREL: All indirects gain +2 range."));
+    }
     @Override
     public Commander create()
     {

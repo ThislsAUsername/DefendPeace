@@ -14,6 +14,18 @@ public class DavisLevels extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Davis", new instantiator());
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "--DAVIS--\r\n" + 
+          "A unit will level up upon killing an enemy unit, for a total of three levels.\r\n" + 
+          "LEVEL 1: +5% firepower\r\n" + 
+          "LEVEL 2: +10% firepower\r\n" + 
+          "LEVEL V: +20% firepower & +20% defense\r\n" + 
+          "xxxXXXXX\r\n" + 
+          "BOOT CAMP: Any units produced will start at Level 2.\r\n" + 
+          "HANGING THREATS: All units gain one level."));
+    }
     @Override
     public Commander create()
     {
@@ -143,7 +155,7 @@ public class DavisLevels extends Commander
   
   private static class LevelProduction extends CommanderAbility
   {
-    private static final String NAME = "Aw, Man";
+    private static final String NAME = "Boot Camp";
     private static final int COST = 3;
     DavisLevels COcast;
 
@@ -162,7 +174,7 @@ public class DavisLevels extends Commander
   
   private static class LevelAll extends CommanderAbility
   {
-    private static final String NAME = "This Isn't Good, Man";
+    private static final String NAME = "Hanging Threats";
     private static final int COST = 8;
     DavisLevels COcast;
 

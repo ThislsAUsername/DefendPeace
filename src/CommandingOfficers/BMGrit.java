@@ -15,6 +15,14 @@ public class BMGrit extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Grit", new instantiator());
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Grit\r\n" + 
+          "  Indirect units have +1 range and gain +20% attack. Direct units lose -20% attack (footsoldiers are normal)\r\n" + 
+          "Snipe Attack -- Indirect units gain +1 Range and +20% attack\r\n" + 
+          "Super Snipe -- Indirect units gain +2 Range and +20% attack"));
+    }
     @Override
     public Commander create()
     {

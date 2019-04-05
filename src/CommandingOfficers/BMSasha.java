@@ -10,6 +10,14 @@ public class BMSasha extends Commander
   private static final CommanderInfo coInfo = new CommanderInfo("Sasha", new instantiator());  
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "Sasha\r\n" + 
+          "  Receives +100 income per property (note: labs and comtowers do not count towards this)\r\n" + 
+          "Market Crash -- Reduce enemy power bar(s) by 10% per 5000 funds\r\n" + 
+          "War Bonds -- Receive funds for damage dealt to enemy units (50% of the respective funds damage)"));
+    }
     @Override
     public Commander create()
     {

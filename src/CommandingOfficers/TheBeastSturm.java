@@ -15,6 +15,14 @@ public class TheBeastSturm extends Commander
 
   private static class instantiator extends COMaker
   {
+    public instantiator()
+    {
+      infoPages.add(new InfoPage(
+          "--THE BEAST--\r\n" + 
+          "Terrain cost is 1 on all terrain (except in snow). Units gain +30% firepower, but lose -20% defense.\r\n" + 
+          "SWARM, ROACHES!: A 2-range missile hits the accumulation of the opponent's most expensive units and deals 4 HP damage.\r\n" + 
+          "GWAR HAR HAR!: A 2-range missile hits the accumulation of the opponent's most expensive units and deals 8 HP damage."));
+    }
     @Override
     public Commander create()
     {
