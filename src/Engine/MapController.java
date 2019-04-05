@@ -446,7 +446,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         // Handled as a special case in handleGameInput().
         break;
       case SAVE:
-        String filename = "save/" + myGame.toString() + ".svp"; // "svp" for "SaVe Peace"
+        String filename = "save/" + myGame.saveFile; // "svp" for "SaVe Peace"
         new File("save/").mkdirs(); // make sure we don't freak out if the directory's not there
 
         System.out.println(String.format("Now saving to %s", filename));
