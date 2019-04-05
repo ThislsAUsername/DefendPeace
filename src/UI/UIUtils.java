@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -190,7 +191,7 @@ public class UIUtils
     return factions.toArray(new Faction[0]);
   }
   
-  public static class Faction
+  public static class Faction implements Serializable
   {
     public String name;
     public String basis;
