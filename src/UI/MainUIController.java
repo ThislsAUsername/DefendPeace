@@ -107,6 +107,7 @@ public class MainUIController implements IController
                 if( !fileEntry.isDirectory() && filename.endsWith(".svp") )
                 {
                   oldGame = GameInstance.loadSave(filename);
+                  oldGame.saveFile = fileEntry.getName(); // Keep whatever name the user sets
                   break; // just load the first one we find
                 }
               }
