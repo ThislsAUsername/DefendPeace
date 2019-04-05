@@ -11,11 +11,10 @@ import UI.InputHandler.InputAction;
 
 /**
  * Stores state to setup Commanders with during game setup.
- * Stores current CO, color, team, and TODO: AI and faction.
+ * Stores current CO, color, team, AI, and faction.
  */
 public class COSetupInfo extends OptionSelector
 {
-  // TODO: fiddle with order once they're all in so the UI can make more sense
   public enum OptionList { COMMANDER, COLOR, FACTION, TEAM, AI };
 
   final CommanderInfo[] COTypes;

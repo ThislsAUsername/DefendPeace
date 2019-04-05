@@ -282,7 +282,7 @@ public class SpriteLibrary
   /**
    * Sets up the available palettes for use.
    * Reads in the first 6 colors on each row.
-   * Top colors are buildings, bottom are units.
+   * Bottom colors are buildings, top are units.
    * The key color is the last color on the top row.
    */
   private static void initResources()
