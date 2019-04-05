@@ -481,8 +481,9 @@ public class SpriteLibrary
   {
     StringBuffer spriteFile = new StringBuffer();
     spriteFile.append("res/unit/");
-    if( !DEFAULT_SPRITE_KEY.equalsIgnoreCase(faction) )
-      spriteFile.append("faction/").append(faction).append("/");
+    if( !DEFAULT_SPRITE_KEY.equalsIgnoreCase(faction) && // If it's a faction, and not default...
+        new File(spriteFile.toString() + "faction/" + faction).canRead()) // and we have a folder *for* that faction...
+      spriteFile.append("faction/").append(faction).append("/"); // treat it like a faction.
     spriteFile.append(unitType.toString().toLowerCase()).append("_map.png");
     return spriteFile.toString();
   }
