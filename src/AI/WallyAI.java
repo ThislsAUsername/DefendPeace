@@ -450,6 +450,7 @@ public class WallyAI implements AIController
               Utils.sortLocationsByDistance(goal, destinations);
               XYCoord destination = null;
               // try to get somewhere safe
+              log(String.format("    %s would like to travel towards %s safely", unit.toStringWithLocation(), goal));
               for( XYCoord xyc : destinations )
               {
                 log(String.format("    is it safe to go to %s?", xyc));

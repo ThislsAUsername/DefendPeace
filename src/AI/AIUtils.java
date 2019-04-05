@@ -357,8 +357,7 @@ public class AIUtils
   }
 
   /**
-   * Compares SearchNodes based on the amount of movePower they possess, and optionally
-   *   the remaining distance to a destination.
+   * Compares Units based on their value, scaled with HP.
    */
   public static class UnitCostComparator implements Comparator<Unit>
   {
