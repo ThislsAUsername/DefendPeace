@@ -332,7 +332,7 @@ public class TerrainSpriteSet
       // Draw any tile transitions that are needed.
       for( TerrainSpriteSet tt : tileTransitions )
       {
-        System.out.println("Drawing transition from " + tt.myTerrainType + " onto " + myTerrainType);
+//        System.out.println("Drawing transition from " + tt.myTerrainType + " onto " + myTerrainType);
         tt.drawTerrain(g, map, x, y, scale, false);
       }
 
