@@ -352,13 +352,27 @@ public class SpriteLibrary
   public static ColorPalette getBuildingColors(Color colorKey)
   {
     initResources();
-    return buildingColorPalettes.get(colorKey);
+    
+    ColorPalette palette = buildingColorPalettes.get(colorKey);
+    if (null == palette) // Uh oh, the player's messing with us. Make stuff up so we don't crash.
+    {
+      buildingColorPalettes.put(colorKey, buildingColorPalettes.get(Color.PINK));
+      palette = buildingColorPalettes.get(colorKey);
+    }
+    return palette;
   }
 
   public static ColorPalette getMapUnitColors(Color colorKey)
   {
     initResources();
-    return mapUnitColorPalettes.get(colorKey);
+    
+    ColorPalette palette = mapUnitColorPalettes.get(colorKey);
+    if (null == palette) // Uh oh, the player's messing with us. Make stuff up so we don't crash.
+    {
+      mapUnitColorPalettes.put(colorKey, mapUnitColorPalettes.get(Color.PINK));
+      palette = mapUnitColorPalettes.get(colorKey);
+    }
+    return palette;
   }
 
   public static String getColorName(Color colorKey)
@@ -749,7 +763,7 @@ public class SpriteLibrary
 
       // If we don't already have this overlay, go load and store it.
       Sprite overlay = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/co_overlay.png"), OVERLAY_WIDTH, OVERLAY_HEIGHT);
-      overlay.colorize(defaultMapColors, mapUnitColorPalettes.get(co.myColor).paletteColors);
+      overlay.colorize(defaultMapColors, getMapUnitColors(co.myColor).paletteColors);
 
       // Draw the Commander's mug on top of the overlay.
       BufferedImage coMug = getCommanderSprites(co.coInfo.name).eyes;
