@@ -157,13 +157,25 @@ public class UIUtils
   public static ColorPalette getBuildingColors(Color colorKey)
   {
     initCosmetics();
-    return buildingColorPalettes.get(colorKey);
+    ColorPalette palette = buildingColorPalettes.get(colorKey);
+    if (null == palette) // Uh oh, the player's messing with us. Make stuff up so we don't crash.
+    {
+      buildingColorPalettes.put(colorKey, buildingColorPalettes.get(Color.PINK));
+      palette = buildingColorPalettes.get(colorKey);
+    }
+    return palette;
   }
 
   public static ColorPalette getMapUnitColors(Color colorKey)
   {
     initCosmetics();
-    return mapUnitColorPalettes.get(colorKey);
+    ColorPalette palette = mapUnitColorPalettes.get(colorKey);
+    if (null == palette) // Uh oh, the player's messing with us. Make stuff up so we don't crash.
+    {
+      mapUnitColorPalettes.put(colorKey, mapUnitColorPalettes.get(Color.PINK));
+      palette = mapUnitColorPalettes.get(colorKey);
+    }
+    return palette;
   }
 
   public static String getColorName(Color colorKey)
