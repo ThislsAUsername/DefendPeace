@@ -51,7 +51,7 @@ public interface GameAction
   public static class AttackAction implements GameAction
   {
     private Path movePath;
-    private XYCoord moveLocation = null;
+    private XYCoord moveCoord = null;
     private XYCoord attackLocation = null;
     private Unit attacker;
     private Unit defender;
@@ -68,7 +68,7 @@ public interface GameAction
       attackLocation = atkLoc;
       if( null != path && (path.getEnd() != null) )
       {
-        moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        moveCoord = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
         if((null != atkLoc) && (null != gameMap) && gameMap.isLocationValid(atkLoc))
         {
           defender = gameMap.getLocation(atkLoc).getResident();
@@ -94,14 +94,16 @@ public interface GameAction
       isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       if( isValid )
       {
-        moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        XYCoord moveCoord = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        Location moveLocation = gameMap.getLocation(moveCoord);
         defender = gameMap.getLocation(attackLocation).getResident();
-        attackRange = Math.abs(moveLocation.xCoord - attackLocation.xCoord)
-            + Math.abs(moveLocation.yCoord - attackLocation.yCoord);
+        attackRange = Math.abs(moveCoord.xCoord - attackLocation.xCoord)
+            + Math.abs(moveCoord.yCoord - attackLocation.yCoord);
 
-        boolean moved = attacker.x != moveLocation.xCoord || attacker.y != moveLocation.yCoord;
+        boolean moved = attacker.x != moveCoord.xCoord || attacker.y != moveCoord.yCoord;
         isValid &= (null != defender) && attacker.canAttack(defender.model, attackRange, moved);
         isValid &= attacker.CO.isEnemy(defender.CO);
+        isValid &= (null == moveLocation.getResident()) || (attacker == moveLocation.getResident());
       }
 
       if( isValid )
@@ -109,7 +111,7 @@ public interface GameAction
         if( Utils.enqueueMoveEvent(gameMap, attacker, movePath, attackEvents) )
         {
           // No surprises in the fog. Resolve combat.
-          BattleEvent event = new BattleEvent(attacker, defender, moveLocation.xCoord, moveLocation.yCoord, gameMap);
+          BattleEvent event = new BattleEvent(attacker, defender, moveCoord.xCoord, moveCoord.yCoord, gameMap);
           attackEvents.add(event);
 
           if( event.attackerDies() )
@@ -142,7 +144,7 @@ public interface GameAction
     @Override
     public XYCoord getMoveLocation()
     {
-      return moveLocation;
+      return moveCoord;
     }
 
     @Override
@@ -161,7 +163,7 @@ public interface GameAction
     public String toString()
     {
       return String.format("[Attack %s with %s after moving to %s]",
-          defender.toStringWithLocation(), attacker.toStringWithLocation(), moveLocation );
+          defender.toStringWithLocation(), attacker.toStringWithLocation(), moveCoord );
     }
   } // ~AttackAction
 
@@ -280,6 +282,7 @@ public interface GameAction
         captureLocation = map.getLocation(movePathEnd);
         isValid &= captureLocation.isCaptureable(); // Valid location
         isValid &= actor.CO.isEnemy(captureLocation.getOwner()); // Valid CO
+        isValid &= (null == captureLocation.getResident()) || (actor == captureLocation.getResident());
       }
 
       // Generate events
@@ -363,6 +366,12 @@ public interface GameAction
       isValid &= null != actor && !actor.isTurnOver;
       isValid &= (null != movePath) && (movePath.getPathLength() > 0);
       isValid &= (null != gameMap);
+      if( isValid )
+      {
+        XYCoord movePathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        Location moveLocation = gameMap.getLocation(movePathEnd);
+        isValid &= (null == moveLocation.getResident()) || (actor == moveLocation.getResident());
+      }
 
       // Generate events.
       if( isValid )
@@ -549,6 +558,11 @@ public interface GameAction
         for( Unit cargo : myDropoffs.keySet() ) // Make sure the cargo can go where we want to put it.
         {
           isValid &= cargo.model.propulsion.canTraverse(gameMap.getEnvironment(myDropoffs.get(cargo)));
+        }
+        for( XYCoord coord : myDropoffs.values() ) // Make sure nobody's there already.
+        {
+          Unit res = gameMap.getLocation(coord).getResident();
+          isValid &= (null == res) || (res == actor); // Except the transport, because it must have moved anyway.
         }
       }
 
