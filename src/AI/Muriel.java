@@ -261,7 +261,7 @@ public class Muriel implements AIController
             // Plot a course towards a repair station, but only apply the action if it moves us.
             // If a unit is stuck on the front lines and can't get away past reinforcements, just gotta knuckle up.
             GameAction goHome = AIUtils.moveTowardLocation(unit, coord, gameMap);
-            if( !goHome.getMoveLocation().equals(unitCoords) )
+            if( (null != goHome) && !goHome.getMoveLocation().equals(unitCoords) )
             {
               log(String.format("  Heading towards %s to resupply", coord));
               queuedActions.offer(goHome);
