@@ -9,6 +9,8 @@ import Terrain.TerrainType;
 
 public class MoveType
 {
+  protected final Integer IMPASSABLE = 99;
+
   // A 2-layer map. Map Weathers to a mapping of Terrains-to-cost.
   protected EnumMap<Weathers, MoveCostByTerrain> moveCosts;
 
@@ -42,14 +44,14 @@ public class MoveType
   /** Returns the cost to traverse terrain type 'terrain' while experiencing weather 'weather'. */
   public int getMoveCost(Weathers weather, TerrainType terrain)
   {
-    Integer cost = 99;
+    Integer cost = IMPASSABLE;
     MoveCostByTerrain mcbw = moveCosts.get(weather);
     if( null != mcbw )
     {
       cost = mcbw.get(terrain);
       if( null == cost )
       {
-        cost = 99;
+        cost = IMPASSABLE;
       }
     }
     return cost.intValue();
@@ -59,6 +61,12 @@ public class MoveType
   public int getMoveCost(Environment tile)
   {
     return getMoveCost(tile.weatherType, tile.terrainType);
+  }
+
+  /** Returns whether the unit can travel in the specified environment. */
+  public boolean canTraverse( Environment tile )
+  {
+    return getMoveCost(tile) < IMPASSABLE;
   }
 
   /** Sets the cost to move through terrain during weather. */

@@ -170,4 +170,10 @@ public class FillRectMapView extends MapView
   {
     return new NobunagaBattleAnimation(getTileSize(), summary.attacker.x, summary.attacker.y, summary.defender.x, summary.defender.y);
   }
+
+  @Override
+  public void cleanup()
+  {
+    // No cleanup required
+  }
 }

@@ -123,6 +123,7 @@ public class Driver implements ActionListener, KeyListener
         changeGameState( oldController, oldView );
 
         // We've switched back to these, now make sure we don't do it again (forever).
+        oldView.cleanup();
         oldController = null;
         oldView = null;
       }

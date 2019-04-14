@@ -572,4 +572,13 @@ public class SpriteMapView extends MapView
     // Create a new animation to show the game results.
     currentAnimation = new SpriteGameEndAnimation(myGame.commanders);
   }
+
+  @Override
+  public void cleanup()
+  {
+    mapArtist.cleanup();
+    mapArtist = null;
+    unitArtist = null;
+    menuArtist = null;
+  }
 }

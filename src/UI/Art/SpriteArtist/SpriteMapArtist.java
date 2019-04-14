@@ -259,4 +259,10 @@ public class SpriteMapArtist
       myArtist.buildMapImage(); // Redraw the whole map.
     }
   }
+
+  public void cleanup()
+  {
+    GameEventListener.unregisterEventListener(baseMapImageUpdater);
+    baseMapImageUpdater = null;
+  }
 }
