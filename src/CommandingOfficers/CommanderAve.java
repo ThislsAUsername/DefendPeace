@@ -27,21 +27,30 @@ import Units.UnitModel;
 /**
  * Commander Ave (AH-vey) loves the cold, and her power allows her to inexorably, if slowly,
  * grind her opponents down beneath a wall of ever-encroaching ice.
- * Despite pernicious rumors to the contrary, she has nothing against Christmas.
- * 
- * Passive:
- *    Ave generates snow around all owned properties, which spreads over time.
- *    Her units take a movement and defense penalty in forests.
- * 
- * Glacio:
- *    Boosts the snow-aura around her buildings;
- *    Hail falls in a two-space radius around her units,
- *      changing the weather in those tiles to snow,
- *      damaging enemies for up to 2HP, and
- *      destroying any forests (reducing them to grass).
  *
- * Likes: Sleigh rides, Hot Chocolate
- * Dislikes: Jungles, Large Cats
+ * Passive:
+ *    Ave generates snow around all owned properties, which spreads over time. The radius
+ *    of effect is small at first, but can expand during gameplay.
+ *    Her units take a movement and defense penalty in forests, but move normally in snow.
+ *
+ * Nix:
+ *    Permanently expand the range of Ave's snow passive. This ability increases in cost
+ *    more quickly than most other abilities as it is used.
+ *    Ave's units gain a 10 percent increase in firepower.
+ *
+ * Glacio:
+ *    Increases the snow-aura around her buildings by 3 spaces for the next turn.
+ *    Drops snow in a 3-space radius around all of her units.
+ *    Stuns any enemy unit within 2 spaces of one of Ave's units or buildings.
+ *    Ave's units gain a 10 percent increase in firepower.
+ *
+ * Oblido:
+ *    Hailstones rain down in a 3-space radius around Ave's units and buildings,
+ *      damaging enemies for up to 2HP, and destroying any forests (reducing them to grass).
+ *    Ave's units gain a 10-percent increase in firepower.
+ *
+ * Likes: Steep Slopes, Hot Chocolate
+ * Dislikes: Trees, Mythical Snow Monsters
  */
 public class CommanderAve extends Commander
 {
@@ -454,7 +463,7 @@ public class CommanderAve extends Commander
 
   /**
    *  Boosts the snow-aura around her buildings, and allows it to (briefly) extend further than normal.
-   *  Deposits snow in a two-space around all of her units.
+   *  Deposits snow in a three-space range around all of her units.
    *  Enemies within 2 spaces of one of Ave's units or buildings are frozen for one turn.
    */
   private static class GlacioAbility extends CommanderAbility
