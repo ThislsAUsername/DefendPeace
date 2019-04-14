@@ -1,0 +1,28 @@
+  SE  SE  SE  SE  SE  SE  SH  FR  GR  CT  GR  FR  RD  RD  CT  CT  GR  SH  SE  SE  SE  RF  SE
+  RF  SE  GR  SE  SH  SH  GR  FR  MT  GR  GR  GR 6FC  GR  GR  GR  FR  GR  AP  SE  SE  SE  SE
+  SE  SE  RV  FR  CT  RD  RD 6FC  GR  GR  FR  GR  RD  RD  RD  RD  GR  GR  FR  FR  SH  SE  RF
+  SE  GR  RV  GR  GR  FR  GR  GR  FR  GR  SP  SH  SH  GR  FR  RD  GR  BK  GR  MT  SP  SE  SE
+  SH  CT  PI  XX  PI  GR  GR  CT  SH  SE  SE  SE  SE  SE  GR  CT  GR  GR  GR  GR  FR  SH  SE
+  FR  GR  GR  GR  RV  FC  SH  SE  SE  RF  SE  SE  SE  SE  SH  SH  FR  FR  RD 6HQ  FR  SH  SE
+  GR  FR  FR  CT  PI  PI  SE  SE  SE  SE  SE  SH  GR  CT  SH  SE  SE  MT  RD  CT  RD  RD  SE
+  CT  GR  GR  GR  GR  FR  SH  SE  SH  GR  BK  FR  GR  MT  GR  SE  SE  SH  GR  GR  MT  RD  SH
+  FR  GR  GR  MT  MT  GR  GR  TW  GR  FR  GR  CT  GR  FR  FR  GR  SH  SE  GR  FR  RD  RD  CT
+  GR  GR  CT  RD  RD  RD  RD  FR  MT  GR  SE  GR  GR  GR  CT  GR  GR  FR  CT  GR  RD  GR  GR
+  GR  GR  GR  RD  FR  MT  RD  RD  GR  SE  SE  SH  SH  GR  RD  RD  FR  GR  GR  RD  RD  FR  MT
+  MT  FR  RD  RD  GR  GR  FR  RD  RD  GR  SH  SH  SE  SE  GR  RD  RD  MT  FR  RD  GR  GR  GR
+  GR  GR  RD  GR  CT  FR  GR  GR  CT  GR  GR  GR  SE  GR  MT  FR  RD  RD  RD  RD  CT  GR  GR
+  CT  RD  RD  FR  GR  SE  SH  GR  FR  FR  GR  CT  GR  FR  GR  TW  GR  GR  MT  MT  GR  GR  FR
+  SH  RD  MT  GR  GR  SH  SE  SE  GR  MT  GR  FR  BK  GR  SH  SE  SH  FR  GR  GR  GR  GR  CT
+  SE  RD  RD  CT  RD  MT  SE  SE  SH  CT  GR  SH  SE  SE  SE  SE  SE  PI  PI  CT  FR  GR  GR
+  SE  SH  FR 8HQ  RD  FR  FR  SH  SH  SE  SE  SE  SE  RF  SE  SE  SH  FC  RV  GR  GR  FR  FR
+  SE  SH  FR  GR  GR  GR  GR  CT  GR  SE  SE  SE  SE  SE  SH  CT  GR  GR  PI  XX  PI  CT  SH
+  SE  SE  SP  MT  GR  BK  GR  RD  FR  GR  SH  SH  SP  GR  FR  GR  GR  FR  GR  GR  RV  GR  SE
+  SE  SE  SH  FR  FR  GR  GR  RD  RD  RD  RD  GR  FR  GR  GR 8FC  RD  RD  CT  GR  RV  SE  SE
+  SE  SE  SE  SE  AP  GR  FR  GR  GR  GR 8FC  GR  GR  GR  MT  GR  FR  SH  SH  SE  GR  SE  RF
+  SE  RF  SE  SE  SE  SH  GR  CT  CT  RD  RD  FR  GR  CT  GR  FR  SH  SE  SE  SE  SE  SE  SE
+team, unit type, x, y
+6, INFANTRY, 12, 1
+6, LANDER, 10, 3
+8, INFANTRY, 15, 19
+8, INFANTRY, 10, 20
+8, LANDER, 12, 18

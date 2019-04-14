@@ -391,6 +391,7 @@ public class TerrainSpriteSet
     if( null == terrainObjects )
     {
       terrainObjects = new HashSet<TerrainType>();
+      terrainObjects.add(TerrainType.BUNKER);
       terrainObjects.add(TerrainType.CITY);
       terrainObjects.add(TerrainType.FACTORY);
       terrainObjects.add(TerrainType.FOREST);
@@ -399,6 +400,7 @@ public class TerrainSpriteSet
       terrainObjects.add(TerrainType.HEADQUARTERS);
       terrainObjects.add(TerrainType.LAB);
       terrainObjects.add(TerrainType.MOUNTAIN);
+      terrainObjects.add(TerrainType.PILLAR);
     }
     return terrainObjects.contains(terrainType);
   }
@@ -461,6 +463,8 @@ public class TerrainSpriteSet
       terrainBases.put(TerrainType.GRASS, TerrainType.GRASS);
       terrainBases.put(TerrainType.RIVER, TerrainType.GRASS);
       terrainBases.put(TerrainType.ROAD, TerrainType.GRASS);
+      terrainBases.put(TerrainType.PILLAR, TerrainType.GRASS);
+      terrainBases.put(TerrainType.BUNKER, TerrainType.GRASS);
 
       terrainBases.put(TerrainType.BRIDGE, TerrainType.SHOAL);
       terrainBases.put(TerrainType.SEAPORT, TerrainType.SHOAL);
