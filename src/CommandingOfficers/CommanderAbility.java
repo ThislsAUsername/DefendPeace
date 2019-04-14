@@ -29,7 +29,19 @@ public abstract class CommanderAbility
   {
     return myName;
   }
-  
+
+  /** Provide a hook to increase the ability's cost for its next invocation.
+   * Being in its own function allows an easy way for individual abilities
+   * to change the cost function if needed.
+   */
+  protected void adjustCost()
+  {
+    // Increase the cost of this ability for next time to mitigate spam and
+    // accommodate the presumably-growing battlefront.
+    // Cost grows by at least one, and at most 10% of the current cost.
+    myPowerCost += Math.max(myPowerCost*0.1, 1);
+  }
+
   /** Final method to do some bookkeeping, and then call
    * perform() do do the actual work. This allows us to
    * manage global Ability side-effects in one place. */
@@ -42,11 +54,7 @@ public abstract class CommanderAbility
 
     myCommander.activateAbility(this);
 
-    // Increase the cost of this ability for next time to mitigate spam and
-    // accommodate the presumably-growing battlefront.
-    // Cost grows by at least one, and at most 10% of the current cost.
-    myPowerCost += Math.max(myPowerCost*0.1, 1);
-    
+    adjustCost();
     perform(gameMap);
   }
 

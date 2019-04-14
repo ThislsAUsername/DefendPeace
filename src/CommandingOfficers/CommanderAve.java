@@ -427,12 +427,16 @@ public class CommanderAve extends Commander
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    protected void adjustCost()
     {
       // Override default cost-increase behavior to make this get more expensive faster.
       numActivations++;
       myPowerCost = 1 + (numActivations*3);
+    }
 
+    @Override
+    protected void perform(MapMaster gameMap)
+    {
       // Increase Ave's sphere of influence.
       Ave.MAX_SNOW_SPREAD_RANGE++;
 
