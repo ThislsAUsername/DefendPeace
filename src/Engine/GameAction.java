@@ -197,8 +197,8 @@ public interface GameAction
         Location site = gameMap.getLocation(where);
         isValid &= (null == site.getResident());
         isValid &= site.getOwner() == who;
-        isValid &= (who.money >= what.getCost());
         isValid &= who.getShoppingList(site).contains(what);
+        isValid &= (who.money >= what.getCost());
       }
 
       if( isValid )
