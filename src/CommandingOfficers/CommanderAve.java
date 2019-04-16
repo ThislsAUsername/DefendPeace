@@ -25,32 +25,33 @@ import Units.Unit;
 import Units.UnitModel;
 
 /**
- * Commander Ave (AH-vey) loves the cold, and her power allows her to inexorably, if slowly,
+ * Commander Ave (AH-vey) supports her skiing habit by slowly growing a mountain of fresh
+ * snow around each of her buildings. This also allows her to gradually but inexorably
  * grind her opponents down beneath a wall of ever-encroaching ice.
  *
  * Passive:
  *    Ave generates snow around all owned properties, which spreads over time. The radius
- *    of effect is small at first, but can expand during gameplay.
- *    Her units take a movement and defense penalty in forests, but move normally in snow.
+ *    of effect is small at first, but can be expanded by her abilities.
+ *    Her units move normally in snow, but take a movement and defense penalty in forests.
  *
  * Nix:
- *    Permanently expand the range of Ave's snow passive. This ability increases in cost
- *    more quickly than most other abilities as it is used.
+ *    Permanently expands the range of Ave's snow passive. This ability increases in cost
+ *      more quickly than most other abilities as it is used.
  *    Ave's units gain a 10 percent increase in firepower.
  *
  * Glacio:
  *    Increases the snow-aura around her buildings by 3 spaces for the next turn.
- *    Drops snow in a 3-space radius around all of her units.
+ *    Snows on every tile in a 3-space radius around each of her units.
  *    Stuns any enemy unit within 2 spaces of one of Ave's units or buildings.
  *    Ave's units gain a 10 percent increase in firepower.
  *
  * Oblido:
  *    Hailstones rain down in a 3-space radius around Ave's units and buildings,
  *      damaging enemies for up to 2HP, and destroying any forests (reducing them to grass).
- *    Ave's units gain a 10-percent increase in firepower.
+ *    Ave's units gain a 20-percent increase in firepower.
  *
- * Likes: Steep Slopes, Hot Chocolate
- * Dislikes: Trees, Mythical Snow Monsters
+ * Likes: Steep Slopes and Sharp Cuts
+ * Dislikes: Trees and Mythical Snow Monsters
  */
 public class CommanderAve extends Commander
 {
