@@ -673,6 +673,12 @@ public interface GameAction
       if( isValid )
       {
         // Figure out where we are acting.
+        Location loc = map.getLocation(myLocation());
+        isValid &= (null == loc.getResident()) || (unitActor == loc.getResident());
+      }
+      if( isValid )
+      {
+        // Figure out where we are acting.
         supplyLocation = myLocation();
 
         // Add a move event if we need to move.
