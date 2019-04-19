@@ -94,7 +94,6 @@ public interface GameAction
       isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       if( isValid )
       {
-        XYCoord moveCoord = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
         Location moveLocation = gameMap.getLocation(moveCoord);
         defender = gameMap.getLocation(attackLocation).getResident();
         attackRange = Math.abs(moveCoord.xCoord - attackLocation.xCoord)
@@ -692,7 +691,6 @@ public interface GameAction
           Unit other = map.getLocation(loc).getResident();
           if( other != null && other.CO == unitActor.CO && !other.isFullySupplied() )
           {
-
             // Add a re-supply event for this unit.
             eventSequence.add(new ResupplyEvent(other));
           }
