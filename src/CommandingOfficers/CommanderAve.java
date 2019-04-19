@@ -614,7 +614,7 @@ public class CommanderAve extends Commander
     public SnowPail(XYCoord coord, int snowAmt)
     {
       snowCoord = coord;
-      snowDepth = snowAmt; // Truncate to two-digit precision.
+      snowDepth = snowAmt;
     }
 
     @Override
