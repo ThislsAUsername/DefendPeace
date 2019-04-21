@@ -25,7 +25,7 @@ public class SpriteLibrary
   // This is the physical size of a single map square in pixels.
   public static final int baseSpriteSize = 16;
   
-  public static final String DEFAULT_SPRITE_KEY = "DEFAULT";
+  public static final String DEFAULT_FACTION_NAME = "DEFAULT";
 
   // Define extra colors as needed.
   private static final Color PURPLE = new Color(231, 123, 255 );
@@ -59,7 +59,7 @@ public class SpriteLibrary
 
   public static Color[] getCOColors()
   {
-    initResources();
+    initCosmetics();
     return mapUnitColorPalettes.keySet().toArray(new Color[0]);
   }
 
@@ -280,12 +280,16 @@ public class SpriteLibrary
   }
   
   /**
-   * Sets up the available palettes for use.
-   * Reads in the first 6 colors on each row.
-   * Bottom colors are buildings, top are units.
-   * The key color is the last color on the top row.
+   * Parses the available palettes and faction unit images.
+   * Both of the above are parsed from res/unit/faction.
+   * For palettes:
+   *   Reads in the first 6 colors on each row.
+   *   Bottom colors are buildings, top are units.
+   *   The key color is the last color on the top row.
+   * For factions:
+   *   The name of the folder is simply collected; no further work is done until units are drawn.
    */
-  private static void initResources()
+  private static void initCosmetics()
   {
     if (null == mapUnitColorPalettes )
     {
@@ -313,7 +317,7 @@ public class SpriteLibrary
       colorNames.put(PURPLE, "sparking");
 
       // We want to be able to use the normal units, as well as any others
-      factionNames.add(DEFAULT_SPRITE_KEY);
+      factionNames.add(DEFAULT_FACTION_NAME);
 
       final File folder = new File("res/unit/faction");
 
@@ -353,25 +357,25 @@ public class SpriteLibrary
 
   public static ColorPalette getBuildingColors(Color colorKey)
   {
-    initResources();
+    initCosmetics();
     return buildingColorPalettes.get(colorKey);
   }
 
   public static ColorPalette getMapUnitColors(Color colorKey)
   {
-    initResources();
+    initCosmetics();
     return mapUnitColorPalettes.get(colorKey);
   }
 
   public static String getColorName(Color colorKey)
   {
-    initResources();
+    initCosmetics();
     return colorNames.get(colorKey);
   }
 
   public static String[] getFactionNames()
   {
-    initResources();
+    initCosmetics();
     return factionNames.toArray(new String[0]);
   }
 
@@ -469,7 +473,7 @@ public class SpriteLibrary
   {
     StringBuffer spriteFile = new StringBuffer();
     spriteFile.append("res/unit/");
-    if( DEFAULT_SPRITE_KEY != faction )
+    if( DEFAULT_FACTION_NAME != faction )
       spriteFile.append("faction/").append(faction).append("/");
     spriteFile.append(unitType.toString().toLowerCase()).append("_map.png");
     return spriteFile.toString();

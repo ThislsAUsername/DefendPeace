@@ -13,12 +13,12 @@ public class AILibrary
   {
     if( null == AIList )
     {
-      buildCommanderList();
+      buildAIInfoList();
     }
     return AIList;
   }
 
-  private static void buildCommanderList()
+  private static void buildAIInfoList()
   {
     AIList = new ArrayList<AIMaker>();
     AIList.add( new NotAnAI() );
