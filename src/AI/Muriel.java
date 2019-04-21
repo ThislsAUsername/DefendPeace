@@ -79,49 +79,70 @@ public class Muriel implements AIController
       {
         for( UnitModel otherModel : otherUnitModels.get(oCo) )
         {
-          Unit myUnit = new Unit(myCo, myModel);
-          Unit otherUnit = new Unit( oCo, otherModel );
-
-          double myDamage = 0;
-          Weapon myWeapon = myUnit.chooseWeapon(otherUnit.model, 1, false);
-          if( null != myWeapon )
-          {
-            BattleInstance.BattleParams params = new BattleInstance.BattleParams(myUnit, myWeapon,
-                otherUnit, Environment.getTile(TerrainType.ROAD, Weathers.CLEAR), false, null);
-            myDamage = params.calculateDamage();
-          }
-
-          // Now go the other way.
-          double otherDamage = 0;
-          Weapon otherWeapon = otherUnit.chooseWeapon(myUnit.model, 1, false);
-          if( null != otherWeapon )
-          {
-            BattleInstance.BattleParams params = new BattleInstance.BattleParams(otherUnit, otherWeapon,
-                myUnit, Environment.getTile(TerrainType.ROAD, Weathers.CLEAR), false, null);
-            otherDamage = params.calculateDamage();
-          }
-
-          // Calculate and store the damage and cost-effectiveness ratios.
-          double ratio = 0;
-          double invRatio = 0;
-          if( myDamage != 0 && otherDamage != 0)
-          {
-            ratio = myDamage / otherDamage;
-            invRatio = 1/ratio;
-          }
-          if( myDamage == 0 ) ratio = 0;
-          if( otherDamage == 0 ) invRatio = 0;
-          if( myDamage != 0 && otherDamage == 0 ) ratio = 10000;
-          if( myDamage == 0 && otherDamage != 0 ) invRatio = 10000;
-          double myCostRatio = ratio * ((double)otherModel.getCost() / myModel.getCost());
-          double otherCostRatio = invRatio * ((double)myModel.getCost() / otherModel.getCost());
-          myUnitEffectMap.put(new UnitModelPair(myModel, otherModel), new UnitMatchupAndMetaInfo(ratio, myCostRatio));
-          myUnitEffectMap.put(new UnitModelPair(otherModel, myModel), new UnitMatchupAndMetaInfo(invRatio, otherCostRatio));
-
-          System.out.println(String.format("%s vs %s: %s/%s, damageRatio: %s, costRatio: %s", myUnit, otherUnit, myDamage, otherDamage, ratio, myCostRatio));
+          getUnitMatchupInfo(myModel, otherModel); // Calculates the matchup and adds it to myUnitEffectMap.
         }
       }
     }
+  }
+
+  /**
+   * Returns the UnitMatchupAndMetaInfo for this unit pair, calculating it first if needed.
+   */
+  private UnitMatchupAndMetaInfo getUnitMatchupInfo(UnitModel myModel, UnitModel otherModel)
+  {
+    Unit myUnit = new Unit(myCo, myModel);
+    Unit otherUnit = new Unit( myCo, otherModel );
+    return getUnitMatchupInfo(myUnit, otherUnit);
+  }
+
+  /**
+   * Returns the UnitMatchupAndMetaInfo for this unit pair, calculating it first if needed.
+   */
+  private UnitMatchupAndMetaInfo getUnitMatchupInfo(Unit myUnit, Unit otherUnit)
+  {
+    UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(myUnit.model, otherUnit.model));
+    if( null != umami ) return umami;
+
+    double myDamage = 0;
+    Weapon myWeapon = myUnit.chooseWeapon(otherUnit.model, 1, false);
+    if( null != myWeapon )
+    {
+      BattleInstance.BattleParams params = new BattleInstance.BattleParams(myUnit, myWeapon,
+          otherUnit, Environment.getTile(TerrainType.ROAD, Weathers.CLEAR), false, null);
+      myDamage = params.calculateDamage();
+    }
+
+    // Now go the other way.
+    double otherDamage = 0;
+    Weapon otherWeapon = otherUnit.chooseWeapon(myUnit.model, 1, false);
+    if( null != otherWeapon )
+    {
+      BattleInstance.BattleParams params = new BattleInstance.BattleParams(otherUnit, otherWeapon,
+          myUnit, Environment.getTile(TerrainType.ROAD, Weathers.CLEAR), false, null);
+      otherDamage = params.calculateDamage();
+    }
+
+    // Calculate and store the damage and cost-effectiveness ratios.
+    double damageRatio = 0;
+    double invRatio = 0;
+    if( myDamage != 0 && otherDamage != 0)
+    {
+      damageRatio = myDamage / otherDamage;
+      invRatio = 1/damageRatio;
+    }
+    if( myDamage == 0 ) damageRatio = 0;
+    if( otherDamage == 0 ) invRatio = 0;
+    if( myDamage != 0 && otherDamage == 0 ) damageRatio = 10000;
+    if( myDamage == 0 && otherDamage != 0 ) invRatio = 10000;
+    UnitModel myModel = myUnit.model;
+    UnitModel otherModel = otherUnit.model;
+    double costRatio = damageRatio * ((double)otherModel.getCost() / myModel.getCost());
+    double otherCostRatio = invRatio * ((double)myModel.getCost() / otherModel.getCost());
+    myUnitEffectMap.put(new UnitModelPair(myModel, otherModel), new UnitMatchupAndMetaInfo(damageRatio, costRatio));
+    myUnitEffectMap.put(new UnitModelPair(otherModel, myModel), new UnitMatchupAndMetaInfo(invRatio, otherCostRatio));
+
+    System.out.println(String.format("Adding matchup: %s vs %s: %s/%s, damageRatio: %s, costRatio: %s", myUnit, otherUnit, myDamage, otherDamage, damageRatio, costRatio));
+    return myUnitEffectMap.get(new UnitModelPair(myModel, otherModel));
   }
 
   @Override
@@ -261,7 +282,7 @@ public class Muriel implements AIController
             // Plot a course towards a repair station, but only apply the action if it moves us.
             // If a unit is stuck on the front lines and can't get away past reinforcements, just gotta knuckle up.
             GameAction goHome = AIUtils.moveTowardLocation(unit, coord, gameMap);
-            if( !goHome.getMoveLocation().equals(unitCoords) )
+            if( (null != goHome) && !goHome.getMoveLocation().equals(unitCoords) )
             {
               log(String.format("  Heading towards %s to resupply", coord));
               queuedActions.offer(goHome);
@@ -356,7 +377,8 @@ public class Muriel implements AIController
           Unit target = gameMap.getLocation(coord).getResident();
 
           // Only chase this unit if we will be effective against it. Don't check shouldAttack here, because we can't actually attack yet.
-          if( myUnitEffectMap.get(new UnitModelPair(unit.model, target.model)).costEffectivenessRatio < COST_EFFECTIVENESS_MIN ) continue;
+          UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(unit, target);
+          if( umami.costEffectivenessRatio < COST_EFFECTIVENESS_MIN ) continue;
 
           // Try to move towards the enemy, but avoid blocking a factory.
           move = AIUtils.moveTowardLocation(unit, coord, gameMap);
@@ -415,7 +437,7 @@ public class Muriel implements AIController
     // Calculate the cost of the damage we can do.
     BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, true), target, gameMap.getLocation(target.x, target.y).getEnvironment(), false, null);
     double damage = params.calculateDamage();
-    UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(unit.model, target.model));
+    UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(unit, target);
 
     // This attack is a good idea if our cost effectiveness is in the acceptable range, or if we can at least half-kill them.
     // The second check is needed because one glass cannon may not have a great overall ratio against another; whoever hits first wins, e.g. Mech vs Anti-Air.
@@ -496,7 +518,7 @@ public class Muriel implements AIController
       for( UnitModel um : myUnitCounts.keySet() )
       {
         double myCount = myUnitCounts.get(um);
-        UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(um, em));
+        UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(um,  em);
         double myStoppingPower = umami.damageRatio * myCount; // I can stop THIS MANY of those things with what I have.
         effectiveThreat -= myStoppingPower; // Subtract my effective weight with this type from their number.
       }
@@ -548,7 +570,7 @@ public class Muriel implements AIController
       for( UnitModel counter : CPI.availableUnitModels )
       {
         if( myCo.money < counter.getCost() ) continue; // If we can't afford it, don't bother.
-        UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(counter, enemyToCounter));
+        UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(counter, enemyToCounter);
         if( umami.costEffectivenessRatio >= COST_EFFECTIVENESS_MIN )
         {
           log(String.format("    %s has cost ratio %s", counter, umami.costEffectivenessRatio));
@@ -574,7 +596,7 @@ public class Muriel implements AIController
         {
           for( Unit enemyUnit : unitLists.get(enemyCo) )
           {
-            UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(counter, enemyUnit.model));
+            UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(counter, enemyUnit.model);
             if( useDamageRatio )
             {
               if( umami.damageRatio >= 1.0 ) score++; // Plus one if it's worth building.
@@ -620,7 +642,7 @@ public class Muriel implements AIController
             double goodness = 0;
             for( UnitModel enemy : enemyUnitCounts.keySet() )
             {
-              UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(counter, enemy));
+              UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(counter, enemy);
               double percent = (enemyUnitCounts.get(enemy)*10) / enemyArmyHP;
               double thisGoodness = (useDamageRatio) ? (umami.damageRatio * percent) : (umami.costEffectivenessRatio * percent);
               //log(String.format("      goodness vs %s: %s (%s * %s)", enemy, thisGoodness, umami.costEffectivenessRatio, percent));
@@ -670,7 +692,7 @@ public class Muriel implements AIController
           while(eusIter.hasNext())
           {
             ModelValuePair enemyStrength = eusIter.next();
-            UnitMatchupAndMetaInfo matchup = myUnitEffectMap.get(new UnitModelPair(idealCounter, enemyStrength.model));
+            UnitMatchupAndMetaInfo matchup = getUnitMatchupInfo(idealCounter, enemyStrength.model);
             enemyStrength.value = enemyStrength.value - matchup.damageRatio; // Subtract this unit's strength from theirs.
           }
           break; // Loop around, re-sort the enemies by strength, and figure out what to build next.

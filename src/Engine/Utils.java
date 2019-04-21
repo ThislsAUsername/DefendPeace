@@ -93,9 +93,12 @@ public class Utils
   }
 
   /**
-   * Sets the highlight for myGame.gameMap.getLocation(x, y) to true if unit can reach (x, y), and false otherwise.
+   * Returns the list of XYCoords in gameMap reachable by unit this turn.
+   * @param unit The unit to evaluate.
+   * @param gameMap The map to search over.
+   * @param includeTransports If true, will include spaces occupied by a transport if that transport has room for unit.
    */
-  public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap)
+  public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap, boolean includeTransports)
   {
     ArrayList<XYCoord> reachableTiles = new ArrayList<XYCoord>();
 
@@ -121,7 +124,8 @@ public class Utils
       SearchNode currentNode = searchQueue.poll();
       // if the space is empty or holds the current unit, highlight
       Unit obstacle = gameMap.getLocation(currentNode.x, currentNode.y).getResident();
-      if( obstacle == null || obstacle == unit || (obstacle.CO == unit.CO && obstacle.hasCargoSpace(unit.model.type)) )
+      if( obstacle == null || obstacle == unit ||
+          (includeTransports && (obstacle.CO == unit.CO) && obstacle.hasCargoSpace(unit.model.type)) )
       {
         reachableTiles.add(new XYCoord(currentNode.x, currentNode.y));
       }
@@ -573,7 +577,7 @@ public class Utils
   }
 
   /**
-   * Evaluates the proposed move, creates a MoveEvent describing it, and adds that event to eventQueu
+   * Evaluates the proposed move, creates a MoveEvent describing it, and adds that event to eventQueue
    * If the move passes over an obstacle, the resulting MoveEvent will have its path shortened accordingly.
    * @param gameMap The world in which the action is to take place.
    * @param unit The unit who is to move.

@@ -295,7 +295,7 @@ public class TestGameEvent extends TestCase
     // Add some units.
     Unit apc = addUnit(testMap, testCo1, UnitEnum.APC, 1, 3);
     Unit mech = addUnit(testMap, testCo1, UnitEnum.MECH, 1, 4);
-    Unit mech2 = addUnit(testMap, testCo1, UnitEnum.MECH, 3, 2);
+    Unit mech2 = addUnit(testMap, testCo1, UnitEnum.MECH, 3, 3);
     Unit recon = addUnit(testMap, testCo1, UnitEnum.RECON, 1, 8); // On the HQ
 
     // Take away ammo/fuel.
@@ -305,6 +305,7 @@ public class TestGameEvent extends TestCase
       mech.weapons.get(i).ammo = 0;
       mech2.weapons.get(i).ammo = 0;
     }
+    apc.fuel = apc.model.maxFuel / 2;
     mech.fuel = 0;
     mech2.fuel = 0;
     recon.fuel = 0;
@@ -333,10 +334,11 @@ public class TestGameEvent extends TestCase
     }
 
     // Give the APC a new GameAction to go resupply mech2.
-    GameAction resupplyAction = new GameAction.ResupplyAction(apc, Utils.findShortestPath(apc, 2, 2, testMap));
+    GameAction resupplyAction = new GameAction.ResupplyAction(apc, Utils.findShortestPath(apc, 2, 3, testMap));
     performGameAction(resupplyAction, testMap);
 
     // Make sure the mechs got their mojo back.
+    testPassed &= validate(apc.fuel != apc.model.maxFuel, "    APC resupplied itself. Life doesn't work that way.");
     testPassed &= validate(mech.fuel == mech.model.maxFuel, "    Mech should have max fuel after turn init, but doesn't.");
     testPassed &= validate(mech2.fuel == mech2.model.maxFuel, "    Mech2 should have max fuel after resupply, but doesn't.");
     testPassed &= validate(recon.fuel == recon.model.maxFuel, "    Recon should have max fuel after new turn, but doesn't.");
