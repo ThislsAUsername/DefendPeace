@@ -442,7 +442,7 @@ public class CommanderAve extends Commander
       Ave.MAX_SNOW_SPREAD_RANGE++;
 
       // Buff units.
-      damageMod.apply(Ave);
+      Ave.addCOModifier(damageMod);
 
       // Drop snow everywhere inside her range.
       ArrayList<MapChangeEvent.EnvironmentAssignment> snowTiles = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
