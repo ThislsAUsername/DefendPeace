@@ -1,6 +1,7 @@
 package UI;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import Engine.OptionSelector;
@@ -23,20 +24,26 @@ public class InGameMenu<T>
 
   public InGameMenu(Collection<T> options)
   {
-    menuOptions = new ArrayList<T>();
-    menuOptions.addAll(options);
-    optionSelector = new OptionSelector(menuOptions.size());
-    wasReset = true;
+    this(options, new OptionSelector(options.size()));
   }
 
   public InGameMenu(T[] options)
   {
+    this(new ArrayList<T>(Arrays.asList(options)));
+  }
+
+  public InGameMenu(T[] options, OptionSelector selector)
+  {
+    this(new ArrayList<T>(Arrays.asList(options)), selector);
+  }
+
+  public InGameMenu(Collection<T> options, OptionSelector selector)
+  {
+    if (options.size() != selector.size())
+      throw new IllegalArgumentException("Number of options doesn't match the size of the OptionSelector");
     menuOptions = new ArrayList<T>();
-    for( int i = 0; i < options.length; ++i )
-    {
-      menuOptions.add( options[i] );
-    }
-    optionSelector = new OptionSelector(menuOptions.size());
+    menuOptions.addAll(options);
+    optionSelector = selector;
     wasReset = true;
   }
 
