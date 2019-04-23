@@ -474,7 +474,7 @@ public class CommanderAve extends Commander
   private static class GlacioAbility extends CommanderAbility
   {
     private static final String GLACIO_NAME = "Glacio";
-    private static final int GLACIO_COST = 6;
+    private static final int GLACIO_COST = 8;
     private static final int GLACIO_BUFF = 10; // Standard 10
     private static final int GLACIO_SNOW_SPREAD = 3;
     private static final int GLACIO_FREEZE_RANGE = 2;
@@ -545,6 +545,7 @@ public class CommanderAve extends Commander
    *  Destroys forests and does 2 HP of damage to all enemies within a 2-space radius around Ave's units and buildings.
    *  Enemies within this radius are damaged for up to 2HP.
    *  Forests within this radius are destroyed (turned to grass).
+   *  This power scales in cost more slowly than average.
    */
   private static class OblidoAbility extends CommanderAbility
   {
@@ -562,6 +563,14 @@ public class CommanderAve extends Commander
       Ave = commander;
       damageMod = new CODamageModifier(OBLIDO_BUFF);
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
+    }
+
+    @Override
+    protected void adjustCost()
+    {
+      // One of the big benefits of this power is deforestation, since trees get in Ave's way.
+      // Trees are only removed once, so we'll increase cost more slowly to counteract the decreased utility.
+      myPowerCost += 0.5;
     }
 
     @Override
