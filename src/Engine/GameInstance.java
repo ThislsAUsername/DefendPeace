@@ -1,9 +1,14 @@
 package Engine;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.MapChangeEvent;
+import Terrain.Environment;
+import Terrain.Environment.Weathers;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
@@ -21,15 +26,15 @@ public class GameInstance
 
   private boolean isFogEnabled;
 
-  public GameInstance(MapMaster map, Commander[] cos)
+  public GameInstance(MapMaster map)
   {
-    if( cos.length < 2 )
+    if( map.commanders.length < 2 )
     {
       System.out.println("WARNING! Creating a game with fewer than two commanders.");
     }
 
     gameMap = map;
-    commanders = cos;
+    commanders = map.commanders;
     activeCoNum = -1; // No commander is active yet.
 
     // Set the initial cursor locations for each player.
@@ -116,16 +121,20 @@ public class GameInstance
    * Activates the turn for the next available CO.
    * @param events
    */
-  public void turn()
+  public GameEventQueue turn()
   {
+    GameEventQueue events = new GameEventQueue();
+    
     // Store the cursor location for the current CO.
     playerCursors.put(activeCoNum, new XYCoord(cursorX, cursorY));
+    int coTurns = 0;
 
     if( null != activeCO) activeCO.endTurn();
 
     // Find the next non-defeated CO.
     do
     {
+      coTurns++;
       activeCoNum++;
       if( activeCoNum > commanders.length - 1 )
       {
@@ -134,11 +143,44 @@ public class GameInstance
       activeCO = commanders[activeCoNum];
     } while (activeCO.isDefeated);
 
+    // Set weather conditions based on forecast
+    ArrayList<MapChangeEvent.EnvironmentAssignment> weatherChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
+    for( int i = 0; i < gameMap.mapWidth; i++ )
+    {
+      for( int j = 0; j < gameMap.mapHeight; j++ )
+      {
+        Location loc = gameMap.getLocation(i, j);
+        if( loc.forecast.isEmpty() )
+        {
+          if( loc.getEnvironment().weatherType != Weathers.CLEAR )
+          {
+            weatherChanges.add(new MapChangeEvent.EnvironmentAssignment(loc.getCoordinates(), Environment.getTile(loc.getEnvironment().terrainType, Weathers.CLEAR)));
+          }
+        }
+        else
+        {
+          Weathers weather = loc.getEnvironment().weatherType;
+          for( int turns = 0; turns < coTurns; turns++ )
+          {
+            weather = loc.forecast.poll();
+          }
+          if( null == weather ) weather = Weathers.CLEAR;
+          weatherChanges.add(new MapChangeEvent.EnvironmentAssignment(loc.getCoordinates(), Environment.getTile(loc.getEnvironment().terrainType, weather)));
+        }
+      }
+    }
+    if( !weatherChanges.isEmpty() )
+    {
+      events.add(new MapChangeEvent(weatherChanges));
+    }
+
     // Set the cursor to the new CO's last known cursor position.
     setCursorLocation(playerCursors.get(activeCoNum).xCoord, playerCursors.get(activeCoNum).yCoord);
-
+    
+    events.addAll(activeCO.initTurn(gameMap));
+    
     // Initialize the next turn, recording any events that will occur.
-    activeCO.initTurn(gameMap);
+    return events;
   }
 
   /**
