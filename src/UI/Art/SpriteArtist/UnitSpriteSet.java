@@ -130,7 +130,7 @@ public class UnitSpriteSet
     BufferedImage frame = null;
 
     // Retrieve the correct subimage.
-    if( u.isTurnOver && u.CO == activeCO )
+    if( u.isStunned || (u.isTurnOver && u.CO == activeCO) )
     {
       frame = turnDone.getFrame(imageIndex);
     }
@@ -207,6 +207,21 @@ public class UnitSpriteSet
 
       // Draw transport icon.
       g.drawImage( cargoIcon, iconX, iconY, iconW, iconH, null );
+    }
+
+    if( u.isStunned )
+    {
+      // Get the icon and characterize the draw space.
+      BufferedImage stunIcon = SpriteLibrary.getStunIcon();
+      int iconW = stunIcon.getWidth() * drawScale;
+      int iconH = stunIcon.getHeight() * drawScale;
+
+      // Draw team-color background for the icon.
+      g.setColor( u.CO.myColor );
+      g.fillRect( drawX+drawScale, drawY+drawScale, iconW-(2*drawScale), iconH-(2*drawScale));
+
+      // Draw stun icon.
+      g.drawImage( stunIcon, drawX, drawY, iconW, iconH, null );
     }
 
     // Draw the capture icon if the unit is capturing a base.

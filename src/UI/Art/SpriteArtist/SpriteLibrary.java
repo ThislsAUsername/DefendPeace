@@ -85,6 +85,9 @@ public class SpriteLibrary
   // Cargo icon for when transports are holding other units.
   private static BufferedImage mapUnitCargoIcon = null;
 
+  // Stun icon for when units are unable to move.
+  private static BufferedImage mapUnitStunIcon = null;
+
   // Capture icon for when units are capturing properties.
   private static BufferedImage mapUnitCaptureIcon = null;
 
@@ -178,11 +181,11 @@ public class SpriteLibrary
     }
     else if( terrainType == TerrainType.PILLAR )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/pillar_clear.png"), w * 2, h * 2);
+      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
     }
     else if( terrainType == TerrainType.BUNKER )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/bunker_clear.png"), w*2, h*2);
+      ss = new TerrainSpriteSet(terrainType, formatString, w*2, h*2);
     }
     else if( terrainType == TerrainType.DUNES )
     {}
@@ -406,7 +409,7 @@ public class SpriteLibrary
   {
     if( null == mapUnitLetterSprites )
     {
-      mapUnitLetterSprites = new Sprite(loadSpriteSheetFile("res/unit/icon/alphabet.png"), 8, 8);
+      mapUnitLetterSprites = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/unit/icon/alphabet.png"), 8, 8);
     }
     return mapUnitLetterSprites;
   }
@@ -454,6 +457,15 @@ public class SpriteLibrary
       mapUnitCargoIcon = SpriteUIUtils.loadSpriteSheetFile("res/unit/icon/cargo.png");
     }
     return mapUnitCargoIcon;
+  }
+
+  public static BufferedImage getStunIcon()
+  {
+    if( null == mapUnitStunIcon )
+    {
+      mapUnitStunIcon = SpriteUIUtils.loadSpriteSheetFile("res/unit/icon/stun.png");
+    }
+    return mapUnitStunIcon;
   }
 
   public static BufferedImage getCaptureIcon()
