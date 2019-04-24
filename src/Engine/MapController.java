@@ -368,7 +368,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case NO_ACTION:
         break;
       default:
-        myGameInputOptionSelector.handleInput(input);
         currentMenu.handleMenuInput(input);
     }
   }
@@ -402,8 +401,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.setCursorLocation(contemplatedAction.movePath.getEnd().x, contemplatedAction.movePath.getEnd().y);
         }
-        currentMenu = new InGameMenu<>(myGameInputHandler.getMenuOptions());
-        currentMenu.setSelectionNumber(myGameInputOptionSelector.getSelectionNormalized());
+        currentMenu = new InGameMenu<>(myGameInputHandler.getMenuOptions(), myGameInputOptionSelector);
         contemplatedAction.aiming = false;
         break;
       case ACTION_READY:
