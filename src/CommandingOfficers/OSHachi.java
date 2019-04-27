@@ -77,7 +77,7 @@ public class OSHachi extends Commander
   {
     private static final String NAME = "Merchant Union";
     private static final int COST = 5;
-    private static final int VALUE = 5;
+    private static final double VALUE = 0.5;
 
     MerchantUnion(Commander commander)
     {
