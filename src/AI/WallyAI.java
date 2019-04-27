@@ -526,8 +526,7 @@ public class WallyAI implements AIController
 
     // TODO: Determine whether the ally actually needs a wall there. Mechs walling for Tanks vs inf is... silly.
     // if we'd be a nice wall for a worthy ally, we can pretend we're safe there also
-    XYCoord[] adjacentCoords = { new XYCoord(xyc.xCoord + 1, xyc.yCoord), new XYCoord(xyc.xCoord - 1, xyc.yCoord),
-        new XYCoord(xyc.xCoord, xyc.yCoord + 1), new XYCoord(xyc.xCoord, xyc.yCoord - 1) };
+    ArrayList<XYCoord> adjacentCoords = Utils.findLocationsInRange(gameMap, xyc, 1);
     for( XYCoord coord : adjacentCoords )
     {
       Location loc = gameMap.getLocation(coord);
@@ -572,7 +571,7 @@ public class WallyAI implements AIController
         if( !unit.model.hasDirectFireWeapon() || neededAttacks.containsValue(unit) ) // don't try to attack twice with one unit
           continue;
 
-        int dist = Math.abs(unit.x - target.x) + Math.abs(unit.y - target.y);
+        int dist = xyc.getDistance(target.x, target.y);
 
         // Figure out how to get here.
         Path movePath = Utils.findShortestPath(unit, xyc, gameMap);
