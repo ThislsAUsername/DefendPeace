@@ -300,9 +300,13 @@ public class SpriteMapView extends MapView
       if (mapViewHeight > mapImage.getHeight())
         deltaY = (mapViewHeight - mapImage.getHeight())/2;
 
+      int drawWidth  = Math.min(mapViewWidth,  mapImage.getWidth());
+      int drawHeight = Math.min(mapViewHeight, mapImage.getHeight());
       // Copy the map image into the window's graphics buffer.
       // First four coords are the dest x,y,x2,y2. Next four are the source coords.      
-      g.drawImage(mapImage, deltaX, deltaY, deltaX + mapViewWidth, deltaY + mapViewHeight, drawX, drawY, drawX + mapViewWidth, drawY + mapViewHeight, null);
+      g.drawImage(mapImage, deltaX, deltaY, deltaX + drawWidth, deltaY + drawHeight,
+                            drawX,  drawY,  drawX  + drawWidth, drawY  + drawHeight,
+                            null);
 
       // Draw the Commander overlay with available funds.
       drawCommanderOverlay(g);
