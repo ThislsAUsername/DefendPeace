@@ -231,13 +231,16 @@ public class WallyAI implements AIController
                   damage += CombatEngine.simulateBattleResults(resident, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
                   neededAttacks.put(xyc, resident);
                   if( damage >= target.getPreciseHP() )
+                  {
+                    foundKill = true;
                     break;
+                  }
                 }
                 // Check that we could potentially move into this space. Also we're scared of fog
                 else if( (gameMap.getEnvironment(xyc).terrainType != TerrainType.FACTORY) && !gameMap.isLocationFogged(xyc) )
                   neededAttacks.put(xyc, null);
               }
-              if( findAssaultKills(gameMap, neededAttacks, target, damage) >= target.getPreciseHP() )
+              if( foundKill || findAssaultKills(gameMap, neededAttacks, target, damage) >= target.getPreciseHP() )
               {
                 log(String.format("  Gonna try to kill %s, who has %s HP", target.toStringWithLocation(), target.getHP()));
                 double damageSum = 0;
