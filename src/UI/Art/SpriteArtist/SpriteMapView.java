@@ -100,6 +100,7 @@ public class SpriteMapView extends MapView
 
     mapViewWidth = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * mapTilesToDrawX;
     mapViewHeight = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * mapTilesToDrawY;
+    SpriteOptions.setScreenDimensions(mapViewWidth, mapViewHeight);
   }
 
   @Override
