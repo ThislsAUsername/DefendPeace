@@ -218,7 +218,7 @@ public class AIUtils
   }
   
   /**
-   * @return The area threatened by the unit, against the specified target type
+   * @return The area and severity of threat from the unit, against the specified target type
    */
   public static Map<XYCoord, Double> findThreatPower(GameMap gameMap, Unit unit, UnitModel target)
   {
@@ -227,7 +227,7 @@ public class AIUtils
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
     for( Weapon wep : unit.weapons )
     {
-      if( wep.ammo > 0 )
+      if( wep.getDamage(target) > 0 )
       {
         if( !wep.model.canFireAfterMoving )
         {

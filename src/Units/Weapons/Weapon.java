@@ -38,7 +38,7 @@ public class Weapon
   {
     if( defender != null )
     {
-      if( (range >= model.minRange) && (range <= model.maxRange) )
+      if( (ammo > 0) && (range >= model.minRange) && (range <= model.maxRange) )
         return getDamage(defender);
     }
     return 0;
