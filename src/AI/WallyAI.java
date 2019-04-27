@@ -221,10 +221,13 @@ public class WallyAI implements AIController
               Map<XYCoord, Unit> neededAttacks = new HashMap<XYCoord, Unit>();
               double damage = 0;
 
+              // Figure out where we can attack from, and include attackers already in range by default.
               for( XYCoord xyc : coordsToCheck )
               {
                 Location loc = gameMap.getLocation(xyc);
                 Unit resident = loc.getResident();
+
+                // Units who can attack from their current position volunteer themselves. Probably not smart sometimes, but oh well.
                 if( null != resident && resident.CO == myCo && !resident.isTurnOver &&
                     resident.canAttack(target.model, xyc.getDistance(target.x, target.y), false))
                 {
@@ -237,7 +240,8 @@ public class WallyAI implements AIController
                   }
                 }
                 // Check that we could potentially move into this space. Also we're scared of fog
-                else if( (gameMap.getEnvironment(xyc).terrainType != TerrainType.FACTORY) && !gameMap.isLocationFogged(xyc) )
+                else if( (null == resident) && (gameMap.getEnvironment(xyc).terrainType != TerrainType.FACTORY)
+                    && !gameMap.isLocationFogged(xyc) )
                   neededAttacks.put(xyc, null);
               }
               if( foundKill || findAssaultKills(gameMap, neededAttacks, target, damage) >= target.getPreciseHP() )
