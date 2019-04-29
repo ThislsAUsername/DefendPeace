@@ -133,7 +133,7 @@ public class Commander extends GameEventListener implements Serializable
     money = DEFAULTSTARTINGMONEY;
 
     myAbilities = new ArrayList<CommanderAbility>();
-    new CODamageModifier(10).apply(this);
+    myTowerDamageBoostAbility = new TowerDamageBoostAbility(this);
   }
 
   protected void addCommanderAbility(CommanderAbility ca)
@@ -439,6 +439,32 @@ public class Commander extends GameEventListener implements Serializable
         ArrayList<UnitModel> shoppingList = (unitProductionByTerrain.get(terrain) != null) ? unitProductionByTerrain.get(terrain)
             : new ArrayList<UnitModel>();
         stream.writeBoolean(shoppingList.contains(getUnitModel(ue)));
+      }
+    }
+  }
+
+  /** Adds 10 to commander attack upon capturing a com tower */
+  private static class TowerDamageBoostAbility extends GameEventListener
+  {
+    private Commander myCommander = null;
+
+    public LootAbility(Commander myCo)
+    {
+      myCommander = myCo;
+    }
+
+    @Override
+    public void receiveCaptureEvent(Unit unit, Location location, Commander previousOwner)
+    {
+      if( unit.CO == myCommander && location.getOwner() == myCommander)
+      {
+        // Captured a new com tower. Apply damage boost. 
+        new CODamageModifier(10).apply(this);
+      }
+      else if (unit.CO != myCommander && previousOwner == myCommander) 
+      {
+        // Friendly com tower has been captured. Revert damage boost. 
+        new CODamageModifier(10).revert(this);
       }
     }
   }

@@ -70,6 +70,12 @@ public class TerrainType
   private static final Color CITY_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
   private static final String CITY_NAME = "CITY";
   public static final TerrainType CITY = new TerrainType( CITY_FLAGS, CITY_DEFENSE, CITY_COLOR, CITY_NAME );
+
+  private static final int TOWER_FLAGS = LAND | CAPTURABLE | PROVIDES_COVER;
+  private static final int TOWER_DEFENSE = 3;
+  private static final Color TOWER_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
+  private static final String TOWER_NAME = "TOWER";
+  public static final TerrainType TOWER = new TerrainType(TOWER_FLAGS, TOWER_DEFENSE, TOWER_COLOR, TOWER_NAME);
   
   private static final int BUNKER_FLAGS = LAND;
   private static final int BUNKER_DEFENSE = 3;
