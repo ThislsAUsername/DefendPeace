@@ -127,7 +127,7 @@ public class TerrainType
   public static final TerrainType MOUNTAIN = new TerrainType( MOUNTAIN_FLAGS, MOUNTAIN_DEFENSE, MOUNTAIN_COLOR, MOUNTAIN_NAME, MOUNTAIN_VISION );
 
   private static final int REEF_FLAGS = WATER | PROVIDES_COVER;
-  private static final int REEF_DEFENSE = 2;
+  private static final int REEF_DEFENSE = 1;
   private static final Color REEF_COLOR = new Color(218, 152, 112);
   private static final String REEF_NAME = "REEF";
   public static final TerrainType REEF = new TerrainType( REEF_FLAGS, REEF_DEFENSE, REEF_COLOR, REEF_NAME );
