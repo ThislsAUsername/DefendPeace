@@ -62,15 +62,11 @@ public class BWIsabellaCS extends Commander
     {
       IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(VALUE);
 
-      Map<UnitModel, UnitModel> indirects = rangeBoost.init(COcast);
+      rangeBoost.init(COcast);
 
       COMovementModifier moveMod = new COMovementModifier(VALUE);
 
       for( UnitModel um : COcast.unitModels )
-      {
-          moveMod.addApplicableUnitModel(um);
-      }
-      for( UnitModel um : indirects.values() )
       {
           moveMod.addApplicableUnitModel(um);
       }
@@ -98,15 +94,11 @@ public class BWIsabellaCS extends Commander
     {
       IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(VALUE);
 
-      Map<UnitModel, UnitModel> indirects = rangeBoost.init(COcast);
+      rangeBoost.init(COcast);
 
       COMovementModifier moveMod = new COMovementModifier(VALUE);
 
       for( UnitModel um : COcast.unitModels )
-      {
-          moveMod.addApplicableUnitModel(um);
-      }
-      for( UnitModel um : indirects.values() )
       {
           moveMod.addApplicableUnitModel(um);
       }

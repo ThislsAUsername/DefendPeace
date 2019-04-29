@@ -117,16 +117,11 @@ public class OSJake extends Commander
       COcast.plainsBuff += VALUE;
       IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(1);
 
-      Map<UnitModel, UnitModel> indirects = rangeBoost.init(COcast);
+      rangeBoost.init(COcast);
 
       COMovementModifier moveMod = new COMovementModifier(2);
 
       for( UnitModel um : COcast.unitModels )
-      {
-        if( um.chassis == ChassisEnum.TANK )
-          moveMod.addApplicableUnitModel(um);
-      }
-      for( UnitModel um : indirects.values() )
       {
         if( um.chassis == ChassisEnum.TANK )
           moveMod.addApplicableUnitModel(um);
