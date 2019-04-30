@@ -74,9 +74,11 @@ public class Commander extends GameEventListener implements Serializable
   public boolean isDefeated = false;
   public XYCoord HQLocation = null;
   private double myAbilityPower = 0;
+  private int numTowers = 0;
 
   private ArrayList<CommanderAbility> myAbilities = null;
   private String myActiveAbilityName = "";
+  private TowerListener myTowerListener = null;
 
   // The AI has to be effectively stateless anyway (to be able to adapt to whatever scenario it finds itself in on map start),
   //   so may as well not require them to care about serializing their contents.
@@ -133,7 +135,7 @@ public class Commander extends GameEventListener implements Serializable
     money = DEFAULTSTARTINGMONEY;
 
     myAbilities = new ArrayList<CommanderAbility>();
-    myTowerDamageBoostAbility = new TowerDamageBoostAbility(this);
+    myTowerListener = new TowerListener(this);
   }
 
   protected void addCommanderAbility(CommanderAbility ca)
@@ -170,14 +172,47 @@ public class Commander extends GameEventListener implements Serializable
     if( aiController != null ) aiController.endTurn();
     myView.resetFog();
   }
+  
+  public void adjustTowerPower() {
+	  // First, revert all previous damage modifiers
+	  new CODamageModifier(10*numTowers).revert(this);
+	  // Count number of towers, and apply new modifiers
+	  numTowers = 0;
+	  for (XYCoord xy : this.ownedProperties) 
+	  {
+		  Location loc = this.myView.getLocation(xy);
+		  if (loc.getEnvironment().terrainType.equals(TerrainType.TOWER)
+			  && loc.getOwner() == this) 
+		  {
+			  numTowers += 1;
+		  }
+	  }
+	  new CODamageModifier(10*numTowers).apply(this);
+  }
+  
+  private static class TowerListener extends GameEventListener{
+	  private Commander myCommander = null;
+	  public TowerListener(Commander myCo) {
+		  myCommander = myCo;
+	  }
+	  
+	  @Override
+	  public void receiveCaptureEvent(Unit unit, Location location) {
+		  if (unit.CO == myCommander && location.getEnvironment().terrainType.equals(TerrainType.TOWER))
+		  {
+			  myCommander.adjustTowerPower();
+		  }
+	  }
+  }
 
   /**
-   * Collect income and handle any COModifiers.
+   * Collect income, adjust tower power, and handle any COModifiers.
    * @param map
    */
   public GameEventQueue initTurn(GameMap map)
   {
     myView.resetFog();
+    adjustTowerPower();
     myActiveAbilityName = "";
     // Accrue income for each city under your control.
     int turnIncome = 0;
@@ -439,32 +474,6 @@ public class Commander extends GameEventListener implements Serializable
         ArrayList<UnitModel> shoppingList = (unitProductionByTerrain.get(terrain) != null) ? unitProductionByTerrain.get(terrain)
             : new ArrayList<UnitModel>();
         stream.writeBoolean(shoppingList.contains(getUnitModel(ue)));
-      }
-    }
-  }
-
-  /** Adds 10 to commander attack upon capturing a com tower */
-  private static class TowerDamageBoostAbility extends GameEventListener
-  {
-    private Commander myCommander = null;
-
-    public LootAbility(Commander myCo)
-    {
-      myCommander = myCo;
-    }
-
-    @Override
-    public void receiveCaptureEvent(Unit unit, Location location, Commander previousOwner)
-    {
-      if( unit.CO == myCommander && location.getOwner() == myCommander)
-      {
-        // Captured a new com tower. Apply damage boost. 
-        new CODamageModifier(10).apply(this);
-      }
-      else if (unit.CO != myCommander && previousOwner == myCommander) 
-      {
-        // Friendly com tower has been captured. Revert damage boost. 
-        new CODamageModifier(10).revert(this);
       }
     }
   }

@@ -11,7 +11,6 @@ public class CaptureEvent implements GameEvent
 {
   private Unit unit = null;
   private Location location = null;
-  private Commander previousOwner = null;
   final int captureAmount;
   final int priorCaptureAmount;
 
@@ -42,7 +41,7 @@ public class CaptureEvent implements GameEvent
   @Override
   public void sendToListener(GameEventListener listener)
   {
-    listener.receiveCaptureEvent( unit, location, previousOwner);
+    listener.receiveCaptureEvent( unit, location);
   }
 
   public boolean willCapture()
@@ -64,10 +63,6 @@ public class CaptureEvent implements GameEvent
         (location.getResident() == unit) &&
         (unit.CO.isEnemy(location.getOwner())) )
     {
-      if this.willCapture() 
-      {
-        this.previousOwner = location.getOwner();
-      }
       unit.capture(gameMap.getLocation(unit.x, unit.y));
     }
   }

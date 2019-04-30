@@ -7,6 +7,7 @@ public class IMapBuilder
   // Convenient handles for the terrain types to shorten map definitions.
   protected static final TerrainType BR = TerrainType.BRIDGE;
   protected static final TerrainType CT = TerrainType.CITY;
+  protected static final TerrainType TW = TerrainType.TOWER;
   protected static final TerrainType PI = TerrainType.PILLAR;
   protected static final TerrainType BK = TerrainType.BUNKER;
   protected static final TerrainType DN = TerrainType.DUNES;
@@ -25,5 +26,5 @@ public class IMapBuilder
   
   protected static final TerrainType LB = TerrainType.HEADQUARTERS; // lab -> HQ
   protected static final TerrainType SR = TerrainType.BUNKER; // full silo, but empty because lol
-  protected static final TerrainType TW = TerrainType.BUNKER; // tower
+   // tower
 }
