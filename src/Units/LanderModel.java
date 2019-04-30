@@ -18,7 +18,7 @@ public class LanderModel extends UnitModel
   private static final MoveType moveType = new FloatLight();
   // TODO: Currently, transports can unload units wherever the transport happens to be, so long as there is valid terrain for the units to end up on.
   // As the source material limits copters to land unloading and landers to shoals, it stands to reason we should support that limitation.
-  private static final ActionType[] actions = { ActionType.UNLOAD, ActionType.WAIT };
+  private static final ActionType[] actions = { ActionType.UNLOAD, ActionType.WAIT, ActionType.JOIN };
 
   public LanderModel()
   {

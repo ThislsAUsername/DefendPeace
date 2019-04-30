@@ -15,7 +15,7 @@ public class MobileSAMModel extends UnitModel
   private static final int MOVE_POWER = 4;
 
   private static final MoveType moveType = new Tires();
-  private static final ActionType[] actions = { ActionType.ATTACK, ActionType.WAIT };
+  private static final ActionType[] actions = { ActionType.ATTACK, ActionType.WAIT, ActionType.JOIN };
   private static final WeaponModel[] weapons = { new MobileSAMWeapon() };
 
   public MobileSAMModel()

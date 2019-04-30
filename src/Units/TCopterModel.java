@@ -16,7 +16,7 @@ public class TCopterModel extends UnitModel
   private static final int MOVE_POWER = 6;
 
   private static final MoveType moveType = new Flight();
-  private static final ActionType[] actions = { ActionType.UNLOAD, ActionType.WAIT };
+  private static final ActionType[] actions = { ActionType.UNLOAD, ActionType.WAIT, ActionType.JOIN };
 
   public TCopterModel()
   {

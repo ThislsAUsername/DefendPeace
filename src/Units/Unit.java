@@ -270,9 +270,9 @@ public class Unit
   {
     XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
     ArrayList<GameActionSet> actionSet = new ArrayList<GameActionSet>();
-    if( map.isLocationEmpty(this, moveLocation) )
+    for( ActionType at : model.possibleActions)
     {
-      for( ActionType at : model.possibleActions)
+      if( map.isLocationEmpty(this, moveLocation) )
       {
         switch (at)
         {
@@ -314,8 +314,9 @@ public class Unit
             actionSet.add(new GameActionSet(new GameAction.WaitAction(this, movePath), false));
             break;
           case LOAD:
+          case JOIN:
             // We only get to here if there is no unit at the end of the move path, which means there is
-            //   no transport in this space to board. LOAD actions are handled down below.
+            //   no transport in this space to board and no friendly unit to reinforce. LOAD/JOIN actions are handled down below.
             break;
           case UNLOAD:
             if( heldUnits.size() > 0 )
@@ -362,11 +363,29 @@ public class Unit
                 .println("getPossibleActions: Invalid action in model's possibleActions: " + at);
         }
       }
-    }
-    else
-    {
-      // There is another unit in the tile at the end of movePath. Only LOAD actions are supported in this case.
-      actionSet.add(new GameActionSet(new GameAction.LoadAction(map, this, movePath), false));
+      else
+      {
+        // There is another unit in the tile at the end of movePath. We are either LOADing a transport or JOINing an ally.
+        if( at == ActionType.LOAD )
+        {
+          if(map.getLocation(moveLocation).getResident().hasCargoSpace(model.type))
+          {
+            actionSet.add(new GameActionSet(new GameAction.LoadAction(map, this, movePath), false));
+          }
+        }
+        else if( at == ActionType.JOIN )
+        {
+          Unit resident = map.getLocation(moveLocation).getResident();
+          if( (resident.model.type == model.type) && (resident.getHP() < resident.model.maxHP) )
+          {
+            actionSet.add(new GameActionSet(new GameAction.UnitJoinAction(map, this, movePath), false));
+          }
+        }
+        else
+        {
+          System.out.println("getPossibleActions: Invalid action in unit's possibleActions: " + at);
+        }
+      }
     }
 
     return actionSet;

@@ -66,6 +66,7 @@ public abstract class GameEventListener
   public void receiveCommanderDefeatEvent(CommanderDefeatEvent event){};
   public void receiveLoadEvent(LoadEvent event){};
   public void receiveMoveEvent(MoveEvent event){};
+  public void receiveUnitJoinEvent(UnitJoinEvent event){};
   public void receiveResupplyEvent(ResupplyEvent event){};
   public void receiveUnitDieEvent(UnitDieEvent event){};
   public void receiveUnloadEvent(UnloadEvent event){};
