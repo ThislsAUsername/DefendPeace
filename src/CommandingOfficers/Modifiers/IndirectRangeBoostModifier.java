@@ -12,16 +12,10 @@ public class IndirectRangeBoostModifier implements COModifier
   ArrayList<WeaponModel> modelsToModify;
   private int boost;
 
-  public IndirectRangeBoostModifier(int boost)
+  public IndirectRangeBoostModifier(Commander commander, int boost)
   {
     this.boost = boost;
     modelsToModify = new ArrayList<WeaponModel>();
-  }
-
-  /** Collects all the ranged weapon models */
-  public void init(Commander commander)
-  {
-    modelsToModify.clear();
     for( UnitModel um : commander.unitModels )
     {
       if( um.weaponModels != null )
