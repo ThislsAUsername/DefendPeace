@@ -135,7 +135,10 @@ public class Commander extends GameEventListener implements Serializable
     money = DEFAULTSTARTINGMONEY;
 
     myAbilities = new ArrayList<CommanderAbility>();
+    
+    // Handles tower damage boost
     myTowerListener = new TowerListener(this);
+    GameEventListener.registerEventListener(myTowerListener);
   }
 
   protected void addCommanderAbility(CommanderAbility ca)
