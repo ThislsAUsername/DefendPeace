@@ -270,9 +270,9 @@ public class Unit
   {
     XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
     ArrayList<GameActionSet> actionSet = new ArrayList<GameActionSet>();
-    for( ActionType at : model.possibleActions)
+    if( map.isLocationEmpty(this, moveLocation) )
     {
-      if( map.isLocationEmpty(this, moveLocation) )
+      for( ActionType at : model.possibleActions)
       {
         switch (at)
         {
@@ -363,28 +363,18 @@ public class Unit
                 .println("getPossibleActions: Invalid action in model's possibleActions: " + at);
         }
       }
-      else
+    }
+    else
+    {
+      // There is another unit in the tile at the end of movePath. We are either LOADing a transport or JOINing an ally.
+      Unit resident = map.getLocation(moveLocation).getResident();
+      if(resident.hasCargoSpace(model.type))
       {
-        // There is another unit in the tile at the end of movePath. We are either LOADing a transport or JOINing an ally.
-        if( at == ActionType.LOAD )
-        {
-          if(map.getLocation(moveLocation).getResident().hasCargoSpace(model.type))
-          {
-            actionSet.add(new GameActionSet(new GameAction.LoadAction(map, this, movePath), false));
-          }
-        }
-        else if( at == ActionType.JOIN )
-        {
-          Unit resident = map.getLocation(moveLocation).getResident();
-          if( (resident.model.type == model.type) && (resident.getHP() < resident.model.maxHP) )
-          {
-            actionSet.add(new GameActionSet(new GameAction.UnitJoinAction(map, this, movePath), false));
-          }
-        }
-        else
-        {
-          System.out.println("getPossibleActions: Invalid action in unit's possibleActions: " + at);
-        }
+        actionSet.add(new GameActionSet(new GameAction.LoadAction(map, this, movePath), false));
+      }
+      if( (resident.model.type == model.type) && (resident.getHP() < resident.model.maxHP) )
+      {
+        actionSet.add(new GameActionSet(new GameAction.UnitJoinAction(map, this, movePath), false));
       }
     }
 

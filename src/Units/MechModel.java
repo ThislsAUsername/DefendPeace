@@ -16,7 +16,7 @@ public class MechModel extends UnitModel
   private static final int MOVE_POWER = 2;
 
   private static final MoveType moveType = new FootMech();
-  private static final ActionType[] actions = { ActionType.ATTACK, ActionType.CAPTURE, ActionType.WAIT, ActionType.JOIN };
+  private static final ActionType[] actions = { ActionType.ATTACK, ActionType.CAPTURE, ActionType.WAIT };
   private static final WeaponModel[] weapons = { new MechZooka(), new MechMGun() };
 
   public MechModel()

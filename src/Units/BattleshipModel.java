@@ -15,7 +15,7 @@ public class BattleshipModel extends UnitModel
   private static final int MOVE_POWER = 5;
 
   private static final MoveType moveType = new FloatHeavy();
-  private static final ActionType[] actions = { ActionType.ATTACK, ActionType.WAIT, ActionType.JOIN };
+  private static final ActionType[] actions = { ActionType.ATTACK, ActionType.WAIT };
   private static final WeaponModel[] weapons = { new BattleshipCannon() };
 
   public BattleshipModel()

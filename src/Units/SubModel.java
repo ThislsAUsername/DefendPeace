@@ -16,7 +16,7 @@ public class SubModel extends UnitModel
 
   // TODO: add submerge
   private static final MoveType moveType = new FloatHeavy();
-  private static final ActionType[] actions = { ActionType.ATTACK, ActionType.WAIT, ActionType.JOIN };
+  private static final ActionType[] actions = { ActionType.ATTACK, ActionType.WAIT };
   private static final WeaponModel[] weapons = { new SubTorpedoes() };
 
   public SubModel()

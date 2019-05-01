@@ -15,7 +15,7 @@ public class FighterModel extends UnitModel
   private static final int MOVE_POWER = 9;
 
   private static final MoveType moveType = new Flight();
-  private static final ActionType[] actions = { ActionType.ATTACK, ActionType.WAIT, ActionType.JOIN };
+  private static final ActionType[] actions = { ActionType.ATTACK, ActionType.WAIT };
   private static final WeaponModel[] weapons = { new FighterMissiles() };
 
   public FighterModel()

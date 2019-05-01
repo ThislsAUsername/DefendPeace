@@ -654,7 +654,7 @@ public interface GameAction
 
         if( isValid )
         {
-          // Find the transport unit.
+          // Find the unit we want to join.
           recipient = gameMap.getLocation(pathEnd).getResident();
           isValid &= (null != recipient) && (recipient.getHP() < recipient.model.maxHP);
         }

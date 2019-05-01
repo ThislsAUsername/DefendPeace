@@ -17,7 +17,7 @@ public class APCModel extends UnitModel
   private static final int VISION_RANGE = 1;
   private static final int MOVE_POWER = 6;
   private static final MoveType moveType = new Tread();
-  private static final ActionType[] actions = { ActionType.RESUPPLY, ActionType.UNLOAD, ActionType.WAIT, ActionType.JOIN };
+  private static final ActionType[] actions = { ActionType.RESUPPLY, ActionType.UNLOAD, ActionType.WAIT };
 
   public APCModel()
   {
