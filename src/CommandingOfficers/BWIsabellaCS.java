@@ -60,9 +60,7 @@ public class BWIsabellaCS extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(VALUE);
-
-      rangeBoost.init(COcast);
+      IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(COcast, VALUE);
 
       COMovementModifier moveMod = new COMovementModifier(VALUE);
 
@@ -92,9 +90,7 @@ public class BWIsabellaCS extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(VALUE);
-
-      rangeBoost.init(COcast);
+      IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(COcast, VALUE);
 
       COMovementModifier moveMod = new COMovementModifier(VALUE);
 

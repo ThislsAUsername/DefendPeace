@@ -102,8 +102,7 @@ public class BMGrit extends Commander
     protected void perform(MapMaster gameMap)
     {
       COcast.indirectBuff += VALUE;
-      IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(1);
-      rangeBoost.init(COcast);
+      IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(COcast, 1);
       COcast.addCOModifier(rangeBoost);
     }
   }
@@ -125,8 +124,7 @@ public class BMGrit extends Commander
     protected void perform(MapMaster gameMap)
     {
       COcast.indirectBuff += VALUE;
-      IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(2);
-      rangeBoost.init(COcast);
+      IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(COcast, 2);
       COcast.addCOModifier(rangeBoost);
     }
   }
