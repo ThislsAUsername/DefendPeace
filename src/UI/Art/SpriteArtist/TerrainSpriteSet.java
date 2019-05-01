@@ -453,6 +453,7 @@ public class TerrainSpriteSet
     {
       terrainBases = new HashMap<TerrainType, TerrainType>();
       terrainBases.put(TerrainType.CITY, TerrainType.GRASS);
+      terrainBases.put(TerrainType.TOWER, TerrainType.GRASS);
       terrainBases.put(TerrainType.DUNES, TerrainType.GRASS);
       terrainBases.put(TerrainType.FACTORY, TerrainType.GRASS);
       terrainBases.put(TerrainType.AIRPORT, TerrainType.GRASS);
