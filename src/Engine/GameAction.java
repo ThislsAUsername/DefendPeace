@@ -16,6 +16,7 @@ import Engine.GameEvents.LoadEvent;
 import Engine.GameEvents.MoveEvent;
 import Engine.GameEvents.ResupplyEvent;
 import Engine.GameEvents.UnitDieEvent;
+import Engine.GameEvents.UnitJoinEvent;
 import Engine.GameEvents.UnloadEvent;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -31,7 +32,7 @@ public interface GameAction
 {
   public enum ActionType
   {
-    ATTACK, CAPTURE, LOAD, RESUPPLY, UNLOAD, WAIT, UNITPRODUCTION, OTHER
+    ATTACK, CAPTURE, LOAD, JOIN, RESUPPLY, UNLOAD, WAIT, UNITPRODUCTION, OTHER
   }
 
   /**
@@ -609,6 +610,93 @@ public interface GameAction
       return String.format("[Unload from %s]", actor.toStringWithLocation());
     }
   } // ~UnloadAction
+
+  // ===========  UnitJoinAction  =================================
+  // A unit join action will combine a unit into a damaged unit to restore its HP. Any overflow HP is converted back into funds.
+  public static class UnitJoinAction implements GameAction
+  {
+    private Unit donor;
+    Path movePath;
+    private XYCoord pathEnd = null;
+    private Unit recipient;
+
+    public UnitJoinAction(GameMap gameMap, Unit actor, Path path)
+    {
+      donor = actor;
+      movePath = path;
+      if( (null != movePath) && (movePath.getPathLength() > 0 ))
+      {
+        pathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        if( (null != gameMap) && gameMap.isLocationValid(pathEnd) )
+        {
+          recipient = gameMap.getLocation(pathEnd).getResident();
+        }
+      }
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      // UNITJOIN actions consist of
+      //   MOVE
+      //   JOIN
+      GameEventQueue unitJoinEvents = new GameEventQueue();
+
+      // Validate input
+      boolean isValid = true;
+      isValid &= (null != donor) && !donor.isTurnOver;
+      isValid &= (null != movePath) && (movePath.getPathLength() > 0);
+      isValid &= (null != gameMap);
+      if( isValid )
+      {
+        pathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        isValid &= gameMap.isLocationValid(pathEnd);
+
+        if( isValid )
+        {
+          // Find the unit we want to join.
+          recipient = gameMap.getLocation(pathEnd).getResident();
+          isValid &= (null != recipient) && (recipient.getHP() < recipient.model.maxHP);
+        }
+      }
+
+      // Create events.
+      if( isValid )
+      {
+        // Move to the recipient, if we don't get blocked.
+        if( Utils.enqueueMoveEvent(gameMap, donor, movePath, unitJoinEvents) )
+        {
+          // Combine forces.
+          unitJoinEvents.add(new UnitJoinEvent(donor, recipient));
+        }
+      }
+      return unitJoinEvents;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return pathEnd;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return pathEnd;
+    }
+
+    @Override
+    public ActionType getType()
+    {
+      return GameAction.ActionType.JOIN;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Join %s into %s]", donor.toStringWithLocation(), recipient.toStringWithLocation());
+    }
+  } // ~UnitJoinAction
 
   // ===========  ResupplyAction  =================================
   // A resupply action will refill fuel and ammunition for any adjacent friendly units.
