@@ -176,6 +176,10 @@ public class SpriteLibrary
     {
       ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
     }
+    else if( terrainType == TerrainType.TOWER )
+    {
+      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
+    }
     else if( terrainType == TerrainType.PILLAR )
     {
       ss = new TerrainSpriteSet(spriteKey.terrainKey, formatString, w * 2, h * 2);
