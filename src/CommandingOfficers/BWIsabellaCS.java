@@ -60,17 +60,11 @@ public class BWIsabellaCS extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(VALUE);
-
-      Map<UnitModel, UnitModel> indirects = rangeBoost.init(COcast);
+      IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(COcast, VALUE);
 
       COMovementModifier moveMod = new COMovementModifier(VALUE);
 
       for( UnitModel um : COcast.unitModels )
-      {
-          moveMod.addApplicableUnitModel(um);
-      }
-      for( UnitModel um : indirects.values() )
       {
           moveMod.addApplicableUnitModel(um);
       }
@@ -96,17 +90,11 @@ public class BWIsabellaCS extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(VALUE);
-
-      Map<UnitModel, UnitModel> indirects = rangeBoost.init(COcast);
+      IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(COcast, VALUE);
 
       COMovementModifier moveMod = new COMovementModifier(VALUE);
 
       for( UnitModel um : COcast.unitModels )
-      {
-          moveMod.addApplicableUnitModel(um);
-      }
-      for( UnitModel um : indirects.values() )
       {
           moveMod.addApplicableUnitModel(um);
       }
