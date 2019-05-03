@@ -473,9 +473,7 @@ public class SpriteLibrary
   private static String getMapUnitSpriteFilename(UnitModel.UnitEnum unitType, String faction)
   {
     StringBuffer spriteFile = new StringBuffer();
-    spriteFile.append("res/unit/");
-    if( DEFAULT_FACTION_NAME != faction )
-      spriteFile.append("faction/").append(faction).append("/");
+    spriteFile.append("res/unit/faction/").append(faction).append("/");
     spriteFile.append(unitType.toString().toLowerCase()).append("_map.png");
     return spriteFile.toString();
   }
