@@ -2,7 +2,6 @@ package Test;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderPatch;
-import CommandingOfficers.CommanderStrong;
 import Engine.GameAction;
 import Engine.Path;
 import Engine.Utils;
@@ -35,7 +34,7 @@ public class TestGameEvent extends TestCase
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
   {
-    testCo1 = new CommanderStrong();
+    testCo1 = new CommanderPatch();
     testCo2 = new CommanderPatch();
     Commander[] cos = { testCo1, testCo2 };
 

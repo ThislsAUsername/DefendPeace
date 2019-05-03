@@ -152,20 +152,20 @@ public class TestCombat extends TestCase
   private boolean testMoveAttack()
   {
     // Add our combatants
-    Unit mechA = addUnit(testMap, testCo1, UnitEnum.MECH, 1, 1);
-    Unit infB = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 1, 3);
+    Unit attacker = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 1, 1);
+    Unit defender = addUnit(testMap, testCo2, UnitEnum.MECH, 1, 3);
 
     // Execute inf- I mean, the action.
-    mechA.initTurn(testMap); // Make sure he is ready to move.
-    performGameAction(new GameAction.AttackAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 2, testMap), 1, 3), testMap);
+    attacker.initTurn(testMap); // Make sure he is ready to move.
+    performGameAction(new GameAction.AttackAction(testMap, attacker, Utils.findShortestPath(attacker, 1, 2, testMap), 1, 3), testMap);
 
     // Check that the mech is undamaged, and that the infantry is no longer with us.
-    boolean testPassed = validate(infB.getHP() < 10, "    Defender took no damage.");
-    testPassed &= validate(mechA.getHP() < 10, "    Attacker took no damage.");
+    boolean testPassed = validate(defender.getHP() < 10, "    Defender took no damage.");
+    testPassed &= validate(attacker.getHP() < 10, "    Attacker took no damage.");
 
     // Clean up
-    testMap.removeUnit(mechA);
-    testMap.removeUnit(infB);
+    testMap.removeUnit(attacker);
+    testMap.removeUnit(defender);
     testCo1.units.clear();
     testCo2.units.clear();
 
