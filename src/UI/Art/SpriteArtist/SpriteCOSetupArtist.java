@@ -11,6 +11,7 @@ import Terrain.MapInfo;
 import UI.COSetupController;
 import UI.COSetupInfo;
 import UI.COSetupInfo.OptionList;
+import UI.UIUtils;
 
 public class SpriteCOSetupArtist
 {
@@ -158,7 +159,7 @@ public class SpriteCOSetupArtist
       g.fillRect(drawX - drawScale, drawY - drawScale, drawW + (2*drawScale), drawH + (2*drawScale));
 
       // draw the CO's color selection
-      BufferedImage colorFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), SpriteLibrary.getColorName(c), 2*drawScale, 2*drawScale);
+      BufferedImage colorFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), UIUtils.getColorName(c), 2*drawScale, 2*drawScale);
       XYCoord colorOffset = getChoiceOffset(OptionList.COLOR, drawW/2, drawH/2, drawScale);
       SpriteLibrary.drawImageCenteredOnPoint(g, colorFrame, xCenter+colorOffset.xCoord, yCenter+colorOffset.yCoord, 1);
 

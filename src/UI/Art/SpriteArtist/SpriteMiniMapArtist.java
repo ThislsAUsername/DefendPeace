@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import Engine.XYCoord;
 import Terrain.MapInfo;
+import UI.UIUtils;
 
 public class SpriteMiniMapArtist
 {
@@ -51,7 +52,7 @@ public class SpriteMiniMapArtist
     {
       Color coColor;
       // Log a warning if SpriteLibrary doesn't have enough colors to support this map.
-      if( co >= SpriteLibrary.getCOColors().length )
+      if( co >= UIUtils.getCOColors().length )
       {
         System.out.println("WARNING! '" + mapInfo.mapName + "' has more start locations than there are team colors!");
 
@@ -60,7 +61,7 @@ public class SpriteMiniMapArtist
       }
       else
       {
-        coColor = SpriteLibrary.getCOColors()[co];
+        coColor = UIUtils.getCOColors()[co];
       }
 
       // Loop through all locations assigned to this CO by mapInfo.
