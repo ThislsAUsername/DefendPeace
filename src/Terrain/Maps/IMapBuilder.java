@@ -23,8 +23,8 @@ public class IMapBuilder
   protected static final TerrainType RD = TerrainType.ROAD;
   protected static final TerrainType SH = TerrainType.SHOAL;
   protected static final TerrainType SE = TerrainType.SEA;
+  protected static final TerrainType LB = TerrainType.LAB; 
   
-  protected static final TerrainType LB = TerrainType.HEADQUARTERS; // lab -> HQ
   protected static final TerrainType SR = TerrainType.BUNKER; // full silo, but empty because lol
    // tower
 }
