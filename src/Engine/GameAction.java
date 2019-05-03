@@ -310,7 +310,8 @@ public interface GameAction
               int numLabs = 0;
               int numHQs = 0;
               Commander CO = captureLocation.getOwner();
-              for (XYCoord xy : CO.ownedProperties) {
+              for (XYCoord xy : CO.ownedProperties) 
+              {
                 Location loc = map.getLocation(xy);
                 if (loc.getEnvironment().terrainType == TerrainType.LAB ) 
                 {
