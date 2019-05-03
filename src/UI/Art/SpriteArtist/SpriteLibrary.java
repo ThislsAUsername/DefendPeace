@@ -25,7 +25,7 @@ public class SpriteLibrary
   // This is the physical size of a single map square in pixels.
   public static final int baseSpriteSize = 16;
   
-  public static final String DEFAULT_FACTION_NAME = "DEFAULT";
+  public static final String DEFAULT_FACTION_NAME = "Thorn";
 
   // Define extra colors as needed.
   private static final Color PURPLE = new Color(231, 123, 255 );
@@ -346,7 +346,8 @@ public class SpriteLibrary
               colorNames.put(key, fileEntry.getName().replace(".png", ""));
             }
           }
-          else // If it's a directory, we assume it's a set of map sprites, i.e. a faction.
+          // If it's a directory, we assume it's a set of map sprites, i.e. a faction.
+          else if(!fileEntry.getName().endsWith(DEFAULT_FACTION_NAME)) // However, we don't wanna add our default twice
           {
             factionNames.add(fileEntry.getName());
           }
