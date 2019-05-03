@@ -15,6 +15,7 @@ import CommandingOfficers.CommanderLibrary;
 import Terrain.Location;
 import Terrain.TerrainType;
 import UI.UIUtils;
+import UI.UIUtils.Faction;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -324,9 +325,11 @@ public class SpriteLibrary
 
   private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
-    String faction = key.commanderKey.factionName;
+    Faction faction = key.commanderKey.faction;
     System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString() + " in faction " + faction);
-    String filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction);
+    String filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction.name);
+    if (!new File(filestr).canRead())
+      filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction.basis);
     UnitSpriteSet spriteSet = new UnitSpriteSet(loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
         UIUtils.getMapUnitColors(key.commanderKey.myColor));
     mapUnitSpriteSetMap.put(key, spriteSet);

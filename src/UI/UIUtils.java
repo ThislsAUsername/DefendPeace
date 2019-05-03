@@ -2,7 +2,9 @@ package UI;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +45,7 @@ public class UIUtils
   private static HashMap<Color, ColorPalette> buildingColorPalettes;
   private static HashMap<Color, ColorPalette> mapUnitColorPalettes;
   private static HashMap<Color, String> colorNames;
-  private static ArrayList<String> factionNames;
+  private static ArrayList<Faction> factions;
 
   
   /**
@@ -63,7 +65,7 @@ public class UIUtils
       buildingColorPalettes = new HashMap<Color, ColorPalette>();
       mapUnitColorPalettes = new HashMap<Color, ColorPalette>();
       colorNames = new HashMap<Color, String>();
-      factionNames = new ArrayList<String>();
+      factions = new ArrayList<Faction>();
 
       // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
       buildingColorPalettes.put(Color.PINK, new ColorPalette(pinkMapBuildingColors));
@@ -84,7 +86,7 @@ public class UIUtils
       colorNames.put(PURPLE, "sparking");
 
       // We want to be able to use the normal units, as well as any others
-      factionNames.add(DEFAULT_FACTION_NAME);
+      factions.add(new Faction(DEFAULT_FACTION_NAME,DEFAULT_FACTION_NAME));
 
       final File folder = new File("res/unit/faction");
 
@@ -121,9 +123,21 @@ public class UIUtils
             }
           }
           // If it's a directory, we assume it's a set of map sprites, i.e. a faction.
-          else if(!fileEntry.getName().endsWith(DEFAULT_FACTION_NAME)) // However, we don't wanna add our default twice
+          else if(fileEntry.canRead() && !fileEntry.getName().endsWith(DEFAULT_FACTION_NAME)) // However, we don't wanna add our default twice
           {
-            factionNames.add(fileEntry.getName());
+            String basis = DEFAULT_FACTION_NAME;
+            try
+            {
+              BufferedReader br = new BufferedReader(new FileReader(fileEntry.getAbsolutePath() + "/basis.txt"));
+              basis = br.readLine().trim();
+              br.close();
+            }
+            catch (IOException ioex)
+            {
+              // if there's no valid basis, there's no problem
+            }
+            
+            factions.add(new Faction(fileEntry.getName(), basis));
           }
         }
       }
@@ -154,11 +168,21 @@ public class UIUtils
     return colorNames.get(colorKey);
   }
 
-  public static String[] getFactionNames()
+  public static Faction[] getFactions()
   {
     initCosmetics();
-    return factionNames.toArray(new String[0]);
+    return factions.toArray(new Faction[0]);
   }
   
-  
+  public static class Faction
+  {
+    public String name;
+    public String basis;
+    
+    public Faction(String pName, String pBasis)
+    {
+      name = pName;
+      basis = pBasis;
+    }
+  }
 }

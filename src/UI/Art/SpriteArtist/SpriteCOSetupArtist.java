@@ -164,7 +164,7 @@ public class SpriteCOSetupArtist
       SpriteLibrary.drawImageCenteredOnPoint(g, colorFrame, xCenter+colorOffset.xCoord, yCenter+colorOffset.yCoord, 1);
 
       // draw the CO's faction selection
-      BufferedImage factionFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), info.getCurrentFaction(), 2*drawScale, 2*drawScale);
+      BufferedImage factionFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), info.getCurrentFaction().name, 2*drawScale, 2*drawScale);
       XYCoord factionOffset = getChoiceOffset(OptionList.FACTION, drawW/2, drawH/2, drawScale);
       SpriteLibrary.drawImageCenteredOnPoint(g, factionFrame, xCenter+factionOffset.xCoord, yCenter+factionOffset.yCoord, 1);
       
