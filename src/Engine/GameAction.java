@@ -316,7 +316,11 @@ public interface GameAction
                 if (loc.getEnvironment().terrainType == TerrainType.LAB ) 
                 {
                   numLabs += 1;
-                  break;
+                  if (numLabs > 1) 
+                  {
+                    break;
+                  }
+                  
                 }
                 if (loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS ) 
                 {
