@@ -296,14 +296,45 @@ public interface GameAction
 
           if( capture.willCapture() ) // If this will succeed, check if the CO will lose as a result.
           {
+            
+            boolean playerHasLost = false;
+            
             // Check if capturing this property will cause someone's defeat.
             if( (propertyType == TerrainType.HEADQUARTERS) && (null != captureLocation.getOwner()) )
             {
+              playerHasLost = true;
+            }
+            
+            else if ((propertyType == TerrainType.LAB) && (null != captureLocation.getOwner())) 
+            {
+              int numLabs = 0;
+              int numHQs = 0;
+              Commander CO = captureLocation.getOwner();
+              for (XYCoord xy : CO.ownedProperties) {
+                Location loc = map.getLocation(xy);
+                if (loc.getEnvironment().terrainType == TerrainType.LAB ) 
+                {
+                  numLabs += 1;
+                }
+                if (loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS ) 
+                {
+                  numHQs += 1;
+                }                
+              }
+              if (numLabs == 0 && numHQs == 0) 
+              {
+                playerHasLost = true;
+              }
+            }
+            
+            
+            if (playerHasLost) {
               // Someone is losing their big, comfy chair.
               CommanderDefeatEvent defeat = new CommanderDefeatEvent(captureLocation.getOwner());
               defeat.setPropertyBeneficiary(actor.CO);
               captureEvents.add(defeat);
             }
+            
           }
         }
       }
