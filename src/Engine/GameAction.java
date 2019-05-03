@@ -328,14 +328,13 @@ public interface GameAction
               }
             }
             
-            
-            if (playerHasLost) {
+            if (playerHasLost) 
+            {
               // Someone is losing their big, comfy chair.
               CommanderDefeatEvent defeat = new CommanderDefeatEvent(captureLocation.getOwner());
               defeat.setPropertyBeneficiary(actor.CO);
               captureEvents.add(defeat);
             }
-            
           }
         }
       }
