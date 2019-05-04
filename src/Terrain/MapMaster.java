@@ -42,6 +42,7 @@ public class MapMaster extends GameMap
     {
       System.out.println("Warning! Wrong number of unit arrays specified for map " + mapInfo.mapName);
       System.out.println(String.format("         Expected zero or %s; received %s", COs.length, mapInfo.mapUnits.size()));
+      initOK = false;
     }
 
     // Assign properties according to MapInfo's direction.
