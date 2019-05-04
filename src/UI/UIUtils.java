@@ -126,15 +126,19 @@ public class UIUtils
           else if(fileEntry.canRead() && !fileEntry.getName().endsWith(DEFAULT_FACTION_NAME)) // However, we don't wanna add our default twice
           {
             String basis = DEFAULT_FACTION_NAME;
-            try
+            String basisPath = fileEntry.getAbsolutePath() + "/basis.txt";
+            if( new File(basisPath).canRead() )
             {
-              BufferedReader br = new BufferedReader(new FileReader(fileEntry.getAbsolutePath() + "/basis.txt"));
-              basis = br.readLine().trim();
-              br.close();
-            }
-            catch (IOException ioex)
-            {
-              // if there's no valid basis, there's no problem
+              try
+              {
+                BufferedReader br = new BufferedReader(new FileReader(basisPath));
+                basis = br.readLine().trim();
+                br.close();
+              }
+              catch (IOException ioex)
+              {
+                System.out.println("WARNING! Exception loading faction basis " + basisPath);
+              }
             }
             
             factions.add(new Faction(fileEntry.getName(), basis));
