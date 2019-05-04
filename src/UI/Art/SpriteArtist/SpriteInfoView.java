@@ -1,67 +1,51 @@
 package UI.Art.SpriteArtist;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
-import java.util.Queue;
-
 import CommandingOfficers.COMaker.InfoPage;
 import CommandingOfficers.Commander;
 import Engine.Driver;
-import Engine.GameInstance;
-import Engine.IView;
-import Engine.Path;
 import Engine.Utils;
-import Engine.Combat.BattleSummary;
-import Engine.Combat.CombatEngine;
-import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.GameMap;
 import UI.InfoController;
 import UI.MapView;
-import UI.Art.Animation.GameAnimation;
-import UI.Art.Animation.NoAnimation;
-import UI.Art.Animation.NobunagaBattleAnimation;
-import UI.Art.Animation.ResupplyAnimation;
-import Units.Unit;
 
-public class SpriteInfoView extends MapView // extend MapView for getDrawableMap()
+/**
+ * InfoView paints the CO's full portrait and a box with info in it.
+ * The contents of the info are defined by inputs; current game status or static CO info are both used
+ */
+public class SpriteInfoView extends MapView // Extend MapView for getDrawableMap(). We don't actually draw it, but we need fog info.
 {
   private InfoController myControl;
   
   /** Width of the visible space in pixels. */
-  private int mapViewWidth;
+  private int viewWidth;
   /** Height of the visible space in pixels. */
-  private int mapViewHeight;
-
-  boolean dimensionsChanged = false; // If the window is resized, don't bother sliding the view into place; just snap.
+  private int viewHeight;
 
   public SpriteInfoView(InfoController control)
   {
     Dimension dims = Driver.getInstance().gameGraphics.getScreenDimensions();
-    mapViewWidth = dims.width;
-    mapViewHeight = dims.height;
+    viewWidth = dims.width;
+    viewHeight = dims.height;
     myControl = control;
   }
 
   @Override
   public Dimension getPreferredDimensions()
   {
-    return new Dimension(mapViewWidth, mapViewHeight);
+    return new Dimension(viewWidth, viewHeight);
   }
 
   @Override
   public void setPreferredDimensions(int width, int height)
   {
     // The user wants to use a specific amount of screen. Figure out how many tiles to draw for them.
-    mapViewWidth = width;
-    mapViewHeight = height;
+    viewWidth = width;
+    viewHeight = height;
     // Let SpriteOptions know we are changing things.
-    SpriteOptions.setScreenDimensions(mapViewWidth, mapViewHeight);
-
-    dimensionsChanged = true; // Let render() know that the window was resized.
+    SpriteOptions.setScreenDimensions(viewWidth, viewHeight);
   }
 
   @Override
@@ -73,8 +57,8 @@ public class SpriteInfoView extends MapView // extend MapView for getDrawableMap
     int drawScale = SpriteOptions.getDrawScale();
     
     int paneOuterBuffer = 4*drawScale; // sets both outer border and frame border size
-    int paneHSize = (int) (mapViewWidth*0.7) - paneOuterBuffer*4; // width of the BG color area
-    int paneVSize = (int) (mapViewHeight   ) - paneOuterBuffer*4; // height ""
+    int paneHSize = (int) (viewWidth*0.7) - paneOuterBuffer*4; // width of the BG color area
+    int paneVSize = (int) (viewHeight   ) - paneOuterBuffer*4; // height ""
 
     // Get the current menu selections.
     Commander co = myControl.getSelectedCO();
@@ -83,16 +67,16 @@ public class SpriteInfoView extends MapView // extend MapView for getDrawableMap
     // Draw the commander art.
     BufferedImage COPic = SpriteLibrary.getCommanderSprites(myControl.getSelectedCOInfo().name).body;
     // justify bottom/right
-    g.drawImage(COPic, mapViewWidth - COPic.getWidth()*drawScale, mapViewHeight - COPic.getHeight()*drawScale,
+    g.drawImage(COPic, viewWidth - COPic.getWidth()*drawScale, viewHeight - COPic.getHeight()*drawScale,
         COPic.getWidth()*drawScale, COPic.getHeight()*drawScale, null);
 
     if (null != co)
       CommanderOverlayArtist.drawCommanderOverlay(g, co, false);
     
     // add the actual info
-    g.setColor(SpriteUIUtils.MENUFRAMECOLOR);
+    g.setColor(SpriteUIUtils.MENUFRAMECOLOR); // outer buffer
     g.fillRect(  paneOuterBuffer,   paneOuterBuffer, paneHSize + 2*paneOuterBuffer, paneVSize + 2*paneOuterBuffer);
-    g.setColor(SpriteUIUtils.MENUBGCOLOR);
+    g.setColor(SpriteUIUtils.MENUBGCOLOR);    // inside of the pane
     g.fillRect(2*paneOuterBuffer, 2*paneOuterBuffer, paneHSize                    , paneVSize                    );
     
     // TODO: consider drawing all pages as one big image, so the user can scroll smoothly through it regardless of screen size
