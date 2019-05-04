@@ -137,7 +137,7 @@ public class UIUtils
               }
               catch (IOException ioex)
               {
-                System.out.println("WARNING! Exception loading faction basis " + basisPath);
+                System.out.println("WARNING! Exception loading faction basis " + basisPath + ". Defaulting to sprites from " + DEFAULT_FACTION_NAME);
               }
             }
             
