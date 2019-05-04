@@ -4,14 +4,11 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import javax.imageio.ImageIO;
+import java.util.Map;
 
 import CommandingOfficers.Commander;
-import CommandingOfficers.CommanderLibrary;
 import Terrain.Location;
 import Terrain.TerrainType;
 import UI.UIUtils;
@@ -27,20 +24,23 @@ public class SpriteLibrary
   // This is the physical size of a single map square in pixels.
   public static final int baseSpriteSize = 16;
 
-  // TODO: Account for weather?
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
-  // TODO: Consider templatizing the key types, and then combining these two maps.
   private static HashMap<UnitSpriteSetKey, UnitSpriteSet> mapUnitSpriteSetMap = new HashMap<UnitSpriteSetKey, UnitSpriteSet>();
 
   // Sprites to hold the images for drawing tentative moves on the map.
   private static Sprite moveCursorLineSprite = null;
   private static Sprite moveCursorArrowSprite = null;
 
-  // HP numbers to overlay on map units when damaged.
+  // Numbers and letters to overlay on map units.
   private static Sprite mapUnitHPSprites = null;
+  private static Sprite mapUnitLetterSprites = null;
+  private static Map<Color,Map<Character,BufferedImage>> mapUnitTextSprites = null;
 
   // Cargo icon for when transports are holding other units.
   private static BufferedImage mapUnitCargoIcon = null;
+
+  // Stun icon for when units are unable to move.
+  private static BufferedImage mapUnitStunIcon = null;
 
   // Capture icon for when units are capturing properties.
   private static BufferedImage mapUnitCaptureIcon = null;
@@ -110,6 +110,14 @@ public class SpriteLibrary
     TerrainType terrainType = spriteKey.terrainKey;
     System.out.println("INFO: Loading terrain sprites for " + terrainType);
 
+    String tileSpritesheetLocations = "res/tileset";
+    String formatString = tileSpritesheetLocations + "/%s_%s.png";
+
+    // Transition format Strings are e.g. "res/tileset/grass_bridge_clear.png", for
+    // the transition from bridge onto grass. We'll drop in the first parameter here,
+    // then pass the result to the TerrainSpriteSet of type bridge.
+    String transitionFormatString = tileSpritesheetLocations + "/%s_%s_%s.png";
+
     TerrainSpriteSet ss = null;
     int w = baseSpriteSize;
     int h = baseSpriteSize;
@@ -117,83 +125,91 @@ public class SpriteLibrary
     // Load the appropriate images and define the necessary relationships for each tile type.
     if( terrainType == TerrainType.BRIDGE )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/bridge_clear.png"), w, h);
+      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
       ss.addTerrainAffinity(TerrainType.GRASS); // No need to also add ROAD, since GRASS is the base of ROAD.
       ss.denyTerrainAffinity(TerrainType.RIVER); // RIVER has a base of GRASS, but we don't want bridge to tile with it.
     }
     else if( terrainType == TerrainType.CITY )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/city_clear.png"), w * 2, h * 2);
+      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
+    }
+    else if( terrainType == TerrainType.PILLAR )
+    {
+      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
+    }
+    else if( terrainType == TerrainType.BUNKER )
+    {
+      ss = new TerrainSpriteSet(terrainType, formatString, w*2, h*2);
     }
     else if( terrainType == TerrainType.DUNES )
     {}
     else if( terrainType == TerrainType.FACTORY )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/factory_clear.png"), w * 2, h * 2);
+      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
     }
     else if( terrainType == TerrainType.AIRPORT )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/airport_clear.png"), w * 2, h * 2);
+      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
     }
     else if( terrainType == TerrainType.SEAPORT )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/seaport_clear.png"), w * 2, h * 2);
+      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
     }
     else if( terrainType == TerrainType.FOREST )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/forest_clear.png"), w * 2, h * 2);
+      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
     }
     else if( terrainType == TerrainType.GRASS )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/grass_clear.png"), w, h);
-      ss.addTileTransition(TerrainType.BRIDGE, loadSpriteSheetFile("res/tileset/grass_bridge_clear.png"), w, h);
+      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
+      ss.addTileTransition(TerrainType.BRIDGE, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
     }
     else if( terrainType == TerrainType.HEADQUARTERS )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/hq_clear.png"), w * 2, h * 2);
+      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
     }
     else if( terrainType == TerrainType.LAB )
     {
       // TODO: get actual sprites for this
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/hq_clear.png"), w * 2, h * 2);
+      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
     }
     else if( terrainType == TerrainType.MOUNTAIN )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/mountain_clear.png"), w * 2, h * 2);
+      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
     }
     else if( terrainType == TerrainType.SEA )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/sea_clear.png"), w, h);
-      ss.addTileTransition(TerrainType.GRASS, loadSpriteSheetFile("res/tileset/sea_grass_clear.png"), w, h);
-      ss.addTileTransition(TerrainType.BRIDGE, loadSpriteSheetFile("res/tileset/sea_bridge_clear.png"), w, h);
-      ss.addTileTransition(TerrainType.RIVER, loadSpriteSheetFile("res/tileset/sea_river_clear.png"), w, h);
+      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
+      ss.addTileTransition(TerrainType.GRASS, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
+      ss.addTileTransition(TerrainType.BRIDGE, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
+      ss.addTileTransition(TerrainType.RIVER, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
     }
     else if( terrainType == TerrainType.REEF )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/reef_clear.png"), w, h);
-      ss.addTileTransition(TerrainType.SEA, loadSpriteSheetFile("res/tileset/reef_clear.png"), w, h);
+      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
+      ss.addTileTransition(TerrainType.SEA, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
     }
     else if( terrainType == TerrainType.RIVER )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/river_clear.png"), w, h);
-      ss.addTileTransition(TerrainType.BRIDGE, loadSpriteSheetFile("res/tileset/sea_bridge_clear.png"), w, h);
+      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
+      ss.addTileTransition(TerrainType.BRIDGE, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
       ss.addTerrainAffinity(TerrainType.SHOAL);
       ss.addTerrainAffinity(TerrainType.SEA);
     }
     else if( terrainType == TerrainType.ROAD )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/road_clear.png"), w, h);
+      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
       ss.addTerrainAffinity(TerrainType.BRIDGE);
       ss.addTerrainAffinity(TerrainType.HEADQUARTERS);
       ss.addTerrainAffinity(TerrainType.FACTORY);
     }
     else if( terrainType == TerrainType.SHOAL )
     {
-      ss = new TerrainSpriteSet(spriteKey.terrainKey, loadSpriteSheetFile("res/tileset/shoal_clear.png"), w, h);
-      ss.addTileTransition(TerrainType.SEA, loadSpriteSheetFile("res/tileset/shoal_sea_clear.png"), w, h);
-      ss.addTileTransition(TerrainType.GRASS, loadSpriteSheetFile("res/tileset/shoal_grass_clear.png"), w, h);
-      ss.addTileTransition(TerrainType.BRIDGE, loadSpriteSheetFile("res/tileset/sea_bridge_clear.png"), w, h);
-      ss.addTileTransition(TerrainType.RIVER, loadSpriteSheetFile("res/tileset/shoal_river_clear.png"), w, h);
+      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
+      ss.addTileTransition(TerrainType.SEA, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
+      ss.addTileTransition(TerrainType.GRASS, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
+      ss.addTileTransition(TerrainType.BRIDGE, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
+      ss.addTileTransition(TerrainType.RIVER, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
     }
     else
     {
@@ -203,31 +219,16 @@ public class SpriteLibrary
     // If this tile is owned by someone, fly their colors.
     if( spriteKey.commanderKey != null )
     {
-      ss.colorize(UIUtils.defaultMapColors, UIUtils.getBuildingColors(spriteKey.commanderKey.myColor).paletteColors);
+      ss.setTeamColor(spriteKey.commanderKey.myColor);
     }
     spriteSetMap.put(spriteKey, ss);
-  }
-
-  private static BufferedImage loadSpriteSheetFile(String filename)
-  {
-    BufferedImage bi = null;
-    try
-    {
-      bi = ImageIO.read(new File(filename));
-    }
-    catch (IOException ioex)
-    {
-      System.out.println("WARNING! Exception loading resource file " + filename);
-      bi = null;
-    }
-    return bi;
   }
 
   public static Sprite getMoveCursorLineSprite()
   {
     if( moveCursorLineSprite == null )
     {
-      moveCursorLineSprite = new Sprite(loadSpriteSheetFile("res/tileset/moveCursorLine.png"), baseSpriteSize, baseSpriteSize);
+      moveCursorLineSprite = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/tileset/moveCursorLine.png"), baseSpriteSize, baseSpriteSize);
     }
 
     return moveCursorLineSprite;
@@ -237,7 +238,7 @@ public class SpriteLibrary
   {
     if( moveCursorArrowSprite == null )
     {
-      moveCursorArrowSprite = new Sprite(loadSpriteSheetFile("res/tileset/moveCursorArrow.png"), baseSpriteSize, baseSpriteSize);
+      moveCursorArrowSprite = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/tileset/moveCursorArrow.png"), baseSpriteSize, baseSpriteSize);
     }
 
     return moveCursorArrowSprite;
@@ -330,7 +331,7 @@ public class SpriteLibrary
     String filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction.name);
     if (!new File(filestr).canRead())
       filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction.basis);
-    UnitSpriteSet spriteSet = new UnitSpriteSet(loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
+    UnitSpriteSet spriteSet = new UnitSpriteSet(SpriteUIUtils.loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
         UIUtils.getMapUnitColors(key.commanderKey.myColor));
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
@@ -347,25 +348,79 @@ public class SpriteLibrary
   {
     if( null == mapUnitHPSprites )
     {
-      mapUnitHPSprites = new Sprite(loadSpriteSheetFile("res/unit/icon/hp.png"), 8, 8);
+      mapUnitHPSprites = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/unit/icon/hp.png"), 8, 8);
     }
     return mapUnitHPSprites;
+  }
+
+  public static Sprite getMapUnitLetterSprites()
+  {
+    if( null == mapUnitLetterSprites )
+    {
+      mapUnitLetterSprites = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/unit/icon/alphabet.png"), 8, 8);
+    }
+    return mapUnitLetterSprites;
+  }
+
+  public static Map<Character,BufferedImage> getColoredMapTextSprites(Color color)
+  {
+    if( null == mapUnitTextSprites )
+    {
+      mapUnitTextSprites = new HashMap<Color,Map<Character,BufferedImage>>();
+    }
+    if( null == mapUnitTextSprites.get(color) )
+    {
+      Map<Character,BufferedImage> colorMap = new HashMap<Character,BufferedImage>();
+
+      // Colorize the characters...
+      Sprite letters = new Sprite(getMapUnitLetterSprites());
+      letters.colorize(Color.WHITE, color);
+      // ...and put them into our map
+      for (char ch = 'A'; ch <= 'Z'; ch++)
+      {
+        int letterIndex = ch - 'A';
+        colorMap.put(ch, letters.getFrame(letterIndex));
+      }
+      
+      // Do the same for numbers
+      Sprite numbers = new Sprite(getMapUnitHPSprites());
+      numbers.colorize(Color.WHITE, color);
+      for (char ch = '0'; ch <= '9'; ch++)
+      {
+        int letterIndex = ch - '0';
+        colorMap.put(ch, numbers.getFrame(letterIndex));
+      }
+      
+      // Put our new map into the general collection, so we don't have to do this again
+      mapUnitTextSprites.put(color, colorMap);
+    }
+    
+    return mapUnitTextSprites.get(color);
   }
 
   public static BufferedImage getCargoIcon()
   {
     if( null == mapUnitCargoIcon )
     {
-      mapUnitCargoIcon = loadSpriteSheetFile("res/unit/icon/cargo.png");
+      mapUnitCargoIcon = SpriteUIUtils.loadSpriteSheetFile("res/unit/icon/cargo.png");
     }
     return mapUnitCargoIcon;
+  }
+
+  public static BufferedImage getStunIcon()
+  {
+    if( null == mapUnitStunIcon )
+    {
+      mapUnitStunIcon = SpriteUIUtils.loadSpriteSheetFile("res/unit/icon/stun.png");
+    }
+    return mapUnitStunIcon;
   }
 
   public static BufferedImage getCaptureIcon()
   {
     if( null == mapUnitCaptureIcon )
     {
-      mapUnitCaptureIcon = loadSpriteSheetFile("res/unit/icon/capture.png");
+      mapUnitCaptureIcon = SpriteUIUtils.loadSpriteSheetFile("res/unit/icon/capture.png");
     }
     return mapUnitCaptureIcon;
   }
@@ -384,7 +439,7 @@ public class SpriteLibrary
   {
     if( null == letterSpritesUppercase )
     {
-      letterSpritesUppercase = new Sprite(loadSpriteSheetFile("res/ui/main/letters_uppercase.png"), 5, 11);
+      letterSpritesUppercase = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/letters_uppercase.png"), 5, 11);
     }
     return letterSpritesUppercase;
   }
@@ -399,7 +454,7 @@ public class SpriteLibrary
   {
     if( null == letterSpritesLowercase )
     {
-      letterSpritesLowercase = new Sprite(loadSpriteSheetFile("res/ui/main/letters_lowercase.png"), 5, 11);
+      letterSpritesLowercase = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/letters_lowercase.png"), 5, 11);
     }
     return letterSpritesLowercase;
   }
@@ -414,7 +469,7 @@ public class SpriteLibrary
   {
     if( null == numberSprites )
     {
-      numberSprites = new Sprite(loadSpriteSheetFile("res/ui/main/numbers.png"), 5, 11);
+      numberSprites = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/numbers.png"), 5, 11);
     }
     return numberSprites;
   }
@@ -429,7 +484,7 @@ public class SpriteLibrary
   {
     if( null == letterSpritesSmallCaps )
     {
-      letterSpritesSmallCaps = new Sprite(loadSpriteSheetFile("res/ui/letters.png"), 5, 6);
+      letterSpritesSmallCaps = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/letters.png"), 5, 6);
     }
     return letterSpritesSmallCaps;
   }
@@ -445,7 +500,7 @@ public class SpriteLibrary
   {
     if( null == numberSpritesSmallCaps )
     {
-      numberSpritesSmallCaps = new Sprite(loadSpriteSheetFile("res/ui/numbers.png"), 5, 6);
+      numberSpritesSmallCaps = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/numbers.png"), 5, 6);
     }
     return numberSpritesSmallCaps;
   }
@@ -460,7 +515,7 @@ public class SpriteLibrary
   {
     if( null == symbolSpritesSmallCaps )
     {
-      symbolSpritesSmallCaps = new Sprite(loadSpriteSheetFile("res/ui/symbols.png"), 5, 6);
+      symbolSpritesSmallCaps = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/symbols.png"), 5, 6);
     }
     return symbolSpritesSmallCaps;
   }
@@ -573,7 +628,7 @@ public class SpriteLibrary
       final int OVERLAY_HEIGHT = 20;
 
       // If we don't already have this overlay, go load and store it.
-      Sprite overlay = new Sprite(loadSpriteSheetFile("res/ui/co_overlay.png"), OVERLAY_WIDTH, OVERLAY_HEIGHT);
+      Sprite overlay = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/co_overlay.png"), OVERLAY_WIDTH, OVERLAY_HEIGHT);
       overlay.colorize(UIUtils.defaultMapColors, UIUtils.getMapUnitColors(co.myColor).paletteColors);
 
       // Draw the Commander's mug on top of the overlay.
@@ -624,7 +679,7 @@ public class SpriteLibrary
     {
       // Image should be: empty bar, full bar, empty point, 1/3 point, 2/3 point, full point, large point.
       // Image should be: empty point, 1/3 point, 2/3 point, full point, large point.
-      Sprite overlay = new Sprite(loadSpriteSheetFile("res/ui/powerbar_pieces.png"), POWERBAR_FRAME_WIDTH, POWERBAR_FRAME_HEIGHT);
+      Sprite overlay = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/powerbar_pieces.png"), POWERBAR_FRAME_WIDTH, POWERBAR_FRAME_HEIGHT);
       overlay.colorize(UIUtils.defaultMapColors, UIUtils.getMapUnitColors(co.myColor).paletteColors);
 
       coPowerBarPieces.put(co, overlay);
@@ -682,7 +737,7 @@ public class SpriteLibrary
   {
     if( null == actionCursor )
     {
-      actionCursor = loadSpriteSheetFile("res/tileset/cursor_action.png");
+      actionCursor = SpriteUIUtils.loadSpriteSheetFile("res/tileset/cursor_action.png");
       if( null == actionCursor )
       {
         actionCursor = createDefaultBlankSprite(baseSpriteSize, baseSpriteSize);
@@ -700,9 +755,9 @@ public class SpriteLibrary
   {
     if( null == menuOptionsSprite )
     {
-      menuOptionsSprite = new Sprite(createBlankImageIfNull(loadSpriteSheetFile("res/ui/main/newgame.png")));
-      menuOptionsSprite.addFrame(createBlankImageIfNull(loadSpriteSheetFile("res/ui/main/options.png")));
-      menuOptionsSprite.addFrame(createBlankImageIfNull(loadSpriteSheetFile("res/ui/main/quit.png")));
+      menuOptionsSprite = new Sprite(createBlankImageIfNull(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/newgame.png")));
+      menuOptionsSprite.addFrame(createBlankImageIfNull(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/options.png")));
+      menuOptionsSprite.addFrame(createBlankImageIfNull(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/quit.png")));
     }
     return menuOptionsSprite;
   }
@@ -711,7 +766,7 @@ public class SpriteLibrary
   {
     if(null == gameOverDefeatText)
     {
-      gameOverDefeatText = loadSpriteSheetFile("res/ui/defeat.png");
+      gameOverDefeatText = SpriteUIUtils.loadSpriteSheetFile("res/ui/defeat.png");
     }
     return gameOverDefeatText;
   }
@@ -720,7 +775,7 @@ public class SpriteLibrary
   {
     if(null == gameOverVictoryText)
     {
-      gameOverVictoryText = loadSpriteSheetFile("res/ui/victory.png");
+      gameOverVictoryText = SpriteUIUtils.loadSpriteSheetFile("res/ui/victory.png");
     }
     return gameOverVictoryText;
   }
@@ -745,9 +800,9 @@ public class SpriteLibrary
       String headString = ((new File(baseFileName + "_face.png").isFile())? baseFileName : basePlaceholder) + "_face.png";
       String eyesString = ((new File(baseFileName + "_eyes.png").isFile())? baseFileName : basePlaceholder) + "_eyes.png";
 
-      BufferedImage body = createBlankImageIfNull(loadSpriteSheetFile(bodyString));
-      BufferedImage head = createBlankImageIfNull(loadSpriteSheetFile(headString));
-      BufferedImage eyes = createBlankImageIfNull(loadSpriteSheetFile(eyesString));
+      BufferedImage body = createBlankImageIfNull(SpriteUIUtils.loadSpriteSheetFile(bodyString));
+      BufferedImage head = createBlankImageIfNull(SpriteUIUtils.loadSpriteSheetFile(headString));
+      BufferedImage eyes = createBlankImageIfNull(SpriteUIUtils.loadSpriteSheetFile(eyesString));
 
       coSpriteSets.put(whichCo, new CommanderSpriteSet(body, head, eyes));
     }

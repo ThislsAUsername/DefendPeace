@@ -179,7 +179,8 @@ public class InfantrySpamAI implements AIController
 
         // Sort my currently-reachable move locations by distance from the goal,
         // and build a GameAction to move to the closest one.
-        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
+        boolean includeTransports = false;
+        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeTransports);
         Utils.sortLocationsByDistance(goal, destinations);
         XYCoord destination = destinations.get(0);
         Path movePath = Utils.findShortestPath(unit, destination, gameMap);

@@ -291,7 +291,7 @@ public class SpriteMapView extends MapView
       if( null != currentActor )
       {
         unitArtist.drawUnit(mapGraphics, currentActor, currentActor.x, currentActor.y, fastAnimIndex);
-        unitArtist.drawUnitIcons(mapGraphics, currentActor, currentActor.x, currentActor.y);
+        unitArtist.drawUnitIcons(mapGraphics, currentActor, currentActor.x, currentActor.y, animIndex);
       }
 
       if( currentAnimation != null )
@@ -470,7 +470,7 @@ public class SpriteMapView extends MapView
           Unit currentActor = mapController.getContemplatedActor();
           if( resident != currentActor )
           {
-            unitArtist.drawUnitIcons(g, resident, resident.x, resident.y);
+            unitArtist.drawUnitIcons(g, resident, resident.x, resident.y, animIndex);
           }
         }
       }
@@ -572,5 +572,14 @@ public class SpriteMapView extends MapView
 
     // Create a new animation to show the game results.
     currentAnimation = new SpriteGameEndAnimation(myGame.commanders);
+  }
+
+  @Override
+  public void cleanup()
+  {
+    mapArtist.cleanup();
+    mapArtist = null;
+    unitArtist = null;
+    menuArtist = null;
   }
 }

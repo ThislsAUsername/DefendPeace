@@ -3,6 +3,7 @@ package Engine;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Queue;
 
 import CommandingOfficers.Commander;
@@ -69,15 +70,16 @@ public class Utils
   {
     ArrayList<XYCoord> locations = findLocationsInRange(map, moveLoc, 1);
     ArrayList<XYCoord> dropoffLocations = new ArrayList<XYCoord>();
-    for( XYCoord loc : locations )
-    {
-      // Add any location that is empty and supports movement of the cargo unit.
-      if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
-          && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
+    if( cargo.model.propulsion.canTraverse(map.getEnvironment(moveLoc)) )
+      for( XYCoord loc : locations )
       {
-        dropoffLocations.add(loc);
+        // Add any location that is empty and supports movement of the cargo unit.
+        if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
+            && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
+        {
+          dropoffLocations.add(loc);
+        }
       }
-    }
     return dropoffLocations;
   }
 
@@ -92,9 +94,12 @@ public class Utils
   }
 
   /**
-   * Sets the highlight for myGame.gameMap.getLocation(x, y) to true if unit can reach (x, y), and false otherwise.
+   * Returns the list of XYCoords in gameMap reachable by unit this turn.
+   * @param unit The unit to evaluate.
+   * @param gameMap The map to search over.
+   * @param includeOccupiedSpaces If true, will include spaces occupied by a friendly unit, if some action could end on this space (e.g. LOAD, JOIN).
    */
-  public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap)
+  public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap, boolean includeOccupiedSpaces)
   {
     ArrayList<XYCoord> reachableTiles = new ArrayList<XYCoord>();
 
@@ -120,7 +125,9 @@ public class Utils
       SearchNode currentNode = searchQueue.poll();
       // if the space is empty or holds the current unit, highlight
       Unit obstacle = gameMap.getLocation(currentNode.x, currentNode.y).getResident();
-      if( obstacle == null || obstacle == unit || (obstacle.CO == unit.CO && obstacle.hasCargoSpace(unit.model.type)) )
+      if( obstacle == null || obstacle == unit ||
+          (includeOccupiedSpaces && (obstacle.CO == unit.CO) && obstacle.hasCargoSpace(unit.model.type)) ||
+          (includeOccupiedSpaces && (obstacle.CO == unit.CO) && (obstacle.model.type == unit.model.type) && (obstacle.getHP() < obstacle.model.maxHP)))
       {
         reachableTiles.add(new XYCoord(currentNode.x, currentNode.y));
       }
@@ -572,7 +579,7 @@ public class Utils
   }
 
   /**
-   * Evaluates the proposed move, creates a MoveEvent describing it, and adds that event to eventQueu
+   * Evaluates the proposed move, creates a MoveEvent describing it, and adds that event to eventQueue
    * If the move passes over an obstacle, the resulting MoveEvent will have its path shortened accordingly.
    * @param gameMap The world in which the action is to take place.
    * @param unit The unit who is to move.
@@ -590,5 +597,25 @@ public class Utils
     }
     eventQueue.add(new Engine.GameEvents.MoveEvent(unit, movePath));
     return originalPathOK;
+  }
+
+  public static HashSet<XYCoord> findLocationsNearProperties(GameMap gameMap, Commander cmdr, int range)
+  {
+    HashSet<XYCoord> tilesInRange = new HashSet<XYCoord>();
+    for( XYCoord prop : cmdr.ownedProperties )
+    {
+      tilesInRange.addAll(Utils.findLocationsInRange(gameMap, prop, 0, range));
+    }
+    return tilesInRange;
+  }
+
+  public static HashSet<XYCoord> findLocationsNearUnits(GameMap gameMap, Commander cmdr, int range)
+  {
+    HashSet<XYCoord> tilesInRange = new HashSet<XYCoord>();
+    for( Unit unit : cmdr.units )
+    {
+      tilesInRange.addAll(Utils.findLocationsInRange(gameMap, new XYCoord(unit.x, unit.y), 0, range));
+    }
+    return tilesInRange;
   }
 }

@@ -1,12 +1,14 @@
 package CommandingOfficers;
 
 import java.util.ArrayList;
+
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COModifier;
-import Engine.Combat.BattleSummary;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.Combat.BattleInstance.CombatContext;
+import Engine.Combat.BattleSummary;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -48,17 +50,28 @@ public class CommanderVenge extends Commander
   }
 
   @Override
-  public void initTurn(GameMap map)
+  public GameEventQueue initTurn(GameMap map)
   {
-    super.initTurn(map);
+    GameEventQueue events = super.initTurn(map);
     counterAtFullPower = false;
     counterFirst = false;
+    return events;
   }
   @Override
   public void endTurn()
   {
     super.endTurn();
     aggressors.clear();
+  }
+
+  @Override
+  public char getUnitMarking(Unit unit)
+  {
+    // If we can get a vengeance boost against this unit, let our player know.
+    if (aggressors.contains(unit))
+      return 'V';
+    
+    return super.getUnitMarking(unit);
   }
 
   @Override

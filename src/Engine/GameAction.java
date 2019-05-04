@@ -16,6 +16,7 @@ import Engine.GameEvents.LoadEvent;
 import Engine.GameEvents.MoveEvent;
 import Engine.GameEvents.ResupplyEvent;
 import Engine.GameEvents.UnitDieEvent;
+import Engine.GameEvents.UnitJoinEvent;
 import Engine.GameEvents.UnloadEvent;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -31,7 +32,7 @@ public interface GameAction
 {
   public enum ActionType
   {
-    ATTACK, CAPTURE, LOAD, RESUPPLY, UNLOAD, WAIT, UNITPRODUCTION, OTHER
+    ATTACK, CAPTURE, LOAD, JOIN, RESUPPLY, UNLOAD, WAIT, UNITPRODUCTION, OTHER
   }
 
   /**
@@ -51,7 +52,7 @@ public interface GameAction
   public static class AttackAction implements GameAction
   {
     private Path movePath;
-    private XYCoord moveLocation = null;
+    private XYCoord moveCoord = null;
     private XYCoord attackLocation = null;
     private Unit attacker;
     private Unit defender;
@@ -68,7 +69,7 @@ public interface GameAction
       attackLocation = atkLoc;
       if( null != path && (path.getEnd() != null) )
       {
-        moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        moveCoord = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
         if((null != atkLoc) && (null != gameMap) && gameMap.isLocationValid(atkLoc))
         {
           defender = gameMap.getLocation(atkLoc).getResident();
@@ -94,14 +95,15 @@ public interface GameAction
       isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       if( isValid )
       {
-        moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        Location moveLocation = gameMap.getLocation(moveCoord);
         defender = gameMap.getLocation(attackLocation).getResident();
-        attackRange = Math.abs(moveLocation.xCoord - attackLocation.xCoord)
-            + Math.abs(moveLocation.yCoord - attackLocation.yCoord);
+        attackRange = Math.abs(moveCoord.xCoord - attackLocation.xCoord)
+            + Math.abs(moveCoord.yCoord - attackLocation.yCoord);
 
-        boolean moved = attacker.x != moveLocation.xCoord || attacker.y != moveLocation.yCoord;
+        boolean moved = attacker.x != moveCoord.xCoord || attacker.y != moveCoord.yCoord;
         isValid &= (null != defender) && attacker.canAttack(defender.model, attackRange, moved);
         isValid &= attacker.CO.isEnemy(defender.CO);
+        isValid &= (null == moveLocation.getResident()) || (attacker == moveLocation.getResident());
       }
 
       if( isValid )
@@ -109,7 +111,7 @@ public interface GameAction
         if( Utils.enqueueMoveEvent(gameMap, attacker, movePath, attackEvents) )
         {
           // No surprises in the fog. Resolve combat.
-          BattleEvent event = new BattleEvent(attacker, defender, moveLocation.xCoord, moveLocation.yCoord, gameMap);
+          BattleEvent event = new BattleEvent(attacker, defender, moveCoord.xCoord, moveCoord.yCoord, gameMap);
           attackEvents.add(event);
 
           if( event.attackerDies() )
@@ -142,7 +144,7 @@ public interface GameAction
     @Override
     public XYCoord getMoveLocation()
     {
-      return moveLocation;
+      return moveCoord;
     }
 
     @Override
@@ -161,7 +163,7 @@ public interface GameAction
     public String toString()
     {
       return String.format("[Attack %s with %s after moving to %s]",
-          defender.toStringWithLocation(), attacker.toStringWithLocation(), moveLocation );
+          defender.toStringWithLocation(), attacker.toStringWithLocation(), moveCoord );
     }
   } // ~AttackAction
 
@@ -195,8 +197,8 @@ public interface GameAction
         Location site = gameMap.getLocation(where);
         isValid &= (null == site.getResident());
         isValid &= site.getOwner() == who;
-        isValid &= (who.money >= what.getCost());
         isValid &= who.getShoppingList(site).contains(what);
+        isValid &= (who.money >= what.getCost());
       }
 
       if( isValid )
@@ -280,6 +282,7 @@ public interface GameAction
         captureLocation = map.getLocation(movePathEnd);
         isValid &= captureLocation.isCaptureable(); // Valid location
         isValid &= actor.CO.isEnemy(captureLocation.getOwner()); // Valid CO
+        isValid &= (null == captureLocation.getResident()) || (actor == captureLocation.getResident());
       }
 
       // Generate events
@@ -363,6 +366,12 @@ public interface GameAction
       isValid &= null != actor && !actor.isTurnOver;
       isValid &= (null != movePath) && (movePath.getPathLength() > 0);
       isValid &= (null != gameMap);
+      if( isValid )
+      {
+        XYCoord movePathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        Location moveLocation = gameMap.getLocation(movePathEnd);
+        isValid &= (null == moveLocation.getResident()) || (actor == moveLocation.getResident());
+      }
 
       // Generate events.
       if( isValid )
@@ -546,6 +555,15 @@ public interface GameAction
       if( isValid )
       {
         isValid &= !actor.heldUnits.isEmpty();
+        for( Unit cargo : myDropoffs.keySet() ) // Make sure the cargo can go where we want to put it.
+        {
+          isValid &= cargo.model.propulsion.canTraverse(gameMap.getEnvironment(myDropoffs.get(cargo)));
+        }
+        for( XYCoord coord : myDropoffs.values() ) // Make sure nobody's there already.
+        {
+          Unit res = gameMap.getLocation(coord).getResident();
+          isValid &= (null == res) || (res == actor); // Except the transport, because it must have moved anyway.
+        }
       }
 
       // Generate events.
@@ -592,6 +610,93 @@ public interface GameAction
       return String.format("[Unload from %s]", actor.toStringWithLocation());
     }
   } // ~UnloadAction
+
+  // ===========  UnitJoinAction  =================================
+  // A unit join action will combine a unit into a damaged unit to restore its HP. Any overflow HP is converted back into funds.
+  public static class UnitJoinAction implements GameAction
+  {
+    private Unit donor;
+    Path movePath;
+    private XYCoord pathEnd = null;
+    private Unit recipient;
+
+    public UnitJoinAction(GameMap gameMap, Unit actor, Path path)
+    {
+      donor = actor;
+      movePath = path;
+      if( (null != movePath) && (movePath.getPathLength() > 0 ))
+      {
+        pathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        if( (null != gameMap) && gameMap.isLocationValid(pathEnd) )
+        {
+          recipient = gameMap.getLocation(pathEnd).getResident();
+        }
+      }
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      // UNITJOIN actions consist of
+      //   MOVE
+      //   JOIN
+      GameEventQueue unitJoinEvents = new GameEventQueue();
+
+      // Validate input
+      boolean isValid = true;
+      isValid &= (null != donor) && !donor.isTurnOver;
+      isValid &= (null != movePath) && (movePath.getPathLength() > 0);
+      isValid &= (null != gameMap);
+      if( isValid )
+      {
+        pathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        isValid &= gameMap.isLocationValid(pathEnd);
+
+        if( isValid )
+        {
+          // Find the unit we want to join.
+          recipient = gameMap.getLocation(pathEnd).getResident();
+          isValid &= (null != recipient) && (recipient.getHP() < recipient.model.maxHP);
+        }
+      }
+
+      // Create events.
+      if( isValid )
+      {
+        // Move to the recipient, if we don't get blocked.
+        if( Utils.enqueueMoveEvent(gameMap, donor, movePath, unitJoinEvents) )
+        {
+          // Combine forces.
+          unitJoinEvents.add(new UnitJoinEvent(donor, recipient));
+        }
+      }
+      return unitJoinEvents;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return pathEnd;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return pathEnd;
+    }
+
+    @Override
+    public ActionType getType()
+    {
+      return GameAction.ActionType.JOIN;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Join %s into %s]", donor.toStringWithLocation(), recipient.toStringWithLocation());
+    }
+  } // ~UnitJoinAction
 
   // ===========  ResupplyAction  =================================
   // A resupply action will refill fuel and ammunition for any adjacent friendly units.
@@ -656,6 +761,12 @@ public interface GameAction
       if( isValid )
       {
         // Figure out where we are acting.
+        Location loc = map.getLocation(myLocation());
+        isValid &= (null == loc.getResident()) || (unitActor == loc.getResident());
+      }
+      if( isValid )
+      {
+        // Figure out where we are acting.
         supplyLocation = myLocation();
 
         // Add a move event if we need to move.
@@ -672,9 +783,8 @@ public interface GameAction
         for( XYCoord loc : locations )
         {
           Unit other = map.getLocation(loc).getResident();
-          if( other != null && other.CO == unitActor.CO && !other.isFullySupplied() )
+          if( other != null && other != unitActor && other.CO == unitActor.CO && !other.isFullySupplied() )
           {
-
             // Add a re-supply event for this unit.
             eventSequence.add(new ResupplyEvent(other));
           }

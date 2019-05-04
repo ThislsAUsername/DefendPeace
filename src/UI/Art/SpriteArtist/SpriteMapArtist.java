@@ -3,10 +3,16 @@ package UI.Art.SpriteArtist;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.Path.PathNode;
+import Engine.Utils;
+import Engine.XYCoord;
+import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
+import Terrain.Environment.Weathers;
 import Terrain.GameMap;
 import UI.MapView;
 import UI.Art.FillRectArtist.FillRectMapArtist;
@@ -18,6 +24,7 @@ public class SpriteMapArtist
   private MapView myView;
 
   BufferedImage baseMapImage;
+  MapImageUpdater baseMapImageUpdater;
 
   private int drawScale;
   private int tileSize;
@@ -45,20 +52,22 @@ public class SpriteMapArtist
     // This nice little hack will semi-randomly decide what color fog is used for this game.
     // It switches every 10 seconds, so two games started 10 seconds apart will have different fog settings.
     String strTime = Long.toString(System.currentTimeMillis());
-    if( Integer.parseInt(new String() + (strTime.charAt(strTime.length() - 5))) % 2 == 0 )
-    {
-      FOG_COLOR = new Color(255, 255, 255, 200); // white
-      HIGHLIGHT_COLOR = new Color(128, 128, 255, 112); // bluish
-    }
-    else
+    if( !myGame.isFogEnabled() || (Integer.parseInt(new String() + (strTime.charAt(strTime.length() - 5))) % 2 == 0) )
     {
       FOG_COLOR = new Color(72, 72, 96, 200); // dark blue
       HIGHLIGHT_COLOR = new Color(255, 255, 255, 160); // white
+    }
+    else
+    {
+      FOG_COLOR = new Color(255, 255, 255, 200); // white
+      HIGHLIGHT_COLOR = new Color(128, 128, 255, 112); // bluish
     }
     TerrainSpriteSet.setFogColor(FOG_COLOR);
 
     // Build base map image.
     buildMapImage();
+    baseMapImageUpdater = new MapImageUpdater(this);
+    GameEventListener.registerEventListener(baseMapImageUpdater);
   }
 
   public void drawBaseTerrain(Graphics g, GameMap gameMap, int viewX, int viewY, int viewW, int viewH)
@@ -209,5 +218,51 @@ public class SpriteMapArtist
         spriteSet.drawTerrain(g, gameMap, x, y, drawScale, false);
       }
     }
+  }
+
+  private void redrawBaseTile(XYCoord coord)
+  {
+    GameMap gameMap = myGame.gameMap;
+    // Get the Graphics object of the local map image, to use for drawing.
+    Graphics g = baseMapImage.getGraphics();
+
+    // If this tile changes, it might necessitate terrain transition changes
+    // in adjacent tiles, so find and redraw the adjacent tiles as well.
+    for( XYCoord drawCoord : Utils.findLocationsInRange(gameMap, coord, 0, 1) )
+    {
+      // Fetch the relevant sprite set for this terrain type and have it draw itself.
+      TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(drawCoord.xCoord, drawCoord.yCoord));
+      spriteSet.drawTerrain(g, gameMap, drawCoord.xCoord, drawCoord.yCoord, drawScale, false);
+    }
+  }
+
+  private static class MapImageUpdater extends GameEventListener
+  {
+    SpriteMapArtist myArtist;
+    MapImageUpdater(SpriteMapArtist artist)
+    {
+      myArtist = artist;
+    }
+
+    @Override
+    public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges)
+    {
+      for( EnvironmentAssignment ea : terrainChanges )
+      {
+        if( null != ea.where ) myArtist.redrawBaseTile(ea.where); // Redraw each tile that changed.
+      }
+    }
+
+    @Override
+    public void receiveWeatherChangeEvent(Weathers weather, int duration)
+    {
+      myArtist.buildMapImage(); // Redraw the whole map.
+    }
+  }
+
+  public void cleanup()
+  {
+    GameEventListener.unregisterEventListener(baseMapImageUpdater);
+    baseMapImageUpdater = null;
   }
 }

@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import Terrain.Environment.Weathers;
+import UI.UIUtils;
 import Terrain.GameMap;
 import Terrain.TerrainType;
 
@@ -22,8 +24,11 @@ import Terrain.TerrainType;
  */
 public class TerrainSpriteSet
 {
-  /** List of Sprites, to allow for variations of the tile type. */
-  private ArrayList<Sprite> terrainSprites;
+  /** This string tells us whence to load our sprites. */
+  private final String resourceTemplateString;
+  /** Map of Sprites by Weather, to allow for variations of the tile type. */
+  private Map<Weathers, ArrayList<Sprite> > terrainSprites;
+  private Color myTeamColor;
   private ArrayList<Sprite> fogTerrainSprites;
   private static Color FOG_COLOR = null;
   private Color myFogColor = null;
@@ -33,8 +38,10 @@ public class TerrainSpriteSet
   private ArrayList<TerrainType> myTerrainAffinities;
   private ArrayList<TerrainType> myTerrainNonAffinities;
 
-  int drawOffsetx;
-  int drawOffsety;
+  private int spriteWidth;
+  private int spriteHeight;
+  private int drawOffsetx; // Large sprites (terrain objects) must be drawn a tile up and over to look right.
+  private int drawOffsety;
 
   // Keys to the sprite array - logical OR the four cardinals to get the corresponding sprite index.
   // The four diagonal directions are just the index for that corner transition.
@@ -50,36 +57,97 @@ public class TerrainSpriteSet
   private static Map<TerrainType, TerrainType> terrainBases = null;
   private static Set<TerrainType> terrainObjects = null;
 
-  public TerrainSpriteSet(TerrainType terrainType, BufferedImage spriteSheet, int spriteWidth, int spriteHeight)
+  private static Color backupSnowOverlayColor = new Color(240, 243, 219, 100);
+  private static Color backupRainOverlayColor = new Color(10, 35, 73, 100);
+  private static Color backupSandOverlayColor = new Color(243, 213, 85, 100);
+  private static Map<Weathers, Color> backupOverlayColors;
+
+  public TerrainSpriteSet(TerrainType terrain, String imageLocationTemplate, int spriteWidth, int spriteHeight)
   {
-    this(terrainType, spriteSheet, spriteWidth, spriteHeight, false);
+    this(terrain, imageLocationTemplate, spriteWidth, spriteHeight, false);
   }
 
-  public TerrainSpriteSet(TerrainType terrainType, BufferedImage spriteSheet, int spriteWidth, int spriteHeight, boolean isTransitionTileset)
+  public TerrainSpriteSet(TerrainType terrain, String imageLocationTemplate, int spriteWidth, int spriteHeight, boolean isTransitionTileset)
   {
-    myTerrainType = terrainType;
-    terrainSprites = new ArrayList<Sprite>();
+    resourceTemplateString = imageLocationTemplate;
+    myTerrainType = terrain;
+    terrainSprites = new HashMap<Weathers, ArrayList<Sprite> >();
     tileTransitions = new ArrayList<TerrainSpriteSet>();
     isTransition = isTransitionTileset;
     myTerrainAffinities = new ArrayList<TerrainType>();
     myTerrainNonAffinities = new ArrayList<TerrainType>();
 
+    this.spriteWidth = spriteWidth;
+    this.spriteHeight = spriteHeight;
+
     // We assume here that all sprites are sized in multiples of the base sprite size.
     drawOffsetx = spriteWidth / SpriteLibrary.baseSpriteSize - 1;
     drawOffsety = spriteHeight / SpriteLibrary.baseSpriteSize - 1;
 
+    if( null == backupOverlayColors )
+    {
+      backupOverlayColors = new HashMap<Weathers, Color>();
+      backupOverlayColors.put(Weathers.SNOW, backupSnowOverlayColor);
+      backupOverlayColors.put(Weathers.RAIN, backupRainOverlayColor);
+      backupOverlayColors.put(Weathers.SANDSTORM, backupSandOverlayColor);
+    }
+  }
+
+  private ArrayList<Sprite> getSpritesByWeather(Weathers weather)
+  {
+    // If we already built the sprite, just return it.
+    ArrayList<Sprite> sprites = terrainSprites.get(weather);
+    if( sprites != null ) return sprites;
+
+    // If not, try to load the file using the resource template string from SpriteLibrary.
+    String spriteSheetFilename = String.format(resourceTemplateString, myTerrainType.toString().toLowerCase(), weather.toString().toLowerCase());
+    BufferedImage spriteSheet = SpriteUIUtils.loadSpriteSheetFile(spriteSheetFilename);
+
+    // If we failed to load the weather-specific version, Just get the clear version (recursively!) and mask over it.
+    if( null == spriteSheet && (weather != Weathers.CLEAR) )
+    {
+      ArrayList<Sprite> clearSprites = getSpritesByWeather(Weathers.CLEAR);
+      ArrayList<Sprite> weatherOverlays = buildSpriteMasks(backupOverlayColors.get(weather));
+      ArrayList<Sprite> weatherSprites = new ArrayList<Sprite>();
+      for( int i = 0; i < clearSprites.size(); ++i )
+      {
+        // Copy the clear sprite, and get the relevant overlay.
+        Sprite sprite = new Sprite(clearSprites.get(i));
+        Sprite overlay = weatherOverlays.get(i);
+
+        // If this is a capturable location and we are owned, colorize before applying the weather overlay.
+        if( myTerrainType.isCapturable() && myTeamColor != null )
+        {
+          sprite.colorize(UIUtils.defaultMapColors, UIUtils.getBuildingColors(myTeamColor).paletteColors);
+        }
+
+        // Draw our faux weather effect.
+        for( int f = 0; f < sprite.numFrames(); ++f )
+        {
+          BufferedImage img = sprite.getFrame(f);
+          img.getGraphics().drawImage(overlay.getFrame(f), 0, 0, null);
+        }
+
+        // Add our new sprite to the weather list.
+        weatherSprites.add(sprite);
+      }
+      // Put our shiny new sprites in the map for future reference.
+      terrainSprites.put(weather, weatherSprites);
+      return weatherSprites;
+    }
+
+    // Cut the sprite sheet into its individual frames.
+    ArrayList<Sprite> spriteArray = new ArrayList<Sprite>();
     if( spriteSheet == null )
     {
       System.out.println("WARNING! Continuing with placeholder images.");
-      // Just make a single frame of the specified size.
-      drawOffsetx = 0;
-      drawOffsety = 0;
       // Create a new blank sprite image of the desired size.
-      terrainSprites.add(new Sprite(null, SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize));
+      spriteArray.add(new Sprite(null, spriteWidth, spriteHeight));
+      terrainSprites.put(weather, spriteArray);
     }
     else
     {
-      // Cut the sprite-sheet up and populate terrainSprites.
+      // Cut the sprite-sheet up and populate spriteArray.
       int xOffset = 0;
       int yOffset = 0;
       int spriteNum = 0;
@@ -91,7 +159,7 @@ public class TerrainSpriteSet
         // Loop until we get as many sprites as we expect or run out of runway.
         while (spriteNum <= maxSpriteIndex && ((spriteNum + 1) * spriteWidth <= spriteSheet.getWidth()))
         {
-          terrainSprites.add(new Sprite(spriteSheet.getSubimage(xOffset, yOffset, spriteWidth, spriteHeight)));
+          spriteArray.add(new Sprite(spriteSheet.getSubimage(xOffset, yOffset, spriteWidth, spriteHeight)));
           xOffset += spriteWidth;
           spriteNum++;
         }
@@ -102,19 +170,20 @@ public class TerrainSpriteSet
           System.out.println("WARNING!   Found " + spriteNum + " " + spriteWidth + "x" + spriteHeight + " sprites in a "
               + spriteSheet.getWidth() + "x" + spriteSheet.getHeight() + " spritesheet");
           System.out.println("WARNING!   (There should be 1, 16, or 20 sprites in a terrain sprite sheet)");
+          throw new RasterFormatException("Sprite sheet " + spriteSheetFilename + " is too small! " + myTerrainType + " sprites are " + spriteWidth + "x" + spriteHeight);
         }
 
         maxSpriteIndex = spriteNum - 1; // However many sprites we found, we won't find more than that on a second horizontal pass.
 
         // If this sprite has more vertical space, pull in alternate versions of the existing terrain tiles.
-        while (yOffset + spriteHeight <= spriteSheet.getHeight())
+        while (yOffset + spriteHeight < spriteSheet.getHeight())
         {
           xOffset = 0;
           spriteNum = 0;
 
           while (spriteNum <= maxSpriteIndex && ((spriteNum + 1) * spriteWidth <= spriteSheet.getWidth()))
           {
-            terrainSprites.get(spriteNum).addFrame(spriteSheet.getSubimage(xOffset, yOffset, spriteWidth, spriteHeight));
+            spriteArray.get(spriteNum).addFrame(spriteSheet.getSubimage(xOffset, yOffset, spriteWidth, spriteHeight));
             xOffset += spriteWidth;
             spriteNum++;
           }
@@ -126,38 +195,41 @@ public class TerrainSpriteSet
       {
         System.out.println("WARNING! RasterFormatException while loading Sprite. Attempting to continue.");
 
-        terrainSprites.clear(); // Clear this in case of partially-created data.
+        spriteArray.clear(); // Clear this in case of partially-created data.
 
         // Make a single blank frame of the specified size.
-        terrainSprites.add(new Sprite(null, spriteWidth, spriteHeight));
+        spriteArray.add(new Sprite(null, spriteWidth, spriteHeight));
       }
+
+      // If this is a capturable location and we are owned, colorize before applying the weather overlay.
+      if( myTerrainType.isCapturable() && myTeamColor != null )
+      {
+        for( Sprite sprite : spriteArray )
+          sprite.colorize(UIUtils.defaultMapColors, UIUtils.getBuildingColors(myTeamColor).paletteColors);
+      }
+
+      terrainSprites.put(weather, spriteArray);
+      System.out.println("INFO: Loaded " + (isTransition? "transition " : "") + "sprites for " + myTerrainType + ", " + weather + ".");
     } // spriteSheet != null
-    System.out.println("INFO: Created TerrainSpriteSheet with " + terrainSprites.size() + " sprites.");
+
+    return spriteArray;
   }
 
   /**
-   * Returns the Sprite for the first variation of this terrain type.
+   * Returns the Sprite for the first variation of this terrain type, for clear weather.
    */
   public Sprite getTerrainSprite()
   {
-    return terrainSprites.get(0);
+    return getSpritesByWeather(Weathers.CLEAR).get(0);
   }
 
   /**
    * Tiles from 'spriteSheet' will be drawn on top of tiles from this sprite set when a tile is adjacent to one or more tiles
    * of type otherTerrain. This allows us to define smoother terrain transitions.
    */
-  public void addTileTransition(TerrainType otherTerrain, BufferedImage spriteSheet, int spriteWidth, int spriteHeight)
+  public void addTileTransition(TerrainType otherTerrain, String fileLocationTemplateString, int spriteWidth, int spriteHeight)
   {
-    tileTransitions.add(new TerrainSpriteSet(otherTerrain, spriteSheet, spriteWidth, spriteHeight, true));
-  }
-
-  public void colorize(Color[] oldColors, Color[] newColors)
-  {
-    for( Sprite s : terrainSprites )
-    {
-      s.colorize(oldColors, newColors);
-    }
+    tileTransitions.add(new TerrainSpriteSet(otherTerrain, fileLocationTemplateString, spriteWidth, spriteHeight, true));
   }
 
   /** Declares another terrain type to be "like" this one - it will be treated as the same type as this when tiling.
@@ -214,6 +286,10 @@ public class TerrainSpriteSet
       int tileSize = SpriteLibrary.baseSpriteSize * scale;
       int variation = (x + 1) * (y) + x; // Used to vary the specific sprite version drawn at each place in a repeatable way.
 
+      // Get the tile we want to draw, based on weather.
+      Weathers currentWeather = map.getEnvironment(x, y).weatherType;
+      ArrayList<Sprite> clearSprites = getSpritesByWeather(currentWeather);
+
       // Figure out how to handle map-edge transitions; we only want to assume the "adjacent" off-map tile has the same type
       //   as the current tile if the current tile type matches the TerrainSpriteSet type (that is, this TerrainSpriteSet does
       //   not define a tile transition - it's the sprite for the actual terrain type of the current tile). This makes it so
@@ -222,32 +298,34 @@ public class TerrainSpriteSet
       short dirIndex = getTileImageIndex(map, x, y, assumeSameTileType);
 
       // Draw the current tile.
-      BufferedImage frame = terrainSprites.get(dirIndex).getFrame(variation);
-      g.drawImage(frame, (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize, frame.getWidth() * scale, frame.getHeight()
-          * scale, null);
+      BufferedImage frame = clearSprites.get(dirIndex).getFrame(variation);
+      if( dirIndex != 0 || !isTransition ) // Don't bother drawing transition tiles with no transitions.
+      {
+        g.drawImage(frame, (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize, frame.getWidth() * scale, frame.getHeight() * scale, null);
+      }
 
       // Handle drawing corner-case tile variations if needed.
-      if( terrainSprites.size() == 20 )
+      if( clearSprites.size() == 20 )
       {
         // If we didn't have a N or W transition, then look in the NW position
         if( (dirIndex & (NORTH | WEST)) == 0 && checkTileType(map, x - 1, y - 1, assumeSameTileType) )
         {
-          g.drawImage(terrainSprites.get(NW).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
+          g.drawImage(clearSprites.get(NW).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
               frame.getWidth() * scale, frame.getHeight() * scale, null);
         }
         if( (dirIndex & (NORTH | EAST)) == 0 && checkTileType(map, x + 1, y - 1, assumeSameTileType) )
         {
-          g.drawImage(terrainSprites.get(NE).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
+          g.drawImage(clearSprites.get(NE).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
               frame.getWidth() * scale, frame.getHeight() * scale, null);
         }
         if( (dirIndex & (SOUTH | EAST)) == 0 && checkTileType(map, x + 1, y + 1, assumeSameTileType) )
         {
-          g.drawImage(terrainSprites.get(SE).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
+          g.drawImage(clearSprites.get(SE).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
               frame.getWidth() * scale, frame.getHeight() * scale, null);
         }
         if( (dirIndex & (SOUTH | WEST)) == 0 && checkTileType(map, x - 1, y + 1, assumeSameTileType) )
         {
-          g.drawImage(terrainSprites.get(SW).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
+          g.drawImage(clearSprites.get(SW).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
               frame.getWidth() * scale, frame.getHeight() * scale, null);
         }
       }
@@ -260,9 +338,13 @@ public class TerrainSpriteSet
       }
 
       // Draw the fog overlay if requested.
-      if( drawFog )
+      if( drawFog && !isTransition )
       {
-        if( (null == fogTerrainSprites) || (FOG_COLOR != myFogColor) ) buildFogSprites();
+        if( (null == fogTerrainSprites) || (FOG_COLOR != myFogColor) )
+        {
+          fogTerrainSprites = buildSpriteMasks(FOG_COLOR);
+          myFogColor = FOG_COLOR;
+        }
         BufferedImage fogFrame = fogTerrainSprites.get(dirIndex).getFrame(variation);
         g.drawImage(fogFrame, (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize, frame.getWidth() * scale, frame.getHeight()
             * scale, null);
@@ -281,8 +363,11 @@ public class TerrainSpriteSet
    */
   private short getTileImageIndex(GameMap map, int x, int y, boolean assumeSameTileType)
   {
+    // Get the list of CLEAR-weather sprites, as they are guaranteed to define our transitions.
+    ArrayList<Sprite> clearSprites = getSpritesByWeather(Weathers.CLEAR);
+
     short dirIndex = 0;
-    if( terrainSprites.size() > 1 ) // We expect the size to be either 1, 16, or 20.
+    if( clearSprites.size() > 1 ) // We expect the size to be either 1, 16, or 20.
     {
       // Figure out which neighboring tiles have the same terrain type as this one.
       dirIndex |= checkTileType(map, x, y - 1, assumeSameTileType) ? NORTH : 0;
@@ -292,11 +377,11 @@ public class TerrainSpriteSet
     }
 
     // Normalize the index value just in case.
-    if( dirIndex >= terrainSprites.size() )
+    if( dirIndex >= clearSprites.size() )
     {
       // We could print a warning here, but there should have been one when the sprites were loaded.
       // At this point we are just preventing an ArrayOutOfBoundsException.
-      dirIndex = (short) (dirIndex % terrainSprites.size());
+      dirIndex = (short) (dirIndex % clearSprites.size());
     }
     return dirIndex;
   }
@@ -307,6 +392,7 @@ public class TerrainSpriteSet
     if( null == terrainObjects )
     {
       terrainObjects = new HashSet<TerrainType>();
+      terrainObjects.add(TerrainType.BUNKER);
       terrainObjects.add(TerrainType.CITY);
       terrainObjects.add(TerrainType.FACTORY);
       terrainObjects.add(TerrainType.FOREST);
@@ -315,6 +401,7 @@ public class TerrainSpriteSet
       terrainObjects.add(TerrainType.HEADQUARTERS);
       terrainObjects.add(TerrainType.LAB);
       terrainObjects.add(TerrainType.MOUNTAIN);
+      terrainObjects.add(TerrainType.PILLAR);
     }
     return terrainObjects.contains(terrainType);
   }
@@ -377,6 +464,8 @@ public class TerrainSpriteSet
       terrainBases.put(TerrainType.GRASS, TerrainType.GRASS);
       terrainBases.put(TerrainType.RIVER, TerrainType.GRASS);
       terrainBases.put(TerrainType.ROAD, TerrainType.GRASS);
+      terrainBases.put(TerrainType.PILLAR, TerrainType.GRASS);
+      terrainBases.put(TerrainType.BUNKER, TerrainType.GRASS);
 
       terrainBases.put(TerrainType.BRIDGE, TerrainType.SHOAL);
       terrainBases.put(TerrainType.SEAPORT, TerrainType.SHOAL);
@@ -394,6 +483,12 @@ public class TerrainSpriteSet
     return terrainBases.get(terrain);
   }
 
+  /** Set the color used to colorize capturable buildings. */
+  public void setTeamColor(Color color)
+  {
+    myTeamColor = color;
+  }
+
   /** Change the color used by all TerrainSpriteSets. */
   public static void setFogColor(Color color)
   {
@@ -401,15 +496,15 @@ public class TerrainSpriteSet
   }
 
   /** Build a set of fog-colored image masks so we can draw precise fog effects. */
-  private void buildFogSprites()
+  private ArrayList<Sprite> buildSpriteMasks(Color maskColor)
   {
-    myFogColor = FOG_COLOR;
-    fogTerrainSprites = new ArrayList<Sprite>();
-    for( Sprite s : terrainSprites )
+    ArrayList<Sprite> spriteMasks = new ArrayList<Sprite>();
+    for( Sprite s : getSpritesByWeather(Weathers.CLEAR) )
     {
       Sprite ns = new Sprite(s);
-      ns.convertToMask(myFogColor);
-      fogTerrainSprites.add(ns);
+      ns.convertToMask(maskColor);
+      spriteMasks.add(ns);
     }
+    return spriteMasks;
   }
 }

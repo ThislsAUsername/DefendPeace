@@ -30,6 +30,7 @@ public class Unit
   private Location captureTarget;
   public Commander CO;
   public boolean isTurnOver;
+  public boolean isStunned;
   private double HP;
   public ArrayList<Weapon> weapons;
   private ArrayList<GameAction> turnInitActions;
@@ -79,7 +80,13 @@ public class Unit
     //   Units that are e.g. in a transport don't burn fuel, etc.
     if( null != locus )
     {
-      isTurnOver = false;
+      if( isStunned )
+      {
+        isTurnOver = true;
+        isStunned = false;
+      }
+      else
+        isTurnOver = false;
       fuel -= model.idleFuelBurn;
       if( captureTarget != null && captureTarget.getResident() != this )
       {
@@ -307,8 +314,9 @@ public class Unit
             actionSet.add(new GameActionSet(new GameAction.WaitAction(this, movePath), false));
             break;
           case LOAD:
+          case JOIN:
             // We only get to here if there is no unit at the end of the move path, which means there is
-            //   no transport in this space to board. LOAD actions are handled down below.
+            //   no transport in this space to board and no friendly unit to reinforce. LOAD/JOIN actions are handled down below.
             break;
           case UNLOAD:
             if( heldUnits.size() > 0 )
@@ -358,8 +366,16 @@ public class Unit
     }
     else
     {
-      // There is another unit in the tile at the end of movePath. Only LOAD actions are supported in this case.
-      actionSet.add(new GameActionSet(new GameAction.LoadAction(map, this, movePath), false));
+      // There is another unit in the tile at the end of movePath. We are either LOADing a transport or JOINing an ally.
+      Unit resident = map.getLocation(moveLocation).getResident();
+      if(resident.hasCargoSpace(model.type))
+      {
+        actionSet.add(new GameActionSet(new GameAction.LoadAction(map, this, movePath), false));
+      }
+      if( (resident.model.type == model.type) && (resident.getHP() < resident.model.maxHP) )
+      {
+        actionSet.add(new GameActionSet(new GameAction.UnitJoinAction(map, this, movePath), false));
+      }
     }
 
     return actionSet;

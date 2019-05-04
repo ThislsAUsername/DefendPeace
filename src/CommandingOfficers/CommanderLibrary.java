@@ -23,5 +23,6 @@ public class CommanderLibrary
     commanderList.add( CommanderVenge.getInfo() );
     commanderList.add( CommanderBear_Bull.getInfo() );
     commanderList.add( CommanderCinder.getInfo() );
+    commanderList.add( CommanderAve.getInfo() );
   }
 }

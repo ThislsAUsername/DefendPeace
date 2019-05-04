@@ -1,7 +1,11 @@
 package Terrain;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
 import Engine.XYCoord;
 import Units.Unit;
+import Units.UnitModel.UnitEnum;
 
 public class MapMaster extends GameMap
 {
@@ -29,10 +33,18 @@ public class MapMaster extends GameMap
     }
 
     // Print a warning if the number of Commanders we have does not match the number the map expects.
-    if( COs.length != mapInfo.COProperties.length )
+    if( COs.length != mapInfo.COProperties.length ||
+      ( mapInfo.mapUnits.size() > 0 && COs.length != mapInfo.mapUnits.size() ) )
     {
       System.out.println("Warning! Wrong number of COs specified for map " + mapInfo.mapName);
+      initOK = false;
     }
+    if( (mapInfo.mapUnits.size() > 0) && (mapInfo.mapUnits.size() != COs.length ) )
+    {
+      System.out.println("Warning! Wrong number of unit arrays specified for map " + mapInfo.mapName);
+      System.out.println(String.format("         Expected zero or %s; received %s", COs.length, mapInfo.mapUnits.size()));
+    }
+
     // Assign properties according to MapInfo's direction.
     for( int co = 0; co < mapInfo.COProperties.length && co < COs.length; ++co )
     {
@@ -66,6 +78,17 @@ public class MapMaster extends GameMap
         else
         {
           System.out.println("Warning! CO specified as owner of an uncapturable location in map " + mapInfo.mapName);
+        }
+      }
+
+      if( !mapInfo.mapUnits.isEmpty() )
+      {
+        Map<XYCoord, UnitEnum> unitSet = mapInfo.mapUnits.get(co);
+        for( Entry<XYCoord, UnitEnum> unitEntry : unitSet.entrySet() )
+        {
+          Unit unit = new Unit(commanders[co], commanders[co].getUnitModel(unitEntry.getValue()));
+          addNewUnit(unit, unitEntry.getKey().xCoord, unitEntry.getKey().yCoord);
+          commanders[co].units.add(unit);
         }
       }
 
@@ -121,7 +144,9 @@ public class MapMaster extends GameMap
   /** Returns the Location at the specified location, or null if that Location does not exist. */
   public Location getLocation(XYCoord location)
   {
-    return getLocation(location.xCoord, location.yCoord);
+    if (null != location)
+      return getLocation(location.xCoord, location.yCoord);
+    return null;
   }
 
   /** Returns the Location at the specified location, or null if that Location does not exist. */
