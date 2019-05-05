@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
 import java.util.ArrayList;
 import CommandingOfficers.Commander;
+import UI.UIUtils;
 import Units.Unit;
 
 public class UnitSpriteSet
@@ -84,7 +85,7 @@ public class UnitSpriteSet
       }
     }
 
-    colorize(SpriteLibrary.defaultMapColors, coColors.paletteColors);
+    colorize(UIUtils.defaultMapColors, coColors.paletteColors);
     if( action > 0 ) // We at least got the IDLE sprites. Use those as the basis for the "already moved" sprites.
     {
       turnDone = new Sprite(sprites[0]); // Duplicate the IDLE sprite to make the TurnDone sprite.

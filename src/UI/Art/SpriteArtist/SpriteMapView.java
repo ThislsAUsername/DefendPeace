@@ -17,6 +17,7 @@ import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import UI.CO_InfoMenu;
 import UI.MapView;
+import UI.UIUtils;
 import UI.Art.Animation.GameAnimation;
 import UI.Art.Animation.NoAnimation;
 import UI.Art.Animation.NobunagaBattleAnimation;
@@ -500,7 +501,7 @@ public class SpriteMapView extends MapView
     String damageText = (int) (damage*10) + "%";
 
     // Build a display of the expected damage.
-    Color[] colors = SpriteLibrary.getMapUnitColors(attacker.myColor).paletteColors;
+    Color[] colors = UIUtils.getMapUnitColors(attacker.myColor).paletteColors;
     BufferedImage dmgImage = SpriteUIUtils.makeTextFrame(colors[4], colors[2], damageText,
         2 * SpriteOptions.getDrawScale(), 2 * SpriteOptions.getDrawScale());
 

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import Terrain.Environment.Weathers;
+import UI.UIUtils;
 import Terrain.GameMap;
 import Terrain.TerrainType;
 
@@ -117,7 +118,7 @@ public class TerrainSpriteSet
         // If this is a capturable location and we are owned, colorize before applying the weather overlay.
         if( myTerrainType.isCapturable() && myTeamColor != null )
         {
-          sprite.colorize(SpriteLibrary.defaultMapColors, SpriteLibrary.getBuildingColors(myTeamColor).paletteColors);
+          sprite.colorize(UIUtils.defaultMapColors, UIUtils.getBuildingColors(myTeamColor).paletteColors);
         }
 
         // Draw our faux weather effect.
@@ -204,7 +205,7 @@ public class TerrainSpriteSet
       if( myTerrainType.isCapturable() && myTeamColor != null )
       {
         for( Sprite sprite : spriteArray )
-          sprite.colorize(SpriteLibrary.defaultMapColors, SpriteLibrary.getBuildingColors(myTeamColor).paletteColors);
+          sprite.colorize(UIUtils.defaultMapColors, UIUtils.getBuildingColors(myTeamColor).paletteColors);
       }
 
       terrainSprites.put(weather, spriteArray);

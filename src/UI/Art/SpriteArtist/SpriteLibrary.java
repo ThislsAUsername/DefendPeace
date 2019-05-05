@@ -11,6 +11,8 @@ import java.util.Map;
 import CommandingOfficers.Commander;
 import Terrain.Location;
 import Terrain.TerrainType;
+import UI.UIUtils;
+import UI.UIUtils.Faction;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -21,54 +23,6 @@ public class SpriteLibrary
 {
   // This is the physical size of a single map square in pixels.
   public static final int baseSpriteSize = 16;
-
-  // Define extra colors as needed.
-  private static final Color PURPLE = new Color(231, 123, 255 );
-
-  // Map Building colors.
-  public static final Color[] defaultMapColors = { new Color(40, 40, 40), new Color(70, 70, 70), new Color(110, 110, 110), new Color(160, 160, 160),
-      new Color(200, 200, 200), new Color(231, 231, 231) };
-  private static Color[] pinkMapBuildingColors = { new Color(142, 26, 26), new Color(255, 219, 74), new Color(190, 90, 90), new Color(240, 140, 140),
-      new Color(250, 190, 190), new Color(255, 245, 245) };
-  private static Color[] cyanMapBuildingColors = { new Color(0, 105, 105), new Color(255, 219, 74), new Color(77, 157, 157), new Color(130, 200, 200),
-      new Color(200, 230, 230), new Color(245, 255, 255) };
-  private static Color[] orangeMapBuildingColors = { new Color(130, 56, 0), new Color(255, 237, 29), new Color(139, 77, 20), new Color(231, 139, 41),
-      new Color(243, 186, 121), new Color(255, 234, 204) };
-  private static Color[] purpleMapBuildingColors = { new Color(90, 14, 99), new Color(255, 207, 95), new Color(133, 65, 130), new Color(174, 115, 189),
-    new Color(222, 171, 240), new Color(255, 231, 255) };
-
-  // Map Unit colors.
-  private static Color[] pinkMapUnitColors = { new Color(142, 26, 26), new Color(199, 62, 62), new Color(248, 100, 100), new Color(255, 136, 136),
-      new Color(255, 175, 175), new Color(255, 201, 201) };
-  private static Color[] cyanMapUnitColors = { new Color(0, 105, 105), new Color(0, 170, 170), new Color(0, 215, 215), new Color(0, 245, 245),
-      new Color(121, 255, 255), new Color(195, 255, 255), };
-  private static Color[] orangeMapUnitColors = { new Color(130, 56, 0), new Color(204, 103, 7), new Color(245, 130, 14), new Color(255, 160, 30),
-      new Color(255, 186, 60), new Color(255, 225, 142), };
-  private static Color[] purpleMapUnitColors = { new Color(90, 14, 99), new Color(132, 41, 148), new Color(181, 62, 198), new Color(201, 98, 223),
-    new Color(231, 123, 255), new Color(243, 180, 255), };
-
-  private static HashMap<Color, ColorPalette> buildingColorPalettes = new HashMap<Color, ColorPalette>(){
-    private static final long serialVersionUID = 1L;
-    {
-      // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
-      put(Color.PINK, new ColorPalette(pinkMapBuildingColors));
-      put(Color.CYAN, new ColorPalette(cyanMapBuildingColors));
-      put(Color.ORANGE, new ColorPalette(orangeMapBuildingColors));
-      put(PURPLE, new ColorPalette(purpleMapBuildingColors));
-    }
-  };
-  private static HashMap<Color, ColorPalette> mapUnitColorPalettes = new HashMap<Color, ColorPalette>(){
-    private static final long serialVersionUID = 1L;
-    {
-      // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
-      put(Color.PINK, new ColorPalette(pinkMapUnitColors));
-      put(Color.CYAN, new ColorPalette(cyanMapUnitColors));
-      put(Color.ORANGE, new ColorPalette(orangeMapUnitColors));
-      put(PURPLE, new ColorPalette(purpleMapUnitColors));
-    }
-  };
-
-  public static final Color[] coColorList = { Color.PINK, Color.CYAN, Color.ORANGE, PURPLE };
 
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
   private static HashMap<UnitSpriteSetKey, UnitSpriteSet> mapUnitSpriteSetMap = new HashMap<UnitSpriteSetKey, UnitSpriteSet>();
@@ -290,16 +244,6 @@ public class SpriteLibrary
     return moveCursorArrowSprite;
   }
 
-  public static ColorPalette getBuildingColors(Color colorKey)
-  {
-    return buildingColorPalettes.get(colorKey);
-  }
-
-  public static ColorPalette getMapUnitColors(Color colorKey)
-  {
-    return mapUnitColorPalettes.get(colorKey);
-  }
-
   private static class SpriteSetKey
   {
     public final TerrainType terrainKey;
@@ -382,17 +326,21 @@ public class SpriteLibrary
 
   private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
-    System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString());
-    String filestr = getMapUnitSpriteFilename(key.unitTypeKey);
+    Faction faction = key.commanderKey.faction;
+    System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString() + " in faction " + faction);
+    String filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction.name);
+    if (!new File(filestr).canRead())
+      filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction.basis);
     UnitSpriteSet spriteSet = new UnitSpriteSet(SpriteUIUtils.loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
-        getMapUnitColors(key.commanderKey.myColor));
+        UIUtils.getMapUnitColors(key.commanderKey.myColor));
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
 
-  private static String getMapUnitSpriteFilename(UnitModel.UnitEnum unitType)
+  private static String getMapUnitSpriteFilename(UnitModel.UnitEnum unitType, String faction)
   {
     StringBuffer spriteFile = new StringBuffer();
-    spriteFile.append("res/unit/").append(unitType.toString().toLowerCase()).append("_map.png");
+    spriteFile.append("res/unit/faction/").append(faction).append("/");
+    spriteFile.append(unitType.toString().toLowerCase()).append("_map.png");
     return spriteFile.toString();
   }
 
@@ -681,7 +629,7 @@ public class SpriteLibrary
 
       // If we don't already have this overlay, go load and store it.
       Sprite overlay = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/co_overlay.png"), OVERLAY_WIDTH, OVERLAY_HEIGHT);
-      overlay.colorize(defaultMapColors, mapUnitColorPalettes.get(co.myColor).paletteColors);
+      overlay.colorize(UIUtils.defaultMapColors, UIUtils.getMapUnitColors(co.myColor).paletteColors);
 
       // Draw the Commander's mug on top of the overlay.
       BufferedImage coMug = getCommanderSprites(co.coInfo.name).eyes;
@@ -705,7 +653,7 @@ public class SpriteLibrary
     Graphics barGfx = bar.getGraphics();
 
     // Get the CO's colors
-    Color[] palette = SpriteLibrary.mapUnitColorPalettes.get(co.myColor).paletteColors;
+    Color[] palette = UIUtils.getMapUnitColors(co.myColor).paletteColors;
 
     // Draw the bar
     barGfx.setColor(Color.BLACK);               // Outside edge
@@ -732,7 +680,7 @@ public class SpriteLibrary
       // Image should be: empty bar, full bar, empty point, 1/3 point, 2/3 point, full point, large point.
       // Image should be: empty point, 1/3 point, 2/3 point, full point, large point.
       Sprite overlay = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/powerbar_pieces.png"), POWERBAR_FRAME_WIDTH, POWERBAR_FRAME_HEIGHT);
-      overlay.colorize(defaultMapColors, mapUnitColorPalettes.get(co.myColor).paletteColors);
+      overlay.colorize(UIUtils.defaultMapColors, UIUtils.getMapUnitColors(co.myColor).paletteColors);
 
       coPowerBarPieces.put(co, overlay);
     }

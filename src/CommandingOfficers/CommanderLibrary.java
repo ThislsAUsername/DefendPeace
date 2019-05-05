@@ -1,6 +1,5 @@
 package CommandingOfficers;
 
-import java.awt.Color;
 import java.util.ArrayList;
 
 public class CommanderLibrary
@@ -25,14 +24,5 @@ public class CommanderLibrary
     commanderList.add( CommanderBear_Bull.getInfo() );
     commanderList.add( CommanderCinder.getInfo() );
     commanderList.add( CommanderAve.getInfo() );
-  }
-
-  public static Commander makeCommander( CommanderInfo info, Color color )
-  {
-    Commander co = info.maker.create();
-
-    co.myColor = color;
-
-    return co;
   }
 }
