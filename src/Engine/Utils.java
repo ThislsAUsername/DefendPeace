@@ -551,7 +551,11 @@ public class Utils
     if (abilityCosts.length > 0)
     {
       double abilityPower = viewed.getAbilityPower();
-      double untilNextPower = abilityCosts[abilityCosts.length - 1]; // init to our biggest cost, so we can only go down
+      double untilNextPower = 0;
+
+      for( double cost : abilityCosts ) // init to our biggest cost, so we can only go down
+        untilNextPower = Math.max(untilNextPower, cost);
+
       for( double cost : abilityCosts ) // find the cheapest cost that we can't afford
       {
         if( cost >= abilityPower )
