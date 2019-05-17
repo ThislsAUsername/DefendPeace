@@ -48,7 +48,8 @@ public class CommanderStrong extends Commander
           "Mobilize ("+MobilizeAbility.MOBILIZE_COST+"):\n" + 
           "Gives an attack boost of "+MobilizeAbility.MOBILIZE_BUFF+"%\n" +
           "Gives a defense boost of "+MobilizeAbility.MOBILIZE_DEFENSE_BUFF+"%\n" +
-          "Grants footsoldiers and APCs two extra points of movement\n" +
+          "Grants two extra points of movement\n" +
+          "Refreshes footsoldiers\n" +
           "Allows Strong to build footsoldiers on cities, industries, and the HQ\n"));
     }
     @Override
