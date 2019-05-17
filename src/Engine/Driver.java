@@ -8,6 +8,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Stack;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -20,14 +21,11 @@ import UI.Art.SpriteArtist.SpriteEngine;
 public class Driver implements ActionListener, KeyListener
 {
   private static Driver gameDriver;
-  private IController gameController;
+  private Stack<ControlState> gameStatus = new Stack<ControlState>();
   private GameViewProxy gameView;
   private JFrame gameWindow;
 
   private javax.swing.Timer repaintTimer;
-
-  private IController oldController = null;
-  private IView oldView = null;
 
   public GraphicsEngine gameGraphics = null;
 
@@ -36,8 +34,9 @@ public class Driver implements ActionListener, KeyListener
     // At game startup, we are at the main menu. Set up controller/viewer
     MainUIController mc = new MainUIController();
     gameGraphics = new SpriteEngine(); // Choose graphics engine based on config file, etc?
-    gameView = new GameViewProxy(gameGraphics.getMainUIView(mc));
-    gameController = mc;
+    IView mv = gameGraphics.getMainUIView(mc);
+    gameView = new GameViewProxy(mv);
+    gameStatus.push(new ControlState(mc,mv));
 
     gameWindow = new JFrame();
     gameWindow.add(gameView);
@@ -67,11 +66,7 @@ public class Driver implements ActionListener, KeyListener
   // TODO: Should oldController/view be a stack?
   public void changeGameState(IController newControl, IView newView)
   {
-    // Store off the old controller/view so we can return to them.
-    oldView = gameView.view;
-    oldController = gameController;
-
-    gameController = newControl;
+    gameStatus.push(new ControlState(newControl, newView));
     // If the new View is valid (it may not be if we are returning to a
     // previously-stored state), then request it keep our screen dimensions.
     if( null != newView )
@@ -111,28 +106,32 @@ public class Driver implements ActionListener, KeyListener
   @Override // From KeyListener
   public void keyPressed(KeyEvent arg0)
   {
+    // Store off the old controller/view so we can return to them.
+    IView oldView = gameView.view;
+    
     InputHandler.InputAction action = InputHandler.pressKey(arg0);
 
     if( action != InputHandler.InputAction.NO_ACTION )
     {
       // Pass the action on to the main game controller; if it says it's done, switch to previous state.
-      if(gameController.handleInput(action))
+      if(gameStatus.peek().controller.handleInput(action))
       {
+        gameStatus.pop(); // discard our current controller
+        
+        if( gameStatus.isEmpty() )
+        {
+          // We are done here. I would say clean up data or whatever, but this is Java.
+          System.exit(0);
+        }
+
+        ControlState destination = gameStatus.pop(); // grab the old one
+        
         // Reinstate the previous controller/view.
-        // If the top-level controller returns done, it's time to exit.
-        changeGameState( oldController, oldView );
+        changeGameState( destination.controller, destination.view );
 
-        // We've switched back to these, now make sure we don't do it again (forever).
+        // Clean up our old view
         oldView.cleanup();
-        oldController = null;
-        oldView = null;
       }
-    }
-
-    if( null == gameController )
-    {
-      // We are done here. I would say clean up data or whatever, but this is Java.
-      System.exit(0);
     }
   }
 
@@ -146,6 +145,21 @@ public class Driver implements ActionListener, KeyListener
   public void keyTyped(KeyEvent arg0)
   {
     // Don't care.
+  }
+
+  /**
+   * ControlState wraps an IController/IView pair for easy storage.
+   */
+  static class ControlState
+  {
+    public final IController controller;
+    public final IView view;
+    
+    public ControlState(IController newControl, IView newView)
+    {
+      controller = newControl;
+      view = newView;
+    }
   }
 
   /**
