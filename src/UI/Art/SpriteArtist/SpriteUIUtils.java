@@ -141,10 +141,18 @@ public class SpriteUIUtils
       if( line.length() * characterWidth <= reqWidth ) // if the line's short enough already, don't split it further
         continue;
 
-      // TODO: check for word boundaries
       lines.remove(i);
-      lines.add(i, line.substring(reqWidth / characterWidth)); // put in the second half
-      lines.add(i, line.substring(0, reqWidth / characterWidth)); // and then the first half behind it
+
+      // See if we can split the line on a space
+      int splitIndex = line.substring(0, reqWidth / characterWidth).lastIndexOf(' ');
+      if( splitIndex < 1 ) // no spaces we can split on
+      {
+        // Can't be helped. Split in the middle of the word
+        splitIndex = reqWidth / characterWidth;
+      }
+
+      lines.add(i, line.substring(splitIndex)); // put in the second half
+      lines.add(i, line.substring(0, splitIndex)); // and then the first half behind it
     }
 
     int totalTextHeight = ((lines.isEmpty()) ? 0 : getMenuTextHeightPx(lines, characterHeight));
