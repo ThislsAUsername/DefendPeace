@@ -11,12 +11,13 @@ import Units.Unit;
 public class CommanderPatch extends Commander
 {
   private static final long serialVersionUID = -543799935457360451L;
-  
-  private static final CommanderInfo coInfo = new CommanderInfo("Patch", new instantiator());  
-  private static class instantiator extends COMaker
+
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Patch");
       infoPages.add(new InfoPage(
           "Commander Patch is a pirate, who does piratey things like lootin' and plunderin'\n"));
       infoPages.add(new InfoPage(

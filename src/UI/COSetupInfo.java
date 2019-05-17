@@ -123,7 +123,7 @@ public class COSetupInfo extends OptionSelector
 
   public Commander makeCommander()
   {
-    Commander co = getCurrentCO().maker.create();
+    Commander co = getCurrentCO().create();
 
     co.myColor = getCurrentColor();
     co.faction = getCurrentFaction();

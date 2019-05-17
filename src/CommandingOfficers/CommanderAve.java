@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Stack;
-
-import CommandingOfficers.COMaker.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.Utils;
@@ -63,11 +61,12 @@ public class CommanderAve extends Commander
   private int MAX_SNOW_DEPTH = 500;
   private CitySnowifier snowifier;
 
-  private static final CommanderInfo coInfo = new CommanderInfo("Ave", new instantiator());  
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Ave");
       infoPages.add(new InfoPage(
           "Commander Ave (AH-vey) loves the cold, and her power allows her to inexorably, if slowly, " + 
           "grind her opponents down beneath a wall of ever-encroaching ice.\r\n" + 

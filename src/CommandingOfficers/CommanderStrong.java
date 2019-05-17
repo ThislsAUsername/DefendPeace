@@ -1,9 +1,5 @@
 package CommandingOfficers;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import CommandingOfficers.COMaker.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
@@ -24,12 +20,13 @@ import Units.UnitModel;
 public class CommanderStrong extends Commander
 {
   private static final long serialVersionUID = -3762678175296290654L;
-  
-  private static final CommanderInfo coInfo = new CommanderInfo("Strong", new instantiator());  
-  private static class instantiator extends COMaker
+
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Strong");
       infoPages.add(new InfoPage(
           "Commander Strong is real strong.\n" +
           "That's it.\n"));

@@ -22,11 +22,12 @@ public class CommanderCinder extends Commander
 {
   private static final long serialVersionUID = 4938851182463546620L;
 
-  private static final CommanderInfo coInfo = new CommanderInfo("Cinder", new instantiator());  
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Cinder");
       infoPages.add(new InfoPage(
           "Commander Cinder trades unit health for a better action economy.\n" +
           "An efficient and merciless commander.\n"));

@@ -3,7 +3,7 @@ package UI.Art.SpriteArtist;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import CommandingOfficers.COMaker.InfoPage;
+import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Commander;
 import Engine.Driver;
 import Engine.Utils;
