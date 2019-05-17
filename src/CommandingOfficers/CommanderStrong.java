@@ -28,25 +28,28 @@ public class CommanderStrong extends Commander
     {
       super("Strong");
       infoPages.add(new InfoPage(
-          "Commander Strong is real strong.\n" +
-          "That's it.\n"));
+          "Commander Strong knows that an army's strength lies in its people.\n" +
+          "Well-positioned soldiers with proper equipment and training are guaranteed to bring results.\n" +
+          "His focus is therefore on achieving this in his own forces, and denying it of his opponent.\n" +
+          "As a result, his transport units and boots on the ground are among the best, and he brings some extra anti-personnel firepower to keep his opponents in check."));
       infoPages.add(new InfoPage(
           "Passive:\n" + 
-          "- Strong gets an attack bonus of 20% on all units\n" +
-          "- Strong can build infantry from air/sea ports\n" +
-          "- Strong's APCs move 1 space further than average\n"));
+          "- Strong's footsoldiers get an attack bonus of 15%\n" +
+          "- When attacking footsoldiers, all Strong's units get an attack bonus of 15%\n" +
+          "- Strong's transports move 1 space further and can hold one more unit than average\n" +
+          "- Strong can build Mechs from air/sea ports\n"));
       infoPages.add(new InfoPage(
           "Strongarm ("+StrongArmAbility.STRONGARM_COST+"):\n" +
-          "Gives an attack boost of "+StrongArmAbility.STRONGARM_BUFF+"%\n" +
-          "Grants footsoldiers and APCs one extra point of movement\n" +
-          "Allows Strong to put an extra unit into any transport\n" +
-          "Allows Strong to build inf and mechs on air/sea ports as well as the HQ\n"));
+          "Gives an attack and defense boost of "+StrongArmAbility.STRONGARM_BUFF+"%\n" +
+          "Gives footsoldiers an additional "+StrongArmAbility.STRONGARM_FOOT_BUFF+"% attack\n" +
+          "Grants footsoldiers and APCs two extra points of movement\n" +
+          "Allows Strong to build infantry on air/sea ports\n"));
       infoPages.add(new InfoPage(
           "Mobilize ("+MobilizeAbility.MOBILIZE_COST+"):\n" + 
           "Gives an attack boost of "+MobilizeAbility.MOBILIZE_BUFF+"%\n" +
+          "Gives a defense boost of "+MobilizeAbility.MOBILIZE_DEFENSE_BUFF+"%\n" +
           "Grants footsoldiers and APCs two extra points of movement\n" +
-          "Allows Strong to put an extra unit into any transport\n" +
-          "Allows Strong to build inf and mechs on air/sea ports as well as the HQ\n"));
+          "Allows Strong to build footsoldiers on cities, industries, and the HQ\n"));
     }
     @Override
     public Commander create()
