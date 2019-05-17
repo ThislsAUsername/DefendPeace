@@ -106,9 +106,6 @@ public class Driver implements ActionListener, KeyListener
   @Override // From KeyListener
   public void keyPressed(KeyEvent arg0)
   {
-    // Store off the old controller/view so we can return to them.
-    IView oldView = gameView.view;
-    
     InputHandler.InputAction action = InputHandler.pressKey(arg0);
 
     if( action != InputHandler.InputAction.NO_ACTION )
@@ -117,6 +114,7 @@ public class Driver implements ActionListener, KeyListener
       if(gameStatus.peek().controller.handleInput(action))
       {
         gameStatus.pop(); // discard our current controller
+        gameView.view.cleanup(); // Clean up our old view
         
         if( gameStatus.isEmpty() )
         {
@@ -128,9 +126,6 @@ public class Driver implements ActionListener, KeyListener
         
         // Reinstate the previous controller/view.
         changeGameState( destination.controller, destination.view );
-
-        // Clean up our old view
-        oldView.cleanup();
       }
     }
   }

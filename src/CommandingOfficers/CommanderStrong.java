@@ -35,7 +35,7 @@ public class CommanderStrong extends Commander
       infoPages.add(new InfoPage(
           "Passive:\n" + 
           "- Strong's footsoldiers get an attack bonus of 15%\n" +
-          "- When attacking footsoldiers, all Strong's units get an attack bonus of 15%\n" +
+          "- When attacking footsoldiers, all of Strong's units get an attack bonus of 15%\n" +
           "- Strong's transports move 1 space further and can hold one more unit than average\n" +
           "- Strong can build Mechs from air/sea ports\n"));
       infoPages.add(new InfoPage(
