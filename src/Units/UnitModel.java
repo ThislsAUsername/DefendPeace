@@ -36,6 +36,7 @@ public class UnitModel implements Serializable
   public UnitEnum type;
   public ChassisEnum chassis;
   private int moneyCost = 9001;
+  public int moneyCostAdjustment = 0;
   public int maxFuel;
   public int idleFuelBurn;
   public int movePower;
@@ -136,7 +137,7 @@ public class UnitModel implements Serializable
   
   public int getCost()
   {
-    return (int) (moneyCost*COcost);
+    return (int) ((moneyCost+moneyCostAdjustment)*COcost);
   }
 
   /**
