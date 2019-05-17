@@ -96,15 +96,16 @@ public class COSetupController implements IController
         }
         break;
       case SEEK: // Display the CO Info menu so we can window-shop
-        ArrayList<CommanderInfo> infos = new ArrayList<CommanderInfo>();
-        
-        for( COSetupInfo selector : coSelectors )
-        {
-          infos.add(selector.getCurrentCO());
-        }
+        ArrayList<CommanderInfo> infos = CommanderLibrary.getCommanderList();
         
         CO_InfoController coInfoMenu = new CO_InfoController(infos);
         IView infoView = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
+
+        // Get the info menu to select the current CO
+        for( int i = 0; i < infos.indexOf(coSelectors[getHighlightedPlayer()].getCurrentCO()); i++ )
+        {
+          coInfoMenu.handleInput(UI.InputHandler.InputAction.DOWN);
+        }
 
         // Give the new controller/view the floor
         Driver.getInstance().changeGameState(coInfoMenu, infoView);
