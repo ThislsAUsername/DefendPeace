@@ -73,7 +73,7 @@ public class GameActionSet
   {
     if( !actionOptions.isEmpty() )
     {
-      return actionOptions.get(0).getType().name();
+      return actionOptions.get(0).getUnitActionType().name();
     }
     System.out.println("WARNING! Invalid GameActionSet!");
     return "INVALID";

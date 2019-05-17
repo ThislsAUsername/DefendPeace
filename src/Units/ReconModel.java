@@ -1,5 +1,6 @@
 package Units;
 
+import Engine.UnitActionType;
 import Engine.GameAction.ActionType;
 import Units.MoveTypes.MoveType;
 import Units.MoveTypes.Tires;
@@ -15,7 +16,7 @@ public class ReconModel extends UnitModel
   private static final int MOVE_POWER = 8;
 
   private static final MoveType moveType = new Tires();
-  private static final ActionType[] actions = { ActionType.ATTACK, ActionType.WAIT };
+  private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
   private static final WeaponModel[] weapons = { new ReconMGun() };
 
   public ReconModel()

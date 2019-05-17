@@ -12,9 +12,8 @@ import java.util.Queue;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
-import Engine.GameAction.ActionType;
 import Engine.GameActionSet;
-import Engine.GameInstance;
+import Engine.UnitActionType;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
@@ -245,7 +244,7 @@ public class Muriel implements AIController
         for( GameActionSet set : actionSet )
         {
           // Go ahead and attack someone as long as we don't have to move.
-          if( set.getSelected().getType() == ActionType.ATTACK )
+          if( set.getSelected().getUnitActionType() == UnitActionType.ATTACK )
           {
             for( GameAction action : set.getGameActions() )
             {
@@ -325,11 +324,11 @@ public class Muriel implements AIController
       }
 
       // Find all the things we can do from here.
-      Map<ActionType, ArrayList<GameAction> > unitActionsByType = AIUtils.getAvailableUnitActionsByType(unit, gameMap);
+      Map<UnitActionType, ArrayList<GameAction> > unitActionsByType = AIUtils.getAvailableUnitActionsByType(unit, gameMap);
 
       //////////////////////////////////////////////////////////////////
       // Look for advantageous attack actions.
-      ArrayList<GameAction> attackActions = unitActionsByType.get(ActionType.ATTACK);
+      ArrayList<GameAction> attackActions = unitActionsByType.get(UnitActionType.ATTACK);
       GameAction maxCarnageAction = null;
       double maxDamageValue = 0;
       for( GameAction action : attackActions )
@@ -359,7 +358,7 @@ public class Muriel implements AIController
 
       //////////////////////////////////////////////////////////////////
       // See if there's something to capture (but only if we are moderately healthy).
-      ArrayList<GameAction> captureActions = unitActionsByType.get(ActionType.CAPTURE);
+      ArrayList<GameAction> captureActions = unitActionsByType.get(UnitActionType.CAPTURE);
       if( !captureActions.isEmpty() && unit.getHP() >= 7 )
       {
         GameAction capture = captureActions.get(0);
@@ -371,7 +370,7 @@ public class Muriel implements AIController
       //////////////////////////////////////////////////////////////////
       // We didn't find an immediate ATTACK or CAPTURE action we can do.
       // Things that can capture; go find something to capture, if you are moderately healthy.
-      if( unit.model.hasActionType(ActionType.CAPTURE) && (unit.getHP() >= 7) )
+      if( unit.model.hasActionType(UnitActionType.CAPTURE) && (unit.getHP() >= 7) )
       {
         log(String.format("Seeking capture target for %s", unit.toStringWithLocation()));
         XYCoord unitCoords = new XYCoord(unit.x, unit.y);
@@ -392,7 +391,7 @@ public class Muriel implements AIController
 
       //////////////////////////////////////////////////////////////////
       // Everyone else, go hunting.
-      if( queuedActions.isEmpty() && unit.model.hasActionType(ActionType.ATTACK) )
+      if( queuedActions.isEmpty() && unit.model.hasActionType(UnitActionType.ATTACK) )
       {
         log(String.format("Seeking attack target for %s", unit.toStringWithLocation()));
         ArrayList<XYCoord> enemyLocations = AIUtils.findEnemyUnits(myCo, gameMap); // Get enemy locations.

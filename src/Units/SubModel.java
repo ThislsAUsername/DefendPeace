@@ -1,5 +1,6 @@
 package Units;
 
+import Engine.UnitActionType;
 import Engine.GameAction.ActionType;
 import Units.MoveTypes.FloatHeavy;
 import Units.MoveTypes.MoveType;
@@ -16,7 +17,7 @@ public class SubModel extends UnitModel
 
   // TODO: add submerge
   private static final MoveType moveType = new FloatHeavy();
-  private static final ActionType[] actions = { ActionType.ATTACK, ActionType.WAIT };
+  private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
   private static final WeaponModel[] weapons = { new SubTorpedoes() };
 
   public SubModel()

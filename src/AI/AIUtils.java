@@ -10,9 +10,9 @@ import java.util.Set;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
-import Engine.GameAction.ActionType;
 import Engine.GameActionSet;
 import Engine.Path;
+import Engine.UnitActionType;
 import Engine.Utils;
 import Engine.XYCoord;
 import Terrain.GameMap;
@@ -59,11 +59,11 @@ public class AIUtils
    * @param gameMap The world in which the Unit lives.
    * @return a Map of ActionType to ArrayList<GameAction>.
    */
-  public static Map<ActionType, ArrayList<GameAction> > getAvailableUnitActionsByType(Unit unit, GameMap gameMap)
+  public static Map<UnitActionType, ArrayList<GameAction> > getAvailableUnitActionsByType(Unit unit, GameMap gameMap)
   {
     // Create the ActionType-indexed map, and ensure we don't have any null pointers.
-    Map<ActionType, ArrayList<GameAction> > actionsByType = new HashMap<ActionType, ArrayList<GameAction> >();
-    for( ActionType atype : ActionType.values() )
+    Map<UnitActionType, ArrayList<GameAction> > actionsByType = new HashMap<UnitActionType, ArrayList<GameAction> >();
+    for( UnitActionType atype : UnitActionType.GENERIC_ACTIONS )
     {
       actionsByType.put(atype, new ArrayList<GameAction>());
     }
@@ -76,7 +76,7 @@ public class AIUtils
     {
       for( GameActionSet actionSet : actionSets )
       {
-        ActionType type = actionSet.getSelected().getType();
+        UnitActionType type = actionSet.getSelected().getUnitActionType();
 
         // Add these actions to the correct map bucket.
         actionsByType.get(type).addAll(actionSet.getGameActions());

@@ -9,6 +9,7 @@ import Engine.GameAction;
 import Engine.GameAction.ActionType;
 import Engine.GameActionSet;
 import Engine.Path;
+import Engine.UnitActionType;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
@@ -266,114 +267,12 @@ public class Unit implements Serializable
   /** Compiles and returns a list of all actions this unit could perform on map after moving along movePath. */
   public ArrayList<GameActionSet> getPossibleActions(GameMap map, Path movePath)
   {
-    XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
     ArrayList<GameActionSet> actionSet = new ArrayList<GameActionSet>();
-    if( map.isLocationEmpty(this, moveLocation) )
+    for( UnitActionType at : model.possibleActions )
     {
-      for( ActionType at : model.possibleActions)
-      {
-        switch (at)
-        {
-          case ATTACK:
-          // Evaluate attack options.
-          {
-            boolean moved = !moveLocation.equals(x, y);
-            ArrayList<GameAction> attackOptions = new ArrayList<GameAction>();
-            for( Weapon wpn : weapons )
-            {
-              // Evaluate this weapon for targets if it has ammo, and if either the weapon
-              // is mobile or we don't care if it's mobile (because we aren't moving).
-              if( wpn.ammo > 0 && (!moved || wpn.model.canFireAfterMoving) )
-              {
-                ArrayList<XYCoord> locations = Utils.findTargetsInRange(map, CO, moveLocation, wpn);
-
-                for( XYCoord loc : locations )
-                {
-                  attackOptions.add(new GameAction.AttackAction(map, this, movePath, loc));
-                }
-              }
-            } // ~Weapon loop
-
-            // Only add this action set if we actually have a target
-            if( !attackOptions.isEmpty() )
-            {
-              // Bundle our attack options into an action set and add it to our return collection.
-              actionSet.add(new GameActionSet(attackOptions));
-            }
-          } // ~attack options
-            break;
-          case CAPTURE:
-            if( CO.isEnemy(map.getLocation(moveLocation).getOwner()) && map.getLocation(moveLocation).isCaptureable() )
-            {
-              actionSet.add(new GameActionSet(new GameAction.CaptureAction(map, this, movePath), false));
-            }
-            break;
-          case WAIT:
-            actionSet.add(new GameActionSet(new GameAction.WaitAction(this, movePath), false));
-            break;
-          case LOAD:
-          case JOIN:
-            // We only get to here if there is no unit at the end of the move path, which means there is
-            //   no transport in this space to board and no friendly unit to reinforce. LOAD/JOIN actions are handled down below.
-            break;
-          case UNLOAD:
-            if( heldUnits.size() > 0 )
-            {
-              ArrayList<GameAction> unloadActions = new ArrayList<GameAction>();
-
-              // TODO: This could get messy real quick for transports with more cargo space. Figure out a
-              //       better way to handle this case.
-              for( Unit cargo : heldUnits )
-              {
-                ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, this, moveLocation, cargo);
-                for( XYCoord loc : dropoffLocations )
-                {
-                  unloadActions.add(new GameAction.UnloadAction(this, movePath, cargo, loc));
-                }
-              }
-
-              if( !unloadActions.isEmpty() )
-              {
-                actionSet.add(new GameActionSet(unloadActions));
-              }
-            }
-            break;
-          case RESUPPLY:
-            // Search for a unit in resupply range.
-            ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, moveLocation, 1);
-
-            // For each location, see if there is a friendly unit to re-supply.
-            for( XYCoord loc : locations )
-            {
-              // If there's a friendly unit there who isn't us, we can resupply them.
-              Unit other = map.getLocation(loc).getResident();
-              if( other != null && other.CO == CO && other != this && !other.isFullySupplied() )
-              {
-                // We found at least one unit we can resupply. Since resupply actions aren't
-                // targeted, we can just add our action and break here.
-                actionSet.add(new GameActionSet(new GameAction.ResupplyAction(this, movePath), false));
-                break;
-              }
-            }
-            break;
-          default:
-            System.out
-                .println("getPossibleActions: Invalid action in model's possibleActions: " + at);
-        }
-      }
-    }
-    else
-    {
-      // There is another unit in the tile at the end of movePath. We are either LOADing a transport or JOINing an ally.
-      Unit resident = map.getLocation(moveLocation).getResident();
-      if(resident.hasCargoSpace(model.type))
-      {
-        actionSet.add(new GameActionSet(new GameAction.LoadAction(map, this, movePath), false));
-      }
-      if( (resident.model.type == model.type) && (resident.getHP() < resident.model.maxHP) )
-      {
-        actionSet.add(new GameActionSet(new GameAction.UnitJoinAction(map, this, movePath), false));
-      }
+      GameActionSet actions = at.getPossibleActions(map, movePath, this);
+      if( null != actions )
+        actionSet.add(actions);
     }
 
     return actionSet;

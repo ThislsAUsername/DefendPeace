@@ -13,6 +13,7 @@ import Engine.GameInstance;
 import Engine.Path;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.UnitActionType;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -122,7 +123,7 @@ public class InfantrySpamAI implements AIController
         for( GameActionSet actionSet : actionSets )
         {
           // See if we have the option to attack.
-          if( actionSet.getSelected().getType() == GameAction.ActionType.ATTACK )
+          if( actionSet.getSelected().getUnitActionType() == UnitActionType.ATTACK )
           {
             actions.offer(actionSet.getSelected() );
             foundAction = true;
@@ -130,7 +131,7 @@ public class InfantrySpamAI implements AIController
           }
           
           // Otherwise, see if we have the option to capture.
-          if( actionSet.getSelected().getType() == GameAction.ActionType.CAPTURE )
+          if( actionSet.getSelected().getUnitActionType() == UnitActionType.CAPTURE )
           {
             actions.offer(actionSet.getSelected() );
             capturingProperties.add(coord);

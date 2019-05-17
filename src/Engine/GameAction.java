@@ -32,7 +32,7 @@ public interface GameAction
 {
   public enum ActionType
   {
-    ATTACK, CAPTURE, LOAD, JOIN, RESUPPLY, UNLOAD, WAIT, UNITPRODUCTION, OTHER
+    UNIT, PRODUCTION, OTHER
   }
 
   /**
@@ -43,6 +43,7 @@ public interface GameAction
   public abstract XYCoord getMoveLocation();
   public abstract XYCoord getTargetLocation();
   public abstract ActionType getType();
+  public abstract UnitActionType getUnitActionType();
 
   // ==========================================================
   //   Concrete Action type classes.
@@ -156,7 +157,7 @@ public interface GameAction
     @Override
     public ActionType getType()
     {
-      return GameAction.ActionType.ATTACK;
+      return GameAction.ActionType.UNIT;
     }
 
     @Override
@@ -164,6 +165,12 @@ public interface GameAction
     {
       return String.format("[Attack %s with %s after moving to %s]",
           defender.toStringWithLocation(), attacker.toStringWithLocation(), moveCoord );
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.ATTACK;
     }
   } // ~AttackAction
 
@@ -229,13 +236,19 @@ public interface GameAction
     @Override
     public ActionType getType()
     {
-      return GameAction.ActionType.UNITPRODUCTION;
+      return GameAction.ActionType.PRODUCTION;
     }
 
     @Override
     public String toString()
     {
       return String.format("[Produce %s at %s]", what, where);
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return null;
     }
   } // ~UnitProductionAction
 
@@ -326,13 +339,19 @@ public interface GameAction
     @Override
     public ActionType getType()
     {
-      return GameAction.ActionType.CAPTURE;
+      return GameAction.ActionType.UNIT;
     }
 
     @Override
     public String toString()
     {
       return String.format("[Capture %s at %s with %s]", propertyType, movePathEnd, actor.toStringWithLocation());
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.CAPTURE;
     }
   } // ~CaptureAction
 
@@ -396,13 +415,19 @@ public interface GameAction
     @Override
     public ActionType getType()
     {
-      return GameAction.ActionType.WAIT;
+      return GameAction.ActionType.UNIT;
     }
 
     @Override
     public String toString()
     {
       return String.format("[Move %s to %s]", actor.toStringWithLocation(), waitLoc);
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.WAIT;
     }
   } // ~WaitAction
 
@@ -482,13 +507,19 @@ public interface GameAction
     @Override
     public ActionType getType()
     {
-      return GameAction.ActionType.LOAD;
+      return GameAction.ActionType.UNIT;
     }
 
     @Override
     public String toString()
     {
       return String.format("[Load %s into %s]", passenger.toStringWithLocation(), transport.toStringWithLocation());
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.LOAD;
     }
   } // ~LoadAction
 
@@ -601,13 +632,19 @@ public interface GameAction
     @Override
     public ActionType getType()
     {
-      return GameAction.ActionType.UNLOAD;
+      return GameAction.ActionType.UNIT;
     }
 
     @Override
     public String toString()
     {
       return String.format("[Unload from %s]", actor.toStringWithLocation());
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.UNLOAD;
     }
   } // ~UnloadAction
 
@@ -688,13 +725,19 @@ public interface GameAction
     @Override
     public ActionType getType()
     {
-      return GameAction.ActionType.JOIN;
+      return GameAction.ActionType.UNIT;
     }
 
     @Override
     public String toString()
     {
       return String.format("[Join %s into %s]", donor.toStringWithLocation(), recipient.toStringWithLocation());
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.JOIN;
     }
   } // ~UnitJoinAction
 
@@ -814,13 +857,19 @@ public interface GameAction
     @Override
     public ActionType getType()
     {
-      return GameAction.ActionType.RESUPPLY;
+      return GameAction.ActionType.UNIT;
     }
 
     @Override
     public String toString()
     {
       return String.format("[Resupply units adjacent to %s with %s]", myLocation(), unitActor.toStringWithLocation());
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.RESUPPLY;
     }
   } // ~ResupplyAction
 
@@ -874,6 +923,12 @@ public interface GameAction
     public String toString()
     {
       return String.format("[Perform CO Ability %s]", myAbility);
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return null;
     }
   } // ~AbilityAction
 }

@@ -1,5 +1,6 @@
 package Units;
 
+import Engine.UnitActionType;
 import Engine.GameAction.ActionType;
 import Units.MoveTypes.FootMech;
 import Units.MoveTypes.MoveType;
@@ -16,7 +17,7 @@ public class MechModel extends UnitModel
   private static final int MOVE_POWER = 2;
 
   private static final MoveType moveType = new FootMech();
-  private static final ActionType[] actions = { ActionType.ATTACK, ActionType.CAPTURE, ActionType.WAIT };
+  private static final UnitActionType[] actions = UnitActionType.FOOTSOLDIER_ACTIONS;
   private static final WeaponModel[] weapons = { new MechZooka(), new MechMGun() };
 
   public MechModel()

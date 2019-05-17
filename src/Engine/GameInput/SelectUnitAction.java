@@ -3,6 +3,7 @@ package Engine.GameInput;
 import java.util.ArrayList;
 
 import Engine.GameActionSet;
+import Engine.UnitActionType;
 
 /************************************************************
  * State to allow selecting an action for a unit.           *
@@ -60,19 +61,11 @@ class SelectUnitAction extends GameInputState<GameActionSet>
       }
       else
       {
-        // We need more input before an action is ready; What kind of input depends on the type of action.
-        switch (chosenSet.getSelected().getType())
+        // We might need more input before an action is ready; What kind of input depends on the type of action.
+        UnitActionType type = chosenSet.getSelected().getUnitActionType();
+        if (null != type)
         {
-          case ATTACK:
-            // We need to select a target to attack.
-            next = new SelectActionTarget(myStateData);
-            break;
-          case UNLOAD:
-            // We need to select a unit to unload.
-            next = new SelectCargo(myStateData);
-            break;
-          default:
-            break;
+          next = type.getInputType(myStateData);
         }
       }
     }

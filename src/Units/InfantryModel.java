@@ -1,5 +1,6 @@
 package Units;
 
+import Engine.UnitActionType;
 import Engine.GameAction.ActionType;
 import Units.MoveTypes.FootStandard;
 import Units.MoveTypes.MoveType;
@@ -15,7 +16,7 @@ public class InfantryModel extends UnitModel
   private static final int MOVE_POWER = 3;
 
   private static final MoveType moveType = new FootStandard();
-  private static final ActionType[] actions = { ActionType.ATTACK, ActionType.CAPTURE, ActionType.WAIT };
+  private static final UnitActionType[] actions = UnitActionType.FOOTSOLDIER_ACTIONS;
   private static final WeaponModel[] weapons = { new InfantryMGun() };
 
   public InfantryModel()

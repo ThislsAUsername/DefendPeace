@@ -1,5 +1,6 @@
 package Units;
 
+import Engine.UnitActionType;
 import Engine.GameAction.ActionType;
 import Units.MoveTypes.MoveType;
 import Units.MoveTypes.Tread;
@@ -15,7 +16,7 @@ public class ArtilleryModel extends UnitModel
   private static final int MOVE_POWER = 5;
 
   private static final MoveType moveType = new Tread();
-  private static final ActionType[] actions = { ActionType.ATTACK, ActionType.WAIT };
+  private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
   private static final WeaponModel[] weapons = { new ArtilleryCannon() };
 
   public ArtilleryModel()
