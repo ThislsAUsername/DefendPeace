@@ -132,6 +132,9 @@ public class SpriteUIUtils
     // Unload our prose into the lines it already has
     lines.addAll(Arrays.asList(prose.split("\\R"))); // \R matches all newline formats, yay convenience
 
+    if( reqWidth < characterWidth || lines.isEmpty() )
+      return SpriteLibrary.createDefaultBlankSprite(1, 1); // zero-dimensioned images aren't kosher
+
     for( int i = 0; i < lines.size(); ++i ) // basic for, since we care about indices
     {
       String line = lines.get(i);
@@ -147,10 +150,7 @@ public class SpriteUIUtils
     int totalTextHeight = ((lines.isEmpty()) ? 0 : getMenuTextHeightPx(lines, characterHeight));
     // Build our image.
     BufferedImage menuImage = null;
-    if( reqWidth == 0 || totalTextHeight == 0 )
-      return SpriteLibrary.createDefaultBlankSprite(1, 1); // zero-dimensioned images aren't kosher
-    else
-      menuImage = SpriteLibrary.createTransparentSprite(reqWidth, totalTextHeight);
+    menuImage = SpriteLibrary.createTransparentSprite(reqWidth, totalTextHeight);
     Graphics g = menuImage.getGraphics();
 
     // Draw the actual text.

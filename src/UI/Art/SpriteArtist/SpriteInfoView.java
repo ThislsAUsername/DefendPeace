@@ -41,7 +41,6 @@ public class SpriteInfoView extends MapView // Extend MapView for getDrawableMap
   @Override
   public void setPreferredDimensions(int width, int height)
   {
-    // The user wants to use a specific amount of screen. Figure out how many tiles to draw for them.
     viewWidth = width;
     viewHeight = height;
     // Let SpriteOptions know we are changing things.
@@ -121,5 +120,12 @@ public class SpriteInfoView extends MapView // Extend MapView for getDrawableMap
   public void animate(GameEventQueue newEvents)
   {
     // TODO Auto-generated method stub
+  }
+
+  @Override
+  public void cleanup()
+  {
+    // TODO Auto-generated method stub
+    
   }
 }
