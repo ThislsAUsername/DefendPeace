@@ -214,7 +214,7 @@ public class GameInstance implements Serializable
       sb.append(co.coInfo.name).append("_");
     }
     sb.setLength(sb.length()-1);
-    sb.append(".svp");
+    sb.append(".svp"); // "svp" for "SaVe Peace"
     return sb.toString();
   }
   

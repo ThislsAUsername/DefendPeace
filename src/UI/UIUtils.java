@@ -163,6 +163,7 @@ public class UIUtils
     {
       buildingColorPalettes.put(colorKey, buildingColorPalettes.get(Color.PINK));
       palette = buildingColorPalettes.get(colorKey);
+      System.out.println(String.format("WARNING!: Failed to retrieve building palette for color %s, defaulting to PINK", colorKey));
     }
     return palette;
   }
@@ -175,6 +176,7 @@ public class UIUtils
     {
       mapUnitColorPalettes.put(colorKey, mapUnitColorPalettes.get(Color.PINK));
       palette = mapUnitColorPalettes.get(colorKey);
+      System.out.println(String.format("WARNING!: Failed to retrieve unit palette for color %s, defaulting to PINK", colorKey));
     }
     return palette;
   }
