@@ -39,7 +39,7 @@ public class Meridian extends Commander
     {
       super("Meridian");
       infoPages.add(new InfoPage(
-          "While other commanders may focus on fine-grain tactics, Meridian has taken a different line: her basic tanks and artillery are built from the same parts, and can be re-configured on the field at no cost.\n" + 
+          "While other commanders may focus on granular tactics, Meridian has taken a different line: her basic tanks and artillery are built from the same parts, and can be re-configured on the field at no cost.\n" +
           "This gives her forces extreme adaptability, and her powers hone this to a razor edge."));
       infoPages.add(new InfoPage(
           "Passive:\n" + 
@@ -151,7 +151,7 @@ public class Meridian extends Commander
   private static class VehicularCharge extends CommanderAbility
   {
     private static final String MOBILIZE_NAME = "Vehicular Charge";
-    private static final int COST = 7;
+    private static final int COST = 6;
     private static final int BASIC_BUFF = 10;
 
     CODamageModifier damageMod = null;
