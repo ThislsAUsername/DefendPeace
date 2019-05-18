@@ -28,7 +28,7 @@ public class CommanderPatch extends Commander
           "Gives an attack boost of "+PLUNDER_ATTACK_BUFF+"%\n" + 
           "Gives "+PLUNDER_INCOME+"x of the value of any funds damage Patch deals.\n"));
       infoPages.add(new InfoPage(
-          "Plunder ("+PILLAGE_COST+"):\n" + 
+          "Pillage ("+PILLAGE_COST+"):\n" + 
           "Gives an attack boost of "+PILLAGE_ATTACK_BUFF+"%\n" + 
           "Gives "+PILLAGE_INCOME+"x the value of any funds damage Patch deals.\n"));
     }

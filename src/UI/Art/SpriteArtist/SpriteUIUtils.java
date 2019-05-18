@@ -121,7 +121,7 @@ public class SpriteUIUtils
    * Returns an image with the input string printed within the specified width, in normal text.
    * @param reqWidth: Actual UI size in pixels that you want to fit the text into.
    */
-  public static BufferedImage paintTextNormalized(String prose, int reqWidth)
+  public static BufferedImage drawTextToWidth(String prose, int reqWidth)
   {
     // Figure out how big our text is.
     int drawScale = SpriteOptions.getDrawScale();
@@ -130,7 +130,7 @@ public class SpriteUIUtils
 
     ArrayList<String> lines = new ArrayList<String>();
     // Unload our prose into the lines it already has
-    lines.addAll(Arrays.asList(prose.split("\\R"))); // \R matches all newline formats, yay convenience
+    lines.addAll(Arrays.asList(prose.split("\\r\\n|\\n|\\r"))); // Should match all common newline formats. If we ever go to Java 8, use \R
 
     if( reqWidth < characterWidth || lines.isEmpty() )
       return SpriteLibrary.createDefaultBlankSprite(1, 1); // zero-dimensioned images aren't kosher

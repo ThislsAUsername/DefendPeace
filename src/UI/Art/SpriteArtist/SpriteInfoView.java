@@ -95,7 +95,7 @@ public class SpriteInfoView extends MapView // Extend MapView for getDrawableMap
 
           // Add brief status text per CO
           String status = new COStateInfo(getDrawableMap(myControl.getGame()), CO).getAbbrevStatus();
-          BufferedImage statusText = SpriteUIUtils.paintTextNormalized(status, drawingWidth);
+          BufferedImage statusText = SpriteUIUtils.drawTextToWidth(status, drawingWidth);
           overlayPic.getGraphics().drawImage(statusText, 0, drawScale * (5+SpriteLibrary.getCoOverlay(CO, true).getHeight()), null);
 
           // Drop the overlay where it's supposed to go
@@ -107,12 +107,12 @@ public class SpriteInfoView extends MapView // Extend MapView for getDrawableMap
         if( null != thisCO )
         {
           String status = new COStateInfo(getDrawableMap(myControl.getGame()), thisCO).getFullStatus();
-          BufferedImage statusText = SpriteUIUtils.paintTextNormalized(status, drawingWidth);
+          BufferedImage statusText = SpriteUIUtils.drawTextToWidth(status, drawingWidth);
           g.drawImage(statusText, 3 * paneOuterBuffer, 3 * paneOuterBuffer, null);
         }
         break;
       case BASIC:
-        BufferedImage infoText = SpriteUIUtils.paintTextNormalized(page.info, drawingWidth);
+        BufferedImage infoText = SpriteUIUtils.drawTextToWidth(page.info, drawingWidth);
         g.drawImage(infoText,3*paneOuterBuffer, 3*paneOuterBuffer, null);
         break;
     }
