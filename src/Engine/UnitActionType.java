@@ -210,8 +210,6 @@ public interface UnitActionType
         {
           ArrayList<GameAction> unloadActions = new ArrayList<GameAction>();
 
-          // TODO: This could get messy real quick for transports with more cargo space. Figure out a
-          //       better way to handle this case.
           for( Unit cargo : actor.heldUnits )
           {
             ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, actor, moveLocation, cargo);
