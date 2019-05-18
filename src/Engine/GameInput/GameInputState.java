@@ -16,7 +16,7 @@ import Units.Unit;
 /************************************************************
  * Abstract base class for all input states.                *
  ************************************************************/
-public abstract class GameInputState<T>
+abstract class GameInputState<T>
 {
   /** The current GameActionBuilder state data,
    *  shared with all State instances. */
@@ -80,13 +80,13 @@ public abstract class GameInputState<T>
   
   /** Undo any StateData changes. */
   public void back(){}
-
+}
 
 /************************************************************
  *  Just a struct class to hold information
  *  for easy sharing across State objects.
  ************************************************************/
-public static class StateData
+class StateData
 {
   public final GameMap gameMap;
   public final Commander commander;
@@ -101,7 +101,7 @@ public static class StateData
     commander = co;
   }
 }
-}
+
 
 /************************************************************
  * Provides access to the valid options for the current state

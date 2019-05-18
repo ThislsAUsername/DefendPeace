@@ -8,7 +8,7 @@ import Engine.GameInput.GameInputHandler.InputType;
 /************************************************************
  * Allows selecting an action's target.                     *
  ************************************************************/
-public class SelectActionTarget extends GameInputState<XYCoord>
+class SelectActionTarget extends GameInputState<XYCoord>
 {
   public SelectActionTarget(StateData data)
   {

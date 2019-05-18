@@ -2,10 +2,6 @@ package Engine;
 
 import java.util.ArrayList;
 
-import Engine.GameInput.GameInputState;
-import Engine.GameInput.SelectActionTarget;
-import Engine.GameInput.SelectCargo;
-import Engine.GameInput.GameInputState.StateData;
 import Terrain.GameMap;
 import Units.Unit;
 import Units.Weapons.Weapon;
@@ -14,7 +10,6 @@ public interface UnitActionType
 {
   public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor);
   public String name();
-  public GameInputState<?> getInputType(GameInputState.StateData data);
 
   public static final UnitActionType ATTACK = new Attack();
   public static final UnitActionType UNLOAD = new Unload();
@@ -75,12 +70,6 @@ public interface UnitActionType
     {
       return "ATTACK";
     }
-
-    @Override
-    public GameInputState<?> getInputType(StateData data)
-    {
-      return new SelectActionTarget(data);
-    }
   }
 
   public static class Capture implements UnitActionType
@@ -104,12 +93,6 @@ public interface UnitActionType
     {
       return "CAPTURE";
     }
-
-    @Override
-    public GameInputState<?> getInputType(StateData data)
-    {
-      return null;
-    }
   }
 
   public static class Wait implements UnitActionType
@@ -129,12 +112,6 @@ public interface UnitActionType
     public String name()
     {
       return "WAIT";
-    }
-
-    @Override
-    public GameInputState<?> getInputType(StateData data)
-    {
-      return null;
     }
   }
 
@@ -160,12 +137,6 @@ public interface UnitActionType
     {
       return "LOAD";
     }
-
-    @Override
-    public GameInputState<?> getInputType(StateData data)
-    {
-      return null;
-    }
   }
 
   public static class Join implements UnitActionType
@@ -189,12 +160,6 @@ public interface UnitActionType
     public String name()
     {
       return "JOIN";
-    }
-
-    @Override
-    public GameInputState<?> getInputType(StateData data)
-    {
-      return null;
     }
   }
 
@@ -233,12 +198,6 @@ public interface UnitActionType
     {
       return "UNLOAD";
     }
-
-    @Override
-    public GameInputState<?> getInputType(StateData data)
-    {
-      return new SelectCargo(data);
-    }
   }
 
   public static class Resupply implements UnitActionType
@@ -272,12 +231,6 @@ public interface UnitActionType
     public String name()
     {
       return "RESUPPLY";
-    }
-
-    @Override
-    public GameInputState<?> getInputType(StateData data)
-    {
-      return null;
     }
   }
 }

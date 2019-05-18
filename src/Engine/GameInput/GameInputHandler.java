@@ -14,7 +14,7 @@ import Terrain.GameMap;
  ************************************************************/
 public class GameInputHandler
 {
-  private GameInputState.StateData myStateData = null;
+  private StateData myStateData = null;
   private Stack<GameInputState<?>> myStateStack = null;
   private StateChangedCallback myCallback = null;
 
@@ -23,7 +23,7 @@ public class GameInputHandler
   public GameInputHandler(GameMap map, Commander currentPlayer, StateChangedCallback callback)
   {
     myStateStack = new Stack<GameInputState<?>>();
-    myStateData = new GameInputState.StateData(map, currentPlayer);
+    myStateData = new StateData(map, currentPlayer);
     myStateStack.push(new DefaultState(myStateData));
     myCallback = callback;
   }
@@ -83,7 +83,7 @@ public class GameInputHandler
   {
     // Unwind the stack, all the way back to the starting state.
     myStateStack.clear();
-    myStateData = new GameInputState.StateData(myStateData.gameMap, myStateData.commander);
+    myStateData = new StateData(myStateData.gameMap, myStateData.commander);
     myStateStack.push(new DefaultState(myStateData));
     return peekCurrentState().getOptions().inputType;
   }

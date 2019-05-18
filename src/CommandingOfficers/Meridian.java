@@ -4,21 +4,16 @@ import java.util.ArrayList;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
-import Engine.GameAction;
 import Engine.GameAction.WaitAction;
 import Engine.GameActionSet;
 import Engine.Path;
 import Engine.UnitActionType;
-import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
-import Engine.GameInput.GameInputState;
-import Engine.GameInput.GameInputState.StateData;
 import Terrain.GameMap;
-import Terrain.Location;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -220,12 +215,6 @@ public class Meridian extends Commander
     public String name()
     {
       return String.format("~%s", destinationType);
-    }
-
-    @Override
-    public GameInputState<?> getInputType(StateData data)
-    {
-      return null;
     }
   }
 
