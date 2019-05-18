@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import Terrain.GameMap;
 import Units.Unit;
+import Units.UnitModel;
 import Units.Weapons.Weapon;
 
 public interface UnitActionType
@@ -231,6 +232,37 @@ public interface UnitActionType
     public String name()
     {
       return "RESUPPLY";
+    }
+  }
+
+  /**
+   * Effectively a wait, but the unit ends up as a different unit at the end of it.
+   * Is a template action, and thus doesn't get a constant.
+   */
+  public static class Transform implements UnitActionType
+  {
+    public final UnitModel destinationType;
+    
+    public Transform(UnitModel type)
+    {
+      destinationType = type;
+    }
+    
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor)
+    {
+      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      if( map.isLocationEmpty(actor, moveLocation) )
+      {
+        return new GameActionSet(new GameAction.TransformAction(actor, movePath, this), false);
+      }
+      return null;
+    }
+
+    @Override
+    public String name()
+    {
+      return String.format("~%s", destinationType);
     }
   }
 }

@@ -11,12 +11,14 @@ import Engine.GameEvents.CaptureEvent;
 import Engine.GameEvents.CommanderAbilityEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.CreateUnitEvent;
+import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.LoadEvent;
 import Engine.GameEvents.MoveEvent;
 import Engine.GameEvents.ResupplyEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.UnitJoinEvent;
+import Engine.GameEvents.UnitTransformEvent;
 import Engine.GameEvents.UnloadEvent;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -933,4 +935,45 @@ public interface GameAction
       return null;
     }
   } // ~AbilityAction
+  
+  // ===========  UnitTransformAction  =================================
+  /** Effectively a WAIT, but the unit ends up as a different unit at the end of it. */
+  public static class TransformAction extends WaitAction
+  {
+    private UnitActionType.Transform type;
+
+    public TransformAction(Unit unit, Path path, UnitActionType.Transform pType)
+    {
+      super(unit, path);
+      type = pType;
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue transformEvents = super.getEvents(gameMap);
+      
+      if( transformEvents.size() > 0 ) // if we successfully made a move action
+      {
+        GameEvent moveEvent = transformEvents.peek();
+        if (moveEvent.getEndPoint().equals(waitLoc)) // make sure we shouldn't be pre-empted
+        {
+          transformEvents.add(new UnitTransformEvent(actor, type.destinationType));
+        }
+      }
+      return transformEvents;
+    }
+    
+    @Override
+    public String toString()
+    {
+      return String.format("[Move %s to %s and transform to %s]", actor.toStringWithLocation(), waitLoc, type.destinationType);
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return type;
+    }
+  } // ~TransformAction
 }
