@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.GameAction;
+import Engine.GameAction.WaitAction;
 import Engine.GameActionSet;
 import Engine.Path;
 import Engine.UnitActionType;
@@ -174,7 +175,7 @@ public class Meridian extends Commander
       myCommander.addCOModifier(damageMod);
       myCommander.addCOModifier(defenseMod);
 
-      // Lastly, all troops are refreshed and able to move again.
+      // Lastly, all land vehicles are refreshed and able to move again.
       for( Unit unit : COcast.units )
       {
         if( unit.model.chassis == UnitModel.ChassisEnum.TANK )
@@ -229,73 +230,32 @@ public class Meridian extends Commander
   }
 
   /** Effectively a wait, but the unit ends up as a different unit at the end of it. */
-  public static class TransformAction implements GameAction
+  public static class TransformAction extends WaitAction
   {
     private Transform type;
-    private Path movePath;
-    private XYCoord waitLoc = null;
-    private Unit actor = null;
 
     public TransformAction(Unit unit, Path path, Transform pType)
     {
-      actor = unit;
-      movePath = path;
-      if( (null != path) && (path.getPathLength() > 0) )
-      {
-        // Store the destination for later.
-        waitLoc = new XYCoord(path.getEnd().x, path.getEnd().y);
-      }
+      super(unit, path);
       type = pType;
     }
 
     @Override
     public GameEventQueue getEvents(MapMaster gameMap)
     {
-      // WAIT actions consist of
-      //   MOVE
-      GameEventQueue transformEvents = new GameEventQueue();
-
-      // Validate input.
-      boolean isValid = true;
-      isValid &= null != actor && !actor.isTurnOver;
-      isValid &= (null != movePath) && (movePath.getPathLength() > 0);
-      isValid &= (null != gameMap);
-      if( isValid )
+      GameEventQueue transformEvents = super.getEvents(gameMap);
+      
+      if( transformEvents.size() > 0 )
       {
-        XYCoord movePathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
-        Location moveLocation = gameMap.getLocation(movePathEnd);
-        isValid &= (null == moveLocation.getResident()) || (actor == moveLocation.getResident());
-      }
-
-      // Generate events.
-      if( isValid )
-      {
-        if (Utils.enqueueMoveEvent(gameMap, actor, movePath, transformEvents))
+        GameEvent moveEvent = transformEvents.peek();
+        if (moveEvent.getEndPoint().equals(waitLoc))
         {
           transformEvents.add(new UnitTransformEvent(actor, type.destinationType, type.co));
         }
       }
       return transformEvents;
     }
-
-    @Override
-    public XYCoord getMoveLocation()
-    {
-      return waitLoc;
-    }
-
-    @Override
-    public XYCoord getTargetLocation()
-    {
-      return waitLoc;
-    }
-
-    @Override
-    public ActionType getType()
-    {
-      return ActionType.UNIT;
-    }
-
+    
     @Override
     public String toString()
     {

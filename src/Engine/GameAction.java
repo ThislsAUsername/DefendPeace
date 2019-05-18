@@ -358,9 +358,9 @@ public interface GameAction
   // ===========  WaitAction  =================================
   public static class WaitAction implements GameAction
   {
-    private Path movePath;
-    private XYCoord waitLoc = null;
-    private Unit actor = null;
+    protected final Path movePath;
+    protected final XYCoord waitLoc;
+    protected final Unit actor;
 
     public WaitAction(Unit unit, Path path)
     {
@@ -371,6 +371,8 @@ public interface GameAction
         // Store the destination for later.
         waitLoc = new XYCoord(path.getEnd().x, path.getEnd().y);
       }
+      else
+        waitLoc = null;
     }
 
     @Override
