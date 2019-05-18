@@ -64,7 +64,7 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
   {
     StringBuilder sb = new StringBuilder();
 
-    sb.append("Income: ").append(income).append("\t");
+    sb.append("Income: ").append(income/1000).append("k  ");
     sb.append("Unit count: ").append(unitCount);
     return sb.toString();
   }
