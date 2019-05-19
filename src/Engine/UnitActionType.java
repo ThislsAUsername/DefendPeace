@@ -150,7 +150,7 @@ public interface UnitActionType
       Unit resident = map.getLocation(moveLocation).getResident();
       if( resident != null )
       {
-        if( (resident.model.type == actor.model.type) && (resident.getHP() < resident.model.maxHP) )
+        if( (resident.model.type == actor.model.type) && resident != actor && (resident.getHP() < resident.model.maxHP) )
         {
           return new GameActionSet(new GameAction.UnitJoinAction(map, actor, movePath), false);
         }
