@@ -17,15 +17,16 @@ public interface UnitActionType
   public static final UnitActionType CAPTURE = new Capture();
   public static final UnitActionType RESUPPLY = new Resupply();
   public static final UnitActionType WAIT = new Wait();
+  public static final UnitActionType DELETE = new Delete();
   public static final UnitActionType LOAD = new Load();
   public static final UnitActionType JOIN = new Join();
 
-  public static final UnitActionType[] GENERIC_ACTIONS = { ATTACK, UNLOAD, CAPTURE, RESUPPLY, WAIT, LOAD, JOIN };
+  public static final UnitActionType[] GENERIC_ACTIONS = { ATTACK, UNLOAD, CAPTURE, RESUPPLY, WAIT, DELETE, LOAD, JOIN };
   
-  public static final UnitActionType[] FOOTSOLDIER_ACTIONS =    { ATTACK, CAPTURE,  WAIT, LOAD, JOIN };
-  public static final UnitActionType[] COMBAT_VEHICLE_ACTIONS = { ATTACK,           WAIT, LOAD, JOIN };
-  public static final UnitActionType[] TRANSPORT_ACTIONS =      { UNLOAD,           WAIT, LOAD, JOIN };
-  public static final UnitActionType[] APC_ACTIONS =            { UNLOAD, RESUPPLY, WAIT, LOAD, JOIN };
+  public static final UnitActionType[] FOOTSOLDIER_ACTIONS =    { ATTACK, CAPTURE,  WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] COMBAT_VEHICLE_ACTIONS = { ATTACK,           WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] TRANSPORT_ACTIONS =      { UNLOAD,           WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] APC_ACTIONS =            { UNLOAD, RESUPPLY, WAIT, DELETE, LOAD, JOIN };
   
 
   public static class Attack implements UnitActionType
@@ -263,6 +264,26 @@ public interface UnitActionType
     public String name()
     {
       return String.format("~%s", destinationType);
+    }
+  }
+
+  public static class Delete implements UnitActionType
+  {
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor)
+    {
+      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      if( moveLocation.equals(actor.x, actor.y) )
+      {
+        return new GameActionSet(new GameAction.UnitDeleteAction(actor), true); // We don't really need a target, but I want a confirm dialogue
+      }
+      return null;
+    }
+
+    @Override
+    public String name()
+    {
+      return "DELETE";
     }
   }
 }

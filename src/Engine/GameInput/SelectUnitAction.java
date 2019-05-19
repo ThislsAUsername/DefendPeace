@@ -61,13 +61,17 @@ class SelectUnitAction extends GameInputState<GameActionSet>
       }
       else
       {
+        UnitActionType actionType = chosenSet.getSelected().getUnitActionType();
         // We might need more input before an action is ready; What kind of input depends on the type of action.
-        if( UnitActionType.ATTACK == chosenSet.getSelected().getUnitActionType() )
+        if( UnitActionType.ATTACK == actionType )
           // We need to select a target to attack.
           next = new SelectActionTarget(myStateData);
-        else if( UnitActionType.UNLOAD == chosenSet.getSelected().getUnitActionType() )
+        else if( UnitActionType.UNLOAD == actionType )
           // We need to select a unit to unload.
           next = new SelectCargo(myStateData);
+        else if( UnitActionType.DELETE == actionType )
+          // We need to select a unit to unload.
+          next = new ConfirmUnitAction(myStateData);
       }
     }
     return next;

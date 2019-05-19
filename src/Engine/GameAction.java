@@ -976,4 +976,56 @@ public interface GameAction
       return type;
     }
   } // ~TransformAction
+
+  // ===========  UnitDeleteAction  =================================
+  /** Removes the unit. Only allows deletion in place */
+  public static class UnitDeleteAction implements GameAction
+  {
+    final Unit actor;
+    final XYCoord destination;
+    
+    public UnitDeleteAction(Unit unit)
+    {
+      actor = unit;
+      destination = new XYCoord(unit.x, unit.y);
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue eventSequence = new GameEventQueue();
+      eventSequence.add(new UnitDieEvent(actor));
+      return eventSequence;
+    }
+
+    @Override
+    public ActionType getType()
+    {
+      return ActionType.UNIT;
+    }
+    
+    @Override
+    public String toString()
+    {
+      return String.format("[Delete %s in place]", actor.toStringWithLocation());
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.DELETE;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return destination;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return destination;
+    }
+  } // ~UnitDeleteAction
 }
