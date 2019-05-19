@@ -243,10 +243,12 @@ public interface UnitActionType
   public static class Transform implements UnitActionType
   {
     public final UnitModel destinationType;
+    public final String name;
     
-    public Transform(UnitModel type)
+    public Transform(UnitModel type, String displayName)
     {
       destinationType = type;
+      name = displayName;
     }
     
     @Override
@@ -263,7 +265,7 @@ public interface UnitActionType
     @Override
     public String name()
     {
-      return String.format("~%s", destinationType);
+      return name;
     }
   }
 

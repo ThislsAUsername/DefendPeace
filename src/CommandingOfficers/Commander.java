@@ -16,6 +16,7 @@ import AI.AILibrary;
 import AI.AIMaker;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
+import Engine.UnitActionType;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.Combat.BattleInstance.CombatContext;
@@ -45,6 +46,7 @@ import Units.NeotankModel;
 import Units.ReconModel;
 import Units.RocketsModel;
 import Units.SubModel;
+import Units.SubSubModel;
 import Units.TCopterModel;
 import Units.TankModel;
 import Units.Unit;
@@ -132,6 +134,20 @@ public class Commander extends GameEventListener implements Serializable
     money = DEFAULTSTARTINGMONEY;
 
     myAbilities = new ArrayList<CommanderAbility>();
+
+    // TODO:
+    // This *really* shouldn't be here, but I ain't sure how best to not do that.
+    // Maybe we should just make some static function to set up this stuff, like the AI/CommanderLibraries?
+    // That has the downfall that there's only one return type from that.
+    // I guess we could have one function that builds the whole unit library, and one that pulls out the buildables and makes the map.
+    // Whatever. This works, for now.
+
+    // Subs gotta dive, man
+    UnitModel sub = getUnitModel(UnitModel.UnitEnum.SUB);
+    UnitModel subsub = new SubSubModel();
+    unitModels.add(subsub);
+    sub.possibleActions.add(new UnitActionType.Transform(subsub, "DIVE"));
+    subsub.possibleActions.add(new UnitActionType.Transform(sub, "RISE"));
   }
 
   protected void addCommanderAbility(CommanderAbility ca)
