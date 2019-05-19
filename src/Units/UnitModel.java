@@ -41,7 +41,8 @@ public class UnitModel implements Serializable
   public int idleFuelBurn;
   public int movePower;
   public int visionRange;
-  public boolean visionIgnoresCover = false;
+  public int visionRangePiercing = 1;
+  public boolean hidden = false;
   public MoveType propulsion;
   public ArrayList<UnitActionType> possibleActions = new ArrayList<UnitActionType>();
   public transient Set<TerrainType> healableHabs;

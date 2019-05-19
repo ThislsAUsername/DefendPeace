@@ -10,5 +10,6 @@ public class SubSubModel extends SubModel
     type = UnitEnum.SUB_SUB;
     chassis = ChassisEnum.SUBMERGED;
     idleFuelBurn = IDLE_FUEL_BURN;
+    hidden = true;
   }
 }
