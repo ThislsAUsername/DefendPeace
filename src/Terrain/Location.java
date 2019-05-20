@@ -102,11 +102,11 @@ public class Location implements Serializable
     setEnvironment(Environment.getTile(getEnvironment().terrainType, w));
     for( int turns = 0; turns < duration; turns++ )
     {
-      forecast.poll();
+      forecast.pollFirst();
     }
     for( int turns = 0; turns < duration; turns++ )
     {
-      forecast.push(w);
+      forecast.addFirst(w);
     }
   }
   
@@ -116,7 +116,8 @@ public class Location implements Serializable
    * @param stream
    * @throws IOException
    */
-  private void writeObject(ObjectOutputStream stream) throws IOException {
+  private void writeObject(ObjectOutputStream stream) throws IOException
+  {
       stream.defaultWriteObject();
       stream.writeInt(TerrainType.TerrainTypeList.indexOf(environs.terrainType));
       stream.writeInt(environs.weatherType.ordinal());
@@ -129,7 +130,8 @@ public class Location implements Serializable
    * @throws IOException
    */
   private void readObject(ObjectInputStream stream)
-          throws IOException, ClassNotFoundException {
+          throws IOException, ClassNotFoundException
+  {
       stream.defaultReadObject();
       environs = Environment.getTile(TerrainType.TerrainTypeList.get(stream.readInt()), Environment.Weathers.values()[stream.readInt()]);
   }

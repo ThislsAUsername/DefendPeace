@@ -1,5 +1,6 @@
 package Engine.GameEvents;
 
+import java.util.ArrayList;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -9,6 +10,8 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import Engine.Combat.BattleSummary;
+import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
+import Terrain.Environment.Weathers;
 import Terrain.Location;
 import Units.Unit;
 
@@ -60,17 +63,21 @@ public abstract class GameEventListener implements Serializable
   }
 
   // The functions below should be overridden by subclasses for event types they care about.
+  // As a rule, we should avoid passing the actual event to the receive hooks when possible.
   public void receiveBattleEvent(BattleSummary summary){};
   public void receiveCreateUnitEvent(Unit unit){};
   public void receiveCaptureEvent(Unit unit, Location location){};
   public void receiveCommanderDefeatEvent(CommanderDefeatEvent event){};
   public void receiveLoadEvent(LoadEvent event){};
   public void receiveMoveEvent(MoveEvent event){};
+  public void receiveUnitJoinEvent(UnitJoinEvent event){};
   public void receiveResupplyEvent(ResupplyEvent event){};
   public void receiveUnitDieEvent(UnitDieEvent event){};
   public void receiveUnloadEvent(UnloadEvent event){};
+  public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){};
+  public void receiveWeatherChangeEvent(Weathers weather, int duration){};
   public void receiveMapChangeEvent(MapChangeEvent event){};
-
+  
   /**
    * Private method, same signature as in Serializable interface
    * Saves whether the listener is registered, as the registered listeners array is static
@@ -78,7 +85,8 @@ public abstract class GameEventListener implements Serializable
    * @param stream
    * @throws IOException
    */
-  private void writeObject(ObjectOutputStream stream) throws IOException {
+  private void writeObject(ObjectOutputStream stream) throws IOException
+  {
     stream.defaultWriteObject();
 
     stream.writeBoolean(eventListeners.contains(this));
@@ -91,7 +99,8 @@ public abstract class GameEventListener implements Serializable
    * @throws IOException
    */
   private void readObject(ObjectInputStream stream)
-          throws IOException, ClassNotFoundException {
+          throws IOException, ClassNotFoundException
+  {
     stream.defaultReadObject();
 
     if (stream.readBoolean())

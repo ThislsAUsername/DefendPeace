@@ -3,10 +3,10 @@ package UI;
 import UI.InputHandler.InputAction;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
+import CommandingOfficers.CommanderInfo.InfoPage;
 
 import java.util.ArrayList;
 
-import CommandingOfficers.COMaker.InfoPage;
 import Engine.GameInstance;
 import Engine.OptionSelector;
 
@@ -44,7 +44,7 @@ public class CO_InfoController implements InfoController
     pageSelectors = new OptionSelector[coInfos.size()];
     for( int i = 0; i < coInfos.size(); ++i )
     {
-      pageSelectors[i] = new OptionSelector(coInfos.get(i).maker.infoPages.size());
+      pageSelectors[i] = new OptionSelector(coInfos.get(i).infoPages.size());
     }
   }
   
@@ -92,7 +92,7 @@ public class CO_InfoController implements InfoController
   @Override
   public InfoPage getSelectedPage()
   {
-    return getSelectedCOInfo().maker.infoPages.get(pageSelectors[coOptionSelector.getSelectionNormalized()].getSelectionNormalized());
+    return getSelectedCOInfo().infoPages.get(pageSelectors[coOptionSelector.getSelectionNormalized()].getSelectionNormalized());
   }
   
   @Override

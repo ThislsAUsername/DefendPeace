@@ -25,6 +25,8 @@ public class CommanderLibrary
     commanderList.add( CommanderCinder.getInfo() );
     commanderList.add( CommanderAve.getInfo() );
     
+    
+    
     commanderList.add( OSAndy.getInfo() );
     commanderList.add( OSHachi.getInfo() );
     commanderList.add( OSJake.getInfo() );

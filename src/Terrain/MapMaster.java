@@ -33,8 +33,7 @@ public class MapMaster extends GameMap
     }
 
     // Print a warning if the number of Commanders we have does not match the number the map expects.
-    if( COs.length != mapInfo.COProperties.length ||
-      ( mapInfo.mapUnits.size() > 0 && COs.length != mapInfo.mapUnits.size() ) )
+    if( COs.length != mapInfo.COProperties.length )
     {
       System.out.println("Warning! Wrong number of COs specified for map " + mapInfo.mapName);
       initOK = false;
@@ -43,6 +42,7 @@ public class MapMaster extends GameMap
     {
       System.out.println("Warning! Wrong number of unit arrays specified for map " + mapInfo.mapName);
       System.out.println(String.format("         Expected zero or %s; received %s", COs.length, mapInfo.mapUnits.size()));
+      initOK = false;
     }
 
     // Assign properties according to MapInfo's direction.

@@ -90,6 +90,10 @@ public abstract class MapView implements IView
   {
     return null;
   }
+  public GameAnimation buildUnitJoinAnimation()
+  {
+    return null;
+  }
   public GameAnimation buildResupplyAnimation(Unit unit)
   {
     return null;

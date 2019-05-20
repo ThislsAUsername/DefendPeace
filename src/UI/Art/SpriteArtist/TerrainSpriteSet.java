@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import Terrain.Environment.Weathers;
+import UI.UIUtils;
 import Terrain.GameMap;
 import Terrain.TerrainType;
 
@@ -117,7 +118,7 @@ public class TerrainSpriteSet
         // If this is a capturable location and we are owned, colorize before applying the weather overlay.
         if( myTerrainType.isCapturable() && myTeamColor != null )
         {
-          sprite.colorize(SpriteLibrary.defaultMapColors, SpriteLibrary.getBuildingColors(myTeamColor).paletteColors);
+          sprite.colorize(UIUtils.defaultMapColors, UIUtils.getBuildingColors(myTeamColor).paletteColors);
         }
 
         // Draw our faux weather effect.
@@ -141,7 +142,7 @@ public class TerrainSpriteSet
     {
       System.out.println("WARNING! Continuing with placeholder images.");
       // Create a new blank sprite image of the desired size.
-      spriteArray.add(new Sprite((BufferedImage)null, spriteWidth, spriteHeight));
+      spriteArray.add(new Sprite(null, spriteWidth, spriteHeight));
       terrainSprites.put(weather, spriteArray);
     }
     else
@@ -197,14 +198,14 @@ public class TerrainSpriteSet
         spriteArray.clear(); // Clear this in case of partially-created data.
 
         // Make a single blank frame of the specified size.
-        spriteArray.add(new Sprite((BufferedImage)null, spriteWidth, spriteHeight));
+        spriteArray.add(new Sprite(null, spriteWidth, spriteHeight));
       }
 
       // If this is a capturable location and we are owned, colorize before applying the weather overlay.
       if( myTerrainType.isCapturable() && myTeamColor != null )
       {
         for( Sprite sprite : spriteArray )
-          sprite.colorize(SpriteLibrary.defaultMapColors, SpriteLibrary.getBuildingColors(myTeamColor).paletteColors);
+          sprite.colorize(UIUtils.defaultMapColors, UIUtils.getBuildingColors(myTeamColor).paletteColors);
       }
 
       terrainSprites.put(weather, spriteArray);

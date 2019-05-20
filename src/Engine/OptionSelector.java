@@ -92,4 +92,9 @@ public class OptionSelector
         System.out.println("Warning: Unexpected input received in OptionSelector.");
     }
   }
+  
+  public int size()
+  {
+    return numOptions;
+  }
 }

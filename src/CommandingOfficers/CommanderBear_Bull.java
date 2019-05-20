@@ -1,5 +1,4 @@
 package CommandingOfficers;
-
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.XYCoord;
 import Terrain.Location;
@@ -17,11 +16,12 @@ public class CommanderBear_Bull extends Commander
 {
   private static final long serialVersionUID = -3048055535977630509L;
   
-  private static final CommanderInfo coInfo = new CommanderInfo("Bear&Bull", new instantiator());  
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Bear&Bull");
       infoPages.add(new InfoPage(
           "Bear&Bull is a pair of commanders who complement each other like the ebbs and flows of a free market.\n" +
           "They have no constant advantage, but can leverage their abilities to gain buying power.\n"));

@@ -37,13 +37,14 @@ public class COSetupController implements IController
     gameBuilder = builder;
     int numCos = gameBuilder.mapInfo.getNumCos();
     playerSelector = new OptionSelector(numCos);
+    // One entry of two numbers for each player, for Commander and color.
     coSelectors = new COSetupInfo[numCos];
 
     // Start by making default CO/color selections.
     for(int co = 0; co < numCos; ++co)
     {
       // Set up our option selection framework
-      coSelectors[co] = new COSetupInfo(numCos, co, CommanderLibrary.getCommanderList(), SpriteLibrary.getCOColors(), SpriteLibrary.getFactionNames(), AILibrary.getAIList());
+      coSelectors[co] = new COSetupInfo(numCos, co, CommanderLibrary.getCommanderList(), UIUtils.getCOColors(), UIUtils.getFactions(), AILibrary.getAIList());
     }
   }
 
@@ -96,15 +97,16 @@ public class COSetupController implements IController
         }
         break;
       case SEEK: // Display the CO Info menu so we can window-shop
-        ArrayList<CommanderInfo> infos = new ArrayList<CommanderInfo>();
-        
-        for( COSetupInfo selector : coSelectors )
-        {
-          infos.add(selector.getCurrentCO());
-        }
+        ArrayList<CommanderInfo> infos = CommanderLibrary.getCommanderList();
         
         CO_InfoController coInfoMenu = new CO_InfoController(infos);
         IView infoView = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
+
+        // Get the info menu to select the current CO
+        for( int i = 0; i < infos.indexOf(coSelectors[getHighlightedPlayer()].getCurrentCO()); i++ )
+        {
+          coInfoMenu.handleInput(UI.InputHandler.InputAction.DOWN);
+        }
 
         // Give the new controller/view the floor
         Driver.getInstance().changeGameState(coInfoMenu, infoView);

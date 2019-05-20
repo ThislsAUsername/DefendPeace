@@ -20,12 +20,13 @@ import Units.Weapons.Weapon;
 public class CommanderVenge extends Commander
 {
   private static final long serialVersionUID = -8207164779284734879L;
-  
-  private static final CommanderInfo coInfo = new CommanderInfo("Venge", new instantiator());
-  private static class instantiator extends COMaker
+
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Venge");
       infoPages.add(new InfoPage(
           "Commander Venge likes to get vengeance for any slight.\n" +
           "Attacking Venge is not always difficult, but you may not like the consequences.\n"));

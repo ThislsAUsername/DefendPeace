@@ -5,14 +5,13 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
-import CommandingOfficers.CommanderLibrary;
-import Engine.XYCoord;
 import CommandingOfficers.CommanderStrong;
 import Engine.XYCoord;
 import Terrain.MapInfo;
 import UI.COSetupController;
 import UI.COSetupInfo;
 import UI.COSetupInfo.OptionList;
+import UI.UIUtils;
 
 public class SpriteCOSetupArtist
 {
@@ -30,7 +29,7 @@ public class SpriteCOSetupArtist
   private static COSetupController myControl = null;
 
   /**
-   * (We want to, eventually) Draw a thing like this, for each player:
+   * Draw a thing like this, for each player:
    * +------------------+ +---------+ +---------+
    * |                  | |  Color  | | Faction |
    * |                  | +---------+ +---------+
@@ -97,6 +96,8 @@ public class SpriteCOSetupArtist
     int numCOs = mapInfo.getNumCos();
     int highlightedPlayer = myControl.getHighlightedPlayer();
 
+    // Allocate a static amount of horizontal space for each player in the map.
+    // Possible TODO: Adjust the allocated space for each player based on how long their selected options actually are. 
     int xSpacing = (int)(
         SpriteLibrary.getCommanderSprites(CommanderStrong.getInfo().name).head.getWidth() + 
         SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth()*EXPECTED_TEXT_LENGTH*2 +
@@ -115,7 +116,7 @@ public class SpriteCOSetupArtist
 
     for(int i = 0; i < numCOs; ++i, drawXCenter += xSpacing)
     {
-      // Draw the box, the color, and the CO portrait.
+      // Draw all the info for the player in question, and the arrows if it's the currently highlighted player
       drawCoInfo(g, myControl.getPlayerInfo(i), drawXCenter, drawYCenter, i == highlightedPlayer);
     }
   }
@@ -123,7 +124,7 @@ public class SpriteCOSetupArtist
   private static void drawSelectorArrows(Graphics g, int xCenter, int yCenter, int yBuffer)
   {
     int drawScale = SpriteOptions.getDrawScale();
-    // Polygons for arrows to indicate the focused player slot. CO face images are 32x32, plus two pixels
+    // Polygons for arrows to indicate the focused player slot. Add two pixels to the vertical buffer
     // for the frame border, plus two pixels between the portrait frame and the arrows.
     int[] upXPoints = {xCenter-(4*drawScale), xCenter, xCenter+drawScale, xCenter+(5*drawScale)};
     int[] upYPoints = {yCenter-(yBuffer*drawScale), yCenter-((yBuffer+4)*drawScale), yCenter-((yBuffer+4)*drawScale), yCenter-(yBuffer*drawScale)};
@@ -160,12 +161,12 @@ public class SpriteCOSetupArtist
       g.fillRect(drawX - drawScale, drawY - drawScale, drawW + (2*drawScale), drawH + (2*drawScale));
 
       // draw the CO's color selection
-      BufferedImage colorFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), SpriteLibrary.getColorName(c), 2*drawScale, 2*drawScale);
+      BufferedImage colorFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), UIUtils.getColorName(c), 2*drawScale, 2*drawScale);
       XYCoord colorOffset = getChoiceOffset(OptionList.COLOR, drawW/2, drawH/2, drawScale);
       SpriteLibrary.drawImageCenteredOnPoint(g, colorFrame, xCenter+colorOffset.xCoord, yCenter+colorOffset.yCoord, 1);
 
       // draw the CO's faction selection
-      BufferedImage factionFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), info.getCurrentFaction(), 2*drawScale, 2*drawScale);
+      BufferedImage factionFrame = SpriteUIUtils.makeTextFrame(c, c.darker(), info.getCurrentFaction().name, 2*drawScale, 2*drawScale);
       XYCoord factionOffset = getChoiceOffset(OptionList.FACTION, drawW/2, drawH/2, drawScale);
       SpriteLibrary.drawImageCenteredOnPoint(g, factionFrame, xCenter+factionOffset.xCoord, yCenter+factionOffset.yCoord, 1);
       
@@ -204,6 +205,9 @@ public class SpriteCOSetupArtist
     }
   }
   
+  /**
+   * @return the x,y offset of the center of the currently-selected option
+   */
   private static XYCoord getChoiceOffset(OptionList option, int imageXShift, int imageYShift, int drawScale)
   {
     int x,y;

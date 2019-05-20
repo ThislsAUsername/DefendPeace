@@ -39,6 +39,8 @@ public class InGameMenu<T>
 
   public InGameMenu(Collection<T> options, OptionSelector selector)
   {
+    if (options.size() != selector.size())
+      throw new IllegalArgumentException("Number of options doesn't match the size of the OptionSelector");
     menuOptions = new ArrayList<T>();
     menuOptions.addAll(options);
     optionSelector = selector;

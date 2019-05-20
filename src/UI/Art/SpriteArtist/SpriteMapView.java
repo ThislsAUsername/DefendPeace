@@ -16,6 +16,7 @@ import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import UI.MapView;
+import UI.UIUtils;
 import UI.Art.Animation.GameAnimation;
 import UI.Art.Animation.NoAnimation;
 import UI.Art.Animation.NobunagaBattleAnimation;
@@ -99,6 +100,7 @@ public class SpriteMapView extends MapView
 
     mapViewWidth = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * mapTilesToDrawX;
     mapViewHeight = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * mapTilesToDrawY;
+    SpriteOptions.setScreenDimensions(mapViewWidth, mapViewHeight);
   }
 
   @Override
@@ -298,9 +300,13 @@ public class SpriteMapView extends MapView
       if (mapViewHeight > mapImage.getHeight())
         deltaY = (mapViewHeight - mapImage.getHeight())/2;
 
+      int drawWidth  = Math.min(mapViewWidth,  mapImage.getWidth());
+      int drawHeight = Math.min(mapViewHeight, mapImage.getHeight());
       // Copy the map image into the window's graphics buffer.
       // First four coords are the dest x,y,x2,y2. Next four are the source coords.      
-      g.drawImage(mapImage, deltaX, deltaY, deltaX + mapViewWidth, deltaY + mapViewHeight, drawX, drawY, drawX + mapViewWidth, drawY + mapViewHeight, null);
+      g.drawImage(mapImage, deltaX, deltaY, deltaX + drawWidth, deltaY + drawHeight,
+                            drawX,  drawY,  drawX  + drawWidth, drawY  + drawHeight,
+                            null);
 
       // Draw the Commander overlay with available funds.
       drawCommanderOverlay(g);
@@ -477,7 +483,7 @@ public class SpriteMapView extends MapView
     String damageText = (int) (damage*10) + "%";
 
     // Build a display of the expected damage.
-    Color[] colors = SpriteLibrary.getMapUnitColors(attacker.myColor).paletteColors;
+    Color[] colors = UIUtils.getMapUnitColors(attacker.myColor).paletteColors;
     BufferedImage dmgImage = SpriteUIUtils.makeTextFrame(colors[4], colors[2], damageText,
         2 * SpriteOptions.getDrawScale(), 2 * SpriteOptions.getDrawScale());
 
@@ -548,5 +554,14 @@ public class SpriteMapView extends MapView
 
     // Create a new animation to show the game results.
     currentAnimation = new SpriteGameEndAnimation(myGame.commanders);
+  }
+
+  @Override
+  public void cleanup()
+  {
+    mapArtist.cleanup();
+    mapArtist = null;
+    unitArtist = null;
+    menuArtist = null;
   }
 }

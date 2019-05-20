@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Queue;
 import CommandingOfficers.Commander;
 import Engine.Path.PathNode;
@@ -93,9 +94,12 @@ public class Utils
   }
 
   /**
-   * Sets the highlight for myGame.gameMap.getLocation(x, y) to true if unit can reach (x, y), and false otherwise.
+   * Returns the list of XYCoords in gameMap reachable by unit this turn.
+   * @param unit The unit to evaluate.
+   * @param gameMap The map to search over.
+   * @param includeOccupiedSpaces If true, will include spaces occupied by a friendly unit, if some action could end on this space (e.g. LOAD, JOIN).
    */
-  public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap)
+  public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap, boolean includeOccupiedSpaces)
   {
     ArrayList<XYCoord> reachableTiles = new ArrayList<XYCoord>();
 
@@ -121,7 +125,9 @@ public class Utils
       SearchNode currentNode = searchQueue.poll();
       // if the space is empty or holds the current unit, highlight
       Unit obstacle = gameMap.getLocation(currentNode.x, currentNode.y).getResident();
-      if( obstacle == null || obstacle == unit || (obstacle.CO == unit.CO && obstacle.hasCargoSpace(unit.model.type)) )
+      if( obstacle == null || obstacle == unit ||
+          (includeOccupiedSpaces && (obstacle.CO == unit.CO) && obstacle.hasCargoSpace(unit.model.type)) ||
+          (includeOccupiedSpaces && (obstacle.CO == unit.CO) && (obstacle.model.type == unit.model.type) && (obstacle.getHP() < obstacle.model.maxHP)))
       {
         reachableTiles.add(new XYCoord(currentNode.x, currentNode.y));
       }
@@ -537,62 +543,6 @@ public class Utils
   }
   
 
-  /** Returns a string describing the game statistics of a given CO */
-  public static String getGameStatusData(GameMap map, Commander viewed)
-  {
-    StringBuilder sb = new StringBuilder();
-
-    // map state
-    int income = 0;
-    int unitCount = 0;
-    int vehCount = 0;
-    int unitFunds = 0;
-    
-    for( int w = 0; w < map.mapWidth; ++w )
-    {
-      for( int h = 0; h < map.mapHeight; ++h )
-      {
-        Location loc = map.getLocation(w, h);
-        if( loc.isProfitable() && loc.getOwner() == viewed )
-        {
-          income += viewed.incomePerCity;
-        }
-        Unit resident = loc.getResident();
-        if( null != resident && resident.CO == viewed )
-        {
-          unitCount++;
-          if (resident.model.chassis != ChassisEnum.TROOP)
-            vehCount++;
-          unitFunds += resident.model.getCost() * resident.getHP() / resident.model.maxHP;
-        }
-      }
-    }
-
-    sb.append("Income:         ").append(income).append("\n");
-    sb.append("Unit count:     ").append(unitCount).append("\n");
-    sb.append("Vehicle count:  ").append(vehCount).append("\n");
-    sb.append("Unit funds:     ").append(unitFunds).append("\n");
-
-    // ability stats
-    double[] abilityCosts = viewed.getAbilityCosts();
-    if (abilityCosts.length > 0)
-    {
-      double abilityPower = viewed.getAbilityPower();
-      double untilNextPower = abilityCosts[abilityCosts.length - 1]; // init to our biggest cost, so we can only go down
-      for( double cost : abilityCosts ) // find the cheapest cost that we can't afford
-      {
-        if( cost >= abilityPower )
-          untilNextPower = Math.min(untilNextPower, cost - abilityPower);
-      }
-
-      sb.append("Ability Power:  ").append((int) (abilityPower * Commander.CHARGERATIO_FUNDS)).append("\n");
-      sb.append("Next Ability:   ").append((int) (untilNextPower*Commander.CHARGERATIO_FUNDS)).append("\n");
-    }
-
-    return sb.toString();
-  }
-  
-
   /** Returns a list of all locations visible to the unit at its current location. */
   public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer)
   {
@@ -681,5 +631,25 @@ public class Utils
     }
     eventQueue.add(new Engine.GameEvents.MoveEvent(unit, movePath));
     return originalPathOK;
+  }
+
+  public static HashSet<XYCoord> findLocationsNearProperties(GameMap gameMap, Commander cmdr, int range)
+  {
+    HashSet<XYCoord> tilesInRange = new HashSet<XYCoord>();
+    for( XYCoord prop : cmdr.ownedProperties )
+    {
+      tilesInRange.addAll(Utils.findLocationsInRange(gameMap, prop, 0, range));
+    }
+    return tilesInRange;
+  }
+
+  public static HashSet<XYCoord> findLocationsNearUnits(GameMap gameMap, Commander cmdr, int range)
+  {
+    HashSet<XYCoord> tilesInRange = new HashSet<XYCoord>();
+    for( Unit unit : cmdr.units )
+    {
+      tilesInRange.addAll(Utils.findLocationsInRange(gameMap, new XYCoord(unit.x, unit.y), 0, range));
+    }
+    return tilesInRange;
   }
 }

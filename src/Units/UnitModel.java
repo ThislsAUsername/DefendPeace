@@ -241,13 +241,34 @@ public class UnitModel implements Serializable
     return hasAction;
   }
 
+  public boolean isSurfaceUnit()
+  {
+    return (ChassisEnum.SHIP == chassis) || (ChassisEnum.TANK == chassis) || (ChassisEnum.TROOP == chassis);
+  }
+
+  public boolean isAirUnit()
+  {
+    return (ChassisEnum.AIR_HIGH == chassis) || (ChassisEnum.AIR_LOW == chassis);
+  }
+
+  public boolean isLandUnit()
+  {
+    return (ChassisEnum.TANK == chassis) || (ChassisEnum.TROOP == chassis);
+  }
+
+  public boolean isSeaUnit()
+  {
+    return (ChassisEnum.SHIP == chassis) || (ChassisEnum.SUBMERGED == chassis);
+  }
+  
   /**
    * Private method, same signature as in Serializable interface
    *
    * @param stream
    * @throws IOException
    */
-  private void writeObject(ObjectOutputStream stream) throws IOException {
+  private void writeObject(ObjectOutputStream stream) throws IOException
+  {
       stream.defaultWriteObject();
       
       for( TerrainType terrain : TerrainType.TerrainTypeList )
@@ -263,7 +284,8 @@ public class UnitModel implements Serializable
    * @throws IOException
    */
   private void readObject(ObjectInputStream stream)
-          throws IOException, ClassNotFoundException {
+          throws IOException, ClassNotFoundException
+  {
       stream.defaultReadObject();
 
       healableHabs = new HashSet<TerrainType>();

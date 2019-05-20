@@ -55,7 +55,7 @@ public class WallyAI implements AIController
   
   Queue<GameAction> actions = new ArrayDeque<GameAction>();
   // sort our units by expense first, we want them to hit first
-  Queue<Unit> unitQueue = new PriorityQueue<Unit>(new AIUtils.UnitCostComparator(false));
+  Queue<Unit> unitQueue = new PriorityQueue<Unit>(11, new AIUtils.UnitCostComparator(false));
   boolean stateChange;
 
   private Commander myCo = null;
@@ -335,7 +335,7 @@ public class WallyAI implements AIController
         boolean foundAction = false;
 
         // Find the possible destinations.
-        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
+        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
         // sort by furthest away, good for capturing
         Utils.sortLocationsByDistance(position, destinations);
         Collections.reverse(destinations);
@@ -415,7 +415,7 @@ public class WallyAI implements AIController
           Unit unit = tempQueue.poll();
 
           // Find the possible destinations.
-          ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
+          ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
 
           if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
           {
@@ -581,7 +581,7 @@ public class WallyAI implements AIController
         continue;
 
       // Attack with the cheapest assault units, if possible.
-      Queue<Unit> assaultQueue = new PriorityQueue<Unit>(new AIUtils.UnitCostComparator(true));
+      Queue<Unit> assaultQueue = new PriorityQueue<Unit>(11, new AIUtils.UnitCostComparator(true));
       assaultQueue.addAll(unitQueue);
       while (!assaultQueue.isEmpty())
       {

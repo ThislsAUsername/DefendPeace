@@ -8,14 +8,14 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import Engine.OptionSelector;
 import UI.InputHandler.InputAction;
+import UI.UIUtils.Faction;
 
 /**
  * Stores state to setup Commanders with during game setup.
- * Stores current CO, color, team, and TODO: AI and faction.
+ * Stores current CO, color, team, AI, and faction.
  */
 public class COSetupInfo extends OptionSelector
 {
-  // TODO: fiddle with order once they're all in so the UI can make more sense
   public enum OptionList { COMMANDER, COLOR, FACTION, TEAM, AI };
 
   final CommanderInfo[] COTypes;
@@ -24,7 +24,7 @@ public class COSetupInfo extends OptionSelector
   final Color[] colors;
   final OptionSelector currentColor;
 
-  final String[] factions;
+  final Faction[] factions;
   final OptionSelector currentFaction;
 
   final OptionSelector currentTeam;
@@ -32,7 +32,7 @@ public class COSetupInfo extends OptionSelector
   final AIMaker[] AIs;
   final OptionSelector currentAI;
 
-  public COSetupInfo(int numPlayers, int thisPlayer, ArrayList<CommanderInfo> COTypeList, Color[] colorList, String[] factionList, ArrayList<AIMaker> AIList)
+  public COSetupInfo(int numPlayers, int thisPlayer, ArrayList<CommanderInfo> COTypeList, Color[] colorList, Faction[] factionList, ArrayList<AIMaker> AIList)
   {
     super(OptionList.values().length);
     
@@ -106,7 +106,7 @@ public class COSetupInfo extends OptionSelector
     return colors[currentColor.getSelectionNormalized()];
   }
   
-  public String getCurrentFaction()
+  public Faction getCurrentFaction()
   {
     return factions[currentFaction.getSelectionNormalized()];
   }
@@ -123,10 +123,10 @@ public class COSetupInfo extends OptionSelector
 
   public Commander makeCommander()
   {
-    Commander co = getCurrentCO().maker.create();
+    Commander co = getCurrentCO().create();
 
     co.myColor = getCurrentColor();
-    co.factionName = getCurrentFaction();
+    co.faction = getCurrentFaction();
     
     co.team = getCurrentTeam();
     

@@ -3,16 +3,6 @@ package UI.Art.SpriteArtist;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.ArrayList;
-
-import javax.imageio.ImageReader;
-import javax.imageio.metadata.IIOMetadataNode;
-
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import java.awt.Graphics;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,116 +41,6 @@ public class SpriteUIUtils
     }
 
     return slide * sign;
-  }
-
-  // stolen wholesale from https://stackoverflow.com/questions/8933893/convert-each-animated-gif-frame-to-a-separate-bufferedimage
-  // edited slightly to suit our needs
-  public static ImageFrame[] readGIF(ImageReader reader, int width, int height) throws IOException
-  {
-    ArrayList<ImageFrame> frames = new ArrayList<ImageFrame>(2);
-
-    // removed searching for width and height; they are known at the time of calling the function
-    
-    BufferedImage master = null;
-    Graphics2D masterGraphics = null;
-
-    for( int frameIndex = 0;; frameIndex++ )
-    {
-      BufferedImage image;
-      try
-      {
-        image = reader.read(frameIndex);
-      }
-      catch (IndexOutOfBoundsException io)
-      {
-        break;
-      }
-
-      IIOMetadataNode root = (IIOMetadataNode) reader.getImageMetadata(frameIndex).getAsTree("javax_imageio_gif_image_1.0");
-      IIOMetadataNode gce = (IIOMetadataNode) root.getElementsByTagName("GraphicControlExtension").item(0);
-      int delay = Integer.valueOf(gce.getAttribute("delayTime"));
-      String disposal = gce.getAttribute("disposalMethod");
-
-      int x = 0;
-      int y = 0;
-
-      if( master == null )
-      {
-        master = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        masterGraphics = master.createGraphics();
-        masterGraphics.setBackground(new Color(0, 0, 0, 0));
-      }
-      
-      // this used to be an else for the above if statement, but that broke the T-Copter animation
-      NodeList children = root.getChildNodes();
-      for( int nodeIndex = 0; nodeIndex < children.getLength(); nodeIndex++ )
-      {
-        Node nodeItem = children.item(nodeIndex);
-        if( nodeItem.getNodeName().equals("ImageDescriptor") )
-        {
-          NamedNodeMap map = nodeItem.getAttributes();
-          x = Integer.valueOf(map.getNamedItem("imageLeftPosition").getNodeValue());
-          y = Integer.valueOf(map.getNamedItem("imageTopPosition").getNodeValue());
-        }
-      }
-      masterGraphics.drawImage(image, x, y, null);
-
-      BufferedImage copy = new BufferedImage(master.getColorModel(), master.copyData(null), master.isAlphaPremultiplied(), null);
-      frames.add(new ImageFrame(copy, delay, disposal));
-
-      if( disposal.equals("restoreToPrevious") )
-      {
-        BufferedImage from = null;
-        for( int i = frameIndex - 1; i >= 0; i-- )
-        {
-          if( !frames.get(i).getDisposal().equals("restoreToPrevious") || frameIndex == 0 )
-          {
-            from = frames.get(i).getImage();
-            break;
-          }
-        }
-
-        master = new BufferedImage(from.getColorModel(), from.copyData(null), from.isAlphaPremultiplied(), null);
-        masterGraphics = master.createGraphics();
-        masterGraphics.setBackground(new Color(0, 0, 0, 0));
-      }
-      else if( disposal.equals("restoreToBackgroundColor") )
-      {
-        masterGraphics.clearRect(x, y, image.getWidth(), image.getHeight());
-      }
-    }
-    reader.dispose();
-
-    return frames.toArray(new ImageFrame[frames.size()]);
-  }
-
-  public static class ImageFrame
-  {
-    private final int delay;
-    private final BufferedImage image;
-    private final String disposal;
-
-    public ImageFrame(BufferedImage image, int delay, String disposal)
-    {
-      this.image = image;
-      this.delay = delay;
-      this.disposal = disposal;
-    }
-
-    public BufferedImage getImage()
-    {
-      return image;
-    }
-
-    public int getDelay()
-    {
-      return delay;
-    }
-
-    public String getDisposal()
-    {
-      return disposal;
-    }
   }
 
   /**
@@ -252,25 +132,33 @@ public class SpriteUIUtils
     // Unload our prose into the lines it already has
     lines.addAll(Arrays.asList(prose.split("\\R"))); // \R matches all newline formats, yay convenience
 
+    if( reqWidth < characterWidth || lines.isEmpty() )
+      return SpriteLibrary.createDefaultBlankSprite(1, 1); // zero-dimensioned images aren't kosher
+
     for( int i = 0; i < lines.size(); ++i ) // basic for, since we care about indices
     {
       String line = lines.get(i);
       if( line.length() * characterWidth <= reqWidth ) // if the line's short enough already, don't split it further
         continue;
 
-      // TODO: check for word boundaries
       lines.remove(i);
-      lines.add(i, line.substring(reqWidth / characterWidth)); // put in the second half
-      lines.add(i, line.substring(0, reqWidth / characterWidth)); // and then the first half behind it
+
+      // See if we can split the line on a space
+      int splitIndex = line.substring(0, reqWidth / characterWidth).lastIndexOf(' ');
+      if( splitIndex < 1 ) // no spaces we can split on
+      {
+        // Can't be helped. Split in the middle of the word
+        splitIndex = reqWidth / characterWidth;
+      }
+
+      lines.add(i, line.substring(splitIndex)); // put in the second half
+      lines.add(i, line.substring(0, splitIndex)); // and then the first half behind it
     }
 
     int totalTextHeight = ((lines.isEmpty()) ? 0 : getMenuTextHeightPx(lines, characterHeight));
     // Build our image.
     BufferedImage menuImage = null;
-    if( reqWidth == 0 || totalTextHeight == 0 )
-      return SpriteLibrary.createDefaultBlankSprite(1, 1); // zero-dimensioned images aren't kosher
-    else
-      menuImage = SpriteLibrary.createTransparentSprite(reqWidth, totalTextHeight);
+    menuImage = SpriteLibrary.createTransparentSprite(reqWidth, totalTextHeight);
     Graphics g = menuImage.getGraphics();
 
     // Draw the actual text.

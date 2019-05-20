@@ -21,7 +21,8 @@ class SelectMoveLocation extends GameInputState<Path>
   protected OptionSet initOptions()
   {
     // Get valid move locations and return our OptionSet.
-    ArrayList<XYCoord> moveLocations = Utils.findPossibleDestinations(myStateData.unitActor, myStateData.gameMap);
+    boolean includeOccupiedSpaces = true; // Include tiles where we could potentially LOAD/JOIN in the set of spaces we get back.
+    ArrayList<XYCoord> moveLocations = Utils.findPossibleDestinations(myStateData.unitActor, myStateData.gameMap, includeOccupiedSpaces);
     return new OptionSet(InputType.PATH_SELECT, moveLocations);
   }
 

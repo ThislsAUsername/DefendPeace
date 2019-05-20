@@ -1,5 +1,6 @@
 package Engine;
 
+import java.util.ArrayList;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -7,9 +8,10 @@ import java.util.HashMap;
 
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
-import Terrain.Environment;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
+import Terrain.Environment;
+import Terrain.Environment.Weathers;
 import Terrain.Location;
 import Terrain.Environment.Weathers;
 import Terrain.MapMaster;
@@ -151,25 +153,34 @@ public class GameInstance implements Serializable
     } while (activeCO.isDefeated);
 
     // Set weather conditions based on forecast
-    events.push(new MapChangeEvent());
+    ArrayList<MapChangeEvent.EnvironmentAssignment> weatherChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
     for( int i = 0; i < gameMap.mapWidth; i++ )
     {
       for( int j = 0; j < gameMap.mapHeight; j++ )
       {
         Location loc = gameMap.getLocation(i, j);
-        for( int turns = 0; turns < coTurns; turns++ )
+        if( loc.forecast.isEmpty() )
         {
-          if( loc.forecast.isEmpty() )
+          if( loc.getEnvironment().weatherType != Weathers.CLEAR )
           {
-            loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, Weathers.CLEAR));
-            break;
-          }
-          else
-          {
-            loc.setEnvironment(Environment.getTile(loc.getEnvironment().terrainType, loc.forecast.poll()));
+            weatherChanges.add(new MapChangeEvent.EnvironmentAssignment(loc.getCoordinates(), Environment.getTile(loc.getEnvironment().terrainType, Weathers.CLEAR)));
           }
         }
+        else
+        {
+          Weathers weather = loc.getEnvironment().weatherType;
+          for( int turns = 0; turns < coTurns; turns++ )
+          {
+            weather = loc.forecast.poll();
+          }
+          if( null == weather ) weather = Weathers.CLEAR;
+          weatherChanges.add(new MapChangeEvent.EnvironmentAssignment(loc.getCoordinates(), Environment.getTile(loc.getEnvironment().terrainType, weather)));
+        }
       }
+    }
+    if( !weatherChanges.isEmpty() )
+    {
+      events.add(new MapChangeEvent(weatherChanges));
     }
 
     // Set the cursor to the new CO's last known cursor position.
@@ -177,6 +188,7 @@ public class GameInstance implements Serializable
     
     events.addAll(activeCO.initTurn(gameMap));
     
+    // Initialize the next turn, recording any events that will occur.
     return events;
   }
 
@@ -203,7 +215,7 @@ public class GameInstance implements Serializable
       sb.append(co.coInfo.name).append("_");
     }
     sb.setLength(sb.length()-1);
-    sb.append(".svp");
+    sb.append(".svp"); // "svp" for "SaVe Peace"
     return sb.toString();
   }
   

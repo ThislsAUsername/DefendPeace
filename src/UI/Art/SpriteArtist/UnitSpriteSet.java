@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
 import java.util.ArrayList;
 import CommandingOfficers.Commander;
-import UI.Art.SpriteArtist.SpriteUIUtils.ImageFrame;
+import UI.UIUtils;
 import Units.Unit;
 
 public class UnitSpriteSet
@@ -85,7 +85,7 @@ public class UnitSpriteSet
       }
     }
 
-    colorize(SpriteLibrary.defaultMapColors, coColors.paletteColors);
+    colorize(UIUtils.defaultMapColors, coColors.paletteColors);
     if( action > 0 ) // We at least got the IDLE sprites. Use those as the basis for the "already moved" sprites.
     {
       turnDone = new Sprite(sprites[0]); // Duplicate the IDLE sprite to make the TurnDone sprite.
@@ -214,7 +214,7 @@ public class UnitSpriteSet
     BufferedImage frame = null;
 
     // Retrieve the correct subimage.
-    if( u.isTurnOver && u.CO == activeCO )
+    if( u.isStunned || (u.isTurnOver && u.CO == activeCO) )
     {
       frame = turnDone.getFrame(imageIndex);
     }
@@ -291,6 +291,21 @@ public class UnitSpriteSet
 
       // Draw transport icon.
       g.drawImage( cargoIcon, iconX, iconY, iconW, iconH, null );
+    }
+
+    if( u.isStunned )
+    {
+      // Get the icon and characterize the draw space.
+      BufferedImage stunIcon = SpriteLibrary.getStunIcon();
+      int iconW = stunIcon.getWidth() * drawScale;
+      int iconH = stunIcon.getHeight() * drawScale;
+
+      // Draw team-color background for the icon.
+      g.setColor( u.CO.myColor );
+      g.fillRect( drawX+drawScale, drawY+drawScale, iconW-(2*drawScale), iconH-(2*drawScale));
+
+      // Draw stun icon.
+      g.drawImage( stunIcon, drawX, drawY, iconW, iconH, null );
     }
 
     // Draw the capture icon if the unit is capturing a base.

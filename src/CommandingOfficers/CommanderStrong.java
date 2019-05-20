@@ -1,47 +1,56 @@
 package CommandingOfficers;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import CommandingOfficers.COMaker.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.COModifier;
+import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
-import CommandingOfficers.Modifiers.UnitRemodelModifier;
+import Engine.Combat.BattleInstance.BattleParams;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
+import Units.Unit;
 import Units.UnitModel;
 
+/**
+ * Commander Strong knows that an army's strength lies in its people. Well-positioned soldiers
+ * with proper equipment and training are guaranteed to bring results. His focus is therefore on
+ * achieving this in his own forces, and denying it of his opponent. As a result, his transport
+ * units and boots on the ground are among the best, and he brings some extra anti-personnel
+ * firepower to keep his opponents in check.
+ */
 public class CommanderStrong extends Commander
 {
   private static final long serialVersionUID = -3762678175296290654L;
-  
-  private static final CommanderInfo coInfo = new CommanderInfo("Strong", new instantiator());  
-  private static class instantiator extends COMaker
+
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Strong");
       infoPages.add(new InfoPage(
-          "Commander Strong is real strong.\n" +
-          "That's it.\n"));
+          "Commander Strong knows that an army's strength lies in its people.\n" +
+          "Well-positioned soldiers with proper equipment and training are guaranteed to bring results.\n" +
+          "His focus is therefore on achieving this in his own forces, and denying it of his opponent.\n" +
+          "As a result, his transport units and boots on the ground are among the best, and he brings some extra anti-personnel firepower to keep his opponents in check."));
       infoPages.add(new InfoPage(
           "Passive:\n" + 
-          "- Strong gets an attack bonus of 20% on all units\n" +
-          "- Strong can build infantry from air/sea ports\n" +
-          "- Strong's APCs move 1 space further than average\n"));
+          "- Strong's footsoldiers get an attack bonus of 15%\n" +
+          "- When attacking footsoldiers, all of Strong's units get an attack bonus of 15%\n" +
+          "- Strong's transports move 1 space further and can hold one more unit than average\n" +
+          "- Strong can build Mechs from air/sea ports\n"));
       infoPages.add(new InfoPage(
           "Strongarm ("+StrongArmAbility.STRONGARM_COST+"):\n" +
-          "Gives an attack boost of "+StrongArmAbility.STRONGARM_BUFF+"%\n" +
-          "Grants footsoldiers and APCs one extra point of movement\n" +
-          "Allows Strong to put an extra unit into any transport\n" +
-          "Allows Strong to build inf and mechs on air/sea ports as well as the HQ\n"));
+          "Gives an attack and defense boost of "+StrongArmAbility.STRONGARM_BUFF+"%\n" +
+          "Gives footsoldiers an additional "+StrongArmAbility.STRONGARM_FOOT_BUFF+"% attack\n" +
+          "Grants footsoldiers and APCs two extra points of movement\n" +
+          "Allows Strong to build infantry on air/sea ports\n"));
       infoPages.add(new InfoPage(
           "Mobilize ("+MobilizeAbility.MOBILIZE_COST+"):\n" + 
           "Gives an attack boost of "+MobilizeAbility.MOBILIZE_BUFF+"%\n" +
-          "Grants footsoldiers and APCs two extra points of movement\n" +
-          "Allows Strong to put an extra unit into any transport\n" +
-          "Allows Strong to build inf and mechs on air/sea ports as well as the HQ\n"));
+          "Gives a defense boost of "+MobilizeAbility.MOBILIZE_DEFENSE_BUFF+"%\n" +
+          "Grants two extra points of movement\n" +
+          "Refreshes footsoldiers\n" +
+          "Allows Strong to build footsoldiers on cities, industries, and the HQ\n"));
     }
     @Override
     public Commander create()
@@ -49,43 +58,33 @@ public class CommanderStrong extends Commander
       return new CommanderStrong();
     }
   }
-  
-  private static Map<UnitModel.UnitEnum, UnitModel> highCapacityUnitModels;
 
   public CommanderStrong()
   {
     super(coInfo);
 
     // Strong allows infantry to be built from any production building.
-    UnitModel infModel = getUnitModel(UnitModel.UnitEnum.INFANTRY);
-    UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, infModel);
-    upm.addProductionPair(TerrainType.SEAPORT, infModel);
+    UnitModel mechModel = getUnitModel(UnitModel.UnitEnum.MECH);
+    UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, mechModel);
+    upm.addProductionPair(TerrainType.SEAPORT, mechModel);
     upm.apply(this); // Passive ability, so don't add it to the COModifier list; just apply it and forget it.
 
-    // Set Strong up with a base damage buff and long-range APCs. These COModifiers are
-    // not added to the modifiers collection so they will not be reverted.
-    COModifier strongMod = new CODamageModifier(20); // Give us a nice base power boost.
+    // Give Strong's footies a base damage buff. This COModifier is not added
+    // to the modifiers collection so it will not be reverted.
+    CODamageModifier strongMod = new CODamageModifier(15); // Give us a nice base power boost.
+    strongMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.INFANTRY));
+    strongMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.MECH));
     strongMod.apply(this);
 
-    COMovementModifier moveMod = new COMovementModifier();
-    moveMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.APC));
-    moveMod.apply(this);
-
-    // Define "high-capacity" transport unit models, to be swapped in by his abilities.
-    if( null == highCapacityUnitModels )
+    // Give every transport type extra move range and an extra cargo slot.
+    for( UnitModel.UnitEnum umEnum : UnitModel.UnitEnum.values() )
     {
-      UnitModel hcApc = UnitModel.clone( getUnitModel(UnitModel.UnitEnum.APC));
-      UnitModel hcLander = UnitModel.clone( getUnitModel(UnitModel.UnitEnum.LANDER));
-      UnitModel hcCopter = UnitModel.clone( getUnitModel(UnitModel.UnitEnum.T_COPTER));
-      highCapacityUnitModels = new HashMap<UnitModel.UnitEnum, UnitModel>();
-      highCapacityUnitModels.put(hcApc.type, hcApc);
-      highCapacityUnitModels.put(hcLander.type, hcLander);
-      highCapacityUnitModels.put(hcCopter.type, hcCopter);
-      for( UnitModel um : highCapacityUnitModels.values() )
+      UnitModel model = getUnitModel(umEnum);
+      if( model.holdingCapacity > 0 )
       {
-        um.holdingCapacity += 1;
+        model.movePower++;
+        model.holdingCapacity++;
       }
-      // TODO: other non-transport types?
     }
 
     addCommanderAbility(new StrongArmAbility(this));
@@ -93,54 +92,73 @@ public class CommanderStrong extends Commander
   }
 
   /**
-   * StrongArm grants Strong a firepower bonus, additional mobility,
-   * and the ability to build Bazooka units from all production buildings and the HQ.
+   * Strong gets a little extra oomph when fighting enemy foot soldiers.
+   */
+  @Override
+  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  {
+    // Grant a firepower increase if we are attacking and the defender is on foot.
+    if( (params.attacker.CO == this) && (params.defender.model.chassis == UnitModel.ChassisEnum.TROOP) )
+    {
+      params.attackFactor += 15;
+    }
+  }
+
+  /**
+   * StrongArm grants Strong a firepower and defense bonus, additional mobility,
+   * and the ability to build infantry units from all production buildings.
    */
   private static class StrongArmAbility extends CommanderAbility
   {
     private static final String STRONGARM_NAME = "Strongarm";
-    private static final int STRONGARM_COST = 10;
-    private static final int STRONGARM_BUFF = 20;
+    private static final int STRONGARM_COST = 4;
+    private static final int STRONGARM_BUFF = 10;
+    private static final int STRONGARM_FOOT_BUFF = 20; // On top of STONGARM_BUFF
 
-    COModifier damageMod = null;
+    CODamageModifier damageMod = null;
+    CODefenseModifier defenseMod = null;
+    CODamageModifier damageModTroop = null;
 
     StrongArmAbility(Commander commander)
     {
       super(commander, STRONGARM_NAME, STRONGARM_COST);
 
       damageMod = new CODamageModifier(STRONGARM_BUFF);
+      defenseMod = new CODefenseModifier(STRONGARM_BUFF);
+      damageModTroop = new CODamageModifier(STRONGARM_FOOT_BUFF);
+      for( UnitModel model : commander.unitModels )
+      {
+        if( model.chassis == UnitModel.ChassisEnum.TROOP )
+        {
+          damageModTroop.addApplicableUnitModel(model);
+        }
+      }
     }
 
     @Override
     protected void perform(MapMaster gameMap)
     {
+      // Grant the base firepower/defense bonus.
       myCommander.addCOModifier(damageMod);
+      myCommander.addCOModifier(defenseMod);
+      myCommander.addCOModifier(damageModTroop);
 
-      // Make infantry and bazookas buildable from all production buildings and the HQ.
+      // Make infantry buildable from all production buildings.
       UnitModel infModel = myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY);
-      UnitModel mechModel = myCommander.getUnitModel(UnitModel.UnitEnum.MECH);
-      UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, mechModel);
-      upm.addProductionPair(TerrainType.SEAPORT, mechModel);
-      upm.addProductionPair(TerrainType.HEADQUARTERS, infModel);
-      upm.addProductionPair(TerrainType.HEADQUARTERS, mechModel);
+      UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, infModel);
+      upm.addProductionPair(TerrainType.SEAPORT, infModel);
       myCommander.addCOModifier(upm);
 
-      // Grant foot-soldiers and transports additional movement power.
-      COMovementModifier moveMod = new COMovementModifier();
-
-      // Use the high-capacity APC since we are swapping that model out for this turn.
-      moveMod.addApplicableUnitModel(highCapacityUnitModels.get(UnitModel.UnitEnum.APC));
-      moveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
-      moveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
-      myCommander.addCOModifier(moveMod);
-
-      // Grant transports extra capacity
-      UnitRemodelModifier urm = new UnitRemodelModifier();
-      for( UnitModel.UnitEnum type : highCapacityUnitModels.keySet() )
+      // Grant troops and transports additional movement power.
+      COMovementModifier moveMod = new COMovementModifier(2);
+      for( UnitModel model : myCommander.unitModels )
       {
-        urm.addUnitRemodel(myCommander.getUnitModel(type), highCapacityUnitModels.get(type));
+        if( (model.chassis == UnitModel.ChassisEnum.TROOP) || (model.holdingCapacity > 0))
+        {
+          moveMod.addApplicableUnitModel(model);
+        }
       }
-      myCommander.addCOModifier(urm);
+      myCommander.addCOModifier(moveMod);
     }
   }
 
@@ -151,50 +169,56 @@ public class CommanderStrong extends Commander
   private static class MobilizeAbility extends CommanderAbility
   {
     private static final String MOBILIZE_NAME = "Mobilize";
-    private static final int MOBILIZE_COST = 20;
+    private static final int MOBILIZE_COST = 8;
     private static final int MOBILIZE_BUFF = 40;
+    private static final int MOBILIZE_DEFENSE_BUFF = 10;
 
-    COModifier damageMod = null;
+    CODamageModifier damageMod = null;
+    CODefenseModifier defenseMod = null;
 
     MobilizeAbility(Commander commander)
     {
       super(commander, MOBILIZE_NAME, MOBILIZE_COST);
 
       damageMod = new CODamageModifier(MOBILIZE_BUFF);
+      defenseMod = new CODefenseModifier(MOBILIZE_DEFENSE_BUFF);
+      AIFlags = PHASE_TURN_START | PHASE_TURN_END;
     }
 
     @Override
     protected void perform(MapMaster gameMap)
     {
+      // Grant the base firepower/defense bonus.
       myCommander.addCOModifier(damageMod);
+      myCommander.addCOModifier(defenseMod);
 
-      // Make all foot-soldiers buildable from all buildings.
+      // Make inf/mechs buildable from all buildings.
       UnitModel infModel = myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY);
       UnitModel mechModel = myCommander.getUnitModel(UnitModel.UnitEnum.MECH);
-      UnitProductionModifier upm = new UnitProductionModifier(TerrainType.CITY, infModel);
+      UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, infModel);
+      upm.addProductionPair(TerrainType.SEAPORT, infModel);
       upm.addProductionPair(TerrainType.CITY, mechModel);
-      upm.addProductionPair(TerrainType.AIRPORT, mechModel);
-      upm.addProductionPair(TerrainType.SEAPORT, mechModel);
-      upm.addProductionPair(TerrainType.HEADQUARTERS, infModel);
+      upm.addProductionPair(TerrainType.CITY, infModel);
       upm.addProductionPair(TerrainType.HEADQUARTERS, mechModel);
+      upm.addProductionPair(TerrainType.HEADQUARTERS, infModel);
       myCommander.addCOModifier(upm);
 
-      // Grant foot-soldiers and transports two (2) additional movement power.
+      // Grant a global +2 movement buff.
       COMovementModifier moveMod = new COMovementModifier(2);
-
-      // Use the high-capacity APC since we are swapping that model out for this turn.
-      moveMod.addApplicableUnitModel(highCapacityUnitModels.get(UnitModel.UnitEnum.APC));
-      moveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
-      moveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
+      for( UnitModel model : myCommander.unitModels )
+      {
+        moveMod.addApplicableUnitModel(model);
+      }
       myCommander.addCOModifier(moveMod);
 
-      // Grant all transports extra cargo space, and TODO: let foot-soldiers hitch a ride on ground vehicles.
-      UnitRemodelModifier urm = new UnitRemodelModifier();
-      for( UnitModel.UnitEnum type : highCapacityUnitModels.keySet() )
+      // Lastly, all troops are refreshed and able to move again.
+      for( Unit unit : myCommander.units )
       {
-        urm.addUnitRemodel(myCommander.getUnitModel(type), highCapacityUnitModels.get(type));
+        if( unit.model.chassis == UnitModel.ChassisEnum.TROOP )
+        {
+          unit.isTurnOver = false;
+        }
       }
-      myCommander.addCOModifier(urm);
     }
   }
 

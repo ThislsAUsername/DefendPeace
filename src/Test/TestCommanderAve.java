@@ -1,6 +1,9 @@
 package Test;
 
+import java.util.ArrayList;
+
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderAve;
 import CommandingOfficers.CommanderPatch;
 import Engine.GameAction;
@@ -143,8 +146,7 @@ public class TestCommanderAve extends TestCase
   {
     boolean testPassed = true;
 
-    // The original three properties should be pretty stuffed with snow. Activate Glacio, and let the flood break forth.
-    // The inRange tile should indeed be in range of the avalanche.
+    // Activate Ave's abilities, and make sure we see the intended effects.
     // We'll also add some units to see Glacio's damage and tree-clearing effects.
     XYCoord forestTile = new XYCoord(8, 4);
     addUnit(testMap, Ave, UnitEnum.INFANTRY, 8, 5);
@@ -154,13 +156,17 @@ public class TestCommanderAve extends TestCase
 
     //Ave.log(true);
     //System.out.println("Snow map:\n" + Ave.getSnowMapAsString());
-    Ave.modifyAbilityPower(20); // Charge up.
-    Ave.getReadyAbilities().get(0).activate(testMap);
+    Ave.modifyAbilityPower(20); // Charge up and use all of Ave's abilities
+    ArrayList<CommanderAbility> abilities = Ave.getReadyAbilities();
+    for( CommanderAbility ca : abilities )
+    {
+      ca.activate(testMap);
+    }
 
     // Check that the ability did what it was supposed to.
     XYCoord inRange = new XYCoord(7,5);
     testPassed &= validate( testMap.getEnvironment(inRange).weatherType == Weathers.SNOW, "    inRange tile didn't refreeze!" );
-    testPassed &= validate( testMap.getEnvironment(forestTile).terrainType == TerrainType.GRASS, "    " + forestTile + " was not cleared to GRASS by Glacio!");
+    testPassed &= validate( testMap.getEnvironment(forestTile).terrainType == TerrainType.GRASS, "    " + forestTile + " was not cleared to GRASS!");
     testPassed &= validate( patchInf.getHP() == 8, String.format("    Infantry has %s HP, but should have 8!", patchInf.getHP()));
     //System.out.println("Snow map after Glacio:\n" + Ave.getSnowMapAsString());
     //Ave.log(false);

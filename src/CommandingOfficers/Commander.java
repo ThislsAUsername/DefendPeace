@@ -1,11 +1,11 @@
 package CommandingOfficers;
 
 import java.awt.Color;
-import java.util.ArrayDeque;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +28,8 @@ import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
+import UI.UIUtils;
+import UI.UIUtils.Faction;
 import UI.Art.SpriteArtist.SpriteLibrary;
 import Units.APCModel;
 import Units.AntiAirModel;
@@ -64,7 +66,7 @@ public class Commander extends GameEventListener implements Serializable
   public Set<XYCoord> ownedProperties;
   public ArrayDeque<COModifier> modifiers;
   public Color myColor;
-  public String factionName = SpriteLibrary.DEFAULT_SPRITE_KEY;
+  public Faction faction;
   public static final int DEFAULTSTARTINGMONEY = 0;
   public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
   public static final int CHARGERATIO_HP = 0; // Funds value of 1 HP damage dealt, for the purpose of power charge
@@ -76,7 +78,7 @@ public class Commander extends GameEventListener implements Serializable
   private double myAbilityPower = 0;
   private int numTowers = 0;
 
-  private ArrayList<CommanderAbility> myAbilities = null;
+  ArrayList<CommanderAbility> myAbilities = null;
   private String myActiveAbilityName = "";
   private TowerListener myTowerListener = null;
 
@@ -351,11 +353,6 @@ public class Commander extends GameEventListener implements Serializable
   public void activateAbility(CommanderAbility ability)
   {
     modifyAbilityPower(-ability.getCost());
-
-    for( CommanderAbility ca : myAbilities )
-    {
-      ca.increaseCost(ca.baseCost * 0.2);
-    }
     // default power boost
     addCOModifier(new CODamageModifier(10));
     addCOModifier(new CODefenseModifier(10));
@@ -453,7 +450,8 @@ public class Commander extends GameEventListener implements Serializable
    * @param stream
    * @throws IOException
    */
-  private void writeObject(ObjectOutputStream stream) throws IOException {
+  private void writeObject(ObjectOutputStream stream) throws IOException
+  {
     stream.defaultWriteObject();
 
     // save our index into the AILibrary
@@ -487,8 +485,8 @@ public class Commander extends GameEventListener implements Serializable
    * @param stream
    * @throws IOException
    */
-  private void readObject(ObjectInputStream stream)
-          throws IOException, ClassNotFoundException {
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException
+  {
     stream.defaultReadObject();
 
     // use our AI index to get back where we were before
