@@ -8,12 +8,12 @@ import Units.Weapons.WeaponModel;
 
 public class LAGageCS extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Gage", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Gage");
       infoPages.add(new InfoPage(
           "--GAGE--\r\n" + 
           "Naval units and indirects gain +20% firepower and +10% defense.\r\n" + 
@@ -105,3 +105,4 @@ public class LAGageCS extends Commander
     }
   }
 }
+

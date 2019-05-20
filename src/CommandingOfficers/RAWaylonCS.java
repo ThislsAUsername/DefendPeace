@@ -7,11 +7,12 @@ import Units.UnitModel.ChassisEnum;
 
 public class RAWaylonCS extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Waylon", new instantiator());
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Waylon");
       infoPages.add(new InfoPage(
           "--WAYLON--\r\n" + 
           "Air units gain +20% firepower and +25% defense.\r\n"
@@ -73,3 +74,4 @@ public class RAWaylonCS extends Commander
     }
   }
 }
+

@@ -3,6 +3,7 @@ package CommandingOfficers;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GlobalWeatherEvent;
 import Engine.GameEvents.MapChangeEvent;
 import Terrain.Environment.Weathers;
 import Terrain.MapMaster;
@@ -13,12 +14,12 @@ import Units.UnitModel;
 
 public class BMOlaf extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Olaf", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Olaf");
       infoPages.add(new InfoPage(
           "Olaf\r\n" + 
           "  Unaffected by snow, but rain affects him as much as snow would for others\r\n" + 
@@ -67,16 +68,7 @@ public class BMOlaf extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      for( int i = 0; i < gameMap.mapWidth; i++ )
-      {
-        for( int j = 0; j < gameMap.mapHeight; j++ )
-        {
-          Location loc = gameMap.getLocation(i, j);
-          int duration = gameMap.commanders.length-1;
-          loc.setForecast(Weathers.SNOW, duration);
-        }
-      }
-      GameEvent event = new MapChangeEvent();
+      GameEvent event = new GlobalWeatherEvent(Weathers.SNOW, 1);
       event.performEvent(gameMap);
       GameEventListener.publishEvent(event);
     }
@@ -109,7 +101,6 @@ public class BMOlaf extends Commander
         for( int j = 0; j < gameMap.mapHeight; j++ )
         {
           Location loc = gameMap.getLocation(i, j);
-          loc.setForecast(Weathers.SNOW, gameMap.commanders.length-1);
           Unit victim = loc.getResident();
           if( victim != null && myCommander.isEnemy(victim.CO) )
           {
@@ -117,9 +108,10 @@ public class BMOlaf extends Commander
           }
         }
       }
-      GameEvent event = new MapChangeEvent();
+      GameEvent event = new GlobalWeatherEvent(Weathers.SNOW, 1);
       event.performEvent(gameMap);
       GameEventListener.publishEvent(event);
     }
   }
 }
+

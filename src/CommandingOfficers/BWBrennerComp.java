@@ -6,11 +6,12 @@ import Units.Unit;
 
 public class BWBrennerComp extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Brenner", new instantiator());
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Brenner");
       infoPages.add(new InfoPage(
           "--BRENNER--\r\n" + 
           "Units gain +10% defense.\r\n" + 
@@ -82,3 +83,4 @@ public class BWBrennerComp extends Commander
     }
   }
 }
+

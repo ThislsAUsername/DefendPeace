@@ -6,12 +6,12 @@ import Units.UnitModel;
 
 public class BHAdder extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Adder", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Adder");
       infoPages.add(new InfoPage(
           "Adder\r\n" + 
           "  Sideslip -- +1 Movement to all units\r\n" + 
@@ -81,3 +81,4 @@ public class BHAdder extends Commander
     }
   }
 }
+

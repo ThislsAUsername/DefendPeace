@@ -10,12 +10,12 @@ import Units.UnitModel.ChassisEnum;
 
 public class BHLash extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Lash", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Lash");
       infoPages.add(new InfoPage(
           "Lash\r\n" + 
           "  Attack power is boosted by +10% for every terrain star (note: aircraft are unaffected by terrain)\r\n" + 
@@ -116,3 +116,4 @@ public class BHLash extends Commander
     }
   }
 }
+

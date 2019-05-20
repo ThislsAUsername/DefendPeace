@@ -4,6 +4,7 @@ import Terrain.Environment.Weathers;
 import Terrain.MapMaster;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GlobalWeatherEvent;
 import Engine.GameEvents.MapChangeEvent;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -11,12 +12,12 @@ import Units.UnitModel;
 
 public class IDSPennyCS extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Penny", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Penny");
       infoPages.add(new InfoPage(
           "--PENNY--\r\n" + 
           "Units are unaffected by weather.\r\n" + 
@@ -67,15 +68,7 @@ public class IDSPennyCS extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      for( int i = 0; i < gameMap.mapWidth; i++ )
-      {
-        for( int j = 0; j < gameMap.mapHeight; j++ )
-        {
-          Location loc = gameMap.getLocation(i, j);
-          loc.setForecast(Weathers.RAIN, gameMap.commanders.length - 1);
-        }
-      }
-      GameEvent event = new MapChangeEvent();
+      GameEvent event = new GlobalWeatherEvent(Weathers.RAIN, 1);
       event.performEvent(gameMap);
       GameEventListener.publishEvent(event);
     }
@@ -95,17 +88,10 @@ public class IDSPennyCS extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      for( int i = 0; i < gameMap.mapWidth; i++ )
-      {
-        for( int j = 0; j < gameMap.mapHeight; j++ )
-        {
-          Location loc = gameMap.getLocation(i, j);
-          loc.setForecast(Weathers.SNOW, gameMap.commanders.length * 3 - 1);
-        }
-      }
-      GameEvent event = new MapChangeEvent();
+      GameEvent event = new GlobalWeatherEvent(Weathers.SNOW, 3);
       event.performEvent(gameMap);
       GameEventListener.publishEvent(event);
     }
   }
 }
+

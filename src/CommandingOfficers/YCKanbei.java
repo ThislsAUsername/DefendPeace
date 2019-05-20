@@ -11,12 +11,12 @@ import Units.UnitModel;
 
 public class YCKanbei extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Kanbei", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Kanbei");
       infoPages.add(new InfoPage(
           "   Kanbei\r\n" + 
           "  Units cost +20% more to build, but gain +30% attack and defense\r\n" + 
@@ -114,3 +114,4 @@ public class YCKanbei extends Commander
     }
   }
 }
+

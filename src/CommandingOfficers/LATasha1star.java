@@ -7,11 +7,12 @@ import Units.UnitModel.ChassisEnum;
 
 public class LATasha1star extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Tasha", new instantiator());
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Tasha");
       infoPages.add(new InfoPage(
           "--TASHA--\r\n" + 
           "Air units gain +40% firepower and +15% defense.\r\n" + 
@@ -73,3 +74,4 @@ public class LATasha1star extends Commander
     }
   }
 }
+

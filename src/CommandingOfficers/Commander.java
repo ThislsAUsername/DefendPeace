@@ -506,3 +506,4 @@ public class Commander extends GameEventListener implements Serializable
     }
   }
 }
+

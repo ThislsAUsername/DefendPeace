@@ -16,11 +16,12 @@ import Units.UnitModel.ChassisEnum;
 
 public class OSJake extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Jake", new instantiator());
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Jake");
       infoPages.add(new InfoPage(
           "Jake\r\n" + 
           "  Units (even aircraft) gain +10% attack power on plains\r\n" + 
@@ -129,3 +130,4 @@ public class OSJake extends Commander
     }
   }
 }
+

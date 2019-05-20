@@ -5,11 +5,12 @@ import CommandingOfficers.Modifiers.CODefenseModifier;
 
 public class LAForsythe extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Forsythe", new instantiator());
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Forsythe");
       infoPages.add(new InfoPage(
           "--FORSYTHE--\r\n" + 
           "Units gain +15% firepower and +10% defense.\r\n" + 
@@ -36,3 +37,4 @@ public class LAForsythe extends Commander
     return coInfo;
   }
 }
+

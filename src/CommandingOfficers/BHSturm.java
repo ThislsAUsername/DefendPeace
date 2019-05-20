@@ -11,12 +11,12 @@ import Units.UnitModel;
 
 public class BHSturm extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Sturm", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Sturm");
       infoPages.add(new InfoPage(
           "Sturm\r\n" + 
           "  Terrain cost is 1 on all terrain (except in snow). Units lose -20% attack, but gain +20% defense\r\n" + 
@@ -125,3 +125,4 @@ public class BHSturm extends Commander
     }
   }
 }
+

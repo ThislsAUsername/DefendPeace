@@ -213,3 +213,4 @@ public class CommanderBear_Bull extends Commander
     return coInfo;
   }
 }
+

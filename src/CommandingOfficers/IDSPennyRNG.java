@@ -2,22 +2,20 @@ package CommandingOfficers;
 
 import Terrain.Environment.Weathers;
 import Terrain.MapMaster;
-import CommandingOfficers.COMaker.InfoPage;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
-import Engine.GameEvents.MapChangeEvent;
-import Terrain.Location;
+import Engine.GameEvents.GlobalWeatherEvent;
 import Terrain.TerrainType;
 import Units.UnitModel;
 
 public class IDSPennyRNG extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Penny RNG", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Penny RNG");
       infoPages.add(new InfoPage(
           "Hey, you're not allowed to see this...\n"
           + "Get out of here with your shenanigans!"));
@@ -65,15 +63,7 @@ public class IDSPennyRNG extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      for( int i = 0; i < gameMap.mapWidth; i++ )
-      {
-        for( int j = 0; j < gameMap.mapHeight; j++ )
-        {
-          Location loc = gameMap.getLocation(i, j);
-          loc.setForecast((Math.random() < 0.5) ? Weathers.SNOW : Weathers.RAIN, gameMap.commanders.length - 1);
-        }
-      }
-      GameEvent event = new MapChangeEvent();
+      GameEvent event = new GlobalWeatherEvent((Math.random() < 0.5) ? Weathers.SNOW : Weathers.RAIN, 1);
       event.performEvent(gameMap);
       GameEventListener.publishEvent(event);
     }
@@ -93,17 +83,10 @@ public class IDSPennyRNG extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      for( int i = 0; i < gameMap.mapWidth; i++ )
-      {
-        for( int j = 0; j < gameMap.mapHeight; j++ )
-        {
-          Location loc = gameMap.getLocation(i, j);
-          loc.setForecast((Math.random() < 0.5) ? Weathers.SNOW : Weathers.RAIN, gameMap.commanders.length * 3 - 1);
-        }
-      }
-      GameEvent event = new MapChangeEvent();
+      GameEvent event = new GlobalWeatherEvent((Math.random() < 0.5) ? Weathers.SNOW : Weathers.RAIN, 3);
       event.performEvent(gameMap);
       GameEventListener.publishEvent(event);
     }
   }
 }
+

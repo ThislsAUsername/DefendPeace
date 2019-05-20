@@ -9,11 +9,12 @@ import Units.UnitModel.ChassisEnum;
 
 public class BWLinAlt extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Lin_Alt", new instantiator());
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Lin_Alt");
       infoPages.add(new InfoPage(
           "--LIN--\r\n" + 
           "Ground units gain +5/5 stats\r\n" + 
@@ -104,3 +105,4 @@ public class BWLinAlt extends Commander
     }
   }
 }
+

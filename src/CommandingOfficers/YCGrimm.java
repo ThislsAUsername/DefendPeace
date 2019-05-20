@@ -6,12 +6,12 @@ import Terrain.MapMaster;
 
 public class YCGrimm extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Grimm", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Grimm");
       infoPages.add(new InfoPage(
           "Grimm\r\n" + 
           "  Units gain +30% attack, but lose -20% defense\r\n" + 
@@ -77,3 +77,4 @@ public class YCGrimm extends Commander
     }
   }
 }
+

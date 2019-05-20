@@ -7,12 +7,12 @@ import Units.Unit;
 
 public class BHHawke extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Hawke", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Hawke");
       infoPages.add(new InfoPage(
           "Hawke\r\n" + 
           "  Units gain +10% attack\r\n" + 
@@ -104,3 +104,4 @@ public class BHHawke extends Commander
     }
   }
 }
+

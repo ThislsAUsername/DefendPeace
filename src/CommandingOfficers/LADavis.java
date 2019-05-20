@@ -9,11 +9,12 @@ import Units.UnitModel.ChassisEnum;
 
 public class LADavis extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Davis AW1Eagle", new instantiator());
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Davis AW1Eagle");
       infoPages.add(new InfoPage(
           "Hey, you're not allowed to see this...\n"
           + "Get out of here with your shenanigans!"));
@@ -77,3 +78,4 @@ public class LADavis extends Commander
     }
   }
 }
+

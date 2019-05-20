@@ -9,11 +9,12 @@ import Units.UnitModel.ChassisEnum;
 
 public class GEEagle extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Eagle", new instantiator());
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Eagle");
       infoPages.add(new InfoPage(
           "Eagle\r\n" + 
           "  Air units gain +15% attack, +10% defense and consume -2 fuel per day. Naval units lose -30% attack\r\n" + 
@@ -118,3 +119,4 @@ public class GEEagle extends Commander
     }
   }
 }
+

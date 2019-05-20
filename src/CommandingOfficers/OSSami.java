@@ -13,12 +13,12 @@ import Units.Weapons.WeaponModel;
 
 public class OSSami extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Sami", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Sami");
       infoPages.add(new InfoPage(
           "Sami\r\n" + 
           "  Footsoldiers gain +30% attack and capture buildings 50% faster (rounded down), other direct units lose -10% attack. Transports gain +1 movement\r\n" + 
@@ -175,3 +175,4 @@ public class OSSami extends Commander
     }
   }
 }
+

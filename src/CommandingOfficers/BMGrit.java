@@ -12,11 +12,12 @@ import Units.Weapons.WeaponModel;
 
 public class BMGrit extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Grit", new instantiator());
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Grit");
       infoPages.add(new InfoPage(
           "Grit\r\n" + 
           "  Indirect units have +1 range and gain +20% attack. Direct units lose -20% attack (footsoldiers are normal)\r\n" + 
@@ -129,3 +130,4 @@ public class BMGrit extends Commander
     }
   }
 }
+

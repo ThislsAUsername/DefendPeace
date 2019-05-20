@@ -7,8 +7,6 @@ import java.awt.image.ColorConvertOp;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 
-import UI.Art.SpriteArtist.SpriteUIUtils.ImageFrame;
-
 /**
  * Holds a collection of related images, e.g. an animation sequence.
  */
@@ -64,34 +62,7 @@ public class Sprite
       }
     }
   }
-
-  public Sprite(ImageFrame[] spriteSet, int spriteWidthPx, int spriteHeightPx)
-  {
-    spriteImages = new ArrayList<BufferedImage>();
-
-    if( null == spriteSet )
-    {
-      System.out.println("WARNING! Sprite() given invalid sprite sheet. Creating placeholder image.");
-      // Just make a single blank frame of the specified size.
-      spriteImages.add(SpriteLibrary.createDefaultBlankSprite(spriteWidthPx, spriteHeightPx));
-    }
-    else
-    {
-      ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
-      //      ColorConvertOp op = new ColorConvertOp(cs, null);
-      for( ImageFrame image : spriteSet )
-      {
-        if( null != image )
-        {
-          BufferedImage master = new BufferedImage(spriteWidthPx, spriteHeightPx, BufferedImage.TYPE_INT_ARGB);
-          //          master.getGraphics().drawImage(op.filter(image.getImage(), null), 0, 0, null);
-          master.getGraphics().drawImage(image.getImage(), 0, 0, null);
-          spriteImages.add(master);
-        }
-      }
-    }
-  }
-
+  
   /**
    * Sprite copy-constructor. Perform a deep-copy on each of the other sprite's frames.
    * @param other

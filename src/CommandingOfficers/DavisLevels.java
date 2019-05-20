@@ -11,11 +11,12 @@ import Units.Unit;
 
 public class DavisLevels extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Davis", new instantiator());
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Davis");
       infoPages.add(new InfoPage(
           "--DAVIS--\r\n" + 
           "A unit will level up upon killing an enemy unit, for a total of three levels.\r\n" + 
@@ -194,3 +195,4 @@ public class DavisLevels extends Commander
     }
   }
 }
+

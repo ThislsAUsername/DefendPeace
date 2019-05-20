@@ -9,12 +9,12 @@ import Units.UnitModel.ChassisEnum;
 
 public class GEJess extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Jess", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Jess");
       infoPages.add(new InfoPage(
           "Jess\r\n" + 
           "  Vehicles gain +10% attack, but all other units (including footsoldiers) lose -10% attack\r\n" + 
@@ -118,3 +118,4 @@ public class GEJess extends Commander
     }
   }
 }
+

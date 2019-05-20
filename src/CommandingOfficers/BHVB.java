@@ -10,12 +10,12 @@ import Units.Unit;
 
 public class BHVB extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Von Bolt", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Von Bolt");
       infoPages.add(new InfoPage(
           "Von Bolt\r\n" + 
           "  Units gain +10% attack and +10% defense\r\n" + 
@@ -76,3 +76,4 @@ public class BHVB extends Commander
     }
   }
 }
+

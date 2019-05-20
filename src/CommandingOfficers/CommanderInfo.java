@@ -40,3 +40,4 @@ public abstract class CommanderInfo implements Serializable
     }
   }
 }
+

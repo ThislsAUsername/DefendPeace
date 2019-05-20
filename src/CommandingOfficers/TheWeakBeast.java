@@ -11,12 +11,12 @@ import Units.UnitModel;
 
 public class TheWeakBeast extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Weak Beast", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Weak Beast");
       infoPages.add(new InfoPage(
           "--Weak BEAST--\r\n" + 
           "Terrain cost is 1 on all terrain (except in snow). Units gain +20% firepower, but lose -20% defense.\r\n" + 
@@ -96,3 +96,4 @@ public class TheWeakBeast extends Commander
     }
   }
 }
+

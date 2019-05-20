@@ -9,11 +9,12 @@ import Terrain.MapMaster;
 
 public class GEJavier extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Javier 1T", new instantiator());
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Javier 1T");
       infoPages.add(new InfoPage(
           "Javier\r\n" + 
           "  Units gain +20% defense against indirect units. +10% defense\r\n" + 
@@ -107,3 +108,4 @@ public class GEJavier extends Commander
     }
   }
 }
+

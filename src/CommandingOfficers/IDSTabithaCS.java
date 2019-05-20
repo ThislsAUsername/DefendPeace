@@ -13,12 +13,12 @@ import Units.Unit;
 
 public class IDSTabithaCS extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Tabitha", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Tabitha");
       infoPages.add(new InfoPage(
           "--TABITHA--\r\n" + 
           "The first unit that attacks is given a \"Mega Boost\" of +50% firepower and +35% defense; this power-up lasts until the player's next turn.\r\n" + 
@@ -154,3 +154,4 @@ public class IDSTabithaCS extends Commander
     }
   }
 }
+

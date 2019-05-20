@@ -12,12 +12,12 @@ import Units.Unit;
 
 public class OSRachel extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Rachel", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Rachel");
       infoPages.add(new InfoPage(
           "Rachel\r\n" + 
           "  +1 HP for repairs (liable for costs)\r\n" + 
@@ -115,3 +115,4 @@ public class OSRachel extends Commander
     }
   }
 }
+

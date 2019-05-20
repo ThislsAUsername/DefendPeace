@@ -10,12 +10,12 @@ import Units.UnitModel.ChassisEnum;
 
 public class OSHachi extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Hachi", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Hachi");
       infoPages.add(new InfoPage(
           "Hachi\r\n" + 
           "  Units cost -10% less to build\r\n" + 
@@ -101,3 +101,4 @@ public class OSHachi extends Commander
     }
   }
 }
+

@@ -12,11 +12,12 @@ import Units.Weapons.WeaponModel;
 
 public class OSMax extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Max", new instantiator());
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Max");
       infoPages.add(new InfoPage(
           "Max\r\n" + 
           "  Direct units gain +20% attack. Indirect units lose -10% attack, and have -1 range\r\n" + 
@@ -147,3 +148,4 @@ public class OSMax extends Commander
     }
   }
 }
+

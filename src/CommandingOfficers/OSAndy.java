@@ -8,12 +8,12 @@ import Units.UnitModel;
 
 public class OSAndy extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Andy", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Andy");
       infoPages.add(new InfoPage(
           "Andy\n"
           + "Doesn't understand airports.\n"
@@ -89,3 +89,4 @@ public class OSAndy extends Commander
     }
   }
 }
+

@@ -9,12 +9,12 @@ import Units.Unit;
 
 public class IDSCaulderSCOP extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Caulder", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Caulder");
       infoPages.add(new InfoPage(
           "--CAULDER--\r\n" + 
           "All damaged units are repaired for +2 HP every turn (liable for costs).\r\n" + 
@@ -101,3 +101,4 @@ public class IDSCaulderSCOP extends Commander
     }
   }
 }
+

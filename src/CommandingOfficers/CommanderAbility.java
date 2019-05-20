@@ -70,3 +70,4 @@ public abstract class CommanderAbility implements Serializable
   /** Subclasses will override this method to enact the ability's effects. */
   protected abstract void perform(MapMaster gameMap);
 }
+

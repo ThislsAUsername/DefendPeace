@@ -6,12 +6,12 @@ import Units.UnitModel;
 
 public class BMColin extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Colin", new instantiator());
-
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Colin");
       infoPages.add(new InfoPage(
           "Colin\r\n" + 
           "  Units cost -20% less to build, but lose -10% attack\r\n" + 
@@ -84,3 +84,4 @@ public class BMColin extends Commander
     }
   }
 }
+

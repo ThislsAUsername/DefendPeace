@@ -10,11 +10,12 @@ import Units.UnitModel;
 
 public class BWIsabellaCS extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Isabella", new instantiator());
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Isabella");
       infoPages.add(new InfoPage(
           "--ISABELLA--\r\n" + 
           "Units gain +10% firepower.\r\n" + 
@@ -104,3 +105,4 @@ public class BWIsabellaCS extends Commander
     }
   }
 }
+

@@ -8,11 +8,12 @@ import Units.Weapons.WeaponModel;
 
 public class BWWillCS extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Will", new instantiator());
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Will");
       infoPages.add(new InfoPage(
           "--WILL--\r\n" + 
           "All ground direct units (including foot soldiers) gain +20% firepower.\r\n" + 
@@ -97,3 +98,4 @@ public class BWWillCS extends Commander
     }
   }
 }
+

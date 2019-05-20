@@ -9,11 +9,12 @@ import Units.UnitModel.ChassisEnum;
 
 public class BWLinCS extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Lin", new instantiator());
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Lin");
       infoPages.add(new InfoPage(
           "--LIN--\r\n" + 
           "Ground units gain +10% firepower.\r\n" + 
@@ -104,3 +105,4 @@ public class BWLinCS extends Commander
     }
   }
 }
+

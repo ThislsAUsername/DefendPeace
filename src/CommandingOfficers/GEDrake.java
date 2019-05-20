@@ -1,9 +1,9 @@
 package CommandingOfficers;
 
-import CommandingOfficers.COMaker.InfoPage;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GlobalWeatherEvent;
 import Engine.GameEvents.MapChangeEvent;
 import Terrain.MapMaster;
 import Terrain.Location;
@@ -15,11 +15,12 @@ import Units.UnitModel.ChassisEnum;
 
 public class GEDrake extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Drake", new instantiator());
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Drake");
       infoPages.add(new InfoPage(
           "Drake\r\n" + 
           "  Naval units gain +1 movement and +25% defense, aircraft lose -20% attack. Unaffected by rain (except vision), more likely to rain in random weather\r\n" + 
@@ -112,7 +113,6 @@ public class GEDrake extends Commander
         for( int j = 0; j < gameMap.mapHeight; j++ )
         {
           Location loc = gameMap.getLocation(i, j);
-          loc.setForecast(Weathers.RAIN, gameMap.commanders.length-1);
           Unit victim = loc.getResident();
           if( victim != null && myCommander.isEnemy(victim.CO) )
           {
@@ -121,9 +121,10 @@ public class GEDrake extends Commander
           }
         }
       }
-      GameEvent event = new MapChangeEvent();
+      GameEvent event = new GlobalWeatherEvent(Weathers.RAIN, 1);
       event.performEvent(gameMap);
       GameEventListener.publishEvent(event);
     }
   }
 }
+

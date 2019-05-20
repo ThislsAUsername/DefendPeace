@@ -7,11 +7,12 @@ import Terrain.MapMaster;
 
 public class BMSasha extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Sasha", new instantiator());  
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Sasha");
       infoPages.add(new InfoPage(
           "Sasha\r\n" + 
           "  Receives +100 income per property (note: labs and comtowers do not count towards this)\r\n" + 
@@ -153,3 +154,4 @@ public class BMSasha extends Commander
     }
   }
 }
+

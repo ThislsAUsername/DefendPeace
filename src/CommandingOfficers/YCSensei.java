@@ -11,11 +11,12 @@ import Units.UnitModel;
 
 public class YCSensei extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Sensei", new instantiator());
-  private static class instantiator extends COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
+      super("Sensei");
       infoPages.add(new InfoPage(
           "Sensei\r\n" + 
           "  Copters gain +50% attack, footsoldiers gain +40% attack, but all other non-air units lose -10% attack. Transports gain +1 movement\r\n" + 
@@ -131,3 +132,4 @@ public class YCSensei extends Commander
     }
   }
 }
+
