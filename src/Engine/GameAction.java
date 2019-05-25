@@ -32,11 +32,6 @@ import Units.UnitModel;
  */
 public interface GameAction
 {
-  public enum ActionType
-  {
-    UNIT, PRODUCTION, OTHER
-  }
-
   /**
    * Returns a GameEventQueue with the events that make up this action. If the action
    * was constructed incorrectly, this should return an empty GameEventQueue.
@@ -44,7 +39,6 @@ public interface GameAction
   public abstract GameEventQueue getEvents(MapMaster map);
   public abstract XYCoord getMoveLocation();
   public abstract XYCoord getTargetLocation();
-  public abstract ActionType getType();
   public abstract UnitActionType getUnitActionType();
 
   // ==========================================================
@@ -157,12 +151,6 @@ public interface GameAction
     }
 
     @Override
-    public ActionType getType()
-    {
-      return GameAction.ActionType.UNIT;
-    }
-
-    @Override
     public String toString()
     {
       return String.format("[Attack %s with %s after moving to %s]",
@@ -233,12 +221,6 @@ public interface GameAction
     public XYCoord getTargetLocation()
     {
       return where;
-    }
-
-    @Override
-    public ActionType getType()
-    {
-      return GameAction.ActionType.PRODUCTION;
     }
 
     @Override
@@ -339,12 +321,6 @@ public interface GameAction
     }
 
     @Override
-    public ActionType getType()
-    {
-      return GameAction.ActionType.UNIT;
-    }
-
-    @Override
     public String toString()
     {
       return String.format("[Capture %s at %s with %s]", propertyType, movePathEnd, actor.toStringWithLocation());
@@ -414,12 +390,6 @@ public interface GameAction
     public XYCoord getTargetLocation()
     {
       return waitLoc;
-    }
-
-    @Override
-    public ActionType getType()
-    {
-      return GameAction.ActionType.UNIT;
     }
 
     @Override
@@ -506,12 +476,6 @@ public interface GameAction
     public XYCoord getTargetLocation()
     {
       return pathEnd;
-    }
-
-    @Override
-    public ActionType getType()
-    {
-      return GameAction.ActionType.UNIT;
     }
 
     @Override
@@ -634,12 +598,6 @@ public interface GameAction
     }
 
     @Override
-    public ActionType getType()
-    {
-      return GameAction.ActionType.UNIT;
-    }
-
-    @Override
     public String toString()
     {
       return String.format("[Unload from %s]", actor.toStringWithLocation());
@@ -724,12 +682,6 @@ public interface GameAction
     public XYCoord getTargetLocation()
     {
       return pathEnd;
-    }
-
-    @Override
-    public ActionType getType()
-    {
-      return GameAction.ActionType.UNIT;
     }
 
     @Override
@@ -859,12 +811,6 @@ public interface GameAction
     }
 
     @Override
-    public ActionType getType()
-    {
-      return GameAction.ActionType.UNIT;
-    }
-
-    @Override
     public String toString()
     {
       return String.format("[Resupply units adjacent to %s with %s]", myLocation(), unitActor.toStringWithLocation());
@@ -913,14 +859,6 @@ public interface GameAction
     public XYCoord getTargetLocation()
     {
       return null;
-    }
-
-    @Override
-    public ActionType getType()
-    {
-      // Use OTHER, just because it doesn't correspond to a normal unit-based
-      // action with an actor, target location, etc.
-      return GameAction.ActionType.OTHER;
     }
 
     @Override
