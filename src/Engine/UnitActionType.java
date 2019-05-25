@@ -20,8 +20,6 @@ public interface UnitActionType
   public static final UnitActionType LOAD = new Load();
   public static final UnitActionType JOIN = new Join();
 
-  public static final UnitActionType[] GENERIC_ACTIONS = { ATTACK, UNLOAD, CAPTURE, RESUPPLY, WAIT, LOAD, JOIN };
-  
   public static final UnitActionType[] FOOTSOLDIER_ACTIONS =    { ATTACK, CAPTURE,  WAIT, LOAD, JOIN };
   public static final UnitActionType[] COMBAT_VEHICLE_ACTIONS = { ATTACK,           WAIT, LOAD, JOIN };
   public static final UnitActionType[] TRANSPORT_ACTIONS =      { UNLOAD,           WAIT, LOAD, JOIN };
