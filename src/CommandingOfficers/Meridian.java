@@ -75,7 +75,8 @@ public class Meridian extends Commander
     return super.initTurn(map);
   }
 
-  public void receiveUnitTranformEvent(Unit unit, UnitModel oldType)
+  @Override // GameEventListener interface
+  public void receiveUnitTransformEvent(Unit unit, UnitModel oldType)
   {
     if (this == unit.CO)
     {
