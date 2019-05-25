@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -43,9 +45,9 @@ public class UIUtils
   private static Color[] purpleMapUnitColors = { new Color(90, 14, 99), new Color(132, 41, 148), new Color(181, 62, 198), new Color(201, 98, 223),
     new Color(231, 123, 255), new Color(243, 180, 255), };
 
-  private static HashMap<Color, ColorPalette> buildingColorPalettes;
-  private static HashMap<Color, ColorPalette> mapUnitColorPalettes;
-  private static HashMap<Color, String> colorNames;
+  private static Map<Color, ColorPalette> buildingColorPalettes;
+  private static Map<Color, ColorPalette> mapUnitColorPalettes;
+  private static Map<Color, String> colorNames;
   private static ArrayList<Faction> factions;
 
   
@@ -63,9 +65,9 @@ public class UIUtils
   {
     if (null == mapUnitColorPalettes )
     {
-      buildingColorPalettes = new HashMap<Color, ColorPalette>();
-      mapUnitColorPalettes = new HashMap<Color, ColorPalette>();
-      colorNames = new HashMap<Color, String>();
+      buildingColorPalettes = new LinkedHashMap<Color, ColorPalette>();
+      mapUnitColorPalettes = new LinkedHashMap<Color, ColorPalette>();
+      colorNames = new LinkedHashMap<Color, String>();
       factions = new ArrayList<Faction>();
 
       // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
