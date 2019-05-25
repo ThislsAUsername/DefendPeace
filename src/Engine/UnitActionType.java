@@ -235,7 +235,8 @@ public interface UnitActionType
 
   /**
    * Effectively a wait, but the unit ends up as a different unit at the end of it.
-   * Is a template action, and thus doesn't get a constant.
+   * This action type requires a parameter (the unit to transform into), and thus
+   * cannot be represented as a static global constant.
    */
   public static class Transform implements UnitActionType
   {
