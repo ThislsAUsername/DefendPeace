@@ -1,8 +1,12 @@
 package Engine;
 
 import java.util.ArrayList;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 
@@ -222,16 +226,17 @@ public class GameInstance implements Serializable
   {
     System.out.println(String.format("Deserializing game data from %s", filename));
     
+    GameVersion verInfo = null;
     GameInstance load = null;
-    try
+    try (FileInputStream file = new FileInputStream(filename); ObjectInputStream in = new ObjectInputStream(file);)
     {
-      FileInputStream file = new FileInputStream(filename);
-      ObjectInputStream in = new ObjectInputStream(file);
+      verInfo = (GameVersion) in.readObject();
+      if( !new GameVersion().isEqual(verInfo) )
+      {
+        throw new Exception(String.format("Deserializing failed! Save is incompatible version: %s", verInfo.toString()));
+      }
 
       load = (GameInstance) in.readObject();
-
-      in.close();
-      file.close();
     }
     catch (Exception ex)
     {
@@ -239,5 +244,23 @@ public class GameInstance implements Serializable
     }
 
     return load;
+  }
+  
+  public void writeSave()
+  {
+    String filename = "save/" + saveFile; // "svp" for "SaVe Peace"
+    new File("save/").mkdirs(); // make sure we don't freak out if the directory's not there
+
+    System.out.println(String.format("Now saving to %s", filename));
+    try (FileOutputStream file = new FileOutputStream(filename); ObjectOutputStream out = new ObjectOutputStream(file);)
+    {
+      // Method for serialization of object
+      out.writeObject(new GameVersion());
+      out.writeObject(this);
+    }
+    catch (IOException ex)
+    {
+      System.out.println(ex.toString());
+    }
   }
 }
