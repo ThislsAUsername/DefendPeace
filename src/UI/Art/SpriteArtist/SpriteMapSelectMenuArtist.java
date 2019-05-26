@@ -177,10 +177,10 @@ public class SpriteMapSelectMenuArtist
    */
   private static void drawPropertyNumber(Graphics g, int num, int x, int y)
   {
-    if(num > 99) // Cap it at 99 for now, and probably for ever.
+    if(num > 999) // Cap it at 999 for now, and probably forever.
     {
       System.out.println("INFO: Maps are getting large, yo");
-      num = 99;
+      num = 999;
     }
 
     // Get the number images, and grab the dimensions
@@ -189,13 +189,14 @@ public class SpriteMapSelectMenuArtist
     int numWidth = nums.getFrame(0).getWidth() * drawScale;
     int numHeight = nums.getFrame(0).getHeight() * drawScale;
 
-    // Property sprites are 2 tiles by two tiles, and we want to be right- and
-    //   bottom-justified, so we adjust sideways.
+    // Property sprites are 2 tiles by two tiles, so we adjust sideways.
     int propSize = SpriteLibrary.baseSpriteSize*drawScale*2;
     x += propSize - numWidth; // right-justify
+    if (num/100 > 0)
+      x += propSize/8; // shift over a bit so we stay centered with 3 digits
     y += propSize - numHeight; // Bottom-justify - no double-digit adjustment.
 
-    do // We divide by 10 and truncate each time; expect two loops max.
+    do // We divide by 10 and truncate each time; expect three loops max.
     {
       int frame = num % 10;
       g.drawImage(nums.getFrame(frame), x, y, numWidth, numHeight, null);
