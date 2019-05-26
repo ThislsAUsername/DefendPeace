@@ -1,5 +1,6 @@
 package Engine;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import Terrain.GameMap;
@@ -7,7 +8,7 @@ import Units.Unit;
 import Units.UnitModel;
 import Units.Weapons.Weapon;
 
-public interface UnitActionType
+public interface UnitActionType extends Serializable
 {
   public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor);
   public String name();
