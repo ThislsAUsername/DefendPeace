@@ -85,7 +85,8 @@ public class MapWindow extends GameMap
     XYCoord coord = new XYCoord(x, y);
     Location masterLoc = master.getLocation(coord);
     Location returnLoc = masterLoc;
-    if( isLocationFogged(coord) )
+    if( isLocationFogged(coord) || // If we can't see anything...
+        (isLocationEmpty(coord) && !master.isLocationEmpty(coord)) ) // ...or what's there is hidden
     {
       returnLoc = new Location(returnLoc.getEnvironment(), coord);
       returnLoc.setHighlight(masterLoc.isHighlightSet());
