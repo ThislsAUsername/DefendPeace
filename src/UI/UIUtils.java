@@ -47,7 +47,7 @@ public class UIUtils
 
   private static Map<Color, ColorPalette> buildingColorPalettes;
   private static Map<Color, ColorPalette> mapUnitColorPalettes;
-  private static Map<Color, String> colorNames;
+  private static Map<Color, String> paletteNames;
   private static ArrayList<Faction> factions;
 
   
@@ -67,7 +67,7 @@ public class UIUtils
     {
       buildingColorPalettes = new LinkedHashMap<Color, ColorPalette>();
       mapUnitColorPalettes = new LinkedHashMap<Color, ColorPalette>();
-      colorNames = new LinkedHashMap<Color, String>();
+      paletteNames = new LinkedHashMap<Color, String>();
       factions = new ArrayList<Faction>();
 
       // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
@@ -83,10 +83,10 @@ public class UIUtils
 
       // Throw some color names in there for the defaults
       // toString() is not user-friendly
-      colorNames.put(Color.PINK, "salmon");
-      colorNames.put(Color.CYAN, "cyan");
-      colorNames.put(Color.ORANGE, "citrus");
-      colorNames.put(PURPLE, "sparking");
+      paletteNames.put(Color.PINK, "salmon");
+      paletteNames.put(Color.CYAN, "cyan");
+      paletteNames.put(Color.ORANGE, "citrus");
+      paletteNames.put(PURPLE, "sparking");
 
       // We want to be able to use the normal units, as well as any others
       factions.add(new Faction(DEFAULT_FACTION_NAME,DEFAULT_FACTION_NAME));
@@ -117,7 +117,7 @@ public class UIUtils
                 }
                 buildingColorPalettes.put(key, new ColorPalette(cStructs));
                 mapUnitColorPalettes.put(key, new ColorPalette(cUnits));
-                colorNames.put(key, fileEntry.getName().replace(".png", ""));
+                paletteNames.put(key, fileEntry.getName().replace(".png", ""));
               }
               catch (IOException ioex)
               {
@@ -181,16 +181,32 @@ public class UIUtils
     return palette;
   }
 
-  public static String getColorName(Color colorKey)
+  public static String getPaletteName(Color colorKey)
   {
     initCosmetics();
-    return colorNames.get(colorKey);
+    return paletteNames.get(colorKey);
   }
 
   public static Faction[] getFactions()
   {
     initCosmetics();
     return factions.toArray(new Faction[0]);
+  }
+  
+  public static String getFactionDisplayName(String palette, String faction)
+  {
+    if ("red".equalsIgnoreCase(palette) && "space".equalsIgnoreCase(faction))
+      return "Shirts";
+    return faction;
+  }
+  
+  public static String getPaletteDisplayName(String palette, String faction)
+  {
+    if ("red".equalsIgnoreCase(palette) && "star".equalsIgnoreCase(faction))
+      return "Orange";
+    if ("maroon".equalsIgnoreCase(palette) && "fire".equalsIgnoreCase(faction))
+      return "Red";
+    return palette;
   }
   
   public static class Faction implements Serializable
