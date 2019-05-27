@@ -177,9 +177,12 @@ public class SpriteLibrary
     {
       ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
     }
+    else if( terrainType == TerrainType.TOWER )
+    {
+      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
+    }
     else if( terrainType == TerrainType.LAB )
     {
-      // TODO: get actual sprites for this
       ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
     }
     else if( terrainType == TerrainType.MOUNTAIN )
