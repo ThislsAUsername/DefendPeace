@@ -62,21 +62,30 @@ public class SpriteMapSelectMenuArtist
     // Draw the highlight for the selected option.
     g.setColor(MENUHIGHLIGHTCOLOR);
     int menuTextYStart = frameBorderHeight;
-    int menuOptionHeight = SpriteLibrary.getLettersUppercase().getFrame(0).getHeight()*drawScale;
-    int selectedOptionYOffset = menuTextYStart + highlightedOption * (menuOptionHeight + drawScale);
-    g.fillRect(0, selectedOptionYOffset, nameSectionDrawWidth, menuOptionHeight);
+    int menuOptionHeight = (SpriteLibrary.getLettersUppercase().getFrame(0).getHeight() + 1)*drawScale; // +1 for a buffer between options.
+    int selectedOptionYOffset = menuTextYStart + highlightedOption * (menuOptionHeight);
 
     // Get the list of selectable maps (possibly specifying a filter (#players, etc).
-    ArrayList<MapInfo> mapInfos = MapLibrary.getMapList(); // = MapLibrary.getMapNames();
+    ArrayList<MapInfo> mapInfos = MapLibrary.getMapList();
+    int verticalShift = 0; // How many map names we skip drawing "off the top"
+    int displayableCount = dimensions.height / menuOptionHeight; // how many maps we can cram on the screen
+    while (selectedOptionYOffset > dimensions.height/2 && // Loop until either the cursor's bumped up to the center of the screen...
+        displayableCount+verticalShift < mapInfos.size()) //  or we'll already show the last map 
+    {
+      verticalShift++;
+      selectedOptionYOffset -= menuOptionHeight;
+    }
+    
+    g.fillRect(0, selectedOptionYOffset, nameSectionDrawWidth, menuOptionHeight);
 
-    // Display the names from the list, highlighting the one that is currently chosen.
-    for(int i = 0; i < mapInfos.size(); ++i)
+    // Display the names from the list
+    for(int i = 0; i < displayableCount; ++i)
     {
       int drawX = 2; // Offset from the edge of the window slightly.
-      int drawY = menuTextYStart + drawScale + i * (menuOptionHeight + drawScale); // +drawScale for a buffer between options.
+      int drawY = menuTextYStart + drawScale + i * (menuOptionHeight);
 
       // Draw visible map names in the list.
-      String str = mapInfos.get(i).mapName;
+      String str = mapInfos.get(i + verticalShift).mapName;
       if(str.length() > maxNameDisplayLength)
       {
         str = str.substring(0, maxNameDisplayLength);
