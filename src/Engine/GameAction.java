@@ -295,21 +295,17 @@ public interface GameAction
           CaptureEvent capture = new CaptureEvent(actor, map.getLocation(movePathEnd));
           captureEvents.add(capture);
 
-          if( capture.willCapture() ) // If this will succeed, check if the CO will lose as a result.
+          if( capture.willCapture() && (null != captureLocation.getOwner()) ) // If this will succeed, check if the CO will lose as a result.
           {
-            
             boolean playerHasLost = false;
-            
-            // Check if capturing this property will cause someone's defeat.
-            if( (propertyType == TerrainType.HEADQUARTERS) && (null != captureLocation.getOwner()) )
+            if( (propertyType == TerrainType.HEADQUARTERS) ) // HQ is guaranteed loss
             {
               playerHasLost = true;
             }
-            
-            else if ((propertyType == TerrainType.LAB) && (null != captureLocation.getOwner())) 
+            else if ((propertyType == TerrainType.LAB)) // Lab is a loss if it's the last HQ-ish building
             {
+              playerHasLost = true;
               int numLabs = 0;
-              int numHQs = 0;
               Commander CO = captureLocation.getOwner();
               for (XYCoord xy : CO.ownedProperties) 
               {
@@ -319,25 +315,20 @@ public interface GameAction
                   numLabs += 1;
                   if (numLabs > 1) 
                   {
+                    playerHasLost = false;
                     break;
                   }
-                  
                 }
                 if (loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS ) 
                 {
-                  numHQs += 1;
+                  playerHasLost = false;
                   break;
                 }                
-              }
-              if (numLabs == 0 && numHQs == 0) 
-              {
-                playerHasLost = true;
               }
             }
             
             if (playerHasLost) 
             {
-              // Someone is losing their big, comfy chair.
               CommanderDefeatEvent defeat = new CommanderDefeatEvent(captureLocation.getOwner());
               defeat.setPropertyBeneficiary(actor.CO);
               captureEvents.add(defeat);
