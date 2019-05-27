@@ -51,11 +51,14 @@ public class CommanderDefeatEvent implements GameEvent
     // Clear the CO array too, just to be thorough.
     defeatedCO.units.clear();
 
-    // Downgrade the defeated commander's HQ to a city, unless they don't have a proper HQ.
-    Location HQLoc = gameMap.getLocation(defeatedCO.HQLocation);
-    if( HQLoc.getEnvironment().terrainType == TerrainType.HEADQUARTERS )
+    // Downgrade the defeated commander's HQ(s) to a city, unless they don't have a proper HQ.
+    for (XYCoord xy : defeatedCO.ownedProperties) 
     {
-      HQLoc.setEnvironment(Environment.getTile(TerrainType.CITY, HQLoc.getEnvironment().weatherType));
+      Location loc = gameMap.getLocation(xy);
+      if (loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS ) 
+      {
+        loc.setEnvironment(Environment.getTile(TerrainType.CITY, loc.getEnvironment().weatherType));
+      }                
     }
 
     // Loop through the map and revoke all of the CO's properties.

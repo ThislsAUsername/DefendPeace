@@ -59,18 +59,14 @@ public class MapMaster extends GameMap
         if( location.isCaptureable() )
         {
           // Check if this location holds an HQ.
-          if( map[x][y].getEnvironment().terrainType == TerrainType.HEADQUARTERS )
+          if( map[x][y].getEnvironment().terrainType == TerrainType.HEADQUARTERS ||
+              map[x][y].getEnvironment().terrainType == TerrainType.LAB)
           {
             // If the CO has no HQ yet, assign this one.
             if( COs[co].HQLocation == null )
             {
               System.out.println("Assigning HQ at " + x + ", " + y + " to " + COs[co]);
               COs[co].HQLocation = new XYCoord(x, y);
-            }
-            // If the CO does have an HQ, turn this location into a city.
-            else
-            {
-              location.setEnvironment(Environment.getTile(TerrainType.CITY, location.getEnvironment().weatherType));
             }
           }
           location.setOwner(COs[co]);

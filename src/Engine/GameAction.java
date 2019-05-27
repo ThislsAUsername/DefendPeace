@@ -298,8 +298,10 @@ public interface GameAction
           if( capture.willCapture() && (null != captureLocation.getOwner()) ) // If this will succeed, check if the CO will lose as a result.
           {
             boolean playerHasLost = false;
+            Commander beneficiary = null;
             if( (propertyType == TerrainType.HEADQUARTERS) ) // HQ is guaranteed loss
             {
+              beneficiary = actor.CO;
               playerHasLost = true;
             }
             else if ((propertyType == TerrainType.LAB)) // Lab is a loss if it's the last HQ-ish building
@@ -330,7 +332,7 @@ public interface GameAction
             if (playerHasLost) 
             {
               CommanderDefeatEvent defeat = new CommanderDefeatEvent(captureLocation.getOwner());
-              defeat.setPropertyBeneficiary(actor.CO);
+              defeat.setPropertyBeneficiary(beneficiary);
               captureEvents.add(defeat);
             }
           }
