@@ -38,6 +38,9 @@ public class Meridian extends Commander
           "Vehicular Charge ("+VehicularCharge.COST+"):\n" +
           "Gives an attack and defense boost of "+VehicularCharge.BASIC_BUFF+"%\n" +
           "Refreshes all land vehicles, but refreshed units suffer an attack and defense penalty of "+POST_REFRESH_STAT_ADJUSTMENT+"%\n"));
+      infoPages.add(new InfoPage(
+          "Meridian concept credit:\n" +
+          "@KvoidDragon#6786 Discord ID 542848671809798166"));
     }
     @Override
     public Commander create()
