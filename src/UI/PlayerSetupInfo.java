@@ -14,7 +14,7 @@ import UI.UIUtils.Faction;
  * Stores state to setup Commanders with during game setup.
  * Stores current CO, color, team, AI, and faction.
  */
-public class COSetupInfo extends OptionSelector
+public class PlayerSetupInfo extends OptionSelector
 {
   public enum OptionList { COMMANDER, COLOR, FACTION, TEAM, AI };
 
@@ -32,7 +32,7 @@ public class COSetupInfo extends OptionSelector
   final AIMaker[] AIs;
   final OptionSelector currentAI;
 
-  public COSetupInfo(int numPlayers, int thisPlayer, ArrayList<CommanderInfo> COTypeList, Color[] colorList, Faction[] factionList, ArrayList<AIMaker> AIList)
+  public PlayerSetupInfo(int numPlayers, int thisPlayer, ArrayList<CommanderInfo> COTypeList, Color[] colorList, Faction[] factionList, ArrayList<AIMaker> AIList)
   {
     super(OptionList.values().length);
     

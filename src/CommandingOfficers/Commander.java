@@ -25,9 +25,7 @@ import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
-import UI.UIUtils;
 import UI.UIUtils.Faction;
-import UI.Art.SpriteArtist.SpriteLibrary;
 import Units.APCModel;
 import Units.AntiAirModel;
 import Units.ArtilleryModel;
@@ -175,6 +173,7 @@ public class Commander extends GameEventListener implements Serializable
    */
   public GameEventQueue initTurn(GameMap map)
   {
+    modifyAbilityPower(5);
     myView.resetFog();
     myActiveAbilityName = "";
     // Accrue income for each city under your control.

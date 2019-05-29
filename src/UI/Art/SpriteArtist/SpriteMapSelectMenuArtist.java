@@ -34,7 +34,7 @@ public class SpriteMapSelectMenuArtist
     }
     else
     { // Pass this along to the COSelectMenuArtist.
-      SpriteCOSetupArtist.draw(g, selectedMapInfo, gameSetup.getSubController());
+      PlayerSetupArtist.draw(g, selectedMapInfo, gameSetup.getSubController());
     }
   }
 

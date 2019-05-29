@@ -286,21 +286,23 @@ public class SpriteLibrary
   private static class UnitSpriteSetKey
   {
     public final UnitModel.UnitEnum unitTypeKey;
-    public final Commander commanderKey;
+    public final Faction factionKey;
+    public final Color colorKey;
     private static ArrayList<UnitSpriteSetKey> instances = new ArrayList<UnitSpriteSetKey>();
 
-    private UnitSpriteSetKey(UnitModel.UnitEnum unitType, Commander co)
+    private UnitSpriteSetKey(UnitModel.UnitEnum unitType, Faction faction, Color color)
     {
       unitTypeKey = unitType;
-      commanderKey = co;
+      factionKey = faction;
+      colorKey = color;
     }
 
-    public static UnitSpriteSetKey instance(UnitModel.UnitEnum unitType, Commander co)
+    public static UnitSpriteSetKey instance(UnitModel.UnitEnum unitType, Faction faction, Color color)
     {
       UnitSpriteSetKey key = null;
       for( int i = 0; i < instances.size(); ++i )
       {
-        if( instances.get(i).unitTypeKey == unitType && instances.get(i).commanderKey == co )
+        if( instances.get(i).unitTypeKey == unitType && instances.get(i).factionKey == faction && instances.get(i).colorKey == color)
         {
           key = instances.get(i);
           break;
@@ -308,7 +310,7 @@ public class SpriteLibrary
       }
       if( key == null )
       {
-        key = new UnitSpriteSetKey(unitType, co);
+        key = new UnitSpriteSetKey(unitType, faction, color);
         instances.add(key);
       }
       return key;
@@ -317,7 +319,12 @@ public class SpriteLibrary
 
   public static UnitSpriteSet getMapUnitSpriteSet(Unit unit)
   {
-    UnitSpriteSetKey key = UnitSpriteSetKey.instance(unit.model.type, unit.CO);
+    return getMapUnitSpriteSet(unit.model.type, unit.CO.faction, unit.CO.myColor);
+  }
+
+  public static UnitSpriteSet getMapUnitSpriteSet(UnitModel.UnitEnum type, Faction faction, Color color)
+  {
+    UnitSpriteSetKey key = UnitSpriteSetKey.instance(type, faction, color);
     if( !mapUnitSpriteSetMap.containsKey(key) )
     {
       // We don't have it? Go load it.
@@ -329,13 +336,13 @@ public class SpriteLibrary
 
   private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
-    Faction faction = key.commanderKey.faction;
-    System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString() + " in faction " + faction);
+    Faction faction = key.factionKey;
+    System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.colorKey.toString() + " in faction " + faction);
     String filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction.name);
     if (!new File(filestr).canRead())
       filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction.basis);
     UnitSpriteSet spriteSet = new UnitSpriteSet(SpriteUIUtils.loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
-        UIUtils.getMapUnitColors(key.commanderKey.myColor));
+        UIUtils.getMapUnitColors(key.colorKey));
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
 
@@ -621,6 +628,19 @@ public class SpriteLibrary
         }
       }
     }
+  }
+
+  /**
+   * Returns a BufferedImage containing the contents of `text` rendered on one line, on a transparent background, with no scaling applied.
+   */
+  public static BufferedImage getTextAsImage(String text)
+  {
+    Sprite letters = getLettersSmallCaps();
+    int width = letters.getFrame(0).getWidth() * text.length();
+    int height = letters.getFrame(0).getHeight();
+    BufferedImage textImage = createTransparentSprite(width, height);
+    drawTextSmallCaps(textImage.getGraphics(), text, 0, 0, 1);
+    return textImage;
   }
 
   /**
