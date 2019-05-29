@@ -44,7 +44,9 @@ public class PlayerSetupArtist
     /////////////////// Ready Button ////////////////////////
     int drawScale = SpriteOptions.getDrawScale();
     BufferedImage readyButton = SpriteUIUtils.makeTextFrame("Ready!", 3*drawScale, 2*drawScale);
-    SpriteLibrary.drawImageCenteredOnPoint(g, readyButton, dimensions.width-(int)(readyButton.getWidth()*0.75), dimensions.height/2, 1);
+    int readyX = dimensions.width-(int)(readyButton.getWidth()*1.25);
+    int readyY = dimensions.height/2-readyButton.getHeight()/2;
+    g.drawImage(readyButton, readyX, readyY, null);
     int readyAreaWidth = (int)(readyButton.getWidth() * 1.5);
 
     /////////////////// Player Panels ///////////////////////
@@ -88,39 +90,52 @@ public class PlayerSetupArtist
         int drawX = playerXCenter - (playerImage.getWidth()*drawScale)/2;
         int drawY = playerYCenter - (playerImage.getHeight()*drawScale)/2;
         g.drawImage(playerImage, drawX, drawY, playerImage.getWidth()*drawScale, playerImage.getHeight()*drawScale, null);
-
-        // Draw the cursor if this is the currently-highlighted player.
-        if( (i == highlightedPlayer) && (myControl.getHighlightedCategory() != PlayerSetupController.SelectionCategories.START.ordinal()) )
-        {
-          PlayerPanel.Pane pane;
-          switch(myControl.getHighlightedCategory())
-          {
-            default:
-            case 0: // Commander
-              pane = panel.commanderPane;
-              break;
-            case 1: // Faction/Color
-              pane = panel.unitPane;
-              break;
-            case 2: // Team
-              pane = panel.teamPane;
-              break;
-            case 3: // AI Controller
-              pane = panel.aiPane;
-              break;
-          }
-          drawSelector(g, drawX+pane.xPos*drawScale, drawY+pane.yPos*drawScale, pane.width*drawScale, pane.height*drawScale);
-          drawSelector(g, drawX+pane.xPos*drawScale+1, drawY+pane.yPos*drawScale+1, pane.width*drawScale-2, pane.height*drawScale-2);
-        }
       }
+    }
+
+    // Figure out where to draw the cursor.
+    if( myControl.getHighlightedCategory() == PlayerSetupController.SelectionCategories.START.ordinal() )
+    {
+      // Ready is currently selected.
+      drawSelector(g, readyX, readyY, readyButton.getWidth(), readyButton.getHeight(), myControl.getPlayerInfo(highlightedPlayer).getCurrentColor());
+    }
+    else // Draw the cursor over the apprpriate player info panel.
+    {
+      PlayerPanel panel = playerPanels.get(highlightedPlayer);
+      PlayerPanel.Pane pane;
+      switch(myControl.getHighlightedCategory())
+      {
+        default:
+        case 0: // Commander
+          pane = panel.commanderPane;
+          break;
+        case 1: // Faction/Color
+          pane = panel.unitPane;
+          break;
+        case 2: // Team
+          pane = panel.teamPane;
+          break;
+        case 3: // AI Controller
+          pane = panel.aiPane;
+          break;
+      }
+      PlayerSetupInfo info = myControl.getPlayerInfo(highlightedPlayer);
+      BufferedImage playerImage = panel.update(info);
+      int drawX = playerXCenter - (playerImage.getWidth()*drawScale)/2;
+      int drawY = dimensions.height / 2 - playerImage.getHeight();
+      drawSelector(g, drawX+pane.xPos*drawScale, drawY+pane.yPos*drawScale, pane.width*drawScale, pane.height*drawScale, info.getCurrentColor());
     }
   }
 
-  private static void drawSelector(Graphics g, int x, int y, int w, int h)
+  private static void drawSelector(Graphics g, int x, int y, int w, int h, Color color)
   {
     // Draw the arrows around the focused player attribute.
-    g.setColor(Color.GREEN);
-    g.drawRect(x, y, w, h);
+    Sprite cursor = new Sprite(SpriteLibrary.getCursorSprites());
+    cursor.colorize(UIUtils.defaultMapColors[4], color);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), x, y, SpriteOptions.getDrawScale());
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), x+w, y, SpriteOptions.getDrawScale());
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), x+w, y+h, SpriteOptions.getDrawScale());
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), x, y+h, SpriteOptions.getDrawScale());
   }
 
   /**

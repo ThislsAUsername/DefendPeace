@@ -58,6 +58,9 @@ public class SpriteLibrary
   private static Sprite numberSpritesSmallCaps = null;
   private static Sprite symbolSpritesSmallCaps = null;
 
+  // Cursor for highlighting things in-game.
+  private static Sprite cursorSprites = null;
+
   // Commander overlay backdrops (shows commander name and funds) for each Commander in the game.
   private static HashMap<Commander, Sprite> coOverlays = new HashMap<Commander, Sprite>();
   private static HashMap<Commander, Sprite> coPowerBarPieces = new HashMap<Commander, Sprite>();
@@ -657,6 +660,15 @@ public class SpriteLibrary
     int drawY = y - drawHeight / 2;
 
     g.drawImage(image, drawX, drawY, drawWidth, drawHeight, null);
+  }
+
+  public static Sprite getCursorSprites()
+  {
+    if( null == cursorSprites )
+    {
+      cursorSprites = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/cursor.png"), 6, 6);
+    }
+    return cursorSprites;
   }
 
   /**
