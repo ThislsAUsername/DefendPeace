@@ -222,6 +222,28 @@ public class GameInstance implements Serializable
     return sb.toString();
   }
   
+  public static boolean isSaveCompatible(String filename)
+  {
+    System.out.println(String.format("Checking compatibility of save %s", filename));
+
+    GameVersion verInfo = null;
+    boolean verMatch = false;
+    try (FileInputStream file = new FileInputStream(filename); ObjectInputStream in = new ObjectInputStream(file);)
+    {
+      verInfo = (GameVersion) in.readObject();
+      if( new GameVersion().isEqual(verInfo) )
+      {
+        verMatch = true;
+      }
+    }
+    catch (Exception ex)
+    {
+      System.out.println(ex.toString());
+    }
+
+    return verMatch;
+  }
+  
   public static GameInstance loadSave(String filename)
   {
     System.out.println(String.format("Deserializing game data from %s", filename));
