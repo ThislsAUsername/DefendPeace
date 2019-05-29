@@ -10,6 +10,8 @@ import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
+import UI.UIUtils;
+
 public class SpriteUIUtils
 {
   public static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
@@ -41,6 +43,17 @@ public class SpriteUIUtils
     }
 
     return slide * sign;
+  }
+
+  public static void drawCursor(Graphics g, int x, int y, int w, int h, Color color, int drawScale)
+  {
+    // Draw the arrows around the focused player attribute.
+    Sprite cursor = new Sprite(SpriteLibrary.getCursorSprites());
+    cursor.colorize(UIUtils.defaultMapColors[4], color);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), x, y, drawScale);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), x+w, y, drawScale);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), x+w, y+h, drawScale);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), x, y+h, drawScale);
   }
 
   /**

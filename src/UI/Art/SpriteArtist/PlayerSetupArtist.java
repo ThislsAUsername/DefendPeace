@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
+import Engine.IController;
 import Terrain.MapInfo;
 import UI.PlayerSetupController;
 import UI.PlayerSetupInfo;
@@ -35,11 +36,39 @@ public class PlayerSetupArtist
       myControl = control;
     }
 
-    // Get the draw space
-    Dimension dimensions = SpriteOptions.getScreenDimensions();
-
     // Draw fancy background effects.
     DiagonalBlindsBG.draw(g);
+
+    IController subMenu = myControl.getSubMenu();
+    if( null == subMenu )
+    {
+      drawPlayerSetup(g, mapInfo, control);
+    }
+    else
+    {
+      if( myControl.getHighlightedCategory() == PlayerSetupController.SelectionCategories.COMMANDER.ordinal() )
+      {
+        
+      }
+      if( myControl.getHighlightedCategory() == PlayerSetupController.SelectionCategories.COLOR_FACTION.ordinal() )
+      {
+        PlayerSetupColorFactionArtist.draw(g, subMenu);
+      }
+      if( myControl.getHighlightedCategory() == PlayerSetupController.SelectionCategories.TEAM.ordinal() )
+      {
+        
+      }
+      if( myControl.getHighlightedCategory() == PlayerSetupController.SelectionCategories.AI.ordinal() )
+      {
+        
+      }
+    }
+  }
+
+  private static void drawPlayerSetup(Graphics g, MapInfo mapInfo, PlayerSetupController control)
+  {
+    // Get the draw space
+    Dimension dimensions = SpriteOptions.getScreenDimensions();
 
     /////////////////// Ready Button ////////////////////////
     int drawScale = SpriteOptions.getDrawScale();
@@ -97,9 +126,9 @@ public class PlayerSetupArtist
     if( myControl.getHighlightedCategory() == PlayerSetupController.SelectionCategories.START.ordinal() )
     {
       // Ready is currently selected.
-      drawSelector(g, readyX, readyY, readyButton.getWidth(), readyButton.getHeight(), myControl.getPlayerInfo(highlightedPlayer).getCurrentColor());
+      SpriteUIUtils.drawCursor(g, readyX, readyY, readyButton.getWidth(), readyButton.getHeight(), myControl.getPlayerInfo(highlightedPlayer).getCurrentColor(), drawScale);
     }
-    else // Draw the cursor over the apprpriate player info panel.
+    else // Draw the cursor over the appropriate player info panel.
     {
       PlayerPanel panel = playerPanels.get(highlightedPlayer);
       PlayerPanel.Pane pane;
@@ -120,22 +149,11 @@ public class PlayerSetupArtist
           break;
       }
       PlayerSetupInfo info = myControl.getPlayerInfo(highlightedPlayer);
-      BufferedImage playerImage = panel.update(info);
+      BufferedImage playerImage = panel.render();
       int drawX = playerXCenter - (playerImage.getWidth()*drawScale)/2;
       int drawY = dimensions.height / 2 - playerImage.getHeight();
-      drawSelector(g, drawX+pane.xPos*drawScale, drawY+pane.yPos*drawScale, pane.width*drawScale, pane.height*drawScale, info.getCurrentColor());
+      SpriteUIUtils.drawCursor(g, drawX+pane.xPos*drawScale, drawY+pane.yPos*drawScale, pane.width*drawScale, pane.height*drawScale, info.getCurrentColor(), drawScale);
     }
-  }
-
-  private static void drawSelector(Graphics g, int x, int y, int w, int h, Color color)
-  {
-    // Draw the arrows around the focused player attribute.
-    Sprite cursor = new Sprite(SpriteLibrary.getCursorSprites());
-    cursor.colorize(UIUtils.defaultMapColors[4], color);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), x, y, SpriteOptions.getDrawScale());
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), x+w, y, SpriteOptions.getDrawScale());
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), x+w, y+h, SpriteOptions.getDrawScale());
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), x, y+h, SpriteOptions.getDrawScale());
   }
 
   /**
@@ -240,6 +258,11 @@ public class PlayerSetupArtist
         aiPane.render(g);
       }
 
+      return myImage;
+    }
+
+    public BufferedImage render()
+    {
       return myImage;
     }
 

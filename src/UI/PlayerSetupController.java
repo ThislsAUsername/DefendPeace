@@ -33,6 +33,8 @@ public class PlayerSetupController implements IController
 
   public enum SelectionCategories { COMMANDER, COLOR_FACTION, TEAM, AI, START };
 
+  private IController subMenu;
+
   public PlayerSetupController( GameBuilder builder )
   {
     // Once we hit go, we plug all the COs we chose into our gameBuilder.
@@ -59,10 +61,95 @@ public class PlayerSetupController implements IController
   public boolean handleInput(InputAction action)
   {
     boolean exitMenu = false;
+    if(null != subMenu)
+    {
+      boolean exitSub = subMenu.handleInput(action);
+      if(exitSub)
+      {
+        // Only apply the change from the sub-menu if it exited via ENTER.
+        if(action == InputAction.ENTER)
+        {
+          final int category = categorySelector.getSelectionNormalized();
+          if( category == SelectionCategories.COMMANDER.ordinal() )
+          {
+            
+          }
+          if( category == SelectionCategories.COLOR_FACTION.ordinal() )
+          {
+            PlayerSetupColorFactionController unitMenu = (PlayerSetupColorFactionController)subMenu;
+            PlayerSetupInfo info = getPlayerInfo(playerSelector.getSelectionNormalized());
+            info.currentColor.setSelectedOption(unitMenu.getSelectedColor());
+            info.currentFaction.setSelectedOption(unitMenu.getSelectedFaction());
+          }
+          if( category == SelectionCategories.TEAM.ordinal() )
+          {
+            
+          }
+          if( category == SelectionCategories.AI.ordinal() )
+          {
+            
+          }
+          if( category == SelectionCategories.START.ordinal() )
+          {
+            
+          }
+        }
+        subMenu = null;
+      }
+    }
+    else
+    {
+      // No sub-menu is active - handle the input here.
+      exitMenu = handlePlayerSetupInput(action);
+    }
+    return exitMenu;
+  }
+
+  /** Returs the currently-active sub-menu, or null if control is held locally. */
+  public IController getSubMenu()
+  {
+    return subMenu;
+  }
+
+  private boolean handlePlayerSetupInput(InputAction action)
+  {
+    boolean exitMenu = false;
+
     switch(action)
     {
       case ENTER:
-        if( categorySelector.getSelectionNormalized() == SelectionCategories.START.ordinal() )
+        // Open a sub-menu based on which player attribute is selected, or start the game.
+        if( categorySelector.getSelectionNormalized() == SelectionCategories.COMMANDER.ordinal() )
+        {
+          ArrayList<CommanderInfo> infos = CommanderLibrary.getCommanderList();
+          
+          CO_InfoController coInfoMenu = new CO_InfoController(infos);
+          IView infoView = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
+
+          // Get the info menu to select the current CO
+          for( int i = 0; i < infos.indexOf(coSelectors[getHighlightedPlayer()].getCurrentCO()); i++ )
+          {
+            coInfoMenu.handleInput(UI.InputHandler.InputAction.DOWN);
+          }
+
+          // Give the new controller/view the floor
+          Driver.getInstance().changeGameState(coInfoMenu, infoView);
+        }
+        else if( categorySelector.getSelectionNormalized() == SelectionCategories.COLOR_FACTION.ordinal() )
+        {
+          Color color = getPlayerInfo(playerSelector.getSelectionNormalized()).getCurrentColor();
+          UIUtils.Faction faction = getPlayerInfo(playerSelector.getSelectionNormalized()).getCurrentFaction();
+          subMenu = new PlayerSetupColorFactionController(color, faction);
+        }
+        else if( categorySelector.getSelectionNormalized() == SelectionCategories.TEAM.ordinal() )
+        {
+
+        }
+        else if( categorySelector.getSelectionNormalized() == SelectionCategories.AI.ordinal() )
+        {
+        
+        }
+        else // ( categorySelector.getSelectionNormalized() == SelectionCategories.START.ordinal() )
         {
           // We have locked in our selection. Stuff it into the GameBuilder and then kick off the game.
           for(int i = 0; i < coSelectors.length; ++i)
@@ -84,24 +171,6 @@ public class PlayerSetupController implements IController
             Driver.getInstance().changeGameState(mapController, mv);
           }
           exitMenu = true;
-        }
-        else
-        {
-          // Open a sub-menu based on which player attribute is selected.
-          ArrayList<CommanderInfo> infos = CommanderLibrary.getCommanderList();
-          
-          CO_InfoController coInfoMenu = new CO_InfoController(infos);
-          IView infoView = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
-
-          // Get the info menu to select the current CO
-          for( int i = 0; i < infos.indexOf(coSelectors[getHighlightedPlayer()].getCurrentCO()); i++ )
-          {
-            coInfoMenu.handleInput(UI.InputHandler.InputAction.DOWN);
-          }
-          
-
-          // Give the new controller/view the floor
-          Driver.getInstance().changeGameState(coInfoMenu, infoView);
         }
         break;
       case BACK:
