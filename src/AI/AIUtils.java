@@ -235,14 +235,24 @@ public class AIUtils
         if( !wep.model.canFireAfterMoving )
         {
           for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, wep.model.minRange, wep.model.maxRange))
-            shootableTiles.put(xyc, wep.getDamage(target) * (unit.getHP() * 0.1));
+          {
+            double val = wep.getDamage(target) * (unit.getHP() / (double) unit.model.maxHP);
+            if (shootableTiles.containsKey(xyc))
+              val = Math.max(val, shootableTiles.get(xyc));
+            shootableTiles.put(xyc, val);
+          }
         }
         else
         {
           for( XYCoord dest : destinations )
           {
             for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, wep.model.minRange, wep.model.maxRange))
-              shootableTiles.put(xyc, wep.getDamage(target) * (unit.getHP() * 0.1));
+            {
+              double val = wep.getDamage(target) * (unit.getHP() / (double) unit.model.maxHP);
+              if (shootableTiles.containsKey(xyc))
+                val = Math.max(val, shootableTiles.get(xyc));
+              shootableTiles.put(xyc, val);
+            }
           }
         }
       }
