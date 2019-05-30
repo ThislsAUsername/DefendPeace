@@ -88,7 +88,7 @@ public class SpriteMapSelectMenuArtist
     /////////////// MiniMap ///////////////////////
     // The mini map and map info panes split the vertical space, so first define some boundaries.
 
-    // Calculate the map info pane height: numPlayers text height, plus property draw size (2x2)..
+    // Calculate the map info pane height: numPlayers text height, plus property draw size (2x2).
     int sqSize = SpriteLibrary.baseSpriteSize*drawScale; // "1 tile" in pixels.
     int MapInfoPaneDrawHeight = characterHeight*drawScale + (sqSize*2);
 

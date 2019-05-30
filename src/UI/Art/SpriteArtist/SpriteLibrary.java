@@ -60,6 +60,7 @@ public class SpriteLibrary
 
   // Cursor for highlighting things in-game.
   private static Sprite cursorSprites = null;
+  private static Sprite arrowheadSprites = null;
 
   // Commander overlay backdrops (shows commander name and funds) for each Commander in the game.
   private static HashMap<Commander, Sprite> coOverlays = new HashMap<Commander, Sprite>();
@@ -669,6 +670,15 @@ public class SpriteLibrary
       cursorSprites = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/cursor.png"), 6, 6);
     }
     return cursorSprites;
+  }
+
+  static Sprite getArrowheadSprites()
+  {
+    if( null == arrowheadSprites )
+    {
+      arrowheadSprites = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/arrowheads.png"), 10, 10);
+    }
+    return arrowheadSprites;
   }
 
   /**

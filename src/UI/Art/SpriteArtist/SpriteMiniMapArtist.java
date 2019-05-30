@@ -12,6 +12,8 @@ import UI.UIUtils;
 public class SpriteMiniMapArtist
 {
   private static HashMap<MapInfo, BufferedImage> mapImages = new HashMap<MapInfo, BufferedImage>();
+  private static Color[] mapPalette;
+  private static boolean mustRedraw;
 
   /**
    * Retrieve a BufferedImage with a 1-pixel-per-tile representation of the provided MapInfo.
@@ -20,10 +22,11 @@ public class SpriteMiniMapArtist
    */
   public static BufferedImage getMapImage(MapInfo mapInfo)
   {
-    if( !mapImages.containsKey(mapInfo) )
+    if( mustRedraw || !mapImages.containsKey(mapInfo) )
     {
       // If we don't already have an image, generate and store it for later.
       mapImages.put(mapInfo, generateMapImage(mapInfo));
+      mustRedraw = false;
     }
 
     return mapImages.get(mapInfo);
@@ -47,12 +50,16 @@ public class SpriteMiniMapArtist
       }
     }
 
+    // If we don't have a palette yet, just get the default one from UIUtis.
+    if( null == mapPalette ) mapPalette = UIUtils.getCOColors();
+
     // Draw team colors for properties that are owned at the start.
     for(int co = 0; co < mapInfo.COProperties.length; ++co)
     {
       Color coColor;
+
       // Log a warning if SpriteLibrary doesn't have enough colors to support this map.
-      if( co >= UIUtils.getCOColors().length )
+      if( co >= mapPalette.length )
       {
         System.out.println("WARNING! '" + mapInfo.mapName + "' has more start locations than there are team colors!");
 
@@ -61,7 +68,7 @@ public class SpriteMiniMapArtist
       }
       else
       {
-        coColor = UIUtils.getCOColors()[co];
+        coColor = mapPalette[co];
       }
 
       // Loop through all locations assigned to this CO by mapInfo.
@@ -78,5 +85,17 @@ public class SpriteMiniMapArtist
     }
 
     return image;
+  }
+
+  /**
+   * Assign a set of colors to be used when generating a minimap image.
+   * @param teamColors An array of color values, one per player
+   * NOTE: If a palette is not set manually, UIUtils.getCOColors() will be used.
+   * NOTE: If too few colors are provided, black will be used as the fallback.
+   */
+  public static void setTeamPalette(Color[] teamColors)
+  {
+    mapPalette = teamColors;
+    mustRedraw = true;
   }
 }

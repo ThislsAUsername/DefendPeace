@@ -194,6 +194,45 @@ public class SpriteUIUtils
     g.fillRect(x, y + h - menuFrameHeight, w, menuFrameHeight); // Lower frame;
   }
 
+  /**
+   * Draws itself as a two-tone box with an image on top.
+   */
+  public static class ImageFrame
+  {
+    public final int xPos;
+    public final int yPos;
+    public final int width;
+    public final int height;
+    private Color mainColor;
+    private Color rimColor;
+    private boolean rimIsUp;
+    private BufferedImage content;
+    public ImageFrame(int x, int y, int w, int h, Color main, Color rim, boolean rimUp, BufferedImage display)
+    {
+      xPos = x;
+      yPos = y;
+      width = w;
+      height = h;
+      mainColor = main;
+      rimColor = rim;
+      rimIsUp = rimUp;
+      content = SpriteLibrary.createDefaultBlankSprite(width, height);
+      Graphics graphics = content.getGraphics();
+      graphics.setColor(rimColor);
+      graphics.fillRect(0, 0, width, height);
+      int dx = 0, dy = 0;
+      if( rimIsUp ) dy++; else dx++;
+      graphics.setColor(mainColor);
+      graphics.fillRect(dx, dy, width-1, height-1);
+      SpriteLibrary.drawImageCenteredOnPoint(graphics, display, width/2, height/2, 1);
+    }
+
+    public void render(Graphics g)
+    {
+      g.drawImage(content, xPos, yPos, width, height, null);
+    }
+  }
+
   public static int getMenuTextWidthPx(ArrayList<String> menuOptions, int scaledCharWidthPx)
   {
     int maxWidth = 0;

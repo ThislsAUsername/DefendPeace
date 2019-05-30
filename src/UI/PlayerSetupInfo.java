@@ -38,9 +38,7 @@ public class PlayerSetupInfo extends OptionSelector
     
     COTypes = COTypeList.toArray(new CommanderInfo[0]);
     currentCO = new OptionSelector(COTypes.length);
-    currentCO.setSelectedOption(0);
-    // Copied TODO: Consider changing this to sequential or random COs once we have enough.
-    // It might be better to save the last state in which a game was started, and use that.
+    currentCO.setSelectedOption(thisPlayer);
 
     colors = colorList;
     currentColor = new OptionSelector(colors.length);
@@ -51,7 +49,7 @@ public class PlayerSetupInfo extends OptionSelector
     currentFaction.setSelectedOption(thisPlayer);
 
     currentTeam = new OptionSelector(numPlayers);
-    currentTeam.setSelectedOption(0); // 0 should be interpreted as "no team"
+    currentTeam.setSelectedOption(thisPlayer);
 
     AIs = AIList.toArray(new AIMaker[0]);
     currentAI = new OptionSelector(AIs.length);
@@ -113,7 +111,7 @@ public class PlayerSetupInfo extends OptionSelector
   
   public int getCurrentTeam()
   {
-    return currentTeam.getSelectionNormalized() - 1; // -1 means "no team"
+    return currentTeam.getSelectionNormalized();
   }
   
   public AIMaker getCurrentAI()

@@ -143,7 +143,7 @@ public class PlayerSetupController implements IController
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.TEAM.ordinal() )
         {
-
+          subMenu = new PlayerSetupTeamController(coSelectors, playerSelector.getSelectionNormalized());
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.AI.ordinal() )
         {
@@ -151,6 +151,7 @@ public class PlayerSetupController implements IController
         }
         else // ( categorySelector.getSelectionNormalized() == SelectionCategories.START.ordinal() )
         {
+          /////////////////////////////////////////////////////////////////////////////////////////////
           // We have locked in our selection. Stuff it into the GameBuilder and then kick off the game.
           for(int i = 0; i < coSelectors.length; ++i)
           {

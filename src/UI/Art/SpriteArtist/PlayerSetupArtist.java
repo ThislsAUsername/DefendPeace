@@ -56,7 +56,7 @@ public class PlayerSetupArtist
       }
       if( myControl.getHighlightedCategory() == PlayerSetupController.SelectionCategories.TEAM.ordinal() )
       {
-        
+        PlayerSetupTeamArtist.draw(g, mapInfo, subMenu);
       }
       if( myControl.getHighlightedCategory() == PlayerSetupController.SelectionCategories.AI.ordinal() )
       {
@@ -131,7 +131,7 @@ public class PlayerSetupArtist
     else // Draw the cursor over the appropriate player info panel.
     {
       PlayerPanel panel = playerPanels.get(highlightedPlayer);
-      PlayerPanel.Pane pane;
+      SpriteUIUtils.ImageFrame pane;
       switch(myControl.getHighlightedCategory())
       {
         default:
@@ -149,7 +149,7 @@ public class PlayerSetupArtist
           break;
       }
       PlayerSetupInfo info = myControl.getPlayerInfo(highlightedPlayer);
-      BufferedImage playerImage = panel.render();
+      BufferedImage playerImage = panel.getImage();
       int drawX = playerXCenter - (playerImage.getWidth()*drawScale)/2;
       int drawY = dimensions.height / 2 - playerImage.getHeight();
       SpriteUIUtils.drawCursor(g, drawX+pane.xPos*drawScale, drawY+pane.yPos*drawScale, pane.width*drawScale, pane.height*drawScale, info.getCurrentColor(), drawScale);
@@ -159,15 +159,15 @@ public class PlayerSetupArtist
   /**
    * Holds all attributes of a player. Can render itself into
    * an image like this, with no scaling applied.
-   * +------------------------------------------------------+
-   * | CommanderName - ColorName FactionName                |
-   * +------------------+ +---------+ +---------+ +---------+
-   * |                  | |         | |  Team   | | Control |
-   * |                  | | Faction | +---------+ +---------+
-   * |        CO        | |  Sprite | |         | |         |
-   * |                  | |         | |    #    | | AI Name |
-   * |                  | |         | |         | |         |
-   * +------------------+ +---------+ +---------+ +---------+
+   * +-----------------------------------------------+
+   * | CommanderName - ColorName FactionName         |
+   * +--------------+----------+---------+-----------+
+   * |              |          |  Team   |  Control  |
+   * |              |          +---------+-----------+
+   * |      CO      |  Sprite  |         |           |
+   * |              |          |    #    |  AI Name  |
+   * |              |          |         |           |
+   * +--------------+----------+---------+-----------+
    */
   private static class PlayerPanel
   {
@@ -186,17 +186,17 @@ public class PlayerSetupArtist
     private String commanderName;
     private String colorName;
     private String factionName;
-    private int teamNumber;
+    private int teamNumber = -99;
     private String aiName;
 
     private BufferedImage myImage;
-    private Pane descriptionPane;
-    private Pane commanderPane;
-    private Pane unitPane;
-    private Pane teamLabel;
-    private Pane teamPane;
-    private Pane aiLabel;
-    private Pane aiPane;
+    private SpriteUIUtils.ImageFrame descriptionPane;
+    private SpriteUIUtils.ImageFrame commanderPane;
+    private SpriteUIUtils.ImageFrame unitPane;
+    private SpriteUIUtils.ImageFrame teamLabel;
+    private SpriteUIUtils.ImageFrame teamPane;
+    private SpriteUIUtils.ImageFrame aiLabel;
+    private SpriteUIUtils.ImageFrame aiPane;
 
     public PlayerPanel(PlayerSetupInfo info)
     {
@@ -206,8 +206,8 @@ public class PlayerSetupArtist
       g.fillRect(0, 0, myImage.getWidth(), myImage.getHeight());
 
       // Create the two panes that don't ever change.
-      teamLabel = new Pane(65, 12, 28, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteLibrary.getTextAsImage("TEAM"));
-      aiLabel = new Pane(94, 12, 54, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteLibrary.getTextAsImage("CONTROL"));
+      teamLabel = new SpriteUIUtils.ImageFrame(65, 12, 28, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteLibrary.getTextAsImage("TEAM"));
+      aiLabel = new SpriteUIUtils.ImageFrame(94, 12, 54, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteLibrary.getTextAsImage("CONTROL"));
       teamLabel.render(g);
       aiLabel.render(g);
 
@@ -230,12 +230,12 @@ public class PlayerSetupArtist
       Graphics g = myImage.getGraphics();
       if( cmdrChanged || colorChanged || factionChanged )
       {
-        descriptionPane = new Pane(1, 1, PANEL_WIDTH - 2, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteLibrary.getTextAsImage(coStrBuf.toString()));
+        descriptionPane = new SpriteUIUtils.ImageFrame(1, 1, PANEL_WIDTH - 2, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteLibrary.getTextAsImage(coStrBuf.toString()));
         descriptionPane.render(g);
       }
       if( cmdrChanged )
       {
-        commanderPane = new Pane(1, 12, portraitPx + 2, portraitPx + 2, info.getCurrentColor(),
+        commanderPane = new SpriteUIUtils.ImageFrame(1, 12, portraitPx + 2, portraitPx + 2, info.getCurrentColor(),
             info.getCurrentColor(), true, SpriteLibrary.getCommanderSprites( info.getCurrentCO().name ).head);
         commanderPane.render(g);
       }
@@ -243,66 +243,27 @@ public class PlayerSetupArtist
       {
         UnitSpriteSet inf = SpriteLibrary.getMapUnitSpriteSet(UnitModel.UnitEnum.INFANTRY, info.getCurrentFaction(), info.getCurrentColor());
         BufferedImage infSprite = inf.sprites[inf.ACTION_IDLE].getFrame(0);
-        unitPane = new Pane(portraitPx + 4, 12, 28, portraitPx + 2, MENUBGCOLOR, MENUHIGHLIGHTCOLOR, true, infSprite);
+        unitPane = new SpriteUIUtils.ImageFrame(portraitPx + 4, 12, 28, portraitPx + 2, MENUBGCOLOR, MENUHIGHLIGHTCOLOR, true, infSprite);
         unitPane.render(g);
       }
       if( teamChanged )
       {
-        teamPane = new Pane(65, 23, 28, 23, MENUBGCOLOR, MENUHIGHLIGHTCOLOR, true,
+        teamPane = new SpriteUIUtils.ImageFrame(65, 23, 28, 23, MENUBGCOLOR, MENUHIGHLIGHTCOLOR, true,
             SpriteLibrary.getMapUnitHPSprites().getFrame(info.getCurrentTeam()));
         teamPane.render(g);
       }
       if( aiChanged )
       {
-        aiPane = new Pane(94, 23, 54, 23, MENUBGCOLOR, MENUHIGHLIGHTCOLOR, true, SpriteLibrary.getTextAsImage(info.getCurrentAI().getName()));
+        aiPane = new SpriteUIUtils.ImageFrame(94, 23, 54, 23, MENUBGCOLOR, MENUHIGHLIGHTCOLOR, true, SpriteLibrary.getTextAsImage(info.getCurrentAI().getName()));
         aiPane.render(g);
       }
 
       return myImage;
     }
 
-    public BufferedImage render()
+    public BufferedImage getImage()
     {
       return myImage;
-    }
-
-    /**
-     * One of the info panes in the mosaic that is the player panel. Draws itself as a two-tone box with an image on top.
-     */
-    public static class Pane
-    {
-      public final int xPos;
-      public final int yPos;
-      public final int width;
-      public final int height;
-      private Color mainColor;
-      private Color rimColor;
-      private boolean rimIsUp;
-      private BufferedImage content;
-      public Pane(int x, int y, int w, int h, Color main, Color rim, boolean rimUp, BufferedImage display)
-      {
-        xPos = x;
-        yPos = y;
-        width = w;
-        height = h;
-        mainColor = main;
-        rimColor = rim;
-        rimIsUp = rimUp;
-        content = SpriteLibrary.createDefaultBlankSprite(width, height);
-        Graphics graphics = content.getGraphics();
-        graphics.setColor(rimColor);
-        graphics.fillRect(0, 0, width, height);
-        int dx = 0, dy = 0;
-        if( rimIsUp ) dy++; else dx++;
-        graphics.setColor(mainColor);
-        graphics.fillRect(dx, dy, width-1, height-1);
-        SpriteLibrary.drawImageCenteredOnPoint(graphics, display, width/2, height/2, 1);
-      }
-
-      public void render(Graphics g)
-      {
-        g.drawImage(content, xPos, yPos, width, height, null);
-      }
     }
   }
 }
