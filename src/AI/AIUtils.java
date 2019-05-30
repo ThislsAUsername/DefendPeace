@@ -1,6 +1,7 @@
 package AI;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -20,6 +21,7 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
+import Units.Weapons.Weapon;
 
 public class AIUtils
 {
@@ -133,7 +135,7 @@ public class AIUtils
 
   /**
    * Creates a map of COs to the units they control, based on what can be seen in the passed-in map.
-   * Units owned by myCommander are ignored - they can be trivially accessed via Commander.units
+   * Units owned by allies are ignored - ours can be trivially accessed via Commander.units, and we don't control ally behavior.
    */
   public static Map<Commander, ArrayList<Unit> > getEnemyUnitsByCommander(Commander myCommander, GameMap gameMap)
   {
@@ -143,7 +145,7 @@ public class AIUtils
       for( int y = 0; y < gameMap.mapHeight; ++y )
       {
         Unit resident = gameMap.getLocation(x, y).getResident();
-        if( (null != resident) && (myCommander != resident.CO) )
+        if( (null != resident) && (myCommander.isEnemy(resident.CO)) )
         {
           if( !unitMap.containsKey(resident.CO) ) unitMap.put(resident.CO, new ArrayList<Unit>());
           unitMap.get(resident.CO).add(resident);
@@ -215,6 +217,36 @@ public class AIUtils
       }
     }
     return retVal;
+  }
+  
+  /**
+   * @return The area and severity of threat from the unit, against the specified target type
+   */
+  public static Map<XYCoord, Double> findThreatPower(GameMap gameMap, Unit unit, UnitModel target)
+  {
+    XYCoord origin = new XYCoord(unit.x, unit.y);
+    Map<XYCoord, Double> shootableTiles = new HashMap<XYCoord, Double>();
+    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
+    for( Weapon wep : unit.weapons )
+    {
+      if( wep.getDamage(target) > 0 )
+      {
+        if( !wep.model.canFireAfterMoving )
+        {
+          for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, wep.model.minRange, wep.model.maxRange))
+            shootableTiles.put(xyc, wep.getDamage(target) * (unit.getHP() * 0.1));
+        }
+        else
+        {
+          for( XYCoord dest : destinations )
+          {
+            for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, wep.model.minRange, wep.model.maxRange))
+              shootableTiles.put(xyc, wep.getDamage(target) * (unit.getHP() * 0.1));
+          }
+        }
+      }
+    }
+    return shootableTiles;
   }
 
   /**
@@ -323,6 +355,28 @@ public class AIUtils
         }
       }
       return num;
+    }
+  }
+
+  /**
+   * Compares Units based on their value, scaled with HP.
+   */
+  public static class UnitCostComparator implements Comparator<Unit>
+  {
+    boolean sortAscending;
+
+    public UnitCostComparator(boolean sortAscending)
+    {
+      this.sortAscending = sortAscending;
+    }
+
+    @Override
+    public int compare(Unit o1, Unit o2)
+    {
+      int diff = o2.model.getCost()*o2.getHP() - o1.model.getCost()*o1.getHP();
+      if (sortAscending)
+        diff *= -1;
+      return diff;
     }
   }
 }
