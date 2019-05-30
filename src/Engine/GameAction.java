@@ -102,7 +102,7 @@ public interface GameAction
 
         boolean moved = attacker.x != moveCoord.xCoord || attacker.y != moveCoord.yCoord;
         isValid &= (null != defender) && attacker.canAttack(defender.model, attackRange, moved);
-        isValid &= attacker.CO.isEnemy(defender.CO);
+        isValid &= (null != defender) && attacker.CO.isEnemy(defender.CO);
         isValid &= (null == moveLocation.getResident()) || (attacker == moveLocation.getResident());
       }
 
