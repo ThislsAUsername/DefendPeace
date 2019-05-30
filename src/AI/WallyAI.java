@@ -28,7 +28,8 @@ import Units.Weapons.Weapon;
 import Units.Weapons.WeaponModel;
 
 /**
- *  Wally makes(?) and breaks walls.
+ *  Wally values units based on firepower and the area they can threaten.
+ *  He tries to keep units safe by keeping them out of range, but will also meatshield to protect more valuable units.
  */
 public class WallyAI implements AIController
 {
@@ -172,7 +173,7 @@ public class WallyAI implements AIController
           continue;
         }
 
-        // Find the possible destinations.
+        // Find the possible destination.
         XYCoord coord = new XYCoord(unit.x, unit.y);
 
         // Figure out how to get here.
