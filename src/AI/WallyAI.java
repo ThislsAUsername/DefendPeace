@@ -62,7 +62,7 @@ public class WallyAI implements AIController
   private static final int INDIRECT_THREAT_THRESHHOLD = 0;
   private static final int DIRECT_THREAT_THRESHHOLD = 13;
   private static final double AGGRO_FUNDS_WEIGHT = 1.5;
-  private static final double RANGE_WEIGHT = 0.07;
+  private static final double RANGE_WEIGHT = 0.2;
 
   private ArrayList<XYCoord> unownedProperties;
   private ArrayList<XYCoord> capturingProperties;
@@ -97,11 +97,12 @@ public class WallyAI implements AIController
             if( vroom.canTraverse(terrain) )
             {
               validTiles++;
-              totalCosts = vroom.getMoveCost(terrain);
+              totalCosts += vroom.getMoveCost(terrain);
             }
           }
         }
-        unitMoveMultipliers.put(vroom, validTiles/totalCosts); // 1.0 is the max expected value
+        double ratio = validTiles/totalCosts; // 1.0 is the max expected value
+        unitMoveMultipliers.put(vroom, ratio*ratio);
       }
     }
   }
@@ -259,6 +260,8 @@ public class WallyAI implements AIController
           {
             for( Unit target : unitLists.get(co) )
             {
+              if (target.getHP() < 1) // Try not to pick fights with zombies
+                continue;
               // log(String.format("  Would like to kill: %s", target.toStringWithLocation()));
               ArrayList<XYCoord> coordsToCheck = Utils.findLocationsInRange(gameMap, new XYCoord(target.x, target.y), 1, AIUtils.findMaxStrikeWeaponRange(myCo));
               Map<XYCoord, Unit> neededAttacks = new HashMap<XYCoord, Unit>();
