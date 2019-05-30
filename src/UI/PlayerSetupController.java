@@ -10,7 +10,6 @@ import CommandingOfficers.CommanderLibrary;
 import Engine.Driver;
 import Engine.GameInstance;
 import Engine.IController;
-import Engine.IView;
 import Engine.MapController;
 import Engine.OptionSelector;
 import Terrain.MapMaster;
@@ -72,7 +71,9 @@ public class PlayerSetupController implements IController
           final int category = categorySelector.getSelectionNormalized();
           if( category == SelectionCategories.COMMANDER.ordinal() )
           {
-            
+            PlayerSetupCommanderController cmdrMenu = (PlayerSetupCommanderController)subMenu;
+            PlayerSetupInfo info = getPlayerInfo(playerSelector.getSelectionNormalized());
+            info.currentCO.setSelectedOption(cmdrMenu.getSelectedCommander());
           }
           if( category == SelectionCategories.COLOR_FACTION.ordinal() )
           {
@@ -82,9 +83,7 @@ public class PlayerSetupController implements IController
             info.currentFaction.setSelectedOption(unitMenu.getSelectedFaction());
           }
           if( category == SelectionCategories.TEAM.ordinal() )
-          {
-            
-          }
+          { /* Do nothing - the sub-menu does the change on its own. */ }
           if( category == SelectionCategories.AI.ordinal() )
           {
             
@@ -122,18 +121,7 @@ public class PlayerSetupController implements IController
         if( categorySelector.getSelectionNormalized() == SelectionCategories.COMMANDER.ordinal() )
         {
           ArrayList<CommanderInfo> infos = CommanderLibrary.getCommanderList();
-          
-          CO_InfoController coInfoMenu = new CO_InfoController(infos);
-          IView infoView = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
-
-          // Get the info menu to select the current CO
-          for( int i = 0; i < infos.indexOf(coSelectors[getHighlightedPlayer()].getCurrentCO()); i++ )
-          {
-            coInfoMenu.handleInput(UI.InputHandler.InputAction.DOWN);
-          }
-
-          // Give the new controller/view the floor
-          Driver.getInstance().changeGameState(coInfoMenu, infoView);
+          subMenu = new PlayerSetupCommanderController(infos, getPlayerInfo(playerSelector.getSelectionNormalized()).currentCO.getSelectionNormalized());
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.COLOR_FACTION.ordinal() )
         {

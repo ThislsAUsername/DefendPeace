@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
@@ -45,11 +46,22 @@ public class SpriteUIUtils
     return slide * sign;
   }
 
+  private static HashMap<Color, Sprite> coloredCursors;
   public static void drawCursor(Graphics g, int x, int y, int w, int h, Color color, int drawScale)
   {
+    if( null == coloredCursors )
+    {
+      coloredCursors = new HashMap<Color, Sprite>();
+    }
+    if( !coloredCursors.containsKey(color) )
+    {
+      Sprite newCursor = new Sprite(SpriteLibrary.getCursorSprites());
+      newCursor.colorize(UIUtils.defaultMapColors[4], color);
+      coloredCursors.put(color, newCursor);
+    }
+
     // Draw the arrows around the focused player attribute.
-    Sprite cursor = new Sprite(SpriteLibrary.getCursorSprites());
-    cursor.colorize(UIUtils.defaultMapColors[4], color);
+    Sprite cursor = coloredCursors.get(color);
     SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), x, y, drawScale);
     SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), x+w, y, drawScale);
     SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), x+w, y+h, drawScale);

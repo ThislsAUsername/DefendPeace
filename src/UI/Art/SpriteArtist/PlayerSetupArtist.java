@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
+import CommandingOfficers.CommanderLibrary;
 import Engine.IController;
 import Terrain.MapInfo;
 import UI.PlayerSetupController;
@@ -48,7 +49,7 @@ public class PlayerSetupArtist
     {
       if( myControl.getHighlightedCategory() == PlayerSetupController.SelectionCategories.COMMANDER.ordinal() )
       {
-        PlayerSetupCommanderArtist.draw(g, subMenu);
+        PlayerSetupCommanderArtist.draw(g, subMenu, CommanderLibrary.getCommanderList(), control.getPlayerInfo(control.getHighlightedPlayer()).getCurrentColor());
       }
       if( myControl.getHighlightedCategory() == PlayerSetupController.SelectionCategories.COLOR_FACTION.ordinal() )
       {
