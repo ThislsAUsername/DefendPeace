@@ -626,9 +626,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
     // Add the CO's units to the queue so we can initialize them.
     unitsToInit.addAll(myGame.activeCO.units);
 
-    // Kick off the animation cycle, which will animate/init each unit.
-    myView.animate(turnEvents);
-    changeInputMode(InputMode.ANIMATION);
+    if( !turnEvents.isEmpty() ) // If there's nothing to animate, don't animate it twice
+    {
+      // Kick off the animation cycle, which will animate/init each unit.
+      myView.animate(turnEvents);
+      changeInputMode(InputMode.ANIMATION);
+    }
 
     myView.animate(null);
   }
