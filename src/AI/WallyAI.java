@@ -331,7 +331,6 @@ public class WallyAI implements AIController
         if (unit.getCaptureProgress() > 0)
         {
           actions.offer(new GameAction.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, position, gameMap)));
-          capturingProperties.add(position);
           break;
         }
 
