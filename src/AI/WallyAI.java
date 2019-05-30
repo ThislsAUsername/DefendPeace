@@ -18,12 +18,14 @@ import Engine.Path;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.CombatEngine;
+import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModel.UnitEnum;
+import Units.MoveTypes.MoveType;
 import Units.Weapons.Weapon;
 import Units.Weapons.WeaponModel;
 
@@ -64,6 +66,8 @@ public class WallyAI implements AIController
 
   private ArrayList<XYCoord> unownedProperties;
   private ArrayList<XYCoord> capturingProperties;
+  
+  private HashMap<MoveType, Double> unitMoveMultipliers = null; // How much we value a given movement type on the map at hand; bigger is better
 
   private StringBuffer logger = new StringBuffer();
   private int turnNum = 0;
@@ -73,9 +77,40 @@ public class WallyAI implements AIController
     myCo = co;
   }
 
+  private void init(GameMap map)
+  {
+    unitMoveMultipliers = new HashMap<MoveType, Double>();
+    for( UnitModel myModel : myCo.unitModels )
+    {
+      MoveType vroom = myModel.propulsion;
+      if (!unitMoveMultipliers.containsKey(vroom))
+      {
+        double totalCosts = 0;
+        int validTiles = 0;
+        // Iterate through the map, counting up the move costs of all valid terrain
+        // TODO: figure out how to count non-valid terrain
+        for( int w = 0; w < map.mapWidth; ++w )
+        {
+          for( int h = 0; h < map.mapHeight; ++h )
+          {
+            Environment terrain = map.getLocation(w, h).getEnvironment();
+            if( vroom.canTraverse(terrain) )
+            {
+              validTiles++;
+              totalCosts = vroom.getMoveCost(terrain);
+            }
+          }
+        }
+        unitMoveMultipliers.put(vroom, validTiles/totalCosts); // 1.0 is the max expected value
+      }
+    }
+  }
+
   @Override
   public void initTurn(GameMap gameMap)
   {
+    if (null == unitMoveMultipliers)
+      init(gameMap);
     turnNum++;
     log(String.format("[======== Wally initializing turn %s for %s =========]", turnNum, myCo));
 
@@ -650,9 +685,6 @@ public class WallyAI implements AIController
       return;
     }
 
-    // We like Recons too much. Don't buy them. Their movement is deceptively high.
-    CPI.availableUnitModels.remove(myCo.getUnitModel(UnitEnum.RECON));
-
     // Sort enemy units by cardinality. We will attempt to build counters for the least numerous first.
     // The most numerous enemies are probably cheap, and also countered by whatever we build for the narrow case.
     ArrayList<UnitModel> enemyModels = new ArrayList<UnitModel>();
@@ -685,7 +717,7 @@ public class WallyAI implements AIController
       while (!availableUnitModels.isEmpty())
       {
         // Sort my available models by their power against this enemy type.
-        Collections.sort(availableUnitModels, new UnitPowerComparator(enemyToCounter));
+        Collections.sort(availableUnitModels, new UnitPowerComparator(enemyToCounter, unitMoveMultipliers));
 
         // Grab the best counter.
         UnitModel idealCounter = availableUnitModels.get(0);
@@ -751,7 +783,7 @@ public class WallyAI implements AIController
   }
 
   /**
-   * Sort units by funds amount in decending order.
+   * Sort units by funds amount in descending order.
    */
   private static class UnitModelFundsComparator implements Comparator<Entry<UnitModel, Double>>
   {
@@ -769,10 +801,12 @@ public class WallyAI implements AIController
   private static class UnitPowerComparator implements Comparator<UnitModel>
   {
     UnitModel targetModel;
+    private Map<MoveType, Double> unitMoveMultipliers;
 
-    public UnitPowerComparator(UnitModel targetType)
+    public UnitPowerComparator(UnitModel targetType, Map<MoveType, Double> pUnitMoveMultipliers)
     {
       targetModel = targetType;
+      unitMoveMultipliers = pUnitMoveMultipliers;
     }
 
     @Override
@@ -783,14 +817,18 @@ public class WallyAI implements AIController
       for( WeaponModel wm : model1.weaponModels )
       {
         double damage = Weapon.strategies[Weapon.currentStrategy].getDamage(wm, targetModel);
-        double range = wm.maxRange + ((wm.canFireAfterMoving) ? model1.movePower : 0);
+        double range = wm.maxRange;
+        if(wm.canFireAfterMoving)
+          range += model1.movePower * unitMoveMultipliers.get(model1.propulsion);
         double effectiveness = damage * targetModel.getCost() * (1 + range * RANGE_WEIGHT);
         eff1 = Math.max(eff1, effectiveness);
       }
       for( WeaponModel wm : model2.weaponModels )
       {
         double damage = Weapon.strategies[Weapon.currentStrategy].getDamage(wm, targetModel);
-        double range = wm.maxRange + ((wm.canFireAfterMoving) ? model2.movePower : 0);
+        double range = wm.maxRange;
+        if(wm.canFireAfterMoving)
+          range += model2.movePower * unitMoveMultipliers.get(model2.propulsion);
         double effectiveness = damage * targetModel.getCost() * (1 + range * RANGE_WEIGHT);
         eff2 = Math.max(eff2, effectiveness);
       }
