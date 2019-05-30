@@ -22,6 +22,7 @@ import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
 import Units.Weapons.Weapon;
+import Units.Weapons.WeaponModel;
 
 public class AIUtils
 {
@@ -247,6 +248,23 @@ public class AIUtils
       }
     }
     return shootableTiles;
+  }
+
+  /**
+   * @return The range at which the CO in question might be able to attack after moving.
+   */
+  public static int findMaxStrikeWeaponRange(Commander co)
+  {
+    int range = 0;
+    for( UnitModel um : co.unitModels )
+    {
+      for( WeaponModel wm : um.weaponModels )
+      {
+        if( wm.canFireAfterMoving )
+          range = Math.max(range, wm.maxRange);
+      }
+    }
+    return range;
   }
 
   /**

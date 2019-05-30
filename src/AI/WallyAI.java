@@ -67,19 +67,10 @@ public class WallyAI implements AIController
 
   private StringBuffer logger = new StringBuffer();
   private int turnNum = 0;
-  private int mobileAttackRange = 0;
 
   public WallyAI(Commander co)
   {
     myCo = co;
-    for( UnitModel um : myCo.unitModels )
-    {
-      for( WeaponModel wm : um.weaponModels )
-      {
-        if( wm.canFireAfterMoving )
-          mobileAttackRange = Math.max(mobileAttackRange, wm.maxRange);
-      }
-    }
   }
 
   @Override
@@ -234,7 +225,7 @@ public class WallyAI implements AIController
             for( Unit target : unitLists.get(co) )
             {
               // log(String.format("  Would like to kill: %s", target.toStringWithLocation()));
-              ArrayList<XYCoord> coordsToCheck = Utils.findLocationsInRange(gameMap, new XYCoord(target.x, target.y), 1, mobileAttackRange);
+              ArrayList<XYCoord> coordsToCheck = Utils.findLocationsInRange(gameMap, new XYCoord(target.x, target.y), 1, AIUtils.findMaxStrikeWeaponRange(myCo));
               Map<XYCoord, Unit> neededAttacks = new HashMap<XYCoord, Unit>();
               double damage = 0;
 
