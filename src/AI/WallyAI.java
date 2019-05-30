@@ -32,6 +32,22 @@ import Units.Weapons.WeaponModel;
  */
 public class WallyAI implements AIController
 {
+  private static class instantiator implements AIMaker
+  {
+    @Override
+    public AIController create(Commander co)
+    {
+      return new WallyAI(co);
+    }
+
+    @Override
+    public String getName()
+    {
+      return "Wally";
+    }
+  }
+  public static final AIMaker info = new instantiator();
+  
   Queue<GameAction> actions = new ArrayDeque<GameAction>();
   // sort our units by expense first, we want them to hit first
   Queue<Unit> unitQueue = new PriorityQueue<Unit>(11, new AIUtils.UnitCostComparator(false));
@@ -321,7 +337,7 @@ public class WallyAI implements AIController
         boolean foundAction = false;
 
         // Find the possible destinations.
-        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
+        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
         // sort by furthest away, good for capturing
         Utils.sortLocationsByDistance(position, destinations);
         Collections.reverse(destinations);
@@ -401,7 +417,7 @@ public class WallyAI implements AIController
           Unit unit = tempQueue.poll();
 
           // Find the possible destinations.
-          ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
+          ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
 
           if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
           {

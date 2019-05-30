@@ -226,7 +226,7 @@ public class AIUtils
   {
     XYCoord origin = new XYCoord(unit.x, unit.y);
     Map<XYCoord, Double> shootableTiles = new HashMap<XYCoord, Double>();
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
+    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
     for( Weapon wep : unit.weapons )
     {
       if( wep.getDamage(target) > 0 )
