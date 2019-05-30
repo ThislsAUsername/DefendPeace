@@ -48,7 +48,7 @@ public class PlayerSetupArtist
     {
       if( myControl.getHighlightedCategory() == PlayerSetupController.SelectionCategories.COMMANDER.ordinal() )
       {
-        
+        PlayerSetupCommanderArtist.draw(g, subMenu);
       }
       if( myControl.getHighlightedCategory() == PlayerSetupController.SelectionCategories.COLOR_FACTION.ordinal() )
       {
@@ -230,6 +230,9 @@ public class PlayerSetupArtist
       Graphics g = myImage.getGraphics();
       if( cmdrChanged || colorChanged || factionChanged )
       {
+        commanderName = info.getCurrentCO().name;
+        colorName = UIUtils.getPaletteName(info.getCurrentColor());
+        factionName = info.getCurrentFaction().name;
         descriptionPane = new SpriteUIUtils.ImageFrame(1, 1, PANEL_WIDTH - 2, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteLibrary.getTextAsImage(coStrBuf.toString()));
         descriptionPane.render(g);
       }
@@ -248,12 +251,14 @@ public class PlayerSetupArtist
       }
       if( teamChanged )
       {
+        teamNumber = info.getCurrentTeam();
         teamPane = new SpriteUIUtils.ImageFrame(65, 23, 28, 23, MENUBGCOLOR, MENUHIGHLIGHTCOLOR, true,
             SpriteLibrary.getMapUnitHPSprites().getFrame(info.getCurrentTeam()));
         teamPane.render(g);
       }
       if( aiChanged )
       {
+        aiName = info.getCurrentAI().getName();
         aiPane = new SpriteUIUtils.ImageFrame(94, 23, 54, 23, MENUBGCOLOR, MENUHIGHLIGHTCOLOR, true, SpriteLibrary.getTextAsImage(info.getCurrentAI().getName()));
         aiPane.render(g);
       }
