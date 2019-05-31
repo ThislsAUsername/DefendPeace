@@ -86,11 +86,9 @@ public class PlayerSetupController implements IController
           { /* Do nothing - the sub-menu does the change on its own. */ }
           if( category == SelectionCategories.AI.ordinal() )
           {
-            
-          }
-          if( category == SelectionCategories.START.ordinal() )
-          {
-            
+            PlayerSetupAiController aiMenu = (PlayerSetupAiController)subMenu;
+            PlayerSetupInfo info = getPlayerInfo(playerSelector.getSelectionNormalized());
+            info.currentAI.setSelectedOption(aiMenu.getSelectedAiIndex());
           }
         }
         subMenu = null;
@@ -135,7 +133,7 @@ public class PlayerSetupController implements IController
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.AI.ordinal() )
         {
-        
+          subMenu = new PlayerSetupAiController(getPlayerInfo(playerSelector.getSelectionNormalized()).currentAI.getSelectionNormalized());
         }
         else // ( categorySelector.getSelectionNormalized() == SelectionCategories.START.ordinal() )
         {

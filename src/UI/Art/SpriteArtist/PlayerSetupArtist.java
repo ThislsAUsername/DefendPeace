@@ -61,7 +61,7 @@ public class PlayerSetupArtist
       }
       if( myControl.getHighlightedCategory() == PlayerSetupController.SelectionCategories.AI.ordinal() )
       {
-        
+        PlayerSetupAiArtist.draw(g, subMenu, control.getPlayerInfo(control.getHighlightedPlayer()).getCurrentColor());
       }
     }
   }

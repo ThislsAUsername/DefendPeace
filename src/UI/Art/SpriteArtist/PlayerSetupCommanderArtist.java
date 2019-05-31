@@ -17,15 +17,13 @@ import UI.UIUtils;
 public class PlayerSetupCommanderArtist
 {
   private static HashMap<Integer, CommanderPanel> coPanels = new HashMap<Integer, CommanderPanel>();
-  private static Sprite myCursor;
-  private static String cursorColor;
 
   public static void draw(Graphics g, IController controller, ArrayList<CommanderInfo> infos, Color playerColor)
   {
     PlayerSetupCommanderController control = (PlayerSetupCommanderController)controller;
     if( null == control )
     {
-      System.out.println("WARNING! PlayerSetupColorFactionArtist was given the wrong controller!");
+      System.out.println("WARNING! PlayerSetupCommanderController was given the wrong controller!");
     }
 
     // Define the draw space
@@ -36,15 +34,8 @@ public class PlayerSetupCommanderArtist
     BufferedImage image = SpriteLibrary.createTransparentSprite(myWidth, myHeight);
     Graphics myG = image.getGraphics();
 
-    // (re)Init the cursor if needed.
-    if( null == myCursor || !(UIUtils.getPaletteName(playerColor).equals(cursorColor)) )
-    {
-      myCursor = new Sprite(SpriteLibrary.getCursorSprites());
-      myCursor.colorize(UIUtils.defaultMapColors[4], playerColor);
-    }
-
     // Allocate space for the Commander faces.
-    int cursorSizePx = myCursor.getFrame(0).getWidth(); // Cursor frames are square.
+    int cursorSizePx = SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Cursor frames are square.
     int coZoneYCenter = myHeight / 2;
 
     /////////////// Tooltip ////////////////////////////
@@ -68,8 +59,7 @@ public class PlayerSetupCommanderArtist
 //      animHighlightedPlayer += slide;
 //    }
 
-    // Find where the zeroth Commander should be drawn.
-    // Shift from the center location by the spacing times the number of the highlighted option.
+    // Find where the zeroth Commander should be drawn. Start by assuming it's centered.
     int drawYCenter = coZoneYCenter;
 
     // We're gonna make this an endless scroll, so back up (in y-space and in the CO list) until
@@ -89,7 +79,7 @@ public class PlayerSetupCommanderArtist
     for(; drawYCenter - CommanderPanel.PANEL_HEIGHT/2 < myHeight ; coToDraw.handleInput(InputAction.DOWN), drawYCenter += (panelHeight))
     {
       // Only bother to draw it if it is onscreen.
-      if( (drawYCenter > -panelHeight/2) && ( drawYCenter < SpriteOptions.getScreenDimensions().getHeight()+(panelHeight/2) ) )
+      if( (drawYCenter > -panelHeight/2) && ( drawYCenter < myHeight+(panelHeight/2) ) )
       {
         CommanderInfo coInfo = infos.get(coToDraw.getSelectionNormalized());
         Integer key = new Integer(coToDraw.getSelectionNormalized());
@@ -103,7 +93,7 @@ public class PlayerSetupCommanderArtist
 
         int drawX = cursorSizePx * 2;
         int drawY = drawYCenter - playerImage.getHeight()/2;
-        myG.drawImage(playerImage, drawX, drawY, playerImage.getWidth(), playerImage.getHeight(), null);
+        myG.drawImage(playerImage, drawX, drawY, null);
 
         // Draw the cursor if this panel is highlighted
         if( highlightedCommander == coToDraw.getSelectionNormalized() )
