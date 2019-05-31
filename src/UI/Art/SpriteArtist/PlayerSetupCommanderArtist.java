@@ -48,8 +48,8 @@ public class PlayerSetupCommanderArtist
     int coZoneYCenter = myHeight / 2;
 
     /////////////// Tooltip ////////////////////////////
-//    BufferedImage tooltip = SpriteUIUtils.makeTextFrame("Press Q for more info", 3, 2);
-//    myG.drawImage(tooltip, myWidth - tooltip.getWidth() - 3, 3, null);
+    BufferedImage tooltip = SpriteUIUtils.makeTextFrame("Press Q for more info", 3, 2);
+    myG.drawImage(tooltip, myWidth - tooltip.getWidth(), 3, null);
 
     /////////////// Commander Portrait //////////////////////
     int highlightedCommander = control.getSelectedCommander();
@@ -108,7 +108,7 @@ public class PlayerSetupCommanderArtist
         // Draw the cursor if this panel is highlighted
         if( highlightedCommander == coToDraw.getSelectionNormalized() )
         {
-          SpriteUIUtils.drawCursor(myG, drawX, drawY, playerImage.getWidth(), playerImage.getHeight(), playerColor, 1);
+          SpriteUIUtils.drawCursor(myG, drawX, drawY, playerImage.getWidth(), playerImage.getHeight(), playerColor);
         }
       }
     }
@@ -132,13 +132,9 @@ public class PlayerSetupCommanderArtist
   private static class CommanderPanel
   {
     // A couple of helper quantities.
-    private static int nameLength = 9;
     private static int textBufferPx = 2;
     private static int eyesWidth = SpriteLibrary.getCommanderSprites( "STRONG" ).eyes.getWidth();
     private static int eyesHeight = SpriteLibrary.getCommanderSprites( "STRONG" ).eyes.getHeight();
-
-    // Total horizontal panel space, sans scaling.
-    public static final int PANEL_WIDTH = 1 + eyesWidth + 1 + nameLength*SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth() + textBufferPx*2 + 1;
 
     // Total vertical panel space, sans scaling.
     public static final int PANEL_HEIGHT = eyesHeight + 2; // Eyes plus 1 above and below.

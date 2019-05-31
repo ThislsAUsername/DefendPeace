@@ -47,7 +47,7 @@ public class SpriteUIUtils
   }
 
   private static HashMap<Color, Sprite> coloredCursors;
-  public static void drawCursor(Graphics g, int x, int y, int w, int h, Color color, int drawScale)
+  public static void drawCursor(Graphics g, int x, int y, int w, int h, Color color)
   {
     if( null == coloredCursors )
     {
@@ -62,10 +62,10 @@ public class SpriteUIUtils
 
     // Draw the arrows around the focused player attribute.
     Sprite cursor = coloredCursors.get(color);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), x, y, drawScale);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), x+w, y, drawScale);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), x+w, y+h, drawScale);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), x, y+h, drawScale);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), x, y, 1);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), x+w, y, 1);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), x+w, y+h, 1);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), x, y+h, 1);
   }
 
   /**
@@ -110,9 +110,8 @@ public class SpriteUIUtils
       int hBuffer, int vBuffer)
   {
     // Find the dimensions of the menu we are drawing.
-    int drawScale = SpriteOptions.getDrawScale();
-    int menuTextWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth() * drawScale;
-    int menuTextHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight() * drawScale;
+    int menuTextWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth();
+    int menuTextHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight();
     int menuWidth = (( items.isEmpty() ) ? 0 : getMenuTextWidthPx(items, menuTextWidth)) + hBuffer * 2;
     int menuHeight = (( items.isEmpty() ) ? 0 : getMenuTextHeightPx(items, menuTextHeight)) + vBuffer * 2;
 
@@ -129,14 +128,14 @@ public class SpriteUIUtils
 
     // Draw the highlight for the currently-selected option.
     // selY = upper menu-frame buffer, plus (letter height, plus 1px-buffer, times number of options).
-    int selY = vBuffer + (menuTextHeight + drawScale) * selection;
+    int selY = vBuffer + (menuTextHeight + 1) * selection;
     g.setColor(focus);
     g.fillRect(0, selY, menuWidth, menuTextHeight);
 
     // Draw the actual menu text.
-    for( int txtY = vBuffer, i = 0; i < items.size(); ++i, txtY += menuTextHeight + drawScale )
+    for( int txtY = vBuffer, i = 0; i < items.size(); ++i, txtY += menuTextHeight + 1 )
     {
-      SpriteLibrary.drawTextSmallCaps(g, items.get(i), hBuffer, txtY, drawScale);
+      SpriteLibrary.drawTextSmallCaps(g, items.get(i), hBuffer, txtY, 1);
     }
 
     return menuImage;

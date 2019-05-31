@@ -68,15 +68,19 @@ public class PlayerSetupArtist
 
   private static void drawPlayerSetup(Graphics g, MapInfo mapInfo, PlayerSetupController control)
   {
-    // Get the draw space
+    // Get the draw space. We'll draw it all in real size and then scale it when we draw to the window.
+    int drawScale = SpriteOptions.getDrawScale();
     Dimension dimensions = SpriteOptions.getScreenDimensions();
+    int imageWidth = dimensions.width / drawScale;
+    int imageHeight = dimensions.height / drawScale;
+    BufferedImage image = SpriteLibrary.createTransparentSprite(imageWidth, imageHeight);
+    Graphics myG = image.getGraphics();
 
     /////////////////// Ready Button ////////////////////////
-    int drawScale = SpriteOptions.getDrawScale();
-    BufferedImage readyButton = SpriteUIUtils.makeTextFrame("Ready!", 3*drawScale, 2*drawScale);
-    int readyX = dimensions.width-(int)(readyButton.getWidth()*1.25);
-    int readyY = dimensions.height/2-readyButton.getHeight()/2;
-    g.drawImage(readyButton, readyX, readyY, null);
+    BufferedImage readyButton = SpriteUIUtils.makeTextFrame("Ready!", 3, 2);
+    int readyX = imageWidth-(int)(readyButton.getWidth()*1.25);
+    int readyY = imageHeight/2-readyButton.getHeight()/2;
+    myG.drawImage(readyButton, readyX, readyY, null);
     int readyAreaWidth = (int)(readyButton.getWidth() * 1.5);
 
     /////////////////// Player Panels ///////////////////////
@@ -84,7 +88,7 @@ public class PlayerSetupArtist
     int highlightedPlayer = myControl.getHighlightedPlayer();
 
     // Calculate the vertical space each player panel will consume.
-    int panelHeight = PlayerPanel.PANEL_HEIGHT*drawScale+drawScale*3;
+    int panelHeight = PlayerPanel.PANEL_HEIGHT+3;
 
     // If we are moving from one option to another, calculate the intermediate draw location.
     if( animHighlightedPlayer != highlightedPlayer )
@@ -94,8 +98,8 @@ public class PlayerSetupArtist
     }
 
     // Define the space to draw the list of player CO portraits.
-    int playerXCenter = ((dimensions.width - readyAreaWidth) / 2);
-    int highlightedPlayerYCenter = dimensions.height / 2; // Whichever player has focus should be centered.
+    int playerXCenter = ((imageWidth - readyAreaWidth) / 2);
+    int highlightedPlayerYCenter = imageHeight / 2; // Whichever player has focus should be centered.
 
     // Find where the zeroth player CO should be drawn.
     // Shift from the center location by the spacing times the number of the highlighted option.
@@ -104,7 +108,7 @@ public class PlayerSetupArtist
     // Draw all of the player info.
     for(int i = 0; i < numCOs; ++i, playerYCenter += (panelHeight))
     {
-      // Only bother to draw it if it is onscreen.
+      // Only bother to draw it if it is on-screen.
       if( (playerYCenter > -panelHeight/2) && ( playerYCenter < SpriteOptions.getScreenDimensions().getHeight()+(panelHeight/2) ) )
       {
         PlayerSetupInfo playerInfo = myControl.getPlayerInfo(i);
@@ -117,9 +121,9 @@ public class PlayerSetupArtist
         // Update the PlayerPanel and render it to an image.
         BufferedImage playerImage = panel.update(playerInfo);
 
-        int drawX = playerXCenter - (playerImage.getWidth()*drawScale)/2;
-        int drawY = playerYCenter - (playerImage.getHeight()*drawScale)/2;
-        g.drawImage(playerImage, drawX, drawY, playerImage.getWidth()*drawScale, playerImage.getHeight()*drawScale, null);
+        int drawX = playerXCenter - (playerImage.getWidth())/2;
+        int drawY = playerYCenter - (playerImage.getHeight())/2;
+        myG.drawImage(playerImage, drawX, drawY, playerImage.getWidth(), playerImage.getHeight(), null);
       }
     }
 
@@ -127,7 +131,7 @@ public class PlayerSetupArtist
     if( myControl.getHighlightedCategory() == PlayerSetupController.SelectionCategories.START.ordinal() )
     {
       // Ready is currently selected.
-      SpriteUIUtils.drawCursor(g, readyX, readyY, readyButton.getWidth(), readyButton.getHeight(), myControl.getPlayerInfo(highlightedPlayer).getCurrentColor(), drawScale);
+      SpriteUIUtils.drawCursor(myG, readyX, readyY, readyButton.getWidth(), readyButton.getHeight(), myControl.getPlayerInfo(highlightedPlayer).getCurrentColor());
     }
     else // Draw the cursor over the appropriate player info panel.
     {
@@ -151,10 +155,13 @@ public class PlayerSetupArtist
       }
       PlayerSetupInfo info = myControl.getPlayerInfo(highlightedPlayer);
       BufferedImage playerImage = panel.getImage();
-      int drawX = playerXCenter - (playerImage.getWidth()*drawScale)/2;
-      int drawY = dimensions.height / 2 - playerImage.getHeight();
-      SpriteUIUtils.drawCursor(g, drawX+pane.xPos*drawScale, drawY+pane.yPos*drawScale, pane.width*drawScale, pane.height*drawScale, info.getCurrentColor(), drawScale);
+      int drawX = playerXCenter - (playerImage.getWidth())/2;
+      int drawY = imageHeight / 2 - playerImage.getHeight()/2;
+      SpriteUIUtils.drawCursor(myG, drawX+pane.xPos, drawY+pane.yPos, pane.width, pane.height, info.getCurrentColor());
     }
+
+    // Finally, draw our rendered image onto the window.
+    g.drawImage(image, 0, 0, dimensions.width, dimensions.height, null);
   }
 
   /**

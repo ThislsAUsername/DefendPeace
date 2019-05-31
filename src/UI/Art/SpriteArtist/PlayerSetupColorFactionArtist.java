@@ -90,7 +90,7 @@ public class PlayerSetupColorFactionArtist
       }
 
     // Draw the cursors around the selected dude.
-    SpriteUIUtils.drawCursor(myG, startX + selX, startY + selY, unitSizePx, unitSizePx, UIUtils.getCOColors()[control.getSelectedColor()], 1);
+    SpriteUIUtils.drawCursor(myG, startX + selX, startY + selY, unitSizePx, unitSizePx, UIUtils.getCOColors()[control.getSelectedColor()]);
 
     // Render our image to the screen at the properly-scaled size.
     g.drawImage(image, 0, 0, dimensions.width, dimensions.height, null);

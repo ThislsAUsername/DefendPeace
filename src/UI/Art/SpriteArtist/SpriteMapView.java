@@ -483,15 +483,14 @@ public class SpriteMapView extends MapView
 
     // Build a display of the expected damage.
     Color[] colors = UIUtils.getMapUnitColors(attacker.myColor).paletteColors;
-    BufferedImage dmgImage = SpriteUIUtils.makeTextFrame(colors[4], colors[2], damageText,
-        2 * SpriteOptions.getDrawScale(), 2 * SpriteOptions.getDrawScale());
+    BufferedImage dmgImage = SpriteUIUtils.makeTextFrame(colors[4], colors[2], damageText, 2, 2);
 
     // Draw the damage estimate directly above the unit being targeted.
     int drawScale = SpriteOptions.getDrawScale();
     int tileSize = SpriteLibrary.baseSpriteSize * drawScale;
     int estimateX = (x * tileSize) + (tileSize / 2);
-    int estimateY = (y * tileSize) - dmgImage.getHeight() / 2;
-    SpriteLibrary.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY, 1);
+    int estimateY = (y * tileSize) - (dmgImage.getHeight()*drawScale) / 2;
+    SpriteLibrary.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY, drawScale);
   }
 
   /**
