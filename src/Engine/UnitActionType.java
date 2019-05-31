@@ -25,9 +25,35 @@ public interface UnitActionType extends Serializable
   public static final UnitActionType[] COMBAT_VEHICLE_ACTIONS = { ATTACK,           WAIT, LOAD, JOIN };
   public static final UnitActionType[] TRANSPORT_ACTIONS =      { UNLOAD,           WAIT, LOAD, JOIN };
   public static final UnitActionType[] APC_ACTIONS =            { UNLOAD, RESUPPLY, WAIT, LOAD, JOIN };
-  
 
-  public static class Attack implements UnitActionType
+  /**
+   * Base type to standardize indexing into HashMaps
+   */
+  abstract static class BaseUnitActionType implements UnitActionType
+  {
+    @Override
+    public int hashCode()
+    {
+      return name().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+      if( this == obj )
+        return true;
+      if( obj == null )
+        return false;
+      if( getClass() != obj.getClass() )
+        return false;
+      UnitActionType other = (UnitActionType) obj;
+      if( !name().contentEquals(other.name()) )
+        return false;
+      return true;
+    }
+  }
+
+  public static class Attack extends BaseUnitActionType
   {
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor)
@@ -72,7 +98,7 @@ public interface UnitActionType extends Serializable
     }
   }
 
-  public static class Capture implements UnitActionType
+  public static class Capture extends BaseUnitActionType
   {
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor)
@@ -95,7 +121,7 @@ public interface UnitActionType extends Serializable
     }
   }
 
-  public static class Wait implements UnitActionType
+  public static class Wait extends BaseUnitActionType
   {
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor)
@@ -115,7 +141,7 @@ public interface UnitActionType extends Serializable
     }
   }
 
-  public static class Load implements UnitActionType
+  public static class Load extends BaseUnitActionType
   {
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor)
@@ -139,7 +165,7 @@ public interface UnitActionType extends Serializable
     }
   }
 
-  public static class Join implements UnitActionType
+  public static class Join extends BaseUnitActionType
   {
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor)
@@ -163,7 +189,7 @@ public interface UnitActionType extends Serializable
     }
   }
 
-  public static class Unload implements UnitActionType
+  public static class Unload extends BaseUnitActionType
   {
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor)
@@ -200,7 +226,7 @@ public interface UnitActionType extends Serializable
     }
   }
 
-  public static class Resupply implements UnitActionType
+  public static class Resupply extends BaseUnitActionType
   {
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor)
@@ -239,7 +265,7 @@ public interface UnitActionType extends Serializable
    * This action type requires a parameter (the unit to transform into), and thus
    * cannot be represented as a static global constant.
    */
-  public static class Transform implements UnitActionType
+  public static class Transform extends BaseUnitActionType
   {
     public final UnitModel destinationType;
     
