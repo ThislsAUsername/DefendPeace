@@ -229,7 +229,7 @@ public class PlayerSetupArtist
       boolean aiChanged = !info.getCurrentAI().getName().equals(aiName);
 
       Graphics g = myImage.getGraphics();
-      if( cmdrChanged || colorChanged || factionChanged )
+      if( cmdrChanged || factionChanged )
       {
         commanderName = info.getCurrentCO().name;
         colorName = UIUtils.getPaletteName(info.getCurrentColor());
@@ -237,7 +237,7 @@ public class PlayerSetupArtist
         descriptionPane = new SpriteUIUtils.ImageFrame(1, 1, PANEL_WIDTH - 2, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteLibrary.getTextAsImage(coStrBuf.toString()));
         descriptionPane.render(g);
       }
-      if( cmdrChanged )
+      if( cmdrChanged || colorChanged )
       {
         commanderPane = new SpriteUIUtils.ImageFrame(1, 12, portraitPx + 2, portraitPx + 2, info.getCurrentColor(),
             info.getCurrentColor(), true, SpriteLibrary.getCommanderSprites( info.getCurrentCO().name ).head);
