@@ -173,7 +173,6 @@ public class Commander extends GameEventListener implements Serializable
    */
   public GameEventQueue initTurn(GameMap map)
   {
-    modifyAbilityPower(5);
     myView.resetFog();
     myActiveAbilityName = "";
     // Accrue income for each city under your control.
