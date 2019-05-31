@@ -88,7 +88,7 @@ public class CommanderAve extends Commander
           "Snows on every tile in a "+GlacioAbility.GLACIO_SNOW_SPREAD+"-space radius around each of her units.\n" +
           "Stuns any enemy unit within "+GlacioAbility.GLACIO_FREEZE_RANGE+" spaces of one of Ave's units or buildings."));
       infoPages.add(new InfoPage(
-          "Oblido ("+OblidoAbility.OBLIDO_RANGE+"):\n" +
+          "Oblido ("+OblidoAbility.OBLIDO_COST+"):\n" +
           "Ave's units gain a "+OblidoAbility.OBLIDO_BUFF+"% increase in firepower.\n" +
           "Hailstones rain down in a "+OblidoAbility.OBLIDO_RANGE+"-space radius around Ave's units and buildings, damaging enemies for up to 2HP, and destroying any forests (reducing them to grass).\n"));
       infoPages.add(new InfoPage(
