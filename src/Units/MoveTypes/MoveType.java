@@ -16,7 +16,7 @@ public class MoveType implements Serializable
   protected final Integer IMPASSABLE = 99;
 
   // A 2-layer map. Map Weathers to a mapping of Terrains-to-cost.
-  protected transient EnumMap<Weathers, MoveCostByTerrain> moveCosts;
+  protected EnumMap<Weathers, MoveCostByTerrain> moveCosts;
 
   /** Default constructor to prohibit movement. This will make it obvious fairly
       quickly if a subclass fails to initialize properly.                         */
@@ -140,67 +140,5 @@ public class MoveType implements Serializable
           setMoveCost(terrain, moveCost);
       }
     }
-
-    /**
-     * Private method, same signature as in Serializable interface
-     *
-     * @param stream
-     * @throws IOException
-     */
-    public void writeObject(ObjectOutputStream stream) throws IOException
-    {
-      for( TerrainType terrain : TerrainType.TerrainTypeList )
-      {
-        stream.writeInt(get(terrain));
-      }
-    }
-
-    /**
-     * Private method, same signature as in Serializable interface
-     *
-     * @param stream
-     * @throws IOException
-     */
-    public void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException
-    {
-      for( TerrainType terrain : TerrainType.TerrainTypeList )
-      {
-        put(terrain, stream.readInt());
-      }
-    }
   } //~MoveCostByTerrain
-  
-  /**
-   * Private method, same signature as in Serializable interface
-   * Manifests as a flattened 2D array of integers; for each weather, for each terrain, what is my move cost? 
-   *
-   * @param stream
-   * @throws IOException
-   */
-  private void writeObject(ObjectOutputStream stream) throws IOException {
-      stream.defaultWriteObject();
-      for( Weathers w : Weathers.values() )
-      {
-        moveCosts.get(w).writeObject(stream);
-      }
-  }
-
-  /**
-   * Private method, same signature as in Serializable interface
-   *
-   * @param stream
-   * @throws IOException
-   */
-  private void readObject(ObjectInputStream stream)
-          throws IOException, ClassNotFoundException {
-      stream.defaultReadObject();
-      
-      moveCosts = new EnumMap<Weathers, MoveCostByTerrain>(Weathers.class);
-      for( Weathers w : Weathers.values() )
-      {
-        MoveCostByTerrain noMoving = new MoveCostByTerrain(99);
-        noMoving.readObject(stream); // initialize the values from our serialized file
-        moveCosts.put(w, noMoving);
-      }
-  }
 }

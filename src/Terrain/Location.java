@@ -13,7 +13,7 @@ import Units.Unit;
 
 public class Location implements Serializable
 {
-  private transient Environment environs = null;
+  private Environment environs = null;
   private Commander owner = null;
   private Unit resident = null;
   private final XYCoord coords;
@@ -108,31 +108,5 @@ public class Location implements Serializable
     {
       forecast.addFirst(w);
     }
-  }
-  
-  /**
-   * Private method, same signature as in Serializable interface
-   *
-   * @param stream
-   * @throws IOException
-   */
-  private void writeObject(ObjectOutputStream stream) throws IOException
-  {
-      stream.defaultWriteObject();
-      stream.writeInt(TerrainType.TerrainTypeList.indexOf(environs.terrainType));
-      stream.writeInt(environs.weatherType.ordinal());
-  }
-
-  /**
-   * Private method, same signature as in Serializable interface
-   *
-   * @param stream
-   * @throws IOException
-   */
-  private void readObject(ObjectInputStream stream)
-          throws IOException, ClassNotFoundException
-  {
-      stream.defaultReadObject();
-      environs = Environment.getTile(TerrainType.TerrainTypeList.get(stream.readInt()), Environment.Weathers.values()[stream.readInt()]);
   }
 }
