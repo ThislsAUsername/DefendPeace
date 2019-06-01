@@ -70,7 +70,7 @@ class SelectUnitAction extends GameInputState<GameActionSet>
           // We need to select a unit to unload.
           next = new SelectCargo(myStateData);
         else if( UnitActionType.DELETE == actionType )
-          // We need to select a unit to unload.
+          // Confirm deletion. Don't want angry users rising up with pitchforks.
           next = new ConfirmUnitAction(myStateData);
       }
     }
