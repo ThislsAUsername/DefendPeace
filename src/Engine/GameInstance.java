@@ -235,6 +235,11 @@ public class GameInstance implements Serializable
       {
         verMatch = true;
       }
+      else
+      {
+        System.out.println(String.format("Save is incompatible version: %s",
+            (null == verInfo) ? "unknown" : verInfo.toString()));
+      }
     }
     catch (Exception ex)
     {
@@ -255,7 +260,8 @@ public class GameInstance implements Serializable
       verInfo = (GameVersion) in.readObject();
       if( !new GameVersion().isEqual(verInfo) )
       {
-        throw new Exception(String.format("Deserializing failed! Save is incompatible version: %s", verInfo.toString()));
+        throw new Exception(String.format("Deserializing failed! Save is incompatible version: %s",
+            (null == verInfo) ? "unknown" : verInfo.toString()));
       }
 
       load = (GameInstance) in.readObject();
