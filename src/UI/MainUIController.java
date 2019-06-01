@@ -107,12 +107,18 @@ public class MainUIController implements IController
             {
               for( final File fileEntry : folder.listFiles() )
               {
-                String filename = fileEntry.getAbsolutePath();
-                // Look for files with our extension that we actually can use
-                if( !fileEntry.isDirectory() && filename.endsWith(".svp") && GameInstance.isSaveCompatible(filename) )
+                String filepath = fileEntry.getAbsolutePath();
+                // Look for files with our extension
+                if( !fileEntry.isDirectory() && filepath.endsWith(".svp") )
                 {
-                  // If everything looks ducky, add it to the list. Don't check it twice.
-                  saves.add(new SaveInfo(filename, fileEntry.getName()));
+                  String filename = fileEntry.getName();
+                  String prettyName = filename.substring(0, filename.length()-4);
+                  if (GameInstance.isSaveCompatible(filepath))
+                    // If everything looks ducky, add it to the list. Don't check it twice.
+                    saves.add(new SaveInfo(filepath, filename, prettyName));
+                  else
+                    // Throw an tilde in there to tell the user "yeah, we see it, and it ain't gonna work."
+                    saves.add(new SaveInfo(filepath, filename, "~" + prettyName));
                 }
               }
             }
@@ -195,17 +201,18 @@ public class MainUIController implements IController
   
   public static class SaveInfo
   {
-    public final String filePath, saveName;
-    public SaveInfo(String pFilepath, String pSaveName)
+    public final String filePath, saveName, displayName;
+    public SaveInfo(String pFilepath, String pSaveName, String pDisplayName)
     {
       filePath = pFilepath;
       saveName = pSaveName;
+      displayName = pDisplayName;
     }
     
     @Override
     public String toString()
     {
-      return saveName;
+      return displayName;
     }
   }
 }
