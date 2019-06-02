@@ -45,14 +45,8 @@ public class PlayerSetupCommanderController implements IController
         done = true;
         break;
       case SEEK:
-        CO_InfoController coInfoMenu = new CO_InfoController(cmdrInfos);
+        CO_InfoController coInfoMenu = new CO_InfoController(cmdrInfos, cmdrSelector.getSelectionNormalized());
         IView infoView = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
-
-        // Get the info menu to select the current CO
-        for( int i = 0; i < cmdrSelector.getSelectionNormalized(); i++ )
-        {
-          coInfoMenu.handleInput(UI.InputHandler.InputAction.DOWN);
-        }
 
         // Give the new controller/view the floor
         Driver.getInstance().changeGameState(coInfoMenu, infoView);

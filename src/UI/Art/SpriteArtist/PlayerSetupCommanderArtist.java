@@ -64,7 +64,7 @@ public class PlayerSetupCommanderArtist
     coToDraw.setSelectedOption(highlightedCommander);
     while( drawYCenter + CommanderPanel.PANEL_HEIGHT/2 > 0 )
     {
-      coToDraw.handleInput(InputAction.UP);
+      coToDraw.prev();
       drawYCenter -= panelHeight;
     }
     // We don't actually want to draw something off the screen, so go forward one again.
@@ -72,7 +72,7 @@ public class PlayerSetupCommanderArtist
     drawYCenter += panelHeight;
 
     // Draw all of the visible commander panels that are on-screen.
-    for(; drawYCenter - CommanderPanel.PANEL_HEIGHT/2 < myHeight ; coToDraw.handleInput(InputAction.DOWN), drawYCenter += (panelHeight))
+    for(; drawYCenter - CommanderPanel.PANEL_HEIGHT/2 < myHeight ; coToDraw.next(), drawYCenter += (panelHeight))
     {
       CommanderInfo coInfo = infos.get(coToDraw.getSelectionNormalized());
       Integer key = new Integer(coToDraw.getSelectionNormalized());
