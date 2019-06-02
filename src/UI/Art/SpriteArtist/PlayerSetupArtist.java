@@ -236,7 +236,7 @@ public class PlayerSetupArtist
       boolean aiChanged = !info.getCurrentAI().getName().equals(aiName);
 
       Graphics g = myImage.getGraphics();
-      if( cmdrChanged || factionChanged )
+      if( cmdrChanged || factionChanged || colorChanged )
       {
         commanderName = info.getCurrentCO().name;
         colorName = UIUtils.getPaletteName(info.getCurrentColor());
