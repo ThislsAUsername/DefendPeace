@@ -224,11 +224,7 @@ public class PlayerSetupArtist
 
     public BufferedImage update(PlayerSetupInfo info)
     {
-      // Pull out the info we need.
-      // "Commander-Color Faction"
-      StringBuffer coStrBuf = new StringBuffer(info.getCurrentCO().name);
-      coStrBuf.append("-").append(UIUtils.getPaletteName(info.getCurrentColor())).append(" ").append(info.getCurrentFaction().name);
-
+      // Keep track of which things need to be redrawn.
       boolean cmdrChanged = !info.getCurrentCO().name.equals(commanderName);
       boolean colorChanged = !UIUtils.getPaletteName(info.getCurrentColor()).equals(colorName);
       boolean factionChanged = !info.getCurrentFaction().name.equals(factionName);
@@ -238,9 +234,15 @@ public class PlayerSetupArtist
       Graphics g = myImage.getGraphics();
       if( cmdrChanged || factionChanged || colorChanged )
       {
+        // Update saved values.
         commanderName = info.getCurrentCO().name;
         colorName = UIUtils.getPaletteName(info.getCurrentColor());
         factionName = info.getCurrentFaction().name;
+
+        // Build the description text: "Commander-Color Faction"
+        StringBuffer coStrBuf = new StringBuffer(commanderName);
+        coStrBuf.append("-").append(colorName).append(" ").append(factionName);
+
         descriptionPane = new SpriteUIUtils.ImageFrame(1, 1, PANEL_WIDTH - 2, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteLibrary.getTextAsImage(coStrBuf.toString()));
         descriptionPane.render(g);
       }
