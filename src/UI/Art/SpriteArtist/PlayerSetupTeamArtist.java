@@ -91,8 +91,7 @@ public class PlayerSetupTeamArtist
     {
       teamColors[i] = control.getPlayerInfo(i).getCurrentColor();
     }
-    SpriteMiniMapArtist.setTeamPalette(teamColors);
-    BufferedImage miniMap = SpriteMiniMapArtist.getMapImage( mapInfo );
+    BufferedImage miniMap = SpriteMiniMapArtist.getMapImage( mapInfo, teamColors );
 
     // Figure out how large to draw the minimap. We want to make it as large as possible, but still
     //   fit inside the available space (with a minimum scale factor of 1).
