@@ -1,6 +1,5 @@
 package UI;
 
-import java.awt.Color;
 import java.util.ArrayList;
 
 import AI.AILibrary;
@@ -52,7 +51,7 @@ public class PlayerSetupController implements IController
     for(int co = 0; co < numCos; ++co)
     {
       // Set up our option selection framework
-      coSelectors[co] = new PlayerSetupInfo(numCos, co, CommanderLibrary.getCommanderList(), UIUtils.getCOColors(), UIUtils.getFactions(), AILibrary.getAIList());
+      coSelectors[co] = new PlayerSetupInfo(co, CommanderLibrary.getCommanderList(), UIUtils.getCOColors(), UIUtils.getFactions(), AILibrary.getAIList());
     }
   }
 
@@ -167,15 +166,5 @@ public class PlayerSetupController implements IController
   public PlayerSetupInfo getPlayerInfo(int p)
   {
     return coSelectors[p];
-  }
-
-  public CommanderInfo getPlayerCo(int p)
-  {
-    return coSelectors[p].getCurrentCO();
-  }
-
-  public Color getPlayerColor(int p)
-  {
-    return coSelectors[p].getCurrentColor();
   }
 }

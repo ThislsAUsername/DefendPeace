@@ -1,7 +1,5 @@
 package UI;
 
-import java.awt.Color;
-
 import Engine.IController;
 import Engine.OptionSelector;
 import UI.InputHandler.InputAction;
@@ -19,32 +17,8 @@ public class PlayerSetupColorFactionController implements IController
 
     // Start the selectors at the initial values.
     myPlayerInfo = playerInfo;
-    Color startingColor = myPlayerInfo.getCurrentColor();
-    UIUtils.Faction startingFaction = myPlayerInfo.getCurrentFaction();
-    setColorSelector(startingColor);
-    setFactionSelector(startingFaction);
-  }
-
-  private void setColorSelector(Color color)
-  {
-    for(int i = 0; i < colorSelector.size(); ++i)
-    {
-      if( color.equals(UIUtils.getCOColors()[i]))
-      {
-        colorSelector.setSelectedOption(i);
-      }
-    }
-  }
-
-  private void setFactionSelector(UIUtils.Faction faction)
-  {
-    for(int i = 0; i < factionSelector.size(); ++i)
-    {
-      if( faction == UIUtils.getFactions()[i] )
-      {
-        factionSelector.setSelectedOption(i);
-      }
-    }
+    colorSelector.setSelectedOption(myPlayerInfo.currentColor);
+    factionSelector.setSelectedOption(myPlayerInfo.currentFaction);
   }
 
   @Override
@@ -55,8 +29,8 @@ public class PlayerSetupColorFactionController implements IController
     {
       case ENTER:
         // Apply change and return control.
-        myPlayerInfo.currentColor.setSelectedOption(colorSelector.getSelectionNormalized());
-        myPlayerInfo.currentFaction.setSelectedOption(factionSelector.getSelectionNormalized());
+        myPlayerInfo.currentColor = colorSelector.getSelectionNormalized();
+        myPlayerInfo.currentFaction = factionSelector.getSelectionNormalized();
         done = true;
         break;
       case UP:

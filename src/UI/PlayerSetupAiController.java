@@ -17,9 +17,9 @@ public class PlayerSetupAiController implements IController
   public PlayerSetupAiController(PlayerSetupInfo playerInfo)
   {
     myPlayerInfo = playerInfo;
-    aiMakers = AILibrary.getAIList();;
+    aiMakers = AILibrary.getAIList();
     aiSelector = new OptionSelector(aiMakers.size());
-    aiSelector.setSelectedOption(myPlayerInfo.currentAI.getSelectionNormalized());
+    aiSelector.setSelectedOption(myPlayerInfo.currentAi);
   }
 
   @Override
@@ -30,7 +30,7 @@ public class PlayerSetupAiController implements IController
     {
       case ENTER:
         // Apply changes and return control.
-        myPlayerInfo.currentAI.setSelectedOption(aiSelector.getSelectionNormalized());
+        myPlayerInfo.currentAi = aiSelector.getSelectionNormalized();
         done = true;
         break;
       case UP:

@@ -16,7 +16,7 @@ public class PlayerSetupTeamController implements IController
     playerSelector = new OptionSelector(playerInfos.length);
     teamSelector = new OptionSelector(playerInfos.length);
     playerSelector.setSelectedOption(selectedPlayer);
-    teamSelector.setSelectedOption(playerInfos[selectedPlayer].getCurrentTeam());
+    teamSelector.setSelectedOption(playerInfos[selectedPlayer].currentTeam);
   }
 
   public int getHighlightedPlayer()
@@ -42,12 +42,12 @@ public class PlayerSetupTeamController implements IController
       case UP:
       case DOWN:
         playerSelector.handleInput(action);
-        teamSelector.setSelectedOption(playerInfos[playerSelector.getSelectionNormalized()].getCurrentTeam());
+        teamSelector.setSelectedOption(playerInfos[playerSelector.getSelectionNormalized()].currentTeam);
         break;
       case LEFT:
       case RIGHT:
         teamSelector.handleInput(action);
-        playerInfos[playerSelector.getSelectionNormalized()].currentTeam.setSelectedOption(teamSelector.getSelectionNormalized());
+        playerInfos[playerSelector.getSelectionNormalized()].currentTeam = teamSelector.getSelectionNormalized();
         break;
       default:
         // Do nothing.

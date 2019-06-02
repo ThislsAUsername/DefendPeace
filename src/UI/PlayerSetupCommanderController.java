@@ -22,7 +22,7 @@ public class PlayerSetupCommanderController implements IController
 
     // Make sure we start with the cursor on the currently-selected Commander.
     cmdrSelector = new OptionSelector(infos.size());
-    cmdrSelector.setSelectedOption(myPlayerInfo.currentCO.getSelectionNormalized());
+    cmdrSelector.setSelectedOption(myPlayerInfo.currentCo);
   }
 
   @Override
@@ -33,7 +33,7 @@ public class PlayerSetupCommanderController implements IController
     {
       case ENTER:
         // Apply change and return control.
-        myPlayerInfo.currentCO.setSelectedOption(cmdrSelector.getSelectionNormalized());
+        myPlayerInfo.currentCo = cmdrSelector.getSelectionNormalized();
         done = true;
         break;
       case UP:
