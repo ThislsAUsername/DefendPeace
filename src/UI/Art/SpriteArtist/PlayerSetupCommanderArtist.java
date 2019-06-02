@@ -71,31 +71,27 @@ public class PlayerSetupCommanderArtist
     coToDraw.handleInput(InputAction.DOWN);
     drawYCenter += panelHeight;
 
-    // Draw all of the visible commander panels.
+    // Draw all of the visible commander panels that are on-screen.
     for(; drawYCenter - CommanderPanel.PANEL_HEIGHT/2 < myHeight ; coToDraw.handleInput(InputAction.DOWN), drawYCenter += (panelHeight))
     {
-      // Only bother to draw it if it is onscreen.
-      if( (drawYCenter > -panelHeight/2) && ( drawYCenter < myHeight+(panelHeight/2) ) )
+      CommanderInfo coInfo = infos.get(coToDraw.getSelectionNormalized());
+      Integer key = new Integer(coToDraw.getSelectionNormalized());
+
+      // Get the relevant PlayerPanel.
+      if( !coPanels.containsKey(key) ) coPanels.put(key, new CommanderPanel(coInfo, playerColor));
+      CommanderPanel panel = coPanels.get(key);
+
+      // Update the PlayerPanel and render it to an image.
+      BufferedImage playerImage = panel.update(coInfo, playerColor);
+
+      int drawX = SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Make sure we have room to draw the cursor around the frame.
+      int drawY = drawYCenter - playerImage.getHeight()/2;
+      myG.drawImage(playerImage, drawX, drawY, null);
+
+      // Draw the cursor if this panel is highlighted
+      if( highlightedCommander == coToDraw.getSelectionNormalized() )
       {
-        CommanderInfo coInfo = infos.get(coToDraw.getSelectionNormalized());
-        Integer key = new Integer(coToDraw.getSelectionNormalized());
-
-        // Get the relevant PlayerPanel.
-        if( !coPanels.containsKey(key) ) coPanels.put(key, new CommanderPanel(coInfo, playerColor));
-        CommanderPanel panel = coPanels.get(key);
-
-        // Update the PlayerPanel and render it to an image.
-        BufferedImage playerImage = panel.update(coInfo, playerColor);
-
-        int drawX = SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Make sure we have room to draw the cursor around the frame.
-        int drawY = drawYCenter - playerImage.getHeight()/2;
-        myG.drawImage(playerImage, drawX, drawY, null);
-
-        // Draw the cursor if this panel is highlighted
-        if( highlightedCommander == coToDraw.getSelectionNormalized() )
-        {
-          SpriteUIUtils.drawCursor(myG, drawX, drawY, playerImage.getWidth(), playerImage.getHeight(), playerColor);
-        }
+        SpriteUIUtils.drawCursor(myG, drawX, drawY, playerImage.getWidth(), playerImage.getHeight(), playerColor);
       }
     }
 
