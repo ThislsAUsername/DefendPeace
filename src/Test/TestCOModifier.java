@@ -143,7 +143,7 @@ public class TestCOModifier extends TestCase
     testPassed &= validate( recon.model == reconModel, "    Recon is not Recon. Malformed test!");
 
     // Turn our hapless infantryman into a lean, mean, driving machine. Make sure the Recon is still a Recon also.
-    UnitRemodelModifier remod = new UnitRemodelModifier(infModel, reconModel);
+    UnitRemodelModifier remod = new UnitRemodelModifier(infModel.type, reconModel.type);
     remod.apply(patch);
     testPassed &= validate( infantry.model == reconModel, "    Infantry is not Recon after being turned into one.");
     testPassed &= validate( recon.model == reconModel, "    Recon is not Recon, but it still should be.");
@@ -159,8 +159,8 @@ public class TestCOModifier extends TestCase
 
     // Another test! We must make sure that two units, after being transmogrified into the same thing, will return to their correct forms.
     UnitModel mechModel = patch.getUnitModel(UnitModel.UnitEnum.MECH);
-    remod = new UnitRemodelModifier(infModel, mechModel);
-    remod.addUnitRemodel(reconModel, mechModel);
+    remod = new UnitRemodelModifier(infModel.type, mechModel.type);
+    remod.addUnitRemodel(reconModel.type, mechModel.type);
     remod.apply(patch);
     testPassed &= validate( infantry.model == mechModel, "    Infantry is not Mech after being changed.");
     testPassed &= validate( recon.model == mechModel, "    Recon is not Mech after being changed.");
