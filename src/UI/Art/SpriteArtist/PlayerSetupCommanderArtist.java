@@ -34,10 +34,6 @@ public class PlayerSetupCommanderArtist
     BufferedImage image = SpriteLibrary.createTransparentSprite(myWidth, myHeight);
     Graphics myG = image.getGraphics();
 
-    // Allocate space for the Commander faces.
-    int cursorSizePx = SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Cursor frames are square.
-    int coZoneYCenter = myHeight / 2;
-
     /////////////// Tooltip ////////////////////////////
     BufferedImage tooltip = SpriteUIUtils.makeTextFrame("Press Q for more info", 3, 2);
     myG.drawImage(tooltip, myWidth - tooltip.getWidth(), 3, null);
@@ -60,7 +56,7 @@ public class PlayerSetupCommanderArtist
 //    }
 
     // Find where the zeroth Commander should be drawn. Start by assuming it's centered.
-    int drawYCenter = coZoneYCenter;
+    int drawYCenter = myHeight / 2;
 
     // We're gonna make this an endless scroll, so back up (in y-space and in the CO list) until
     // we find the Commander that would be off the top of the screen.
@@ -91,7 +87,7 @@ public class PlayerSetupCommanderArtist
         // Update the PlayerPanel and render it to an image.
         BufferedImage playerImage = panel.update(coInfo, playerColor);
 
-        int drawX = cursorSizePx * 2;
+        int drawX = SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Make sure we have room to draw the cursor around the frame.
         int drawY = drawYCenter - playerImage.getHeight()/2;
         myG.drawImage(playerImage, drawX, drawY, null);
 
@@ -151,7 +147,7 @@ public class PlayerSetupCommanderArtist
       {
         myColor = UIUtils.getPaletteName(color);
         commanderFace = new SpriteUIUtils.ImageFrame(1, 1, eyesWidth, eyesHeight, color,
-            color, true, SpriteLibrary.getCommanderSprites( coInfo.name ).head);
+            color, true, SpriteLibrary.getCommanderSprites( coInfo.name ).eyes);
 
         // If only the color changed, we don't need to redraw the nameplate, so check that the name actually changed.
         if( !coInfo.name.equals(myCoName) )
