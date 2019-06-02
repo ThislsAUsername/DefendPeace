@@ -81,7 +81,7 @@ public class PlayerSetupColorFactionArtist
         int yOff = f*unitSizePx + unitBuffer*(f) + startY;
 
         // Only draw on-screen options.
-        if( (xOff < myWidth) && (yOff < myWidth) && (xOff > -unitSizePx) && (yOff > -unitSizePx))
+        if( (xOff < myWidth) && (yOff < myHeight) && (xOff > -unitSizePx) && (yOff > -unitSizePx))
         {
           if( null == unitArray[f][c] )
             unitArray[f][c] = SpriteLibrary.getMapUnitSpriteSet(UnitModel.UnitEnum.INFANTRY, UIUtils.getFactions()[f], UIUtils.getCOColors()[c]).sprites[0].getFrame(0);
