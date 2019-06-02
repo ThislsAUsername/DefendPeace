@@ -22,5 +22,11 @@ public class SubModel extends UnitModel
   public SubModel()
   {
     super("Submarine", UnitEnum.SUB, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType, actions, weapons);
+    addSubAction();
+  }
+  
+  protected void addSubAction()
+  {
+    possibleActions.add(new UnitActionType.Transform(UnitEnum.SUB_SUB, "DIVE"));
   }
 }

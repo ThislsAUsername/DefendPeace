@@ -1,5 +1,7 @@
 package Units;
 
+import Engine.UnitActionType;
+
 public class SubSubModel extends SubModel
 {
   private static final int IDLE_FUEL_BURN = 5;
@@ -11,5 +13,11 @@ public class SubSubModel extends SubModel
     chassis = ChassisEnum.SUBMERGED;
     idleFuelBurn = IDLE_FUEL_BURN;
     hidden = true;
+  }
+  
+  @Override
+  protected void addSubAction()
+  {
+    possibleActions.add(new UnitActionType.Transform(UnitEnum.SUB, "RISE"));
   }
 }

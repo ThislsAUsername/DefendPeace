@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import Terrain.GameMap;
 import Units.Unit;
 import Units.UnitModel;
+import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
 
 public interface UnitActionType
@@ -242,10 +243,10 @@ public interface UnitActionType
    */
   public static class Transform implements UnitActionType
   {
-    public final UnitModel destinationType;
+    public final UnitEnum destinationType;
     public final String name;
     
-    public Transform(UnitModel type, String displayName)
+    public Transform(UnitEnum type, String displayName)
     {
       destinationType = type;
       name = displayName;

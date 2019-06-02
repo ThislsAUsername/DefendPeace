@@ -60,7 +60,7 @@ public class Commander extends GameEventListener implements Serializable
   public final CommanderInfo coInfo;
   public GameMap myView;
   public ArrayList<Unit> units;
-  public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
+  public Map<UnitEnum, UnitModel> unitModels = new HashMap<UnitEnum, UnitModel>();
   public transient Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
   public Set<XYCoord> ownedProperties;
   public ArrayList<COModifier> modifiers;
@@ -124,9 +124,15 @@ public class Commander extends GameEventListener implements Serializable
     unitProductionByTerrain.put(TerrainType.AIRPORT, airportModels);
 
     // Compile one master list of everything we can build.
-    unitModels.addAll(factoryModels);
-    unitModels.addAll(seaportModels);
-    unitModels.addAll(airportModels);
+    for (UnitModel um : factoryModels)
+      unitModels.put(um.type, um);
+    for (UnitModel um : seaportModels)
+      unitModels.put(um.type, um);
+    for (UnitModel um : airportModels)
+      unitModels.put(um.type, um);
+
+    UnitModel subsub = new SubSubModel();
+    unitModels.put(subsub.type, subsub); // We don't want a separate "submerged sub" build option
 
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
@@ -134,20 +140,6 @@ public class Commander extends GameEventListener implements Serializable
     money = DEFAULTSTARTINGMONEY;
 
     myAbilities = new ArrayList<CommanderAbility>();
-
-    // TODO:
-    // This *really* shouldn't be here, but I ain't sure how best to not do that.
-    // Maybe we should just make some static function to set up this stuff, like the AI/CommanderLibraries?
-    // That has the downfall that there's only one return type from that.
-    // I guess we could have one function that builds the whole unit library, and one that pulls out the buildables and makes the map.
-    // Whatever. This works, for now.
-
-    // Subs gotta dive, man
-    UnitModel sub = getUnitModel(UnitModel.UnitEnum.SUB);
-    UnitModel subsub = new SubSubModel();
-    unitModels.add(subsub);
-    sub.possibleActions.add(new UnitActionType.Transform(subsub, "DIVE"));
-    subsub.possibleActions.add(new UnitActionType.Transform(sub, "RISE"));
   }
 
   protected void addCommanderAbility(CommanderAbility ca)
@@ -252,20 +244,10 @@ public class Commander extends GameEventListener implements Serializable
     return true;
   }
 
+  // Leaving this for now, to avoid merge conflicts
   public UnitModel getUnitModel(UnitEnum unitType)
   {
-    UnitModel um = null;
-
-    for( UnitModel iter : unitModels )
-    {
-      if( iter.type == unitType )
-      {
-        um = iter;
-        break;
-      }
-    }
-
-    return um;
+    return unitModels.get(unitType);
   }
   
   /**
