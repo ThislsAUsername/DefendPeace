@@ -10,16 +10,16 @@ import UI.InputHandler.InputAction;
 
 public class PlayerSetupAiController implements IController
 {
+  PlayerSetupInfo myPlayerInfo;
   ArrayList<AIMaker> aiMakers;
   OptionSelector aiSelector;
-  private int startingIndex;
 
-  public PlayerSetupAiController(int currentIndex)
+  public PlayerSetupAiController(PlayerSetupInfo playerInfo)
   {
+    myPlayerInfo = playerInfo;
     aiMakers = AILibrary.getAIList();;
     aiSelector = new OptionSelector(aiMakers.size());
-    aiSelector.setSelectedOption(currentIndex);
-    startingIndex = currentIndex;
+    aiSelector.setSelectedOption(myPlayerInfo.currentAI.getSelectionNormalized());
   }
 
   @Override
@@ -29,6 +29,8 @@ public class PlayerSetupAiController implements IController
     switch(action)
     {
       case ENTER:
+        // Apply changes and return control.
+        myPlayerInfo.currentAI.setSelectedOption(aiSelector.getSelectionNormalized());
         done = true;
         break;
       case UP:
@@ -36,9 +38,8 @@ public class PlayerSetupAiController implements IController
         aiSelector.handleInput(action);
         break;
       case BACK:
-        // Cancel: reset the option selectors to ensure we don't confuse the caller.
+        // Cancel: return control without applying changes.
         done = true;
-        aiSelector.setSelectedOption(startingIndex);
         break;
       case SEEK:
       case LEFT:

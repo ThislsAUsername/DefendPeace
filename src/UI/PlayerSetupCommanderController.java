@@ -11,16 +11,18 @@ import UI.InputHandler.InputAction;
 
 public class PlayerSetupCommanderController implements IController
 {
+  PlayerSetupInfo myPlayerInfo;
   ArrayList<CommanderInfo> cmdrInfos;
   OptionSelector cmdrSelector;
-  private int startingIndex;
 
-  public PlayerSetupCommanderController(ArrayList<CommanderInfo> infos, int currentIndex)
+  public PlayerSetupCommanderController(ArrayList<CommanderInfo> infos, PlayerSetupInfo playerInfo)
   {
     cmdrInfos = infos;
+    myPlayerInfo = playerInfo;
+
+    // Make sure we start with the cursor on the currently-selected Commander.
     cmdrSelector = new OptionSelector(infos.size());
-    cmdrSelector.setSelectedOption(currentIndex);
-    startingIndex = currentIndex;
+    cmdrSelector.setSelectedOption(myPlayerInfo.currentCO.getSelectionNormalized());
   }
 
   @Override
@@ -30,6 +32,8 @@ public class PlayerSetupCommanderController implements IController
     switch(action)
     {
       case ENTER:
+        // Apply change and return control.
+        myPlayerInfo.currentCO.setSelectedOption(cmdrSelector.getSelectionNormalized());
         done = true;
         break;
       case UP:
@@ -37,9 +41,8 @@ public class PlayerSetupCommanderController implements IController
         cmdrSelector.handleInput(action);
         break;
       case BACK:
-        // Cancel: reset the option selectors to ensure we don't confuse the caller.
+        // Cancel: return control without applying changes.
         done = true;
-        cmdrSelector.setSelectedOption(startingIndex);
         break;
       case SEEK:
         CO_InfoController coInfoMenu = new CO_InfoController(cmdrInfos);

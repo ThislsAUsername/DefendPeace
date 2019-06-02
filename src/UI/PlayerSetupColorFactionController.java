@@ -8,25 +8,19 @@ import UI.InputHandler.InputAction;
 
 public class PlayerSetupColorFactionController implements IController
 {
+  private PlayerSetupInfo myPlayerInfo;
   OptionSelector colorSelector;
   OptionSelector factionSelector;
-  private Color startingColor;
-  private UIUtils.Faction startingFaction;
 
-  public PlayerSetupColorFactionController(Color startingColor, UIUtils.Faction startingFaction)
+  public PlayerSetupColorFactionController(PlayerSetupInfo playerInfo)
   {
     colorSelector = new OptionSelector(UIUtils.getCOColors().length);
     factionSelector = new OptionSelector(UIUtils.getFactions().length);
 
     // Start the selectors at the initial values.
-    reset( startingColor, startingFaction );
-  }
-
-  public void reset(Color startingColor, UIUtils.Faction startingFaction)
-  {
-    // The number of factions/colors available should not change while the game is running, so don't bother updating those.
-    this.startingColor = startingColor;
-    this.startingFaction = startingFaction;
+    myPlayerInfo = playerInfo;
+    Color startingColor = myPlayerInfo.getCurrentColor();
+    UIUtils.Faction startingFaction = myPlayerInfo.getCurrentFaction();
     setColorSelector(startingColor);
     setFactionSelector(startingFaction);
   }
@@ -60,6 +54,9 @@ public class PlayerSetupColorFactionController implements IController
     switch(action)
     {
       case ENTER:
+        // Apply change and return control.
+        myPlayerInfo.currentColor.setSelectedOption(colorSelector.getSelectionNormalized());
+        myPlayerInfo.currentFaction.setSelectedOption(factionSelector.getSelectionNormalized());
         done = true;
         break;
       case UP:
@@ -71,10 +68,8 @@ public class PlayerSetupColorFactionController implements IController
         colorSelector.handleInput(action);
         break;
       case BACK:
-        // Cancel: reset the option selectors to ensure we don't confuse the caller.
+        // Don't apply changes; just return control.
         done = true;
-        setColorSelector(startingColor);
-        setFactionSelector(startingFaction);
         break;
       default:
         // Do nothing.

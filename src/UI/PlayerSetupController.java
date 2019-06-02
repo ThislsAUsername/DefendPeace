@@ -65,32 +65,7 @@ public class PlayerSetupController implements IController
       boolean exitSub = subMenu.handleInput(action);
       if(exitSub)
       {
-        // Only apply the change from the sub-menu if it exited via ENTER.
-        if(action == InputAction.ENTER)
-        {
-          final int category = categorySelector.getSelectionNormalized();
-          if( category == SelectionCategories.COMMANDER.ordinal() )
-          {
-            PlayerSetupCommanderController cmdrMenu = (PlayerSetupCommanderController)subMenu;
-            PlayerSetupInfo info = getPlayerInfo(playerSelector.getSelectionNormalized());
-            info.currentCO.setSelectedOption(cmdrMenu.getSelectedCommander());
-          }
-          if( category == SelectionCategories.COLOR_FACTION.ordinal() )
-          {
-            PlayerSetupColorFactionController unitMenu = (PlayerSetupColorFactionController)subMenu;
-            PlayerSetupInfo info = getPlayerInfo(playerSelector.getSelectionNormalized());
-            info.currentColor.setSelectedOption(unitMenu.getSelectedColor());
-            info.currentFaction.setSelectedOption(unitMenu.getSelectedFaction());
-          }
-          if( category == SelectionCategories.TEAM.ordinal() )
-          { /* Do nothing - the sub-menu does the change on its own. */ }
-          if( category == SelectionCategories.AI.ordinal() )
-          {
-            PlayerSetupAiController aiMenu = (PlayerSetupAiController)subMenu;
-            PlayerSetupInfo info = getPlayerInfo(playerSelector.getSelectionNormalized());
-            info.currentAI.setSelectedOption(aiMenu.getSelectedAiIndex());
-          }
-        }
+        // The sub-menu will have applied any necessary player changes already.
         subMenu = null;
       }
     }
@@ -119,13 +94,11 @@ public class PlayerSetupController implements IController
         if( categorySelector.getSelectionNormalized() == SelectionCategories.COMMANDER.ordinal() )
         {
           ArrayList<CommanderInfo> infos = CommanderLibrary.getCommanderList();
-          subMenu = new PlayerSetupCommanderController(infos, getPlayerInfo(playerSelector.getSelectionNormalized()).currentCO.getSelectionNormalized());
+          subMenu = new PlayerSetupCommanderController(infos, getPlayerInfo(playerSelector.getSelectionNormalized()));
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.COLOR_FACTION.ordinal() )
         {
-          Color color = getPlayerInfo(playerSelector.getSelectionNormalized()).getCurrentColor();
-          UIUtils.Faction faction = getPlayerInfo(playerSelector.getSelectionNormalized()).getCurrentFaction();
-          subMenu = new PlayerSetupColorFactionController(color, faction);
+          subMenu = new PlayerSetupColorFactionController(getPlayerInfo(playerSelector.getSelectionNormalized()));
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.TEAM.ordinal() )
         {
@@ -133,7 +106,7 @@ public class PlayerSetupController implements IController
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.AI.ordinal() )
         {
-          subMenu = new PlayerSetupAiController(getPlayerInfo(playerSelector.getSelectionNormalized()).currentAI.getSelectionNormalized());
+          subMenu = new PlayerSetupAiController(getPlayerInfo(playerSelector.getSelectionNormalized()));
         }
         else // ( categorySelector.getSelectionNormalized() == SelectionCategories.START.ordinal() )
         {
