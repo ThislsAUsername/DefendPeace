@@ -9,7 +9,7 @@ import CommandingOfficers.CommanderInfo;
 import UI.UIUtils.Faction;
 
 /**
- * Stores a player's info with during game setup.
+ * Stores a player's info during game setup.
  * Stores current CO, color, team, AI, and faction.
  */
 public class PlayerSetupInfo
