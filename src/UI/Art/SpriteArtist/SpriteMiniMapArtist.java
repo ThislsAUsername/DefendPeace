@@ -37,7 +37,6 @@ public class SpriteMiniMapArtist
   {
     if( mapInfo != lastMapDrawn || palettesDiffer(teamColors) )
     {
-      System.out.println("Redrawing map.");
       // If we don't already have an image, generate and store it for later.
       lastMapImage = generateMapImage(mapInfo, teamColors);
       lastMapDrawn = mapInfo;
