@@ -111,7 +111,7 @@ public class SpriteMiniMapArtist
     boolean colorsDiffer = false;
     for( int i = 0; i < newColors.length; ++i )
     {
-      if( colorsDiffer(newColors[i], lastTeamColors[i]) )
+      if( !newColors[i].equals(lastTeamColors[i]) )
       {
         colorsDiffer = true;
         break;
@@ -119,11 +119,5 @@ public class SpriteMiniMapArtist
     }
 
     return colorsDiffer;
-  }
-
-  private static boolean colorsDiffer(Color c1, Color c2)
-  {
-    boolean same = (c1.getRed() == c2.getRed()) && (c1.getGreen() == c2.getGreen()) && (c1.getBlue() == c2.getBlue());
-    return !same;
   }
 }
