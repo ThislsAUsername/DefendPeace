@@ -102,7 +102,7 @@ public class PlayerSetupAiArtist
     myG.drawRect(infoX, infoY, infoW, infoH);
 
     // Draw the composed image to the window at scale.
-    g.drawImage(image, 0, 0, dimensions.width, dimensions.height, null);
+    g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
 
     // TODO: Fix drawTextToWidth to not apply scaling automatically.
     BufferedImage infoText = SpriteUIUtils.drawTextToWidth(text, (aiInfoZoneWidth - nameplateHeight*2)*drawScale);

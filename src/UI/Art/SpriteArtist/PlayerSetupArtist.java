@@ -161,7 +161,7 @@ public class PlayerSetupArtist
     }
 
     // Finally, draw our rendered image onto the window.
-    g.drawImage(image, 0, 0, dimensions.width, dimensions.height, null);
+    g.drawImage(image, 0, 0, imageWidth*drawScale, imageHeight*drawScale, null);
   }
 
   /**

@@ -116,7 +116,7 @@ public class PlayerSetupTeamArtist
     myG.drawImage(miniMap, mapLeft, mapTop, mapWidth, mapHeight, null);
 
     // Render the final composed image to the window.
-    g.drawImage(image, 0, 0, dimensions.width, dimensions.height, null);
+    g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
   }
 
   /**

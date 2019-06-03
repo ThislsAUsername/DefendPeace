@@ -93,7 +93,7 @@ public class PlayerSetupColorFactionArtist
     SpriteUIUtils.drawCursor(myG, startX + selX, startY + selY, unitSizePx, unitSizePx, UIUtils.getCOColors()[control.getSelectedColor()]);
 
     // Render our image to the screen at the properly-scaled size.
-    g.drawImage(image, 0, 0, dimensions.width, dimensions.height, null);
+    g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
   }
 
   private static void initialize()

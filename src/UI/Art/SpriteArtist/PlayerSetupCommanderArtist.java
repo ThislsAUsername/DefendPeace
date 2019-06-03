@@ -95,12 +95,8 @@ public class PlayerSetupCommanderArtist
       }
     }
 
-    /////////////// Cursor //////////////////////
-//    CommanderPanel panel = coPanels.get(highlightedPlayer);
-//    int highlightedPanelY = (int)(coZoneYCenter - CommanderPanel.PANEL_HEIGHT/2);
-
     // Draw the composed image to the window at scale.
-    g.drawImage(image, 0, 0, dimensions.width, dimensions.height, null);
+    g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
   }
 
   /**
