@@ -109,7 +109,7 @@ public class PlayerSetupArtist
     for(int i = 0; i < numCOs; ++i, playerYCenter += (panelHeight))
     {
       // Only bother to draw it if it is on-screen.
-      if( (playerYCenter > -panelHeight/2) && ( playerYCenter < SpriteOptions.getScreenDimensions().getHeight()+(panelHeight/2) ) )
+      if( (playerYCenter > -panelHeight/2) && ( playerYCenter < imageHeight+(panelHeight/2) ) )
       {
         PlayerSetupInfo playerInfo = myControl.getPlayerInfo(i);
         Integer key = new Integer(i);
@@ -133,9 +133,17 @@ public class PlayerSetupArtist
       // Ready is currently selected.
       SpriteUIUtils.drawCursor(myG, readyX, readyY, readyButton.getWidth(), readyButton.getHeight(), myControl.getPlayerInfo(highlightedPlayer).getCurrentColor());
     }
-    else // Draw the cursor over the appropriate player info panel.
+    else // Draw the cursor over the appropriate player info panel, if it is visible.
     {
+      // If the user pushes up from zero, the panel at the end may not have been rendered yet, and may not exist. If so, build it.
       PlayerPanel panel = playerPanels.get(highlightedPlayer);
+      if( null == panel )
+      {
+        panel = new PlayerPanel(myControl.getPlayerInfo(highlightedPlayer));
+        playerPanels.put(highlightedPlayer, panel);
+      }
+
+      // Figure out which frame in the player panel is under the cursor.
       SpriteUIUtils.ImageFrame pane;
       switch(myControl.getHighlightedCategory())
       {
