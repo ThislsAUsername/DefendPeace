@@ -99,13 +99,13 @@ public interface GameAction
       if( isValid )
       {
         Location moveLocation = gameMap.getLocation(moveCoord);
-        defender = gameMap.getLocation(attackLocation).getResident();
         attackRange = Math.abs(moveCoord.xCoord - attackLocation.xCoord)
             + Math.abs(moveCoord.yCoord - attackLocation.yCoord);
 
         boolean moved = attacker.x != moveCoord.xCoord || attacker.y != moveCoord.yCoord;
+        isValid &= (gameMap.getLocation(attackLocation).getResident() == defender);
         isValid &= (null != defender) && attacker.canAttack(defender.model, attackRange, moved);
-        isValid &= attacker.CO.isEnemy(defender.CO);
+        isValid &= (null != defender) && attacker.CO.isEnemy(defender.CO);
         isValid &= (null == moveLocation.getResident()) || (attacker == moveLocation.getResident());
       }
 
@@ -820,9 +820,14 @@ public interface GameAction
         // Note that movePath being null is OK for ResupplyAction when it is being re-used.
         if( movePath != null )
         {
-          eventSequence.add(new MoveEvent(unitActor, movePath));
+          // If we should be blocked, don't resupply anything.
+          if( !Utils.enqueueMoveEvent(map, unitActor, movePath, eventSequence) )
+            isValid = false;
         }
+      }
 
+      if( isValid )
+      {
         // Get the adjacent map locations.
         ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, supplyLocation, 1);
 
