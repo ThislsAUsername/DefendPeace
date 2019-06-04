@@ -162,7 +162,7 @@ public class PlayerSetupTeamArtist
 
       commanderFrame = new SpriteUIUtils.ImageFrame(1, 1, portraitPx + 2, portraitPx + 2, info.getCurrentColor(),
           info.getCurrentColor(), true, SpriteLibrary.getCommanderSprites( info.getCurrentCO().name ).head);
-      teamLabel = new SpriteUIUtils.ImageFrame(commanderFrame.width+2, 1, 28, 10, SpriteUIUtils.MENUHIGHLIGHTCOLOR, SpriteUIUtils.MENUBGCOLOR, false, SpriteLibrary.getTextAsImage("TEAM"));
+      teamLabel = new SpriteUIUtils.ImageFrame(commanderFrame.width+2, 1, 28, 10, SpriteUIUtils.MENUHIGHLIGHTCOLOR, SpriteUIUtils.MENUBGCOLOR, false, SpriteLibrary.getTextAsImage("TEAM", true));
       commanderFrame.render(g);
       teamLabel.render(g);
 

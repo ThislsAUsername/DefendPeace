@@ -51,7 +51,7 @@ public class PlayerSetupAiArtist
       for( int i = 0; i < aiOptions.size(); ++i )
       {
         BufferedImage frame = SpriteUIUtils.makeTextFrame(SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR, buf.toString(), 3, 2);
-        SpriteLibrary.drawImageCenteredOnPoint(frame.getGraphics(), SpriteLibrary.getTextAsImage(aiOptions.get(i).getName()), frame.getWidth()/2, frame.getHeight()/2, 1);
+        SpriteLibrary.drawImageCenteredOnPoint(frame.getGraphics(), SpriteLibrary.getTextAsImage(aiOptions.get(i).getName(), true), frame.getWidth()/2, frame.getHeight()/2, 1);
         aiNameplates.put(i, frame);
       }
     }

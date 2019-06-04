@@ -635,15 +635,28 @@ public class SpriteLibrary
   }
 
   /**
-   * Returns a BufferedImage containing the contents of `text` rendered on one line, on a transparent background, with no scaling applied.
+   * Returns a BufferedImage containing the contents of `text` rendered on one
+   * line in the standard font, on a transparent background, with no scaling applied.
    */
   public static BufferedImage getTextAsImage(String text)
   {
-    Sprite letters = getLettersSmallCaps();
+    return getTextAsImage(text, false);
+  }
+
+  /**
+   * Returns a BufferedImage containing the contents of `text` rendered on one line (in small
+   * caps or standard font as specified), on a transparent background, with no scaling applied.
+   */
+  public static BufferedImage getTextAsImage(String text, boolean smallCaps)
+  {
+    Sprite letters = (smallCaps) ? getLettersSmallCaps() : getLettersLowercase();
     int width = letters.getFrame(0).getWidth() * text.length();
     int height = letters.getFrame(0).getHeight();
     BufferedImage textImage = createTransparentSprite(width, height);
-    drawTextSmallCaps(textImage.getGraphics(), text, 0, 0, 1);
+    if( smallCaps )
+      drawTextSmallCaps(textImage.getGraphics(), text, 0, 0, 1);
+    else
+      drawText(textImage.getGraphics(), text, 0, 0, 1);
     return textImage;
   }
 

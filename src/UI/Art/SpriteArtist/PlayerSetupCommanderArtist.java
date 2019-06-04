@@ -110,7 +110,7 @@ public class PlayerSetupCommanderArtist
   private static class CommanderPanel
   {
     // A couple of helper quantities.
-    private static int textBufferPx = 2;
+    private static int textBufferPx = 4;
     private static int eyesWidth = SpriteLibrary.getCommanderSprites( "STRONG" ).eyes.getWidth();
     private static int eyesHeight = SpriteLibrary.getCommanderSprites( "STRONG" ).eyes.getHeight();
 
@@ -145,7 +145,7 @@ public class PlayerSetupCommanderArtist
         if( !coInfo.name.equals(myCoName) )
         {
           myCoName = coInfo.name;
-          int newWidth = myCoName.length() * SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth() + textBufferPx*2;
+          int newWidth = myCoName.length() * SpriteLibrary.getLettersLowercase().getFrame(0).getWidth() + textBufferPx*2;
           BufferedImage namePlate = SpriteLibrary.getTextAsImage(myCoName);
           commanderName = new SpriteUIUtils.ImageFrame(commanderFace.width+2, 1, newWidth, commanderFace.height,
               SpriteUIUtils.MENUHIGHLIGHTCOLOR, SpriteUIUtils.MENUBGCOLOR, false, namePlate);
