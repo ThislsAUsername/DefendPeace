@@ -822,7 +822,8 @@ public interface GameAction
         {
           // If we should be blocked, don't resupply anything.
           if( !Utils.enqueueMoveEvent(map, unitActor, movePath, eventSequence) )
-            isValid = false;
+            isValid = false; // isValid is used to signal pre-emption here rather than a malformed action.
+                             // Strange control flow stems from ResupplyAction's dual purpose. 
         }
       }
 
