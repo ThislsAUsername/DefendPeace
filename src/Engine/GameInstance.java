@@ -253,16 +253,10 @@ public class GameInstance implements Serializable
   {
     System.out.println(String.format("Deserializing game data from %s", filename));
     
-    GameVersion verInfo = null;
     GameInstance load = null;
     try (FileInputStream file = new FileInputStream(filename); ObjectInputStream in = new ObjectInputStream(file);)
     {
-      verInfo = (GameVersion) in.readObject();
-      if( !new GameVersion().isEqual(verInfo) )
-      {
-        throw new Exception(String.format("Deserializing failed! Save is incompatible version: %s",
-            (null == verInfo) ? "unknown" : verInfo.toString()));
-      }
+      in.readObject(); // Pull out and discard our version info
 
       load = (GameInstance) in.readObject();
     }
