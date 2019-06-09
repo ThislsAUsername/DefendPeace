@@ -11,6 +11,7 @@ import Engine.IController;
 import Terrain.MapInfo;
 import UI.PlayerSetupController;
 import UI.PlayerSetupInfo;
+import UI.SlidingValue;
 import UI.UIUtils;
 import Units.UnitModel;
 
@@ -20,7 +21,7 @@ public class PlayerSetupArtist
   private static final Color MENUBGCOLOR = new Color(234, 204, 154);
   private static final Color MENUHIGHLIGHTCOLOR = new Color(246, 234, 210);
 
-  private static double animHighlightedPlayer = 0;
+  private static SlidingValue animHighlightedPlayer;
 
   private static PlayerSetupController myControl = null;
 
@@ -33,7 +34,7 @@ public class PlayerSetupArtist
     //   this class is static, but the CO select screen is not.
     if(myControl != control)
     {
-      animHighlightedPlayer = control.getHighlightedPlayer();
+      animHighlightedPlayer = null;
       myControl = control;
     }
 
@@ -90,20 +91,21 @@ public class PlayerSetupArtist
     // Calculate the vertical space each player panel will consume.
     int panelHeight = PlayerPanel.PANEL_HEIGHT+3;
 
-    // If we are moving from one option to another, calculate the intermediate draw location.
-    if( animHighlightedPlayer != highlightedPlayer )
-    {
-      double slide = SpriteUIUtils.calculateSlideAmount(animHighlightedPlayer, highlightedPlayer);
-      animHighlightedPlayer += slide;
-    }
 
     // Define the space to draw the list of player CO portraits.
     int playerXCenter = ((imageWidth - readyAreaWidth) / 2);
     int highlightedPlayerYCenter = imageHeight / 2; // Whichever player has focus should be centered.
 
+    // If we are moving from one option to another, calculate the intermediate draw location.
+    if( null == animHighlightedPlayer )
+    {
+      animHighlightedPlayer = new SlidingValue(highlightedPlayer*panelHeight);
+    }
+    animHighlightedPlayer.set(highlightedPlayer*panelHeight);
+
     // Find where the zeroth player CO should be drawn.
     // Shift from the center location by the spacing times the number of the highlighted option.
-    int playerYCenter = (int)(highlightedPlayerYCenter - (animHighlightedPlayer * panelHeight));
+    int playerYCenter = (int)(highlightedPlayerYCenter - animHighlightedPlayer.get());
 
     // Draw all of the player info.
     for(int i = 0; i < numCOs; ++i, playerYCenter += (panelHeight))
