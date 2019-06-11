@@ -10,11 +10,14 @@ import Engine.IController;
 import Terrain.MapInfo;
 import UI.PlayerSetupInfo;
 import UI.PlayerSetupTeamController;
+import UI.SlidingValue;
 import UI.UIUtils;
 
 public class PlayerSetupTeamArtist
 {
   private static HashMap<Integer, TeamPanel> teamPanels = new HashMap<Integer, TeamPanel>();
+  private static SlidingValue player0YCenter;
+  private static long lastCallTime = 0; // A long delay means we probably just entered this screen.
 
   public static void draw(Graphics g, MapInfo mapInfo, IController controller)
   {
@@ -52,22 +55,23 @@ public class PlayerSetupTeamArtist
     int panelBuffer = 3;
     int panelHeight = TeamPanel.PANEL_HEIGHT+panelBuffer;
 
-    // If we are moving from one option to another, calculate the intermediate draw location.
-//    if( animHighlightedPlayer != highlightedPlayer )
-//    {
-//      double slide = SpriteUIUtils.calculateSlideAmount(animHighlightedPlayer, highlightedPlayer);
-//      animHighlightedPlayer += slide;
-//    }
-
     // Find where the zeroth player CO should be drawn.
     // Shift from the center location by the spacing times the number of the highlighted option.
-    int playerYCenter = (int)(playerZoneYCenter - (highlightedPlayer * panelHeight));
+    int target = (int)(playerZoneYCenter - (highlightedPlayer * panelHeight));
+    if( null == player0YCenter ) player0YCenter = new SlidingValue(target);
+    long callTime = System.currentTimeMillis();
+    if( callTime - lastCallTime > 64 )
+      player0YCenter.snap(target); // If we just entered this screen then snap into position instead of scrolling.
+    else
+      player0YCenter.set(target); // If we were here already, then show the scrolling animation.
+    lastCallTime = callTime;
+    int drawYCenter = (int)player0YCenter.get();
 
     // Draw all of the visible team panels.
-    for(int i = 0; i < numCOs; ++i, playerYCenter += (panelHeight))
+    for(int i = 0; i < numCOs; ++i, drawYCenter += (panelHeight))
     {
       // Only bother to draw it if it is onscreen.
-      if( (playerYCenter > -panelHeight/2) && ( playerYCenter < SpriteOptions.getScreenDimensions().getHeight()+(panelHeight/2) ) )
+      if( (drawYCenter > -panelHeight/2) && ( drawYCenter < SpriteOptions.getScreenDimensions().getHeight()+(panelHeight/2) ) )
       {
         PlayerSetupInfo playerInfo = control.getPlayerInfo(i);
         Integer key = new Integer(i);
@@ -80,7 +84,7 @@ public class PlayerSetupTeamArtist
         BufferedImage playerImage = panel.update(playerInfo);
 
         int drawX = arrowheadPx * 2;
-        int drawY = playerYCenter - playerImage.getHeight()/2;
+        int drawY = drawYCenter - playerImage.getHeight()/2;
         myG.drawImage(playerImage, drawX, drawY, playerImage.getWidth(), playerImage.getHeight(), null);
       }
     }
