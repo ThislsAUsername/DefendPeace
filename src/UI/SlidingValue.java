@@ -31,6 +31,14 @@ public class SlidingValue
     }
   }
 
+  /** Set a target/destination for this SlidingPoint and move it there instantly. */
+  public void snap(int val)
+  {
+    actualValue = val;
+    visualValue = val;
+    lastTime = System.currentTimeMillis();
+  }
+
   /** Retrieve the "current" location of the point as it slides to its destination. */
   public double get()
   {
