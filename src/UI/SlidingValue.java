@@ -73,11 +73,12 @@ public class SlidingValue
       td -= UPDATE_DELAY_MS;
       double animMoveFraction = 0.3; // Movement amount per cycle.
       double animSnapDistance = 0.05; // Minimum distance at which point we just snap into place.
-      double diff = Math.abs(targetNum - currentNum);
+      double diff = Math.abs(targetNum - (currentNum+slide));
       int sign = (targetNum > currentNum) ? 1 : -1; // Since we took abs(), make sure we can correct the sign.
       if( diff < animSnapDistance )
       { // If we are close enough, just move the exact distance.
-        slide = diff * sign;
+        td = 0;
+        slide = targetNum - currentNum;
       }
       else
       { // Move a fixed fraction of the remaining distance.
