@@ -57,6 +57,12 @@ public class SlidingValue
     return currentValue;
   }
 
+  /** Get the "current" location of the point, rounded to the nearest int. **/
+  public int geti()
+  {
+    return (int)(0.5 + get());
+  }
+
   /** Retrieve the current destination (the last set() value) of this sliding point. */
   public int getDestination()
   {

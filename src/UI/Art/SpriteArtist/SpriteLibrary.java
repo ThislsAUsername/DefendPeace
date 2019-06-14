@@ -676,6 +676,21 @@ public class SpriteLibrary
     g.drawImage(image, drawX, drawY, drawWidth, drawHeight, null);
   }
 
+  private static HashMap<Color, Sprite> coloredCursors;
+  public static Sprite getCursorSprites(Color color)
+  {
+    if( null == coloredCursors )
+    {
+      coloredCursors = new HashMap<Color, Sprite>();
+    }
+    if( !coloredCursors.containsKey(color) )
+    {
+      Sprite newCursor = new Sprite(SpriteLibrary.getCursorSprites());
+      newCursor.colorize(UIUtils.defaultMapColors[4], color);
+      coloredCursors.put(color, newCursor);
+    }
+    return coloredCursors.get(color);
+  }
   public static Sprite getCursorSprites()
   {
     if( null == cursorSprites )
