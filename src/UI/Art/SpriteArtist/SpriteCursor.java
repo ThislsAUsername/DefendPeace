@@ -39,6 +39,12 @@ public class SpriteCursor
     xPos.snap(y);
   }
 
+  public void set(int x, int y, boolean snap)
+  {
+    if(snap) snap(x, y);
+    else set(x, y);
+  }
+
   public void set(int x, int y, int w, int h)
   {
     xPos.set(x);
@@ -53,6 +59,12 @@ public class SpriteCursor
     yPos.snap(y);
     width.snap(w);
     height.snap(h);
+  }
+
+  public void set(int x, int y, int w, int h, boolean snap)
+  {
+    if(snap) snap(x, y, w, h);
+    else set(x, y, w, h);
   }
 
   public void draw(Graphics g)

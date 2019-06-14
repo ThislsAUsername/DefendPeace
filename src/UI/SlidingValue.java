@@ -30,6 +30,13 @@ public class SlidingValue
     }
   }
 
+  /** Set a target/destination for this SlidingPoint. If `snap` is true, go instantly to val. */
+  public void set(int val, boolean snap)
+  {
+    if(snap) snap(val);
+    else set(val);
+  }
+
   /** Set a target/destination for this SlidingPoint and move it there instantly. */
   public void snap(int val)
   {
