@@ -9,6 +9,8 @@ package UI;
 public class SlidingValue
 {
   private static final long UPDATE_DELAY_MS = 16; // Minimum time to update the intermediate position.
+  private static final double UPDATE_FACTOR = 0.7; // Move (1-UPDATE_FACTOR)*distance on each update delay.
+  private static final double SNAP_DISTANCE = 0.05;
   private int targetValue;
   private double currentValue;
   private long lastTime;
@@ -49,14 +51,11 @@ public class SlidingValue
   public double get()
   {
     // If we are already basically there, just snap to.
-    double snapDistance = 0.05;
-    if( Math.abs(targetValue - currentValue) < snapDistance )
+    if( Math.abs(targetValue - currentValue) < SNAP_DISTANCE )
     {
       currentValue = targetValue;
     }
-
-    // Otherwise, figure out how much closer to get and move in.
-    if( currentValue != targetValue )
+    else // Otherwise, figure out how much closer to get and move in.
     {
       double slide = calculateSlideAmount();
       currentValue += slide;
@@ -64,7 +63,7 @@ public class SlidingValue
     return currentValue;
   }
 
-  /** Get the "current" location of the point, rounded to the nearest int. **/
+  /** Get the "current" value, rounded to the nearest int. **/
   public int geti()
   {
     return (int)(0.5 + get());
@@ -78,8 +77,6 @@ public class SlidingValue
 
   private double calculateSlideAmount()
   {
-    double moveFraction = 0.3;
-
     long time = System.currentTimeMillis();
 
     // Figure out how many UPDATE_DELAY_MS intervals have passed.
@@ -88,7 +85,7 @@ public class SlidingValue
     lastTime = time;
 
     double dist = targetValue - currentValue;
-    double slide = dist - (dist * Math.pow(1-moveFraction, power));
+    double slide = dist - (dist * Math.pow(UPDATE_FACTOR, power));
     return slide;
   }
 }
