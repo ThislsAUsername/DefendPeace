@@ -10,7 +10,6 @@ import java.util.HashMap;
 import CommandingOfficers.CommanderInfo;
 import Engine.IController;
 import Engine.OptionSelector;
-import UI.InputHandler.InputAction;
 import UI.PlayerSetupCommanderController;
 import UI.SlidingValue;
 import UI.UIUtils;
@@ -49,7 +48,7 @@ public class PlayerSetupCommanderArtist
     BufferedImage likeness = SpriteLibrary.getCommanderSprites( infos.get(highlightedCommander).name ).body;
     myG.drawImage(likeness, myWidth-likeness.getWidth(), myHeight-likeness.getHeight(), null);
 
-    /////////////// Team Panels //////////////////////
+    /////////////// Commander Panels //////////////////////
     // Calculate the vertical space each player panel will consume.
     int panelBuffer = 3;
     int panelHeight = CommanderPanel.PANEL_HEIGHT+panelBuffer;
@@ -67,10 +66,10 @@ public class PlayerSetupCommanderArtist
       drawYCenter -= panelHeight;
     }
     // We don't actually want to draw something off the screen, so go forward one again.
-    coToDraw.handleInput(InputAction.DOWN);
+    coToDraw.next();
     drawYCenter += panelHeight;
 
-    // Draw all of the visible commander panels that are on-screen.
+    // Draw all of the commander panels that are visible.
     for(; drawYCenter - CommanderPanel.PANEL_HEIGHT/2 < myHeight ; coToDraw.next(), drawYCenter += (panelHeight))
     {
       CommanderInfo coInfo = infos.get(coToDraw.getSelectionNormalized());
@@ -87,7 +86,7 @@ public class PlayerSetupCommanderArtist
       int drawY = drawYCenter - playerImage.getHeight()/2;
       myG.drawImage(playerImage, drawX, drawY, null);
 
-      // Draw the cursor if this panel is highlighted
+      // Draw the cursor if this panel is highlighted.
       if( highlightedCommander == coToDraw.getSelectionNormalized() )
       {
         panelDrawW.set(playerImage.getWidth(), snapCursor);
