@@ -16,12 +16,16 @@ import UI.UIUtils;
 public class PlayerSetupTeamArtist
 {
   private static HashMap<Integer, TeamPanel> teamPanels = new HashMap<Integer, TeamPanel>();
-  private static SlidingValue player0YCenter;
-  private static long lastCallTime = 0; // A long delay means we probably just entered this screen.
+  private static SlidingValue player0YCenter = new SlidingValue(0);
+  private static PlayerSetupTeamController control;
 
   public static void draw(Graphics g, MapInfo mapInfo, IController controller)
   {
-    PlayerSetupTeamController control = (PlayerSetupTeamController)controller;
+    boolean refresh = false;
+    if (control != controller) // If our controller is different than what it was before, refresh our slidy behaviors
+      refresh = true;
+    
+    control = (PlayerSetupTeamController)controller;
     if( null == control )
     {
       System.out.println("WARNING! PlayerSetupColorFactionArtist was given the wrong controller!");
@@ -57,15 +61,11 @@ public class PlayerSetupTeamArtist
 
     // Find where the zeroth player CO should be drawn.
     // Shift from the center location by the spacing times the number of the highlighted option.
-    int target = (int)(playerZoneYCenter - (highlightedPlayer * panelHeight));
-    if( null == player0YCenter ) player0YCenter = new SlidingValue(target);
-    long callTime = System.currentTimeMillis();
-    if( callTime - lastCallTime > 64 )
-      player0YCenter.snap(target); // If we just entered this screen then snap into position instead of scrolling.
-    else
-      player0YCenter.set(target); // If we were here already, then show the scrolling animation.
-    lastCallTime = callTime;
-    int drawYCenter = (int)player0YCenter.get();
+    int target = (int) (playerZoneYCenter - (highlightedPlayer * panelHeight));
+    if( refresh ) // If the view is new, don't just slide
+      player0YCenter.snap(target);
+    player0YCenter.set(target);
+    int drawYCenter = (int) player0YCenter.get();
 
     // Draw all of the visible team panels.
     for(int i = 0; i < numCOs; ++i, drawYCenter += (panelHeight))
@@ -74,7 +74,7 @@ public class PlayerSetupTeamArtist
       if( (drawYCenter > -panelHeight/2) && ( drawYCenter < SpriteOptions.getScreenDimensions().getHeight()+(panelHeight/2) ) )
       {
         PlayerSetupInfo playerInfo = control.getPlayerInfo(i);
-        Integer key = new Integer(i);
+        Integer key = i;
 
         // Get the relevant PlayerPanel.
         if( !teamPanels.containsKey(key) ) teamPanels.put(key, new TeamPanel(playerInfo));
