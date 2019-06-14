@@ -11,13 +11,13 @@ public class SlidingValue
   private static final long UPDATE_DELAY_MS = 16; // Minimum time to update the intermediate position.
   private static double UPDATE_SCALE_FACTOR = 0.7; // What fraction of the difference we'll take up per UPDATE_DELAY
   private static double ANIM_SNAP_DISTANCE = 0.5; // Minimum distance, at which point we just snap into place.
-  private int startValue, endValue;
+  private int startValue, targetValue;
   private long startTime;
   private boolean done;
 
   public SlidingValue(int val)
   {
-    endValue = val;
+    targetValue = val;
     startValue = val;
     done = false;
     startTime = System.currentTimeMillis();
@@ -26,19 +26,26 @@ public class SlidingValue
   /** Set a target/destination for this SlidingPoint. */
   public void set(int val)
   {
-    if( val != endValue )
+    if( val != targetValue )
     {
       startValue = (int) get();
-      endValue = val;
+      targetValue = val;
       done = false;
       startTime = System.currentTimeMillis();
     }
   }
 
+  /** Set a target/destination for this SlidingPoint. If `snap` is true, go instantly to val. */
+  public void set(int val, boolean snap)
+  {
+    if(snap) snap(val);
+    else set(val);
+  }
+
   /** Set a target/destination for this SlidingPoint and move it there instantly. */
   public void snap(int val)
   {
-    endValue = val;
+    targetValue = val;
     startValue = val;
     done = true;
     startTime = System.currentTimeMillis();
@@ -48,17 +55,23 @@ public class SlidingValue
   public double get()
   {
     if (done)
-      return endValue;
+      return targetValue;
     long td = System.currentTimeMillis() - startTime;
-    double diff = (endValue - startValue) * Math.pow(UPDATE_SCALE_FACTOR, td / UPDATE_DELAY_MS);
+    double diff = (targetValue - startValue) * Math.pow(UPDATE_SCALE_FACTOR, td / UPDATE_DELAY_MS);
     if (Math.abs(diff) <= ANIM_SNAP_DISTANCE)
       done = true;
-    return endValue - diff;
+    return targetValue - diff;
+  }
+
+  /** Get the "current" location of the point, rounded to the nearest int. **/
+  public int geti()
+  {
+    return (int)(0.5 + get());
   }
 
   /** Retrieve the current destination (the last set() value) of this sliding point. */
   public int getDestination()
   {
-    return endValue;
+    return targetValue;
   }
 }

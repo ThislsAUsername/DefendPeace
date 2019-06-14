@@ -10,13 +10,16 @@ import java.util.HashMap;
 import CommandingOfficers.CommanderInfo;
 import Engine.IController;
 import Engine.OptionSelector;
-import UI.InputHandler.InputAction;
 import UI.PlayerSetupCommanderController;
+import UI.SlidingValue;
 import UI.UIUtils;
 
 public class PlayerSetupCommanderArtist
 {
   private static HashMap<Integer, CommanderPanel> coPanels = new HashMap<Integer, CommanderPanel>();
+
+  private static PlayerSetupCommanderController myControl;
+  private static SlidingValue panelDrawW = new SlidingValue(0);
 
   public static void draw(Graphics g, IController controller, ArrayList<CommanderInfo> infos, Color playerColor)
   {
@@ -25,6 +28,8 @@ public class PlayerSetupCommanderArtist
     {
       System.out.println("WARNING! PlayerSetupCommanderController was given the wrong controller!");
     }
+    boolean snapCursor = myControl != control;
+    myControl = control;
 
     // Define the draw space
     int drawScale = SpriteOptions.getDrawScale();
@@ -43,17 +48,10 @@ public class PlayerSetupCommanderArtist
     BufferedImage likeness = SpriteLibrary.getCommanderSprites( infos.get(highlightedCommander).name ).body;
     myG.drawImage(likeness, myWidth-likeness.getWidth(), myHeight-likeness.getHeight(), null);
 
-    /////////////// Team Panels //////////////////////
+    /////////////// Commander Panels //////////////////////
     // Calculate the vertical space each player panel will consume.
     int panelBuffer = 3;
     int panelHeight = CommanderPanel.PANEL_HEIGHT+panelBuffer;
-
-    // If we are moving from one option to another, calculate the intermediate draw location.
-//    if( animHighlightedPlayer != highlightedPlayer )
-//    {
-//      double slide = SpriteUIUtils.calculateSlideAmount(animHighlightedPlayer, highlightedPlayer);
-//      animHighlightedPlayer += slide;
-//    }
 
     // Find where the zeroth Commander should be drawn. Start by assuming it's centered.
     int drawYCenter = myHeight / 2;
@@ -68,10 +66,10 @@ public class PlayerSetupCommanderArtist
       drawYCenter -= panelHeight;
     }
     // We don't actually want to draw something off the screen, so go forward one again.
-    coToDraw.handleInput(InputAction.DOWN);
+    coToDraw.next();
     drawYCenter += panelHeight;
 
-    // Draw all of the visible commander panels that are on-screen.
+    // Draw all of the commander panels that are visible.
     for(; drawYCenter - CommanderPanel.PANEL_HEIGHT/2 < myHeight ; coToDraw.next(), drawYCenter += (panelHeight))
     {
       CommanderInfo coInfo = infos.get(coToDraw.getSelectionNormalized());
@@ -88,10 +86,11 @@ public class PlayerSetupCommanderArtist
       int drawY = drawYCenter - playerImage.getHeight()/2;
       myG.drawImage(playerImage, drawX, drawY, null);
 
-      // Draw the cursor if this panel is highlighted
+      // Draw the cursor if this panel is highlighted.
       if( highlightedCommander == coToDraw.getSelectionNormalized() )
       {
-        SpriteUIUtils.drawCursor(myG, drawX, drawY, playerImage.getWidth(), playerImage.getHeight(), playerColor);
+        panelDrawW.set(playerImage.getWidth(), snapCursor);
+        SpriteCursor.draw(myG, drawX, drawY, panelDrawW.geti(), playerImage.getHeight(), playerColor);
       }
     }
 

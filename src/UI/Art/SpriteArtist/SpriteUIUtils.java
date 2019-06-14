@@ -7,39 +7,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
-import UI.UIUtils;
 
 public class SpriteUIUtils
 {
   public static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
   public static final Color MENUBGCOLOR = new Color(234, 204, 154);
   public static final Color MENUHIGHLIGHTCOLOR = new Color(246, 234, 210);
-
-  private static HashMap<Color, Sprite> coloredCursors;
-  public static void drawCursor(Graphics g, int x, int y, int w, int h, Color color)
-  {
-    if( null == coloredCursors )
-    {
-      coloredCursors = new HashMap<Color, Sprite>();
-    }
-    if( !coloredCursors.containsKey(color) )
-    {
-      Sprite newCursor = new Sprite(SpriteLibrary.getCursorSprites());
-      newCursor.colorize(UIUtils.defaultMapColors[4], color);
-      coloredCursors.put(color, newCursor);
-    }
-
-    // Draw the arrows around the focused player attribute.
-    Sprite cursor = coloredCursors.get(color);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), x, y, 1);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), x+w, y, 1);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), x+w, y+h, 1);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), x, y+h, 1);
-  }
 
   /**
    * Loads the image at the given file location and returns it as a BufferedImage.

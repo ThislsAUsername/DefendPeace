@@ -85,8 +85,8 @@ public class SpriteMainUIView implements IView
 
     // Figure out where to actually draw the currently-highlighted option. Note that this changes 
     //   immediately when up or down is pressed, and the new option becomes the basis for drawing.
-    final int xBasisLoc = (int) (xCenter - (animHighlightedOption.get() - highlightedOption) * optionSeparationX);
-    final int yBasisLoc = (int) (yCenter - (animHighlightedOption.get() - highlightedOption) * optionSeparationY);
+    final int xBasisLoc = (int) (xCenter - (animHighlightedOption.get() - animHighlightedOption.getDestination()) * optionSeparationX);
+    final int yBasisLoc = (int) (yCenter - (animHighlightedOption.get() - animHighlightedOption.getDestination()) * optionSeparationY);
 
     // Draw the center option, then the two adjacent, then the next two, until we are off the screen.
     int layer = 0; // We start by drawing all options 0 distance from the highlighted one.

@@ -21,7 +21,8 @@ public class PlayerSetupArtist
   private static final Color MENUBGCOLOR = new Color(234, 204, 154);
   private static final Color MENUHIGHLIGHTCOLOR = new Color(246, 234, 210);
 
-  private static SlidingValue animHighlightedPlayer;
+  private static SlidingValue animHighlightedPlayer = new SlidingValue(0);
+  private static SpriteCursor spriteCursor = new SpriteCursor(0, 0, 0, 0, UIUtils.getCOColors()[0]);
 
   private static PlayerSetupController myControl = null;
 
@@ -32,11 +33,8 @@ public class PlayerSetupArtist
     // If control has changed, we just entered a new CO setup screen. We don't want to
     //   animate a menu transition based on the last time we were choosing COs, since
     //   this class is static, but the CO select screen is not.
-    if(myControl != control)
-    {
-      animHighlightedPlayer = null;
-      myControl = control;
-    }
+    boolean snapCursor = myControl != control;
+    myControl = control;
 
     // Draw fancy background effects.
     DiagonalBlindsBG.draw(g);
@@ -44,7 +42,7 @@ public class PlayerSetupArtist
     IController subMenu = myControl.getSubMenu();
     if( null == subMenu )
     {
-      drawPlayerSetup(g, mapInfo, control);
+      drawPlayerSetup(g, mapInfo, snapCursor);
     }
     else
     {
@@ -67,7 +65,7 @@ public class PlayerSetupArtist
     }
   }
 
-  private static void drawPlayerSetup(Graphics g, MapInfo mapInfo, PlayerSetupController control)
+  private static void drawPlayerSetup(Graphics g, MapInfo mapInfo, boolean snapCursor)
   {
     // Get the draw space. We'll draw it all in real size and then scale it when we draw to the window.
     int drawScale = SpriteOptions.getDrawScale();
@@ -91,17 +89,15 @@ public class PlayerSetupArtist
     // Calculate the vertical space each player panel will consume.
     int panelHeight = PlayerPanel.PANEL_HEIGHT+3;
 
-
     // Define the space to draw the list of player CO portraits.
     int playerXCenter = ((imageWidth - readyAreaWidth) / 2);
     int highlightedPlayerYCenter = imageHeight / 2; // Whichever player has focus should be centered.
 
     // If we are moving from one option to another, calculate the intermediate draw location.
-    if( null == animHighlightedPlayer )
-    {
-      animHighlightedPlayer = new SlidingValue(highlightedPlayer*panelHeight);
-    }
-    animHighlightedPlayer.set(highlightedPlayer*panelHeight);
+    if(snapCursor)
+      animHighlightedPlayer.snap(highlightedPlayer*panelHeight);
+    else
+      animHighlightedPlayer.set(highlightedPlayer*panelHeight);
 
     // Find where the zeroth player CO should be drawn.
     // Shift from the center location by the spacing times the number of the highlighted option.
@@ -130,10 +126,16 @@ public class PlayerSetupArtist
     }
 
     // Figure out where to draw the cursor.
+    PlayerSetupInfo info = myControl.getPlayerInfo(highlightedPlayer);
+    spriteCursor.set(info.getCurrentColor());
     if( myControl.getHighlightedCategory() == PlayerSetupController.SelectionCategories.START.ordinal() )
     {
       // Ready is currently selected.
-      SpriteUIUtils.drawCursor(myG, readyX, readyY, readyButton.getWidth(), readyButton.getHeight(), myControl.getPlayerInfo(highlightedPlayer).getCurrentColor());
+      if( snapCursor )
+        spriteCursor.snap(readyX, readyY, readyButton.getWidth(), readyButton.getHeight());
+      else
+        spriteCursor.set(readyX, readyY, readyButton.getWidth(), readyButton.getHeight());
+      spriteCursor.draw(myG);
     }
     else // Draw the cursor over the appropriate player info panel, if it is visible.
     {
@@ -163,11 +165,14 @@ public class PlayerSetupArtist
           pane = panel.aiPane;
           break;
       }
-      PlayerSetupInfo info = myControl.getPlayerInfo(highlightedPlayer);
       BufferedImage playerImage = panel.getImage();
-      int drawX = playerXCenter - (playerImage.getWidth())/2;
-      int drawY = imageHeight / 2 - playerImage.getHeight()/2;
-      SpriteUIUtils.drawCursor(myG, drawX+pane.xPos, drawY+pane.yPos, pane.width, pane.height, info.getCurrentColor());
+      int panelX = playerXCenter - (playerImage.getWidth())/2;
+      int panelY = imageHeight / 2 - playerImage.getHeight()/2;
+      if( snapCursor )
+        spriteCursor.snap(panelX+pane.xPos, panelY+pane.yPos, pane.width, pane.height);
+      else
+        spriteCursor.set(panelX+pane.xPos, panelY+pane.yPos, pane.width, pane.height);
+      spriteCursor.draw(myG);
     }
 
     // Finally, draw our rendered image onto the window.
