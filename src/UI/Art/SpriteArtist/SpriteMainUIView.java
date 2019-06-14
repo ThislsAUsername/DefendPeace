@@ -20,7 +20,7 @@ public class SpriteMainUIView implements IView
   private Color[] menuBGColors = {new Color(218,38,2), new Color(0,155,211), new Color(30,218,2), new Color(206,224,234)};
   int highestOption = menuBGColors.length - 1;
 
-  private SlidingValue animHighlightedOption;
+  private SlidingValue animHighlightedOption = new SlidingValue(0);
 
   private int windowWidth;
   private int windowHeight;
@@ -78,10 +78,6 @@ public class SpriteMainUIView implements IView
     int yCenter = 80*SpriteOptions.getDrawScale();
 
     // If we are moving from one highlighted option to another, calculate the intermediate draw location.
-    if( animHighlightedOption == null )
-    {
-      animHighlightedOption = new SlidingValue(highlightedOption);
-    }
     animHighlightedOption.set(highlightedOption);
 
     int optionSeparationX = windowWidth / 6; // So we can evenly space the seven visible options.
@@ -89,8 +85,8 @@ public class SpriteMainUIView implements IView
 
     // Figure out where to actually draw the currently-highlighted option. Note that this changes 
     //   immediately when up or down is pressed, and the new option becomes the basis for drawing.
-    final int xBasisLoc = (int) (xCenter - (animHighlightedOption.get()) * optionSeparationX);
-    final int yBasisLoc = (int) (yCenter - (animHighlightedOption.get()) * optionSeparationY);
+    final int xBasisLoc = (int) (xCenter - (animHighlightedOption.get() - animHighlightedOption.getDestination()) * optionSeparationX);
+    final int yBasisLoc = (int) (yCenter - (animHighlightedOption.get() - animHighlightedOption.getDestination()) * optionSeparationY);
 
     // Draw the center option, then the two adjacent, then the next two, until we are off the screen.
     int layer = 0; // We start by drawing all options 0 distance from the highlighted one.
