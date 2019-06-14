@@ -36,7 +36,7 @@ public class SpriteCursor
   public void snap(int x, int y)
   {
     xPos.snap(x);
-    xPos.snap(y);
+    yPos.snap(y);
   }
 
   public void set(int x, int y, boolean snap)
