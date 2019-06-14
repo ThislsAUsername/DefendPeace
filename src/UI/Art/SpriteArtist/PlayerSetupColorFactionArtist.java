@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 
 import Engine.IController;
 import UI.PlayerSetupColorFactionController;
+import UI.SlidingValue;
 import UI.UIUtils;
 import Units.UnitModel;
 
@@ -20,6 +21,11 @@ public class PlayerSetupColorFactionArtist
   private static int gridWidth;
   private static int gridHeight;
 
+  private static IController myControl;
+  private static SlidingValue gridX = new SlidingValue(0);
+  private static SlidingValue gridY = new SlidingValue(0);
+  private static SpriteCursor spriteCursor = new SpriteCursor(0, 0, SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize, UIUtils.getCOColors()[0]);
+
   public static void draw(Graphics g, IController controller)
   {
     PlayerSetupColorFactionController control = (PlayerSetupColorFactionController)controller;
@@ -27,6 +33,8 @@ public class PlayerSetupColorFactionArtist
     {
       System.out.println("WARNING! PlayerSetupColorFactionArtist was given the wrong controller!");
     }
+    boolean snapCursor = myControl != control;
+    myControl = control;
 
     // Make sure we have all the things we need to draw.
     initialize();
@@ -69,6 +77,9 @@ public class PlayerSetupColorFactionArtist
       startY += minY - (startY + selY );
     }
 
+    gridX.set(startX, snapCursor);
+    gridY.set(startY, snapCursor);
+
     // Render it in true size, and then we'll scale it to window size as we draw it.
     BufferedImage image = SpriteLibrary.createTransparentSprite(myWidth, myHeight);
     Graphics myG = image.getGraphics();
@@ -77,8 +88,8 @@ public class PlayerSetupColorFactionArtist
       for(int f = 0; f < UIUtils.getFactions().length; ++f)
       {
         // Figure out where this should be drawn.
-        int xOff = c*unitSizePx + unitBuffer*(c) + startX;
-        int yOff = f*unitSizePx + unitBuffer*(f) + startY;
+        int xOff = c*unitSizePx + unitBuffer*(c) + gridX.geti();
+        int yOff = f*unitSizePx + unitBuffer*(f) + gridY.geti();
 
         // Only draw on-screen options.
         if( (xOff < myWidth) && (yOff < myHeight) && (xOff > -unitSizePx) && (yOff > -unitSizePx))
@@ -90,7 +101,9 @@ public class PlayerSetupColorFactionArtist
       }
 
     // Draw the cursors around the selected dude.
-    SpriteCursor.draw(myG, startX + selX, startY + selY, unitSizePx, unitSizePx, UIUtils.getCOColors()[control.getSelectedColor()]);
+    spriteCursor.set(startX+selX, startY+selY, snapCursor);
+    spriteCursor.set(UIUtils.getCOColors()[control.getSelectedColor()]);
+    spriteCursor.draw(myG);
 
     // Render our image to the screen at the properly-scaled size.
     g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
