@@ -203,15 +203,12 @@ public class UnitModel
   public boolean hasImmobileWeapon()
   {
     boolean hasSiege = false;
-    if(weaponModels != null && weaponModels.size() > 0)
+    for( WeaponModel wm : weaponModels )
     {
-      for( WeaponModel wm : weaponModels )
+      if( !wm.canFireAfterMoving )
       {
-        if( !wm.canFireAfterMoving )
-        {
-          hasSiege = true;
-          break;
-        }
+        hasSiege = true;
+        break;
       }
     }
     return hasSiege;
