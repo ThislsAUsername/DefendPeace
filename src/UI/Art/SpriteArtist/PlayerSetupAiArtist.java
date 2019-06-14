@@ -11,11 +11,15 @@ import AI.AILibrary;
 import AI.AIMaker;
 import Engine.IController;
 import UI.PlayerSetupAiController;
+import UI.UIUtils;
 
 public class PlayerSetupAiArtist
 {
   private static HashMap<Integer, BufferedImage> aiNameplates = new HashMap<Integer, BufferedImage>();
   private static int maxAiNameLength = -99;
+
+  private static IController myControl;
+  private static SpriteCursor spriteCursor = new SpriteCursor(0, 0, 0, 0, UIUtils.getCOColors()[0]);
 
   public static void draw(Graphics g, IController controller, Color playerColor)
   {
@@ -24,6 +28,8 @@ public class PlayerSetupAiArtist
     {
       System.out.println("WARNING! PlayerSetupAiController was given the wrong controller!");
     }
+    boolean snapCursor = myControl != control;
+    myControl = control;
 
     // Define the draw space
     int drawScale = SpriteOptions.getDrawScale();
@@ -63,7 +69,7 @@ public class PlayerSetupAiArtist
 
     // Find where the zeroth option should be drawn.
     int highlightedAi = control.getSelectedAiIndex();
-    int drawY = nameBuffer/2;
+    int drawY = nameBuffer;
 
     // Draw all of the visible AI names.
     for(int i = 0; i < aiNameplates.size(); i++, drawY += (nameplateYSpace))
@@ -79,7 +85,9 @@ public class PlayerSetupAiArtist
         // Draw the cursor if this panel is highlighted
         if( highlightedAi == i )
         {
-          SpriteCursor.draw(myG, drawX, drawY, aiNameplate.getWidth(), aiNameplate.getHeight(), playerColor);
+          spriteCursor.set(playerColor);
+          spriteCursor.set(drawX, drawY, aiNameplate.getWidth(), aiNameplate.getHeight(), snapCursor);
+          spriteCursor.draw(myG);
         }
       }
     }
