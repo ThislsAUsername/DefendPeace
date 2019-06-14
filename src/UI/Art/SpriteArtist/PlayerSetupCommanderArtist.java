@@ -19,6 +19,7 @@ public class PlayerSetupCommanderArtist
   private static HashMap<Integer, CommanderPanel> coPanels = new HashMap<Integer, CommanderPanel>();
 
   private static PlayerSetupCommanderController myControl;
+  private static SlidingValue panelOffsetY = new SlidingValue(0);
   private static SlidingValue panelDrawW = new SlidingValue(0);
 
   public static void draw(Graphics g, IController controller, ArrayList<CommanderInfo> infos, Color playerColor)
@@ -44,8 +45,9 @@ public class PlayerSetupCommanderArtist
     myG.drawImage(tooltip, myWidth - tooltip.getWidth(), 3, null);
 
     /////////////// Commander Portrait //////////////////////
-    int highlightedCommander = control.getSelectedCommander();
-    BufferedImage likeness = SpriteLibrary.getCommanderSprites( infos.get(highlightedCommander).name ).body;
+    int highlightedCmdr = control.cmdrSelector.getSelectionNormalized();
+    int highlightedCmdrOffset = control.cmdrSelector.getSelectionAbsolute();
+    BufferedImage likeness = SpriteLibrary.getCommanderSprites( infos.get(highlightedCmdr).name ).body;
     myG.drawImage(likeness, myWidth-likeness.getWidth(), myHeight-likeness.getHeight(), null);
 
     /////////////// Commander Panels //////////////////////
@@ -53,23 +55,27 @@ public class PlayerSetupCommanderArtist
     int panelBuffer = 3;
     int panelHeight = CommanderPanel.PANEL_HEIGHT+panelBuffer;
 
-    // Find where the zeroth Commander should be drawn. Start by assuming it's centered.
-    int drawYCenter = myHeight / 2;
+    // Find where the zeroth Commander should be drawn.
+    panelOffsetY.set(highlightedCmdrOffset*panelHeight);
+    int drawYCenter = myHeight / 2 - panelOffsetY.geti();
 
     // We're gonna make this an endless scroll, so back up (in y-space and in the CO list) until
     // we find the Commander that would be off the top of the screen.
     OptionSelector coToDraw = new OptionSelector(infos.size());
-    coToDraw.setSelectedOption(highlightedCommander);
     while( drawYCenter + CommanderPanel.PANEL_HEIGHT/2 > 0 )
     {
       coToDraw.prev();
       drawYCenter -= panelHeight;
     }
-    // We don't actually want to draw something off the screen, so go forward one again.
-    coToDraw.next();
-    drawYCenter += panelHeight;
+    // We don't actually want to draw something off the screen, so go forward until we are on-screen again.
+    while( drawYCenter + CommanderPanel.PANEL_HEIGHT/2 < 0 )
+    {
+      coToDraw.next();
+      drawYCenter += panelHeight;
+    }
 
     // Draw all of the commander panels that are visible.
+    int drawX = SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Make sure we have room to draw the cursor around the frame.
     for(; drawYCenter - CommanderPanel.PANEL_HEIGHT/2 < myHeight ; coToDraw.next(), drawYCenter += (panelHeight))
     {
       CommanderInfo coInfo = infos.get(coToDraw.getSelectionNormalized());
@@ -82,17 +88,18 @@ public class PlayerSetupCommanderArtist
       // Update the PlayerPanel and render it to an image.
       BufferedImage playerImage = panel.update(coInfo, playerColor);
 
-      int drawX = SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Make sure we have room to draw the cursor around the frame.
       int drawY = drawYCenter - playerImage.getHeight()/2;
       myG.drawImage(playerImage, drawX, drawY, null);
 
-      // Draw the cursor if this panel is highlighted.
-      if( highlightedCommander == coToDraw.getSelectionNormalized() )
+      // Set the cursor width.
+      if( highlightedCmdr == coToDraw.getSelectionNormalized() )
       {
         panelDrawW.set(playerImage.getWidth(), snapCursor);
-        SpriteCursor.draw(myG, drawX, drawY, panelDrawW.geti(), playerImage.getHeight(), playerColor);
       }
     }
+
+    // Draw the cursor over the center option.
+    SpriteCursor.draw(myG, drawX, myHeight/2 - CommanderPanel.PANEL_HEIGHT/2, panelDrawW.geti(), CommanderPanel.PANEL_HEIGHT, playerColor);
 
     // Draw the composed image to the window at scale.
     g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);

@@ -11,9 +11,9 @@ import UI.InputHandler.InputAction;
 
 public class PlayerSetupCommanderController implements IController
 {
-  PlayerSetupInfo myPlayerInfo;
-  ArrayList<CommanderInfo> cmdrInfos;
-  OptionSelector cmdrSelector;
+  private PlayerSetupInfo myPlayerInfo;
+  private ArrayList<CommanderInfo> cmdrInfos;
+  public OptionSelector cmdrSelector;
 
   public PlayerSetupCommanderController(ArrayList<CommanderInfo> infos, PlayerSetupInfo playerInfo)
   {
@@ -57,10 +57,5 @@ public class PlayerSetupCommanderController implements IController
         // Do nothing.
     }
     return done;
-  }
-
-  public int getSelectedCommander()
-  {
-    return cmdrSelector.getSelectionNormalized();
   }
 }

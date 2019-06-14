@@ -66,7 +66,7 @@ public class SlidingValue
   /** Get the "current" value, rounded to the nearest int. **/
   public int geti()
   {
-    return (int)(0.5 + get());
+    return (int)Math.round(get());
   }
 
   /** Retrieve the current destination (the last set() value) of this sliding point. */
