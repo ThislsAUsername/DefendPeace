@@ -12,11 +12,15 @@ import Engine.IController;
 import Engine.OptionSelector;
 import UI.InputHandler.InputAction;
 import UI.PlayerSetupCommanderController;
+import UI.SlidingValue;
 import UI.UIUtils;
 
 public class PlayerSetupCommanderArtist
 {
   private static HashMap<Integer, CommanderPanel> coPanels = new HashMap<Integer, CommanderPanel>();
+
+  private static PlayerSetupCommanderController myControl;
+  private static SlidingValue panelDrawW = new SlidingValue(0);
 
   public static void draw(Graphics g, IController controller, ArrayList<CommanderInfo> infos, Color playerColor)
   {
@@ -25,6 +29,8 @@ public class PlayerSetupCommanderArtist
     {
       System.out.println("WARNING! PlayerSetupCommanderController was given the wrong controller!");
     }
+    boolean snapCursor = myControl != control;
+    myControl = control;
 
     // Define the draw space
     int drawScale = SpriteOptions.getDrawScale();
@@ -47,13 +53,6 @@ public class PlayerSetupCommanderArtist
     // Calculate the vertical space each player panel will consume.
     int panelBuffer = 3;
     int panelHeight = CommanderPanel.PANEL_HEIGHT+panelBuffer;
-
-    // If we are moving from one option to another, calculate the intermediate draw location.
-//    if( animHighlightedPlayer != highlightedPlayer )
-//    {
-//      double slide = SpriteUIUtils.calculateSlideAmount(animHighlightedPlayer, highlightedPlayer);
-//      animHighlightedPlayer += slide;
-//    }
 
     // Find where the zeroth Commander should be drawn. Start by assuming it's centered.
     int drawYCenter = myHeight / 2;
@@ -91,7 +90,8 @@ public class PlayerSetupCommanderArtist
       // Draw the cursor if this panel is highlighted
       if( highlightedCommander == coToDraw.getSelectionNormalized() )
       {
-        SpriteCursor.draw(myG, drawX, drawY, playerImage.getWidth(), playerImage.getHeight(), playerColor);
+        panelDrawW.set(playerImage.getWidth(), snapCursor);
+        SpriteCursor.draw(myG, drawX, drawY, panelDrawW.geti(), playerImage.getHeight(), playerColor);
       }
     }
 
