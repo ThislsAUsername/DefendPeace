@@ -79,7 +79,7 @@ public class PlayerSetupAiArtist
         // Draw the cursor if this panel is highlighted
         if( highlightedAi == i )
         {
-          SpriteUIUtils.drawCursor(myG, drawX, drawY, aiNameplate.getWidth(), aiNameplate.getHeight(), playerColor);
+          SpriteCursor.draw(myG, drawX, drawY, aiNameplate.getWidth(), aiNameplate.getHeight(), playerColor);
         }
       }
     }

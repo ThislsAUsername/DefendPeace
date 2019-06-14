@@ -91,7 +91,7 @@ public class PlayerSetupCommanderArtist
       // Draw the cursor if this panel is highlighted
       if( highlightedCommander == coToDraw.getSelectionNormalized() )
       {
-        SpriteUIUtils.drawCursor(myG, drawX, drawY, playerImage.getWidth(), playerImage.getHeight(), playerColor);
+        SpriteCursor.draw(myG, drawX, drawY, playerImage.getWidth(), playerImage.getHeight(), playerColor);
       }
     }
 

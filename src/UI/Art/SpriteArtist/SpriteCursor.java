@@ -63,4 +63,14 @@ public class SpriteCursor
     SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), xPos.geti()+width.geti(), yPos.geti()+height.geti(), 1);
     SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), xPos.geti(), yPos.geti()+height.geti(), 1);
   }
+
+  public static void draw(Graphics g, int x, int y, int w, int h, Color color)
+  {
+    // Draw the arrows around the focused player attribute.
+    Sprite cursor = SpriteLibrary.getCursorSprites(color);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), x, y, 1);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), x+w, y, 1);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), x+w, y+h, 1);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), x, y+h, 1);
+  }
 }
