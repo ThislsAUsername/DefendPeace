@@ -76,7 +76,7 @@ public class PlayerSetupController implements IController
     return exitMenu;
   }
 
-  /** Returs the currently-active sub-menu, or null if control is held locally. */
+  /** Returns the currently-active sub-menu, or null if control is held locally. */
   public IController getSubMenu()
   {
     return subMenu;
