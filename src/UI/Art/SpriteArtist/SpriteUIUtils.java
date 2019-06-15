@@ -209,7 +209,7 @@ public class SpriteUIUtils
   {
     // Height of the letters plus 1 (for buffer between menu options), times the number of entries,
     // minus 1 because there is no buffer after the last entry.
-    return (scaledCharHeightPx + SpriteOptions.getDrawScale()) * menuOptions.size() - SpriteOptions.getDrawScale();
+    return (scaledCharHeightPx + 1) * menuOptions.size() - 1;
   }
 
   public static int getTileSize()
