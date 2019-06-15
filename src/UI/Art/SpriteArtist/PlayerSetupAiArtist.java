@@ -100,8 +100,6 @@ public class PlayerSetupAiArtist
     int infoY = infoBuffer;
     int infoW = aiInfoZoneWidth - infoBuffer * 2;
     int infoH = myHeight - infoBuffer*2;
-    String text = "If I had anything helpful to say about this AI, I would write it here.\n" +
-        "I don't though, so all you get is this useless blurb.";
 
     // Draw a nice frame and populate it with some useful info about the AI.
     myG.setColor(new Color(255, 255, 255, 80));
@@ -113,7 +111,7 @@ public class PlayerSetupAiArtist
     g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
 
     // TODO: Fix drawTextToWidth to not apply scaling automatically.
-    BufferedImage infoText = SpriteUIUtils.drawTextToWidth(text, (aiInfoZoneWidth - nameplateHeight*2)*drawScale);
+    BufferedImage infoText = SpriteUIUtils.drawTextToWidth(aiOptions.get(highlightedAi).getDescription(), (aiInfoZoneWidth - nameplateHeight*2)*drawScale);
     g.drawImage(infoText, (infoX+infoBuffer)*drawScale, (infoY+infoBuffer)*drawScale, null);
   }
 }
