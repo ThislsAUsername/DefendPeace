@@ -13,6 +13,11 @@ public class SpriteCursor
   private SlidingValue height;
   private Color color;
 
+  // Variables to control the cursor animations
+  private static final long ANIM_CYCLE_TIME_MS = 800;
+  private static final long NUM_CYCLE_PHASES = 4;
+  private static final long TIME_PER_CYCLE_MS = ANIM_CYCLE_TIME_MS / NUM_CYCLE_PHASES;
+
   public SpriteCursor(int x, int y, int w, int h, Color c)
   {
     xPos = new SlidingValue(x);
@@ -70,19 +75,48 @@ public class SpriteCursor
   public void draw(Graphics g)
   {
     Sprite cursor = SpriteLibrary.getCursorSprites(color);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), xPos.geti(), yPos.geti(), 1);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), xPos.geti()+width.geti(), yPos.geti(), 1);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), xPos.geti()+width.geti(), yPos.geti()+height.geti(), 1);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), xPos.geti(), yPos.geti()+height.geti(), 1);
+    int[] offs = getSpriteOffsets();
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), xPos.geti()+offs[0], yPos.geti()+offs[1], 1);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), xPos.geti()+width.geti()+offs[2], yPos.geti()+offs[1], 1);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), xPos.geti()+width.geti()+offs[2], yPos.geti()+height.geti()+offs[3], 1);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), xPos.geti()+offs[0], yPos.geti()+height.geti()+offs[3], 1);
+  }
+
+  private static int[] getSpriteOffsets()
+  {
+    long td = System.currentTimeMillis() % ANIM_CYCLE_TIME_MS;
+    int phase = 0;
+    for( ; td > TIME_PER_CYCLE_MS; td -= TIME_PER_CYCLE_MS, phase++ );
+
+    int[] offs = {0, 0, 0, 0};
+    switch(phase)
+    {
+      case 0:
+      case 1:
+      case 2:
+        // Mostly we hang out in standard position.
+        break;
+      case 3:
+        // Every so often, bump in a bit.
+        offs[0] = 1;  // x
+        offs[1] = 1;  // y
+        offs[2] = -1; // w
+        offs[3] = -1; // h
+        break;
+        default:
+          System.out.println("Unknown animation phase in Cursor!");
+    }
+    return offs;
   }
 
   public static void draw(Graphics g, int x, int y, int w, int h, Color color)
   {
     // Draw the arrows around the focused player attribute.
     Sprite cursor = SpriteLibrary.getCursorSprites(color);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), x, y, 1);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), x+w, y, 1);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), x+w, y+h, 1);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), x, y+h, 1);
+    int[] offs = getSpriteOffsets();
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), x+offs[0], y+offs[1], 1);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), x+w+offs[2], y+offs[1], 1);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), x+w+offs[2], y+h+offs[3], 1);
+    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), x+offs[0], y+h+offs[3], 1);
   }
 }
