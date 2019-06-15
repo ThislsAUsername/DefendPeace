@@ -12,11 +12,12 @@ public class GameVersion implements Serializable
   int majorRev, minorRev, hotfix;
   public GameVersion()
   {
-    majorRev = 0;
-    minorRev = 1;
-    hotfix = 0;
+    majorRev = 3; // For substantial, save-breaking changes to the game logic.
+    minorRev = 0; // For added content or UI updates
+    hotfix   = 0; // For bugfixes (hopefully to never see increment)
   }
   
+  // TODO: Consider more nuanced validation here
   public boolean isEqual(GameVersion other)
   {
     boolean equal = true;

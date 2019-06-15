@@ -5,6 +5,9 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
+import UI.InGameMenu;
+import UI.MainUIController;
+import UI.MainUIController.SaveInfo;
 import Engine.IView;
 import UI.MainUIController;
 import UI.SlidingValue;
@@ -55,6 +58,7 @@ public class SpriteMainUIView implements IView
         SpriteMapSelectMenuArtist.draw(g, controller.getGameSetupController());
         break;
       case MAIN:
+      case SAVE_SELECT:
         renderMainMenu(g);
         break;
       case OPTIONS:
@@ -73,9 +77,10 @@ public class SpriteMainUIView implements IView
     // Draw background.
     drawMenuBG(g, highlightedOption);
 
+    int drawScale = SpriteOptions.getDrawScale();
     // We start by assuming the highlighted option will be drawn centered.
     int xCenter = windowWidth / 2;
-    int yCenter = 80*SpriteOptions.getDrawScale();
+    int yCenter = 80*drawScale;
 
     // If we are moving from one highlighted option to another, calculate the intermediate draw location.
     animHighlightedOption.set(highlightedOption);
@@ -108,6 +113,13 @@ public class SpriteMainUIView implements IView
         drawY = yBasisLoc - (layer * optionSeparationY);
         drawMenuOption(g, highlightedOption - layer, drawX, drawY);
       }
+    }
+    
+    if (null != controller.saveMenu) // If we've got a save menu on hand, draw it.
+    {
+      InGameMenu<SaveInfo> sm = controller.saveMenu;
+      BufferedImage savesImage = SpriteUIUtils.makeTextMenu(sm.getAllOptions(), sm.getSelectionNumber(), 3*drawScale, 4*drawScale);
+      SpriteLibrary.drawImageCenteredOnPoint(g, savesImage, xCenter, yCenter, 1);
     }
   }
 

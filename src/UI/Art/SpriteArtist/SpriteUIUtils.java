@@ -55,6 +55,10 @@ public class SpriteUIUtils
     items.add(item);
     return makeTextMenu(bg, frame, bg, items, 0, hBuffer, vBuffer);
   }
+  public static BufferedImage makeTextMenu(ArrayList<String> items, int selection, int hBuffer, int vBuffer)
+  {
+    return makeTextMenu(MENUBGCOLOR, MENUFRAMECOLOR, MENUHIGHLIGHTCOLOR, items, selection, hBuffer, vBuffer);
+  }
   public static BufferedImage makeTextMenu(Color bg, Color frame, Color focus, ArrayList<String> items, int selection,
       int hBuffer, int vBuffer)
   {
