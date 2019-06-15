@@ -82,10 +82,10 @@ public class UIUtils
 
       // Throw some color names in there for the defaults
       // toString() is not user-friendly
-      paletteNames.put(Color.PINK, "salmon");
+      paletteNames.put(Color.PINK, "rose");
       paletteNames.put(Color.CYAN, "cyan");
-      paletteNames.put(Color.ORANGE, "citrus");
-      paletteNames.put(PURPLE, "sparking");
+      paletteNames.put(Color.ORANGE, "orange");
+      paletteNames.put(PURPLE, "violet");
 
       // We want to be able to use the normal units, as well as any others
       factions.add(new Faction(DEFAULT_FACTION_NAME,DEFAULT_FACTION_NAME));
