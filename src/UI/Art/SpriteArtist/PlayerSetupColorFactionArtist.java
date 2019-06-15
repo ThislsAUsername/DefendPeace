@@ -126,4 +126,26 @@ public class PlayerSetupColorFactionArtist
     gridWidth = numColors*unitSizePx + unitBuffer*(numColors-1);
     gridHeight = numFactions*unitSizePx + unitBuffer*(numFactions-1);
   }
+
+  private static int nextFac = 0;
+  private static int nextCol = 0;
+  private static boolean donePreloading = false;
+  /** This can be called repeatedly on the sly to get all infantry sprites
+   * in memory and make this option screen less sluggish on first entry. */
+  public static boolean preloadOneInfantrySprite()
+  {
+    if( !donePreloading )
+    {
+      SpriteLibrary.getMapUnitSpriteSet(UnitModel.UnitEnum.INFANTRY, UIUtils.getFactions()[nextFac], UIUtils.getCOColors()[nextCol]);
+      nextFac++;
+      if( nextFac >= UIUtils.getFactions().length )
+      {
+        nextFac = 0;
+        nextCol++;
+        if( nextCol >= UIUtils.getCOColors().length )
+          donePreloading = true;
+      }
+    }
+    return donePreloading;
+  }
 }
