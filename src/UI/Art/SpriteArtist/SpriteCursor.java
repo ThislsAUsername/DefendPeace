@@ -74,12 +74,7 @@ public class SpriteCursor
 
   public void draw(Graphics g)
   {
-    Sprite cursor = SpriteLibrary.getCursorSprites(color);
-    int[] offs = getSpriteOffsets();
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), xPos.geti()+offs[0], yPos.geti()+offs[1], 1);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), xPos.geti()+width.geti()+offs[2], yPos.geti()+offs[1], 1);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), xPos.geti()+width.geti()+offs[2], yPos.geti()+height.geti()+offs[3], 1);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), xPos.geti()+offs[0], yPos.geti()+height.geti()+offs[3], 1);
+    draw(g, xPos.geti(), yPos.geti(), width.geti(), height.geti(), color);
   }
 
   private static int[] getSpriteOffsets()
