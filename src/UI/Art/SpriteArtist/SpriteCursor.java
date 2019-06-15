@@ -17,6 +17,7 @@ public class SpriteCursor
   private static final long ANIM_CYCLE_TIME_MS = 800;
   private static final long NUM_CYCLE_PHASES = 4;
   private static final long TIME_PER_CYCLE_MS = ANIM_CYCLE_TIME_MS / NUM_CYCLE_PHASES;
+  private static final long ALT_RARITY = 8;
 
   public SpriteCursor(int x, int y, int w, int h, Color c)
   {
@@ -77,29 +78,27 @@ public class SpriteCursor
     draw(g, xPos.geti(), yPos.geti(), width.geti(), height.geti(), color);
   }
 
-  private static int[] getSpriteOffsets()
+  private static boolean[] getSpriteOffsets()
   {
-    long td = System.currentTimeMillis() % ANIM_CYCLE_TIME_MS;
+    long currentTime = System.currentTimeMillis();
+    long td = currentTime % ANIM_CYCLE_TIME_MS;
     int phase = 0;
+    boolean altCycle = currentTime % (ANIM_CYCLE_TIME_MS*ALT_RARITY) < ANIM_CYCLE_TIME_MS;
     for( ; td > TIME_PER_CYCLE_MS; td -= TIME_PER_CYCLE_MS, phase++ );
 
-    int[] offs = {0, 0, 0, 0};
-    switch(phase)
+    boolean[] offs = {false, false, false, false};
+    if( phase == 0 && !altCycle )
     {
-      case 0:
-      case 1:
-      case 2:
-        // Mostly we hang out in standard position.
-        break;
-      case 3:
-        // Every so often, bump in a bit.
-        offs[0] = 1;  // x
-        offs[1] = 1;  // y
-        offs[2] = -1; // w
-        offs[3] = -1; // h
-        break;
-        default:
-          System.out.println("Unknown animation phase in Cursor!");
+      // Every so often, bump in a bit.
+      offs[0] = offs[1] = offs[2] = offs[3] = true;
+    }
+    else if( altCycle )
+    {
+      // Alternate animation cycle. More rarely, bump in each corner one at a time.
+      offs[0] = (phase == 0); // top-left
+      offs[1] = (phase == 1); // top-right
+      offs[2] = (phase == 2); // bot-right
+      offs[3] = (phase == 3); // bot-left
     }
     return offs;
   }
@@ -108,10 +107,25 @@ public class SpriteCursor
   {
     // Draw the arrows around the focused player attribute.
     Sprite cursor = SpriteLibrary.getCursorSprites(color);
-    int[] offs = getSpriteOffsets();
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), x+offs[0], y+offs[1], 1);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), x+w+offs[2], y+offs[1], 1);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), x+w+offs[2], y+h+offs[3], 1);
-    SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), x+offs[0], y+h+offs[3], 1);
+    boolean[] offs = getSpriteOffsets();
+    if( offs[0] )
+      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), x+1, y+1, 1);
+    else
+      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), x, y, 1);
+
+    if( offs[1] )
+      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), x+w-1, y+1, 1);
+    else
+      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), x+w, y, 1);
+
+    if( offs[2] )
+      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), x+w-1, y+h-1, 1);
+    else
+      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), x+w, y+h, 1);
+
+    if( offs[3] )
+      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), x+1, y+h-1, 1);
+    else
+      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), x, y+h, 1);
   }
 }
