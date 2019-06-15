@@ -49,7 +49,7 @@ public class PlayerSetupAiArtist
         if( aiOptions.get(i).getName().length() > maxAiNameLength ) maxAiNameLength = aiOptions.get(i).getName().length();
       }
 
-      // Make a string of all spaces of the required length so we can build nameplates of the same length. Soooo hacky, I know.
+      // Make a string of all spaces of the required length so we can build nameplates of the same length.
       StringBuilder buf = new StringBuilder();
       for( int n = 0; n < maxAiNameLength; ++n ) buf.append(" ");
 
