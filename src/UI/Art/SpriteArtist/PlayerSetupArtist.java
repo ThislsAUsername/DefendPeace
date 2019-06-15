@@ -256,7 +256,7 @@ public class PlayerSetupArtist
 
         // Build the description text: "Commander-Color Faction"
         StringBuffer coStrBuf = new StringBuffer(commanderName);
-        coStrBuf.append("-").append(colorName).append(" ").append(factionName);
+        coStrBuf.append("-").append(UIUtils.getCanonicalFactionName(colorName, factionName));
 
         descriptionPane = new SpriteUIUtils.ImageFrame(1, 1, PANEL_WIDTH - 2, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteLibrary.getTextAsImage(coStrBuf.toString(), true));
         descriptionPane.render(g);
