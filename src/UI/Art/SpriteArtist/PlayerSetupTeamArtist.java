@@ -16,8 +16,8 @@ import UI.UIUtils;
 public class PlayerSetupTeamArtist
 {
   private static HashMap<Integer, TeamPanel> teamPanels = new HashMap<Integer, TeamPanel>();
-  private static SlidingValue player0YCenter;
-  private static long lastCallTime = 0; // A long delay means we probably just entered this screen.
+  private static SlidingValue player0YCenter = new SlidingValue(0);
+  private static IController myControl;
 
   public static void draw(Graphics g, MapInfo mapInfo, IController controller)
   {
@@ -26,6 +26,8 @@ public class PlayerSetupTeamArtist
     {
       System.out.println("WARNING! PlayerSetupColorFactionArtist was given the wrong controller!");
     }
+    boolean snapCursor = myControl != control;
+    myControl = control;
 
     // Define the draw space
     int drawScale = SpriteOptions.getDrawScale();
@@ -58,13 +60,7 @@ public class PlayerSetupTeamArtist
     // Find where the zeroth player CO should be drawn.
     // Shift from the center location by the spacing times the number of the highlighted option.
     int target = (int)(playerZoneYCenter - (highlightedPlayer * panelHeight));
-    if( null == player0YCenter ) player0YCenter = new SlidingValue(target);
-    long callTime = System.currentTimeMillis();
-    if( callTime - lastCallTime > 64 )
-      player0YCenter.snap(target); // If we just entered this screen then snap into position instead of scrolling.
-    else
-      player0YCenter.set(target); // If we were here already, then show the scrolling animation.
-    lastCallTime = callTime;
+    player0YCenter.set(target, snapCursor); // If we just entered this screen then snap into position instead of scrolling.
     int drawYCenter = (int)player0YCenter.get();
 
     // Draw all of the visible team panels.
