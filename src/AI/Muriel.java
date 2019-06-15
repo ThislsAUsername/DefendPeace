@@ -50,7 +50,7 @@ public class Muriel implements AIController
     {
       return
           "Muriel attempts to choose new units to build based on the enemy force composition.\n" +
-          "She knows some basics of unit control, but doesn't currently understand ranged attacks.";
+          "She knows basic unit tactics, but doesn't currently understand ranged attacks.";
     }
   }
   public static final AIMaker info = new instantiator();
