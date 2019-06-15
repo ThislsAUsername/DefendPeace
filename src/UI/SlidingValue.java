@@ -9,17 +9,17 @@ package UI;
 public class SlidingValue
 {
   private static final long UPDATE_DELAY_MS = 16; // Minimum time to update the intermediate position.
-  private static final double UPDATE_FACTOR = 0.7; // Move (1-UPDATE_FACTOR)*distance on each update delay.
+  private static final double SLIDE_FACTOR = 0.7; // Move (1-UPDATE_FACTOR)*distance on each update delay.
   private static final double SNAP_DISTANCE = 0.05;
   private int targetValue;
-  private double currentValue;
-  private long lastTime;
+  private double startValue;
+  private long startTime;
 
   public SlidingValue(int val)
   {
     targetValue = val;
-    currentValue = val;
-    lastTime = System.currentTimeMillis();
+    startValue = val;
+    startTime = System.currentTimeMillis();
   }
 
   /** Set a target/destination for this SlidingPoint. */
@@ -27,8 +27,9 @@ public class SlidingValue
   {
     if( val != targetValue )
     {
+      startValue = get();
       targetValue = val;
-      lastTime = System.currentTimeMillis();
+      startTime = System.currentTimeMillis();
     }
   }
 
@@ -43,24 +44,25 @@ public class SlidingValue
   public void snap(int val)
   {
     targetValue = val;
-    currentValue = val;
-    lastTime = System.currentTimeMillis();
+    startValue = val;
+    startTime = System.currentTimeMillis();
   }
 
   /** Retrieve the "current" location of the point as it slides to its destination. */
   public double get()
   {
-    // If we are already basically there, just snap to.
-    if( Math.abs(targetValue - currentValue) < SNAP_DISTANCE )
-    {
-      currentValue = targetValue;
-    }
-    else // Otherwise, figure out how much closer to get and move in.
-    {
-      double slide = calculateSlideAmount();
-      currentValue += slide;
-    }
-    return currentValue;
+    if( targetValue == startValue) // If we are on target, return.
+      return targetValue;
+
+    // Otherwise, figure out how far we should be from targetValue given the elapsed time.
+    long td = System.currentTimeMillis() - startTime;
+    double diff = (targetValue - startValue) * Math.pow(SLIDE_FACTOR, td/UPDATE_DELAY_MS);
+
+    // Once we get close enough, just snap into place.
+    if( Math.abs(diff) <= SNAP_DISTANCE )
+      startValue = targetValue;
+
+    return targetValue - diff;
   }
 
   /** Get the "current" value, rounded to the nearest int. **/
@@ -73,19 +75,5 @@ public class SlidingValue
   public int getDestination()
   {
     return targetValue;
-  }
-
-  private double calculateSlideAmount()
-  {
-    long time = System.currentTimeMillis();
-
-    // Figure out how many UPDATE_DELAY_MS intervals have passed.
-    int power = 0;
-    for(long temp = time; temp > lastTime; ++power, temp -= UPDATE_DELAY_MS);
-    lastTime = time;
-
-    double dist = targetValue - currentValue;
-    double slide = dist - (dist * Math.pow(UPDATE_FACTOR, power));
-    return slide;
   }
 }

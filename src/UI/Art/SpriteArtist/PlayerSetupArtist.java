@@ -103,7 +103,7 @@ public class PlayerSetupArtist
 
     // Find where the zeroth player CO should be drawn.
     // Shift from the center location by the spacing times the number of the highlighted option.
-    int playerYCenter = (int)(highlightedPlayerYCenter - animHighlightedPlayer.get());
+    int playerYCenter = highlightedPlayerYCenter - animHighlightedPlayer.geti();
 
     // Draw all of the player info.
     for(int i = 0; i < numCOs; ++i, playerYCenter += (panelHeight))
