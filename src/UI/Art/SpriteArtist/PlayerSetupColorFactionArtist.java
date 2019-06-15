@@ -53,10 +53,11 @@ public class PlayerSetupColorFactionArtist
     int startY = myHeight / 2 - gridHeight / 2;
 
     // Figure out if we need to realign things.
-    int maxX = myWidth - myWidth/4 - unitSizePx;
-    int maxY = myHeight - myHeight/4 - unitSizePx;
-    int minX = myWidth/4;
-    int minY = myHeight/4;
+    int marginFrac = 8;
+    int maxX = myWidth - myWidth/marginFrac - unitSizePx;
+    int maxY = myHeight - myHeight/marginFrac - unitSizePx;
+    int minX = myWidth/marginFrac;
+    int minY = myHeight/marginFrac;
     int selX = color*(unitSizePx + unitBuffer);
     int selY = faction*(unitSizePx + unitBuffer);
 
