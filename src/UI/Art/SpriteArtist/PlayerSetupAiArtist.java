@@ -11,7 +11,6 @@ import AI.AILibrary;
 import AI.AIMaker;
 import Engine.IController;
 import UI.PlayerSetupAiController;
-import UI.UIUtils;
 
 public class PlayerSetupAiArtist
 {
@@ -19,7 +18,7 @@ public class PlayerSetupAiArtist
   private static int maxAiNameLength = -99;
 
   private static IController myControl;
-  private static SpriteCursor spriteCursor = new SpriteCursor(0, 0, 0, 0, UIUtils.getCOColors()[0]);
+  private static SpriteCursor spriteCursor = new SpriteCursor();
 
   public static void draw(Graphics g, IController controller, Color playerColor)
   {

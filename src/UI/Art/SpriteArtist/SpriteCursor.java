@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 import UI.SlidingValue;
+import UI.UIUtils;
 
 public class SpriteCursor
 {
@@ -18,6 +19,11 @@ public class SpriteCursor
   private static final long NUM_CYCLE_PHASES = 4;
   private static final long TIME_PER_CYCLE_MS = ANIM_CYCLE_TIME_MS / NUM_CYCLE_PHASES;
   private static final long ALT_RARITY = 8;
+
+  public SpriteCursor()
+  {
+    this(0, 0, 0, 0, UIUtils.getCOColors()[0]);
+  }
 
   public SpriteCursor(int x, int y, int w, int h, Color c)
   {

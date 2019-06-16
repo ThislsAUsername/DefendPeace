@@ -22,7 +22,7 @@ public class PlayerSetupArtist
   private static final Color MENUHIGHLIGHTCOLOR = new Color(246, 234, 210);
 
   private static SlidingValue animHighlightedPlayer = new SlidingValue(0);
-  private static SpriteCursor spriteCursor = new SpriteCursor(0, 0, 0, 0, UIUtils.getCOColors()[0]);
+  private static SpriteCursor spriteCursor = new SpriteCursor();
 
   private static PlayerSetupController myControl = null;
 
