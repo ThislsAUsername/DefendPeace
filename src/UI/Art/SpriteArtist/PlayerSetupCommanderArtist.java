@@ -56,7 +56,7 @@ public class PlayerSetupCommanderArtist
     int panelHeight = CommanderPanel.PANEL_HEIGHT+panelBuffer;
 
     // Find where the zeroth Commander should be drawn.
-    panelOffsetY.set(highlightedCmdr*panelHeight, snapCursor);
+    panelOffsetY.set(highlightedCmdrOffset*panelHeight, snapCursor);
     int drawYCenter = myHeight / 2 - panelOffsetY.geti();
 
     // We're gonna make this an endless scroll, so back up (in y-space and in the CO list) until
