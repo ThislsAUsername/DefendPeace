@@ -44,6 +44,14 @@ public class Muriel implements AIController
     {
       return "Muriel";
     }
+
+    @Override
+    public String getDescription()
+    {
+      return
+          "Muriel attempts to choose new units to build based on the enemy force composition.\n" +
+          "She knows basic unit tactics, but doesn't currently understand ranged attacks.";
+    }
   }
   public static final AIMaker info = new instantiator();
   

@@ -58,6 +58,10 @@ public class SpriteLibrary
   private static Sprite numberSpritesSmallCaps = null;
   private static Sprite symbolSpritesSmallCaps = null;
 
+  // Cursor for highlighting things in-game.
+  private static Sprite cursorSprites = null;
+  private static Sprite arrowheadSprites = null;
+
   // Commander overlay backdrops (shows commander name and funds) for each Commander in the game.
   private static HashMap<Commander, Sprite> coOverlays = new HashMap<Commander, Sprite>();
   private static HashMap<Commander, Sprite> coPowerBarPieces = new HashMap<Commander, Sprite>();
@@ -286,21 +290,23 @@ public class SpriteLibrary
   private static class UnitSpriteSetKey
   {
     public final UnitModel.UnitEnum unitTypeKey;
-    public final Commander commanderKey;
+    public final Faction factionKey;
+    public final Color colorKey;
     private static ArrayList<UnitSpriteSetKey> instances = new ArrayList<UnitSpriteSetKey>();
 
-    private UnitSpriteSetKey(UnitModel.UnitEnum unitType, Commander co)
+    private UnitSpriteSetKey(UnitModel.UnitEnum unitType, Faction faction, Color color)
     {
       unitTypeKey = unitType;
-      commanderKey = co;
+      factionKey = faction;
+      colorKey = color;
     }
 
-    public static UnitSpriteSetKey instance(UnitModel.UnitEnum unitType, Commander co)
+    public static UnitSpriteSetKey instance(UnitModel.UnitEnum unitType, Faction faction, Color color)
     {
       UnitSpriteSetKey key = null;
       for( int i = 0; i < instances.size(); ++i )
       {
-        if( instances.get(i).unitTypeKey == unitType && instances.get(i).commanderKey == co )
+        if( instances.get(i).unitTypeKey == unitType && instances.get(i).factionKey == faction && instances.get(i).colorKey == color)
         {
           key = instances.get(i);
           break;
@@ -308,7 +314,7 @@ public class SpriteLibrary
       }
       if( key == null )
       {
-        key = new UnitSpriteSetKey(unitType, co);
+        key = new UnitSpriteSetKey(unitType, faction, color);
         instances.add(key);
       }
       return key;
@@ -317,7 +323,12 @@ public class SpriteLibrary
 
   public static UnitSpriteSet getMapUnitSpriteSet(Unit unit)
   {
-    UnitSpriteSetKey key = UnitSpriteSetKey.instance(unit.model.type, unit.CO);
+    return getMapUnitSpriteSet(unit.model.type, unit.CO.faction, unit.CO.myColor);
+  }
+
+  public static UnitSpriteSet getMapUnitSpriteSet(UnitModel.UnitEnum type, Faction faction, Color color)
+  {
+    UnitSpriteSetKey key = UnitSpriteSetKey.instance(type, faction, color);
     if( !mapUnitSpriteSetMap.containsKey(key) )
     {
       // We don't have it? Go load it.
@@ -329,13 +340,13 @@ public class SpriteLibrary
 
   private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
-    Faction faction = key.commanderKey.faction;
-    System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.commanderKey.myColor.toString() + " in faction " + faction);
+    Faction faction = key.factionKey;
+    System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.colorKey.toString() + " in faction " + faction);
     String filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction.name);
     if (!new File(filestr).canRead())
       filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction.basis);
     UnitSpriteSet spriteSet = new UnitSpriteSet(SpriteUIUtils.loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
-        UIUtils.getMapUnitColors(key.commanderKey.myColor));
+        UIUtils.getMapUnitColors(key.colorKey));
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
 
@@ -624,6 +635,32 @@ public class SpriteLibrary
   }
 
   /**
+   * Returns a BufferedImage containing the contents of `text` rendered on one
+   * line in the standard font, on a transparent background, with no scaling applied.
+   */
+  public static BufferedImage getTextAsImage(String text)
+  {
+    return getTextAsImage(text, false);
+  }
+
+  /**
+   * Returns a BufferedImage containing the contents of `text` rendered on one line (in small
+   * caps or standard font as specified), on a transparent background, with no scaling applied.
+   */
+  public static BufferedImage getTextAsImage(String text, boolean smallCaps)
+  {
+    Sprite letters = (smallCaps) ? getLettersSmallCaps() : getLettersLowercase();
+    int width = letters.getFrame(0).getWidth() * text.length();
+    int height = letters.getFrame(0).getHeight();
+    BufferedImage textImage = createTransparentSprite(width, height);
+    if( smallCaps )
+      drawTextSmallCaps(textImage.getGraphics(), text, 0, 0, 1);
+    else
+      drawText(textImage.getGraphics(), text, 0, 0, 1);
+    return textImage;
+  }
+
+  /**
    * Draws the provided image, centered around x, y.
    */
   public static void drawImageCenteredOnPoint(Graphics g, BufferedImage image, int x, int y, int drawScale)
@@ -637,6 +674,39 @@ public class SpriteLibrary
     int drawY = y - drawHeight / 2;
 
     g.drawImage(image, drawX, drawY, drawWidth, drawHeight, null);
+  }
+
+  private static HashMap<Color, Sprite> coloredCursors;
+  public static Sprite getCursorSprites(Color color)
+  {
+    if( null == coloredCursors )
+    {
+      coloredCursors = new HashMap<Color, Sprite>();
+    }
+    if( !coloredCursors.containsKey(color) )
+    {
+      Sprite newCursor = new Sprite(SpriteLibrary.getCursorSprites());
+      newCursor.colorize(UIUtils.defaultMapColors[4], color);
+      coloredCursors.put(color, newCursor);
+    }
+    return coloredCursors.get(color);
+  }
+  public static Sprite getCursorSprites()
+  {
+    if( null == cursorSprites )
+    {
+      cursorSprites = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/cursor.png"), 6, 6);
+    }
+    return cursorSprites;
+  }
+
+  static Sprite getArrowheadSprites()
+  {
+    if( null == arrowheadSprites )
+    {
+      arrowheadSprites = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/arrowheads.png"), 10, 10);
+    }
+    return arrowheadSprites;
   }
 
   /**

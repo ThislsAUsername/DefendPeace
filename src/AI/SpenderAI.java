@@ -39,6 +39,14 @@ public class SpenderAI implements AIController
     {
       return "Spender";
     }
+
+    @Override
+    public String getDescription()
+    {
+      return
+          "All Spender knows is that money in the bank doesn't help on the field, so he tries to spend all funds as quickly as possible.\n" +
+          "This can sometimes result in building units that are not useful.";
+    }
   }
   public static final AIMaker info = new instantiator();
   

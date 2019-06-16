@@ -8,7 +8,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -83,10 +82,10 @@ public class UIUtils
 
       // Throw some color names in there for the defaults
       // toString() is not user-friendly
-      paletteNames.put(Color.PINK, "salmon");
+      paletteNames.put(Color.PINK, "rose");
       paletteNames.put(Color.CYAN, "cyan");
-      paletteNames.put(Color.ORANGE, "citrus");
-      paletteNames.put(PURPLE, "sparking");
+      paletteNames.put(Color.ORANGE, "orange");
+      paletteNames.put(PURPLE, "violet");
 
       // We want to be able to use the normal units, as well as any others
       factions.add(new Faction(DEFAULT_FACTION_NAME,DEFAULT_FACTION_NAME));
@@ -193,20 +192,15 @@ public class UIUtils
     return factions.toArray(new Faction[0]);
   }
   
-  public static String getFactionDisplayName(String palette, String faction)
+  public static String getCanonicalFactionName(String palette, String faction)
   {
-    if ("red".equalsIgnoreCase(palette) && "space".equalsIgnoreCase(faction))
-      return "Shirts";
-    return faction;
-  }
-  
-  public static String getPaletteDisplayName(String palette, String faction)
-  {
+    if ("red".equalsIgnoreCase(palette) && "frontier".equalsIgnoreCase(faction))
+      return "Red Shirts";
     if ("red".equalsIgnoreCase(palette) && "star".equalsIgnoreCase(faction))
-      return "Orange";
+      return "Orange Star";
     if ("maroon".equalsIgnoreCase(palette) && "fire".equalsIgnoreCase(faction))
-      return "Red";
-    return palette;
+      return "Red Fire";
+    return palette + ' ' + faction;
   }
   
   public static class Faction implements Serializable
