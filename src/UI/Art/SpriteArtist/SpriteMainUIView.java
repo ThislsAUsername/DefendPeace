@@ -5,11 +5,10 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
+import Engine.IView;
 import UI.InGameMenu;
 import UI.MainUIController;
 import UI.MainUIController.SaveInfo;
-import Engine.IView;
-import UI.MainUIController;
 import UI.SlidingValue;
 
 /**
@@ -118,8 +117,8 @@ public class SpriteMainUIView implements IView
     if (null != controller.saveMenu) // If we've got a save menu on hand, draw it.
     {
       InGameMenu<SaveInfo> sm = controller.saveMenu;
-      BufferedImage savesImage = SpriteUIUtils.makeTextMenu(sm.getAllOptions(), sm.getSelectionNumber(), 3*drawScale, 4*drawScale);
-      SpriteLibrary.drawImageCenteredOnPoint(g, savesImage, xCenter, yCenter, 1);
+      BufferedImage savesImage = SpriteUIUtils.makeTextMenu(sm.getAllOptions(), sm.getSelectionNumber(), 3, 4);
+      SpriteLibrary.drawImageCenteredOnPoint(g, savesImage, xCenter, yCenter, drawScale);
     }
   }
 
