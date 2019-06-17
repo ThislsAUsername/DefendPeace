@@ -140,7 +140,7 @@ public class CommanderCinder extends Commander
 
   public void setPrices(int repetitons)
   {
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
       um.moneyCostAdjustment = repetitons*PREMIUM_PER_BUILD;
     }

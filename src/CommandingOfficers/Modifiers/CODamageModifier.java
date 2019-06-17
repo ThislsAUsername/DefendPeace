@@ -46,7 +46,7 @@ public class CODamageModifier implements COModifier
   {
     if( modelsToModify.isEmpty() )
     {
-      modelsToModify.addAll(commander.unitModels);
+      modelsToModify.addAll(commander.unitModels.values());
     }
 
     for( UnitModel um : modelsToModify )

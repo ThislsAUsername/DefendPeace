@@ -23,7 +23,7 @@ public class UnitModel implements Serializable
 {
   public enum UnitEnum
   {
-    INFANTRY, MECH, RECON, TANK, MD_TANK, NEOTANK, APC, ARTILLERY, ROCKETS, ANTI_AIR, MOBILESAM, FIGHTER, BOMBER, B_COPTER, T_COPTER, BATTLESHIP, CRUISER, LANDER, SUB
+    INFANTRY, MECH, RECON, TANK, MD_TANK, NEOTANK, APC, ARTILLERY, ROCKETS, ANTI_AIR, MOBILESAM, FIGHTER, BOMBER, B_COPTER, T_COPTER, BATTLESHIP, CRUISER, LANDER, SUB, SUB_SUB
   };
 
   // Subs are ships unless they're submerged.
@@ -41,7 +41,8 @@ public class UnitModel implements Serializable
   public int idleFuelBurn;
   public int movePower;
   public int visionRange;
-  public boolean visionIgnoresCover = false;
+  public int visionRangePiercing = 1;
+  public boolean hidden = false;
   public MoveType propulsion;
   public ArrayList<UnitActionType> possibleActions = new ArrayList<UnitActionType>();
   public Set<TerrainType> healableHabs;

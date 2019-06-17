@@ -63,8 +63,8 @@ public class Meridian extends Commander
     UnitModel arty = getUnitModel(UnitModel.UnitEnum.ARTILLERY);
     tank.moneyCostAdjustment      -= 500;
     arty.moneyCostAdjustment      += 500;
-    tank.possibleActions.add(new UnitActionType.Transform(arty));
-    arty.possibleActions.add(new UnitActionType.Transform(tank));
+    tank.possibleActions.add(new UnitActionType.Transform(UnitModel.UnitEnum.ARTILLERY, "~ARTY"));
+    arty.possibleActions.add(new UnitActionType.Transform(UnitModel.UnitEnum.TANK,      "~TANK"));
 
     addCommanderAbility(new ChangeAndFlow(this));
     addCommanderAbility(new VehicularCharge(this));

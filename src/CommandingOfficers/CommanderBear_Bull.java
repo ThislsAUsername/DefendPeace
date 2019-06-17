@@ -74,7 +74,7 @@ public class CommanderBear_Bull extends Commander
       isBull = false;
       if( setIncome )
         incomePerCity = (int) (incomeBase * BEAR_MOD);
-      for( UnitModel um : unitModels )
+      for( UnitModel um : unitModels.values() )
       {
         um.COcost = BEAR_MOD;
       }
@@ -84,7 +84,7 @@ public class CommanderBear_Bull extends Commander
       isBull = true;
       if( setIncome )
         incomePerCity = (int) (incomeBase * BULL_MOD);
-      for( UnitModel um : unitModels )
+      for( UnitModel um : unitModels.values() )
       {
         um.COcost = BULL_MOD;
       }
@@ -193,7 +193,7 @@ public class CommanderBear_Bull extends Commander
     {
       CommanderBear_Bull cmdr = (CommanderBear_Bull) commander;
       // Instead of swapping, we get a discount. Yaaaay.
-      for( UnitModel um : cmdr.unitModels )
+      for( UnitModel um : cmdr.unitModels.values() )
       {
         um.COcost -= BOOMBUST_BUFF;
       }

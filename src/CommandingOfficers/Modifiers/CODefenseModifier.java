@@ -15,7 +15,7 @@ public class CODefenseModifier implements COModifier
   @Override
   public void apply(Commander commander)
   {
-    for( UnitModel um : commander.unitModels )
+    for( UnitModel um : commander.unitModels.values() )
     {
       if( um.weaponModels != null )
       {
@@ -27,7 +27,7 @@ public class CODefenseModifier implements COModifier
   @Override
   public void revert(Commander commander)
   {
-    for( UnitModel um : commander.unitModels )
+    for( UnitModel um : commander.unitModels.values() )
     {
       if( um.weaponModels != null )
       {

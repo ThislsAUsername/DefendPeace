@@ -62,21 +62,30 @@ public class SpriteMapSelectMenuArtist
     // Draw the highlight for the selected option.
     g.setColor(MENUHIGHLIGHTCOLOR);
     int menuTextYStart = frameBorderHeight;
-    int menuOptionHeight = SpriteLibrary.getLettersUppercase().getFrame(0).getHeight()*drawScale;
-    int selectedOptionYOffset = menuTextYStart + highlightedOption * (menuOptionHeight + drawScale);
-    g.fillRect(0, selectedOptionYOffset, nameSectionDrawWidth, menuOptionHeight);
+    int menuOptionHeight = (SpriteLibrary.getLettersUppercase().getFrame(0).getHeight() + 1)*drawScale; // +1 for a buffer between options.
+    int selectedOptionYOffset = menuTextYStart + highlightedOption * (menuOptionHeight);
 
     // Get the list of selectable maps (possibly specifying a filter (#players, etc).
-    ArrayList<MapInfo> mapInfos = MapLibrary.getMapList(); // = MapLibrary.getMapNames();
+    ArrayList<MapInfo> mapInfos = MapLibrary.getMapList();
+    int verticalShift = 0; // How many map names we skip drawing "off the top"
+    int displayableCount = dimensions.height / menuOptionHeight; // how many maps we can cram on the screen
+    while (selectedOptionYOffset > dimensions.height/2 && // Loop until either the cursor's bumped up to the center of the screen...
+        displayableCount+verticalShift < mapInfos.size()) //  or we'll already show the last map 
+    {
+      verticalShift++;
+      selectedOptionYOffset -= menuOptionHeight;
+    }
+    
+    g.fillRect(0, selectedOptionYOffset, nameSectionDrawWidth, menuOptionHeight);
 
-    // Display the names from the list, highlighting the one that is currently chosen.
-    for(int i = 0; i < mapInfos.size(); ++i)
+    // Display the names from the list
+    for(int i = 0; i < displayableCount; ++i)
     {
       int drawX = 2; // Offset from the edge of the window slightly.
-      int drawY = menuTextYStart + drawScale + i * (menuOptionHeight + drawScale); // +drawScale for a buffer between options.
+      int drawY = menuTextYStart + drawScale + i * (menuOptionHeight);
 
       // Draw visible map names in the list.
-      String str = mapInfos.get(i).mapName;
+      String str = mapInfos.get(i + verticalShift).mapName;
       if(str.length() > maxNameDisplayLength)
       {
         str = str.substring(0, maxNameDisplayLength);
@@ -177,10 +186,10 @@ public class SpriteMapSelectMenuArtist
    */
   private static void drawPropertyNumber(Graphics g, int num, int x, int y)
   {
-    if(num > 99) // Cap it at 99 for now, and probably for ever.
+    if(num > 999) // Cap it at 999 for now, and probably forever.
     {
       System.out.println("INFO: Maps are getting large, yo");
-      num = 99;
+      num = 999;
     }
 
     // Get the number images, and grab the dimensions
@@ -189,13 +198,14 @@ public class SpriteMapSelectMenuArtist
     int numWidth = nums.getFrame(0).getWidth() * drawScale;
     int numHeight = nums.getFrame(0).getHeight() * drawScale;
 
-    // Property sprites are 2 tiles by two tiles, and we want to be right- and
-    //   bottom-justified, so we adjust sideways.
+    // Property sprites are 2 tiles by two tiles, so we adjust sideways.
     int propSize = SpriteLibrary.baseSpriteSize*drawScale*2;
     x += propSize - numWidth; // right-justify
+    if (num/100 > 0)
+      x += propSize/8; // shift over a bit so we stay centered with 3 digits
     y += propSize - numHeight; // Bottom-justify - no double-digit adjustment.
 
-    do // We divide by 10 and truncate each time; expect two loops max.
+    do // We divide by 10 and truncate each time; expect three loops max.
     {
       int frame = num % 10;
       g.drawImage(nums.getFrame(frame), x, y, numWidth, numHeight, null);

@@ -8,6 +8,7 @@ import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
 import Units.UnitModel;
+import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
 import Units.Weapons.WeaponModel;
 
@@ -15,13 +16,13 @@ public class UnitTransformEvent implements GameEvent
 {
   private Unit unit;
   private UnitModel oldType;
-  private UnitModel type;
+  private UnitEnum destinationType;
 
-  public UnitTransformEvent(Unit unit, UnitModel destination)
+  public UnitTransformEvent(Unit unit, UnitEnum destination)
   {
     this.unit = unit;
     oldType = unit.model;
-    type = destination;
+    destinationType = destination;
   }
 
   @Override
@@ -39,6 +40,7 @@ public class UnitTransformEvent implements GameEvent
   @Override
   public void performEvent(MapMaster gameMap)
   {
+    UnitModel type = unit.CO.unitModels.get(destinationType);
     unit.model = type;
     ArrayList<Weapon> temp = unit.weapons;
     unit.weapons = new ArrayList<Weapon>();

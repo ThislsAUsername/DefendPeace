@@ -2,6 +2,7 @@ package AI;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -84,9 +85,9 @@ public class Muriel implements AIController
   private void init(Commander[] allCos)
   {
     // Initialize UnitModel collections.
-    ArrayList<UnitModel> myUnitModels = new ArrayList<UnitModel>();
+    Collection<UnitModel> myUnitModels = myCo.unitModels.values();
     enemyCos = new ArrayList<Commander>();
-    Map<Commander, ArrayList<UnitModel> > otherUnitModels = new HashMap<Commander, ArrayList<UnitModel> >();
+    Map<Commander, Collection<UnitModel> > otherUnitModels = new HashMap<Commander, Collection<UnitModel> >();
     for( Commander other : allCos )
     {
       if( myCo.isEnemy(other) )
@@ -97,10 +98,9 @@ public class Muriel implements AIController
     }
 
     // Figure out what I and everyone else can build.
-    myUnitModels = myCo.unitModels;
     for( Commander oCo : enemyCos )
     {
-      otherUnitModels.put(oCo, oCo.unitModels);
+      otherUnitModels.put(oCo, oCo.unitModels.values());
     }
 
     // Figure out unit matchups.

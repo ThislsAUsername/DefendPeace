@@ -125,7 +125,7 @@ public class CommanderStrong extends Commander
       damageMod = new CODamageModifier(STRONGARM_BUFF);
       defenseMod = new CODefenseModifier(STRONGARM_BUFF);
       damageModTroop = new CODamageModifier(STRONGARM_FOOT_BUFF);
-      for( UnitModel model : commander.unitModels )
+      for( UnitModel model : commander.unitModels.values() )
       {
         if( model.chassis == UnitModel.ChassisEnum.TROOP )
         {
@@ -150,7 +150,7 @@ public class CommanderStrong extends Commander
 
       // Grant troops and transports additional movement power.
       COMovementModifier moveMod = new COMovementModifier(2);
-      for( UnitModel model : myCommander.unitModels )
+      for( UnitModel model : myCommander.unitModels.values() )
       {
         if( (model.chassis == UnitModel.ChassisEnum.TROOP) || (model.holdingCapacity > 0))
         {
@@ -204,7 +204,7 @@ public class CommanderStrong extends Commander
 
       // Grant a global +2 movement buff.
       COMovementModifier moveMod = new COMovementModifier(2);
-      for( UnitModel model : myCommander.unitModels )
+      for( UnitModel model : myCommander.unitModels.values() )
       {
         moveMod.addApplicableUnitModel(model);
       }

@@ -14,7 +14,6 @@ import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.LoadEvent;
-import Engine.GameEvents.MoveEvent;
 import Engine.GameEvents.ResupplyEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.UnitJoinEvent;
@@ -93,13 +92,13 @@ public interface GameAction
       if( isValid )
       {
         Location moveLocation = gameMap.getLocation(moveCoord);
-        defender = gameMap.getLocation(attackLocation).getResident();
         attackRange = Math.abs(moveCoord.xCoord - attackLocation.xCoord)
             + Math.abs(moveCoord.yCoord - attackLocation.yCoord);
 
         boolean moved = attacker.x != moveCoord.xCoord || attacker.y != moveCoord.yCoord;
+        isValid &= (gameMap.getLocation(attackLocation).getResident() == defender);
         isValid &= (null != defender) && attacker.canAttack(defender.model, attackRange, moved);
-        isValid &= attacker.CO.isEnemy(defender.CO);
+        isValid &= (null != defender) && attacker.CO.isEnemy(defender.CO);
         isValid &= (null == moveLocation.getResident()) || (attacker == moveLocation.getResident());
       }
 
@@ -772,9 +771,15 @@ public interface GameAction
         // Note that movePath being null is OK for ResupplyAction when it is being re-used.
         if( movePath != null )
         {
-          eventSequence.add(new MoveEvent(unitActor, movePath));
+          // If we should be blocked, don't resupply anything.
+          if( !Utils.enqueueMoveEvent(map, unitActor, movePath, eventSequence) )
+            isValid = false; // isValid is used to signal pre-emption here rather than a malformed action.
+                             // Strange control flow stems from ResupplyAction's dual purpose. 
         }
+      }
 
+      if( isValid )
+      {
         // Get the adjacent map locations.
         ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, supplyLocation, 1);
 
@@ -916,4 +921,50 @@ public interface GameAction
       return type;
     }
   } // ~TransformAction
+
+  // ===========  UnitDeleteAction  =================================
+  /** Removes the unit. Only allows deletion in place */
+  public static class UnitDeleteAction implements GameAction
+  {
+    final Unit actor;
+    final XYCoord destination;
+    
+    public UnitDeleteAction(Unit unit)
+    {
+      actor = unit;
+      destination = new XYCoord(unit.x, unit.y);
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue eventSequence = new GameEventQueue();
+      eventSequence.add(new UnitDieEvent(actor));
+      return eventSequence;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Delete %s in place]", actor.toStringWithLocation());
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.DELETE;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return destination;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return destination;
+    }
+  } // ~UnitDeleteAction
 }

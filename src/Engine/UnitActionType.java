@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import Terrain.GameMap;
 import Units.Unit;
 import Units.UnitModel;
+import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
 
 public interface UnitActionType extends Serializable
@@ -18,14 +19,14 @@ public interface UnitActionType extends Serializable
   public static final UnitActionType CAPTURE = new Capture();
   public static final UnitActionType RESUPPLY = new Resupply();
   public static final UnitActionType WAIT = new Wait();
+  public static final UnitActionType DELETE = new Delete();
   public static final UnitActionType LOAD = new Load();
   public static final UnitActionType JOIN = new Join();
 
-  public static final UnitActionType[] FOOTSOLDIER_ACTIONS =    { ATTACK, CAPTURE,  WAIT, LOAD, JOIN };
-  public static final UnitActionType[] COMBAT_VEHICLE_ACTIONS = { ATTACK,           WAIT, LOAD, JOIN };
-  public static final UnitActionType[] TRANSPORT_ACTIONS =      { UNLOAD,           WAIT, LOAD, JOIN };
-  public static final UnitActionType[] APC_ACTIONS =            { UNLOAD, RESUPPLY, WAIT, LOAD, JOIN };
-  
+  public static final UnitActionType[] FOOTSOLDIER_ACTIONS =    { ATTACK, CAPTURE,  WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] COMBAT_VEHICLE_ACTIONS = { ATTACK,           WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] TRANSPORT_ACTIONS =      { UNLOAD,           WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] APC_ACTIONS =            { UNLOAD, RESUPPLY, WAIT, DELETE, LOAD, JOIN };
 
   public static class Attack implements UnitActionType
   {
@@ -184,7 +185,7 @@ public interface UnitActionType extends Serializable
       Unit resident = map.getLocation(moveLocation).getResident();
       if( resident != null )
       {
-        if( (resident.model.type == actor.model.type) && (resident.getHP() < resident.model.maxHP) )
+        if( (resident.model.type == actor.model.type) && resident != actor && (resident.getHP() < resident.model.maxHP) )
         {
           return new GameActionSet(new GameAction.UnitJoinAction(map, actor, movePath), false);
         }
@@ -304,11 +305,13 @@ public interface UnitActionType extends Serializable
    */
   public static class Transform implements UnitActionType
   {
-    public final UnitModel destinationType;
+    public final UnitEnum destinationType;
+    public final String name;
     
-    public Transform(UnitModel type)
+    public Transform(UnitEnum type, String displayName)
     {
       destinationType = type;
+      name = displayName;
     }
     
     @Override
@@ -325,7 +328,27 @@ public interface UnitActionType extends Serializable
     @Override
     public String name()
     {
-      return String.format("~%s", destinationType);
+      return name;
+    }
+  }
+
+  public static class Delete implements UnitActionType
+  {
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor)
+    {
+      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      if( moveLocation.equals(actor.x, actor.y) )
+      {
+        return new GameActionSet(new GameAction.UnitDeleteAction(actor), true); // We don't really need a target, but I want a confirm dialogue
+      }
+      return null;
+    }
+
+    @Override
+    public String name()
+    {
+      return "DELETE";
     }
   }
 }

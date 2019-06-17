@@ -109,7 +109,7 @@ public class CommanderAve extends Commander
     super(coInfo);
 
     // Ave's units are fine in the snow, but not in the trees.
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
       for( TerrainType terrain : TerrainType.TerrainTypeList )
       {

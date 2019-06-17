@@ -16,6 +16,7 @@ import AI.AILibrary;
 import AI.AIMaker;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
+import Engine.UnitActionType;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.Combat.BattleInstance.CombatContext;
@@ -43,6 +44,7 @@ import Units.NeotankModel;
 import Units.ReconModel;
 import Units.RocketsModel;
 import Units.SubModel;
+import Units.SubSubModel;
 import Units.TCopterModel;
 import Units.TankModel;
 import Units.Unit;
@@ -56,7 +58,7 @@ public class Commander extends GameEventListener implements Serializable
   public final CommanderInfo coInfo;
   public GameMap myView;
   public ArrayList<Unit> units;
-  public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
+  public Map<UnitEnum, UnitModel> unitModels = new HashMap<UnitEnum, UnitModel>();
   public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
   public Set<XYCoord> ownedProperties;
   public ArrayList<COModifier> modifiers;
@@ -120,9 +122,15 @@ public class Commander extends GameEventListener implements Serializable
     unitProductionByTerrain.put(TerrainType.AIRPORT, airportModels);
 
     // Compile one master list of everything we can build.
-    unitModels.addAll(factoryModels);
-    unitModels.addAll(seaportModels);
-    unitModels.addAll(airportModels);
+    for (UnitModel um : factoryModels)
+      unitModels.put(um.type, um);
+    for (UnitModel um : seaportModels)
+      unitModels.put(um.type, um);
+    for (UnitModel um : airportModels)
+      unitModels.put(um.type, um);
+
+    UnitModel subsub = new SubSubModel();
+    unitModels.put(subsub.type, subsub); // We don't want a separate "submerged sub" build option
 
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
@@ -234,20 +242,10 @@ public class Commander extends GameEventListener implements Serializable
     return true;
   }
 
+  // Leaving this for now, to avoid merge conflicts
   public UnitModel getUnitModel(UnitEnum unitType)
   {
-    UnitModel um = null;
-
-    for( UnitModel iter : unitModels )
-    {
-      if( iter.type == unitType )
-      {
-        um = iter;
-        break;
-      }
-    }
-
-    return um;
+    return unitModels.get(unitType);
   }
   
   /**
