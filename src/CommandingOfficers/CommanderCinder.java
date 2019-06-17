@@ -52,7 +52,7 @@ public class CommanderCinder extends Commander
     }
   }
 
-  private static final double PREMIUM_PER_BUILD = 1000;
+  private static final int PREMIUM_PER_BUILD = 1000;
 
   private HashMap<XYCoord, Integer> buildCounts = new HashMap<>();
 
@@ -140,13 +140,9 @@ public class CommanderCinder extends Commander
 
   public void setPrices(int repetitons)
   {
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
-      um.COcost = 1.0;
-    }
-    for( UnitModel um : unitModels )
-    {
-      um.COcost = (1.0 + repetitons*PREMIUM_PER_BUILD/um.getCost());
+      um.moneyCostAdjustment = repetitons*PREMIUM_PER_BUILD;
     }
   }
 

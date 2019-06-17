@@ -1,6 +1,5 @@
 package UI.Art.SpriteArtist;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -31,8 +30,8 @@ public class SpriteMenuArtist
 
     // Get the draw scale, and figure out the resulting "real" text size, etc.
     drawScale = SpriteOptions.getDrawScale();
-    menuHBuffer = 3 * drawScale; // Amount of visible menu to left and right of options;
-    menuVBuffer = 4 * drawScale; // Amount of visible menu above and below menu options;
+    menuHBuffer = 3; // Amount of visible menu to left and right of options;
+    menuVBuffer = 4; // Amount of visible menu above and below menu options;
   }
 
   /**
@@ -53,13 +52,13 @@ public class SpriteMenuArtist
 
       BufferedImage menu = SpriteUIUtils.makeTextMenu(SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR, SpriteUIUtils.MENUHIGHLIGHTCOLOR,
           myCurrentMenuStrings, myCurrentMenu.getSelectionNumber(), menuHBuffer, menuVBuffer);
-      int menuWidth = menu.getWidth();
-      int menuHeight = menu.getHeight();
+      int menuWidth = menu.getWidth()*drawScale;
+      int menuHeight = menu.getHeight()*drawScale;
 
       // Center the menu over the current action target location, accounting for the position of the map view.
       int viewTileSize = myView.getTileSize(); // Grab this value for convenience.
-      int drawX = myGame.getCursorX() * viewTileSize - (menu.getWidth() / 2 - viewTileSize / 2);
-      int drawY = myGame.getCursorY() * viewTileSize - (menu.getHeight() / 2 - viewTileSize / 2);
+      int drawX = myGame.getCursorX() * viewTileSize - (menuWidth / 2 - viewTileSize / 2);
+      int drawY = myGame.getCursorY() * viewTileSize - (menuHeight / 2 - viewTileSize / 2);
 
       // Make sure the menu is fully contained in viewable space.
       Dimension dims = SpriteOptions.getScreenDimensions();
@@ -73,7 +72,7 @@ public class SpriteMenuArtist
       drawX -= Math.max(0, drawX + menuWidth - myGame.gameMap.mapWidth * viewTileSize);   // right
       drawY -= Math.max(0, drawY + menuHeight - myGame.gameMap.mapHeight * viewTileSize); // bottom
 
-      g.drawImage(menu, drawX, drawY, null);
+      g.drawImage(menu, drawX, drawY, menuWidth, menuHeight, null);
     }
   }
 

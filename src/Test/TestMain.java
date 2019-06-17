@@ -23,6 +23,7 @@ public class TestMain extends TestCase
   {
     boolean testsPassed = true;
     testsPassed &= validate(new TestUnitMovement().runTest(), "Unit movement test failed!");
+    testsPassed &= validate(new TestVisionMechanics().runTest(), "Vision mechanics test failed!");
     testsPassed &= validate(new TestTransport().runTest(), "Transport test failed!");
     testsPassed &= validate(new TestCombat().runTest(), "Combat test failed!");
     testsPassed &= validate(new TestCombatMods().runTest(), "Combat modification test failed!");
