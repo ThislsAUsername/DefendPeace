@@ -70,6 +70,15 @@ public interface UnitActionType extends Serializable
     {
       return "ATTACK";
     }
+
+    /**
+     * From Serializable interface
+     * @return The statically-defined object to use for this action type.
+     */
+    private Object readResolve()
+    {
+      return ATTACK;
+    }
   }
 
   public static class Capture implements UnitActionType
@@ -93,6 +102,15 @@ public interface UnitActionType extends Serializable
     {
       return "CAPTURE";
     }
+
+    /**
+     * From Serializable interface
+     * @return The statically-defined object to use for this action type.
+     */
+    private Object readResolve()
+    {
+      return CAPTURE;
+    }
   }
 
   public static class Wait implements UnitActionType
@@ -112,6 +130,15 @@ public interface UnitActionType extends Serializable
     public String name()
     {
       return "WAIT";
+    }
+
+    /**
+     * From Serializable interface
+     * @return The statically-defined object to use for this action type.
+     */
+    private Object readResolve()
+    {
+      return WAIT;
     }
   }
 
@@ -137,6 +164,15 @@ public interface UnitActionType extends Serializable
     {
       return "LOAD";
     }
+
+    /**
+     * From Serializable interface
+     * @return The statically-defined object to use for this action type.
+     */
+    private Object readResolve()
+    {
+      return LOAD;
+    }
   }
 
   public static class Join implements UnitActionType
@@ -160,6 +196,15 @@ public interface UnitActionType extends Serializable
     public String name()
     {
       return "JOIN";
+    }
+
+    /**
+     * From Serializable interface
+     * @return The statically-defined object to use for this action type.
+     */
+    private Object readResolve()
+    {
+      return JOIN;
     }
   }
 
@@ -198,6 +243,15 @@ public interface UnitActionType extends Serializable
     {
       return "UNLOAD";
     }
+
+    /**
+     * From Serializable interface
+     * @return The statically-defined object to use for this action type.
+     */
+    private Object readResolve()
+    {
+      return UNLOAD;
+    }
   }
 
   public static class Resupply implements UnitActionType
@@ -231,6 +285,15 @@ public interface UnitActionType extends Serializable
     public String name()
     {
       return "RESUPPLY";
+    }
+
+    /**
+     * From Serializable interface
+     * @return The statically-defined object to use for this action type.
+     */
+    private Object readResolve()
+    {
+      return RESUPPLY;
     }
   }
 
