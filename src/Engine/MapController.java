@@ -434,25 +434,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         // Handled as a special case in handleGameInput().
         break;
       case SAVE:
-        String filename = "save/" + myGame.saveFile; // "svp" for "SaVe Peace"
-        new File("save/").mkdirs(); // make sure we don't freak out if the directory's not there
-
-        System.out.println(String.format("Now saving to %s", filename));
-        try
-        {
-          FileOutputStream file = new FileOutputStream(filename);
-          ObjectOutputStream out = new ObjectOutputStream(file);
-
-          // Method for serialization of object
-          out.writeObject(myGame);
-
-          out.close();
-          file.close();
-        }
-        catch (IOException ex)
-        {
-          System.out.println(ex.toString());
-        }
+        myGame.writeSave();
         myGameInputHandler.reset(); // SAVE is a terminal state. Reset the input handler.
         break;
       case CO_STATS:

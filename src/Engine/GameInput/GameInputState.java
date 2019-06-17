@@ -102,7 +102,6 @@ class StateData
   }
 }
 
-
 /************************************************************
  * Provides access to the valid options for the current state
  * via its accessors. If an accessor returns null, that input

@@ -1,5 +1,6 @@
 package Engine;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import Terrain.GameMap;
@@ -8,7 +9,7 @@ import Units.UnitModel;
 import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
 
-public interface UnitActionType
+public interface UnitActionType extends Serializable
 {
   public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor);
   public String name();
@@ -22,13 +23,10 @@ public interface UnitActionType
   public static final UnitActionType LOAD = new Load();
   public static final UnitActionType JOIN = new Join();
 
-  public static final UnitActionType[] GENERIC_ACTIONS = { ATTACK, UNLOAD, CAPTURE, RESUPPLY, WAIT, DELETE, LOAD, JOIN };
-  
   public static final UnitActionType[] FOOTSOLDIER_ACTIONS =    { ATTACK, CAPTURE,  WAIT, DELETE, LOAD, JOIN };
   public static final UnitActionType[] COMBAT_VEHICLE_ACTIONS = { ATTACK,           WAIT, DELETE, LOAD, JOIN };
   public static final UnitActionType[] TRANSPORT_ACTIONS =      { UNLOAD,           WAIT, DELETE, LOAD, JOIN };
   public static final UnitActionType[] APC_ACTIONS =            { UNLOAD, RESUPPLY, WAIT, DELETE, LOAD, JOIN };
-  
 
   public static class Attack implements UnitActionType
   {
@@ -73,6 +71,15 @@ public interface UnitActionType
     {
       return "ATTACK";
     }
+
+    /**
+     * From Serializable interface
+     * @return The statically-defined object to use for this action type.
+     */
+    private Object readResolve()
+    {
+      return ATTACK;
+    }
   }
 
   public static class Capture implements UnitActionType
@@ -96,6 +103,15 @@ public interface UnitActionType
     {
       return "CAPTURE";
     }
+
+    /**
+     * From Serializable interface
+     * @return The statically-defined object to use for this action type.
+     */
+    private Object readResolve()
+    {
+      return CAPTURE;
+    }
   }
 
   public static class Wait implements UnitActionType
@@ -115,6 +131,15 @@ public interface UnitActionType
     public String name()
     {
       return "WAIT";
+    }
+
+    /**
+     * From Serializable interface
+     * @return The statically-defined object to use for this action type.
+     */
+    private Object readResolve()
+    {
+      return WAIT;
     }
   }
 
@@ -140,6 +165,15 @@ public interface UnitActionType
     {
       return "LOAD";
     }
+
+    /**
+     * From Serializable interface
+     * @return The statically-defined object to use for this action type.
+     */
+    private Object readResolve()
+    {
+      return LOAD;
+    }
   }
 
   public static class Join implements UnitActionType
@@ -163,6 +197,15 @@ public interface UnitActionType
     public String name()
     {
       return "JOIN";
+    }
+
+    /**
+     * From Serializable interface
+     * @return The statically-defined object to use for this action type.
+     */
+    private Object readResolve()
+    {
+      return JOIN;
     }
   }
 
@@ -201,6 +244,15 @@ public interface UnitActionType
     {
       return "UNLOAD";
     }
+
+    /**
+     * From Serializable interface
+     * @return The statically-defined object to use for this action type.
+     */
+    private Object readResolve()
+    {
+      return UNLOAD;
+    }
   }
 
   public static class Resupply implements UnitActionType
@@ -235,11 +287,21 @@ public interface UnitActionType
     {
       return "RESUPPLY";
     }
+
+    /**
+     * From Serializable interface
+     * @return The statically-defined object to use for this action type.
+     */
+    private Object readResolve()
+    {
+      return RESUPPLY;
+    }
   }
 
   /**
    * Effectively a wait, but the unit ends up as a different unit at the end of it.
-   * Is a template action, and thus doesn't get a constant.
+   * This action type requires a parameter (the unit to transform into), and thus
+   * cannot be represented as a static global constant.
    */
   public static class Transform implements UnitActionType
   {

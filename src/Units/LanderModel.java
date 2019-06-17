@@ -2,7 +2,6 @@ package Units;
 
 import java.util.Vector;
 
-import Engine.GameAction.ActionType;
 import Engine.UnitActionType;
 import Units.MoveTypes.FloatLight;
 import Units.MoveTypes.MoveType;

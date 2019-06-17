@@ -1,7 +1,6 @@
 package Units;
 
 import Engine.UnitActionType;
-import Engine.GameAction.ActionType;
 import Units.MoveTypes.FootStandard;
 import Units.MoveTypes.MoveType;
 import Units.Weapons.InfantryMGun;

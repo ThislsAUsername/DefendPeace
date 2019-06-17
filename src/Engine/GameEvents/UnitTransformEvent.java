@@ -34,7 +34,7 @@ public class UnitTransformEvent implements GameEvent
   @Override
   public void sendToListener(GameEventListener listener)
   {
-    listener.receiveUnitTranformEvent(unit, oldType);
+    listener.receiveUnitTransformEvent(unit, oldType);
   }
 
   @Override

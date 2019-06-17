@@ -63,7 +63,7 @@ public class AIUtils
   {
     // Create the ActionType-indexed map, and ensure we don't have any null pointers.
     Map<UnitActionType, ArrayList<GameAction> > actionsByType = new HashMap<UnitActionType, ArrayList<GameAction> >();
-    for( UnitActionType atype : UnitActionType.GENERIC_ACTIONS )
+    for( UnitActionType atype : unit.model.possibleActions )
     {
       actionsByType.put(atype, new ArrayList<GameAction>());
     }
