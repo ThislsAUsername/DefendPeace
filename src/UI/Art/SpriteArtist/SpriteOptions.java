@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import Engine.Driver;
 import Engine.OptionSelector;
 import UI.InputHandler;
+import UI.SlidingValue;
 import Units.Weapons.Weapon;
 
 public class SpriteOptions
@@ -26,7 +27,7 @@ public class SpriteOptions
   private static GraphicsOption damageSystemOption = new GraphicsOption("Damage System", Weapon.stratDescriptions, 0);
   private static GraphicsOption[] allOptions = { drawScaleOption, dummyOption, damageSystemOption };
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
-  private static double animHighlightedOption = 0;
+  private static SlidingValue animHighlightedOption;
 
   private static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
   private static final Color MENUBGCOLOR = new Color(234, 204, 154);
@@ -105,6 +106,8 @@ public class SpriteOptions
     ag.fillPolygon(lXPoints, lYPoints, lXPoints.length);
     ag.fillPolygon(rXPoints, rYPoints, rXPoints.length);
 
+    animHighlightedOption = new SlidingValue(0);
+
     initialized = true;
   }
 
@@ -150,6 +153,7 @@ public class SpriteOptions
       case UP:
       case DOWN:
         highlightedOption.handleInput(action);
+        animHighlightedOption.set(highlightedOption.getSelectionNormalized());
         break;
       case LEFT:
       case RIGHT:
@@ -191,7 +195,7 @@ public class SpriteOptions
     }
 
     highlightedOption.setSelectedOption(0);
-    animHighlightedOption = 0;
+    animHighlightedOption.set(0);
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -221,15 +225,8 @@ public class SpriteOptions
       drawGraphicsOption(g, xDraw, yDraw, allOptions[i]);
     }
 
-    // If we are moving from one option to another, calculate the intermediate draw location.
-    if( animHighlightedOption != highlightedOption.getSelectionNormalized() )
-    {
-      double slide = SpriteUIUtils.calculateSlideAmount(animHighlightedOption, highlightedOption.getSelectionNormalized());
-      animHighlightedOption += slide;
-    }
-
     // Draw the arrows around the highlighted option, animating movement when switching.
-    yDraw = firstOptionY + (int) (ySpacing * animHighlightedOption) + (3 * drawScale); // +3 to center.
+    yDraw = firstOptionY + (int) (ySpacing * animHighlightedOption.get()) + (3 * drawScale); // +3 to center.
     xDraw += (graphicsOptionWidth - optionSettingPanel.getWidth() - 8) * drawScale; // Subtract 5 to center the arrows around the option setting panel.
 
     g.drawImage(optionArrows, xDraw, yDraw, optionArrows.getWidth() * drawScale, optionArrows.getHeight() * drawScale, null);

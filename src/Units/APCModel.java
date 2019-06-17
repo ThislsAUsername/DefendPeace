@@ -5,7 +5,6 @@ import java.util.Vector;
 
 import Engine.GameAction;
 import Engine.UnitActionType;
-import Engine.GameAction.ActionType;
 import Units.MoveTypes.MoveType;
 import Units.MoveTypes.Tread;
 import Units.Weapons.WeaponModel;

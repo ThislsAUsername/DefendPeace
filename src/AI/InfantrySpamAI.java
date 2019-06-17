@@ -9,11 +9,10 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.GameInstance;
 import Engine.Path;
+import Engine.UnitActionType;
 import Engine.Utils;
 import Engine.XYCoord;
-import Engine.UnitActionType;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -37,6 +36,14 @@ public class InfantrySpamAI implements AIController
     public String getName()
     {
       return "ISAI";
+    }
+
+    @Override
+    public String getDescription()
+    {
+      return
+          "Infantry Spam AI (ISAI) knows there are two objectives in this game: Shoot things and capture things.\n" +
+          "Infantry can do both, so why build anything else?";
     }
   }
   public static final AIMaker info = new instantiator();

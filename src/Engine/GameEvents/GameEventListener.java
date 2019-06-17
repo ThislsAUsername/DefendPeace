@@ -75,7 +75,7 @@ public abstract class GameEventListener implements Serializable
   public void receiveResupplyEvent(ResupplyEvent event){};
   public void receiveUnitDieEvent(UnitDieEvent event){};
   public void receiveUnloadEvent(UnloadEvent event){};
-  public void receiveUnitTranformEvent(Unit unit, UnitModel oldType){};
+  public void receiveUnitTransformEvent(Unit unit, UnitModel oldType){};
   public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){};
   public void receiveWeatherChangeEvent(Weathers weather, int duration){};
   public void receiveMapChangeEvent(MapChangeEvent event){};

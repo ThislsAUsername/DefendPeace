@@ -6,11 +6,9 @@ import java.util.Vector;
 
 import CommandingOfficers.Commander;
 import Engine.GameAction;
-import Engine.GameAction.ActionType;
 import Engine.GameActionSet;
 import Engine.Path;
 import Engine.UnitActionType;
-import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.ResupplyEvent;
