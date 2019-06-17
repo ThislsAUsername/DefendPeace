@@ -8,7 +8,7 @@ import Engine.OptionSelector;
 public class MapSelectController implements IController
 {
   private OptionSelector optionSelector = new OptionSelector( MapLibrary.getMapList().size() );
-  private COSetupController coSelectMenu;
+  private PlayerSetupController coSelectMenu;
 
   private boolean isInSubmenu = false;
 
@@ -22,7 +22,7 @@ public class MapSelectController implements IController
     return isInSubmenu;
   }
 
-  public COSetupController getSubController()
+  public PlayerSetupController getSubController()
   {
     return coSelectMenu;
   }
@@ -68,7 +68,7 @@ public class MapSelectController implements IController
         // Create the GameBuilder with the selected map, and transition to the CO select screen.
         // If we go forward/back a few times, the old copies of these get replaced and garbage-collected.
         GameBuilder gameBuilder = new GameBuilder( MapLibrary.getMapList().get( optionSelector.getSelectionNormalized() ) );
-        coSelectMenu = new COSetupController( gameBuilder );
+        coSelectMenu = new PlayerSetupController( gameBuilder );
         isInSubmenu = true;
         break;
       case BACK:

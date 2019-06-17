@@ -1,6 +1,5 @@
 package UI.Art.Animation;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
@@ -38,8 +37,8 @@ public class ResupplyAnimation implements GameAnimation
      *   ------------
      * But with cool pop up/pop down effects.
      */
-    signWidth = ((menuTextWidth * SUPPLYTEXT.length())) * drawScale;
-    signHeight = (menuTextHeight) * drawScale;
+    signWidth = ((menuTextWidth * SUPPLYTEXT.length()));
+    signHeight = (menuTextHeight);
   }
 
   @Override
@@ -84,7 +83,7 @@ public class ResupplyAnimation implements GameAnimation
     {
       // The sign is legible.
       menu = SpriteUIUtils.makeTextFrame(SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR,
-          SUPPLYTEXT, 2 * drawScale, 2 * drawScale);
+          SUPPLYTEXT, 2, 2);
     }
     else if( animTime < signGone )
     {
@@ -95,7 +94,7 @@ public class ResupplyAnimation implements GameAnimation
 
       menu = SpriteUIUtils.makeTextFrame(SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR, width / 2, height / 2);
     }
-    SpriteLibrary.drawImageCenteredOnPoint(g, menu, tileCenterX, tileCenterY, 1); // image generation accounts for drawscale, so don't scale image
+    SpriteLibrary.drawImageCenteredOnPoint(g, menu, tileCenterX, tileCenterY, drawScale);
 
     return animTime > signGone;
   }

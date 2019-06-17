@@ -16,6 +16,7 @@ import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import UI.MapView;
+import UI.SlidingValue;
 import UI.UIUtils;
 import UI.Art.Animation.GameAnimation;
 import UI.Art.Animation.NoAnimation;
@@ -64,8 +65,8 @@ public class SpriteMapView extends MapView
   private int mapViewX;
   private int mapViewY;
   // Coordinates of the draw view, with double precision. Will constantly move towards (mapViewX, mapViewY).
-  private double mapViewDrawX;
-  private double mapViewDrawY;
+  private SlidingValue mapViewDrawX;
+  private SlidingValue mapViewDrawY;
 
   boolean dimensionsChanged = false; // If the window is resized, don't bother sliding the view into place; just snap.
 
@@ -95,8 +96,8 @@ public class SpriteMapView extends MapView
     // Start the view at the top-left by default.
     mapViewX = 0;
     mapViewY = 0;
-    mapViewDrawX = 0;
-    mapViewDrawY = 0;
+    mapViewDrawX = new SlidingValue(0);
+    mapViewDrawY = new SlidingValue(0);
 
     mapViewWidth = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * mapTilesToDrawX;
     mapViewHeight = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * mapTilesToDrawY;
@@ -218,8 +219,8 @@ public class SpriteMapView extends MapView
 
       // Draw the portion of the base terrain that is currently in-window.
       int drawMultiplier = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale();
-      int drawX = (int) (mapViewDrawX * drawMultiplier);
-      int drawY = (int) (mapViewDrawY * drawMultiplier);
+      int drawX = (int) (mapViewDrawX.get() * drawMultiplier);
+      int drawY = (int) (mapViewDrawY.get() * drawMultiplier);
 
       // Make sure we specify draw coordinates that are valid per the underlying map image.
       int maxDrawX = mapImage.getWidth() - mapViewWidth;
@@ -358,19 +359,13 @@ public class SpriteMapView extends MapView
       // If the window was resized, don't slide the view into
       // place, just snap it to where it belongs.
       dimensionsChanged = false;
-      mapViewDrawX = mapViewX;
-      mapViewDrawY = mapViewY;
+      mapViewDrawX.snap(mapViewX);
+      mapViewDrawY.snap(mapViewY);
     }
     else
     {
-      if( mapViewDrawX != mapViewX )
-      {
-        mapViewDrawX += SpriteUIUtils.calculateSlideAmount(mapViewDrawX, mapViewX);
-      }
-      if( mapViewDrawY != mapViewY )
-      {
-        mapViewDrawY += SpriteUIUtils.calculateSlideAmount(mapViewDrawY, mapViewY);
-      }
+      mapViewDrawX.set(mapViewX);
+      mapViewDrawY.set(mapViewY);
     }
   }
 
@@ -406,8 +401,8 @@ public class SpriteMapView extends MapView
   {
     // Draw terrain objects and units in order so they overlap correctly.
     // Only bother iterating over the visible map space (plus a 2-square border).
-    int drawY = (int) mapViewDrawY;
-    int drawX = (int) mapViewDrawX;
+    int drawY = (int) mapViewDrawY.get();
+    int drawX = (int) mapViewDrawX.get();
     for( int y = drawY - 1; y < drawY + mapTilesToDrawY + 2; ++y )
     {
       for( int x = drawX - 1; x < drawX + mapTilesToDrawX + 2; ++x )
@@ -483,15 +478,14 @@ public class SpriteMapView extends MapView
 
     // Build a display of the expected damage.
     Color[] colors = UIUtils.getMapUnitColors(attacker.myColor).paletteColors;
-    BufferedImage dmgImage = SpriteUIUtils.makeTextFrame(colors[4], colors[2], damageText,
-        2 * SpriteOptions.getDrawScale(), 2 * SpriteOptions.getDrawScale());
+    BufferedImage dmgImage = SpriteUIUtils.makeTextFrame(colors[4], colors[2], damageText, 2, 2);
 
     // Draw the damage estimate directly above the unit being targeted.
     int drawScale = SpriteOptions.getDrawScale();
     int tileSize = SpriteLibrary.baseSpriteSize * drawScale;
     int estimateX = (x * tileSize) + (tileSize / 2);
-    int estimateY = (y * tileSize) - dmgImage.getHeight() / 2;
-    SpriteLibrary.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY, 1);
+    int estimateY = (y * tileSize) - (dmgImage.getHeight()*drawScale) / 2;
+    SpriteLibrary.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY, drawScale);
   }
 
   /**

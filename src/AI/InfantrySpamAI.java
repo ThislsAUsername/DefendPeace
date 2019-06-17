@@ -37,6 +37,14 @@ public class InfantrySpamAI implements AIController
     {
       return "ISAI";
     }
+
+    @Override
+    public String getDescription()
+    {
+      return
+          "Infantry Spam AI (ISAI) knows there are two objectives in this game: Shoot things and capture things.\n" +
+          "Infantry can do both, so why build anything else?";
+    }
   }
   public static final AIMaker info = new instantiator();
   
