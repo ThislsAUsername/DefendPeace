@@ -29,8 +29,9 @@ public class CommanderCinder extends Commander
     {
       super("Cinder");
       infoPages.add(new InfoPage(
-          "Commander Cinder trades unit health for a better action economy.\n" +
-          "An efficient and merciless commander.\n"));
+          "Commander Cinder uses this callsign at all times. Her given name, according to her, is 'not important'.\n" + 
+          "'Cinder' is not a name, but designates time-warpers from Grey Sky's super-soldier program.\n" + 
+          "Fighting physics isn't free, though, and the waste heat has a mind of its own - 'Cinder' is entirely too accurate."));
       infoPages.add(new InfoPage(
           "Passive:\n" + 
           "- Units are built at 8 HP, but can act immediately.\n" +
