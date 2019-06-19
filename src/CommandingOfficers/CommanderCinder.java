@@ -29,9 +29,8 @@ public class CommanderCinder extends Commander
     {
       super("Cinder");
       infoPages.add(new InfoPage(
-          "Commander Cinder uses this callsign at all times. Her given name, according to her, is 'not important'.\n" + 
-          "'Cinder' is not a name, but designates time-warpers from Grey Sky's super-soldier program.\n" + 
-          "Fighting physics isn't free, though, and the waste heat has a mind of its own - 'Cinder' is entirely too accurate."));
+          "'Cinders' are products of Grey Sky's super-soldier program who gain initiative in battle by warping time - they're named for the unpredictable thermal surges caused by their temporal meddling.\n" + 
+          "Having taken this title as her name, Commander Cinder's blazing speed dominates the battlefield."));
       infoPages.add(new InfoPage(
           "Passive:\n" + 
           "- Units are built at 8 HP, but can act immediately.\n" +
