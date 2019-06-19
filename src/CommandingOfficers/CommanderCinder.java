@@ -29,8 +29,8 @@ public class CommanderCinder extends Commander
     {
       super("Cinder");
       infoPages.add(new InfoPage(
-          "Commander Cinder trades unit health for a better action economy.\n" +
-          "An efficient and merciless commander.\n"));
+          "'Cinders' are products of Grey Sky's super-soldier program who gain initiative in battle by warping time - they're named for the unpredictable thermal surges caused by their temporal meddling.\n" + 
+          "Having taken this title as her name, Commander Cinder's blazing speed dominates the battlefield."));
       infoPages.add(new InfoPage(
           "Passive:\n" + 
           "- Units are built at 8 HP, but can act immediately.\n" +
