@@ -1,5 +1,9 @@
 package Engine;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Queue;
@@ -11,7 +15,8 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameInput.GameInputHandler;
 import Terrain.GameMap;
 import Terrain.Location;
-import UI.CO_InfoMenu;
+import UI.CO_InfoController;
+import UI.GameStatsController;
 import UI.InGameMenu;
 import UI.InputHandler;
 import UI.InputHandler.InputAction;
@@ -43,11 +48,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
   Queue<Unit> unitsToInit = null;
   private boolean isGameOver;
 
-  // We use a different method for the CO Info menu than the others (MetaAction, etc) because
-  // it has two different axes of control, and because it has no actions that can result.
-  public boolean isInCoInfoMenu = false;
-  private CO_InfoMenu coInfoMenu;
-
   /** Just a simple struct to hold the currently-selected unit and its tentative path. */
   private class ContemplatedAction
   {
@@ -67,18 +67,23 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   public MapController(GameInstance game, MapView view)
   {
+    this(game,view,true);
+  }
+
+  public MapController(GameInstance game, MapView view, boolean initGame)
+  {
     myGame = game;
     myView = view;
     myView.setController(this);
     inputMode = InputMode.INPUT;
     unitsToInit = new ArrayDeque<Unit>();
     isGameOver = false;
-    coInfoMenu = new CO_InfoMenu(myGame.commanders.length);
     nextSeekIndex = 0;
     contemplatedAction = new ContemplatedAction();
 
-    // Start the first turn.
-    startNextTurn();
+    if( initGame )
+      // Start the first turn.
+      startNextTurn();
 
     // Initialize our game input handler.
     myGameInputHandler = new GameInputHandler(myGame.activeCO.myView, myGame.activeCO, this);
@@ -110,14 +115,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
         break;
       case INPUT:
-        if( isInCoInfoMenu && coInfoMenu.handleInput(input) )
-        {
-          isInCoInfoMenu = false;
-        }
-        else
-        {
           exitMap = handleGameInput(input);
-        }
         break;
       default:
         System.out.println("WARNING! Received invalid InputAction " + input);
@@ -157,7 +155,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         System.out.println("Invalid InputStateHandler mode in MapController! " + mode);
     }
 
-    return myGameInputHandler.getInputType() == GameInputHandler.InputType.LEAVE_MAP;
+    return myGameInputHandler.shouldLeaveMap();
   }
 
   /**
@@ -435,9 +433,25 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case LEAVE_MAP:
         // Handled as a special case in handleGameInput().
         break;
+      case SAVE:
+        myGame.writeSave();
+        myGameInputHandler.reset(); // SAVE is a terminal state. Reset the input handler.
+        break;
+      case CO_STATS:
+        GameStatsController coStatsMenu = new GameStatsController(myGame);
+        IView statsView = Driver.getInstance().gameGraphics.createInfoView(coStatsMenu);
+
+        myGameInputHandler.reset(); // CO_STATS is a terminal state. Reset the input handler.
+        // Give the new controller/view the floor
+        Driver.getInstance().changeGameState(coStatsMenu, statsView);
+        break;
       case CO_INFO:
-        isInCoInfoMenu = true;
+        CO_InfoController coInfoMenu = new CO_InfoController(myGame);
+        IView infoView = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
+
         myGameInputHandler.reset(); // CO_INFO is a terminal state. Reset the input handler.
+        // Give the new controller/view the floor
+        Driver.getInstance().changeGameState(coInfoMenu, infoView);
         break;
       default:
         System.out.println("WARNING! Attempting to switch to unknown input type " + inputType);
@@ -652,10 +666,5 @@ public class MapController implements IController, GameInputHandler.StateChanged
   public InGameMenu<? extends Object> getCurrentGameMenu()
   {
     return currentMenu;
-  }
-
-  public CO_InfoMenu getCoInfoMenu()
-  {
-    return coInfoMenu;
   }
 }

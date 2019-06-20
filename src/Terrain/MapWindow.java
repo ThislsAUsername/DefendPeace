@@ -1,5 +1,7 @@
 package Terrain;
 
+import java.util.ArrayList;
+
 import CommandingOfficers.Commander;
 import Engine.Path;
 import Engine.Path.PathNode;
@@ -14,6 +16,7 @@ public class MapWindow extends GameMap
   boolean isFogEnabled;
   private boolean[][] isFogged;
   private Commander[][] lastOwnerSeen;
+  private ArrayList<Unit> confirmedVisibles;
 
   public MapWindow(MapMaster pMaster, Commander pViewer)
   {
@@ -28,6 +31,7 @@ public class MapWindow extends GameMap
     commanders = master.commanders;
     isFogEnabled = fog;
     isFogged = new boolean[mapWidth][mapHeight];
+    confirmedVisibles = new ArrayList<Unit>();
 
     // We start with knowledge of what properties everyone starts with.
     lastOwnerSeen = new Commander[mapWidth][mapHeight];
@@ -81,7 +85,8 @@ public class MapWindow extends GameMap
     XYCoord coord = new XYCoord(x, y);
     Location masterLoc = master.getLocation(coord);
     Location returnLoc = masterLoc;
-    if( isLocationFogged(coord) )
+    if( isLocationFogged(coord) || // If we can't see anything...
+        (isLocationEmpty(coord) && !master.isLocationEmpty(coord)) ) // ...or what's there is hidden
     {
       returnLoc = new Location(returnLoc.getEnvironment(), coord);
       returnLoc.setHighlight(masterLoc.isHighlightSet());
@@ -98,24 +103,32 @@ public class MapWindow extends GameMap
   /** Returns true if no unit is at the specified x and y coordinate, false else */
   public boolean isLocationEmpty(XYCoord coords)
   {
-    return isLocationFogged(coords) || master.isLocationEmpty(null, coords);
+    return isLocationEmpty(null, coords.xCoord, coords.yCoord);
   }
 
   /** Returns true if no unit is at the specified x and y coordinate, false else */
   public boolean isLocationEmpty(int x, int y)
   {
-    return isLocationFogged(x, y) || master.isLocationEmpty(null, x, y);
+    return isLocationEmpty(null, x, y);
   }
 
   /** Returns true if no unit (excluding 'unit') is in the specified Location. */
   public boolean isLocationEmpty(Unit unit, XYCoord coords)
   {
-    return isLocationFogged(coords) || master.isLocationEmpty(unit, coords.xCoord, coords.yCoord);
+    return isLocationEmpty(unit, coords.xCoord, coords.yCoord);
   }
 
   /** Returns true if no unit (excluding 'unit') is in the specified Location. */
   public boolean isLocationEmpty(Unit unit, int x, int y)
   {
+    Unit resident = master.getLocation(x, y).getResident();
+    // if there's nothing there, yeah...
+    if (resident == null)
+      return true;
+    // say it's not there if we dunno it's there
+    if (resident.model.hidden && !confirmedVisibles.contains(resident)) 
+      return true;
+    // otherwise, consult the fog map and master map
     return isLocationFogged(x, y) || master.isLocationEmpty(unit, x, y);
   }
 
@@ -134,6 +147,7 @@ public class MapWindow extends GameMap
   public void resetFog()
   {
     // assume everything is fogged
+    confirmedVisibles.clear();
     for( int y = 0; y < mapHeight; ++y )
     {
       for( int x = 0; x < mapWidth; ++x )
@@ -150,10 +164,14 @@ public class MapWindow extends GameMap
       {
         for( Unit unit : co.units )
         {
-          for( XYCoord coord : Utils.findVisibleLocations(this, unit) )
+          for( XYCoord coord : Utils.findVisibleLocations(this, unit, false) )
           {
-            isFogged[coord.xCoord][coord.yCoord] = false;
-            lastOwnerSeen[coord.xCoord][coord.yCoord] = master.getLocation(coord).getOwner();
+            revealFog(coord, false);
+          }
+          // We need to do a second pass with piercing vision so we can know whether to reveal the units
+          for( XYCoord coord : Utils.findVisibleLocations(this, unit, true) )
+          {
+            revealFog(coord, true);
           }
         }
         for( XYCoord xyc : co.ownedProperties )
@@ -161,8 +179,7 @@ public class MapWindow extends GameMap
           Location loc = master.getLocation(xyc);
           for( XYCoord coord : Utils.findVisibleLocations(this, loc.getCoordinates(), Environment.PROPERTY_VISION_RANGE) )
           {
-            isFogged[coord.xCoord][coord.yCoord] = false;
-            lastOwnerSeen[coord.xCoord][coord.yCoord] = master.getLocation(coord).getOwner();
+            revealFog(coord, false);
           }
         }
       }
@@ -175,10 +192,14 @@ public class MapWindow extends GameMap
       return;
     if( !viewer.isEnemy(scout.CO) )
     {
-      for( XYCoord coord : Utils.findVisibleLocations(this, scout, scout.x, scout.y) )
+      for( XYCoord coord : Utils.findVisibleLocations(this, scout, false) )
       {
-        isFogged[coord.xCoord][coord.yCoord] = false;
-        lastOwnerSeen[coord.xCoord][coord.yCoord] = master.getLocation(coord).getOwner();
+        revealFog(coord, true);
+      }
+      // We need to do a second pass with piercing vision so we can know whether to reveal the units
+      for( XYCoord coord : Utils.findVisibleLocations(this, scout, true) )
+      {
+        revealFog(coord, true);
       }
     }
   }
@@ -191,12 +212,25 @@ public class MapWindow extends GameMap
     {
       for( PathNode node : movepath.getWaypoints() )
       {
-        for( XYCoord coord : Utils.findVisibleLocations(this, scout, node.x, node.y) )
+        for( XYCoord coord : Utils.findVisibleLocations(this, scout, node.x, node.y, false) )
         {
-          isFogged[coord.xCoord][coord.yCoord] = false;
-          lastOwnerSeen[coord.xCoord][coord.yCoord] = master.getLocation(coord).getOwner();
+          revealFog(coord, false);
+        }
+        // We need to do a second pass with piercing vision so we can know whether to reveal the units
+        for( XYCoord coord : Utils.findVisibleLocations(this, scout, node.x, node.y, true) )
+        {
+          revealFog(coord, true);
         }
       }
     }
+  }
+  
+  public void revealFog(XYCoord coord, boolean piercing)
+  {
+    Location loc = master.getLocation(coord);
+    isFogged[coord.xCoord][coord.yCoord] = false;
+    lastOwnerSeen[coord.xCoord][coord.yCoord] = loc.getOwner();
+    if (piercing && loc.getResident() != null)
+      confirmedVisibles.add(loc.getResident());
   }
 }

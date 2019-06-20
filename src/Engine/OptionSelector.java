@@ -72,17 +72,27 @@ public class OptionSelector
     return chosenOption;
   }
 
+  public void next()
+  {
+    highlightedOption++;
+  }
+
+  public void prev()
+  {
+    highlightedOption--;
+  }
+
   public void handleInput(InputAction action)
   {
     switch( action )
     {
       case DOWN:
       case RIGHT:
-        highlightedOption++;
+        next();
         break;
       case UP:
       case LEFT:
-        highlightedOption--;
+        prev();
         break;
       case BACK:
       case ENTER:

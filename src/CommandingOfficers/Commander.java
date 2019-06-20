@@ -1,6 +1,10 @@
 package CommandingOfficers;
 
 import java.awt.Color;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,8 +12,11 @@ import java.util.Map;
 import java.util.Set;
 
 import AI.AIController;
+import AI.AILibrary;
+import AI.AIMaker;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
+import Engine.UnitActionType;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.Combat.BattleInstance.CombatContext;
@@ -19,9 +26,7 @@ import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
-import UI.UIUtils;
 import UI.UIUtils.Faction;
-import UI.Art.SpriteArtist.SpriteLibrary;
 import Units.APCModel;
 import Units.AntiAirModel;
 import Units.ArtilleryModel;
@@ -39,18 +44,21 @@ import Units.NeotankModel;
 import Units.ReconModel;
 import Units.RocketsModel;
 import Units.SubModel;
+import Units.SubSubModel;
 import Units.TCopterModel;
 import Units.TankModel;
 import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModel.UnitEnum;
 
-public class Commander extends GameEventListener
+public class Commander extends GameEventListener implements Serializable
 {
+  private static final long serialVersionUID = -6740892333060450105L;
+  
   public final CommanderInfo coInfo;
   public GameMap myView;
   public ArrayList<Unit> units;
-  public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
+  public Map<UnitEnum, UnitModel> unitModels = new HashMap<UnitEnum, UnitModel>();
   public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
   public Set<XYCoord> ownedProperties;
   public ArrayList<COModifier> modifiers;
@@ -69,7 +77,9 @@ public class Commander extends GameEventListener
   private ArrayList<CommanderAbility> myAbilities = null;
   private String myActiveAbilityName = "";
 
-  private AIController aiController = null;
+  // The AI has to be effectively stateless anyway (to be able to adapt to whatever scenario it finds itself in on map start),
+  //   so may as well not require them to care about serializing their contents.
+  private transient AIController aiController = null;
 
   public Commander(CommanderInfo info)
   {
@@ -112,9 +122,15 @@ public class Commander extends GameEventListener
     unitProductionByTerrain.put(TerrainType.AIRPORT, airportModels);
 
     // Compile one master list of everything we can build.
-    unitModels.addAll(factoryModels);
-    unitModels.addAll(seaportModels);
-    unitModels.addAll(airportModels);
+    for (UnitModel um : factoryModels)
+      unitModels.put(um.type, um);
+    for (UnitModel um : seaportModels)
+      unitModels.put(um.type, um);
+    for (UnitModel um : airportModels)
+      unitModels.put(um.type, um);
+
+    UnitModel subsub = new SubSubModel();
+    unitModels.put(subsub.type, subsub); // We don't want a separate "submerged sub" build option
 
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
@@ -226,20 +242,10 @@ public class Commander extends GameEventListener
     return true;
   }
 
+  // Leaving this for now, to avoid merge conflicts
   public UnitModel getUnitModel(UnitEnum unitType)
   {
-    UnitModel um = null;
-
-    for( UnitModel iter : unitModels )
-    {
-      if( iter.type == unitType )
-      {
-        um = iter;
-        break;
-      }
-    }
-
-    return um;
+    return unitModels.get(unitType);
   }
   
   /**
@@ -383,5 +389,43 @@ public class Commander extends GameEventListener
       return aiController.getNextAction(myView);
     }
     return null;
+  }
+
+  /**
+   * Private method, same signature as in Serializable interface
+   *
+   * @param stream
+   * @throws IOException
+   */
+  private void writeObject(ObjectOutputStream stream) throws IOException
+  {
+    stream.defaultWriteObject();
+
+    // save our index into the AILibrary
+    // TODO: Consider serializing AI as well, so we don't need this method
+    if( null == aiController )
+      stream.writeInt(0); // Humans live at index 0 of the AI array. That sounds philosophical.
+    else
+    {
+      for( AIMaker AI : AILibrary.getAIList() )
+      {
+        if( AI.getName().equalsIgnoreCase(aiController.getAIInfo().getName()) )
+          stream.writeInt(AILibrary.getAIList().indexOf(AI));
+      }
+    }
+  }
+
+  /**
+   * Private method, same signature as in Serializable interface
+   *
+   * @param stream
+   * @throws IOException
+   */
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException
+  {
+    stream.defaultReadObject();
+
+    // use our AI index to get back where we were before
+    aiController = AILibrary.getAIList().get(stream.readInt()).create(this);
   }
 }

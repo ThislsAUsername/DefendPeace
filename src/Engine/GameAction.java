@@ -11,12 +11,13 @@ import Engine.GameEvents.CaptureEvent;
 import Engine.GameEvents.CommanderAbilityEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.CreateUnitEvent;
+import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.LoadEvent;
-import Engine.GameEvents.MoveEvent;
 import Engine.GameEvents.ResupplyEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.UnitJoinEvent;
+import Engine.GameEvents.UnitTransformEvent;
 import Engine.GameEvents.UnloadEvent;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -30,11 +31,6 @@ import Units.UnitModel;
  */
 public interface GameAction
 {
-  public enum ActionType
-  {
-    ATTACK, CAPTURE, LOAD, JOIN, RESUPPLY, UNLOAD, WAIT, UNITPRODUCTION, OTHER
-  }
-
   /**
    * Returns a GameEventQueue with the events that make up this action. If the action
    * was constructed incorrectly, this should return an empty GameEventQueue.
@@ -42,7 +38,7 @@ public interface GameAction
   public abstract GameEventQueue getEvents(MapMaster map);
   public abstract XYCoord getMoveLocation();
   public abstract XYCoord getTargetLocation();
-  public abstract ActionType getType();
+  public abstract UnitActionType getUnitActionType();
 
   // ==========================================================
   //   Concrete Action type classes.
@@ -96,13 +92,13 @@ public interface GameAction
       if( isValid )
       {
         Location moveLocation = gameMap.getLocation(moveCoord);
-        defender = gameMap.getLocation(attackLocation).getResident();
         attackRange = Math.abs(moveCoord.xCoord - attackLocation.xCoord)
             + Math.abs(moveCoord.yCoord - attackLocation.yCoord);
 
         boolean moved = attacker.x != moveCoord.xCoord || attacker.y != moveCoord.yCoord;
+        isValid &= (gameMap.getLocation(attackLocation).getResident() == defender);
         isValid &= (null != defender) && attacker.canAttack(defender.model, attackRange, moved);
-        isValid &= attacker.CO.isEnemy(defender.CO);
+        isValid &= (null != defender) && attacker.CO.isEnemy(defender.CO);
         isValid &= (null == moveLocation.getResident()) || (attacker == moveLocation.getResident());
       }
 
@@ -154,16 +150,16 @@ public interface GameAction
     }
 
     @Override
-    public ActionType getType()
-    {
-      return GameAction.ActionType.ATTACK;
-    }
-
-    @Override
     public String toString()
     {
       return String.format("[Attack %s with %s after moving to %s]",
           defender.toStringWithLocation(), attacker.toStringWithLocation(), moveCoord );
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.ATTACK;
     }
   } // ~AttackAction
 
@@ -227,15 +223,15 @@ public interface GameAction
     }
 
     @Override
-    public ActionType getType()
-    {
-      return GameAction.ActionType.UNITPRODUCTION;
-    }
-
-    @Override
     public String toString()
     {
       return String.format("[Produce %s at %s]", what, where);
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return null;
     }
   } // ~UnitProductionAction
 
@@ -324,24 +320,24 @@ public interface GameAction
     }
 
     @Override
-    public ActionType getType()
-    {
-      return GameAction.ActionType.CAPTURE;
-    }
-
-    @Override
     public String toString()
     {
       return String.format("[Capture %s at %s with %s]", propertyType, movePathEnd, actor.toStringWithLocation());
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.CAPTURE;
     }
   } // ~CaptureAction
 
   // ===========  WaitAction  =================================
   public static class WaitAction implements GameAction
   {
-    private Path movePath;
-    private XYCoord waitLoc = null;
-    private Unit actor = null;
+    private final Path movePath;
+    private final XYCoord waitLoc;
+    private final Unit actor;
 
     public WaitAction(Unit unit, Path path)
     {
@@ -352,6 +348,8 @@ public interface GameAction
         // Store the destination for later.
         waitLoc = new XYCoord(path.getEnd().x, path.getEnd().y);
       }
+      else
+        waitLoc = null;
     }
 
     @Override
@@ -394,15 +392,15 @@ public interface GameAction
     }
 
     @Override
-    public ActionType getType()
-    {
-      return GameAction.ActionType.WAIT;
-    }
-
-    @Override
     public String toString()
     {
       return String.format("[Move %s to %s]", actor.toStringWithLocation(), waitLoc);
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.WAIT;
     }
   } // ~WaitAction
 
@@ -480,15 +478,15 @@ public interface GameAction
     }
 
     @Override
-    public ActionType getType()
-    {
-      return GameAction.ActionType.LOAD;
-    }
-
-    @Override
     public String toString()
     {
       return String.format("[Load %s into %s]", passenger.toStringWithLocation(), transport.toStringWithLocation());
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.LOAD;
     }
   } // ~LoadAction
 
@@ -599,15 +597,15 @@ public interface GameAction
     }
 
     @Override
-    public ActionType getType()
-    {
-      return GameAction.ActionType.UNLOAD;
-    }
-
-    @Override
     public String toString()
     {
       return String.format("[Unload from %s]", actor.toStringWithLocation());
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.UNLOAD;
     }
   } // ~UnloadAction
 
@@ -686,15 +684,15 @@ public interface GameAction
     }
 
     @Override
-    public ActionType getType()
-    {
-      return GameAction.ActionType.JOIN;
-    }
-
-    @Override
     public String toString()
     {
       return String.format("[Join %s into %s]", donor.toStringWithLocation(), recipient.toStringWithLocation());
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.JOIN;
     }
   } // ~UnitJoinAction
 
@@ -773,9 +771,15 @@ public interface GameAction
         // Note that movePath being null is OK for ResupplyAction when it is being re-used.
         if( movePath != null )
         {
-          eventSequence.add(new MoveEvent(unitActor, movePath));
+          // If we should be blocked, don't resupply anything.
+          if( !Utils.enqueueMoveEvent(map, unitActor, movePath, eventSequence) )
+            isValid = false; // isValid is used to signal pre-emption here rather than a malformed action.
+                             // Strange control flow stems from ResupplyAction's dual purpose. 
         }
+      }
 
+      if( isValid )
+      {
         // Get the adjacent map locations.
         ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, supplyLocation, 1);
 
@@ -812,15 +816,15 @@ public interface GameAction
     }
 
     @Override
-    public ActionType getType()
-    {
-      return GameAction.ActionType.RESUPPLY;
-    }
-
-    @Override
     public String toString()
     {
       return String.format("[Resupply units adjacent to %s with %s]", myLocation(), unitActor.toStringWithLocation());
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.RESUPPLY;
     }
   } // ~ResupplyAction
 
@@ -863,17 +867,104 @@ public interface GameAction
     }
 
     @Override
-    public ActionType getType()
+    public String toString()
     {
-      // Use OTHER, just because it doesn't correspond to a normal unit-based
-      // action with an actor, target location, etc.
-      return GameAction.ActionType.OTHER;
+      return String.format("[Perform CO Ability %s]", myAbility);
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return null;
+    }
+  } // ~AbilityAction
+  
+  // ===========  UnitTransformAction  =================================
+  /** Effectively a WAIT, but the unit ends up as a different unit at the end of it. */
+  public static class TransformAction extends WaitAction
+  {
+    private UnitActionType.Transform type;
+    Unit actor;
+
+    public TransformAction(Unit unit, Path path, UnitActionType.Transform pType)
+    {
+      super(unit, path);
+      type = pType;
+      actor = unit;
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue transformEvents = super.getEvents(gameMap);
+      
+      if( transformEvents.size() > 0 ) // if we successfully made a move action
+      {
+        GameEvent moveEvent = transformEvents.peek();
+        if (moveEvent.getEndPoint().equals(getMoveLocation())) // make sure we shouldn't be pre-empted
+        {
+          transformEvents.add(new UnitTransformEvent(actor, type.destinationType));
+        }
+      }
+      return transformEvents;
+    }
+    
+    @Override
+    public String toString()
+    {
+      return String.format("[Move %s to %s and transform to %s]", actor.toStringWithLocation(), getMoveLocation(), type.destinationType);
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return type;
+    }
+  } // ~TransformAction
+
+  // ===========  UnitDeleteAction  =================================
+  /** Removes the unit. Only allows deletion in place */
+  public static class UnitDeleteAction implements GameAction
+  {
+    final Unit actor;
+    final XYCoord destination;
+    
+    public UnitDeleteAction(Unit unit)
+    {
+      actor = unit;
+      destination = new XYCoord(unit.x, unit.y);
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue eventSequence = new GameEventQueue();
+      eventSequence.add(new UnitDieEvent(actor));
+      return eventSequence;
     }
 
     @Override
     public String toString()
     {
-      return String.format("[Perform CO Ability %s]", myAbility);
+      return String.format("[Delete %s in place]", actor.toStringWithLocation());
     }
-  } // ~AbilityAction
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.DELETE;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return destination;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return destination;
+    }
+  } // ~UnitDeleteAction
 }

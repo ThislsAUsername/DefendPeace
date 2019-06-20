@@ -20,9 +20,31 @@ import Units.UnitModel;
  */
 public class CommanderCinder extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Cinder", new instantiator());  
-  private static class instantiator implements COMaker
+  private static final long serialVersionUID = 4938851182463546620L;
+
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
+    public instantiator()
+    {
+      super("Cinder");
+      infoPages.add(new InfoPage(
+          "'Cinders' are products of Grey Sky's super-soldier program who gain initiative in battle by warping time - they're named for the unpredictable thermal surges caused by their temporal meddling.\n" + 
+          "Having taken this title as her name, Commander Cinder's blazing speed dominates the battlefield."));
+      infoPages.add(new InfoPage(
+          "Passive:\n" + 
+          "- Units are built at 8 HP, but can act immediately.\n" +
+          "- Building on a base that has produced this turn already incurs a fee of 1000 funds per build you have already done there this turn.\n"));
+      infoPages.add(new InfoPage(
+          SearAbility.SEAR_NAME+" ("+SearAbility.SEAR_COST+"):\n" +
+          "Removes "+SearAbility.SEAR_WOUND+" HP from each of Cinder's units.\n" +
+          "Units that had not yet acted have their supplies restored.\n" +
+          "Units are refreshed and may act again.\n"));
+      infoPages.add(new InfoPage(
+          WitchFireAbility.WITCHFIRE_NAME+" ("+WitchFireAbility.WITCHFIRE_COST+"):\n" +
+          "After any unit attacks, it will lose "+WitchFireAbility.WITCHFIRE_HP_COST+" HP and be refreshed.\n" +
+          "This may be done repeatedly, but it can kill Cinder's own units.\n"));
+    }
     @Override
     public Commander create()
     {
@@ -30,7 +52,7 @@ public class CommanderCinder extends Commander
     }
   }
 
-  private static final double COST_MOD_PER_BUILD = 1.2;
+  private static final int PREMIUM_PER_BUILD = 1000;
 
   private HashMap<XYCoord, Integer> buildCounts = new HashMap<>();
 
@@ -118,9 +140,9 @@ public class CommanderCinder extends Commander
 
   public void setPrices(int repetitons)
   {
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
-      um.COcost = Math.pow(COST_MOD_PER_BUILD, repetitons);
+      um.moneyCostAdjustment = repetitons*PREMIUM_PER_BUILD;
     }
   }
 

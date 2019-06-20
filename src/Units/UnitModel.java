@@ -1,12 +1,16 @@
 package Units;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
 import Engine.GameAction;
-import Engine.GameAction.ActionType;
+import Engine.UnitActionType;
 import Terrain.Location;
 import Terrain.TerrainType;
 import Units.MoveTypes.MoveType;
@@ -15,11 +19,11 @@ import Units.Weapons.WeaponModel;
 /**
  * Defines the invariant characteristics of a unit. One UnitModel can be shared across many instances of that Unit type.
  */
-public class UnitModel
+public class UnitModel implements Serializable
 {
   public enum UnitEnum
   {
-    INFANTRY, MECH, RECON, TANK, MD_TANK, NEOTANK, APC, ARTILLERY, ROCKETS, ANTI_AIR, MOBILESAM, FIGHTER, BOMBER, B_COPTER, T_COPTER, BATTLESHIP, CRUISER, LANDER, SUB
+    INFANTRY, MECH, RECON, TANK, MD_TANK, NEOTANK, APC, ARTILLERY, ROCKETS, ANTI_AIR, MOBILESAM, FIGHTER, BOMBER, B_COPTER, T_COPTER, BATTLESHIP, CRUISER, LANDER, SUB, SUB_SUB
   };
 
   // Subs are ships unless they're submerged.
@@ -32,13 +36,15 @@ public class UnitModel
   public UnitEnum type;
   public ChassisEnum chassis;
   private int moneyCost = 9001;
+  public int moneyCostAdjustment = 0;
   public int maxFuel;
   public int idleFuelBurn;
   public int movePower;
   public int visionRange;
-  public boolean visionIgnoresCover = false;
+  public int visionRangePiercing = 1;
+  public boolean hidden = false;
   public MoveType propulsion;
-  public ArrayList<ActionType> possibleActions = new ArrayList<ActionType>();
+  public ArrayList<UnitActionType> possibleActions = new ArrayList<UnitActionType>();
   public Set<TerrainType> healableHabs;
   public ArrayList<WeaponModel> weaponModels = new ArrayList<WeaponModel>();
 
@@ -50,11 +56,11 @@ public class UnitModel
   public double COcost = 1.0;
 
   public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, ActionType[] actions, WeaponModel[] weapons)
+      MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] weapons)
   {
     this(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion);
 
-    for( ActionType action : actions )
+    for( UnitActionType action : actions )
     {
       possibleActions.add(action);
     }
@@ -65,10 +71,10 @@ public class UnitModel
   }
 
   public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, ArrayList<ActionType> actions, ArrayList<WeaponModel> weapons)
+      MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> weapons)
   {
     this(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion);
-    possibleActions = actions;
+    possibleActions.addAll(actions);
     weaponModels = weapons;
   }
 
@@ -132,7 +138,7 @@ public class UnitModel
   
   public int getCost()
   {
-    return (int) (moneyCost*COcost);
+    return (int) ((moneyCost+moneyCostAdjustment)*COcost);
   }
 
   /**
@@ -203,12 +209,12 @@ public class UnitModel
     return name;
   }
 
-  public boolean hasActionType(ActionType actionType)
+  public boolean hasActionType(UnitActionType UnitActionType)
   {
     boolean hasAction = false;
-    for( ActionType at : possibleActions )
+    for( UnitActionType at : possibleActions )
     {
-      if( at == actionType )
+      if( at == UnitActionType )
       {
         hasAction = true;
         break;

@@ -17,4 +17,6 @@ public interface AIController
    * @return A GameAction to execute, or null if the AIPlayer is ready to end its turn.
    */
   public GameAction getNextAction(GameMap gameMap);
+  
+  public AIMaker getAIInfo();
 }

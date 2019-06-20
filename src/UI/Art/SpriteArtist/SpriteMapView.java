@@ -15,8 +15,8 @@ import Engine.Combat.CombatEngine;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
-import UI.CO_InfoMenu;
 import UI.MapView;
+import UI.SlidingValue;
 import UI.UIUtils;
 import UI.Art.Animation.GameAnimation;
 import UI.Art.Animation.NoAnimation;
@@ -65,8 +65,8 @@ public class SpriteMapView extends MapView
   private int mapViewX;
   private int mapViewY;
   // Coordinates of the draw view, with double precision. Will constantly move towards (mapViewX, mapViewY).
-  private double mapViewDrawX;
-  private double mapViewDrawY;
+  private SlidingValue mapViewDrawX;
+  private SlidingValue mapViewDrawY;
 
   boolean dimensionsChanged = false; // If the window is resized, don't bother sliding the view into place; just snap.
 
@@ -96,11 +96,12 @@ public class SpriteMapView extends MapView
     // Start the view at the top-left by default.
     mapViewX = 0;
     mapViewY = 0;
-    mapViewDrawX = 0;
-    mapViewDrawY = 0;
+    mapViewDrawX = new SlidingValue(0);
+    mapViewDrawY = new SlidingValue(0);
 
     mapViewWidth = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * mapTilesToDrawX;
     mapViewHeight = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * mapTilesToDrawY;
+    SpriteOptions.setScreenDimensions(mapViewWidth, mapViewHeight);
   }
 
   @Override
@@ -118,18 +119,6 @@ public class SpriteMapView extends MapView
     int tileSize = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale();
     mapTilesToDrawX = mapViewWidth / tileSize;
     mapTilesToDrawY = mapViewHeight / tileSize;
-
-    // Cap the view width/height to the dimensions of the map.
-    if( mapTilesToDrawX > myGame.gameMap.mapWidth )
-    {
-      mapTilesToDrawX = myGame.gameMap.mapWidth;
-      mapViewWidth = mapTilesToDrawX * tileSize;
-    }
-    if( mapTilesToDrawY > myGame.gameMap.mapHeight )
-    {
-      mapTilesToDrawY = myGame.gameMap.mapHeight;
-      mapViewHeight = mapTilesToDrawY * tileSize;
-    }
 
     // Let SpriteOptions know we are changing things.
     SpriteOptions.setScreenDimensions(mapViewWidth, mapViewHeight);
@@ -216,26 +205,9 @@ public class SpriteMapView extends MapView
   public void render(Graphics g)
   {
     GameMap gameMap = getDrawableMap(myGame);
-    // If we are in the CO_INFO menu, don't draw the map, etc.
-    if( mapController.isInCoInfoMenu )
-    {
-      // Get the CO info menu.
-      CO_InfoMenu menu = mapController.getCoInfoMenu();
+    
+    DiagonalBlindsBG.draw(g);
 
-      // Get the current menu selections.
-      int co = menu.getCoSelection();
-      int page = menu.getPageSelection();
-
-      // TODO: Create the other CO info pages (powers, stats, etc).
-
-      // Draw the background.
-
-      // Draw the commander art.
-      g.drawImage(SpriteLibrary.getCommanderSprites(myGame.commanders[co].coInfo.name).body, 0, 0, mapViewWidth,
-          mapViewHeight, null);
-    }
-    else
-    {
       // We draw in two stages. First, we draw the map/units onto a canvas which is the size
       // of the entire map; then we copy the visible section of that canvas onto the game window.
       // This allows us to avoid extra calculations to place map objects within in the window.
@@ -247,8 +219,8 @@ public class SpriteMapView extends MapView
 
       // Draw the portion of the base terrain that is currently in-window.
       int drawMultiplier = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale();
-      int drawX = (int) (mapViewDrawX * drawMultiplier);
-      int drawY = (int) (mapViewDrawY * drawMultiplier);
+      int drawX = (int) (mapViewDrawX.get() * drawMultiplier);
+      int drawY = (int) (mapViewDrawY.get() * drawMultiplier);
 
       // Make sure we specify draw coordinates that are valid per the underlying map image.
       int maxDrawX = mapImage.getWidth() - mapViewWidth;
@@ -321,14 +293,24 @@ public class SpriteMapView extends MapView
       {
         menuArtist.drawMenu(mapGraphics, mapViewX, mapViewY);
       }
+      
+      // When we draw the map, we want to center it if it's smaller than the view dimensions
+      int deltaX = 0, deltaY = 0;
+      if (mapViewWidth > mapImage.getWidth())
+        deltaX = (mapViewWidth - mapImage.getWidth())/2;
+      if (mapViewHeight > mapImage.getHeight())
+        deltaY = (mapViewHeight - mapImage.getHeight())/2;
 
+      int drawWidth  = Math.min(mapViewWidth,  mapImage.getWidth());
+      int drawHeight = Math.min(mapViewHeight, mapImage.getHeight());
       // Copy the map image into the window's graphics buffer.
-      // First four coords are the dest x,y,x2,y2. Next four are the source coords.
-      g.drawImage(mapImage, 0, 0, mapViewWidth, mapViewHeight, drawX, drawY, drawX + mapViewWidth, drawY + mapViewHeight, null);
+      // First four coords are the dest x,y,x2,y2. Next four are the source coords.      
+      g.drawImage(mapImage, deltaX, deltaY, deltaX + drawWidth, deltaY + drawHeight,
+                            drawX,  drawY,  drawX  + drawWidth, drawY  + drawHeight,
+                            null);
 
       // Draw the Commander overlay with available funds.
       drawCommanderOverlay(g);
-    } // End of case for no overlay menu.
   }
 
   private void adjustViewLocation()
@@ -377,19 +359,13 @@ public class SpriteMapView extends MapView
       // If the window was resized, don't slide the view into
       // place, just snap it to where it belongs.
       dimensionsChanged = false;
-      mapViewDrawX = mapViewX;
-      mapViewDrawY = mapViewY;
+      mapViewDrawX.snap(mapViewX);
+      mapViewDrawY.snap(mapViewY);
     }
     else
     {
-      if( mapViewDrawX != mapViewX )
-      {
-        mapViewDrawX += SpriteUIUtils.calculateSlideAmount(mapViewDrawX, mapViewX);
-      }
-      if( mapViewDrawY != mapViewY )
-      {
-        mapViewDrawY += SpriteUIUtils.calculateSlideAmount(mapViewDrawY, mapViewY);
-      }
+      mapViewDrawX.set(mapViewX);
+      mapViewDrawY.set(mapViewY);
     }
   }
 
@@ -425,8 +401,8 @@ public class SpriteMapView extends MapView
   {
     // Draw terrain objects and units in order so they overlap correctly.
     // Only bother iterating over the visible map space (plus a 2-square border).
-    int drawY = (int) mapViewDrawY;
-    int drawX = (int) mapViewDrawX;
+    int drawY = (int) mapViewDrawY.get();
+    int drawX = (int) mapViewDrawX.get();
     for( int y = drawY - 1; y < drawY + mapTilesToDrawY + 2; ++y )
     {
       for( int x = drawX - 1; x < drawX + mapTilesToDrawX + 2; ++x )
@@ -502,15 +478,14 @@ public class SpriteMapView extends MapView
 
     // Build a display of the expected damage.
     Color[] colors = UIUtils.getMapUnitColors(attacker.myColor).paletteColors;
-    BufferedImage dmgImage = SpriteUIUtils.makeTextFrame(colors[4], colors[2], damageText,
-        2 * SpriteOptions.getDrawScale(), 2 * SpriteOptions.getDrawScale());
+    BufferedImage dmgImage = SpriteUIUtils.makeTextFrame(colors[4], colors[2], damageText, 2, 2);
 
     // Draw the damage estimate directly above the unit being targeted.
     int drawScale = SpriteOptions.getDrawScale();
     int tileSize = SpriteLibrary.baseSpriteSize * drawScale;
     int estimateX = (x * tileSize) + (tileSize / 2);
-    int estimateY = (y * tileSize) - dmgImage.getHeight() / 2;
-    SpriteLibrary.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY, 1);
+    int estimateY = (y * tileSize) - (dmgImage.getHeight()*drawScale) / 2;
+    SpriteLibrary.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY, drawScale);
   }
 
   /**

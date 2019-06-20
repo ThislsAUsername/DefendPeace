@@ -1,23 +1,30 @@
 package UI;
 
+import java.io.File;
+import java.util.ArrayList;
+
 import Engine.Driver;
+import Engine.GameInstance;
 import Engine.IController;
+import Engine.MapController;
 import Engine.OptionSelector;
 
 public class MainUIController implements IController
 {
-  public enum SubMenu { MAIN, GAME_SETUP, OPTIONS };
+  public enum SubMenu { MAIN, SAVE_SELECT, GAME_SETUP, OPTIONS };
   private SubMenu currentSubMenuType = SubMenu.MAIN;
 
   // NOTE: This list of menu options is mirrored by the Sprite of option images we get from SpriteLibrary.
   final int NEW_GAME = 0;
-  final int OPTIONS = 1;
-  final int QUIT = 2;
-  final int numMenuOptions = 3;
+  final int CONTINUE = 1;
+  final int OPTIONS = 2;
+  final int QUIT = 3;
+  final int numMenuOptions = 4;
 
   private OptionSelector optionSelector = new OptionSelector(numMenuOptions);
 
   private MapSelectController gameSetup = new MapSelectController();
+  public InGameMenu<SaveInfo> saveMenu = null;
   
   public SubMenu getSubMenuType()
   {
@@ -53,6 +60,9 @@ public class MainUIController implements IController
         break;
       case MAIN:
         exitGame = handleMainMenuInput(action);
+        break;
+      case SAVE_SELECT:
+        handleSaveSelectMenuInput(action);
         break;
       case OPTIONS:
         // Since different graphics engines could implement different available
@@ -90,6 +100,39 @@ public class MainUIController implements IController
           case NEW_GAME:
             currentSubMenuType = SubMenu.GAME_SETUP;
           break;
+          case CONTINUE:
+            ArrayList<SaveInfo> saves = new ArrayList<SaveInfo>();
+            final File folder = new File("save/");
+            if( folder.canRead() )
+            {
+              for( final File fileEntry : folder.listFiles() )
+              {
+                String filepath = fileEntry.getAbsolutePath();
+                // Look for files with our extension
+                if( !fileEntry.isDirectory() && filepath.endsWith(".svp") )
+                {
+                  String filename = fileEntry.getName();
+                  String prettyName = filename.substring(0, filename.length()-4);
+                  if (GameInstance.isSaveCompatible(filepath))
+                    // If everything looks ducky, add it to the list. Don't check it twice.
+                    saves.add(new SaveInfo(filepath, filename, prettyName));
+                  else
+                    // Throw an tilde in there to tell the user "yeah, we see it, and it ain't gonna work."
+                    saves.add(new SaveInfo(filepath, filename, "~" + prettyName));
+                }
+              }
+            }
+
+            if( !saves.isEmpty() )
+            {
+              saveMenu = new InGameMenu<SaveInfo>(saves);
+              currentSubMenuType = SubMenu.SAVE_SELECT;
+            }
+            else
+            {
+              System.out.println("WARNING: There are no valid saves to load.");
+            }
+            break;
           case OPTIONS:
             currentSubMenuType = SubMenu.OPTIONS;
             break;
@@ -115,5 +158,61 @@ public class MainUIController implements IController
     }
 
     return exitMenu;
+  }
+
+  private void handleSaveSelectMenuInput(InputHandler.InputAction action)
+  {
+    switch( action )
+    {
+      case ENTER:
+        // Grab the current option and roll it back to within the valid range, then evaluate.
+        SaveInfo chosenOption = saveMenu.getSelectedOption();
+
+        // We've already successfully read the save file, so let's assume the user isn't messing with us
+        GameInstance oldGame = GameInstance.loadSave(chosenOption.filePath);
+        if( null != oldGame )
+        {
+          oldGame.saveFile = chosenOption.saveName; // Keep whatever name the user set
+          // We don't need our save selection menu anymore...
+          saveMenu = null;
+          currentSubMenuType = SubMenu.MAIN;
+
+          // Set up the game to run...
+          MapView mv = Driver.getInstance().gameGraphics.createMapView(oldGame);
+          MapController mapController = new MapController(oldGame, mv, false);
+
+          // Mash the big red button and start the game.
+          Driver.getInstance().changeGameState(mapController, mv);
+        }
+        else
+        {
+          System.out.println(String.format("WARNING: Hey man, messing with %s while I'm tryna use it ain't cool", chosenOption.filePath));
+        }
+        break;
+      case BACK: // throw away the save list and go back
+        saveMenu = null;
+        currentSubMenuType = SubMenu.MAIN;
+        break;
+      default:
+          // Pass along to the OptionSelector.
+          saveMenu.handleMenuInput(action);
+    }
+  }
+  
+  public static class SaveInfo
+  {
+    public final String filePath, saveName, displayName;
+    public SaveInfo(String pFilepath, String pSaveName, String pDisplayName)
+    {
+      filePath = pFilepath;
+      saveName = pSaveName;
+      displayName = pDisplayName;
+    }
+    
+    @Override
+    public String toString()
+    {
+      return displayName;
+    }
   }
 }

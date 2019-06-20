@@ -18,7 +18,7 @@ public class GameInputHandler
   private Stack<GameInputState<?>> myStateStack = null;
   private StateChangedCallback myCallback = null;
 
-  public enum InputType { FREE_TILE_SELECT, PATH_SELECT, MENU_SELECT, CONSTRAINED_TILE_SELECT, ACTION_READY, END_TURN, LEAVE_MAP, CO_INFO };
+  public enum InputType { FREE_TILE_SELECT, PATH_SELECT, MENU_SELECT, CONSTRAINED_TILE_SELECT, ACTION_READY, END_TURN, SAVE, LEAVE_MAP, CO_STATS, CO_INFO };
 
   public GameInputHandler(GameMap map, Commander currentPlayer, StateChangedCallback callback)
   {
@@ -150,6 +150,12 @@ public class GameInputHandler
   public ArrayList<XYCoord> getCoordinateOptions()
   {
     return peekCurrentState().getOptions().getCoordinateOptions();
+  }
+  
+  public boolean shouldLeaveMap()
+  {
+    InputType action = getInputType();
+    return action == InputType.LEAVE_MAP; 
   }
 
   /************************************************************

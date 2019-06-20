@@ -10,10 +10,9 @@ import java.util.Queue;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
-import Engine.GameAction.ActionType;
 import Engine.GameActionSet;
-import Engine.GameInstance;
 import Engine.Path;
+import Engine.UnitActionType;
 import Engine.Utils;
 import Engine.XYCoord;
 import Terrain.GameMap;
@@ -40,8 +39,21 @@ public class SpenderAI implements AIController
     {
       return "Spender";
     }
+
+    @Override
+    public String getDescription()
+    {
+      return
+          "All Spender knows is that money in the bank doesn't help on the field, so he tries to spend all funds as quickly as possible.\n" +
+          "This can sometimes result in building units that are not useful.";
+    }
   }
   public static final AIMaker info = new instantiator();
+  
+  public AIMaker getAIInfo()
+  {
+    return info;
+  }
   
   Queue<GameAction> actions = new ArrayDeque<GameAction>();
   Queue<Unit> unitQueue = new ArrayDeque<Unit>();
@@ -153,7 +165,7 @@ public class SpenderAI implements AIController
           for( GameActionSet actionSet : actionSets )
           {
             // See if we have the option to attack.
-            if( actionSet.getSelected().getType() == GameAction.ActionType.ATTACK )
+            if( actionSet.getSelected().getUnitActionType() == UnitActionType.ATTACK )
             {
               actions.offer(actionSet.getSelected());
               foundAction = true;
@@ -161,7 +173,7 @@ public class SpenderAI implements AIController
             }
 
             // Otherwise, see if we have the option to capture.
-            if( actionSet.getSelected().getType() == GameAction.ActionType.CAPTURE )
+            if( actionSet.getSelected().getUnitActionType() == UnitActionType.CAPTURE )
             {
               actions.offer(actionSet.getSelected());
               capturingProperties.add(coord);
@@ -203,7 +215,7 @@ public class SpenderAI implements AIController
             boolean validTarget = false;
             ArrayList<XYCoord> validTargets = new ArrayList<>();
 
-            if( unit.model.possibleActions.contains(ActionType.CAPTURE) )
+            if( unit.model.possibleActions.contains(UnitActionType.CAPTURE) )
             {
               validTargets.addAll(unownedProperties);
             }

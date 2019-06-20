@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Stack;
-
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.Utils;
@@ -46,7 +45,7 @@ import Units.UnitModel;
  *    Ave's units gain a 10 percent increase in firepower.
  *
  * Oblido:
- *    Hailstones rain down in a 3-space radius around Ave's units and buildings,
+ *    Hailstones rain down in a 2-space radius around Ave's units and buildings,
  *      damaging enemies for up to 2HP, and destroying any forests (reducing them to grass).
  *    Ave's units gain a 20-percent increase in firepower.
  *
@@ -62,9 +61,40 @@ public class CommanderAve extends Commander
   private int MAX_SNOW_DEPTH = 500;
   private CitySnowifier snowifier;
 
-  private static final CommanderInfo coInfo = new CommanderInfo("Ave", new instantiator());  
-  private static class instantiator implements COMaker
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
+    public instantiator()
+    {
+      super("Ave");
+      infoPages.add(new InfoPage(
+          "Commander Ave (AH-vey) supports her skiing habit by slowly growing a mountain of fresh " +
+          "snow around each of her buildings. This also allows her to gradually but inexorably " +
+          "grind her opponents down beneath a wall of ever-encroaching ice."));
+      infoPages.add(new InfoPage(
+          "Passive:\r\n" +
+          "- Ave generates snow around all owned properties, which spreads over time.\n" +
+          "- The radius of effect is small at first, but can be expanded by her abilities.\n" +
+          "- Her units move normally in snow, but take a movement and defense penalty in forests."));
+      infoPages.add(new InfoPage(
+          "Nix ("+NixAbility.NIX_COST+"):\n" +
+          "Ave's units gain a "+NixAbility.NIX_BUFF+"% increase in firepower.\n" +
+          "Permanently expands the range of Ave's snow passive.\n" +
+          "This ability increases in cost more quickly than most other abilities as it is used."));
+      infoPages.add(new InfoPage(
+          "Glacio ("+GlacioAbility.GLACIO_COST+"):\n" +
+          "Ave's units gain a "+GlacioAbility.GLACIO_BUFF+"% increase in firepower.\n" +
+          "Increases the snow-aura around her buildings by "+GlacioAbility.GLACIO_SNOW_SPREAD+" spaces for the next turn.\n" +
+          "Snows on every tile in a "+GlacioAbility.GLACIO_SNOW_SPREAD+"-space radius around each of her units.\n" +
+          "Stuns any enemy unit within "+GlacioAbility.GLACIO_FREEZE_RANGE+" spaces of one of Ave's units or buildings."));
+      infoPages.add(new InfoPage(
+          "Oblido ("+OblidoAbility.OBLIDO_COST+"):\n" +
+          "Ave's units gain a "+OblidoAbility.OBLIDO_BUFF+"% increase in firepower.\n" +
+          "Hailstones rain down in a "+OblidoAbility.OBLIDO_RANGE+"-space radius around Ave's units and buildings, damaging enemies for up to 2HP, and destroying any forests (reducing them to grass).\n"));
+      infoPages.add(new InfoPage(
+          "Likes: Steep Slopes and Sharp Cuts\n" +
+          "Dislikes: Trees and Mythical Snow Monsters"));
+    }
     @Override
     public Commander create()
     {
@@ -79,7 +109,7 @@ public class CommanderAve extends Commander
     super(coInfo);
 
     // Ave's units are fine in the snow, but not in the trees.
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
       for( TerrainType terrain : TerrainType.TerrainTypeList )
       {

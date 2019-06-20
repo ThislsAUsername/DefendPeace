@@ -1,6 +1,6 @@
 package Units;
 
-import Engine.GameAction.ActionType;
+import Engine.UnitActionType;
 import Units.MoveTypes.FloatHeavy;
 import Units.MoveTypes.MoveType;
 import Units.Weapons.BattleshipCannon;
@@ -15,7 +15,7 @@ public class BattleshipModel extends UnitModel
   private static final int MOVE_POWER = 5;
 
   private static final MoveType moveType = new FloatHeavy();
-  private static final ActionType[] actions = { ActionType.ATTACK, ActionType.WAIT };
+  private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
   private static final WeaponModel[] weapons = { new BattleshipCannon() };
 
   public BattleshipModel()

@@ -1,5 +1,6 @@
 package Terrain;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,10 +8,10 @@ import java.util.Map;
  * Environment is a flyweight class - each Terrain/Weather combination is instantiated only once.
  * Subsequent calls to retrieve that tile will receive the same copy.
  */
-public class Environment
+public class Environment implements Serializable
 {
-  public static final int PROPERTY_VISION_RANGE = 2; 
-  
+  public static final int PROPERTY_VISION_RANGE = 2;
+
   public enum Weathers
   {
     CLEAR, SNOW, RAIN, SANDSTORM
@@ -20,7 +21,7 @@ public class Environment
   public final Weathers weatherType;
 
   // Maintain a list of all tile types. Each type will be added the first time it is used.
-  private static Map<TerrainType, Environment[]> tileInstances= new HashMap<TerrainType, Environment[]>();
+  private static Map<TerrainType, Environment[]> tileInstances = new HashMap<TerrainType, Environment[]>();
 
   /**
    * Private constructor so that Tile can manage all of its flyweights.
