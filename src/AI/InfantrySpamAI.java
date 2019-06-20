@@ -9,8 +9,8 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.GameInstance;
 import Engine.Path;
+import Engine.UnitActionType;
 import Engine.Utils;
 import Engine.XYCoord;
 import Terrain.GameMap;
@@ -36,6 +36,14 @@ public class InfantrySpamAI implements AIController
     public String getName()
     {
       return "ISAI";
+    }
+
+    @Override
+    public String getDescription()
+    {
+      return
+          "Infantry Spam AI (ISAI) knows there are two objectives in this game: Shoot things and capture things.\n" +
+          "Infantry can do both, so why build anything else?";
     }
   }
   public static final AIMaker info = new instantiator();
@@ -122,7 +130,7 @@ public class InfantrySpamAI implements AIController
         for( GameActionSet actionSet : actionSets )
         {
           // See if we have the option to attack.
-          if( actionSet.getSelected().getType() == GameAction.ActionType.ATTACK )
+          if( actionSet.getSelected().getUnitActionType() == UnitActionType.ATTACK )
           {
             actions.offer(actionSet.getSelected() );
             foundAction = true;
@@ -130,7 +138,7 @@ public class InfantrySpamAI implements AIController
           }
           
           // Otherwise, see if we have the option to capture.
-          if( actionSet.getSelected().getType() == GameAction.ActionType.CAPTURE )
+          if( actionSet.getSelected().getUnitActionType() == UnitActionType.CAPTURE )
           {
             actions.offer(actionSet.getSelected() );
             capturingProperties.add(coord);

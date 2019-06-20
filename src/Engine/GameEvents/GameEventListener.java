@@ -14,6 +14,7 @@ import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
 import Terrain.Environment.Weathers;
 import Terrain.Location;
 import Units.Unit;
+import Units.UnitModel;
 
 /**
  * Subclasses can register to be notified of any supported event types. This class is both the event distributor,
@@ -74,6 +75,7 @@ public abstract class GameEventListener implements Serializable
   public void receiveResupplyEvent(ResupplyEvent event){};
   public void receiveUnitDieEvent(UnitDieEvent event){};
   public void receiveUnloadEvent(UnloadEvent event){};
+  public void receiveUnitTransformEvent(Unit unit, UnitModel oldType){};
   public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){};
   public void receiveWeatherChangeEvent(Weathers weather, int duration){};
   public void receiveMapChangeEvent(MapChangeEvent event){};

@@ -20,10 +20,30 @@ import Units.Weapons.Weapon;
 public class CommanderVenge extends Commander
 {
   private static final long serialVersionUID = -8207164779284734879L;
-  
-  private static final CommanderInfo coInfo = new CommanderInfo("Venge", new instantiator());
-  private static class instantiator implements COMaker
+
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
+    public instantiator()
+    {
+      super("Venge");
+      infoPages.add(new InfoPage(
+          "Commander Venge likes to get vengeance for any slight.\n" +
+          "Attacking Venge is not always difficult, but you may not like the consequences.\n"));
+      infoPages.add(new InfoPage(
+          "Passive:\n" + 
+          "- After being attacked, Venge gets a bonus of "+VENGEANCE_BOOST+"% attack against the unit that picked the fight.\n" +
+          "- Units that Venge can get vengeance on are marked with a V.\n"));
+      infoPages.add(new InfoPage(
+          IronWill.NAME+" ("+IronWill.COST+"):\n" +
+          "Gives a defense boost of "+IronWill.IRONWILL_BUFF+"%\n" +
+          "Units now deal counterattacks as if they had not taken damage from the hit.\n"));
+      infoPages.add(new InfoPage(
+          Retribution.NAME+" ("+Retribution.COST+"):\n" +
+          "Gives an attack boost of "+Retribution.RETRIBUTION_BUFF+"%\n" +
+          "Gives a defense penalty of "+Retribution.RETRIBUTION_NERF+"%\n" +
+          "Units now counterattack before they are hit.\n"));
+    }
     @Override
     public Commander create()
     {
@@ -34,7 +54,7 @@ public class CommanderVenge extends Commander
   /** A list of all the units that have attacked me since my last turn. */
   private ArrayList<Unit> aggressors = new ArrayList<Unit>();
   /** How much power I get when beating them up */
-  public final int VENGEANCE_BOOST = 50;
+  public final static int VENGEANCE_BOOST = 50;
   public boolean counterAtFullPower = false;
   public boolean counterFirst = false;
 

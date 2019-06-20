@@ -2,6 +2,7 @@ package AI;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,9 +13,8 @@ import java.util.Queue;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
-import Engine.GameAction.ActionType;
 import Engine.GameActionSet;
-import Engine.GameInstance;
+import Engine.UnitActionType;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
@@ -44,6 +44,14 @@ public class Muriel implements AIController
     public String getName()
     {
       return "Muriel";
+    }
+
+    @Override
+    public String getDescription()
+    {
+      return
+          "Muriel attempts to choose new units to build based on the enemy force composition.\n" +
+          "She knows basic unit tactics, but doesn't currently understand ranged attacks.";
     }
   }
   public static final AIMaker info = new instantiator();
@@ -77,9 +85,9 @@ public class Muriel implements AIController
   private void init(Commander[] allCos)
   {
     // Initialize UnitModel collections.
-    ArrayList<UnitModel> myUnitModels = new ArrayList<UnitModel>();
+    Collection<UnitModel> myUnitModels = myCo.unitModels.values();
     enemyCos = new ArrayList<Commander>();
-    Map<Commander, ArrayList<UnitModel> > otherUnitModels = new HashMap<Commander, ArrayList<UnitModel> >();
+    Map<Commander, Collection<UnitModel> > otherUnitModels = new HashMap<Commander, Collection<UnitModel> >();
     for( Commander other : allCos )
     {
       if( myCo.isEnemy(other) )
@@ -90,10 +98,9 @@ public class Muriel implements AIController
     }
 
     // Figure out what I and everyone else can build.
-    myUnitModels = myCo.unitModels;
     for( Commander oCo : enemyCos )
     {
-      otherUnitModels.put(oCo, oCo.unitModels);
+      otherUnitModels.put(oCo, oCo.unitModels.values());
     }
 
     // Figure out unit matchups.
@@ -245,7 +252,7 @@ public class Muriel implements AIController
         for( GameActionSet set : actionSet )
         {
           // Go ahead and attack someone as long as we don't have to move.
-          if( set.getSelected().getType() == ActionType.ATTACK )
+          if( set.getSelected().getUnitActionType() == UnitActionType.ATTACK )
           {
             for( GameAction action : set.getGameActions() )
             {
@@ -325,42 +332,45 @@ public class Muriel implements AIController
       }
 
       // Find all the things we can do from here.
-      Map<ActionType, ArrayList<GameAction> > unitActionsByType = AIUtils.getAvailableUnitActionsByType(unit, gameMap);
+      Map<UnitActionType, ArrayList<GameAction> > unitActionsByType = AIUtils.getAvailableUnitActionsByType(unit, gameMap);
 
       //////////////////////////////////////////////////////////////////
       // Look for advantageous attack actions.
-      ArrayList<GameAction> attackActions = unitActionsByType.get(ActionType.ATTACK);
+      ArrayList<GameAction> attackActions = unitActionsByType.get(UnitActionType.ATTACK);
       GameAction maxCarnageAction = null;
       double maxDamageValue = 0;
-      for( GameAction action : attackActions )
+      if( null != attackActions )
       {
-        // Sift through all attack actions we can perform.
-        XYCoord targetLoc = action.getTargetLocation();
-        Unit target = gameMap.getLocation(targetLoc).getResident();
-        Environment environment = gameMap.getEnvironment(targetLoc);
-
-        // Calculate the cost of the damage we can do.
-        BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, true), target, environment, false, null);
-        double hpDamage = Math.min(params.calculateDamage(), target.getPreciseHP());
-        double damageValue = (target.model.getCost()/10) * hpDamage;
-
-        // Find the attack that causes the most monetary damage, provided it's at least a halfway decent idea.
-        if( (damageValue > maxDamageValue) && shouldAttack(unit, target, gameMap) )
+        for( GameAction action : attackActions )
         {
-          maxDamageValue = damageValue;
-          maxCarnageAction = action;
+          // Sift through all attack actions we can perform.
+          XYCoord targetLoc = action.getTargetLocation();
+          Unit target = gameMap.getLocation(targetLoc).getResident();
+          Environment environment = gameMap.getEnvironment(targetLoc);
+
+          // Calculate the cost of the damage we can do.
+          BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, true), target, environment, false, null);
+          double hpDamage = Math.min(params.calculateDamage(), target.getPreciseHP());
+          double damageValue = (target.model.getCost()/10) * hpDamage;
+
+          // Find the attack that causes the most monetary damage, provided it's at least a halfway decent idea.
+          if( (damageValue > maxDamageValue) && shouldAttack(unit, target, gameMap) )
+          {
+            maxDamageValue = damageValue;
+            maxCarnageAction = action;
+          }
         }
-      }
-      if( maxCarnageAction != null)
-      {
-        queuedActions.offer(maxCarnageAction);
-        break; // Find one action per invocation to avoid overlap.
+        if( maxCarnageAction != null)
+        {
+          queuedActions.offer(maxCarnageAction);
+          break; // Find one action per invocation to avoid overlap.
+        }
       }
 
       //////////////////////////////////////////////////////////////////
       // See if there's something to capture (but only if we are moderately healthy).
-      ArrayList<GameAction> captureActions = unitActionsByType.get(ActionType.CAPTURE);
-      if( !captureActions.isEmpty() && unit.getHP() >= 7 )
+      ArrayList<GameAction> captureActions = unitActionsByType.get(UnitActionType.CAPTURE);
+      if( null != captureActions && !captureActions.isEmpty() && unit.getHP() >= 7 )
       {
         GameAction capture = captureActions.get(0);
         queuedActions.offer(capture);
@@ -371,7 +381,7 @@ public class Muriel implements AIController
       //////////////////////////////////////////////////////////////////
       // We didn't find an immediate ATTACK or CAPTURE action we can do.
       // Things that can capture; go find something to capture, if you are moderately healthy.
-      if( unit.model.hasActionType(ActionType.CAPTURE) && (unit.getHP() >= 7) )
+      if( unit.model.hasActionType(UnitActionType.CAPTURE) && (unit.getHP() >= 7) )
       {
         log(String.format("Seeking capture target for %s", unit.toStringWithLocation()));
         XYCoord unitCoords = new XYCoord(unit.x, unit.y);
@@ -392,7 +402,7 @@ public class Muriel implements AIController
 
       //////////////////////////////////////////////////////////////////
       // Everyone else, go hunting.
-      if( queuedActions.isEmpty() && unit.model.hasActionType(ActionType.ATTACK) )
+      if( queuedActions.isEmpty() && unit.model.hasActionType(UnitActionType.ATTACK) )
       {
         log(String.format("Seeking attack target for %s", unit.toStringWithLocation()));
         ArrayList<XYCoord> enemyLocations = AIUtils.findEnemyUnits(myCo, gameMap); // Get enemy locations.

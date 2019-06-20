@@ -20,10 +20,38 @@ import Units.UnitModel;
 public class CommanderStrong extends Commander
 {
   private static final long serialVersionUID = -3762678175296290654L;
-  
-  private static final CommanderInfo coInfo = new CommanderInfo("Strong", new instantiator());  
-  private static class instantiator implements COMaker
+
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
+    public instantiator()
+    {
+      super("Strong");
+      infoPages.add(new InfoPage(
+          "Commander Strong knows that an army's strength lies in its people.\n" +
+          "Well-positioned soldiers with proper equipment and training are guaranteed to bring results.\n" +
+          "His focus is therefore on achieving this in his own forces, and denying it of his opponent.\n" +
+          "As a result, his transport units and boots on the ground are among the best, and he brings some extra anti-personnel firepower to keep his opponents in check."));
+      infoPages.add(new InfoPage(
+          "Passive:\n" + 
+          "- Strong's footsoldiers get an attack bonus of 15%\n" +
+          "- When attacking footsoldiers, all of Strong's units get an attack bonus of 15%\n" +
+          "- Strong's transports move 1 space further and can hold one more unit than average\n" +
+          "- Strong can build Mechs from air/sea ports\n"));
+      infoPages.add(new InfoPage(
+          "Strongarm ("+StrongArmAbility.STRONGARM_COST+"):\n" +
+          "Gives an attack and defense boost of "+StrongArmAbility.STRONGARM_BUFF+"%\n" +
+          "Gives footsoldiers an additional "+StrongArmAbility.STRONGARM_FOOT_BUFF+"% attack\n" +
+          "Grants footsoldiers and APCs two extra points of movement\n" +
+          "Allows Strong to build infantry on air/sea ports\n"));
+      infoPages.add(new InfoPage(
+          "Mobilize ("+MobilizeAbility.MOBILIZE_COST+"):\n" + 
+          "Gives an attack boost of "+MobilizeAbility.MOBILIZE_BUFF+"%\n" +
+          "Gives a defense boost of "+MobilizeAbility.MOBILIZE_DEFENSE_BUFF+"%\n" +
+          "Grants two extra points of movement\n" +
+          "Refreshes footsoldiers\n" +
+          "Allows Strong to build footsoldiers on cities, industries, and the HQ\n"));
+    }
     @Override
     public Commander create()
     {
@@ -98,7 +126,7 @@ public class CommanderStrong extends Commander
       damageMod = new CODamageModifier(STRONGARM_BUFF);
       defenseMod = new CODefenseModifier(STRONGARM_BUFF);
       damageModTroop = new CODamageModifier(STRONGARM_FOOT_BUFF);
-      for( UnitModel model : commander.unitModels )
+      for( UnitModel model : commander.unitModels.values() )
       {
         if( model.chassis == UnitModel.ChassisEnum.TROOP )
         {
@@ -123,7 +151,7 @@ public class CommanderStrong extends Commander
 
       // Grant troops and transports additional movement power.
       COMovementModifier moveMod = new COMovementModifier(2);
-      for( UnitModel model : myCommander.unitModels )
+      for( UnitModel model : myCommander.unitModels.values() )
       {
         if( (model.chassis == UnitModel.ChassisEnum.TROOP) || (model.holdingCapacity > 0))
         {
@@ -177,7 +205,7 @@ public class CommanderStrong extends Commander
 
       // Grant a global +2 movement buff.
       COMovementModifier moveMod = new COMovementModifier(2);
-      for( UnitModel model : myCommander.unitModels )
+      for( UnitModel model : myCommander.unitModels.values() )
       {
         moveMod.addApplicableUnitModel(model);
       }

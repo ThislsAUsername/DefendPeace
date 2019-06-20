@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
+import UI.SlidingValue;
 import UI.Art.Animation.GameAnimation;
 
 /**
@@ -48,12 +49,10 @@ public class SpriteGameEndAnimation implements GameAnimation
     {
       // Get the panel we currently want to move.
       GameResultPanel panel = panels.get(panelsInPlace);
-
-      // Figure out how far to move it, and move it.
-      panel.xPos += SpriteUIUtils.calculateSlideAmount(panel.xPos, 0);
+      panel.xPos.set(0);
 
       // Decide whether this panel is in place now.
-      if( 0 == panel.xPos )
+      if( 0 == panel.xPos.get() )
       {
         panelsInPlace++;
       }
@@ -63,7 +62,7 @@ public class SpriteGameEndAnimation implements GameAnimation
     for( GameResultPanel p : panels )
     {
       BufferedImage img = p.panel;
-      g.drawImage( p.panel, p.xPos, p.yPos-img.getHeight()/2, img.getWidth(), img.getHeight(), null);
+      g.drawImage( p.panel, (int)p.xPos.get(), p.yPos-img.getHeight()/2, img.getWidth(), img.getHeight(), null);
     }
 
     // Never terminate the animation. The game is over, so just hang out until the game exits.
@@ -79,7 +78,7 @@ public class SpriteGameEndAnimation implements GameAnimation
   private static class GameResultPanel
   {
     BufferedImage panel;
-    int xPos;
+    SlidingValue xPos;
     int yPos;
 
     public GameResultPanel(Commander cmdr, int xDir, int hPos)
@@ -89,7 +88,7 @@ public class SpriteGameEndAnimation implements GameAnimation
       int screenWidth = SpriteOptions.getScreenDimensions().width;
       
       // Figure out where the panel will start out before moving onto the screen.
-      xPos = screenWidth * xDir;
+      xPos = new SlidingValue(screenWidth * xDir);
       yPos = hPos;
 
       // Get the CO eyes image and the VICTORY/DEFEAT text.

@@ -18,7 +18,7 @@ public class GameInputHandler
   private Stack<GameInputState<?>> myStateStack = null;
   private StateChangedCallback myCallback = null;
 
-  public enum InputType { FREE_TILE_SELECT, PATH_SELECT, MENU_SELECT, CONSTRAINED_TILE_SELECT, ACTION_READY, END_TURN, SAVE, LEAVE_MAP, CO_INFO };
+  public enum InputType { FREE_TILE_SELECT, PATH_SELECT, MENU_SELECT, CONSTRAINED_TILE_SELECT, ACTION_READY, END_TURN, SAVE, LEAVE_MAP, CO_STATS, CO_INFO };
 
   public GameInputHandler(GameMap map, Commander currentPlayer, StateChangedCallback callback)
   {
