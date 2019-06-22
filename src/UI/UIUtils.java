@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 import javax.imageio.ImageIO;
 
@@ -94,6 +95,7 @@ public class UIUtils
 
       if (folder.canRead())
       {
+        PriorityQueue<TeamColorSpec> orderedPalettes = new PriorityQueue<TeamColorSpec>();
         for( final File fileEntry : folder.listFiles() )
         {
           // If it's a file, we assume it's a palette
@@ -105,8 +107,12 @@ public class UIUtils
               try
               {
                 BufferedImage bi = ImageIO.read(new File(colorName));
+
                 // Grab the last color on the first row as our "banner" color
                 Color key = new Color(bi.getRGB(bi.getWidth() - 1, 0));
+
+                // Use the last color in the building row to order our colors.
+                int ordinal = new Color(bi.getRGB(bi.getWidth() - 1, 1)).getRGB();
                 Color[] cUnits = new Color[defaultMapColors.length];
                 Color[] cStructs = new Color[defaultMapColors.length];
                 for( int i = 0; i < defaultMapColors.length; i++ )
@@ -114,8 +120,7 @@ public class UIUtils
                   cUnits[i] = new Color(bi.getRGB(i, 0));
                   cStructs[i] = new Color(bi.getRGB(i, 1));
                 }
-                buildingColorPalettes.put(key, new ColorPalette(cStructs));
-                mapUnitColorPalettes.put(key, new ColorPalette(cUnits));
+                orderedPalettes.offer(new TeamColorSpec(key, ordinal, new ColorPalette(cUnits), new ColorPalette(cStructs)));
                 paletteNames.put(key, fileEntry.getName().replace(".png", ""));
               }
               catch (IOException ioex)
@@ -145,6 +150,14 @@ public class UIUtils
             
             factions.add(new Faction(fileEntry.getName(), basis));
           }
+        }
+
+        // Insert our now-ordered color palettes into the permanent collections in the correct order.
+        while(!orderedPalettes.isEmpty())
+        {
+          TeamColorSpec tcs = orderedPalettes.poll();
+          mapUnitColorPalettes.put(tcs.key, tcs.unitColors);
+          buildingColorPalettes.put(tcs.key, tcs.buildingColors);
         }
       }
     }
@@ -185,6 +198,10 @@ public class UIUtils
   public static String getPaletteName(Color colorKey)
   {
     initCosmetics();
+    if( !paletteNames.containsKey(colorKey) )
+    {
+      throw new NullPointerException("Cannot find name for Color " + colorKey);
+    }
     return paletteNames.get(colorKey);
   }
 
@@ -214,6 +231,28 @@ public class UIUtils
     {
       name = pName;
       basis = pBasis;
+    }
+  }
+
+  private static class TeamColorSpec implements Comparable<TeamColorSpec>
+  {
+    final ColorPalette unitColors;
+    final ColorPalette buildingColors;
+    final Color key;
+    final int ordinal;
+
+    public TeamColorSpec(Color colorKey, int colorOrdinal, ColorPalette units, ColorPalette buildings)
+    {
+      key = colorKey;
+      ordinal = colorOrdinal;
+      unitColors = units;
+      buildingColors = buildings;
+    }
+
+    @Override
+    public int compareTo(TeamColorSpec other)
+    {
+      return ordinal - other.ordinal;
     }
   }
 }
