@@ -6,7 +6,6 @@ import java.awt.image.BufferedImage;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo.InfoPage;
-import Engine.Driver;
 import Engine.GameEvents.GameEventQueue;
 import UI.COStateInfo;
 import UI.InfoController;
@@ -19,33 +18,23 @@ import UI.MapView;
 public class SpriteInfoView extends MapView // Extend MapView for getDrawableMap(). We don't actually draw it, but we need fog info.
 {
   private InfoController myControl;
-  
-  /** Width of the visible space in pixels. */
-  private int viewWidth;
-  /** Height of the visible space in pixels. */
-  private int viewHeight;
 
   public SpriteInfoView(InfoController control)
   {
-    Dimension dims = Driver.getInstance().gameGraphics.getScreenDimensions();
-    viewWidth = dims.width;
-    viewHeight = dims.height;
     myControl = control;
   }
 
   @Override
   public Dimension getPreferredDimensions()
   {
-    return new Dimension(viewWidth, viewHeight);
+    return SpriteOptions.getScreenDimensions();
   }
 
   @Override
   public void setPreferredDimensions(int width, int height)
   {
-    viewWidth = width;
-    viewHeight = height;
     // Let SpriteOptions know we are changing things.
-    SpriteOptions.setScreenDimensions(viewWidth, viewHeight);
+    SpriteOptions.setScreenDimensions(width, height);
   }
 
   @Override
