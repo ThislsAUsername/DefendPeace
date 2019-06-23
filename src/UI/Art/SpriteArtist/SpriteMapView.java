@@ -87,15 +87,13 @@ public class SpriteMapView extends MapView
       setCommanderUnitFacing(co, game.gameMap);
     }
 
-    // By default, we will show a 15x10 chunk of the map.
-    mapTilesToDrawX = 15;
-    mapTilesToDrawY = 10;
     // Start the view at the top-left by default.
     mapViewDrawX = new SlidingValue(0);
     mapViewDrawY = new SlidingValue(0);
 
-    mapViewWidth = SpriteLibrary.baseSpriteSize * mapTilesToDrawX;
-    mapViewHeight = SpriteLibrary.baseSpriteSize * mapTilesToDrawY;
+    // Set the view to show the whole map, if possible
+    mapViewWidth = SpriteLibrary.baseSpriteSize * game.gameMap.mapWidth;
+    mapViewHeight = SpriteLibrary.baseSpriteSize * game.gameMap.mapHeight;
     SpriteOptions.setScreenDimensions(mapViewWidth * SpriteOptions.getDrawScale(), mapViewHeight * SpriteOptions.getDrawScale());
   }
 
@@ -108,7 +106,7 @@ public class SpriteMapView extends MapView
   @Override
   public void setPreferredDimensions(int width, int height)
   {
-    // The user wants to use a specific amount of screen. Figure out how many tiles to draw for them.
+    // The user wants to use a specific amount of screen. Figure out how many tiles to draw.
     int drawScale = SpriteOptions.getDrawScale();
     mapViewWidth = width / drawScale;
     mapViewHeight = height / drawScale;
