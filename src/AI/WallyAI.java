@@ -190,6 +190,30 @@ public class WallyAI implements AIController
       }
 
       Queue<Unit> tempQueue = new ArrayDeque<Unit>();
+
+      // Queue all of the capture actions we don't have to move for
+      while (actions.isEmpty() && !unitQueue.isEmpty())
+      {
+        Unit unit = unitQueue.poll();
+        XYCoord position = new XYCoord(unit.x, unit.y);
+
+        if( unit.getCaptureProgress() > 0 )
+        {
+          actions.offer(new GameAction.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, position, gameMap)));
+        }
+        else
+        {
+          tempQueue.offer(unit);
+        }
+      }
+
+      // reset our units back into unitQueue if we need to calculate more
+      if( actions.isEmpty() )
+      {
+        unitQueue.addAll(tempQueue);
+        tempQueue.clear();
+      }
+
       // Evaluate siege attacks
       while (actions.isEmpty() && !unitQueue.isEmpty())
       {
@@ -356,12 +380,6 @@ public class WallyAI implements AIController
       {
         Unit unit = unitQueue.poll();
         XYCoord position = new XYCoord(unit.x, unit.y);
-        
-        if (unit.getCaptureProgress() > 0)
-        {
-          actions.offer(new GameAction.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, position, gameMap)));
-          break;
-        }
 
         boolean foundAction = false;
 
