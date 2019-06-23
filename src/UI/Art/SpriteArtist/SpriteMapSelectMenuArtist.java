@@ -89,13 +89,16 @@ public class SpriteMapSelectMenuArtist
       int drawY = menuTextYStart + 1 + i * (menuOptionHeight);
 
       // Draw visible map names in the list.
-      String str = mapInfos.get(i + verticalShift).mapName;
-      if(str.length() > maxNameDisplayLength)
+      if (mapInfos.size() > i + verticalShift)
       {
-        str = str.substring(0, maxNameDisplayLength);
-      }
+        String str = mapInfos.get(i + verticalShift).mapName;
+        if(str.length() > maxNameDisplayLength)
+        {
+          str = str.substring(0, maxNameDisplayLength);
+        }
 
-      SpriteLibrary.drawText(menuGraphics, str, drawX, drawY);
+        SpriteLibrary.drawText(menuGraphics, str, drawX, drawY);
+      }
     }
 
     /////////////// MiniMap ///////////////////////
