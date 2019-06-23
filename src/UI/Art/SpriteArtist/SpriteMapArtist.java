@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.Path.PathNode;
@@ -15,7 +16,6 @@ import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
 import Terrain.Environment.Weathers;
 import Terrain.GameMap;
 import UI.MapView;
-import UI.Art.FillRectArtist.FillRectMapArtist;
 import Units.Unit;
 
 public class SpriteMapArtist
@@ -31,7 +31,7 @@ public class SpriteMapArtist
   private Color FOG_COLOR;
   private Color HIGHLIGHT_COLOR;
 
-  FillRectMapArtist backupArtist; // TODO: Make this obsolete.
+  SpriteCursor spriteCursor;
 
   public SpriteMapArtist(GameInstance game, MapView view)
   {
@@ -40,10 +40,8 @@ public class SpriteMapArtist
     myView = view;
 
     tileSize = myView.getTileSize();
-
-    // TODO: make this obsolete.
-    backupArtist = new FillRectMapArtist(myGame);
-    backupArtist.setView(myView);
+    Commander co0 = game.commanders[0];
+    spriteCursor = new SpriteCursor(co0.HQLocation.xCoord * tileSize, co0.HQLocation.yCoord * tileSize, tileSize, tileSize, co0.myColor);
 
     baseMapImage = new BufferedImage(gameMap.mapWidth * tileSize, gameMap.mapHeight * tileSize, BufferedImage.TYPE_INT_RGB);
 
@@ -99,11 +97,10 @@ public class SpriteMapArtist
   {
     if( !isTargeting )
     {
-      // TODO: Get an actual map cursor.
       // Draw the default map cursor.
-      final Color COLOR_CURSOR = new Color(253, 171, 77, 200);
-      g.setColor(COLOR_CURSOR);
-      g.fillRect(drawX * tileSize, drawY * tileSize, tileSize, tileSize);
+      spriteCursor.set(myGame.activeCO.myColor);
+      spriteCursor.set(drawX*tileSize, drawY*tileSize);
+      spriteCursor.draw(g);
     }
     else
     {

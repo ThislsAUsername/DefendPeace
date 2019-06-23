@@ -61,9 +61,6 @@ public class SpriteMapView extends MapView
   // The number of map tiles to draw. This corresponds to the size of the game window.
   private int mapTilesToDrawX;
   private int mapTilesToDrawY;
-  // Coordinates of the upper-left-most, currently visible map location.
-  private int mapViewX;
-  private int mapViewY;
   // Coordinates of the draw view, with double precision. Will constantly move towards (mapViewX, mapViewY).
   private SlidingValue mapViewDrawX;
   private SlidingValue mapViewDrawY;
@@ -94,8 +91,6 @@ public class SpriteMapView extends MapView
     mapTilesToDrawX = 15;
     mapTilesToDrawY = 10;
     // Start the view at the top-left by default.
-    mapViewX = 0;
-    mapViewY = 0;
     mapViewDrawX = new SlidingValue(0);
     mapViewDrawY = new SlidingValue(0);
 
@@ -294,7 +289,7 @@ public class SpriteMapView extends MapView
     }
     else
     {
-      menuArtist.drawMenu(mapGraphics, mapViewX, mapViewY);
+      menuArtist.drawMenu(mapGraphics, mapViewDrawX.geti(), mapViewDrawY.geti());
     }
 
     // When we draw the map, we want to center it if it's smaller than the view dimensions
@@ -332,6 +327,8 @@ public class SpriteMapView extends MapView
 
     // Maintain a 2-space buffer between the cursor and the edge of the visible map, when possible.
     int buffer = 2; // Note the cursor takes up one space, so we will have to add 1 when checking the right/bottom border.
+    int mapViewX = mapViewDrawX.getDestination();
+    int mapViewY = mapViewDrawY.getDestination();
     if( (mapViewX + mapTilesToDrawX) < (curX + buffer + 1) )
     {
       mapViewX = curX - mapTilesToDrawX + buffer + 1; // Move our view to keep the cursor in sight.
@@ -530,11 +527,11 @@ public class SpriteMapView extends MapView
   private void drawCommanderOverlay(Graphics g)
   {
     // Choose the CO overlay location based on the cursor location on the screen.
-    if( !overlayIsLeft && (myGame.getCursorX() - mapViewX) > (mapTilesToDrawX - 1) * 3 / 5 )
+    if( !overlayIsLeft && (myGame.getCursorX() - mapViewDrawX.get()) > (mapTilesToDrawX - 1) * 3 / 5 )
     {
       overlayIsLeft = true;
     }
-    if( overlayIsLeft && (myGame.getCursorX() - mapViewX) < mapTilesToDrawX * 2 / 5 )
+    if( overlayIsLeft && (myGame.getCursorX() - mapViewDrawX.get()) < mapTilesToDrawX * 2 / 5 )
     {
       overlayIsLeft = false;
     }
