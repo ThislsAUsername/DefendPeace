@@ -14,7 +14,7 @@ import UI.SlidingValue;
 /**
  * This class is responsible for drawing the main menu visible at game startup.
  */
-public class SpriteMainUIView implements IView
+public class MainUIView implements IView
 {
   MainUIController controller = null;
 
@@ -27,7 +27,7 @@ public class SpriteMainUIView implements IView
   private int menuWidth;
   private int menuHeight;
 
-  public SpriteMainUIView( MainUIController control )
+  public MainUIView( MainUIController control )
   {
     controller = control;
     menuWidth = SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale();
@@ -54,7 +54,7 @@ public class SpriteMainUIView implements IView
     switch(controller.getSubMenuType())
     {
       case GAME_SETUP:
-        SpriteMapSelectMenuArtist.draw(g, controller.getGameSetupController());
+        MapSelectMenuArtist.draw(g, controller.getGameSetupController());
         break;
       case MAIN:
       case SAVE_SELECT:

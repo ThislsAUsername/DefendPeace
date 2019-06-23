@@ -11,7 +11,7 @@ import Terrain.MapLibrary;
 import Terrain.TerrainType;
 import UI.MapSelectController;
 
-public class SpriteMapSelectMenuArtist
+public class MapSelectMenuArtist
 {
   private static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
   private static final Color MENUBGCOLOR = new Color(234, 204, 154);
@@ -122,7 +122,7 @@ public class SpriteMapSelectMenuArtist
 
     // Draw the mini-map representation of the highlighted map.
     selectedMapInfo = mapInfos.get(highlightedOption);
-    BufferedImage miniMap = SpriteMiniMapArtist.getMapImage( selectedMapInfo );
+    BufferedImage miniMap = MiniMapArtist.getMapImage( selectedMapInfo );
 
     // Figure out how large to draw the minimap. We want to make it as large as possible, but still
     //   fit inside the available space (with a minimum scale factor of 1).

@@ -15,11 +15,11 @@ import UI.MapView;
  * InfoView paints the CO's full portrait and a box with info in it.
  * The contents of the info are defined by inputs; current game status or static CO info are both used
  */
-public class SpriteInfoView extends MapView // Extend MapView for getDrawableMap(). We don't actually draw it, but we need fog info.
+public class InfoView extends MapView // Extend MapView for getDrawableMap(). We don't actually draw it, but we need fog info.
 {
   private InfoController myControl;
 
-  public SpriteInfoView(InfoController control)
+  public InfoView(InfoController control)
   {
     myControl = control;
   }

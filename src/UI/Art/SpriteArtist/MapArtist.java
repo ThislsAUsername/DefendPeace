@@ -18,7 +18,7 @@ import Terrain.GameMap;
 import UI.MapView;
 import Units.Unit;
 
-public class SpriteMapArtist
+public class MapArtist
 {
   private GameInstance myGame;
   private MapView myView;
@@ -33,7 +33,7 @@ public class SpriteMapArtist
 
   SpriteCursor spriteCursor;
 
-  public SpriteMapArtist(GameInstance game, MapView view)
+  public MapArtist(GameInstance game, MapView view)
   {
     myGame = game;
     GameMap gameMap = myGame.gameMap;
@@ -233,8 +233,8 @@ public class SpriteMapArtist
 
   private static class MapImageUpdater extends GameEventListener
   {
-    SpriteMapArtist myArtist;
-    MapImageUpdater(SpriteMapArtist artist)
+    MapArtist myArtist;
+    MapImageUpdater(MapArtist artist)
     {
       myArtist = artist;
     }
