@@ -207,6 +207,10 @@ public class SpriteOptions
     // Draw a fancy background.
     DiagonalBlindsBG.draw(g);
 
+    // Create an un-scaled image to draw everything at real size before scaling it to the screen.
+    BufferedImage optionsImage = SpriteLibrary.createTransparentSprite(dimensions.width/drawScale, dimensions.height/drawScale);
+    Graphics optionsGraphics = optionsImage.getGraphics();
+
     // Build the necessary images.
     if( !initialized )
     {
@@ -214,37 +218,40 @@ public class SpriteOptions
     }
 
     // Set up some initial parameters.
-    int xDraw = (dimensions.width / 2) - ((drawScale * graphicsOptionWidth) / 2);
-    int yDraw = drawScale * graphicsOptionHeight;
+    int xDraw = (optionsImage.getWidth() / 2) - (graphicsOptionWidth / 2);
+    int yDraw = graphicsOptionHeight;
     int firstOptionY = yDraw; // Hold onto this to draw the selector arrows.
-    int ySpacing = drawScale * (graphicsOptionHeight + (optionNamePanel.getHeight() / 2));
+    int ySpacing = (graphicsOptionHeight + (optionNamePanel.getHeight() / 2));
 
     // Loop through and draw everything.
     for( int i = 0; i < allOptions.length; ++i, yDraw += ySpacing )
     {
-      drawGraphicsOption(g, xDraw, yDraw, allOptions[i]);
+      drawGraphicsOption(optionsGraphics, xDraw, yDraw, allOptions[i]);
     }
 
     // Draw the arrows around the highlighted option, animating movement when switching.
-    yDraw = firstOptionY + (int) (ySpacing * animHighlightedOption.get()) + (3 * drawScale); // +3 to center.
-    xDraw += (graphicsOptionWidth - optionSettingPanel.getWidth() - 8) * drawScale; // Subtract 5 to center the arrows around the option setting panel.
+    yDraw = firstOptionY + (int) (ySpacing * animHighlightedOption.get()) + (3); // +3 to center.
+    xDraw += (graphicsOptionWidth - optionSettingPanel.getWidth() - 8); // Subtract 5 to center the arrows around the option setting panel.
 
-    g.drawImage(optionArrows, xDraw, yDraw, optionArrows.getWidth() * drawScale, optionArrows.getHeight() * drawScale, null);
+    optionsGraphics.drawImage(optionArrows, xDraw, yDraw, optionArrows.getWidth(), optionArrows.getHeight(), null);
+
+    // Redraw to the screen at scale.
+    g.drawImage(optionsImage, 0, 0, optionsImage.getWidth()*drawScale, optionsImage.getHeight()*drawScale, null);
   }
 
   private static void drawGraphicsOption(Graphics g, int x, int y, GraphicsOption opt)
   {
-    int drawBuffer = textBuffer * drawScale;
+    int drawBuffer = textBuffer;
 
     // Draw the name panel and the name.
-    g.drawImage(optionNamePanel, x, y, optionNamePanel.getWidth() * drawScale, optionNamePanel.getHeight() * drawScale, null);
-    SpriteLibrary.drawText(g, opt.optionName, x + drawBuffer, y + drawBuffer, drawScale);
+    g.drawImage(optionNamePanel, x, y, optionNamePanel.getWidth(), optionNamePanel.getHeight(), null);
+    SpriteLibrary.drawText(g, opt.optionName, x + drawBuffer, y + drawBuffer);
 
     // Draw the setting panel and the setting value.
-    x = x + drawScale * (optionNamePanel.getWidth() + (3 * letterWidth));
+    x = x + (optionNamePanel.getWidth() + (3 * letterWidth));
     BufferedImage settingPanel = (opt.isChanged()) ? optionSettingPanelChanged : optionSettingPanel;
-    g.drawImage(settingPanel, x, y, settingPanel.getWidth() * drawScale, settingPanel.getHeight() * drawScale, null);
-    SpriteLibrary.drawText(g, opt.getSettingValueText(), x + drawBuffer, y + drawBuffer, drawScale);
+    g.drawImage(settingPanel, x, y, settingPanel.getWidth(), settingPanel.getHeight(), null);
+    SpriteLibrary.drawText(g, opt.getSettingValueText(), x + drawBuffer, y + drawBuffer);
   }
 
   private static class GraphicsOption extends OptionSelector

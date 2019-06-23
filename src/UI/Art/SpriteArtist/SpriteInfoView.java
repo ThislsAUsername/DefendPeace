@@ -3,11 +3,10 @@ package UI.Art.SpriteArtist;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import CommandingOfficers.CommanderInfo.InfoPage;
+
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.Driver;
-import Engine.GameInstance;
-import Engine.Utils;
 import Engine.GameEvents.GameEventQueue;
 import UI.COStateInfo;
 import UI.InfoController;
@@ -54,12 +53,17 @@ public class SpriteInfoView extends MapView // Extend MapView for getDrawableMap
   {
     DiagonalBlindsBG.draw(g);
 
-    // Get the CO info menu.
+    // Get the draw space. We'll draw it all in real size and then scale it when we draw to the window.
     int drawScale = SpriteOptions.getDrawScale();
+    Dimension dimensions = SpriteOptions.getScreenDimensions();
+    int imageWidth = dimensions.width / drawScale;
+    int imageHeight = dimensions.height / drawScale;
+    BufferedImage image = SpriteLibrary.createTransparentSprite(imageWidth, imageHeight);
+    Graphics myG = image.getGraphics();
     
-    int paneOuterBuffer = 4*drawScale; // sets both outer border and frame border size
-    int paneHSize = (int) (viewWidth*0.7) - paneOuterBuffer*4; // width of the BG color area
-    int paneVSize = (int) (viewHeight   ) - paneOuterBuffer*4; // height ""
+    int paneOuterBuffer = 4; // sets both outer border and frame border size
+    int paneHSize = (int) (imageWidth*0.7) - paneOuterBuffer*4; // width of the BG color area
+    int paneVSize = (int) (imageHeight   ) - paneOuterBuffer*4; // height ""
 
     // Get the current menu selections.
     Commander thisCO = myControl.getSelectedCO();
@@ -68,24 +72,23 @@ public class SpriteInfoView extends MapView // Extend MapView for getDrawableMap
     // Draw the commander art.
     BufferedImage COPic = SpriteLibrary.getCommanderSprites(myControl.getSelectedCOInfo().name).body;
     // justify bottom/right
-    g.drawImage(COPic, viewWidth - COPic.getWidth()*drawScale, viewHeight - COPic.getHeight()*drawScale,
-        COPic.getWidth()*drawScale, COPic.getHeight()*drawScale, null);
+    myG.drawImage(COPic, imageWidth - COPic.getWidth(), imageHeight - COPic.getHeight(), null);
 
     if (null != thisCO)
-      CommanderOverlayArtist.drawCommanderOverlay(g, thisCO, false);
+      CommanderOverlayArtist.drawCommanderOverlay(myG, thisCO, false);
     
     // add the actual info
-    g.setColor(SpriteUIUtils.MENUFRAMECOLOR); // outer buffer
-    g.fillRect(  paneOuterBuffer,   paneOuterBuffer, paneHSize + 2*paneOuterBuffer, paneVSize + 2*paneOuterBuffer);
-    g.setColor(SpriteUIUtils.MENUBGCOLOR);    // inside of the pane
-    g.fillRect(2*paneOuterBuffer, 2*paneOuterBuffer, paneHSize                    , paneVSize                    );
+    myG.setColor(SpriteUIUtils.MENUFRAMECOLOR); // outer buffer
+    myG.fillRect(  paneOuterBuffer,   paneOuterBuffer, paneHSize + 2*paneOuterBuffer, paneVSize + 2*paneOuterBuffer);
+    myG.setColor(SpriteUIUtils.MENUBGCOLOR);    // inside of the pane
+    myG.fillRect(2*paneOuterBuffer, 2*paneOuterBuffer, paneHSize                    , paneVSize                    );
     
     // TODO: consider drawing all pages as one big image, so the user can scroll smoothly through it regardless of screen size
     int drawingWidth = paneHSize - paneOuterBuffer;
     switch (page.pageType)
     {
       case CO_HEADERS:
-        int overlayHeight = 42*drawScale;
+        int overlayHeight = 42;
         int heightOffset = 0;
         for (Commander CO : myControl.getGame().commanders)
         {
@@ -96,10 +99,10 @@ public class SpriteInfoView extends MapView // Extend MapView for getDrawableMap
           // Add brief status text per CO
           String status = new COStateInfo(getDrawableMap(myControl.getGame()), CO).getAbbrevStatus();
           BufferedImage statusText = SpriteUIUtils.drawTextToWidth(status, drawingWidth);
-          overlayPic.getGraphics().drawImage(statusText, 0, drawScale * (5+SpriteLibrary.getCoOverlay(CO, true).getHeight()), null);
+          overlayPic.getGraphics().drawImage(statusText, 0, (5+SpriteLibrary.getCoOverlay(CO, true).getHeight()), null);
 
           // Drop the overlay where it's supposed to go
-          g.drawImage(overlayPic,2*paneOuterBuffer, 2*paneOuterBuffer + heightOffset, null);
+          myG.drawImage(overlayPic,2*paneOuterBuffer, 2*paneOuterBuffer + heightOffset, null);
           heightOffset += overlayHeight;
         }
         break;
@@ -108,14 +111,17 @@ public class SpriteInfoView extends MapView // Extend MapView for getDrawableMap
         {
           String status = new COStateInfo(getDrawableMap(myControl.getGame()), thisCO).getFullStatus();
           BufferedImage statusText = SpriteUIUtils.drawTextToWidth(status, drawingWidth);
-          g.drawImage(statusText, 3 * paneOuterBuffer, 3 * paneOuterBuffer, null);
+          myG.drawImage(statusText, 3 * paneOuterBuffer, 3 * paneOuterBuffer, null);
         }
         break;
       case BASIC:
         BufferedImage infoText = SpriteUIUtils.drawTextToWidth(page.info, drawingWidth);
-        g.drawImage(infoText,3*paneOuterBuffer, 3*paneOuterBuffer, null);
+        myG.drawImage(infoText,3*paneOuterBuffer, 3*paneOuterBuffer, null);
         break;
     }
+
+    // Finally, draw our rendered image onto the window.
+    g.drawImage(image, 0, 0, imageWidth*drawScale, imageHeight*drawScale, null);
   }
 
   

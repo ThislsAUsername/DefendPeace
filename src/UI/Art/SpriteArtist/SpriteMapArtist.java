@@ -26,7 +26,6 @@ public class SpriteMapArtist
   BufferedImage baseMapImage;
   MapImageUpdater baseMapImageUpdater;
 
-  private int drawScale;
   private int tileSize;
 
   private Color FOG_COLOR;
@@ -40,7 +39,6 @@ public class SpriteMapArtist
     GameMap gameMap = myGame.gameMap;
     myView = view;
 
-    drawScale = SpriteOptions.getDrawScale();
     tileSize = myView.getTileSize();
 
     // TODO: make this obsolete.
@@ -94,7 +92,7 @@ public class SpriteMapArtist
     TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(x, y));
 
     boolean drawFog = gameMap.isLocationFogged(x, y);
-    spriteSet.drawTerrainObject(g, gameMap, x, y, drawScale, drawFog);
+    spriteSet.drawTerrainObject(g, gameMap, x, y, drawFog);
   }
 
   public void drawCursor(Graphics g, Unit unitActor, boolean isTargeting, int drawX, int drawY)
@@ -110,7 +108,7 @@ public class SpriteMapArtist
     else
     {
       SpriteLibrary.drawImageCenteredOnPoint(g, SpriteLibrary.getActionCursor(), myGame.getCursorX() * tileSize + (tileSize / 2),
-          myGame.getCursorY() * tileSize + (tileSize / 2), drawScale);
+          myGame.getCursorY() * tileSize + (tileSize / 2));
     }
   }
 
@@ -215,7 +213,7 @@ public class SpriteMapArtist
       {
         // Fetch the relevant sprite set for this terrain type and have it draw itself.
         TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(x, y));
-        spriteSet.drawTerrain(g, gameMap, x, y, drawScale, false);
+        spriteSet.drawTerrain(g, gameMap, x, y, false);
       }
     }
   }
@@ -232,7 +230,7 @@ public class SpriteMapArtist
     {
       // Fetch the relevant sprite set for this terrain type and have it draw itself.
       TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(drawCoord.xCoord, drawCoord.yCoord));
-      spriteSet.drawTerrain(g, gameMap, drawCoord.xCoord, drawCoord.yCoord, drawScale, false);
+      spriteSet.drawTerrain(g, gameMap, drawCoord.xCoord, drawCoord.yCoord, false);
     }
   }
 

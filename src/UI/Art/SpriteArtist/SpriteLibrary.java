@@ -555,14 +555,13 @@ public class SpriteLibrary
    * @param text Text to be drawn as sprited letters.
    * @param x X-coordinate of the top-left corner of the first letter to be drawn.
    * @param y Y-coordinate of the top-left corner of the first letter to be drawn.
-   * @param scale Scaling factor to be applied when drawing.
    */
-  public static void drawText(Graphics g, String text, int x, int y, int scale)
+  public static void drawText(Graphics g, String text, int x, int y)
   {
     Sprite uppercase = getLettersUppercase();
     Sprite lowercase = getLettersLowercase();
-    int menuTextWidth = uppercase.getFrame(0).getWidth() * scale;
-    int menuTextHeight = uppercase.getFrame(0).getHeight() * scale;
+    int menuTextWidth = uppercase.getFrame(0).getWidth();
+    int menuTextHeight = uppercase.getFrame(0).getHeight();
 
     for( int i = 0; i < text.length(); ++i, x += menuTextWidth )
     {
@@ -602,13 +601,12 @@ public class SpriteLibrary
    * @param text Text to be drawn as sprited letters.
    * @param x X-coordinate of the top-left corner of the first letter to be drawn.
    * @param y Y-coordinate of the top-left corner of the first letter to be drawn.
-   * @param scale Scaling factor to be applied when drawing.
    */
-  public static void drawTextSmallCaps(Graphics g, String text, int x, int y, int scale)
+  public static void drawTextSmallCaps(Graphics g, String text, int x, int y)
   {
     Sprite smallCaps = getLettersSmallCaps();
-    int menuTextWidth = smallCaps.getFrame(0).getWidth() * scale;
-    int menuTextHeight = smallCaps.getFrame(0).getHeight() * scale;
+    int menuTextWidth = smallCaps.getFrame(0).getWidth();
+    int menuTextHeight = smallCaps.getFrame(0).getHeight();
     text = text.toUpperCase(); // SmallCaps is all uppercase.
 
     for( int i = 0; i < text.length(); ++i, x += menuTextWidth )
@@ -654,14 +652,22 @@ public class SpriteLibrary
     int height = letters.getFrame(0).getHeight();
     BufferedImage textImage = createTransparentSprite(width, height);
     if( smallCaps )
-      drawTextSmallCaps(textImage.getGraphics(), text, 0, 0, 1);
+      drawTextSmallCaps(textImage.getGraphics(), text, 0, 0);
     else
-      drawText(textImage.getGraphics(), text, 0, 0, 1);
+      drawText(textImage.getGraphics(), text, 0, 0);
     return textImage;
   }
 
   /**
    * Draws the provided image, centered around x, y.
+   */
+  public static void drawImageCenteredOnPoint(Graphics g, BufferedImage image, int x, int y)
+  {
+    drawImageCenteredOnPoint(g, image, x, y, 1);
+  }
+
+  /**
+   * Draws the provided image, centered around x, y, scaled by the provided factor.
    */
   public static void drawImageCenteredOnPoint(Graphics g, BufferedImage image, int x, int y, int drawScale)
   {

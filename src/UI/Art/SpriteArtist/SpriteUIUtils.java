@@ -88,7 +88,7 @@ public class SpriteUIUtils
     // Draw the actual menu text.
     for( int txtY = vBuffer, i = 0; i < items.size(); ++i, txtY += menuTextHeight + 1 )
     {
-      SpriteLibrary.drawTextSmallCaps(g, items.get(i), hBuffer, txtY, 1);
+      SpriteLibrary.drawTextSmallCaps(g, items.get(i), hBuffer, txtY);
     }
 
     return menuImage;
@@ -101,9 +101,8 @@ public class SpriteUIUtils
   public static BufferedImage drawTextToWidth(String prose, int reqWidth)
   {
     // Figure out how big our text is.
-    int drawScale = SpriteOptions.getDrawScale();
-    int characterWidth = SpriteLibrary.getLettersUppercase().getFrame(0).getWidth() * drawScale;
-    int characterHeight = SpriteLibrary.getLettersUppercase().getFrame(0).getHeight() * drawScale;
+    int characterWidth = SpriteLibrary.getLettersUppercase().getFrame(0).getWidth();
+    int characterHeight = SpriteLibrary.getLettersUppercase().getFrame(0).getHeight();
 
     ArrayList<String> lines = new ArrayList<String>();
     // Unload our prose into the lines it already has
@@ -139,9 +138,9 @@ public class SpriteUIUtils
     Graphics g = menuImage.getGraphics();
 
     // Draw the actual text.
-    for( int txtY = 0, i = 0; i < lines.size(); ++i, txtY += characterHeight + drawScale )
+    for( int txtY = 0, i = 0; i < lines.size(); ++i, txtY += characterHeight + 1 )
     {
-      SpriteLibrary.drawText(g, lines.get(i), 0, txtY, drawScale);
+      SpriteLibrary.drawText(g, lines.get(i), 0, txtY);
     }
 
     return menuImage;
@@ -188,7 +187,7 @@ public class SpriteUIUtils
       if( rimIsUp ) dy++; else dx++;
       graphics.setColor(mainColor);
       graphics.fillRect(dx, dy, width-1, height-1);
-      SpriteLibrary.drawImageCenteredOnPoint(graphics, display, width/2, height/2, 1);
+      SpriteLibrary.drawImageCenteredOnPoint(graphics, display, width/2, height/2);
     }
 
     public void render(Graphics g)
@@ -197,23 +196,23 @@ public class SpriteUIUtils
     }
   }
 
-  public static int getMenuTextWidthPx(ArrayList<String> menuOptions, int scaledCharWidthPx)
+  public static int getMenuTextWidthPx(ArrayList<String> menuOptions, int charWidthPx)
   {
     int maxWidth = 0;
     for( int i = 0; i < menuOptions.size(); ++i )
     {
-      int optw = menuOptions.get(i).length() * scaledCharWidthPx;
+      int optw = menuOptions.get(i).length() * charWidthPx;
       maxWidth = (optw > maxWidth) ? optw : maxWidth;
     }
 
     return maxWidth;
   }
 
-  public static int getMenuTextHeightPx(ArrayList<String> menuOptions, int scaledCharHeightPx)
+  public static int getMenuTextHeightPx(ArrayList<String> menuOptions, int charHeightPx)
   {
     // Height of the letters plus 1 (for buffer between menu options), times the number of entries,
     // minus 1 because there is no buffer after the last entry.
-    return (scaledCharHeightPx + 1) * menuOptions.size() - 1;
+    return (charHeightPx + 1) * menuOptions.size() - 1;
   }
 
   public static int getTileSize()

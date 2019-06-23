@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.Set;
 
 import Terrain.Environment.Weathers;
-import UI.UIUtils;
 import Terrain.GameMap;
 import Terrain.TerrainType;
+import UI.UIUtils;
 
 /**
  * Responsible for storing and organizing all image data associated with a specific map tile type, and drawing the
@@ -250,21 +250,21 @@ public class TerrainSpriteSet
    * Draws the terrain at the indicated location, accounting for any defined tile transitions.
    * Does not draw terrain objects (buildings, trees, mountains, etc).
    */
-  public void drawTerrain(Graphics g, GameMap map, int x, int y, int scale, boolean drawFog)
+  public void drawTerrain(Graphics g, GameMap map, int x, int y, boolean drawFog)
   {
-    drawTile(g, map, x, y, scale, drawFog, false);
+    drawTile(g, map, x, y, drawFog, false);
   }
 
   /**
    * Draws any terrain object at the indicated location, accounting for any defined tile transitions.
    * Does not draw the underlying terrain (grass, water, etc).
    */
-  public void drawTerrainObject(Graphics g, GameMap map, int x, int y, int scale, boolean drawFog)
+  public void drawTerrainObject(Graphics g, GameMap map, int x, int y, boolean drawFog)
   {
-    drawTile(g, map, x, y, scale, drawFog, true);
+    drawTile(g, map, x, y, drawFog, true);
   }
 
-  private void drawTile(Graphics g, GameMap map, int x, int y, int scale, boolean drawFog, boolean shouldDrawTerrainObject)
+  private void drawTile(Graphics g, GameMap map, int x, int y, boolean drawFog, boolean shouldDrawTerrainObject)
   {
     // Draw the base tile type, if needed. It's needed if we are not the base type, and if we are not drawing
     //   a terrain object. If this object is holding transition tiles, we also don't want to (re)draw the base type.
@@ -273,7 +273,7 @@ public class TerrainSpriteSet
     {
       System.out.println("Drawing " + baseTerrainType + " as base of " + myTerrainType);
       TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(baseTerrainType);
-      spriteSet.drawTile(g, map, x, y, scale, drawFog, shouldDrawTerrainObject);
+      spriteSet.drawTile(g, map, x, y, drawFog, shouldDrawTerrainObject);
     }
 
     // Figure out if we need to draw this tile, based on this tile type and whether the caller
@@ -283,7 +283,7 @@ public class TerrainSpriteSet
     {
       // Either: we are only drawing terrain objects, and this tile type does represent a terrain object,
       //     or: we are only drawing base terrain, and this tile type represents base terrain.
-      int tileSize = SpriteLibrary.baseSpriteSize * scale;
+      int tileSize = SpriteLibrary.baseSpriteSize;
       int variation = (x + 1) * (y) + x; // Used to vary the specific sprite version drawn at each place in a repeatable way.
 
       // Get the tile we want to draw, based on weather.
@@ -301,7 +301,7 @@ public class TerrainSpriteSet
       BufferedImage frame = clearSprites.get(dirIndex).getFrame(variation);
       if( dirIndex != 0 || !isTransition ) // Don't bother drawing transition tiles with no transitions.
       {
-        g.drawImage(frame, (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize, frame.getWidth() * scale, frame.getHeight() * scale, null);
+        g.drawImage(frame, (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize, frame.getWidth(), frame.getHeight(), null);
       }
 
       // Handle drawing corner-case tile variations if needed.
@@ -311,22 +311,22 @@ public class TerrainSpriteSet
         if( (dirIndex & (NORTH | WEST)) == 0 && checkTileType(map, x - 1, y - 1, assumeSameTileType) )
         {
           g.drawImage(clearSprites.get(NW).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
-              frame.getWidth() * scale, frame.getHeight() * scale, null);
+              frame.getWidth(), frame.getHeight(), null);
         }
         if( (dirIndex & (NORTH | EAST)) == 0 && checkTileType(map, x + 1, y - 1, assumeSameTileType) )
         {
           g.drawImage(clearSprites.get(NE).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
-              frame.getWidth() * scale, frame.getHeight() * scale, null);
+              frame.getWidth(), frame.getHeight(), null);
         }
         if( (dirIndex & (SOUTH | EAST)) == 0 && checkTileType(map, x + 1, y + 1, assumeSameTileType) )
         {
           g.drawImage(clearSprites.get(SE).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
-              frame.getWidth() * scale, frame.getHeight() * scale, null);
+              frame.getWidth(), frame.getHeight(), null);
         }
         if( (dirIndex & (SOUTH | WEST)) == 0 && checkTileType(map, x - 1, y + 1, assumeSameTileType) )
         {
           g.drawImage(clearSprites.get(SW).getFrame(variation), (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize,
-              frame.getWidth() * scale, frame.getHeight() * scale, null);
+              frame.getWidth(), frame.getHeight(), null);
         }
       }
 
@@ -334,7 +334,7 @@ public class TerrainSpriteSet
       for( TerrainSpriteSet tt : tileTransitions )
       {
         System.out.println("Drawing transition from " + tt.myTerrainType + " onto " + myTerrainType);
-        tt.drawTerrain(g, map, x, y, scale, false);
+        tt.drawTerrain(g, map, x, y, false);
       }
 
       // Draw the fog overlay if requested.
@@ -346,8 +346,7 @@ public class TerrainSpriteSet
           myFogColor = FOG_COLOR;
         }
         BufferedImage fogFrame = fogTerrainSprites.get(dirIndex).getFrame(variation);
-        g.drawImage(fogFrame, (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize, frame.getWidth() * scale, frame.getHeight()
-            * scale, null);
+        g.drawImage(fogFrame, (x - drawOffsetx) * tileSize, (y - drawOffsety) * tileSize, frame.getWidth(), frame.getHeight(), null);
       }
     }
   }

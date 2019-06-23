@@ -115,23 +115,23 @@ public class SpriteCursor
     Sprite cursor = SpriteLibrary.getCursorSprites(color);
     boolean[] offs = getSpriteOffsets();
     if( offs[0] )
-      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), x+1, y+1, 1);
+      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), x+1, y+1);
     else
-      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), x, y, 1);
+      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(0), x, y);
 
     if( offs[1] )
-      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), x+w-1, y+1, 1);
+      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), x+w-1, y+1);
     else
-      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), x+w, y, 1);
+      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(1), x+w, y);
 
     if( offs[2] )
-      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), x+w-1, y+h-1, 1);
+      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), x+w-1, y+h-1);
     else
-      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), x+w, y+h, 1);
+      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(2), x+w, y+h);
 
     if( offs[3] )
-      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), x+1, y+h-1, 1);
+      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), x+1, y+h-1);
     else
-      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), x, y+h, 1);
+      SpriteLibrary.drawImageCenteredOnPoint(g, cursor.getFrame(3), x, y+h);
   }
 }

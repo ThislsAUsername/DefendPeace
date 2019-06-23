@@ -84,7 +84,6 @@ public class SpriteGameEndAnimation implements GameAnimation
     public GameResultPanel(Commander cmdr, int xDir, int hPos)
     {
       // Establish some basic parameters.
-      int drawScale = SpriteOptions.getDrawScale();
       int screenWidth = SpriteOptions.getScreenDimensions().width;
       
       // Figure out where the panel will start out before moving onto the screen.
@@ -98,7 +97,7 @@ public class SpriteGameEndAnimation implements GameAnimation
       // Make a panel image large enough to fill the screen horizontally, and frame the CO portrait vertically.
       panel = SpriteLibrary.createDefaultBlankSprite(
           screenWidth,
-          (coMug.getHeight() + 2) * drawScale);
+          (coMug.getHeight() + 2));
       Graphics g = panel.getGraphics();
 
       // Make it all black to start, so we have a border/edge to frame the panel.
@@ -107,15 +106,15 @@ public class SpriteGameEndAnimation implements GameAnimation
 
       // Draw the background based on the CO color, inside our frame.
       g.setColor( cmdr.myColor );
-      g.fillRect( 0, 1*drawScale, panel.getWidth(), panel.getHeight() - (2*drawScale) );
+      g.fillRect( 0, 1, panel.getWidth(), panel.getHeight() - 2 );
 
       // Draw the CO portrait in place
-      g.drawImage(coMug, (screenWidth / 8), drawScale,
-          coMug.getWidth() * drawScale, coMug.getHeight() * drawScale, null);
+      g.drawImage(coMug, (screenWidth / 8), 1,
+          coMug.getWidth(), coMug.getHeight(), null);
 
       // Draw the victory/defeat text, centered.
-      int xPos = ( (screenWidth / 2) - ( (resultText.getWidth() * drawScale) / 2) ); 
-      g.drawImage(resultText, xPos, 3*drawScale, resultText.getWidth() * drawScale, resultText.getHeight() * drawScale, null);
+      int xPos = ( (screenWidth / 2) - ( (resultText.getWidth()) / 2) ); 
+      g.drawImage(resultText, xPos, 3, resultText.getWidth(), resultText.getHeight(), null);
     }
   }
 }

@@ -41,48 +41,52 @@ public class SpriteMapSelectMenuArtist
   private static void drawMapSelectMenu(Graphics g, MapSelectController gameSetup)
   {
     Dimension dimensions = SpriteOptions.getScreenDimensions();
+    int drawScale = SpriteOptions.getDrawScale();
+    int menuWidth = dimensions.width/drawScale;
+    int menuHeight = dimensions.height/drawScale;
+    BufferedImage menuImage = SpriteLibrary.createDefaultBlankSprite(menuWidth, menuHeight);
+    Graphics menuGraphics = menuImage.getGraphics();
 
     int highlightedOption = gameSetup.getSelectedOption();
-    int drawScale = SpriteOptions.getDrawScale();
 
     /////////////// Map selection pane ///////////////////////
     // Paint the whole area over in our background color.
-    g.setColor(MENUBGCOLOR);
-    g.fillRect(0,0,dimensions.width,dimensions.height);
+    menuGraphics.setColor(MENUBGCOLOR);
+    menuGraphics.fillRect(0,0,menuWidth,menuHeight);
 
     // Draw the frame for the list of maps, with the highlight for the current option.
-    int frameBorderHeight = 3*drawScale;
-    int nameSectionDrawWidth = nameSectionWidth * drawScale;
-    g.setColor(MENUFRAMECOLOR);
-    g.fillRect(nameSectionDrawWidth, 0, drawScale, dimensions.height); // sidebar
-    g.fillRect(0,0,nameSectionDrawWidth,frameBorderHeight); // top bar
-    g.fillRect(0, dimensions.height-frameBorderHeight, nameSectionDrawWidth, 3*drawScale); // bottom bar
+    int frameBorderHeight = 3;
+    int nameSectionDrawWidth = nameSectionWidth;
+    menuGraphics.setColor(MENUFRAMECOLOR);
+    menuGraphics.fillRect(nameSectionDrawWidth, 0, 1, menuHeight); // sidebar
+    menuGraphics.fillRect(0,0,nameSectionDrawWidth,frameBorderHeight); // top bar
+    menuGraphics.fillRect(0, menuHeight-frameBorderHeight, nameSectionDrawWidth, 3); // bottom bar
     //TODO: Draw little arrows on the top and bottom frame to show it can scroll.
 
     // Draw the highlight for the selected option.
-    g.setColor(MENUHIGHLIGHTCOLOR);
+    menuGraphics.setColor(MENUHIGHLIGHTCOLOR);
     int menuTextYStart = frameBorderHeight;
-    int menuOptionHeight = (SpriteLibrary.getLettersUppercase().getFrame(0).getHeight() + 1)*drawScale; // +1 for a buffer between options.
+    int menuOptionHeight = (SpriteLibrary.getLettersUppercase().getFrame(0).getHeight() + 1); // +1 for a buffer between options.
     int selectedOptionYOffset = menuTextYStart + highlightedOption * (menuOptionHeight);
 
     // Get the list of selectable maps (possibly specifying a filter (#players, etc).
     ArrayList<MapInfo> mapInfos = MapLibrary.getMapList();
     int verticalShift = 0; // How many map names we skip drawing "off the top"
-    int displayableCount = dimensions.height / menuOptionHeight; // how many maps we can cram on the screen
-    while (selectedOptionYOffset > dimensions.height/2 && // Loop until either the cursor's bumped up to the center of the screen...
+    int displayableCount = menuHeight / menuOptionHeight; // how many maps we can cram on the screen
+    while (selectedOptionYOffset > menuHeight/2 && // Loop until either the cursor's bumped up to the center of the screen...
         displayableCount+verticalShift < mapInfos.size()) //  or we'll already show the last map 
     {
       verticalShift++;
       selectedOptionYOffset -= menuOptionHeight;
     }
     
-    g.fillRect(0, selectedOptionYOffset, nameSectionDrawWidth, menuOptionHeight);
+    menuGraphics.fillRect(0, selectedOptionYOffset, nameSectionDrawWidth, menuOptionHeight);
 
     // Display the names from the list
     for(int i = 0; i < displayableCount; ++i)
     {
       int drawX = 2; // Offset from the edge of the window slightly.
-      int drawY = menuTextYStart + drawScale + i * (menuOptionHeight);
+      int drawY = menuTextYStart + 1 + i * (menuOptionHeight);
 
       // Draw visible map names in the list.
       String str = mapInfos.get(i + verticalShift).mapName;
@@ -91,27 +95,27 @@ public class SpriteMapSelectMenuArtist
         str = str.substring(0, maxNameDisplayLength);
       }
 
-      SpriteLibrary.drawText(g, str, drawX, drawY, drawScale);
+      SpriteLibrary.drawText(menuGraphics, str, drawX, drawY);
     }
 
     /////////////// MiniMap ///////////////////////
     // The mini map and map info panes split the vertical space, so first define some boundaries.
 
     // Calculate the map info pane height: numPlayers text height, plus property draw size (2x2).
-    int sqSize = SpriteLibrary.baseSpriteSize*drawScale; // "1 tile" in pixels.
-    int MapInfoPaneDrawHeight = characterHeight*drawScale + (sqSize*2);
+    int sqSize = SpriteLibrary.baseSpriteSize; // "1 tile" in pixels.
+    int MapInfoPaneDrawHeight = characterHeight + (sqSize*2);
 
     // Figure out how large the map can be based on the border divisions.
-    int maxMiniMapWidth = dimensions.width - nameSectionDrawWidth;
-    int maxMiniMapHeight = dimensions.height - MapInfoPaneDrawHeight;
+    int maxMiniMapWidth = menuWidth - nameSectionDrawWidth;
+    int maxMiniMapHeight = menuHeight - MapInfoPaneDrawHeight;
 
     // Find the center of the minimap display.
     int miniMapCenterX = nameSectionDrawWidth + (maxMiniMapWidth / 2);
     int miniMapCenterY = maxMiniMapHeight / 2;
 
     // Draw a line to separate the minimap image and the player/property info.
-    g.setColor(MENUFRAMECOLOR);
-    g.fillRect(nameSectionDrawWidth, maxMiniMapHeight, dimensions.width-nameSectionDrawWidth, drawScale);
+    menuGraphics.setColor(MENUFRAMECOLOR);
+    menuGraphics.fillRect(nameSectionDrawWidth, maxMiniMapHeight, menuWidth-nameSectionDrawWidth, 1);
 
     // Draw the mini-map representation of the highlighted map.
     selectedMapInfo = mapInfos.get(highlightedOption);
@@ -122,27 +126,27 @@ public class SpriteMapSelectMenuArtist
     int mmWScale = maxMiniMapWidth / miniMap.getWidth();
     int mmHScale = maxMiniMapHeight / miniMap.getHeight();
     int mmScale = (mmWScale > mmHScale)? mmHScale : mmWScale;
-    if( mmScale > 10*drawScale ) mmScale = 10*drawScale;
+    if( mmScale > 10 ) mmScale = 10;
 
     // Draw the mini map.
-    SpriteLibrary.drawImageCenteredOnPoint(g, miniMap, miniMapCenterX, miniMapCenterY, mmScale);
+    SpriteLibrary.drawImageCenteredOnPoint(menuGraphics, miniMap, miniMapCenterX, miniMapCenterY, mmScale);
 
     /////////////// Map Information ///////////////////////
-    int buffer = 3*drawScale;
+    int buffer = 3;
 
     int numPlayers = selectedMapInfo.getNumCos(); // Get the number of players the map supports
     StringBuilder sb = new StringBuilder().append(numPlayers).append(" Players"); // Build a string to say that.
-    SpriteLibrary.drawText(g, sb.toString(), nameSectionDrawWidth+buffer, maxMiniMapHeight+buffer, drawScale);
+    SpriteLibrary.drawText(menuGraphics, sb.toString(), nameSectionDrawWidth+buffer, maxMiniMapHeight+buffer);
 
     sb.setLength(0); // Clear so we can build the map dimensions string.
     sb.append(selectedMapInfo.getWidth()).append("x").append(selectedMapInfo.getHeight());
-    int dimsDrawX = dimensions.width - (characterWidth*7*drawScale) - drawScale;
-    SpriteLibrary.drawText(g, sb.toString(), dimsDrawX, maxMiniMapHeight+buffer, drawScale);
+    int dimsDrawX = menuWidth - (characterWidth*7) - 1;
+    SpriteLibrary.drawText(menuGraphics, sb.toString(), dimsDrawX, maxMiniMapHeight+buffer);
 
     // Draw the number of each type of property on this map.
 
     int propsDrawX = nameSectionDrawWidth + (2*buffer) - sqSize; // Map name pane plus generous buffer, minus one square (building sprites are 2x2).
-    int propsDrawY = maxMiniMapHeight+buffer+(characterHeight*drawScale)+buffer - (sqSize/2); // Map  pane plus "# players" string plus buffer, minus 1/2sq.
+    int propsDrawY = maxMiniMapHeight+buffer+(characterHeight)+buffer - (sqSize/2); // Map  pane plus "# players" string plus buffer, minus 1/2sq.
 
     // Define an array with all the property types we care to enumerate.
     TerrainType[] propertyTypes = {TerrainType.CITY, TerrainType.FACTORY, TerrainType.AIRPORT, TerrainType.SEAPORT};
@@ -153,13 +157,16 @@ public class SpriteMapSelectMenuArtist
       // Get the first image of the first variation of the specified terrain type.
       BufferedImage image = SpriteLibrary.getTerrainSpriteSet(terrain).getTerrainSprite().getFrame(0);
       // Draw it, with the number of times it occurs on the map.
-      g.drawImage(image, propsDrawX, propsDrawY, sqSize*2, sqSize*2, null);
+      menuGraphics.drawImage(image, propsDrawX, propsDrawY, sqSize*2, sqSize*2, null);
 
-      drawPropertyNumber(g, num, propsDrawX, propsDrawY);
+      drawPropertyNumber(menuGraphics, num, propsDrawX, propsDrawY);
 
       // Increment x draw location a fair bit for the next one.
       propsDrawX += sqSize + 3*buffer;
     }
+
+    // Draw to the window at scale.
+    g.drawImage(menuImage, 0, 0, menuImage.getWidth()*drawScale, menuImage.getHeight()*drawScale, null);
   }
 
   /**
@@ -193,13 +200,12 @@ public class SpriteMapSelectMenuArtist
     }
 
     // Get the number images, and grab the dimensions
-    int drawScale = SpriteOptions.getDrawScale();
     Sprite nums = SpriteLibrary.getMapUnitHPSprites();
-    int numWidth = nums.getFrame(0).getWidth() * drawScale;
-    int numHeight = nums.getFrame(0).getHeight() * drawScale;
+    int numWidth = nums.getFrame(0).getWidth();
+    int numHeight = nums.getFrame(0).getHeight();
 
     // Property sprites are 2 tiles by two tiles, so we adjust sideways.
-    int propSize = SpriteLibrary.baseSpriteSize*drawScale*2;
+    int propSize = SpriteLibrary.baseSpriteSize*2;
     x += propSize - numWidth; // right-justify
     if (num/100 > 0)
       x += propSize/8; // shift over a bit so we stay centered with 3 digits
