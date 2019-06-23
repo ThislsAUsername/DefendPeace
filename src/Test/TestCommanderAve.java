@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
-import CommandingOfficers.CommanderAve;
-import CommandingOfficers.CommanderPatch;
+import CommandingOfficers.Ave;
+import CommandingOfficers.Patch;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.Utils;
@@ -24,14 +24,14 @@ import Units.UnitModel.UnitEnum;
 public class TestCommanderAve extends TestCase
 {
   private Commander Patch;
-  private CommanderAve Ave;
+  private Ave Ave;
   private MapMaster testMap;
   private GameInstance game;
 
   private void setupTest()
   {
-    Ave = new CommanderAve();
-    Patch = new CommanderPatch();
+    Ave = new Ave();
+    Patch = new Patch();
     Commander[] cos = { Ave, Patch };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
@@ -75,7 +75,7 @@ public class TestCommanderAve extends TestCase
     infantry.initTurn(testMap);
     performGameAction(capture, testMap);
 
-    testPassed &= validate(Ave.getSnowMapClone()[city.xCoord][city.yCoord] == CommanderAve.SNOW_THRESHOLD, "    Ave doesn't have 1 snow in city after capture");
+    testPassed &= validate(Ave.getSnowMapClone()[city.xCoord][city.yCoord] == Ave.SNOW_THRESHOLD, "    Ave doesn't have 1 snow in city after capture");
 
     return testPassed;
   }

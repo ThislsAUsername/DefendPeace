@@ -8,7 +8,7 @@ import Terrain.MapMaster;
 import Terrain.Location;
 import Units.Unit;
 
-public class CommanderPatch extends Commander
+public class Patch extends Commander
 {
   private static final long serialVersionUID = -543799935457360451L;
 
@@ -35,7 +35,7 @@ public class CommanderPatch extends Commander
     @Override
     public Commander create()
     {
-      return new CommanderPatch();
+      return new Patch();
     }
   }
 
@@ -52,7 +52,7 @@ public class CommanderPatch extends Commander
 
   private LootAbility myLootAbility = null;
 
-  public CommanderPatch()
+  public Patch()
   {
     super(coInfo);
 

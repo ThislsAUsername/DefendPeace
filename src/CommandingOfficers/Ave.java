@@ -52,7 +52,7 @@ import Units.UnitModel;
  * Likes: Steep Slopes and Sharp Cuts
  * Dislikes: Trees and Mythical Snow Monsters
  */
-public class CommanderAve extends Commander
+public class Ave extends Commander
 {
   public static final int SNOW_THRESHOLD = 100; // Big numbers for integer math.
   public static final int SNOW_PER_TURN = 400;
@@ -98,13 +98,13 @@ public class CommanderAve extends Commander
     @Override
     public Commander create()
     {
-      return new CommanderAve();
+      return new Ave();
     }
   }
 
   private int[][] snowMap;
 
-  public CommanderAve()
+  public Ave()
   {
     super(coInfo);
 
@@ -446,10 +446,10 @@ public class CommanderAve extends Commander
 
     private int numActivations = 0;
 
-    CommanderAve Ave;
+    Ave Ave;
     COModifier damageMod = null;
 
-    NixAbility(CommanderAve commander)
+    NixAbility(Ave commander)
     {
       super(commander, NIX_NAME, NIX_COST);
       Ave = commander;
@@ -479,9 +479,9 @@ public class CommanderAve extends Commander
       HashSet<XYCoord> tiles = Utils.findLocationsNearProperties(gameMap, Ave, Ave.MAX_SNOW_SPREAD_RANGE);
       for( XYCoord coord : tiles )
       {
-        if( Ave.snowMap[coord.xCoord][coord.yCoord] < CommanderAve.SNOW_THRESHOLD )
+        if( Ave.snowMap[coord.xCoord][coord.yCoord] < Ave.SNOW_THRESHOLD )
         {
-          Ave.snowMap[coord.xCoord][coord.yCoord] = CommanderAve.SNOW_THRESHOLD;
+          Ave.snowMap[coord.xCoord][coord.yCoord] = Ave.SNOW_THRESHOLD;
           if( gameMap.getEnvironment(coord).weatherType != Weathers.SNOW )
           {
             snowTiles.add(new MapChangeEvent.EnvironmentAssignment(coord, Environment.getTile(gameMap.getEnvironment(coord).terrainType, Weathers.SNOW), 1));
@@ -509,10 +509,10 @@ public class CommanderAve extends Commander
     private static final int GLACIO_SNOW_SPREAD = 3;
     private static final int GLACIO_FREEZE_RANGE = 2;
 
-    CommanderAve Ave;
+    Ave Ave;
     COModifier damageMod = null;
 
-    GlacioAbility(CommanderAve commander)
+    GlacioAbility(Ave commander)
     {
       super(commander, GLACIO_NAME, GLACIO_COST);
       Ave = commander;
@@ -535,9 +535,9 @@ public class CommanderAve extends Commander
       tilesInRange.addAll(Utils.findLocationsNearUnits(gameMap, Ave, GLACIO_SNOW_SPREAD));
       for( XYCoord coord : tilesInRange )
       {
-        if( Ave.snowMap[coord.xCoord][coord.yCoord] < CommanderAve.SNOW_THRESHOLD )
+        if( Ave.snowMap[coord.xCoord][coord.yCoord] < Ave.SNOW_THRESHOLD )
         {
-          Ave.snowMap[coord.xCoord][coord.yCoord] = CommanderAve.SNOW_THRESHOLD;
+          Ave.snowMap[coord.xCoord][coord.yCoord] = Ave.SNOW_THRESHOLD;
           if( gameMap.getEnvironment(coord).weatherType != Weathers.SNOW )
           {
             tileChanges.add(new MapChangeEvent.EnvironmentAssignment(coord, Environment.getTile(gameMap.getEnvironment(coord).terrainType, Weathers.SNOW), 1));
@@ -584,10 +584,10 @@ public class CommanderAve extends Commander
     private static final int OBLIDO_BUFF = 20;
     private static final int OBLIDO_RANGE = 2;
 
-    CommanderAve Ave;
+    Ave Ave;
     COModifier damageMod = null;
 
-    OblidoAbility(CommanderAve commander)
+    OblidoAbility(Ave commander)
     {
       super(commander, OBLIDO_NAME, OBLIDO_COST);
       Ave = commander;
@@ -666,8 +666,8 @@ public class CommanderAve extends Commander
 
   private static class CitySnowifier extends GameEventListener
   {
-    CommanderAve Ave;
-    public CitySnowifier(CommanderAve cmdr)
+    Ave Ave;
+    public CitySnowifier(Ave cmdr)
     {
       Ave = cmdr;
     }

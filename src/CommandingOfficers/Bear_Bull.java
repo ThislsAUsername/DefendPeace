@@ -12,7 +12,7 @@ import Units.UnitModel;
  * In Bull mode, he gets more and pays more.
  * His powers let him toggle between these to maximize his gainz.
  */
-public class CommanderBear_Bull extends Commander
+public class Bear_Bull extends Commander
 {
   private static final long serialVersionUID = -3048055535977630509L;
   
@@ -44,7 +44,7 @@ public class CommanderBear_Bull extends Commander
     @Override
     public Commander create()
     {
-      return new CommanderBear_Bull();
+      return new Bear_Bull();
     }
   }
   
@@ -54,7 +54,7 @@ public class CommanderBear_Bull extends Commander
   private final double BEAR_MOD = 0.9;
   private final double BULL_MOD = 1.2;
 
-  public CommanderBear_Bull()
+  public Bear_Bull()
   {
     super(coInfo);
 
@@ -103,13 +103,13 @@ public class CommanderBear_Bull extends Commander
     private static final String DOWNTURN_NAME = "DownTurn";
     private static final int DOWNUPTURN_COST = 3;
     private static final int DOWNUPTURN_LIQUIDATION = 3;
-    CommanderBear_Bull COcast;
+    Bear_Bull COcast;
 
     UpDownTurnAbility(Commander commander)
     {
       // as we start in Bear form, UpTurn is the correct starting name
       super(commander, UPTURN_NAME, DOWNUPTURN_COST);
-      COcast = (CommanderBear_Bull) commander;
+      COcast = (Bear_Bull) commander;
     }
 
     @Override
@@ -143,14 +143,14 @@ public class CommanderBear_Bull extends Commander
     @Override // COModifier interface.
     public void apply(Commander commander)
     {
-      CommanderBear_Bull cmdr = (CommanderBear_Bull) commander;
+      Bear_Bull cmdr = (Bear_Bull) commander;
       cmdr.swapD2Ds(false);
     }
 
     @Override
     public void revert(Commander commander)
     {
-      CommanderBear_Bull cmdr = (CommanderBear_Bull) commander;
+      Bear_Bull cmdr = (Bear_Bull) commander;
       cmdr.swapD2Ds(true);
     }
   }
@@ -166,13 +166,13 @@ public class CommanderBear_Bull extends Commander
     private static final String BOOM_NAME = "Boom";
     private static final int BOOMBUST_COST = 6;
     private static final double BOOMBUST_BUFF = 0.2;
-    CommanderBear_Bull COcast;
+    Bear_Bull COcast;
 
     BustBoomAbility(Commander commander)
     {
       // as we start in Bear form, Boom is the correct starting name
       super(commander, BOOM_NAME, BOOMBUST_COST);
-      COcast = (CommanderBear_Bull) commander;
+      COcast = (Bear_Bull) commander;
     }
 
     @Override
@@ -191,7 +191,7 @@ public class CommanderBear_Bull extends Commander
     @Override // COModifier interface.
     public void apply(Commander commander)
     {
-      CommanderBear_Bull cmdr = (CommanderBear_Bull) commander;
+      Bear_Bull cmdr = (Bear_Bull) commander;
       // Instead of swapping, we get a discount. Yaaaay.
       for( UnitModel um : cmdr.unitModels.values() )
       {
@@ -203,7 +203,7 @@ public class CommanderBear_Bull extends Commander
     public void revert(Commander commander)
     {
       // Next turn, we swap D2Ds permanently
-      CommanderBear_Bull cmdr = (CommanderBear_Bull) commander;
+      Bear_Bull cmdr = (Bear_Bull) commander;
       cmdr.swapD2Ds(true);
     }
   }
