@@ -219,7 +219,7 @@ public class SpriteMapView extends MapView
     adjustViewLocation();
 
     // Draw the portion of the base terrain that is currently in-window.
-    int drawMultiplier = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale();
+    int drawMultiplier = SpriteLibrary.baseSpriteSize;
     int drawX = (int) (mapViewDrawX.get() * drawMultiplier);
     int drawY = (int) (mapViewDrawY.get() * drawMultiplier);
 
