@@ -24,7 +24,7 @@ public class SpriteGameEndAnimation implements GameAnimation
     int numCommanders = commanders.length;
 
     // If we draw n panels, we will have n+1 spaces around/between them.
-    int vSpacing = SpriteOptions.getScreenDimensions().height / (numCommanders+1);
+    int vSpacing = (SpriteOptions.getScreenDimensions().height/SpriteOptions.getDrawScale()) / (numCommanders+1);
 
     // Set our starting position.
     int hLoc = vSpacing;
@@ -84,7 +84,7 @@ public class SpriteGameEndAnimation implements GameAnimation
     public GameResultPanel(Commander cmdr, int xDir, int hPos)
     {
       // Establish some basic parameters.
-      int screenWidth = SpriteOptions.getScreenDimensions().width;
+      int screenWidth = SpriteOptions.getScreenDimensions().width/SpriteOptions.getDrawScale();
       
       // Figure out where the panel will start out before moving onto the screen.
       xPos = new SlidingValue(screenWidth * xDir);
