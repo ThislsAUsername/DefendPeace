@@ -26,9 +26,9 @@ public class PlayerSetupInfo
 
   public PlayerSetupInfo(int thisPlayer, ArrayList<CommanderInfo> COTypeList, Color[] colorList, Faction[] factionList, ArrayList<AIMaker> AIList)
   {
-    currentCo = thisPlayer;
-    currentColor = thisPlayer;
-    currentFaction = thisPlayer;
+    currentCo = thisPlayer % COTypeList.size();
+    currentColor = thisPlayer % colorList.length;
+    currentFaction = thisPlayer % factionList.length;
     currentTeam = thisPlayer;
     currentAi = 0; // Default to human.
 
