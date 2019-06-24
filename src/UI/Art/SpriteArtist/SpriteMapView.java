@@ -219,10 +219,8 @@ public class SpriteMapView extends MapView
     int drawY = (int) (mapViewDrawY.get() * drawMultiplier);
 
     // Make sure we specify draw coordinates that are valid per the underlying map image.
-    int myWidth = mapViewWidth;
-    int myHeight = mapViewHeight;
-    int maxDrawX = mapImage.getWidth() - myWidth;
-    int maxDrawY = mapImage.getHeight() - myHeight;
+    int maxDrawX = mapImage.getWidth() - mapViewWidth;
+    int maxDrawY = mapImage.getHeight() - mapViewHeight;
     if( drawX > maxDrawX )
       drawX = maxDrawX;
     if( drawX < 0 )
@@ -310,7 +308,7 @@ public class SpriteMapView extends MapView
 
     // First four coords are the dest x,y,x2,y2. Next four are the source coords.
     screenGraphics.drawImage(mapImage, deltaX, deltaY, (deltaX + drawWidth), (deltaY + drawHeight),
-        drawX,  drawY,  drawX  + drawWidth, drawY  + drawHeight, null);
+                                       drawX,  drawY,  (drawX  + drawWidth), (drawY  + drawHeight), null);
 
     // Draw the Commander overlay with available funds.
     drawCommanderOverlay(screenGraphics);
