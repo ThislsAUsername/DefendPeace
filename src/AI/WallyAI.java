@@ -282,7 +282,9 @@ public class WallyAI implements AIController
           // log(String.format("Hunting CO %s's units", co.coInfo.name));
           if( myCo.isEnemy(co) )
           {
-            for( Unit target : unitLists.get(co) )
+            Queue<Unit> targetQueue = new PriorityQueue<Unit>(unitLists.get(co).size(), new AIUtils.UnitCostComparator(false));
+            targetQueue.addAll(unitLists.get(co)); // We want to kill the most expensive enemy units
+            for( Unit target : targetQueue )
             {
               if (target.getHP() < 1) // Try not to pick fights with zombies
                 continue;
@@ -647,9 +649,12 @@ public class WallyAI implements AIController
         {
           neededAttacks.put(xyc, unit);
           double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
-          thisDamage = findAssaultKills(gameMap, neededAttacks, target, thisDamage);
+
+          if (thisDamage > target.getPreciseHP())
+            continue; // OHKOs should be decided using different logic
 
           log(String.format("  Use %s to deal %sHP?", unit.toStringWithLocation(), thisDamage));
+          thisDamage = findAssaultKills(gameMap, neededAttacks, target, thisDamage);
 
           // Base case, stop iterating.
           if( thisDamage >= target.getPreciseHP() )
