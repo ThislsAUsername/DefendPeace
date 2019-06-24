@@ -144,17 +144,20 @@ public class WallyAI implements AIController
         }
       }
     }
+
+    // Check for a turn-kickoff power
+    AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_TURN_START);
+
     capturingProperties = new ArrayList<XYCoord>();
     for( Unit unit : myCo.units )
     {
       if( unit.getCaptureProgress() > 0 )
       {
         capturingProperties.add(unit.getCaptureTargetCoords());
+        XYCoord position = new XYCoord(unit.x, unit.y);
+        actions.offer(new GameAction.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, position, gameMap)));
       }
     }
-
-    // Check for a turn-kickoff power
-    AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_TURN_START);
   }
 
   @Override
@@ -203,30 +206,6 @@ public class WallyAI implements AIController
       }
 
       Queue<Unit> tempQueue = new ArrayDeque<Unit>();
-
-      // Queue all of the capture actions we don't have to move for
-      while (actions.isEmpty() && !unitQueue.isEmpty())
-      {
-        Unit unit = unitQueue.poll();
-        XYCoord position = new XYCoord(unit.x, unit.y);
-
-        if( unit.getCaptureProgress() > 0 )
-        {
-          actions.offer(new GameAction.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, position, gameMap)));
-        }
-        else
-        {
-          tempQueue.offer(unit);
-        }
-      }
-
-      // reset our units back into unitQueue if we need to calculate more
-      if( actions.isEmpty() )
-      {
-        unitQueue.addAll(tempQueue);
-        tempQueue.clear();
-      }
-
       // Evaluate siege attacks
       while (actions.isEmpty() && !unitQueue.isEmpty())
       {
@@ -483,7 +462,7 @@ public class WallyAI implements AIController
 
           if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
           {
-//            log(String.format("  Seeking a property to send %s after", unit.toStringWithLocation()));
+            log(String.format("  Evaluating travel for %s", unit.toStringWithLocation()));
             int index = 0;
             XYCoord goal = null;
             Path path = null;
