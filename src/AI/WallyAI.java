@@ -12,9 +12,9 @@ import java.util.Queue;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
-import Engine.GameAction.ActionType;
 import Engine.GameActionSet;
 import Engine.Path;
+import Engine.UnitActionType;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.CombatEngine;
@@ -48,8 +48,21 @@ public class WallyAI implements AIController
     {
       return "Wally";
     }
+
+    @Override
+    public String getDescription()
+    {
+      return
+          "Wally thinks he's clever; he knows about artillery, and tries to keep his important units safe until he wants to engage.\n" +
+          "He's a little slow on the uptake, though.";
+    }
   }
   public static final AIMaker info = new instantiator();
+
+  public AIMaker getAIInfo()
+  {
+    return info;
+  }
   
   Queue<GameAction> actions = new ArrayDeque<GameAction>();
   // sort our units by expense first, we want them to hit first
@@ -80,7 +93,7 @@ public class WallyAI implements AIController
   private void init(GameMap map)
   {
     unitMoveMultipliers = new HashMap<MoveType, Double>();
-    for( UnitModel myModel : myCo.unitModels )
+    for( UnitModel myModel : myCo.unitModels.values() )
     {
       MoveType vroom = myModel.propulsion;
       if (!unitMoveMultipliers.containsKey(vroom))
@@ -237,7 +250,7 @@ public class WallyAI implements AIController
         for( GameActionSet actionSet : actionSets )
         {
           // See if we have the option to attack.
-          if( actionSet.getSelected().getType() == GameAction.ActionType.ATTACK )
+          if( actionSet.getSelected().getUnitActionType() == UnitActionType.ATTACK )
           {
             for( GameAction action : actionSet.getGameActions() )
             {
@@ -353,7 +366,7 @@ public class WallyAI implements AIController
       if( actions.isEmpty() )
       {
         Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
-        for( UnitModel um : myCo.unitModels )
+        for( UnitModel um : myCo.unitModels.values() )
         {
           threatMap.put(um, new HashMap<XYCoord, Double>());
           for( Commander co : unitLists.keySet() )
@@ -401,7 +414,7 @@ public class WallyAI implements AIController
           for( GameActionSet actionSet : actionSets )
           {
             // See if we can bag enough damage to be worth sacrificing the unit
-            if( actionSet.getSelected().getType() == GameAction.ActionType.ATTACK )
+            if( actionSet.getSelected().getUnitActionType() == UnitActionType.ATTACK )
             {
               for( GameAction ga : actionSet.getGameActions() )
               {
@@ -435,7 +448,7 @@ public class WallyAI implements AIController
               break; // Only allow one action per unit.
 
             // Only consider capturing if we can sit still or go somewhere safe.
-            if( actionSet.getSelected().getType() == GameAction.ActionType.CAPTURE
+            if( actionSet.getSelected().getUnitActionType() == UnitActionType.CAPTURE
                 && (coord.getDistance(unit.x, unit.y) == 0 || canWallHere(gameMap, threatMap, unit, coord) ) )
             {
               actions.offer(actionSet.getSelected());
@@ -477,7 +490,7 @@ public class WallyAI implements AIController
             boolean validTarget = false;
             ArrayList<XYCoord> validTargets = new ArrayList<>();
 
-            if( unit.model.possibleActions.contains(ActionType.CAPTURE) )
+            if( unit.model.possibleActions.contains(UnitActionType.CAPTURE) )
             {
               validTargets.addAll(unownedProperties);
             }

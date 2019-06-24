@@ -266,7 +266,7 @@ public class AIUtils
   public static int findMaxStrikeWeaponRange(Commander co)
   {
     int range = 0;
-    for( UnitModel um : co.unitModels )
+    for( UnitModel um : co.unitModels.values() )
     {
       for( WeaponModel wm : um.weaponModels )
       {
