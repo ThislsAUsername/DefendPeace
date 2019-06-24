@@ -1,8 +1,10 @@
 package CommandingOfficers;
 
+import java.io.Serializable;
+
 import Terrain.MapMaster;
 
-public abstract class CommanderAbility
+public abstract class CommanderAbility implements Serializable
 {
   public static final int PHASE_TURN_START = 1;
   public static final int PHASE_BUY = PHASE_TURN_START << 1;

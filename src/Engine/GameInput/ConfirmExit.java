@@ -22,16 +22,16 @@ public class ConfirmExit extends GameInputState<ConfirmExit.ConfirmExitEnum>
   public GameInputState<?> select(ConfirmExit.ConfirmExitEnum option)
   {
     GameInputState<?> next = this;
-    
-    if( ConfirmExitEnum.LEAVE_MAP == option )
+    switch(option)
     {
-      // Go back to the main menu.
-      next = new ExitToMainMenu(myStateData);
-    }
-    else if( ConfirmExitEnum.EXIT_GAME == option )
-    {
-      // Exit the application entirely.
-      System.exit(0);
+      case LEAVE_MAP:
+        // Go back to the main menu.
+        next = new ExitToMainMenu(myStateData);
+        break;
+      case EXIT_GAME:
+        // Exit the application entirely.
+        System.exit(0);
+        break;
     }
     
     return next;

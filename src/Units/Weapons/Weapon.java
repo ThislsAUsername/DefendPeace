@@ -1,12 +1,14 @@
 package Units.Weapons;
 
+import java.io.Serializable;
+
 import Units.UnitModel;
 import Units.Weapons.Damage.DSDamage;
 import Units.Weapons.Damage.DamageStrategy;
 import Units.Weapons.Damage.DoRDamage;
 import Units.Weapons.Damage.BHRDamage;
 
-public class Weapon
+public class Weapon implements Serializable
 {
 
   public WeaponModel model;

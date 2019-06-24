@@ -1,5 +1,4 @@
 package CommandingOfficers;
-
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.XYCoord;
 import Terrain.Location;
@@ -15,9 +14,33 @@ import Units.UnitModel;
  */
 public class CommanderBear_Bull extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Bear&Bull", new instantiator());  
-  private static class instantiator implements COMaker
+  private static final long serialVersionUID = -3048055535977630509L;
+  
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
+    public instantiator()
+    {
+      super("Bear&Bull");
+      infoPages.add(new InfoPage(
+          "Bear&Bull is a pair of commanders who complement each other like the ebbs and flows of a free market.\n" +
+          "They have no constant advantage, but can leverage their abilities to gain buying power.\n"));
+      infoPages.add(new InfoPage(
+          "Passive:\n" +
+          "- Bear pays and gets 90% cash.\n" +
+          "  - Abilities: Upturn and Boom\n" +
+          "- Bull pays and gets 120% cash.\n" +
+          "  - Abilities: Downturn and Bust\n"));
+      infoPages.add(new InfoPage(
+          "Upturn/Downturn ("+UpDownTurnAbility.DOWNUPTURN_COST+"):\n" +
+          "Switches temporarily to the other commander. Does not affect income.\n" +
+          "Removes "+UpDownTurnAbility.DOWNUPTURN_LIQUIDATION+" HP from any unit on any property you own.\n" +
+          "You get the funds value of all HP removed.\n"));
+      infoPages.add(new InfoPage(
+          "Boom/Bust ("+BustBoomAbility.BOOMBUST_COST+"):\n" +
+          "Permanently switches in the other commander.\n" +
+          "Also grants a 20 percent discount this turn.\n"));
+    }
     @Override
     public Commander create()
     {
@@ -51,7 +74,7 @@ public class CommanderBear_Bull extends Commander
       isBull = false;
       if( setIncome )
         incomePerCity = (int) (incomeBase * BEAR_MOD);
-      for( UnitModel um : unitModels )
+      for( UnitModel um : unitModels.values() )
       {
         um.COcost = BEAR_MOD;
       }
@@ -61,7 +84,7 @@ public class CommanderBear_Bull extends Commander
       isBull = true;
       if( setIncome )
         incomePerCity = (int) (incomeBase * BULL_MOD);
-      for( UnitModel um : unitModels )
+      for( UnitModel um : unitModels.values() )
       {
         um.COcost = BULL_MOD;
       }
@@ -170,7 +193,7 @@ public class CommanderBear_Bull extends Commander
     {
       CommanderBear_Bull cmdr = (CommanderBear_Bull) commander;
       // Instead of swapping, we get a discount. Yaaaay.
-      for( UnitModel um : cmdr.unitModels )
+      for( UnitModel um : cmdr.unitModels.values() )
       {
         um.COcost -= BOOMBUST_BUFF;
       }

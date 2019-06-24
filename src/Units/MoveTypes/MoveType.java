@@ -1,5 +1,9 @@
 package Units.MoveTypes;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.HashMap;
 
@@ -7,7 +11,7 @@ import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.TerrainType;
 
-public class MoveType
+public class MoveType implements Serializable
 {
   protected final Integer IMPASSABLE = 99;
 
@@ -136,5 +140,5 @@ public class MoveType
           setMoveCost(terrain, moveCost);
       }
     }
-  }
+  } //~MoveCostByTerrain
 }

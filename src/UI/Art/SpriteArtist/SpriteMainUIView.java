@@ -5,9 +5,11 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
-import UI.MainUIController;
-
 import Engine.IView;
+import UI.InGameMenu;
+import UI.MainUIController;
+import UI.MainUIController.SaveInfo;
+import UI.SlidingValue;
 
 /**
  * This class is responsible for drawing the main menu visible at game startup.
@@ -17,10 +19,10 @@ public class SpriteMainUIView implements IView
   MainUIController controller = null;
 
   // Note that menuBGColors must be defined to match MainController.menuOptions.
-  private Color[] menuBGColors = {new Color(218,38,2), new Color(30,218,2), new Color(206,224,234)};
+  private Color[] menuBGColors = {new Color(218,38,2), new Color(0,155,211), new Color(30,218,2), new Color(206,224,234)};
   int highestOption = menuBGColors.length - 1;
 
-  private double animHighlightedOption = 0;
+  private SlidingValue animHighlightedOption = new SlidingValue(0);
 
   private int windowWidth;
   private int windowHeight;
@@ -55,6 +57,7 @@ public class SpriteMainUIView implements IView
         SpriteMapSelectMenuArtist.draw(g, controller.getGameSetupController());
         break;
       case MAIN:
+      case SAVE_SELECT:
         renderMainMenu(g);
         break;
       case OPTIONS:
@@ -73,24 +76,21 @@ public class SpriteMainUIView implements IView
     // Draw background.
     drawMenuBG(g, highlightedOption);
 
+    int drawScale = SpriteOptions.getDrawScale();
     // We start by assuming the highlighted option will be drawn centered.
     int xCenter = windowWidth / 2;
-    int yCenter = 80*SpriteOptions.getDrawScale();
+    int yCenter = 80*drawScale;
 
     // If we are moving from one highlighted option to another, calculate the intermediate draw location.
-    if( animHighlightedOption != highlightedOption )
-    {
-      double slide = SpriteUIUtils.calculateSlideAmount(animHighlightedOption, highlightedOption);
-      animHighlightedOption += slide;
-    }
+    animHighlightedOption.set(highlightedOption);
 
     int optionSeparationX = windowWidth / 6; // So we can evenly space the seven visible options.
     int optionSeparationY = windowHeight / 6;
 
     // Figure out where to actually draw the currently-highlighted option. Note that this changes 
     //   immediately when up or down is pressed, and the new option becomes the basis for drawing.
-    final int xBasisLoc = (int) (xCenter - (animHighlightedOption - highlightedOption) * optionSeparationX);
-    final int yBasisLoc = (int) (yCenter - (animHighlightedOption - highlightedOption) * optionSeparationY);
+    final int xBasisLoc = (int) (xCenter - (animHighlightedOption.get() - animHighlightedOption.getDestination()) * optionSeparationX);
+    final int yBasisLoc = (int) (yCenter - (animHighlightedOption.get() - animHighlightedOption.getDestination()) * optionSeparationY);
 
     // Draw the center option, then the two adjacent, then the next two, until we are off the screen.
     int layer = 0; // We start by drawing all options 0 distance from the highlighted one.
@@ -112,6 +112,13 @@ public class SpriteMainUIView implements IView
         drawY = yBasisLoc - (layer * optionSeparationY);
         drawMenuOption(g, highlightedOption - layer, drawX, drawY);
       }
+    }
+    
+    if (null != controller.saveMenu) // If we've got a save menu on hand, draw it.
+    {
+      InGameMenu<SaveInfo> sm = controller.saveMenu;
+      BufferedImage savesImage = SpriteUIUtils.makeTextMenu(sm.getAllOptions(), sm.getSelectionNumber(), 3, 4);
+      SpriteLibrary.drawImageCenteredOnPoint(g, savesImage, xCenter, yCenter, drawScale);
     }
   }
 

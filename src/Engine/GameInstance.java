@@ -1,6 +1,13 @@
 package Engine;
 
 import java.util.ArrayList;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 
 import CommandingOfficers.Commander;
@@ -13,8 +20,11 @@ import Terrain.Location;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
 
-public class GameInstance
+public class GameInstance implements Serializable
 {
+  private static final long serialVersionUID = -2961286039214471155L;
+  
+  public String saveFile;
   public Terrain.MapMaster gameMap;
   public Commander[] commanders;
   private int activeCoNum;
@@ -54,6 +64,8 @@ public class GameInstance
       }
       GameEventListener.registerEventListener(commanders[i]);
     }
+    
+    saveFile = getSaveName();
   }
 
   public boolean isFogEnabled()
@@ -191,6 +203,86 @@ public class GameInstance
     for( Commander co : commanders )
     {
       GameEventListener.unregisterEventListener(co);
+    }
+  }
+  
+  /**
+   * Just concatenates the names of all the COs involved
+   * TODO: get fancy and actually split the teams out
+   */
+  private String getSaveName()
+  {
+    StringBuilder sb = new StringBuilder();
+    for( Commander co : commanders )
+    {
+      sb.append(co.coInfo.name).append("_");
+    }
+    sb.setLength(sb.length()-1);
+    sb.append(".svp"); // "svp" for "SaVe Peace"
+    return sb.toString();
+  }
+  
+  public static boolean isSaveCompatible(String filename)
+  {
+    System.out.println(String.format("Checking compatibility of save %s", filename));
+
+    GameVersion verInfo = null;
+    boolean verMatch = false;
+    try (FileInputStream file = new FileInputStream(filename); ObjectInputStream in = new ObjectInputStream(file);)
+    {
+      verInfo = (GameVersion) in.readObject();
+      if( new GameVersion().isEqual(verInfo) )
+      {
+        verMatch = true;
+      }
+      else
+      {
+        System.out.println(String.format("Save is incompatible version: %s",
+            (null == verInfo) ? "unknown" : verInfo.toString()));
+      }
+    }
+    catch (Exception ex)
+    {
+      System.out.println(ex.toString());
+    }
+
+    return verMatch;
+  }
+  
+  public static GameInstance loadSave(String filename)
+  {
+    System.out.println(String.format("Deserializing game data from %s", filename));
+    
+    GameInstance load = null;
+    try (FileInputStream file = new FileInputStream(filename); ObjectInputStream in = new ObjectInputStream(file);)
+    {
+      in.readObject(); // Pull out and discard our version info
+
+      load = (GameInstance) in.readObject();
+    }
+    catch (Exception ex)
+    {
+      System.out.println(ex.toString());
+    }
+
+    return load;
+  }
+  
+  public void writeSave()
+  {
+    String filename = "save/" + saveFile; // "svp" for "SaVe Peace"
+    new File("save/").mkdirs(); // make sure we don't freak out if the directory's not there
+
+    System.out.println(String.format("Now saving to %s", filename));
+    try (FileOutputStream file = new FileOutputStream(filename); ObjectOutputStream out = new ObjectOutputStream(file);)
+    {
+      // Method for serialization of object
+      out.writeObject(new GameVersion());
+      out.writeObject(this);
+    }
+    catch (IOException ex)
+    {
+      System.out.println(ex.toString());
     }
   }
 }

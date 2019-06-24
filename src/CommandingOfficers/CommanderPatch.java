@@ -10,9 +10,28 @@ import Units.Unit;
 
 public class CommanderPatch extends Commander
 {
-  private static final CommanderInfo coInfo = new CommanderInfo("Patch", new instantiator());  
-  private static class instantiator implements COMaker
+  private static final long serialVersionUID = -543799935457360451L;
+
+  private static final CommanderInfo coInfo = new instantiator();
+  private static class instantiator extends CommanderInfo
   {
+    public instantiator()
+    {
+      super("Patch");
+      infoPages.add(new InfoPage(
+          "Commander Patch is a pirate, who does piratey things like lootin' and plunderin'\n"));
+      infoPages.add(new InfoPage(
+          "Passive:\n" + 
+          "- Patch gets a turn's worth of income from any property he captures\n"));
+      infoPages.add(new InfoPage(
+          "Plunder ("+PLUNDER_COST+"):\n" + 
+          "Gives an attack boost of "+PLUNDER_ATTACK_BUFF+"%\n" + 
+          "Gives "+PLUNDER_INCOME+"x of the value of any funds damage Patch deals.\n"));
+      infoPages.add(new InfoPage(
+          "Pillage ("+PILLAGE_COST+"):\n" + 
+          "Gives an attack boost of "+PILLAGE_ATTACK_BUFF+"%\n" + 
+          "Gives "+PILLAGE_INCOME+"x the value of any funds damage Patch deals.\n"));
+    }
     @Override
     public Commander create()
     {

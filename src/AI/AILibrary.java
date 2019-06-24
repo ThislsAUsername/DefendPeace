@@ -3,7 +3,6 @@ package AI;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
-import Engine.GameInstance;
 
 public class AILibrary
 {  
@@ -40,6 +39,12 @@ public class AILibrary
     public String getName()
     {
       return "Human";
+    }
+
+    @Override
+    public String getDescription()
+    {
+      return "Human Player. This is you.\n\nGood luck!";
     }
   }
 }
