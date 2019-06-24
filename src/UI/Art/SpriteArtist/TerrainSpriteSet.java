@@ -103,7 +103,7 @@ public class TerrainSpriteSet
 
     // If not, try to load the file using the resource template string from SpriteLibrary.
     String spriteSheetFilename = String.format(resourceTemplateString, myTerrainType.toString().toLowerCase(), weather.toString().toLowerCase());
-    BufferedImage spriteSheet = SpriteUIUtils.loadSpriteSheetFile(spriteSheetFilename);
+    BufferedImage spriteSheet = SpriteLibrary.loadSpriteSheetFile(spriteSheetFilename);
 
     // If we failed to load the weather-specific version, Just get the clear version (recursively!) and mask over it.
     if( null == spriteSheet && (weather != Weathers.CLEAR) )

@@ -488,7 +488,7 @@ public class SpriteMapView extends MapView
     int tileSize = SpriteLibrary.baseSpriteSize;
     int estimateX = (x * tileSize) + (tileSize / 2);
     int estimateY = (y * tileSize) - dmgImage.getHeight() / 2;
-    SpriteLibrary.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY);
+    SpriteUIUtils.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY);
   }
 
   /**

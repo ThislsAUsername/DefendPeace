@@ -104,7 +104,7 @@ public class MapArtist
     }
     else
     {
-      SpriteLibrary.drawImageCenteredOnPoint(g, SpriteLibrary.getActionCursor(), myGame.getCursorX() * tileSize + (tileSize / 2),
+      SpriteUIUtils.drawImageCenteredOnPoint(g, SpriteLibrary.getActionCursor(), myGame.getCursorX() * tileSize + (tileSize / 2),
           myGame.getCursorY() * tileSize + (tileSize / 2));
     }
   }

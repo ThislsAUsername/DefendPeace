@@ -54,8 +54,8 @@ public class CommanderOverlayArtist
     if( overlayIsLeft )
     { // Draw the overlay on the left side.
       g.drawImage(overlayImage, 0, 0, overlayImage.getWidth(), overlayImage.getHeight(), null);
-      SpriteLibrary.drawTextSmallCaps(g, coString, xTextOffset, yTextOffset); // CO name
-      SpriteLibrary.drawTextSmallCaps(g, overlayFundsString, xTextOffset, textHeight + 1 + yTextOffset); // Funds
+      SpriteUIUtils.drawTextSmallCaps(g, coString, xTextOffset, yTextOffset); // CO name
+      SpriteUIUtils.drawTextSmallCaps(g, overlayFundsString, xTextOffset, textHeight + 1 + yTextOffset); // Funds
       g.drawImage( powerBarImage, 0, (overlayImage.getHeight()) - (POWERBAR_BUFFER), powerBarImage.getWidth(), powerBarImage.getHeight(), null );
     }
     else
@@ -65,8 +65,8 @@ public class CommanderOverlayArtist
       int coNameXPos = mapViewWidth - spriteA.getWidth() * coString.length() - xTextOffset;
       int fundsXPos = mapViewWidth - spriteA.getWidth() * overlayFundsString.length() - xTextOffset;
       g.drawImage(overlayImage, xPos, 0, overlayImage.getWidth(), overlayImage.getHeight(), null);
-      SpriteLibrary.drawTextSmallCaps(g, coString, coNameXPos, yTextOffset); // CO name
-      SpriteLibrary.drawTextSmallCaps(g, overlayFundsString, fundsXPos, textHeight + 1 + yTextOffset); // Funds
+      SpriteUIUtils.drawTextSmallCaps(g, coString, coNameXPos, yTextOffset); // CO name
+      SpriteUIUtils.drawTextSmallCaps(g, overlayFundsString, fundsXPos, textHeight + 1 + yTextOffset); // Funds
       int pbXPos = mapViewWidth - powerBarImage.getWidth();
       if( trueIfBarFalseIfText )
       {
@@ -172,18 +172,18 @@ public class CommanderOverlayArtist
       Graphics fgGfx = foreground.getGraphics();
 
       // Generate a shaped black background to hold the ability name.
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 0, 0);
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 0, 1);
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 0, 2);
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 1, 0);
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 1, 1);
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 1, 2);
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 2, 0);
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 2, 1);
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 2, 2);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 0, 0);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 0, 1);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 0, 2);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 1, 0);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 1, 1);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 1, 2);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 2, 0);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 2, 1);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 2, 2);
 
       // Make an intermediate image of the center text, and recolor it to an intermediate value.
-      SpriteLibrary.drawTextSmallCaps(fgGfx, abilityName, 1, 1);
+      SpriteUIUtils.drawTextSmallCaps(fgGfx, abilityName, 1, 1);
       Sprite fgSpr = new Sprite(foreground);
       Color intermediate = new Color(99, 100, 101);
       fgSpr.colorize(Color.BLACK, intermediate);

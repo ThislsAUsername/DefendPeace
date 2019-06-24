@@ -122,7 +122,7 @@ public class MainUIView implements IView
     {
       InGameMenu<SaveInfo> sm = controller.saveMenu;
       BufferedImage savesImage = SpriteUIUtils.makeTextMenu(sm.getAllOptions(), sm.getSelectionNumber(), 3, 4);
-      SpriteLibrary.drawImageCenteredOnPoint(menuGraphics, savesImage, xCenter, yCenter);
+      SpriteUIUtils.drawImageCenteredOnPoint(menuGraphics, savesImage, xCenter, yCenter);
     }
 
     // Draw the composited image to the window.
@@ -166,7 +166,7 @@ public class MainUIView implements IView
     // Only draw the image if it will actually show on the screen.
     if( y > -1*menuText.getHeight() && y < menuHeight + menuText.getHeight())
     {
-      SpriteLibrary.drawImageCenteredOnPoint(g, menuText, x, y);
+      SpriteUIUtils.drawImageCenteredOnPoint(g, menuText, x, y);
     }
   }
 

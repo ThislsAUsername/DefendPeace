@@ -97,7 +97,7 @@ public class MapSelectMenuArtist
           str = str.substring(0, maxNameDisplayLength);
         }
 
-        SpriteLibrary.drawText(menuGraphics, str, drawX, drawY);
+        SpriteUIUtils.drawText(menuGraphics, str, drawX, drawY);
       }
     }
 
@@ -132,19 +132,19 @@ public class MapSelectMenuArtist
     if( mmScale > 10 ) mmScale = 10;
 
     // Draw the mini map.
-    SpriteLibrary.drawImageCenteredOnPoint(menuGraphics, miniMap, miniMapCenterX, miniMapCenterY, mmScale);
+    SpriteUIUtils.drawImageCenteredOnPoint(menuGraphics, miniMap, miniMapCenterX, miniMapCenterY, mmScale);
 
     /////////////// Map Information ///////////////////////
     int buffer = 3;
 
     int numPlayers = selectedMapInfo.getNumCos(); // Get the number of players the map supports
     StringBuilder sb = new StringBuilder().append(numPlayers).append(" Players"); // Build a string to say that.
-    SpriteLibrary.drawText(menuGraphics, sb.toString(), nameSectionDrawWidth+buffer, maxMiniMapHeight+buffer);
+    SpriteUIUtils.drawText(menuGraphics, sb.toString(), nameSectionDrawWidth+buffer, maxMiniMapHeight+buffer);
 
     sb.setLength(0); // Clear so we can build the map dimensions string.
     sb.append(selectedMapInfo.getWidth()).append("x").append(selectedMapInfo.getHeight());
     int dimsDrawX = menuWidth - (characterWidth*7) - 1;
-    SpriteLibrary.drawText(menuGraphics, sb.toString(), dimsDrawX, maxMiniMapHeight+buffer);
+    SpriteUIUtils.drawText(menuGraphics, sb.toString(), dimsDrawX, maxMiniMapHeight+buffer);
 
     // Draw the number of each type of property on this map.
 

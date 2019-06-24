@@ -231,8 +231,8 @@ public class PlayerSetupArtist
       g.fillRect(0, 0, myImage.getWidth(), myImage.getHeight());
 
       // Create the two panes that don't ever change.
-      teamLabel = new SpriteUIUtils.ImageFrame(65, 12, 28, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteLibrary.getTextAsImage("TEAM", true));
-      aiLabel = new SpriteUIUtils.ImageFrame(94, 12, 54, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteLibrary.getTextAsImage("CONTROL", true));
+      teamLabel = new SpriteUIUtils.ImageFrame(65, 12, 28, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteUIUtils.getTextAsImage("TEAM", true));
+      aiLabel = new SpriteUIUtils.ImageFrame(94, 12, 54, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteUIUtils.getTextAsImage("CONTROL", true));
       teamLabel.render(g);
       aiLabel.render(g);
 
@@ -260,7 +260,7 @@ public class PlayerSetupArtist
         StringBuffer coStrBuf = new StringBuffer(commanderName);
         coStrBuf.append("-").append(UIUtils.getCanonicalFactionName(colorName, factionName));
 
-        descriptionPane = new SpriteUIUtils.ImageFrame(1, 1, PANEL_WIDTH - 2, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteLibrary.getTextAsImage(coStrBuf.toString(), true));
+        descriptionPane = new SpriteUIUtils.ImageFrame(1, 1, PANEL_WIDTH - 2, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteUIUtils.getTextAsImage(coStrBuf.toString(), true));
         descriptionPane.render(g);
       }
       if( cmdrChanged || colorChanged )
@@ -286,7 +286,7 @@ public class PlayerSetupArtist
       if( aiChanged )
       {
         aiName = info.getCurrentAI().getName();
-        aiPane = new SpriteUIUtils.ImageFrame(94, 23, 54, 23, MENUBGCOLOR, MENUHIGHLIGHTCOLOR, true, SpriteLibrary.getTextAsImage(info.getCurrentAI().getName(), true));
+        aiPane = new SpriteUIUtils.ImageFrame(94, 23, 54, 23, MENUBGCOLOR, MENUHIGHLIGHTCOLOR, true, SpriteUIUtils.getTextAsImage(info.getCurrentAI().getName(), true));
         aiPane.render(g);
       }
 

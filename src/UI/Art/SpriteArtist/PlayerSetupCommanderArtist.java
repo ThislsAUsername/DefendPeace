@@ -152,7 +152,7 @@ public class PlayerSetupCommanderArtist
         {
           myCoName = coInfo.name;
           int newWidth = myCoName.length() * SpriteLibrary.getLettersLowercase().getFrame(0).getWidth() + textBufferPx*2;
-          BufferedImage namePlate = SpriteLibrary.getTextAsImage(myCoName);
+          BufferedImage namePlate = SpriteUIUtils.getTextAsImage(myCoName);
           commanderName = new SpriteUIUtils.ImageFrame(commanderFace.width+2, 1, newWidth, commanderFace.height,
               SpriteUIUtils.MENUHIGHLIGHTCOLOR, SpriteUIUtils.MENUBGCOLOR, false, namePlate);
         }

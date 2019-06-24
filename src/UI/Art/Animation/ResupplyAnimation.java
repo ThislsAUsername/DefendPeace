@@ -91,7 +91,7 @@ public class ResupplyAnimation implements GameAnimation
 
       menu = SpriteUIUtils.makeTextFrame(SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR, width / 2, height / 2);
     }
-    SpriteLibrary.drawImageCenteredOnPoint(g, menu, tileCenterX, tileCenterY);
+    SpriteUIUtils.drawImageCenteredOnPoint(g, menu, tileCenterX, tileCenterY);
 
     return animTime > signGone;
   }
