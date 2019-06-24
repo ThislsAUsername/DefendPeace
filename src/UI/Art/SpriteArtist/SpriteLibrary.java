@@ -115,7 +115,6 @@ public class SpriteLibrary
   private static void createTerrainSpriteSet(SpriteSetKey spriteKey)
   {
     TerrainType terrainType = spriteKey.terrainKey;
-    System.out.println("INFO: Loading terrain sprites for " + terrainType);
 
     String tileSpritesheetLocations = "res/tileset";
     String formatString = tileSpritesheetLocations + "/%s_%s.png";
@@ -341,7 +340,6 @@ public class SpriteLibrary
   private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
     Faction faction = key.factionKey;
-    System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.colorKey.toString() + " in faction " + faction);
     String filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction.name);
     if (!new File(filestr).canRead())
       filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction.basis);

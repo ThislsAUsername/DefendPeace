@@ -120,7 +120,6 @@ public class UnitSpriteSet
 
   private void colorize(Color[] oldColors, Color[] newColors)
   {
-    System.out.println("Colorizing sprite with " + sprites.length + " images:");
     for( Sprite s : sprites )
     {
       s.colorize(oldColors, newColors);

@@ -62,6 +62,8 @@ public class TerrainSpriteSet
   private static Color backupSandOverlayColor = new Color(243, 213, 85, 100);
   private static Map<Weathers, Color> backupOverlayColors;
 
+  private static boolean logDetails = false;
+
   public TerrainSpriteSet(TerrainType terrain, String imageLocationTemplate, int spriteWidth, int spriteHeight)
   {
     this(terrain, imageLocationTemplate, spriteWidth, spriteHeight, false);
@@ -209,7 +211,8 @@ public class TerrainSpriteSet
       }
 
       terrainSprites.put(weather, spriteArray);
-      System.out.println("INFO: Loaded " + (isTransition? "transition " : "") + "sprites for " + myTerrainType + ", " + weather + ".");
+      if( logDetails )
+        System.out.println("INFO: Loaded " + (isTransition? "transition " : "") + "sprites for " + myTerrainType + ", " + weather + ".");
     } // spriteSheet != null
 
     return spriteArray;
@@ -271,7 +274,8 @@ public class TerrainSpriteSet
     TerrainType baseTerrainType = getBaseTerrainType(myTerrainType);
     if( baseTerrainType != myTerrainType && !shouldDrawTerrainObject && !isTransition )
     {
-      System.out.println("Drawing " + baseTerrainType + " as base of " + myTerrainType);
+      if( logDetails )
+        System.out.println("Drawing " + baseTerrainType + " as base of " + myTerrainType);
       TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(baseTerrainType);
       spriteSet.drawTile(g, map, x, y, drawFog, shouldDrawTerrainObject);
     }
@@ -333,7 +337,8 @@ public class TerrainSpriteSet
       // Draw any tile transitions that are needed.
       for( TerrainSpriteSet tt : tileTransitions )
       {
-        System.out.println("Drawing transition from " + tt.myTerrainType + " onto " + myTerrainType);
+        if( logDetails )
+          System.out.println("Drawing transition from " + tt.myTerrainType + " onto " + myTerrainType);
         tt.drawTerrain(g, map, x, y, false);
       }
 
