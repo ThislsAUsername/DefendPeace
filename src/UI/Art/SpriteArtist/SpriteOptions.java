@@ -245,13 +245,13 @@ public class SpriteOptions
 
     // Draw the name panel and the name.
     g.drawImage(optionNamePanel, x, y, optionNamePanel.getWidth(), optionNamePanel.getHeight(), null);
-    SpriteLibrary.drawText(g, opt.optionName, x + drawBuffer, y + drawBuffer);
+    SpriteUIUtils.drawText(g, opt.optionName, x + drawBuffer, y + drawBuffer);
 
     // Draw the setting panel and the setting value.
     x = x + (optionNamePanel.getWidth() + (3 * letterWidth));
     BufferedImage settingPanel = (opt.isChanged()) ? optionSettingPanelChanged : optionSettingPanel;
     g.drawImage(settingPanel, x, y, settingPanel.getWidth(), settingPanel.getHeight(), null);
-    SpriteLibrary.drawText(g, opt.getSettingValueText(), x + drawBuffer, y + drawBuffer);
+    SpriteUIUtils.drawText(g, opt.getSettingValueText(), x + drawBuffer, y + drawBuffer);
   }
 
   private static class GraphicsOption extends OptionSelector

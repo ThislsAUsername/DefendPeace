@@ -18,7 +18,7 @@ import Units.UnitModel;
 /*
  * Cinder is based on getting an edge in the action economy, at the cost of unit health.
  */
-public class CommanderCinder extends Commander
+public class Cinder extends Commander
 {
   private static final long serialVersionUID = 4938851182463546620L;
 
@@ -48,7 +48,7 @@ public class CommanderCinder extends Commander
     @Override
     public Commander create()
     {
-      return new CommanderCinder();
+      return new Cinder();
     }
   }
 
@@ -58,7 +58,7 @@ public class CommanderCinder extends Commander
 
   private GameEventQueue pollEvents = new GameEventQueue();
 
-  public CommanderCinder()
+  public Cinder()
   {
     super(coInfo);
 
@@ -240,7 +240,7 @@ public class CommanderCinder extends Commander
           // Guess he's not gonna make it.
           // TODO: Maybe add a debuff event/animation here as well.
           UnitDieEvent event = new UnitDieEvent(minion);
-          CommanderCinder Cinder = (CommanderCinder)myCommander;
+          Cinder Cinder = (Cinder)myCommander;
           Cinder.pollEvents.add(event);
         }
       }

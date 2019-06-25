@@ -7,7 +7,6 @@ import Terrain.Maps.FiringRange;
 import Terrain.Maps.MapReader;
 import Terrain.Maps.SpannIsland;
 import Terrain.Maps.TestRange;
-import Terrain.Maps.Triumvirate;
 
 public class MapLibrary
 {
@@ -28,7 +27,6 @@ public class MapLibrary
     availableMaps.add(TestRange.getMapInfo());
     availableMaps.add(FiringRange.getMapInfo());
     availableMaps.add(SpannIsland.getMapInfo());
-    availableMaps.add(Triumvirate.getMapInfo());
     availableMaps.add(CageMatch.getMapInfo());
     availableMaps.addAll(MapReader.readMapData());
   }

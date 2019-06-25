@@ -12,13 +12,13 @@ import UI.Art.Animation.GameAnimation;
 /**
  * Draws the end-of-battle victory/defeat overlay anmiation.
  */
-public class SpriteGameEndAnimation implements GameAnimation
+public class GameEndAnimation implements GameAnimation
 {
   private ArrayList<GameResultPanel> panels;
 
   private int panelsInPlace = 0;
 
-  public SpriteGameEndAnimation(Commander[] commanders)
+  public GameEndAnimation(Commander[] commanders)
   {
     // Figure out how far apart to draw each panel.
     int numCommanders = commanders.length;

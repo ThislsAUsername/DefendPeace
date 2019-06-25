@@ -35,9 +35,9 @@ public class SpriteMapView extends MapView
   // of this image is drawn to the screen.
   private BufferedImage mapImage = null;
 
-  private SpriteMapArtist mapArtist;
-  private SpriteUnitArtist unitArtist;
-  private SpriteMenuArtist menuArtist;
+  private MapArtist mapArtist;
+  private UnitArtist unitArtist;
+  private MenuArtist menuArtist;
 
   // Overlay management variables.
   private boolean overlayIsLeft = true;
@@ -74,9 +74,9 @@ public class SpriteMapView extends MapView
         SpriteLibrary.baseSpriteSize * game.gameMap.mapWidth,
         SpriteLibrary.baseSpriteSize * game.gameMap.mapHeight);
 
-    mapArtist = new SpriteMapArtist(game, this);
-    unitArtist = new SpriteUnitArtist(game, this);
-    menuArtist = new SpriteMenuArtist(game, this);
+    mapArtist = new MapArtist(game, this);
+    unitArtist = new UnitArtist(game, this);
+    menuArtist = new MenuArtist(game, this);
 
     myGame = game;
     unitFacings = new HashMap<Commander, Boolean>();
@@ -488,7 +488,7 @@ public class SpriteMapView extends MapView
     int tileSize = SpriteLibrary.baseSpriteSize;
     int estimateX = (x * tileSize) + (tileSize / 2);
     int estimateY = (y * tileSize) - dmgImage.getHeight() / 2;
-    SpriteLibrary.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY);
+    SpriteUIUtils.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY);
   }
 
   /**
@@ -549,7 +549,7 @@ public class SpriteMapView extends MapView
     }
 
     // Create a new animation to show the game results.
-    currentAnimation = new SpriteGameEndAnimation(myGame.commanders);
+    currentAnimation = new GameEndAnimation(myGame.commanders);
   }
 
   @Override

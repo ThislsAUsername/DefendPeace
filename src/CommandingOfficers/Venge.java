@@ -17,7 +17,7 @@ import Units.Weapons.Weapon;
 /*
  * Venge enhances counter-attacks of all sorts.
  */
-public class CommanderVenge extends Commander
+public class Venge extends Commander
 {
   private static final long serialVersionUID = -8207164779284734879L;
 
@@ -47,7 +47,7 @@ public class CommanderVenge extends Commander
     @Override
     public Commander create()
     {
-      return new CommanderVenge();
+      return new Venge();
     }
   }
 
@@ -58,7 +58,7 @@ public class CommanderVenge extends Commander
   public boolean counterAtFullPower = false;
   public boolean counterFirst = false;
 
-  public CommanderVenge()
+  public Venge()
   {
     super(coInfo);
 
@@ -157,9 +157,9 @@ public class CommanderVenge extends Commander
     private static final int COST = 3;
     private static final int IRONWILL_BUFF = 30; // Get a nice defense boost, since we can't counter-attack if we're dead.
     COModifier defenseMod = null;
-    CommanderVenge COcast;
+    Venge COcast;
 
-    IronWill(CommanderVenge commander)
+    IronWill(Venge commander)
     {
       super(commander, NAME, COST);
       COcast = commander;
@@ -185,9 +185,9 @@ public class CommanderVenge extends Commander
     private static final int RETRIBUTION_NERF = 20;
     COModifier damageMod = null;
     COModifier defenseMod = null;
-    CommanderVenge COcast;
+    Venge COcast;
 
-    Retribution(CommanderVenge commander)
+    Retribution(Venge commander)
     {
       super(commander, NAME, COST);
       COcast = commander;

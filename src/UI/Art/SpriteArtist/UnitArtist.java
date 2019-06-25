@@ -5,12 +5,12 @@ import java.awt.Graphics;
 import Engine.GameInstance;
 import Units.Unit;
 
-public class SpriteUnitArtist
+public class UnitArtist
 {
   private GameInstance myGame;
   private SpriteMapView myView;
 
-  public SpriteUnitArtist(GameInstance game, SpriteMapView view)
+  public UnitArtist(GameInstance game, SpriteMapView view)
   {
     myGame = game;
     myView = view;

@@ -18,12 +18,12 @@ public class CommanderLibrary
   private static void buildCommanderList()
   {
     commanderList = new ArrayList<CommanderInfo>();
-    commanderList.add( CommanderStrong.getInfo() );
-    commanderList.add( CommanderPatch.getInfo() );
-    commanderList.add( CommanderVenge.getInfo() );
+    commanderList.add( Strong.getInfo() );
+    commanderList.add( Patch.getInfo() );
+    commanderList.add( Venge.getInfo() );
     commanderList.add( Meridian.getInfo() );
-    commanderList.add( CommanderBear_Bull.getInfo() );
-    commanderList.add( CommanderCinder.getInfo() );
-    commanderList.add( CommanderAve.getInfo() );
+    commanderList.add( Bear_Bull.getInfo() );
+    commanderList.add( Cinder.getInfo() );
+    commanderList.add( Ave.getInfo() );
   }
 }

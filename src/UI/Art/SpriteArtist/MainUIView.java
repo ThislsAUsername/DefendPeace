@@ -14,7 +14,7 @@ import UI.SlidingValue;
 /**
  * This class is responsible for drawing the main menu visible at game startup.
  */
-public class SpriteMainUIView implements IView
+public class MainUIView implements IView
 {
   MainUIController controller = null;
 
@@ -27,7 +27,7 @@ public class SpriteMainUIView implements IView
   private int menuWidth;
   private int menuHeight;
 
-  public SpriteMainUIView( MainUIController control )
+  public MainUIView( MainUIController control )
   {
     controller = control;
     menuWidth = SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale();
@@ -54,7 +54,7 @@ public class SpriteMainUIView implements IView
     switch(controller.getSubMenuType())
     {
       case GAME_SETUP:
-        SpriteMapSelectMenuArtist.draw(g, controller.getGameSetupController());
+        MapSelectMenuArtist.draw(g, controller.getGameSetupController());
         break;
       case MAIN:
       case SAVE_SELECT:
@@ -122,7 +122,7 @@ public class SpriteMainUIView implements IView
     {
       InGameMenu<SaveInfo> sm = controller.saveMenu;
       BufferedImage savesImage = SpriteUIUtils.makeTextMenu(sm.getAllOptions(), sm.getSelectionNumber(), 3, 4);
-      SpriteLibrary.drawImageCenteredOnPoint(menuGraphics, savesImage, xCenter, yCenter);
+      SpriteUIUtils.drawImageCenteredOnPoint(menuGraphics, savesImage, xCenter, yCenter);
     }
 
     // Draw the composited image to the window.
@@ -166,7 +166,7 @@ public class SpriteMainUIView implements IView
     // Only draw the image if it will actually show on the screen.
     if( y > -1*menuText.getHeight() && y < menuHeight + menuText.getHeight())
     {
-      SpriteLibrary.drawImageCenteredOnPoint(g, menuText, x, y);
+      SpriteUIUtils.drawImageCenteredOnPoint(g, menuText, x, y);
     }
   }
 

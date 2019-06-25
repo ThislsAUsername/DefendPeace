@@ -4,9 +4,12 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 import CommandingOfficers.Commander;
 import Terrain.Location;
@@ -76,6 +79,29 @@ public class SpriteLibrary
   private static BufferedImage gameOverVictoryText = null;
 
   /**
+   * Loads the image at the given file location and returns it as a BufferedImage.
+   * @param filename The full file-path to an image on disk.
+   * @return The file as a BufferedImage, or null if the file cannot be read.
+   */
+  public static BufferedImage loadSpriteSheetFile(String filename)
+  {
+    BufferedImage bi = null;
+    try
+    {
+      File imgFile = new File(filename);
+      if( imgFile.exists() && !imgFile.isDirectory() )
+        bi = ImageIO.read(imgFile);
+      else System.out.println("WARNING! Resource file " + filename + " does not exist.");
+    }
+    catch (IOException ioex)
+    {
+      System.out.println("WARNING! Exception loading resource file " + filename);
+      bi = null;
+    }
+    return bi;
+  }
+
+  /**
    * Retrieve (loading if needed) the sprites associated with the given terrain type. For ownable terrain types
    * (e.g. cities), the unowned variant of the sprite will be returned.
    */
@@ -115,7 +141,6 @@ public class SpriteLibrary
   private static void createTerrainSpriteSet(SpriteSetKey spriteKey)
   {
     TerrainType terrainType = spriteKey.terrainKey;
-    System.out.println("INFO: Loading terrain sprites for " + terrainType);
 
     String tileSpritesheetLocations = "res/tileset";
     String formatString = tileSpritesheetLocations + "/%s_%s.png";
@@ -235,7 +260,7 @@ public class SpriteLibrary
   {
     if( moveCursorLineSprite == null )
     {
-      moveCursorLineSprite = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/tileset/moveCursorLine.png"), baseSpriteSize, baseSpriteSize);
+      moveCursorLineSprite = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/tileset/moveCursorLine.png"), baseSpriteSize, baseSpriteSize);
     }
 
     return moveCursorLineSprite;
@@ -245,7 +270,7 @@ public class SpriteLibrary
   {
     if( moveCursorArrowSprite == null )
     {
-      moveCursorArrowSprite = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/tileset/moveCursorArrow.png"), baseSpriteSize, baseSpriteSize);
+      moveCursorArrowSprite = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/tileset/moveCursorArrow.png"), baseSpriteSize, baseSpriteSize);
     }
 
     return moveCursorArrowSprite;
@@ -341,11 +366,10 @@ public class SpriteLibrary
   private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
     Faction faction = key.factionKey;
-    System.out.println("creating " + key.unitTypeKey.toString() + " spriteset for CO " + key.colorKey.toString() + " in faction " + faction);
     String filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction.name);
     if (!new File(filestr).canRead())
       filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction.basis);
-    UnitSpriteSet spriteSet = new UnitSpriteSet(SpriteUIUtils.loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
+    UnitSpriteSet spriteSet = new UnitSpriteSet(SpriteLibrary.loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
         UIUtils.getMapUnitColors(key.colorKey));
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
@@ -362,7 +386,7 @@ public class SpriteLibrary
   {
     if( null == mapUnitHPSprites )
     {
-      mapUnitHPSprites = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/unit/icon/hp.png"), 8, 8);
+      mapUnitHPSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/unit/icon/hp.png"), 8, 8);
     }
     return mapUnitHPSprites;
   }
@@ -371,7 +395,7 @@ public class SpriteLibrary
   {
     if( null == mapUnitLetterSprites )
     {
-      mapUnitLetterSprites = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/unit/icon/alphabet.png"), 8, 8);
+      mapUnitLetterSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/unit/icon/alphabet.png"), 8, 8);
     }
     return mapUnitLetterSprites;
   }
@@ -416,7 +440,7 @@ public class SpriteLibrary
   {
     if( null == mapUnitCargoIcon )
     {
-      mapUnitCargoIcon = SpriteUIUtils.loadSpriteSheetFile("res/unit/icon/cargo.png");
+      mapUnitCargoIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/cargo.png");
     }
     return mapUnitCargoIcon;
   }
@@ -425,7 +449,7 @@ public class SpriteLibrary
   {
     if( null == mapUnitStunIcon )
     {
-      mapUnitStunIcon = SpriteUIUtils.loadSpriteSheetFile("res/unit/icon/stun.png");
+      mapUnitStunIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/stun.png");
     }
     return mapUnitStunIcon;
   }
@@ -434,7 +458,7 @@ public class SpriteLibrary
   {
     if( null == mapUnitCaptureIcon )
     {
-      mapUnitCaptureIcon = SpriteUIUtils.loadSpriteSheetFile("res/unit/icon/capture.png");
+      mapUnitCaptureIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/capture.png");
     }
     return mapUnitCaptureIcon;
   }
@@ -453,7 +477,7 @@ public class SpriteLibrary
   {
     if( null == letterSpritesUppercase )
     {
-      letterSpritesUppercase = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/letters_uppercase.png"), 5, 11);
+      letterSpritesUppercase = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/main/letters_uppercase.png"), 5, 11);
     }
     return letterSpritesUppercase;
   }
@@ -468,7 +492,7 @@ public class SpriteLibrary
   {
     if( null == letterSpritesLowercase )
     {
-      letterSpritesLowercase = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/letters_lowercase.png"), 5, 11);
+      letterSpritesLowercase = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/main/letters_lowercase.png"), 5, 11);
     }
     return letterSpritesLowercase;
   }
@@ -483,7 +507,7 @@ public class SpriteLibrary
   {
     if( null == numberSprites )
     {
-      numberSprites = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/numbers.png"), 5, 11);
+      numberSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/main/numbers.png"), 5, 11);
     }
     return numberSprites;
   }
@@ -498,7 +522,7 @@ public class SpriteLibrary
   {
     if( null == symbolSprites )
     {
-      symbolSprites = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/symbols.png"), 5, 11);
+      symbolSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/main/symbols.png"), 5, 11);
     }
     return symbolSprites;
   }
@@ -513,7 +537,7 @@ public class SpriteLibrary
   {
     if( null == letterSpritesSmallCaps )
     {
-      letterSpritesSmallCaps = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/letters.png"), 5, 6);
+      letterSpritesSmallCaps = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/letters.png"), 5, 6);
     }
     return letterSpritesSmallCaps;
   }
@@ -529,7 +553,7 @@ public class SpriteLibrary
   {
     if( null == numberSpritesSmallCaps )
     {
-      numberSpritesSmallCaps = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/numbers.png"), 5, 6);
+      numberSpritesSmallCaps = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/numbers.png"), 5, 6);
     }
     return numberSpritesSmallCaps;
   }
@@ -544,142 +568,9 @@ public class SpriteLibrary
   {
     if( null == symbolSpritesSmallCaps )
     {
-      symbolSpritesSmallCaps = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/symbols.png"), 5, 6);
+      symbolSpritesSmallCaps = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/symbols.png"), 5, 6);
     }
     return symbolSpritesSmallCaps;
-  }
-
-  /**
-   * Draws the provided text at the provided location, using the standard alphanumeric sprite set.
-   * @param g Graphics object to draw the text.
-   * @param text Text to be drawn as sprited letters.
-   * @param x X-coordinate of the top-left corner of the first letter to be drawn.
-   * @param y Y-coordinate of the top-left corner of the first letter to be drawn.
-   */
-  public static void drawText(Graphics g, String text, int x, int y)
-  {
-    Sprite uppercase = getLettersUppercase();
-    Sprite lowercase = getLettersLowercase();
-    int menuTextWidth = uppercase.getFrame(0).getWidth();
-    int menuTextHeight = uppercase.getFrame(0).getHeight();
-
-    for( int i = 0; i < text.length(); ++i, x += menuTextWidth )
-    {
-      char thisChar = text.charAt(i);
-      if( Character.isAlphabetic(thisChar) )
-      {
-        if( Character.isUpperCase(thisChar) )
-        {
-          int letterIndex = thisChar - 'A';
-          g.drawImage(uppercase.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
-        }
-        else
-        {
-          int letterIndex = thisChar - 'a';
-          g.drawImage(lowercase.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
-        }
-      }
-      else if( Character.isDigit(thisChar) )
-      {
-        int letterIndex = thisChar - '0';
-        g.drawImage(getNumbers().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
-      }
-      else // Assume symbolic
-      {
-        int symbolIndex = charKey.indexOf(text.charAt(i));
-        if( symbolIndex >= 0 )
-        {
-          g.drawImage(getSymbols().getFrame(symbolIndex), x, y, menuTextWidth, menuTextHeight, null);
-        }
-      }
-    }
-  }
-
-  /**
-   * Draws the provided text at the provided location, using the small-caps alphanumeric sprite set.
-   * @param g Graphics object to draw the text.
-   * @param text Text to be drawn as sprited letters.
-   * @param x X-coordinate of the top-left corner of the first letter to be drawn.
-   * @param y Y-coordinate of the top-left corner of the first letter to be drawn.
-   */
-  public static void drawTextSmallCaps(Graphics g, String text, int x, int y)
-  {
-    Sprite smallCaps = getLettersSmallCaps();
-    int menuTextWidth = smallCaps.getFrame(0).getWidth();
-    int menuTextHeight = smallCaps.getFrame(0).getHeight();
-    text = text.toUpperCase(); // SmallCaps is all uppercase.
-
-    for( int i = 0; i < text.length(); ++i, x += menuTextWidth )
-    {
-      if( Character.isAlphabetic(text.charAt(i)) )
-      {
-        int letterIndex = text.charAt(i) - 'A';
-        g.drawImage(smallCaps.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
-      }
-      else if( Character.isDigit(text.charAt(i)) )
-      {
-        int letterIndex = text.charAt(i) - '0';
-        g.drawImage(getNumbersSmallCaps().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
-      }
-      else // Assume symbolic
-      {
-        int symbolIndex = charKey.indexOf(text.charAt(i));
-        if( symbolIndex >= 0 )
-        {
-          g.drawImage(getSymbolsSmallCaps().getFrame(symbolIndex), x, y, menuTextWidth, menuTextHeight, null);
-        }
-      }
-    }
-  }
-
-  /**
-   * Returns a BufferedImage containing the contents of `text` rendered on one
-   * line in the standard font, on a transparent background, with no scaling applied.
-   */
-  public static BufferedImage getTextAsImage(String text)
-  {
-    return getTextAsImage(text, false);
-  }
-
-  /**
-   * Returns a BufferedImage containing the contents of `text` rendered on one line (in small
-   * caps or standard font as specified), on a transparent background, with no scaling applied.
-   */
-  public static BufferedImage getTextAsImage(String text, boolean smallCaps)
-  {
-    Sprite letters = (smallCaps) ? getLettersSmallCaps() : getLettersLowercase();
-    int width = letters.getFrame(0).getWidth() * text.length();
-    int height = letters.getFrame(0).getHeight();
-    BufferedImage textImage = createTransparentSprite(width, height);
-    if( smallCaps )
-      drawTextSmallCaps(textImage.getGraphics(), text, 0, 0);
-    else
-      drawText(textImage.getGraphics(), text, 0, 0);
-    return textImage;
-  }
-
-  /**
-   * Draws the provided image, centered around x, y.
-   */
-  public static void drawImageCenteredOnPoint(Graphics g, BufferedImage image, int x, int y)
-  {
-    drawImageCenteredOnPoint(g, image, x, y, 1);
-  }
-
-  /**
-   * Draws the provided image, centered around x, y, scaled by the provided factor.
-   */
-  public static void drawImageCenteredOnPoint(Graphics g, BufferedImage image, int x, int y, int drawScale)
-  {
-    // Calculate the size to draw.
-    int drawWidth = image.getWidth() * drawScale;
-    int drawHeight = image.getHeight() * drawScale;
-
-    // Center over the target location.
-    int drawX = x - drawWidth / 2;
-    int drawY = y - drawHeight / 2;
-
-    g.drawImage(image, drawX, drawY, drawWidth, drawHeight, null);
   }
 
   private static HashMap<Color, Sprite> coloredCursors;
@@ -701,7 +592,7 @@ public class SpriteLibrary
   {
     if( null == cursorSprites )
     {
-      cursorSprites = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/cursor.png"), 6, 6);
+      cursorSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/cursor.png"), 6, 6);
     }
     return cursorSprites;
   }
@@ -710,7 +601,7 @@ public class SpriteLibrary
   {
     if( null == arrowheadSprites )
     {
-      arrowheadSprites = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/arrowheads.png"), 10, 10);
+      arrowheadSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/arrowheads.png"), 10, 10);
     }
     return arrowheadSprites;
   }
@@ -729,7 +620,7 @@ public class SpriteLibrary
       final int OVERLAY_HEIGHT = 20;
 
       // If we don't already have this overlay, go load and store it.
-      Sprite overlay = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/co_overlay.png"), OVERLAY_WIDTH, OVERLAY_HEIGHT);
+      Sprite overlay = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/co_overlay.png"), OVERLAY_WIDTH, OVERLAY_HEIGHT);
       overlay.colorize(UIUtils.defaultMapColors, UIUtils.getMapUnitColors(co.myColor).paletteColors);
 
       // Draw the Commander's mug on top of the overlay.
@@ -780,7 +671,7 @@ public class SpriteLibrary
     {
       // Image should be: empty bar, full bar, empty point, 1/3 point, 2/3 point, full point, large point.
       // Image should be: empty point, 1/3 point, 2/3 point, full point, large point.
-      Sprite overlay = new Sprite(SpriteUIUtils.loadSpriteSheetFile("res/ui/powerbar_pieces.png"), POWERBAR_FRAME_WIDTH, POWERBAR_FRAME_HEIGHT);
+      Sprite overlay = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/powerbar_pieces.png"), POWERBAR_FRAME_WIDTH, POWERBAR_FRAME_HEIGHT);
       overlay.colorize(UIUtils.defaultMapColors, UIUtils.getMapUnitColors(co.myColor).paletteColors);
 
       coPowerBarPieces.put(co, overlay);
@@ -838,7 +729,7 @@ public class SpriteLibrary
   {
     if( null == actionCursor )
     {
-      actionCursor = SpriteUIUtils.loadSpriteSheetFile("res/tileset/cursor_action.png");
+      actionCursor = SpriteLibrary.loadSpriteSheetFile("res/tileset/cursor_action.png");
       if( null == actionCursor )
       {
         actionCursor = createDefaultBlankSprite(baseSpriteSize, baseSpriteSize);
@@ -856,10 +747,10 @@ public class SpriteLibrary
   {
     if( null == menuOptionsSprite )
     {
-      menuOptionsSprite = new Sprite(createBlankImageIfNull(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/newgame.png")));
-      menuOptionsSprite.addFrame(createBlankImageIfNull(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/continue.png")));
-      menuOptionsSprite.addFrame(createBlankImageIfNull(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/options.png")));
-      menuOptionsSprite.addFrame(createBlankImageIfNull(SpriteUIUtils.loadSpriteSheetFile("res/ui/main/quit.png")));
+      menuOptionsSprite = new Sprite(createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile("res/ui/main/newgame.png")));
+      menuOptionsSprite.addFrame(createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile("res/ui/main/continue.png")));
+      menuOptionsSprite.addFrame(createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile("res/ui/main/options.png")));
+      menuOptionsSprite.addFrame(createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile("res/ui/main/quit.png")));
     }
     return menuOptionsSprite;
   }
@@ -868,7 +759,7 @@ public class SpriteLibrary
   {
     if(null == gameOverDefeatText)
     {
-      gameOverDefeatText = SpriteUIUtils.loadSpriteSheetFile("res/ui/defeat.png");
+      gameOverDefeatText = SpriteLibrary.loadSpriteSheetFile("res/ui/defeat.png");
     }
     return gameOverDefeatText;
   }
@@ -877,7 +768,7 @@ public class SpriteLibrary
   {
     if(null == gameOverVictoryText)
     {
-      gameOverVictoryText = SpriteUIUtils.loadSpriteSheetFile("res/ui/victory.png");
+      gameOverVictoryText = SpriteLibrary.loadSpriteSheetFile("res/ui/victory.png");
     }
     return gameOverVictoryText;
   }
@@ -902,9 +793,9 @@ public class SpriteLibrary
       String headString = ((new File(baseFileName + "_face.png").isFile())? baseFileName : basePlaceholder) + "_face.png";
       String eyesString = ((new File(baseFileName + "_eyes.png").isFile())? baseFileName : basePlaceholder) + "_eyes.png";
 
-      BufferedImage body = createBlankImageIfNull(SpriteUIUtils.loadSpriteSheetFile(bodyString));
-      BufferedImage head = createBlankImageIfNull(SpriteUIUtils.loadSpriteSheetFile(headString));
-      BufferedImage eyes = createBlankImageIfNull(SpriteUIUtils.loadSpriteSheetFile(eyesString));
+      BufferedImage body = createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile(bodyString));
+      BufferedImage head = createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile(headString));
+      BufferedImage eyes = createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile(eyesString));
 
       coSpriteSets.put(whichCo, new CommanderSpriteSet(body, head, eyes));
     }

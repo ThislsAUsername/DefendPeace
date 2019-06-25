@@ -9,7 +9,7 @@ import Engine.GameInstance;
 import UI.InGameMenu;
 import UI.MapView;
 
-public class SpriteMenuArtist
+public class MenuArtist
 {
   private GameInstance myGame;
   private MapView myView;
@@ -19,7 +19,7 @@ public class SpriteMenuArtist
   private int menuHBuffer; // Amount of visible menu to left and right of options;
   private int menuVBuffer; // Amount of visible menu above and below menu options;
 
-  public SpriteMenuArtist(GameInstance game, SpriteMapView view)
+  public MenuArtist(GameInstance game, SpriteMapView view)
   {
     myGame = game;
     myCurrentMenu = null;
