@@ -5,17 +5,15 @@ import java.awt.Graphics;
 import Engine.GameInstance;
 import Units.Unit;
 
-public class SpriteUnitArtist
+public class UnitArtist
 {
   private GameInstance myGame;
   private SpriteMapView myView;
-  int drawScale;
 
-  public SpriteUnitArtist(GameInstance game, SpriteMapView view)
+  public UnitArtist(GameInstance game, SpriteMapView view)
   {
     myGame = game;
     myView = view;
-    drawScale = SpriteOptions.getDrawScale();
   }
 
   /**
@@ -28,7 +26,7 @@ public class SpriteUnitArtist
     // Convert "real" location into a draw-space location, then draw icons.
     int drawX = (int) (myView.getTileSize() * x);
     int drawY = (int) (myView.getTileSize() * y);
-    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnitIcons(g, myGame.commanders, unit, animIndex, drawX, drawY, drawScale);
+    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnitIcons(g, myGame.commanders, unit, animIndex, drawX, drawY);
   }
 
   /**
@@ -44,6 +42,6 @@ public class SpriteUnitArtist
 
     // Draw the unit at the specified location.
     SpriteLibrary.getMapUnitSpriteSet(unit).drawUnit(g, myGame.activeCO, unit, /*currentAction,*/
-    animIndex, drawX, drawY, drawScale, myView.getFlipUnitFacing(unit.CO));
+    animIndex, drawX, drawY, myView.getFlipUnitFacing(unit.CO));
   }
 }

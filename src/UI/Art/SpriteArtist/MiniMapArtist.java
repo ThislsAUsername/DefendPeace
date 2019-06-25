@@ -8,7 +8,7 @@ import Engine.XYCoord;
 import Terrain.MapInfo;
 import UI.UIUtils;
 
-public class SpriteMiniMapArtist
+public class MiniMapArtist
 {
   private static MapInfo lastMapDrawn;
   private static Color[] lastTeamColors;

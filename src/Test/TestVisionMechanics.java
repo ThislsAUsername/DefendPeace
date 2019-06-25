@@ -3,8 +3,8 @@ package Test;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
-import CommandingOfficers.CommanderPatch;
-import CommandingOfficers.CommanderStrong;
+import CommandingOfficers.Patch;
+import CommandingOfficers.Strong;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
@@ -31,8 +31,8 @@ public class TestVisionMechanics extends TestCase
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
   {
-    strong = new CommanderStrong();
-    patch = new CommanderPatch();
+    strong = new Strong();
+    patch = new Patch();
     Commander[] cos = { strong, patch };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));

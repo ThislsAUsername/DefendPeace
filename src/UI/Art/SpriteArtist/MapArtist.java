@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.Path.PathNode;
@@ -15,10 +16,9 @@ import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
 import Terrain.Environment.Weathers;
 import Terrain.GameMap;
 import UI.MapView;
-import UI.Art.FillRectArtist.FillRectMapArtist;
 import Units.Unit;
 
-public class SpriteMapArtist
+public class MapArtist
 {
   private GameInstance myGame;
   private MapView myView;
@@ -26,26 +26,22 @@ public class SpriteMapArtist
   BufferedImage baseMapImage;
   MapImageUpdater baseMapImageUpdater;
 
-  private int drawScale;
   private int tileSize;
 
   private Color FOG_COLOR;
   private Color HIGHLIGHT_COLOR;
 
-  FillRectMapArtist backupArtist; // TODO: Make this obsolete.
+  SpriteCursor spriteCursor;
 
-  public SpriteMapArtist(GameInstance game, MapView view)
+  public MapArtist(GameInstance game, MapView view)
   {
     myGame = game;
     GameMap gameMap = myGame.gameMap;
     myView = view;
 
-    drawScale = SpriteOptions.getDrawScale();
     tileSize = myView.getTileSize();
-
-    // TODO: make this obsolete.
-    backupArtist = new FillRectMapArtist(myGame);
-    backupArtist.setView(myView);
+    Commander co0 = game.commanders[0];
+    spriteCursor = new SpriteCursor(co0.HQLocation.xCoord * tileSize, co0.HQLocation.yCoord * tileSize, tileSize, tileSize, co0.myColor);
 
     baseMapImage = new BufferedImage(gameMap.mapWidth * tileSize, gameMap.mapHeight * tileSize, BufferedImage.TYPE_INT_RGB);
 
@@ -94,23 +90,22 @@ public class SpriteMapArtist
     TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(x, y));
 
     boolean drawFog = gameMap.isLocationFogged(x, y);
-    spriteSet.drawTerrainObject(g, gameMap, x, y, drawScale, drawFog);
+    spriteSet.drawTerrainObject(g, gameMap, x, y, drawFog);
   }
 
   public void drawCursor(Graphics g, Unit unitActor, boolean isTargeting, int drawX, int drawY)
   {
     if( !isTargeting )
     {
-      // TODO: Get an actual map cursor.
       // Draw the default map cursor.
-      final Color COLOR_CURSOR = new Color(253, 171, 77, 200);
-      g.setColor(COLOR_CURSOR);
-      g.fillRect(drawX * tileSize, drawY * tileSize, tileSize, tileSize);
+      spriteCursor.set(myGame.activeCO.myColor);
+      spriteCursor.set(drawX*tileSize, drawY*tileSize);
+      spriteCursor.draw(g);
     }
     else
     {
-      SpriteLibrary.drawImageCenteredOnPoint(g, SpriteLibrary.getActionCursor(), myGame.getCursorX() * tileSize + (tileSize / 2),
-          myGame.getCursorY() * tileSize + (tileSize / 2), drawScale);
+      SpriteUIUtils.drawImageCenteredOnPoint(g, SpriteLibrary.getActionCursor(), myGame.getCursorX() * tileSize + (tileSize / 2),
+          myGame.getCursorY() * tileSize + (tileSize / 2));
     }
   }
 
@@ -215,7 +210,7 @@ public class SpriteMapArtist
       {
         // Fetch the relevant sprite set for this terrain type and have it draw itself.
         TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(x, y));
-        spriteSet.drawTerrain(g, gameMap, x, y, drawScale, false);
+        spriteSet.drawTerrain(g, gameMap, x, y, false);
       }
     }
   }
@@ -232,14 +227,14 @@ public class SpriteMapArtist
     {
       // Fetch the relevant sprite set for this terrain type and have it draw itself.
       TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(drawCoord.xCoord, drawCoord.yCoord));
-      spriteSet.drawTerrain(g, gameMap, drawCoord.xCoord, drawCoord.yCoord, drawScale, false);
+      spriteSet.drawTerrain(g, gameMap, drawCoord.xCoord, drawCoord.yCoord, false);
     }
   }
 
   private static class MapImageUpdater extends GameEventListener
   {
-    SpriteMapArtist myArtist;
-    MapImageUpdater(SpriteMapArtist artist)
+    MapArtist myArtist;
+    MapImageUpdater(MapArtist artist)
     {
       myArtist = artist;
     }

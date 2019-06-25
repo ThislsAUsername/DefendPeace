@@ -22,12 +22,11 @@ public class CommanderOverlayArtist
   {
     updateAnimIndex();
 
-    int drawScale = SpriteOptions.getDrawScale();
     int coEyesWidth = 25;
-    int xTextOffset = (4+coEyesWidth) * drawScale; // Distance from the side of the view to the CO overlay text.
-    int yTextOffset = 3 * drawScale; // Distance from the top of the view to the CO overlay text.
+    int xTextOffset = (4+coEyesWidth); // Distance from the side of the view to the CO overlay text.
+    int yTextOffset = 3; // Distance from the top of the view to the CO overlay text.
     BufferedImage spriteA = SpriteLibrary.getLettersSmallCaps().getFrame(0); // Convenient reference so we can check dimensions.
-    int textHeight = spriteA.getHeight() * drawScale;
+    int textHeight = spriteA.getHeight();
 
     // Rebuild the funds string to draw if it has changed.
     if( previousOverlayFunds != commander.money )
@@ -54,30 +53,30 @@ public class CommanderOverlayArtist
 
     if( overlayIsLeft )
     { // Draw the overlay on the left side.
-      g.drawImage(overlayImage, 0, 0, overlayImage.getWidth() * drawScale, overlayImage.getHeight() * drawScale, null);
-      SpriteLibrary.drawTextSmallCaps(g, coString, xTextOffset, yTextOffset, drawScale); // CO name
-      SpriteLibrary.drawTextSmallCaps(g, overlayFundsString, xTextOffset, textHeight + drawScale + yTextOffset, drawScale); // Funds
-      g.drawImage( powerBarImage, 0, (overlayImage.getHeight() * drawScale) - (POWERBAR_BUFFER*drawScale), powerBarImage.getWidth() * drawScale, powerBarImage.getHeight() * drawScale, null );
+      g.drawImage(overlayImage, 0, 0, overlayImage.getWidth(), overlayImage.getHeight(), null);
+      SpriteUIUtils.drawTextSmallCaps(g, coString, xTextOffset, yTextOffset); // CO name
+      SpriteUIUtils.drawTextSmallCaps(g, overlayFundsString, xTextOffset, textHeight + 1 + yTextOffset); // Funds
+      g.drawImage( powerBarImage, 0, (overlayImage.getHeight()) - (POWERBAR_BUFFER), powerBarImage.getWidth(), powerBarImage.getHeight(), null );
     }
     else
     { // Draw the overlay on the right side.
-      int screenWidth = SpriteOptions.getScreenDimensions().width;
-      int xPos = screenWidth - overlayImage.getWidth() * drawScale;
-      int coNameXPos = screenWidth - spriteA.getWidth() * drawScale * coString.length() - xTextOffset;
-      int fundsXPos = screenWidth - spriteA.getWidth() * drawScale * overlayFundsString.length() - xTextOffset;
-      g.drawImage(overlayImage, xPos, 0, overlayImage.getWidth() * drawScale, overlayImage.getHeight() * drawScale, null);
-      SpriteLibrary.drawTextSmallCaps(g, coString, coNameXPos, yTextOffset, drawScale); // CO name
-      SpriteLibrary.drawTextSmallCaps(g, overlayFundsString, fundsXPos, textHeight + drawScale + yTextOffset, drawScale); // Funds
-      int pbXPos = screenWidth - powerBarImage.getWidth() * drawScale;
+      int mapViewWidth = SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale();
+      int xPos = mapViewWidth - overlayImage.getWidth();
+      int coNameXPos = mapViewWidth - spriteA.getWidth() * coString.length() - xTextOffset;
+      int fundsXPos = mapViewWidth - spriteA.getWidth() * overlayFundsString.length() - xTextOffset;
+      g.drawImage(overlayImage, xPos, 0, overlayImage.getWidth(), overlayImage.getHeight(), null);
+      SpriteUIUtils.drawTextSmallCaps(g, coString, coNameXPos, yTextOffset); // CO name
+      SpriteUIUtils.drawTextSmallCaps(g, overlayFundsString, fundsXPos, textHeight + 1 + yTextOffset); // Funds
+      int pbXPos = mapViewWidth - powerBarImage.getWidth();
       if( trueIfBarFalseIfText )
       {
         // We are drawing the power bar, and want to flip it horizontally.
-        g.drawImage( powerBarImage, pbXPos + (powerBarImage.getWidth() * drawScale), (overlayImage.getHeight() * drawScale) - (POWERBAR_BUFFER*drawScale), -powerBarImage.getWidth() * drawScale, powerBarImage.getHeight() * drawScale, null );
+        g.drawImage( powerBarImage, pbXPos + (powerBarImage.getWidth()), (overlayImage.getHeight()) - (POWERBAR_BUFFER), -powerBarImage.getWidth(), powerBarImage.getHeight(), null );
       }
       else
       {
-        // We are drawing an ability name, and we don't want to flib it.
-        g.drawImage( powerBarImage, pbXPos, (overlayImage.getHeight() * drawScale) - (POWERBAR_BUFFER*drawScale), powerBarImage.getWidth() * drawScale, powerBarImage.getHeight() * drawScale, null );
+        // We are drawing an ability name, and we don't want to flip it.
+        g.drawImage( powerBarImage, pbXPos, (overlayImage.getHeight()) - (POWERBAR_BUFFER), powerBarImage.getWidth(), powerBarImage.getHeight(), null );
       }
     }
   }
@@ -173,18 +172,18 @@ public class CommanderOverlayArtist
       Graphics fgGfx = foreground.getGraphics();
 
       // Generate a shaped black background to hold the ability name.
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 0, 0, 1);
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 0, 1, 1);
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 0, 2, 1);
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 1, 0, 1);
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 1, 1, 1);
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 1, 2, 1);
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 2, 0, 1);
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 2, 1, 1);
-      SpriteLibrary.drawTextSmallCaps(bgGfx, abilityName, 2, 2, 1);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 0, 0);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 0, 1);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 0, 2);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 1, 0);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 1, 1);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 1, 2);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 2, 0);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 2, 1);
+      SpriteUIUtils.drawTextSmallCaps(bgGfx, abilityName, 2, 2);
 
       // Make an intermediate image of the center text, and recolor it to an intermediate value.
-      SpriteLibrary.drawTextSmallCaps(fgGfx, abilityName, 1, 1, 1);
+      SpriteUIUtils.drawTextSmallCaps(fgGfx, abilityName, 1, 1);
       Sprite fgSpr = new Sprite(foreground);
       Color intermediate = new Color(99, 100, 101);
       fgSpr.colorize(Color.BLACK, intermediate);
