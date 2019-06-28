@@ -18,14 +18,15 @@ public class SpriteOptions
   private static final int WINDOWHEIGHT_DEFAULT = 160;
   private static final int DRAWSCALE_DEFAULT = 2;
   private static int drawScale = DRAWSCALE_DEFAULT;
+  private static boolean animationsOn = true;
 
   private static Dimension dimensions = new Dimension(WINDOWWIDTH_DEFAULT * drawScale, WINDOWHEIGHT_DEFAULT * drawScale);
 
   // Set up configurable options.
   private static GraphicsOption drawScaleOption = new GraphicsOption("Draw Scale", 1, 6, DRAWSCALE_DEFAULT);
-  private static GraphicsOption dummyOption = new GraphicsOption("Dummy option");
+  private static GraphicsOption animationsOption = new GraphicsOption("Animations", true);
   private static GraphicsOption damageSystemOption = new GraphicsOption("Damage System", Weapon.stratDescriptions, 0);
-  private static GraphicsOption[] allOptions = { drawScaleOption, dummyOption, damageSystemOption };
+  private static GraphicsOption[] allOptions = { drawScaleOption, animationsOption, damageSystemOption };
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
   private static SlidingValue animHighlightedOption;
 
@@ -57,6 +58,11 @@ public class SpriteOptions
   public static int getDrawScale()
   {
     return drawScale;
+  }
+
+  public static boolean getAnimationsEnabled()
+  {
+    return animationsOn;
   }
 
   private static void initialize()
@@ -173,15 +179,20 @@ public class SpriteOptions
    */
   private static void applyConfigOptions()
   {
-    drawScale = drawScaleOption.getSelectionNormalized();
-    dimensions.setSize(WINDOWWIDTH_DEFAULT * drawScale, WINDOWHEIGHT_DEFAULT * drawScale);
-    Weapon.currentStrategy = damageSystemOption.getSelectionNormalized();
-    Driver.getInstance().updateView(); // Tell the driver to look at these settings again.
-
+    // Persist the values in the GraphicsOption objects.
     for( GraphicsOption go : allOptions )
     {
       go.storeCurrentValue();
     }
+
+    // Store the options locally.
+    drawScale = drawScaleOption.getSelectionNormalized();
+    animationsOn = animationsOption.getSelectionNormalized() != 0;
+    Weapon.currentStrategy = damageSystemOption.getSelectionNormalized();
+
+    // Apply effects.
+    dimensions.setSize(WINDOWWIDTH_DEFAULT * drawScale, WINDOWHEIGHT_DEFAULT * drawScale);
+    Driver.getInstance().updateView(); // Tell the driver to look at these settings again.
   }
 
   /**
@@ -267,7 +278,6 @@ public class SpriteOptions
       minOption = 0;
       optionName = name;
       setSelectedOption(defaultValue);
-      storedValue = defaultValue;
       optionList = Options;
     }
     public GraphicsOption(String name, int min, int max, int defaultValue)
@@ -276,19 +286,20 @@ public class SpriteOptions
       minOption = min;
       optionName = name;
       setSelectedOption(defaultValue);
-      storedValue = defaultValue;
       optionList = new String[1 + max - min];
       for( int i = 0; i <= max - min; i++ )
       {
         optionList[i] = "" + (min + i);
       }
     }
-    public GraphicsOption(String name)
+    public GraphicsOption(String name, boolean defaultValue)
     {
       super(2); // No min/max means this is a boolean choice.
       minOption = 0;
       optionName = name;
       optionList = new String[] { "Off", "On" };
+      if( defaultValue ) setSelectedOption(1);
+      storeCurrentValue();
     }
     @Override
     public int getSelectionNormalized()
@@ -299,6 +310,7 @@ public class SpriteOptions
     public void setSelectedOption(int value)
     {
       super.setSelectedOption(value - minOption);
+      storedValue = getSelectionNormalized();
     }
     public String getSettingValueText()
     {
