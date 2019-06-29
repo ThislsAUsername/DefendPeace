@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 
 import Engine.Driver;
 import Engine.OptionSelector;
+import UI.GameOption;
 import UI.InputHandler;
 import UI.SlidingValue;
 import Units.Weapons.Weapon;
@@ -23,10 +24,10 @@ public class SpriteOptions
   private static Dimension dimensions = new Dimension(WINDOWWIDTH_DEFAULT * drawScale, WINDOWHEIGHT_DEFAULT * drawScale);
 
   // Set up configurable options.
-  private static GraphicsOption drawScaleOption = new GraphicsOption("Draw Scale", 1, 6, DRAWSCALE_DEFAULT);
-  private static GraphicsOption animationsOption = new GraphicsOption("Animations", true);
-  private static GraphicsOption damageSystemOption = new GraphicsOption("Damage System", Weapon.stratDescriptions, 0);
-  private static GraphicsOption[] allOptions = { drawScaleOption, animationsOption, damageSystemOption };
+  private static GameOption drawScaleOption = new GameOption("Draw Scale", 1, 6, DRAWSCALE_DEFAULT);
+  private static GameOption animationsOption = new GameOption("Animations", true);
+  private static GameOption damageSystemOption = new GameOption("Damage System", Weapon.stratDescriptions, 0);
+  private static GameOption[] allOptions = { drawScaleOption, animationsOption, damageSystemOption };
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
   private static SlidingValue animHighlightedOption;
 
@@ -179,8 +180,8 @@ public class SpriteOptions
    */
   private static void applyConfigOptions()
   {
-    // Persist the values in the GraphicsOption objects.
-    for( GraphicsOption go : allOptions )
+    // Persist the values in the GameOption objects.
+    for( GameOption go : allOptions )
     {
       go.storeCurrentValue();
     }
@@ -200,7 +201,7 @@ public class SpriteOptions
    */
   private static void resetConfigOptions()
   {
-    for( GraphicsOption go : allOptions )
+    for( GameOption go : allOptions )
     {
       go.loseChanges();
     }
@@ -237,7 +238,7 @@ public class SpriteOptions
     // Loop through and draw everything.
     for( int i = 0; i < allOptions.length; ++i, yDraw += ySpacing )
     {
-      drawGraphicsOption(optionsGraphics, xDraw, yDraw, allOptions[i]);
+      drawGameOption(optionsGraphics, xDraw, yDraw, allOptions[i]);
     }
 
     // Draw the arrows around the highlighted option, animating movement when switching.
@@ -250,7 +251,7 @@ public class SpriteOptions
     g.drawImage(optionsImage, 0, 0, optionsImage.getWidth()*drawScale, optionsImage.getHeight()*drawScale, null);
   }
 
-  private static void drawGraphicsOption(Graphics g, int x, int y, GraphicsOption opt)
+  private static void drawGameOption(Graphics g, int x, int y, GameOption opt)
   {
     int drawBuffer = textBuffer;
 
@@ -263,70 +264,5 @@ public class SpriteOptions
     BufferedImage settingPanel = (opt.isChanged()) ? optionSettingPanelChanged : optionSettingPanel;
     g.drawImage(settingPanel, x, y, settingPanel.getWidth(), settingPanel.getHeight(), null);
     SpriteUIUtils.drawText(g, opt.getSettingValueText(), x + drawBuffer, y + drawBuffer);
-  }
-
-  private static class GraphicsOption extends OptionSelector
-  {
-    public final String optionName;
-    public final int minOption;
-    public final String[] optionList;
-    private int storedValue = 0;
-
-    public GraphicsOption(String name, String[] Options, int defaultValue)
-    {
-      super(Options.length);
-      minOption = 0;
-      optionName = name;
-      setSelectedOption(defaultValue);
-      optionList = Options;
-    }
-    public GraphicsOption(String name, int min, int max, int defaultValue)
-    {
-      super(max - min);
-      minOption = min;
-      optionName = name;
-      setSelectedOption(defaultValue);
-      optionList = new String[1 + max - min];
-      for( int i = 0; i <= max - min; i++ )
-      {
-        optionList[i] = "" + (min + i);
-      }
-    }
-    public GraphicsOption(String name, boolean defaultValue)
-    {
-      super(2); // No min/max means this is a boolean choice.
-      minOption = 0;
-      optionName = name;
-      optionList = new String[] { "Off", "On" };
-      if( defaultValue ) setSelectedOption(1);
-      storeCurrentValue();
-    }
-    @Override
-    public int getSelectionNormalized()
-    {
-      return super.getSelectionNormalized() + minOption;
-    }
-    @Override
-    public void setSelectedOption(int value)
-    {
-      super.setSelectedOption(value - minOption);
-      storedValue = getSelectionNormalized();
-    }
-    public String getSettingValueText()
-    {
-      return optionList[getSelectionNormalized()-minOption];
-    }
-    public void storeCurrentValue()
-    {
-      storedValue = getSelectionNormalized();
-    }
-    public boolean isChanged()
-    {
-      return (storedValue != getSelectionNormalized());
-    }
-    public void loseChanges()
-    {
-      setSelectedOption(storedValue);
-    }
   }
 }
