@@ -4,10 +4,13 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import Engine.Driver;
 import Engine.OptionSelector;
 import UI.GameOption;
+import UI.GameOptionBool;
+import UI.GameOptionInt;
 import UI.InputHandler;
 import UI.SlidingValue;
 import Units.Weapons.Weapon;
@@ -24,9 +27,9 @@ public class SpriteOptions
   private static Dimension dimensions = new Dimension(WINDOWWIDTH_DEFAULT * drawScale, WINDOWHEIGHT_DEFAULT * drawScale);
 
   // Set up configurable options.
-  private static GameOption drawScaleOption = new GameOption("Draw Scale", 1, 6, 1, DRAWSCALE_DEFAULT);
-  private static GameOption animationsOption = new GameOption("Animations", true);
-  private static GameOption damageSystemOption = new GameOption("Damage System", Weapon.stratDescriptions, 0);
+  private static GameOption<Integer> drawScaleOption = new GameOptionInt("Draw Scale", 1, 6, 1, DRAWSCALE_DEFAULT);
+  private static GameOptionBool animationsOption = new GameOptionBool("Animations", true);
+  private static GameOption<String> damageSystemOption = new GameOption<String>("Damage System", Weapon.stratDescriptions, 0);
   private static GameOption[] allOptions = { drawScaleOption, animationsOption, damageSystemOption };
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
   private static SlidingValue animHighlightedOption;
@@ -77,12 +80,12 @@ public class SpriteOptions
     // Calculate the size of the longest item panel needed.
     for( int i = 0; i < allOptions.length; ++i )
     {
-      String[] allItems = (String[])allOptions[i].optionList;
-      for( int j = 0; j < allItems.length; ++j )
+      ArrayList allItems = allOptions[i].optionList;
+      for( int j = 0; j < allItems.size(); ++j )
       {
-        if( allItems[j].length() > maxItemLen )
+        if( allItems.get(j).toString().length() > maxItemLen )
         {
-          maxItemLen = allItems[j].length();
+          maxItemLen = allItems.get(j).toString().length();
         }
       }
     }
