@@ -27,7 +27,6 @@ public class GameOption extends OptionSelector
     for( int i = 0; i < numOptions; i++ )
     {
       int value = min + (i*stride);
-      System.out.println(String.format("Storing %s at index %s", value, i));
       optionList[i] = "" + value;
       if( value == defaultValue )
       {

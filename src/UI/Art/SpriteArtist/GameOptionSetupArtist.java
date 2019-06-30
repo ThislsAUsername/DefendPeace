@@ -106,7 +106,6 @@ public class GameOptionSetupArtist
     // Build the necessary images.
     if( reinit )
     {
-      System.out.println("Initializing!");
       initialize();
     }
 
