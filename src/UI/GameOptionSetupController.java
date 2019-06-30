@@ -9,7 +9,7 @@ public class GameOptionSetupController implements IController
 {
   private GameOption<Boolean> fowOption = new GameOptionBool("Fog of War", false);
   private GameOption<Integer> startingFundsOption = new GameOptionInt("Starting Funds", 0, 50000, 1000, 0);
-  private GameOption<Integer> incomeOption = new GameOptionInt("Income", 500, 20000, 500, 1000);
+  private GameOption<Integer> incomeOption = new GameOptionInt("Income", 250, 20000, 250, 1000);
   private GameOption<Weathers> weatherOption = new GameOption<Weathers>("Weather", Weathers.values(), 0);
 
   // Get a list of all GameOptions.
