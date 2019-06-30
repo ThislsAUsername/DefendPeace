@@ -186,8 +186,8 @@ public class SpriteOptions
     }
 
     // Store the options locally.
-    drawScale = drawScaleOption.getSelectionNormalized();
-    animationsOn = animationsOption.getSelectionNormalized() != 0;
+    drawScale = drawScaleOption.getSelectedObject();
+    animationsOn = animationsOption.getSelectedObject();
     Weapon.currentStrategy = damageSystemOption.getSelectionNormalized();
 
     // Apply effects.
