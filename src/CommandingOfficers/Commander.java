@@ -133,7 +133,6 @@ public class Commander extends GameEventListener implements Serializable
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
     ownedProperties = new HashSet<XYCoord>();
-    money = 0;
 
     myAbilities = new ArrayList<CommanderAbility>();
   }
