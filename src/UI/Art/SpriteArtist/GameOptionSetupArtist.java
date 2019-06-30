@@ -146,6 +146,6 @@ public class GameOptionSetupArtist
     x = x + (optionNamePanel.getWidth() + (3 * SpriteLibrary.getLettersLowercase().getFrame(0).getWidth()));
     BufferedImage settingPanel = (opt.isChanged()) ? optionSettingPanel : optionSettingPanel;
     g.drawImage(settingPanel, x, y, settingPanel.getWidth(), settingPanel.getHeight(), null);
-    SpriteUIUtils.drawText(g, opt.getSettingValueText(), x + textBuffer, y + textBuffer);
+    SpriteUIUtils.drawText(g, opt.getCurrentValueText(), x + textBuffer, y + textBuffer);
   }
 }

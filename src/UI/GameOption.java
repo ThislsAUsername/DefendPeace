@@ -35,7 +35,7 @@ public class GameOption<T> extends OptionSelector
   {
     return optionList.get(getSelectionNormalized()-minOption);
   }
-  public String getSettingValueText()
+  public String getCurrentValueText()
   {
     return optionList.get(getSelectionNormalized()-minOption).toString();
   }
