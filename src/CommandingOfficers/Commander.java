@@ -16,7 +16,6 @@ import AI.AILibrary;
 import AI.AIMaker;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
-import Engine.UnitActionType;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.Combat.BattleInstance.CombatContext;
@@ -64,7 +63,6 @@ public class Commander extends GameEventListener implements Serializable
   public ArrayList<COModifier> modifiers;
   public Color myColor;
   public Faction faction;
-  public static final int DEFAULTSTARTINGMONEY = 0;
   public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
   public static final int CHARGERATIO_HP = 100; // Funds value of 1 HP damage dealt, for the purpose of power charge
   public int money = 0;
@@ -135,7 +133,7 @@ public class Commander extends GameEventListener implements Serializable
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
     ownedProperties = new HashSet<XYCoord>();
-    money = DEFAULTSTARTINGMONEY;
+    money = 0;
 
     myAbilities = new ArrayList<CommanderAbility>();
   }

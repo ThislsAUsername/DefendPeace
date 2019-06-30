@@ -6,10 +6,10 @@ public class GameOption extends OptionSelector
 {
   public final String optionName;
   public final int minOption;
-  public final String[] optionList;
+  public final Object[] optionList;
   private int storedValue = 0;
 
-  public GameOption(String name, String[] Options, int defaultValue)
+  public GameOption(String name, Object[] Options, int defaultValue)
   {
     super(Options.length);
     minOption = 0;
@@ -17,16 +17,22 @@ public class GameOption extends OptionSelector
     setSelectedOption(defaultValue);
     optionList = Options;
   }
-  public GameOption(String name, int min, int max, int defaultValue)
+  public GameOption(String name, int min, int max, int stride, int defaultValue)
   {
-    super(max - min);
-    minOption = min;
+    super(1 + (max - min)/stride);
+    minOption = 0;
     optionName = name;
-    setSelectedOption(defaultValue);
-    optionList = new String[1 + max - min];
-    for( int i = 0; i <= max - min; i++ )
+    int numOptions = 1 + (max - min) / stride;
+    optionList = new String[numOptions];
+    for( int i = 0; i < numOptions; i++ )
     {
-      optionList[i] = "" + (min + i);
+      int value = min + (i*stride);
+      System.out.println(String.format("Storing %s at index %s", value, i));
+      optionList[i] = "" + value;
+      if( value == defaultValue )
+      {
+        setSelectedOption(i);
+      }
     }
   }
   public GameOption(String name, boolean defaultValue)
@@ -48,9 +54,13 @@ public class GameOption extends OptionSelector
     super.setSelectedOption(value - minOption);
     storedValue = getSelectionNormalized();
   }
-  public String getSettingValueText()
+  public Object getSelectedObject()
   {
     return optionList[getSelectionNormalized()-minOption];
+  }
+  public String getSettingValueText()
+  {
+    return optionList[getSelectionNormalized()-minOption].toString();
   }
   public void storeCurrentValue()
   {

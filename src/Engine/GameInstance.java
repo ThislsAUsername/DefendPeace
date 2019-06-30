@@ -1,6 +1,5 @@
 package Engine;
 
-import java.util.ArrayList;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -8,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import CommandingOfficers.Commander;
@@ -35,8 +35,14 @@ public class GameInstance implements Serializable
   HashMap<Integer, XYCoord> playerCursors = null;
 
   private boolean isFogEnabled;
+  private Weathers defaultWeather;
 
   public GameInstance(MapMaster map)
+  {
+    this(map, false, Weathers.CLEAR, 0);
+  }
+
+  public GameInstance(MapMaster map, boolean fogOfWarOn, Weathers weather, int startingFunds)
   {
     if( map.commanders.length < 2 )
     {
@@ -44,6 +50,9 @@ public class GameInstance implements Serializable
     }
 
     gameMap = map;
+    isFogEnabled = fogOfWarOn;
+    defaultWeather = weather;
+
     commanders = map.commanders;
     activeCoNum = -1; // No commander is active yet.
 
@@ -51,6 +60,7 @@ public class GameInstance implements Serializable
     playerCursors = new HashMap<Integer, XYCoord>();
     for( int i = 0; i < commanders.length; ++i )
     {
+      commanders[i].money = startingFunds;
       if( commanders[i].HQLocation != null )
       {
         commanders[i].myView = new MapWindow(map, commanders[i], isFogEnabled);
@@ -164,9 +174,9 @@ public class GameInstance implements Serializable
         Location loc = gameMap.getLocation(i, j);
         if( loc.forecast.isEmpty() )
         {
-          if( loc.getEnvironment().weatherType != Weathers.CLEAR )
+          if( loc.getEnvironment().weatherType != defaultWeather )
           {
-            weatherChanges.add(new MapChangeEvent.EnvironmentAssignment(loc.getCoordinates(), Environment.getTile(loc.getEnvironment().terrainType, Weathers.CLEAR)));
+            weatherChanges.add(new MapChangeEvent.EnvironmentAssignment(loc.getCoordinates(), Environment.getTile(loc.getEnvironment().terrainType, defaultWeather)));
           }
         }
         else
@@ -176,7 +186,7 @@ public class GameInstance implements Serializable
           {
             weather = loc.forecast.poll();
           }
-          if( null == weather ) weather = Weathers.CLEAR;
+          if( null == weather ) weather = defaultWeather;
           weatherChanges.add(new MapChangeEvent.EnvironmentAssignment(loc.getCoordinates(), Environment.getTile(loc.getEnvironment().terrainType, weather)));
         }
       }
