@@ -7,14 +7,12 @@ import Engine.OptionSelector;
 public class GameOption<T> extends OptionSelector
 {
   public final String optionName;
-  public final int minOption;
   public final ArrayList<T> optionList;
   private int storedValue = 0;
 
   public GameOption(String name, T[] Options, int defaultIndex)
   {
     super(Options.length);
-    minOption = 0;
     optionName = name;
     setSelectedOption(defaultIndex);
     optionList = new ArrayList<T>();
@@ -23,21 +21,21 @@ public class GameOption<T> extends OptionSelector
   @Override
   public int getSelectionNormalized()
   {
-    return super.getSelectionNormalized() + minOption;
+    return super.getSelectionNormalized();
   }
   @Override
   public void setSelectedOption(int value)
   {
-    super.setSelectedOption(value - minOption);
+    super.setSelectedOption(value);
     storedValue = getSelectionNormalized();
   }
   public T getSelectedObject()
   {
-    return optionList.get(getSelectionNormalized()-minOption);
+    return optionList.get(getSelectionNormalized());
   }
   public String getCurrentValueText()
   {
-    return optionList.get(getSelectionNormalized()-minOption).toString();
+    return optionList.get(getSelectionNormalized()).toString();
   }
   public void storeCurrentValue()
   {

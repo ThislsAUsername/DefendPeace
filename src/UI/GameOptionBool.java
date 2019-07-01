@@ -11,7 +11,7 @@ public class GameOptionBool extends GameOption<Boolean>
   @Override
   public String getCurrentValueText()
   {
-    boolean value = optionList.get(getSelectionNormalized()-minOption);
+    boolean value = optionList.get(getSelectionNormalized());
     return (value ? "On" : "Off");
   }
 }
