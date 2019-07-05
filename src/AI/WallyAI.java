@@ -75,7 +75,7 @@ public class WallyAI implements AIController
   private static final int INDIRECT_THREAT_THRESHHOLD = 0;
   private static final int DIRECT_THREAT_THRESHHOLD = 13;
   private static final double AGGRO_FUNDS_WEIGHT = 1.5;
-  private static final double RANGE_WEIGHT = 0.2;
+  private static final double RANGE_WEIGHT = 1;
 
   private ArrayList<XYCoord> unownedProperties;
   private ArrayList<XYCoord> capturingProperties;
@@ -837,28 +837,36 @@ public class WallyAI implements AIController
     @Override
     public int compare(UnitModel model1, UnitModel model2)
     {
-      double eff1 = 0;
-      double eff2 = 0;
-      for( WeaponModel wm : model1.weaponModels )
-      {
-        double damage = Weapon.strategies[Weapon.currentStrategy].getDamage(wm, targetModel);
-        double range = wm.maxRange;
-        if(wm.canFireAfterMoving)
-          range += wally.getEffectiveMove(model1);
-        double effectiveness = damage * targetModel.getCost() * (1 + range * RANGE_WEIGHT);
-        eff1 = Math.max(eff1, effectiveness);
-      }
-      for( WeaponModel wm : model2.weaponModels )
-      {
-        double damage = Weapon.strategies[Weapon.currentStrategy].getDamage(wm, targetModel);
-        double range = wm.maxRange;
-        if(wm.canFireAfterMoving)
-          range += wally.getEffectiveMove(model2);
-        double effectiveness = damage * targetModel.getCost() * (1 + range * RANGE_WEIGHT);
-        eff2 = Math.max(eff2, effectiveness);
-      }
+      double eff1 = wally.findEffectiveness(model1, targetModel);
+      double eff2 = wally.findEffectiveness(model2, targetModel);
 
       return (eff1 < eff2) ? 1 : ((eff1 > eff2) ? -1 : 0);
     }
+  }
+  
+  /** Returns effective power in terms of whole kills per unit, based on respective threat areas and how much damage I deal */
+  public double findEffectiveness(UnitModel model, UnitModel target)
+  {
+    double theirRange = 0;
+    for( WeaponModel wm : target.weaponModels )
+    {
+      double range = wm.maxRange;
+      if( wm.canFireAfterMoving )
+        range += getEffectiveMove(target);
+      theirRange = Math.max(theirRange, range);
+    }
+    double counterPower = 0;
+    for( WeaponModel wm : model.weaponModels )
+    {
+      double damage = Weapon.strategies[Weapon.currentStrategy].getDamage(wm, target);
+      double myRange = wm.maxRange;
+      if( wm.canFireAfterMoving )
+        myRange += getEffectiveMove(model);
+      double rangeMod = Math.pow(myRange / theirRange, RANGE_WEIGHT);
+      // TODO: account for average terrain defense?
+      double effectiveness = damage * rangeMod / 100;
+      counterPower = Math.max(counterPower, effectiveness);
+    }
+    return counterPower;
   }
 }
