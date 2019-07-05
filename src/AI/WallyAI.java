@@ -470,87 +470,10 @@ public class WallyAI implements AIController
         while (!tempQueue.isEmpty())
         {
           Unit unit = tempQueue.poll();
-
-          // Find the possible destinations.
-          ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
-
-          if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
+          if (queueTravelAction(gameMap, threatMap, unit))
           {
-            log(String.format("  Evaluating travel for %s", unit.toStringWithLocation()));
-            int index = 0;
-            XYCoord goal = null;
-            Path path = null;
-            boolean validTarget = false;
-            ArrayList<XYCoord> validTargets = new ArrayList<>();
-
-            if( unit.model.possibleActions.contains(UnitActionType.CAPTURE) )
-            {
-              validTargets.addAll(unownedProperties);
-            }
-            else
-            {
-              for( XYCoord coord : unownedProperties )
-              {
-                Location loc = gameMap.getLocation(coord);
-                if( loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS && loc.getOwner() != null )
-                {
-                  validTargets.add(coord);
-                }
-              }
-            }
-            // Loop until we find a valid property to go capture or run out of options.
-            Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), validTargets);
-            do
-            {
-              goal = validTargets.get(index++);
-              path = Utils.findShortestPath(unit, goal, gameMap, true);
-              validTarget = (myCo.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
-                  && !capturingProperties.contains(goal) // We aren't already capturing it.
-                  && (path.getPathLength() > 0)); // We can reach it.
-//              log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal,
-//                  (validTarget ? "Yes" : "No")));
-            } while (!validTarget && (index < validTargets.size())); // Loop until we run out of properties to check.
-
-            if( validTarget )
-            {
-              log(String.format("    Selected %s at %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal));
-
-              // Choose the point on the path just out of our range as our 'goal', and try to move there.
-              // This will allow us to navigate around large obstacles that require us to move away
-              // from our intended long-term goal.
-              path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
-              goal = new XYCoord(path.getEnd().x, path.getEnd().y); // Set the last location as our goal.
-
-//              log(String.format("    Intermediate waypoint: %s", goal));
-
-              // Sort my currently-reachable move locations by distance from the goal,
-              // and build a GameAction to move to the closest one.
-              Utils.sortLocationsByDistance(goal, destinations);
-              XYCoord destination = null;
-              // try to get somewhere safe
-              log(String.format("    %s would like to travel towards %s safely", unit.toStringWithLocation(), goal));
-              for( XYCoord xyc : destinations )
-              {
-                log(String.format("    is it safe to go to %s?", xyc));
-                if( canWallHere(gameMap, threatMap, unit, xyc) )
-                {
-                  log(String.format("    Yes"));
-                  destination = xyc;
-                  break;
-                }
-              }
-              if( null != destination )
-              {
-                Path movePath = Utils.findShortestPath(unit, destination, gameMap);
-                if( movePath.getPathLength() > 1 ) // We only want to try to travel if we can actually go somewhere
-                {
-                  GameAction move = new GameAction.WaitAction(unit, movePath);
-                  actions.offer(move);
-                  stateChange = true;
-                  break;
-                }
-              }
-            }
+            stateChange = true;
+            break;
           }
         }
       }
@@ -578,6 +501,92 @@ public class WallyAI implements AIController
     } while (nextAction == null && stateChange); // we don't want to end early, so if the state changed and we don't have an action yet, try again
     log(String.format("  Action: %s", nextAction));
     return nextAction;
+  }
+  
+  private boolean queueTravelAction(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit)
+  {
+    // Find the possible destinations.
+    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
+
+    if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
+    {
+      log(String.format("  Evaluating travel for %s", unit.toStringWithLocation()));
+      int index = 0;
+      XYCoord goal = null;
+      Path path = null;
+      boolean validTarget = false;
+      ArrayList<XYCoord> validTargets = new ArrayList<>();
+
+      if( unit.model.possibleActions.contains(UnitActionType.CAPTURE) )
+      {
+        validTargets.addAll(unownedProperties);
+      }
+      else
+      {
+        for( XYCoord coord : unownedProperties )
+        {
+          Location loc = gameMap.getLocation(coord);
+          if( loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS && loc.getOwner() != null )
+          {
+            validTargets.add(coord);
+          }
+        }
+      }
+      // Loop until we find a valid property to go capture or run out of options.
+      Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), validTargets);
+      do
+      {
+        goal = validTargets.get(index++);
+        path = Utils.findShortestPath(unit, goal, gameMap, true);
+        validTarget = (myCo.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
+            && !capturingProperties.contains(goal) // We aren't already capturing it.
+            && (path.getPathLength() > 0)); // We can reach it.
+//        log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal,
+//            (validTarget ? "Yes" : "No")));
+      } while (!validTarget && (index < validTargets.size())); // Loop until we run out of properties to check.
+
+      if( validTarget )
+      {
+        log(String.format("    Selected %s at %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal));
+
+        // Choose the point on the path just out of our range as our 'goal', and try to move there.
+        // This will allow us to navigate around large obstacles that require us to move away
+        // from our intended long-term goal.
+        path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
+        goal = new XYCoord(path.getEnd().x, path.getEnd().y); // Set the last location as our goal.
+
+//        log(String.format("    Intermediate waypoint: %s", goal));
+
+        // Sort my currently-reachable move locations by distance from the goal,
+        // and build a GameAction to move to the closest one.
+        Utils.sortLocationsByDistance(goal, destinations);
+        XYCoord destination = null;
+        // try to get somewhere safe
+        log(String.format("    %s would like to travel towards %s safely", unit.toStringWithLocation(), goal));
+        for( XYCoord xyc : destinations )
+        {
+          log(String.format("    is it safe to go to %s?", xyc));
+          if( canWallHere(gameMap, threatMap, unit, xyc) )
+          {
+            log(String.format("    Yes"));
+            destination = xyc;
+            break;
+          }
+        }
+        if( null != destination )
+        {
+          Path movePath = Utils.findShortestPath(unit, destination, gameMap);
+          if( movePath.getPathLength() > 1 ) // We only want to try to travel if we can actually go somewhere
+          {
+            GameAction move = new GameAction.WaitAction(unit, movePath);
+            actions.offer(move);
+            stateChange = true;
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   }
 
   private boolean isSafe(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc)
