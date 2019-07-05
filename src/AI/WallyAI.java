@@ -392,7 +392,7 @@ public class WallyAI implements AIController
         boolean foundAction = false;
 
         // Find the possible destinations.
-        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
+        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, true);
         // sort by furthest away, good for capturing
         Utils.sortLocationsByDistance(position, destinations);
         Collections.reverse(destinations);
@@ -403,9 +403,18 @@ public class WallyAI implements AIController
           Path movePath = Utils.findShortestPath(unit, coord, gameMap);
 
           // Figure out what I can do here.
-          ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath);
+          ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, true);
           for( GameActionSet actionSet : actionSets )
           {
+            boolean spaceFree = gameMap.isLocationEmpty(unit, coord);
+            Unit resident = gameMap.getLocation(coord).getResident();
+            if (!spaceFree)
+            {
+              if (resident.isTurnOver || resident.getHP()*resident.model.getCost() >= unit.getHP()*unit.model.getCost())
+                continue; // If we can't evict or we're not worth more than the other dude, we don't get to kick him out
+              log(String.format("  Evicting %s if I need to", resident.toStringWithLocation()));
+            }
+
             // See if we can bag enough damage to be worth sacrificing the unit
             if( actionSet.getSelected().getUnitActionType() == UnitActionType.ATTACK )
             {
@@ -429,7 +438,7 @@ public class WallyAI implements AIController
                   goForIt = true;
                 }
 
-                if( goForIt )
+                if( goForIt && (spaceFree || queueTravelAction(gameMap, threatMap, resident, true)))
                 {
                   actions.offer(ga);
                   foundAction = true;
@@ -442,7 +451,8 @@ public class WallyAI implements AIController
 
             // Only consider capturing if we can sit still or go somewhere safe.
             if( actionSet.getSelected().getUnitActionType() == UnitActionType.CAPTURE
-                && (coord.getDistance(unit.x, unit.y) == 0 || canWallHere(gameMap, threatMap, unit, coord) ) )
+                && ( coord.getDistance(unit.x, unit.y) == 0 || canWallHere(gameMap, threatMap, unit, coord) ) 
+                && ( spaceFree || queueTravelAction(gameMap, threatMap, resident, true) ) )
             {
               actions.offer(actionSet.getSelected());
               capturingProperties.add(coord);
@@ -470,7 +480,7 @@ public class WallyAI implements AIController
         while (!tempQueue.isEmpty())
         {
           Unit unit = tempQueue.poll();
-          if (queueTravelAction(gameMap, threatMap, unit))
+          if (queueTravelAction(gameMap, threatMap, unit, false))
           {
             stateChange = true;
             break;
@@ -503,7 +513,7 @@ public class WallyAI implements AIController
     return nextAction;
   }
   
-  private boolean queueTravelAction(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit)
+  private boolean queueTravelAction(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, boolean ignoreSafety)
   {
     // Find the possible destinations.
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
@@ -562,11 +572,11 @@ public class WallyAI implements AIController
         Utils.sortLocationsByDistance(goal, destinations);
         XYCoord destination = null;
         // try to get somewhere safe
-        log(String.format("    %s would like to travel towards %s safely", unit.toStringWithLocation(), goal));
+        log(String.format("    %s would like to travel towards %s. Safely?: %s", unit.toStringWithLocation(), goal, !ignoreSafety));
         for( XYCoord xyc : destinations )
         {
           log(String.format("    is it safe to go to %s?", xyc));
-          if( canWallHere(gameMap, threatMap, unit, xyc) )
+          if( ignoreSafety || canWallHere(gameMap, threatMap, unit, xyc) )
           {
             log(String.format("    Yes"));
             destination = xyc;

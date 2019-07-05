@@ -125,9 +125,7 @@ public class Utils
       SearchNode currentNode = searchQueue.poll();
       // if the space is empty or holds the current unit, highlight
       Unit obstacle = gameMap.getLocation(currentNode.x, currentNode.y).getResident();
-      if( obstacle == null || obstacle == unit ||
-          (includeOccupiedSpaces && (obstacle.CO == unit.CO) && obstacle.hasCargoSpace(unit.model.type)) ||
-          (includeOccupiedSpaces && (obstacle.CO == unit.CO) && (obstacle.model.type == unit.model.type) && (obstacle.getHP() < obstacle.model.maxHP)))
+      if( obstacle == null || obstacle == unit || includeOccupiedSpaces ) // expandSearchNode will throw out spaces occupied by enemies
       {
         reachableTiles.add(new XYCoord(currentNode.x, currentNode.y));
       }
