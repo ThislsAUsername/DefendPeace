@@ -717,6 +717,30 @@ public class WallyAI implements AIController
       }
     }
 
+    // Figure out how well we think we have the existing threats covered
+    Map<UnitModel, Double> myUnitCounts = new HashMap<UnitModel, Double>();
+    for( Unit u : myCo.units )
+    {
+      // Count how many of each model of enemy units are in play.
+      if( myUnitCounts.containsKey(u.model) )
+      {
+        myUnitCounts.put(u.model, myUnitCounts.get(u.model) + (u.getHP() / 10));
+      }
+      else
+      {
+        myUnitCounts.put(u.model, u.getHP() / 10.0);
+      }
+    }
+
+    for (UnitModel threat : enemyUnitCounts.keySet())
+    {
+      for (UnitModel counter : myUnitCounts.keySet()) // Subtract how well we think we counter each enemy from their HP counts
+      {
+        double counterPower = findEffectiveness(counter, threat);
+        enemyUnitCounts.put(threat, enemyUnitCounts.get(threat) - counterPower * myUnitCounts.get(counter));
+      }
+    }
+
     // change unit quantity->funds
     for( Entry<UnitModel, Double> ent : enemyUnitCounts.entrySet() )
     {
