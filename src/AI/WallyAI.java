@@ -80,7 +80,38 @@ public class WallyAI implements AIController
   private ArrayList<XYCoord> unownedProperties;
   private ArrayList<XYCoord> capturingProperties;
   
-  private HashMap<MoveType, Double> unitMoveMultipliers = null; // How much we value a given movement type on the map at hand; bigger is better
+  private HashMap<UnitModel, Double> unitEffectiveMove = null; // How well the unit can move, on average, on this map
+  public double getEffectiveMove(UnitModel model)
+  {
+    if (unitEffectiveMove.containsKey(model))
+      return unitEffectiveMove.get(model);
+
+    MoveType p = model.propulsion;
+    GameMap map = myCo.myView;
+    double totalCosts = 0;
+    int validTiles = 0;
+    double totalTiles = map.mapWidth * map.mapHeight; // to avoid integer division
+    // Iterate through the map, counting up the move costs of all valid terrain
+    for( int w = 0; w < map.mapWidth; ++w )
+    {
+      for( int h = 0; h < map.mapHeight; ++h )
+      {
+        Environment terrain = map.getLocation(w, h).getEnvironment();
+        if( p.canTraverse(terrain) )
+        {
+          validTiles++;
+          int cost = p.getMoveCost(terrain);
+          totalCosts += cost*cost; // square each cost to emphasize impact of being slowed down
+        }
+      }
+    }
+    //             term for how fast you are   term for map coverage
+    double ratio = (validTiles / totalCosts) * (validTiles / totalTiles); // 1.0 is the max expected value
+    
+    double effMove = model.movePower * ratio;
+    unitEffectiveMove.put(model, effMove);
+    return effMove;
+  }
 
   private StringBuffer logger = new StringBuffer();
   private int turnNum = 0;
@@ -92,30 +123,13 @@ public class WallyAI implements AIController
 
   private void init(GameMap map)
   {
-    unitMoveMultipliers = new HashMap<MoveType, Double>();
-    for( UnitModel myModel : myCo.unitModels.values() )
+    unitEffectiveMove = new HashMap<UnitModel, Double>();
+    // init all move multipliers before powers come into play
+    for( Commander co : map.commanders )
     {
-      MoveType vroom = myModel.propulsion;
-      if (!unitMoveMultipliers.containsKey(vroom))
+      for( UnitModel model : co.unitModels.values() )
       {
-        double totalCosts = 0;
-        int validTiles = 0;
-        // Iterate through the map, counting up the move costs of all valid terrain
-        // TODO: figure out how to count non-valid terrain
-        for( int w = 0; w < map.mapWidth; ++w )
-        {
-          for( int h = 0; h < map.mapHeight; ++h )
-          {
-            Environment terrain = map.getLocation(w, h).getEnvironment();
-            if( vroom.canTraverse(terrain) )
-            {
-              validTiles++;
-              totalCosts += vroom.getMoveCost(terrain);
-            }
-          }
-        }
-        double ratio = validTiles/totalCosts; // 1.0 is the max expected value
-        unitMoveMultipliers.put(vroom, ratio*ratio);
+        getEffectiveMove(model);
       }
     }
   }
@@ -123,7 +137,7 @@ public class WallyAI implements AIController
   @Override
   public void initTurn(GameMap gameMap)
   {
-    if (null == unitMoveMultipliers)
+    if (null == unitEffectiveMove)
       init(gameMap);
     turnNum++;
     log(String.format("[======== Wally initializing turn %s for %s =========]", turnNum, myCo));
@@ -703,8 +717,6 @@ public class WallyAI implements AIController
       return;
     }
 
-    // Sort enemy units by cardinality. We will attempt to build counters for the least numerous first.
-    // The most numerous enemies are probably cheap, and also countered by whatever we build for the narrow case.
     ArrayList<UnitModel> enemyModels = new ArrayList<UnitModel>();
     ArrayList<Entry<UnitModel, Double>> entryArray = new ArrayList<Entry<UnitModel, Double>>(enemyUnitCounts.entrySet());
     // change unit quantity->funds
@@ -735,7 +747,7 @@ public class WallyAI implements AIController
       while (!availableUnitModels.isEmpty())
       {
         // Sort my available models by their power against this enemy type.
-        Collections.sort(availableUnitModels, new UnitPowerComparator(enemyToCounter, unitMoveMultipliers));
+        Collections.sort(availableUnitModels, new UnitPowerComparator(enemyToCounter, this));
 
         // Grab the best counter.
         UnitModel idealCounter = availableUnitModels.get(0);
@@ -819,12 +831,12 @@ public class WallyAI implements AIController
   private static class UnitPowerComparator implements Comparator<UnitModel>
   {
     UnitModel targetModel;
-    private Map<MoveType, Double> unitMoveMultipliers;
+    private WallyAI wally;
 
-    public UnitPowerComparator(UnitModel targetType, Map<MoveType, Double> pUnitMoveMultipliers)
+    public UnitPowerComparator(UnitModel targetType, WallyAI pWally)
     {
       targetModel = targetType;
-      unitMoveMultipliers = pUnitMoveMultipliers;
+      wally = pWally;
     }
 
     @Override
@@ -837,7 +849,7 @@ public class WallyAI implements AIController
         double damage = Weapon.strategies[Weapon.currentStrategy].getDamage(wm, targetModel);
         double range = wm.maxRange;
         if(wm.canFireAfterMoving)
-          range += model1.movePower * unitMoveMultipliers.get(model1.propulsion);
+          range += wally.getEffectiveMove(model1);
         double effectiveness = damage * targetModel.getCost() * (1 + range * RANGE_WEIGHT);
         eff1 = Math.max(eff1, effectiveness);
       }
@@ -846,7 +858,7 @@ public class WallyAI implements AIController
         double damage = Weapon.strategies[Weapon.currentStrategy].getDamage(wm, targetModel);
         double range = wm.maxRange;
         if(wm.canFireAfterMoving)
-          range += model2.movePower * unitMoveMultipliers.get(model2.propulsion);
+          range += wally.getEffectiveMove(model2);
         double effectiveness = damage * targetModel.getCost() * (1 + range * RANGE_WEIGHT);
         eff2 = Math.max(eff2, effectiveness);
       }
