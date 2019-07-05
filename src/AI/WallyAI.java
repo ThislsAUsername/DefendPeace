@@ -683,6 +683,15 @@ public class WallyAI implements AIController
 
   private void queueUnitProductionActions(GameMap gameMap)
   {
+    // Figure out what unit types we can purchase with our available properties.
+    AIUtils.CommanderProductionInfo CPI = new AIUtils.CommanderProductionInfo(myCo, gameMap);
+
+    if( CPI.availableProperties.isEmpty() )
+    {
+      log("No properties available to build.");
+      return;
+    }
+
     log("Evaluating Production needs");
     int budget = myCo.money;
 
@@ -708,36 +717,22 @@ public class WallyAI implements AIController
       }
     }
 
-    // Figure out what unit types we can purchase with our available properties.
-    AIUtils.CommanderProductionInfo CPI = new AIUtils.CommanderProductionInfo(myCo, gameMap);
-
-    if( CPI.availableProperties.isEmpty() )
-    {
-      log("No properties available to build.");
-      return;
-    }
-
-    ArrayList<UnitModel> enemyModels = new ArrayList<UnitModel>();
-    ArrayList<Entry<UnitModel, Double>> entryArray = new ArrayList<Entry<UnitModel, Double>>(enemyUnitCounts.entrySet());
     // change unit quantity->funds
-    for( Entry<UnitModel, Double> ent : entryArray )
+    for( Entry<UnitModel, Double> ent : enemyUnitCounts.entrySet() )
     {
       ent.setValue(ent.getValue() * ent.getKey().getCost());
     }
 
-    Collections.sort(entryArray, new UnitModelFundsComparator());
-    for( Entry<UnitModel, Double> ent : entryArray )
-    {
-      enemyModels.add(ent.getKey());
-    }
+    Queue<Entry<UnitModel, Double>> enemyModels = 
+        new PriorityQueue<Entry<UnitModel, Double>>(myCo.unitModels.size(), new UnitModelFundsComparator());
+    enemyModels.addAll(enemyUnitCounts.entrySet());
 
     // Try to purchase units that will counter the most-represented enemies.
     while (!enemyModels.isEmpty() && !CPI.availableUnitModels.isEmpty())
     {
       // Find the first (most funds-invested) enemy UnitModel, and remove it. Even if we can't find an adequate counter,
       // there is not reason to consider it again on the next iteration.
-      UnitModel enemyToCounter = enemyModels.get(0);
-      enemyModels.remove(enemyToCounter);
+      UnitModel enemyToCounter = enemyModels.poll().getKey();
       double enemyNumber = enemyUnitCounts.get(enemyToCounter);
       log(String.format("Need a counter for %sx%s", enemyToCounter, enemyNumber));
       log(String.format("Remaining budget: %s", budget));
