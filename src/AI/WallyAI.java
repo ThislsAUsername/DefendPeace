@@ -71,11 +71,12 @@ public class WallyAI implements AIController
 
   private Commander myCo = null;
 
-  // % damage dealable to feel "threatened"
-  private static final int INDIRECT_THREAT_THRESHHOLD = 0;
+  // What % damage I'll ignore when checking safety
+  private static final int INDIRECT_THREAT_THRESHHOLD = 7;
   private static final int DIRECT_THREAT_THRESHHOLD = 13;
-  private static final double AGGRO_FUNDS_WEIGHT = 1.5;
-  private static final double RANGE_WEIGHT = 1;
+  private static final double AGGRO_FUNDS_WEIGHT = 1.5; // How many times my value I need to get before sacrifice is worth it
+  private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
+  private static final double MIN_SIEGE_RANGE_WEIGHT = 1; // How much to penalize siege weapon ranges for their min ranges 
 
   private ArrayList<XYCoord> unownedProperties;
   private ArrayList<XYCoord> capturingProperties;
@@ -143,6 +144,7 @@ public class WallyAI implements AIController
     log(String.format("[======== Wally initializing turn %s for %s =========]", turnNum, myCo));
 
     // Make sure we don't have any hang-ons from last time.
+    unitQueue.clear();
     actions.clear();
 
     // Create a list of every property we don't own, but want to.
@@ -905,6 +907,8 @@ public class WallyAI implements AIController
       double myRange = wm.maxRange;
       if( wm.canFireAfterMoving )
         myRange += getEffectiveMove(model);
+      else
+        myRange -= (wm.minRange - 1)*MIN_SIEGE_RANGE_WEIGHT; // penalize range based on inner range
       double rangeMod = Math.pow(myRange / theirRange, RANGE_WEIGHT);
       // TODO: account for average terrain defense?
       double effectiveness = damage * rangeMod / 100;
