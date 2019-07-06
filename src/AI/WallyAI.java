@@ -17,6 +17,7 @@ import Engine.Path;
 import Engine.UnitActionType;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Terrain.Environment;
 import Terrain.GameMap;
@@ -514,7 +515,8 @@ public class WallyAI implements AIController
     log(String.format("  Action: %s", nextAction));
     return nextAction;
   }
-  
+
+  /** Find a good long-term objective for the given unit, and pursue it (with consideration for life-preservation optional) */
   private boolean queueTravelAction(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, boolean ignoreSafety)
   {
     // Find the possible destinations.
@@ -588,10 +590,35 @@ public class WallyAI implements AIController
         if( null != destination )
         {
           Path movePath = Utils.findShortestPath(unit, destination, gameMap);
+          GameAction action = null;
           if( movePath.getPathLength() > 1 ) // We only want to try to travel if we can actually go somewhere
           {
-            GameAction move = new GameAction.WaitAction(unit, movePath);
-            actions.offer(move);
+            ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, false);
+
+            // Since we're moving anyway, might as well try shooting the scenery
+            for( GameActionSet actionSet : actionSets )
+            {
+              if( actionSet.getSelected().getUnitActionType() == UnitActionType.ATTACK )
+              {
+                double bestDamage = 0;
+                for( GameAction attack : actionSet.getGameActions() )
+                {
+                  Unit target = gameMap.getLocation(attack.getTargetLocation()).getResident();
+                  BattleSummary results = CombatEngine.simulateBattleResults(unit, target, gameMap, destination.xCoord, destination.yCoord);
+                  double loss   = unit  .model.getCost() * Math.min(unit  .getPreciseHP(), results.attackerHPLoss);
+                  double damage = target.model.getCost() * Math.min(target.getPreciseHP(), results.defenderHPLoss);
+                  if( damage > bestDamage && damage*AGGRO_FUNDS_WEIGHT > loss )
+                  {
+                    bestDamage = damage;
+                    action = attack;
+                  }
+                }
+              }
+            }
+
+            if( null == action) // Just wait if we can't do anything cool
+             action = new GameAction.WaitAction(unit, movePath);
+            actions.offer(action);
             stateChange = true;
             return true;
           }
