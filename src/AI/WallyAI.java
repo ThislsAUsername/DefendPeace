@@ -66,9 +66,6 @@ public class WallyAI implements AIController
   }
   
   Queue<GameAction> actions = new ArrayDeque<GameAction>();
-  // sort our units by expense first, we want them to hit first
-  Queue<Unit> unitQueue = new PriorityQueue<Unit>(11, new AIUtils.UnitCostComparator(false));
-  boolean stateChange;
 
   private Commander myCo = null;
 
@@ -145,7 +142,6 @@ public class WallyAI implements AIController
     log(String.format("[======== Wally initializing turn %s for %s =========]", turnNum, myCo));
 
     // Make sure we don't have any hang-ons from last time.
-    unitQueue.clear();
     actions.clear();
 
     // Create a list of every property we don't own, but want to.
@@ -201,27 +197,26 @@ public class WallyAI implements AIController
    */
   public GameAction getNextAction(GameMap gameMap)
   {
+    // If we have more actions ready, don't bother calculating stuff.
+    if( !actions.isEmpty() )
+    {
+      GameAction action = actions.poll();
+      log("  Action: " + action);
+      return action;
+    }
+
+    // Prioritize using our most expensive units first
+    Queue<Unit> unitQueue = new PriorityQueue<Unit>(11, new AIUtils.UnitCostComparator(false));
+    for( Unit unit : myCo.units )
+    {
+      if( unit.isTurnOver )
+        continue; // No actions for stale units.
+      unitQueue.offer(unit);
+    }
+
     GameAction nextAction = null;
     do
     {
-      // If we have more actions ready, don't bother calculating stuff.
-      if( !actions.isEmpty() )
-      {
-        GameAction action = actions.poll();
-        log("  Action: " + action);
-        return action;
-      }
-      else if( unitQueue.isEmpty() )
-      {
-        stateChange = false; // There's been no gamestate change since we last iterated through all the units, since we're about to do just that
-        for( Unit unit : myCo.units )
-        {
-          if( unit.isTurnOver )
-            continue; // No actions for stale units.
-          unitQueue.offer(unit);
-        }
-      }
-
       Queue<Unit> tempQueue = new ArrayDeque<Unit>();
       // Evaluate siege attacks
       while (actions.isEmpty() && !unitQueue.isEmpty())
@@ -264,7 +259,6 @@ public class WallyAI implements AIController
         {
           log(String.format("%s is shooting %s", unit.toStringWithLocation(), gameMap.getLocation(bestAttack.getTargetLocation()).getResident()));
           actions.offer(bestAttack);
-          stateChange = true;
           break;
         }
         else // tempqueue the siege unit if it can't attack
@@ -325,7 +319,7 @@ public class WallyAI implements AIController
                     && !gameMap.isLocationFogged(xyc) )
                   neededAttacks.put(xyc, null);
               }
-              if( foundKill || findAssaultKills(gameMap, neededAttacks, target, damage) >= target.getPreciseHP() )
+              if( foundKill || findAssaultKills(gameMap, unitQueue, neededAttacks, target, damage) >= target.getPreciseHP() )
               {
                 log(String.format("  Gonna try to kill %s, who has %s HP", target.toStringWithLocation(), target.getHP()));
                 double damageSum = 0;
@@ -342,7 +336,6 @@ public class WallyAI implements AIController
                       break;
                   }
                 }
-                stateChange = true;
                 foundKill = true;
                 break;
               }
@@ -468,7 +461,6 @@ public class WallyAI implements AIController
         }
         if( foundAction )
         {
-          stateChange = true;
           break; // Only one action per getNextAction() call, to avoid overlap.
         }
         else
@@ -478,40 +470,37 @@ public class WallyAI implements AIController
       }
 
       // If no attack/capture actions are available now, just move around
-      if( actions.isEmpty() && !stateChange )
+      if( actions.isEmpty() )
       {
         while (!tempQueue.isEmpty())
         {
           Unit unit = tempQueue.poll();
           if (queueTravelAction(gameMap, threatMap, unit, false))
-          {
-            stateChange = true;
             break;
-          }
         }
       }
 
       // Check for an available buying enhancement power
-      if( actions.isEmpty() && !stateChange )
+      if( actions.isEmpty() )
       {
         AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_BUY);
       }
 
       // We will add all build commands at once, since they can't conflict.
-      if( actions.isEmpty() && !stateChange )
+      if( actions.isEmpty() )
       {
         queueUnitProductionActions(gameMap);
       }
 
       // Check for a turn-ending power
-      if( actions.isEmpty() && !stateChange )
+      if( actions.isEmpty() )
       {
         AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_TURN_END);
       }
 
       // Return the next action, or null if actions is empty.
       nextAction = actions.poll();
-    } while (nextAction == null && stateChange); // we don't want to end early, so if the state changed and we don't have an action yet, try again
+    } while ( nextAction == null && !unitQueue.isEmpty() ); // we don't want to end early, so if the state changed and we don't have an action yet, try again
     log(String.format("  Action: %s", nextAction));
     return nextAction;
   }
@@ -619,7 +608,6 @@ public class WallyAI implements AIController
             if( null == action) // Just wait if we can't do anything cool
              action = new GameAction.WaitAction(unit, movePath);
             actions.offer(action);
-            stateChange = true;
             return true;
           }
         }
@@ -670,7 +658,7 @@ public class WallyAI implements AIController
    * Attempts to find a combination of attacks that will create a kill.
    * Recursive.
    */
-  private double findAssaultKills(GameMap gameMap, Map<XYCoord, Unit> neededAttacks, Unit target, double pDamage)
+  private double findAssaultKills(GameMap gameMap, Queue<Unit> unitQueue, Map<XYCoord, Unit> neededAttacks, Unit target, double pDamage)
   {
     // base case; we found a kill
     if( pDamage >= target.getPreciseHP() )
@@ -708,7 +696,7 @@ public class WallyAI implements AIController
             continue; // OHKOs should be decided using different logic
 
           log(String.format("  Use %s to deal %sHP?", unit.toStringWithLocation(), thisDamage));
-          thisDamage = findAssaultKills(gameMap, neededAttacks, target, thisDamage);
+          thisDamage = findAssaultKills(gameMap, unitQueue, neededAttacks, target, thisDamage);
 
           // Base case, stop iterating.
           if( thisDamage >= target.getPreciseHP() )
