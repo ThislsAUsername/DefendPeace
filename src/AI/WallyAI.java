@@ -75,7 +75,7 @@ public class WallyAI implements AIController
   private static final int DIRECT_THREAT_THRESHHOLD = 13;
   private static final double AGGRO_FUNDS_WEIGHT = 1.5; // How many times my value I need to get before sacrifice is worth it
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
-  private static final double MIN_SIEGE_RANGE_WEIGHT = 1; // How much to penalize siege weapon ranges for their min ranges 
+  private static final double MIN_SIEGE_RANGE_WEIGHT = 0.5; // How much to penalize siege weapon ranges for their min ranges 
 
   private ArrayList<XYCoord> unownedProperties;
   private ArrayList<XYCoord> capturingProperties;
@@ -629,12 +629,12 @@ public class WallyAI implements AIController
    */
   private boolean canWallHere(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc)
   {
+    // don't stand on a factory or in danger for no good reason
+    if( gameMap.getEnvironment(xyc).terrainType == TerrainType.FACTORY )
+      return false;
     // if we're safe, we're safe
     if( isSafe(gameMap, threatMap, unit, xyc) )
       return true;
-    // don't stand on a factory or in danger for no good reason
-    if( gameMap.getEnvironment(xyc).terrainType == TerrainType.FACTORY || !unit.model.hasDirectFireWeapon())
-      return false;
 
     // TODO: Determine whether the ally actually needs a wall there. Mechs walling for Tanks vs inf is... silly.
     // if we'd be a nice wall for a worthy ally, we can pretend we're safe there also
@@ -795,7 +795,7 @@ public class WallyAI implements AIController
       // there is not reason to consider it again on the next iteration.
       UnitModel enemyToCounter = enemyModels.poll().getKey();
       double enemyNumber = enemyUnitCounts.get(enemyToCounter);
-      log(String.format("Need a counter for %sx%s", enemyToCounter, enemyNumber));
+      log(String.format("Need a counter for %sx%s", enemyToCounter, enemyNumber / enemyToCounter.getCost() / enemyToCounter.maxHP));
       log(String.format("Remaining budget: %s", budget));
 
       // Get our possible options for countermeasures.
