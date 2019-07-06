@@ -81,7 +81,7 @@ public class WallyAI implements AIController
   private static final double AGGRO_EFFECT_THRESHHOLD = 0.42; // How effective do I need to be against a unit to target it?
   private static final double AGGRO_FUNDS_WEIGHT = 1.5; // How many times my value I need to get before sacrifice is worth it
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
-  private static final double MIN_SIEGE_RANGE_WEIGHT = 0.5; // How much to penalize siege weapon ranges for their min ranges 
+  private static final double MIN_SIEGE_RANGE_WEIGHT = 2; // Exponent for how much to penalize siege weapon ranges for their min ranges 
 
   private ArrayList<XYCoord> unownedProperties;
   private ArrayList<XYCoord> capturingProperties;
@@ -1013,7 +1013,7 @@ public class WallyAI implements AIController
       if( wm.canFireAfterMoving )
         myRange += getEffectiveMove(model);
       else
-        myRange -= (wm.minRange - 1)*MIN_SIEGE_RANGE_WEIGHT; // penalize range based on inner range
+        myRange -= (Math.pow(wm.minRange, MIN_SIEGE_RANGE_WEIGHT) - 1); // penalize range based on inner range
       double rangeMod = Math.pow(myRange / theirRange, RANGE_WEIGHT);
       // TODO: account for average terrain defense?
       double effectiveness = damage * rangeMod / 100;
