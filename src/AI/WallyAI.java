@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Set;
+
+import AI.AIUtils.CommanderProductionInfo;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
@@ -758,6 +761,53 @@ public class WallyAI implements AIController
     return damage;
   }
 
+  /**
+   * Returns the center mass of a given unit type, weighted by HP
+   * NOTE: Will violate fog knowledge
+   */
+  private static XYCoord findAverageDeployLocation(GameMap gameMap, Commander co, UnitModel model)
+  {
+    // init with the center of the map
+    int totalX = gameMap.mapWidth /2;
+    int totalY = gameMap.mapHeight/2;
+    int totalPoints = 1;
+    for( Unit unit : co.units )
+    {
+      if( unit.model == model )
+      {
+        totalX += unit.x * unit.getHP();
+        totalY += unit.y * unit.getHP();
+        totalPoints += unit.getHP();
+      }
+    }
+
+    return new XYCoord(totalX/totalPoints, totalY/totalPoints);
+  }
+
+  /**
+   * Returns the ideal place to build a unit type or null if it's impossible
+   * Kinda-sorta copied from AIUtils
+   */
+  public XYCoord getLocationToBuild(CommanderProductionInfo CPI, UnitModel model)
+  {
+    Set<TerrainType> desiredTerrains = CPI.modelToTerrainMap.get(model);
+    ArrayList<XYCoord> candidates = new ArrayList<XYCoord>();
+    for( Location loc : CPI.availableProperties )
+    {
+      if( desiredTerrains.contains(loc.getEnvironment().terrainType) )
+      {
+        candidates.add(loc.getCoordinates());
+      }
+    }
+    if (candidates.isEmpty())
+      return null;
+
+    // Sort locations by how close they are to "center mass" of that unit type, then reverse since we want to distribute our forces
+    Utils.sortLocationsByDistance(findAverageDeployLocation(myCo.myView, myCo, model), candidates);
+    Collections.reverse(candidates);
+    return candidates.get(0);
+  }
+
   private void queueUnitProductionActions(GameMap gameMap)
   {
     // Figure out what unit types we can purchase with our available properties.
@@ -771,6 +821,7 @@ public class WallyAI implements AIController
 
     log("Evaluating Production needs");
     int budget = myCo.money;
+    UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
 
     // Get a count of enemy forces.
     Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
@@ -863,7 +914,6 @@ public class WallyAI implements AIController
           int totalCost = numberToBuy * idealCounter.getCost();
 
           // Calculate a cost buffer to ensure we have enough money left so that no factories sit idle.
-          UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
           int costBuffer = (CPI.getNumFacilitiesFor(infModel) - 1) * infModel.getCost(); // The -1 assumes we will build this unit from a factory. Possibly untrue.
           if( 0 > costBuffer )
             costBuffer = 0; // No granting ourselves extra moolah.
@@ -878,10 +928,10 @@ public class WallyAI implements AIController
             log(String.format("    I can build %s %s, for a cost of %s", numberToBuy, idealCounter, totalCost));
             for( int i = 0; i < numberToBuy; ++i )
             {
-              Location loc = CPI.getLocationToBuild(idealCounter);
-              actions.offer(new GameAction.UnitProductionAction(myCo, idealCounter, loc.getCoordinates()));
+              XYCoord coord = getLocationToBuild(CPI, idealCounter);
+              actions.offer(new GameAction.UnitProductionAction(myCo, idealCounter, coord));
               budget -= idealCounter.getCost();
-              CPI.removeBuildLocation(loc);
+              CPI.removeBuildLocation(gameMap.getLocation(coord));
             }
             // We found a counter for this enemy UnitModel; break and go to the next type.
             // This break means we will build at most one type of unit per turn to counter each enemy type.
@@ -898,13 +948,12 @@ public class WallyAI implements AIController
 
     // Build infantry from any remaining facilities.
     log("Building infantry to fill out my production");
-    UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
     while ((budget >= infModel.getCost()) && (CPI.availableUnitModels.contains(infModel)))
     {
-      Location loc = CPI.getLocationToBuild(infModel);
-      actions.offer(new GameAction.UnitProductionAction(myCo, infModel, loc.getCoordinates()));
+      XYCoord coord = getLocationToBuild(CPI, infModel);
+      actions.offer(new GameAction.UnitProductionAction(myCo, infModel, coord));
       budget -= infModel.getCost();
-      CPI.removeBuildLocation(loc);
+      CPI.removeBuildLocation(gameMap.getLocation(coord));
     }
   }
 
