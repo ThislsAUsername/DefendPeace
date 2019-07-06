@@ -514,6 +514,8 @@ public class WallyAI implements AIController
   {
     // Find the possible destinations.
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
+    if (ignoreSafety) // If we *must* travel, make sure we do actually move.
+      destinations.remove(0);
 
     if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
     {
