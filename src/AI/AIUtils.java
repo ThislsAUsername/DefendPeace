@@ -189,7 +189,7 @@ public class AIUtils
   public static ArrayList<XYCoord> findRepairDepots(Unit unit)
   {
     ArrayList<XYCoord> stations = new ArrayList<XYCoord>();
-    for( XYCoord xyc : unit.CO.ownedProperties )
+    for( XYCoord xyc : unit.CO.ownedProperties ) // TODO: Revisit if we ever get a CO that repairs on non-owned or non-properties
     {
       Location loc = unit.CO.myView.getLocation(xyc);
       if( unit.model.canRepairOn(loc) )

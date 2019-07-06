@@ -73,6 +73,8 @@ public class WallyAI implements AIController
   // What % damage I'll ignore when checking safety
   private static final int INDIRECT_THREAT_THRESHHOLD = 7;
   private static final int DIRECT_THREAT_THRESHHOLD = 13;
+  private static final double UNIT_REFUEL_THRESHHOLD = 0.25; // Fuel fraction for refuel
+  private static final double UNIT_REARM_THRESHHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
   private static final double AGGRO_EFFECT_THRESHHOLD = 0.42; // How effective do I need to be against a unit to target it?
   private static final double AGGRO_FUNDS_WEIGHT = 1.5; // How many times my value I need to get before sacrifice is worth it
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
@@ -224,7 +226,7 @@ public class WallyAI implements AIController
       while (actions.isEmpty() && !unitQueue.isEmpty())
       {
         Unit unit = unitQueue.poll();
-        if( (gameMap.getEnvironment(unit.x, unit.y).terrainType == TerrainType.FACTORY) || !unit.model.hasImmobileWeapon() )
+        if( unit.CO.unitProductionByTerrain.containsKey(gameMap.getEnvironment(unit.x, unit.y).terrainType) || !unit.model.hasImmobileWeapon() )
         {
           tempQueue.offer(unit);
           continue;
@@ -317,7 +319,7 @@ public class WallyAI implements AIController
                   }
                 }
                 // Check that we could potentially move into this space. Also we're scared of fog
-                else if( (null == resident) && (gameMap.getEnvironment(xyc).terrainType != TerrainType.FACTORY)
+                else if( (null == resident) && myCo.unitProductionByTerrain.containsKey(gameMap.getEnvironment(xyc).terrainType)
                     && !gameMap.isLocationFogged(xyc) )
                   neededAttacks.put(xyc, null);
               }
@@ -432,7 +434,7 @@ public class WallyAI implements AIController
                   log(String.format("    He plans to deal %s HP damage for a net gain of %s funds", damage, (target.model.getCost() * damage - unit.model.getCost() * unit.getHP())/10));
                   goForIt = true;
                 }
-                else if( (gameMap.getEnvironment(unit.x, unit.y).terrainType != TerrainType.FACTORY) && isSafe(gameMap, threatMap, unit, ga.getMoveLocation()) )
+                else if( unit.CO.unitProductionByTerrain.containsKey(gameMap.getEnvironment(unit.x, unit.y).terrainType) && isSafe(gameMap, threatMap, unit, ga.getMoveLocation()) )
                 {
                   log(String.format("  %s thinks it's safe to attack %s", unit.toStringWithLocation(), target.toStringWithLocation()));
                   goForIt = true;
@@ -526,7 +528,30 @@ public class WallyAI implements AIController
       boolean validTarget = false;
       ArrayList<XYCoord> validTargets = new ArrayList<>();
 
-      if( unit.model.possibleActions.contains(UnitActionType.CAPTURE) )
+      boolean shouldResupply = (unit.getHP() < unit.model.maxHP) || (unit.fuel < unit.model.maxFuel*UNIT_REFUEL_THRESHHOLD);
+      if( !shouldResupply )
+      {
+        // Resupply also if we need ammo.
+        for( Weapon weap : unit.weapons )
+        {
+          if( weap.ammo <= weap.model.maxAmmo * UNIT_REARM_THRESHHOLD )
+            shouldResupply = true;
+        }
+      }
+
+      if( shouldResupply )
+      {
+        log(String.format("%s needs supplies.", unit.toStringWithLocation()));
+        ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
+        for( XYCoord coord : stations )
+        {
+          Location station = gameMap.getLocation(coord);
+          // Go to the nearest unoccupied friendly depot, but don't gum up the production lines.
+          if( station.getResident() == null && unit.CO.unitProductionByTerrain.containsKey(station.getEnvironment().terrainType) )
+            validTargets.add(coord);
+        }
+      }
+      else if( unit.model.possibleActions.contains(UnitActionType.CAPTURE) )
       {
         validTargets.addAll(unownedProperties);
       }
@@ -645,7 +670,7 @@ public class WallyAI implements AIController
   {
     // Don't stand on a friendly factory for no good reason
     Location destination = gameMap.getLocation(xyc);
-    if( !unit.CO.isEnemy(destination.getOwner()) && destination.getEnvironment().terrainType == TerrainType.FACTORY )
+    if( !unit.CO.isEnemy(destination.getOwner()) && unit.CO.unitProductionByTerrain.containsKey(destination.getEnvironment().terrainType) )
       return false;
     // if we're safe, we're safe
     if( isSafe(gameMap, threatMap, unit, xyc) )
