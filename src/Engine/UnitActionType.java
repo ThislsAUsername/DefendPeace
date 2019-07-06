@@ -154,7 +154,7 @@ public abstract class UnitActionType implements Serializable
     {
       XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
       Unit resident = map.getLocation(moveLocation).getResident();
-      if( resident != null )
+      if( !ignoreResident && resident != null )
       {
         if( resident.hasCargoSpace(actor.model.type) )
         {
@@ -187,7 +187,7 @@ public abstract class UnitActionType implements Serializable
     {
       XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
       Unit resident = map.getLocation(moveLocation).getResident();
-      if( resident != null )
+      if( !ignoreResident && resident != null )
       {
         if( (resident.model.type == actor.model.type) && resident != actor && (resident.getHP() < resident.model.maxHP) )
         {
@@ -225,6 +225,7 @@ public abstract class UnitActionType implements Serializable
         {
           ArrayList<GameAction> unloadActions = new ArrayList<GameAction>();
 
+          // TODO: Consider using ignoreResident for dropoff points as well
           for( Unit cargo : actor.heldUnits )
           {
             ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, actor, moveLocation, cargo);
@@ -322,7 +323,7 @@ public abstract class UnitActionType implements Serializable
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
-      if( ignoreResident || ignoreResident || map.isLocationEmpty(actor, moveLocation) )
+      if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         return new GameActionSet(new GameAction.TransformAction(actor, movePath, this), false);
       }
