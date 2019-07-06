@@ -641,8 +641,9 @@ public class WallyAI implements AIController
    */
   private boolean canWallHere(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc)
   {
-    // don't stand on a factory or in danger for no good reason
-    if( gameMap.getEnvironment(xyc).terrainType == TerrainType.FACTORY )
+    // Don't stand on a friendly factory for no good reason
+    Location destination = gameMap.getLocation(xyc);
+    if( !unit.CO.isEnemy(destination.getOwner()) && destination.getEnvironment().terrainType == TerrainType.FACTORY )
       return false;
     // if we're safe, we're safe
     if( isSafe(gameMap, threatMap, unit, xyc) )
