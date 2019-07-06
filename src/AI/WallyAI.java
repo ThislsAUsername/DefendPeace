@@ -73,6 +73,7 @@ public class WallyAI implements AIController
   // What % damage I'll ignore when checking safety
   private static final int INDIRECT_THREAT_THRESHHOLD = 7;
   private static final int DIRECT_THREAT_THRESHHOLD = 13;
+  private static final double AGGRO_EFFECT_THRESHHOLD = 0.42; // How effective do I need to be against a unit to target it?
   private static final double AGGRO_FUNDS_WEIGHT = 1.5; // How many times my value I need to get before sacrifice is worth it
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
   private static final double MIN_SIEGE_RANGE_WEIGHT = 0.5; // How much to penalize siege weapon ranges for their min ranges 
@@ -352,6 +353,7 @@ public class WallyAI implements AIController
       }
 
       // Figure out where we don't wanna go
+      ArrayList<Unit> allThreats = new ArrayList<Unit>();
       Map<UnitModel, Map<XYCoord, Double>> threatMap = new HashMap<UnitModel, Map<XYCoord, Double>>();
       if( actions.isEmpty() )
       {
@@ -366,6 +368,7 @@ public class WallyAI implements AIController
               for( Unit threat : unitLists.get(co) )
               {
                 // add each new threat to the existing threats
+                allThreats.add(threat);
                 Map<XYCoord, Double> threatArea = threatMap.get(um);
                 for( Entry<XYCoord, Double> newThreat : AIUtils.findThreatPower(gameMap, threat, um).entrySet() )
                 {
@@ -435,7 +438,7 @@ public class WallyAI implements AIController
                   goForIt = true;
                 }
 
-                if( goForIt && (spaceFree || queueTravelAction(gameMap, threatMap, resident, true)))
+                if( goForIt && (spaceFree || queueTravelAction(gameMap, allThreats, threatMap, resident, true)))
                 {
                   actions.offer(ga);
                   foundAction = true;
@@ -449,7 +452,7 @@ public class WallyAI implements AIController
             // Only consider capturing if we can sit still or go somewhere safe.
             if( actionSet.getSelected().getUnitActionType() == UnitActionType.CAPTURE
                 && ( coord.getDistance(unit.x, unit.y) == 0 || canWallHere(gameMap, threatMap, unit, coord) ) 
-                && ( spaceFree || queueTravelAction(gameMap, threatMap, resident, true) ) )
+                && ( spaceFree || queueTravelAction(gameMap, allThreats, threatMap, resident, true) ) )
             {
               actions.offer(actionSet.getSelected());
               capturingProperties.add(coord);
@@ -476,7 +479,7 @@ public class WallyAI implements AIController
         while (!tempQueue.isEmpty())
         {
           Unit unit = tempQueue.poll();
-          if (queueTravelAction(gameMap, threatMap, unit, false))
+          if (queueTravelAction(gameMap, allThreats, threatMap, unit, false))
             break;
         }
       }
@@ -507,7 +510,7 @@ public class WallyAI implements AIController
   }
 
   /** Find a good long-term objective for the given unit, and pursue it (with consideration for life-preservation optional) */
-  private boolean queueTravelAction(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, boolean ignoreSafety)
+  private boolean queueTravelAction(GameMap gameMap, ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, boolean ignoreSafety)
   {
     // Find the possible destinations.
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
@@ -525,7 +528,16 @@ public class WallyAI implements AIController
       {
         validTargets.addAll(unownedProperties);
       }
-      else
+      else if( unit.model.possibleActions.contains(UnitActionType.ATTACK) )
+      {
+        for (Unit target : allThreats)
+        {
+          if (AGGRO_EFFECT_THRESHHOLD > findEffectiveness(unit.model, target.model))
+            validTargets.add(new XYCoord(target.x, target.y));
+        }
+      }
+
+      if (validTargets.isEmpty()) // Send 'em to the HQ if they haven't got anything better to do
       {
         for( XYCoord coord : unownedProperties )
         {
