@@ -54,8 +54,9 @@ public class WallyAI implements AIController
     public String getDescription()
     {
       return
-          "Wally thinks he's clever; he knows about artillery, and tries to keep his important units safe until he wants to engage.\n" +
-          "He's a little slow on the uptake, though.";
+          "Wally values units based on firepower and the area they can threaten.\n" +
+          "He tries to keep units out of harm's way, and to protect expensive units with cheaper ones.\n" +
+          "He can be overly timid, and thus is a fan of artillery.";
     }
   }
   public static final AIMaker info = new instantiator();
