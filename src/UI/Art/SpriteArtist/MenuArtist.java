@@ -9,18 +9,17 @@ import Engine.GameInstance;
 import UI.InGameMenu;
 import UI.MapView;
 
-public class SpriteMenuArtist
+public class MenuArtist
 {
   private GameInstance myGame;
   private MapView myView;
   private InGameMenu<? extends Object> myCurrentMenu;
   private ArrayList<String> myCurrentMenuStrings;
-  private int drawScale;
 
   private int menuHBuffer; // Amount of visible menu to left and right of options;
   private int menuVBuffer; // Amount of visible menu above and below menu options;
 
-  public SpriteMenuArtist(GameInstance game, SpriteMapView view)
+  public MenuArtist(GameInstance game, SpriteMapView view)
   {
     myGame = game;
     myCurrentMenu = null;
@@ -29,7 +28,6 @@ public class SpriteMenuArtist
     myView = view;
 
     // Get the draw scale, and figure out the resulting "real" text size, etc.
-    drawScale = SpriteOptions.getDrawScale();
     menuHBuffer = 3; // Amount of visible menu to left and right of options;
     menuVBuffer = 4; // Amount of visible menu above and below menu options;
   }
@@ -52,8 +50,8 @@ public class SpriteMenuArtist
 
       BufferedImage menu = SpriteUIUtils.makeTextMenu(SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR, SpriteUIUtils.MENUHIGHLIGHTCOLOR,
           myCurrentMenuStrings, myCurrentMenu.getSelectionNumber(), menuHBuffer, menuVBuffer);
-      int menuWidth = menu.getWidth()*drawScale;
-      int menuHeight = menu.getHeight()*drawScale;
+      int menuWidth = menu.getWidth();
+      int menuHeight = menu.getHeight();
 
       // Center the menu over the current action target location, accounting for the position of the map view.
       int viewTileSize = myView.getTileSize(); // Grab this value for convenience.

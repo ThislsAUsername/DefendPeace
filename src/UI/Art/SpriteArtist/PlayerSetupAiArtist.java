@@ -56,7 +56,7 @@ public class PlayerSetupAiArtist
       for( int i = 0; i < aiOptions.size(); ++i )
       {
         BufferedImage frame = SpriteUIUtils.makeTextFrame(SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR, buf.toString(), 3, 2);
-        SpriteLibrary.drawImageCenteredOnPoint(frame.getGraphics(), SpriteLibrary.getTextAsImage(aiOptions.get(i).getName(), true), frame.getWidth()/2, frame.getHeight()/2, 1);
+        SpriteUIUtils.drawImageCenteredOnPoint(frame.getGraphics(), SpriteUIUtils.getTextAsImage(aiOptions.get(i).getName(), true), frame.getWidth()/2, frame.getHeight()/2);
         aiNameplates.put(i, frame);
       }
     }
@@ -106,11 +106,11 @@ public class PlayerSetupAiArtist
     myG.setColor(new Color(100, 115, 130));
     myG.drawRect(infoX, infoY, infoW, infoH);
 
+    // Draw the AI description.
+    BufferedImage infoText = SpriteUIUtils.drawTextToWidth(aiOptions.get(highlightedAi).getDescription(), (aiInfoZoneWidth - nameplateHeight*2));
+    myG.drawImage(infoText, (infoX+infoBuffer), (infoY+infoBuffer), null);
+
     // Draw the composed image to the window at scale.
     g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
-
-    // TODO: Fix drawTextToWidth to not apply scaling automatically.
-    BufferedImage infoText = SpriteUIUtils.drawTextToWidth(aiOptions.get(highlightedAi).getDescription(), (aiInfoZoneWidth - nameplateHeight*2)*drawScale);
-    g.drawImage(infoText, (infoX+infoBuffer)*drawScale, (infoY+infoBuffer)*drawScale, null);
   }
 }

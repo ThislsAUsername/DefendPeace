@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
 import java.util.ArrayList;
+
 import CommandingOfficers.Commander;
 import UI.UIUtils;
 import Units.Unit;
@@ -119,7 +120,6 @@ public class UnitSpriteSet
 
   private void colorize(Color[] oldColors, Color[] newColors)
   {
-    System.out.println("Colorizing sprite with " + sprites.length + " images:");
     for( Sprite s : sprites )
     {
       s.colorize(oldColors, newColors);
@@ -143,24 +143,22 @@ public class UnitSpriteSet
     return frame;
   }
 
-  public void drawUnit(Graphics g, Commander activeCO, Unit u, /* int action,*/int imageIndex, int drawX, int drawY,
-      int drawScale, boolean flipImage)
+  public void drawUnit(Graphics g, Commander activeCO, Unit u, /* int action,*/int imageIndex, int drawX, int drawY, boolean flipImage)
   {
     BufferedImage frame = getUnitImage(activeCO, u, imageIndex);
 
     // Draw the unit, facing the appropriate direction.
     if( flipImage )
     {
-      g.drawImage(frame, drawX + (frame.getWidth() * drawScale), drawY, -frame.getWidth() * drawScale, frame.getHeight()
-          * drawScale, null);
+      g.drawImage(frame, drawX + (frame.getWidth()), drawY, -frame.getWidth(), frame.getHeight(), null);
     }
     else
     {
-      g.drawImage(frame, drawX, drawY, frame.getWidth() * drawScale, frame.getHeight() * drawScale, null);
+      g.drawImage(frame, drawX, drawY, frame.getWidth(), frame.getHeight(), null);
     }
   }
 
-  public void drawUnitIcons(Graphics g, Commander[] COs, Unit u, int animIndex, int drawX, int drawY, int drawScale)
+  public void drawUnitIcons(Graphics g, Commander[] COs, Unit u, int animIndex, int drawX, int drawY)
   {
     int unitHeight = turnDone.getFrame(0).getHeight();
 
@@ -168,7 +166,7 @@ public class UnitSpriteSet
     if( u.getHP() < 10 )
     {
       BufferedImage num = SpriteLibrary.getMapUnitHPSprites().getFrame(u.getHP());
-      g.drawImage(num, drawX, drawY + ((unitHeight * drawScale) / 2), num.getWidth() * drawScale, num.getHeight() * drawScale,
+      g.drawImage(num, drawX, drawY + ((unitHeight) / 2), num.getWidth(), num.getHeight(),
           null);
     }
     
@@ -189,7 +187,7 @@ public class UnitSpriteSet
       Commander co = markers.get((animIndex%(markers.size()*ANIM_FRAMES_PER_MARK))/ANIM_FRAMES_PER_MARK);
       BufferedImage symbol = SpriteLibrary.getColoredMapTextSprites(co.myColor).get(co.getUnitMarking(u));
       // draw in the upper right corner
-      g.drawImage(symbol, drawX + ((unitHeight * drawScale) / 2), drawY, symbol.getWidth() * drawScale, symbol.getHeight() * drawScale, null);
+      g.drawImage(symbol, drawX + ((unitHeight) / 2), drawY, symbol.getWidth(), symbol.getHeight(), null);
     }
 
     // Draw the transport icon if the unit is holding another unit.
@@ -197,10 +195,10 @@ public class UnitSpriteSet
     {
       // Get the icon and characterize the draw space.
       BufferedImage cargoIcon = SpriteLibrary.getCargoIcon();
-      int iconX = drawX + ((unitHeight * drawScale) / 2);
-      int iconY = drawY + ((unitHeight * drawScale) / 2);
-      int iconW = cargoIcon.getWidth() * drawScale;
-      int iconH = cargoIcon.getHeight() * drawScale;
+      int iconX = drawX + ((unitHeight) / 2);
+      int iconY = drawY + ((unitHeight) / 2);
+      int iconW = cargoIcon.getWidth();
+      int iconH = cargoIcon.getHeight();
 
       // Draw team-color background for the icon.
       g.setColor( u.CO.myColor );
@@ -214,12 +212,12 @@ public class UnitSpriteSet
     {
       // Get the icon and characterize the draw space.
       BufferedImage stunIcon = SpriteLibrary.getStunIcon();
-      int iconW = stunIcon.getWidth() * drawScale;
-      int iconH = stunIcon.getHeight() * drawScale;
+      int iconW = stunIcon.getWidth();
+      int iconH = stunIcon.getHeight();
 
       // Draw team-color background for the icon.
       g.setColor( u.CO.myColor );
-      g.fillRect( drawX+drawScale, drawY+drawScale, iconW-(2*drawScale), iconH-(2*drawScale));
+      g.fillRect( drawX+1, drawY+1, iconW-(2), iconH-(2));
 
       // Draw stun icon.
       g.drawImage( stunIcon, drawX, drawY, iconW, iconH, null );
@@ -230,10 +228,10 @@ public class UnitSpriteSet
     {
       // Get the icon and characterize the draw space.
       BufferedImage captureIcon = SpriteLibrary.getCaptureIcon();
-      int iconX = drawX + ((unitHeight * drawScale) / 2);
-      int iconY = drawY + ((unitHeight * drawScale) / 2);
-      int iconW = captureIcon.getWidth() * drawScale;
-      int iconH = captureIcon.getHeight() * drawScale;
+      int iconX = drawX + ((unitHeight) / 2);
+      int iconY = drawY + ((unitHeight) / 2);
+      int iconW = captureIcon.getWidth();
+      int iconH = captureIcon.getHeight();
 
       // Draw team-color background for the icon.
       g.setColor( u.CO.myColor );

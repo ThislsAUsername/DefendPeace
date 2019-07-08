@@ -14,7 +14,7 @@ import UI.SlidingValue;
 /**
  * This class is responsible for drawing the main menu visible at game startup.
  */
-public class SpriteMainUIView implements IView
+public class MainUIView implements IView
 {
   MainUIController controller = null;
 
@@ -24,14 +24,14 @@ public class SpriteMainUIView implements IView
 
   private SlidingValue animHighlightedOption = new SlidingValue(0);
 
-  private int windowWidth;
-  private int windowHeight;
+  private int menuWidth;
+  private int menuHeight;
 
-  public SpriteMainUIView( MainUIController control )
+  public MainUIView( MainUIController control )
   {
     controller = control;
-    windowWidth = SpriteOptions.getScreenDimensions().width;
-    windowHeight = SpriteOptions.getScreenDimensions().height;
+    menuWidth = SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale();
+    menuHeight = SpriteOptions.getScreenDimensions().height / SpriteOptions.getDrawScale();
   }
 
   @Override
@@ -43,8 +43,8 @@ public class SpriteMainUIView implements IView
   @Override
   public void setPreferredDimensions(int width, int height)
   {
-    windowWidth = width;
-    windowHeight = height;
+    menuWidth = width / SpriteOptions.getDrawScale();
+    menuHeight = height / SpriteOptions.getDrawScale();
     SpriteOptions.setScreenDimensions(width, height);
   }
 
@@ -54,7 +54,7 @@ public class SpriteMainUIView implements IView
     switch(controller.getSubMenuType())
     {
       case GAME_SETUP:
-        SpriteMapSelectMenuArtist.draw(g, controller.getGameSetupController());
+        MapSelectMenuArtist.draw(g, controller.getGameSetupController());
         break;
       case MAIN:
       case SAVE_SELECT:
@@ -73,19 +73,23 @@ public class SpriteMainUIView implements IView
     // Find out where we are in the absolute, to enable our fancy spinning animation.
     int highlightedOption = controller.getOptionSelector().getSelectionAbsolute();
     
-    // Draw background.
-    drawMenuBG(g, highlightedOption);
+    BufferedImage menuImage = SpriteLibrary.createTransparentSprite(menuWidth, menuHeight);
+    int menuWidth = menuImage.getWidth();
+    int menuHeight = menuImage.getHeight();
+    Graphics menuGraphics = menuImage.getGraphics();
 
-    int drawScale = SpriteOptions.getDrawScale();
+    // Draw background.
+    drawMenuBG(menuGraphics, highlightedOption);
+
     // We start by assuming the highlighted option will be drawn centered.
-    int xCenter = windowWidth / 2;
-    int yCenter = 80*drawScale;
+    int xCenter = menuWidth / 2;
+    int yCenter = menuHeight / 2;
 
     // If we are moving from one highlighted option to another, calculate the intermediate draw location.
     animHighlightedOption.set(highlightedOption);
 
-    int optionSeparationX = windowWidth / 6; // So we can evenly space the seven visible options.
-    int optionSeparationY = windowHeight / 6;
+    int optionSeparationX = menuWidth / 6; // So we can evenly space the seven visible options.
+    int optionSeparationY = menuHeight / 6;
 
     // Figure out where to actually draw the currently-highlighted option. Note that this changes 
     //   immediately when up or down is pressed, and the new option becomes the basis for drawing.
@@ -103,14 +107,14 @@ public class SpriteMainUIView implements IView
       drawX = xBasisLoc + (layer * optionSeparationX);
       drawY = yBasisLoc + (layer * optionSeparationY);
 
-      drawMenuOption(g, highlightedOption + layer, drawX, drawY);
+      drawMenuOption(menuGraphics, highlightedOption + layer, drawX, drawY);
 
       // Draw the menu option equidistant from the highlighted option on the other side.
       if(layer > 0)
       {
         drawX = xBasisLoc - (layer * optionSeparationX);
         drawY = yBasisLoc - (layer * optionSeparationY);
-        drawMenuOption(g, highlightedOption - layer, drawX, drawY);
+        drawMenuOption(menuGraphics, highlightedOption - layer, drawX, drawY);
       }
     }
     
@@ -118,8 +122,12 @@ public class SpriteMainUIView implements IView
     {
       InGameMenu<SaveInfo> sm = controller.saveMenu;
       BufferedImage savesImage = SpriteUIUtils.makeTextMenu(sm.getAllOptions(), sm.getSelectionNumber(), 3, 4);
-      SpriteLibrary.drawImageCenteredOnPoint(g, savesImage, xCenter, yCenter, drawScale);
+      SpriteUIUtils.drawImageCenteredOnPoint(menuGraphics, savesImage, xCenter, yCenter);
     }
+
+    // Draw the composited image to the window.
+    int drawScale = SpriteOptions.getDrawScale();
+    g.drawImage(menuImage, 0, 0, menuImage.getWidth()*drawScale, menuImage.getHeight()*drawScale, null);
   }
 
   ///////////////////////////////////////////////////////////////
@@ -133,14 +141,17 @@ public class SpriteMainUIView implements IView
     for(;highlightedOption > highestOption; highlightedOption -= menuBGColors.length);
 
     // Get the background color for this option and draw our fancy pattern.
+    int bgHeight = SpriteOptions.getScreenDimensions().height / SpriteOptions.getDrawScale();
+    int yCenter = bgHeight / 2;
+    int halfTextFrameHeight = (SpriteLibrary.getMainMenuOptions().getFrame(0).getHeight() + 4)/2;
+
     Color drawColor = menuBGColors[highlightedOption];
     g.setColor(drawColor);
-    int frameWidth = windowWidth;
-    int drawScale = SpriteOptions.getDrawScale();
-    g.fillRect(0, 0,  frameWidth, 68*drawScale);
-    g.fillRect(0, 70*drawScale, frameWidth, drawScale);
-    g.fillRect(0, 89*drawScale, frameWidth, drawScale);
-    g.fillRect(0, 92*drawScale, frameWidth, windowHeight - (92*drawScale));
+    int frameWidth = menuWidth;
+    g.fillRect(0, 0,  frameWidth, yCenter - halfTextFrameHeight - 3);
+    g.fillRect(0, yCenter - halfTextFrameHeight - 1, frameWidth, 1);
+    g.fillRect(0, yCenter + halfTextFrameHeight + 1, frameWidth, 1);
+    g.fillRect(0, yCenter + halfTextFrameHeight + 4, frameWidth, bgHeight - (yCenter + halfTextFrameHeight));
   }
 
   /**
@@ -153,9 +164,9 @@ public class SpriteMainUIView implements IView
     BufferedImage menuText = SpriteLibrary.getMainMenuOptions().getFrame(option);
 
     // Only draw the image if it will actually show on the screen.
-    if( y > -1*menuText.getHeight() && y < windowHeight + menuText.getHeight())
+    if( y > -1*menuText.getHeight() && y < menuHeight + menuText.getHeight())
     {
-      SpriteLibrary.drawImageCenteredOnPoint(g, menuText, x, y, SpriteOptions.getDrawScale());
+      SpriteUIUtils.drawImageCenteredOnPoint(g, menuText, x, y);
     }
   }
 

@@ -35,9 +35,9 @@ public class SpriteMapView extends MapView
   // of this image is drawn to the screen.
   private BufferedImage mapImage = null;
 
-  private SpriteMapArtist mapArtist;
-  private SpriteUnitArtist unitArtist;
-  private SpriteMenuArtist menuArtist;
+  private MapArtist mapArtist;
+  private UnitArtist unitArtist;
+  private MenuArtist menuArtist;
 
   // Overlay management variables.
   private boolean overlayIsLeft = true;
@@ -61,9 +61,6 @@ public class SpriteMapView extends MapView
   // The number of map tiles to draw. This corresponds to the size of the game window.
   private int mapTilesToDrawX;
   private int mapTilesToDrawY;
-  // Coordinates of the upper-left-most, currently visible map location.
-  private int mapViewX;
-  private int mapViewY;
   // Coordinates of the draw view, with double precision. Will constantly move towards (mapViewX, mapViewY).
   private SlidingValue mapViewDrawX;
   private SlidingValue mapViewDrawY;
@@ -74,12 +71,12 @@ public class SpriteMapView extends MapView
   {
     // Create an initial image that can contain the entire map.
     mapImage = SpriteLibrary.createDefaultBlankSprite(
-        SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * game.gameMap.mapWidth,
-        SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * game.gameMap.mapHeight);
+        SpriteLibrary.baseSpriteSize * game.gameMap.mapWidth,
+        SpriteLibrary.baseSpriteSize * game.gameMap.mapHeight);
 
-    mapArtist = new SpriteMapArtist(game, this);
-    unitArtist = new SpriteUnitArtist(game, this);
-    menuArtist = new SpriteMenuArtist(game, this);
+    mapArtist = new MapArtist(game, this);
+    unitArtist = new UnitArtist(game, this);
+    menuArtist = new MenuArtist(game, this);
 
     myGame = game;
     unitFacings = new HashMap<Commander, Boolean>();
@@ -90,38 +87,35 @@ public class SpriteMapView extends MapView
       setCommanderUnitFacing(co, game.gameMap);
     }
 
-    // By default, we will show a 15x10 chunk of the map.
-    mapTilesToDrawX = 15;
-    mapTilesToDrawY = 10;
     // Start the view at the top-left by default.
-    mapViewX = 0;
-    mapViewY = 0;
     mapViewDrawX = new SlidingValue(0);
     mapViewDrawY = new SlidingValue(0);
 
-    mapViewWidth = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * mapTilesToDrawX;
-    mapViewHeight = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale() * mapTilesToDrawY;
-    SpriteOptions.setScreenDimensions(mapViewWidth, mapViewHeight);
+    // Set the view to show the whole map, if possible
+    mapViewWidth = SpriteLibrary.baseSpriteSize * game.gameMap.mapWidth;
+    mapViewHeight = SpriteLibrary.baseSpriteSize * game.gameMap.mapHeight;
+    SpriteOptions.setScreenDimensions(mapViewWidth * SpriteOptions.getDrawScale(), mapViewHeight * SpriteOptions.getDrawScale());
   }
 
   @Override
   public Dimension getPreferredDimensions()
   {
-    return new Dimension(mapViewWidth, mapViewHeight);
+    return new Dimension(mapViewWidth * SpriteOptions.getDrawScale(), mapViewHeight * SpriteOptions.getDrawScale());
   }
 
   @Override
   public void setPreferredDimensions(int width, int height)
   {
-    // The user wants to use a specific amount of screen. Figure out how many tiles to draw for them.
-    mapViewWidth = width;
-    mapViewHeight = height;
-    int tileSize = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale();
+    // The user wants to use a specific amount of screen. Figure out how many tiles to draw.
+    int drawScale = SpriteOptions.getDrawScale();
+    mapViewWidth = width / drawScale;
+    mapViewHeight = height / drawScale;
+    int tileSize = SpriteLibrary.baseSpriteSize;
     mapTilesToDrawX = mapViewWidth / tileSize;
     mapTilesToDrawY = mapViewHeight / tileSize;
 
     // Let SpriteOptions know we are changing things.
-    SpriteOptions.setScreenDimensions(mapViewWidth, mapViewHeight);
+    SpriteOptions.setScreenDimensions(width, height);
 
     dimensionsChanged = true; // Let render() know that the window was resized.
   }
@@ -129,7 +123,7 @@ public class SpriteMapView extends MapView
   @Override
   public int getTileSize()
   {
-    return SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale();
+    return SpriteLibrary.baseSpriteSize;
   }
 
   /** Returns whether the commander's map units should be flipped horizontally when drawn. */
@@ -208,109 +202,117 @@ public class SpriteMapView extends MapView
     
     DiagonalBlindsBG.draw(g);
 
-      // We draw in two stages. First, we draw the map/units onto a canvas which is the size
-      // of the entire map; then we copy the visible section of that canvas onto the game window.
-      // This allows us to avoid extra calculations to place map objects within in the window.
-      Graphics mapGraphics = mapImage.getGraphics();
+    // We draw in three stages. First, we draw the map/units onto a canvas which is the size
+    // of the entire map; then we copy the visible section of that canvas onto a screen-sized
+    // image, then draw the overlay and scale that composite as we draw it to the window.
+    Graphics mapGraphics = mapImage.getGraphics();
 
-      // No overlay is being shown - draw the map, units, etc.
-      // Make sure the view is centered where we want it.
-      adjustViewLocation();
+    // No overlay is being shown - draw the map, units, etc.
+    // Make sure the view is centered where we want it.
+    adjustViewLocation();
 
-      // Draw the portion of the base terrain that is currently in-window.
-      int drawMultiplier = SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale();
-      int drawX = (int) (mapViewDrawX.get() * drawMultiplier);
-      int drawY = (int) (mapViewDrawY.get() * drawMultiplier);
+    // Draw the portion of the base terrain that is currently in-window.
+    int drawMultiplier = SpriteLibrary.baseSpriteSize;
+    int drawX = (int) (mapViewDrawX.get() * drawMultiplier);
+    int drawY = (int) (mapViewDrawY.get() * drawMultiplier);
 
-      // Make sure we specify draw coordinates that are valid per the underlying map image.
-      int maxDrawX = mapImage.getWidth() - mapViewWidth;
-      int maxDrawY = mapImage.getHeight() - mapViewHeight;
-      if( drawX > maxDrawX )
-        drawX = maxDrawX;
-      if( drawX < 0 )
-        drawX = 0;
-      if( drawY > maxDrawY )
-        drawY = maxDrawY;
-      if( drawY < 0 )
-        drawY = 0;
+    // Make sure we specify draw coordinates that are valid per the underlying map image.
+    int maxDrawX = mapImage.getWidth() - mapViewWidth;
+    int maxDrawY = mapImage.getHeight() - mapViewHeight;
+    if( drawX > maxDrawX )
+      drawX = maxDrawX;
+    if( drawX < 0 )
+      drawX = 0;
+    if( drawY > maxDrawY )
+      drawY = maxDrawY;
+    if( drawY < 0 )
+      drawY = 0;
 
-      mapArtist.drawBaseTerrain(mapGraphics, gameMap, drawX, drawY, mapViewWidth, mapViewHeight);
+    mapArtist.drawBaseTerrain(mapGraphics, gameMap, drawX, drawY, mapViewWidth, mapViewHeight);
 
-      // Update the central sprite indices so animations happen in sync.
-      updateAnimationIndices();
+    // Update the central sprite indices so animations happen in sync.
+    updateAnimationIndices();
 
-      // Draw units, buildings, trees, etc.
-      drawUnitsAndMapObjects(mapGraphics, gameMap);
+    // Draw units, buildings, trees, etc.
+    drawUnitsAndMapObjects(mapGraphics, gameMap);
 
-      // Apply any relevant map highlight.
-      mapArtist.drawHighlights(mapGraphics);
+    // Apply any relevant map highlight.
+    mapArtist.drawHighlights(mapGraphics);
 
-      // Draw Unit icons on top of everything, to make sure they are seen clearly.
-      drawUnitIcons(mapGraphics, gameMap);
+    // Draw Unit icons on top of everything, to make sure they are seen clearly.
+    drawUnitIcons(mapGraphics, gameMap);
 
-      // Get a reference to the current action being built, if one exists.
-      Unit currentActor = mapController.getContemplatedActor();
-      Path currentPath = mapController.getContemplatedMove();
-      boolean isTargeting = mapController.isTargeting();
+    // Get a reference to the current action being built, if one exists.
+    Unit currentActor = mapController.getContemplatedActor();
+    Path currentPath = mapController.getContemplatedMove();
+    boolean isTargeting = mapController.isTargeting();
 
-      // Draw the movement arrow if the user is contemplating a move/action (but not once the action commences).
-      if( null != currentPath && null == currentAnimation )
+    // Draw the movement arrow if the user is contemplating a move/action (but not once the action commences).
+    if( null != currentPath && null == currentAnimation )
+    {
+      mapArtist.drawMovePath(mapGraphics, mapController.getContemplatedMove());
+    }
+
+    // Draw the currently-acting unit so it's on top of everything.
+    if( null != currentActor )
+    {
+      unitArtist.drawUnit(mapGraphics, currentActor, currentActor.x, currentActor.y, fastAnimIndex);
+      unitArtist.drawUnitIcons(mapGraphics, currentActor, currentActor.x, currentActor.y, animIndex);
+    }
+
+    if( currentAnimation != null )
+    {
+      // Animate until it tells you it's done.
+      if( currentAnimation.animate(mapGraphics) )
       {
-        mapArtist.drawMovePath(mapGraphics, mapController.getContemplatedMove());
-      }
+        currentAnimation = null;
 
-      // Draw the currently-acting unit so it's on top of everything.
-      if( null != currentActor )
+        // The animation is over; remove the corresponding event and notify the controller.
+        mapController.animationEnded(eventsToAnimate.poll(), eventsToAnimate.isEmpty());
+
+        // Get the next event animation if one exists.
+        loadNextEventAnimation();
+      }
+    }
+    else if( getCurrentGameMenu() == null )
+    {
+      mapArtist.drawCursor(mapGraphics, currentActor, isTargeting, myGame.getCursorX(), myGame.getCursorY());
+      Unit target = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
+      if( isTargeting && null != currentPath && null != target)
       {
-        unitArtist.drawUnit(mapGraphics, currentActor, currentActor.x, currentActor.y, fastAnimIndex);
-        unitArtist.drawUnitIcons(mapGraphics, currentActor, currentActor.x, currentActor.y, animIndex);
+        drawDamagePreviewSet(mapGraphics, currentActor, currentPath, target);
       }
+    }
+    else
+    {
+      menuArtist.drawMenu(mapGraphics, mapViewDrawX.geti(), mapViewDrawY.geti());
+    }
 
-      if( currentAnimation != null )
-      {
-        // Animate until it tells you it's done.
-        if( currentAnimation.animate(mapGraphics) )
-        {
-          currentAnimation = null;
+    // When we draw the map, we want to center it if it's smaller than the view dimensions
+    int deltaX = 0, deltaY = 0;
+    if (mapViewWidth > mapImage.getWidth())
+      deltaX = (mapViewWidth - mapImage.getWidth())/2;
+    if (mapViewHeight > mapImage.getHeight())
+      deltaY = (mapViewHeight - mapImage.getHeight())/2;
 
-          // The animation is over; remove the corresponding event and notify the controller.
-          mapController.animationEnded(eventsToAnimate.poll(), eventsToAnimate.isEmpty());
+    // Copy the relevant section of the map image onto a screen-sized image buffer.
+    Dimension dims = SpriteOptions.getScreenDimensions();
+    int drawScale = SpriteOptions.getDrawScale();
+    BufferedImage screenImage = SpriteLibrary.createTransparentSprite(dims.width/drawScale, dims.height/drawScale);
+    Graphics screenGraphics = screenImage.getGraphics();
 
-          // Get the next event animation if one exists.
-          loadNextEventAnimation();
-        }
-      }
-      else if( getCurrentGameMenu() == null )
-      {
-        mapArtist.drawCursor(mapGraphics, currentActor, isTargeting, myGame.getCursorX(), myGame.getCursorY());
-        Unit target = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
-        if( isTargeting && null != currentPath && null != target)
-        {
-          drawDamagePreviewSet(mapGraphics, currentActor, currentPath, target);
-        }
-      }
-      else
-      {
-        menuArtist.drawMenu(mapGraphics, mapViewX, mapViewY);
-      }
-      
-      // When we draw the map, we want to center it if it's smaller than the view dimensions
-      int deltaX = 0, deltaY = 0;
-      if (mapViewWidth > mapImage.getWidth())
-        deltaX = (mapViewWidth - mapImage.getWidth())/2;
-      if (mapViewHeight > mapImage.getHeight())
-        deltaY = (mapViewHeight - mapImage.getHeight())/2;
+    int drawWidth  = Math.min(mapViewWidth,  mapImage.getWidth());
+    int drawHeight = Math.min(mapViewHeight, mapImage.getHeight());
 
-      int drawWidth  = Math.min(mapViewWidth,  mapImage.getWidth());
-      int drawHeight = Math.min(mapViewHeight, mapImage.getHeight());
-      // Copy the map image into the window's graphics buffer.
-      // First four coords are the dest x,y,x2,y2. Next four are the source coords.      
-      g.drawImage(mapImage, deltaX, deltaY, deltaX + drawWidth, deltaY + drawHeight,
-                            drawX,  drawY,  drawX  + drawWidth, drawY  + drawHeight,
-                            null);
+    // First four coords are the dest x,y,x2,y2. Next four are the source coords.
+    screenGraphics.drawImage(mapImage, deltaX, deltaY, (deltaX + drawWidth), (deltaY + drawHeight),
+                                       drawX,  drawY,  (drawX  + drawWidth), (drawY  + drawHeight), null);
 
-      // Draw the Commander overlay with available funds.
-      drawCommanderOverlay(g);
+    // Draw the Commander overlay with available funds.
+    drawCommanderOverlay(screenGraphics);
+
+    // Copy the screen image into the window's graphics buffer.
+    g.drawImage(screenImage, 0, 0, screenImage.getWidth()*drawScale, screenImage.getHeight()*drawScale, null);
   }
 
   private void adjustViewLocation()
@@ -321,6 +323,8 @@ public class SpriteMapView extends MapView
 
     // Maintain a 2-space buffer between the cursor and the edge of the visible map, when possible.
     int buffer = 2; // Note the cursor takes up one space, so we will have to add 1 when checking the right/bottom border.
+    int mapViewX = mapViewDrawX.getDestination();
+    int mapViewY = mapViewDrawY.getDestination();
     if( (mapViewX + mapTilesToDrawX) < (curX + buffer + 1) )
     {
       mapViewX = curX - mapTilesToDrawX + buffer + 1; // Move our view to keep the cursor in sight.
@@ -481,11 +485,10 @@ public class SpriteMapView extends MapView
     BufferedImage dmgImage = SpriteUIUtils.makeTextFrame(colors[4], colors[2], damageText, 2, 2);
 
     // Draw the damage estimate directly above the unit being targeted.
-    int drawScale = SpriteOptions.getDrawScale();
-    int tileSize = SpriteLibrary.baseSpriteSize * drawScale;
+    int tileSize = SpriteLibrary.baseSpriteSize;
     int estimateX = (x * tileSize) + (tileSize / 2);
-    int estimateY = (y * tileSize) - (dmgImage.getHeight()*drawScale) / 2;
-    SpriteLibrary.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY, drawScale);
+    int estimateY = (y * tileSize) - dmgImage.getHeight() / 2;
+    SpriteUIUtils.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY);
   }
 
   /**
@@ -520,11 +523,11 @@ public class SpriteMapView extends MapView
   private void drawCommanderOverlay(Graphics g)
   {
     // Choose the CO overlay location based on the cursor location on the screen.
-    if( !overlayIsLeft && (myGame.getCursorX() - mapViewX) > (mapTilesToDrawX - 1) * 3 / 5 )
+    if( !overlayIsLeft && (myGame.getCursorX() - mapViewDrawX.get()) > (mapTilesToDrawX - 1) * 3 / 5 )
     {
       overlayIsLeft = true;
     }
-    if( overlayIsLeft && (myGame.getCursorX() - mapViewX) < mapTilesToDrawX * 2 / 5 )
+    if( overlayIsLeft && (myGame.getCursorX() - mapViewDrawX.get()) < mapTilesToDrawX * 2 / 5 )
     {
       overlayIsLeft = false;
     }
@@ -546,7 +549,7 @@ public class SpriteMapView extends MapView
     }
 
     // Create a new animation to show the game results.
-    currentAnimation = new SpriteGameEndAnimation(myGame.commanders);
+    currentAnimation = new GameEndAnimation(myGame.commanders);
   }
 
   @Override

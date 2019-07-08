@@ -17,7 +17,7 @@ import Units.UnitModel;
  * units and boots on the ground are among the best, and he brings some extra anti-personnel
  * firepower to keep his opponents in check.
  */
-public class CommanderStrong extends Commander
+public class Strong extends Commander
 {
   private static final long serialVersionUID = -3762678175296290654L;
 
@@ -55,11 +55,11 @@ public class CommanderStrong extends Commander
     @Override
     public Commander create()
     {
-      return new CommanderStrong();
+      return new Strong();
     }
   }
 
-  public CommanderStrong()
+  public Strong()
   {
     super(coInfo);
 

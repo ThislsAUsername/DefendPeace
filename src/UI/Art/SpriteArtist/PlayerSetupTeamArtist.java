@@ -91,7 +91,7 @@ public class PlayerSetupTeamArtist
     {
       teamColors[i] = control.getPlayerInfo(i).getCurrentColor();
     }
-    BufferedImage miniMap = SpriteMiniMapArtist.getMapImage( mapInfo, teamColors );
+    BufferedImage miniMap = MiniMapArtist.getMapImage( mapInfo, teamColors );
 
     // Figure out how large to draw the minimap. We want to make it as large as possible, but still
     //   fit inside the available space (with a minimum scale factor of 1).
@@ -162,7 +162,7 @@ public class PlayerSetupTeamArtist
 
       commanderFrame = new SpriteUIUtils.ImageFrame(1, 1, portraitPx + 2, portraitPx + 2, info.getCurrentColor(),
           info.getCurrentColor(), true, SpriteLibrary.getCommanderSprites( info.getCurrentCO().name ).head);
-      teamLabel = new SpriteUIUtils.ImageFrame(commanderFrame.width+2, 1, 28, 10, SpriteUIUtils.MENUHIGHLIGHTCOLOR, SpriteUIUtils.MENUBGCOLOR, false, SpriteLibrary.getTextAsImage("TEAM", true));
+      teamLabel = new SpriteUIUtils.ImageFrame(commanderFrame.width+2, 1, 28, 10, SpriteUIUtils.MENUHIGHLIGHTCOLOR, SpriteUIUtils.MENUBGCOLOR, false, SpriteUIUtils.getTextAsImage("TEAM", true));
       commanderFrame.render(g);
       teamLabel.render(g);
 
