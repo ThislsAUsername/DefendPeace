@@ -81,7 +81,8 @@ public class WallyAI implements AIController
   private static final double AGGRO_EFFECT_THRESHHOLD = 0.42; // How effective do I need to be against a unit to target it?
   private static final double AGGRO_FUNDS_WEIGHT = 1.5; // How many times my value I need to get before sacrifice is worth it
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
-  private static final double MIN_SIEGE_RANGE_WEIGHT = 2; // Exponent for how much to penalize siege weapon ranges for their min ranges 
+  private static final double TERRAIN_PENALTY_WEIGHT = 3; // Exponent for how crippling we think high move costs are
+  private static final double MIN_SIEGE_RANGE_WEIGHT = 0.8; // Exponent for how much to penalize siege weapon ranges for their min ranges 
 
   private ArrayList<XYCoord> unownedProperties;
   private ArrayList<XYCoord> capturingProperties;
@@ -107,7 +108,7 @@ public class WallyAI implements AIController
         {
           validTiles++;
           int cost = p.getMoveCost(terrain);
-          totalCosts += cost*cost; // square each cost to emphasize impact of being slowed down
+          totalCosts += Math.pow(cost, TERRAIN_PENALTY_WEIGHT);
         }
       }
     }
@@ -514,6 +515,7 @@ public class WallyAI implements AIController
     return nextAction;
   }
 
+  /** Produces a list of destinations for the unit, ordered by their relative precedence */
   private ArrayList<XYCoord> findTravelDestinations(GameMap gameMap, ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit)
   {
     ArrayList<XYCoord> goals = new ArrayList<XYCoord>();
@@ -549,13 +551,38 @@ public class WallyAI implements AIController
     }
     else if( unit.model.possibleActions.contains(UnitActionType.ATTACK) )
     {
+      Map<UnitModel, Double> valueMap = new HashMap<UnitModel, Double>();
+      Map<UnitModel, ArrayList<XYCoord>> targetMap = new HashMap<UnitModel, ArrayList<XYCoord>>();
+
+      // Categorize all enemies by type, and all types by how well we match up vs them
       for (Unit target : allThreats)
       {
+        UnitModel model = target.model;
         XYCoord targetCoord = new XYCoord(target.x, target.y);
-        if (AGGRO_EFFECT_THRESHHOLD > findEffectiveness(unit.model, target.model))
-          goals.add(targetCoord);
+        double effectiveness = findEffectiveness(unit.model, target.model);
+        if (Utils.findShortestPath(unit, targetCoord, gameMap, true) != null &&
+            AGGRO_EFFECT_THRESHHOLD > effectiveness)
+        {
+          valueMap.put(model, effectiveness*model.getCost());
+          if (!targetMap.containsKey(model)) targetMap.put(model, new ArrayList<XYCoord>());
+          targetMap.get(model).add(targetCoord);
+        }
       }
-      Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
+
+      // Sort all individual target lists by distance
+      for (ArrayList<XYCoord> targetList : targetMap.values())
+        Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), targetList);
+
+      // Sort all target types by how much we want to shoot them with this unit
+      Queue<Entry<UnitModel, Double>> targetTypesInOrder = 
+          new PriorityQueue<Entry<UnitModel, Double>>(myCo.unitModels.size(), new UnitModelFundsComparator());
+      targetTypesInOrder.addAll(valueMap.entrySet());
+
+      while (!targetTypesInOrder.isEmpty())
+      {
+        UnitModel model = targetTypesInOrder.poll().getKey(); // peel off the juiciest
+        goals.addAll(targetMap.get(model)); // produce a list ordered by juiciness first, then distance TODO: consider a holistic "juiciness" metric that takes into account both matchup and distance?
+      }
     }
 
     if (goals.isEmpty()) // Send 'em to the HQ if they haven't got anything better to do
@@ -570,7 +597,7 @@ public class WallyAI implements AIController
       }
       Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
     }
-    
+
     return goals;
   }
 
@@ -649,9 +676,9 @@ public class WallyAI implements AIController
                 {
                   Unit target = gameMap.getLocation(attack.getTargetLocation()).getResident();
                   BattleSummary results = CombatEngine.simulateBattleResults(unit, target, gameMap, destination.xCoord, destination.yCoord);
-                  double loss   = unit  .model.getCost() * Math.min(unit  .getPreciseHP(), results.attackerHPLoss);
-                  double damage = target.model.getCost() * Math.min(target.getPreciseHP(), results.defenderHPLoss);
-                  if( damage > bestDamage && damage*AGGRO_FUNDS_WEIGHT > loss )
+                  double loss   = Math.min(unit  .getHP(), (int)results.attackerHPLoss);
+                  double damage = Math.min(target.getHP(), (int)results.defenderHPLoss);
+                  if( damage > bestDamage && damage > loss ) // only shoot that which you hurt more than it hurts you
                   {
                     bestDamage = damage;
                     action = attack;
