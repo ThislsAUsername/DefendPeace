@@ -514,6 +514,66 @@ public class WallyAI implements AIController
     return nextAction;
   }
 
+  private ArrayList<XYCoord> findTravelDestinations(GameMap gameMap, ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit)
+  {
+    ArrayList<XYCoord> goals = new ArrayList<XYCoord>();
+
+    boolean shouldResupply = (unit.getHP() < unit.model.maxHP) || (unit.fuel < unit.model.maxFuel*UNIT_REFUEL_THRESHHOLD);
+    if( !shouldResupply )
+    {
+      // Resupply also if we need ammo.
+      for( Weapon weap : unit.weapons )
+      {
+        if( weap.ammo <= weap.model.maxAmmo * UNIT_REARM_THRESHHOLD )
+          shouldResupply = true;
+      }
+    }
+
+    if( shouldResupply )
+    {
+      log(String.format("%s needs supplies.", unit.toStringWithLocation()));
+      ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
+      for( XYCoord coord : stations )
+      {
+        Location station = gameMap.getLocation(coord);
+        // Go to the nearest unoccupied friendly depot, but don't gum up the production lines.
+        if( station.getResident() == null && unit.CO.unitProductionByTerrain.containsKey(station.getEnvironment().terrainType) )
+          goals.add(coord);
+      }
+      Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
+    }
+    else if( unit.model.possibleActions.contains(UnitActionType.CAPTURE) )
+    {
+      goals.addAll(unownedProperties);
+      Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
+    }
+    else if( unit.model.possibleActions.contains(UnitActionType.ATTACK) )
+    {
+      for (Unit target : allThreats)
+      {
+        XYCoord targetCoord = new XYCoord(target.x, target.y);
+        if (AGGRO_EFFECT_THRESHHOLD > findEffectiveness(unit.model, target.model))
+          goals.add(targetCoord);
+      }
+      Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
+    }
+
+    if (goals.isEmpty()) // Send 'em to the HQ if they haven't got anything better to do
+    {
+      for( XYCoord coord : unownedProperties )
+      {
+        Location loc = gameMap.getLocation(coord);
+        if( loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS && loc.getOwner() != null )
+        {
+          goals.add(coord);
+        }
+      }
+      Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
+    }
+    
+    return goals;
+  }
+
   /** Find a good long-term objective for the given unit, and pursue it (with consideration for life-preservation optional) */
   private boolean queueTravelAction(GameMap gameMap, ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, boolean ignoreSafety)
   {
@@ -529,57 +589,9 @@ public class WallyAI implements AIController
       XYCoord goal = null;
       Path path = null;
       boolean validTarget = false;
-      ArrayList<XYCoord> validTargets = new ArrayList<>();
+      ArrayList<XYCoord> validTargets = findTravelDestinations(gameMap, allThreats, threatMap, unit);
 
-      boolean shouldResupply = (unit.getHP() < unit.model.maxHP) || (unit.fuel < unit.model.maxFuel*UNIT_REFUEL_THRESHHOLD);
-      if( !shouldResupply )
-      {
-        // Resupply also if we need ammo.
-        for( Weapon weap : unit.weapons )
-        {
-          if( weap.ammo <= weap.model.maxAmmo * UNIT_REARM_THRESHHOLD )
-            shouldResupply = true;
-        }
-      }
-
-      if( shouldResupply )
-      {
-        log(String.format("%s needs supplies.", unit.toStringWithLocation()));
-        ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
-        for( XYCoord coord : stations )
-        {
-          Location station = gameMap.getLocation(coord);
-          // Go to the nearest unoccupied friendly depot, but don't gum up the production lines.
-          if( station.getResident() == null && unit.CO.unitProductionByTerrain.containsKey(station.getEnvironment().terrainType) )
-            validTargets.add(coord);
-        }
-      }
-      else if( unit.model.possibleActions.contains(UnitActionType.CAPTURE) )
-      {
-        validTargets.addAll(unownedProperties);
-      }
-      else if( unit.model.possibleActions.contains(UnitActionType.ATTACK) )
-      {
-        for (Unit target : allThreats)
-        {
-          if (AGGRO_EFFECT_THRESHHOLD > findEffectiveness(unit.model, target.model))
-            validTargets.add(new XYCoord(target.x, target.y));
-        }
-      }
-
-      if (validTargets.isEmpty()) // Send 'em to the HQ if they haven't got anything better to do
-      {
-        for( XYCoord coord : unownedProperties )
-        {
-          Location loc = gameMap.getLocation(coord);
-          if( loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS && loc.getOwner() != null )
-          {
-            validTargets.add(coord);
-          }
-        }
-      }
       // Loop until we find a valid property to go capture or run out of options.
-      Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), validTargets);
       do
       {
         goal = validTargets.get(index++);
