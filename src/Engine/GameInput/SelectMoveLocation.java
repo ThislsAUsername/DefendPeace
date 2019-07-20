@@ -44,6 +44,8 @@ class SelectMoveLocation extends GameInputState<Path>
 
       // Construct the next state instance.
       next = new SelectUnitAction(myStateData);
+      if (next.mySelector.size() < 1)
+        next = this; // If there ain't no actions, don't do nuthin'
     }
     return next;
   }

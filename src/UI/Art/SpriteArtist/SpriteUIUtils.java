@@ -14,6 +14,7 @@ public class SpriteUIUtils
   public static final Color MENUBGCOLOR = new Color(234, 204, 154);
   public static final Color MENUHIGHLIGHTCOLOR = new Color(246, 234, 210);
 
+
   public static BufferedImage makeTextFrame(String item, int hBuffer, int vBuffer)
   {
     return makeTextFrame(MENUBGCOLOR, MENUFRAMECOLOR, item, hBuffer, vBuffer);
