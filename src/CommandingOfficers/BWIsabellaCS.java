@@ -65,7 +65,7 @@ public class BWIsabellaCS extends Commander
 
       COMovementModifier moveMod = new COMovementModifier(VALUE);
 
-      for( UnitModel um : COcast.unitModels )
+      for( UnitModel um : COcast.unitModels.values() )
       {
           moveMod.addApplicableUnitModel(um);
       }
@@ -95,7 +95,7 @@ public class BWIsabellaCS extends Commander
 
       COMovementModifier moveMod = new COMovementModifier(VALUE);
 
-      for( UnitModel um : COcast.unitModels )
+      for( UnitModel um : COcast.unitModels.values() )
       {
           moveMod.addApplicableUnitModel(um);
       }

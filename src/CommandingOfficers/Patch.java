@@ -8,7 +8,7 @@ import Terrain.MapMaster;
 import Terrain.Location;
 import Units.Unit;
 
-public class CommanderPatch extends Commander
+public class Patch extends Commander
 {
   private static final long serialVersionUID = -543799935457360451L;
 
@@ -28,31 +28,31 @@ public class CommanderPatch extends Commander
           "Gives an attack boost of "+PLUNDER_ATTACK_BUFF+"%\n" + 
           "Gives "+PLUNDER_INCOME+"x of the value of any funds damage Patch deals.\n"));
       infoPages.add(new InfoPage(
-          "Plunder ("+PILLAGE_COST+"):\n" + 
+          "Pillage ("+PILLAGE_COST+"):\n" + 
           "Gives an attack boost of "+PILLAGE_ATTACK_BUFF+"%\n" + 
           "Gives "+PILLAGE_INCOME+"x the value of any funds damage Patch deals.\n"));
     }
     @Override
     public Commander create()
     {
-      return new CommanderPatch();
+      return new Patch();
     }
   }
 
   // Variables to characterize Patch's abilities.
   private static final String PLUNDER_NAME = "Plunder";
-  private static final int PLUNDER_COST = 5;
+  private static final int PLUNDER_COST = 3;
   private static final double PLUNDER_INCOME = 0.25;
   private static final int PLUNDER_ATTACK_BUFF = 10;
 
   private static final String PILLAGE_NAME = "Pillage";
-  private static final int PILLAGE_COST = 10;
+  private static final int PILLAGE_COST = 6;
   private static final double PILLAGE_INCOME = 0.5;
   private static final int PILLAGE_ATTACK_BUFF = 25;
 
   private LootAbility myLootAbility = null;
 
-  public CommanderPatch()
+  public Patch()
   {
     super(coInfo);
 

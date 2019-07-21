@@ -125,9 +125,7 @@ public class Utils
       SearchNode currentNode = searchQueue.poll();
       // if the space is empty or holds the current unit, highlight
       Unit obstacle = gameMap.getLocation(currentNode.x, currentNode.y).getResident();
-      if( obstacle == null || obstacle == unit ||
-          (includeOccupiedSpaces && (obstacle.CO == unit.CO) && obstacle.hasCargoSpace(unit.model.type)) ||
-          (includeOccupiedSpaces && (obstacle.CO == unit.CO) && (obstacle.model.type == unit.model.type) && (obstacle.getHP() < obstacle.model.maxHP)))
+      if( obstacle == null || obstacle == unit || includeOccupiedSpaces ) // expandSearchNode will throw out spaces occupied by enemies
       {
         reachableTiles.add(new XYCoord(currentNode.x, currentNode.y));
       }
@@ -544,23 +542,22 @@ public class Utils
   
 
   /** Returns a list of all locations visible to the unit at its current location. */
-  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer)
+  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, boolean piercing)
   {
-    return findVisibleLocations(map, viewer, viewer.x, viewer.y);
+    return findVisibleLocations(map, viewer, viewer.x, viewer.y, piercing);
   }
   /** Returns a list of all locations that would be visible to the unit if it were at (x, y). */
-  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, int x, int y)
+  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, int x, int y, boolean piercing)
   {
     ArrayList<XYCoord> viewables = new ArrayList<XYCoord>();
 
     if( map.isLocationValid(x, y) )
     {
-      int range = viewer.model.visionRange;
+      int range = (piercing)? viewer.model.visionRangePiercing : viewer.model.visionRange;
       // if it's a surface unit, give it the boost the terrain would provide
-      if( viewer.model.chassis == ChassisEnum.TROOP || viewer.model.chassis == ChassisEnum.TANK
-          || viewer.model.chassis == ChassisEnum.SHIP )
+      if( viewer.model.isSurfaceUnit() )
         range += map.getEnvironment(x, y).terrainType.getVisionBoost();
-      viewables.addAll(findVisibleLocations(map, new XYCoord(x, y), range, viewer.model.visionIgnoresCover));
+      viewables.addAll(findVisibleLocations(map, new XYCoord(x, y), range, piercing));
     }
     
     return viewables;
@@ -585,7 +582,7 @@ public class Utils
         if( currentRange <= range && map.isLocationValid(coord) )
         {
           // If we're adjacent, or we can see through cover, or it's *not* cover, we can see into it.
-          if( currentRange < 2 || piercing || !map.getEnvironment(coord).terrainType.isCover() )
+          if( piercing || !map.getEnvironment(coord).terrainType.isCover() )
           {
             // Add this location to the set.
             locations.add(coord);

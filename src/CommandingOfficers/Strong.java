@@ -17,7 +17,7 @@ import Units.UnitModel;
  * units and boots on the ground are among the best, and he brings some extra anti-personnel
  * firepower to keep his opponents in check.
  */
-public class CommanderStrong extends Commander
+public class Strong extends Commander
 {
   private static final long serialVersionUID = -3762678175296290654L;
 
@@ -55,11 +55,11 @@ public class CommanderStrong extends Commander
     @Override
     public Commander create()
     {
-      return new CommanderStrong();
+      return new Strong();
     }
   }
 
-  public CommanderStrong()
+  public Strong()
   {
     super(coInfo);
 
@@ -126,7 +126,7 @@ public class CommanderStrong extends Commander
       damageMod = new CODamageModifier(STRONGARM_BUFF);
       defenseMod = new CODefenseModifier(STRONGARM_BUFF);
       damageModTroop = new CODamageModifier(STRONGARM_FOOT_BUFF);
-      for( UnitModel model : commander.unitModels )
+      for( UnitModel model : commander.unitModels.values() )
       {
         if( model.chassis == UnitModel.ChassisEnum.TROOP )
         {
@@ -151,7 +151,7 @@ public class CommanderStrong extends Commander
 
       // Grant troops and transports additional movement power.
       COMovementModifier moveMod = new COMovementModifier(2);
-      for( UnitModel model : myCommander.unitModels )
+      for( UnitModel model : myCommander.unitModels.values() )
       {
         if( (model.chassis == UnitModel.ChassisEnum.TROOP) || (model.holdingCapacity > 0))
         {
@@ -205,7 +205,7 @@ public class CommanderStrong extends Commander
 
       // Grant a global +2 movement buff.
       COMovementModifier moveMod = new COMovementModifier(2);
-      for( UnitModel model : myCommander.unitModels )
+      for( UnitModel model : myCommander.unitModels.values() )
       {
         moveMod.addApplicableUnitModel(model);
       }
@@ -227,4 +227,3 @@ public class CommanderStrong extends Commander
     return coInfo;
   }
 }
-

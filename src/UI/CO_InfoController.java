@@ -31,9 +31,10 @@ public class CO_InfoController implements InfoController
     init(infos);
   }
 
-  public CO_InfoController( ArrayList<CommanderInfo> infos )
+  public CO_InfoController( ArrayList<CommanderInfo> infos, int startingIndex )
   {
     init(infos);
+    coOptionSelector.setSelectedOption(startingIndex);
   }
   
   private void init( ArrayList<CommanderInfo> infos )

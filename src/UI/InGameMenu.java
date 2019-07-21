@@ -181,4 +181,17 @@ public class InGameMenu<T>
   {
     return menuOptions.get(index).toString();
   }
+
+  /**
+   * Returns string representations of all menu options.
+   */
+  public ArrayList<String> getAllOptions()
+  {
+    ArrayList<String> out = new ArrayList<String>();
+    for (T option : menuOptions)
+    {
+      out.add(option.toString());
+    }
+    return out;
+  }
 }

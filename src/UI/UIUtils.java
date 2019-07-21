@@ -8,7 +8,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.PriorityQueue;
 
 import javax.imageio.ImageIO;
 
@@ -43,9 +45,9 @@ public class UIUtils
   private static Color[] purpleMapUnitColors = { new Color(90, 14, 99), new Color(132, 41, 148), new Color(181, 62, 198), new Color(201, 98, 223),
     new Color(231, 123, 255), new Color(243, 180, 255), };
 
-  private static HashMap<Color, ColorPalette> buildingColorPalettes;
-  private static HashMap<Color, ColorPalette> mapUnitColorPalettes;
-  private static HashMap<Color, String> colorNames;
+  private static Map<Color, ColorPalette> buildingColorPalettes;
+  private static Map<Color, ColorPalette> mapUnitColorPalettes;
+  private static Map<Color, String> paletteNames;
   private static ArrayList<Faction> factions;
 
   
@@ -63,9 +65,9 @@ public class UIUtils
   {
     if (null == mapUnitColorPalettes )
     {
-      buildingColorPalettes = new HashMap<Color, ColorPalette>();
-      mapUnitColorPalettes = new HashMap<Color, ColorPalette>();
-      colorNames = new HashMap<Color, String>();
+      buildingColorPalettes = new LinkedHashMap<Color, ColorPalette>();
+      mapUnitColorPalettes = new LinkedHashMap<Color, ColorPalette>();
+      paletteNames = new LinkedHashMap<Color, String>();
       factions = new ArrayList<Faction>();
 
       // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
@@ -81,10 +83,10 @@ public class UIUtils
 
       // Throw some color names in there for the defaults
       // toString() is not user-friendly
-      colorNames.put(Color.PINK, "salmon");
-      colorNames.put(Color.CYAN, "cyan");
-      colorNames.put(Color.ORANGE, "citrus");
-      colorNames.put(PURPLE, "sparking");
+      paletteNames.put(Color.PINK, "rose");
+      paletteNames.put(Color.CYAN, "cyan");
+      paletteNames.put(Color.ORANGE, "orange");
+      paletteNames.put(PURPLE, "violet");
 
       // We want to be able to use the normal units, as well as any others
       factions.add(new Faction(DEFAULT_FACTION_NAME,DEFAULT_FACTION_NAME));
@@ -93,6 +95,7 @@ public class UIUtils
 
       if (folder.canRead())
       {
+        PriorityQueue<TeamColorSpec> orderedPalettes = new PriorityQueue<TeamColorSpec>();
         for( final File fileEntry : folder.listFiles() )
         {
           // If it's a file, we assume it's a palette
@@ -104,8 +107,12 @@ public class UIUtils
               try
               {
                 BufferedImage bi = ImageIO.read(new File(colorName));
+
                 // Grab the last color on the first row as our "banner" color
                 Color key = new Color(bi.getRGB(bi.getWidth() - 1, 0));
+
+                // Use the last color in the building row to order our colors.
+                int ordinal = new Color(bi.getRGB(bi.getWidth() - 1, 1)).getRGB();
                 Color[] cUnits = new Color[defaultMapColors.length];
                 Color[] cStructs = new Color[defaultMapColors.length];
                 for( int i = 0; i < defaultMapColors.length; i++ )
@@ -113,9 +120,8 @@ public class UIUtils
                   cUnits[i] = new Color(bi.getRGB(i, 0));
                   cStructs[i] = new Color(bi.getRGB(i, 1));
                 }
-                buildingColorPalettes.put(key, new ColorPalette(cStructs));
-                mapUnitColorPalettes.put(key, new ColorPalette(cUnits));
-                colorNames.put(key, fileEntry.getName().replace(".png", ""));
+                orderedPalettes.offer(new TeamColorSpec(key, ordinal, new ColorPalette(cUnits), new ColorPalette(cStructs)));
+                paletteNames.put(key, fileEntry.getName().replace(".png", ""));
               }
               catch (IOException ioex)
               {
@@ -145,6 +151,14 @@ public class UIUtils
             factions.add(new Faction(fileEntry.getName(), basis));
           }
         }
+
+        // Insert our now-ordered color palettes into the permanent collections in the correct order.
+        while(!orderedPalettes.isEmpty())
+        {
+          TeamColorSpec tcs = orderedPalettes.poll();
+          mapUnitColorPalettes.put(tcs.key, tcs.unitColors);
+          buildingColorPalettes.put(tcs.key, tcs.buildingColors);
+        }
       }
     }
   }
@@ -163,7 +177,7 @@ public class UIUtils
     {
       buildingColorPalettes.put(colorKey, buildingColorPalettes.get(Color.PINK));
       palette = buildingColorPalettes.get(colorKey);
-      System.out.println(String.format("WARNING!: Failed to retrieve building palette for color %s, defaulting to %s", colorKey, getColorName(Color.PINK)));
+      System.out.println(String.format("WARNING!: Failed to retrieve building palette for color %s, defaulting to %s", colorKey, paletteNames.get(Color.PINK)));
     }
     return palette;
   }
@@ -176,21 +190,36 @@ public class UIUtils
     {
       mapUnitColorPalettes.put(colorKey, mapUnitColorPalettes.get(Color.PINK));
       palette = mapUnitColorPalettes.get(colorKey);
-      System.out.println(String.format("WARNING!: Failed to retrieve unit palette for color %s, defaulting to %s", colorKey, getColorName(Color.PINK)));
+      System.out.println(String.format("WARNING!: Failed to retrieve unit palette for color %s, defaulting to %s", colorKey, paletteNames.get(Color.PINK)));
     }
     return palette;
   }
 
-  public static String getColorName(Color colorKey)
+  public static String getPaletteName(Color colorKey)
   {
     initCosmetics();
-    return colorNames.get(colorKey);
+    if( !paletteNames.containsKey(colorKey) )
+    {
+      throw new NullPointerException("Cannot find name for Color " + colorKey);
+    }
+    return paletteNames.get(colorKey);
   }
 
   public static Faction[] getFactions()
   {
     initCosmetics();
     return factions.toArray(new Faction[0]);
+  }
+  
+  public static String getCanonicalFactionName(String palette, String faction)
+  {
+    if ("red".equalsIgnoreCase(palette) && "frontier".equalsIgnoreCase(faction))
+      return "Red Shirts";
+    if ("red".equalsIgnoreCase(palette) && "star".equalsIgnoreCase(faction))
+      return "Orange Star";
+    if ("maroon".equalsIgnoreCase(palette) && "fire".equalsIgnoreCase(faction))
+      return "Red Fire";
+    return palette + ' ' + faction;
   }
   
   public static class Faction implements Serializable
@@ -202,6 +231,28 @@ public class UIUtils
     {
       name = pName;
       basis = pBasis;
+    }
+  }
+
+  private static class TeamColorSpec implements Comparable<TeamColorSpec>
+  {
+    final ColorPalette unitColors;
+    final ColorPalette buildingColors;
+    final Color key;
+    final int ordinal;
+
+    public TeamColorSpec(Color colorKey, int colorOrdinal, ColorPalette units, ColorPalette buildings)
+    {
+      key = colorKey;
+      ordinal = colorOrdinal;
+      unitColors = units;
+      buildingColors = buildings;
+    }
+
+    @Override
+    public int compareTo(TeamColorSpec other)
+    {
+      return ordinal - other.ordinal;
     }
   }
 }

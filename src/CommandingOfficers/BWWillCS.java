@@ -32,7 +32,7 @@ public class BWWillCS extends Commander
   {
     super(coInfo);
 
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
       if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )
       {
@@ -75,7 +75,7 @@ public class BWWillCS extends Commander
     protected void perform(MapMaster gameMap)
     {
       COMovementModifier moveMod = new COMovementModifier(power);
-      for( UnitModel um : myCommander.unitModels )
+      for( UnitModel um : myCommander.unitModels.values() )
       {
         if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )
         {

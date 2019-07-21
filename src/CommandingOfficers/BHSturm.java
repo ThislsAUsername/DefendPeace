@@ -63,7 +63,7 @@ public class BHSturm extends Commander
 //          break;
 //      }
 //    }
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
       for( TerrainType terrain : TerrainType.TerrainTypeList )
       {

@@ -51,7 +51,7 @@ public class BHAdder extends Commander
     protected void perform(MapMaster gameMap)
     {
       COMovementModifier moveMod = new COMovementModifier(1);
-      for(UnitModel um : myCommander.unitModels)
+      for(UnitModel um : myCommander.unitModels.values())
       {
         moveMod.addApplicableUnitModel(um);
       }
@@ -73,7 +73,7 @@ public class BHAdder extends Commander
     protected void perform(MapMaster gameMap)
     {
       COMovementModifier moveMod = new COMovementModifier(2);
-      for(UnitModel um : myCommander.unitModels)
+      for(UnitModel um : myCommander.unitModels.values())
       {
         moveMod.addApplicableUnitModel(um);
       }

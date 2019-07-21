@@ -23,7 +23,7 @@ public class COVisionModifier implements COModifier
     for( UnitModel um : modelsToModify)
     {
       um.visionRange += visionBoost;
-      um.visionIgnoresCover = true;
+      um.visionRangePiercing = um.visionRange;
     }
   }
 
@@ -46,7 +46,7 @@ public class COVisionModifier implements COModifier
     for( UnitModel um : modelsToModify)
     {
       um.visionRange -= visionBoost;
-      um.visionIgnoresCover = false;
+      um.visionRangePiercing = 1; // TODO: Fix this
     }
   }
 }

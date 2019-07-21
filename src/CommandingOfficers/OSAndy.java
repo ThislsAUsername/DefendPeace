@@ -81,7 +81,7 @@ public class OSAndy extends Commander
       }
       myCommander.addCOModifier(new CODamageModifier(10));
       COMovementModifier moveMod = new COMovementModifier(1);
-      for(UnitModel um : myCommander.unitModels)
+      for(UnitModel um : myCommander.unitModels.values())
       {
         moveMod.addApplicableUnitModel(um);
       }

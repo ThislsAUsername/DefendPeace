@@ -36,7 +36,7 @@ public class IDSPennyCS extends Commander
   {
     super(coInfo);
 
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
       for( TerrainType terrain : TerrainType.TerrainTypeList )
       {

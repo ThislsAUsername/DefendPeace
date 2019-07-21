@@ -1,7 +1,7 @@
 package Test;
 
 import CommandingOfficers.Commander;
-import CommandingOfficers.CommanderPatch;
+import CommandingOfficers.Patch;
 import Engine.GameAction;
 import Engine.Path;
 import Engine.Utils;
@@ -34,8 +34,8 @@ public class TestGameEvent extends TestCase
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
   {
-    testCo1 = new CommanderPatch();
-    testCo2 = new CommanderPatch();
+    testCo1 = new Patch();
+    testCo2 = new Patch();
     Commander[] cos = { testCo1, testCo2 };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));

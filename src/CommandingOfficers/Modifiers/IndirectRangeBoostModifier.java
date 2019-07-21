@@ -16,7 +16,7 @@ public class IndirectRangeBoostModifier implements COModifier
   {
     this.boost = boost;
     modelsToModify = new ArrayList<WeaponModel>();
-    for( UnitModel um : commander.unitModels )
+    for( UnitModel um : commander.unitModels.values() )
     {
       if( um.weaponModels != null )
       {

@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import javax.imageio.ImageIO;
 
 public class SpriteUIUtils
@@ -16,56 +15,6 @@ public class SpriteUIUtils
   public static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
   public static final Color MENUBGCOLOR = new Color(234, 204, 154);
   public static final Color MENUHIGHLIGHTCOLOR = new Color(246, 234, 210);
-  
-  /**
-   * Calculate the distance to move an image make it look like it slides quickly into place instead of
-   * just snapping at each button-press. Distance moved per frame is proportional to distance from goal location.
-   * It is expected that currentNum and targetNum will not differ by more than 1.0.
-   * NOTE: currentNum and targetNum correspond to (relative) positions, not to pixels.
-   * NOTE: This is calibrated for 60fps, and changing the frame rate will change the closure speed.
-   * 
-   */
-  public static double calculateSlideAmount(double currentNum, int targetNum)
-  {
-    double animMoveFraction = 0.3; // Movement cap to prevent over-speedy menu movement.
-    double animSnapDistance = 0.05; // Minimum distance at which point we just snap into place.
-    double slide = 0; // Return value; the distance we actually are going to move.
-    double diff = Math.abs(targetNum - currentNum);
-    int sign = (targetNum > currentNum) ? 1 : -1; // Since we took abs(), make sure we can correct the sign.
-    if( diff < animSnapDistance )
-    { // If we are close enough, just move the exact distance.
-      slide = diff;
-    }
-    else
-    { // Move a fixed fraction of the remaining distance.
-      slide = diff * animMoveFraction;
-    }
-
-    return slide * sign;
-  }
-
-  /**
-   * Loads the image at the given file location and returns it as a BufferedImage.
-   * @param filename The full file-path to an image on disk.
-   * @return The file as a BufferedImage, or null if the file cannot be read.
-   */
-  public static BufferedImage loadSpriteSheetFile(String filename)
-  {
-    BufferedImage bi = null;
-    try
-    {
-      File imgFile = new File(filename);
-      if( imgFile.exists() && !imgFile.isDirectory() )
-        bi = ImageIO.read(imgFile);
-      else System.out.println("WARNING! Resource file " + filename + " does not exist.");
-    }
-    catch (IOException ioex)
-    {
-      System.out.println("WARNING! Exception loading resource file " + filename);
-      bi = null;
-    }
-    return bi;
-  }
 
   public static BufferedImage makeTextFrame(String item, int hBuffer, int vBuffer)
   {
@@ -82,13 +31,16 @@ public class SpriteUIUtils
     items.add(item);
     return makeTextMenu(bg, frame, bg, items, 0, hBuffer, vBuffer);
   }
+  public static BufferedImage makeTextMenu(ArrayList<String> items, int selection, int hBuffer, int vBuffer)
+  {
+    return makeTextMenu(MENUBGCOLOR, MENUFRAMECOLOR, MENUHIGHLIGHTCOLOR, items, selection, hBuffer, vBuffer);
+  }
   public static BufferedImage makeTextMenu(Color bg, Color frame, Color focus, ArrayList<String> items, int selection,
       int hBuffer, int vBuffer)
   {
     // Find the dimensions of the menu we are drawing.
-    int drawScale = SpriteOptions.getDrawScale();
-    int menuTextWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth() * drawScale;
-    int menuTextHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight() * drawScale;
+    int menuTextWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth();
+    int menuTextHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight();
     int menuWidth = (( items.isEmpty() ) ? 0 : getMenuTextWidthPx(items, menuTextWidth)) + hBuffer * 2;
     int menuHeight = (( items.isEmpty() ) ? 0 : getMenuTextHeightPx(items, menuTextHeight)) + vBuffer * 2;
 
@@ -105,14 +57,14 @@ public class SpriteUIUtils
 
     // Draw the highlight for the currently-selected option.
     // selY = upper menu-frame buffer, plus (letter height, plus 1px-buffer, times number of options).
-    int selY = vBuffer + (menuTextHeight + drawScale) * selection;
+    int selY = vBuffer + (menuTextHeight + 1) * selection;
     g.setColor(focus);
     g.fillRect(0, selY, menuWidth, menuTextHeight);
 
     // Draw the actual menu text.
-    for( int txtY = vBuffer, i = 0; i < items.size(); ++i, txtY += menuTextHeight + drawScale )
+    for( int txtY = vBuffer, i = 0; i < items.size(); ++i, txtY += menuTextHeight + 1 )
     {
-      SpriteLibrary.drawTextSmallCaps(g, items.get(i), hBuffer, txtY, drawScale);
+      SpriteUIUtils.drawTextSmallCaps(g, items.get(i), hBuffer, txtY);
     }
 
     return menuImage;
@@ -122,16 +74,15 @@ public class SpriteUIUtils
    * Returns an image with the input string printed within the specified width, in normal text.
    * @param reqWidth: Actual UI size in pixels that you want to fit the text into.
    */
-  public static BufferedImage paintTextNormalized(String prose, int reqWidth)
+  public static BufferedImage drawTextToWidth(String prose, int reqWidth)
   {
     // Figure out how big our text is.
-    int drawScale = SpriteOptions.getDrawScale();
-    int characterWidth = SpriteLibrary.getLettersUppercase().getFrame(0).getWidth() * drawScale;
-    int characterHeight = SpriteLibrary.getLettersUppercase().getFrame(0).getHeight() * drawScale;
+    int characterWidth = SpriteLibrary.getLettersUppercase().getFrame(0).getWidth();
+    int characterHeight = SpriteLibrary.getLettersUppercase().getFrame(0).getHeight();
 
     ArrayList<String> lines = new ArrayList<String>();
     // Unload our prose into the lines it already has
-    lines.addAll(Arrays.asList(prose.split("\\R"))); // \R matches all newline formats, yay convenience
+    lines.addAll(Arrays.asList(prose.split("\\r\\n|\\n|\\r"))); // Should match all common newline formats. If we ever go to Java 8, use \R
 
     if( reqWidth < characterWidth || lines.isEmpty() )
       return SpriteLibrary.createDefaultBlankSprite(1, 1); // zero-dimensioned images aren't kosher
@@ -163,9 +114,9 @@ public class SpriteUIUtils
     Graphics g = menuImage.getGraphics();
 
     // Draw the actual text.
-    for( int txtY = 0, i = 0; i < lines.size(); ++i, txtY += characterHeight + drawScale )
+    for( int txtY = 0, i = 0; i < lines.size(); ++i, txtY += characterHeight + 1 )
     {
-      SpriteLibrary.drawText(g, lines.get(i), 0, txtY, drawScale);
+      SpriteUIUtils.drawText(g, lines.get(i), 0, txtY);
     }
 
     return menuImage;
@@ -182,27 +133,199 @@ public class SpriteUIUtils
     g.fillRect(x, y + h - menuFrameHeight, w, menuFrameHeight); // Lower frame;
   }
 
-  public static int getMenuTextWidthPx(ArrayList<String> menuOptions, int scaledCharWidthPx)
+  /**
+   * Draws itself as a two-tone box with an image on top.
+   */
+  public static class ImageFrame
+  {
+    public final int xPos;
+    public final int yPos;
+    public final int width;
+    public final int height;
+    private Color mainColor;
+    private Color rimColor;
+    private boolean rimIsUp;
+    private BufferedImage content;
+    public ImageFrame(int x, int y, int w, int h, Color main, Color rim, boolean rimUp, BufferedImage display)
+    {
+      xPos = x;
+      yPos = y;
+      width = w;
+      height = h;
+      mainColor = main;
+      rimColor = rim;
+      rimIsUp = rimUp;
+      content = SpriteLibrary.createDefaultBlankSprite(width, height);
+      Graphics graphics = content.getGraphics();
+      graphics.setColor(rimColor);
+      graphics.fillRect(0, 0, width, height);
+      int dx = 0, dy = 0;
+      if( rimIsUp ) dy++; else dx++;
+      graphics.setColor(mainColor);
+      graphics.fillRect(dx, dy, width-1, height-1);
+      SpriteUIUtils.drawImageCenteredOnPoint(graphics, display, width/2, height/2);
+    }
+
+    public void render(Graphics g)
+    {
+      g.drawImage(content, xPos, yPos, width, height, null);
+    }
+  }
+
+  public static int getMenuTextWidthPx(ArrayList<String> menuOptions, int charWidthPx)
   {
     int maxWidth = 0;
     for( int i = 0; i < menuOptions.size(); ++i )
     {
-      int optw = menuOptions.get(i).length() * scaledCharWidthPx;
+      int optw = menuOptions.get(i).length() * charWidthPx;
       maxWidth = (optw > maxWidth) ? optw : maxWidth;
     }
 
     return maxWidth;
   }
 
-  public static int getMenuTextHeightPx(ArrayList<String> menuOptions, int scaledCharHeightPx)
+  public static int getMenuTextHeightPx(ArrayList<String> menuOptions, int charHeightPx)
   {
     // Height of the letters plus 1 (for buffer between menu options), times the number of entries,
     // minus 1 because there is no buffer after the last entry.
-    return (scaledCharHeightPx + SpriteOptions.getDrawScale()) * menuOptions.size() - SpriteOptions.getDrawScale();
+    return (charHeightPx + 1) * menuOptions.size() - 1;
   }
 
   public static int getTileSize()
   {
     return SpriteLibrary.baseSpriteSize * SpriteOptions.getDrawScale();
+  }
+
+  /**
+   * Draws the provided image, centered around x, y.
+   */
+  public static void drawImageCenteredOnPoint(Graphics g, BufferedImage image, int x, int y)
+  {
+    SpriteUIUtils.drawImageCenteredOnPoint(g, image, x, y, 1);
+  }
+
+  /**
+   * Draws the provided image, centered around x, y, scaled by the provided factor.
+   */
+  public static void drawImageCenteredOnPoint(Graphics g, BufferedImage image, int x, int y, int drawScale)
+  {
+    // Calculate the size to draw.
+    int drawWidth = image.getWidth() * drawScale;
+    int drawHeight = image.getHeight() * drawScale;
+  
+    // Center over the target location.
+    int drawX = x - drawWidth / 2;
+    int drawY = y - drawHeight / 2;
+  
+    g.drawImage(image, drawX, drawY, drawWidth, drawHeight, null);
+  }
+
+  /**
+   * Draws the provided text at the provided location, using the standard alphanumeric sprite set.
+   * @param g Graphics object to draw the text.
+   * @param text Text to be drawn as sprited letters.
+   * @param x X-coordinate of the top-left corner of the first letter to be drawn.
+   * @param y Y-coordinate of the top-left corner of the first letter to be drawn.
+   */
+  public static void drawText(Graphics g, String text, int x, int y)
+  {
+    Sprite uppercase = SpriteLibrary.getLettersUppercase();
+    Sprite lowercase = SpriteLibrary.getLettersLowercase();
+    int menuTextWidth = uppercase.getFrame(0).getWidth();
+    int menuTextHeight = uppercase.getFrame(0).getHeight();
+  
+    for( int i = 0; i < text.length(); ++i, x += menuTextWidth )
+    {
+      char thisChar = text.charAt(i);
+      if( Character.isAlphabetic(thisChar) )
+      {
+        if( Character.isUpperCase(thisChar) )
+        {
+          int letterIndex = thisChar - 'A';
+          g.drawImage(uppercase.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+        }
+        else
+        {
+          int letterIndex = thisChar - 'a';
+          g.drawImage(lowercase.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+        }
+      }
+      else if( Character.isDigit(thisChar) )
+      {
+        int letterIndex = thisChar - '0';
+        g.drawImage(SpriteLibrary.getNumbers().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+      }
+      else // Assume symbolic
+      {
+        int symbolIndex = SpriteLibrary.charKey.indexOf(text.charAt(i));
+        if( symbolIndex >= 0 )
+        {
+          g.drawImage(SpriteLibrary.getSymbols().getFrame(symbolIndex), x, y, menuTextWidth, menuTextHeight, null);
+        }
+      }
+    }
+  }
+
+  /**
+   * Draws the provided text at the provided location, using the small-caps alphanumeric sprite set.
+   * @param g Graphics object to draw the text.
+   * @param text Text to be drawn as sprited letters.
+   * @param x X-coordinate of the top-left corner of the first letter to be drawn.
+   * @param y Y-coordinate of the top-left corner of the first letter to be drawn.
+   */
+  public static void drawTextSmallCaps(Graphics g, String text, int x, int y)
+  {
+    Sprite smallCaps = SpriteLibrary.getLettersSmallCaps();
+    int menuTextWidth = smallCaps.getFrame(0).getWidth();
+    int menuTextHeight = smallCaps.getFrame(0).getHeight();
+    text = text.toUpperCase(); // SmallCaps is all uppercase.
+  
+    for( int i = 0; i < text.length(); ++i, x += menuTextWidth )
+    {
+      if( Character.isAlphabetic(text.charAt(i)) )
+      {
+        int letterIndex = text.charAt(i) - 'A';
+        g.drawImage(smallCaps.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+      }
+      else if( Character.isDigit(text.charAt(i)) )
+      {
+        int letterIndex = text.charAt(i) - '0';
+        g.drawImage(SpriteLibrary.getNumbersSmallCaps().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+      }
+      else // Assume symbolic
+      {
+        int symbolIndex = SpriteLibrary.charKey.indexOf(text.charAt(i));
+        if( symbolIndex >= 0 )
+        {
+          g.drawImage(SpriteLibrary.getSymbolsSmallCaps().getFrame(symbolIndex), x, y, menuTextWidth, menuTextHeight, null);
+        }
+      }
+    }
+  }
+
+  /**
+   * Returns a BufferedImage containing the contents of `text` rendered on one
+   * line in the standard font, on a transparent background, with no scaling applied.
+   */
+  public static BufferedImage getTextAsImage(String text)
+  {
+    return SpriteUIUtils.getTextAsImage(text, false);
+  }
+
+  /**
+   * Returns a BufferedImage containing the contents of `text` rendered on one line (in small
+   * caps or standard font as specified), on a transparent background, with no scaling applied.
+   */
+  public static BufferedImage getTextAsImage(String text, boolean smallCaps)
+  {
+    Sprite letters = (smallCaps) ? SpriteLibrary.getLettersSmallCaps() : SpriteLibrary.getLettersLowercase();
+    int width = letters.getFrame(0).getWidth() * text.length();
+    int height = letters.getFrame(0).getHeight();
+    BufferedImage textImage = SpriteLibrary.createTransparentSprite(width, height);
+    if( smallCaps )
+      drawTextSmallCaps(textImage.getGraphics(), text, 0, 0);
+    else
+      drawText(textImage.getGraphics(), text, 0, 0);
+    return textImage;
   }
 }

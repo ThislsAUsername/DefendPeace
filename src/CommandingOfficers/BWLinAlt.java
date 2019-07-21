@@ -33,7 +33,7 @@ public class BWLinAlt extends Commander
   {
     super(coInfo);
 
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
       if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP)
       {
@@ -68,7 +68,7 @@ public class BWLinAlt extends Commander
       myCommander.addCOModifier(new CODefenseModifier(5));
       // add vision +1 and piercing vision to land units
       COVisionModifier sightMod = new COVisionModifier(1);
-      for( UnitModel um : myCommander.unitModels )
+      for( UnitModel um : myCommander.unitModels.values() )
       {
         if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )
           sightMod.addApplicableUnitModel(um);
@@ -95,7 +95,7 @@ public class BWLinAlt extends Commander
       myCommander.addCOModifier(new CODefenseModifier(15));
       // add vision +2 and piercing vision to land units
       COVisionModifier sightMod = new COVisionModifier(2);
-      for( UnitModel um : myCommander.unitModels )
+      for( UnitModel um : myCommander.unitModels.values() )
       {
         if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )
           sightMod.addApplicableUnitModel(um);

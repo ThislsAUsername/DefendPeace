@@ -36,7 +36,7 @@ public class OSSami extends Commander
   {
     super(coInfo);
 
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
       if( um.chassis == ChassisEnum.TROOP )
       {

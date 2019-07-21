@@ -37,7 +37,7 @@ public class OSMax extends Commander
   {
     super(coInfo);
 
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
       if( um.weaponModels != null )
       {
@@ -108,7 +108,7 @@ public class OSMax extends Commander
       COcast.directBuff += VALUE;
       COMovementModifier moveMod = new COMovementModifier(1);
 
-      for( UnitModel um : COcast.unitModels )
+      for( UnitModel um : COcast.unitModels.values() )
       {
         if( um.chassis != ChassisEnum.TROOP && um.hasDirectFireWeapon() )
           moveMod.addApplicableUnitModel(um);
@@ -138,7 +138,7 @@ public class OSMax extends Commander
 
       COMovementModifier moveMod = new COMovementModifier(2);
 
-      for( UnitModel um : COcast.unitModels )
+      for( UnitModel um : COcast.unitModels.values() )
       {
         if( um.chassis != ChassisEnum.TROOP && um.hasDirectFireWeapon() )
           moveMod.addApplicableUnitModel(um);

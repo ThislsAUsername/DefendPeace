@@ -32,7 +32,7 @@ public class GEJess extends Commander
   {
     super(coInfo);
 
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
       if( um.chassis == ChassisEnum.TANK)
       {
@@ -72,7 +72,7 @@ public class GEJess extends Commander
       }
       UnitTypeDamageModifier landPowerMod = new UnitTypeDamageModifier(10);
       COMovementModifier landMoveMod = new COMovementModifier(1);
-      for( UnitModel um : myCommander.unitModels )
+      for( UnitModel um : myCommander.unitModels.values() )
       {
         if( um.chassis == ChassisEnum.TANK)
         {
@@ -105,7 +105,7 @@ public class GEJess extends Commander
       }
       UnitTypeDamageModifier landPowerMod = new UnitTypeDamageModifier(30);
       COMovementModifier landMoveMod = new COMovementModifier(2);
-      for( UnitModel um : myCommander.unitModels )
+      for( UnitModel um : myCommander.unitModels.values() )
       {
         if( um.chassis == ChassisEnum.TANK)
         {

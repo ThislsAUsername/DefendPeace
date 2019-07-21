@@ -1,5 +1,6 @@
 package CommandingOfficers.Modifiers;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import CommandingOfficers.Commander;
@@ -18,8 +19,8 @@ public class PerfectMoveModifier extends UnitRemodelModifier implements COModifi
   /** Add a new unit transform assignment. */
   public Map<UnitModel, UnitModel> init(Commander commander)
   {
-    modelSwaps.clear();
-    for( UnitModel um : commander.unitModels )
+//    modelSwaps.clear();
+    for( UnitModel um : commander.unitModels.values() )
     {
       UnitModel newModel = UnitModel.clone(um);
 
@@ -32,8 +33,8 @@ public class PerfectMoveModifier extends UnitRemodelModifier implements COModifi
         }
       }
 
-      modelSwaps.put(um, newModel);
+//      modelSwaps.put(um, newModel);
     }
-    return modelSwaps;
+    return new HashMap<UnitModel, UnitModel>(); // TODO: fix this
   }
 }

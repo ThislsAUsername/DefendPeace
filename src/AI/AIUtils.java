@@ -11,9 +11,9 @@ import java.util.Set;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
-import Engine.GameAction.ActionType;
 import Engine.GameActionSet;
 import Engine.Path;
+import Engine.UnitActionType;
 import Engine.Utils;
 import Engine.XYCoord;
 import Terrain.GameMap;
@@ -22,6 +22,7 @@ import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
 import Units.Weapons.Weapon;
+import Units.Weapons.WeaponModel;
 
 public class AIUtils
 {
@@ -61,11 +62,11 @@ public class AIUtils
    * @param gameMap The world in which the Unit lives.
    * @return a Map of ActionType to ArrayList<GameAction>.
    */
-  public static Map<ActionType, ArrayList<GameAction> > getAvailableUnitActionsByType(Unit unit, GameMap gameMap)
+  public static Map<UnitActionType, ArrayList<GameAction> > getAvailableUnitActionsByType(Unit unit, GameMap gameMap)
   {
     // Create the ActionType-indexed map, and ensure we don't have any null pointers.
-    Map<ActionType, ArrayList<GameAction> > actionsByType = new HashMap<ActionType, ArrayList<GameAction> >();
-    for( ActionType atype : ActionType.values() )
+    Map<UnitActionType, ArrayList<GameAction> > actionsByType = new HashMap<UnitActionType, ArrayList<GameAction> >();
+    for( UnitActionType atype : unit.model.possibleActions )
     {
       actionsByType.put(atype, new ArrayList<GameAction>());
     }
@@ -78,7 +79,7 @@ public class AIUtils
     {
       for( GameActionSet actionSet : actionSets )
       {
-        ActionType type = actionSet.getSelected().getType();
+        UnitActionType type = actionSet.getSelected().getUnitActionType();
 
         // Add these actions to the correct map bucket.
         actionsByType.get(type).addAll(actionSet.getGameActions());
@@ -135,7 +136,7 @@ public class AIUtils
 
   /**
    * Creates a map of COs to the units they control, based on what can be seen in the passed-in map.
-   * Units owned by myCommander are ignored - they can be trivially accessed via Commander.units
+   * Units owned by allies are ignored - ours can be trivially accessed via Commander.units, and we don't control ally behavior.
    */
   public static Map<Commander, ArrayList<Unit> > getEnemyUnitsByCommander(Commander myCommander, GameMap gameMap)
   {
@@ -145,7 +146,7 @@ public class AIUtils
       for( int y = 0; y < gameMap.mapHeight; ++y )
       {
         Unit resident = gameMap.getLocation(x, y).getResident();
-        if( (null != resident) && (myCommander != resident.CO) )
+        if( (null != resident) && (myCommander.isEnemy(resident.CO)) )
         {
           if( !unitMap.containsKey(resident.CO) ) unitMap.put(resident.CO, new ArrayList<Unit>());
           unitMap.get(resident.CO).add(resident);
@@ -188,7 +189,7 @@ public class AIUtils
   public static ArrayList<XYCoord> findRepairDepots(Unit unit)
   {
     ArrayList<XYCoord> stations = new ArrayList<XYCoord>();
-    for( XYCoord xyc : unit.CO.ownedProperties )
+    for( XYCoord xyc : unit.CO.ownedProperties ) // TODO: Revisit if we ever get a CO that repairs on non-owned or non-properties
     {
       Location loc = unit.CO.myView.getLocation(xyc);
       if( unit.model.canRepairOn(loc) )
@@ -220,7 +221,11 @@ public class AIUtils
   }
   
   /**
+<<<<<<< HEAD
    * @return The area threatened by the unit, against the specified target type
+=======
+   * @return The area and severity of threat from the unit, against the specified target type
+>>>>>>> origin/master
    */
   public static Map<XYCoord, Double> findThreatPower(GameMap gameMap, Unit unit, UnitModel target)
   {
@@ -229,24 +234,51 @@ public class AIUtils
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
     for( Weapon wep : unit.weapons )
     {
-      if( wep.ammo > 0 )
+      if( wep.getDamage(target) > 0 )
       {
         if( !wep.model.canFireAfterMoving )
         {
           for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, wep.model.minRange, wep.model.maxRange))
-            shootableTiles.put(xyc, wep.getDamage(target) * (unit.getHP() * 0.1));
+          {
+            double val = wep.getDamage(target) * (unit.getHP() / (double) unit.model.maxHP);
+            if (shootableTiles.containsKey(xyc))
+              val = Math.max(val, shootableTiles.get(xyc));
+            shootableTiles.put(xyc, val);
+          }
         }
         else
         {
           for( XYCoord dest : destinations )
           {
             for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, wep.model.minRange, wep.model.maxRange))
-              shootableTiles.put(xyc, wep.getDamage(target) * (unit.getHP() * 0.1));
+            {
+              double val = wep.getDamage(target) * (unit.getHP() / (double) unit.model.maxHP);
+              if (shootableTiles.containsKey(xyc))
+                val = Math.max(val, shootableTiles.get(xyc));
+              shootableTiles.put(xyc, val);
+            }
           }
         }
       }
     }
     return shootableTiles;
+  }
+
+  /**
+   * @return The range at which the CO in question might be able to attack after moving.
+   */
+  public static int findMaxStrikeWeaponRange(Commander co)
+  {
+    int range = 0;
+    for( UnitModel um : co.unitModels.values() )
+    {
+      for( WeaponModel wm : um.weaponModels )
+      {
+        if( wm.canFireAfterMoving )
+          range = Math.max(range, wm.maxRange);
+      }
+    }
+    return range;
   }
 
   /**
@@ -359,8 +391,12 @@ public class AIUtils
   }
 
   /**
+<<<<<<< HEAD
    * Compares SearchNodes based on the amount of movePower they possess, and optionally
    *   the remaining distance to a destination.
+=======
+   * Compares Units based on their value, scaled with HP.
+>>>>>>> origin/master
    */
   public static class UnitCostComparator implements Comparator<Unit>
   {

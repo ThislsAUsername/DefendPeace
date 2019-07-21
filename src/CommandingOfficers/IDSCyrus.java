@@ -39,7 +39,7 @@ public class IDSCyrus extends Commander
   {
     super(coInfo);
     
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
       um.visionRange += 1;
     }
@@ -110,7 +110,7 @@ public class IDSCyrus extends Commander
     {
       COcast.terrainDrain = 2;
       COVisionModifier sightMod = new COVisionModifier(1);
-      for(UnitModel um : myCommander.unitModels)
+      for(UnitModel um : myCommander.unitModels.values())
       {
         sightMod.addApplicableUnitModel(um);
       }
@@ -137,7 +137,7 @@ public class IDSCyrus extends Commander
       COcast.counterFirst = true;
       COcast.terrainDrain = 3;
       COVisionModifier sightMod = new COVisionModifier(2);
-      for(UnitModel um : myCommander.unitModels)
+      for(UnitModel um : myCommander.unitModels.values())
       {
         sightMod.addApplicableUnitModel(um);
       }

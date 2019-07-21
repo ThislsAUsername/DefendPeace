@@ -1,4 +1,7 @@
 *.class
 Thumbs.db
+<<<<<<< HEAD
 /.metadata/
+=======
+>>>>>>> origin/master
 /bin/

@@ -34,7 +34,7 @@ public class YCSensei extends Commander
   {
     super(coInfo);
 
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
       switch (um.chassis)
       {

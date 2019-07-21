@@ -1,12 +1,10 @@
 package UI.Art.Animation;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 import Engine.XYCoord;
 import UI.Art.SpriteArtist.SpriteLibrary;
-import UI.Art.SpriteArtist.SpriteOptions;
 import UI.Art.SpriteArtist.SpriteUIUtils;
 
 public class ResupplyAnimation implements GameAnimation
@@ -27,7 +25,6 @@ public class ResupplyAnimation implements GameAnimation
   public ResupplyAnimation(int mapX, int mapY)
   {
     mapLocation = new XYCoord(mapX, mapY);
-    int drawScale = SpriteOptions.getDrawScale();
     int menuTextWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth();
     int menuTextHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight();
 
@@ -38,8 +35,8 @@ public class ResupplyAnimation implements GameAnimation
      *   ------------
      * But with cool pop up/pop down effects.
      */
-    signWidth = ((menuTextWidth * SUPPLYTEXT.length())) * drawScale;
-    signHeight = (menuTextHeight) * drawScale;
+    signWidth = ((menuTextWidth * SUPPLYTEXT.length()));
+    signHeight = (menuTextHeight);
   }
 
   @Override
@@ -64,8 +61,7 @@ public class ResupplyAnimation implements GameAnimation
     final long signUpEnd = 550;
     final long signGone = 600;
 
-    int drawScale = SpriteOptions.getDrawScale();
-    int tileSize = SpriteLibrary.baseSpriteSize * drawScale;
+    int tileSize = SpriteLibrary.baseSpriteSize;
     int tileCenterX = (mapLocation.xCoord * tileSize) + (tileSize / 2);
     int tileCenterY = (mapLocation.yCoord * tileSize) + (tileSize / 2);
 
@@ -84,7 +80,7 @@ public class ResupplyAnimation implements GameAnimation
     {
       // The sign is legible.
       menu = SpriteUIUtils.makeTextFrame(SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR,
-          SUPPLYTEXT, 2 * drawScale, 2 * drawScale);
+          SUPPLYTEXT, 2, 2);
     }
     else if( animTime < signGone )
     {
@@ -95,7 +91,7 @@ public class ResupplyAnimation implements GameAnimation
 
       menu = SpriteUIUtils.makeTextFrame(SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR, width / 2, height / 2);
     }
-    SpriteLibrary.drawImageCenteredOnPoint(g, menu, tileCenterX, tileCenterY, 1); // image generation accounts for drawscale, so don't scale image
+    SpriteUIUtils.drawImageCenteredOnPoint(g, menu, tileCenterX, tileCenterY);
 
     return animTime > signGone;
   }

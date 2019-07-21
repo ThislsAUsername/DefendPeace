@@ -2,7 +2,7 @@ package Engine.Combat;
 
 import CommandingOfficers.Commander;
 import Engine.GameAction;
-import Engine.GameAction.ActionType;
+import Engine.UnitActionType;
 import Units.Unit;
 
 public class CaptureUnitValueFinder implements IValueFinder
@@ -20,9 +20,9 @@ public class CaptureUnitValueFinder implements IValueFinder
   public int getValue(Unit unit)
   {
     int captureValue = 0;
-    for( GameAction.ActionType action : unit.model.possibleActions )
+    for( UnitActionType action : unit.model.possibleActions )
     {
-      if( action == ActionType.CAPTURE )
+      if( action == UnitActionType.CAPTURE )
       {
         captureValue++;
         break;

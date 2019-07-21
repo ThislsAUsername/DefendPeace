@@ -19,6 +19,7 @@ import AI.AILibrary;
 import AI.AIMaker;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
+import Engine.UnitActionType;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.Combat.BattleInstance.CombatContext;
@@ -48,6 +49,7 @@ import Units.NeotankModel;
 import Units.ReconModel;
 import Units.RocketsModel;
 import Units.SubModel;
+import Units.SubSubModel;
 import Units.TCopterModel;
 import Units.TankModel;
 import Units.Unit;
@@ -61,8 +63,8 @@ public class Commander extends GameEventListener implements Serializable
   public final CommanderInfo coInfo;
   public GameMap myView;
   public ArrayList<Unit> units;
-  public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
-  public transient Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
+  public Map<UnitEnum, UnitModel> unitModels = new HashMap<UnitEnum, UnitModel>();
+  public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
   public Set<XYCoord> ownedProperties;
   public ArrayDeque<COModifier> modifiers;
   public Color myColor;
@@ -127,9 +129,15 @@ public class Commander extends GameEventListener implements Serializable
     unitProductionByTerrain.put(TerrainType.AIRPORT, airportModels);
 
     // Compile one master list of everything we can build.
-    unitModels.addAll(factoryModels);
-    unitModels.addAll(seaportModels);
-    unitModels.addAll(airportModels);
+    for (UnitModel um : factoryModels)
+      unitModels.put(um.type, um);
+    for (UnitModel um : seaportModels)
+      unitModels.put(um.type, um);
+    for (UnitModel um : airportModels)
+      unitModels.put(um.type, um);
+
+    UnitModel subsub = new SubSubModel();
+    unitModels.put(subsub.type, subsub); // We don't want a separate "submerged sub" build option
 
     modifiers = new ArrayDeque<COModifier>();
     units = new ArrayList<Unit>();
@@ -277,20 +285,10 @@ public class Commander extends GameEventListener implements Serializable
     return true;
   }
 
+  // Leaving this for now, to avoid merge conflicts
   public UnitModel getUnitModel(UnitEnum unitType)
   {
-    UnitModel um = null;
-
-    for( UnitModel iter : unitModels )
-    {
-      if( iter.type == unitType )
-      {
-        um = iter;
-        break;
-      }
-    }
-
-    return um;
+    return unitModels.get(unitType);
   }
   
   /**
@@ -455,6 +453,7 @@ public class Commander extends GameEventListener implements Serializable
     stream.defaultWriteObject();
 
     // save our index into the AILibrary
+    // TODO: Consider serializing AI as well, so we don't need this method
     if( null == aiController )
       stream.writeInt(0); // Humans live at index 0 of the AI array. That sounds philosophical.
     else
@@ -463,18 +462,6 @@ public class Commander extends GameEventListener implements Serializable
       {
         if( AI.getName().equalsIgnoreCase(aiController.getAIInfo().getName()) )
           stream.writeInt(AILibrary.getAIList().indexOf(AI));
-      }
-    }
-
-    // Write out our shopping list as a flattened 2D array of booleans; for each terrain, for all unit types, can I build it?
-    // This is probably inefficient use of space, but just look at all this not-caring I can do!
-    for( TerrainType terrain : TerrainType.TerrainTypeList )
-    {
-      for( UnitEnum ue : UnitModel.UnitEnum.values() )
-      {
-        ArrayList<UnitModel> shoppingList = (unitProductionByTerrain.get(terrain) != null) ? unitProductionByTerrain.get(terrain)
-            : new ArrayList<UnitModel>();
-        stream.writeBoolean(shoppingList.contains(getUnitModel(ue)));
       }
     }
   }
@@ -491,19 +478,6 @@ public class Commander extends GameEventListener implements Serializable
 
     // use our AI index to get back where we were before
     aiController = AILibrary.getAIList().get(stream.readInt()).create(this);
-
-    // rebuild our shopping list
-    unitProductionByTerrain = new HashMap<TerrainType, ArrayList<UnitModel>>();
-    for( TerrainType terrain : TerrainType.TerrainTypeList )
-    {
-      ArrayList<UnitModel> shoppingList = new ArrayList<UnitModel>();
-      for( UnitEnum ue : UnitModel.UnitEnum.values() )
-      {
-        if( stream.readBoolean() )
-          shoppingList.add(getUnitModel(ue));
-      }
-      unitProductionByTerrain.put(terrain, shoppingList);
-    }
   }
 }
 

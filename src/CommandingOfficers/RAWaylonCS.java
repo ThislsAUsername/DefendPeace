@@ -31,7 +31,7 @@ public class RAWaylonCS extends Commander
   {
     super(coInfo);
 
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
       if( um.chassis == ChassisEnum.AIR_HIGH || um.chassis == ChassisEnum.AIR_LOW )
       {
@@ -63,7 +63,7 @@ public class RAWaylonCS extends Commander
     protected void perform(MapMaster gameMap)
     {
       UnitTypeDefenseModifier airDefMod = new UnitTypeDefenseModifier(power);
-      for( UnitModel um : myCommander.unitModels )
+      for( UnitModel um : myCommander.unitModels.values() )
       {
         if( um.chassis == ChassisEnum.AIR_HIGH ||  um.chassis == ChassisEnum.AIR_LOW)
         {

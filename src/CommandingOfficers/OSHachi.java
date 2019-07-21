@@ -40,7 +40,7 @@ public class OSHachi extends Commander
   @Override
   public GameEventQueue initTurn(GameMap map)
   {
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
       um.COcost = 0.9;
     }
@@ -66,7 +66,7 @@ public class OSHachi extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      for( UnitModel um : myCommander.unitModels )
+      for( UnitModel um : myCommander.unitModels.values() )
       {
         um.COcost = VALUE;
       }
@@ -90,7 +90,7 @@ public class OSHachi extends Commander
       UnitProductionModifier upm = new UnitProductionModifier(TerrainType.CITY,
           myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
 
-      for( UnitModel um : myCommander.unitModels )
+      for( UnitModel um : myCommander.unitModels.values() )
       {
         um.COcost = VALUE;
         if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )

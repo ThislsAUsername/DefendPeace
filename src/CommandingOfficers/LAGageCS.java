@@ -32,7 +32,7 @@ public class LAGageCS extends Commander
   {
     super(coInfo);
 
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
       boolean buff = false;
       if( um.chassis == ChassisEnum.SHIP )

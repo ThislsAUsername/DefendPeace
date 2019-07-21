@@ -99,7 +99,7 @@ public class COSetupController implements IController
       case SEEK: // Display the CO Info menu so we can window-shop
         ArrayList<CommanderInfo> infos = CommanderLibrary.getCommanderList();
         
-        CO_InfoController coInfoMenu = new CO_InfoController(infos);
+        CO_InfoController coInfoMenu = new CO_InfoController(infos, 0);
         IView infoView = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
 
         // Get the info menu to select the current CO

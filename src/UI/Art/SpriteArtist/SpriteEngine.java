@@ -15,7 +15,7 @@ public class SpriteEngine implements GraphicsEngine
   @Override
   public IView getMainUIView(MainUIController control)
   {
-    return new SpriteMainUIView(control);
+    return new MainUIView(control);
   }
 
   @Override
@@ -39,6 +39,6 @@ public class SpriteEngine implements GraphicsEngine
   @Override
   public IView createInfoView(InfoController control)
   {
-    return new SpriteInfoView(control);
+    return new InfoView(control);
   }
 }

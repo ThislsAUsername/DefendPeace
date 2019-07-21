@@ -19,7 +19,7 @@ import Units.UnitModel;
 /*
  * Cinder is based on getting an edge in the action economy, at the cost of unit health.
  */
-public class CommanderCinder extends Commander
+public class Cinder extends Commander
 {
   private static final long serialVersionUID = 4938851182463546620L;
 
@@ -30,8 +30,8 @@ public class CommanderCinder extends Commander
     {
       super("Cinder");
       infoPages.add(new InfoPage(
-          "Commander Cinder trades unit health for a better action economy.\n" +
-          "An efficient and merciless commander.\n"));
+          "'Cinders' are products of Grey Sky's super-soldier program who gain initiative in battle by warping time - they're named for the unpredictable thermal surges caused by their temporal meddling.\n" + 
+          "Having taken this title as her name, Commander Cinder's blazing speed dominates the battlefield."));
       infoPages.add(new InfoPage(
           "Passive:\n" + 
           "- Units are built at 8 HP, but can act immediately.\n" +
@@ -49,17 +49,17 @@ public class CommanderCinder extends Commander
     @Override
     public Commander create()
     {
-      return new CommanderCinder();
+      return new Cinder();
     }
   }
 
-  private static final double PREMIUM_PER_BUILD = 1000;
+  private static final int PREMIUM_PER_BUILD = 1000;
 
   private HashMap<XYCoord, Integer> buildCounts = new HashMap<>();
 
   private GameEventQueue pollEvents = new GameEventQueue();
 
-  public CommanderCinder()
+  public Cinder()
   {
     super(coInfo);
 
@@ -141,13 +141,9 @@ public class CommanderCinder extends Commander
 
   public void setPrices(int repetitons)
   {
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
-      um.COcost = 1.0;
-    }
-    for( UnitModel um : unitModels )
-    {
-      um.COcost = (1.0 + repetitons*PREMIUM_PER_BUILD/um.getCost());
+      um.moneyCostAdjustment = repetitons*PREMIUM_PER_BUILD;
     }
   }
 
@@ -245,7 +241,7 @@ public class CommanderCinder extends Commander
           // Guess he's not gonna make it.
           // TODO: Maybe add a debuff event/animation here as well.
           UnitDieEvent event = new UnitDieEvent(minion);
-          CommanderCinder Cinder = (CommanderCinder)myCommander;
+          Cinder Cinder = (Cinder)myCommander;
           Cinder.pollEvents.add(event);
         }
       }

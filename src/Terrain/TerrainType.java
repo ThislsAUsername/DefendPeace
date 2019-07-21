@@ -1,14 +1,16 @@
 package Terrain;
 
 import java.awt.Color;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class TerrainType
+public class TerrainType implements Serializable
 {
   // Local class data
   private int mDefenseLevel = -1;   // Level of protection provided by this terrain type. Typically 0-4.
-  private  Color mMainColor = null; // Predominant color of this terrain type. Here for convenience.
+  private Color mMainColor = null;  // Predominant color of this terrain type. Here for convenience.
   private int mAttributes = 0;      // bitmask of binary tile characteristics.
   private String mName;             // Human-readable name of the terrain type.
   private int mVisionBoost = 0;     // How much this terrain enhances the vision of surface units on it.
@@ -178,5 +180,36 @@ public class TerrainType
   public String toString()
   {
     return mName;
+  }
+
+  /**
+   * Private method, same signature as in Serializable interface
+   * 
+   * This method lets us write a different kind of object out to the file, replacing ourselves.
+   * This lets us retrieve a static TerrainType instance with the written object's readResolve().
+   */
+  private Object writeReplace() throws ObjectStreamException
+  {
+    return new SerialTerrain(TerrainTypeList.indexOf(this));
+  }
+
+  private static class SerialTerrain implements Serializable
+  {
+    public int index;
+
+    public SerialTerrain(int i)
+    {
+      index = i;
+    }
+
+    /**
+     * Private method, same signature as in Serializable interface
+     * 
+     * This method lets us return a different object than we initially wrote to the file.
+     */
+    private Object readResolve() throws ObjectStreamException
+    {
+      return TerrainTypeList.get(index);
+    }
   }
 }

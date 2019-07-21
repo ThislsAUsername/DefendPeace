@@ -434,25 +434,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         // Handled as a special case in handleGameInput().
         break;
       case SAVE:
-        String filename = "save/" + myGame.saveFile;
-        new File("save/").mkdirs(); // make sure we don't freak out if the directory's not there
-
-        System.out.println(String.format("Now saving to %s", filename));
-        try
-        {
-          FileOutputStream file = new FileOutputStream(filename);
-          ObjectOutputStream out = new ObjectOutputStream(file);
-
-          // Method for serialization of object
-          out.writeObject(myGame);
-
-          out.close();
-          file.close();
-        }
-        catch (IOException ex)
-        {
-          System.out.println(ex.toString());
-        }
+        myGame.writeSave();
         myGameInputHandler.reset(); // SAVE is a terminal state. Reset the input handler.
         break;
       case CO_STATS:
@@ -658,9 +640,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
     // Add the CO's units to the queue so we can initialize them.
     unitsToInit.addAll(myGame.activeCO.units);
 
-    // Kick off the animation cycle, which will animate/init each unit.
-    myView.animate(turnEvents);
-    changeInputMode(InputMode.ANIMATION);
+    if( !turnEvents.isEmpty() ) // If there's nothing to animate, don't animate it twice
+    {
+      // Kick off the animation cycle, which will animate/init each unit.
+      myView.animate(turnEvents);
+      changeInputMode(InputMode.ANIMATION);
+    }
 
     myView.animate(null);
   }

@@ -119,7 +119,7 @@ public class OSJake extends Commander
 
       COMovementModifier moveMod = new COMovementModifier(2);
 
-      for( UnitModel um : COcast.unitModels )
+      for( UnitModel um : COcast.unitModels.values() )
       {
         if( um.chassis == ChassisEnum.TANK )
           moveMod.addApplicableUnitModel(um);

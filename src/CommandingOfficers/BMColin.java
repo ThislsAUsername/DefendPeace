@@ -29,7 +29,7 @@ public class BMColin extends Commander
   {
     super(coInfo);
 
-    for( UnitModel um : unitModels )
+    for( UnitModel um : unitModels.values() )
     {
       um.modifyDamageRatio(-10);
       um.COcost = 0.8;
