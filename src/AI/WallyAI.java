@@ -1047,7 +1047,7 @@ public class WallyAI implements AIController
     double counterPower = 0;
     for( WeaponModel wm : model.weaponModels )
     {
-      double damage = Weapon.strategies[Weapon.currentStrategy].getDamage(wm, target);
+      double damage = WeaponModel.getDamage(wm, target);
       double myRange = wm.maxRange;
       if( wm.canFireAfterMoving )
         myRange += getEffectiveMove(model);
