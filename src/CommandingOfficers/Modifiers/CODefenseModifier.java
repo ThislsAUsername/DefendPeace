@@ -1,9 +1,13 @@
 package CommandingOfficers.Modifiers;
 
 import Units.UnitModel;
-import CommandingOfficers.Commander;
 
-public class CODefenseModifier implements COModifier
+import java.util.ArrayList;
+
+import CommandingOfficers.Commander;
+import CommandingOfficers.Modifiers.COModifier.GenericCOModifier;
+
+public class CODefenseModifier extends GenericCOModifier
 {
   private int defenseModifier = 0;
 
@@ -13,9 +17,9 @@ public class CODefenseModifier implements COModifier
   }
 
   @Override
-  public void apply(Commander commander)
+  public void applyChanges(Commander commander, ArrayList<UnitModel> models)
   {
-    for( UnitModel um : commander.unitModels.values() )
+    for( UnitModel um : models )
     {
       if( um.weaponModels != null )
       {
@@ -25,9 +29,9 @@ public class CODefenseModifier implements COModifier
   }
 
   @Override
-  public void revert(Commander commander)
+  public void revertChanges(Commander commander, ArrayList<UnitModel> models)
   {
-    for( UnitModel um : commander.unitModels.values() )
+    for( UnitModel um : models )
     {
       if( um.weaponModels != null )
       {

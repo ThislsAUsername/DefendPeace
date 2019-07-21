@@ -3,11 +3,11 @@ package CommandingOfficers.Modifiers;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
+import CommandingOfficers.Modifiers.COModifier.GenericCOModifier;
 import Units.UnitModel;
 
-public class COMovementModifier implements COModifier
+public class COMovementModifier extends GenericCOModifier
 {
-  ArrayList<UnitModel> modelsToModify;
   private int rangeChange;
 
   public COMovementModifier()
@@ -18,35 +18,21 @@ public class COMovementModifier implements COModifier
   public COMovementModifier(int range)
   {
     rangeChange = range;
-    modelsToModify = new ArrayList<UnitModel>();
   }
 
   @Override
-  public void apply(Commander commander)
+  public void applyChanges(Commander commander, ArrayList<UnitModel> models)
   {
-    for( UnitModel um : modelsToModify)
+    for( UnitModel um : models )
     {
       um.movePower = um.movePower + rangeChange;
     }
   }
 
-  public void addApplicableUnitModel(UnitModel model)
-  {
-    if( model != null )
-    {
-      modelsToModify.add(model);
-    }
-    else
-    {
-      System.out.println("Attempting to add null model to COMovementModifier!");
-      throw new NullPointerException(); // Make sure this oversight doesn't go unnoticed.
-    }
-  }
-
   @Override
-  public void revert(Commander commander)
+  public void revertChanges(Commander commander, ArrayList<UnitModel> models)
   {
-    for( UnitModel um : modelsToModify )
+    for( UnitModel um : models )
     {
       um.movePower = um.movePower - rangeChange;
     }

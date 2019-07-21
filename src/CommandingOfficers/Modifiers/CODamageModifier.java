@@ -3,11 +3,11 @@ package CommandingOfficers.Modifiers;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
+import CommandingOfficers.Modifiers.COModifier.GenericCOModifier;
 import Units.UnitModel;
 
-public class CODamageModifier implements COModifier
+public class CODamageModifier extends GenericCOModifier
 {
-  ArrayList<UnitModel> modelsToModify;
   private int attackModifier = 0;
 
   /**
@@ -20,36 +20,12 @@ public class CODamageModifier implements COModifier
   public CODamageModifier(int firepowerChange)
   {
     attackModifier = firepowerChange;
-    modelsToModify = new ArrayList<UnitModel>();
-  }
-
-  /**
-   * Add a UnitModel type for this modifier to affect. If no models are added
-   * this way, then by default apply will affect all of the Commander's UnitModels.
-   * @param model
-   */
-  public void addApplicableUnitModel(UnitModel model)
-  {
-    if( model != null )
-    {
-      modelsToModify.add(model);
-    }
-    else
-    {
-      System.out.println("Attempting to add null model to COMovementModifier!");
-      throw new NullPointerException(); // Make sure this oversight doesn't go unnoticed.
-    }
   }
 
   @Override
-  public void apply(Commander commander)
+  public void applyChanges(Commander commander, ArrayList<UnitModel> models)
   {
-    if( modelsToModify.isEmpty() )
-    {
-      modelsToModify.addAll(commander.unitModels.values());
-    }
-
-    for( UnitModel um : modelsToModify )
+    for( UnitModel um : models )
     {
       if( um.weaponModels != null )
       {
@@ -59,9 +35,9 @@ public class CODamageModifier implements COModifier
   }
 
   @Override
-  public void revert(Commander commander)
+  public void revertChanges(Commander commander, ArrayList<UnitModel> models)
   {
-    for( UnitModel um : modelsToModify )
+    for( UnitModel um : models )
     {
       if( um.weaponModels != null )
       {
