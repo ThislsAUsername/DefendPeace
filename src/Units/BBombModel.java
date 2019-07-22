@@ -20,6 +20,6 @@ public class BBombModel extends UnitModel
   public BBombModel()
   {
     super("BBomb", UnitEnum.BBOMB, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType, actions, weapons);
-    possibleActions.add(new UnitActionType.Explode(5, 5));
+    possibleActions.add(new UnitActionType.Explode(5, 3));
   }
 }

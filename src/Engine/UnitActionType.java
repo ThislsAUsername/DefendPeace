@@ -360,8 +360,7 @@ public abstract class UnitActionType implements Serializable
       XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
-        // TODO: fix this
-//        return new GameActionSet(new GameAction.TransformAction(actor, movePath, this), false);
+        return new GameActionSet(new GameAction.ExplodeAction(actor, movePath, this), false);
       }
       return null;
     }

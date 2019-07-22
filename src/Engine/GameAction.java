@@ -2,6 +2,7 @@ package Engine;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import CommandingOfficers.Commander;
@@ -14,6 +15,7 @@ import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.LoadEvent;
+import Engine.GameEvents.MassDamageEvent;
 import Engine.GameEvents.ResupplyEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.UnitJoinEvent;
@@ -913,6 +915,60 @@ public interface GameAction
     public String toString()
     {
       return String.format("[Move %s to %s and transform to %s]", actor.toStringWithLocation(), getMoveLocation(), type.destinationType);
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return type;
+    }
+  } // ~TransformAction
+  
+  // ===========  ExplodeAction  =================================
+  /** Effectively a WAIT, but the unit explodes at the end of it. */
+  public static class ExplodeAction extends WaitAction
+  {
+    private UnitActionType.Explode type;
+    Unit actor;
+
+    public ExplodeAction(Unit unit, Path path, UnitActionType.Explode pType)
+    {
+      super(unit, path);
+      type = pType;
+      actor = unit;
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue explodeEvents = super.getEvents(gameMap);
+      
+      if( explodeEvents.size() > 0 ) // if we successfully made a move action
+      {
+        GameEvent moveEvent = explodeEvents.peek();
+        if (moveEvent.getEndPoint().equals(getMoveLocation())) // make sure we shouldn't be pre-empted
+        {
+          explodeEvents.add(new UnitDieEvent(actor)); // If you explode, you die
+
+          HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
+          for (XYCoord coord : Utils.findLocationsInRange(gameMap, getMoveLocation(), type.range))
+          {
+            Unit victim = gameMap.getLocation(coord).getResident();
+            if (null != victim)
+              victims.add(victim);
+          }
+          victims.remove(actor); // Since you're already dead when you explode, you can't get hurt in the explosion
+
+          explodeEvents.add(new MassDamageEvent(victims, type.damage, false));
+        }
+      }
+      return explodeEvents;
+    }
+    
+    @Override
+    public String toString()
+    {
+      return String.format("[Move %s to %s and explode]", actor.toStringWithLocation(), getMoveLocation());
     }
 
     @Override

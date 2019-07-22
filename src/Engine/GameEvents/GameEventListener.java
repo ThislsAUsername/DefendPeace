@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -79,6 +80,7 @@ public abstract class GameEventListener implements Serializable
   public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){};
   public void receiveWeatherChangeEvent(Weathers weather, int duration){};
   public void receiveMapChangeEvent(MapChangeEvent event){};
+  public void receiveMassDamageEvent(Map<Unit, Integer> lostHP){};
   
   /**
    * Private method, same signature as in Serializable interface
