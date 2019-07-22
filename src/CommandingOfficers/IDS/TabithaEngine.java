@@ -1,161 +1,131 @@
 package CommandingOfficers.IDS;
 
+import java.util.ArrayList;
+
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CostValueFinder;
 import Engine.Combat.MassStrikeUtils;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameAction;
+import Engine.GameActionSet;
+import Engine.Path;
+import Engine.UnitActionType;
+import Engine.XYCoord;
 import Engine.Combat.BattleInstance.BattleParams;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
 
-public class TabithaEngine extends Commander
+public abstract class TabithaEngine extends Commander
 {
-  private static final CommanderInfo coInfo = new instantiator();
-  private static class instantiator extends CommanderInfo
-  {
-    public instantiator()
-    {
-      super("Tabitha");
-      infoPages.add(new InfoPage(
-          "--TABITHA--\r\n" + 
-          "The first unit that attacks is given a \"Mega Boost\" of +50% firepower and +35% defense; this power-up lasts until the player's next turn.\r\n" + 
-          "xxxxxxXXXX\r\n" + 
-          "FIRESTORM: A 2-range missile hits the opponent's largest mass of units and deals 4 HP damage; all units gain +10/10.\r\n" + 
-          "APOCALYPSE: A 2-range missile hits the opponent's largest mass of units and deals 8 HP damage; all units gain +35/35."));
-    }
-    @Override
-    public Commander create()
-    {
-      return new TabithaEngine();
-    }
-  }
+  public static final String MECHANICS_BLURB =
+            "A Mega Boost is awarded when a unit attacks, or by a special action done in place (does not end turn).\n"
+          + "Mega Boosted units gain the generic +10/10 on powers, but no power-specific stat boost\n";
+  public ArrayList<Unit> COUs = new ArrayList<Unit>();
+  public abstract int getMegaBoostCount();
+  public void onCOULost() {};
+  public final int COUPow; // static values that define the power the COU should stay at
+  public final int COUDef;
+  private int megaPow; // floating values that dip on powers to match the above
+  private int megaDef;
+  private boolean canApplyBoost = false;
 
-  public TabithaEngine()
+  public TabithaEngine(int atk, int def, CommanderInfo info)
   {
-    super(coInfo);
-
-    addCommanderAbility(new Firestorm(this));
-    addCommanderAbility(new Apocolypse(this));
+    super(info);
+    COUPow = atk;
+    COUDef = def;
+    megaPow = COUPow;
+    megaDef = COUDef;
   }
-
-  public static CommanderInfo getInfo()
-  {
-    return coInfo;
-  }
-  
-  private Unit COU;
-  private int COUBoost;
 
   @Override
   public char getUnitMarking(Unit unit)
   {
-    if (unit == COU)
+    if( COUs.contains(unit) )
       return 'T';
-    
+
     return super.getUnitMarking(unit);
   }
 
   @Override
   public GameEventQueue initTurn(GameMap map)
   {
-    this.COU = null;
-    COUBoost = 35;
+    this.COUs.clear();
+    megaPow = COUPow;
+    megaDef = COUDef;
+    canApplyBoost = true;
     return super.initTurn(map);
   }
-  
+
   @Override
   public void endTurn()
   {
+    canApplyBoost = false;
     super.endTurn();
-    if (null == COU)
-      COUBoost = 0;
   }
 
   @Override
   public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
   {
+    boolean freeBoost = canApplyBoost && COUs.size() < getMegaBoostCount();
+
     if( params.attacker.CO == this )
     {
       Unit minion = params.attacker;
 
-      if( null == COU || minion == COU )
-        params.attackFactor += COUBoost;
+      if( freeBoost || COUs.contains(minion) )
+        params.attackFactor += megaPow;
     }
 
     if( params.defender.CO == this )
     {
       Unit minion = params.defender;
 
-      if( null == COU || minion == COU )
-        params.defenseFactor += COUBoost;
+      if( freeBoost || COUs.contains(minion) )
+        params.defenseFactor += megaDef;
     }
-
   }
 
   @Override
   public void receiveBattleEvent(BattleSummary battleInfo)
   {
     super.receiveBattleEvent(battleInfo);
+    boolean freeBoost = canApplyBoost && COUs.size() < getMegaBoostCount();
     // Determine if we were part of this fight.
-    if( COU == null && battleInfo.attacker.CO == this )
+    if( freeBoost && battleInfo.attacker.CO == this )
     {
-      COU = battleInfo.attacker;
+      COUs.add(battleInfo.attacker);
     }
   }
 
-  private static class Firestorm extends CommanderAbility
+  protected static class NukeIt extends CommanderAbility
   {
-    private static final String NAME = "Firestorm";
-    private static final int COST = 6;
-    private static final int POWER = 4;
     TabithaEngine COcast;
+    private int nukePower, atk, def;
 
-    Firestorm(Commander commander)
+    NukeIt(TabithaEngine commander, String name, int cost, int nuke, int pAtk, int pDef)
     {
-      super(commander, NAME, COST);
-      COcast = (TabithaEngine) commander;
+      super(commander, name, cost);
+      nukePower = nuke;
+      atk = pAtk;
+      def = pDef;
     }
 
     @Override
     protected void perform(MapMaster gameMap)
     {
-      COcast.COUBoost -= 10;
-      myCommander.addCOModifier(new CODamageModifier(10));
-      myCommander.addCOModifier(new CODefenseModifier(10));
-      MassStrikeUtils.damageStrike(gameMap, POWER,
-          MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true)), 2);
-    }
-  }
-
-  private static class Apocolypse extends CommanderAbility
-  {
-    private static final String NAME = "Apocolypse";
-    private static final int COST = 10;
-    private static final int POWER = 8;
-    TabithaEngine COcast;
-
-    Apocolypse(Commander commander)
-    {
-      super(commander, NAME, COST);
-      COcast = (TabithaEngine) commander;
-    }
-
-    @Override
-    protected void perform(MapMaster gameMap)
-    {
-      COcast.COUBoost = 0;
-      myCommander.addCOModifier(new CODamageModifier(35));
-      myCommander.addCOModifier(new CODefenseModifier(35));
-      MassStrikeUtils.damageStrike(gameMap, POWER,
-          MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true)), 2);
+      COcast.megaPow -= atk;
+      COcast.megaDef -= def;
+      myCommander.addCOModifier(new CODamageModifier(atk));
+      myCommander.addCOModifier(new CODefenseModifier(def));
+      XYCoord target = MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true));
+      MassStrikeUtils.damageStrike(gameMap, nukePower, target, 2);
     }
   }
 }
-

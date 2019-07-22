@@ -31,6 +31,7 @@ import CommandingOfficers.IDS.Caulder;
 import CommandingOfficers.IDS.Cyrus;
 import CommandingOfficers.IDS.PennyAlt;
 import CommandingOfficers.IDS.PennyCS;
+import CommandingOfficers.IDS.TabithaBasic;
 import CommandingOfficers.IDS.TabithaEngine;
 import CommandingOfficers.Lazuria.Forsythe;
 import CommandingOfficers.Lazuria.Gage;
@@ -122,7 +123,7 @@ public class CommanderLibrary
     commanderList.add( PennyCS.getInfo() );
     commanderList.add( PennyAlt.getInfo() );
 //    commanderList.add( IDSPennyRNG.getInfo() );
-    commanderList.add( TabithaEngine.getInfo() );
+    commanderList.add( TabithaBasic.getInfo() );
     commanderList.add( Cyrus.getInfo() );
 
 //    commanderList.add( LADavis.getInfo() );
