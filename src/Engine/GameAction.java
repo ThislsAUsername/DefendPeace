@@ -14,6 +14,7 @@ import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.LoadEvent;
 import Engine.GameEvents.MassDamageEvent;
 import Engine.GameEvents.ResupplyEvent;
@@ -829,6 +830,100 @@ public interface GameAction
       return UnitActionType.RESUPPLY;
     }
   } // ~ResupplyAction
+
+  // ===========  RepairUnitAction  ===============================
+  public static class RepairUnitAction implements GameAction
+  {
+    private Path movePath;
+    private XYCoord startCoord;
+    private XYCoord moveCoord;
+    private XYCoord repairCoord;
+
+    public RepairUnitAction(XYCoord startLoc, Path path, int targetX, int targetY)
+    {
+      this(startLoc, path, new XYCoord(targetX, targetY));
+    }
+
+    public RepairUnitAction(XYCoord startLoc, Path path, XYCoord repairLoc)
+    {
+      movePath = path;
+      startCoord = startLoc;
+      repairCoord = repairLoc;
+      if( null != path && (path.getEnd() != null) )
+      {
+        moveCoord = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      }
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      // Repair actions consist of
+      //   MOVE
+      //   HEAL
+      //   REPAIR
+      GameEventQueue repairEvents = new GameEventQueue();
+
+      boolean isValid = true;
+      Unit benefactor = null;
+      Unit beneficiary = null;
+
+      if( (null != gameMap) && (null != startCoord) && (null != repairCoord) &&
+          gameMap.isLocationValid(startCoord) && gameMap.isLocationValid(repairCoord) )
+      {
+        benefactor = gameMap.getLocation(startCoord).getResident();
+        beneficiary = gameMap.getLocation(repairCoord).getResident();
+        isValid &= benefactor != null && !benefactor.isTurnOver;
+        isValid &= (null != beneficiary) && !benefactor.CO.isEnemy(beneficiary.CO);
+        isValid &= (null != gameMap) && (gameMap.isLocationValid(repairCoord));
+        isValid &= (movePath != null) && (movePath.getPathLength() > 0);
+      }
+      else
+        isValid = false;
+
+      if( isValid )
+      {
+        Location moveLocation = gameMap.getLocation(moveCoord);
+        isValid &= (null == moveLocation.getResident()) || (benefactor == moveLocation.getResident());
+      }
+
+      if( isValid )
+      {
+        if( Utils.enqueueMoveEvent(gameMap, benefactor, movePath, repairEvents) )
+        {
+          // No surprises in the fog.
+          repairEvents.add(new HealUnitEvent(beneficiary, true));
+          repairEvents.add(new ResupplyEvent(beneficiary));
+        }
+      }
+      return repairEvents;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return moveCoord;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return repairCoord;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Heal at %s after moving to %s]",
+          repairCoord, moveCoord );
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return UnitActionType.REPAIR_UNIT;
+    }
+  } // ~RepairUnitAction
 
   // ===========  AbilityAction  =================================
   public static class AbilityAction implements GameAction

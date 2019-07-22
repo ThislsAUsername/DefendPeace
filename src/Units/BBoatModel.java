@@ -28,7 +28,6 @@ public class BBoatModel extends UnitModel
     {
       holdables.add(carryable[i]);
     }
-    // TODO: fix
-//    possibleActions.add(new UnitActionType.Explode(5, 5));
+    possibleActions.add(UnitActionType.REPAIR_UNIT);
   }
 }

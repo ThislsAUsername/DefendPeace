@@ -22,6 +22,7 @@ public abstract class UnitActionType implements Serializable
   public static final UnitActionType UNLOAD = new Unload();
   public static final UnitActionType CAPTURE = new Capture();
   public static final UnitActionType RESUPPLY = new Resupply();
+  public static final UnitActionType REPAIR_UNIT = new RepairUnit();
   public static final UnitActionType WAIT = new Wait();
   public static final UnitActionType DELETE = new Delete();
   public static final UnitActionType LOAD = new Load();
@@ -302,6 +303,55 @@ public abstract class UnitActionType implements Serializable
     private Object readResolve()
     {
       return RESUPPLY;
+    }
+  }
+
+  public static class RepairUnit extends UnitActionType
+  {
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    {
+      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
+      {
+        ArrayList<GameAction> repairOptions = new ArrayList<GameAction>();
+        ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, moveLocation, 1, 1);
+
+        // For each location, see if there is a friendly unit to repair.
+        for( XYCoord loc : locations )
+        {
+          // If there's a friendly unit there who isn't us, we can repair them.
+          Unit other = map.getLocation(loc).getResident();
+          if( other != null && other.CO == actor.CO && other != actor &&
+              (!other.isFullySupplied() || other.getPreciseHP() < other.model.maxHP) )
+          {
+            repairOptions.add(new GameAction.RepairUnitAction(new XYCoord(actor.x, actor.y), movePath, loc));
+          }
+        }
+
+        // Only add this action set if we actually have a target
+        if( !repairOptions.isEmpty() )
+        {
+          // Bundle our attack options into an action set
+          return new GameActionSet(repairOptions);
+        }
+      }
+      return null;
+    }
+
+    @Override
+    public String name()
+    {
+      return "REPAIR";
+    }
+
+    /**
+     * From Serializable interface
+     * @return The statically-defined object to use for this action type.
+     */
+    private Object readResolve()
+    {
+      return REPAIR_UNIT;
     }
   }
 

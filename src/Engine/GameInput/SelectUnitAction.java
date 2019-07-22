@@ -66,6 +66,9 @@ class SelectUnitAction extends GameInputState<GameActionSet>
         if( UnitActionType.ATTACK == actionType )
           // We need to select a target to attack.
           next = new SelectActionTarget(myStateData);
+        else if( UnitActionType.REPAIR_UNIT == actionType )
+          // We need to select a target to repair.
+          next = new SelectActionTarget(myStateData);
         else if( UnitActionType.UNLOAD == actionType )
           // We need to select a unit to unload.
           next = new SelectCargo(myStateData);
