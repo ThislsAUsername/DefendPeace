@@ -6,29 +6,29 @@ import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
 import Units.Weapons.WeaponModel;
 
-public class LAGageCS extends Commander
+public class LAGageWoke extends Commander
 {
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
-      super("Gage");
+      super("Woke Gage");
       infoPages.add(new InfoPage(
-          "--GAGE--\r\n" + 
+          "--WOKE GAGE--\r\n" + 
           "Naval units and indirects gain +20% firepower and +10% defense.\r\n" + 
-          "xxXXX\r\n" + 
-          "LONG SHOT: All indirects gain +1 range.\r\n" + 
-          "LONG BARREL: All indirects gain +2 range."));
+          "xxxXXXXX\r\n" + 
+          "LONG SHOT: All indirects gain +2 range.\r\n" + 
+          "LONG BARREL: All indirects gain +4 range."));
     }
     @Override
     public Commander create()
     {
-      return new LAGageCS();
+      return new LAGageWoke();
     }
   }
 
-  public LAGageCS()
+  public LAGageWoke()
   {
     super(coInfo);
 
@@ -54,8 +54,8 @@ public class LAGageCS extends Commander
       }
     }
 
-    addCommanderAbility(new RangeBonus(this, "Long Shot", 2, 1));
-    addCommanderAbility(new RangeBonus(this, "Long Barrel", 5, 2));
+    addCommanderAbility(new RangeBonus(this, "Long Shot", 3, 2));
+    addCommanderAbility(new RangeBonus(this, "Long Barrel", 8, 4));
   }
 
   public static CommanderInfo getInfo()
