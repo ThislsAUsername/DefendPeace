@@ -1,8 +1,9 @@
 package CommandingOfficers.IDS;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
+import Units.Unit;
 
-public class TabithaBasic extends TabithaEngine
+public class PolyTabitha extends TabithaEngine
 {
   public static final int MEGA_ATK = 35;
   public static final int MEGA_DEF = 35;
@@ -11,10 +12,12 @@ public class TabithaBasic extends TabithaEngine
   {
     public instantiator()
     {
-      super("Tabitha");
+      super("Polytha");
       infoPages.add(new InfoPage(
-            "--TABITHA--\n"
-          + "Can grant a \"Mega Boost\" of +"+MEGA_ATK+"/"+MEGA_DEF+" stats; this power-up lasts until next turn.\n"
+            "--POLYTHA--\n"
+          + "Can grant a \"Mega Boost\" of "+MEGA_ATK+"/"+MEGA_DEF+" stats; this power-up lasts until next turn.\n"
+          + "Gains an extra Mega Boost when COP is charged, and a third at full meter.\n"
+          + "Loses 3 stars worth of charge on the loss of any Boosted unit.\n"
           + MECHANICS_BLURB
           + "xxxxxxXXXX\n"
           + "FIRESTORM: A 2-range missile hits the opponent's largest mass of units and deals 4 HP damage; all units gain +10/10.\n"
@@ -23,14 +26,24 @@ public class TabithaBasic extends TabithaEngine
     @Override
     public Commander create()
     {
-      return new TabithaBasic();
+      return new PolyTabitha();
     }
   }
 
   @Override
-  public int getMegaBoostCount() {return 1;}
+  public int getMegaBoostCount()
+  {
+    return 1 + getReadyAbilities().size();
+  }
+  @Override
+  public void onCOULost(Unit minion)
+  {
+    double max = getMaxAbilityPower();
+    double loss = max / 10 * 3; // 10 stars total, 3 to lose
+    modifyAbilityPower(-loss);
+  }
 
-  public TabithaBasic()
+  public PolyTabitha()
   {
     super(MEGA_ATK, MEGA_DEF, coInfo);
 

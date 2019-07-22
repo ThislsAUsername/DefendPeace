@@ -33,7 +33,7 @@ public abstract class TabithaEngine extends Commander
           + "Mega Boosted units gain the generic +10/10 on powers, but no power-specific stat boost\n";
   public ArrayList<Unit> COUs = new ArrayList<Unit>();
   public abstract int getMegaBoostCount();
-  public void onCOULost() {};
+  public void onCOULost(Unit minion) {};
   public final int COUPow; // static values that define the power the COU should stay at
   public final int COUDef;
   private int megaPow; // floating values that dip on powers to match the above
@@ -58,7 +58,7 @@ public abstract class TabithaEngine extends Commander
   public char getUnitMarking(Unit unit)
   {
     if( COUs.contains(unit) )
-      return 'T';
+      return 'M';
 
     return super.getUnitMarking(unit);
   }
@@ -111,6 +111,21 @@ public abstract class TabithaEngine extends Commander
     if( freeBoost && battleInfo.attacker.CO == this )
     {
       COUs.add(battleInfo.attacker);
+    }
+
+
+    Unit minion = null;
+    if( this == battleInfo.defender.CO )
+    {
+      minion = battleInfo.defender;
+    }
+    if( this == battleInfo.attacker.CO )
+    {
+      minion = battleInfo.attacker;
+    }
+    if (null != minion && minion.getHP() < 1 && COUs.contains(minion))
+    {
+      onCOULost(minion);
     }
   }
 
