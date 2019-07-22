@@ -2,6 +2,51 @@ package CommandingOfficers;
 
 import java.util.ArrayList;
 
+import CommandingOfficers.Assorted.AllDaWaylon;
+import CommandingOfficers.Assorted.WaylonCS;
+import CommandingOfficers.Assorted.TheBeastSturm;
+import CommandingOfficers.Assorted.TheWeakBeast;
+import CommandingOfficers.BlackHole.Adder;
+import CommandingOfficers.BlackHole.Hawke;
+import CommandingOfficers.BlackHole.Kindle;
+import CommandingOfficers.BlackHole.Lash;
+import CommandingOfficers.BlackHole.Sturm;
+import CommandingOfficers.BlackHole.VB;
+import CommandingOfficers.BlueMoon.Colin;
+import CommandingOfficers.BlueMoon.Grit;
+import CommandingOfficers.BlueMoon.Olaf;
+import CommandingOfficers.BlueMoon.Sasha;
+import CommandingOfficers.BrennersWolves.Adderbella;
+import CommandingOfficers.BrennersWolves.Brenner;
+import CommandingOfficers.BrennersWolves.Isabella;
+import CommandingOfficers.BrennersWolves.LinAlt;
+import CommandingOfficers.BrennersWolves.Lin;
+import CommandingOfficers.BrennersWolves.Will;
+import CommandingOfficers.GreenEarth.Drake;
+import CommandingOfficers.GreenEarth.Eagle;
+import CommandingOfficers.GreenEarth.Javier;
+import CommandingOfficers.GreenEarth.Jess;
+import CommandingOfficers.IDS.CaulderAlt;
+import CommandingOfficers.IDS.Caulder;
+import CommandingOfficers.IDS.Cyrus;
+import CommandingOfficers.IDS.PennyAlt;
+import CommandingOfficers.IDS.PennyCS;
+import CommandingOfficers.IDS.TabithaEngine;
+import CommandingOfficers.Lazuria.Forsythe;
+import CommandingOfficers.Lazuria.Gage;
+import CommandingOfficers.Lazuria.WokeGage;
+import CommandingOfficers.Lazuria.Tasha;
+import CommandingOfficers.Lazuria.WokeTasha;
+import CommandingOfficers.OrangeStar.Andy;
+import CommandingOfficers.OrangeStar.Hachi;
+import CommandingOfficers.OrangeStar.Jake;
+import CommandingOfficers.OrangeStar.Max;
+import CommandingOfficers.OrangeStar.Rachel;
+import CommandingOfficers.OrangeStar.Sami;
+import CommandingOfficers.YellowComet.Grimm;
+import CommandingOfficers.YellowComet.Kanbei;
+import CommandingOfficers.YellowComet.Sensei;
+
 public class CommanderLibrary
 {  
   private static ArrayList<CommanderInfo> commanderList = null;
@@ -28,57 +73,57 @@ public class CommanderLibrary
     
     
     
-    commanderList.add( OSAndy.getInfo() );
-    commanderList.add( OSHachi.getInfo() );
-    commanderList.add( OSJake.getInfo() );
-    commanderList.add( OSMax.getInfo() );
-    commanderList.add( OSRachel.getInfo() );
-    commanderList.add( OSSami.getInfo() );
+    commanderList.add( Andy.getInfo() );
+    commanderList.add( Hachi.getInfo() );
+    commanderList.add( Jake.getInfo() );
+    commanderList.add( Max.getInfo() );
+    commanderList.add( Rachel.getInfo() );
+    commanderList.add( Sami.getInfo() );
     
-    commanderList.add( BMColin.getInfo() );
-    commanderList.add( BMGrit.getInfo() );
-    commanderList.add( BMOlaf.getInfo() );
-    commanderList.add( BMSasha.getInfo() );
+    commanderList.add( Colin.getInfo() );
+    commanderList.add( Grit.getInfo() );
+    commanderList.add( Olaf.getInfo() );
+    commanderList.add( Sasha.getInfo() );
     
-    commanderList.add( GEEagle.getInfo() );
-    commanderList.add( GEJess.getInfo() );
-    commanderList.add( GEDrake.getInfo() );
-    commanderList.add( GEJavier.getInfo() );
+    commanderList.add( Eagle.getInfo() );
+    commanderList.add( Jess.getInfo() );
+    commanderList.add( Drake.getInfo() );
+    commanderList.add( Javier.getInfo() );
     
-    commanderList.add( YCGrimm.getInfo() );
-    commanderList.add( YCKanbei.getInfo() );
-    commanderList.add( YCSensei.getInfo() );
+    commanderList.add( Grimm.getInfo() );
+    commanderList.add( Kanbei.getInfo() );
+    commanderList.add( Sensei.getInfo() );
     
-    commanderList.add( BHAdder.getInfo() );
-    commanderList.add( BHHawke.getInfo() );
-    commanderList.add( BHKindle.getInfo() );
-    commanderList.add( BHLash.getInfo() );
-    commanderList.add( BHSturm.getInfo() );
-    commanderList.add( BHVB.getInfo() );
+    commanderList.add( Adder.getInfo() );
+    commanderList.add( Hawke.getInfo() );
+    commanderList.add( Kindle.getInfo() );
+    commanderList.add( Lash.getInfo() );
+    commanderList.add( Sturm.getInfo() );
+    commanderList.add( VB.getInfo() );
 
-    commanderList.add( BWBrennerComp.getInfo() );
-    commanderList.add( BWIsabellaCS.getInfo() );
-    commanderList.add( BWAdderbella.getInfo() );
-    commanderList.add( BWLinCS.getInfo() );
-    commanderList.add( BWLinAlt.getInfo() );
-    commanderList.add( BWWillCS.getInfo() );
+    commanderList.add( Brenner.getInfo() );
+    commanderList.add( Isabella.getInfo() );
+    commanderList.add( Adderbella.getInfo() );
+    commanderList.add( Lin.getInfo() );
+    commanderList.add( LinAlt.getInfo() );
+    commanderList.add( Will.getInfo() );
 
-    commanderList.add( LAForsythe.getInfo() );
-    commanderList.add( LAGageCS.getInfo() );
-    commanderList.add( LAGageWoke.getInfo() );
-    commanderList.add( LATasha.getInfo() );
-    commanderList.add( LATashaWoke.getInfo() );
+    commanderList.add( Forsythe.getInfo() );
+    commanderList.add( Gage.getInfo() );
+    commanderList.add( WokeGage.getInfo() );
+    commanderList.add( Tasha.getInfo() );
+    commanderList.add( WokeTasha.getInfo() );
 
-    commanderList.add( RAWaylonCS.getInfo() );
-    commanderList.add( RAAllDaWaylon.getInfo() );
+    commanderList.add( WaylonCS.getInfo() );
+    commanderList.add( AllDaWaylon.getInfo() );
 
-    commanderList.add( IDSCaulderSCOP.getInfo() );
-    commanderList.add( IDSCaulder3.getInfo() );
-    commanderList.add( IDSPennyCS.getInfo() );
-    commanderList.add( IDSPennyAlt.getInfo() );
+    commanderList.add( Caulder.getInfo() );
+    commanderList.add( CaulderAlt.getInfo() );
+    commanderList.add( PennyCS.getInfo() );
+    commanderList.add( PennyAlt.getInfo() );
 //    commanderList.add( IDSPennyRNG.getInfo() );
-    commanderList.add( IDSTabithaCS.getInfo() );
-    commanderList.add( IDSCyrus.getInfo() );
+    commanderList.add( TabithaEngine.getInfo() );
+    commanderList.add( Cyrus.getInfo() );
 
 //    commanderList.add( LADavis.getInfo() );
     commanderList.add( TheBeastSturm.getInfo() );
