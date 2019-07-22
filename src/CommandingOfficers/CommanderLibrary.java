@@ -73,6 +73,7 @@ public class CommanderLibrary
     commanderList.add( RAAllDaWaylon.getInfo() );
 
     commanderList.add( IDSCaulderSCOP.getInfo() );
+    commanderList.add( IDSCaulder3.getInfo() );
     commanderList.add( IDSPennyCS.getInfo() );
 //    commanderList.add( IDSPennyRNG.getInfo() );
     commanderList.add( IDSTabithaCS.getInfo() );

@@ -7,16 +7,16 @@ import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
 
-public class IDSCaulderSCOP extends Commander
+public class IDSCaulder3 extends Commander
 {
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
-      super("Caulder");
+      super("Caulder Alt");
       infoPages.add(new InfoPage(
-          "--CAULDER--\r\n" +
+          "--CAULDER ALT--\r\n" +
           "All damaged units are repaired for +"+ D2DREPAIRS +" HP every turn (liable for costs).\r\n" +
           "XXXXX XXXXX\r\n" +
           "SUPREME BOOST: All units gain +40% firepower, +25% defense, and are repaired for +"+ SupremeBoost.REPAIRS +" HP (liable for costs -- watch your funds!)."));
@@ -24,13 +24,13 @@ public class IDSCaulderSCOP extends Commander
     @Override
     public Commander create()
     {
-      return new IDSCaulderSCOP();
+      return new IDSCaulder3();
     }
   }
 
-  public static final int D2DREPAIRS = 2;
+  public static final int D2DREPAIRS = 3;
 
-  public IDSCaulderSCOP()
+  public IDSCaulder3()
   {
     super(coInfo);
 
@@ -76,7 +76,7 @@ public class IDSCaulderSCOP extends Commander
   {
     private static final String NAME = "Supreme Boost";
     private static final int COST = 10;
-    private static final int REPAIRS = 3;
+    private static final int REPAIRS = 2;
 
     SupremeBoost(Commander commander)
     {
