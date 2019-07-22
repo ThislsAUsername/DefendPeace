@@ -70,6 +70,7 @@ public class CommanderLibrary
     commanderList.add( LATashaWoke.getInfo() );
 
     commanderList.add( RAWaylonCS.getInfo() );
+    commanderList.add( RAAllDaWaylon.getInfo() );
 
     commanderList.add( IDSCaulderSCOP.getInfo() );
     commanderList.add( IDSPennyCS.getInfo() );

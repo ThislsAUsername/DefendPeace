@@ -5,29 +5,29 @@ import Terrain.MapMaster;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
 
-public class RAWaylonCS extends Commander
+public class RAAllDaWaylon extends Commander
 {
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
-      super("Waylon");
+      super("AllDaWaylon");
       infoPages.add(new InfoPage(
-          "--WAYLON--\r\n" +
-          "Air units gain +20% firepower and +25% defense.\r\n" +
+          "--All da Way...lon--\r\n" +
+          "Air units gain +20% firepower and +30% defense.\r\n" +
           "xxxXXX\n" +
-          "WINGMAN: All air units gain +25% defense.\r\n" +
-          "BAD COMPANY: All air units gain +50% defense."));
+          "WINGMAN: All air units gain +20% defense.\r\n" +
+          "BAD COMPANY: All air units gain +45% defense."));
     }
     @Override
     public Commander create()
     {
-      return new RAWaylonCS();
+      return new RAAllDaWaylon();
     }
   }
 
-  public RAWaylonCS()
+  public RAAllDaWaylon()
   {
     super(coInfo);
 
@@ -36,12 +36,12 @@ public class RAWaylonCS extends Commander
       if( um.chassis == ChassisEnum.AIR_HIGH || um.chassis == ChassisEnum.AIR_LOW )
       {
         um.modifyDamageRatio(20);
-        um.modifyDefenseRatio(25);
+        um.modifyDefenseRatio(30);
       }
     }
 
-    addCommanderAbility(new AirDefBonus(this, "Wingman", 3, 25));
-    addCommanderAbility(new AirDefBonus(this, "Bad Company", 6, 50));
+    addCommanderAbility(new AirDefBonus(this, "Wingman", 3, 20));
+    addCommanderAbility(new AirDefBonus(this, "Bad Company", 6, 45));
   }
 
   public static CommanderInfo getInfo()
