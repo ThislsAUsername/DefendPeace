@@ -19,10 +19,10 @@ public class IDSCyrus extends Commander
     {
       super("Cyrus");
       infoPages.add(new InfoPage(
-          "--CYRUS--\r\n" + 
-          "+1 vision in Fog of War, and all enemy units lose one terrain star. All units have hidden HP, but can have bad luck (up to -5% bad luck).\r\n" + 
-          "xxxXX\r\n" + 
-          "COURAGEOUS: +1 vision; can see into hiding places; all enemy units lose one additional terrain star.\r\n" + 
+          "--CYRUS--\r\n" +
+          "+1 vision in Fog of War, and all enemy units lose one terrain star. All units have hidden HP, but can have bad luck (up to -5% bad luck).\r\n" +
+          "xxxXX\r\n" +
+          "COURAGEOUS: +1 vision; can see into hiding places; all enemy units lose one additional terrain star.\r\n" +
           "FEARLESS: +2 vision; can see into hiding places; all enemy units lose two additional terrain stars; a unit being attacked attacks first even if it would be destroyed."));
     }
     @Override
@@ -110,10 +110,6 @@ public class IDSCyrus extends Commander
     {
       COcast.terrainDrain = 2;
       COVisionModifier sightMod = new COVisionModifier(1);
-      for(UnitModel um : myCommander.unitModels.values())
-      {
-        sightMod.addApplicableUnitModel(um);
-      }
       myCommander.addCOModifier(sightMod);
       myCommander.myView.revealFog();
     }
@@ -137,10 +133,6 @@ public class IDSCyrus extends Commander
       COcast.counterFirst = true;
       COcast.terrainDrain = 3;
       COVisionModifier sightMod = new COVisionModifier(2);
-      for(UnitModel um : myCommander.unitModels.values())
-      {
-        sightMod.addApplicableUnitModel(um);
-      }
       myCommander.addCOModifier(sightMod);
       myCommander.myView.revealFog();
     }
