@@ -27,10 +27,12 @@ public abstract class UnitActionType implements Serializable
   public static final UnitActionType LOAD = new Load();
   public static final UnitActionType JOIN = new Join();
 
-  public static final UnitActionType[] FOOTSOLDIER_ACTIONS =    { ATTACK, CAPTURE,  WAIT, DELETE, LOAD, JOIN };
-  public static final UnitActionType[] COMBAT_VEHICLE_ACTIONS = { ATTACK,           WAIT, DELETE, LOAD, JOIN };
-  public static final UnitActionType[] TRANSPORT_ACTIONS =      { UNLOAD,           WAIT, DELETE, LOAD, JOIN };
-  public static final UnitActionType[] APC_ACTIONS =            { UNLOAD, RESUPPLY, WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] FOOTSOLDIER_ACTIONS =      { ATTACK, CAPTURE,  WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] COMBAT_VEHICLE_ACTIONS =   { ATTACK,           WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] COMBAT_TRANSPORT_ACTIONS = { ATTACK, UNLOAD,   WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] TRANSPORT_ACTIONS =        { UNLOAD,           WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] APC_ACTIONS =              { UNLOAD, RESUPPLY, WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] BASIC_ACTIONS =            {                   WAIT, DELETE, LOAD, JOIN };
 
   public static class Attack extends UnitActionType
   {
@@ -334,6 +336,40 @@ public abstract class UnitActionType implements Serializable
     public String name()
     {
       return name;
+    }
+  }
+
+  /**
+   * Effectively a wait, but the unit dies and deals damage to everything nearby
+   * This action type requires parameters, and thus
+   * cannot be represented as a static global constant.
+   */
+  public static class Explode extends UnitActionType
+  {
+    public final int damage, range;
+    
+    public Explode(int pDamage, int pRange)
+    {
+      damage = pDamage;
+      range = pRange;
+    }
+    
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    {
+      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
+      {
+        // TODO: fix this
+//        return new GameActionSet(new GameAction.TransformAction(actor, movePath, this), false);
+      }
+      return null;
+    }
+
+    @Override
+    public String name()
+    {
+      return "EXPLODE";
     }
   }
 

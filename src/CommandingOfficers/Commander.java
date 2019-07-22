@@ -30,19 +30,26 @@ import UI.UIUtils.Faction;
 import Units.APCModel;
 import Units.AntiAirModel;
 import Units.ArtilleryModel;
+import Units.BBoatModel;
+import Units.BBombModel;
 import Units.BCopterModel;
 import Units.BattleshipModel;
 import Units.BomberModel;
+import Units.CarrierModel;
 import Units.CruiserModel;
 import Units.FighterModel;
 import Units.InfantryModel;
 import Units.LanderModel;
 import Units.MDTankModel;
 import Units.MechModel;
+import Units.MegatankModel;
 import Units.MobileSAMModel;
 import Units.NeotankModel;
+import Units.PiperunnerModel;
 import Units.ReconModel;
 import Units.RocketsModel;
+import Units.StealthHideModel;
+import Units.StealthModel;
 import Units.SubModel;
 import Units.SubSubModel;
 import Units.TCopterModel;
@@ -99,21 +106,27 @@ public class Commander extends GameEventListener implements Serializable
     factoryModels.add(new TankModel());
     factoryModels.add(new MDTankModel());
     factoryModels.add(new NeotankModel());
+    factoryModels.add(new MegatankModel());
     factoryModels.add(new RocketsModel());
     factoryModels.add(new AntiAirModel());
     factoryModels.add(new MobileSAMModel());
+    factoryModels.add(new PiperunnerModel());
 
     // Record those units we can get from a Seaport.
     seaportModels.add(new LanderModel());
     seaportModels.add(new CruiserModel());
     seaportModels.add(new SubModel());
     seaportModels.add(new BattleshipModel());
+    seaportModels.add(new CarrierModel());
+    seaportModels.add(new BBoatModel());
 
     // Inscribe those war machines obtainable from an Airport.
     airportModels.add(new TCopterModel());
     airportModels.add(new BCopterModel());
     airportModels.add(new FighterModel());
     airportModels.add(new BomberModel());
+    airportModels.add(new StealthModel());
+    airportModels.add(new BBombModel());
 
     // Dump these lists into a hashmap for easy reference later.
     unitProductionByTerrain = new HashMap<TerrainType, ArrayList<UnitModel>>();
@@ -131,6 +144,8 @@ public class Commander extends GameEventListener implements Serializable
 
     UnitModel subsub = new SubSubModel();
     unitModels.put(subsub.type, subsub); // We don't want a separate "submerged sub" build option
+    UnitModel stealthy = new StealthHideModel();
+    unitModels.put(stealthy.type, stealthy);
 
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();

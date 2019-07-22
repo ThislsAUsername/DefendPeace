@@ -80,7 +80,7 @@ public class MoveType implements Serializable
   }
 
   /** Set the move cost for this terrain for all weather conditions. Useful for marking a terrain as impassable. */
-  protected void setMoveCost(TerrainType terrain, int cost)
+  public void setMoveCost(TerrainType terrain, int cost)
   {
     for( Weathers w : Weathers.values() )
     {
