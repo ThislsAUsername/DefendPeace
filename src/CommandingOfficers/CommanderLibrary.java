@@ -66,7 +66,8 @@ public class CommanderLibrary
     commanderList.add( LAForsythe.getInfo() );
     commanderList.add( LAGageCS.getInfo() );
     commanderList.add( LAGageWoke.getInfo() );
-    commanderList.add( LATasha1star.getInfo() );
+    commanderList.add( LATasha.getInfo() );
+    commanderList.add( LATashaWoke.getInfo() );
 
     commanderList.add( RAWaylonCS.getInfo() );
 
