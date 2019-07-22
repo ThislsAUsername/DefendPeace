@@ -8,13 +8,13 @@ import Units.UnitModel;
 
 public interface COModifier extends Serializable
 {
-  public abstract void apply(Commander commander);
-  public abstract void revert(Commander commander);
+  public abstract void applyChanges(Commander commander);
+  public abstract void revertChanges(Commander commander);
 
   /** 
    * Generic COModifier that operates on all units if it's given no specific types to operate on.
    */
-  public abstract static class GenericCOModifier implements COModifier
+  public abstract static class GenericUnitModifier implements COModifier
   {
     private ArrayList<UnitModel> modelsToModify;
 
@@ -24,7 +24,7 @@ public interface COModifier extends Serializable
      * To impact only specific units, use addApplicableUnitModel to set
      * the ones that should be modified.
      */
-    public GenericCOModifier()
+    public GenericUnitModifier()
     {
       modelsToModify = new ArrayList<UnitModel>();
     }
@@ -48,22 +48,22 @@ public interface COModifier extends Serializable
     }
 
     @Override
-    public final void apply(Commander commander)
+    public final void applyChanges(Commander commander)
     {
       if( modelsToModify.isEmpty() )
       {
         modelsToModify.addAll(commander.unitModels.values());
       }
-      applyChanges(commander, modelsToModify);
+      modifyUnits(commander, modelsToModify);
     }
-    protected abstract void applyChanges(Commander commander, ArrayList<UnitModel> models);
+    protected abstract void modifyUnits(Commander commander, ArrayList<UnitModel> models);
 
     @Override
-    public final void revert(Commander commander)
+    public final void revertChanges(Commander commander)
     {
-      revertChanges(commander, modelsToModify);
+      restoreUnits(commander, modelsToModify);
     }
-    protected abstract void revertChanges(Commander commander, ArrayList<UnitModel> models);
+    protected abstract void restoreUnits(Commander commander, ArrayList<UnitModel> models);
   } // ~GenericCOModifier
 
 }

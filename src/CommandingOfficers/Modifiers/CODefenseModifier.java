@@ -5,9 +5,9 @@ import Units.UnitModel;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
-import CommandingOfficers.Modifiers.COModifier.GenericCOModifier;
+import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 
-public class CODefenseModifier extends GenericCOModifier
+public class CODefenseModifier extends GenericUnitModifier
 {
   private int defenseModifier = 0;
 
@@ -17,7 +17,7 @@ public class CODefenseModifier extends GenericCOModifier
   }
 
   @Override
-  public void applyChanges(Commander commander, ArrayList<UnitModel> models)
+  public void modifyUnits(Commander commander, ArrayList<UnitModel> models)
   {
     for( UnitModel um : models )
     {
@@ -29,7 +29,7 @@ public class CODefenseModifier extends GenericCOModifier
   }
 
   @Override
-  public void revertChanges(Commander commander, ArrayList<UnitModel> models)
+  public void restoreUnits(Commander commander, ArrayList<UnitModel> models)
   {
     for( UnitModel um : models )
     {
