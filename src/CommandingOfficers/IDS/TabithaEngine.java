@@ -10,6 +10,8 @@ import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CostValueFinder;
 import Engine.Combat.MassStrikeUtils;
+import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameAction;
 import Engine.GameActionSet;
@@ -19,7 +21,10 @@ import Engine.XYCoord;
 import Engine.Combat.BattleInstance.BattleParams;
 import Terrain.GameMap;
 import Terrain.MapMaster;
+import UI.MapView;
+import UI.Art.Animation.GameAnimation;
 import Units.Unit;
+import Units.UnitModel;
 
 public abstract class TabithaEngine extends Commander
 {
@@ -42,6 +47,11 @@ public abstract class TabithaEngine extends Commander
     COUDef = def;
     megaPow = COUPow;
     megaDef = COUDef;
+
+    for( UnitModel um : unitModels.values() )
+    {
+      um.possibleActions.add(new MegaBoost(this));
+    }
   }
 
   @Override
@@ -126,6 +136,122 @@ public abstract class TabithaEngine extends Commander
       myCommander.addCOModifier(new CODefenseModifier(def));
       XYCoord target = MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true));
       MassStrikeUtils.damageStrike(gameMap, nukePower, target, 2);
+    }
+  }
+
+  //////////////////////////////////////////////////////////
+  // Mega action jazz happens after this point
+  //////////////////////////////////////////////////////////
+
+  private static class MegaBoost extends UnitActionType
+  {
+    final TabithaEngine tabby;
+    public MegaBoost(TabithaEngine owner)
+    {
+      tabby = owner;
+    }
+
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    {
+      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      if( moveLocation.equals(actor.x, actor.y) && tabby.COUs.size() < tabby.getMegaBoostCount() )
+      {
+        return new GameActionSet(new ApplyMegaBoost(this, actor), false);
+      }
+      return null;
+    }
+
+    @Override
+    public String name()
+    {
+      return "MEGA BOOST";
+    }
+  }
+
+  private static class ApplyMegaBoost implements GameAction
+  {
+    final MegaBoost type;
+    final Unit actor;
+    final XYCoord destination;
+    public ApplyMegaBoost(MegaBoost owner, Unit unit)
+    {
+      type = owner;
+      actor = unit;
+      destination = new XYCoord(unit.x, unit.y);
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue eventSequence = new GameEventQueue();
+      eventSequence.add(new MegaBoostEvent(type.tabby, actor));
+      return eventSequence;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Mega Boost %s in place]", actor.toStringWithLocation());
+    }
+
+    @Override
+    public UnitActionType getUnitActionType()
+    {
+      return type;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return destination;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return destination;
+    }
+  } // ~ApplyMegaBoost
+
+  private static class MegaBoostEvent implements GameEvent
+  {
+    final TabithaEngine tabby;
+    private Unit unit;
+
+    public MegaBoostEvent(TabithaEngine owner, Unit unit)
+    {
+      tabby = owner;
+      this.unit = unit;
+    }
+
+    @Override
+    public GameAnimation getEventAnimation(MapView mapView)
+    {
+      return null;
+    }
+
+    @Override
+    public void sendToListener(GameEventListener listener)
+    {
+    }
+
+    @Override
+    public void performEvent(MapMaster gameMap)
+    {
+      tabby.COUs.add(unit);
+    }
+
+    @Override
+    public XYCoord getStartPoint()
+    {
+      return new XYCoord(unit.x, unit.y);
+    }
+
+    @Override
+    public XYCoord getEndPoint()
+    {
+      return new XYCoord(unit.x, unit.y);
     }
   }
 }
