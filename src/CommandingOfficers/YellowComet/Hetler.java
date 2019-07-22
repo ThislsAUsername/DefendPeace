@@ -13,28 +13,28 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import Units.UnitModel;
 
-public class Sensei extends Commander
+public class Hetler extends Commander
 {
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
-      super("Sensei");
+      super("Hetler");
       infoPages.add(new InfoPage(
-          "Sensei\r\n" + 
+          "Hetler (rebalanced Sensei)\r\n" + 
           "  Copters gain +50% attack, footsoldiers gain +40% attack, but all other non-air units lose -10% attack. Transports gain +1 movement\r\n" + 
-          "Copter Command -- Copters' strength is increased by +15%; 9 HP Infantry units are placed on every owned, empty city\r\n" + 
-          "Airborne Assault -- Copters' strength is increased by +15%; 9 HP Mech units are placed on every owned, empty city"));
+          "Copter Command (3): Copters' strength is increased by +15%\r\n" + 
+          "Airborne Assault (9): Copters' strength is increased by +15%; 9 HP Infantry units are placed on every owned, empty city"));
     }
     @Override
     public Commander create()
     {
-      return new Sensei();
+      return new Hetler();
     }
   }
 
-  public Sensei()
+  public Hetler()
   {
     super(coInfo);
 
@@ -73,8 +73,8 @@ public class Sensei extends Commander
 
   private static class CopterCommand extends CommanderAbility
   {
-    private static final String NAME = "Copter Command";
-    private static final int COST = 2;
+    private static final String NAME = "Airborne Assault";
+    private static final int COST = 3;
 
     CopterCommand(Commander commander)
     {
@@ -84,19 +84,6 @@ public class Sensei extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      UnitModel spawn = myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY);
-      for( XYCoord xyc : myCommander.ownedProperties )
-      {
-        Location loc = gameMap.getLocation(xyc);
-        if( loc.getEnvironment().terrainType == TerrainType.CITY && loc.getResident() == null)
-        {
-          CreateUnitEvent cue = new CreateUnitEvent(myCommander,spawn,loc.getCoordinates());
-          myCommander.money += spawn.getCost();
-          cue.performEvent(gameMap);
-          loc.getResident().alterHP(-1);
-          loc.getResident().isTurnOver = false;
-        }
-      }
       CODamageModifier copterPowerMod = new CODamageModifier(15);
       copterPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.B_COPTER));
       myCommander.addCOModifier(copterPowerMod);
@@ -106,18 +93,17 @@ public class Sensei extends Commander
   private static class AirborneAssault extends CommanderAbility
   {
     private static final String NAME = "Airborne Assault";
-    private static final int COST = 6;
+    private static final int COST = 9;
 
     AirborneAssault(Commander commander)
     {
-      // as we start in Bear form, UpTurn is the correct starting name
       super(commander, NAME, COST);
     }
 
     @Override
     protected void perform(MapMaster gameMap)
     {
-      UnitModel spawn = myCommander.getUnitModel(UnitModel.UnitEnum.MECH);
+      UnitModel spawn = myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY);
       for( XYCoord xyc : myCommander.ownedProperties )
       {
         Location loc = gameMap.getLocation(xyc);

@@ -12,6 +12,7 @@ import CommandingOfficers.BlackHole.Kindle;
 import CommandingOfficers.BlackHole.Lash;
 import CommandingOfficers.BlackHole.Sturm;
 import CommandingOfficers.BlackHole.VB;
+import CommandingOfficers.BlueMoon.BillyGates;
 import CommandingOfficers.BlueMoon.Colin;
 import CommandingOfficers.BlueMoon.Grit;
 import CommandingOfficers.BlueMoon.Olaf;
@@ -45,14 +46,17 @@ import CommandingOfficers.Lazuria.WokeGage;
 import CommandingOfficers.Lazuria.Tasha;
 import CommandingOfficers.Lazuria.WokeTasha;
 import CommandingOfficers.OrangeStar.Andy;
+import CommandingOfficers.OrangeStar.Caroline;
 import CommandingOfficers.OrangeStar.Hachi;
 import CommandingOfficers.OrangeStar.Jake;
 import CommandingOfficers.OrangeStar.Max;
 import CommandingOfficers.OrangeStar.Rachel;
 import CommandingOfficers.OrangeStar.Sami;
 import CommandingOfficers.YellowComet.Grimm;
+import CommandingOfficers.YellowComet.Hetler;
 import CommandingOfficers.YellowComet.Kanbei;
 import CommandingOfficers.YellowComet.Sensei;
+import CommandingOfficers.YellowComet.Yamamoto;
 
 public class CommanderLibrary
 {  
@@ -86,8 +90,10 @@ public class CommanderLibrary
     commanderList.add( Max.getInfo() );
     commanderList.add( Rachel.getInfo() );
     commanderList.add( Sami.getInfo() );
+    commanderList.add( Caroline.getInfo() );
     
     commanderList.add( Colin.getInfo() );
+    commanderList.add( BillyGates.getInfo() );
     commanderList.add( Grit.getInfo() );
     commanderList.add( Olaf.getInfo() );
     commanderList.add( Sasha.getInfo() );
@@ -101,7 +107,9 @@ public class CommanderLibrary
     
     commanderList.add( Grimm.getInfo() );
     commanderList.add( Kanbei.getInfo() );
+    commanderList.add( Yamamoto.getInfo() );
     commanderList.add( Sensei.getInfo() );
+    commanderList.add( Hetler.getInfo() );
     
     commanderList.add( Adder.getInfo() );
     commanderList.add( Hawke.getInfo() );
@@ -125,6 +133,7 @@ public class CommanderLibrary
 
     commanderList.add( WaylonCS.getInfo() );
     commanderList.add( AllDaWaylon.getInfo() );
+    commanderList.add( Davis.getInfo() );
 
     commanderList.add( Caulder.getInfo() );
     commanderList.add( CaulderAlt.getInfo() );
@@ -136,7 +145,6 @@ public class CommanderLibrary
     commanderList.add( OmegaTabitha.getInfo() );
     commanderList.add( Cyrus.getInfo() );
 
-    commanderList.add( Davis.getInfo() );
     commanderList.add( TheBeastSturm.getInfo() );
     commanderList.add( TheWeakBeast.getInfo() );
     for (CommanderInfo info : commanderList)
