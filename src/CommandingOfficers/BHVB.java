@@ -32,8 +32,8 @@ public class BHVB extends Commander
   {
     super(coInfo);
 
-    new CODamageModifier(10).apply(this);
-    new CODefenseModifier(10).apply(this);
+    new CODamageModifier(10).applyChanges(this);
+    new CODefenseModifier(10).applyChanges(this);
 
     addCommanderAbility(new ExMachina(this));
   }

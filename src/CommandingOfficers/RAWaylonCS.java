@@ -1,6 +1,6 @@
 package CommandingOfficers;
 
-import CommandingOfficers.Modifiers.UnitTypeDefenseModifier;
+import CommandingOfficers.Modifiers.CODefenseModifier;
 import Terrain.MapMaster;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
@@ -62,7 +62,7 @@ public class RAWaylonCS extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      UnitTypeDefenseModifier airDefMod = new UnitTypeDefenseModifier(power);
+      CODefenseModifier airDefMod = new CODefenseModifier(power);
       for( UnitModel um : myCommander.unitModels.values() )
       {
         if( um.chassis == ChassisEnum.AIR_HIGH ||  um.chassis == ChassisEnum.AIR_LOW)

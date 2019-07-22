@@ -1,7 +1,7 @@
 package CommandingOfficers;
 
-import CommandingOfficers.Modifiers.UnitTypeDamageModifier;
-import CommandingOfficers.Modifiers.UnitTypeDefenseModifier;
+import CommandingOfficers.Modifiers.CODamageModifier;
+import CommandingOfficers.Modifiers.CODefenseModifier;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
@@ -68,13 +68,13 @@ public class GEEagle extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      UnitTypeDamageModifier airPowerMod = new UnitTypeDamageModifier(5);
+      CODamageModifier airPowerMod = new CODamageModifier(5);
       airPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.B_COPTER));
       airPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.T_COPTER));
       airPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.FIGHTER));
       airPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.BOMBER));
       myCommander.addCOModifier(airPowerMod);
-      UnitTypeDefenseModifier airDefMod = new UnitTypeDefenseModifier(10);
+      CODefenseModifier airDefMod = new CODefenseModifier(10);
       airDefMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.B_COPTER));
       airDefMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.T_COPTER));
       airDefMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.FIGHTER));
@@ -104,13 +104,13 @@ public class GEEagle extends Commander
           unit.isTurnOver = false;
         }
       }
-      UnitTypeDamageModifier airPowerMod = new UnitTypeDamageModifier(5);
+      CODamageModifier airPowerMod = new CODamageModifier(5);
       airPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.B_COPTER));
       airPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.T_COPTER));
       airPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.FIGHTER));
       airPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.BOMBER));
       myCommander.addCOModifier(airPowerMod);
-      UnitTypeDefenseModifier airDefMod = new UnitTypeDefenseModifier(10);
+      CODefenseModifier airDefMod = new CODefenseModifier(10);
       airDefMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.B_COPTER));
       airDefMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.T_COPTER));
       airDefMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.FIGHTER));

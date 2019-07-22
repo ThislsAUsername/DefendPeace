@@ -83,7 +83,6 @@ public class BHLash extends Commander
       super(commander, NAME, COST);
       COcast = (BHLash) commander;
       moveMod = new PerfectMoveModifier();
-      moveMod.init(COcast);
     }
 
     @Override
@@ -105,7 +104,6 @@ public class BHLash extends Commander
       super(commander, NAME, COST);
       COcast = (BHLash) commander;
       moveMod = new PerfectMoveModifier();
-      moveMod.init(COcast);
     }
 
     @Override

@@ -34,7 +34,7 @@ public class GEJavier extends Commander
   {
     super(coInfo);
 
-    new CODefenseModifier(10).apply(this);
+    new CODefenseModifier(10).applyChanges(this);
 
     addCommanderAbility(new TowerShield(this));
     addCommanderAbility(new TowerOfPower(this));

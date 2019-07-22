@@ -100,13 +100,13 @@ public class BMSasha extends Commander
     }
 
     @Override // COModifier interface.
-    public void apply(Commander commander)
+    public void applyChanges(Commander commander)
     {
       // No special action required.
     }
 
     @Override
-    public void revert(Commander commander)
+    public void revertChanges(Commander commander)
     {
       // This will be called when the Commander removes this COModifier. It will remove the damage
       // modifier we added as well, so we just need to turn off the the damage-to-income listener.

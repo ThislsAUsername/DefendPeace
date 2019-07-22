@@ -1,8 +1,8 @@
 package CommandingOfficers;
 
+import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
-import CommandingOfficers.Modifiers.UnitTypeDamageModifier;
 import Engine.GameEvents.GameEventListener;
 import Terrain.MapMaster;
 import Terrain.Location;
@@ -64,7 +64,7 @@ public class OSSami extends Commander
     moveMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.APC));
     moveMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.T_COPTER));
     moveMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.LANDER));
-    moveMod.apply(this);
+    moveMod.applyChanges(this);
 
     addCommanderAbility(new DoubleTime(this));
     addCommanderAbility(new VictoryMarch(this));
@@ -102,7 +102,7 @@ public class OSSami extends Commander
     protected void perform(MapMaster gameMap)
     {
       // Grant foot-soldiers additional firepower.
-      UnitTypeDamageModifier infPowerMod = new UnitTypeDamageModifier(POWER);
+      CODamageModifier infPowerMod = new CODamageModifier(POWER);
       infPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
       infPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
       myCommander.addCOModifier(infPowerMod);
@@ -132,7 +132,7 @@ public class OSSami extends Commander
     {
       myCommander.addCOModifier(this);
       // Grant foot-soldiers additional firepower.
-      UnitTypeDamageModifier infPowerMod = new UnitTypeDamageModifier(POWER);
+      CODamageModifier infPowerMod = new CODamageModifier(POWER);
       infPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
       infPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
       myCommander.addCOModifier(infPowerMod);
@@ -143,13 +143,13 @@ public class OSSami extends Commander
     }
 
     @Override // COModifier interface.
-    public void apply(Commander commander)
+    public void applyChanges(Commander commander)
     {
       GameEventListener.registerEventListener(listener);
     }
 
     @Override
-    public void revert(Commander commander)
+    public void revertChanges(Commander commander)
     {
       GameEventListener.unregisterEventListener(listener);
     }

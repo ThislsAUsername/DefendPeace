@@ -55,7 +55,7 @@ public class BMOlaf extends Commander
     return coInfo;
   }
 
-  private static class Blizzard extends CommanderAbility implements COModifier
+  private static class Blizzard extends CommanderAbility
   {
     private static final String NAME = "Blizzard";
     private static final int COST = 3;
@@ -72,14 +72,6 @@ public class BMOlaf extends Commander
       event.performEvent(gameMap);
       GameEventListener.publishEvent(event);
     }
-
-    @Override // COModifier interface.
-    public void apply(Commander commander)
-    {}
-
-    @Override
-    public void revert(Commander commander)
-    {}
   }
 
   private static class WinterFury extends CommanderAbility

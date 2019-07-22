@@ -34,7 +34,7 @@ public class BWIsabellaCS extends Commander
   {
     super(coInfo);
 
-    new CODamageModifier(10).apply(this);
+    new CODamageModifier(10).applyChanges(this);
     
     addCommanderAbility(new DeepStrike(this));
     addCommanderAbility(new Overlord(this));

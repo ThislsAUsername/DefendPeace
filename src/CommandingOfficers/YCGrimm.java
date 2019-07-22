@@ -29,8 +29,8 @@ public class YCGrimm extends Commander
   {
     super(coInfo);
     
-    new CODamageModifier(30).apply(this);
-    new CODefenseModifier(-20).apply(this);
+    new CODamageModifier(30).applyChanges(this);
+    new CODefenseModifier(-20).applyChanges(this);
 
     addCommanderAbility(new Knuckleduster(this));
     addCommanderAbility(new Haymaker(this));

@@ -176,8 +176,8 @@ public class Commander extends GameEventListener implements Serializable
 
   public void addCOModifier(COModifier mod)
   {
-    mod.apply(this);
-    modifiers.offer(mod); // Add to the list so the modifier can be reverted next turn.
+    mod.applyChanges(this);
+    modifiers.add(mod); // Add to the list so the modifier can be reverted next turn.
   }
 
   public void endTurn()
@@ -188,7 +188,7 @@ public class Commander extends GameEventListener implements Serializable
   
   public void adjustTowerPower() {
 	  // First, revert all previous damage modifiers
-	  new CODamageModifier(10*numTowers).revert(this);
+	  new CODamageModifier(10*numTowers).revertChanges(this);
 	  // Count number of towers, and apply new modifiers
 	  numTowers = 0;
 	  for (XYCoord xy : this.ownedProperties) 
@@ -200,7 +200,7 @@ public class Commander extends GameEventListener implements Serializable
 			  numTowers += 1;
 		  }
 	  }
-	  new CODamageModifier(10*numTowers).apply(this);
+	  new CODamageModifier(10*numTowers).applyChanges(this);
   }
   
   private static class TowerListener extends GameEventListener{
@@ -246,7 +246,7 @@ public class Commander extends GameEventListener implements Serializable
     // TODO: If/when we have modifiers that last multiple turns, figure out how to handle them.
     while (!modifiers.isEmpty())
     {
-      modifiers.poll().revert(this);
+      modifiers.poll().revertChanges(this);
     }
 
     if( null != aiController )

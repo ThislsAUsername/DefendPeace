@@ -41,7 +41,7 @@ public class UnitRemodelModifier implements COModifier
   }
 
   @Override
-  public void apply(Commander commander)
+  public void applyChanges(Commander commander)
   {
     for( Unit unit : commander.units )
     {
@@ -63,7 +63,7 @@ public class UnitRemodelModifier implements COModifier
   }
 
   @Override
-  public void revert(Commander commander)
+  public void revertChanges(Commander commander)
   {
     for( Unit unit : unitsChanged )
     {

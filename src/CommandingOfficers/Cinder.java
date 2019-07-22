@@ -200,13 +200,13 @@ public class Cinder extends Commander
     }
 
     @Override // COModifier interface.
-    public void apply(Commander commander)
+    public void applyChanges(Commander commander)
     {
       GameEventListener.registerEventListener(listener);
     }
 
     @Override
-    public void revert(Commander commander)
+    public void revertChanges(Commander commander)
     {
       GameEventListener.unregisterEventListener(listener);
     }

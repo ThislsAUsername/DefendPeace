@@ -1,40 +1,58 @@
 package CommandingOfficers.Modifiers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import CommandingOfficers.Commander;
+import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import Units.UnitModel;
+import Units.MoveTypes.MoveType;
 
-public class PerfectMoveModifier extends UnitRemodelModifier implements COModifier
+public class PerfectMoveModifier extends GenericUnitModifier
 {
+  Map<UnitModel, MoveType> originalPropulsions = new HashMap<UnitModel, MoveType>();
 
+  public final boolean doSnow;
+  public PerfectMoveModifier(boolean zoomThroughSnow)
+  {
+    doSnow = zoomThroughSnow;
+  }
   public PerfectMoveModifier()
   {
-    super();
+    this(false);
   }
 
-  /** Add a new unit transform assignment. */
-  public Map<UnitModel, UnitModel> init(Commander commander)
+  @Override
+  protected final void modifyUnits(Commander commander, ArrayList<UnitModel> models)
   {
-//    modelSwaps.clear();
-    for( UnitModel um : commander.unitModels.values() )
+    for( UnitModel um : models )
     {
-      UnitModel newModel = UnitModel.clone(um);
+      originalPropulsions.put(um,um.propulsion);
+      MoveType newGroove = new MoveType(um.propulsion);
+      um.propulsion = newGroove;
 
       for( TerrainType terrain : TerrainType.TerrainTypeList )
       {
-        if( newModel.propulsion.getMoveCost(Weathers.CLEAR, terrain) < 99 )
+        if( newGroove.getMoveCost(Weathers.CLEAR, terrain) < 99 )
         {
-          newModel.propulsion.setMoveCost(Weathers.CLEAR, terrain, 1);
-          newModel.propulsion.setMoveCost(Weathers.RAIN, terrain, 1);
+          newGroove.setMoveCost(Weathers.CLEAR, terrain, 1);
+          newGroove.setMoveCost(Weathers.RAIN, terrain, 1);
+          if (doSnow)
+            newGroove.setMoveCost(Weathers.SNOW, terrain, 1);
         }
       }
-
-//      modelSwaps.put(um, newModel);
     }
-    return new HashMap<UnitModel, UnitModel>(); // TODO: fix this
+  }
+
+  @Override
+  protected final void restoreUnits(Commander commander, ArrayList<UnitModel> models)
+  {
+    for( UnitModel um : models )
+    {
+      um.propulsion = originalPropulsions.get(um);
+    }
   }
 }

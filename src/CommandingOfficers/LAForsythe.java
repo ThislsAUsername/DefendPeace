@@ -27,8 +27,8 @@ public class LAForsythe extends Commander
   {
     super(coInfo);
 
-    new CODamageModifier(15).apply(this);
-    new CODefenseModifier(10).apply(this);
+    new CODamageModifier(15).applyChanges(this);
+    new CODefenseModifier(10).applyChanges(this);
 
   }
 

@@ -30,7 +30,7 @@ public class BWBrennerComp extends Commander
   {
     super(coInfo);
 
-    new CODefenseModifier(10).apply(this);
+    new CODefenseModifier(10).applyChanges(this);
 
     addCommanderAbility(new Reinforce(this));
     addCommanderAbility(new Lifeline(this));

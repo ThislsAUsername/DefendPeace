@@ -4,53 +4,45 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import CommandingOfficers.Commander;
+import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 import Units.UnitModel;
 import Units.Weapons.WeaponModel;
 
-public class IndirectRangeBoostModifier implements COModifier
+public class IndirectRangeBoostModifier extends GenericUnitModifier
 {
-  ArrayList<WeaponModel> modelsToModify;
   private int boost;
 
   public IndirectRangeBoostModifier(Commander commander, int boost)
   {
     this.boost = boost;
-    modelsToModify = new ArrayList<WeaponModel>();
-    for( UnitModel um : commander.unitModels.values() )
+  }
+
+  @Override
+  protected final void modifyUnits(Commander commander, ArrayList<UnitModel> models)
+  {
+    for( UnitModel um : models )
     {
-      if( um.weaponModels != null )
+      for( WeaponModel pewpew : um.weaponModels )
       {
-        for( WeaponModel pewpew : um.weaponModels )
+        if( pewpew.maxRange > 1 )
         {
-          if( pewpew.maxRange > 1 )
-          {
-            modelsToModify.add(pewpew);
-          }
+          pewpew.maxRange += boost;
         }
       }
     }
   }
 
   @Override
-  public void apply(Commander commander)
+  protected final void restoreUnits(Commander commander, ArrayList<UnitModel> models)
   {
-    for( WeaponModel pewpew : modelsToModify )
+    for( UnitModel um : models )
     {
-      if( pewpew.maxRange > 1 )
+      for( WeaponModel pewpew : um.weaponModels )
       {
-        pewpew.maxRange += boost;
-      }
-    }
-  }
-
-  @Override
-  public void revert(Commander commander)
-  {
-    for( WeaponModel pewpew : modelsToModify )
-    {
-      if( pewpew.maxRange > 1 )
-      {
-        pewpew.maxRange -= boost;
+        if( pewpew.maxRange > 1 )
+        {
+          pewpew.maxRange -= boost;
+        }
       }
     }
   }

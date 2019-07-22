@@ -29,7 +29,7 @@ public class BHHawke extends Commander
   public BHHawke()
   {
     super(coInfo);
-    new CODamageModifier(10).apply(this);
+    new CODamageModifier(10).applyChanges(this);
 
     addCommanderAbility(new BlackWave(this));
     addCommanderAbility(new BlackStorm(this));

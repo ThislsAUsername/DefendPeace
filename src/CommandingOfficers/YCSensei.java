@@ -1,7 +1,7 @@
 package CommandingOfficers;
 
+import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
-import CommandingOfficers.Modifiers.UnitTypeDamageModifier;
 import Engine.XYCoord;
 import Engine.GameEvents.CreateUnitEvent;
 import Terrain.MapMaster;
@@ -56,7 +56,7 @@ public class YCSensei extends Commander
     moveMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.APC));
     moveMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.T_COPTER));
     moveMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.LANDER));
-    moveMod.apply(this);
+    moveMod.applyChanges(this);
 
     addCommanderAbility(new CopterCommand(this));
     addCommanderAbility(new AirborneAssault(this));
@@ -93,7 +93,7 @@ public class YCSensei extends Commander
           loc.getResident().isTurnOver = false;
         }
       }
-      UnitTypeDamageModifier copterPowerMod = new UnitTypeDamageModifier(15);
+      CODamageModifier copterPowerMod = new CODamageModifier(15);
       copterPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.B_COPTER));
       myCommander.addCOModifier(copterPowerMod);
     }
@@ -126,7 +126,7 @@ public class YCSensei extends Commander
           loc.getResident().isTurnOver = false;
         }
       }
-      UnitTypeDamageModifier copterPowerMod = new UnitTypeDamageModifier(15);
+      CODamageModifier copterPowerMod = new CODamageModifier(15);
       copterPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.B_COPTER));
       myCommander.addCOModifier(copterPowerMod);
     }

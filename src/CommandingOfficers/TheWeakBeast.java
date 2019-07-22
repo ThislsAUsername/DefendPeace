@@ -46,8 +46,8 @@ public class TheWeakBeast extends Commander
       }
     }
 
-    new CODamageModifier(20).apply(this);
-    new CODefenseModifier(-20).apply(this);
+    new CODamageModifier(20).applyChanges(this);
+    new CODefenseModifier(-20).applyChanges(this);
 
     addCommanderAbility(new MeteorStrike(this));
     addCommanderAbility(new MeatierStrike(this));

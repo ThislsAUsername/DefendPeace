@@ -1,7 +1,7 @@
 package CommandingOfficers;
 
+import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
-import CommandingOfficers.Modifiers.UnitTypeDamageModifier;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
@@ -70,7 +70,7 @@ public class GEJess extends Commander
       {
         unit.resupply();
       }
-      UnitTypeDamageModifier landPowerMod = new UnitTypeDamageModifier(10);
+      CODamageModifier landPowerMod = new CODamageModifier(10);
       COMovementModifier landMoveMod = new COMovementModifier(1);
       for( UnitModel um : myCommander.unitModels.values() )
       {
@@ -103,7 +103,7 @@ public class GEJess extends Commander
       {
         unit.resupply();
       }
-      UnitTypeDamageModifier landPowerMod = new UnitTypeDamageModifier(30);
+      CODamageModifier landPowerMod = new CODamageModifier(30);
       COMovementModifier landMoveMod = new COMovementModifier(2);
       for( UnitModel um : myCommander.unitModels.values() )
       {

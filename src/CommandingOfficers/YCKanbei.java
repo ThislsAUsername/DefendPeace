@@ -36,8 +36,8 @@ public class YCKanbei extends Commander
   {
     super(coInfo);
 
-    new CODamageModifier(30).apply(this);
-    new CODefenseModifier(30).apply(this);
+    new CODamageModifier(30).applyChanges(this);
+    new CODefenseModifier(30).applyChanges(this);
     for( UnitModel um : unitModels.values() )
     {
       um.COcost = 1.2;
