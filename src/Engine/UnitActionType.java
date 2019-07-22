@@ -17,6 +17,7 @@ public abstract class UnitActionType implements Serializable
   }
   public abstract GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident);
   public abstract String name();
+  public boolean shouldConfirm = false;
 
   public static final UnitActionType ATTACK = new Attack();
   public static final UnitActionType UNLOAD = new Unload();
@@ -402,6 +403,7 @@ public abstract class UnitActionType implements Serializable
     {
       damage = pDamage;
       range = pRange;
+      shouldConfirm = true;
     }
     
     @Override
@@ -410,7 +412,7 @@ public abstract class UnitActionType implements Serializable
       XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
-        return new GameActionSet(new GameAction.ExplodeAction(actor, movePath, this), false);
+        return new GameActionSet(new GameAction.ExplodeAction(actor, movePath, this), true); // We don't really need a target, but I want a confirm dialogue
       }
       return null;
     }
@@ -424,6 +426,11 @@ public abstract class UnitActionType implements Serializable
 
   public static class Delete extends UnitActionType
   {
+    public Delete()
+    {
+      shouldConfirm = true;
+    }
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
