@@ -17,7 +17,7 @@ public class CODefenseModifier extends GenericUnitModifier
   }
 
   @Override
-  public void modifyUnits(Commander commander, ArrayList<UnitModel> models)
+  protected final void modifyUnits(Commander commander, ArrayList<UnitModel> models)
   {
     for( UnitModel um : models )
     {
@@ -29,7 +29,7 @@ public class CODefenseModifier extends GenericUnitModifier
   }
 
   @Override
-  public void restoreUnits(Commander commander, ArrayList<UnitModel> models)
+  protected final void restoreUnits(Commander commander, ArrayList<UnitModel> models)
   {
     for( UnitModel um : models )
     {
