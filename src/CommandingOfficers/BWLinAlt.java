@@ -2,6 +2,8 @@ package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
+import CommandingOfficers.Modifiers.COModifier;
+import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 import CommandingOfficers.Modifiers.COVisionModifier;
 import Terrain.MapMaster;
 import Units.UnitModel;
@@ -14,13 +16,13 @@ public class BWLinAlt extends Commander
   {
     public instantiator()
     {
-      super("Lin_Alt");
+      super("Lin Alt");
       infoPages.add(new InfoPage(
-          "--LIN--\r\n" + 
+          "--LIN Alt--\r\n" + 
           "Ground units gain +5/5 stats\r\n" + 
           "xxXXX\r\n" + 
-          "SCOUT: All ground units get 120/120 stats, +1 vision, and can see into hiding places.\r\n" + 
-          "NIGHT VISION: All ground units get 130/130 stats, +2 vision, and can see into hiding places."));
+          "SCOUT: All ground units get +1 vision, and can see into hiding places.\r\n" + 
+          "NIGHT VISION: All ground units get +15/10 stats, +2 vision, and can see into hiding places."));
     }
     @Override
     public Commander create()
@@ -54,7 +56,7 @@ public class BWLinAlt extends Commander
   private static class Scout extends CommanderAbility
   {
     private static final String NAME = "Scout";
-    private static final int COST = 3;
+    private static final int COST = 2;
 
     Scout(Commander commander)
     {
@@ -64,8 +66,6 @@ public class BWLinAlt extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      myCommander.addCOModifier(new CODamageModifier(5));
-      myCommander.addCOModifier(new CODefenseModifier(5));
       // add vision +1 and piercing vision to land units
       COVisionModifier sightMod = new COVisionModifier(1);
       for( UnitModel um : myCommander.unitModels.values() )
@@ -81,7 +81,7 @@ public class BWLinAlt extends Commander
   private static class NightVision extends CommanderAbility
   {
     private static final String NAME = "Night Vision";
-    private static final int COST = 7;
+    private static final int COST = 5;
 
     NightVision(Commander commander)
     {
@@ -91,16 +91,22 @@ public class BWLinAlt extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      myCommander.addCOModifier(new CODamageModifier(15));
-      myCommander.addCOModifier(new CODefenseModifier(15));
       // add vision +2 and piercing vision to land units
-      COVisionModifier sightMod = new COVisionModifier(2);
+      GenericUnitModifier sightMod = new COVisionModifier(2);
+      GenericUnitModifier powMod = new CODamageModifier(15);
+      GenericUnitModifier defMod = new CODefenseModifier(10);
       for( UnitModel um : myCommander.unitModels.values() )
       {
         if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )
+        {
           sightMod.addApplicableUnitModel(um);
+          powMod.addApplicableUnitModel(um);
+          defMod.addApplicableUnitModel(um);
+        }
       }
       myCommander.addCOModifier(sightMod);
+      myCommander.addCOModifier(powMod);
+      myCommander.addCOModifier(defMod);
       myCommander.myView.revealFog();
     }
   }

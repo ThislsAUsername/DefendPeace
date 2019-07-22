@@ -3,6 +3,7 @@ package CommandingOfficers;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COVisionModifier;
+import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 import Terrain.MapMaster;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
@@ -17,10 +18,10 @@ public class BWLinCS extends Commander
       super("Lin");
       infoPages.add(new InfoPage(
           "--LIN--\r\n" + 
-          "Ground units gain +10% firepower.\r\n" + 
-          "xxXXX\r\n" + 
-          "SCOUT: All ground units get 120/120 stats, +1 vision, and can see into hiding places.\r\n" + 
-          "NIGHT VISION: All ground units get 130/130 stats, +2 vision, and can see into hiding places."));
+          "Ground units gain +10/5 stats.\r\n" +
+          "xxXXX\r\n" +
+          "SCOUT: All ground units get +1 vision, and can see into hiding places.\r\n" +
+          "NIGHT VISION: All ground units get +10/10 stats, +2 vision, and can see into hiding places."));
     }
     @Override
     public Commander create()
@@ -38,6 +39,7 @@ public class BWLinCS extends Commander
       if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP)
       {
         um.modifyDamageRatio(10);
+        um.modifyDefenseRatio(5);
       }
     }
 
@@ -72,8 +74,6 @@ public class BWLinCS extends Commander
       }
       myCommander.addCOModifier(sightMod);
       myCommander.myView.revealFog();
-      
-      myCommander.addCOModifier(new CODefenseModifier(10));
     }
   }
 
@@ -91,17 +91,22 @@ public class BWLinCS extends Commander
     protected void perform(MapMaster gameMap)
     {
       // add vision +2 and piercing vision to land units
-      COVisionModifier sightMod = new COVisionModifier(2);
+      GenericUnitModifier sightMod = new COVisionModifier(2);
+      GenericUnitModifier powMod = new CODamageModifier(10);
+      GenericUnitModifier defMod = new CODefenseModifier(10);
       for( UnitModel um : myCommander.unitModels.values() )
       {
         if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )
+        {
           sightMod.addApplicableUnitModel(um);
+          powMod.addApplicableUnitModel(um);
+          defMod.addApplicableUnitModel(um);
+        }
       }
       myCommander.addCOModifier(sightMod);
+      myCommander.addCOModifier(powMod);
+      myCommander.addCOModifier(defMod);
       myCommander.myView.revealFog();
-      
-      myCommander.addCOModifier(new CODamageModifier(10));
-      myCommander.addCOModifier(new CODefenseModifier(20));
     }
   }
 }
