@@ -102,7 +102,8 @@ public class Unit implements Serializable
 
         if( HP < model.maxHP )
         {
-          int neededHP = Math.min(model.maxHP - getHP(), CO.getRepairPower());
+          int repairPower = CO.getRepairPower();
+          int neededHP = Math.min(model.maxHP - getHP(), repairPower);
           double proportionalCost = model.getCost() / model.maxHP;
           int repairedHP = neededHP;
           while (CO.money < repairedHP * proportionalCost)
@@ -111,6 +112,10 @@ public class Unit implements Serializable
           }
           CO.money -= repairedHP * proportionalCost;
           alterHP(repairedHP);
+
+          // Top off HP if there's excess power but we hit the HP cap
+          if (repairedHP < repairPower && getHP() == model.maxHP)
+            alterHP(1);
         }
       }
 
