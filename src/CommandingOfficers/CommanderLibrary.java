@@ -77,7 +77,6 @@ public class CommanderLibrary
 //    commanderList.add( LADavis.getInfo() );
     commanderList.add( TheBeastSturm.getInfo() );
     commanderList.add( TheWeakBeast.getInfo() );
-    commanderList.add( DavisLevels.getInfo() );
   }
 }
 
