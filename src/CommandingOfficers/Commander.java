@@ -362,6 +362,13 @@ public class Commander extends GameEventListener implements Serializable
     myAbilityPower += amount;
     if( myAbilityPower < 0 )
       myAbilityPower = 0;
+    double maxPower = getMaxAbilityPower();
+    if( myAbilityPower > maxPower )
+      myAbilityPower = maxPower;
+  }
+
+  public double getMaxAbilityPower()
+  {
     double maxPower = 0;
     for( CommanderAbility ca : myAbilities )
     {
@@ -370,8 +377,7 @@ public class Commander extends GameEventListener implements Serializable
         maxPower = ca.getCost();
       }
     }
-    if( myAbilityPower > maxPower )
-      myAbilityPower = maxPower;
+    return maxPower;
   }
 
   public int getRepairPower()
