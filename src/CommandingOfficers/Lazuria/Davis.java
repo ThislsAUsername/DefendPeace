@@ -18,10 +18,14 @@ public class Davis extends Commander
   {
     public instantiator()
     {
-      super("Davis AW1Eagle");
+      super("Davis");
       infoPages.add(new InfoPage(
-          "Hey, you're not allowed to see this...\n"
-          + "Get out of here with your shenanigans!"));
+          "Davis (AW1 Eagle)\n"
+        + "  Air units gain +15/10 stats and consume -2 fuel per day. Naval units lose -20% attack\r\n"));
+      infoPages.add(new InfoPage(
+          "Coward's Flight (6):\n"
+        + "All non-footsoldier units lose -30/-40 stats. (This comes out to 80/70 stats for tanks)\n"
+        + "All non-footsoldier units may move and fire again even if built this turn (use this power after moving!)"));
     }
     @Override
     public Commander create()
@@ -63,7 +67,6 @@ public class Davis extends Commander
 
     CowardFlight(Commander commander)
     {
-      // as we start in Bear form, UpTurn is the correct starting name
       super(commander, NAME, COST);
     }
 
@@ -72,7 +75,7 @@ public class Davis extends Commander
     {
       for( Unit unit : myCommander.units )
       {
-        if( unit.model.chassis != ChassisEnum.TROOP ) // don't penalize units who haven't moved yet 
+        if( unit.model.chassis != ChassisEnum.TROOP ) 
         {
           unit.isTurnOver = false;
         }
