@@ -93,8 +93,7 @@ public class OSJake extends Commander
     protected void perform(MapMaster gameMap)
     {
       COcast.plainsBuff += VALUE;
-      IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(COcast, 1);
-      COcast.addCOModifier(rangeBoost);
+      COcast.addCOModifier(new IndirectRangeBoostModifier(1));
     }
   }
 
@@ -115,7 +114,6 @@ public class OSJake extends Commander
     protected void perform(MapMaster gameMap)
     {
       COcast.plainsBuff += VALUE;
-      IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(COcast, 1);
 
       COMovementModifier moveMod = new COMovementModifier(2);
 
@@ -125,7 +123,7 @@ public class OSJake extends Commander
           moveMod.addApplicableUnitModel(um);
       }
 
-      COcast.addCOModifier(rangeBoost);
+      COcast.addCOModifier(new IndirectRangeBoostModifier(1));
       myCommander.addCOModifier(moveMod);
     }
   }

@@ -58,6 +58,7 @@ public class CommanderLibrary
 
     commanderList.add( BWBrennerComp.getInfo() );
     commanderList.add( BWIsabellaCS.getInfo() );
+    commanderList.add( BWAdderbella.getInfo() );
     commanderList.add( BWLinCS.getInfo() );
     commanderList.add( BWLinAlt.getInfo() );
     commanderList.add( BWWillCS.getInfo() );

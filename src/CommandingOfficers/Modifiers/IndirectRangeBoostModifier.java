@@ -12,7 +12,7 @@ public class IndirectRangeBoostModifier extends GenericUnitModifier
 {
   private int boost;
 
-  public IndirectRangeBoostModifier(Commander commander, int boost)
+  public IndirectRangeBoostModifier(int boost)
   {
     this.boost = boost;
   }

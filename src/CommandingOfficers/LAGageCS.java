@@ -79,8 +79,7 @@ public class LAGageCS extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(COcast, VALUE);
-      COcast.addCOModifier(rangeBoost);
+      COcast.addCOModifier(new IndirectRangeBoostModifier(VALUE));
     }
   }
 
@@ -100,8 +99,7 @@ public class LAGageCS extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      IndirectRangeBoostModifier rangeBoost = new IndirectRangeBoostModifier(COcast, VALUE);
-      COcast.addCOModifier(rangeBoost);
+      COcast.addCOModifier(new IndirectRangeBoostModifier(VALUE));
     }
   }
 }

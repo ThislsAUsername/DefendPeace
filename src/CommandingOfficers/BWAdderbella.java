@@ -6,29 +6,29 @@ import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.IndirectRangeBoostModifier;
 import Terrain.MapMaster;
 
-public class BWIsabellaCS extends Commander
+public class BWAdderbella extends Commander
 {
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
-      super("Isabella");
+      super("Adderbella");
       infoPages.add(new InfoPage(
-          "--ISABELLA--\r\n" + 
+          "--ADDERBELLA--\r\n" + 
           "Units gain +10% firepower.\r\n" + 
-          "xxxXXXX\r\n" + 
+          "xxXXX\r\n" + 
           "DEEP STRIKE: All units gain +1 movement; all indirects also gain +1 range.\r\n" + 
           "OVERLORD: All units gain +2 movement and +10% defense; all indirects also gain +2 range."));
     }
     @Override
     public Commander create()
     {
-      return new BWIsabellaCS();
+      return new BWAdderbella();
     }
   }
 
-  public BWIsabellaCS()
+  public BWAdderbella()
   {
     super(coInfo);
 
@@ -46,14 +46,14 @@ public class BWIsabellaCS extends Commander
   private static class DeepStrike extends CommanderAbility
   {
     private static final String NAME = "Deep Strike";
-    private static final int COST = 3;
+    private static final int COST = 2;
     private static final int VALUE = 1;
-    BWIsabellaCS COcast;
+    BWAdderbella COcast;
 
     DeepStrike(Commander commander)
     {
       super(commander, NAME, COST);
-      COcast = (BWIsabellaCS) commander;
+      COcast = (BWAdderbella) commander;
     }
 
     @Override
@@ -67,14 +67,14 @@ public class BWIsabellaCS extends Commander
   private static class Overlord extends CommanderAbility
   {
     private static final String NAME = "Overlord";
-    private static final int COST = 7;
+    private static final int COST = 5;
     private static final int VALUE = 2;
-    BWIsabellaCS COcast;
+    BWAdderbella COcast;
 
     Overlord(Commander commander)
     {
       super(commander, NAME, COST);
-      COcast = (BWIsabellaCS) commander;
+      COcast = (BWAdderbella) commander;
     }
 
     @Override
