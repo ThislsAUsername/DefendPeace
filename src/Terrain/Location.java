@@ -13,7 +13,7 @@ import Units.Unit;
 
 public class Location implements Serializable
 {
-  private transient Environment environs = null;
+  private Environment environs = null;
   private Commander owner = null;
   private Unit resident = null;
   private final XYCoord coords;

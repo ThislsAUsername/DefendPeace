@@ -16,7 +16,7 @@ public class MoveType implements Serializable
   protected final Integer IMPASSABLE = 99;
 
   // A 2-layer map. Map Weathers to a mapping of Terrains-to-cost.
-  protected transient EnumMap<Weathers, MoveCostByTerrain> moveCosts;
+  protected EnumMap<Weathers, MoveCostByTerrain> moveCosts;
 
   /** Default constructor to prohibit movement. This will make it obvious fairly
       quickly if a subclass fails to initialize properly.                         */
