@@ -19,9 +19,10 @@ public class LAForsythe extends Commander
       infoPages.add(new InfoPage(
           "--FORSYTHE--\r\n" + 
           "Units gain +10% firepower and +10% defense.\r\n" + 
-          "LEVEL 1: +5% firepower\r\n" + 
-          "LEVEL 2: +10% firepower\r\n" + 
-          "LEVEL V: +20% firepower & +20% defense\r\n" + 
+          "On making a kill, units gain a level" +
+          "LEVEL 1: +5% firepower\r\n" +
+          "LEVEL 2: +10% firepower\r\n" +
+          "LEVEL V: +20% firepower & +15% defense\r\n" +
           "NO CO POWERS"));
     }
     @Override
@@ -69,7 +70,7 @@ public class LAForsythe extends Commander
   public int getVetDef(int level)
   {
     if( level > 2 )
-      return 20;
+      return 15;
     return 0;
   }
   public void levelUnit(Unit minion)
