@@ -22,13 +22,16 @@ import CommandingOfficers.BrennersWolves.Isabella;
 import CommandingOfficers.BrennersWolves.LinAlt;
 import CommandingOfficers.BrennersWolves.Lin;
 import CommandingOfficers.BrennersWolves.Will;
+import CommandingOfficers.GreenEarth.DSJess;
 import CommandingOfficers.GreenEarth.Drake;
 import CommandingOfficers.GreenEarth.Eagle;
 import CommandingOfficers.GreenEarth.Javier;
 import CommandingOfficers.GreenEarth.Jess;
+import CommandingOfficers.GreenEarth.WakJess;
 import CommandingOfficers.IDS.CaulderAlt;
 import CommandingOfficers.IDS.Caulder;
 import CommandingOfficers.IDS.Cyrus;
+import CommandingOfficers.IDS.OmegaTabitha;
 import CommandingOfficers.IDS.PennyAlt;
 import CommandingOfficers.IDS.PennyCS;
 import CommandingOfficers.IDS.PennyRNG;
@@ -91,6 +94,8 @@ public class CommanderLibrary
     
     commanderList.add( Eagle.getInfo() );
     commanderList.add( Jess.getInfo() );
+    commanderList.add( WakJess.getInfo() );
+    commanderList.add( DSJess.getInfo() );
     commanderList.add( Drake.getInfo() );
     commanderList.add( Javier.getInfo() );
     
@@ -128,6 +133,7 @@ public class CommanderLibrary
     commanderList.add( PennyRNG.getInfo() );
     commanderList.add( TabithaBasic.getInfo() );
     commanderList.add( PolyTabitha.getInfo() );
+    commanderList.add( OmegaTabitha.getInfo() );
     commanderList.add( Cyrus.getInfo() );
 
     commanderList.add( Davis.getInfo() );
