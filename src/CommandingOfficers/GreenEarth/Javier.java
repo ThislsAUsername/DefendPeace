@@ -20,8 +20,9 @@ public class Javier extends Commander
     {
       super("Javier 1T");
       infoPages.add(new InfoPage(
-          "Javier\r\n" + 
-          "  Units gain +20% defense against indirect units. +10% defense\r\n" + 
+          "Javier 1T\r\n" + 
+          "  Units gain +20% defense against indirect units.\n"
+          + "+10% defense\r\n" + 
           "Tower Shield -- Extra defense against indirects (+20%); +10/10 stats\r\n" + 
           "Tower of Power -- Even more defense against indirects (+60%); +20/20 stats"));
     }

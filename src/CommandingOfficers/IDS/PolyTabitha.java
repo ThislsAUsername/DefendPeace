@@ -17,11 +17,16 @@ public class PolyTabitha extends TabithaEngine
             "--POLYTHA--\n"
           + "Can grant a \"Mega Boost\" of "+MEGA_ATK+"/"+MEGA_DEF+" stats; this power-up lasts until next turn.\n"
           + "Gains an extra Mega Boost when COP is charged, and a third at full meter.\n"
-          + "Loses 3 stars worth of charge on the loss of any Boosted unit.\n"
-          + MECHANICS_BLURB
-          + "xxxxxxXXXX\n"
-          + "FIRESTORM: A 2-range missile hits the opponent's largest mass of units and deals 4 HP damage; all units gain +10/10.\n"
-          + "APOCALYPSE: A 2-range missile hits the opponent's largest mass of units and deals 8 HP damage; all units gain +35/35."));
+          + "Loses 3 stars worth of charge on the loss of any Boosted unit.\n"));
+      infoPages.add(MECHANICS_BLURB);
+      infoPages.add(new InfoPage(
+            "FIRESTORM (6):\n"
+          + "A 2-range missile hits the opponent's largest mass of units and deals 4 HP damage\n"
+          + "All units gain +10/10.\n"));
+      infoPages.add(new InfoPage(
+            "APOCALYPSE (10):\n"
+          + "A 2-range missile hits the opponent's largest mass of units and deals 8 HP damage\n"
+          + "All units gain +35/35."));
     }
     @Override
     public Commander create()

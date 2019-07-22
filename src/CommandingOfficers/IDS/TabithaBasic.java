@@ -1,6 +1,7 @@
 package CommandingOfficers.IDS;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
+import CommandingOfficers.CommanderInfo.InfoPage;
 
 public class TabithaBasic extends TabithaEngine
 {
@@ -14,11 +15,16 @@ public class TabithaBasic extends TabithaEngine
       super("Tabitha");
       infoPages.add(new InfoPage(
             "--TABITHA--\n"
-          + "Can grant a \"Mega Boost\" of +"+MEGA_ATK+"/"+MEGA_DEF+" stats; this power-up lasts until next turn.\n"
-          + MECHANICS_BLURB
-          + "xxxxxxXXXX\n"
-          + "FIRESTORM: A 2-range missile hits the opponent's largest mass of units and deals 4 HP damage; all units gain +10/10.\n"
-          + "APOCALYPSE: A 2-range missile hits the opponent's largest mass of units and deals 8 HP damage; all units gain +35/35."));
+          + "Can grant a single \"Mega Boost\" of +"+MEGA_ATK+"/"+MEGA_DEF+" stats; this power-up lasts until next turn.\n"));
+      infoPages.add(MECHANICS_BLURB);
+      infoPages.add(new InfoPage(
+            "FIRESTORM (6):\n"
+          + "A 2-range missile hits the opponent's largest mass of units and deals 4 HP damage\n"
+          + "All units gain +10/10.\n"));
+      infoPages.add(new InfoPage(
+            "APOCALYPSE (10):\n"
+          + "A 2-range missile hits the opponent's largest mass of units and deals 8 HP damage\n"
+          + "All units gain +35/35."));
     }
     @Override
     public Commander create()

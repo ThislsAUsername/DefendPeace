@@ -131,6 +131,10 @@ public class CommanderLibrary
 //    commanderList.add( LADavis.getInfo() );
     commanderList.add( TheBeastSturm.getInfo() );
     commanderList.add( TheWeakBeast.getInfo() );
+    for (CommanderInfo info : commanderList)
+    {
+//      System.out.println(info.name);
+    }
   }
 }
 

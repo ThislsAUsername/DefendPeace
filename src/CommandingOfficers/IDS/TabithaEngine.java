@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
+import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.Combat.BattleSummary;
@@ -28,9 +29,10 @@ import Units.UnitModel;
 
 public abstract class TabithaEngine extends Commander
 {
-  public static final String MECHANICS_BLURB =
-            "A Mega Boost is awarded when a unit attacks, or by a special action done in place (does not end turn).\n"
-          + "Mega Boosted units gain the generic +10/10 on powers, but no power-specific stat boost\n";
+  public static final InfoPage MECHANICS_BLURB = new InfoPage(
+            "Mega Boost mechanics:\n"
+          + "A Mega Boost is awarded when a unit attacks, or by a special action done in place (does not end turn).\n"
+          + "Mega Boosted units gain the generic +10/10 on powers, but no power-specific stat boost\n");
   public ArrayList<Unit> COUs = new ArrayList<Unit>();
   public abstract int getMegaBoostCount();
   public void onCOULost(Unit minion) {};
