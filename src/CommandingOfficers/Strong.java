@@ -67,14 +67,14 @@ public class Strong extends Commander
     UnitModel mechModel = getUnitModel(UnitModel.UnitEnum.MECH);
     UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, mechModel);
     upm.addProductionPair(TerrainType.SEAPORT, mechModel);
-    upm.apply(this); // Passive ability, so don't add it to the COModifier list; just apply it and forget it.
+    upm.applyChanges(this); // Passive ability, so don't add it to the COModifier list; just apply it and forget it.
 
     // Give Strong's footies a base damage buff. This COModifier is not added
     // to the modifiers collection so it will not be reverted.
     CODamageModifier strongMod = new CODamageModifier(15); // Give us a nice base power boost.
     strongMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.INFANTRY));
     strongMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.MECH));
-    strongMod.apply(this);
+    strongMod.applyChanges(this);
 
     // Give every transport type extra move range and an extra cargo slot.
     for( UnitModel.UnitEnum umEnum : UnitModel.UnitEnum.values() )
