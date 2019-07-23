@@ -12,7 +12,7 @@ public class MassStrikeUtils
 
   public static XYCoord findValueConcentration(GameMap map, int maxRange, IValueFinder evaluator)
   {
-    XYCoord maxTarget = null;
+    XYCoord maxTarget = new XYCoord(0,0);
     int maxValue = 0;
     for( int i = 0; i < map.mapWidth; i++ )
     {
