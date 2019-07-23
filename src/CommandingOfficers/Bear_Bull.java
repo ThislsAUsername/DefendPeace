@@ -48,8 +48,7 @@ public class Bear_Bull extends Commander
       return new Bear_Bull(rules);
     }
   }
-  
-  private final int incomeBase;
+
   public boolean isBull;
 
   private final double BEAR_MOD = 0.9;
@@ -59,7 +58,6 @@ public class Bear_Bull extends Commander
   {
     super(coInfo, rules);
 
-    incomeBase = rules.incomePerCity;
     // we start in Bear mode, so swap to it at the start
     isBull = true;
     swapD2Ds(true);
@@ -74,7 +72,7 @@ public class Bear_Bull extends Commander
     {
       isBull = false;
       if( setIncome )
-        incomeAdjustment = (int) (incomeBase * BEAR_MOD) - gameRules.incomePerCity;
+        incomeAdjustment = (int) (gameRules.incomePerCity * BEAR_MOD) - gameRules.incomePerCity;
       for( UnitModel um : unitModels.values() )
       {
         um.COcost = BEAR_MOD;
@@ -84,7 +82,7 @@ public class Bear_Bull extends Commander
     {
       isBull = true;
       if( setIncome )
-        incomeAdjustment = (int) (incomeBase * BULL_MOD) - gameRules.incomePerCity;
+        incomeAdjustment = (int) (gameRules.incomePerCity * BULL_MOD) - gameRules.incomePerCity;
       for( UnitModel um : unitModels.values() )
       {
         um.COcost = BULL_MOD;
