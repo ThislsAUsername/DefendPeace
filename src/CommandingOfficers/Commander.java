@@ -16,6 +16,7 @@ import AI.AILibrary;
 import AI.AIMaker;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
+import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.Combat.BattleInstance.CombatContext;
@@ -55,6 +56,7 @@ public class Commander extends GameEventListener implements Serializable
   private static final long serialVersionUID = -6740892333060450105L;
   
   public final CommanderInfo coInfo;
+  public final GameScenario.GameRules gameRules;
   public GameMap myView;
   public ArrayList<Unit> units;
   public Map<UnitEnum, UnitModel> unitModels = new HashMap<UnitEnum, UnitModel>();
@@ -66,7 +68,7 @@ public class Commander extends GameEventListener implements Serializable
   public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
   public static final int CHARGERATIO_HP = 100; // Funds value of 1 HP damage dealt, for the purpose of power charge
   public int money = 0;
-  public int incomePerCity = 1000;
+  public int incomeAdjustment = 0; // Commander subclasses can increase/decrease income if needed.
   public int team = -1;
   public boolean isDefeated = false;
   public XYCoord HQLocation = null;
@@ -79,9 +81,10 @@ public class Commander extends GameEventListener implements Serializable
   //   so may as well not require them to care about serializing their contents.
   private transient AIController aiController = null;
 
-  public Commander(CommanderInfo info)
+  public Commander(CommanderInfo info, GameScenario.GameRules rules)
   {
     coInfo = info;
+    gameRules = rules;
 
     // TODO We probably don't want to hard-code the buildable units.
     ArrayList<UnitModel> factoryModels = new ArrayList<UnitModel>();
@@ -189,7 +192,7 @@ public class Commander extends GameEventListener implements Serializable
         Location loc = map.getLocation(w, h);
         if( loc.isProfitable() && loc.getOwner() == this )
         {
-          turnIncome += incomePerCity;
+          turnIncome += gameRules.incomePerCity + incomeAdjustment;
         }
       }
     }

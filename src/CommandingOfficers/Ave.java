@@ -5,8 +5,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Stack;
+
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
+import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance.BattleParams;
@@ -96,17 +98,17 @@ public class Ave extends Commander
           "Dislikes: Trees and Mythical Snow Monsters"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Ave();
+      return new Ave(rules);
     }
   }
 
   private int[][] snowMap;
 
-  public Ave()
+  public Ave(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     // Ave's units are fine in the snow, but not in the trees.
     for( UnitModel um : unitModels.values() )

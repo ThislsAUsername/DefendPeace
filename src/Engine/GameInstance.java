@@ -37,17 +37,20 @@ public class GameInstance implements Serializable
   private boolean isFogEnabled;
   private Weathers defaultWeather;
 
+  private GameScenario gameScenario;
+
   public GameInstance(MapMaster map)
   {
-    this(map, false, Weathers.CLEAR, 0);
+    this(map, false, Weathers.CLEAR, new GameScenario());
   }
 
-  public GameInstance(MapMaster map, boolean fogOfWarOn, Weathers weather, int startingFunds)
+  public GameInstance(MapMaster map, boolean fogOfWarOn, Weathers weather, GameScenario scenario)
   {
     if( map.commanders.length < 2 )
     {
       System.out.println("WARNING! Creating a game with fewer than two commanders.");
     }
+    gameScenario = scenario;
 
     gameMap = map;
     isFogEnabled = fogOfWarOn;
@@ -60,7 +63,7 @@ public class GameInstance implements Serializable
     playerCursors = new HashMap<Integer, XYCoord>();
     for( int i = 0; i < commanders.length; ++i )
     {
-      commanders[i].money = startingFunds;
+      commanders[i].money = gameScenario.rules.startingFunds;
       if( commanders[i].HQLocation != null )
       {
         commanders[i].myView = new MapWindow(map, commanders[i], isFogEnabled);
@@ -198,7 +201,11 @@ public class GameInstance implements Serializable
 
     // Set the cursor to the new CO's last known cursor position.
     setCursorLocation(playerCursors.get(activeCoNum).xCoord, playerCursors.get(activeCoNum).yCoord);
-    
+
+    // Handle income and any other scenario-specific events.
+    events.addAll(gameScenario.initTurn(gameMap));
+
+    // Handle any CO-specific turn events.
     events.addAll(activeCO.initTurn(gameMap));
     
     // Initialize the next turn, recording any events that will occur.

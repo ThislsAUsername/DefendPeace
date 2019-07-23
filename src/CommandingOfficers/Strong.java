@@ -4,6 +4,7 @@ import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
+import Engine.GameScenario;
 import Engine.Combat.BattleInstance.BattleParams;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
@@ -53,15 +54,15 @@ public class Strong extends Commander
           "Allows Strong to build footsoldiers on cities, industries, and the HQ\n"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Strong();
+      return new Strong(rules);
     }
   }
 
-  public Strong()
+  public Strong(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     // Strong allows infantry to be built from any production building.
     UnitModel mechModel = getUnitModel(UnitModel.UnitEnum.MECH);

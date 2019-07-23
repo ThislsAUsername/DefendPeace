@@ -109,12 +109,7 @@ public class PlayerSetupController implements IController
         {
           /////////////////////////////////////////////////////////////////////////////////////////////
           // We have locked in our selection. Stuff it into the GameBuilder and then kick off the game.
-          for(int i = 0; i < coSelectors.length; ++i)
-          {
-            gameBuilder.addCO(coSelectors[i].makeCommander());
-          }
-
-          GameInstance newGame = gameBuilder.createGame();
+          GameInstance newGame = gameBuilder.createGame(coSelectors);
 
           if( null != newGame )
           {
