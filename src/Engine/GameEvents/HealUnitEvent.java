@@ -9,13 +9,14 @@ import Units.Unit;
 public class HealUnitEvent implements GameEvent
 {
   private Unit unit;
-  public final int repairPower = 1;
+  public final int repairPower;
   public final boolean liableForCosts;
 
-  public HealUnitEvent(Unit aTarget, boolean payUp)
+  public HealUnitEvent(Unit aTarget, int HP, boolean payUp)
   {
     unit = aTarget;
     liableForCosts = payUp;
+    repairPower = HP;
   }
 
   @Override
