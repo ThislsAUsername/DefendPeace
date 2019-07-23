@@ -861,7 +861,7 @@ public interface GameAction
       // Repair actions consist of
       //   MOVE
       //   HEAL
-      //   REPAIR
+      //   RESUPPLY
       GameEventQueue repairEvents = new GameEventQueue();
 
       boolean isValid = true;
