@@ -129,6 +129,7 @@ public class Cyrus extends Commander
     {
       super(commander, NAME, COST);
       COcast = commander;
+      AIFlags |= PHASE_TURN_END;
     }
 
     @Override

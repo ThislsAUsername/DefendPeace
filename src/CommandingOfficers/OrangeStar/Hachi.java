@@ -65,6 +65,7 @@ public class Hachi extends Commander
     Barter(Commander commander)
     {
       super(commander, NAME, COST);
+      AIFlags |= PHASE_BUY;
     }
 
     @Override
@@ -86,6 +87,7 @@ public class Hachi extends Commander
     MerchantUnion(Commander commander)
     {
       super(commander, NAME, COST);
+      AIFlags |= PHASE_BUY;
     }
 
     @Override

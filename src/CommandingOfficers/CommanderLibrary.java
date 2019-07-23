@@ -10,6 +10,7 @@ import CommandingOfficers.BlackHole.Adder;
 import CommandingOfficers.BlackHole.Hawke;
 import CommandingOfficers.BlackHole.Kindle;
 import CommandingOfficers.BlackHole.Lash;
+import CommandingOfficers.BlackHole.OmegaSturm;
 import CommandingOfficers.BlackHole.Sturm;
 import CommandingOfficers.BlackHole.VB;
 import CommandingOfficers.BlueMoon.BillyGates;
@@ -57,6 +58,7 @@ import CommandingOfficers.OrangeStar.YuanDelta;
 import CommandingOfficers.YellowComet.Grimm;
 import CommandingOfficers.YellowComet.Hetler;
 import CommandingOfficers.YellowComet.Kanbei;
+import CommandingOfficers.YellowComet.OmegaKanbei;
 import CommandingOfficers.YellowComet.Sensei;
 import CommandingOfficers.YellowComet.Yamamoto;
 
@@ -151,6 +153,8 @@ public class CommanderLibrary
 
     commanderList.add( TheBeastSturm.getInfo() );
     commanderList.add( TheWeakBeast.getInfo() );
+    commanderList.add( OmegaKanbei.getInfo() );
+    commanderList.add( OmegaSturm.getInfo() );
     for (CommanderInfo info : commanderList)
     {
 //      System.out.println(info.name);

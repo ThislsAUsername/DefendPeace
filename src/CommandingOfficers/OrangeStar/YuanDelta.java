@@ -62,6 +62,7 @@ public class YuanDelta extends Commander
     MerchantUnion(Commander commander)
     {
       super(commander, NAME, COST);
+      AIFlags |= PHASE_BUY;
     }
 
     @Override

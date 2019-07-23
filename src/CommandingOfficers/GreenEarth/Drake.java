@@ -78,6 +78,7 @@ public class Drake extends Commander
     Tsunami(Commander commander)
     {
       super(commander, NAME, COST);
+      AIFlags |= PHASE_TURN_END;
     }
 
     @Override
@@ -107,6 +108,7 @@ public class Drake extends Commander
     Typhoon(Commander commander)
     {
       super(commander, NAME, COST);
+      AIFlags |= PHASE_TURN_END;
     }
 
     @Override

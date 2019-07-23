@@ -67,6 +67,7 @@ public class Olaf extends Commander
     Blizzard(Commander commander)
     {
       super(commander, NAME, COST);
+      AIFlags |= PHASE_TURN_END;
     }
 
     @Override
@@ -87,6 +88,7 @@ public class Olaf extends Commander
     {
       // as we start in Bear form, UpTurn is the correct starting name
       super(commander, NAME, COST);
+      AIFlags |= PHASE_TURN_END;
     }
 
     @Override

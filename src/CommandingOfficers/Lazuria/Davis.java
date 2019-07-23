@@ -68,6 +68,7 @@ public class Davis extends Commander
     CowardFlight(Commander commander)
     {
       super(commander, NAME, COST);
+      AIFlags = PHASE_TURN_END;
     }
 
     @Override

@@ -20,9 +20,9 @@ public class Eagle extends Commander
     {
       super("Eagle");
       infoPages.add(new InfoPage(
-          "Eagle\r\n" + 
-          "  Air units gain +15% attack, +10% defense and consume -2 fuel per day. Naval units lose -30% attack\r\n" + 
-          "Lightning Drive -- Boosts Air unit attack by 5% and defense by 10%\r\n" + 
+          "Eagle\r\n" +
+          "  Air units gain +15% attack, +10% defense and consume -2 fuel per day. Naval units lose -30% attack\r\n" +
+          "Lightning Drive -- Boosts Air unit attack by 5% and defense by 10%\r\n" +
           "Lightning Strike -- Boosts Air unit attack by 5% and defense by 10%. All non-footsoldier units may move and fire again even if built this turn (use this power after moving!)"));
     }
     @Override
@@ -96,6 +96,7 @@ public class Eagle extends Commander
     {
       // as we start in Bear form, UpTurn is the correct starting name
       super(commander, NAME, COST);
+      AIFlags = PHASE_TURN_END;
     }
 
     @Override
@@ -103,7 +104,7 @@ public class Eagle extends Commander
     {
       for( Unit unit : myCommander.units )
       {
-        if( unit.model.chassis != ChassisEnum.TROOP ) // don't penalize units who haven't moved yet 
+        if( unit.model.chassis != ChassisEnum.TROOP ) 
         {
           unit.isTurnOver = false;
         }
