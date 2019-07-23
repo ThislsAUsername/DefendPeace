@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import AI.AIController;
@@ -368,6 +369,7 @@ public class Commander extends GameEventListener implements Serializable
   /**
    * Track battles that happen, and get ability power based on combat this CO is in.
    */
+  @Override
   public void receiveBattleEvent(final BattleSummary summary)
   {
     // We only care who the units belong to, not who picked the fight. 
@@ -394,7 +396,7 @@ public class Commander extends GameEventListener implements Serializable
     if( minion != null && enemy != null )
     {
       double power = 0; // value in funds of the charge we're getting
-      
+
       // Add up the funds value of the damage done to both participants.
       power += myHPLoss / minion.model.maxHP * minion.model.getCost();
       // The damage we deal is worth half as much as the damage we take, to help powers be a comeback mechanic.
@@ -406,6 +408,29 @@ public class Commander extends GameEventListener implements Serializable
       power /= CHARGERATIO_FUNDS;
 
       modifyAbilityPower(power);
+    }
+  }
+
+  /**
+   * Track mass damage done to my units, and get ability power based on it.
+   */
+  @Override
+  public void receiveMassDamageEvent(Map<Unit, Integer> lostHP)
+  {
+    for( Entry<Unit, Integer> damageEntry : lostHP.entrySet() )
+    {
+      Unit unit = damageEntry.getKey();
+      if (this == unit.CO)
+      {
+      double power = 0; // value in funds of the charge we're getting
+
+      power += ((double)damageEntry.getValue()) / unit.model.maxHP * unit.model.getCost();
+
+      // Convert funds to ability power units
+      power /= CHARGERATIO_FUNDS;
+
+      modifyAbilityPower(power);
+      }
     }
   }
 
