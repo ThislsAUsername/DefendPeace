@@ -3,6 +3,10 @@ package CommandingOfficers;
 import java.util.ArrayList;
 
 import CommandingOfficers.Assorted.AllDaWaylon;
+import CommandingOfficers.Assorted.Creed;
+import CommandingOfficers.Assorted.Fastfield;
+import CommandingOfficers.Assorted.Greyfield;
+import CommandingOfficers.Assorted.Sneakfield;
 import CommandingOfficers.Assorted.WaylonCS;
 import CommandingOfficers.Assorted.TheBeastSturm;
 import CommandingOfficers.Assorted.TheWeakBeast;
@@ -140,6 +144,9 @@ public class CommanderLibrary
 
     commanderList.add( WaylonCS.getInfo() );
     commanderList.add( AllDaWaylon.getInfo() );
+    commanderList.add( Greyfield.getInfo() );
+    commanderList.add( Fastfield.getInfo() );
+    commanderList.add( Sneakfield.getInfo() );
     commanderList.add( Davis.getInfo() );
 
     commanderList.add( Caulder.getInfo() );
@@ -154,6 +161,7 @@ public class CommanderLibrary
 
     commanderList.add( TheBeastSturm.getInfo() );
     commanderList.add( TheWeakBeast.getInfo() );
+    commanderList.add( Creed.getInfo() );
     commanderList.add( OmegaKanbei.getInfo() );
     commanderList.add( OmegaSturm.getInfo() );
     commanderList.add( OmegaCaulder.getInfo() );
