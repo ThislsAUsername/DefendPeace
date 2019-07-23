@@ -1,4 +1,7 @@
 package CommandingOfficers;
+import java.util.HashMap;
+import java.util.Map;
+
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.XYCoord;
 import Terrain.Location;
@@ -125,6 +128,7 @@ public class Bear_Bull extends Commander
       myCommander.addCOModifier(this);
 
       // Damage is dealt after swapping D2Ds so it's actually useful to Bear
+      Map<Unit, Integer> damageDealt = new HashMap<Unit, Integer>();
       for( XYCoord xyc : myCommander.ownedProperties )
       {
         Location loc = gameMap.getLocation(xyc);
@@ -133,11 +137,15 @@ public class Bear_Bull extends Commander
           Unit victim = loc.getResident();
           if( null != victim )
           {
-            double delta = victim.alterHP(-1*DOWNUPTURN_LIQUIDATION); // Remove some of the unit's HP
+            int starting = victim.getHP();
+            victim.alterHP(-1*DOWNUPTURN_LIQUIDATION); // Remove some of the unit's HP
+            int delta = starting - victim.getHP();
             myCommander.money += (-1 * delta * victim.model.getCost()) / 10; // ...and turn it into moolah
+            damageDealt.put(victim, delta);
           }
         }
       }
+      // TODO: Publish damage dealt here? Except the publish function takes an Event and the list of listeners is private
     }
 
     @Override // COModifier interface.
