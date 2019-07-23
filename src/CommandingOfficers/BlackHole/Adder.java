@@ -17,8 +17,9 @@ public class Adder extends Commander
     {
       super("Adder");
       infoPages.add(new InfoPage(
-          "Adder\r\n" + 
-          "  Sideslip -- +1 Movement to all units\r\n" + 
+          "Adder\n" +
+          "D2D: Thinks he's T1\n" +
+          "  Sideslip -- +1 Movement to all units\n" +
           "Sidewinder -- +2 Movement to all units"));
     }
     @Override
