@@ -34,6 +34,7 @@ import CommandingOfficers.GreenEarth.WakJess;
 import CommandingOfficers.IDS.CaulderAlt;
 import CommandingOfficers.IDS.Caulder;
 import CommandingOfficers.IDS.Cyrus;
+import CommandingOfficers.IDS.OmegaCaulder;
 import CommandingOfficers.IDS.OmegaTabitha;
 import CommandingOfficers.IDS.PennyAlt;
 import CommandingOfficers.IDS.PennyCS;
@@ -155,6 +156,7 @@ public class CommanderLibrary
     commanderList.add( TheWeakBeast.getInfo() );
     commanderList.add( OmegaKanbei.getInfo() );
     commanderList.add( OmegaSturm.getInfo() );
+    commanderList.add( OmegaCaulder.getInfo() );
     for (CommanderInfo info : commanderList)
     {
 //      System.out.println(info.name);

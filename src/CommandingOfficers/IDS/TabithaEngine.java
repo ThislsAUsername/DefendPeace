@@ -139,6 +139,7 @@ public abstract class TabithaEngine extends Commander
     NukeIt(TabithaEngine commander, String name, int cost, int nuke, int pAtk, int pDef)
     {
       super(commander, name, cost);
+      COcast = commander;
       nukePower = nuke;
       atk = pAtk;
       def = pDef;
