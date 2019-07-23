@@ -25,6 +25,7 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.MapMaster;
 import Terrain.TerrainType;
 import UI.UIUtils.Faction;
 import Units.APCModel;
@@ -194,7 +195,7 @@ public class Commander extends GameEventListener implements Serializable
    * Collect income and handle any COModifiers.
    * @param map
    */
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     myView.resetFog();
     myActiveAbilityName = "";
@@ -226,7 +227,13 @@ public class Commander extends GameEventListener implements Serializable
       aiController.initTurn(myView);
     }
 
-    return new GameEventQueue();
+    GameEventQueue events = new GameEventQueue();
+    for( Unit u : units )
+    {
+      events.addAll(u.initTurn(map));
+    }
+
+    return events;
   }
 
   /**
