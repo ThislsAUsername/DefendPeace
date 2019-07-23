@@ -129,7 +129,7 @@ public class Ave extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap gameMap)
+  public GameEventQueue initTurn(MapMaster gameMap)
   {
     GameEventQueue returnEvents = super.initTurn(gameMap);
 
