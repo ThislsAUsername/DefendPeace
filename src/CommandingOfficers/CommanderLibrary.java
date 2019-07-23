@@ -16,6 +16,7 @@ import CommandingOfficers.BlueMoon.BillyGates;
 import CommandingOfficers.BlueMoon.Colin;
 import CommandingOfficers.BlueMoon.Grit;
 import CommandingOfficers.BlueMoon.Olaf;
+import CommandingOfficers.BlueMoon.Rojenski;
 import CommandingOfficers.BlueMoon.Sasha;
 import CommandingOfficers.BrennersWolves.Adderbella;
 import CommandingOfficers.BrennersWolves.Brenner;
@@ -52,6 +53,7 @@ import CommandingOfficers.OrangeStar.Jake;
 import CommandingOfficers.OrangeStar.Max;
 import CommandingOfficers.OrangeStar.Rachel;
 import CommandingOfficers.OrangeStar.Sami;
+import CommandingOfficers.OrangeStar.YuanDelta;
 import CommandingOfficers.YellowComet.Grimm;
 import CommandingOfficers.YellowComet.Hetler;
 import CommandingOfficers.YellowComet.Kanbei;
@@ -86,15 +88,17 @@ public class CommanderLibrary
     
     commanderList.add( Andy.getInfo() );
     commanderList.add( Hachi.getInfo() );
+    commanderList.add( YuanDelta.getInfo() );
     commanderList.add( Jake.getInfo() );
     commanderList.add( Max.getInfo() );
     commanderList.add( Rachel.getInfo() );
-    commanderList.add( Sami.getInfo() );
     commanderList.add( Caroline.getInfo() );
+    commanderList.add( Sami.getInfo() );
     
     commanderList.add( Colin.getInfo() );
     commanderList.add( BillyGates.getInfo() );
     commanderList.add( Grit.getInfo() );
+    commanderList.add( Rojenski.getInfo() );
     commanderList.add( Olaf.getInfo() );
     commanderList.add( Sasha.getInfo() );
     
