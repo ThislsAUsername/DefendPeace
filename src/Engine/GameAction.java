@@ -875,7 +875,6 @@ public interface GameAction
         beneficiary = gameMap.getLocation(repairCoord).getResident();
         isValid &= benefactor != null && !benefactor.isTurnOver;
         isValid &= (null != beneficiary) && !benefactor.CO.isEnemy(beneficiary.CO);
-        isValid &= (null != gameMap) && (gameMap.isLocationValid(repairCoord));
         isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       }
       else
