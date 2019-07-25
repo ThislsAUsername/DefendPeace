@@ -21,7 +21,7 @@ public class WokeGage extends Commander
       infoPages.add(new InfoPage(
           "--WOKE GAGE--\r\n" + 
           "Naval units and indirects gain +20% firepower and +10% defense.\r\n" + 
-          "xxxXXXXX\r\n" + 
+          "xxxxxXXXX\r\n" + 
           "LONG SHOT: All indirects gain +2 range.\r\n" + 
           "LONG BARREL: All indirects gain +4 range."));
     }
@@ -58,8 +58,8 @@ public class WokeGage extends Commander
       }
     }
 
-    addCommanderAbility(new RangeBonus(this, "Long Shot", 3, 2));
-    addCommanderAbility(new RangeBonus(this, "Long Barrel", 8, 4));
+    addCommanderAbility(new RangeBonus(this, "Long Shot", 5, 2));
+    addCommanderAbility(new RangeBonus(this, "Long Barrel", 9, 4));
   }
 
   public static CommanderInfo getInfo()
