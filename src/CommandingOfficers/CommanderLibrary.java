@@ -65,6 +65,7 @@ import CommandingOfficers.YellowComet.Hetler;
 import CommandingOfficers.YellowComet.Kanbei;
 import CommandingOfficers.YellowComet.OmegaKanbei;
 import CommandingOfficers.YellowComet.Sensei;
+import CommandingOfficers.YellowComet.Spannbei;
 import CommandingOfficers.YellowComet.Yamamoto;
 
 public class CommanderLibrary
@@ -119,6 +120,7 @@ public class CommanderLibrary
     commanderList.add( Grimm.getInfo() );
     commanderList.add( Kanbei.getInfo() );
     commanderList.add( Yamamoto.getInfo() );
+    commanderList.add( Spannbei.getInfo() );
     commanderList.add( Sensei.getInfo() );
     commanderList.add( Hetler.getInfo() );
     
