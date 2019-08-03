@@ -430,6 +430,6 @@ public class Commander extends GameEventListener implements Serializable
       // Re-check ownership just because.
       if( myView.getLocation(coord).getOwner() == this && myView.getLocation(coord).isProfitable() ) ++count;
     }
-    return (count * gameRules.incomePerCity) + incomeAdjustment;
+    return count * (gameRules.incomePerCity + incomeAdjustment);
   }
 }
