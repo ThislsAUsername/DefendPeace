@@ -3,6 +3,7 @@ package UI.Art.SpriteArtist;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import Terrain.MapInfo;
 import UI.GameOption;
@@ -37,12 +38,12 @@ public class GameOptionSetupArtist
     // Calculate the size of the longest item panel needed.
     for( int i = 0; i < allOptions.length; ++i )
     {
-      Object[] allItems = allOptions[i].optionList;
-      for( int j = 0; j < allItems.length; ++j )
+      ArrayList allItems = allOptions[i].optionList;
+      for( int j = 0; j < allItems.size(); ++j )
       {
-        if( allItems[j].toString().length() > maxItemLen )
+        if( allItems.get(j).toString().length() > maxItemLen )
         {
-          maxItemLen = allItems[j].toString().length();
+          maxItemLen = allItems.get(j).toString().length();
         }
       }
 
@@ -145,6 +146,6 @@ public class GameOptionSetupArtist
     x = x + (optionNamePanel.getWidth() + (3 * SpriteLibrary.getLettersLowercase().getFrame(0).getWidth()));
     BufferedImage settingPanel = (opt.isChanged()) ? optionSettingPanel : optionSettingPanel;
     g.drawImage(settingPanel, x, y, settingPanel.getWidth(), settingPanel.getHeight(), null);
-    SpriteUIUtils.drawText(g, opt.getSettingValueText(), x + textBuffer, y + textBuffer);
+    SpriteUIUtils.drawText(g, opt.getCurrentValueText(), x + textBuffer, y + textBuffer);
   }
 }

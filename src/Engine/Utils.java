@@ -13,7 +13,6 @@ import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Units.Unit;
-import Units.UnitModel.ChassisEnum;
 import Units.Weapons.Weapon;
 
 public class Utils
@@ -102,6 +101,12 @@ public class Utils
   public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap, boolean includeOccupiedSpaces)
   {
     ArrayList<XYCoord> reachableTiles = new ArrayList<XYCoord>();
+
+    if( null == unit || unit.x < 0 || unit.y < 0 )
+    {
+      System.out.println("WARNING! Finding destinations for ineligible unit!");
+      return reachableTiles;
+    }
 
     // set all locations to false/remaining move = 0
     int[][] costGrid = new int[gameMap.mapWidth][gameMap.mapHeight];

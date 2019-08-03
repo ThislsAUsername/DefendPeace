@@ -7,10 +7,10 @@ import UI.InputHandler.InputAction;
 
 public class GameOptionSetupController implements IController
 {
-  private GameOption fowOption = new GameOption("Fog of War", false);
-  private GameOption startingFundsOption = new GameOption("Starting Funds", 0, 50000, 1000, 0);
-  private GameOption incomeOption = new GameOption("Income", 500, 20000, 500, 1000);
-  private GameOption weatherOption = new GameOption("Weather", Weathers.values(), 0);
+  private GameOption<Boolean> fowOption = new GameOptionBool("Fog of War", false);
+  private GameOption<Integer> startingFundsOption = new GameOptionInt("Starting Funds", 0, 50000, 1000, 0);
+  private GameOption<Integer> incomeOption = new GameOptionInt("Income", 250, 20000, 250, 1000);
+  private GameOption<Weathers> weatherOption = new GameOption<Weathers>("Weather", Weathers.values(), 0);
 
   // Get a list of all GameOptions.
   public GameOption[] gameOptions = {fowOption, startingFundsOption, incomeOption, weatherOption};
@@ -68,9 +68,9 @@ public class GameOptionSetupController implements IController
       case ENTER:
         // Set the selected options and transition to the player setup screen.
         for( GameOption go : gameOptions ) go.storeCurrentValue();
-        gameBuilder.isFowEnabled = fowOption.getSelectedObject().equals("On");
-        gameBuilder.startingFunds = Integer.parseInt(startingFundsOption.getSelectedObject().toString());
-        gameBuilder.incomePerCity = Integer.parseInt(incomeOption.getSelectedObject().toString());
+        gameBuilder.isFowEnabled = fowOption.getSelectedObject();
+        gameBuilder.startingFunds = startingFundsOption.getSelectedObject();
+        gameBuilder.incomePerCity = incomeOption.getSelectedObject();
         gameBuilder.defaultWeather = (Weathers)weatherOption.getSelectedObject();
         coSelectMenu = new PlayerSetupController( gameBuilder );
         isInSubmenu = true;
