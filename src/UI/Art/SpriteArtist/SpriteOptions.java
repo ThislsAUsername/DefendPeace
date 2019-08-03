@@ -25,8 +25,7 @@ public class SpriteOptions
   // Set up configurable options.
   private static GraphicsOption drawScaleOption = new GraphicsOption("Draw Scale", 1, 6, DRAWSCALE_DEFAULT);
   private static GraphicsOption animationsOption = new GraphicsOption("Animations", true);
-  private static GraphicsOption damageSystemOption = new GraphicsOption("Damage System", Weapon.stratDescriptions, 0);
-  private static GraphicsOption[] allOptions = { drawScaleOption, animationsOption, damageSystemOption };
+  private static GraphicsOption[] allOptions = { drawScaleOption, animationsOption };
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
   private static SlidingValue animHighlightedOption;
 

@@ -41,12 +41,12 @@ public class Patch extends Commander
 
   // Variables to characterize Patch's abilities.
   private static final String PLUNDER_NAME = "Plunder";
-  private static final int PLUNDER_COST = 5;
+  private static final int PLUNDER_COST = 3;
   private static final double PLUNDER_INCOME = 0.25;
   private static final int PLUNDER_ATTACK_BUFF = 10;
 
   private static final String PILLAGE_NAME = "Pillage";
-  private static final int PILLAGE_COST = 10;
+  private static final int PILLAGE_COST = 6;
   private static final double PILLAGE_INCOME = 0.5;
   private static final int PILLAGE_ATTACK_BUFF = 25;
 
@@ -123,13 +123,13 @@ public class Patch extends Commander
     }
 
     @Override // COModifier interface.
-    public void apply(Commander commander)
+    public void applyChanges(Commander commander)
     {
       // No special action required.
     }
 
     @Override
-    public void revert(Commander commander)
+    public void revertChanges(Commander commander)
     {
       // This will be called when the Commander removes this COModifier. It will remove the damage
       // modifier we added as well, so we just need to turn off the the damage-to-income listener.
