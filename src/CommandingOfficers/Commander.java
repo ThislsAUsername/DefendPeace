@@ -183,20 +183,9 @@ public class Commander extends GameEventListener implements Serializable
   {
     myView.resetFog();
     myActiveAbilityName = "";
+
     // Accrue income for each city under your control.
-    int turnIncome = 0;
-    for( int w = 0; w < map.mapWidth; ++w )
-    {
-      for( int h = 0; h < map.mapHeight; ++h )
-      {
-        Location loc = map.getLocation(w, h);
-        if( loc.isProfitable() && loc.getOwner() == this )
-        {
-          turnIncome += gameRules.incomePerCity + incomeAdjustment;
-        }
-      }
-    }
-    money += turnIncome;
+    money += getIncomePerTurn();
 
     // Un-apply any modifiers that were activated last turn.
     // TODO: If/when we have modifiers that last multiple turns, figure out how to handle them.
@@ -427,5 +416,20 @@ public class Commander extends GameEventListener implements Serializable
 
     // use our AI index to get back where we were before
     aiController = AILibrary.getAIList().get(stream.readInt()).create(this);
+  }
+
+  /**
+   * Count up the number of profitable properties we own, multiply by the game's income-per-city
+   * setting, and tack on any CO-specific income modifier, then return the result.
+   */
+  public int getIncomePerTurn()
+  {
+    int count = 0;
+    for( XYCoord coord : ownedProperties )
+    {
+      // Re-check ownership just because.
+      if( myView.getLocation(coord).getOwner() == this && myView.getLocation(coord).isProfitable() ) ++count;
+    }
+    return (count * gameRules.incomePerCity) + incomeAdjustment;
   }
 }
