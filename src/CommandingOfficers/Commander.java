@@ -163,7 +163,7 @@ public class Commander extends GameEventListener implements Serializable
 
   public void addCOModifier(COModifier mod)
   {
-    mod.apply(this);
+    mod.applyChanges(this);
     modifiers.add(mod); // Add to the list so the modifier can be reverted next turn.
   }
 
@@ -200,7 +200,7 @@ public class Commander extends GameEventListener implements Serializable
     // TODO: If/when we have modifiers that last multiple turns, figure out how to handle them.
     for( int i = modifiers.size() - 1; i >= 0; --i )
     {
-      modifiers.get(i).revert(this);
+      modifiers.get(i).revertChanges(this);
       modifiers.remove(i);
     }
 
