@@ -29,8 +29,7 @@ public class SpriteOptions
   // Set up configurable options.
   private static GameOption<Integer> drawScaleOption = new GameOptionInt("Draw Scale", 1, 6, 1, DRAWSCALE_DEFAULT);
   private static GameOptionBool animationsOption = new GameOptionBool("Animations", true);
-  private static GameOption<String> damageSystemOption = new GameOption<String>("Damage System", Weapon.stratDescriptions, 0);
-  private static GameOption[] allOptions = { drawScaleOption, animationsOption, damageSystemOption };
+  private static GameOption[] allOptions = { drawScaleOption, animationsOption };
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
   private static SlidingValue animHighlightedOption;
 
@@ -188,7 +187,6 @@ public class SpriteOptions
     // Store the options locally.
     drawScale = drawScaleOption.getSelectedObject();
     animationsOn = animationsOption.getSelectedObject();
-    Weapon.currentStrategy = damageSystemOption.getSelectionNormalized();
 
     // Apply effects.
     dimensions.setSize(WINDOWWIDTH_DEFAULT * drawScale, WINDOWHEIGHT_DEFAULT * drawScale);

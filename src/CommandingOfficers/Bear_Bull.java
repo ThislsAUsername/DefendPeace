@@ -140,14 +140,14 @@ public class Bear_Bull extends Commander
     }
 
     @Override // COModifier interface.
-    public void apply(Commander commander)
+    public void applyChanges(Commander commander)
     {
       Bear_Bull cmdr = (Bear_Bull) commander;
       cmdr.swapD2Ds(false);
     }
 
     @Override
-    public void revert(Commander commander)
+    public void revertChanges(Commander commander)
     {
       Bear_Bull cmdr = (Bear_Bull) commander;
       cmdr.swapD2Ds(true);
@@ -188,7 +188,7 @@ public class Bear_Bull extends Commander
     }
 
     @Override // COModifier interface.
-    public void apply(Commander commander)
+    public void applyChanges(Commander commander)
     {
       Bear_Bull cmdr = (Bear_Bull) commander;
       // Instead of swapping, we get a discount. Yaaaay.
@@ -199,7 +199,7 @@ public class Bear_Bull extends Commander
     }
 
     @Override // COModifier interface.
-    public void revert(Commander commander)
+    public void revertChanges(Commander commander)
     {
       // Next turn, we swap D2Ds permanently
       Bear_Bull cmdr = (Bear_Bull) commander;

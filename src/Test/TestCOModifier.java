@@ -57,12 +57,12 @@ public class TestCOModifier extends TestCase
 
     // Apply a damage modifier and make sure we saw an increase.
     CODamageModifier dmgMod = new CODamageModifier(50);
-    dmgMod.apply(patch);
+    dmgMod.applyChanges(patch);
     int newDmg = inf.getDamageRatio();
     testPassed &= validate(startDmg < newDmg, "    Damage modifier did not increase damage ratio!");
     
     // Make sure reverting takes it back to normal.
-    dmgMod.revert(patch);
+    dmgMod.revertChanges(patch);
     int lastDmg = inf.getDamageRatio();
     testPassed &= validate(startDmg == lastDmg, "    Damage modifier did not return to normal");
     
@@ -81,12 +81,12 @@ public class TestCOModifier extends TestCase
     int MOVEMOD = 3;
     COMovementModifier moveMod = new COMovementModifier(MOVEMOD);
     moveMod.addApplicableUnitModel(patch.getUnitModel(UnitModel.UnitEnum.INFANTRY));
-    moveMod.apply(patch);
+    moveMod.applyChanges(patch);
     int newMove = inf.movePower;
     testPassed &= validate( (newMove - startMove) == MOVEMOD, "    Movement modifier did not apply as expected!");
 
     // Make sure reverting takes it back to normal.
-    moveMod.revert(patch);
+    moveMod.revertChanges(patch);
     int lastMove = inf.movePower;
     testPassed &= validate( lastMove == startMove, "    Movement modifier did not return the move power to normal!");
 
@@ -111,13 +111,13 @@ public class TestCOModifier extends TestCase
     // Try to add both types.
     UnitProductionModifier upMod = new UnitProductionModifier(FC, bship);
     upMod.addProductionPair(FC, inf);
-    upMod.apply(patch);
+    upMod.applyChanges(patch);
     
     // Verify that Patch can now build Battleships from a factory.
     testPassed &= validate( factoryModels.contains(bship), "    Factory cannot build Battleships, though it should be able to now.");
     
     // Revert the mod and ensure we can no longer build battleships.
-    upMod.revert(patch);
+    upMod.revertChanges(patch);
     testPassed &= validate( !factoryModels.contains(bship), "    Factory can still build Battleships, though it should not.");
     
     // Make sure it didn't also remove the ability to construct Infantry.
@@ -146,7 +146,7 @@ public class TestCOModifier extends TestCase
 
     // Turn our hapless infantryman into a lean, mean, driving machine. Make sure the Recon is still a Recon also.
     UnitRemodelModifier remod = new UnitRemodelModifier(infModel.type, reconModel.type);
-    remod.apply(patch);
+    remod.applyChanges(patch);
     testPassed &= validate( infantry.model == reconModel, "    Infantry is not Recon after being turned into one.");
     testPassed &= validate( recon.model == reconModel, "    Recon is not Recon, but it still should be.");
     for( int i = 0; i < infantry.weapons.size(); ++i )
@@ -155,7 +155,7 @@ public class TestCOModifier extends TestCase
     }
 
     // OK, that was weird. Change him back. Please. Make sure nothing weird happened to the Recon in the process.
-    remod.revert(patch);
+    remod.revertChanges(patch);
     testPassed &= validate( infantry.model == infModel, "    Infantry is not Infantry after being changed back.");
     testPassed &= validate( recon.model == reconModel, "    Recon is not Recon, though it should not have changed.");
 
@@ -163,11 +163,11 @@ public class TestCOModifier extends TestCase
     UnitModel mechModel = patch.getUnitModel(UnitModel.UnitEnum.MECH);
     remod = new UnitRemodelModifier(infModel.type, mechModel.type);
     remod.addUnitRemodel(reconModel.type, mechModel.type);
-    remod.apply(patch);
+    remod.applyChanges(patch);
     testPassed &= validate( infantry.model == mechModel, "    Infantry is not Mech after being changed.");
     testPassed &= validate( recon.model == mechModel, "    Recon is not Mech after being changed.");
 
-    remod.revert(patch);
+    remod.revertChanges(patch);
     testPassed &= validate( infantry.model == infModel, "    Infantry is not Infantry after being unMeched.");
     testPassed &= validate( recon.model == reconModel, "    Recon is not Recon after being unMeched.");
 

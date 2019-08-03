@@ -32,7 +32,6 @@ public class TestMain extends TestCase
     testsPassed &= validate(new TestInputHandler().runTest(), "InputHandler test failed!");
     testsPassed &= validate(new TestCapture().runTest(), "Capture test failed!");
     testsPassed &= validate(new TestGameEvent().runTest(), "GameEvent test failed!");
-    testsPassed &= validate(new TestDamageStrategy().runTest(), "DamageStrategy test failed!");
     testsPassed &= validate(new TestCOModifier().runTest(), "COModifier test failed!");
     testsPassed &= validate(new TestCommanderAve().runTest(), "CommanderAve test failed!");
     System.out.println("All tests completed.");

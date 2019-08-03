@@ -265,10 +265,14 @@ public class Unit implements Serializable
   /** Compiles and returns a list of all actions this unit could perform on map after moving along movePath. */
   public ArrayList<GameActionSet> getPossibleActions(GameMap map, Path movePath)
   {
+    return getPossibleActions(map, movePath, false);
+  }
+  public ArrayList<GameActionSet> getPossibleActions(GameMap map, Path movePath, boolean ignoreResident)
+  {
     ArrayList<GameActionSet> actionSet = new ArrayList<GameActionSet>();
     for( UnitActionType at : model.possibleActions )
     {
-      GameActionSet actions = at.getPossibleActions(map, movePath, this);
+      GameActionSet actions = at.getPossibleActions(map, movePath, this, ignoreResident);
       if( null != actions )
         actionSet.add(actions);
     }
