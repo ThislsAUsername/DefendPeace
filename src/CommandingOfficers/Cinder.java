@@ -101,7 +101,7 @@ public class Cinder extends Commander
    * Purchase price problems reset at the start of turn.
    */
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     // If we haven't initialized our buildable locations yet, do so.
     if( buildCounts.size() < 1 )

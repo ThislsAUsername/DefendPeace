@@ -14,6 +14,7 @@ import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
+import Engine.GameEvents.MassDamageEvent;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.GameMap;
@@ -129,7 +130,7 @@ public class Ave extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap gameMap)
+  public GameEventQueue initTurn(MapMaster gameMap)
   {
     GameEventQueue returnEvents = super.initTurn(gameMap);
 
@@ -611,6 +612,7 @@ public class Ave extends Commander
 
       // Keep track of any tiles that change.
       ArrayList<MapChangeEvent.EnvironmentAssignment> tileChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
+      ArrayList<Unit> victims = new ArrayList<Unit>();
 
       // Change terrain to snow around each of Ave's units and buildings, and damage trees and enemies.
       HashSet<XYCoord> affectedTiles = Utils.findLocationsNearProperties(gameMap, Ave, OBLIDO_RANGE);
@@ -630,13 +632,17 @@ public class Ave extends Commander
         // Damage each enemy nearby.
         if( null != loc.getResident() && myCommander.isEnemy(loc.getResident().CO) )
         {
-          loc.getResident().alterHP(-2);
+          victims.add(loc.getResident());
         }
       }
 
-      GameEvent event = new MapChangeEvent(tileChanges);
-      event.performEvent(gameMap);
-      GameEventListener.publishEvent(event);
+      GameEvent damage = new MassDamageEvent(victims, 2, false);
+      damage.performEvent(gameMap);
+      GameEventListener.publishEvent(damage);
+
+      GameEvent tileChange = new MapChangeEvent(tileChanges);
+      tileChange.performEvent(gameMap);
+      GameEventListener.publishEvent(tileChange);
     }
   } // Oblido
 

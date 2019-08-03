@@ -1,6 +1,14 @@
 package CommandingOfficers;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.XYCoord;
+import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.MassDamageEvent;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -50,6 +58,7 @@ public class Bear_Bull extends Commander
   
   private final int incomeBase;
   public boolean isBull;
+  public boolean liquidateMassDamage = false; // flag used during Upturn/Downturn
 
   private final double BEAR_MOD = 0.9;
   private final double BULL_MOD = 1.2;
@@ -91,6 +100,19 @@ public class Bear_Bull extends Commander
     }
   }
 
+  @Override
+  public void receiveMassDamageEvent(Map<Unit, Integer> lostHP)
+  {
+    if( liquidateMassDamage ) // If I'm collecting funds, collect from everyone
+      for( Entry<Unit, Integer> damageEntry : lostHP.entrySet() )
+      {
+        Unit unit = damageEntry.getKey();
+        money += (damageEntry.getValue() * unit.model.getCost()) / unit.model.maxHP;
+      }
+    else // Otherwise, do whatever we normally do
+      super.receiveMassDamageEvent(lostHP);
+  }
+
   /**
    * Down/UpTurn swaps D2Ds for this turn.
    * All units on a property you own take 3HP mass damage and you gain the funds value of that HP.
@@ -125,6 +147,7 @@ public class Bear_Bull extends Commander
       myCommander.addCOModifier(this);
 
       // Damage is dealt after swapping D2Ds so it's actually useful to Bear
+      ArrayList<Unit> victims = new ArrayList<Unit>();
       for( XYCoord xyc : myCommander.ownedProperties )
       {
         Location loc = gameMap.getLocation(xyc);
@@ -133,11 +156,15 @@ public class Bear_Bull extends Commander
           Unit victim = loc.getResident();
           if( null != victim )
           {
-            double delta = victim.alterHP(-1*DOWNUPTURN_LIQUIDATION); // Remove some of the unit's HP
-            myCommander.money += (-1 * delta * victim.model.getCost()) / 10; // ...and turn it into moolah
+            victims.add(victim);
           }
         }
       }
+      COcast.liquidateMassDamage = true; // Collect money instead of ability energy
+      GameEvent damage = new MassDamageEvent(victims, DOWNUPTURN_LIQUIDATION, false);
+      damage.performEvent(gameMap);
+      GameEventListener.publishEvent(damage);
+      COcast.liquidateMassDamage = false;
     }
 
     @Override // COModifier interface.

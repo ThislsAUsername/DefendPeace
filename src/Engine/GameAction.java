@@ -891,7 +891,7 @@ public interface GameAction
         if( Utils.enqueueMoveEvent(gameMap, benefactor, movePath, repairEvents) )
         {
           // No surprises in the fog.
-          repairEvents.add(new HealUnitEvent(beneficiary, true));
+          repairEvents.add(new HealUnitEvent(beneficiary, 1, true)); // As this is a unit action, there's no usecase to vary this yet
           repairEvents.add(new ResupplyEvent(beneficiary));
         }
       }

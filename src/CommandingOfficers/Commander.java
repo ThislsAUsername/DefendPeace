@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import AI.AIController;
@@ -25,6 +26,7 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.MapMaster;
 import Terrain.TerrainType;
 import UI.UIUtils.Faction;
 import Units.APCModel;
@@ -194,7 +196,7 @@ public class Commander extends GameEventListener implements Serializable
    * Collect income and handle any COModifiers.
    * @param map
    */
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     myView.resetFog();
     myActiveAbilityName = "";
@@ -226,7 +228,13 @@ public class Commander extends GameEventListener implements Serializable
       aiController.initTurn(myView);
     }
 
-    return new GameEventQueue();
+    GameEventQueue events = new GameEventQueue();
+    for( Unit u : units )
+    {
+      events.addAll(u.initTurn(map));
+    }
+
+    return events;
   }
 
   /**
@@ -331,6 +339,16 @@ public class Commander extends GameEventListener implements Serializable
     myAbilityPower += amount;
     if( myAbilityPower < 0 )
       myAbilityPower = 0;
+    double maxPower = getMaxAbilityPower();
+    if( myAbilityPower > maxPower )
+      myAbilityPower = maxPower;
+  }
+
+  /**
+   * @return The maximum level of ability energy this CO can hold
+   */
+  public double getMaxAbilityPower()
+  {
     double maxPower = 0;
     for( CommanderAbility ca : myAbilities )
     {
@@ -339,13 +357,19 @@ public class Commander extends GameEventListener implements Serializable
         maxPower = ca.getCost();
       }
     }
-    if( myAbilityPower > maxPower )
-      myAbilityPower = maxPower;
+    return maxPower;
+  }
+
+  // TODO: determine if this needs parameters, and if so, what?
+  public int getRepairPower()
+  {
+    return 2;
   }
 
   /**
    * Track battles that happen, and get ability power based on combat this CO is in.
    */
+  @Override
   public void receiveBattleEvent(final BattleSummary summary)
   {
     // We only care who the units belong to, not who picked the fight. 
@@ -372,7 +396,7 @@ public class Commander extends GameEventListener implements Serializable
     if( minion != null && enemy != null )
     {
       double power = 0; // value in funds of the charge we're getting
-      
+
       // Add up the funds value of the damage done to both participants.
       power += myHPLoss / minion.model.maxHP * minion.model.getCost();
       // The damage we deal is worth half as much as the damage we take, to help powers be a comeback mechanic.
@@ -384,6 +408,29 @@ public class Commander extends GameEventListener implements Serializable
       power /= CHARGERATIO_FUNDS;
 
       modifyAbilityPower(power);
+    }
+  }
+
+  /**
+   * Track mass damage done to my units, and get ability power based on it.
+   */
+  @Override
+  public void receiveMassDamageEvent(Map<Unit, Integer> lostHP)
+  {
+    for( Entry<Unit, Integer> damageEntry : lostHP.entrySet() )
+    {
+      Unit unit = damageEntry.getKey();
+      if (this == unit.CO)
+      {
+      double power = 0; // value in funds of the charge we're getting
+
+      power += ((double)damageEntry.getValue()) / unit.model.maxHP * unit.model.getCost();
+
+      // Convert funds to ability power units
+      power /= CHARGERATIO_FUNDS;
+
+      modifyAbilityPower(power);
+      }
     }
   }
 

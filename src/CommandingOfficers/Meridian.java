@@ -71,7 +71,7 @@ public class Meridian extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     justTransformed.clear();
     toBeNerfed.clear();
