@@ -10,29 +10,29 @@ import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
 import Units.Weapons.WeaponModel;
 
-public class Will extends Commander
+public class CoolWill extends Commander
 {
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
     public instantiator()
     {
-      super("Will");
+      super("Cool Will");
       infoPages.add(new InfoPage(
-          "--WILL--\r\n" + 
+          "--Cool Will--\r\n" + 
           "All ground direct units (including foot soldiers) gain +20% firepower.\r\n" + 
-          "xxxXXX\r\n" + 
+          "xxXXX\r\n" + 
           "RALLY CRY: All ground direct units gain +1 movement\r\n" + 
           "A NEW ERA: All ground direct units gain +2 movement"));
     }
     @Override
     public Commander create()
     {
-      return new Will();
+      return new CoolWill();
     }
   }
 
-  public Will()
+  public CoolWill()
   {
     super(coInfo);
 
@@ -56,8 +56,8 @@ public class Will extends Commander
       }
     }
 
-    addCommanderAbility(new GoFast(this, "Rally Cry", 3, 1));
-    addCommanderAbility(new GoFast(this, "A New Era", 6, 2));
+    addCommanderAbility(new GoFast(this, "Rally Cry", 2, 1));
+    addCommanderAbility(new GoFast(this, "A New Era", 5, 2));
   }
 
   public static CommanderInfo getInfo()

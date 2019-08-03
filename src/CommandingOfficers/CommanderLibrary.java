@@ -25,6 +25,7 @@ import CommandingOfficers.BlueMoon.Rojenski;
 import CommandingOfficers.BlueMoon.Sasha;
 import CommandingOfficers.BrennersWolves.Adderbella;
 import CommandingOfficers.BrennersWolves.Brenner;
+import CommandingOfficers.BrennersWolves.CoolWill;
 import CommandingOfficers.BrennersWolves.Isabella;
 import CommandingOfficers.BrennersWolves.LinAlt;
 import CommandingOfficers.BrennersWolves.Lin;
@@ -137,6 +138,7 @@ public class CommanderLibrary
     commanderList.add( Lin.getInfo() );
     commanderList.add( LinAlt.getInfo() );
     commanderList.add( Will.getInfo() );
+    commanderList.add( CoolWill.getInfo() );
 
     commanderList.add( Forsythe.getInfo() );
     commanderList.add( Gage.getInfo() );
