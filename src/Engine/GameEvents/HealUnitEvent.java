@@ -1,5 +1,6 @@
 package Engine.GameEvents;
 
+import CommandingOfficers.Commander;
 import Engine.XYCoord;
 import Terrain.MapMaster;
 import UI.MapView;
@@ -10,13 +11,13 @@ public class HealUnitEvent implements GameEvent
 {
   private Unit unit;
   public final int repairPower;
-  public final boolean liableForCosts;
+  public final Commander payer;
 
-  public HealUnitEvent(Unit aTarget, int HP, boolean payUp)
+  public HealUnitEvent(Unit aTarget, int HP, Commander pPayer)
   {
     unit = aTarget;
-    liableForCosts = payUp;
     repairPower = HP;
+    payer = pPayer;
   }
 
   @Override
@@ -34,7 +35,7 @@ public class HealUnitEvent implements GameEvent
   @Override
   public void performEvent(MapMaster gameMap)
   {
-    if (!liableForCosts)
+    if (null == payer)
       unit.alterHP(repairPower);
     else
     {
@@ -46,11 +47,11 @@ public class HealUnitEvent implements GameEvent
         int neededHP = Math.min(maxHP - unit.getHP(), repairPower); // Only pay for whole HPs
         double proportionalCost = unit.model.getCost() / maxHP;
         int repairedHP = neededHP;
-        while (unit.CO.money < repairedHP * proportionalCost) // Only repair what we can afford
+        while (payer.money < repairedHP * proportionalCost) // Only repair what we can afford
         {
           repairedHP--;
         }
-        unit.CO.money -= repairedHP * proportionalCost;
+        payer.money -= repairedHP * proportionalCost;
         unit.alterHP(repairedHP);
 
         // Top off HP if there's excess power but we hit the HP cap

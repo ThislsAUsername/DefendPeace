@@ -93,9 +93,9 @@ public class Unit implements Serializable
       }
 
       // If the unit is not at max health, and is on a repair tile, heal it.
-      if( model.canRepairOn(locus) && locus.getOwner() == CO )
+      if( model.canRepairOn(locus) && !CO.isEnemy(locus.getOwner()) )
       {
-        events.add(new HealUnitEvent(this, CO.getRepairPower(), true)); // Event handles cost logic
+        events.add(new HealUnitEvent(this, CO.getRepairPower(), CO)); // Event handles cost logic
         // Resupply is free; whether or not we can repair, go ahead and add the resupply event.
         if( !isFullySupplied() )
         {

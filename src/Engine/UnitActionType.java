@@ -323,7 +323,7 @@ public abstract class UnitActionType implements Serializable
         {
           // If there's a friendly unit there who isn't us, we can repair them.
           Unit other = map.getLocation(loc).getResident();
-          if( other != null && other.CO == actor.CO && other != actor &&
+          if( other != null && !actor.CO.isEnemy(other.CO) && other != actor &&
               (!other.isFullySupplied() || other.getPreciseHP() < other.model.maxHP) )
           {
             repairOptions.add(new GameAction.RepairUnitAction(actor, movePath, other));
