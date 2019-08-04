@@ -11,7 +11,8 @@ import UI.Art.Animation.GameAnimation;
 import Units.Unit;
 
 /**
- * Deals damage of configurable lethality to an arbitrary number of units, without invoking combat
+ * Deals damage to an arbitrary number of units, without invoking combat
+ * Lethality only affects whether to expect units to die, and thus allow all of their HP to be put into the victim map
  * Note: Damage dealt will not be tracked correctly if the event is executed twice
  */
 public class MassDamageEvent implements GameEvent
