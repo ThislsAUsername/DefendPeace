@@ -1,10 +1,12 @@
 package Engine;
 
+import java.io.Serializable;
+
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 
 
-public class GameScenario
+public class GameScenario implements Serializable
 {
   public final static int DEFAULT_INCOME = 1000;
   public final static int DEFAULT_STARTING_FUNDS = 0;
@@ -26,7 +28,7 @@ public class GameScenario
   }
 
   /** Immutable object to hold the rules of engagement for a given match. */
-  public static class GameRules
+  public static class GameRules implements Serializable
   {
     public final int incomePerCity;
     public final int startingFunds;
