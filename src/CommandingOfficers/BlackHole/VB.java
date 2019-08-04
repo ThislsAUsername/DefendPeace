@@ -1,5 +1,6 @@
 package CommandingOfficers.BlackHole;
 
+import Engine.GameScenario;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
@@ -27,15 +28,15 @@ public class VB extends Commander
           "Ex Machina -- A 2 Range missile hits the accumulation of the opponent's most expensive units, does 3 HP damage to them and stuns them during their next turn"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new VB();
+      return new VB(rules);
     }
   }
 
-  public VB()
+  public VB(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     new CODamageModifier(10).applyChanges(this);
     new CODefenseModifier(10).applyChanges(this);

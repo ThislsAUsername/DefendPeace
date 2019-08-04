@@ -1,5 +1,6 @@
 package CommandingOfficers.YellowComet;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -28,15 +29,15 @@ public class Sensei extends Commander
           "Airborne Assault -- Copters' strength is increased by +15%; 9 HP Mech units are placed on every owned, empty city"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Sensei();
+      return new Sensei(rules);
     }
   }
 
-  public Sensei()
+  public Sensei(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

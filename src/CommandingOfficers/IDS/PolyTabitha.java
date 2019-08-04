@@ -1,4 +1,5 @@
 package CommandingOfficers.IDS;
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import Units.Unit;

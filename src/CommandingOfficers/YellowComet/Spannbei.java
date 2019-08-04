@@ -1,5 +1,6 @@
 package CommandingOfficers.YellowComet;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -28,17 +29,17 @@ public class Spannbei extends Commander
           "Samurai Spirit -- Boosts attack by 10%, defense by 20%, and his counterattacks do 50% more damage"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Spannbei();
+      return new Spannbei(rules);
     }
   }
 
   private double counterMult = 1;
 
-  public Spannbei()
+  public Spannbei(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     new CODamageModifier(30).applyChanges(this);
     new CODefenseModifier(30).applyChanges(this);

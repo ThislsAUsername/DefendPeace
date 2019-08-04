@@ -7,6 +7,7 @@ import java.util.PriorityQueue;
 import java.util.Stack;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
+import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance.BattleParams;
@@ -96,17 +97,17 @@ public class CommanderAve extends Commander
           "Dislikes: Trees and Mythical Snow Monsters"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new CommanderAve();
+      return new CommanderAve(rules);
     }
   }
 
   private int[][] snowMap;
 
-  public CommanderAve()
+  public CommanderAve(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     // Ave's units are fine in the snow, but not in the trees.
     for( UnitModel um : unitModels.values() )

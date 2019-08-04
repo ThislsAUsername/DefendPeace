@@ -1,5 +1,6 @@
 package CommandingOfficers.Assorted;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -25,15 +26,15 @@ public class AllDaWaylon extends Commander
           "BAD COMPANY: All air units gain +45% defense."));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new AllDaWaylon();
+      return new AllDaWaylon(rules);
     }
   }
 
-  public AllDaWaylon()
+  public AllDaWaylon(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

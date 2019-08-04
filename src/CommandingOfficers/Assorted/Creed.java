@@ -1,5 +1,6 @@
 package CommandingOfficers.Assorted;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -25,15 +26,15 @@ public class Creed extends Commander
           "Tactical Genius (5): May deploy any unit from cities"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Creed();
+      return new Creed(rules);
     }
   }
 
-  public Creed()
+  public Creed(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     addCommanderAbility(new TacticalGenius(this));
   }

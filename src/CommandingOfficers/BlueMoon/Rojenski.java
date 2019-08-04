@@ -1,5 +1,6 @@
 package CommandingOfficers.BlueMoon;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -26,15 +27,15 @@ public class Rojenski extends Commander
           "LONG BARREL: All indirects gain +2 range."));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Rojenski();
+      return new Rojenski(rules);
     }
   }
 
-  public Rojenski()
+  public Rojenski(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

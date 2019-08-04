@@ -1,5 +1,6 @@
 package CommandingOfficers.Modifiers;
 
+import Engine.GameScenario;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;

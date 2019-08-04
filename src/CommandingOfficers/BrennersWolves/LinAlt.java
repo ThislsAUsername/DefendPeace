@@ -1,5 +1,6 @@
 package CommandingOfficers.BrennersWolves;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -29,15 +30,15 @@ public class LinAlt extends Commander
           "NIGHT VISION: All ground units get +15/10 stats, +2 vision, and can see into hiding places."));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new LinAlt();
+      return new LinAlt(rules);
     }
   }
 
-  public LinAlt()
+  public LinAlt(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

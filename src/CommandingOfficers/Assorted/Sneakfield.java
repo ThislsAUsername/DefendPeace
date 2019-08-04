@@ -1,5 +1,6 @@
 package CommandingOfficers.Assorted;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -26,15 +27,15 @@ public class Sneakfield extends Commander
           "Supply Chain (3): Resupply all units"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Sneakfield();
+      return new Sneakfield(rules);
     }
   }
 
-  public Sneakfield()
+  public Sneakfield(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

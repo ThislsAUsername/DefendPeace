@@ -1,5 +1,6 @@
 package CommandingOfficers.OrangeStar;
 
+import Engine.GameScenario;
 import Engine.Combat.BattleInstance.BattleParams;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
@@ -26,18 +27,18 @@ public class Caroline extends Commander
           "SCOP: Luck floor is maxed out, for +15% luck on every attack."));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Caroline();
+      return new Caroline(rules);
     }
   }
 
   private final int luckMax = 15;
   private int luckFloor = 0;
 
-  public Caroline()
+  public Caroline(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     addCommanderAbility(new LuckFloor(this, "Lucky Star", 3, 7));
     addCommanderAbility(new LuckFloor(this, "Lady Luck", 6, 15));

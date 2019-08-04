@@ -1,5 +1,6 @@
 package CommandingOfficers.YellowComet;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -23,15 +24,15 @@ public class Grimm extends Commander
           "Haymaker -- Offensive Boost by +50%"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Grimm();
+      return new Grimm(rules);
     }
   }
 
-  public Grimm()
+  public Grimm(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
     
     new CODamageModifier(30).applyChanges(this);
     new CODefenseModifier(-20).applyChanges(this);

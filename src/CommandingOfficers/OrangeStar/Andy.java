@@ -1,5 +1,6 @@
 package CommandingOfficers.OrangeStar;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -25,15 +26,15 @@ public class Andy extends Commander
           "Hyper Upgrade -- Andy's units gain +5HP, +10% firepower and +1 Movement"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Andy();
+      return new Andy(rules);
     }
   }
 
-  public Andy()
+  public Andy(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     addCommanderAbility(new HyperRepair(this));
     addCommanderAbility(new HyperUpgrade(this));

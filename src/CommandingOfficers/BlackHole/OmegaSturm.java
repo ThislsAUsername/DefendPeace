@@ -1,5 +1,6 @@
 package CommandingOfficers.BlackHole;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -35,15 +36,15 @@ public class OmegaSturm extends Commander
           "Just like you remember it ;)"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new OmegaSturm();
+      return new OmegaSturm(rules);
     }
   }
 
-  public OmegaSturm()
+  public OmegaSturm(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     new PerfectMoveModifier(false).applyChanges(this);
     new CODamageModifier (20).applyChanges(this);

@@ -1,5 +1,6 @@
 package CommandingOfficers.OrangeStar;
 
+import Engine.GameScenario;
 import Engine.Combat.BattleInstance.BattleParams;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
@@ -29,17 +30,17 @@ public class Rachel extends Commander
           "Covering Fire -- Three 2-range missiles strike the opponents' greatest accumulation of footsoldier HP, unit funds value, and unit HP (in that order)."));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Rachel();
+      return new Rachel(rules);
     }
   }
 
   private int luckMax = 10;
 
-  public Rachel()
+  public Rachel(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     addCommanderAbility(new LuckyLass(this));
     addCommanderAbility(new CoveringFire(this));

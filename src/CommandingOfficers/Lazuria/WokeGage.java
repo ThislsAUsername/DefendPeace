@@ -1,5 +1,6 @@
 package CommandingOfficers.Lazuria;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -26,15 +27,15 @@ public class WokeGage extends Commander
           "LONG BARREL: All indirects gain +4 range."));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new WokeGage();
+      return new WokeGage(rules);
     }
   }
 
-  public WokeGage()
+  public WokeGage(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

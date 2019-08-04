@@ -1,5 +1,6 @@
 package CommandingOfficers.Modifiers;
 
+import Engine.GameScenario;
 import Units.UnitModel;
 
 import java.util.ArrayList;

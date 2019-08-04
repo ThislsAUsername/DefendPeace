@@ -1,5 +1,6 @@
 package CommandingOfficers.BlackHole;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -29,17 +30,17 @@ public class Kindle extends Commander
           "High Society -- Urban bonus increased to +130%, and attack power boosted by +3% for every city owned"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Kindle();
+      return new Kindle(rules);
     }
   }
 
   private int urbanBuff = 40;
 
-  public Kindle()
+  public Kindle(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     addCommanderAbility(new UrbanBlight(this));
     addCommanderAbility(new HighSociety(this));

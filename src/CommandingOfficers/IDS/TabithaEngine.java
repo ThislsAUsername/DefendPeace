@@ -1,5 +1,6 @@
 package CommandingOfficers.IDS;
 
+import Engine.GameScenario;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;

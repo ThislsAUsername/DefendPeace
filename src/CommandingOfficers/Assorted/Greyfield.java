@@ -1,5 +1,6 @@
 package CommandingOfficers.Assorted;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -28,15 +29,15 @@ public class Greyfield extends Commander
           "High Command (5): Resupply all units"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Greyfield();
+      return new Greyfield(rules);
     }
   }
 
-  public Greyfield()
+  public Greyfield(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

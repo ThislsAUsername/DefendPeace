@@ -1,5 +1,6 @@
 package CommandingOfficers.OrangeStar;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -27,15 +28,15 @@ public class Hachi extends Commander
           "Merchant Union -- Units cost -50% and ground units can deploy from cities"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Hachi();
+      return new Hachi(rules);
     }
   }
 
-  public Hachi()
+  public Hachi(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     addCommanderAbility(new Barter(this));
     addCommanderAbility(new MerchantUnion(this));

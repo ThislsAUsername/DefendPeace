@@ -1,5 +1,6 @@
 package CommandingOfficers.BlackHole;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -24,15 +25,15 @@ public class Hawke extends Commander
           "Black Storm -- All enemy units lose -2 HP, and your own units gain +2 HP"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Hawke();
+      return new Hawke(rules);
     }
   }
 
-  public Hawke()
+  public Hawke(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
     new CODamageModifier(10).applyChanges(this);
 
     addCommanderAbility(new BlackWave(this));

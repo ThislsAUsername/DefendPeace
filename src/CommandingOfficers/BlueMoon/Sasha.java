@@ -1,5 +1,6 @@
 package CommandingOfficers.BlueMoon;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -24,9 +25,9 @@ public class Sasha extends Commander
           "War Bonds -- Receive funds for damage dealt to enemy units (50% of the respective funds damage)"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Sasha();
+      return new Sasha(rules);
     }
   }
 
@@ -36,9 +37,9 @@ public class Sasha extends Commander
   private static final int PILLAGE_COST = 6;
   private static final double PILLAGE_INCOME = 0.5;
 
-  public Sasha()
+  public Sasha(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
     
     incomePerCity += 100;
 

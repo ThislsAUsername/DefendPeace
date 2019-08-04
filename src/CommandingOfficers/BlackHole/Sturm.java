@@ -1,5 +1,6 @@
 package CommandingOfficers.BlackHole;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -28,15 +29,15 @@ public class Sturm extends Commander
           "Meteor Strike II -- A 2 Range missile hits the accumulation of the opponent's most expensive units and deals 8 HP damage"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Sturm();
+      return new Sturm(rules);
     }
   }
 
-  public Sturm()
+  public Sturm(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     // legacy code left in for ~reasons~
 //    PerfectMoveModifier moveMod = new PerfectMoveModifier();

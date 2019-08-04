@@ -1,5 +1,6 @@
 package CommandingOfficers.YellowComet;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -28,15 +29,15 @@ public class Hetler extends Commander
           "Airborne Assault (9): Copters' strength is increased by +15%; 9 HP Infantry units are placed on every owned, empty city"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Hetler();
+      return new Hetler(rules);
     }
   }
 
-  public Hetler()
+  public Hetler(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

@@ -1,5 +1,6 @@
 package CommandingOfficers.Lazuria;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -25,15 +26,15 @@ public class Tasha extends Commander
           "FOX ONE: All air units gain +2 movement."));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Tasha();
+      return new Tasha(rules);
     }
   }
 
-  public Tasha()
+  public Tasha(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

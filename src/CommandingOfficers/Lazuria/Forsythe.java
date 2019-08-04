@@ -1,5 +1,6 @@
 package CommandingOfficers.Lazuria;
 
+import Engine.GameScenario;
 import java.util.HashMap;
 
 import CommandingOfficers.Commander;
@@ -29,15 +30,15 @@ public class Forsythe extends Commander
           "NO CO POWERS"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Forsythe();
+      return new Forsythe(rules);
     }
   }
 
-  public Forsythe()
+  public Forsythe(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     new CODamageModifier(10).applyChanges(this);
     new CODefenseModifier(10).applyChanges(this);

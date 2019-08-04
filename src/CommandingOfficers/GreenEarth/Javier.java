@@ -1,5 +1,6 @@
 package CommandingOfficers.GreenEarth;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -27,17 +28,17 @@ public class Javier extends Commander
           "Tower of Power -- Even more defense against indirects (+60%); +20/20 stats"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Javier();
+      return new Javier(rules);
     }
   }
   
   public int indirectDef = 20;
 
-  public Javier()
+  public Javier(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     new CODefenseModifier(10).applyChanges(this);
 

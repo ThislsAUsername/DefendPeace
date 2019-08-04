@@ -1,5 +1,6 @@
 package CommandingOfficers.Lazuria;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -28,15 +29,15 @@ public class Davis extends Commander
         + "All non-footsoldier units may move and fire again even if built this turn (use this power after moving!)"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Davis();
+      return new Davis(rules);
     }
   }
 
-  public Davis()
+  public Davis(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

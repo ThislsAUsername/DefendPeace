@@ -1,5 +1,6 @@
 package CommandingOfficers.IDS;
 
+import Engine.GameScenario;
 import Terrain.Environment.Weathers;
 import Terrain.MapMaster;
 import CommandingOfficers.Commander;
@@ -25,15 +26,15 @@ public class PennyRNG extends Commander
           + "Get out of here with your shenanigans!"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new PennyRNG();
+      return new PennyRNG(rules);
     }
   }
 
-  public PennyRNG()
+  public PennyRNG(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

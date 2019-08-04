@@ -1,5 +1,6 @@
 package CommandingOfficers.OrangeStar;
 
+import Engine.GameScenario;
 import java.util.Map;
 
 import CommandingOfficers.Commander;
@@ -33,17 +34,17 @@ public class Jake extends Commander
           "Block Rock -- Land indirects gain +1 Range; Plains bonus increased by +30%; Vehicles gain +2 Movement\r\n"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Jake();
+      return new Jake(rules);
     }
   }
   
   private int plainsBuff = 10;
 
-  public Jake()
+  public Jake(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     addCommanderAbility(new BeatDown(this));
     addCommanderAbility(new BlockRock(this));

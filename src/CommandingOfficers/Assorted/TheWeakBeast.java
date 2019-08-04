@@ -1,5 +1,6 @@
 package CommandingOfficers.Assorted;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -28,15 +29,15 @@ public class TheWeakBeast extends Commander
           "GWAR HAR HAR!: A 2-range missile hits the accumulation of the opponent's most expensive units and deals 8 HP damage."));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new TheWeakBeast();
+      return new TheWeakBeast(rules);
     }
   }
 
-  public TheWeakBeast()
+  public TheWeakBeast(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

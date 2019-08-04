@@ -1,5 +1,6 @@
 package CommandingOfficers.IDS;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -26,17 +27,17 @@ public class CaulderAlt extends Commander
           "SUPREME BOOST: All units gain +40% firepower, +25% defense, and are repaired for +"+ SupremeBoost.REPAIRS +" HP (liable for costs -- watch your funds!)."));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new CaulderAlt();
+      return new CaulderAlt(rules);
     }
   }
 
   public static final int D2DREPAIRS = 3;
 
-  public CaulderAlt()
+  public CaulderAlt(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     addCommanderAbility(new SupremeBoost(this));
   }

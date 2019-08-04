@@ -1,5 +1,6 @@
 package CommandingOfficers.YellowComet;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -29,17 +30,17 @@ public class OmegaKanbei extends Commander
           "Lightning Samurai (13): All units are refreshed"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new OmegaKanbei();
+      return new OmegaKanbei(rules);
     }
   }
 
   private double counterMult = 1.5;
 
-  public OmegaKanbei()
+  public OmegaKanbei(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     new CODamageModifier(50).applyChanges(this);
     new CODefenseModifier(50).applyChanges(this);

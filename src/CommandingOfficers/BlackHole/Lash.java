@@ -1,5 +1,6 @@
 package CommandingOfficers.BlackHole;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -27,18 +28,18 @@ public class Lash extends Commander
           "Prime Tactics -- Doubles terrain stars; Movement cost over all terrain is reduced to 1 (except in snow)"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Lash();
+      return new Lash(rules);
     }
   }
 
   private final int starBuff = 10;
   private int starMult = 1;
 
-  public Lash()
+  public Lash(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     addCommanderAbility(new TerrainTactics(this));
     addCommanderAbility(new PrimeTactics(this));

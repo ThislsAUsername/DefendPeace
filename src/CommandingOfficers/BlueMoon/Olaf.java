@@ -1,5 +1,6 @@
 package CommandingOfficers.BlueMoon;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -31,15 +32,15 @@ public class Olaf extends Commander
           "Winter Fury -- Enemy units lose 2 HP (to a minimum of 1); changes the weather to Snow (1 day)"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Olaf();
+      return new Olaf(rules);
     }
   }
 
-  public Olaf()
+  public Olaf(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

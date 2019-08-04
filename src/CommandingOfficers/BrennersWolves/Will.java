@@ -1,5 +1,6 @@
 package CommandingOfficers.BrennersWolves;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -26,15 +27,15 @@ public class Will extends Commander
           "A NEW ERA: All ground direct units gain +2 movement"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Will();
+      return new Will(rules);
     }
   }
 
-  public Will()
+  public Will(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

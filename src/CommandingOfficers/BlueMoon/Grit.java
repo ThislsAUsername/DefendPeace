@@ -1,5 +1,6 @@
 package CommandingOfficers.BlueMoon;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -29,17 +30,17 @@ public class Grit extends Commander
           "Super Snipe -- Indirect units gain +2 Range and +20% attack"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Grit();
+      return new Grit(rules);
     }
   }
   
   public int indirectBuff = 20;
 
-  public Grit()
+  public Grit(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

@@ -1,5 +1,6 @@
 package CommandingOfficers.GreenEarth;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -32,15 +33,15 @@ public class Drake extends Commander
           "Typhoon -- All enemy units lose 2 HP (to a minimum of 1) and half their fuel. Weather changes to Rain (1 day)"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Drake();
+      return new Drake(rules);
     }
   }
 
-  public Drake()
+  public Drake(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

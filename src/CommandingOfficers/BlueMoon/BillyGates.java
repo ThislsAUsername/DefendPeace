@@ -1,5 +1,6 @@
 package CommandingOfficers.BlueMoon;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -23,15 +24,15 @@ public class BillyGates extends Commander
           "Power of Money (6): Unit attack percentage increases by (3 * Funds/1000)%"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new BillyGates();
+      return new BillyGates(rules);
     }
   }
 
-  public BillyGates()
+  public BillyGates(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

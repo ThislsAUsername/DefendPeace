@@ -1,5 +1,6 @@
 package CommandingOfficers.IDS;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -30,18 +31,18 @@ public class Cyrus extends Commander
           "FEARLESS: +2 vision; can see into hiding places; all enemy units lose two additional terrain stars; a unit being attacked attacks first even if it would be destroyed."));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Cyrus();
+      return new Cyrus(rules);
     }
   }
 
   public int terrainDrain = 1;
   public boolean counterFirst = false;
 
-  public Cyrus()
+  public Cyrus(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
     
     for( UnitModel um : unitModels.values() )
     {

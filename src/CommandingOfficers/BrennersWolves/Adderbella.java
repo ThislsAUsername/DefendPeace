@@ -1,5 +1,6 @@
 package CommandingOfficers.BrennersWolves;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -26,15 +27,15 @@ public class Adderbella extends Commander
           "OVERLORD: All units gain +2 movement and +10% defense; all indirects also gain +2 range."));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Adderbella();
+      return new Adderbella(rules);
     }
   }
 
-  public Adderbella()
+  public Adderbella(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     new CODamageModifier(10).applyChanges(this);
     

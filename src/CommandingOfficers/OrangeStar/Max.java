@@ -1,5 +1,6 @@
 package CommandingOfficers.OrangeStar;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -29,17 +30,17 @@ public class Max extends Commander
           "Max Blast -- Direct Units gain +2 Movement and their power increases by +30%"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Max();
+      return new Max(rules);
     }
   }
   
   public int directBuff = 20;
 
-  public Max()
+  public Max(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

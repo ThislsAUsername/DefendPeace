@@ -1,5 +1,6 @@
 package CommandingOfficers.OrangeStar;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -30,15 +31,15 @@ public class Sami extends Commander
           "Victory March -- Footsoldiers gain +40% power, +2 Movement, and capture any building in one turn (even with 1 HP)"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Sami();
+      return new Sami(rules);
     }
   }
 
-  public Sami()
+  public Sami(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

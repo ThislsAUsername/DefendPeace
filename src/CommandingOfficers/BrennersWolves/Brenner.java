@@ -1,5 +1,6 @@
 package CommandingOfficers.BrennersWolves;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -24,15 +25,15 @@ public class Brenner extends Commander
           "LIFELINE: All units gain +6 HP."));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Brenner();
+      return new Brenner(rules);
     }
   }
 
-  public Brenner()
+  public Brenner(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     new CODefenseModifier(10).applyChanges(this);
 

@@ -1,5 +1,6 @@
 package CommandingOfficers.GreenEarth;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -26,15 +27,15 @@ public class Eagle extends Commander
           "Lightning Strike -- Boosts Air unit attack by 5% and defense by 10%. All non-footsoldier units may move and fire again even if built this turn (use this power after moving!)"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Eagle();
+      return new Eagle(rules);
     }
   }
 
-  public Eagle()
+  public Eagle(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {

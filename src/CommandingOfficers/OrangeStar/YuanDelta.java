@@ -1,5 +1,6 @@
 package CommandingOfficers.OrangeStar;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -26,15 +27,15 @@ public class YuanDelta extends Commander
           "Merchant Union (8): Ground vehicles can deploy from cities"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new YuanDelta();
+      return new YuanDelta(rules);
     }
   }
 
-  public YuanDelta()
+  public YuanDelta(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     addCommanderAbility(new MerchantUnion(this));
   }

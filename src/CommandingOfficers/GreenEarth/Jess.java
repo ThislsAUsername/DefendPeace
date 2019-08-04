@@ -1,5 +1,6 @@
 package CommandingOfficers.GreenEarth;
 
+import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -26,15 +27,15 @@ public class Jess extends Commander
           "Overdrive -- All units resupply; vehicles gain +30% attack +2 Movement"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Jess();
+      return new Jess(rules);
     }
   }
 
-  public Jess()
+  public Jess(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {
