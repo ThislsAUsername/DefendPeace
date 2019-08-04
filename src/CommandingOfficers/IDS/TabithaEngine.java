@@ -9,6 +9,7 @@ import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
+import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CostValueFinder;
 import Engine.Combat.MassStrikeUtils;
@@ -27,6 +28,7 @@ import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
 import Units.UnitModel;
+import Units.UnitModel.ChassisEnum;
 
 public abstract class TabithaEngine extends Commander
 {
@@ -37,6 +39,7 @@ public abstract class TabithaEngine extends Commander
   public ArrayList<Unit> COUs = new ArrayList<Unit>();
   public abstract int getMegaBoostCount();
   public void onCOULost(Unit minion) {};
+  public boolean canBoost(UnitModel type) {return true;};
   public final int COUPow; // static values that define the power the COU should stay at
   public final int COUDef;
   private int megaPow; // floating values that dip on powers to match the above
@@ -53,7 +56,8 @@ public abstract class TabithaEngine extends Commander
 
     for( UnitModel um : unitModels.values() )
     {
-      um.possibleActions.add(new MegaBoost(this));
+      if( canBoost(um) )
+        um.possibleActions.add(new MegaBoost(this));
     }
   }
 
@@ -92,7 +96,7 @@ public abstract class TabithaEngine extends Commander
     {
       Unit minion = params.attacker;
 
-      if( freeBoost || COUs.contains(minion) )
+      if( (freeBoost && canBoost(minion.model)) || COUs.contains(minion) )
         params.attackFactor += megaPow;
     }
 
@@ -100,7 +104,7 @@ public abstract class TabithaEngine extends Commander
     {
       Unit minion = params.defender;
 
-      if( freeBoost || COUs.contains(minion) )
+      if( (freeBoost && canBoost(minion.model)) || COUs.contains(minion) )
         params.defenseFactor += megaDef;
     }
   }
@@ -111,7 +115,7 @@ public abstract class TabithaEngine extends Commander
     super.receiveBattleEvent(battleInfo);
     boolean freeBoost = canApplyBoost && COUs.size() < getMegaBoostCount();
     // Determine if we were part of this fight.
-    if( freeBoost && battleInfo.attacker.CO == this )
+    if( (freeBoost && canBoost(battleInfo.attacker.model)) && battleInfo.attacker.CO == this )
     {
       COUs.add(battleInfo.attacker);
     }
@@ -132,16 +136,15 @@ public abstract class TabithaEngine extends Commander
     }
   }
 
-  protected static class NukeIt extends CommanderAbility
+  protected static class nonStackingBoost extends CommanderAbility
   {
     TabithaEngine COcast;
-    private int nukePower, atk, def;
+    private int atk, def;
 
-    NukeIt(TabithaEngine commander, String name, int cost, int nuke, int pAtk, int pDef)
+    protected nonStackingBoost(TabithaEngine commander, String name, int cost, int pAtk, int pDef)
     {
       super(commander, name, cost);
       COcast = commander;
-      nukePower = nuke;
       atk = pAtk;
       def = pDef;
     }
@@ -151,8 +154,35 @@ public abstract class TabithaEngine extends Commander
     {
       COcast.megaPow -= atk;
       COcast.megaDef -= def;
-      myCommander.addCOModifier(new CODamageModifier(atk));
-      myCommander.addCOModifier(new CODefenseModifier(def));
+      GenericUnitModifier powMod = new CODamageModifier(atk);
+      GenericUnitModifier defMod = new CODefenseModifier(def);
+      for( UnitModel um : myCommander.unitModels.values() )
+      {
+        if( COcast.canBoost(um) )
+        {
+          powMod.addApplicableUnitModel(um);
+          defMod.addApplicableUnitModel(um);
+        }
+      }
+      COcast.addCOModifier(powMod);
+      COcast.addCOModifier(defMod);
+    }
+  }
+
+  protected static class NukeIt extends nonStackingBoost
+  {
+    private int nukePower;
+
+    protected NukeIt(TabithaEngine commander, String name, int cost, int nuke, int pAtk, int pDef)
+    {
+      super(commander, name, cost, pAtk, pDef);
+      nukePower = nuke;
+    }
+
+    @Override
+    protected void perform(MapMaster gameMap)
+    {
+      super.perform(gameMap);
       XYCoord target = MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true));
       MassStrikeUtils.damageStrike(gameMap, nukePower, target, 2);
     }

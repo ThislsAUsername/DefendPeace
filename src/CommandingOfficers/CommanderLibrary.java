@@ -28,6 +28,7 @@ import CommandingOfficers.BrennersWolves.Brenner;
 import CommandingOfficers.BrennersWolves.CoolWill;
 import CommandingOfficers.BrennersWolves.Isabella;
 import CommandingOfficers.BrennersWolves.LinAlt;
+import CommandingOfficers.BrennersWolves.Link;
 import CommandingOfficers.BrennersWolves.Lin;
 import CommandingOfficers.BrennersWolves.Will;
 import CommandingOfficers.GreenEarth.DSJess;
@@ -50,6 +51,7 @@ import CommandingOfficers.IDS.TabithaEngine;
 import CommandingOfficers.Lazuria.Davis;
 import CommandingOfficers.Lazuria.Forsythe;
 import CommandingOfficers.Lazuria.Gage;
+import CommandingOfficers.Lazuria.T3Tasha;
 import CommandingOfficers.Lazuria.WokeGage;
 import CommandingOfficers.Lazuria.Tasha;
 import CommandingOfficers.Lazuria.WokeTasha;
@@ -137,6 +139,7 @@ public class CommanderLibrary
     commanderList.add( Adderbella.getInfo() );
     commanderList.add( Lin.getInfo() );
     commanderList.add( LinAlt.getInfo() );
+    commanderList.add( Link.getInfo() );
     commanderList.add( Will.getInfo() );
     commanderList.add( CoolWill.getInfo() );
 
@@ -145,6 +148,7 @@ public class CommanderLibrary
     commanderList.add( WokeGage.getInfo() );
     commanderList.add( Tasha.getInfo() );
     commanderList.add( WokeTasha.getInfo() );
+    commanderList.add( T3Tasha.getInfo() );
 
     commanderList.add( WaylonCS.getInfo() );
     commanderList.add( AllDaWaylon.getInfo() );
