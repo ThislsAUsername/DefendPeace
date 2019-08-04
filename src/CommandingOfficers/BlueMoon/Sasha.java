@@ -41,7 +41,7 @@ public class Sasha extends Commander
   {
     super(coInfo, rules);
     
-    incomePerCity += 100;
+    incomeAdjustment = 100;
 
     addCommanderAbility(new MarketCrash(this));
     addCommanderAbility(new WarBonds(this, PILLAGE_NAME, PILLAGE_COST, PILLAGE_INCOME));

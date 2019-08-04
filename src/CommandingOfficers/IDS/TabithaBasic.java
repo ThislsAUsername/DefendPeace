@@ -28,18 +28,18 @@ public class TabithaBasic extends TabithaEngine
           + "All units gain +35/35."));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new TabithaBasic();
+      return new TabithaBasic(rules);
     }
   }
 
   @Override
   public int getMegaBoostCount() {return 1;}
 
-  public TabithaBasic()
+  public TabithaBasic(GameScenario.GameRules rules)
   {
-    super(MEGA_ATK, MEGA_DEF, coInfo);
+    super(MEGA_ATK, MEGA_DEF, coInfo, rules);
 
     addCommanderAbility(new NukeIt(this, "Firestorm",   6, 4, 10, 10));
     addCommanderAbility(new NukeIt(this, "Apocalypse", 10, 8, 35, 35));

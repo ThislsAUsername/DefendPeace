@@ -26,9 +26,9 @@ public class OmegaTabitha extends TabithaEngine
           + "All units gain +50/35."));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new OmegaTabitha();
+      return new OmegaTabitha(rules);
     }
   }
 
@@ -40,9 +40,9 @@ public class OmegaTabitha extends TabithaEngine
     modifyAbilityPower(-42);
   }
 
-  public OmegaTabitha()
+  public OmegaTabitha(GameScenario.GameRules rules)
   {
-    super(MEGA_ATK, MEGA_DEF, coInfo);
+    super(MEGA_ATK, MEGA_DEF, coInfo, rules);
 
     addCommanderAbility(new NukeIt(this, "APOCALYPSE", 13, 8, 50, 35));
   }

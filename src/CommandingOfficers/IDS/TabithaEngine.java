@@ -43,9 +43,9 @@ public abstract class TabithaEngine extends Commander
   private int megaDef;
   private boolean canApplyBoost = false;
 
-  public TabithaEngine(int atk, int def, CommanderInfo info)
+  public TabithaEngine(int atk, int def, CommanderInfo info, GameScenario.GameRules rules)
   {
-    super(info);
+    super(info, rules);
     COUPow = atk;
     COUDef = def;
     megaPow = COUPow;

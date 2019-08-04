@@ -35,18 +35,18 @@ public class OmegaCaulder extends TabithaEngine
           + "I heard you like pain?"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new OmegaCaulder();
+      return new OmegaCaulder(rules);
     }
   }
 
   @Override
   public int getMegaBoostCount() {return 3;}
 
-  public OmegaCaulder()
+  public OmegaCaulder(GameScenario.GameRules rules)
   {
-    super(MEGA_ATK, MEGA_DEF, coInfo);
+    super(MEGA_ATK, MEGA_DEF, coInfo, rules);
 
     for( UnitModel um : unitModels.values() )
     {
