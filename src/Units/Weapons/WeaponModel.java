@@ -11,7 +11,7 @@ public class WeaponModel implements Serializable
     INFANTRYMGUN, MECHZOOKA, MECHMGUN,
     RECONMGUN, TANKCANNON, TANKMGUN, MD_TANKCANNON, MD_TANKMGUN, NEOCANNON, NEOMGUN, MEGACANNON, MEGAMGUN,
     ARTILLERYCANNON, ROCKETS, PIPEGUN, ANTI_AIRMGUN, MOBILESAM,
-    FIGHTERMISSILES, BOMBERBOMBS, STEALTHPEWS, B_COPTERROCKETS, B_COPTERMGUN,
+    FIGHTERMISSILES, BOMBERBOMBS, STEALTH_SHOTS, B_COPTERROCKETS, B_COPTERMGUN,
     CARRIERMISSILES, BATTLESHIPCANNON, CRUISERTORPEDOES, CRUISERMGUN, SUBTORPEDOES
   };
 
@@ -78,7 +78,7 @@ public class WeaponModel implements Serializable
 /* MOBILESAM        */{   0,    0,     0,    0,       0,       0,        0,   0,         0,       0,          0,        0,         0,     100,    100,     100,            0,      120,      120,   120,       0,     0,          0,       0,      0,   0,       0 }, /* MOBILESAM        */
 /* FIGHTERMISSILES  */{   0,    0,     0,    0,       0,       0,        0,   0,         0,       0,          0,        0,         0,      55,    100,      85,           85,      100,      100,   120,       0,     0,          0,       0,      0,   0,       0 }, /* FIGHTERMISSILES  */
 /* BOMBERBOMBS      */{ 110,  110,   105,  105,      95,      90,       35, 105,       105,     105,        105,       95,       105,       0,      0,       0,            0,        0,        0,     0,     105,    75,         75,      85,     95,  95,       0 }, /* BOMBERBOMBS      */
-/* STEALTHPEWS      */{  90,   90,    85,   75,      70,      60,       15,  85,        75,      85,         80,       50,        85,      45,     70,      55,           55,       85,       95,   120,      45,    65,         45,      35,     65,  55,       0 }, /* STEALTHPEWS      */
+/* STEALTH_SHOTS    */{  90,   90,    85,   75,      70,      60,       15,  85,        75,      85,         80,       50,        85,      45,     70,      55,           55,       85,       95,   120,      45,    65,         45,      35,     65,  55,       0 }, /* STEALTHPEWS      */
 /* B_COPTERROCKETS  */{   0,    0,    55,   55,      25,      20,       10,  60,        65,      65,         55,       25,        65,       0,      0,       0,            0,        0,        0,     0,      25,    25,         25,      55,     25,  25,       0 }, /* B_COPTERROCKETS  */
 /* B_COPTERMGUN     */{  75,   75,    30,    6,       1,       1,        0,  20,        25,      35,          6,        6,        35,       0,      0,       0,            0,       65,       95,     0,       0,     0,          0,       0,      0,   0,       0 }, /* B_COPTERMGUN     */
 /* CARRIERMISSILES  */{   0,    0,     0,    0,       0,       0,        0,   0,         0,       0,          0,        0,         0,     100,    100,     100,            0,      115,      115,   120,       0,     0,          0,       0,      0,   0,       0 }, /* CARRIERMISSILES  */

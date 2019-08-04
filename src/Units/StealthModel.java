@@ -3,7 +3,7 @@ package Units;
 import Engine.UnitActionType;
 import Units.MoveTypes.Flight;
 import Units.MoveTypes.MoveType;
-import Units.Weapons.StealthPews;
+import Units.Weapons.StealthShots;
 import Units.Weapons.WeaponModel;
 
 public class StealthModel extends UnitModel
@@ -16,7 +16,7 @@ public class StealthModel extends UnitModel
 
   private static final MoveType moveType = new Flight();
   private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
-  private static final WeaponModel[] weapons = { new StealthPews() };
+  private static final WeaponModel[] weapons = { new StealthShots() };
 
   public StealthModel()
   {
