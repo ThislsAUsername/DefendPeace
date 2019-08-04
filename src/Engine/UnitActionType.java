@@ -326,7 +326,7 @@ public abstract class UnitActionType implements Serializable
           if( other != null && other.CO == actor.CO && other != actor &&
               (!other.isFullySupplied() || other.getPreciseHP() < other.model.maxHP) )
           {
-            repairOptions.add(new GameAction.RepairUnitAction(new XYCoord(actor.x, actor.y), movePath, loc));
+            repairOptions.add(new GameAction.RepairUnitAction(actor, movePath, other));
           }
         }
 

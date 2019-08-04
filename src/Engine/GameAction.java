@@ -837,17 +837,19 @@ public interface GameAction
     private XYCoord startCoord;
     private XYCoord moveCoord;
     private XYCoord repairCoord;
+    Unit benefactor;
+    Unit beneficiary;
 
-    public RepairUnitAction(XYCoord startLoc, Path path, int targetX, int targetY)
+    public RepairUnitAction(Unit actor, Path path, Unit target)
     {
-      this(startLoc, path, new XYCoord(targetX, targetY));
-    }
-
-    public RepairUnitAction(XYCoord startLoc, Path path, XYCoord repairLoc)
-    {
+      benefactor = actor;
+      beneficiary = target;
       movePath = path;
-      startCoord = startLoc;
-      repairCoord = repairLoc;
+      if( benefactor != null && null != beneficiary )
+      {
+        startCoord = new XYCoord(actor.x, actor.y);
+        repairCoord = new XYCoord(target.x, target.y);
+      }
       if( null != path && (path.getEnd() != null) )
       {
         moveCoord = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
@@ -864,16 +866,12 @@ public interface GameAction
       GameEventQueue repairEvents = new GameEventQueue();
 
       boolean isValid = true;
-      Unit benefactor = null;
-      Unit beneficiary = null;
 
       if( (null != gameMap) && (null != startCoord) && (null != repairCoord) &&
           gameMap.isLocationValid(startCoord) && gameMap.isLocationValid(repairCoord) )
       {
-        benefactor = gameMap.getLocation(startCoord).getResident();
-        beneficiary = gameMap.getLocation(repairCoord).getResident();
         isValid &= benefactor != null && !benefactor.isTurnOver;
-        isValid &= (null != beneficiary) && !benefactor.CO.isEnemy(beneficiary.CO);
+        isValid &= isValid && null != beneficiary && !benefactor.CO.isEnemy(beneficiary.CO);
         isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       }
       else
@@ -912,8 +910,8 @@ public interface GameAction
     @Override
     public String toString()
     {
-      return String.format("[Heal at %s after moving to %s]",
-          repairCoord, moveCoord );
+      return String.format("[Move %s to %s and heal %s]",
+          benefactor.toStringWithLocation(), moveCoord, beneficiary.toStringWithLocation());
     }
 
     @Override
