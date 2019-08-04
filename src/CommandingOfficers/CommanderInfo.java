@@ -3,6 +3,8 @@ package CommandingOfficers;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import Engine.GameScenario;
+
 public abstract class CommanderInfo implements Serializable
 {
   public final String name;
@@ -14,7 +16,7 @@ public abstract class CommanderInfo implements Serializable
     infoPages = new ArrayList<InfoPage>();
   }
 
-  public abstract Commander create();
+  public abstract Commander create(GameScenario.GameRules rules);
 
   public static class InfoPage implements Serializable
   {

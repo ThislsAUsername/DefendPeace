@@ -1,5 +1,6 @@
 package CommandingOfficers;
 import CommandingOfficers.Modifiers.COModifier;
+import Engine.GameScenario;
 import Engine.XYCoord;
 import Terrain.Location;
 import Terrain.MapMaster;
@@ -42,23 +43,21 @@ public class Bear_Bull extends Commander
           "Also grants a 20 percent discount this turn.\n"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Bear_Bull();
+      return new Bear_Bull(rules);
     }
   }
-  
-  private final int incomeBase;
+
   public boolean isBull;
 
   private final double BEAR_MOD = 0.9;
   private final double BULL_MOD = 1.2;
 
-  public Bear_Bull()
+  public Bear_Bull(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
-    incomeBase = incomePerCity;
     // we start in Bear mode, so swap to it at the start
     isBull = true;
     swapD2Ds(true);
@@ -73,7 +72,7 @@ public class Bear_Bull extends Commander
     {
       isBull = false;
       if( setIncome )
-        incomePerCity = (int) (incomeBase * BEAR_MOD);
+        incomeAdjustment = (int) (gameRules.incomePerCity * BEAR_MOD) - gameRules.incomePerCity;
       for( UnitModel um : unitModels.values() )
       {
         um.COcost = BEAR_MOD;
@@ -83,7 +82,7 @@ public class Bear_Bull extends Commander
     {
       isBull = true;
       if( setIncome )
-        incomePerCity = (int) (incomeBase * BULL_MOD);
+        incomeAdjustment = (int) (gameRules.incomePerCity * BULL_MOD) - gameRules.incomePerCity;
       for( UnitModel um : unitModels.values() )
       {
         um.COcost = BULL_MOD;

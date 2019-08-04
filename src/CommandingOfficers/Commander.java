@@ -16,7 +16,7 @@ import AI.AILibrary;
 import AI.AIMaker;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
-import Engine.UnitActionType;
+import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.Combat.BattleInstance.CombatContext;
@@ -56,6 +56,7 @@ public class Commander extends GameEventListener implements Serializable
   private static final long serialVersionUID = -6740892333060450105L;
   
   public final CommanderInfo coInfo;
+  public final GameScenario.GameRules gameRules;
   public GameMap myView;
   public ArrayList<Unit> units;
   public Map<UnitEnum, UnitModel> unitModels = new HashMap<UnitEnum, UnitModel>();
@@ -64,11 +65,10 @@ public class Commander extends GameEventListener implements Serializable
   public ArrayList<COModifier> modifiers;
   public Color myColor;
   public Faction faction;
-  public static final int DEFAULTSTARTINGMONEY = 0;
   public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
   public static final int CHARGERATIO_HP = 100; // Funds value of 1 HP damage dealt, for the purpose of power charge
   public int money = 0;
-  public int incomePerCity = 1000;
+  public int incomeAdjustment = 0; // Commander subclasses can increase/decrease income if needed.
   public int team = -1;
   public boolean isDefeated = false;
   public XYCoord HQLocation = null;
@@ -81,9 +81,10 @@ public class Commander extends GameEventListener implements Serializable
   //   so may as well not require them to care about serializing their contents.
   private transient AIController aiController = null;
 
-  public Commander(CommanderInfo info)
+  public Commander(CommanderInfo info, GameScenario.GameRules rules)
   {
     coInfo = info;
+    gameRules = rules;
 
     // TODO We probably don't want to hard-code the buildable units.
     ArrayList<UnitModel> factoryModels = new ArrayList<UnitModel>();
@@ -135,7 +136,6 @@ public class Commander extends GameEventListener implements Serializable
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
     ownedProperties = new HashSet<XYCoord>();
-    money = DEFAULTSTARTINGMONEY;
 
     myAbilities = new ArrayList<CommanderAbility>();
   }
@@ -183,20 +183,9 @@ public class Commander extends GameEventListener implements Serializable
   {
     myView.resetFog();
     myActiveAbilityName = "";
+
     // Accrue income for each city under your control.
-    int turnIncome = 0;
-    for( int w = 0; w < map.mapWidth; ++w )
-    {
-      for( int h = 0; h < map.mapHeight; ++h )
-      {
-        Location loc = map.getLocation(w, h);
-        if( loc.isProfitable() && loc.getOwner() == this )
-        {
-          turnIncome += incomePerCity;
-        }
-      }
-    }
-    money += turnIncome;
+    money += getIncomePerTurn();
 
     // Un-apply any modifiers that were activated last turn.
     // TODO: If/when we have modifiers that last multiple turns, figure out how to handle them.
@@ -427,5 +416,20 @@ public class Commander extends GameEventListener implements Serializable
 
     // use our AI index to get back where we were before
     aiController = AILibrary.getAIList().get(stream.readInt()).create(this);
+  }
+
+  /**
+   * Count up the number of profitable properties we own, multiply by the game's income-per-city
+   * setting, and tack on any CO-specific income modifier, then return the result.
+   */
+  public int getIncomePerTurn()
+  {
+    int count = 0;
+    for( XYCoord coord : ownedProperties )
+    {
+      // Re-check ownership just because.
+      if( myView.getLocation(coord).getOwner() == this && myView.getLocation(coord).isProfitable() ) ++count;
+    }
+    return count * (gameRules.incomePerCity + incomeAdjustment);
   }
 }

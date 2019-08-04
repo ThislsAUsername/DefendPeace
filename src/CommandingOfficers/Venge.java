@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COModifier;
+import Engine.GameScenario;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.Combat.BattleInstance.CombatContext;
 import Engine.Combat.BattleSummary;
@@ -45,9 +46,9 @@ public class Venge extends Commander
           "Units now counterattack before they are hit.\n"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Venge();
+      return new Venge(rules);
     }
   }
 
@@ -58,9 +59,9 @@ public class Venge extends Commander
   public boolean counterAtFullPower = false;
   public boolean counterFirst = false;
 
-  public Venge()
+  public Venge(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     addCommanderAbility(new IronWill(this));
     addCommanderAbility(new Retribution(this));

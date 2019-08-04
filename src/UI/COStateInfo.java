@@ -28,7 +28,7 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
         Location loc = map.getLocation(w, h);
         if( loc.isProfitable() && loc.getOwner() == viewed )
         {
-          income += viewed.incomePerCity;
+          income += viewed.gameRules.incomePerCity + viewed.incomeAdjustment;
         }
         Unit resident = loc.getResident();
         if( null != resident && resident.CO == viewed )

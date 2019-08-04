@@ -2,11 +2,12 @@ package Test;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
+import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.MapMaster;
 import Terrain.MapInfo;
+import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel.UnitEnum;
@@ -19,7 +20,8 @@ public class TestHealing extends TestCase
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
   {
-    testCo1 = new Patch();
+    GameScenario scn = new GameScenario();
+    testCo1 = new Patch(scn.rules);
     Commander[] cos = { testCo1 };
     // Create a small map with a city to provide healing.
     TerrainType[][] testLoc = {
