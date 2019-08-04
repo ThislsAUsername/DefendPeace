@@ -4,6 +4,7 @@ import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
+import Engine.GameScenario;
 import Engine.Combat.BattleInstance.BattleParams;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
@@ -53,28 +54,28 @@ public class Strong extends Commander
           "Allows Strong to build footsoldiers on cities, industries, and the HQ\n"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Strong();
+      return new Strong(rules);
     }
   }
 
-  public Strong()
+  public Strong(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     // Strong allows infantry to be built from any production building.
     UnitModel mechModel = getUnitModel(UnitModel.UnitEnum.MECH);
     UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, mechModel);
     upm.addProductionPair(TerrainType.SEAPORT, mechModel);
-    upm.apply(this); // Passive ability, so don't add it to the COModifier list; just apply it and forget it.
+    upm.applyChanges(this); // Passive ability, so don't add it to the COModifier list; just apply it and forget it.
 
     // Give Strong's footies a base damage buff. This COModifier is not added
     // to the modifiers collection so it will not be reverted.
     CODamageModifier strongMod = new CODamageModifier(15); // Give us a nice base power boost.
     strongMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.INFANTRY));
     strongMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.MECH));
-    strongMod.apply(this);
+    strongMod.applyChanges(this);
 
     // Give every transport type extra move range and an extra cargo slot.
     for( UnitModel.UnitEnum umEnum : UnitModel.UnitEnum.values() )

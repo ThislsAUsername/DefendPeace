@@ -1,25 +1,16 @@
 package Test;
 
-import java.util.ArrayList;
-
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
-import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.COMovementModifier;
-import CommandingOfficers.Modifiers.UnitProductionModifier;
-import CommandingOfficers.Modifiers.UnitRemodelModifier;
 import Engine.GameAction;
+import Engine.GameScenario;
 import Engine.Path;
 import Engine.Utils;
-import Engine.Combat.BattleSummary;
-import Engine.Combat.CombatEngine;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
-import Terrain.TerrainType;
 import Units.Unit;
-import Units.UnitModel;
 import Units.UnitModel.UnitEnum;
 
 public class TestVisionMechanics extends TestCase
@@ -31,8 +22,9 @@ public class TestVisionMechanics extends TestCase
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
   {
-    strong = new Strong();
-    patch = new Patch();
+    GameScenario scn = new GameScenario();
+    strong = new Strong(scn.rules);
+    patch = new Patch(scn.rules);
     Commander[] cos = { strong, patch };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));

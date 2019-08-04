@@ -58,7 +58,6 @@ public class WeaponModel implements Serializable
 
   // format is [attacker][defender]
   private static int[][] damageChart = {
-// defenders:      INFANTRY, MECH, RECON, TANK, MD_TANK, NEOTANK,           APC, ARTILLERY, ROCKETS,             ANTI_AIR, MOBILESAM, FIGHTER, BOMBER,                        B_COPTER, T_COPTER,                        BATTLESHIP, CRUISER, LANDER, SUB, SUB_SUB
 // defenders:      INFANTRY, MECH, RECON, TANK, MD_TANK, NEOTANK, MEGATANK, APC, ARTILLERY, ROCKETS, PIPERUNNER, ANTI_AIR, MOBILESAM, FIGHTER, BOMBER, STEALTH, STEALTH_HIDE, B_COPTER, T_COPTER, BBOMB, CARRIER, BBOAT, BATTLESHIP, CRUISER, LANDER, SUB, SUB_SUB
 /* INFANTRYMGUN     */{  55,   45,    12,    5,       1,       1,        1,  14,        15,      25,          5,        5,        25,       0,      0,       0,            0,        7,       30,     0,       0,     0,          0,       0,      0,   0,       0 }, /* INFANTRYMGUN     */
 /* MECHZOOKA        */{   0,    0,    85,   55,      15,      15,        5,  75,        70,      85,         55,       65,        85,       0,      0,       0,            0,        0,        0,     0,       0,     0,          0,       0,      0,   0,       0 }, /* MECHZOOKA        */

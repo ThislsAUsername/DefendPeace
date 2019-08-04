@@ -34,7 +34,7 @@ public class UnitProductionModifier implements COModifier
   }
 
   @Override
-  public void apply(Commander commander)
+  public void applyChanges(Commander commander)
   {
     for(TerrainType tt : productionMods.keySet() )
     {
@@ -66,7 +66,7 @@ public class UnitProductionModifier implements COModifier
   }
 
   @Override
-  public void revert(Commander commander)
+  public void revertChanges(Commander commander)
   {
     for( TerrainType tt : productionMods.keySet() )
     {

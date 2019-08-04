@@ -102,7 +102,6 @@ public interface GameAction
         isValid &= (gameMap.getLocation(attackLocation).getResident() == defender);
         isValid &= (null != defender) && attacker.canAttack(defender.model, attackRange, moved);
         isValid &= (null != defender) && attacker.CO.isEnemy(defender.CO);
-        isValid &= (null == moveLocation.getResident()) || (attacker == moveLocation.getResident());
       }
 
       if( isValid )

@@ -34,7 +34,7 @@ public class MapSelectMenuArtist
     }
     else
     { // Pass this along to the next Artist.
-      PlayerSetupArtist.draw(g, selectedMapInfo, gameSetup.getSubController());
+      GameOptionSetupArtist.draw(g, selectedMapInfo, gameSetup.getSubController());
     }
   }
 

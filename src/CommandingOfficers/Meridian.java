@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
+import Engine.GameScenario;
 import Engine.UnitActionType;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEventQueue;
@@ -43,9 +44,9 @@ public class Meridian extends Commander
           "@KvoidDragon#6786 Discord ID 542848671809798166"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Meridian();
+      return new Meridian(rules);
     }
   }
 
@@ -54,9 +55,9 @@ public class Meridian extends Commander
   private ArrayList<Unit> toBeNerfed = new ArrayList<Unit>();
   private static final int POST_REFRESH_STAT_ADJUSTMENT = -25;
 
-  public Meridian()
+  public Meridian(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     // Meridian's tanks and arty cost the same
     UnitModel tank = getUnitModel(UnitModel.UnitEnum.TANK);

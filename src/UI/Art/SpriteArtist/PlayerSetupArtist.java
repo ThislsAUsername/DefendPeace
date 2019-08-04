@@ -1,6 +1,5 @@
 package UI.Art.SpriteArtist;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -17,10 +16,6 @@ import Units.UnitModel;
 
 public class PlayerSetupArtist
 {
-  private static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
-  private static final Color MENUBGCOLOR = new Color(234, 204, 154);
-  private static final Color MENUHIGHLIGHTCOLOR = new Color(246, 234, 210);
-
   private static SlidingValue animHighlightedPlayer = new SlidingValue(0);
   private static SpriteCursor spriteCursor = new SpriteCursor();
 
@@ -227,12 +222,12 @@ public class PlayerSetupArtist
     {
       myImage = SpriteLibrary.createDefaultBlankSprite( PANEL_WIDTH, PANEL_HEIGHT );
       Graphics g = myImage.getGraphics();
-      g.setColor(MENUFRAMECOLOR);
+      g.setColor(SpriteUIUtils.MENUFRAMECOLOR);
       g.fillRect(0, 0, myImage.getWidth(), myImage.getHeight());
 
       // Create the two panes that don't ever change.
-      teamLabel = new SpriteUIUtils.ImageFrame(65, 12, 28, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteUIUtils.getTextAsImage("TEAM", true));
-      aiLabel = new SpriteUIUtils.ImageFrame(94, 12, 54, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteUIUtils.getTextAsImage("CONTROL", true));
+      teamLabel = new SpriteUIUtils.ImageFrame(65, 12, 28, 10, SpriteUIUtils.MENUHIGHLIGHTCOLOR, SpriteUIUtils.MENUBGCOLOR, false, SpriteUIUtils.getTextAsImage("TEAM", true));
+      aiLabel = new SpriteUIUtils.ImageFrame(94, 12, 54, 10, SpriteUIUtils.MENUHIGHLIGHTCOLOR, SpriteUIUtils.MENUBGCOLOR, false, SpriteUIUtils.getTextAsImage("CONTROL", true));
       teamLabel.render(g);
       aiLabel.render(g);
 
@@ -260,7 +255,7 @@ public class PlayerSetupArtist
         StringBuffer coStrBuf = new StringBuffer(commanderName);
         coStrBuf.append("-").append(UIUtils.getCanonicalFactionName(colorName, factionName));
 
-        descriptionPane = new SpriteUIUtils.ImageFrame(1, 1, PANEL_WIDTH - 2, 10, MENUHIGHLIGHTCOLOR, MENUBGCOLOR, false, SpriteUIUtils.getTextAsImage(coStrBuf.toString(), true));
+        descriptionPane = new SpriteUIUtils.ImageFrame(1, 1, PANEL_WIDTH - 2, 10, SpriteUIUtils.MENUHIGHLIGHTCOLOR, SpriteUIUtils.MENUBGCOLOR, false, SpriteUIUtils.getTextAsImage(coStrBuf.toString(), true));
         descriptionPane.render(g);
       }
       if( cmdrChanged || colorChanged )
@@ -273,20 +268,20 @@ public class PlayerSetupArtist
       {
         UnitSpriteSet inf = SpriteLibrary.getMapUnitSpriteSet(UnitModel.UnitEnum.INFANTRY, info.getCurrentFaction(), info.getCurrentColor());
         BufferedImage infSprite = inf.sprites[inf.ACTION_IDLE].getFrame(0);
-        unitPane = new SpriteUIUtils.ImageFrame(portraitPx + 4, 12, 28, portraitPx + 2, MENUBGCOLOR, MENUHIGHLIGHTCOLOR, true, infSprite);
+        unitPane = new SpriteUIUtils.ImageFrame(portraitPx + 4, 12, 28, portraitPx + 2, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUHIGHLIGHTCOLOR, true, infSprite);
         unitPane.render(g);
       }
       if( teamChanged )
       {
         teamNumber = info.getCurrentTeam();
-        teamPane = new SpriteUIUtils.ImageFrame(65, 23, 28, 23, MENUBGCOLOR, MENUHIGHLIGHTCOLOR, true,
+        teamPane = new SpriteUIUtils.ImageFrame(65, 23, 28, 23, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUHIGHLIGHTCOLOR, true,
             SpriteLibrary.getMapUnitHPSprites().getFrame(info.getCurrentTeam()));
         teamPane.render(g);
       }
       if( aiChanged )
       {
         aiName = info.getCurrentAI().getName();
-        aiPane = new SpriteUIUtils.ImageFrame(94, 23, 54, 23, MENUBGCOLOR, MENUHIGHLIGHTCOLOR, true, SpriteUIUtils.getTextAsImage(info.getCurrentAI().getName(), true));
+        aiPane = new SpriteUIUtils.ImageFrame(94, 23, 54, 23, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUHIGHLIGHTCOLOR, true, SpriteUIUtils.getTextAsImage(info.getCurrentAI().getName(), true));
         aiPane.render(g);
       }
 

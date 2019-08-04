@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import AI.AIMaker;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
+import Engine.GameScenario;
 import UI.UIUtils.Faction;
 
 /**
@@ -38,9 +39,9 @@ public class PlayerSetupInfo
     availableAis = AIList.toArray(new AIMaker[0]);
   }
 
-  public Commander makeCommander()
+  public Commander makeCommander(GameScenario.GameRules rules)
   {
-    Commander co = availableCommanders[currentCo].create();
+    Commander co = availableCommanders[currentCo].create(rules);
 
     co.myColor = availableColors[currentColor];
     co.faction = availableFactions[currentFaction];

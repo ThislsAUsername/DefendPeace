@@ -2,10 +2,11 @@ package CommandingOfficers;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
+import Engine.GameScenario;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
-import Terrain.MapMaster;
 import Terrain.Location;
+import Terrain.MapMaster;
 import Units.Unit;
 
 public class Patch extends Commander
@@ -33,9 +34,9 @@ public class Patch extends Commander
           "Gives "+PILLAGE_INCOME+"x the value of any funds damage Patch deals.\n"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Patch();
+      return new Patch(rules);
     }
   }
 
@@ -52,9 +53,9 @@ public class Patch extends Commander
 
   private LootAbility myLootAbility = null;
 
-  public Patch()
+  public Patch(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     addCommanderAbility(new PatchAbility(this, PLUNDER_NAME, PLUNDER_COST, PLUNDER_INCOME, PLUNDER_ATTACK_BUFF));
     addCommanderAbility(new PatchAbility(this, PILLAGE_NAME, PILLAGE_COST, PILLAGE_INCOME, PILLAGE_ATTACK_BUFF));
@@ -86,7 +87,7 @@ public class Patch extends Commander
       if( unit.CO == myCommander && location.getOwner() == myCommander && location.isProfitable() )
       {
         // We just successfully captured a property. Loot the place!
-        myCommander.money += myCommander.incomePerCity;
+        myCommander.money += myCommander.gameRules.incomePerCity;
       }
     }
   }
@@ -123,13 +124,13 @@ public class Patch extends Commander
     }
 
     @Override // COModifier interface.
-    public void apply(Commander commander)
+    public void applyChanges(Commander commander)
     {
       // No special action required.
     }
 
     @Override
-    public void revert(Commander commander)
+    public void revertChanges(Commander commander)
     {
       // This will be called when the Commander removes this COModifier. It will remove the damage
       // modifier we added as well, so we just need to turn off the the damage-to-income listener.
