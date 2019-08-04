@@ -398,6 +398,7 @@ public abstract class UnitActionType implements Serializable
   public static class Explode extends UnitActionType
   {
     public final int damage, range;
+    public final boolean isLethal = false;
     
     public Explode(int pDamage, int pRange)
     {

@@ -19,7 +19,7 @@ public class MassDamageEvent implements GameEvent
   // Records how many HP each victim lost; doubles as our victim storage area
   private Map<Unit, Integer> victims = new HashMap<Unit, Integer>();
   public final int damage;
-  public final boolean lethal;
+  public final int minResultHP;
 
   public MassDamageEvent(Collection<Unit> pVictims, int pDamage, boolean isLethal)
   {
@@ -28,7 +28,10 @@ public class MassDamageEvent implements GameEvent
       victims.put(victim, 0);
     }
     damage = pDamage;
-    lethal = isLethal;
+    if( isLethal )
+      minResultHP = 0;
+    else
+      minResultHP = 1;
   }
 
   @Override
@@ -49,22 +52,8 @@ public class MassDamageEvent implements GameEvent
     for (Unit victim : victims.keySet())
     {
       int starting = victim.getHP();
-      if( lethal && damage > starting )
-      {
-        victim.damageHP(-damage);
-        victims.put(victim, starting);
-
-        // Guess he's not gonna make it.
-        // TODO: Is there a better way to do this?
-        UnitDieEvent event = new UnitDieEvent(victim);
-        event.performEvent(gameMap);
-        GameEventListener.publishEvent(event);
-      }
-      else
-      {
-        victim.alterHP(-damage);
-        victims.put(victim, starting - victim.getHP());
-      }
+      victim.alterHP(-damage);
+      victims.put(victim, Math.min(damage, starting - minResultHP));
     }
   }
 

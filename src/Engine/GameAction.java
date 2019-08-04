@@ -13,6 +13,7 @@ import Engine.GameEvents.CommanderAbilityEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.LoadEvent;
@@ -1029,6 +1030,7 @@ public interface GameAction
       actor = unit;
     }
 
+    @SuppressWarnings("unused") // Unused code has been tested and may be useful at some point
     @Override
     public GameEventQueue getEvents(MapMaster gameMap)
     {
@@ -1039,18 +1041,36 @@ public interface GameAction
         GameEvent moveEvent = explodeEvents.peek();
         if (moveEvent.getEndPoint().equals(getMoveLocation())) // make sure we shouldn't be pre-empted
         {
+          HashMap<Commander, Integer> killCounts = new HashMap<Commander, Integer>(); // Track kills for defeat checks
           explodeEvents.add(new UnitDieEvent(actor)); // If you explode, you die
+          killCounts.put(actor.CO, 1);
 
           HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
           for (XYCoord coord : Utils.findLocationsInRange(gameMap, getMoveLocation(), type.range))
           {
             Unit victim = gameMap.getLocation(coord).getResident();
-            if (null != victim)
+            if (null != victim && victim != actor) // Since you're already dead when you explode, you can't get hurt in the explosion
+            {
               victims.add(victim);
+              if( type.isLethal && type.damage >= victim.getHP() )
+              {
+                // Guess he's not gonna make it.
+                explodeEvents.add(new UnitDieEvent(victim));
+                if( killCounts.containsKey(victim.CO) )
+                  killCounts.put(victim.CO, killCounts.get(victim.CO) + 1);
+                else
+                  killCounts.put(victim.CO, 1);
+              }
+            }
           }
-          victims.remove(actor); // Since you're already dead when you explode, you can't get hurt in the explosion
 
-          explodeEvents.add(new MassDamageEvent(victims, type.damage, false));
+          explodeEvents.addFirst(new MassDamageEvent(victims, type.damage, type.isLethal));
+          for( Commander co : killCounts.keySet() )
+            if( killCounts.get(co) >= co.units.size() )
+            {
+              // CO is out of units. Too bad.
+              explodeEvents.add(new CommanderDefeatEvent(co));
+            }
         }
       }
       return explodeEvents;
@@ -1087,6 +1107,12 @@ public interface GameAction
     {
       GameEventQueue eventSequence = new GameEventQueue();
       eventSequence.add(new UnitDieEvent(actor));
+      // The unit died; check if the Commander is defeated.
+      if( actor.CO.units.size() == 1 )
+      {
+        // CO is out of units. Too bad.
+        eventSequence.add(new CommanderDefeatEvent(actor.CO));
+      }
       return eventSequence;
     }
 
