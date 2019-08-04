@@ -1,14 +1,14 @@
 package UI;
 
-import Terrain.MapLibrary;
-import UI.InputHandler.InputAction;
 import Engine.IController;
 import Engine.OptionSelector;
+import Terrain.MapLibrary;
+import UI.InputHandler.InputAction;
 
 public class MapSelectController implements IController
 {
   private OptionSelector optionSelector = new OptionSelector( MapLibrary.getMapList().size() );
-  private PlayerSetupController coSelectMenu;
+  private GameOptionSetupController gameOptionsMenu;
 
   private boolean isInSubmenu = false;
 
@@ -22,9 +22,9 @@ public class MapSelectController implements IController
     return isInSubmenu;
   }
 
-  public PlayerSetupController getSubController()
+  public GameOptionSetupController getSubController()
   {
-    return coSelectMenu;
+    return gameOptionsMenu;
   }
 
   @Override
@@ -34,7 +34,7 @@ public class MapSelectController implements IController
 
     if(isInSubmenu)
     {
-      exitMenu = coSelectMenu.handleInput(action);
+      exitMenu = gameOptionsMenu.handleInput(action);
       if(exitMenu)
       {
         isInSubmenu = false;
@@ -68,7 +68,7 @@ public class MapSelectController implements IController
         // Create the GameBuilder with the selected map, and transition to the CO select screen.
         // If we go forward/back a few times, the old copies of these get replaced and garbage-collected.
         GameBuilder gameBuilder = new GameBuilder( MapLibrary.getMapList().get( optionSelector.getSelectionNormalized() ) );
-        coSelectMenu = new PlayerSetupController( gameBuilder );
+        gameOptionsMenu = new GameOptionSetupController( gameBuilder );
         isInSubmenu = true;
         break;
       case BACK:

@@ -2,12 +2,13 @@ package Test;
 
 import java.util.ArrayList;
 
+import CommandingOfficers.Ave;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
-import CommandingOfficers.Ave;
 import CommandingOfficers.Patch;
 import Engine.GameAction;
 import Engine.GameInstance;
+import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEvent;
@@ -30,8 +31,9 @@ public class TestCommanderAve extends TestCase
 
   private void setupTest()
   {
-    Ave = new Ave();
-    Patch = new Patch();
+    GameScenario scn = new GameScenario();
+    Ave = new Ave(scn.rules);
+    Patch = new Patch(scn.rules);
     Commander[] cos = { Ave, Patch };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));

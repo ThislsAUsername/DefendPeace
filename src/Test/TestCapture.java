@@ -4,6 +4,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
 import Engine.GameAction;
+import Engine.GameScenario;
 import Engine.Utils;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEvent;
@@ -25,8 +26,9 @@ public class TestCapture extends TestCase
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
   {
-    testCo1 = new Strong();
-    testCo2 = new Patch();
+    GameScenario scenario = new GameScenario();
+    testCo1 = new Strong(scenario.rules);
+    testCo2 = new Patch(scenario.rules);
     Commander[] cos = { testCo1, testCo2 };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));

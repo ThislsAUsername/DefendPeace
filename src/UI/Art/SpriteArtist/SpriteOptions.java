@@ -4,9 +4,13 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import Engine.Driver;
 import Engine.OptionSelector;
+import UI.GameOption;
+import UI.GameOptionBool;
+import UI.GameOptionInt;
 import UI.InputHandler;
 import UI.SlidingValue;
 import Units.Weapons.Weapon;
@@ -18,20 +22,16 @@ public class SpriteOptions
   private static final int WINDOWHEIGHT_DEFAULT = 160;
   private static final int DRAWSCALE_DEFAULT = 2;
   private static int drawScale = DRAWSCALE_DEFAULT;
+  private static boolean animationsOn = true;
 
   private static Dimension dimensions = new Dimension(WINDOWWIDTH_DEFAULT * drawScale, WINDOWHEIGHT_DEFAULT * drawScale);
 
   // Set up configurable options.
-  private static GraphicsOption drawScaleOption = new GraphicsOption("Draw Scale", 1, 6, DRAWSCALE_DEFAULT);
-  private static GraphicsOption dummyOption = new GraphicsOption("Dummy option");
-  private static GraphicsOption damageSystemOption = new GraphicsOption("Damage System", Weapon.stratDescriptions, 0);
-  private static GraphicsOption[] allOptions = { drawScaleOption, dummyOption, damageSystemOption };
+  private static GameOption<Integer> drawScaleOption = new GameOptionInt("Draw Scale", 1, 6, 1, DRAWSCALE_DEFAULT);
+  private static GameOptionBool animationsOption = new GameOptionBool("Animations", true);
+  private static GameOption[] allOptions = { drawScaleOption, animationsOption };
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
   private static SlidingValue animHighlightedOption;
-
-  private static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
-  private static final Color MENUBGCOLOR = new Color(234, 204, 154);
-  private static final Color MENUHIGHLIGHTCOLOR = new Color(246, 234, 210);
 
   private static boolean initialized = false;
   private static int letterWidth = SpriteLibrary.getLettersUppercase().getFrame(0).getWidth();
@@ -59,6 +59,11 @@ public class SpriteOptions
     return drawScale;
   }
 
+  public static boolean getAnimationsEnabled()
+  {
+    return animationsOn;
+  }
+
   private static void initialize()
   {
     int maxNameLen = 0;
@@ -74,21 +79,21 @@ public class SpriteOptions
     // Calculate the size of the longest item panel needed.
     for( int i = 0; i < allOptions.length; ++i )
     {
-      String[] allItems = allOptions[i].optionList;
-      for( int j = 0; j < allItems.length; ++j )
+      ArrayList allItems = allOptions[i].optionList;
+      for( int j = 0; j < allItems.size(); ++j )
       {
-        if( allItems[j].length() > maxItemLen )
+        if( allItems.get(j).toString().length() > maxItemLen )
         {
-          maxItemLen = allItems[j].length();
+          maxItemLen = allItems.get(j).toString().length();
         }
       }
     }
 
     // This panel will hold the name of the option.
-    optionNamePanel = generateOptionPanel(maxNameLen, MENUBGCOLOR);
+    optionNamePanel = generateOptionPanel(maxNameLen, SpriteUIUtils.MENUBGCOLOR);
     // This panel will hold the current setting for the option.
-    optionSettingPanel = generateOptionPanel(maxItemLen, MENUBGCOLOR);
-    optionSettingPanelChanged = generateOptionPanel(maxItemLen, MENUHIGHLIGHTCOLOR);
+    optionSettingPanel = generateOptionPanel(maxItemLen, SpriteUIUtils.MENUBGCOLOR);
+    optionSettingPanelChanged = generateOptionPanel(maxItemLen, SpriteUIUtils.MENUHIGHLIGHTCOLOR);
     int itemWidth = optionSettingPanel.getWidth()+ letterWidth * 2; // dual purpose buffer, also used for the switching arrows
 
     graphicsOptionWidth = optionNamePanel.getWidth() + itemWidth + letterWidth; // Plus some space for a buffer between panels.
@@ -102,7 +107,7 @@ public class SpriteOptions
     // Build an image with the selection arrows.
     optionArrows = new BufferedImage(itemWidth+7, 10, BufferedImage.TYPE_INT_ARGB);
     Graphics ag = optionArrows.getGraphics();
-    ag.setColor(MENUFRAMECOLOR);
+    ag.setColor(SpriteUIUtils.MENUFRAMECOLOR);
     ag.fillPolygon(lXPoints, lYPoints, lXPoints.length);
     ag.fillPolygon(rXPoints, rYPoints, rXPoints.length);
 
@@ -115,7 +120,7 @@ public class SpriteOptions
    * Build an image for a floating panel to hold the specified text length, and return it.
    * @param length The max text length intended to be shown on this panel.
    */
-  private static BufferedImage generateOptionPanel(int length, Color fgColor)
+  static BufferedImage generateOptionPanel(int length, Color fgColor)
   {
     int w = (2 * textBuffer) + (letterWidth * length);
     int h = (textBuffer) + (SpriteLibrary.getLettersUppercase().getFrame(0).getHeight());
@@ -127,7 +132,7 @@ public class SpriteOptions
     Graphics g = panel.getGraphics();
 
     // Draw the shadow.
-    g.setColor(MENUFRAMECOLOR);
+    g.setColor(SpriteUIUtils.MENUFRAMECOLOR);
     g.fillRect(sw, sh, w, h);
 
     // Draw the writing surface.
@@ -173,15 +178,19 @@ public class SpriteOptions
    */
   private static void applyConfigOptions()
   {
-    drawScale = drawScaleOption.getSelectionNormalized();
-    dimensions.setSize(WINDOWWIDTH_DEFAULT * drawScale, WINDOWHEIGHT_DEFAULT * drawScale);
-    Weapon.currentStrategy = damageSystemOption.getSelectionNormalized();
-    Driver.getInstance().updateView(); // Tell the driver to look at these settings again.
-
-    for( GraphicsOption go : allOptions )
+    // Persist the values in the GameOption objects.
+    for( GameOption go : allOptions )
     {
       go.storeCurrentValue();
     }
+
+    // Store the options locally.
+    drawScale = drawScaleOption.getSelectedObject();
+    animationsOn = animationsOption.getSelectedObject();
+
+    // Apply effects.
+    dimensions.setSize(WINDOWWIDTH_DEFAULT * drawScale, WINDOWHEIGHT_DEFAULT * drawScale);
+    Driver.getInstance().updateView(); // Tell the driver to look at these settings again.
   }
 
   /**
@@ -189,7 +198,7 @@ public class SpriteOptions
    */
   private static void resetConfigOptions()
   {
-    for( GraphicsOption go : allOptions )
+    for( GameOption go : allOptions )
     {
       go.loseChanges();
     }
@@ -226,7 +235,7 @@ public class SpriteOptions
     // Loop through and draw everything.
     for( int i = 0; i < allOptions.length; ++i, yDraw += ySpacing )
     {
-      drawGraphicsOption(optionsGraphics, xDraw, yDraw, allOptions[i]);
+      drawGameOption(optionsGraphics, xDraw, yDraw, allOptions[i]);
     }
 
     // Draw the arrows around the highlighted option, animating movement when switching.
@@ -239,7 +248,7 @@ public class SpriteOptions
     g.drawImage(optionsImage, 0, 0, optionsImage.getWidth()*drawScale, optionsImage.getHeight()*drawScale, null);
   }
 
-  private static void drawGraphicsOption(Graphics g, int x, int y, GraphicsOption opt)
+  static void drawGameOption(Graphics g, int x, int y, GameOption opt)
   {
     int drawBuffer = textBuffer;
 
@@ -251,70 +260,6 @@ public class SpriteOptions
     x = x + (optionNamePanel.getWidth() + (3 * letterWidth));
     BufferedImage settingPanel = (opt.isChanged()) ? optionSettingPanelChanged : optionSettingPanel;
     g.drawImage(settingPanel, x, y, settingPanel.getWidth(), settingPanel.getHeight(), null);
-    SpriteUIUtils.drawText(g, opt.getSettingValueText(), x + drawBuffer, y + drawBuffer);
-  }
-
-  private static class GraphicsOption extends OptionSelector
-  {
-    public final String optionName;
-    public final int minOption;
-    public final String[] optionList;
-    private int storedValue = 0;
-
-    public GraphicsOption(String name, String[] Options, int defaultValue)
-    {
-      super(Options.length);
-      minOption = 0;
-      optionName = name;
-      setSelectedOption(defaultValue);
-      storedValue = defaultValue;
-      optionList = Options;
-    }
-    public GraphicsOption(String name, int min, int max, int defaultValue)
-    {
-      super(max - min);
-      minOption = min;
-      optionName = name;
-      setSelectedOption(defaultValue);
-      storedValue = defaultValue;
-      optionList = new String[1 + max - min];
-      for( int i = 0; i <= max - min; i++ )
-      {
-        optionList[i] = "" + (min + i);
-      }
-    }
-    public GraphicsOption(String name)
-    {
-      super(2); // No min/max means this is a boolean choice.
-      minOption = 0;
-      optionName = name;
-      optionList = new String[] { "Off", "On" };
-    }
-    @Override
-    public int getSelectionNormalized()
-    {
-      return super.getSelectionNormalized() + minOption;
-    }
-    @Override
-    public void setSelectedOption(int value)
-    {
-      super.setSelectedOption(value - minOption);
-    }
-    public String getSettingValueText()
-    {
-      return optionList[getSelectionNormalized()-minOption];
-    }
-    public void storeCurrentValue()
-    {
-      storedValue = getSelectionNormalized();
-    }
-    public boolean isChanged()
-    {
-      return (storedValue != getSelectionNormalized());
-    }
-    public void loseChanges()
-    {
-      setSelectedOption(storedValue);
-    }
+    SpriteUIUtils.drawText(g, opt.getCurrentValueText(), x + drawBuffer, y + drawBuffer);
   }
 }

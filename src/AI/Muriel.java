@@ -587,7 +587,7 @@ public class Muriel implements AIController
 
       // If we have a lot of cash on hand, don't worry about cost effectiveness - just maximize damage instead.
       // If we ever collect more than twice our income in funds, we just aren't spending fast enough. Fix that.
-      int incomePerTurn = myCo.ownedProperties.size() * myCo.incomePerCity;
+      int incomePerTurn = myCo.getIncomePerTurn();
       boolean useDamageRatio = (myCo.money > (incomePerTurn*2)); // Rich people can afford to think differently.
       if(useDamageRatio) log("  High funds - sorting units by damage ratio instead of cost effectiveness.");
 

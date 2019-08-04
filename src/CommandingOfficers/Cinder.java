@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import CommandingOfficers.Modifiers.COModifier;
+import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
@@ -47,9 +48,9 @@ public class Cinder extends Commander
           "This may be done repeatedly, but it can kill Cinder's own units.\n"));
     }
     @Override
-    public Commander create()
+    public Commander create(GameScenario.GameRules rules)
     {
-      return new Cinder();
+      return new Cinder(rules);
     }
   }
 
@@ -59,9 +60,9 @@ public class Cinder extends Commander
 
   private GameEventQueue pollEvents = new GameEventQueue();
 
-  public Cinder()
+  public Cinder(GameScenario.GameRules rules)
   {
-    super(coInfo);
+    super(coInfo, rules);
 
     addCommanderAbility(new SearAbility(this));
     addCommanderAbility(new WitchFireAbility(this));

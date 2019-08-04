@@ -3,7 +3,6 @@ package UI;
 import java.util.ArrayList;
 
 import AI.AILibrary;
-import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderLibrary;
 import Engine.Driver;
@@ -11,7 +10,6 @@ import Engine.GameInstance;
 import Engine.IController;
 import Engine.MapController;
 import Engine.OptionSelector;
-import Terrain.MapMaster;
 import UI.InputHandler.InputAction;
 
 /**
@@ -111,24 +109,21 @@ public class PlayerSetupController implements IController
         {
           /////////////////////////////////////////////////////////////////////////////////////////////
           // We have locked in our selection. Stuff it into the GameBuilder and then kick off the game.
-          for(int i = 0; i < coSelectors.length; ++i)
+          GameInstance newGame = gameBuilder.createGame(coSelectors);
+
+          if( null != newGame )
           {
-            gameBuilder.addCO(coSelectors[i].makeCommander());
-          }
-  
-          // Build the CO list and the new map and create the game instance.
-          Commander[] cos = gameBuilder.commanders.toArray(new Commander[gameBuilder.commanders.size()]);
-          MapMaster map = new MapMaster( cos, gameBuilder.mapInfo );
-          if( map.initOK() )
-          {
-            GameInstance newGame = new GameInstance(map);
-  
             MapView mv = Driver.getInstance().gameGraphics.createMapView(newGame);
             MapController mapController = new MapController(newGame, mv);
-  
+
             // Mash the big red button and start the game.
             Driver.getInstance().changeGameState(mapController, mv);
           }
+          else
+          {
+            System.out.println("WARNING! Something went wrong while creating the game!");
+          }
+
           exitMenu = true;
         }
         break;
