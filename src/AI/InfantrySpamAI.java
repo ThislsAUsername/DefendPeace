@@ -130,7 +130,7 @@ public class InfantrySpamAI implements AIController
         for( GameActionSet actionSet : actionSets )
         {
           // See if we have the option to attack.
-          if( actionSet.getSelected().getUnitActionType() == UnitActionType.ATTACK )
+          if( actionSet.getSelected().getType() == UnitActionType.ATTACK )
           {
             actions.offer(actionSet.getSelected() );
             foundAction = true;
@@ -138,7 +138,7 @@ public class InfantrySpamAI implements AIController
           }
           
           // Otherwise, see if we have the option to capture.
-          if( actionSet.getSelected().getUnitActionType() == UnitActionType.CAPTURE )
+          if( actionSet.getSelected().getType() == UnitActionType.CAPTURE )
           {
             actions.offer(actionSet.getSelected() );
             capturingProperties.add(coord);

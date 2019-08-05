@@ -42,7 +42,7 @@ public interface GameAction
   public abstract GameEventQueue getEvents(MapMaster map);
   public abstract XYCoord getMoveLocation();
   public abstract XYCoord getTargetLocation();
-  public abstract UnitActionType getUnitActionType();
+  public abstract UnitActionType getType();
 
   // ==========================================================
   //   Concrete Action type classes.
@@ -160,7 +160,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return UnitActionType.ATTACK;
     }
@@ -232,7 +232,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return null;
     }
@@ -329,7 +329,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return UnitActionType.CAPTURE;
     }
@@ -401,7 +401,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return UnitActionType.WAIT;
     }
@@ -487,7 +487,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return UnitActionType.LOAD;
     }
@@ -606,7 +606,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return UnitActionType.UNLOAD;
     }
@@ -693,7 +693,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return UnitActionType.JOIN;
     }
@@ -825,7 +825,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return UnitActionType.RESUPPLY;
     }
@@ -916,7 +916,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return UnitActionType.REPAIR_UNIT;
     }
@@ -967,7 +967,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return null;
     }
@@ -1010,7 +1010,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return type;
     }
@@ -1052,7 +1052,7 @@ public interface GameAction
             }
           }
 
-          explodeEvents.addFirst(new MassDamageEvent(victims, type.damage, type.isLethal));
+          explodeEvents.addFirst(new MassDamageEvent(victims, type.damage, false));
           if( actor.CO.units.size() == 1 )
           {
             // CO is out of units. Too bad.
@@ -1070,7 +1070,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return type;
     }
@@ -1110,7 +1110,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return UnitActionType.DELETE;
     }
