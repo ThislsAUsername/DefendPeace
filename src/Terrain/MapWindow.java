@@ -191,6 +191,7 @@ public class MapWindow extends GameMap
         }
         for( XYCoord xyc : co.ownedProperties )
         {
+          revealFog(xyc, true); // Properties can see themselves and anything on them
           Location loc = master.getLocation(xyc);
           for( XYCoord coord : Utils.findVisibleLocations(this, loc.getCoordinates(), Environment.PROPERTY_VISION_RANGE) )
           {
