@@ -5,6 +5,7 @@ import Units.UnitModel;
 
 public class Weapon implements Serializable
 {
+  private static final long serialVersionUID = 1L;
   public WeaponModel model;
   public int ammo;
 

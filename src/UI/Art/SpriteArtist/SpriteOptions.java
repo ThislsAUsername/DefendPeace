@@ -13,7 +13,6 @@ import UI.GameOptionBool;
 import UI.GameOptionInt;
 import UI.InputHandler;
 import UI.SlidingValue;
-import Units.Weapons.Weapon;
 
 public class SpriteOptions
 {

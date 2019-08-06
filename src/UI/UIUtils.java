@@ -224,6 +224,7 @@ public class UIUtils
   
   public static class Faction implements Serializable
   {
+    private static final long serialVersionUID = 1L;
     public String name;
     public String basis;
     

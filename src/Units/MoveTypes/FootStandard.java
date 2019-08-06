@@ -5,6 +5,8 @@ import Terrain.TerrainType;
 
 public class FootStandard extends MoveTypeLand
 {
+  private static final long serialVersionUID = 1L;
+
   public FootStandard()
   {
     // Make adjustments to the base-class values.

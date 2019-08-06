@@ -539,6 +539,7 @@ public class SpriteMapView extends MapView
    * To be called once all but one faction has been eliminated.
    * Animates the victory/defeat overlay.
    */
+  @Override
   public void gameIsOver()
   {
     if( currentAnimation != null )

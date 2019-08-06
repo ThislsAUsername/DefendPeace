@@ -189,6 +189,7 @@ public class TerrainType implements Serializable
 
   private static class SerialTerrain implements Serializable
   {
+    private static final long serialVersionUID = 1L;
     public int index;
 
     public SerialTerrain(int i)

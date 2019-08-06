@@ -56,6 +56,7 @@ public class Muriel implements AIController
   }
   public static final AIMaker info = new instantiator();
   
+  @Override
   public AIMaker getAIInfo()
   {
     return info;

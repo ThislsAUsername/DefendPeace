@@ -8,6 +8,7 @@ import Units.UnitModel;
 
 public class CODamageModifier extends GenericUnitModifier
 {
+  private static final long serialVersionUID = 1L;
   private int attackModifier = 0;
 
   /**

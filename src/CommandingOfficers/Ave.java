@@ -57,6 +57,7 @@ import Units.UnitModel;
  */
 public class Ave extends Commander
 {
+  private static final long serialVersionUID = 1L;
   public static final int SNOW_THRESHOLD = 100; // Big numbers for integer math.
   public static final int SNOW_PER_TURN = 400;
   public static final int SNOW_MELT_RATE = 100;
@@ -67,6 +68,7 @@ public class Ave extends Commander
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Ave");
@@ -443,6 +445,7 @@ public class Ave extends Commander
    */
   private static class NixAbility extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NIX_NAME = "Nix";
     private static final int NIX_COST = 1;
     private static final int NIX_BUFF = 10; // Standard 10
@@ -506,6 +509,7 @@ public class Ave extends Commander
    */
   private static class GlacioAbility extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String GLACIO_NAME = "Glacio";
     private static final int GLACIO_COST = 8;
     private static final int GLACIO_BUFF = 10; // Standard 10
@@ -582,6 +586,7 @@ public class Ave extends Commander
    */
   private static class OblidoAbility extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String OBLIDO_NAME = "Oblido";
     private static final int OBLIDO_COST = 8;
     private static final int OBLIDO_BUFF = 20;
@@ -674,6 +679,7 @@ public class Ave extends Commander
 
   private static class CitySnowifier extends GameEventListener
   {
+    private static final long serialVersionUID = 1L;
     Ave Ave;
     public CitySnowifier(Ave cmdr)
     {

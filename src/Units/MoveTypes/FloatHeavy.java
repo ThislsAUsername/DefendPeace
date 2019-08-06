@@ -5,6 +5,8 @@ import Terrain.TerrainType;
 
 public class FloatHeavy extends MoveTypeSea
 {
+  private static final long serialVersionUID = 1L;
+
   public FloatHeavy()
   {
     // Heavier boats can't travel through shoals.

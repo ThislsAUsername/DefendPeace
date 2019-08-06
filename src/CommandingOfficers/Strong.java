@@ -25,6 +25,7 @@ public class Strong extends Commander
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Strong");
@@ -111,6 +112,7 @@ public class Strong extends Commander
    */
   private static class StrongArmAbility extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String STRONGARM_NAME = "Strongarm";
     private static final int STRONGARM_COST = 4;
     private static final int STRONGARM_BUFF = 10;
@@ -169,6 +171,7 @@ public class Strong extends Commander
    */
   private static class MobilizeAbility extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String MOBILIZE_NAME = "Mobilize";
     private static final int MOBILIZE_COST = 8;
     private static final int MOBILIZE_BUFF = 40;

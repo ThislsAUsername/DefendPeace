@@ -9,6 +9,7 @@ import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 
 public class CODefenseModifier extends GenericUnitModifier
 {
+  private static final long serialVersionUID = 1L;
   private int defenseModifier = 0;
 
   public CODefenseModifier(int percentChange)

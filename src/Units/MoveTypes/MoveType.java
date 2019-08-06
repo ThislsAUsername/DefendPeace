@@ -1,8 +1,5 @@
 package Units.MoveTypes;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -13,6 +10,8 @@ import Terrain.TerrainType;
 
 public class MoveType implements Serializable
 {
+  private static final long serialVersionUID = 1L;
+
   protected final Integer IMPASSABLE = 99;
 
   // A 2-layer map. Map Weathers to a mapping of Terrains-to-cost.

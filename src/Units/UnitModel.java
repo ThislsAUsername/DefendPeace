@@ -1,8 +1,5 @@
 package Units;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,6 +18,8 @@ import Units.Weapons.WeaponModel;
  */
 public class UnitModel implements Serializable
 {
+  private static final long serialVersionUID = 1L;
+
   public enum UnitEnum
   {
     INFANTRY, MECH,

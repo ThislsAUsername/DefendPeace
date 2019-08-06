@@ -5,12 +5,13 @@ import java.util.ArrayList;
 
 import Terrain.GameMap;
 import Units.Unit;
-import Units.UnitModel;
 import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
 
 public abstract class UnitActionType implements Serializable
 {
+  private static final long serialVersionUID = 1L;
+
   public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor)
   {
     return getPossibleActions(map, movePath, actor, false);
@@ -38,6 +39,8 @@ public abstract class UnitActionType implements Serializable
 
   public static class Attack extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
@@ -92,6 +95,8 @@ public abstract class UnitActionType implements Serializable
 
   public static class Capture extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
@@ -124,6 +129,8 @@ public abstract class UnitActionType implements Serializable
 
   public static class Wait extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
@@ -153,6 +160,8 @@ public abstract class UnitActionType implements Serializable
 
   public static class Load extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
@@ -186,6 +195,8 @@ public abstract class UnitActionType implements Serializable
 
   public static class Join extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
@@ -219,6 +230,8 @@ public abstract class UnitActionType implements Serializable
 
   public static class Unload extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
@@ -266,6 +279,8 @@ public abstract class UnitActionType implements Serializable
 
   public static class Resupply extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
@@ -309,6 +324,8 @@ public abstract class UnitActionType implements Serializable
 
   public static class RepairUnit extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
@@ -363,6 +380,7 @@ public abstract class UnitActionType implements Serializable
    */
   public static class Transform extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
     public final UnitEnum destinationType;
     public final String name;
     
@@ -397,6 +415,7 @@ public abstract class UnitActionType implements Serializable
    */
   public static class Explode extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
     public final int damage, range;
     
     public Explode(int pDamage, int pRange)
@@ -426,6 +445,8 @@ public abstract class UnitActionType implements Serializable
 
   public static class Delete extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
+
     public Delete()
     {
       shouldConfirm = true;
