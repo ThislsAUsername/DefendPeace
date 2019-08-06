@@ -28,7 +28,7 @@ public class SpriteOptions
   // Set up configurable options.
   private static GameOption<Integer> drawScaleOption = new GameOptionInt("Draw Scale", 1, 6, 1, DRAWSCALE_DEFAULT);
   private static GameOptionBool animationsOption = new GameOptionBool("Animations", true);
-  private static GameOption[] allOptions = { drawScaleOption, animationsOption };
+  private static GameOption<?>[] allOptions = { drawScaleOption, animationsOption };
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
   private static SlidingValue animHighlightedOption;
 
@@ -78,7 +78,7 @@ public class SpriteOptions
     // Calculate the size of the longest item panel needed.
     for( int i = 0; i < allOptions.length; ++i )
     {
-      ArrayList allItems = allOptions[i].optionList;
+      ArrayList<?> allItems = allOptions[i].optionList;
       for( int j = 0; j < allItems.size(); ++j )
       {
         if( allItems.get(j).toString().length() > maxItemLen )
@@ -178,7 +178,7 @@ public class SpriteOptions
   private static void applyConfigOptions()
   {
     // Persist the values in the GameOption objects.
-    for( GameOption go : allOptions )
+    for( GameOption<?> go : allOptions )
     {
       go.storeCurrentValue();
     }
@@ -197,7 +197,7 @@ public class SpriteOptions
    */
   private static void resetConfigOptions()
   {
-    for( GameOption go : allOptions )
+    for( GameOption<?> go : allOptions )
     {
       go.loseChanges();
     }
@@ -247,7 +247,7 @@ public class SpriteOptions
     g.drawImage(optionsImage, 0, 0, optionsImage.getWidth()*drawScale, optionsImage.getHeight()*drawScale, null);
   }
 
-  static void drawGameOption(Graphics g, int x, int y, GameOption opt)
+  static void drawGameOption(Graphics g, int x, int y, GameOption<?> opt)
   {
     int drawBuffer = textBuffer;
 

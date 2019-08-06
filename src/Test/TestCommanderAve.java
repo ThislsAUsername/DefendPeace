@@ -77,7 +77,7 @@ public class TestCommanderAve extends TestCase
     infantry.initTurn(testMap);
     performGameAction(capture, testMap);
 
-    testPassed &= validate(Ave.getSnowMapClone()[city.xCoord][city.yCoord] == Ave.SNOW_THRESHOLD, "    Ave doesn't have 1 snow in city after capture");
+    testPassed &= validate(Ave.getSnowMapClone()[city.xCoord][city.yCoord] == CommandingOfficers.Ave.SNOW_THRESHOLD, "    Ave doesn't have 1 snow in city after capture");
 
     return testPassed;
   }

@@ -13,7 +13,7 @@ public class GameOptionSetupController implements IController
   private GameOption<Weathers> weatherOption = new GameOption<Weathers>("Weather", Weathers.values(), 0);
 
   // Get a list of all GameOptions.
-  public GameOption[] gameOptions = {fowOption, startingFundsOption, incomeOption, weatherOption};
+  public GameOption<?>[] gameOptions = {fowOption, startingFundsOption, incomeOption, weatherOption};
 
   public OptionSelector optionSelector = new OptionSelector( gameOptions.length );
   private PlayerSetupController coSelectMenu;
@@ -67,7 +67,7 @@ public class GameOptionSetupController implements IController
     {
       case ENTER:
         // Set the selected options and transition to the player setup screen.
-        for( GameOption go : gameOptions ) go.storeCurrentValue();
+        for( GameOption<?> go : gameOptions ) go.storeCurrentValue();
         gameBuilder.isFowEnabled = fowOption.getSelectedObject();
         gameBuilder.startingFunds = startingFundsOption.getSelectedObject();
         gameBuilder.incomePerCity = incomeOption.getSelectedObject();

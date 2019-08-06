@@ -94,7 +94,7 @@ public interface GameAction
       isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       if( isValid )
       {
-        Location moveLocation = gameMap.getLocation(moveCoord);
+        isValid &= gameMap.isLocationValid(moveCoord);
         attackRange = Math.abs(moveCoord.xCoord - attackLocation.xCoord)
             + Math.abs(moveCoord.yCoord - attackLocation.yCoord);
 

@@ -619,7 +619,7 @@ public class Muriel implements AIController
       if( counters.isEmpty() )
       {
         log("  No suitable counters identified.");
-        enemyUnitStrengths.remove(enemyToCounter);
+        enemyUnitStrengths.poll();
         continue; // We can't build anything useful. Bah, humbug.
       }
 
