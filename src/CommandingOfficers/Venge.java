@@ -73,7 +73,7 @@ public class Venge extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     GameEventQueue events = super.initTurn(map);
     counterAtFullPower = false;

@@ -249,7 +249,7 @@ public class WallyAI implements AIController
         for( GameActionSet actionSet : actionSets )
         {
           // See if we have the option to attack.
-          if( actionSet.getSelected().getUnitActionType() == UnitActionType.ATTACK )
+          if( actionSet.getSelected().getType() == UnitActionType.ATTACK )
           {
             for( GameAction action : actionSet.getGameActions() )
             {
@@ -422,7 +422,7 @@ public class WallyAI implements AIController
             }
 
             // See if we can bag enough damage to be worth sacrificing the unit
-            if( actionSet.getSelected().getUnitActionType() == UnitActionType.ATTACK )
+            if( actionSet.getSelected().getType() == UnitActionType.ATTACK )
             {
               for( GameAction ga : actionSet.getGameActions() )
               {
@@ -456,7 +456,7 @@ public class WallyAI implements AIController
               break; // Only allow one action per unit.
 
             // Only consider capturing if we can sit still or go somewhere safe.
-            if( actionSet.getSelected().getUnitActionType() == UnitActionType.CAPTURE
+            if( actionSet.getSelected().getType() == UnitActionType.CAPTURE
                 && ( coord.getDistance(unit.x, unit.y) == 0 || canWallHere(gameMap, threatMap, unit, coord) ) 
                 && ( spaceFree || queueTravelAction(gameMap, allThreats, threatMap, resident, true) ) )
             {
@@ -669,7 +669,7 @@ public class WallyAI implements AIController
             // Since we're moving anyway, might as well try shooting the scenery
             for( GameActionSet actionSet : actionSets )
             {
-              if( actionSet.getSelected().getUnitActionType() == UnitActionType.ATTACK )
+              if( actionSet.getSelected().getType() == UnitActionType.ATTACK )
               {
                 double bestDamage = 0;
                 for( GameAction attack : actionSet.getGameActions() )

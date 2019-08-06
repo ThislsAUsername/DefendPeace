@@ -252,7 +252,7 @@ public class Muriel implements AIController
         for( GameActionSet set : actionSet )
         {
           // Go ahead and attack someone as long as we don't have to move.
-          if( set.getSelected().getUnitActionType() == UnitActionType.ATTACK )
+          if( set.getSelected().getType() == UnitActionType.ATTACK )
           {
             for( GameAction action : set.getGameActions() )
             {

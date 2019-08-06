@@ -11,6 +11,7 @@ import Engine.Path;
 import Engine.UnitActionType;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.ResupplyEvent;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -92,29 +93,13 @@ public class Unit implements Serializable
       }
 
       // If the unit is not at max health, and is on a repair tile, heal it.
-      if( model.canRepairOn(locus) && locus.getOwner() == CO )
+      if( model.canRepairOn(locus) && !CO.isEnemy(locus.getOwner()) )
       {
+        events.add(new HealUnitEvent(this, CO.getRepairPower(), CO)); // Event handles cost logic
         // Resupply is free; whether or not we can repair, go ahead and add the resupply event.
         if( !isFullySupplied() )
         {
           events.add(new ResupplyEvent(this));
-        }
-
-        if( HP < model.maxHP )
-        {
-          int neededHP = Math.min(model.maxHP - getHP(), 2); // will be 0, 1, 2
-          double proportionalCost = model.getCost() / model.maxHP;
-          if( CO.money >= neededHP * proportionalCost )
-          {
-            CO.money -= neededHP * proportionalCost;
-            alterHP(2);
-          }
-          else if( CO.money >= proportionalCost )
-          {
-            // case will only be used if neededHP is 2
-            CO.money -= proportionalCost;
-            alterHP(1);
-          }
         }
       }
 
@@ -211,7 +196,7 @@ public class Unit implements Serializable
     double before = HP;
     // Change the unit's health, but don't grant more
     // than 10 HP, and don't drop HP to zero.
-    HP = Math.max(1, Math.min(10, getHP() + change));
+    HP = Math.max(0.1, Math.min(model.maxHP, getHP() + change));
     return HP - before;
   }
 
