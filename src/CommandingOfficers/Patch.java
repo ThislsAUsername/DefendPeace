@@ -11,7 +11,7 @@ import Units.Unit;
 
 public class Patch extends Commander
 {
-  private static final long serialVersionUID = -543799935457360451L;
+  private static final long serialVersionUID = 1L;
 
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo

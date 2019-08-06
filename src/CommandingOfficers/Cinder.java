@@ -21,7 +21,7 @@ import Units.UnitModel;
  */
 public class Cinder extends Commander
 {
-  private static final long serialVersionUID = 4938851182463546620L;
+  private static final long serialVersionUID = 1L;
 
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo

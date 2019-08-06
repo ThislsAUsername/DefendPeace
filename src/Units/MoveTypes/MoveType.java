@@ -92,8 +92,7 @@ public class MoveType implements Serializable
   /** Convenience class to allow easy manipulation of move costs. */
   protected class MoveCostByTerrain extends HashMap<TerrainType, Integer>
   {
-    /** We don't actually serialize this map, but declaring this prevents a warning. */
-    private static final long serialVersionUID = 2956827533548597328L;
+    private static final long serialVersionUID = 1L;
 
     public MoveCostByTerrain(int moveCost)
     {

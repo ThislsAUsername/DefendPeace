@@ -20,7 +20,7 @@ import Units.UnitModel;
  */
 public class Strong extends Commander
 {
-  private static final long serialVersionUID = -3762678175296290654L;
+  private static final long serialVersionUID = 1L;
 
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo

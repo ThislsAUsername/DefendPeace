@@ -23,7 +23,7 @@ import Units.UnitModel;
  */
 public class Bear_Bull extends Commander
 {
-  private static final long serialVersionUID = -3048055535977630509L;
+  private static final long serialVersionUID = 1L;
   
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo

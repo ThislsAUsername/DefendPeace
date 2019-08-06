@@ -165,7 +165,7 @@ public class Driver implements ActionListener, KeyListener
    */
   private static class GameViewProxy extends JPanel
   {
-    private static final long serialVersionUID = 2373394816370307709L;
+    private static final long serialVersionUID = 1L;
 
     private IView view;
     public GameViewProxy( IView v )

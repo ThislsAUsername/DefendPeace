@@ -843,5 +843,5 @@ public class Muriel implements AIController
 
   /** Stores an object with info about how well UnitModelPair.first fares against UnitModelPair.second on average. */
   private class UnitEffectivenessMap extends HashMap<UnitModelPair, UnitMatchupAndMetaInfo>
-  {private static final long serialVersionUID = -4954625729036690735L;}
+  {private static final long serialVersionUID = 1L;}
 }

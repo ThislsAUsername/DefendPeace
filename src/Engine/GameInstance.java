@@ -22,7 +22,7 @@ import Terrain.MapWindow;
 
 public class GameInstance implements Serializable
 {
-  private static final long serialVersionUID = -2961286039214471155L;
+  private static final long serialVersionUID = 1L;
   
   public String saveFile;
   public Terrain.MapMaster gameMap;

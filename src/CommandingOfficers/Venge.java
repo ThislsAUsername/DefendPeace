@@ -20,7 +20,7 @@ import Units.Weapons.Weapon;
  */
 public class Venge extends Commander
 {
-  private static final long serialVersionUID = -8207164779284734879L;
+  private static final long serialVersionUID = 1L;
 
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
