@@ -4,16 +4,17 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import Terrain.MapMaster;
 import Units.UnitModel;
 
 public class Adder extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Adder");
@@ -45,6 +46,7 @@ public class Adder extends Commander
 
   private static class Sideslip extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Sideslip";
     private static final int COST = 2;
 
@@ -67,6 +69,7 @@ public class Adder extends Commander
 
   private static class Sidewinder extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Sidewinder";
     private static final int COST = 5;
 

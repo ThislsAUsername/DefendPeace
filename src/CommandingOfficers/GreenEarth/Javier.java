@@ -4,19 +4,19 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.GameMap;
 import Terrain.MapMaster;
 
 public class Javier extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Javier 1T");
@@ -72,6 +72,7 @@ public class Javier extends Commander
 
   private static class TowerShield extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Tower Shield";
     private static final int COST = 3;
     private static final int VALUE = 20;
@@ -94,6 +95,7 @@ public class Javier extends Commander
 
   private static class TowerOfPower extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Tower of Power";
     private static final int COST = 6;
     private static final int VALUE = 60;

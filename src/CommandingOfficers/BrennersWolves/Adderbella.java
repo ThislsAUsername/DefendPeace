@@ -4,7 +4,6 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
@@ -13,9 +12,11 @@ import Terrain.MapMaster;
 
 public class Adderbella extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Adderbella");
@@ -50,6 +51,7 @@ public class Adderbella extends Commander
 
   private static class DeepStrike extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Deep Strike";
     private static final int COST = 2;
     private static final int VALUE = 1;
@@ -71,6 +73,7 @@ public class Adderbella extends Commander
 
   private static class Overlord extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Overlord";
     private static final int COST = 5;
     private static final int VALUE = 2;

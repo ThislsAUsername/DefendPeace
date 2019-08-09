@@ -1,6 +1,5 @@
 package CommandingOfficers.Modifiers;
 
-import Engine.GameScenario;
 import java.io.Serializable;
 import java.util.ArrayList;
 

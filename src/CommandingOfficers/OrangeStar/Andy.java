@@ -4,7 +4,6 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import Terrain.MapMaster;
@@ -13,9 +12,11 @@ import Units.UnitModel;
 
 public class Andy extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Andy");
@@ -47,6 +48,7 @@ public class Andy extends Commander
 
   private static class HyperRepair extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Hyper Repair";
     private static final int COST = 3;
     private static final int VALUE = 2;
@@ -68,6 +70,7 @@ public class Andy extends Commander
 
   private static class HyperUpgrade extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Hyper Upgrade";
     private static final int COST = 6;
     private static final int VALUE = 5;

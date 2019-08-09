@@ -4,13 +4,10 @@ import java.util.ArrayList;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import CommandingOfficers.Commander;
@@ -20,7 +17,6 @@ import Engine.GameEvents.MapChangeEvent;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.Location;
-import Terrain.Environment.Weathers;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
 

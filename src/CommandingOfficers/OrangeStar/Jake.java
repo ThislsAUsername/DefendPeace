@@ -1,18 +1,14 @@
 package CommandingOfficers.OrangeStar;
 
 import Engine.GameScenario;
-import java.util.Map;
-
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.IndirectRangeBoostModifier;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
-import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
@@ -21,9 +17,11 @@ import Units.UnitModel.ChassisEnum;
 
 public class Jake extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Jake");
@@ -83,6 +81,7 @@ public class Jake extends Commander
 
   private static class BeatDown extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Beat Down";
     private static final int COST = 3;
     private static final int VALUE = 10;
@@ -104,6 +103,7 @@ public class Jake extends Commander
 
   private static class BlockRock extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Block Rock";
     private static final int COST = 6;
     private static final int VALUE = 30;

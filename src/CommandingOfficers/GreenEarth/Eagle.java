@@ -4,7 +4,6 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Terrain.MapMaster;
@@ -14,9 +13,11 @@ import Units.UnitModel.ChassisEnum;
 
 public class Eagle extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Eagle");
@@ -62,6 +63,7 @@ public class Eagle extends Commander
 
   private static class LightningDrive extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Lightning Drive";
     private static final int COST = 3;
 
@@ -90,6 +92,7 @@ public class Eagle extends Commander
 
   private static class LightningStrike extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Lightning Strike";
     private static final int COST = 9;
 

@@ -4,16 +4,17 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Terrain.MapMaster;
 
 public class Grimm extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Grimm");
@@ -48,6 +49,7 @@ public class Grimm extends Commander
 
   private static class Knuckleduster extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Knuckleduster";
     private static final int COST = 3;
     private static final int VALUE = 20;
@@ -66,6 +68,7 @@ public class Grimm extends Commander
 
   private static class Haymaker extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Haymaker";
     private static final int COST = 6;
     private static final int VALUE = 50;

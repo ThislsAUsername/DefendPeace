@@ -4,7 +4,6 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import Engine.XYCoord;
@@ -16,9 +15,11 @@ import Units.UnitModel;
 
 public class Hetler extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Hetler");
@@ -74,6 +75,7 @@ public class Hetler extends Commander
 
   private static class CopterCommand extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Airborne Assault";
     private static final int COST = 3;
 
@@ -93,6 +95,7 @@ public class Hetler extends Commander
 
   private static class AirborneAssault extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Airborne Assault";
     private static final int COST = 9;
 

@@ -31,9 +31,7 @@ import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
-import UI.UIUtils;
 import UI.UIUtils.Faction;
-import UI.Art.SpriteArtist.SpriteLibrary;
 import Units.APCModel;
 import Units.AntiAirModel;
 import Units.ArtilleryModel;
@@ -221,7 +219,8 @@ public class Commander extends GameEventListener implements Serializable
   }
   
   private static class TowerListener extends GameEventListener{
-	  private Commander myCommander = null;
+    private static final long serialVersionUID = 1L;
+    private Commander myCommander = null;
 	  public TowerListener(Commander myCo) {
 		  myCommander = myCo;
 	  }

@@ -1,6 +1,5 @@
 package CommandingOfficers.Modifiers;
 
-import Engine.GameScenario;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +13,8 @@ import Units.MoveTypes.MoveType;
 
 public class PerfectMoveModifier extends GenericUnitModifier
 {
+  private static final long serialVersionUID = 1L;
+
   Map<UnitModel, MoveType> originalPropulsions = new HashMap<UnitModel, MoveType>();
 
   public final boolean doSnow;

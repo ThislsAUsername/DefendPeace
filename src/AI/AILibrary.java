@@ -3,7 +3,6 @@ package AI;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
-import Engine.GameInstance;
 
 public class AILibrary
 {  

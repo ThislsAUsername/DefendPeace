@@ -4,22 +4,22 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
-import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 
 public class Kindle extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Kindle");
@@ -79,6 +79,7 @@ public class Kindle extends Commander
 
   private static class UrbanBlight extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Urban Blight";
     private static final int COST = 3;
     private static final int VALUE = 3;
@@ -109,6 +110,7 @@ public class Kindle extends Commander
 
   private static class HighSociety extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "High Society";
     private static final int COST = 6;
     Kindle COcast;

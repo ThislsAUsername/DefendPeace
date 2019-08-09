@@ -4,10 +4,8 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
-import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 import CommandingOfficers.Modifiers.COVisionModifier;
 import Terrain.MapMaster;
@@ -16,9 +14,11 @@ import Units.UnitModel.ChassisEnum;
 
 public class LinAlt extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Lin Alt");
@@ -60,6 +60,7 @@ public class LinAlt extends Commander
 
   private static class Scout extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Scout";
     private static final int COST = 2;
 
@@ -85,6 +86,7 @@ public class LinAlt extends Commander
 
   private static class NightVision extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Night Vision";
     private static final int COST = 5;
 

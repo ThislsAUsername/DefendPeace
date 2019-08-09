@@ -1,9 +1,7 @@
 package UI.Art.SpriteArtist;
 
 import java.awt.Color;
-import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorConvertOp;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 

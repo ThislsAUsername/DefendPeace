@@ -4,7 +4,6 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.Combat.CostValueFinder;
@@ -16,9 +15,11 @@ import Units.UnitModel;
 
 public class Sturm extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Sturm");
@@ -94,6 +95,7 @@ public class Sturm extends Commander
 
   private static class MeteorStrike extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Meteor Strike";
     private static final int COST = 6;
     private static final int POWER = 4;
@@ -113,6 +115,7 @@ public class Sturm extends Commander
 
   private static class MeatierStrike extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Meatier Strike";
     private static final int COST = 10;
     private static final int POWER = 8;

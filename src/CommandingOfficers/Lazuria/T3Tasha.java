@@ -11,11 +11,13 @@ import Units.UnitModel.ChassisEnum;
 
 public class T3Tasha extends TabithaEngine
 {
+  private static final long serialVersionUID = 1L;
   public static final int MEGA_ATK = 40;
   public static final int MEGA_DEF = 20;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("T3Tasha");
@@ -50,6 +52,7 @@ public class T3Tasha extends TabithaEngine
 
   private static class AirMoveBonus extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private int power = 1;
 
     AirMoveBonus(Commander commander, String name, int cost, int buff)
@@ -75,6 +78,7 @@ public class T3Tasha extends TabithaEngine
 
   protected static class FoxOne extends nonStackingBoost
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Fox One";
     static final int COST = 5;
 

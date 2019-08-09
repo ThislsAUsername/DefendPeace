@@ -4,16 +4,17 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import Terrain.MapMaster;
 import Units.UnitModel;
 
 public class BillyGates extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Billy Gates");
@@ -52,6 +53,7 @@ public class BillyGates extends Commander
 
   private static class GoldRush extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Gold Rush";
     private static final int COST = 4;
     private static final double VALUE = 1.2;
@@ -72,6 +74,7 @@ public class BillyGates extends Commander
 
   private static class PowerOfMoney extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Power of Money";
     private static final int COST = 6;
     private static final double VALUE = 3.333/1000;

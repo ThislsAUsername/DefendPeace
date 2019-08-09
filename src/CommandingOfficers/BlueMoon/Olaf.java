@@ -4,12 +4,9 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
-import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GlobalWeatherEvent;
-import Engine.GameEvents.MapChangeEvent;
 import Terrain.Environment.Weathers;
 import Terrain.MapMaster;
 import Terrain.Location;
@@ -19,9 +16,11 @@ import Units.UnitModel;
 
 public class Olaf extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Olaf");
@@ -62,6 +61,7 @@ public class Olaf extends Commander
 
   private static class Blizzard extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Blizzard";
     private static final int COST = 3;
 
@@ -82,6 +82,7 @@ public class Olaf extends Commander
 
   private static class WinterFury extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Winter Fury";
     private static final int COST = 7;
     

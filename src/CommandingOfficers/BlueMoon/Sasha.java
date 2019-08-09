@@ -4,7 +4,6 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
@@ -12,9 +11,11 @@ import Terrain.MapMaster;
 
 public class Sasha extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Sasha");
@@ -55,6 +56,7 @@ public class Sasha extends Commander
 
   private static class MarketCrash extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Market Crash";
     private static final int COST = 2;
     private static final double FUNDS_TO_DRAIN_ALL = 50000;
@@ -84,6 +86,7 @@ public class Sasha extends Commander
 
   private static class WarBonds extends CommanderAbility implements COModifier
   {
+    private static final long serialVersionUID = 1L;
     private DamageDealtToIncomeConverter listener = null;
 
     WarBonds(Commander myCO, String abilityName, int abilityCost, double incomeRatio)
@@ -127,6 +130,7 @@ public class Sasha extends Commander
    */
   private static class DamageDealtToIncomeConverter extends GameEventListener
   {
+    private static final long serialVersionUID = 1L;
     private Commander myCommander = null;
     private double myIncomeRatio = 0.0;
 

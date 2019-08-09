@@ -4,19 +4,19 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
 
 public class Caulder extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Caulder");
@@ -79,6 +79,7 @@ public class Caulder extends Commander
 
   private static class SupremeBoost extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Supreme Boost";
     private static final int COST = 10;
     private static final int REPAIRS = 3;

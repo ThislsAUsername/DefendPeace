@@ -6,8 +6,6 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Assorted.Greyfield.BuildSeaplane;
-import CommandingOfficers.CommanderInfo.InfoPage;
-import CommandingOfficers.Modifiers.CODefenseModifier;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
@@ -17,9 +15,11 @@ import Units.Weapons.Weapon;
 
 public class Fastfield extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Fastfield");
@@ -80,6 +80,7 @@ public class Fastfield extends Commander
 
   private static class Resupply extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private boolean ammo, fuel;
 
     Resupply(Commander commander, String name, int cost, boolean ammo, boolean fuel)

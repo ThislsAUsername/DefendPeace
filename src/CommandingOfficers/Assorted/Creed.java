@@ -6,7 +6,6 @@ import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.GameMap;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
@@ -14,9 +13,11 @@ import Units.UnitModel;
 
 public class Creed extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Creed");
@@ -50,6 +51,7 @@ public class Creed extends Commander
     return super.initTurn(map);
   }
 
+  @Override
   public void receiveCreateUnitEvent(Unit unit)
   {
     if( this == unit.CO )
@@ -65,6 +67,7 @@ public class Creed extends Commander
 
   private static class TacticalGenius extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Tactical Genius";
     private static final int COST = 5;
 

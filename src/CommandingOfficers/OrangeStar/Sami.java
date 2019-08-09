@@ -4,7 +4,6 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
@@ -18,9 +17,11 @@ import Units.Weapons.WeaponModel;
 
 public class Sami extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Sami");
@@ -94,6 +95,7 @@ public class Sami extends Commander
 
   private static class DoubleTime extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Double Time";
     private static final int COST = 3;
     private static final int POWER = 20;
@@ -120,6 +122,7 @@ public class Sami extends Commander
 
   private static class VictoryMarch extends CommanderAbility implements COModifier
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Victory March";
     private static final int COST = 8;
     private static final int POWER = 40;
@@ -162,6 +165,7 @@ public class Sami extends Commander
 
   private static class InstantCapListener extends GameEventListener
   {
+    private static final long serialVersionUID = 1L;
     private Commander myCommander = null;
 
     public InstantCapListener(Commander myCo)

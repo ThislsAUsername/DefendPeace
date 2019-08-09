@@ -4,10 +4,8 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.GameMap;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.UnitModel;
@@ -15,9 +13,11 @@ import Units.UnitModel.ChassisEnum;
 
 public class Hachi extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Hachi");
@@ -59,6 +59,7 @@ public class Hachi extends Commander
 
   private static class Barter extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Barter";
     private static final int COST = 3;
     private static final double VALUE = 0.5;
@@ -81,6 +82,7 @@ public class Hachi extends Commander
 
   private static class MerchantUnion extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Merchant Union";
     private static final int COST = 5;
     private static final double VALUE = 0.5;

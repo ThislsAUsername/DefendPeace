@@ -5,21 +5,21 @@ import Engine.Combat.BattleInstance.BattleParams;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.Combat.CaptureUnitValueFinder;
 import Engine.Combat.CostValueFinder;
 import Engine.Combat.HPValueFinder;
 import Engine.Combat.MassStrikeUtils;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
 
 public class Rachel extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Rachel");
@@ -81,6 +81,7 @@ public class Rachel extends Commander
 
   private static class LuckyLass extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Lucky Lass";
     private static final int COST = 3;
     private static final int VALUE = 40;
@@ -101,6 +102,7 @@ public class Rachel extends Commander
 
   private static class CoveringFire extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Covering Fire";
     private static final int COST = 6;
 

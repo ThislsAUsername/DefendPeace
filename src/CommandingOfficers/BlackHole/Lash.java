@@ -4,20 +4,20 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.PerfectMoveModifier;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
-import Terrain.GameMap;
 import Terrain.Location;
 import Units.UnitModel.ChassisEnum;
 
 public class Lash extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Lash");
@@ -78,6 +78,7 @@ public class Lash extends Commander
 
   private static class TerrainTactics extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Terrain Tactics";
     private static final int COST = 4;
     Lash COcast;
@@ -99,6 +100,7 @@ public class Lash extends Commander
 
   private static class PrimeTactics extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Prime Tactics";
     private static final int COST = 7;
     Lash COcast;

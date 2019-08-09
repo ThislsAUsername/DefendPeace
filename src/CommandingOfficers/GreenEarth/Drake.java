@@ -4,12 +4,9 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
-import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GlobalWeatherEvent;
-import Engine.GameEvents.MapChangeEvent;
 import Terrain.MapMaster;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -20,9 +17,11 @@ import Units.UnitModel.ChassisEnum;
 
 public class Drake extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Drake");
@@ -73,6 +72,7 @@ public class Drake extends Commander
 
   private static class Tsunami extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Tsunami";
     private static final int COST = 4;
 
@@ -103,6 +103,7 @@ public class Drake extends Commander
 
   private static class Typhoon extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Typhoon";
     private static final int COST = 7;
 

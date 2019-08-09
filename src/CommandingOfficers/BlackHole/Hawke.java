@@ -4,7 +4,6 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import Terrain.MapMaster;
 import Terrain.Location;
@@ -12,9 +11,11 @@ import Units.Unit;
 
 public class Hawke extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Hawke");
@@ -47,6 +48,7 @@ public class Hawke extends Commander
 
   private static class BlackWave extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Black Wave";
     private static final int COST = 5;
     private static final int POWER = 1;
@@ -79,6 +81,7 @@ public class Hawke extends Commander
 
   private static class BlackStorm extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Black Storm";
     private static final int COST = 9;
     private static final int POWER = 2;

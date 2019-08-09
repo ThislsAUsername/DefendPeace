@@ -4,7 +4,6 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import Terrain.MapMaster;
 import Units.UnitModel;
@@ -13,9 +12,11 @@ import Units.Weapons.WeaponModel;
 
 public class Will extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Will");
@@ -68,6 +69,7 @@ public class Will extends Commander
 
   private static class GoFast extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private final int power;
 
     GoFast(Commander commander, String name, int cost, int oomph)

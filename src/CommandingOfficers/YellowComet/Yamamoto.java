@@ -4,21 +4,21 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
 
 public class Yamamoto extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Yamamoto");
@@ -82,6 +82,7 @@ public class Yamamoto extends Commander
 
   private static class MoraleBoost extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Morale Boost";
     private static final int COST = 4;
     private static final int VALUE = 10;
@@ -100,6 +101,7 @@ public class Yamamoto extends Commander
 
   private static class SamuraiSpirit extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Samurai Spirit";
     private static final int COST = 7;
     private Yamamoto COcast;

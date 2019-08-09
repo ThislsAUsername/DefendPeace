@@ -176,6 +176,7 @@ public class MapWindow extends GameMap
     revealFog();
   }
   
+  @Override
   public void revealFog()
   {
     for( Commander co : commanders )

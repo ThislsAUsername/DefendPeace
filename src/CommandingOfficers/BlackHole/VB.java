@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.Combat.CostValueFinder;
@@ -16,9 +15,11 @@ import Units.Unit;
 
 public class VB extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Von Bolt");
@@ -60,6 +61,7 @@ public class VB extends Commander
 
   private static class ExMachina extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Ex Machina";
     private static final int COST = 10;
     private static final int POWER = 3;

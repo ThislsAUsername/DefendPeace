@@ -2,15 +2,16 @@ package CommandingOfficers.IDS;
 import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 
 public class TabithaBasic extends TabithaEngine
 {
+  private static final long serialVersionUID = 1L;
   public static final int MEGA_ATK = 35;
   public static final int MEGA_DEF = 35;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Tabitha");

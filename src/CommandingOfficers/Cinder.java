@@ -11,9 +11,7 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.UnitDieEvent;
 import Terrain.MapMaster;
-import Terrain.GameMap;
 import Terrain.Location;
-import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
 

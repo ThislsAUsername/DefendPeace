@@ -28,10 +28,10 @@ import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
 
 public abstract class TabithaEngine extends Commander
 {
+  private static final long serialVersionUID = 1L;
   public static final InfoPage MECHANICS_BLURB = new InfoPage(
             "Mega Boost mechanics:\n"
           + "A Mega Boost is awarded when a unit attacks, or by a special action done in place (does not end turn).\n"
@@ -138,6 +138,7 @@ public abstract class TabithaEngine extends Commander
 
   protected static class nonStackingBoost extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     TabithaEngine COcast;
     private int atk, def;
 
@@ -171,6 +172,7 @@ public abstract class TabithaEngine extends Commander
 
   protected static class NukeIt extends nonStackingBoost
   {
+    private static final long serialVersionUID = 1L;
     private int nukePower;
 
     protected NukeIt(TabithaEngine commander, String name, int cost, int nuke, int pAtk, int pDef)
@@ -194,6 +196,7 @@ public abstract class TabithaEngine extends Commander
 
   private static class MegaBoost extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
     final TabithaEngine tabby;
     public MegaBoost(TabithaEngine owner)
     {

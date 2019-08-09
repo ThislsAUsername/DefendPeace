@@ -4,16 +4,17 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Terrain.MapMaster;
 import Units.Unit;
 
 public class Brenner extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Brenner");
@@ -48,6 +49,7 @@ public class Brenner extends Commander
 
   private static class Reinforce extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Reinforce";
     private static final int COST = 4;
     private static final int VALUE = 3;
@@ -69,6 +71,7 @@ public class Brenner extends Commander
 
   private static class Lifeline extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Lifeline";
     private static final int COST = 8;
     private static final int VALUE = 6;

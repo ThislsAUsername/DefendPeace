@@ -4,10 +4,8 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.GameMap;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.UnitModel;
@@ -15,9 +13,11 @@ import Units.UnitModel.ChassisEnum;
 
 public class YuanDelta extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Yuan Delta");
@@ -57,6 +57,7 @@ public class YuanDelta extends Commander
 
   private static class MerchantUnion extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Merchant Union";
     private static final int COST = 8;
 

@@ -6,7 +6,6 @@ import Terrain.MapMaster;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GlobalWeatherEvent;
@@ -15,9 +14,11 @@ import Units.UnitModel;
 
 public class PennyRNG extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Penny RNG");
@@ -57,6 +58,7 @@ public class PennyRNG extends Commander
 
   private static class Stormfront extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Stormfront";
     private static final int COST = 3;
 
@@ -76,6 +78,7 @@ public class PennyRNG extends Commander
 
   private static class Enigma extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Enigma";
     private static final int COST = 8;
 

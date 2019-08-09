@@ -7,18 +7,18 @@ import CommandingOfficers.IDS.TabithaEngine;
 import CommandingOfficers.Modifiers.COVisionModifier;
 import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 import Terrain.MapMaster;
-import Terrain.TerrainType;
-import Terrain.Environment.Weathers;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
 
 public class Link extends TabithaEngine
 {
+  private static final long serialVersionUID = 1L;
   public static final int MEGA_ATK = 20;
   public static final int MEGA_DEF = 20;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Link");
@@ -53,6 +53,7 @@ public class Link extends TabithaEngine
 
   private static class Scout extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Scout";
     private static final int COST = 2;
 
@@ -78,6 +79,7 @@ public class Link extends TabithaEngine
 
   protected static class NightVision extends nonStackingBoost
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Night Vision";
     static final int COST = 6;
 

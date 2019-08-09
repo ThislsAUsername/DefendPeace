@@ -20,16 +20,8 @@ import Engine.Combat.CombatEngine;
 import java.util.Set;
 
 import AI.AIUtils.CommanderProductionInfo;
-import CommandingOfficers.Commander;
-import CommandingOfficers.CommanderAbility;
-import Engine.GameAction;
-import Engine.GameActionSet;
-import Engine.Path;
 import Engine.UnitActionType;
-import Engine.Utils;
-import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
-import Engine.Combat.CombatEngine;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;

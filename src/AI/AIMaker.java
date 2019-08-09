@@ -1,7 +1,6 @@
 package AI;
 
 import CommandingOfficers.Commander;
-import Engine.GameInstance;
 
 public interface AIMaker
 {

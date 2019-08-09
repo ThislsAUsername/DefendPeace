@@ -1,9 +1,6 @@
 package CommandingOfficers.Modifiers;
 
-import Engine.GameScenario;
 import java.util.ArrayList;
-import java.util.Map;
-
 import CommandingOfficers.Commander;
 import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 import Units.UnitModel;
@@ -11,6 +8,7 @@ import Units.Weapons.WeaponModel;
 
 public class IndirectRangeBoostModifier extends GenericUnitModifier
 {
+  private static final long serialVersionUID = 1L;
   private int boost;
 
   public IndirectRangeBoostModifier(int boost)

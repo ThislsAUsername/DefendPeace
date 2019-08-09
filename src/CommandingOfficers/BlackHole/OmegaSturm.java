@@ -4,27 +4,21 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.PerfectMoveModifier;
 import Engine.Combat.CostValueFinder;
 import Engine.Combat.MassStrikeUtils;
-import Engine.GameEvents.GameEvent;
-import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
-import Engine.GameEvents.GlobalWeatherEvent;
-import Terrain.GameMap;
 import Terrain.MapMaster;
-import Terrain.TerrainType;
-import Terrain.Environment.Weathers;
-import Units.UnitModel;
 
 public class OmegaSturm extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Omega Sturm");
@@ -67,6 +61,7 @@ public class OmegaSturm extends Commander
 
   private static class MeteorStrike extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Meteor Strike";
     private static final int COST = 13;
     private static final int POWER = 8;

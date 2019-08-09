@@ -12,8 +12,6 @@ import Engine.GameEvents.GameEventQueue;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
-import CommandingOfficers.Modifiers.CODefenseModifier;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import UI.MapView;
@@ -26,9 +24,11 @@ import Units.Weapons.Weapon;
 
 public class Greyfield extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Greyfield");
@@ -89,6 +89,7 @@ public class Greyfield extends Commander
 
   private static class Resupply extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private boolean ammo, fuel;
 
     Resupply(Commander commander, String name, int cost, boolean ammo, boolean fuel)
@@ -117,6 +118,7 @@ public class Greyfield extends Commander
   
   public static class BuildSeaplane extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
     final Commander payer;
     final UnitModel seaplane;
     public BuildSeaplane(Commander owner)

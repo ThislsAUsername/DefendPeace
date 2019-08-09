@@ -6,7 +6,6 @@ import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.GlobalWeatherEvent;
-import Terrain.GameMap;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
@@ -15,12 +14,14 @@ import Units.UnitModel;
 
 public class OmegaCaulder extends TabithaEngine
 {
+  private static final long serialVersionUID = 1L;
   public static final int MEGA_ATK = 70;
   public static final int MEGA_DEF = 45;
   public static final int D2DREPAIRS = 5;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Omega Caulder");
@@ -63,6 +64,8 @@ public class OmegaCaulder extends TabithaEngine
 
   protected static class APOCALYPSE extends NukeIt
   {
+    private static final long serialVersionUID = 1L;
+
     APOCALYPSE(TabithaEngine commander)
     {
       super(commander, "APOCALYPSE", 13, 8, 50, 35);

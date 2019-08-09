@@ -1,6 +1,5 @@
 package CommandingOfficers.Modifiers;
 
-import Engine.GameScenario;
 import Units.UnitModel;
 
 import java.util.ArrayList;
@@ -10,6 +9,7 @@ import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 
 public class COVisionModifier extends GenericUnitModifier
 {
+  private static final long serialVersionUID = 1L;
   private int visionBoost = 0;
 
   public COVisionModifier(int boost)
