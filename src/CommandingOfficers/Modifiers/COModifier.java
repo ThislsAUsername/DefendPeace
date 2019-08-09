@@ -17,6 +17,7 @@ public interface COModifier extends Serializable
    */
   public abstract static class GenericUnitModifier implements COModifier
   {
+    private static final long serialVersionUID = 1L;
     private ArrayList<UnitModel> modelsToModify;
 
     /**

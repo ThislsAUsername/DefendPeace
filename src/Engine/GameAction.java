@@ -2,6 +2,7 @@ package Engine;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import CommandingOfficers.Commander;
@@ -13,7 +14,9 @@ import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.LoadEvent;
+import Engine.GameEvents.MassDamageEvent;
 import Engine.GameEvents.ResupplyEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.UnitJoinEvent;
@@ -38,7 +41,7 @@ public interface GameAction
   public abstract GameEventQueue getEvents(MapMaster map);
   public abstract XYCoord getMoveLocation();
   public abstract XYCoord getTargetLocation();
-  public abstract UnitActionType getUnitActionType();
+  public abstract UnitActionType getType();
 
   // ==========================================================
   //   Concrete Action type classes.
@@ -91,7 +94,7 @@ public interface GameAction
       isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       if( isValid )
       {
-        Location moveLocation = gameMap.getLocation(moveCoord);
+        isValid &= gameMap.isLocationValid(moveCoord);
         attackRange = Math.abs(moveCoord.xCoord - attackLocation.xCoord)
             + Math.abs(moveCoord.yCoord - attackLocation.yCoord);
 
@@ -156,7 +159,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return UnitActionType.ATTACK;
     }
@@ -228,7 +231,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return null;
     }
@@ -355,7 +358,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return UnitActionType.CAPTURE;
     }
@@ -427,7 +430,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return UnitActionType.WAIT;
     }
@@ -513,7 +516,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return UnitActionType.LOAD;
     }
@@ -632,7 +635,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return UnitActionType.UNLOAD;
     }
@@ -719,7 +722,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return UnitActionType.JOIN;
     }
@@ -851,11 +854,102 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return UnitActionType.RESUPPLY;
     }
   } // ~ResupplyAction
+
+  // ===========  RepairUnitAction  ===============================
+  public static class RepairUnitAction implements GameAction
+  {
+    private Path movePath;
+    private XYCoord startCoord;
+    private XYCoord moveCoord;
+    private XYCoord repairCoord;
+    Unit benefactor;
+    Unit beneficiary;
+
+    public RepairUnitAction(Unit actor, Path path, Unit target)
+    {
+      benefactor = actor;
+      beneficiary = target;
+      movePath = path;
+      if( benefactor != null && null != beneficiary )
+      {
+        startCoord = new XYCoord(actor.x, actor.y);
+        repairCoord = new XYCoord(target.x, target.y);
+      }
+      if( null != path && (path.getEnd() != null) )
+      {
+        moveCoord = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      }
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      // Repair actions consist of
+      //   MOVE
+      //   HEAL
+      //   RESUPPLY
+      GameEventQueue repairEvents = new GameEventQueue();
+
+      boolean isValid = true;
+
+      if( (null != gameMap) && (null != startCoord) && (null != repairCoord) &&
+          gameMap.isLocationValid(startCoord) && gameMap.isLocationValid(repairCoord) )
+      {
+        isValid &= benefactor != null && !benefactor.isTurnOver;
+        isValid &= isValid && null != beneficiary && !benefactor.CO.isEnemy(beneficiary.CO);
+        isValid &= (movePath != null) && (movePath.getPathLength() > 0);
+      }
+      else
+        isValid = false;
+
+      if( isValid )
+      {
+        Location moveLocation = gameMap.getLocation(moveCoord);
+        isValid &= (null == moveLocation.getResident()) || (benefactor == moveLocation.getResident());
+      }
+
+      if( isValid )
+      {
+        if( Utils.enqueueMoveEvent(gameMap, benefactor, movePath, repairEvents) )
+        {
+          // No surprises in the fog.
+          repairEvents.add(new HealUnitEvent(beneficiary, 1, benefactor.CO)); // As this is a unit action, there's no usecase to vary this yet
+          repairEvents.add(new ResupplyEvent(beneficiary));
+        }
+      }
+      return repairEvents;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return moveCoord;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return repairCoord;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Move %s to %s and heal %s]",
+          benefactor.toStringWithLocation(), moveCoord, beneficiary.toStringWithLocation());
+    }
+
+    @Override
+    public UnitActionType getType()
+    {
+      return UnitActionType.REPAIR_UNIT;
+    }
+  } // ~RepairUnitAction
 
   // ===========  AbilityAction  =================================
   public static class AbilityAction implements GameAction
@@ -902,7 +996,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return null;
     }
@@ -945,7 +1039,67 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
+    {
+      return type;
+    }
+  } // ~TransformAction
+  
+  // ===========  ExplodeAction  =================================
+  /** Effectively a WAIT, but the unit explodes at the end of it. */
+  public static class ExplodeAction extends WaitAction
+  {
+    private UnitActionType.Explode type;
+    Unit actor;
+
+    public ExplodeAction(Unit unit, Path path, UnitActionType.Explode pType)
+    {
+      super(unit, path);
+      type = pType;
+      actor = unit;
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue explodeEvents = super.getEvents(gameMap);
+      
+      if( explodeEvents.size() > 0 ) // if we successfully made a move action
+      {
+        GameEvent moveEvent = explodeEvents.peek();
+        if (moveEvent.getEndPoint().equals(getMoveLocation())) // make sure we shouldn't be pre-empted
+        {
+          explodeEvents.add(new UnitDieEvent(actor)); // If you explode, you die
+
+          HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
+          for (XYCoord coord : Utils.findLocationsInRange(gameMap, getMoveLocation(), type.range))
+          {
+            Unit victim = gameMap.getLocation(coord).getResident();
+            if (null != victim && victim != actor) // Since you're already dead when you explode, you can't get hurt in the explosion
+            {
+              victims.add(victim);
+            }
+          }
+
+          explodeEvents.addFirst(new MassDamageEvent(victims, type.damage, false));
+          if( actor.CO.units.size() == 1 )
+          {
+            // CO is out of units. Too bad.
+            explodeEvents.add(new CommanderDefeatEvent(actor.CO));
+          }
+        }
+      }
+      return explodeEvents;
+    }
+    
+    @Override
+    public String toString()
+    {
+      return String.format("[Move %s to %s and explode]", actor.toStringWithLocation(), getMoveLocation());
+    }
+
+    @Override
+    public UnitActionType getType()
     {
       return type;
     }
@@ -969,6 +1123,12 @@ public interface GameAction
     {
       GameEventQueue eventSequence = new GameEventQueue();
       eventSequence.add(new UnitDieEvent(actor));
+      // The unit died; check if the Commander is defeated.
+      if( actor.CO.units.size() == 1 )
+      {
+        // CO is out of units. Too bad.
+        eventSequence.add(new CommanderDefeatEvent(actor.CO));
+      }
       return eventSequence;
     }
 
@@ -979,7 +1139,7 @@ public interface GameAction
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return UnitActionType.DELETE;
     }

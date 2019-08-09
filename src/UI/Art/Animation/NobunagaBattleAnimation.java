@@ -3,9 +3,6 @@ package UI.Art.Animation;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import Units.Unit;
-import Engine.GameAction;
-
 public class NobunagaBattleAnimation implements GameAnimation
 {
   long startTime = 0;
@@ -64,6 +61,7 @@ public class NobunagaBattleAnimation implements GameAnimation
     return animTime > endTime;
   }
 
+  @Override
   public void cancel()
   {
     endTime = 0;

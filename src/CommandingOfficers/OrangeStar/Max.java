@@ -66,7 +66,7 @@ public class Max extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     this.directBuff = 20;
     return super.initTurn(map);

@@ -48,7 +48,7 @@ public class CaulderAlt extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     GameEventQueue ret = super.initTurn(map);
 

@@ -58,7 +58,7 @@ public class Rachel extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     this.luckMax = 10;
     return super.initTurn(map);

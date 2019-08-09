@@ -1,8 +1,5 @@
 package Units;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,9 +18,15 @@ import Units.Weapons.WeaponModel;
  */
 public class UnitModel implements Serializable
 {
+  private static final long serialVersionUID = 1L;
+
   public enum UnitEnum
   {
-    INFANTRY, MECH, RECON, TANK, MD_TANK, NEOTANK, APC, ARTILLERY, ROCKETS, ANTI_AIR, MOBILESAM, FIGHTER, BOMBER, B_COPTER, T_COPTER, BATTLESHIP, CRUISER, LANDER, SUB, SUB_SUB
+    INFANTRY, MECH,
+    RECON, TANK, MD_TANK, NEOTANK, MEGATANK,
+    APC, ARTILLERY, ROCKETS, PIPERUNNER, ANTI_AIR, MOBILESAM,
+    FIGHTER, BOMBER, STEALTH, STEALTH_HIDE, B_COPTER, T_COPTER, BBOMB,
+    CARRIER, BBOAT, BATTLESHIP, CRUISER, LANDER, SUB, SUB_SUB
   };
 
   // Subs are ships unless they're submerged.

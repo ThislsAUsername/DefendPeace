@@ -8,7 +8,6 @@ import Engine.GameScenario;
 import Engine.UnitActionType;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
@@ -18,9 +17,11 @@ import Units.UnitModel;
  */
 public class Meridian extends Commander
 {
+  private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Meridian");
@@ -72,7 +73,7 @@ public class Meridian extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     justTransformed.clear();
     toBeNerfed.clear();
@@ -109,6 +110,7 @@ public class Meridian extends Commander
    */
   private static class ChangeAndFlow extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String STRONGARM_NAME = "Change and Flow";
     private static final int COST = 4;
     private static final int BASIC_BUFF = 10;
@@ -147,6 +149,7 @@ public class Meridian extends Commander
    */
   private static class VehicularCharge extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String MOBILIZE_NAME = "Vehicular Charge";
     private static final int COST = 6;
     private static final int BASIC_BUFF = 10;

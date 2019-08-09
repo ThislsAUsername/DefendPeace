@@ -9,6 +9,7 @@ import Units.UnitModel;
 
 public class COMovementModifier extends GenericUnitModifier
 {
+  private static final long serialVersionUID = 1L;
   private int rangeChange;
 
   public COMovementModifier()

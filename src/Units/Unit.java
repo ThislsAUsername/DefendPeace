@@ -11,6 +11,7 @@ import Engine.Path;
 import Engine.UnitActionType;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.ResupplyEvent;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -21,6 +22,7 @@ import Units.Weapons.WeaponModel;
 
 public class Unit implements Serializable
 {
+  private static final long serialVersionUID = 1L;
   public Vector<Unit> heldUnits;
   public UnitModel model;
   public int x;
@@ -92,30 +94,13 @@ public class Unit implements Serializable
       }
 
       // If the unit is not at max health, and is on a repair tile, heal it.
-      if( model.canRepairOn(locus) && locus.getOwner() == CO )
+      if( model.canRepairOn(locus) && !CO.isEnemy(locus.getOwner()) )
       {
+        events.add(new HealUnitEvent(this, CO.getRepairPower(), CO)); // Event handles cost logic
         // Resupply is free; whether or not we can repair, go ahead and add the resupply event.
         if( !isFullySupplied() )
         {
           events.add(new ResupplyEvent(this));
-        }
-
-        if( HP < model.maxHP )
-        {
-          int repairPower = CO.getRepairPower();
-          int neededHP = Math.min(model.maxHP - getHP(), repairPower);
-          double proportionalCost = model.getCost() / model.maxHP;
-          int repairedHP = neededHP;
-          while (CO.money < repairedHP * proportionalCost)
-          {
-            repairedHP--;
-          }
-          CO.money -= repairedHP * proportionalCost;
-          alterHP(repairedHP);
-
-          // Top off HP if there's excess power but we hit the HP cap
-          if (repairedHP < repairPower && getHP() == model.maxHP)
-            alterHP(1);
         }
       }
 
@@ -212,9 +197,7 @@ public class Unit implements Serializable
     double before = HP;
     // Change the unit's health, but don't grant more
     // than 10 HP, and don't drop HP to zero.
-    HP = Math.max(1, Math.min(10, getHP() + change));
-    if( HP > 9 )
-      HP = 10;
+    HP = Math.max(0.1, Math.min(model.maxHP, getHP() + change));
     return HP - before;
   }
 

@@ -58,7 +58,7 @@ public class Spannbei extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     counterMult = 1;
     return super.initTurn(map);

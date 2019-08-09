@@ -79,7 +79,7 @@ public class AIUtils
     {
       for( GameActionSet actionSet : actionSets )
       {
-        UnitActionType type = actionSet.getSelected().getUnitActionType();
+        UnitActionType type = actionSet.getSelected().getType();
 
         // Add these actions to the correct map bucket.
         actionsByType.get(type).addAll(actionSet.getGameActions());

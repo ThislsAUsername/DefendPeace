@@ -50,7 +50,7 @@ public class Caroline extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     this.luckFloor = 0;
     return super.initTurn(map);

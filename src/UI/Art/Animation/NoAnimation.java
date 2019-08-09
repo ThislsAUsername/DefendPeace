@@ -15,6 +15,7 @@ public class NoAnimation implements GameAnimation
     return true;
   }
 
+  @Override
   public void cancel()
   {
   }

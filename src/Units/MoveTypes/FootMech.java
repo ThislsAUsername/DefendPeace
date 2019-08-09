@@ -5,6 +5,8 @@ import Terrain.TerrainType;
 
 public class FootMech extends MoveTypeLand
 {
+  private static final long serialVersionUID = 1L;
+
   public FootMech()
   {
     // Initialize the default land-based movement costs, then override specific values.

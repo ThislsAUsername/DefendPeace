@@ -79,7 +79,7 @@ public class OmegaCaulder extends TabithaEngine
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     GameEventQueue ret = super.initTurn(map);
 

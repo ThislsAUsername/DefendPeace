@@ -23,7 +23,7 @@ public class GameOptionSetupArtist
 
   private static void initialize()
   {
-    GameOption[] allOptions = myControl.gameOptions;
+    GameOption<?>[] allOptions = myControl.gameOptions;
 
     int maxNameLen = 0;
     // Calculate the size of the longest option panel needed.
@@ -38,7 +38,7 @@ public class GameOptionSetupArtist
     // Calculate the size of the longest item panel needed.
     for( int i = 0; i < allOptions.length; ++i )
     {
-      ArrayList allItems = allOptions[i].optionList;
+      ArrayList<?> allItems = allOptions[i].optionList;
       for( int j = 0; j < allItems.size(); ++j )
       {
         if( allItems.get(j).toString().length() > maxItemLen )
@@ -117,7 +117,7 @@ public class GameOptionSetupArtist
     int ySpacing = (graphicsOptionHeight + (optionNamePanel.getHeight() / 2));
 
     // Loop through and draw everything.
-    GameOption[] allOptions = myControl.gameOptions;
+    GameOption<?>[] allOptions = myControl.gameOptions;
     for( int i = 0; i < allOptions.length; ++i, yDraw += ySpacing )
     {
       drawGameOption(optionsGraphics, xDraw, yDraw, allOptions[i]);
@@ -134,7 +134,7 @@ public class GameOptionSetupArtist
     g.drawImage(optionsImage, 0, 0, optionsImage.getWidth()*drawScale, optionsImage.getHeight()*drawScale, null);
   }
 
-  static void drawGameOption(Graphics g, int x, int y, GameOption opt)
+  static void drawGameOption(Graphics g, int x, int y, GameOption<?> opt)
   {
     int textBuffer = 4;
 

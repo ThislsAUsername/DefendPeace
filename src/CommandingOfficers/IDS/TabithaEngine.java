@@ -71,7 +71,7 @@ public abstract class TabithaEngine extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     this.COUs.clear();
     megaPow = COUPow;
@@ -245,7 +245,7 @@ public abstract class TabithaEngine extends Commander
     }
 
     @Override
-    public UnitActionType getUnitActionType()
+    public UnitActionType getType()
     {
       return type;
     }

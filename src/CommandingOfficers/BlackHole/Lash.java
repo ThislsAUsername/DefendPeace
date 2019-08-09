@@ -51,7 +51,7 @@ public class Lash extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     starMult = 1;
     return super.initTurn(map);

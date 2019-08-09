@@ -8,6 +8,7 @@ import Units.Unit;
 
 public abstract class GameMap implements Serializable
 {
+  private static final long serialVersionUID = 1L;
   public final int mapWidth;
   public final int mapHeight;
   public CommandingOfficers.Commander[] commanders;

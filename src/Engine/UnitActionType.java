@@ -5,35 +5,42 @@ import java.util.ArrayList;
 
 import Terrain.GameMap;
 import Units.Unit;
-import Units.UnitModel;
 import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
 
 public abstract class UnitActionType implements Serializable
 {
+  private static final long serialVersionUID = 1L;
+
   public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor)
   {
     return getPossibleActions(map, movePath, actor, false);
   }
   public abstract GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident);
   public abstract String name();
+  public boolean shouldConfirm = false;
 
   public static final UnitActionType ATTACK = new Attack();
   public static final UnitActionType UNLOAD = new Unload();
   public static final UnitActionType CAPTURE = new Capture();
   public static final UnitActionType RESUPPLY = new Resupply();
+  public static final UnitActionType REPAIR_UNIT = new RepairUnit();
   public static final UnitActionType WAIT = new Wait();
   public static final UnitActionType DELETE = new Delete();
   public static final UnitActionType LOAD = new Load();
   public static final UnitActionType JOIN = new Join();
 
-  public static final UnitActionType[] FOOTSOLDIER_ACTIONS =    { ATTACK, CAPTURE,  WAIT, DELETE, LOAD, JOIN };
-  public static final UnitActionType[] COMBAT_VEHICLE_ACTIONS = { ATTACK,           WAIT, DELETE, LOAD, JOIN };
-  public static final UnitActionType[] TRANSPORT_ACTIONS =      { UNLOAD,           WAIT, DELETE, LOAD, JOIN };
-  public static final UnitActionType[] APC_ACTIONS =            { UNLOAD, RESUPPLY, WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] FOOTSOLDIER_ACTIONS =      { ATTACK, CAPTURE,  WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] COMBAT_VEHICLE_ACTIONS =   { ATTACK,           WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] COMBAT_TRANSPORT_ACTIONS = { ATTACK, UNLOAD,   WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] TRANSPORT_ACTIONS =        { UNLOAD,           WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] APC_ACTIONS =              { UNLOAD, RESUPPLY, WAIT, DELETE, LOAD, JOIN };
+  public static final UnitActionType[] BASIC_ACTIONS =            {                   WAIT, DELETE, LOAD, JOIN };
 
   public static class Attack extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
@@ -88,6 +95,8 @@ public abstract class UnitActionType implements Serializable
 
   public static class Capture extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
@@ -120,6 +129,8 @@ public abstract class UnitActionType implements Serializable
 
   public static class Wait extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
@@ -149,6 +160,8 @@ public abstract class UnitActionType implements Serializable
 
   public static class Load extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
@@ -182,6 +195,8 @@ public abstract class UnitActionType implements Serializable
 
   public static class Join extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
@@ -215,6 +230,8 @@ public abstract class UnitActionType implements Serializable
 
   public static class Unload extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
@@ -262,6 +279,8 @@ public abstract class UnitActionType implements Serializable
 
   public static class Resupply extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
@@ -303,6 +322,57 @@ public abstract class UnitActionType implements Serializable
     }
   }
 
+  public static class RepairUnit extends UnitActionType
+  {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    {
+      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
+      {
+        ArrayList<GameAction> repairOptions = new ArrayList<GameAction>();
+        ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, moveLocation, 1, 1);
+
+        // For each location, see if there is a friendly unit to repair.
+        for( XYCoord loc : locations )
+        {
+          // If there's a friendly unit there who isn't us, we can repair them.
+          Unit other = map.getLocation(loc).getResident();
+          if( other != null && !actor.CO.isEnemy(other.CO) && other != actor &&
+              (!other.isFullySupplied() || other.getPreciseHP() < other.model.maxHP) )
+          {
+            repairOptions.add(new GameAction.RepairUnitAction(actor, movePath, other));
+          }
+        }
+
+        // Only add this action set if we actually have a target
+        if( !repairOptions.isEmpty() )
+        {
+          // Bundle our attack options into an action set
+          return new GameActionSet(repairOptions);
+        }
+      }
+      return null;
+    }
+
+    @Override
+    public String name()
+    {
+      return "REPAIR";
+    }
+
+    /**
+     * From Serializable interface
+     * @return The statically-defined object to use for this action type.
+     */
+    private Object readResolve()
+    {
+      return REPAIR_UNIT;
+    }
+  }
+
   /**
    * Effectively a wait, but the unit ends up as a different unit at the end of it.
    * This action type requires a parameter (the unit to transform into), and thus
@@ -310,6 +380,7 @@ public abstract class UnitActionType implements Serializable
    */
   public static class Transform extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
     public final UnitEnum destinationType;
     public final String name;
     
@@ -337,8 +408,50 @@ public abstract class UnitActionType implements Serializable
     }
   }
 
+  /**
+   * Effectively a wait, but the unit dies and deals damage to everything nearby
+   * This action type requires parameters, and thus
+   * cannot be represented as a static global constant.
+   */
+  public static class Explode extends UnitActionType
+  {
+    private static final long serialVersionUID = 1L;
+    public final int damage, range;
+    
+    public Explode(int pDamage, int pRange)
+    {
+      damage = pDamage;
+      range = pRange;
+      shouldConfirm = true;
+    }
+    
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    {
+      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
+      {
+        return new GameActionSet(new GameAction.ExplodeAction(actor, movePath, this), true); // We don't really need a target, but I want a confirm dialogue
+      }
+      return null;
+    }
+
+    @Override
+    public String name()
+    {
+      return "EXPLODE";
+    }
+  }
+
   public static class Delete extends UnitActionType
   {
+    private static final long serialVersionUID = 1L;
+
+    public Delete()
+    {
+      shouldConfirm = true;
+    }
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {

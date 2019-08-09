@@ -52,7 +52,7 @@ public class Javier extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     this.indirectDef = 20;
     return super.initTurn(map);

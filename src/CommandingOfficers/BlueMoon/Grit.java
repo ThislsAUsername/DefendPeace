@@ -63,7 +63,7 @@ public class Grit extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     this.indirectBuff = 20;
     return super.initTurn(map);

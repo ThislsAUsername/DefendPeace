@@ -59,7 +59,7 @@ public class OmegaSturm extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     modifyAbilityPower(1);
     return super.initTurn(map);

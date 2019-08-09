@@ -41,7 +41,7 @@ public class YuanDelta extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     for( UnitModel um : unitModels.values() )
     {

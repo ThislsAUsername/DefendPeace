@@ -16,6 +16,7 @@ import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
+import Engine.GameEvents.MassDamageEvent;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.GameMap;
@@ -56,6 +57,7 @@ import Units.UnitModel;
  */
 public class Ave extends Commander
 {
+  private static final long serialVersionUID = 1L;
   public static final int SNOW_THRESHOLD = 100; // Big numbers for integer math.
   public static final int SNOW_PER_TURN = 400;
   public static final int SNOW_MELT_RATE = 100;
@@ -66,6 +68,7 @@ public class Ave extends Commander
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Ave");
@@ -131,7 +134,7 @@ public class Ave extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap gameMap)
+  public GameEventQueue initTurn(MapMaster gameMap)
   {
     GameEventQueue returnEvents = super.initTurn(gameMap);
 
@@ -442,19 +445,20 @@ public class Ave extends Commander
    */
   private static class NixAbility extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NIX_NAME = "Nix";
     private static final int NIX_COST = 1;
     private static final int NIX_BUFF = 10; // Standard 10
 
     private int numActivations = 0;
 
-    Ave Ave;
+    Ave coCast;
     COModifier damageMod = null;
 
     NixAbility(Ave commander)
     {
       super(commander, NIX_NAME, NIX_COST);
-      Ave = commander;
+      coCast = commander;
       damageMod = new CODamageModifier(NIX_BUFF);
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
     }
@@ -471,19 +475,19 @@ public class Ave extends Commander
     protected void perform(MapMaster gameMap)
     {
       // Increase Ave's sphere of influence.
-      Ave.MAX_SNOW_SPREAD_RANGE++;
+      coCast.MAX_SNOW_SPREAD_RANGE++;
 
       // Buff units.
-      Ave.addCOModifier(damageMod);
+      coCast.addCOModifier(damageMod);
 
       // Drop snow everywhere inside her range.
       ArrayList<MapChangeEvent.EnvironmentAssignment> snowTiles = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
-      HashSet<XYCoord> tiles = Utils.findLocationsNearProperties(gameMap, Ave, Ave.MAX_SNOW_SPREAD_RANGE);
+      HashSet<XYCoord> tiles = Utils.findLocationsNearProperties(gameMap, coCast, coCast.MAX_SNOW_SPREAD_RANGE);
       for( XYCoord coord : tiles )
       {
-        if( Ave.snowMap[coord.xCoord][coord.yCoord] < Ave.SNOW_THRESHOLD )
+        if( coCast.snowMap[coord.xCoord][coord.yCoord] < Ave.SNOW_THRESHOLD )
         {
-          Ave.snowMap[coord.xCoord][coord.yCoord] = Ave.SNOW_THRESHOLD;
+          coCast.snowMap[coord.xCoord][coord.yCoord] = Ave.SNOW_THRESHOLD;
           if( gameMap.getEnvironment(coord).weatherType != Weathers.SNOW )
           {
             snowTiles.add(new MapChangeEvent.EnvironmentAssignment(coord, Environment.getTile(gameMap.getEnvironment(coord).terrainType, Weathers.SNOW), 1));
@@ -505,19 +509,20 @@ public class Ave extends Commander
    */
   private static class GlacioAbility extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String GLACIO_NAME = "Glacio";
     private static final int GLACIO_COST = 8;
     private static final int GLACIO_BUFF = 10; // Standard 10
     private static final int GLACIO_SNOW_SPREAD = 3;
     private static final int GLACIO_FREEZE_RANGE = 2;
 
-    Ave Ave;
+    Ave coCast;
     COModifier damageMod = null;
 
     GlacioAbility(Ave commander)
     {
       super(commander, GLACIO_NAME, GLACIO_COST);
-      Ave = commander;
+      coCast = commander;
       damageMod = new CODamageModifier(GLACIO_BUFF);
       AIFlags = PHASE_TURN_END;
     }
@@ -532,14 +537,14 @@ public class Ave extends Commander
       ArrayList<MapChangeEvent.EnvironmentAssignment> tileChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
 
       // Add snow in an expanded range around Ave's areas.
-      int maxSnowRange = Ave.MAX_SNOW_SPREAD_RANGE + GLACIO_SNOW_SPREAD;
-      HashSet<XYCoord> tilesInRange = Utils.findLocationsNearProperties(gameMap, Ave, maxSnowRange);
-      tilesInRange.addAll(Utils.findLocationsNearUnits(gameMap, Ave, GLACIO_SNOW_SPREAD));
+      int maxSnowRange = coCast.MAX_SNOW_SPREAD_RANGE + GLACIO_SNOW_SPREAD;
+      HashSet<XYCoord> tilesInRange = Utils.findLocationsNearProperties(gameMap, coCast, maxSnowRange);
+      tilesInRange.addAll(Utils.findLocationsNearUnits(gameMap, coCast, GLACIO_SNOW_SPREAD));
       for( XYCoord coord : tilesInRange )
       {
-        if( Ave.snowMap[coord.xCoord][coord.yCoord] < Ave.SNOW_THRESHOLD )
+        if( coCast.snowMap[coord.xCoord][coord.yCoord] < Ave.SNOW_THRESHOLD )
         {
-          Ave.snowMap[coord.xCoord][coord.yCoord] = Ave.SNOW_THRESHOLD;
+          coCast.snowMap[coord.xCoord][coord.yCoord] = Ave.SNOW_THRESHOLD;
           if( gameMap.getEnvironment(coord).weatherType != Weathers.SNOW )
           {
             tileChanges.add(new MapChangeEvent.EnvironmentAssignment(coord, Environment.getTile(gameMap.getEnvironment(coord).terrainType, Weathers.SNOW), 1));
@@ -548,8 +553,8 @@ public class Ave extends Commander
       }
 
       // Freeze enemies around each of Ave's units or buildings.
-      tilesInRange = Utils.findLocationsNearUnits(gameMap, Ave, GLACIO_FREEZE_RANGE);
-      tilesInRange.addAll(Utils.findLocationsNearProperties(gameMap, Ave, GLACIO_FREEZE_RANGE));
+      tilesInRange = Utils.findLocationsNearUnits(gameMap, coCast, GLACIO_FREEZE_RANGE);
+      tilesInRange.addAll(Utils.findLocationsNearProperties(gameMap, coCast, GLACIO_FREEZE_RANGE));
       for( XYCoord coord : tilesInRange )
       {
         // Freeze each nearby enemy.
@@ -581,6 +586,7 @@ public class Ave extends Commander
    */
   private static class OblidoAbility extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String OBLIDO_NAME = "Oblido";
     private static final int OBLIDO_COST = 8;
     private static final int OBLIDO_BUFF = 20;
@@ -613,6 +619,7 @@ public class Ave extends Commander
 
       // Keep track of any tiles that change.
       ArrayList<MapChangeEvent.EnvironmentAssignment> tileChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
+      ArrayList<Unit> victims = new ArrayList<Unit>();
 
       // Change terrain to snow around each of Ave's units and buildings, and damage trees and enemies.
       HashSet<XYCoord> affectedTiles = Utils.findLocationsNearProperties(gameMap, Ave, OBLIDO_RANGE);
@@ -632,13 +639,17 @@ public class Ave extends Commander
         // Damage each enemy nearby.
         if( null != loc.getResident() && myCommander.isEnemy(loc.getResident().CO) )
         {
-          loc.getResident().alterHP(-2);
+          victims.add(loc.getResident());
         }
       }
 
-      GameEvent event = new MapChangeEvent(tileChanges);
-      event.performEvent(gameMap);
-      GameEventListener.publishEvent(event);
+      GameEvent damage = new MassDamageEvent(victims, 2, false);
+      damage.performEvent(gameMap);
+      GameEventListener.publishEvent(damage);
+
+      GameEvent tileChange = new MapChangeEvent(tileChanges);
+      tileChange.performEvent(gameMap);
+      GameEventListener.publishEvent(tileChange);
     }
   } // Oblido
 
@@ -668,6 +679,7 @@ public class Ave extends Commander
 
   private static class CitySnowifier extends GameEventListener
   {
+    private static final long serialVersionUID = 1L;
     Ave Ave;
     public CitySnowifier(Ave cmdr)
     {

@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Map;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import AI.AIController;
@@ -28,6 +29,7 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
+import Terrain.MapMaster;
 import Terrain.TerrainType;
 import UI.UIUtils;
 import UI.UIUtils.Faction;
@@ -35,19 +37,26 @@ import UI.Art.SpriteArtist.SpriteLibrary;
 import Units.APCModel;
 import Units.AntiAirModel;
 import Units.ArtilleryModel;
+import Units.BBoatModel;
+import Units.BBombModel;
 import Units.BCopterModel;
 import Units.BattleshipModel;
 import Units.BomberModel;
+import Units.CarrierModel;
 import Units.CruiserModel;
 import Units.FighterModel;
 import Units.InfantryModel;
 import Units.LanderModel;
 import Units.MDTankModel;
 import Units.MechModel;
+import Units.MegatankModel;
 import Units.MobileSAMModel;
 import Units.NeotankModel;
+import Units.PiperunnerModel;
 import Units.ReconModel;
 import Units.RocketsModel;
+import Units.StealthHideModel;
+import Units.StealthModel;
 import Units.SubModel;
 import Units.SubSubModel;
 import Units.TCopterModel;
@@ -58,7 +67,7 @@ import Units.UnitModel.UnitEnum;
 
 public class Commander extends GameEventListener implements Serializable
 {
-  private static final long serialVersionUID = -6740892333060450105L;
+  private static final long serialVersionUID = 1L;
   
   public final CommanderInfo coInfo;
   public final GameScenario.GameRules gameRules;
@@ -107,21 +116,27 @@ public class Commander extends GameEventListener implements Serializable
     factoryModels.add(new TankModel());
     factoryModels.add(new MDTankModel());
     factoryModels.add(new NeotankModel());
+    factoryModels.add(new MegatankModel());
     factoryModels.add(new RocketsModel());
     factoryModels.add(new AntiAirModel());
     factoryModels.add(new MobileSAMModel());
+    factoryModels.add(new PiperunnerModel());
 
     // Record those units we can get from a Seaport.
     seaportModels.add(new LanderModel());
     seaportModels.add(new CruiserModel());
     seaportModels.add(new SubModel());
     seaportModels.add(new BattleshipModel());
+    seaportModels.add(new CarrierModel());
+    seaportModels.add(new BBoatModel());
 
     // Inscribe those war machines obtainable from an Airport.
     airportModels.add(new TCopterModel());
     airportModels.add(new BCopterModel());
     airportModels.add(new FighterModel());
     airportModels.add(new BomberModel());
+    airportModels.add(new StealthModel());
+    airportModels.add(new BBombModel());
 
     // Dump these lists into a hashmap for easy reference later.
     unitProductionByTerrain = new HashMap<TerrainType, ArrayList<UnitModel>>();
@@ -139,6 +154,8 @@ public class Commander extends GameEventListener implements Serializable
 
     UnitModel subsub = new SubSubModel();
     unitModels.put(subsub.type, subsub); // We don't want a separate "submerged sub" build option
+    UnitModel stealthy = new StealthHideModel();
+    unitModels.put(stealthy.type, stealthy);
 
     modifiers = new ArrayDeque<COModifier>();
     units = new ArrayList<Unit>();
@@ -222,7 +239,7 @@ public class Commander extends GameEventListener implements Serializable
    * Collect income, adjust tower power, and handle any COModifiers.
    * @param map
    */
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     myView.resetFog();
     adjustTowerPower();
@@ -243,7 +260,13 @@ public class Commander extends GameEventListener implements Serializable
       aiController.initTurn(myView);
     }
 
-    return new GameEventQueue();
+    GameEventQueue events = new GameEventQueue();
+    for( Unit u : units )
+    {
+      events.addAll(u.initTurn(map));
+    }
+
+    return events;
   }
 
   /**
@@ -356,6 +379,9 @@ public class Commander extends GameEventListener implements Serializable
       myAbilityPower = maxPower;
   }
 
+  /**
+   * @return The maximum level of ability energy this CO can hold
+   */
   public double getMaxAbilityPower()
   {
     double maxPower = 0;
@@ -369,6 +395,7 @@ public class Commander extends GameEventListener implements Serializable
     return maxPower;
   }
 
+  // TODO: determine if this needs parameters, and if so, what?
   public int getRepairPower()
   {
     return 2;
@@ -377,6 +404,7 @@ public class Commander extends GameEventListener implements Serializable
   /**
    * Track battles that happen, and get ability power based on combat this CO is in.
    */
+  @Override
   public void receiveBattleEvent(final BattleSummary summary)
   {
     // We only care who the units belong to, not who picked the fight. 
@@ -403,7 +431,7 @@ public class Commander extends GameEventListener implements Serializable
     if( minion != null && enemy != null && myActiveAbilityName.equalsIgnoreCase("") )
     {
       double power = 0; // value in funds of the charge we're getting
-      
+
       // Add up the funds value of the damage done to both participants.
       power += myHPLoss / minion.model.maxHP * minion.model.getCost();
       // The damage we deal is worth half as much as the damage we take, to help powers be a comeback mechanic.
@@ -415,6 +443,29 @@ public class Commander extends GameEventListener implements Serializable
       power /= CHARGERATIO_FUNDS;
 
       modifyAbilityPower(power);
+    }
+  }
+
+  /**
+   * Track mass damage done to my units, and get ability power based on it.
+   */
+  @Override
+  public void receiveMassDamageEvent(Map<Unit, Integer> lostHP)
+  {
+    for( Entry<Unit, Integer> damageEntry : lostHP.entrySet() )
+    {
+      Unit unit = damageEntry.getKey();
+      if (this == unit.CO)
+      {
+      double power = 0; // value in funds of the charge we're getting
+
+      power += ((double)damageEntry.getValue()) / unit.model.maxHP * unit.model.getCost();
+
+      // Convert funds to ability power units
+      power /= CHARGERATIO_FUNDS;
+
+      modifyAbilityPower(power);
+      }
     }
   }
 

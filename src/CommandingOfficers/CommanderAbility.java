@@ -6,6 +6,7 @@ import Terrain.MapMaster;
 
 public abstract class CommanderAbility implements Serializable
 {
+  private static final long serialVersionUID = 1L;
   public static final int PHASE_TURN_START = 1;
   public static final int PHASE_BUY = PHASE_TURN_START << 1;
   public static final int PHASE_TURN_END = PHASE_BUY << 1;

@@ -10,7 +10,6 @@ import Engine.Combat.BattleInstance.BattleParams;
 import Engine.Combat.BattleInstance.CombatContext;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.Weapons.Weapon;
@@ -20,11 +19,12 @@ import Units.Weapons.Weapon;
  */
 public class Venge extends Commander
 {
-  private static final long serialVersionUID = -8207164779284734879L;
+  private static final long serialVersionUID = 1L;
 
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Venge");
@@ -73,7 +73,7 @@ public class Venge extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     GameEventQueue events = super.initTurn(map);
     counterAtFullPower = false;
@@ -154,6 +154,7 @@ public class Venge extends Commander
    */
   private static class IronWill extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Iron Will";
     private static final int COST = 3;
     private static final int IRONWILL_BUFF = 30; // Get a nice defense boost, since we can't counter-attack if we're dead.
@@ -181,6 +182,7 @@ public class Venge extends Commander
    */
   private static class Retribution extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String NAME = "Retribution";
     private static final int COST = 6;
     private static final int RETRIBUTION_BUFF = 30; // Trade defense for offense, since we hit before our attacker does.

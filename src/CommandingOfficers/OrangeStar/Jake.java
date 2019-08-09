@@ -56,7 +56,7 @@ public class Jake extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     this.plainsBuff = 10;
     return super.initTurn(map);

@@ -1,13 +1,6 @@
 package Engine;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Queue;
-
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
@@ -45,7 +38,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   private InputMode inputMode;
 
-  Queue<Unit> unitsToInit = null;
   private boolean isGameOver;
 
   /** Just a simple struct to hold the currently-selected unit and its tentative path. */
@@ -76,7 +68,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
     myView = view;
     myView.setController(this);
     inputMode = InputMode.INPUT;
-    unitsToInit = new ArrayDeque<Unit>();
     isGameOver = false;
     nextSeekIndex = 0;
     contemplatedAction = new ContemplatedAction();
@@ -542,14 +533,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
       GameEventListener.publishEvent(event);
     }
 
-    if( animEventQueueIsEmpty && !unitsToInit.isEmpty() )
-    {
-      animEventQueueIsEmpty = false;
-      Unit u = unitsToInit.poll();
-      GameEventQueue events = u.initTurn(myGame.gameMap);
-      myView.animate(events);
-    }
-
     if( animEventQueueIsEmpty )
     {
       for( Commander co : myGame.commanders )
@@ -636,9 +619,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     // Reinitialize the InputStateHandler for the new turn.
     myGameInputHandler = new GameInputHandler(myGame.activeCO.myView, myGame.activeCO, this);
-
-    // Add the CO's units to the queue so we can initialize them.
-    unitsToInit.addAll(myGame.activeCO.units);
 
     if( !turnEvents.isEmpty() ) // If there's nothing to animate, don't animate it twice
     {

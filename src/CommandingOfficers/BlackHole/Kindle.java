@@ -52,7 +52,7 @@ public class Kindle extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     this.urbanBuff = 40;
     return super.initTurn(map);

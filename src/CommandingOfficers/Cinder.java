@@ -22,11 +22,12 @@ import Units.UnitModel;
  */
 public class Cinder extends Commander
 {
-  private static final long serialVersionUID = 4938851182463546620L;
+  private static final long serialVersionUID = 1L;
 
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Cinder");
@@ -86,6 +87,7 @@ public class Cinder extends Commander
    * To compensate for the ability to continue producing units in a single turn,
    * the cost of units increases exponentially for repeated purchases from a single property.
    */
+  @Override
   public void receiveCreateUnitEvent(Unit unit)
   {
     if( this == unit.CO )
@@ -103,7 +105,7 @@ public class Cinder extends Commander
    * Purchase price problems reset at the start of turn.
    */
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     // If we haven't initialized our buildable locations yet, do so.
     if( buildCounts.size() < 1 )
@@ -153,6 +155,7 @@ public class Cinder extends Commander
    */
   private static class SearAbility extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
     private static final String SEAR_NAME = "Sear";
     private static final int SEAR_COST = 5;
     private static final int SEAR_WOUND = -1;
@@ -183,6 +186,7 @@ public class Cinder extends Commander
    */
   private static class WitchFireAbility extends CommanderAbility implements COModifier
   {
+    private static final long serialVersionUID = 1L;
     private static final String WITCHFIRE_NAME = "Witchfire";
     private static final int WITCHFIRE_COST = 9;
     private static final int WITCHFIRE_HP_COST = 1;
@@ -215,6 +219,7 @@ public class Cinder extends Commander
 
   private static class WitchFireListener extends GameEventListener
   {
+    private static final long serialVersionUID = 1L;
     private Commander myCommander = null;
     private final int refreshCost;
 

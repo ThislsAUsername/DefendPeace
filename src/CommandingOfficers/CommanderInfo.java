@@ -7,6 +7,7 @@ import Engine.GameScenario;
 
 public abstract class CommanderInfo implements Serializable
 {
+  private static final long serialVersionUID = 1L;
   public final String name;
   public ArrayList<InfoPage> infoPages;
 
@@ -20,6 +21,7 @@ public abstract class CommanderInfo implements Serializable
 
   public static class InfoPage implements Serializable
   {
+    private static final long serialVersionUID = 1L;
     public enum PageType {
       CO_HEADERS, GAME_STATUS, BASIC
     }

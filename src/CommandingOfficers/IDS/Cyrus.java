@@ -59,7 +59,7 @@ public class Cyrus extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(GameMap map)
+  public GameEventQueue initTurn(MapMaster map)
   {
     terrainDrain = 1;
     counterFirst = false;
