@@ -3,6 +3,7 @@ package Units;
 import java.util.Vector;
 
 import Engine.UnitActionType;
+import Engine.UnitActionType.Unload;
 import Units.MoveTypes.FloatHeavy;
 import Units.MoveTypes.MoveType;
 import Units.Weapons.CarrierMissiles;
@@ -25,6 +26,7 @@ public class CarrierModel extends UnitModel
   {
     super("Carrier", UnitEnum.CARRIER, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType, actions, weapons);
     holdingCapacity = 2;
+    possibleActions.add(UnitActionType.UNLOAD);
     UnitEnum[] carryable = { UnitEnum.B_COPTER, UnitEnum.T_COPTER, UnitEnum.FIGHTER, UnitEnum.BOMBER, UnitEnum.STEALTH, UnitEnum.BBOMB };
     holdables = new Vector<UnitEnum>(carryable.length);
     for( int i = 0; i < holdables.capacity(); i++ )
