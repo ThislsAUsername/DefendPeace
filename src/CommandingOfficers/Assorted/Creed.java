@@ -22,6 +22,7 @@ public class Creed extends Commander
       super("Creed");
       infoPages.add(new InfoPage(
           "Ursarkar E. Creed\n" + 
+          "  Even the Chaos Gods tremble at his reality-warping powers.\n" +
           "  Units cost -50% less to build, and can act immediately\n" + 
           "Tactical Genius (5): May deploy any unit from cities"));
     }
