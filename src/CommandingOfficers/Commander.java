@@ -447,7 +447,7 @@ public class Commander extends GameEventListener implements Serializable
   }
 
   /**
-   * Track mass damage done to my units, and get ability power based on it.
+   * Track mass damage done to my units, and get nothing.
    */
   @Override
   public void receiveMassDamageEvent(Map<Unit, Integer> lostHP)
@@ -464,7 +464,7 @@ public class Commander extends GameEventListener implements Serializable
       // Convert funds to ability power units
       power /= CHARGERATIO_FUNDS;
 
-      modifyAbilityPower(power);
+//      modifyAbilityPower(power);
       }
     }
   }
