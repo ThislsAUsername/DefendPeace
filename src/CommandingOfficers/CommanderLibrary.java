@@ -47,7 +47,6 @@ import CommandingOfficers.IDS.PennyCS;
 import CommandingOfficers.IDS.PennyRNG;
 import CommandingOfficers.IDS.PolyTabitha;
 import CommandingOfficers.IDS.TabithaBasic;
-import CommandingOfficers.IDS.TabithaEngine;
 import CommandingOfficers.Lazuria.Davis;
 import CommandingOfficers.Lazuria.Forsythe;
 import CommandingOfficers.Lazuria.Gage;

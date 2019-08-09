@@ -1,6 +1,7 @@
 package CommandingOfficers.Assorted;
 
 import Engine.GameScenario;
+import Engine.UnitActionType;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -10,6 +11,7 @@ import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
+import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
 
 public class Sneakfield extends Commander
@@ -39,7 +41,11 @@ public class Sneakfield extends Commander
 
     for( UnitModel um : unitModels.values() )
     {
-      // TODO: stealths
+      if ( um.type == UnitEnum.STEALTH || um.type == UnitEnum.STEALTH_HIDE)
+      {
+        um.modifyDamageRatio(10);
+        um.modifyDefenseRatio(30);
+      }
       if( um.chassis == ChassisEnum.SUBMERGED || um.chassis == ChassisEnum.SHIP ||
           um.chassis == ChassisEnum.AIR_LOW )
       {

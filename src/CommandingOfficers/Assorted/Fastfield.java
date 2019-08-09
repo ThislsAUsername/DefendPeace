@@ -1,15 +1,18 @@
 package CommandingOfficers.Assorted;
 
 import Engine.GameScenario;
+import Engine.UnitActionType;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
+import CommandingOfficers.Assorted.Greyfield.BuildSeaplane;
 import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModel.ChassisEnum;
+import Units.UnitModel.UnitEnum;
 import Units.Weapons.Weapon;
 
 public class Fastfield extends Commander
@@ -41,7 +44,23 @@ public class Fastfield extends Commander
 
     for( UnitModel um : unitModels.values() )
     {
-      // TODO: stealths
+      if ( um.type == UnitEnum.STEALTH || um.type == UnitEnum.STEALTH_HIDE)
+      {
+        um.possibleActions.clear();
+        for( UnitActionType action : UnitActionType.COMBAT_VEHICLE_ACTIONS )
+        {
+          um.possibleActions.add(action);
+        }
+        um.name = "Seaplane";
+        um.hidden = false;
+        um.moneyCostAdjustment = -9000;
+        um.movePower += 1;
+        um.modifyDamageRatio(10);
+        um.modifyDefenseRatio(30);
+      }
+      if ( um.type == UnitEnum.CARRIER)
+        um.possibleActions.add(new BuildSeaplane(this));
+      
       if( um.chassis == ChassisEnum.SUBMERGED || um.chassis == ChassisEnum.SHIP ||
           um.chassis == ChassisEnum.AIR_LOW )
       {
