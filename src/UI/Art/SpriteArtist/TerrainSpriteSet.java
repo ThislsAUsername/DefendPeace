@@ -404,6 +404,7 @@ public class TerrainSpriteSet
       terrainObjects.add(TerrainType.SEAPORT);
       terrainObjects.add(TerrainType.HEADQUARTERS);
       terrainObjects.add(TerrainType.LAB);
+      terrainObjects.add(TerrainType.TOWER);
       terrainObjects.add(TerrainType.MOUNTAIN);
       terrainObjects.add(TerrainType.PILLAR);
     }

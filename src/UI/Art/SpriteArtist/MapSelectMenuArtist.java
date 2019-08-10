@@ -152,7 +152,7 @@ public class MapSelectMenuArtist
     int propsDrawY = maxMiniMapHeight+buffer+(characterHeight)+buffer - (sqSize/2); // Map  pane plus "# players" string plus buffer, minus 1/2sq.
 
     // Define an array with all the property types we care to enumerate.
-    TerrainType[] propertyTypes = {TerrainType.CITY, TerrainType.FACTORY, TerrainType.AIRPORT, TerrainType.SEAPORT};
+    TerrainType[] propertyTypes = {TerrainType.CITY, TerrainType.FACTORY, TerrainType.AIRPORT, TerrainType.SEAPORT, TerrainType.TOWER};
     for(int i = 0; i < propertyTypes.length; ++i)
     {
       TerrainType terrain = propertyTypes[i];
