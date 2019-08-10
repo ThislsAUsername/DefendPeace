@@ -178,7 +178,7 @@ public class BattleInstance
       this.attacker = attacker;
       this.defender = defender;
       baseDamage = attackerWeapon.getDamage(defender.model);
-      attackFactor = attacker.model.getDamageRatio();
+      attackFactor = attacker.model.getDamageRatio() + attacker.CO.getTowerBoost();
       attackerHP = attacker.getHP();
       defenseFactor = defender.model.getDefenseRatio();
       defenderHP = defender.getHP();

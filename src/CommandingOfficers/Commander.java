@@ -85,11 +85,9 @@ public class Commander extends GameEventListener implements Serializable
   public boolean isDefeated = false;
   public XYCoord HQLocation = null;
   private double myAbilityPower = 0;
-  private int numTowers = 0;
 
   ArrayList<CommanderAbility> myAbilities = null;
   private String myActiveAbilityName = "";
-  private TowerListener myTowerListener = null;
 
   // The AI has to be effectively stateless anyway (to be able to adapt to whatever scenario it finds itself in on map start),
   //   so may as well not require them to care about serializing their contents.
@@ -160,10 +158,6 @@ public class Commander extends GameEventListener implements Serializable
     ownedProperties = new HashSet<XYCoord>();
 
     myAbilities = new ArrayList<CommanderAbility>();
-    
-    // Handles tower damage boost
-    myTowerListener = new TowerListener(this);
-    GameEventListener.registerEventListener(myTowerListener);
   }
 
   protected void addCommanderAbility(CommanderAbility ca)
@@ -201,11 +195,9 @@ public class Commander extends GameEventListener implements Serializable
     myView.resetFog();
   }
   
-  public void adjustTowerPower() {
-	  // First, revert all previous damage modifiers
-	  new CODamageModifier(10*numTowers).revertChanges(this);
+  public int getTowerBoost() {
 	  // Count number of towers, and apply new modifiers
-	  numTowers = 0;
+	  int numTowers = 0;
 	  for (XYCoord xy : this.ownedProperties) 
 	  {
 		  Location loc = this.myView.getLocation(xy);
@@ -215,23 +207,7 @@ public class Commander extends GameEventListener implements Serializable
 			  numTowers += 1;
 		  }
 	  }
-	  new CODamageModifier(10*numTowers).applyChanges(this);
-  }
-  
-  private static class TowerListener extends GameEventListener{
-    private static final long serialVersionUID = 1L;
-    private Commander myCommander = null;
-	  public TowerListener(Commander myCo) {
-		  myCommander = myCo;
-	  }
-	  
-	  @Override
-	  public void receiveCaptureEvent(Unit unit, Location location) {
-		  if (unit.CO == myCommander && location.getEnvironment().terrainType.equals(TerrainType.TOWER))
-		  {
-			  myCommander.adjustTowerPower();
-		  }
-	  }
+	  return 10 * numTowers;
   }
 
   /**
@@ -241,7 +217,6 @@ public class Commander extends GameEventListener implements Serializable
   public GameEventQueue initTurn(MapMaster map)
   {
     myView.resetFog();
-    adjustTowerPower();
     myActiveAbilityName = "";
 
     // Accrue income for each city under your control.
