@@ -90,11 +90,10 @@ public interface GameAction
       int attackRange = -1;
       boolean isValid = true;
       isValid &= attacker != null && !attacker.isTurnOver;
-      isValid &= (null != gameMap) && (gameMap.isLocationValid(attackLocation));
+      isValid &= (null != gameMap) && (gameMap.isLocationValid(attackLocation)) && gameMap.isLocationValid(moveCoord);
       isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       if( isValid )
       {
-        isValid &= gameMap.isLocationValid(moveCoord);
         attackRange = Math.abs(moveCoord.xCoord - attackLocation.xCoord)
             + Math.abs(moveCoord.yCoord - attackLocation.yCoord);
 
