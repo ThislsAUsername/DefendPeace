@@ -216,7 +216,7 @@ public class MapWindow extends GameMap
     {
       for( XYCoord coord : Utils.findVisibleLocations(this, scout, false) )
       {
-        revealFog(coord, true);
+        revealFog(coord, false);
       }
       // We need to do a second pass with piercing vision so we can know whether to reveal the units
       for( XYCoord coord : Utils.findVisibleLocations(this, scout, true) )

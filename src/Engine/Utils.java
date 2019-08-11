@@ -560,8 +560,8 @@ public class Utils
     if( map.isLocationValid(x, y) )
     {
       int range = (piercing)? viewer.model.visionRangePiercing : viewer.model.visionRange;
-      // if it's a surface unit, give it the boost the terrain would provide
-      if( viewer.model.isSurfaceUnit() )
+      // if it's a surface unit, give it the boost the terrain would provide, so long as it's not adjacent-only vision
+      if( (!piercing || range > 1) && viewer.model.isSurfaceUnit() )
         range += map.getEnvironment(x, y).terrainType.getVisionBoost();
       viewables.addAll(findVisibleLocations(map, new XYCoord(x, y), range, piercing));
     }
