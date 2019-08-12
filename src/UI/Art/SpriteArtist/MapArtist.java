@@ -223,6 +223,7 @@ public class MapArtist
 
   private static class MapImageUpdater extends GameEventListener
   {
+    private static final long serialVersionUID = 1L;
     MapArtist myArtist;
     MapImageUpdater(MapArtist artist)
     {

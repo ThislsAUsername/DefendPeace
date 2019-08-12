@@ -22,6 +22,7 @@ import Units.Weapons.WeaponModel;
 
 public class Unit implements Serializable
 {
+  private static final long serialVersionUID = 1L;
   public Vector<Unit> heldUnits;
   public UnitModel model;
   public int x;

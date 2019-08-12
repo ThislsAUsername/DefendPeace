@@ -11,11 +11,12 @@ import Units.Unit;
 
 public class Patch extends Commander
 {
-  private static final long serialVersionUID = -543799935457360451L;
+  private static final long serialVersionUID = 1L;
 
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Patch");
@@ -74,6 +75,7 @@ public class Patch extends Commander
    *  property, so long as that property is one that generates income. */
   private static class LootAbility extends GameEventListener
   {
+    private static final long serialVersionUID = 1L;
     private Commander myCommander = null;
 
     public LootAbility(Commander myCo)
@@ -96,6 +98,7 @@ public class Patch extends Commander
    * income based on damage inflicted to enemies. */
   private static class PatchAbility extends CommanderAbility implements COModifier
   {
+    private static final long serialVersionUID = 1L;
     private DamageDealtToIncomeConverter listener = null;
     private CODamageModifier damageBuff = null;
 
@@ -146,6 +149,7 @@ public class Patch extends Commander
    */
   private static class DamageDealtToIncomeConverter extends GameEventListener
   {
+    private static final long serialVersionUID = 1L;
     private Commander myCommander = null;
     private double myIncomeRatio = 0.0;
 

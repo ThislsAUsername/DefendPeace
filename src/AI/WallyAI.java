@@ -28,7 +28,6 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.UnitEnum;
 import Units.MoveTypes.MoveType;
 import Units.Weapons.Weapon;
 import Units.Weapons.WeaponModel;
@@ -64,6 +63,7 @@ public class WallyAI implements AIController
   }
   public static final AIMaker info = new instantiator();
 
+  @Override
   public AIMaker getAIInfo()
   {
     return info;

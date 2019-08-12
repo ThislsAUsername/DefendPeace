@@ -5,6 +5,8 @@ import Terrain.TerrainType;
 
 public class Tires extends MoveTypeLand
 {
+  private static final long serialVersionUID = 1L;
+
   public Tires()
   {
     // Wheels are no good for mountains or rivers; disable movement for all weather types.

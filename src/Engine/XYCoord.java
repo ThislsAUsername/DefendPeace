@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class XYCoord implements Serializable
 {
-
+  private static final long serialVersionUID = 1L;
   public final int xCoord;
   public final int yCoord;
 

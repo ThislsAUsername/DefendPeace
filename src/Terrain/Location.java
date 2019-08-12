@@ -1,9 +1,6 @@
 package Terrain;
 
 import java.util.ArrayDeque;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import CommandingOfficers.Commander;
@@ -13,6 +10,7 @@ import Units.Unit;
 
 public class Location implements Serializable
 {
+  private static final long serialVersionUID = 1L;
   private Environment environs = null;
   private Commander owner = null;
   private Unit resident = null;

@@ -5,6 +5,8 @@ import Terrain.TerrainType;
 
 public class Flight extends MoveTypeAir
 {
+  private static final long serialVersionUID = 1L;
+
   public Flight()
   {
     // Override specific move cost values.

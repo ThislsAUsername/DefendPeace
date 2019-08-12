@@ -6,6 +6,8 @@ import Units.UnitModel;
 
 public class WeaponModel implements Serializable
 {
+  private static final long serialVersionUID = 1L;
+
   public enum WeaponType
   {
     INFANTRYMGUN, MECHZOOKA, MECHMGUN,

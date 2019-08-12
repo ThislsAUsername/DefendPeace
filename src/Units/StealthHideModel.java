@@ -4,6 +4,7 @@ import Engine.UnitActionType;
 
 public class StealthHideModel extends StealthModel
 {
+  private static final long serialVersionUID = 1L;
   private static final int IDLE_FUEL_BURN = 8;
 
   public StealthHideModel()

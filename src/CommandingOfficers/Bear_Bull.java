@@ -1,6 +1,5 @@
 package CommandingOfficers;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -23,11 +22,12 @@ import Units.UnitModel;
  */
 public class Bear_Bull extends Commander
 {
-  private static final long serialVersionUID = -3048055535977630509L;
+  private static final long serialVersionUID = 1L;
   
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
   {
+    private static final long serialVersionUID = 1L;
     public instantiator()
     {
       super("Bear&Bull");
@@ -120,6 +120,7 @@ public class Bear_Bull extends Commander
    */
   private static class UpDownTurnAbility extends CommanderAbility implements COModifier
   {
+    private static final long serialVersionUID = 1L;
     private static final String UPTURN_NAME = "UpTurn";
     private static final String DOWNTURN_NAME = "DownTurn";
     private static final int DOWNUPTURN_COST = 3;
@@ -188,6 +189,7 @@ public class Bear_Bull extends Commander
    */
   private static class BustBoomAbility extends CommanderAbility implements COModifier
   {
+    private static final long serialVersionUID = 1L;
     private static final String BUST_NAME = "Bust";
     private static final String BOOM_NAME = "Boom";
     private static final int BOOMBUST_COST = 6;

@@ -37,6 +37,8 @@ public class InputHandler
       case RIGHT:
         rightHeld++;
         break;
+      default:
+        break;
     }
     return input;
   }
@@ -99,6 +101,8 @@ public class InputHandler
         break;
       case RIGHT:
         rightHeld = 0;
+        break;
+      default:
         break;
     }
   }

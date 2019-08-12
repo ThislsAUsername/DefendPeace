@@ -2,6 +2,7 @@ package Units.Weapons;
 
 public class CopterRockets extends WeaponModel
 {
+  private static final long serialVersionUID = 1L;
 
   public CopterRockets()
   {

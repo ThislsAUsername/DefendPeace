@@ -62,7 +62,7 @@ import Units.UnitModel.UnitEnum;
 
 public class Commander extends GameEventListener implements Serializable
 {
-  private static final long serialVersionUID = -6740892333060450105L;
+  private static final long serialVersionUID = 1L;
   
   public final CommanderInfo coInfo;
   public final GameScenario.GameRules gameRules;

@@ -8,6 +8,7 @@ import Units.Weapons.WeaponModel;
 
 public class MobileSAMModel extends UnitModel
 {
+  private static final long serialVersionUID = 1L;
   private static final int UNIT_COST = 12000;
   private static final int MAX_FUEL = 50;
   private static final int IDLE_FUEL_BURN = 0;

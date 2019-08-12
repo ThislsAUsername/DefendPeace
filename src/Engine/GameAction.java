@@ -13,7 +13,6 @@ import Engine.GameEvents.CommanderAbilityEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEvent;
-import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.LoadEvent;
@@ -91,11 +90,10 @@ public interface GameAction
       int attackRange = -1;
       boolean isValid = true;
       isValid &= attacker != null && !attacker.isTurnOver;
-      isValid &= (null != gameMap) && (gameMap.isLocationValid(attackLocation));
+      isValid &= (null != gameMap) && (gameMap.isLocationValid(attackLocation)) && gameMap.isLocationValid(moveCoord);
       isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       if( isValid )
       {
-        Location moveLocation = gameMap.getLocation(moveCoord);
         attackRange = Math.abs(moveCoord.xCoord - attackLocation.xCoord)
             + Math.abs(moveCoord.yCoord - attackLocation.yCoord);
 

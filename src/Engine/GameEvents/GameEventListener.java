@@ -25,6 +25,7 @@ import Units.UnitModel;
  */
 public abstract class GameEventListener implements Serializable
 {
+  private static final long serialVersionUID = 1L;
   /** Static list of all event subscribers */
   private static Set<GameEventListener> eventListeners = Collections.newSetFromMap(new WeakHashMap<GameEventListener, Boolean>());
 

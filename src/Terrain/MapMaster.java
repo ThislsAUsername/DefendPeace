@@ -9,6 +9,7 @@ import Units.UnitModel.UnitEnum;
 
 public class MapMaster extends GameMap
 {
+  private static final long serialVersionUID = 1L;
   private Location[][] map;
   public CommandingOfficers.Commander[] commanders;
 
@@ -113,6 +114,7 @@ public class MapMaster extends GameMap
   /**
    * Returns true if (x,y) lies within the GameMap, false else.
    */
+  @Override
   public boolean isLocationValid(XYCoord coords)
   {
     return (coords != null) && isLocationValid(coords.xCoord, coords.yCoord);
@@ -121,17 +123,20 @@ public class MapMaster extends GameMap
   /**
    * Returns true if (x,y) lies within the GameMap, false else.
    */
+  @Override
   public boolean isLocationValid(int x, int y)
   {
     return !(x < 0 || x >= mapWidth || y < 0 || y >= mapHeight);
   }
 
   /** Returns the Environment of the specified tile, or null if that location does not exist. */
+  @Override
   public Environment getEnvironment(XYCoord coord)
   {
     return getEnvironment(coord.xCoord, coord.yCoord);
   }
   /** Returns the Environment of the specified tile, or null if that location does not exist. */
+  @Override
   public Environment getEnvironment(int w, int h)
   {
     if( !isLocationValid(w, h) )
@@ -142,6 +147,7 @@ public class MapMaster extends GameMap
   }
 
   /** Returns the Location at the specified location, or null if that Location does not exist. */
+  @Override
   public Location getLocation(XYCoord location)
   {
     if (null != location)
@@ -150,6 +156,7 @@ public class MapMaster extends GameMap
   }
 
   /** Returns the Location at the specified location, or null if that Location does not exist. */
+  @Override
   public Location getLocation(int w, int h)
   {
     if( !isLocationValid(w, h) )
@@ -159,6 +166,7 @@ public class MapMaster extends GameMap
     return map[w][h];
   }
 
+  @Override
   public void clearAllHighlights()
   {
     for( int w = 0; w < mapWidth; ++w )
@@ -171,24 +179,28 @@ public class MapMaster extends GameMap
   }
 
   /** Returns true if no unit is at the specified x and y coordinate, false else */
+  @Override
   public boolean isLocationEmpty(XYCoord coords)
   {
     return isLocationEmpty(null, coords);
   }
 
   /** Returns true if no unit is at the specified x and y coordinate, false else */
+  @Override
   public boolean isLocationEmpty(int x, int y)
   {
     return isLocationEmpty(null, x, y);
   }
 
   /** Returns true if no unit (excluding 'unit') is in the specified Location. */
+  @Override
   public boolean isLocationEmpty(Unit unit, XYCoord coords)
   {
     return isLocationEmpty(unit, coords.xCoord, coords.yCoord);
   }
 
   /** Returns true if no unit (excluding 'unit') is in the specified Location. */
+  @Override
   public boolean isLocationEmpty(Unit unit, int x, int y)
   {
     boolean empty = true;
@@ -280,10 +292,12 @@ public class MapMaster extends GameMap
    * Returns true if the location lies outside the GameMap.
    * False otherwise
    */
+  @Override
   public boolean isLocationFogged(XYCoord coord)
   {
     return isLocationFogged(coord.xCoord, coord.yCoord);
   }
+  @Override
   public boolean isLocationFogged(int x, int y)
   {
     return (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) ? true : false;

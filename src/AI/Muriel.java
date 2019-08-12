@@ -56,6 +56,7 @@ public class Muriel implements AIController
   }
   public static final AIMaker info = new instantiator();
   
+  @Override
   public AIMaker getAIInfo()
   {
     return info;
@@ -618,7 +619,7 @@ public class Muriel implements AIController
       if( counters.isEmpty() )
       {
         log("  No suitable counters identified.");
-        enemyUnitStrengths.remove(enemyToCounter);
+        enemyUnitStrengths.poll();
         continue; // We can't build anything useful. Bah, humbug.
       }
 
@@ -843,5 +844,5 @@ public class Muriel implements AIController
 
   /** Stores an object with info about how well UnitModelPair.first fares against UnitModelPair.second on average. */
   private class UnitEffectivenessMap extends HashMap<UnitModelPair, UnitMatchupAndMetaInfo>
-  {private static final long serialVersionUID = -4954625729036690735L;}
+  {private static final long serialVersionUID = 1L;}
 }
