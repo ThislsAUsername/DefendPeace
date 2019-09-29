@@ -28,6 +28,8 @@ public class GameStatsController implements InfoController
     
     coOptionSelector = new OptionSelector(myGame.commanders.length);
     pageSelector = new OptionSelector(infoPages.size());
+    
+    coOptionSelector.setSelectedOption(myGame.getActiveCOIndex());
   }
 
   @Override

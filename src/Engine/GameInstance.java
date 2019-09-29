@@ -86,6 +86,20 @@ public class GameInstance implements Serializable
     return isFogEnabled;
   }
 
+  public int getActiveCOIndex()
+  {
+    return getCOIndex(activeCO);
+  }
+  public int getCOIndex(Commander co)
+  {
+    for( int i = 0; i < commanders.length; ++i )
+    {
+      if( co == commanders[i] )
+        return i;
+    }
+    return -1;
+  }
+
   public void setCursorLocation(XYCoord loc)
   {
     setCursorLocation(loc.xCoord, loc.yCoord);
