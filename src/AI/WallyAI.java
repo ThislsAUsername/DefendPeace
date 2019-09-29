@@ -590,7 +590,8 @@ public class WallyAI implements AIController
       for( XYCoord coord : unownedProperties )
       {
         Location loc = gameMap.getLocation(coord);
-        if( loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS && loc.getOwner() != null )
+        if( (loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS || TerrainType.LAB == loc.getEnvironment().terrainType)
+            && loc.getOwner() != null)
         {
           goals.add(coord);
         }
