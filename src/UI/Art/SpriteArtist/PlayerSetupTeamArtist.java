@@ -70,7 +70,7 @@ public class PlayerSetupTeamArtist
       if( (drawYCenter > -panelHeight/2) && ( drawYCenter < SpriteOptions.getScreenDimensions().getHeight()+(panelHeight/2) ) )
       {
         PlayerSetupInfo playerInfo = control.getPlayerInfo(i);
-        Integer key = new Integer(i);
+        Integer key = i;
 
         // Get the relevant PlayerPanel.
         if( !teamPanels.containsKey(key) ) teamPanels.put(key, new TeamPanel(playerInfo));
@@ -174,9 +174,8 @@ public class PlayerSetupTeamArtist
       Graphics g = myImage.getGraphics();
       if( teamNumber != info.getCurrentTeam() )
       {
-        teamNumber = info.getCurrentTeam();
         teamFrame = new SpriteUIUtils.ImageFrame(commanderFrame.width+2, teamLabel.height+2, 28, 23, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUHIGHLIGHTCOLOR, true,
-            SpriteLibrary.getMapUnitHPSprites().getFrame(info.getCurrentTeam()));
+            SpriteUIUtils.getNumberAsImage(info.getCurrentTeam()));
         teamFrame.render(g);
       }
       if( !UIUtils.getPaletteName(info.getCurrentColor()).equals(colorName) )

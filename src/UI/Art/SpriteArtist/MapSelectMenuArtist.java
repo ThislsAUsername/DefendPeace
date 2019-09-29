@@ -208,18 +208,21 @@ public class MapSelectMenuArtist
     int numHeight = nums.getFrame(0).getHeight();
 
     // Property sprites are 2 tiles by two tiles, so we adjust sideways.
-    int propSize = SpriteLibrary.baseSpriteSize*2;
+    int propSize = SpriteLibrary.baseSpriteSize * 2;
     x += propSize - numWidth; // right-justify
-    if (num/100 > 0)
-      x += propSize/8; // shift over a bit so we stay centered with 3 digits
+    if( num / 10 > 0 )
+    {
+      x -= numWidth;
+      if( num / 100 > 0 )
+      {
+        x -= numWidth;
+        x += propSize / 8; // shift over a bit so we stay centered with 3 digits
+      }
+    }
     y += propSize - numHeight; // Bottom-justify - no double-digit adjustment.
 
-    do // We divide by 10 and truncate each time; expect three loops max.
-    {
-      int frame = num % 10;
-      g.drawImage(nums.getFrame(frame), x, y, numWidth, numHeight, null);
-      num /= 10; // Shift to the next higher digit in the number.
-      x -= numWidth; // Move the x-draw location to the left.
-    }while(num > 0);
+    BufferedImage numImage = SpriteUIUtils.getNumberAsImage(num);
+
+    g.drawImage(numImage, x, y, numImage.getWidth(), numImage.getHeight(), null);
   }
 }

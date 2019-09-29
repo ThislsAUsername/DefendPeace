@@ -273,9 +273,8 @@ public class PlayerSetupArtist
       }
       if( teamChanged )
       {
-        teamNumber = info.getCurrentTeam();
         teamPane = new SpriteUIUtils.ImageFrame(65, 23, 28, 23, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUHIGHLIGHTCOLOR, true,
-            SpriteLibrary.getMapUnitHPSprites().getFrame(info.getCurrentTeam()));
+            SpriteUIUtils.getNumberAsImage(info.getCurrentTeam()));
         teamPane.render(g);
       }
       if( aiChanged )

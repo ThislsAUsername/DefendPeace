@@ -327,4 +327,37 @@ public class SpriteUIUtils
       drawText(textImage.getGraphics(), text, 0, 0);
     return textImage;
   }
+
+  /**
+   * Returns a BufferedImage containing the input number rendered on one line (in map HP letters),
+   *  on a transparent background, with no scaling applied.
+   */
+  public static BufferedImage getNumberAsImage(int num)
+  {
+    Sprite nums = SpriteLibrary.getMapUnitHPSprites();
+    int numWidth = nums.getFrame(0).getWidth();
+    int numHeight = nums.getFrame(0).getHeight();
+
+    int digits = 1, divisor = 10; // Start the count at one, since "0" is still one digit
+    if( num / divisor > 0 )
+    {
+      divisor *= 10;
+      ++digits;
+    }
+
+    int width = nums.getFrame(0).getWidth() * digits;
+    int height = nums.getFrame(0).getHeight();
+    BufferedImage numImage = SpriteLibrary.createTransparentSprite(width, height);
+    Graphics g = numImage.getGraphics();
+
+    int x = width;
+    do // We divide by 10 and truncate each time; expect three loops max.
+    {
+      int frame = num % 10;
+      x -= numWidth; // Move the x-draw location to the left.
+      g.drawImage(nums.getFrame(frame), x, 0, numWidth, numHeight, null);
+      num /= 10; // Shift to the next higher digit in the number.
+    } while (num > 0);
+    return numImage;
+  }
 }
