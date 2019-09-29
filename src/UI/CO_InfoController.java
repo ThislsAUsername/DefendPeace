@@ -29,6 +29,7 @@ public class CO_InfoController implements InfoController
     }
     
     init(infos);
+    coOptionSelector.setSelectedOption(myGame.getActiveCOIndex());
   }
 
   public CO_InfoController( ArrayList<CommanderInfo> infos, int startingIndex )

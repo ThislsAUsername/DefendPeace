@@ -279,7 +279,6 @@ public interface GameAction
         captureLocation = map.getLocation(movePathEnd);
         isValid &= captureLocation.isCaptureable(); // Valid location
         isValid &= actor.CO.isEnemy(captureLocation.getOwner()); // Valid CO
-        isValid &= (null == captureLocation.getResident()) || (actor == captureLocation.getResident());
       }
 
       // Generate events
@@ -365,12 +364,6 @@ public interface GameAction
       isValid &= null != actor && !actor.isTurnOver;
       isValid &= (null != movePath) && (movePath.getPathLength() > 0);
       isValid &= (null != gameMap);
-      if( isValid )
-      {
-        XYCoord movePathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
-        Location moveLocation = gameMap.getLocation(movePathEnd);
-        isValid &= (null == moveLocation.getResident()) || (actor == moveLocation.getResident());
-      }
 
       // Generate events.
       if( isValid )
@@ -760,12 +753,6 @@ public interface GameAction
       if( isValid )
       {
         // Figure out where we are acting.
-        Location loc = map.getLocation(myLocation());
-        isValid &= (null == loc.getResident()) || (unitActor == loc.getResident());
-      }
-      if( isValid )
-      {
-        // Figure out where we are acting.
         supplyLocation = myLocation();
 
         // Add a move event if we need to move.
@@ -875,12 +862,6 @@ public interface GameAction
       }
       else
         isValid = false;
-
-      if( isValid )
-      {
-        Location moveLocation = gameMap.getLocation(moveCoord);
-        isValid &= (null == moveLocation.getResident()) || (benefactor == moveLocation.getResident());
-      }
 
       if( isValid )
       {
