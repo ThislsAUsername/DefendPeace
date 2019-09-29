@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
 import Engine.IController;
+import Engine.XYCoord;
 import Terrain.MapInfo;
 import UI.PlayerSetupInfo;
 import UI.PlayerSetupTeamController;
@@ -114,6 +115,7 @@ public class PlayerSetupTeamArtist
 
     // Draw the mini map.
     myG.drawImage(miniMap, mapLeft, mapTop, mapWidth, mapHeight, null);
+    drawPlayerPropertyHighlights(myG, mapLeft, mapTop, mapInfo, mmScale, highlightedPlayer, (int) (Math.abs(target - player0YCenter.get())/4));
 
     // Render the final composed image to the window.
     g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
@@ -186,6 +188,22 @@ public class PlayerSetupTeamArtist
         commanderFrame.render(g);
       }
       return myImage;
+    }
+  }
+
+  /**
+   * Draws little white boxes around all the currently-highlighted player's properties.
+   * @param distance - defines how far the boxes should be from the property edge (serves to highlight the new properties when switching between players)
+   */
+  private static void drawPlayerPropertyHighlights(Graphics g, int baseX, int baseY, MapInfo mapInfo, int scale, int faction, int distance)
+  {
+    g.setColor(Color.WHITE);
+    XYCoord[] ownedCoords = mapInfo.COProperties[faction];
+    for( XYCoord coord : ownedCoords )
+    {
+      int x = baseX + coord.xCoord * scale - distance, y = baseY + coord.yCoord * scale - distance;
+      int s = scale + distance * 2;
+      g.drawRect(x, y, s, s);
     }
   }
 }
