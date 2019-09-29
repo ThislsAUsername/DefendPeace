@@ -105,7 +105,7 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
           // Highlight the selected CO
           if( i == coIndex )
           {
-            overlayG.setColor(new Color(246, 234, 210));
+            overlayG.setColor(SpriteUIUtils.MENUHIGHLIGHTCOLOR);
             overlayG.fillRect(0, 0, drawingWidth, coEntryHeight);
           }
 

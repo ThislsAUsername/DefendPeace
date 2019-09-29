@@ -339,7 +339,7 @@ public class SpriteUIUtils
     int numHeight = nums.getFrame(0).getHeight();
 
     int digits = 1, divisor = 10; // Start the count at one, since "0" is still one digit
-    if( num / divisor > 0 )
+    while (num / divisor > 0)
     {
       divisor *= 10;
       ++digits;
