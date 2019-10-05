@@ -101,24 +101,24 @@ public class TestCOModifier extends TestCase
     ArrayList<UnitModel> factoryModels = patch.unitProductionByTerrain.get(FC);
     
     // Define a type we want to add, and verify it isn't already buildable.
-    UnitModel bship = patch.getUnitModel(UnitModel.UnitEnum.BATTLESHIP);
-    testPassed &= validate( !factoryModels.contains(bship), "    Factory can build Battleship by default. Malformed test!" );
+    UnitModel ship = patch.unitProductionByTerrain.get(TerrainType.SEAPORT).get(3);
+    testPassed &= validate( !factoryModels.contains(ship), "    Factory can build ships by default. Malformed test!" );
     
     // Define a type we will try to add, that is buildable already.
     UnitModel inf = patch.getUnitModel(UnitModel.UnitEnum.INFANTRY);
     testPassed &= validate( factoryModels.contains(inf), "    Factory cannot build infantry by default. Malformed test!" );
     
     // Try to add both types.
-    UnitProductionModifier upMod = new UnitProductionModifier(FC, bship);
+    UnitProductionModifier upMod = new UnitProductionModifier(FC, ship);
     upMod.addProductionPair(FC, inf);
     upMod.applyChanges(patch);
     
     // Verify that Patch can now build Battleships from a factory.
-    testPassed &= validate( factoryModels.contains(bship), "    Factory cannot build Battleships, though it should be able to now.");
+    testPassed &= validate( factoryModels.contains(ship), "    Factory cannot build ships, though it should be able to now.");
     
     // Revert the mod and ensure we can no longer build battleships.
     upMod.revertChanges(patch);
-    testPassed &= validate( !factoryModels.contains(bship), "    Factory can still build Battleships, though it should not.");
+    testPassed &= validate( !factoryModels.contains(ship), "    Factory can still build ships, though it should not.");
     
     // Make sure it didn't also remove the ability to construct Infantry.
     testPassed &= validate( factoryModels.contains(inf), "    Factory can no longer build Infantry, though it should.");
