@@ -21,8 +21,8 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
-import Units.Weapons.Weapon;
-import Units.Weapons.WeaponModel;
+import Units.Weapon;
+import Units.WeaponModel;
 
 public class AIUtils
 {

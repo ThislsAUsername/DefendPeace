@@ -12,7 +12,7 @@ import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
 import Units.Unit;
-import Units.Weapons.Weapon;
+import Units.Weapon;
 
 /*
  * Venge enhances counter-attacks of all sorts.

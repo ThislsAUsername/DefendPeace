@@ -7,8 +7,8 @@ import java.util.Map;
 import CommandingOfficers.Commander;
 import Units.Unit;
 import Units.UnitModel;
+import Units.Weapon;
 import Units.UnitModel.UnitEnum;
-import Units.Weapons.Weapon;
 
 /** Modifier to temporarily turn one unit into another kind of unit.
  *  This only applies to active units (newly-built units will not be changed).

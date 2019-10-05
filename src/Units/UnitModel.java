@@ -11,7 +11,6 @@ import Engine.UnitActionType;
 import Terrain.Location;
 import Terrain.TerrainType;
 import Units.MoveTypes.MoveType;
-import Units.Weapons.WeaponModel;
 
 /**
  * Defines the invariant characteristics of a unit. One UnitModel can be shared across many instances of that Unit type.
@@ -53,7 +52,7 @@ public class UnitModel implements Serializable
 
   public int maxHP;
   public int holdingCapacity;
-  public Vector<UnitEnum> holdables;
+  public Vector<ChassisEnum> holdables;
   private int COstr;
   private int COdef;
   public double COcost = 1.0;
@@ -106,7 +105,7 @@ public class UnitModel implements Serializable
     COstr = 100;
     COdef = 100;
     holdingCapacity = 0;
-    holdables = new Vector<UnitEnum>();
+    holdables = new Vector<ChassisEnum>();
   }
 
   /**

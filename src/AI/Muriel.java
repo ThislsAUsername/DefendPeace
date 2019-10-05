@@ -25,7 +25,7 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
-import Units.Weapons.Weapon;
+import Units.Weapon;
 
 /**
  * Muriel will Make Units Reactively, Informed by the Enemy Loadout.

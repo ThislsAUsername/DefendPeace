@@ -13,7 +13,7 @@ import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Units.Unit;
-import Units.Weapons.Weapon;
+import Units.Weapon;
 
 public class Utils
 {

@@ -8,9 +8,9 @@ import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
 import Units.UnitModel;
+import Units.Weapon;
+import Units.WeaponModel;
 import Units.UnitModel.UnitEnum;
-import Units.Weapons.Weapon;
-import Units.Weapons.WeaponModel;
 
 public class UnitTransformEvent implements GameEvent
 {

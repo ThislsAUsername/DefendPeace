@@ -442,7 +442,7 @@ public interface GameAction
         {
           // Find the transport unit.
           transport = gameMap.getLocation(pathEnd).getResident();
-          isValid &= (null != transport) && transport.hasCargoSpace(passenger.model.type);
+          isValid &= (null != transport) && transport.hasCargoSpace(passenger.model.chassis);
         }
       }
 

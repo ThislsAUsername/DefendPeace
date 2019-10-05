@@ -8,8 +8,8 @@ import java.util.Map.Entry;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Units.Unit;
+import Units.Weapon;
 import Units.UnitModel.ChassisEnum;
-import Units.Weapons.Weapon;
 
 /**
  * BattleInstance provides COs with two levels of control of what goes on in combat:

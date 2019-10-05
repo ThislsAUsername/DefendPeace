@@ -16,9 +16,8 @@ import Engine.GameEvents.ResupplyEvent;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
+import Units.UnitModel.ChassisEnum;
 import Units.UnitModel.UnitEnum;
-import Units.Weapons.Weapon;
-import Units.Weapons.WeaponModel;
 
 public class Unit implements Serializable
 {
@@ -266,7 +265,7 @@ public class Unit implements Serializable
     return actionSet;
   }
 
-  public boolean hasCargoSpace(UnitEnum type)
+  public boolean hasCargoSpace(ChassisEnum type)
   {
     return (model.holdingCapacity > 0 && heldUnits.size() < model.holdingCapacity && model.holdables.contains(type));
   }

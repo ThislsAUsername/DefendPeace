@@ -23,8 +23,8 @@ import Terrain.MapWindow;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
+import Units.Weapon;
 import Units.UnitModel.UnitEnum;
-import Units.Weapons.Weapon;
 
 public class TestGameEvent extends TestCase
 {

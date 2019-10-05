@@ -28,9 +28,9 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
+import Units.Weapon;
+import Units.WeaponModel;
 import Units.MoveTypes.MoveType;
-import Units.Weapons.Weapon;
-import Units.Weapons.WeaponModel;
 
 /**
  *  Wally values units based on firepower and the area they can threaten.

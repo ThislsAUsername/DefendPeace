@@ -1,7 +1,6 @@
-package Units.Weapons;
+package Units;
 
 import java.io.Serializable;
-import Units.UnitModel;
 
 public class Weapon implements Serializable
 {

@@ -2,7 +2,7 @@ package Engine.Combat;
 
 import Terrain.TerrainType;
 import Units.Unit;
-import Units.Weapons.Weapon;
+import Units.Weapon;
 
 /**
  * This class simply provides information describing a battle, and is used more like a C-style struct than an object.

@@ -5,8 +5,8 @@ import java.util.ArrayList;
 
 import Terrain.GameMap;
 import Units.Unit;
+import Units.Weapon;
 import Units.UnitModel.UnitEnum;
-import Units.Weapons.Weapon;
 
 public abstract class UnitActionType implements Serializable
 {
@@ -169,7 +169,7 @@ public abstract class UnitActionType implements Serializable
       Unit resident = map.getLocation(moveLocation).getResident();
       if( !ignoreResident && resident != null )
       {
-        if( resident.hasCargoSpace(actor.model.type) )
+        if( resident.hasCargoSpace(actor.model.chassis) )
         {
           return new GameActionSet(new GameAction.LoadAction(map, actor, movePath), false);
         }

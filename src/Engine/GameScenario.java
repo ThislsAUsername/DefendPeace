@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
+import Units.AWBWUnits;
+import Units.UnitModelScheme;
 
 
 public class GameScenario implements Serializable
@@ -20,7 +22,7 @@ public class GameScenario implements Serializable
   }
   public GameScenario(int income, int startFunds)
   {
-    rules = new GameRules(income, startFunds);
+    rules = new GameRules(new AWBWUnits(), income, startFunds);
   }
 
   public GameEventQueue initTurn(GameMap map)
@@ -34,11 +36,13 @@ public class GameScenario implements Serializable
     private static final long serialVersionUID = 1L;
     public final int incomePerCity;
     public final int startingFunds;
+    public final UnitModelScheme unitModelScheme;
 
-    public GameRules(int income, int startFunds)
+    public GameRules(UnitModelScheme ums, int income, int startFunds)
     {
       incomePerCity = income;
       startingFunds = startFunds;
+      unitModelScheme = ums;
     }
   }
 }
