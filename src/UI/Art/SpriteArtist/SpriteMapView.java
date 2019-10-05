@@ -487,7 +487,7 @@ public class SpriteMapView extends MapView
     // Draw the damage estimate directly above the unit being targeted.
     int tileSize = SpriteLibrary.baseSpriteSize;
     int estimateX = (x * tileSize) + (tileSize / 2);
-    int estimateY = (y * tileSize) - dmgImage.getHeight() / 2;
+    int estimateY = Math.max((y * tileSize) - dmgImage.getHeight() / 2, dmgImage.getHeight() / 2); // Don't want it floating off-screen
     SpriteUIUtils.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY);
   }
 
