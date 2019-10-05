@@ -209,6 +209,9 @@ public class Commander extends GameEventListener implements Serializable
 	  }
 	  return 10 * numTowers;
   }
+  public int getTowerDefBoost() {
+    return 0;
+  }
 
   /**
    * Collect income, adjust tower power, and handle any COModifiers.

@@ -35,6 +35,7 @@ import CommandingOfficers.GreenEarth.DSJess;
 import CommandingOfficers.GreenEarth.Drake;
 import CommandingOfficers.GreenEarth.Eagle;
 import CommandingOfficers.GreenEarth.Javier;
+import CommandingOfficers.GreenEarth.Javier1T;
 import CommandingOfficers.GreenEarth.Jess;
 import CommandingOfficers.GreenEarth.WakJess;
 import CommandingOfficers.IDS.CaulderAlt;
@@ -118,6 +119,7 @@ public class CommanderLibrary
     commanderList.add( DSJess.getInfo() );
     commanderList.add( Drake.getInfo() );
     commanderList.add( Javier.getInfo() );
+    commanderList.add( Javier1T.getInfo() );
     
     commanderList.add( Grimm.getInfo() );
     commanderList.add( Kanbei.getInfo() );

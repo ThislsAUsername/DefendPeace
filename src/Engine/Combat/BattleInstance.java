@@ -180,7 +180,7 @@ public class BattleInstance
       baseDamage = attackerWeapon.getDamage(defender.model);
       attackFactor = attacker.model.getDamageRatio() + attacker.CO.getTowerBoost();
       attackerHP = attacker.getHP();
-      defenseFactor = defender.model.getDefenseRatio();
+      defenseFactor = defender.model.getDefenseRatio() + defender.CO.getTowerDefBoost();
       defenderHP = defender.getHP();
       terrainDefense = 0;
       this.isCounter = isCounter;

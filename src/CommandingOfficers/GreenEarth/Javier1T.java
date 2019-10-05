@@ -4,11 +4,13 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
+import CommandingOfficers.Modifiers.CODamageModifier;
+import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
 
-public class Javier extends Commander
+public class Javier1T extends Commander
 {
   private static final long serialVersionUID = 1L;
   private static final CommanderInfo coInfo = new instantiator();
@@ -17,27 +19,29 @@ public class Javier extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Javier");
+      super("Javier 1T");
       infoPages.add(new InfoPage(
-          "Javier\n" +
+          "Javier 1T\n" +
           "  Units gain +20% defense against indirect units.\n" +
-          "  Units gain defense equal to all offense gained via comm tower\n" +
-          "Tower Shield -- Double comm tower effects. Extra defense against indirects (+20%)\n" +
-          "Tower of Power -- Triple comm tower effects. Even more defense against indirects (+60%)"));
+          "  +10% defense\n" +
+          "  Consistently T1, instead of T0-4 depending on map" + 
+          "Tower Shield -- Extra defense against indirects (+20%); +10/10 stats\n" + 
+          "Tower of Power -- Even more defense against indirects (+60%); +20/20 stats"));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
     {
-      return new Javier(rules);
+      return new Javier1T(rules);
     }
   }
   
   public int indirectDef = 20;
-  public int commPowerMult = 1;
 
-  public Javier(GameScenario.GameRules rules)
+  public Javier1T(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
+
+    new CODefenseModifier(10).applyChanges(this);
 
     addCommanderAbility(new TowerShield(this));
     addCommanderAbility(new TowerOfPower(this));
@@ -52,15 +56,7 @@ public class Javier extends Commander
   public GameEventQueue initTurn(MapMaster map)
   {
     this.indirectDef = 20;
-    this.commPowerMult = 1;
     return super.initTurn(map);
-  }
-
-  public int getTowerBoost() {
-    return super.getTowerBoost() * commPowerMult;
-  }
-  public int getTowerDefBoost() {
-    return getTowerBoost();
   }
 
   @Override
@@ -81,19 +77,20 @@ public class Javier extends Commander
     private static final String NAME = "Tower Shield";
     private static final int COST = 3;
     private static final int VALUE = 20;
-    Javier COcast;
+    Javier1T COcast;
 
     TowerShield(Commander commander)
     {
       super(commander, NAME, COST);
-      COcast = (Javier) commander;
+      COcast = (Javier1T) commander;
     }
 
     @Override
     protected void perform(MapMaster gameMap)
     {
       COcast.indirectDef += VALUE;
-      COcast.commPowerMult = 2;
+      myCommander.addCOModifier(new CODamageModifier(10));
+      myCommander.addCOModifier(new CODefenseModifier(10));
     }
   }
 
@@ -103,19 +100,20 @@ public class Javier extends Commander
     private static final String NAME = "Tower of Power";
     private static final int COST = 6;
     private static final int VALUE = 60;
-    Javier COcast;
+    Javier1T COcast;
 
     TowerOfPower(Commander commander)
     {
       super(commander, NAME, COST);
-      COcast = (Javier) commander;
+      COcast = (Javier1T) commander;
     }
 
     @Override
     protected void perform(MapMaster gameMap)
     {
       COcast.indirectDef += VALUE;
-      COcast.commPowerMult = 3;
+      myCommander.addCOModifier(new CODamageModifier(20));
+      myCommander.addCOModifier(new CODefenseModifier(20));
     }
   }
 }
