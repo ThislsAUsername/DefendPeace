@@ -6,7 +6,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -42,7 +41,7 @@ public class Commander extends GameEventListener implements Serializable
   public final GameScenario.GameRules gameRules;
   public GameMap myView;
   public ArrayList<Unit> units;
-  public Map<UnitEnum, UnitModel> unitModels = new HashMap<UnitEnum, UnitModel>();
+  public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
   public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
   public Set<XYCoord> ownedProperties;
   public ArrayList<COModifier> modifiers;
@@ -73,7 +72,7 @@ public class Commander extends GameEventListener implements Serializable
     GameReadyModels GRMs = rules.unitModelScheme.getGameReadyModels();
     unitProductionByTerrain = GRMs.shoppingList;
     for (UnitModel um : GRMs.unitModels)
-      unitModels.put(um.type, um);
+      unitModels.add(um);
 
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
@@ -179,10 +178,20 @@ public class Commander extends GameEventListener implements Serializable
     return true;
   }
 
-  // Leaving this for now, to avoid merge conflicts
   public UnitModel getUnitModel(UnitEnum unitType)
   {
-    return unitModels.get(unitType);
+    UnitModel um = null;
+
+    for( UnitModel iter : unitModels )
+    {
+      if( iter.type == unitType )
+      {
+        um = iter;
+        break;
+      }
+    }
+
+    return um;
   }
   
   /**

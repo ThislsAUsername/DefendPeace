@@ -43,7 +43,8 @@ public class AWBWUnits extends UnitModelScheme
     // Record those units we can get from a Seaport.
     seaportModels.add(new LanderModel());
     seaportModels.add(new CruiserModel());
-    seaportModels.add(new SubModel());
+    UnitModel sub = new SubModel();
+    seaportModels.add(sub);
     seaportModels.add(new BattleshipModel());
     seaportModels.add(new CarrierModel());
     seaportModels.add(new BBoatModel());
@@ -53,7 +54,8 @@ public class AWBWUnits extends UnitModelScheme
     airportModels.add(new BCopterModel());
     airportModels.add(new FighterModel());
     airportModels.add(new BomberModel());
-    airportModels.add(new StealthModel());
+    UnitModel stealth = new StealthModel();
+    airportModels.add(stealth);
     airportModels.add(new BBombModel());
 
     // Dump these lists into a hashmap for easy reference later.
@@ -71,9 +73,13 @@ public class AWBWUnits extends UnitModelScheme
 
     // Handle transforming units separately, since we don't want two buy-entries
     UnitModel subsub = new SubSubModel();
+    sub.possibleActions.add(new UnitActionType.Transform(subsub, "DIVE"));
+    subsub.possibleActions.add(new UnitActionType.Transform(sub, "RISE"));
     awbwModels.unitModels.add(subsub);
-    UnitModel stealthy = new StealthHideModel();
-    awbwModels.unitModels.add(stealthy);
+    UnitModel sneaky = new StealthHideModel();
+    stealth.possibleActions.add(new UnitActionType.Transform(sneaky, "HIDE"));
+    sneaky.possibleActions.add(new UnitActionType.Transform(stealth, "APPEAR"));
+    awbwModels.unitModels.add(sneaky);
 
     return awbwModels;
   }
@@ -460,12 +466,6 @@ public class AWBWUnits extends UnitModelScheme
     {
       super("Stealth", UnitEnum.STEALTH, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
-      addStealthAction();
-    }
-
-    protected void addStealthAction()
-    {
-      possibleActions.add(new UnitActionType.Transform(UnitEnum.STEALTH_HIDE, "HIDE"));
     }
   }
 
@@ -480,12 +480,6 @@ public class AWBWUnits extends UnitModelScheme
       type = UnitEnum.STEALTH_HIDE;
       idleFuelBurn = IDLE_FUEL_BURN;
       hidden = true;
-    }
-
-    @Override
-    protected void addStealthAction()
-    {
-      possibleActions.add(new UnitActionType.Transform(UnitEnum.STEALTH, "APPEAR"));
     }
   }
 
@@ -582,12 +576,6 @@ public class AWBWUnits extends UnitModelScheme
     {
       super("Submarine", UnitEnum.SUB, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, weapons);
-      addSubAction();
-    }
-
-    protected void addSubAction()
-    {
-      possibleActions.add(new UnitActionType.Transform(UnitEnum.SUB_SUB, "DIVE"));
     }
   }
 
@@ -603,12 +591,6 @@ public class AWBWUnits extends UnitModelScheme
       chassis = ChassisEnum.SUBMERGED;
       idleFuelBurn = IDLE_FUEL_BURN;
       hidden = true;
-    }
-
-    @Override
-    protected void addSubAction()
-    {
-      possibleActions.add(new UnitActionType.Transform(UnitEnum.SUB, "RISE"));
     }
   }
 

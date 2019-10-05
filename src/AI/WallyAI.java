@@ -134,7 +134,7 @@ public class WallyAI implements AIController
     // init all move multipliers before powers come into play
     for( Commander co : map.commanders )
     {
-      for( UnitModel model : co.unitModels.values() )
+      for( UnitModel model : co.unitModels )
       {
         getEffectiveMove(model);
       }
@@ -364,7 +364,7 @@ public class WallyAI implements AIController
       if( actions.isEmpty() )
       {
         Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
-        for( UnitModel um : myCo.unitModels.values() )
+        for( UnitModel um : myCo.unitModels )
         {
           threatMap.put(um, new HashMap<XYCoord, Double>());
           for( Commander co : unitLists.keySet() )

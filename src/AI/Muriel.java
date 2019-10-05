@@ -86,7 +86,7 @@ public class Muriel implements AIController
   private void init(Commander[] allCos)
   {
     // Initialize UnitModel collections.
-    Collection<UnitModel> myUnitModels = myCo.unitModels.values();
+    Collection<UnitModel> myUnitModels = myCo.unitModels;
     enemyCos = new ArrayList<Commander>();
     Map<Commander, Collection<UnitModel> > otherUnitModels = new HashMap<Commander, Collection<UnitModel> >();
     for( Commander other : allCos )
@@ -101,7 +101,7 @@ public class Muriel implements AIController
     // Figure out what I and everyone else can build.
     for( Commander oCo : enemyCos )
     {
-      otherUnitModels.put(oCo, oCo.unitModels.values());
+      otherUnitModels.put(oCo, oCo.unitModels);
     }
 
     // Figure out unit matchups.

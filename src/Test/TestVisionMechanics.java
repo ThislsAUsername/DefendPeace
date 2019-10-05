@@ -58,7 +58,7 @@ public class TestVisionMechanics extends TestCase
     // We need 2 units to observe, one of which should be hidden, the other in cover
     Unit bait = addUnit(testMap, patch, UnitEnum.APC, 6, 5);
     Unit meaty = addUnit(testMap, patch, UnitEnum.MD_TANK, 7, 5);
-    patch.unitModels.get(UnitEnum.MD_TANK).hidden = true; // Does anyone else think this is a bad idea? No? Okay, must be fair and balanced.
+    meaty.model.hidden = true; // Does anyone else think this is a bad idea? No? Okay, must be fair and balanced.
     
     // It's Strong's turn. Set up his fog goggles.
     strong.initTurn(testMap);

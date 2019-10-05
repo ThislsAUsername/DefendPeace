@@ -10,15 +10,14 @@ import Units.Unit;
 import Units.UnitModel;
 import Units.Weapon;
 import Units.WeaponModel;
-import Units.UnitModel.UnitEnum;
 
 public class UnitTransformEvent implements GameEvent
 {
   private Unit unit;
   private UnitModel oldType;
-  private UnitEnum destinationType;
+  private UnitModel destinationType;
 
-  public UnitTransformEvent(Unit unit, UnitEnum destination)
+  public UnitTransformEvent(Unit unit, UnitModel destination)
   {
     this.unit = unit;
     oldType = unit.model;
@@ -40,13 +39,12 @@ public class UnitTransformEvent implements GameEvent
   @Override
   public void performEvent(MapMaster gameMap)
   {
-    UnitModel type = unit.CO.unitModels.get(destinationType);
-    unit.model = type;
+    unit.model = destinationType;
     ArrayList<Weapon> temp = unit.weapons;
     unit.weapons = new ArrayList<Weapon>();
     
     // Create the new weapon list
-    for( WeaponModel weapType : type.weaponModels )
+    for( WeaponModel weapType : destinationType.weaponModels )
     {
       unit.weapons.add(new Weapon(weapType));
     }

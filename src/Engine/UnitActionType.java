@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import Terrain.GameMap;
 import Units.Unit;
 import Units.Weapon;
-import Units.UnitModel.UnitEnum;
+import Units.UnitModel;
 
 public abstract class UnitActionType implements Serializable
 {
@@ -381,10 +381,10 @@ public abstract class UnitActionType implements Serializable
   public static class Transform extends UnitActionType
   {
     private static final long serialVersionUID = 1L;
-    public final UnitEnum destinationType;
+    public final UnitModel destinationType;
     public final String name;
     
-    public Transform(UnitEnum type, String displayName)
+    public Transform(UnitModel type, String displayName)
     {
       destinationType = type;
       name = displayName;

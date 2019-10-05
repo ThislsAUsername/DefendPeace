@@ -53,7 +53,7 @@ public interface COModifier extends Serializable
     {
       if( modelsToModify.isEmpty() )
       {
-        modelsToModify.addAll(commander.unitModels.values());
+        modelsToModify.addAll(commander.unitModels);
       }
       modifyUnits(commander, modelsToModify);
     }
