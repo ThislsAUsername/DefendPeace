@@ -93,7 +93,7 @@ public class BattleInstance
     {
       // New battle instance with defender counter-attacking.
       BattleParams defendInstance = BattleParams.getCounterAttack(context);
-      defendInstance.attackerHP -= defenderHPLoss; // Account for the first attack's damage to the now-attacker.
+      defendInstance.attackerHP = Math.ceil(context.defender.getPreciseHP() - defenderHPLoss); // Account for the first attack's damage to the now-attacker.
 
       // Modifications apply "attacker first", and the defender is now the attacker.
       context.defender.CO.applyCombatModifiers(defendInstance, true);
