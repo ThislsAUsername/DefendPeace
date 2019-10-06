@@ -4,6 +4,7 @@ import Engine.IController;
 import Engine.OptionSelector;
 import Terrain.Environment.Weathers;
 import UI.InputHandler.InputAction;
+import Units.UnitModelScheme;
 
 public class GameOptionSetupController implements IController
 {
@@ -11,11 +12,12 @@ public class GameOptionSetupController implements IController
   private GameOption<Integer> startingFundsOption = new GameOptionInt("Starting Funds", 0, 50000, 1000, 0);
   private GameOption<Integer> incomeOption = new GameOptionInt("Income", 250, 20000, 250, 1000);
   private GameOption<Weathers> weatherOption = new GameOption<Weathers>("Weather", Weathers.values(), 0);
+  private GameOption<UnitModelScheme> unitSchemeOption;
 
   // Get a list of all GameOptions.
-  public GameOption<?>[] gameOptions = {fowOption, startingFundsOption, incomeOption, weatherOption};
+  public GameOption<?>[] gameOptions;
 
-  public OptionSelector optionSelector = new OptionSelector( gameOptions.length );
+  public OptionSelector optionSelector;
   private PlayerSetupController coSelectMenu;
 
   private boolean isInSubmenu = false;
@@ -26,6 +28,11 @@ public class GameOptionSetupController implements IController
   public GameOptionSetupController(GameBuilder aGameBuilder)
   {
     gameBuilder = aGameBuilder;
+
+    unitSchemeOption = new GameOption<UnitModelScheme>("Unit set", gameBuilder.mapInfo.getValidUnitModelSchemes(), 0);
+
+    gameOptions = new GameOption<?>[] {fowOption, startingFundsOption, incomeOption, weatherOption, unitSchemeOption};
+    optionSelector = new OptionSelector( gameOptions.length );
   }
 
   @Override
@@ -72,6 +79,7 @@ public class GameOptionSetupController implements IController
         gameBuilder.startingFunds = startingFundsOption.getSelectedObject();
         gameBuilder.incomePerCity = incomeOption.getSelectedObject();
         gameBuilder.defaultWeather = (Weathers)weatherOption.getSelectedObject();
+        gameBuilder.unitModelScheme = unitSchemeOption.getSelectedObject();
         coSelectMenu = new PlayerSetupController( gameBuilder );
         isInSubmenu = true;
         break;

@@ -20,12 +20,13 @@ public class PlayerSetupInfo
   public int currentFaction;
   public int currentTeam;
   public int currentAi;
+  public final String iconicUnitName;
   private final CommanderInfo[] availableCommanders;
   private final Color[] availableColors;
   private final Faction[] availableFactions;
   private final AIMaker[] availableAis;
 
-  public PlayerSetupInfo(int thisPlayer, ArrayList<CommanderInfo> COTypeList, Color[] colorList, Faction[] factionList, ArrayList<AIMaker> AIList)
+  public PlayerSetupInfo(int thisPlayer, ArrayList<CommanderInfo> COTypeList, Color[] colorList, Faction[] factionList, ArrayList<AIMaker> AIList, String displayUnit)
   {
     currentCo = thisPlayer % COTypeList.size();
     currentColor = thisPlayer % colorList.length;
@@ -37,6 +38,8 @@ public class PlayerSetupInfo
     availableColors = colorList;
     availableFactions = factionList;
     availableAis = AIList.toArray(new AIMaker[0]);
+
+    iconicUnitName = displayUnit;
   }
 
   public Commander makeCommander(GameScenario.GameRules rules)

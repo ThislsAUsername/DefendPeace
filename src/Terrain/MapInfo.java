@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import Engine.XYCoord;
+import Units.AWBWUnits;
 import Units.UnitModel;
+import Units.UnitModelScheme;
 
 public class MapInfo
 {
@@ -39,5 +41,18 @@ public class MapInfo
   public int getNumCos()
   {
     return COProperties.length;
+  }
+
+  /**
+   * Determines which unit sets are valid for this map.
+   */
+  public UnitModelScheme[] getValidUnitModelSchemes()
+  {
+    ArrayList<UnitModelScheme> umsList = new ArrayList<UnitModelScheme>();
+    umsList.add(new AWBWUnits());
+    
+    // TODO: Filter based on the existence of non-core units in the map
+    
+    return umsList.toArray(new UnitModelScheme[0]);
   }
 }
