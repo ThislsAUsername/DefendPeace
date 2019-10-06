@@ -66,9 +66,9 @@ public class UnitModel implements Serializable
     {
       possibleActions.add(action);
     }
-    for( WeaponModel action : weapons )
+    for( WeaponModel wm : weapons )
     {
-      weaponModels.add(new WeaponModel(action));
+      weaponModels.add(wm.clone());
     }
   }
 
@@ -123,7 +123,7 @@ public class UnitModel implements Serializable
       weaponModels = new ArrayList<WeaponModel>();
       for( WeaponModel weapon : other.weaponModels )
       {
-        weaponModels.add(new WeaponModel(weapon));
+        weaponModels.add(weapon.clone());
       }
     }
 

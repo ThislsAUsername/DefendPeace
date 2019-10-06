@@ -21,7 +21,7 @@ public class Weapon implements Serializable
   {
     if( ammo == 0 || defender == null )
       return 0;
-    return WeaponModel.getDamage(model, defender);
+    return model.getDamage(defender);
   }
 
   /**
