@@ -49,6 +49,9 @@ public class UnitJoinEvent implements GameEvent
 
       // Remove the donor unit.
       gameMap.removeUnit(unitDonor);
+
+      // End the turn of the recipient.
+      unitRecipient.isTurnOver = true;
     }
     else
     {
