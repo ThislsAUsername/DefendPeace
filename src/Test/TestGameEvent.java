@@ -59,6 +59,7 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(testMoveEvent(), "  MoveEvent test failed.");
     testPassed &= validate(testUnitDieEvent(), "  UnitDieEvent test failed.");
     testPassed &= validate(testResupplyEvent(), "  Resupply test failed.");
+    testPassed &= validate(testUnitJoinEvent(), "  Join test failed.");
     testPassed &= validate(testCommanderDefeatEvent(), "  CommanderDefeatEvent test failed."); // Put this one last because it alters the map.
 
     return testPassed;
@@ -354,6 +355,56 @@ public class TestGameEvent extends TestCase
     // Clean up.
     testMap.removeUnit(apc);
     testMap.removeUnit(mech);
+    testMap.removeUnit(mech2);
+    testMap.removeUnit(recon);
+
+    return testPassed;
+  }
+
+  private boolean testUnitJoinEvent()
+  {
+    boolean testPassed = true;
+
+    // Add some units.
+    Unit recipient = addUnit(testMap, testCo1, UnitEnum.MECH, 1, 4);
+    Unit donor = addUnit(testMap, testCo1, UnitEnum.MECH, 1, 5);
+    recipient.initTurn(testMap);
+    donor.initTurn(testMap);
+
+    // Record CO funds.
+    int funds = testCo1.money;
+
+    // Hurt the recipient.
+    recipient.damageHP(2);
+
+    // Verify health and readiness.
+    testPassed &= validate(recipient.getHP() == 8, "    Recipient has incorrect HP!");
+    testPassed &= validate(!recipient.isTurnOver, "    Donor's turn is over despite not having moved!");
+    testPassed &= validate(!donor.isTurnOver, "    Recipient's turn is over despite not having moved!");
+
+    // Tell Donor to join Recipient.
+    GameAction joinAction = new GameAction.UnitJoinAction(testMap, donor, Utils.findShortestPath(donor, new XYCoord(1, 4), testMap));
+    performGameAction(joinAction, testMap);
+
+    // Verification:
+    // 1) Only the Recipient should still be on the map.
+    testPassed &= validate(testMap.isLocationValid(recipient.x, recipient.y), "    Recipient no longer thinks it is on the map after being joined!");
+    testPassed &= validate(!testMap.isLocationValid(donor.x, donor.y), "    Donor still thinks it is on the map after joining!");
+    testPassed &= validate( null != testMap.getLocation(1, 4).getResident(), "    Recipient is no longer on the map!");
+    testPassed &= validate( null == testMap.getLocation(1, 5).getResident(), "    Donor is still on the map!");
+
+    // 2) The Recipient now has 10 HP.
+    testPassed &= validate( recipient.getHP() == 10, "    The Recipient was not healed by joining!");
+
+    // 3) The Recipient's turn is over.
+    testPassed &= validate( recipient.isTurnOver, "    The Recipient's turn is not over!");
+
+    // 4) the CO gained funds.
+    testPassed &= validate( funds < testCo1.money, "    The Commander gained no funds by joining!");
+
+    // Clean up.
+    testMap.removeUnit(recipient);
+    testMap.removeUnit(donor);
 
     return testPassed;
   }
