@@ -366,45 +366,45 @@ public class TestGameEvent extends TestCase
     boolean testPassed = true;
 
     // Add some units.
-    Unit mech = addUnit(testMap, testCo1, UnitEnum.MECH, 1, 4);
-    Unit mech2 = addUnit(testMap, testCo1, UnitEnum.MECH, 1, 5);
-    mech.initTurn(testMap);
-    mech2.initTurn(testMap);
+    Unit recipient = addUnit(testMap, testCo1, UnitEnum.MECH, 1, 4);
+    Unit donor = addUnit(testMap, testCo1, UnitEnum.MECH, 1, 5);
+    recipient.initTurn(testMap);
+    donor.initTurn(testMap);
 
     // Record CO funds.
     int funds = testCo1.money;
 
     // Hurt one mech.
-    mech.damageHP(2);
+    recipient.damageHP(2);
 
     // Verify health and readiness.
-    testPassed &= validate(mech.getHP() == 8, "    mech has incorrect HP!");
-    testPassed &= validate(!mech.isTurnOver, "    mech's turn is over despite not having moved!");
-    testPassed &= validate(!mech2.isTurnOver, "    mech2's turn is over despite not having moved!");
+    testPassed &= validate(recipient.getHP() == 8, "    mech has incorrect HP!");
+    testPassed &= validate(!recipient.isTurnOver, "    mech's turn is over despite not having moved!");
+    testPassed &= validate(!donor.isTurnOver, "    mech2's turn is over despite not having moved!");
 
     // Tell mech2 to join mech 1.
-    GameAction joinAction = new GameAction.UnitJoinAction(testMap, mech2, Utils.findShortestPath(mech2, new XYCoord(1, 4), testMap));
+    GameAction joinAction = new GameAction.UnitJoinAction(testMap, donor, Utils.findShortestPath(donor, new XYCoord(1, 4), testMap));
     performGameAction(joinAction, testMap);
 
     // Verification:
     // 1) Only one mech is still on the map.
-    testPassed &= validate(testMap.isLocationValid(mech.x, mech.y), "    mech no longer thinks it is on the map after joining!");
-    testPassed &= validate(!testMap.isLocationValid(mech2.x, mech2.y), "    mech2 still thinks it is on the map after joining!");
+    testPassed &= validate(testMap.isLocationValid(recipient.x, recipient.y), "    mech no longer thinks it is on the map after joining!");
+    testPassed &= validate(!testMap.isLocationValid(donor.x, donor.y), "    mech2 still thinks it is on the map after joining!");
     testPassed &= validate( null != testMap.getLocation(1, 4).getResident(), "    mech is no longer on the map!");
     testPassed &= validate( null == testMap.getLocation(1, 5).getResident(), "    mech2 is still on the map!");
 
     // 2) The mech has 10 HP.
-    testPassed &= validate( mech.getHP() == 10, "    The mech was not healed by joining!");
+    testPassed &= validate( recipient.getHP() == 10, "    The mech was not healed by joining!");
 
     // 3) The mech's turn is over.
-    testPassed &= validate( mech.isTurnOver, "    The mech's turn is not over!");
+    testPassed &= validate( recipient.isTurnOver, "    The mech's turn is not over!");
 
     // 4) the CO gained funds.
     testPassed &= validate( funds < testCo1.money, "    The Commander gained no funds by joining!");
 
     // Clean up.
-    testMap.removeUnit(mech);
-    testMap.removeUnit(mech2);
+    testMap.removeUnit(recipient);
+    testMap.removeUnit(donor);
 
     return testPassed;
   }
