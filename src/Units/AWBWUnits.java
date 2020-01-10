@@ -98,7 +98,46 @@ public class AWBWUnits extends UnitModelScheme
     return awbwModels;
   }
 
-  public static class InfantryModel extends UnitModel
+  public static class AWBWUnitModel extends UnitModel
+  {
+    private static final long serialVersionUID = 1L;
+
+    public AWBWUnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision,
+        int pMovePower, MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] weapons)
+    {
+      super(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons);
+    }
+    public AWBWUnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision,
+        int pMovePower, MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> weapons)
+    {
+      super(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons);
+    }
+
+    public UnitModel clone()
+    {
+      // Make a copy of your weapon types.
+      if( weaponModels != null )
+      {
+        weaponModels = new ArrayList<WeaponModel>();
+        for( WeaponModel weapon : weaponModels )
+        {
+          weaponModels.add(weapon.clone());
+        }
+      }
+
+      // Create a new model with the given attributes.
+      AWBWUnitModel newModel = new AWBWUnitModel(name, type, chassis, getCost(), maxFuel, idleFuelBurn, visionRange, movePower,
+          new MoveType(propulsion), possibleActions, weaponModels);
+
+      // Duplicate the other model's transporting abilities.
+      newModel.holdingCapacity = holdingCapacity;
+      newModel.holdables.addAll(holdables);
+
+      return newModel;
+    }
+  }
+
+  public static class InfantryModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 1000;
@@ -118,7 +157,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class MechModel extends UnitModel
+  public static class MechModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 3000;
@@ -133,12 +172,12 @@ public class AWBWUnits extends UnitModelScheme
 
     public MechModel()
     {
-      super("Mech", Units.UnitModel.UnitEnum.MECH, ChassisEnum.TROOP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
+      super("Mech", UnitEnum.MECH, ChassisEnum.TROOP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
           MOVE_POWER, moveType, actions, weapons);
     }
   }
 
-  public static class APCModel extends UnitModel
+  public static class APCModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 5000;
@@ -174,7 +213,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class ReconModel extends UnitModel
+  public static class ReconModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 4000;
@@ -189,12 +228,12 @@ public class AWBWUnits extends UnitModelScheme
 
     public ReconModel()
     {
-      super("Recon", Units.UnitModel.UnitEnum.RECON, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
+      super("Recon", UnitEnum.RECON, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
           MOVE_POWER, moveType, actions, weapons);
     }
   }
 
-  public static class TankModel extends UnitModel
+  public static class TankModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 7000;
@@ -214,7 +253,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class MDTankModel extends UnitModel
+  public static class MDTankModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 16000;
@@ -234,7 +273,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class NeotankModel extends UnitModel
+  public static class NeotankModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 22000;
@@ -254,7 +293,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class MegatankModel extends UnitModel
+  public static class MegatankModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 28000;
@@ -274,7 +313,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class ArtilleryModel extends UnitModel
+  public static class ArtilleryModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 6000;
@@ -294,7 +333,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class RocketsModel extends UnitModel
+  public static class RocketsModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 15000;
@@ -314,7 +353,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class PiperunnerModel extends UnitModel
+  public static class PiperunnerModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 20000;
@@ -336,7 +375,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class AntiAirModel extends UnitModel
+  public static class AntiAirModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 8000;
@@ -355,7 +394,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class MobileSAMModel extends UnitModel
+  public static class MobileSAMModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 12000;
@@ -377,7 +416,7 @@ public class AWBWUnits extends UnitModelScheme
 
   // air
 
-  public static class TCopterModel extends UnitModel
+  public static class TCopterModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 5000;
@@ -403,7 +442,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class BCopterModel extends UnitModel
+  public static class BCopterModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 9000;
@@ -423,7 +462,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class BomberModel extends UnitModel
+  public static class BomberModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 22000;
@@ -443,7 +482,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class FighterModel extends UnitModel
+  public static class FighterModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 20000;
@@ -463,7 +502,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class StealthModel extends UnitModel
+  public static class StealthModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 24000;
@@ -497,7 +536,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class BBombModel extends UnitModel
+  public static class BBombModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 25000;
@@ -520,7 +559,7 @@ public class AWBWUnits extends UnitModelScheme
 
   // sea
 
-  public static class BBoatModel extends UnitModel
+  public static class BBoatModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 7500;
@@ -547,7 +586,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class LanderModel extends UnitModel
+  public static class LanderModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 12000;
@@ -573,7 +612,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class SubModel extends UnitModel
+  public static class SubModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 20000;
@@ -608,7 +647,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class BattleshipModel extends UnitModel
+  public static class BattleshipModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 28000;
@@ -628,7 +667,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class CarrierModel extends UnitModel
+  public static class CarrierModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 30000;
@@ -655,7 +694,7 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
-  public static class CruiserModel extends UnitModel
+  public static class CruiserModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final int UNIT_COST = 18000;

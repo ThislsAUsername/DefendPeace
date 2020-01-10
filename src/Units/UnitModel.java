@@ -15,7 +15,7 @@ import Units.MoveTypes.MoveType;
 /**
  * Defines the invariant characteristics of a unit. One UnitModel can be shared across many instances of that Unit type.
  */
-public class UnitModel implements Serializable
+public abstract class UnitModel implements Serializable
 {
   private static final long serialVersionUID = 1L;
 
@@ -116,27 +116,10 @@ public class UnitModel implements Serializable
    */
   public static UnitModel clone(UnitModel other)
   {
-    // Make a copy of the weapons used by the other model.
-    ArrayList<WeaponModel> weaponModels = null;
-    if( other.weaponModels != null )
-    {
-      weaponModels = new ArrayList<WeaponModel>();
-      for( WeaponModel weapon : other.weaponModels )
-      {
-        weaponModels.add(weapon.clone());
-      }
-    }
-
-    // Create a new model with the given attributes.
-    UnitModel newModel = new UnitModel(other.name, other.type, other.chassis, other.getCost(), other.maxFuel, other.idleFuelBurn, other.visionRange,
-        other.movePower, new MoveType(other.propulsion), other.possibleActions, weaponModels);
-
-    // Duplicate the other model's transporting abilities.
-    newModel.holdingCapacity = other.holdingCapacity;
-    newModel.holdables.addAll(other.holdables);
-
-    return newModel;
+    return other.clone();
   }
+  /** Performs a deep copy of the UnitModel in question */
+  public abstract UnitModel clone();
   
   public int getCost()
   {
