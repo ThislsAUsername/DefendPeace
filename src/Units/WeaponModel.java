@@ -2,6 +2,8 @@ package Units;
 
 import java.io.Serializable;
 
+import Units.AWBWUnits.AWBWUnitModel;
+
 public abstract class WeaponModel implements Serializable
 {
   private static final long serialVersionUID = 1L;
@@ -40,5 +42,12 @@ public abstract class WeaponModel implements Serializable
   /**
    * @return returns its base damage against that unit type
    */
-  public abstract double getDamage(UnitModel defender);
+  public double getDamage(UnitModel defender)
+  {
+    return defender.getDamageRedirect(this);
+  }
+  public double getDamage(AWBWUnitModel defender)
+  {
+    throw new UnsupportedOperationException("Called base WeaponModel.getDamage() with input type " + defender.getClass());
+  }
 }

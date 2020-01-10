@@ -119,6 +119,7 @@ public abstract class UnitModel implements Serializable
     return other.clone();
   }
   /** Performs a deep copy of the UnitModel in question */
+  @Override
   public abstract UnitModel clone();
   
   public int getCost()
@@ -167,6 +168,9 @@ public abstract class UnitModel implements Serializable
     // Most Units don't have any; specific UnitModel types can override.
     return new ArrayList<GameAction>();
   }
+
+  /** Calls the appropriate type-specific override of getDamage() on the input WeaponModel */
+  public abstract double getDamageRedirect(WeaponModel wm);
 
   /**
    * @return True if this UnitModel has at least one weapon with a minimum range of 1.

@@ -113,6 +113,7 @@ public class AWBWUnits extends UnitModelScheme
       super(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons);
     }
 
+    @Override
     public UnitModel clone()
     {
       // Make a copy of your weapon types.
@@ -134,6 +135,12 @@ public class AWBWUnits extends UnitModelScheme
       newModel.holdables.addAll(holdables);
 
       return newModel;
+    }
+
+    @Override
+    public double getDamageRedirect(WeaponModel wm)
+    {
+      return wm.getDamage(this);
     }
   }
 

@@ -1,5 +1,7 @@
 package Units;
 
+import Units.AWBWUnits.AWBWUnitModel;
+
 public class AWBWWeapons
 {
   protected enum WeaponType
@@ -40,7 +42,7 @@ public class AWBWWeapons
     }
 
     @Override
-    public double getDamage(UnitModel defender)
+    public double getDamage(AWBWUnitModel defender)
     {
       return damageChart[type.ordinal()][defender.type.ordinal()];
     }
