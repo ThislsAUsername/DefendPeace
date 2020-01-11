@@ -5,7 +5,8 @@ import java.util.Map.Entry;
 
 import Engine.XYCoord;
 import Units.Unit;
-import Units.UnitModel.UnitRoleEnum;
+import Units.UnitModel;
+import Units.UnitModelScheme;
 
 public class MapMaster extends GameMap
 {
@@ -84,12 +85,20 @@ public class MapMaster extends GameMap
 
       if( !mapInfo.mapUnits.isEmpty() )
       {
-        Map<XYCoord, UnitRoleEnum> unitSet = mapInfo.mapUnits.get(co);
-        for( Entry<XYCoord, UnitRoleEnum> unitEntry : unitSet.entrySet() )
+        Map<XYCoord, String> unitSet = mapInfo.mapUnits.get(co);
+        for( Entry<XYCoord, String> unitEntry : unitSet.entrySet() )
         {
-          Unit unit = new Unit(commanders[co], commanders[co].getUnitModel(unitEntry.getValue()));
-          addNewUnit(unit, unitEntry.getKey().xCoord, unitEntry.getKey().yCoord);
-          commanders[co].units.add(unit);
+          UnitModel model = UnitModelScheme.getModelFromString(unitEntry.getValue(), commanders[co].unitModels);
+          if( model != null )
+          {
+            Unit unit = new Unit(commanders[co], model);
+            addNewUnit(unit, unitEntry.getKey().xCoord, unitEntry.getKey().yCoord);
+            commanders[co].units.add(unit);
+          }
+          else
+          {
+            System.out.println("Warning! Invalid unit " + unitEntry.getValue() + " specified in map " + mapInfo.mapName);
+          }
         }
       }
 

@@ -33,6 +33,23 @@ public abstract class UnitModel implements Serializable
     TRANSPORT,
   };
 
+  private static ArrayList<String> unitRoleIDs = null;
+  public static ArrayList<String> getUnitRoleIDs()
+  {
+    if( null == unitRoleIDs )
+    {
+      unitRoleIDs = new ArrayList<String>();
+      for( UnitRoleEnum role : UnitRoleEnum.values() )
+        unitRoleIDs.add(standardizeID(role.toString()));
+    }
+    return unitRoleIDs;
+  }
+
+  public static String standardizeID(String input)
+  {
+    return input.toLowerCase().replaceAll(" ", "_").replaceAll("-", "_");
+  }
+
   // Subs are ships unless they're submerged.
   public enum ChassisEnum
   {

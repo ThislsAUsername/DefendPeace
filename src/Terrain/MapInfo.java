@@ -5,7 +5,6 @@ import java.util.Map;
 
 import Engine.XYCoord;
 import Units.AWBWUnits;
-import Units.UnitModel;
 import Units.UnitModelScheme;
 
 public class MapInfo
@@ -13,14 +12,14 @@ public class MapInfo
   public final String mapName;
   public final TerrainType[][] terrain;
   public final XYCoord[][] COProperties;
-  public final ArrayList<Map<XYCoord,UnitModel.UnitRoleEnum>> mapUnits;
+  public final ArrayList<Map<XYCoord,String>> mapUnits;
 
   public MapInfo(String name, TerrainType[][] tiles, XYCoord[][] props)
   {
-    this(name, tiles, props, new ArrayList<Map<XYCoord,UnitModel.UnitRoleEnum>>());
+    this(name, tiles, props, new ArrayList<Map<XYCoord,String>>());
   }
 
-  public MapInfo(String name, TerrainType[][] tiles, XYCoord[][] props, ArrayList<Map<XYCoord,UnitModel.UnitRoleEnum>> units)
+  public MapInfo(String name, TerrainType[][] tiles, XYCoord[][] props, ArrayList<Map<XYCoord,String>> units)
   {
     mapName = name;
     terrain = tiles;

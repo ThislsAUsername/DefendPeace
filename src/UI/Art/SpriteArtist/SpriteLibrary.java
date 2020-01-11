@@ -17,6 +17,7 @@ import Terrain.TerrainType;
 import UI.UIUtils;
 import UI.UIUtils.Faction;
 import Units.Unit;
+import Units.UnitModel;
 
 /**
  * Responsible for loading all game images from disk. All methods are static, and resources are loaded the first time they are needed.
@@ -377,7 +378,7 @@ public class SpriteLibrary
   {
     StringBuffer spriteFile = new StringBuffer();
     spriteFile.append("res/unit/faction/").append(faction).append("/");
-    spriteFile.append(unitType.toLowerCase().replaceAll(" ", "_").replaceAll("-", "_")).append("_map.png");
+    spriteFile.append(UnitModel.standardizeID(unitType)).append("_map.png");
     return spriteFile.toString();
   }
 
