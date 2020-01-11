@@ -61,6 +61,7 @@ public abstract class UnitModel implements Serializable
   public ChassisEnum chassis;
   private int moneyCost = 9001;
   public int moneyCostAdjustment = 0;
+  public double customStarValue = 0;
   public int maxFuel;
   public int idleFuelBurn;
   public int movePower;
@@ -80,9 +81,9 @@ public abstract class UnitModel implements Serializable
   public double COcost = 1.0;
 
   public UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] weapons)
+      MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] weapons, double starValue)
   {
-    this(pName, pRole, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion);
+    this(pName, pRole, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, starValue);
 
     for( UnitActionType action : actions )
     {
@@ -95,20 +96,21 @@ public abstract class UnitModel implements Serializable
   }
 
   public UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> weapons)
+      MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> weapons, double starValue)
   {
-    this(pName, pRole, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion);
+    this(pName, pRole, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, starValue);
     possibleActions.addAll(actions);
     weaponModels = weapons;
   }
 
   private UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion)
+      MoveType pPropulsion, double starValue)
   {
     name = pName;
     role = pRole;
     chassis = pChassis;
     moneyCost = cost;
+    customStarValue = starValue;
     maxFuel = pFuelMax;
     idleFuelBurn = pIdleFuelBurn;
     visionRange = pVision;
