@@ -17,7 +17,7 @@ import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Units.UnitModel.ChassisEnum;
-import Units.UnitModel.UnitEnum;
+import Units.UnitModel.UnitRoleEnum;
 
 public class Unit implements Serializable
 {

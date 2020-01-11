@@ -13,14 +13,14 @@ public class MapInfo
   public final String mapName;
   public final TerrainType[][] terrain;
   public final XYCoord[][] COProperties;
-  public final ArrayList<Map<XYCoord,UnitModel.UnitEnum>> mapUnits;
+  public final ArrayList<Map<XYCoord,UnitModel.UnitRoleEnum>> mapUnits;
 
   public MapInfo(String name, TerrainType[][] tiles, XYCoord[][] props)
   {
-    this(name, tiles, props, new ArrayList<Map<XYCoord,UnitModel.UnitEnum>>());
+    this(name, tiles, props, new ArrayList<Map<XYCoord,UnitModel.UnitRoleEnum>>());
   }
 
-  public MapInfo(String name, TerrainType[][] tiles, XYCoord[][] props, ArrayList<Map<XYCoord,UnitModel.UnitEnum>> units)
+  public MapInfo(String name, TerrainType[][] tiles, XYCoord[][] props, ArrayList<Map<XYCoord,UnitModel.UnitRoleEnum>> units)
   {
     mapName = name;
     terrain = tiles;

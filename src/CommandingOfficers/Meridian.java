@@ -60,14 +60,14 @@ public class Meridian extends Commander
   {
     super(coInfo, rules);
 
-    // Meridian's tanks and arty cost the same
-    UnitModel tank = getUnitModel(UnitModel.UnitEnum.TANK);
-    UnitModel arty = getUnitModel(UnitModel.UnitEnum.ARTILLERY);
+    // Meridian's basic tanks and arty cost the same
+    UnitModel tank = getUnitModel(UnitModel.UnitRoleEnum.ASSAULT);
+    UnitModel arty = getUnitModel(UnitModel.UnitRoleEnum.SIEGE);
     int costShift = (tank.getCost() - arty.getCost())/2;
     tank.moneyCostAdjustment -= costShift;
     arty.moneyCostAdjustment += costShift;
     tank.possibleActions.add(new UnitActionType.Transform(arty, "~ARTY"));
-    arty.possibleActions.add(new UnitActionType.Transform(tank,      "~TANK"));
+    arty.possibleActions.add(new UnitActionType.Transform(tank, "~TANK"));
 
     addCommanderAbility(new ChangeAndFlow(this));
     addCommanderAbility(new VehicularCharge(this));

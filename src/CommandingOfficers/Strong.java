@@ -66,7 +66,7 @@ public class Strong extends Commander
     super(coInfo, rules);
 
     // Strong allows infantry to be built from any production building.
-    UnitModel mechModel = getUnitModel(UnitModel.UnitEnum.MECH);
+    UnitModel mechModel = getUnitModel(UnitModel.UnitRoleEnum.MECH);
     UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, mechModel);
     upm.addProductionPair(TerrainType.SEAPORT, mechModel);
     upm.applyChanges(this); // Passive ability, so don't add it to the COModifier list; just apply it and forget it.
@@ -74,14 +74,13 @@ public class Strong extends Commander
     // Give Strong's footies a base damage buff. This COModifier is not added
     // to the modifiers collection so it will not be reverted.
     CODamageModifier strongMod = new CODamageModifier(15); // Give us a nice base power boost.
-    strongMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.INFANTRY));
-    strongMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.MECH));
+    strongMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitRoleEnum.INFANTRY));
+    strongMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitRoleEnum.MECH));
     strongMod.applyChanges(this);
 
     // Give every transport type extra move range and an extra cargo slot.
-    for( UnitModel.UnitEnum umEnum : UnitModel.UnitEnum.values() )
+    for (UnitModel model : unitModels)
     {
-      UnitModel model = getUnitModel(umEnum);
       if( model.holdingCapacity > 0 )
       {
         model.movePower++;
@@ -147,7 +146,7 @@ public class Strong extends Commander
       myCommander.addCOModifier(damageModTroop);
 
       // Make infantry buildable from all production buildings.
-      UnitModel infModel = myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+      UnitModel infModel = myCommander.getUnitModel(UnitModel.UnitRoleEnum.INFANTRY);
       UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, infModel);
       upm.addProductionPair(TerrainType.SEAPORT, infModel);
       myCommander.addCOModifier(upm);
@@ -197,8 +196,8 @@ public class Strong extends Commander
       myCommander.addCOModifier(defenseMod);
 
       // Make inf/mechs buildable from all buildings.
-      UnitModel infModel = myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY);
-      UnitModel mechModel = myCommander.getUnitModel(UnitModel.UnitEnum.MECH);
+      UnitModel infModel = myCommander.getUnitModel(UnitModel.UnitRoleEnum.INFANTRY);
+      UnitModel mechModel = myCommander.getUnitModel(UnitModel.UnitRoleEnum.MECH);
       UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, infModel);
       upm.addProductionPair(TerrainType.SEAPORT, infModel);
       upm.addProductionPair(TerrainType.CITY, mechModel);

@@ -12,7 +12,7 @@ import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
 import Units.Unit;
-import Units.UnitModel.UnitEnum;
+import Units.UnitModel.UnitRoleEnum;
 
 public class TestCombatMods extends TestCase
 {
@@ -56,13 +56,13 @@ public class TestCombatMods extends TestCase
   private boolean testBasicMod()
   {
     // Add our test subjects
-    Unit infActive = addUnit(testMap, cinder, UnitEnum.INFANTRY, 7, 3);
+    Unit infActive = addUnit(testMap, cinder, UnitRoleEnum.INFANTRY, 7, 3);
     infActive.initTurn(testMap); // Make sure he is ready to move.
-    Unit infPassive = addUnit(testMap, cinder, UnitEnum.INFANTRY, 7, 5);
+    Unit infPassive = addUnit(testMap, cinder, UnitRoleEnum.INFANTRY, 7, 5);
     
     // We need a victim and an angry man to avenge him
-    Unit bait = addUnit(testMap, venge, UnitEnum.APC, 7, 4);
-    Unit meaty = addUnit(testMap, venge, UnitEnum.MD_TANK, 8, 4);
+    Unit bait = addUnit(testMap, venge, UnitRoleEnum.TRANSPORT, 7, 4);
+    Unit meaty = addUnit(testMap, venge, UnitRoleEnum.ASSAULT, 8, 4);
     
     // Poke the bear...
     performGameAction(new GameAction.AttackAction(testMap, infActive, Utils.findShortestPath(infActive, 7, 3, testMap), 7, 4), testMap);
@@ -91,8 +91,8 @@ public class TestCombatMods extends TestCase
   private boolean testIronWill()
   {
     // Add our test subjects
-    Unit infA = addUnit(testMap, cinder, UnitEnum.INFANTRY, 7, 3);
-    Unit infB = addUnit(testMap, venge, UnitEnum.INFANTRY, 7, 5);
+    Unit infA = addUnit(testMap, cinder, UnitRoleEnum.INFANTRY, 7, 3);
+    Unit infB = addUnit(testMap, venge, UnitRoleEnum.INFANTRY, 7, 5);
     
     // Check our damage for each first strike pre-power...
     BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
@@ -126,8 +126,8 @@ public class TestCombatMods extends TestCase
   private boolean testRetribution()
   {
     // Add our test subjects
-    Unit infA = addUnit(testMap, cinder, UnitEnum.INFANTRY, 7, 3);
-    Unit infB = addUnit(testMap, venge, UnitEnum.INFANTRY, 7, 5);
+    Unit infA = addUnit(testMap, cinder, UnitRoleEnum.INFANTRY, 7, 3);
+    Unit infB = addUnit(testMap, venge, UnitRoleEnum.INFANTRY, 7, 5);
     
     // Check our damage for each first strike pre-power...
     BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);

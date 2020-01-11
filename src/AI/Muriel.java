@@ -592,7 +592,7 @@ public class Muriel implements AIController
       if(useDamageRatio) log("  High funds - sorting units by damage ratio instead of cost effectiveness.");
 
       // If we are low on grunts, make sure we save money to build more.
-      UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+      UnitModel infModel = myCo.getUnitModel(UnitModel.UnitRoleEnum.INFANTRY);
       int costBuffer = 0;
       if( !myUnitCounts.containsKey(infModel) || (myUnitCounts.get(infModel) < (myCo.units.size() * INFANTRY_PROPORTION)) )
       {
@@ -740,7 +740,7 @@ public class Muriel implements AIController
     } // ~while( still choosing units to build )
 
     // Build infantry from any remaining facilities.
-    UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+    UnitModel infModel = myCo.getUnitModel(UnitModel.UnitRoleEnum.INFANTRY);
     while( (budget >= infModel.getCost()) && (CPI.availableUnitModels.contains(infModel)) )
     {
       Location loc = CPI.getLocationToBuild(infModel);
@@ -807,8 +807,8 @@ public class Muriel implements AIController
     {
       final int prime = 160091;
       int result = 1;
-      result = prime * result + first.type.ordinal();
-      result = prime * result + second.type.ordinal();
+      result = prime * result + first.name.hashCode();
+      result = prime * result + second.name.hashCode();
       return result;
     }
 

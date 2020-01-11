@@ -98,19 +98,31 @@ public class AWBWUnits extends UnitModelScheme
     return awbwModels;
   }
 
+  public enum AWBWUnitEnum
+  {
+    INFANTRY, MECH,
+    RECON, TANK, MD_TANK, NEOTANK, MEGATANK,
+    APC, ARTILLERY, ROCKETS, PIPERUNNER, ANTI_AIR, MOBILESAM,
+    FIGHTER, BOMBER, STEALTH, STEALTH_HIDE, B_COPTER, T_COPTER, BBOMB,
+    CARRIER, BBOAT, BATTLESHIP, CRUISER, LANDER, SUB, SUB_SUB
+  };
+
   public static class AWBWUnitModel extends UnitModel
   {
     private static final long serialVersionUID = 1L;
+    public AWBWUnitEnum type;
 
-    public AWBWUnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision,
+    public AWBWUnitModel(String pName, AWBWUnitEnum pType, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision,
         int pMovePower, MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] weapons)
     {
-      super(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons);
+      super(pName, pRole, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons);
+      type = pType;
     }
-    public AWBWUnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision,
+    public AWBWUnitModel(String pName, AWBWUnitEnum pType, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision,
         int pMovePower, MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> weapons)
     {
-      super(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons);
+      super(pName, pRole, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons);
+      type = pType;
     }
 
     @Override
@@ -127,7 +139,7 @@ public class AWBWUnits extends UnitModelScheme
       }
 
       // Create a new model with the given attributes.
-      AWBWUnitModel newModel = new AWBWUnitModel(name, type, chassis, getCost(), maxFuel, idleFuelBurn, visionRange, movePower,
+      AWBWUnitModel newModel = new AWBWUnitModel(name, type, role, chassis, getCost(), maxFuel, idleFuelBurn, visionRange, movePower,
           new MoveType(propulsion), possibleActions, weaponModels);
 
       // Duplicate the other model's transporting abilities.
@@ -159,7 +171,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public InfantryModel()
     {
-      super("Infantry", UnitEnum.INFANTRY, ChassisEnum.TROOP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Infantry", AWBWUnitEnum.INFANTRY, UnitRoleEnum.INFANTRY, ChassisEnum.TROOP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
     }
   }
@@ -179,7 +191,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public MechModel()
     {
-      super("Mech", UnitEnum.MECH, ChassisEnum.TROOP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
+      super("Mech", AWBWUnitEnum.MECH, UnitRoleEnum.MECH, ChassisEnum.TROOP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
           MOVE_POWER, moveType, actions, weapons);
     }
   }
@@ -197,7 +209,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public APCModel()
     {
-      super("APC", UnitEnum.APC, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+      super("APC", AWBWUnitEnum.APC, UnitRoleEnum.TRANSPORT, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0]);
       holdingCapacity = 1;
       ChassisEnum[] carryable = { ChassisEnum.TROOP };
@@ -235,7 +247,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public ReconModel()
     {
-      super("Recon", UnitEnum.RECON, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
+      super("Recon", AWBWUnitEnum.RECON, UnitRoleEnum.RECON, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
           MOVE_POWER, moveType, actions, weapons);
     }
   }
@@ -255,7 +267,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public TankModel()
     {
-      super("Tank", UnitEnum.TANK, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+      super("Tank", AWBWUnitEnum.TANK, UnitRoleEnum.ASSAULT, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, weapons);
     }
   }
@@ -275,7 +287,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public MDTankModel()
     {
-      super("Md Tank", UnitEnum.MD_TANK, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Md Tank", AWBWUnitEnum.MD_TANK, UnitRoleEnum.ASSAULT, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
     }
   }
@@ -295,7 +307,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public NeotankModel()
     {
-      super("Neotank", UnitEnum.NEOTANK, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Neotank", AWBWUnitEnum.NEOTANK, UnitRoleEnum.ASSAULT, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
     }
   }
@@ -315,7 +327,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public MegatankModel()
     {
-      super("Megatank", UnitEnum.MEGATANK, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Megatank", AWBWUnitEnum.MEGATANK, UnitRoleEnum.ASSAULT, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
     }
   }
@@ -335,7 +347,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public ArtilleryModel()
     {
-      super("Artillery", UnitEnum.ARTILLERY, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Artillery", AWBWUnitEnum.ARTILLERY, UnitRoleEnum.SIEGE, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
     }
   }
@@ -355,7 +367,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public RocketsModel()
     {
-      super("Rockets", UnitEnum.ROCKETS, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Rockets", AWBWUnitEnum.ROCKETS, UnitRoleEnum.SIEGE, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
     }
   }
@@ -375,7 +387,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public PiperunnerModel()
     {
-      super("Piperunner", UnitEnum.PIPERUNNER, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Piperunner", AWBWUnitEnum.PIPERUNNER, UnitRoleEnum.SIEGE, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
       propulsion.setMoveCost(TerrainType.PILLAR, 1);
       propulsion.setMoveCost(TerrainType.FACTORY, 1);
@@ -396,7 +408,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public AntiAirModel()
     {
-      super("Anti-Air", UnitEnum.ANTI_AIR, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Anti-Air", AWBWUnitEnum.ANTI_AIR, UnitRoleEnum.ANTI_AIR, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
     }
   }
@@ -416,7 +428,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public MobileSAMModel()
     {
-      super("Mobile SAM", UnitEnum.MOBILESAM, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Mobile SAM", AWBWUnitEnum.MOBILESAM, UnitRoleEnum.ANTI_AIR, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
     }
   }
@@ -437,7 +449,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public TCopterModel()
     {
-      super("T-Copter", UnitEnum.T_COPTER, ChassisEnum.AIR_LOW, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("T-Copter", AWBWUnitEnum.T_COPTER, UnitRoleEnum.TRANSPORT, ChassisEnum.AIR_LOW, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, new WeaponModel[0]);
       holdingCapacity = 1;
       ChassisEnum[] carryable = { ChassisEnum.TROOP };
@@ -464,7 +476,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public BCopterModel()
     {
-      super("B-Copter", UnitEnum.B_COPTER, ChassisEnum.AIR_LOW, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("B-Copter", AWBWUnitEnum.B_COPTER, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_LOW, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
     }
   }
@@ -484,7 +496,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public BomberModel()
     {
-      super("Bomber", UnitEnum.BOMBER, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Bomber", AWBWUnitEnum.BOMBER, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
     }
   }
@@ -504,7 +516,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public FighterModel()
     {
-      super("Fighter", UnitEnum.FIGHTER, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Fighter", AWBWUnitEnum.FIGHTER, UnitRoleEnum.AIR_SUPERIORITY, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
     }
   }
@@ -524,7 +536,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public StealthModel()
     {
-      super("Stealth", UnitEnum.STEALTH, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Stealth", AWBWUnitEnum.STEALTH, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
     }
   }
@@ -537,7 +549,7 @@ public class AWBWUnits extends UnitModelScheme
     public StealthHideModel()
     {
       super();
-      type = UnitEnum.STEALTH_HIDE;
+      type = AWBWUnitEnum.STEALTH_HIDE;
       idleFuelBurn = IDLE_FUEL_BURN;
       hidden = true;
     }
@@ -558,7 +570,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public BBombModel()
     {
-      super("BBomb", UnitEnum.BBOMB, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("BBomb", AWBWUnitEnum.BBOMB, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
       possibleActions.add(new UnitActionType.Explode(5, 3));
     }
@@ -580,7 +592,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public BBoatModel()
     {
-      super("BBoat", UnitEnum.BBOAT, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+      super("BBoat", AWBWUnitEnum.BBOAT, UnitRoleEnum.TRANSPORT, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0]);
       holdingCapacity = 2;
       ChassisEnum[] carryable = { ChassisEnum.TROOP };
@@ -607,7 +619,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public LanderModel()
     {
-      super("Lander", UnitEnum.LANDER, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+      super("Lander", AWBWUnitEnum.LANDER, UnitRoleEnum.TRANSPORT, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0]);
       holdingCapacity = 2;
       ChassisEnum[] carryable = { ChassisEnum.TROOP, ChassisEnum.TANK };
@@ -634,7 +646,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public SubModel()
     {
-      super("Sub", UnitEnum.SUB, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+      super("Sub", AWBWUnitEnum.SUB, UnitRoleEnum.ASSAULT, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, weapons);
     }
   }
@@ -647,7 +659,7 @@ public class AWBWUnits extends UnitModelScheme
     public SubSubModel()
     {
       super();
-      type = UnitEnum.SUB_SUB;
+      type = AWBWUnitEnum.SUB_SUB;
       chassis = ChassisEnum.SUBMERGED;
       idleFuelBurn = IDLE_FUEL_BURN;
       hidden = true;
@@ -669,7 +681,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public BattleshipModel()
     {
-      super("Battleship", UnitEnum.BATTLESHIP, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Battleship", AWBWUnitEnum.BATTLESHIP, UnitRoleEnum.SIEGE, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
     }
   }
@@ -687,9 +699,9 @@ public class AWBWUnits extends UnitModelScheme
     private static final UnitActionType[] actions = UnitActionType.COMBAT_TRANSPORT_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.CarrierMissiles() };
 
-    public CarrierModel()
+    public CarrierModel() // TODO: Resupply held units
     {
-      super("Carrier", UnitEnum.CARRIER, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Carrier", AWBWUnitEnum.CARRIER, UnitRoleEnum.TRANSPORT, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
       holdingCapacity = 2;
       ChassisEnum[] carryable = { ChassisEnum.AIR_LOW, ChassisEnum.AIR_HIGH };
@@ -716,7 +728,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public CruiserModel()
     {
-      super("Cruiser", UnitEnum.CRUISER, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Cruiser", AWBWUnitEnum.CRUISER, UnitRoleEnum.ANTI_AIR, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons);
       holdingCapacity = 2;
       ChassisEnum[] carryable = { ChassisEnum.AIR_LOW };

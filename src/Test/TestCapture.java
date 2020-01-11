@@ -15,7 +15,7 @@ import Terrain.MapMaster;
 import Terrain.MapWindow;
 import Terrain.TerrainType;
 import Units.Unit;
-import Units.UnitModel.UnitEnum;
+import Units.UnitModel.UnitRoleEnum;
 
 public class TestCapture extends TestCase
 {
@@ -62,7 +62,7 @@ public class TestCapture extends TestCase
     testPassed &= validate( prop.isCaptureable(), "    Unexpected terrain found! Test will be invalid." );
 
     // Add a unit to help run the tests.
-    Unit infA = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 2, 2); // On the city.
+    Unit infA = addUnit(testMap, testCo1, UnitRoleEnum.INFANTRY, 2, 2); // On the city.
 
     // Start capturing the city.
     infA.initTurn(testMap);
@@ -92,7 +92,7 @@ public class TestCapture extends TestCase
     testPassed &= validate( infA.getCaptureProgress() == 10, "    Infantry should not lose capture progress due to WAIT.");
 
     // Make sure that attacking someone else does not reset capture progress.
-    Unit infB = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 1, 2); // Make an enemy adjacent to the city.
+    Unit infB = addUnit(testMap, testCo2, UnitRoleEnum.INFANTRY, 1, 2); // Make an enemy adjacent to the city.
     infB.alterHP( -8 ); // Make sure he will die without retaliating.
     infA.initTurn(testMap);
     performGameAction(new GameAction.AttackAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap), 1, 2), testMap); // Bop him on the head.
@@ -138,7 +138,7 @@ public class TestCapture extends TestCase
     testCo2.team = 0;
     
     // Set up for the test.
-    Unit infA = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 2, 2); // On the city.
+    Unit infA = addUnit(testMap, testCo1, UnitRoleEnum.INFANTRY, 2, 2); // On the city.
     prop.setOwner(testCo2);
 
     // Start capturing the city.
@@ -177,7 +177,7 @@ public class TestCapture extends TestCase
     testPassed &= validate( hq.getEnvironment().terrainType == TerrainType.HEADQUARTERS, "    HQ for testCo2 is not where expected.");
 
     // Add a unit to help run the tests.
-    Unit mech = addUnit(testMap, testCo1, UnitEnum.MECH, 13, 1); // On the HQ, just to make this easy.
+    Unit mech = addUnit(testMap, testCo1, UnitRoleEnum.MECH, 13, 1); // On the HQ, just to make this easy.
 
     // Start capturing the HQ.
     mech.initTurn(testMap);

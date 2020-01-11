@@ -19,13 +19,18 @@ public abstract class UnitModel implements Serializable
 {
   private static final long serialVersionUID = 1L;
 
-  public enum UnitEnum
+  /**
+   * Defines the core types of units we expect to be in any given unit set.
+   * Unit sets should have no less than one of each.
+   * Unit sets should order models such that the most "sensible" type (generally cheapest, land) is the first type of a given role.
+   */
+  public enum UnitRoleEnum
   {
     INFANTRY, MECH,
-    RECON, TANK, MD_TANK, NEOTANK, MEGATANK,
-    APC, ARTILLERY, ROCKETS, PIPERUNNER, ANTI_AIR, MOBILESAM,
-    FIGHTER, BOMBER, STEALTH, STEALTH_HIDE, B_COPTER, T_COPTER, BBOMB,
-    CARRIER, BBOAT, BATTLESHIP, CRUISER, LANDER, SUB, SUB_SUB
+    RECON, ASSAULT,
+    SIEGE, ANTI_AIR,
+    AIR_ASSAULT, AIR_SUPERIORITY,
+    TRANSPORT,
   };
 
   // Subs are ships unless they're submerged.
@@ -35,7 +40,7 @@ public abstract class UnitModel implements Serializable
   };
 
   public String name;
-  public UnitEnum type;
+  public UnitRoleEnum role;
   public ChassisEnum chassis;
   private int moneyCost = 9001;
   public int moneyCostAdjustment = 0;
@@ -57,10 +62,10 @@ public abstract class UnitModel implements Serializable
   private int COdef;
   public double COcost = 1.0;
 
-  public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
+  public UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] weapons)
   {
-    this(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion);
+    this(pName, pRole, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion);
 
     for( UnitActionType action : actions )
     {
@@ -72,19 +77,19 @@ public abstract class UnitModel implements Serializable
     }
   }
 
-  public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
+  public UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> weapons)
   {
-    this(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion);
+    this(pName, pRole, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion);
     possibleActions.addAll(actions);
     weaponModels = weapons;
   }
 
-  private UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
+  private UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion)
   {
     name = pName;
-    type = pType;
+    role = pRole;
     chassis = pChassis;
     moneyCost = cost;
     maxFuel = pFuelMax;

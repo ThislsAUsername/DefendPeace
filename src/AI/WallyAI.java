@@ -701,7 +701,7 @@ public class WallyAI implements AIController
 
   private boolean isSafe(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc)
   {
-    Double threat = threatMap.get(myCo.getUnitModel(unit.model.type)).get(xyc);
+    Double threat = threatMap.get(unit.model).get(xyc);
     int threshhold = unit.model.hasDirectFireWeapon() ? DIRECT_THREAT_THRESHHOLD : INDIRECT_THREAT_THRESHHOLD;
     return (null == threat || threshhold > threat);
   }
@@ -861,7 +861,7 @@ public class WallyAI implements AIController
 
     log("Evaluating Production needs");
     int budget = myCo.money;
-    UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+    UnitModel infModel = myCo.getUnitModel(UnitModel.UnitRoleEnum.INFANTRY);
 
     // Get a count of enemy forces.
     Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);

@@ -70,7 +70,7 @@ class SelectUnitProduction extends GameInputState<String>
     for(UnitModel model : models)
     {
       // Store each string and record the max length.
-      String str = model.type.toString();
+      String str = model.name;
       menuStrings.add( str );
       maxNameLength = Math.max(maxNameLength, str.length());
       maxPriceLength = Math.max(maxPriceLength, Integer.toString(model.getCost()).length());

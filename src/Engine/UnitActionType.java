@@ -204,7 +204,8 @@ public abstract class UnitActionType implements Serializable
       Unit resident = map.getLocation(moveLocation).getResident();
       if( !ignoreResident && resident != null )
       {
-        if( (resident.model.type == actor.model.type) && resident != actor && (resident.getHP() < resident.model.maxHP) )
+        // TODO: Consider if and how off-CO joins should be allowed if tags ever happens
+        if( resident.model.equals(actor.model) && resident != actor && (resident.getHP() < resident.model.maxHP) )
         {
           return new GameActionSet(new GameAction.UnitJoinAction(map, actor, movePath), false);
         }

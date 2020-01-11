@@ -30,7 +30,7 @@ import Terrain.TerrainType;
 import UI.UIUtils.Faction;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.UnitEnum;
+import Units.UnitModel.UnitRoleEnum;
 import Units.UnitModelScheme.GameReadyModels;
 
 public class Commander extends GameEventListener implements Serializable
@@ -178,13 +178,13 @@ public class Commander extends GameEventListener implements Serializable
     return true;
   }
 
-  public UnitModel getUnitModel(UnitEnum unitType)
+  public UnitModel getUnitModel(UnitRoleEnum unitType)
   {
     UnitModel um = null;
 
     for( UnitModel iter : unitModels )
     {
-      if( iter.type == unitType )
+      if( iter.role == unitType )
       {
         um = iter;
         break;

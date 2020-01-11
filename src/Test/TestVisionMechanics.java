@@ -11,7 +11,7 @@ import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
 import Units.Unit;
-import Units.UnitModel.UnitEnum;
+import Units.UnitModel.UnitRoleEnum;
 
 public class TestVisionMechanics extends TestCase
 {
@@ -49,15 +49,15 @@ public class TestVisionMechanics extends TestCase
 
   private boolean testFogDetection()
   {
-    Unit fool = addUnit(testMap, strong, UnitEnum.APC, 7, 2); fool.initTurn(testMap);
-    Unit scout = addUnit(testMap, strong, UnitEnum.RECON, 7, 3); scout.initTurn(testMap);
-    Unit punch = addUnit(testMap, strong, UnitEnum.ARTILLERY, 4, 5); punch.initTurn(testMap);
-    Unit resupplyable = addUnit(testMap, strong, UnitEnum.APC, 8, 8); resupplyable.initTurn(testMap);
+    Unit fool = addUnit(testMap, strong, UnitRoleEnum.TRANSPORT, 7, 2); fool.initTurn(testMap);
+    Unit scout = addUnit(testMap, strong, UnitRoleEnum.RECON, 7, 3); scout.initTurn(testMap);
+    Unit punch = addUnit(testMap, strong, UnitRoleEnum.SIEGE, 4, 5); punch.initTurn(testMap);
+    Unit resupplyable = addUnit(testMap, strong, UnitRoleEnum.TRANSPORT, 8, 8); resupplyable.initTurn(testMap);
     resupplyable.fuel = 0;
     
     // We need 2 units to observe, one of which should be hidden, the other in cover
-    Unit bait = addUnit(testMap, patch, UnitEnum.APC, 6, 5);
-    Unit meaty = addUnit(testMap, patch, UnitEnum.TANK, 7, 5);
+    Unit bait = addUnit(testMap, patch, UnitRoleEnum.TRANSPORT, 6, 5);
+    Unit meaty = addUnit(testMap, patch, UnitRoleEnum.ASSAULT, 7, 5);
     meaty.model.hidden = true; // Does anyone else think this is a bad idea? No? Okay, must be fair and balanced.
     
     // It's Strong's turn. Set up his fog goggles.

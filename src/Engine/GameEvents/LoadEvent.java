@@ -39,7 +39,7 @@ public class LoadEvent implements GameEvent
     }
     else
     {
-      System.out.println("WARNING! Cannot load " + unitCargo.model.type + " onto " + unitTransport.model.type );
+      System.out.println("WARNING! Cannot load " + unitCargo.model.name + " onto " + unitTransport.model.name );
     }
   }
 

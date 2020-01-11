@@ -50,7 +50,7 @@ public class TestCOModifier extends TestCase
   private boolean testDamageModifier()
   {
     boolean testPassed = true;
-    UnitModel inf = patch.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+    UnitModel inf = patch.getUnitModel(UnitModel.UnitRoleEnum.INFANTRY);
     
     // Get base damage ratio.
     int startDmg = inf.getDamageRatio();
@@ -72,7 +72,7 @@ public class TestCOModifier extends TestCase
   private boolean testMovementModifier()
   {
     boolean testPassed = true;
-    UnitModel inf = patch.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+    UnitModel inf = patch.getUnitModel(UnitModel.UnitRoleEnum.INFANTRY);
     
     // Get base movement speed
     int startMove = inf.movePower;
@@ -80,7 +80,7 @@ public class TestCOModifier extends TestCase
     // Apply a movement modifier and re-check.
     int MOVEMOD = 3;
     COMovementModifier moveMod = new COMovementModifier(MOVEMOD);
-    moveMod.addApplicableUnitModel(patch.getUnitModel(UnitModel.UnitEnum.INFANTRY));
+    moveMod.addApplicableUnitModel(patch.getUnitModel(UnitModel.UnitRoleEnum.INFANTRY));
     moveMod.applyChanges(patch);
     int newMove = inf.movePower;
     testPassed &= validate( (newMove - startMove) == MOVEMOD, "    Movement modifier did not apply as expected!");
@@ -105,7 +105,7 @@ public class TestCOModifier extends TestCase
     testPassed &= validate( !factoryModels.contains(ship), "    Factory can build ships by default. Malformed test!" );
     
     // Define a type we will try to add, that is buildable already.
-    UnitModel inf = patch.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+    UnitModel inf = patch.getUnitModel(UnitModel.UnitRoleEnum.INFANTRY);
     testPassed &= validate( factoryModels.contains(inf), "    Factory cannot build infantry by default. Malformed test!" );
     
     // Try to add both types.
@@ -130,16 +130,16 @@ public class TestCOModifier extends TestCase
   {
     boolean testPassed = true;
 
-    addUnit(testMap, patch, UnitModel.UnitEnum.INFANTRY, 2, 2);
-    addUnit(testMap, patch, UnitModel.UnitEnum.RECON, 2, 3);
+    addUnit(testMap, patch, UnitModel.UnitRoleEnum.INFANTRY, 2, 2);
+    addUnit(testMap, patch, UnitModel.UnitRoleEnum.RECON, 2, 3);
     Unit infantry = testMap.getLocation(2, 2).getResident();
     Unit recon = testMap.getLocation(2, 3).getResident();
 
     testPassed &= validate( infantry != null, "    Infantry is missing. Malformed test!");
     testPassed &= validate( recon != null, "    Recon is missing. Malformed test!");
 
-    UnitModel infModel = patch.getUnitModel(UnitModel.UnitEnum.INFANTRY);
-    UnitModel reconModel = patch.getUnitModel(UnitModel.UnitEnum.RECON);
+    UnitModel infModel = patch.getUnitModel(UnitModel.UnitRoleEnum.INFANTRY);
+    UnitModel reconModel = patch.getUnitModel(UnitModel.UnitRoleEnum.RECON);
 
     testPassed &= validate( infantry.model == infModel, "    Infantry is not Infantry. Malformed test!");
     testPassed &= validate( recon.model == reconModel, "    Recon is not Recon. Malformed test!");
@@ -160,7 +160,7 @@ public class TestCOModifier extends TestCase
     testPassed &= validate( recon.model == reconModel, "    Recon is not Recon, though it should not have changed.");
 
     // Another test! We must make sure that two units, after being transmogrified into the same thing, will return to their correct forms.
-    UnitModel mechModel = patch.getUnitModel(UnitModel.UnitEnum.MECH);
+    UnitModel mechModel = patch.getUnitModel(UnitModel.UnitRoleEnum.MECH);
     remod = new UnitRemodelModifier(infModel, mechModel);
     remod.addUnitRemodel(reconModel, mechModel);
     remod.applyChanges(patch);

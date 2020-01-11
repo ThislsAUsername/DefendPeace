@@ -20,7 +20,7 @@ import Terrain.MapMaster;
 import Terrain.MapWindow;
 import Terrain.TerrainType;
 import Units.Unit;
-import Units.UnitModel.UnitEnum;
+import Units.UnitModel.UnitRoleEnum;
 
 public class TestCommanderAve extends TestCase
 {
@@ -68,7 +68,7 @@ public class TestCommanderAve extends TestCase
     testPassed &= validate(testMap.getEnvironment(city).terrainType == TerrainType.CITY, "    City location is not a city!");
     testPassed &= validate(testMap.getEnvironment(city).weatherType == Weathers.CLEAR, "    Weather is not clear at start!");
 
-    Unit infantry = addUnit(testMap, Ave, Units.UnitModel.UnitEnum.INFANTRY, city.xCoord, city.yCoord);
+    Unit infantry = addUnit(testMap, Ave, Units.UnitModel.UnitRoleEnum.INFANTRY, city.xCoord, city.yCoord);
     GameAction capture = new GameAction.CaptureAction(testMap, infantry, Utils.findShortestPath(infantry, city, testMap));
 
     // Give it the ol' one-two.
@@ -151,9 +151,9 @@ public class TestCommanderAve extends TestCase
     // Activate Ave's abilities, and make sure we see the intended effects.
     // We'll also add some units to see Glacio's damage and tree-clearing effects.
     XYCoord forestTile = new XYCoord(8, 4);
-    addUnit(testMap, Ave, UnitEnum.INFANTRY, 8, 5);
-    addUnit(testMap, Ave, UnitEnum.INFANTRY, 6, 5);
-    Unit patchInf = addUnit(testMap, Patch, UnitEnum.INFANTRY, 7, 5);
+    addUnit(testMap, Ave, UnitRoleEnum.INFANTRY, 8, 5);
+    addUnit(testMap, Ave, UnitRoleEnum.INFANTRY, 6, 5);
+    Unit patchInf = addUnit(testMap, Patch, UnitRoleEnum.INFANTRY, 7, 5);
     testPassed &= validate( testMap.getEnvironment(forestTile).terrainType == TerrainType.FOREST, "    " + forestTile + " is not a Forest, but should be!");
 
     //Ave.log(true);
