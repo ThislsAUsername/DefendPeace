@@ -64,6 +64,7 @@ public abstract class UnitModel implements Serializable
   public double customStarValue = 0;
   public int maxFuel;
   public int idleFuelBurn;
+  public int maxMaterials = 0;
   public int movePower;
   public int visionRange;
   public int visionRangePiercing = 1;

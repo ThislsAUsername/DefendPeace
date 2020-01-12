@@ -62,7 +62,8 @@ public class DoRUnits extends UnitModelScheme
     seaportModels.add(new CruiserModel());
     UnitModel subsub = new SubSubModel(); // Subs are built submerged
     seaportModels.add(subsub);
-    seaportModels.add(new CarrierModel());
+    UnitModel carrier = new CarrierModel();
+    seaportModels.add(carrier);
     seaportModels.add(new BattleshipModel());
     seaportModels.add(new LanderModel());
 
@@ -92,7 +93,9 @@ public class DoRUnits extends UnitModelScheme
     subsub.possibleActions.add(new UnitActionType.Transform(sub, "RISE"));
     dorModels.unitModels.add(sub);
 
-    dorModels.unitModels.add(new SeaplaneModel());
+    UnitModel seaplane = new SeaplaneModel();
+    carrier.possibleActions.add(new UnitActionType.UnitProduce(seaplane));
+    dorModels.unitModels.add(seaplane);
 
     return dorModels;
   }
@@ -585,12 +588,7 @@ public class DoRUnits extends UnitModelScheme
       super("T-Copter", DoRUnitEnum.T_COPTER, UnitRoleEnum.TRANSPORT, ChassisEnum.AIR_LOW, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, new WeaponModel[0], STAR_VALUE);
       holdingCapacity = 1;
-      ChassisEnum[] carryable = { ChassisEnum.TROOP };
-      holdables = new Vector<ChassisEnum>(carryable.length);
-      for( int i = 0; i < holdables.capacity(); i++ )
-      {
-        holdables.add(carryable[i]);
-      }
+      holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.TROOP));
     }
   }
 
@@ -638,12 +636,7 @@ public class DoRUnits extends UnitModelScheme
       super("Cruiser", DoRUnitEnum.CRUISER, UnitRoleEnum.ANTI_AIR, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
       holdingCapacity = 2;
-      ChassisEnum[] carryable = { ChassisEnum.AIR_LOW };
-      holdables = new Vector<ChassisEnum>(carryable.length);
-      for( int i = 0; i < holdables.capacity(); i++ )
-      {
-        holdables.add(carryable[i]);
-      }
+      holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.AIR_LOW));
     }
   }
 
@@ -697,17 +690,13 @@ public class DoRUnits extends UnitModelScheme
     private static final UnitActionType[] actions = UnitActionType.COMBAT_TRANSPORT_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.CarrierMGun() };
 
-    public CarrierModel() // TODO: Launch. Resupply and repair held units. Produce.
+    public CarrierModel() // TODO: Launch. Resupply and repair held units.
     {
       super("Carrier", DoRUnitEnum.CARRIER, UnitRoleEnum.TRANSPORT, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
+      maxMaterials = 4;
       holdingCapacity = 2;
-      ChassisEnum[] carryable = { ChassisEnum.AIR_LOW, ChassisEnum.AIR_HIGH };
-      holdables = new Vector<ChassisEnum>(carryable.length);
-      for( int i = 0; i < holdables.capacity(); i++ )
-      {
-        holdables.add(carryable[i]);
-      }
+      holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.AIR_LOW, ChassisEnum.AIR_HIGH));
     }
   }
 
@@ -750,12 +739,7 @@ public class DoRUnits extends UnitModelScheme
       super("Lander", DoRUnitEnum.LANDER, UnitRoleEnum.TRANSPORT, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0], STAR_VALUE);
       holdingCapacity = 2;
-      ChassisEnum[] carryable = { ChassisEnum.TROOP, ChassisEnum.TANK };
-      holdables = new Vector<ChassisEnum>(carryable.length);
-      for( int i = 0; i < holdables.capacity(); i++ )
-      {
-        holdables.add(carryable[i]);
-      }
+      holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.TROOP, ChassisEnum.TANK));
     }
   }
 

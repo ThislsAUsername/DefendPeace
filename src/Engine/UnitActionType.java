@@ -470,4 +470,35 @@ public abstract class UnitActionType implements Serializable
       return "DELETE";
     }
   }
+
+  public static class UnitProduce extends UnitActionType
+  {
+    private static final long serialVersionUID = 1L;
+    final UnitModel typeToBuild;
+    public UnitProduce(UnitModel type)
+    {
+      typeToBuild = type;
+    }
+
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    {
+      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      if( moveLocation.equals(actor.x, actor.y) &&
+          actor.hasCargoSpace(typeToBuild.chassis) &&
+          actor.CO.money > typeToBuild.getCost() &&
+          actor.materials > 0 )
+      {
+        return new GameActionSet(new GameAction.UnitProduceAction(this, actor), false);
+      }
+      return null;
+    }
+
+    @Override
+    public String name()
+    {
+      return "BUILD";
+    }
+  }
+
 }

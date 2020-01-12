@@ -20,8 +20,10 @@ import Engine.GameEvents.MassDamageEvent;
 import Engine.GameEvents.ResupplyEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.UnitJoinEvent;
+import Engine.GameEvents.UnitProduceEvent;
 import Engine.GameEvents.UnitTransformEvent;
 import Engine.GameEvents.UnloadEvent;
+import Engine.UnitActionType.UnitProduce;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
@@ -1106,4 +1108,50 @@ public interface GameAction
       return destination;
     }
   } // ~UnitDeleteAction
+
+  public static class UnitProduceAction implements GameAction
+  {
+    final UnitProduce type;
+    final Unit actor;
+    final XYCoord destination;
+    public UnitProduceAction(UnitProduce pType, Unit unit)
+    {
+      type = pType;
+      actor = unit;
+      destination = new XYCoord(unit.x, unit.y);
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue eventSequence = new GameEventQueue();
+      eventSequence.add(new UnitProduceEvent(actor.CO, actor, type.typeToBuild));
+      return eventSequence;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Build "+type.typeToBuild.name+" with %s in place]", actor.toStringWithLocation());
+    }
+
+    @Override
+    public UnitActionType getType()
+    {
+      return type;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return destination;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return destination;
+    }
+  } // ~UnitProduceAction
+
 }

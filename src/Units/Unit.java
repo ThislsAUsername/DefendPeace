@@ -17,7 +17,6 @@ import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Units.UnitModel.ChassisEnum;
-import Units.UnitModel.UnitRoleEnum;
 
 public class Unit implements Serializable
 {
@@ -27,6 +26,7 @@ public class Unit implements Serializable
   public int x;
   public int y;
   public int fuel;
+  public int materials;
   private int captureProgress;
   private Location captureTarget;
   public Commander CO;
@@ -40,6 +40,7 @@ public class Unit implements Serializable
     CO = co;
     model = um;
     fuel = model.maxFuel;
+    materials = model.maxMaterials;
     isTurnOver = true;
     HP = model.maxHP;
     captureProgress = 0;

@@ -1,6 +1,7 @@
 package Units;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Vector;
 import Engine.GameAction;
 import Engine.UnitActionType;
@@ -215,12 +216,7 @@ public class AWBWUnits extends UnitModelScheme
       super("APC", AWBWUnitEnum.APC, UnitRoleEnum.TRANSPORT, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0], STAR_VALUE);
       holdingCapacity = 1;
-      ChassisEnum[] carryable = { ChassisEnum.TROOP };
-      holdables = new Vector<ChassisEnum>(carryable.length);
-      for( int i = 0; i < holdables.capacity(); i++ )
-      {
-        holdables.add(carryable[i]);
-      }
+      holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.TROOP));
     }
 
     /**
@@ -466,12 +462,7 @@ public class AWBWUnits extends UnitModelScheme
       super("T-Copter", AWBWUnitEnum.T_COPTER, UnitRoleEnum.TRANSPORT, ChassisEnum.AIR_LOW, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, new WeaponModel[0], STAR_VALUE);
       holdingCapacity = 1;
-      ChassisEnum[] carryable = { ChassisEnum.TROOP };
-      holdables = new Vector<ChassisEnum>(carryable.length);
-      for( int i = 0; i < holdables.capacity(); i++ )
-      {
-        holdables.add(carryable[i]);
-      }
+      holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.TROOP));
     }
   }
 
@@ -615,12 +606,7 @@ public class AWBWUnits extends UnitModelScheme
       super("BBoat", AWBWUnitEnum.BBOAT, UnitRoleEnum.TRANSPORT, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0], STAR_VALUE);
       holdingCapacity = 2;
-      ChassisEnum[] carryable = { ChassisEnum.TROOP };
-      holdables = new Vector<ChassisEnum>(carryable.length);
-      for( int i = 0; i < holdables.capacity(); i++ )
-      {
-        holdables.add(carryable[i]);
-      }
+      holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.TROOP));
       possibleActions.add(UnitActionType.REPAIR_UNIT);
     }
   }
@@ -643,12 +629,7 @@ public class AWBWUnits extends UnitModelScheme
       super("Lander", AWBWUnitEnum.LANDER, UnitRoleEnum.TRANSPORT, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0], STAR_VALUE);
       holdingCapacity = 2;
-      ChassisEnum[] carryable = { ChassisEnum.TROOP, ChassisEnum.TANK };
-      holdables = new Vector<ChassisEnum>(carryable.length);
-      for( int i = 0; i < holdables.capacity(); i++ )
-      {
-        holdables.add(carryable[i]);
-      }
+      holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.TROOP, ChassisEnum.TANK));
     }
   }
 
@@ -728,12 +709,7 @@ public class AWBWUnits extends UnitModelScheme
       super("Carrier", AWBWUnitEnum.CARRIER, UnitRoleEnum.TRANSPORT, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
       holdingCapacity = 2;
-      ChassisEnum[] carryable = { ChassisEnum.AIR_LOW, ChassisEnum.AIR_HIGH };
-      holdables = new Vector<ChassisEnum>(carryable.length);
-      for( int i = 0; i < holdables.capacity(); i++ )
-      {
-        holdables.add(carryable[i]);
-      }
+      holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.AIR_LOW, ChassisEnum.AIR_HIGH));
     }
   }
 
@@ -756,12 +732,7 @@ public class AWBWUnits extends UnitModelScheme
       super("Cruiser", AWBWUnitEnum.CRUISER, UnitRoleEnum.ANTI_AIR, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
       holdingCapacity = 2;
-      ChassisEnum[] carryable = { ChassisEnum.AIR_LOW };
-      holdables = new Vector<ChassisEnum>(carryable.length);
-      for( int i = 0; i < holdables.capacity(); i++ )
-      {
-        holdables.add(carryable[i]);
-      }
+      holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.AIR_LOW));
     }
   }
 
