@@ -8,7 +8,7 @@ import Engine.IController;
 import UI.PlayerSetupColorFactionController;
 import UI.SlidingValue;
 import UI.UIUtils;
-import Units.UnitModel;
+import Units.UnitModel.UnitRoleEnum;
 
 public class PlayerSetupColorFactionArtist
 {
@@ -96,7 +96,7 @@ public class PlayerSetupColorFactionArtist
         if( (xOff < myWidth) && (yOff < myHeight) && (xOff > -unitSizePx) && (yOff > -unitSizePx))
         {
           if( null == unitArray[f][c] )
-            unitArray[f][c] = SpriteLibrary.getMapUnitSpriteSet(control.iconicUnitName, UIUtils.getFactions()[f], UIUtils.getCOColors()[c]).sprites[0].getFrame(0);
+            unitArray[f][c] = SpriteLibrary.getMapUnitSpriteSet(UnitRoleEnum.INFANTRY.toString(), UIUtils.getFactions()[f], UIUtils.getCOColors()[c]).sprites[0].getFrame(0);
           myG.drawImage(unitArray[f][c], xOff, yOff, null);
         }
       }
@@ -118,7 +118,7 @@ public class PlayerSetupColorFactionArtist
     }
 
     // Just pull one sprite to start with. Loading everything at once might take a while.
-    unitArray[0][0] = SpriteLibrary.getMapUnitSpriteSet(myControl.iconicUnitName, UIUtils.getFactions()[0], UIUtils.getCOColors()[0]).sprites[0].getFrame(0);
+    unitArray[0][0] = SpriteLibrary.getMapUnitSpriteSet(UnitRoleEnum.INFANTRY.toString(), UIUtils.getFactions()[0], UIUtils.getCOColors()[0]).sprites[0].getFrame(0);
 
     unitSizePx = unitArray[0][0].getHeight(); // Units are square.
     unitBuffer = unitSizePx / 3; // Space between options in the grid.
@@ -133,11 +133,11 @@ public class PlayerSetupColorFactionArtist
   private static boolean donePreloading = false;
   /** This can be called repeatedly on the sly to get all infantry sprites
    * in memory and make this option screen less sluggish on first entry. */
-  public static boolean preloadOneInfantrySprite(String unitName)
+  public static boolean preloadOneInfantrySprite()
   {
     if( !donePreloading )
     {
-      SpriteLibrary.getMapUnitSpriteSet(unitName, UIUtils.getFactions()[nextFac], UIUtils.getCOColors()[nextCol]);
+      SpriteLibrary.getMapUnitSpriteSet(UnitRoleEnum.INFANTRY.toString(), UIUtils.getFactions()[nextFac], UIUtils.getCOColors()[nextCol]);
       nextFac++;
       if( nextFac >= UIUtils.getFactions().length )
       {

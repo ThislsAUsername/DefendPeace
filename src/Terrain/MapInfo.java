@@ -2,10 +2,15 @@ package Terrain;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import Engine.XYCoord;
 import Units.AWBWUnits;
+import Units.DoRUnits;
+import Units.Unit;
+import Units.UnitModel;
 import Units.UnitModelScheme;
+import Units.UnitModelScheme.GameReadyModels;
 
 public class MapInfo
 {
@@ -49,9 +54,32 @@ public class MapInfo
   {
     ArrayList<UnitModelScheme> umsList = new ArrayList<UnitModelScheme>();
     umsList.add(new AWBWUnits());
-    
-    // TODO: Filter based on the existence of non-core units in the map
-    
+    umsList.add(new DoRUnits());
+
+    // Filter based on the existence of non-core units in the map
+    for( UnitModelScheme scheme : umsList )
+    {
+      GameReadyModels models = scheme.getGameReadyModels();
+      boolean schemeInvalid = false;
+      
+      for( Map<XYCoord, String> unitSet : mapUnits )
+      {
+        for( Entry<XYCoord, String> unitEntry : unitSet.entrySet() )
+        {
+          UnitModel model = UnitModelScheme.getModelFromString(unitEntry.getValue(), models.unitModels);
+          if( model == null )
+          {
+            schemeInvalid = true; // This unit isn't supported in the scheme, so drop the scheme
+            break;
+          }
+        }
+        if( schemeInvalid )
+          break;
+      }
+
+      scheme.schemeValid = !schemeInvalid;
+    }
+
     return umsList.toArray(new UnitModelScheme[0]);
   }
 }

@@ -24,6 +24,10 @@ public class GameScenario implements Serializable
   {
     rules = new GameRules(new AWBWUnits(), income, startFunds);
   }
+  public GameScenario(UnitModelScheme scheme, int income, int startFunds)
+  {
+    rules = new GameRules(scheme, income, startFunds);
+  }
 
   public GameEventQueue initTurn(GameMap map)
   {

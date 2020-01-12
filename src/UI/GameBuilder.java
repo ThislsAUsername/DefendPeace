@@ -25,9 +25,9 @@ public class GameBuilder
     mapInfo = info;
   }
 
-  public GameInstance createGame(PlayerSetupInfo[] coInfos)
+  public GameInstance createGame(UnitModelScheme scheme, PlayerSetupInfo[] coInfos)
   {
-    GameScenario scenario = new GameScenario(incomePerCity, startingFunds);
+    GameScenario scenario = new GameScenario(scheme, incomePerCity, startingFunds);
 
     // Create all of the commanders.
     Commander[] cos = new Commander[mapInfo.getNumCos()];

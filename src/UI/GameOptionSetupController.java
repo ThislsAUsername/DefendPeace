@@ -31,6 +31,10 @@ public class GameOptionSetupController implements IController
 
     unitSchemeOption = new GameOption<UnitModelScheme>("Unit set", gameBuilder.mapInfo.getValidUnitModelSchemes(), 0);
 
+    // Default to the first valid unit scheme
+    for (int i = 0; !unitSchemeOption.getSelectedObject().schemeValid && i < unitSchemeOption.size(); ++i )
+      unitSchemeOption.setSelectedOption(i);
+
     gameOptions = new GameOption<?>[] {fowOption, startingFundsOption, incomeOption, weatherOption, unitSchemeOption};
     optionSelector = new OptionSelector( gameOptions.length );
   }

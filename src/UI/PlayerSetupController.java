@@ -26,7 +26,6 @@ public class PlayerSetupController implements IController
 
   private GameBuilder gameBuilder = null;
   PlayerSetupInfo[] coSelectors;
-  public final String iconicUnitName;
 
   public enum SelectionCategories { COMMANDER, COLOR_FACTION, TEAM, AI, START };
 
@@ -36,7 +35,6 @@ public class PlayerSetupController implements IController
   {
     // Once we hit go, we plug all the COs we chose into our gameBuilder.
     gameBuilder = builder;
-    iconicUnitName = gameBuilder.unitModelScheme.getIconicUnitName();
 
     // Set up our row/col selectors.
     int numCos = gameBuilder.mapInfo.getNumCos();
@@ -52,7 +50,7 @@ public class PlayerSetupController implements IController
     {
       // Set up our option selection framework
       coSelectors[co] = new PlayerSetupInfo(co, CommanderLibrary.getCommanderList(),
-          UIUtils.getCOColors(), UIUtils.getFactions(), AILibrary.getAIList(), iconicUnitName);
+          UIUtils.getCOColors(), UIUtils.getFactions(), AILibrary.getAIList());
     }
   }
 
@@ -112,7 +110,7 @@ public class PlayerSetupController implements IController
         {
           /////////////////////////////////////////////////////////////////////////////////////////////
           // We have locked in our selection. Stuff it into the GameBuilder and then kick off the game.
-          GameInstance newGame = gameBuilder.createGame(coSelectors);
+          GameInstance newGame = gameBuilder.createGame(gameBuilder.unitModelScheme, coSelectors);
 
           if( null != newGame )
           {

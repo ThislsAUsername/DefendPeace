@@ -4,7 +4,7 @@ import Units.AWBWUnits.AWBWUnitModel;
 
 public class AWBWWeapons
 {
-  protected enum WeaponType
+  protected enum AWBWWeaponType
   {
     INFANTRYMGUN, MECHZOOKA, MECHMGUN,
     RECONMGUN, TANKCANNON, TANKMGUN, MD_TANKCANNON, MD_TANKMGUN, NEOCANNON, NEOMGUN, MEGACANNON, MEGAMGUN,
@@ -17,23 +17,25 @@ public class AWBWWeapons
   {
     private static final long serialVersionUID = 1L;
 
-    public WeaponType type;
-    protected AWBWWeapon(WeaponType type, int ammo, int minRange, int maxRange)
+    public AWBWWeaponType type;
+    protected AWBWWeapon(AWBWWeaponType type, int ammo, int minRange, int maxRange)
     {
       super(ammo, minRange, maxRange);
       this.type = type;
     }
-    protected AWBWWeapon(WeaponType type, int ammo)
+    protected AWBWWeapon(AWBWWeaponType type, int ammo)
     {
       this(type, ammo, 1, 1);
     }
-    protected AWBWWeapon(WeaponType type)
+    protected AWBWWeapon(AWBWWeaponType type)
     {
       this(type, -1, 1, 1);
     }
     public AWBWWeapon(AWBWWeapon other)
     {
       this(other.type, other.maxAmmo, other.minRange, other.maxRange);
+      canFireAfterMoving = other.canFireAfterMoving;
+      hasInfiniteAmmo = other.hasInfiniteAmmo;
     }
     @Override
     public WeaponModel clone()
@@ -54,7 +56,7 @@ public class AWBWWeapons
 
     public InfantryMGun()
     {
-      super(WeaponType.INFANTRYMGUN);
+      super(AWBWWeaponType.INFANTRYMGUN);
     }
   }
 
@@ -64,7 +66,7 @@ public class AWBWWeapons
 
     public MechMGun()
     {
-      super(WeaponType.MECHMGUN);
+      super(AWBWWeaponType.MECHMGUN);
     }
   }
 
@@ -75,7 +77,7 @@ public class AWBWWeapons
 
     public MechZooka()
     {
-      super(WeaponType.MECHZOOKA, MAX_AMMO);
+      super(AWBWWeaponType.MECHZOOKA, MAX_AMMO);
     }
   }
 
@@ -85,7 +87,7 @@ public class AWBWWeapons
 
     public ReconMGun()
     {
-      super(WeaponType.RECONMGUN);
+      super(AWBWWeaponType.RECONMGUN);
     }
   }
 
@@ -95,7 +97,7 @@ public class AWBWWeapons
 
     public TankMGun()
     {
-      super(WeaponType.TANKMGUN);
+      super(AWBWWeaponType.TANKMGUN);
     }
   }
 
@@ -106,7 +108,7 @@ public class AWBWWeapons
 
     public TankCannon()
     {
-      super(WeaponType.TANKCANNON, MAX_AMMO);
+      super(AWBWWeaponType.TANKCANNON, MAX_AMMO);
     }
   }
 
@@ -116,7 +118,7 @@ public class AWBWWeapons
 
     public MDTankMGun()
     {
-      super(WeaponType.MD_TANKMGUN);
+      super(AWBWWeaponType.MD_TANKMGUN);
     }
   }
 
@@ -127,7 +129,7 @@ public class AWBWWeapons
 
     public MDTankCannon()
     {
-      super(WeaponType.MD_TANKCANNON, MAX_AMMO);
+      super(AWBWWeaponType.MD_TANKCANNON, MAX_AMMO);
     }
   }
 
@@ -137,7 +139,7 @@ public class AWBWWeapons
 
     public NeoMGun()
     {
-      super(WeaponType.NEOMGUN);
+      super(AWBWWeaponType.NEOMGUN);
     }
   }
 
@@ -148,7 +150,7 @@ public class AWBWWeapons
 
     public NeoCannon()
     {
-      super(WeaponType.NEOCANNON, MAX_AMMO);
+      super(AWBWWeaponType.NEOCANNON, MAX_AMMO);
     }
   }
 
@@ -158,7 +160,7 @@ public class AWBWWeapons
 
     public MegaMGun()
     {
-      super(WeaponType.MEGAMGUN);
+      super(AWBWWeaponType.MEGAMGUN);
     }
   }
 
@@ -169,7 +171,7 @@ public class AWBWWeapons
 
     public MegaCannon()
     {
-      super(WeaponType.MEGACANNON, MAX_AMMO);
+      super(AWBWWeaponType.MEGACANNON, MAX_AMMO);
     }
   }
 
@@ -182,20 +184,20 @@ public class AWBWWeapons
 
     public ArtilleryCannon()
     {
-      super(WeaponType.ARTILLERYCANNON, MAX_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.ARTILLERYCANNON, MAX_AMMO, MIN_RANGE, MAX_RANGE);
     }
   }
 
   public static class RocketRockets extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 9;
+    private static final int MAX_AMMO = 6;
     private static final int MIN_RANGE = 3;
     private static final int MAX_RANGE = 5;
 
     public RocketRockets()
     {
-      super(WeaponType.ROCKETS, MAX_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.ROCKETS, MAX_AMMO, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -208,7 +210,7 @@ public class AWBWWeapons
 
     public PipeGun()
     {
-      super(WeaponType.PIPEGUN, MAX_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.PIPEGUN, MAX_AMMO, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -219,7 +221,7 @@ public class AWBWWeapons
 
     public AntiAirMGun()
     {
-      super(WeaponType.ANTI_AIRMGUN, MAX_AMMO);
+      super(AWBWWeaponType.ANTI_AIRMGUN, MAX_AMMO);
     }
   }
 
@@ -232,7 +234,7 @@ public class AWBWWeapons
 
     public MobileSAMWeapon()
     {
-      super(WeaponType.MOBILESAM, MAX_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.MOBILESAM, MAX_AMMO, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -244,7 +246,7 @@ public class AWBWWeapons
 
     public CopterMGun()
     {
-      super(WeaponType.B_COPTERMGUN);
+      super(AWBWWeaponType.B_COPTERMGUN);
     }
   }
 
@@ -255,7 +257,7 @@ public class AWBWWeapons
 
     public CopterRockets()
     {
-      super(WeaponType.B_COPTERROCKETS, MAX_AMMO);
+      super(AWBWWeaponType.B_COPTERROCKETS, MAX_AMMO);
     }
   }
 
@@ -266,7 +268,7 @@ public class AWBWWeapons
 
     public BomberBombs()
     {
-      super(WeaponType.BOMBERBOMBS, MAX_AMMO);
+      super(AWBWWeaponType.BOMBERBOMBS, MAX_AMMO);
     }
   }
 
@@ -277,7 +279,7 @@ public class AWBWWeapons
 
     public FighterMissiles()
     {
-      super(WeaponType.FIGHTERMISSILES, MAX_AMMO);
+      super(AWBWWeaponType.FIGHTERMISSILES, MAX_AMMO);
     }
   }
 
@@ -288,7 +290,7 @@ public class AWBWWeapons
 
     public StealthShots()
     {
-      super(WeaponType.STEALTH_SHOTS, MAX_AMMO);
+      super(AWBWWeaponType.STEALTH_SHOTS, MAX_AMMO);
     }
   }
 
@@ -301,7 +303,7 @@ public class AWBWWeapons
 
     public SubTorpedoes()
     {
-      super(WeaponType.SUBTORPEDOES, MAX_AMMO);
+      super(AWBWWeaponType.SUBTORPEDOES, MAX_AMMO);
     }
   }
 
@@ -314,7 +316,7 @@ public class AWBWWeapons
 
     public BattleshipCannon()
     {
-      super(WeaponType.BATTLESHIPCANNON, MAX_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.BATTLESHIPCANNON, MAX_AMMO, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -327,7 +329,7 @@ public class AWBWWeapons
 
     public CarrierMissiles()
     {
-      super(WeaponType.CARRIERMISSILES, MAX_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.CARRIERMISSILES, MAX_AMMO, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -337,7 +339,7 @@ public class AWBWWeapons
 
     public CruiserMGun()
     {
-      super(WeaponType.CRUISERMGUN);
+      super(AWBWWeaponType.CRUISERMGUN);
     }
   }
 
@@ -348,7 +350,7 @@ public class AWBWWeapons
 
     public CruiserTorpedoes()
     {
-      super(WeaponType.CRUISERTORPEDOES, MAX_AMMO);
+      super(AWBWWeaponType.CRUISERTORPEDOES, MAX_AMMO);
     }
   }
 

@@ -3,6 +3,7 @@ package Units;
 import java.io.Serializable;
 
 import Units.AWBWUnits.AWBWUnitModel;
+import Units.DoRUnits.DoRUnitModel;
 
 public abstract class WeaponModel implements Serializable
 {
@@ -47,6 +48,10 @@ public abstract class WeaponModel implements Serializable
     return defender.getDamageRedirect(this);
   }
   public double getDamage(AWBWUnitModel defender)
+  {
+    throw new UnsupportedOperationException("Called base WeaponModel.getDamage() with input type " + defender.getClass());
+  }
+  public double getDamage(DoRUnitModel defender)
   {
     throw new UnsupportedOperationException("Called base WeaponModel.getDamage() with input type " + defender.getClass());
   }

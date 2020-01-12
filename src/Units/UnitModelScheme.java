@@ -13,6 +13,9 @@ import Units.UnitModel.UnitRoleEnum;
 public abstract class UnitModelScheme implements Serializable
 {
   private static final long serialVersionUID = 1L;
+  
+  /** Indicates whether, for the given map/game, all the units can be instantiated */
+  public boolean schemeValid = true;
 
   /**
    * When the UI wants to show a unit type, it should use this string.
