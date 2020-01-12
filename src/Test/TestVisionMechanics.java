@@ -108,6 +108,7 @@ public class TestVisionMechanics extends TestCase
     testMap.removeUnit(fool);
     testMap.removeUnit(scout);
     testMap.removeUnit(punch);
+    testMap.removeUnit(resupplyable);
     
     testMap.removeUnit(bait);
     testMap.removeUnit(meaty);
