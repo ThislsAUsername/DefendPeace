@@ -6,9 +6,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
-import Engine.GameAction;
 import Engine.UnitActionType;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.Location;
+import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.MoveTypes.MoveType;
 
@@ -188,10 +189,10 @@ public abstract class UnitModel implements Serializable
   /** Provides a hook for inheritors to supply turn-initialization actions to a unit.
    * @param self Assumed to be a Unit of the model's type.
    */
-  public ArrayList<GameAction> getTurnInitActions(Unit self)
+  public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
   {
     // Most Units don't have any; specific UnitModel types can override.
-    return new ArrayList<GameAction>();
+    return new GameEventQueue();
   }
 
   /** Calls the appropriate type-specific override of getDamage() on the input WeaponModel */

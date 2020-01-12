@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.Vector;
 import Engine.GameAction;
 import Engine.UnitActionType;
+import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.ResupplyEvent;
+import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.MoveTypes.Flight;
 import Units.MoveTypes.FloatHeavy;
@@ -223,11 +226,11 @@ public class AWBWUnits extends UnitModelScheme
      * APCs re-supply any adjacent allies at the beginning of every turn. Make it so.
      */
     @Override
-    public ArrayList<GameAction> getTurnInitActions(Unit self)
+    public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
     {
-      ArrayList<GameAction> actions = new ArrayList<GameAction>(1);
-      actions.add(new GameAction.ResupplyAction(self));
-      return actions;
+      GameEventQueue events = new GameEventQueue();
+      events.addAll(new GameAction.ResupplyAction(self).getEvents(map));
+      return events;
     }
   }
 
@@ -704,12 +707,23 @@ public class AWBWUnits extends UnitModelScheme
     private static final UnitActionType[] actions = UnitActionType.COMBAT_TRANSPORT_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.CarrierMissiles() };
 
-    public CarrierModel() // TODO: Resupply held units
+    public CarrierModel()
     {
       super("Carrier", AWBWUnitEnum.CARRIER, UnitRoleEnum.TRANSPORT, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
       holdingCapacity = 2;
       holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.AIR_LOW, ChassisEnum.AIR_HIGH));
+    }
+
+    /** Carriers re-supply their cargo at the beginning of every turn. Make it so. */
+    @Override
+    public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
+    {
+      GameEventQueue events = new GameEventQueue();
+      for( Unit cargo : self.heldUnits )
+        if( !cargo.isFullySupplied() )
+          events.add(new ResupplyEvent(cargo));
+      return events;
     }
   }
 

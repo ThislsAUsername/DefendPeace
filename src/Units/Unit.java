@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 import CommandingOfficers.Commander;
-import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.Path;
 import Engine.UnitActionType;
@@ -104,11 +103,8 @@ public class Unit implements Serializable
         }
       }
 
-      // Collect any turn-initialization actions for this unit.
-      for( GameAction ga : model.getTurnInitActions(this) )
-      {
-        events.addAll(ga.getEvents(map));
-      }
+      // Collect any turn-initialization events for this unit.
+      events.addAll(model.getTurnInitEvents(this, map));
     } // ~If location is valid.
 
     return events;
