@@ -266,6 +266,7 @@ public class Unit implements Serializable
   public boolean isFullySupplied()
   {
     boolean isFull = (model.maxFuel == fuel);
+    isFull &= (model.maxAmmo == ammo);
     return isFull;
   }
 

@@ -604,7 +604,7 @@ public class AWBWUnits extends UnitModelScheme
     {
       super("BBomb", AWBWUnitEnum.BBOMB, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
-      possibleActions.add(new UnitActionType.Explode(5, 3));
+      possibleActions.add(0, new UnitActionType.Explode(5, 3));
     }
   }
 
@@ -630,7 +630,7 @@ public class AWBWUnits extends UnitModelScheme
           actions, new WeaponModel[0], STAR_VALUE);
       holdingCapacity = 2;
       holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.TROOP));
-      possibleActions.add(UnitActionType.REPAIR_UNIT);
+      possibleActions.add(0, UnitActionType.REPAIR_UNIT);
     }
   }
 

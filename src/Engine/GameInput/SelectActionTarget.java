@@ -20,8 +20,10 @@ class SelectActionTarget extends GameInputState<XYCoord>
   {
     ArrayList<XYCoord> targets = myStateData.actionSet.getTargetedLocations();
 
-    // We can only attack the selected tiles, and they may be disjoint, so use constrained tile select.
-    return new OptionSet(InputType.CONSTRAINED_TILE_SELECT, targets);
+    return new OptionSet(
+          myStateData.actionSet.useFreeSelect?
+          InputType.FREE_TILE_SELECT : InputType.CONSTRAINED_TILE_SELECT,
+          targets);
   }
 
   @Override

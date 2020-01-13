@@ -12,6 +12,7 @@ import Engine.GameEvents.CaptureEvent;
 import Engine.GameEvents.CommanderAbilityEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.CreateUnitEvent;
+import Engine.GameEvents.FlareEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
@@ -23,6 +24,7 @@ import Engine.GameEvents.UnitJoinEvent;
 import Engine.GameEvents.UnitProduceEvent;
 import Engine.GameEvents.UnitTransformEvent;
 import Engine.GameEvents.UnloadEvent;
+import Engine.UnitActionType.Flare;
 import Engine.UnitActionType.UnitProduce;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -1153,5 +1155,83 @@ public interface GameAction
       return destination;
     }
   } // ~UnitProduceAction
+
+  // ===========  FlareAction  ===============================
+  public static class FlareAction implements GameAction
+  {
+    private Flare type;
+    private Path movePath;
+    private XYCoord moveCoord = null;
+    private XYCoord launchLocation = null;
+    private Unit actor;
+
+    public FlareAction(Flare pType, Unit actor, Path path, int targetX, int targetY)
+    {
+      this(pType, actor, path, new XYCoord(targetX, targetY));
+    }
+
+    public FlareAction(Flare pType, Unit actor, Path path, XYCoord atkLoc)
+    {
+      type = pType;
+      movePath = path;
+      this.actor = actor;
+      launchLocation = atkLoc;
+      if( null != path && (path.getEnd() != null) )
+      {
+        moveCoord = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      }
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue flareEvents = new GameEventQueue();
+
+      // Validate input.
+      boolean isValid = true;
+      isValid &= actor != null && !actor.isTurnOver;
+      isValid &= (null != gameMap) && (gameMap.isLocationValid(launchLocation)) && gameMap.isLocationValid(moveCoord);
+      isValid &= (movePath != null) && (movePath.getPathLength() > 0);
+
+      int range = Math.abs(moveCoord.xCoord - launchLocation.xCoord)
+            + Math.abs(moveCoord.yCoord - launchLocation.yCoord);
+      isValid &= type.minRange <= range && range <= type.maxRange;
+
+      if( isValid )
+      {
+        if( Utils.enqueueMoveEvent(gameMap, actor, movePath, flareEvents) )
+        {
+          // No surprises in the fog. Resolve defoggination.
+          GameEvent event = new FlareEvent(actor, launchLocation, type.radius);
+          flareEvents.add(event);
+        }
+      }
+      return flareEvents;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[%s will launch a flare to %s from %s]", actor.toStringWithLocation(), launchLocation, moveCoord);
+    }
+
+    @Override
+    public UnitActionType getType()
+    {
+      return type;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return moveCoord;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return launchLocation;
+    }
+  }
 
 }

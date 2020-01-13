@@ -98,7 +98,7 @@ public class DoRUnits extends UnitModelScheme
     dorModels.unitModels.add(sub);
 
     UnitModel seaplane = new SeaplaneModel();
-    carrier.possibleActions.add(new UnitActionType.UnitProduce(seaplane));
+    carrier.possibleActions.add(0, new UnitActionType.UnitProduce(seaplane));
     dorModels.unitModels.add(seaplane);
 
     return dorModels;
@@ -266,10 +266,11 @@ public class DoRUnits extends UnitModelScheme
     private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.FlareMGun() };
 
-    public FlareModel() // TODO: add flare gun
+    public FlareModel()
     {
       super("Flare", DoRUnitEnum.FLARE, UnitRoleEnum.RECON, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
           MOVE_POWER, moveType, actions, weapons, STAR_VALUE);
+      possibleActions.add(0, new UnitActionType.Flare(0, 5, 2));
     }
   }
 

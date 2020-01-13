@@ -501,4 +501,50 @@ public abstract class UnitActionType implements Serializable
     }
   }
 
+  public static class Flare extends UnitActionType
+  {
+    private static final long serialVersionUID = 1L;
+    public int minRange, maxRange, radius;
+    public Flare(int minRange, int maxRange, int radius)
+    {
+      this.minRange = minRange;
+      this.maxRange = maxRange;
+      this.radius = radius;
+    }
+
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    {
+      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
+      {
+        if ( actor.ammo > 0 && moveLocation.equals(actor.x, actor.y))
+        {
+          ArrayList<GameAction> targetOptions = new ArrayList<GameAction>();
+
+          ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, moveLocation, minRange, maxRange);
+
+          for( XYCoord loc : locations )
+            targetOptions.add(new GameAction.FlareAction(this, actor, movePath, loc));
+
+          // Only add this action set if we actually have a target
+          if( !targetOptions.isEmpty() )
+          {
+            // Bundle our attack options into an action set
+            GameActionSet actions = new GameActionSet(targetOptions);
+            actions.useFreeSelect = true;
+            return actions;
+          }
+        }
+      }
+      return null;
+    }
+
+    @Override
+    public String name()
+    {
+      return "FLARE";
+    }
+  }
+
 }
