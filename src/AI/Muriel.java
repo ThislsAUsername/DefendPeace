@@ -25,7 +25,7 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
-import Units.Weapon;
+import Units.WeaponModel;
 
 /**
  * Muriel will Make Units Reactively, Informed by the Enemy Loadout.
@@ -137,7 +137,7 @@ public class Muriel implements AIController
     if( null != umami ) return umami;
 
     double myDamage = 0;
-    Weapon myWeapon = myUnit.chooseWeapon(otherUnit.model, 1, false);
+    WeaponModel myWeapon = myUnit.chooseWeapon(otherUnit.model, 1, false);
     if( null != myWeapon )
     {
       BattleInstance.BattleParams params = new BattleInstance.BattleParams(myUnit, myWeapon,
@@ -147,7 +147,7 @@ public class Muriel implements AIController
 
     // Now go the other way.
     double otherDamage = 0;
-    Weapon otherWeapon = otherUnit.chooseWeapon(myUnit.model, 1, false);
+    WeaponModel otherWeapon = otherUnit.chooseWeapon(myUnit.model, 1, false);
     if( null != otherWeapon )
     {
       BattleInstance.BattleParams params = new BattleInstance.BattleParams(otherUnit, otherWeapon,
@@ -292,17 +292,12 @@ public class Muriel implements AIController
         shouldResupply = true;
       }
       // If we are out of ammo.
-      if( unit.weapons != null && unit.weapons.size() > 0 )
+      if( unit.ammo == 0 )
       {
-        for( Weapon weap : unit.weapons )
-        {
-          if(weap.ammo == 0)
-          {
-            log(String.format("%s is out of ammo.", unit.toStringWithLocation()));
-            shouldResupply = true;
-          }
-        }
+        log(String.format("%s is out of ammo.", unit.toStringWithLocation()));
+        shouldResupply = true;
       }
+
       if( shouldResupply )
       {
         ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);

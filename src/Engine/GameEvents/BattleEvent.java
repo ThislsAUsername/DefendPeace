@@ -61,13 +61,13 @@ public class BattleEvent implements GameEvent
     // Apply the battle results that we calculated previously.
     Unit attacker = battleInfo.attacker;
     Unit defender = battleInfo.defender;
-    battleInfo.attackerWeapon.fire(); // expend ammo
+    battleInfo.attackerWeapon.fire(attacker); // expend ammo
     defender.damageHP( battleInfo.defenderHPLoss );
 
     // Handle counter-attack if relevant.
     if( battleInfo.attackerHPLoss > 0 )
     {
-      battleInfo.defenderWeapon.fire();
+      battleInfo.defenderWeapon.fire(defender);
       attacker.damageHP( battleInfo.attackerHPLoss );
     }
   }

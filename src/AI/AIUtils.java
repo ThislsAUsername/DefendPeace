@@ -21,7 +21,6 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
-import Units.Weapon;
 import Units.WeaponModel;
 
 public class AIUtils
@@ -228,13 +227,13 @@ public class AIUtils
     XYCoord origin = new XYCoord(unit.x, unit.y);
     Map<XYCoord, Double> shootableTiles = new HashMap<XYCoord, Double>();
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
-    for( Weapon wep : unit.weapons )
+    for( WeaponModel wep : unit.model.weapons )
     {
       if( wep.getDamage(target) > 0 )
       {
-        if( !wep.model.canFireAfterMoving )
+        if( !wep.canFireAfterMoving )
         {
-          for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, wep.model.minRange, wep.model.maxRange))
+          for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, wep.minRange, wep.maxRange))
           {
             double val = wep.getDamage(target) * (unit.getHP() / (double) unit.model.maxHP);
             if (shootableTiles.containsKey(xyc))
@@ -246,7 +245,7 @@ public class AIUtils
         {
           for( XYCoord dest : destinations )
           {
-            for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, wep.model.minRange, wep.model.maxRange))
+            for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, wep.minRange, wep.maxRange))
             {
               double val = wep.getDamage(target) * (unit.getHP() / (double) unit.model.maxHP);
               if (shootableTiles.containsKey(xyc))
@@ -268,7 +267,7 @@ public class AIUtils
     int range = 0;
     for( UnitModel um : co.unitModels )
     {
-      for( WeaponModel wm : um.weaponModels )
+      for( WeaponModel wm : um.weapons )
       {
         if( wm.canFireAfterMoving )
           range = Math.max(range, wm.maxRange);

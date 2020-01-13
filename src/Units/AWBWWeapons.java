@@ -12,30 +12,31 @@ public class AWBWWeapons
     FIGHTERMISSILES, BOMBERBOMBS, STEALTH_SHOTS, B_COPTERROCKETS, B_COPTERMGUN,
     CARRIERMISSILES, BATTLESHIPCANNON, CRUISERTORPEDOES, CRUISERMGUN, SUBTORPEDOES
   };
+  
+  protected final static boolean USE_AMMO = true;
 
   private static class AWBWWeapon extends WeaponModel
   {
     private static final long serialVersionUID = 1L;
 
     public AWBWWeaponType type;
-    protected AWBWWeapon(AWBWWeaponType type, int ammo, int minRange, int maxRange)
+    protected AWBWWeapon(AWBWWeaponType type, boolean infiniteAmmo, int minRange, int maxRange)
     {
-      super(ammo, minRange, maxRange);
+      super(infiniteAmmo, minRange, maxRange);
       this.type = type;
     }
-    protected AWBWWeapon(AWBWWeaponType type, int ammo)
+    protected AWBWWeapon(AWBWWeaponType type, boolean infiniteAmmo)
     {
-      this(type, ammo, 1, 1);
+      this(type, infiniteAmmo, 1, 1);
     }
     protected AWBWWeapon(AWBWWeaponType type)
     {
-      this(type, -1, 1, 1);
+      this(type, true, 1, 1);
     }
     public AWBWWeapon(AWBWWeapon other)
     {
-      this(other.type, other.maxAmmo, other.minRange, other.maxRange);
+      this(other.type, other.hasInfiniteAmmo, other.minRange, other.maxRange);
       canFireAfterMoving = other.canFireAfterMoving;
-      hasInfiniteAmmo = other.hasInfiniteAmmo;
     }
     @Override
     public WeaponModel clone()
@@ -73,11 +74,10 @@ public class AWBWWeapons
   public static class MechZooka extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 3;
 
     public MechZooka()
     {
-      super(AWBWWeaponType.MECHZOOKA, MAX_AMMO);
+      super(AWBWWeaponType.MECHZOOKA, USE_AMMO);
     }
   }
 
@@ -104,11 +104,10 @@ public class AWBWWeapons
   public static class TankCannon extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 9;
 
     public TankCannon()
     {
-      super(AWBWWeaponType.TANKCANNON, MAX_AMMO);
+      super(AWBWWeaponType.TANKCANNON, USE_AMMO);
     }
   }
 
@@ -125,11 +124,10 @@ public class AWBWWeapons
   public static class MDTankCannon extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 8;
 
     public MDTankCannon()
     {
-      super(AWBWWeaponType.MD_TANKCANNON, MAX_AMMO);
+      super(AWBWWeaponType.MD_TANKCANNON, USE_AMMO);
     }
   }
 
@@ -146,11 +144,10 @@ public class AWBWWeapons
   public static class NeoCannon extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 9;
 
     public NeoCannon()
     {
-      super(AWBWWeaponType.NEOCANNON, MAX_AMMO);
+      super(AWBWWeaponType.NEOCANNON, USE_AMMO);
     }
   }
 
@@ -167,74 +164,68 @@ public class AWBWWeapons
   public static class MegaCannon extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 3;
 
     public MegaCannon()
     {
-      super(AWBWWeaponType.MEGACANNON, MAX_AMMO);
+      super(AWBWWeaponType.MEGACANNON, USE_AMMO);
     }
   }
 
   public static class ArtilleryCannon extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 9;
     private static final int MIN_RANGE = 2;
     private static final int MAX_RANGE = 3;
 
     public ArtilleryCannon()
     {
-      super(AWBWWeaponType.ARTILLERYCANNON, MAX_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.ARTILLERYCANNON, USE_AMMO, MIN_RANGE, MAX_RANGE);
     }
   }
 
   public static class RocketRockets extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 6;
     private static final int MIN_RANGE = 3;
     private static final int MAX_RANGE = 5;
 
     public RocketRockets()
     {
-      super(AWBWWeaponType.ROCKETS, MAX_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.ROCKETS, USE_AMMO, MIN_RANGE, MAX_RANGE);
     }
   }
 
   public static class PipeGun extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 9;
     private static final int MIN_RANGE = 2;
     private static final int MAX_RANGE = 5;
 
     public PipeGun()
     {
-      super(AWBWWeaponType.PIPEGUN, MAX_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.PIPEGUN, USE_AMMO, MIN_RANGE, MAX_RANGE);
     }
   }
 
   public static class AntiAirMGun extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 9;
 
     public AntiAirMGun()
     {
-      super(AWBWWeaponType.ANTI_AIRMGUN, MAX_AMMO);
+      super(AWBWWeaponType.ANTI_AIRMGUN, USE_AMMO);
     }
   }
 
   public static class MobileSAMWeapon extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 9;
     private static final int MIN_RANGE = 3;
     private static final int MAX_RANGE = 5;
 
     public MobileSAMWeapon()
     {
-      super(AWBWWeaponType.MOBILESAM, MAX_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.MOBILESAM, USE_AMMO, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -253,44 +244,40 @@ public class AWBWWeapons
   public static class CopterRockets extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 6;
 
     public CopterRockets()
     {
-      super(AWBWWeaponType.B_COPTERROCKETS, MAX_AMMO);
+      super(AWBWWeaponType.B_COPTERROCKETS, USE_AMMO);
     }
   }
 
   public static class BomberBombs extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 9;
 
     public BomberBombs()
     {
-      super(AWBWWeaponType.BOMBERBOMBS, MAX_AMMO);
+      super(AWBWWeaponType.BOMBERBOMBS, USE_AMMO);
     }
   }
 
   public static class FighterMissiles extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 9;
 
     public FighterMissiles()
     {
-      super(AWBWWeaponType.FIGHTERMISSILES, MAX_AMMO);
+      super(AWBWWeaponType.FIGHTERMISSILES, USE_AMMO);
     }
   }
 
   public static class StealthShots extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 6;
 
     public StealthShots()
     {
-      super(AWBWWeaponType.STEALTH_SHOTS, MAX_AMMO);
+      super(AWBWWeaponType.STEALTH_SHOTS, USE_AMMO);
     }
   }
 
@@ -299,37 +286,34 @@ public class AWBWWeapons
   public static class SubTorpedoes extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 6;
 
     public SubTorpedoes()
     {
-      super(AWBWWeaponType.SUBTORPEDOES, MAX_AMMO);
+      super(AWBWWeaponType.SUBTORPEDOES, USE_AMMO);
     }
   }
 
   public static class BattleshipCannon extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 9;
     private static final int MIN_RANGE = 2;
     private static final int MAX_RANGE = 6;
 
     public BattleshipCannon()
     {
-      super(AWBWWeaponType.BATTLESHIPCANNON, MAX_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.BATTLESHIPCANNON, USE_AMMO, MIN_RANGE, MAX_RANGE);
     }
   }
 
   public static class CarrierMissiles extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 9;
     private static final int MIN_RANGE = 3;
     private static final int MAX_RANGE = 8;
 
     public CarrierMissiles()
     {
-      super(AWBWWeaponType.CARRIERMISSILES, MAX_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.CARRIERMISSILES, USE_AMMO, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -346,11 +330,10 @@ public class AWBWWeapons
   public static class CruiserTorpedoes extends AWBWWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 9;
 
     public CruiserTorpedoes()
     {
-      super(AWBWWeaponType.CRUISERTORPEDOES, MAX_AMMO);
+      super(AWBWWeaponType.CRUISERTORPEDOES, USE_AMMO);
     }
   }
 

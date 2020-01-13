@@ -23,7 +23,6 @@ import Terrain.MapWindow;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
-import Units.Weapon;
 import Units.UnitModel.UnitRoleEnum;
 
 public class TestGameEvent extends TestCase
@@ -300,12 +299,8 @@ public class TestGameEvent extends TestCase
     Unit recon = addUnit(testMap, testCo1, UnitRoleEnum.RECON, 1, 8); // On the HQ
 
     // Take away ammo/fuel.
-    int numWeapons = mech.weapons.size();
-    for( int i = 0; i < numWeapons; ++i )
-    {
-      mech.weapons.get(i).ammo = 0;
-      mech2.weapons.get(i).ammo = 0;
-    }
+    mech.ammo = 0;
+    mech2.ammo = 0;
     apc.fuel = apc.model.maxFuel / 2;
     mech.fuel = 0;
     mech2.fuel = 0;
@@ -315,17 +310,12 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(mech.fuel == 0, "    Mech still has fuel, but shouldn't.");
     testPassed &= validate(mech2.fuel == 0, "    Mech2 still has fuel, but shouldn't.");
     testPassed &= validate(recon.fuel == 0, "    Recon still has fuel, but shouldn't.");
-    for( int i = 0; i < numWeapons; ++i )
-    {
-      Weapon wpn = mech.weapons.get(i);
-      testPassed &= validate((wpn.ammo == 0),
-          "    Mech weapon " + wpn.model.toString() + "  still has " + wpn.ammo + " ammo, but should be empty.");
-      Weapon wpn2 = mech2.weapons.get(i);
-      testPassed &= validate((wpn2.ammo == 0),
-          "    Mech2 weapon " + wpn2.model.toString() + "  still has " + wpn2.ammo + " ammo, but should be empty.");
-    }
+    testPassed &= validate((mech.ammo == 0),
+        "    Mech still has " + mech.ammo + " ammo, but should be empty.");
+    testPassed &= validate((mech2.ammo == 0),
+        "    Mech2 weapon still has " + mech2.ammo + " ammo, but should be empty.");
 
-    // Simulate a new turn for the APC/Recon; the apc should re-supply the mech, and the recon should re-supply from the  HQ.
+    // Simulate a new turn for the APC/Recon; the apc should re-supply the mech, and the recon should re-supply from the HQ.
     GameEventQueue events = new GameEventQueue();
     events.addAll(apc.initTurn(testMap));
     events.addAll(recon.initTurn(testMap));
@@ -343,13 +333,8 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(mech.fuel == mech.model.maxFuel, "    Mech should have max fuel after turn init, but doesn't.");
     testPassed &= validate(mech2.fuel == mech2.model.maxFuel, "    Mech2 should have max fuel after resupply, but doesn't.");
     testPassed &= validate(recon.fuel == recon.model.maxFuel, "    Recon should have max fuel after new turn, but doesn't.");
-    for( int i = 0; i < numWeapons; ++i )
-    {
-      Weapon wpn = mech.weapons.get(i);
-      testPassed &= validate((wpn.ammo == wpn.model.maxAmmo), "    Mech weapon should have max ammo after resupply.");
-      Weapon wpn2 = mech2.weapons.get(i);
-      testPassed &= validate((wpn2.ammo == wpn2.model.maxAmmo), "    Mech2 weapon should have max ammo after resupply.");
-    }
+    testPassed &= validate((mech.ammo == mech.model.maxAmmo), "    Mech should have max ammo after resupply.");
+    testPassed &= validate((mech2.ammo == mech2.model.maxAmmo), "    Mech2 should have max ammo after resupply.");
 
     // Clean up.
     testMap.removeUnit(apc);

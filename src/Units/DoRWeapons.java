@@ -15,30 +15,31 @@ public class DoRWeapons
     GUNBOATGUN, CRUISERTORPEDOES, CRUISERMGUN, 
     SUBTORPEDOES, CARRIERMGUN, BATTLESHIPCANNON,
   };
+  
+  protected final static boolean MAX_AMMO = true;
 
   private static class DoRWeapon extends WeaponModel
   {
     private static final long serialVersionUID = 1L;
 
     public DoRWeaponType type;
-    protected DoRWeapon(DoRWeaponType type, int ammo, int minRange, int maxRange)
+    protected DoRWeapon(DoRWeaponType type, boolean infiniteAmmo, int minRange, int maxRange)
     {
-      super(ammo, minRange, maxRange);
+      super(infiniteAmmo, minRange, maxRange);
       this.type = type;
     }
-    protected DoRWeapon(DoRWeaponType type, int ammo)
+    protected DoRWeapon(DoRWeaponType type, boolean infiniteAmmo)
     {
-      this(type, ammo, 1, 1);
+      this(type, infiniteAmmo, 1, 1);
     }
     protected DoRWeapon(DoRWeaponType type)
     {
-      this(type, -1, 1, 1);
+      this(type, true, 1, 1);
     }
     public DoRWeapon(DoRWeapon other)
     {
-      this(other.type, other.maxAmmo, other.minRange, other.maxRange);
+      this(other.type, other.hasInfiniteAmmo, other.minRange, other.maxRange);
       canFireAfterMoving = other.canFireAfterMoving;
-      hasInfiniteAmmo = other.hasInfiniteAmmo;
     }
     @Override
     public WeaponModel clone()
@@ -66,7 +67,6 @@ public class DoRWeapons
   public static class MechZooka extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 3;
 
     public MechZooka()
     {
@@ -107,7 +107,6 @@ public class DoRWeapons
   public static class AntiAirMGun extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 6;
 
     public AntiAirMGun()
     {
@@ -118,7 +117,6 @@ public class DoRWeapons
   public static class TankCannon extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 6;
 
     public TankCannon()
     {
@@ -149,7 +147,6 @@ public class DoRWeapons
   public static class MDTankCannon extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 5;
 
     public MDTankCannon()
     {
@@ -170,7 +167,6 @@ public class DoRWeapons
   public static class WarCannon extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 5;
 
     public WarCannon()
     {
@@ -181,7 +177,6 @@ public class DoRWeapons
   public static class ArtilleryCannon extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 6;
     private static final int MIN_RANGE = 2;
     private static final int MAX_RANGE = 3;
 
@@ -194,7 +189,6 @@ public class DoRWeapons
   public static class AntiTankCannon extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 6;
     private static final int MIN_RANGE = 1;
     private static final int MAX_RANGE = 3;
 
@@ -207,7 +201,6 @@ public class DoRWeapons
   public static class RocketRockets extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 5;
     private static final int MIN_RANGE = 3;
     private static final int MAX_RANGE = 5;
 
@@ -220,7 +213,6 @@ public class DoRWeapons
   public static class MobileSAMWeapon extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 5;
     private static final int MIN_RANGE = 3;
     private static final int MAX_RANGE = 6;
 
@@ -235,7 +227,6 @@ public class DoRWeapons
   public static class FighterMissiles extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 6;
 
     public FighterMissiles()
     {
@@ -246,7 +237,6 @@ public class DoRWeapons
   public static class BomberBombs extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 6;
 
     public BomberBombs()
     {
@@ -257,7 +247,6 @@ public class DoRWeapons
   public static class SeaplaneShots extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 3;
 
     public SeaplaneShots()
     {
@@ -268,7 +257,6 @@ public class DoRWeapons
   public static class DusterMGun extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 9;
 
     public DusterMGun()
     {
@@ -279,7 +267,6 @@ public class DoRWeapons
   public static class CopterRockets extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 6;
 
     public CopterRockets()
     {
@@ -302,7 +289,6 @@ public class DoRWeapons
   public static class GunBoatGun extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 1;
 
     public GunBoatGun()
     {
@@ -313,7 +299,6 @@ public class DoRWeapons
   public static class CruiserTorpedoes extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 9;
 
     public CruiserTorpedoes()
     {
@@ -334,7 +319,6 @@ public class DoRWeapons
   public static class SubTorpedoes extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 6;
 
     public SubTorpedoes()
     {
@@ -345,7 +329,6 @@ public class DoRWeapons
   public static class BattleshipCannon extends DoRWeapon
   {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_AMMO = 9;
     private static final int MIN_RANGE = 3;
     private static final int MAX_RANGE = 5;
 

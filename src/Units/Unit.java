@@ -24,6 +24,7 @@ public class Unit implements Serializable
   public UnitModel model;
   public int x;
   public int y;
+  public int ammo;
   public int fuel;
   public int materials;
   private int captureProgress;
@@ -32,31 +33,18 @@ public class Unit implements Serializable
   public boolean isTurnOver;
   public boolean isStunned;
   private double HP;
-  public ArrayList<Weapon> weapons;
 
   public Unit(Commander co, UnitModel um)
   {
     CO = co;
     model = um;
+    ammo = model.maxAmmo;
     fuel = model.maxFuel;
     materials = model.maxMaterials;
     isTurnOver = true;
     HP = model.maxHP;
     captureProgress = 0;
     captureTarget = null;
-    if( model.weaponModels != null )
-    {
-      weapons = new ArrayList<Weapon>();
-      for( WeaponModel weapType : model.weaponModels )
-      {
-        weapons.add(new Weapon(weapType));
-      }
-    }
-    else
-    {
-      // Just make sure we don't crash if we try to iterate on this.
-      weapons = new ArrayList<Weapon>();
-    }
     if( model.holdingCapacity > 0 )
       heldUnits = new Vector<Unit>(model.holdingCapacity);
   }
@@ -117,13 +105,13 @@ public class Unit implements Serializable
   public boolean canAttack(UnitModel targetType, int range, boolean afterMoving)
   {
     // if we have no weapons, we can't hurt things
-    if( weapons == null )
+    if( model.weapons == null )
       return false;
 
     boolean canHit = false;
-    for( Weapon weapon : weapons )
+    for( WeaponModel weapon : model.weapons )
     {
-      if( afterMoving && !weapon.model.canFireAfterMoving )
+      if( afterMoving && !weapon.canFireAfterMoving )
       {
         // If we are planning to move first, and the weapon
         // can't shoot after moving, then move along.
@@ -146,18 +134,18 @@ public class Unit implements Serializable
    * @param afterMoving
    * @return The best weapon for that target, or null if no usable weapon exists.
    */
-  public Weapon chooseWeapon(UnitModel targetType, int range, boolean afterMoving)
+  public WeaponModel chooseWeapon(UnitModel targetType, int range, boolean afterMoving)
   {
     // if we have no weapons, we can't hurt things
-    if( weapons == null )
+    if( model.weapons == null )
       return null;
 
-    Weapon chosenWeapon = null;
+    WeaponModel chosenWeapon = null;
     double maxDamage = 0;
-    for( Weapon weapon : weapons )
+    for( WeaponModel weapon : model.weapons )
     {
       // If the weapon isn't mobile, we cannot fire if we moved.
-      if( afterMoving && !weapon.model.canFireAfterMoving )
+      if( afterMoving && !weapon.canFireAfterMoving )
       {
         continue;
       }
@@ -271,27 +259,13 @@ public class Unit implements Serializable
   public void resupply()
   {
     fuel = model.maxFuel;
-    if( null != weapons )
-    {
-      for( Weapon wpn : weapons )
-      {
-        wpn.reload();
-      }
-    }
+    ammo = model.maxAmmo;
   }
 
   /** Returns true if resupply would have zero effect on this unit. */
   public boolean isFullySupplied()
   {
     boolean isFull = (model.maxFuel == fuel);
-    if( isFull )
-    {
-      // Check weapon ammo.
-      for( Weapon w : weapons )
-      {
-        isFull &= (w.model.maxAmmo == w.ammo);
-      }
-    }
     return isFull;
   }
 

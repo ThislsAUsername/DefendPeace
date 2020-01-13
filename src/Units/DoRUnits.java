@@ -119,16 +119,16 @@ public class DoRUnits extends UnitModelScheme
     private static final long serialVersionUID = 1L;
     public DoRUnitEnum type;
 
-    public DoRUnitModel(String pName, DoRUnitEnum pType, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision,
+    public DoRUnitModel(String pName, DoRUnitEnum pType, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
         int pMovePower, MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] weapons, double starValue)
     {
-      super(pName, pRole, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
+      super(pName, pRole, pChassis, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
       type = pType;
     }
-    public DoRUnitModel(String pName, DoRUnitEnum pType, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision,
+    public DoRUnitModel(String pName, DoRUnitEnum pType, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
         int pMovePower, MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> weapons, double starValue)
     {
-      super(pName, pRole, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
+      super(pName, pRole, pChassis, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
       type = pType;
     }
 
@@ -136,18 +136,18 @@ public class DoRUnits extends UnitModelScheme
     public UnitModel clone()
     {
       // Make a copy of your weapon types.
-      if( weaponModels != null )
+      if( weapons != null )
       {
-        weaponModels = new ArrayList<WeaponModel>();
-        for( WeaponModel weapon : weaponModels )
+        weapons = new ArrayList<WeaponModel>();
+        for( WeaponModel weapon : weapons )
         {
-          weaponModels.add(weapon.clone());
+          weapons.add(weapon.clone());
         }
       }
 
       // Create a new model with the given attributes.
-      DoRUnitModel newModel = new DoRUnitModel(name, type, role, chassis, getCost(), maxFuel, idleFuelBurn, visionRange, movePower,
-          new MoveType(propulsion), possibleActions, weaponModels, customStarValue);
+      DoRUnitModel newModel = new DoRUnitModel(name, type, role, chassis, getCost(), maxAmmo, maxFuel, idleFuelBurn, visionRange, movePower,
+          new MoveType(propulsion), possibleActions, weapons, customStarValue);
 
       // Duplicate the other model's transporting abilities.
       newModel.holdingCapacity = holdingCapacity;
@@ -170,6 +170,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 0.4;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 0;
+    private static final int MAX_AMMO = -1;
     private static final int VISION_RANGE = 2;
     private static final int MOVE_POWER = 3;
 
@@ -179,7 +180,7 @@ public class DoRUnits extends UnitModelScheme
 
     public InfantryModel()
     {
-      super("Infantry", DoRUnitEnum.INFANTRY, UnitRoleEnum.INFANTRY, ChassisEnum.TROOP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Infantry", DoRUnitEnum.INFANTRY, UnitRoleEnum.INFANTRY, ChassisEnum.TROOP, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -191,6 +192,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 0.4;
     private static final int MAX_FUEL = 70;
     private static final int IDLE_FUEL_BURN = 0;
+    private static final int MAX_AMMO = 3;
     private static final int VISION_RANGE = 2;
     private static final int MOVE_POWER = 2;
 
@@ -200,7 +202,7 @@ public class DoRUnits extends UnitModelScheme
 
     public MechModel()
     {
-      super("Mech", DoRUnitEnum.MECH, UnitRoleEnum.MECH, ChassisEnum.TROOP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
+      super("Mech", DoRUnitEnum.MECH, UnitRoleEnum.MECH, ChassisEnum.TROOP, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
           MOVE_POWER, moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -212,6 +214,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 0.4;
     private static final int MAX_FUEL = 70;
     private static final int IDLE_FUEL_BURN = 0;
+    private static final int MAX_AMMO = -1;
     private static final int VISION_RANGE = 2;
     private static final int MOVE_POWER = 5;
 
@@ -221,7 +224,7 @@ public class DoRUnits extends UnitModelScheme
 
     public BikeModel()
     {
-      super("Bike", DoRUnitEnum.BIKE, UnitRoleEnum.INFANTRY, ChassisEnum.TROOP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
+      super("Bike", DoRUnitEnum.BIKE, UnitRoleEnum.INFANTRY, ChassisEnum.TROOP, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
           MOVE_POWER, moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -233,6 +236,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.0;
     private static final int MAX_FUEL = 80;
     private static final int IDLE_FUEL_BURN = 0;
+    private static final int MAX_AMMO = -1;
     private static final int VISION_RANGE = 5;
     private static final int MOVE_POWER = 8;
 
@@ -242,7 +246,7 @@ public class DoRUnits extends UnitModelScheme
 
     public ReconModel()
     {
-      super("Recon", DoRUnitEnum.RECON, UnitRoleEnum.RECON, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
+      super("Recon", DoRUnitEnum.RECON, UnitRoleEnum.RECON, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
           MOVE_POWER, moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -254,6 +258,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.0;
     private static final int MAX_FUEL = 60;
     private static final int IDLE_FUEL_BURN = 0;
+    private static final int MAX_AMMO = 3;
     private static final int VISION_RANGE = 2;
     private static final int MOVE_POWER = 5;
 
@@ -263,7 +268,7 @@ public class DoRUnits extends UnitModelScheme
 
     public FlareModel() // TODO: add flare gun
     {
-      super("Flare", DoRUnitEnum.FLARE, UnitRoleEnum.RECON, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
+      super("Flare", DoRUnitEnum.FLARE, UnitRoleEnum.RECON, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
           MOVE_POWER, moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -275,6 +280,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.0;
     private static final int MAX_FUEL = 60;
     private static final int IDLE_FUEL_BURN = 0;
+    private static final int MAX_AMMO = 6;
     private static final int VISION_RANGE = 2;
     private static final int MOVE_POWER = 6;
     private static final MoveType moveType = new Tread();
@@ -283,7 +289,7 @@ public class DoRUnits extends UnitModelScheme
 
     public AntiAirModel()
     {
-      super("Anti-Air", DoRUnitEnum.ANTI_AIR, UnitRoleEnum.ANTI_AIR, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Anti-Air", DoRUnitEnum.ANTI_AIR, UnitRoleEnum.ANTI_AIR, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -295,6 +301,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.0;
     private static final int MAX_FUEL = 70;
     private static final int IDLE_FUEL_BURN = 0;
+    private static final int MAX_AMMO = 6;
     private static final int VISION_RANGE = 3;
     private static final int MOVE_POWER = 6;
 
@@ -304,7 +311,7 @@ public class DoRUnits extends UnitModelScheme
 
     public TankModel()
     {
-      super("Tank", DoRUnitEnum.TANK, UnitRoleEnum.ASSAULT, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+      super("Tank", DoRUnitEnum.TANK, UnitRoleEnum.ASSAULT, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, weapons, STAR_VALUE);
     }
   }
@@ -316,6 +323,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.4;
     private static final int MAX_FUEL = 50;
     private static final int IDLE_FUEL_BURN = 0;
+    private static final int MAX_AMMO = 5;
     private static final int VISION_RANGE = 2;
     private static final int MOVE_POWER = 5;
 
@@ -325,7 +333,7 @@ public class DoRUnits extends UnitModelScheme
 
     public MDTankModel()
     {
-      super("Md Tank", DoRUnitEnum.MD_TANK, UnitRoleEnum.ASSAULT, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Md Tank", DoRUnitEnum.MD_TANK, UnitRoleEnum.ASSAULT, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -337,6 +345,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.6;
     private static final int MAX_FUEL = 50;
     private static final int IDLE_FUEL_BURN = 0;
+    private static final int MAX_AMMO = 5;
     private static final int VISION_RANGE = 2;
     private static final int MOVE_POWER = 4;
 
@@ -346,7 +355,7 @@ public class DoRUnits extends UnitModelScheme
 
     public WarTankModel()
     {
-      super("War Tank", DoRUnitEnum.WAR_TANK, UnitRoleEnum.ASSAULT, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("War Tank", DoRUnitEnum.WAR_TANK, UnitRoleEnum.ASSAULT, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -358,6 +367,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.0;
     private static final int MAX_FUEL = 50;
     private static final int IDLE_FUEL_BURN = 0;
+    private static final int MAX_AMMO = 6;
     private static final int VISION_RANGE = 3;
     private static final int MOVE_POWER = 5;
 
@@ -367,7 +377,7 @@ public class DoRUnits extends UnitModelScheme
 
     public ArtilleryModel()
     {
-      super("Artillery", DoRUnitEnum.ARTILLERY, UnitRoleEnum.SIEGE, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Artillery", DoRUnitEnum.ARTILLERY, UnitRoleEnum.SIEGE, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -379,6 +389,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.4;
     private static final int MAX_FUEL = 50;
     private static final int IDLE_FUEL_BURN = 0;
+    private static final int MAX_AMMO = 6;
     private static final int VISION_RANGE = 2;
     private static final int MOVE_POWER = 4;
 
@@ -388,7 +399,7 @@ public class DoRUnits extends UnitModelScheme
 
     public AntiTankModel()
     {
-      super("AntiTank", DoRUnitEnum.ANTITANK, UnitRoleEnum.SIEGE, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("AntiTank", DoRUnitEnum.ANTITANK, UnitRoleEnum.SIEGE, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -400,6 +411,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.4;
     private static final int MAX_FUEL = 50;
     private static final int IDLE_FUEL_BURN = 0;
+    private static final int MAX_AMMO = 5;
     private static final int VISION_RANGE = 3;
     private static final int MOVE_POWER = 5;
 
@@ -409,7 +421,7 @@ public class DoRUnits extends UnitModelScheme
 
     public RocketsModel()
     {
-      super("Rockets", DoRUnitEnum.ROCKETS, UnitRoleEnum.SIEGE, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Rockets", DoRUnitEnum.ROCKETS, UnitRoleEnum.SIEGE, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -421,6 +433,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.4;
     private static final int MAX_FUEL = 50;
     private static final int IDLE_FUEL_BURN = 0;
+    private static final int MAX_AMMO = 5;
     private static final int VISION_RANGE = 5;
     private static final int MOVE_POWER = 5; // Finally, sigh
 
@@ -430,7 +443,7 @@ public class DoRUnits extends UnitModelScheme
 
     public MobileSAMModel()
     {
-      super("Mobile SAM", DoRUnitEnum.MOBILESAM, UnitRoleEnum.ANTI_AIR, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Mobile SAM", DoRUnitEnum.MOBILESAM, UnitRoleEnum.ANTI_AIR, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -442,6 +455,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 0.8;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 0;
+    private static final int MAX_AMMO = -1;
     private static final int VISION_RANGE = 1;
     private static final int MOVE_POWER = 6;
     private static final MoveType moveType = new Tread();
@@ -449,7 +463,7 @@ public class DoRUnits extends UnitModelScheme
 
     public RigModel() // TODO: Build temporary air/ports. Also, temporary ports are traversible by FloatHeavy, but only by friendlies.
     {
-      super("Rig", DoRUnitEnum.RIG, UnitRoleEnum.TRANSPORT, ChassisEnum.TANK, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+      super("Rig", DoRUnitEnum.RIG, UnitRoleEnum.TRANSPORT, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0], STAR_VALUE);
       holdingCapacity = 1;
       holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.TROOP));
@@ -476,6 +490,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.8;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 5;
+    private static final int MAX_AMMO = 6;
     private static final int VISION_RANGE = 5;
     private static final int MOVE_POWER = 9;
 
@@ -485,7 +500,7 @@ public class DoRUnits extends UnitModelScheme
 
     public FighterModel()
     {
-      super("Fighter", DoRUnitEnum.FIGHTER, UnitRoleEnum.AIR_SUPERIORITY, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Fighter", DoRUnitEnum.FIGHTER, UnitRoleEnum.AIR_SUPERIORITY, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -497,6 +512,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.8;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 5;
+    private static final int MAX_AMMO = 6;
     private static final int VISION_RANGE = 3;
     private static final int MOVE_POWER = 7;
 
@@ -506,7 +522,7 @@ public class DoRUnits extends UnitModelScheme
 
     public BomberModel()
     {
-      super("Bomber", DoRUnitEnum.BOMBER, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Bomber", DoRUnitEnum.BOMBER, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -518,6 +534,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.4;
     private static final int MAX_FUEL = 40;
     private static final int IDLE_FUEL_BURN = 5;
+    private static final int MAX_AMMO = 3;
     private static final int VISION_RANGE = 4;
     private static final int MOVE_POWER = 7;
 
@@ -527,7 +544,7 @@ public class DoRUnits extends UnitModelScheme
 
     public SeaplaneModel()
     {
-      super("Seaplane", DoRUnitEnum.SEAPLANE, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Seaplane", DoRUnitEnum.SEAPLANE, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -539,6 +556,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.4;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 5;
+    private static final int MAX_AMMO = 9;
     private static final int VISION_RANGE = 4;
     private static final int MOVE_POWER = 8;
 
@@ -548,7 +566,7 @@ public class DoRUnits extends UnitModelScheme
 
     public DusterModel()
     {
-      super("Duster", DoRUnitEnum.DUSTER, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Duster", DoRUnitEnum.DUSTER, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -560,6 +578,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.2;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 2;
+    private static final int MAX_AMMO = 6;
     private static final int VISION_RANGE = 3;
     private static final int MOVE_POWER = 6;
 
@@ -569,7 +588,7 @@ public class DoRUnits extends UnitModelScheme
 
     public BCopterModel()
     {
-      super("B-Copter", DoRUnitEnum.B_COPTER, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_LOW, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("B-Copter", DoRUnitEnum.B_COPTER, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_LOW, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -581,6 +600,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.0;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 2;
+    private static final int MAX_AMMO = -1;
     private static final int VISION_RANGE = 1;
     private static final int MOVE_POWER = 6;
 
@@ -589,7 +609,7 @@ public class DoRUnits extends UnitModelScheme
 
     public TCopterModel()
     {
-      super("T-Copter", DoRUnitEnum.T_COPTER, UnitRoleEnum.TRANSPORT, ChassisEnum.AIR_LOW, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("T-Copter", DoRUnitEnum.T_COPTER, UnitRoleEnum.TRANSPORT, ChassisEnum.AIR_LOW, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, new WeaponModel[0], STAR_VALUE);
       holdingCapacity = 1;
       holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.TROOP));
@@ -605,6 +625,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.0;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 1;
+    private static final int MAX_AMMO = 1;
     private static final int VISION_RANGE = 2;
     private static final int MOVE_POWER = 7;
 
@@ -614,7 +635,7 @@ public class DoRUnits extends UnitModelScheme
 
     public GunboatModel()
     {
-      super("Gunboat", DoRUnitEnum.GUNBOAT, UnitRoleEnum.SIEGE, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Gunboat", DoRUnitEnum.GUNBOAT, UnitRoleEnum.SIEGE, ChassisEnum.SHIP, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
       holdingCapacity = 1;
       holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.TROOP));
@@ -628,6 +649,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.6;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 1;
+    private static final int MAX_AMMO = 9;
     private static final int VISION_RANGE = 5;
     private static final int MOVE_POWER = 6;
 
@@ -637,7 +659,7 @@ public class DoRUnits extends UnitModelScheme
 
     public CruiserModel()
     {
-      super("Cruiser", DoRUnitEnum.CRUISER, UnitRoleEnum.ANTI_AIR, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Cruiser", DoRUnitEnum.CRUISER, UnitRoleEnum.ANTI_AIR, ChassisEnum.SHIP, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
       holdingCapacity = 2;
       holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.AIR_LOW));
@@ -651,6 +673,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.8;
     private static final int MAX_FUEL = 70;
     private static final int IDLE_FUEL_BURN = 1;
+    private static final int MAX_AMMO = 6;
     private static final int VISION_RANGE = 5;
     private static final int MOVE_POWER = 6;
 
@@ -660,7 +683,7 @@ public class DoRUnits extends UnitModelScheme
 
     public SubModel()
     {
-      super("Sub", DoRUnitEnum.SUB, UnitRoleEnum.ASSAULT, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+      super("Sub", DoRUnitEnum.SUB, UnitRoleEnum.ASSAULT, ChassisEnum.SHIP, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, weapons, STAR_VALUE);
     }
   }
@@ -687,6 +710,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 2.2;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 1;
+    private static final int MAX_AMMO = -1;
     private static final int VISION_RANGE = 4;
     private static final int MOVE_POWER = 5;
 
@@ -696,7 +720,7 @@ public class DoRUnits extends UnitModelScheme
 
     public CarrierModel() // TODO: Launch.
     {
-      super("Carrier", DoRUnitEnum.CARRIER, UnitRoleEnum.TRANSPORT, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Carrier", DoRUnitEnum.CARRIER, UnitRoleEnum.TRANSPORT, ChassisEnum.SHIP, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
       maxMaterials = 4;
       holdingCapacity = 2;
@@ -725,6 +749,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 2.0;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 1;
+    private static final int MAX_AMMO = 9;
     private static final int VISION_RANGE = 3;
     private static final int MOVE_POWER = 5;
 
@@ -734,7 +759,7 @@ public class DoRUnits extends UnitModelScheme
 
     public BattleshipModel()
     {
-      super("Battleship", DoRUnitEnum.BATTLESHIP, UnitRoleEnum.SIEGE, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Battleship", DoRUnitEnum.BATTLESHIP, UnitRoleEnum.SIEGE, ChassisEnum.SHIP, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -746,6 +771,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 1.2;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 1;
+    private static final int MAX_AMMO = -1;
     private static final int VISION_RANGE = 1;
     private static final int MOVE_POWER = 6;
 
@@ -754,7 +780,7 @@ public class DoRUnits extends UnitModelScheme
 
     public LanderModel()
     {
-      super("Lander", DoRUnitEnum.LANDER, UnitRoleEnum.TRANSPORT, ChassisEnum.SHIP, UNIT_COST, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+      super("Lander", DoRUnitEnum.LANDER, UnitRoleEnum.TRANSPORT, ChassisEnum.SHIP, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0], STAR_VALUE);
       holdingCapacity = 2;
       holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.TROOP, ChassisEnum.TANK));

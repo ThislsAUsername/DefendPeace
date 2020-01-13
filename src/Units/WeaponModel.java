@@ -11,14 +11,12 @@ public abstract class WeaponModel implements Serializable
 
   public boolean canFireAfterMoving;
   public boolean hasInfiniteAmmo;
-  public int maxAmmo;
   public int minRange;
   public int maxRange;
 
-  protected WeaponModel(int ammo, int minRange, int maxRange)
+  protected WeaponModel(boolean infiniteAmmo, int minRange, int maxRange)
   {
-    hasInfiniteAmmo = (ammo < 0) ? true : false;
-    maxAmmo = hasInfiniteAmmo ? Integer.MAX_VALUE : ammo;
+    hasInfiniteAmmo = infiniteAmmo;
     if( minRange > 1 )
     {
       canFireAfterMoving = false;
@@ -30,21 +28,55 @@ public abstract class WeaponModel implements Serializable
     this.minRange = minRange;
     this.maxRange = maxRange;
   }
-  protected WeaponModel(int ammo)
+  protected WeaponModel(boolean infiniteAmmo)
   {
-    this(ammo, 1, 1);
+    this(infiniteAmmo, 1, 1);
   }
   protected WeaponModel()
   {
-    this(-1, 1, 1);
+    this(true, 1, 1);
   }
   public abstract WeaponModel clone();
 
+  public boolean loaded(Unit user)
+  {
+    if( hasInfiniteAmmo )
+      return true;
+    else
+      return user.ammo > 0;
+  }
+
+  /** Expend ammo, if the weapon uses ammo */
+  public void fire(Unit user)
+  {
+    if( !hasInfiniteAmmo )
+    {
+      if( user.ammo > 0 )
+        user.ammo--;
+      else if( user.ammo == 0 )
+        System.out.println("WARNING: fired an empty gun!");
+    }
+  }
+
+  /**
+   * @return returns its base damage against defender if the unit is in range
+   */
+  public double getDamage( UnitModel defender, int range )
+  {
+    if( defender != null )
+    {
+      if( (range >= minRange) && (range <= maxRange) )
+        return getDamage(defender);
+    }
+    return 0;
+  }
   /**
    * @return returns its base damage against that unit type
    */
   public double getDamage(UnitModel defender)
   {
+    if( defender == null )
+      return 0;
     return defender.getDamageRedirect(this);
   }
   public double getDamage(AWBWUnitModel defender)

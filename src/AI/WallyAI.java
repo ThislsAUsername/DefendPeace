@@ -28,7 +28,6 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
-import Units.Weapon;
 import Units.WeaponModel;
 import Units.MoveTypes.MoveType;
 
@@ -521,15 +520,7 @@ public class WallyAI implements AIController
     ArrayList<XYCoord> goals = new ArrayList<XYCoord>();
 
     boolean shouldResupply = (unit.getHP() < unit.model.maxHP) || (unit.fuel < unit.model.maxFuel*UNIT_REFUEL_THRESHHOLD);
-    if( !shouldResupply )
-    {
-      // Resupply also if we need ammo.
-      for( Weapon weap : unit.weapons )
-      {
-        if( weap.ammo <= weap.model.maxAmmo * UNIT_REARM_THRESHHOLD )
-          shouldResupply = true;
-      }
-    }
+    shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHHOLD;
 
     if( shouldResupply )
     {
@@ -940,7 +931,7 @@ public class WallyAI implements AIController
         UnitModel idealCounter = availableUnitModels.get(0);
         availableUnitModels.remove(idealCounter); // Make sure we don't try to build two rounds of the same thing in one turn.
         // I only want combat units, since I don't understand transports
-        if( !idealCounter.weaponModels.isEmpty() )
+        if( !idealCounter.weapons.isEmpty() )
         {
           log(String.format("  buy %s?", idealCounter));
 
@@ -1038,7 +1029,7 @@ public class WallyAI implements AIController
   public double findEffectiveness(UnitModel model, UnitModel target)
   {
     double theirRange = 0;
-    for( WeaponModel wm : target.weaponModels )
+    for( WeaponModel wm : target.weapons )
     {
       double range = wm.maxRange;
       if( wm.canFireAfterMoving )
@@ -1046,7 +1037,7 @@ public class WallyAI implements AIController
       theirRange = Math.max(theirRange, range);
     }
     double counterPower = 0;
-    for( WeaponModel wm : model.weaponModels )
+    for( WeaponModel wm : model.weapons )
     {
       double damage = wm.getDamage(target);
       double myRange = wm.maxRange;

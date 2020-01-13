@@ -13,7 +13,7 @@ import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Units.Unit;
-import Units.Weapon;
+import Units.WeaponModel;
 
 public class Utils
 {
@@ -48,9 +48,9 @@ public class Utils
   }
 
   /** Returns a list of locations of all enemy units that weapon could hit from attackerPosition. */
-  public static ArrayList<XYCoord> findTargetsInRange(GameMap map, Commander co, XYCoord attackerPosition, Weapon weapon)
+  public static ArrayList<XYCoord> findTargetsInRange(GameMap map, Commander co, XYCoord attackerPosition, WeaponModel weapon)
   {
-    ArrayList<XYCoord> locations = findLocationsInRange(map, attackerPosition, weapon.model.minRange, weapon.model.maxRange);
+    ArrayList<XYCoord> locations = findLocationsInRange(map, attackerPosition, weapon.minRange, weapon.maxRange);
     ArrayList<XYCoord> targets = new ArrayList<XYCoord>();
     for( XYCoord loc : locations )
     {

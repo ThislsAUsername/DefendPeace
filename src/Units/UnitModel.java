@@ -63,6 +63,7 @@ public abstract class UnitModel implements Serializable
   private int moneyCost = 9001;
   public int moneyCostAdjustment = 0;
   public double customStarValue = 0;
+  public int maxAmmo;
   public int maxFuel;
   public int idleFuelBurn;
   public int maxMaterials = 0;
@@ -73,7 +74,7 @@ public abstract class UnitModel implements Serializable
   public MoveType propulsion;
   public ArrayList<UnitActionType> possibleActions = new ArrayList<UnitActionType>();
   public Set<TerrainType> healableHabs;
-  public ArrayList<WeaponModel> weaponModels = new ArrayList<WeaponModel>();
+  public ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();
 
   public int maxHP;
   public int holdingCapacity;
@@ -82,36 +83,37 @@ public abstract class UnitModel implements Serializable
   private int COdef;
   public double COcost = 1.0;
 
-  public UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] weapons, double starValue)
+  public UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
+      MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] pWeapons, double starValue)
   {
-    this(pName, pRole, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, starValue);
+    this(pName, pRole, pChassis, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, starValue);
 
     for( UnitActionType action : actions )
     {
       possibleActions.add(action);
     }
-    for( WeaponModel wm : weapons )
+    for( WeaponModel wm : pWeapons )
     {
-      weaponModels.add(wm.clone());
+      weapons.add(wm.clone());
     }
   }
 
-  public UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> weapons, double starValue)
+  public UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
+      MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> pWeapons, double starValue)
   {
-    this(pName, pRole, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, starValue);
+    this(pName, pRole, pChassis, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, starValue);
     possibleActions.addAll(actions);
-    weaponModels = weapons;
+    weapons = pWeapons;
   }
 
-  private UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
+  private UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion, double starValue)
   {
     name = pName;
     role = pRole;
     chassis = pChassis;
     moneyCost = cost;
+    maxAmmo = pAmmoMax;
     customStarValue = starValue;
     maxFuel = pFuelMax;
     idleFuelBurn = pIdleFuelBurn;
@@ -204,9 +206,9 @@ public abstract class UnitModel implements Serializable
   public boolean hasDirectFireWeapon()
   {
     boolean hasDirect = false;
-    if(weaponModels != null && weaponModels.size() > 0)
+    if(weapons != null && weapons.size() > 0)
     {
-      for( WeaponModel wm : weaponModels )
+      for( WeaponModel wm : weapons )
       {
         if( wm.minRange == 1 )
         {
@@ -224,7 +226,7 @@ public abstract class UnitModel implements Serializable
   public boolean hasImmobileWeapon()
   {
     boolean hasSiege = false;
-    for( WeaponModel wm : weaponModels )
+    for( WeaponModel wm : weapons )
     {
       if( !wm.canFireAfterMoving )
       {

@@ -12,7 +12,7 @@ import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
 import Units.Unit;
-import Units.Weapon;
+import Units.WeaponModel;
 
 /*
  * Venge enhances counter-attacks of all sorts.
@@ -105,13 +105,13 @@ public class Venge extends Commander
     {
       // Store our unit. Since defenders don't move, we have defenderX/Y already.
       Unit minion = instance.defender;
-      Weapon myWeapon = instance.defenderWeapon;
-      
+      WeaponModel myWeapon = instance.defenderWeapon;
+
       instance.defender = instance.attacker;
       instance.defenderWeapon = instance.attackerWeapon;
       instance.defenderX = instance.attackerX;
       instance.defenderY = instance.attackerY;
-      
+
       instance.attacker = minion;
       instance.attackerWeapon = myWeapon;
       instance.attackerX = minion.x;

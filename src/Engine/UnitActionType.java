@@ -5,8 +5,8 @@ import java.util.ArrayList;
 
 import Terrain.GameMap;
 import Units.Unit;
-import Units.Weapon;
 import Units.UnitModel;
+import Units.WeaponModel;
 
 public abstract class UnitActionType implements Serializable
 {
@@ -51,11 +51,11 @@ public abstract class UnitActionType implements Serializable
         {
           boolean moved = !moveLocation.equals(actor.x, actor.y);
           ArrayList<GameAction> attackOptions = new ArrayList<GameAction>();
-          for( Weapon wpn : actor.weapons )
+          for( WeaponModel wpn : actor.model.weapons )
           {
             // Evaluate this weapon for targets if it has ammo, and if either the weapon
             // is mobile or we don't care if it's mobile (because we aren't moving).
-            if( wpn.ammo > 0 && (!moved || wpn.model.canFireAfterMoving) )
+            if( wpn.loaded(actor) && (!moved || wpn.canFireAfterMoving) )
             {
               ArrayList<XYCoord> locations = Utils.findTargetsInRange(map, actor.CO, moveLocation, wpn);
 
