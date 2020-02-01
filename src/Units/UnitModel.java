@@ -60,9 +60,8 @@ public abstract class UnitModel implements Serializable
   public String name;
   public UnitRoleEnum role;
   public ChassisEnum chassis;
-  private int moneyCost = 9001;
-  public int moneyCostAdjustment = 0;
-  public double abilityPowerValue = 0;
+  protected int moneyCost;
+  public double abilityPowerValue;
   public int maxAmmo;
   public int maxFuel;
   public int idleFuelBurn;
@@ -73,15 +72,16 @@ public abstract class UnitModel implements Serializable
   public boolean hidden = false;
   public MoveType propulsion;
   public ArrayList<UnitActionType> possibleActions = new ArrayList<UnitActionType>();
-  public Set<TerrainType> healableHabs;
+  public Set<TerrainType> healableHabs = new HashSet<TerrainType>();
   public ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();
 
-  public int maxHP;
-  public int holdingCapacity;
-  public Vector<ChassisEnum> holdables;
-  private int COstr;
-  private int COdef;
+  public int maxHP = 10;
+  public int holdingCapacity = 0;
+  public Vector<ChassisEnum> holdables = new Vector<ChassisEnum>();
+  private int COstr = 100;
+  private int COdef = 100;
   public double COcost = 1.0;
+  public int moneyCostAdjustment = 0;
 
   public UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] pWeapons, double powerValue)
@@ -120,7 +120,7 @@ public abstract class UnitModel implements Serializable
     visionRange = pVision;
     movePower = pMovePower;
     propulsion = new MoveType(pPropulsion);
-    healableHabs = new HashSet<TerrainType>();
+
     for( TerrainType terrain : TerrainType.TerrainTypeList )
     {
       if( (((chassis == ChassisEnum.AIR_HIGH) || (chassis == ChassisEnum.AIR_LOW)) && terrain.healsAir()) ||
@@ -128,28 +128,34 @@ public abstract class UnitModel implements Serializable
           (((chassis == ChassisEnum.SHIP) || (chassis == ChassisEnum.SUBMERGED)) && terrain.healsSea()) )
         healableHabs.add(terrain);
     }
-
-    maxHP = 10;
-    COstr = 100;
-    COdef = 100;
-    holdingCapacity = 0;
-    holdables = new Vector<ChassisEnum>();
   }
 
   /**
-   * Copy-constructor. Does a deep-copy on 'other' to allow easy creation of
-   * unit types that are similar to exiting types.
+   * Copy-constructor. Does a deep-copy to allow easy creation of
+   * unit types that are similar to existing types.
    * @param other The UnitModel to clone.
    * @return The UnitModel clone.
    */
-  public static UnitModel clone(UnitModel other)
-  {
-    return other.clone();
-  }
-  /** Performs a deep copy of the UnitModel in question */
   @Override
   public abstract UnitModel clone();
-  
+
+  /** Copies stuff that isn't directly handled by the constructor. */
+  protected void copyValues(UnitModel other)
+  {
+    // Duplicate the other model's transporting abilities.
+    holdingCapacity = other.holdingCapacity;
+    holdables.addAll(other.holdables);
+
+    // Duplicate other assorted values
+    maxHP = other.maxHP;
+    maxMaterials = other.maxMaterials;
+
+    COstr = other.COstr;
+    COdef = other.COdef;
+    COcost = other.COcost;
+    moneyCostAdjustment = other.moneyCostAdjustment;
+  }
+
   public int getCost()
   {
     return (int) ((moneyCost+moneyCostAdjustment)*COcost);

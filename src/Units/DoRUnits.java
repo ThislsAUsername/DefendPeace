@@ -135,24 +135,11 @@ public class DoRUnits extends UnitModelScheme
     @Override
     public UnitModel clone()
     {
-      // Make a copy of your weapon types.
-      if( weapons != null )
-      {
-        weapons = new ArrayList<WeaponModel>();
-        for( WeaponModel weapon : weapons )
-        {
-          weapons.add(weapon.clone());
-        }
-      }
-
       // Create a new model with the given attributes.
-      DoRUnitModel newModel = new DoRUnitModel(name, type, role, chassis, getCost(), maxAmmo, maxFuel, idleFuelBurn, visionRange, movePower,
+      DoRUnitModel newModel = new DoRUnitModel(name, type, role, chassis, moneyCost, maxAmmo, maxFuel, idleFuelBurn, visionRange, movePower,
           new MoveType(propulsion), possibleActions, weapons, abilityPowerValue);
 
-      // Duplicate the other model's transporting abilities.
-      newModel.holdingCapacity = holdingCapacity;
-      newModel.holdables.addAll(holdables);
-
+      newModel.copyValues(this);
       return newModel;
     }
 
