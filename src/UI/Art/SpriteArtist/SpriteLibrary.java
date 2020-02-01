@@ -329,9 +329,10 @@ public class SpriteLibrary
     public static UnitSpriteSetKey instance(String unitType, Faction faction, Color color)
     {
       UnitSpriteSetKey key = null;
+      String stdType = UnitModel.standardizeID(unitType);
       for( int i = 0; i < instances.size(); ++i )
       {
-        if( instances.get(i).unitTypeKey.equalsIgnoreCase(unitType) && instances.get(i).factionKey == faction && instances.get(i).colorKey == color)
+        if( instances.get(i).unitTypeKey.equals(stdType) && instances.get(i).factionKey == faction && instances.get(i).colorKey == color)
         {
           key = instances.get(i);
           break;
@@ -339,7 +340,7 @@ public class SpriteLibrary
       }
       if( key == null )
       {
-        key = new UnitSpriteSetKey(unitType, faction, color);
+        key = new UnitSpriteSetKey(stdType, faction, color);
         instances.add(key);
       }
       return key;
