@@ -16,7 +16,7 @@ public class DoRWeapons
     SUBTORPEDOES, CARRIERMGUN, BATTLESHIPCANNON,
   };
   
-  protected final static boolean MAX_AMMO = true;
+  protected final static boolean USE_AMMO = true;
 
   private static class DoRWeapon extends WeaponModel
   {
@@ -70,7 +70,7 @@ public class DoRWeapons
 
     public MechZooka()
     {
-      super(DoRWeaponType.MECHZOOKA, MAX_AMMO);
+      super(DoRWeaponType.MECHZOOKA, USE_AMMO);
     }
   }
 
@@ -110,7 +110,7 @@ public class DoRWeapons
 
     public AntiAirMGun()
     {
-      super(DoRWeaponType.ANTI_AIRMGUN, MAX_AMMO);
+      super(DoRWeaponType.ANTI_AIRMGUN, USE_AMMO);
     }
   }
 
@@ -120,7 +120,7 @@ public class DoRWeapons
 
     public TankCannon()
     {
-      super(DoRWeaponType.TANKCANNON, MAX_AMMO);
+      super(DoRWeaponType.TANKCANNON, USE_AMMO);
     }
   }
 
@@ -150,7 +150,7 @@ public class DoRWeapons
 
     public MDTankCannon()
     {
-      super(DoRWeaponType.MD_TANKCANNON, MAX_AMMO);
+      super(DoRWeaponType.MD_TANKCANNON, USE_AMMO);
     }
   }
 
@@ -170,7 +170,7 @@ public class DoRWeapons
 
     public WarCannon()
     {
-      super(DoRWeaponType.WARCANNON, MAX_AMMO);
+      super(DoRWeaponType.WARCANNON, USE_AMMO);
     }
   }
 
@@ -182,7 +182,7 @@ public class DoRWeapons
 
     public ArtilleryCannon()
     {
-      super(DoRWeaponType.ARTILLERYCANNON, MAX_AMMO, MIN_RANGE, MAX_RANGE);
+      super(DoRWeaponType.ARTILLERYCANNON, USE_AMMO, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -194,7 +194,7 @@ public class DoRWeapons
 
     public AntiTankCannon()
     {
-      super(DoRWeaponType.ANTITANKCANNON, MAX_AMMO, MIN_RANGE, MAX_RANGE);
+      super(DoRWeaponType.ANTITANKCANNON, USE_AMMO, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -206,7 +206,7 @@ public class DoRWeapons
 
     public RocketRockets()
     {
-      super(DoRWeaponType.ROCKETS, MAX_AMMO, MIN_RANGE, MAX_RANGE);
+      super(DoRWeaponType.ROCKETS, USE_AMMO, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -218,7 +218,7 @@ public class DoRWeapons
 
     public MobileSAMWeapon()
     {
-      super(DoRWeaponType.MOBILESAM, MAX_AMMO, MIN_RANGE, MAX_RANGE);
+      super(DoRWeaponType.MOBILESAM, USE_AMMO, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -230,7 +230,7 @@ public class DoRWeapons
 
     public FighterMissiles()
     {
-      super(DoRWeaponType.FIGHTERMISSILES, MAX_AMMO);
+      super(DoRWeaponType.FIGHTERMISSILES, USE_AMMO);
     }
   }
 
@@ -240,7 +240,7 @@ public class DoRWeapons
 
     public BomberBombs()
     {
-      super(DoRWeaponType.BOMBERBOMBS, MAX_AMMO);
+      super(DoRWeaponType.BOMBERBOMBS, USE_AMMO);
     }
   }
 
@@ -250,7 +250,7 @@ public class DoRWeapons
 
     public SeaplaneShots()
     {
-      super(DoRWeaponType.SEAPLANESHOTS, MAX_AMMO);
+      super(DoRWeaponType.SEAPLANESHOTS, USE_AMMO);
     }
   }
 
@@ -260,7 +260,7 @@ public class DoRWeapons
 
     public DusterMGun()
     {
-      super(DoRWeaponType.DUSTERMGUN, MAX_AMMO);
+      super(DoRWeaponType.DUSTERMGUN, USE_AMMO);
     }
   }
 
@@ -270,7 +270,7 @@ public class DoRWeapons
 
     public CopterRockets()
     {
-      super(DoRWeaponType.COPTERROCKETS, MAX_AMMO);
+      super(DoRWeaponType.COPTERROCKETS, USE_AMMO);
     }
   }
 
@@ -292,7 +292,7 @@ public class DoRWeapons
 
     public GunBoatGun()
     {
-      super(DoRWeaponType.GUNBOATGUN, MAX_AMMO);
+      super(DoRWeaponType.GUNBOATGUN, USE_AMMO);
     }
   }
 
@@ -302,7 +302,7 @@ public class DoRWeapons
 
     public CruiserTorpedoes()
     {
-      super(DoRWeaponType.CRUISERTORPEDOES, MAX_AMMO);
+      super(DoRWeaponType.CRUISERTORPEDOES, USE_AMMO);
     }
   }
 
@@ -322,7 +322,7 @@ public class DoRWeapons
 
     public SubTorpedoes()
     {
-      super(DoRWeaponType.SUBTORPEDOES, MAX_AMMO);
+      super(DoRWeaponType.SUBTORPEDOES, USE_AMMO);
     }
   }
 
@@ -334,7 +334,7 @@ public class DoRWeapons
 
     public BattleshipCannon()
     {
-      super(DoRWeaponType.BATTLESHIPCANNON, MAX_AMMO, MIN_RANGE, MAX_RANGE);
+      super(DoRWeaponType.BATTLESHIPCANNON, USE_AMMO, MIN_RANGE, MAX_RANGE);
       canFireAfterMoving = true;
     }
   }
