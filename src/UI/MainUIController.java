@@ -118,7 +118,7 @@ public class MainUIController implements IController
                     saves.add(new SaveInfo(filepath, filename, prettyName));
                   else
                     // Throw an tilde in there to tell the user "yeah, we see it, and it ain't gonna work."
-                    saves.add(new SaveInfo(filepath, filename, "~" + prettyName));
+                    saves.add(new SaveInfo(filepath, filename, "!" + prettyName));
                 }
               }
             }

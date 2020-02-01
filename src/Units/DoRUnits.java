@@ -27,7 +27,7 @@ public class DoRUnits extends UnitModelScheme
   @Override
   public String toString()
   {
-    return "DoR" + (schemeValid ? "" : "!");
+    return super.toString() + "DoR";
   }
 
   @Override

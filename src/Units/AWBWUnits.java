@@ -25,7 +25,7 @@ public class AWBWUnits extends UnitModelScheme
   @Override
   public String toString()
   {
-    return "AWBW" + (schemeValid ? "" : "!");
+    return super.toString() + "AWBW";
   }
 
   @Override

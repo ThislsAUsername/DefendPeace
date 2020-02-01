@@ -16,6 +16,11 @@ public abstract class UnitModelScheme implements Serializable
   
   /** Indicates whether, for the given map/game, all the units can be instantiated */
   public boolean schemeValid = true;
+  @Override
+  public String toString()
+  {
+    return (schemeValid ? "" : "!");
+  }
 
   /**
    * When the UI wants to show a unit type, it should use this string.
