@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import Engine.XYCoord;
 import Units.AWBWUnits;
 import Units.DoRUnits;
-import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModelScheme;
 import Units.UnitModelScheme.GameReadyModels;
@@ -69,7 +68,7 @@ public class MapInfo
           UnitModel model = UnitModelScheme.getModelFromString(unitEntry.getValue(), models.unitModels);
           if( model == null )
           {
-            schemeInvalid = true; // This unit isn't supported in the scheme, so drop the scheme
+            schemeInvalid = true; // This unit isn't supported in the scheme, so let the scheme know it's deprecated for this map
             break;
           }
         }

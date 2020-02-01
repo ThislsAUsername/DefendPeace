@@ -22,10 +22,7 @@ public class CODefenseModifier extends GenericUnitModifier
   {
     for( UnitModel um : models )
     {
-      if( um.weapons != null )
-      {
-        um.modifyDefenseRatio(defenseModifier);
-      }
+      um.modifyDefenseRatio(defenseModifier);
     }
   }
 
@@ -34,10 +31,7 @@ public class CODefenseModifier extends GenericUnitModifier
   {
     for( UnitModel um : models )
     {
-      if( um.weapons != null )
-      {
-        um.modifyDefenseRatio(-defenseModifier);
-      }
+      um.modifyDefenseRatio(-defenseModifier);
     }
   }
 }
