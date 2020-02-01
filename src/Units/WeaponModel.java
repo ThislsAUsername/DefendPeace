@@ -49,13 +49,10 @@ public abstract class WeaponModel implements Serializable
   /**
    * @return returns its base damage against defender if the unit is in range
    */
-  public double getDamage( UnitModel defender, int range )
+  public double getDamage(UnitModel defender, int range)
   {
-    if( defender != null )
-    {
-      if( (range >= minRange) && (range <= maxRange) )
-        return getDamage(defender);
-    }
+    if( (range >= minRange) && (range <= maxRange) )
+      return getDamage(defender);
     return 0;
   }
   /**
@@ -64,7 +61,7 @@ public abstract class WeaponModel implements Serializable
   public double getDamage(UnitModel defender)
   {
     if( defender == null )
-      return 0;
+      throw new IllegalArgumentException("Stare not into the void. It just may stare back.");
     return defender.getDamageRedirect(this);
   }
   public double getDamage(AWBWUnitModel defender)
