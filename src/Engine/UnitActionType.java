@@ -44,7 +44,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         // Evaluate attack options.
@@ -100,7 +100,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         if( actor.CO.isEnemy(map.getLocation(moveLocation).getOwner()) && map.getLocation(moveLocation).isCaptureable() )
@@ -134,7 +134,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         return new GameActionSet(new GameAction.WaitAction(actor, movePath), false);
@@ -165,7 +165,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       Unit resident = map.getLocation(moveLocation).getResident();
       if( !ignoreResident && resident != null )
       {
@@ -200,7 +200,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       Unit resident = map.getLocation(moveLocation).getResident();
       if( !ignoreResident && resident != null )
       {
@@ -236,7 +236,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         if( actor.heldUnits.size() > 0 )
@@ -285,7 +285,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         // Search for a unit in resupply range.
@@ -330,7 +330,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         ArrayList<GameAction> repairOptions = new ArrayList<GameAction>();
@@ -394,7 +394,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         return new GameActionSet(new GameAction.TransformAction(actor, movePath, this), false);
@@ -429,7 +429,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         return new GameActionSet(new GameAction.ExplodeAction(actor, movePath, this), true); // We don't really need a target, but I want a confirm dialogue
@@ -456,7 +456,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( moveLocation.equals(actor.x, actor.y) )
       {
         return new GameActionSet(new GameAction.UnitDeleteAction(actor), true); // We don't really need a target, but I want a confirm dialogue
@@ -483,7 +483,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( moveLocation.equals(actor.x, actor.y) &&
           actor.hasCargoSpace(typeToBuild.chassis) &&
           actor.CO.money > typeToBuild.getCost() &&
@@ -515,7 +515,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         if ( actor.ammo > 0 && moveLocation.equals(actor.x, actor.y))

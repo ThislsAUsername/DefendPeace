@@ -85,6 +85,6 @@ public class MoveEvent implements GameEvent
   @Override
   public XYCoord getEndPoint()
   {
-    return new XYCoord(unitPath.getEnd().x, unitPath.getEnd().y);
+    return unitPath.getEndCoord();
   }
 }

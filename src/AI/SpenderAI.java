@@ -252,7 +252,7 @@ public class SpenderAI implements AIController
               // This will allow us to navigate around large obstacles that require us to move away
               // from our intended long-term goal.
               path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
-              goal = new XYCoord(path.getEnd().x, path.getEnd().y); // Set the last location as our goal.
+              goal = path.getEndCoord(); // Set the last location as our goal.
 
               log(String.format("    Intermediate waypoint: %s", goal));
 

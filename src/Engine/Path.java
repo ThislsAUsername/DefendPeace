@@ -201,6 +201,16 @@ public class Path
     return p;
   }
 
+  public XYCoord getEndCoord()
+  {
+    PathNode p = getEnd();
+
+    if( null == p )
+      return null;
+
+    return new XYCoord(p.x, p.y);
+  }
+
   public static class PathNode
   {
     public int x;

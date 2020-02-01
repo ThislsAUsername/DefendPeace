@@ -72,7 +72,7 @@ public interface GameAction
       attackLocation = atkLoc;
       if( null != path && (path.getEnd() != null) )
       {
-        moveCoord = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        moveCoord = movePath.getEndCoord();
         if((null != atkLoc) && (null != gameMap) && gameMap.isLocationValid(atkLoc))
         {
           defender = gameMap.getLocation(atkLoc).getResident();
@@ -254,7 +254,7 @@ public interface GameAction
       movePath = path;
       if( (null != path) && path.getPathLength() > 0 )
       {
-        movePathEnd = new XYCoord(path.getEnd().x, path.getEnd().y);
+        movePathEnd = path.getEndCoord();
       }
       if( (null != gameMap) && gameMap.isLocationValid(movePathEnd))
       {
@@ -279,7 +279,7 @@ public interface GameAction
       isValid &= (null != movePath) && (movePath.getPathLength() > 0); // Valid path
       if( isValid )
       {
-        movePathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        movePathEnd = movePath.getEndCoord();
         captureLocation = map.getLocation(movePathEnd);
         isValid &= captureLocation.isCaptureable(); // Valid location
         isValid &= actor.CO.isEnemy(captureLocation.getOwner()); // Valid CO
@@ -350,7 +350,7 @@ public interface GameAction
       if( (null != path) && (path.getPathLength() > 0) )
       {
         // Store the destination for later.
-        waitLoc = new XYCoord(path.getEnd().x, path.getEnd().y);
+        waitLoc = movePath.getEndCoord();
       }
       else
         waitLoc = null;
@@ -416,7 +416,7 @@ public interface GameAction
       movePath = path;
       if( (null != movePath) && (movePath.getPathLength() > 0 ))
       {
-        pathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        pathEnd = movePath.getEndCoord();
         if( (null != gameMap) && gameMap.isLocationValid(pathEnd) )
         {
           transport = gameMap.getLocation(pathEnd).getResident();
@@ -439,7 +439,7 @@ public interface GameAction
       isValid &= (null != gameMap);
       if( isValid )
       {
-        pathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        pathEnd = movePath.getEndCoord();
         isValid &= gameMap.isLocationValid(pathEnd);
 
         if( isValid )
@@ -521,7 +521,7 @@ public interface GameAction
       // Grab the move location and the first drop location to support getMoveLocation and getTargetLocation.
       if( (null != movePath) && (movePath.getPathLength() > 0 ))
       {
-        moveLoc = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        moveLoc = movePath.getEndCoord();
       }
       if( !myDropoffs.isEmpty() )
       {
@@ -622,7 +622,7 @@ public interface GameAction
       movePath = path;
       if( (null != movePath) && (movePath.getPathLength() > 0 ))
       {
-        pathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        pathEnd = movePath.getEndCoord();
         if( (null != gameMap) && gameMap.isLocationValid(pathEnd) )
         {
           recipient = gameMap.getLocation(pathEnd).getResident();
@@ -645,7 +645,7 @@ public interface GameAction
       isValid &= (null != gameMap);
       if( isValid )
       {
-        pathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        pathEnd = movePath.getEndCoord();
         isValid &= gameMap.isLocationValid(pathEnd);
 
         if( isValid )
@@ -731,7 +731,7 @@ public interface GameAction
       XYCoord loc;
       if( movePath != null )
       {
-        loc = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        loc = movePath.getEndCoord();
       }
       else
       {
@@ -842,7 +842,7 @@ public interface GameAction
       }
       if( null != path && (path.getEnd() != null) )
       {
-        moveCoord = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        moveCoord = movePath.getEndCoord();
       }
     }
 
@@ -1179,7 +1179,7 @@ public interface GameAction
       launchLocation = atkLoc;
       if( null != path && (path.getEnd() != null) )
       {
-        moveCoord = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        moveCoord = path.getEndCoord();
       }
     }
 
@@ -1213,7 +1213,8 @@ public interface GameAction
     @Override
     public String toString()
     {
-      return String.format("[%s will launch a flare to %s from %s]", actor.toStringWithLocation(), launchLocation, moveCoord);
+      return String.format("[Launch a flare to %s with %s after moving to %s]",
+          launchLocation, actor.toStringWithLocation(), moveCoord );
     }
 
     @Override

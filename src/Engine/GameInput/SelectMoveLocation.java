@@ -36,7 +36,7 @@ class SelectMoveLocation extends GameInputState<Path>
       next = null;
     }
     else if( (null != path) && (path.getPathLength() > 0)
-        && myOptions.getCoordinateOptions().contains(new XYCoord(path.getEnd().x, path.getEnd().y))
+        && myOptions.getCoordinateOptions().contains(path.getEndCoord())
         && Utils.isPathValid(myStateData.unitActor, path, myStateData.gameMap) )
     {
       // The path ends on a valid move location, and is traversable by the unit. Store it.
