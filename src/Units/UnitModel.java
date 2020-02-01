@@ -62,7 +62,7 @@ public abstract class UnitModel implements Serializable
   public ChassisEnum chassis;
   private int moneyCost = 9001;
   public int moneyCostAdjustment = 0;
-  public double customStarValue = 0;
+  public double abilityPowerValue = 0;
   public int maxAmmo;
   public int maxFuel;
   public int idleFuelBurn;
@@ -84,9 +84,9 @@ public abstract class UnitModel implements Serializable
   public double COcost = 1.0;
 
   public UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] pWeapons, double starValue)
+      MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] pWeapons, double powerValue)
   {
-    this(pName, pRole, pChassis, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, starValue);
+    this(pName, pRole, pChassis, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, powerValue);
 
     for( UnitActionType action : actions )
     {
@@ -99,22 +99,22 @@ public abstract class UnitModel implements Serializable
   }
 
   public UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> pWeapons, double starValue)
+      MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> pWeapons, double powerValue)
   {
-    this(pName, pRole, pChassis, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, starValue);
+    this(pName, pRole, pChassis, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, powerValue);
     possibleActions.addAll(actions);
     weapons = pWeapons;
   }
 
   private UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, double starValue)
+      MoveType pPropulsion, double powerValue)
   {
     name = pName;
     role = pRole;
     chassis = pChassis;
     moneyCost = cost;
     maxAmmo = pAmmoMax;
-    customStarValue = starValue;
+    abilityPowerValue = powerValue;
     maxFuel = pFuelMax;
     idleFuelBurn = pIdleFuelBurn;
     visionRange = pVision;

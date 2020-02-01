@@ -147,7 +147,7 @@ public class DoRUnits extends UnitModelScheme
 
       // Create a new model with the given attributes.
       DoRUnitModel newModel = new DoRUnitModel(name, type, role, chassis, getCost(), maxAmmo, maxFuel, idleFuelBurn, visionRange, movePower,
-          new MoveType(propulsion), possibleActions, weapons, customStarValue);
+          new MoveType(propulsion), possibleActions, weapons, abilityPowerValue);
 
       // Duplicate the other model's transporting abilities.
       newModel.holdingCapacity = holdingCapacity;

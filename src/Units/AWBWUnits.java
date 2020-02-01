@@ -144,7 +144,7 @@ public class AWBWUnits extends UnitModelScheme
 
       // Create a new model with the given attributes.
       AWBWUnitModel newModel = new AWBWUnitModel(name, type, role, chassis, getCost(), maxAmmo, maxFuel, idleFuelBurn, visionRange, movePower,
-          new MoveType(propulsion), possibleActions, weapons, customStarValue);
+          new MoveType(propulsion), possibleActions, weapons, abilityPowerValue);
 
       // Duplicate the other model's transporting abilities.
       newModel.holdingCapacity = holdingCapacity;
