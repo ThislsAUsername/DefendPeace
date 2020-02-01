@@ -159,6 +159,18 @@ public class Unit implements Serializable
     return chosenWeapon;
   }
 
+  /** Expend ammo, if the weapon uses ammo */
+  public void fire(WeaponModel weapon)
+  {
+    if( !weapon.hasInfiniteAmmo )
+    {
+      if( ammo > 0 )
+        ammo--;
+      else
+        System.out.println("WARNING: fired with no available ammo!");
+    }
+  }
+
   public int getHP()
   {
     return (int) Math.ceil(HP);

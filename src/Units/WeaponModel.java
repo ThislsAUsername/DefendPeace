@@ -46,18 +46,6 @@ public abstract class WeaponModel implements Serializable
       return user.ammo > 0;
   }
 
-  /** Expend ammo, if the weapon uses ammo */
-  public void fire(Unit user)
-  {
-    if( !hasInfiniteAmmo )
-    {
-      if( user.ammo > 0 )
-        user.ammo--;
-      else if( user.ammo == 0 )
-        System.out.println("WARNING: fired an empty gun!");
-    }
-  }
-
   /**
    * @return returns its base damage against defender if the unit is in range
    */
