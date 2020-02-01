@@ -596,6 +596,9 @@ public class AWBWUnits extends UnitModelScheme
     private static final int VISION_RANGE = 1;
     private static final int MOVE_POWER = 9;
 
+    private static final int EXPLODE_RADIUS = 3;
+    private static final int EXPLODE_POWER = 5;
+
     private static final MoveType moveType = new Flight();
     private static final UnitActionType[] actions = UnitActionType.BASIC_ACTIONS;
     private static final WeaponModel[] weapons = {};
@@ -604,7 +607,7 @@ public class AWBWUnits extends UnitModelScheme
     {
       super("BBomb", AWBWUnitEnum.BBOMB, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
-      possibleActions.add(0, new UnitActionType.Explode(5, 3));
+      possibleActions.add(0, new UnitActionType.Explode(EXPLODE_POWER, EXPLODE_RADIUS));
     }
   }
 
