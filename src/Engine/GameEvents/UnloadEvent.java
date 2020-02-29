@@ -44,6 +44,7 @@ public class UnloadEvent implements GameEvent
       transport.heldUnits.remove(cargo);
       gameMap.moveUnit(cargo, dropLoc.xCoord, dropLoc.yCoord);
       cargo.isTurnOver = true;
+      transport.CO.myView.revealFog(cargo);
     }
     else
     {

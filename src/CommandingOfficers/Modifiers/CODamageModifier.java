@@ -28,10 +28,7 @@ public class CODamageModifier extends GenericUnitModifier
   {
     for( UnitModel um : models )
     {
-      if( um.weaponModels != null )
-      {
-        um.modifyDamageRatio(attackModifier);
-      }
+      um.modifyDamageRatio(attackModifier);
     }
   }
 
@@ -40,10 +37,7 @@ public class CODamageModifier extends GenericUnitModifier
   {
     for( UnitModel um : models )
     {
-      if( um.weaponModels != null )
-      {
-        um.modifyDamageRatio(-attackModifier);
-      }
+      um.modifyDamageRatio(-attackModifier);
     }
   }
 }

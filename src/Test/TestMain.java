@@ -28,6 +28,7 @@ public class TestMain extends TestCase
     testsPassed &= validate(new TestCombat().runTest(), "Combat test failed!");
     testsPassed &= validate(new TestCombatMods().runTest(), "Combat modification test failed!");
     testsPassed &= validate(new TestHealing().runTest(), "Healing test failed!");
+    testsPassed &= validate(new TestSaveLoad().runTest(), "Save/load test failed!");
     testsPassed &= validate(new TestSprite().runTest(), "Sprite test failed!");
     testsPassed &= validate(new TestInputHandler().runTest(), "InputHandler test failed!");
     testsPassed &= validate(new TestCapture().runTest(), "Capture test failed!");

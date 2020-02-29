@@ -8,7 +8,7 @@ import Engine.IController;
 import UI.PlayerSetupColorFactionController;
 import UI.SlidingValue;
 import UI.UIUtils;
-import Units.UnitModel;
+import Units.UnitModel.UnitRoleEnum;
 
 public class PlayerSetupColorFactionArtist
 {
@@ -21,7 +21,7 @@ public class PlayerSetupColorFactionArtist
   private static int gridWidth;
   private static int gridHeight;
 
-  private static IController myControl;
+  private static PlayerSetupColorFactionController myControl;
   private static SlidingValue gridX = new SlidingValue(0);
   private static SlidingValue gridY = new SlidingValue(0);
   private static SpriteCursor spriteCursor = new SpriteCursor(0, 0, SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize, UIUtils.getCOColors()[0]);
@@ -96,7 +96,7 @@ public class PlayerSetupColorFactionArtist
         if( (xOff < myWidth) && (yOff < myHeight) && (xOff > -unitSizePx) && (yOff > -unitSizePx))
         {
           if( null == unitArray[f][c] )
-            unitArray[f][c] = SpriteLibrary.getMapUnitSpriteSet(UnitModel.UnitEnum.INFANTRY, UIUtils.getFactions()[f], UIUtils.getCOColors()[c]).sprites[0].getFrame(0);
+            unitArray[f][c] = SpriteLibrary.getMapUnitSpriteSet(UnitRoleEnum.INFANTRY.toString(), UIUtils.getFactions()[f], UIUtils.getCOColors()[c]).sprites[0].getFrame(0);
           myG.drawImage(unitArray[f][c], xOff, yOff, null);
         }
       }
@@ -118,7 +118,7 @@ public class PlayerSetupColorFactionArtist
     }
 
     // Just pull one sprite to start with. Loading everything at once might take a while.
-    unitArray[0][0] = SpriteLibrary.getMapUnitSpriteSet(UnitModel.UnitEnum.INFANTRY, UIUtils.getFactions()[0], UIUtils.getCOColors()[0]).sprites[0].getFrame(0);
+    unitArray[0][0] = SpriteLibrary.getMapUnitSpriteSet(UnitRoleEnum.INFANTRY.toString(), UIUtils.getFactions()[0], UIUtils.getCOColors()[0]).sprites[0].getFrame(0);
 
     unitSizePx = unitArray[0][0].getHeight(); // Units are square.
     unitBuffer = unitSizePx / 3; // Space between options in the grid.
@@ -137,7 +137,7 @@ public class PlayerSetupColorFactionArtist
   {
     if( !donePreloading )
     {
-      SpriteLibrary.getMapUnitSpriteSet(UnitModel.UnitEnum.INFANTRY, UIUtils.getFactions()[nextFac], UIUtils.getCOColors()[nextCol]);
+      SpriteLibrary.getMapUnitSpriteSet(UnitRoleEnum.INFANTRY.toString(), UIUtils.getFactions()[nextFac], UIUtils.getCOColors()[nextCol]);
       nextFac++;
       if( nextFac >= UIUtils.getFactions().length )
       {

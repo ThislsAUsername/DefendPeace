@@ -12,6 +12,7 @@ import Engine.GameEvents.CaptureEvent;
 import Engine.GameEvents.CommanderAbilityEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.CreateUnitEvent;
+import Engine.GameEvents.FlareEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
@@ -20,8 +21,11 @@ import Engine.GameEvents.MassDamageEvent;
 import Engine.GameEvents.ResupplyEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.UnitJoinEvent;
+import Engine.GameEvents.UnitProduceEvent;
 import Engine.GameEvents.UnitTransformEvent;
 import Engine.GameEvents.UnloadEvent;
+import Engine.UnitActionType.Flare;
+import Engine.UnitActionType.UnitProduce;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
@@ -68,7 +72,7 @@ public interface GameAction
       attackLocation = atkLoc;
       if( null != path && (path.getEnd() != null) )
       {
-        moveCoord = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        moveCoord = movePath.getEndCoord();
         if((null != atkLoc) && (null != gameMap) && gameMap.isLocationValid(atkLoc))
         {
           defender = gameMap.getLocation(atkLoc).getResident();
@@ -250,7 +254,7 @@ public interface GameAction
       movePath = path;
       if( (null != path) && path.getPathLength() > 0 )
       {
-        movePathEnd = new XYCoord(path.getEnd().x, path.getEnd().y);
+        movePathEnd = path.getEndCoord();
       }
       if( (null != gameMap) && gameMap.isLocationValid(movePathEnd))
       {
@@ -275,7 +279,7 @@ public interface GameAction
       isValid &= (null != movePath) && (movePath.getPathLength() > 0); // Valid path
       if( isValid )
       {
-        movePathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        movePathEnd = movePath.getEndCoord();
         captureLocation = map.getLocation(movePathEnd);
         isValid &= captureLocation.isCaptureable(); // Valid location
         isValid &= actor.CO.isEnemy(captureLocation.getOwner()); // Valid CO
@@ -346,7 +350,7 @@ public interface GameAction
       if( (null != path) && (path.getPathLength() > 0) )
       {
         // Store the destination for later.
-        waitLoc = new XYCoord(path.getEnd().x, path.getEnd().y);
+        waitLoc = movePath.getEndCoord();
       }
       else
         waitLoc = null;
@@ -412,7 +416,7 @@ public interface GameAction
       movePath = path;
       if( (null != movePath) && (movePath.getPathLength() > 0 ))
       {
-        pathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        pathEnd = movePath.getEndCoord();
         if( (null != gameMap) && gameMap.isLocationValid(pathEnd) )
         {
           transport = gameMap.getLocation(pathEnd).getResident();
@@ -435,14 +439,14 @@ public interface GameAction
       isValid &= (null != gameMap);
       if( isValid )
       {
-        pathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        pathEnd = movePath.getEndCoord();
         isValid &= gameMap.isLocationValid(pathEnd);
 
         if( isValid )
         {
           // Find the transport unit.
           transport = gameMap.getLocation(pathEnd).getResident();
-          isValid &= (null != transport) && transport.hasCargoSpace(passenger.model.type);
+          isValid &= (null != transport) && transport.hasCargoSpace(passenger.model.chassis);
         }
       }
 
@@ -517,7 +521,7 @@ public interface GameAction
       // Grab the move location and the first drop location to support getMoveLocation and getTargetLocation.
       if( (null != movePath) && (movePath.getPathLength() > 0 ))
       {
-        moveLoc = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        moveLoc = movePath.getEndCoord();
       }
       if( !myDropoffs.isEmpty() )
       {
@@ -618,7 +622,7 @@ public interface GameAction
       movePath = path;
       if( (null != movePath) && (movePath.getPathLength() > 0 ))
       {
-        pathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        pathEnd = movePath.getEndCoord();
         if( (null != gameMap) && gameMap.isLocationValid(pathEnd) )
         {
           recipient = gameMap.getLocation(pathEnd).getResident();
@@ -641,7 +645,7 @@ public interface GameAction
       isValid &= (null != gameMap);
       if( isValid )
       {
-        pathEnd = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        pathEnd = movePath.getEndCoord();
         isValid &= gameMap.isLocationValid(pathEnd);
 
         if( isValid )
@@ -727,7 +731,7 @@ public interface GameAction
       XYCoord loc;
       if( movePath != null )
       {
-        loc = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        loc = movePath.getEndCoord();
       }
       else
       {
@@ -838,7 +842,7 @@ public interface GameAction
       }
       if( null != path && (path.getEnd() != null) )
       {
-        moveCoord = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+        moveCoord = movePath.getEndCoord();
       }
     }
 
@@ -1106,4 +1110,130 @@ public interface GameAction
       return destination;
     }
   } // ~UnitDeleteAction
+
+  // ===========  UnitProduceAction  ===============================
+  public static class UnitProduceAction implements GameAction
+  {
+    final UnitProduce type;
+    final Unit actor;
+    final XYCoord destination;
+    public UnitProduceAction(UnitProduce pType, Unit unit)
+    {
+      type = pType;
+      actor = unit;
+      destination = new XYCoord(unit.x, unit.y);
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue eventSequence = new GameEventQueue();
+      eventSequence.add(new UnitProduceEvent(actor.CO, actor, type.typeToBuild));
+      return eventSequence;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Build "+type.typeToBuild.name+" with %s in place]", actor.toStringWithLocation());
+    }
+
+    @Override
+    public UnitActionType getType()
+    {
+      return type;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return destination;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return destination;
+    }
+  } // ~UnitProduceAction
+
+  // ===========  FlareAction  ===============================
+  public static class FlareAction implements GameAction
+  {
+    private Flare type;
+    private Path movePath;
+    private XYCoord moveCoord = null;
+    private XYCoord launchLocation = null;
+    private Unit actor;
+
+    public FlareAction(Flare pType, Unit actor, Path path, int targetX, int targetY)
+    {
+      this(pType, actor, path, new XYCoord(targetX, targetY));
+    }
+
+    public FlareAction(Flare pType, Unit actor, Path path, XYCoord atkLoc)
+    {
+      type = pType;
+      movePath = path;
+      this.actor = actor;
+      launchLocation = atkLoc;
+      if( null != path && (path.getEnd() != null) )
+      {
+        moveCoord = path.getEndCoord();
+      }
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue flareEvents = new GameEventQueue();
+
+      // Validate input.
+      boolean isValid = true;
+      isValid &= actor != null && !actor.isTurnOver;
+      isValid &= (null != gameMap) && (gameMap.isLocationValid(launchLocation)) && gameMap.isLocationValid(moveCoord);
+      isValid &= (movePath != null) && (movePath.getPathLength() > 0);
+
+      int range = Math.abs(moveCoord.xCoord - launchLocation.xCoord)
+            + Math.abs(moveCoord.yCoord - launchLocation.yCoord);
+      isValid &= type.minRange <= range && range <= type.maxRange;
+
+      if( isValid )
+      {
+        if( Utils.enqueueMoveEvent(gameMap, actor, movePath, flareEvents) )
+        {
+          // No surprises in the fog. Resolve defoggination.
+          GameEvent event = new FlareEvent(actor, launchLocation, type.radius);
+          flareEvents.add(event);
+        }
+      }
+      return flareEvents;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Launch a flare to %s with %s after moving to %s]",
+          launchLocation, actor.toStringWithLocation(), moveCoord );
+    }
+
+    @Override
+    public UnitActionType getType()
+    {
+      return type;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return moveCoord;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return launchLocation;
+    }
+  }
+
 }

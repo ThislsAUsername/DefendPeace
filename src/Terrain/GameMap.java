@@ -19,14 +19,10 @@ public abstract class GameMap implements Serializable
     mapHeight = h;
   }
   
-  /**
-   * Returns true if (x,y) lies within the GameMap, false else.
-   */
+  /** Returns true if (x,y) lies within the GameMap, false else. */
   public abstract boolean isLocationValid(XYCoord coords);
 
-  /**
-   * Returns true if (x,y) lies within the GameMap, false else.
-   */
+  /** Returns true if (x,y) lies within the GameMap, false else. */
   public abstract boolean isLocationValid(int x, int y);
 
   /** Returns the Environment of the specified tile, or null if that location does not exist. */
@@ -55,27 +51,23 @@ public abstract class GameMap implements Serializable
   /** Returns true if no unit (excluding 'unit') is in the specified Location. */
   public abstract boolean isLocationEmpty(Unit unit, int x, int y);
 
-  /**
-   * Returns true if the location lies outside the GameMap.
-   */
+  /** Returns true if the location lies outside the GameMap. */
   public abstract boolean isLocationFogged(XYCoord coord);
   public abstract boolean isLocationFogged(int x, int y);
 
-  /**
-   * Resets fog, if applicable
-   */
+  /** Resets fog, if applicable */
   public void resetFog()
   {}
 
-  /**
-   * Reveals fog around the given unit, if applicable
-   */
+  /** Reveals fog around the given unit, if applicable */
   public void revealFog(Unit scout)
   {}
 
-  /**
-   * Reveals fog along the movement path, if applicable
-   */
+  /** Reveals fog along the movement path, if applicable */
   public void revealFog(Unit scout, Path movepath)
+  {}
+
+  /** Reveals a single tile of fog */
+  public void revealFog(XYCoord coord, boolean piercing)
   {}
 }

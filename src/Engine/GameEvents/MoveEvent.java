@@ -71,7 +71,7 @@ public class MoveEvent implements GameEvent
       }
       else
       {
-        System.out.println("WARNING! Unable to move " + unit.model.type + " to (" + endpoint.x + ", " + endpoint.y + ")");
+        System.out.println("WARNING! Unable to move " + unit.model.name + " to (" + endpoint.x + ", " + endpoint.y + ")");
       }
     }
   }
@@ -85,6 +85,6 @@ public class MoveEvent implements GameEvent
   @Override
   public XYCoord getEndPoint()
   {
-    return new XYCoord(unitPath.getEnd().x, unitPath.getEnd().y);
+    return unitPath.getEndCoord();
   }
 }

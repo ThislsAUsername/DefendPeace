@@ -6,28 +6,50 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
-import Engine.GameAction;
 import Engine.UnitActionType;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.Location;
+import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.MoveTypes.MoveType;
-import Units.Weapons.WeaponModel;
 
 /**
  * Defines the invariant characteristics of a unit. One UnitModel can be shared across many instances of that Unit type.
  */
-public class UnitModel implements Serializable
+public abstract class UnitModel implements Serializable
 {
   private static final long serialVersionUID = 1L;
 
-  public enum UnitEnum
+  /**
+   * Defines the core types of units we expect to be in any given unit set.
+   * Unit sets should have no less than one of each.
+   * Unit sets should order models such that the most "sensible" type (generally cheapest, land) is the first type of a given role.
+   */
+  public enum UnitRoleEnum
   {
     INFANTRY, MECH,
-    RECON, TANK, MD_TANK, NEOTANK, MEGATANK,
-    APC, ARTILLERY, ROCKETS, PIPERUNNER, ANTI_AIR, MOBILESAM,
-    FIGHTER, BOMBER, STEALTH, STEALTH_HIDE, B_COPTER, T_COPTER, BBOMB,
-    CARRIER, BBOAT, BATTLESHIP, CRUISER, LANDER, SUB, SUB_SUB
+    RECON, ASSAULT,
+    SIEGE, ANTI_AIR,
+    AIR_ASSAULT, AIR_SUPERIORITY,
+    TRANSPORT,
   };
+
+  private static ArrayList<String> unitRoleIDs = null;
+  public static ArrayList<String> getUnitRoleIDs()
+  {
+    if( null == unitRoleIDs )
+    {
+      unitRoleIDs = new ArrayList<String>();
+      for( UnitRoleEnum role : UnitRoleEnum.values() )
+        unitRoleIDs.add(standardizeID(role.toString()));
+    }
+    return unitRoleIDs;
+  }
+
+  public static String standardizeID(String input)
+  {
+    return input.toLowerCase().replaceAll(" ", "_").replaceAll("-", "_");
+  }
 
   // Subs are ships unless they're submerged.
   public enum ChassisEnum
@@ -36,12 +58,15 @@ public class UnitModel implements Serializable
   };
 
   public String name;
-  public UnitEnum type;
+  public UnitRoleEnum role;
   public ChassisEnum chassis;
   private int moneyCost = 9001;
   public int moneyCostAdjustment = 0;
+  public double abilityPowerValue = 0;
+  public int maxAmmo;
   public int maxFuel;
   public int idleFuelBurn;
+  public int maxMaterials = 0;
   public int movePower;
   public int visionRange;
   public int visionRangePiercing = 1;
@@ -49,45 +74,47 @@ public class UnitModel implements Serializable
   public MoveType propulsion;
   public ArrayList<UnitActionType> possibleActions = new ArrayList<UnitActionType>();
   public Set<TerrainType> healableHabs;
-  public ArrayList<WeaponModel> weaponModels = new ArrayList<WeaponModel>();
+  public ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();
 
   public int maxHP;
   public int holdingCapacity;
-  public Vector<UnitEnum> holdables;
+  public Vector<ChassisEnum> holdables;
   private int COstr;
   private int COdef;
   public double COcost = 1.0;
 
-  public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] weapons)
+  public UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
+      MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] pWeapons, double powerValue)
   {
-    this(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion);
+    this(pName, pRole, pChassis, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, powerValue);
 
     for( UnitActionType action : actions )
     {
       possibleActions.add(action);
     }
-    for( WeaponModel action : weapons )
+    for( WeaponModel wm : pWeapons )
     {
-      weaponModels.add(new WeaponModel(action));
+      weapons.add(wm.clone());
     }
   }
 
-  public UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> weapons)
+  public UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
+      MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> pWeapons, double powerValue)
   {
-    this(pName, pType, pChassis, cost, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion);
+    this(pName, pRole, pChassis, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, powerValue);
     possibleActions.addAll(actions);
-    weaponModels = weapons;
+    weapons = pWeapons;
   }
 
-  private UnitModel(String pName, UnitEnum pType, ChassisEnum pChassis, int cost, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion)
+  private UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
+      MoveType pPropulsion, double powerValue)
   {
     name = pName;
-    type = pType;
+    role = pRole;
     chassis = pChassis;
     moneyCost = cost;
+    maxAmmo = pAmmoMax;
+    abilityPowerValue = powerValue;
     maxFuel = pFuelMax;
     idleFuelBurn = pIdleFuelBurn;
     visionRange = pVision;
@@ -106,7 +133,7 @@ public class UnitModel implements Serializable
     COstr = 100;
     COdef = 100;
     holdingCapacity = 0;
-    holdables = new Vector<UnitEnum>();
+    holdables = new Vector<ChassisEnum>();
   }
 
   /**
@@ -117,27 +144,11 @@ public class UnitModel implements Serializable
    */
   public static UnitModel clone(UnitModel other)
   {
-    // Make a copy of the weapons used by the other model.
-    ArrayList<WeaponModel> weaponModels = null;
-    if( other.weaponModels != null )
-    {
-      weaponModels = new ArrayList<WeaponModel>();
-      for( WeaponModel weapon : other.weaponModels )
-      {
-        weaponModels.add(new WeaponModel(weapon));
-      }
-    }
-
-    // Create a new model with the given attributes.
-    UnitModel newModel = new UnitModel(other.name, other.type, other.chassis, other.getCost(), other.maxFuel, other.idleFuelBurn, other.visionRange,
-        other.movePower, new MoveType(other.propulsion), other.possibleActions, weaponModels);
-
-    // Duplicate the other model's transporting abilities.
-    newModel.holdingCapacity = other.holdingCapacity;
-    newModel.holdables.addAll(other.holdables);
-
-    return newModel;
+    return other.clone();
   }
+  /** Performs a deep copy of the UnitModel in question */
+  @Override
+  public abstract UnitModel clone();
   
   public int getCost()
   {
@@ -180,11 +191,14 @@ public class UnitModel implements Serializable
   /** Provides a hook for inheritors to supply turn-initialization actions to a unit.
    * @param self Assumed to be a Unit of the model's type.
    */
-  public ArrayList<GameAction> getTurnInitActions(Unit self)
+  public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
   {
     // Most Units don't have any; specific UnitModel types can override.
-    return new ArrayList<GameAction>();
+    return new GameEventQueue();
   }
+
+  /** Calls the appropriate type-specific override of getDamage() on the input WeaponModel */
+  public abstract double getDamageRedirect(WeaponModel wm);
 
   /**
    * @return True if this UnitModel has at least one weapon with a minimum range of 1.
@@ -192,9 +206,9 @@ public class UnitModel implements Serializable
   public boolean hasDirectFireWeapon()
   {
     boolean hasDirect = false;
-    if(weaponModels != null && weaponModels.size() > 0)
+    if(weapons != null && weapons.size() > 0)
     {
-      for( WeaponModel wm : weaponModels )
+      for( WeaponModel wm : weapons )
       {
         if( wm.minRange == 1 )
         {
@@ -212,7 +226,7 @@ public class UnitModel implements Serializable
   public boolean hasImmobileWeapon()
   {
     boolean hasSiege = false;
-    for( WeaponModel wm : weaponModels )
+    for( WeaponModel wm : weapons )
     {
       if( !wm.canFireAfterMoving )
       {

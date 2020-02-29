@@ -314,24 +314,25 @@ public class SpriteLibrary
 
   private static class UnitSpriteSetKey
   {
-    public final UnitModel.UnitEnum unitTypeKey;
+    public final String unitTypeKey;
     public final Faction factionKey;
     public final Color colorKey;
     private static ArrayList<UnitSpriteSetKey> instances = new ArrayList<UnitSpriteSetKey>();
 
-    private UnitSpriteSetKey(UnitModel.UnitEnum unitType, Faction faction, Color color)
+    private UnitSpriteSetKey(String unitType, Faction faction, Color color)
     {
       unitTypeKey = unitType;
       factionKey = faction;
       colorKey = color;
     }
 
-    public static UnitSpriteSetKey instance(UnitModel.UnitEnum unitType, Faction faction, Color color)
+    public static UnitSpriteSetKey instance(String unitType, Faction faction, Color color)
     {
       UnitSpriteSetKey key = null;
+      String stdType = UnitModel.standardizeID(unitType);
       for( int i = 0; i < instances.size(); ++i )
       {
-        if( instances.get(i).unitTypeKey == unitType && instances.get(i).factionKey == faction && instances.get(i).colorKey == color)
+        if( instances.get(i).unitTypeKey.equals(stdType) && instances.get(i).factionKey == faction && instances.get(i).colorKey == color)
         {
           key = instances.get(i);
           break;
@@ -339,7 +340,7 @@ public class SpriteLibrary
       }
       if( key == null )
       {
-        key = new UnitSpriteSetKey(unitType, faction, color);
+        key = new UnitSpriteSetKey(stdType, faction, color);
         instances.add(key);
       }
       return key;
@@ -348,10 +349,10 @@ public class SpriteLibrary
 
   public static UnitSpriteSet getMapUnitSpriteSet(Unit unit)
   {
-    return getMapUnitSpriteSet(unit.model.type, unit.CO.faction, unit.CO.myColor);
+    return getMapUnitSpriteSet(unit.model.name, unit.CO.faction, unit.CO.myColor);
   }
 
-  public static UnitSpriteSet getMapUnitSpriteSet(UnitModel.UnitEnum type, Faction faction, Color color)
+  public static UnitSpriteSet getMapUnitSpriteSet(String type, Faction faction, Color color)
   {
     UnitSpriteSetKey key = UnitSpriteSetKey.instance(type, faction, color);
     if( !mapUnitSpriteSetMap.containsKey(key) )
@@ -374,11 +375,11 @@ public class SpriteLibrary
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
 
-  private static String getMapUnitSpriteFilename(UnitModel.UnitEnum unitType, String faction)
+  private static String getMapUnitSpriteFilename(String unitType, String faction)
   {
     StringBuffer spriteFile = new StringBuffer();
     spriteFile.append("res/unit/faction/").append(faction).append("/");
-    spriteFile.append(unitType.toString().toLowerCase()).append("_map.png");
+    spriteFile.append(UnitModel.standardizeID(unitType)).append("_map.png");
     return spriteFile.toString();
   }
 

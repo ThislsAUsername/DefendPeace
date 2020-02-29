@@ -9,6 +9,7 @@ public class GameActionSet
   private ArrayList<GameAction> actionOptions;
   private OptionSelector selector;
   private boolean isTargetRequired;
+  public boolean useFreeSelect = false;
 
   public GameActionSet(GameAction action, boolean requireTarget)
   {

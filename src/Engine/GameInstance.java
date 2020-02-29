@@ -299,7 +299,7 @@ public class GameInstance implements Serializable
     return load;
   }
   
-  public void writeSave()
+  public String writeSave()
   {
     String filename = "save/" + saveFile; // "svp" for "SaVe Peace"
     new File("save/").mkdirs(); // make sure we don't freak out if the directory's not there
@@ -315,5 +315,7 @@ public class GameInstance implements Serializable
     {
       System.out.println(ex.toString());
     }
+
+    return filename;
   }
 }

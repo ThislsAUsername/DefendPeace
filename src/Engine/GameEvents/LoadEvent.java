@@ -32,14 +32,14 @@ public class LoadEvent implements GameEvent
   @Override
   public void performEvent(MapMaster gameMap)
   {
-    if( null != unitTransport && unitTransport.hasCargoSpace(unitCargo.model.type) )
+    if( null != unitTransport && unitTransport.hasCargoSpace(unitCargo.model.chassis) )
     {
       gameMap.removeUnit(unitCargo);
       unitTransport.heldUnits.add(unitCargo);
     }
     else
     {
-      System.out.println("WARNING! Cannot load " + unitCargo.model.type + " onto " + unitTransport.model.type );
+      System.out.println("WARNING! Cannot load " + unitCargo.model.name + " onto " + unitTransport.model.name );
     }
   }
 

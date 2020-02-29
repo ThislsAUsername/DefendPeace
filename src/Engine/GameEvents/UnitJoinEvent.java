@@ -55,7 +55,7 @@ public class UnitJoinEvent implements GameEvent
     }
     else
     {
-      System.out.println("WARNING! Cannot join " + unitDonor.model.type + " with " + unitRecipient.model.type );
+      System.out.println("WARNING! Cannot join " + unitDonor.model.name + " with " + unitRecipient.model.name );
     }
   }
 

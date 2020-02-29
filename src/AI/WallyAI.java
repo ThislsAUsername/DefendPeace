@@ -28,9 +28,8 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
+import Units.WeaponModel;
 import Units.MoveTypes.MoveType;
-import Units.Weapons.Weapon;
-import Units.Weapons.WeaponModel;
 
 /**
  *  Wally values units based on firepower and the area they can threaten.
@@ -134,7 +133,7 @@ public class WallyAI implements AIController
     // init all move multipliers before powers come into play
     for( Commander co : map.commanders )
     {
-      for( UnitModel model : co.unitModels.values() )
+      for( UnitModel model : co.unitModels )
       {
         getEffectiveMove(model);
       }
@@ -364,7 +363,7 @@ public class WallyAI implements AIController
       if( actions.isEmpty() )
       {
         Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
-        for( UnitModel um : myCo.unitModels.values() )
+        for( UnitModel um : myCo.unitModels )
         {
           threatMap.put(um, new HashMap<XYCoord, Double>());
           for( Commander co : unitLists.keySet() )
@@ -521,15 +520,7 @@ public class WallyAI implements AIController
     ArrayList<XYCoord> goals = new ArrayList<XYCoord>();
 
     boolean shouldResupply = (unit.getHP() < unit.model.maxHP) || (unit.fuel < unit.model.maxFuel*UNIT_REFUEL_THRESHHOLD);
-    if( !shouldResupply )
-    {
-      // Resupply also if we need ammo.
-      for( Weapon weap : unit.weapons )
-      {
-        if( weap.ammo <= weap.model.maxAmmo * UNIT_REARM_THRESHHOLD )
-          shouldResupply = true;
-      }
-    }
+    shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHHOLD;
 
     if( shouldResupply )
     {
@@ -639,7 +630,7 @@ public class WallyAI implements AIController
         // This will allow us to navigate around large obstacles that require us to move away
         // from our intended long-term goal.
         path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
-        goal = new XYCoord(path.getEnd().x, path.getEnd().y); // Set the last location as our goal.
+        goal = path.getEndCoord(); // Set the last location as our goal.
 
 //        log(String.format("    Intermediate waypoint: %s", goal));
 
@@ -701,7 +692,7 @@ public class WallyAI implements AIController
 
   private boolean isSafe(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc)
   {
-    Double threat = threatMap.get(myCo.getUnitModel(unit.model.type)).get(xyc);
+    Double threat = threatMap.get(unit.model).get(xyc);
     int threshhold = unit.model.hasDirectFireWeapon() ? DIRECT_THREAT_THRESHHOLD : INDIRECT_THREAT_THRESHHOLD;
     return (null == threat || threshhold > threat);
   }
@@ -861,7 +852,7 @@ public class WallyAI implements AIController
 
     log("Evaluating Production needs");
     int budget = myCo.money;
-    UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+    UnitModel infModel = myCo.getUnitModel(UnitModel.UnitRoleEnum.INFANTRY);
 
     // Get a count of enemy forces.
     Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
@@ -940,7 +931,7 @@ public class WallyAI implements AIController
         UnitModel idealCounter = availableUnitModels.get(0);
         availableUnitModels.remove(idealCounter); // Make sure we don't try to build two rounds of the same thing in one turn.
         // I only want combat units, since I don't understand transports
-        if( !idealCounter.weaponModels.isEmpty() )
+        if( !idealCounter.weapons.isEmpty() )
         {
           log(String.format("  buy %s?", idealCounter));
 
@@ -1038,7 +1029,7 @@ public class WallyAI implements AIController
   public double findEffectiveness(UnitModel model, UnitModel target)
   {
     double theirRange = 0;
-    for( WeaponModel wm : target.weaponModels )
+    for( WeaponModel wm : target.weapons )
     {
       double range = wm.maxRange;
       if( wm.canFireAfterMoving )
@@ -1046,9 +1037,9 @@ public class WallyAI implements AIController
       theirRange = Math.max(theirRange, range);
     }
     double counterPower = 0;
-    for( WeaponModel wm : model.weaponModels )
+    for( WeaponModel wm : model.weapons )
     {
-      double damage = WeaponModel.getDamage(wm, target);
+      double damage = wm.getDamage(target);
       double myRange = wm.maxRange;
       if( wm.canFireAfterMoving )
         myRange += getEffectiveMove(model);

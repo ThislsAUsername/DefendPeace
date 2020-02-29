@@ -5,8 +5,8 @@ import java.util.ArrayList;
 
 import Terrain.GameMap;
 import Units.Unit;
-import Units.UnitModel.UnitEnum;
-import Units.Weapons.Weapon;
+import Units.UnitModel;
+import Units.WeaponModel;
 
 public abstract class UnitActionType implements Serializable
 {
@@ -44,18 +44,18 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         // Evaluate attack options.
         {
           boolean moved = !moveLocation.equals(actor.x, actor.y);
           ArrayList<GameAction> attackOptions = new ArrayList<GameAction>();
-          for( Weapon wpn : actor.weapons )
+          for( WeaponModel wpn : actor.model.weapons )
           {
             // Evaluate this weapon for targets if it has ammo, and if either the weapon
             // is mobile or we don't care if it's mobile (because we aren't moving).
-            if( wpn.ammo > 0 && (!moved || wpn.model.canFireAfterMoving) )
+            if( wpn.loaded(actor) && (!moved || wpn.canFireAfterMoving) )
             {
               ArrayList<XYCoord> locations = Utils.findTargetsInRange(map, actor.CO, moveLocation, wpn);
 
@@ -100,7 +100,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         if( actor.CO.isEnemy(map.getLocation(moveLocation).getOwner()) && map.getLocation(moveLocation).isCaptureable() )
@@ -134,7 +134,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         return new GameActionSet(new GameAction.WaitAction(actor, movePath), false);
@@ -165,11 +165,11 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       Unit resident = map.getLocation(moveLocation).getResident();
       if( !ignoreResident && resident != null )
       {
-        if( resident.hasCargoSpace(actor.model.type) )
+        if( resident.hasCargoSpace(actor.model.chassis) )
         {
           return new GameActionSet(new GameAction.LoadAction(map, actor, movePath), false);
         }
@@ -200,11 +200,12 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       Unit resident = map.getLocation(moveLocation).getResident();
       if( !ignoreResident && resident != null )
       {
-        if( (resident.model.type == actor.model.type) && resident != actor && (resident.getHP() < resident.model.maxHP) )
+        // TODO: Consider if and how off-CO joins should be allowed if tags ever happens
+        if( resident.model.equals(actor.model) && resident != actor && (resident.getHP() < resident.model.maxHP) )
         {
           return new GameActionSet(new GameAction.UnitJoinAction(map, actor, movePath), false);
         }
@@ -235,7 +236,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         if( actor.heldUnits.size() > 0 )
@@ -284,7 +285,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         // Search for a unit in resupply range.
@@ -329,7 +330,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         ArrayList<GameAction> repairOptions = new ArrayList<GameAction>();
@@ -381,10 +382,10 @@ public abstract class UnitActionType implements Serializable
   public static class Transform extends UnitActionType
   {
     private static final long serialVersionUID = 1L;
-    public final UnitEnum destinationType;
+    public final UnitModel destinationType;
     public final String name;
     
-    public Transform(UnitEnum type, String displayName)
+    public Transform(UnitModel type, String displayName)
     {
       destinationType = type;
       name = displayName;
@@ -393,7 +394,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         return new GameActionSet(new GameAction.TransformAction(actor, movePath, this), false);
@@ -428,7 +429,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         return new GameActionSet(new GameAction.ExplodeAction(actor, movePath, this), true); // We don't really need a target, but I want a confirm dialogue
@@ -455,7 +456,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
+      XYCoord moveLocation = movePath.getEndCoord();
       if( moveLocation.equals(actor.x, actor.y) )
       {
         return new GameActionSet(new GameAction.UnitDeleteAction(actor), true); // We don't really need a target, but I want a confirm dialogue
@@ -469,4 +470,81 @@ public abstract class UnitActionType implements Serializable
       return "DELETE";
     }
   }
+
+  public static class UnitProduce extends UnitActionType
+  {
+    private static final long serialVersionUID = 1L;
+    final UnitModel typeToBuild;
+    public UnitProduce(UnitModel type)
+    {
+      typeToBuild = type;
+    }
+
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    {
+      XYCoord moveLocation = movePath.getEndCoord();
+      if( moveLocation.equals(actor.x, actor.y) &&
+          actor.hasCargoSpace(typeToBuild.chassis) &&
+          actor.CO.money > typeToBuild.getCost() &&
+          actor.materials > 0 )
+      {
+        return new GameActionSet(new GameAction.UnitProduceAction(this, actor), false);
+      }
+      return null;
+    }
+
+    @Override
+    public String name()
+    {
+      return "BUILD";
+    }
+  }
+
+  public static class Flare extends UnitActionType
+  {
+    private static final long serialVersionUID = 1L;
+    public int minRange, maxRange, radius;
+    public Flare(int minRange, int maxRange, int radius)
+    {
+      this.minRange = minRange;
+      this.maxRange = maxRange;
+      this.radius = radius;
+    }
+
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    {
+      XYCoord moveLocation = movePath.getEndCoord();
+      if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
+      {
+        if ( actor.ammo > 0 && moveLocation.equals(actor.x, actor.y))
+        {
+          ArrayList<GameAction> targetOptions = new ArrayList<GameAction>();
+
+          ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, moveLocation, minRange, maxRange);
+
+          for( XYCoord loc : locations )
+            targetOptions.add(new GameAction.FlareAction(this, actor, movePath, loc));
+
+          // Only add this action set if we actually have a target
+          if( !targetOptions.isEmpty() )
+          {
+            // Bundle our attack options into an action set
+            GameActionSet actions = new GameActionSet(targetOptions);
+            actions.useFreeSelect = true;
+            return actions;
+          }
+        }
+      }
+      return null;
+    }
+
+    @Override
+    public String name()
+    {
+      return "FLARE";
+    }
+  }
+
 }

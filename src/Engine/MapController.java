@@ -369,18 +369,21 @@ public class MapController implements IController, GameInputHandler.StateChanged
   {
     GameInputHandler.InputType inputType = myGameInputHandler.getInputType();
     myGameInputOptionSelector = myGameInputHandler.getOptionSelector();
+
     myGame.gameMap.clearAllHighlights();
+    // Set the target-location highlights.
+    ArrayList<XYCoord> options = myGameInputHandler.getCoordinateOptions();
+    if ( null != options)
+      for( XYCoord xyc : options )
+      {
+        myGame.gameMap.getLocation(xyc).setHighlight(true);
+      }
+
     currentMenu = null;
 
     switch (inputType)
     {
       case CONSTRAINED_TILE_SELECT:
-        // Set the target-location highlights.
-        ArrayList<XYCoord> targets = myGameInputHandler.getCoordinateOptions();
-        for( XYCoord targ : targets )
-        {
-          myGame.gameMap.getLocation(targ).setHighlight(true);
-        }
         // Create an option selector to keep track of where we are.
         myGame.setCursorLocation(myGameInputHandler.getCoordinateOptions().get(myGameInputOptionSelector.getSelectionNormalized()));
         contemplatedAction.aiming = true;
@@ -405,12 +408,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
         if( null != contemplatedAction.actor )
         {
           myGame.setCursorLocation(contemplatedAction.actor.x, contemplatedAction.actor.y);
-        }
-        // Highlight all possible destinations.
-        ArrayList<XYCoord> moveLocations = myGameInputHandler.getCoordinateOptions();
-        for( XYCoord xy : moveLocations )
-        {
-          myGame.gameMap.getLocation(xy.xCoord, xy.yCoord).setHighlight(true);
         }
 
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.

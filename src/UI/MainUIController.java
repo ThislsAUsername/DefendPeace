@@ -117,8 +117,8 @@ public class MainUIController implements IController
                     // If everything looks ducky, add it to the list. Don't check it twice.
                     saves.add(new SaveInfo(filepath, filename, prettyName));
                   else
-                    // Throw an tilde in there to tell the user "yeah, we see it, and it ain't gonna work."
-                    saves.add(new SaveInfo(filepath, filename, "~" + prettyName));
+                    // Throw an extra mark in there to tell the user "yeah, we see it, and it ain't gonna work."
+                    saves.add(new SaveInfo(filepath, filename, "!" + prettyName));
                 }
               }
             }

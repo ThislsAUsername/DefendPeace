@@ -23,8 +23,7 @@ import Terrain.MapWindow;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.UnitEnum;
-import Units.Weapons.Weapon;
+import Units.UnitModel.UnitRoleEnum;
 
 public class TestGameEvent extends TestCase
 {
@@ -70,8 +69,8 @@ public class TestGameEvent extends TestCase
     boolean testPassed = true;
 
     // Add our combatants
-    Unit infA = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 1, 1);
-    Unit infB = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 1, 2);
+    Unit infA = addUnit(testMap, testCo1, UnitRoleEnum.INFANTRY, 1, 1);
+    Unit infB = addUnit(testMap, testCo2, UnitRoleEnum.INFANTRY, 1, 2);
 
     BattleEvent event = new BattleEvent(infA, infB, 2, 2, testMap);
     event.performEvent(testMap);
@@ -95,7 +94,7 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(city.getOwner() == null, "    City should not be owned by any CO yet.");
 
     // Add a unit
-    Unit infA = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 2, 2);
+    Unit infA = addUnit(testMap, testCo1, UnitRoleEnum.INFANTRY, 2, 2);
     testPassed &= validate(infA.getCaptureProgress() == 0, "    Infantry capture progress is not 0.");
 
     // Create a new event, and ensure it does not predict full capture in one turn.
@@ -150,7 +149,7 @@ public class TestGameEvent extends TestCase
 
     XYCoord coords = new XYCoord(13, 8);
     int startFunds = testCo1.money = 9001;
-    CreateUnitEvent event = new CreateUnitEvent(testCo1, testCo1.getUnitModel(UnitEnum.INFANTRY), coords);
+    CreateUnitEvent event = new CreateUnitEvent(testCo1, testCo1.getUnitModel(UnitRoleEnum.INFANTRY), coords);
 
     testPassed &= validate(testMap.getLocation(coords).getResident() == null, "    Location is already occupied.");
 
@@ -158,7 +157,7 @@ public class TestGameEvent extends TestCase
 
     Unit resident = testMap.getLocation(coords).getResident();
     testPassed &= validate(resident != null, "    Failed to create a unit.");
-    testPassed &= validate(resident.model.type == UnitEnum.INFANTRY, "    Unit created with wrong type.");
+    testPassed &= validate(resident.model.role == UnitRoleEnum.INFANTRY, "    Unit created with wrong type.");
     testPassed &= validate(resident.CO == testCo1, "    Unit created with wrong type.");
     // TODO: Consider moving cost into a new TransferFundsEvent.
     testPassed &= validate(testCo1.money == (startFunds - resident.model.getCost()), "    Unit cost not accounted correctly.");
@@ -174,9 +173,9 @@ public class TestGameEvent extends TestCase
     boolean testPassed = true;
 
     // Add some units.
-    Unit inf = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 2, 2);
-    Unit mech = addUnit(testMap, testCo1, UnitEnum.MECH, 2, 3);
-    Unit apc = addUnit(testMap, testCo1, UnitEnum.APC, 3, 2);
+    Unit inf = addUnit(testMap, testCo1, UnitRoleEnum.INFANTRY, 2, 2);
+    Unit mech = addUnit(testMap, testCo1, UnitRoleEnum.MECH, 2, 3);
+    Unit apc = addUnit(testMap, testCo1, UnitRoleEnum.TRANSPORT, 3, 2);
 
     // Try to load the infantry onto the mech unit, and ensure it fails.
     new LoadEvent(inf, mech).performEvent(testMap);
@@ -189,7 +188,7 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(testMap.getLocation(2, 2).getResident() == null, "   Infantry is still at his old map location.");
     testPassed &= validate(-1 == inf.x && -1 == inf.y, "    Infantry does not think he is in the transport.");
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC is not holding 1 unit, but should be holding Infantry.");
-    testPassed &= validate(apc.heldUnits.get(0).model.type == UnitModel.UnitEnum.INFANTRY,
+    testPassed &= validate(apc.heldUnits.get(0).model.role == UnitModel.UnitRoleEnum.INFANTRY,
         "    Held unit is not type INFANTRY, but should be.");
 
     // Now see if we can also load the mech into the APC; verify this fails.
@@ -224,9 +223,9 @@ public class TestGameEvent extends TestCase
     boolean testPassed = true;
 
     // Add some units.
-    Unit inf = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 2, 2);
-    Unit mech = addUnit(testMap, testCo1, UnitEnum.MECH, 2, 3);
-    Unit apc = addUnit(testMap, testCo1, UnitEnum.APC, 3, 2);
+    Unit inf = addUnit(testMap, testCo1, UnitRoleEnum.INFANTRY, 2, 2);
+    Unit mech = addUnit(testMap, testCo1, UnitRoleEnum.MECH, 2, 3);
+    Unit apc = addUnit(testMap, testCo1, UnitRoleEnum.TRANSPORT, 3, 2);
 
     Path path = new Path(1.0); // TODO: Why do we have to provide a speed here?
     path.addWaypoint(3, 3); // we need two waypoints to not break compatibility with MoveEvent, since it assumes the first waypoint isn't used.
@@ -269,8 +268,8 @@ public class TestGameEvent extends TestCase
     boolean testPassed = true;
 
     // Add some units.
-    Unit inf = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 2, 2);
-    Unit mech = addUnit(testMap, testCo1, UnitEnum.MECH, 2, 3);
+    Unit inf = addUnit(testMap, testCo1, UnitRoleEnum.INFANTRY, 2, 2);
+    Unit mech = addUnit(testMap, testCo1, UnitRoleEnum.MECH, 2, 3);
     mech.damageHP(5); // Just for some variation.
 
     // Knock 'em dead.
@@ -295,18 +294,14 @@ public class TestGameEvent extends TestCase
     boolean testPassed = true;
 
     // Add some units.
-    Unit apc = addUnit(testMap, testCo1, UnitEnum.APC, 1, 3);
-    Unit mech = addUnit(testMap, testCo1, UnitEnum.MECH, 1, 4);
-    Unit mech2 = addUnit(testMap, testCo1, UnitEnum.MECH, 3, 3);
-    Unit recon = addUnit(testMap, testCo1, UnitEnum.RECON, 1, 8); // On the HQ
+    Unit apc = addUnit(testMap, testCo1, UnitRoleEnum.TRANSPORT, 1, 3);
+    Unit mech = addUnit(testMap, testCo1, UnitRoleEnum.MECH, 1, 4);
+    Unit mech2 = addUnit(testMap, testCo1, UnitRoleEnum.MECH, 3, 3);
+    Unit recon = addUnit(testMap, testCo1, UnitRoleEnum.RECON, 1, 8); // On the HQ
 
     // Take away ammo/fuel.
-    int numWeapons = mech.weapons.size();
-    for( int i = 0; i < numWeapons; ++i )
-    {
-      mech.weapons.get(i).ammo = 0;
-      mech2.weapons.get(i).ammo = 0;
-    }
+    mech.ammo = 0;
+    mech2.ammo = 0;
     apc.fuel = apc.model.maxFuel / 2;
     mech.fuel = 0;
     mech2.fuel = 0;
@@ -316,17 +311,12 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(mech.fuel == 0, "    Mech still has fuel, but shouldn't.");
     testPassed &= validate(mech2.fuel == 0, "    Mech2 still has fuel, but shouldn't.");
     testPassed &= validate(recon.fuel == 0, "    Recon still has fuel, but shouldn't.");
-    for( int i = 0; i < numWeapons; ++i )
-    {
-      Weapon wpn = mech.weapons.get(i);
-      testPassed &= validate((wpn.ammo == 0),
-          "    Mech weapon " + wpn.model.toString() + "  still has " + wpn.ammo + " ammo, but should be empty.");
-      Weapon wpn2 = mech2.weapons.get(i);
-      testPassed &= validate((wpn2.ammo == 0),
-          "    Mech2 weapon " + wpn2.model.toString() + "  still has " + wpn2.ammo + " ammo, but should be empty.");
-    }
+    testPassed &= validate((mech.ammo == 0),
+        "    Mech still has " + mech.ammo + " ammo, but should be empty.");
+    testPassed &= validate((mech2.ammo == 0),
+        "    Mech2 weapon still has " + mech2.ammo + " ammo, but should be empty.");
 
-    // Simulate a new turn for the APC/Recon; the apc should re-supply the mech, and the recon should re-supply from the  HQ.
+    // Simulate a new turn for the APC/Recon; the apc should re-supply the mech, and the recon should re-supply from the HQ.
     GameEventQueue events = new GameEventQueue();
     events.addAll(apc.initTurn(testMap));
     events.addAll(recon.initTurn(testMap));
@@ -344,13 +334,8 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(mech.fuel == mech.model.maxFuel, "    Mech should have max fuel after turn init, but doesn't.");
     testPassed &= validate(mech2.fuel == mech2.model.maxFuel, "    Mech2 should have max fuel after resupply, but doesn't.");
     testPassed &= validate(recon.fuel == recon.model.maxFuel, "    Recon should have max fuel after new turn, but doesn't.");
-    for( int i = 0; i < numWeapons; ++i )
-    {
-      Weapon wpn = mech.weapons.get(i);
-      testPassed &= validate((wpn.ammo == wpn.model.maxAmmo), "    Mech weapon should have max ammo after resupply.");
-      Weapon wpn2 = mech2.weapons.get(i);
-      testPassed &= validate((wpn2.ammo == wpn2.model.maxAmmo), "    Mech2 weapon should have max ammo after resupply.");
-    }
+    testPassed &= validate((mech.ammo == mech.model.maxAmmo), "    Mech should have max ammo after resupply.");
+    testPassed &= validate((mech2.ammo == mech2.model.maxAmmo), "    Mech2 should have max ammo after resupply.");
 
     // Clean up.
     testMap.removeUnit(apc);
@@ -436,9 +421,9 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(fac2.getOwner() == testCo2, "    Fac 2 should belong to CO 2.");
 
     // Grant some units to testCo2
-    Unit baddie1 = addUnit(testMap, testCo2, UnitEnum.INFANTRY, 13, 1);
-    Unit baddie2 = addUnit(testMap, testCo2, UnitEnum.MECH, 12, 1);
-    Unit baddie3 = addUnit(testMap, testCo2, UnitEnum.APC, 13, 2);
+    Unit baddie1 = addUnit(testMap, testCo2, UnitRoleEnum.INFANTRY, 13, 1);
+    Unit baddie2 = addUnit(testMap, testCo2, UnitRoleEnum.MECH, 12, 1);
+    Unit baddie3 = addUnit(testMap, testCo2, UnitRoleEnum.TRANSPORT, 13, 2);
 
     // Verify the units were added correctly.
     testPassed &= validate(testMap.getLocation(13, 1).getResident() == baddie1, "    Unit baddie1 is not where he belongs.");

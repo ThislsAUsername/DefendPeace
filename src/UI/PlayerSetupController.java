@@ -49,7 +49,8 @@ public class PlayerSetupController implements IController
     for(int co = 0; co < numCos; ++co)
     {
       // Set up our option selection framework
-      coSelectors[co] = new PlayerSetupInfo(co, CommanderLibrary.getCommanderList(), UIUtils.getCOColors(), UIUtils.getFactions(), AILibrary.getAIList());
+      coSelectors[co] = new PlayerSetupInfo(co, CommanderLibrary.getCommanderList(),
+          UIUtils.getCOColors(), UIUtils.getFactions(), AILibrary.getAIList());
     }
   }
 
@@ -109,7 +110,7 @@ public class PlayerSetupController implements IController
         {
           /////////////////////////////////////////////////////////////////////////////////////////////
           // We have locked in our selection. Stuff it into the GameBuilder and then kick off the game.
-          GameInstance newGame = gameBuilder.createGame(coSelectors);
+          GameInstance newGame = gameBuilder.createGame(gameBuilder.unitModelScheme, coSelectors);
 
           if( null != newGame )
           {

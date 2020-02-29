@@ -25,7 +25,7 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
-import Units.Weapons.Weapon;
+import Units.WeaponModel;
 
 /**
  * Muriel will Make Units Reactively, Informed by the Enemy Loadout.
@@ -86,7 +86,7 @@ public class Muriel implements AIController
   private void init(Commander[] allCos)
   {
     // Initialize UnitModel collections.
-    Collection<UnitModel> myUnitModels = myCo.unitModels.values();
+    Collection<UnitModel> myUnitModels = myCo.unitModels;
     enemyCos = new ArrayList<Commander>();
     Map<Commander, Collection<UnitModel> > otherUnitModels = new HashMap<Commander, Collection<UnitModel> >();
     for( Commander other : allCos )
@@ -101,7 +101,7 @@ public class Muriel implements AIController
     // Figure out what I and everyone else can build.
     for( Commander oCo : enemyCos )
     {
-      otherUnitModels.put(oCo, oCo.unitModels.values());
+      otherUnitModels.put(oCo, oCo.unitModels);
     }
 
     // Figure out unit matchups.
@@ -137,7 +137,7 @@ public class Muriel implements AIController
     if( null != umami ) return umami;
 
     double myDamage = 0;
-    Weapon myWeapon = myUnit.chooseWeapon(otherUnit.model, 1, false);
+    WeaponModel myWeapon = myUnit.chooseWeapon(otherUnit.model, 1, false);
     if( null != myWeapon )
     {
       BattleInstance.BattleParams params = new BattleInstance.BattleParams(myUnit, myWeapon,
@@ -147,7 +147,7 @@ public class Muriel implements AIController
 
     // Now go the other way.
     double otherDamage = 0;
-    Weapon otherWeapon = otherUnit.chooseWeapon(myUnit.model, 1, false);
+    WeaponModel otherWeapon = otherUnit.chooseWeapon(myUnit.model, 1, false);
     if( null != otherWeapon )
     {
       BattleInstance.BattleParams params = new BattleInstance.BattleParams(otherUnit, otherWeapon,
@@ -292,17 +292,12 @@ public class Muriel implements AIController
         shouldResupply = true;
       }
       // If we are out of ammo.
-      if( unit.weapons != null && unit.weapons.size() > 0 )
+      if( unit.ammo == 0 )
       {
-        for( Weapon weap : unit.weapons )
-        {
-          if(weap.ammo == 0)
-          {
-            log(String.format("%s is out of ammo.", unit.toStringWithLocation()));
-            shouldResupply = true;
-          }
-        }
+        log(String.format("%s is out of ammo.", unit.toStringWithLocation()));
+        shouldResupply = true;
       }
+
       if( shouldResupply )
       {
         ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
@@ -592,7 +587,7 @@ public class Muriel implements AIController
       if(useDamageRatio) log("  High funds - sorting units by damage ratio instead of cost effectiveness.");
 
       // If we are low on grunts, make sure we save money to build more.
-      UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+      UnitModel infModel = myCo.getUnitModel(UnitModel.UnitRoleEnum.INFANTRY);
       int costBuffer = 0;
       if( !myUnitCounts.containsKey(infModel) || (myUnitCounts.get(infModel) < (myCo.units.size() * INFANTRY_PROPORTION)) )
       {
@@ -740,7 +735,7 @@ public class Muriel implements AIController
     } // ~while( still choosing units to build )
 
     // Build infantry from any remaining facilities.
-    UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+    UnitModel infModel = myCo.getUnitModel(UnitModel.UnitRoleEnum.INFANTRY);
     while( (budget >= infModel.getCost()) && (CPI.availableUnitModels.contains(infModel)) )
     {
       Location loc = CPI.getLocationToBuild(infModel);
@@ -807,8 +802,8 @@ public class Muriel implements AIController
     {
       final int prime = 160091;
       int result = 1;
-      result = prime * result + first.type.ordinal();
-      result = prime * result + second.type.ordinal();
+      result = prime * result + first.name.hashCode();
+      result = prime * result + second.name.hashCode();
       return result;
     }
 
