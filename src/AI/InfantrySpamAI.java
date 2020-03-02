@@ -10,9 +10,10 @@ import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.Path;
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -131,7 +132,7 @@ public class InfantrySpamAI implements AIController
         for( GameActionSet actionSet : actionSets )
         {
           // See if we have the option to attack.
-          if( actionSet.getSelected().getType() == UnitActionType.ATTACK )
+          if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
           {
             actions.offer(actionSet.getSelected() );
             foundAction = true;
@@ -139,7 +140,7 @@ public class InfantrySpamAI implements AIController
           }
           
           // Otherwise, see if we have the option to capture.
-          if( actionSet.getSelected().getType() == UnitActionType.CAPTURE )
+          if( actionSet.getSelected().getType() == UnitActionFactory.CAPTURE )
           {
             actions.offer(actionSet.getSelected() );
             capturingProperties.add(coord);
@@ -176,7 +177,7 @@ public class InfantrySpamAI implements AIController
         {
           log("    Failed to find a path to a capturable property. Waiting");
           // We couldn't find a valid move point (are we on an island?). Just give up.
-          GameAction wait = new GameAction.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
+          GameAction wait = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
           actions.offer(wait);
           break;
         }
@@ -198,7 +199,7 @@ public class InfantrySpamAI implements AIController
         Utils.sortLocationsByDistance(goal, destinations);
         XYCoord destination = destinations.get(0);
         Path movePath = Utils.findShortestPath(unit, destination, gameMap);
-        GameAction move = new GameAction.WaitAction(unit, movePath);
+        GameAction move = new WaitLifecycle.WaitAction(unit, movePath);
         actions.offer(move);
         break;
       }

@@ -3,11 +3,11 @@ package Test;
 import CommandingOfficers.Cinder;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Venge;
-import Engine.GameAction;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
+import Engine.UnitActionLifecycles.BattleLifecycle;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
@@ -65,7 +65,7 @@ public class TestCombatMods extends TestCase
     Unit meaty = addUnit(testMap, venge, UnitModel.ASSAULT, 8, 4);
     
     // Poke the bear...
-    performGameAction(new GameAction.AttackAction(testMap, infActive, Utils.findShortestPath(infActive, 7, 3, testMap), 7, 4), testMap);
+    performGameAction(new BattleLifecycle.BattleAction(testMap, infActive, Utils.findShortestPath(infActive, 7, 3, testMap), 7, 4), testMap);
 
     // See how much damage meaty can do to our two contestants on offense...
     BattleSummary vengeful = CombatEngine.simulateBattleResults(meaty, infActive, testMap, 8, 3);

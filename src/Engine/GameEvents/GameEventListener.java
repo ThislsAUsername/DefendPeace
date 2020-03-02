@@ -12,6 +12,9 @@ import java.util.WeakHashMap;
 
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
+import Engine.UnitActionLifecycles.JoinLifecycle;
+import Engine.UnitActionLifecycles.LoadLifecycle;
+import Engine.UnitActionLifecycles.UnloadLifecycle;
 import Terrain.Environment.Weathers;
 import Terrain.Location;
 import Units.Unit;
@@ -71,12 +74,12 @@ public abstract class GameEventListener implements Serializable
   public void receiveCreateUnitEvent(Unit unit){};
   public void receiveCaptureEvent(Unit unit, Location location){};
   public void receiveCommanderDefeatEvent(CommanderDefeatEvent event){};
-  public void receiveLoadEvent(LoadEvent event){};
+  public void receiveLoadEvent(LoadLifecycle.LoadEvent event){};
   public void receiveMoveEvent(MoveEvent event){};
-  public void receiveUnitJoinEvent(UnitJoinEvent event){};
+  public void receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){};
   public void receiveResupplyEvent(ResupplyEvent event){};
   public void receiveUnitDieEvent(UnitDieEvent event){};
-  public void receiveUnloadEvent(UnloadEvent event){};
+  public void receiveUnloadEvent(UnloadLifecycle.UnloadEvent event){};
   public void receiveUnitTransformEvent(Unit unit, UnitModel oldType){};
   public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){};
   public void receiveWeatherChangeEvent(Weathers weather, int duration){};

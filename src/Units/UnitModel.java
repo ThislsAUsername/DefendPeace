@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.Location;
 import Terrain.MapMaster;
@@ -64,7 +64,7 @@ public abstract class UnitModel implements Serializable
   public int visionRangePiercing = 1;
   public boolean hidden = false;
   public MoveType propulsion;
-  public ArrayList<UnitActionType> possibleActions = new ArrayList<UnitActionType>();
+  public ArrayList<UnitActionFactory> possibleActions = new ArrayList<UnitActionFactory>();
   public Set<TerrainType> healableHabs = new HashSet<TerrainType>();
   public ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();
 
@@ -78,11 +78,11 @@ public abstract class UnitModel implements Serializable
   public int moneyCostAdjustment = 0;
 
   public UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] pWeapons, double powerValue)
+      MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] pWeapons, double powerValue)
   {
     this(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, powerValue);
 
-    for( UnitActionType action : actions )
+    for( UnitActionFactory action : actions )
     {
       possibleActions.add(action);
     }
@@ -93,7 +93,7 @@ public abstract class UnitModel implements Serializable
   }
 
   public UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> pWeapons, double powerValue)
+      MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> pWeapons, double powerValue)
   {
     this(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, powerValue);
     possibleActions.addAll(actions);
@@ -243,10 +243,10 @@ public abstract class UnitModel implements Serializable
     return name;
   }
 
-  public boolean hasActionType(UnitActionType UnitActionType)
+  public boolean hasActionType(UnitActionFactory UnitActionType)
   {
     boolean hasAction = false;
-    for( UnitActionType at : possibleActions )
+    for( UnitActionFactory at : possibleActions )
     {
       if( at == UnitActionType )
       {

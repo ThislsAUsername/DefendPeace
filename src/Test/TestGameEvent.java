@@ -7,16 +7,19 @@ import Engine.GameScenario;
 import Engine.Path;
 import Engine.Utils;
 import Engine.XYCoord;
-import Engine.GameEvents.BattleEvent;
-import Engine.GameEvents.CaptureEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
-import Engine.GameEvents.LoadEvent;
 import Engine.GameEvents.MoveEvent;
 import Engine.GameEvents.UnitDieEvent;
-import Engine.GameEvents.UnloadEvent;
+import Engine.UnitActionLifecycles.BattleLifecycle;
+import Engine.UnitActionLifecycles.CaptureLifecycle;
+import Engine.UnitActionLifecycles.JoinLifecycle;
+import Engine.UnitActionLifecycles.LoadLifecycle;
+import Engine.UnitActionLifecycles.ResupplyLifecycle;
+import Engine.UnitActionLifecycles.UnloadLifecycle;
+import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
@@ -71,7 +74,7 @@ public class TestGameEvent extends TestCase
     Unit infA = addUnit(testMap, testCo1, UnitModel.TROOP, 1, 1);
     Unit infB = addUnit(testMap, testCo2, UnitModel.TROOP, 1, 2);
 
-    BattleEvent event = new BattleEvent(infA, infB, 2, 2, testMap);
+    BattleLifecycle.BattleEvent event = new BattleLifecycle.BattleEvent(infA, infB, 2, 2, testMap);
     event.performEvent(testMap);
     testPassed &= validate(infB.getHP() < 10, "    Defender Was not damaged");
     testPassed &= validate(infA.getHP() < 10, "    Defender did not counter-attack");
@@ -97,7 +100,7 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(infA.getCaptureProgress() == 0, "    Infantry capture progress is not 0.");
 
     // Create a new event, and ensure it does not predict full capture in one turn.
-    CaptureEvent captureEvent = new CaptureEvent(infA, city);
+    CaptureLifecycle.CaptureEvent captureEvent = new CaptureLifecycle.CaptureEvent(infA, city);
     testPassed &= validate(captureEvent.willCapture() == false, "    Event incorrectly predicts capture will succeed.");
     // NOTE: The prediction will be unreliable after performing the event. I'm re-using it here for convenience, but
     //       GameEvents are really designed to be single-use.
@@ -112,10 +115,10 @@ public class TestGameEvent extends TestCase
 
     // Move the unit; he should lose his capture progress.
     infA.initTurn(testMap);
-    GameAction moveAction = new GameAction.WaitAction(infA, Utils.findShortestPath(infA, 1, 2, testMap));
+    GameAction moveAction = new WaitLifecycle.WaitAction(infA, Utils.findShortestPath(infA, 1, 2, testMap));
     performGameAction(moveAction, testMap);
     infA.initTurn(testMap);
-    GameAction moveAction2 = new GameAction.WaitAction(infA, Utils.findShortestPath(infA, 2, 2, testMap));
+    GameAction moveAction2 = new WaitLifecycle.WaitAction(infA, Utils.findShortestPath(infA, 2, 2, testMap));
     performGameAction(moveAction2, testMap);
 
     // 5, 10, 15
@@ -130,7 +133,7 @@ public class TestGameEvent extends TestCase
         "    Infantry capture progress should be 15, not " + infA.getCaptureProgress() + ".");
 
     // Recreate the captureEvent so we can check the prediction again.
-    captureEvent = new CaptureEvent(infA, city);
+    captureEvent = new CaptureLifecycle.CaptureEvent(infA, city);
     testPassed &= validate(captureEvent.willCapture() == true, "    Event incorrectly predicts failure to capture.");
     captureEvent.performEvent(testMap);
     testPassed &= validate(infA.getCaptureProgress() == 0, "    Infantry capture progress should be 0 again.");
@@ -177,13 +180,13 @@ public class TestGameEvent extends TestCase
     Unit apc = addUnit(testMap, testCo1, UnitModel.TRANSPORT, 3, 2);
 
     // Try to load the infantry onto the mech unit, and ensure it fails.
-    new LoadEvent(inf, mech).performEvent(testMap);
+    new LoadLifecycle.LoadEvent(inf, mech).performEvent(testMap);
     testPassed &= validate(testMap.getLocation(2, 2).getResident() == inf, "    Infantry should still be at (2, 2).");
     testPassed &= validate(2 == inf.x && 2 == inf.y, "    Infantry should still think he is at (2, 2).");
     testPassed &= validate(mech.heldUnits == null, "    Mech should not have holding capacity.");
 
     // Try to load the infantry into the APC, and make sure it works.
-    new LoadEvent(inf, apc).performEvent(testMap);
+    new LoadLifecycle.LoadEvent(inf, apc).performEvent(testMap);
     testPassed &= validate(testMap.getLocation(2, 2).getResident() == null, "   Infantry is still at his old map location.");
     testPassed &= validate(-1 == inf.x && -1 == inf.y, "    Infantry does not think he is in the transport.");
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC is not holding 1 unit, but should be holding Infantry.");
@@ -191,19 +194,19 @@ public class TestGameEvent extends TestCase
         "    Held unit is not infantry, but should be.");
 
     // Now see if we can also load the mech into the APC; verify this fails.
-    new LoadEvent(mech, apc).performEvent(testMap);
+    new LoadLifecycle.LoadEvent(mech, apc).performEvent(testMap);
     testPassed &= validate(testMap.getLocation(2, 3).getResident() == mech, "    Mech should still be at (2, 3).");
     testPassed &= validate(2 == mech.x && 3 == mech.y, "    Mech does not think he is at (2, 3), but he should.");
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC should still only be holding 1 unit.");
 
     // Unload the mech; this should fail, since he is not on the transport.
-    new UnloadEvent(apc, mech, 3, 3).performEvent(testMap);
+    new UnloadLifecycle.UnloadEvent(apc, mech, 3, 3).performEvent(testMap);
     testPassed &= validate(testMap.getLocation(3, 3).getResident() == null, "    Location (3, 3) should have no residents.");
     testPassed &= validate(2 == mech.x && 3 == mech.y, "    Mech thinks he has moved, but should still be at (2, 3).");
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC should still have one passenger.");
 
     // Unload the infantry; this should succeed.
-    new UnloadEvent(apc, inf, 3, 3).performEvent(testMap);
+    new UnloadLifecycle.UnloadEvent(apc, inf, 3, 3).performEvent(testMap);
     testPassed &= validate(testMap.getLocation(3, 3).getResident() == inf, "    Infantry is not at the dropoff point.");
     testPassed &= validate(apc.heldUnits.size() == 0,
         "    APC should have zero cargo, but heldUnits size is " + apc.heldUnits.size());
@@ -325,7 +328,7 @@ public class TestGameEvent extends TestCase
     }
 
     // Give the APC a new GameAction to go resupply mech2.
-    GameAction resupplyAction = new GameAction.ResupplyAction(apc, Utils.findShortestPath(apc, 2, 3, testMap));
+    GameAction resupplyAction = new ResupplyLifecycle.ResupplyAction(apc, Utils.findShortestPath(apc, 2, 3, testMap));
     performGameAction(resupplyAction, testMap);
 
     // Make sure the mechs got their mojo back.
@@ -367,7 +370,7 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(!donor.isTurnOver, "    Recipient's turn is over despite not having moved!");
 
     // Tell Donor to join Recipient.
-    GameAction joinAction = new GameAction.UnitJoinAction(testMap, donor, Utils.findShortestPath(donor, new XYCoord(1, 4), testMap));
+    GameAction joinAction = new JoinLifecycle.JoinAction(testMap, donor, Utils.findShortestPath(donor, new XYCoord(1, 4), testMap));
     performGameAction(joinAction, testMap);
 
     // Verification:

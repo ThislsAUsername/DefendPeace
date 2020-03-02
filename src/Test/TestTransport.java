@@ -5,10 +5,11 @@ import java.util.ArrayList;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
-import Engine.GameAction;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.UnitActionLifecycles.LoadLifecycle;
+import Engine.UnitActionLifecycles.UnloadLifecycle;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
@@ -59,11 +60,11 @@ public class TestTransport extends TestCase
 
     // Try a basic load/move/unload order.
     cargo.initTurn(testMap); // Get him ready.
-    performGameAction(new GameAction.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 4, 2, testMap)), testMap);
+    performGameAction(new LoadLifecycle.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 4, 2, testMap)), testMap);
     testPassed &= validate(testMap.getLocation(4, 2).getResident() != cargo, "    Cargo is still on the map.");
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC is not holding a unit.");
     apc.initTurn(testMap); // Get him ready.
-    performGameAction(new GameAction.UnloadAction(testMap, apc, Utils.findShortestPath(apc, 7, 3, testMap), cargo, 7, 4), testMap);
+    performGameAction(new UnloadLifecycle.UnloadAction(testMap, apc, Utils.findShortestPath(apc, 7, 3, testMap), cargo, 7, 4), testMap);
     testPassed &= validate(testMap.getLocation(7, 4).getResident() == cargo, "    Cargo was not dropped off correctly.");
     testPassed &= validate(apc.heldUnits.isEmpty(), "    APC is not empty when it should be.");
 
@@ -74,8 +75,8 @@ public class TestTransport extends TestCase
     // Make sure we can unload a unit on the apc's current location.
     cargo.initTurn(testMap);
     apc.initTurn(testMap);
-    performGameAction(new GameAction.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 7, 3, testMap)), testMap);
-    performGameAction(new GameAction.UnloadAction(testMap, apc, Utils.findShortestPath(apc, 7, 4, testMap), cargo, 7, 3), testMap);
+    performGameAction(new LoadLifecycle.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 7, 3, testMap)), testMap);
+    performGameAction(new UnloadLifecycle.UnloadAction(testMap, apc, Utils.findShortestPath(apc, 7, 4, testMap), cargo, 7, 3), testMap);
     testPassed &= validate(testMap.getLocation(7, 4).getResident() == apc, "    APC is not where it belongs.");
     testPassed &= validate(testMap.getLocation(7, 3).getResident() == cargo, "    Cargo is not at dropoff location");
 
@@ -83,7 +84,7 @@ public class TestTransport extends TestCase
     cargo.alterHP(-5);
     testPassed &= validate( cargo.getHP() == 5, "    Cargo has the wrong amount of HP(" + cargo.getHP() + ")");
     cargo.initTurn(testMap);
-    performGameAction(new GameAction.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 7, 4, testMap)), testMap);
+    performGameAction(new LoadLifecycle.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 7, 4, testMap)), testMap);
     testPassed &= validate(testMap.getLocation(7, 4).getResident() != cargo, "    Cargo is not in the APC.");
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC has the wrong cargo size (");
 

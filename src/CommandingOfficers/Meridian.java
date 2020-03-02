@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.GameScenario;
-import Engine.UnitActionType;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEventQueue;
+import Engine.UnitActionLifecycles.TransformLifecycle;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
@@ -66,8 +66,8 @@ public class Meridian extends Commander
     int costShift = (tank.getCost() - arty.getCost())/2;
     tank.moneyCostAdjustment -= costShift;
     arty.moneyCostAdjustment += costShift;
-    tank.possibleActions.add(new UnitActionType.Transform(arty, "~ARTY"));
-    arty.possibleActions.add(new UnitActionType.Transform(tank, "~TANK"));
+    tank.possibleActions.add(new TransformLifecycle.TransformFactory(arty, "~ARTY"));
+    arty.possibleActions.add(new TransformLifecycle.TransformFactory(tank, "~TANK"));
 
     addCommanderAbility(new ChangeAndFlow(this));
     addCommanderAbility(new VehicularCharge(this));

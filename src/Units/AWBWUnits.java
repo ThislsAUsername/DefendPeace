@@ -1,10 +1,12 @@
 package Units;
 
 import java.util.ArrayList;
-import Engine.GameAction;
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.ResupplyEvent;
+import Engine.UnitActionLifecycles.ExplodeLifecycle;
+import Engine.UnitActionLifecycles.ResupplyLifecycle;
+import Engine.UnitActionLifecycles.TransformLifecycle;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.MoveTypes.Flight;
@@ -89,12 +91,12 @@ public class AWBWUnits extends UnitModelScheme
 
     // Handle transforming units separately, since we don't want two buy-entries
     UnitModel subsub = new SubSubModel();
-    sub.possibleActions.add(new UnitActionType.Transform(subsub, "DIVE"));
-    subsub.possibleActions.add(new UnitActionType.Transform(sub, "RISE"));
+    sub.possibleActions.add(new TransformLifecycle.TransformFactory(subsub, "DIVE"));
+    subsub.possibleActions.add(new TransformLifecycle.TransformFactory(sub, "RISE"));
     awbwModels.unitModels.add(subsub);
     UnitModel sneaky = new StealthHideModel();
-    stealth.possibleActions.add(new UnitActionType.Transform(sneaky, "HIDE"));
-    sneaky.possibleActions.add(new UnitActionType.Transform(stealth, "APPEAR"));
+    stealth.possibleActions.add(new TransformLifecycle.TransformFactory(sneaky, "HIDE"));
+    sneaky.possibleActions.add(new TransformLifecycle.TransformFactory(stealth, "APPEAR"));
     awbwModels.unitModels.add(sneaky);
 
     return awbwModels;
@@ -115,13 +117,13 @@ public class AWBWUnits extends UnitModelScheme
     public AWBWUnitEnum type;
 
     public AWBWUnitModel(String pName, AWBWUnitEnum pType, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
-        int pMovePower, MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] weapons, double starValue)
+        int pMovePower, MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] weapons, double starValue)
     {
       super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
       type = pType;
     }
     public AWBWUnitModel(String pName, AWBWUnitEnum pType, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
-        int pMovePower, MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> weapons, double starValue)
+        int pMovePower, MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> weapons, double starValue)
     {
       super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
       type = pType;
@@ -159,7 +161,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 3;
 
     private static final MoveType moveType = new FootStandard();
-    private static final UnitActionType[] actions = UnitActionType.FOOTSOLDIER_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.FOOTSOLDIER_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.InfantryMGun() };
 
     public InfantryModel()
@@ -183,7 +185,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 2;
 
     private static final MoveType moveType = new FootMech();
-    private static final UnitActionType[] actions = UnitActionType.FOOTSOLDIER_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.FOOTSOLDIER_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.MechZooka(), new AWBWWeapons.MechMGun() };
 
     public MechModel()
@@ -206,7 +208,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int VISION_RANGE = 1;
     private static final int MOVE_POWER = 6;
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.APC_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.APC_ACTIONS;
 
     public APCModel()
     {
@@ -223,7 +225,7 @@ public class AWBWUnits extends UnitModelScheme
     public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
     {
       GameEventQueue events = new GameEventQueue();
-      events.addAll(new GameAction.ResupplyAction(self).getEvents(map));
+      events.addAll(new ResupplyLifecycle.ResupplyAction(self).getEvents(map));
       return events;
     }
   }
@@ -242,7 +244,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 8;
 
     private static final MoveType moveType = new Tires();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.ReconMGun() };
 
     public ReconModel()
@@ -266,7 +268,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.TankCannon(), new AWBWWeapons.TankMGun() };
 
     public TankModel()
@@ -290,7 +292,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.MDTankCannon(), new AWBWWeapons.MDTankMGun() };
 
     public MDTankModel()
@@ -314,7 +316,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.NeoCannon(), new AWBWWeapons.NeoMGun() };
 
     public NeotankModel()
@@ -338,7 +340,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 4;
 
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.MegaCannon(), new AWBWWeapons.MegaMGun() };
 
     public MegatankModel()
@@ -362,7 +364,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.ArtilleryCannon() };
 
     public ArtilleryModel()
@@ -386,7 +388,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new Tires();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.RocketRockets() };
 
     public RocketsModel()
@@ -410,7 +412,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 9;
 
     private static final MoveType moveType = new MoveType();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.PipeGun() };
 
     public PiperunnerModel()
@@ -435,7 +437,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int VISION_RANGE = 2;
     private static final int MOVE_POWER = 6;
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.AntiAirMGun() };
 
     public AntiAirModel()
@@ -459,7 +461,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 4;
 
     private static final MoveType moveType = new Tires();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.MobileSAMWeapon() };
 
     public MobileSAMModel()
@@ -485,7 +487,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.TRANSPORT_ACTIONS;
 
     public TCopterModel()
     {
@@ -510,7 +512,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.CopterRockets(), new AWBWWeapons.CopterMGun() };
 
     public BCopterModel()
@@ -534,7 +536,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 7;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.BomberBombs() };
 
     public BomberModel()
@@ -558,7 +560,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 9;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.FighterMissiles() };
 
     public FighterModel()
@@ -582,7 +584,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.StealthShots() };
 
     public StealthModel()
@@ -623,14 +625,14 @@ public class AWBWUnits extends UnitModelScheme
     private static final int EXPLODE_POWER = 5;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.BASIC_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.BASIC_ACTIONS;
     private static final WeaponModel[] weapons = {};
 
     public BBombModel()
     {
       super("BBomb", AWBWUnitEnum.BBOMB, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
-      possibleActions.add(0, new UnitActionType.Explode(EXPLODE_POWER, EXPLODE_RADIUS));
+      possibleActions.add(0, new ExplodeLifecycle.ExplodeFactory(EXPLODE_POWER, EXPLODE_RADIUS));
     }
   }
 
@@ -650,7 +652,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 7;
 
     private static final MoveType moveType = new FloatLight();
-    private static final UnitActionType[] actions = UnitActionType.TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.TRANSPORT_ACTIONS;
 
     public BBoatModel()
     {
@@ -658,7 +660,7 @@ public class AWBWUnits extends UnitModelScheme
           actions, new WeaponModel[0], STAR_VALUE);
       holdingCapacity = 2;
       carryableMask = TROOP;
-      possibleActions.add(0, UnitActionType.REPAIR_UNIT);
+      possibleActions.add(0, UnitActionFactory.REPAIR_UNIT);
     }
   }
 
@@ -676,7 +678,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new FloatLight();
-    private static final UnitActionType[] actions = UnitActionType.TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.TRANSPORT_ACTIONS;
 
     public LanderModel()
     {
@@ -701,7 +703,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new FloatHeavy();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.SubTorpedoes() };
 
     public SubModel()
@@ -740,7 +742,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new FloatHeavy();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.BattleshipCannon() };
 
     public BattleshipModel()
@@ -764,7 +766,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new FloatHeavy();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_TRANSPORT_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.CarrierMissiles() };
 
     public CarrierModel()
@@ -801,7 +803,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new FloatHeavy();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_TRANSPORT_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.CruiserTorpedoes(), new AWBWWeapons.CruiserMGun() };
 
     public CruiserModel()

@@ -1,11 +1,14 @@
 package Units;
 
 import java.util.ArrayList;
-import Engine.GameAction;
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.ResupplyEvent;
+import Engine.UnitActionLifecycles.FlareLifecycle;
+import Engine.UnitActionLifecycles.ResupplyLifecycle;
+import Engine.UnitActionLifecycles.TransformLifecycle;
+import Engine.UnitActionLifecycles.UnitProduceLifecycle;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.MoveTypes.Flight;
@@ -91,12 +94,12 @@ public class DoRUnits extends UnitModelScheme
 
     // Handle transforming units separately, since we don't want two buy-entries
     UnitModel sub = new SubSubModel();
-    sub.possibleActions.add(new UnitActionType.Transform(subsub, "DIVE"));
-    subsub.possibleActions.add(new UnitActionType.Transform(sub, "RISE"));
+    sub.possibleActions.add(new TransformLifecycle.TransformFactory(subsub, "DIVE"));
+    subsub.possibleActions.add(new TransformLifecycle.TransformFactory(sub, "RISE"));
     dorModels.unitModels.add(sub);
 
     UnitModel seaplane = new SeaplaneModel();
-    carrier.possibleActions.add(0, new UnitActionType.UnitProduce(seaplane));
+    carrier.possibleActions.add(0, new UnitProduceLifecycle.UnitProduceFactory(seaplane));
     dorModels.unitModels.add(seaplane);
 
     return dorModels;
@@ -118,13 +121,13 @@ public class DoRUnits extends UnitModelScheme
     public DoRUnitEnum type;
 
     public DoRUnitModel(String pName, DoRUnitEnum pType, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
-        int pMovePower, MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] weapons, double starValue)
+        int pMovePower, MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] weapons, double starValue)
     {
       super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
       type = pType;
     }
     public DoRUnitModel(String pName, DoRUnitEnum pType, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
-        int pMovePower, MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> weapons, double starValue)
+        int pMovePower, MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> weapons, double starValue)
     {
       super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
       type = pType;
@@ -162,7 +165,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 3;
 
     private static final MoveType moveType = new FootStandard();
-    private static final UnitActionType[] actions = UnitActionType.FOOTSOLDIER_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.FOOTSOLDIER_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.InfantryMGun() };
 
     public InfantryModel()
@@ -186,7 +189,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 2;
 
     private static final MoveType moveType = new FootMech();
-    private static final UnitActionType[] actions = UnitActionType.FOOTSOLDIER_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.FOOTSOLDIER_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.MechZooka(), new DoRWeapons.MechMGun() };
 
     public MechModel()
@@ -210,7 +213,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new TiresRugged();
-    private static final UnitActionType[] actions = UnitActionType.FOOTSOLDIER_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.FOOTSOLDIER_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.MechMGun() };
 
     public BikeModel()
@@ -234,7 +237,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 8;
 
     private static final MoveType moveType = new Tires();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.ReconMGun() };
 
     public ReconModel()
@@ -258,14 +261,14 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.FlareMGun() };
 
     public FlareModel()
     {
       super("Flare", DoRUnitEnum.FLARE, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
           MOVE_POWER, moveType, actions, weapons, STAR_VALUE);
-      possibleActions.add(0, new UnitActionType.Flare(0, 5, 2));
+      possibleActions.add(0, new FlareLifecycle.FlareFactory(0, 5, 2));
     }
   }
 
@@ -282,7 +285,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int VISION_RANGE = 2;
     private static final int MOVE_POWER = 6;
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.AntiAirMGun() };
 
     public AntiAirModel()
@@ -306,7 +309,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.TankCannon(), new DoRWeapons.TankMGun() };
 
     public TankModel()
@@ -330,7 +333,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.MDTankCannon(), new DoRWeapons.MDTankMGun() };
 
     public MDTankModel()
@@ -354,7 +357,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 4;
 
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.WarCannon(), new DoRWeapons.WarMGun() };
 
     public WarTankModel()
@@ -378,7 +381,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.ArtilleryCannon() };
 
     public ArtilleryModel()
@@ -402,7 +405,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 4;
 
     private static final MoveType moveType = new TiresRugged();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.AntiTankCannon() };
 
     public AntiTankModel()
@@ -426,7 +429,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new Tires();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.RocketRockets() };
 
     public RocketsModel()
@@ -450,7 +453,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5; // Finally, sigh
 
     private static final MoveType moveType = new Tires();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.MobileSAMWeapon() };
 
     public MobileSAMModel()
@@ -473,7 +476,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int VISION_RANGE = 1;
     private static final int MOVE_POWER = 6;
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.APC_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.APC_ACTIONS;
 
     public RigModel() // TODO: Build temporary air/ports. Also, temporary ports are traversible by FloatHeavy, but only by friendlies.
     {
@@ -491,7 +494,7 @@ public class DoRUnits extends UnitModelScheme
     public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
     {
       GameEventQueue events = new GameEventQueue();
-      events.addAll(new GameAction.ResupplyAction(self).getEvents(map));
+      events.addAll(new ResupplyLifecycle.ResupplyAction(self).getEvents(map));
       return events;
     }
   }
@@ -512,7 +515,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 9;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.FighterMissiles() };
 
     public FighterModel()
@@ -536,7 +539,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 7;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.BomberBombs() };
 
     public BomberModel()
@@ -560,7 +563,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 7;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.SeaplaneShots() };
 
     public SeaplaneModel()
@@ -584,7 +587,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 8;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.DusterMGun() };
 
     public DusterModel()
@@ -608,7 +611,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.CopterRockets(), new DoRWeapons.CopterMGun() };
 
     public BCopterModel()
@@ -632,7 +635,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.TRANSPORT_ACTIONS;
 
     public TCopterModel()
     {
@@ -660,7 +663,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 7;
 
     private static final MoveType moveType = new FloatLight();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_TRANSPORT_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.GunBoatGun() };
 
     public GunboatModel()
@@ -687,7 +690,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new FloatHeavy();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_TRANSPORT_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.CruiserTorpedoes(), new DoRWeapons.CruiserMGun() };
 
     public CruiserModel()
@@ -713,7 +716,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new FloatHeavy();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.SubTorpedoes() };
 
     public SubModel()
@@ -752,7 +755,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new FloatHeavy();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_TRANSPORT_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.CarrierMGun() };
 
     public CarrierModel() // TODO: Launch.
@@ -793,7 +796,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new FloatHeavy();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.BattleshipCannon() };
 
     public BattleshipModel()
@@ -817,7 +820,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new FloatLight();
-    private static final UnitActionType[] actions = UnitActionType.TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.TRANSPORT_ACTIONS;
 
     public LanderModel()
     {

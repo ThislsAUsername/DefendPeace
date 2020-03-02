@@ -17,11 +17,14 @@ import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.Path;
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
+import Engine.UnitActionLifecycles.BattleLifecycle;
+import Engine.UnitActionLifecycles.CaptureLifecycle;
+import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -175,7 +178,7 @@ public class WallyAI implements AIController
       {
         capturingProperties.add(unit.getCaptureTargetCoords());
         XYCoord position = new XYCoord(unit.x, unit.y);
-        actions.offer(new GameAction.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, position, gameMap)));
+        actions.offer(new CaptureLifecycle.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, position, gameMap)));
       }
     }
   }
@@ -248,7 +251,7 @@ public class WallyAI implements AIController
         for( GameActionSet actionSet : actionSets )
         {
           // See if we have the option to attack.
-          if( actionSet.getSelected().getType() == UnitActionType.ATTACK )
+          if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
           {
             for( GameAction action : actionSet.getGameActions() )
             {
@@ -336,7 +339,7 @@ public class WallyAI implements AIController
                   if( null != unit )
                   {
                     damageSum += CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
-                    actions.offer(new GameAction.AttackAction(gameMap, unit, Utils.findShortestPath(unit, xyc, gameMap), target.x, target.y));
+                    actions.offer(new BattleLifecycle.BattleAction(gameMap, unit, Utils.findShortestPath(unit, xyc, gameMap), target.x, target.y));
                     unitQueue.remove(unit);
                     log(String.format("    %s brings the damage total to %s", unit.toStringWithLocation(), damageSum));
                     if (damageSum >= target.getPreciseHP())
@@ -421,7 +424,7 @@ public class WallyAI implements AIController
             }
 
             // See if we can bag enough damage to be worth sacrificing the unit
-            if( actionSet.getSelected().getType() == UnitActionType.ATTACK )
+            if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
             {
               for( GameAction ga : actionSet.getGameActions() )
               {
@@ -455,7 +458,7 @@ public class WallyAI implements AIController
               break; // Only allow one action per unit.
 
             // Only consider capturing if we can sit still or go somewhere safe.
-            if( actionSet.getSelected().getType() == UnitActionType.CAPTURE
+            if( actionSet.getSelected().getType() == UnitActionFactory.CAPTURE
                 && ( coord.getDistance(unit.x, unit.y) == 0 || canWallHere(gameMap, threatMap, unit, coord) ) 
                 && ( spaceFree || queueTravelAction(gameMap, allThreats, threatMap, resident, true) ) )
             {
@@ -535,12 +538,12 @@ public class WallyAI implements AIController
       }
       Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
     }
-    else if( unit.model.possibleActions.contains(UnitActionType.CAPTURE) )
+    else if( unit.model.possibleActions.contains(UnitActionFactory.CAPTURE) )
     {
       goals.addAll(unownedProperties);
       Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
     }
-    else if( unit.model.possibleActions.contains(UnitActionType.ATTACK) )
+    else if( unit.model.possibleActions.contains(UnitActionFactory.ATTACK) )
     {
       Map<UnitModel, Double> valueMap = new HashMap<UnitModel, Double>();
       Map<UnitModel, ArrayList<XYCoord>> targetMap = new HashMap<UnitModel, ArrayList<XYCoord>>();
@@ -661,7 +664,7 @@ public class WallyAI implements AIController
             // Since we're moving anyway, might as well try shooting the scenery
             for( GameActionSet actionSet : actionSets )
             {
-              if( actionSet.getSelected().getType() == UnitActionType.ATTACK )
+              if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
               {
                 double bestDamage = 0;
                 for( GameAction attack : actionSet.getGameActions() )
@@ -680,7 +683,7 @@ public class WallyAI implements AIController
             }
 
             if( null == action) // Just wait if we can't do anything cool
-             action = new GameAction.WaitAction(unit, movePath);
+             action = new WaitLifecycle.WaitAction(unit, movePath);
             actions.offer(action);
             return true;
           }

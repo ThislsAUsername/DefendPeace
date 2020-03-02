@@ -13,9 +13,10 @@ import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.Path;
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -61,11 +62,11 @@ public class AIUtils
    * @param gameMap The world in which the Unit lives.
    * @return a Map of ActionType to ArrayList<GameAction>.
    */
-  public static Map<UnitActionType, ArrayList<GameAction> > getAvailableUnitActionsByType(Unit unit, GameMap gameMap)
+  public static Map<UnitActionFactory, ArrayList<GameAction> > getAvailableUnitActionsByType(Unit unit, GameMap gameMap)
   {
     // Create the ActionType-indexed map, and ensure we don't have any null pointers.
-    Map<UnitActionType, ArrayList<GameAction> > actionsByType = new HashMap<UnitActionType, ArrayList<GameAction> >();
-    for( UnitActionType atype : unit.model.possibleActions )
+    Map<UnitActionFactory, ArrayList<GameAction> > actionsByType = new HashMap<UnitActionFactory, ArrayList<GameAction> >();
+    for( UnitActionFactory atype : unit.model.possibleActions )
     {
       actionsByType.put(atype, new ArrayList<GameAction>());
     }
@@ -78,7 +79,7 @@ public class AIUtils
     {
       for( GameActionSet actionSet : actionSets )
       {
-        UnitActionType type = actionSet.getSelected().getType();
+        UnitActionFactory type = actionSet.getSelected().getType();
 
         // Add these actions to the correct map bucket.
         actionsByType.get(type).addAll(actionSet.getGameActions());
@@ -175,7 +176,7 @@ public class AIUtils
       boolean includeTransports = false;
       ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, includeTransports); // Find the valid moves we can make.
       Utils.sortLocationsByDistance(path.getEndCoord(), validMoves); // Sort moves based on intermediate destination. 
-      move = new GameAction.WaitAction(unit, Utils.findShortestPath(unit, validMoves.get(0), gameMap)); // Move to best option.
+      move = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, validMoves.get(0), gameMap)); // Move to best option.
     }
     return move;
   }

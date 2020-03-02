@@ -13,6 +13,7 @@ import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.UnitActionLifecycles.CaptureLifecycle;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.MapLibrary;
@@ -69,7 +70,7 @@ public class TestCommanderAve extends TestCase
     testPassed &= validate(testMap.getEnvironment(city).weatherType == Weathers.CLEAR, "    Weather is not clear at start!");
 
     Unit infantry = addUnit(testMap, Ave, UnitModel.TROOP, city.xCoord, city.yCoord);
-    GameAction capture = new GameAction.CaptureAction(testMap, infantry, Utils.findShortestPath(infantry, city, testMap));
+    GameAction capture = new CaptureLifecycle.CaptureAction(testMap, infantry, Utils.findShortestPath(infantry, city, testMap));
 
     // Give it the ol' one-two.
     infantry.initTurn(testMap);
