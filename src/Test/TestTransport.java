@@ -13,7 +13,7 @@ import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
 import Units.Unit;
-import Units.UnitModel.UnitRoleEnum;
+import Units.UnitModel;
 
 public class TestTransport extends TestCase
 {
@@ -52,8 +52,8 @@ public class TestTransport extends TestCase
   private static boolean testLoadUnloadAPC()
   {
     // Add a couple of units to drive this test.
-    Unit cargo = addUnit(testMap, testCo1, UnitRoleEnum.INFANTRY, 4, 1);
-    Unit apc = addUnit(testMap, testCo1, UnitRoleEnum.TRANSPORT, 4, 2);
+    Unit cargo = addUnit(testMap, testCo1, UnitModel.TROOP, 4, 1);
+    Unit apc = addUnit(testMap, testCo1, UnitModel.TRANSPORT, 4, 2);
 
     boolean testPassed = true;
 

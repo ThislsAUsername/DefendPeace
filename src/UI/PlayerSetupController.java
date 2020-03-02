@@ -96,7 +96,7 @@ public class PlayerSetupController implements IController
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.COLOR_FACTION.ordinal() )
         {
-          subMenu = new PlayerSetupColorFactionController(getPlayerInfo(playerSelector.getSelectionNormalized()));
+          subMenu = new PlayerSetupColorFactionController(getPlayerInfo(playerSelector.getSelectionNormalized()), getIconicUnit());
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.TEAM.ordinal() )
         {
@@ -110,7 +110,7 @@ public class PlayerSetupController implements IController
         {
           /////////////////////////////////////////////////////////////////////////////////////////////
           // We have locked in our selection. Stuff it into the GameBuilder and then kick off the game.
-          GameInstance newGame = gameBuilder.createGame(gameBuilder.unitModelScheme, coSelectors);
+          GameInstance newGame = gameBuilder.createGame(coSelectors);
 
           if( null != newGame )
           {
@@ -162,5 +162,10 @@ public class PlayerSetupController implements IController
   public PlayerSetupInfo getPlayerInfo(int p)
   {
     return coSelectors[p];
+  }
+
+  public String getIconicUnit()
+  {
+    return gameBuilder.unitModelScheme.getIconicUnitName();
   }
 }

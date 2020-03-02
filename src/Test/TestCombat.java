@@ -13,7 +13,7 @@ import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
 import Units.Unit;
-import Units.UnitModel.UnitRoleEnum;
+import Units.UnitModel;
 
 public class TestCombat extends TestCase
 {
@@ -54,8 +54,8 @@ public class TestCombat extends TestCase
   private boolean testUnitDeath()
   {
     // Add our combatants
-    Unit mechA = addUnit(testMap, testCo1, UnitRoleEnum.MECH, 1, 1);
-    Unit infB = addUnit(testMap, testCo2, UnitRoleEnum.INFANTRY, 1, 2);
+    Unit mechA = addUnit(testMap, testCo1, UnitModel.MECH, 1, 1);
+    Unit infB = addUnit(testMap, testCo2, UnitModel.TROOP, 1, 2);
     mechA.initTurn(testMap); // Make sure he is ready to move.
 
     // Make sure the infantry will die with one attack
@@ -79,8 +79,8 @@ public class TestCombat extends TestCase
   private boolean testTeamAttack()
   {
     // Add our combatants
-    Unit mechA = addUnit(testMap, testCo1, UnitRoleEnum.MECH, 1, 1);
-    Unit infB = addUnit(testMap, testCo2, UnitRoleEnum.INFANTRY, 1, 2);
+    Unit mechA = addUnit(testMap, testCo1, UnitModel.MECH, 1, 1);
+    Unit infB = addUnit(testMap, testCo2, UnitModel.TROOP, 1, 2);
     
     // Make them friends
     testCo1.team = 0;
@@ -110,9 +110,9 @@ public class TestCombat extends TestCase
   private boolean testIndirectAttacks()
   {
     // Add our combatants
-    Unit offender = addUnit(testMap, testCo1, UnitRoleEnum.SIEGE, 6, 5);
-    Unit defender = addUnit(testMap, testCo2, UnitRoleEnum.MECH, 6, 6);
-    Unit victim = addUnit(testMap, testCo2, UnitRoleEnum.SIEGE, 6, 7);
+    Unit offender = addUnit(testMap, testCo1, UnitModel.SIEGE, 6, 5);
+    Unit defender = addUnit(testMap, testCo2, UnitModel.MECH, 6, 6);
+    Unit victim = addUnit(testMap, testCo2, UnitModel.SIEGE, 6, 7);
 
     // offender will attempt to shoot point blank. This should fail, since artillery cannot direct fire.
     offender.initTurn(testMap); // Make sure he is ready to move.
@@ -154,8 +154,8 @@ public class TestCombat extends TestCase
   private boolean testMoveAttack()
   {
     // Add our combatants
-    Unit attacker = addUnit(testMap, testCo1, UnitRoleEnum.INFANTRY, 1, 1);
-    Unit defender = addUnit(testMap, testCo2, UnitRoleEnum.MECH, 1, 3);
+    Unit attacker = addUnit(testMap, testCo1, UnitModel.TROOP, 1, 1);
+    Unit defender = addUnit(testMap, testCo2, UnitModel.MECH, 1, 3);
 
     // Execute inf- I mean, the action.
     attacker.initTurn(testMap); // Make sure he is ready to move.
@@ -180,8 +180,8 @@ public class TestCombat extends TestCase
     boolean testPassed = true;
 
     // Add our combatants
-    Unit mechA = addUnit(testMap, testCo1, UnitRoleEnum.MECH, 1, 1);
-    Unit infB = addUnit(testMap, testCo2, UnitRoleEnum.INFANTRY, 1, 2);
+    Unit mechA = addUnit(testMap, testCo1, UnitModel.MECH, 1, 1);
+    Unit infB = addUnit(testMap, testCo2, UnitModel.TROOP, 1, 2);
 
     // Make sure the infantry will die with one attack
     infB.damageHP(7);

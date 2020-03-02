@@ -30,7 +30,6 @@ import Terrain.TerrainType;
 import UI.UIUtils.Faction;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.UnitRoleEnum;
 import Units.UnitModelScheme.GameReadyModels;
 
 public class Commander extends GameEventListener implements Serializable
@@ -178,13 +177,19 @@ public class Commander extends GameEventListener implements Serializable
     return true;
   }
 
-  public UnitModel getUnitModel(UnitRoleEnum unitType)
+  public UnitModel getUnitModel(long unitRole)
+  {
+    return getUnitModel(unitRole, true);
+  }
+  public UnitModel getUnitModel(long unitRole, boolean matchOnAny)
   {
     UnitModel um = null;
 
     for( UnitModel iter : unitModels )
     {
-      if( iter.role == unitType )
+      boolean some = (iter.role & unitRole) > 0;
+      boolean all = (iter.role & unitRole) == unitRole;
+      if( all || (some && matchOnAny) )
       {
         um = iter;
         break;
@@ -192,6 +197,27 @@ public class Commander extends GameEventListener implements Serializable
     }
 
     return um;
+  }
+
+  public ArrayList<UnitModel> getAllModels(long unitRole)
+  {
+    return getAllModels(unitRole, true);
+  }
+  public ArrayList<UnitModel> getAllModels(long unitRole, boolean matchOnAny)
+  {
+    ArrayList<UnitModel> models = new ArrayList<UnitModel>();
+
+    for( UnitModel iter : unitModels )
+    {
+      boolean some = (iter.role & unitRole) > 0;
+      boolean all = (iter.role & unitRole) == unitRole;
+      if( all || (some && matchOnAny) )
+      {
+        models.add(iter);
+      }
+    }
+
+    return models;
   }
   
   /**

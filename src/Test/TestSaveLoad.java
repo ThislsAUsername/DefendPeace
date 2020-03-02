@@ -10,7 +10,7 @@ import Engine.GameScenario;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Units.Unit;
-import Units.UnitModel.UnitRoleEnum;
+import Units.UnitModel;
 
 public class TestSaveLoad extends TestCase
 {
@@ -45,14 +45,14 @@ public class TestSaveLoad extends TestCase
 
   private boolean testSaveLoad()
   {
-    Unit fool = addUnit(testMap, strong, UnitRoleEnum.TRANSPORT, 7, 2); fool.initTurn(testMap);
-    Unit scout = addUnit(testMap, strong, UnitRoleEnum.RECON, 7, 3); scout.initTurn(testMap);
-    Unit punch = addUnit(testMap, strong, UnitRoleEnum.SIEGE, 4, 5); punch.initTurn(testMap);
-    Unit resupplyable = addUnit(testMap, strong, UnitRoleEnum.TRANSPORT, 8, 8); resupplyable.initTurn(testMap);
+    Unit fool = addUnit(testMap, strong, UnitModel.TRANSPORT, 7, 2); fool.initTurn(testMap);
+    Unit scout = addUnit(testMap, strong, UnitModel.RECON, 7, 3); scout.initTurn(testMap);
+    Unit punch = addUnit(testMap, strong, UnitModel.SIEGE, 4, 5); punch.initTurn(testMap);
+    Unit resupplyable = addUnit(testMap, strong, UnitModel.TRANSPORT, 8, 8); resupplyable.initTurn(testMap);
     resupplyable.fuel = 0;
     
-    Unit bait = addUnit(testMap, patch, UnitRoleEnum.TRANSPORT, 6, 5);
-    Unit meaty = addUnit(testMap, patch, UnitRoleEnum.ASSAULT, 7, 5);
+    Unit bait = addUnit(testMap, patch, UnitModel.TRANSPORT, 6, 5);
+    Unit meaty = addUnit(testMap, patch, UnitModel.ASSAULT, 7, 5);
     
     // It's Strong's turn. Set up his fog goggles.
     strong.initTurn(testMap);

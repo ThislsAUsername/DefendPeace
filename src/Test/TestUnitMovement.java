@@ -12,7 +12,7 @@ import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
 import Units.Unit;
-import Units.UnitModel.UnitRoleEnum;
+import Units.UnitModel;
 
 public class TestUnitMovement extends TestCase
 {
@@ -52,7 +52,7 @@ public class TestUnitMovement extends TestCase
   private boolean testStayPut()
   {
     // Add a Unit and try to move it.
-    Unit mover = addUnit(testMap, testCo1, UnitRoleEnum.INFANTRY, 4, 4);
+    Unit mover = addUnit(testMap, testCo1, UnitModel.TROOP, 4, 4);
     Path mvPath = Utils.findShortestPath(mover, 4, 4, testMap);
 
     // A path from here to here should still have one path node.
@@ -86,7 +86,7 @@ public class TestUnitMovement extends TestCase
   private boolean testSimpleMovement()
   {
     // Add a Unit and try to move it.
-    Unit mover = addUnit(testMap, testCo1, UnitRoleEnum.INFANTRY, 4, 4);
+    Unit mover = addUnit(testMap, testCo1, UnitModel.TROOP, 4, 4);
     mover.initTurn(testMap); // Make sure he's ready to go.
     XYCoord destination = new XYCoord(6, 5);
     GameAction ga = new GameAction.WaitAction(mover, Utils.findShortestPath(mover, destination, testMap));
@@ -110,7 +110,7 @@ public class TestUnitMovement extends TestCase
   private boolean testOutOfRangeMovement()
   {
     // Make a unit and add it to the map.
-    Unit mover = addUnit(testMap, testCo1, UnitRoleEnum.INFANTRY, 4, 4);
+    Unit mover = addUnit(testMap, testCo1, UnitModel.TROOP, 4, 4);
     mover.isTurnOver = false; // Make sure he's ready to go.
 
     // Make an action to move the unit 5 spaces away, and execute it.
@@ -156,21 +156,21 @@ public class TestUnitMovement extends TestCase
     multiPath.addWaypoint(2, 5);
 
     // Make sure the action didn't actually execute.
-    boolean testPassed = validate(grassPath.getFuelCost(testCo1.getUnitModel(UnitRoleEnum.INFANTRY), testMap) == 7,
+    boolean testPassed = validate(grassPath.getFuelCost(testCo1.getUnitModel(UnitModel.TROOP), testMap) == 7,
         "    Infantry do not charge 1 fuel per space of grass.");
-    testPassed &= validate(multiPath.getFuelCost(testCo1.getUnitModel(UnitRoleEnum.INFANTRY), testMap) == 4,
+    testPassed &= validate(multiPath.getFuelCost(testCo1.getUnitModel(UnitModel.TROOP), testMap) == 4,
         "    Infantry movecost is not 1 for road, grass, forest, or city.");
-    testPassed &= validate(grassPath.getFuelCost(testCo1.getUnitModel(UnitRoleEnum.AIR_ASSAULT), testMap) == 7,
+    testPassed &= validate(grassPath.getFuelCost(testCo1.getUnitModel(UnitModel.AIR_LOW | UnitModel.ASSAULT, false), testMap) == 7,
         "    B Copter does not charge 1 fuel per space of grass.");
-    testPassed &= validate(multiPath.getFuelCost(testCo1.getUnitModel(UnitRoleEnum.AIR_ASSAULT), testMap) == 4,
+    testPassed &= validate(multiPath.getFuelCost(testCo1.getUnitModel(UnitModel.AIR_LOW | UnitModel.ASSAULT, false), testMap) == 4,
         "    B Copter movecost is not 1 for road, grass, forest, or city.");
-    testPassed &= validate(grassPath.getFuelCost(testCo1.getUnitModel(UnitRoleEnum.RECON), testMap) == 14,
+    testPassed &= validate(grassPath.getFuelCost(testCo1.getUnitModel(UnitModel.RECON), testMap) == 14,
         "    Recon does not charge 2 fuel per space of grass.");
-    testPassed &= validate(multiPath.getFuelCost(testCo1.getUnitModel(UnitRoleEnum.RECON), testMap) == 7,
+    testPassed &= validate(multiPath.getFuelCost(testCo1.getUnitModel(UnitModel.RECON), testMap) == 7,
         "    Recon movecost is wrong for road, grass, forest, or city.");
-    testPassed &= validate(grassPath.getFuelCost(testCo1.getUnitModel(UnitRoleEnum.ASSAULT), testMap) == 7,
+    testPassed &= validate(grassPath.getFuelCost(testCo1.getUnitModel(UnitModel.ASSAULT), testMap) == 7,
         "    Tank does not charge 1 fuel per space of grass.");
-    testPassed &= validate(multiPath.getFuelCost(testCo1.getUnitModel(UnitRoleEnum.ASSAULT), testMap) == 5,
+    testPassed &= validate(multiPath.getFuelCost(testCo1.getUnitModel(UnitModel.ASSAULT), testMap) == 5,
         "    Tank movecost is wrong for road, grass, forest, or city.");
     testPassed &= validate(multiPath.getFuelCost(testCo1.unitModels.get(15), testMap) == 396,
         "    Cruiser movecost is wrong for road, grass, forest, or city.");

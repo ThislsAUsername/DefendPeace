@@ -10,7 +10,7 @@ import Terrain.MapInfo;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
-import Units.UnitModel.UnitRoleEnum;
+import Units.UnitModel;
 
 public class TestHealing extends TestCase
 {
@@ -44,7 +44,7 @@ public class TestHealing extends TestCase
   /** Make sure an Infantry unit heals correctly when passing time on an owned city. */
   private boolean testHealing()
   {
-    Unit victim = addUnit(testMap, testCo1, UnitRoleEnum.INFANTRY, 0, 0);
+    Unit victim = addUnit(testMap, testCo1, UnitModel.TROOP, 0, 0);
     // Assuming 200/turn for healing infantry: 999\200 = 4, plus one healing after that = 5,
     //    plus another iteration to check poverty conditions = 6 iterations
     testCo1.money = 999;

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import Terrain.TerrainType;
-import Units.UnitModel.UnitRoleEnum;
 
 /**
  * Provides the primary interface for the game to get info about game-specific units.
@@ -42,26 +41,12 @@ public abstract class UnitModelScheme implements Serializable
   {
     String name = UnitModel.standardizeID(pName);
     UnitModel model = null;
-    ArrayList<String> coreRoles = UnitModel.getUnitRoleIDs();
-    if (coreRoles.contains(name))
-    {
-      UnitRoleEnum role = UnitModel.UnitRoleEnum.values()[coreRoles.indexOf(name)];
-      for( UnitModel um : models )
-        if( um.role.equals(role) )
-        {
-          model = um;
-          break;
-        }
-    }
-    else // If it's not a core type, see if there's a name match
-    {
-      for( UnitModel um : models )
-        if( UnitModel.standardizeID(um.name).equals(name) )
-        {
-          model = um;
-          break;
-        }
-    }
+    for( UnitModel um : models )
+      if( UnitModel.standardizeID(um.name).equals(name) )
+      {
+        model = um;
+        break;
+      }
     return model;
   }
 }

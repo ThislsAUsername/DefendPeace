@@ -12,7 +12,6 @@ import UI.PlayerSetupController;
 import UI.PlayerSetupInfo;
 import UI.SlidingValue;
 import UI.UIUtils;
-import Units.UnitModel.UnitRoleEnum;
 
 public class PlayerSetupArtist
 {
@@ -59,7 +58,7 @@ public class PlayerSetupArtist
       }
     }
     // Start preloading infantry sprites in the background so the ColorFaction screen doesn't freeze on first entry.
-    PlayerSetupColorFactionArtist.preloadOneInfantrySprite();
+    PlayerSetupColorFactionArtist.preloadOneInfantrySprite(control.getIconicUnit());
   }
 
   private static void drawPlayerSetup(Graphics g, MapInfo mapInfo, boolean snapCursor)
@@ -266,7 +265,7 @@ public class PlayerSetupArtist
       }
       if( factionChanged || colorChanged )
       {
-        UnitSpriteSet inf = SpriteLibrary.getMapUnitSpriteSet(UnitRoleEnum.INFANTRY.toString(), info.getCurrentFaction(), info.getCurrentColor());
+        UnitSpriteSet inf = SpriteLibrary.getMapUnitSpriteSet(myControl.getIconicUnit(), info.getCurrentFaction(), info.getCurrentColor());
         BufferedImage infSprite = inf.sprites[inf.ACTION_IDLE].getFrame(0);
         unitPane = new SpriteUIUtils.ImageFrame(portraitPx + 4, 12, 28, portraitPx + 2, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUHIGHLIGHTCOLOR, true, infSprite);
         unitPane.render(g);

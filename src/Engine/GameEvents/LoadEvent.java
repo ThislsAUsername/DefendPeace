@@ -32,7 +32,7 @@ public class LoadEvent implements GameEvent
   @Override
   public void performEvent(MapMaster gameMap)
   {
-    if( null != unitTransport && unitTransport.hasCargoSpace(unitCargo.model.chassis) )
+    if( null != unitTransport && unitTransport.hasCargoSpace(unitCargo.model.role) )
     {
       gameMap.removeUnit(unitCargo);
       unitTransport.heldUnits.add(unitCargo);

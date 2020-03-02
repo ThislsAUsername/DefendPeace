@@ -169,7 +169,7 @@ public abstract class UnitActionType implements Serializable
       Unit resident = map.getLocation(moveLocation).getResident();
       if( !ignoreResident && resident != null )
       {
-        if( resident.hasCargoSpace(actor.model.chassis) )
+        if( resident.hasCargoSpace(actor.model.role) )
         {
           return new GameActionSet(new GameAction.LoadAction(map, actor, movePath), false);
         }
@@ -485,7 +485,7 @@ public abstract class UnitActionType implements Serializable
     {
       XYCoord moveLocation = movePath.getEndCoord();
       if( moveLocation.equals(actor.x, actor.y) &&
-          actor.hasCargoSpace(typeToBuild.chassis) &&
+          actor.hasCargoSpace(typeToBuild.role) &&
           actor.CO.money > typeToBuild.getCost() &&
           actor.materials > 0 )
       {

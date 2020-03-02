@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Vector;
 
 import Engine.UnitActionType;
 import Engine.GameEvents.GameEventQueue;
@@ -21,45 +20,39 @@ public abstract class UnitModel implements Serializable
   private static final long serialVersionUID = 1L;
 
   /**
-   * Defines the core types of units we expect to be in any given unit set.
-   * Unit sets should have no less than one of each.
-   * Unit sets should order models such that the most "sensible" type (generally cheapest, land) is the first type of a given role.
+   * These are the high-level traits on which to filter unit types.
+   * Unit sets should order models such that the most "sensible" type
+   *   (generally cheapest, land, assault) is the first type fulfill a given role.
    */
-  public enum UnitRoleEnum
-  {
-    INFANTRY, MECH,
-    RECON, ASSAULT,
-    SIEGE, ANTI_AIR,
-    AIR_ASSAULT, AIR_SUPERIORITY,
-    TRANSPORT,
-  };
-
-  private static ArrayList<String> unitRoleIDs = null;
-  public static ArrayList<String> getUnitRoleIDs()
-  {
-    if( null == unitRoleIDs )
-    {
-      unitRoleIDs = new ArrayList<String>();
-      for( UnitRoleEnum role : UnitRoleEnum.values() )
-        unitRoleIDs.add(standardizeID(role.toString()));
-    }
-    return unitRoleIDs;
-  }
+  // Morphology
+  public static final long TROOP           = 1 <<  0; // Not in vehicle
+  public static final long TANK            = 1 <<  1; // Ground-traveling vehicle
+  public static final long HOVER           = 1 <<  2; // e.g. helicopter
+  public static final long JET             = 1 <<  3;
+  public static final long SHIP            = 1 <<  4;
+  // Domain
+  public static final long LAND            = 1 <<  8;
+  public static final long AIR_LOW         = 1 <<  9;
+  public static final long AIR_HIGH        = 1 << 10;
+  public static final long SEA             = 1 << 11;
+  public static final long SUBSURFACE      = 1 << 12;
+  // Role; Unit sets are expected to have at least one of each
+  public static final long MECH            = 1 << 16; // Footsoldier equipped against hardened targets
+  public static final long RECON           = 1 << 17; // Scout
+  public static final long ASSAULT         = 1 << 18; // Fast unit that can deal with hardened ground targets
+  public static final long SIEGE           = 1 << 19; // Unit with heavy strike capabilities at range
+  public static final long SURFACE_TO_AIR  = 1 << 20;
+  public static final long AIR_TO_SURFACE  = 1 << 21;
+  public static final long AIR_TO_AIR      = 1 << 22;
+  public static final long TRANSPORT       = 1 << 23;
 
   public static String standardizeID(String input)
   {
     return input.toLowerCase().replaceAll(" ", "_").replaceAll("-", "_");
   }
 
-  // Subs are ships unless they're submerged.
-  public enum ChassisEnum
-  {
-    TROOP, TANK, AIR_LOW, AIR_HIGH, SHIP, SUBMERGED
-  };
-
   public String name;
-  public UnitRoleEnum role;
-  public ChassisEnum chassis;
+  public long role;
   protected int moneyCost;
   public double abilityPowerValue;
   public int maxAmmo;
@@ -77,16 +70,17 @@ public abstract class UnitModel implements Serializable
 
   public int maxHP = 10;
   public int holdingCapacity = 0;
-  public Vector<ChassisEnum> holdables = new Vector<ChassisEnum>();
+  public long carryableMask;
+  public long carryableExclusionMask;
   private int COstr = 100;
   private int COdef = 100;
   public double COcost = 1.0;
   public int moneyCostAdjustment = 0;
 
-  public UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
+  public UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] pWeapons, double powerValue)
   {
-    this(pName, pRole, pChassis, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, powerValue);
+    this(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, powerValue);
 
     for( UnitActionType action : actions )
     {
@@ -98,20 +92,19 @@ public abstract class UnitModel implements Serializable
     }
   }
 
-  public UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
+  public UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> pWeapons, double powerValue)
   {
-    this(pName, pRole, pChassis, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, powerValue);
+    this(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, powerValue);
     possibleActions.addAll(actions);
     weapons = pWeapons;
   }
 
-  private UnitModel(String pName, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
+  private UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion, double powerValue)
   {
     name = pName;
     role = pRole;
-    chassis = pChassis;
     moneyCost = cost;
     maxAmmo = pAmmoMax;
     abilityPowerValue = powerValue;
@@ -123,9 +116,9 @@ public abstract class UnitModel implements Serializable
 
     for( TerrainType terrain : TerrainType.TerrainTypeList )
     {
-      if( (((chassis == ChassisEnum.AIR_HIGH) || (chassis == ChassisEnum.AIR_LOW)) && terrain.healsAir()) ||
-          (((chassis == ChassisEnum.TANK) || (chassis == ChassisEnum.TROOP)) && terrain.healsLand()) ||
-          (((chassis == ChassisEnum.SHIP) || (chassis == ChassisEnum.SUBMERGED)) && terrain.healsSea()) )
+      if( (((role & (AIR_LOW | AIR_HIGH)) > 0) && terrain.healsAir()) ||
+          (((role & (LAND)) > 0) && terrain.healsLand()) ||
+          (((role & (SEA)) > 0) && terrain.healsSea()) )
         healableHabs.add(terrain);
     }
   }
@@ -144,7 +137,8 @@ public abstract class UnitModel implements Serializable
   {
     // Duplicate the other model's transporting abilities.
     holdingCapacity = other.holdingCapacity;
-    holdables.addAll(other.holdables);
+    carryableMask = other.carryableMask;
+    carryableExclusionMask = other.carryableExclusionMask;
 
     // Duplicate other assorted values
     maxHP = other.maxHP;
@@ -265,21 +259,26 @@ public abstract class UnitModel implements Serializable
 
   public boolean isSurfaceUnit()
   {
-    return (ChassisEnum.SHIP == chassis) || (ChassisEnum.TANK == chassis) || (ChassisEnum.TROOP == chassis);
+    return ((role & (LAND | SEA)) > 0) && ((role & SUBSURFACE) == 0);
   }
 
   public boolean isAirUnit()
   {
-    return (ChassisEnum.AIR_HIGH == chassis) || (ChassisEnum.AIR_LOW == chassis);
+    return ((role & (AIR_LOW | AIR_HIGH)) > 0);
   }
 
   public boolean isLandUnit()
   {
-    return (ChassisEnum.TANK == chassis) || (ChassisEnum.TROOP == chassis);
+    return ((role & LAND) > 0);
   }
 
   public boolean isSeaUnit()
   {
-    return (ChassisEnum.SHIP == chassis) || (ChassisEnum.SUBMERGED == chassis);
+    return ((role & SEA) > 0);
+  }
+
+  public boolean isTroop()
+  {
+    return ((role & TROOP) > 0);
   }
 }

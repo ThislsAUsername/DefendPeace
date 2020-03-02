@@ -852,7 +852,7 @@ public class WallyAI implements AIController
 
     log("Evaluating Production needs");
     int budget = myCo.money;
-    UnitModel infModel = myCo.getUnitModel(UnitModel.UnitRoleEnum.INFANTRY);
+    UnitModel infModel = myCo.getUnitModel(UnitModel.TROOP);
 
     // Get a count of enemy forces.
     Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);

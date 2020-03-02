@@ -61,8 +61,8 @@ public class Meridian extends Commander
     super(coInfo, rules);
 
     // Meridian's basic tanks and arty cost the same
-    UnitModel tank = getUnitModel(UnitModel.UnitRoleEnum.ASSAULT);
-    UnitModel arty = getUnitModel(UnitModel.UnitRoleEnum.SIEGE);
+    UnitModel tank = getUnitModel(UnitModel.ASSAULT);
+    UnitModel arty = getUnitModel(UnitModel.SIEGE);
     int costShift = (tank.getCost() - arty.getCost())/2;
     tank.moneyCostAdjustment -= costShift;
     arty.moneyCostAdjustment += costShift;
@@ -179,7 +179,7 @@ public class Meridian extends Commander
       // Lastly, all land vehicles are refreshed and able to move again.
       for( Unit unit : COcast.units )
       {
-        if( unit.model.chassis == UnitModel.ChassisEnum.TANK )
+        if( ((unit.model.role & UnitModel.TANK) > 0) )
         {
           if (unit.isTurnOver)
             COcast.toBeNerfed.add(unit);

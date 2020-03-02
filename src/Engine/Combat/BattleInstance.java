@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Units.Unit;
-import Units.UnitModel.ChassisEnum;
 import Units.WeaponModel;
 
 /**
@@ -184,7 +183,7 @@ public class BattleInstance
       this.isCounter = isCounter;
       combatRef = ref;
       // Air units shouldn't get terrain defense
-      if( ChassisEnum.AIR_HIGH != defender.model.chassis && ChassisEnum.AIR_LOW != defender.model.chassis )
+      if( defender.model.isAirUnit() )
       {
         // getDefLevel returns the number of terrain stars. Since we're using %Def, we need to multiply by 10. However, we do that when we multiply by HP in calculateDamage.
         terrainDefense = battleground.terrainType.getDefLevel();

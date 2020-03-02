@@ -15,7 +15,6 @@ import Engine.GameEvents.ResupplyEvent;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
-import Units.UnitModel.ChassisEnum;
 
 public class Unit implements Serializable
 {
@@ -262,9 +261,12 @@ public class Unit implements Serializable
     return actionSet;
   }
 
-  public boolean hasCargoSpace(ChassisEnum type)
+  public boolean hasCargoSpace(long type)
   {
-    return (model.holdingCapacity > 0 && heldUnits.size() < model.holdingCapacity && model.holdables.contains(type));
+    return (model.holdingCapacity > 0 && 
+            heldUnits.size() < model.holdingCapacity &&
+            ((model.carryableMask & type) > 0) &&
+            ((model.carryableExclusionMask & type) == 0));
   }
 
   /** Grant this unit full fuel and ammunition */
