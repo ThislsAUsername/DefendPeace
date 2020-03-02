@@ -31,7 +31,7 @@ public class DoRUnits extends UnitModelScheme
   @Override
   public String getIconicUnitName()
   {
-    return "Bike";
+    return "Infantry";
   }
 
   @Override

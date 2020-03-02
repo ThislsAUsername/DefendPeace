@@ -497,7 +497,7 @@ public abstract class UnitActionType implements Serializable
     @Override
     public String name()
     {
-      return "BUILD";
+      return "BUILD " + typeToBuild.toString();
     }
   }
 
