@@ -210,7 +210,7 @@ public class Strong extends Commander
       // Lastly, all troops are refreshed and able to move again.
       for( Unit unit : myCommander.units )
       {
-        if( (unit.model.role & UnitModel.TROOP) > 0 )
+        if( unit.model.isAll(UnitModel.TROOP) )
         {
           unit.isTurnOver = false;
         }

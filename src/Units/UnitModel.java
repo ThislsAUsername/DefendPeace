@@ -116,9 +116,9 @@ public abstract class UnitModel implements Serializable
 
     for( TerrainType terrain : TerrainType.TerrainTypeList )
     {
-      if( (((role & (AIR_LOW | AIR_HIGH)) > 0) && terrain.healsAir()) ||
-          (((role & (LAND)) > 0) && terrain.healsLand()) ||
-          (((role & (SEA)) > 0) && terrain.healsSea()) )
+      if( (isAny(AIR_LOW | AIR_HIGH) && terrain.healsAir())  ||
+          (isAny(LAND)               && terrain.healsLand()) ||
+          (isAny(SEA)                && terrain.healsSea())  )
         healableHabs.add(terrain);
     }
   }
@@ -257,28 +257,41 @@ public abstract class UnitModel implements Serializable
     return hasAction;
   }
 
+  public boolean isAny(long input)
+  {
+    return (role & input) > 0;
+  }
+  public boolean isNone(long input)
+  {
+    return (role & input) == 0;
+  }
+  public boolean isAll(long input)
+  {
+    return (role & input) == input;
+  }
+
   public boolean isSurfaceUnit()
   {
-    return ((role & (LAND | SEA)) > 0) && ((role & SUBSURFACE) == 0);
+    return isAny(LAND | SEA) && isNone(SUBSURFACE);
   }
 
   public boolean isAirUnit()
   {
-    return ((role & (AIR_LOW | AIR_HIGH)) > 0);
+    return isAny(AIR_LOW | AIR_HIGH);
   }
 
   public boolean isLandUnit()
   {
-    return ((role & LAND) > 0);
+    return isAll(LAND);
   }
 
   public boolean isSeaUnit()
   {
-    return ((role & SEA) > 0);
+    return isAll(SEA);
   }
 
   public boolean isTroop()
   {
-    return ((role & TROOP) > 0);
+    return isAll(TROOP);
   }
 }

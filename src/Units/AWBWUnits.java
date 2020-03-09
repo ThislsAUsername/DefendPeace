@@ -133,7 +133,7 @@ public class AWBWUnits extends UnitModelScheme
     public UnitModel clone()
     {
       // Create a new model with the given attributes.
-      AWBWUnitModel newModel = new AWBWUnitModel(name, type, role, getCost(), maxAmmo, maxFuel, idleFuelBurn, visionRange, movePower,
+      AWBWUnitModel newModel = new AWBWUnitModel(name, type, role, moneyCost, maxAmmo, maxFuel, idleFuelBurn, visionRange, movePower,
           new MoveType(propulsion), possibleActions, weapons, abilityPowerValue);
 
       newModel.copyValues(this);

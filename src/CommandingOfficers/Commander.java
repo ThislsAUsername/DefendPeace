@@ -187,8 +187,8 @@ public class Commander extends GameEventListener implements Serializable
 
     for( UnitModel iter : unitModels )
     {
-      boolean some = (iter.role & unitRole) > 0;
-      boolean all = (iter.role & unitRole) == unitRole;
+      boolean some = iter.isAny(unitRole);
+      boolean all = iter.isAll(unitRole);
       if( all || (some && matchOnAny) )
       {
         um = iter;
@@ -209,8 +209,8 @@ public class Commander extends GameEventListener implements Serializable
 
     for( UnitModel iter : unitModels )
     {
-      boolean some = (iter.role & unitRole) > 0;
-      boolean all = (iter.role & unitRole) == unitRole;
+      boolean some = iter.isAny(unitRole);
+      boolean all = iter.isAll(unitRole);
       if( all || (some && matchOnAny) )
       {
         models.add(iter);

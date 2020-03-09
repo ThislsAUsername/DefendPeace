@@ -159,7 +159,7 @@ public class TestGameEvent extends TestCase
 
     Unit resident = testMap.getLocation(coords).getResident();
     testPassed &= validate(resident != null, "    Failed to create a unit.");
-    testPassed &= validate(resident.model.role == (UnitModel.TROOP | UnitModel.LAND), "    Unit created with wrong type.");
+    testPassed &= validate(resident.model.isAll(UnitModel.TROOP | UnitModel.LAND), "    Unit created with wrong type.");
     testPassed &= validate(resident.CO == testCo1, "    Unit created with wrong CO.");
     // TODO: Consider moving cost into a new TransferFundsEvent.
     testPassed &= validate(testCo1.money == (startFunds - resident.model.getCost()), "    Unit cost not accounted correctly.");
@@ -190,7 +190,7 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(testMap.getLocation(2, 2).getResident() == null, "   Infantry is still at his old map location.");
     testPassed &= validate(-1 == inf.x && -1 == inf.y, "    Infantry does not think he is in the transport.");
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC is not holding 1 unit, but should be holding Infantry.");
-    testPassed &= validate(apc.heldUnits.get(0).model.role == (UnitModel.TROOP | UnitModel.LAND),
+    testPassed &= validate(apc.heldUnits.get(0).model.isAll(UnitModel.TROOP | UnitModel.LAND),
         "    Held unit is not infantry, but should be.");
 
     // Now see if we can also load the mech into the APC; verify this fails.

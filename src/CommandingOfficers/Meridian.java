@@ -179,7 +179,7 @@ public class Meridian extends Commander
       // Lastly, all land vehicles are refreshed and able to move again.
       for( Unit unit : COcast.units )
       {
-        if( ((unit.model.role & UnitModel.TANK) > 0) )
+        if( unit.model.isAll(UnitModel.TANK) )
         {
           if (unit.isTurnOver)
             COcast.toBeNerfed.add(unit);
