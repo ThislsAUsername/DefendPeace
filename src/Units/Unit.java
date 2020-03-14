@@ -7,7 +7,7 @@ import java.util.Vector;
 import CommandingOfficers.Commander;
 import Engine.GameActionSet;
 import Engine.Path;
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
@@ -15,7 +15,6 @@ import Engine.GameEvents.ResupplyEvent;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
-import Units.UnitModel.ChassisEnum;
 
 public class Unit implements Serializable
 {
@@ -252,7 +251,7 @@ public class Unit implements Serializable
   public ArrayList<GameActionSet> getPossibleActions(GameMap map, Path movePath, boolean ignoreResident)
   {
     ArrayList<GameActionSet> actionSet = new ArrayList<GameActionSet>();
-    for( UnitActionType at : model.possibleActions )
+    for( UnitActionFactory at : model.possibleActions )
     {
       GameActionSet actions = at.getPossibleActions(map, movePath, this, ignoreResident);
       if( null != actions )
@@ -262,9 +261,12 @@ public class Unit implements Serializable
     return actionSet;
   }
 
-  public boolean hasCargoSpace(ChassisEnum type)
+  public boolean hasCargoSpace(long type)
   {
-    return (model.holdingCapacity > 0 && heldUnits.size() < model.holdingCapacity && model.holdables.contains(type));
+    return (model.holdingCapacity > 0 && 
+            heldUnits.size() < model.holdingCapacity &&
+            ((model.carryableMask & type) > 0) &&
+            ((model.carryableExclusionMask & type) == 0));
   }
 
   /** Grant this unit full fuel and ammunition */

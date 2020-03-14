@@ -16,9 +16,14 @@ public class UnitProductionModifier implements COModifier
   private static final long serialVersionUID = 1L;
   private Map<TerrainType, Set<UnitModel>> productionMods = null; 
 
-  public UnitProductionModifier(TerrainType terrain, UnitModel model)
+  public UnitProductionModifier()
   {
     productionMods = new HashMap<TerrainType, Set<UnitModel>>();
+  }
+  
+  public UnitProductionModifier(TerrainType terrain, UnitModel model)
+  {
+    this();
     addProductionPair(terrain, model);
   }
 

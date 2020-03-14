@@ -1,12 +1,12 @@
 package Units;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Vector;
-import Engine.GameAction;
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.ResupplyEvent;
+import Engine.UnitActionLifecycles.ExplodeLifecycle;
+import Engine.UnitActionLifecycles.ResupplyLifecycle;
+import Engine.UnitActionLifecycles.TransformLifecycle;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.MoveTypes.Flight;
@@ -91,12 +91,12 @@ public class AWBWUnits extends UnitModelScheme
 
     // Handle transforming units separately, since we don't want two buy-entries
     UnitModel subsub = new SubSubModel();
-    sub.possibleActions.add(new UnitActionType.Transform(subsub, "DIVE"));
-    subsub.possibleActions.add(new UnitActionType.Transform(sub, "RISE"));
+    sub.possibleActions.add(new TransformLifecycle.TransformFactory(subsub, "DIVE"));
+    subsub.possibleActions.add(new TransformLifecycle.TransformFactory(sub, "RISE"));
     awbwModels.unitModels.add(subsub);
     UnitModel sneaky = new StealthHideModel();
-    stealth.possibleActions.add(new UnitActionType.Transform(sneaky, "HIDE"));
-    sneaky.possibleActions.add(new UnitActionType.Transform(stealth, "APPEAR"));
+    stealth.possibleActions.add(new TransformLifecycle.TransformFactory(sneaky, "HIDE"));
+    sneaky.possibleActions.add(new TransformLifecycle.TransformFactory(stealth, "APPEAR"));
     awbwModels.unitModels.add(sneaky);
 
     return awbwModels;
@@ -116,40 +116,27 @@ public class AWBWUnits extends UnitModelScheme
     private static final long serialVersionUID = 1L;
     public AWBWUnitEnum type;
 
-    public AWBWUnitModel(String pName, AWBWUnitEnum pType, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
-        int pMovePower, MoveType pPropulsion, UnitActionType[] actions, WeaponModel[] weapons, double starValue)
+    public AWBWUnitModel(String pName, AWBWUnitEnum pType, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
+        int pMovePower, MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] weapons, double starValue)
     {
-      super(pName, pRole, pChassis, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
+      super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
       type = pType;
     }
-    public AWBWUnitModel(String pName, AWBWUnitEnum pType, UnitRoleEnum pRole, ChassisEnum pChassis, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
-        int pMovePower, MoveType pPropulsion, ArrayList<UnitActionType> actions, ArrayList<WeaponModel> weapons, double starValue)
+    public AWBWUnitModel(String pName, AWBWUnitEnum pType, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
+        int pMovePower, MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> weapons, double starValue)
     {
-      super(pName, pRole, pChassis, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
+      super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
       type = pType;
     }
 
     @Override
     public UnitModel clone()
     {
-      // Make a copy of your weapon types.
-      if( weapons != null )
-      {
-        weapons = new ArrayList<WeaponModel>();
-        for( WeaponModel weapon : weapons )
-        {
-          weapons.add(weapon.clone());
-        }
-      }
-
       // Create a new model with the given attributes.
-      AWBWUnitModel newModel = new AWBWUnitModel(name, type, role, chassis, getCost(), maxAmmo, maxFuel, idleFuelBurn, visionRange, movePower,
+      AWBWUnitModel newModel = new AWBWUnitModel(name, type, role, moneyCost, maxAmmo, maxFuel, idleFuelBurn, visionRange, movePower,
           new MoveType(propulsion), possibleActions, weapons, abilityPowerValue);
 
-      // Duplicate the other model's transporting abilities.
-      newModel.holdingCapacity = holdingCapacity;
-      newModel.holdables.addAll(holdables);
-
+      newModel.copyValues(this);
       return newModel;
     }
 
@@ -163,6 +150,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class InfantryModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = TROOP | LAND;
+    
     private static final int UNIT_COST = 1000;
     private static final double STAR_VALUE = 0.4;
     private static final int MAX_FUEL = 99;
@@ -172,12 +161,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 3;
 
     private static final MoveType moveType = new FootStandard();
-    private static final UnitActionType[] actions = UnitActionType.FOOTSOLDIER_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.FOOTSOLDIER_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.InfantryMGun() };
 
     public InfantryModel()
     {
-      super("Infantry", AWBWUnitEnum.INFANTRY, UnitRoleEnum.INFANTRY, ChassisEnum.TROOP, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Infantry", AWBWUnitEnum.INFANTRY, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -185,6 +174,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class MechModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = MECH | TROOP | LAND;
+    
     private static final int UNIT_COST = 3000;
     private static final double STAR_VALUE = 0.4;
     private static final int MAX_FUEL = 99;
@@ -194,12 +185,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 2;
 
     private static final MoveType moveType = new FootMech();
-    private static final UnitActionType[] actions = UnitActionType.FOOTSOLDIER_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.FOOTSOLDIER_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.MechZooka(), new AWBWWeapons.MechMGun() };
 
     public MechModel()
     {
-      super("Mech", AWBWUnitEnum.MECH, UnitRoleEnum.MECH, ChassisEnum.TROOP, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
+      super("Mech", AWBWUnitEnum.MECH, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
           MOVE_POWER, moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -207,6 +198,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class APCModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = TRANSPORT | TANK | LAND;
+    
     private static final int UNIT_COST = 5000;
     private static final double STAR_VALUE = 0.8;
     private static final int MAX_FUEL = 70;
@@ -215,14 +208,14 @@ public class AWBWUnits extends UnitModelScheme
     private static final int VISION_RANGE = 1;
     private static final int MOVE_POWER = 6;
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.APC_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.APC_ACTIONS;
 
     public APCModel()
     {
-      super("APC", AWBWUnitEnum.APC, UnitRoleEnum.TRANSPORT, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+      super("APC", AWBWUnitEnum.APC, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0], STAR_VALUE);
       holdingCapacity = 1;
-      holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.TROOP));
+      carryableMask = TROOP;
     }
 
     /**
@@ -232,7 +225,7 @@ public class AWBWUnits extends UnitModelScheme
     public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
     {
       GameEventQueue events = new GameEventQueue();
-      events.addAll(new GameAction.ResupplyAction(self).getEvents(map));
+      events.addAll(new ResupplyLifecycle.ResupplyAction(self).getEvents(map));
       return events;
     }
   }
@@ -240,6 +233,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class ReconModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = RECON | TANK | LAND;
+    
     private static final int UNIT_COST = 4000;
     private static final double STAR_VALUE = 1.0;
     private static final int MAX_FUEL = 80;
@@ -249,12 +244,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 8;
 
     private static final MoveType moveType = new Tires();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.ReconMGun() };
 
     public ReconModel()
     {
-      super("Recon", AWBWUnitEnum.RECON, UnitRoleEnum.RECON, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
+      super("Recon", AWBWUnitEnum.RECON, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
           MOVE_POWER, moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -262,6 +257,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class TankModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = ASSAULT | TANK | LAND;
+    
     private static final int UNIT_COST = 7000;
     private static final double STAR_VALUE = 1.0;
     private static final int MAX_FUEL = 70;
@@ -271,12 +268,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.TankCannon(), new AWBWWeapons.TankMGun() };
 
     public TankModel()
     {
-      super("Tank", AWBWUnitEnum.TANK, UnitRoleEnum.ASSAULT, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+      super("Tank", AWBWUnitEnum.TANK, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, weapons, STAR_VALUE);
     }
   }
@@ -284,6 +281,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class MDTankModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = ASSAULT | TANK | LAND;
+    
     private static final int UNIT_COST = 16000;
     private static final double STAR_VALUE = 1.6;
     private static final int MAX_FUEL = 50;
@@ -293,12 +292,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.MDTankCannon(), new AWBWWeapons.MDTankMGun() };
 
     public MDTankModel()
     {
-      super("Md Tank", AWBWUnitEnum.MD_TANK, UnitRoleEnum.ASSAULT, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Md Tank", AWBWUnitEnum.MD_TANK, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -306,6 +305,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class NeotankModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = ASSAULT | TANK | LAND;
+    
     private static final int UNIT_COST = 22000;
     private static final double STAR_VALUE = 1.8;
     private static final int MAX_FUEL = 99;
@@ -315,12 +316,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.NeoCannon(), new AWBWWeapons.NeoMGun() };
 
     public NeotankModel()
     {
-      super("Neotank", AWBWUnitEnum.NEOTANK, UnitRoleEnum.ASSAULT, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Neotank", AWBWUnitEnum.NEOTANK, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -328,6 +329,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class MegatankModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = ASSAULT | TANK | LAND;
+    
     private static final int UNIT_COST = 28000;
     private static final double STAR_VALUE = 2.2;
     private static final int MAX_FUEL = 50;
@@ -337,12 +340,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 4;
 
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.MegaCannon(), new AWBWWeapons.MegaMGun() };
 
     public MegatankModel()
     {
-      super("Megatank", AWBWUnitEnum.MEGATANK, UnitRoleEnum.ASSAULT, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Megatank", AWBWUnitEnum.MEGATANK, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -350,6 +353,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class ArtilleryModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = SIEGE | TANK | LAND;
+    
     private static final int UNIT_COST = 6000;
     private static final double STAR_VALUE = 1.0;
     private static final int MAX_FUEL = 50;
@@ -359,12 +364,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.ArtilleryCannon() };
 
     public ArtilleryModel()
     {
-      super("Artillery", AWBWUnitEnum.ARTILLERY, UnitRoleEnum.SIEGE, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Artillery", AWBWUnitEnum.ARTILLERY, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -372,6 +377,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class RocketsModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = SIEGE | TANK | LAND;
+    
     private static final int UNIT_COST = 15000;
     private static final double STAR_VALUE = 1.4;
     private static final int MAX_FUEL = 50;
@@ -381,12 +388,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new Tires();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.RocketRockets() };
 
     public RocketsModel()
     {
-      super("Rockets", AWBWUnitEnum.ROCKETS, UnitRoleEnum.SIEGE, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Rockets", AWBWUnitEnum.ROCKETS, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -394,6 +401,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class PiperunnerModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = SIEGE | TANK | LAND;
+    
     private static final int UNIT_COST = 20000;
     private static final double STAR_VALUE = 2.0;
     private static final int MAX_FUEL = 99;
@@ -403,12 +412,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 9;
 
     private static final MoveType moveType = new MoveType();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.PipeGun() };
 
     public PiperunnerModel()
     {
-      super("Piperunner", AWBWUnitEnum.PIPERUNNER, UnitRoleEnum.SIEGE, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Piperunner", AWBWUnitEnum.PIPERUNNER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
       propulsion.setMoveCost(TerrainType.PILLAR, 1);
       propulsion.setMoveCost(TerrainType.FACTORY, 1);
@@ -418,6 +427,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class AntiAirModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = SURFACE_TO_AIR | TANK | LAND;
+    
     private static final int UNIT_COST = 8000;
     private static final double STAR_VALUE = 1.0;
     private static final int MAX_FUEL = 60;
@@ -426,12 +437,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int VISION_RANGE = 2;
     private static final int MOVE_POWER = 6;
     private static final MoveType moveType = new Tread();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.AntiAirMGun() };
 
     public AntiAirModel()
     {
-      super("Anti-Air", AWBWUnitEnum.ANTI_AIR, UnitRoleEnum.ANTI_AIR, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Anti-Air", AWBWUnitEnum.ANTI_AIR, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -439,6 +450,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class MobileSAMModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = SIEGE | SURFACE_TO_AIR | TANK | LAND;
+    
     private static final int UNIT_COST = 12000;
     private static final double STAR_VALUE = 1.4;
     private static final int MAX_FUEL = 50;
@@ -448,12 +461,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 4;
 
     private static final MoveType moveType = new Tires();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.MobileSAMWeapon() };
 
     public MobileSAMModel()
     {
-      super("Mobile SAM", AWBWUnitEnum.MOBILESAM, UnitRoleEnum.ANTI_AIR, ChassisEnum.TANK, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Mobile SAM", AWBWUnitEnum.MOBILESAM, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -463,6 +476,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class TCopterModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = TRANSPORT | HOVER | AIR_LOW;
+    
     private static final int UNIT_COST = 5000;
     private static final double STAR_VALUE = 1.0;
     private static final int MAX_FUEL = 99;
@@ -472,20 +487,22 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.TRANSPORT_ACTIONS;
 
     public TCopterModel()
     {
-      super("T-Copter", AWBWUnitEnum.T_COPTER, UnitRoleEnum.TRANSPORT, ChassisEnum.AIR_LOW, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("T-Copter", AWBWUnitEnum.T_COPTER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, new WeaponModel[0], STAR_VALUE);
       holdingCapacity = 1;
-      holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.TROOP));
+      carryableMask = TROOP;
     }
   }
 
   public static class BCopterModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = AIR_TO_SURFACE | ASSAULT | HOVER | AIR_LOW;
+    
     private static final int UNIT_COST = 9000;
     private static final double STAR_VALUE = 1.2;
     private static final int MAX_FUEL = 99;
@@ -495,12 +512,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.CopterRockets(), new AWBWWeapons.CopterMGun() };
 
     public BCopterModel()
     {
-      super("B-Copter", AWBWUnitEnum.B_COPTER, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_LOW, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("B-Copter", AWBWUnitEnum.B_COPTER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -508,6 +525,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class BomberModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = AIR_TO_SURFACE | ASSAULT | JET | AIR_HIGH;
+    
     private static final int UNIT_COST = 22000;
     private static final double STAR_VALUE = 1.8;
     private static final int MAX_FUEL = 99;
@@ -517,12 +536,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 7;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.BomberBombs() };
 
     public BomberModel()
     {
-      super("Bomber", AWBWUnitEnum.BOMBER, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Bomber", AWBWUnitEnum.BOMBER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -530,6 +549,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class FighterModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = AIR_TO_AIR | JET | AIR_HIGH;
+    
     private static final int UNIT_COST = 20000;
     private static final double STAR_VALUE = 1.8;
     private static final int MAX_FUEL = 99;
@@ -539,12 +560,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 9;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.FighterMissiles() };
 
     public FighterModel()
     {
-      super("Fighter", AWBWUnitEnum.FIGHTER, UnitRoleEnum.AIR_SUPERIORITY, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Fighter", AWBWUnitEnum.FIGHTER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -552,6 +573,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class StealthModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = AIR_TO_SURFACE | AIR_TO_AIR | ASSAULT | JET | AIR_HIGH;
+    
     private static final int UNIT_COST = 24000;
     private static final double STAR_VALUE = 2.0;
     private static final int MAX_FUEL = 60;
@@ -561,12 +584,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.StealthShots() };
 
     public StealthModel()
     {
-      super("Stealth", AWBWUnitEnum.STEALTH, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Stealth", AWBWUnitEnum.STEALTH, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -588,6 +611,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class BBombModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = JET | AIR_HIGH;
+    
     private static final int UNIT_COST = 25000;
     private static final double STAR_VALUE = 0.6;
     private static final int MAX_FUEL = 45;
@@ -600,14 +625,14 @@ public class AWBWUnits extends UnitModelScheme
     private static final int EXPLODE_POWER = 5;
 
     private static final MoveType moveType = new Flight();
-    private static final UnitActionType[] actions = UnitActionType.BASIC_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.BASIC_ACTIONS;
     private static final WeaponModel[] weapons = {};
 
     public BBombModel()
     {
-      super("BBomb", AWBWUnitEnum.BBOMB, UnitRoleEnum.AIR_ASSAULT, ChassisEnum.AIR_HIGH, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("BBomb", AWBWUnitEnum.BBOMB, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
-      possibleActions.add(0, new UnitActionType.Explode(EXPLODE_POWER, EXPLODE_RADIUS));
+      possibleActions.add(0, new ExplodeLifecycle.ExplodeFactory(EXPLODE_POWER, EXPLODE_RADIUS));
     }
   }
 
@@ -616,6 +641,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class BBoatModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = TRANSPORT | SHIP | SEA;
+    
     private static final int UNIT_COST = 7500;
     private static final double STAR_VALUE = 1.0;
     private static final int MAX_FUEL = 60;
@@ -625,21 +652,23 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 7;
 
     private static final MoveType moveType = new FloatLight();
-    private static final UnitActionType[] actions = UnitActionType.TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.TRANSPORT_ACTIONS;
 
     public BBoatModel()
     {
-      super("BBoat", AWBWUnitEnum.BBOAT, UnitRoleEnum.TRANSPORT, ChassisEnum.SHIP, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+      super("BBoat", AWBWUnitEnum.BBOAT, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0], STAR_VALUE);
       holdingCapacity = 2;
-      holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.TROOP));
-      possibleActions.add(0, UnitActionType.REPAIR_UNIT);
+      carryableMask = TROOP;
+      possibleActions.add(0, UnitActionFactory.REPAIR_UNIT);
     }
   }
 
   public static class LanderModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = TRANSPORT | SHIP | SEA;
+
     private static final int UNIT_COST = 12000;
     private static final double STAR_VALUE = 1.2;
     private static final int MAX_FUEL = 99;
@@ -649,20 +678,22 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new FloatLight();
-    private static final UnitActionType[] actions = UnitActionType.TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.TRANSPORT_ACTIONS;
 
     public LanderModel()
     {
-      super("Lander", AWBWUnitEnum.LANDER, UnitRoleEnum.TRANSPORT, ChassisEnum.SHIP, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, new WeaponModel[0], STAR_VALUE);
+      super("Lander", AWBWUnitEnum.LANDER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+          moveType, actions, new WeaponModel[0], STAR_VALUE);
       holdingCapacity = 2;
-      holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.TROOP, ChassisEnum.TANK));
+      carryableMask = TROOP | TANK;
     }
   }
 
   public static class SubModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = SHIP | SEA;
+
     private static final int UNIT_COST = 20000;
     private static final double STAR_VALUE = 1.8;
     private static final int MAX_FUEL = 60;
@@ -672,12 +703,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new FloatHeavy();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.SubTorpedoes() };
 
     public SubModel()
     {
-      super("Sub", AWBWUnitEnum.SUB, UnitRoleEnum.ASSAULT, ChassisEnum.SHIP, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+      super("Sub", AWBWUnitEnum.SUB, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, weapons, STAR_VALUE);
     }
   }
@@ -691,7 +722,7 @@ public class AWBWUnits extends UnitModelScheme
     {
       super();
       type = AWBWUnitEnum.SUB_SUB;
-      chassis = ChassisEnum.SUBMERGED;
+      role |= SUBSURFACE;
       idleFuelBurn = IDLE_FUEL_BURN;
       hidden = true;
     }
@@ -700,6 +731,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class BattleshipModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = SIEGE | SHIP | SEA;
+    
     private static final int UNIT_COST = 28000;
     private static final double STAR_VALUE = 2.2;
     private static final int MAX_FUEL = 99;
@@ -709,12 +742,12 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new FloatHeavy();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_VEHICLE_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.BattleshipCannon() };
 
     public BattleshipModel()
     {
-      super("Battleship", AWBWUnitEnum.BATTLESHIP, UnitRoleEnum.SIEGE, ChassisEnum.SHIP, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Battleship", AWBWUnitEnum.BATTLESHIP, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -722,6 +755,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class CarrierModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = SIEGE | SURFACE_TO_AIR | TRANSPORT | SHIP | SEA;
+    
     private static final int UNIT_COST = 30000;
     private static final double STAR_VALUE = 2.2;
     private static final int MAX_FUEL = 99;
@@ -731,15 +766,15 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new FloatHeavy();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_TRANSPORT_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.CarrierMissiles() };
 
     public CarrierModel()
     {
-      super("Carrier", AWBWUnitEnum.CARRIER, UnitRoleEnum.TRANSPORT, ChassisEnum.SHIP, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Carrier", AWBWUnitEnum.CARRIER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
       holdingCapacity = 2;
-      holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.AIR_LOW, ChassisEnum.AIR_HIGH));
+      carryableMask = AIR_LOW | AIR_HIGH;
     }
 
     /** Carriers re-supply their cargo at the beginning of every turn. Make it so. */
@@ -757,6 +792,8 @@ public class AWBWUnits extends UnitModelScheme
   public static class CruiserModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = SIEGE | SURFACE_TO_AIR | SHIP | SEA;
+    
     private static final int UNIT_COST = 18000;
     private static final double STAR_VALUE = 1.6;
     private static final int MAX_FUEL = 99;
@@ -766,15 +803,15 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new FloatHeavy();
-    private static final UnitActionType[] actions = UnitActionType.COMBAT_TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_TRANSPORT_ACTIONS;
     private static final WeaponModel[] weapons = { new AWBWWeapons.CruiserTorpedoes(), new AWBWWeapons.CruiserMGun() };
 
     public CruiserModel()
     {
-      super("Cruiser", AWBWUnitEnum.CRUISER, UnitRoleEnum.ANTI_AIR, ChassisEnum.SHIP, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Cruiser", AWBWUnitEnum.CRUISER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
       holdingCapacity = 2;
-      holdables = new Vector<ChassisEnum>(Arrays.asList(ChassisEnum.AIR_LOW));
+      carryableMask = AIR_LOW;
     }
   }
 

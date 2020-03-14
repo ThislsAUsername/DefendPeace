@@ -13,6 +13,7 @@ import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.UnitActionLifecycles.CaptureLifecycle;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.MapLibrary;
@@ -20,7 +21,7 @@ import Terrain.MapMaster;
 import Terrain.MapWindow;
 import Terrain.TerrainType;
 import Units.Unit;
-import Units.UnitModel.UnitRoleEnum;
+import Units.UnitModel;
 
 public class TestCommanderAve extends TestCase
 {
@@ -68,8 +69,8 @@ public class TestCommanderAve extends TestCase
     testPassed &= validate(testMap.getEnvironment(city).terrainType == TerrainType.CITY, "    City location is not a city!");
     testPassed &= validate(testMap.getEnvironment(city).weatherType == Weathers.CLEAR, "    Weather is not clear at start!");
 
-    Unit infantry = addUnit(testMap, Ave, Units.UnitModel.UnitRoleEnum.INFANTRY, city.xCoord, city.yCoord);
-    GameAction capture = new GameAction.CaptureAction(testMap, infantry, Utils.findShortestPath(infantry, city, testMap));
+    Unit infantry = addUnit(testMap, Ave, UnitModel.TROOP, city.xCoord, city.yCoord);
+    GameAction capture = new CaptureLifecycle.CaptureAction(testMap, infantry, Utils.findShortestPath(infantry, city, testMap));
 
     // Give it the ol' one-two.
     infantry.initTurn(testMap);
@@ -151,9 +152,9 @@ public class TestCommanderAve extends TestCase
     // Activate Ave's abilities, and make sure we see the intended effects.
     // We'll also add some units to see Glacio's damage and tree-clearing effects.
     XYCoord forestTile = new XYCoord(8, 4);
-    addUnit(testMap, Ave, UnitRoleEnum.INFANTRY, 8, 5);
-    addUnit(testMap, Ave, UnitRoleEnum.INFANTRY, 6, 5);
-    Unit patchInf = addUnit(testMap, Patch, UnitRoleEnum.INFANTRY, 7, 5);
+    addUnit(testMap, Ave, UnitModel.TROOP, 8, 5);
+    addUnit(testMap, Ave, UnitModel.TROOP, 6, 5);
+    Unit patchInf = addUnit(testMap, Patch, UnitModel.TROOP, 7, 5);
     testPassed &= validate( testMap.getEnvironment(forestTile).terrainType == TerrainType.FOREST, "    " + forestTile + " is not a Forest, but should be!");
 
     //Ave.log(true);

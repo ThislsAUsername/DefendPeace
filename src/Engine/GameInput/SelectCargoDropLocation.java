@@ -6,6 +6,7 @@ import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.XYCoord;
 import Engine.GameInput.GameInputHandler.InputType;
+import Engine.UnitActionLifecycles.UnloadLifecycle;
 import Units.Unit;
 
 /************************************************************
@@ -49,7 +50,7 @@ class SelectCargoDropLocation extends GameInputState<XYCoord>
       else
       {
         // Since we can't drop any additional units, build the GameAction and move to ActionReady.
-        GameAction ga = new GameAction.UnloadAction(myStateData.unitActor, myStateData.path, myStateData.unitLocationMap);
+        GameAction ga = new UnloadLifecycle.UnloadAction(myStateData.unitActor, myStateData.path, myStateData.unitLocationMap);
 
         // Override the current ActionSet with a new one, since we just redefined it.
         myStateData.actionSet = new GameActionSet( ga, true );

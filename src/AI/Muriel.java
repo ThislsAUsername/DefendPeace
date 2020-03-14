@@ -14,10 +14,12 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
+import Engine.UnitActionLifecycles.CaptureLifecycle;
+import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.GameMap;
@@ -239,7 +241,7 @@ public class Muriel implements AIController
       if( unit.getCaptureProgress() > 0 )
       {
         log(String.format("%s is currently capturing; continue", unit.toStringWithLocation()));
-        queuedActions.offer(new GameAction.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
+        queuedActions.offer(new CaptureLifecycle.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
         break;
       }
 
@@ -253,7 +255,7 @@ public class Muriel implements AIController
         for( GameActionSet set : actionSet )
         {
           // Go ahead and attack someone as long as we don't have to move.
-          if( set.getSelected().getType() == UnitActionType.ATTACK )
+          if( set.getSelected().getType() == UnitActionFactory.ATTACK )
           {
             for( GameAction action : set.getGameActions() )
             {
@@ -271,7 +273,7 @@ public class Muriel implements AIController
         if( queuedActions.isEmpty() )
         {
           // We didn't find someone adjacent to smash, so just sit tight for now.
-          queuedActions.offer(new GameAction.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
+          queuedActions.offer(new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
         }
         break;
       } // ~Continue repairing if in a depot.
@@ -328,11 +330,11 @@ public class Muriel implements AIController
       }
 
       // Find all the things we can do from here.
-      Map<UnitActionType, ArrayList<GameAction> > unitActionsByType = AIUtils.getAvailableUnitActionsByType(unit, gameMap);
+      Map<UnitActionFactory, ArrayList<GameAction> > unitActionsByType = AIUtils.getAvailableUnitActionsByType(unit, gameMap);
 
       //////////////////////////////////////////////////////////////////
       // Look for advantageous attack actions.
-      ArrayList<GameAction> attackActions = unitActionsByType.get(UnitActionType.ATTACK);
+      ArrayList<GameAction> attackActions = unitActionsByType.get(UnitActionFactory.ATTACK);
       GameAction maxCarnageAction = null;
       double maxDamageValue = 0;
       if( null != attackActions )
@@ -365,7 +367,7 @@ public class Muriel implements AIController
 
       //////////////////////////////////////////////////////////////////
       // See if there's something to capture (but only if we are moderately healthy).
-      ArrayList<GameAction> captureActions = unitActionsByType.get(UnitActionType.CAPTURE);
+      ArrayList<GameAction> captureActions = unitActionsByType.get(UnitActionFactory.CAPTURE);
       if( null != captureActions && !captureActions.isEmpty() && unit.getHP() >= 7 )
       {
         GameAction capture = captureActions.get(0);
@@ -377,7 +379,7 @@ public class Muriel implements AIController
       //////////////////////////////////////////////////////////////////
       // We didn't find an immediate ATTACK or CAPTURE action we can do.
       // Things that can capture; go find something to capture, if you are moderately healthy.
-      if( unit.model.hasActionType(UnitActionType.CAPTURE) && (unit.getHP() >= 7) )
+      if( unit.model.hasActionType(UnitActionFactory.CAPTURE) && (unit.getHP() >= 7) )
       {
         log(String.format("Seeking capture target for %s", unit.toStringWithLocation()));
         XYCoord unitCoords = new XYCoord(unit.x, unit.y);
@@ -398,7 +400,7 @@ public class Muriel implements AIController
 
       //////////////////////////////////////////////////////////////////
       // Everyone else, go hunting.
-      if( queuedActions.isEmpty() && unit.model.hasActionType(UnitActionType.ATTACK) )
+      if( queuedActions.isEmpty() && unit.model.hasActionType(UnitActionFactory.ATTACK) )
       {
         log(String.format("Seeking attack target for %s", unit.toStringWithLocation()));
         ArrayList<XYCoord> enemyLocations = AIUtils.findEnemyUnits(myCo, gameMap); // Get enemy locations.
@@ -430,7 +432,7 @@ public class Muriel implements AIController
         // Couldn't find any capture or attack actions. This unit is
         // either a transport, or stranded on an island somewhere.
         log(String.format("Could not find an action for %s. Waiting", unit.toStringWithLocation()));
-        queuedActions.offer(new GameAction.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
+        queuedActions.offer(new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
       }
     } // ~Unit action loop
 
@@ -587,7 +589,7 @@ public class Muriel implements AIController
       if(useDamageRatio) log("  High funds - sorting units by damage ratio instead of cost effectiveness.");
 
       // If we are low on grunts, make sure we save money to build more.
-      UnitModel infModel = myCo.getUnitModel(UnitModel.UnitRoleEnum.INFANTRY);
+      UnitModel infModel = myCo.getUnitModel(UnitModel.TROOP);
       int costBuffer = 0;
       if( !myUnitCounts.containsKey(infModel) || (myUnitCounts.get(infModel) < (myCo.units.size() * INFANTRY_PROPORTION)) )
       {
@@ -735,7 +737,7 @@ public class Muriel implements AIController
     } // ~while( still choosing units to build )
 
     // Build infantry from any remaining facilities.
-    UnitModel infModel = myCo.getUnitModel(UnitModel.UnitRoleEnum.INFANTRY);
+    UnitModel infModel = myCo.getUnitModel(UnitModel.TROOP);
     while( (budget >= infModel.getCost()) && (CPI.availableUnitModels.contains(infModel)) )
     {
       Location loc = CPI.getLocationToBuild(infModel);

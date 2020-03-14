@@ -4,7 +4,6 @@ import CommandingOfficers.Commander;
 import Terrain.GameMap;
 import Terrain.Location;
 import Units.Unit;
-import Units.UnitModel.ChassisEnum;
 
 /** Convenience class to collate and format visible game state info for a given CO */
 public class COStateInfo // TODO: Consider making this class parse data for all COs at once
@@ -34,7 +33,7 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
         if( null != resident && resident.CO == viewed )
         {
           unitCount++;
-          if( resident.model.chassis != ChassisEnum.TROOP )
+          if( resident.model.isTroop() )
             vehCount++;
           unitFunds += resident.model.getCost() * resident.getHP() / resident.model.maxHP;
         }

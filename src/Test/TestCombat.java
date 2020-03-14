@@ -9,11 +9,12 @@ import Engine.Utils;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.UnitActionLifecycles.BattleLifecycle;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
 import Units.Unit;
-import Units.UnitModel.UnitRoleEnum;
+import Units.UnitModel;
 
 public class TestCombat extends TestCase
 {
@@ -54,15 +55,15 @@ public class TestCombat extends TestCase
   private boolean testUnitDeath()
   {
     // Add our combatants
-    Unit mechA = addUnit(testMap, testCo1, UnitRoleEnum.MECH, 1, 1);
-    Unit infB = addUnit(testMap, testCo2, UnitRoleEnum.INFANTRY, 1, 2);
+    Unit mechA = addUnit(testMap, testCo1, UnitModel.MECH, 1, 1);
+    Unit infB = addUnit(testMap, testCo2, UnitModel.TROOP, 1, 2);
     mechA.initTurn(testMap); // Make sure he is ready to move.
 
     // Make sure the infantry will die with one attack
     infB.damageHP(7);
 
     // Execute inf- I mean, the action.
-    performGameAction(new GameAction.AttackAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2),
+    performGameAction(new BattleLifecycle.BattleAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2),
         testMap);
 
     // Check that the mech is undamaged, and that the infantry is no longer with us.
@@ -79,8 +80,8 @@ public class TestCombat extends TestCase
   private boolean testTeamAttack()
   {
     // Add our combatants
-    Unit mechA = addUnit(testMap, testCo1, UnitRoleEnum.MECH, 1, 1);
-    Unit infB = addUnit(testMap, testCo2, UnitRoleEnum.INFANTRY, 1, 2);
+    Unit mechA = addUnit(testMap, testCo1, UnitModel.MECH, 1, 1);
+    Unit infB = addUnit(testMap, testCo2, UnitModel.TROOP, 1, 2);
     
     // Make them friends
     testCo1.team = 0;
@@ -90,7 +91,7 @@ public class TestCombat extends TestCase
     infB.damageHP(7);
 
     // Hug the infantry in a friendly manner.
-    performGameAction(new GameAction.AttackAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2),
+    performGameAction(new BattleLifecycle.BattleAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2),
         testMap);
 
     // Check that the mech is undamaged, and that the infantry is still with us.
@@ -110,32 +111,32 @@ public class TestCombat extends TestCase
   private boolean testIndirectAttacks()
   {
     // Add our combatants
-    Unit offender = addUnit(testMap, testCo1, UnitRoleEnum.SIEGE, 6, 5);
-    Unit defender = addUnit(testMap, testCo2, UnitRoleEnum.MECH, 6, 6);
-    Unit victim = addUnit(testMap, testCo2, UnitRoleEnum.SIEGE, 6, 7);
+    Unit offender = addUnit(testMap, testCo1, UnitModel.SIEGE, 6, 5);
+    Unit defender = addUnit(testMap, testCo2, UnitModel.MECH, 6, 6);
+    Unit victim = addUnit(testMap, testCo2, UnitModel.SIEGE, 6, 7);
 
     // offender will attempt to shoot point blank. This should fail, since artillery cannot direct fire.
     offender.initTurn(testMap); // Make sure he is ready to move.
-    performGameAction(new GameAction.AttackAction(testMap, offender, Utils.findShortestPath(offender, 6, 5, testMap), 6, 6),
+    performGameAction(new BattleLifecycle.BattleAction(testMap, offender, Utils.findShortestPath(offender, 6, 5, testMap), 6, 6),
         testMap);
     boolean testPassed = validate(defender.getPreciseHP() == 10, "    Artillery dealt damage at range 1. Artillery range should be 2-3.");
     
     // offender will attempt to move and fire. This should fail, since artillery cannot fire after moving.
     offender.initTurn(testMap);
-    performGameAction(new GameAction.AttackAction(testMap, offender, Utils.findShortestPath(offender, 6, 4, testMap), 6, 6),
+    performGameAction(new BattleLifecycle.BattleAction(testMap, offender, Utils.findShortestPath(offender, 6, 4, testMap), 6, 6),
         testMap);
     testPassed &= validate(defender.getPreciseHP() == 10, "    Artillery dealt damage despite moving before firing.");
 
     // offender will shoot victim.
     offender.initTurn(testMap); // Make sure he is ready to move.
-    performGameAction(new GameAction.AttackAction(testMap, offender, Utils.findShortestPath(offender, 6, 5, testMap), 6, 7),
+    performGameAction(new BattleLifecycle.BattleAction(testMap, offender, Utils.findShortestPath(offender, 6, 5, testMap), 6, 7),
         testMap);
     testPassed &= validate(victim.getPreciseHP() != 10, "    Artillery failed to do damage at a range of 2, without moving.");
     testPassed &= validate(offender.getPreciseHP() == 10, "    Artillery received a counterattack from a range of 2. Counterattacks should only be possible at range 1.");
 
     // defender will attack offender.
     defender.initTurn(testMap); // Make sure he is ready to move.
-    performGameAction(new GameAction.AttackAction(testMap, defender, Utils.findShortestPath(defender, 6, 6, testMap), 6, 5),
+    performGameAction(new BattleLifecycle.BattleAction(testMap, defender, Utils.findShortestPath(defender, 6, 6, testMap), 6, 5),
         testMap);
     
     // check that offender is damaged and defender is not.
@@ -154,12 +155,12 @@ public class TestCombat extends TestCase
   private boolean testMoveAttack()
   {
     // Add our combatants
-    Unit attacker = addUnit(testMap, testCo1, UnitRoleEnum.INFANTRY, 1, 1);
-    Unit defender = addUnit(testMap, testCo2, UnitRoleEnum.MECH, 1, 3);
+    Unit attacker = addUnit(testMap, testCo1, UnitModel.TROOP, 1, 1);
+    Unit defender = addUnit(testMap, testCo2, UnitModel.MECH, 1, 3);
 
     // Execute inf- I mean, the action.
     attacker.initTurn(testMap); // Make sure he is ready to move.
-    performGameAction(new GameAction.AttackAction(testMap, attacker, Utils.findShortestPath(attacker, 1, 2, testMap), 1, 3), testMap);
+    performGameAction(new BattleLifecycle.BattleAction(testMap, attacker, Utils.findShortestPath(attacker, 1, 2, testMap), 1, 3), testMap);
 
     // Check that the mech is undamaged, and that the infantry is no longer with us.
     boolean testPassed = validate(defender.getHP() < 10, "    Defender took no damage.");
@@ -180,15 +181,15 @@ public class TestCombat extends TestCase
     boolean testPassed = true;
 
     // Add our combatants
-    Unit mechA = addUnit(testMap, testCo1, UnitRoleEnum.MECH, 1, 1);
-    Unit infB = addUnit(testMap, testCo2, UnitRoleEnum.INFANTRY, 1, 2);
+    Unit mechA = addUnit(testMap, testCo1, UnitModel.MECH, 1, 1);
+    Unit infB = addUnit(testMap, testCo2, UnitModel.TROOP, 1, 2);
 
     // Make sure the infantry will die with one attack
     infB.damageHP(7);
 
     // Create the attack action so we can predict the unit will die, and his CO will therefore be defeated.
     mechA.initTurn(testMap); // Make sure he is ready to act.
-    GameAction battleAction = new GameAction.AttackAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2);
+    GameAction battleAction = new BattleLifecycle.BattleAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2);
 
     // Extract the resulting GameEventQueue.
     GameEventQueue events = battleAction.getEvents(testMap);

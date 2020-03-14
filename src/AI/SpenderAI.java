@@ -12,9 +12,10 @@ import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.Path;
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -166,7 +167,7 @@ public class SpenderAI implements AIController
           for( GameActionSet actionSet : actionSets )
           {
             // See if we have the option to attack.
-            if( actionSet.getSelected().getType() == UnitActionType.ATTACK )
+            if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
             {
               actions.offer(actionSet.getSelected());
               foundAction = true;
@@ -174,7 +175,7 @@ public class SpenderAI implements AIController
             }
 
             // Otherwise, see if we have the option to capture.
-            if( actionSet.getSelected().getType() == UnitActionType.CAPTURE )
+            if( actionSet.getSelected().getType() == UnitActionFactory.CAPTURE )
             {
               actions.offer(actionSet.getSelected());
               capturingProperties.add(coord);
@@ -216,7 +217,7 @@ public class SpenderAI implements AIController
             boolean validTarget = false;
             ArrayList<XYCoord> validTargets = new ArrayList<>();
 
-            if( unit.model.possibleActions.contains(UnitActionType.CAPTURE) )
+            if( unit.model.possibleActions.contains(UnitActionFactory.CAPTURE) )
             {
               validTargets.addAll(unownedProperties);
             }
@@ -263,7 +264,7 @@ public class SpenderAI implements AIController
               Path movePath = Utils.findShortestPath(unit, destination, gameMap);
               if( movePath.getPathLength() > 1 ) // We only want to try to travel if we can actually go somewhere
               {
-                GameAction move = new GameAction.WaitAction(unit, movePath);
+                GameAction move = new WaitLifecycle.WaitAction(unit, movePath);
                 actions.offer(move);
                 stateChange = true;
                 break;
