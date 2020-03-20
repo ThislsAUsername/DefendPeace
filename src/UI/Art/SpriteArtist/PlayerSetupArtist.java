@@ -58,7 +58,7 @@ public class PlayerSetupArtist
       }
     }
     // Start preloading infantry sprites in the background so the ColorFaction screen doesn't freeze on first entry.
-    PlayerSetupColorFactionArtist.preloadOneInfantrySprite(control.getIconicUnit());
+    PlayerSetupColorFactionArtist.startSpritePreloader(control.getIconicUnit());
   }
 
   private static void drawPlayerSetup(Graphics g, MapInfo mapInfo, boolean snapCursor)
