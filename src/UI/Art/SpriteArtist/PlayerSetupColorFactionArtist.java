@@ -92,7 +92,7 @@ public class PlayerSetupColorFactionArtist
     BufferedImage image = SpriteLibrary.createTransparentSprite(myWidth, myHeight);
     Graphics myG = image.getGraphics();
 
-    if( !donePreloading )
+    if( isp != null )
     {
       isp.join();
       isp = null;
@@ -145,8 +145,6 @@ public class PlayerSetupColorFactionArtist
   {
     private Thread myThread;
     private String myUnitName;
-    private int nextFac = 0;
-    private int nextCol = 0;
 
     public InfantrySpritePreloader(String unitName)
     {
@@ -158,18 +156,14 @@ public class PlayerSetupColorFactionArtist
     @Override
     public void run()
     {
-      while( !donePreloading )
+      for( int nextCol = 0; nextCol < UIUtils.getCOColors().length; ++nextCol )
       {
-        SpriteLibrary.getMapUnitSpriteSet(myUnitName, UIUtils.getFactions()[nextFac], UIUtils.getCOColors()[nextCol]);
-        nextFac++;
-        if( nextFac >= UIUtils.getFactions().length )
+        for( int nextFac = 0; nextFac < UIUtils.getFactions().length; ++nextFac )
         {
-          nextFac = 0;
-          nextCol++;
-          if( nextCol >= UIUtils.getCOColors().length )
-            donePreloading = true;
+          SpriteLibrary.getMapUnitSpriteSet(myUnitName, UIUtils.getFactions()[nextFac], UIUtils.getCOColors()[nextCol]);
         }
       }
+      donePreloading = true;
     }
 
     public void join()
