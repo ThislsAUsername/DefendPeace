@@ -15,6 +15,7 @@ public class SpriteEngine implements GraphicsEngine
   @Override
   public IView getMainUIView(MainUIController control)
   {
+    PlayerSetupColorFactionArtist.startSpritePreloader("Infantry");
     return new MainUIView(control);
   }
 
