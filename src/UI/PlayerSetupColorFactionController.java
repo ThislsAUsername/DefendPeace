@@ -9,9 +9,8 @@ public class PlayerSetupColorFactionController implements IController
   private PlayerSetupInfo myPlayerInfo;
   OptionSelector colorSelector;
   OptionSelector factionSelector;
-  public final String iconicUnitName;
 
-  public PlayerSetupColorFactionController(PlayerSetupInfo playerInfo, String unitName)
+  public PlayerSetupColorFactionController(PlayerSetupInfo playerInfo)
   {
     colorSelector = new OptionSelector(UIUtils.getCOColors().length);
     factionSelector = new OptionSelector(UIUtils.getFactions().length);
@@ -20,8 +19,6 @@ public class PlayerSetupColorFactionController implements IController
     myPlayerInfo = playerInfo;
     colorSelector.setSelectedOption(myPlayerInfo.currentColor);
     factionSelector.setSelectedOption(myPlayerInfo.currentFaction);
-    
-    iconicUnitName = unitName;
   }
 
   @Override

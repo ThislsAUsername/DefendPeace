@@ -263,7 +263,7 @@ public class PlayerSetupArtist
       }
       if( factionChanged || colorChanged )
       {
-        UnitSpriteSet inf = SpriteLibrary.getMapUnitSpriteSet(myControl.getIconicUnit(), info.getCurrentFaction(), info.getCurrentColor());
+        UnitSpriteSet inf = SpriteLibrary.getMapUnitSpriteSet("Infantry", info.getCurrentFaction(), info.getCurrentColor());
         BufferedImage infSprite = inf.sprites[inf.ACTION_IDLE].getFrame(0);
         unitPane = new SpriteUIUtils.ImageFrame(portraitPx + 4, 12, 28, portraitPx + 2, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUHIGHLIGHTCOLOR, true, infSprite);
         unitPane.render(g);

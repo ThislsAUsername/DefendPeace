@@ -21,12 +21,6 @@ public abstract class UnitModelScheme implements Serializable
     return (schemeValid ? "" : "!");
   }
 
-  /**
-   * When the UI wants to show a unit type, it should use this string.
-   * Typically the name of whatever passes for infantry, but can be anything.
-   */
-  public abstract String getIconicUnitName();
-  
   // Fetches a shopping list and a full unit list for a generic commander.
   public abstract GameReadyModels getGameReadyModels();
 

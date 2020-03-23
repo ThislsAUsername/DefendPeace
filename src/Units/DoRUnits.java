@@ -32,12 +32,6 @@ public class DoRUnits extends UnitModelScheme
   }
 
   @Override
-  public String getIconicUnitName()
-  {
-    return "Infantry";
-  }
-
-  @Override
   public GameReadyModels getGameReadyModels()
   {
     GameReadyModels dorModels = new GameReadyModels();

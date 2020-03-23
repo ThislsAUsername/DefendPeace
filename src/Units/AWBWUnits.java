@@ -29,12 +29,6 @@ public class AWBWUnits extends UnitModelScheme
   }
 
   @Override
-  public String getIconicUnitName()
-  {
-    return "Infantry";
-  }
-
-  @Override
   public GameReadyModels getGameReadyModels()
   {
     GameReadyModels awbwModels = new GameReadyModels();

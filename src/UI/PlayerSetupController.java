@@ -96,7 +96,7 @@ public class PlayerSetupController implements IController
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.COLOR_FACTION.ordinal() )
         {
-          subMenu = new PlayerSetupColorFactionController(getPlayerInfo(playerSelector.getSelectionNormalized()), getIconicUnit());
+          subMenu = new PlayerSetupColorFactionController(getPlayerInfo(playerSelector.getSelectionNormalized()));
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.TEAM.ordinal() )
         {
@@ -162,10 +162,5 @@ public class PlayerSetupController implements IController
   public PlayerSetupInfo getPlayerInfo(int p)
   {
     return coSelectors[p];
-  }
-
-  public String getIconicUnit()
-  {
-    return gameBuilder.unitModelScheme.getIconicUnitName();
   }
 }
