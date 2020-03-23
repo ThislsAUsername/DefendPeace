@@ -25,6 +25,14 @@ public class PlayerSetupColorFactionArtist
   private static SlidingValue gridY = new SlidingValue(0);
   private static SpriteCursor spriteCursor = new SpriteCursor(0, 0, SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize, UIUtils.getCOColors()[0]);
 
+  private static boolean donePreloading = false;
+  private static InfantrySpritePreloader isp;
+  public static void startSpritePreloader(String name)
+  {
+    if( !donePreloading && (null == isp) )
+    isp = new InfantrySpritePreloader(name);
+  }
+
   public static void draw(Graphics g, IController controller)
   {
     PlayerSetupColorFactionController control = (PlayerSetupColorFactionController)controller;
@@ -84,6 +92,12 @@ public class PlayerSetupColorFactionArtist
     BufferedImage image = SpriteLibrary.createTransparentSprite(myWidth, myHeight);
     Graphics myG = image.getGraphics();
 
+    if( isp != null )
+    {
+      isp.join();
+      isp = null;
+    }
+
     for( int c = 0; c < UIUtils.getCOColors().length; ++c)
       for(int f = 0; f < UIUtils.getFactions().length; ++f)
       {
@@ -127,25 +141,41 @@ public class PlayerSetupColorFactionArtist
     gridHeight = numFactions*unitSizePx + unitBuffer*(numFactions-1);
   }
 
-  private static int nextFac = 0;
-  private static int nextCol = 0;
-  private static boolean donePreloading = false;
-  /** This can be called repeatedly on the sly to get all infantry sprites
-   * in memory and make this option screen less sluggish on first entry. */
-  public static boolean preloadOneInfantrySprite(String unitName)
+  public static class InfantrySpritePreloader implements Runnable
   {
-    if( !donePreloading )
+    private Thread myThread;
+    private String myUnitName;
+
+    public InfantrySpritePreloader(String unitName)
     {
-      SpriteLibrary.getMapUnitSpriteSet(unitName, UIUtils.getFactions()[nextFac], UIUtils.getCOColors()[nextCol]);
-      nextFac++;
-      if( nextFac >= UIUtils.getFactions().length )
+      myThread = new Thread(this);
+      myThread.start();
+      myUnitName = unitName;
+    }
+
+    @Override
+    public void run()
+    {
+      for( int nextCol = 0; nextCol < UIUtils.getCOColors().length; ++nextCol )
       {
-        nextFac = 0;
-        nextCol++;
-        if( nextCol >= UIUtils.getCOColors().length )
-          donePreloading = true;
+        for( int nextFac = 0; nextFac < UIUtils.getFactions().length; ++nextFac )
+        {
+          SpriteLibrary.getMapUnitSpriteSet(myUnitName, UIUtils.getFactions()[nextFac], UIUtils.getCOColors()[nextCol]);
+        }
+      }
+      donePreloading = true;
+    }
+
+    public void join()
+    {
+      try
+      {
+        myThread.join();
+      }
+      catch(InterruptedException ie)
+      {
+        System.out.println("[InfantrySpritePreloader] Exception! Details:\n  " + ie.toString());
       }
     }
-    return donePreloading;
   }
 }
