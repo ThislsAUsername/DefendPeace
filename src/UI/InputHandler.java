@@ -144,4 +144,39 @@ public class InputHandler
     return rightHeld > 1;
   }
 
+  public static String getActionKeyName( InputAction action )
+  {
+    String keyText;
+    switch( action )
+    {
+      case BACK:
+        keyText = KeyEvent.getKeyText(backKeyCodes.get(0));
+        break;
+      case DOWN:
+        keyText = KeyEvent.getKeyText(downKeyCodes.get(0));
+        break;
+      case LEFT:
+        keyText = KeyEvent.getKeyText(leftKeyCodes.get(0));
+        break;
+      case NO_ACTION:
+        keyText = "NO KEY";
+        break;
+      case RIGHT:
+        keyText = KeyEvent.getKeyText(rightKeyCodes.get(0));
+        break;
+      case SEEK:
+        keyText = KeyEvent.getKeyText(seekKeyCodes.get(0));
+        break;
+      case SELECT:
+        keyText = KeyEvent.getKeyText(selectKeyCodes.get(0));
+        break;
+      case UP:
+        keyText = KeyEvent.getKeyText(upKeyCodes.get(0));
+        break;
+      default:
+        keyText = "INVALID ACTION";
+        break;
+    };
+    return keyText;
+  }
 }
