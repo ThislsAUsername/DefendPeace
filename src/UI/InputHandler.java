@@ -286,7 +286,6 @@ public class InputHandler implements IController
         {
           Integer actualKeyCode = InputHandler.getBoundKeyCodes(selectedAction).get(keyIndex);
           InputHandler.unbindKey(selectedAction, actualKeyCode);
-          //actionKeySelectors[kb] = new ActionKeySelector(actionKeys.action); // Update the stored key bindings.
         }
         break;
       case BACK:
