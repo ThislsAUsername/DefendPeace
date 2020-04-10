@@ -58,13 +58,16 @@ public class MainUIView implements IView
         break;
       case MAIN:
       case SAVE_SELECT:
+      case OPTIONS_SELECT:
         renderMainMenu(g);
         break;
-      case OPTIONS:
+      case GRAPHICS_OPTIONS:
         SpriteOptions.draw(g);
         break;
+      case CONTROL_OPTIONS:
+        break;
         default:
-          System.out.println("Warning: Invalid menu type " + controller.getSubMenuType() + " in SpriteMainUIView.render().");
+          System.out.println("Warning: Invalid menu type " + controller.getSubMenuType() + " in MainUIView.render().");
     }
   }
 
@@ -124,8 +127,14 @@ public class MainUIView implements IView
       BufferedImage savesImage = SpriteUIUtils.makeTextMenu(sm.getAllOptions(), sm.getSelectionNumber(), 3, 4);
       SpriteUIUtils.drawImageCenteredOnPoint(menuGraphics, savesImage, xCenter, yCenter);
     }
+    else if (null != controller.optionsMenu)
+    {
+      InGameMenu<MainUIController.SubMenu> om = controller.optionsMenu;
+      BufferedImage omImage = SpriteUIUtils.makeTextMenu(om.getAllOptions(), om.getSelectionNumber(), 3, 4);
+      SpriteUIUtils.drawImageCenteredOnPoint(menuGraphics, omImage, xCenter, yCenter);
+    }
 
-    // Draw the composited image to the window.
+    // Draw the composed image to the window.
     int drawScale = SpriteOptions.getDrawScale();
     g.drawImage(menuImage, 0, 0, menuImage.getWidth()*drawScale, menuImage.getHeight()*drawScale, null);
   }

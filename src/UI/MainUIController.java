@@ -2,6 +2,7 @@ package UI;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import Engine.Driver;
 import Engine.GameInstance;
@@ -11,7 +12,7 @@ import Engine.OptionSelector;
 
 public class MainUIController implements IController
 {
-  public enum SubMenu { MAIN, SAVE_SELECT, GAME_SETUP, OPTIONS };
+  public enum SubMenu { MAIN, SAVE_SELECT, GAME_SETUP, OPTIONS_SELECT, GRAPHICS_OPTIONS, CONTROL_OPTIONS };
   private SubMenu currentSubMenuType = SubMenu.MAIN;
 
   // NOTE: This list of menu options is mirrored by the Sprite of option images we get from SpriteLibrary.
@@ -25,6 +26,7 @@ public class MainUIController implements IController
 
   private MapSelectController gameSetup = new MapSelectController();
   public InGameMenu<SaveInfo> saveMenu = null;
+  public InGameMenu<SubMenu> optionsMenu = null;
   
   public SubMenu getSubMenuType()
   {
@@ -64,19 +66,23 @@ public class MainUIController implements IController
       case SAVE_SELECT:
         handleSaveSelectMenuInput(action);
         break;
-      case OPTIONS:
+      case OPTIONS_SELECT:
+        handleOptionMenuSelectInput(action);
+        break;
+      case GRAPHICS_OPTIONS:
         // Since different graphics engines could implement different available
         //   options, we cannot handle this input directly. Instead, just feed
         //   the user inputs to the graphics engine directly.
         exitGame = Driver.getInstance().gameGraphics.handleOptionsInput(action);
 
-        //exitGame = handleOptionsMenu(action);
         if(exitGame)
         {
           // If the subMenu was not MAIN, we go back to MAIN.
           currentSubMenuType = SubMenu.MAIN;
           exitGame = false;
         }
+        break;
+      case CONTROL_OPTIONS:
         break;
       default:
         System.out.println("Warning: Invalid input " + action + " in MainUIController.");
@@ -134,7 +140,8 @@ public class MainUIController implements IController
             }
             break;
           case OPTIONS:
-            currentSubMenuType = SubMenu.OPTIONS;
+            optionsMenu = new InGameMenu<SubMenu>(Arrays.asList(SubMenu.GRAPHICS_OPTIONS, SubMenu.CONTROL_OPTIONS));
+            currentSubMenuType = SubMenu.OPTIONS_SELECT;
             break;
           case QUIT:
             // Let the caller know we are done here.
@@ -158,6 +165,37 @@ public class MainUIController implements IController
     }
 
     return exitMenu;
+  }
+
+  private void handleOptionMenuSelectInput(InputHandler.InputAction action)
+  {
+    switch( action )
+    {
+      case SELECT:
+        // Grab the selected option.
+        SubMenu chosenOption = optionsMenu.getSelectedOption();
+        optionsMenu = null; // We are done with this until next time.
+
+        switch( chosenOption )
+        {
+          case GRAPHICS_OPTIONS:
+            currentSubMenuType = SubMenu.GRAPHICS_OPTIONS;
+            break;
+          case CONTROL_OPTIONS:
+            currentSubMenuType = SubMenu.CONTROL_OPTIONS;
+            break;
+            default:
+              System.out.println(String.format("Invalid Option SubMenu '%s' selected!", chosenOption.toString()));
+        }
+
+        break;
+      case BACK:
+        currentSubMenuType = SubMenu.MAIN;
+        break;
+      default:
+          // Pass along to the OptionSelector.
+          optionsMenu.handleMenuInput(action);
+    }
   }
 
   private void handleSaveSelectMenuInput(InputHandler.InputAction action)
