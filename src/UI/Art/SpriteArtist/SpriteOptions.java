@@ -147,7 +147,7 @@ public class SpriteOptions
 
     switch (action)
     {
-      case ENTER:
+      case SELECT:
         applyConfigOptions();
         break;
       case BACK:

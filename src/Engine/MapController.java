@@ -93,14 +93,14 @@ public class MapController implements IController, GameInputHandler.StateChanged
     switch (inputMode)
     {
       case ANIMATION:
-        if( InputAction.BACK == input || InputAction.ENTER == input )
+        if( InputAction.BACK == input || InputAction.SELECT == input )
         {
           myView.cancelAnimation();
         }
         break;
       case EXITGAME:
         // Once the game is over, wait for an ENTER or BACK input to return to the main menu.
-        if( input == InputHandler.InputAction.BACK || input == InputHandler.InputAction.ENTER )
+        if( input == InputHandler.InputAction.BACK || input == InputHandler.InputAction.SELECT )
         {
           exitMap = true;
         }
@@ -203,7 +203,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
           ++nextSeekIndex;
         }
         break;
-      case ENTER:
+      case SELECT:
         // Get the current location.
         XYCoord cursorCoords = new XYCoord(myGame.getCursorX(), myGame.getCursorY());
         Location loc = myGame.gameMap.getLocation(cursorCoords);
@@ -234,7 +234,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   {
     switch (input)
     {
-      case ENTER:
+      case SELECT:
         myGameInputHandler.select(new XYCoord(myGame.getCursorX(), myGame.getCursorY()));
         break;
       case BACK:
@@ -306,7 +306,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
         break;
-      case ENTER:
+      case SELECT:
         GameInputHandler.InputType type = myGameInputHandler.select(contemplatedAction.movePath);
         // If the next state has an InputType of FREE_TILE_SELECT, then we actually moved back()
         // instead of forward to the action-select state. Clear the path so we can rebuild it.
@@ -347,7 +347,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     switch (input)
     {
-      case ENTER:
+      case SELECT:
         // Pass the user's selection to the state handler.
         myGameInputHandler.select(myGameInputHandler.getMenuOptions()[myGameInputOptionSelector.getSelectionNormalized()]);
         break;

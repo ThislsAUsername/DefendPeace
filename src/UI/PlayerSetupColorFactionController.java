@@ -30,7 +30,7 @@ public class PlayerSetupColorFactionController implements IController
     boolean done = false;
     switch(action)
     {
-      case ENTER:
+      case SELECT:
         // Apply change and return control.
         myPlayerInfo.currentColor = colorSelector.getSelectionNormalized();
         myPlayerInfo.currentFaction = factionSelector.getSelectionNormalized();

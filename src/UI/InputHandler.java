@@ -7,14 +7,14 @@ public class InputHandler
 {
   public enum InputAction
   {
-    NO_ACTION, UP, DOWN, LEFT, RIGHT, SEEK, ENTER, BACK
+    NO_ACTION, UP, DOWN, LEFT, RIGHT, SEEK, SELECT, BACK
   };
 
   static Integer[] upDefaultKeyCodes = {KeyEvent.VK_UP, KeyEvent.VK_W};
   static Integer[] downDefaultKeyCodes = {KeyEvent.VK_DOWN, KeyEvent.VK_S};
   static Integer[] leftDefaultKeyCodes = {KeyEvent.VK_LEFT, KeyEvent.VK_A};
   static Integer[] rightDefaultKeyCodes = {KeyEvent.VK_RIGHT, KeyEvent.VK_D};
-  static Integer[] enterDefaultKeyCodes = {KeyEvent.VK_ENTER, KeyEvent.VK_SPACE};
+  static Integer[] selectDefaultKeyCodes = {KeyEvent.VK_ENTER, KeyEvent.VK_SPACE};
   static Integer[] backDefaultKeyCodes = {KeyEvent.VK_ESCAPE, KeyEvent.VK_BACK_SPACE};
   static Integer[] seekDefaultKeyCodes = {KeyEvent.VK_Q};
 
@@ -22,7 +22,7 @@ public class InputHandler
   static ArrayList<Integer> downKeyCodes = new ArrayList<Integer>(Arrays.asList(downDefaultKeyCodes));
   static ArrayList<Integer> leftKeyCodes = new ArrayList<Integer>(Arrays.asList(leftDefaultKeyCodes));
   static ArrayList<Integer> rightKeyCodes = new ArrayList<Integer>(Arrays.asList(rightDefaultKeyCodes));
-  static ArrayList<Integer> enterKeyCodes = new ArrayList<Integer>(Arrays.asList(enterDefaultKeyCodes));
+  static ArrayList<Integer> selectKeyCodes = new ArrayList<Integer>(Arrays.asList(selectDefaultKeyCodes));
   static ArrayList<Integer> backKeyCodes = new ArrayList<Integer>(Arrays.asList(backDefaultKeyCodes));
   static ArrayList<Integer> seekKeyCodes = new ArrayList<Integer>(Arrays.asList(seekDefaultKeyCodes));
 
@@ -87,9 +87,9 @@ public class InputHandler
     {
       ia = InputAction.RIGHT;
     }
-    else if( enterKeyCodes.contains(keyCode) )
+    else if( selectKeyCodes.contains(keyCode) )
     {
-      ia = InputAction.ENTER;
+      ia = InputAction.SELECT;
     }
     else if( backKeyCodes.contains(keyCode) )
     {

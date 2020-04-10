@@ -91,7 +91,7 @@ public class MainUIController implements IController
 
     switch( action )
     {
-      case ENTER:
+      case SELECT:
         // Grab the current option and roll it back to within the valid range, then evaluate.
         int chosenOption = optionSelector.getSelectionNormalized();
 
@@ -164,7 +164,7 @@ public class MainUIController implements IController
   {
     switch( action )
     {
-      case ENTER:
+      case SELECT:
         // Grab the current option and roll it back to within the valid range, then evaluate.
         SaveInfo chosenOption = saveMenu.getSelectedOption();
 

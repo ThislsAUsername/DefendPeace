@@ -95,7 +95,7 @@ public class OptionSelector
         prev();
         break;
       case BACK:
-      case ENTER:
+      case SELECT:
       case NO_ACTION:
         break;
       default:

@@ -87,7 +87,7 @@ public class PlayerSetupController implements IController
 
     switch(action)
     {
-      case ENTER:
+      case SELECT:
         // Open a sub-menu based on which player attribute is selected, or start the game.
         if( categorySelector.getSelectionNormalized() == SelectionCategories.COMMANDER.ordinal() )
         {

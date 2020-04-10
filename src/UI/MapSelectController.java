@@ -64,7 +64,7 @@ public class MapSelectController implements IController
     boolean exitMenu = false;
     switch(action)
     {
-      case ENTER:
+      case SELECT:
         // Create the GameBuilder with the selected map, and transition to the CO select screen.
         // If we go forward/back a few times, the old copies of these get replaced and garbage-collected.
         GameBuilder gameBuilder = new GameBuilder( MapLibrary.getMapList().get( optionSelector.getSelectionNormalized() ) );

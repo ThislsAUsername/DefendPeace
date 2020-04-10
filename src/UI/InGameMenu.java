@@ -123,7 +123,7 @@ public class InGameMenu<T>
         break;
       case LEFT:
       case RIGHT:
-      case ENTER:
+      case SELECT:
       case BACK:
       case NO_ACTION:
       default:

@@ -35,7 +35,7 @@ public class PlayerSetupTeamController implements IController
     boolean done = false;
     switch(action)
     {
-      case ENTER:
+      case SELECT:
       case BACK:
         done = true; // Treat Enter/back the same.
         break;

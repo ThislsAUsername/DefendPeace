@@ -76,7 +76,7 @@ public class GameOptionSetupController implements IController
     boolean exitMenu = false;
     switch(action)
     {
-      case ENTER:
+      case SELECT:
         // Set the selected options and transition to the player setup screen.
         for( GameOption<?> go : gameOptions ) go.storeCurrentValue();
         gameBuilder.isFowEnabled = fowOption.getSelectedObject();
