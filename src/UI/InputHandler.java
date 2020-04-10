@@ -3,11 +3,16 @@ package UI;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
-public class InputHandler
+import java.util.HashMap;
+
+import Engine.IController;
+import Engine.OptionSelector;
+import UI.InputHandler.InputAction;
+public class InputHandler implements IController
 {
   public enum InputAction
   {
-    NO_ACTION, UP, DOWN, LEFT, RIGHT, SEEK, SELECT, BACK
+    UP, DOWN, LEFT, RIGHT, SEEK, SELECT, BACK
   };
 
   static Integer[] upDefaultKeyCodes = {KeyEvent.VK_UP, KeyEvent.VK_W};
@@ -26,21 +31,51 @@ public class InputHandler
   static ArrayList<Integer> backKeyCodes = new ArrayList<Integer>(Arrays.asList(backDefaultKeyCodes));
   static ArrayList<Integer> seekKeyCodes = new ArrayList<Integer>(Arrays.asList(seekDefaultKeyCodes));
 
+  static HashMap<InputAction, ArrayList<Integer> > bindingsByInputAction;
+  static {
+    bindingsByInputAction = new HashMap<InputAction, ArrayList<Integer> >();
+    //bindingsByInputAction.put(InputAction.NO_ACTION, noActionKeyCodes);
+    bindingsByInputAction.put(InputAction.UP, upKeyCodes);
+    bindingsByInputAction.put(InputAction.DOWN, downKeyCodes);
+    bindingsByInputAction.put(InputAction.LEFT, leftKeyCodes);
+    bindingsByInputAction.put(InputAction.RIGHT, rightKeyCodes);
+    bindingsByInputAction.put(InputAction.SELECT, selectKeyCodes);
+    bindingsByInputAction.put(InputAction.BACK, backKeyCodes);
+    bindingsByInputAction.put(InputAction.SEEK, seekKeyCodes);
+  }
+
   // MovementInput variables
   static short upHeld = 0;
   static short downHeld = 0;
   static short leftHeld = 0;
   static short rightHeld = 0;
 
-  /**
-   * No reason to make an instance of this class.
-   */
-  private InputHandler()
-  {}
+  private static int lastKeyPressedCode = 0;
+
+  // Will be true when we are waiting to input a key assignment.
+  private static boolean assigningKey = false;
+
+  public OptionSelector actionCommandSelector = new OptionSelector( InputHandler.InputAction.values().length );
+  public OptionSelector actionKeySelector = new OptionSelector(1); // We will just use the absolute, and normalize per action.
+
+  private InputHandler(){}
+  private static InputHandler singleton;
+  public static InputHandler getInstance()
+  {
+    if( null == singleton )
+      singleton = new InputHandler();
+    return singleton;
+  }
 
   public static InputAction pressKey(KeyEvent key)
   {
+    lastKeyPressedCode = key.getKeyCode();
     InputAction input = getActionFromKey(key);
+    if( assigningKey )
+    {
+      getInstance().handleInput(input);
+    }
+    if( null != input )
     switch (input)
     {
       case UP:
@@ -69,7 +104,7 @@ public class InputHandler
    */
   private static InputAction getActionFromKey(java.awt.event.KeyEvent event)
   {
-    InputAction ia = InputAction.NO_ACTION;
+    InputAction ia = null;
     int keyCode = event.getKeyCode();
     if( upKeyCodes.contains(keyCode) )
     {
@@ -105,6 +140,7 @@ public class InputHandler
   public static void releaseKey(KeyEvent e)
   {
     InputAction input = getActionFromKey(e);
+    if( null != input )
     switch (input)
     {
       case UP:
@@ -144,39 +180,141 @@ public class InputHandler
     return rightHeld > 1;
   }
 
-  public static String getActionKeyName( InputAction action )
+  public static ArrayList<String> getBoundKeyNames(InputAction action)
   {
-    String keyText;
-    switch( action )
+    ArrayList<String> keyNames = new ArrayList<String>();
+    if( bindingsByInputAction.containsKey(action) )
     {
+      for( int keyCode : bindingsByInputAction.get(action) )
+      {
+        keyNames.add(KeyEvent.getKeyText(keyCode));
+      }
+    }
+    else
+    {
+      keyNames.add("NO ACTION");
+    }
+    return keyNames;
+  }
+
+  public static ArrayList<Integer> getBoundKeyCodes(InputAction inputAction)
+  {
+    if( bindingsByInputAction.containsKey(inputAction) )
+    {
+      return bindingsByInputAction.get(inputAction);
+    }
+    return new ArrayList<Integer>();
+  }
+
+  public static boolean unbindKey(InputAction action, Integer keyCode)
+  {
+    boolean removed = true;
+    ArrayList<Integer> bindings = bindingsByInputAction.get(action);
+    if(bindings.size() > 1) // Ensure we don't remove the last key for this command.
+    {
+      removed = bindings.remove(keyCode);
+    }
+    else
+    {
+      System.out.println("Warning! Cannot unbind key as it would leave no keys for " + action);
+    }
+    return removed;
+  }
+
+  public static boolean bindLastPressedKey(InputAction action)
+  {
+    int keyCode = lastKeyPressedCode;
+    // First, check if another action is assigned this KeyCode.
+    InputAction priorKeyAction = null;
+    for(InputAction ia : InputAction.values())
+    {
+      ArrayList<Integer> bindings = bindingsByInputAction.get(ia);
+      if( bindings.contains(keyCode) )
+      {
+        if( bindings.size() < 2 )
+        {
+          // Attempting to add a key for this command, except this key is already
+          // assigned to another command that has no alternate key. Stop.
+          System.out.println("Warning! Cannot reassign key as it would leave no keys for " + ia);
+          return false;
+        }
+        else
+        {
+          priorKeyAction = ia;
+        }
+      }
+    }
+
+    if(priorKeyAction != null)
+    {
+      Integer ikey = keyCode;
+      bindingsByInputAction.get(priorKeyAction).remove(ikey);
+    }
+    bindingsByInputAction.get(action).add(keyCode);
+
+    return true;
+  }
+
+  @Override
+  public boolean handleInput(InputAction action)
+  {
+    boolean exitMenu = false;
+
+    if(assigningKey)
+    {
+      // Assign the new key.
+      int kb = actionCommandSelector.getSelectionNormalized();
+      InputHandler.InputAction assignedAction = InputHandler.InputAction.values()[kb];
+      InputHandler.bindLastPressedKey(assignedAction);
+      assigningKey = false;
+    }
+    else
+    switch(action)
+    {
+      case SELECT:
+        // If the currently-selected item is an existing key command, remove it.
+        int kb = actionCommandSelector.getSelectionNormalized();
+        InputAction selectedAction = InputHandler.InputAction.values()[kb];
+        OptionSelector actionKeys = getKeySelector(selectedAction);
+        int keyIndex = actionKeys.getSelectionNormalized();
+        if( keyIndex == actionKeys.size()-1 )
+        {
+          // Then this is the "Add" option.
+          assigningKey = true;
+        }
+        else
+        {
+          Integer actualKeyCode = InputHandler.getBoundKeyCodes(selectedAction).get(keyIndex);
+          InputHandler.unbindKey(selectedAction, actualKeyCode);
+          //actionKeySelectors[kb] = new ActionKeySelector(actionKeys.action); // Update the stored key bindings.
+        }
+        break;
       case BACK:
-        keyText = KeyEvent.getKeyText(backKeyCodes.get(0));
+        exitMenu = true;
         break;
       case DOWN:
-        keyText = KeyEvent.getKeyText(downKeyCodes.get(0));
+      case UP:
+        actionCommandSelector.handleInput(action);
         break;
       case LEFT:
-        keyText = KeyEvent.getKeyText(leftKeyCodes.get(0));
-        break;
-      case NO_ACTION:
-        keyText = "NO KEY";
-        break;
       case RIGHT:
-        keyText = KeyEvent.getKeyText(rightKeyCodes.get(0));
+        actionKeySelector.handleInput(action);
         break;
-      case SEEK:
-        keyText = KeyEvent.getKeyText(seekKeyCodes.get(0));
-        break;
-      case SELECT:
-        keyText = KeyEvent.getKeyText(selectKeyCodes.get(0));
-        break;
-      case UP:
-        keyText = KeyEvent.getKeyText(upKeyCodes.get(0));
-        break;
-      default:
-        keyText = "INVALID ACTION";
-        break;
-    };
-    return keyText;
+        default:
+          System.out.println("Warning: Unsupported input " + action + " in InputHandler.");
+    }
+    return exitMenu;
+  }
+
+  public boolean isAssigningKey()
+  {
+    return assigningKey;
+  }
+
+  public OptionSelector getKeySelector(InputAction action)
+  {
+    OptionSelector keySelector = new OptionSelector(InputHandler.getBoundKeyCodes(action).size() + 1); // +1 for Add
+    keySelector.setSelectedOption(actionKeySelector.getSelectionAbsolute());
+    return keySelector;
   }
 }

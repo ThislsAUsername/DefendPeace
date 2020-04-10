@@ -76,7 +76,6 @@ public class CO_InfoController implements InfoController
         }
         goBack = true;
         break;
-      case NO_ACTION:
         default:
           // Other actions are not supported.
     }

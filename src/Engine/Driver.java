@@ -109,7 +109,7 @@ public class Driver implements ActionListener, KeyListener
   {
     InputHandler.InputAction action = InputHandler.pressKey(arg0);
 
-    if( action != InputHandler.InputAction.NO_ACTION )
+    if( action != null )
     {
       // Pass the action on to the main game controller; if it says it's done, switch to previous state.
       if(gameStatus.peek().controller.handleInput(action))

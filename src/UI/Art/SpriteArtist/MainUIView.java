@@ -65,6 +65,7 @@ public class MainUIView implements IView
         SpriteOptions.draw(g);
         break;
       case CONTROL_OPTIONS:
+        ControlOptionsSetupArtist.draw(g, controller.getControlOptionsSetupController());
         break;
         default:
           System.out.println("Warning: Invalid menu type " + controller.getSubMenuType() + " in MainUIView.render().");

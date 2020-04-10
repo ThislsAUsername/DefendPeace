@@ -221,9 +221,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case BACK:
         myGameInputHandler.back();
         break;
-      case NO_ACTION:
-        // No action means do nothing. Done.
-        break;
       default:
         System.out.println("WARNING! MapController.handleFreeTileSelect() was given invalid input enum (" + input + ")");
     }
@@ -255,7 +252,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
         myGameInputOptionSelector.handleInput(input);
         myGame.setCursorLocation(targetLocations.get(myGameInputOptionSelector.getSelectionNormalized()));
         break;
-      case NO_ACTION:
       case SEEK: // Seek does nothing in this input state.
       default:
     }
@@ -319,8 +315,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
         myGameInputHandler.back();
         contemplatedAction.movePath = null;
         break;
-      case NO_ACTION:
-        break;
       default:
         System.out.println("WARNING! MapController.handleMovementInput() was given invalid input enum (" + input + ")");
     }
@@ -353,8 +347,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
         break;
       case BACK:
         myGameInputHandler.back();
-        break;
-      case NO_ACTION:
         break;
       default:
         currentMenu.handleMenuInput(input);

@@ -164,7 +164,6 @@ public class SpriteOptions
         allOptions[highlightedOption.getSelectionNormalized()].handleInput(action);
         break;
       case SEEK:
-      case NO_ACTION:
         break;
     }
 

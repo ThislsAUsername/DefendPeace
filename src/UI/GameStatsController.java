@@ -55,7 +55,6 @@ public class GameStatsController implements InfoController
         pageSelector.setSelectedOption(0);
         goBack = true;
         break;
-      case NO_ACTION:
         default:
           // Other actions are not supported.
     }

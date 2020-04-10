@@ -80,8 +80,6 @@ public class MapSelectController implements IController
       case RIGHT:
         optionSelector.handleInput(action);
         break;
-      case NO_ACTION:
-        break;
         default:
           System.out.println("Warning: Unsupported input " + action + " in map select menu.");
     }

@@ -96,7 +96,6 @@ public class OptionSelector
         break;
       case BACK:
       case SELECT:
-      case NO_ACTION:
         break;
       default:
         System.out.println("Warning: Unexpected input received in OptionSelector.");

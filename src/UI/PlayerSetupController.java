@@ -141,8 +141,6 @@ public class PlayerSetupController implements IController
       case RIGHT:
         categorySelector.handleInput(action);
         break;
-      case NO_ACTION:
-        break;
         default:
           System.out.println("Warning: Unsupported input " + action + " in CO setup menu.");
     }

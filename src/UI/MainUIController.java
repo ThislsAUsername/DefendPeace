@@ -25,6 +25,7 @@ public class MainUIController implements IController
   private OptionSelector optionSelector = new OptionSelector(numMenuOptions);
 
   private MapSelectController gameSetup = new MapSelectController();
+  private InputHandler controlOptionsSetup = InputHandler.getInstance();
   public InGameMenu<SaveInfo> saveMenu = null;
   public InGameMenu<SubMenu> optionsMenu = null;
   
@@ -41,6 +42,11 @@ public class MainUIController implements IController
   public MapSelectController getGameSetupController()
   {
     return gameSetup;
+  }
+
+  public InputHandler getControlOptionsSetupController()
+  {
+    return controlOptionsSetup;
   }
 
   @Override // From IController
@@ -83,6 +89,8 @@ public class MainUIController implements IController
         }
         break;
       case CONTROL_OPTIONS:
+        if( controlOptionsSetup.handleInput(action) )
+          currentSubMenuType = SubMenu.MAIN;
         break;
       default:
         System.out.println("Warning: Invalid input " + action + " in MainUIController.");
@@ -159,7 +167,6 @@ public class MainUIController implements IController
         optionSelector.handleInput(action);
         break;
       case BACK: // There's no "back" from here. Select Quit to exit.
-      case NO_ACTION:
         default:
           // Other actions (LEFT, RIGHT, BACK) not supported in the main menu.
     }

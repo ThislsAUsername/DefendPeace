@@ -125,7 +125,6 @@ public class InGameMenu<T>
       case RIGHT:
       case SELECT:
       case BACK:
-      case NO_ACTION:
       default:
         System.out.println("WARNING! gameMenu.handleMenuInput() was given invalid action enum (" + action + ")");
     }
