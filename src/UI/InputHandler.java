@@ -1,12 +1,30 @@
 package UI;
 
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
 public class InputHandler
 {
   public enum InputAction
   {
     NO_ACTION, UP, DOWN, LEFT, RIGHT, SEEK, ENTER, BACK
   };
+
+  static Integer[] upDefaultKeyCodes = {KeyEvent.VK_UP, KeyEvent.VK_W};
+  static Integer[] downDefaultKeyCodes = {KeyEvent.VK_DOWN, KeyEvent.VK_S};
+  static Integer[] leftDefaultKeyCodes = {KeyEvent.VK_LEFT, KeyEvent.VK_A};
+  static Integer[] rightDefaultKeyCodes = {KeyEvent.VK_RIGHT, KeyEvent.VK_D};
+  static Integer[] enterDefaultKeyCodes = {KeyEvent.VK_ENTER, KeyEvent.VK_SPACE};
+  static Integer[] backDefaultKeyCodes = {KeyEvent.VK_ESCAPE, KeyEvent.VK_BACK_SPACE};
+  static Integer[] seekDefaultKeyCodes = {KeyEvent.VK_Q};
+
+  static ArrayList<Integer> upKeyCodes = new ArrayList<Integer>(Arrays.asList(upDefaultKeyCodes));
+  static ArrayList<Integer> downKeyCodes = new ArrayList<Integer>(Arrays.asList(downDefaultKeyCodes));
+  static ArrayList<Integer> leftKeyCodes = new ArrayList<Integer>(Arrays.asList(leftDefaultKeyCodes));
+  static ArrayList<Integer> rightKeyCodes = new ArrayList<Integer>(Arrays.asList(rightDefaultKeyCodes));
+  static ArrayList<Integer> enterKeyCodes = new ArrayList<Integer>(Arrays.asList(enterDefaultKeyCodes));
+  static ArrayList<Integer> backKeyCodes = new ArrayList<Integer>(Arrays.asList(backDefaultKeyCodes));
+  static ArrayList<Integer> seekKeyCodes = new ArrayList<Integer>(Arrays.asList(seekDefaultKeyCodes));
 
   // MovementInput variables
   static short upHeld = 0;
@@ -52,35 +70,34 @@ public class InputHandler
   private static InputAction getActionFromKey(java.awt.event.KeyEvent event)
   {
     InputAction ia = InputAction.NO_ACTION;
-    switch (event.getKeyCode())
+    int keyCode = event.getKeyCode();
+    if( upKeyCodes.contains(keyCode) )
     {
-      case KeyEvent.VK_UP:
-      case KeyEvent.VK_W:
-        ia = InputAction.UP;
-        break;
-      case KeyEvent.VK_DOWN:
-      case KeyEvent.VK_S:
-        ia = InputAction.DOWN;
-        break;
-      case KeyEvent.VK_LEFT:
-      case KeyEvent.VK_A:
-        ia = InputAction.LEFT;
-        break;
-      case KeyEvent.VK_RIGHT:
-      case KeyEvent.VK_D:
-        ia = InputAction.RIGHT;
-        break;
-      case KeyEvent.VK_ENTER:
-      case KeyEvent.VK_SPACE:
-        ia = InputAction.ENTER;
-        break;
-      case KeyEvent.VK_BACK_SPACE:
-      case KeyEvent.VK_ESCAPE:
-        ia = InputAction.BACK;
-        break;
-      case KeyEvent.VK_Q:
-        ia = InputAction.SEEK;
-        break;
+      ia = InputAction.UP;
+    }
+    else if( downKeyCodes.contains(keyCode) )
+    {
+      ia = InputAction.DOWN;
+    }
+    else if( leftKeyCodes.contains(keyCode) )
+    {
+      ia = InputAction.LEFT;
+    }
+    else if( rightKeyCodes.contains(keyCode) )
+    {
+      ia = InputAction.RIGHT;
+    }
+    else if( enterKeyCodes.contains(keyCode) )
+    {
+      ia = InputAction.ENTER;
+    }
+    else if( backKeyCodes.contains(keyCode) )
+    {
+      ia = InputAction.BACK;
+    }
+    else if( seekKeyCodes.contains(keyCode) )
+    {
+      ia = InputAction.SEEK;
     }
     return ia;
   }
