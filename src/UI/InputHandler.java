@@ -73,8 +73,16 @@ public class InputHandler implements IController
     InputAction input = getActionFromKey(key);
     if( assigningKey )
     {
-      getInstance().handleInput(input);
+      // Assign the new key.
+      int kb = getInstance().actionCommandSelector.getSelectionNormalized();
+      InputHandler.InputAction assignedAction = InputHandler.InputAction.values()[kb];
+      InputHandler.bindLastPressedKey(assignedAction);
+      assigningKey = false;
+
+      // Ensure this key press isn't also interpreted as an action topside.
+      input = null;
     }
+
     if( null != input )
     switch (input)
     {
@@ -260,15 +268,6 @@ public class InputHandler implements IController
   {
     boolean exitMenu = false;
 
-    if(assigningKey)
-    {
-      // Assign the new key.
-      int kb = actionCommandSelector.getSelectionNormalized();
-      InputHandler.InputAction assignedAction = InputHandler.InputAction.values()[kb];
-      InputHandler.bindLastPressedKey(assignedAction);
-      assigningKey = false;
-    }
-    else
     switch(action)
     {
       case SELECT:
