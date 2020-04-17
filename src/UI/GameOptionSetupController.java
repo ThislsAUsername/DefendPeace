@@ -76,7 +76,7 @@ public class GameOptionSetupController implements IController
     boolean exitMenu = false;
     switch(action)
     {
-      case ENTER:
+      case SELECT:
         // Set the selected options and transition to the player setup screen.
         for( GameOption<?> go : gameOptions ) go.storeCurrentValue();
         gameBuilder.isFowEnabled = fowOption.getSelectedObject();
@@ -98,8 +98,6 @@ public class GameOptionSetupController implements IController
       case RIGHT:
         int opt = optionSelector.getSelectionNormalized();
         gameOptions[opt].handleInput(action);
-        break;
-      case NO_ACTION:
         break;
         default:
           System.out.println("Warning: Unsupported input " + action + " in map select menu.");

@@ -87,7 +87,7 @@ public class PlayerSetupController implements IController
 
     switch(action)
     {
-      case ENTER:
+      case SELECT:
         // Open a sub-menu based on which player attribute is selected, or start the game.
         if( categorySelector.getSelectionNormalized() == SelectionCategories.COMMANDER.ordinal() )
         {
@@ -140,8 +140,6 @@ public class PlayerSetupController implements IController
       case LEFT:
       case RIGHT:
         categorySelector.handleInput(action);
-        break;
-      case NO_ACTION:
         break;
         default:
           System.out.println("Warning: Unsupported input " + action + " in CO setup menu.");

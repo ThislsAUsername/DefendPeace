@@ -31,7 +31,7 @@ public class PlayerSetupCommanderController implements IController
     boolean done = false;
     switch(action)
     {
-      case ENTER:
+      case SELECT:
         // Apply change and return control.
         myPlayerInfo.currentCo = cmdrSelector.getSelectionNormalized();
         done = true;

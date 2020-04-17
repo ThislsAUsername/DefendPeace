@@ -66,7 +66,7 @@ public class CO_InfoController implements InfoController
         // Left/Right changes which sub-page has focus.
         pageSelectors[coOptionSelector.getSelectionNormalized()].handleInput(action);
         break;
-      case ENTER:
+      case SELECT:
       case BACK:
         // Reset the selectors and leave this menu.
         coOptionSelector.setSelectedOption(0);
@@ -76,7 +76,6 @@ public class CO_InfoController implements InfoController
         }
         goBack = true;
         break;
-      case NO_ACTION:
         default:
           // Other actions are not supported.
     }

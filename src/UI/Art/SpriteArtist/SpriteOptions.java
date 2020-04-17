@@ -147,7 +147,7 @@ public class SpriteOptions
 
     switch (action)
     {
-      case ENTER:
+      case SELECT:
         applyConfigOptions();
         break;
       case BACK:
@@ -164,7 +164,6 @@ public class SpriteOptions
         allOptions[highlightedOption.getSelectionNormalized()].handleInput(action);
         break;
       case SEEK:
-      case NO_ACTION:
         break;
     }
 
