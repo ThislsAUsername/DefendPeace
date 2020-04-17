@@ -1,47 +1,88 @@
 package UI;
 
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.InputMismatchException;
+import java.util.Scanner;
 
 import Engine.IController;
 import Engine.OptionSelector;
-import UI.InputHandler.InputAction;
+
 public class InputHandler implements IController
 {
+  private static final String KEYS_FILENAME = "res/keys.txt";
   public enum InputAction
   {
     UP, DOWN, LEFT, RIGHT, SEEK, SELECT, BACK
   };
 
-  static Integer[] upDefaultKeyCodes = {KeyEvent.VK_UP, KeyEvent.VK_W};
-  static Integer[] downDefaultKeyCodes = {KeyEvent.VK_DOWN, KeyEvent.VK_S};
-  static Integer[] leftDefaultKeyCodes = {KeyEvent.VK_LEFT, KeyEvent.VK_A};
-  static Integer[] rightDefaultKeyCodes = {KeyEvent.VK_RIGHT, KeyEvent.VK_D};
-  static Integer[] selectDefaultKeyCodes = {KeyEvent.VK_ENTER, KeyEvent.VK_SPACE};
-  static Integer[] backDefaultKeyCodes = {KeyEvent.VK_ESCAPE, KeyEvent.VK_BACK_SPACE};
-  static Integer[] seekDefaultKeyCodes = {KeyEvent.VK_Q};
-
-  static ArrayList<Integer> upKeyCodes = new ArrayList<Integer>(Arrays.asList(upDefaultKeyCodes));
-  static ArrayList<Integer> downKeyCodes = new ArrayList<Integer>(Arrays.asList(downDefaultKeyCodes));
-  static ArrayList<Integer> leftKeyCodes = new ArrayList<Integer>(Arrays.asList(leftDefaultKeyCodes));
-  static ArrayList<Integer> rightKeyCodes = new ArrayList<Integer>(Arrays.asList(rightDefaultKeyCodes));
-  static ArrayList<Integer> selectKeyCodes = new ArrayList<Integer>(Arrays.asList(selectDefaultKeyCodes));
-  static ArrayList<Integer> backKeyCodes = new ArrayList<Integer>(Arrays.asList(backDefaultKeyCodes));
-  static ArrayList<Integer> seekKeyCodes = new ArrayList<Integer>(Arrays.asList(seekDefaultKeyCodes));
+  static ArrayList<Integer> upDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_UP, KeyEvent.VK_W));
+  static ArrayList<Integer> downDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_DOWN, KeyEvent.VK_S));
+  static ArrayList<Integer> leftDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_LEFT, KeyEvent.VK_A));
+  static ArrayList<Integer> rightDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_RIGHT, KeyEvent.VK_D));
+  static ArrayList<Integer> selectDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_ENTER, KeyEvent.VK_SPACE));
+  static ArrayList<Integer> backDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_ESCAPE, KeyEvent.VK_BACK_SPACE));
+  static ArrayList<Integer> seekDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_Q));
 
   static HashMap<InputAction, ArrayList<Integer> > bindingsByInputAction;
   static {
     bindingsByInputAction = new HashMap<InputAction, ArrayList<Integer> >();
-    //bindingsByInputAction.put(InputAction.NO_ACTION, noActionKeyCodes);
-    bindingsByInputAction.put(InputAction.UP, upKeyCodes);
-    bindingsByInputAction.put(InputAction.DOWN, downKeyCodes);
-    bindingsByInputAction.put(InputAction.LEFT, leftKeyCodes);
-    bindingsByInputAction.put(InputAction.RIGHT, rightKeyCodes);
-    bindingsByInputAction.put(InputAction.SELECT, selectKeyCodes);
-    bindingsByInputAction.put(InputAction.BACK, backKeyCodes);
-    bindingsByInputAction.put(InputAction.SEEK, seekKeyCodes);
+
+    // Load keys file if it exists
+    boolean loadedFile = false;
+    File keyFile = new File(KEYS_FILENAME);
+    if( keyFile.exists() )
+    {
+      try
+      {
+        Scanner scanner = new Scanner(keyFile);
+        while(scanner.hasNextLine())
+        {
+          Scanner linescan = new Scanner(scanner.nextLine());
+          InputAction actionType = InputAction.valueOf(linescan.next());
+          ArrayList<Integer> actionCodes = new ArrayList<Integer>();
+          while(linescan.hasNext())
+          {
+            actionCodes.add(linescan.nextInt());
+          }
+          bindingsByInputAction.put(actionType, actionCodes);
+          linescan.close();
+        }
+        scanner.close();
+
+        // Make sure we have assigned all possible InputActions before we declare success.
+        if( bindingsByInputAction.size() != InputAction.values().length )
+          System.out.println("Saved key file did not have values for all actions! Reverting to defaults.");
+        else
+          loadedFile = true;
+      }
+      catch(FileNotFoundException fnfe)
+      {
+        System.out.println("Somehow we failed to find the keys file after checking that it exists! Using defaults.");
+      }
+      catch( InputMismatchException ime )
+      {
+        System.out.println("Encountered an error while parsing keys file! Using defaults.");
+      }
+    }
+
+    if( !loadedFile )
+    {
+      // Otherwise just set defaults
+      bindingsByInputAction.put(InputAction.UP, upDefaultKeyCodes);
+      bindingsByInputAction.put(InputAction.DOWN, downDefaultKeyCodes);
+      bindingsByInputAction.put(InputAction.LEFT, leftDefaultKeyCodes);
+      bindingsByInputAction.put(InputAction.RIGHT, rightDefaultKeyCodes);
+      bindingsByInputAction.put(InputAction.SELECT, selectDefaultKeyCodes);
+      bindingsByInputAction.put(InputAction.BACK, backDefaultKeyCodes);
+      bindingsByInputAction.put(InputAction.SEEK, seekDefaultKeyCodes);
+    }
   }
 
   // MovementInput variables
@@ -114,31 +155,31 @@ public class InputHandler implements IController
   {
     InputAction ia = null;
     int keyCode = event.getKeyCode();
-    if( upKeyCodes.contains(keyCode) )
+    if( bindingsByInputAction.get(InputAction.UP).contains(keyCode) )
     {
       ia = InputAction.UP;
     }
-    else if( downKeyCodes.contains(keyCode) )
+    else if( bindingsByInputAction.get(InputAction.DOWN).contains(keyCode) )
     {
       ia = InputAction.DOWN;
     }
-    else if( leftKeyCodes.contains(keyCode) )
+    else if( bindingsByInputAction.get(InputAction.LEFT).contains(keyCode) )
     {
       ia = InputAction.LEFT;
     }
-    else if( rightKeyCodes.contains(keyCode) )
+    else if( bindingsByInputAction.get(InputAction.RIGHT).contains(keyCode) )
     {
       ia = InputAction.RIGHT;
     }
-    else if( selectKeyCodes.contains(keyCode) )
+    else if( bindingsByInputAction.get(InputAction.SELECT).contains(keyCode) )
     {
       ia = InputAction.SELECT;
     }
-    else if( backKeyCodes.contains(keyCode) )
+    else if( bindingsByInputAction.get(InputAction.BACK).contains(keyCode) )
     {
       ia = InputAction.BACK;
     }
-    else if( seekKeyCodes.contains(keyCode) )
+    else if( bindingsByInputAction.get(InputAction.SEEK).contains(keyCode) )
     {
       ia = InputAction.SEEK;
     }
@@ -288,6 +329,26 @@ public class InputHandler implements IController
         }
         break;
       case BACK:
+        // Write keys file.
+        try
+        {
+          File keyFile = new File(KEYS_FILENAME);
+          FileWriter writer = new FileWriter(keyFile, false);
+          for( InputAction command: bindingsByInputAction.keySet() )
+          {
+            writer.write(command.toString());
+            for( Integer code : bindingsByInputAction.get(command) )
+            {
+              writer.write(" " + code);
+            }
+            writer.write('\n');
+          }
+          writer.close();
+        }
+        catch( IOException ioe )
+        {
+          System.out.println("Error! Failed to save key bindings file!.\n  " + ioe.toString());
+        }
         exitMenu = true;
         break;
       case DOWN:
@@ -301,6 +362,7 @@ public class InputHandler implements IController
         default:
           System.out.println("Warning: Unsupported input " + action + " in InputHandler.");
     }
+
     return exitMenu;
   }
 
