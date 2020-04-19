@@ -18,6 +18,7 @@ import Units.MoveTypes.FloatLight;
 import Units.MoveTypes.FootMech;
 import Units.MoveTypes.FootStandard;
 import Units.MoveTypes.MoveType;
+import Units.MoveTypes.MoveTypeFey;
 import Units.MoveTypes.Tires;
 import Units.MoveTypes.TiresRugged;
 import Units.MoveTypes.Tread;
@@ -116,6 +117,8 @@ public class DoRUnits extends UnitModelScheme
     GUNBOAT, CRUISER, SUB, SUB_SUB, CARRIER, BATTLESHIP, LANDER,
   };
 
+  public static final MoveType DoRFloatHeavy = new MoveTypeFey(new FloatHeavy());
+
   public static class DoRUnitModel extends UnitModel
   {
     private static final long serialVersionUID = 1L;
@@ -139,7 +142,7 @@ public class DoRUnits extends UnitModelScheme
     {
       // Create a new model with the given attributes.
       DoRUnitModel newModel = new DoRUnitModel(name, type, role, moneyCost, maxAmmo, maxFuel, idleFuelBurn, visionRange, movePower,
-          new MoveType(propulsion), possibleActions, weapons, abilityPowerValue);
+          propulsion.clone(), possibleActions, weapons, abilityPowerValue);
 
       newModel.copyValues(this);
       return newModel;
@@ -479,7 +482,7 @@ public class DoRUnits extends UnitModelScheme
     private static final MoveType moveType = new Tread();
     private static final UnitActionFactory[] actions = UnitActionFactory.APC_ACTIONS;
 
-    public RigModel() // TODO: Build temporary air/ports. Also, temporary ports are traversible by FloatHeavy, but only by friendlies.
+    public RigModel()
     {
       super("Rig", DoRUnitEnum.RIG, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0], STAR_VALUE);
@@ -696,7 +699,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int VISION_RANGE = 5;
     private static final int MOVE_POWER = 6;
 
-    private static final MoveType moveType = new FloatHeavy();
+    private static final MoveType moveType = DoRFloatHeavy;
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_TRANSPORT_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.CruiserTorpedoes(), new DoRWeapons.CruiserMGun() };
 
@@ -722,7 +725,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int VISION_RANGE = 5;
     private static final int MOVE_POWER = 6;
 
-    private static final MoveType moveType = new FloatHeavy();
+    private static final MoveType moveType = DoRFloatHeavy;
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.SubTorpedoes() };
 
@@ -761,7 +764,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int VISION_RANGE = 4;
     private static final int MOVE_POWER = 5;
 
-    private static final MoveType moveType = new FloatHeavy();
+    private static final MoveType moveType = DoRFloatHeavy;
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.CarrierMGun() };
 
@@ -803,7 +806,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int VISION_RANGE = 3;
     private static final int MOVE_POWER = 5;
 
-    private static final MoveType moveType = new FloatHeavy();
+    private static final MoveType moveType = DoRFloatHeavy;
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.BattleshipCannon() };
 

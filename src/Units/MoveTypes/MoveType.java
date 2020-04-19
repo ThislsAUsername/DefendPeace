@@ -32,7 +32,12 @@ public class MoveType implements Serializable
     }
   }
 
-  public MoveType(MoveType other)
+  public MoveType clone()
+  {
+    return new MoveType(this);
+  }
+
+  protected MoveType(MoveType other)
   {
     // Initialize
     this();

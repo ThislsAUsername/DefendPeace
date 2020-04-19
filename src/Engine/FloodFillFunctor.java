@@ -24,7 +24,7 @@ public interface FloodFillFunctor
   /** Acts as the default way of calculating unit mobility */
   public static class BasicMoveFillFunctor implements FloodFillFunctor
   {
-    private final Unit unit;
+    public final Unit unit;
 
     public BasicMoveFillFunctor(Unit mover)
     {

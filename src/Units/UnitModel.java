@@ -112,7 +112,7 @@ public abstract class UnitModel implements Serializable
     idleFuelBurn = pIdleFuelBurn;
     visionRange = pVision;
     movePower = pMovePower;
-    propulsion = new MoveType(pPropulsion);
+    propulsion = pPropulsion.clone();
 
     for( TerrainType terrain : TerrainType.TerrainTypeList )
     {
