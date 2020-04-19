@@ -111,16 +111,20 @@ public class TestUnitMovement extends TestCase
   private boolean testOutOfRangeMovement()
   {
     // Make a unit and add it to the map.
-    Unit mover = addUnit(testMap, testCo1, UnitModel.TROOP, 4, 4);
+    Unit mover = addUnit(testMap, testCo1, UnitModel.TROOP, 2, 4);
     mover.isTurnOver = false; // Make sure he's ready to go.
 
-    // Make an action to move the unit 5 spaces away, and execute it.
+    // Make an action to move the unit far away, and execute it.
     GameAction ga = new WaitLifecycle.WaitAction(mover, Utils.findShortestPath(mover, 7, 6, testMap));
     performGameAction(ga, testMap);
 
-    // Make sure the action didn't actually execute.
-    boolean testPassed = validate(testMap.getLocation(4, 4).getResident() == mover, "    Infantry moved when he shouldn't have.");
-    testPassed &= validate(4 == mover.x && 4 == mover.y, "    Infantry thinks he moved when he should not have.");
+    // Make an action to move the inf 3 spaces onto a mountain, and execute it.
+    GameAction ga2 = new WaitLifecycle.WaitAction(mover, Utils.findShortestPath(mover, 5, 4, testMap));
+    performGameAction(ga2, testMap);
+
+    // Make sure the actions didn't actually execute.
+    boolean testPassed = validate(testMap.getLocation(2, 4).getResident() == mover, "    Infantry moved when he shouldn't have.");
+    testPassed &= validate(2 == mover.x && 4 == mover.y, "    Infantry thinks he moved when he should not have.");
     testPassed &= validate(testMap.getLocation(7, 6).getResident() == null,
         "    Target location has a resident when it should not.");
     testPassed &= validate(99 == mover.fuel, "    Infantry lost fuel when attempting an invalid movement that should fail.");

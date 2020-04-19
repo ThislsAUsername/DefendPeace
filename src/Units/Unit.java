@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 import CommandingOfficers.Commander;
+import Engine.FloodFillFunctor;
 import Engine.GameActionSet;
 import Engine.Path;
 import Engine.UnitActionFactory;
@@ -99,6 +100,11 @@ public class Unit implements Serializable
     } // ~If location is valid.
 
     return events;
+  }
+
+  public FloodFillFunctor getMoveFunctor()
+  {
+    return model.propulsion.getUnitMoveFunctor(this);
   }
 
   /**

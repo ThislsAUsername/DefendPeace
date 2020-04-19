@@ -38,8 +38,7 @@ public class AIUtils
     Map<XYCoord, ArrayList<GameActionSet> > actions = new HashMap<XYCoord, ArrayList<GameActionSet> >();
 
     // Find the possible destinations.
-    boolean includeTransports = true;
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeTransports);
+    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
 
     for( XYCoord coord : destinations )
     {
@@ -173,8 +172,7 @@ public class AIUtils
     if( path.getPathLength() > 0 ) // Check that the destination is reachable at least in theory.
     {
       path.snip(unit.model.movePower+1); // Trim the path so we don't try to walk through walls.
-      boolean includeTransports = false;
-      ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, includeTransports); // Find the valid moves we can make.
+      ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap); // Find the valid moves we can make.
       Utils.sortLocationsByDistance(path.getEndCoord(), validMoves); // Sort moves based on intermediate destination. 
       move = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, validMoves.get(0), gameMap)); // Move to best option.
     }
@@ -227,7 +225,7 @@ public class AIUtils
   {
     XYCoord origin = new XYCoord(unit.x, unit.y);
     Map<XYCoord, Double> shootableTiles = new HashMap<XYCoord, Double>();
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
+    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
     for( WeaponModel wep : unit.model.weapons )
     {
       if( wep.getDamage(target) > 0 )

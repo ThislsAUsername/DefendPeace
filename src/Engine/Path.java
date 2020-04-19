@@ -221,6 +221,10 @@ public class Path
       this.x = x;
       this.y = y;
     }
+    public XYCoord GetCoordinates()
+    {
+      return new XYCoord(x, y);
+    }
     @Override
     public String toString()
     {

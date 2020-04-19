@@ -400,7 +400,7 @@ public class WallyAI implements AIController
         boolean foundAction = false;
 
         // Find the possible destinations.
-        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, true);
+        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
         // sort by furthest away, good for capturing
         Utils.sortLocationsByDistance(position, destinations);
         Collections.reverse(destinations);
@@ -600,7 +600,7 @@ public class WallyAI implements AIController
   private boolean queueTravelAction(GameMap gameMap, ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, boolean ignoreSafety)
   {
     // Find the possible destinations.
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
+    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
     if (ignoreSafety) // If we *must* travel, make sure we do actually move.
       destinations.remove(0);
 
