@@ -183,7 +183,15 @@ public class SpriteLibrary
     {
       ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
     }
+    else if( terrainType == TerrainType.TEMP_AIRPORT )
+    {
+      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
+    }
     else if( terrainType == TerrainType.SEAPORT )
+    {
+      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
+    }
+    else if( terrainType == TerrainType.TEMP_SEAPORT )
     {
       ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
     }
