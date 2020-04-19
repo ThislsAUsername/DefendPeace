@@ -7,7 +7,6 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameInput.GameInputHandler;
 import Terrain.GameMap;
-import Terrain.Location;
 import UI.CO_InfoController;
 import UI.GameStatsController;
 import UI.InGameMenu;
@@ -43,13 +42,11 @@ public class MapController implements IController, GameInputHandler.StateChanged
   /** Just a simple struct to hold the currently-selected unit and its tentative path. */
   private class ContemplatedAction
   {
-    Unit actor = null;
     Path movePath = null;
     boolean aiming = false;
 
     public void clear()
     {
-      actor = null;
       movePath = null;
       aiming = false;
     }
@@ -206,14 +203,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case SELECT:
         // Get the current location.
         XYCoord cursorCoords = new XYCoord(myGame.getCursorX(), myGame.getCursorY());
-        Location loc = myGame.gameMap.getLocation(cursorCoords);
-        Unit actor = loc.getResident();
-
-        // If there is a unit that is is ready to move, or if it is someone else's, then record it so we can build the move path.
-        if( null != actor && ((actor.CO == myGame.activeCO && !actor.isTurnOver) || (actor.CO != myGame.activeCO)) )
-        {
-          contemplatedAction.actor = actor;
-        }
 
         // Pass the current cursor location to the GameInputHandler.
         myGameInputHandler.select(cursorCoords);
@@ -381,7 +370,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
         contemplatedAction.aiming = true;
         break;
       case MENU_SELECT:
-        if( null != contemplatedAction.movePath )
+        Path path = contemplatedAction.movePath;
+        if( null != path && path.getPathLength() > 0 )
         {
           myGame.setCursorLocation(contemplatedAction.movePath.getEnd().x, contemplatedAction.movePath.getEnd().y);
         }
@@ -397,9 +387,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
         contemplatedAction.aiming = false;
         break;
       case PATH_SELECT:
-        if( null != contemplatedAction.actor )
+        XYCoord coord = myGameInputHandler.getUnitCoord();
+        if( null != coord )
         {
-          myGame.setCursorLocation(contemplatedAction.actor.x, contemplatedAction.actor.y);
+          myGame.setCursorLocation(coord.xCoord, coord.yCoord);
         }
 
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.
@@ -479,10 +470,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     contemplatedAction.movePath.addWaypoint(x, y);
 
-    if( !Utils.isPathValid(contemplatedAction.actor, contemplatedAction.movePath, map) )
+    Unit actor = myGameInputHandler.getActingUnit();
+    XYCoord coord = myGameInputHandler.getUnitCoord();
+    if( !Utils.isPathValid(coord, actor, contemplatedAction.movePath, map) )
     {
       // The currently-built path is invalid. Try to generate a new one (may still return null).
-      contemplatedAction.movePath = Utils.findShortestPath(contemplatedAction.actor, x, y, map);
+      contemplatedAction.movePath = Utils.findShortestPath(coord, actor, x, y, map);
     }
   }
 
@@ -621,7 +614,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   public Unit getContemplatedActor()
   {
-    return contemplatedAction.actor;
+    return myGameInputHandler.getActingUnit();
+  }
+
+  public XYCoord getContemplationCoord()
+  {
+    return myGameInputHandler.getUnitCoord();
   }
 
   public Path getContemplatedMove()

@@ -6,6 +6,7 @@ import Engine.UnitActionLifecycles.BattleLifecycle;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
 import Engine.UnitActionLifecycles.DeleteLifecycle;
 import Engine.UnitActionLifecycles.JoinLifecycle;
+import Engine.UnitActionLifecycles.LaunchLifecycle;
 import Engine.UnitActionLifecycles.LoadLifecycle;
 import Engine.UnitActionLifecycles.RepairLifecycle;
 import Engine.UnitActionLifecycles.ResupplyLifecycle;
@@ -28,6 +29,7 @@ public abstract class UnitActionFactory implements Serializable
 
   public static final UnitActionFactory ATTACK = new BattleLifecycle.BattleFactory();
   public static final UnitActionFactory UNLOAD = new UnloadLifecycle.UnloadFactory();
+  public static final UnitActionFactory LAUNCH = new LaunchLifecycle.LaunchFactory();
   public static final UnitActionFactory CAPTURE = new CaptureLifecycle.CaptureFactory();
   public static final UnitActionFactory RESUPPLY = new ResupplyLifecycle.ResupplyFactory();
   public static final UnitActionFactory REPAIR_UNIT = new RepairLifecycle.RepairFactory();

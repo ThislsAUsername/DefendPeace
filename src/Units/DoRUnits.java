@@ -755,16 +755,17 @@ public class DoRUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final MoveType moveType = new FloatHeavy();
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] weapons = { new DoRWeapons.CarrierMGun() };
 
-    public CarrierModel() // TODO: Launch.
+    public CarrierModel()
     {
       super("Carrier", DoRUnitEnum.CARRIER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
       maxMaterials = 4;
       holdingCapacity = 2;
       carryableMask = AIR_LOW | AIR_HIGH;
+      possibleActions.add(0, UnitActionFactory.LAUNCH);
     }
 
     /** DoR Carriers re-supply and repair their cargo at the beginning of every turn. Make it so. */

@@ -63,22 +63,26 @@ public class Unit implements Serializable
 
     // Only perform turn initialization for the unit if it is on the map.
     //   Units that are e.g. in a transport don't burn fuel, etc.
+    if( isStunned )
+    {
+      isTurnOver = true;
+      isStunned = false;
+    }
+    else
+      isTurnOver = false;
+    if( captureTarget != null && captureTarget.getResident() != this )
+    {
+      captureTarget = null;
+      captureProgress = 0;
+    }
+
+    if( null != heldUnits )
+      for( Unit cargo : heldUnits )
+        events.addAll(cargo.initTurn(map));
+
     if( null != locus )
     {
-      if( isStunned )
-      {
-        isTurnOver = true;
-        isStunned = false;
-      }
-      else
-        isTurnOver = false;
       fuel -= model.idleFuelBurn;
-      if( captureTarget != null && captureTarget.getResident() != this )
-      {
-        captureTarget = null;
-        captureProgress = 0;
-      }
-
       // If the unit is not at max health, and is on a repair tile, heal it.
       if( model.canRepairOn(locus) && !CO.isEnemy(locus.getOwner()) )
       {

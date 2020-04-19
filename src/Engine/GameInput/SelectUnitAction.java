@@ -66,6 +66,9 @@ class SelectUnitAction extends GameInputState<GameActionSet>
         if( UnitActionFactory.UNLOAD == actionType )
           // We need to select a unit to unload.
           next = new SelectCargo(myStateData);
+        else if( UnitActionFactory.LAUNCH == actionType )
+          // We need to select a unit to launch.
+          next = new SelectLaunchable(myStateData);
         else if( actionType.shouldConfirm )
           // Confirm deletion. Don't want angry users rising up with pitchforks.
           next = new ConfirmUnitAction(myStateData);

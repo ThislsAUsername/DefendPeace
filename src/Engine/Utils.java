@@ -92,17 +92,22 @@ public class Utils
     }
   }
 
+  /** Alias for {@link #findPossibleDestinations(XYCoord, Unit, GameMap, boolean) findPossibleDestinations()} **/
+  public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap, boolean includeOccupiedSpaces)
+  {
+    return findPossibleDestinations(new XYCoord(unit.x, unit.y), unit, gameMap, includeOccupiedSpaces);
+  }
   /**
    * Returns the list of XYCoords in gameMap reachable by unit this turn.
    * @param unit The unit to evaluate.
    * @param gameMap The map to search over.
    * @param includeOccupiedSpaces If true, will include spaces occupied by a friendly unit, if some action could end on this space (e.g. LOAD, JOIN).
    */
-  public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap, boolean includeOccupiedSpaces)
+  public static ArrayList<XYCoord> findPossibleDestinations(XYCoord start, Unit unit, GameMap gameMap, boolean includeOccupiedSpaces)
   {
     ArrayList<XYCoord> reachableTiles = new ArrayList<XYCoord>();
 
-    if( null == unit || unit.x < 0 || unit.y < 0 )
+    if( null == unit || null == start || start.xCoord < 0 || start.yCoord < 0 )
     {
       System.out.println("WARNING! Finding destinations for ineligible unit!");
       return reachableTiles;
@@ -119,8 +124,8 @@ public class Utils
     }
 
     // set up our search
-    SearchNode root = new SearchNode(unit.x, unit.y);
-    costGrid[unit.x][unit.y] = 0;
+    SearchNode root = new SearchNode(start.xCoord, start.yCoord);
+    costGrid[start.xCoord][start.yCoord] = 0;
     Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(costGrid));
     searchQueue.add(root);
     // do search
@@ -174,10 +179,13 @@ public class Utils
   {
     return unit.model.propulsion.getMoveCost(map.getEnvironment(x, y));
   }
-
   public static boolean isPathValid(Unit unit, Path path, GameMap map)
   {
-    if( (null == path) || (null == unit) )
+    return isPathValid(new XYCoord(unit.x, unit.y), unit, path, map);
+  }
+  public static boolean isPathValid(XYCoord start, Unit unit, Path path, GameMap map)
+  {
+    if( (null == path) || (null == unit) || (null == start) )
     {
       return false;
     }
@@ -186,7 +194,7 @@ public class Utils
     boolean canReach = true;
 
     // Make sure the first waypoint is under the Unit.
-    if( path.getPathLength() <= 0 || path.getWaypoint(0).x != unit.x || path.getWaypoint(0).y != unit.y )
+    if( path.getPathLength() <= 0 || path.getWaypoint(0).x != start.xCoord || path.getWaypoint(0).y != start.yCoord )
     {
       canReach = false;
     }
@@ -211,20 +219,30 @@ public class Utils
     return canReach;
   }
 
-  /** Alias for {@link #findShortestPath(Unit, int, int, GameMap, boolean) findShortestPath(Unit, int, int, GameMap, boolean)} **/
+  /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
   public static Path findShortestPath(Unit unit, XYCoord destination, GameMap map, boolean theoretical)
   {
     return findShortestPath(unit, destination.xCoord, destination.yCoord, map, theoretical);
   }
-  /** Alias for {@link #findShortestPath(Unit, int, int, GameMap, boolean) findShortestPath(Unit, int, int, GameMap, boolean=false)} **/
+  /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
+  public static Path findShortestPath(Unit unit, int x, int y, GameMap map, boolean theoretical)
+  {
+    return findShortestPath(new XYCoord(unit.x, unit.y), unit, x, y, map, false);
+  }
+  /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
   public static Path findShortestPath(Unit unit, XYCoord destination, GameMap map)
   {
     return findShortestPath(unit, destination.xCoord, destination.yCoord, map, false);
   }
-  /** Alias for {@link #findShortestPath(Unit, int, int, GameMap, boolean) findShortestPath(Unit, int, int, GameMap, boolean=false)} **/
+  /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
   public static Path findShortestPath(Unit unit, int x, int y, GameMap map)
   {
     return findShortestPath(unit, x, y, map, false);
+  }
+  /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
+  public static Path findShortestPath(XYCoord start, Unit unit, int x, int y, GameMap map)
+  {
+    return findShortestPath(start, unit, x, y, map, false);
   }
   /**
    * Calculate and return the shortest path for unit to take from its current location to map(x, y).
@@ -236,9 +254,9 @@ public class Utils
    * @param map The current GameMap referenced by the Path returned.
    * @param theoretical If true, ignores other Units and move-power limitations.
    */
-  public static Path findShortestPath(Unit unit, int x, int y, GameMap map, boolean theoretical)
+  public static Path findShortestPath(XYCoord start, Unit unit, int x, int y, GameMap map, boolean theoretical)
   {
-    if( null == unit || null == map || !map.isLocationValid(unit.x, unit.y) )
+    if( null == start || null == unit || null == map || !map.isLocationValid(start.xCoord, start.yCoord) )
     {
       return null;
     }
@@ -262,8 +280,8 @@ public class Utils
     }
 
     // Set up search parameters.
-    SearchNode root = new SearchNode(unit.x, unit.y);
-    costGrid[unit.x][unit.y] = 0;
+    SearchNode root = new SearchNode(start.xCoord, start.yCoord);
+    costGrid[start.xCoord][start.yCoord] = 0;
     Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(costGrid, x, y));
     searchQueue.add(root);
 
