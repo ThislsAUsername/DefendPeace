@@ -64,7 +64,7 @@ public class TerrainType implements Serializable
   private static final int TEMP_AIRPORT_FLAGS = LAND | CAPTURABLE | PROVIDES_COVER | HEALS_AIR;
   private static final int TEMP_AIRPORT_DEFENSE = 1;
   private static final Color TEMP_AIRPORT_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
-  private static final String TEMP_AIRPORT_NAME = "TEMP AIRPORT";
+  private static final String TEMP_AIRPORT_NAME = "TEMP_AIRPORT";
   public static final TerrainType TEMP_AIRPORT = new TerrainType( TEMP_AIRPORT_FLAGS, TEMP_AIRPORT_DEFENSE, TEMP_AIRPORT_COLOR, TEMP_AIRPORT_NAME );
 
   private static final int BRIDGE_FLAGS = LAND | WATER;
@@ -167,7 +167,7 @@ public class TerrainType implements Serializable
   private static final int TEMP_SEAPORT_FLAGS = LAND | WATER | CAPTURABLE | PROVIDES_COVER | HEALS_SEA;
   private static final int TEMP_SEAPORT_DEFENSE = 1;
   private static final Color TEMP_SEAPORT_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
-  private static final String TEMP_SEAPORT_NAME = "TEMP SEAPORT";
+  private static final String TEMP_SEAPORT_NAME = "TEMP_SEAPORT";
   public static final TerrainType TEMP_SEAPORT = new TerrainType( TEMP_SEAPORT_FLAGS, TEMP_SEAPORT_DEFENSE, TEMP_SEAPORT_COLOR, TEMP_SEAPORT_NAME );
 
   private static final int SHOAL_FLAGS = LAND | WATER;
