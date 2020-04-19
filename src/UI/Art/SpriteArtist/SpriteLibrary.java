@@ -198,10 +198,6 @@ public class SpriteLibrary
       ss.addTileTransition(TerrainType.BRIDGE, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
       ss.addTileTransition(TerrainType.RIVER, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
     }
-    else
-    {
-      System.out.println("ERROR! [SpriteLibrary.loadTerrainSpriteSet] Unknown terrain type " + terrainType);
-    }
 
     // If this tile is owned by someone, fly their colors.
     if( spriteKey.commanderKey != null )
