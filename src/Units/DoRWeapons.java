@@ -195,6 +195,7 @@ public class DoRWeapons
     public AntiTankCannon()
     {
       super(DoRWeaponType.ANTITANKCANNON, USE_AMMO, MIN_RANGE, MAX_RANGE);
+      this.canFireAfterMoving = false;
     }
   }
 
