@@ -200,18 +200,9 @@ public class Unit implements Serializable
     return HP - before;
   }
 
-  public void capture(Location target)
+  public boolean capture(Location target)
   {
-    if( !target.isCaptureable() )
-    {
-      System.out.println("ERROR! Attempting to capture an uncapturable Location!");
-      return;
-    }
-    if( !CO.isEnemy(target.getOwner()) )
-    {
-      System.out.println("WARNING! Attempting to capture an allied property!");
-      return;
-    }
+    boolean success = false;
 
     if( target != captureTarget )
     {
@@ -224,7 +215,10 @@ public class Unit implements Serializable
       target.setOwner(CO);
       captureProgress = 0;
       target = null;
+      success = true;
     }
+
+    return success;
   }
 
   public void stopCapturing()

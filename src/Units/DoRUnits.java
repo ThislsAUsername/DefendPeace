@@ -7,6 +7,7 @@ import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.ResupplyEvent;
 import Engine.UnitActionLifecycles.FlareLifecycle;
 import Engine.UnitActionLifecycles.ResupplyLifecycle;
+import Engine.UnitActionLifecycles.TerraformLifecycle;
 import Engine.UnitActionLifecycles.TransformLifecycle;
 import Engine.UnitActionLifecycles.UnitProduceLifecycle;
 import Terrain.MapMaster;
@@ -485,6 +486,12 @@ public class DoRUnits extends UnitModelScheme
       holdingCapacity = 1;
       carryableMask = TROOP;
       carryableExclusionMask = TANK; // Can't carry Bikes
+
+      maxMaterials = 1;
+      possibleActions.add(
+          new TerraformLifecycle.TerraformFactory(TerrainType.GRASS, TerrainType.TEMP_AIRPORT, "BUILD"));
+      possibleActions.add(
+          new TerraformLifecycle.TerraformFactory(TerrainType.SHOAL, TerrainType.TEMP_SEAPORT, "BUILD"));
     }
 
     /**
