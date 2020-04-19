@@ -391,7 +391,7 @@ public class TerrainSpriteSet
   }
 
   /** Return true if this terrain type takes up more than one tile when drawn. */
-  private boolean isTerrainObject(TerrainType terrainType)
+  public static boolean isTerrainObject(TerrainType terrainType)
   {
     if( null == terrainObjects )
     {
