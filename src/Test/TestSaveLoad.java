@@ -30,6 +30,7 @@ public class TestSaveLoad extends TestCase
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
 
     game = new GameInstance(testMap);
+    game.saveFile = "fancyTestSave.svp";
   }
 
   @Override
