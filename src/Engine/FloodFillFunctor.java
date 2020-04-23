@@ -53,7 +53,7 @@ public interface FloodFillFunctor
     public boolean canEnd(GameMap map, XYCoord end)
     {
       Unit obstacle = map.getLocation(end).getResident();
-      return (obstacle == null || obstacle == unit);
+      return (obstacle == null || !unit.CO.isEnemy(obstacle.CO));
     }
 
     public int findMoveCost(XYCoord from, XYCoord to, GameMap map)
