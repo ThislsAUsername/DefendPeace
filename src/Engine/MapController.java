@@ -373,7 +373,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         Path path = contemplatedAction.movePath;
         if( null != path && path.getPathLength() > 0 )
         {
-          myGame.setCursorLocation(contemplatedAction.movePath.getEnd().x, contemplatedAction.movePath.getEnd().y);
+          myGame.setCursorLocation(contemplatedAction.movePath.getEnd().GetCoordinates());
         }
         currentMenu = new InGameMenu<>(myGameInputHandler.getMenuOptions(), myGameInputOptionSelector);
         contemplatedAction.aiming = false;
@@ -390,7 +390,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         XYCoord coord = myGameInputHandler.getUnitCoord();
         if( null != coord )
         {
-          myGame.setCursorLocation(coord.xCoord, coord.yCoord);
+          myGame.setCursorLocation(coord);
         }
 
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.

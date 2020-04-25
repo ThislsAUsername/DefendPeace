@@ -102,10 +102,10 @@ public abstract class LaunchLifecycle
     @Override
     public GameEventQueue getEvents(MapMaster gameMap)
     {
-      // UNLOAD actions consist of
-      //   MOVE (transport)
-      //   UNLOAD
-      //   [UNLOAD]*
+      // LAUNCH actions consist of
+      //   LAUNCH
+      //   Launchable's action events
+      //   [LOAD]*
       GameEventQueue launchEvents = new GameEventQueue();
 
       // Validate input.
@@ -145,7 +145,9 @@ public abstract class LaunchLifecycle
     @Override
     public String toString()
     {
-      return String.format("[Launch from %s]", launcher.toStringWithLocation());
+      return String.format("[Launch %s from %s, then execute {%s}]",
+          launchee, launcher.toStringWithLocation(),
+          cargoAction.toString());
     }
 
     @Override

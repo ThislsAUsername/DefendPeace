@@ -118,7 +118,7 @@ public class Utils
       return reachableTiles;
     }
 
-    // set all locations to unreachable/remaining move = 0
+    // set all locations to unreachable
     int[][] powerGrid = new int[gameMap.mapWidth][gameMap.mapHeight];
     for( int i = 0; i < gameMap.mapWidth; i++ )
     {
