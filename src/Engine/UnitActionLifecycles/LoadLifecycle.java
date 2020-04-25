@@ -99,6 +99,9 @@ public abstract class LoadLifecycle
         }
       }
 
+      // Make it so the passenger actually executes the move
+      movePath.snipCollision(gameMap, passenger);
+
       // Create events.
       if( isValid )
       {
