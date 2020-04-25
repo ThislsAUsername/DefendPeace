@@ -119,7 +119,8 @@ public class InfantrySpamAI implements AIController
     // Handle actions for each unit the CO owns.
     for( Unit unit : myCo.units )
     {
-      if( unit.isTurnOver ) continue; // No actions for stale units.
+      if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y))
+        continue; // No actions for units that are stale or out of bounds
       boolean foundAction = false;
 
       // Find the possible unit actions.

@@ -24,7 +24,6 @@ import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Engine.UnitActionLifecycles.BattleLifecycle;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
-import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -219,8 +218,8 @@ public class WallyAI implements AIController
     Queue<Unit> unitQueue = new PriorityQueue<Unit>(11, new AIUtils.UnitCostComparator(false));
     for( Unit unit : myCo.units )
     {
-      if( unit.isTurnOver )
-        continue; // No actions for stale units.
+      if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y))
+        continue; // No actions for units that are stale or out of bounds.
       unitQueue.offer(unit);
     }
 
@@ -603,6 +602,7 @@ public class WallyAI implements AIController
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
     if (ignoreSafety) // If we *must* travel, make sure we do actually move.
       destinations.remove(0);
+    Utils.trimFullLocations(gameMap, destinations);
 
     if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
     {
@@ -618,8 +618,7 @@ public class WallyAI implements AIController
       {
         goal = validTargets.get(index++);
         path = Utils.findShortestPath(unit, goal, gameMap, true);
-        validTarget = (myCo.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
-            && !capturingProperties.contains(goal) // We aren't already capturing it.
+        validTarget = (!capturingProperties.contains(goal) // We aren't already capturing it.
             && (path.getPathLength() > 0)); // We can reach it.
 //        log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal,
 //            (validTarget ? "Yes" : "No")));
@@ -656,11 +655,10 @@ public class WallyAI implements AIController
         if( null != destination )
         {
           Path movePath = Utils.findShortestPath(unit, destination, gameMap);
+          ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, false);
           GameAction action = null;
-          if( movePath.getPathLength() > 1 ) // We only want to try to travel if we can actually go somewhere
+          if( movePath.getPathLength() > 1 && actionSets.size() > 0 ) // We only want to try to travel if we can actually go somewhere and do something
           {
-            ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, false);
-
             // Since we're moving anyway, might as well try shooting the scenery
             for( GameActionSet actionSet : actionSets )
             {
@@ -682,8 +680,8 @@ public class WallyAI implements AIController
               }
             }
 
-            if( null == action) // Just wait if we can't do anything cool
-             action = new WaitLifecycle.WaitAction(unit, movePath);
+            if( null == action ) // Just wait if we can't do anything cool
+             action = actionSets.get(0).getSelected();
             actions.offer(action);
             return true;
           }

@@ -139,7 +139,7 @@ public class Muriel implements AIController
     if( null != umami ) return umami;
 
     double myDamage = 0;
-    WeaponModel myWeapon = myUnit.chooseWeapon(otherUnit.model, 1, false);
+    WeaponModel myWeapon = myUnit.chooseWeapon(otherUnit.model, 1, myUnit.model.hasMobileWeapon());
     if( null != myWeapon )
     {
       BattleInstance.BattleParams params = new BattleInstance.BattleParams(myUnit, myWeapon,
@@ -149,7 +149,7 @@ public class Muriel implements AIController
 
     // Now go the other way.
     double otherDamage = 0;
-    WeaponModel otherWeapon = otherUnit.chooseWeapon(myUnit.model, 1, false);
+    WeaponModel otherWeapon = otherUnit.chooseWeapon(myUnit.model, 1, myUnit.model.hasMobileWeapon());
     if( null != otherWeapon )
     {
       BattleInstance.BattleParams params = new BattleInstance.BattleParams(otherUnit, otherWeapon,
@@ -235,7 +235,8 @@ public class Muriel implements AIController
     // Handle Unit Actions
     for( Unit unit : myCo.units )
     {
-      if( unit.isTurnOver ) continue; // Ignore stale units.
+      if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y))
+        continue; // No actions for units that are stale or out of bounds
 
       // If we are capturing something, finish what we started.
       if( unit.getCaptureProgress() > 0 )
@@ -347,7 +348,7 @@ public class Muriel implements AIController
           Environment environment = gameMap.getEnvironment(targetLoc);
 
           // Calculate the cost of the damage we can do.
-          BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, true), target, environment, false, null);
+          BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, unit.model.hasMobileWeapon()), target, environment, false, null);
           double hpDamage = Math.min(params.calculateDamage(), target.getPreciseHP());
           double damageValue = (target.model.getCost()/10) * hpDamage;
 
@@ -470,7 +471,7 @@ public class Muriel implements AIController
   private boolean shouldAttack(Unit unit, Unit target, GameMap gameMap)
   {
     // Calculate the cost of the damage we can do.
-    BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, true), target, gameMap.getLocation(target.x, target.y).getEnvironment(), false, null);
+    BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, unit.model.hasMobileWeapon()), target, gameMap.getLocation(target.x, target.y).getEnvironment(), false, null);
     double damage = params.calculateDamage();
     UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(unit, target);
 

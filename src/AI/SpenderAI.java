@@ -140,8 +140,8 @@ public class SpenderAI implements AIController
         stateChange = false; // There's been no gamestate change since we last iterated through all the units, since we're about to do just that
         for( Unit unit : myCo.units )
         {
-          if( unit.isTurnOver )
-            continue; // No actions for stale units.
+          if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y))
+            continue; // No actions for units that are stale or out of bounds
           unitQueue.offer(unit);
         }
       }
@@ -205,6 +205,7 @@ public class SpenderAI implements AIController
 
           // Find the possible destinations.
           ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
+          Utils.trimFullLocations(gameMap, destinations);
 
           if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
           {

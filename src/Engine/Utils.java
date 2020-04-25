@@ -615,4 +615,11 @@ public class Utils
     }
     return tilesInRange;
   }
+
+  public static void trimFullLocations(GameMap gameMap, ArrayList<XYCoord> destinations)
+  {
+    for( XYCoord coord : destinations.toArray(new XYCoord[0]) )
+      if( null != gameMap.getLocation(coord).getResident() )
+        destinations.remove(coord);
+  }
 }

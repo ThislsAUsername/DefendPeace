@@ -169,10 +169,11 @@ public class AIUtils
 
     // Find the full path that would get this unit to the destination, regardless of how long. 
     Path path = Utils.findShortestPath(unit, destination, gameMap, true);
-    if( path.getPathLength() > 0 ) // Check that the destination is reachable at least in theory.
+    ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap); // Find the valid moves we can make.
+    Utils.trimFullLocations(gameMap, validMoves);
+    if( path.getPathLength() > 0 && validMoves.size() > 0 ) // Check that the destination is reachable at least in theory.
     {
       path.snip(unit.model.movePower+1); // Trim the path so we don't try to walk through walls.
-      ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap); // Find the valid moves we can make.
       Utils.sortLocationsByDistance(path.getEndCoord(), validMoves); // Sort moves based on intermediate destination. 
       move = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, validMoves.get(0), gameMap)); // Move to best option.
     }

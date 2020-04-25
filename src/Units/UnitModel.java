@@ -236,6 +236,19 @@ public abstract class UnitModel implements Serializable
     }
     return hasSiege;
   }
+  public boolean hasMobileWeapon()
+  {
+    boolean hasStrike = false;
+    for( WeaponModel wm : weapons )
+    {
+      if( wm.canFireAfterMoving )
+      {
+        hasStrike = true;
+        break;
+      }
+    }
+    return hasStrike;
+  }
 
   @Override
   public String toString()
