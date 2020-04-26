@@ -245,11 +245,11 @@ public class Path
 
   public void snipCollision(GameMap map, Unit unit)
   {
-    for( int i = waypoints.size()-1 ; i > 0; i--)
+    for( int i = 0; i < waypoints.size(); i++)
     {
       PathNode point = waypoints.get(i);
       Unit obstacle = map.getLocation(point.x, point.y).getResident();
-      if( null != obstacle )
+      if( null != obstacle && unit.CO.isEnemy(obstacle.CO) )
       {
         snip(i);
         break;
