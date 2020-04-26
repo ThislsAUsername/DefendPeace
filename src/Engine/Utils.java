@@ -92,21 +92,25 @@ public class Utils
     }
   }
 
-  /** Alias for {@link #findPossibleDestinations(XYCoord, Unit, GameMap, boolean) findPossibleDestinations()} **/
+  /** Alias for {@link #findPossibleDestinations(XYCoord, Unit, GameMap) findPossibleDestinations()} **/
   public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap)
   {
     return findPossibleDestinations(new XYCoord(unit.x, unit.y), unit, gameMap);
   }
-  /** Alias for {@link #findPossibleDestinations(XYCoord, Unit, GameMap, boolean) findPossibleDestinations()} **/
+  /**
+   * Finds the area reachable this turn by input unit.
+   * Alias for {@link #findFloodFillArea(XYCoord, FloodFillFunctor, int, GameMap) findFloodFillArea()}
+   */
   public static ArrayList<XYCoord> findPossibleDestinations(XYCoord start, Unit unit, GameMap gameMap)
   {
     return findFloodFillArea(start, unit.getMoveFunctor(), Math.min(unit.model.movePower, unit.fuel), gameMap);
   }
   /**
-   * Returns the list of XYCoords in gameMap reachable by unit this turn.
-   * @param unit The unit to evaluate.
+   * @param start Initial location; will usually be in the output set.
+   * @param fff Determines the cost to fill from one tile to another.
+   * @param initialFillPower How much juice to give the FloodFillFunctor
    * @param gameMap The map to search over.
-   * @param includeOccupiedSpaces If true, will include spaces occupied by a friendly unit, if some action could end on this space (e.g. LOAD, JOIN).
+   * @return The list of XYCoords in gameMap reachable by the FloodFillFunctor from the start coord, given initialFillPower.
    */
   public static ArrayList<XYCoord> findFloodFillArea(XYCoord start, FloodFillFunctor fff, int initialFillPower, GameMap gameMap)
   {
@@ -616,6 +620,9 @@ public class Utils
     return tilesInRange;
   }
 
+  /**
+   * Given the input set of destinations, it removes the destinations that are occupied by a unit already.
+   */
   public static void trimFullLocations(GameMap gameMap, ArrayList<XYCoord> destinations)
   {
     for( XYCoord coord : destinations.toArray(new XYCoord[0]) )
