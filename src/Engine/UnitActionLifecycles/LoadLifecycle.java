@@ -168,6 +168,7 @@ public abstract class LoadLifecycle
         gameMap.removeUnit(unitCargo);
         unitCargo.x = -1;
         unitCargo.y = -1;
+        unitCargo.isTurnOver = true;
         unitTransport.heldUnits.add(unitCargo);
       }
       else
