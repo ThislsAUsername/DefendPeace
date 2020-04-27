@@ -93,17 +93,17 @@ public class Utils
   }
 
   /** Alias for {@link #findPossibleDestinations(XYCoord, Unit, GameMap) findPossibleDestinations()} **/
-  public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap)
+  public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap, boolean includeOccupied)
   {
-    return findPossibleDestinations(new XYCoord(unit.x, unit.y), unit, gameMap);
+    return findPossibleDestinations(new XYCoord(unit.x, unit.y), unit, gameMap, includeOccupied);
   }
   /**
    * Finds the area reachable this turn by input unit.
    * Alias for {@link #findFloodFillArea(XYCoord, FloodFillFunctor, int, GameMap) findFloodFillArea()}
    */
-  public static ArrayList<XYCoord> findPossibleDestinations(XYCoord start, Unit unit, GameMap gameMap)
+  public static ArrayList<XYCoord> findPossibleDestinations(XYCoord start, Unit unit, GameMap gameMap, boolean includeOccupied)
   {
-    return findFloodFillArea(start, unit.getMoveFunctor(), Math.min(unit.model.movePower, unit.fuel), gameMap);
+    return findFloodFillArea(start, unit.getMoveFunctor(includeOccupied), Math.min(unit.model.movePower, unit.fuel), gameMap);
   }
   /**
    * @param start Initial location; will usually be in the output set.
@@ -148,7 +148,7 @@ public class Utils
         reachableTiles.add(coord);
       }
 
-      expandSearchNode(fff, gameMap, currentNode, searchQueue, powerGrid, false);
+      expandSearchNode(fff, gameMap, currentNode, searchQueue, powerGrid);
 
       currentNode = null;
     }
@@ -156,13 +156,13 @@ public class Utils
     return reachableTiles;
   }
 
-  public static boolean isPathValid(Unit unit, Path path, GameMap map)
+  public static boolean isPathValid(Unit unit, Path path, GameMap map, boolean includeOccupied)
   {
-    return isPathValid(new XYCoord(unit.x, unit.y), unit, path, map);
+    return isPathValid(new XYCoord(unit.x, unit.y), unit, path, map, includeOccupied);
   }
-  public static boolean isPathValid(XYCoord start, Unit unit, Path path, GameMap map)
+  public static boolean isPathValid(XYCoord start, Unit unit, Path path, GameMap map, boolean includeOccupied)
   {
-    return isPathValid(start, unit.getMoveFunctor(), Math.min(unit.model.movePower, unit.fuel), path, map);
+    return isPathValid(start, unit.getMoveFunctor(includeOccupied), Math.min(unit.model.movePower, unit.fuel), path, map);
   }
   public static boolean isPathValid(XYCoord start, FloodFillFunctor fff, int initialFillPower, Path path, GameMap map)
   {
@@ -185,7 +185,7 @@ public class Utils
     {
       XYCoord newCoord = path.getWaypoint(i).GetCoordinates();
 
-      movePower = fff.getRemainingFillPower(map, movePower, lastCoord, newCoord, false);
+      movePower = fff.getRemainingFillPower(map, movePower, lastCoord, newCoord);
       lastCoord = newCoord;
       if( movePower < 0 )
       {
@@ -221,22 +221,29 @@ public class Utils
   {
     return findShortestPath(start, unit, x, y, map, false);
   }
-  /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
-  public static Path findShortestPath(XYCoord start, Unit unit, int x, int y, GameMap map, boolean theoretical)
-  {
-    return findShortestPath(start, unit.getMoveFunctor(), Math.min(unit.model.movePower, unit.fuel), x, y, map, theoretical);
-  }
   /**
-   * Calculate and return the shortest path for unit to take from its current location to map(x, y).
-   * The Path will avoid non-allied units unless `theoretical` is true.
-   * If no valid path is found, an empty Path will be returned.
-   * @param unit The unit under consideration. The Unit's current location will be the starting point for the path,
-   *             and the unit's move-power will limit the path length.
-   * @param destination The desired endpoint for the Path.
-   * @param map The current GameMap referenced by the Path returned.
+   * Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)}
    * @param theoretical If true, ignores other Units and move-power limitations.
    */
-  public static Path findShortestPath(XYCoord start, FloodFillFunctor fff, int initialFillPower, int x, int y, GameMap map, boolean theoretical)
+  public static Path findShortestPath(XYCoord start, Unit unit, int x, int y, GameMap map, boolean theoretical)
+  {
+    // findShortestPath() is given a particular endpoint already, so it assumes that it is valid to end up there.
+    return findShortestPath(start, unit.getMoveFunctor(true, theoretical),
+                            (theoretical)? Integer.MAX_VALUE : Math.min(unit.model.movePower, unit.fuel),
+                            x, y, map);
+  }
+  /**
+   * Calculate and return the minimum-cost path for the FloodFillFunctor from its current location to map(x, y).
+   * The Path will avoid non-allied units unless `theoretical` is true.
+   * If no valid path is found, an empty Path will be returned.
+   * @param start Initial location; will usually be in the output set.
+   * @param fff Determines the cost to fill from one tile to another.
+   * @param initialFillPower How much juice to give the FloodFillFunctor
+   * @param x Final X coordinate
+   * @param y Final Y coordinate
+   * @param map The map to search over.
+   */
+  public static Path findShortestPath(XYCoord start, FloodFillFunctor fff, int initialFillPower, int x, int y, GameMap map)
   {
     if( null == start || null == fff || null == map || !map.isLocationValid(start.xCoord, start.yCoord) )
     {
@@ -263,7 +270,7 @@ public class Utils
 
     // Set up search parameters.
     SearchNode root = new SearchNode(start.xCoord, start.yCoord);
-    powerGrid[start.xCoord][start.yCoord] = (theoretical)? Integer.MAX_VALUE : initialFillPower;
+    powerGrid[start.xCoord][start.yCoord] = initialFillPower;
     Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid, x, y));
     searchQueue.add(root);
 
@@ -289,7 +296,7 @@ public class Utils
         break;
       }
 
-      expandSearchNode(fff, map, currentNode, searchQueue, powerGrid, theoretical);
+      expandSearchNode(fff, map, currentNode, searchQueue, powerGrid);
 
       currentNode = null;
     }
@@ -315,7 +322,7 @@ public class Utils
    * @param theoretical If set, don't limit range using move power, and don't worry about other Units in the way.
    */
   private static void expandSearchNode(FloodFillFunctor fff, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue,
-      int[][] powerGrid, boolean theoretical)
+      int[][] powerGrid)
   {
     ArrayList<XYCoord> coordsToCheck = findLocationsInRange(map, currentNode.getCoordinates(), 1, 1);
 
@@ -325,12 +332,9 @@ public class Utils
       // then update the power grid and re-queue the next node.
       int oldPower = powerGrid[currentNode.x][currentNode.y];
       int oldNextPower = powerGrid[next.xCoord][next.yCoord];
-      int newNextPower = fff.getRemainingFillPower(map, oldPower, currentNode.getCoordinates(), next, theoretical);
+      int newNextPower = fff.getRemainingFillPower(map, oldPower, currentNode.getCoordinates(), next);
 
-      // If we are playing "What if" then don't worry too much about move cost.
-      boolean canMove = (theoretical) ? true : (newNextPower >= 0);
-
-      if( canMove && (newNextPower > oldNextPower) )
+      if( newNextPower > oldNextPower )
       {
         powerGrid[next.xCoord][next.yCoord] = newNextPower;
         searchQueue.add(new SearchNode(next, currentNode));
@@ -620,13 +624,4 @@ public class Utils
     return tilesInRange;
   }
 
-  /**
-   * Given the input set of destinations, it removes the destinations that are occupied by a unit already.
-   */
-  public static void trimFullLocations(GameMap gameMap, ArrayList<XYCoord> destinations)
-  {
-    for( XYCoord coord : destinations.toArray(new XYCoord[0]) )
-      if( null != gameMap.getLocation(coord).getResident() )
-        destinations.remove(coord);
-  }
 }

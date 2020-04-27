@@ -185,23 +185,12 @@ public class InfantrySpamAI implements AIController
 
         log(String.format("    Selected %s at %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal));
 
-        // Choose the point on the path just out of our range as our 'goal', and try to move there.
-        // This will allow us to navigate around large obstacles that require us to move away
-        // from our intended long-term goal.
-        path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
-        goal = path.getEndCoord(); // Set the last location as our goal.
-
-        log(String.format("    Intermediate waypoint: %s", goal));
-
-        // Sort my currently-reachable move locations by distance from the goal,
-        // and build a GameAction to move to the closest one.
-        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
-        Utils.sortLocationsByDistance(goal, destinations);
-        XYCoord destination = destinations.get(0);
-        Path movePath = Utils.findShortestPath(unit, destination, gameMap);
-        GameAction move = new WaitLifecycle.WaitAction(unit, movePath);
-        actions.offer(move);
-        break;
+        GameAction move = AIUtils.moveTowardLocation(unit, goal, gameMap);
+        if( null != move )
+        {
+          actions.offer(move);
+          break;
+        }
       }
     }
 

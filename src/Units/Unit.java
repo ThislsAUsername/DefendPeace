@@ -102,9 +102,14 @@ public class Unit implements Serializable
     return events;
   }
 
-  public FloodFillFunctor getMoveFunctor()
+  public FloodFillFunctor getMoveFunctor(boolean includeOccupied)
   {
-    return model.propulsion.getUnitMoveFunctor(this);
+    // Units cannot normally pass through enemies
+    return getMoveFunctor(includeOccupied, false);
+  }
+  public FloodFillFunctor getMoveFunctor(boolean includeOccupied, boolean canTravelThroughEnemies)
+  {
+    return model.propulsion.getUnitMoveFunctor(this, includeOccupied, canTravelThroughEnemies);
   }
 
   /**

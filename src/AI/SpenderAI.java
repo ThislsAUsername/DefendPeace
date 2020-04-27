@@ -154,7 +154,7 @@ public class SpenderAI implements AIController
         boolean foundAction = false;
 
         // Find the possible destinations.
-        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
+        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
 
         for( XYCoord coord : destinations )
         {
@@ -204,8 +204,7 @@ public class SpenderAI implements AIController
           Unit unit = travelQueue.poll();
 
           // Find the possible destinations.
-          ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap);
-          Utils.trimFullLocations(gameMap, destinations);
+          ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
 
           if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
           {

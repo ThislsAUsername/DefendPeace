@@ -68,9 +68,9 @@ public class MoveType implements Serializable
     return cost.intValue();
   }
 
-  public FloodFillFunctor getUnitMoveFunctor(Unit mover)
+  public FloodFillFunctor getUnitMoveFunctor(Unit mover, boolean includeOccupied, boolean canTravelThroughEnemies)
   {
-    return new BasicMoveFillFunctor(mover);
+    return new BasicMoveFillFunctor(mover, includeOccupied, canTravelThroughEnemies);
   }
 
   /** Returns the cost to traverse the given tile, accounting for its current terrain and weather types. */

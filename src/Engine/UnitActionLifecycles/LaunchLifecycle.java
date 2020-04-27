@@ -41,7 +41,8 @@ public abstract class LaunchLifecycle
             cargo.x = actor.x;
             cargo.y = actor.y;
 
-            ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(cargo, map);
+            boolean canEndOnOccupied = true;
+            ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(cargo, map, canEndOnOccupied);
             // Acting in place after a launch is a cool concept, but a little weird in execution
             // Also, allowing action in place would allow *launching*, and recursive launching isn't something I wanna bite off
             destinations.remove(moveLocation);

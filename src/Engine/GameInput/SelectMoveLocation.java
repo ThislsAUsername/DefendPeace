@@ -12,6 +12,8 @@ import Engine.GameInput.GameInputHandler.InputType;
  ************************************************************/
 class SelectMoveLocation extends GameInputState<Path>
 {
+  public final boolean canEndOnOccupied = true;
+
   public SelectMoveLocation(StateData data)
   {
     super(data);
@@ -21,7 +23,9 @@ class SelectMoveLocation extends GameInputState<Path>
   protected OptionSet initOptions()
   {
     // Get valid move locations and return our OptionSet.
-    ArrayList<XYCoord> moveLocations = Utils.findPossibleDestinations(myStateData.unitCoord, myStateData.unitActor, myStateData.gameMap);
+    ArrayList<XYCoord> moveLocations = 
+        Utils.findPossibleDestinations(myStateData.unitCoord, myStateData.unitActor,
+                                       myStateData.gameMap, canEndOnOccupied);
     return new OptionSet(InputType.PATH_SELECT, moveLocations);
   }
 
@@ -36,7 +40,7 @@ class SelectMoveLocation extends GameInputState<Path>
     }
     else if( (null != path) && (path.getPathLength() > 0)
         && myOptions.getCoordinateOptions().contains(path.getEndCoord())
-        && Utils.isPathValid(myStateData.unitCoord, myStateData.unitActor, path, myStateData.gameMap) )
+        && Utils.isPathValid(myStateData.unitCoord, myStateData.unitActor, path, myStateData.gameMap, canEndOnOccupied) )
     {
       // The path ends on a valid move location, and is traversable by the unit. Store it.
       myStateData.path = path;

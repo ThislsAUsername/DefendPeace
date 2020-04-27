@@ -472,7 +472,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     Unit actor = myGameInputHandler.getActingUnit();
     XYCoord coord = myGameInputHandler.getUnitCoord();
-    if( !Utils.isPathValid(coord, actor, contemplatedAction.movePath, map) )
+    boolean canEndOnOccupied = true;
+    if( !Utils.isPathValid(coord, actor, contemplatedAction.movePath, map, canEndOnOccupied) )
     {
       // The currently-built path is invalid. Try to generate a new one (may still return null).
       contemplatedAction.movePath = Utils.findShortestPath(coord, actor, x, y, map);
