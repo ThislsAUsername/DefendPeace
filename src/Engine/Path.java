@@ -245,15 +245,29 @@ public class Path
 
   public void snipCollision(GameMap map, Unit unit)
   {
-    for( int i = 0; i < waypoints.size(); i++)
+    boolean includeOccupiedSpaces = false;
+    FloodFillFunctor fff = unit.getMoveFunctor(includeOccupiedSpaces);
+
+    // Snip if we can't actually traverse, iterate starting at the fist place we move
+    for( int i = 1; i < waypoints.size(); ++i)
     {
-      PathNode point = waypoints.get(i);
-      Unit obstacle = map.getLocation(point.x, point.y).getResident();
-      if( null != obstacle && unit.CO.isEnemy(obstacle.CO) )
+      XYCoord from = waypoints.get(i-1).GetCoordinates();
+      XYCoord to   = waypoints.get( i ).GetCoordinates();
+      if( 0 > fff.getRemainingFillPower(map, unit.model.movePower, from, to) )
       {
         snip(i);
         break;
       }
+    }
+
+    // Snip if we can't arrive, iterate backwards
+    // Don't check zero since we don't want to invalidate the path
+    for( int i = waypoints.size()-1; i > 0; --i )
+    {
+      XYCoord to = waypoints.get(i).GetCoordinates();
+      if( fff.canEnd(map, to) )
+        break;
+      snip(i);
     }
   }
 
