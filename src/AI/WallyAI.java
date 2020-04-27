@@ -80,7 +80,7 @@ public class WallyAI implements AIController
   private static final double UNIT_REFUEL_THRESHHOLD = 0.25; // Fuel fraction for refuel
   private static final double UNIT_REARM_THRESHHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
   private static final double AGGRO_EFFECT_THRESHHOLD = 0.42; // How effective do I need to be against a unit to target it?
-  private static final double AGGRO_FUNDS_WEIGHT = 1.5; // How many times my value I need to get before sacrifice is worth it
+  private static final double AGGRO_FUNDS_WEIGHT = 0.9; // Multiplier on damage I need to get before a sacrifice is worth it
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
   private static final double TERRAIN_PENALTY_WEIGHT = 3; // Exponent for how crippling we think high move costs are
   private static final double MIN_SIEGE_RANGE_WEIGHT = 0.8; // Exponent for how much to penalize siege weapon ranges for their min ranges 
@@ -404,17 +404,17 @@ public class WallyAI implements AIController
         Utils.sortLocationsByDistance(position, destinations);
         Collections.reverse(destinations);
 
-        for( XYCoord coord : destinations )
+        for( XYCoord moveCoord : destinations )
         {
           // Figure out how to get here.
-          Path movePath = Utils.findShortestPath(unit, coord, gameMap);
+          Path movePath = Utils.findShortestPath(unit, moveCoord, gameMap);
 
           // Figure out what I can do here.
           ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, includeOccupiedSpaces);
           for( GameActionSet actionSet : actionSets )
           {
-            boolean spaceFree = gameMap.isLocationEmpty(unit, coord);
-            Unit resident = gameMap.getLocation(coord).getResident();
+            boolean spaceFree = gameMap.isLocationEmpty(unit, moveCoord);
+            Unit resident = gameMap.getLocation(moveCoord).getResident();
             if (!spaceFree)
             {
               if (unit.CO != resident.CO || resident.isTurnOver
@@ -430,8 +430,8 @@ public class WallyAI implements AIController
               {
                 Location loc = gameMap.getLocation(ga.getTargetLocation());
                 Unit target = loc.getResident();
-                double damage = CombatEngine.simulateBattleResults(unit, target, gameMap, ga.getMoveLocation().xCoord,
-                    ga.getMoveLocation().yCoord).defenderHPLoss;
+                double damage = CombatEngine.simulateBattleResults(unit, target, gameMap, moveCoord.xCoord,
+                    moveCoord.yCoord).defenderHPLoss;
                 
                 boolean goForIt = false;
                 if( target.model.getCost() * damage * AGGRO_FUNDS_WEIGHT > unit.model.getCost() * unit.getHP() )
@@ -440,7 +440,7 @@ public class WallyAI implements AIController
                   log(String.format("    He plans to deal %s HP damage for a net gain of %s funds", damage, (target.model.getCost() * damage - unit.model.getCost() * unit.getHP())/10));
                   goForIt = true;
                 }
-                else if( unit.CO.unitProductionByTerrain.containsKey(gameMap.getEnvironment(unit.x, unit.y).terrainType) && isSafe(gameMap, threatMap, unit, ga.getMoveLocation()) )
+                else if( !unit.CO.unitProductionByTerrain.containsKey(gameMap.getEnvironment(moveCoord).terrainType) && isSafe(gameMap, threatMap, unit, ga.getMoveLocation()) )
                 {
                   log(String.format("  %s thinks it's safe to attack %s", unit.toStringWithLocation(), target.toStringWithLocation()));
                   goForIt = true;
@@ -459,11 +459,11 @@ public class WallyAI implements AIController
 
             // Only consider capturing if we can sit still or go somewhere safe.
             if( actionSet.getSelected().getType() == UnitActionFactory.CAPTURE
-                && ( coord.getDistance(unit.x, unit.y) == 0 || canWallHere(gameMap, threatMap, unit, coord) ) 
+                && ( moveCoord.getDistance(unit.x, unit.y) == 0 || canWallHere(gameMap, threatMap, unit, moveCoord) ) 
                 && ( spaceFree || queueTravelAction(gameMap, allThreats, threatMap, resident, true) ) )
             {
               actions.offer(actionSet.getSelected());
-              capturingProperties.add(coord);
+              capturingProperties.add(moveCoord);
               foundAction = true;
               break;
             }
