@@ -301,8 +301,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
         break;
       case BACK:
-        myGameInputHandler.back();
         contemplatedAction.movePath = null;
+        myGameInputHandler.back();
         break;
       default:
         System.out.println("WARNING! MapController.handleMovementInput() was given invalid input enum (" + input + ")");
@@ -374,6 +374,14 @@ public class MapController implements IController, GameInputHandler.StateChanged
         if( null != path && path.getPathLength() > 0 )
         {
           myGame.setCursorLocation(contemplatedAction.movePath.getEnd().GetCoordinates());
+        }
+        else
+        {
+          XYCoord coord = myGameInputHandler.getUnitCoord();
+          if( null != coord )
+          {
+            myGame.setCursorLocation(coord);
+          }
         }
         currentMenu = new InGameMenu<>(myGameInputHandler.getMenuOptions(), myGameInputOptionSelector);
         contemplatedAction.aiming = false;
