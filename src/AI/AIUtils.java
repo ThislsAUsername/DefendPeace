@@ -26,11 +26,14 @@ import Units.WeaponModel;
 
 public class AIUtils
 {
-  /** Overload for {@link #getAvailableUnitActions(Unit, GameMap, boolean)} */
+  /**
+   * Overload for {@link #getAvailableUnitActions(Unit, GameMap, boolean)}
+   * Assumes caller isn't interested in moving into units' current spaces
+   */
   public static Map<XYCoord, ArrayList<GameActionSet> > getAvailableUnitActions(Unit unit, GameMap gameMap)
   {
-    // Most AIs aren't interested in joining or loading
-    return getAvailableUnitActions(unit, gameMap, false);
+    boolean includeOccupiedDestinations = false;
+    return getAvailableUnitActions(unit, gameMap, includeOccupiedDestinations);
   }
   /**
    * Finds all actions available to unit, and organizes them by location.
@@ -39,7 +42,8 @@ public class AIUtils
    * @return a Map of XYCoord to ArrayList<GameActionSet>. Each XYCoord will have a GameActionSet for
    * each type of action the unit can perform from that location.
    */
-  public static Map<XYCoord, ArrayList<GameActionSet> > getAvailableUnitActions(Unit unit, GameMap gameMap, boolean includeOccupiedDestinations)
+  public static Map<XYCoord, ArrayList<GameActionSet> >
+                getAvailableUnitActions(Unit unit, GameMap gameMap, boolean includeOccupiedDestinations)
   {
     Map<XYCoord, ArrayList<GameActionSet> > actions = new HashMap<XYCoord, ArrayList<GameActionSet> >();
 
@@ -63,6 +67,7 @@ public class AIUtils
 
   /**
    * Finds all actions available to unit, and organizes them by type instead of by location.
+   * Assumes caller isn't interested in moving into units' current spaces
    * @param unit The unit under consideration.
    * @param gameMap The world in which the Unit lives.
    * @return a Map of ActionType to ArrayList<GameAction>.
@@ -232,7 +237,8 @@ public class AIUtils
   {
     XYCoord origin = new XYCoord(unit.x, unit.y);
     Map<XYCoord, Double> shootableTiles = new HashMap<XYCoord, Double>();
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, true);
+    boolean includeOccupiedDestinations = true; // We assume the enemy knows how to manage positioning within his turn
+    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedDestinations);
     for( WeaponModel wep : unit.model.weapons )
     {
       if( wep.getDamage(target) > 0 )
