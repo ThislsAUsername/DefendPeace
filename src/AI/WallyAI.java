@@ -398,8 +398,8 @@ public class WallyAI implements AIController
 
         boolean foundAction = false;
 
-        // Find the possible destinations.
-        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
+        boolean includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
+        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces);
         // sort by furthest away, good for capturing
         Utils.sortLocationsByDistance(position, destinations);
         Collections.reverse(destinations);
@@ -410,14 +410,15 @@ public class WallyAI implements AIController
           Path movePath = Utils.findShortestPath(unit, coord, gameMap);
 
           // Figure out what I can do here.
-          ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, true);
+          ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, includeOccupiedSpaces);
           for( GameActionSet actionSet : actionSets )
           {
             boolean spaceFree = gameMap.isLocationEmpty(unit, coord);
             Unit resident = gameMap.getLocation(coord).getResident();
             if (!spaceFree)
             {
-              if (resident.isTurnOver || resident.getHP()*resident.model.getCost() >= unit.getHP()*unit.model.getCost())
+              if (unit.CO != resident.CO || resident.isTurnOver
+                  || resident.getHP()*resident.model.getCost() >= unit.getHP()*unit.model.getCost())
                 continue; // If we can't evict or we're not worth more than the other dude, we don't get to kick him out
               log(String.format("  Evicting %s if I need to", resident.toStringWithLocation()));
             }
