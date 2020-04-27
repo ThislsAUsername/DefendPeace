@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Queue;
 
 import CommandingOfficers.Commander;
-import Engine.Path.PathNode;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -571,10 +570,13 @@ public class Utils
   public static boolean pathCollides(GameMap map, Unit unit, Path path)
   {
     boolean result = false;
-    for( PathNode point : path.getWaypoints() )
+    boolean includeOccupiedSpaces = true; // Shouldn't matter, as we don't invoke canEnd()
+    FloodFillFunctor fff = unit.getMoveFunctor(includeOccupiedSpaces);
+    for( int i = 1; i < path.getPathLength(); ++i)
     {
-      Unit obstacle = map.getLocation(point.x, point.y).getResident();
-      if( null != obstacle && unit.CO.isEnemy(obstacle.CO) )
+      XYCoord from = path.getWaypoint(i-1).GetCoordinates();
+      XYCoord to   = path.getWaypoint( i ).GetCoordinates();
+      if( 0 > fff.getRemainingFillPower(map, unit.model.movePower, from, to) )
       {
         result = true;
         break;
