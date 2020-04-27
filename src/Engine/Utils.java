@@ -93,17 +93,17 @@ public class Utils
   }
 
   /** Alias for {@link #findPossibleDestinations(XYCoord, Unit, GameMap) findPossibleDestinations()} **/
-  public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap, boolean includeOccupied)
+  public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap, boolean includeOccupiedSpaces)
   {
-    return findPossibleDestinations(new XYCoord(unit.x, unit.y), unit, gameMap, includeOccupied);
+    return findPossibleDestinations(new XYCoord(unit.x, unit.y), unit, gameMap, includeOccupiedSpaces);
   }
   /**
    * Finds the area reachable this turn by input unit.
    * Alias for {@link #findFloodFillArea(XYCoord, FloodFillFunctor, int, GameMap) findFloodFillArea()}
    */
-  public static ArrayList<XYCoord> findPossibleDestinations(XYCoord start, Unit unit, GameMap gameMap, boolean includeOccupied)
+  public static ArrayList<XYCoord> findPossibleDestinations(XYCoord start, Unit unit, GameMap gameMap, boolean includeOccupiedSpaces)
   {
-    return findFloodFillArea(start, unit.getMoveFunctor(includeOccupied), Math.min(unit.model.movePower, unit.fuel), gameMap);
+    return findFloodFillArea(start, unit.getMoveFunctor(includeOccupiedSpaces), Math.min(unit.model.movePower, unit.fuel), gameMap);
   }
   /**
    * @param start Initial location; will usually be in the output set.
@@ -156,13 +156,13 @@ public class Utils
     return reachableTiles;
   }
 
-  public static boolean isPathValid(Unit unit, Path path, GameMap map, boolean includeOccupied)
+  public static boolean isPathValid(Unit unit, Path path, GameMap map, boolean includeOccupiedSpaces)
   {
-    return isPathValid(new XYCoord(unit.x, unit.y), unit, path, map, includeOccupied);
+    return isPathValid(new XYCoord(unit.x, unit.y), unit, path, map, includeOccupiedSpaces);
   }
-  public static boolean isPathValid(XYCoord start, Unit unit, Path path, GameMap map, boolean includeOccupied)
+  public static boolean isPathValid(XYCoord start, Unit unit, Path path, GameMap map, boolean includeOccupiedSpaces)
   {
-    return isPathValid(start, unit.getMoveFunctor(includeOccupied), Math.min(unit.model.movePower, unit.fuel), path, map);
+    return isPathValid(start, unit.getMoveFunctor(includeOccupiedSpaces), Math.min(unit.model.movePower, unit.fuel), path, map);
   }
   public static boolean isPathValid(XYCoord start, FloodFillFunctor fff, int initialFillPower, Path path, GameMap map)
   {
