@@ -44,7 +44,6 @@ public class MoveEvent implements GameEvent
     {
       Path.PathNode endpoint = unitPath.getEnd();
       int fuelBurn = unitPath.getFuelCost(unit, gameMap);
-      boolean includeOccupied = false;
 
       unit.fuel = Math.max(0, unit.fuel - fuelBurn);
 
@@ -60,14 +59,8 @@ public class MoveEvent implements GameEvent
 
       // If the unit is already at the destination, we don't need to move it.
       if( 0 != fuelBurn )
-      {
-        // Make sure it is valid to move this unit to its destination.
-        if( fuelBurn <= unit.model.movePower
-            && unit.getMoveFunctor(includeOccupied).canEnd(gameMap, endpoint.GetCoordinates()) )
-          gameMap.moveUnit(unit, endpoint.x, endpoint.y);
-        else
-          System.out.println("WARNING! Invalid move " + unit.model.name + " to (" + endpoint.x + ", " + endpoint.y + ")");
-      }
+        // If the move is un-executable, moveUnit() will catch it safely
+        gameMap.moveUnit(unit, endpoint.x, endpoint.y);
     }
   }
 
