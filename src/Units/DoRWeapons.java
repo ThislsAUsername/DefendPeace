@@ -1,5 +1,6 @@
 package Units;
 
+import Terrain.TerrainType;
 import Units.DoRUnits.DoRUnitModel;
 
 public class DoRWeapons
@@ -51,6 +52,12 @@ public class DoRWeapons
     public double getDamage(DoRUnitModel defender)
     {
       return damageChart[type.ordinal()][defender.type.ordinal()];
+    }
+
+    @Override
+    public double getDamage(TerrainType defender)
+    {
+      return 0;
     }
   }
 

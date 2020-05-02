@@ -2,6 +2,7 @@ package Units;
 
 import java.io.Serializable;
 
+import Terrain.TerrainType;
 import Units.AWBWUnits.AWBWUnitModel;
 import Units.DoRUnits.DoRUnitModel;
 
@@ -72,4 +73,9 @@ public abstract class WeaponModel implements Serializable
   {
     throw new UnsupportedOperationException("Called base WeaponModel.getDamage() with input type " + defender.getClass());
   }
+
+  /**
+   * @return returns its base damage against that terrain type
+   */
+  public abstract double getDamage(TerrainType target);
 }

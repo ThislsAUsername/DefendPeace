@@ -16,6 +16,7 @@ public class Location implements Serializable
   private Unit resident = null;
   private final XYCoord coords;
   private boolean highlightSet = false;
+  public int durability = 99;
   public ArrayDeque<Weathers> forecast = new ArrayDeque<>();
 
   public Environment getEnvironment()

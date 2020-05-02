@@ -46,7 +46,7 @@ public class Utils
     return locations;
   }
 
-  /** Returns a list of locations of all enemy units that weapon could hit from attackerPosition. */
+  /** Returns a list of locations of all valid targets that weapon could hit from attackerPosition. */
   public static ArrayList<XYCoord> findTargetsInRange(GameMap map, Commander co, XYCoord attackerPosition, WeaponModel weapon)
   {
     ArrayList<XYCoord> locations = findLocationsInRange(map, attackerPosition, weapon.minRange, weapon.maxRange);
@@ -60,6 +60,9 @@ public class Utils
       {
         targets.add(loc);
       }
+      // You can never be friends with terrain, so shoot anything that's shootable
+      else if (weapon.getDamage(map.getEnvironment(loc).terrainType) > 0)
+        targets.add(loc);
     }
     return targets;
   }
