@@ -27,15 +27,6 @@ import Units.WeaponModel;
 public class AIUtils
 {
   /**
-   * Overload for {@link #getAvailableUnitActions(Unit, GameMap, boolean)}
-   * Assumes caller isn't interested in moving into units' current spaces
-   */
-  public static Map<XYCoord, ArrayList<GameActionSet> > getAvailableUnitActions(Unit unit, GameMap gameMap)
-  {
-    boolean includeOccupiedDestinations = false;
-    return getAvailableUnitActions(unit, gameMap, includeOccupiedDestinations);
-  }
-  /**
    * Finds all actions available to unit, and organizes them by location.
    * @param unit The unit under consideration.
    * @param gameMap The world in which the Unit lives.
@@ -43,8 +34,9 @@ public class AIUtils
    * each type of action the unit can perform from that location.
    */
   public static Map<XYCoord, ArrayList<GameActionSet> >
-                getAvailableUnitActions(Unit unit, GameMap gameMap, boolean includeOccupiedDestinations)
+                getAvailableUnitActions(Unit unit, GameMap gameMap)
   {
+    boolean includeOccupiedDestinations = true;
     Map<XYCoord, ArrayList<GameActionSet> > actions = new HashMap<XYCoord, ArrayList<GameActionSet> >();
 
     // Find the possible destinations.
