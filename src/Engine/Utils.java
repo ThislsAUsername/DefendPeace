@@ -576,6 +576,7 @@ public class Utils
     {
       XYCoord from = path.getWaypoint(i-1).GetCoordinates();
       XYCoord to   = path.getWaypoint( i ).GetCoordinates();
+      // getRemainingFillPower() checks for collisions relevant to the unit, and will give us a negative result in that case
       if( 0 > fff.getRemainingFillPower(map, unit.model.movePower, from, to) )
       {
         result = true;
