@@ -95,12 +95,12 @@ public class Strong extends Commander
    * Strong gets a little extra oomph when fighting enemy foot soldiers.
    */
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void buffAttack(BattleParams params)
   {
     // Grant a firepower increase if we are attacking and the defender is on foot.
-    if( (params.attacker.CO == this) && params.defender.model.isTroop() )
+    if( (params.attacker.body.CO == this) && params.defender.body.model.isTroop() )
     {
-      params.attackFactor += 15;
+      params.attackPower += 15;
     }
   }
 

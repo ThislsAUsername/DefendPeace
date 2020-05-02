@@ -94,15 +94,15 @@ public class Meridian extends Commander
    * Troops that have been refreshed by Meridian's bigger power get a stat nerf
    */
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void buffAttack(BattleParams params)
   {
-    if( toBeNerfed.contains(params.attacker) )
+    if( toBeNerfed.contains(params.attacker.body) )
     {
-      params.attackFactor += POST_REFRESH_STAT_ADJUSTMENT;
+      params.attackPower += POST_REFRESH_STAT_ADJUSTMENT;
     }
-    if( toBeNerfed.contains(params.defender) )
+    if( toBeNerfed.contains(params.defender.body) )
     {
-      params.defenseFactor += POST_REFRESH_STAT_ADJUSTMENT;
+      params.defensePower += POST_REFRESH_STAT_ADJUSTMENT;
     }
   }
 

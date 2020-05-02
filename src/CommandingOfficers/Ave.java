@@ -156,13 +156,13 @@ public class Ave extends Commander
 
   /** Ave's units take less cover from forests. */
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void buffDefense(BattleParams params)
   {
-    if( params.defender.CO == this // We are defending, in a FOREST
-        && (params.combatRef.gameMap.getEnvironment(params.defender.x, params.defender.y).terrainType == TerrainType.FOREST)
-        && (params.defender.model.isLandUnit()))  // And our unit is actually on the ground.
+    // We are defending, in a FOREST
+    if( (params.map.getEnvironment(params.defender.x, params.defender.y).terrainType == TerrainType.FOREST)
+        && (params.defender.body.model.isLandUnit()))  // And our unit is actually on the ground.
     {
-      params.terrainDefense--;
+      params.terrainStars--;
     }
   }
 

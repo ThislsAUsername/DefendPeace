@@ -120,22 +120,19 @@ public class Venge extends Commander
   }
 
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void buffAttack(BattleParams params)
   {
-    if( amITheAttacker )
-    {
       if( counterAtFullPower && params.isCounter )
       {
         // counterattack as if the unit had not taken damage.
-        params.attackerHP = params.attacker.getHP();
+        params.attackerHP = params.attacker.body.getHP();
       }
 
-      if( aggressors.contains(params.defender) )
+      if( aggressors.contains(params.defender.body) )
       {
         // Boost attack if it's time to avenge slights
-        params.attackFactor += VENGEANCE_BOOST;
+        params.attackPower += VENGEANCE_BOOST;
       }
-    }
   }
 
   @Override

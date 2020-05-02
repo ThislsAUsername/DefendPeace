@@ -307,4 +307,5 @@ public class Unit implements Serializable
   {
     return String.format("%s at %s", model, new XYCoord(x, y));
   }
+
 }

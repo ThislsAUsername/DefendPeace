@@ -96,11 +96,9 @@ public class Commander extends GameEventListener implements Serializable
    */
   public void changeCombatContext(CombatContext instance)
   {}
-  /**
-   * Allows a Commander to inject modifications that must be evaluated at combat time
-   * @param striking - lets the Commander know if it's dealing or taking damage 
-   */
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void buffAttack(BattleParams params)
+  {}
+  public void buffDefense(BattleParams params)
   {}
 
   public void addCOModifier(COModifier mod)

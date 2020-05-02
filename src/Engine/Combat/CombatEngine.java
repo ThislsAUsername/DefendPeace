@@ -61,21 +61,13 @@ public class CombatEngine
     Map<Unit, Entry<WeaponModel,Double>> unitDamageMap = new HashMap<Unit, Entry<WeaponModel,Double>>();
     unitDamageMap.put(attacker, new AbstractMap.SimpleEntry<WeaponModel,Double>(attackerWeapon, 0.0));
     unitDamageMap.put(defender, new AbstractMap.SimpleEntry<WeaponModel,Double>(defenderWeapon, 0.0));
-    
-    // let the COs fool around with anything they want...
-    attacker.CO.changeCombatContext(context);
-    defender.CO.changeCombatContext(context);
-    
-    // From here on in, use context variables only (Easy way to confirm: delete BattleInstance's variable block and see what gets marked as an error)
-    
+
+    // From here on in, use context variables only
+
     double attackerHPLoss = 0;
 
     // Set up our scenario.
     BattleParams attackInstance = BattleParams.getAttack(context);
-
-    // Last-minute adjustments.
-    context.attacker.CO.applyCombatModifiers(attackInstance, true);
-    context.defender.CO.applyCombatModifiers(attackInstance, false);
 
     double defenderHPLoss = attackInstance.calculateDamage();
     unitDamageMap.put(context.attacker, new AbstractMap.SimpleEntry<WeaponModel,Double>(context.attackerWeapon, defenderHPLoss));
@@ -86,11 +78,7 @@ public class CombatEngine
     {
       // New battle instance with defender counter-attacking.
       BattleParams defendInstance = BattleParams.getCounterAttack(context);
-      defendInstance.attackerHP = Math.ceil(context.defender.getPreciseHP() - defenderHPLoss); // Account for the first attack's damage to the now-attacker.
-
-      // Modifications apply "attacker first", and the defender is now the attacker.
-      context.defender.CO.applyCombatModifiers(defendInstance, true);
-      context.attacker.CO.applyCombatModifiers(defendInstance, false);
+      defendInstance.attackerHP -= Math.ceil(defender.getPreciseHP() - defenderHPLoss); // Account for the first attack's damage to the now-attacker.
 
       attackerHPLoss = defendInstance.calculateDamage();
       unitDamageMap.put(context.defender, new AbstractMap.SimpleEntry<WeaponModel,Double>(context.defenderWeapon, attackerHPLoss));
@@ -99,10 +87,10 @@ public class CombatEngine
     
     // Calculations complete. We are setting up our BattleSummary, so go back to using known-accurate info
     return new BattleSummary(attacker, unitDamageMap.get(attacker).getKey(),
-                             defender, unitDamageMap.get(defender).getKey(), 
+                             defender, unitDamageMap.get(defender).getKey(),
                              map.getEnvironment(attackerX, attackerY).terrainType,
-                             map.getEnvironment(defenderX, defenderY).terrainType, 
+                             map.getEnvironment(defenderX, defenderY).terrainType,
                              unitDamageMap.get(defender).getValue(), unitDamageMap.get(attacker).getValue());
   }
-  
+
 }

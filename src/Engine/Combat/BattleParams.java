@@ -1,8 +1,6 @@
 package Engine.Combat;
 
-import Terrain.Environment;
-import Units.Unit;
-import Units.WeaponModel;
+import Terrain.GameMap;
 
 /**
  * Utility struct used to facilitate calculating battle results.
@@ -11,50 +9,73 @@ import Units.WeaponModel;
  */
 public class BattleParams
 {
-  public final Unit attacker, defender; 
-  public final CombatContext combatRef; // strictly for reference
+  public final Combatant attacker;
+  public final Combatant defender;
+
+  // Stuff inherited for reference from CombatContext
+  public final GameMap map; // for reference, not weirdness
+  public final int battleRange;
+
   public double baseDamage;
   public double attackerHP;
-  public double attackFactor;
+  public double attackPower;
   public double defenderHP;
-  public double defenseFactor;
-  public double terrainDefense;
+  public double defensePower;
+  public double terrainStars;
   public final boolean isCounter;
 
   public static BattleParams getAttack(final CombatContext ref)
   {
-    return new BattleParams(ref.attacker, ref.attackerWeapon, ref.defender, ref.gameMap.getEnvironment(ref.defenderX, ref.defenderY), false, ref);
+    return new BattleParams(
+        new Combatant(ref.attacker, ref.attackerWeapon, ref.attackerX, ref.attackerY),
+        new Combatant(ref.defender, ref.defenderWeapon, ref.defenderX, ref.defenderY),
+        ref.gameMap, ref.battleRange,
+        ref.attacker.model.getDamageRatio(),
+        ref.defender.model.getDefenseRatio(), ref.defenderTerrainStars,
+        false);
   }
   public static BattleParams getCounterAttack(final CombatContext ref)
   {
-    return new BattleParams(ref.defender, ref.defenderWeapon, ref.attacker, ref.gameMap.getEnvironment(ref.attackerX, ref.attackerY), true, ref);
+    return new BattleParams(
+        new Combatant(ref.defender, ref.defenderWeapon, ref.defenderX, ref.defenderY),
+        new Combatant(ref.attacker, ref.attackerWeapon, ref.attackerX, ref.attackerY),
+        ref.gameMap, ref.battleRange,
+        ref.defender.model.getDamageRatio(),
+        ref.attacker.model.getDefenseRatio(), ref.attackerTerrainStars,
+        true);
   }
 
-  public BattleParams(Unit attacker, WeaponModel attackerWeapon, Unit defender, Environment battleground, boolean isCounter, final CombatContext ref)
+  public BattleParams(
+      Combatant attacker, Combatant defender,
+      GameMap map, int battleRange,
+      double attackPower,
+      double defensePower, double terrainStars,
+      boolean isCounter)
   {
     this.attacker = attacker;
     this.defender = defender;
-    baseDamage = attackerWeapon.getDamage(defender.model);
-    attackFactor = attacker.model.getDamageRatio();
-    attackerHP = attacker.getHP();
-    defenseFactor = defender.model.getDefenseRatio();
-    defenderHP = defender.getHP();
-    terrainDefense = 0;
+    this.map = map;
+
+    this.battleRange = battleRange;
+    this.attackPower = attackPower;
     this.isCounter = isCounter;
-    combatRef = ref;
-    // Air units shouldn't get terrain defense
-    if( defender.model.isAirUnit() )
-    {
-      // getDefLevel returns the number of terrain stars. Since we're using %Def, we need to multiply by 10. However, we do that when we multiply by HP in calculateDamage.
-      terrainDefense = battleground.terrainType.getDefLevel();
-    }
+    baseDamage = attacker.gun.getDamage(defender.body.model);
+
+    this.defensePower = defensePower;
+    this.terrainStars = terrainStars;
+    attackerHP = attacker.body.getHP();
+    defenderHP = defender.body.getHP();
+
+    // Apply any last-minute adjustments.
+    attacker.body.CO.buffAttack(this);
+    defender.body.CO.buffDefense(this);
   }
 
   public double calculateDamage()
   {
     //    [B*ACO/100+R]*(AHP/10)*[(200-(DCO+DTR*DHP))/100]
-    double overallPower = (baseDamage * attackFactor / 100/*+Random factor?*/) * attackerHP / 10;
-    double overallDefense = ((200 - (defenseFactor + terrainDefense * defenderHP)) / 100);
+    double overallPower = (baseDamage * attackPower / 100/*+Random factor?*/) * attackerHP / 10;
+    double overallDefense = ((200 - (defensePower + terrainStars * defenderHP)) / 100);
     return overallPower * overallDefense / 10; // original formula was % damage, now it must be HP of damage
   }
 }
