@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.GameScenario;
-import Engine.Combat.BattleParams;
+import Engine.Combat.StrikeParams;
+import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.TransformLifecycle;
 import Terrain.MapMaster;
@@ -94,12 +95,16 @@ public class Meridian extends Commander
    * Troops that have been refreshed by Meridian's bigger power get a stat nerf
    */
   @Override
-  public void buffAttack(BattleParams params)
+  public void buffStrike(StrikeParams params)
   {
     if( toBeNerfed.contains(params.attacker.body) )
     {
       params.attackPower += POST_REFRESH_STAT_ADJUSTMENT;
     }
+  }
+  @Override
+  public void buffDefense(BattleParams params)
+  {
     if( toBeNerfed.contains(params.defender.body) )
     {
       params.defensePower += POST_REFRESH_STAT_ADJUSTMENT;

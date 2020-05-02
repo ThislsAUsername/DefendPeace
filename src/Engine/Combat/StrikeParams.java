@@ -7,10 +7,9 @@ import Terrain.GameMap;
  * Parameters are public to allow modification in Commander.applyCombatModifiers()
  * One BattleParams is a single attack from a single unit; any counterattack is a second instance. 
  */
-public class BattleParams
+public class StrikeParams
 {
   public final Combatant attacker;
-  public final Combatant defender;
 
   // Stuff inherited for reference from CombatContext
   public final GameMap map; // for reference, not weirdness
@@ -19,9 +18,6 @@ public class BattleParams
   public double baseDamage;
   public double attackerHP;
   public double attackPower;
-  public double defenderHP;
-  public double defensePower;
-  public double terrainStars;
   public final boolean isCounter;
 
   public static BattleParams getAttack(final CombatContext ref)
@@ -45,37 +41,71 @@ public class BattleParams
         true);
   }
 
-  public BattleParams(
-      Combatant attacker, Combatant defender,
+  public StrikeParams(
+      Combatant attacker,
       GameMap map, int battleRange,
-      double attackPower,
-      double defensePower, double terrainStars,
+      double attackPower, double baseDamage,
       boolean isCounter)
   {
     this.attacker = attacker;
-    this.defender = defender;
     this.map = map;
 
     this.battleRange = battleRange;
     this.attackPower = attackPower;
     this.isCounter = isCounter;
-    baseDamage = attacker.gun.getDamage(defender.body.model);
+    this.baseDamage = baseDamage;
 
-    this.defensePower = defensePower;
-    this.terrainStars = terrainStars;
     attackerHP = attacker.body.getHP();
-    defenderHP = defender.body.getHP();
 
     // Apply any last-minute adjustments.
-    attacker.body.CO.buffAttack(this);
-    defender.body.CO.buffDefense(this);
+    attacker.body.CO.buffStrike(this);
   }
 
   public double calculateDamage()
   {
     //    [B*ACO/100+R]*(AHP/10)*[(200-(DCO+DTR*DHP))/100]
     double overallPower = (baseDamage * attackPower / 100/*+Random factor?*/) * attackerHP / 10;
-    double overallDefense = ((200 - (defensePower + terrainStars * defenderHP)) / 100);
-    return overallPower * overallDefense / 10; // original formula was % damage, now it must be HP of damage
+    return overallPower / 10; // original formula was % damage, now it must be HP of damage
+  }
+
+  public static class BattleParams extends StrikeParams
+  {
+    public final Combatant defender;
+
+    public double defenderHP;
+    public double defensePower;
+    public double terrainStars;
+
+    public BattleParams(
+        Combatant attacker, Combatant defender,
+        GameMap map, int battleRange,
+        double attackPower,
+        double defensePower, double terrainStars,
+        boolean isCounter)
+    {
+      super(attacker,
+          map, battleRange,
+          attackPower, attacker.gun.getDamage(defender.body.model),
+          isCounter);
+      this.defender = defender;
+
+      this.attackPower = attackPower;
+
+      this.defensePower = defensePower;
+      this.terrainStars = terrainStars;
+      attackerHP = attacker.body.getHP();
+      defenderHP = defender.body.getHP();
+
+      // Apply any last-minute adjustments.
+      attacker.body.CO.buffAttack(this);
+      defender.body.CO.buffDefense(this);
+    }
+
+    @Override
+    public double calculateDamage()
+    {
+      double overallDefense = ((200 - (defensePower + terrainStars * defenderHP)) / 100);
+      return super.calculateDamage() * overallDefense;
+    }
   }
 }

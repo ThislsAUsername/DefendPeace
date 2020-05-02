@@ -6,7 +6,8 @@ import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameScenario;
-import Engine.Combat.BattleParams;
+import Engine.Combat.StrikeParams;
+import Engine.Combat.StrikeParams.BattleParams;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatContext;
 import Engine.GameEvents.GameEventQueue;
@@ -120,14 +121,17 @@ public class Venge extends Commander
   }
 
   @Override
-  public void buffAttack(BattleParams params)
+  public void buffStrike(StrikeParams params)
   {
       if( counterAtFullPower && params.isCounter )
       {
         // counterattack as if the unit had not taken damage.
         params.attackerHP = params.attacker.body.getHP();
       }
-
+  }
+  @Override
+  public void buffAttack(BattleParams params)
+  {
       if( aggressors.contains(params.defender.body) )
       {
         // Boost attack if it's time to avenge slights

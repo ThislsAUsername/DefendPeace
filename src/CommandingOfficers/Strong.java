@@ -5,7 +5,7 @@ import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import Engine.GameScenario;
-import Engine.Combat.BattleParams;
+import Engine.Combat.StrikeParams.BattleParams;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;

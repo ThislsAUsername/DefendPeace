@@ -18,9 +18,10 @@ import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
 import Engine.GameScenario;
 import Engine.XYCoord;
-import Engine.Combat.BattleParams;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatContext;
+import Engine.Combat.StrikeParams;
+import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
@@ -86,7 +87,7 @@ public class Commander extends GameEventListener implements Serializable
   }
 
   /**
-   * These functions Allow a Commander to inject modifications before evaluating a battle.
+   * These functions allow a Commander to inject modifications before evaluating a battle.
    * Simple damage buffs, etc. can be accomplished via COModifiers, but effects
    * that depend on circumstances that must be evaluated at combat time (e.g. a
    * terrain-based firepower bonus) can be handled here.
@@ -96,8 +97,13 @@ public class Commander extends GameEventListener implements Serializable
    */
   public void changeCombatContext(CombatContext instance)
   {}
+  /** Called any time you are making a weapon attack */
+  public void buffStrike(StrikeParams params)
+  {}
+  /** Called any time you are attacking a unit, always after {@link #buffStrike(StrikeParams)} */
   public void buffAttack(BattleParams params)
   {}
+  /** Called any time your unit is being attacked, after {@link #buffAttack(BattleParams)} */
   public void buffDefense(BattleParams params)
   {}
 

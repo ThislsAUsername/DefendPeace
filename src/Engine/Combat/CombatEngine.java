@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import Engine.Combat.StrikeParams.BattleParams;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -67,7 +68,7 @@ public class CombatEngine
     double attackerHPLoss = 0;
 
     // Set up our scenario.
-    BattleParams attackInstance = BattleParams.getAttack(context);
+    BattleParams attackInstance = StrikeParams.getAttack(context);
 
     double defenderHPLoss = attackInstance.calculateDamage();
     unitDamageMap.put(context.attacker, new AbstractMap.SimpleEntry<WeaponModel,Double>(context.attackerWeapon, defenderHPLoss));
@@ -77,7 +78,7 @@ public class CombatEngine
     if( context.canCounter && (context.defender.getPreciseHP() > defenderHPLoss) )
     {
       // New battle instance with defender counter-attacking.
-      BattleParams defendInstance = BattleParams.getCounterAttack(context);
+      BattleParams defendInstance = StrikeParams.getCounterAttack(context);
       defendInstance.attackerHP -= Math.ceil(defender.getPreciseHP() - defenderHPLoss); // Account for the first attack's damage to the now-attacker.
 
       attackerHPLoss = defendInstance.calculateDamage();
