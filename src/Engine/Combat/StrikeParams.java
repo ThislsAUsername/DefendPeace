@@ -10,6 +10,7 @@ import Terrain.GameMap;
 public class StrikeParams
 {
   public final Combatant attacker;
+  public final GameMap map; // for reference, not weirdness
 
   // Stuff inherited for reference from CombatContext
   public final int battleRange;
@@ -25,35 +26,37 @@ public class StrikeParams
         new Combatant(ref.attacker, ref.attackerWeapon, ref.attackerX, ref.attackerY),
         new Combatant(ref.defender, ref.defenderWeapon, ref.defenderX, ref.defenderY),
         ref.gameMap, ref.battleRange,
-        ref.attacker.model.getDamageRatio(),
+        ref.attacker.model.getDamageRatio(), ref.attacker.getHP(),
         ref.defender.model.getDefenseRatio(), ref.defenderTerrainStars,
         false);
   }
-  public static BattleParams getCounterAttack(final CombatContext ref)
+  public static BattleParams getCounterAttack(final CombatContext ref, double counterHP)
   {
     return new BattleParams(
         new Combatant(ref.defender, ref.defenderWeapon, ref.defenderX, ref.defenderY),
         new Combatant(ref.attacker, ref.attackerWeapon, ref.attackerX, ref.attackerY),
         ref.gameMap, ref.battleRange,
-        ref.defender.model.getDamageRatio(),
+        ref.defender.model.getDamageRatio(), counterHP,
         ref.attacker.model.getDefenseRatio(), ref.attackerTerrainStars,
         true);
   }
 
   public StrikeParams(
       Combatant attacker,
-      int battleRange,
-      double attackPower, double baseDamage,
+      GameMap map, int battleRange,
+      double attackPower, double attackerHP,
+      double baseDamage,
       boolean isCounter)
   {
     this.attacker = attacker;
+    this.map = map;
 
     this.battleRange = battleRange;
     this.attackPower = attackPower;
     this.isCounter = isCounter;
     this.baseDamage = baseDamage;
 
-    attackerHP = attacker.body.getHP();
+    this.attackerHP = attackerHP;
 
     // Apply any last-minute adjustments.
     attacker.body.CO.buffStrike(this);
@@ -69,7 +72,6 @@ public class StrikeParams
   public static class BattleParams extends StrikeParams
   {
     public final Combatant defender;
-    public final GameMap map; // for reference, not weirdness
 
     public double defenderHP;
     public double defensePower;
@@ -78,22 +80,21 @@ public class StrikeParams
     public BattleParams(
         Combatant attacker, Combatant defender,
         GameMap map, int battleRange,
-        double attackPower,
+        double attackPower, double attackerHP,
         double defensePower, double terrainStars,
         boolean isCounter)
     {
       super(attacker,
-          battleRange,
-          attackPower, (null == attacker.gun)? 0 : attacker.gun.getDamage(defender.body.model),
+          map, battleRange,
+          attackPower, attackerHP,
+          (null == attacker.gun)? 0 : attacker.gun.getDamage(defender.body.model),
           isCounter);
       this.defender = defender;
-      this.map = map;
 
       this.attackPower = attackPower;
 
       this.defensePower = defensePower;
       this.terrainStars = terrainStars;
-      attackerHP = attacker.body.getHP();
       defenderHP = defender.body.getHP();
 
       // Apply any last-minute adjustments.

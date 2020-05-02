@@ -78,8 +78,8 @@ public class CombatEngine
     if( context.canCounter && (context.defender.getPreciseHP() > defenderHPLoss) )
     {
       // New battle instance with defender counter-attacking.
-      BattleParams defendInstance = StrikeParams.getCounterAttack(context);
-      defendInstance.attackerHP -= Math.ceil(defender.getPreciseHP() - defenderHPLoss); // Account for the first attack's damage to the now-attacker.
+      double counterHP = Math.ceil(defender.getPreciseHP() - defenderHPLoss); // Account for the first attack's damage to the now-attacker.
+      BattleParams defendInstance = StrikeParams.getCounterAttack(context, counterHP);
 
       attackerHPLoss = defendInstance.calculateDamage();
       unitDamageMap.put(context.defender, new AbstractMap.SimpleEntry<WeaponModel,Double>(context.defenderWeapon, attackerHPLoss));
@@ -94,13 +94,14 @@ public class CombatEngine
                              unitDamageMap.get(defender).getValue(), unitDamageMap.get(attacker).getValue());
   }
 
-  public static StrikeParams buildSimpleAttack( Unit attacker, int battleRange, Unit defender, int terrainStars, boolean attackerMoved )
+  public static BattleParams buildSimpleAttack( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
   {
-    WeaponModel wm = attacker.chooseWeapon(defender.model, battleRange, attackerMoved);
-    return new StrikeParams(
-        new Combatant(attacker, wm, attacker.x, attacker.x),
-        battleRange, attacker.model.getDamageRatio(),
-        (null == wm)? 0 : wm.getDamage(defender.model),
+    return new BattleParams(
+        new Combatant(attacker, attacker.chooseWeapon(defender.model, battleRange, attackerMoved), attacker.x, attacker.x),
+        new Combatant(defender, null, defender.x, defender.x),
+        map, battleRange,
+        attacker.model.getDamageRatio(), attacker.getHP(),
+        defender.model.getDefenseRatio(), terrainStars,
         false);
   }
 }
