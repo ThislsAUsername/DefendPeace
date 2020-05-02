@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.GameScenario;
-import Engine.Combat.BattleInstance.BattleParams;
+import Engine.Combat.BattleParams;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.TransformLifecycle;
 import Terrain.MapMaster;

@@ -17,7 +17,7 @@ import Engine.GameActionSet;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
-import Engine.Combat.BattleInstance;
+import Engine.Combat.BattleParams;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.Environment;
@@ -142,7 +142,7 @@ public class Muriel implements AIController
     WeaponModel myWeapon = myUnit.chooseWeapon(otherUnit.model, 1, myUnit.model.hasMobileWeapon());
     if( null != myWeapon )
     {
-      BattleInstance.BattleParams params = new BattleInstance.BattleParams(myUnit, myWeapon,
+      BattleParams params = new BattleParams(myUnit, myWeapon,
           otherUnit, Environment.getTile(TerrainType.ROAD, Weathers.CLEAR), false, null);
       myDamage = params.calculateDamage();
     }
@@ -152,7 +152,7 @@ public class Muriel implements AIController
     WeaponModel otherWeapon = otherUnit.chooseWeapon(myUnit.model, 1, myUnit.model.hasMobileWeapon());
     if( null != otherWeapon )
     {
-      BattleInstance.BattleParams params = new BattleInstance.BattleParams(otherUnit, otherWeapon,
+      BattleParams params = new BattleParams(otherUnit, otherWeapon,
           myUnit, Environment.getTile(TerrainType.ROAD, Weathers.CLEAR), false, null);
       otherDamage = params.calculateDamage();
     }
@@ -348,7 +348,7 @@ public class Muriel implements AIController
           Environment environment = gameMap.getEnvironment(targetLoc);
 
           // Calculate the cost of the damage we can do.
-          BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, unit.model.hasMobileWeapon()), target, environment, false, null);
+          BattleParams params = new BattleParams(unit, unit.chooseWeapon(target.model, 1, unit.model.hasMobileWeapon()), target, environment, false, null);
           double hpDamage = Math.min(params.calculateDamage(), target.getPreciseHP());
           double damageValue = (target.model.getCost()/10) * hpDamage;
 
@@ -471,7 +471,7 @@ public class Muriel implements AIController
   private boolean shouldAttack(Unit unit, Unit target, GameMap gameMap)
   {
     // Calculate the cost of the damage we can do.
-    BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, unit.model.hasMobileWeapon()), target, gameMap.getLocation(target.x, target.y).getEnvironment(), false, null);
+    BattleParams params = new BattleParams(unit, unit.chooseWeapon(target.model, 1, unit.model.hasMobileWeapon()), target, gameMap.getLocation(target.x, target.y).getEnvironment(), false, null);
     double damage = params.calculateDamage();
     UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(unit, target);
 

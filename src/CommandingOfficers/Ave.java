@@ -11,7 +11,7 @@ import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
-import Engine.Combat.BattleInstance.BattleParams;
+import Engine.Combat.BattleParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
