@@ -126,6 +126,7 @@ public abstract class LaunchLifecycle
         XYCoord firstEndPoint = cargoEvents.peekFirst().getEndPoint();
         if (null != firstEndPoint && firstEndPoint.equals(launcher.x, launcher.y))
           // If the first action ends on top of the launcher, assume it's a move action and re-load the unit to avoid weird states
+          // This could theoretically happen due to ambush when there are no valid destinations on the path
           launchEvents.add(new LoadLifecycle.LoadEvent(launchee, launcher));
       }
       return launchEvents;
