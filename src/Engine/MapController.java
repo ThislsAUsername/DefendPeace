@@ -404,7 +404,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.
         break;
       case FREE_TILE_SELECT:
-        // This state doesn't require any special handling.
+        myGameInputHandler.reset(); // Reset the input handler to get rid of stale state
         break;
       case END_TURN:
         startNextTurn();
