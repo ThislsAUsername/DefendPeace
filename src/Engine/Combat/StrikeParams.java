@@ -12,7 +12,6 @@ public class StrikeParams
   public final Combatant attacker;
 
   // Stuff inherited for reference from CombatContext
-  public final GameMap map; // for reference, not weirdness
   public final int battleRange;
 
   public double baseDamage;
@@ -43,12 +42,11 @@ public class StrikeParams
 
   public StrikeParams(
       Combatant attacker,
-      GameMap map, int battleRange,
+      int battleRange,
       double attackPower, double baseDamage,
       boolean isCounter)
   {
     this.attacker = attacker;
-    this.map = map;
 
     this.battleRange = battleRange;
     this.attackPower = attackPower;
@@ -71,6 +69,7 @@ public class StrikeParams
   public static class BattleParams extends StrikeParams
   {
     public final Combatant defender;
+    public final GameMap map; // for reference, not weirdness
 
     public double defenderHP;
     public double defensePower;
@@ -84,10 +83,11 @@ public class StrikeParams
         boolean isCounter)
     {
       super(attacker,
-          map, battleRange,
-          attackPower, attacker.gun.getDamage(defender.body.model),
+          battleRange,
+          attackPower, (null == attacker.gun)? 0 : attacker.gun.getDamage(defender.body.model),
           isCounter);
       this.defender = defender;
+      this.map = map;
 
       this.attackPower = attackPower;
 

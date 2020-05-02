@@ -94,4 +94,13 @@ public class CombatEngine
                              unitDamageMap.get(defender).getValue(), unitDamageMap.get(attacker).getValue());
   }
 
+  public static StrikeParams buildSimpleAttack( Unit attacker, int battleRange, Unit defender, int terrainStars, boolean attackerMoved )
+  {
+    WeaponModel wm = attacker.chooseWeapon(defender.model, battleRange, attackerMoved);
+    return new StrikeParams(
+        new Combatant(attacker, wm, attacker.x, attacker.x),
+        battleRange, attacker.model.getDamageRatio(),
+        (null == wm)? 0 : wm.getDamage(defender.model),
+        false);
+  }
 }

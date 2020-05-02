@@ -17,17 +17,16 @@ import Engine.GameActionSet;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
-import Engine.Combat.BattleParams;
+import Engine.Combat.CombatEngine;
+import Engine.Combat.StrikeParams;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.Environment;
-import Terrain.Environment.Weathers;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
-import Units.WeaponModel;
 
 /**
  * Muriel will Make Units Reactively, Informed by the Enemy Loadout.
@@ -138,24 +137,10 @@ public class Muriel implements AIController
     UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(myUnit.model, otherUnit.model));
     if( null != umami ) return umami;
 
-    double myDamage = 0;
-    WeaponModel myWeapon = myUnit.chooseWeapon(otherUnit.model, 1, myUnit.model.hasMobileWeapon());
-    if( null != myWeapon )
-    {
-      BattleParams params = new BattleParams(myUnit, myWeapon,
-          otherUnit, Environment.getTile(TerrainType.ROAD, Weathers.CLEAR), false, null);
-      myDamage = params.calculateDamage();
-    }
+    double myDamage = CombatEngine.buildSimpleAttack(myUnit, 1, otherUnit, 0, myUnit.model.hasMobileWeapon()).calculateDamage();
 
     // Now go the other way.
-    double otherDamage = 0;
-    WeaponModel otherWeapon = otherUnit.chooseWeapon(myUnit.model, 1, myUnit.model.hasMobileWeapon());
-    if( null != otherWeapon )
-    {
-      BattleParams params = new BattleParams(otherUnit, otherWeapon,
-          myUnit, Environment.getTile(TerrainType.ROAD, Weathers.CLEAR), false, null);
-      otherDamage = params.calculateDamage();
-    }
+    double otherDamage = CombatEngine.buildSimpleAttack(otherUnit, 1, myUnit, 0, false).calculateDamage();
 
     // Calculate and store the damage and cost-effectiveness ratios.
     double damageRatio = 0;
@@ -348,7 +333,8 @@ public class Muriel implements AIController
           Environment environment = gameMap.getEnvironment(targetLoc);
 
           // Calculate the cost of the damage we can do.
-          BattleParams params = new BattleParams(unit, unit.chooseWeapon(target.model, 1, unit.model.hasMobileWeapon()), target, environment, false, null);
+          StrikeParams params = CombatEngine.buildSimpleAttack(unit, 1, target, environment.terrainType.getDefLevel(), unit.model.hasMobileWeapon());
+
           double hpDamage = Math.min(params.calculateDamage(), target.getPreciseHP());
           double damageValue = (target.model.getCost()/10) * hpDamage;
 
@@ -471,8 +457,8 @@ public class Muriel implements AIController
   private boolean shouldAttack(Unit unit, Unit target, GameMap gameMap)
   {
     // Calculate the cost of the damage we can do.
-    BattleParams params = new BattleParams(unit, unit.chooseWeapon(target.model, 1, unit.model.hasMobileWeapon()), target, gameMap.getLocation(target.x, target.y).getEnvironment(), false, null);
-    double damage = params.calculateDamage();
+    double damage = CombatEngine.buildSimpleAttack(unit, 1, target, gameMap.getEnvironment(target.x, target.y).terrainType.getDefLevel(), unit.model.hasMobileWeapon()).calculateDamage();
+
     UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(unit, target);
 
     // This attack is a good idea if our cost effectiveness is in the acceptable range, or if we can at least half-kill them.
