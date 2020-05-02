@@ -32,7 +32,7 @@ public class Unit implements Serializable
   public Commander CO;
   public boolean isTurnOver;
   public boolean isStunned;
-  private double HP;
+  private int health; // HP value as a percentage, thus 10x displayed HP value
 
   public Unit(Commander co, UnitModel um)
   {
@@ -42,7 +42,7 @@ public class Unit implements Serializable
     fuel = model.maxFuel;
     materials = model.maxMaterials;
     isTurnOver = true;
-    HP = model.maxHP;
+    health = model.maxHP * 10;
     captureProgress = 0;
     captureTarget = null;
     if( model.holdingCapacity > 0 )
@@ -187,28 +187,32 @@ public class Unit implements Serializable
 
   public int getHP()
   {
-    return (int) Math.ceil(HP);
+    return (int) Math.ceil(healthToHP(health));
   }
   public double getPreciseHP()
   {
-    return HP;
+    return healthToHP(health);
+  }
+  private static double healthToHP(int input)
+  {
+    return ((double)input)/10;
   }
 
   public void damageHP(double damage)
   {
-    HP -= damage;
-    if( HP < 0 )
+    health -= damage*10;
+    if( health < 0 )
     {
-      HP = 0;
+      health = 0;
     }
   }
   public double alterHP(int change)
   {
-    double before = HP;
-    // Change the unit's health, but don't grant more
-    // than 10 HP, and don't drop HP to zero.
-    HP = Math.max(0.1, Math.min(model.maxHP, getHP() + change));
-    return HP - before;
+    int before = health;
+    // Change the unit's health, but don't
+    // go over maxHP, and don't drop HP to zero.
+    health = Math.max(1, Math.min(model.maxHP, getHP() + change) * 10);
+    return healthToHP(health - before);
   }
 
   public boolean capture(Location target)

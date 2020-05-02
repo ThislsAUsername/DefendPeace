@@ -108,7 +108,7 @@ public class TestGameEvent extends TestCase
     captureEvent.performEvent(testMap);
     testPassed &= validate(infA.getCaptureProgress() == 10, "    Infantry capture progress is not 10.");
 
-    // Hurt the unit so he won't captre as fast.
+    // Hurt the unit so he won't capture as fast.
     infA.damageHP(5.0);
     captureEvent.performEvent(testMap);
     testPassed &= validate(infA.getCaptureProgress() == 15, "    Infantry capture progress is not 15.");
