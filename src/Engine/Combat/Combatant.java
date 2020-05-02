@@ -19,4 +19,10 @@ public class Combatant
     this.x = x;
     this.y = y;
   }
+
+  @Override
+  public String toString()
+  {
+    return "CO " + body.CO + " attacking with " + body;
+  }
 }
