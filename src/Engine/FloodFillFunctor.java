@@ -37,20 +37,17 @@ public interface FloodFillFunctor
 
     public int getRemainingFillPower(GameMap map, int initialFillPower, XYCoord from, XYCoord to)
     {
+      int cost = findMoveCost(from, to, map);
+
       // if we're past the edges of the map
       if( !map.isLocationValid(to) )
-        return -1;
+        cost = MoveType.IMPASSABLE;
 
       // if there is an enemy unit in that space
       if( !canTravelThroughEnemies
           && (map.getLocation(to).getResident() != null)
           && unit.CO.isEnemy(map.getLocation(to).getResident().CO) )
-        return -1;
-
-      // if this unit can't traverse that terrain.
-      int cost = findMoveCost(from, to, map);
-      if( cost == MoveType.IMPASSABLE )
-        return -1;
+        cost = MoveType.IMPASSABLE;
 
       return initialFillPower - cost;
     }
