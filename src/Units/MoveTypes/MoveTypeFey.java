@@ -47,7 +47,7 @@ public class MoveTypeFey extends MoveType
           && unit.CO.isEnemy(map.getLocation(to).getOwner()))
         return IMPASSABLE;
 
-      return unit.model.propulsion.getMoveCost(endEnv);
+      return propulsion.getMoveCost(endEnv);
     }
   } // ~FeyMoveFillFunctor
 }
