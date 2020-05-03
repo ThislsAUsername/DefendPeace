@@ -244,11 +244,7 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(7 == mech.x && 6 == mech.y, "    Mech should think he is at (7, 6) after moving.");
     testPassed &= validate(testMap.getLocation(7, 6).getResident() == mech, "    Mech is not at (7, 6) after moving.");
 
-    path.addWaypoint(7, 0); // New endpoint over water.
-    new MoveEvent(mech, path).performEvent(testMap); // This should not execute. Water is bad for grunts.
-    testPassed &= validate(7 == mech.x && 6 == mech.y, "    Mech does not think he is at (7, 6), but should.");
-    testPassed &= validate(testMap.getLocation(7, 6).getResident() == mech, "    Mech is not still at (7, 6), but should be.");
-    testPassed &= validate(testMap.getLocation(7, 0).getResident() == null, "    Location (7, 0) should still be empty.");
+    // Test moving into water removed since MoveEvent no longer validates that the unit can actually get there.
 
     path.addWaypoint(7, 5); // New endpoint to move apc over infantry.
     new MoveEvent(apc, path).performEvent(testMap); // This should not execute. Treads are bad for grunts.
