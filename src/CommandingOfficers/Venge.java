@@ -166,6 +166,7 @@ public class Venge extends Commander
       super(commander, NAME, COST);
       COcast = commander;
       defenseMod = new CODefenseModifier(IRONWILL_BUFF);
+      AIFlags = PHASE_TURN_END;
     }
 
     @Override
