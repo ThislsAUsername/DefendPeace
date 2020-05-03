@@ -184,7 +184,7 @@ public class Utils
     {
       XYCoord newCoord = path.getWaypoint(i).GetCoordinates();
 
-      movePower = fff.getRemainingFillPower(map, movePower, lastCoord, newCoord);
+      movePower -= fff.getTransitionCost(map, lastCoord, newCoord);
       lastCoord = newCoord;
       if( movePower < 0 )
       {
@@ -331,7 +331,7 @@ public class Utils
       // then update the power grid and re-queue the next node.
       int oldPower = powerGrid[currentNode.x][currentNode.y];
       int oldNextPower = powerGrid[next.xCoord][next.yCoord];
-      int newNextPower = fff.getRemainingFillPower(map, oldPower, currentNode.getCoordinates(), next);
+      int newNextPower = oldPower - fff.getTransitionCost(map, currentNode.getCoordinates(), next);
 
       if( newNextPower > oldNextPower )
       {
@@ -576,8 +576,8 @@ public class Utils
     {
       XYCoord from = path.getWaypoint(i-1).GetCoordinates();
       XYCoord to   = path.getWaypoint( i ).GetCoordinates();
-      // getRemainingFillPower() checks for collisions relevant to the unit, and will give us a negative result in that case
-      if( 0 > fff.getRemainingFillPower(map, unit.model.movePower, from, to) )
+      // If there are collisions relevant to the unit, the cost will be IMPASSABLE
+      if( unit.model.movePower < fff.getTransitionCost(map, from, to) )
       {
         result = true;
         break;

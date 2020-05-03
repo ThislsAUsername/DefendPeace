@@ -173,8 +173,7 @@ public class Path
     {
       XYCoord from = waypoints.get(i-1).GetCoordinates();
       XYCoord to   = waypoints.get( i ).GetCoordinates();
-      // Starting at zero move gives us the exact cost, just negative
-      cost -= fff.getRemainingFillPower(map, 0, from, to);
+      cost += fff.getTransitionCost(map, from, to);
     }
     return cost;
   }
@@ -256,7 +255,7 @@ public class Path
     {
       XYCoord from = waypoints.get(i-1).GetCoordinates();
       XYCoord to   = waypoints.get( i ).GetCoordinates();
-      if( 0 > fff.getRemainingFillPower(map, unit.model.movePower, from, to) )
+      if( unit.model.movePower < fff.getTransitionCost(map, from, to) )
       {
         snip(i);
         break;

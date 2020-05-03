@@ -14,7 +14,7 @@ public interface FloodFillFunctor
    * Determines whether the Location (x, y), can be traveled through.
    * @param ignoreUnits If set, this function will ignore enemy-unit presence.
    */
-  int getRemainingFillPower(GameMap map, int initialFillPower, XYCoord from, XYCoord to);
+  int getTransitionCost(GameMap map, XYCoord from, XYCoord to);
   /**
    * Determines whether the Location (x, y), is a valid destination.
    */
@@ -35,13 +35,13 @@ public interface FloodFillFunctor
       this.canTravelThroughEnemies = canTravelThroughEnemies;
     }
 
-    public int getRemainingFillPower(GameMap map, int initialFillPower, XYCoord from, XYCoord to)
+    public int getTransitionCost(GameMap map, XYCoord from, XYCoord to)
     {
-      int cost = findMoveCost(from, to, map);
-
       // if we're past the edges of the map
       if( !map.isLocationValid(to) )
-        cost = MoveType.IMPASSABLE;
+        return MoveType.IMPASSABLE;
+
+      int cost = findMoveCost(from, to, map);
 
       // if there is an enemy unit in that space
       if( !canTravelThroughEnemies
@@ -49,7 +49,7 @@ public interface FloodFillFunctor
           && unit.CO.isEnemy(map.getLocation(to).getResident().CO) )
         cost = MoveType.IMPASSABLE;
 
-      return initialFillPower - cost;
+      return cost;
     }
 
     public boolean canEnd(GameMap map, XYCoord end)
