@@ -25,14 +25,16 @@ public interface FloodFillFunctor
   public static class BasicMoveFillFunctor implements FloodFillFunctor
   {
     public final Unit unit;
+    public final MoveType propulsion;
     public final boolean includeOccupiedDestinations;
     public final boolean canTravelThroughEnemies;
 
-    public BasicMoveFillFunctor(Unit mover, boolean includeOccupied, boolean canTravelThroughEnemies)
+    public BasicMoveFillFunctor(Unit mover, MoveType propulsion, boolean includeOccupied, boolean canTravelThroughEnemies)
     {
       unit = mover;
+      this.propulsion = propulsion;
       this.includeOccupiedDestinations = includeOccupied;
-      this.canTravelThroughEnemies = canTravelThroughEnemies;
+      this.canTravelThroughEnemies = (null == unit)? true : canTravelThroughEnemies;
     }
 
     public int getTransitionCost(GameMap map, XYCoord from, XYCoord to)
@@ -62,7 +64,7 @@ public interface FloodFillFunctor
 
     public int findMoveCost(XYCoord from, XYCoord to, GameMap map)
     {
-      return unit.model.propulsion.getMoveCost(map.getEnvironment(to.xCoord, to.yCoord));
+      return propulsion.getMoveCost(map.getEnvironment(to.xCoord, to.yCoord));
     }
   } // ~BasicMoveFillFunctor
 

@@ -70,7 +70,7 @@ public class MoveType implements Serializable
 
   public FloodFillFunctor getUnitMoveFunctor(Unit mover, boolean includeOccupied, boolean canTravelThroughEnemies)
   {
-    return new BasicMoveFillFunctor(mover, includeOccupied, canTravelThroughEnemies);
+    return new BasicMoveFillFunctor(mover, this, includeOccupied, canTravelThroughEnemies);
   }
 
   /** Returns the cost to traverse the given tile, accounting for its current terrain and weather types. */

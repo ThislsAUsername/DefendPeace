@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import Terrain.GameMap;
 import Units.Unit;
+import Units.UnitModel;
 
 /**
  * Path stores a list of waypoints with associated times to reach them. Once all 
@@ -163,11 +164,11 @@ public class Path
   /**
    * @return the amount of fuel it would cost to travel this path with the given unit type 
   **/
-  public int getFuelCost(Unit unit, GameMap map)
+  public int getFuelCost(UnitModel unit, GameMap map)
   {
     int cost = 0;
-    boolean includeOccupied = true;
-    FloodFillFunctor fff = unit.getMoveFunctor(includeOccupied);
+    boolean includeOccupied = true, canTravelThroughEnemies = true;
+    FloodFillFunctor fff = unit.propulsion.getUnitMoveFunctor(null, includeOccupied, canTravelThroughEnemies);
     // We iterate from 1 because the first waypoint is the unit's initial position.
     for (int i = 1; i < waypoints.size(); i++)
     {

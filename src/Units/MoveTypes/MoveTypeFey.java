@@ -28,14 +28,14 @@ public class MoveTypeFey extends MoveType
   @Override
   public FloodFillFunctor getUnitMoveFunctor(Unit mover, boolean includeOccupied, boolean canTravelThroughEnemies)
   {
-    return new FeyMoveFillFunctor(mover, includeOccupied, canTravelThroughEnemies);
+    return new FeyMoveFillFunctor(mover, this, includeOccupied, canTravelThroughEnemies);
   }
 
   public static class FeyMoveFillFunctor extends BasicMoveFillFunctor
   {
-    public FeyMoveFillFunctor(Unit mover, boolean includeOccupied, boolean canTravelThroughEnemies)
+    public FeyMoveFillFunctor(Unit mover, MoveType propulsion, boolean includeOccupied, boolean canTravelThroughEnemies)
     {
-      super(mover, includeOccupied, canTravelThroughEnemies);
+      super(mover, propulsion, includeOccupied, canTravelThroughEnemies);
     }
 
     @Override
