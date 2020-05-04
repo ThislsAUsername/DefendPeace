@@ -158,6 +158,12 @@ public class AIUtils
     return unitMap;
   }
 
+  /** Overload of {@link #moveTowardLocation(Unit, XYCoord, GameMap, Set)} **/
+  public static GameAction moveTowardLocation(Unit unit, XYCoord destination, GameMap gameMap )
+  {
+    return moveTowardLocation(unit, destination, gameMap, null);
+  }
+
   /**
    * Create and return a GameAction.WaitAction that will move unit towards destination, around
    * any intervening obstacles. If no possible route exists, return false.
@@ -165,18 +171,21 @@ public class AIUtils
    * @param destination Where we eventually want the unit to be.
    * @param gameMap The map on which the unit is moving.
    * @return A GameAction to bring the unit closer to the destination, or null if it is unreachable.
+   * @param excludeDestinations A list of coordinates of Map locations we don't want to move to.
    */
-  public static GameAction moveTowardLocation(Unit unit, XYCoord destination, GameMap gameMap)
+  public static GameAction moveTowardLocation(Unit unit, XYCoord destination, GameMap gameMap, Set<XYCoord> excludeDestinations )
   {
     GameAction move = null;
 
     // Find the full path that would get this unit to the destination, regardless of how long. 
     Path path = Utils.findShortestPath(unit, destination, gameMap, true);
-    ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, false); // Find the valid moves we can make.
+    boolean includeTransports = false;
+    ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, includeTransports); // Find the valid moves we can make.
 
     if( path.getPathLength() > 0 && validMoves.size() > 0 ) // Check that the destination is reachable at least in theory.
     {
       path.snip(unit.model.movePower+1); // Trim the path so we go the right immediate direction.
+      if( null != excludeDestinations) validMoves.removeAll(excludeDestinations);
       Utils.sortLocationsByDistance(path.getEndCoord(), validMoves); // Sort moves based on intermediate destination. 
       move = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, validMoves.get(0), gameMap)); // Move to best option.
     }
