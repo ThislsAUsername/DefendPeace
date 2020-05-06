@@ -45,11 +45,12 @@ public class MoveEvent implements GameEvent
       Path.PathNode endpoint = unitPath.getEnd();
       int fuelBurn = unitPath.getFuelCost(unit.model, gameMap);
 
-      boolean includeOccupiedSpaces = false;
+      boolean includeOccupiedSpaces = true; // To allow validation for LOAD/JOIN actions.
       if( fuelBurn <= unit.fuel && fuelBurn <= unit.model.movePower
           && unit.getMoveFunctor(includeOccupiedSpaces).canEnd(gameMap, endpoint.GetCoordinates()))
       {
-        gameMap.moveUnit(unit, endpoint.x, endpoint.y);
+        if( null == gameMap.getLocation(endpoint.x, endpoint.y).getResident() ) // Just avoid triggering a warning.
+          gameMap.moveUnit(unit, endpoint.x, endpoint.y);
         unit.isTurnOver = true;
 
         unit.fuel -= fuelBurn;
