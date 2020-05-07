@@ -42,7 +42,8 @@ public class MoveTypeFey extends MoveType
     public int findMoveCost(XYCoord from, XYCoord to, GameMap map)
     {
       Environment endEnv = map.getEnvironment(to);
-      if (unit.model.healableHabs.contains(endEnv.terrainType)
+      // Fey units cannot enter enemy-controlled spaces.
+      if (null != unit && unit.model.healableHabs.contains(endEnv.terrainType)
           && endEnv.terrainType.isCapturable()
           && unit.CO.isEnemy(map.getLocation(to).getOwner()))
         return IMPASSABLE;
