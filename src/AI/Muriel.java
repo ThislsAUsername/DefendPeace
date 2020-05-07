@@ -416,8 +416,7 @@ public class Muriel implements AIController
             if( Utils.findManhattanDistance(unitCoord, threatCoord) <= MAX_RELEVANT_DISTANCE )
             {
               // If we, in the enemy's place, would attack `unit` with `threat`, then we should not let them attack us.
-              UnitMatchupAndMetaInfo invUmami = getUnitMatchupInfo(threat, unit);
-              if( invUmami.costEffectivenessRatio > COST_EFFECTIVENESS_MIN && threat.getHP() >= 6 )
+              if( threat.canAttack(unit.model) && shouldAttack(threat, unit, gameMap) )
               {
                 // Add coordinates that `threat` could target to our "no-go" list.
                 Map<XYCoord, Double> threatMap = AIUtils.findThreatPower(gameMap, threat, unit.model);

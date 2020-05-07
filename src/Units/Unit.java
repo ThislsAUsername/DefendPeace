@@ -147,6 +147,26 @@ public class Unit implements Serializable
   }
 
   /**
+   * @return whether this unit has a weapon that can hit `targetType` under any circumstances.  */
+  public boolean canAttack(UnitModel targetType)
+  {
+    // if we have no weapons, we can't hurt things
+    if( model.weapons == null )
+      return false;
+
+    boolean canHit = false;
+    for( WeaponModel weapon : model.weapons )
+    {
+      if( weapon.getDamage(targetType) > 0 )
+      {
+        canHit = true;
+        break;
+      }
+    }
+    return canHit;
+  }
+
+  /**
    * Select the weapon owned by this unit that can inflict the
    * most damage against the chosen target
    * @param target

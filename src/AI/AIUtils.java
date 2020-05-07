@@ -170,7 +170,7 @@ public class AIUtils
    * @param unit The unit we want to move.
    * @param destination Where we eventually want the unit to be.
    * @param gameMap The map on which the unit is moving.
-   * @return A GameAction to bring the unit closer to the destination, or null if it is unreachable.
+   * @return A GameAction to bring the unit closer to the destination, or null if no available move exists.
    * @param excludeDestinations A list of coordinates of Map locations we don't want to move to.
    */
   public static GameAction moveTowardLocation(Unit unit, XYCoord destination, GameMap gameMap, Set<XYCoord> excludeDestinations )
@@ -186,8 +186,11 @@ public class AIUtils
     {
       path.snip(unit.model.movePower+1); // Trim the path so we go the right immediate direction.
       if( null != excludeDestinations) validMoves.removeAll(excludeDestinations);
-      Utils.sortLocationsByDistance(path.getEndCoord(), validMoves); // Sort moves based on intermediate destination. 
-      move = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, validMoves.get(0), gameMap)); // Move to best option.
+      if( !validMoves.isEmpty() )
+      {
+        Utils.sortLocationsByDistance(path.getEndCoord(), validMoves); // Sort moves based on intermediate destination.
+        move = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, validMoves.get(0), gameMap)); // Move to best option.
+      }
     }
     return move;
   }
