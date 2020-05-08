@@ -22,8 +22,8 @@ public class Unit implements Serializable
   private static final long serialVersionUID = 1L;
   public Vector<Unit> heldUnits;
   public UnitModel model;
-  public int x;
-  public int y;
+  public int x = -1;
+  public int y = -1;
   public int ammo;
   public int fuel;
   public int materials;
