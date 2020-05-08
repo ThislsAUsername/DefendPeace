@@ -45,22 +45,26 @@ public class MoveEvent implements GameEvent
       Path.PathNode endpoint = unitPath.getEnd();
       int fuelBurn = unitPath.getFuelCost(unit.model, gameMap);
 
-      unit.fuel = Math.max(0, unit.fuel - fuelBurn);
-
-      // Every unit action begins with a (potentially 0-distance) move,
-      // so we'll just set the "has moved" flag here.
-      unit.isTurnOver = true;
-
-      // reveal fog as applicable
-      for( Commander co : gameMap.commanders )
+      boolean includeOccupiedSpaces = true; // To allow validation for LOAD/JOIN actions.
+      if( fuelBurn <= unit.fuel && fuelBurn <= unit.model.movePower
+          && unit.getMoveFunctor(includeOccupiedSpaces).canEnd(gameMap, endpoint.GetCoordinates()))
       {
-        co.myView.revealFog(unit, unitPath);
-      }
+        if( null == gameMap.getLocation(endpoint.x, endpoint.y).getResident() ) // Just avoid triggering a warning.
+          gameMap.moveUnit(unit, endpoint.x, endpoint.y);
+        unit.isTurnOver = true;
 
-      // If the unit is already at the destination, we don't need to move it.
-      if( 0 != fuelBurn )
-        // If the move is un-executable, moveUnit() will catch it safely
-        gameMap.moveUnit(unit, endpoint.x, endpoint.y);
+        unit.fuel -= fuelBurn;
+
+        // reveal fog as applicable
+        for( Commander co : gameMap.commanders )
+        {
+          co.myView.revealFog(unit, unitPath);
+        }
+      }
+      else
+      {
+        System.out.println("WARNING! Invalid move " + unit.model.name + " to (" + endpoint.x + ", " + endpoint.y + ")");
+      }
     }
   }
 
