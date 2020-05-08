@@ -168,6 +168,7 @@ public abstract class LoadLifecycle
         gameMap.removeUnit(unitCargo);
         unitCargo.x = -1;
         unitCargo.y = -1;
+        unitTransport.heldUnits.remove(unitCargo); // Make sure we can't double-load
         unitTransport.heldUnits.add(unitCargo);
       }
       else
