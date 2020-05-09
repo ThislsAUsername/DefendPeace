@@ -391,7 +391,7 @@ public class TerrainSpriteSet
   }
 
   /** Return true if this terrain type takes up more than one tile when drawn. */
-  private boolean isTerrainObject(TerrainType terrainType)
+  public static boolean isTerrainObject(TerrainType terrainType)
   {
     if( null == terrainObjects )
     {
@@ -401,7 +401,9 @@ public class TerrainSpriteSet
       terrainObjects.add(TerrainType.FACTORY);
       terrainObjects.add(TerrainType.FOREST);
       terrainObjects.add(TerrainType.AIRPORT);
+      terrainObjects.add(TerrainType.TEMP_AIRPORT);
       terrainObjects.add(TerrainType.SEAPORT);
+      terrainObjects.add(TerrainType.TEMP_SEAPORT);
       terrainObjects.add(TerrainType.HEADQUARTERS);
       terrainObjects.add(TerrainType.LAB);
       terrainObjects.add(TerrainType.MOUNTAIN);
@@ -461,6 +463,7 @@ public class TerrainSpriteSet
       terrainBases.put(TerrainType.DUNES, TerrainType.GRASS);
       terrainBases.put(TerrainType.FACTORY, TerrainType.GRASS);
       terrainBases.put(TerrainType.AIRPORT, TerrainType.GRASS);
+      terrainBases.put(TerrainType.TEMP_AIRPORT, TerrainType.GRASS);
       terrainBases.put(TerrainType.FOREST, TerrainType.GRASS);
       terrainBases.put(TerrainType.HEADQUARTERS, TerrainType.GRASS);
       terrainBases.put(TerrainType.LAB, TerrainType.GRASS);
@@ -473,6 +476,7 @@ public class TerrainSpriteSet
 
       terrainBases.put(TerrainType.BRIDGE, TerrainType.SHOAL);
       terrainBases.put(TerrainType.SEAPORT, TerrainType.SHOAL);
+      terrainBases.put(TerrainType.TEMP_SEAPORT, TerrainType.SHOAL);
       terrainBases.put(TerrainType.SHOAL, TerrainType.SHOAL);
 
       terrainBases.put(TerrainType.REEF, TerrainType.SEA);

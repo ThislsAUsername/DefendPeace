@@ -42,7 +42,7 @@ public class ResupplyAnimation implements GameAnimation
   @Override
   public boolean animate(Graphics g)
   {
-    if( isCancelled )
+    if( isCancelled || mapLocation.xCoord < 0 || mapLocation.yCoord < 0 )
     {
       return true;
     }

@@ -12,7 +12,6 @@ import java.util.TreeMap;
 import Engine.XYCoord;
 import Terrain.MapInfo;
 import Terrain.TerrainType;
-import Units.UnitModel;
 
 public class MapReader extends IMapBuilder
 {
@@ -194,8 +193,12 @@ public class MapReader extends IMapBuilder
         return FC;
       case "AP":
         return AP;
+      case "TA":
+        return TA;
       case "SP":
         return SP;
+      case "TS":
+        return TS;
       case "FR":
         return FR;
       case "GR":

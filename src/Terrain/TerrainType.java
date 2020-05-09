@@ -61,6 +61,12 @@ public class TerrainType implements Serializable
   private static final String AIRPORT_NAME = "AIRPORT";
   public static final TerrainType AIRPORT = new TerrainType( AIRPORT_FLAGS, AIRPORT_DEFENSE, AIRPORT_COLOR, AIRPORT_NAME);
 
+  private static final int TEMP_AIRPORT_FLAGS = LAND | CAPTURABLE | PROVIDES_COVER | HEALS_AIR;
+  private static final int TEMP_AIRPORT_DEFENSE = 1;
+  private static final Color TEMP_AIRPORT_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
+  private static final String TEMP_AIRPORT_NAME = "TEMP_AIRPORT";
+  public static final TerrainType TEMP_AIRPORT = new TerrainType( TEMP_AIRPORT_FLAGS, TEMP_AIRPORT_DEFENSE, TEMP_AIRPORT_COLOR, TEMP_AIRPORT_NAME );
+
   private static final int BRIDGE_FLAGS = LAND | WATER;
   private static final int BRIDGE_DEFENSE = 0;
   private static final Color BRIDGE_COLOR = new Color(189, 189, 189);
@@ -158,6 +164,12 @@ public class TerrainType implements Serializable
   private static final String SEAPORT_NAME = "SEAPORT";
   public static final TerrainType SEAPORT = new TerrainType( SEAPORT_FLAGS, SEAPORT_DEFENSE, SEAPORT_COLOR, SEAPORT_NAME );
 
+  private static final int TEMP_SEAPORT_FLAGS = LAND | WATER | CAPTURABLE | PROVIDES_COVER | HEALS_SEA;
+  private static final int TEMP_SEAPORT_DEFENSE = 1;
+  private static final Color TEMP_SEAPORT_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
+  private static final String TEMP_SEAPORT_NAME = "TEMP_SEAPORT";
+  public static final TerrainType TEMP_SEAPORT = new TerrainType( TEMP_SEAPORT_FLAGS, TEMP_SEAPORT_DEFENSE, TEMP_SEAPORT_COLOR, TEMP_SEAPORT_NAME );
+
   private static final int SHOAL_FLAGS = LAND | WATER;
   private static final int SHOAL_DEFENSE = 0;
   private static final Color SHOAL_COLOR = new Color(253, 224, 93);
@@ -167,7 +179,7 @@ public class TerrainType implements Serializable
   // List of all terrain types.
   public static final ArrayList<TerrainType> TerrainTypeList =
       new ArrayList<TerrainType>(Arrays.asList(
-          AIRPORT, BRIDGE, CITY, BUNKER, PILLAR, DUNES, FACTORY, FOREST, GRASS, HEADQUARTERS, LAB, MOUNTAIN, REEF, RIVER, ROAD, SEA, SEAPORT, SHOAL
+          AIRPORT, TEMP_AIRPORT, BRIDGE, CITY, BUNKER, PILLAR, DUNES, FACTORY, FOREST, GRASS, HEADQUARTERS, LAB, MOUNTAIN, REEF, RIVER, ROAD, SEA, SEAPORT, TEMP_SEAPORT, SHOAL
           ));
 
   @Override

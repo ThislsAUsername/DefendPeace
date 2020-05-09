@@ -253,7 +253,7 @@ public class MapMaster extends GameMap
 
     // Update the map
     Location priorLoc = getLocation(unit.x, unit.y);
-    if( null != priorLoc )
+    if( null != priorLoc && priorLoc.getResident() == unit )
     {
       priorLoc.setResident(null);
     }

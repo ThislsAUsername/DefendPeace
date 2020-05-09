@@ -43,7 +43,7 @@ public abstract class UnitProduceLifecycle
     @Override
     public String name()
     {
-      return "BUILD " + typeToBuild.toString();
+      return String.format("BUILD %s (%d)", typeToBuild.toString(), typeToBuild.getCost());
     }
   } //~factory
 

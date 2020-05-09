@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 import CommandingOfficers.Commander;
+import Engine.FloodFillFunctor;
 import Engine.GameActionSet;
 import Engine.Path;
 import Engine.UnitActionFactory;
@@ -21,8 +22,8 @@ public class Unit implements Serializable
   private static final long serialVersionUID = 1L;
   public Vector<Unit> heldUnits;
   public UnitModel model;
-  public int x;
-  public int y;
+  public int x = -1;
+  public int y = -1;
   public int ammo;
   public int fuel;
   public int materials;
@@ -63,22 +64,26 @@ public class Unit implements Serializable
 
     // Only perform turn initialization for the unit if it is on the map.
     //   Units that are e.g. in a transport don't burn fuel, etc.
+    if( isStunned )
+    {
+      isTurnOver = true;
+      isStunned = false;
+    }
+    else
+      isTurnOver = false;
+    if( captureTarget != null && captureTarget.getResident() != this )
+    {
+      captureTarget = null;
+      captureProgress = 0;
+    }
+
+    if( null != heldUnits )
+      for( Unit cargo : heldUnits )
+        events.addAll(cargo.initTurn(map));
+
     if( null != locus )
     {
-      if( isStunned )
-      {
-        isTurnOver = true;
-        isStunned = false;
-      }
-      else
-        isTurnOver = false;
       fuel -= model.idleFuelBurn;
-      if( captureTarget != null && captureTarget.getResident() != this )
-      {
-        captureTarget = null;
-        captureProgress = 0;
-      }
-
       // If the unit is not at max health, and is on a repair tile, heal it.
       if( model.canRepairOn(locus) && !CO.isEnemy(locus.getOwner()) )
       {
@@ -95,6 +100,16 @@ public class Unit implements Serializable
     } // ~If location is valid.
 
     return events;
+  }
+
+  public FloodFillFunctor getMoveFunctor(boolean includeOccupied)
+  {
+    // Units cannot normally pass through enemies
+    return getMoveFunctor(includeOccupied, false);
+  }
+  public FloodFillFunctor getMoveFunctor(boolean includeOccupied, boolean canTravelThroughEnemies)
+  {
+    return model.propulsion.getUnitMoveFunctor(this, includeOccupied, canTravelThroughEnemies);
   }
 
   /**
@@ -196,18 +211,9 @@ public class Unit implements Serializable
     return HP - before;
   }
 
-  public void capture(Location target)
+  public boolean capture(Location target)
   {
-    if( !target.isCaptureable() )
-    {
-      System.out.println("ERROR! Attempting to capture an uncapturable Location!");
-      return;
-    }
-    if( !CO.isEnemy(target.getOwner()) )
-    {
-      System.out.println("WARNING! Attempting to capture an allied property!");
-      return;
-    }
+    boolean success = false;
 
     if( target != captureTarget )
     {
@@ -220,7 +226,10 @@ public class Unit implements Serializable
       target.setOwner(CO);
       captureProgress = 0;
       target = null;
+      success = true;
     }
+
+    return success;
   }
 
   public void stopCapturing()

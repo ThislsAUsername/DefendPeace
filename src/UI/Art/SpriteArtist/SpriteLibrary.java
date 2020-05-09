@@ -154,98 +154,49 @@ public class SpriteLibrary
     int w = baseSpriteSize;
     int h = baseSpriteSize;
 
+    if( TerrainSpriteSet.isTerrainObject(terrainType))
+      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
+    else
+      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
+
     // Load the appropriate images and define the necessary relationships for each tile type.
     if( terrainType == TerrainType.BRIDGE )
     {
-      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
       ss.addTerrainAffinity(TerrainType.GRASS); // No need to also add ROAD, since GRASS is the base of ROAD.
       ss.denyTerrainAffinity(TerrainType.RIVER); // RIVER has a base of GRASS, but we don't want bridge to tile with it.
     }
-    else if( terrainType == TerrainType.CITY )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
-    }
-    else if( terrainType == TerrainType.PILLAR )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
-    }
-    else if( terrainType == TerrainType.BUNKER )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w*2, h*2);
-    }
-    else if( terrainType == TerrainType.DUNES )
-    {}
-    else if( terrainType == TerrainType.FACTORY )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
-    }
-    else if( terrainType == TerrainType.AIRPORT )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
-    }
-    else if( terrainType == TerrainType.SEAPORT )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
-    }
-    else if( terrainType == TerrainType.FOREST )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
-    }
     else if( terrainType == TerrainType.GRASS )
     {
-      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
       ss.addTileTransition(TerrainType.BRIDGE, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
-    }
-    else if( terrainType == TerrainType.HEADQUARTERS )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
-    }
-    else if( terrainType == TerrainType.LAB )
-    {
-      // TODO: get actual sprites for this
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
-    }
-    else if( terrainType == TerrainType.MOUNTAIN )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
     }
     else if( terrainType == TerrainType.SEA )
     {
-      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
       ss.addTileTransition(TerrainType.GRASS, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
       ss.addTileTransition(TerrainType.BRIDGE, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
       ss.addTileTransition(TerrainType.RIVER, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
     }
     else if( terrainType == TerrainType.REEF )
     {
-      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
       ss.addTileTransition(TerrainType.SEA, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
     }
     else if( terrainType == TerrainType.RIVER )
     {
-      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
       ss.addTileTransition(TerrainType.BRIDGE, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
       ss.addTerrainAffinity(TerrainType.SHOAL);
       ss.addTerrainAffinity(TerrainType.SEA);
     }
     else if( terrainType == TerrainType.ROAD )
     {
-      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
       ss.addTerrainAffinity(TerrainType.BRIDGE);
       ss.addTerrainAffinity(TerrainType.HEADQUARTERS);
       ss.addTerrainAffinity(TerrainType.FACTORY);
     }
     else if( terrainType == TerrainType.SHOAL )
     {
-      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
       ss.addTileTransition(TerrainType.SEA, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
       ss.addTileTransition(TerrainType.GRASS, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
       ss.addTileTransition(TerrainType.BRIDGE, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
       ss.addTileTransition(TerrainType.RIVER, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
-    }
-    else
-    {
-      System.out.println("ERROR! [SpriteLibrary.loadTerrainSpriteSet] Unknown terrain type " + terrainType);
     }
 
     // If this tile is owned by someone, fly their colors.

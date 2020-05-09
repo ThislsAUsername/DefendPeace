@@ -8,6 +8,7 @@ import Engine.GameAction;
 import Engine.OptionSelector;
 import Engine.XYCoord;
 import Terrain.GameMap;
+import Units.Unit;
 
 /************************************************************
  * Handles converting user input into game actions.
@@ -151,11 +152,21 @@ public class GameInputHandler
   {
     return peekCurrentState().getOptions().getCoordinateOptions();
   }
-  
+
+  public XYCoord getUnitCoord()
+  {
+    return myStateData.unitCoord;
+  }
+
+  public Unit getActingUnit()
+  {
+    return myStateData.unitActor;
+  }
+
   public boolean shouldLeaveMap()
   {
     InputType action = getInputType();
-    return action == InputType.LEAVE_MAP; 
+    return action == InputType.LEAVE_MAP;
   }
 
   /************************************************************

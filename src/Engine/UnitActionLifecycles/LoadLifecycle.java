@@ -166,6 +166,9 @@ public abstract class LoadLifecycle
       if( null != unitTransport && unitTransport.hasCargoSpace(unitCargo.model.role) )
       {
         gameMap.removeUnit(unitCargo);
+        unitCargo.x = -1;
+        unitCargo.y = -1;
+        unitTransport.heldUnits.remove(unitCargo); // Make sure we can't double-load
         unitTransport.heldUnits.add(unitCargo);
       }
       else

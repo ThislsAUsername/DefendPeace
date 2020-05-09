@@ -112,7 +112,7 @@ public abstract class UnitModel implements Serializable
     idleFuelBurn = pIdleFuelBurn;
     visionRange = pVision;
     movePower = pMovePower;
-    propulsion = new MoveType(pPropulsion);
+    propulsion = pPropulsion.clone();
 
     for( TerrainType terrain : TerrainType.TerrainTypeList )
     {
@@ -235,6 +235,19 @@ public abstract class UnitModel implements Serializable
       }
     }
     return hasSiege;
+  }
+  public boolean hasMobileWeapon()
+  {
+    boolean hasStrike = false;
+    for( WeaponModel wm : weapons )
+    {
+      if( wm.canFireAfterMoving )
+      {
+        hasStrike = true;
+        break;
+      }
+    }
+    return hasStrike;
   }
 
   @Override

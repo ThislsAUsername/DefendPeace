@@ -33,13 +33,14 @@ public class AIUtils
    * @return a Map of XYCoord to ArrayList<GameActionSet>. Each XYCoord will have a GameActionSet for
    * each type of action the unit can perform from that location.
    */
-  public static Map<XYCoord, ArrayList<GameActionSet> > getAvailableUnitActions(Unit unit, GameMap gameMap)
+  public static Map<XYCoord, ArrayList<GameActionSet> >
+                getAvailableUnitActions(Unit unit, GameMap gameMap)
   {
+    boolean includeOccupiedDestinations = true;
     Map<XYCoord, ArrayList<GameActionSet> > actions = new HashMap<XYCoord, ArrayList<GameActionSet> >();
 
     // Find the possible destinations.
-    boolean includeTransports = true;
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeTransports);
+    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedDestinations);
 
     for( XYCoord coord : destinations )
     {
@@ -58,6 +59,7 @@ public class AIUtils
 
   /**
    * Finds all actions available to unit, and organizes them by type instead of by location.
+   * Assumes caller isn't interested in moving into units' current spaces
    * @param unit The unit under consideration.
    * @param gameMap The world in which the Unit lives.
    * @return a Map of ActionType to ArrayList<GameAction>.
@@ -170,11 +172,11 @@ public class AIUtils
 
     // Find the full path that would get this unit to the destination, regardless of how long. 
     Path path = Utils.findShortestPath(unit, destination, gameMap, true);
-    if( path.getPathLength() > 0 ) // Check that the destination is reachable at least in theory.
+    ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, false); // Find the valid moves we can make.
+
+    if( path.getPathLength() > 0 && validMoves.size() > 0 ) // Check that the destination is reachable at least in theory.
     {
-      path.snip(unit.model.movePower+1); // Trim the path so we don't try to walk through walls.
-      boolean includeTransports = false;
-      ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, includeTransports); // Find the valid moves we can make.
+      path.snip(unit.model.movePower+1); // Trim the path so we go the right immediate direction.
       Utils.sortLocationsByDistance(path.getEndCoord(), validMoves); // Sort moves based on intermediate destination. 
       move = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, validMoves.get(0), gameMap)); // Move to best option.
     }
@@ -227,7 +229,8 @@ public class AIUtils
   {
     XYCoord origin = new XYCoord(unit.x, unit.y);
     Map<XYCoord, Double> shootableTiles = new HashMap<XYCoord, Double>();
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
+    boolean includeOccupiedDestinations = true; // We assume the enemy knows how to manage positioning within his turn
+    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedDestinations);
     for( WeaponModel wep : unit.model.weapons )
     {
       if( wep.getDamage(target) > 0 )
