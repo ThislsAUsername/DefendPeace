@@ -97,8 +97,8 @@ public class CombatEngine
   public static BattleParams buildSimpleAttack( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
   {
     return new BattleParams(
-        new Combatant(attacker, attacker.chooseWeapon(defender.model, battleRange, attackerMoved), attacker.x, attacker.x),
-        new Combatant(defender, null, defender.x, defender.x),
+        new Combatant(attacker, attacker.chooseWeapon(defender.model, battleRange, attackerMoved), attacker.x, attacker.y),
+        new Combatant(defender, null, defender.x, defender.y),
         map, battleRange,
         attacker.model.getDamageRatio(), attacker.getHP(),
         defender.model.getDefenseRatio(), terrainStars,

@@ -125,7 +125,11 @@ public class Muriel implements AIController
   private UnitMatchupAndMetaInfo getUnitMatchupInfo(UnitModel myModel, UnitModel otherModel)
   {
     Unit myUnit = new Unit(myCo, myModel);
+    myUnit.x = 0;
+    myUnit.y = 0;
     Unit otherUnit = new Unit( myCo, otherModel );
+    otherUnit.x = 0;
+    otherUnit.y = 0;
     return getUnitMatchupInfo(myUnit, otherUnit);
   }
 

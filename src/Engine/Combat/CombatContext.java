@@ -39,9 +39,9 @@ public class CombatContext
     // Air units shouldn't get terrain defense
     // getDefLevel returns the number of terrain stars. Since we're using %Def, we need to multiply by 10. However, we do that when we multiply by HP in calculateDamage.
     if( !attacker.model.isAirUnit() )
-      attackerTerrainStars = map.getEnvironment(defenderX, defenderX).terrainType.getDefLevel();
+      attackerTerrainStars = map.getEnvironment(attackerX, attackerY).terrainType.getDefLevel();
     if( !defender.model.isAirUnit() )
-      defenderTerrainStars = map.getEnvironment(defenderX, defenderX).terrainType.getDefLevel();
+      defenderTerrainStars = map.getEnvironment(defenderX, defenderY).terrainType.getDefLevel();
 
     // let the COs fool around with anything they want...
     pAttacker.CO.changeCombatContext(this);
