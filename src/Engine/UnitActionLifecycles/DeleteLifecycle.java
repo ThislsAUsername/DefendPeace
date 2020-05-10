@@ -40,6 +40,15 @@ public abstract class DeleteLifecycle
     {
       return "DELETE";
     }
+
+    /**
+     * From Serializable interface
+     * @return The statically-defined object to use for this action type.
+     */
+    private Object readResolve()
+    {
+      return DELETE;
+    }
   } // ~factory
 
   public static class DeleteAction implements GameAction

@@ -53,9 +53,10 @@ public class Utils
     ArrayList<XYCoord> targets = new ArrayList<XYCoord>();
     for( XYCoord loc : locations )
     {
-      if( map.getLocation(loc).getResident() != null && // Someone is there.
-          map.getLocation(loc).getResident().CO.isEnemy(co) && // They are not friendly.
-          weapon.getDamage(map.getLocation(loc).getResident().model) > 0 ) // We can shoot them.
+      Unit resident = map.getLocation(loc).getResident();
+      if( resident != null && // Peeps are there.
+          resident.CO.isEnemy(co) && // They are not friendly.
+          weapon.getDamage(resident.model) > 0 ) // We can shoot them.
       {
         targets.add(loc);
       }
