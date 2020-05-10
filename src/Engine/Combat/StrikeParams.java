@@ -91,8 +91,6 @@ public class StrikeParams
           isCounter);
       this.defender = defender;
 
-      this.attackPower = attackPower;
-
       this.defensePower = defensePower;
       this.terrainStars = terrainStars;
       defenderHP = defender.body.getHP();
