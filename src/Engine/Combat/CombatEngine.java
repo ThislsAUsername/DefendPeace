@@ -78,7 +78,7 @@ public class CombatEngine
     if( context.canCounter && (context.defender.getPreciseHP() > defenderHPLoss) )
     {
       // New battle instance with defender counter-attacking.
-      double counterHP = Math.ceil(defender.getPreciseHP() - defenderHPLoss); // Account for the first attack's damage to the now-attacker.
+      double counterHP = Math.ceil(context.defender.getPreciseHP() - defenderHPLoss); // Account for the first attack's damage to the now-attacker.
       BattleParams defendInstance = StrikeParams.getCounterAttack(context, counterHP);
 
       attackerHPLoss = defendInstance.calculateDamage();
