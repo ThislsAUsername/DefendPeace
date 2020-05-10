@@ -1,6 +1,7 @@
 package Engine.UnitActionLifecycles;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import Engine.GameAction;
 import Engine.GameActionSet;
@@ -37,7 +38,7 @@ public abstract class BattleLifecycle
         // Evaluate attack options.
         {
           boolean moved = !moveLocation.equals(actor.x, actor.y);
-          ArrayList<GameAction> attackOptions = new ArrayList<GameAction>();
+          HashSet<XYCoord> allWeaponTargets = new HashSet<XYCoord>();
           for( WeaponModel wpn : actor.model.weapons )
           {
             // Evaluate this weapon for targets if it has ammo, and if either the weapon
@@ -46,16 +47,18 @@ public abstract class BattleLifecycle
             {
               ArrayList<XYCoord> locations = Utils.findTargetsInRange(map, actor.CO, moveLocation, wpn);
 
-              for( XYCoord loc : locations )
-              {
-                attackOptions.add(new BattleAction(map, actor, movePath, loc));
-              }
+              allWeaponTargets.addAll(locations);
             }
           } // ~Weapon loop
 
           // Only add this action set if we actually have a target
-          if( !attackOptions.isEmpty() )
+          if( !allWeaponTargets.isEmpty() )
           {
+            ArrayList<GameAction> attackOptions = new ArrayList<GameAction>();
+            for( XYCoord loc : allWeaponTargets )
+            {
+              attackOptions.add(new BattleAction(map, actor, movePath, loc));
+            }
             // Bundle our attack options into an action set
             return new GameActionSet(attackOptions);
           }
