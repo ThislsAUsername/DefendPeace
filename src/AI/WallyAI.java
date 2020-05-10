@@ -24,6 +24,7 @@ import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Engine.UnitActionLifecycles.BattleLifecycle;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
+import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -254,8 +255,9 @@ public class WallyAI implements AIController
           {
             for( GameAction action : actionSet.getGameActions() )
             {
-              Unit target = gameMap.getLocation(action.getTargetLocation()).getResident();
-              double damage = target.model.getCost() * Math.min(target.getPreciseHP(), CombatEngine.simulateBattleResults(unit, target, gameMap, unit.x, unit.y).defenderHPLoss);
+              Location loc = gameMap.getLocation(action.getTargetLocation());
+              Unit target = loc.getResident();
+              double damage = valueUnit(target, loc, false) * Math.min(target.getHP(), CombatEngine.simulateBattleResults(unit, target, gameMap, unit.x, unit.y).defenderHPLoss);
               if( damage > bestDamage )
               {
                 bestDamage = damage;
@@ -395,6 +397,7 @@ public class WallyAI implements AIController
       {
         Unit unit = unitQueue.poll();
         XYCoord position = new XYCoord(unit.x, unit.y);
+        Location unitLoc = gameMap.getLocation(position);
 
         boolean foundAction = false;
 
@@ -428,19 +431,23 @@ public class WallyAI implements AIController
             {
               for( GameAction ga : actionSet.getGameActions() )
               {
-                Location loc = gameMap.getLocation(ga.getTargetLocation());
-                Unit target = loc.getResident();
-                double damage = CombatEngine.simulateBattleResults(unit, target, gameMap, moveCoord.xCoord,
-                    moveCoord.yCoord).defenderHPLoss;
+                Location targetLoc = gameMap.getLocation(ga.getTargetLocation());
+                Unit target = targetLoc.getResident();
+                BattleSummary results = CombatEngine.simulateBattleResults(unit, target, gameMap, moveCoord.xCoord,
+                    moveCoord.yCoord);
+                double loss   = Math.min(unit  .getHP(), (int)results.attackerHPLoss);
+                double damage = Math.min(target.getHP(), (int)results.defenderHPLoss);
                 
                 boolean goForIt = false;
-                if( target.model.getCost() * damage * AGGRO_FUNDS_WEIGHT > unit.model.getCost() * unit.getHP() )
+                if( valueUnit(target, targetLoc, false) * Math.floor(damage) * AGGRO_FUNDS_WEIGHT > valueUnit(unit, unitLoc, true) )
                 {
                   log(String.format("  %s is going aggro on %s", unit.toStringWithLocation(), target.toStringWithLocation()));
                   log(String.format("    He plans to deal %s HP damage for a net gain of %s funds", damage, (target.model.getCost() * damage - unit.model.getCost() * unit.getHP())/10));
                   goForIt = true;
                 }
-                else if( !unit.CO.unitProductionByTerrain.containsKey(gameMap.getEnvironment(moveCoord).terrainType) && isSafe(gameMap, threatMap, unit, ga.getMoveLocation()) )
+                else if( damage > loss
+                       && !unit.CO.unitProductionByTerrain.containsKey(gameMap.getEnvironment(moveCoord).terrainType)
+                       && isSafe(gameMap, threatMap, unit, ga.getMoveLocation()) )
                 {
                   log(String.format("  %s thinks it's safe to attack %s", unit.toStringWithLocation(), target.toStringWithLocation()));
                   goForIt = true;
@@ -585,7 +592,7 @@ public class WallyAI implements AIController
       {
         Location loc = gameMap.getLocation(coord);
         if( (loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS || TerrainType.LAB == loc.getEnvironment().terrainType)
-            && loc.getOwner() != null)
+            && myCo.isEnemy(loc.getOwner()) )
         {
           goals.add(coord);
         }
@@ -673,6 +680,7 @@ public class WallyAI implements AIController
                   double damage = Math.min(target.getHP(), (int)results.defenderHPLoss);
                   if( damage > bestDamage && damage > loss ) // only shoot that which you hurt more than it hurts you
                   {
+                    log(String.format("      Best en passant attack deals %s in exchange for %s", damage, loss));
                     bestDamage = damage;
                     action = attack;
                   }
@@ -681,7 +689,7 @@ public class WallyAI implements AIController
             }
 
             if( null == action ) // Just wait if we can't do anything cool
-             action = actionSets.get(0).getSelected();
+             action = new WaitLifecycle.WaitAction(unit, movePath);
             actions.offer(action);
             return true;
           }
@@ -721,7 +729,7 @@ public class WallyAI implements AIController
       {
         Unit resident = loc.getResident();
         if( resident != null && !myCo.isEnemy(resident.CO) 
-            && resident.model.getCost() * resident.getHP() > unit.model.getCost() * unit.getHP() )
+            && valueUnit(resident, loc, true) > valueUnit(unit, destination, true) )
         {
           return true;
         }
@@ -791,6 +799,18 @@ public class WallyAI implements AIController
     }
 
     return damage;
+  }
+
+  private static int valueUnit(Unit unit, Location locale, boolean includeCurrentHealth)
+  {
+    int value = unit.model.getCost();
+
+    if (includeCurrentHealth)
+      value *= unit.getHP();
+    value *= (unit.getCaptureProgress() > 0 && locale.isCaptureable())? 8 : 1; // Strongly value capturing units
+    value -= locale.getEnvironment().terrainType.getDefLevel(); // Value things on lower terrain more, so we wall for equal units if we can get on better terrain
+
+    return value;
   }
 
   /**
