@@ -16,7 +16,7 @@ public class DoRWeapons
     SUBTORPEDOES, CARRIERMGUN, BATTLESHIPCANNON,
   };
   
-  protected final static boolean USE_AMMO = true;
+  protected final static boolean USE_AMMO = false;
 
   private static class DoRWeapon extends WeaponModel
   {

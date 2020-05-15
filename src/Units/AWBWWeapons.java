@@ -13,7 +13,7 @@ public class AWBWWeapons
     CARRIERMISSILES, BATTLESHIPCANNON, CRUISERTORPEDOES, CRUISERMGUN, SUBTORPEDOES
   };
   
-  protected final static boolean USE_AMMO = true;
+  protected final static boolean USE_AMMO = false;
 
   private static class AWBWWeapon extends WeaponModel
   {
