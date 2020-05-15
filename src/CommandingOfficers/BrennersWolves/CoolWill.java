@@ -7,8 +7,6 @@ import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import Terrain.MapMaster;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
-import Units.Weapons.WeaponModel;
 
 public class CoolWill extends Commander
 {
@@ -38,24 +36,10 @@ public class CoolWill extends Commander
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
-      if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )
-      {
-        if( um.weaponModels != null )
-        {
-          boolean buff = false;
-          for( WeaponModel pewpew : um.weaponModels )
-          {
-            if( pewpew.canFireAfterMoving )
-            {
-              buff = true;
-            }
-          }
-          if( buff )
-            um.modifyDamageRatio(20);
-        }
-      }
+      if( um.isLandUnit() && um.hasMobileWeapon() )
+        um.modifyDamageRatio(20);
     }
 
     addCommanderAbility(new GoFast(this, "Rally Cry", 2, 1));
@@ -82,23 +66,11 @@ public class CoolWill extends Commander
     protected void perform(MapMaster gameMap)
     {
       COMovementModifier moveMod = new COMovementModifier(power);
-      for( UnitModel um : myCommander.unitModels.values() )
+      for( UnitModel um : myCommander.unitModels )
       {
-        if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )
+        if( um.isLandUnit() && um.hasMobileWeapon() )
         {
-          if( um.weaponModels != null )
-          {
-            boolean buff = false;
-            for( WeaponModel pewpew : um.weaponModels )
-            {
-              if( pewpew.canFireAfterMoving )
-              {
-                buff = true;
-              }
-            }
-            if( buff )
-              moveMod.addApplicableUnitModel(um);
-          }
+          moveMod.addApplicableUnitModel(um);
         }
       }
       myCommander.addCOModifier(moveMod);

@@ -7,8 +7,6 @@ import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.IndirectRangeBoostModifier;
 import Terrain.MapMaster;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
-import Units.Weapons.WeaponModel;
 
 public class Gage extends Commander
 {
@@ -38,22 +36,9 @@ public class Gage extends Commander
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
-      boolean buff = false;
-      if( um.chassis == ChassisEnum.SHIP || um.chassis == ChassisEnum.SUBMERGED )
-        buff = true;
-      if( !buff && um.weaponModels != null )
-      {
-        for( WeaponModel pewpew : um.weaponModels )
-        {
-          if( !pewpew.canFireAfterMoving )
-          {
-            buff = true;
-          }
-        }
-      }
-      if( buff )
+      if( um.isSeaUnit() | um.hasIndirectFireWeapon() )
       {
         um.modifyDamageRatio(20);
         um.modifyDefenseRatio(10);

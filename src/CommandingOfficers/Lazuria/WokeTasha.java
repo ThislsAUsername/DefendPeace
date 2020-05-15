@@ -7,7 +7,6 @@ import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import Terrain.MapMaster;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
 
 public class WokeTasha extends Commander
 {
@@ -37,9 +36,9 @@ public class WokeTasha extends Commander
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
-      if( um.chassis == ChassisEnum.AIR_HIGH || um.chassis == ChassisEnum.AIR_LOW )
+      if( um.isAirUnit() )
       {
         um.modifyDamageRatio(40);
         um.modifyDefenseRatio(15);
@@ -70,9 +69,9 @@ public class WokeTasha extends Commander
     protected void perform(MapMaster gameMap)
     {
       COMovementModifier airMoveMod = new COMovementModifier(power);
-      for( UnitModel um : myCommander.unitModels.values() )
+      for( UnitModel um : myCommander.unitModels )
       {
-        if( um.chassis == ChassisEnum.AIR_HIGH ||  um.chassis == ChassisEnum.AIR_LOW)
+        if( um.isAirUnit() )
         {
           airMoveMod.addApplicableUnitModel(um);
         }

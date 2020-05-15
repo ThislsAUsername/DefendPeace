@@ -49,7 +49,7 @@ public class OmegaCaulder extends TabithaEngine
   {
     super(MEGA_ATK, MEGA_DEF, coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
       for( TerrainType terrain : TerrainType.TerrainTypeList )
       {

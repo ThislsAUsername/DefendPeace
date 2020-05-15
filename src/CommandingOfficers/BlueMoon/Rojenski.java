@@ -1,13 +1,15 @@
 package CommandingOfficers.BlueMoon;
 
 import Engine.GameScenario;
+import Engine.Combat.BattleInstance.BattleParams;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.IndirectRangeBoostModifier;
 import Terrain.MapMaster;
+import Units.Unit;
 import Units.UnitModel;
-import Units.Weapons.WeaponModel;
+import Units.WeaponModel;
 
 public class Rojenski extends Commander
 {
@@ -20,10 +22,11 @@ public class Rojenski extends Commander
     {
       super("Rojenski");
       infoPages.add(new InfoPage(
-          "--Rojenski (rebalanced Grit)--\r\n" + 
-          "Indirects gain +20% firepower and +1 range, everything else loses -20% firepower.\r\n" + 
-          "xxxXXX\r\n" + 
-          "LONG SHOT: All indirects gain +1 range.\r\n" + 
+          "--Rojenski (rebalanced Grit)--\r\n" +
+          "  Indirects gain +1 range.\r\n" +
+          "  +20% firepower in indirect combat, -20% firepower in direct combat.\r\n" +
+          "xxxXXX\r\n" +
+          "LONG SHOT: All indirects gain +1 range.\r\n" +
           "LONG BARREL: All indirects gain +2 range."));
     }
     @Override
@@ -32,37 +35,48 @@ public class Rojenski extends Commander
       return new Rojenski(rules);
     }
   }
+  
+  public int indirectBuff = 20;
 
   public Rojenski(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
-      boolean buff = false;
-      if( !buff && um.weaponModels != null )
+      for( WeaponModel pewpew : um.weapons )
       {
-        for( WeaponModel pewpew : um.weaponModels )
+        if( pewpew.maxRange > 1 )
         {
-          if( pewpew.maxRange > 1 )
-          {
-            pewpew.maxRange += 1;
-            buff = true;
-          }
+          pewpew.maxRange += 1;
         }
-      }
-      if( buff )
-      {
-        um.modifyDamageRatio(20);
-      }
-      else
-      {
-        um.modifyDamageRatio(-20);
       }
     }
 
     addCommanderAbility(new RangeBonus(this, "Long Shot", 3, 1));
     addCommanderAbility(new RangeBonus(this, "Long Barrel", 6, 2));
+  }
+
+  @Override
+  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  {
+    Unit minion = null;
+    if( params.attacker.CO == this )
+    {
+      minion = params.attacker;
+    }
+
+    if( null != minion )
+    {
+      if( params.combatRef.battleRange == 1 )
+      {
+        params.attackFactor -= 20;
+      }
+      else
+      {
+        params.attackFactor += indirectBuff;
+      }
+    }
   }
 
   public static CommanderInfo getInfo()

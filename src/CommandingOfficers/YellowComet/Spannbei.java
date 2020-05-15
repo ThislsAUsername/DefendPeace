@@ -43,7 +43,7 @@ public class Spannbei extends Commander
 
     new CODamageModifier(30).applyChanges(this);
     new CODefenseModifier(30).applyChanges(this);
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
       um.COcost = 1.5;
     }

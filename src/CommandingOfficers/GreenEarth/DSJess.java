@@ -9,7 +9,6 @@ import CommandingOfficers.Modifiers.COMovementModifier;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
 
 public class DSJess extends Commander
 {
@@ -23,8 +22,8 @@ public class DSJess extends Commander
       super("DS Jess");
       infoPages.add(new InfoPage(
           "DS Jess\r\n" + 
-          "  Vehicles gain +20% attack, but all other vehicles lose -10% attack\r\n" + 
-          "Turbo Charge -- All units resupply; vehicles gain +20% attack and +1 Movement\r\n" + 
+          "  Ground vehicles gain +20% attack, but all other vehicles lose -10% attack\r\n" +
+          "Turbo Charge -- All units resupply; vehicles gain +20% attack and +1 Movement\r\n" +
           "Overdrive -- All units resupply; vehicles gain +40% attack and +2 Movement"));
     }
     @Override
@@ -38,13 +37,13 @@ public class DSJess extends Commander
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
-      if( um.chassis == ChassisEnum.TANK)
+      if( um.isAny(UnitModel.TANK) )
       {
         um.modifyDamageRatio(20);
       }
-      else if( um.chassis != ChassisEnum.TROOP)
+      else if( um.isNone(UnitModel.TROOP) )
       {
         um.modifyDamageRatio(-10);
       }
@@ -79,9 +78,9 @@ public class DSJess extends Commander
       }
       CODamageModifier landPowerMod = new CODamageModifier(20);
       COMovementModifier landMoveMod = new COMovementModifier(1);
-      for( UnitModel um : myCommander.unitModels.values() )
+      for( UnitModel um : myCommander.unitModels )
       {
-        if( um.chassis == ChassisEnum.TANK)
+        if( um.isAny(UnitModel.TANK) )
         {
           landPowerMod.addApplicableUnitModel(um);
           landMoveMod.addApplicableUnitModel(um);
@@ -113,9 +112,9 @@ public class DSJess extends Commander
       }
       CODamageModifier landPowerMod = new CODamageModifier(40);
       COMovementModifier landMoveMod = new COMovementModifier(2);
-      for( UnitModel um : myCommander.unitModels.values() )
+      for( UnitModel um : myCommander.unitModels )
       {
-        if( um.chassis == ChassisEnum.TANK)
+        if( um.isAny(UnitModel.TANK) )
         {
           landPowerMod.addApplicableUnitModel(um);
           landMoveMod.addApplicableUnitModel(um);

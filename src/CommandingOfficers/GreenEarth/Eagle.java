@@ -9,7 +9,6 @@ import CommandingOfficers.Modifiers.CODefenseModifier;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
 
 public class Eagle extends Commander
 {
@@ -38,15 +37,15 @@ public class Eagle extends Commander
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
-      if( um.chassis == ChassisEnum.AIR_HIGH || um.chassis == ChassisEnum.AIR_LOW )
+      if( um.isAirUnit() )
       {
         um.modifyDamageRatio(15);
         um.modifyDefenseRatio(10);
         um.idleFuelBurn -= 2;
       }
-      if( um.chassis == ChassisEnum.SHIP || um.chassis == ChassisEnum.SUBMERGED )
+      if( um.isSeaUnit() )
       {
         um.modifyDamageRatio(-30);
       }
@@ -76,16 +75,18 @@ public class Eagle extends Commander
     protected void perform(MapMaster gameMap)
     {
       CODamageModifier airPowerMod = new CODamageModifier(5);
-      airPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.B_COPTER));
-      airPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.T_COPTER));
-      airPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.FIGHTER));
-      airPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.BOMBER));
-      myCommander.addCOModifier(airPowerMod);
       CODefenseModifier airDefMod = new CODefenseModifier(10);
-      airDefMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.B_COPTER));
-      airDefMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.T_COPTER));
-      airDefMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.FIGHTER));
-      airDefMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.BOMBER));
+
+      for( UnitModel um : myCommander.unitModels )
+      {
+        if( um.isAirUnit() )
+        {
+          airPowerMod.addApplicableUnitModel(um);
+          airDefMod.  addApplicableUnitModel(um);
+        }
+      }
+
+      myCommander.addCOModifier(airPowerMod);
       myCommander.addCOModifier(airDefMod);
     }
   }
@@ -108,22 +109,25 @@ public class Eagle extends Commander
     {
       for( Unit unit : myCommander.units )
       {
-        if( unit.model.chassis != ChassisEnum.TROOP ) 
+        if( unit.model.isNone(UnitModel.TROOP) )
         {
           unit.isTurnOver = false;
         }
       }
+
       CODamageModifier airPowerMod = new CODamageModifier(5);
-      airPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.B_COPTER));
-      airPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.T_COPTER));
-      airPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.FIGHTER));
-      airPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.BOMBER));
-      myCommander.addCOModifier(airPowerMod);
       CODefenseModifier airDefMod = new CODefenseModifier(10);
-      airDefMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.B_COPTER));
-      airDefMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.T_COPTER));
-      airDefMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.FIGHTER));
-      airDefMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.BOMBER));
+
+      for( UnitModel um : myCommander.unitModels )
+      {
+        if( um.isAirUnit() )
+        {
+          airPowerMod.addApplicableUnitModel(um);
+          airDefMod.  addApplicableUnitModel(um);
+        }
+      }
+
+      myCommander.addCOModifier(airPowerMod);
       myCommander.addCOModifier(airDefMod);
     }
   }

@@ -44,7 +44,7 @@ public class Creed extends Commander
   @Override
   public GameEventQueue initTurn(MapMaster map)
   {
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
       um.COcost = 0.5;
     }
@@ -80,10 +80,9 @@ public class Creed extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      UnitProductionModifier upm = new UnitProductionModifier(TerrainType.CITY,
-          myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
+      UnitProductionModifier upm = new UnitProductionModifier();
 
-      for( UnitModel um : myCommander.unitModels.values() )
+      for( UnitModel um : myCommander.unitModels )
       {
         upm.addProductionPair(TerrainType.CITY, um);
       }

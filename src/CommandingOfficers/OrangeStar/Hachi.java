@@ -9,7 +9,6 @@ import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
 
 public class Hachi extends Commander
 {
@@ -45,7 +44,7 @@ public class Hachi extends Commander
   @Override
   public GameEventQueue initTurn(MapMaster map)
   {
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
       um.COcost = 0.9;
     }
@@ -73,7 +72,7 @@ public class Hachi extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      for( UnitModel um : myCommander.unitModels.values() )
+      for( UnitModel um : myCommander.unitModels )
       {
         um.COcost = VALUE;
       }
@@ -96,13 +95,12 @@ public class Hachi extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      UnitProductionModifier upm = new UnitProductionModifier(TerrainType.CITY,
-          myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
+      UnitProductionModifier upm = new UnitProductionModifier();
 
-      for( UnitModel um : myCommander.unitModels.values() )
+      for( UnitModel um : myCommander.unitModels )
       {
         um.COcost = VALUE;
-        if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )
+        if( um.isLandUnit() )
           upm.addProductionPair(TerrainType.CITY, um);
       }
 

@@ -10,8 +10,7 @@ import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
-import Units.Weapons.WeaponModel;
+import Units.WeaponModel;
 
 public class Grit extends Commander
 {
@@ -24,8 +23,10 @@ public class Grit extends Commander
     {
       super("Grit");
       infoPages.add(new InfoPage(
-          "Grit\r\n" + 
-          "  Indirect units have +1 range and gain +20% attack. Direct units lose -20% attack (footsoldiers are normal)\r\n" + 
+          "Grit\r\n" +
+           "  Indirects gain +1 range.\r\n" +
+           "  +20% firepower in indirect combat\r\n" +
+           "  -20% firepower in non-footsoldier direct combat.\r\n" +
           "Snipe Attack -- Indirect units gain +1 Range and +20% attack\r\n" + 
           "Super Snipe -- Indirect units gain +2 Range and +20% attack"));
     }
@@ -42,9 +43,9 @@ public class Grit extends Commander
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
-      for( WeaponModel pewpew : um.weaponModels )
+      for( WeaponModel pewpew : um.weapons )
       {
         if( pewpew.maxRange > 1 )
         {
@@ -80,7 +81,7 @@ public class Grit extends Commander
 
     if( null != minion )
     {
-      if( params.combatRef.battleRange == 1 && minion.model.chassis != ChassisEnum.TROOP )
+      if( params.combatRef.battleRange == 1 && minion.model.isNone(UnitModel.TROOP) )
       {
         params.attackFactor -= 20;
       }

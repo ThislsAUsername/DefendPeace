@@ -10,8 +10,7 @@ import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
-import Units.Weapons.WeaponModel;
+import Units.WeaponModel;
 
 public class Max extends Commander
 {
@@ -24,9 +23,11 @@ public class Max extends Commander
     {
       super("Max");
       infoPages.add(new InfoPage(
-          "Max\r\n" + 
-          "  Direct units gain +20% attack. Indirect units lose -10% attack, and have -1 range\r\n" + 
-          "Max Force -- Direct units gain +1 Movement and their power increases by +10%\r\n" + 
+          "Max\r\n" +
+          "  Indirects lose -1 range.\r\n" +
+          "  +20% firepower in non-footsoldier direct combat.\r\n" +
+          "  -10% firepower in indirect combat\r\n" +
+          "Max Force -- Direct units gain +1 Movement and their power increases by +10%\r\n" +
           "Max Blast -- Direct Units gain +2 Movement and their power increases by +30%"));
     }
     @Override
@@ -42,11 +43,11 @@ public class Max extends Commander
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
-      if( um.weaponModels != null )
+      if( um.weapons != null )
       {
-        for( WeaponModel pewpew : um.weaponModels )
+        for( WeaponModel pewpew : um.weapons )
         {
           if( pewpew.maxRange > 1 )
           {
@@ -83,7 +84,7 @@ public class Max extends Commander
 
     if( null != minion )
     {
-      if( params.combatRef.battleRange == 1 && minion.model.chassis != ChassisEnum.TROOP )
+      if( params.combatRef.battleRange == 1 && minion.model.isNone(UnitModel.TROOP) )
       {
         params.attackFactor += directBuff;
       }
@@ -114,9 +115,9 @@ public class Max extends Commander
       COcast.directBuff += VALUE;
       COMovementModifier moveMod = new COMovementModifier(1);
 
-      for( UnitModel um : COcast.unitModels.values() )
+      for( UnitModel um : COcast.unitModels )
       {
-        if( um.chassis != ChassisEnum.TROOP && um.hasDirectFireWeapon() )
+        if( um.isNone(UnitModel.TROOP) && um.hasDirectFireWeapon() )
           moveMod.addApplicableUnitModel(um);
       }
 
@@ -145,9 +146,9 @@ public class Max extends Commander
 
       COMovementModifier moveMod = new COMovementModifier(2);
 
-      for( UnitModel um : COcast.unitModels.values() )
+      for( UnitModel um : COcast.unitModels )
       {
-        if( um.chassis != ChassisEnum.TROOP && um.hasDirectFireWeapon() )
+        if( um.isNone(UnitModel.TROOP) && um.hasDirectFireWeapon() )
           moveMod.addApplicableUnitModel(um);
       }
 

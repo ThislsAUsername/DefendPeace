@@ -1,26 +1,14 @@
 package CommandingOfficers.Assorted;
 
-import Engine.GameAction;
-import Engine.GameActionSet;
 import Engine.GameScenario;
-import Engine.Path;
 import Engine.UnitActionFactory;
-import Engine.XYCoord;
-import Engine.GameEvents.GameEvent;
-import Engine.GameEvents.GameEventListener;
-import Engine.GameEvents.GameEventQueue;
+import Engine.UnitActionLifecycles.UnitProduceLifecycle;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import Terrain.GameMap;
 import Terrain.MapMaster;
-import UI.MapView;
-import UI.Art.Animation.GameAnimation;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
-import Units.UnitModel.UnitEnum;
-import Units.Weapons.Weapon;
 
 public class Greyfield extends Commander
 {
@@ -47,13 +35,20 @@ public class Greyfield extends Commander
     }
   }
 
+  private static final long SEAPLANE_ROLE =
+        UnitModel.AIR_TO_SURFACE
+      | UnitModel.AIR_TO_AIR
+      | UnitModel.ASSAULT
+      | UnitModel.JET
+      | UnitModel.AIR_HIGH;
+
   public Greyfield(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
-      if ( um.type == UnitEnum.STEALTH || um.type == UnitEnum.STEALTH_HIDE)
+      if ( um.name.equalsIgnoreCase("stealth") )
       {
         um.possibleActions.clear();
         for( UnitActionFactory action : UnitActionFactory.COMBAT_VEHICLE_ACTIONS )
@@ -64,14 +59,23 @@ public class Greyfield extends Commander
         um.hidden = false;
         um.moneyCostAdjustment = -9000;
         um.movePower += 1;
+      }
+
+      boolean canBuild = false;
+      for( UnitActionFactory action : um.possibleActions )
+        if( action.name().contains("BUILD") )
+          canBuild = true;
+      if( (um.carryableMask & UnitModel.AIR_HIGH) > 0
+          && !canBuild )
+        um.possibleActions.add(0, new UnitProduceLifecycle.UnitProduceFactory(getUnitModel(SEAPLANE_ROLE)));
+
+      if ( um.isAll(SEAPLANE_ROLE) )
+      {
         um.modifyDamageRatio(10);
         um.modifyDefenseRatio(30);
       }
-      if ( um.type == UnitEnum.CARRIER)
-        um.possibleActions.add(new BuildSeaplane(this));
-      
-      if( um.chassis == ChassisEnum.SUBMERGED || um.chassis == ChassisEnum.SHIP ||
-          um.chassis == ChassisEnum.AIR_LOW )
+      if ( um.isSeaUnit()
+           || um.isAll(UnitModel.AIR_LOW) )
       {
         um.modifyDamageRatio(10);
         um.modifyDefenseRatio(30);
@@ -104,157 +108,14 @@ public class Greyfield extends Commander
     {
       for (Unit unit : myCommander.units)
       {
+        unit.materials = unit.model.maxMaterials;
         if( fuel )
           unit.fuel = unit.model.maxFuel;
         if( ammo )
-          for( Weapon w : unit.weapons )
-            w.reload();
+          unit.ammo = unit.model.maxAmmo;
       }
     }
   }
-  
-  
-  
-  
-  public static class BuildSeaplane extends UnitActionFactory
-  {
-    private static final long serialVersionUID = 1L;
-    final Commander payer;
-    final UnitModel seaplane;
-    public BuildSeaplane(Commander owner)
-    {
-      payer = owner;
-      seaplane = owner.getUnitModel(UnitEnum.STEALTH);
-    }
 
-    @Override
-    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
-    {
-      XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
-      if( moveLocation.equals(actor.x, actor.y) && actor.hasCargoSpace(seaplane.type) && payer.money > seaplane.getCost() )
-      {
-        return new GameActionSet(new BuildSeaplaneAction(this, actor), false);
-      }
-      return null;
-    }
-
-    @Override
-    public String name()
-    {
-      return "BUILD";
-    }
-  }
-
-  public static class BuildSeaplaneAction implements GameAction
-  {
-    final BuildSeaplane type;
-    final Unit actor;
-    final XYCoord destination;
-    public BuildSeaplaneAction(BuildSeaplane owner, Unit unit)
-    {
-      type = owner;
-      actor = unit;
-      destination = new XYCoord(unit.x, unit.y);
-    }
-
-    @Override
-    public GameEventQueue getEvents(MapMaster gameMap)
-    {
-      GameEventQueue eventSequence = new GameEventQueue();
-      eventSequence.add(new BuildSeaplaneEvent(type.payer, actor, type.seaplane));
-      return eventSequence;
-    }
-
-    @Override
-    public String toString()
-    {
-      return String.format("[Build seaplane with %s in place]", actor.toStringWithLocation());
-    }
-
-    @Override
-    public UnitActionFactory getType()
-    {
-      return type;
-    }
-
-    @Override
-    public XYCoord getMoveLocation()
-    {
-      return destination;
-    }
-
-    @Override
-    public XYCoord getTargetLocation()
-    {
-      return destination;
-    }
-  } // ~BuildSeaplaneAction
-
-  public static class BuildSeaplaneEvent implements GameEvent
-  {
-    private final Commander myCommander;
-    private Unit builder;
-    private final Unit myNewUnit;
-
-    public BuildSeaplaneEvent(Commander commander, Unit unit, UnitModel model)
-    {
-      myCommander = commander;
-      builder = unit;
-
-      // TODO: Consider breaking the fiscal part into its own event.
-      if( model.getCost() <= commander.money )
-      {
-        myNewUnit = new Unit(myCommander, model);
-      }
-      else
-      {
-        System.out.println("WARNING! Attempting to build unit with insufficient funds.");
-        myNewUnit = null;
-      }
-    }
-
-    @Override
-    public GameAnimation getEventAnimation(MapView mapView)
-    {
-      return null;
-    }
-
-    @Override
-    public void sendToListener(GameEventListener listener)
-    {
-      if( null != myNewUnit )
-      {
-        listener.receiveCreateUnitEvent(myNewUnit);
-      }
-    }
-
-    @Override
-    public void performEvent(MapMaster gameMap)
-    {
-      if( null != myNewUnit )
-      {
-        myCommander.money -= myNewUnit.model.getCost();
-        myCommander.units.add(myNewUnit);
-        builder.heldUnits.add(myNewUnit);
-        builder.isTurnOver = true;
-      }
-      else
-      {
-        System.out.println("Warning! Attempting to build unit with insufficient funds.");
-      }
-    }
-
-    @Override
-    public XYCoord getStartPoint()
-    {
-      return new XYCoord(builder.x, builder.y);
-    }
-
-    @Override
-    public XYCoord getEndPoint()
-    {
-      return new XYCoord(builder.x, builder.y);
-    }
-  }
 }
 

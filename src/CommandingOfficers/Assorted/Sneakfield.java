@@ -7,9 +7,6 @@ import CommandingOfficers.CommanderInfo;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
-import Units.UnitModel.UnitEnum;
-import Units.Weapons.Weapon;
 
 public class Sneakfield extends Commander
 {
@@ -34,19 +31,26 @@ public class Sneakfield extends Commander
     }
   }
 
+  private static final long SEAPLANE_ROLE =
+        UnitModel.AIR_TO_SURFACE
+      | UnitModel.AIR_TO_AIR
+      | UnitModel.ASSAULT
+      | UnitModel.JET
+      | UnitModel.AIR_HIGH;
+
   public Sneakfield(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
-      if ( um.type == UnitEnum.STEALTH || um.type == UnitEnum.STEALTH_HIDE)
+      if ( um.isAll(SEAPLANE_ROLE) )
       {
         um.modifyDamageRatio(10);
         um.modifyDefenseRatio(30);
       }
-      if( um.chassis == ChassisEnum.SUBMERGED || um.chassis == ChassisEnum.SHIP ||
-          um.chassis == ChassisEnum.AIR_LOW )
+      if ( um.isSeaUnit()
+           || um.isAll(UnitModel.AIR_LOW) )
       {
         um.modifyDamageRatio(10);
         um.modifyDefenseRatio(30);
@@ -79,11 +83,11 @@ public class Sneakfield extends Commander
     {
       for (Unit unit : myCommander.units)
       {
+        unit.materials = unit.model.maxMaterials;
         if( fuel )
           unit.fuel = unit.model.maxFuel;
         if( ammo )
-          for( Weapon w : unit.weapons )
-            w.reload();
+          unit.ammo = unit.model.maxAmmo;
       }
     }
   }

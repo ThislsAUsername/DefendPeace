@@ -2,16 +2,13 @@ package CommandingOfficers.Assorted;
 
 import Engine.GameScenario;
 import Engine.UnitActionFactory;
+import Engine.UnitActionLifecycles.UnitProduceLifecycle;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.Assorted.Greyfield.BuildSeaplane;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
-import Units.UnitModel.UnitEnum;
-import Units.Weapons.Weapon;
 
 public class Fastfield extends Commander
 {
@@ -38,13 +35,20 @@ public class Fastfield extends Commander
     }
   }
 
+  private static final long SEAPLANE_ROLE =
+        UnitModel.AIR_TO_SURFACE
+      | UnitModel.AIR_TO_AIR
+      | UnitModel.ASSAULT
+      | UnitModel.JET
+      | UnitModel.AIR_HIGH;
+
   public Fastfield(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
-      if ( um.type == UnitEnum.STEALTH || um.type == UnitEnum.STEALTH_HIDE)
+      if ( um.name.equalsIgnoreCase("stealth") )
       {
         um.possibleActions.clear();
         for( UnitActionFactory action : UnitActionFactory.COMBAT_VEHICLE_ACTIONS )
@@ -55,14 +59,23 @@ public class Fastfield extends Commander
         um.hidden = false;
         um.moneyCostAdjustment = -9000;
         um.movePower += 1;
+      }
+
+      boolean canBuild = false;
+      for( UnitActionFactory action : um.possibleActions )
+        if( action.name().contains("BUILD") )
+          canBuild = true;
+      if( (um.carryableMask & UnitModel.AIR_HIGH) > 0
+          && !canBuild )
+        um.possibleActions.add(0, new UnitProduceLifecycle.UnitProduceFactory(getUnitModel(SEAPLANE_ROLE)));
+
+      if ( um.isAll(SEAPLANE_ROLE) )
+      {
         um.modifyDamageRatio(10);
         um.modifyDefenseRatio(30);
       }
-      if ( um.type == UnitEnum.CARRIER)
-        um.possibleActions.add(new BuildSeaplane(this));
-      
-      if( um.chassis == ChassisEnum.SUBMERGED || um.chassis == ChassisEnum.SHIP ||
-          um.chassis == ChassisEnum.AIR_LOW )
+      if ( um.isSeaUnit()
+           || um.isAll(UnitModel.AIR_LOW) )
       {
         um.modifyDamageRatio(10);
         um.modifyDefenseRatio(30);
@@ -95,11 +108,11 @@ public class Fastfield extends Commander
     {
       for (Unit unit : myCommander.units)
       {
+        unit.materials = unit.model.maxMaterials;
         if( fuel )
           unit.fuel = unit.model.maxFuel;
         if( ammo )
-          for( Weapon w : unit.weapons )
-            w.reload();
+          unit.ammo = unit.model.maxAmmo;
       }
     }
   }

@@ -35,7 +35,7 @@ public class BillyGates extends Commander
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
       um.modifyDamageRatio(-10);
       um.modifyDefenseRatio(-10);

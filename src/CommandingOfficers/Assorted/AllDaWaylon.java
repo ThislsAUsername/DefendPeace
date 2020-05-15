@@ -7,7 +7,6 @@ import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Terrain.MapMaster;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
 
 public class AllDaWaylon extends Commander
 {
@@ -37,9 +36,9 @@ public class AllDaWaylon extends Commander
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
-      if( um.chassis == ChassisEnum.AIR_HIGH || um.chassis == ChassisEnum.AIR_LOW )
+      if( um.isAirUnit() )
       {
         um.modifyDamageRatio(20);
         um.modifyDefenseRatio(30);
@@ -70,9 +69,9 @@ public class AllDaWaylon extends Commander
     protected void perform(MapMaster gameMap)
     {
       CODefenseModifier airDefMod = new CODefenseModifier(power);
-      for( UnitModel um : myCommander.unitModels.values() )
+      for( UnitModel um : myCommander.unitModels )
       {
-        if( um.chassis == ChassisEnum.AIR_HIGH ||  um.chassis == ChassisEnum.AIR_LOW)
+        if( um.isAirUnit() )
         {
           airDefMod.addApplicableUnitModel(um);
         }

@@ -9,7 +9,6 @@ import CommandingOfficers.Modifiers.CODefenseModifier;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
 
 public class Davis extends Commander
 {
@@ -40,15 +39,15 @@ public class Davis extends Commander
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
-      if( um.chassis == ChassisEnum.AIR_HIGH || um.chassis == ChassisEnum.AIR_LOW )
+      if( um.isAirUnit() )
       {
         um.modifyDamageRatio(15);
         um.modifyDefenseRatio(10);
         um.idleFuelBurn -= 2;
       }
-      if( um.chassis == ChassisEnum.SHIP || um.chassis == ChassisEnum.SUBMERGED )
+      if( um.isSeaUnit() )
       {
         um.modifyDamageRatio(-20);
       }
@@ -79,7 +78,7 @@ public class Davis extends Commander
     {
       for( Unit unit : myCommander.units )
       {
-        if( unit.model.chassis != ChassisEnum.TROOP ) 
+        if( unit.model.isNone(UnitModel.TROOP) )
         {
           unit.isTurnOver = false;
         }

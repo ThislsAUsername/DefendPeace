@@ -8,7 +8,6 @@ import CommandingOfficers.Modifiers.COVisionModifier;
 import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 import Terrain.MapMaster;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
 
 public class Link extends TabithaEngine
 {
@@ -41,7 +40,7 @@ public class Link extends TabithaEngine
   public int getMegaBoostCount() {return 1;};
   @Override
   public boolean canBoost(UnitModel type)
-  {return type.chassis == ChassisEnum.TANK || type.chassis == ChassisEnum.TROOP;}
+  {return type.isLandUnit();}
 
   public Link(GameScenario.GameRules rules)
   {
@@ -67,9 +66,9 @@ public class Link extends TabithaEngine
     {
       // add vision +1 and piercing vision to land units
       COVisionModifier sightMod = new COVisionModifier(1);
-      for( UnitModel um : myCommander.unitModels.values() )
+      for( UnitModel um : myCommander.unitModels )
       {
-        if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )
+        if( um.isLandUnit() )
           sightMod.addApplicableUnitModel(um);
       }
       myCommander.addCOModifier(sightMod);
@@ -94,9 +93,9 @@ public class Link extends TabithaEngine
       super.perform(gameMap);
       // add vision +2 and piercing vision to land units
       GenericUnitModifier sightMod = new COVisionModifier(2);
-      for( UnitModel um : myCommander.unitModels.values() )
+      for( UnitModel um : myCommander.unitModels )
       {
-        if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )
+        if( um.isLandUnit() )
         {
           sightMod.addApplicableUnitModel(um);
         }

@@ -10,7 +10,6 @@ import CommandingOfficers.Modifiers.COVisionModifier;
 import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 import Terrain.MapMaster;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
 
 public class Lin extends Commander
 {
@@ -40,9 +39,9 @@ public class Lin extends Commander
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
-      if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP)
+      if( um.isLandUnit() )
       {
         um.modifyDamageRatio(10);
         um.modifyDefenseRatio(5);
@@ -74,9 +73,9 @@ public class Lin extends Commander
     {
       // add vision +1 and piercing vision to land units
       COVisionModifier sightMod = new COVisionModifier(1);
-      for( UnitModel um : myCommander.unitModels.values() )
+      for( UnitModel um : myCommander.unitModels )
       {
-        if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )
+        if( um.isLandUnit() )
           sightMod.addApplicableUnitModel(um);
       }
       myCommander.addCOModifier(sightMod);
@@ -102,9 +101,9 @@ public class Lin extends Commander
       GenericUnitModifier sightMod = new COVisionModifier(2);
       GenericUnitModifier powMod = new CODamageModifier(10);
       GenericUnitModifier defMod = new CODefenseModifier(10);
-      for( UnitModel um : myCommander.unitModels.values() )
+      for( UnitModel um : myCommander.unitModels )
       {
-        if( um.chassis == ChassisEnum.TANK || um.chassis == ChassisEnum.TROOP )
+        if( um.isLandUnit() )
         {
           sightMod.addApplicableUnitModel(um);
           powMod.addApplicableUnitModel(um);

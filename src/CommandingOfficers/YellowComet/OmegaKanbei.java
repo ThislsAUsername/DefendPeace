@@ -42,7 +42,7 @@ public class OmegaKanbei extends Commander
 
     new CODamageModifier(50).applyChanges(this);
     new CODefenseModifier(50).applyChanges(this);
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
       um.COcost = 1.4;
     }

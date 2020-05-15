@@ -40,28 +40,23 @@ public class Hetler extends Commander
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    COMovementModifier moveMod = new COMovementModifier();
+
+    for( UnitModel um : unitModels )
     {
-      switch (um.chassis)
-      {
-        case AIR_LOW:
-          um.modifyDamageRatio(50);
-          break;
-        case TROOP:
-          um.modifyDamageRatio(40);
-          break;
-        case AIR_HIGH:
-          break;
-        default:
+      if (um.isAny(UnitModel.AIR_LOW))
+        um.modifyDamageRatio(50);
+      if (um.isAny(UnitModel.TROOP))
+        um.modifyDamageRatio(40);
+      if (um.isNone(UnitModel.AIR_LOW
+                   | UnitModel.AIR_HIGH
+                   | UnitModel.TROOP))
           um.modifyDamageRatio(-10);
-          break;
-      }
+
+      if (um.isAny(UnitModel.TRANSPORT))
+        moveMod.addApplicableUnitModel(um);
     }
 
-    COMovementModifier moveMod = new COMovementModifier();
-    moveMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.APC));
-    moveMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.T_COPTER));
-    moveMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.LANDER));
     moveMod.applyChanges(this);
 
     addCommanderAbility(new CopterCommand(this));
@@ -88,7 +83,7 @@ public class Hetler extends Commander
     protected void perform(MapMaster gameMap)
     {
       CODamageModifier copterPowerMod = new CODamageModifier(15);
-      copterPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.B_COPTER));
+      copterPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.AIR_LOW | UnitModel.ASSAULT));
       myCommander.addCOModifier(copterPowerMod);
     }
   }
@@ -107,7 +102,7 @@ public class Hetler extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      UnitModel spawn = myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+      UnitModel spawn = myCommander.getUnitModel(UnitModel.TROOP);
       for( XYCoord xyc : myCommander.ownedProperties )
       {
         Location loc = gameMap.getLocation(xyc);
@@ -121,7 +116,7 @@ public class Hetler extends Commander
         }
       }
       CODamageModifier copterPowerMod = new CODamageModifier(15);
-      copterPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.B_COPTER));
+      copterPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.AIR_LOW | UnitModel.ASSAULT));
       myCommander.addCOModifier(copterPowerMod);
     }
   }

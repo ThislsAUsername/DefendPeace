@@ -221,6 +221,26 @@ public abstract class UnitModel implements Serializable
   }
 
   /**
+   * @return True if this UnitModel has at least one weapon with a maximum range over 1.
+   */
+  public boolean hasIndirectFireWeapon()
+  {
+    boolean hasIndirect = false;
+    if(weapons != null && weapons.size() > 0)
+    {
+      for( WeaponModel wm : weapons )
+      {
+        if( wm.maxRange > 1 )
+        {
+          hasIndirect = true;
+          break;
+        }
+      }
+    }
+    return hasIndirect;
+  }
+
+  /**
    * @return True if this UnitModel has at least one weapon that cannot fire after moving.
    */
   public boolean hasImmobileWeapon()

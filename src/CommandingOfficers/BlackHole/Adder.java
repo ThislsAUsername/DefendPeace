@@ -59,7 +59,7 @@ public class Adder extends Commander
     protected void perform(MapMaster gameMap)
     {
       COMovementModifier moveMod = new COMovementModifier(1);
-      for(UnitModel um : myCommander.unitModels.values())
+      for(UnitModel um : myCommander.unitModels)
       {
         moveMod.addApplicableUnitModel(um);
       }
@@ -82,7 +82,7 @@ public class Adder extends Commander
     protected void perform(MapMaster gameMap)
     {
       COMovementModifier moveMod = new COMovementModifier(2);
-      for(UnitModel um : myCommander.unitModels.values())
+      for(UnitModel um : myCommander.unitModels)
       {
         moveMod.addApplicableUnitModel(um);
       }

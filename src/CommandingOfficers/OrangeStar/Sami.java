@@ -12,8 +12,6 @@ import Terrain.MapMaster;
 import Terrain.Location;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
-import Units.Weapons.WeaponModel;
 
 public class Sami extends Commander
 {
@@ -42,34 +40,26 @@ public class Sami extends Commander
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    COMovementModifier moveMod = new COMovementModifier();
+
+    for( UnitModel um : unitModels )
     {
-      if( um.chassis == ChassisEnum.TROOP )
+      if( um.isAny(UnitModel.TROOP) )
       {
         um.modifyDamageRatio(30);
       }
       else // if you're not a footsoldier and you have direct attacks, get debuffed
       {
-        if( um.weaponModels != null )
+        if( um.hasDirectFireWeapon() )
         {
-          boolean debuff = false;
-          for( WeaponModel pewpew : um.weaponModels )
-          {
-            if( pewpew.maxRange == 1 )
-            {
-              debuff = true;
-            }
-          }
-          if( debuff )
-            um.modifyDamageRatio(-10);
+          um.modifyDamageRatio(-10);
         }
       }
+
+      if (um.isAny(UnitModel.TRANSPORT))
+        moveMod.addApplicableUnitModel(um);
     }
 
-    COMovementModifier moveMod = new COMovementModifier();
-    moveMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.APC));
-    moveMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.T_COPTER));
-    moveMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.LANDER));
     moveMod.applyChanges(this);
 
     addCommanderAbility(new DoubleTime(this));
@@ -110,12 +100,18 @@ public class Sami extends Commander
     {
       // Grant foot-soldiers additional firepower.
       CODamageModifier infPowerMod = new CODamageModifier(POWER);
-      infPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
-      infPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
-      myCommander.addCOModifier(infPowerMod);
       COMovementModifier infmoveMod = new COMovementModifier(1);
-      infmoveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
-      infmoveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
+
+      for( UnitModel um : myCommander.unitModels )
+      {
+        if( um.isAny(UnitModel.TROOP) )
+        {
+          infPowerMod.addApplicableUnitModel(um);
+          infmoveMod. addApplicableUnitModel(um);
+        }
+      }
+
+      myCommander.addCOModifier(infPowerMod);
       myCommander.addCOModifier(infmoveMod);
     }
   }
@@ -141,12 +137,18 @@ public class Sami extends Commander
       myCommander.addCOModifier(this);
       // Grant foot-soldiers additional firepower.
       CODamageModifier infPowerMod = new CODamageModifier(POWER);
-      infPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
-      infPowerMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
-      myCommander.addCOModifier(infPowerMod);
       COMovementModifier infmoveMod = new COMovementModifier(2);
-      infmoveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY));
-      infmoveMod.addApplicableUnitModel(myCommander.getUnitModel(UnitModel.UnitEnum.MECH));
+
+      for( UnitModel um : myCommander.unitModels )
+      {
+        if( um.isAny(UnitModel.TROOP) )
+        {
+          infPowerMod.addApplicableUnitModel(um);
+          infmoveMod. addApplicableUnitModel(um);
+        }
+      }
+
+      myCommander.addCOModifier(infPowerMod);
       myCommander.addCOModifier(infmoveMod);
     }
 

@@ -13,7 +13,6 @@ import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
 
 public class Drake extends Commander
 {
@@ -42,13 +41,13 @@ public class Drake extends Commander
   {
     super(coInfo, rules);
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
-      if( um.chassis == ChassisEnum.AIR_HIGH || um.chassis == ChassisEnum.AIR_LOW )
+      if( um.isAirUnit() )
       {
         um.modifyDamageRatio(20);
       }
-      if( um.chassis == ChassisEnum.SHIP || um.chassis == ChassisEnum.SUBMERGED )
+      if( um.isSeaUnit() )
       {
         um.movePower += 1;
         um.modifyDefenseRatio(25);

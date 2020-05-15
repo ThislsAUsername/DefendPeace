@@ -7,7 +7,6 @@ import CommandingOfficers.IDS.TabithaEngine;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import Terrain.MapMaster;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
 
 public class T3Tasha extends TabithaEngine
 {
@@ -40,7 +39,7 @@ public class T3Tasha extends TabithaEngine
   public int getMegaBoostCount() {return 1;};
   @Override
   public boolean canBoost(UnitModel type)
-  {return type.chassis == ChassisEnum.AIR_HIGH || type.chassis == ChassisEnum.AIR_LOW;}
+  {return type.isAirUnit();}
 
   public T3Tasha(GameScenario.GameRules rules)
   {
@@ -65,9 +64,9 @@ public class T3Tasha extends TabithaEngine
     protected void perform(MapMaster gameMap)
     {
       COMovementModifier airMoveMod = new COMovementModifier(power);
-      for( UnitModel um : myCommander.unitModels.values() )
+      for( UnitModel um : myCommander.unitModels )
       {
-        if( um.chassis == ChassisEnum.AIR_HIGH ||  um.chassis == ChassisEnum.AIR_LOW)
+        if( um.isAirUnit() )
         {
           airMoveMod.addApplicableUnitModel(um);
         }
@@ -92,9 +91,9 @@ public class T3Tasha extends TabithaEngine
     {
       super.perform(gameMap);
       COMovementModifier airMoveMod = new COMovementModifier(2);
-      for( UnitModel um : myCommander.unitModels.values() )
+      for( UnitModel um : myCommander.unitModels )
       {
-        if( um.chassis == ChassisEnum.AIR_HIGH ||  um.chassis == ChassisEnum.AIR_LOW)
+        if( um.isAirUnit() )
         {
           airMoveMod.addApplicableUnitModel(um);
         }

@@ -11,7 +11,7 @@ import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
-import Units.Weapons.Weapon;
+import Units.WeaponModel;
 
 public class Cyrus extends Commander
 {
@@ -44,7 +44,7 @@ public class Cyrus extends Commander
   {
     super(coInfo, rules);
     
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
       um.visionRange += 1;
     }
@@ -74,13 +74,13 @@ public class Cyrus extends Commander
     {
       // Store our unit. Since defenders don't move, we have defenderX/Y already.
       Unit minion = instance.defender;
-      Weapon myWeapon = instance.defenderWeapon;
-      
+      WeaponModel myWeapon = instance.defenderWeapon;
+
       instance.defender = instance.attacker;
       instance.defenderWeapon = instance.attackerWeapon;
       instance.defenderX = instance.attackerX;
       instance.defenderY = instance.attackerY;
-      
+
       instance.attacker = minion;
       instance.attackerWeapon = myWeapon;
       instance.attackerX = minion.x;

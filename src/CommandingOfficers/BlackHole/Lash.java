@@ -9,7 +9,6 @@ import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
 import Terrain.Location;
-import Units.UnitModel.ChassisEnum;
 
 public class Lash extends Commander
 {
@@ -60,17 +59,15 @@ public class Lash extends Commander
   @Override
   public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
   {
-    if( params.attacker.CO == this && params.attacker.model.chassis != ChassisEnum.AIR_HIGH
-        && params.attacker.model.chassis != ChassisEnum.AIR_LOW )
+    if( params.attacker.CO == this )
     {
       Location loc = params.combatRef.gameMap.getLocation(params.combatRef.attackerX, params.combatRef.attackerY);
       if( loc != null && loc.isCaptureable() )
       {
-        params.attackFactor += starBuff * loc.getEnvironment().terrainType.getDefLevel() * starMult;
+        params.attackFactor += starBuff * params.terrainDefense * starMult;
       }
     }
-    if( params.defender.CO == this && params.defender.model.chassis != ChassisEnum.AIR_HIGH
-        && params.defender.model.chassis != ChassisEnum.AIR_LOW )
+    if( params.defender.CO == this )
     {
       params.terrainDefense *= starMult;
     }

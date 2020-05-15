@@ -54,7 +54,7 @@ public abstract class TabithaEngine extends Commander
     megaPow = COUPow;
     megaDef = COUDef;
 
-    for( UnitModel um : unitModels.values() )
+    for( UnitModel um : unitModels )
     {
       if( canBoost(um) )
         um.possibleActions.add(new MegaBoost(this));
@@ -157,7 +157,7 @@ public abstract class TabithaEngine extends Commander
       COcast.megaDef -= def;
       GenericUnitModifier powMod = new CODamageModifier(atk);
       GenericUnitModifier defMod = new CODefenseModifier(def);
-      for( UnitModel um : myCommander.unitModels.values() )
+      for( UnitModel um : myCommander.unitModels )
       {
         if( COcast.canBoost(um) )
         {

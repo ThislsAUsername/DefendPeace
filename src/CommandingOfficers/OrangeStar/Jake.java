@@ -13,7 +13,6 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.ChassisEnum;
 
 public class Jake extends Commander
 {
@@ -122,9 +121,9 @@ public class Jake extends Commander
 
       COMovementModifier moveMod = new COMovementModifier(2);
 
-      for( UnitModel um : COcast.unitModels.values() )
+      for( UnitModel um : COcast.unitModels )
       {
-        if( um.chassis == ChassisEnum.TANK )
+        if( um.isAny(UnitModel.TANK) )
           moveMod.addApplicableUnitModel(um);
       }
 
