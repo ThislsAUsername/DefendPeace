@@ -59,6 +59,8 @@ public class Greyfield extends Commander
         um.hidden = false;
         um.moneyCostAdjustment = -9000;
         um.movePower += 1;
+        um.maxFuel = 40;
+        um.maxAmmo = 3;
       }
 
       boolean canBuild = false;
