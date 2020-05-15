@@ -18,7 +18,6 @@ import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.CombatEngine;
-import Engine.Combat.StrikeParams;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.Environment;
@@ -141,10 +140,10 @@ public class Muriel implements AIController
     UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(myUnit.model, otherUnit.model));
     if( null != umami ) return umami;
 
-    double myDamage = CombatEngine.buildSimpleAttack(myUnit, 1, otherUnit, myCo.myView, 0, myUnit.model.hasMobileWeapon()).calculateDamage();
+    double myDamage = CombatEngine.calculateOneStrikeDamage(myUnit, 1, otherUnit, myCo.myView, 0, myUnit.model.hasMobileWeapon());
 
     // Now go the other way.
-    double otherDamage = CombatEngine.buildSimpleAttack(otherUnit, 1, myUnit, myCo.myView, 0, false).calculateDamage();
+    double otherDamage = CombatEngine.calculateOneStrikeDamage(otherUnit, 1, myUnit, myCo.myView, 0, false);
 
     // Calculate and store the damage and cost-effectiveness ratios.
     double damageRatio = 0;
@@ -337,9 +336,9 @@ public class Muriel implements AIController
           Environment environment = gameMap.getEnvironment(targetLoc);
 
           // Calculate the cost of the damage we can do.
-          StrikeParams params = CombatEngine.buildSimpleAttack(unit, 1, target, gameMap, environment.terrainType.getDefLevel(), unit.model.hasMobileWeapon());
+          double attackDamage = CombatEngine.calculateOneStrikeDamage(unit, 1, target, gameMap, environment.terrainType.getDefLevel(), unit.model.hasMobileWeapon());
 
-          double hpDamage = Math.min(params.calculateDamage(), target.getPreciseHP());
+          double hpDamage = Math.min(attackDamage, target.getPreciseHP());
           double damageValue = (target.model.getCost()/10) * hpDamage;
 
           // Find the attack that causes the most monetary damage, provided it's at least a halfway decent idea.
@@ -461,7 +460,7 @@ public class Muriel implements AIController
   private boolean shouldAttack(Unit unit, Unit target, GameMap gameMap)
   {
     // Calculate the cost of the damage we can do.
-    double damage = CombatEngine.buildSimpleAttack(unit, 1, target, gameMap, gameMap.getEnvironment(target.x, target.y).terrainType.getDefLevel(), unit.model.hasMobileWeapon()).calculateDamage();
+    double damage = CombatEngine.calculateOneStrikeDamage(unit, 1, target, gameMap, gameMap.getEnvironment(target.x, target.y).terrainType.getDefLevel(), unit.model.hasMobileWeapon());
 
     UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(unit, target);
 

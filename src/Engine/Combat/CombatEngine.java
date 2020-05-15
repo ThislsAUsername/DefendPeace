@@ -94,7 +94,7 @@ public class CombatEngine
                              unitDamageMap.get(defender).getValue(), unitDamageMap.get(attacker).getValue());
   }
 
-  public static BattleParams buildSimpleAttack( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
+  public static double calculateOneStrikeDamage( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
   {
     return new BattleParams(
         new Combatant(attacker, attacker.chooseWeapon(defender.model, battleRange, attackerMoved), attacker.x, attacker.y),
@@ -102,6 +102,6 @@ public class CombatEngine
         map, battleRange,
         attacker.model.getDamageRatio(), attacker.getHP(),
         defender.model.getDefenseRatio(), terrainStars,
-        false);
+        false).calculateDamage();
   }
 }
