@@ -185,7 +185,7 @@ public class TerrainType implements Serializable
   // List of all terrain types.
   public static final ArrayList<TerrainType> TerrainTypeList =
       new ArrayList<TerrainType>(Arrays.asList(
-          AIRPORT, TEMP_AIRPORT, BRIDGE, CITY, BUNKER, PILLAR, DUNES, FACTORY, FOREST, GRASS, HEADQUARTERS, LAB, MOUNTAIN, REEF, RIVER, ROAD, SEA, SEAPORT, TEMP_SEAPORT, SHOAL
+          AIRPORT, TEMP_AIRPORT, BRIDGE, CITY, TOWER, BUNKER, PILLAR, DUNES, FACTORY, FOREST, GRASS, HEADQUARTERS, LAB, MOUNTAIN, REEF, RIVER, ROAD, SEA, SEAPORT, TEMP_SEAPORT, SHOAL
           ));
 
   @Override
