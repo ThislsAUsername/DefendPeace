@@ -326,7 +326,7 @@ public class Muriel implements AIController
       ArrayList<GameAction> attackActions = unitActionsByType.get(UnitActionFactory.ATTACK);
       GameAction maxCarnageAction = null;
       double maxDamageValue = 0;
-      if( null != attackActions )
+      if( null != attackActions && !attackActions.isEmpty() )
       {
         for( GameAction action : attackActions )
         {
