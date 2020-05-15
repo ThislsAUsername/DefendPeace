@@ -8,11 +8,12 @@ import Engine.GameScenario;
 import Engine.Path;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
 import Units.Unit;
-import Units.UnitModel.UnitEnum;
+import Units.UnitModel;
 
 public class TestUnitMovement extends TestCase
 {
@@ -52,7 +53,7 @@ public class TestUnitMovement extends TestCase
   private boolean testStayPut()
   {
     // Add a Unit and try to move it.
-    Unit mover = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 4, 4);
+    Unit mover = addUnit(testMap, testCo1, UnitModel.TROOP, 4, 4);
     Path mvPath = Utils.findShortestPath(mover, 4, 4, testMap);
 
     // A path from here to here should still have one path node.
@@ -60,20 +61,20 @@ public class TestUnitMovement extends TestCase
 
     // Try to build a malformed action and make sure it doesn't work.
     mover.initTurn(testMap);
-    GameAction badUnit = new GameAction.WaitAction(null, mvPath);
+    GameAction badUnit = new WaitLifecycle.WaitAction(null, mvPath);
     testPassed &= validate(badUnit.getEvents(testMap).size() == 0, "    A WaitAction with a null unit should have no events!");
     mover.initTurn(testMap);
-    GameAction nullPath = new GameAction.WaitAction(mover, null);
+    GameAction nullPath = new WaitLifecycle.WaitAction(mover, null);
     testPassed &= validate(nullPath.getEvents(testMap).size() == 0, "    A WaitAction with a null path should have no events!");
     mover.initTurn(testMap);
-    GameAction emptyPath = new GameAction.WaitAction(mover, new Path(100));
+    GameAction emptyPath = new WaitLifecycle.WaitAction(mover, new Path(100));
     testPassed &= validate(emptyPath.getEvents(testMap).size() == 0,
         "    A WaitAction with an empty path should have no events!");
     mover.initTurn(testMap);
-    GameAction nullMap = new GameAction.WaitAction(mover, mvPath);
+    GameAction nullMap = new WaitLifecycle.WaitAction(mover, mvPath);
     testPassed &= validate(nullMap.getEvents(null).size() == 0, "    A WaitAction with a null map should have no events!");
     mover.initTurn(testMap);
-    GameAction okAction = new GameAction.WaitAction(mover, mvPath);
+    GameAction okAction = new WaitLifecycle.WaitAction(mover, mvPath);
     testPassed &= validate(okAction.getEvents(testMap).size() > 0, "   WaitAction should be valid but has no events!");
 
     // clean up.
@@ -86,10 +87,10 @@ public class TestUnitMovement extends TestCase
   private boolean testSimpleMovement()
   {
     // Add a Unit and try to move it.
-    Unit mover = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 4, 4);
+    Unit mover = addUnit(testMap, testCo1, UnitModel.TROOP, 4, 4);
     mover.initTurn(testMap); // Make sure he's ready to go.
     XYCoord destination = new XYCoord(6, 5);
-    GameAction ga = new GameAction.WaitAction(mover, Utils.findShortestPath(mover, destination, testMap));
+    GameAction ga = new WaitLifecycle.WaitAction(mover, Utils.findShortestPath(mover, destination, testMap));
 
     performGameAction(ga, testMap);
 
@@ -110,16 +111,20 @@ public class TestUnitMovement extends TestCase
   private boolean testOutOfRangeMovement()
   {
     // Make a unit and add it to the map.
-    Unit mover = addUnit(testMap, testCo1, UnitEnum.INFANTRY, 4, 4);
+    Unit mover = addUnit(testMap, testCo1, UnitModel.TROOP, 2, 4);
     mover.isTurnOver = false; // Make sure he's ready to go.
 
-    // Make an action to move the unit 5 spaces away, and execute it.
-    GameAction ga = new GameAction.WaitAction(mover, Utils.findShortestPath(mover, 7, 6, testMap));
+    // Make an action to move the unit far away, and execute it.
+    GameAction ga = new WaitLifecycle.WaitAction(mover, Utils.findShortestPath(mover, 7, 6, testMap));
     performGameAction(ga, testMap);
 
-    // Make sure the action didn't actually execute.
-    boolean testPassed = validate(testMap.getLocation(4, 4).getResident() == mover, "    Infantry moved when he shouldn't have.");
-    testPassed &= validate(4 == mover.x && 4 == mover.y, "    Infantry thinks he moved when he should not have.");
+    // Make an action to move the inf 3 spaces onto a mountain, and execute it.
+    GameAction ga2 = new WaitLifecycle.WaitAction(mover, Utils.findShortestPath(mover, 5, 4, testMap));
+    performGameAction(ga2, testMap);
+
+    // Make sure the actions didn't actually execute.
+    boolean testPassed = validate(testMap.getLocation(2, 4).getResident() == mover, "    Infantry moved when he shouldn't have.");
+    testPassed &= validate(2 == mover.x && 4 == mover.y, "    Infantry thinks he moved when he should not have.");
     testPassed &= validate(testMap.getLocation(7, 6).getResident() == null,
         "    Target location has a resident when it should not.");
     testPassed &= validate(99 == mover.fuel, "    Infantry lost fuel when attempting an invalid movement that should fail.");
@@ -156,23 +161,23 @@ public class TestUnitMovement extends TestCase
     multiPath.addWaypoint(2, 5);
 
     // Make sure the action didn't actually execute.
-    boolean testPassed = validate(grassPath.getFuelCost(testCo1.getUnitModel(UnitEnum.INFANTRY), testMap) == 7,
+    boolean testPassed = validate(grassPath.getFuelCost(testCo1.getUnitModel(UnitModel.TROOP), testMap) == 7,
         "    Infantry do not charge 1 fuel per space of grass.");
-    testPassed &= validate(multiPath.getFuelCost(testCo1.getUnitModel(UnitEnum.INFANTRY), testMap) == 4,
+    testPassed &= validate(multiPath.getFuelCost(testCo1.getUnitModel(UnitModel.TROOP), testMap) == 4,
         "    Infantry movecost is not 1 for road, grass, forest, or city.");
-    testPassed &= validate(grassPath.getFuelCost(testCo1.getUnitModel(UnitEnum.B_COPTER), testMap) == 7,
+    testPassed &= validate(grassPath.getFuelCost(testCo1.getUnitModel(UnitModel.AIR_LOW | UnitModel.ASSAULT, false), testMap) == 7,
         "    B Copter does not charge 1 fuel per space of grass.");
-    testPassed &= validate(multiPath.getFuelCost(testCo1.getUnitModel(UnitEnum.B_COPTER), testMap) == 4,
+    testPassed &= validate(multiPath.getFuelCost(testCo1.getUnitModel(UnitModel.AIR_LOW | UnitModel.ASSAULT, false), testMap) == 4,
         "    B Copter movecost is not 1 for road, grass, forest, or city.");
-    testPassed &= validate(grassPath.getFuelCost(testCo1.getUnitModel(UnitEnum.RECON), testMap) == 14,
+    testPassed &= validate(grassPath.getFuelCost(testCo1.getUnitModel(UnitModel.RECON), testMap) == 14,
         "    Recon does not charge 2 fuel per space of grass.");
-    testPassed &= validate(multiPath.getFuelCost(testCo1.getUnitModel(UnitEnum.RECON), testMap) == 7,
+    testPassed &= validate(multiPath.getFuelCost(testCo1.getUnitModel(UnitModel.RECON), testMap) == 7,
         "    Recon movecost is wrong for road, grass, forest, or city.");
-    testPassed &= validate(grassPath.getFuelCost(testCo1.getUnitModel(UnitEnum.TANK), testMap) == 7,
+    testPassed &= validate(grassPath.getFuelCost(testCo1.getUnitModel(UnitModel.ASSAULT), testMap) == 7,
         "    Tank does not charge 1 fuel per space of grass.");
-    testPassed &= validate(multiPath.getFuelCost(testCo1.getUnitModel(UnitEnum.TANK), testMap) == 5,
+    testPassed &= validate(multiPath.getFuelCost(testCo1.getUnitModel(UnitModel.ASSAULT), testMap) == 5,
         "    Tank movecost is wrong for road, grass, forest, or city.");
-    testPassed &= validate(multiPath.getFuelCost(testCo1.getUnitModel(UnitEnum.CRUISER), testMap) == 396,
+    testPassed &= validate(multiPath.getFuelCost(testCo1.unitModels.get(15), testMap) == 396,
         "    Cruiser movecost is wrong for road, grass, forest, or city.");
 
     return testPassed;

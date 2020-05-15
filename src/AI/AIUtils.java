@@ -13,16 +13,16 @@ import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.Path;
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
-import Units.Weapons.Weapon;
-import Units.Weapons.WeaponModel;
+import Units.WeaponModel;
 
 public class AIUtils
 {
@@ -33,13 +33,14 @@ public class AIUtils
    * @return a Map of XYCoord to ArrayList<GameActionSet>. Each XYCoord will have a GameActionSet for
    * each type of action the unit can perform from that location.
    */
-  public static Map<XYCoord, ArrayList<GameActionSet> > getAvailableUnitActions(Unit unit, GameMap gameMap)
+  public static Map<XYCoord, ArrayList<GameActionSet> >
+                getAvailableUnitActions(Unit unit, GameMap gameMap)
   {
+    boolean includeOccupiedDestinations = true;
     Map<XYCoord, ArrayList<GameActionSet> > actions = new HashMap<XYCoord, ArrayList<GameActionSet> >();
 
     // Find the possible destinations.
-    boolean includeTransports = true;
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeTransports);
+    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedDestinations);
 
     for( XYCoord coord : destinations )
     {
@@ -58,15 +59,16 @@ public class AIUtils
 
   /**
    * Finds all actions available to unit, and organizes them by type instead of by location.
+   * Assumes caller isn't interested in moving into units' current spaces
    * @param unit The unit under consideration.
    * @param gameMap The world in which the Unit lives.
    * @return a Map of ActionType to ArrayList<GameAction>.
    */
-  public static Map<UnitActionType, ArrayList<GameAction> > getAvailableUnitActionsByType(Unit unit, GameMap gameMap)
+  public static Map<UnitActionFactory, ArrayList<GameAction> > getAvailableUnitActionsByType(Unit unit, GameMap gameMap)
   {
     // Create the ActionType-indexed map, and ensure we don't have any null pointers.
-    Map<UnitActionType, ArrayList<GameAction> > actionsByType = new HashMap<UnitActionType, ArrayList<GameAction> >();
-    for( UnitActionType atype : unit.model.possibleActions )
+    Map<UnitActionFactory, ArrayList<GameAction> > actionsByType = new HashMap<UnitActionFactory, ArrayList<GameAction> >();
+    for( UnitActionFactory atype : unit.model.possibleActions )
     {
       actionsByType.put(atype, new ArrayList<GameAction>());
     }
@@ -79,7 +81,7 @@ public class AIUtils
     {
       for( GameActionSet actionSet : actionSets )
       {
-        UnitActionType type = actionSet.getSelected().getType();
+        UnitActionFactory type = actionSet.getSelected().getType();
 
         // Add these actions to the correct map bucket.
         actionsByType.get(type).addAll(actionSet.getGameActions());
@@ -170,13 +172,13 @@ public class AIUtils
 
     // Find the full path that would get this unit to the destination, regardless of how long. 
     Path path = Utils.findShortestPath(unit, destination, gameMap, true);
-    if( path.getPathLength() > 0 ) // Check that the destination is reachable at least in theory.
+    ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, false); // Find the valid moves we can make.
+
+    if( path.getPathLength() > 0 && validMoves.size() > 0 ) // Check that the destination is reachable at least in theory.
     {
-      path.snip(unit.model.movePower+1); // Trim the path so we don't try to walk through walls.
-      boolean includeTransports = false;
-      ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, includeTransports); // Find the valid moves we can make.
-      Utils.sortLocationsByDistance(new XYCoord(path.getEnd().x, path.getEnd().y), validMoves); // Sort moves based on intermediate destination. 
-      move = new GameAction.WaitAction(unit, Utils.findShortestPath(unit, validMoves.get(0), gameMap)); // Move to best option.
+      path.snip(unit.model.movePower+1); // Trim the path so we go the right immediate direction.
+      Utils.sortLocationsByDistance(path.getEndCoord(), validMoves); // Sort moves based on intermediate destination. 
+      move = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, validMoves.get(0), gameMap)); // Move to best option.
     }
     return move;
   }
@@ -231,14 +233,15 @@ public class AIUtils
   {
     XYCoord origin = new XYCoord(unit.x, unit.y);
     Map<XYCoord, Double> shootableTiles = new HashMap<XYCoord, Double>();
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
-    for( Weapon wep : unit.weapons )
+    boolean includeOccupiedDestinations = true; // We assume the enemy knows how to manage positioning within his turn
+    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedDestinations);
+    for( WeaponModel wep : unit.model.weapons )
     {
       if( wep.getDamage(target) > 0 )
       {
-        if( !wep.model.canFireAfterMoving )
+        if( !wep.canFireAfterMoving )
         {
-          for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, wep.model.minRange, wep.model.maxRange))
+          for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, wep.minRange, wep.maxRange))
           {
             double val = wep.getDamage(target) * (unit.getHP() / (double) unit.model.maxHP);
             if (shootableTiles.containsKey(xyc))
@@ -250,7 +253,7 @@ public class AIUtils
         {
           for( XYCoord dest : destinations )
           {
-            for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, wep.model.minRange, wep.model.maxRange))
+            for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, wep.minRange, wep.maxRange))
             {
               double val = wep.getDamage(target) * (unit.getHP() / (double) unit.model.maxHP);
               if (shootableTiles.containsKey(xyc))
@@ -270,9 +273,9 @@ public class AIUtils
   public static int findMaxStrikeWeaponRange(Commander co)
   {
     int range = 0;
-    for( UnitModel um : co.unitModels.values() )
+    for( UnitModel um : co.unitModels )
     {
-      for( WeaponModel wm : um.weaponModels )
+      for( WeaponModel wm : um.weapons )
       {
         if( wm.canFireAfterMoving )
           range = Math.max(range, wm.maxRange);

@@ -19,7 +19,7 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.Path;
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance.BattleParams;
 import Terrain.GameMap;
@@ -194,7 +194,7 @@ public abstract class TabithaEngine extends Commander
   // Mega action jazz happens after this point
   //////////////////////////////////////////////////////////
 
-  private static class MegaBoost extends UnitActionType
+  private static class MegaBoost extends UnitActionFactory
   {
     private static final long serialVersionUID = 1L;
     final TabithaEngine tabby;
@@ -248,7 +248,7 @@ public abstract class TabithaEngine extends Commander
     }
 
     @Override
-    public UnitActionType getType()
+    public UnitActionFactory getType()
     {
       return type;
     }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 import Units.UnitModel;
-import Units.Weapons.WeaponModel;
+import Units.WeaponModel;
 
 public class IndirectRangeBoostModifier extends GenericUnitModifier
 {
@@ -21,7 +21,7 @@ public class IndirectRangeBoostModifier extends GenericUnitModifier
   {
     for( UnitModel um : models )
     {
-      for( WeaponModel pewpew : um.weaponModels )
+      for( WeaponModel pewpew : um.weapons )
       {
         if( pewpew.maxRange > 1 )
         {
@@ -36,7 +36,7 @@ public class IndirectRangeBoostModifier extends GenericUnitModifier
   {
     for( UnitModel um : models )
     {
-      for( WeaponModel pewpew : um.weaponModels )
+      for( WeaponModel pewpew : um.weapons )
       {
         if( pewpew.maxRange > 1 )
         {

@@ -28,7 +28,7 @@ public class PlayerSetupAiController implements IController
     boolean done = false;
     switch(action)
     {
-      case ENTER:
+      case SELECT:
         // Apply changes and return control.
         myPlayerInfo.currentAi = aiSelector.getSelectionNormalized();
         done = true;

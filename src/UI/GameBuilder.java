@@ -6,6 +6,7 @@ import Engine.GameScenario;
 import Terrain.Environment.Weathers;
 import Terrain.MapInfo;
 import Terrain.MapMaster;
+import Units.UnitModelScheme;
 
 /**
  * Represents all of the information needed to create a GameInstance.
@@ -17,6 +18,7 @@ public class GameBuilder
   public int startingFunds = 0;
   public int incomePerCity = 1000;
   public Weathers defaultWeather = Weathers.CLEAR;
+  public UnitModelScheme unitModelScheme = null;
 
   GameBuilder(MapInfo info)
   {
@@ -25,7 +27,7 @@ public class GameBuilder
 
   public GameInstance createGame(PlayerSetupInfo[] coInfos)
   {
-    GameScenario scenario = new GameScenario(incomePerCity, startingFunds);
+    GameScenario scenario = new GameScenario(unitModelScheme, incomePerCity, startingFunds);
 
     // Create all of the commanders.
     Commander[] cos = new Commander[mapInfo.getNumCos()];

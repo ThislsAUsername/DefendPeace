@@ -7,7 +7,6 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameInput.GameInputHandler;
 import Terrain.GameMap;
-import Terrain.Location;
 import UI.CO_InfoController;
 import UI.GameStatsController;
 import UI.InGameMenu;
@@ -43,13 +42,11 @@ public class MapController implements IController, GameInputHandler.StateChanged
   /** Just a simple struct to hold the currently-selected unit and its tentative path. */
   private class ContemplatedAction
   {
-    Unit actor = null;
     Path movePath = null;
     boolean aiming = false;
 
     public void clear()
     {
-      actor = null;
       movePath = null;
       aiming = false;
     }
@@ -93,14 +90,14 @@ public class MapController implements IController, GameInputHandler.StateChanged
     switch (inputMode)
     {
       case ANIMATION:
-        if( InputAction.BACK == input || InputAction.ENTER == input )
+        if( InputAction.BACK == input || InputAction.SELECT == input )
         {
           myView.cancelAnimation();
         }
         break;
       case EXITGAME:
         // Once the game is over, wait for an ENTER or BACK input to return to the main menu.
-        if( input == InputHandler.InputAction.BACK || input == InputHandler.InputAction.ENTER )
+        if( input == InputHandler.InputAction.BACK || input == InputHandler.InputAction.SELECT )
         {
           exitMap = true;
         }
@@ -203,26 +200,15 @@ public class MapController implements IController, GameInputHandler.StateChanged
           ++nextSeekIndex;
         }
         break;
-      case ENTER:
+      case SELECT:
         // Get the current location.
         XYCoord cursorCoords = new XYCoord(myGame.getCursorX(), myGame.getCursorY());
-        Location loc = myGame.gameMap.getLocation(cursorCoords);
-        Unit actor = loc.getResident();
-
-        // If there is a unit that is is ready to move, or if it is someone else's, then record it so we can build the move path.
-        if( null != actor && ((actor.CO == myGame.activeCO && !actor.isTurnOver) || (actor.CO != myGame.activeCO)) )
-        {
-          contemplatedAction.actor = actor;
-        }
 
         // Pass the current cursor location to the GameInputHandler.
         myGameInputHandler.select(cursorCoords);
         break;
       case BACK:
         myGameInputHandler.back();
-        break;
-      case NO_ACTION:
-        // No action means do nothing. Done.
         break;
       default:
         System.out.println("WARNING! MapController.handleFreeTileSelect() was given invalid input enum (" + input + ")");
@@ -234,7 +220,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   {
     switch (input)
     {
-      case ENTER:
+      case SELECT:
         myGameInputHandler.select(new XYCoord(myGame.getCursorX(), myGame.getCursorY()));
         break;
       case BACK:
@@ -255,7 +241,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
         myGameInputOptionSelector.handleInput(input);
         myGame.setCursorLocation(targetLocations.get(myGameInputOptionSelector.getSelectionNormalized()));
         break;
-      case NO_ACTION:
       case SEEK: // Seek does nothing in this input state.
       default:
     }
@@ -306,7 +291,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
         break;
-      case ENTER:
+      case SELECT:
         GameInputHandler.InputType type = myGameInputHandler.select(contemplatedAction.movePath);
         // If the next state has an InputType of FREE_TILE_SELECT, then we actually moved back()
         // instead of forward to the action-select state. Clear the path so we can rebuild it.
@@ -316,10 +301,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
         break;
       case BACK:
-        myGameInputHandler.back();
         contemplatedAction.movePath = null;
-        break;
-      case NO_ACTION:
+        myGameInputHandler.back();
         break;
       default:
         System.out.println("WARNING! MapController.handleMovementInput() was given invalid input enum (" + input + ")");
@@ -347,14 +330,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     switch (input)
     {
-      case ENTER:
+      case SELECT:
         // Pass the user's selection to the state handler.
         myGameInputHandler.select(myGameInputHandler.getMenuOptions()[myGameInputOptionSelector.getSelectionNormalized()]);
         break;
       case BACK:
         myGameInputHandler.back();
-        break;
-      case NO_ACTION:
         break;
       default:
         currentMenu.handleMenuInput(input);
@@ -369,26 +350,38 @@ public class MapController implements IController, GameInputHandler.StateChanged
   {
     GameInputHandler.InputType inputType = myGameInputHandler.getInputType();
     myGameInputOptionSelector = myGameInputHandler.getOptionSelector();
+
     myGame.gameMap.clearAllHighlights();
+    // Set the target-location highlights.
+    ArrayList<XYCoord> options = myGameInputHandler.getCoordinateOptions();
+    if ( null != options)
+      for( XYCoord xyc : options )
+      {
+        myGame.gameMap.getLocation(xyc).setHighlight(true);
+      }
+
     currentMenu = null;
 
     switch (inputType)
     {
       case CONSTRAINED_TILE_SELECT:
-        // Set the target-location highlights.
-        ArrayList<XYCoord> targets = myGameInputHandler.getCoordinateOptions();
-        for( XYCoord targ : targets )
-        {
-          myGame.gameMap.getLocation(targ).setHighlight(true);
-        }
         // Create an option selector to keep track of where we are.
         myGame.setCursorLocation(myGameInputHandler.getCoordinateOptions().get(myGameInputOptionSelector.getSelectionNormalized()));
         contemplatedAction.aiming = true;
         break;
       case MENU_SELECT:
-        if( null != contemplatedAction.movePath )
+        Path path = contemplatedAction.movePath;
+        if( null != path && path.getPathLength() > 0 )
         {
-          myGame.setCursorLocation(contemplatedAction.movePath.getEnd().x, contemplatedAction.movePath.getEnd().y);
+          myGame.setCursorLocation(contemplatedAction.movePath.getEnd().GetCoordinates());
+        }
+        else
+        {
+          XYCoord coord = myGameInputHandler.getUnitCoord();
+          if( null != coord )
+          {
+            myGame.setCursorLocation(coord);
+          }
         }
         currentMenu = new InGameMenu<>(myGameInputHandler.getMenuOptions(), myGameInputOptionSelector);
         contemplatedAction.aiming = false;
@@ -402,21 +395,16 @@ public class MapController implements IController, GameInputHandler.StateChanged
         contemplatedAction.aiming = false;
         break;
       case PATH_SELECT:
-        if( null != contemplatedAction.actor )
+        XYCoord coord = myGameInputHandler.getUnitCoord();
+        if( null != coord )
         {
-          myGame.setCursorLocation(contemplatedAction.actor.x, contemplatedAction.actor.y);
-        }
-        // Highlight all possible destinations.
-        ArrayList<XYCoord> moveLocations = myGameInputHandler.getCoordinateOptions();
-        for( XYCoord xy : moveLocations )
-        {
-          myGame.gameMap.getLocation(xy.xCoord, xy.yCoord).setHighlight(true);
+          myGame.setCursorLocation(coord);
         }
 
         buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.
         break;
       case FREE_TILE_SELECT:
-        // This state doesn't require any special handling.
+        myGameInputHandler.reset(); // Reset the input handler to get rid of stale state
         break;
       case END_TURN:
         startNextTurn();
@@ -490,10 +478,13 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     contemplatedAction.movePath.addWaypoint(x, y);
 
-    if( !Utils.isPathValid(contemplatedAction.actor, contemplatedAction.movePath, map) )
+    Unit actor = myGameInputHandler.getActingUnit();
+    XYCoord coord = myGameInputHandler.getUnitCoord();
+    boolean canEndOnOccupied = true;
+    if( !Utils.isPathValid(coord, actor, contemplatedAction.movePath, map, canEndOnOccupied) )
     {
       // The currently-built path is invalid. Try to generate a new one (may still return null).
-      contemplatedAction.movePath = Utils.findShortestPath(contemplatedAction.actor, x, y, map);
+      contemplatedAction.movePath = Utils.findShortestPath(coord, actor, x, y, map);
     }
   }
 
@@ -632,7 +623,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   public Unit getContemplatedActor()
   {
-    return contemplatedAction.actor;
+    return myGameInputHandler.getActingUnit();
+  }
+
+  public XYCoord getContemplationCoord()
+  {
+    return myGameInputHandler.getUnitCoord();
   }
 
   public Path getContemplatedMove()

@@ -91,6 +91,8 @@ class StateData
   public final GameMap gameMap;
   public final Commander commander;
   public Unit unitActor = null;
+  public Unit unitLauncher = null;
+  public XYCoord unitCoord = null;
   public GameActionSet actionSet = null;
   public Path path = null;
   public ArrayList<? extends Object> menuOptions = null; // Just require a toString().

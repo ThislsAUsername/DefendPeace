@@ -65,23 +65,21 @@ public class Strong extends Commander
   {
     super(coInfo, rules);
 
-    // Strong allows infantry to be built from any production building.
-    UnitModel mechModel = getUnitModel(UnitModel.UnitEnum.MECH);
+    // Strong allows mechs to be built from any production building.
+    UnitModel mechModel = getUnitModel(UnitModel.MECH);
     UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, mechModel);
     upm.addProductionPair(TerrainType.SEAPORT, mechModel);
     upm.applyChanges(this); // Passive ability, so don't add it to the COModifier list; just apply it and forget it.
 
-    // Give Strong's footies a base damage buff. This COModifier is not added
-    // to the modifiers collection so it will not be reverted.
+    // Give Strong's footies a base damage buff.
     CODamageModifier strongMod = new CODamageModifier(15); // Give us a nice base power boost.
-    strongMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.INFANTRY));
-    strongMod.addApplicableUnitModel(getUnitModel(UnitModel.UnitEnum.MECH));
-    strongMod.applyChanges(this);
+    for( UnitModel model : getAllModels(UnitModel.TROOP) )
+      strongMod.addApplicableUnitModel(model);
+    strongMod.applyChanges(this); // Passive ability, so don't add it to the COModifier list; just apply it and forget it.
 
     // Give every transport type extra move range and an extra cargo slot.
-    for( UnitModel.UnitEnum umEnum : UnitModel.UnitEnum.values() )
+    for (UnitModel model : unitModels)
     {
-      UnitModel model = getUnitModel(umEnum);
       if( model.holdingCapacity > 0 )
       {
         model.movePower++;
@@ -100,7 +98,7 @@ public class Strong extends Commander
   public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
   {
     // Grant a firepower increase if we are attacking and the defender is on foot.
-    if( (params.attacker.CO == this) && (params.defender.model.chassis == UnitModel.ChassisEnum.TROOP) )
+    if( (params.attacker.CO == this) && params.defender.model.isTroop() )
     {
       params.attackFactor += 15;
     }
@@ -129,12 +127,9 @@ public class Strong extends Commander
       damageMod = new CODamageModifier(STRONGARM_BUFF);
       defenseMod = new CODefenseModifier(STRONGARM_BUFF);
       damageModTroop = new CODamageModifier(STRONGARM_FOOT_BUFF);
-      for( UnitModel model : commander.unitModels.values() )
+      for( UnitModel model : commander.getAllModels(UnitModel.TROOP) )
       {
-        if( model.chassis == UnitModel.ChassisEnum.TROOP )
-        {
-          damageModTroop.addApplicableUnitModel(model);
-        }
+        damageModTroop.addApplicableUnitModel(model);
       }
     }
 
@@ -147,19 +142,16 @@ public class Strong extends Commander
       myCommander.addCOModifier(damageModTroop);
 
       // Make infantry buildable from all production buildings.
-      UnitModel infModel = myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+      UnitModel infModel = myCommander.getUnitModel(UnitModel.TROOP);
       UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, infModel);
       upm.addProductionPair(TerrainType.SEAPORT, infModel);
       myCommander.addCOModifier(upm);
 
       // Grant troops and transports additional movement power.
       COMovementModifier moveMod = new COMovementModifier(2);
-      for( UnitModel model : myCommander.unitModels.values() )
+      for( UnitModel model : myCommander.getAllModels(UnitModel.TROOP | UnitModel.TRANSPORT) )
       {
-        if( (model.chassis == UnitModel.ChassisEnum.TROOP) || (model.holdingCapacity > 0))
-        {
-          moveMod.addApplicableUnitModel(model);
-        }
+        moveMod.addApplicableUnitModel(model);
       }
       myCommander.addCOModifier(moveMod);
     }
@@ -196,20 +188,20 @@ public class Strong extends Commander
       myCommander.addCOModifier(damageMod);
       myCommander.addCOModifier(defenseMod);
 
-      // Make inf/mechs buildable from all buildings.
-      UnitModel infModel = myCommander.getUnitModel(UnitModel.UnitEnum.INFANTRY);
-      UnitModel mechModel = myCommander.getUnitModel(UnitModel.UnitEnum.MECH);
-      UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, infModel);
-      upm.addProductionPair(TerrainType.SEAPORT, infModel);
-      upm.addProductionPair(TerrainType.CITY, mechModel);
-      upm.addProductionPair(TerrainType.CITY, infModel);
-      upm.addProductionPair(TerrainType.HEADQUARTERS, mechModel);
-      upm.addProductionPair(TerrainType.HEADQUARTERS, infModel);
+      // Make all TROOPs buildable from all production centers, cities, and the HQ.
+      UnitProductionModifier upm = new UnitProductionModifier();
+      for( UnitModel model : myCommander.getAllModels(UnitModel.TROOP) )
+      {
+        upm.addProductionPair(TerrainType.AIRPORT, model);
+        upm.addProductionPair(TerrainType.SEAPORT, model);
+        upm.addProductionPair(TerrainType.CITY, model);
+        upm.addProductionPair(TerrainType.HEADQUARTERS, model);
+      }
       myCommander.addCOModifier(upm);
 
       // Grant a global +2 movement buff.
       COMovementModifier moveMod = new COMovementModifier(2);
-      for( UnitModel model : myCommander.unitModels.values() )
+      for( UnitModel model : myCommander.unitModels )
       {
         moveMod.addApplicableUnitModel(model);
       }
@@ -218,7 +210,7 @@ public class Strong extends Commander
       // Lastly, all troops are refreshed and able to move again.
       for( Unit unit : myCommander.units )
       {
-        if( unit.model.chassis == UnitModel.ChassisEnum.TROOP )
+        if( unit.model.isAll(UnitModel.TROOP) )
         {
           unit.isTurnOver = false;
         }

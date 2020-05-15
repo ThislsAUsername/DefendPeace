@@ -14,10 +14,12 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleInstance;
+import Engine.UnitActionLifecycles.CaptureLifecycle;
+import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.GameMap;
@@ -25,7 +27,7 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
-import Units.Weapons.Weapon;
+import Units.WeaponModel;
 
 /**
  * Muriel will Make Units Reactively, Informed by the Enemy Loadout.
@@ -86,7 +88,7 @@ public class Muriel implements AIController
   private void init(Commander[] allCos)
   {
     // Initialize UnitModel collections.
-    Collection<UnitModel> myUnitModels = myCo.unitModels.values();
+    Collection<UnitModel> myUnitModels = myCo.unitModels;
     enemyCos = new ArrayList<Commander>();
     Map<Commander, Collection<UnitModel> > otherUnitModels = new HashMap<Commander, Collection<UnitModel> >();
     for( Commander other : allCos )
@@ -101,7 +103,7 @@ public class Muriel implements AIController
     // Figure out what I and everyone else can build.
     for( Commander oCo : enemyCos )
     {
-      otherUnitModels.put(oCo, oCo.unitModels.values());
+      otherUnitModels.put(oCo, oCo.unitModels);
     }
 
     // Figure out unit matchups.
@@ -137,7 +139,7 @@ public class Muriel implements AIController
     if( null != umami ) return umami;
 
     double myDamage = 0;
-    Weapon myWeapon = myUnit.chooseWeapon(otherUnit.model, 1, false);
+    WeaponModel myWeapon = myUnit.chooseWeapon(otherUnit.model, 1, myUnit.model.hasMobileWeapon());
     if( null != myWeapon )
     {
       BattleInstance.BattleParams params = new BattleInstance.BattleParams(myUnit, myWeapon,
@@ -147,7 +149,7 @@ public class Muriel implements AIController
 
     // Now go the other way.
     double otherDamage = 0;
-    Weapon otherWeapon = otherUnit.chooseWeapon(myUnit.model, 1, false);
+    WeaponModel otherWeapon = otherUnit.chooseWeapon(myUnit.model, 1, myUnit.model.hasMobileWeapon());
     if( null != otherWeapon )
     {
       BattleInstance.BattleParams params = new BattleInstance.BattleParams(otherUnit, otherWeapon,
@@ -233,13 +235,14 @@ public class Muriel implements AIController
     // Handle Unit Actions
     for( Unit unit : myCo.units )
     {
-      if( unit.isTurnOver ) continue; // Ignore stale units.
+      if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y))
+        continue; // No actions for units that are stale or out of bounds
 
       // If we are capturing something, finish what we started.
       if( unit.getCaptureProgress() > 0 )
       {
         log(String.format("%s is currently capturing; continue", unit.toStringWithLocation()));
-        queuedActions.offer(new GameAction.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
+        queuedActions.offer(new CaptureLifecycle.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
         break;
       }
 
@@ -253,7 +256,7 @@ public class Muriel implements AIController
         for( GameActionSet set : actionSet )
         {
           // Go ahead and attack someone as long as we don't have to move.
-          if( set.getSelected().getType() == UnitActionType.ATTACK )
+          if( set.getSelected().getType() == UnitActionFactory.ATTACK )
           {
             for( GameAction action : set.getGameActions() )
             {
@@ -271,7 +274,7 @@ public class Muriel implements AIController
         if( queuedActions.isEmpty() )
         {
           // We didn't find someone adjacent to smash, so just sit tight for now.
-          queuedActions.offer(new GameAction.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
+          queuedActions.offer(new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
         }
         break;
       } // ~Continue repairing if in a depot.
@@ -292,17 +295,12 @@ public class Muriel implements AIController
         shouldResupply = true;
       }
       // If we are out of ammo.
-      if( unit.weapons != null && unit.weapons.size() > 0 )
+      if( unit.ammo == 0 )
       {
-        for( Weapon weap : unit.weapons )
-        {
-          if(weap.ammo == 0)
-          {
-            log(String.format("%s is out of ammo.", unit.toStringWithLocation()));
-            shouldResupply = true;
-          }
-        }
+        log(String.format("%s is out of ammo.", unit.toStringWithLocation()));
+        shouldResupply = true;
       }
+
       if( shouldResupply )
       {
         ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
@@ -333,11 +331,11 @@ public class Muriel implements AIController
       }
 
       // Find all the things we can do from here.
-      Map<UnitActionType, ArrayList<GameAction> > unitActionsByType = AIUtils.getAvailableUnitActionsByType(unit, gameMap);
+      Map<UnitActionFactory, ArrayList<GameAction> > unitActionsByType = AIUtils.getAvailableUnitActionsByType(unit, gameMap);
 
       //////////////////////////////////////////////////////////////////
       // Look for advantageous attack actions.
-      ArrayList<GameAction> attackActions = unitActionsByType.get(UnitActionType.ATTACK);
+      ArrayList<GameAction> attackActions = unitActionsByType.get(UnitActionFactory.ATTACK);
       GameAction maxCarnageAction = null;
       double maxDamageValue = 0;
       if( null != attackActions )
@@ -350,7 +348,7 @@ public class Muriel implements AIController
           Environment environment = gameMap.getEnvironment(targetLoc);
 
           // Calculate the cost of the damage we can do.
-          BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, true), target, environment, false, null);
+          BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, unit.model.hasMobileWeapon()), target, environment, false, null);
           double hpDamage = Math.min(params.calculateDamage(true), target.getPreciseHP());
           double damageValue = (target.model.getCost()/10) * hpDamage;
 
@@ -370,7 +368,7 @@ public class Muriel implements AIController
 
       //////////////////////////////////////////////////////////////////
       // See if there's something to capture (but only if we are moderately healthy).
-      ArrayList<GameAction> captureActions = unitActionsByType.get(UnitActionType.CAPTURE);
+      ArrayList<GameAction> captureActions = unitActionsByType.get(UnitActionFactory.CAPTURE);
       if( null != captureActions && !captureActions.isEmpty() && unit.getHP() >= 7 )
       {
         GameAction capture = captureActions.get(0);
@@ -382,7 +380,7 @@ public class Muriel implements AIController
       //////////////////////////////////////////////////////////////////
       // We didn't find an immediate ATTACK or CAPTURE action we can do.
       // Things that can capture; go find something to capture, if you are moderately healthy.
-      if( unit.model.hasActionType(UnitActionType.CAPTURE) && (unit.getHP() >= 7) )
+      if( unit.model.hasActionType(UnitActionFactory.CAPTURE) && (unit.getHP() >= 7) )
       {
         log(String.format("Seeking capture target for %s", unit.toStringWithLocation()));
         XYCoord unitCoords = new XYCoord(unit.x, unit.y);
@@ -403,7 +401,7 @@ public class Muriel implements AIController
 
       //////////////////////////////////////////////////////////////////
       // Everyone else, go hunting.
-      if( queuedActions.isEmpty() && unit.model.hasActionType(UnitActionType.ATTACK) )
+      if( queuedActions.isEmpty() && unit.model.hasActionType(UnitActionFactory.ATTACK) )
       {
         log(String.format("Seeking attack target for %s", unit.toStringWithLocation()));
         ArrayList<XYCoord> enemyLocations = AIUtils.findEnemyUnits(myCo, gameMap); // Get enemy locations.
@@ -435,7 +433,7 @@ public class Muriel implements AIController
         // Couldn't find any capture or attack actions. This unit is
         // either a transport, or stranded on an island somewhere.
         log(String.format("Could not find an action for %s. Waiting", unit.toStringWithLocation()));
-        queuedActions.offer(new GameAction.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
+        queuedActions.offer(new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)));
       }
     } // ~Unit action loop
 
@@ -473,7 +471,7 @@ public class Muriel implements AIController
   private boolean shouldAttack(Unit unit, Unit target, GameMap gameMap)
   {
     // Calculate the cost of the damage we can do.
-    BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, true), target, gameMap.getLocation(target.x, target.y).getEnvironment(), false, null);
+    BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, unit.model.hasMobileWeapon()), target, gameMap.getLocation(target.x, target.y).getEnvironment(), false, null);
     double damage = params.calculateDamage(true);
     UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(unit, target);
 
@@ -592,7 +590,7 @@ public class Muriel implements AIController
       if(useDamageRatio) log("  High funds - sorting units by damage ratio instead of cost effectiveness.");
 
       // If we are low on grunts, make sure we save money to build more.
-      UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+      UnitModel infModel = myCo.getUnitModel(UnitModel.TROOP);
       int costBuffer = 0;
       if( !myUnitCounts.containsKey(infModel) || (myUnitCounts.get(infModel) < (myCo.units.size() * INFANTRY_PROPORTION)) )
       {
@@ -740,7 +738,7 @@ public class Muriel implements AIController
     } // ~while( still choosing units to build )
 
     // Build infantry from any remaining facilities.
-    UnitModel infModel = myCo.getUnitModel(UnitModel.UnitEnum.INFANTRY);
+    UnitModel infModel = myCo.getUnitModel(UnitModel.TROOP);
     while( (budget >= infModel.getCost()) && (CPI.availableUnitModels.contains(infModel)) )
     {
       Location loc = CPI.getLocationToBuild(infModel);
@@ -807,8 +805,8 @@ public class Muriel implements AIController
     {
       final int prime = 160091;
       int result = 1;
-      result = prime * result + first.type.ordinal();
-      result = prime * result + second.type.ordinal();
+      result = prime * result + first.name.hashCode();
+      result = prime * result + second.name.hashCode();
       return result;
     }
 

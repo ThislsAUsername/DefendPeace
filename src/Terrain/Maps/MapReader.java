@@ -12,7 +12,6 @@ import java.util.TreeMap;
 import Engine.XYCoord;
 import Terrain.MapInfo;
 import Terrain.TerrainType;
-import Units.UnitModel;
 
 public class MapReader extends IMapBuilder
 {
@@ -125,10 +124,10 @@ public class MapReader extends IMapBuilder
             }
             
             // now that we've parsed the map, try to parse any units
-            ArrayList<Map<XYCoord,UnitModel.UnitEnum>> units = new ArrayList<Map<XYCoord,UnitModel.UnitEnum>>();
+            ArrayList<Map<XYCoord,String>> units = new ArrayList<Map<XYCoord,String>>();
             for (int i = 0; i < numSides; ++i)
             {
-              units.add(new HashMap<XYCoord,UnitModel.UnitEnum>());
+              units.add(new HashMap<XYCoord,String>());
             }
             // we'll assume there's a useless line between the map and any units because I'm ~lazy~
             while (scanner.hasNextLine())
@@ -141,9 +140,10 @@ public class MapReader extends IMapBuilder
                 try
                 {
                   int team = Integer.parseInt(unitTokens[0].trim());
-                  UnitModel.UnitEnum type = UnitModel.UnitEnum.valueOf(unitTokens[1].trim());
+                  String type = unitTokens[1].trim();
                   int x = Integer.parseInt(unitTokens[2].trim());
                   int y = Integer.parseInt(unitTokens[3].trim());
+                  // Add last in case of parsing errors
                   units.get(factionList.indexOf(team)).put(new XYCoord(x, y), type);
                 }
                 catch (Exception e)
@@ -193,8 +193,12 @@ public class MapReader extends IMapBuilder
         return FC;
       case "AP":
         return AP;
+      case "TA":
+        return TA;
       case "SP":
         return SP;
+      case "TS":
+        return TS;
       case "FR":
         return FR;
       case "GR":

@@ -10,6 +10,7 @@ import java.util.Queue;
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.Path;
+import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Engine.GameEvents.GameEvent;
@@ -244,6 +245,7 @@ public class SpriteMapView extends MapView
 
     // Get a reference to the current action being built, if one exists.
     Unit currentActor = mapController.getContemplatedActor();
+    XYCoord actorCoord = mapController.getContemplationCoord();
     Path currentPath = mapController.getContemplatedMove();
     boolean isTargeting = mapController.isTargeting();
 
@@ -256,8 +258,8 @@ public class SpriteMapView extends MapView
     // Draw the currently-acting unit so it's on top of everything.
     if( null != currentActor )
     {
-      unitArtist.drawUnit(mapGraphics, currentActor, currentActor.x, currentActor.y, fastAnimIndex);
-      unitArtist.drawUnitIcons(mapGraphics, currentActor, currentActor.x, currentActor.y, animIndex);
+      unitArtist.drawUnit(mapGraphics, currentActor, actorCoord.xCoord, actorCoord.yCoord, fastAnimIndex);
+      unitArtist.drawUnitIcons(mapGraphics, currentActor, actorCoord.xCoord, actorCoord.yCoord, animIndex);
     }
 
     if( currentAnimation != null )
@@ -488,7 +490,7 @@ public class SpriteMapView extends MapView
     // Draw the damage estimate directly above the unit being targeted.
     int tileSize = SpriteLibrary.baseSpriteSize;
     int estimateX = (x * tileSize) + (tileSize / 2);
-    int estimateY = (y * tileSize) - dmgImage.getHeight() / 2;
+    int estimateY = Math.max((y * tileSize) - dmgImage.getHeight() / 2, dmgImage.getHeight() / 2); // Don't want it floating off-screen
     SpriteUIUtils.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY);
   }
 

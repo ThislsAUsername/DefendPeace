@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 import CommandingOfficers.Commander;
-import Engine.GameAction;
+import Engine.FloodFillFunctor;
 import Engine.GameActionSet;
 import Engine.Path;
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
@@ -16,48 +16,35 @@ import Engine.GameEvents.ResupplyEvent;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
-import Units.UnitModel.UnitEnum;
-import Units.Weapons.Weapon;
-import Units.Weapons.WeaponModel;
 
 public class Unit implements Serializable
 {
   private static final long serialVersionUID = 1L;
   public Vector<Unit> heldUnits;
   public UnitModel model;
-  public int x;
-  public int y;
+  public int x = -1;
+  public int y = -1;
+  public int ammo;
   public int fuel;
+  public int materials;
   private int captureProgress;
   private Location captureTarget;
   public Commander CO;
   public boolean isTurnOver;
   public boolean isStunned;
   private double HP;
-  public ArrayList<Weapon> weapons;
 
   public Unit(Commander co, UnitModel um)
   {
     CO = co;
     model = um;
+    ammo = model.maxAmmo;
     fuel = model.maxFuel;
+    materials = model.maxMaterials;
     isTurnOver = true;
     HP = model.maxHP;
     captureProgress = 0;
     captureTarget = null;
-    if( model.weaponModels != null )
-    {
-      weapons = new ArrayList<Weapon>();
-      for( WeaponModel weapType : model.weaponModels )
-      {
-        weapons.add(new Weapon(weapType));
-      }
-    }
-    else
-    {
-      // Just make sure we don't crash if we try to iterate on this.
-      weapons = new ArrayList<Weapon>();
-    }
     if( model.holdingCapacity > 0 )
       heldUnits = new Vector<Unit>(model.holdingCapacity);
   }
@@ -77,22 +64,26 @@ public class Unit implements Serializable
 
     // Only perform turn initialization for the unit if it is on the map.
     //   Units that are e.g. in a transport don't burn fuel, etc.
+    if( isStunned )
+    {
+      isTurnOver = true;
+      isStunned = false;
+    }
+    else
+      isTurnOver = false;
+    if( captureTarget != null && captureTarget.getResident() != this )
+    {
+      captureTarget = null;
+      captureProgress = 0;
+    }
+
+    if( null != heldUnits )
+      for( Unit cargo : heldUnits )
+        events.addAll(cargo.initTurn(map));
+
     if( null != locus )
     {
-      if( isStunned )
-      {
-        isTurnOver = true;
-        isStunned = false;
-      }
-      else
-        isTurnOver = false;
       fuel -= model.idleFuelBurn;
-      if( captureTarget != null && captureTarget.getResident() != this )
-      {
-        captureTarget = null;
-        captureProgress = 0;
-      }
-
       // If the unit is not at max health, and is on a repair tile, heal it.
       if( model.canRepairOn(locus) && !CO.isEnemy(locus.getOwner()) )
       {
@@ -104,14 +95,21 @@ public class Unit implements Serializable
         }
       }
 
-      // Collect any turn-initialization actions for this unit.
-      for( GameAction ga : model.getTurnInitActions(this) )
-      {
-        events.addAll(ga.getEvents(map));
-      }
+      // Collect any turn-initialization events for this unit.
+      events.addAll(model.getTurnInitEvents(this, map));
     } // ~If location is valid.
 
     return events;
+  }
+
+  public FloodFillFunctor getMoveFunctor(boolean includeOccupied)
+  {
+    // Units cannot normally pass through enemies
+    return getMoveFunctor(includeOccupied, false);
+  }
+  public FloodFillFunctor getMoveFunctor(boolean includeOccupied, boolean canTravelThroughEnemies)
+  {
+    return model.propulsion.getUnitMoveFunctor(this, includeOccupied, canTravelThroughEnemies);
   }
 
   /**
@@ -121,13 +119,13 @@ public class Unit implements Serializable
   public boolean canAttack(UnitModel targetType, int range, boolean afterMoving)
   {
     // if we have no weapons, we can't hurt things
-    if( weapons == null )
+    if( model.weapons == null )
       return false;
 
     boolean canHit = false;
-    for( Weapon weapon : weapons )
+    for( WeaponModel weapon : model.weapons )
     {
-      if( afterMoving && !weapon.model.canFireAfterMoving )
+      if( afterMoving && !weapon.canFireAfterMoving )
       {
         // If we are planning to move first, and the weapon
         // can't shoot after moving, then move along.
@@ -150,18 +148,18 @@ public class Unit implements Serializable
    * @param afterMoving
    * @return The best weapon for that target, or null if no usable weapon exists.
    */
-  public Weapon chooseWeapon(UnitModel targetType, int range, boolean afterMoving)
+  public WeaponModel chooseWeapon(UnitModel targetType, int range, boolean afterMoving)
   {
     // if we have no weapons, we can't hurt things
-    if( weapons == null )
+    if( model.weapons == null )
       return null;
 
-    Weapon chosenWeapon = null;
+    WeaponModel chosenWeapon = null;
     double maxDamage = 0;
-    for( Weapon weapon : weapons )
+    for( WeaponModel weapon : model.weapons )
     {
       // If the weapon isn't mobile, we cannot fire if we moved.
-      if( afterMoving && !weapon.model.canFireAfterMoving )
+      if( afterMoving && !weapon.canFireAfterMoving )
       {
         continue;
       }
@@ -173,6 +171,18 @@ public class Unit implements Serializable
       }
     }
     return chosenWeapon;
+  }
+
+  /** Expend ammo, if the weapon uses ammo */
+  public void fire(WeaponModel weapon)
+  {
+    if( !weapon.hasInfiniteAmmo )
+    {
+      if( ammo > 0 )
+        ammo--;
+      else
+        System.out.println("WARNING: fired with no available ammo!");
+    }
   }
 
   public int getHP()
@@ -201,18 +211,9 @@ public class Unit implements Serializable
     return HP - before;
   }
 
-  public void capture(Location target)
+  public boolean capture(Location target)
   {
-    if( !target.isCaptureable() )
-    {
-      System.out.println("ERROR! Attempting to capture an uncapturable Location!");
-      return;
-    }
-    if( !CO.isEnemy(target.getOwner()) )
-    {
-      System.out.println("WARNING! Attempting to capture an allied property!");
-      return;
-    }
+    boolean success = false;
 
     if( target != captureTarget )
     {
@@ -225,7 +226,10 @@ public class Unit implements Serializable
       target.setOwner(CO);
       captureProgress = 0;
       target = null;
+      success = true;
     }
+
+    return success;
   }
 
   public void stopCapturing()
@@ -256,7 +260,7 @@ public class Unit implements Serializable
   public ArrayList<GameActionSet> getPossibleActions(GameMap map, Path movePath, boolean ignoreResident)
   {
     ArrayList<GameActionSet> actionSet = new ArrayList<GameActionSet>();
-    for( UnitActionType at : model.possibleActions )
+    for( UnitActionFactory at : model.possibleActions )
     {
       GameActionSet actions = at.getPossibleActions(map, movePath, this, ignoreResident);
       if( null != actions )
@@ -266,36 +270,26 @@ public class Unit implements Serializable
     return actionSet;
   }
 
-  public boolean hasCargoSpace(UnitEnum type)
+  public boolean hasCargoSpace(long type)
   {
-    return (model.holdingCapacity > 0 && heldUnits.size() < model.holdingCapacity && model.holdables.contains(type));
+    return (model.holdingCapacity > 0 && 
+            heldUnits.size() < model.holdingCapacity &&
+            ((model.carryableMask & type) > 0) &&
+            ((model.carryableExclusionMask & type) == 0));
   }
 
   /** Grant this unit full fuel and ammunition */
   public void resupply()
   {
     fuel = model.maxFuel;
-    if( null != weapons )
-    {
-      for( Weapon wpn : weapons )
-      {
-        wpn.reload();
-      }
-    }
+    ammo = model.maxAmmo;
   }
 
   /** Returns true if resupply would have zero effect on this unit. */
   public boolean isFullySupplied()
   {
     boolean isFull = (model.maxFuel == fuel);
-    if( isFull )
-    {
-      // Check weapon ammo.
-      for( Weapon w : weapons )
-      {
-        isFull &= (w.model.maxAmmo == w.ammo);
-      }
-    }
+    isFull &= (model.maxAmmo == ammo);
     return isFull;
   }
 

@@ -1,7 +1,7 @@
 package CommandingOfficers.Assorted;
 
 import Engine.GameScenario;
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -47,7 +47,7 @@ public class Fastfield extends Commander
       if ( um.type == UnitEnum.STEALTH || um.type == UnitEnum.STEALTH_HIDE)
       {
         um.possibleActions.clear();
-        for( UnitActionType action : UnitActionType.COMBAT_VEHICLE_ACTIONS )
+        for( UnitActionFactory action : UnitActionFactory.COMBAT_VEHICLE_ACTIONS )
         {
           um.possibleActions.add(action);
         }

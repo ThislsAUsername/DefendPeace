@@ -12,7 +12,6 @@ import UI.PlayerSetupController;
 import UI.PlayerSetupInfo;
 import UI.SlidingValue;
 import UI.UIUtils;
-import Units.UnitModel;
 
 public class PlayerSetupArtist
 {
@@ -58,8 +57,6 @@ public class PlayerSetupArtist
         PlayerSetupAiArtist.draw(g, subMenu, control.getPlayerInfo(control.getHighlightedPlayer()).getCurrentColor());
       }
     }
-    // Start preloading infantry sprites in the background so the ColorFaction screen doesn't freeze on first entry.
-    PlayerSetupColorFactionArtist.preloadOneInfantrySprite();
   }
 
   private static void drawPlayerSetup(Graphics g, MapInfo mapInfo, boolean snapCursor)
@@ -107,7 +104,7 @@ public class PlayerSetupArtist
       if( (playerYCenter > -panelHeight/2) && ( playerYCenter < imageHeight+(panelHeight/2) ) )
       {
         PlayerSetupInfo playerInfo = myControl.getPlayerInfo(i);
-        Integer key = new Integer(i);
+        Integer key = i;
 
         // Get the relevant PlayerPanel.
         if( !playerPanels.containsKey(key) ) playerPanels.put(key, new PlayerPanel(playerInfo));
@@ -266,16 +263,15 @@ public class PlayerSetupArtist
       }
       if( factionChanged || colorChanged )
       {
-        UnitSpriteSet inf = SpriteLibrary.getMapUnitSpriteSet(UnitModel.UnitEnum.INFANTRY, info.getCurrentFaction(), info.getCurrentColor());
+        UnitSpriteSet inf = SpriteLibrary.getMapUnitSpriteSet(myControl.getIconicUnit(), info.getCurrentFaction(), info.getCurrentColor());
         BufferedImage infSprite = inf.sprites[inf.ACTION_IDLE].getFrame(0);
         unitPane = new SpriteUIUtils.ImageFrame(portraitPx + 4, 12, 28, portraitPx + 2, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUHIGHLIGHTCOLOR, true, infSprite);
         unitPane.render(g);
       }
       if( teamChanged )
       {
-        teamNumber = info.getCurrentTeam();
         teamPane = new SpriteUIUtils.ImageFrame(65, 23, 28, 23, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUHIGHLIGHTCOLOR, true,
-            SpriteLibrary.getMapUnitHPSprites().getFrame(info.getCurrentTeam()));
+            SpriteUIUtils.getNumberAsImage(info.getCurrentTeam()));
         teamPane.render(g);
       }
       if( aiChanged )

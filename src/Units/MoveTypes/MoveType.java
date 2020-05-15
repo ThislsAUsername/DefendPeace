@@ -4,15 +4,18 @@ import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.HashMap;
 
+import Engine.FloodFillFunctor;
+import Engine.FloodFillFunctor.BasicMoveFillFunctor;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.TerrainType;
+import Units.Unit;
 
 public class MoveType implements Serializable
 {
   private static final long serialVersionUID = 1L;
 
-  protected final Integer IMPASSABLE = 99;
+  public final static Integer IMPASSABLE = 99;
 
   // A 2-layer map. Map Weathers to a mapping of Terrains-to-cost.
   protected EnumMap<Weathers, MoveCostByTerrain> moveCosts;
@@ -29,7 +32,12 @@ public class MoveType implements Serializable
     }
   }
 
-  public MoveType( MoveType other )
+  public MoveType clone()
+  {
+    return new MoveType(this);
+  }
+
+  protected MoveType(MoveType other)
   {
     // Initialize
     this();
@@ -60,6 +68,11 @@ public class MoveType implements Serializable
     return cost.intValue();
   }
 
+  public FloodFillFunctor getUnitMoveFunctor(Unit mover, boolean includeOccupied, boolean canTravelThroughEnemies)
+  {
+    return new BasicMoveFillFunctor(mover, this, includeOccupied, canTravelThroughEnemies);
+  }
+
   /** Returns the cost to traverse the given tile, accounting for its current terrain and weather types. */
   public int getMoveCost(Environment tile)
   {
@@ -67,7 +80,7 @@ public class MoveType implements Serializable
   }
 
   /** Returns whether the unit can travel in the specified environment. */
-  public boolean canTraverse( Environment tile )
+  public boolean canTraverse(Environment tile)
   {
     return getMoveCost(tile) < IMPASSABLE;
   }

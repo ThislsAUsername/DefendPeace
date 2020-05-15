@@ -8,7 +8,6 @@ import Engine.IController;
 import UI.PlayerSetupColorFactionController;
 import UI.SlidingValue;
 import UI.UIUtils;
-import Units.UnitModel;
 
 public class PlayerSetupColorFactionArtist
 {
@@ -21,10 +20,18 @@ public class PlayerSetupColorFactionArtist
   private static int gridWidth;
   private static int gridHeight;
 
-  private static IController myControl;
+  private static PlayerSetupColorFactionController myControl;
   private static SlidingValue gridX = new SlidingValue(0);
   private static SlidingValue gridY = new SlidingValue(0);
   private static SpriteCursor spriteCursor = new SpriteCursor(0, 0, SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize, UIUtils.getCOColors()[0]);
+
+  private static boolean donePreloading = false;
+  private static InfantrySpritePreloader isp;
+  public static void startSpritePreloader(String name)
+  {
+    if( !donePreloading && (null == isp) )
+    isp = new InfantrySpritePreloader(name);
+  }
 
   public static void draw(Graphics g, IController controller)
   {
@@ -85,6 +92,12 @@ public class PlayerSetupColorFactionArtist
     BufferedImage image = SpriteLibrary.createTransparentSprite(myWidth, myHeight);
     Graphics myG = image.getGraphics();
 
+    if( isp != null )
+    {
+      isp.join();
+      isp = null;
+    }
+
     for( int c = 0; c < UIUtils.getCOColors().length; ++c)
       for(int f = 0; f < UIUtils.getFactions().length; ++f)
       {
@@ -96,7 +109,7 @@ public class PlayerSetupColorFactionArtist
         if( (xOff < myWidth) && (yOff < myHeight) && (xOff > -unitSizePx) && (yOff > -unitSizePx))
         {
           if( null == unitArray[f][c] )
-            unitArray[f][c] = SpriteLibrary.getMapUnitSpriteSet(UnitModel.UnitEnum.INFANTRY, UIUtils.getFactions()[f], UIUtils.getCOColors()[c]).sprites[0].getFrame(0);
+            unitArray[f][c] = SpriteLibrary.getMapUnitSpriteSet(myControl.iconicUnitName, UIUtils.getFactions()[f], UIUtils.getCOColors()[c]).sprites[0].getFrame(0);
           myG.drawImage(unitArray[f][c], xOff, yOff, null);
         }
       }
@@ -118,7 +131,7 @@ public class PlayerSetupColorFactionArtist
     }
 
     // Just pull one sprite to start with. Loading everything at once might take a while.
-    unitArray[0][0] = SpriteLibrary.getMapUnitSpriteSet(UnitModel.UnitEnum.INFANTRY, UIUtils.getFactions()[0], UIUtils.getCOColors()[0]).sprites[0].getFrame(0);
+    unitArray[0][0] = SpriteLibrary.getMapUnitSpriteSet(myControl.iconicUnitName, UIUtils.getFactions()[0], UIUtils.getCOColors()[0]).sprites[0].getFrame(0);
 
     unitSizePx = unitArray[0][0].getHeight(); // Units are square.
     unitBuffer = unitSizePx / 3; // Space between options in the grid.
@@ -128,25 +141,41 @@ public class PlayerSetupColorFactionArtist
     gridHeight = numFactions*unitSizePx + unitBuffer*(numFactions-1);
   }
 
-  private static int nextFac = 0;
-  private static int nextCol = 0;
-  private static boolean donePreloading = false;
-  /** This can be called repeatedly on the sly to get all infantry sprites
-   * in memory and make this option screen less sluggish on first entry. */
-  public static boolean preloadOneInfantrySprite()
+  public static class InfantrySpritePreloader implements Runnable
   {
-    if( !donePreloading )
+    private Thread myThread;
+    private String myUnitName;
+
+    public InfantrySpritePreloader(String unitName)
     {
-      SpriteLibrary.getMapUnitSpriteSet(UnitModel.UnitEnum.INFANTRY, UIUtils.getFactions()[nextFac], UIUtils.getCOColors()[nextCol]);
-      nextFac++;
-      if( nextFac >= UIUtils.getFactions().length )
+      myThread = new Thread(this);
+      myThread.start();
+      myUnitName = unitName;
+    }
+
+    @Override
+    public void run()
+    {
+      for( int nextCol = 0; nextCol < UIUtils.getCOColors().length; ++nextCol )
       {
-        nextFac = 0;
-        nextCol++;
-        if( nextCol >= UIUtils.getCOColors().length )
-          donePreloading = true;
+        for( int nextFac = 0; nextFac < UIUtils.getFactions().length; ++nextFac )
+        {
+          SpriteLibrary.getMapUnitSpriteSet(myUnitName, UIUtils.getFactions()[nextFac], UIUtils.getCOColors()[nextCol]);
+        }
+      }
+      donePreloading = true;
+    }
+
+    public void join()
+    {
+      try
+      {
+        myThread.join();
+      }
+      catch(InterruptedException ie)
+      {
+        System.out.println("[InfantrySpritePreloader] Exception! Details:\n  " + ie.toString());
       }
     }
-    return donePreloading;
   }
 }

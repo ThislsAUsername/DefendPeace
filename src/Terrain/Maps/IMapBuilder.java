@@ -13,7 +13,9 @@ public class IMapBuilder
   protected static final TerrainType DN = TerrainType.DUNES;
   protected static final TerrainType FC = TerrainType.FACTORY;
   protected static final TerrainType AP = TerrainType.AIRPORT;
+  protected static final TerrainType TA = TerrainType.TEMP_AIRPORT;
   protected static final TerrainType SP = TerrainType.SEAPORT;
+  protected static final TerrainType TS = TerrainType.TEMP_SEAPORT;
   protected static final TerrainType FR = TerrainType.FOREST;
   protected static final TerrainType GR = TerrainType.GRASS;
   protected static final TerrainType HQ = TerrainType.HEADQUARTERS;

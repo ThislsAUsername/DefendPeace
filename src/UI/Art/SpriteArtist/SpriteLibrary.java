@@ -160,102 +160,49 @@ public class SpriteLibrary
     int w = baseSpriteSize;
     int h = baseSpriteSize;
 
+    if( TerrainSpriteSet.isTerrainObject(terrainType))
+      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
+    else
+      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
+
     // Load the appropriate images and define the necessary relationships for each tile type.
     if( terrainType == TerrainType.BRIDGE )
     {
-      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
       ss.addTerrainAffinity(TerrainType.GRASS); // No need to also add ROAD, since GRASS is the base of ROAD.
       ss.denyTerrainAffinity(TerrainType.RIVER); // RIVER has a base of GRASS, but we don't want bridge to tile with it.
     }
-    else if( terrainType == TerrainType.CITY )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
-    }
-    else if( terrainType == TerrainType.PILLAR )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
-    }
-    else if( terrainType == TerrainType.BUNKER )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w*2, h*2);
-    }
-    else if( terrainType == TerrainType.DUNES )
-    {}
-    else if( terrainType == TerrainType.FACTORY )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
-    }
-    else if( terrainType == TerrainType.AIRPORT )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
-    }
-    else if( terrainType == TerrainType.SEAPORT )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
-    }
-    else if( terrainType == TerrainType.FOREST )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
-    }
     else if( terrainType == TerrainType.GRASS )
     {
-      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
       ss.addTileTransition(TerrainType.BRIDGE, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
-    }
-    else if( terrainType == TerrainType.HEADQUARTERS )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
-    }
-    else if( terrainType == TerrainType.TOWER )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
-    }
-    else if( terrainType == TerrainType.LAB )
-    {
-      // TODO: get actual sprites for this
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
-    }
-    else if( terrainType == TerrainType.MOUNTAIN )
-    {
-      ss = new TerrainSpriteSet(terrainType, formatString, w * 2, h * 2);
     }
     else if( terrainType == TerrainType.SEA )
     {
-      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
       ss.addTileTransition(TerrainType.GRASS, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
       ss.addTileTransition(TerrainType.BRIDGE, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
       ss.addTileTransition(TerrainType.RIVER, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
     }
     else if( terrainType == TerrainType.REEF )
     {
-      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
       ss.addTileTransition(TerrainType.SEA, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
     }
     else if( terrainType == TerrainType.RIVER )
     {
-      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
       ss.addTileTransition(TerrainType.BRIDGE, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
       ss.addTerrainAffinity(TerrainType.SHOAL);
       ss.addTerrainAffinity(TerrainType.SEA);
     }
     else if( terrainType == TerrainType.ROAD )
     {
-      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
       ss.addTerrainAffinity(TerrainType.BRIDGE);
       ss.addTerrainAffinity(TerrainType.HEADQUARTERS);
       ss.addTerrainAffinity(TerrainType.FACTORY);
     }
     else if( terrainType == TerrainType.SHOAL )
     {
-      ss = new TerrainSpriteSet(terrainType, formatString, w, h);
       ss.addTileTransition(TerrainType.SEA, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
       ss.addTileTransition(TerrainType.GRASS, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
       ss.addTileTransition(TerrainType.BRIDGE, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
       ss.addTileTransition(TerrainType.RIVER, String.format(transitionFormatString, terrainType.toString().toLowerCase(), "%s", "%s"), w, h);
-    }
-    else
-    {
-      System.out.println("ERROR! [SpriteLibrary.loadTerrainSpriteSet] Unknown terrain type " + terrainType);
     }
 
     // If this tile is owned by someone, fly their colors.
@@ -324,24 +271,25 @@ public class SpriteLibrary
 
   private static class UnitSpriteSetKey
   {
-    public final UnitModel.UnitEnum unitTypeKey;
+    public final String unitTypeKey;
     public final Faction factionKey;
     public final Color colorKey;
     private static ArrayList<UnitSpriteSetKey> instances = new ArrayList<UnitSpriteSetKey>();
 
-    private UnitSpriteSetKey(UnitModel.UnitEnum unitType, Faction faction, Color color)
+    private UnitSpriteSetKey(String unitType, Faction faction, Color color)
     {
       unitTypeKey = unitType;
       factionKey = faction;
       colorKey = color;
     }
 
-    public static UnitSpriteSetKey instance(UnitModel.UnitEnum unitType, Faction faction, Color color)
+    public static UnitSpriteSetKey instance(String unitType, Faction faction, Color color)
     {
       UnitSpriteSetKey key = null;
+      String stdType = UnitModel.standardizeID(unitType);
       for( int i = 0; i < instances.size(); ++i )
       {
-        if( instances.get(i).unitTypeKey == unitType && instances.get(i).factionKey == faction && instances.get(i).colorKey == color)
+        if( instances.get(i).unitTypeKey.equals(stdType) && instances.get(i).factionKey == faction && instances.get(i).colorKey == color)
         {
           key = instances.get(i);
           break;
@@ -349,7 +297,7 @@ public class SpriteLibrary
       }
       if( key == null )
       {
-        key = new UnitSpriteSetKey(unitType, faction, color);
+        key = new UnitSpriteSetKey(stdType, faction, color);
         instances.add(key);
       }
       return key;
@@ -358,10 +306,10 @@ public class SpriteLibrary
 
   public static UnitSpriteSet getMapUnitSpriteSet(Unit unit)
   {
-    return getMapUnitSpriteSet(unit.model.type, unit.CO.faction, unit.CO.myColor);
+    return getMapUnitSpriteSet(unit.model.name, unit.CO.faction, unit.CO.myColor);
   }
 
-  public static UnitSpriteSet getMapUnitSpriteSet(UnitModel.UnitEnum type, Faction faction, Color color)
+  public static UnitSpriteSet getMapUnitSpriteSet(String type, Faction faction, Color color)
   {
     UnitSpriteSetKey key = UnitSpriteSetKey.instance(type, faction, color);
     if( !mapUnitSpriteSetMap.containsKey(key) )
@@ -384,11 +332,11 @@ public class SpriteLibrary
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
 
-  private static String getMapUnitSpriteFilename(UnitModel.UnitEnum unitType, String faction)
+  private static String getMapUnitSpriteFilename(String unitType, String faction)
   {
     StringBuffer spriteFile = new StringBuffer();
     spriteFile.append("res/unit/faction/").append(faction).append("/");
-    spriteFile.append(unitType.toString().toLowerCase()).append("_map.png");
+    spriteFile.append(UnitModel.standardizeID(unitType)).append("_map.png");
     return spriteFile.toString();
   }
 

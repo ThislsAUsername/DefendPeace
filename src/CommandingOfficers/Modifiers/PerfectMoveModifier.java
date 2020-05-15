@@ -33,7 +33,7 @@ public class PerfectMoveModifier extends GenericUnitModifier
     for( UnitModel um : models )
     {
       originalPropulsions.put(um,um.propulsion);
-      MoveType newGroove = new MoveType(um.propulsion);
+      MoveType newGroove = um.propulsion.clone();
       um.propulsion = newGroove;
 
       for( TerrainType terrain : TerrainType.TerrainTypeList )

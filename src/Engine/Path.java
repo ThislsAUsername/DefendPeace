@@ -164,14 +164,17 @@ public class Path
   /**
    * @return the amount of fuel it would cost to travel this path with the given unit type 
   **/
-  public int getFuelCost(UnitModel model, GameMap map)
+  public int getFuelCost(UnitModel unit, GameMap map)
   {
     int cost = 0;
+    boolean includeOccupied = true, canTravelThroughEnemies = true;
+    FloodFillFunctor fff = unit.propulsion.getUnitMoveFunctor(null, includeOccupied, canTravelThroughEnemies);
     // We iterate from 1 because the first waypoint is the unit's initial position.
     for (int i = 1; i < waypoints.size(); i++)
     {
-      PathNode loc = waypoints.get(i);
-      cost += model.propulsion.getMoveCost(map.getEnvironment(loc.x, loc.y));
+      XYCoord from = waypoints.get(i-1).GetCoordinates();
+      XYCoord to   = waypoints.get( i ).GetCoordinates();
+      cost += fff.getTransitionCost(map, from, to);
     }
     return cost;
   }
@@ -201,6 +204,16 @@ public class Path
     return p;
   }
 
+  public XYCoord getEndCoord()
+  {
+    PathNode p = getEnd();
+
+    if( null == p )
+      return null;
+
+    return new XYCoord(p.x, p.y);
+  }
+
   public static class PathNode
   {
     public int x;
@@ -210,6 +223,10 @@ public class Path
     {
       this.x = x;
       this.y = y;
+    }
+    public XYCoord GetCoordinates()
+    {
+      return new XYCoord(x, y);
     }
     @Override
     public String toString()
@@ -231,15 +248,29 @@ public class Path
 
   public void snipCollision(GameMap map, Unit unit)
   {
-    for( int i = 0; i < waypoints.size(); i++)
+    boolean includeOccupiedSpaces = false;
+    FloodFillFunctor fff = unit.getMoveFunctor(includeOccupiedSpaces);
+
+    // Snip if we can't actually traverse, iterate starting at the fist place we move
+    for( int i = 1; i < waypoints.size(); ++i)
     {
-      PathNode point = waypoints.get(i);
-      Unit obstacle = map.getLocation(point.x, point.y).getResident();
-      if( null != obstacle && unit.CO.isEnemy(obstacle.CO) )
+      XYCoord from = waypoints.get(i-1).GetCoordinates();
+      XYCoord to   = waypoints.get( i ).GetCoordinates();
+      if( unit.model.movePower < fff.getTransitionCost(map, from, to) )
       {
         snip(i);
         break;
       }
+    }
+
+    // Snip if we can't arrive, iterate backwards
+    // Don't check zero since we don't want to invalidate the path
+    for( int i = waypoints.size()-1; i > 0; --i )
+    {
+      XYCoord to = waypoints.get(i).GetCoordinates();
+      if( fff.canEnd(map, to) )
+        break;
+      snip(i);
     }
   }
 

@@ -12,9 +12,10 @@ import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.Path;
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -139,8 +140,8 @@ public class SpenderAI implements AIController
         stateChange = false; // There's been no gamestate change since we last iterated through all the units, since we're about to do just that
         for( Unit unit : myCo.units )
         {
-          if( unit.isTurnOver )
-            continue; // No actions for stale units.
+          if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y))
+            continue; // No actions for units that are stale or out of bounds
           unitQueue.offer(unit);
         }
       }
@@ -153,8 +154,7 @@ public class SpenderAI implements AIController
         boolean foundAction = false;
 
         // Find the possible destinations.
-        boolean includeTransports = true;
-        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeTransports);
+        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
 
         for( XYCoord coord : destinations )
         {
@@ -166,7 +166,7 @@ public class SpenderAI implements AIController
           for( GameActionSet actionSet : actionSets )
           {
             // See if we have the option to attack.
-            if( actionSet.getSelected().getType() == UnitActionType.ATTACK )
+            if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
             {
               actions.offer(actionSet.getSelected());
               foundAction = true;
@@ -174,7 +174,7 @@ public class SpenderAI implements AIController
             }
 
             // Otherwise, see if we have the option to capture.
-            if( actionSet.getSelected().getType() == UnitActionType.CAPTURE )
+            if( actionSet.getSelected().getType() == UnitActionFactory.CAPTURE )
             {
               actions.offer(actionSet.getSelected());
               capturingProperties.add(coord);
@@ -204,8 +204,7 @@ public class SpenderAI implements AIController
           Unit unit = travelQueue.poll();
 
           // Find the possible destinations.
-          boolean includeTransports = false;
-          ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeTransports);
+          ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
 
           if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
           {
@@ -216,7 +215,7 @@ public class SpenderAI implements AIController
             boolean validTarget = false;
             ArrayList<XYCoord> validTargets = new ArrayList<>();
 
-            if( unit.model.possibleActions.contains(UnitActionType.CAPTURE) )
+            if( unit.model.possibleActions.contains(UnitActionFactory.CAPTURE) )
             {
               validTargets.addAll(unownedProperties);
             }
@@ -252,7 +251,7 @@ public class SpenderAI implements AIController
               // This will allow us to navigate around large obstacles that require us to move away
               // from our intended long-term goal.
               path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
-              goal = new XYCoord(path.getEnd().x, path.getEnd().y); // Set the last location as our goal.
+              goal = path.getEndCoord(); // Set the last location as our goal.
 
               log(String.format("    Intermediate waypoint: %s", goal));
 
@@ -263,7 +262,7 @@ public class SpenderAI implements AIController
               Path movePath = Utils.findShortestPath(unit, destination, gameMap);
               if( movePath.getPathLength() > 1 ) // We only want to try to travel if we can actually go somewhere
               {
-                GameAction move = new GameAction.WaitAction(unit, movePath);
+                GameAction move = new WaitLifecycle.WaitAction(unit, movePath);
                 actions.offer(move);
                 stateChange = true;
                 break;
@@ -306,7 +305,7 @@ public class SpenderAI implements AIController
           for( UnitModel unit : units )
           {
             // I only want combat units, since I don't understand transports
-            if( !unit.weaponModels.isEmpty() && unit.getCost() <= budget )
+            if( !unit.weapons.isEmpty() && unit.getCost() <= budget )
             {
               budget -= unit.getCost();
               purchases.put(locShopList.getKey(), unit);
@@ -328,7 +327,7 @@ public class SpenderAI implements AIController
             for( UnitModel unit : units )
             {
               // I want expensive units, but they have to have guns
-              if( budget > unit.getCost() && unit.getCost() > currentPurchase.getCost() && !unit.weaponModels.isEmpty() )
+              if( budget > unit.getCost() && unit.getCost() > currentPurchase.getCost() && !unit.weapons.isEmpty() )
                 currentPurchase = unit;
             }
             // once we've found the most expensive thing we can buy here, record that

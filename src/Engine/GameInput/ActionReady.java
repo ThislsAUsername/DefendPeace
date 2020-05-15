@@ -1,5 +1,8 @@
 package Engine.GameInput;
 
+import Engine.GameAction;
+import Engine.UnitActionLifecycles.LaunchLifecycle.LaunchAction;
+
 /************************************************************
  * Terminal state - just provides the selected action.      *
  ************************************************************/
@@ -13,6 +16,10 @@ class ActionReady extends GameInputState<Object>
   @Override
   protected OptionSet initOptions()
   {
-    return new OptionSet(myStateData.actionSet.getSelected());
+    GameAction readiedAction = myStateData.actionSet.getSelected();
+    // If the unit needs to be launched, wrap its action in a launch action.
+    if (null != myStateData.unitLauncher)
+      readiedAction = new LaunchAction(myStateData.unitLauncher, myStateData.unitActor, readiedAction);
+    return new OptionSet(readiedAction);
   }
 }

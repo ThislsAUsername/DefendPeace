@@ -4,7 +4,7 @@ import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.GameScenario;
 import Engine.Path;
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
@@ -56,7 +56,7 @@ public class Greyfield extends Commander
       if ( um.type == UnitEnum.STEALTH || um.type == UnitEnum.STEALTH_HIDE)
       {
         um.possibleActions.clear();
-        for( UnitActionType action : UnitActionType.COMBAT_VEHICLE_ACTIONS )
+        for( UnitActionFactory action : UnitActionFactory.COMBAT_VEHICLE_ACTIONS )
         {
           um.possibleActions.add(action);
         }
@@ -116,7 +116,7 @@ public class Greyfield extends Commander
   
   
   
-  public static class BuildSeaplane extends UnitActionType
+  public static class BuildSeaplane extends UnitActionFactory
   {
     private static final long serialVersionUID = 1L;
     final Commander payer;
@@ -172,7 +172,7 @@ public class Greyfield extends Commander
     }
 
     @Override
-    public UnitActionType getType()
+    public UnitActionFactory getType()
     {
       return type;
     }

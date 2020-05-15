@@ -28,6 +28,8 @@ public class GameStatsController implements InfoController
     
     coOptionSelector = new OptionSelector(myGame.commanders.length);
     pageSelector = new OptionSelector(infoPages.size());
+    
+    coOptionSelector.setSelectedOption(myGame.getActiveCOIndex());
   }
 
   @Override
@@ -46,14 +48,13 @@ public class GameStatsController implements InfoController
         // Left/Right changes which sub-page has focus.
         pageSelector.handleInput(action);
         break;
-      case ENTER:
+      case SELECT:
       case BACK:
         // Reset the selectors and leave this menu.
         coOptionSelector.setSelectedOption(0);
         pageSelector.setSelectedOption(0);
         goBack = true;
         break;
-      case NO_ACTION:
         default:
           // Other actions are not supported.
     }

@@ -7,7 +7,6 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
 import Units.Unit;
-import Units.UnitModel.UnitEnum;
 
 /**
  * Interface for building test cases for both unit tests and higher-level functionality as needed.
@@ -47,7 +46,7 @@ public abstract class TestCase
    * 
    * NOTE: This function does not take into account existing units, so beware stomping.
    */
-  protected static Unit addUnit(MapMaster map, Commander co, UnitEnum type, int x, int y)
+  protected static Unit addUnit(MapMaster map, Commander co, long type, int x, int y)
   {
     Unit u = new Unit(co, co.getUnitModel(type));
     map.addNewUnit(u, x, y);

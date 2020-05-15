@@ -49,7 +49,8 @@ public class PlayerSetupController implements IController
     for(int co = 0; co < numCos; ++co)
     {
       // Set up our option selection framework
-      coSelectors[co] = new PlayerSetupInfo(co, CommanderLibrary.getCommanderList(), UIUtils.getCOColors(), UIUtils.getFactions(), AILibrary.getAIList());
+      coSelectors[co] = new PlayerSetupInfo(co, CommanderLibrary.getCommanderList(),
+          UIUtils.getCOColors(), UIUtils.getFactions(), AILibrary.getAIList());
     }
   }
 
@@ -86,7 +87,7 @@ public class PlayerSetupController implements IController
 
     switch(action)
     {
-      case ENTER:
+      case SELECT:
         // Open a sub-menu based on which player attribute is selected, or start the game.
         if( categorySelector.getSelectionNormalized() == SelectionCategories.COMMANDER.ordinal() )
         {
@@ -95,7 +96,7 @@ public class PlayerSetupController implements IController
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.COLOR_FACTION.ordinal() )
         {
-          subMenu = new PlayerSetupColorFactionController(getPlayerInfo(playerSelector.getSelectionNormalized()));
+          subMenu = new PlayerSetupColorFactionController(getPlayerInfo(playerSelector.getSelectionNormalized()), getIconicUnit());
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.TEAM.ordinal() )
         {
@@ -140,8 +141,6 @@ public class PlayerSetupController implements IController
       case RIGHT:
         categorySelector.handleInput(action);
         break;
-      case NO_ACTION:
-        break;
         default:
           System.out.println("Warning: Unsupported input " + action + " in CO setup menu.");
     }
@@ -161,5 +160,10 @@ public class PlayerSetupController implements IController
   public PlayerSetupInfo getPlayerInfo(int p)
   {
     return coSelectors[p];
+  }
+
+  public String getIconicUnit()
+  {
+    return gameBuilder.unitModelScheme.getIconicUnitName();
   }
 }

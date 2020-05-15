@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.GameScenario;
-import Engine.UnitActionType;
 import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEventQueue;
+import Engine.UnitActionLifecycles.TransformLifecycle;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
@@ -60,13 +60,14 @@ public class Meridian extends Commander
   {
     super(coInfo, rules);
 
-    // Meridian's tanks and arty cost the same
-    UnitModel tank = getUnitModel(UnitModel.UnitEnum.TANK);
-    UnitModel arty = getUnitModel(UnitModel.UnitEnum.ARTILLERY);
-    tank.moneyCostAdjustment      -= 500;
-    arty.moneyCostAdjustment      += 500;
-    tank.possibleActions.add(new UnitActionType.Transform(UnitModel.UnitEnum.ARTILLERY, "~ARTY"));
-    arty.possibleActions.add(new UnitActionType.Transform(UnitModel.UnitEnum.TANK,      "~TANK"));
+    // Meridian's basic tanks and arty cost the same
+    UnitModel tank = getUnitModel(UnitModel.ASSAULT);
+    UnitModel arty = getUnitModel(UnitModel.SIEGE);
+    int costShift = (tank.getCost() - arty.getCost())/2;
+    tank.moneyCostAdjustment -= costShift;
+    arty.moneyCostAdjustment += costShift;
+    tank.possibleActions.add(new TransformLifecycle.TransformFactory(arty, "~ARTY"));
+    arty.possibleActions.add(new TransformLifecycle.TransformFactory(tank, "~TANK"));
 
     addCommanderAbility(new ChangeAndFlow(this));
     addCommanderAbility(new VehicularCharge(this));
@@ -178,7 +179,7 @@ public class Meridian extends Commander
       // Lastly, all land vehicles are refreshed and able to move again.
       for( Unit unit : COcast.units )
       {
-        if( unit.model.chassis == UnitModel.ChassisEnum.TANK )
+        if( unit.model.isAll(UnitModel.TANK) )
         {
           if (unit.isTurnOver)
             COcast.toBeNerfed.add(unit);

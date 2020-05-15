@@ -10,9 +10,10 @@ import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.Path;
-import Engine.UnitActionType;
+import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -118,7 +119,8 @@ public class InfantrySpamAI implements AIController
     // Handle actions for each unit the CO owns.
     for( Unit unit : myCo.units )
     {
-      if( unit.isTurnOver ) continue; // No actions for stale units.
+      if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y))
+        continue; // No actions for units that are stale or out of bounds
       boolean foundAction = false;
 
       // Find the possible unit actions.
@@ -131,7 +133,7 @@ public class InfantrySpamAI implements AIController
         for( GameActionSet actionSet : actionSets )
         {
           // See if we have the option to attack.
-          if( actionSet.getSelected().getType() == UnitActionType.ATTACK )
+          if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
           {
             actions.offer(actionSet.getSelected() );
             foundAction = true;
@@ -139,7 +141,7 @@ public class InfantrySpamAI implements AIController
           }
           
           // Otherwise, see if we have the option to capture.
-          if( actionSet.getSelected().getType() == UnitActionType.CAPTURE )
+          if( actionSet.getSelected().getType() == UnitActionFactory.CAPTURE )
           {
             actions.offer(actionSet.getSelected() );
             capturingProperties.add(coord);
@@ -176,31 +178,19 @@ public class InfantrySpamAI implements AIController
         {
           log("    Failed to find a path to a capturable property. Waiting");
           // We couldn't find a valid move point (are we on an island?). Just give up.
-          GameAction wait = new GameAction.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
+          GameAction wait = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
           actions.offer(wait);
           break;
         }
 
         log(String.format("    Selected %s at %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal));
 
-        // Choose the point on the path just out of our range as our 'goal', and try to move there.
-        // This will allow us to navigate around large obstacles that require us to move away
-        // from our intended long-term goal.
-        path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
-        goal = new XYCoord(path.getEnd().x, path.getEnd().y); // Set the last location as our goal.
-
-        log(String.format("    Intermediate waypoint: %s", goal));
-
-        // Sort my currently-reachable move locations by distance from the goal,
-        // and build a GameAction to move to the closest one.
-        boolean includeTransports = false;
-        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeTransports);
-        Utils.sortLocationsByDistance(goal, destinations);
-        XYCoord destination = destinations.get(0);
-        Path movePath = Utils.findShortestPath(unit, destination, gameMap);
-        GameAction move = new GameAction.WaitAction(unit, movePath);
-        actions.offer(move);
-        break;
+        GameAction move = AIUtils.moveTowardLocation(unit, goal, gameMap);
+        if( null != move )
+        {
+          actions.offer(move);
+          break;
+        }
       }
     }
 

@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
 import Engine.IController;
+import Engine.XYCoord;
 import Terrain.MapInfo;
 import UI.PlayerSetupInfo;
 import UI.PlayerSetupTeamController;
@@ -70,7 +71,7 @@ public class PlayerSetupTeamArtist
       if( (drawYCenter > -panelHeight/2) && ( drawYCenter < SpriteOptions.getScreenDimensions().getHeight()+(panelHeight/2) ) )
       {
         PlayerSetupInfo playerInfo = control.getPlayerInfo(i);
-        Integer key = new Integer(i);
+        Integer key = i;
 
         // Get the relevant PlayerPanel.
         if( !teamPanels.containsKey(key) ) teamPanels.put(key, new TeamPanel(playerInfo));
@@ -114,6 +115,7 @@ public class PlayerSetupTeamArtist
 
     // Draw the mini map.
     myG.drawImage(miniMap, mapLeft, mapTop, mapWidth, mapHeight, null);
+    drawPlayerPropertyHighlights(myG, mapLeft, mapTop, mapInfo, mmScale, highlightedPlayer, (int) (Math.abs(target - player0YCenter.get())/4));
 
     // Render the final composed image to the window.
     g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
@@ -174,9 +176,8 @@ public class PlayerSetupTeamArtist
       Graphics g = myImage.getGraphics();
       if( teamNumber != info.getCurrentTeam() )
       {
-        teamNumber = info.getCurrentTeam();
         teamFrame = new SpriteUIUtils.ImageFrame(commanderFrame.width+2, teamLabel.height+2, 28, 23, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUHIGHLIGHTCOLOR, true,
-            SpriteLibrary.getMapUnitHPSprites().getFrame(info.getCurrentTeam()));
+            SpriteUIUtils.getNumberAsImage(info.getCurrentTeam()));
         teamFrame.render(g);
       }
       if( !UIUtils.getPaletteName(info.getCurrentColor()).equals(colorName) )
@@ -187,6 +188,22 @@ public class PlayerSetupTeamArtist
         commanderFrame.render(g);
       }
       return myImage;
+    }
+  }
+
+  /**
+   * Draws little white boxes around all the currently-highlighted player's properties.
+   * @param distance - defines how far the boxes should be from the property edge (serves to highlight the new properties when switching between players)
+   */
+  private static void drawPlayerPropertyHighlights(Graphics g, int baseX, int baseY, MapInfo mapInfo, int scale, int faction, int distance)
+  {
+    g.setColor(Color.WHITE);
+    XYCoord[] ownedCoords = mapInfo.COProperties[faction];
+    for( XYCoord coord : ownedCoords )
+    {
+      int x = baseX + coord.xCoord * scale - distance, y = baseY + coord.yCoord * scale - distance;
+      int s = scale + distance * 2;
+      g.drawRect(x, y, s, s);
     }
   }
 }

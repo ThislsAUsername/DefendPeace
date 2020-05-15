@@ -7,7 +7,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import CommandingOfficers.Modifiers.CODamageModifier;
@@ -32,36 +31,9 @@ import Terrain.Location;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import UI.UIUtils.Faction;
-import Units.APCModel;
-import Units.AntiAirModel;
-import Units.ArtilleryModel;
-import Units.BBoatModel;
-import Units.BBombModel;
-import Units.BCopterModel;
-import Units.BattleshipModel;
-import Units.BomberModel;
-import Units.CarrierModel;
-import Units.CruiserModel;
-import Units.FighterModel;
-import Units.InfantryModel;
-import Units.LanderModel;
-import Units.MDTankModel;
-import Units.MechModel;
-import Units.MegatankModel;
-import Units.MobileSAMModel;
-import Units.NeotankModel;
-import Units.PiperunnerModel;
-import Units.ReconModel;
-import Units.RocketsModel;
-import Units.StealthHideModel;
-import Units.StealthModel;
-import Units.SubModel;
-import Units.SubSubModel;
-import Units.TCopterModel;
-import Units.TankModel;
 import Units.Unit;
 import Units.UnitModel;
-import Units.UnitModel.UnitEnum;
+import Units.UnitModelScheme.GameReadyModels;
 
 public class Commander extends GameEventListener implements Serializable
 {
@@ -71,7 +43,7 @@ public class Commander extends GameEventListener implements Serializable
   public final GameScenario.GameRules gameRules;
   public GameMap myView;
   public ArrayList<Unit> units;
-  public Map<UnitEnum, UnitModel> unitModels = new HashMap<UnitEnum, UnitModel>();
+  public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
   public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
   public Set<XYCoord> ownedProperties;
   public ArrayDeque<COModifier> modifiers;
@@ -98,60 +70,11 @@ public class Commander extends GameEventListener implements Serializable
     coInfo = info;
     gameRules = rules;
 
-    // TODO We probably don't want to hard-code the buildable units.
-    ArrayList<UnitModel> factoryModels = new ArrayList<UnitModel>();
-    ArrayList<UnitModel> seaportModels = new ArrayList<UnitModel>();
-    ArrayList<UnitModel> airportModels = new ArrayList<UnitModel>();
-
-    // Define everything we can build from a Factory.
-    factoryModels.add(new InfantryModel());
-    factoryModels.add(new MechModel());
-    factoryModels.add(new APCModel());
-    factoryModels.add(new ArtilleryModel());
-    factoryModels.add(new ReconModel());
-    factoryModels.add(new TankModel());
-    factoryModels.add(new MDTankModel());
-    factoryModels.add(new NeotankModel());
-    factoryModels.add(new MegatankModel());
-    factoryModels.add(new RocketsModel());
-    factoryModels.add(new AntiAirModel());
-    factoryModels.add(new MobileSAMModel());
-    factoryModels.add(new PiperunnerModel());
-
-    // Record those units we can get from a Seaport.
-    seaportModels.add(new LanderModel());
-    seaportModels.add(new CruiserModel());
-    seaportModels.add(new SubModel());
-    seaportModels.add(new BattleshipModel());
-    seaportModels.add(new CarrierModel());
-    seaportModels.add(new BBoatModel());
-
-    // Inscribe those war machines obtainable from an Airport.
-    airportModels.add(new TCopterModel());
-    airportModels.add(new BCopterModel());
-    airportModels.add(new FighterModel());
-    airportModels.add(new BomberModel());
-    airportModels.add(new StealthModel());
-    airportModels.add(new BBombModel());
-
-    // Dump these lists into a hashmap for easy reference later.
-    unitProductionByTerrain = new HashMap<TerrainType, ArrayList<UnitModel>>();
-    unitProductionByTerrain.put(TerrainType.FACTORY, factoryModels);
-    unitProductionByTerrain.put(TerrainType.SEAPORT, seaportModels);
-    unitProductionByTerrain.put(TerrainType.AIRPORT, airportModels);
-
-    // Compile one master list of everything we can build.
-    for (UnitModel um : factoryModels)
-      unitModels.put(um.type, um);
-    for (UnitModel um : seaportModels)
-      unitModels.put(um.type, um);
-    for (UnitModel um : airportModels)
-      unitModels.put(um.type, um);
-
-    UnitModel subsub = new SubSubModel();
-    unitModels.put(subsub.type, subsub); // We don't want a separate "submerged sub" build option
-    UnitModel stealthy = new StealthHideModel();
-    unitModels.put(stealthy.type, stealthy);
+    // Fetch our fieldable unit types from the rules
+    GameReadyModels GRMs = rules.unitModelScheme.getGameReadyModels();
+    unitProductionByTerrain = GRMs.shoppingList;
+    for (UnitModel um : GRMs.unitModels)
+      unitModels.add(um);
 
     modifiers = new ArrayDeque<COModifier>();
     units = new ArrayList<Unit>();
@@ -274,10 +197,47 @@ public class Commander extends GameEventListener implements Serializable
     return true;
   }
 
-  // Leaving this for now, to avoid merge conflicts
-  public UnitModel getUnitModel(UnitEnum unitType)
+  public UnitModel getUnitModel(long unitRole)
   {
-    return unitModels.get(unitType);
+    return getUnitModel(unitRole, true);
+  }
+  public UnitModel getUnitModel(long unitRole, boolean matchOnAny)
+  {
+    UnitModel um = null;
+
+    for( UnitModel iter : unitModels )
+    {
+      boolean some = iter.isAny(unitRole);
+      boolean all = iter.isAll(unitRole);
+      if( all || (some && matchOnAny) )
+      {
+        um = iter;
+        break;
+      }
+    }
+
+    return um;
+  }
+
+  public ArrayList<UnitModel> getAllModels(long unitRole)
+  {
+    return getAllModels(unitRole, true);
+  }
+  public ArrayList<UnitModel> getAllModels(long unitRole, boolean matchOnAny)
+  {
+    ArrayList<UnitModel> models = new ArrayList<UnitModel>();
+
+    for( UnitModel iter : unitModels )
+    {
+      boolean some = iter.isAny(unitRole);
+      boolean all = iter.isAll(unitRole);
+      if( all || (some && matchOnAny) )
+      {
+        models.add(iter);
+      }
+    }
+
+    return models;
   }
   
   /**

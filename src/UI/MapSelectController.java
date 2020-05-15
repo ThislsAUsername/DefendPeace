@@ -64,7 +64,7 @@ public class MapSelectController implements IController
     boolean exitMenu = false;
     switch(action)
     {
-      case ENTER:
+      case SELECT:
         // Create the GameBuilder with the selected map, and transition to the CO select screen.
         // If we go forward/back a few times, the old copies of these get replaced and garbage-collected.
         GameBuilder gameBuilder = new GameBuilder( MapLibrary.getMapList().get( optionSelector.getSelectionNormalized() ) );
@@ -79,8 +79,6 @@ public class MapSelectController implements IController
       case LEFT:
       case RIGHT:
         optionSelector.handleInput(action);
-        break;
-      case NO_ACTION:
         break;
         default:
           System.out.println("Warning: Unsupported input " + action + " in map select menu.");
