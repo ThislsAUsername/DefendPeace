@@ -20,6 +20,10 @@ public class StrikeParams
   public double attackPower;
   public final boolean isCounter;
 
+  public double defenderHP = 0;
+  public double defensePower = 100;
+  public double terrainStars = 0;
+
   public static BattleParams getAttack(final CombatContext ref)
   {
     return new BattleParams(
@@ -66,16 +70,13 @@ public class StrikeParams
   {
     //    [B*ACO/100+R]*(AHP/10)*[(200-(DCO+DTR*DHP))/100]
     double overallPower = (baseDamage * attackPower / 100/*+Random factor?*/) * attackerHP / 10;
-    return overallPower / 10; // original formula was % damage, now it must be HP of damage
+    double overallDefense = ((200 - (defensePower + terrainStars * defenderHP)) / 100);
+    return overallPower * overallDefense / 10; // original formula was % damage, now it must be HP of damage
   }
 
   public static class BattleParams extends StrikeParams
   {
     public final Combatant defender;
-
-    public double defenderHP;
-    public double defensePower;
-    public double terrainStars;
 
     public BattleParams(
         Combatant attacker, Combatant defender,
@@ -98,13 +99,6 @@ public class StrikeParams
       // Apply any last-minute adjustments.
       attacker.body.CO.buffAttack(this);
       defender.body.CO.buffDefense(this);
-    }
-
-    @Override
-    public double calculateDamage()
-    {
-      double overallDefense = ((200 - (defensePower + terrainStars * defenderHP)) / 100);
-      return super.calculateDamage() * overallDefense;
     }
   }
 }
