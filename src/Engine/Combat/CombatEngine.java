@@ -12,9 +12,7 @@ import Units.Unit;
 import Units.WeaponModel;
 
 /**
- * CombatEngine provides COs with two levels of control of what goes on in combat:
- * changeCombatContext(), which takes in a CombatContext and allows the COs to fiddle with just about anything.
- * applyCombatModifiers(), which is for directly modifying a unit's firepower in a given attack.
+ * CombatEngine serves as the general-purpose interface into the combat calculation logic.
  */
 public class CombatEngine
 {

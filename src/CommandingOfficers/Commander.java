@@ -91,9 +91,8 @@ public class Commander extends GameEventListener implements Serializable
    * Simple damage buffs, etc. can be accomplished via COModifiers, but effects
    * that depend on circumstances that must be evaluated at combat time (e.g. a
    * terrain-based firepower bonus) can be handled here.
-   * applyCombatModifiers() will serve for most combat changes, like the above example.
-   * changeCombatContext() allows the CO to tweak the BattleInstance itself,
-   * to allow for drastic changes to the combat like counterattacking first or at 2+ range.
+   * buffStrike(), buffAttack(), and buffDefense() will serve for most combat changes, like the above example.
+   * changeCombatContext() allows the CO to make more drastic changes like counterattacking first or at 2+ range.
    */
   public void changeCombatContext(CombatContext instance)
   {}
