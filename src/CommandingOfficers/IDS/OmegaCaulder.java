@@ -26,8 +26,8 @@ public class OmegaCaulder extends TabithaEngine
     {
       super("Omega Caulder");
       infoPages.add(new InfoPage(
-            "Called \"Omega\" because he's extra fair and balanced.\n"
-          + "Can grant up to 3 \"Mega Boost\"s of +"+MEGA_ATK+"/"+MEGA_DEF+" stats; this power-up lasts until next turn.\n"
+            "Called \'Omega\' because he's extra fair and balanced.\n"
+          + "Can grant up to 3 \'Mega Boost\'s of +"+MEGA_ATK+"/"+MEGA_DEF+" stats; this power-up lasts until next turn.\n"
           + "All damaged units are repaired for +"+ D2DREPAIRS +" HP every turn (liable for costs).\r\n"
           + "Unaffected by weather."));
       infoPages.add(MECHANICS_BLURB);

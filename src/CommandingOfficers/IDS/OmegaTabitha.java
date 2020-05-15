@@ -17,8 +17,8 @@ public class OmegaTabitha extends TabithaEngine
     {
       super("Omega Tabitha");
       infoPages.add(new InfoPage(
-            "Called \"Omega\" because she's extra fair and balanced.\n"
-          + "Can grant a single \"Mega Boost\" of +"+MEGA_ATK+"/"+MEGA_DEF+" stats; this power-up lasts until next turn.\n"
+            "The strongest reasonable interpretation of Tabitha into AWBW mechanics.\n"
+          + "Can grant a single \'Mega Boost\' of +"+MEGA_ATK+"/"+MEGA_DEF+" stats; this power-up lasts until next turn.\n"
           + "Loses all COP charge if the Mega Boosted unit dies."));
       infoPages.add(MECHANICS_BLURB);
       infoPages.add(new InfoPage(
