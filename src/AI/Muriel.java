@@ -140,10 +140,10 @@ public class Muriel implements AIController
     UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(myUnit.model, otherUnit.model));
     if( null != umami ) return umami;
 
-    double myDamage = CombatEngine.calculateOneStrikeDamage(myUnit, 1, otherUnit, myCo.myView, 0, myUnit.model.hasMobileWeapon());
+    int myDamage = CombatEngine.calculateOneStrikeDamage(myUnit, 1, otherUnit, myCo.myView, 0, myUnit.model.hasMobileWeapon());
 
     // Now go the other way.
-    double otherDamage = CombatEngine.calculateOneStrikeDamage(otherUnit, 1, myUnit, myCo.myView, 0, false);
+    int otherDamage = CombatEngine.calculateOneStrikeDamage(otherUnit, 1, myUnit, myCo.myView, 0, false);
 
     // Calculate and store the damage and cost-effectiveness ratios.
     double damageRatio = 0;
@@ -336,9 +336,9 @@ public class Muriel implements AIController
           Environment environment = gameMap.getEnvironment(targetLoc);
 
           // Calculate the cost of the damage we can do.
-          double attackDamage = CombatEngine.calculateOneStrikeDamage(unit, 1, target, gameMap, environment.terrainType.getDefLevel(), unit.model.hasMobileWeapon());
+          int attackDamage = CombatEngine.calculateOneStrikeDamage(unit, 1, target, gameMap, environment.terrainType.getDefLevel(), unit.model.hasMobileWeapon());
 
-          double hpDamage = Math.min(attackDamage, target.getPreciseHP());
+          double hpDamage = Math.min(attackDamage, target.getPreciseHealth());
           double damageValue = (target.model.getCost()/10) * hpDamage;
 
           // Find the attack that causes the most monetary damage, provided it's at least a halfway decent idea.
@@ -460,13 +460,13 @@ public class Muriel implements AIController
   private boolean shouldAttack(Unit unit, Unit target, GameMap gameMap)
   {
     // Calculate the cost of the damage we can do.
-    double damage = CombatEngine.calculateOneStrikeDamage(unit, 1, target, gameMap, gameMap.getEnvironment(target.x, target.y).terrainType.getDefLevel(), unit.model.hasMobileWeapon());
+    int damage = CombatEngine.calculateOneStrikeDamage(unit, 1, target, gameMap, gameMap.getEnvironment(target.x, target.y).terrainType.getDefLevel(), unit.model.hasMobileWeapon());
 
     UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(unit, target);
 
     // This attack is a good idea if our cost effectiveness is in the acceptable range, or if we can at least half-kill them.
     // The second check is needed because one glass cannon may not have a great overall ratio against another; whoever hits first wins, e.g. Mech vs Anti-Air.
-    return (umami.costEffectivenessRatio > COST_EFFECTIVENESS_MIN) || (damage > (target.getHP() / 2.0));
+    return (umami.costEffectivenessRatio > COST_EFFECTIVENESS_MIN) || (damage > (target.getEffectiveHealth() / 2.0));
   }
 
   private void queueUnitProductionActions(GameMap gameMap)

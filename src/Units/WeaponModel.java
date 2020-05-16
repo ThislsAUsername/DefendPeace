@@ -47,28 +47,28 @@ public abstract class WeaponModel implements Serializable
   }
 
   /**
-   * @return returns its base damage against defender if the unit is in range
+   * @return returns its base health damage against defender if the unit is in range
    */
-  public double getDamage(UnitModel defender, int range)
+  public int getDamage(UnitModel defender, int range)
   {
     if( (range >= minRange) && (range <= maxRange) )
       return getDamage(defender);
     return 0;
   }
   /**
-   * @return returns its base damage against that unit type
+   * @return returns its base health damage against that unit type
    */
-  public double getDamage(UnitModel defender)
+  public int getDamage(UnitModel defender)
   {
     if( defender == null )
       throw new IllegalArgumentException("Stare not into the void. It just may stare back.");
     return defender.getDamageRedirect(this);
   }
-  public double getDamage(AWBWUnitModel defender)
+  public int getDamage(AWBWUnitModel defender)
   {
     throw new UnsupportedOperationException("Called base WeaponModel.getDamage() with input type " + defender.getClass());
   }
-  public double getDamage(DoRUnitModel defender)
+  public int getDamage(DoRUnitModel defender)
   {
     throw new UnsupportedOperationException("Called base WeaponModel.getDamage() with input type " + defender.getClass());
   }

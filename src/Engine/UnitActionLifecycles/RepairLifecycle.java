@@ -36,7 +36,7 @@ public abstract class RepairLifecycle
           // If there's a friendly unit there who isn't us, we can repair them.
           Unit other = map.getLocation(loc).getResident();
           if( other != null && !actor.CO.isEnemy(other.CO) && other != actor
-              && (!other.isFullySupplied() || other.getPreciseHP() < other.model.maxHP) )
+              && (!other.isFullySupplied() || other.getPreciseHealth() < other.model.maxHP * 10) )
           {
             repairOptions.add(new RepairUnitAction(actor, movePath, other));
           }

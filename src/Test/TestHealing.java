@@ -58,7 +58,7 @@ public class TestHealing extends TestCase
     while (true)
     {
       iteration++;
-      victim.damageHP(2.5); // Hurt the victim.
+      victim.damageHealth(25); // Hurt the victim.
       prevMoney = testCo1.money; // Track money.
       prevHP = victim.getHP(); // Track HP.
 

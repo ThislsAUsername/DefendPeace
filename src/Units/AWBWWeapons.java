@@ -45,7 +45,7 @@ public class AWBWWeapons
     }
 
     @Override
-    public double getDamage(AWBWUnitModel defender)
+    public int getDamage(AWBWUnitModel defender)
     {
       return damageChart[type.ordinal()][defender.type.ordinal()];
     }

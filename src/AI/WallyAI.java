@@ -247,7 +247,7 @@ public class WallyAI implements AIController
         // Figure out what I can do here.
         ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath);
         GameAction bestAttack = null;
-        double bestDamage = 0;
+        int bestDamage = 0;
         for( GameActionSet actionSet : actionSets )
         {
           // See if we have the option to attack.
@@ -257,7 +257,7 @@ public class WallyAI implements AIController
             {
               Location loc = gameMap.getLocation(action.getTargetLocation());
               Unit target = loc.getResident();
-              double damage = valueUnit(target, loc, false) * Math.min(target.getHP(), CombatEngine.simulateBattleResults(unit, target, gameMap, unit.x, unit.y).defenderHPLoss);
+              int damage = valueUnit(target, loc, false) * Math.min(target.getHP(), CombatEngine.simulateBattleResults(unit, target, gameMap, unit.x, unit.y).defenderHPLoss);
               if( damage > bestDamage )
               {
                 bestDamage = damage;
@@ -305,7 +305,7 @@ public class WallyAI implements AIController
               // log(String.format("  Would like to kill: %s", target.toStringWithLocation()));
               ArrayList<XYCoord> coordsToCheck = Utils.findLocationsInRange(gameMap, new XYCoord(target.x, target.y), 1, AIUtils.findMaxStrikeWeaponRange(myCo));
               Map<XYCoord, Unit> neededAttacks = new HashMap<XYCoord, Unit>();
-              double damage = 0;
+              int damage = 0;
 
               // Figure out where we can attack from, and include attackers already in range by default.
               for( XYCoord xyc : coordsToCheck )
@@ -317,9 +317,9 @@ public class WallyAI implements AIController
                 if( null != resident && resident.CO == myCo && !resident.isTurnOver &&
                     resident.canAttack(target.model, xyc.getDistance(target.x, target.y), false))
                 {
-                  damage += CombatEngine.simulateBattleResults(resident, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
+                  damage += CombatEngine.simulateBattleResults(resident, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHealthLoss;
                   neededAttacks.put(xyc, resident);
-                  if( damage >= target.getPreciseHP() )
+                  if( damage >= target.getPreciseHealth() )
                   {
                     foundKill = true;
                     break;
@@ -330,20 +330,20 @@ public class WallyAI implements AIController
                     && !gameMap.isLocationFogged(xyc) )
                   neededAttacks.put(xyc, null);
               }
-              if( foundKill || findAssaultKills(gameMap, unitQueue, neededAttacks, target, damage) >= target.getPreciseHP() )
+              if( foundKill || findAssaultKills(gameMap, unitQueue, neededAttacks, target, damage) >= target.getPreciseHealth() )
               {
-                log(String.format("  Gonna try to kill %s, who has %s HP", target.toStringWithLocation(), target.getHP()));
-                double damageSum = 0;
+                log(String.format("  Gonna try to kill %s, who has %s HP", target.toStringWithLocation(), target.getPreciseHealth()));
+                int damageSum = 0;
                 for( XYCoord xyc : neededAttacks.keySet() )
                 {
                   Unit unit = neededAttacks.get(xyc);
                   if( null != unit )
                   {
-                    damageSum += CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
+                    damageSum += CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHealthLoss;
                     actions.offer(new BattleLifecycle.BattleAction(gameMap, unit, Utils.findShortestPath(unit, xyc, gameMap), target.x, target.y));
                     unitQueue.remove(unit);
                     log(String.format("    %s brings the damage total to %s", unit.toStringWithLocation(), damageSum));
-                    if (damageSum >= target.getPreciseHP())
+                    if (damageSum >= target.getPreciseHealth())
                       break;
                   }
                 }
@@ -435,8 +435,8 @@ public class WallyAI implements AIController
                 Unit target = targetLoc.getResident();
                 BattleSummary results = CombatEngine.simulateBattleResults(unit, target, gameMap, moveCoord.xCoord,
                     moveCoord.yCoord);
-                double loss   = Math.min(unit  .getHP(), (int)results.attackerHPLoss);
-                double damage = Math.min(target.getHP(), (int)results.defenderHPLoss);
+                double loss   = Math.min(unit  .getHP(), results.attackerHPLoss);
+                double damage = Math.min(target.getHP(), results.defenderHPLoss);
                 
                 boolean goForIt = false;
                 if( valueUnit(target, targetLoc, false) * Math.floor(damage) * AGGRO_FUNDS_WEIGHT > valueUnit(unit, unitLoc, true) )
@@ -676,8 +676,8 @@ public class WallyAI implements AIController
                 {
                   Unit target = gameMap.getLocation(attack.getTargetLocation()).getResident();
                   BattleSummary results = CombatEngine.simulateBattleResults(unit, target, gameMap, destination.xCoord, destination.yCoord);
-                  double loss   = Math.min(unit  .getHP(), (int)results.attackerHPLoss);
-                  double damage = Math.min(target.getHP(), (int)results.defenderHPLoss);
+                  double loss   = Math.min(unit  .getHP(), results.attackerHPLoss);
+                  double damage = Math.min(target.getHP(), results.defenderHPLoss);
                   if( damage > bestDamage && damage > loss ) // only shoot that which you hurt more than it hurts you
                   {
                     log(String.format("      Best en passant attack deals %s in exchange for %s", damage, loss));
@@ -742,15 +742,15 @@ public class WallyAI implements AIController
    * Attempts to find a combination of attacks that will create a kill.
    * Recursive.
    */
-  private double findAssaultKills(GameMap gameMap, Queue<Unit> unitQueue, Map<XYCoord, Unit> neededAttacks, Unit target, double pDamage)
+  private int findAssaultKills(GameMap gameMap, Queue<Unit> unitQueue, Map<XYCoord, Unit> neededAttacks, Unit target, int pDamage)
   {
     // base case; we found a kill
-    if( pDamage >= target.getPreciseHP() )
+    if( pDamage >= target.getPreciseHealth() )
     {
       return pDamage;
     }
 
-    double damage = pDamage;
+    int damage = pDamage;
     for( XYCoord xyc : neededAttacks.keySet() )
     {
       // Don't try to attack from the same space twice.
@@ -774,16 +774,16 @@ public class WallyAI implements AIController
         if( movePath.getPathLength() > 0 && unit.canAttack(target.model, dist, true) )
         {
           neededAttacks.put(xyc, unit);
-          double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
+          int thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHealthLoss;
 
-          if (thisDamage > target.getPreciseHP())
+          if (thisDamage > target.getPreciseHealth())
             continue; // OHKOs should be decided using different logic
 
           log(String.format("  Use %s to deal %sHP?", unit.toStringWithLocation(), thisDamage));
           thisDamage = findAssaultKills(gameMap, unitQueue, neededAttacks, target, thisDamage);
 
           // Base case, stop iterating.
-          if( thisDamage >= target.getPreciseHP() )
+          if( thisDamage >= target.getPreciseHealth() )
           {
             log(String.format("    Yes, shoot %s", target.toStringWithLocation()));
             damage = thisDamage;

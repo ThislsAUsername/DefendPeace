@@ -471,16 +471,16 @@ public class SpriteMapView extends MapView
       BattleSummary summary = CombatEngine.simulateBattleResults(currentActor, target, getDrawableMap(myGame),
           currentPath.getEnd().x, currentPath.getEnd().y);
       // draw any damage done, with the color of the one dealing the damage
-      if( summary.attackerHPLoss > 0 )
-        drawDamagePreview(g, summary.attackerHPLoss, summary.defender.CO, summary.attacker.x, summary.attacker.y);
-      if( summary.defenderHPLoss > 0 )
-        drawDamagePreview(g, summary.defenderHPLoss, summary.attacker.CO, summary.defender.x, summary.defender.y);
+      if( summary.attackerHealthLoss > 0 )
+        drawDamagePreview(g, summary.attackerHealthLoss, summary.defender.CO, summary.attacker.x, summary.attacker.y);
+      if( summary.defenderHealthLoss > 0 )
+        drawDamagePreview(g, summary.defenderHealthLoss, summary.attacker.CO, summary.defender.x, summary.defender.y);
     }
   }
-  public void drawDamagePreview(Graphics g, double damage, Commander attacker, int x, int y)
+  public void drawDamagePreview(Graphics g, int damage, Commander attacker, int x, int y)
   {
     // grab the two most significant digits and convert to %
-    String damageText = (int) (damage*10) + "%";
+    String damageText = damage + "%";
 
     // Build a display of the expected damage.
     Color[] colors = UIUtils.getMapUnitColors(attacker.myColor).paletteColors;
