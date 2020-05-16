@@ -156,7 +156,7 @@ public class Ave extends Commander
 
   /** Ave's units take less cover from forests. */
   @Override
-  public void buffDefense(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
     // We are defending, in a FOREST
     if( (params.map.getEnvironment(params.defender.x, params.defender.y).terrainType == TerrainType.FOREST)

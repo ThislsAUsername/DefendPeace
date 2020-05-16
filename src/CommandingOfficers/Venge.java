@@ -121,7 +121,7 @@ public class Venge extends Commander
   }
 
   @Override
-  public void buffStrike(StrikeParams params)
+  public void modifyUnitAttack(StrikeParams params)
   {
       if( counterAtFullPower && params.isCounter )
       {
@@ -130,7 +130,7 @@ public class Venge extends Commander
       }
   }
   @Override
-  public void buffAttack(BattleParams params)
+  public void modifyUnitAttackOnUnit(BattleParams params)
   {
       if( aggressors.contains(params.defender.body) )
       {

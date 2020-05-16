@@ -63,7 +63,7 @@ public class StrikeParams
     this.attackerHP = attackerHP;
 
     // Apply any last-minute adjustments.
-    attacker.body.CO.buffStrike(this);
+    attacker.body.CO.modifyUnitAttack(this);
   }
 
   public double calculateDamage()
@@ -97,8 +97,8 @@ public class StrikeParams
       defenderHP = defender.body.getHP();
 
       // Apply any last-minute adjustments.
-      attacker.body.CO.buffAttack(this);
-      defender.body.CO.buffDefense(this);
+      attacker.body.CO.modifyUnitAttackOnUnit(this);
+      defender.body.CO.modifyUnitDefenseAgainstUnit(this);
     }
   }
 }

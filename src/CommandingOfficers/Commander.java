@@ -91,19 +91,31 @@ public class Commander extends GameEventListener implements Serializable
    * Simple damage buffs, etc. can be accomplished via COModifiers, but effects
    * that depend on circumstances that must be evaluated at combat time (e.g. a
    * terrain-based firepower bonus) can be handled here.
-   * buffStrike(), buffAttack(), and buffDefense() will serve for most combat changes, like the above example.
+   * The following three functions will serve for most combat changes, like the above example.
    * changeCombatContext() allows the CO to make more drastic changes like counterattacking first or at 2+ range.
    */
   public void changeCombatContext(CombatContext instance)
   {}
-  /** Called any time you are making a weapon attack */
-  public void buffStrike(StrikeParams params)
+  /**
+   * Called any time you are making a weapon attack.
+   * Applies to all potential targets, whether they be units or not.
+   * Should be used to modify attacks from your units
+   *   any time you do not need specific information about the target.
+   */
+  public void modifyUnitAttack(StrikeParams params)
   {}
-  /** Called any time you are attacking a unit, always after {@link #buffStrike(StrikeParams)} */
-  public void buffAttack(BattleParams params)
+  /**
+   * Called any time you are attacking a unit, always after {@link #modifyUnitAttack(StrikeParams)}
+   * Applies only when attacking a unit.
+   * Should be used only when you need specific information about your target.
+   */
+  public void modifyUnitAttackOnUnit(BattleParams params)
   {}
-  /** Called any time your unit is being attacked, after {@link #buffAttack(BattleParams)} */
-  public void buffDefense(BattleParams params)
+  /**
+   * Called any time your unit is being attacked, after {@link #modifyUnitAttackOnUnit(BattleParams)}
+   * Should be used to modify attacks made against your units.
+   */
+  public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {}
 
   public void addCOModifier(COModifier mod)
