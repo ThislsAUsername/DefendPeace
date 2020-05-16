@@ -13,7 +13,7 @@ public class AWBWWeapons
     CARRIERMISSILES, BATTLESHIPCANNON, CRUISERTORPEDOES, CRUISERMGUN, SUBTORPEDOES
   };
   
-  protected final static boolean USE_AMMO = false;
+  protected final static boolean EATS_BULLETS = false;
 
   private static class AWBWWeapon extends WeaponModel
   {
@@ -77,7 +77,7 @@ public class AWBWWeapons
 
     public MechZooka()
     {
-      super(AWBWWeaponType.MECHZOOKA, USE_AMMO);
+      super(AWBWWeaponType.MECHZOOKA, EATS_BULLETS);
     }
   }
 
@@ -107,7 +107,7 @@ public class AWBWWeapons
 
     public TankCannon()
     {
-      super(AWBWWeaponType.TANKCANNON, USE_AMMO);
+      super(AWBWWeaponType.TANKCANNON, EATS_BULLETS);
     }
   }
 
@@ -127,7 +127,7 @@ public class AWBWWeapons
 
     public MDTankCannon()
     {
-      super(AWBWWeaponType.MD_TANKCANNON, USE_AMMO);
+      super(AWBWWeaponType.MD_TANKCANNON, EATS_BULLETS);
     }
   }
 
@@ -147,7 +147,7 @@ public class AWBWWeapons
 
     public NeoCannon()
     {
-      super(AWBWWeaponType.NEOCANNON, USE_AMMO);
+      super(AWBWWeaponType.NEOCANNON, EATS_BULLETS);
     }
   }
 
@@ -167,7 +167,7 @@ public class AWBWWeapons
 
     public MegaCannon()
     {
-      super(AWBWWeaponType.MEGACANNON, USE_AMMO);
+      super(AWBWWeaponType.MEGACANNON, EATS_BULLETS);
     }
   }
 
@@ -179,7 +179,7 @@ public class AWBWWeapons
 
     public ArtilleryCannon()
     {
-      super(AWBWWeaponType.ARTILLERYCANNON, USE_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.ARTILLERYCANNON, EATS_BULLETS, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -191,7 +191,7 @@ public class AWBWWeapons
 
     public RocketRockets()
     {
-      super(AWBWWeaponType.ROCKETS, USE_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.ROCKETS, EATS_BULLETS, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -203,7 +203,7 @@ public class AWBWWeapons
 
     public PipeGun()
     {
-      super(AWBWWeaponType.PIPEGUN, USE_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.PIPEGUN, EATS_BULLETS, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -213,7 +213,7 @@ public class AWBWWeapons
 
     public AntiAirMGun()
     {
-      super(AWBWWeaponType.ANTI_AIRMGUN, USE_AMMO);
+      super(AWBWWeaponType.ANTI_AIRMGUN, EATS_BULLETS);
     }
   }
 
@@ -225,7 +225,7 @@ public class AWBWWeapons
 
     public MobileSAMWeapon()
     {
-      super(AWBWWeaponType.MOBILESAM, USE_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.MOBILESAM, EATS_BULLETS, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -247,7 +247,7 @@ public class AWBWWeapons
 
     public CopterRockets()
     {
-      super(AWBWWeaponType.B_COPTERROCKETS, USE_AMMO);
+      super(AWBWWeaponType.B_COPTERROCKETS, EATS_BULLETS);
     }
   }
 
@@ -257,7 +257,7 @@ public class AWBWWeapons
 
     public BomberBombs()
     {
-      super(AWBWWeaponType.BOMBERBOMBS, USE_AMMO);
+      super(AWBWWeaponType.BOMBERBOMBS, EATS_BULLETS);
     }
   }
 
@@ -267,7 +267,7 @@ public class AWBWWeapons
 
     public FighterMissiles()
     {
-      super(AWBWWeaponType.FIGHTERMISSILES, USE_AMMO);
+      super(AWBWWeaponType.FIGHTERMISSILES, EATS_BULLETS);
     }
   }
 
@@ -277,7 +277,7 @@ public class AWBWWeapons
 
     public StealthShots()
     {
-      super(AWBWWeaponType.STEALTH_SHOTS, USE_AMMO);
+      super(AWBWWeaponType.STEALTH_SHOTS, EATS_BULLETS);
     }
   }
 
@@ -289,7 +289,7 @@ public class AWBWWeapons
 
     public SubTorpedoes()
     {
-      super(AWBWWeaponType.SUBTORPEDOES, USE_AMMO);
+      super(AWBWWeaponType.SUBTORPEDOES, EATS_BULLETS);
     }
   }
 
@@ -301,7 +301,7 @@ public class AWBWWeapons
 
     public BattleshipCannon()
     {
-      super(AWBWWeaponType.BATTLESHIPCANNON, USE_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.BATTLESHIPCANNON, EATS_BULLETS, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -313,7 +313,7 @@ public class AWBWWeapons
 
     public CarrierMissiles()
     {
-      super(AWBWWeaponType.CARRIERMISSILES, USE_AMMO, MIN_RANGE, MAX_RANGE);
+      super(AWBWWeaponType.CARRIERMISSILES, EATS_BULLETS, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -333,7 +333,7 @@ public class AWBWWeapons
 
     public CruiserTorpedoes()
     {
-      super(AWBWWeaponType.CRUISERTORPEDOES, USE_AMMO);
+      super(AWBWWeaponType.CRUISERTORPEDOES, EATS_BULLETS);
     }
   }
 
