@@ -56,7 +56,9 @@ public class CombatEngine
 
     CombatContext context = new CombatContext(map, attacker, attackerWeapon, defender, defenderWeapon, battleRange, attackerX, attackerY);
     
-    // If the attacker and defender get swapped, we want to still give a coherent BattleSummary.
+    // unitDamageMap provides an order- and perspective-agnostic view of how much damage was done
+    // This is necessary to pass information coherently between this function's local context
+    //   and the context of the CombatContext which can be altered in unpredictable ways.
     Map<Unit, Entry<WeaponModel,Double>> unitDamageMap = new HashMap<Unit, Entry<WeaponModel,Double>>();
     unitDamageMap.put(attacker, new AbstractMap.SimpleEntry<WeaponModel,Double>(attackerWeapon, 0.0));
     unitDamageMap.put(defender, new AbstractMap.SimpleEntry<WeaponModel,Double>(defenderWeapon, 0.0));
@@ -84,7 +86,10 @@ public class CombatEngine
       if( !isSim && attackerHPLoss > context.attacker.getPreciseHP() ) attackerHPLoss = context.attacker.getPreciseHP();
     }
     
-    // Calculations complete. We are setting up our BattleSummary, so go back to using known-accurate info
+    // Calculations complete.
+    // Since we are setting up our BattleSummary, use non-CombatContext variables
+    //   so consumers of the Summary will see results consistent with the current board/map state
+    //   (e.g. the Unit 'attacker' actually belongs to the CO whose turn it currently is)
     return new BattleSummary(attacker, unitDamageMap.get(attacker).getKey(),
                              defender, unitDamageMap.get(defender).getKey(),
                              map.getEnvironment(attackerX, attackerY).terrainType,
