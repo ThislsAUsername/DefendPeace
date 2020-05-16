@@ -337,6 +337,8 @@ public class Utils
       if( newNextPower > oldNextPower )
       {
         powerGrid[next.xCoord][next.yCoord] = newNextPower;
+        // Prevent wrong path generation due to updating the shared powerGrid
+        searchQueue.removeIf(node->next.equals(node.getCoordinates()));
         searchQueue.add(new SearchNode(next, currentNode));
       }
     }
