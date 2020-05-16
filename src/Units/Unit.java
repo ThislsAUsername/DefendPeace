@@ -198,6 +198,10 @@ public class Unit implements Serializable
     return ((double)input)/10;
   }
 
+  /**
+   * Reduces HP by the specified amount.
+   * Enforces a minimum of 0.
+   */
   public void damageHP(double damage)
   {
     health -= damage*10;
@@ -206,11 +210,16 @@ public class Unit implements Serializable
       health = 0;
     }
   }
+
+  /**
+   * Increases HP by the specified amount.
+   * Enforces a minimum of 0.1.
+   * Enforces model.maxHP.
+   * @return the change in HP
+   */
   public double alterHP(int change)
   {
     int before = health;
-    // Change the unit's health, but don't
-    // go over maxHP, and don't drop HP to zero.
     health = Math.max(1, Math.min(model.maxHP, getHP() + change) * 10);
     return healthToHP(health - before);
   }
