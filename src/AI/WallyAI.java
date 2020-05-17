@@ -529,7 +529,7 @@ public class WallyAI implements AIController
   {
     ArrayList<XYCoord> goals = new ArrayList<XYCoord>();
 
-    boolean shouldResupply = (unit.getHP() < unit.model.maxHP) || (unit.fuel < unit.model.maxFuel*UNIT_REFUEL_THRESHHOLD);
+    boolean shouldResupply = unit.isHurt() || (unit.fuel < unit.model.maxFuel*UNIT_REFUEL_THRESHHOLD);
     shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHHOLD;
 
     if( shouldResupply )

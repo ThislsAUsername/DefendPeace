@@ -29,7 +29,7 @@ public abstract class JoinLifecycle
       if( !ignoreResident && resident != null )
       {
         // TODO: Consider if and how off-CO joins should be allowed if tags ever happens
-        if( resident.model.equals(actor.model) && resident != actor && (resident.getHP() < resident.model.maxHP) )
+        if( resident.model.equals(actor.model) && resident != actor && resident.isHurt() )
         {
           return new GameActionSet(new JoinAction(map, actor, movePath), false);
         }
@@ -97,7 +97,7 @@ public abstract class JoinLifecycle
         {
           // Find the unit we want to join.
           recipient = gameMap.getLocation(pathEnd).getResident();
-          isValid &= (null != recipient) && (recipient.getHP() < recipient.model.maxHP);
+          isValid &= (null != recipient) && recipient.isHurt();
         }
       }
 
@@ -165,7 +165,7 @@ public abstract class JoinLifecycle
     @Override
     public void performEvent(MapMaster gameMap)
     {
-      if( null != unitRecipient && (unitRecipient.getHP() < unitRecipient.model.maxHP) )
+      if( null != unitRecipient && unitRecipient.isHurt() )
       {
         // Crunch the numbers we need up front.
         int donorHP = unitDonor.getHP();

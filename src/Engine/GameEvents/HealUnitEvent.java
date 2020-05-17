@@ -35,13 +35,11 @@ public class HealUnitEvent implements GameEvent
   @Override
   public void performEvent(MapMaster gameMap)
   {
-    int maxHP = unit.model.maxHP;
-
     if (null == payer)
       unit.alterHP(repairPowerHP);
-    else if( unit.getPreciseHealth() < maxHP * 10 )
+    else if( unit.isHurt() )
     {
-      int costPerHP = unit.model.getCost() / maxHP;
+      int costPerHP = unit.model.getCost() / unit.model.maxHP;
 
       int affordableHP = payer.money / costPerHP;
       int actualRepair = Math.min(repairPowerHP, affordableHP);

@@ -48,7 +48,7 @@ public class Unit implements Serializable
     fuel = model.maxFuel;
     materials = model.maxMaterials;
     isTurnOver = true;
-    health = model.maxHP * 10;
+    health = healthFromHP(model.maxHP);
     captureProgress = 0;
     captureTarget = null;
     if( model.holdingCapacity > 0 )
@@ -201,9 +201,18 @@ public class Unit implements Serializable
   {
     return health;
   }
+  public boolean isHurt()
+  {
+    return health < healthFromHP(model.maxHP);
+  }
   public int getHP()
   {
     return healthToHP(health);
+  }
+  /** @return value in range [0-1.0]; represents the unit's current effectiveness */
+  public double getHPRatio()
+  {
+    return getHP() / (double)model.maxHP;
   }
   /** @return health value == its corresponding HP value * 10 */
   public static int effectiveHealth(int input)
@@ -214,6 +223,10 @@ public class Unit implements Serializable
   {
     return effectiveHealth(input) / 10;
   }
+  public static int healthFromHP(int input)
+  {
+    return input * 10;
+  }
 
   /**
    * Reduces health by the specified amount.
@@ -222,13 +235,13 @@ public class Unit implements Serializable
   public int damageHealth(int damage)
   {
     int before = getHP();
-    health = Math.max(0, Math.min(model.maxHP*10, health - damage));
+    health = Math.max(0, Math.min(healthFromHP(model.maxHP), health - damage));
     return getHP() - before;
   }
   /** HP overload for {@link #damageHealth(int)} */
   public int damageHP(int damage)
   {
-    return damageHealth(10 * damage);
+    return damageHealth(healthFromHP(damage));
   }
 
   /**
@@ -243,13 +256,13 @@ public class Unit implements Serializable
     if (change > 0)
       health = getEffectiveHealth();
     // Need to respect model.maxHealth even if it isn't round
-    health = Math.min(model.maxHP*10, health);
+    health = Math.min(healthFromHP(model.maxHP), health);
     return getHP() - before;
   }
   /** HP overload for {@link #alterHealth(int)} */
-  public int alterHP(int damage)
+  public int alterHP(int change)
   {
-    return alterHealth(10 * damage);
+    return alterHealth(healthFromHP(change));
   }
 
   public boolean capture(Location target)
