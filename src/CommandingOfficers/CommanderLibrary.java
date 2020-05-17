@@ -13,6 +13,7 @@ import CommandingOfficers.Assorted.TheWeakBeast;
 import CommandingOfficers.BlackHole.Adder;
 import CommandingOfficers.BlackHole.Hawke;
 import CommandingOfficers.BlackHole.Kindle;
+import CommandingOfficers.BlackHole.Koal;
 import CommandingOfficers.BlackHole.Lash;
 import CommandingOfficers.BlackHole.OmegaSturm;
 import CommandingOfficers.BlackHole.Sturm;
@@ -131,6 +132,7 @@ public class CommanderLibrary
     commanderList.add( Hetler.getInfo() );
     
     commanderList.add( Adder.getInfo() );
+    commanderList.add( Koal.getInfo() );
     commanderList.add( Hawke.getInfo() );
     commanderList.add( Kindle.getInfo() );
     commanderList.add( Lash.getInfo() );
