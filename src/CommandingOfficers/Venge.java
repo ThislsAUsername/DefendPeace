@@ -11,6 +11,7 @@ import Engine.Combat.StrikeParams.BattleParams;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatContext;
 import Engine.GameEvents.GameEventQueue;
+import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.WeaponModel;
@@ -96,6 +97,13 @@ public class Venge extends Commander
       return 'V';
     
     return super.getUnitMarking(unit);
+  }
+
+  @Override
+  public void receiveUnitJoinEvent(JoinEvent join)
+  {
+    if (aggressors.contains(join.unitDonor))
+      aggressors.add(join.unitRecipient);
   }
 
   @Override

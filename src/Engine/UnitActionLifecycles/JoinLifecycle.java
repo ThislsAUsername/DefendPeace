@@ -141,8 +141,8 @@ public abstract class JoinLifecycle
 
   public static class JoinEvent implements GameEvent
   {
-    private Unit unitDonor = null;
-    private Unit unitRecipient = null;
+    public final Unit unitDonor;
+    public final Unit unitRecipient;
 
     public JoinEvent(Unit donor, Unit recipient)
     {
