@@ -68,6 +68,7 @@ import CommandingOfficers.YellowComet.Hetler;
 import CommandingOfficers.YellowComet.Kanbei;
 import CommandingOfficers.YellowComet.OmegaKanbei;
 import CommandingOfficers.YellowComet.Sensei;
+import CommandingOfficers.YellowComet.Sonja;
 import CommandingOfficers.YellowComet.Spannbei;
 import CommandingOfficers.YellowComet.Yamamoto;
 
@@ -125,6 +126,7 @@ public class CommanderLibrary
     commanderList.add( Kanbei.getInfo() );
     commanderList.add( Yamamoto.getInfo() );
     commanderList.add( Spannbei.getInfo() );
+    commanderList.add( Sonja.getInfo() );
     commanderList.add( Sensei.getInfo() );
     commanderList.add( Hetler.getInfo() );
     
@@ -174,10 +176,10 @@ public class CommanderLibrary
     commanderList.add( OmegaKanbei.getInfo() );
     commanderList.add( OmegaSturm.getInfo() );
     commanderList.add( OmegaCaulder.getInfo() );
-    for (CommanderInfo info : commanderList)
-    {
+//    for (CommanderInfo info : commanderList)
+//    {
 //      System.out.println(info.name);
-    }
+//    }
   }
 }
 
