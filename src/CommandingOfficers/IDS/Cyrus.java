@@ -25,7 +25,7 @@ public class Cyrus extends Commander
       super("Cyrus");
       infoPages.add(new InfoPage(
           "--Cyrus--\r\n" +
-          "+1 vision in Fog of War, ignores one terrain star when attacking. All units have bad luck (up to -5% bad luck).\r\n" +
+          "+1 vision in Fog of War, ignores one terrain star when attacking. All units have bad luck (up to -4% bad luck).\r\n" +
           "xxxXX\r\n" +
           "Defiant Flare: +1 vision; can see into hiding places; ignores an additional terrain star when attacking.\r\n" +
           "Sunrise: +2 vision; can see into hiding places; ignores two additional terrains star when attacking; a unit being attacked attacks first even if it would be destroyed."));
@@ -125,7 +125,7 @@ public class Cyrus extends Commander
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Fearless";
-    private static final int COST = 6;
+    private static final int COST = 5;
     Cyrus COcast;
 
     Retribution(Cyrus commander)
