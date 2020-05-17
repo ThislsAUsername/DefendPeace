@@ -24,11 +24,11 @@ public class Cyrus extends Commander
     {
       super("Cyrus");
       infoPages.add(new InfoPage(
-          "--CYRUS--\r\n" +
-          "+1 vision in Fog of War, and all enemy units lose one terrain star. All units have hidden HP, but can have bad luck (up to -5% bad luck).\r\n" +
+          "--Cyrus--\r\n" +
+          "+1 vision in Fog of War, ignores one terrain star when attacking. All units have bad luck (up to -5% bad luck).\r\n" +
           "xxxXX\r\n" +
-          "COURAGEOUS: +1 vision; can see into hiding places; all enemy units lose one additional terrain star.\r\n" +
-          "FEARLESS: +2 vision; can see into hiding places; all enemy units lose two additional terrain stars; a unit being attacked attacks first even if it would be destroyed."));
+          "Defiant Flare: +1 vision; can see into hiding places; ignores an additional terrain star when attacking.\r\n" +
+          "Sunrise: +2 vision; can see into hiding places; ignores two additional terrains star when attacking; a unit being attacked attacks first even if it would be destroyed."));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
