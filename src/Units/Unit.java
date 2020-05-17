@@ -210,7 +210,7 @@ public class Unit implements Serializable
     return healthToHP(health);
   }
   /** @return value in range [0-1.0]; represents the unit's current effectiveness */
-  public double getHPRatio()
+  public double getHPFactor()
   {
     return getHP() / (double)model.maxHP;
   }
