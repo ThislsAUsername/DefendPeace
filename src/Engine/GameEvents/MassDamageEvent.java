@@ -20,7 +20,7 @@ public class MassDamageEvent implements GameEvent
   // Records how many HP each victim lost; doubles as our victim storage area
   private Map<Unit, Integer> victims = new HashMap<Unit, Integer>();
   public final int damage;
-  public final int minResultHP;
+  public final boolean lethal;
 
   public MassDamageEvent(Collection<Unit> pVictims, int pDamage, boolean isLethal)
   {
@@ -29,10 +29,7 @@ public class MassDamageEvent implements GameEvent
       victims.put(victim, 0);
     }
     damage = pDamage;
-    if( isLethal )
-      minResultHP = 0;
-    else
-      minResultHP = 1;
+    lethal = isLethal;
   }
 
   @Override
@@ -52,9 +49,12 @@ public class MassDamageEvent implements GameEvent
   {
     for (Unit victim : victims.keySet())
     {
-      int starting = victim.getHP();
-      victim.alterHP(-damage);
-      victims.put(victim, Math.min(damage, starting - minResultHP));
+      int deltaHP = 0;
+      if( lethal )
+        deltaHP = victim.damageHP(damage);
+      else
+        deltaHP = victim.alterHP(-damage);
+      victims.put(victim, deltaHP);
     }
   }
 

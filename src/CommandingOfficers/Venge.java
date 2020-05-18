@@ -6,10 +6,12 @@ import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameScenario;
-import Engine.Combat.BattleInstance.BattleParams;
-import Engine.Combat.BattleInstance.CombatContext;
+import Engine.Combat.StrikeParams;
+import Engine.Combat.StrikeParams.BattleParams;
 import Engine.Combat.BattleSummary;
+import Engine.Combat.CombatContext;
 import Engine.GameEvents.GameEventQueue;
+import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.WeaponModel;
@@ -98,6 +100,13 @@ public class Venge extends Commander
   }
 
   @Override
+  public void receiveUnitJoinEvent(JoinEvent join)
+  {
+    if (aggressors.contains(join.unitDonor))
+      aggressors.add(join.unitRecipient);
+  }
+
+  @Override
   public void changeCombatContext(CombatContext instance)
   {
     // If we're swapping, and we can counter, and we're on the defensive, do the swap.
@@ -120,22 +129,22 @@ public class Venge extends Commander
   }
 
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void modifyUnitAttack(StrikeParams params)
   {
-    if( amITheAttacker )
-    {
       if( counterAtFullPower && params.isCounter )
       {
         // counterattack as if the unit had not taken damage.
-        params.attackerHP = params.attacker.getHP();
+        params.attackerHP = params.attacker.body.getHP();
       }
-
-      if( aggressors.contains(params.defender) )
+  }
+  @Override
+  public void modifyUnitAttackOnUnit(BattleParams params)
+  {
+      if( aggressors.contains(params.defender.body) )
       {
         // Boost attack if it's time to avenge slights
-        params.attackFactor += VENGEANCE_BOOST;
+        params.attackPower += VENGEANCE_BOOST;
       }
-    }
   }
 
   @Override

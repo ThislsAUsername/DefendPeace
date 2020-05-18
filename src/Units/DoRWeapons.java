@@ -16,7 +16,7 @@ public class DoRWeapons
     SUBTORPEDOES, CARRIERMGUN, BATTLESHIPCANNON,
   };
   
-  protected final static boolean USE_AMMO = true;
+  protected final static boolean EATS_BULLETS = false;
 
   private static class DoRWeapon extends WeaponModel
   {
@@ -70,7 +70,7 @@ public class DoRWeapons
 
     public MechZooka()
     {
-      super(DoRWeaponType.MECHZOOKA, USE_AMMO);
+      super(DoRWeaponType.MECHZOOKA, EATS_BULLETS);
     }
   }
 
@@ -110,7 +110,7 @@ public class DoRWeapons
 
     public AntiAirMGun()
     {
-      super(DoRWeaponType.ANTI_AIRMGUN, USE_AMMO);
+      super(DoRWeaponType.ANTI_AIRMGUN, EATS_BULLETS);
     }
   }
 
@@ -120,7 +120,7 @@ public class DoRWeapons
 
     public TankCannon()
     {
-      super(DoRWeaponType.TANKCANNON, USE_AMMO);
+      super(DoRWeaponType.TANKCANNON, EATS_BULLETS);
     }
   }
 
@@ -150,7 +150,7 @@ public class DoRWeapons
 
     public MDTankCannon()
     {
-      super(DoRWeaponType.MD_TANKCANNON, USE_AMMO);
+      super(DoRWeaponType.MD_TANKCANNON, EATS_BULLETS);
     }
   }
 
@@ -170,7 +170,7 @@ public class DoRWeapons
 
     public WarCannon()
     {
-      super(DoRWeaponType.WARCANNON, USE_AMMO);
+      super(DoRWeaponType.WARCANNON, EATS_BULLETS);
     }
   }
 
@@ -182,7 +182,7 @@ public class DoRWeapons
 
     public ArtilleryCannon()
     {
-      super(DoRWeaponType.ARTILLERYCANNON, USE_AMMO, MIN_RANGE, MAX_RANGE);
+      super(DoRWeaponType.ARTILLERYCANNON, EATS_BULLETS, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -194,7 +194,7 @@ public class DoRWeapons
 
     public AntiTankCannon()
     {
-      super(DoRWeaponType.ANTITANKCANNON, USE_AMMO, MIN_RANGE, MAX_RANGE);
+      super(DoRWeaponType.ANTITANKCANNON, EATS_BULLETS, MIN_RANGE, MAX_RANGE);
       this.canFireAfterMoving = false;
     }
   }
@@ -207,7 +207,7 @@ public class DoRWeapons
 
     public RocketRockets()
     {
-      super(DoRWeaponType.ROCKETS, USE_AMMO, MIN_RANGE, MAX_RANGE);
+      super(DoRWeaponType.ROCKETS, EATS_BULLETS, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -219,7 +219,7 @@ public class DoRWeapons
 
     public MobileSAMWeapon()
     {
-      super(DoRWeaponType.MOBILESAM, USE_AMMO, MIN_RANGE, MAX_RANGE);
+      super(DoRWeaponType.MOBILESAM, EATS_BULLETS, MIN_RANGE, MAX_RANGE);
     }
   }
 
@@ -231,7 +231,7 @@ public class DoRWeapons
 
     public FighterMissiles()
     {
-      super(DoRWeaponType.FIGHTERMISSILES, USE_AMMO);
+      super(DoRWeaponType.FIGHTERMISSILES, EATS_BULLETS);
     }
   }
 
@@ -241,7 +241,7 @@ public class DoRWeapons
 
     public BomberBombs()
     {
-      super(DoRWeaponType.BOMBERBOMBS, USE_AMMO);
+      super(DoRWeaponType.BOMBERBOMBS, EATS_BULLETS);
     }
   }
 
@@ -251,7 +251,7 @@ public class DoRWeapons
 
     public SeaplaneShots()
     {
-      super(DoRWeaponType.SEAPLANESHOTS, USE_AMMO);
+      super(DoRWeaponType.SEAPLANESHOTS, EATS_BULLETS);
     }
   }
 
@@ -261,7 +261,7 @@ public class DoRWeapons
 
     public DusterMGun()
     {
-      super(DoRWeaponType.DUSTERMGUN, USE_AMMO);
+      super(DoRWeaponType.DUSTERMGUN, EATS_BULLETS);
     }
   }
 
@@ -271,7 +271,7 @@ public class DoRWeapons
 
     public CopterRockets()
     {
-      super(DoRWeaponType.COPTERROCKETS, USE_AMMO);
+      super(DoRWeaponType.COPTERROCKETS, EATS_BULLETS);
     }
   }
 
@@ -293,7 +293,7 @@ public class DoRWeapons
 
     public GunBoatGun()
     {
-      super(DoRWeaponType.GUNBOATGUN, USE_AMMO);
+      super(DoRWeaponType.GUNBOATGUN, EATS_BULLETS);
     }
   }
 
@@ -303,7 +303,7 @@ public class DoRWeapons
 
     public CruiserTorpedoes()
     {
-      super(DoRWeaponType.CRUISERTORPEDOES, USE_AMMO);
+      super(DoRWeaponType.CRUISERTORPEDOES, EATS_BULLETS);
     }
   }
 
@@ -323,7 +323,7 @@ public class DoRWeapons
 
     public SubTorpedoes()
     {
-      super(DoRWeaponType.SUBTORPEDOES, USE_AMMO);
+      super(DoRWeaponType.SUBTORPEDOES, EATS_BULLETS);
     }
   }
 
@@ -335,7 +335,7 @@ public class DoRWeapons
 
     public BattleshipCannon()
     {
-      super(DoRWeaponType.BATTLESHIPCANNON, USE_AMMO, MIN_RANGE, MAX_RANGE);
+      super(DoRWeaponType.BATTLESHIPCANNON, EATS_BULLETS, MIN_RANGE, MAX_RANGE);
       canFireAfterMoving = true;
     }
   }

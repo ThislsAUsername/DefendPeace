@@ -18,9 +18,10 @@ import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
 import Engine.GameScenario;
 import Engine.XYCoord;
-import Engine.Combat.BattleInstance.BattleParams;
-import Engine.Combat.BattleInstance.CombatContext;
 import Engine.Combat.BattleSummary;
+import Engine.Combat.CombatContext;
+import Engine.Combat.StrikeParams;
+import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
@@ -86,21 +87,35 @@ public class Commander extends GameEventListener implements Serializable
   }
 
   /**
-   * These functions Allow a Commander to inject modifications before evaluating a battle.
+   * These functions allow a Commander to inject modifications before evaluating a battle.
    * Simple damage buffs, etc. can be accomplished via COModifiers, but effects
    * that depend on circumstances that must be evaluated at combat time (e.g. a
    * terrain-based firepower bonus) can be handled here.
-   * applyCombatModifiers() will serve for most combat changes, like the above example.
-   * changeCombatContext() allows the CO to tweak the BattleInstance itself,
-   * to allow for drastic changes to the combat like counterattacking first or at 2+ range.
+   * The following three functions will serve for most combat changes, like the above example.
+   * changeCombatContext() allows the CO to make more drastic changes like counterattacking first or at 2+ range.
    */
   public void changeCombatContext(CombatContext instance)
   {}
   /**
-   * Allows a Commander to inject modifications that must be evaluated at combat time
-   * @param striking - lets the Commander know if it's dealing or taking damage 
+   * Called any time you are making a weapon attack.
+   * Applies to all potential targets, whether they be units or not.
+   * Should be used to modify attacks from your units
+   *   any time you do not need specific information about the target.
    */
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void modifyUnitAttack(StrikeParams params)
+  {}
+  /**
+   * Called any time you are attacking a unit, always after {@link #modifyUnitAttack(StrikeParams)}
+   * Applies only when attacking a unit.
+   * Should be used only when you need specific information about your target.
+   */
+  public void modifyUnitAttackOnUnit(BattleParams params)
+  {}
+  /**
+   * Called any time your unit is being attacked, after {@link #modifyUnitAttackOnUnit(BattleParams)}
+   * Should be used to modify attacks made against your units.
+   */
+  public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {}
 
   public void addCOModifier(COModifier mod)

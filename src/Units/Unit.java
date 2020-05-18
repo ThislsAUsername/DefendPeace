@@ -32,7 +32,13 @@ public class Unit implements Serializable
   public Commander CO;
   public boolean isTurnOver;
   public boolean isStunned;
-  private double HP;
+  /**
+   * HP is a value, typically in range [1-10], that determines the current actual strength of a unit.
+   * A unit at 0 HP is dead.
+   * Health is HP value as a percentage, thus ~10x the HP value.
+   * When determining HP, health must always be rounded up.
+   */
+  private int health;
 
   public Unit(Commander co, UnitModel um)
   {
@@ -42,7 +48,7 @@ public class Unit implements Serializable
     fuel = model.maxFuel;
     materials = model.maxMaterials;
     isTurnOver = true;
-    HP = model.maxHP;
+    health = healthFromHP(model.maxHP);
     captureProgress = 0;
     captureTarget = null;
     if( model.holdingCapacity > 0 )
@@ -185,30 +191,58 @@ public class Unit implements Serializable
     }
   }
 
+  public boolean isHurt()
+  {
+    return health < healthFromHP(model.maxHP);
+  }
   public int getHP()
   {
-    return (int) Math.ceil(HP);
+    return (int) Math.ceil(healthToHP(health));
   }
+  /** @return value in range [0-1.0]; represents the unit's current effectiveness */
+  public double getHPFactor()
+  {
+    return getHP() / (double)model.maxHP;
+  }
+  /** @return un-rounded HP */
   public double getPreciseHP()
   {
-    return HP;
+    return healthToHP(health);
+  }
+  private static double healthToHP(int input)
+  {
+    return ((double)input)/10;
+  }
+  private static int healthFromHP(double input)
+  {
+    return (int) (input * 10);
   }
 
-  public void damageHP(double damage)
+  /**
+   * Reduces HP by the specified amount.
+   * Enforces a minimum of 0.
+   * @return the change in HP
+   */
+  public int damageHP(double damage)
   {
-    HP -= damage;
-    if( HP < 0 )
-    {
-      HP = 0;
-    }
+    int before = getHP();
+    health = Math.max(0, Math.min(healthFromHP(model.maxHP), health - healthFromHP(damage)));
+    return getHP() - before;
   }
-  public double alterHP(int change)
+
+  /**
+   * Increases HP by the specified amount.
+   * Enforces a minimum of 0.1.
+   * When healing, sets health to the maximum value for its HP
+   * @return the change in HP
+   */
+  public int alterHP(int change)
   {
-    double before = HP;
-    // Change the unit's health, but don't grant more
-    // than 10 HP, and don't drop HP to zero.
-    HP = Math.max(0.1, Math.min(model.maxHP, getHP() + change));
-    return HP - before;
+    int before = getHP();
+    health = Math.max(1, healthFromHP( Math.min(model.maxHP, getHP() + change) ));
+    if (change > 0)
+      health = healthFromHP(getHP());
+    return getHP() - before;
   }
 
   public boolean capture(Location target)
@@ -303,4 +337,5 @@ public class Unit implements Serializable
   {
     return String.format("%s at %s", model, new XYCoord(x, y));
   }
+
 }
