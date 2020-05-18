@@ -15,7 +15,7 @@ public class StrikeParams
   // Stuff inherited for reference from CombatContext
   public final int battleRange;
 
-  public double baseDamage; // health, not HP
+  public double baseDamage;
   public double attackerHP;
   public double attackPower;
   public final boolean isCounter;
@@ -66,13 +66,12 @@ public class StrikeParams
     attacker.body.CO.modifyUnitAttack(this);
   }
 
-  /** @return health damage */
-  public int calculateDamage()
+  public double calculateDamage()
   {
     //    [B*ACO/100+R]*(AHP/10)*[(200-(DCO+DTR*DHP))/100]
     double overallPower = (baseDamage * attackPower / 100/*+Random factor?*/) * attackerHP / 10;
     double overallDefense = ((200 - (defensePower + terrainStars * defenderHP)) / 100);
-    return (int) (overallPower * overallDefense);
+    return overallPower * overallDefense / 10; // original formula was % damage, now it must be HP of damage
   }
 
   public static class BattleParams extends StrikeParams

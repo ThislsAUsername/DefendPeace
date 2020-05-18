@@ -109,7 +109,7 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(infA.getCaptureProgress() == 10, "    Infantry capture progress is not 10.");
 
     // Hurt the unit so he won't capture as fast.
-    infA.damageHP(5);
+    infA.damageHP(5.0);
     captureEvent.performEvent(testMap);
     testPassed &= validate(infA.getCaptureProgress() == 15, "    Infantry capture progress is not 15.");
 
@@ -279,10 +279,10 @@ public class TestGameEvent extends TestCase
     new UnitDieEvent(mech).performEvent(testMap);
 
     // Make sure the pins are down.
-    testPassed &= validate(inf.getPreciseHealth() == 0, "    Infantry still has health after dying.");
+    testPassed &= validate(inf.getPreciseHP() == 0, "    Infantry still has health after dying.");
     testPassed &= validate(inf.x == -1 && inf.y == -1, "    Infantry still thinks he is on the map after death.");
     testPassed &= validate(testMap.getLocation(2, 2).getResident() == null, "    Infantry did not vacate his space after death.");
-    testPassed &= validate(mech.getPreciseHealth() == 0, "    Mech still has health after dying.");
+    testPassed &= validate(mech.getPreciseHP() == 0, "    Mech still has health after dying.");
     testPassed &= validate(mech.x == -1 && mech.y == -1, "    Mech still thinks he is on the map after death.");
     testPassed &= validate(testMap.getLocation(2, 3).getResident() == null, "    Mech did not vacate his space after death.");
 

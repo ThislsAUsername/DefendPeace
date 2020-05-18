@@ -48,7 +48,7 @@ public class DoRWeapons
     }
 
     @Override
-    public int getDamage(DoRUnitModel defender)
+    public double getDamage(DoRUnitModel defender)
     {
       return damageChart[type.ordinal()][defender.type.ordinal()];
     }

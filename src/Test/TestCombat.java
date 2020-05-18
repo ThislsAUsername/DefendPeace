@@ -67,7 +67,7 @@ public class TestCombat extends TestCase
         testMap);
 
     // Check that the mech is undamaged, and that the infantry is no longer with us.
-    boolean testPassed = validate(mechA.getPreciseHealth() == 100, "    Attacker lost or gained health.");
+    boolean testPassed = validate(mechA.getPreciseHP() == 10, "    Attacker lost or gained health.");
     testPassed &= validate(testMap.getLocation(1, 2).getResident() == null, "    Defender is still on the map.");
 
     // Clean up
@@ -95,7 +95,7 @@ public class TestCombat extends TestCase
         testMap);
 
     // Check that the mech is undamaged, and that the infantry is still with us.
-    boolean testPassed = validate(mechA.getPreciseHealth() == 100, "    Attacker lost or gained health.");
+    boolean testPassed = validate(mechA.getPreciseHP() == 10, "    Attacker lost or gained health.");
     testPassed &= validate(testMap.getLocation(1, 2).getResident() != null, "    Defender died.");
 
     // Clean up
@@ -119,20 +119,20 @@ public class TestCombat extends TestCase
     offender.initTurn(testMap); // Make sure he is ready to move.
     performGameAction(new BattleLifecycle.BattleAction(testMap, offender, Utils.findShortestPath(offender, 6, 5, testMap), 6, 6),
         testMap);
-    boolean testPassed = validate(defender.getPreciseHealth() == 100, "    Artillery dealt damage at range 1. Artillery range should be 2-3.");
+    boolean testPassed = validate(defender.getPreciseHP() == 10, "    Artillery dealt damage at range 1. Artillery range should be 2-3.");
     
     // offender will attempt to move and fire. This should fail, since artillery cannot fire after moving.
     offender.initTurn(testMap);
     performGameAction(new BattleLifecycle.BattleAction(testMap, offender, Utils.findShortestPath(offender, 6, 4, testMap), 6, 6),
         testMap);
-    testPassed &= validate(defender.getPreciseHealth() == 100, "    Artillery dealt damage despite moving before firing.");
+    testPassed &= validate(defender.getPreciseHP() == 10, "    Artillery dealt damage despite moving before firing.");
 
     // offender will shoot victim.
     offender.initTurn(testMap); // Make sure he is ready to move.
     performGameAction(new BattleLifecycle.BattleAction(testMap, offender, Utils.findShortestPath(offender, 6, 5, testMap), 6, 7),
         testMap);
-    testPassed &= validate(victim.getPreciseHealth() != 100, "    Artillery failed to do damage at a range of 2, without moving.");
-    testPassed &= validate(offender.getPreciseHealth() == 100, "    Artillery received a counterattack from a range of 2. Counterattacks should only be possible at range 1.");
+    testPassed &= validate(victim.getPreciseHP() != 10, "    Artillery failed to do damage at a range of 2, without moving.");
+    testPassed &= validate(offender.getPreciseHP() == 10, "    Artillery received a counterattack from a range of 2. Counterattacks should only be possible at range 1.");
 
     // defender will attack offender.
     defender.initTurn(testMap); // Make sure he is ready to move.
@@ -140,8 +140,8 @@ public class TestCombat extends TestCase
         testMap);
     
     // check that offender is damaged and defender is not.
-    testPassed &= validate(offender.getPreciseHealth() != 100, "    Mech failed to deal damage to adjacent artillery.");
-    testPassed &= validate(defender.getPreciseHealth() == 100, "    Mech receives a counterattack from artillery at range 1. Artillery range should be 2-3.");
+    testPassed &= validate(offender.getPreciseHP() != 10, "    Mech failed to deal damage to adjacent artillery.");
+    testPassed &= validate(defender.getPreciseHP() == 10, "    Mech receives a counterattack from artillery at range 1. Artillery range should be 2-3.");
 
     // Clean up
     testMap.removeUnit(offender);

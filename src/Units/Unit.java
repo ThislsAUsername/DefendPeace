@@ -191,78 +191,58 @@ public class Unit implements Serializable
     }
   }
 
-  /** @return unit HP * 10 */
-  public int getEffectiveHealth()
-  {
-    return effectiveHealth(health);
-  }
-  /** @return unit actual health */
-  public int getPreciseHealth()
-  {
-    return health;
-  }
   public boolean isHurt()
   {
     return health < healthFromHP(model.maxHP);
   }
   public int getHP()
   {
-    return healthToHP(health);
+    return (int) Math.ceil(healthToHP(health));
   }
   /** @return value in range [0-1.0]; represents the unit's current effectiveness */
   public double getHPFactor()
   {
     return getHP() / (double)model.maxHP;
   }
-  /** @return health value == its corresponding HP value * 10 */
-  public static int effectiveHealth(int input)
+  /** @return un-rounded HP */
+  public double getPreciseHP()
   {
-    return (input - input%10) + ((input%10 > 0)? 10:0);
+    return healthToHP(health);
   }
-  public static int healthToHP(int input)
+  private static double healthToHP(int input)
   {
-    return effectiveHealth(input) / 10;
+    return ((double)input)/10;
   }
-  public static int healthFromHP(int input)
+  private static int healthFromHP(double input)
   {
-    return input * 10;
-  }
-
-  /**
-   * Reduces health by the specified amount.
-   * @return the change in HP
-   */
-  public int damageHealth(int damage)
-  {
-    int before = getHP();
-    health = Math.max(0, Math.min(healthFromHP(model.maxHP), health - damage));
-    return getHP() - before;
-  }
-  /** HP overload for {@link #damageHealth(int)} */
-  public int damageHP(int damage)
-  {
-    return damageHealth(healthFromHP(damage));
+    return (int) (input * 10);
   }
 
   /**
-   * Increases health by the specified amount.
-   * If increasing health, sets it to the highest available value within that HP.
+   * Reduces HP by the specified amount.
+   * Enforces a minimum of 0.
    * @return the change in HP
    */
-  public int alterHealth(int change)
+  public int damageHP(double damage)
   {
     int before = getHP();
-    health = Math.max(1, health + change);
-    if (change > 0)
-      health = getEffectiveHealth();
-    // Need to respect model.maxHealth even if it isn't round
-    health = Math.min(healthFromHP(model.maxHP), health);
+    health = Math.max(0, Math.min(healthFromHP(model.maxHP), health - healthFromHP(damage)));
     return getHP() - before;
   }
-  /** HP overload for {@link #alterHealth(int)} */
+
+  /**
+   * Increases HP by the specified amount.
+   * Enforces a minimum of 0.1.
+   * When healing, sets health to the maximum value for its HP
+   * @return the change in HP
+   */
   public int alterHP(int change)
   {
-    return alterHealth(healthFromHP(change));
+    int before = getHP();
+    health = Math.max(1, healthFromHP( Math.min(model.maxHP, getHP() + change) ));
+    if (change > 0)
+      health = healthFromHP(getHP());
+    return getHP() - before;
   }
 
   public boolean capture(Location target)

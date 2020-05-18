@@ -198,7 +198,7 @@ public abstract class UnitModel implements Serializable
   }
 
   /** Calls the appropriate type-specific override of getDamage() on the input WeaponModel */
-  public abstract int getDamageRedirect(WeaponModel wm);
+  public abstract double getDamageRedirect(WeaponModel wm);
 
   /**
    * @return True if this UnitModel has at least one weapon with a minimum range of 1.

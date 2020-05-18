@@ -141,7 +141,7 @@ public class AWBWUnits extends UnitModelScheme
     }
 
     @Override
-    public int getDamageRedirect(WeaponModel wm)
+    public double getDamageRedirect(WeaponModel wm)
     {
       return wm.getDamage(this);
     }
