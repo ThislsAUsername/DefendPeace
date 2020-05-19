@@ -16,5 +16,6 @@ public class MoveTypeAir extends MoveType
     moveCosts.get(Weathers.SNOW).setAllMovementCosts(1);
     moveCosts.get(Weathers.SANDSTORM).setAllMovementCosts(1);
     setMoveCost(TerrainType.PILLAR, 99);
+    setMoveCost(TerrainType.METEOR, 99);
   }
 }
