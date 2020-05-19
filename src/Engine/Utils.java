@@ -61,7 +61,8 @@ public class Utils
         targets.add(loc);
       }
       // You can never be friends with terrain, so shoot anything that's shootable
-      else if (weapon.getDamage(map.getEnvironment(loc).terrainType) > 0)
+      else if (resident == null && // Peeps ain't there.
+               weapon.getDamage(map.getEnvironment(loc).terrainType) > 0)
         targets.add(loc);
     }
     return targets;

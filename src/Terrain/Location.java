@@ -6,9 +6,11 @@ import java.io.Serializable;
 import CommandingOfficers.Commander;
 import Engine.XYCoord;
 import Terrain.Environment.Weathers;
+import Units.ITargetable;
 import Units.Unit;
+import Units.WeaponModel;
 
-public class Location implements Serializable
+public class Location implements Serializable, ITargetable
 {
   private static final long serialVersionUID = 1L;
   private Environment environs = null;
@@ -107,5 +109,22 @@ public class Location implements Serializable
     {
       forecast.addFirst(w);
     }
+  }
+
+  @Override
+  public double getDamageRedirect(WeaponModel wm)
+  {
+    return wm.getDamage(environs.terrainType);
+  }
+
+  @Override
+  public String toString()
+  {
+    return environs.terrainType.toString();
+  }
+
+  public String toStringWithLocation()
+  {
+    return String.format("%s at %s", toString(), coords);
   }
 }

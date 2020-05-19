@@ -57,7 +57,7 @@ public class DoRWeapons
     @Override
     public double getDamage(TerrainType defender)
     {
-      return 0;
+      return 42;
     }
   }
 

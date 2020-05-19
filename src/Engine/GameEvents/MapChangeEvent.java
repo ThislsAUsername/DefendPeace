@@ -50,6 +50,7 @@ public class MapChangeEvent implements GameEvent
       if( null != loc )
       {
         loc.setEnvironment(ea.environment);
+        loc.durability = 99;
         if( ea.duration > 0 )
           loc.setForecast(ea.environment.weatherType, (gameMap.commanders.length * ea.duration) - 1);
       }

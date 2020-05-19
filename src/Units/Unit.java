@@ -122,7 +122,7 @@ public class Unit implements Serializable
    * @return whether or not this unit can attack the given unit type at the
    * specified range, accounting for the possibility of moving first.
    */
-  public boolean canAttack(UnitModel targetType, int range, boolean afterMoving)
+  public boolean canAttack(ITargetable targetType, int range, boolean afterMoving)
   {
     // if we have no weapons, we can't hurt things
     if( model.weapons == null )
@@ -154,7 +154,7 @@ public class Unit implements Serializable
    * @param afterMoving
    * @return The best weapon for that target, or null if no usable weapon exists.
    */
-  public WeaponModel chooseWeapon(UnitModel targetType, int range, boolean afterMoving)
+  public WeaponModel chooseWeapon(ITargetable targetType, int range, boolean afterMoving)
   {
     // if we have no weapons, we can't hurt things
     if( model.weapons == null )
