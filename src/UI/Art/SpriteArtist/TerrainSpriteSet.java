@@ -408,6 +408,7 @@ public class TerrainSpriteSet
       terrainObjects.add(TerrainType.LAB);
       terrainObjects.add(TerrainType.MOUNTAIN);
       terrainObjects.add(TerrainType.PILLAR);
+      terrainObjects.add(TerrainType.METEOR);
     }
     return terrainObjects.contains(terrainType);
   }
