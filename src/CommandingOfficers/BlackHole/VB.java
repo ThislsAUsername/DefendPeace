@@ -50,15 +50,6 @@ public class VB extends Commander
     return coInfo;
   }
 
-  @Override
-  public char getUnitMarking(Unit unit)
-  {
-    if (unit.isStunned)
-      return 'S';
-    
-    return super.getUnitMarking(unit);
-  }
-
   private static class ExMachina extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
