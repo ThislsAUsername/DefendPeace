@@ -1,6 +1,7 @@
 package Engine.UnitActionLifecycles;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 
 import Engine.GameAction;
@@ -11,6 +12,7 @@ import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
+import Engine.Combat.DamagePopup;
 import Engine.Combat.StrikeParams;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEvent;
@@ -91,7 +93,7 @@ public abstract class BattleLifecycle
     }
   } // ~Factory
 
-  public static class BattleAction implements GameAction
+  public static class BattleAction extends GameAction
   {
     private Path movePath;
     private XYCoord moveCoord = null;
@@ -181,6 +183,24 @@ public abstract class BattleLifecycle
     }
 
     @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap map)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+
+      BattleSummary summary = CombatEngine.simulateBattleResults(attacker, defender, map,
+                              moveCoord.xCoord, moveCoord.yCoord);
+
+      // output any damage done, with the color of the one dealing the damage
+      if( summary.attackerHPLoss > 0 )
+        output.add(new DamagePopup(movePath.getWaypoint(0).GetCoordinates(), defender.CO.myColor, (int) (summary.attackerHPLoss*10) + "%"));
+      if( summary.defenderHPLoss > 0 )
+        // grab the two most significant digits and convert to %
+        output.add(new DamagePopup(attackLocation, attacker.CO.myColor, (int) (summary.defenderHPLoss*10) + "%"));
+
+      return output;
+    }
+
+    @Override
     public XYCoord getMoveLocation()
     {
       return moveCoord;
@@ -206,7 +226,7 @@ public abstract class BattleLifecycle
     }
   } // ~BattleAction
 
-  public static class DemolitionAction implements GameAction
+  public static class DemolitionAction extends GameAction
   {
     private Path movePath;
     private XYCoord moveCoord = null;
@@ -277,6 +297,21 @@ public abstract class BattleLifecycle
         }
       }
       return attackEvents;
+    }
+
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap map)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+
+      StrikeParams result = CombatEngine.calculateTerrainDamage(attacker, movePath, target, map);
+
+      // output any damage done, with the color of the one dealing the damage
+      if( result.calculateDamage() > 0 )
+        // grab the two most significant digits and convert to %
+        output.add(new DamagePopup(attackLocation, attacker.CO.myColor, (int) (result.calculateDamage()*10) + "%"));
+
+      return output;
     }
 
     @Override

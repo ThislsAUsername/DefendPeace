@@ -68,7 +68,7 @@ public abstract class RepairLifecycle
     }
   }
 
-  public static class RepairUnitAction implements GameAction
+  public static class RepairUnitAction extends GameAction
   {
     private Path movePath;
     private XYCoord startCoord;

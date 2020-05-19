@@ -88,7 +88,7 @@ public abstract class LaunchLifecycle
     }
   } // ~Factory
 
-  public static class LaunchAction implements GameAction
+  public static class LaunchAction extends GameAction
   {
     private Unit launcher, launchee;
     private GameAction cargoAction;

@@ -1,10 +1,15 @@
 package Engine;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
+import Engine.Combat.DamagePopup;
 import Engine.GameEvents.CommanderAbilityEvent;
 import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEventQueue;
+import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Units.UnitModel;
@@ -12,7 +17,7 @@ import Units.UnitModel;
 /**
  * Provides an interface for all in-game actions.
  */
-public interface GameAction
+public abstract class GameAction
 {
   /**
    * Returns a GameEventQueue with the events that make up this action. If the action
@@ -23,14 +28,17 @@ public interface GameAction
   public abstract XYCoord getTargetLocation();
   public abstract UnitActionFactory getType();
 
+  public Collection<DamagePopup> getDamagePopups(GameMap map)
+  {
+    return new ArrayList<DamagePopup>();
+  }
+
   // ==========================================================
   //   Concrete Action type classes.
   // ==========================================================
 
-  // ===========  AttackAction  ===============================
-
   // ===========  UnitProductionAction  ==============================
-  public static class UnitProductionAction implements GameAction
+  public static class UnitProductionAction extends GameAction
   {
     private final XYCoord where;
     private final Commander who;
@@ -102,7 +110,7 @@ public interface GameAction
   } // ~UnitProductionAction
 
   // ===========  AbilityAction  =================================
-  public static class AbilityAction implements GameAction
+  public static class AbilityAction extends GameAction
   {
     private GameEventQueue abilityEvents = null;
     private CommanderAbility myAbility;

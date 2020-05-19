@@ -52,7 +52,7 @@ public abstract class LoadLifecycle
     }
   }
 
-  public static class LoadAction implements GameAction
+  public static class LoadAction extends GameAction
   {
     private Unit passenger;
     Path movePath;

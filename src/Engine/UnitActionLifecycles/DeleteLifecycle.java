@@ -51,7 +51,7 @@ public abstract class DeleteLifecycle
     }
   } // ~factory
 
-  public static class DeleteAction implements GameAction
+  public static class DeleteAction extends GameAction
   {
     final Unit actor;
     final XYCoord destination;

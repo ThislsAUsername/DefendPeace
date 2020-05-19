@@ -44,7 +44,7 @@ public abstract class WaitLifecycle
     }
   } //~Factory
 
-  public static class WaitAction implements GameAction
+  public static class WaitAction extends GameAction
   {
     private final Path movePath;
     private final XYCoord waitLoc;

@@ -12,7 +12,7 @@ import Engine.GameInstance;
 import Engine.Path;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
-import Engine.Combat.CombatEngine;
+import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
@@ -262,6 +262,11 @@ public class SpriteMapView extends MapView
       unitArtist.drawUnitIcons(mapGraphics, currentActor, actorCoord.xCoord, actorCoord.yCoord, animIndex);
     }
 
+    for( DamagePopup popup :
+                            mapController.getDamagePopups(getDrawableMap(myGame),
+                                                          myGame.getCursorLocation().getCoordinates()) )
+      drawDamagePreview(mapGraphics, popup);
+
     if( currentAnimation != null )
     {
       // Animate until it tells you it's done.
@@ -279,11 +284,6 @@ public class SpriteMapView extends MapView
     else if( getCurrentGameMenu() == null )
     {
       mapArtist.drawCursor(mapGraphics, currentActor, isTargeting, myGame.getCursorX(), myGame.getCursorY());
-      Unit target = myGame.gameMap.getLocation(myGame.getCursorX(), myGame.getCursorY()).getResident();
-      if( isTargeting && null != currentPath && null != target)
-      {
-        drawDamagePreviewSet(mapGraphics, currentActor, currentPath, target);
-      }
     }
     else
     {
@@ -458,38 +458,20 @@ public class SpriteMapView extends MapView
       }
     }
   }
-  
-  /**
-   * Draws the predicted damage for both attacker and defender, as applicable.
-   */
-  public void drawDamagePreviewSet(Graphics g, Unit currentActor, Path currentPath, Unit target)
-  {
-    int dist = Math.abs(target.x - currentPath.getEnd().x) + Math.abs(target.y - currentPath.getEnd().y);
-    if( currentActor.canAttack(target.model, dist, currentPath.getPathLength() > 1) )
-    {
-      // find out how it would go
-      BattleSummary summary = CombatEngine.simulateBattleResults(currentActor, target, getDrawableMap(myGame),
-          currentPath.getEnd().x, currentPath.getEnd().y);
-      // draw any damage done, with the color of the one dealing the damage
-      if( summary.attackerHPLoss > 0 )
-        drawDamagePreview(g, summary.attackerHPLoss, summary.defender.CO, summary.attacker.x, summary.attacker.y);
-      if( summary.defenderHPLoss > 0 )
-        drawDamagePreview(g, summary.defenderHPLoss, summary.attacker.CO, summary.defender.x, summary.defender.y);
-    }
-  }
-  public void drawDamagePreview(Graphics g, double damage, Commander attacker, int x, int y)
-  {
-    // grab the two most significant digits and convert to %
-    String damageText = (int) (damage*10) + "%";
 
+  /**
+   * Draws a predicted damage panel
+   */
+  public void drawDamagePreview(Graphics g, DamagePopup data)
+  {
     // Build a display of the expected damage.
-    Color[] colors = UIUtils.getMapUnitColors(attacker.myColor).paletteColors;
-    BufferedImage dmgImage = SpriteUIUtils.makeTextFrame(colors[4], colors[2], damageText, 2, 2);
+    Color[] colors = UIUtils.getMapUnitColors(data.color).paletteColors;
+    BufferedImage dmgImage = SpriteUIUtils.makeTextFrame(colors[4], colors[2], data.quantity, 2, 2);
 
     // Draw the damage estimate directly above the unit being targeted.
     int tileSize = SpriteLibrary.baseSpriteSize;
-    int estimateX = (x * tileSize) + (tileSize / 2);
-    int estimateY = Math.max((y * tileSize) - dmgImage.getHeight() / 2, dmgImage.getHeight() / 2); // Don't want it floating off-screen
+    int estimateX = (data.coords.xCoord * tileSize) + (tileSize / 2);
+    int estimateY = Math.max((data.coords.yCoord * tileSize) - dmgImage.getHeight() / 2, dmgImage.getHeight() / 2); // Don't want it floating off-screen
     SpriteUIUtils.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY);
   }
 

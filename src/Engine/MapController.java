@@ -1,7 +1,10 @@
 package Engine;
 
 import java.util.ArrayList;
+import java.util.Collection;
+
 import CommandingOfficers.Commander;
+import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -639,6 +642,11 @@ public class MapController implements IController, GameInputHandler.StateChanged
   public boolean isTargeting()
   {
     return contemplatedAction.aiming;
+  }
+
+  public Collection<DamagePopup> getDamagePopups(GameMap map, XYCoord target)
+  {
+    return myGameInputHandler.getDamagePopups(map, target);
   }
 
   /** Returns the currently-active in-game menu, or null if no menu is in use. */
