@@ -1,3 +1,4 @@
+#!/usr/bin/python
 
 import sys
 import math
@@ -132,10 +133,10 @@ def indexToTerrainCode(x):
 		110: '  PI',
 		111: '  SR',#silo (SR, for Silo Ready)
 		112: '  BK',#used silo
-		113: '  XX',#HPipe seam
-		114: '  XX',#VPipe seam
-		115: '  XX',#HPipe seam broken
-		116: '  XX',#VPipe seam broken
+		113: '  ME',#HPipe seam
+		114: '  ME',#VPipe seam
+		115: '  GR',#HPipe seam broken
+		116: '  GR',#VPipe seam broken
 		117: ' 8AP',#airport
 		118: ' 8FC',#base/factory
 		119: ' 8CT',#city
