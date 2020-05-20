@@ -334,6 +334,8 @@ public class Muriel implements AIController
           XYCoord targetLoc = action.getTargetLocation();
           Unit target = gameMap.getLocation(targetLoc).getResident();
           Environment environment = gameMap.getEnvironment(targetLoc);
+          if( null == target )
+            continue;
 
           // Calculate the cost of the damage we can do.
           double attackDamage = CombatEngine.calculateOneStrikeDamage(unit, 1, target, gameMap, environment.terrainType.getDefLevel(), unit.model.hasMobileWeapon());

@@ -433,6 +433,8 @@ public class WallyAI implements AIController
               {
                 Location targetLoc = gameMap.getLocation(ga.getTargetLocation());
                 Unit target = targetLoc.getResident();
+                if( null == target )
+                  continue;
                 BattleSummary results = CombatEngine.simulateBattleResults(unit, target, gameMap, moveCoord.xCoord,
                     moveCoord.yCoord);
                 double loss   = Math.min(unit  .getHP(), (int)results.attackerHPLoss);
@@ -675,6 +677,8 @@ public class WallyAI implements AIController
                 for( GameAction attack : actionSet.getGameActions() )
                 {
                   Unit target = gameMap.getLocation(attack.getTargetLocation()).getResident();
+                  if( null == target )
+                    continue;
                   BattleSummary results = CombatEngine.simulateBattleResults(unit, target, gameMap, destination.xCoord, destination.yCoord);
                   double loss   = Math.min(unit  .getHP(), (int)results.attackerHPLoss);
                   double damage = Math.min(target.getHP(), (int)results.defenderHPLoss);
