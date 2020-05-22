@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import Engine.Path;
+import Engine.XYCoord;
 import Engine.Combat.StrikeParams.BattleParams;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -36,6 +37,10 @@ public class CombatEngine
   {
     boolean attackerMoved = attacker.x != attackerX || attacker.y != attackerY;
     return calculateBattleResults(attacker, defender, map, attackerMoved, attackerX, attackerY, true);
+  }
+  public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, XYCoord moveCoord )
+  {
+    return simulateBattleResults(attacker, defender, map, moveCoord.xCoord, moveCoord.yCoord);
   }
 
   public static StrikeParams calculateTerrainDamage( Unit attacker, Path path, Location target, GameMap map )

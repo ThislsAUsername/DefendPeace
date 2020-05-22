@@ -676,16 +676,21 @@ public class WallyAI implements AIController
                 double bestDamage = 0;
                 for( GameAction attack : actionSet.getGameActions() )
                 {
-                  Unit target = gameMap.getLocation(attack.getTargetLocation()).getResident();
-                  if( null == target )
-                    continue;
-                  BattleSummary results = CombatEngine.simulateBattleResults(unit, target, gameMap, destination.xCoord, destination.yCoord);
-                  double loss   = Math.min(unit  .getHP(), (int)results.attackerHPLoss);
-                  double damage = Math.min(target.getHP(), (int)results.defenderHPLoss);
-                  if( damage > bestDamage && damage > loss ) // only shoot that which you hurt more than it hurts you
+                  double damageValue = AIUtils.scoreAttackAction(unit, attack, gameMap,
+                      (results) -> {
+                        double loss   = Math.min(unit            .getHP(), (int)results.attackerHPLoss);
+                        double damage = Math.min(results.defender.getHP(), (int)results.defenderHPLoss);
+
+                        if( damage > loss ) // only shoot that which you hurt more than it hurts you
+                          return damage * results.defender.model.getCost();
+
+                        return 0.;
+                      }, (terrain, params) -> 0.01); // Attack terrain, but don't prioritize it over units
+
+                  if( damageValue > bestDamage )
                   {
-                    log(String.format("      Best en passant attack deals %s in exchange for %s", damage, loss));
-                    bestDamage = damage;
+                    log(String.format("      Best en passant attack deals %s", damageValue));
+                    bestDamage = damageValue;
                     action = attack;
                   }
                 }
