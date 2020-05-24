@@ -1,13 +1,12 @@
 package CommandingOfficers.BlueMoon;
 
 import Engine.GameScenario;
-import Engine.Combat.BattleInstance.BattleParams;
+import Engine.Combat.StrikeParams;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.IndirectRangeBoostModifier;
 import Terrain.MapMaster;
-import Units.Unit;
 import Units.UnitModel;
 import Units.WeaponModel;
 
@@ -58,24 +57,15 @@ public class Rojenski extends Commander
   }
 
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void modifyUnitAttack(StrikeParams params)
   {
-    Unit minion = null;
-    if( params.attacker.CO == this )
+    if( params.battleRange == 1 )
     {
-      minion = params.attacker;
+      params.attackPower -= 20;
     }
-
-    if( null != minion )
+    else
     {
-      if( params.combatRef.battleRange == 1 )
-      {
-        params.attackFactor -= 20;
-      }
-      else
-      {
-        params.attackFactor += indirectBuff;
-      }
+      params.attackPower += indirectBuff;
     }
   }
 

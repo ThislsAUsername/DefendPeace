@@ -1,17 +1,16 @@
 package CommandingOfficers.OrangeStar;
 
 import Engine.GameScenario;
+import Engine.Combat.StrikeParams;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.IndirectRangeBoostModifier;
-import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
 import Terrain.Location;
 import Terrain.TerrainType;
-import Units.Unit;
 import Units.UnitModel;
 
 public class Jake extends Commander
@@ -60,21 +59,12 @@ public class Jake extends Commander
   }
 
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void modifyUnitAttack(StrikeParams params)
   {
-    Unit minion = null;
-    if( params.attacker.CO == this )
+    Location loc = params.map.getLocation(params.attacker.x, params.attacker.y);
+    if( loc != null && loc.getEnvironment().terrainType == TerrainType.GRASS )
     {
-      minion = params.attacker;
-    }
-
-    if( null != minion )
-    {
-      Location loc = params.combatRef.gameMap.getLocation(params.combatRef.attackerX, params.combatRef.attackerY);
-      if( loc != null && loc.getEnvironment().terrainType == TerrainType.GRASS )
-      {
-        params.attackFactor += plainsBuff;
-      }
+      params.attackPower += plainsBuff;
     }
   }
 

@@ -243,7 +243,7 @@ public class AIUtils
         {
           for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, wep.minRange, wep.maxRange))
           {
-            double val = wep.getDamage(target) * (unit.getHP() / (double) unit.model.maxHP);
+            double val = wep.getDamage(target) * unit.getHPFactor();
             if (shootableTiles.containsKey(xyc))
               val = Math.max(val, shootableTiles.get(xyc));
             shootableTiles.put(xyc, val);
@@ -255,7 +255,7 @@ public class AIUtils
           {
             for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, wep.minRange, wep.maxRange))
             {
-              double val = wep.getDamage(target) * (unit.getHP() / (double) unit.model.maxHP);
+              double val = wep.getDamage(target) * unit.getHPFactor();
               if (shootableTiles.containsKey(xyc))
                 val = Math.max(val, shootableTiles.get(xyc));
               shootableTiles.put(xyc, val);

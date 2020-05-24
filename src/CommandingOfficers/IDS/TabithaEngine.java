@@ -13,6 +13,8 @@ import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CostValueFinder;
 import Engine.Combat.MassStrikeUtils;
+import Engine.Combat.StrikeParams;
+import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -21,7 +23,6 @@ import Engine.GameActionSet;
 import Engine.Path;
 import Engine.UnitActionFactory;
 import Engine.XYCoord;
-import Engine.Combat.BattleInstance.BattleParams;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import UI.MapView;
@@ -88,25 +89,18 @@ public abstract class TabithaEngine extends Commander
   }
 
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void modifyUnitAttack(StrikeParams params)
   {
     boolean freeBoost = canApplyBoost && COUs.size() < getMegaBoostCount();
-
-    if( params.attacker.CO == this )
-    {
-      Unit minion = params.attacker;
-
-      if( (freeBoost && canBoost(minion.model)) || COUs.contains(minion) )
-        params.attackFactor += megaPow;
-    }
-
-    if( params.defender.CO == this )
-    {
-      Unit minion = params.defender;
-
-      if( (freeBoost && canBoost(minion.model)) || COUs.contains(minion) )
-        params.defenseFactor += megaDef;
-    }
+    if( (freeBoost && canBoost(params.attacker.body.model)) || COUs.contains(params.attacker.body) )
+      params.attackPower += megaPow;
+  }
+  @Override
+  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  {
+    boolean freeBoost = canApplyBoost && COUs.size() < getMegaBoostCount();
+    if( (freeBoost && canBoost(params.defender.body.model)) || COUs.contains(params.defender.body) )
+      params.defensePower += megaDef;
   }
 
   @Override

@@ -1,12 +1,12 @@
 package CommandingOfficers.GreenEarth;
 
 import Engine.GameScenario;
+import Engine.Combat.StrikeParams.BattleParams;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
-import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
 
@@ -60,14 +60,11 @@ public class Javier1T extends Commander
   }
 
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
-    if( params.defender.CO == this )
+    if ( params.battleRange > 1 )
     {
-      if ( params.combatRef.battleRange > 1 )
-      {
-        params.defenseFactor += indirectDef;
-      }
+      params.defensePower += indirectDef;
     }
   }
 

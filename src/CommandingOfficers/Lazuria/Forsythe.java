@@ -8,7 +8,8 @@ import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.Combat.BattleSummary;
-import Engine.Combat.BattleInstance.BattleParams;
+import Engine.Combat.StrikeParams;
+import Engine.Combat.StrikeParams.BattleParams;
 import Units.Unit;
 
 public class Forsythe extends Commander
@@ -87,23 +88,16 @@ public class Forsythe extends Commander
   }
 
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.CO == this )
-    {
-      Unit minion = params.attacker;
-
-      if( null != minion && killCounts.containsKey(minion) )
-        params.attackFactor += getVetPower(killCounts.get(minion));
-    }
-
-    if( params.defender.CO == this )
-    {
-      Unit minion = params.defender;
-
-      if( null != minion && killCounts.containsKey(minion) )
-        params.defenseFactor += getVetDef(killCounts.get(minion));
-    }
+    if( killCounts.containsKey(params.attacker.body) )
+      params.attackPower += getVetPower(killCounts.get(params.attacker.body));
+  }
+  @Override
+  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  {
+    if( killCounts.containsKey(params.defender.body) )
+      params.defensePower += getVetDef(killCounts.get(params.defender.body));
   }
 
   @Override

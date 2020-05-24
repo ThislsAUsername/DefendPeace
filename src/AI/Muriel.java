@@ -17,17 +17,15 @@ import Engine.GameActionSet;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
-import Engine.Combat.BattleInstance;
+import Engine.Combat.CombatEngine;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.Environment;
-import Terrain.Environment.Weathers;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
-import Units.WeaponModel;
 
 /**
  * Muriel will Make Units Reactively, Informed by the Enemy Loadout.
@@ -126,7 +124,11 @@ public class Muriel implements AIController
   private UnitMatchupAndMetaInfo getUnitMatchupInfo(UnitModel myModel, UnitModel otherModel)
   {
     Unit myUnit = new Unit(myCo, myModel);
+    myUnit.x = 0;
+    myUnit.y = 0;
     Unit otherUnit = new Unit( myCo, otherModel );
+    otherUnit.x = 0;
+    otherUnit.y = 0;
     return getUnitMatchupInfo(myUnit, otherUnit);
   }
 
@@ -138,24 +140,10 @@ public class Muriel implements AIController
     UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(myUnit.model, otherUnit.model));
     if( null != umami ) return umami;
 
-    double myDamage = 0;
-    WeaponModel myWeapon = myUnit.chooseWeapon(otherUnit.model, 1, myUnit.model.hasMobileWeapon());
-    if( null != myWeapon )
-    {
-      BattleInstance.BattleParams params = new BattleInstance.BattleParams(myUnit, myWeapon,
-          otherUnit, Environment.getTile(TerrainType.ROAD, Weathers.CLEAR), false, null);
-      myDamage = params.calculateDamage(true);
-    }
+    double myDamage = CombatEngine.calculateOneStrikeDamage(myUnit, 1, otherUnit, myCo.myView, 0, myUnit.model.hasMobileWeapon());
 
     // Now go the other way.
-    double otherDamage = 0;
-    WeaponModel otherWeapon = otherUnit.chooseWeapon(myUnit.model, 1, myUnit.model.hasMobileWeapon());
-    if( null != otherWeapon )
-    {
-      BattleInstance.BattleParams params = new BattleInstance.BattleParams(otherUnit, otherWeapon,
-          myUnit, Environment.getTile(TerrainType.ROAD, Weathers.CLEAR), false, null);
-      otherDamage = params.calculateDamage(true);
-    }
+    double otherDamage = CombatEngine.calculateOneStrikeDamage(otherUnit, 1, myUnit, myCo.myView, 0, false);
 
     // Calculate and store the damage and cost-effectiveness ratios.
     double damageRatio = 0;
@@ -348,8 +336,10 @@ public class Muriel implements AIController
           Environment environment = gameMap.getEnvironment(targetLoc);
 
           // Calculate the cost of the damage we can do.
-          BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, unit.model.hasMobileWeapon()), target, environment, false, null);
-          double hpDamage = Math.min(params.calculateDamage(true), target.getPreciseHP());
+          double attackDamage = CombatEngine.calculateOneStrikeDamage(unit, 1, target, gameMap, environment.terrainType.getDefLevel(), unit.model.hasMobileWeapon());
+
+          double hpDamage = Math.min(attackDamage, target.getPreciseHP());
+
           double damageValue = (target.model.getCost()/10) * hpDamage;
 
           // Find the attack that causes the most monetary damage, provided it's at least a halfway decent idea.
@@ -471,8 +461,8 @@ public class Muriel implements AIController
   private boolean shouldAttack(Unit unit, Unit target, GameMap gameMap)
   {
     // Calculate the cost of the damage we can do.
-    BattleInstance.BattleParams params = new BattleInstance.BattleParams(unit, unit.chooseWeapon(target.model, 1, unit.model.hasMobileWeapon()), target, gameMap.getLocation(target.x, target.y).getEnvironment(), false, null);
-    double damage = params.calculateDamage(true);
+    double damage = CombatEngine.calculateOneStrikeDamage(unit, 1, target, gameMap, gameMap.getEnvironment(target.x, target.y).terrainType.getDefLevel(), unit.model.hasMobileWeapon());
+
     UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(unit, target);
 
     // This attack is a good idea if our cost effectiveness is in the acceptable range, or if we can at least half-kill them.

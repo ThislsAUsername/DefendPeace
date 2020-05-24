@@ -1,12 +1,12 @@
 package CommandingOfficers.YellowComet;
 
 import Engine.GameScenario;
+import Engine.Combat.CombatContext;
+import Engine.Combat.StrikeParams;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.COVisionModifier;
-import Engine.Combat.BattleInstance.BattleParams;
-import Engine.Combat.BattleInstance.CombatContext;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -87,14 +87,13 @@ public class Sonja extends Commander
   }
 
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void modifyUnitAttack(StrikeParams params)
   {
-    if( amITheAttacker )
+    params.dispersion = 10;
+    if( params.isCounter )
     {
-      params.dispersion = 10;
-      if( params.isCounter )
-        // it's a multiplier according to the damage calc
-        params.attackFactor *= 50;
+      // it's a multiplier according to the damage calc
+      params.attackPower *= 50;
     }
   }
 

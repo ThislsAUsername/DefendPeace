@@ -5,8 +5,8 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.COVisionModifier;
-import Engine.Combat.BattleInstance.BattleParams;
-import Engine.Combat.BattleInstance.CombatContext;
+import Engine.Combat.CombatContext;
+import Engine.Combat.StrikeParams;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -89,13 +89,10 @@ public class Cyrus extends Commander
   }
 
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void modifyUnitAttack(StrikeParams params)
   {
-    if( amITheAttacker )
-    {
-      params.terrainDefense = Math.max(0, params.terrainDefense-terrainDrain);
-      params.dispersion = 5;
-    }
+    params.dispersion = 5;
+    params.terrainStars = Math.max(0, params.terrainStars-terrainDrain);
   }
 
   private static class Courageous extends CommanderAbility

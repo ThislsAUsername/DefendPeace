@@ -1,14 +1,15 @@
 package CommandingOfficers.BlackHole;
 
 import Engine.GameScenario;
+import Engine.Combat.StrikeParams;
+import Engine.Combat.StrikeParams.BattleParams;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.PerfectMoveModifier;
-import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
-import Terrain.Location;
+import Terrain.Environment;
 
 public class Lash extends Commander
 {
@@ -57,20 +58,15 @@ public class Lash extends Commander
   }
 
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.CO == this )
-    {
-      Location loc = params.combatRef.gameMap.getLocation(params.combatRef.attackerX, params.combatRef.attackerY);
-      if( loc != null && loc.isCaptureable() )
-      {
-        params.attackFactor += starBuff * params.terrainDefense * starMult;
-      }
-    }
-    if( params.defender.CO == this )
-    {
-      params.terrainDefense *= starMult;
-    }
+    Environment env = params.map.getEnvironment(params.attacker.x, params.attacker.y);
+    params.attackPower += starBuff * env.terrainType.getDefLevel() * starMult;
+  }
+  @Override
+  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  {
+    params.terrainStars *= starMult;
   }
 
   private static class TerrainTactics extends CommanderAbility

@@ -1,14 +1,13 @@
 package CommandingOfficers.OrangeStar;
 
 import Engine.GameScenario;
+import Engine.Combat.StrikeParams;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.COMovementModifier;
-import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
-import Units.Unit;
 import Units.UnitModel;
 import Units.WeaponModel;
 
@@ -74,24 +73,15 @@ public class Max extends Commander
   }
 
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void modifyUnitAttack(StrikeParams params)
   {
-    Unit minion = null;
-    if( params.attacker.CO == this )
+    if( params.battleRange == 1 && params.attacker.body.model.isNone(UnitModel.TROOP) )
     {
-      minion = params.attacker;
+      params.attackPower += directBuff;
     }
-
-    if( null != minion )
+    else if ( params.battleRange > 1 )
     {
-      if( params.combatRef.battleRange == 1 && minion.model.isNone(UnitModel.TROOP) )
-      {
-        params.attackFactor += directBuff;
-      }
-      else if ( params.combatRef.battleRange > 1 )
-      {
-        params.attackFactor -= 10;
-      }
+      params.attackPower -= 10;
     }
   }
 

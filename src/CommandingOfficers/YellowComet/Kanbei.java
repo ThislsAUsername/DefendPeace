@@ -1,15 +1,14 @@
 package CommandingOfficers.YellowComet;
 
 import Engine.GameScenario;
+import Engine.Combat.StrikeParams;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
-import Engine.Combat.BattleInstance.BattleParams;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
-import Units.Unit;
 import Units.UnitModel;
 
 public class Kanbei extends Commander
@@ -65,18 +64,12 @@ public class Kanbei extends Commander
   }
 
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void modifyUnitAttack(StrikeParams params)
   {
-    Unit minion = null;
-    if( params.attacker.CO == this )
-    {
-      minion = params.attacker;
-    }
-
-    if( null != minion && params.isCounter )
+    if( params.isCounter )
     {
       // it's a multiplier according to the damage calc
-      params.attackFactor *= counterMult;
+      params.attackPower *= counterMult;
     }
   }
 

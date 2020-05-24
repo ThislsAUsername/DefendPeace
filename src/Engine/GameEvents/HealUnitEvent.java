@@ -10,13 +10,13 @@ import Units.Unit;
 public class HealUnitEvent implements GameEvent
 {
   private Unit unit;
-  public final int repairPower;
+  public final int repairPowerHP;
   public final Commander payer;
 
   public HealUnitEvent(Unit aTarget, int HP, Commander pPayer)
   {
     unit = aTarget;
-    repairPower = HP;
+    repairPowerHP = HP;
     payer = pPayer;
   }
 
@@ -36,28 +36,16 @@ public class HealUnitEvent implements GameEvent
   public void performEvent(MapMaster gameMap)
   {
     if (null == payer)
-      unit.alterHP(repairPower);
-    else
+      unit.alterHP(repairPowerHP);
+    else if( unit.isHurt() )
     {
-      double HP = unit.getPreciseHP();
-      int maxHP = unit.model.maxHP;
+      int costPerHP = unit.model.getCost() / unit.model.maxHP;
 
-      if( HP < unit.model.maxHP )
-      {
-        int neededHP = Math.min(maxHP - unit.getHP(), repairPower); // Only pay for whole HPs
-        double proportionalCost = unit.model.getCost() / maxHP;
-        int repairedHP = neededHP;
-        while (payer.money < repairedHP * proportionalCost) // Only repair what we can afford
-        {
-          repairedHP--;
-        }
-        payer.money -= repairedHP * proportionalCost;
-        unit.alterHP(repairedHP);
+      int affordableHP = payer.money / costPerHP;
+      int actualRepair = Math.min(repairPowerHP, affordableHP);
 
-        // Top off HP if there's excess power but we hit the HP cap
-        if (repairedHP < repairPower && unit.getHP() == maxHP)
-          unit.alterHP(1);
-      }
+      int deltaHP = unit.alterHP(actualRepair);
+      payer.money -= deltaHP * costPerHP;
     }
   }
 

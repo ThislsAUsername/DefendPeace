@@ -1,7 +1,6 @@
 package CommandingOfficers.OrangeStar;
 
 import Engine.GameScenario;
-import Engine.Combat.BattleInstance.BattleParams;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -9,9 +8,9 @@ import Engine.Combat.CaptureUnitValueFinder;
 import Engine.Combat.CostValueFinder;
 import Engine.Combat.HPValueFinder;
 import Engine.Combat.MassStrikeUtils;
+import Engine.Combat.StrikeParams;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
-import Units.Unit;
 
 public class Rachel extends Commander
 {
@@ -65,18 +64,9 @@ public class Rachel extends Commander
   }
 
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void modifyUnitAttack(StrikeParams params)
   {
-    Unit minion = null;
-    if( params.attacker.CO == this )
-    {
-      minion = params.attacker;
-    }
-
-    if( null != minion )
-    {
-      params.luckMax = luckMax;
-    }
+    params.luckMax = luckMax;
   }
 
   private static class LuckyLass extends CommanderAbility

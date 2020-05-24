@@ -11,7 +11,7 @@ import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
-import Engine.Combat.BattleInstance.BattleParams;
+import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -156,13 +156,13 @@ public class Ave extends Commander
 
   /** Ave's units take less cover from forests. */
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
-    if( params.defender.CO == this // We are defending, in a FOREST
-        && (params.combatRef.gameMap.getEnvironment(params.defender.x, params.defender.y).terrainType == TerrainType.FOREST)
-        && (params.defender.model.isLandUnit()))  // And our unit is actually on the ground.
+    // We are defending, in a FOREST
+    if( (params.map.getEnvironment(params.defender.x, params.defender.y).terrainType == TerrainType.FOREST)
+        && (params.defender.body.model.isLandUnit()))  // And our unit is actually on the ground.
     {
-      params.terrainDefense--;
+      params.terrainStars--;
     }
   }
 

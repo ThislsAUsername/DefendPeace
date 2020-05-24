@@ -1,13 +1,12 @@
 package CommandingOfficers.OrangeStar;
 
 import Engine.GameScenario;
-import Engine.Combat.BattleInstance.BattleParams;
+import Engine.Combat.StrikeParams;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
-import Units.Unit;
 
 public class Caroline extends Commander
 {
@@ -58,19 +57,10 @@ public class Caroline extends Commander
   }
 
   @Override
-  public void applyCombatModifiers(BattleParams params, boolean amITheAttacker)
+  public void modifyUnitAttack(StrikeParams params)
   {
-    Unit minion = null;
-    if( params.attacker.CO == this )
-    {
-      minion = params.attacker;
-    }
-
-    if( null != minion )
-    {
-      params.luckMax = luckMax - luckFloor;
-      params.baseDamage += luckFloor;
-    }
+    params.luckMax = luckMax - luckFloor;
+    params.baseDamage += luckFloor;
   }
 
   private static class LuckFloor extends CommanderAbility
