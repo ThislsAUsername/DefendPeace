@@ -10,6 +10,7 @@ import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
+import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
 import Units.Unit;
 
 public class Forsythe extends Commander
@@ -28,7 +29,7 @@ public class Forsythe extends Commander
           "On making a kill, units gain a level" +
           "LEVEL 1: +5% firepower\r\n" +
           "LEVEL 2: +10% firepower\r\n" +
-          "LEVEL V: +20% firepower & +15% defense\r\n" +
+          "LEVEL V: +20% firepower & defense\r\n" +
           "NO CO POWERS"));
     }
     @Override
@@ -76,7 +77,7 @@ public class Forsythe extends Commander
   public int getVetDef(int level)
   {
     if( level > 2 )
-      return 15;
+      return 20;
     return 0;
   }
   public void levelUnit(Unit minion)
@@ -85,6 +86,17 @@ public class Forsythe extends Commander
       killCounts.put(minion, killCounts.get(minion) + 1);
     else
       killCounts.put(minion, 1);
+  }
+  @Override
+  public void receiveUnitJoinEvent(JoinEvent join)
+  {
+    int higherKills = 0;
+    if( killCounts.containsKey(join.unitDonor) )
+      higherKills = Math.max(higherKills, killCounts.get(join.unitDonor));
+    if( killCounts.containsKey(join.unitRecipient) )
+      higherKills = Math.max(higherKills, killCounts.get(join.unitRecipient));
+    if( higherKills > 0 )
+      killCounts.put(join.unitRecipient, higherKills);
   }
 
   @Override
