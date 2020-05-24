@@ -446,12 +446,6 @@ public class Utils
     return industries;
   }
 
-  /** Calculate the Manhattan distance between the two coordinates (number of moves for a flying unit). */
-  public static int findManhattanDistance(XYCoord c1, XYCoord c2)
-  {
-    return Math.abs(c1.xCoord - c2.xCoord) + Math.abs(c1.yCoord - c2.yCoord);
-  }
-
   /**
    * Compare XYCoords based on how far they are from myCenter.
    * XYCoords closer to myCenter will be "less than" XYCoords that are farther away.
@@ -468,8 +462,8 @@ public class Utils
     @Override
     public int compare(XYCoord xy1, XYCoord xy2)
     {
-      int xy1Dist = findManhattanDistance(xy1, myCenter);
-      int xy2Dist = findManhattanDistance(xy2, myCenter);
+      int xy1Dist = xy1.getDistance(myCenter);
+      int xy2Dist = xy2.getDistance(myCenter);
 
       return xy1Dist - xy2Dist;
     }

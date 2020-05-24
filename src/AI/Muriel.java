@@ -419,7 +419,7 @@ public class Muriel implements AIController
             XYCoord threatCoord = enemyLocations.get(j);
             Unit threat = gameMap.getLocation(threatCoord).getResident();
             XYCoord unitCoord = new XYCoord(unit.x, unit.y);
-            if( Utils.findManhattanDistance(unitCoord, threatCoord) <= MAX_RELEVANT_DISTANCE )
+            if( unitCoord.getDistance(threatCoord) <= MAX_RELEVANT_DISTANCE )
             {
               // If we, in the enemy's place, would attack `unit` with `threat`, then we should not let them attack us.
               if( threat.canAttack(unit.model) && shouldAttack(threat, unit, gameMap) )
