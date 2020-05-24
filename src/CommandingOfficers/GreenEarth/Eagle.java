@@ -69,6 +69,7 @@ public class Eagle extends Commander
     LightningDrive(Commander commander)
     {
       super(commander, NAME, COST);
+      AIFlags = 0;
     }
 
     @Override
