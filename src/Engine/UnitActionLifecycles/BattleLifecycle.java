@@ -449,8 +449,7 @@ public abstract class BattleLifecycle
     @Override
     public GameAnimation getEventAnimation(MapView mapView)
     {
-      return null;
-      // TODO: return mapView.buildBattleAnimation();
+      return mapView.buildDemolitionAnimation(result, getEndPoint(), percentDamage);
     }
 
     @Override

@@ -5,7 +5,9 @@ import Engine.GameInstance;
 import Engine.IView;
 import Engine.MapController;
 import Engine.Path;
+import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
+import Engine.Combat.StrikeParams;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
@@ -67,6 +69,10 @@ public abstract class MapView implements IView
   /////////////////////////////////////////////////////////////////////////////////////
 
   public GameAnimation buildBattleAnimation( BattleSummary summary )
+  {
+    return null;
+  }
+  public GameAnimation buildDemolitionAnimation( StrikeParams params, XYCoord target, int damage )
   {
     return null;
   }

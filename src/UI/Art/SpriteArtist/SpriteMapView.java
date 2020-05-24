@@ -13,6 +13,7 @@ import Engine.Path;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.DamagePopup;
+import Engine.Combat.StrikeParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
@@ -380,6 +381,12 @@ public class SpriteMapView extends MapView
   {
     return new NobunagaBattleAnimation(getTileSize(), summary.attacker.x, summary.attacker.y, summary.defender.x,
         summary.defender.y);
+  }
+
+  @Override // from MapView
+  public GameAnimation buildDemolitionAnimation( StrikeParams params, XYCoord target, int damage )
+  {
+    return new NobunagaBattleAnimation(getTileSize(), params.attacker.x, params.attacker.y, target.xCoord, target.yCoord);
   }
 
   @Override
