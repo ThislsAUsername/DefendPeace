@@ -223,11 +223,7 @@ public class AIUtils
   }
   
   /**
-<<<<<<< HEAD
-   * @return The area threatened by the unit, against the specified target type
-=======
    * @return The area and severity of threat from the unit, against the specified target type
->>>>>>> origin/master
    */
   public static Map<XYCoord, Double> findThreatPower(GameMap gameMap, Unit unit, UnitModel target)
   {
@@ -394,12 +390,7 @@ public class AIUtils
   }
 
   /**
-<<<<<<< HEAD
-   * Compares SearchNodes based on the amount of movePower they possess, and optionally
-   *   the remaining distance to a destination.
-=======
    * Compares Units based on their value, scaled with HP.
->>>>>>> origin/master
    */
   public static class UnitCostComparator implements Comparator<Unit>
   {
