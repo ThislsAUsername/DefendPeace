@@ -338,7 +338,7 @@ public class Muriel implements AIController
                   return (results.defender.model.getCost() / 10) * hpDamage;
 
                 return 0.;
-              }, (terrain, params) -> 0.01); // Attack terrain, but don't prioritize it over units
+              }, (terrain, params) -> 0.); // Don't mess with terrain
 
           // Find the attack that causes the most monetary damage, provided it's at least a halfway decent idea.
           if( (damageValue > maxDamageValue) )
