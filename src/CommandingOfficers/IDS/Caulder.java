@@ -24,7 +24,7 @@ public class Caulder extends Commander
           "--CAULDER--\r\n" +
           "All damaged units are repaired for +"+ D2DREPAIRS +" HP every turn (liable for costs).\r\n" +
           "XXXXX XXXXX\r\n" +
-          "SUPREME BOOST: All units gain +40% firepower, +25% defense, and are repaired for +"+ SupremeBoost.REPAIRS +" HP (liable for costs -- watch your funds!)."));
+          "SUPREME BOOST: All units gain +"+MEGA_ATK+"/"+MEGA_DEF+" stats, and are repaired for +"+ SupremeBoost.REPAIRS +" HP (liable for costs -- watch your funds!)."));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -34,6 +34,8 @@ public class Caulder extends Commander
   }
 
   public static final int D2DREPAIRS = 2;
+  public static final int MEGA_ATK = 50;
+  public static final int MEGA_DEF = 35;
 
   public Caulder(GameScenario.GameRules rules)
   {
@@ -92,8 +94,8 @@ public class Caulder extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      myCommander.addCOModifier(new CODamageModifier(40));
-      myCommander.addCOModifier(new CODefenseModifier(25));
+      myCommander.addCOModifier(new CODamageModifier(MEGA_ATK));
+      myCommander.addCOModifier(new CODefenseModifier(MEGA_DEF));
       for( Unit unit : myCommander.units )
       {
         double HP = unit.getPreciseHP();

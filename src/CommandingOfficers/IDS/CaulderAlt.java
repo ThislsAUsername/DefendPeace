@@ -24,7 +24,7 @@ public class CaulderAlt extends Commander
           "--CAULDER ALT--\r\n" +
           "All damaged units are repaired for +"+ D2DREPAIRS +" HP every turn (liable for costs).\r\n" +
           "XXXXX XXXXX\r\n" +
-          "SUPREME BOOST: All units gain +40% firepower, +25% defense, and are repaired for +"+ SupremeBoost.REPAIRS +" HP (liable for costs -- watch your funds!)."));
+          "SUPREME BOOST: All units gain +"+MEGA_ATK+"/"+MEGA_DEF+" stats."));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -33,7 +33,9 @@ public class CaulderAlt extends Commander
     }
   }
 
-  public static final int D2DREPAIRS = 3;
+  public static final int D2DREPAIRS = 2;
+  public static final int MEGA_ATK = 50;
+  public static final int MEGA_DEF = 35;
 
   public CaulderAlt(GameScenario.GameRules rules)
   {
@@ -82,7 +84,6 @@ public class CaulderAlt extends Commander
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Supreme Boost";
     private static final int COST = 10;
-    private static final int REPAIRS = 2;
 
     SupremeBoost(Commander commander)
     {
@@ -92,29 +93,8 @@ public class CaulderAlt extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      myCommander.addCOModifier(new CODamageModifier(40));
-      myCommander.addCOModifier(new CODefenseModifier(25));
-      for( Unit unit : myCommander.units )
-      {
-        double HP = unit.getPreciseHP();
-        double maxHP = unit.model.maxHP;
-        if( HP < maxHP )
-        {
-          int neededHP = (int) Math.min(maxHP - unit.getHP(), REPAIRS);
-          double proportionalCost = unit.model.getCost() / maxHP;
-          int repairedHP = neededHP;
-          while (myCommander.money < repairedHP * proportionalCost)
-          {
-            repairedHP--;
-          }
-          myCommander.money -= repairedHP * proportionalCost;
-          unit.alterHP(repairedHP);
-
-          // Top off HP if there's excess power but we hit the HP cap
-          if (repairedHP < D2DREPAIRS && unit.getHP() == maxHP)
-            unit.alterHP(1);
-        }
-      }
+      myCommander.addCOModifier(new CODamageModifier(MEGA_ATK));
+      myCommander.addCOModifier(new CODefenseModifier(MEGA_DEF));
     }
   }
 }
