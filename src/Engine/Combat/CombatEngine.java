@@ -49,7 +49,7 @@ public class CombatEngine
     boolean attackerMoved = path.getPathLength() > 1;
     WeaponModel weapon = attacker.chooseWeapon(target, battleRange, attackerMoved);
     return new StrikeParams(
-        new Combatant(attacker, weapon, attacker.x, attacker.y),
+        new Combatant(attacker, weapon, path.getEnd().x, path.getEnd().y),
         map, battleRange,
         attacker.model.getDamageRatio(), attacker.getHP(),
         weapon.getDamage(target),
