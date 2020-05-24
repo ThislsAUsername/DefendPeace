@@ -131,6 +131,8 @@ public class Unit implements Serializable
     boolean canHit = false;
     for( WeaponModel weapon : model.weapons )
     {
+      if( !weapon.loaded(this) ) continue; // Can't shoot with no bullets.
+
       if( afterMoving && !weapon.canFireAfterMoving )
       {
         // If we are planning to move first, and the weapon
@@ -147,7 +149,9 @@ public class Unit implements Serializable
   }
 
   /**
-   * @return whether this unit has a weapon that can hit `targetType` under any circumstances.  */
+   * @return Whether this unit has a weapon with ammo that can hit `targetType`
+   * under any combination of ranged/direct, move-first/static.
+   */
   public boolean canAttack(UnitModel targetType)
   {
     // if we have no weapons, we can't hurt things
@@ -157,6 +161,8 @@ public class Unit implements Serializable
     boolean canHit = false;
     for( WeaponModel weapon : model.weapons )
     {
+      if( !weapon.loaded(this) ) continue; // Can't shoot with no bullets.
+
       if( weapon.getDamage(targetType) > 0 )
       {
         canHit = true;
@@ -184,6 +190,8 @@ public class Unit implements Serializable
     double maxDamage = 0;
     for( WeaponModel weapon : model.weapons )
     {
+      if( !weapon.loaded(this) ) continue; // Can't shoot with no bullets.
+
       // If the weapon isn't mobile, we cannot fire if we moved.
       if( afterMoving && !weapon.canFireAfterMoving )
       {
