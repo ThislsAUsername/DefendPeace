@@ -316,6 +316,10 @@ public class Muriel implements AIController
           }
         }
         if( !queuedActions.isEmpty() ) break; // Break so we don't inadvertently plan two actions for this unit.
+        else
+        {
+          log("  Cannot find an available resupply station.");
+        }
       }
 
       // Find all the things we can do from here.
@@ -400,6 +404,8 @@ public class Muriel implements AIController
         {
           XYCoord coord = enemyLocations.get(i);
           Unit target = gameMap.getLocation(coord).getResident();
+
+          if( !unit.canAttack(target.model) ) continue; // Make sure we can attack this type; also accounts for ammo.
 
           // Only chase this unit if we will be effective against it. Don't check shouldAttack here, because we can't actually attack yet.
           UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(unit, target);
