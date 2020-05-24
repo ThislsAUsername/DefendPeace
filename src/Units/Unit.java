@@ -89,7 +89,7 @@ public class Unit implements Serializable
 
     if( null != locus )
     {
-      fuel -= model.idleFuelBurn;
+      fuel = Math.max(0, fuel - model.idleFuelBurn);
       // If the unit is not at max health, and is on a repair tile, heal it.
       if( model.canRepairOn(locus) && !CO.isEnemy(locus.getOwner()) )
       {
