@@ -59,6 +59,9 @@ public class TestUnitMovement extends TestCase
     // A path from here to here should still have one path node.
     boolean testPassed = (mvPath.getPathLength() == 1);
 
+    // Make sure it doesn't cost fuel to go nowhere.
+    testPassed &= 0 == mvPath.getFuelCost(mover.model, testMap);
+
     // Try to build a malformed action and make sure it doesn't work.
     mover.initTurn(testMap);
     GameAction badUnit = new WaitLifecycle.WaitAction(null, mvPath);

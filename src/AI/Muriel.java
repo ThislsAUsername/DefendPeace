@@ -316,6 +316,10 @@ public class Muriel implements AIController
           }
         }
         if( !queuedActions.isEmpty() ) break; // Break so we don't inadvertently plan two actions for this unit.
+        else
+        {
+          log("  Cannot find an available resupply station.");
+        }
       }
 
       // Find all the things we can do from here.
@@ -326,7 +330,7 @@ public class Muriel implements AIController
       ArrayList<GameAction> attackActions = unitActionsByType.get(UnitActionFactory.ATTACK);
       GameAction maxCarnageAction = null;
       double maxDamageValue = 0;
-      if( null != attackActions )
+      if( null != attackActions && !attackActions.isEmpty() )
       {
         for( GameAction action : attackActions )
         {
@@ -401,12 +405,35 @@ public class Muriel implements AIController
           XYCoord coord = enemyLocations.get(i);
           Unit target = gameMap.getLocation(coord).getResident();
 
+          if( !unit.canAttack(target.model) ) continue; // Make sure we can attack this type; also accounts for ammo.
+
           // Only chase this unit if we will be effective against it. Don't check shouldAttack here, because we can't actually attack yet.
           UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(unit, target);
           if( umami.costEffectivenessRatio < COST_EFFECTIVENESS_MIN ) continue;
 
+          // Find locations that would be dangerous for us so we can avoid sauntering into enemy fire.
+          HashSet<XYCoord> noGoZone = new HashSet<XYCoord>();
+          final int MAX_RELEVANT_DISTANCE = 27; // ~3x the move distance of the fastest units. Up for tweaking.
+          for(int j = 0; j < enemyLocations.size(); ++j)
+          {
+            XYCoord threatCoord = enemyLocations.get(j);
+            Unit threat = gameMap.getLocation(threatCoord).getResident();
+            XYCoord unitCoord = new XYCoord(unit.x, unit.y);
+            if( unitCoord.getDistance(threatCoord) <= MAX_RELEVANT_DISTANCE )
+            {
+              // If we, in the enemy's place, would attack `unit` with `threat`, then we should not let them attack us.
+              if( threat.canAttack(unit.model) && shouldAttack(threat, unit, gameMap) )
+              {
+                // Add coordinates that `threat` could target to our "no-go" list.
+                Map<XYCoord, Double> threatMap = AIUtils.findThreatPower(gameMap, threat, unit.model);
+                noGoZone.addAll(threatMap.keySet()); // Ignore the valueMap of the return; we have already decided `threat` is dangerous.
+              }
+            }
+            else break; // Don't bother considering far-away baddies for our no-go zone.
+          }
+
           // Try to move towards the enemy, but avoid blocking a factory.
-          move = AIUtils.moveTowardLocation(unit, coord, gameMap);
+          move = AIUtils.moveTowardLocation(unit, coord, gameMap, noGoZone);
           if( null != move && (gameMap.getLocation(move.getMoveLocation()).getEnvironment().terrainType != TerrainType.FACTORY))
           {
             log(String.format("  Found %s", gameMap.getLocation(coord).getResident().toStringWithLocation()));

@@ -89,7 +89,7 @@ public class Unit implements Serializable
 
     if( null != locus )
     {
-      fuel -= model.idleFuelBurn;
+      fuel = Math.max(0, fuel - model.idleFuelBurn);
       // If the unit is not at max health, and is on a repair tile, heal it.
       if( model.canRepairOn(locus) && !CO.isEnemy(locus.getOwner()) )
       {
@@ -131,6 +131,8 @@ public class Unit implements Serializable
     boolean canHit = false;
     for( WeaponModel weapon : model.weapons )
     {
+      if( !weapon.loaded(this) ) continue; // Can't shoot with no bullets.
+
       if( afterMoving && !weapon.canFireAfterMoving )
       {
         // If we are planning to move first, and the weapon
@@ -138,6 +140,30 @@ public class Unit implements Serializable
         continue;
       }
       if( weapon.getDamage(targetType, range) > 0 )
+      {
+        canHit = true;
+        break;
+      }
+    }
+    return canHit;
+  }
+
+  /**
+   * @return Whether this unit has a weapon with ammo that can hit `targetType`
+   * under any combination of ranged/direct, move-first/static.
+   */
+  public boolean canAttack(UnitModel targetType)
+  {
+    // if we have no weapons, we can't hurt things
+    if( model.weapons == null )
+      return false;
+
+    boolean canHit = false;
+    for( WeaponModel weapon : model.weapons )
+    {
+      if( !weapon.loaded(this) ) continue; // Can't shoot with no bullets.
+
+      if( weapon.getDamage(targetType) > 0 )
       {
         canHit = true;
         break;
@@ -164,6 +190,8 @@ public class Unit implements Serializable
     double maxDamage = 0;
     for( WeaponModel weapon : model.weapons )
     {
+      if( !weapon.loaded(this) ) continue; // Can't shoot with no bullets.
+
       // If the weapon isn't mobile, we cannot fire if we moved.
       if( afterMoving && !weapon.canFireAfterMoving )
       {

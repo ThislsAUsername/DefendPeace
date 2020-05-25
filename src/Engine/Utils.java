@@ -462,8 +462,8 @@ public class Utils
     @Override
     public int compare(XYCoord xy1, XYCoord xy2)
     {
-      int xy1Dist = Math.abs(xy1.xCoord - myCenter.xCoord) + Math.abs(xy1.yCoord - myCenter.yCoord);
-      int xy2Dist = Math.abs(xy2.xCoord - myCenter.xCoord) + Math.abs(xy2.yCoord - myCenter.yCoord);
+      int xy1Dist = xy1.getDistance(myCenter);
+      int xy2Dist = xy2.getDistance(myCenter);
 
       return xy1Dist - xy2Dist;
     }
