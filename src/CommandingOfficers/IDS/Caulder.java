@@ -56,24 +56,13 @@ public class Caulder extends Commander
 
     for( Unit unit : units )
     {
-      double HP = unit.getPreciseHP();
-      double maxHP = unit.model.maxHP;
-      if( HP < maxHP )
-      {
-        int neededHP = (int) Math.min(maxHP - unit.getHP(), D2DREPAIRS);
-        double proportionalCost = unit.model.getCost() / maxHP;
-        int repairedHP = neededHP;
-        while (money < repairedHP * proportionalCost)
-        {
-          repairedHP--;
-        }
-        money -= repairedHP * proportionalCost;
-        unit.alterHP(repairedHP);
+      int costPerHP = unit.model.getCost() / unit.model.maxHP;
 
-        // Top off HP if there's excess power but we hit the HP cap
-        if (repairedHP < D2DREPAIRS && unit.getHP() == maxHP)
-          unit.alterHP(1);
-      }
+      int affordableHP = this.money / costPerHP;
+      int actualRepair = Math.min(D2DREPAIRS, affordableHP);
+
+      int deltaHP = unit.alterHP(actualRepair);
+      this.money -= deltaHP * costPerHP;
     }
     
     return ret;
@@ -98,24 +87,13 @@ public class Caulder extends Commander
       myCommander.addCOModifier(new CODefenseModifier(MEGA_DEF));
       for( Unit unit : myCommander.units )
       {
-        double HP = unit.getPreciseHP();
-        double maxHP = unit.model.maxHP;
-        if( HP < maxHP )
-        {
-          int neededHP = (int) Math.min(maxHP - unit.getHP(), REPAIRS);
-          double proportionalCost = unit.model.getCost() / maxHP;
-          int repairedHP = neededHP;
-          while (myCommander.money < repairedHP * proportionalCost)
-          {
-            repairedHP--;
-          }
-          myCommander.money -= repairedHP * proportionalCost;
-          unit.alterHP(repairedHP);
+        int costPerHP = unit.model.getCost() / unit.model.maxHP;
 
-          // Top off HP if there's excess power but we hit the HP cap
-          if (repairedHP < D2DREPAIRS && unit.getHP() == maxHP)
-            unit.alterHP(1);
-        }
+        int affordableHP = myCommander.money / costPerHP;
+        int actualRepair = Math.min(REPAIRS, affordableHP);
+
+        int deltaHP = unit.alterHP(actualRepair);
+        myCommander.money -= deltaHP * costPerHP;
       }
     }
   }
