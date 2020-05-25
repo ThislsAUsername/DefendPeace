@@ -408,6 +408,7 @@ public class TerrainSpriteSet
       terrainObjects.add(TerrainType.LAB);
       terrainObjects.add(TerrainType.MOUNTAIN);
       terrainObjects.add(TerrainType.PILLAR);
+      terrainObjects.add(TerrainType.METEOR);
     }
     return terrainObjects.contains(terrainType);
   }
@@ -472,6 +473,7 @@ public class TerrainSpriteSet
       terrainBases.put(TerrainType.RIVER, TerrainType.GRASS);
       terrainBases.put(TerrainType.ROAD, TerrainType.GRASS);
       terrainBases.put(TerrainType.PILLAR, TerrainType.GRASS);
+      terrainBases.put(TerrainType.METEOR, TerrainType.GRASS);
       terrainBases.put(TerrainType.BUNKER, TerrainType.GRASS);
 
       terrainBases.put(TerrainType.BRIDGE, TerrainType.SHOAL);

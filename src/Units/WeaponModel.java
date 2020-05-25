@@ -2,6 +2,7 @@ package Units;
 
 import java.io.Serializable;
 
+import Terrain.TerrainType;
 import Units.AWBWUnits.AWBWUnitModel;
 import Units.DoRUnits.DoRUnitModel;
 
@@ -49,16 +50,16 @@ public abstract class WeaponModel implements Serializable
   /**
    * @return returns its base damage against defender if the unit is in range
    */
-  public double getDamage(UnitModel defender, int range)
+  public double getDamage(ITargetable defender, int range)
   {
     if( (range >= minRange) && (range <= maxRange) )
       return getDamage(defender);
     return 0;
   }
   /**
-   * @return returns its base damage against that unit type
+   * @return returns its base damage against that target type
    */
-  public double getDamage(UnitModel defender)
+  public double getDamage(ITargetable defender)
   {
     if( defender == null )
       throw new IllegalArgumentException("Stare not into the void. It just may stare back.");
@@ -72,4 +73,5 @@ public abstract class WeaponModel implements Serializable
   {
     throw new UnsupportedOperationException("Called base WeaponModel.getDamage() with input type " + defender.getClass());
   }
+  public abstract double getDamage(TerrainType target);
 }

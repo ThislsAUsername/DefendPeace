@@ -8,6 +8,7 @@ public class IMapBuilder
   protected static final TerrainType BR = TerrainType.BRIDGE;
   protected static final TerrainType CT = TerrainType.CITY;
   protected static final TerrainType PI = TerrainType.PILLAR;
+  protected static final TerrainType ME = TerrainType.METEOR;
   protected static final TerrainType BK = TerrainType.BUNKER;
   protected static final TerrainType DN = TerrainType.DUNES;
   protected static final TerrainType FC = TerrainType.FACTORY;

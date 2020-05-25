@@ -54,7 +54,7 @@ public abstract class CaptureLifecycle
     }
   } // ~CaptureFactory
 
-  public static class CaptureAction implements GameAction
+  public static class CaptureAction extends GameAction
   {
     private Unit actor = null;
     private Path movePath;

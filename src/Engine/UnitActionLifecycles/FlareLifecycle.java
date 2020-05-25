@@ -66,7 +66,7 @@ public abstract class FlareLifecycle
     }
   }
 
-  public static class FlareAction implements GameAction
+  public static class FlareAction extends GameAction
   {
     private FlareFactory type;
     private Path movePath;

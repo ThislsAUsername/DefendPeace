@@ -1,5 +1,7 @@
 package Units;
 
+import Terrain.TerrainType;
+import Units.AWBWUnits.AWBWUnitEnum;
 import Units.AWBWUnits.AWBWUnitModel;
 
 public class AWBWWeapons
@@ -48,6 +50,14 @@ public class AWBWWeapons
     public double getDamage(AWBWUnitModel defender)
     {
       return damageChart[type.ordinal()][defender.type.ordinal()];
+    }
+
+    @Override
+    public double getDamage(TerrainType target)
+    {
+      if( TerrainType.METEOR == target )
+        return damageChart[type.ordinal()][AWBWUnitEnum.NEOTANK.ordinal()];
+      return 0;
     }
   }
 

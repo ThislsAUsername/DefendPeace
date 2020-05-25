@@ -54,7 +54,7 @@ public abstract class JoinLifecycle
   }
 
   // A unit join action will combine a unit into a damaged unit to restore its HP. Any overflow HP is converted back into funds.
-  public static class JoinAction implements GameAction
+  public static class JoinAction extends GameAction
   {
     private Unit donor;
     Path movePath;

@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
@@ -16,6 +18,9 @@ import Engine.Path;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.Combat.BattleSummary;
+import Engine.Combat.CombatEngine;
+import Engine.Combat.StrikeParams;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -233,7 +238,38 @@ public class AIUtils
     }
     return retVal;
   }
-  
+
+  /**
+   * Evaluates an attack action based on caller-provided logic
+   * @param unit The attacking unit
+   * @param action The action to evaluate
+   * @param map The user's current game knowledge
+   * @param combatScorer Evaluates combat with a unit
+   * @param demolishScorer Evaluates targeting terrain
+   * @return
+   */
+  public static double scoreAttackAction(Unit unit, GameAction action, GameMap map,
+                                         Function<BattleSummary, Double> combatScorer,
+                                         BiFunction<TerrainType, StrikeParams, Double> demolishScorer)
+  {
+    double score = 0;
+    Location targetLoc = map.getLocation(action.getTargetLocation());
+    Unit targetUnit = targetLoc.getResident();
+    if( null != targetUnit )
+    {
+      BattleSummary results = CombatEngine.simulateBattleResults(unit, targetUnit, map, action.getMoveLocation());
+      score = combatScorer.apply(results);
+    }
+    else
+    {
+      StrikeParams params = CombatEngine.calculateTerrainDamage(unit,
+          Utils.findShortestPath(unit, action.getMoveLocation(), map), targetLoc, map);
+      score = demolishScorer.apply(targetLoc.getEnvironment().terrainType, params);
+    }
+
+    return score;
+  }
+
   /**
    * @return The area and severity of threat from the unit, against the specified target type
    */

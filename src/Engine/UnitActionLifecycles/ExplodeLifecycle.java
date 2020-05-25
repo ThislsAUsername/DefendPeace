@@ -1,5 +1,7 @@
 package Engine.UnitActionLifecycles;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 
 import Engine.GameActionSet;
@@ -7,6 +9,7 @@ import Engine.Path;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.Combat.DamagePopup;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
@@ -78,15 +81,7 @@ public abstract class ExplodeLifecycle
         {
           explodeEvents.add(new UnitDieEvent(actor)); // If you explode, you die
 
-          HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
-          for( XYCoord coord : Utils.findLocationsInRange(gameMap, getMoveLocation(), type.range) )
-          {
-            Unit victim = gameMap.getLocation(coord).getResident();
-            if( null != victim && victim != actor ) // Since you're already dead when you explode, you can't get hurt in the explosion
-            {
-              victims.add(victim);
-            }
-          }
+          HashSet<Unit> victims = findVictims(gameMap); // Find all of our unlucky participants
 
           explodeEvents.addFirst(new MassDamageEvent(victims, type.damage, false));
           if( actor.CO.units.size() == 1 )
@@ -97,6 +92,31 @@ public abstract class ExplodeLifecycle
         }
       }
       return explodeEvents;
+    }
+
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap map)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+
+      for( Unit victim : findVictims(map) )
+        output.add(new DamagePopup(new XYCoord(victim.x, victim.y), actor.CO.myColor, Math.min(victim.getHP()-1, type.damage)*10 + "%"));
+
+      return output;
+    }
+
+    public HashSet<Unit> findVictims(GameMap map)
+    {
+      HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
+      for( XYCoord coord : Utils.findLocationsInRange(map, getMoveLocation(), type.range) )
+      {
+        Unit victim = map.getLocation(coord).getResident();
+        if( null != victim && victim != actor ) // Since you're already dead when you explode, you can't get hurt in the explosion
+        {
+          victims.add(victim);
+        }
+      }
+      return victims;
     }
 
     @Override

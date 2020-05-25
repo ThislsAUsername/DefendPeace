@@ -5,8 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import Engine.Path;
+import Engine.XYCoord;
 import Engine.Combat.StrikeParams.BattleParams;
 import Terrain.GameMap;
+import Terrain.Location;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.WeaponModel;
@@ -21,9 +24,9 @@ public class CombatEngine
    * object to represent the specific combat instance and returns the result it calculates.
    * Requires perfect map info just in case the COs need to get weird.
    */
-  public static BattleSummary calculateBattleResults( Unit attacker, Unit defender, MapMaster map, int attackerX, int attackerY )
+  public static BattleSummary calculateBattleResults( Unit attacker, Unit defender, MapMaster map, boolean attackerMoved, int attackerX, int attackerY )
   {
-    return calculateBattleResults(attacker, defender, map, attackerX, attackerY, false);
+    return calculateBattleResults(attacker, defender, map, attackerMoved, attackerX, attackerY, false);
   }
 
   /**
@@ -32,7 +35,25 @@ public class CombatEngine
    */
   public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, int attackerX, int attackerY )
   {
-    return calculateBattleResults(attacker, defender, map, attackerX, attackerY, true);
+    boolean attackerMoved = attacker.x != attackerX || attacker.y != attackerY;
+    return calculateBattleResults(attacker, defender, map, attackerMoved, attackerX, attackerY, true);
+  }
+  public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, XYCoord moveCoord )
+  {
+    return simulateBattleResults(attacker, defender, map, moveCoord.xCoord, moveCoord.yCoord);
+  }
+
+  public static StrikeParams calculateTerrainDamage( Unit attacker, Path path, Location target, GameMap map )
+  {
+    int battleRange = path.getEndCoord().getDistance(target.getCoordinates());
+    boolean attackerMoved = path.getPathLength() > 1;
+    WeaponModel weapon = attacker.chooseWeapon(target, battleRange, attackerMoved);
+    return new StrikeParams(
+        new Combatant(attacker, weapon, path.getEnd().x, path.getEnd().y),
+        map, battleRange,
+        attacker.model.getDamageRatio(), attacker.getHP(),
+        weapon.getDamage(target),
+        false);
   }
 
   /**
@@ -42,11 +63,12 @@ public class CombatEngine
    * @param isSim Determines whether to cap damage at the HP of the victim in question
    * @return A BattleSummary object containing all relevant details from this combat instance.
    */
-  public static BattleSummary calculateBattleResults(Unit attacker, Unit defender, GameMap map, int attackerX, int attackerY, boolean isSim)
+  public static BattleSummary calculateBattleResults(Unit attacker, Unit defender, GameMap map,
+                                                     boolean attackerMoved, int attackerX, int attackerY,
+                                                     boolean isSim)
   {
     int defenderX = defender.x; // This variable is technically not necessary, but provides consistent names with attackerX/Y.
     int defenderY = defender.y;
-    boolean attackerMoved = attacker.x != attackerX || attacker.y != attackerY;
     int battleRange = Math.abs(attackerX - defenderX) + Math.abs(attackerY - defenderY);
     WeaponModel attackerWeapon = attacker.chooseWeapon(defender.model, battleRange, attackerMoved);
     WeaponModel defenderWeapon = null;

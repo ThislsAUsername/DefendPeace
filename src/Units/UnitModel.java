@@ -15,7 +15,7 @@ import Units.MoveTypes.MoveType;
 /**
  * Defines the invariant characteristics of a unit. One UnitModel can be shared across many instances of that Unit type.
  */
-public abstract class UnitModel implements Serializable
+public abstract class UnitModel implements Serializable, ITargetable
 {
   private static final long serialVersionUID = 1L;
 
@@ -196,9 +196,6 @@ public abstract class UnitModel implements Serializable
     // Most Units don't have any; specific UnitModel types can override.
     return new GameEventQueue();
   }
-
-  /** Calls the appropriate type-specific override of getDamage() on the input WeaponModel */
-  public abstract double getDamageRedirect(WeaponModel wm);
 
   /**
    * @return True if this UnitModel has at least one weapon with a minimum range of 1.

@@ -47,7 +47,7 @@ public abstract class UnitProduceLifecycle
     }
   } //~factory
 
-  public static class UnitProduceAction implements GameAction
+  public static class UnitProduceAction extends GameAction
   {
     final UnitProduceFactory type;
     final Unit actor;

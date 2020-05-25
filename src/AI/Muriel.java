@@ -20,7 +20,6 @@ import Engine.XYCoord;
 import Engine.Combat.CombatEngine;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
-import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
@@ -335,18 +334,18 @@ public class Muriel implements AIController
         for( GameAction action : attackActions )
         {
           // Sift through all attack actions we can perform.
-          XYCoord targetLoc = action.getTargetLocation();
-          Unit target = gameMap.getLocation(targetLoc).getResident();
-          Environment environment = gameMap.getEnvironment(targetLoc);
+          double damageValue = AIUtils.scoreAttackAction(unit, action, gameMap,
+              (results) -> {
+                double hpDamage = Math.min(results.defenderHPLoss, results.defender.getPreciseHP());
 
-          // Calculate the cost of the damage we can do.
-          double attackDamage = CombatEngine.calculateOneStrikeDamage(unit, 1, target, gameMap, environment.terrainType.getDefLevel(), unit.model.hasMobileWeapon());
+                if( shouldAttack(unit, results.defender, gameMap) )
+                  return (results.defender.model.getCost() / 10) * hpDamage;
 
-          double hpDamage = Math.min(attackDamage, target.getPreciseHP());
-          double damageValue = (target.model.getCost()/10) * hpDamage;
+                return 0.;
+              }, (terrain, params) -> 0.); // Don't mess with terrain
 
           // Find the attack that causes the most monetary damage, provided it's at least a halfway decent idea.
-          if( (damageValue > maxDamageValue) && shouldAttack(unit, target, gameMap) )
+          if( (damageValue > maxDamageValue) )
           {
             maxDamageValue = damageValue;
             maxCarnageAction = action;

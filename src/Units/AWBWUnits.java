@@ -420,6 +420,7 @@ public class AWBWUnits extends UnitModelScheme
       super("Piperunner", AWBWUnitEnum.PIPERUNNER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
       propulsion.setMoveCost(TerrainType.PILLAR, 1);
+      propulsion.setMoveCost(TerrainType.METEOR, 1);
       propulsion.setMoveCost(TerrainType.FACTORY, 1);
     }
   }

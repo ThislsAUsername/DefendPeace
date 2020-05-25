@@ -70,7 +70,7 @@ public abstract class UnloadLifecycle
     }
   } // ~Factory
 
-  public static class UnloadAction implements GameAction
+  public static class UnloadAction extends GameAction
   {
     private Unit actor;
     private Path movePath;
