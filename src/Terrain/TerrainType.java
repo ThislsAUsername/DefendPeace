@@ -82,7 +82,7 @@ public class TerrainType implements Serializable
   private static final String TEMP_AIRPORT_NAME = "TEMP_AIRPORT";
   public static final TerrainType TEMP_AIRPORT = new TerrainType( TEMP_AIRPORT_FLAGS, TEMP_AIRPORT_DEFENSE, TEMP_AIRPORT_COLOR, TEMP_AIRPORT_NAME, GRASS );
 
-  private static final int BRIDGE_FLAGS = LAND | WATER;
+  private static final int BRIDGE_FLAGS = LAND;
   private static final int BRIDGE_DEFENSE = 0;
   private static final Color BRIDGE_COLOR = new Color(189, 189, 189);
   private static final String BRIDGE_NAME = "BRIDGE";
