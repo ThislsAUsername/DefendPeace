@@ -86,13 +86,18 @@ public class Cyrus extends Commander
       instance.attackerX = minion.x;
       instance.attackerY = minion.y;
     }
+
+    // Get in early and deny Lash's attack bonus regardless of attack order
+    if(this == instance.attacker.CO)
+      instance.defenderTerrainStars = Math.max(0, instance.defenderTerrainStars-terrainDrain);
+    if(this == instance.defender.CO)
+      instance.attackerTerrainStars = Math.max(0, instance.attackerTerrainStars-terrainDrain);
   }
 
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
     params.dispersion = 5;
-    params.terrainStars = Math.max(0, params.terrainStars-terrainDrain);
   }
 
   private static class Courageous extends CommanderAbility

@@ -104,7 +104,7 @@ public class CombatEngine
         new Combatant(defender, null, defender.x, defender.y),
         map, battleRange,
         attacker.model.getDamageRatio(), attacker.getHP(),
-        defender.model.getDefenseRatio(), terrainStars,
+        defender.model.getDefenseRatio(), terrainStars, terrainStars,
         false, true).calculateDamage();
   }
 }

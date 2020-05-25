@@ -9,7 +9,6 @@ import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.PerfectMoveModifier;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
-import Terrain.Environment;
 
 public class Lash extends Commander
 {
@@ -60,8 +59,8 @@ public class Lash extends Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    Environment env = params.map.getEnvironment(params.attacker.x, params.attacker.y);
-    params.attackPower += starBuff * env.terrainType.getDefLevel() * starMult;
+    if( !params.attacker.body.model.isAirUnit() )
+      params.attackPower += starBuff * params.attackerTerrainStars * starMult;
   }
   @Override
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
