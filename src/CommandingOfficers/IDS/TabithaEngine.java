@@ -35,7 +35,7 @@ public abstract class TabithaEngine extends Commander
   private static final long serialVersionUID = 1L;
   public static final InfoPage MECHANICS_BLURB = new InfoPage(
             "Mega Boost mechanics:\n"
-          + "A Mega Boost is awarded when a unit attacks, or by a special action done in place (does not end turn).\n"
+          + "A Mega Boost is awarded via a special action done in place (does not end turn).\n"
           + "Mega Boosted units gain the generic +10/10 on powers, but no power-specific stat boost\n");
   public ArrayList<Unit> COUs = new ArrayList<Unit>();
   public abstract int getMegaBoostCount();
@@ -45,7 +45,6 @@ public abstract class TabithaEngine extends Commander
   public final int COUDef;
   private int megaPow; // floating values that dip on powers to match the above
   private int megaDef;
-  private boolean canApplyBoost = false;
 
   public TabithaEngine(int atk, int def, CommanderInfo info, GameScenario.GameRules rules)
   {
@@ -77,29 +76,25 @@ public abstract class TabithaEngine extends Commander
     this.COUs.clear();
     megaPow = COUPow;
     megaDef = COUDef;
-    canApplyBoost = true;
     return super.initTurn(map);
   }
 
   @Override
   public void endTurn()
   {
-    canApplyBoost = false;
     super.endTurn();
   }
 
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    boolean freeBoost = canApplyBoost && COUs.size() < getMegaBoostCount();
-    if( (freeBoost && canBoost(params.attacker.body.model)) || COUs.contains(params.attacker.body) )
+    if( COUs.contains(params.attacker.body) )
       params.attackPower += megaPow;
   }
   @Override
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
-    boolean freeBoost = canApplyBoost && COUs.size() < getMegaBoostCount();
-    if( (freeBoost && canBoost(params.defender.body.model)) || COUs.contains(params.defender.body) )
+    if( COUs.contains(params.defender.body) )
       params.defensePower += megaDef;
   }
 
@@ -107,13 +102,6 @@ public abstract class TabithaEngine extends Commander
   public void receiveBattleEvent(BattleSummary battleInfo)
   {
     super.receiveBattleEvent(battleInfo);
-    boolean freeBoost = canApplyBoost && COUs.size() < getMegaBoostCount();
-    // Determine if we were part of this fight.
-    if( (freeBoost && canBoost(battleInfo.attacker.model)) && battleInfo.attacker.CO == this )
-    {
-      COUs.add(battleInfo.attacker);
-    }
-
 
     Unit minion = null;
     if( this == battleInfo.defender.CO )
