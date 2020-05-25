@@ -21,7 +21,7 @@ public class Fastfield extends Commander
     {
       super("Greyfield");
       infoPages.add(new InfoPage(
-          "Stealths are replaced with Seaplanes, which are Stealths with +1 move that cost 15k, but can't hide." +
+          "Stealths are replaced with Seaplanes, which are Stealths with 3 ammo, 40 fuel, and +1 move that cost 15k, but can't hide." +
           "Can build Seaplanes from Carriers" +
           "Naval units, copters, and Seaplanes gain +10% firepower and +30% defense.\n" +
           "xXX\n" +
