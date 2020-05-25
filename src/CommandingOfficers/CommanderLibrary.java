@@ -12,6 +12,7 @@ import CommandingOfficers.BlackHole.Hawke;
 import CommandingOfficers.BlackHole.Kindle;
 import CommandingOfficers.BlackHole.Koal;
 import CommandingOfficers.BlackHole.Lash;
+import CommandingOfficers.BlackHole.OmegaKoal;
 import CommandingOfficers.BlackHole.OmegaSturm;
 import CommandingOfficers.BlackHole.Sturm;
 import CommandingOfficers.BlackHole.VB;
@@ -146,6 +147,7 @@ public class CommanderLibrary
     commanderList.add( TheBeastSturm.getInfo() );
     commanderList.add( Creed.getInfo() );
     commanderList.add( OmegaKanbei.getInfo() );
+    commanderList.add( OmegaKoal.getInfo() );
     commanderList.add( OmegaSturm.getInfo() );
     commanderList.add( OmegaCaulder.getInfo() );
 //    for (CommanderInfo info : commanderList)
