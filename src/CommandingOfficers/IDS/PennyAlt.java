@@ -21,11 +21,11 @@ public class PennyAlt extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Penny Alt");
+      super("Penny");
       infoPages.add(new InfoPage(
-          "--PENNY ALT--\r\n" +
+          "--PENNY--\r\n" +
           "Units are unaffected by weather.\r\n" +
-          "xxxXXXXX\r\n" +
+          "xxXXXX\r\n" +
           "STORMFRONT: Changes the weather to Snow for one day.\r\n" +
           "ENIGMA: Changes the weather to Rain for three days."));
     }
@@ -63,7 +63,7 @@ public class PennyAlt extends Commander
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Stormfront";
-    private static final int COST = 3;
+    private static final int COST = 2;
 
     Stormfront(Commander commander)
     {
@@ -83,7 +83,7 @@ public class PennyAlt extends Commander
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Enigma";
-    private static final int COST = 8;
+    private static final int COST = 6;
 
     Enigma(Commander commander)
     {
