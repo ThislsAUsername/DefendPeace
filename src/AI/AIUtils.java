@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
@@ -16,6 +18,9 @@ import Engine.Path;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.Combat.BattleSummary;
+import Engine.Combat.CombatEngine;
+import Engine.Combat.StrikeParams;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -158,27 +163,39 @@ public class AIUtils
     return unitMap;
   }
 
+  /** Overload of {@link #moveTowardLocation(Unit, XYCoord, GameMap, Set)} **/
+  public static GameAction moveTowardLocation(Unit unit, XYCoord destination, GameMap gameMap )
+  {
+    return moveTowardLocation(unit, destination, gameMap, null);
+  }
+
   /**
    * Create and return a GameAction.WaitAction that will move unit towards destination, around
    * any intervening obstacles. If no possible route exists, return false.
    * @param unit The unit we want to move.
    * @param destination Where we eventually want the unit to be.
    * @param gameMap The map on which the unit is moving.
-   * @return A GameAction to bring the unit closer to the destination, or null if it is unreachable.
+   * @return A GameAction to bring the unit closer to the destination, or null if no available move exists.
+   * @param excludeDestinations A list of coordinates of Map locations we don't want to move to.
    */
-  public static GameAction moveTowardLocation(Unit unit, XYCoord destination, GameMap gameMap)
+  public static GameAction moveTowardLocation(Unit unit, XYCoord destination, GameMap gameMap, Set<XYCoord> excludeDestinations )
   {
     GameAction move = null;
 
     // Find the full path that would get this unit to the destination, regardless of how long. 
     Path path = Utils.findShortestPath(unit, destination, gameMap, true);
-    ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, false); // Find the valid moves we can make.
+    boolean includeTransports = false;
+    ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, includeTransports); // Find the valid moves we can make.
 
     if( path.getPathLength() > 0 && validMoves.size() > 0 ) // Check that the destination is reachable at least in theory.
     {
       path.snip(unit.model.movePower+1); // Trim the path so we go the right immediate direction.
-      Utils.sortLocationsByDistance(path.getEndCoord(), validMoves); // Sort moves based on intermediate destination. 
-      move = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, validMoves.get(0), gameMap)); // Move to best option.
+      if( null != excludeDestinations) validMoves.removeAll(excludeDestinations);
+      if( !validMoves.isEmpty() )
+      {
+        Utils.sortLocationsByDistance(path.getEndCoord(), validMoves); // Sort moves based on intermediate destination.
+        move = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, validMoves.get(0), gameMap)); // Move to best option.
+      }
     }
     return move;
   }
@@ -221,7 +238,38 @@ public class AIUtils
     }
     return retVal;
   }
-  
+
+  /**
+   * Evaluates an attack action based on caller-provided logic
+   * @param unit The attacking unit
+   * @param action The action to evaluate
+   * @param map The user's current game knowledge
+   * @param combatScorer Evaluates combat with a unit
+   * @param demolishScorer Evaluates targeting terrain
+   * @return
+   */
+  public static double scoreAttackAction(Unit unit, GameAction action, GameMap map,
+                                         Function<BattleSummary, Double> combatScorer,
+                                         BiFunction<TerrainType, StrikeParams, Double> demolishScorer)
+  {
+    double score = 0;
+    Location targetLoc = map.getLocation(action.getTargetLocation());
+    Unit targetUnit = targetLoc.getResident();
+    if( null != targetUnit )
+    {
+      BattleSummary results = CombatEngine.simulateBattleResults(unit, targetUnit, map, action.getMoveLocation());
+      score = combatScorer.apply(results);
+    }
+    else
+    {
+      StrikeParams params = CombatEngine.calculateTerrainDamage(unit,
+          Utils.findShortestPath(unit, action.getMoveLocation(), map), targetLoc, map);
+      score = demolishScorer.apply(targetLoc.getEnvironment().terrainType, params);
+    }
+
+    return score;
+  }
+
   /**
    * @return The area and severity of threat from the unit, against the specified target type
    */

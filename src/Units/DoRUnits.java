@@ -115,6 +115,7 @@ public class DoRUnits extends UnitModelScheme
     ARTILLERY, ANTITANK, ROCKETS, MOBILESAM, RIG,
     FIGHTER, BOMBER, SEAPLANE, DUSTER, B_COPTER, T_COPTER,
     GUNBOAT, CRUISER, SUB, SUB_SUB, CARRIER, BATTLESHIP, LANDER,
+    METEOR,
   };
 
   public static final MoveType DoRFloatHeavy = new MoveTypeFey(new FloatHeavy());

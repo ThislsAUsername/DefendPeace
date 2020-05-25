@@ -1,6 +1,7 @@
 package Engine.UnitActionLifecycles;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 
 import Engine.GameAction;
@@ -11,13 +12,19 @@ import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
+import Engine.Combat.DamagePopup;
+import Engine.Combat.StrikeParams;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.MapChangeEvent;
 import Engine.GameEvents.UnitDieEvent;
+import Terrain.Environment;
 import Terrain.GameMap;
+import Terrain.Location;
 import Terrain.MapMaster;
+import Terrain.TerrainType;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
@@ -57,7 +64,10 @@ public abstract class BattleLifecycle
             ArrayList<GameAction> attackOptions = new ArrayList<GameAction>();
             for( XYCoord loc : allWeaponTargets )
             {
-              attackOptions.add(new BattleAction(map, actor, movePath, loc));
+              if( null != map.getLocation(loc).getResident() )
+                attackOptions.add(new BattleAction(map, actor, movePath, loc));
+              else
+                attackOptions.add(new DemolitionAction(map, actor, movePath, loc));
             }
             // Bundle our attack options into an action set
             return new GameActionSet(attackOptions);
@@ -83,7 +93,7 @@ public abstract class BattleLifecycle
     }
   } // ~Factory
 
-  public static class BattleAction implements GameAction
+  public static class BattleAction extends GameAction
   {
     private Path movePath;
     private XYCoord moveCoord = null;
@@ -142,7 +152,7 @@ public abstract class BattleLifecycle
         if( Utils.enqueueMoveEvent(gameMap, attacker, movePath, attackEvents) )
         {
           // No surprises in the fog. Resolve combat.
-          BattleEvent event = new BattleEvent(attacker, defender, moveCoord.xCoord, moveCoord.yCoord, gameMap);
+          BattleEvent event = new BattleEvent(attacker, defender, movePath, gameMap);
           attackEvents.add(event);
 
           if( event.attackerDies() )
@@ -173,6 +183,24 @@ public abstract class BattleLifecycle
     }
 
     @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap map)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+
+      BattleSummary summary = CombatEngine.simulateBattleResults(attacker, defender, map,
+                              moveCoord.xCoord, moveCoord.yCoord);
+
+      // output any damage done, with the color of the one dealing the damage
+      if( summary.attackerHPLoss > 0 )
+        output.add(new DamagePopup(movePath.getWaypoint(0).GetCoordinates(), defender.CO.myColor, (int) (summary.attackerHPLoss*10) + "%"));
+      if( summary.defenderHPLoss > 0 )
+        // grab the two most significant digits and convert to %
+        output.add(new DamagePopup(attackLocation, attacker.CO.myColor, (int) (summary.defenderHPLoss*10) + "%"));
+
+      return output;
+    }
+
+    @Override
     public XYCoord getMoveLocation()
     {
       return moveCoord;
@@ -196,7 +224,121 @@ public abstract class BattleLifecycle
     {
       return UnitActionFactory.ATTACK;
     }
-  } // ~Action
+  } // ~BattleAction
+
+  public static class DemolitionAction extends GameAction
+  {
+    private Path movePath;
+    private XYCoord moveCoord = null;
+    private XYCoord attackLocation = null;
+    private Unit attacker;
+    private Location target;
+
+    public DemolitionAction(GameMap gameMap, Unit actor, Path path, XYCoord atkLoc)
+    {
+      movePath = path;
+      attacker = actor;
+      attackLocation = atkLoc;
+      if( null != path && (path.getEnd() != null) )
+      {
+        moveCoord = movePath.getEndCoord();
+        if( (null != atkLoc) && (null != gameMap) && gameMap.isLocationValid(atkLoc) )
+        {
+          target = gameMap.getLocation(atkLoc);
+        }
+      }
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      // ATTACK actions consist of
+      //   MOVE
+      //   BATTLE
+      //   [MAP CHANGE]
+      //   [DEFEAT]
+      GameEventQueue attackEvents = new GameEventQueue();
+
+      // Validate input.
+      int attackRange = -1;
+      boolean isValid = true;
+      isValid &= attacker != null && !attacker.isTurnOver;
+      isValid &= (null != gameMap) && (gameMap.isLocationValid(attackLocation)) && gameMap.isLocationValid(moveCoord);
+      isValid &= (movePath != null) && (movePath.getPathLength() > 0);
+      if( isValid )
+      {
+        attackRange = Math.abs(moveCoord.xCoord - attackLocation.xCoord) + Math.abs(moveCoord.yCoord - attackLocation.yCoord);
+
+        boolean moved = attacker.x != moveCoord.xCoord || attacker.y != moveCoord.yCoord;
+        isValid &= (null != target) && attacker.canAttack(target, attackRange, moved);
+      }
+
+      if( isValid )
+      {
+        target = gameMap.getLocation(attackLocation); // Re-assign with the real location instance
+        if( Utils.enqueueMoveEvent(gameMap, attacker, movePath, attackEvents) )
+        {
+          // No surprises in the fog. Resolve combat.
+          DemolitionEvent event = new DemolitionEvent(attacker, target, movePath, gameMap);
+          attackEvents.add(event);
+
+          if( event.demolitionFinishes() )
+          {
+            Environment oldEnvirons = target.getEnvironment();
+            Environment newEnvirons = Environment.getTile(oldEnvirons.terrainType.getBaseTerrain(), oldEnvirons.weatherType);
+            attackEvents.add(new MapChangeEvent(target.getCoordinates(), newEnvirons));
+
+            // Check if destroying this property will cause someone's defeat.
+            if( (TerrainType.HEADQUARTERS == oldEnvirons.terrainType) && (null != target.getOwner()) )
+            {
+              attackEvents.add(new CommanderDefeatEvent(target.getOwner()));
+            }
+          }
+        }
+      }
+      return attackEvents;
+    }
+
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap map)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+
+      StrikeParams result = CombatEngine.calculateTerrainDamage(attacker, movePath, target, map);
+
+      // output any damage done, with the color of the one dealing the damage
+      if( result.calculateDamage() > 0 )
+        // grab the two most significant digits and convert to %
+        output.add(new DamagePopup(attackLocation, attacker.CO.myColor, (int) (result.calculateDamage()*10) + "%"));
+
+      return output;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return moveCoord;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return attackLocation;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Attack %s with %s after moving to %s]", target.toStringWithLocation(),
+          attacker.toStringWithLocation(), moveCoord);
+    }
+
+    @Override
+    public UnitActionFactory getType()
+    {
+      return UnitActionFactory.ATTACK;
+    }
+  } // ~DemolitionAction
 
   /**
    * BattleEvent handles a single battle event between two units. The outcome is
@@ -208,10 +350,11 @@ public abstract class BattleLifecycle
     private final BattleSummary battleInfo;
     private final XYCoord defenderCoords;
 
-    public BattleEvent(Unit attacker, Unit defender, int attackerX, int attackerY, MapMaster map)
+    public BattleEvent(Unit attacker, Unit defender, Path path, MapMaster map)
     {
+      boolean attackerMoved = path.getPathLength() > 1;
       // Calculate the result of the battle immediately. This will allow us to plan the animation.
-      battleInfo = CombatEngine.calculateBattleResults(attacker, defender, map, attackerX, attackerY);
+      battleInfo = CombatEngine.calculateBattleResults(attacker, defender, map, attackerMoved, path.getEnd().x, path.getEnd().y);
       defenderCoords = new XYCoord(defender.x, defender.y);
     }
 
@@ -273,5 +416,68 @@ public abstract class BattleLifecycle
     {
       return defenderCoords;
     }
-  } // ~Event
+  } // ~BattleEvent
+
+  public static class DemolitionEvent implements GameEvent
+  {
+    private final StrikeParams result;
+    private final int percentDamage;
+    private final Location target;
+
+    public DemolitionEvent(Unit attacker, Location target, Path path, MapMaster map)
+    {
+      this.target = target;
+      // Calculate the result of the battle immediately. This will allow us to plan the animation.
+      result = CombatEngine.calculateTerrainDamage(attacker, path, target, map);
+      percentDamage = (int) (10 * result.calculateDamage());
+    }
+
+    public Unit getAttacker()
+    {
+      return result.attacker.body;
+    }
+
+    public Location getDefender()
+    {
+      return target;
+    }
+    public boolean demolitionFinishes()
+    {
+      return target.durability - percentDamage <= 0;
+    }
+
+    @Override
+    public GameAnimation getEventAnimation(MapView mapView)
+    {
+      return mapView.buildDemolitionAnimation(result, getEndPoint(), percentDamage);
+    }
+
+    @Override
+    public void sendToListener(GameEventListener listener)
+    {
+      // TODO?
+    }
+
+    @Override
+    public void performEvent(MapMaster gameMap)
+    {
+      // Apply the battle results that we calculated previously.
+      Unit attacker = result.attacker.body;
+      attacker.fire(result.attacker.gun); // expend ammo
+      target.durability -= percentDamage;
+    }
+
+    @Override
+    public XYCoord getStartPoint()
+    {
+      return target.getCoordinates();
+    }
+
+    @Override
+    public XYCoord getEndPoint()
+    {
+      return target.getCoordinates();
+    }
+  } // ~DemolitionEvent
+
 }

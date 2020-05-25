@@ -44,7 +44,7 @@ public abstract class WaitLifecycle
     }
   } //~Factory
 
-  public static class WaitAction implements GameAction
+  public static class WaitAction extends GameAction
   {
     private final Path movePath;
     private final XYCoord waitLoc;
@@ -75,6 +75,15 @@ public abstract class WaitLifecycle
       isValid &= null != actor && !actor.isTurnOver;
       isValid &= (null != movePath) && (movePath.getPathLength() > 0);
       isValid &= (null != gameMap);
+
+      if( isValid ) // Check fuel.
+      {
+        Path.PathNode endpoint = movePath.getEnd();
+        int fuelBurn = movePath.getFuelCost(actor.model, gameMap);
+        boolean includeOccupiedSpaces = true; // To allow validation for LOAD/JOIN actions.
+        isValid = fuelBurn <= actor.fuel && fuelBurn <= actor.model.movePower
+            && actor.getMoveFunctor(includeOccupiedSpaces).canEnd(gameMap, endpoint.GetCoordinates());
+      }
 
       // Generate events.
       if( isValid )

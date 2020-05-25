@@ -89,7 +89,7 @@ public class Unit implements Serializable
 
     if( null != locus )
     {
-      fuel -= model.idleFuelBurn;
+      fuel = Math.max(0, fuel - model.idleFuelBurn);
       // If the unit is not at max health, and is on a repair tile, heal it.
       if( model.canRepairOn(locus) && !CO.isEnemy(locus.getOwner()) )
       {
@@ -122,7 +122,7 @@ public class Unit implements Serializable
    * @return whether or not this unit can attack the given unit type at the
    * specified range, accounting for the possibility of moving first.
    */
-  public boolean canAttack(UnitModel targetType, int range, boolean afterMoving)
+  public boolean canAttack(ITargetable targetType, int range, boolean afterMoving)
   {
     // if we have no weapons, we can't hurt things
     if( model.weapons == null )
@@ -131,6 +131,8 @@ public class Unit implements Serializable
     boolean canHit = false;
     for( WeaponModel weapon : model.weapons )
     {
+      if( !weapon.loaded(this) ) continue; // Can't shoot with no bullets.
+
       if( afterMoving && !weapon.canFireAfterMoving )
       {
         // If we are planning to move first, and the weapon
@@ -147,6 +149,30 @@ public class Unit implements Serializable
   }
 
   /**
+   * @return Whether this unit has a weapon with ammo that can hit `targetType`
+   * under any combination of ranged/direct, move-first/static.
+   */
+  public boolean canAttack(UnitModel targetType)
+  {
+    // if we have no weapons, we can't hurt things
+    if( model.weapons == null )
+      return false;
+
+    boolean canHit = false;
+    for( WeaponModel weapon : model.weapons )
+    {
+      if( !weapon.loaded(this) ) continue; // Can't shoot with no bullets.
+
+      if( weapon.getDamage(targetType) > 0 )
+      {
+        canHit = true;
+        break;
+      }
+    }
+    return canHit;
+  }
+
+  /**
    * Select the weapon owned by this unit that can inflict the
    * most damage against the chosen target
    * @param target
@@ -154,7 +180,7 @@ public class Unit implements Serializable
    * @param afterMoving
    * @return The best weapon for that target, or null if no usable weapon exists.
    */
-  public WeaponModel chooseWeapon(UnitModel targetType, int range, boolean afterMoving)
+  public WeaponModel chooseWeapon(ITargetable targetType, int range, boolean afterMoving)
   {
     // if we have no weapons, we can't hurt things
     if( model.weapons == null )
@@ -164,6 +190,8 @@ public class Unit implements Serializable
     double maxDamage = 0;
     for( WeaponModel weapon : model.weapons )
     {
+      if( !weapon.loaded(this) ) continue; // Can't shoot with no bullets.
+
       // If the weapon isn't mobile, we cannot fire if we moved.
       if( afterMoving && !weapon.canFireAfterMoving )
       {

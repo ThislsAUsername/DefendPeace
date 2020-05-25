@@ -1,6 +1,7 @@
 package Engine.GameInput;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 import CommandingOfficers.Commander;
@@ -9,6 +10,7 @@ import Engine.GameActionSet;
 import Engine.OptionSelector;
 import Engine.Path;
 import Engine.XYCoord;
+import Engine.Combat.DamagePopup;
 import Engine.GameInput.GameInputHandler.InputType;
 import Terrain.GameMap;
 import Units.Unit;
@@ -43,6 +45,11 @@ abstract class GameInputState<T>
   public OptionSet getOptions()
   {
     return myOptions;
+  }
+
+  public Collection<DamagePopup> getDamagePopups(GameMap map, XYCoord target)
+  {
+    return new ArrayList<DamagePopup>();
   }
 
   protected OptionSelector buildSelector()

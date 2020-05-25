@@ -62,7 +62,7 @@ public abstract class ResupplyLifecycle
   }
 
   // A resupply action will refill fuel and ammunition for any adjacent friendly units.
-  public static class ResupplyAction implements GameAction
+  public static class ResupplyAction extends GameAction
   {
     private Unit unitActor = null;
     private Path movePath = null;

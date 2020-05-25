@@ -203,7 +203,7 @@ public abstract class TabithaEngine extends Commander
     }
   }
 
-  private static class ApplyMegaBoost implements GameAction
+  private static class ApplyMegaBoost extends GameAction
   {
     final MegaBoost type;
     final Unit actor;
