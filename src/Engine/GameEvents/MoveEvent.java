@@ -16,7 +16,7 @@ import Units.Unit;
  */
 public class MoveEvent implements GameEvent
 {
-  private Unit unit = null;
+  public final Unit unit;
   private Path unitPath = null;
 
   public MoveEvent(Unit u, Path path)

@@ -1,11 +1,18 @@
 package CommandingOfficers.IDS;
 import Engine.GameScenario;
+import Engine.Utils;
+import Engine.XYCoord;
+
+import java.util.ArrayList;
+import java.util.Collections;
+
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.GlobalWeatherEvent;
+import Engine.GameEvents.MoveEvent;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
@@ -27,7 +34,7 @@ public class OmegaCaulder extends TabithaEngine
       super("Omega Caulder");
       infoPages.add(new InfoPage(
             "Called \'Omega\' because he's extra fair and balanced.\n"
-          + "Can grant up to 3 \'Mega Boost\'s of +"+MEGA_ATK+"/"+MEGA_DEF+" stats; this power-up lasts until next turn.\n"
+          + "After his first move, automatically grants up to 3 \'Mega Boost\'s of +"+MEGA_ATK+"/"+MEGA_DEF+" stats; this power-up lasts until next turn.\n"
           + "All damaged units are repaired for +"+ D2DREPAIRS +" HP every turn (liable for costs).\r\n"
           + "Unaffected by weather."));
       infoPages.add(MECHANICS_BLURB);
@@ -103,13 +110,40 @@ public class OmegaCaulder extends TabithaEngine
         unit.alterHP(repairedHP);
 
         // Top off HP if there's excess power but we hit the HP cap
-        if (repairedHP < D2DREPAIRS && unit.getHP() == maxHP)
+        if( repairedHP < D2DREPAIRS && unit.getHP() == maxHP )
           unit.alterHP(1);
       }
     }
-    
+
     return ret;
   }
+
+  public void receiveMoveEvent(MoveEvent event)
+  {
+    super.receiveMoveEvent(event);
+    if( this != event.unit.CO )
+      return; // I can only boost during my own turn
+
+    ArrayList<XYCoord> unitCoords = new ArrayList<XYCoord>();
+    for( Unit unit : this.units )
+    {
+      XYCoord coord = new XYCoord(unit.x, unit.y);
+      if( unit.getHP() > 5 && myView.isLocationValid(coord) )
+        unitCoords.add(coord);
+    }
+    // Find the units farthest from my own base
+    Utils.sortLocationsByDistance(HQLocation, unitCoords);
+    Collections.reverse(unitCoords);
+
+    for( XYCoord coord : unitCoords )
+    {
+      if( COUs.size() >= getMegaBoostCount() )
+        break;
+      Unit unit = myView.getLocation(coord).getResident();
+      if( null != unit )
+        COUs.add(unit);
+    }
+  };
 
   public static CommanderInfo getInfo()
   {
