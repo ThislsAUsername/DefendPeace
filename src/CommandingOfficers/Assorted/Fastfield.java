@@ -19,7 +19,7 @@ public class Fastfield extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Fastfield");
+      super("Greyfield");
       infoPages.add(new InfoPage(
           "Stealths are replaced with Seaplanes, which are Stealths with +1 move that cost 15k, but can't hide." +
           "Can build Seaplanes from Carriers" +

@@ -19,10 +19,10 @@ public class Will extends Commander
     {
       super("Will");
       infoPages.add(new InfoPage(
-          "--WILL--\r\n" + 
-          "All ground direct units (including foot soldiers) gain +20% firepower.\r\n" + 
-          "xxxXXX\r\n" + 
-          "RALLY CRY: All ground direct units gain +1 movement\r\n" + 
+          "--WILL--\r\n" +
+          "All ground direct units (including foot soldiers) gain +20% firepower.\r\n" +
+          "xxXXX\r\n" +
+          "RALLY CRY: All ground direct units gain +1 movement\r\n" +
           "A NEW ERA: All ground direct units gain +2 movement"));
     }
     @Override
@@ -44,8 +44,8 @@ public class Will extends Commander
       }
     }
 
-    addCommanderAbility(new GoFast(this, "Rally Cry", 3, 1));
-    addCommanderAbility(new GoFast(this, "A New Era", 6, 2));
+    addCommanderAbility(new GoFast(this, "Rally Cry", 2, 1));
+    addCommanderAbility(new GoFast(this, "A New Era", 5, 2));
   }
 
   public static CommanderInfo getInfo()

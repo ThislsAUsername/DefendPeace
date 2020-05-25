@@ -17,9 +17,9 @@ public class AllDaWaylon extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("AllDaWaylon");
+      super("Waylon");
       infoPages.add(new InfoPage(
-          "--All da Way...lon--\r\n" +
+          "--Waylon--\r\n" +
           "Air units gain +20% firepower and +30% defense.\r\n" +
           "xxxXXX\n" +
           "WINGMAN: All air units gain +20% defense.\r\n" +

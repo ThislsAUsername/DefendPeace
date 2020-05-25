@@ -22,7 +22,7 @@ public class OmegaTabitha extends TabithaEngine
           + "Loses all COP charge if the Mega Boosted unit dies."));
       infoPages.add(MECHANICS_BLURB);
       infoPages.add(new InfoPage(
-            "APOCALYPSE (13):\n"
+            "APOCALYPSE (10):\n"
           + "A 2-range missile hits the opponent's largest mass of units and deals 8 HP damage\n"
           + "All units gain +50/35."));
     }
@@ -45,7 +45,7 @@ public class OmegaTabitha extends TabithaEngine
   {
     super(MEGA_ATK, MEGA_DEF, coInfo, rules);
 
-    addCommanderAbility(new NukeIt(this, "APOCALYPSE", 13, 8, 50, 35));
+    addCommanderAbility(new NukeIt(this, "APOCALYPSE", 10, 8, 50, 35));
   }
 
   public static CommanderInfo getInfo()

@@ -20,9 +20,9 @@ public class Link extends TabithaEngine
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Link");
+      super("Lin");
       infoPages.add(new InfoPage(
-            "No relation to 'Lin', whoever that is.\n"
+            "Lin\n"
           + "Can grant a single boost of +"+MEGA_ATK+"/"+MEGA_DEF+" stats, but only to ground units; this power-up lasts until next turn.\n"
           + "xxXXXX\n"
           + "Scout: All ground units gain +1 vision and can see into hiding places.\n"

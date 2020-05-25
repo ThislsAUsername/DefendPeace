@@ -5,11 +5,8 @@ import java.util.ArrayList;
 import CommandingOfficers.Assorted.AllDaWaylon;
 import CommandingOfficers.Assorted.Creed;
 import CommandingOfficers.Assorted.Fastfield;
-import CommandingOfficers.Assorted.Greyfield;
 import CommandingOfficers.Assorted.Sneakfield;
-import CommandingOfficers.Assorted.WaylonCS;
 import CommandingOfficers.Assorted.TheBeastSturm;
-import CommandingOfficers.Assorted.TheWeakBeast;
 import CommandingOfficers.BlackHole.Adder;
 import CommandingOfficers.BlackHole.Hawke;
 import CommandingOfficers.BlackHole.Kindle;
@@ -24,13 +21,9 @@ import CommandingOfficers.BlueMoon.Grit;
 import CommandingOfficers.BlueMoon.Olaf;
 import CommandingOfficers.BlueMoon.Rojenski;
 import CommandingOfficers.BlueMoon.Sasha;
-import CommandingOfficers.BrennersWolves.Adderbella;
 import CommandingOfficers.BrennersWolves.Brenner;
-import CommandingOfficers.BrennersWolves.CoolWill;
 import CommandingOfficers.BrennersWolves.Isabella;
-import CommandingOfficers.BrennersWolves.LinAlt;
 import CommandingOfficers.BrennersWolves.Link;
-import CommandingOfficers.BrennersWolves.Lin;
 import CommandingOfficers.BrennersWolves.Will;
 import CommandingOfficers.GreenEarth.DSJess;
 import CommandingOfficers.GreenEarth.Drake;
@@ -38,7 +31,6 @@ import CommandingOfficers.GreenEarth.Eagle;
 import CommandingOfficers.GreenEarth.Javier;
 import CommandingOfficers.GreenEarth.Javier1T;
 import CommandingOfficers.GreenEarth.Jess;
-import CommandingOfficers.GreenEarth.WakJess;
 import CommandingOfficers.IDS.CaulderAlt;
 import CommandingOfficers.IDS.Caulder;
 import CommandingOfficers.IDS.Cyrus;
@@ -47,15 +39,10 @@ import CommandingOfficers.IDS.OmegaTabitha;
 import CommandingOfficers.IDS.PennyAlt;
 import CommandingOfficers.IDS.PennyCS;
 import CommandingOfficers.IDS.PennyRNG;
-import CommandingOfficers.IDS.PolyTabitha;
 import CommandingOfficers.IDS.TabithaBasic;
-import CommandingOfficers.Lazuria.Davis;
 import CommandingOfficers.Lazuria.Forsythe;
 import CommandingOfficers.Lazuria.Gage;
-import CommandingOfficers.Lazuria.T3Tasha;
-import CommandingOfficers.Lazuria.WokeGage;
 import CommandingOfficers.Lazuria.Tasha;
-import CommandingOfficers.Lazuria.WokeTasha;
 import CommandingOfficers.OrangeStar.Andy;
 import CommandingOfficers.OrangeStar.Caroline;
 import CommandingOfficers.OrangeStar.Hachi;
@@ -117,7 +104,6 @@ public class CommanderLibrary
     
     commanderList.add( Eagle.getInfo() );
     commanderList.add( Jess.getInfo() );
-    commanderList.add( WakJess.getInfo() );
     commanderList.add( DSJess.getInfo() );
     commanderList.add( Drake.getInfo() );
     commanderList.add( Javier.getInfo() );
@@ -141,26 +127,16 @@ public class CommanderLibrary
 
     commanderList.add( Brenner.getInfo() );
     commanderList.add( Isabella.getInfo() );
-    commanderList.add( Adderbella.getInfo() );
-    commanderList.add( Lin.getInfo() );
-    commanderList.add( LinAlt.getInfo() );
     commanderList.add( Link.getInfo() );
     commanderList.add( Will.getInfo() );
-    commanderList.add( CoolWill.getInfo() );
 
     commanderList.add( Forsythe.getInfo() );
     commanderList.add( Gage.getInfo() );
-    commanderList.add( WokeGage.getInfo() );
     commanderList.add( Tasha.getInfo() );
-    commanderList.add( WokeTasha.getInfo() );
-    commanderList.add( T3Tasha.getInfo() );
 
-    commanderList.add( WaylonCS.getInfo() );
     commanderList.add( AllDaWaylon.getInfo() );
-    commanderList.add( Greyfield.getInfo() );
     commanderList.add( Fastfield.getInfo() );
     commanderList.add( Sneakfield.getInfo() );
-    commanderList.add( Davis.getInfo() );
 
     commanderList.add( Caulder.getInfo() );
     commanderList.add( CaulderAlt.getInfo() );
@@ -168,12 +144,10 @@ public class CommanderLibrary
     commanderList.add( PennyAlt.getInfo() );
     commanderList.add( PennyRNG.getInfo() );
     commanderList.add( TabithaBasic.getInfo() );
-    commanderList.add( PolyTabitha.getInfo() );
     commanderList.add( OmegaTabitha.getInfo() );
     commanderList.add( Cyrus.getInfo() );
 
     commanderList.add( TheBeastSturm.getInfo() );
-    commanderList.add( TheWeakBeast.getInfo() );
     commanderList.add( Creed.getInfo() );
     commanderList.add( OmegaKanbei.getInfo() );
     commanderList.add( OmegaSturm.getInfo() );
