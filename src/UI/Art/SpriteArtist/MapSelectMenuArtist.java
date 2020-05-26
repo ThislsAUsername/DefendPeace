@@ -19,10 +19,10 @@ public class MapSelectMenuArtist
 
   private static final int characterWidth = SpriteLibrary.getLettersUppercase().getFrame(0).getWidth();
   private static final int characterHeight = SpriteLibrary.getLettersUppercase().getFrame(0).getHeight();
-  private static final int maxNameDisplayLength = 28;
+  private static final int maxNameDisplayLength = 32;
   // The map-name section shall be wide enough for a 14-character name, plus two-pixel buffer on each side.
   // (characterWidth+1)*maxNameDisplayLength + 3 (3 not 4, because the kerning buffer for the final letter is 1 already).
-  private static final int nameSectionWidth = ((characterWidth+1) * maxNameDisplayLength) + 3;
+  private static final int nameSectionWidth = ((characterWidth+1) * maxNameDisplayLength);
 
   private static MapInfo selectedMapInfo = null;
 
