@@ -76,6 +76,7 @@ public abstract class GameEventListener implements Serializable
   public void receiveCommanderDefeatEvent(CommanderDefeatEvent event){};
   public void receiveLoadEvent(LoadLifecycle.LoadEvent event){};
   public void receiveMoveEvent(MoveEvent event){};
+  public void receiveTeleportEvent(TeleportEvent teleportEvent){};
   public void receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){};
   public void receiveResupplyEvent(ResupplyEvent event){};
   public void receiveUnitDieEvent(UnitDieEvent event){};

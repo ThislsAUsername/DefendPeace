@@ -10,6 +10,7 @@ import Engine.Combat.BattleSummary;
 import Engine.Combat.StrikeParams;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.TeleportEvent;
 import Terrain.GameMap;
 import Terrain.MapWindow;
 import UI.Art.Animation.GameAnimation;
@@ -109,6 +110,11 @@ public abstract class MapView implements IView
     return null;
   }
   public GameAnimation buildMoveAnimation( Unit unit, Path movePath )
+  {
+    return null;
+  }
+  public GameAnimation buildTeleportAnimation( Unit unit, XYCoord start, XYCoord end,
+      TeleportEvent.AnimationStyle animStyle, TeleportEvent.CollisionOutcome crashResult )
   {
     return null;
   }
