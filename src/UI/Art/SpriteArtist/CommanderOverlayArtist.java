@@ -104,7 +104,7 @@ public class CommanderOverlayArtist
     int slowAnimIndex = (animIndex/32) % 2;
 
     // Find the most expensive ability so we know how long to draw the bar.
-    double maxAP = 0;
+    double maxAP = 1;
     for( int i = 0; i < abilityPoints.length; ++i )
     {
       maxAP = (maxAP < abilityPoints[i]) ? abilityPoints[i] : maxAP;
