@@ -1,6 +1,7 @@
 package Engine;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -619,9 +620,9 @@ public class Utils
    * Find all locations within `range` spaces of all known properties owned by `cmdr`.
    * @return a Set of all qualifying locations.
    */
-  public static HashSet<XYCoord> findLocationsNearProperties(GameMap gameMap, Commander cmdr, int range)
+  public static Set<XYCoord> findLocationsNearProperties(GameMap gameMap, Commander cmdr, int range)
   {
-    HashSet<XYCoord> tilesInRange = new HashSet<XYCoord>();
+    HashSet<XYCoord> propTiles = new HashSet<XYCoord>();
 
     // NOTE: We can't just use cmdr.ownedProperties because that gives away unit locations that we may not be able to see.
     for( int x = 0; x < gameMap.mapWidth; ++x )
@@ -631,11 +632,11 @@ public class Utils
         XYCoord xyc = new XYCoord(x, y);
         if( gameMap.getLocation(xyc).getOwner() == cmdr )
         {
-          tilesInRange.addAll(Utils.findLocationsInRange(gameMap, xyc, 0, range));
+          propTiles.add(xyc);
         }
       }
     }
-    return tilesInRange;
+    return findLocationsNearPoints(gameMap, propTiles, range);
   }
 
   /**
@@ -644,7 +645,7 @@ public class Utils
    */
   public static Set<XYCoord> findLocationsNearUnits(GameMap gameMap, Commander cmdr, int range)
   {
-    HashSet<XYCoord> tilesInRange = new HashSet<XYCoord>();
+    HashSet<XYCoord> unitTiles = new HashSet<XYCoord>();
 
     // NOTE: We can't just use cmdr.units because that gives away unit locations that we may not be able to see.
     for( int x = 0; x < gameMap.mapWidth; ++x )
@@ -655,10 +656,41 @@ public class Utils
         Unit unit = gameMap.getLocation(xyc).getResident();
         if( unit != null && cmdr == unit.CO )
         {
-          tilesInRange.addAll(Utils.findLocationsInRange(gameMap, xyc, 0, range));
+          unitTiles.add(xyc);
         }
       }
     }
+    return findLocationsNearPoints(gameMap, unitTiles, range);
+  }
+
+  /**
+   * Find all locations within `range` spaces of the specified units.
+   * @return a Set of all qualifying locations.
+   */
+  public static Set<XYCoord> findLocationsNearUnits(GameMap gameMap, Collection<Unit> units, int range)
+  {
+    HashSet<XYCoord> unitTiles = new HashSet<XYCoord>();
+
+    for( Unit u : units )
+    {
+      unitTiles.add(new XYCoord(u.x, u.y));
+    }
+    return findLocationsNearPoints(gameMap, unitTiles, range);
+  }
+
+  /**
+   * Find all locations within `range` spaces of the given points.
+   * @return a Set of all qualifying locations.
+   */
+  public static Set<XYCoord> findLocationsNearPoints(GameMap gameMap, Collection<XYCoord> points, int range)
+  {
+    HashSet<XYCoord> tilesInRange = new HashSet<XYCoord>();
+
+    for( XYCoord point : points )
+    {
+      tilesInRange.addAll(Utils.findLocationsInRange(gameMap, point, range));
+    }
+
     return tilesInRange;
   }
 
