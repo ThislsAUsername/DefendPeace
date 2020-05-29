@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Queue;
+import java.util.Set;
 
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventQueue;
@@ -614,22 +615,49 @@ public class Utils
     return originalPathOK;
   }
 
+  /**
+   * Find all locations within `range` spaces of all known properties owned by `cmdr`.
+   * @return a Set of all qualifying locations.
+   */
   public static HashSet<XYCoord> findLocationsNearProperties(GameMap gameMap, Commander cmdr, int range)
   {
     HashSet<XYCoord> tilesInRange = new HashSet<XYCoord>();
-    for( XYCoord prop : cmdr.ownedProperties )
+
+    // NOTE: We can't just use cmdr.ownedProperties because that gives away unit locations that we may not be able to see.
+    for( int x = 0; x < gameMap.mapWidth; ++x )
     {
-      tilesInRange.addAll(Utils.findLocationsInRange(gameMap, prop, 0, range));
+      for( int y = 0; y < gameMap.mapHeight; ++y )
+      {
+        XYCoord xyc = new XYCoord(x, y);
+        if( gameMap.getLocation(xyc).getOwner() == cmdr )
+        {
+          tilesInRange.addAll(Utils.findLocationsInRange(gameMap, xyc, 0, range));
+        }
+      }
     }
     return tilesInRange;
   }
 
-  public static HashSet<XYCoord> findLocationsNearUnits(GameMap gameMap, Commander cmdr, int range)
+  /**
+   * Find all locations within `range` spaces of all known units owned by `cmdr`.
+   * @return a Set of all qualifying locations.
+   */
+  public static Set<XYCoord> findLocationsNearUnits(GameMap gameMap, Commander cmdr, int range)
   {
     HashSet<XYCoord> tilesInRange = new HashSet<XYCoord>();
-    for( Unit unit : cmdr.units )
+
+    // NOTE: We can't just use cmdr.units because that gives away unit locations that we may not be able to see.
+    for( int x = 0; x < gameMap.mapWidth; ++x )
     {
-      tilesInRange.addAll(Utils.findLocationsInRange(gameMap, new XYCoord(unit.x, unit.y), 0, range));
+      for( int y = 0; y < gameMap.mapHeight; ++y )
+      {
+        XYCoord xyc = new XYCoord(x, y);
+        Unit unit = gameMap.getLocation(xyc).getResident();
+        if( unit != null && cmdr == unit.CO )
+        {
+          tilesInRange.addAll(Utils.findLocationsInRange(gameMap, xyc, 0, range));
+        }
+      }
     }
     return tilesInRange;
   }
