@@ -30,7 +30,6 @@ public class TeleportEvent implements GameEvent
 
   public enum CollisionOutcome
   {
-    REMOVE,
     KILL,
     SWAP
   }
@@ -38,6 +37,7 @@ public class TeleportEvent implements GameEvent
   public TeleportEvent(Unit u, XYCoord dest, AnimationStyle animStyle, CollisionOutcome crashResult)
   {
     unit = u;
+    unitStart = new XYCoord(unit.x, unit.y);
     unitDestination = dest;
     animationStyle = animStyle;
     collisionOutcome = crashResult;
@@ -45,17 +45,17 @@ public class TeleportEvent implements GameEvent
 
   public TeleportEvent(Unit u, XYCoord dest, AnimationStyle animStyle)
   {
-    this(u, dest, animStyle, CollisionOutcome.REMOVE); // No muss, no fuss.
+    this(u, dest, animStyle, CollisionOutcome.KILL);
   }
 
   public TeleportEvent(Unit u, XYCoord dest, CollisionOutcome crashResult)
   {
-    this(u, dest, AnimationStyle.BLINK, crashResult); // No muss, no fuss.
+    this(u, dest, AnimationStyle.BLINK, crashResult);
   }
 
   public TeleportEvent(Unit u, XYCoord dest)
   {
-    this(u, dest, AnimationStyle.BLINK, CollisionOutcome.REMOVE); // No muss, no fuss.
+    this(u, dest, AnimationStyle.BLINK, CollisionOutcome.KILL);
   }
 
   @Override
@@ -67,7 +67,7 @@ public class TeleportEvent implements GameEvent
   @Override
   public void sendToListener(GameEventListener listener)
   {
-    listener.receiveTeleportEvent(this);
+    listener.receiveTeleportEvent(unit, unitStart, unitDestination);
   }
 
   @Override
@@ -77,23 +77,38 @@ public class TeleportEvent implements GameEvent
 
     // Figure out if something's in the way, and what to do with it.
     Unit oldResident = gameMap.getLocation(unitDestination).getResident();
+    boolean killOldResident = false;
     if( null != oldResident )
     {
       switch(collisionOutcome)
       {
-        case REMOVE:
-          gameMap.removeUnit(oldResident);
-          break;
         case KILL:
-          UnitDieEvent ude = new UnitDieEvent(oldResident);
-          ude.performEvent(gameMap);
+          killOldResident = true;
           break;
         case SWAP:
           // Move him to where our guy started. If he can't live there, he dies.
-          gameMap.moveUnit(oldResident, unitStart.xCoord, unitStart.yCoord);
-          if( !oldResident.model.propulsion.canTraverse(gameMap.getEnvironment(unitStart)) )
-            new UnitDieEvent(oldResident).performEvent(gameMap);
+          if( gameMap.isLocationValid(unitStart) )
+          {
+            gameMap.moveUnit(oldResident, unitStart.xCoord, unitStart.yCoord);
+            if( !oldResident.model.propulsion.canTraverse(gameMap.getEnvironment(unitStart)) )
+            {
+              killOldResident = true;
+            }
+          }
+          else killOldResident = true;
           break;
+      }
+    }
+
+    if( killOldResident )
+    {
+      UnitDieEvent ude = new UnitDieEvent(oldResident);
+      ude.performEvent(gameMap);
+
+      // Poor sap died; Check if his CO lost the game.
+      if( oldResident.CO.units.size() == 0 )
+      {
+        new CommanderDefeatEvent(oldResident.CO).performEvent(gameMap);
       }
     }
 
@@ -104,6 +119,13 @@ public class TeleportEvent implements GameEvent
     if( !unit.model.propulsion.canTraverse(gameMap.getEnvironment(unitDestination)) )
     {
       new UnitDieEvent(unit).performEvent(gameMap);
+
+      // Our unit died; check if we are defeated.
+      if( unit.CO.units.size() == 0 )
+      {
+        // CO is out of units. Too bad.
+        new CommanderDefeatEvent(unit.CO).performEvent(gameMap);
+      }
     }
   }
 

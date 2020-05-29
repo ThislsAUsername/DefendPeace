@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
 import Engine.UnitActionLifecycles.JoinLifecycle;
@@ -76,7 +77,7 @@ public abstract class GameEventListener implements Serializable
   public void receiveCommanderDefeatEvent(CommanderDefeatEvent event){};
   public void receiveLoadEvent(LoadLifecycle.LoadEvent event){};
   public void receiveMoveEvent(MoveEvent event){};
-  public void receiveTeleportEvent(TeleportEvent teleportEvent){};
+  public void receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){};
   public void receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){};
   public void receiveResupplyEvent(ResupplyEvent event){};
   public void receiveUnitDieEvent(UnitDieEvent event){};

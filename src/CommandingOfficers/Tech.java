@@ -2,24 +2,20 @@ package CommandingOfficers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
-import java.util.Set;
 
 import AI.AIUtils;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
-import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
-import Engine.Combat.BattleSummary;
-import Engine.GameEvents.GameEventListener;
-import Terrain.Location;
+import Engine.GameEvents.TeleportEvent;
 import Terrain.MapMaster;
 import Units.Unit;
+import Units.UnitModel;
 
 public class Tech extends Commander
 {
@@ -38,8 +34,8 @@ public class Tech extends Commander
           "Passive:\n" +
           "- Tech has some of the best mechanics around, allowing her units to repair 3 HP per turn instead of just 2.\n"));
       infoPages.add(new InfoPage(
-          TechdropAbility.NAME + " (" + TechdropAbility.COST+  "):\n" +
-          "Gives an attack boost of " + TechdropAbility.BUFF + " to all units and deploys a Mechwarrior to the front lines.\n"));
+          TECHDROP_NAME + " (" + TECHDROP_COST + "):\n" +
+          "Gives an attack boost of " + TECHDROP_BUFF + " to all units and deploys a Mechwarrior to the front lines.\n"));
       infoPages.add(new InfoPage(
           OVERCHARGE_NAME + " (" + OVERCHARGE_COST + "):\n" +
           "Gives an attack boost of "+ OVERCHARGE_BUFF +
@@ -58,7 +54,12 @@ public class Tech extends Commander
   // Variables to characterize this Commander's abilities.
   private static final int TECH_REPAIR = 3; // Used for both D2D heal and ability heal.
 
-  private static final String OVERCHARGE_NAME = "Overheal";
+  private static final String TECHDROP_NAME = "Tech Drop";
+  private static final int TECHDROP_COST = 5;
+  private static final int TECHDROP_BUFF = 10;
+  private static final int TECHDROP_RANGE = 2;
+
+  private static final String OVERCHARGE_NAME = "Overcharge";
   private static final int OVERCHARGE_COST = 6;
   private static final int OVERCHARGE_BUFF = 20;
   private static final int OVERCHARGE_HEAL = 3;
@@ -71,7 +72,7 @@ public class Tech extends Commander
   {
     super(coInfo, rules);
 
-//    addCommanderAbility(new PatchAbility(this, AIRDROP_NAME, AIRDROP_COST, PLUNDER_INCOME, AIRDROP_BUFF));
+    addCommanderAbility(new TechdropAbility(this, TECHDROP_NAME, TECHDROP_COST, TECHDROP_BUFF, TECHDROP_RANGE));
 //    addCommanderAbility(new PatchAbility(this, OVERHEAL_NAME, OVERHEAL_COST, PILLAGE_INCOME, OVERHEAL_BUFF));
 
   }
@@ -91,21 +92,18 @@ public class Tech extends Commander
   private static class TechdropAbility extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
-    private static final String NAME = "Airdrop";
-    private static final int COST = 3;
-    private static final int BUFF = 10;
 
     private CODamageModifier damageBuff = null;
     private CODefenseModifier defenseBuff = null;
     private int dropRange;
 
-    TechdropAbility(Commander myCO, String abilityName, int abilityCost, int abilityRange)
+    TechdropAbility(Commander myCO, String abilityName, int abilityCost, int buff, int abilityRange)
     {
       super(myCO, abilityName, abilityCost);
 
       // Create a COModifier that we can apply to Patch when needed.
-      damageBuff = new CODamageModifier(BUFF);
-      defenseBuff = new CODefenseModifier(BUFF);
+      damageBuff = new CODamageModifier(buff);
+      defenseBuff = new CODefenseModifier(buff);
       dropRange = abilityRange;
     }
 
@@ -154,7 +152,7 @@ public class Tech extends Commander
         if(nmexy.getDistance(myCommander.HQLocation) < nme.model.movePower && nme.model.isTroop())
           nmeval *= 12; // More weight if this unit threatens HQ.
 
-        for( XYCoord xyc : Utils.findLocationsInRange(gameMap, nmexy, dropRange) )
+        for( XYCoord xyc : Utils.findLocationsInRange(gameMap, nmexy, 0, dropRange) )
         {
           Integer curVal = enemyScores.putIfAbsent(xyc, nmeval);      // Put value if absent
           if( null != curVal ) enemyScores.put(xyc, curVal + nmeval); // Combine values if already present
@@ -190,7 +188,9 @@ public class Tech extends Commander
       {
         ScoredSpace ss = scoredSpaces.poll();
         if( ss.score == s1.score )
+        {
           equalSpaces.add(ss);
+        }
         else break;
       }
 
@@ -203,9 +203,12 @@ public class Tech extends Commander
       }
       XYCoord landingZone = equalSpaces.get(index).space;
 
-      // EVENTS:
-      // | MechWarrior drops from the sky into place.
-      // | Victim on landing pad expires if present.
+      // Create our new unit and teleport it into place.
+      long unitFlags = UnitModel.ASSAULT | UnitModel.LAND | UnitModel.TANK; // TODO There has got to be a better way to choose a model.
+      Unit dropIn = new Unit(myCommander, myCommander.getUnitModel( unitFlags, false ) );
+      myCommander.units.add(dropIn);
+      new TeleportEvent(dropIn, landingZone, TeleportEvent.AnimationStyle.DROP_IN, TeleportEvent.CollisionOutcome.KILL).performEvent(gameMap);
+      dropIn.isTurnOver = false;
     }
 
     private class ScoredSpace implements Comparable<ScoredSpace>
