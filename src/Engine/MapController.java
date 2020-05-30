@@ -45,12 +45,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
   /** Just a simple struct to hold the currently-selected unit and its tentative path. */
   private class ContemplatedAction
   {
-    Path movePath = null;
     boolean aiming = false;
 
     public void clear()
     {
-      movePath = null;
       aiming = false;
     }
   }
@@ -265,7 +263,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorDown();
         }
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
+        myGameInputHandler.consider(myGame.getCursorCoord());
         break;
       case DOWN:
         myGame.moveCursorDown();
@@ -274,7 +272,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorUp();
         }
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
+        myGameInputHandler.consider(myGame.getCursorCoord());
         break;
       case LEFT:
         myGame.moveCursorLeft();
@@ -283,7 +281,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorRight();
         }
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
+        myGameInputHandler.consider(myGame.getCursorCoord());
         break;
       case RIGHT:
         myGame.moveCursorRight();
@@ -292,19 +290,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorLeft();
         }
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
+        myGameInputHandler.consider(myGame.getCursorCoord());
         break;
       case SELECT:
-        GameInputHandler.InputType type = myGameInputHandler.select(contemplatedAction.movePath);
-        // If the next state has an InputType of FREE_TILE_SELECT, then we actually moved back()
-        // instead of forward to the action-select state. Clear the path so we can rebuild it.
-        if( type == GameInputHandler.InputType.FREE_TILE_SELECT )
-        {
-          contemplatedAction.movePath = null;
-        }
+        myGameInputHandler.select(myGame.getCursorCoord());
         break;
       case BACK:
-        contemplatedAction.movePath = null;
         myGameInputHandler.back();
         break;
       default:
@@ -373,10 +364,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
         contemplatedAction.aiming = true;
         break;
       case MENU_SELECT:
-        Path path = contemplatedAction.movePath;
+        Path path = myGameInputHandler.myStateData.path;
         if( null != path && path.getPathLength() > 0 )
         {
-          myGame.setCursorLocation(contemplatedAction.movePath.getEnd().GetCoordinates());
+          myGame.setCursorLocation(path.getEnd().GetCoordinates());
         }
         else
         {
@@ -404,7 +395,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
           myGame.setCursorLocation(coord);
         }
 
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.
+        myGameInputHandler.consider(myGame.getCursorCoord()); // Get our first waypoint.
         break;
       case FREE_TILE_SELECT:
         myGameInputHandler.reset(); // Reset the input handler to get rid of stale state
@@ -455,39 +446,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
       myGameInputHandler.reset();
       contemplatedAction.clear();
       currentMenu = null;
-    }
-  }
-
-  /**
-   * Constructs a unit's movement path, one tile at a time, as the user moves the cursor around the map.
-   * If the current movement path is impossible, it will attempt to regenerate a path from scratch.
-   */
-  private void buildMovePath(int x, int y, GameMap map)
-  {
-    if( null == contemplatedAction.movePath )
-    {
-      contemplatedAction.movePath = new Path(myView.getMapUnitMoveSpeed());
-    }
-
-    // If the new point already exists on the path, cut the extraneous points out.
-    for( int i = 0; i < contemplatedAction.movePath.getPathLength(); ++i )
-    {
-      if( contemplatedAction.movePath.getWaypoint(i).x == x && contemplatedAction.movePath.getWaypoint(i).y == y )
-      {
-        contemplatedAction.movePath.snip(i);
-        break;
-      }
-    }
-
-    contemplatedAction.movePath.addWaypoint(x, y);
-
-    Unit actor = myGameInputHandler.getActingUnit();
-    XYCoord coord = myGameInputHandler.getUnitCoord();
-    boolean canEndOnOccupied = true;
-    if( !Utils.isPathValid(coord, actor, contemplatedAction.movePath, map, canEndOnOccupied) )
-    {
-      // The currently-built path is invalid. Try to generate a new one (may still return null).
-      contemplatedAction.movePath = Utils.findShortestPath(coord, actor, x, y, map);
     }
   }
 
@@ -636,7 +594,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   public Path getContemplatedMove()
   {
-    return contemplatedAction.movePath;
+    return myGameInputHandler.myStateData.path;
   }
 
   public boolean isTargeting()

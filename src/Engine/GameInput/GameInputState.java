@@ -78,6 +78,7 @@ abstract class GameInputState<T>
     return mySelector;
   }
 
+  public void consider(T option) {}
   // Default implementations of select() will just keep us
   // in the same state. Subclasses will define transitions.
   public GameInputState<?> select(T option)
@@ -87,29 +88,32 @@ abstract class GameInputState<T>
   
   /** Undo any StateData changes. */
   public void back(){}
-}
 
-/************************************************************
- *  Just a struct class to hold information
- *  for easy sharing across State objects.
- ************************************************************/
-class StateData
-{
-  public final GameMap gameMap;
-  public final Commander commander;
-  public Unit unitActor = null;
-  public Unit unitLauncher = null;
-  public XYCoord unitCoord = null;
-  public GameActionSet actionSet = null;
-  public Path path = null;
-  public ArrayList<? extends Object> menuOptions = null; // Just require a toString().
-  public Map<Unit, XYCoord> unitLocationMap = null; // Used to map units to unload locations.
-  public StateData(GameMap map, Commander co)
+
+  /************************************************************
+   *  Just a struct class to hold information
+   *  for easy sharing across State objects.
+   ************************************************************/
+  public static class StateData
   {
-    gameMap = map;
-    commander = co;
+    public final GameMap gameMap;
+    public final Commander commander;
+    public Unit unitActor = null;
+    public Unit unitLauncher = null;
+    public XYCoord unitCoord = null;
+    public GameActionSet actionSet = null;
+    public Path path = null;
+    public ArrayList<? extends Object> menuOptions = null; // Just require a toString().
+    public Map<Unit, XYCoord> unitLocationMap = null; // Used to map units to unload locations.
+
+    public StateData(GameMap map, Commander co)
+    {
+      gameMap = map;
+      commander = co;
+    }
   }
-}
+
+} //~GameInputState
 
 /************************************************************
  * Provides access to the valid options for the current state
