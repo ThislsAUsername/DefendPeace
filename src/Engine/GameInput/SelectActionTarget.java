@@ -1,13 +1,11 @@
 package Engine.GameInput;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 import Engine.GameAction;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
 import Engine.GameInput.GameInputHandler.InputType;
-import Terrain.GameMap;
 
 /************************************************************
  * Allows selecting an action's target.                     *
@@ -24,6 +22,7 @@ class SelectActionTarget extends GameInputState<XYCoord>
   {
     ArrayList<XYCoord> targets = myStateData.actionSet.getTargetedLocations();
 
+    consider(targets.get(0));
     return new OptionSet(
           myStateData.actionSet.useFreeSelect?
           InputType.FREE_TILE_SELECT : InputType.CONSTRAINED_TILE_SELECT,
@@ -31,14 +30,15 @@ class SelectActionTarget extends GameInputState<XYCoord>
   }
 
   @Override
-  public Collection<DamagePopup> getDamagePopups(GameMap map, XYCoord target)
+  public void consider(XYCoord coord)
   {
     for( GameAction action : myStateData.actionSet.getGameActions() )
-      if( target.equals(action.getTargetLocation()) )
-        return action.getDamagePopups(map);
-    return super.getDamagePopups(map, target);
+      if( coord.equals(action.getTargetLocation()) )
+      {
+        myStateData.damagePopups = action.getDamagePopups(myStateData.gameMap);
+        break;
+      }
   }
-
   @Override
   public GameInputState<?> select(XYCoord targetLocation)
   {
@@ -72,5 +72,11 @@ class SelectActionTarget extends GameInputState<XYCoord>
   public boolean isTargeting()
   {
     return true;
+  }
+
+  @Override
+  public void back()
+  {
+    myStateData.damagePopups = new ArrayList<DamagePopup>();
   }
 }

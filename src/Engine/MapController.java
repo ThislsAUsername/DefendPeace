@@ -9,7 +9,6 @@ import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameInput.GameInputHandler;
-import Terrain.GameMap;
 import UI.CO_InfoController;
 import UI.GameStatsController;
 import UI.InGameMenu;
@@ -188,11 +187,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
         break;
       case SELECT:
-        // Get the current location.
-        XYCoord cursorCoords = new XYCoord(myGame.getCursorX(), myGame.getCursorY());
-
         // Pass the current cursor location to the GameInputHandler.
-        myGameInputHandler.select(cursorCoords);
+        myGameInputHandler.select(myGame.getCursorCoord());
         break;
       case BACK:
         myGameInputHandler.back();
@@ -577,9 +573,9 @@ public class MapController implements IController, GameInputHandler.StateChanged
     return myGameInputHandler.isTargeting();
   }
 
-  public Collection<DamagePopup> getDamagePopups(GameMap map, XYCoord target)
+  public Collection<DamagePopup> getDamagePopups()
   {
-    return myGameInputHandler.getDamagePopups(map, target);
+    return myGameInputHandler.myStateData.damagePopups;
   }
 
   /** Returns the currently-active in-game menu, or null if no menu is in use. */

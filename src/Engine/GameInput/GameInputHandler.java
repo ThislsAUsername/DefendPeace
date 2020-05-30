@@ -1,14 +1,12 @@
 package Engine.GameInput;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Stack;
 
 import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.OptionSelector;
 import Engine.XYCoord;
-import Engine.Combat.DamagePopup;
 import Engine.GameInput.GameInputState.StateData;
 import Terrain.GameMap;
 import Units.Unit;
@@ -164,11 +162,6 @@ public class GameInputHandler
   public ArrayList<XYCoord> getCoordinateOptions()
   {
     return peekCurrentState().getOptions().getCoordinateOptions();
-  }
-
-  public Collection<DamagePopup> getDamagePopups(GameMap map, XYCoord target)
-  {
-    return peekCurrentState().getDamagePopups(map, target);
   }
 
   public XYCoord getUnitCoord()

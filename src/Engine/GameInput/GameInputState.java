@@ -47,11 +47,6 @@ abstract class GameInputState<T>
     return myOptions;
   }
 
-  public Collection<DamagePopup> getDamagePopups(GameMap map, XYCoord target)
-  {
-    return new ArrayList<DamagePopup>();
-  }
-
   protected OptionSelector buildSelector()
   {
     OptionSelector selector = null;
@@ -109,6 +104,7 @@ abstract class GameInputState<T>
     public Path path = null;
     public ArrayList<? extends Object> menuOptions = null; // Just require a toString().
     public Map<Unit, XYCoord> unitLocationMap = null; // Used to map units to unload locations.
+    public Collection<DamagePopup> damagePopups = new ArrayList<DamagePopup>();
 
     public StateData(GameMap map, Commander co)
     {
