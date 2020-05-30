@@ -67,7 +67,7 @@ public class GameInputHandler
   }
 
   /**
-   * Move the current state to consider a new option
+   * Tentatively select, i.e. hover over a new option
    * @param option - The chosen menu option, from among those provided by OptionSet.getMenuOptions().
    */
   public <T> void consider(T option)
