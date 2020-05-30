@@ -371,14 +371,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
         myGameInputHandler.reset();
         break;
-      case PATH_SELECT:
-        XYCoord coord = myGameInputHandler.getUnitCoord();
-        if( null != coord )
-        {
-          myGame.setCursorLocation(coord);
-        }
-
-        myGameInputHandler.consider(myGame.getCursorCoord()); // Get our first waypoint.
+      case PATH_SELECT: // no special handling
         break;
       case FREE_TILE_SELECT:
         myGameInputHandler.reset(); // Reset the input handler to get rid of stale state

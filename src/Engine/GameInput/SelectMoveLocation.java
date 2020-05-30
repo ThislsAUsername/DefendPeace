@@ -29,6 +29,7 @@ class SelectMoveLocation extends GameInputState<XYCoord>
                                        myStateData.gameMap, canEndOnOccupied);
     if (null != myStateData.unitLauncher)
       moveLocations.remove(myStateData.unitCoord); // Prevent returning to the spot of the launch
+    buildMovePath(myStateData.unitCoord.xCoord, myStateData.unitCoord.yCoord);
     return new OptionSet(InputType.PATH_SELECT, moveLocations);
   }
 
