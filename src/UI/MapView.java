@@ -113,8 +113,8 @@ public abstract class MapView implements IView
   {
     return null;
   }
-  public GameAnimation buildTeleportAnimation( Unit unit, XYCoord start, XYCoord end,
-      TeleportEvent.AnimationStyle animStyle, TeleportEvent.CollisionOutcome crashResult )
+  public GameAnimation buildTeleportAnimation( Unit unit, XYCoord start, XYCoord end, Unit obstacle,
+      TeleportEvent.AnimationStyle animStyle, boolean moverDies, boolean moveeDies )
   {
     return null;
   }

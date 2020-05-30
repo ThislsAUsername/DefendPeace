@@ -15,12 +15,12 @@ public class UnitSpriteSet
 
   Sprite sprites[] = new Sprite[6];
 
-  public final int ACTION_IDLE = 0;
-  public final int ACTION_MOVENORTH = 1;
-  public final int ACTION_MOVEEAST = 2;
-  public final int ACTION_MOVESOUTH = 3;
-  public final int ACTION_MOVEWEST = 4;
-  public final int ACTION_DIE = 5;
+  public static final int ACTION_IDLE = 0;
+  public static final int ACTION_MOVENORTH = 1;
+  public static final int ACTION_MOVEEAST = 2;
+  public static final int ACTION_MOVESOUTH = 3;
+  public static final int ACTION_MOVEWEST = 4;
+  public static final int ACTION_DIE = 5;
   
   public final int ANIM_FRAMES_PER_MARK = 3; 
 
@@ -126,6 +126,9 @@ public class UnitSpriteSet
     }
   }
 
+  /**
+   * Return the subimage of the requested sprite, greying if it cannot move, unless a different CO is active.
+   */
   private BufferedImage getUnitImage(Commander activeCO, Unit u, int imageIndex)
   {
     BufferedImage frame = null;
@@ -140,6 +143,16 @@ public class UnitSpriteSet
       frame = sprites[ACTION_IDLE/*action*/].getFrame(imageIndex);
     }
 
+    return frame;
+  }
+
+  /**
+   * Return the frame `imageIndex` of the `action` Sprite in this UnitSpriteSet.
+   */
+  public BufferedImage getUnitImage(int action, int imageIndex)
+  {
+    BufferedImage frame = null;
+    frame = sprites[action].getFrame(imageIndex);
     return frame;
   }
 

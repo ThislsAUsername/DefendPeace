@@ -12,6 +12,7 @@ import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.TeleportEvent;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -97,6 +98,8 @@ public class Tech extends Commander
     private CODefenseModifier defenseBuff = null;
     private int dropRange;
 
+    GameEventQueue abilityEvents;
+
     TechdropAbility(Commander myCO, String abilityName, int abilityCost, int buff, int abilityRange)
     {
       super(myCO, abilityName, abilityCost);
@@ -105,6 +108,7 @@ public class Tech extends Commander
       damageBuff = new CODamageModifier(buff);
       defenseBuff = new CODefenseModifier(buff);
       dropRange = abilityRange;
+      abilityEvents = new GameEventQueue();
     }
 
     @Override
@@ -114,6 +118,16 @@ public class Tech extends Commander
       myCommander.addCOModifier(damageBuff);
       myCommander.addCOModifier(defenseBuff);
 
+      // Perform any events we generated in getEvents().
+      while(!abilityEvents.isEmpty())
+      {
+        abilityEvents.poll().performEvent(gameMap);
+      }
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
       // We want to find the spot where more muscle will do the most good; i.e. somewhere that is highly contested.
       // Score spaces by subtracting the value of nearby friendlies from the value of nearby enemies.
       // The result is how much cost-advantage the enemy has in that space.
@@ -177,7 +191,7 @@ public class Tech extends Commander
       if( scoredSpaces.isEmpty() )
       {
         System.out.println("[TechDrop.perform] Cannot find suitable landing zone. Aborting!");
-        return;
+        return abilityEvents;
       }
 
       // Find all spaces that are equally contested.
@@ -203,12 +217,14 @@ public class Tech extends Commander
       }
       XYCoord landingZone = equalSpaces.get(index).space;
 
-      // Create our new unit and teleport it into place.
+      // Create our new unit and the teleport event to put it into place.
       long unitFlags = UnitModel.ASSAULT | UnitModel.LAND | UnitModel.TANK; // TODO There has got to be a better way to choose a model.
       Unit dropIn = new Unit(myCommander, myCommander.getUnitModel( unitFlags, false ) );
+      dropIn.isTurnOver = false; // Hit the ground ready to rumble.
       myCommander.units.add(dropIn);
-      new TeleportEvent(dropIn, landingZone, TeleportEvent.AnimationStyle.DROP_IN, TeleportEvent.CollisionOutcome.KILL).performEvent(gameMap);
-      dropIn.isTurnOver = false;
+      TeleportEvent techDrop = new TeleportEvent(gameMap, dropIn, landingZone, TeleportEvent.AnimationStyle.DROP_IN, TeleportEvent.CollisionOutcome.KILL);
+      abilityEvents.add(techDrop);
+      return abilityEvents;
     }
 
     private class ScoredSpace implements Comparable<ScoredSpace>
@@ -229,5 +245,4 @@ public class Tech extends Commander
       }
     }
   }
-
 }

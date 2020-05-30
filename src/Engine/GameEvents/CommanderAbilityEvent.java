@@ -9,6 +9,7 @@ import UI.Art.Animation.GameAnimation;
 public class CommanderAbilityEvent implements GameEvent
 {
   private final CommanderAbility myAbility;
+  GameEventQueue gameEvents;
 
   public CommanderAbilityEvent(CommanderAbility ability)
   {
@@ -18,19 +19,35 @@ public class CommanderAbilityEvent implements GameEvent
   @Override
   public GameAnimation getEventAnimation(MapView mapView)
   {
-    return null;
+    // TODO: CO Ability intro splash
+    GameAnimation anim = null;
+    if( !gameEvents.isEmpty() )
+    {
+      // Just grab the first one for now; TODO create compound animations.
+      anim = gameEvents.peek().getEventAnimation(mapView);
+    }
+    return anim;
   }
 
   @Override
   public void sendToListener(GameEventListener listener)
   {
-    // TODO Auto-generated method stub
+    for(GameEvent ge : gameEvents )
+    {
+      ge.sendToListener(listener);
+    }
   }
 
   @Override
   public void performEvent(MapMaster gameMap)
   {
     myAbility.activate(gameMap);
+  }
+
+  /** Called by AbilityAction before `getEventAnimation`, `performEvent`, or `sendToListener`. */
+  public void generateAbilityEvents(MapMaster gameMap)
+  {
+    gameEvents = myAbility.getEvents(gameMap);
   }
 
   @Override

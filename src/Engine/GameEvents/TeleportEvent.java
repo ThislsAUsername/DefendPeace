@@ -1,8 +1,7 @@
 package Engine.GameEvents;
 
-import CommandingOfficers.Commander;
-import Engine.Path;
 import Engine.XYCoord;
+import Terrain.GameMap;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -19,8 +18,12 @@ public class TeleportEvent implements GameEvent
   private Unit unit;
   XYCoord unitStart;
   private XYCoord unitDestination;
+  private Unit obstacle;
   private AnimationStyle animationStyle;
   private CollisionOutcome collisionOutcome;
+
+  private boolean unitDies;
+  private boolean obstacleDies;
 
   public enum AnimationStyle
   {
@@ -34,34 +37,36 @@ public class TeleportEvent implements GameEvent
     SWAP
   }
 
-  public TeleportEvent(Unit u, XYCoord dest, AnimationStyle animStyle, CollisionOutcome crashResult)
+  public TeleportEvent(GameMap map, Unit u, XYCoord dest, AnimationStyle animStyle, CollisionOutcome crashResult)
   {
     unit = u;
     unitStart = new XYCoord(unit.x, unit.y);
     unitDestination = dest;
     animationStyle = animStyle;
     collisionOutcome = crashResult;
+    unitDies = false;
+    obstacleDies = false;
   }
 
-  public TeleportEvent(Unit u, XYCoord dest, AnimationStyle animStyle)
+  public TeleportEvent(GameMap map, Unit u, XYCoord dest, AnimationStyle animStyle)
   {
-    this(u, dest, animStyle, CollisionOutcome.KILL);
+    this(map, u, dest, animStyle, CollisionOutcome.KILL);
   }
 
-  public TeleportEvent(Unit u, XYCoord dest, CollisionOutcome crashResult)
+  public TeleportEvent(GameMap map, Unit u, XYCoord dest, CollisionOutcome crashResult)
   {
-    this(u, dest, AnimationStyle.BLINK, crashResult);
+    this(map, u, dest, AnimationStyle.BLINK, crashResult);
   }
 
-  public TeleportEvent(Unit u, XYCoord dest)
+  public TeleportEvent(GameMap map, Unit u, XYCoord dest)
   {
-    this(u, dest, AnimationStyle.BLINK, CollisionOutcome.KILL);
+    this(map, u, dest, AnimationStyle.BLINK, CollisionOutcome.KILL);
   }
 
   @Override
   public GameAnimation getEventAnimation(MapView mapView)
   {
-    return mapView.buildTeleportAnimation(unit, unitStart, unitDestination, animationStyle, collisionOutcome);
+    return mapView.buildTeleportAnimation(unit, unitStart, unitDestination, obstacle, animationStyle, unitDies, obstacleDies);
   }
 
   @Override
@@ -76,39 +81,39 @@ public class TeleportEvent implements GameEvent
     gameMap.removeUnit(unit); // First remove our guy. He's in the ether.
 
     // Figure out if something's in the way, and what to do with it.
-    Unit oldResident = gameMap.getLocation(unitDestination).getResident();
-    boolean killOldResident = false;
-    if( null != oldResident )
+    obstacle = gameMap.getLocation(unitDestination).getResident();
+    obstacleDies = false;
+    if( null != obstacle )
     {
       switch(collisionOutcome)
       {
         case KILL:
-          killOldResident = true;
+          obstacleDies = true;
           break;
         case SWAP:
           // Move him to where our guy started. If he can't live there, he dies.
           if( gameMap.isLocationValid(unitStart) )
           {
-            gameMap.moveUnit(oldResident, unitStart.xCoord, unitStart.yCoord);
-            if( !oldResident.model.propulsion.canTraverse(gameMap.getEnvironment(unitStart)) )
+            gameMap.moveUnit(obstacle, unitStart.xCoord, unitStart.yCoord);
+            if( !obstacle.model.propulsion.canTraverse(gameMap.getEnvironment(unitStart)) )
             {
-              killOldResident = true;
+              obstacleDies = true;
             }
           }
-          else killOldResident = true;
+          else obstacleDies = true;
           break;
       }
     }
 
-    if( killOldResident )
+    if( obstacleDies )
     {
-      UnitDieEvent ude = new UnitDieEvent(oldResident);
+      UnitDieEvent ude = new UnitDieEvent(obstacle);
       ude.performEvent(gameMap);
 
       // Poor sap died; Check if his CO lost the game.
-      if( oldResident.CO.units.size() == 0 )
+      if( obstacle.CO.units.size() == 0 )
       {
-        new CommanderDefeatEvent(oldResident.CO).performEvent(gameMap);
+        new CommanderDefeatEvent(obstacle.CO).performEvent(gameMap);
       }
     }
 
@@ -118,6 +123,7 @@ public class TeleportEvent implements GameEvent
     // If our guy can't survive there, end him.
     if( !unit.model.propulsion.canTraverse(gameMap.getEnvironment(unitDestination)) )
     {
+      unitDies = true;
       new UnitDieEvent(unit).performEvent(gameMap);
 
       // Our unit died; check if we are defeated.

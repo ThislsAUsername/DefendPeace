@@ -112,8 +112,8 @@ public abstract class GameAction
   // ===========  AbilityAction  =================================
   public static class AbilityAction extends GameAction
   {
-    private GameEventQueue abilityEvents = null;
     private CommanderAbility myAbility;
+    private CommanderAbilityEvent myEvent;
 
     public AbilityAction(CommanderAbility ability)
     {
@@ -124,14 +124,18 @@ public abstract class GameAction
       isValid &= myAbility.myCommander.getReadyAbilities().contains(myAbility);
       if( isValid )
       {
-        abilityEvents = new GameEventQueue();
-        abilityEvents.add(new CommanderAbilityEvent(myAbility));
+        myEvent = new CommanderAbilityEvent(myAbility);
       }
     }
 
     @Override
     public GameEventQueue getEvents(MapMaster map)
     {
+      myEvent.generateAbilityEvents(map); // Let the ability figure out what's gonna go down.
+
+      // We still just return this event as the gateway.
+      GameEventQueue abilityEvents = new GameEventQueue();
+      abilityEvents.add(myEvent);
       return abilityEvents;
     }
 
