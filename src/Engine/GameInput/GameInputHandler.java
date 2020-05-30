@@ -187,6 +187,11 @@ public class GameInputHandler
     return action == InputType.LEAVE_MAP;
   }
 
+  public boolean isTargeting()
+  {
+    return peekCurrentState().isTargeting();
+  }
+
   /************************************************************
    * Interface so classes can be notified of state changes.
    ************************************************************/

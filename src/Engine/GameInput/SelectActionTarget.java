@@ -67,4 +67,10 @@ class SelectActionTarget extends GameInputState<XYCoord>
     // If we couldn't find an action for this location, return the current state.
     return next;
   }
+
+  @Override
+  public boolean isTargeting()
+  {
+    return true;
+  }
 }

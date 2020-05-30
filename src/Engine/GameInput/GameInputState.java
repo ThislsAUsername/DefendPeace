@@ -89,6 +89,10 @@ abstract class GameInputState<T>
   /** Undo any StateData changes. */
   public void back(){}
 
+  public boolean isTargeting()
+  {
+    return false;
+  }
 
   /************************************************************
    *  Just a struct class to hold information

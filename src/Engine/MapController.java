@@ -42,19 +42,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   private boolean isGameOver;
 
-  /** Just a simple struct to hold the currently-selected unit and its tentative path. */
-  private class ContemplatedAction
-  {
-    boolean aiming = false;
-
-    public void clear()
-    {
-      aiming = false;
-    }
-  }
-
-  ContemplatedAction contemplatedAction;
-
   public MapController(GameInstance game, MapView view)
   {
     this(game,view,true);
@@ -68,7 +55,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
     inputMode = InputMode.INPUT;
     isGameOver = false;
     nextSeekIndex = 0;
-    contemplatedAction = new ContemplatedAction();
 
     if( initGame )
       // Start the first turn.
@@ -361,7 +347,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case CONSTRAINED_TILE_SELECT:
         // Create an option selector to keep track of where we are.
         myGame.setCursorLocation(myGameInputHandler.getCoordinateOptions().get(myGameInputOptionSelector.getSelectionNormalized()));
-        contemplatedAction.aiming = true;
         break;
       case MENU_SELECT:
         Path path = myGameInputHandler.myStateData.path;
@@ -378,7 +363,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
           }
         }
         currentMenu = new InGameMenu<>(myGameInputHandler.getMenuOptions(), myGameInputOptionSelector);
-        contemplatedAction.aiming = false;
         break;
       case ACTION_READY:
         if( null != myGameInputHandler.getReadyAction() )
@@ -386,7 +370,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
           executeGameAction(myGameInputHandler.getReadyAction());
         }
         myGameInputHandler.reset();
-        contemplatedAction.aiming = false;
         break;
       case PATH_SELECT:
         XYCoord coord = myGameInputHandler.getUnitCoord();
@@ -444,7 +427,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
       // If we are changing input modes, we
       // know we don't have a valid action right now.
       myGameInputHandler.reset();
-      contemplatedAction.clear();
       currentMenu = null;
     }
   }
@@ -599,7 +581,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   public boolean isTargeting()
   {
-    return contemplatedAction.aiming;
+    return myGameInputHandler.isTargeting();
   }
 
   public Collection<DamagePopup> getDamagePopups(GameMap map, XYCoord target)
