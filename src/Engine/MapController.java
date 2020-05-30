@@ -204,7 +204,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     switch (input)
     {
       case SELECT:
-        myGameInputHandler.select(new XYCoord(myGame.getCursorX(), myGame.getCursorY()));
+        myGameInputHandler.select(myGame.getCursorCoord());
         break;
       case BACK:
         myGameInputHandler.back();
