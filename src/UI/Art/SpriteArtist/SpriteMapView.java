@@ -248,7 +248,7 @@ public class SpriteMapView extends MapView
 
     // Get a reference to the current action being built, if one exists.
     Unit currentActor = mapController.getContemplatedActor();
-    AnimState actorAnimState = null;
+    AnimState actorAnimState = AnimState.IDLE;
     XYCoord actorDrawCoord = mapController.getContemplationCoord();
     if( null != currentAnimation )
     {
@@ -271,8 +271,10 @@ public class SpriteMapView extends MapView
     // Draw the currently-acting unit so it's on top of everything.
     if( null != currentActor )
     {
-      unitArtist.drawUnitInDrawSpace(mapGraphics, currentActor, actorDrawCoord.xCoord, actorDrawCoord.yCoord, actorAnimState, fastAnimIndex);
-      unitArtist.drawUnitIconsInDrawSpace(mapGraphics, currentActor, actorDrawCoord.xCoord, actorDrawCoord.yCoord, animIndex);
+      SpriteLibrary.getMapUnitSpriteSet(currentActor)
+      .drawUnit(mapGraphics, actorAnimState, fastAnimIndex,
+          actorDrawCoord.xCoord, actorDrawCoord.yCoord,
+          getFlipUnitFacing(currentActor.CO) );
     }
 
     for( DamagePopup popup :

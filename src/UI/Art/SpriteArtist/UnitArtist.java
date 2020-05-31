@@ -27,13 +27,7 @@ public class UnitArtist
     // Convert "real" location into a draw-space location, then draw icons.
     int drawX = (int) (myView.getTileSize() * x);
     int drawY = (int) (myView.getTileSize() * y);
-    drawUnitIconsInDrawSpace(g, unit, drawX, drawY, animIndex);
-  }
-  /**
-   * Draws any applicable unit icons for the unit, at the specified draw-space location.
-   */
-  public void drawUnitIconsInDrawSpace(Graphics g, Unit unit, int drawX, int drawY, int animIndex)
-  {
+
     SpriteLibrary.getMapUnitSpriteSet(unit).drawUnitIcons(g, myGame.commanders, unit, animIndex, drawX, drawY);
   }
 
@@ -44,21 +38,10 @@ public class UnitArtist
    */
   public void drawUnit(Graphics g, Unit unit, int x, int y, int animIndex)
   {
-    // Convert "real" game-model location to a draw-space location.
     int drawX = (int) (myView.getTileSize() * x);
     int drawY = (int) (myView.getTileSize() * y);
-    drawUnitInDrawSpace(g, unit, drawX, drawY, null, animIndex);
-  }
-  /**
-   * Allows drawing of a single unit, at a specified draw-space location.
-   */
-  public void drawUnitInDrawSpace(Graphics g, Unit unit, int drawX, int drawY, AnimState state, int animIndex)
-  {
-    if( null == state )
-    {
-      boolean tired = unit.isStunned || (unit.isTurnOver && unit.CO == myGame.activeCO);
-      state = (tired)? AnimState.TIRED : AnimState.IDLE;
-    }
+    boolean tired = unit.isStunned || (unit.isTurnOver && unit.CO == myGame.activeCO);
+    AnimState state = (tired) ? AnimState.TIRED : AnimState.IDLE;
 
     // Draw the unit at the specified location.
     SpriteLibrary.getMapUnitSpriteSet(unit).drawUnit(g, state,
