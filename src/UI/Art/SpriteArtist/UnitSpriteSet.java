@@ -43,6 +43,14 @@ public class UnitSpriteSet
       System.out.println("WARNING: Exception hit in UnitSpriteSet constructor:" + e);
       System.out.println("WARNING:   Attempting to continue.");
     }
+
+    // Handle the case of having one sideways move direction and not the other defined
+    if( null == sprites[AnimState.MOVEEAST.ordinal()] && null != sprites[AnimState.MOVEWEST.ordinal()] )
+      sprites[AnimState.MOVEEAST.ordinal()] = new Sprite(sprites[AnimState.MOVEWEST.ordinal()], true);
+
+    if( null == sprites[AnimState.MOVEWEST.ordinal()] && null != sprites[AnimState.MOVEEAST.ordinal()] )
+      sprites[AnimState.MOVEWEST.ordinal()] = new Sprite(sprites[AnimState.MOVEEAST.ordinal()], true);
+
     // Fill out any missing images
     Sprite defaultSprite = sprites[AnimState.IDLE.ordinal()];
     // Use the IDLE action if it exists, otherwise we are going with a black rectangle.
