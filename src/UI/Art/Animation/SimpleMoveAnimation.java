@@ -9,7 +9,7 @@ public class SimpleMoveAnimation implements GameAnimation
 {
   long startTime = 0;
 
-  private final long maxTime = 300;
+  private final long maxTime = 250;
   private long endTime;
 
   private final Unit actor;

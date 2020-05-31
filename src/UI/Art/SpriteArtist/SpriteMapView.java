@@ -429,6 +429,9 @@ public class SpriteMapView extends MapView
     // Only bother iterating over the visible map space (plus a 2-square border).
     int drawY = (int) mapViewDrawY.get();
     int drawX = (int) mapViewDrawX.get();
+    Unit currentActor = mapController.getContemplatedActor();
+    if( null != currentAnimation )
+      currentActor = currentAnimation.getActor();
     for( int y = drawY - 1; y < drawY + mapTilesToDrawY + 2; ++y )
     {
       for( int x = drawX - 1; x < drawX + mapTilesToDrawX + 2; ++x )
@@ -443,7 +446,6 @@ public class SpriteMapView extends MapView
           {
             Unit resident = gameMap.getLocation(x, y).getResident();
             // If an action is being considered, draw the active unit later, not now.
-            Unit currentActor = mapController.getContemplatedActor();
             if( resident != currentActor )
             {
               unitArtist.drawUnit(g, resident, resident.x, resident.y, animIndex);
@@ -461,6 +463,9 @@ public class SpriteMapView extends MapView
    */
   public void drawUnitIcons(Graphics g, GameMap gameMap)
   {
+    Unit currentActor = mapController.getContemplatedActor();
+    if( null != currentAnimation )
+      currentActor = currentAnimation.getActor();
     for( int y = 0; y < gameMap.mapHeight; ++y )
     {
       for( int x = 0; x < gameMap.mapWidth; ++x )
@@ -469,7 +474,6 @@ public class SpriteMapView extends MapView
         {
           Unit resident = gameMap.getLocation(x, y).getResident();
           // If an action is being considered, draw the active unit later, not now.
-          Unit currentActor = mapController.getContemplatedActor();
           if( resident != currentActor )
           {
             unitArtist.drawUnitIcons(g, resident, resident.x, resident.y, animIndex);
