@@ -104,7 +104,7 @@ public class UnitSpriteSet
     BufferedImage frame = getUnitImage(state, imageIndex);
 
     // Draw the unit, facing the appropriate direction.
-    if( flipImage )
+    if( flipImage && isStateFlippable(state) )
     {
       g.drawImage(frame, drawX + (frame.getWidth()), drawY, -frame.getWidth(), frame.getHeight(), null);
     }
@@ -195,6 +195,20 @@ public class UnitSpriteSet
 
       // Draw transport icon.
       g.drawImage( captureIcon, iconX, iconY, iconW, iconH, null );
+    }
+  }
+
+  public static boolean isStateFlippable(AnimState state)
+  {
+    switch(state)
+    {
+      case MOVENORTH:
+      case MOVEEAST:
+      case MOVESOUTH:
+      case MOVEWEST:
+        return false;
+      default:
+        return true;
     }
   }
 }

@@ -63,4 +63,31 @@ public class SimpleMoveAnimation implements GameAnimation
 
     return new XYCoord( (int) (currX * tileSize), (int) (currY * tileSize) );
   }
+
+  @Override
+  public AnimState getAnimState()
+  {
+    final long animTime = System.currentTimeMillis() - startTime;
+    final double tilesTraveled = animTime * tilesPerMs;
+    final int prevTileIndex = Math.min((int) Math.floor(tilesTraveled), path.getPathLength() - 1);
+    final int nextTileIndex = Math.min((int) Math.ceil (tilesTraveled), path.getPathLength() - 1);
+
+    final XYCoord coord1 = path.getWaypoint( prevTileIndex ).GetCoordinates();
+    final XYCoord coord2 = path.getWaypoint( nextTileIndex ).GetCoordinates();
+
+    final int diffX = coord2.xCoord - coord1.xCoord;
+    final int diffY = coord2.yCoord - coord1.yCoord;
+
+    // Either x or y can be different. Check x offset.
+    if( 0 != diffX )
+    {
+      return (0 < diffX) ? AnimState.MOVEEAST : AnimState.MOVEWEST;
+    }
+    else if( 0 != diffY ) // If not x, maybe y is different.
+    {
+      return (0 < diffY) ? AnimState.MOVENORTH : AnimState.MOVESOUTH;
+    }
+
+    return AnimState.IDLE;
+  }
 }
