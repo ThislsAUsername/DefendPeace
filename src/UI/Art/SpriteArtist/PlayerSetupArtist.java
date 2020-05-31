@@ -12,6 +12,7 @@ import UI.PlayerSetupController;
 import UI.PlayerSetupInfo;
 import UI.SlidingValue;
 import UI.UIUtils;
+import UI.Art.Animation.GameAnimation.AnimState;
 
 public class PlayerSetupArtist
 {
@@ -264,7 +265,7 @@ public class PlayerSetupArtist
       if( factionChanged || colorChanged )
       {
         UnitSpriteSet inf = SpriteLibrary.getMapUnitSpriteSet(myControl.getIconicUnit(), info.getCurrentFaction(), info.getCurrentColor());
-        BufferedImage infSprite = inf.sprites[UnitSpriteSet.AnimState.IDLE.ordinal()].getFrame(0);
+        BufferedImage infSprite = inf.sprites[AnimState.IDLE.ordinal()].getFrame(0);
         unitPane = new SpriteUIUtils.ImageFrame(portraitPx + 4, 12, 28, portraitPx + 2, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUHIGHLIGHTCOLOR, true, infSprite);
         unitPane.render(g);
       }

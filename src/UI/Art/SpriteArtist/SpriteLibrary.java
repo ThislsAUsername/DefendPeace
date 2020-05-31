@@ -16,8 +16,8 @@ import CommandingOfficers.Commander;
 import Terrain.Location;
 import Terrain.TerrainType;
 import UI.UIUtils;
-import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import UI.UIUtils.Faction;
+import UI.Art.Animation.GameAnimation.AnimState;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -330,8 +330,8 @@ public class SpriteLibrary
   }
 
   private static String getMapUnitSpriteFilename(String unitType, String faction)
-  { return getMapUnitSpriteFilename(unitType, faction, UnitSpriteSet.AnimState.IDLE); }
-  private static String getMapUnitSpriteFilename(String unitType, String faction, UnitSpriteSet.AnimState state)
+  { return getMapUnitSpriteFilename(unitType, faction, AnimState.IDLE); }
+  private static String getMapUnitSpriteFilename(String unitType, String faction, AnimState state)
   {
     final String format = "res/unit/faction/%s/%s_map%s.png";
     String spriteFile = String.format( format, faction,
