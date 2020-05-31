@@ -9,17 +9,20 @@ public class SimpleMoveAnimation implements GameAnimation
 {
   long startTime = 0;
 
-  private long endTime = 600;
+  private final long maxTime = 300;
+  private long endTime;
 
   private final Unit actor;
   private final Path path;
+  private final double tilesPerMs;
 
   public SimpleMoveAnimation(Unit actor, Path path)
   {
     this.actor = actor;
     this.path = path;
-    path.start();
     startTime = System.currentTimeMillis();
+    tilesPerMs = actor.model.movePower / (double) maxTime;
+    endTime = (long) ((path.getPathLength() - 1) / tilesPerMs);
   }
 
   @Override
@@ -44,8 +47,20 @@ public class SimpleMoveAnimation implements GameAnimation
   @Override
   public XYCoord getActorDrawCoord(int tileSize)
   {
-    XYCoord coord = path.getPosition();
+    final long animTime = System.currentTimeMillis() - startTime;
+    final double tilesTraveled = animTime * tilesPerMs;
+    final int prevTileIndex = Math.min((int) Math.floor(tilesTraveled), path.getPathLength() - 1);
+    final int nextTileIndex = Math.min((int) Math.ceil (tilesTraveled), path.getPathLength() - 1);
 
-    return new XYCoord(coord.xCoord * tileSize, coord.yCoord * tileSize);
+    final XYCoord coord1 = path.getWaypoint( prevTileIndex ).GetCoordinates();
+    final XYCoord coord2 = path.getWaypoint( nextTileIndex ).GetCoordinates();
+
+    final double diffX = coord2.xCoord - coord1.xCoord;
+    final double diffY = coord2.yCoord - coord1.yCoord;
+    final double tileDiff = tilesTraveled - prevTileIndex;
+    final double currX = coord1.xCoord + tileDiff * diffX;
+    final double currY = coord1.yCoord + tileDiff * diffY;
+
+    return new XYCoord( (int) (currX * tileSize), (int) (currY * tileSize) );
   }
 }
