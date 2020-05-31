@@ -466,7 +466,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   {
     if( null == contemplatedAction.movePath )
     {
-      contemplatedAction.movePath = new Path(myView.getMapUnitMoveSpeed());
+      contemplatedAction.movePath = new Path();
     }
 
     // If the new point already exists on the path, cut the extraneous points out.

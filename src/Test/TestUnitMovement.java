@@ -70,7 +70,7 @@ public class TestUnitMovement extends TestCase
     GameAction nullPath = new WaitLifecycle.WaitAction(mover, null);
     testPassed &= validate(nullPath.getEvents(testMap).size() == 0, "    A WaitAction with a null path should have no events!");
     mover.initTurn(testMap);
-    GameAction emptyPath = new WaitLifecycle.WaitAction(mover, new Path(100));
+    GameAction emptyPath = new WaitLifecycle.WaitAction(mover, new Path());
     testPassed &= validate(emptyPath.getEvents(testMap).size() == 0,
         "    A WaitAction with an empty path should have no events!");
     mover.initTurn(testMap);
@@ -145,7 +145,7 @@ public class TestUnitMovement extends TestCase
     // We don't need any units, since whether fuel drain properly applies to units is handled by the other two tests.
 
     // A 7-space movement across nothing but grass.
-    Path grassPath = new Path(1.0);
+    Path grassPath = new Path();
     grassPath.addWaypoint(3, 7);
     grassPath.addWaypoint(4, 7);
     grassPath.addWaypoint(5, 7);
@@ -156,7 +156,7 @@ public class TestUnitMovement extends TestCase
     grassPath.addWaypoint(10, 7);
 
     // A 4-space movement across 1 road, 1 plain, 1 forest, and 1 city
-    Path multiPath = new Path(1.0);
+    Path multiPath = new Path();
     multiPath.addWaypoint(5, 6);
     multiPath.addWaypoint(4, 6);
     multiPath.addWaypoint(3, 6);

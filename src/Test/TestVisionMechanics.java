@@ -84,7 +84,7 @@ public class TestVisionMechanics extends TestCase
     testPassed &= validate(missMeat.getEvents(testMap).size() == 0, "    You can shoot invisible things.");
 
     // Drive by the two hidden units
-    Path excursion = new Path(42);
+    Path excursion = new Path();
     excursion.addWaypoint(7, 3);
     excursion.addWaypoint(7, 4);
     excursion.addWaypoint(6, 4);
