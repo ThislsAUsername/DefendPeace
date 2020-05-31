@@ -85,7 +85,7 @@ public class SimpleMoveAnimation implements GameAnimation
     }
     else if( 0 != diffY ) // If not x, maybe y is different.
     {
-      return (0 < diffY) ? AnimState.MOVENORTH : AnimState.MOVESOUTH;
+      return (0 < diffY) ? AnimState.MOVESOUTH : AnimState.MOVENORTH;
     }
 
     return AnimState.IDLE;
