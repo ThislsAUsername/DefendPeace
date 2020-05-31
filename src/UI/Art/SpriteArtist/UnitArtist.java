@@ -3,6 +3,7 @@ package UI.Art.SpriteArtist;
 import java.awt.Graphics;
 
 import Engine.GameInstance;
+import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import Units.Unit;
 
 public class UnitArtist
@@ -39,9 +40,12 @@ public class UnitArtist
     // Convert "real" game-model location to a draw-space location.
     int drawX = (int) (myView.getTileSize() * x);
     int drawY = (int) (myView.getTileSize() * y);
+    UnitSpriteSet.AnimState state = AnimState.IDLE;
+    if( unit.isStunned || (unit.isTurnOver && unit.CO == myGame.activeCO) )
+      state = AnimState.TIRED;
 
     // Draw the unit at the specified location.
-    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnit(g, myGame.activeCO, unit, /*currentAction,*/
+    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnit(g, state,
     animIndex, drawX, drawY, myView.getFlipUnitFacing(unit.CO));
   }
 }
