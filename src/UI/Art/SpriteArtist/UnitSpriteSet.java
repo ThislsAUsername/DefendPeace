@@ -110,15 +110,17 @@ public class UnitSpriteSet
   public void drawUnit(Graphics g, AnimState state, int imageIndex, int drawX, int drawY, boolean flipImage)
   {
     BufferedImage frame = getUnitImage(state, imageIndex);
+    int shiftX =(SpriteLibrary.baseSpriteSize - frame.getWidth())/2; // center X
+    int shiftY = SpriteLibrary.baseSpriteSize - frame.getHeight(); // bottom-justify Y
 
     // Draw the unit, facing the appropriate direction.
     if( flipImage && isStateFlippable(state) )
     {
-      g.drawImage(frame, drawX + (frame.getWidth()), drawY, -frame.getWidth(), frame.getHeight(), null);
+      g.drawImage(frame, drawX - shiftX + (frame.getWidth()), drawY + shiftY, -frame.getWidth(), frame.getHeight(), null);
     }
     else
     {
-      g.drawImage(frame, drawX, drawY, frame.getWidth(), frame.getHeight(), null);
+      g.drawImage(frame, drawX + shiftX, drawY + shiftY, frame.getWidth(), frame.getHeight(), null);
     }
   }
 
