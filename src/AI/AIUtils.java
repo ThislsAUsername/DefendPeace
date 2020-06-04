@@ -458,4 +458,28 @@ public class AIUtils
       return diff;
     }
   }
+
+  /** Return the set of locations with enemies or terrain that `unit` could attack in one turn from `start` */
+  public static Set<XYCoord> findPossibleTargets(GameMap gameMap, Unit unit, XYCoord start)
+  {
+    Set<XYCoord> targetLocs = new HashSet<XYCoord>();
+    boolean allowEndingOnUnits = false; // We can't attack from on top of another unit.
+    ArrayList<XYCoord> moves = Utils.findPossibleDestinations(start, unit, gameMap, allowEndingOnUnits);
+    for( XYCoord move : moves )
+    {
+      boolean moved = !move.equals(start);
+
+      for( WeaponModel wpn : unit.model.weapons )
+      {
+        // Evaluate this weapon for targets if it has ammo, and if either the weapon
+        // is mobile or we don't care if it's mobile (because we aren't moving).
+        if( wpn.loaded(unit) && (!moved || wpn.canFireAfterMoving) )
+        {
+          ArrayList<XYCoord> locations = Utils.findTargetsInRange(gameMap, unit.CO, move, wpn);
+          targetLocs.addAll(locations);
+        }
+      } // ~Weapon loop
+    }
+    return targetLocs;
+  }
 }
