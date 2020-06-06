@@ -137,6 +137,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
    */
   private void handleFreeTileSelect(InputHandler.InputAction input)
   {
+    boolean shouldConsider = true;
     switch (input)
     {
       case UP:
@@ -189,25 +190,32 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case SELECT:
         // Pass the current cursor location to the GameInputHandler.
         myGameInputHandler.select(myGame.getCursorCoord());
+        shouldConsider = false;
         break;
       case BACK:
         myGameInputHandler.back();
+        shouldConsider = false;
         break;
       default:
         System.out.println("WARNING! MapController.handleFreeTileSelect() was given invalid input enum (" + input + ")");
     }
+    if( shouldConsider )
+      myGameInputHandler.consider(myGame.getCursorCoord());
   }
 
   /** Force the user to select one map tile from the InputStateHandler's selection. */
   private void handleConstrainedTileSelect(InputHandler.InputAction input)
   {
+    boolean shouldConsider = true;
     switch (input)
     {
       case SELECT:
         myGameInputHandler.select(myGame.getCursorCoord());
+        shouldConsider = false;
         break;
       case BACK:
         myGameInputHandler.back();
+        shouldConsider = false;
         break;
       case UP:
       case LEFT:
@@ -227,6 +235,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case SEEK: // Seek does nothing in this input state.
       default:
     }
+    if( shouldConsider )
+      myGameInputHandler.consider(myGame.getCursorCoord());
   }
 
   /**
@@ -235,6 +245,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   private void handlePathSelect(InputHandler.InputAction input)
   {
     boolean inMoveableSpace = myGame.getCursorLocation().isHighlightSet();
+    boolean shouldConsider = true;
 
     switch (input)
     {
@@ -245,7 +256,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorDown();
         }
-        myGameInputHandler.consider(myGame.getCursorCoord());
         break;
       case DOWN:
         myGame.moveCursorDown();
@@ -254,7 +264,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorUp();
         }
-        myGameInputHandler.consider(myGame.getCursorCoord());
         break;
       case LEFT:
         myGame.moveCursorLeft();
@@ -263,7 +272,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorRight();
         }
-        myGameInputHandler.consider(myGame.getCursorCoord());
         break;
       case RIGHT:
         myGame.moveCursorRight();
@@ -272,17 +280,20 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorLeft();
         }
-        myGameInputHandler.consider(myGame.getCursorCoord());
         break;
       case SELECT:
         myGameInputHandler.select(myGame.getCursorCoord());
+        shouldConsider = false;
         break;
       case BACK:
         myGameInputHandler.back();
+        shouldConsider = false;
         break;
       default:
         System.out.println("WARNING! MapController.handleMovementInput() was given invalid input enum (" + input + ")");
     }
+    if( shouldConsider )
+      myGameInputHandler.consider(myGame.getCursorCoord());
   }
 
   /**
@@ -303,19 +314,24 @@ public class MapController implements IController, GameInputHandler.StateChanged
       myGameInputHandler.back();
       return;
     }
+    boolean shouldConsider = true;
 
     switch (input)
     {
       case SELECT:
         // Pass the user's selection to the state handler.
         myGameInputHandler.select(myGameInputHandler.getMenuOptions()[myGameInputOptionSelector.getSelectionNormalized()]);
+        shouldConsider = false;
         break;
       case BACK:
         myGameInputHandler.back();
+        shouldConsider = false;
         break;
       default:
         currentMenu.handleMenuInput(input);
     }
+    if( shouldConsider )
+      myGameInputHandler.consider(myGame.getCursorCoord());
   }
 
   /**
