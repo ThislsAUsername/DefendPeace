@@ -55,7 +55,7 @@ public class UnitSpriteSet
     Sprite defaultSprite = sprites[AnimState.IDLE.ordinal()];
     // Use the IDLE action if it exists, otherwise we are going with a black rectangle.
     if( null == defaultSprite )
-      new Sprite(null, SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize);
+      defaultSprite = new Sprite(null, SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize);
     for( int action = 0; action < AnimState.values().length; ++action )
     {
       if( null == sprites[action] )
