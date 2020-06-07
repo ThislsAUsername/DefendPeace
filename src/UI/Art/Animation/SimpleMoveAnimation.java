@@ -3,6 +3,9 @@ package UI.Art.Animation;
 import java.awt.Graphics;
 import Engine.Path;
 import Engine.XYCoord;
+import UI.Art.SpriteArtist.SpriteLibrary;
+import UI.Art.SpriteArtist.UnitSpriteSet;
+import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import Units.Unit;
 
 public class SimpleMoveAnimation implements GameAnimation
@@ -12,13 +15,18 @@ public class SimpleMoveAnimation implements GameAnimation
   private final long maxTime = 250;
   private long endTime;
 
+  private final int tileSize;
   private final Unit actor;
+  UnitSpriteSet actorSpriteSet;
   private final Path path;
   private final double tilesPerMs;
+  private static int timePerFrame = 125;
 
-  public SimpleMoveAnimation(Unit actor, Path path)
+  public SimpleMoveAnimation(int tileSize, Unit actor, Path path)
   {
+    this.tileSize = tileSize;
     this.actor = actor;
+    actorSpriteSet = SpriteLibrary.getMapUnitSpriteSet(actor);
     this.path = path;
     startTime = System.currentTimeMillis();
     tilesPerMs = actor.model.movePower / (double) maxTime;
@@ -29,6 +37,16 @@ public class SimpleMoveAnimation implements GameAnimation
   public boolean animate(Graphics g)
   {
     long animTime = System.currentTimeMillis() - startTime;
+
+    // Figure out which way the actor is going and where he is.
+    AnimState actorAnimState = getAnimState();
+    XYCoord actorDrawCoord = getActorDrawCoord(animTime, tileSize);
+    boolean flip = actorAnimState == AnimState.MOVEWEST;
+
+    // Choose the sprite index and draw it.
+    int spriteIndex = (int)Math.floor(animTime / timePerFrame);
+    actorSpriteSet.drawUnit(g, actorAnimState, spriteIndex, actorDrawCoord.xCoord, actorDrawCoord.yCoord, flip );
+
     return animTime > endTime;
   }
 
@@ -38,16 +56,13 @@ public class SimpleMoveAnimation implements GameAnimation
     endTime = 0;
   }
 
-  @Override
   public Unit getActor()
   {
     return actor;
   }
 
-  @Override
-  public XYCoord getActorDrawCoord(int tileSize)
+  public XYCoord getActorDrawCoord(long animTime, int tileSize)
   {
-    final long animTime = System.currentTimeMillis() - startTime;
     final double tilesTraveled = animTime * tilesPerMs;
     final int prevTileIndex = Math.min((int) Math.floor(tilesTraveled), path.getPathLength() - 1);
     final int nextTileIndex = Math.min((int) Math.ceil (tilesTraveled), path.getPathLength() - 1);
@@ -64,7 +79,6 @@ public class SimpleMoveAnimation implements GameAnimation
     return new XYCoord( (int) (currX * tileSize), (int) (currY * tileSize) );
   }
 
-  @Override
   public AnimState getAnimState()
   {
     final long animTime = System.currentTimeMillis() - startTime;

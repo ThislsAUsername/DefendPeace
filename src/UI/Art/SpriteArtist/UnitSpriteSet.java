@@ -8,7 +8,6 @@ import java.util.function.Function;
 
 import CommandingOfficers.Commander;
 import UI.UIUtils;
-import UI.Art.Animation.GameAnimation.AnimState;
 import Units.Unit;
 
 public class UnitSpriteSet
@@ -16,6 +15,18 @@ public class UnitSpriteSet
   Sprite sprites[] = new Sprite[AnimState.values().length];
 
   public final int ANIM_FRAMES_PER_MARK = 3;
+
+  public static enum AnimState
+  {
+    IDLE
+    {
+      public String toString()
+      {
+        return ""; // To match the existing map image format
+      }
+    },
+    TIRED, MOVENORTH, MOVEEAST, MOVESOUTH, MOVEWEST, DIE
+  }
 
   /**
    * Fetch a sprite sheet for each animation state and colorize it

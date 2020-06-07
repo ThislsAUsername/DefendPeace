@@ -25,7 +25,6 @@ import UI.Art.Animation.NoAnimation;
 import UI.Art.Animation.NobunagaBattleAnimation;
 import UI.Art.Animation.ResupplyAnimation;
 import UI.Art.Animation.SimpleMoveAnimation;
-import UI.Art.Animation.GameAnimation.AnimState;
 import Units.Unit;
 
 public class SpriteMapView extends MapView
@@ -248,17 +247,7 @@ public class SpriteMapView extends MapView
 
     // Get a reference to the current action being built, if one exists.
     Unit currentActor = mapController.getContemplatedActor();
-    AnimState actorAnimState = AnimState.IDLE;
-    XYCoord actorDrawCoord = mapController.getContemplationCoord();
-    if( null != currentAnimation )
-    {
-      currentActor = currentAnimation.getActor();
-      actorAnimState = currentAnimation.getAnimState();
-      actorDrawCoord = currentAnimation.getActorDrawCoord(getTileSize());
-    }
-    else if( null != actorDrawCoord )
-      // Convert "real" game-model location to a draw-space location.
-      actorDrawCoord = new XYCoord(actorDrawCoord.xCoord * getTileSize(), actorDrawCoord.yCoord * getTileSize());
+    XYCoord actorCoord = mapController.getContemplationCoord();
     Path currentPath = mapController.getContemplatedMove();
     boolean isTargeting = mapController.isTargeting();
 
@@ -271,10 +260,8 @@ public class SpriteMapView extends MapView
     // Draw the currently-acting unit so it's on top of everything.
     if( null != currentActor )
     {
-      SpriteLibrary.getMapUnitSpriteSet(currentActor)
-      .drawUnit(mapGraphics, actorAnimState, fastAnimIndex,
-          actorDrawCoord.xCoord, actorDrawCoord.yCoord,
-          getFlipUnitFacing(currentActor.CO) );
+      unitArtist.drawUnit(mapGraphics, currentActor, actorCoord.xCoord, actorCoord.yCoord, fastAnimIndex);
+      unitArtist.drawUnitIcons(mapGraphics, currentActor, actorCoord.xCoord, actorCoord.yCoord, animIndex);
     }
 
     for( DamagePopup popup :
@@ -393,21 +380,21 @@ public class SpriteMapView extends MapView
   @Override // from MapView
   public GameAnimation buildBattleAnimation(BattleSummary summary)
   {
-    return new NobunagaBattleAnimation(summary.attacker, getTileSize(), summary.attacker.x, summary.attacker.y, summary.defender.x,
+    return new NobunagaBattleAnimation(getTileSize(), summary.attacker.x, summary.attacker.y, summary.defender.x,
         summary.defender.y);
   }
 
   @Override // from MapView
   public GameAnimation buildDemolitionAnimation( StrikeParams params, XYCoord target, int damage )
   {
-    return new NobunagaBattleAnimation(params.attacker.body, getTileSize(), params.attacker.x, params.attacker.y, target.xCoord, target.yCoord);
+    return new NobunagaBattleAnimation(getTileSize(), params.attacker.x, params.attacker.y, target.xCoord, target.yCoord);
   }
 
   @Override
   // from MapView
   public GameAnimation buildMoveAnimation(Unit unit, Path movePath)
   {
-    return new SimpleMoveAnimation(unit, movePath);
+    return new SimpleMoveAnimation(getTileSize(), unit, movePath);
   }
 
   @Override // from MapView
@@ -430,8 +417,6 @@ public class SpriteMapView extends MapView
     int drawY = (int) mapViewDrawY.get();
     int drawX = (int) mapViewDrawX.get();
     Unit currentActor = mapController.getContemplatedActor();
-    if( null != currentAnimation )
-      currentActor = currentAnimation.getActor();
     for( int y = drawY - 1; y < drawY + mapTilesToDrawY + 2; ++y )
     {
       for( int x = drawX - 1; x < drawX + mapTilesToDrawX + 2; ++x )
@@ -464,8 +449,6 @@ public class SpriteMapView extends MapView
   public void drawUnitIcons(Graphics g, GameMap gameMap)
   {
     Unit currentActor = mapController.getContemplatedActor();
-    if( null != currentAnimation )
-      currentActor = currentAnimation.getActor();
     for( int y = 0; y < gameMap.mapHeight; ++y )
     {
       for( int x = 0; x < gameMap.mapWidth; ++x )

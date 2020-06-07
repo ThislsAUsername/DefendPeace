@@ -3,7 +3,7 @@ package UI.Art.SpriteArtist;
 import java.awt.Graphics;
 
 import Engine.GameInstance;
-import UI.Art.Animation.GameAnimation.AnimState;
+import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import Units.Unit;
 
 public class UnitArtist

@@ -3,8 +3,6 @@ package UI.Art.Animation;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import Units.Unit;
-
 public class NobunagaBattleAnimation implements GameAnimation
 {
   long startTime = 0;
@@ -12,15 +10,13 @@ public class NobunagaBattleAnimation implements GameAnimation
   private long endTime = 600;
   private final int tileSize;
 
-  private final Unit actor;
   int attackerX = -1;
   int attackerY = -1;
   int defenderX = -1;
   int defenderY = -1;
 
-  public NobunagaBattleAnimation(Unit actor, int tileSize, int fromX, int fromY, int toX, int toY)
+  public NobunagaBattleAnimation(int tileSize, int fromX, int fromY, int toX, int toY)
   {
-    this.actor = actor;
     attackerX = fromX;
     attackerY = fromY;
     defenderX = toX;
@@ -69,10 +65,5 @@ public class NobunagaBattleAnimation implements GameAnimation
   public void cancel()
   {
     endTime = 0;
-  }
-
-  public Unit getActor()
-  {
-    return actor;
   }
 }

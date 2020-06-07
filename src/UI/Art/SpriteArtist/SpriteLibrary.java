@@ -17,7 +17,7 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import UI.UIUtils;
 import UI.UIUtils.Faction;
-import UI.Art.Animation.GameAnimation.AnimState;
+import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import Units.Unit;
 import Units.UnitModel;
 
