@@ -1,14 +1,13 @@
 package Engine.GameInput;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Stack;
 
 import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.OptionSelector;
 import Engine.XYCoord;
-import Engine.Combat.DamagePopup;
+import Engine.GameInput.GameInputState.StateData;
 import Terrain.GameMap;
 import Units.Unit;
 
@@ -17,7 +16,7 @@ import Units.Unit;
  ************************************************************/
 public class GameInputHandler
 {
-  private StateData myStateData = null;
+  public StateData myStateData = null;
   private Stack<GameInputState<?>> myStateStack = null;
   private StateChangedCallback myCallback = null;
 
@@ -67,6 +66,16 @@ public class GameInputHandler
     return newCurrentState;
   }
 
+  /**
+   * Tentatively select, i.e. hover over a new option
+   * @param option - The chosen menu option, from among those provided by OptionSet.getMenuOptions().
+   */
+  public <T> void consider(T option)
+  {
+    @SuppressWarnings("unchecked")
+    GameInputState<T> current = (GameInputState<T>) peekCurrentState();
+    current.consider(option);
+  }
   /**
    * Choose the passed-in option for the current state, triggering a transition to the
    * next state. If no transition is possible, the state will not change.
@@ -155,11 +164,6 @@ public class GameInputHandler
     return peekCurrentState().getOptions().getCoordinateOptions();
   }
 
-  public Collection<DamagePopup> getDamagePopups(GameMap map, XYCoord target)
-  {
-    return peekCurrentState().getDamagePopups(map, target);
-  }
-
   public XYCoord getUnitCoord()
   {
     return myStateData.unitCoord;
@@ -174,6 +178,11 @@ public class GameInputHandler
   {
     InputType action = getInputType();
     return action == InputType.LEAVE_MAP;
+  }
+
+  public boolean isTargeting()
+  {
+    return peekCurrentState().isTargeting();
   }
 
   /************************************************************

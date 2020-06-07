@@ -123,6 +123,10 @@ public class GameInstance implements Serializable
   {
     return cursorY;
   }
+  public XYCoord getCursorCoord()
+  {
+    return new XYCoord(cursorX, cursorY);
+  }
   public Location getCursorLocation()
   {
     return gameMap.getLocation(cursorX, cursorY);

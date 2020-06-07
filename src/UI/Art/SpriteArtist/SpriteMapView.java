@@ -263,9 +263,7 @@ public class SpriteMapView extends MapView
       unitArtist.drawUnitIcons(mapGraphics, currentActor, actorCoord.xCoord, actorCoord.yCoord, animIndex);
     }
 
-    for( DamagePopup popup :
-                            mapController.getDamagePopups(getDrawableMap(myGame),
-                                                          myGame.getCursorLocation().getCoordinates()) )
+    for( DamagePopup popup : mapController.getDamagePopups() )
       drawDamagePreview(mapGraphics, popup);
 
     if( currentAnimation != null )
