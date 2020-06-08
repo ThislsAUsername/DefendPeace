@@ -47,7 +47,8 @@ public class SimpleMoveAnimation implements GameAnimation
     int spriteIndex = (int)Math.floor(animTime / timePerFrame);
     actorSpriteSet.drawUnit(g, actorAnimState, spriteIndex, actorDrawCoord.xCoord, actorDrawCoord.yCoord, flip );
 
-    return animTime > endTime;
+    actor.isDrawable = animTime > endTime;
+    return actor.isDrawable; // Tell the map artist not to draw this unit until it's done moving.
   }
 
   @Override

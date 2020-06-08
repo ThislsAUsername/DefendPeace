@@ -431,7 +431,7 @@ public class SpriteMapView extends MapView
           {
             Unit resident = gameMap.getLocation(x, y).getResident();
             // If an action is being considered, draw the active unit later, not now.
-            if( resident != currentActor )
+            if( resident != currentActor && resident.isDrawable )
             {
               unitArtist.drawUnit(g, resident, resident.x, resident.y, animIndex);
             }
@@ -457,7 +457,7 @@ public class SpriteMapView extends MapView
         {
           Unit resident = gameMap.getLocation(x, y).getResident();
           // If an action is being considered, draw the active unit later, not now.
-          if( resident != currentActor )
+          if( resident != currentActor && resident.isDrawable )
           {
             unitArtist.drawUnitIcons(g, resident, resident.x, resident.y, animIndex);
           }

@@ -32,6 +32,8 @@ public class Unit implements Serializable
   public Commander CO;
   public boolean isTurnOver;
   public boolean isStunned;
+  public boolean isDrawable;
+
   /**
    * HP is a value, typically in range [1-10], that determines the current actual strength of a unit.
    * A unit at 0 HP is dead.
@@ -51,6 +53,8 @@ public class Unit implements Serializable
     health = healthFromHP(model.maxHP);
     captureProgress = 0;
     captureTarget = null;
+    isDrawable = true;
+
     if( model.holdingCapacity > 0 )
       heldUnits = new Vector<Unit>(model.holdingCapacity);
   }
