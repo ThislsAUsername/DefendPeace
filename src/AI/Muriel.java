@@ -248,6 +248,7 @@ public class Muriel implements AIController
             for( GameAction action : set.getGameActions() )
             {
               Unit other = gameMap.getLocation(action.getTargetLocation()).getResident();
+              if( null == other ) continue; // Don't bother with terrain.
               if( shouldAttack(unit, other, gameMap) )
               {
                 log(String.format("  May as well try to shoot %s since I'm here anyway", other));
