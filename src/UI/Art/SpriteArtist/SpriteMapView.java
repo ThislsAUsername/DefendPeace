@@ -24,7 +24,7 @@ import UI.Art.Animation.GameAnimation;
 import UI.Art.Animation.NoAnimation;
 import UI.Art.Animation.NobunagaBattleAnimation;
 import UI.Art.Animation.ResupplyAnimation;
-import UI.Art.Animation.SimpleMoveAnimation;
+import UI.Art.Animation.MoveAnimation;
 import Units.Unit;
 
 public class SpriteMapView extends MapView
@@ -394,7 +394,7 @@ public class SpriteMapView extends MapView
   // from MapView
   public GameAnimation buildMoveAnimation(Unit unit, Path movePath)
   {
-    return new SimpleMoveAnimation(getTileSize(), unit, movePath);
+    return new MoveAnimation(getTileSize(), unit, movePath);
   }
 
   @Override // from MapView

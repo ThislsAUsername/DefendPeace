@@ -8,7 +8,7 @@ import UI.Art.SpriteArtist.UnitSpriteSet;
 import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import Units.Unit;
 
-public class SimpleMoveAnimation implements GameAnimation
+public class MoveAnimation implements GameAnimation
 {
   long startTime = 0;
 
@@ -22,7 +22,7 @@ public class SimpleMoveAnimation implements GameAnimation
   private final double tilesPerMs;
   private static int timePerFrame = 125;
 
-  public SimpleMoveAnimation(int tileSize, Unit actor, Path path)
+  public MoveAnimation(int tileSize, Unit actor, Path path)
   {
     this.tileSize = tileSize;
     this.actor = actor;
