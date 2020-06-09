@@ -258,14 +258,14 @@ public class SpriteMapView extends MapView
     }
 
     // Draw the currently-acting unit so it's on top of everything.
-    if( null != currentActor )
+    if( null != currentActor && null == currentAnimation )
     {
       unitArtist.drawUnit(mapGraphics, currentActor, actorCoord.xCoord, actorCoord.yCoord, fastAnimIndex);
       unitArtist.drawUnitIcons(mapGraphics, currentActor, actorCoord.xCoord, actorCoord.yCoord, animIndex);
-    }
 
-    for( DamagePopup popup : mapController.getDamagePopups() )
-      drawDamagePreview(mapGraphics, popup);
+      for( DamagePopup popup : mapController.getDamagePopups() )
+        drawDamagePreview(mapGraphics, popup);
+    }
 
     if( currentAnimation != null )
     {
@@ -378,14 +378,14 @@ public class SpriteMapView extends MapView
   @Override // from MapView
   public GameAnimation buildBattleAnimation(BattleSummary summary)
   {
-    return new NobunagaBattleAnimation(getTileSize(), summary.attacker.x, summary.attacker.y, summary.defender.x,
+    return new NobunagaBattleAnimation(getTileSize(), summary.attacker, summary.attacker.x, summary.attacker.y, summary.defender.x,
         summary.defender.y);
   }
 
   @Override // from MapView
   public GameAnimation buildDemolitionAnimation( StrikeParams params, XYCoord target, int damage )
   {
-    return new NobunagaBattleAnimation(getTileSize(), params.attacker.x, params.attacker.y, target.xCoord, target.yCoord);
+    return new NobunagaBattleAnimation(getTileSize(), params.attacker.body, params.attacker.x, params.attacker.y, target.xCoord, target.yCoord);
   }
 
   @Override
@@ -429,7 +429,7 @@ public class SpriteMapView extends MapView
           {
             Unit resident = gameMap.getLocation(x, y).getResident();
             // If an action is being considered, draw the active unit later, not now.
-            if( resident != currentActor && resident.isDrawable )
+            if( resident != currentActor )
             {
               unitArtist.drawUnit(g, resident, resident.x, resident.y, animIndex);
             }
@@ -455,7 +455,7 @@ public class SpriteMapView extends MapView
         {
           Unit resident = gameMap.getLocation(x, y).getResident();
           // If an action is being considered, draw the active unit later, not now.
-          if( resident != currentActor && resident.isDrawable )
+          if( resident != currentActor )
           {
             unitArtist.drawUnitIcons(g, resident, resident.x, resident.y, animIndex);
           }

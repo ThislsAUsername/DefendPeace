@@ -3,6 +3,10 @@ package UI.Art.Animation;
 import java.awt.Color;
 import java.awt.Graphics;
 
+import UI.Art.SpriteArtist.SpriteLibrary;
+import UI.Art.SpriteArtist.UnitSpriteSet;
+import Units.Unit;
+
 public class NobunagaBattleAnimation implements GameAnimation
 {
   long startTime = 0;
@@ -15,8 +19,11 @@ public class NobunagaBattleAnimation implements GameAnimation
   int defenderX = -1;
   int defenderY = -1;
 
-  public NobunagaBattleAnimation(int tileSize, int fromX, int fromY, int toX, int toY)
+  UnitSpriteSet actorSpriteSet;
+
+  public NobunagaBattleAnimation(int tileSize, Unit actor, int fromX, int fromY, int toX, int toY)
   {
+    actorSpriteSet = SpriteLibrary.getMapUnitSpriteSet(actor);
     attackerX = fromX;
     attackerY = fromY;
     defenderX = toX;
@@ -29,6 +36,11 @@ public class NobunagaBattleAnimation implements GameAnimation
   public boolean animate(Graphics g)
   {
     long animTime = System.currentTimeMillis() - startTime;
+
+    // Draw the attacker in position.
+    int spriteIndex = 0; // No need to be fancy.
+    boolean flip = attackerX > defenderX;
+    actorSpriteSet.drawUnit(g, UnitSpriteSet.AnimState.IDLE, spriteIndex, attackerX * tileSize, attackerY * tileSize, flip );
 
     if( animTime > 500 )
     {

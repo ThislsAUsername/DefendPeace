@@ -47,8 +47,7 @@ public class MoveAnimation implements GameAnimation
     int spriteIndex = (int)Math.floor(animTime / timePerFrame);
     actorSpriteSet.drawUnit(g, actorAnimState, spriteIndex, actorDrawCoord.xCoord, actorDrawCoord.yCoord, flip );
 
-    actor.isDrawable = animTime > endTime;
-    return actor.isDrawable; // Tell the map artist not to draw this unit until it's done moving.
+    return animTime > endTime;
   }
 
   @Override

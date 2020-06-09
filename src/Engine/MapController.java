@@ -24,6 +24,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   // A menu to display options to the player.
   private InGameMenu<? extends Object> currentMenu;
+  private Unit currentActor = null;
 
   // A GameInputHandler to convert inputs into player actions, and
   // a reference to the current GameInputState's OptionSelector.
@@ -381,7 +382,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           executeGameAction(myGameInputHandler.getReadyAction());
         }
-        myGameInputHandler.reset();
         break;
       case PATH_SELECT: // no special handling
         break;
@@ -429,9 +429,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     if( null != myGameInputHandler )
     {
-      // If we are changing input modes, we
-      // know we don't have a valid action right now.
-      myGameInputHandler.reset();
+      // If we are changing input modes, we can't be down in a menu.
       currentMenu = null;
     }
   }
@@ -450,6 +448,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       if( events.size() > 0 )
       {
         actionOK = true; // Invalid actions don't produce events.
+        currentActor = myGameInputHandler.getActingUnit();
         // Send the events to the animator. They will be applied/executed in animationEnded().
         changeInputMode(InputMode.ANIMATION);
         myView.animate(events);
@@ -490,6 +489,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
     // If we are done animating the last action, check to see if the game is over.
     if( animEventQueueIsEmpty )
     {
+      currentActor = null;
+
       // Count the number of COs that are left.
       int activeNum = 0;
       for( int i = 0; i < myGame.commanders.length; ++i )
@@ -544,6 +545,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           // Back to normal input mode.
           changeInputMode(InputMode.INPUT);
+          myGameInputHandler.reset();
         }
       }
     }
@@ -571,7 +573,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   public Unit getContemplatedActor()
   {
-    return myGameInputHandler.getActingUnit();
+    return (null != myGameInputHandler.getActingUnit()) ? myGameInputHandler.getActingUnit() : currentActor;
   }
 
   public XYCoord getContemplationCoord()
