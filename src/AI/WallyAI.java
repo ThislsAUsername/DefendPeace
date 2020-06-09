@@ -257,6 +257,7 @@ public class WallyAI implements AIController
             {
               Location loc = gameMap.getLocation(action.getTargetLocation());
               Unit target = loc.getResident();
+              if( null == target ) continue; // Ignore terrain
               double damage = valueUnit(target, loc, false) * Math.min(target.getHP(), CombatEngine.simulateBattleResults(unit, target, gameMap, unit.x, unit.y).defenderHPLoss);
               if( damage > bestDamage )
               {
