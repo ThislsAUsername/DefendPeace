@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Queue;
 
 import Engine.GameInstance;
@@ -381,7 +382,9 @@ public class SpriteMapView extends MapView
     // Only bother iterating over the visible map space (plus a 2-square border).
     int drawY = (int) mapViewDrawY.get();
     int drawX = (int) mapViewDrawX.get();
-    Unit currentActor = mapController.getContemplatedActor();
+    ArrayList<Unit> actors = currentAnimation.getActors();
+    if( null != mapController.getContemplatedActor() )
+      actors.add(mapController.getContemplatedActor());
     for( int y = drawY - 1; y < drawY + mapTilesToDrawY + 2; ++y )
     {
       for( int x = drawX - 1; x < drawX + mapTilesToDrawX + 2; ++x )
@@ -396,7 +399,7 @@ public class SpriteMapView extends MapView
           {
             Unit resident = gameMap.getLocation(x, y).getResident();
             // If an action is being considered, draw the active unit later, not now.
-            if( resident != currentActor )
+            if( !actors.contains(resident) )
             {
               unitArtist.drawUnit(g, resident, resident.x, resident.y, animIndex);
             }
@@ -413,7 +416,9 @@ public class SpriteMapView extends MapView
    */
   public void drawUnitIcons(Graphics g, GameMap gameMap)
   {
-    Unit currentActor = mapController.getContemplatedActor();
+    ArrayList<Unit> actors = currentAnimation.getActors();
+    if( null != mapController.getContemplatedActor() )
+      actors.add(mapController.getContemplatedActor());
     for( int y = 0; y < gameMap.mapHeight; ++y )
     {
       for( int x = 0; x < gameMap.mapWidth; ++x )
@@ -422,7 +427,7 @@ public class SpriteMapView extends MapView
         {
           Unit resident = gameMap.getLocation(x, y).getResident();
           // If an action is being considered, draw the active unit later, not now.
-          if( resident != currentActor )
+          if( !actors.contains(resident) )
           {
             unitArtist.drawUnitIcons(g, resident, resident.x, resident.y, animIndex);
           }

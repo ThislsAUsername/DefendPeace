@@ -2,6 +2,7 @@ package UI.Art.Animation;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.ArrayList;
 
 import UI.Art.SpriteArtist.SpriteLibrary;
 import UI.Art.SpriteArtist.UnitSpriteSet;
@@ -78,5 +79,13 @@ public class NobunagaBattleAnimation implements GameAnimation
   public void cancel()
   {
     endTime = 0;
+  }
+
+  @Override
+  public ArrayList<Unit> getActors()
+  {
+    ArrayList<Unit> out = new ArrayList<Unit>();
+    out.add(actor);
+    return out;
   }
 }

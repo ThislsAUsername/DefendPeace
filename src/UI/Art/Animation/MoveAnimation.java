@@ -1,6 +1,8 @@
 package UI.Art.Animation;
 
 import java.awt.Graphics;
+import java.util.ArrayList;
+
 import Engine.Path;
 import Engine.XYCoord;
 import UI.Art.SpriteArtist.SpriteLibrary;
@@ -55,11 +57,6 @@ public class MoveAnimation implements GameAnimation
     endTime = 0;
   }
 
-  public Unit getActor()
-  {
-    return actor;
-  }
-
   public XYCoord getActorDrawCoord(long animTime, int tileSize)
   {
     final double tilesTraveled = animTime * tilesPerMs;
@@ -102,5 +99,13 @@ public class MoveAnimation implements GameAnimation
     }
 
     return AnimState.IDLE;
+  }
+
+  @Override
+  public ArrayList<Unit> getActors()
+  {
+    ArrayList<Unit> out = new ArrayList<Unit>();
+    out.add(actor);
+    return out;
   }
 }
