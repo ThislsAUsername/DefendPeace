@@ -44,12 +44,10 @@ public class SpriteMapView extends MapView
 
   // Variables for controlling map animations.
   protected Queue<GameEvent> eventsToAnimate = new GameEventQueue();
-  private int animIndex = 0;
-  private final int animIndexUpdateInterval = 250;
+  private static final int animIndexUpdateInterval = 250;
 
   // Separate animation speed for "active" things (e.g. units moving).
-  private int fastAnimIndex = 0;
-  private final int fastAnimIndexUpdateInterval = 125;
+  private static final int fastAnimIndexUpdateInterval = 125;
 
   /** Width of the visible space in pixels. */
   private int mapViewWidth;
@@ -200,16 +198,17 @@ public class SpriteMapView extends MapView
     mapArtist.drawBaseTerrain(mapGraphics, gameMap, drawX, drawY, mapViewWidth, mapViewHeight);
 
     // Update the central sprite indices so animations happen in sync.
-    updateAnimationIndices();
+    int animIndex = getAnimIndex();
+    int fastAnimIndex = getFastAnimIndex();
 
     // Draw units, buildings, trees, etc.
-    drawUnitsAndMapObjects(mapGraphics, gameMap);
+    drawUnitsAndMapObjects(mapGraphics, gameMap, animIndex);
 
     // Apply any relevant map highlight.
     mapArtist.drawHighlights(mapGraphics);
 
     // Draw Unit icons on top of everything, to make sure they are seen clearly.
-    drawUnitIcons(mapGraphics, gameMap);
+    drawUnitIcons(mapGraphics, gameMap, animIndex);
 
     // Get a reference to the current action being built, if one exists.
     Unit currentActor = mapController.getContemplatedActor();
@@ -374,7 +373,7 @@ public class SpriteMapView extends MapView
    * NOTE: Does not draw the currently-active unit, if one exists; that will
    * be drawn later so it is more visible, and so it can be animated separately.
    */
-  private void drawUnitsAndMapObjects(Graphics g, GameMap gameMap)
+  private void drawUnitsAndMapObjects(Graphics g, GameMap gameMap, int animIndex)
   {
     // Draw terrain objects and units in order so they overlap correctly.
     // Only bother iterating over the visible map space (plus a 2-square border).
@@ -412,7 +411,7 @@ public class SpriteMapView extends MapView
    * NOTE: Does not draw the unit icon for the currently-active unit, if
    * one is selected; this must be done separately.
    */
-  public void drawUnitIcons(Graphics g, GameMap gameMap)
+  public void drawUnitIcons(Graphics g, GameMap gameMap, int animIndex)
   {
     ArrayList<Unit> actors = currentAnimation.getActors();
     if( null != mapController.getContemplatedActor() )
@@ -451,14 +450,19 @@ public class SpriteMapView extends MapView
   }
 
   /**
-   * Updates the index which determines the frame that is drawn for map animations.
+   * Fetch the index which determines the frame that is drawn for map animations.
    */
-  private void updateAnimationIndices()
+  public static int getAnimIndex()
   {
     // Calculate the sprite index to use.
     long thisTime = System.currentTimeMillis();
-    animIndex = (int) (thisTime / animIndexUpdateInterval);
-    fastAnimIndex = (int) (thisTime / fastAnimIndexUpdateInterval);
+    return (int) (thisTime / animIndexUpdateInterval);
+  }
+  public static int getFastAnimIndex()
+  {
+    // Calculate the sprite index to use.
+    long thisTime = System.currentTimeMillis();
+    return (int) (thisTime / fastAnimIndexUpdateInterval);
   }
 
   /**
