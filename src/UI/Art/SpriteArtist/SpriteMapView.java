@@ -4,10 +4,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
 import java.util.Queue;
 
-import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.XYCoord;
@@ -29,8 +27,6 @@ import Units.Unit;
 
 public class SpriteMapView extends MapView
 {
-  private HashMap<Commander, Boolean> unitFacings;
-
   private GameInstance myGame;
 
   // Local map buffer to simplify drawing for sub-artists. Game assets are drawn
@@ -82,13 +78,6 @@ public class SpriteMapView extends MapView
     menuArtist = new MenuArtist(game, this);
 
     myGame = game;
-    unitFacings = new HashMap<Commander, Boolean>();
-
-    // Locally store which direction each CO should be facing.
-    for( CommandingOfficers.Commander co : game.commanders )
-    {
-      setCommanderUnitFacing(co, game.gameMap);
-    }
 
     // Start the view at the top-left by default.
     mapViewDrawX = new SlidingValue(0);
@@ -127,28 +116,6 @@ public class SpriteMapView extends MapView
   public int getTileSize()
   {
     return SpriteLibrary.baseSpriteSize;
-  }
-
-  /** Returns whether the commander's map units should be flipped horizontally when drawn. */
-  public boolean getFlipUnitFacing(Commander co)
-  {
-    boolean flip = false;
-    if( unitFacings.containsKey(co) ) // Make sure we don't try to assign null to a boolean.
-    {
-      flip = unitFacings.get(co);
-    }
-    return flip;
-  }
-
-  /**
-   * Set the facing direction of the CO based on the location of the HQ. If the
-   * HQ is on the left side of the map, the units should face right, and vice versa.
-   * @param co
-   * @param map
-   */
-  private void setCommanderUnitFacing(CommandingOfficers.Commander co, GameMap map)
-  {
-    unitFacings.put(co, co.HQLocation.xCoord >= map.mapWidth / 2);
   }
 
   @Override
@@ -406,7 +373,7 @@ public class SpriteMapView extends MapView
    * to ensure that they are layered correctly (near things are drawn on top of far
    * things, and units are drawn on top of terrain objects).
    * NOTE: Does not draw the currently-active unit, if one exists; that will
-   * be drawn later so it is more visible, and so it can be animated.
+   * be drawn later so it is more visible, and so it can be animated separately.
    */
   private void drawUnitsAndMapObjects(Graphics g, GameMap gameMap)
   {

@@ -41,11 +41,10 @@ public class MoveAnimation implements GameAnimation
     // Figure out which way the actor is going and where he is.
     AnimState actorAnimState = getAnimState();
     XYCoord actorDrawCoord = getActorDrawCoord(animTime, tileSize);
-    boolean flip = actorAnimState == AnimState.MOVEWEST;
 
     // Choose the sprite index and draw it.
     int spriteIndex = (int)Math.floor(animTime / timePerFrame);
-    actorSpriteSet.drawUnit(g, actorAnimState, spriteIndex, actorDrawCoord.xCoord, actorDrawCoord.yCoord, flip );
+    actorSpriteSet.drawUnit(g, actor, actorAnimState, spriteIndex, actorDrawCoord.xCoord, actorDrawCoord.yCoord );
 
     return animTime > endTime;
   }

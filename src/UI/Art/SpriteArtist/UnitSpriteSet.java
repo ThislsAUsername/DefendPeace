@@ -118,8 +118,12 @@ public class UnitSpriteSet
     return sprites[state.ordinal()].getFrame(imageIndex);
   }
 
-  public void drawUnit(Graphics g, AnimState state, int imageIndex, int drawX, int drawY, boolean flipImage)
+  public void drawUnit(Graphics g, Unit u, AnimState state, int imageIndex, int drawX, int drawY)
   {
+    // Set the facing direction of the CO based on the location of the HQ. If the
+    // HQ is on the left side of the map, the units should face right, and vice versa.
+    boolean flipImage = u.CO.HQLocation.xCoord >= u.CO.myView.mapWidth / 2;
+
     BufferedImage frame = getUnitImage(state, imageIndex);
     int shiftX =(SpriteLibrary.baseSpriteSize - frame.getWidth())/2; // center X
     int shiftY = SpriteLibrary.baseSpriteSize - frame.getHeight(); // bottom-justify Y

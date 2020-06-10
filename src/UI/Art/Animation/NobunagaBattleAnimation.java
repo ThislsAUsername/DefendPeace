@@ -19,10 +19,12 @@ public class NobunagaBattleAnimation implements GameAnimation
   int defenderX = -1;
   int defenderY = -1;
 
+  Unit actor;
   UnitSpriteSet actorSpriteSet;
 
   public NobunagaBattleAnimation(int tileSize, Unit actor, int fromX, int fromY, int toX, int toY)
   {
+    this.actor = actor;
     actorSpriteSet = SpriteLibrary.getMapUnitSpriteSet(actor);
     attackerX = fromX;
     attackerY = fromY;
@@ -39,8 +41,7 @@ public class NobunagaBattleAnimation implements GameAnimation
 
     // Draw the attacker in position.
     int spriteIndex = 0; // No need to be fancy.
-    boolean flip = attackerX > defenderX;
-    actorSpriteSet.drawUnit(g, UnitSpriteSet.AnimState.IDLE, spriteIndex, attackerX * tileSize, attackerY * tileSize, flip );
+    actorSpriteSet.drawUnit(g, actor, UnitSpriteSet.AnimState.IDLE, spriteIndex, attackerX * tileSize, attackerY * tileSize );
 
     if( animTime > 500 )
     {
