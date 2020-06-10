@@ -45,12 +45,10 @@ public class SpriteMapView extends MapView
   // Variables for controlling map animations.
   protected Queue<GameEvent> eventsToAnimate = new GameEventQueue();
   private int animIndex = 0;
-  private long animIndexUpdateTime = 0;
   private final int animIndexUpdateInterval = 250;
 
   // Separate animation speed for "active" things (e.g. units moving).
   private int fastAnimIndex = 0;
-  private long fastAnimIndexUpdateTime = 0;
   private final int fastAnimIndexUpdateInterval = 125;
 
   /** Width of the visible space in pixels. */
@@ -459,22 +457,8 @@ public class SpriteMapView extends MapView
   {
     // Calculate the sprite index to use.
     long thisTime = System.currentTimeMillis();
-    long animTimeDiff = thisTime - animIndexUpdateTime;
-    long fastAnimTimeDiff = thisTime - fastAnimIndexUpdateTime;
-
-    // If it's time to update the sprite index... update the sprite index.
-    if( animTimeDiff > animIndexUpdateInterval )
-    {
-      animIndex++;
-      animIndexUpdateTime = thisTime;
-    }
-
-    // If it's time to update the fast sprite index... you know what to do.
-    if( fastAnimTimeDiff > fastAnimIndexUpdateInterval )
-    {
-      fastAnimIndex++;
-      fastAnimIndexUpdateTime = thisTime;
-    }
+    animIndex = (int) (thisTime / animIndexUpdateInterval);
+    fastAnimIndex = (int) (thisTime / fastAnimIndexUpdateInterval);
   }
 
   /**
