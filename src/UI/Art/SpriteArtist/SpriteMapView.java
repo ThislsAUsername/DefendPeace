@@ -19,6 +19,7 @@ import Terrain.GameMap;
 import UI.MapView;
 import UI.SlidingValue;
 import UI.UIUtils;
+import UI.Art.Animation.BaseUnitAnimation;
 import UI.Art.Animation.GameAnimation;
 import UI.Art.Animation.NoAnimation;
 import UI.Art.Animation.NobunagaBattleAnimation;
@@ -195,11 +196,23 @@ public class SpriteMapView extends MapView
     if( drawY < 0 )
       drawY = 0;
 
+    // Get a reference to the current action being built, if one exists.
+    Unit currentActor = mapController.getContemplatedActor();
+    XYCoord actorCoord = mapController.getContemplationCoord();
+    boolean notifyOnAnimEnd = true;
+    if( null != currentActor && null == currentAnimation ) // Draw the currently-acting unit so it's on top of everything.
+    {
+      currentAnimation = new BaseUnitAnimation(drawMultiplier, currentActor, actorCoord);
+      notifyOnAnimEnd = false;
+    }
+    Path currentPath = mapController.getContemplatedMove();
+    boolean isTargeting = mapController.isTargeting();
+
+    // Start actually drawing things
     mapArtist.drawBaseTerrain(mapGraphics, gameMap, drawX, drawY, mapViewWidth, mapViewHeight);
 
     // Update the central sprite indices so animations happen in sync.
     int animIndex = getAnimIndex();
-    int fastAnimIndex = getFastAnimIndex();
 
     // Draw units, buildings, trees, etc.
     drawUnitsAndMapObjects(mapGraphics, gameMap, animIndex);
@@ -210,27 +223,15 @@ public class SpriteMapView extends MapView
     // Draw Unit icons on top of everything, to make sure they are seen clearly.
     drawUnitIcons(mapGraphics, gameMap, animIndex);
 
-    // Get a reference to the current action being built, if one exists.
-    Unit currentActor = mapController.getContemplatedActor();
-    XYCoord actorCoord = mapController.getContemplationCoord();
-    Path currentPath = mapController.getContemplatedMove();
-    boolean isTargeting = mapController.isTargeting();
-
     // Draw the movement arrow if the user is contemplating a move/action (but not once the action commences).
-    if( null != currentPath && null == currentAnimation )
+    if( null != currentPath )
     {
       mapArtist.drawMovePath(mapGraphics, mapController.getContemplatedMove());
     }
 
-    // Draw the currently-acting unit so it's on top of everything.
-    if( null != currentActor && null == currentAnimation )
-    {
-      unitArtist.drawUnit(mapGraphics, currentActor, actorCoord.xCoord, actorCoord.yCoord, fastAnimIndex);
-      unitArtist.drawUnitIcons(mapGraphics, currentActor, actorCoord.xCoord, actorCoord.yCoord, animIndex);
-
+    if( null != currentActor )
       for( DamagePopup popup : mapController.getDamagePopups() )
         drawDamagePreview(mapGraphics, popup);
-    }
 
     if( currentAnimation != null )
     {
@@ -240,13 +241,14 @@ public class SpriteMapView extends MapView
         currentAnimation = null;
 
         // The animation is over; remove the corresponding event and notify the controller.
-        mapController.animationEnded(eventsToAnimate.poll(), eventsToAnimate.isEmpty());
+        if( notifyOnAnimEnd ) // ...but only if we're animating events
+          mapController.animationEnded(eventsToAnimate.poll(), eventsToAnimate.isEmpty());
 
         // Get the next event animation if one exists.
         loadNextEventAnimation();
       }
     }
-    else if( getCurrentGameMenu() == null )
+    if( getCurrentGameMenu() == null )
     {
       mapArtist.drawCursor(mapGraphics, currentActor, isTargeting, myGame.getCursorX(), myGame.getCursorY());
     }
@@ -379,9 +381,9 @@ public class SpriteMapView extends MapView
     // Only bother iterating over the visible map space (plus a 2-square border).
     int drawY = (int) mapViewDrawY.get();
     int drawX = (int) mapViewDrawX.get();
-    ArrayList<Unit> actors = currentAnimation.getActors();
-    if( null != mapController.getContemplatedActor() )
-      actors.add(mapController.getContemplatedActor());
+    ArrayList<Unit> actors = null;
+    if( null != currentAnimation )
+      actors = currentAnimation.getActors();
     for( int y = drawY - 1; y < drawY + mapTilesToDrawY + 2; ++y )
     {
       for( int x = drawX - 1; x < drawX + mapTilesToDrawX + 2; ++x )
@@ -396,7 +398,7 @@ public class SpriteMapView extends MapView
           {
             Unit resident = gameMap.getLocation(x, y).getResident();
             // If an action is being considered, draw the active unit later, not now.
-            if( !actors.contains(resident) )
+            if( null == actors || !actors.contains(resident) )
             {
               unitArtist.drawUnit(g, resident, resident.x, resident.y, animIndex);
             }
@@ -413,9 +415,9 @@ public class SpriteMapView extends MapView
    */
   public void drawUnitIcons(Graphics g, GameMap gameMap, int animIndex)
   {
-    ArrayList<Unit> actors = currentAnimation.getActors();
-    if( null != mapController.getContemplatedActor() )
-      actors.add(mapController.getContemplatedActor());
+    ArrayList<Unit> actors = null;
+    if( null != currentAnimation )
+      actors = currentAnimation.getActors();
     for( int y = 0; y < gameMap.mapHeight; ++y )
     {
       for( int x = 0; x < gameMap.mapWidth; ++x )
@@ -424,7 +426,7 @@ public class SpriteMapView extends MapView
         {
           Unit resident = gameMap.getLocation(x, y).getResident();
           // If an action is being considered, draw the active unit later, not now.
-          if( !actors.contains(resident) )
+          if( null == actors || !actors.contains(resident) )
           {
             unitArtist.drawUnitIcons(g, resident, resident.x, resident.y, animIndex);
           }
@@ -463,6 +465,12 @@ public class SpriteMapView extends MapView
     // Calculate the sprite index to use.
     long thisTime = System.currentTimeMillis();
     return (int) (thisTime / fastAnimIndexUpdateInterval);
+  }
+  public static boolean shouldFlip(Unit u)
+  {
+    // Set the facing direction of the CO based on the location of the HQ. If the
+    // HQ is on the left side of the map, the units should face right, and vice versa.
+    return u.CO.HQLocation.xCoord >= u.CO.myView.mapWidth / 2;
   }
 
   /**
