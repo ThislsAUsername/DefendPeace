@@ -49,6 +49,7 @@ public class SpriteMapView extends MapView
 
   // Separate animation speed for "active" things (e.g. units moving).
   private static final int fastAnimIndexUpdateInterval = 125;
+  private final BaseUnitAnimation contemplationAnim = new BaseUnitAnimation(0, null, null);
 
   /** Width of the visible space in pixels. */
   private int mapViewWidth;
@@ -202,7 +203,7 @@ public class SpriteMapView extends MapView
     boolean notifyOnAnimEnd = true;
     if( null != currentActor && null == currentAnimation ) // Draw the currently-acting unit so it's on top of everything.
     {
-      currentAnimation = new BaseUnitAnimation(drawMultiplier, currentActor, actorCoord);
+      currentAnimation = contemplationAnim.update(drawMultiplier, currentActor, actorCoord);
       notifyOnAnimEnd = false;
     }
     Path currentPath = mapController.getContemplatedMove();
