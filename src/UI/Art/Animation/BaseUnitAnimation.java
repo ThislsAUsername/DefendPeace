@@ -45,7 +45,7 @@ public class BaseUnitAnimation implements GameAnimation
       AnimState state = AnimState.MOVEEAST; // Draw the unit running in place
       if( SpriteMapView.shouldFlip(actor) )
         state = AnimState.MOVEWEST;
-      drawUnit(g, actor, state, actor.x, actor.y);
+      drawUnit(g, actor, state, actorCoord.xCoord, actorCoord.yCoord);
     }
 
     return animTime > duration;
