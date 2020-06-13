@@ -99,7 +99,7 @@ public class Unit implements Serializable
         // Resupply is free; whether or not we can repair, go ahead and add the resupply event.
         if( !isFullySupplied() )
         {
-          events.add(new ResupplyEvent(this));
+          events.add(new ResupplyEvent(this, this));
         }
       }
 
