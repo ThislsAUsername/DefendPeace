@@ -111,7 +111,9 @@ public class Sprite
 
   public BufferedImage getFrame(int index)
   {
-    return spriteImages.get(Math.abs(index) % spriteImages.size());
+    index = index % spriteImages.size();
+    if(index < 0) index += spriteImages.size();
+    return spriteImages.get(index);
   }
 
   /**
