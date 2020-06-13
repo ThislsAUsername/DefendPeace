@@ -317,7 +317,7 @@ public class SpriteLibrary
 
   private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
-    UnitSpriteSet spriteSet = new UnitSpriteSet( key.unitTypeKey, key.factionKey.name, UIUtils.getMapUnitColors(key.colorKey) );
+    UnitSpriteSet spriteSet = new UnitSpriteSet( key.unitTypeKey, key.factionKey, UIUtils.getMapUnitColors(key.colorKey) );
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
 

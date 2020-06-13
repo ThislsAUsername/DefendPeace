@@ -3,10 +3,12 @@ package UI.Art.SpriteArtist;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
 import UI.UIUtils;
+import UI.UIUtils.Faction;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -33,13 +35,14 @@ public class UnitSpriteSet
    * @param fileFinder Mapping from action type to file name
    * @param coColors What colors the end sprites should use
    */
-  public UnitSpriteSet(String unitType, String factionName, ColorPalette coColors)
+  public UnitSpriteSet(String unitType, Faction faction, ColorPalette coColors)
   {
     try
     {
       for( int action = 0; action < AnimState.values().length; ++action )
       {
-        String fileStr = getMapUnitSpriteFilename(unitType, factionName, AnimState.values()[action]);
+        String fileStr = getMapUnitSpriteFilename(unitType, faction, AnimState.values()[action]);
+
         BufferedImage spriteSheet = SpriteLibrary.loadSpriteSheetFile(fileStr);
         if( null != spriteSheet )
         {
@@ -105,12 +108,26 @@ public class UnitSpriteSet
 
   }
 
-  private static String getMapUnitSpriteFilename(String unitType, String faction, AnimState state)
+  /**
+   * Attempt to load the sprite for the given unit type, as owned by the specified faction.
+   * If the specified faction has no sprite for that unit, it will try to load it from that faction's
+   * basis instead. If the basis also has no sprite, then it will default to loading the "Thorn" version.
+   * @return The name of the file to load.
+   */
+  private static String getMapUnitSpriteFilename(String unitType, Faction faction, AnimState state)
   {
     final String format = "res/unit/faction/%s/%s_map%s.png";
-    String spriteFile = String.format( format, faction,
-                     UnitModel.standardizeID(unitType),
-                     UnitModel.standardizeID(state.toString()) );
+    String[] namesToTry = {faction.name, faction.basis, "Thorn"};
+
+    String spriteFile = "";
+    for( String name : namesToTry )
+    {
+      spriteFile = String.format( format, name,
+                       UnitModel.standardizeID(unitType),
+                       UnitModel.standardizeID(state.toString()) );
+      if (new File(spriteFile).canRead())
+        break;
+    }
     return spriteFile;
   }
 
