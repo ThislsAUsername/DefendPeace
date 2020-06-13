@@ -39,9 +39,12 @@ public class UnitSpriteSet
   {
     try
     {
+      // Create a filename string template to fetch all relevant animations.
+      String filenameTemplate = getMapUnitSpriteFilenameTemplate(unitType, faction);
       for( int action = 0; action < AnimState.values().length; ++action )
       {
-        String fileStr = getMapUnitSpriteFilename(unitType, faction, AnimState.values()[action]);
+        // Get the filename for this animation state.
+        String fileStr = String.format(filenameTemplate, UnitModel.standardizeID(AnimState.values()[action].toString()));
 
         BufferedImage spriteSheet = SpriteLibrary.loadSpriteSheetFile(fileStr);
         if( null != spriteSheet )
@@ -109,26 +112,29 @@ public class UnitSpriteSet
   }
 
   /**
-   * Attempt to load the sprite for the given unit type, as owned by the specified faction.
+   * Find the IDLE map-sprite file for the given unit type, as owned by the specified faction.
    * If the specified faction has no sprite for that unit, it will try to load it from that faction's
-   * basis instead. If the basis also has no sprite, then it will default to loading the "Thorn" version.
-   * @return The name of the file to load.
+   * basis instead. If the basis also has no sprite, then it will default to the "Thorn" version.
+   * The resulting template-string ensures that all sprites loaded are from the same faction set.
+   * @return A string with the given unit/faction names populated, and a template token for the unit state.
    */
-  private static String getMapUnitSpriteFilename(String unitType, Faction faction, AnimState state)
+  private String getMapUnitSpriteFilenameTemplate(String unitType, Faction faction)
   {
     final String format = "res/unit/faction/%s/%s_map%s.png";
-    String[] namesToTry = {faction.name, faction.basis, "Thorn"};
 
-    String spriteFile = "";
+    // Try the faction's proper name, the one it's based off of, then default to "Thorn" if all else fails.
+    String[] namesToTry = {faction.name, faction.basis};
+    String template = String.format( format, "Thorn", UnitModel.standardizeID(unitType), "" ); // Replace if we can.
     for( String name : namesToTry )
     {
-      spriteFile = String.format( format, name,
-                       UnitModel.standardizeID(unitType),
-                       UnitModel.standardizeID(state.toString()) );
-      if (new File(spriteFile).canRead())
+      String idleName = String.format( format, name, UnitModel.standardizeID(unitType), "" );
+      if (new File(idleName).canRead())
+      {
+        template = String.format( format, name, UnitModel.standardizeID(unitType), "%s" );
         break;
+      }
     }
-    return spriteFile;
+    return template;
   }
 
   private void colorize(Color[] oldColors, Color[] newColors)
