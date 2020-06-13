@@ -364,9 +364,9 @@ public class SpriteMapView extends MapView
   }
 
   @Override // from MapView
-  public GameAnimation buildResupplyAnimation(Unit unit)
+  public GameAnimation buildResupplyAnimation(Unit supplier, Unit unit)
   {
-    return new ResupplyAnimation(unit.x, unit.y);
+    return new ResupplyAnimation(getTileSize(), supplier, unit.x, unit.y);
   }
 
   /**
