@@ -9,7 +9,7 @@ import UI.Art.SpriteArtist.SpriteUIUtils;
 import UI.Art.SpriteArtist.UnitSpriteSet;
 import Units.Unit;
 
-public class ResupplyAnimation extends BaseUnitAnimation
+public class ResupplyAnimation extends BaseUnitActionAnimation
 {
   private boolean firstCall = true;
   private boolean isCancelled = false;

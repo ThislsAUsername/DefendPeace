@@ -6,7 +6,7 @@ import java.awt.Graphics;
 import UI.Art.SpriteArtist.UnitSpriteSet;
 import Units.Unit;
 
-public class NobunagaBattleAnimation extends BaseUnitAnimation
+public class NobunagaBattleAnimation extends BaseUnitActionAnimation
 {
   int attackerX = -1;
   int attackerY = -1;

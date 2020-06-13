@@ -7,7 +7,7 @@ import Engine.XYCoord;
 import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import Units.Unit;
 
-public class MoveAnimation extends BaseUnitAnimation
+public class MoveAnimation extends BaseUnitActionAnimation
 {
   private final long maxTime = 250;
 

@@ -19,7 +19,7 @@ import Terrain.GameMap;
 import UI.MapView;
 import UI.SlidingValue;
 import UI.UIUtils;
-import UI.Art.Animation.BaseUnitAnimation;
+import UI.Art.Animation.BaseUnitActionAnimation;
 import UI.Art.Animation.GameAnimation;
 import UI.Art.Animation.NoAnimation;
 import UI.Art.Animation.NobunagaBattleAnimation;
@@ -49,7 +49,7 @@ public class SpriteMapView extends MapView
 
   // Separate animation speed for "active" things (e.g. units moving).
   private static final int fastAnimIndexUpdateInterval = 125;
-  private final BaseUnitAnimation contemplationAnim = new BaseUnitAnimation(0, null, null);
+  private final BaseUnitActionAnimation contemplationAnim = new BaseUnitActionAnimation(0, null, null);
 
   /** Width of the visible space in pixels. */
   private int mapViewWidth;

@@ -10,7 +10,7 @@ import UI.Art.SpriteArtist.UnitSpriteSet;
 import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import Units.Unit;
 
-public class BaseUnitAnimation implements GameAnimation
+public class BaseUnitActionAnimation implements GameAnimation
 {
   protected long startTime = 0;
   protected long duration = -42;
@@ -21,11 +21,11 @@ public class BaseUnitAnimation implements GameAnimation
   private UnitSpriteSet actorSpriteSet;
   protected XYCoord actorCoord;
 
-  public BaseUnitAnimation(int tileSize, Unit actor, XYCoord actorCoord)
+  public BaseUnitActionAnimation(int tileSize, Unit actor, XYCoord actorCoord)
   {
     update(tileSize, actor, actorCoord);
   }
-  public BaseUnitAnimation update(int tileSize, Unit actor, XYCoord actorCoord)
+  public BaseUnitActionAnimation update(int tileSize, Unit actor, XYCoord actorCoord)
   {
     startTime = System.currentTimeMillis();
     this.tileSize = tileSize;
