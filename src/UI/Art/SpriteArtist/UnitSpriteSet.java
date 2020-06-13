@@ -4,11 +4,11 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.function.Function;
 
 import CommandingOfficers.Commander;
 import UI.UIUtils;
 import Units.Unit;
+import Units.UnitModel;
 
 public class UnitSpriteSet
 {
@@ -33,14 +33,14 @@ public class UnitSpriteSet
    * @param fileFinder Mapping from action type to file name
    * @param coColors What colors the end sprites should use
    */
-  public UnitSpriteSet(Function<AnimState, String> fileFinder, ColorPalette coColors)
+  public UnitSpriteSet(String unitType, String factionName, ColorPalette coColors)
   {
     try
     {
       for( int action = 0; action < AnimState.values().length; ++action )
       {
-        String filestr = fileFinder.apply(AnimState.values()[action]);
-        BufferedImage spriteSheet = SpriteLibrary.loadSpriteSheetFile(filestr);
+        String fileStr = getMapUnitSpriteFilename(unitType, factionName, AnimState.values()[action]);
+        BufferedImage spriteSheet = SpriteLibrary.loadSpriteSheetFile(fileStr);
         if( null != spriteSheet )
         {
           // Assume sub-sprites are squares that fill out the height of the source image
@@ -103,6 +103,15 @@ public class UnitSpriteSet
       }
     }
 
+  }
+
+  private static String getMapUnitSpriteFilename(String unitType, String faction, AnimState state)
+  {
+    final String format = "res/unit/faction/%s/%s_map%s.png";
+    String spriteFile = String.format( format, faction,
+                     UnitModel.standardizeID(unitType),
+                     UnitModel.standardizeID(state.toString()) );
+    return spriteFile;
   }
 
   private void colorize(Color[] oldColors, Color[] newColors)
