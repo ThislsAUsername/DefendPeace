@@ -14,10 +14,10 @@ public class BaseUnitAnimation implements GameAnimation
   protected long startTime = 0;
   protected long duration = -42;
 
-  public final int tileSize;
+  protected int tileSize;
 
-  protected final Unit actor;
-  protected final XYCoord actorCoord;
+  protected Unit actor;
+  protected XYCoord actorCoord;
 
   public BaseUnitAnimation(int tileSize, Unit actor, XYCoord actorCoord)
   {
@@ -25,6 +25,14 @@ public class BaseUnitAnimation implements GameAnimation
     this.tileSize = tileSize;
     this.actor = actor;
     this.actorCoord = actorCoord;
+  }
+  public BaseUnitAnimation update(int tileSize, Unit actor, XYCoord actorCoord)
+  {
+    startTime = System.currentTimeMillis();
+    this.tileSize = tileSize;
+    this.actor = actor;
+    this.actorCoord = actorCoord;
+    return this;
   }
 
   @Override
@@ -37,7 +45,7 @@ public class BaseUnitAnimation implements GameAnimation
       AnimState state = AnimState.MOVEEAST; // Draw the unit running in place
       if( SpriteMapView.shouldFlip(actor) )
         state = AnimState.MOVEWEST;
-      drawUnit(g, actor, state, actor.x, actor.y);
+      drawUnit(g, actor, state, actorCoord.xCoord, actorCoord.yCoord);
     }
 
     return animTime > duration;
