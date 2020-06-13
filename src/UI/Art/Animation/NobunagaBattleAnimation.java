@@ -2,37 +2,25 @@ package UI.Art.Animation;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.util.ArrayList;
 
-import UI.Art.SpriteArtist.SpriteLibrary;
 import UI.Art.SpriteArtist.UnitSpriteSet;
 import Units.Unit;
 
-public class NobunagaBattleAnimation implements GameAnimation
+public class NobunagaBattleAnimation extends BaseUnitAnimation
 {
-  long startTime = 0;
-
-  private long endTime = 600;
-  private final int tileSize;
-
   int attackerX = -1;
   int attackerY = -1;
   int defenderX = -1;
   int defenderY = -1;
 
-  Unit actor;
-  UnitSpriteSet actorSpriteSet;
-
   public NobunagaBattleAnimation(int tileSize, Unit actor, int fromX, int fromY, int toX, int toY)
   {
-    this.actor = actor;
-    actorSpriteSet = SpriteLibrary.getMapUnitSpriteSet(actor);
+    super(tileSize, actor, null);
     attackerX = fromX;
     attackerY = fromY;
     defenderX = toX;
     defenderY = toY;
-    startTime = System.currentTimeMillis();
-    this.tileSize = tileSize;
+    duration = 600;
   }
 
   @Override
@@ -41,8 +29,7 @@ public class NobunagaBattleAnimation implements GameAnimation
     long animTime = System.currentTimeMillis() - startTime;
 
     // Draw the attacker in position.
-    int spriteIndex = 0; // No need to be fancy.
-    actorSpriteSet.drawUnit(g, actor, UnitSpriteSet.AnimState.IDLE, spriteIndex, attackerX * tileSize, attackerY * tileSize );
+    drawUnit(g, actor, UnitSpriteSet.AnimState.IDLE, attackerX, attackerY );
 
     if( animTime > 500 )
     {
@@ -72,20 +59,6 @@ public class NobunagaBattleAnimation implements GameAnimation
       g.setColor(Color.WHITE);
       g.fillRect(attackerX * tileSize, attackerY * tileSize, tileSize, tileSize);
     }
-    return animTime > endTime;
-  }
-
-  @Override
-  public void cancel()
-  {
-    endTime = 0;
-  }
-
-  @Override
-  public ArrayList<Unit> getActors()
-  {
-    ArrayList<Unit> out = new ArrayList<Unit>();
-    out.add(actor);
-    return out;
+    return animTime > duration;
   }
 }

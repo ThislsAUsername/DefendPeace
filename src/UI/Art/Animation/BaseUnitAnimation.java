@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import Engine.XYCoord;
 import UI.Art.SpriteArtist.SpriteLibrary;
 import UI.Art.SpriteArtist.SpriteMapView;
+import UI.Art.SpriteArtist.UnitSpriteSet;
 import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import Units.Unit;
 
@@ -17,20 +18,20 @@ public class BaseUnitAnimation implements GameAnimation
   protected int tileSize;
 
   protected Unit actor;
+  private UnitSpriteSet actorSpriteSet;
   protected XYCoord actorCoord;
 
   public BaseUnitAnimation(int tileSize, Unit actor, XYCoord actorCoord)
   {
-    startTime = System.currentTimeMillis();
-    this.tileSize = tileSize;
-    this.actor = actor;
-    this.actorCoord = actorCoord;
+    update(tileSize, actor, actorCoord);
   }
   public BaseUnitAnimation update(int tileSize, Unit actor, XYCoord actorCoord)
   {
     startTime = System.currentTimeMillis();
     this.tileSize = tileSize;
     this.actor = actor;
+    if( null != actor )
+      this.actorSpriteSet = SpriteLibrary.getMapUnitSpriteSet(actor);
     this.actorCoord = actorCoord;
     return this;
   }
@@ -64,7 +65,8 @@ public class BaseUnitAnimation implements GameAnimation
    */
   public void drawUnit(Graphics g, Unit actor, AnimState state, int spriteIndex, double realX, double realY)
   {
-    SpriteLibrary.getMapUnitSpriteSet(actor).drawUnit(g, actor, state, spriteIndex, (int) realX * tileSize, (int) realY * tileSize );
+    if( null != actor && null != actorSpriteSet )
+      actorSpriteSet.drawUnit(g, actor, state, spriteIndex, (int) (realX * tileSize), (int) (realY * tileSize));
   }
 
   @Override
