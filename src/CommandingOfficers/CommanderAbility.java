@@ -62,7 +62,8 @@ public abstract class CommanderAbility implements Serializable
     perform(gameMap);
   }
 
-  /** Subclasses will override this method to enact the ability's effects. */
+  /** Subclasses will override this method to enact the ability's effects.
+   * Note that `getEvents` will be called before `perform`, so events can be cached. */
   protected abstract void perform(MapMaster gameMap);
 
   /** Allows a CommanderAbility to generate events that will be animated and published. */

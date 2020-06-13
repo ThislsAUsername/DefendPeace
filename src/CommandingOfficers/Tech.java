@@ -46,8 +46,8 @@ public class Tech extends Commander
           "Gives an attack boost of "+ OVERCHARGE_BUFF +
           " and heals all units by " + OVERCHARGE_HEAL + ", allowing HP>10 for this turn.\n"));
       infoPages.add(new InfoPage(
-          SPECIAL_DELIVERY_NAME + " (" + SPECIAL_DELIVERY_COST + "):\n" +
-          "Gives an attack boost of " + SPECIAL_DELIVERY_BUFF + " to all units and deploys three Mechwarriors to the front lines.\n"));
+          STEEL_HAIL_NAME + " (" + STEEL_HAIL_COST + "):\n" +
+          "Gives an attack boost of " + STEEL_HAIL_BUFF + " to all units and deploys three Mechwarriors to the front lines.\n"));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -62,6 +62,7 @@ public class Tech extends Commander
   private static final String TECHDROP_NAME = "Tech Drop";
   private static final int TECHDROP_COST = 5;
   private static final int TECHDROP_BUFF = 10;
+  private static final int TECHDROP_NUM = 1;
   private static final int TECHDROP_RANGE = 2;
 
   private static final String OVERCHARGE_NAME = "Overcharge";
@@ -69,17 +70,18 @@ public class Tech extends Commander
   private static final int OVERCHARGE_BUFF = 20;
   private static final int OVERCHARGE_HEAL = 3;
 
-  private static final String SPECIAL_DELIVERY_NAME = "Special Delivery";
-  private static final int SPECIAL_DELIVERY_COST = 9;
-  private static final int SPECIAL_DELIVERY_BUFF = 20;
+  private static final String STEEL_HAIL_NAME = "Steel Hail";
+  private static final int STEEL_HAIL_COST = 9;
+  private static final int STEEL_HAIL_BUFF = 20;
+  private static final int STEEL_HAIL_NUM = 3;
+  private static final int STEEL_HAIL_RANGE = 3;
 
   public Tech(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
-    addCommanderAbility(new TechdropAbility(this, TECHDROP_NAME, TECHDROP_COST, TECHDROP_BUFF, TECHDROP_RANGE));
-//    addCommanderAbility(new PatchAbility(this, OVERHEAL_NAME, OVERHEAL_COST, PILLAGE_INCOME, OVERHEAL_BUFF));
-
+    addCommanderAbility(new TechdropAbility(this, TECHDROP_NAME, TECHDROP_COST, TECHDROP_BUFF, TECHDROP_NUM, TECHDROP_RANGE));
+    addCommanderAbility(new TechdropAbility(this, STEEL_HAIL_NAME, STEEL_HAIL_COST, STEEL_HAIL_BUFF, STEEL_HAIL_NUM, STEEL_HAIL_RANGE));
   }
 
   public static CommanderInfo getInfo()
@@ -101,16 +103,18 @@ public class Tech extends Commander
     private CODamageModifier damageBuff = null;
     private CODefenseModifier defenseBuff = null;
     private int dropRange;
+    private int numDrops;
 
     GameEventQueue abilityEvents;
 
-    TechdropAbility(Commander myCO, String abilityName, int abilityCost, int buff, int abilityRange)
+    TechdropAbility(Commander myCO, String abilityName, int abilityCost, int buff, int num, int abilityRange)
     {
       super(myCO, abilityName, abilityCost);
 
       // Create a COModifier that we can apply to Patch when needed.
       damageBuff = new CODamageModifier(buff);
       defenseBuff = new CODefenseModifier(buff);
+      numDrops = num;
       dropRange = abilityRange;
       abilityEvents = new GameEventQueue();
     }
@@ -135,6 +139,27 @@ public class Tech extends Commander
       boolean log = false;
       if( log ) System.out.println("[TechDrop] getEvents() entry");
 
+      // Prep events for `numDrops` deployments. Recalculate landing position between each.
+      Set<XYCoord> dropLocs = new HashSet<XYCoord>();
+      for( int i = 0; i < numDrops; ++i )
+      {
+        TeleportEvent techDrop = generateDropEvent(gameMap, dropLocs, log);
+        if( null != techDrop )
+        {
+          dropLocs.add(techDrop.getEndPoint());
+          abilityEvents.add(techDrop);
+        }
+        else
+        {
+          System.out.println("[TechdropAbility.getEvents] WARNING! Could not find drop location.");
+        }
+      }
+
+      return abilityEvents;
+    }
+
+    private TeleportEvent generateDropEvent(MapMaster gameMap, Set<XYCoord> noDropLocs, boolean log)
+    {
       // Create a new Unit to drop onto the battlefield.
       long unitFlags = UnitModel.ASSAULT | UnitModel.LAND | UnitModel.TANK; // TODO There has got to be a better way to choose a model.
       Unit techMech = new Unit(myCommander, myCommander.getUnitModel( unitFlags, false ) );
@@ -159,6 +184,7 @@ public class Tech extends Commander
       }
 
       Set<XYCoord> invalidDropCoords = new HashSet<XYCoord>();
+      invalidDropCoords.addAll(noDropLocs);
       for( Unit u : myCommander.units )
       {
         XYCoord uxy = new XYCoord(u.x, u.y);                       // Unit location
@@ -263,7 +289,7 @@ public class Tech extends Commander
       if( scoredSpaces.isEmpty() )
       {
         System.out.println("[TechDrop.perform] Cannot find suitable landing zone. Aborting!");
-        return abilityEvents;
+        return null;
       }
 
       // Find all spaces that are equally contested.
@@ -295,8 +321,7 @@ public class Tech extends Commander
       // Create our new unit and the teleport event to put it into place.
       myCommander.units.add(techMech);
       TeleportEvent techDrop = new TeleportEvent(gameMap, techMech, landingZone, TeleportEvent.AnimationStyle.DROP_IN, TeleportEvent.CollisionOutcome.KILL);
-      abilityEvents.add(techDrop);
-      return abilityEvents;
+      return techDrop;
     }
 
     private class ScoredSpace implements Comparable<ScoredSpace>
