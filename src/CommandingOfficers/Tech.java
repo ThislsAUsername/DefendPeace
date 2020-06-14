@@ -81,6 +81,7 @@ public class Tech extends Commander
     super(coInfo, rules);
 
     addCommanderAbility(new TechdropAbility(this, TECHDROP_NAME, TECHDROP_COST, TECHDROP_BUFF, TECHDROP_NUM, TECHDROP_RANGE));
+    addCommanderAbility(new OverchargeAbility(this, OVERCHARGE_NAME, OVERCHARGE_COST, OVERCHARGE_BUFF, OVERCHARGE_HEAL));
     addCommanderAbility(new TechdropAbility(this, STEEL_HAIL_NAME, STEEL_HAIL_COST, STEEL_HAIL_BUFF, STEEL_HAIL_NUM, STEEL_HAIL_RANGE));
   }
 
@@ -95,7 +96,69 @@ public class Tech extends Commander
     return TECH_REPAIR;
   }
 
-  /** Drop a MechWarroir onto the most contested point on the battlefront. */
+  @Override
+  public GameEventQueue initTurn(MapMaster map)
+  {
+    System.out.println("Tech init turn! ability " + getActiveAbilityName());
+
+    // End Overcharge. Any units who still have > maxHP get reset to max.
+    if( getActiveAbilityName().contentEquals(OVERCHARGE_NAME))
+    for(Unit u: units)
+    {
+      if( u.getPreciseHP() > u.model.maxHP ) u.alterHP(10);
+    }
+
+    // Do the normal turn-init stuff.
+    GameEventQueue events = super.initTurn(map);
+
+    return events;
+  }
+
+  @Override
+  public char getUnitMarking(Unit unit)
+  {
+    // Mark units with > maxHP HP with the amount of overage.
+    if (unit.getHP() > unit.model.maxHP)
+      return Character.forDigit(unit.getHP()-unit.model.maxHP, 10);
+
+    return super.getUnitMarking(unit);
+  }
+
+  /** Heal all units by the specified amount, allowing HP>10, and provide a buff. */
+  private static class OverchargeAbility extends CommanderAbility
+  {
+    private CODamageModifier damageBuff = null;
+    private CODefenseModifier defenseBuff = null;
+    private int healAmount;
+
+    public OverchargeAbility(Commander commander, String abilityName, double abilityCost, int buff, int healAmt)
+    {
+      super(commander, abilityName, abilityCost);
+
+      // Create COModifiers that we can apply when needed.
+      damageBuff = new CODamageModifier(buff);
+      defenseBuff = new CODefenseModifier(buff);
+      healAmount = healAmt;
+    }
+
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    protected void perform(MapMaster gameMap)
+    {
+      // Bump up our power level.
+      myCommander.addCOModifier(damageBuff);
+      myCommander.addCOModifier(defenseBuff);
+
+      // Overcharge
+      for(Unit u: myCommander.units)
+      {
+        u.alterHP(healAmount, true);
+      }
+    }
+  }
+
+  /** Drop a MechWarrior onto the most contested point on the battlefront. */
   private static class TechdropAbility extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
@@ -107,11 +170,11 @@ public class Tech extends Commander
 
     GameEventQueue abilityEvents;
 
-    TechdropAbility(Commander myCO, String abilityName, int abilityCost, int buff, int num, int abilityRange)
+    TechdropAbility(Commander myCO, String abilityName, double abilityCost, int buff, int num, int abilityRange)
     {
       super(myCO, abilityName, abilityCost);
 
-      // Create a COModifier that we can apply to Patch when needed.
+      // Create COModifiers that we can apply when needed.
       damageBuff = new CODamageModifier(buff);
       defenseBuff = new CODefenseModifier(buff);
       numDrops = num;

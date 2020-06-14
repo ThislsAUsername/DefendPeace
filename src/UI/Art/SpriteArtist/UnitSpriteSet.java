@@ -175,8 +175,8 @@ public class UnitSpriteSet
   {
     int unitHeight = turnDone.getFrame(0).getHeight();
 
-    // Draw the unit's HP if it is below full health.
-    if( u.getHP() < 10 )
+    // Draw the unit's HP if it is not at full health.
+    if( u.getHP() < u.model.maxHP )
     {
       BufferedImage num = SpriteLibrary.getMapUnitHPSprites().getFrame(u.getHP());
       g.drawImage(num, drawX, drawY + ((unitHeight) / 2), num.getWidth(), num.getHeight(),
