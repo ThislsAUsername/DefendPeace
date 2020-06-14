@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 import javax.imageio.ImageIO;
 
@@ -17,7 +16,6 @@ import Terrain.Location;
 import Terrain.TerrainType;
 import UI.UIUtils;
 import UI.UIUtils.Faction;
-import UI.Art.Animation.GameAnimation.AnimState;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -319,25 +317,8 @@ public class SpriteLibrary
 
   private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
-    Faction faction = key.factionKey;
-
-    Function<AnimState,String> fileFinder = (state) -> getMapUnitSpriteFilename(key.unitTypeKey, faction.name, state);
-    if (!new File(getMapUnitSpriteFilename(key.unitTypeKey, faction.name)).canRead())
-      fileFinder = (state) -> getMapUnitSpriteFilename(key.unitTypeKey, faction.basis, state);
-
-    UnitSpriteSet spriteSet = new UnitSpriteSet( fileFinder, UIUtils.getMapUnitColors(key.colorKey) );
+    UnitSpriteSet spriteSet = new UnitSpriteSet( key.unitTypeKey, key.factionKey, UIUtils.getMapUnitColors(key.colorKey) );
     mapUnitSpriteSetMap.put(key, spriteSet);
-  }
-
-  private static String getMapUnitSpriteFilename(String unitType, String faction)
-  { return getMapUnitSpriteFilename(unitType, faction, AnimState.IDLE); }
-  private static String getMapUnitSpriteFilename(String unitType, String faction, AnimState state)
-  {
-    final String format = "res/unit/faction/%s/%s_map%s.png";
-    String spriteFile = String.format( format, faction,
-                     UnitModel.standardizeID(unitType),
-                     UnitModel.standardizeID(state.toString()) );
-    return spriteFile;
   }
 
   public static Sprite getMapUnitHPSprites()

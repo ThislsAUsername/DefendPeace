@@ -3,7 +3,7 @@ package UI.Art.SpriteArtist;
 import java.awt.Graphics;
 
 import Engine.GameInstance;
-import UI.Art.Animation.GameAnimation.AnimState;
+import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import Units.Unit;
 
 public class UnitArtist
@@ -44,7 +44,7 @@ public class UnitArtist
     AnimState state = (tired) ? AnimState.TIRED : AnimState.IDLE;
 
     // Draw the unit at the specified location.
-    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnit(g, state,
-    animIndex, drawX, drawY, myView.getFlipUnitFacing(unit.CO));
+    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnit(g, unit, state,
+    animIndex, drawX, drawY);
   }
 }

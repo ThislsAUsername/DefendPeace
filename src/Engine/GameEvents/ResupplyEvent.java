@@ -8,17 +8,18 @@ import Units.Unit;
 
 public class ResupplyEvent implements GameEvent
 {
-  private Unit target;
+  private Unit supplier, target;
 
-  public ResupplyEvent(Unit aTarget)
+  public ResupplyEvent(Unit aSupplier, Unit aTarget)
   {
+    supplier = aSupplier;
     target = aTarget;
   }
 
   @Override
   public GameAnimation getEventAnimation(MapView mapView)
   {
-    return mapView.buildResupplyAnimation(target);
+    return mapView.buildResupplyAnimation(supplier, target);
   }
 
   @Override

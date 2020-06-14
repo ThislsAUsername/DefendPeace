@@ -66,4 +66,10 @@ class SelectCargoDropLocation extends GameInputState<XYCoord>
   {
     myStateData.unitLocationMap.remove(myCargo);
   }
+
+  @Override
+  public boolean isTargeting()
+  {
+    return true;
+  }
 }
