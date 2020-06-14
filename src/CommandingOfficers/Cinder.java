@@ -88,9 +88,9 @@ public class Cinder extends Commander
   @Override
   public void receiveCreateUnitEvent(Unit unit)
   {
-    if( this == unit.CO )
+    XYCoord buildCoords = new XYCoord(unit.x, unit.y);
+    if( this == unit.CO && buildCounts.containsKey(buildCoords) )
     {
-      XYCoord buildCoords = new XYCoord(unit.x, unit.y);
       buildCounts.put(buildCoords, buildCounts.get(buildCoords) + 1);
       setPrices(0);
 

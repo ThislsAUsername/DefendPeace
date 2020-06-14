@@ -3,12 +3,14 @@ package UI.Art.SpriteArtist;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
-import java.util.function.Function;
 
 import CommandingOfficers.Commander;
 import UI.UIUtils;
+import UI.UIUtils.Faction;
 import Units.Unit;
+import Units.UnitModel;
 
 public class UnitSpriteSet
 {
@@ -33,14 +35,18 @@ public class UnitSpriteSet
    * @param fileFinder Mapping from action type to file name
    * @param coColors What colors the end sprites should use
    */
-  public UnitSpriteSet(Function<AnimState, String> fileFinder, ColorPalette coColors)
+  public UnitSpriteSet(String unitType, Faction faction, ColorPalette coColors)
   {
     try
     {
+      // Create a filename string template to fetch all relevant animations.
+      String filenameTemplate = getMapUnitSpriteFilenameTemplate(unitType, faction);
       for( int action = 0; action < AnimState.values().length; ++action )
       {
-        String filestr = fileFinder.apply(AnimState.values()[action]);
-        BufferedImage spriteSheet = SpriteLibrary.loadSpriteSheetFile(filestr);
+        // Get the filename for this animation state.
+        String fileStr = String.format(filenameTemplate, UnitModel.standardizeID(AnimState.values()[action].toString()));
+
+        BufferedImage spriteSheet = SpriteLibrary.loadSpriteSheetFile(fileStr);
         if( null != spriteSheet )
         {
           // Assume sub-sprites are squares that fill out the height of the source image
@@ -105,6 +111,32 @@ public class UnitSpriteSet
 
   }
 
+  /**
+   * Find the IDLE map-sprite file for the given unit type, as owned by the specified faction.
+   * If the specified faction has no sprite for that unit, it will try to load it from that faction's
+   * basis instead. If the basis also has no sprite, then it will default to the "Thorn" version.
+   * The resulting template-string ensures that all sprites loaded are from the same faction set.
+   * @return A string with the given unit/faction names populated, and a template token for the unit state.
+   */
+  private String getMapUnitSpriteFilenameTemplate(String unitType, Faction faction)
+  {
+    final String format = "res/unit/faction/%s/%s_map%s.png";
+
+    // Try the faction's proper name, the one it's based off of, then default to "Thorn" if all else fails.
+    String[] namesToTry = {faction.name, faction.basis};
+    String template = String.format( format, "Thorn", UnitModel.standardizeID(unitType), "" ); // Replace if we can.
+    for( String name : namesToTry )
+    {
+      String idleName = String.format( format, name, UnitModel.standardizeID(unitType), "" );
+      if (new File(idleName).canRead())
+      {
+        template = String.format( format, name, UnitModel.standardizeID(unitType), "%s" );
+        break;
+      }
+    }
+    return template;
+  }
+
   private void colorize(Color[] oldColors, Color[] newColors)
   {
     for( Sprite s : sprites )
@@ -118,8 +150,10 @@ public class UnitSpriteSet
     return sprites[state.ordinal()].getFrame(imageIndex);
   }
 
-  public void drawUnit(Graphics g, AnimState state, int imageIndex, int drawX, int drawY, boolean flipImage)
+  public void drawUnit(Graphics g, Unit u, AnimState state, int imageIndex, int drawX, int drawY)
   {
+    boolean flipImage = SpriteMapView.shouldFlip(u);
+
     BufferedImage frame = getUnitImage(state, imageIndex);
     int shiftX =(SpriteLibrary.baseSpriteSize - frame.getWidth())/2; // center X
     int shiftY = SpriteLibrary.baseSpriteSize - frame.getHeight(); // bottom-justify Y

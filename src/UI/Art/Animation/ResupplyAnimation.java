@@ -6,8 +6,10 @@ import java.awt.image.BufferedImage;
 import Engine.XYCoord;
 import UI.Art.SpriteArtist.SpriteLibrary;
 import UI.Art.SpriteArtist.SpriteUIUtils;
+import UI.Art.SpriteArtist.UnitSpriteSet;
+import Units.Unit;
 
-public class ResupplyAnimation implements GameAnimation
+public class ResupplyAnimation extends BaseUnitActionAnimation
 {
   private boolean firstCall = true;
   private boolean isCancelled = false;
@@ -17,14 +19,15 @@ public class ResupplyAnimation implements GameAnimation
   private int signWidth = 0;
   private int signHeight = 0;
 
-  public ResupplyAnimation(XYCoord mapLocation)
+  public ResupplyAnimation(int tileSize, Unit supplier, int mapX, int mapY)
   {
-    this(mapLocation.xCoord, mapLocation.yCoord);
+    this(tileSize, supplier, new XYCoord(mapX, mapY));
   }
 
-  public ResupplyAnimation(int mapX, int mapY)
+  public ResupplyAnimation(int tileSize, Unit supplier, XYCoord mapLocation)
   {
-    mapLocation = new XYCoord(mapX, mapY);
+    super(tileSize, supplier, null);
+    this.mapLocation = mapLocation;
     int menuTextWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth();
     int menuTextHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight();
 
@@ -53,6 +56,9 @@ public class ResupplyAnimation implements GameAnimation
       startTime = System.currentTimeMillis();
       firstCall = false;
     }
+
+    if( null != actor )
+      drawUnit(g, actor, UnitSpriteSet.AnimState.IDLE, actor.x, actor.y );
 
     long animTime = System.currentTimeMillis() - startTime;
 
