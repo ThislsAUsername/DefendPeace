@@ -249,13 +249,18 @@ public class SpriteMapView extends MapView
         loadNextEventAnimation();
       }
     }
-    if( getCurrentGameMenu() == null )
+
+    // Draw the cursor/our menu if we aren't animating events
+    if( currentAnimation == null || !notifyOnAnimEnd )
     {
-      mapArtist.drawCursor(mapGraphics, currentActor, isTargeting, myGame.getCursorX(), myGame.getCursorY());
-    }
-    else
-    {
-      menuArtist.drawMenu(mapGraphics, mapViewDrawX.geti(), mapViewDrawY.geti());
+      if( getCurrentGameMenu() == null )
+      {
+        mapArtist.drawCursor(mapGraphics, currentActor, isTargeting, myGame.getCursorX(), myGame.getCursorY());
+      }
+      else
+      {
+        menuArtist.drawMenu(mapGraphics, mapViewDrawX.geti(), mapViewDrawY.geti());
+      }
     }
 
     // When we draw the map, we want to center it if it's smaller than the view dimensions
