@@ -788,7 +788,7 @@ public class DoRUnits extends UnitModelScheme
       {
         events.add(new HealUnitEvent(cargo, self.CO.getRepairPower(), self.CO)); // Event handles cost logic
         if( !cargo.isFullySupplied() )
-          events.add(new ResupplyEvent(cargo));
+          events.add(new ResupplyEvent(self, cargo));
       }
       return events;
     }

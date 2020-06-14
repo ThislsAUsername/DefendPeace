@@ -120,7 +120,7 @@ public abstract class RepairLifecycle
         {
           // No surprises in the fog.
           repairEvents.add(new HealUnitEvent(beneficiary, 1, benefactor.CO)); // As this is a unit action, there's no usecase to vary this yet
-          repairEvents.add(new ResupplyEvent(beneficiary));
+          repairEvents.add(new ResupplyEvent(benefactor, beneficiary));
         }
       }
       return repairEvents;

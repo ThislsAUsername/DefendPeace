@@ -785,7 +785,7 @@ public class AWBWUnits extends UnitModelScheme
       GameEventQueue events = new GameEventQueue();
       for( Unit cargo : self.heldUnits )
         if( !cargo.isFullySupplied() )
-          events.add(new ResupplyEvent(cargo));
+          events.add(new ResupplyEvent(self, cargo));
       return events;
     }
   }
