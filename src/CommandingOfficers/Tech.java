@@ -319,15 +319,17 @@ public class Tech extends Commander
             continue;
           }
 
-          // No dropping into we can't travel on.
+          // No dropping into spaces we couldn't enter normally.
           if( !techMech.model.propulsion.canTraverse(gameMap.getEnvironment(xyc)) )
           {
             invalidDropCoords.add(xyc);
             continue;
           }
 
-          Integer curVal = enemyScores.putIfAbsent(xyc, nmeval);               // Put value if absent
-          if( null != curVal ) enemyScores.put(xyc, Math.max(curVal, nmeval)); // Keep the larger value.
+          double discountFactor = 0.5; // Farther spaces are worth less. This encourages up-in-your-facedness.
+          Integer discountedVal = (int)(nmeval * Math.pow(discountFactor, xyc.getDistance(nmexy)));
+          Integer curVal = enemyScores.putIfAbsent(xyc, discountedVal);                  // Put value if absent
+          if( null != curVal ) enemyScores.put(xyc, Math.max(curVal, discountedVal));    // Keep the larger value.
         }
 
         // We can't squash non-troops.
@@ -390,7 +392,7 @@ public class Tech extends Commander
         if(log) System.out.println("Score for " + coord + " is " + (escore-fscore));
       }
 
-      // If there are no good spaces... this should never happen.
+      // If there are no good spaces... this should almost never happen.
       if( scoredSpaces.isEmpty() )
       {
         System.out.println("[TechDrop.perform] Cannot find suitable landing zone. Aborting!");
