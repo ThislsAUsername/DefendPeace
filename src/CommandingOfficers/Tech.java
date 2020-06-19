@@ -34,20 +34,25 @@ public class Tech extends Commander
     {
       super("Tech");
       infoPages.add(new InfoPage(
-          "Tech is a first-rate grease monkey who like nothing better than to create and deploy new technologies'\n"));
+          "Tech is a first-rate grease monkey who like nothing better than to build new machines and set them loose.\n"));
       infoPages.add(new InfoPage(
           "Passive:\n" +
           "- Tech has some of the best mechanics around, allowing her units to repair 3 HP per turn instead of just 2.\n"));
       infoPages.add(new InfoPage(
           TECHDROP_NAME + " (" + TECHDROP_COST + "):\n" +
-          "Gives an attack boost of " + TECHDROP_BUFF + " to all units and deploys a Mechwarrior to the front lines.\n"));
+              "Deploys " + TECHDROP_NUM + " BattleMech to the front lines.\n" +
+              "All mechanical units gain " + TECHDROP_BUFF + "% attack.\n" +
+              "All units gain " + TECHDROP_BUFF + "% Defense.\n"));
       infoPages.add(new InfoPage(
           OVERCHARGE_NAME + " (" + OVERCHARGE_COST + "):\n" +
-          "Gives an attack boost of "+ OVERCHARGE_BUFF +
-          " and heals all units by " + OVERCHARGE_HEAL + ", allowing HP>10 for this turn.\n"));
+              "All mechanical units are repaired by " + OVERCHARGE_HEAL + " HP, allowing more than 10 HP for this turn.\n" +
+              "All mechanical units gain " + OVERCHARGE_BUFF + "% attack.\n" +
+              "All Units gain " + OVERCHARGE_BUFF + "% defense"));
       infoPages.add(new InfoPage(
           STEEL_HAIL_NAME + " (" + STEEL_HAIL_COST + "):\n" +
-          "Gives an attack boost of " + STEEL_HAIL_BUFF + " to all units and deploys three Mechwarriors to the front lines.\n"));
+              "Deploys " + STEEL_HAIL_NUM + " BattleMechs to the front lines.\n" +
+              "All mechanical units gain " + STEEL_HAIL_BUFF + "% attack.\n" +
+              "All units gain " + STEEL_HAIL_BUFF + "% defense.\n"));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -75,6 +80,10 @@ public class Tech extends Commander
   private static final int STEEL_HAIL_BUFF = 20;
   private static final int STEEL_HAIL_NUM = 3;
   private static final int STEEL_HAIL_RANGE = 3;
+
+  // These units get the most benefit from Tech's abilities.
+  private static long mechanicalUnits = UnitModel.TANK | UnitModel.HOVER | UnitModel.JET | UnitModel.SEA;
+
 
   public Tech(GameScenario.GameRules rules)
   {
@@ -129,6 +138,12 @@ public class Tech extends Commander
       damageBuff = new CODamageModifier(buff);
       defenseBuff = new CODefenseModifier(buff);
       healAmount = healAmt;
+
+      // Only mechanical units get the firepower boost.
+      long exclude = UnitModel.TROOP;
+      ArrayList<UnitModel> models = commander.getAllModels(Tech.mechanicalUnits, true, exclude);
+      for( UnitModel m : models )
+        damageBuff.addApplicableUnitModel(m);
     }
 
     private static final long serialVersionUID = 1L;
@@ -143,6 +158,8 @@ public class Tech extends Commander
       // Overcharge
       for(Unit u: myCommander.units)
       {
+        // Only mechanical units get overcharged.
+        if( u.model.isNone(UnitModel.TROOP) )
         u.alterHP(healAmount, true);
       }
     }
@@ -160,9 +177,9 @@ public class Tech extends Commander
 
     GameEventQueue abilityEvents;
 
-    TechdropAbility(Commander myCO, String abilityName, double abilityCost, int buff, int num, int abilityRange)
+    TechdropAbility(Commander commander, String abilityName, double abilityCost, int buff, int num, int abilityRange)
     {
-      super(myCO, abilityName, abilityCost);
+      super(commander, abilityName, abilityCost);
 
       // Create COModifiers that we can apply when needed.
       damageBuff = new CODamageModifier(buff);
@@ -170,6 +187,12 @@ public class Tech extends Commander
       numDrops = num;
       dropRange = abilityRange;
       abilityEvents = new GameEventQueue();
+
+      // Only mechanical units get the firepower boost.
+      long exclude = UnitModel.TROOP;
+      ArrayList<UnitModel> models = commander.getAllModels(Tech.mechanicalUnits, true, exclude);
+      for( UnitModel m : models )
+        damageBuff.addApplicableUnitModel(m);
     }
 
     @Override

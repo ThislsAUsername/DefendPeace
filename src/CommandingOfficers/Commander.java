@@ -220,12 +220,16 @@ public class Commander extends GameEventListener implements Serializable
   }
   public ArrayList<UnitModel> getAllModels(long unitRole, boolean matchOnAny)
   {
+    return getAllModels(unitRole, matchOnAny, 0);
+  }
+  public ArrayList<UnitModel> getAllModels(long unitRole, boolean matchOnAny, long excludedRoles)
+  {
     ArrayList<UnitModel> models = new ArrayList<UnitModel>();
 
     for( UnitModel iter : unitModels )
     {
-      boolean some = iter.isAny(unitRole);
-      boolean all = iter.isAll(unitRole);
+      boolean some = iter.isAny(unitRole) && iter.isNone(excludedRoles);
+      boolean all = iter.isAll(unitRole) && iter.isNone(excludedRoles);
       if( all || (some && matchOnAny) )
       {
         models.add(iter);
