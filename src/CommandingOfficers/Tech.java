@@ -114,16 +114,6 @@ public class Tech extends Commander
     return events;
   }
 
-  @Override
-  public char getUnitMarking(Unit unit)
-  {
-    // Mark units with > maxHP HP with the amount of overage.
-    if (unit.getHP() > unit.model.maxHP)
-      return Character.forDigit(unit.getHP()-unit.model.maxHP, 10);
-
-    return super.getUnitMarking(unit);
-  }
-
   /** Heal all units by the specified amount, allowing HP>10, and provide a buff. */
   private static class OverchargeAbility extends CommanderAbility
   {
