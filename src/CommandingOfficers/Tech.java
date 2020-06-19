@@ -144,6 +144,8 @@ public class Tech extends Commander
       ArrayList<UnitModel> models = commander.getAllModels(Tech.mechanicalUnits, true, exclude);
       for( UnitModel m : models )
         damageBuff.addApplicableUnitModel(m);
+
+      AIFlags = PHASE_TURN_START | PHASE_TURN_END;
     }
 
     private static final long serialVersionUID = 1L;
