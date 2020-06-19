@@ -1,10 +1,7 @@
 package Engine.GameInput;
 
-import java.util.Collection;
-
-import Engine.XYCoord;
+import java.util.ArrayList;
 import Engine.Combat.DamagePopup;
-import Terrain.GameMap;
 
 public class ConfirmUnitAction extends GameInputState<ConfirmUnitAction.ConfirmActionEnum>
 {
@@ -16,18 +13,13 @@ public class ConfirmUnitAction extends GameInputState<ConfirmUnitAction.ConfirmA
   public ConfirmUnitAction(StateData data)
   {
     super(data);
+    myStateData.damagePopups = myStateData.actionSet.getSelected().getDamagePopups(myStateData.gameMap);
   }
 
   @Override
   protected OptionSet initOptions()
   {
     return new OptionSet(ConfirmActionEnum.values());
-  }
-
-  @Override
-  public Collection<DamagePopup> getDamagePopups(GameMap map, XYCoord target)
-  {
-    return myStateData.actionSet.getSelected().getDamagePopups(map);
   }
 
   @Override
@@ -45,5 +37,11 @@ public class ConfirmUnitAction extends GameInputState<ConfirmUnitAction.ConfirmA
     }
     
     return next;
+  }
+
+  @Override
+  public void back()
+  {
+    myStateData.damagePopups = new ArrayList<DamagePopup>();
   }
 }
