@@ -108,8 +108,6 @@ public class Tech extends Commander
   @Override
   public GameEventQueue initTurn(MapMaster map)
   {
-    System.out.println("Tech init turn! ability " + getActiveAbilityName());
-
     // End Overcharge. Any units who still have > maxHP get reset to max.
     if( getActiveAbilityName().contentEquals(OVERCHARGE_NAME))
     for(Unit u: units)
@@ -214,18 +212,24 @@ public class Tech extends Commander
     @Override
     public GameEventQueue getEvents(MapMaster gameMap)
     {
-      boolean log = false;
+      boolean log = true;
       if( log ) System.out.println("[TechDrop] getEvents() entry");
 
       // Prep events for `numDrops` deployments. Recalculate landing position between each.
       Set<XYCoord> dropLocs = new HashSet<XYCoord>();
       for( int i = 0; i < numDrops; ++i )
       {
-        TeleportEvent techDrop = generateDropEvent(gameMap, dropLocs, log);
+        TeleportEvent techDrop = generateDropEvent(gameMap, log);
         if( null != techDrop )
         {
-          dropLocs.add(techDrop.getEndPoint());
+          // Store the new event.
           abilityEvents.add(techDrop);
+
+          // Place it on the map temporarily so we account for it in subsequent drops.
+          dropLocs.add(techDrop.getEndPoint());
+          Unit u = techDrop.getUnit();
+          XYCoord loc = techDrop.getEndPoint();
+          gameMap.moveUnit(u, loc.xCoord, loc.yCoord);
         }
         else
         {
@@ -233,10 +237,16 @@ public class Tech extends Commander
         }
       }
 
+      // Make sure we remove the new units until they actually drop in.
+      for( XYCoord dl : dropLocs )
+      {
+        gameMap.removeUnit(gameMap.getLocation(dl).getResident());
+      }
+
       return abilityEvents;
     }
 
-    private TeleportEvent generateDropEvent(MapMaster gameMap, Set<XYCoord> noDropLocs, boolean log)
+    private TeleportEvent generateDropEvent(MapMaster gameMap, boolean log)
     {
       // Create a new Unit to drop onto the battlefield.
       long unitFlags = UnitModel.ASSAULT | UnitModel.LAND | UnitModel.TANK; // TODO There has got to be a better way to choose a model.
@@ -262,7 +272,6 @@ public class Tech extends Commander
       }
 
       Set<XYCoord> invalidDropCoords = new HashSet<XYCoord>();
-      invalidDropCoords.addAll(noDropLocs);
       for( Unit u : myCommander.units )
       {
         XYCoord uxy = new XYCoord(u.x, u.y);                       // Unit location
@@ -293,8 +302,11 @@ public class Tech extends Commander
         Unit nme = gameMap.getLocation(nmexy).getResident();          // Enemy unit
         Integer nmeval = nme.model.getCost() * nme.getHP();           // Enemy value
 
-        if(nmexy.getDistance(myCommander.HQLocation) < nme.model.movePower && nme.model.hasActionType(UnitActionFactory.CAPTURE))
+        if(nmexy.getDistance(myCommander.HQLocation) <= nme.model.movePower && nme.model.hasActionType(UnitActionFactory.CAPTURE))
+        {
+          if( log ) System.out.println(String.format("%s is too close to HQ. Increasing threat rating:", nme.toStringWithLocation()));
           nmeval *= 100; // More weight if this unit threatens HQ.
+        }
 
         // Assign base scores.
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, nmexy, 0, dropRange) )
@@ -328,10 +340,10 @@ public class Tech extends Commander
         {
           // Valid drop locations containing enemy troops rate higher based on whom we could strike from there.
           int val = enemyScores.get(nmexy); // Currently worth this much.
-          friendScores.put(nmexy, 0); // Remove nearby-friend score penalty when smashing is an option.
+          if( friendScores.containsKey(nmexy) ) friendScores.put(nmexy, 0); // Remove nearby-friend score penalty when smashing is an option.
 
           Set<XYCoord> enemyLocations = AIUtils.findPossibleTargets(gameMap, techMech, nmexy);
-          if( log ) System.out.println(String.format("Would have %d possible targets after squashing %s", enemyLocations.size(), nme.toStringWithLocation()));
+          if( log ) System.out.println(String.format("Would have %d possible attacks after squashing %s", enemyLocations.size(), nme.toStringWithLocation()));
 
           int bestAttackVal = 0;
           for( XYCoord targetxy : enemyLocations )
@@ -349,8 +361,23 @@ public class Tech extends Commander
         }
       }
 
+      // We only want to drop in near enemies; remove any destinations with no "enemy score".
+      Set<XYCoord> friendCoords = new HashSet<XYCoord>(friendScores.keySet());
+      for( XYCoord fc : friendCoords )
+        if( !enemyScores.keySet().contains(fc) )
+          friendScores.remove(fc);
+
+      // If that leaves us with no drop zones, then just reinforce the HQ.
+      if( friendScores.isEmpty() )
+      {
+        if( log ) System.out.println("No valid drop zones near nemy. Reinforcing HQ.");
+        for( XYCoord nearHQ : Utils.findLocationsInRange(gameMap, myCommander.HQLocation, 0, dropRange) )
+            friendScores.put(nearHQ, 0);
+      }
+
       // Remove any destinations we can't use.
-      for(XYCoord fc : invalidDropCoords) friendScores.remove(fc);
+      for(XYCoord fc : invalidDropCoords)
+        friendScores.remove(fc);
 
       // Calculate and store scores in a pri-queue for easy sorting.
       PriorityQueue<ScoredSpace> scoredSpaces = new PriorityQueue<ScoredSpace>();

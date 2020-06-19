@@ -135,6 +135,11 @@ public class TeleportEvent implements GameEvent
     }
   }
 
+  public Unit getUnit()
+  {
+    return unit;
+  }
+
   @Override
   public XYCoord getStartPoint()
   {
