@@ -39,7 +39,7 @@ public class Driver implements ActionListener, KeyListener
   private Driver()
   {
     Utils.paintAllFactions(baseUnitPath,baseFactionPath,false);
-    Utils.paintAllFactions(baseFlipperUnitPath,baseFactionPath,true);
+//    Utils.paintAllFactions(baseFlipperUnitPath,baseFactionPath,true);
     
     // At game startup, we are at the main menu. Set up controller/viewer
     MainUIController mc = new MainUIController();

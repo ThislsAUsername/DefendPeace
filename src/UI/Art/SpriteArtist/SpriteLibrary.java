@@ -288,7 +288,7 @@ public class SpriteLibrary
       ImageInputStream ciis = ImageIO.createImageInputStream(new File(filename));
       reader.setInput(ciis, false);
 
-      frames = SpriteUIUtils.readGIF(reader, baseSpriteSize, baseSpriteSize);
+      frames = SpriteUIUtils.readGIF(reader);
     }
     catch (IOException ioex)
     {
@@ -489,25 +489,30 @@ public class SpriteLibrary
 
   /**
    * Code kinda-not-really stolen from https://stackoverflow.com/questions/20826216/copy-two-bufferedimages-into-one-image-side-by-side
-   * join two BufferedImage
-   * you can add a orientation parameter to control direction
-   * you can use a array to join more BufferedImage
+   * joins BufferedImages, creating a spritesheet of square sprites
    */
   public static BufferedImage joinBufferedImage(ImageFrame[] frames, int w, int h, boolean flipImage)
   {
-    //do some calculations first
-    int offset = 0;
-    int width = frames.length * (w + offset);
-    int height = h;
+    int imageSpacing = 0;
+    int spriteDimension = Math.max(w, h);
+    int offsetX = (int) ((spriteDimension - w)/2 + 0.5); // center x
+    int offsetY =         spriteDimension - h;     // bottom justify
+    if( offsetX > 1 || offsetY > 1 )
+      System.out.println("WARNING: generating spritesheet for irregular image width/height: " + w + "," + h +"\nand offsets:"+offsetX+","+offsetY);
+
+    // Final spritesheet sizing
+    int width = frames.length * (spriteDimension + imageSpacing);
+    int height = spriteDimension;
     //create a new buffer and draw two image into the new image
     BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
     Graphics g = newImage.getGraphics();
+
     for( int i = 0; i < frames.length; i++ )
     {
       if( flipImage )
-        g.drawImage(frames[i].getImage(), w + i * (w + offset), 0, -w, h, null);
+        g.drawImage(frames[i].getImage(), w + i * (spriteDimension + imageSpacing) +offsetX, offsetY, -w+offsetX, h+offsetY, null);
       else
-        g.drawImage(frames[i].getImage(), i * (w + offset), 0, null);
+        g.drawImage(frames[i].getImage(), i * (spriteDimension + imageSpacing) +offsetX, offsetY, null);
     }
     return newImage;
   }
@@ -578,14 +583,14 @@ public class SpriteLibrary
 //    }
     
     // sort by brightness
-    palette.sort(new Comparator<Color>()
-    {
-      @Override
-      public int compare(Color o1, Color o2)
-      {
-        return (int) (colorDistance(o1, Color.black) - colorDistance(o2, Color.black));
-      }
-    });
+//    palette.sort(new Comparator<Color>()
+//    {
+//      @Override
+//      public int compare(Color o1, Color o2)
+//      {
+//        return (int) (colorDistance(o1, Color.black) - colorDistance(o2, Color.black));
+//      }
+//    });
     
     int offset = 0;
     int width = palette.size() * (w + offset);

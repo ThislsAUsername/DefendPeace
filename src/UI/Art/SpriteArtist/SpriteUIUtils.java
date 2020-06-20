@@ -44,7 +44,7 @@ public class SpriteUIUtils
 
   // stolen wholesale from https://stackoverflow.com/questions/8933893/convert-each-animated-gif-frame-to-a-separate-bufferedimage
   // edited slightly to suit our needs
-  public static ImageFrame[] readGIF(ImageReader reader, int width, int height) throws IOException
+  public static ImageFrame[] readGIF(ImageReader reader) throws IOException
   {
     ArrayList<ImageFrame> frames = new ArrayList<ImageFrame>(2);
 
@@ -75,7 +75,7 @@ public class SpriteUIUtils
 
       if( master == null )
       {
-        master = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        master = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
         masterGraphics = master.createGraphics();
         masterGraphics.setBackground(new Color(0, 0, 0, 0));
       }

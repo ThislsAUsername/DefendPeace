@@ -1,6 +1,7 @@
 package Engine;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -467,19 +468,40 @@ public class Utils
 
     Set<Color> palette = new HashSet<>();
 
+    Color[] osColors = new Color[] 
+        {
+            new Color(128,   0,  16),
+            new Color(192,   0,   0),
+            new Color(240,   0,   8),
+            new Color(248,  88,   0),
+            new Color(248, 152, 104),
+            new Color(248, 184, 120),
+        };
+
     for( final File fileEntry : folder.listFiles() )
     {
       String filestr = fileEntry.getName();
       if( !fileEntry.isDirectory() && filestr.contains(".gif") )
       {
-        String unitName = filestr.replaceFirst(facAbbrev, "").replace(".gif", "");
+        String unitName = standardizeID(
+            filestr
+            .replaceFirst(facAbbrev, "")
+            .replaceFirst("_mup",   "_mapmovenorth")
+            .replaceFirst("_mdown", "_mapmovesouth")
+            .replaceFirst("_mside", "_mapmoveeast")
+            .replace(".gif", "")
+            );
+        if( !unitName.contains("_map") )
+          unitName += "_map";
         System.out.println("  " + unitName);
         ImageFrame[] frames = SpriteLibrary.loadAnimation(facInPath+"/"+filestr);
+        colorize(frames, osColors, SpriteLibrary.defaultMapColors);
         try
         {
-          String fileOutStr = (facOutPath + "/" + unitName + "_map.png").replaceAll("\\-", "");
+          BufferedImage joinedImage = SpriteLibrary.joinBufferedImage(frames, frames[0].getImage().getWidth(), frames[0].getImage().getHeight(), flip);
+          String fileOutStr = (facOutPath + "/" + unitName + ".png");
           ImageIO.write(
-              SpriteLibrary.joinBufferedImage(SpriteLibrary.paintItGray(frames, palette), SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize, flip),
+              joinedImage,
               "png", new File(fileOutStr));
         }
         catch (IOException e)
@@ -491,5 +513,35 @@ public class Utils
     }
 
     return palette;
+  }
+
+  /**
+   * For every image contained in this sprite, change each pixel with a value in oldColors to the corresponding value in newColors.
+   */
+  public static void colorize(ImageFrame[] spriteImages, Color[] oldColors, Color[] newColors)
+  {
+    for( ImageFrame frame : spriteImages )
+    {
+      BufferedImage bi = frame.getImage();
+      for( int x = 0; x < bi.getWidth(); ++x )
+      {
+        for( int y = 0; y < bi.getHeight(); ++y )
+        {
+          int colorValue = bi.getRGB(x, y);
+          for( int c = 0; c < oldColors.length; ++c )
+          {
+            if( oldColors[c].getRGB() == colorValue )
+            {
+              bi.setRGB(x, y, newColors[c].getRGB());
+            }
+          }
+        }
+      }
+    }
+  }
+
+  public static String standardizeID(String input)
+  {
+    return input.toLowerCase().replaceAll(" ", "_").replaceAll("-", "_");
   }
 }
