@@ -429,7 +429,9 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     if( null != myGameInputHandler )
     {
-      // If we are changing input modes, we can't be down in a menu.
+      // If we are changing input modes, we
+      // know we don't have a valid action right now.
+      myGameInputHandler.reset();
       currentMenu = null;
     }
   }
