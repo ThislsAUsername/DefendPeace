@@ -219,17 +219,12 @@ public class Tech extends Commander
       Set<XYCoord> dropLocs = new HashSet<XYCoord>();
       for( int i = 0; i < numDrops; ++i )
       {
-        TeleportEvent techDrop = generateDropEvent(gameMap, log);
+        TeleportEvent techDrop = generateDropEvent(gameMap, dropLocs, log);
         if( null != techDrop )
         {
           // Store the new event.
-          abilityEvents.add(techDrop);
-
-          // Place it on the map temporarily so we account for it in subsequent drops.
           dropLocs.add(techDrop.getEndPoint());
-          Unit u = techDrop.getUnit();
-          XYCoord loc = techDrop.getEndPoint();
-          gameMap.moveUnit(u, loc.xCoord, loc.yCoord);
+          abilityEvents.add(techDrop);
         }
         else
         {
@@ -237,20 +232,15 @@ public class Tech extends Commander
         }
       }
 
-      // Make sure we remove the new units until they actually drop in.
-      for( XYCoord dl : dropLocs )
-      {
-        gameMap.removeUnit(gameMap.getLocation(dl).getResident());
-      }
-
       return abilityEvents;
     }
 
-    private TeleportEvent generateDropEvent(MapMaster gameMap, boolean log)
+    private TeleportEvent generateDropEvent(MapMaster gameMap, Set<XYCoord> priorDrops, boolean log)
     {
       // Create a new Unit to drop onto the battlefield.
       long unitFlags = UnitModel.ASSAULT | UnitModel.LAND | UnitModel.TANK; // TODO There has got to be a better way to choose a model.
-      Unit techMech = new Unit(myCommander, myCommander.getUnitModel( unitFlags, false ) );
+      UnitModel techModel = myCommander.getUnitModel( unitFlags, false );
+      Unit techMech = new Unit(myCommander, techModel);
       techMech.isTurnOver = false; // Hit the ground ready to rumble.
       if( myCommander.HQLocation.xCoord >= gameMap.mapWidth / 2 )
         techMech.x = gameMap.mapWidth; // Make the unit face left as it falls to match the rest of the units.
@@ -268,19 +258,23 @@ public class Tech extends Commander
       {
         // Record any locations near owned properties; we want to be able to rescue unprotected structures.
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, propCoord, 0, dropRange) )
-          if( !techMech.model.propulsion.canTraverse(gameMap.getEnvironment(xyc)) )
+          if( !techModel.propulsion.canTraverse(gameMap.getEnvironment(xyc)) )
             friendScores.put(xyc, 0);
       }
 
       Set<XYCoord> invalidDropCoords = new HashSet<XYCoord>();
+      invalidDropCoords.addAll(priorDrops);
+
+      // Calculate areas of influence for friendly units.
       for( Unit u : myCommander.units )
       {
         XYCoord uxy = new XYCoord(u.x, u.y);                       // Unit location
         Integer uval = u.model.getCost() * u.getHP();              // Unit value
+
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, uxy, dropRange) )
         {
           // No dropping into spaces we can't travel on.
-          if( !techMech.model.propulsion.canTraverse(gameMap.getEnvironment(xyc)) )
+          if( !techModel.propulsion.canTraverse(gameMap.getEnvironment(xyc)) )
           {
             invalidDropCoords.add(xyc);
             continue;
@@ -294,12 +288,30 @@ public class Tech extends Commander
         invalidDropCoords.add(uxy); // No stomping on friends!
       }
 
+      // Account for friendly influence of prior drops.
+      for( XYCoord pdc : priorDrops )
+      {
+        Integer uval = techModel.getCost() * techMech.getHP();
+
+        for( XYCoord xyc : Utils.findLocationsInRange(gameMap, pdc, dropRange) )
+        {
+          if( friendScores.containsKey(xyc) ) // Only update existing scores; don't add new spaces here.
+          {
+            Integer curVal = friendScores.get(xyc);
+            friendScores.put(xyc, Math.max(curVal, uval)); // Take the larger value.
+          }
+        }
+      }
+
       // Next calculate unfriendly values. Note that these are only eligible landing spaces if they are also within
       // range of friendly units, but it's easier to just compute all the values and then ignore invalid places.
       ArrayList<XYCoord> enemyCoords = AIUtils.findEnemyUnits(myCommander, gameMap);
       Map<XYCoord, Integer> enemyScores = new HashMap<XYCoord, Integer>();
       for( XYCoord nmexy : enemyCoords )
       {
+        if( priorDrops.contains(nmexy) )
+          continue; // Ignore enemies that are about to get pasted anyway.
+
         Unit nme = gameMap.getLocation(nmexy).getResident();          // Enemy unit
         Integer nmeval = nme.model.getCost() * nme.getHP();           // Enemy value
 
@@ -309,7 +321,7 @@ public class Tech extends Commander
           nmeval *= 100; // More weight if this unit threatens HQ.
         }
 
-        // Assign base scores.
+        // Assign base scores for spaces around this enemy.
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, nmexy, 0, dropRange) )
         {
           // No dropping into enemy-held properties.
@@ -351,12 +363,15 @@ public class Tech extends Commander
           int bestAttackVal = 0;
           for( XYCoord targetxy : enemyLocations )
           {
+            if( priorDrops.contains(targetxy) )
+              continue; // Ignore enemies that are about to get pasted anyway.
+
             Unit t = gameMap.getLocation(targetxy).getResident();
-            if( null == t ) continue; // We don't give a bonus for proximity to destructable terrain.
+            if( null == t ) continue; // We don't give a bonus for proximity to destructible terrain.
 
             int tval = t.model.getCost() * t.getHP();
             if( bestAttackVal < tval ) bestAttackVal = tval;
-            if( log ) System.out.println(String.format("Adding %d to %s for %s", tval, nmexy, t.toStringWithLocation()));
+            if( log ) System.out.println(String.format("Could add %d to %s for %s", tval, nmexy, t.toStringWithLocation()));
           }
           val += bestAttackVal; // Increase the score of stomping here by the cost of the most expensive unit we can attack.
           if( log ) System.out.println(String.format("Value for %s: %d", nme.toStringWithLocation(), val));
@@ -449,5 +464,5 @@ public class Tech extends Commander
         return other.score - score;
       }
     }
-  }
-}
+  } // class TechDropAbility
+} // class Tech
