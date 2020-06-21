@@ -25,6 +25,8 @@ public class TeleportEvent implements GameEvent
   private boolean unitDies;
   private boolean obstacleDies;
 
+  private GameEventQueue subEvents = new GameEventQueue();
+
   public enum AnimationStyle
   {
     BLINK,
@@ -73,6 +75,8 @@ public class TeleportEvent implements GameEvent
   public void sendToListener(GameEventListener listener)
   {
     listener.receiveTeleportEvent(unit, unitStart, unitDestination);
+    for( GameEvent sub : subEvents )
+      sub.sendToListener(listener);
   }
 
   @Override
@@ -109,11 +113,14 @@ public class TeleportEvent implements GameEvent
     {
       UnitDieEvent ude = new UnitDieEvent(obstacle);
       ude.performEvent(gameMap);
+      subEvents.add(ude);
 
       // Poor sap died; Check if his CO lost the game.
       if( obstacle.CO.units.size() == 0 )
       {
-        new CommanderDefeatEvent(obstacle.CO).performEvent(gameMap);
+        CommanderDefeatEvent cde = new CommanderDefeatEvent(obstacle.CO);
+        cde.performEvent(gameMap);
+        subEvents.add(cde);
       }
     }
 
@@ -124,13 +131,17 @@ public class TeleportEvent implements GameEvent
     if( !unit.model.propulsion.canTraverse(gameMap.getEnvironment(unitDestination)) )
     {
       unitDies = true;
-      new UnitDieEvent(unit).performEvent(gameMap);
+      UnitDieEvent ude = new UnitDieEvent(unit);
+      ude.performEvent(gameMap);
+      subEvents.add(ude);
 
       // Our unit died; check if we are defeated.
       if( unit.CO.units.size() == 0 )
       {
         // CO is out of units. Too bad.
-        new CommanderDefeatEvent(unit.CO).performEvent(gameMap);
+        CommanderDefeatEvent cde = new CommanderDefeatEvent(unit.CO);
+        cde.performEvent(gameMap);
+        subEvents.add(cde);
       }
     }
   }
