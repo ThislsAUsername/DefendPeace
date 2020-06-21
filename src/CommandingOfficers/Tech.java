@@ -42,7 +42,7 @@ public class Tech extends Commander
           TECHDROP_NAME + " (" + TECHDROP_COST + "):\n" +
               "Deploys " + TECHDROP_NUM + " BattleMech to the front lines.\n" +
               "All mechanical units gain " + TECHDROP_BUFF + "% attack.\n" +
-              "All units gain " + TECHDROP_BUFF + "% Defense.\n"));
+              "All units gain " + TECHDROP_BUFF + "% defense.\n"));
       infoPages.add(new InfoPage(
           OVERCHARGE_NAME + " (" + OVERCHARGE_COST + "):\n" +
               "All mechanical units are repaired by " + OVERCHARGE_HEAL + " HP, allowing more than 10 HP for this turn.\n" +
@@ -268,7 +268,8 @@ public class Tech extends Commander
       {
         // Record any locations near owned properties; we want to be able to rescue unprotected structures.
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, propCoord, 0, dropRange) )
-          friendScores.put(xyc, 0);
+          if( !techMech.model.propulsion.canTraverse(gameMap.getEnvironment(xyc)) )
+            friendScores.put(xyc, 0);
       }
 
       Set<XYCoord> invalidDropCoords = new HashSet<XYCoord>();
