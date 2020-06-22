@@ -19,18 +19,18 @@ public class AirDropAnimation implements GameAnimation
   XYCoord dropDestination;
   int dropHeight = 15;
 
-  int phase = 1;
+  int phase = 0;
 
   // Phase 0 variables.
-  double xCurrent;
+  double xDrop;
   double yCurrent;
   double vel;
   double deltaV;
 
-  // Phase 1 variables.
-  Color light = new Color(255, 255, 255, 190);
-  double xLeftLight;
-  double xRightLight;
+  // Effects variables.
+  Color fxColor = new Color(255, 255, 255, 190);
+  double xLeft;
+  double xRight;
 
   boolean done;
 
@@ -45,14 +45,14 @@ public class AirDropAnimation implements GameAnimation
     dropDestination = end;
 
     // Phase 0
-    xCurrent = dropDestination.xCoord;
+    xDrop = dropDestination.xCoord;
     yCurrent = dropDestination.yCoord - dropHeight; // So we drop in from the sky.
     vel = 0.5;
     deltaV = 0.03;
 
     // Phase 1
-    xLeftLight = xCurrent-1.5;
-    xRightLight = xCurrent+2.5;
+    xLeft = xDrop-1.5;
+    xRight = xDrop+2.5;
 
     done = false;
   }
@@ -62,13 +62,13 @@ public class AirDropAnimation implements GameAnimation
   {
     if(0==phase) // Guide lights
     {
-      g.setColor(light);
-      g.fillRect((int)(xLeftLight*tileSize), (int)(yCurrent*tileSize), 2, dropHeight*tileSize+tileSize);
-      g.fillRect((int)(xRightLight*tileSize), (int)(yCurrent*tileSize), 2, dropHeight*tileSize+tileSize);
-      xLeftLight += 0.125;
-      xRightLight -= 0.125;
+      g.setColor(fxColor);
+      g.fillRect((int)(xLeft*tileSize), (int)(yCurrent*tileSize), 2, dropHeight*tileSize+tileSize);
+      g.fillRect((int)(xRight*tileSize), (int)(yCurrent*tileSize), 2, dropHeight*tileSize+tileSize);
+      xLeft += 0.125;
+      xRight -= 0.125;
 
-      if( xLeftLight >= xRightLight )
+      if( xLeft >= xRight )
       {
         phase++;
       }
@@ -81,15 +81,39 @@ public class AirDropAnimation implements GameAnimation
       if( yCurrent > dropDestination.yCoord )
       {
         yCurrent = dropDestination.yCoord;
-        done = true;
+        phase++;
+
+        // Set up the next phase.
+        xLeft = xDrop+0.25;
+        xRight = xDrop+0.75;
       }
 
-      int xDraw = (int)(xCurrent*tileSize);
+      int xDraw = (int)(xDrop*tileSize);
       int yDraw = (int)(yCurrent*tileSize);
       boolean flipUnitFacing = dropOrigin.xCoord >= dropDestination.xCoord;
       unitSpriteSet.drawUnit(g, mover.CO, mover, 0, xDraw, yDraw, flipUnitFacing );
     }
-    // TODO: Draw explosions if/when needed.
+    else if(2==phase)
+    {
+      // TODO: Draw explosions if/when needed.
+
+      // Draw dust clouds from landing.
+      final int diam_px = 10; // Draw-space pixels.
+      final double map_y = dropDestination.yCoord+0.75;
+      int xlDraw = (int)(xLeft*tileSize)-diam_px/2;
+      int xrDraw = (int)(xRight*tileSize)-diam_px/2;
+      int yDraw = (int)(map_y*tileSize)-diam_px/2;
+      g.setColor(fxColor);
+
+      boolean flipUnitFacing = dropOrigin.xCoord >= dropDestination.xCoord;
+      unitSpriteSet.drawUnit(g, mover.CO, mover, 0, tileSize*dropDestination.xCoord, tileSize*dropDestination.yCoord, flipUnitFacing );
+      g.fillOval(xlDraw, yDraw, diam_px, diam_px);
+      g.fillOval(xrDraw, yDraw, diam_px, diam_px);
+
+      xLeft -= 0.07;
+      xRight += 0.07;
+      if( xLeft < xDrop-.3 ) done = true;
+    }
 
     return done;
   }
