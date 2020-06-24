@@ -19,8 +19,18 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.TeleportEvent;
 import Terrain.Location;
 import Terrain.MapMaster;
+import Terrain.TerrainType;
+import Units.AWBWWeapons;
 import Units.Unit;
 import Units.UnitModel;
+import Units.UnitModelScheme;
+import Units.UnitModelScheme.GameReadyModels;
+import Units.WeaponModel;
+import Units.AWBWUnits.AWBWUnitEnum;
+import Units.AWBWUnits.AWBWUnitModel;
+import Units.MoveTypes.FootMech;
+import Units.MoveTypes.MoveType;
+import Units.MoveTypes.Tread;
 
 public class Tech extends Commander
 {
@@ -42,7 +52,8 @@ public class Tech extends Commander
           TECHDROP_NAME + " (" + TECHDROP_COST + "):\n" +
               "Deploys " + TECHDROP_NUM + " BattleMech to the front lines.\n" +
               "All mechanical units gain " + TECHDROP_BUFF + "% attack.\n" +
-              "All units gain " + TECHDROP_BUFF + "% defense.\n"));
+              "All units gain " + TECHDROP_BUFF + "% defense.\n" +
+              "\nNOTE: BattleMechs require special parts and cannot normally be repaired.\n"));
       infoPages.add(new InfoPage(
           OVERCHARGE_NAME + " (" + OVERCHARGE_COST + "):\n" +
               "All mechanical units are repaired by " + OVERCHARGE_HEAL + " HP, allowing more than 10 HP for this turn.\n" +
@@ -52,7 +63,8 @@ public class Tech extends Commander
           STEEL_HAIL_NAME + " (" + STEEL_HAIL_COST + "):\n" +
               "Deploys " + STEEL_HAIL_NUM + " BattleMechs to the front lines.\n" +
               "All mechanical units gain " + STEEL_HAIL_BUFF + "% attack.\n" +
-              "All units gain " + STEEL_HAIL_BUFF + "% defense.\n"));
+              "All units gain " + STEEL_HAIL_BUFF + "% defense.\n" +
+              "\nNOTE: BattleMechs require special parts and cannot normally be repaired.\n"));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -83,15 +95,15 @@ public class Tech extends Commander
 
   // These units get the most benefit from Tech's abilities.
   private static long mechanicalUnits = UnitModel.TANK | UnitModel.HOVER | UnitModel.JET | UnitModel.SEA;
-
+  private UnitModel BattleMechModel = createBattleMechModel();
 
   public Tech(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
-    addCommanderAbility(new TechdropAbility(this, TECHDROP_NAME, TECHDROP_COST, TECHDROP_BUFF, TECHDROP_NUM, TECHDROP_RANGE));
+    addCommanderAbility(new TechdropAbility(this, TECHDROP_NAME, TECHDROP_COST, BattleMechModel, TECHDROP_BUFF, TECHDROP_NUM, TECHDROP_RANGE));
     addCommanderAbility(new OverchargeAbility(this, OVERCHARGE_NAME, OVERCHARGE_COST, OVERCHARGE_BUFF, OVERCHARGE_HEAL));
-    addCommanderAbility(new TechdropAbility(this, STEEL_HAIL_NAME, STEEL_HAIL_COST, STEEL_HAIL_BUFF, STEEL_HAIL_NUM, STEEL_HAIL_RANGE));
+    addCommanderAbility(new TechdropAbility(this, STEEL_HAIL_NAME, STEEL_HAIL_COST, BattleMechModel, STEEL_HAIL_BUFF, STEEL_HAIL_NUM, STEEL_HAIL_RANGE));
   }
 
   public static CommanderInfo getInfo()
@@ -174,12 +186,15 @@ public class Tech extends Commander
     private CODefenseModifier defenseBuff = null;
     private int dropRange;
     private int numDrops;
+    private UnitModel unitModelToDrop;
 
     GameEventQueue abilityEvents;
 
-    TechdropAbility(Commander commander, String abilityName, double abilityCost, int buff, int num, int abilityRange)
+    TechdropAbility(Commander commander, String abilityName, double abilityCost, UnitModel unitToDrop, int buff, int num, int abilityRange)
     {
       super(commander, abilityName, abilityCost);
+
+      unitModelToDrop = unitToDrop;
 
       // Create COModifiers that we can apply when needed.
       damageBuff = new CODamageModifier(buff);
@@ -238,9 +253,7 @@ public class Tech extends Commander
     private TeleportEvent generateDropEvent(MapMaster gameMap, Set<XYCoord> priorDrops, boolean log)
     {
       // Create a new Unit to drop onto the battlefield.
-      long unitFlags = UnitModel.ASSAULT | UnitModel.LAND | UnitModel.TANK; // TODO There has got to be a better way to choose a model.
-      UnitModel techModel = myCommander.getUnitModel( unitFlags, false );
-      Unit techMech = new Unit(myCommander, techModel);
+      Unit techMech = new Unit(myCommander, unitModelToDrop);
       techMech.isTurnOver = false; // Hit the ground ready to rumble.
       if( myCommander.HQLocation.xCoord >= gameMap.mapWidth / 2 )
         techMech.x = gameMap.mapWidth; // Make the unit face left as it falls to match the rest of the units.
@@ -258,7 +271,7 @@ public class Tech extends Commander
       {
         // Record any locations near owned properties; we want to be able to rescue unprotected structures.
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, propCoord, 0, dropRange) )
-          if( !techModel.propulsion.canTraverse(gameMap.getEnvironment(xyc)) )
+          if( !unitModelToDrop.propulsion.canTraverse(gameMap.getEnvironment(xyc)) )
             friendScores.put(xyc, 0);
       }
 
@@ -274,7 +287,7 @@ public class Tech extends Commander
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, uxy, dropRange) )
         {
           // No dropping into spaces we can't travel on.
-          if( !techModel.propulsion.canTraverse(gameMap.getEnvironment(xyc)) )
+          if( !unitModelToDrop.propulsion.canTraverse(gameMap.getEnvironment(xyc)) )
           {
             invalidDropCoords.add(xyc);
             continue;
@@ -291,7 +304,7 @@ public class Tech extends Commander
       // Account for friendly influence of prior drops.
       for( XYCoord pdc : priorDrops )
       {
-        Integer uval = techModel.getCost() * techMech.getHP();
+        Integer uval = unitModelToDrop.getCost() * techMech.getHP();
 
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, pdc, dropRange) )
         {
@@ -465,4 +478,36 @@ public class Tech extends Commander
       }
     }
   } // class TechDropAbility
+
+  /**
+   * Cobble together a new unit type from existing parts so that we don't have to modify
+   * the existing unit enum or damage tables. There are several downsides to this approach,
+   * like needing to use existing weapon/chassis types, and the fact that it'll break if
+   * we add a new UnitModelScheme with different units or weapons.
+   * @return A UnitModelScheme-compliant UnitModel to drop on enemy heads.
+   */
+  private UnitModel createBattleMechModel()
+  {
+    GameReadyModels grModels = gameRules.unitModelScheme.getGameReadyModels();
+    UnitModel mdTank = UnitModelScheme.getModelFromString("Md Tank", grModels.unitModels);
+    UnitModel BattleMech = mdTank.clone();
+    BattleMech.name = "BattleMech";
+    BattleMech.role = BattleMech.role | UnitModel.SURFACE_TO_AIR;
+//    BattleMech.moneyCost = 20000;
+    BattleMech.abilityPowerValue = 2.0;
+    BattleMech.maxFuel = 30;
+    BattleMech.maxAmmo = 10;
+    BattleMech.visionRange = 2;
+    BattleMech.movePower = 4;
+    BattleMech.propulsion = new FootMech();
+    BattleMech.healableHabs = new HashSet<TerrainType>(); // BattleMechs have specialized parts, not easy to repair.
+
+    UnitModel antiAir = UnitModelScheme.getModelFromString("Anti-Air", grModels.unitModels);
+    WeaponModel ratatat = antiAir.weapons.get(0).clone();
+    ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();
+    weapons.add(BattleMech.weapons.get(0));
+    weapons.add(ratatat);
+    BattleMech.weapons = weapons;
+    return BattleMech;
+  }
 } // class Tech
