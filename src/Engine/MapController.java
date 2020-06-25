@@ -381,7 +381,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           executeGameAction(myGameInputHandler.getReadyAction());
         }
-        myGameInputHandler.reset();
+        myGameInputHandler.reset(); // Reset the input handler to get rid of stale state
         break;
       case PATH_SELECT: // no special handling
         break;
@@ -544,6 +544,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           // Back to normal input mode.
           changeInputMode(InputMode.INPUT);
+          myGameInputHandler.reset();
         }
       }
     }

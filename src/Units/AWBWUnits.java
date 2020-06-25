@@ -467,7 +467,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public MobileSAMModel()
     {
-      super("Mobile SAM", AWBWUnitEnum.MOBILESAM, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Missiles", AWBWUnitEnum.MOBILESAM, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -785,7 +785,7 @@ public class AWBWUnits extends UnitModelScheme
       GameEventQueue events = new GameEventQueue();
       for( Unit cargo : self.heldUnits )
         if( !cargo.isFullySupplied() )
-          events.add(new ResupplyEvent(cargo));
+          events.add(new ResupplyEvent(self, cargo));
       return events;
     }
   }

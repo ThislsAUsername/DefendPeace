@@ -3,6 +3,7 @@ package UI.Art.SpriteArtist;
 import java.awt.Graphics;
 
 import Engine.GameInstance;
+import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import Units.Unit;
 
 public class UnitArtist
@@ -21,11 +22,12 @@ public class UnitArtist
    * "Real" means that the specified x and y are that of the game's
    * underlying data model, not of the draw-space.
    */
-  public void drawUnitIcons(Graphics g, Unit unit, double x, double y, int animIndex)
+  public void drawUnitIcons(Graphics g, Unit unit, int x, int y, int animIndex)
   {
     // Convert "real" location into a draw-space location, then draw icons.
     int drawX = (int) (myView.getTileSize() * x);
     int drawY = (int) (myView.getTileSize() * y);
+
     SpriteLibrary.getMapUnitSpriteSet(unit).drawUnitIcons(g, myGame.commanders, unit, animIndex, drawX, drawY);
   }
 
@@ -36,12 +38,13 @@ public class UnitArtist
    */
   public void drawUnit(Graphics g, Unit unit, int x, int y, int animIndex)
   {
-    // Convert "real" game-model location to a draw-space location.
     int drawX = (int) (myView.getTileSize() * x);
     int drawY = (int) (myView.getTileSize() * y);
+    boolean tired = unit.isStunned || (unit.isTurnOver && unit.CO == myGame.activeCO);
+    AnimState state = (tired) ? AnimState.TIRED : AnimState.IDLE;
 
     // Draw the unit at the specified location.
-    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnit(g, myGame.activeCO, unit, /*currentAction,*/
-    animIndex, drawX, drawY, myView.getFlipUnitFacing(unit.CO));
+    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnit(g, unit, state,
+    animIndex, drawX, drawY);
   }
 }

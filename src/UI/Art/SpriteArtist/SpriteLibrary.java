@@ -317,21 +317,8 @@ public class SpriteLibrary
 
   private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
-    Faction faction = key.factionKey;
-    String filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction.name);
-    if (!new File(filestr).canRead())
-      filestr = getMapUnitSpriteFilename(key.unitTypeKey, faction.basis);
-    UnitSpriteSet spriteSet = new UnitSpriteSet(SpriteLibrary.loadSpriteSheetFile(filestr), baseSpriteSize, baseSpriteSize,
-        UIUtils.getMapUnitColors(key.colorKey));
+    UnitSpriteSet spriteSet = new UnitSpriteSet( key.unitTypeKey, key.factionKey, UIUtils.getMapUnitColors(key.colorKey) );
     mapUnitSpriteSetMap.put(key, spriteSet);
-  }
-
-  private static String getMapUnitSpriteFilename(String unitType, String faction)
-  {
-    StringBuffer spriteFile = new StringBuffer();
-    spriteFile.append("res/unit/faction/").append(faction).append("/");
-    spriteFile.append(UnitModel.standardizeID(unitType)).append("_map.png");
-    return spriteFile.toString();
   }
 
   public static Sprite getMapUnitHPSprites()
