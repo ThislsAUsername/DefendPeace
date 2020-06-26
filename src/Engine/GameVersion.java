@@ -23,7 +23,7 @@ public class GameVersion implements Serializable
     boolean equal = true;
     equal &= (majorRev == other.majorRev);
     equal &= (minorRev == other.minorRev);
-    equal &= (hotfix   == other.hotfix);
+    equal &= (hotfix   >= other.hotfix);
     return equal;
   }
 
