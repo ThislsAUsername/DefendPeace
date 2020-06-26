@@ -359,13 +359,13 @@ public class Tech extends Commander
           int val = enemyScores.get(nmexy); // Currently worth this much.
           if( friendScores.containsKey(nmexy) ) friendScores.put(nmexy, 0); // Remove nearby-friend score penalty when smashing is an option.
 
-          Set<XYCoord> enemyLocations = AIUtils.findPossibleTargets(gameMap, techMech, nmexy);
+          boolean shootTerrain = false;
+          Set<XYCoord> enemyLocations = AIUtils.findPossibleTargets(gameMap, techMech, nmexy, shootTerrain);
           if( log ) System.out.println(String.format("Would have %d possible attacks after squashing %s", enemyLocations.size(), nme.toStringWithLocation()));
-
           int bestAttackVal = 0;
           for( XYCoord targetxy : enemyLocations )
           {
-            if( priorDrops.contains(targetxy) )
+            if( priorDrops.contains(targetxy) || (targetxy.equals(nmexy)) )
               continue; // Ignore enemies that are about to get pasted anyway.
 
             Unit t = gameMap.getLocation(targetxy).getResident();

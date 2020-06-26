@@ -51,6 +51,12 @@ public class Utils
   /** Returns a list of locations of all valid targets that weapon could hit from attackerPosition. */
   public static ArrayList<XYCoord> findTargetsInRange(GameMap map, Commander co, XYCoord attackerPosition, WeaponModel weapon)
   {
+    return findTargetsInRange(map, co, attackerPosition, weapon, true);
+  }
+
+  /** Returns a list of locations of all valid targets that weapon could hit from attackerPosition. */
+  public static ArrayList<XYCoord> findTargetsInRange(GameMap map, Commander co, XYCoord attackerPosition, WeaponModel weapon, boolean includeTerrain)
+  {
     ArrayList<XYCoord> locations = findLocationsInRange(map, attackerPosition, weapon.minRange, weapon.maxRange);
     ArrayList<XYCoord> targets = new ArrayList<XYCoord>();
     for( XYCoord loc : locations )
@@ -63,7 +69,7 @@ public class Utils
         targets.add(loc);
       }
       // You can never be friends with terrain, so shoot anything that's shootable
-      else if (resident == null && // Peeps ain't there.
+      else if (includeTerrain && resident == null && // Peeps ain't there.
                weapon.getDamage(map.getEnvironment(loc).terrainType) > 0)
         targets.add(loc);
     }
