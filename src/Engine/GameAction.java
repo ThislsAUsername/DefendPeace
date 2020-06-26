@@ -131,11 +131,10 @@ public abstract class GameAction
     @Override
     public GameEventQueue getEvents(MapMaster map)
     {
-      myEvent.generateAbilityEvents(map); // Let the ability figure out what's gonna go down.
-
-      // We still just return this event as the gateway.
+      // Create an event for the ability itself, and then append any additional events.
       GameEventQueue abilityEvents = new GameEventQueue();
       abilityEvents.add(myEvent);
+      abilityEvents.addAll(myEvent.generateAbilityEvents(map));
       return abilityEvents;
     }
 

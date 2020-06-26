@@ -21,11 +21,6 @@ public class CommanderAbilityEvent implements GameEvent
   {
     // TODO: CO Ability intro splash
     GameAnimation anim = null;
-    if( !gameEvents.isEmpty() )
-    {
-      // Just grab the first one for now; TODO create compound animations.
-      anim = gameEvents.peek().getEventAnimation(mapView);
-    }
     return anim;
   }
 
@@ -45,9 +40,10 @@ public class CommanderAbilityEvent implements GameEvent
   }
 
   /** Called by AbilityAction before `getEventAnimation`, `performEvent`, or `sendToListener`. */
-  public void generateAbilityEvents(MapMaster gameMap)
+  public GameEventQueue generateAbilityEvents(MapMaster gameMap)
   {
     gameEvents = myAbility.getEvents(gameMap);
+    return gameEvents;
   }
 
   @Override

@@ -183,8 +183,6 @@ public class Tech extends Commander
     private int numDrops;
     private UnitModel unitModelToDrop;
 
-    GameEventQueue abilityEvents;
-
     TechdropAbility(Commander commander, String abilityName, double abilityCost, UnitModel unitToDrop, int buff, int num, int abilityRange)
     {
       super(commander, abilityName, abilityCost);
@@ -196,7 +194,6 @@ public class Tech extends Commander
       defenseBuff = new CODefenseModifier(buff);
       numDrops = num;
       dropRange = abilityRange;
-      abilityEvents = new GameEventQueue();
 
       // Only mechanical units get the firepower boost.
       long allUnits = ~0;
@@ -209,15 +206,9 @@ public class Tech extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      // Bump up our power level.
+      // Bump up our power level. The actual drops are handled by getEvents().
       myCommander.addCOModifier(damageBuff);
       myCommander.addCOModifier(defenseBuff);
-
-      // Perform any events we generated in getEvents().
-      while(!abilityEvents.isEmpty())
-      {
-        abilityEvents.poll().performEvent(gameMap);
-      }
     }
 
     @Override
@@ -225,6 +216,8 @@ public class Tech extends Commander
     {
       boolean log = true;
       if( log ) System.out.println("[TechDrop] getEvents() entry");
+
+      GameEventQueue abilityEvents = new GameEventQueue();
 
       // Prep events for `numDrops` deployments. Recalculate landing position between each.
       Set<XYCoord> dropLocs = new HashSet<XYCoord>();
@@ -267,7 +260,7 @@ public class Tech extends Commander
       {
         // Record any locations near owned properties; we want to be able to rescue unprotected structures.
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, propCoord, 0, dropRange) )
-          if( !unitModelToDrop.propulsion.canTraverse(gameMap.getEnvironment(xyc)) )
+          if( unitModelToDrop.propulsion.canTraverse(gameMap.getEnvironment(xyc)) )
             friendScores.put(xyc, 0);
       }
 
