@@ -490,10 +490,11 @@ public class Tech extends Commander
   private UnitModel createBattleMechModel()
   {
     UnitModel mdTank = UnitModelScheme.getModelFromString("Md Tank", unitModels);
+    UnitModel antiAir = UnitModelScheme.getModelFromString("Anti-Air", unitModels);
     UnitModel BattleMech = mdTank.clone();
     BattleMech.name = "BattleMech";
     BattleMech.role = BattleMech.role | UnitModel.SURFACE_TO_AIR;
-//    BattleMech.moneyCost = 20000;
+    BattleMech.moneyCostAdjustment = mdTank.getCost() + (antiAir.getCost()/2);
     BattleMech.abilityPowerValue = 2.0;
     BattleMech.maxFuel = 30;
     BattleMech.maxAmmo = 10;
@@ -502,7 +503,6 @@ public class Tech extends Commander
     BattleMech.propulsion = new FootMech();
     BattleMech.healableHabs = new HashSet<TerrainType>(); // BattleMechs have specialized parts, not easy to repair.
 
-    UnitModel antiAir = UnitModelScheme.getModelFromString("Anti-Air", unitModels);
     WeaponModel ratatat = antiAir.weapons.get(0).clone();
     ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();
     weapons.add(BattleMech.weapons.get(0));
