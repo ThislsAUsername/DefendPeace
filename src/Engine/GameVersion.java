@@ -14,7 +14,7 @@ public class GameVersion implements Serializable
   {
     majorRev = 4; // For substantial, save-breaking changes to the game logic.
     minorRev = 2; // For added content or UI updates
-    hotfix   = 0; // For bugfixes (hopefully to never see increment)
+    hotfix   = 1; // For bugfixes (hopefully to never see increment)
   }
   
   // TODO: Consider more nuanced validation here
