@@ -64,7 +64,7 @@ public class StrikeParams
     this.map = map;
 
     this.battleRange = battleRange;
-    this.attackPower = attackPower;
+    this.attackPower = attackPower + attacker.body.CO.getTowerBoost();
     this.isCounter = isCounter;
     this.isSim = isSim;
     this.baseDamage = baseDamage;
@@ -111,7 +111,7 @@ public class StrikeParams
           isCounter, isSim);
       this.defender = defender;
 
-      this.defensePower = defensePower;
+      this.defensePower = defensePower + defender.body.CO.getTowerDefBoost();
       this.terrainStars = terrainStars;
       defenderHP = defender.body.getHP();
       applyTerrain = !defender.body.model.isAirUnit();
