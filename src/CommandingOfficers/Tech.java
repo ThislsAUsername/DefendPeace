@@ -78,7 +78,7 @@ public class Tech extends Commander
 
   private static final String OVERCHARGE_NAME = "Overcharge";
   private static final int OVERCHARGE_COST = 6;
-  private static final int OVERCHARGE_BUFF = 20;
+  private static final int OVERCHARGE_BUFF = 10;
   private static final int OVERCHARGE_HEAL = 3;
 
   private static final String STEEL_HAIL_NAME = "Steel Hail";
