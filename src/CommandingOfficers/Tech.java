@@ -20,17 +20,11 @@ import Engine.GameEvents.TeleportEvent;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
-import Units.AWBWWeapons;
 import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModelScheme;
-import Units.UnitModelScheme.GameReadyModels;
 import Units.WeaponModel;
-import Units.AWBWUnits.AWBWUnitEnum;
-import Units.AWBWUnits.AWBWUnitModel;
 import Units.MoveTypes.FootMech;
-import Units.MoveTypes.MoveType;
-import Units.MoveTypes.Tread;
 
 public class Tech extends Commander
 {
@@ -93,8 +87,6 @@ public class Tech extends Commander
   private static final int STEEL_HAIL_NUM = 3;
   private static final int STEEL_HAIL_RANGE = 3;
 
-  // These units get the most benefit from Tech's abilities.
-  private static long mechanicalUnits = UnitModel.TANK | UnitModel.HOVER | UnitModel.JET | UnitModel.SEA;
   private UnitModel BattleMechModel = createBattleMechModel();
 
   public Tech(GameScenario.GameRules rules)
@@ -137,9 +129,10 @@ public class Tech extends Commander
   /** Heal all units by the specified amount, allowing HP>10, and provide a buff. */
   private static class OverchargeAbility extends CommanderAbility
   {
-    private CODamageModifier damageBuff = null;
-    private CODefenseModifier defenseBuff = null;
+    private CODamageModifier damageBuff;
+    private CODefenseModifier defenseBuff;
     private int healAmount;
+    private ArrayList<UnitModel> unitsToOverCharge;
 
     public OverchargeAbility(Commander commander, String abilityName, double abilityCost, int buff, int healAmt)
     {
@@ -150,10 +143,12 @@ public class Tech extends Commander
       defenseBuff = new CODefenseModifier(buff);
       healAmount = healAmt;
 
-      // Only mechanical units get the firepower boost.
+      // Only mechanical/non-troop units get the firepower boost.
+      long allUnits = ~0;
       long exclude = UnitModel.TROOP;
-      ArrayList<UnitModel> models = commander.getAllModels(Tech.mechanicalUnits, true, exclude);
-      for( UnitModel m : models )
+      unitsToOverCharge = commander.getAllModels(allUnits, true, exclude);
+
+      for( UnitModel m : unitsToOverCharge )
         damageBuff.addApplicableUnitModel(m);
 
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
@@ -171,9 +166,8 @@ public class Tech extends Commander
       // Overcharge
       for(Unit u: myCommander.units)
       {
-        // Only mechanical units get overcharged.
-        if( u.model.isNone(UnitModel.TROOP) )
-        u.alterHP(healAmount, true);
+        if( unitsToOverCharge.contains(u.model) )
+          u.alterHP(healAmount, true);
       }
     }
   }
@@ -205,8 +199,9 @@ public class Tech extends Commander
       abilityEvents = new GameEventQueue();
 
       // Only mechanical units get the firepower boost.
+      long allUnits = ~0;
       long exclude = UnitModel.TROOP;
-      ArrayList<UnitModel> models = commander.getAllModels(Tech.mechanicalUnits, true, exclude);
+      ArrayList<UnitModel> models = commander.getAllModels(allUnits, true, exclude);
       for( UnitModel m : models )
         damageBuff.addApplicableUnitModel(m);
     }
