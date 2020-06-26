@@ -489,8 +489,7 @@ public class Tech extends Commander
    */
   private UnitModel createBattleMechModel()
   {
-    GameReadyModels grModels = gameRules.unitModelScheme.getGameReadyModels();
-    UnitModel mdTank = UnitModelScheme.getModelFromString("Md Tank", grModels.unitModels);
+    UnitModel mdTank = UnitModelScheme.getModelFromString("Md Tank", unitModels);
     UnitModel BattleMech = mdTank.clone();
     BattleMech.name = "BattleMech";
     BattleMech.role = BattleMech.role | UnitModel.SURFACE_TO_AIR;
@@ -503,7 +502,7 @@ public class Tech extends Commander
     BattleMech.propulsion = new FootMech();
     BattleMech.healableHabs = new HashSet<TerrainType>(); // BattleMechs have specialized parts, not easy to repair.
 
-    UnitModel antiAir = UnitModelScheme.getModelFromString("Anti-Air", grModels.unitModels);
+    UnitModel antiAir = UnitModelScheme.getModelFromString("Anti-Air", unitModels);
     WeaponModel ratatat = antiAir.weapons.get(0).clone();
     ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();
     weapons.add(BattleMech.weapons.get(0));
