@@ -38,13 +38,14 @@ public class OmegaKoal extends Commander
   public static final int baseDef = 20;
   private int nowPow = basePow; // floating values that dip on powers to match the above
   private int nowDef = baseDef;
+  public static final String SCOP_NAME = "Trail of Woe";
 
   public OmegaKoal(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
     addCommanderAbility(new RoadRage(this, "Forced March", 3, 1, 30, 0));
-    addCommanderAbility(new RoadRage(this, "Trail of Woe", 5, 2, 30, 30));
+    addCommanderAbility(new RoadRage(this, SCOP_NAME, 5, 2, 30, 30));
   }
 
   public static CommanderInfo getInfo()
@@ -64,7 +65,11 @@ public class OmegaKoal extends Commander
   public void modifyUnitAttack(StrikeParams params)
   {
     if( params.attackerTerrainStars < 1 )
+    {
       params.attackPower += nowPow;
+      if( params.isCounter && SCOP_NAME.contentEquals(getActiveAbilityName()) )
+        params.attackPower *= 2;
+    }
   }
   @Override
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
