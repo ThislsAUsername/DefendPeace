@@ -81,9 +81,7 @@ public class AirDropAnimation extends BaseUnitActionAnimation
         xRight = xDrop+0.75;
       }
 
-      int xDraw = (int)(xDrop*tileSize);
-      int yDraw = (int)(yCurrent*tileSize);
-      drawUnit(g, actor, AnimState.IDLE, xDraw, yDraw);
+      drawUnit(g, actor, AnimState.IDLE, xDrop, yCurrent);
     }
     else if(2==phase)
     {
@@ -97,7 +95,7 @@ public class AirDropAnimation extends BaseUnitActionAnimation
       int yDraw = (int)(map_y*tileSize)-diam_px/2;
       g.setColor(fxColor);
 
-      drawUnit(g, actor, AnimState.IDLE, tileSize*dropDestination.xCoord, tileSize*dropDestination.yCoord);
+      drawUnit(g, actor, AnimState.IDLE, dropDestination.xCoord, dropDestination.yCoord);
       g.fillOval(xlDraw, yDraw, diam_px, diam_px);
       g.fillOval(xrDraw, yDraw, diam_px, diam_px);
 
