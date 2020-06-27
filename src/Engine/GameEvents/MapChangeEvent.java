@@ -49,8 +49,9 @@ public class MapChangeEvent implements GameEvent
       Location loc = gameMap.getLocation(ea.where);
       if( null != loc )
       {
+        if( loc.getEnvironment().terrainType != ea.environment.terrainType )
+          loc.durability = 99;
         loc.setEnvironment(ea.environment);
-        loc.durability = 99;
         if( ea.duration > 0 )
           loc.setForecast(ea.environment.weatherType, (gameMap.commanders.length * ea.duration) - 1);
       }

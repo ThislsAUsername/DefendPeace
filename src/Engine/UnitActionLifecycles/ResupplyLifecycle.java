@@ -148,7 +148,7 @@ public abstract class ResupplyLifecycle
           if( other != null && other != unitActor && other.CO == unitActor.CO && !other.isFullySupplied() )
           {
             // Add a re-supply event for this unit.
-            eventSequence.add(new ResupplyEvent(other));
+            eventSequence.add(new ResupplyEvent(unitActor, other));
           }
         }
       }

@@ -101,7 +101,7 @@ public abstract class MapView implements IView
   {
     return null;
   }
-  public GameAnimation buildResupplyAnimation(Unit unit)
+  public GameAnimation buildResupplyAnimation(Unit supplier, Unit unit)
   {
     return null;
   }

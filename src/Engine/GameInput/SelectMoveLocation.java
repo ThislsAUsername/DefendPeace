@@ -74,7 +74,7 @@ class SelectMoveLocation extends GameInputState<XYCoord>
   {
     if( null == myStateData.path )
     {
-      myStateData.path = new Path(42);
+      myStateData.path = new Path();
     }
 
     // If the new point already exists on the path, cut the extraneous points out.

@@ -1,6 +1,8 @@
 package UI.Art.Animation;
 
 import java.awt.Graphics;
+import java.util.ArrayList;
+import Units.Unit;
 
 public interface GameAnimation
 {
@@ -13,4 +15,12 @@ public interface GameAnimation
    * Allows the caller to tell this animation to end early.
    */
   public void cancel();
+
+  /**
+   * The set of units that shouldn't be otherwise drawn while the GameAnimation is in progress
+   */
+  public default ArrayList<Unit> getActors()
+  {
+    return new ArrayList<Unit>();
+  }
 }

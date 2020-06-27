@@ -262,7 +262,7 @@ public class Utils
       return null;
     }
 
-    Path aPath = new Path(100);
+    Path aPath = new Path();
     if( !map.isLocationValid(x, y) )
     {
       // Unit is not in a valid place. No path can be found.

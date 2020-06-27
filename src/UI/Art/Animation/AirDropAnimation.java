@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import Engine.XYCoord;
 import UI.Art.SpriteArtist.SpriteLibrary;
 import UI.Art.SpriteArtist.UnitSpriteSet;
+import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import Units.Unit;
 
 public class AirDropAnimation implements GameAnimation
@@ -90,8 +91,7 @@ public class AirDropAnimation implements GameAnimation
 
       int xDraw = (int)(xDrop*tileSize);
       int yDraw = (int)(yCurrent*tileSize);
-      boolean flipUnitFacing = dropOrigin.xCoord >= dropDestination.xCoord;
-      unitSpriteSet.drawUnit(g, mover.CO, mover, 0, xDraw, yDraw, flipUnitFacing );
+      unitSpriteSet.drawUnit(g, mover, AnimState.IDLE, 0, xDraw, yDraw);
     }
     else if(2==phase)
     {
@@ -105,8 +105,7 @@ public class AirDropAnimation implements GameAnimation
       int yDraw = (int)(map_y*tileSize)-diam_px/2;
       g.setColor(fxColor);
 
-      boolean flipUnitFacing = dropOrigin.xCoord >= dropDestination.xCoord;
-      unitSpriteSet.drawUnit(g, mover.CO, mover, 0, tileSize*dropDestination.xCoord, tileSize*dropDestination.yCoord, flipUnitFacing );
+      unitSpriteSet.drawUnit(g, mover, AnimState.IDLE, 0, tileSize*dropDestination.xCoord, tileSize*dropDestination.yCoord);
       g.fillOval(xlDraw, yDraw, diam_px, diam_px);
       g.fillOval(xrDraw, yDraw, diam_px, diam_px);
 

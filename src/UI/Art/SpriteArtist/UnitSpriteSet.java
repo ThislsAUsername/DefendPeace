@@ -3,119 +3,139 @@ package UI.Art.SpriteArtist;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.awt.image.RasterFormatException;
+import java.io.File;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
 import UI.UIUtils;
+import UI.UIUtils.Faction;
 import Units.Unit;
+import Units.UnitModel;
 
 public class UnitSpriteSet
 {
+  Sprite sprites[] = new Sprite[AnimState.values().length];
 
-  Sprite sprites[] = new Sprite[6];
-
-  public static final int ACTION_IDLE = 0;
-  public static final int ACTION_MOVENORTH = 1;
-  public static final int ACTION_MOVEEAST = 2;
-  public static final int ACTION_MOVESOUTH = 3;
-  public static final int ACTION_MOVEWEST = 4;
-  public static final int ACTION_DIE = 5;
-  
   public final int ANIM_FRAMES_PER_MARK = 3; 
 
   Sprite turnDone;
+  public static enum AnimState
+  {
+    IDLE
+    {
+      public String toString()
+      {
+        return ""; // To match the existing map image format
+      }
+    },
+    TIRED, MOVENORTH, MOVEEAST, MOVESOUTH, MOVEWEST, DIE
+  }
 
   /**
-   * UnitSpritSet constructor - parse the provided sprite sheet. Sprites are expected to 
-   * be arranged in rows by animation type, in the following order:
-   * idle
-   * Move North
-   * Move East
-   * Move South
-   * Move West
-   * Death
-   * 
-   * @param spriteSheet The image containing the frames to be used in this sprite set.
-   * @param width The width of each frame in the sprite.
-   * @param height The height of each frame in the sprite.
+   * Fetch a sprite sheet for each animation state and colorize it
+   * @param fileFinder Mapping from action type to file name
+   * @param coColors What colors the end sprites should use
    */
-  public UnitSpriteSet(BufferedImage spriteSheet, int width, int height, ColorPalette coColors)
+  public UnitSpriteSet(String unitType, Faction faction, ColorPalette coColors)
   {
-    int h = 0;
-    int action = ACTION_IDLE; // This variable relies on the ordering of the ACTION variables defined above.
-
     try
     {
-      if( null != spriteSheet && spriteSheet.getWidth() >= width && spriteSheet.getHeight() >= height )
+      // Create a filename string template to fetch all relevant animations.
+      String filenameTemplate = getMapUnitSpriteFilenameTemplate(unitType, faction);
+      for( int action = 0; action < AnimState.values().length; ++action )
       {
-        while (height <= spriteSheet.getHeight() && action <= ACTION_DIE)
+        // Get the filename for this animation state.
+        String fileStr = String.format(filenameTemplate, UnitModel.standardizeID(AnimState.values()[action].toString()));
+
+        BufferedImage spriteSheet = SpriteLibrary.loadSpriteSheetFile(fileStr);
+        if( null != spriteSheet )
         {
-          Sprite spr = new Sprite(spriteSheet.getSubimage(0, h, spriteSheet.getWidth(), height), width, height);
+          // Assume sub-sprites are squares that fill out the height of the source image
+          Sprite spr = new Sprite(spriteSheet, spriteSheet.getHeight(), spriteSheet.getHeight());
           sprites[action] = spr;
-          ++action;
         }
-        if( action < ACTION_DIE )
-        { // We didn't load all animations we wanted - our sprite set is incomplete. Default the rest to IDLE.
-          sprites[action] = sprites[ACTION_IDLE];
-          ++action;
-        }
-      }
-      else
-      { // No sprite sheet provided? Just make stuff up.
-        System.out.println("WARNING! Continuing with placeholder images.");
-        sprites[ACTION_IDLE] = new Sprite(null, width, height);
-        for( int i = ACTION_IDLE + 1; i <= ACTION_DIE; ++i )
-        {
-          sprites[i] = sprites[ACTION_IDLE];
-        }
-        turnDone = sprites[ACTION_IDLE];
       }
     }
-    catch (RasterFormatException rfe)
+    catch (Exception e)
     {
-      // Something went wrong. Just make something up and hope nobody notices.
-      // Use the IDLE action if it exists, otherwise we are going with a black rectangle.
-      Sprite defaultSprite = (action > ACTION_IDLE) ? sprites[ACTION_IDLE] : new Sprite(null, width, height);
-
-      System.out.println("WARNING: RasterFormatException in UnitSpriteSet constructor.");
+      System.out.println("WARNING: Exception hit in UnitSpriteSet constructor:" + e);
       System.out.println("WARNING:   Attempting to continue.");
-      for( ; action <= ACTION_DIE; ++action )
-      {
+    }
+
+    // Handle the case of having one sideways move direction and not the other defined
+    if( null == sprites[AnimState.MOVEEAST.ordinal()] && null != sprites[AnimState.MOVEWEST.ordinal()] )
+      sprites[AnimState.MOVEEAST.ordinal()] = new Sprite(sprites[AnimState.MOVEWEST.ordinal()], true);
+
+    if( null == sprites[AnimState.MOVEWEST.ordinal()] && null != sprites[AnimState.MOVEEAST.ordinal()] )
+      sprites[AnimState.MOVEWEST.ordinal()] = new Sprite(sprites[AnimState.MOVEEAST.ordinal()], true);
+
+    // Fill out any missing images
+    Sprite defaultSprite = sprites[AnimState.IDLE.ordinal()];
+    // Use the IDLE action if it exists, otherwise we are going with a black rectangle.
+    if( null == defaultSprite )
+      defaultSprite = new Sprite(null, SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize);
+    for( int action = 0; action < AnimState.values().length; ++action )
+    {
+      if( null == sprites[action] )
         sprites[action] = defaultSprite;
-      }
     }
 
     colorize(UIUtils.defaultMapColors, coColors.paletteColors);
-    if( action > 0 ) // We at least got the IDLE sprites. Use those as the basis for the "already moved" sprites.
+
+    Sprite turnDone = new Sprite(sprites[AnimState.TIRED.ordinal()]);
+    sprites[AnimState.TIRED.ordinal()] = turnDone;
+
+    // Get my color presets.
+    Color tiredColor = new Color(128, 128, 128, 160);
+
+    // Shade each frame so the unit can be grayed-out after moving.
+    for( int f = 0; f < turnDone.numFrames(); ++f )
     {
-      turnDone = new Sprite(sprites[0]); // Duplicate the IDLE sprite to make the TurnDone sprite.
+      BufferedImage frame = turnDone.getFrame(f);
+      Graphics g = frame.getGraphics();
+      g.setColor(tiredColor);
 
-      // Get my color presets.
-      Color tiredColor = new Color(128, 128, 128, 160);
-
-      // Shade each frame so the unit can be grayed-out after moving.
-      for( int f = 0; f < turnDone.numFrames(); ++f )
+      // Loop through each pixel and shade the non-transparent ones.
+      for( int y = 0; y < frame.getHeight(); ++y )
       {
-        BufferedImage frame = turnDone.getFrame(f);
-        Graphics g = frame.getGraphics();
-        g.setColor(tiredColor);
-
-        // Loop through each pixel and shade the non-transparent ones.
-        for( int y = 0; y < frame.getHeight(); ++y )
+        for( int x = 0; x < frame.getWidth(); ++x )
         {
-          for( int x = 0; x < frame.getWidth(); ++x )
+          // Only shade pixels that are are not transparent.
+          if( frame.getRGB(x, y) != 0 )
           {
-            // Only shade pixels that are are not transparent.
-            if( frame.getRGB(x, y) != 0 )
-            {
-              // Yes, one pixel at a time.
-              g.fillRect(x, y, 1, 1);
-            }
+            // Yes, one pixel at a time.
+            g.fillRect(x, y, 1, 1);
           }
         }
       }
     }
+
+  }
+
+  /**
+   * Find the IDLE map-sprite file for the given unit type, as owned by the specified faction.
+   * If the specified faction has no sprite for that unit, it will try to load it from that faction's
+   * basis instead. If the basis also has no sprite, then it will default to the "Thorn" version.
+   * The resulting template-string ensures that all sprites loaded are from the same faction set.
+   * @return A string with the given unit/faction names populated, and a template token for the unit state.
+   */
+  private String getMapUnitSpriteFilenameTemplate(String unitType, Faction faction)
+  {
+    final String format = "res/unit/faction/%s/%s_map%s.png";
+
+    // Try the faction's proper name, the one it's based off of, then default to "Thorn" if all else fails.
+    String[] namesToTry = {faction.name, faction.basis};
+    String template = String.format( format, "Thorn", UnitModel.standardizeID(unitType), "" ); // Replace if we can.
+    for( String name : namesToTry )
+    {
+      String idleName = String.format( format, name, UnitModel.standardizeID(unitType), "" );
+      if (new File(idleName).canRead())
+      {
+        template = String.format( format, name, UnitModel.standardizeID(unitType), "%s" );
+        break;
+      }
+    }
+    return template;
   }
 
   private void colorize(Color[] oldColors, Color[] newColors)
@@ -129,21 +149,9 @@ public class UnitSpriteSet
   /**
    * Return the subimage of the requested sprite, greying if it cannot move, unless a different CO is active.
    */
-  private BufferedImage getUnitImage(Commander activeCO, Unit u, int imageIndex)
+  private BufferedImage getUnitImage(AnimState state, int imageIndex)
   {
-    BufferedImage frame = null;
-
-    // Retrieve the correct subimage.
-    if( u.isStunned || (u.isTurnOver && u.CO == activeCO) )
-    {
-      frame = turnDone.getFrame(imageIndex);
-    }
-    else
-    {
-      frame = sprites[ACTION_IDLE/*action*/].getFrame(imageIndex);
-    }
-
-    return frame;
+    return sprites[state.ordinal()].getFrame(imageIndex);
   }
 
   /**
@@ -156,24 +164,28 @@ public class UnitSpriteSet
     return frame;
   }
 
-  public void drawUnit(Graphics g, Commander activeCO, Unit u, /* int action,*/int imageIndex, int drawX, int drawY, boolean flipImage)
+  public void drawUnit(Graphics g, Unit u, AnimState state, int imageIndex, int drawX, int drawY)
   {
-    BufferedImage frame = getUnitImage(activeCO, u, imageIndex);
+    boolean flipImage = SpriteMapView.shouldFlip(u);
+
+    BufferedImage frame = getUnitImage(state, imageIndex);
+    int shiftX =(SpriteLibrary.baseSpriteSize - frame.getWidth())/2; // center X
+    int shiftY = SpriteLibrary.baseSpriteSize - frame.getHeight(); // bottom-justify Y
 
     // Draw the unit, facing the appropriate direction.
-    if( flipImage )
+    if( flipImage && isStateFlippable(state) )
     {
-      g.drawImage(frame, drawX + (frame.getWidth()), drawY, -frame.getWidth(), frame.getHeight(), null);
+      g.drawImage(frame, drawX - shiftX + (frame.getWidth()), drawY + shiftY, -frame.getWidth(), frame.getHeight(), null);
     }
     else
     {
-      g.drawImage(frame, drawX, drawY, frame.getWidth(), frame.getHeight(), null);
+      g.drawImage(frame, drawX + shiftX, drawY + shiftY, frame.getWidth(), frame.getHeight(), null);
     }
   }
 
   public void drawUnitIcons(Graphics g, Commander[] COs, Unit u, int animIndex, int drawX, int drawY)
   {
-    int unitHeight = turnDone.getFrame(0).getHeight();
+    int unitHeight = sprites[0].getFrame(0).getHeight();
 
     ArrayList<BufferedImage> unitIcons = new ArrayList<BufferedImage>();
 
@@ -254,6 +266,20 @@ public class UnitSpriteSet
 
       // Draw the icon
       g.drawImage( icon, iconX, iconY, iconW, iconH, null );
+    }
+  }
+
+  public static boolean isStateFlippable(AnimState state)
+  {
+    switch(state)
+    {
+      case MOVENORTH:
+      case MOVEEAST:
+      case MOVESOUTH:
+      case MOVEWEST:
+        return false;
+      default:
+        return true;
     }
   }
 }
