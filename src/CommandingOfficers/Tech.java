@@ -260,12 +260,8 @@ public class Tech extends Commander
       {
         // Record any locations near owned properties; we want to be able to rescue unprotected structures.
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, propCoord, 0, dropRange) )
-          if( unitModelToDrop.propulsion.canTraverse(gameMap.getEnvironment(xyc)) )
-            friendScores.put(xyc, 0);
+          friendScores.put(xyc, 0);
       }
-
-      Set<XYCoord> invalidDropCoords = new HashSet<XYCoord>();
-      invalidDropCoords.addAll(priorDrops);
 
       // Calculate areas of influence for friendly units.
       for( Unit u : myCommander.units )
@@ -275,19 +271,9 @@ public class Tech extends Commander
 
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, uxy, dropRange) )
         {
-          // No dropping into spaces we can't travel on.
-          if( !unitModelToDrop.propulsion.canTraverse(gameMap.getEnvironment(xyc)) )
-          {
-            invalidDropCoords.add(xyc);
-            continue;
-          }
-
           Integer curVal = friendScores.putIfAbsent(xyc, uval);               // Put value if absent
           if( null != curVal ) friendScores.put(xyc, Math.max(curVal, uval)); // Take the larger value.
         }
-
-        // Remove any spaces that already have friends in them - no smashing friends.
-        invalidDropCoords.add(uxy); // No stomping on friends!
       }
 
       // Account for friendly influence of prior drops.
@@ -304,6 +290,8 @@ public class Tech extends Commander
           }
         }
       }
+
+      Set<XYCoord> invalidDropCoords = findInvalidDropCoords(gameMap, friendScores.keySet(), priorDrops);
 
       // Next calculate unfriendly values. Note that these are only eligible landing spaces if they are also within
       // range of friendly units, but it's easier to just compute all the values and then ignore invalid places.
@@ -326,34 +314,13 @@ public class Tech extends Commander
         // Assign base scores for spaces around this enemy.
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, nmexy, 0, dropRange) )
         {
-          // No dropping into enemy-held properties.
-          Location xycl = gameMap.getLocation(xyc);
-          if( xycl.isCaptureable() && (null != xycl.getOwner()) && xycl.getOwner().isEnemy(myCommander))
-          {
-            invalidDropCoords.add(xyc);
-            continue;
-          }
-
-          // No dropping into spaces we couldn't enter normally.
-          if( !techMech.model.propulsion.canTraverse(gameMap.getEnvironment(xyc)) )
-          {
-            invalidDropCoords.add(xyc);
-            continue;
-          }
-
           double discountFactor = 0.5; // Farther spaces are worth less. This encourages up-in-your-facedness.
           Integer discountedVal = (int)(nmeval * Math.pow(discountFactor, xyc.getDistance(nmexy)));
           Integer curVal = enemyScores.putIfAbsent(xyc, discountedVal);                  // Put value if absent
           if( null != curVal ) enemyScores.put(xyc, Math.max(curVal, discountedVal));    // Keep the larger value.
         }
 
-        // We can't squash non-troops.
-        if( !nme.model.isTroop() )
-        {
-          invalidDropCoords.add(nmexy);
-          continue;
-        }
-        else if( !invalidDropCoords.contains(nmexy) )
+        if( !invalidDropCoords.contains(nmexy) )
         {
           // Valid drop locations containing enemy troops rate higher based on whom we could strike from there.
           int val = enemyScores.get(nmexy); // Currently worth this much.
@@ -447,6 +414,37 @@ public class Tech extends Commander
       myCommander.units.add(techMech);
       TeleportEvent techDrop = new TeleportEvent(gameMap, techMech, landingZone, TeleportEvent.AnimationStyle.DROP_IN, TeleportEvent.CollisionOutcome.KILL);
       return techDrop;
+    }
+
+    private Set<XYCoord> findInvalidDropCoords(MapMaster gameMap, final Set<XYCoord> options, final Set<XYCoord> priorDrops)
+    {
+      Set<XYCoord> invalidDropCoords = new HashSet<XYCoord>();
+      invalidDropCoords.addAll(priorDrops);
+      for( XYCoord pdc : options )
+      {
+        // No unfortunate accidents
+        if( !unitModelToDrop.propulsion.canTraverse(gameMap.getEnvironment(pdc)) )
+          invalidDropCoords.add(pdc);
+
+        // No trespassing
+        Location xycl = gameMap.getLocation(pdc);
+        if( xycl.isCaptureable() && (null != xycl.getOwner()) && xycl.getOwner().isEnemy(myCommander) )
+          invalidDropCoords.add(pdc);
+
+        Unit resident = xycl.getResident();
+        if( null == resident )
+          continue;
+
+        // No stomping on friends!
+        if( !myCommander.isEnemy(resident.CO) )
+          invalidDropCoords.add(pdc);
+
+        // Only stomp on squishies
+        if( !resident.model.isTroop() )
+          invalidDropCoords.add(pdc);
+      }
+
+      return invalidDropCoords;
     }
 
     private class ScoredSpace implements Comparable<ScoredSpace>
