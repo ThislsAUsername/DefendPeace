@@ -4,17 +4,11 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 import Engine.XYCoord;
-import UI.Art.SpriteArtist.SpriteLibrary;
-import UI.Art.SpriteArtist.UnitSpriteSet;
 import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import Units.Unit;
 
-public class AirDropAnimation implements GameAnimation
+public class AirDropAnimation extends BaseUnitActionAnimation
 {
-  private final int tileSize;
-
-  Unit mover;
-  UnitSpriteSet unitSpriteSet;
   boolean someoneDies;
   XYCoord dropOrigin;
   XYCoord dropDestination;
@@ -37,10 +31,8 @@ public class AirDropAnimation implements GameAnimation
 
   public AirDropAnimation(int tileSize, Unit unit, XYCoord start, XYCoord end, boolean unitDies, boolean obstacleUnitDies)
   {
-    this.tileSize = tileSize;
+    super(tileSize, unit, null);
 
-    mover = unit;
-    unitSpriteSet = SpriteLibrary.getMapUnitSpriteSet(unit);
     someoneDies = unitDies | obstacleUnitDies;
     dropOrigin = start;
     dropDestination = end;
@@ -91,7 +83,7 @@ public class AirDropAnimation implements GameAnimation
 
       int xDraw = (int)(xDrop*tileSize);
       int yDraw = (int)(yCurrent*tileSize);
-      unitSpriteSet.drawUnit(g, mover, AnimState.IDLE, 0, xDraw, yDraw);
+      drawUnit(g, actor, AnimState.IDLE, xDraw, yDraw);
     }
     else if(2==phase)
     {
@@ -105,7 +97,7 @@ public class AirDropAnimation implements GameAnimation
       int yDraw = (int)(map_y*tileSize)-diam_px/2;
       g.setColor(fxColor);
 
-      unitSpriteSet.drawUnit(g, mover, AnimState.IDLE, 0, tileSize*dropDestination.xCoord, tileSize*dropDestination.yCoord);
+      drawUnit(g, actor, AnimState.IDLE, tileSize*dropDestination.xCoord, tileSize*dropDestination.yCoord);
       g.fillOval(xlDraw, yDraw, diam_px, diam_px);
       g.fillOval(xrDraw, yDraw, diam_px, diam_px);
 

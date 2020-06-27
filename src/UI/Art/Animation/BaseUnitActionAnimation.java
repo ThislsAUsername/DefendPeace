@@ -60,6 +60,7 @@ public class BaseUnitActionAnimation implements GameAnimation
     int spriteIndex = SpriteMapView.getFastAnimIndex();
     drawUnit(g, actor, state, spriteIndex, realX, realY );
   }
+
   /**
    * Draws the unit at the given domain-level map coordinates
    */
