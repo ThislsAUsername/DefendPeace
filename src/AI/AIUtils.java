@@ -231,11 +231,10 @@ public class AIUtils
       if( flags == (ab.AIFlags & flags) )
       {
         retVal = ab;
-        if (null != q)
-          q.offer(new GameAction.AbilityAction(ab));
-        break;
       }
     }
+    if (null != q && null != retVal)
+      q.offer(new GameAction.AbilityAction(retVal));
     return retVal;
   }
 
