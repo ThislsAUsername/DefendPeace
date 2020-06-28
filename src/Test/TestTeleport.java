@@ -116,7 +116,7 @@ public class TestTeleport extends TestCase
     }
 
     @Override
-    public void receiveUnitDieEvent(UnitDieEvent event)
+    public void receiveUnitDieEvent(Unit unit, XYCoord grave, Integer hpLost)
     {
       death = true;
     }

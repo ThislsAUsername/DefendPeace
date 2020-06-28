@@ -402,6 +402,17 @@ public class Commander extends GameEventListener implements Serializable
     }
   }
 
+  @Override
+  public void receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
+  {
+    if( this == victim.CO )
+    {
+      double power = hpBeforeDeath / victim.model.maxHP * victim.model.getCost();
+      power /= CHARGERATIO_FUNDS;
+      modifyAbilityPower(power);
+    }
+  };
+
   public void setAIController(AIController ai)
   {
     aiController = ai;
