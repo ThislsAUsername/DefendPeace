@@ -314,6 +314,8 @@ public class Tech extends Commander
         // Assign base scores for spaces around this enemy.
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, nmexy, 0, dropRange) )
         {
+          if(invalidDropCoords.contains(xyc))
+            continue;
           double discountFactor = 0.5; // Farther spaces are worth less. This encourages up-in-your-facedness.
           Integer discountedVal = (int)(nmeval * Math.pow(discountFactor, xyc.getDistance(nmexy)));
           Integer curVal = enemyScores.putIfAbsent(xyc, discountedVal);                  // Put value if absent
