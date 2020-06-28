@@ -146,9 +146,8 @@ public class Tech extends Commander
       healAmount = healAmt;
 
       // Only mechanical/non-troop units get the firepower boost.
-      long allUnits = ~0;
       long exclude = UnitModel.TROOP;
-      unitsToOverCharge = commander.getAllModels(allUnits, true, exclude);
+      unitsToOverCharge = commander.getAllModelsNot(exclude);
 
       for( UnitModel m : unitsToOverCharge )
         damageBuff.addApplicableUnitModel(m);
@@ -198,9 +197,8 @@ public class Tech extends Commander
       dropRange = abilityRange;
 
       // Only mechanical units get the firepower boost.
-      long allUnits = ~0;
       long exclude = UnitModel.TROOP;
-      ArrayList<UnitModel> models = commander.getAllModels(allUnits, true, exclude);
+      ArrayList<UnitModel> models = commander.getAllModelsNot(exclude);
       for( UnitModel m : models )
         damageBuff.addApplicableUnitModel(m);
     }

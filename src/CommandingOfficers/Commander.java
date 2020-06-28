@@ -222,6 +222,11 @@ public class Commander extends GameEventListener implements Serializable
   {
     return getAllModels(unitRole, matchOnAny, 0);
   }
+  public ArrayList<UnitModel> getAllModelsNot(long excludedUnitRoles)
+  {
+    long allFlags = ~0;
+    return getAllModels(allFlags, true, excludedUnitRoles);
+  }
   public ArrayList<UnitModel> getAllModels(long unitRole, boolean matchOnAny, long excludedRoles)
   {
     ArrayList<UnitModel> models = new ArrayList<UnitModel>();
