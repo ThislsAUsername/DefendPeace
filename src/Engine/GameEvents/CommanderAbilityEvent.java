@@ -9,7 +9,6 @@ import UI.Art.Animation.GameAnimation;
 public class CommanderAbilityEvent implements GameEvent
 {
   private final CommanderAbility myAbility;
-  GameEventQueue gameEvents;
 
   public CommanderAbilityEvent(CommanderAbility ability)
   {
@@ -34,13 +33,6 @@ public class CommanderAbilityEvent implements GameEvent
   public void performEvent(MapMaster gameMap)
   {
     myAbility.activate(gameMap);
-  }
-
-  /** Called by AbilityAction before `getEventAnimation`, `performEvent`, or `sendToListener`. */
-  public GameEventQueue generateAbilityEvents(MapMaster gameMap)
-  {
-    gameEvents = myAbility.getEvents(gameMap);
-    return gameEvents;
   }
 
   @Override

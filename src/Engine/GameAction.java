@@ -120,28 +120,27 @@ public abstract class GameAction
   public static class AbilityAction extends GameAction
   {
     private CommanderAbility myAbility;
-    private CommanderAbilityEvent myEvent;
 
     public AbilityAction(CommanderAbility ability)
     {
       // ABILITY actions consist of
       //   ABILITY
       myAbility = ability;
-      boolean isValid = null != myAbility;
-      isValid &= myAbility.myCommander.getReadyAbilities().contains(myAbility);
-      if( isValid )
-      {
-        myEvent = new CommanderAbilityEvent(myAbility);
-      }
     }
 
     @Override
     public GameEventQueue getEvents(MapMaster map)
     {
-      // Create an event for the ability itself, and then append any additional events.
       GameEventQueue abilityEvents = new GameEventQueue();
-      abilityEvents.add(myEvent);
-      abilityEvents.addAll(myEvent.generateAbilityEvents(map));
+
+      // Validity check
+      boolean isValid = null != myAbility;
+      isValid &= myAbility.myCommander.getReadyAbilities().contains(myAbility);
+      if( !isValid ) return abilityEvents;
+
+      // Create an event for the ability itself, and then for each resulting event.
+      abilityEvents.add(new CommanderAbilityEvent(myAbility));
+      abilityEvents.addAll(myAbility.getEvents(map));
       return abilityEvents;
     }
 
