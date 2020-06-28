@@ -7,11 +7,17 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.CommanderAbilityEvent;
+import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.TeleportEvent;
+import Engine.GameEvents.UnitDieEvent;
+import Engine.GameEvents.TeleportEvent.AnimationStyle;
+import Engine.GameEvents.TeleportEvent.CollisionOutcome;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
+import Units.Unit;
 import Units.UnitModel;
 
 /**
@@ -162,5 +168,136 @@ public abstract class GameAction
       return null;
     }
   } // ~AbilityAction
-  
+
+  // ===========  TeleportAction  =================================
+  /**
+   * Moves a unit directly to the destination without traversing intermediate steps.
+   * No validation is performed on the final destination, but affordances are provided for
+   * conflict resolution (e.g. existing units can swap places, die, or simply be removed).
+   * If a unit is teleported into non-traversable terrain, it will die; teleport carefully.
+   */
+  public static class TeleportAction extends GameAction
+  {
+    private Unit unit;
+    private XYCoord unitStart;
+    private XYCoord unitDestination;
+    private Unit obstacle;
+    private AnimationStyle animationStyle;
+    private CollisionOutcome collisionOutcome;
+
+    public TeleportAction(Unit u, XYCoord dest)
+    {
+      this(u, dest, TeleportEvent.AnimationStyle.BLINK, TeleportEvent.CollisionOutcome.KILL);
+    }
+
+    public TeleportAction(Unit u, XYCoord dest, CollisionOutcome crashResult)
+    {
+      this(u, dest, TeleportEvent.AnimationStyle.BLINK, crashResult);
+    }
+
+    public TeleportAction(Unit u, XYCoord dest, AnimationStyle animStyle, CollisionOutcome crashResult)
+    {
+      unit = u;
+      unitStart = new XYCoord(unit.x, unit.y);
+      unitDestination = dest;
+      animationStyle = animStyle;
+      collisionOutcome = crashResult;
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      // Teleport actions consist of
+      // [TELEPORT] (if the two units swap places)
+      // [DEATH]    (if the other unit is squashed or killed by swapping onto bad terrain)
+      // [DEFEAT]   (if the other unit's death causes defeat)
+      // [TELEPORT] (to move this unit to its destination)
+      // [DEATH]    (if this unit can't survive at the destination)
+      // [DEFEAT]   (if the acting unit dies and is the last one)
+
+      GameEventQueue subEvents = new GameEventQueue();
+
+      // Validate input.
+      boolean isValid = true;
+      isValid &= null != unit && !unit.isTurnOver;
+      isValid &= (null != gameMap && null != unitDestination) && gameMap.isLocationValid(unitDestination);
+
+      if( !isValid ) return subEvents;
+
+      // Put our guy where he belongs.
+      subEvents.add(new TeleportEvent(gameMap, unit, unitDestination, animationStyle));
+
+      // Figure out if something's in the way, and what to do with it.
+      obstacle = gameMap.getLocation(unitDestination).getResident();
+      boolean obstacleDies = false;
+      if( null != obstacle )
+      {
+        switch(collisionOutcome)
+        {
+          case KILL:
+            obstacleDies = true;
+            break;
+          case SWAP:
+            // Move him to where our guy started. If he can't live there, he dies.
+            if( gameMap.isLocationValid(unitStart) )
+            {
+              subEvents.add(new TeleportEvent(gameMap, obstacle, unitStart, animationStyle));
+              if( !obstacle.model.propulsion.canTraverse(gameMap.getEnvironment(unitStart)) )
+              {
+                obstacleDies = true;
+              }
+            }
+            else obstacleDies = true;
+            break;
+        }
+      }
+
+      if( obstacleDies )
+      {
+        UnitDieEvent ude = new UnitDieEvent(obstacle);
+        subEvents.add(ude);
+
+        // Poor sap died; Check if his CO lost the game.
+        if( obstacle.CO.units.size() == 1 )
+        {
+          CommanderDefeatEvent cde = new CommanderDefeatEvent(obstacle.CO);
+          subEvents.add(cde);
+        }
+      }
+
+      // If our guy can't survive there, end him.
+      if( !unit.model.propulsion.canTraverse(gameMap.getEnvironment(unitDestination)) )
+      {
+        UnitDieEvent ude = new UnitDieEvent(unit);
+        subEvents.add(ude);
+
+        // Our unit died; check if we are defeated.
+        if( unit.CO.units.size() == 1 )
+        {
+          // CO is out of units. Too bad.
+          CommanderDefeatEvent cde = new CommanderDefeatEvent(unit.CO);
+          subEvents.add(cde);
+        }
+      }
+      return subEvents;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return unitDestination;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return unitDestination;
+    }
+
+    @Override
+    public UnitActionFactory getType()
+    {
+      return null;
+    }
+  } // ~TeleportAction
 }

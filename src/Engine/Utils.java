@@ -233,6 +233,11 @@ public class Utils
   {
     return findShortestPath(start, unit, x, y, map, false);
   }
+  /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
+  public static Path findShortestPath(XYCoord start, Unit unit, XYCoord destination, GameMap map)
+  {
+    return findShortestPath(start, unit, destination.xCoord, destination.yCoord, map, false);
+  }
   /**
    * Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)}
    * @param theoretical If true, ignores other Units and move-power limitations.

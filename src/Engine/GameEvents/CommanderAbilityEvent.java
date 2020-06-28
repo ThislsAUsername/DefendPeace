@@ -27,10 +27,7 @@ public class CommanderAbilityEvent implements GameEvent
   @Override
   public void sendToListener(GameEventListener listener)
   {
-    for(GameEvent ge : gameEvents )
-    {
-      ge.sendToListener(listener);
-    }
+    // TODO Auto-generated method stub
   }
 
   @Override

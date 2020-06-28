@@ -238,6 +238,11 @@ public class MapMaster extends GameMap
 
   public void moveUnit(Unit unit, int x, int y)
   {
+    moveUnit(unit, x, y, false);
+  }
+
+  public void moveUnit(Unit unit, int x, int y, boolean force)
+  {
     if( unit.x == x && unit.y == y )
     {
       // We are not actually moving. Just return.
@@ -247,8 +252,15 @@ public class MapMaster extends GameMap
 
     if( !isLocationEmpty(unit, x, y) )
     {
-      System.out.println("ERROR! Attempting to move unit to an occupied Location!");
-      return;
+      if( force ) // Force is set; the user *must* know what he's doing.
+      {
+        removeUnit(getLocation(x, y).getResident());
+      }
+      else
+      {
+        System.out.println("ERROR! Attempting to move unit to an occupied Location!");
+        return;
+      }
     }
 
     // Update the map
