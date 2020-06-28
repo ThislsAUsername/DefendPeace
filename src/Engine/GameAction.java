@@ -10,6 +10,7 @@ import Engine.GameEvents.CommanderAbilityEvent;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.MassDamageEvent;
 import Engine.GameEvents.TeleportEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.TeleportEvent.AnimationStyle;
@@ -208,12 +209,14 @@ public abstract class GameAction
     public GameEventQueue getEvents(MapMaster gameMap)
     {
       // Teleport actions consist of
-      // [TELEPORT] (if the two units swap places)
-      // [DEATH]    (if the other unit is squashed or killed by swapping onto bad terrain)
-      // [DEFEAT]   (if the other unit's death causes defeat)
-      // [TELEPORT] (to move this unit to its destination)
-      // [DEATH]    (if this unit can't survive at the destination)
-      // [DEFEAT]   (if the acting unit dies and is the last one)
+      // [TELEPORT]   (if the two units swap places)
+      // [MASSDAMAGE] (if the other unit is squashed or killed by swapping onto bad terrain)
+      // [DEATH]      (if the other unit is squashed or killed by swapping onto bad terrain)
+      // [DEFEAT]     (if the other unit's death causes defeat)
+      // [TELEPORT]   (to move this unit to its destination)
+      // [MASSDAMAGE] (if this unit can't survive at the destination)
+      // [DEATH]      (if this unit can't survive at the destination)
+      // [DEFEAT]     (if the acting unit dies and is the last one)
 
       GameEventQueue subEvents = new GameEventQueue();
 
@@ -254,7 +257,12 @@ public abstract class GameAction
 
       if( obstacleDies )
       {
+        ArrayList<Unit> ary = new ArrayList<Unit>();
+        ary.add(obstacle);
+        boolean fatal = false;
+        MassDamageEvent mde = new MassDamageEvent(ary, obstacle.getHP()+1, fatal);
         UnitDieEvent ude = new UnitDieEvent(obstacle);
+        subEvents.add(mde);
         subEvents.add(ude);
 
         // Poor sap died; Check if his CO lost the game.
@@ -268,7 +276,12 @@ public abstract class GameAction
       // If our guy can't survive there, end him.
       if( !unit.model.propulsion.canTraverse(gameMap.getEnvironment(unitDestination)) )
       {
+        ArrayList<Unit> ary = new ArrayList<Unit>();
+        ary.add(unit);
+        boolean fatal = false;
+        MassDamageEvent mde = new MassDamageEvent(ary, unit.getHP()+1, fatal);
         UnitDieEvent ude = new UnitDieEvent(unit);
+        subEvents.add(mde);
         subEvents.add(ude);
 
         // Our unit died; check if we are defeated.
