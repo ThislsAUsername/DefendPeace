@@ -244,11 +244,8 @@ public class Tech extends Commander
         Unit r = gameMap.getLocation(xyc).getResident();
         if( null != r )
         {
-          Integer oldVal = smashes.get(r.CO);
-          if( null == oldVal )
-            smashes.put(r.CO, 1);
-          else
-            smashes.put(r.CO, oldVal+1);
+          Integer oldVal = smashes.putIfAbsent(r.CO, 1);
+          if( null != oldVal ) smashes.put(r.CO, oldVal+1);
         }
       }
       for( Commander co : smashes.keySet() )
