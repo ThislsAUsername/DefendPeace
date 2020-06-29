@@ -258,7 +258,7 @@ public abstract class GameAction
       {
         ArrayList<Unit> ary = new ArrayList<Unit>();
         ary.add(obstacle);
-        boolean fatal = false;
+        boolean fatal = true;
         MassDamageEvent mde = new MassDamageEvent(ary, obstacle.getHP()+1, fatal);
         UnitDieEvent ude = new UnitDieEvent(obstacle);
         subEvents.add(mde);
@@ -277,7 +277,7 @@ public abstract class GameAction
       {
         ArrayList<Unit> ary = new ArrayList<Unit>();
         ary.add(unit);
-        boolean fatal = false;
+        boolean fatal = true;
         MassDamageEvent mde = new MassDamageEvent(ary, unit.getHP()+1, fatal);
         UnitDieEvent ude = new UnitDieEvent(unit);
         subEvents.add(mde);
