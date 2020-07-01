@@ -9,7 +9,6 @@ import Units.Unit;
 
 public class AirDropAnimation extends BaseUnitActionAnimation
 {
-  boolean someoneDies;
   XYCoord dropOrigin;
   XYCoord dropDestination;
   int dropHeight = 15;
@@ -29,11 +28,10 @@ public class AirDropAnimation extends BaseUnitActionAnimation
 
   boolean done;
 
-  public AirDropAnimation(int tileSize, Unit unit, XYCoord start, XYCoord end, boolean unitDies, boolean obstacleUnitDies)
+  public AirDropAnimation(int tileSize, Unit unit, XYCoord start, XYCoord end)
   {
     super(tileSize, unit, null);
 
-    someoneDies = unitDies | obstacleUnitDies;
     dropOrigin = start;
     dropDestination = end;
 
@@ -85,8 +83,6 @@ public class AirDropAnimation extends BaseUnitActionAnimation
     }
     else if(2==phase)
     {
-      // TODO: Draw explosions if/when needed.
-
       // Draw dust clouds from landing.
       final int diam_px = 10; // Draw-space pixels.
       final double map_y = dropDestination.yCoord+0.75;

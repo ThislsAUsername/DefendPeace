@@ -372,12 +372,12 @@ public class SpriteMapView extends MapView
 
   @Override // from MapView
   public GameAnimation buildTeleportAnimation( Unit unit, XYCoord start, XYCoord end, Unit obstacle,
-      TeleportEvent.AnimationStyle animStyle, boolean unitDies, boolean obstacleDies )
+      TeleportEvent.AnimationStyle animStyle )
   {
     if( animStyle == AnimationStyle.BLINK )
       return null; // TODO: Should AirDropAnimation just be TeleportAnimation and take in the animation style?
     else
-      return new AirDropAnimation(getTileSize(), unit, start, end, unitDies, obstacleDies);
+      return new AirDropAnimation(getTileSize(), unit, start, end);
   }
 
   @Override // from MapView

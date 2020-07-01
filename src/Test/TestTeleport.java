@@ -56,17 +56,23 @@ public class TestTeleport extends TestCase
 
     // Add a unit.
     Unit friend = addUnit(testMap, testCo1, UnitModel.MECH, start.xCoord, start.yCoord);
+    friend.isTurnOver = false;
 
     // Teleport him.
-    GameEvent tp = new TeleportEvent(testMap, friend, end);
-    tp.performEvent(testMap);
+    GameAction tp = new GameAction.TeleportAction(friend, end);
+    for( GameEvent event : tp.getEvents(testMap) )
+      event.performEvent(testMap);
     testPassed &= validate((friend.x == end.xCoord && friend.y== end.yCoord), "    Friend doesn't think teleport moved him!");
     testPassed &= validate(friend == testMap.getLocation(end).getResident(), "    Friend didn't move on the map!");
 
     // Dunk him.
-    tp = new TeleportEvent(testMap, friend, water);
-    tp.performEvent(testMap);
-    GameEventListener.publishEvent(tp); // Publish so we can check results.
+    friend.isTurnOver = false;
+    tp = new GameAction.TeleportAction(friend, water);
+    for( GameEvent event : tp.getEvents(testMap) )
+    {
+      event.performEvent(testMap);
+      GameEventListener.publishEvent(event); // Publish so we can check results.
+    }
     testPassed &= validate(listener.death, "    UnitDieEvent was not published for unit in water!");
     testPassed &= validate(listener.defeat, "    Listener received no defeat event for last unit drowning!");
     listener.reset();
@@ -76,9 +82,13 @@ public class TestTeleport extends TestCase
     Unit enemy = addUnit(testMap, testCo2, UnitModel.MECH, end.xCoord, end.yCoord);
 
     // Swap them
-    tp = new TeleportEvent(testMap, friend, end, TeleportEvent.CollisionOutcome.SWAP);
-    tp.performEvent(testMap);
-    GameEventListener.publishEvent(tp);
+    friend.isTurnOver = false;
+    tp = new GameAction.TeleportAction(friend, end, TeleportEvent.CollisionOutcome.SWAP);
+    for( GameEvent event : tp.getEvents(testMap) )
+    {
+      event.performEvent(testMap);
+      GameEventListener.publishEvent(event); // Publish so we can check results.
+    }
     testPassed &= validate((friend.x == end.xCoord && friend.y== end.yCoord), "    Friend doesn't think he swapped!");
     testPassed &= validate(friend == testMap.getLocation(end).getResident(), "    Friend didn't move!");
     testPassed &= validate((enemy.x == start.xCoord && enemy.y== start.yCoord), "    Enemy doesn't think he swapped!");
@@ -88,9 +98,13 @@ public class TestTeleport extends TestCase
     listener.reset();
 
     // Stomp enemy with friend.
-    tp = new TeleportEvent(testMap, friend, start, TeleportEvent.CollisionOutcome.KILL);
-    tp.performEvent(testMap);
-    GameEventListener.publishEvent(tp);
+    friend.isTurnOver = false;
+    tp = new GameAction.TeleportAction(friend, start, TeleportEvent.CollisionOutcome.KILL);
+    for( GameEvent event : tp.getEvents(testMap) )
+    {
+      event.performEvent(testMap);
+      GameEventListener.publishEvent(event); // Publish so we can check results.
+    }
     testPassed &= validate((friend.x == start.xCoord && friend.y== start.yCoord), "    Friend doesn't think he swapped!");
     testPassed &= validate(friend == testMap.getLocation(start).getResident(), "    Friend didn't move!");
     testPassed &= validate(listener.death, "    UnitDieEvent was not published for stomped unit!");
@@ -116,7 +130,7 @@ public class TestTeleport extends TestCase
     }
 
     @Override
-    public void receiveUnitDieEvent(UnitDieEvent event)
+    public void receiveUnitDieEvent(Unit unit, XYCoord grave, Integer hpLost)
     {
       death = true;
     }

@@ -80,7 +80,7 @@ public abstract class GameEventListener implements Serializable
   public void receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){};
   public void receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){};
   public void receiveResupplyEvent(ResupplyEvent event){};
-  public void receiveUnitDieEvent(UnitDieEvent event){};
+  public void receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath){};
   public void receiveUnloadEvent(UnloadLifecycle.UnloadEvent event){};
   public void receiveUnitTransformEvent(Unit unit, UnitModel oldType){};
   public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){};

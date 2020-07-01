@@ -222,6 +222,11 @@ public class Commander extends GameEventListener implements Serializable
   {
     return getAllModels(unitRole, matchOnAny, 0);
   }
+  public ArrayList<UnitModel> getAllModelsNot(long excludedUnitRoles)
+  {
+    long allFlags = ~0;
+    return getAllModels(allFlags, true, excludedUnitRoles);
+  }
   public ArrayList<UnitModel> getAllModels(long unitRole, boolean matchOnAny, long excludedRoles)
   {
     ArrayList<UnitModel> models = new ArrayList<UnitModel>();
@@ -390,14 +395,13 @@ public class Commander extends GameEventListener implements Serializable
       Unit unit = damageEntry.getKey();
       if (this == unit.CO)
       {
-      double power = 0; // value in funds of the charge we're getting
+        double power = 0; // value in funds of the charge we're getting
 
-      power += ((double)damageEntry.getValue()) / unit.model.maxHP * unit.model.getCost();
+        power += ((double)damageEntry.getValue()) / unit.model.maxHP * unit.model.getCost();
 
-      // Convert funds to ability power units
-      power /= CHARGERATIO_FUNDS;
-
-      modifyAbilityPower(power);
+        // Convert funds to ability power units
+        power /= CHARGERATIO_FUNDS;
+        modifyAbilityPower(power);
       }
     }
   }

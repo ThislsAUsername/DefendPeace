@@ -11,10 +11,12 @@ import java.util.Set;
 import AI.AIUtils;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
+import Engine.GameAction.TeleportAction;
 import Engine.GameScenario;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.TeleportEvent;
 import Terrain.Location;
@@ -144,9 +146,8 @@ public class Tech extends Commander
       healAmount = healAmt;
 
       // Only mechanical/non-troop units get the firepower boost.
-      long allUnits = ~0;
       long exclude = UnitModel.TROOP;
-      unitsToOverCharge = commander.getAllModels(allUnits, true, exclude);
+      unitsToOverCharge = commander.getAllModelsNot(exclude);
 
       for( UnitModel m : unitsToOverCharge )
         damageBuff.addApplicableUnitModel(m);
@@ -172,7 +173,7 @@ public class Tech extends Commander
     }
   }
 
-  /** Drop a MechWarrior onto the most contested point on the battlefront. */
+  /** Drop a BattleMech onto the most contested point on the battlefront. */
   private static class TechdropAbility extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
@@ -196,9 +197,8 @@ public class Tech extends Commander
       dropRange = abilityRange;
 
       // Only mechanical units get the firepower boost.
-      long allUnits = ~0;
       long exclude = UnitModel.TROOP;
-      ArrayList<UnitModel> models = commander.getAllModels(allUnits, true, exclude);
+      ArrayList<UnitModel> models = commander.getAllModelsNot(exclude);
       for( UnitModel m : models )
         damageBuff.addApplicableUnitModel(m);
     }
@@ -223,12 +223,12 @@ public class Tech extends Commander
       Set<XYCoord> dropLocs = new HashSet<XYCoord>();
       for( int i = 0; i < numDrops; ++i )
       {
-        TeleportEvent techDrop = generateDropEvent(gameMap, dropLocs, log);
+        TeleportAction techDrop = generateDropEvent(gameMap, dropLocs, log);
         if( null != techDrop )
         {
           // Store the new event.
-          dropLocs.add(techDrop.getEndPoint());
-          abilityEvents.add(techDrop);
+          dropLocs.add(techDrop.getMoveLocation());
+          abilityEvents.addAll(techDrop.getEvents(gameMap));
         }
         else
         {
@@ -236,10 +236,28 @@ public class Tech extends Commander
         }
       }
 
+      // Figure out if this caused the enemy's defeat. The TeleportActions can't track
+      // this because multiple units may be smashed at once.
+      Map<Commander, Integer> smashes = new HashMap<Commander, Integer>();
+      for( XYCoord xyc : dropLocs )
+      {
+        Unit r = gameMap.getLocation(xyc).getResident();
+        if( null != r )
+        {
+          Integer oldVal = smashes.putIfAbsent(r.CO, 1);
+          if( null != oldVal ) smashes.put(r.CO, oldVal+1);
+        }
+      }
+      for( Commander co : smashes.keySet() )
+      {
+        if( co.units.size() > 1 && co.units.size() <= smashes.get(co) )
+          abilityEvents.add(new CommanderDefeatEvent(co));
+      }
+
       return abilityEvents;
     }
 
-    private TeleportEvent generateDropEvent(MapMaster gameMap, Set<XYCoord> priorDrops, boolean log)
+    private TeleportAction generateDropEvent(MapMaster gameMap, Set<XYCoord> priorDrops, boolean log)
     {
       // Create a new Unit to drop onto the battlefield.
       Unit techMech = new Unit(myCommander, unitModelToDrop);
@@ -414,7 +432,7 @@ public class Tech extends Commander
 
       // Create our new unit and the teleport event to put it into place.
       myCommander.units.add(techMech);
-      TeleportEvent techDrop = new TeleportEvent(gameMap, techMech, landingZone, TeleportEvent.AnimationStyle.DROP_IN, TeleportEvent.CollisionOutcome.KILL);
+      TeleportAction techDrop = new TeleportAction(techMech, landingZone, TeleportEvent.AnimationStyle.DROP_IN, TeleportEvent.CollisionOutcome.KILL);
       return techDrop;
     }
 
