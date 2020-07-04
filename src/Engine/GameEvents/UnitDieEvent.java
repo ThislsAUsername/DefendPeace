@@ -9,10 +9,14 @@ import Units.Unit;
 public class UnitDieEvent implements GameEvent
 {
   private Unit unit;
+  private XYCoord where;
+  private Integer hpBeforeDeath;
 
   public UnitDieEvent( Unit unit )
   {
     this.unit = unit;
+    this.where = new XYCoord(unit.x, unit.y);
+    this.hpBeforeDeath = unit.getHP();
   }
 
   @Override
@@ -24,7 +28,7 @@ public class UnitDieEvent implements GameEvent
   @Override
   public void sendToListener(GameEventListener listener)
   {
-    listener.receiveUnitDieEvent( this );
+    listener.receiveUnitDieEvent( unit, where, hpBeforeDeath );
   }
 
   @Override

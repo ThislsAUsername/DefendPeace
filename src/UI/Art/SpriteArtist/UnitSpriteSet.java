@@ -16,8 +16,9 @@ public class UnitSpriteSet
 {
   Sprite sprites[] = new Sprite[AnimState.values().length];
 
-  public final int ANIM_FRAMES_PER_MARK = 3;
+  public final int ANIM_FRAMES_PER_MARK = 3; 
 
+  Sprite turnDone;
   public static enum AnimState
   {
     IDLE
@@ -145,9 +146,22 @@ public class UnitSpriteSet
     }
   }
 
+  /**
+   * Return the subimage of the requested sprite, greying if it cannot move, unless a different CO is active.
+   */
   private BufferedImage getUnitImage(AnimState state, int imageIndex)
   {
     return sprites[state.ordinal()].getFrame(imageIndex);
+  }
+
+  /**
+   * Return the frame `imageIndex` of the `action` Sprite in this UnitSpriteSet.
+   */
+  public BufferedImage getUnitImage(int action, int imageIndex)
+  {
+    BufferedImage frame = null;
+    frame = sprites[action].getFrame(imageIndex);
+    return frame;
   }
 
   public void drawUnit(Graphics g, Unit u, AnimState state, int imageIndex, int drawX, int drawY)
@@ -173,12 +187,22 @@ public class UnitSpriteSet
   {
     int unitHeight = sprites[0].getFrame(0).getHeight();
 
-    // Draw the unit's HP if it is below full health.
-    if( u.getHP() < 10 )
+    ArrayList<BufferedImage> unitIcons = new ArrayList<BufferedImage>();
+
+    // Draw the unit's HP if it is not at full health.
+    if( u.getHP() != u.model.maxHP )
     {
-      BufferedImage num = SpriteLibrary.getMapUnitHPSprites().getFrame(u.getHP());
-      g.drawImage(num, drawX, drawY + ((unitHeight) / 2), num.getWidth(), num.getHeight(),
-          null);
+      BufferedImage num;
+      if( u.getHP() > u.model.maxHP )
+      {
+        num = SpriteLibrary.getMapUnitHPSprites().getFrame(1); // Tens place.
+
+        // Ones place shares space with the activity icons below if HP > 10.
+        unitIcons.add( SpriteLibrary.getMapUnitHPSprites().getFrame((u.getHP()-u.model.maxHP)) );
+      }
+      else
+        num = SpriteLibrary.getMapUnitHPSprites().getFrame(u.getHP());
+      g.drawImage(num, drawX, drawY + ((unitHeight) / 2), num.getWidth(), num.getHeight(), null);
     }
     
     // Collect all the Commanders who desire to mark this unit
@@ -201,24 +225,7 @@ public class UnitSpriteSet
       g.drawImage(symbol, drawX + ((unitHeight) / 2), drawY, symbol.getWidth(), symbol.getHeight(), null);
     }
 
-    // Draw the transport icon if the unit is holding another unit.
-    if( u.heldUnits != null && !u.heldUnits.isEmpty() )
-    {
-      // Get the icon and characterize the draw space.
-      BufferedImage cargoIcon = SpriteLibrary.getCargoIcon();
-      int iconX = drawX + ((unitHeight) / 2);
-      int iconY = drawY + ((unitHeight) / 2);
-      int iconW = cargoIcon.getWidth();
-      int iconH = cargoIcon.getHeight();
-
-      // Draw team-color background for the icon.
-      g.setColor( u.CO.myColor );
-      g.fillRect( iconX, iconY, iconW, iconH);
-
-      // Draw transport icon.
-      g.drawImage( cargoIcon, iconX, iconY, iconW, iconH, null );
-    }
-
+    // Evaluate/draw unit status effects.
     if( u.isStunned )
     {
       // Get the icon and characterize the draw space.
@@ -234,22 +241,31 @@ public class UnitSpriteSet
       g.drawImage( stunIcon, drawX, drawY, iconW, iconH, null );
     }
 
-    // Draw the capture icon if the unit is capturing a base.
+    // Transport icon.
+    if( u.heldUnits != null && !u.heldUnits.isEmpty() )
+      unitIcons.add(SpriteLibrary.getCargoIcon());
+
+    // Capture icon.
     if( u.getCaptureProgress() > 0 )
+      unitIcons.add(SpriteLibrary.getCaptureIcon());
+
+    // Draw one of the current activity icons in the lower-right.
+    if( !unitIcons.isEmpty() )
     {
-      // Get the icon and characterize the draw space.
-      BufferedImage captureIcon = SpriteLibrary.getCaptureIcon();
+      int iconIndex = (animIndex%(unitIcons.size()*ANIM_FRAMES_PER_MARK))/ANIM_FRAMES_PER_MARK;
+      BufferedImage icon = unitIcons.get(iconIndex);
+
       int iconX = drawX + ((unitHeight) / 2);
       int iconY = drawY + ((unitHeight) / 2);
-      int iconW = captureIcon.getWidth();
-      int iconH = captureIcon.getHeight();
+      int iconW = icon.getWidth();
+      int iconH = icon.getHeight();
 
       // Draw team-color background for the icon.
       g.setColor( u.CO.myColor );
       g.fillRect( iconX, iconY, iconW, iconH);
 
-      // Draw transport icon.
-      g.drawImage( captureIcon, iconX, iconY, iconW, iconH, null );
+      // Draw the icon
+      g.drawImage( icon, iconX, iconY, iconW, iconH, null );
     }
   }
 

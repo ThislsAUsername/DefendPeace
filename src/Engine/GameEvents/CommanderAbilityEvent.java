@@ -18,7 +18,9 @@ public class CommanderAbilityEvent implements GameEvent
   @Override
   public GameAnimation getEventAnimation(MapView mapView)
   {
-    return null;
+    // TODO: CO Ability intro splash
+    GameAnimation anim = null;
+    return anim;
   }
 
   @Override

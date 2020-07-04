@@ -231,11 +231,10 @@ public class AIUtils
       if( flags == (ab.AIFlags & flags) )
       {
         retVal = ab;
-        if (null != q)
-          q.offer(new GameAction.AbilityAction(ab));
-        break;
       }
     }
+    if (null != q && null != retVal)
+      q.offer(new GameAction.AbilityAction(retVal));
     return retVal;
   }
 
@@ -457,5 +456,30 @@ public class AIUtils
         diff *= -1;
       return diff;
     }
+  }
+
+  /** Return the set of locations with enemies or terrain that `unit` could attack in one turn from `start` */
+  public static Set<XYCoord> findPossibleTargets(GameMap gameMap, Unit unit, XYCoord start, boolean includeTerrain)
+  {
+    Set<XYCoord> targetLocs = new HashSet<XYCoord>();
+    boolean allowEndingOnUnits = false; // We can't attack from on top of another unit.
+    ArrayList<XYCoord> moves = Utils.findPossibleDestinations(start, unit, gameMap, allowEndingOnUnits);
+    for( XYCoord move : moves )
+    {
+      boolean moved = !move.equals(start);
+
+      for( WeaponModel wpn : unit.model.weapons )
+      {
+        // Evaluate this weapon for targets if it has ammo, and if either the weapon
+        // is mobile or we don't care if it's mobile (because we aren't moving).
+        if( wpn.loaded(unit) && (!moved || wpn.canFireAfterMoving) )
+        {
+          ArrayList<XYCoord> locations = Utils.findTargetsInRange(gameMap, unit.CO, move, wpn, includeTerrain);
+          targetLocs.addAll(locations);
+        }
+      } // ~Weapon loop
+    }
+    targetLocs.remove(start); // No attacking your own position.
+    return targetLocs;
   }
 }

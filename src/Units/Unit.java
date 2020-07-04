@@ -255,8 +255,9 @@ public class Unit implements Serializable
    */
   public int damageHP(double damage)
   {
+    if( damage < 0 ) throw new ArithmeticException("Cannot inflict negative damage!");
     int before = getHP();
-    health = Math.max(0, Math.min(healthFromHP(model.maxHP), health - healthFromHP(damage)));
+    health = Math.max(0, health - healthFromHP(damage));
     return getHP() - before;
   }
 
@@ -266,10 +267,12 @@ public class Unit implements Serializable
    * When healing, sets health to the maximum value for its HP
    * @return the change in HP
    */
-  public int alterHP(int change)
+  public int alterHP(int change) { return alterHP(change, false); }
+  public int alterHP(int change, boolean allowOver)
   {
     int before = getHP();
-    health = Math.max(1, healthFromHP( Math.min(model.maxHP, getHP() + change) ));
+    int newHP = allowOver ? getHP()+change : Math.min(model.maxHP, getHP() + change);
+    health = Math.max(1, healthFromHP(newHP));
     if (change > 0)
       health = healthFromHP(getHP());
     return getHP() - before;

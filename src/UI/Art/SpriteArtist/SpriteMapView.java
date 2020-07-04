@@ -15,6 +15,8 @@ import Engine.Combat.DamagePopup;
 import Engine.Combat.StrikeParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.TeleportEvent;
+import Engine.GameEvents.TeleportEvent.AnimationStyle;
 import Terrain.GameMap;
 import UI.MapView;
 import UI.SlidingValue;
@@ -24,6 +26,7 @@ import UI.Art.Animation.GameAnimation;
 import UI.Art.Animation.NoAnimation;
 import UI.Art.Animation.NobunagaBattleAnimation;
 import UI.Art.Animation.ResupplyAnimation;
+import UI.Art.Animation.AirDropAnimation;
 import UI.Art.Animation.MoveAnimation;
 import Units.Unit;
 
@@ -361,11 +364,20 @@ public class SpriteMapView extends MapView
     return new NobunagaBattleAnimation(getTileSize(), params.attacker.body, params.attacker.x, params.attacker.y, target.xCoord, target.yCoord);
   }
 
-  @Override
-  // from MapView
+  @Override // from MapView
   public GameAnimation buildMoveAnimation(Unit unit, Path movePath)
   {
     return new MoveAnimation(getTileSize(), unit, movePath);
+  }
+
+  @Override // from MapView
+  public GameAnimation buildTeleportAnimation( Unit unit, XYCoord start, XYCoord end, Unit obstacle,
+      TeleportEvent.AnimationStyle animStyle )
+  {
+    if( animStyle == AnimationStyle.BLINK )
+      return null; // TODO: Should AirDropAnimation just be TeleportAnimation and take in the animation style?
+    else
+      return new AirDropAnimation(getTileSize(), unit, start, end);
   }
 
   @Override // from MapView

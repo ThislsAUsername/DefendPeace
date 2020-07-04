@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.Stack;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
@@ -482,7 +483,7 @@ public class Ave extends Commander
 
       // Drop snow everywhere inside her range.
       ArrayList<MapChangeEvent.EnvironmentAssignment> snowTiles = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
-      HashSet<XYCoord> tiles = Utils.findLocationsNearProperties(gameMap, coCast, coCast.MAX_SNOW_SPREAD_RANGE);
+      Set<XYCoord> tiles = Utils.findLocationsNearProperties(gameMap, coCast, coCast.MAX_SNOW_SPREAD_RANGE);
       for( XYCoord coord : tiles )
       {
         if( coCast.snowMap[coord.xCoord][coord.yCoord] < Ave.SNOW_THRESHOLD )
@@ -538,7 +539,7 @@ public class Ave extends Commander
 
       // Add snow in an expanded range around Ave's areas.
       int maxSnowRange = coCast.MAX_SNOW_SPREAD_RANGE + GLACIO_SNOW_SPREAD;
-      HashSet<XYCoord> tilesInRange = Utils.findLocationsNearProperties(gameMap, coCast, maxSnowRange);
+      Set<XYCoord> tilesInRange = Utils.findLocationsNearProperties(gameMap, coCast, maxSnowRange);
       tilesInRange.addAll(Utils.findLocationsNearUnits(gameMap, coCast, GLACIO_SNOW_SPREAD));
       for( XYCoord coord : tilesInRange )
       {
@@ -622,7 +623,7 @@ public class Ave extends Commander
       ArrayList<Unit> victims = new ArrayList<Unit>();
 
       // Change terrain to snow around each of Ave's units and buildings, and damage trees and enemies.
-      HashSet<XYCoord> affectedTiles = Utils.findLocationsNearProperties(gameMap, Ave, OBLIDO_RANGE);
+      Set<XYCoord> affectedTiles = Utils.findLocationsNearProperties(gameMap, Ave, OBLIDO_RANGE);
       affectedTiles.addAll(Utils.findLocationsNearUnits(gameMap, Ave, OBLIDO_RANGE));
 
       // Smash things. Don't add snow though.
