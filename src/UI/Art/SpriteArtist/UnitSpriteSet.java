@@ -252,7 +252,6 @@ public class UnitSpriteSet
       int iconW = statusIcon.getWidth();
       int iconH = statusIcon.getHeight();
 
-      // Draw stun icon.
       g.drawImage( statusIcon, drawX, drawY, iconW, iconH, null );
     }
 
