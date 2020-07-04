@@ -73,18 +73,18 @@ public class Tech extends Commander
   private static final int TECH_REPAIR = 3; // Used for both D2D heal and ability heal.
 
   private static final String TECHDROP_NAME = "Tech Drop";
-  private static final int TECHDROP_COST = 5;
+  private static final int TECHDROP_COST = 7;
   private static final int TECHDROP_BUFF = 10;
   private static final int TECHDROP_NUM = 1;
   private static final int TECHDROP_RANGE = 2;
 
   private static final String OVERCHARGE_NAME = "Overcharge";
-  private static final int OVERCHARGE_COST = 6;
+  private static final int OVERCHARGE_COST = 5;
   private static final int OVERCHARGE_BUFF = 10;
   private static final int OVERCHARGE_HEAL = 3;
 
   private static final String STEEL_HAIL_NAME = "Steel Hail";
-  private static final int STEEL_HAIL_COST = 9;
+  private static final int STEEL_HAIL_COST = 14;
   private static final int STEEL_HAIL_BUFF = 20;
   private static final int STEEL_HAIL_NUM = 3;
   private static final int STEEL_HAIL_RANGE = 3;
