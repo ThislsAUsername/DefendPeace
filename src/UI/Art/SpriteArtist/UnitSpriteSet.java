@@ -183,6 +183,14 @@ public class UnitSpriteSet
     }
   }
 
+  /**
+   * Draw icons detailing any relevant unit information.
+   * Icons are arranged as follows:
+   * Upper Left: Status icons, e.g. when stunned or low on fuel or ammo.
+   * Upper Right: Special markings, usually applied by Commander abilities.
+   * Lower Right: Activity icons, e.g. transporting units or capturing property.
+   * Lower Left: HP when not at full health (this can extend to the lower right if the unit has >10 HP).
+   */
   public void drawUnitIcons(Graphics g, Commander[] COs, Unit u, int animIndex, int drawX, int drawY)
   {
     int unitHeight = sprites[0].getFrame(0).getHeight();
@@ -226,19 +234,26 @@ public class UnitSpriteSet
     }
 
     // Evaluate/draw unit status effects.
+    ArrayList<BufferedImage> statusIcons = new ArrayList<BufferedImage>();
     if( u.isStunned )
-    {
-      // Get the icon and characterize the draw space.
-      BufferedImage stunIcon = SpriteLibrary.getStunIcon();
-      int iconW = stunIcon.getWidth();
-      int iconH = stunIcon.getHeight();
+      statusIcons.add(SpriteLibrary.getStunIcon());
 
-      // Draw team-color background for the icon.
-      g.setColor( u.CO.myColor );
-      g.fillRect( drawX+1, drawY+1, iconW-(2), iconH-(2));
+    double lowIndicatorFraction = 3.0;
+    if( u.fuel < u.model.maxFuel / lowIndicatorFraction )
+      statusIcons.add(SpriteLibrary.getFuelIcon());
+
+    if( u.ammo >= 0 && !u.model.weapons.isEmpty() && u.ammo < u.model.maxAmmo / lowIndicatorFraction )
+      statusIcons.add(SpriteLibrary.getAmmoIcon());
+
+    if( !statusIcons.isEmpty() )
+    {
+      int iconIndex = (animIndex%(statusIcons.size()*ANIM_FRAMES_PER_MARK))/ANIM_FRAMES_PER_MARK;
+      BufferedImage statusIcon = statusIcons.get(iconIndex);
+      int iconW = statusIcon.getWidth();
+      int iconH = statusIcon.getHeight();
 
       // Draw stun icon.
-      g.drawImage( stunIcon, drawX, drawY, iconW, iconH, null );
+      g.drawImage( statusIcon, drawX, drawY, iconW, iconH, null );
     }
 
     // Transport icon.
@@ -248,6 +263,10 @@ public class UnitSpriteSet
     // Capture icon.
     if( u.getCaptureProgress() > 0 )
       unitIcons.add(SpriteLibrary.getCaptureIcon());
+
+    // Hide icon.
+    if( u.model.hidden )
+      unitIcons.add(SpriteLibrary.getHideIcon());
 
     // Draw one of the current activity icons in the lower-right.
     if( !unitIcons.isEmpty() )
