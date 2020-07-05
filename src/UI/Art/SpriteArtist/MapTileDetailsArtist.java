@@ -112,8 +112,8 @@ public class MapTileDetailsArtist
     
     // Each attribute with a 1-px buffer, plus space for the tile itself.
     int numAttrs = Math.max(terrainAttrs.size(), unitAttrs.size());
-    int lowerBuffer = 3;
-    int panelH = numAttrs*iconSize+numAttrs+(tileSize*2)+lowerBuffer;
+    int bufferPx = 3;
+    int panelH = numAttrs*iconSize+numAttrs+(tileSize*2)+bufferPx;
 
     // Create the overlay image.
     tileOverlay = SpriteLibrary.createTransparentSprite(panelW, panelH);
@@ -121,7 +121,8 @@ public class MapTileDetailsArtist
 
     // Draw the semi-transparent panel backing.
     ltog.setColor(new Color(0, 0, 0, 100));
-    ltog.fillRect(0, 0, tileOverlay.getWidth(), tileOverlay.getHeight());
+    //ltog.fillRect(0, 0, tileOverlay.getWidth(), tileOverlay.getHeight());
+    ltog.fillRoundRect(0, 0, tileOverlay.getWidth(), tileOverlay.getHeight(), bufferPx*2, bufferPx*2);
 
     // Figure out where to draw.
     int drawX = isTerrainObject ? 0 : tileSize;
@@ -135,12 +136,12 @@ public class MapTileDetailsArtist
     {
       drawX = terrainPanelW;
       drawY = tileSize;
-      drawColumn(ltog, unitImage, unitAttrs, drawX, drawY, 0);
+      drawColumn(ltog, unitImage, unitAttrs, drawX, drawY, -iconSize/2);
     }
 
     // Draw the tile coordinates.
-    drawX = lowerBuffer;
-    drawY = lowerBuffer;
+    drawX = bufferPx;
+    drawY = bufferPx;
     String coordStr = String.format("(%d, %d)", coord.xCoord, coord.yCoord);
     SpriteUIUtils.drawTextSmallCaps(ltog, coordStr, drawX, drawY);
 
