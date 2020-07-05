@@ -41,14 +41,15 @@ public class SpriteLibrary
   private static Sprite mapUnitLetterSprites = null;
   private static Map<Color,Map<Character,BufferedImage>> mapUnitTextSprites = null;
 
-  // Cargo icon for when transports are holding other units.
-  private static BufferedImage mapUnitCargoIcon = null;
-
-  // Stun icon for when units are unable to move.
+  // Unit icons for various conditions.
   private static BufferedImage mapUnitStunIcon = null;
+  private static BufferedImage mapUnitFuelIcon = null;
+  private static BufferedImage mapUnitAmmoIcon = null;
 
-  // Capture icon for when units are capturing properties.
+  // Unit icons for various activities.
+  private static BufferedImage mapUnitCargoIcon = null;
   private static BufferedImage mapUnitCaptureIcon = null;
+  private static BufferedImage mapUnitHideIcon = null;
 
   // Letters for writing in menus.
   private static Sprite letterSpritesUppercase = null;
@@ -393,6 +394,24 @@ public class SpriteLibrary
     return mapUnitStunIcon;
   }
 
+  public static BufferedImage getFuelIcon()
+  {
+    if( null == mapUnitFuelIcon )
+    {
+      mapUnitFuelIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/fuel.png");
+    }
+    return mapUnitFuelIcon;
+  }
+
+  public static BufferedImage getAmmoIcon()
+  {
+    if( null == mapUnitAmmoIcon )
+    {
+      mapUnitAmmoIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/ammo.png");
+    }
+    return mapUnitAmmoIcon;
+  }
+
   public static BufferedImage getCaptureIcon()
   {
     if( null == mapUnitCaptureIcon )
@@ -400,6 +419,15 @@ public class SpriteLibrary
       mapUnitCaptureIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/capture.png");
     }
     return mapUnitCaptureIcon;
+  }
+
+  public static BufferedImage getHideIcon()
+  {
+    if( null == mapUnitHideIcon )
+    {
+      mapUnitHideIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/hide.png");
+    }
+    return mapUnitHideIcon;
   }
 
   ///////////////////////////////////////////////////////////////////
