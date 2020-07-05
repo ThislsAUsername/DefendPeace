@@ -4,17 +4,44 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Map;
 
+import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.MapChangeEvent;
+import Engine.GameEvents.MoveEvent;
+import Engine.GameEvents.ResupplyEvent;
+import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
+import Engine.UnitActionLifecycles.JoinLifecycle;
+import Engine.UnitActionLifecycles.LoadLifecycle;
+import Engine.UnitActionLifecycles.UnloadLifecycle;
 import Engine.XYCoord;
+import Engine.Combat.BattleSummary;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.TerrainType;
+import Terrain.Environment.Weathers;
 import Units.Unit;
+import Units.UnitModel;
 
+/**
+ * Generates an overlay image to show details about the unit and terrain under the cursor.
+ */
 public class MapTileDetailsArtist
 {
   private static XYCoord currentTile = new XYCoord(-1, -1);
   private static BufferedImage tileOverlay;
+  private static MtdaListener mtdaListener = new MtdaListener();
+
+  static
+  {
+    mtdaListener.registerForEvents();
+  }
+
+  public static void resetOverlay()
+  {
+    currentTile = new XYCoord(-1, -1);
+  }
 
   public static void drawTileDetails(Graphics g, GameMap map, XYCoord tileToDetail, boolean overlayIsLeft)
   {
@@ -154,5 +181,27 @@ public class MapTileDetailsArtist
       drawX += tens.getWidth();
       g.drawImage(ones, drawX, drawY, null);
     }
+  }
+
+  /** This class just listens for any event that could change what is under the cursor, which is pretty much all of them. */
+  private static class MtdaListener extends GameEventListener
+  {
+    private static final long serialVersionUID = 1L;
+    public void receiveBattleEvent(BattleSummary summary){MapTileDetailsArtist.resetOverlay();};
+    public void receiveCreateUnitEvent(Unit unit){MapTileDetailsArtist.resetOverlay();};
+    public void receiveCaptureEvent(Unit unit, Location location){MapTileDetailsArtist.resetOverlay();};
+    public void receiveCommanderDefeatEvent(CommanderDefeatEvent event){MapTileDetailsArtist.resetOverlay();};
+    public void receiveLoadEvent(LoadLifecycle.LoadEvent event){MapTileDetailsArtist.resetOverlay();};
+    public void receiveMoveEvent(MoveEvent event){MapTileDetailsArtist.resetOverlay();};
+    public void receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){MapTileDetailsArtist.resetOverlay();};
+    public void receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){MapTileDetailsArtist.resetOverlay();};
+    public void receiveResupplyEvent(ResupplyEvent event){MapTileDetailsArtist.resetOverlay();};
+    public void receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath){MapTileDetailsArtist.resetOverlay();};
+    public void receiveUnloadEvent(UnloadLifecycle.UnloadEvent event){MapTileDetailsArtist.resetOverlay();};
+    public void receiveUnitTransformEvent(Unit unit, UnitModel oldType){MapTileDetailsArtist.resetOverlay();};
+    public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){MapTileDetailsArtist.resetOverlay();};
+    public void receiveWeatherChangeEvent(Weathers weather, int duration){MapTileDetailsArtist.resetOverlay();};
+    public void receiveMapChangeEvent(MapChangeEvent event){MapTileDetailsArtist.resetOverlay();};
+    public void receiveMassDamageEvent(Map<Unit, Integer> lostHP){MapTileDetailsArtist.resetOverlay();};
   }
 }
