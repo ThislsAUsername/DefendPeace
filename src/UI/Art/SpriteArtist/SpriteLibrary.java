@@ -41,7 +41,9 @@ public class SpriteLibrary
   private static Sprite mapUnitLetterSprites = null;
   private static Map<Color,Map<Character,BufferedImage>> mapUnitTextSprites = null;
 
-  // Unit icons for various conditions.
+  // Icons for various attributes.
+  private static BufferedImage mapHeartIcon = null;
+  private static BufferedImage mapShieldIcon = null;
   private static BufferedImage mapUnitStunIcon = null;
   private static BufferedImage mapUnitFuelIcon = null;
   private static BufferedImage mapUnitAmmoIcon = null;
@@ -392,6 +394,24 @@ public class SpriteLibrary
       mapUnitStunIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/stun.png");
     }
     return mapUnitStunIcon;
+  }
+
+  public static BufferedImage getHeartIcon()
+  {
+    if( null == mapHeartIcon )
+    {
+      mapHeartIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/heart.png");
+    }
+    return mapHeartIcon;
+  }
+
+  public static BufferedImage getShieldIcon()
+  {
+    if( null == mapShieldIcon )
+    {
+      mapShieldIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/shield.png");
+    }
+    return mapShieldIcon;
   }
 
   public static BufferedImage getFuelIcon()

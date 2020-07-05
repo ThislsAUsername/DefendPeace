@@ -249,6 +249,12 @@ public class TerrainSpriteSet
     myTerrainNonAffinities.add(otherTerrain);
   }
 
+  /** Provides a way to consistently get the same tile variation for the same location. */
+  public static int getTileVariation(int x, int y)
+  {
+    return (x + 1) * (y) + x;
+  }
+
   /**
    * Draws the terrain at the indicated location, accounting for any defined tile transitions.
    * Does not draw terrain objects (buildings, trees, mountains, etc).
@@ -288,7 +294,7 @@ public class TerrainSpriteSet
       // Either: we are only drawing terrain objects, and this tile type does represent a terrain object,
       //     or: we are only drawing base terrain, and this tile type represents base terrain.
       int tileSize = SpriteLibrary.baseSpriteSize;
-      int variation = (x + 1) * (y) + x; // Used to vary the specific sprite version drawn at each place in a repeatable way.
+      int variation = getTileVariation(x, y);
 
       // Get the tile we want to draw, based on weather.
       Weathers currentWeather = map.getEnvironment(x, y).weatherType;

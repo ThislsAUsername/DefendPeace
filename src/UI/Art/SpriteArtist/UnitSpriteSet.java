@@ -147,6 +147,14 @@ public class UnitSpriteSet
   }
 
   /**
+   * Return the first IDLE sprite image.
+   */
+  public BufferedImage getUnitImage()
+  {
+    return sprites[AnimState.IDLE.ordinal()].getFrame(0);
+  }
+
+  /**
    * Return the subimage of the requested sprite, greying if it cannot move, unless a different CO is active.
    */
   private BufferedImage getUnitImage(AnimState state, int imageIndex)
