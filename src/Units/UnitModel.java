@@ -3,10 +3,14 @@ package Units;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import Engine.UnitActionFactory;
+import Engine.Utils;
+import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.UnitDieEvent;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
@@ -189,12 +193,40 @@ public abstract class UnitModel implements Serializable, ITargetable
   }
 
   /** Provides a hook for inheritors to supply turn-initialization actions to a unit.
+   * Overriders should collect the output of super.getTurnInitEvents() before returning.
    * @param self Assumed to be a Unit of the model's type.
+   * @param map The current true state of the game map.
    */
   public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
   {
-    // Most Units don't have any; specific UnitModel types can override.
-    return new GameEventQueue();
+    GameEventQueue queue = new GameEventQueue();
+    if( isAirUnit() && 0 == self.fuel )
+    {
+      // Uh oh. We are about to go crashy crashy. Unless we are about to be resupplied...
+      boolean ok = false;
+      XYCoord xyc = new XYCoord(self.x, self.y);
+      Location loc = map.getLocation(xyc);
+
+      // First check if we are on an airport.
+      if(loc.getOwner() == self.CO && canRepairOn(loc))
+        ok = true;
+
+      // Next see if there is a friendly APC nearby.
+      List<XYCoord> adjacents = Utils.findLocationsInRange(map, xyc, 1);
+      for( XYCoord adj : adjacents )
+      {
+        Unit res = map.getLocation(adj).getResident();
+        if( null != res && (res.CO == self.CO) && res.model.hasActionType(UnitActionFactory.RESUPPLY) )
+        {
+          ok = true;
+          break;
+        }
+      }
+
+      if(!ok)
+        queue.add(new UnitDieEvent(self));
+    }
+    return queue;
   }
 
   /**
