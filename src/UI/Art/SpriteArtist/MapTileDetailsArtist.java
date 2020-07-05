@@ -101,7 +101,7 @@ public class MapTileDetailsArtist
       if( unit.ammo >= 0 ) 
         unitAttrs.add(new AttributeArtist(SpriteLibrary.getAmmoIcon(), unit.ammo));
       if( unit.getCaptureProgress() > 0)
-        unitAttrs.add(new AttributeArtist(SpriteLibrary.getCaptureIcon(), unit.ammo));
+        unitAttrs.add(new AttributeArtist(SpriteLibrary.getCaptureIcon(), unit.getCaptureProgress()));
     }
 
     ///////////////////////////////////////////////////////////////
