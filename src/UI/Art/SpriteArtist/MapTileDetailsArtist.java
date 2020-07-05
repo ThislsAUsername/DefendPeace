@@ -175,7 +175,7 @@ public class MapTileDetailsArtist
     {
       g.drawImage(icon, drawX, drawY, null);
       drawX += icon.getWidth() + 2;
-      Sprite numbers = SpriteLibrary.getMapUnitHPSprites();
+      Sprite numbers = SpriteLibrary.getMapUnitNumberSprites();
       BufferedImage tens = numbers.getFrame((int)(value / 10));
       BufferedImage ones = numbers.getFrame((int)(value % 10));
       g.drawImage(tens, drawX, drawY, null);

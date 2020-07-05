@@ -203,7 +203,7 @@ public class MapSelectMenuArtist
     }
 
     // Get the number images, and grab the dimensions
-    Sprite nums = SpriteLibrary.getMapUnitHPSprites();
+    Sprite nums = SpriteLibrary.getMapUnitNumberSprites();
     int numWidth = nums.getFrame(0).getWidth();
     int numHeight = nums.getFrame(0).getHeight();
 

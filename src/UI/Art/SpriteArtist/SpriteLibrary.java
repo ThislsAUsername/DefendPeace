@@ -37,7 +37,7 @@ public class SpriteLibrary
   private static Sprite moveCursorArrowSprite = null;
 
   // Numbers and letters to overlay on map units.
-  private static Sprite mapUnitHPSprites = null;
+  private static Sprite mapUnitNumberSprites = null;
   private static Sprite mapUnitLetterSprites = null;
   private static Map<Color,Map<Character,BufferedImage>> mapUnitTextSprites = null;
 
@@ -324,13 +324,13 @@ public class SpriteLibrary
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
 
-  public static Sprite getMapUnitHPSprites()
+  public static Sprite getMapUnitNumberSprites()
   {
-    if( null == mapUnitHPSprites )
+    if( null == mapUnitNumberSprites )
     {
-      mapUnitHPSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/unit/icon/hp.png"), 8, 8);
+      mapUnitNumberSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/unit/icon/numbers.png"), 8, 8);
     }
-    return mapUnitHPSprites;
+    return mapUnitNumberSprites;
   }
 
   public static Sprite getMapUnitLetterSprites()
@@ -363,7 +363,7 @@ public class SpriteLibrary
       }
       
       // Do the same for numbers
-      Sprite numbers = new Sprite(getMapUnitHPSprites());
+      Sprite numbers = new Sprite(getMapUnitNumberSprites());
       numbers.colorize(Color.WHITE, color);
       for (char ch = '0'; ch <= '9'; ch++)
       {

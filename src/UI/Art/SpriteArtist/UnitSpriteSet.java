@@ -211,13 +211,13 @@ public class UnitSpriteSet
       BufferedImage num;
       if( u.getHP() > u.model.maxHP )
       {
-        num = SpriteLibrary.getMapUnitHPSprites().getFrame(1); // Tens place.
+        num = SpriteLibrary.getMapUnitNumberSprites().getFrame(1); // Tens place.
 
         // Ones place shares space with the activity icons below if HP > 10.
-        unitIcons.add( SpriteLibrary.getMapUnitHPSprites().getFrame((u.getHP()-u.model.maxHP)) );
+        unitIcons.add( SpriteLibrary.getMapUnitNumberSprites().getFrame((u.getHP()-u.model.maxHP)) );
       }
       else
-        num = SpriteLibrary.getMapUnitHPSprites().getFrame(u.getHP());
+        num = SpriteLibrary.getMapUnitNumberSprites().getFrame(u.getHP());
       g.drawImage(num, drawX, drawY + ((unitHeight) / 2), num.getWidth(), num.getHeight(), null);
     }
     
