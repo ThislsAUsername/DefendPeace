@@ -269,7 +269,7 @@ public class UnitSpriteSet
 
     // Capture icon.
     if( u.getCaptureProgress() > 0 )
-      unitIcons.add(SpriteLibrary.getCaptureIcon());
+      unitIcons.add(SpriteLibrary.getCaptureIcon(u.CO.myColor));
 
     // Hide icon.
     if( u.model.hidden )

@@ -50,7 +50,7 @@ public class SpriteLibrary
 
   // Unit icons for various activities.
   private static BufferedImage mapUnitCargoIcon = null;
-  private static BufferedImage mapUnitCaptureIcon = null;
+  private static HashMap<Color, BufferedImage> mapUnitCaptureIcons = new HashMap<Color, BufferedImage>();
   private static BufferedImage mapUnitHideIcon = null;
 
   // Letters for writing in menus.
@@ -432,13 +432,19 @@ public class SpriteLibrary
     return mapUnitAmmoIcon;
   }
 
-  public static BufferedImage getCaptureIcon()
+  public static BufferedImage getCaptureIcon(Color color)
   {
-    if( null == mapUnitCaptureIcon )
+    if( !mapUnitCaptureIcons.containsKey(color) )
     {
-      mapUnitCaptureIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/capture.png");
+      BufferedImage icon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/capture.png");
+      BufferedImage bi = SpriteLibrary.createTransparentSprite(icon.getWidth(), icon.getHeight());
+      Graphics g = bi.getGraphics();
+      g.setColor(color);
+      g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
+      g.drawImage(icon, 0, 0, null);
+      mapUnitCaptureIcons.put(color, bi);
     }
-    return mapUnitCaptureIcon;
+    return mapUnitCaptureIcons.get(color);
   }
 
   public static BufferedImage getHideIcon()
