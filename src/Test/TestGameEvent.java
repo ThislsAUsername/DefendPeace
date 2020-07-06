@@ -322,6 +322,7 @@ public class TestGameEvent extends TestCase
     GameEventQueue events = new GameEventQueue();
     events.addAll(apc.initTurn(testMap));
     events.addAll(recon.initTurn(testMap));
+    events.addAll(mech.initTurn(testMap));
     for( GameEvent event : events )
     {
       event.performEvent(testMap);

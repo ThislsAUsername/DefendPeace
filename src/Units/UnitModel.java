@@ -10,6 +10,8 @@ import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.HealUnitEvent;
+import Engine.GameEvents.ResupplyEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Terrain.Location;
 import Terrain.MapMaster;
@@ -200,32 +202,49 @@ public abstract class UnitModel implements Serializable, ITargetable
   public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
   {
     GameEventQueue queue = new GameEventQueue();
-    if( isAirUnit() && 0 == self.fuel )
+
+    XYCoord xyc = new XYCoord(self.x, self.y);
+    Location loc = map.getLocation(xyc);
+
+    // No actions for units in transports. Should also be checked in Unit.
+    if( null == loc ) return queue;
+
+    boolean resupplying = false;
+
+    // If the unit is not at max health, and is on a repair tile, heal it.
+    if( canRepairOn(loc) && !self.CO.isEnemy(loc.getOwner()) )
     {
-      // Uh oh. We are about to go crashy crashy. Unless we are about to be resupplied...
-      boolean ok = false;
-      XYCoord xyc = new XYCoord(self.x, self.y);
-      Location loc = map.getLocation(xyc);
+      queue.add(new HealUnitEvent(self, self.CO.getRepairPower(), self.CO)); // Event handles cost logic
+      // Resupply is free; whether or not we can repair, go ahead and add the resupply event.
+      if( !self.isFullySupplied() )
+      {
+        resupplying = true;
+        queue.add(new ResupplyEvent(self, self));
+      }
+    }
 
-      // First check if we are on an airport.
-      if(loc.getOwner() == self.CO && canRepairOn(loc))
-        ok = true;
-
-      // Next see if there is a friendly APC nearby.
+    // If there is an adjacent APC or similar, resupply.
+    if( !resupplying && !self.isFullySupplied() )
+    {
       List<XYCoord> adjacents = Utils.findLocationsInRange(map, xyc, 1);
       for( XYCoord adj : adjacents )
       {
         Unit res = map.getLocation(adj).getResident();
-        if( null != res && (res.CO == self.CO) && res.model.hasActionType(UnitActionFactory.RESUPPLY) )
+        if( (null != res) && !res.CO.isEnemy(self.CO) && res.model.hasActionType(UnitActionFactory.RESUPPLY) )
         {
-          ok = true;
+          queue.add(new ResupplyEvent(res, self));
+          resupplying = true;
           break;
         }
       }
-
-      if(!ok)
-        queue.add(new UnitDieEvent(self));
     }
+
+    if( !resupplying && (0 == self.fuel) & (isAirUnit() || isSeaUnit()) )
+    {
+      // Uh oh. It's crashy crashy time.
+      queue.add(new UnitDieEvent(self));
+    }
+
     return queue;
   }
 
