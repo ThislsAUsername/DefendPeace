@@ -699,7 +699,7 @@ public class Utils
 
     for( XYCoord point : points )
     {
-      tilesInRange.addAll(Utils.findLocationsInRange(gameMap, point, range));
+      tilesInRange.addAll(Utils.findLocationsInRange(gameMap, point, 0, range));
     }
 
     return tilesInRange;
