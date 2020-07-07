@@ -51,7 +51,14 @@ public class MassDamageEvent implements GameEvent
     {
       int deltaHP = 0;
       if( lethal )
+      {
         deltaHP = victim.damageHP(damage);
+        if( 0 == victim.getHP() )
+        {
+          gameMap.removeUnit(victim);
+          victim.CO.units.remove(victim);
+        }
+      }
       else
         deltaHP = victim.alterHP(-damage);
       int lostHP = -deltaHP;
