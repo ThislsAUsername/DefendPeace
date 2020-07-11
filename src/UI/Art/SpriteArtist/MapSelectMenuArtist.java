@@ -129,7 +129,6 @@ public class MapSelectMenuArtist
     int mmWScale = drawScale*maxMiniMapWidth / miniMap.getWidth();
     int mmHScale = drawScale*maxMiniMapHeight / miniMap.getHeight();
     int mmScale = (mmWScale > mmHScale)? mmHScale : mmWScale;
-    if( mmScale > 10 ) mmScale = 10;
 
     /////////////// Map Information ///////////////////////
     int buffer = 3;
