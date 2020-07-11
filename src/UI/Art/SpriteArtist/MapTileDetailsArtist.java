@@ -176,10 +176,15 @@ public class MapTileDetailsArtist
       g.drawImage(icon, drawX, drawY, null);
       drawX += icon.getWidth() + 2;
       Sprite numbers = SpriteLibrary.getMapUnitNumberSprites();
-      BufferedImage tens = numbers.getFrame((int)(value / 10));
-      BufferedImage ones = numbers.getFrame((int)(value % 10));
-      g.drawImage(tens, drawX, drawY, null);
-      drawX += tens.getWidth();
+      int tensVal = (int)(value / 10);
+      if( 0 != tensVal )
+      {
+        BufferedImage tens = numbers.getFrame(tensVal);
+        g.drawImage(tens, drawX, drawY, null);
+      }
+      int onesVal = (int)(value % 10);
+      BufferedImage ones = numbers.getFrame(onesVal);
+      drawX += ones.getWidth();
       g.drawImage(ones, drawX, drawY, null);
     }
   }
