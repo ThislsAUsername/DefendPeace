@@ -25,6 +25,7 @@ public abstract class ModularAI implements AIController
   protected Comparator<Unit> unitOrderSetter = new AIUtils.UnitCostComparator(false);
 
   private StringBuffer logger = new StringBuffer();
+  protected int turnNum = 0;
 
   public ModularAI(Commander co)
   {
@@ -34,6 +35,7 @@ public abstract class ModularAI implements AIController
   @Override
   public void initTurn(GameMap gameMap)
   {
+    ++turnNum;
     // Create a list of every property we don't own, but want to.
     unownedProperties = new ArrayList<XYCoord>();
     for( int x = 0; x < gameMap.mapWidth; ++x )
