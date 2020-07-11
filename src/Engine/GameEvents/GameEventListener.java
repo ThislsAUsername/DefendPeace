@@ -72,6 +72,7 @@ public abstract class GameEventListener implements Serializable
   // The functions below should be overridden by subclasses for event types they care about.
   // As a rule, we should avoid passing the actual event to the receive hooks when possible.
   public void receiveBattleEvent(BattleSummary summary){};
+  public void receiveDemolitionEvent(Unit actor, XYCoord tile){};
   public void receiveCreateUnitEvent(Unit unit){};
   public void receiveCaptureEvent(Unit unit, Location location){};
   public void receiveCommanderDefeatEvent(CommanderDefeatEvent event){};

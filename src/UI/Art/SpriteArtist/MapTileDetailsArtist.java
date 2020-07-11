@@ -194,6 +194,7 @@ public class MapTileDetailsArtist
   {
     private static final long serialVersionUID = 1L;
     public void receiveBattleEvent(BattleSummary summary){MapTileDetailsArtist.resetOverlay();};
+    public void receiveDemolitionEvent(Unit actor, XYCoord tile){MapTileDetailsArtist.resetOverlay();};
     public void receiveCreateUnitEvent(Unit unit){MapTileDetailsArtist.resetOverlay();};
     public void receiveCaptureEvent(Unit unit, Location location){MapTileDetailsArtist.resetOverlay();};
     public void receiveCommanderDefeatEvent(CommanderDefeatEvent event){MapTileDetailsArtist.resetOverlay();};
