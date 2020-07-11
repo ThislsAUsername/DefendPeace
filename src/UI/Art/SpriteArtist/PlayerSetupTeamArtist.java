@@ -87,17 +87,18 @@ public class PlayerSetupTeamArtist
     }
 
     /////////////////// MiniMap ////////////////////////
+    // Figure out how large to draw the minimap. We want to make it as large as possible, but still
+    //   fit inside the available space (with a minimum scale factor of 1).
+    int maxMiniMapWidth = myWidth - playerZoneWidth - 4; // Subtract 4 so we have room to draw a frame.
+    int maxMiniMapHeight = myHeight - 4;
+
     Color[] teamColors = new Color[mapInfo.getNumCos()];
     for( int i = 0; i < mapInfo.getNumCos(); ++i )
     {
       teamColors[i] = control.getPlayerInfo(i).getCurrentColor();
     }
-    BufferedImage miniMap = MiniMapArtist.getMapImage( mapInfo, teamColors );
+    BufferedImage miniMap = MiniMapArtist.getMapImage( mapInfo, teamColors, maxMiniMapWidth, maxMiniMapHeight );
 
-    // Figure out how large to draw the minimap. We want to make it as large as possible, but still
-    //   fit inside the available space (with a minimum scale factor of 1).
-    int maxMiniMapWidth = myWidth - playerZoneWidth - 4; // Subtract 4 so we have room to draw a frame.
-    int maxMiniMapHeight = myHeight - 4;
     int mmWScale = maxMiniMapWidth / miniMap.getWidth();
     int mmHScale = maxMiniMapHeight / miniMap.getHeight();
     int mmScale = (mmWScale > mmHScale)? mmHScale : mmWScale;

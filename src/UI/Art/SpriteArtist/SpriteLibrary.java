@@ -29,6 +29,7 @@ public class SpriteLibrary
   public static final int baseSpriteSize = 16;
 
   public static final String charKey = "%./-~,;:!?'&()";
+  public static final String DEFAULT_FACTION = "Thorn";
 
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
   private static HashMap<UnitSpriteSetKey, UnitSpriteSet> mapUnitSpriteSetMap = new HashMap<UnitSpriteSetKey, UnitSpriteSet>();

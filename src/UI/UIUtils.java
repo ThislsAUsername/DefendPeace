@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 
 import CommandingOfficers.Commander;
 import UI.Art.SpriteArtist.ColorPalette;
+import UI.Art.SpriteArtist.SpriteLibrary;
 
 public class UIUtils
 {  
@@ -233,6 +234,10 @@ public class UIUtils
     {
       name = pName;
       basis = pBasis;
+    }
+    public Faction()
+    {
+      this(SpriteLibrary.DEFAULT_FACTION, SpriteLibrary.DEFAULT_FACTION);
     }
   }
 
