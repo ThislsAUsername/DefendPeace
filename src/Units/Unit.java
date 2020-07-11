@@ -288,7 +288,7 @@ public class Unit implements Serializable
       captureProgress = 0;
     }
     captureProgress += getHP();
-    if( captureProgress >= 20 )
+    if( captureProgress >= target.getEnvironment().terrainType.getCaptureThreshold() )
     {
       target.setOwner(CO);
       captureProgress = 0;
