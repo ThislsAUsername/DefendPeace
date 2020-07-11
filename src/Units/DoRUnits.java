@@ -497,17 +497,6 @@ public class DoRUnits extends UnitModelScheme
       possibleActions.add(
           new TerraformLifecycle.TerraformFactory(TerrainType.SHOAL, TerrainType.TEMP_SEAPORT, "BUILD"));
     }
-
-    /**
-     * Rigs re-supply any adjacent allies at the beginning of every turn. Make it so.
-     */
-    @Override
-    public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
-    {
-      GameEventQueue events = new GameEventQueue();
-      events.addAll(new ResupplyLifecycle.ResupplyAction(self).getEvents(map));
-      return events;
-    }
   }
 
   // air
