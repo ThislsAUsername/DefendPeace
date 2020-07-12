@@ -2,6 +2,7 @@ package AI;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -23,7 +24,6 @@ import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Engine.UnitActionLifecycles.BattleLifecycle;
-import Engine.UnitActionLifecycles.CaptureLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.Environment;
 import Terrain.GameMap;
@@ -38,7 +38,7 @@ import Units.MoveTypes.MoveType;
  *  Wally values units based on firepower and the area they can threaten.
  *  He tries to keep units safe by keeping them out of range, but will also meatshield to protect more valuable units.
  */
-public class WallyAI implements AIController
+public class WallyAI extends ModularAI
 {
   private static class instantiator implements AIMaker
   {
@@ -70,10 +70,6 @@ public class WallyAI implements AIController
   {
     return info;
   }
-  
-  Queue<GameAction> actions = new ArrayDeque<GameAction>();
-
-  private Commander myCo = null;
 
   // What % damage I'll ignore when checking safety
   private static final int INDIRECT_THREAT_THRESHHOLD = 7;
@@ -85,10 +81,9 @@ public class WallyAI implements AIController
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
   private static final double TERRAIN_PENALTY_WEIGHT = 3; // Exponent for how crippling we think high move costs are
   private static final double MIN_SIEGE_RANGE_WEIGHT = 0.8; // Exponent for how much to penalize siege weapon ranges for their min ranges 
-
-  private ArrayList<XYCoord> unownedProperties;
-  private ArrayList<XYCoord> capturingProperties;
   
+  private Map<UnitModel, Map<XYCoord, Double>> threatMap;
+  private ArrayList<Unit> allThreats;
   private HashMap<UnitModel, Double> unitEffectiveMove = null; // How well the unit can move, on average, on this map
   public double getEffectiveMove(UnitModel model)
   {
@@ -122,12 +117,25 @@ public class WallyAI implements AIController
     return effMove;
   }
 
-  private StringBuffer logger = new StringBuffer();
-  private int turnNum = 0;
 
   public WallyAI(Commander co)
   {
-    myCo = co;
+    super(co);
+    aiPhases = new ArrayList<AIModule>(
+        Arrays.asList(
+            new PowerActivator(co, CommanderAbility.PHASE_TURN_START),
+            new GenerateThreatMap(co, this),
+            new CaptureFinisher(co, this),
+
+            new SiegeAttacks(co, this),
+            new NHitKO(co, this),
+            new FreeRealEstate(co, this),
+            new Travel(co, this),
+            new PowerActivator(co, CommanderAbility.PHASE_BUY),
+            new BuildStuff(co, this),
+
+            new PowerActivator(co, CommanderAbility.PHASE_TURN_END)
+            ));
   }
 
   private void init(GameMap map)
@@ -146,97 +154,32 @@ public class WallyAI implements AIController
   @Override
   public void initTurn(GameMap gameMap)
   {
+    super.initTurn(gameMap);
     if (null == unitEffectiveMove)
       init(gameMap);
-    turnNum++;
     log(String.format("[======== Wally initializing turn %s for %s =========]", turnNum, myCo));
-
-    // Make sure we don't have any hang-ons from last time.
-    actions.clear();
-
-    // Create a list of every property we don't own, but want to.
-    unownedProperties = new ArrayList<XYCoord>();
-    for( int x = 0; x < gameMap.mapWidth; ++x )
-    {
-      for( int y = 0; y < gameMap.mapHeight; ++y )
-      {
-        XYCoord loc = new XYCoord(x, y);
-        if( gameMap.getLocation(loc).isCaptureable() && myCo.isEnemy(gameMap.getLocation(loc).getOwner()) )
-        {
-          unownedProperties.add(loc);
-        }
-      }
-    }
-
-    // Check for a turn-kickoff power
-    AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_TURN_START);
-
-    capturingProperties = new ArrayList<XYCoord>();
-    for( Unit unit : myCo.units )
-    {
-      if( unit.getCaptureProgress() > 0 )
-      {
-        capturingProperties.add(unit.getCaptureTargetCoords());
-        XYCoord position = new XYCoord(unit.x, unit.y);
-        actions.offer(new CaptureLifecycle.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, position, gameMap)));
-      }
-    }
   }
 
   @Override
   public void endTurn()
   {
     log(String.format("[======== Wally ending turn %s for %s =========]", turnNum, myCo));
-    logger = new StringBuffer();
   }
 
-  private void log(String message)
+  public static class SiegeAttacks extends UnitActionFinder
   {
-    System.out.println(message);
-    logger.append(message).append('\n');
-  }
-
-  @Override
-  /**
-   * Our to-do list for a given turn:
-   * 1) siege attacks
-   * 2) try for any mobile kills
-   * 3) capture if needed
-   * 4) travel
-   * 5) build
-   */
-  public GameAction getNextAction(GameMap gameMap)
-  {
-    // If we have more actions ready, don't bother calculating stuff.
-    if( !actions.isEmpty() )
+    private static final long serialVersionUID = 1L;
+    public SiegeAttacks(Commander co, ModularAI ai)
     {
-      GameAction action = actions.poll();
-      log("  Action: " + action);
-      return action;
+      super(co, ai);
     }
 
-    // Prioritize using our most expensive units first
-    Queue<Unit> unitQueue = new PriorityQueue<Unit>(11, new AIUtils.UnitCostComparator(false));
-    for( Unit unit : myCo.units )
+    @Override
+    public GameAction getUnitAction(Unit unit, GameMap gameMap)
     {
-      if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y))
-        continue; // No actions for units that are stale or out of bounds.
-      unitQueue.offer(unit);
-    }
-
-    GameAction nextAction = null;
-    do
-    {
-      Queue<Unit> tempQueue = new ArrayDeque<Unit>();
-      // Evaluate siege attacks
-      while (actions.isEmpty() && !unitQueue.isEmpty())
-      {
-        Unit unit = unitQueue.poll();
+      GameAction bestAttack = null;
         if( unit.CO.unitProductionByTerrain.containsKey(gameMap.getEnvironment(unit.x, unit.y).terrainType) || !unit.model.hasImmobileWeapon() )
-        {
-          tempQueue.offer(unit);
-          continue;
-        }
+          return bestAttack;
 
         // Find the possible destination.
         XYCoord coord = new XYCoord(unit.x, unit.y);
@@ -246,7 +189,6 @@ public class WallyAI implements AIController
 
         // Figure out what I can do here.
         ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath);
-        GameAction bestAttack = null;
         double bestDamage = 0;
         for( GameActionSet actionSet : actionSets )
         {
@@ -269,108 +211,152 @@ public class WallyAI implements AIController
         }
         if( null != bestAttack )
         {
-          log(String.format("%s is shooting %s", unit.toStringWithLocation(), gameMap.getLocation(bestAttack.getTargetLocation()).getResident()));
-          actions.offer(bestAttack);
-          break;
+          ai.log(String.format("%s is shooting %s", unit.toStringWithLocation(), gameMap.getLocation(bestAttack.getTargetLocation()).getResident()));
         }
-        else // tempqueue the siege unit if it can't attack
-        {
-          tempQueue.offer(unit);
-        }
-      }
+        return bestAttack;
+    }
+  }
 
-      // reset our units back into unitQueue if we need to calculate more
-      if( actions.isEmpty() )
-      {
-        unitQueue.addAll(tempQueue);
-        tempQueue.clear();
-      }
+  // Try to get confirmed kills with mobile strikes.
+  public static class NHitKO implements AIModule
+  {
+    private static final long serialVersionUID = 1L;
+    public Commander myCo;
+    public final WallyAI ai;
 
-      // Try to get confirmed kills with mobile strikes.
-      if( actions.isEmpty() && !unitQueue.isEmpty() )
+    public NHitKO(Commander co, WallyAI ai)
+    {
+      myCo = co;
+      this.ai = ai;
+    }
+
+    XYCoord targetLoc;
+    Map<XYCoord, Unit> neededAttacks;
+    double damageSum = 0;
+    public void reset()
+    {
+      targetLoc = null;
+      neededAttacks = null;
+      damageSum = 0;
+    }
+
+    @Override
+    public GameAction getNextAction(PriorityQueue<Unit> unitQueue, GameMap gameMap)
+    {
+      GameAction nextAction = nextAttack(gameMap);
+      if (null != nextAction)
+        return nextAction;
+      
+      boolean foundKill = false;
+      // Get a count of enemy forces.
+      Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
+      for( Commander co : unitLists.keySet() )
       {
-        boolean foundKill = false;
-        // Get a count of enemy forces.
-        Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
-        for( Commander co : unitLists.keySet() )
+        // log(String.format("Hunting CO %s's units", co.coInfo.name));
+        if( myCo.isEnemy(co) )
         {
-          // log(String.format("Hunting CO %s's units", co.coInfo.name));
-          if( myCo.isEnemy(co) )
+          Queue<Unit> targetQueue = new PriorityQueue<Unit>(unitLists.get(co).size(), new AIUtils.UnitCostComparator(false));
+          targetQueue.addAll(unitLists.get(co)); // We want to kill the most expensive enemy units
+          for( Unit target : targetQueue )
           {
-            Queue<Unit> targetQueue = new PriorityQueue<Unit>(unitLists.get(co).size(), new AIUtils.UnitCostComparator(false));
-            targetQueue.addAll(unitLists.get(co)); // We want to kill the most expensive enemy units
-            for( Unit target : targetQueue )
+            if (target.getHP() < 1) // Try not to pick fights with zombies
+              continue;
+            // log(String.format("  Would like to kill: %s", target.toStringWithLocation()));
+            ArrayList<XYCoord> coordsToCheck = Utils.findLocationsInRange(gameMap, new XYCoord(target.x, target.y), 1, AIUtils.findMaxStrikeWeaponRange(myCo));
+            neededAttacks = new HashMap<XYCoord, Unit>();
+            double damage = 0;
+
+            // Figure out where we can attack from, and include attackers already in range by default.
+            for( XYCoord xyc : coordsToCheck )
             {
-              if (target.getHP() < 1) // Try not to pick fights with zombies
-                continue;
-              // log(String.format("  Would like to kill: %s", target.toStringWithLocation()));
-              ArrayList<XYCoord> coordsToCheck = Utils.findLocationsInRange(gameMap, new XYCoord(target.x, target.y), 1, AIUtils.findMaxStrikeWeaponRange(myCo));
-              Map<XYCoord, Unit> neededAttacks = new HashMap<XYCoord, Unit>();
-              double damage = 0;
+              Location loc = gameMap.getLocation(xyc);
+              Unit resident = loc.getResident();
 
-              // Figure out where we can attack from, and include attackers already in range by default.
-              for( XYCoord xyc : coordsToCheck )
+              // Units who can attack from their current position volunteer themselves. Probably not smart sometimes, but oh well.
+              if( null != resident && resident.CO == myCo && !resident.isTurnOver &&
+                  resident.canAttack(target.model, xyc.getDistance(target.x, target.y), false))
               {
-                Location loc = gameMap.getLocation(xyc);
-                Unit resident = loc.getResident();
-
-                // Units who can attack from their current position volunteer themselves. Probably not smart sometimes, but oh well.
-                if( null != resident && resident.CO == myCo && !resident.isTurnOver &&
-                    resident.canAttack(target.model, xyc.getDistance(target.x, target.y), false))
+                damage += CombatEngine.simulateBattleResults(resident, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
+                neededAttacks.put(xyc, resident);
+                if( damage >= target.getPreciseHP() )
                 {
-                  damage += CombatEngine.simulateBattleResults(resident, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
-                  neededAttacks.put(xyc, resident);
-                  if( damage >= target.getPreciseHP() )
-                  {
-                    foundKill = true;
-                    break;
-                  }
+                  foundKill = true;
+                  break;
                 }
-                // Check that we could potentially move into this space. Also we're scared of fog
-                else if( (null == resident) && myCo.unitProductionByTerrain.containsKey(gameMap.getEnvironment(xyc).terrainType)
-                    && !gameMap.isLocationFogged(xyc) )
-                  neededAttacks.put(xyc, null);
               }
-              if( foundKill || findAssaultKills(gameMap, unitQueue, neededAttacks, target, damage) >= target.getPreciseHP() )
-              {
-                log(String.format("  Gonna try to kill %s, who has %s HP", target.toStringWithLocation(), target.getHP()));
-                double damageSum = 0;
-                for( XYCoord xyc : neededAttacks.keySet() )
-                {
-                  Unit unit = neededAttacks.get(xyc);
-                  if( null != unit )
-                  {
-                    damageSum += CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
-                    actions.offer(new BattleLifecycle.BattleAction(gameMap, unit, Utils.findShortestPath(unit, xyc, gameMap), target.x, target.y));
-                    unitQueue.remove(unit);
-                    log(String.format("    %s brings the damage total to %s", unit.toStringWithLocation(), damageSum));
-                    if (damageSum >= target.getPreciseHP())
-                      break;
-                  }
-                }
-                foundKill = true;
-                break;
-              }
-              else
-              {
-                // log(String.format("  Can't kill %s, oh well", target.toStringWithLocation()));
-              }
+              // Check that we could potentially move into this space. Also we're scared of fog
+              else if( (null == resident) && myCo.unitProductionByTerrain.containsKey(gameMap.getEnvironment(xyc).terrainType)
+                  && !gameMap.isLocationFogged(xyc) )
+                neededAttacks.put(xyc, null);
+            }
+            if( foundKill || ai.findAssaultKills(gameMap, unitQueue, neededAttacks, target, damage) >= target.getPreciseHP() )
+            {
+              foundKill = true;
+              ai.log(String.format("  Gonna try to kill %s, who has %s HP", target.toStringWithLocation(), target.getHP()));
+              targetLoc = new XYCoord(target.x, target.y);
+              return nextAttack(gameMap);
+            }
+            else
+            {
+              // log(String.format("  Can't kill %s, oh well", target.toStringWithLocation()));
             }
           }
-          if( foundKill )
-            break;
         }
       }
+      
+      return null;
+    }
 
-      // Figure out where we don't wanna go
-      ArrayList<Unit> allThreats = new ArrayList<Unit>();
-      Map<UnitModel, Map<XYCoord, Double>> threatMap = new HashMap<UnitModel, Map<XYCoord, Double>>();
-      if( actions.isEmpty() )
+    private GameAction nextAttack(GameMap gameMap)
+    {
+      if( null == targetLoc || null == neededAttacks )
+        return null;
+
+      Unit target = gameMap.getLocation(targetLoc).getResident();
+      if( null == target )
       {
+        ai.log(String.format("    NHitKO target is ded. Ayy."));
+        reset();
+        return null;
+      }
+
+      for( XYCoord xyc : neededAttacks.keySet() )
+      {
+        Unit unit = neededAttacks.get(xyc);
+        if( null == unit || unit.isTurnOver )
+          continue;
+
+        damageSum += CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
+        ai.log(String.format("    %s brings the damage total to %s", unit.toStringWithLocation(), damageSum));
+        return new BattleLifecycle.BattleAction(gameMap, unit, Utils.findShortestPath(unit, xyc, gameMap), target.x, target.y);
+      }
+      ai.log(String.format("    NHitKO ran out of attacks to do"));
+      reset();
+      return null;
+    }
+  }
+
+  public static class GenerateThreatMap implements AIModule
+  {
+    private static final long serialVersionUID = 1L;
+    public Commander myCo;
+    public final WallyAI ai;
+
+    public GenerateThreatMap(Commander co, WallyAI ai)
+    {
+      myCo = co;
+      this.ai = ai;
+    }
+
+    @Override
+    public GameAction getNextAction(PriorityQueue<Unit> unitQueue, GameMap gameMap)
+    {
+      ai.allThreats = new ArrayList<Unit>();
+      ai.threatMap = new HashMap<UnitModel, Map<XYCoord, Double>>();
         Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
         for( UnitModel um : myCo.unitModels )
         {
-          threatMap.put(um, new HashMap<XYCoord, Double>());
+          ai.threatMap.put(um, new HashMap<XYCoord, Double>());
           for( Commander co : unitLists.keySet() )
           {
             if( myCo.isEnemy(co) )
@@ -378,8 +364,8 @@ public class WallyAI implements AIController
               for( Unit threat : unitLists.get(co) )
               {
                 // add each new threat to the existing threats
-                allThreats.add(threat);
-                Map<XYCoord, Double> threatArea = threatMap.get(um);
+                ai.allThreats.add(threat);
+                Map<XYCoord, Double> threatArea = ai.threatMap.get(um);
                 for( Entry<XYCoord, Double> newThreat : AIUtils.findThreatPower(gameMap, threat, um).entrySet() )
                 {
                   if( null == threatArea.get(newThreat.getKey()) )
@@ -391,140 +377,148 @@ public class WallyAI implements AIController
             }
           }
         }
-      }
+        
+      return null;
+    }
+  }
 
-      // try to get unit value by capture or attack
-      while (actions.isEmpty() && !unitQueue.isEmpty())
+  // Try to get unit value by capture or attack
+  public static class FreeRealEstate extends UnitActionFinder
+  {
+    private static final long serialVersionUID = 1L;
+    private final WallyAI ai;
+    public FreeRealEstate(Commander co, WallyAI ai)
+    {
+      super(co, ai);
+      this.ai = ai;
+    }
+
+    @Override
+    public GameAction getUnitAction(Unit unit, GameMap gameMap)
+    {
+      XYCoord position = new XYCoord(unit.x, unit.y);
+      Location unitLoc = gameMap.getLocation(position);
+
+      boolean includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
+      ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces);
+      // sort by furthest away, good for capturing
+      Utils.sortLocationsByDistance(position, destinations);
+      Collections.reverse(destinations);
+
+      for( XYCoord moveCoord : destinations )
       {
-        Unit unit = unitQueue.poll();
-        XYCoord position = new XYCoord(unit.x, unit.y);
-        Location unitLoc = gameMap.getLocation(position);
+        // Figure out how to get here.
+        Path movePath = Utils.findShortestPath(unit, moveCoord, gameMap);
 
-        boolean foundAction = false;
-
-        boolean includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
-        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces);
-        // sort by furthest away, good for capturing
-        Utils.sortLocationsByDistance(position, destinations);
-        Collections.reverse(destinations);
-
-        for( XYCoord moveCoord : destinations )
+        // Figure out what I can do here.
+        ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, includeOccupiedSpaces);
+        for( GameActionSet actionSet : actionSets )
         {
-          // Figure out how to get here.
-          Path movePath = Utils.findShortestPath(unit, moveCoord, gameMap);
-
-          // Figure out what I can do here.
-          ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, includeOccupiedSpaces);
-          for( GameActionSet actionSet : actionSets )
+          boolean spaceFree = gameMap.isLocationEmpty(unit, moveCoord);
+          Unit resident = gameMap.getLocation(moveCoord).getResident();
+          if (!spaceFree)
           {
-            boolean spaceFree = gameMap.isLocationEmpty(unit, moveCoord);
-            Unit resident = gameMap.getLocation(moveCoord).getResident();
-            if (!spaceFree)
-            {
-              if (unit.CO != resident.CO || resident.isTurnOver
-                  || resident.getHP()*resident.model.getCost() >= unit.getHP()*unit.model.getCost())
-                continue; // If we can't evict or we're not worth more than the other dude, we don't get to kick him out
-              log(String.format("  Evicting %s if I need to", resident.toStringWithLocation()));
-            }
+            if (unit.CO != resident.CO || resident.isTurnOver
+                || resident.getHP()*resident.model.getCost() >= unit.getHP()*unit.model.getCost())
+              continue; // If we can't evict or we're not worth more than the other dude, we don't get to kick him out
+            ai.log(String.format("  Evicting %s if I need to", resident.toStringWithLocation()));
+          }
 
-            // See if we can bag enough damage to be worth sacrificing the unit
-            if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
+          // See if we can bag enough damage to be worth sacrificing the unit
+          if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
+          {
+            for( GameAction ga : actionSet.getGameActions() )
             {
-              for( GameAction ga : actionSet.getGameActions() )
+              Location targetLoc = gameMap.getLocation(ga.getTargetLocation());
+              Unit target = targetLoc.getResident();
+              if( null == target )
+                continue;
+              BattleSummary results = CombatEngine.simulateBattleResults(unit, target, gameMap, moveCoord.xCoord,
+                  moveCoord.yCoord);
+              double loss   = Math.min(unit  .getHP(), (int)results.attackerHPLoss);
+              double damage = Math.min(target.getHP(), (int)results.defenderHPLoss);
+              
+              boolean goForIt = false;
+              if( valueUnit(target, targetLoc, false) * Math.floor(damage) * AGGRO_FUNDS_WEIGHT > valueUnit(unit, unitLoc, true) )
               {
-                Location targetLoc = gameMap.getLocation(ga.getTargetLocation());
-                Unit target = targetLoc.getResident();
-                if( null == target )
-                  continue;
-                BattleSummary results = CombatEngine.simulateBattleResults(unit, target, gameMap, moveCoord.xCoord,
-                    moveCoord.yCoord);
-                double loss   = Math.min(unit  .getHP(), (int)results.attackerHPLoss);
-                double damage = Math.min(target.getHP(), (int)results.defenderHPLoss);
-                
-                boolean goForIt = false;
-                if( valueUnit(target, targetLoc, false) * Math.floor(damage) * AGGRO_FUNDS_WEIGHT > valueUnit(unit, unitLoc, true) )
-                {
-                  log(String.format("  %s is going aggro on %s", unit.toStringWithLocation(), target.toStringWithLocation()));
-                  log(String.format("    He plans to deal %s HP damage for a net gain of %s funds", damage, (target.model.getCost() * damage - unit.model.getCost() * unit.getHP())/10));
-                  goForIt = true;
-                }
-                else if( damage > loss
-                       && !unit.CO.unitProductionByTerrain.containsKey(gameMap.getEnvironment(moveCoord).terrainType)
-                       && isSafe(gameMap, threatMap, unit, ga.getMoveLocation()) )
-                {
-                  log(String.format("  %s thinks it's safe to attack %s", unit.toStringWithLocation(), target.toStringWithLocation()));
-                  goForIt = true;
-                }
+                ai.log(String.format("  %s is going aggro on %s", unit.toStringWithLocation(), target.toStringWithLocation()));
+                ai.log(String.format("    He plans to deal %s HP damage for a net gain of %s funds", damage, (target.model.getCost() * damage - unit.model.getCost() * unit.getHP())/10));
+                goForIt = true;
+              }
+              else if( damage > loss
+                     && !unit.CO.unitProductionByTerrain.containsKey(gameMap.getEnvironment(moveCoord).terrainType)
+                     && ai.isSafe(gameMap, ai.threatMap, unit, ga.getMoveLocation()) )
+              {
+                ai.log(String.format("  %s thinks it's safe to attack %s", unit.toStringWithLocation(), target.toStringWithLocation()));
+                goForIt = true;
+              }
 
-                if( goForIt && (spaceFree || queueTravelAction(gameMap, allThreats, threatMap, resident, true)))
-                {
-                  actions.offer(ga);
-                  foundAction = true;
-                  break;
-                }
+              if( goForIt )
+              {
+                if( !spaceFree )
+                  return ai.findTravelAction(gameMap, ai.allThreats, ai.threatMap, resident, true);
+                return ga;
               }
             }
-            if( foundAction )
-              break; // Only allow one action per unit.
-
-            // Only consider capturing if we can sit still or go somewhere safe.
-            if( actionSet.getSelected().getType() == UnitActionFactory.CAPTURE
-                && ( moveCoord.getDistance(unit.x, unit.y) == 0 || canWallHere(gameMap, threatMap, unit, moveCoord) ) 
-                && ( spaceFree || queueTravelAction(gameMap, allThreats, threatMap, resident, true) ) )
-            {
-              actions.offer(actionSet.getSelected());
-              capturingProperties.add(moveCoord);
-              foundAction = true;
-              break;
-            }
           }
-          if( foundAction )
-            break; // Only allow one action per unit.
-        }
-        if( foundAction )
-        {
-          break; // Only one action per getNextAction() call, to avoid overlap.
-        }
-        else
-        {
-          tempQueue.offer(unit); // if we can't do anything useful right now, consider just moving towards a useful destination
-        }
-      }
 
-      // If no attack/capture actions are available now, just move around
-      if( actions.isEmpty() )
-      {
-        while (!tempQueue.isEmpty())
-        {
-          Unit unit = tempQueue.poll();
-          if (queueTravelAction(gameMap, allThreats, threatMap, unit, false))
-            break;
+          // Only consider capturing if we can sit still or go somewhere safe.
+          if( actionSet.getSelected().getType() == UnitActionFactory.CAPTURE
+              && ( moveCoord.getDistance(unit.x, unit.y) == 0 || ai.canWallHere(gameMap, ai.threatMap, unit, moveCoord) ) 
+            )
+          {
+            if( !spaceFree )
+              return ai.findTravelAction(gameMap, ai.allThreats, ai.threatMap, resident, true);
+            return actionSet.getSelected();
+          }
         }
       }
+      return null;
+    }
+  }
 
-      // Check for an available buying enhancement power
+  // If no attack/capture actions are available now, just move around
+  public static class Travel extends UnitActionFinder
+  {
+    private static final long serialVersionUID = 1L;
+    private final WallyAI ai;
+    public Travel(Commander co, WallyAI ai)
+    {
+      super(co, ai);
+      this.ai = ai;
+    }
+
+    @Override
+    public GameAction getUnitAction(Unit unit, GameMap gameMap)
+    {
+      return ai.findTravelAction(gameMap, ai.allThreats, ai.threatMap, unit, false);
+    }
+  }
+
+  public static class BuildStuff implements AIModule
+  {
+    private static final long serialVersionUID = 1L;
+    public final Commander myCo;
+    public final WallyAI ai;
+
+    public BuildStuff(Commander co, WallyAI ai)
+    {
+      myCo = co;
+      this.ai = ai;
+    }
+    
+    Queue<GameAction> actions = new ArrayDeque<GameAction>();
+
+    @Override
+    public GameAction getNextAction(PriorityQueue<Unit> unitQueue, GameMap gameMap)
+    {
       if( actions.isEmpty() )
-      {
-        AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_BUY);
-      }
+        ai.queueUnitProductionActions(gameMap, actions);
 
-      // We will add all build commands at once, since they can't conflict.
-      if( actions.isEmpty() )
-      {
-        queueUnitProductionActions(gameMap);
-      }
-
-      // Check for a turn-ending power
-      if( actions.isEmpty() )
-      {
-        AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_TURN_END);
-      }
-
-      // Return the next action, or null if actions is empty.
-      nextAction = actions.poll();
-    } while ( nextAction == null && !unitQueue.isEmpty() ); // we don't want to end early, so if the state changed and we don't have an action yet, try again
-    log(String.format("  Action: %s", nextAction));
-    return nextAction;
+      if( !actions.isEmpty() )
+        return actions.poll();
+      return null;
+    }
   }
 
   /** Produces a list of destinations for the unit, ordered by their relative precedence */
@@ -607,7 +601,7 @@ public class WallyAI implements AIController
   }
 
   /** Find a good long-term objective for the given unit, and pursue it (with consideration for life-preservation optional) */
-  private boolean queueTravelAction(GameMap gameMap, ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, boolean ignoreSafety)
+  private GameAction findTravelAction(GameMap gameMap, ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, boolean ignoreSafety)
   {
     // Find the possible destinations.
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
@@ -628,7 +622,7 @@ public class WallyAI implements AIController
       {
         goal = validTargets.get(index++);
         path = Utils.findShortestPath(unit, goal, gameMap, true);
-        validTarget = (!capturingProperties.contains(goal) // We aren't already capturing it.
+        validTarget = (!AIUtils.isCapturing(gameMap, myCo, goal) // We aren't already capturing it.
             && (path.getPathLength() > 0)); // We can reach it.
 //        log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal,
 //            (validTarget ? "Yes" : "No")));
@@ -700,13 +694,12 @@ public class WallyAI implements AIController
 
             if( null == action ) // Just wait if we can't do anything cool
              action = new WaitLifecycle.WaitAction(unit, movePath);
-            actions.offer(action);
-            return true;
+            return action;
           }
         }
       }
     }
-    return false;
+    return null;
   }
 
   private boolean isSafe(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc)
@@ -869,8 +862,8 @@ public class WallyAI implements AIController
     Collections.reverse(candidates);
     return candidates.get(0);
   }
-
-  private void queueUnitProductionActions(GameMap gameMap)
+  
+  private void queueUnitProductionActions(GameMap gameMap, Queue<GameAction> actions)
   {
     // Figure out what unit types we can purchase with our available properties.
     AIUtils.CommanderProductionInfo CPI = new AIUtils.CommanderProductionInfo(myCo, gameMap);

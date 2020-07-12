@@ -328,6 +328,17 @@ public class AIUtils
   }
 
   /**
+   * @return Whether a friendly CO is currently in the process of acquiring the specified coordinates
+   */
+  public static boolean isCapturing(GameMap map, Commander co, XYCoord coord)
+  {
+    Unit unit = map.getLocation(coord).getResident();
+    if( null == unit || co.isEnemy(unit.CO) )
+      return false;
+    return unit.getCaptureProgress() > 0;
+  }
+
+  /**
    * Keeps track of a commander's production facilities. When created, it will automatically catalog
    * all available facilities, and all units that can be built. It is then easy to ask whether it is
    * possible to build a given type of unit, or find a location to do so.
