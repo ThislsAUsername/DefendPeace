@@ -54,6 +54,11 @@ public abstract class ModularAI implements AIController
         }
       }
     }
+
+    for( AIModule phase : aiPhases )
+    {
+      phase.initTurn(gameMap);
+    }
   }
 
   protected void log(String message)
@@ -94,6 +99,7 @@ public abstract class ModularAI implements AIController
   public static interface AIModule extends Serializable
   {
     public GameAction getNextAction(PriorityQueue<Unit> unitQueue, GameMap map);
+    public default void initTurn(GameMap gameMap) {}
   }
 
   public static class PowerActivator implements AIModule
@@ -108,9 +114,16 @@ public abstract class ModularAI implements AIController
       aiPhase = phase;
     }
 
+    public boolean checked = false;
+    @Override
+    public void initTurn(GameMap gameMap) { checked = false; }
     @Override
     public GameAction getNextAction(PriorityQueue<Unit> unitQueue, GameMap map)
     {
+      if( checked )
+        return null;
+      checked = true;
+
       CommanderAbility retVal = AIUtils.queueCromulentAbility(null, myCo, aiPhase);
       if( null != retVal )
         return new GameAction.AbilityAction(retVal);
