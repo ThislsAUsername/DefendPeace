@@ -74,7 +74,8 @@ public class WallyAI extends ModularAI
   // What % damage I'll ignore when checking safety
   private static final int INDIRECT_THREAT_THRESHHOLD = 7;
   private static final int DIRECT_THREAT_THRESHHOLD = 13;
-  private static final double UNIT_REFUEL_THRESHHOLD = 0.25; // Fuel fraction for refuel
+  private static final int    UNIT_HEAL_THRESHHOLD = 6; // HP at which units heal
+  private static final double UNIT_REFUEL_THRESHHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
   private static final double UNIT_REARM_THRESHHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
   private static final double AGGRO_EFFECT_THRESHHOLD = 0.42; // How effective do I need to be against a unit to target it?
   private static final double AGGRO_FUNDS_WEIGHT = 0.9; // Multiplier on damage I need to get before a sacrifice is worth it
@@ -525,15 +526,20 @@ public class WallyAI extends ModularAI
   {
     ArrayList<XYCoord> goals = new ArrayList<XYCoord>();
 
-    boolean shouldResupply = unit.isHurt() || (unit.fuel < unit.model.maxFuel * UNIT_REFUEL_THRESHHOLD);
-    shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHHOLD;
-
-    if( shouldResupply )
+    ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
+    Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), stations);
+    if( stations.size() > 0 )
     {
-      log(String.format("%s needs supplies.", unit.toStringWithLocation()));
-      ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
-      goals.addAll(stations);
-      Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
+      boolean shouldResupply = unit.getHP() <= UNIT_HEAL_THRESHHOLD;
+      shouldResupply |= unit.fuel <= UNIT_REFUEL_THRESHHOLD
+          * Utils.findShortestPath(unit, stations.get(0), gameMap).getFuelCost(unit.model, gameMap);
+      shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHHOLD;
+
+      if( shouldResupply )
+      {
+        log(String.format("%s needs supplies.", unit.toStringWithLocation()));
+        goals.addAll(stations);
+      }
     }
     else if( unit.model.possibleActions.contains(UnitActionFactory.CAPTURE) )
     {
@@ -597,7 +603,11 @@ public class WallyAI extends ModularAI
    * Find a good long-term objective for the given unit, and pursue it (with consideration for life-preservation optional)
    * For use after unit building is complete
    */
-  private GameAction findTravelAction(GameMap gameMap, ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, boolean ignoreSafety)
+  private GameAction findTravelAction(
+                        GameMap gameMap,
+                        ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap,
+                        Unit unit,
+                        boolean ignoreSafety)
   {
     // Find the possible destinations.
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
@@ -606,7 +616,7 @@ public class WallyAI extends ModularAI
 
     if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
     {
-      log(String.format("  Evaluating travel for %s", unit.toStringWithLocation()));
+      log(String.format("  Evaluating travel for %s. Forced?: %s", unit.toStringWithLocation(), ignoreSafety));
       int index = 0;
       XYCoord goal = null;
       Path path = null;
