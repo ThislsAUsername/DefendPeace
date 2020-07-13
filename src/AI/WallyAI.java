@@ -129,10 +129,10 @@ public class WallyAI extends ModularAI
 
             new SiegeAttacks(co, this),
             new NHitKO(co, this),
-            new FreeRealEstate(co, this),
-            new Travel(co, this),
             new PowerActivator(co, CommanderAbility.PHASE_BUY),
             new BuildStuff(co, this),
+            new FreeRealEstate(co, this),
+            new Travel(co, this),
 
             new PowerActivator(co, CommanderAbility.PHASE_TURN_END)
             ));
@@ -178,11 +178,11 @@ public class WallyAI extends ModularAI
     public GameAction getUnitAction(Unit unit, GameMap gameMap)
     {
       GameAction bestAttack = null;
-      if( unit.CO.unitProductionByTerrain.containsKey(gameMap.getEnvironment(unit.x, unit.y).terrainType) || !unit.model.hasImmobileWeapon() )
-        return bestAttack;
-
       // Find the possible destination.
       XYCoord coord = new XYCoord(unit.x, unit.y);
+
+      if( AIUtils.isFriendlyProduction(gameMap, myCo, coord) || !unit.model.hasImmobileWeapon() )
+        return bestAttack;
 
       // Figure out how to get here.
       Path movePath = Utils.findShortestPath(unit, coord, gameMap);
@@ -286,7 +286,7 @@ public class WallyAI extends ModularAI
                 }
               }
               // Check that we could potentially move into this space. Also we're scared of fog
-              else if( (null == resident) && myCo.unitProductionByTerrain.containsKey(gameMap.getEnvironment(xyc).terrainType)
+              else if( (null == resident) && !AIUtils.isFriendlyProduction(gameMap, myCo, xyc)
                   && !gameMap.isLocationFogged(xyc) )
                 neededAttacks.put(xyc, null);
             }
@@ -447,7 +447,6 @@ public class WallyAI extends ModularAI
                 goForIt = true;
               }
               else if( damage > loss
-                     && !unit.CO.unitProductionByTerrain.containsKey(gameMap.getEnvironment(moveCoord).terrainType)
                      && ai.isSafe(gameMap, ai.threatMap, unit, ga.getMoveLocation()) )
               {
                 ai.log(String.format("  %s thinks it's safe to attack %s", unit.toStringWithLocation(), target.toStringWithLocation()));
@@ -533,13 +532,7 @@ public class WallyAI extends ModularAI
     {
       log(String.format("%s needs supplies.", unit.toStringWithLocation()));
       ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
-      for( XYCoord coord : stations )
-      {
-        Location station = gameMap.getLocation(coord);
-        // Go to the nearest unoccupied friendly depot, but don't gum up the production lines.
-        if( station.getResident() == null && unit.CO.unitProductionByTerrain.containsKey(station.getEnvironment().terrainType) )
-          goals.add(coord);
-      }
+      goals.addAll(stations);
       Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
     }
     else if( unit.model.possibleActions.contains(UnitActionFactory.CAPTURE) )
@@ -600,7 +593,10 @@ public class WallyAI extends ModularAI
     return goals;
   }
 
-  /** Find a good long-term objective for the given unit, and pursue it (with consideration for life-preservation optional) */
+  /**
+   * Find a good long-term objective for the given unit, and pursue it (with consideration for life-preservation optional)
+   * For use after unit building is complete
+   */
   private GameAction findTravelAction(GameMap gameMap, ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, boolean ignoreSafety)
   {
     // Find the possible destinations.
@@ -711,13 +707,11 @@ public class WallyAI extends ModularAI
 
   /**
    * @return whether it's safe or a good place to wall
+   * For use after unit building is complete
    */
   private boolean canWallHere(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc)
   {
-    // Don't stand on a friendly factory for no good reason
     Location destination = gameMap.getLocation(xyc);
-    if( !unit.CO.isEnemy(destination.getOwner()) && unit.CO.unitProductionByTerrain.containsKey(destination.getEnvironment().terrainType) )
-      return false;
     // if we're safe, we're safe
     if( isSafe(gameMap, threatMap, unit, xyc) )
       return true;

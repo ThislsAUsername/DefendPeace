@@ -339,6 +339,17 @@ public class AIUtils
   }
 
   /**
+   * @return Whether a friendly CO can build from the specified coordinates
+   */
+  public static boolean isFriendlyProduction(GameMap map, Commander co, XYCoord coord)
+  {
+    Commander owner = map.getLocation(coord).getOwner();
+    if( null == owner || co.isEnemy(owner) )
+      return false;
+    return owner.unitProductionByTerrain.containsKey(map.getEnvironment(coord).terrainType);
+  }
+
+  /**
    * Keeps track of a commander's production facilities. When created, it will automatically catalog
    * all available facilities, and all units that can be built. It is then easy to ask whether it is
    * possible to build a given type of unit, or find a location to do so.
