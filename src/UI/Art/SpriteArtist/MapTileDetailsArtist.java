@@ -50,6 +50,7 @@ public class MapTileDetailsArtist
 
     int edgeBuffer = 2;
     int mapViewHeight = SpriteOptions.getScreenDimensions().height / SpriteOptions.getDrawScale();
+    int mapViewWidth = SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale();
     if( overlayIsLeft )
     { // Draw the overlay on the left side.
       int drawX = edgeBuffer;
@@ -58,11 +59,20 @@ public class MapTileDetailsArtist
     }
     else
     { // Draw the overlay on the right side.
-      int mapViewWidth = SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale();
       int drawX = mapViewWidth - edgeBuffer - tileOverlay.getWidth();
       int drawY = mapViewHeight - edgeBuffer - tileOverlay.getHeight();
       g.drawImage(tileOverlay, drawX, drawY, null);
     }
+
+    // Draw the tile coordinates.
+    String coordStr = String.format("(%d, %d)", tileToDetail.xCoord, tileToDetail.yCoord);
+    BufferedImage coordsImg = SpriteUIUtils.getTextAsImage(coordStr, true);
+    int bufferPx = 2;
+    int drawX = (overlayIsLeft ? mapViewWidth - coordsImg.getWidth() - bufferPx : bufferPx);
+    int drawY = mapViewHeight - coordsImg.getHeight() - bufferPx - bufferPx*2;
+    SpriteUIUtils.drawMenuFrame(g, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR,
+        drawX, drawY, coordsImg.getWidth(), coordsImg.getHeight()+bufferPx*2, bufferPx);
+    g.drawImage(coordsImg, drawX, drawY+bufferPx, null);
   }
 
   private static void generateOverlay(GameMap map, XYCoord coord)
@@ -139,12 +149,6 @@ public class MapTileDetailsArtist
       drawY = tileSize;
       drawColumn(ltog, unitImage, unitAttrs, drawX, drawY, -iconSize/2);
     }
-
-    // Draw the tile coordinates.
-    drawX = bufferPx;
-    drawY = bufferPx;
-    String coordStr = String.format("(%d, %d)", coord.xCoord, coord.yCoord);
-    SpriteUIUtils.drawTextSmallCaps(ltog, coordStr, drawX, drawY);
 
     currentTile = coord;
   }
