@@ -253,9 +253,13 @@ public class SpriteMapView extends MapView
       }
     }
 
+    // Keep track of whether we want to draw tile info.
+    boolean hudVisible = false;
+
     // Draw the cursor/our menu if we aren't animating events
     if( currentAnimation == null || !notifyOnAnimEnd )
     {
+      hudVisible = true; // Only draw tile details when not animating.
       if( getCurrentGameMenu() == null )
       {
         mapArtist.drawCursor(mapGraphics, currentActor, isTargeting, myGame.getCursorX(), myGame.getCursorY());
@@ -287,7 +291,7 @@ public class SpriteMapView extends MapView
                                        drawX,  drawY,  (drawX  + drawWidth), (drawY  + drawHeight), null);
 
     // Draw the Commander overlay with available funds.
-    drawHUD(screenGraphics);
+    if(hudVisible) drawHUD(screenGraphics);
 
     // Copy the screen image into the window's graphics buffer.
     g.drawImage(screenImage, 0, 0, screenImage.getWidth()*drawScale, screenImage.getHeight()*drawScale, null);
