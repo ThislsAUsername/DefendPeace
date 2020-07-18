@@ -165,6 +165,7 @@ public class TerrainSpriteSet
           xOffset += spriteWidth;
           spriteNum++;
         }
+        yOffset += spriteHeight;
 
         if( spriteNum != 1 && spriteNum != 16 && spriteNum != 20 )
         {
@@ -178,7 +179,7 @@ public class TerrainSpriteSet
         maxSpriteIndex = spriteNum - 1; // However many sprites we found, we won't find more than that on a second horizontal pass.
 
         // If this sprite has more vertical space, pull in alternate versions of the existing terrain tiles.
-        while (yOffset + spriteHeight < spriteSheet.getHeight())
+        while (yOffset + spriteHeight <= spriteSheet.getHeight())
         {
           xOffset = 0;
           spriteNum = 0;
