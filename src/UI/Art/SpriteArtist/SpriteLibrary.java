@@ -49,9 +49,9 @@ public class SpriteLibrary
   private static BufferedImage mapUnitAmmoIcon = null;
 
   // Unit icons for various activities.
-  private static BufferedImage mapUnitCargoIcon = null;
+  private static HashMap<Color, BufferedImage> mapUnitCargoIcons = new HashMap<Color, BufferedImage>();
   private static HashMap<Color, BufferedImage> mapUnitCaptureIcons = new HashMap<Color, BufferedImage>();
-  private static BufferedImage mapUnitHideIcon = null;
+  private static HashMap<Color, BufferedImage> mapUnitHideIcons = new HashMap<Color, BufferedImage>();
 
   // Letters for writing in menus.
   private static Sprite letterSpritesUppercase = null;
@@ -378,13 +378,19 @@ public class SpriteLibrary
     return mapUnitTextSprites.get(color);
   }
 
-  public static BufferedImage getCargoIcon()
+  public static BufferedImage getCargoIcon(Color color)
   {
-    if( null == mapUnitCargoIcon )
+    if( !mapUnitCargoIcons.containsKey(color) )
     {
-      mapUnitCargoIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/cargo.png");
+      BufferedImage icon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/cargo.png");
+      BufferedImage bi = SpriteLibrary.createTransparentSprite(icon.getWidth(), icon.getHeight());
+      Graphics g = bi.getGraphics();
+      g.setColor(color);
+      g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
+      g.drawImage(icon, 0, 0, null);
+      mapUnitCargoIcons.put(color, bi);
     }
-    return mapUnitCargoIcon;
+    return mapUnitCargoIcons.get(color);
   }
 
   public static BufferedImage getStunIcon()
@@ -447,13 +453,19 @@ public class SpriteLibrary
     return mapUnitCaptureIcons.get(color);
   }
 
-  public static BufferedImage getHideIcon()
+  public static BufferedImage getHideIcon(Color color)
   {
-    if( null == mapUnitHideIcon )
+    if( !mapUnitHideIcons.containsKey(color) )
     {
-      mapUnitHideIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/hide.png");
+      BufferedImage icon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/hide.png");
+      BufferedImage bi = SpriteLibrary.createTransparentSprite(icon.getWidth(), icon.getHeight());
+      Graphics g = bi.getGraphics();
+      g.setColor(color);
+      g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
+      g.drawImage(icon, 0, 0, null);
+      mapUnitHideIcons.put(color, bi);
     }
-    return mapUnitHideIcon;
+    return mapUnitHideIcons.get(color);
   }
 
   ///////////////////////////////////////////////////////////////////
