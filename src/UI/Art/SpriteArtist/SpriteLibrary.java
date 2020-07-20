@@ -378,21 +378,6 @@ public class SpriteLibrary
     return mapUnitTextSprites.get(color);
   }
 
-  public static BufferedImage getCargoIcon(Color color)
-  {
-    if( !mapUnitCargoIcons.containsKey(color) )
-    {
-      BufferedImage icon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/cargo.png");
-      BufferedImage bi = SpriteLibrary.createTransparentSprite(icon.getWidth(), icon.getHeight());
-      Graphics g = bi.getGraphics();
-      g.setColor(color);
-      g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
-      g.drawImage(icon, 0, 0, null);
-      mapUnitCargoIcons.put(color, bi);
-    }
-    return mapUnitCargoIcons.get(color);
-  }
-
   public static BufferedImage getStunIcon()
   {
     if( null == mapUnitStunIcon )
@@ -438,34 +423,34 @@ public class SpriteLibrary
     return mapUnitAmmoIcon;
   }
 
-  public static BufferedImage getCaptureIcon(Color color)
+  private static BufferedImage getColoredSprite(HashMap<Color, BufferedImage> map, String filename, Color color)
   {
-    if( !mapUnitCaptureIcons.containsKey(color) )
+    if( !map.containsKey(color) )
     {
-      BufferedImage icon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/capture.png");
+      BufferedImage icon = SpriteLibrary.loadSpriteSheetFile(filename);
       BufferedImage bi = SpriteLibrary.createTransparentSprite(icon.getWidth(), icon.getHeight());
       Graphics g = bi.getGraphics();
       g.setColor(color);
       g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
       g.drawImage(icon, 0, 0, null);
-      mapUnitCaptureIcons.put(color, bi);
+      map.put(color, bi);
     }
-    return mapUnitCaptureIcons.get(color);
+    return map.get(color);
+  }
+
+  public static BufferedImage getCargoIcon(Color color)
+  {
+    return getColoredSprite( mapUnitCargoIcons, "res/unit/icon/cargo.png", color);
+  }
+
+  public static BufferedImage getCaptureIcon(Color color)
+  {
+    return getColoredSprite( mapUnitCaptureIcons, "res/unit/icon/capture.png", color);
   }
 
   public static BufferedImage getHideIcon(Color color)
   {
-    if( !mapUnitHideIcons.containsKey(color) )
-    {
-      BufferedImage icon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/hide.png");
-      BufferedImage bi = SpriteLibrary.createTransparentSprite(icon.getWidth(), icon.getHeight());
-      Graphics g = bi.getGraphics();
-      g.setColor(color);
-      g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
-      g.drawImage(icon, 0, 0, null);
-      mapUnitHideIcons.put(color, bi);
-    }
-    return mapUnitHideIcons.get(color);
+    return getColoredSprite( mapUnitHideIcons, "res/unit/icon/hide.png", color);
   }
 
   ///////////////////////////////////////////////////////////////////
