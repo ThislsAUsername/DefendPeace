@@ -233,10 +233,6 @@ public class SpriteMapView extends MapView
       mapArtist.drawMovePath(mapGraphics, mapController.getContemplatedMove());
     }
 
-    if( null != currentActor )
-      for( DamagePopup popup : mapController.getDamagePopups() )
-        drawDamagePreview(mapGraphics, popup);
-
     if( currentAnimation != null )
     {
       // Animate until it tells you it's done.
@@ -265,6 +261,10 @@ public class SpriteMapView extends MapView
         menuArtist.drawMenu(mapGraphics, mapViewDrawX.geti(), mapViewDrawY.geti());
       }
     }
+
+    if( null != currentActor )
+      for( DamagePopup popup : mapController.getDamagePopups() )
+        drawDamagePreview(mapGraphics, popup);
 
     // When we draw the map, we want to center it if it's smaller than the view dimensions
     int deltaX = 0, deltaY = 0;
