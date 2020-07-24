@@ -49,9 +49,9 @@ public class SpriteLibrary
   private static BufferedImage mapUnitAmmoIcon = null;
 
   // Unit icons for various activities.
-  private static BufferedImage mapUnitCargoIcon = null;
+  private static HashMap<Color, BufferedImage> mapUnitCargoIcons = new HashMap<Color, BufferedImage>();
   private static HashMap<Color, BufferedImage> mapUnitCaptureIcons = new HashMap<Color, BufferedImage>();
-  private static BufferedImage mapUnitHideIcon = null;
+  private static HashMap<Color, BufferedImage> mapUnitHideIcons = new HashMap<Color, BufferedImage>();
 
   // Letters for writing in menus.
   private static Sprite letterSpritesUppercase = null;
@@ -378,15 +378,6 @@ public class SpriteLibrary
     return mapUnitTextSprites.get(color);
   }
 
-  public static BufferedImage getCargoIcon()
-  {
-    if( null == mapUnitCargoIcon )
-    {
-      mapUnitCargoIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/cargo.png");
-    }
-    return mapUnitCargoIcon;
-  }
-
   public static BufferedImage getStunIcon()
   {
     if( null == mapUnitStunIcon )
@@ -432,28 +423,34 @@ public class SpriteLibrary
     return mapUnitAmmoIcon;
   }
 
-  public static BufferedImage getCaptureIcon(Color color)
+  private static BufferedImage getColoredSprite(HashMap<Color, BufferedImage> map, String filename, Color color)
   {
-    if( !mapUnitCaptureIcons.containsKey(color) )
+    if( !map.containsKey(color) )
     {
-      BufferedImage icon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/capture.png");
+      BufferedImage icon = SpriteLibrary.loadSpriteSheetFile(filename);
       BufferedImage bi = SpriteLibrary.createTransparentSprite(icon.getWidth(), icon.getHeight());
       Graphics g = bi.getGraphics();
       g.setColor(color);
       g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
       g.drawImage(icon, 0, 0, null);
-      mapUnitCaptureIcons.put(color, bi);
+      map.put(color, bi);
     }
-    return mapUnitCaptureIcons.get(color);
+    return map.get(color);
   }
 
-  public static BufferedImage getHideIcon()
+  public static BufferedImage getCargoIcon(Color color)
   {
-    if( null == mapUnitHideIcon )
-    {
-      mapUnitHideIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/hide.png");
-    }
-    return mapUnitHideIcon;
+    return getColoredSprite( mapUnitCargoIcons, "res/unit/icon/cargo.png", color);
+  }
+
+  public static BufferedImage getCaptureIcon(Color color)
+  {
+    return getColoredSprite( mapUnitCaptureIcons, "res/unit/icon/capture.png", color);
+  }
+
+  public static BufferedImage getHideIcon(Color color)
+  {
+    return getColoredSprite( mapUnitHideIcons, "res/unit/icon/hide.png", color);
   }
 
   ///////////////////////////////////////////////////////////////////

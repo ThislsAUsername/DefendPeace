@@ -265,7 +265,7 @@ public class UnitSpriteSet
 
     // Transport icon.
     if( u.heldUnits != null && !u.heldUnits.isEmpty() )
-      unitIcons.add(SpriteLibrary.getCargoIcon());
+      unitIcons.add(SpriteLibrary.getCargoIcon(u.CO.myColor));
 
     // Capture icon.
     if( u.getCaptureProgress() > 0 )
@@ -273,7 +273,7 @@ public class UnitSpriteSet
 
     // Hide icon.
     if( u.model.hidden )
-      unitIcons.add(SpriteLibrary.getHideIcon());
+      unitIcons.add(SpriteLibrary.getHideIcon(u.CO.myColor));
 
     // Draw one of the current activity icons in the lower-right.
     if( !unitIcons.isEmpty() )
@@ -285,10 +285,6 @@ public class UnitSpriteSet
       int iconY = drawY + ((unitHeight) / 2);
       int iconW = icon.getWidth();
       int iconH = icon.getHeight();
-
-      // Draw team-color background for the icon.
-      g.setColor( u.CO.myColor );
-      g.fillRect( iconX, iconY, iconW, iconH);
 
       // Draw the icon
       g.drawImage( icon, iconX, iconY, iconW, iconH, null );
