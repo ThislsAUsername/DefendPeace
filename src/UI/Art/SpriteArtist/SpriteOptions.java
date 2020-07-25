@@ -4,7 +4,13 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
+import java.util.Scanner;
 
 import Engine.Driver;
 import Engine.OptionSelector;
@@ -32,7 +38,6 @@ public class SpriteOptions
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
   private static SlidingValue animHighlightedOption;
 
-  private static boolean initialized = false;
   private static int letterWidth = SpriteLibrary.getLettersUppercase().getFrame(0).getWidth();
   private static int textBuffer = 4;
   private static int graphicsOptionWidth = 0; // Set in initialize().
@@ -63,7 +68,7 @@ public class SpriteOptions
     return animationsOn;
   }
 
-  private static void initialize()
+  static void initialize()
   {
     int maxNameLen = 0;
     // Calculate the size of the longest option panel needed.
@@ -112,7 +117,8 @@ public class SpriteOptions
 
     animHighlightedOption = new SlidingValue(0);
 
-    initialized = true;
+    // Load saved settings from disk, if they exist.
+    loadSettingsFromDisk();
   }
 
   /**
@@ -185,6 +191,7 @@ public class SpriteOptions
     // Store the options locally.
     drawScale = drawScaleOption.getSelectedObject();
     animationsOn = animationsOption.getSelectedObject();
+    saveSettingsToDisk();
 
     // Apply effects.
     dimensions.setSize(WINDOWWIDTH_DEFAULT * drawScale, WINDOWHEIGHT_DEFAULT * drawScale);
@@ -206,6 +213,76 @@ public class SpriteOptions
   }
 
   //////////////////////////////////////////////////////////////////////
+  //  File utility functions.
+  //////////////////////////////////////////////////////////////////////
+  private static final String KEYS_FILENAME = "res/graphics_options.txt";
+  private static final String DRAWSCALE_KEY = "Drawscale";
+  private static final String ANIMATION_KEY = "Animation";
+
+  private static void saveSettingsToDisk()
+  {
+    try
+    {
+      File keyFile = new File(KEYS_FILENAME);
+      FileWriter writer = new FileWriter(keyFile, false);
+
+      StringBuffer buf = new StringBuffer();
+      buf.append(DRAWSCALE_KEY).append(" ").append(drawScaleOption.getSelectionNormalized()+1).append("\n");
+      buf.append(ANIMATION_KEY).append(" ").append(animationsOption.getSelectionNormalized()).append("\n");
+      writer.write(buf.toString());
+      writer.close();
+    }
+    catch( IOException ioe )
+    {
+      System.out.println("Error! Failed to save graphics settings file!.\n  " + ioe.toString());
+    }
+  }
+
+  private static void loadSettingsFromDisk()
+  {
+    // Load keys file if it exists
+    File keyFile = new File(KEYS_FILENAME);
+    if( keyFile.exists() )
+    {
+      try
+      {
+        Scanner scanner = new Scanner(keyFile);
+        while(scanner.hasNextLine())
+        {
+          Scanner linescan = new Scanner(scanner.nextLine());
+          String key = linescan.next();
+
+          switch(key)
+          {
+            case DRAWSCALE_KEY:
+              drawScaleOption.setSelectedOption(Integer.parseInt(linescan.next())-1);
+              drawScale = drawScaleOption.getSelectedObject();
+              dimensions.setSize(WINDOWWIDTH_DEFAULT * drawScale, WINDOWHEIGHT_DEFAULT * drawScale);
+              break;
+            case ANIMATION_KEY:
+              animationsOption.setSelectedOption(Integer.parseInt(linescan.next()));
+              animationsOn = animationsOption.getSelectedObject();
+              break;
+              default:
+                System.out.println("WARNING! Unrecognized key '" + key + "' in graphics settings file!");
+          }
+
+          linescan.close();
+        }
+        scanner.close();
+      }
+      catch(FileNotFoundException fnfe)
+      {
+        System.out.println("Somehow we failed to find the keys file after checking that it exists! Using defaults.");
+      }
+      catch( InputMismatchException ime )
+      {
+        System.out.println("Encountered an error while parsing keys file! Using defaults.");
+      }
+    } // ~if file exists
+  }
+
+  //////////////////////////////////////////////////////////////////////
   //  Drawing code below.
   //////////////////////////////////////////////////////////////////////
 
@@ -217,12 +294,6 @@ public class SpriteOptions
     // Create an un-scaled image to draw everything at real size before scaling it to the screen.
     BufferedImage optionsImage = SpriteLibrary.createTransparentSprite(dimensions.width/drawScale, dimensions.height/drawScale);
     Graphics optionsGraphics = optionsImage.getGraphics();
-
-    // Build the necessary images.
-    if( !initialized )
-    {
-      initialize();
-    }
 
     // Set up some initial parameters.
     int xDraw = (optionsImage.getWidth() / 2) - (graphicsOptionWidth / 2);

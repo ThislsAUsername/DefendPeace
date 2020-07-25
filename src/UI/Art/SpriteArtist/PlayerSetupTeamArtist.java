@@ -87,35 +87,35 @@ public class PlayerSetupTeamArtist
     }
 
     /////////////////// MiniMap ////////////////////////
+    // Figure out how large to draw the minimap. We want to make it as large as possible, but still
+    //   fit inside the available space (with a minimum scale factor of 1).
+    int maxMiniMapWidth = myWidth - playerZoneWidth - 4; // Subtract 4 so we have room to draw a frame.
+    int maxMiniMapHeight = myHeight - 4;
+
     Color[] teamColors = new Color[mapInfo.getNumCos()];
     for( int i = 0; i < mapInfo.getNumCos(); ++i )
     {
       teamColors[i] = control.getPlayerInfo(i).getCurrentColor();
     }
-    BufferedImage miniMap = MiniMapArtist.getMapImage( mapInfo, teamColors );
+    BufferedImage miniMap = MiniMapArtist.getMapImage( mapInfo, teamColors, drawScale*maxMiniMapWidth, drawScale*maxMiniMapHeight );
 
-    // Figure out how large to draw the minimap. We want to make it as large as possible, but still
-    //   fit inside the available space (with a minimum scale factor of 1).
-    int maxMiniMapWidth = myWidth - playerZoneWidth - 4; // Subtract 4 so we have room to draw a frame.
-    int maxMiniMapHeight = myHeight - 4;
-    int mmWScale = maxMiniMapWidth / miniMap.getWidth();
-    int mmHScale = maxMiniMapHeight / miniMap.getHeight();
+    int mmWScale = drawScale*maxMiniMapWidth / miniMap.getWidth();
+    int mmHScale = drawScale*maxMiniMapHeight / miniMap.getHeight();
     int mmScale = (mmWScale > mmHScale)? mmHScale : mmWScale;
-    if( mmScale > 10) mmScale = 10;
 
     // Draw a frame for the minimap.
     int mapWidth = miniMap.getWidth() * mmScale;
     int mapHeight = miniMap.getHeight() * mmScale;
-    int mapLeft = playerZoneWidth + (maxMiniMapWidth - mapWidth)/2;
-    int mapTop = (myHeight / 2) - (mapHeight / 2);
-    myG.setColor(SpriteUIUtils.MENUFRAMECOLOR);
-    myG.fillRect(mapLeft-(2), mapTop-(2), mapWidth+(4), mapHeight+(4));
-    myG.setColor(SpriteUIUtils.MENUBGCOLOR);
-    myG.fillRect(mapLeft-1, mapTop-1, mapWidth+2, mapHeight+2);
+    int mapLeft = drawScale*playerZoneWidth + (drawScale*maxMiniMapWidth - mapWidth)/2;
+    int mapTop = (drawScale*myHeight / 2) - (mapHeight / 2);
+    g.setColor(SpriteUIUtils.MENUFRAMECOLOR);
+    g.fillRect(mapLeft-(drawScale*2), mapTop-(drawScale*2), mapWidth+(drawScale*4), mapHeight+(drawScale*4));
+    g.setColor(SpriteUIUtils.MENUBGCOLOR);
+    g.fillRect(mapLeft-drawScale*1, mapTop-drawScale*1, mapWidth+drawScale*2, mapHeight+drawScale*2);
 
     // Draw the mini map.
-    myG.drawImage(miniMap, mapLeft, mapTop, mapWidth, mapHeight, null);
-    drawPlayerPropertyHighlights(myG, mapLeft, mapTop, mapInfo, mmScale, highlightedPlayer, (int) (Math.abs(target - player0YCenter.get())/4));
+    g.drawImage(miniMap, mapLeft, mapTop, mapWidth, mapHeight, null);
+    drawPlayerPropertyHighlights(g, mapLeft, mapTop, mapInfo, mmScale * miniMap.getWidth()/mapInfo.getWidth(), highlightedPlayer, (int) (Math.abs(target - player0YCenter.get())/4));
 
     // Render the final composed image to the window.
     g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);

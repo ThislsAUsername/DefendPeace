@@ -9,12 +9,11 @@ import Units.Unit;
 public class UnitArtist
 {
   private GameInstance myGame;
-  private SpriteMapView myView;
+  private static final int tileSize = SpriteLibrary.baseSpriteSize;
 
-  public UnitArtist(GameInstance game, SpriteMapView view)
+  public UnitArtist(GameInstance game)
   {
     myGame = game;
-    myView = view;
   }
 
   /**
@@ -25,8 +24,8 @@ public class UnitArtist
   public void drawUnitIcons(Graphics g, Unit unit, int x, int y, int animIndex)
   {
     // Convert "real" location into a draw-space location, then draw icons.
-    int drawX = (int) (myView.getTileSize() * x);
-    int drawY = (int) (myView.getTileSize() * y);
+    int drawX = (int) (tileSize * x);
+    int drawY = (int) (tileSize * y);
 
     SpriteLibrary.getMapUnitSpriteSet(unit).drawUnitIcons(g, myGame.commanders, unit, animIndex, drawX, drawY);
   }
@@ -38,8 +37,8 @@ public class UnitArtist
    */
   public void drawUnit(Graphics g, Unit unit, int x, int y, int animIndex)
   {
-    int drawX = (int) (myView.getTileSize() * x);
-    int drawY = (int) (myView.getTileSize() * y);
+    int drawX = (int) (tileSize * x);
+    int drawY = (int) (tileSize * y);
     boolean tired = unit.isStunned || (unit.isTurnOver && unit.CO == myGame.activeCO);
     AnimState state = (tired) ? AnimState.TIRED : AnimState.IDLE;
 
