@@ -35,7 +35,7 @@ public class SpriteOptions
   // Set up configurable options.
   private static GameOption<Integer> drawScaleOption = new GameOptionInt("Draw Scale", 1, 6, 1, DRAWSCALE_DEFAULT);
   private static GameOptionBool animationsOption = new GameOptionBool("Animations", true);
-  private static GameOptionBool coordinatesOption = new GameOptionBool("Coordinates", false);
+  private static GameOptionBool coordinatesOption = new GameOptionBool("Show Coords", false);
   private static GameOption<?>[] allOptions = { drawScaleOption, animationsOption, coordinatesOption };
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
   private static SlidingValue animHighlightedOption;
@@ -226,7 +226,7 @@ public class SpriteOptions
   private static final String KEYS_FILENAME = "res/graphics_options.txt";
   private static final String DRAWSCALE_KEY = "Drawscale";
   private static final String ANIMATION_KEY = "Animation";
-  private static final String COORDINATES_KEY = "Coordinates";
+  private static final String COORDINATES_KEY = "ShowCoords";
 
   private static void saveSettingsToDisk()
   {
