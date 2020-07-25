@@ -1,38 +1,18 @@
 package AI;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Set;
 
 import AI.AIUtils.CommanderProductionInfo;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
-import Engine.GameAction;
-import Engine.GameActionSet;
-import Engine.Path;
-import Engine.UnitActionFactory;
-import Engine.Utils;
-import Engine.XYCoord;
+import Engine.*;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Engine.UnitActionLifecycles.BattleLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
-import Terrain.Environment;
-import Terrain.GameMap;
-import Terrain.Location;
-import Terrain.TerrainType;
-import Units.Unit;
-import Units.UnitModel;
-import Units.WeaponModel;
+import Terrain.*;
+import Units.*;
 import Units.MoveTypes.MoveType;
 
 /**
@@ -522,16 +502,43 @@ public class WallyAI extends ModularAI
       this.ai = ai;
     }
 
-    Queue<GameAction> actions = new ArrayDeque<GameAction>();
+    Map<XYCoord, UnitModel> builds;
 
     @Override
     public GameAction getNextAction(PriorityQueue<Unit> unitQueue, GameMap gameMap)
     {
-      if( actions.isEmpty() )
-        ai.queueUnitProductionActions(gameMap, actions);
+      if( null == builds )
+        builds = ai.queueUnitProductionActions(gameMap);
 
-      if( !actions.isEmpty() )
-        return actions.poll();
+      for( XYCoord coord : new ArrayList<XYCoord>(builds.keySet()) )
+      {
+        Unit resident = gameMap.getResident(coord);
+        if( null != resident )
+        {
+          if( resident.CO == myCo && !resident.isTurnOver )
+            return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, null, resident);
+          else
+          {
+            ai.log(String.format("WARNING: Trying to build on un-evictable unit %s", resident.toStringWithLocation()));
+            builds.remove(coord);
+            continue;
+          }
+        }
+        ArrayList<UnitModel> list = myCo.getShoppingList(gameMap.getLocation(coord)); // COs expect to see their shopping lists fetched before a purchase
+        UnitModel toBuy = builds.get(coord);
+        if( toBuy.getCost() <= myCo.money && list.contains(toBuy) )
+        {
+          builds.remove(coord);
+          return new GameAction.UnitProductionAction(myCo, toBuy, coord);
+        }
+        else
+        {
+          ai.log(String.format("WARNING: Trying to build unavailable unit %s", toBuy));
+          continue;
+        }
+      }
+
+      builds = null;
       return null;
     }
   }
@@ -629,13 +636,15 @@ public class WallyAI extends ModularAI
                         ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap,
                         Unit evicter, Unit unit)
   {
+    log(String.format("  Evicting %s", unit.toStringWithLocation()));
     boolean isBase = false;
     if( null == evictionStack )
     {
       evictionStack = new HashSet<Unit>();
       isBase = true;
     }
-    evictionStack.add(evicter);
+    if( evicter != null )
+      evictionStack.add(evicter);
 
     if( evictionStack.contains(unit) )
       return null;
@@ -713,11 +722,9 @@ public class WallyAI extends ModularAI
       Unit resident = gameMap.getLocation(xyc).getResident();
       if( null != resident && unit != resident )
       {
-        log(String.format("    Need to evict %s", resident.toStringWithLocation()));
         if( unit.CO == resident.CO && !resident.isTurnOver )
           action = evictUnit(gameMap, allThreats, threatMap, unit, resident);
         if( null != action ) return action;
-        log(String.format("    Eviction failed"));
         continue;
       }
 
@@ -921,15 +928,17 @@ public class WallyAI extends ModularAI
     return candidates.get(0);
   }
 
-  private void queueUnitProductionActions(GameMap gameMap, Queue<GameAction> actions)
+  private Map<XYCoord, UnitModel> queueUnitProductionActions(GameMap gameMap)
   {
+    Map<XYCoord, UnitModel> builds = new HashMap<XYCoord, UnitModel>();
     // Figure out what unit types we can purchase with our available properties.
-    AIUtils.CommanderProductionInfo CPI = new AIUtils.CommanderProductionInfo(myCo, gameMap);
+    boolean includeFriendlyOccupied = true;
+    AIUtils.CommanderProductionInfo CPI = new AIUtils.CommanderProductionInfo(myCo, gameMap, includeFriendlyOccupied);
 
     if( CPI.availableProperties.isEmpty() )
     {
       log("No properties available to build.");
-      return;
+      return builds;
     }
 
     log("Evaluating Production needs");
@@ -1042,7 +1051,7 @@ public class WallyAI extends ModularAI
             for( int i = 0; i < numberToBuy; ++i )
             {
               XYCoord coord = getLocationToBuild(CPI, idealCounter);
-              actions.offer(new GameAction.UnitProductionAction(myCo, idealCounter, coord));
+              builds.put(coord, idealCounter);
               budget -= idealCounter.getCost();
               CPI.removeBuildLocation(gameMap.getLocation(coord));
             }
@@ -1064,10 +1073,12 @@ public class WallyAI extends ModularAI
     while ((budget >= infModel.getCost()) && (CPI.availableUnitModels.contains(infModel)))
     {
       XYCoord coord = getLocationToBuild(CPI, infModel);
-      actions.offer(new GameAction.UnitProductionAction(myCo, infModel, coord));
+      builds.put(coord, infModel);
       budget -= infModel.getCost();
       CPI.removeBuildLocation(gameMap.getLocation(coord));
     }
+
+    return builds;
   }
 
   /**

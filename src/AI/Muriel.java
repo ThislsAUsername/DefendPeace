@@ -503,7 +503,8 @@ public class Muriel implements AIController
     log("Budget: " + budget);
 
     // Figure out what unit types we can purchase with our available properties.
-    AIUtils.CommanderProductionInfo CPI = new AIUtils.CommanderProductionInfo(myCo, gameMap);
+    boolean includeFriendlyOccupied = false;
+    AIUtils.CommanderProductionInfo CPI = new AIUtils.CommanderProductionInfo(myCo, gameMap, includeFriendlyOccupied);
 
     if( CPI.availableProperties.isEmpty() )
     {

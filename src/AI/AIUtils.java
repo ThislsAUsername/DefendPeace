@@ -368,7 +368,7 @@ public class AIUtils
      * Build a model of the production capabilities for a given Commander.
      * Could be used for your own, or your opponent's.
      */
-    public CommanderProductionInfo(Commander co, GameMap gameMap)
+    public CommanderProductionInfo(Commander co, GameMap gameMap, boolean includeFriendlyOccupied)
     {
       // Figure out what unit types we can purchase with our available properties.
       myCo = co;
@@ -380,7 +380,9 @@ public class AIUtils
       for( XYCoord xyc : co.ownedProperties )
       {
         Location loc = co.myView.getLocation(xyc);
-        if( gameMap.isLocationEmpty(loc.getCoordinates()))
+        Unit blocker = loc.getResident();
+        if( null == blocker
+            || (includeFriendlyOccupied && co == blocker.CO && !blocker.isTurnOver) )
         {
           ArrayList<UnitModel> models = co.getShoppingList(loc);
           availableUnitModels.addAll(models);

@@ -76,6 +76,21 @@ public class MapWindow extends GameMap
     return master.getEnvironment(w, h);
   }
 
+  @Override
+  public Unit getResident(XYCoord coord)
+  {
+    return getResident(coord.xCoord, coord.yCoord);
+  }
+  @Override
+  public Unit getResident(int w, int h)
+  {
+    if( !isLocationValid(w, h) )
+    {
+      return null;
+    }
+    return getLocation(w, h).getResident();
+  }
+
   /** Returns the Location at the specified location, or null if that Location does not exist. */
   @Override
   public Location getLocation(XYCoord location)
