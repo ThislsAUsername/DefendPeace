@@ -5,13 +5,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import Engine.XYCoord;
+import Terrain.Environment.Weathers;
 import Units.AWBWUnits;
 import Units.DoRUnits;
 import Units.UnitModel;
 import Units.UnitModelScheme;
 import Units.UnitModelScheme.GameReadyModels;
 
-public class MapInfo
+public class MapInfo implements IEnvironsProvider
 {
   public final String mapName;
   public final TerrainType[][] terrain;
@@ -44,6 +45,40 @@ public class MapInfo
   public int getNumCos()
   {
     return COProperties.length;
+  }
+
+  /**
+   * Returns true if (x,y) lies within the GameMap, false else.
+   */
+  @Override
+  public boolean isLocationValid(XYCoord coords)
+  {
+    return (coords != null) && isLocationValid(coords.xCoord, coords.yCoord);
+  }
+  /**
+   * Returns true if (x,y) lies within the GameMap, false else.
+   */
+  @Override
+  public boolean isLocationValid(int x, int y)
+  {
+    return !(x < 0 || x >= getWidth() || y < 0 || y >= getHeight());
+  }
+
+  /** Returns the Environment of the specified tile, or null if that location does not exist. */
+  @Override
+  public Environment getEnvironment(XYCoord coord)
+  {
+    return getEnvironment(coord.xCoord, coord.yCoord);
+  }
+  /** Returns the Environment of the specified tile, or null if that location does not exist. */
+  @Override
+  public Environment getEnvironment(int x, int y)
+  {
+    if( !isLocationValid(x, y) )
+    {
+      return null;
+    }
+    return Environment.getTile(terrain[x][y], Weathers.CLEAR);
   }
 
   /**

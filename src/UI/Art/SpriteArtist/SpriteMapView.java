@@ -75,8 +75,8 @@ public class SpriteMapView extends MapView
         SpriteLibrary.baseSpriteSize * game.gameMap.mapWidth,
         SpriteLibrary.baseSpriteSize * game.gameMap.mapHeight);
 
-    mapArtist = new MapArtist(game, this);
-    unitArtist = new UnitArtist(game, this);
+    mapArtist = new MapArtist(game);
+    unitArtist = new UnitArtist(game);
     menuArtist = new MenuArtist(game, this);
 
     myGame = game;
@@ -112,12 +112,6 @@ public class SpriteMapView extends MapView
     SpriteOptions.setScreenDimensions(width, height);
 
     dimensionsChanged = true; // Let render() know that the window was resized.
-  }
-
-  @Override
-  public int getTileSize()
-  {
-    return SpriteLibrary.baseSpriteSize;
   }
 
   @Override
@@ -354,20 +348,20 @@ public class SpriteMapView extends MapView
   @Override // from MapView
   public GameAnimation buildBattleAnimation(BattleSummary summary)
   {
-    return new NobunagaBattleAnimation(getTileSize(), summary.attacker, summary.attacker.x, summary.attacker.y, summary.defender.x,
+    return new NobunagaBattleAnimation(SpriteLibrary.baseSpriteSize, summary.attacker, summary.attacker.x, summary.attacker.y, summary.defender.x,
         summary.defender.y);
   }
 
   @Override // from MapView
   public GameAnimation buildDemolitionAnimation( StrikeParams params, XYCoord target, int damage )
   {
-    return new NobunagaBattleAnimation(getTileSize(), params.attacker.body, params.attacker.x, params.attacker.y, target.xCoord, target.yCoord);
+    return new NobunagaBattleAnimation(SpriteLibrary.baseSpriteSize, params.attacker.body, params.attacker.x, params.attacker.y, target.xCoord, target.yCoord);
   }
 
   @Override // from MapView
   public GameAnimation buildMoveAnimation(Unit unit, Path movePath)
   {
-    return new MoveAnimation(getTileSize(), unit, movePath);
+    return new MoveAnimation(SpriteLibrary.baseSpriteSize, unit, movePath);
   }
 
   @Override // from MapView
@@ -377,13 +371,13 @@ public class SpriteMapView extends MapView
     if( animStyle == AnimationStyle.BLINK )
       return null; // TODO: Should AirDropAnimation just be TeleportAnimation and take in the animation style?
     else
-      return new AirDropAnimation(getTileSize(), unit, start, end);
+      return new AirDropAnimation(SpriteLibrary.baseSpriteSize, unit, start, end);
   }
 
   @Override // from MapView
   public GameAnimation buildResupplyAnimation(Unit supplier, Unit unit)
   {
-    return new ResupplyAnimation(getTileSize(), supplier, unit.x, unit.y);
+    return new ResupplyAnimation(SpriteLibrary.baseSpriteSize, supplier, unit.x, unit.y);
   }
 
   /**

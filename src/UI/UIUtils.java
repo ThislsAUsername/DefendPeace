@@ -14,7 +14,9 @@ import java.util.PriorityQueue;
 
 import javax.imageio.ImageIO;
 
+import CommandingOfficers.Commander;
 import UI.Art.SpriteArtist.ColorPalette;
+import UI.Art.SpriteArtist.SpriteLibrary;
 
 public class UIUtils
 {  
@@ -232,6 +234,47 @@ public class UIUtils
     {
       name = pName;
       basis = pBasis;
+    }
+    public Faction()
+    {
+      this(SpriteLibrary.DEFAULT_FACTION, SpriteLibrary.DEFAULT_FACTION);
+    }
+  }
+
+  public static class COSpriteSpec
+  {
+    public final Faction faction;
+    public final Color color;
+
+    public COSpriteSpec(Faction faction, Color color)
+    {
+      this.faction = faction;
+      this.color = color;
+    }
+
+    public static COSpriteSpec instance(Commander co)
+    {
+      COSpriteSpec spec = null;
+      if( null != co )
+        spec = new COSpriteSpec(co.faction, co.myColor);
+      return spec;
+    }
+
+    public static boolean support(COSpriteSpec me, COSpriteSpec you)
+    {
+      // If we're the same, yay
+      if( me == you )
+        return true;
+      // If we're not the same and one of us is null, boo
+      if( null == me || null == you )
+        return false;
+
+      return me.supports(you.faction, you.color);
+    }
+
+    public boolean supports(Faction pFaction, Color pColor)
+    {
+      return faction.name.contentEquals(pFaction.name) && color.equals(pColor);
     }
   }
 

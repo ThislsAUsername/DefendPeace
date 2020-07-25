@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import Terrain.Environment.Weathers;
-import Terrain.GameMap;
+import Terrain.IEnvironsProvider;
 import Terrain.TerrainType;
 import UI.UIUtils;
 
@@ -254,7 +254,7 @@ public class TerrainSpriteSet
    * Draws the terrain at the indicated location, accounting for any defined tile transitions.
    * Does not draw terrain objects (buildings, trees, mountains, etc).
    */
-  public void drawTerrain(Graphics g, GameMap map, int x, int y, boolean drawFog)
+  public void drawTerrain(Graphics g, IEnvironsProvider map, int x, int y, boolean drawFog)
   {
     drawTile(g, map, x, y, drawFog, false);
   }
@@ -263,12 +263,12 @@ public class TerrainSpriteSet
    * Draws any terrain object at the indicated location, accounting for any defined tile transitions.
    * Does not draw the underlying terrain (grass, water, etc).
    */
-  public void drawTerrainObject(Graphics g, GameMap map, int x, int y, boolean drawFog)
+  public void drawTerrainObject(Graphics g, IEnvironsProvider map, int x, int y, boolean drawFog)
   {
     drawTile(g, map, x, y, drawFog, true);
   }
 
-  private void drawTile(Graphics g, GameMap map, int x, int y, boolean drawFog, boolean shouldDrawTerrainObject)
+  private void drawTile(Graphics g, IEnvironsProvider map, int x, int y, boolean drawFog, boolean shouldDrawTerrainObject)
   {
     // Draw the base tile type, if needed. It's needed if we are not the base type, and if we are not drawing
     //   a terrain object. If this object is holding transition tiles, we also don't want to (re)draw the base type.
@@ -366,7 +366,7 @@ public class TerrainSpriteSet
    * @param assumeSameTileType
    * @return
    */
-  private short getTileImageIndex(GameMap map, int x, int y, boolean assumeSameTileType)
+  private short getTileImageIndex(IEnvironsProvider map, int x, int y, boolean assumeSameTileType)
   {
     // Get the list of CLEAR-weather sprites, as they are guaranteed to define our transitions.
     ArrayList<Sprite> clearSprites = getSpritesByWeather(Weathers.CLEAR);
@@ -423,7 +423,7 @@ public class TerrainSpriteSet
    *   us to draw roads that go off the map, etc, but keep it from looking like there is always land across
    *   the water at the edge of the map due to unwanted cliff-face transitions.
    */
-  private boolean checkTileType(GameMap map, int x, int y, boolean assumeTrue)
+  private boolean checkTileType(IEnvironsProvider map, int x, int y, boolean assumeTrue)
   {
     boolean terrainTypesMatch = false;
 

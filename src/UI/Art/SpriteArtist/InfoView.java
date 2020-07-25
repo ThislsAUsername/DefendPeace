@@ -1,6 +1,5 @@
 package UI.Art.SpriteArtist;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -141,13 +140,6 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
 
   
   // Vestigial method stubs from MapView
-  @Override
-  public int getTileSize()
-  {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
   @Override
   public void animate(GameEventQueue newEvents)
   {

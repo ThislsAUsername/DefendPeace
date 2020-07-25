@@ -15,6 +15,7 @@ import CommandingOfficers.Commander;
 import Terrain.Location;
 import Terrain.TerrainType;
 import UI.UIUtils;
+import UI.UIUtils.COSpriteSpec;
 import UI.UIUtils.Faction;
 import Units.Unit;
 import Units.UnitModel;
@@ -28,6 +29,7 @@ public class SpriteLibrary
   public static final int baseSpriteSize = 16;
 
   public static final String charKey = "%./-~,;:!?'&()";
+  public static final String DEFAULT_FACTION = "Thorn";
 
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
   private static HashMap<UnitSpriteSetKey, UnitSpriteSet> mapUnitSpriteSetMap = new HashMap<UnitSpriteSetKey, UnitSpriteSet>();
@@ -124,7 +126,22 @@ public class SpriteLibrary
    */
   public static TerrainSpriteSet getTerrainSpriteSet(Location loc)
   {
-    SpriteSetKey spriteKey = SpriteSetKey.instance(loc.getEnvironment().terrainType, loc.getOwner());
+    SpriteSetKey spriteKey = SpriteSetKey.instance(loc.getEnvironment().terrainType, COSpriteSpec.instance(loc.getOwner()));
+    if( !spriteSetMap.containsKey(spriteKey) )
+    {
+      // Don't have it? Create it.
+      createTerrainSpriteSet(spriteKey);
+    }
+    // Now we must have an entry for that terrain type.
+    return spriteSetMap.get(spriteKey);
+  }
+
+  /**
+   * Retrieve (loading if needed) the sprites associated with the given terrain type and faction/color
+   */
+  public static TerrainSpriteSet getTerrainSpriteSet(TerrainType terrain, COSpriteSpec spec)
+  {
+    SpriteSetKey spriteKey = SpriteSetKey.instance(terrain, spec);
     if( !spriteSetMap.containsKey(spriteKey) )
     {
       // Don't have it? Create it.
@@ -203,7 +220,7 @@ public class SpriteLibrary
     // If this tile is owned by someone, fly their colors.
     if( spriteKey.commanderKey != null )
     {
-      ss.setTeamColor(spriteKey.commanderKey.myColor);
+      ss.setTeamColor(spriteKey.commanderKey.color);
     }
     spriteSetMap.put(spriteKey, ss);
   }
@@ -231,21 +248,22 @@ public class SpriteLibrary
   private static class SpriteSetKey
   {
     public final TerrainType terrainKey;
-    public final Commander commanderKey;
+    public final COSpriteSpec commanderKey;
     private static ArrayList<SpriteSetKey> instances = new ArrayList<SpriteSetKey>();
 
-    private SpriteSetKey(TerrainType terrain, Commander co)
+    private SpriteSetKey(TerrainType terrain, COSpriteSpec spec)
     {
       terrainKey = terrain;
-      commanderKey = co;
+      commanderKey = spec;
     }
 
-    public static SpriteSetKey instance(TerrainType terrain, Commander co)
+    public static SpriteSetKey instance(TerrainType terrain, COSpriteSpec spec)
     {
       SpriteSetKey key = null;
       for( int i = 0; i < instances.size(); ++i )
       {
-        if( instances.get(i).terrainKey == terrain && instances.get(i).commanderKey == co )
+        if( instances.get(i).terrainKey == terrain &&
+            (COSpriteSpec.support(instances.get(i).commanderKey, spec)) )
         {
           key = instances.get(i);
           break;
@@ -253,7 +271,7 @@ public class SpriteLibrary
       }
       if( key == null )
       {
-        key = new SpriteSetKey(terrain, co);
+        key = new SpriteSetKey(terrain, spec);
         instances.add(key);
       }
       return key;
@@ -267,15 +285,13 @@ public class SpriteLibrary
   private static class UnitSpriteSetKey
   {
     public final String unitTypeKey;
-    public final Faction factionKey;
-    public final Color colorKey;
+    public final COSpriteSpec spriteSpec;
     private static ArrayList<UnitSpriteSetKey> instances = new ArrayList<UnitSpriteSetKey>();
 
     private UnitSpriteSetKey(String unitType, Faction faction, Color color)
     {
       unitTypeKey = unitType;
-      factionKey = faction;
-      colorKey = color;
+      spriteSpec = new COSpriteSpec(faction, color);
     }
 
     public static UnitSpriteSetKey instance(String unitType, Faction faction, Color color)
@@ -284,7 +300,7 @@ public class SpriteLibrary
       String stdType = UnitModel.standardizeID(unitType);
       for( int i = 0; i < instances.size(); ++i )
       {
-        if( instances.get(i).unitTypeKey.equals(stdType) && instances.get(i).factionKey == faction && instances.get(i).colorKey == color)
+        if( instances.get(i).unitTypeKey.equals(stdType) && instances.get(i).spriteSpec.supports(faction, color) )
         {
           key = instances.get(i);
           break;
@@ -318,7 +334,7 @@ public class SpriteLibrary
 
   private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
-    UnitSpriteSet spriteSet = new UnitSpriteSet( key.unitTypeKey, key.factionKey, UIUtils.getMapUnitColors(key.colorKey) );
+    UnitSpriteSet spriteSet = new UnitSpriteSet( key.unitTypeKey, key.spriteSpec.faction, UIUtils.getMapUnitColors(key.spriteSpec.color) );
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
 

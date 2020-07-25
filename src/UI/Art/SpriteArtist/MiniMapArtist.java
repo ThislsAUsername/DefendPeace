@@ -3,16 +3,17 @@ package UI.Art.SpriteArtist;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-
 import Engine.XYCoord;
 import Terrain.MapInfo;
 import UI.UIUtils;
+import UI.UIUtils.COSpriteSpec;
+import UI.UIUtils.Faction;
 
 public class MiniMapArtist
 {
   private static MapInfo lastMapDrawn;
   private static Color[] lastTeamColors;
-  private static BufferedImage lastMapImage;
+  private static BufferedImage lastMiniMapImage, lastFullMapImage;
 
   /**
    * Retrieve a BufferedImage with a 1-pixel-per-tile representation of the provided MapInfo.
@@ -20,9 +21,9 @@ public class MiniMapArtist
    * if this function is called again with the same MapInfo.
    * Teams will be colored according to the default color ordering.
    */
-  public static BufferedImage getMapImage(MapInfo mapInfo)
+  public static BufferedImage getMapImage(MapInfo mapInfo, int maxWidth, int maxHeight)
   {
-    return getMapImage(mapInfo, UIUtils.getCOColors());
+    return getMapImage(mapInfo, UIUtils.getCOColors(), maxWidth, maxHeight);
   }
 
   /**
@@ -33,23 +34,30 @@ public class MiniMapArtist
    *        are provided, black will be used for any remaining ones. If null is passed in,
    *        the default team-color ordering will be used.
    */
-  public static BufferedImage getMapImage(MapInfo mapInfo, Color[] teamColors)
+  public static BufferedImage getMapImage(MapInfo mapInfo, Color[] teamColors, int maxWidth, int maxHeight)
   {
     if( mapInfo != lastMapDrawn || palettesDiffer(teamColors) )
     {
       // If we don't already have an image, generate and store it for later.
-      lastMapImage = generateMapImage(mapInfo, teamColors);
+      lastMiniMapImage = generateMiniMapImage(mapInfo, teamColors);
+      lastFullMapImage = generateFullMapImage(mapInfo, teamColors);
       lastMapDrawn = mapInfo;
       lastTeamColors = teamColors;
     }
 
-    return lastMapImage;
+    BufferedImage miniMap = lastMiniMapImage;
+    // Use the full map image if it'll fit.
+    if(   maxHeight >= lastFullMapImage.getHeight()
+        && maxWidth >= lastFullMapImage.getWidth() )
+      miniMap = lastFullMapImage;
+
+    return miniMap;
   }
 
   /**
    * Generates a BufferedImage with a 1-pixel-per=tile representation of the map.
    */
-  private static BufferedImage generateMapImage(MapInfo mapInfo, Color[] teamColors)
+  private static BufferedImage generateMiniMapImage(MapInfo mapInfo, Color[] teamColors)
   {
     BufferedImage image = new BufferedImage(mapInfo.getWidth(), mapInfo.getHeight(), BufferedImage.TYPE_INT_ARGB);
     Graphics g = image.getGraphics();
@@ -95,6 +103,66 @@ public class MiniMapArtist
 
         g.setColor( coColor );
         g.fillRect(x, y, 1, 1);
+      }
+    }
+
+    return image;
+  }
+
+  /**
+   * Generates a BufferedImage containing the full-scale map.
+   */
+  private static BufferedImage generateFullMapImage(MapInfo mapInfo, Color[] teamColors)
+  {
+    // If we don't have a palette yet, just get the default one from UIUtis.
+    if( null == teamColors ) teamColors = UIUtils.getCOColors();
+
+    BufferedImage image = new BufferedImage(
+        mapInfo.getWidth() * SpriteLibrary.baseSpriteSize,
+        mapInfo.getHeight() * SpriteLibrary.baseSpriteSize,
+        BufferedImage.TYPE_INT_ARGB);
+    Graphics g = image.getGraphics();
+
+    for(int y = 0; y < mapInfo.getHeight(); ++y) // Iterate horizontally to layer terrain correctly.
+    {
+      for(int x = 0; x < mapInfo.getWidth(); ++x)
+      {
+        XYCoord coord = new XYCoord(x, y);
+        COSpriteSpec spec = null;
+        // Figure out team color, if any
+        for( int co = 0; co < mapInfo.COProperties.length; ++co )
+        {
+          for( int i = 0; i < mapInfo.COProperties[co].length; ++i )
+          {
+            if( coord.equals(mapInfo.COProperties[co][i]) )
+            {
+              Color coColor;
+
+              // Log a warning if SpriteLibrary doesn't have enough colors to support this map.
+              if( co >= teamColors.length )
+              {
+                System.out.println("WARNING! '" + mapInfo.mapName + "' has more start locations than there are team colors!");
+
+                // But soldier onwards anyway.
+                coColor = Color.BLACK;
+              }
+              else
+              {
+                coColor = teamColors[co];
+              }
+
+              spec = new COSpriteSpec(new Faction(), coColor);
+              break;
+            }
+          }
+          if( null != spec)
+            break;
+        }
+
+        // Fetch the relevant sprite set for this terrain type and have it draw itself.
+        TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(mapInfo.terrain[x][y], spec);
+        spriteSet.drawTerrain(g, mapInfo, x, y, false);
+        spriteSet.drawTerrainObject(g, mapInfo, x, y, false);
       }
     }
 
