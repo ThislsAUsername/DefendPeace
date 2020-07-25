@@ -250,7 +250,6 @@ public class WallyAI extends ModularAI
       if( null != nextAction )
         return nextAction;
 
-      boolean foundKill = false;
       // Get a count of enemy forces.
       Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
       for( Commander co : unitLists.keySet() )
@@ -281,23 +280,34 @@ public class WallyAI extends ModularAI
               {
                 damage += CombatEngine.simulateBattleResults(resident, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
                 neededAttacks.put(xyc, resident);
-                if( damage >= target.getPreciseHP() )
-                {
-                  foundKill = true;
+                if( damage >= target.getHP() )
                   break;
-                }
               }
               // Check that we could potentially move into this space. Also we're scared of fog
               else if( (null == resident) && !AIUtils.isFriendlyProduction(gameMap, myCo, xyc)
                   && !gameMap.isLocationFogged(xyc) )
                 neededAttacks.put(xyc, null);
             }
-            if( foundKill || ai.findAssaultKills(gameMap, unitQueue, neededAttacks, target, damage) >= target.getPreciseHP() )
+            damage = ai.findAssaultKills(gameMap, unitQueue, neededAttacks, target, damage);
+            if( damage >= target.getHP() )
             {
-              foundKill = true;
-              ai.log(String.format("  Gonna try to kill %s, who has %s HP", target.toStringWithLocation(), target.getHP()));
-              targetLoc = new XYCoord(target.x, target.y);
-              return nextAttack(gameMap);
+              if( neededAttacks.size() > 1 )
+              {
+                for( XYCoord space : neededAttacks.keySet() )
+                {
+                  if( null == neededAttacks.get(space) )
+                    continue;
+                  double thisShot = CombatEngine.simulateBattleResults(neededAttacks.get(space), target, gameMap, space.xCoord, space.yCoord).defenderHPLoss;
+                  if( target.getHP() <= damage - thisShot )
+                  {
+                    neededAttacks.put(space, null);
+                    damage -= thisShot;
+                  }
+                }
+                ai.log(String.format("  Gonna try to kill %s, who has %s HP", target.toStringWithLocation(), target.getHP()));
+                targetLoc = new XYCoord(target.x, target.y);
+                return nextAttack(gameMap);
+              }
             }
             else
             {
