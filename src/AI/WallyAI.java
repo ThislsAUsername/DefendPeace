@@ -659,98 +659,94 @@ public class WallyAI extends ModularAI
       destinations.remove(0);
     // TODO: Jump in a transport, if available, or join?
 
-    if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
-    {
-      log(String.format("  Evaluating travel for %s. Forced?: %s", unit.toStringWithLocation(), ignoreSafety));
-      XYCoord goal = null;
-      Path path = null;
-      ArrayList<XYCoord> validTargets = findTravelDestinations(gameMap, allThreats, threatMap, unit);
+    log(String.format("  Evaluating travel for %s. Forced?: %s", unit.toStringWithLocation(), ignoreSafety));
+    XYCoord goal = null;
+    Path path = null;
+    ArrayList<XYCoord> validTargets = findTravelDestinations(gameMap, allThreats, threatMap, unit);
 
-      for( XYCoord target : validTargets )
+    for( XYCoord target : validTargets )
+    {
+      path = Utils.findShortestPath(unit, target, gameMap, true);
+      if( path.getPathLength() > 0 ) // We can reach it.
       {
-        path = Utils.findShortestPath(unit, target, gameMap, true);
-        if( path.getPathLength() > 0 ) // We can reach it.
-        {
-          goal = target;
-          break;
-        }
+        goal = target;
+        break;
+      }
 //        log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal,
 //            (validTarget ? "Yes" : "No")));
-      }
+    }
 
-      if( null != goal )
-      {
-        log(String.format("    Selected %s at %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal));
+    if( null == goal ) return null;
 
-        // Choose the point on the path just out of our range as our 'goal', and try to move there.
-        // This will allow us to navigate around large obstacles that require us to move away
-        // from our intended long-term goal.
-        path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
-        goal = path.getEndCoord(); // Set the last location as our goal.
+    log(String.format("    Selected %s at %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal));
+
+    // Choose the point on the path just out of our range as our 'goal', and try to move there.
+    // This will allow us to navigate around large obstacles that require us to move away
+    // from our intended long-term goal.
+    path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
+    goal = path.getEndCoord(); // Set the last location as our goal.
 
 //        log(String.format("    Intermediate waypoint: %s", goal));
 
-        // Sort my currently-reachable move locations by distance from the goal,
-        // and build a GameAction to move to the closest one.
-        Utils.sortLocationsByDistance(goal, destinations);
-        log(String.format("    %s would like to travel towards %s. Safely?: %s", unit.toStringWithLocation(), goal, !ignoreSafety));
-        for( XYCoord xyc : destinations )
+    // Sort my currently-reachable move locations by distance from the goal,
+    // and build a GameAction to move to the closest one.
+    Utils.sortLocationsByDistance(goal, destinations);
+    log(String.format("    %s would like to travel towards %s. Safely?: %s", unit.toStringWithLocation(), goal, !ignoreSafety));
+    for( XYCoord xyc : destinations )
+    {
+      log(String.format("    is it safe to go to %s?", xyc));
+      if( !ignoreSafety && !canWallHere(gameMap, threatMap, unit, xyc) )
+        continue;
+      log(String.format("    Yes"));
+
+      GameAction action = null;
+      Unit resident = gameMap.getLocation(xyc).getResident();
+      if( null != resident && unit != resident )
+      {
+        log(String.format("    Need to evict %s", resident.toStringWithLocation()));
+        if( unit.CO == resident.CO && !resident.isTurnOver )
+          action = evictUnit(gameMap, allThreats, threatMap, unit, resident);
+        if( null != action ) return action;
+        log(String.format("    Eviction failed"));
+        continue;
+      }
+
+      Path movePath = Utils.findShortestPath(unit, xyc, gameMap);
+      ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, ignoreResident);
+      if( actionSets.size() > 0 )
+      {
+        // Since we're moving anyway, might as well try shooting the scenery
+        for( GameActionSet actionSet : actionSets )
         {
-          log(String.format("    is it safe to go to %s?", xyc));
-          if( !ignoreSafety && !canWallHere(gameMap, threatMap, unit, xyc) )
-            continue;
-          log(String.format("    Yes"));
-
-          GameAction action = null;
-          Unit resident = gameMap.getLocation(xyc).getResident();
-          if( null != resident && unit != resident )
+          if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
           {
-            log(String.format("    Need to evict %s", resident.toStringWithLocation()));
-            if( unit.CO == resident.CO && !resident.isTurnOver )
-              action = evictUnit(gameMap, allThreats, threatMap, unit, resident);
-            if( null != action ) return action;
-            log(String.format("    Eviction failed"));
-            continue;
-          }
-
-          Path movePath = Utils.findShortestPath(unit, xyc, gameMap);
-          ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, ignoreResident);
-          if( actionSets.size() > 0 )
-          {
-            // Since we're moving anyway, might as well try shooting the scenery
-            for( GameActionSet actionSet : actionSets )
+            double bestDamage = 0;
+            for( GameAction attack : actionSet.getGameActions() )
             {
-              if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
+              double damageValue = AIUtils.scoreAttackAction(unit, attack, gameMap,
+                  (results) -> {
+                    double loss   = Math.min(unit            .getHP(), (int)results.attackerHPLoss);
+                    double damage = Math.min(results.defender.getHP(), (int)results.defenderHPLoss);
+
+                    if( damage > loss ) // only shoot that which you hurt more than it hurts you
+                      return damage * results.defender.model.getCost();
+
+                    return 0.;
+                  }, (terrain, params) -> 0.01); // Attack terrain, but don't prioritize it over units
+
+              if( damageValue > bestDamage )
               {
-                double bestDamage = 0;
-                for( GameAction attack : actionSet.getGameActions() )
-                {
-                  double damageValue = AIUtils.scoreAttackAction(unit, attack, gameMap,
-                      (results) -> {
-                        double loss   = Math.min(unit            .getHP(), (int)results.attackerHPLoss);
-                        double damage = Math.min(results.defender.getHP(), (int)results.defenderHPLoss);
-
-                        if( damage > loss ) // only shoot that which you hurt more than it hurts you
-                          return damage * results.defender.model.getCost();
-
-                        return 0.;
-                      }, (terrain, params) -> 0.01); // Attack terrain, but don't prioritize it over units
-
-                  if( damageValue > bestDamage )
-                  {
-                    log(String.format("      Best en passant attack deals %s", damageValue));
-                    bestDamage = damageValue;
-                    action = attack;
-                  }
-                }
+                log(String.format("      Best en passant attack deals %s", damageValue));
+                bestDamage = damageValue;
+                action = attack;
               }
             }
-
-            if( null == action ) // Just wait if we can't do anything cool
-              action = new WaitLifecycle.WaitAction(unit, movePath);
-            return action;
           }
         }
+
+        if( null == action ) // Just wait if we can't do anything cool
+          action = new WaitLifecycle.WaitAction(unit, movePath);
+        return action;
       }
     }
     return null;
