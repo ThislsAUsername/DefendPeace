@@ -548,8 +548,9 @@ public class WallyAI extends ModularAI
     }
     else if( unit.model.possibleActions.contains(UnitActionFactory.CAPTURE) )
     {
-      goals.addAll(unownedProperties);
-      Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
+      for( XYCoord xyc : unownedProperties )
+        if( !AIUtils.isCapturing(gameMap, myCo, xyc) )
+          goals.add(xyc);
     }
     else if( unit.model.possibleActions.contains(UnitActionFactory.ATTACK) )
     {
@@ -587,20 +588,23 @@ public class WallyAI extends ModularAI
       }
     }
 
-    if( goals.isEmpty() ) // Send 'em to the HQ if they haven't got anything better to do
+    if( goals.isEmpty() ) // Send 'em at production facilities if they haven't got anything better to do
     {
       for( XYCoord coord : unownedProperties )
       {
         Location loc = gameMap.getLocation(coord);
-        if( (loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS || TerrainType.LAB == loc.getEnvironment().terrainType)
+        if( myCo.unitProductionByTerrain.containsKey(loc.getEnvironment().terrainType)
             && myCo.isEnemy(loc.getOwner()) )
         {
           goals.add(coord);
         }
       }
-      Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
     }
 
+    if( goals.isEmpty() ) // If there's really nothing to do, go to MY HQ
+      goals.add(myCo.HQLocation);
+
+    Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
     return goals;
   }
 
@@ -658,24 +662,23 @@ public class WallyAI extends ModularAI
     if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
     {
       log(String.format("  Evaluating travel for %s. Forced?: %s", unit.toStringWithLocation(), ignoreSafety));
-      int index = 0;
       XYCoord goal = null;
       Path path = null;
-      boolean validTarget = false;
       ArrayList<XYCoord> validTargets = findTravelDestinations(gameMap, allThreats, threatMap, unit);
 
-      // Loop until we find a valid property to go capture or run out of options.
-      do
+      for( XYCoord target : validTargets )
       {
-        goal = validTargets.get(index++);
-        path = Utils.findShortestPath(unit, goal, gameMap, true);
-        validTarget = (!AIUtils.isCapturing(gameMap, myCo, goal) // We aren't already capturing it.
-            && (path.getPathLength() > 0)); // We can reach it.
+        path = Utils.findShortestPath(unit, target, gameMap, true);
+        if( path.getPathLength() > 0 ) // We can reach it.
+        {
+          goal = target;
+          break;
+        }
 //        log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal,
 //            (validTarget ? "Yes" : "No")));
-      } while (!validTarget && (index < validTargets.size())); // Loop until we run out of properties to check.
+      }
 
-      if( validTarget )
+      if( null != goal )
       {
         log(String.format("    Selected %s at %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal));
 
