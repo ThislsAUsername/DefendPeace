@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
@@ -398,6 +399,11 @@ public class WallyAI extends ModularAI
     @Override
     public GameAction getUnitAction(Unit unit, GameMap gameMap)
     {
+      return findValueAction(myCo, ai, unit, gameMap);
+    }
+
+    public static GameAction findValueAction(Commander co, WallyAI ai, Unit unit, GameMap gameMap)
+    {
       XYCoord position = new XYCoord(unit.x, unit.y);
       Location unitLoc = gameMap.getLocation(position);
 
@@ -420,10 +426,9 @@ public class WallyAI extends ModularAI
           Unit resident = gameMap.getLocation(moveCoord).getResident();
           if( !spaceFree )
           {
-            if( unit.CO != resident.CO || resident.isTurnOver
-                || resident.getHP() * resident.model.getCost() >= unit.getHP() * unit.model.getCost() )
-              continue; // If we can't evict or we're not worth more than the other dude, we don't get to kick him out
-            ai.log(String.format("  Evicting %s if I need to", resident.toStringWithLocation()));
+            if( unit.CO != resident.CO || resident.isTurnOver )
+              continue;
+            // ai.log(String.format("  Evicting %s if I need to", resident.toStringWithLocation()));
           }
 
           // See if we can bag enough damage to be worth sacrificing the unit
@@ -457,7 +462,7 @@ public class WallyAI extends ModularAI
               if( goForIt )
               {
                 if( !spaceFree )
-                  return ai.findTravelAction(gameMap, ai.allThreats, ai.threatMap, resident, true);
+                  return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident);
                 return ga;
               }
             }
@@ -468,7 +473,7 @@ public class WallyAI extends ModularAI
               && (moveCoord.getDistance(unit.x, unit.y) == 0 || ai.canWallHere(gameMap, ai.threatMap, unit, moveCoord)) )
           {
             if( !spaceFree )
-              return ai.findTravelAction(gameMap, ai.allThreats, ai.threatMap, resident, true);
+              return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident);
             return actionSet.getSelected();
           }
         }
@@ -599,6 +604,40 @@ public class WallyAI extends ModularAI
     return goals;
   }
 
+  /** Functions as working memory to prevent eviction cycles */
+  private transient Set<Unit> evictionStack;
+  /**
+   * Queue the first action required to move a unit out of the way
+   * For use after unit building is complete
+   */
+  private GameAction evictUnit(
+                        GameMap gameMap,
+                        ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap,
+                        Unit evicter, Unit unit)
+  {
+    boolean isBase = false;
+    if( null == evictionStack )
+    {
+      evictionStack = new HashSet<Unit>();
+      isBase = true;
+    }
+    evictionStack.add(evicter);
+
+    if( evictionStack.contains(unit) )
+      return null;
+    evictionStack.add(unit);
+
+    GameAction result = FreeRealEstate.findValueAction(myCo, this, unit, gameMap);
+    if( null != result ) return result;
+
+    boolean ignoreSafety = true;
+    result = findTravelAction(gameMap, allThreats, threatMap, unit, ignoreSafety);
+
+    if( isBase )
+      evictionStack = null;
+    return result;
+  }
+
   /**
    * Find a good long-term objective for the given unit, and pursue it (with consideration for life-preservation optional)
    * For use after unit building is complete
@@ -610,9 +649,11 @@ public class WallyAI extends ModularAI
                         boolean ignoreSafety)
   {
     // Find the possible destinations.
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
+    boolean ignoreResident = true;
+    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, ignoreResident);
     if( ignoreSafety ) // If we *must* travel, make sure we do actually move.
       destinations.remove(0);
+    // TODO: Jump in a transport, if available, or join?
 
     if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
     {
@@ -649,25 +690,29 @@ public class WallyAI extends ModularAI
         // Sort my currently-reachable move locations by distance from the goal,
         // and build a GameAction to move to the closest one.
         Utils.sortLocationsByDistance(goal, destinations);
-        XYCoord destination = null;
-        // try to get somewhere safe
         log(String.format("    %s would like to travel towards %s. Safely?: %s", unit.toStringWithLocation(), goal, !ignoreSafety));
         for( XYCoord xyc : destinations )
         {
           log(String.format("    is it safe to go to %s?", xyc));
-          if( ignoreSafety || canWallHere(gameMap, threatMap, unit, xyc) )
-          {
-            log(String.format("    Yes"));
-            destination = xyc;
-            break;
-          }
-        }
-        if( null != destination )
-        {
-          Path movePath = Utils.findShortestPath(unit, destination, gameMap);
-          ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, false);
+          if( !ignoreSafety && !canWallHere(gameMap, threatMap, unit, xyc) )
+            continue;
+          log(String.format("    Yes"));
+
           GameAction action = null;
-          if( movePath.getPathLength() > 1 && actionSets.size() > 0 ) // We only want to try to travel if we can actually go somewhere and do something
+          Unit resident = gameMap.getLocation(xyc).getResident();
+          if( null != resident && unit != resident )
+          {
+            log(String.format("    Need to evict %s", resident.toStringWithLocation()));
+            if( unit.CO == resident.CO && !resident.isTurnOver )
+              action = evictUnit(gameMap, allThreats, threatMap, unit, resident);
+            if( null != action ) return action;
+            log(String.format("    Eviction failed"));
+            continue;
+          }
+
+          Path movePath = Utils.findShortestPath(unit, xyc, gameMap);
+          ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, ignoreResident);
+          if( actionSets.size() > 0 )
           {
             // Since we're moving anyway, might as well try shooting the scenery
             for( GameActionSet actionSet : actionSets )
