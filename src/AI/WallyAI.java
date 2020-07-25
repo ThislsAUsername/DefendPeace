@@ -744,7 +744,7 @@ public class WallyAI extends ModularAI
           }
         }
 
-        if( null == action ) // Just wait if we can't do anything cool
+        if( null == action && movePath.getPathLength() > 1) // Just wait if we can't do anything cool
           action = new WaitLifecycle.WaitAction(unit, movePath);
         return action;
       }
