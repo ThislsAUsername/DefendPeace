@@ -28,13 +28,15 @@ public class SpriteOptions
   private static final int DRAWSCALE_DEFAULT = 2;
   private static int drawScale = DRAWSCALE_DEFAULT;
   private static boolean animationsOn = true;
+  private static boolean coordinatesOn = false;
 
   private static Dimension dimensions = new Dimension(WINDOWWIDTH_DEFAULT * drawScale, WINDOWHEIGHT_DEFAULT * drawScale);
 
   // Set up configurable options.
   private static GameOption<Integer> drawScaleOption = new GameOptionInt("Draw Scale", 1, 6, 1, DRAWSCALE_DEFAULT);
   private static GameOptionBool animationsOption = new GameOptionBool("Animations", true);
-  private static GameOption<?>[] allOptions = { drawScaleOption, animationsOption };
+  private static GameOptionBool coordinatesOption = new GameOptionBool("Show Coords", false);
+  private static GameOption<?>[] allOptions = { drawScaleOption, animationsOption, coordinatesOption };
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
   private static SlidingValue animHighlightedOption;
 
@@ -66,6 +68,11 @@ public class SpriteOptions
   public static boolean getAnimationsEnabled()
   {
     return animationsOn;
+  }
+
+  public static boolean getCoordinatesEnabled()
+  {
+    return coordinatesOn;
   }
 
   static void initialize()
@@ -191,6 +198,7 @@ public class SpriteOptions
     // Store the options locally.
     drawScale = drawScaleOption.getSelectedObject();
     animationsOn = animationsOption.getSelectedObject();
+    coordinatesOn = coordinatesOption.getSelectedObject();
     saveSettingsToDisk();
 
     // Apply effects.
@@ -218,6 +226,7 @@ public class SpriteOptions
   private static final String KEYS_FILENAME = "res/graphics_options.txt";
   private static final String DRAWSCALE_KEY = "Drawscale";
   private static final String ANIMATION_KEY = "Animation";
+  private static final String COORDINATES_KEY = "ShowCoords";
 
   private static void saveSettingsToDisk()
   {
@@ -229,6 +238,7 @@ public class SpriteOptions
       StringBuffer buf = new StringBuffer();
       buf.append(DRAWSCALE_KEY).append(" ").append(drawScaleOption.getSelectionNormalized()+1).append("\n");
       buf.append(ANIMATION_KEY).append(" ").append(animationsOption.getSelectionNormalized()).append("\n");
+      buf.append(COORDINATES_KEY).append(" ").append(coordinatesOption.getSelectionNormalized()).append("\n");
       writer.write(buf.toString());
       writer.close();
     }
@@ -262,6 +272,10 @@ public class SpriteOptions
             case ANIMATION_KEY:
               animationsOption.setSelectedOption(Integer.parseInt(linescan.next()));
               animationsOn = animationsOption.getSelectedObject();
+              break;
+            case COORDINATES_KEY:
+              coordinatesOption.setSelectedOption(Integer.parseInt(linescan.next()));
+              coordinatesOn = coordinatesOption.getSelectedObject();
               break;
               default:
                 System.out.println("WARNING! Unrecognized key '" + key + "' in graphics settings file!");
