@@ -506,4 +506,23 @@ public class AIUtils
     targetLocs.remove(start); // No attacking your own position.
     return targetLocs;
   }
+
+  /**
+   * Finds allied production centers in the input set
+   */
+  public static Set<XYCoord> findAlliedIndustries(GameMap gameMap, Commander co, Iterable<XYCoord> coords, boolean ignoreMyOwn)
+  {
+    Set<XYCoord> result = new HashSet<XYCoord>();
+    for( XYCoord coord : coords )
+    {
+      Commander owner = gameMap.getLocation(coord).getOwner();
+      if( co.isEnemy(owner) )
+        continue;
+      if( ignoreMyOwn && co == owner )
+        continue;
+      if( owner.unitProductionByTerrain.containsKey(gameMap.getEnvironment(coord).terrainType) )
+        result.add(coord);
+    }
+    return result;
+  }
 }

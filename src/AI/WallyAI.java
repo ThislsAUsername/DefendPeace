@@ -486,7 +486,8 @@ public class WallyAI extends ModularAI
     @Override
     public GameAction getUnitAction(Unit unit, GameMap gameMap)
     {
-      return ai.findTravelAction(gameMap, ai.allThreats, ai.threatMap, unit, false);
+      boolean avoidProduction = false;
+      return ai.findTravelAction(gameMap, ai.allThreats, ai.threatMap, unit, false, avoidProduction);
     }
   }
 
@@ -515,8 +516,9 @@ public class WallyAI extends ModularAI
         Unit resident = gameMap.getResident(coord);
         if( null != resident )
         {
+          boolean avoidProduction = true;
           if( resident.CO == myCo && !resident.isTurnOver )
-            return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, null, resident);
+            return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, null, resident, avoidProduction);
           else
           {
             ai.log(String.format("WARNING: Trying to build on un-evictable unit %s", resident.toStringWithLocation()));
@@ -544,7 +546,11 @@ public class WallyAI extends ModularAI
   }
 
   /** Produces a list of destinations for the unit, ordered by their relative precedence */
-  private ArrayList<XYCoord> findTravelDestinations(GameMap gameMap, ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit)
+  private ArrayList<XYCoord> findTravelDestinations(
+                                  GameMap gameMap,
+                                  ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap,
+                                  Unit unit,
+                                  boolean avoidProduction )
   {
     ArrayList<XYCoord> goals = new ArrayList<XYCoord>();
 
@@ -562,6 +568,8 @@ public class WallyAI extends ModularAI
         log(String.format("%s needs supplies.", unit.toStringWithLocation()));
         goals.addAll(stations);
       }
+      if( avoidProduction )
+        goals.removeAll(AIUtils.findAlliedIndustries(gameMap, myCo, goals, !avoidProduction));
     }
     else if( unit.model.possibleActions.contains(UnitActionFactory.CAPTURE) )
     {
@@ -630,11 +638,20 @@ public class WallyAI extends ModularAI
   /**
    * Queue the first action required to move a unit out of the way
    * For use after unit building is complete
+   * Can recurse based on the other functions it calls.
    */
   private GameAction evictUnit(
                         GameMap gameMap,
                         ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap,
                         Unit evicter, Unit unit)
+  {
+    return evictUnit(gameMap, allThreats, threatMap, evicter, unit, false);
+  }
+  private GameAction evictUnit(
+                        GameMap gameMap,
+                        ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap,
+                        Unit evicter, Unit unit,
+                        boolean avoidProduction )
   {
     log(String.format("  Evicting %s", unit.toStringWithLocation()));
     boolean isBase = false;
@@ -654,7 +671,7 @@ public class WallyAI extends ModularAI
     if( null != result ) return result;
 
     boolean ignoreSafety = true;
-    result = findTravelAction(gameMap, allThreats, threatMap, unit, ignoreSafety);
+    result = findTravelAction(gameMap, allThreats, threatMap, unit, ignoreSafety, avoidProduction);
 
     if( isBase )
       evictionStack = null;
@@ -663,25 +680,27 @@ public class WallyAI extends ModularAI
 
   /**
    * Find a good long-term objective for the given unit, and pursue it (with consideration for life-preservation optional)
-   * For use after unit building is complete
    */
   private GameAction findTravelAction(
                         GameMap gameMap,
                         ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap,
                         Unit unit,
-                        boolean ignoreSafety)
+                        boolean ignoreSafety,
+                        boolean avoidProduction )
   {
     // Find the possible destinations.
     boolean ignoreResident = true;
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, ignoreResident);
     if( ignoreSafety ) // If we *must* travel, make sure we do actually move.
       destinations.remove(0);
+    destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, myCo, destinations, !avoidProduction));
+
     // TODO: Jump in a transport, if available, or join?
 
     log(String.format("  Evaluating travel for %s. Forced?: %s", unit.toStringWithLocation(), ignoreSafety));
     XYCoord goal = null;
     Path path = null;
-    ArrayList<XYCoord> validTargets = findTravelDestinations(gameMap, allThreats, threatMap, unit);
+    ArrayList<XYCoord> validTargets = findTravelDestinations(gameMap, allThreats, threatMap, unit, avoidProduction);
 
     for( XYCoord target : validTargets )
     {
