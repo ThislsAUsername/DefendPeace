@@ -446,7 +446,7 @@ public class WallyAI extends ModularAI
                 goForIt = true;
               }
               else if( damage > loss
-                     && ai.isSafe(gameMap, ai.threatMap, unit, ga.getMoveLocation()) )
+                     && ai.canWallHere(gameMap, ai.threatMap, unit, ga.getMoveLocation()) )
               {
                 ai.log(String.format("  %s thinks it's safe to attack %s", unit.toStringWithLocation(), target.toStringWithLocation()));
                 goForIt = true;
@@ -455,7 +455,11 @@ public class WallyAI extends ModularAI
               if( goForIt )
               {
                 if( !spaceFree )
-                  return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident);
+                {
+                  boolean ignoreSafety =
+                      valueUnit(unit, gameMap.getLocation(moveCoord), true) >= valueUnit(resident, gameMap.getLocation(moveCoord), true);
+                  return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident, ignoreSafety);
+                }
                 return ga;
               }
             }
@@ -466,7 +470,11 @@ public class WallyAI extends ModularAI
               && (moveCoord.getDistance(unit.x, unit.y) == 0 || ai.canWallHere(gameMap, ai.threatMap, unit, moveCoord)) )
           {
             if( !spaceFree )
-              return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident);
+            {
+              boolean ignoreSafety =
+                  valueUnit(unit, gameMap.getLocation(moveCoord), true) >= valueUnit(resident, gameMap.getLocation(moveCoord), true);
+              return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident, ignoreSafety);
+            }
             return actionSet.getSelected();
           }
         }
@@ -491,7 +499,8 @@ public class WallyAI extends ModularAI
     {
       ai.log(String.format("Evaluating travel for %s.", unit.toStringWithLocation()));
       boolean avoidProduction = false;
-      return ai.findTravelAction(gameMap, ai.allThreats, ai.threatMap, unit, false, avoidProduction);
+      boolean ignoreSafety = false;
+      return ai.findTravelAction(gameMap, ai.allThreats, ai.threatMap, unit, false, ignoreSafety, avoidProduction);
     }
   }
 
@@ -521,9 +530,9 @@ public class WallyAI extends ModularAI
         Unit resident = gameMap.getResident(coord);
         if( null != resident )
         {
-          boolean avoidProduction = true;
+          boolean ignoreSafety = true, avoidProduction = true;
           if( resident.CO == myCo && !resident.isTurnOver )
-            return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, null, resident, avoidProduction);
+            return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, null, resident, ignoreSafety, avoidProduction);
           else
           {
             ai.log(String.format("  Can't evict unit %s to build %s", resident.toStringWithLocation(), builds.get(coord)));
@@ -648,14 +657,16 @@ public class WallyAI extends ModularAI
   private GameAction evictUnit(
                         GameMap gameMap,
                         ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap,
-                        Unit evicter, Unit unit)
+                        Unit evicter, Unit unit,
+                        boolean ignoreSafety )
   {
-    return evictUnit(gameMap, allThreats, threatMap, evicter, unit, false);
+    return evictUnit(gameMap, allThreats, threatMap, evicter, unit, ignoreSafety, false);
   }
   private GameAction evictUnit(
                         GameMap gameMap,
                         ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap,
                         Unit evicter, Unit unit,
+                        boolean ignoreSafety,
                         boolean avoidProduction )
   {
     boolean isBase = false;
@@ -681,8 +692,7 @@ public class WallyAI extends ModularAI
     GameAction result = FreeRealEstate.findValueAction(myCo, this, unit, gameMap, mustMove, avoidProduction);
     if( null == result )
     {
-      boolean ignoreSafety = true;
-      result = findTravelAction(gameMap, allThreats, threatMap, unit, ignoreSafety, avoidProduction);
+      result = findTravelAction(gameMap, allThreats, threatMap, unit, ignoreSafety, mustMove, avoidProduction);
     }
 
     if( isBase )
@@ -698,13 +708,13 @@ public class WallyAI extends ModularAI
                         GameMap gameMap,
                         ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap,
                         Unit unit,
-                        boolean ignoreSafety,
+                        boolean ignoreSafety, boolean mustMove,
                         boolean avoidProduction )
   {
     // Find the possible destinations.
     boolean ignoreResident = true;
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, ignoreResident);
-    if( ignoreSafety ) // If we *must* travel, make sure we do actually move.
+    if( mustMove ) // If we *must* travel, make sure we do actually move.
       destinations.remove(new XYCoord(unit.x, unit.y));
     destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, myCo, destinations, !avoidProduction));
 
@@ -735,26 +745,26 @@ public class WallyAI extends ModularAI
     // Sort my currently-reachable move locations by distance from the goal,
     // and build a GameAction to move to the closest one.
     Utils.sortLocationsByDistance(pathPoint, destinations);
-    log(String.format("  %s is traveling toward %s at %s via %s  Forced?: %s",
+    log(String.format("  %s is traveling toward %s at %s via %s  mustMove?: %s  ignoreSafety?: %s",
                           unit.toStringWithLocation(),
                           gameMap.getLocation(goal).getEnvironment().terrainType, goal,
-                          pathPoint, ignoreSafety));
+                          pathPoint, mustMove, ignoreSafety));
     for( XYCoord xyc : destinations )
     {
       log(String.format("    is it safe to go to %s?", xyc));
       if( !ignoreSafety && !canWallHere(gameMap, threatMap, unit, xyc) )
         continue;
-      log(String.format("    Yes"));
 
       GameAction action = null;
       Unit resident = gameMap.getLocation(xyc).getResident();
       if( null != resident && unit != resident )
       {
         if( unit.CO == resident.CO && !resident.isTurnOver )
-          action = evictUnit(gameMap, allThreats, threatMap, unit, resident);
+          action = evictUnit(gameMap, allThreats, threatMap, unit, resident, ignoreSafety);
         if( null != action ) return action;
         continue;
       }
+      log(String.format("    Yes"));
 
       Path movePath = Utils.findShortestPath(unit, xyc, gameMap);
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, ignoreResident);
@@ -903,7 +913,7 @@ public class WallyAI extends ModularAI
 
     if( includeCurrentHealth )
       value *= unit.getHP();
-    value *= (unit.getCaptureProgress() > 0 && locale.isCaptureable()) ? 8 : 1; // Strongly value capturing units
+    value *= (unit.model.hasActionType(UnitActionFactory.CAPTURE) && locale.isCaptureable()) ? 8 : 1; // Strongly value capturing units
     value -= locale.getEnvironment().terrainType.getDefLevel(); // Value things on lower terrain more, so we wall for equal units if we can get on better terrain
 
     return value;
