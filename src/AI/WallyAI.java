@@ -692,7 +692,7 @@ public class WallyAI extends ModularAI
     boolean ignoreResident = true;
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, ignoreResident);
     if( ignoreSafety ) // If we *must* travel, make sure we do actually move.
-      destinations.remove(0);
+      destinations.remove(new XYCoord(unit.x, unit.y));
     destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, myCo, destinations, !avoidProduction));
 
     // TODO: Jump in a transport, if available, or join?
