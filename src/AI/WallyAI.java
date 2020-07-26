@@ -521,7 +521,7 @@ public class WallyAI extends ModularAI
             return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, null, resident, avoidProduction);
           else
           {
-            ai.log(String.format("WARNING: Trying to build on un-evictable unit %s", resident.toStringWithLocation()));
+            ai.log(String.format("    Can't evict unit %s to build %s", resident.toStringWithLocation(), builds.get(coord)));
             builds.remove(coord);
             continue;
           }
@@ -535,7 +535,7 @@ public class WallyAI extends ModularAI
         }
         else
         {
-          ai.log(String.format("WARNING: Trying to build unavailable unit %s", toBuy));
+          ai.log(String.format("    Trying to build %s, but it's unavailable at %s", toBuy, coord));
           continue;
         }
       }
