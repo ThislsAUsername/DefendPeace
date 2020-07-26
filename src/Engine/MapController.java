@@ -566,8 +566,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
       myView.animate(turnEvents);
       changeInputMode(InputMode.ANIMATION);
     }
-
-    myView.animate(null);
+    else
+    {
+      myView.animate(null);
+    }
   }
 
   public Unit getContemplatedActor()
