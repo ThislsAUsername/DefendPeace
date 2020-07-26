@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.ArrayList;
+import java.util.*;
 
 import CommandingOfficers.Commander;
 import UI.UIUtils;
@@ -17,6 +17,8 @@ public class UnitSpriteSet
   Sprite sprites[] = new Sprite[AnimState.values().length];
 
   public final int ANIM_FRAMES_PER_MARK = 3; 
+  private Set<AnimState> unFlippableStates = new HashSet<AnimState>(
+      Arrays.asList(AnimState.MOVENORTH, AnimState.MOVEEAST, AnimState.MOVESOUTH, AnimState.MOVEWEST));
 
   Sprite turnDone;
   public static enum AnimState
@@ -77,7 +79,10 @@ public class UnitSpriteSet
     for( int action = 0; action < AnimState.values().length; ++action )
     {
       if( null == sprites[action] )
+      {
+        unFlippableStates.remove(AnimState.values()[action]);
         sprites[action] = defaultSprite;
+      }
     }
 
     colorize(UIUtils.defaultMapColors, coColors.paletteColors);
@@ -291,17 +296,8 @@ public class UnitSpriteSet
     }
   }
 
-  public static boolean isStateFlippable(AnimState state)
+  public boolean isStateFlippable(AnimState state)
   {
-    switch(state)
-    {
-      case MOVENORTH:
-      case MOVEEAST:
-      case MOVESOUTH:
-      case MOVEWEST:
-        return false;
-      default:
-        return true;
-    }
+    return !unFlippableStates.contains(state);
   }
 }
