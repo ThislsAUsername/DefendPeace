@@ -389,16 +389,23 @@ public class WallyAI extends ModularAI
     @Override
     public GameAction getUnitAction(Unit unit, GameMap gameMap)
     {
-      return findValueAction(myCo, ai, unit, gameMap);
+      boolean mustMove = false;
+      boolean avoidProduction = false;
+      return findValueAction(myCo, ai, unit, gameMap, mustMove, avoidProduction);
     }
 
-    public static GameAction findValueAction(Commander co, WallyAI ai, Unit unit, GameMap gameMap)
+    public static GameAction findValueAction( Commander co, WallyAI ai,
+                                              Unit unit, GameMap gameMap,
+                                              boolean mustMove, boolean avoidProduction )
     {
       XYCoord position = new XYCoord(unit.x, unit.y);
       Location unitLoc = gameMap.getLocation(position);
 
       boolean includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
       ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces);
+      if( mustMove )
+        destinations.remove(new XYCoord(unit.x, unit.y));
+      destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, co, destinations, !avoidProduction));
       // sort by furthest away, good for capturing
       Utils.sortLocationsByDistance(position, destinations);
       Collections.reverse(destinations);
@@ -670,7 +677,8 @@ public class WallyAI extends ModularAI
     }
     evictionStack.add(unit);
 
-    GameAction result = FreeRealEstate.findValueAction(myCo, this, unit, gameMap);
+    boolean mustMove = true;
+    GameAction result = FreeRealEstate.findValueAction(myCo, this, unit, gameMap, mustMove, avoidProduction);
     if( null == result )
     {
       boolean ignoreSafety = true;
