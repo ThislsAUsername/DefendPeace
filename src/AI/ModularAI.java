@@ -92,7 +92,7 @@ public abstract class ModularAI implements AIController
       if( null != nextAction )
         break;
     }
-    log(String.format("  Action: %s", nextAction));
+    log(String.format("Action: %s", nextAction));
     return nextAction;
   }
 

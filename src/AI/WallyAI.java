@@ -269,25 +269,25 @@ public class WallyAI extends ModularAI
                 neededAttacks.put(xyc, null);
             }
             damage = ai.findAssaultKills(gameMap, unitQueue, neededAttacks, target, damage);
-            if( damage >= target.getHP() )
+            if( damage >= target.getHP() && neededAttacks.size() > 1 )
             {
-              if( neededAttacks.size() > 1 )
+              ai.log(String.format("Found %s-Hit KO dealing %s HP to %s, who has %s", neededAttacks.size(), (int)damage, target.toStringWithLocation(), target.getHP()));
+              for( XYCoord space : neededAttacks.keySet() )
               {
-                for( XYCoord space : neededAttacks.keySet() )
+                Unit attacker = neededAttacks.get(space);
+                if( null == attacker )
+                  continue;
+                double thisShot = CombatEngine.simulateBattleResults(attacker, target, gameMap, space.xCoord, space.yCoord).defenderHPLoss;
+                ai.log(String.format("  Can I prune %s (dealing %s)?", attacker.toStringWithLocation(), thisShot));
+                if( target.getHP() <= damage - thisShot )
                 {
-                  if( null == neededAttacks.get(space) )
-                    continue;
-                  double thisShot = CombatEngine.simulateBattleResults(neededAttacks.get(space), target, gameMap, space.xCoord, space.yCoord).defenderHPLoss;
-                  if( target.getHP() <= damage - thisShot )
-                  {
-                    neededAttacks.put(space, null);
-                    damage -= thisShot;
-                  }
+                  neededAttacks.put(space, null);
+                  damage -= thisShot;
+                  ai.log(String.format("    Yes! Total damage is now %s", damage));
                 }
-                ai.log(String.format("  Gonna try to kill %s, who has %s HP", target.toStringWithLocation(), target.getHP()));
-                targetLoc = new XYCoord(target.x, target.y);
-                return nextAttack(gameMap);
               }
+              targetLoc = new XYCoord(target.x, target.y);
+              return nextAttack(gameMap);
             }
             else
             {
@@ -414,12 +414,8 @@ public class WallyAI extends ModularAI
         {
           boolean spaceFree = gameMap.isLocationEmpty(unit, moveCoord);
           Unit resident = gameMap.getLocation(moveCoord).getResident();
-          if( !spaceFree )
-          {
-            if( unit.CO != resident.CO || resident.isTurnOver )
-              continue;
-            // ai.log(String.format("  Evicting %s if I need to", resident.toStringWithLocation()));
-          }
+          if( !spaceFree && (unit.CO != resident.CO || resident.isTurnOver) )
+            continue;
 
           // See if we can bag enough damage to be worth sacrificing the unit
           if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
@@ -486,6 +482,7 @@ public class WallyAI extends ModularAI
     @Override
     public GameAction getUnitAction(Unit unit, GameMap gameMap)
     {
+      ai.log(String.format("Evaluating travel for %s.", unit.toStringWithLocation()));
       boolean avoidProduction = false;
       return ai.findTravelAction(gameMap, ai.allThreats, ai.threatMap, unit, false, avoidProduction);
     }
@@ -513,6 +510,7 @@ public class WallyAI extends ModularAI
 
       for( XYCoord coord : new ArrayList<XYCoord>(builds.keySet()) )
       {
+        ai.log(String.format("Attempting to build %s at %s", builds.get(coord), coord));
         Unit resident = gameMap.getResident(coord);
         if( null != resident )
         {
@@ -521,7 +519,7 @@ public class WallyAI extends ModularAI
             return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, null, resident, avoidProduction);
           else
           {
-            ai.log(String.format("    Can't evict unit %s to build %s", resident.toStringWithLocation(), builds.get(coord)));
+            ai.log(String.format("  Can't evict unit %s to build %s", resident.toStringWithLocation(), builds.get(coord)));
             builds.remove(coord);
             continue;
           }
@@ -535,7 +533,7 @@ public class WallyAI extends ModularAI
         }
         else
         {
-          ai.log(String.format("    Trying to build %s, but it's unavailable at %s", toBuy, coord));
+          ai.log(String.format("  Trying to build %s, but it's unavailable at %s", toBuy, coord));
           continue;
         }
       }
@@ -565,7 +563,7 @@ public class WallyAI extends ModularAI
 
       if( shouldResupply )
       {
-        log(String.format("%s needs supplies.", unit.toStringWithLocation()));
+        log(String.format("  %s needs supplies.", unit.toStringWithLocation()));
         goals.addAll(stations);
       }
       if( avoidProduction )
@@ -653,28 +651,35 @@ public class WallyAI extends ModularAI
                         Unit evicter, Unit unit,
                         boolean avoidProduction )
   {
-    log(String.format("  Evicting %s", unit.toStringWithLocation()));
     boolean isBase = false;
     if( null == evictionStack )
     {
       evictionStack = new HashSet<Unit>();
       isBase = true;
     }
+    String spacing = "";
+    for( int i = 0; i < evictionStack.size(); ++i ) spacing += "  ";
+    log(String.format("%sAttempting to evict %s", spacing, unit.toStringWithLocation()));
     if( evicter != null )
       evictionStack.add(evicter);
 
     if( evictionStack.contains(unit) )
+    {
+      log(String.format("%s  Eviction cycle! Bailing.", spacing));
       return null;
+    }
     evictionStack.add(unit);
 
     GameAction result = FreeRealEstate.findValueAction(myCo, this, unit, gameMap);
-    if( null != result ) return result;
-
-    boolean ignoreSafety = true;
-    result = findTravelAction(gameMap, allThreats, threatMap, unit, ignoreSafety, avoidProduction);
+    if( null == result )
+    {
+      boolean ignoreSafety = true;
+      result = findTravelAction(gameMap, allThreats, threatMap, unit, ignoreSafety, avoidProduction);
+    }
 
     if( isBase )
       evictionStack = null;
+    log(String.format("%s  Eviction of %s success? %s", spacing, unit.toStringWithLocation(), null != result));
     return result;
   }
 
@@ -697,7 +702,6 @@ public class WallyAI extends ModularAI
 
     // TODO: Jump in a transport, if available, or join?
 
-    log(String.format("  Evaluating travel for %s. Forced?: %s", unit.toStringWithLocation(), ignoreSafety));
     XYCoord goal = null;
     Path path = null;
     ArrayList<XYCoord> validTargets = findTravelDestinations(gameMap, allThreats, threatMap, unit, avoidProduction);
@@ -710,26 +714,23 @@ public class WallyAI extends ModularAI
         goal = target;
         break;
       }
-//        log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal,
-//            (validTarget ? "Yes" : "No")));
     }
 
     if( null == goal ) return null;
-
-    log(String.format("    Selected %s at %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal));
 
     // Choose the point on the path just out of our range as our 'goal', and try to move there.
     // This will allow us to navigate around large obstacles that require us to move away
     // from our intended long-term goal.
     path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
-    goal = path.getEndCoord(); // Set the last location as our goal.
-
-//        log(String.format("    Intermediate waypoint: %s", goal));
+    XYCoord pathPoint = path.getEndCoord(); // Set the last location as our goal.
 
     // Sort my currently-reachable move locations by distance from the goal,
     // and build a GameAction to move to the closest one.
-    Utils.sortLocationsByDistance(goal, destinations);
-    log(String.format("    %s would like to travel towards %s. Safely?: %s", unit.toStringWithLocation(), goal, !ignoreSafety));
+    Utils.sortLocationsByDistance(pathPoint, destinations);
+    log(String.format("  %s is traveling toward %s at %s via %s  Forced?: %s",
+                          unit.toStringWithLocation(),
+                          gameMap.getLocation(goal).getEnvironment().terrainType, goal,
+                          pathPoint, ignoreSafety));
     for( XYCoord xyc : destinations )
     {
       log(String.format("    is it safe to go to %s?", xyc));
@@ -866,19 +867,19 @@ public class WallyAI extends ModularAI
           if( thisDamage > target.getPreciseHP() )
             continue; // OHKOs should be decided using different logic
 
-          log(String.format("  Use %s to deal %sHP?", unit.toStringWithLocation(), thisDamage));
+//          log(String.format("  Use %s to deal %sHP?", unit.toStringWithLocation(), thisDamage));
           thisDamage = findAssaultKills(gameMap, unitQueue, neededAttacks, target, thisDamage);
 
           // Base case, stop iterating.
           if( thisDamage >= target.getPreciseHP() )
           {
-            log(String.format("    Yes, shoot %s", target.toStringWithLocation()));
+//            log(String.format("    Yes, shoot %s", target.toStringWithLocation()));
             damage = thisDamage;
             break;
           }
           else
           {
-            log(String.format("    Nope"));
+//            log(String.format("    Nope"));
             neededAttacks.put(xyc, null);
           }
         }
@@ -1044,36 +1045,21 @@ public class WallyAI extends ModularAI
         if( !idealCounter.weapons.isEmpty() )
         {
           log(String.format("  buy %s?", idealCounter));
-
-          // Figure out how many of idealCounter we want, and how many we can actually build.
-          int numberToBuy = 2;
-          log(String.format("    Would like to build %s of them", numberToBuy));
-          int maxBuildable = CPI.getNumFacilitiesFor(idealCounter);
-          log(String.format("    Facilities available: %s", maxBuildable));
-          if( numberToBuy > maxBuildable )
-            numberToBuy = maxBuildable; // This is the number we have production for right now.
-          int totalCost = numberToBuy * idealCounter.getCost();
+          int totalCost = idealCounter.getCost();
 
           // Calculate a cost buffer to ensure we have enough money left so that no factories sit idle.
           int costBuffer = (CPI.getNumFacilitiesFor(infModel) - 1) * infModel.getCost(); // The -1 assumes we will build this unit from a factory. Possibly untrue.
           if( 0 > costBuffer )
             costBuffer = 0; // No granting ourselves extra moolah.
-          while (totalCost > (budget - costBuffer)) // This finds how many we can afford.
-          {
-            totalCost -= idealCounter.getCost();
-            numberToBuy--;
-          }
-          if( numberToBuy > 0 )
+          if(totalCost <= (budget - costBuffer))
           {
             // Go place orders.
-            log(String.format("    I can build %s %s, for a cost of %s", numberToBuy, idealCounter, totalCost));
-            for( int i = 0; i < numberToBuy; ++i )
-            {
-              XYCoord coord = getLocationToBuild(CPI, idealCounter);
-              builds.put(coord, idealCounter);
-              budget -= idealCounter.getCost();
-              CPI.removeBuildLocation(gameMap.getLocation(coord));
-            }
+            log(String.format("    I can build %s for a cost of %s (%s remaining, witholding %s)",
+                                    idealCounter, totalCost, budget, costBuffer));
+            XYCoord coord = getLocationToBuild(CPI, idealCounter);
+            builds.put(coord, idealCounter);
+            budget -= idealCounter.getCost();
+            CPI.removeBuildLocation(gameMap.getLocation(coord));
             // We found a counter for this enemy UnitModel; break and go to the next type.
             // This break means we will build at most one type of unit per turn to counter each enemy type.
             break;
@@ -1095,6 +1081,7 @@ public class WallyAI extends ModularAI
       builds.put(coord, infModel);
       budget -= infModel.getCost();
       CPI.removeBuildLocation(gameMap.getLocation(coord));
+      log(String.format("  At %s (%s remaining)", coord, budget));
     }
 
     return builds;
