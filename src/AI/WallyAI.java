@@ -246,7 +246,6 @@ public class WallyAI extends ModularAI
             // log(String.format("  Would like to kill: %s", target.toStringWithLocation()));
             ArrayList<XYCoord> coordsToCheck = Utils.findLocationsInRange(gameMap, new XYCoord(target.x, target.y), 1, AIUtils.findMaxStrikeWeaponRange(myCo));
             neededAttacks = new HashMap<XYCoord, Unit>();
-            double damage = 0;
 
             // Figure out where we can attack from, and include attackers already in range by default.
             for( XYCoord xyc : coordsToCheck )
@@ -254,34 +253,32 @@ public class WallyAI extends ModularAI
               Location loc = gameMap.getLocation(xyc);
               Unit resident = loc.getResident();
 
-              // Units who can attack from their current position volunteer themselves. Probably not smart sometimes, but oh well.
               if( null != resident && resident.CO == myCo && !resident.isTurnOver
                   && resident.canAttack(target.model, xyc.getDistance(target.x, target.y), false) )
-              {
-                damage += CombatEngine.simulateBattleResults(resident, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
-                neededAttacks.put(xyc, resident);
-                if( damage >= target.getHP() )
-                  break;
-              }
+                neededAttacks.put(xyc, null);
               // Check that we could potentially move into this space. Also we're scared of fog
               else if( (null == resident) && !AIUtils.isFriendlyProduction(gameMap, myCo, xyc)
                   && !gameMap.isLocationFogged(xyc) )
                 neededAttacks.put(xyc, null);
             }
-            damage = ai.findAssaultKills(gameMap, unitQueue, neededAttacks, target, damage);
+            double damage = ai.findAssaultKills(gameMap, unitQueue, neededAttacks, target, 0);
             if( damage >= target.getHP() && neededAttacks.size() > 1 )
             {
               ai.log(String.format("Found %s-Hit KO dealing %s HP to %s, who has %s", neededAttacks.size(), (int)damage, target.toStringWithLocation(), target.getHP()));
-              for( XYCoord space : neededAttacks.keySet() )
+              // Prune excess attacks and empty attacking spaces
+              for( XYCoord space : new ArrayList<XYCoord>(neededAttacks.keySet()) )
               {
                 Unit attacker = neededAttacks.get(space);
                 if( null == attacker )
+                {
+                  neededAttacks.remove(space);
                   continue;
+                }
                 double thisShot = CombatEngine.simulateBattleResults(attacker, target, gameMap, space.xCoord, space.yCoord).defenderHPLoss;
                 ai.log(String.format("  Can I prune %s (dealing %s)?", attacker.toStringWithLocation(), thisShot));
                 if( target.getHP() <= damage - thisShot )
                 {
-                  neededAttacks.put(space, null);
+                  neededAttacks.remove(space);
                   damage -= thisShot;
                   ai.log(String.format("    Yes! Total damage is now %s", damage));
                 }
@@ -316,12 +313,22 @@ public class WallyAI extends ModularAI
       for( XYCoord xyc : neededAttacks.keySet() )
       {
         Unit unit = neededAttacks.get(xyc);
-        if( null == unit || unit.isTurnOver )
+        if( unit.isTurnOver || !gameMap.isLocationEmpty(unit, xyc) )
           continue;
 
         damageSum += CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
         ai.log(String.format("    %s brings the damage total to %s", unit.toStringWithLocation(), damageSum));
         return new BattleLifecycle.BattleAction(gameMap, unit, Utils.findShortestPath(unit, xyc, gameMap), target.x, target.y);
+      }
+      // If we're here, we're either done or we need to clear out friendly blockers
+      for( XYCoord xyc : neededAttacks.keySet() )
+      {
+        Unit resident = gameMap.getResident(xyc);
+        if( resident.isTurnOver || resident.CO != myCo )
+          continue;
+
+        boolean ignoreSafety = true, avoidProduction = true;;
+        return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, neededAttacks.get(xyc), resident, ignoreSafety, avoidProduction);
       }
       ai.log(String.format("    NHitKO ran out of attacks to do"));
       reset();
