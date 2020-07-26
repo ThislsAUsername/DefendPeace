@@ -334,7 +334,7 @@ public class SpriteUIUtils
    */
   public static BufferedImage getNumberAsImage(int num)
   {
-    Sprite nums = SpriteLibrary.getMapUnitHPSprites();
+    Sprite nums = SpriteLibrary.getMapUnitNumberSprites();
     int numWidth = nums.getFrame(0).getWidth();
     int numHeight = nums.getFrame(0).getHeight();
 

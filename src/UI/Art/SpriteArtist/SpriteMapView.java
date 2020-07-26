@@ -75,8 +75,8 @@ public class SpriteMapView extends MapView
         SpriteLibrary.baseSpriteSize * game.gameMap.mapWidth,
         SpriteLibrary.baseSpriteSize * game.gameMap.mapHeight);
 
-    mapArtist = new MapArtist(game, this);
-    unitArtist = new UnitArtist(game, this);
+    mapArtist = new MapArtist(game);
+    unitArtist = new UnitArtist(game);
     menuArtist = new MenuArtist(game, this);
 
     myGame = game;
@@ -112,12 +112,6 @@ public class SpriteMapView extends MapView
     SpriteOptions.setScreenDimensions(width, height);
 
     dimensionsChanged = true; // Let render() know that the window was resized.
-  }
-
-  @Override
-  public int getTileSize()
-  {
-    return SpriteLibrary.baseSpriteSize;
   }
 
   @Override
@@ -233,10 +227,6 @@ public class SpriteMapView extends MapView
       mapArtist.drawMovePath(mapGraphics, mapController.getContemplatedMove());
     }
 
-    if( null != currentActor )
-      for( DamagePopup popup : mapController.getDamagePopups() )
-        drawDamagePreview(mapGraphics, popup);
-
     if( currentAnimation != null )
     {
       // Animate until it tells you it's done.
@@ -253,9 +243,13 @@ public class SpriteMapView extends MapView
       }
     }
 
+    // Keep track of whether we want to draw tile info.
+    boolean hudVisible = false;
+
     // Draw the cursor/our menu if we aren't animating events
     if( currentAnimation == null || !notifyOnAnimEnd )
     {
+      hudVisible = true; // Only draw tile details when not animating.
       if( getCurrentGameMenu() == null )
       {
         mapArtist.drawCursor(mapGraphics, currentActor, isTargeting, myGame.getCursorX(), myGame.getCursorY());
@@ -265,6 +259,10 @@ public class SpriteMapView extends MapView
         menuArtist.drawMenu(mapGraphics, mapViewDrawX.geti(), mapViewDrawY.geti());
       }
     }
+
+    if( null != currentActor )
+      for( DamagePopup popup : mapController.getDamagePopups() )
+        drawDamagePreview(mapGraphics, popup);
 
     // When we draw the map, we want to center it if it's smaller than the view dimensions
     int deltaX = 0, deltaY = 0;
@@ -287,7 +285,7 @@ public class SpriteMapView extends MapView
                                        drawX,  drawY,  (drawX  + drawWidth), (drawY  + drawHeight), null);
 
     // Draw the Commander overlay with available funds.
-    drawCommanderOverlay(screenGraphics);
+    if(hudVisible) drawHUD(screenGraphics);
 
     // Copy the screen image into the window's graphics buffer.
     g.drawImage(screenImage, 0, 0, screenImage.getWidth()*drawScale, screenImage.getHeight()*drawScale, null);
@@ -354,20 +352,20 @@ public class SpriteMapView extends MapView
   @Override // from MapView
   public GameAnimation buildBattleAnimation(BattleSummary summary)
   {
-    return new NobunagaBattleAnimation(getTileSize(), summary.attacker, summary.attacker.x, summary.attacker.y, summary.defender.x,
+    return new NobunagaBattleAnimation(SpriteLibrary.baseSpriteSize, summary.attacker, summary.attacker.x, summary.attacker.y, summary.defender.x,
         summary.defender.y);
   }
 
   @Override // from MapView
   public GameAnimation buildDemolitionAnimation( StrikeParams params, XYCoord target, int damage )
   {
-    return new NobunagaBattleAnimation(getTileSize(), params.attacker.body, params.attacker.x, params.attacker.y, target.xCoord, target.yCoord);
+    return new NobunagaBattleAnimation(SpriteLibrary.baseSpriteSize, params.attacker.body, params.attacker.x, params.attacker.y, target.xCoord, target.yCoord);
   }
 
   @Override // from MapView
   public GameAnimation buildMoveAnimation(Unit unit, Path movePath)
   {
-    return new MoveAnimation(getTileSize(), unit, movePath);
+    return new MoveAnimation(SpriteLibrary.baseSpriteSize, unit, movePath);
   }
 
   @Override // from MapView
@@ -377,13 +375,13 @@ public class SpriteMapView extends MapView
     if( animStyle == AnimationStyle.BLINK )
       return null; // TODO: Should AirDropAnimation just be TeleportAnimation and take in the animation style?
     else
-      return new AirDropAnimation(getTileSize(), unit, start, end);
+      return new AirDropAnimation(SpriteLibrary.baseSpriteSize, unit, start, end);
   }
 
   @Override // from MapView
   public GameAnimation buildResupplyAnimation(Unit supplier, Unit unit)
   {
-    return new ResupplyAnimation(getTileSize(), supplier, unit.x, unit.y);
+    return new ResupplyAnimation(SpriteLibrary.baseSpriteSize, supplier, unit.x, unit.y);
   }
 
   /**
@@ -495,7 +493,7 @@ public class SpriteMapView extends MapView
    * Draws the commander overlay, with the commander name and available funds.
    * @param g
    */
-  private void drawCommanderOverlay(Graphics g)
+  private void drawHUD(Graphics g)
   {
     // Choose the CO overlay location based on the cursor location on the screen.
     if( !overlayIsLeft && (myGame.getCursorX() - mapViewDrawX.get()) > (mapTilesToDrawX - 1) * 3 / 5 )
@@ -508,6 +506,7 @@ public class SpriteMapView extends MapView
     }
 
     CommanderOverlayArtist.drawCommanderOverlay(g, myGame.activeCO, overlayIsLeft);
+    MapTileDetailsArtist.drawTileDetails(g, myGame.activeCO.myView, myGame.getCursorCoord(), overlayIsLeft);
   }
 
   /**

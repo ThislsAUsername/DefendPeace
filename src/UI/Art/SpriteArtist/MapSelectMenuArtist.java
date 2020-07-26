@@ -122,17 +122,13 @@ public class MapSelectMenuArtist
 
     // Draw the mini-map representation of the highlighted map.
     selectedMapInfo = mapInfos.get(highlightedOption);
-    BufferedImage miniMap = MiniMapArtist.getMapImage( selectedMapInfo );
+    BufferedImage miniMap = MiniMapArtist.getMapImage(selectedMapInfo, drawScale*maxMiniMapWidth, drawScale*maxMiniMapHeight);
 
     // Figure out how large to draw the minimap. We want to make it as large as possible, but still
     //   fit inside the available space (with a minimum scale factor of 1).
-    int mmWScale = maxMiniMapWidth / miniMap.getWidth();
-    int mmHScale = maxMiniMapHeight / miniMap.getHeight();
+    int mmWScale = drawScale*maxMiniMapWidth / miniMap.getWidth();
+    int mmHScale = drawScale*maxMiniMapHeight / miniMap.getHeight();
     int mmScale = (mmWScale > mmHScale)? mmHScale : mmWScale;
-    if( mmScale > 10 ) mmScale = 10;
-
-    // Draw the mini map.
-    SpriteUIUtils.drawImageCenteredOnPoint(menuGraphics, miniMap, miniMapCenterX, miniMapCenterY, mmScale);
 
     /////////////// Map Information ///////////////////////
     int buffer = 3;
@@ -170,6 +166,9 @@ public class MapSelectMenuArtist
 
     // Draw to the window at scale.
     g.drawImage(menuImage, 0, 0, menuImage.getWidth()*drawScale, menuImage.getHeight()*drawScale, null);
+
+    // Draw the mini map on top.
+    SpriteUIUtils.drawImageCenteredOnPoint(g, miniMap, drawScale*miniMapCenterX, drawScale*miniMapCenterY, mmScale);
   }
 
   /**
@@ -203,7 +202,7 @@ public class MapSelectMenuArtist
     }
 
     // Get the number images, and grab the dimensions
-    Sprite nums = SpriteLibrary.getMapUnitHPSprites();
+    Sprite nums = SpriteLibrary.getMapUnitNumberSprites();
     int numWidth = nums.getFrame(0).getWidth();
     int numHeight = nums.getFrame(0).getHeight();
 

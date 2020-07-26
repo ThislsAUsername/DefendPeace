@@ -6,7 +6,7 @@ import Engine.Path;
 import Engine.XYCoord;
 import Units.Unit;
 
-public abstract class GameMap implements Serializable
+public abstract class GameMap implements Serializable, IEnvironsProvider
 {
   private static final long serialVersionUID = 1L;
   public final int mapWidth;

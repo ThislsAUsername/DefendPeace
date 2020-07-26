@@ -125,7 +125,7 @@ public class UnitSpriteSet
 
     // Try the faction's proper name, the one it's based off of, then default to "Thorn" if all else fails.
     String[] namesToTry = {faction.name, faction.basis};
-    String template = String.format( format, "Thorn", UnitModel.standardizeID(unitType), "" ); // Replace if we can.
+    String template = String.format( format, SpriteLibrary.DEFAULT_FACTION, UnitModel.standardizeID(unitType), "" ); // Replace if we can.
     for( String name : namesToTry )
     {
       String idleName = String.format( format, name, UnitModel.standardizeID(unitType), "" );
@@ -144,6 +144,14 @@ public class UnitSpriteSet
     {
       s.colorize(oldColors, newColors);
     }
+  }
+
+  /**
+   * Return the first IDLE sprite image.
+   */
+  public BufferedImage getUnitImage()
+  {
+    return sprites[AnimState.IDLE.ordinal()].getFrame(0);
   }
 
   /**
@@ -203,13 +211,13 @@ public class UnitSpriteSet
       BufferedImage num;
       if( u.getHP() > u.model.maxHP )
       {
-        num = SpriteLibrary.getMapUnitHPSprites().getFrame(1); // Tens place.
+        num = SpriteLibrary.getMapUnitNumberSprites().getFrame(1); // Tens place.
 
         // Ones place shares space with the activity icons below if HP > 10.
-        unitIcons.add( SpriteLibrary.getMapUnitHPSprites().getFrame((u.getHP()-u.model.maxHP)) );
+        unitIcons.add( SpriteLibrary.getMapUnitNumberSprites().getFrame((u.getHP()-u.model.maxHP)) );
       }
       else
-        num = SpriteLibrary.getMapUnitHPSprites().getFrame(u.getHP());
+        num = SpriteLibrary.getMapUnitNumberSprites().getFrame(u.getHP());
       g.drawImage(num, drawX, drawY + ((unitHeight) / 2), num.getWidth(), num.getHeight(), null);
     }
     
@@ -257,15 +265,15 @@ public class UnitSpriteSet
 
     // Transport icon.
     if( u.heldUnits != null && !u.heldUnits.isEmpty() )
-      unitIcons.add(SpriteLibrary.getCargoIcon());
+      unitIcons.add(SpriteLibrary.getCargoIcon(u.CO.myColor));
 
     // Capture icon.
     if( u.getCaptureProgress() > 0 )
-      unitIcons.add(SpriteLibrary.getCaptureIcon());
+      unitIcons.add(SpriteLibrary.getCaptureIcon(u.CO.myColor));
 
     // Hide icon.
     if( u.model.hidden )
-      unitIcons.add(SpriteLibrary.getHideIcon());
+      unitIcons.add(SpriteLibrary.getHideIcon(u.CO.myColor));
 
     // Draw one of the current activity icons in the lower-right.
     if( !unitIcons.isEmpty() )
@@ -277,10 +285,6 @@ public class UnitSpriteSet
       int iconY = drawY + ((unitHeight) / 2);
       int iconW = icon.getWidth();
       int iconH = icon.getHeight();
-
-      // Draw team-color background for the icon.
-      g.setColor( u.CO.myColor );
-      g.fillRect( iconX, iconY, iconW, iconH);
 
       // Draw the icon
       g.drawImage( icon, iconX, iconY, iconW, iconH, null );

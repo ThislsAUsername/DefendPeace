@@ -15,6 +15,7 @@ import CommandingOfficers.Commander;
 import Terrain.Location;
 import Terrain.TerrainType;
 import UI.UIUtils;
+import UI.UIUtils.COSpriteSpec;
 import UI.UIUtils.Faction;
 import Units.Unit;
 import Units.UnitModel;
@@ -28,6 +29,7 @@ public class SpriteLibrary
   public static final int baseSpriteSize = 16;
 
   public static final String charKey = "%./-~,;:!?'&()";
+  public static final String DEFAULT_FACTION = "Thorn";
 
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
   private static HashMap<UnitSpriteSetKey, UnitSpriteSet> mapUnitSpriteSetMap = new HashMap<UnitSpriteSetKey, UnitSpriteSet>();
@@ -37,19 +39,21 @@ public class SpriteLibrary
   private static Sprite moveCursorArrowSprite = null;
 
   // Numbers and letters to overlay on map units.
-  private static Sprite mapUnitHPSprites = null;
+  private static Sprite mapUnitNumberSprites = null;
   private static Sprite mapUnitLetterSprites = null;
   private static Map<Color,Map<Character,BufferedImage>> mapUnitTextSprites = null;
 
-  // Unit icons for various conditions.
+  // Icons for various attributes.
+  private static BufferedImage mapHeartIcon = null;
+  private static BufferedImage mapShieldIcon = null;
   private static BufferedImage mapUnitStunIcon = null;
   private static BufferedImage mapUnitFuelIcon = null;
   private static BufferedImage mapUnitAmmoIcon = null;
 
   // Unit icons for various activities.
-  private static BufferedImage mapUnitCargoIcon = null;
-  private static BufferedImage mapUnitCaptureIcon = null;
-  private static BufferedImage mapUnitHideIcon = null;
+  private static HashMap<Color, BufferedImage> mapUnitCargoIcons = new HashMap<Color, BufferedImage>();
+  private static HashMap<Color, BufferedImage> mapUnitCaptureIcons = new HashMap<Color, BufferedImage>();
+  private static HashMap<Color, BufferedImage> mapUnitHideIcons = new HashMap<Color, BufferedImage>();
 
   // Letters for writing in menus.
   private static Sprite letterSpritesUppercase = null;
@@ -124,7 +128,22 @@ public class SpriteLibrary
    */
   public static TerrainSpriteSet getTerrainSpriteSet(Location loc)
   {
-    SpriteSetKey spriteKey = SpriteSetKey.instance(loc.getEnvironment().terrainType, loc.getOwner());
+    SpriteSetKey spriteKey = SpriteSetKey.instance(loc.getEnvironment().terrainType, COSpriteSpec.instance(loc.getOwner()));
+    if( !spriteSetMap.containsKey(spriteKey) )
+    {
+      // Don't have it? Create it.
+      createTerrainSpriteSet(spriteKey);
+    }
+    // Now we must have an entry for that terrain type.
+    return spriteSetMap.get(spriteKey);
+  }
+
+  /**
+   * Retrieve (loading if needed) the sprites associated with the given terrain type and faction/color
+   */
+  public static TerrainSpriteSet getTerrainSpriteSet(TerrainType terrain, COSpriteSpec spec)
+  {
+    SpriteSetKey spriteKey = SpriteSetKey.instance(terrain, spec);
     if( !spriteSetMap.containsKey(spriteKey) )
     {
       // Don't have it? Create it.
@@ -203,7 +222,7 @@ public class SpriteLibrary
     // If this tile is owned by someone, fly their colors.
     if( spriteKey.commanderKey != null )
     {
-      ss.setTeamColor(spriteKey.commanderKey.myColor);
+      ss.setTeamColor(spriteKey.commanderKey.color);
     }
     spriteSetMap.put(spriteKey, ss);
   }
@@ -231,21 +250,22 @@ public class SpriteLibrary
   private static class SpriteSetKey
   {
     public final TerrainType terrainKey;
-    public final Commander commanderKey;
+    public final COSpriteSpec commanderKey;
     private static ArrayList<SpriteSetKey> instances = new ArrayList<SpriteSetKey>();
 
-    private SpriteSetKey(TerrainType terrain, Commander co)
+    private SpriteSetKey(TerrainType terrain, COSpriteSpec spec)
     {
       terrainKey = terrain;
-      commanderKey = co;
+      commanderKey = spec;
     }
 
-    public static SpriteSetKey instance(TerrainType terrain, Commander co)
+    public static SpriteSetKey instance(TerrainType terrain, COSpriteSpec spec)
     {
       SpriteSetKey key = null;
       for( int i = 0; i < instances.size(); ++i )
       {
-        if( instances.get(i).terrainKey == terrain && instances.get(i).commanderKey == co )
+        if( instances.get(i).terrainKey == terrain &&
+            (COSpriteSpec.support(instances.get(i).commanderKey, spec)) )
         {
           key = instances.get(i);
           break;
@@ -253,7 +273,7 @@ public class SpriteLibrary
       }
       if( key == null )
       {
-        key = new SpriteSetKey(terrain, co);
+        key = new SpriteSetKey(terrain, spec);
         instances.add(key);
       }
       return key;
@@ -267,15 +287,13 @@ public class SpriteLibrary
   private static class UnitSpriteSetKey
   {
     public final String unitTypeKey;
-    public final Faction factionKey;
-    public final Color colorKey;
+    public final COSpriteSpec spriteSpec;
     private static ArrayList<UnitSpriteSetKey> instances = new ArrayList<UnitSpriteSetKey>();
 
     private UnitSpriteSetKey(String unitType, Faction faction, Color color)
     {
       unitTypeKey = unitType;
-      factionKey = faction;
-      colorKey = color;
+      spriteSpec = new COSpriteSpec(faction, color);
     }
 
     public static UnitSpriteSetKey instance(String unitType, Faction faction, Color color)
@@ -284,7 +302,7 @@ public class SpriteLibrary
       String stdType = UnitModel.standardizeID(unitType);
       for( int i = 0; i < instances.size(); ++i )
       {
-        if( instances.get(i).unitTypeKey.equals(stdType) && instances.get(i).factionKey == faction && instances.get(i).colorKey == color)
+        if( instances.get(i).unitTypeKey.equals(stdType) && instances.get(i).spriteSpec.supports(faction, color) )
         {
           key = instances.get(i);
           break;
@@ -318,17 +336,17 @@ public class SpriteLibrary
 
   private static void createMapUnitSpriteSet(UnitSpriteSetKey key)
   {
-    UnitSpriteSet spriteSet = new UnitSpriteSet( key.unitTypeKey, key.factionKey, UIUtils.getMapUnitColors(key.colorKey) );
+    UnitSpriteSet spriteSet = new UnitSpriteSet( key.unitTypeKey, key.spriteSpec.faction, UIUtils.getMapUnitColors(key.spriteSpec.color) );
     mapUnitSpriteSetMap.put(key, spriteSet);
   }
 
-  public static Sprite getMapUnitHPSprites()
+  public static Sprite getMapUnitNumberSprites()
   {
-    if( null == mapUnitHPSprites )
+    if( null == mapUnitNumberSprites )
     {
-      mapUnitHPSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/unit/icon/hp.png"), 8, 8);
+      mapUnitNumberSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/unit/icon/numbers.png"), 8, 8);
     }
-    return mapUnitHPSprites;
+    return mapUnitNumberSprites;
   }
 
   public static Sprite getMapUnitLetterSprites()
@@ -361,7 +379,7 @@ public class SpriteLibrary
       }
       
       // Do the same for numbers
-      Sprite numbers = new Sprite(getMapUnitHPSprites());
+      Sprite numbers = new Sprite(getMapUnitNumberSprites());
       numbers.colorize(Color.WHITE, color);
       for (char ch = '0'; ch <= '9'; ch++)
       {
@@ -376,15 +394,6 @@ public class SpriteLibrary
     return mapUnitTextSprites.get(color);
   }
 
-  public static BufferedImage getCargoIcon()
-  {
-    if( null == mapUnitCargoIcon )
-    {
-      mapUnitCargoIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/cargo.png");
-    }
-    return mapUnitCargoIcon;
-  }
-
   public static BufferedImage getStunIcon()
   {
     if( null == mapUnitStunIcon )
@@ -392,6 +401,24 @@ public class SpriteLibrary
       mapUnitStunIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/stun.png");
     }
     return mapUnitStunIcon;
+  }
+
+  public static BufferedImage getHeartIcon()
+  {
+    if( null == mapHeartIcon )
+    {
+      mapHeartIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/heart.png");
+    }
+    return mapHeartIcon;
+  }
+
+  public static BufferedImage getShieldIcon()
+  {
+    if( null == mapShieldIcon )
+    {
+      mapShieldIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/shield.png");
+    }
+    return mapShieldIcon;
   }
 
   public static BufferedImage getFuelIcon()
@@ -412,22 +439,34 @@ public class SpriteLibrary
     return mapUnitAmmoIcon;
   }
 
-  public static BufferedImage getCaptureIcon()
+  private static BufferedImage getColoredSprite(HashMap<Color, BufferedImage> map, String filename, Color color)
   {
-    if( null == mapUnitCaptureIcon )
+    if( !map.containsKey(color) )
     {
-      mapUnitCaptureIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/capture.png");
+      BufferedImage icon = SpriteLibrary.loadSpriteSheetFile(filename);
+      BufferedImage bi = SpriteLibrary.createTransparentSprite(icon.getWidth(), icon.getHeight());
+      Graphics g = bi.getGraphics();
+      g.setColor(color);
+      g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
+      g.drawImage(icon, 0, 0, null);
+      map.put(color, bi);
     }
-    return mapUnitCaptureIcon;
+    return map.get(color);
   }
 
-  public static BufferedImage getHideIcon()
+  public static BufferedImage getCargoIcon(Color color)
   {
-    if( null == mapUnitHideIcon )
-    {
-      mapUnitHideIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/hide.png");
-    }
-    return mapUnitHideIcon;
+    return getColoredSprite( mapUnitCargoIcons, "res/unit/icon/cargo.png", color);
+  }
+
+  public static BufferedImage getCaptureIcon(Color color)
+  {
+    return getColoredSprite( mapUnitCaptureIcons, "res/unit/icon/capture.png", color);
+  }
+
+  public static BufferedImage getHideIcon(Color color)
+  {
+    return getColoredSprite( mapUnitHideIcons, "res/unit/icon/hide.png", color);
   }
 
   ///////////////////////////////////////////////////////////////////

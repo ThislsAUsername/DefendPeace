@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import Terrain.Environment.Weathers;
-import Terrain.GameMap;
+import Terrain.IEnvironsProvider;
 import Terrain.TerrainType;
 import UI.UIUtils;
 
@@ -165,6 +165,7 @@ public class TerrainSpriteSet
           xOffset += spriteWidth;
           spriteNum++;
         }
+        yOffset += spriteHeight;
 
         if( spriteNum != 1 && spriteNum != 16 && spriteNum != 20 )
         {
@@ -178,7 +179,7 @@ public class TerrainSpriteSet
         maxSpriteIndex = spriteNum - 1; // However many sprites we found, we won't find more than that on a second horizontal pass.
 
         // If this sprite has more vertical space, pull in alternate versions of the existing terrain tiles.
-        while (yOffset + spriteHeight < spriteSheet.getHeight())
+        while (yOffset + spriteHeight <= spriteSheet.getHeight())
         {
           xOffset = 0;
           spriteNum = 0;
@@ -249,11 +250,17 @@ public class TerrainSpriteSet
     myTerrainNonAffinities.add(otherTerrain);
   }
 
+  /** Provides a way to consistently get the same tile variation for the same location. */
+  public static int getTileVariation(int x, int y)
+  {
+    return (x + 1) * (y) + x;
+  }
+
   /**
    * Draws the terrain at the indicated location, accounting for any defined tile transitions.
    * Does not draw terrain objects (buildings, trees, mountains, etc).
    */
-  public void drawTerrain(Graphics g, GameMap map, int x, int y, boolean drawFog)
+  public void drawTerrain(Graphics g, IEnvironsProvider map, int x, int y, boolean drawFog)
   {
     drawTile(g, map, x, y, drawFog, false);
   }
@@ -262,12 +269,12 @@ public class TerrainSpriteSet
    * Draws any terrain object at the indicated location, accounting for any defined tile transitions.
    * Does not draw the underlying terrain (grass, water, etc).
    */
-  public void drawTerrainObject(Graphics g, GameMap map, int x, int y, boolean drawFog)
+  public void drawTerrainObject(Graphics g, IEnvironsProvider map, int x, int y, boolean drawFog)
   {
     drawTile(g, map, x, y, drawFog, true);
   }
 
-  private void drawTile(Graphics g, GameMap map, int x, int y, boolean drawFog, boolean shouldDrawTerrainObject)
+  private void drawTile(Graphics g, IEnvironsProvider map, int x, int y, boolean drawFog, boolean shouldDrawTerrainObject)
   {
     // Draw the base tile type, if needed. It's needed if we are not the base type, and if we are not drawing
     //   a terrain object. If this object is holding transition tiles, we also don't want to (re)draw the base type.
@@ -288,7 +295,7 @@ public class TerrainSpriteSet
       // Either: we are only drawing terrain objects, and this tile type does represent a terrain object,
       //     or: we are only drawing base terrain, and this tile type represents base terrain.
       int tileSize = SpriteLibrary.baseSpriteSize;
-      int variation = (x + 1) * (y) + x; // Used to vary the specific sprite version drawn at each place in a repeatable way.
+      int variation = getTileVariation(x, y);
 
       // Get the tile we want to draw, based on weather.
       Weathers currentWeather = map.getEnvironment(x, y).weatherType;
@@ -365,7 +372,7 @@ public class TerrainSpriteSet
    * @param assumeSameTileType
    * @return
    */
-  private short getTileImageIndex(GameMap map, int x, int y, boolean assumeSameTileType)
+  private short getTileImageIndex(IEnvironsProvider map, int x, int y, boolean assumeSameTileType)
   {
     // Get the list of CLEAR-weather sprites, as they are guaranteed to define our transitions.
     ArrayList<Sprite> clearSprites = getSpritesByWeather(Weathers.CLEAR);
@@ -422,7 +429,7 @@ public class TerrainSpriteSet
    *   us to draw roads that go off the map, etc, but keep it from looking like there is always land across
    *   the water at the edge of the map due to unwanted cliff-face transitions.
    */
-  private boolean checkTileType(GameMap map, int x, int y, boolean assumeTrue)
+  private boolean checkTileType(IEnvironsProvider map, int x, int y, boolean assumeTrue)
   {
     boolean terrainTypesMatch = false;
 

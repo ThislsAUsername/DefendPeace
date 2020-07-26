@@ -15,31 +15,27 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
 import Terrain.Environment.Weathers;
 import Terrain.GameMap;
-import UI.MapView;
 import Units.Unit;
 
 public class MapArtist
 {
   private GameInstance myGame;
-  private MapView myView;
 
   BufferedImage baseMapImage;
   MapImageUpdater baseMapImageUpdater;
 
-  private int tileSize;
+  private static final int tileSize = SpriteLibrary.baseSpriteSize;
 
   private Color FOG_COLOR;
   private Color HIGHLIGHT_COLOR;
 
   SpriteCursor spriteCursor;
 
-  public MapArtist(GameInstance game, MapView view)
+  public MapArtist(GameInstance game)
   {
     myGame = game;
     GameMap gameMap = myGame.gameMap;
-    myView = view;
 
-    tileSize = myView.getTileSize();
     Commander co0 = game.commanders[0];
     spriteCursor = new SpriteCursor(co0.HQLocation.xCoord * tileSize, co0.HQLocation.yCoord * tileSize, tileSize, tileSize, co0.myColor);
 

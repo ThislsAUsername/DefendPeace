@@ -455,7 +455,7 @@ public abstract class BattleLifecycle
     @Override
     public void sendToListener(GameEventListener listener)
     {
-      // TODO?
+      listener.receiveDemolitionEvent(result.attacker.body, target.getCoordinates());
     }
 
     @Override
