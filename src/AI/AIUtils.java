@@ -517,7 +517,7 @@ public class AIUtils
     {
       Commander owner = gameMap.getLocation(coord).getOwner();
       if( co.isEnemy(owner) )
-        continue;
+        continue; // counts as a null check on owner
       if( ignoreMyOwn && co == owner )
         continue;
       if( owner.unitProductionByTerrain.containsKey(gameMap.getEnvironment(coord).terrainType) )
