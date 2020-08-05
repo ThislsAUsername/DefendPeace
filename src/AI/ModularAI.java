@@ -68,7 +68,7 @@ public abstract class ModularAI implements AIController
     }
 
     GameAction nextAction = null;
-    PriorityQueue<Unit> unitQueue = new PriorityQueue<Unit>(13, unitOrderSetter);
+    PriorityQueue<Unit> unitQueue = new PriorityQueue<Unit>(eligibleUnits.size(), unitOrderSetter);
 
     // Each module gets a shot at the whole unit queue, in order.
     // If no action's found, we're done
