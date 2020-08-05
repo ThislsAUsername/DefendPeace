@@ -160,21 +160,11 @@ public class UnitSpriteSet
   }
 
   /**
-   * Return the subimage of the requested sprite, greying if it cannot move, unless a different CO is active.
+   * Return the requested subimage of the sprite for the indicated unit state.
    */
-  private BufferedImage getUnitImage(AnimState state, int imageIndex)
+  public BufferedImage getUnitImage(AnimState state, int imageIndex)
   {
     return sprites[state.ordinal()].getFrame(imageIndex);
-  }
-
-  /**
-   * Return the frame `imageIndex` of the `action` Sprite in this UnitSpriteSet.
-   */
-  public BufferedImage getUnitImage(int action, int imageIndex)
-  {
-    BufferedImage frame = null;
-    frame = sprites[action].getFrame(imageIndex);
-    return frame;
   }
 
   public void drawUnit(Graphics g, Unit u, AnimState state, int imageIndex, int drawX, int drawY)
