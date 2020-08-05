@@ -1,7 +1,9 @@
 package UI.Art.SpriteArtist;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.*;
@@ -15,6 +17,7 @@ import Units.UnitModel;
 public class UnitSpriteSet
 {
   Sprite sprites[] = new Sprite[AnimState.values().length];
+  Sprite buffMask;
 
   public final int ANIM_FRAMES_PER_MARK = 3; 
   private Set<AnimState> unFlippableStates = new HashSet<AnimState>(
@@ -115,6 +118,9 @@ public class UnitSpriteSet
       }
     }
 
+    // Make a mask that we can draw with varying opacity to indicate buff effects.
+    buffMask = new Sprite(sprites[AnimState.TIRED.ordinal()]);
+    buffMask.convertToMask(new Color(255, 255, 255, 255));
   }
 
   /**
@@ -170,8 +176,10 @@ public class UnitSpriteSet
   public void drawUnit(Graphics g, Unit u, AnimState state, int imageIndex, int drawX, int drawY)
   {
     boolean flipImage = SpriteMapView.shouldFlip(u);
+    boolean drawBuff = AnimState.IDLE == state && !u.CO.getActiveAbilityName().isEmpty();
 
     BufferedImage frame = getUnitImage(state, imageIndex);
+    BufferedImage buffFrame = drawBuff ? buffMask.getFrame(imageIndex) : null;
     int shiftX =(SpriteLibrary.baseSpriteSize - frame.getWidth())/2; // center X
     int shiftY = SpriteLibrary.baseSpriteSize - frame.getHeight(); // bottom-justify Y
 
@@ -179,10 +187,27 @@ public class UnitSpriteSet
     if( flipImage && isStateFlippable(state) )
     {
       g.drawImage(frame, drawX - shiftX + (frame.getWidth()), drawY + shiftY, -frame.getWidth(), frame.getHeight(), null);
+      if( drawBuff )
+      {
+        // Set opacity as a function of time.
+        double opacity = 0.3*Math.sin(System.currentTimeMillis()/250.) + 0.6;
+        ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float)opacity));
+        g.drawImage(buffFrame, drawX - shiftX + (buffFrame.getWidth()),
+            drawY + shiftY, -buffFrame.getWidth(), buffFrame.getHeight(), null);
+        ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+      }
     }
     else
     {
       g.drawImage(frame, drawX + shiftX, drawY + shiftY, frame.getWidth(), frame.getHeight(), null);
+      if( drawBuff )
+      {
+        // Set opacity as a function of time.
+        double opacity = 0.3*Math.sin(System.currentTimeMillis()/250.) + 0.6;
+        ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float)opacity));
+        g.drawImage(buffFrame, drawX + shiftX, drawY + shiftY, buffFrame.getWidth(), buffFrame.getHeight(), null);
+        ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+      }
     }
   }
 
