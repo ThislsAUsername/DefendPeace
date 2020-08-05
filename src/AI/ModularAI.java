@@ -42,18 +42,7 @@ public abstract class ModularAI implements AIController
     logger = new StringBuffer(); // Reset at the start of the turn so the AI's action log stays in memory between turns for review
     ++turnNum;
     // Create a list of every property we don't own, but want to.
-    unownedProperties = new ArrayList<XYCoord>();
-    for( int x = 0; x < gameMap.mapWidth; ++x )
-    {
-      for( int y = 0; y < gameMap.mapHeight; ++y )
-      {
-        XYCoord loc = new XYCoord(x, y);
-        if( gameMap.getLocation(loc).isCaptureable() && myCo.isEnemy(gameMap.getLocation(loc).getOwner()) )
-        {
-          unownedProperties.add(loc);
-        }
-      }
-    }
+    unownedProperties = AIUtils.findNonAlliedProperties(myCo, gameMap);
 
     for( AIModule phase : aiPhases )
     {
