@@ -505,10 +505,55 @@ public class SpriteMapView extends MapView
       overlayIsLeft = false;
     }
 
+    // Draw the Commander's image, current funds, and power level.
     CommanderOverlayArtist.drawCommanderOverlay(g, myGame.activeCO, overlayIsLeft);
 
+    drawTurnCounter(g, overlayIsLeft);
+
+    // Draw terrain defense and unit status.
     if( includeTileDetails )
       MapTileDetailsArtist.drawTileDetails(g, myGame.activeCO.myView, myGame.getCursorCoord(), overlayIsLeft);
+  }
+
+  private int lastTurnNum = -1;
+  private BufferedImage turnNumImage;
+  private void drawTurnCounter(Graphics g, boolean counterIsRight)
+  {
+    // Generate the turn-counter image.
+    int turnNum = myGame.getCurrentTurn();
+    if( lastTurnNum != turnNum )
+    {
+      System.out.println("rebuilding turn image.");
+      lastTurnNum = turnNum;
+      BufferedImage day = SpriteUIUtils.getTextAsImage("Turn ");
+      BufferedImage dayNum = SpriteUIUtils.getBoldTextAsImage(Integer.toString(turnNum));
+      int width = day.getWidth() + dayNum.getWidth();
+      int height = dayNum.getHeight();
+
+      turnNumImage = SpriteLibrary.createTransparentSprite(width, height);
+      Graphics dcg = turnNumImage.getGraphics();
+      dcg.drawImage(day, 0, 0, null);
+      dcg.drawImage(dayNum, turnNumImage.getWidth()-dayNum.getWidth(), 0, null);
+    }
+
+    // Draw the turn counter.
+    int xDraw = (counterIsRight
+        ? (SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale()) - 2 - turnNumImage.getWidth()
+        : 2);
+    int yDraw = 3;
+
+    // Draw a CO-colored background with the counter.
+    int arcW = turnNumImage.getHeight()+4;
+    g.setColor(UIUtils.getMapUnitColors(myGame.activeCO.myColor).paletteColors[4]); // 0 is darker, 5 is lighter.
+    g.fillArc(xDraw - (arcW/2), yDraw-2, arcW, arcW-1, 90, 180);
+    g.fillArc(xDraw + turnNumImage.getWidth()-(arcW/2), yDraw-2, arcW, arcW-1, -90, 180);
+    g.fillRect(xDraw, yDraw-1, turnNumImage.getWidth()+1, turnNumImage.getHeight()+2);
+    g.setColor(Color.BLACK);
+    g.drawArc(xDraw - (arcW/2), yDraw-2, arcW, arcW-1, 90, 180);
+    g.drawArc(xDraw + turnNumImage.getWidth()-(arcW/2), yDraw-2, arcW, arcW-1, -90, 180);
+    g.drawLine(xDraw, yDraw-2, xDraw + turnNumImage.getWidth(), yDraw-2);
+    g.drawLine(xDraw, yDraw+turnNumImage.getHeight()+1, xDraw + turnNumImage.getWidth(), yDraw+turnNumImage.getHeight()+1);
+    g.drawImage(turnNumImage, xDraw, yDraw, null);
   }
 
   /**

@@ -246,6 +246,20 @@ public class SpriteUIUtils
   }
 
   /**
+   * Draws the provided text at the provided location, with the Bold
+   * alphanumeric sprite set used for unit HP.
+   * @param g Graphics object to draw the text.
+   * @param text Text to be drawn.
+   * @param x X-coordinate of the top-left corner of the first letter to be drawn.
+   * @param y Y-coordinate of the top-left corner of the first letter to be drawn.
+   */
+  public static void drawBoldText(Graphics g, String text, int x, int y)
+  {
+    drawText(g, text, x, y, SpriteLibrary.getMapUnitLetterSprites(), SpriteLibrary.getMapUnitLetterSprites(),
+        SpriteLibrary.getMapUnitNumberSprites(), SpriteLibrary.getMapUnitSymbolSprites());
+  }
+
+  /**
    * Draws the provided text at the provided location, using the provided sprite set.
    * @param g Graphics object to draw the text.
    * @param text Text to be drawn as sprited letters.
@@ -317,6 +331,20 @@ public class SpriteUIUtils
       drawTextSmallCaps(textImage.getGraphics(), text, 0, 0);
     else
       drawText(textImage.getGraphics(), text, 0, 0);
+    return textImage;
+  }
+
+  /**
+   * Returns a BufferedImage containing the contents of `text` rendered on one line,
+   *  on a transparent background, with no scaling applied.
+   */
+  public static BufferedImage getBoldTextAsImage(String text)
+  {
+    Sprite letters = SpriteLibrary.getMapUnitLetterSprites();
+    int width = letters.getFrame(0).getWidth() * text.length();
+    int height = letters.getFrame(0).getHeight();
+    BufferedImage textImage = SpriteLibrary.createTransparentSprite(width, height);
+    drawBoldText(textImage.getGraphics(), text, 0, 0);
     return textImage;
   }
 
