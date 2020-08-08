@@ -332,7 +332,7 @@ public class WallyAI extends ModularAI
         if( resident.isTurnOver || resident.CO != myCo )
           continue;
 
-        boolean ignoreSafety = true, avoidProduction = true;;
+        boolean ignoreSafety = true, avoidProduction = true;
         return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, neededAttacks.get(xyc), resident, ignoreSafety, avoidProduction);
       }
       ai.log(String.format("    NHitKO ran out of attacks to do"));
@@ -784,8 +784,10 @@ public class WallyAI extends ModularAI
       Unit resident = gameMap.getLocation(xyc).getResident();
       if( null != resident && unit != resident )
       {
+        boolean evictIgnoreSafety =
+            valueUnit(unit, gameMap.getLocation(xyc), true) >= valueUnit(resident, gameMap.getLocation(xyc), true);
         if( unit.CO == resident.CO && !resident.isTurnOver )
-          action = evictUnit(gameMap, allThreats, threatMap, unit, resident, ignoreSafety);
+          action = evictUnit(gameMap, allThreats, threatMap, unit, resident, evictIgnoreSafety);
         if( null != action ) return action;
         continue;
       }
