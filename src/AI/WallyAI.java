@@ -732,8 +732,6 @@ public class WallyAI extends ModularAI
     // Find the possible destinations.
     boolean ignoreResident = true;
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, ignoreResident);
-    if( mustMove ) // If we *must* travel, make sure we do actually move.
-      destinations.remove(new XYCoord(unit.x, unit.y));
     destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, myCo, destinations, !avoidProduction));
 
     // TODO: Jump in a transport, if available, or join?
@@ -741,6 +739,11 @@ public class WallyAI extends ModularAI
     XYCoord goal = null;
     Path path = null;
     ArrayList<XYCoord> validTargets = findTravelDestinations(gameMap, allThreats, threatMap, unit, avoidProduction);
+    if( mustMove ) // If we *must* travel, make sure we do actually move.
+    {
+      destinations.remove(new XYCoord(unit.x, unit.y));
+      validTargets.remove(new XYCoord(unit.x, unit.y));
+    }
 
     for( XYCoord target : validTargets )
     {
@@ -932,6 +935,7 @@ public class WallyAI extends ModularAI
     if( unit.CO.isEnemy(locale.getOwner()) &&
             unit.model.hasActionType(UnitActionFactory.CAPTURE)
             && locale.isCaptureable() )
+
       value += valueTerrain(unit.CO, locale.getEnvironment().terrainType); // Strongly value units that threaten capture
     if( includeCurrentHealth )
       value *= unit.getHP();
