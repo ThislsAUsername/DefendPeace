@@ -228,8 +228,51 @@ public class SpriteUIUtils
    */
   public static void drawText(Graphics g, String text, int x, int y)
   {
-    Sprite uppercase = SpriteLibrary.getLettersUppercase();
-    Sprite lowercase = SpriteLibrary.getLettersLowercase();
+    drawText(g, text, x, y, SpriteLibrary.getLettersUppercase(), SpriteLibrary.getLettersLowercase(),
+        SpriteLibrary.getNumbers(), SpriteLibrary.getSymbols());
+  }
+
+  /**
+   * Draws the provided text at the provided location, using the small-caps alphanumeric sprite set.
+   * @param g Graphics object to draw the text.
+   * @param text Text to be drawn as sprited letters.
+   * @param x X-coordinate of the top-left corner of the first letter to be drawn.
+   * @param y Y-coordinate of the top-left corner of the first letter to be drawn.
+   */
+  public static void drawTextSmallCaps(Graphics g, String text, int x, int y)
+  {
+    drawText(g, text, x, y, SpriteLibrary.getLettersSmallCaps(), SpriteLibrary.getLettersSmallCaps(),
+        SpriteLibrary.getNumbersSmallCaps(), SpriteLibrary.getSymbolsSmallCaps());
+  }
+
+  /**
+   * Draws the provided text at the provided location, with the Bold
+   * alphanumeric sprite set used for unit HP.
+   * @param g Graphics object to draw the text.
+   * @param text Text to be drawn.
+   * @param x X-coordinate of the top-left corner of the first letter to be drawn.
+   * @param y Y-coordinate of the top-left corner of the first letter to be drawn.
+   */
+  public static void drawBoldText(Graphics g, String text, int x, int y)
+  {
+    drawText(g, text, x, y, SpriteLibrary.getMapUnitLetterSprites(), SpriteLibrary.getMapUnitLetterSprites(),
+        SpriteLibrary.getMapUnitNumberSprites(), SpriteLibrary.getMapUnitSymbolSprites());
+  }
+
+  /**
+   * Draws the provided text at the provided location, using the provided sprite set.
+   * @param g Graphics object to draw the text.
+   * @param text Text to be drawn as sprited letters.
+   * @param x X-coordinate of the top-left corner of the first letter to be drawn.
+   * @param y Y-coordinate of the top-left corner of the first letter to be drawn.
+   * @param uppercase Sprite containing the uppercase letter sprites.
+   * @param lowercase Lowercase letter sprites. Can just be a duplicate of `upperase` if they match.
+   * @param numbers Numeric character sprites.
+   * @param symbols Symbolic character sprites.
+   */
+  public static void drawText(Graphics g, String text, int x, int y,
+      Sprite uppercase, Sprite lowercase, Sprite numbers, Sprite symbols)
+  {
     int menuTextWidth = uppercase.getFrame(0).getWidth();
     int menuTextHeight = uppercase.getFrame(0).getHeight();
   
@@ -252,51 +295,14 @@ public class SpriteUIUtils
       else if( Character.isDigit(thisChar) )
       {
         int letterIndex = thisChar - '0';
-        g.drawImage(SpriteLibrary.getNumbers().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
+        g.drawImage(numbers.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
       }
       else // Assume symbolic
       {
         int symbolIndex = SpriteLibrary.charKey.indexOf(text.charAt(i));
         if( symbolIndex >= 0 )
         {
-          g.drawImage(SpriteLibrary.getSymbols().getFrame(symbolIndex), x, y, menuTextWidth, menuTextHeight, null);
-        }
-      }
-    }
-  }
-
-  /**
-   * Draws the provided text at the provided location, using the small-caps alphanumeric sprite set.
-   * @param g Graphics object to draw the text.
-   * @param text Text to be drawn as sprited letters.
-   * @param x X-coordinate of the top-left corner of the first letter to be drawn.
-   * @param y Y-coordinate of the top-left corner of the first letter to be drawn.
-   */
-  public static void drawTextSmallCaps(Graphics g, String text, int x, int y)
-  {
-    Sprite smallCaps = SpriteLibrary.getLettersSmallCaps();
-    int menuTextWidth = smallCaps.getFrame(0).getWidth();
-    int menuTextHeight = smallCaps.getFrame(0).getHeight();
-    text = text.toUpperCase(); // SmallCaps is all uppercase.
-  
-    for( int i = 0; i < text.length(); ++i, x += menuTextWidth )
-    {
-      if( Character.isAlphabetic(text.charAt(i)) )
-      {
-        int letterIndex = text.charAt(i) - 'A';
-        g.drawImage(smallCaps.getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
-      }
-      else if( Character.isDigit(text.charAt(i)) )
-      {
-        int letterIndex = text.charAt(i) - '0';
-        g.drawImage(SpriteLibrary.getNumbersSmallCaps().getFrame(letterIndex), x, y, menuTextWidth, menuTextHeight, null);
-      }
-      else // Assume symbolic
-      {
-        int symbolIndex = SpriteLibrary.charKey.indexOf(text.charAt(i));
-        if( symbolIndex >= 0 )
-        {
-          g.drawImage(SpriteLibrary.getSymbolsSmallCaps().getFrame(symbolIndex), x, y, menuTextWidth, menuTextHeight, null);
+          g.drawImage(symbols.getFrame(symbolIndex), x, y, menuTextWidth, menuTextHeight, null);
         }
       }
     }
@@ -325,6 +331,20 @@ public class SpriteUIUtils
       drawTextSmallCaps(textImage.getGraphics(), text, 0, 0);
     else
       drawText(textImage.getGraphics(), text, 0, 0);
+    return textImage;
+  }
+
+  /**
+   * Returns a BufferedImage containing the contents of `text` rendered on one line,
+   *  on a transparent background, with no scaling applied.
+   */
+  public static BufferedImage getBoldTextAsImage(String text)
+  {
+    Sprite letters = SpriteLibrary.getMapUnitLetterSprites();
+    int width = letters.getFrame(0).getWidth() * text.length();
+    int height = letters.getFrame(0).getHeight();
+    BufferedImage textImage = SpriteLibrary.createTransparentSprite(width, height);
+    drawBoldText(textImage.getGraphics(), text, 0, 0);
     return textImage;
   }
 

@@ -41,6 +41,7 @@ public class SpriteLibrary
   // Numbers and letters to overlay on map units.
   private static Sprite mapUnitNumberSprites = null;
   private static Sprite mapUnitLetterSprites = null;
+  private static Sprite mapUnitSymbolSprites = null;
   private static Map<Color,Map<Character,BufferedImage>> mapUnitTextSprites = null;
 
   // Icons for various attributes.
@@ -356,6 +357,15 @@ public class SpriteLibrary
       mapUnitLetterSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/unit/icon/alphabet.png"), 8, 8);
     }
     return mapUnitLetterSprites;
+  }
+
+  public static Sprite getMapUnitSymbolSprites()
+  {
+    if( null == mapUnitSymbolSprites )
+    {
+      mapUnitSymbolSprites = new Sprite(SpriteLibrary.createDefaultBlankSprite(8, 8), 8, 8);
+    }
+    return mapUnitSymbolSprites;
   }
 
   public static Map<Character,BufferedImage> getColoredMapTextSprites(Color color)
