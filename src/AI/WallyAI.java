@@ -110,14 +110,15 @@ public class WallyAI extends ModularAI
     aiPhases = new ArrayList<AIModule>(
         Arrays.asList(
             new PowerActivator(co, CommanderAbility.PHASE_TURN_START),
-            new GenerateThreatMap(co, this),
+            new GenerateThreatMap(co, this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
             new CaptureFinisher(co, this),
 
             new SiegeAttacks(co, this),
             new NHitKO(co, this),
             new PowerActivator(co, CommanderAbility.PHASE_BUY),
+            new FreeRealEstate(co, this, false), // Get any capture actions in before eviction goes into full force
             new BuildStuff(co, this),
-            new FreeRealEstate(co, this),
+            new FreeRealEstate(co, this, true),
             new Travel(co, this),
 
             new PowerActivator(co, CommanderAbility.PHASE_TURN_END)
@@ -391,10 +392,12 @@ public class WallyAI extends ModularAI
   {
     private static final long serialVersionUID = 1L;
     private final WallyAI ai;
-    public FreeRealEstate(Commander co, WallyAI ai)
+    private final boolean canEvict;
+    public FreeRealEstate(Commander co, WallyAI ai, boolean canEvict)
     {
       super(co, ai);
       this.ai = ai;
+      this.canEvict = canEvict;
     }
 
     @Override
@@ -402,12 +405,13 @@ public class WallyAI extends ModularAI
     {
       boolean mustMove = false;
       boolean avoidProduction = false;
-      return findValueAction(myCo, ai, unit, gameMap, mustMove, avoidProduction);
+      return findValueAction(myCo, ai, unit, gameMap, mustMove, avoidProduction, canEvict);
     }
 
     public static GameAction findValueAction( Commander co, WallyAI ai,
                                               Unit unit, GameMap gameMap,
-                                              boolean mustMove, boolean avoidProduction )
+                                              boolean mustMove, boolean avoidProduction,
+                                              boolean canEvict )
     {
       XYCoord position = new XYCoord(unit.x, unit.y);
       Location unitLoc = gameMap.getLocation(position);
@@ -432,8 +436,8 @@ public class WallyAI extends ModularAI
         {
           boolean spaceFree = gameMap.isLocationEmpty(unit, moveCoord);
           Unit resident = gameMap.getLocation(moveCoord).getResident();
-          if( !spaceFree && (unit.CO != resident.CO || resident.isTurnOver) )
-            continue;
+          if( !spaceFree && (!canEvict || (unit.CO != resident.CO || resident.isTurnOver)) )
+            continue; // Bail if we can't clear the space
 
           // See if we can bag enough damage to be worth sacrificing the unit
           if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
@@ -706,8 +710,8 @@ public class WallyAI extends ModularAI
     }
     evictionStack.add(unit);
 
-    boolean mustMove = true;
-    GameAction result = FreeRealEstate.findValueAction(myCo, this, unit, gameMap, mustMove, avoidProduction);
+    boolean mustMove = true, canEvict = true;
+    GameAction result = FreeRealEstate.findValueAction(myCo, this, unit, gameMap, mustMove, avoidProduction, canEvict);
     if( null == result )
     {
       result = findTravelAction(gameMap, allThreats, threatMap, unit, ignoreSafety, mustMove, avoidProduction);
