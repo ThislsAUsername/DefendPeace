@@ -15,6 +15,7 @@ import Terrain.Location;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.WeaponModel;
+import Units.MoveTypes.MoveType;
 
 public class Utils
 {
@@ -86,7 +87,7 @@ public class Utils
       {
         // Add any location that is empty and supports movement of the cargo unit.
         if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
-            && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
+            && MoveType.IMPASSABLE > cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
         {
           dropoffLocations.add(loc);
         }
