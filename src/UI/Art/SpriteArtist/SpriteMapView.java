@@ -544,7 +544,7 @@ public class SpriteMapView extends MapView
 
     // Draw a CO-colored background with the counter.
     int arcW = turnNumImage.getHeight()+4;
-    g.setColor(UIUtils.getMapUnitColors(myGame.activeCO.myColor).paletteColors[4]); // 0 is darker, 5 is lighter.
+    g.setColor(myGame.activeCO.myColor);
     g.fillArc(xDraw - (arcW/2), yDraw-2, arcW, arcW-1, 90, 180);
     g.fillArc(xDraw + turnNumImage.getWidth()-(arcW/2), yDraw-2, arcW, arcW-1, -90, 180);
     g.fillRect(xDraw, yDraw-1, turnNumImage.getWidth()+1, turnNumImage.getHeight()+2);
