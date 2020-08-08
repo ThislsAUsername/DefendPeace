@@ -660,6 +660,7 @@ public class WallyAI extends ModularAI
 
   /** Functions as working memory to prevent eviction cycles */
   private transient Set<Unit> evictionStack;
+  private static final int    EVICTION_STACK_MAX_DEPTH = 7;
   /**
    * Queue the first action required to move a unit out of the way
    * For use after unit building is complete
@@ -686,6 +687,7 @@ public class WallyAI extends ModularAI
       evictionStack = new HashSet<Unit>();
       isBase = true;
     }
+
     String spacing = "";
     for( int i = 0; i < evictionStack.size(); ++i ) spacing += "  ";
     log(String.format("%sAttempting to evict %s", spacing, unit.toStringWithLocation()));
@@ -695,6 +697,11 @@ public class WallyAI extends ModularAI
     if( evictionStack.contains(unit) )
     {
       log(String.format("%s  Eviction cycle! Bailing.", spacing));
+      return null;
+    }
+    if( evictionStack.size() > EVICTION_STACK_MAX_DEPTH )
+    {
+      log(String.format("%s  Too many units blocking! Bailing.", spacing));
       return null;
     }
     evictionStack.add(unit);
