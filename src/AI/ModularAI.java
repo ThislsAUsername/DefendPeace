@@ -25,7 +25,7 @@ public abstract class ModularAI implements AIController
   protected ArrayList<XYCoord> unownedProperties;
   // List of possible AI modes, in order of precedence
   protected ArrayList<AIModule> aiPhases;
-  // Used to determine what the default priority for unit actions is
+  // Sets the ordering for units in the unit queue fed to the modules
   protected Comparator<Unit> unitOrderSetter = new AIUtils.UnitCostComparator(false);
 
   private StringBuffer logger = new StringBuffer();
