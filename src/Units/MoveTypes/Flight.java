@@ -12,5 +12,7 @@ public class Flight extends MoveTypeAir
     // Override specific move cost values.
     moveCosts.get(Weathers.SNOW).setAllMovementCosts(2);
     setMoveCost(Weathers.SANDSTORM, TerrainType.DUNES, 3);
+    setMoveCost(TerrainType.PILLAR, 99);
+    setMoveCost(TerrainType.METEOR, 99);
   }
 }
