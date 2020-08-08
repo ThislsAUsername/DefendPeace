@@ -62,7 +62,11 @@ public class WallyAI extends ModularAI
   private static final double AGGRO_FUNDS_WEIGHT = 0.9; // Multiplier on damage I need to get before a sacrifice is worth it
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
   private static final double TERRAIN_PENALTY_WEIGHT = 3; // Exponent for how crippling we think high move costs are
-  private static final double MIN_SIEGE_RANGE_WEIGHT = 0.8; // Exponent for how much to penalize siege weapon ranges for their min ranges 
+  private static final double MIN_SIEGE_RANGE_WEIGHT = 0.8; // Exponent for how much to penalize siege weapon ranges for their min ranges
+
+  private static final double TERRAIN_FUNDS_WEIGHT = 2.5; // Multiplier for per-city income for adding value to units threatening to cap
+  private static final double TERRAIN_INDUSTRY_WEIGHT = 20000; // Funds amount added to units threatening to cap an industry
+  private static final double TERRAIN_HQ_WEIGHT = 42000; //                  "                                      HQ
   
   private Map<UnitModel, Map<XYCoord, Double>> threatMap;
   private ArrayList<Unit> allThreats;
@@ -918,11 +922,27 @@ public class WallyAI extends ModularAI
   {
     int value = unit.model.getCost();
 
+    if( unit.CO.isEnemy(locale.getOwner()) &&
+            unit.model.hasActionType(UnitActionFactory.CAPTURE)
+            && locale.isCaptureable() )
+      value += valueTerrain(unit.CO, locale.getEnvironment().terrainType); // Strongly value units that threaten capture
     if( includeCurrentHealth )
       value *= unit.getHP();
-    value *= (unit.model.hasActionType(UnitActionFactory.CAPTURE) && locale.isCaptureable()) ? 8 : 1; // Strongly value capturing units
     value -= locale.getEnvironment().terrainType.getDefLevel(); // Value things on lower terrain more, so we wall for equal units if we can get on better terrain
 
+    return value;
+  }
+
+  private static int valueTerrain(Commander co, TerrainType terrain)
+  {
+    int value = 0;
+    if( terrain.isProfitable() )
+      value += co.gameRules.incomePerCity * TERRAIN_FUNDS_WEIGHT;
+    if( co.unitProductionByTerrain.containsKey(terrain) )
+      value += TERRAIN_INDUSTRY_WEIGHT;
+    if( TerrainType.HEADQUARTERS == terrain
+        || TerrainType.LAB == terrain )
+      value += TERRAIN_HQ_WEIGHT;
     return value;
   }
 
