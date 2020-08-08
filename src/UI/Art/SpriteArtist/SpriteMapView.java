@@ -244,12 +244,12 @@ public class SpriteMapView extends MapView
     }
 
     // Keep track of whether we want to draw tile info.
-    boolean hudVisible = false;
+    boolean showTileDetails = false;
 
     // Draw the cursor/our menu if we aren't animating events
     if( currentAnimation == null || !notifyOnAnimEnd )
     {
-      hudVisible = true; // Only draw tile details when not animating.
+      showTileDetails = true; // Only draw tile details when not animating.
       if( getCurrentGameMenu() == null )
       {
         mapArtist.drawCursor(mapGraphics, currentActor, isTargeting, myGame.getCursorX(), myGame.getCursorY());
@@ -285,7 +285,7 @@ public class SpriteMapView extends MapView
                                        drawX,  drawY,  (drawX  + drawWidth), (drawY  + drawHeight), null);
 
     // Draw the Commander overlay with available funds.
-    if(hudVisible) drawHUD(screenGraphics);
+    drawHUD(screenGraphics, showTileDetails);
 
     // Copy the screen image into the window's graphics buffer.
     g.drawImage(screenImage, 0, 0, screenImage.getWidth()*drawScale, screenImage.getHeight()*drawScale, null);
@@ -493,7 +493,7 @@ public class SpriteMapView extends MapView
    * Draws the commander overlay, with the commander name and available funds.
    * @param g
    */
-  private void drawHUD(Graphics g)
+  private void drawHUD(Graphics g, boolean includeTileDetails)
   {
     // Choose the CO overlay location based on the cursor location on the screen.
     if( !overlayIsLeft && (myGame.getCursorX() - mapViewDrawX.get()) > (mapTilesToDrawX - 1) * 3 / 5 )
@@ -506,7 +506,9 @@ public class SpriteMapView extends MapView
     }
 
     CommanderOverlayArtist.drawCommanderOverlay(g, myGame.activeCO, overlayIsLeft);
-    MapTileDetailsArtist.drawTileDetails(g, myGame.activeCO.myView, myGame.getCursorCoord(), overlayIsLeft);
+
+    if( includeTileDetails )
+      MapTileDetailsArtist.drawTileDetails(g, myGame.activeCO.myView, myGame.getCursorCoord(), overlayIsLeft);
   }
 
   /**
