@@ -155,6 +155,21 @@ public class MapMaster extends GameMap
     return map[w][h].getEnvironment();
   }
 
+  @Override
+  public Unit getResident(XYCoord coord)
+  {
+    return getResident(coord.xCoord, coord.yCoord);
+  }
+  @Override
+  public Unit getResident(int w, int h)
+  {
+    if( !isLocationValid(w, h) )
+    {
+      return null;
+    }
+    return map[w][h].getResident();
+  }
+
   /** Returns the Location at the specified location, or null if that Location does not exist. */
   @Override
   public Location getLocation(XYCoord location)
