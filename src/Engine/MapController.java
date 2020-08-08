@@ -177,15 +177,22 @@ public class MapController implements IController, GameInputHandler.StateChanged
           seekLocations.addAll(usableProperties);
         }
 
-        // Normalize the index to allow wrapping.
-        if( nextSeekIndex >= seekLocations.size() )
+        if( !seekLocations.isEmpty() )
         {
-          nextSeekIndex = 0;
-        }
+          // Normalize the index to allow wrapping.
+          if( nextSeekIndex >= seekLocations.size() )
+          {
+            nextSeekIndex = 0;
+          }
 
-        // Move to the next location.
-        XYCoord seekCoord = seekLocations.get(nextSeekIndex++);
-        myGame.setCursorLocation(seekCoord);
+          // Move to the next location.
+          XYCoord seekCoord = seekLocations.get(nextSeekIndex++);
+
+          // Don't allow seeking to the current location.
+          if( myGame.getCursorCoord().equals(seekCoord) ) seekCoord = seekLocations.get(nextSeekIndex++);
+
+          myGame.setCursorLocation(seekCoord);
+        }
 
         break;
       case SELECT:
