@@ -17,8 +17,8 @@ import Units.UnitModel;
 
 public class UnitSpriteSet
 {
-  Sprite sprites[] = new Sprite[AnimState.values().length];
-  Sprite buffMask;
+  Sprite sprites[]   = new Sprite[AnimState.values().length];
+  Sprite buffMasks[] = new Sprite[AnimState.values().length];
 
   public final int ANIM_FRAMES_PER_MARK = 3; 
   private Set<AnimState> unFlippableStates = new HashSet<AnimState>(
@@ -120,9 +120,13 @@ public class UnitSpriteSet
     }
 
     // Make a mask that we can draw with varying opacity to indicate buff effects.
-    buffMask = new Sprite(sprites[AnimState.IDLE.ordinal()]);
-    buffMask.eraseNonGrey(20);
-    buffMask.convertToMask(new Color(255, 255, 255, 255));
+    for( int action = 0; action < AnimState.values().length; ++action )
+    {
+      Sprite buffMask = new Sprite(sprites[action]);
+      buffMask.eraseNonGrey(20);
+      buffMask.convertToMask(new Color(255, 255, 255, 255));
+      buffMasks[action] = buffMask;
+    }
   }
 
   /**
@@ -185,7 +189,7 @@ public class UnitSpriteSet
     boolean flipImage = SpriteMapView.shouldFlip(u);
 
     // Figure out if we need to draw a buff overlay. If so, get some things together.
-    boolean drawBuff = AnimState.IDLE == state && !u.CO.getActiveAbilityName().isEmpty();
+    boolean drawBuff = !u.CO.getActiveAbilityName().isEmpty();
     float buffOpacity = 0;
     if( drawBuff )
     {
@@ -202,7 +206,7 @@ public class UnitSpriteSet
     }
 
     BufferedImage frame = getUnitImage(state, imageIndex);
-    BufferedImage buffFrame = drawBuff ? buffMask.getFrame(imageIndex) : null;
+    BufferedImage buffFrame = drawBuff ? buffMasks[state.ordinal()].getFrame(imageIndex) : null;
     int shiftX =(SpriteLibrary.baseSpriteSize - frame.getWidth())/2; // center X
     int shiftY = SpriteLibrary.baseSpriteSize - frame.getHeight(); // bottom-justify Y
 
