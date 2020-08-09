@@ -363,7 +363,7 @@ public class SpriteLibrary
   {
     if( null == mapUnitSymbolSprites )
     {
-      mapUnitSymbolSprites = new Sprite(SpriteLibrary.createDefaultBlankSprite(8, 8), 8, 8);
+      mapUnitSymbolSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/unit/icon/symbols.png"), 8, 8);
     }
     return mapUnitSymbolSprites;
   }
