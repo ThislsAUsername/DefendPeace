@@ -123,10 +123,10 @@ public class UnitSpriteSet
     for( int action = 0; action < AnimState.values().length; ++action )
     {
       Sprite buffMask = new Sprite(sprites[action]);
-      buffMask.eraseNonGrey(20);
-      buffMask.convertToMask(new Color(255, 255, 255, 255));
+      buffMask.convertToInverseBrightnessMask(new Color(255, 255, 255, 255));
       buffMasks[action] = buffMask;
     }
+
   }
 
   /**
