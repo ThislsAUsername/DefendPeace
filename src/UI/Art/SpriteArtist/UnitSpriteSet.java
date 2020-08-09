@@ -121,7 +121,8 @@ public class UnitSpriteSet
 
     // Make a mask that we can draw with varying opacity to indicate buff effects.
     buffMask = new Sprite(sprites[AnimState.IDLE.ordinal()]);
-    buffMask.colorize(Color.BLACK, Color.WHITE);
+    buffMask.eraseNonGrey(20);
+    buffMask.convertToMask(new Color(255, 255, 255, 255));
   }
 
   /**

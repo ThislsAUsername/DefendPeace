@@ -182,4 +182,33 @@ public class Sprite
       }
     }
   }
+
+  public void eraseNonGrey(int rgbDeltaThreshold)
+  {
+    for( BufferedImage bi : spriteImages )
+    {
+      WritableRaster raster = bi.getRaster();
+      for( int x = 0; x < bi.getWidth(); ++x )
+      {
+        for( int y = 0; y < bi.getHeight(); ++y )
+        {
+          double[] pixel = new double[4];
+          raster.getPixel(x, y, pixel);
+          double R = pixel[0];
+          double G = pixel[1];
+          double B = pixel[2];
+          if(
+            Math.abs(R - G) >= rgbDeltaThreshold ||
+            Math.abs(R - B) >= rgbDeltaThreshold ||
+            Math.abs(G - B) >= rgbDeltaThreshold
+            )
+          {
+            pixel[3] = 0;
+            raster.setPixel(x, y, pixel);
+          }
+        }
+      }
+    }
+  }
+
 }
