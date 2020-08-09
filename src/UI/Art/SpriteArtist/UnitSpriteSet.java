@@ -190,7 +190,7 @@ public class UnitSpriteSet
     {
       // Set opacity as a function of time.
       long nowTime = System.currentTimeMillis();
-      buffOpacity = (float)(0.2*Math.sin(nowTime/150.) + 0.4);
+      buffOpacity = (float)(0.9*Math.max(0, Math.sin(nowTime/130.)));
 
       // Only regenerate the AlphaComposite object once per timestep.
       if(lastCompositeCreationTime != nowTime)
