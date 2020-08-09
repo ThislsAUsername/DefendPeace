@@ -116,8 +116,18 @@ public class PlayerSetupColorFactionArtist
 
     // Draw the cursors around the selected dude.
     spriteCursor.set(startX+selX, startY+selY, snapCursor);
-    spriteCursor.set(UIUtils.getCOColors()[control.getSelectedColor()]);
+    spriteCursor.set(UIUtils.getCOColors()[color]);
     spriteCursor.draw(myG);
+
+    // Draw the currently-selected army's name
+    String colorName = UIUtils.getPaletteName(UIUtils.getCOColors()[color]);
+    String factionName = UIUtils.getFactions()[faction].name;
+
+    BufferedImage armyNameImage = SpriteUIUtils.makeTextFrame(UIUtils.getCanonicalFactionName(colorName, factionName), 2, 2);
+
+    int drawNameX = myWidth / 2;
+    int drawNameY = armyNameImage.getHeight() / 2 + 2;
+    SpriteUIUtils.drawImageCenteredOnPoint(myG, armyNameImage, drawNameX, drawNameY);
 
     // Render our image to the screen at the properly-scaled size.
     g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
