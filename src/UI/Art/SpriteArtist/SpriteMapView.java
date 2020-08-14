@@ -23,6 +23,7 @@ import UI.SlidingValue;
 import UI.UIUtils;
 import UI.Art.Animation.BaseUnitActionAnimation;
 import UI.Art.Animation.GameAnimation;
+import UI.Art.Animation.GameEndAnimation;
 import UI.Art.Animation.NoAnimation;
 import UI.Art.Animation.NobunagaBattleAnimation;
 import UI.Art.Animation.ResupplyAnimation;
