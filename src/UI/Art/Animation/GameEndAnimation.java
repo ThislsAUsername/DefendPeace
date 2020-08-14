@@ -1,4 +1,4 @@
-package UI.Art.SpriteArtist;
+package UI.Art.Animation;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -7,7 +7,8 @@ import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
 import UI.SlidingValue;
-import UI.Art.Animation.GameAnimation;
+import UI.Art.SpriteArtist.SpriteLibrary;
+import UI.Art.SpriteArtist.SpriteOptions;
 
 /**
  * Draws the end-of-battle victory/defeat overlay animation.
