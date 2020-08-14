@@ -10,9 +10,9 @@ import UI.SlidingValue;
 import UI.Art.Animation.GameAnimation;
 
 /**
- * Draws the end-of-battle victory/defeat overlay anmiation.
+ * Draws the end-of-battle victory/defeat overlay animation.
  */
-public class GameEndAnimation implements GameAnimation
+public class GameEndAnimation extends GameAnimation
 {
   private ArrayList<GameResultPanel> panels;
 
@@ -20,22 +20,24 @@ public class GameEndAnimation implements GameAnimation
 
   public GameEndAnimation(Commander[] commanders)
   {
+    super(false);
+
     // Figure out how far apart to draw each panel.
     int numCommanders = commanders.length;
 
     // If we draw n panels, we will have n+1 spaces around/between them.
-    int vSpacing = (SpriteOptions.getScreenDimensions().height/SpriteOptions.getDrawScale()) / (numCommanders+1);
+    int vSpacing = (SpriteOptions.getScreenDimensions().height) / (numCommanders+1);
 
     // Set our starting position.
-    int hLoc = vSpacing;
+    int yPos = vSpacing;
     
     // Create and populate our ArrayList.
     panels = new ArrayList<GameResultPanel>();
-    for( int i = 0; i < numCommanders; ++i, hLoc += vSpacing)
+    for( int i = 0; i < numCommanders; ++i, yPos += vSpacing)
     {
       int xDir = (i % 2 == 0)? -1:1;
       // Create a victory/defeat panel for each commander.
-      panels.add( new GameResultPanel(commanders[i], xDir, hLoc));
+      panels.add( new GameResultPanel(commanders[i], xDir, yPos));
     }
   }
 
@@ -59,10 +61,11 @@ public class GameEndAnimation implements GameAnimation
     }
 
     // Draw all of the panels.
+    int drawScale = SpriteOptions.getDrawScale();
     for( GameResultPanel p : panels )
     {
       BufferedImage img = p.panel;
-      g.drawImage( p.panel, (int)p.xPos.get(), p.yPos-img.getHeight()/2, img.getWidth(), img.getHeight(), null);
+      g.drawImage( p.panel, (int)p.xPos.get(), p.yPos-img.getHeight()/2, img.getWidth()*drawScale, img.getHeight()*drawScale, null);
     }
 
     // Never terminate the animation. The game is over, so just hang out until the game exits.
@@ -81,14 +84,14 @@ public class GameEndAnimation implements GameAnimation
     SlidingValue xPos;
     int yPos;
 
-    public GameResultPanel(Commander cmdr, int xDir, int hPos)
+    public GameResultPanel(Commander cmdr, int xDir, int yLoc)
     {
       // Establish some basic parameters.
-      int screenWidth = SpriteOptions.getScreenDimensions().width/SpriteOptions.getDrawScale();
+      int screenWidth = SpriteOptions.getScreenDimensions().width;
       
       // Figure out where the panel will start out before moving onto the screen.
       xPos = new SlidingValue(screenWidth * xDir);
-      yPos = hPos;
+      yPos = yLoc;
 
       // Get the CO eyes image and the VICTORY/DEFEAT text.
       BufferedImage coMug = SpriteLibrary.getCommanderSprites(cmdr.coInfo.name).eyes;
@@ -96,7 +99,7 @@ public class GameEndAnimation implements GameAnimation
 
       // Make a panel image large enough to fill the screen horizontally, and frame the CO portrait vertically.
       panel = SpriteLibrary.createDefaultBlankSprite(
-          screenWidth,
+          screenWidth / SpriteOptions.getDrawScale(),
           (coMug.getHeight() + 2));
       Graphics g = panel.getGraphics();
 
@@ -108,12 +111,15 @@ public class GameEndAnimation implements GameAnimation
       g.setColor( cmdr.myColor );
       g.fillRect( 0, 1, panel.getWidth(), panel.getHeight() - 2 );
 
+      int combinedWidth = coMug.getWidth()*2 + resultText.getWidth();
+      int xPos = (panel.getWidth() / 2) - (combinedWidth / 2);
+
       // Draw the CO portrait in place
-      g.drawImage(coMug, (screenWidth / 8), 1,
+      g.drawImage(coMug, xPos, 1,
           coMug.getWidth(), coMug.getHeight(), null);
 
       // Draw the victory/defeat text, centered.
-      int xPos = ( (screenWidth / 2) - ( (resultText.getWidth()) / 2) ); 
+      xPos += coMug.getWidth()*2;
       g.drawImage(resultText, xPos, 3, resultText.getWidth(), resultText.getHeight(), null);
     }
   }

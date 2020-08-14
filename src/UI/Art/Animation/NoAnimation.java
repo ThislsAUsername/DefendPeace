@@ -2,11 +2,12 @@ package UI.Art.Animation;
 
 import java.awt.Graphics;
 
-public class NoAnimation implements GameAnimation
+public class NoAnimation extends GameAnimation
 {
 
   public NoAnimation()
   {
+    super(true);
   }
 
   @Override

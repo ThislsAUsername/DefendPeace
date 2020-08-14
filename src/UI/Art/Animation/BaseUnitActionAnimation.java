@@ -8,7 +8,7 @@ import UI.Art.SpriteArtist.*;
 import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import Units.Unit;
 
-public class BaseUnitActionAnimation implements GameAnimation
+public class BaseUnitActionAnimation extends GameAnimation
 {
   protected long startTime = 0;
   protected long duration = -42;
@@ -20,6 +20,7 @@ public class BaseUnitActionAnimation implements GameAnimation
 
   public BaseUnitActionAnimation(int tileSize, Unit actor, XYCoord actorCoord)
   {
+    super(true);
     update(tileSize, actor, actorCoord);
   }
   public BaseUnitActionAnimation update(int tileSize, Unit actor, XYCoord actorCoord)
