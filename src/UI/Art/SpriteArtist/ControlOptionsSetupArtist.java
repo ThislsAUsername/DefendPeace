@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import UI.InputHandler;
+import UI.Art.SpriteArtist.Backgrounds.DiagonalBlindsBG;
 import UI.InputHandler.InputAction;
 
 public class ControlOptionsSetupArtist

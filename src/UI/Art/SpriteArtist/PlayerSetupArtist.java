@@ -12,6 +12,7 @@ import UI.PlayerSetupController;
 import UI.PlayerSetupInfo;
 import UI.SlidingValue;
 import UI.UIUtils;
+import UI.Art.SpriteArtist.Backgrounds.DiagonalBlindsBG;
 import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 
 public class PlayerSetupArtist

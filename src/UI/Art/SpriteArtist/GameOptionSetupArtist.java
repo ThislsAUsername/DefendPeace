@@ -9,6 +9,7 @@ import Terrain.MapInfo;
 import UI.GameOption;
 import UI.GameOptionSetupController;
 import UI.SlidingValue;
+import UI.Art.SpriteArtist.Backgrounds.DiagonalBlindsBG;
 
 public class GameOptionSetupArtist
 {
