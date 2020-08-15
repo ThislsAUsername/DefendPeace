@@ -31,6 +31,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   private OptionSelector myGameInputOptionSelector = null;
 
   private int nextSeekIndex;
+  private ArrayList<XYCoord> seekLocations;
 
   private enum InputMode
   {
@@ -153,39 +154,46 @@ public class MapController implements IController, GameInputHandler.StateChanged
         myGame.moveCursorRight();
         break;
       case SEEK: // Move the cursor to either the next unit that is ready to move, or an owned usable property.
-        boolean found = false;
-        int tries = 0;
-        int numUnits = myGame.activeCO.units.size();
-        ArrayList<XYCoord> usableProperties = Utils.findUsableProperties(myGame.activeCO, myGame.gameMap);
-        int numFreeIndustries = usableProperties.size();
-        int maxTries = numUnits + numFreeIndustries;
-        while ((maxTries > 0) && !found && (tries < maxTries))
+        
+        if( null == seekLocations )
+        {
+          // Populate our list of seek candidates and sort them by distance from the cursor.
+          nextSeekIndex = 0; // We are going to rebuild the list; start from the start.
+
+          // First get all active units, sorted.
+          ArrayList<XYCoord> unitLocations = new ArrayList<XYCoord>();
+          unitLocations.addAll(Utils.findLocationsNearUnits(myGame.gameMap, myGame.activeCO.units, 0));
+          unitLocations.removeIf(xy -> myGame.gameMap.getLocation(xy).getResident().isTurnOver);
+          Utils.sortLocationsByDistance(myGame.getCursorCoord(), unitLocations);
+
+          // Find all usable properties, sorted.
+          ArrayList<XYCoord> usableProperties = Utils.findUsableProperties(myGame.activeCO, myGame.gameMap);
+          usableProperties.removeIf(xy -> myGame.gameMap.getLocation(xy).getResident() != null);
+          Utils.sortLocationsByDistance(myGame.getCursorCoord(), usableProperties);
+
+          // We'll loop over units first, then properties.
+          seekLocations = new ArrayList<XYCoord>();
+          seekLocations.addAll(unitLocations);
+          seekLocations.addAll(usableProperties);
+        }
+
+        if( !seekLocations.isEmpty() )
         {
           // Normalize the index to allow wrapping.
-          if( nextSeekIndex >= maxTries )
+          if( nextSeekIndex >= seekLocations.size() )
           {
             nextSeekIndex = 0;
           }
 
-          if( nextSeekIndex < numUnits )
-          {
-            // If we find a unit that is ready to go, move the cursor to it.
-            Unit nextUnit = myGame.activeCO.units.get(nextSeekIndex);
-            if( !nextUnit.isTurnOver )
-            {
-              myGame.setCursorLocation(nextUnit.x, nextUnit.y);
-              found = true;
-            }
-          }
-          else
-          {
-            myGame.setCursorLocation(usableProperties.get(nextSeekIndex - numUnits));
-            found = true;
-          }
-          // Increment for the next loop cycle or SEEK input.
-          ++tries;
-          ++nextSeekIndex;
+          // Move to the next location.
+          XYCoord seekCoord = seekLocations.get(nextSeekIndex++);
+
+          // Don't allow seeking to the current location.
+          if( myGame.getCursorCoord().equals(seekCoord) ) seekCoord = seekLocations.get(nextSeekIndex++);
+
+          myGame.setCursorLocation(seekCoord);
         }
+
         break;
       case SELECT:
         // Pass the current cursor location to the GameInputHandler.
@@ -340,6 +348,9 @@ public class MapController implements IController, GameInputHandler.StateChanged
   @Override
   public void onStateChange()
   {
+    // Whenever we have a context change, clear the seek list.
+    seekLocations = null;
+
     GameInputHandler.InputType inputType = myGameInputHandler.getInputType();
     myGameInputOptionSelector = myGameInputHandler.getOptionSelector();
 
