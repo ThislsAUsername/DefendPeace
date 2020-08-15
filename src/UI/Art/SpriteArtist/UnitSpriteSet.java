@@ -121,7 +121,7 @@ public class UnitSpriteSet
 
     // Make a mask that we can draw with varying opacity to indicate buff effects.
     buffMask = new Sprite(sprites[AnimState.IDLE.ordinal()]);
-    buffMask.colorize(Color.BLACK, Color.WHITE);
+    buffMask.convertToInverseBrightnessMask(new Color(255, 255, 255, 255));
   }
 
   /**
@@ -190,7 +190,7 @@ public class UnitSpriteSet
     {
       // Set opacity as a function of time.
       long nowTime = System.currentTimeMillis();
-      buffOpacity = (float)(0.3*Math.sin(nowTime/250.) + 0.6);
+      buffOpacity = (float)(0.9*Math.max(0, Math.sin(nowTime/130.)));
 
       // Only regenerate the AlphaComposite object once per timestep.
       if(lastCompositeCreationTime != nowTime)

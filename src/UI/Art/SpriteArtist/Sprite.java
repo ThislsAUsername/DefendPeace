@@ -182,4 +182,29 @@ public class Sprite
       }
     }
   }
+
+  public void convertToInverseBrightnessMask(Color maskColor)
+  {
+    for( BufferedImage bi : spriteImages )
+    {
+      WritableRaster raster = bi.getRaster();
+      double mask[] = {maskColor.getRed(), maskColor.getGreen(), maskColor.getBlue(), maskColor.getAlpha() };
+      for( int x = 0; x < bi.getWidth(); ++x )
+      {
+        for( int y = 0; y < bi.getHeight(); ++y )
+        {
+          double[] pixel = new double[4];
+          raster.getPixel(x, y, pixel);
+          if( pixel[3] == 0 )
+            continue;
+          double scaledBrightness = (pixel[0] + pixel[1] + pixel[2]) / 3;
+          scaledBrightness = Math.min(255, scaledBrightness * 1.5);
+          // Mask alpha == inverse of the pixel brightness
+          mask[3] = 255 - scaledBrightness;
+          raster.setPixel(x, y, mask);
+        }
+      }
+    }
+  }
+
 }
