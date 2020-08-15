@@ -37,25 +37,26 @@ public class HorizontalStreaksBG
   {
     Dimension dimensions = SpriteOptions.getScreenDimensions();
 
-    // Lay down the base coat of paint.
-    COLOR_BG = newColor;
-    g.setColor(COLOR_BG);
-    g.fillRect(0, 0, dimensions.width, dimensions.height);
-
     // If the scale has changed since we last checked, reinitialize.
     if( null == lastDim ||
+        COLOR_BG != newColor ||
         Math.abs(dimensions.height - lastDim.height) > regenTolerance ||
         Math.abs(dimensions.width - lastDim.width) > regenTolerance ||
         drawScale != SpriteOptions.getDrawScale() ||
         null == streaksImage)
     {
+      COLOR_BG = newColor;
       lastDim = new Dimension(dimensions);
       drawScale = SpriteOptions.getDrawScale();
       lastDrawTime = System.currentTimeMillis();
       
       // Generate an image with all of the streaks.
       streaksImage = SpriteLibrary.createTransparentSprite(dimensions.width, dimensions.height);
+
+      // Lay down the base coat of paint.
       Graphics sg = streaksImage.getGraphics();
+      sg.setColor(COLOR_BG);
+      sg.fillRect(0, 0, dimensions.width, dimensions.height);
       int numToGenerate = (int)(((dimensions.width*dimensions.height) / (streakHeightMean*streakLengthMean*drawScale*drawScale)) * saturation);
       for( int nn = 0; nn < numToGenerate; nn++ )
       {
