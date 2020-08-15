@@ -28,7 +28,7 @@ public class TurnInitAnimation extends GameAnimation
   SlidingValue bgOffset;
 
   long ingressEndTime = -1;
-  long holdTimeMs = 1500;
+  long holdTimeMs = 1000;
   boolean ending;
 
   public TurnInitAnimation(Commander cmdr, int turnNum)
@@ -90,8 +90,6 @@ public class TurnInitAnimation extends GameAnimation
 
     // Return true once the outro completes.
     boolean done = ending && !bgOffset.moving();
-    System.out.println("bgo=" + bgOffset.get());
-    System.out.println("reporting done=" + done);
     return done;
   }
 
