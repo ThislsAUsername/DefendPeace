@@ -14,6 +14,7 @@ import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
+import Engine.GameEvents.TurnInitEvent;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.Location;
@@ -216,6 +217,9 @@ public class GameInstance implements Serializable
         }
       }
     }
+
+    events.add(new TurnInitEvent(activeCO, currentTurn));
+
     if( !weatherChanges.isEmpty() )
     {
       events.add(new MapChangeEvent(weatherChanges));

@@ -11,9 +11,11 @@ import Engine.Combat.StrikeParams;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.TeleportEvent;
+import Engine.GameEvents.TurnInitEvent;
 import Terrain.GameMap;
 import Terrain.MapWindow;
 import UI.Art.Animation.GameAnimation;
+import UI.Art.Animation.TurnInitAnimation;
 import Units.Unit;
 
 public abstract class MapView implements IView
@@ -104,6 +106,10 @@ public abstract class MapView implements IView
       TeleportEvent.AnimationStyle animStyle )
   {
     return null;
+  }
+  public GameAnimation buildTurnInitAnimation( Commander cmdr, int turn )
+  {
+    return new TurnInitAnimation(cmdr, turn);
   }
   public GameAnimation buildCommanderDefeatAnimation( CommanderDefeatEvent event )
   {
