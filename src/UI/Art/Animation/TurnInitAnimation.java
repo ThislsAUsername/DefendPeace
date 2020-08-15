@@ -1,5 +1,6 @@
 package UI.Art.Animation;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -8,6 +9,7 @@ import CommandingOfficers.Commander;
 import UI.SlidingValue;
 import UI.Art.SpriteArtist.SpriteLibrary;
 import UI.Art.SpriteArtist.SpriteOptions;
+import UI.Art.SpriteArtist.SpriteUIUtils;
 import UI.Art.SpriteArtist.Backgrounds.HorizontalStreaksBG;
 
 /**
@@ -45,7 +47,21 @@ public class TurnInitAnimation extends GameAnimation
   {
     dims = new Dimension(SpriteOptions.getScreenDimensions());
     bgImage = SpriteLibrary.createDefaultBlankSprite(dims.width, dims.height);
-    fgImage = SpriteLibrary.createTransparentSprite(dims.width, dims.height);
+
+
+    int drawScale = SpriteOptions.getDrawScale();
+    BufferedImage dayImg = SpriteUIUtils.getBoldTextAsImage("Turn " + turn);
+    int buf = 3*drawScale;
+    fgImage = SpriteLibrary.createTransparentSprite(dims.width, dayImg.getHeight()*drawScale + (buf*2));
+    int xCenter = dims.width/2;
+    Graphics fgg = fgImage.getGraphics();
+    fgg.setColor(Color.BLACK);
+    fgg.fillRect(0, 0, fgImage.getWidth(), drawScale);
+    fgg.fillRect(0, fgImage.getHeight()-drawScale, fgImage.getWidth(), drawScale);
+    fgg.setColor(new Color(255, 255, 255, 180));
+    fgg.fillRect(0, drawScale, fgImage.getWidth(), fgImage.getHeight()-(2*drawScale));
+    fgImage.getGraphics().drawImage(dayImg, xCenter-dayImg.getWidth(), buf,
+        dayImg.getWidth()*drawScale, dayImg.getHeight()*drawScale, null);
   }
 
   @Override
@@ -57,7 +73,7 @@ public class TurnInitAnimation extends GameAnimation
     int fgx = (int)bgOffset.get();
     int bgx = fgx*-1;
 
-    if( fgx == 0 )
+    if( fgx == 0 && !ending )
     {
       isMapVisible = false;
       if( ingressEndTime == -1 )
@@ -70,7 +86,7 @@ public class TurnInitAnimation extends GameAnimation
     HorizontalStreaksBG.draw(bgImage.getGraphics(), commander.myColor);
 
     g.drawImage(bgImage, bgx, 0, null);
-    g.drawImage(fgImage, fgx, 0, null);
+    g.drawImage(fgImage, fgx, bgImage.getHeight()/2-fgImage.getHeight()/2, null);
 
     // Return true once the outro completes.
     boolean done = ending && !bgOffset.moving();
