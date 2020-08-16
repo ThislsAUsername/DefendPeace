@@ -406,9 +406,9 @@ public class SpriteMapView extends MapView
   }
 
   @Override
-  public GameAnimation buildTurnInitAnimation( Commander cmdr, int turn )
+  public GameAnimation buildTurnInitAnimation( Commander cmdr, int turn, boolean hideMap )
   {
-    return new TurnInitAnimation(cmdr, turn);
+    return new TurnInitAnimation(cmdr, turn, hideMap);
   }
 
   @Override // from MapView

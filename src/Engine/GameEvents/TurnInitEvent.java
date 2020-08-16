@@ -13,17 +13,19 @@ public class TurnInitEvent implements GameEvent
 {
   Commander cmdr;
   int turn;
+  boolean opaque;
 
-  public TurnInitEvent(Commander co, int turnNum)
+  public TurnInitEvent(Commander co, int turnNum, boolean hideMap)
   {
     cmdr = co;
     turn = turnNum;
+    opaque = hideMap;
   }
 
   @Override
   public GameAnimation getEventAnimation(MapView mapView)
   {
-    return mapView.buildTurnInitAnimation(cmdr, turn);
+    return mapView.buildTurnInitAnimation(cmdr, turn, opaque);
   }
 
   @Override

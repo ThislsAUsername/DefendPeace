@@ -19,6 +19,7 @@ public class TurnInitAnimation extends GameAnimation
 {
   Commander commander;
   int turn;
+  boolean opaque;
 
   BufferedImage bgImage;
   BufferedImage fgImage;
@@ -28,14 +29,15 @@ public class TurnInitAnimation extends GameAnimation
   SlidingValue bgOffset;
 
   long ingressEndTime = -1;
-  long holdTimeMs = 1000;
+  long holdTimeMs = 700;
   boolean ending;
 
-  public TurnInitAnimation(Commander cmdr, int turnNum)
+  public TurnInitAnimation(Commander cmdr, int turnNum, boolean hideMap)
   {
     super(false);
     commander = cmdr;
     turn = turnNum;
+    opaque = hideMap;
     int width = SpriteOptions.getScreenDimensions().width;
     slideDir = (Math.random() > 0.5) ? -1 : 1;
     bgOffset = new SlidingValue(width*slideDir);
@@ -58,7 +60,7 @@ public class TurnInitAnimation extends GameAnimation
     fgg.setColor(Color.BLACK);
     fgg.fillRect(0, 0, fgImage.getWidth(), drawScale);
     fgg.fillRect(0, fgImage.getHeight()-drawScale, fgImage.getWidth(), drawScale);
-    fgg.setColor(new Color(255, 255, 255, 180));
+    fgg.setColor((opaque ? new Color(255, 255, 255, 180) : commander.myColor));
     fgg.fillRect(0, drawScale, fgImage.getWidth(), fgImage.getHeight()-(2*drawScale));
     fgImage.getGraphics().drawImage(dayImg, xCenter-dayImg.getWidth(), buf,
         dayImg.getWidth()*drawScale, dayImg.getHeight()*drawScale, null);
@@ -75,17 +77,18 @@ public class TurnInitAnimation extends GameAnimation
 
     if( fgx == 0 && !ending )
     {
-      isMapVisible = false;
+      isMapVisible = !opaque;
       if( ingressEndTime == -1 )
         ingressEndTime = System.currentTimeMillis();
-      else if( System.currentTimeMillis() - ingressEndTime > holdTimeMs )
+      else if( !opaque && // We require user input to end the anim if we are covering the map.
+          System.currentTimeMillis() - ingressEndTime > holdTimeMs )
         cancel(); // Trigger the outro.
     }
 
     // Redraw the bg effects image.
     HorizontalStreaksBG.draw(bgImage.getGraphics(), commander.myColor);
 
-    g.drawImage(bgImage, bgx, 0, null);
+    if( opaque ) g.drawImage(bgImage, bgx, 0, null);
     g.drawImage(fgImage, fgx, bgImage.getHeight()/2-fgImage.getHeight()/2, null);
 
     // Return true once the outro completes.

@@ -218,7 +218,7 @@ public class GameInstance implements Serializable
       }
     }
 
-    events.add(new TurnInitEvent(activeCO, currentTurn));
+    events.add(new TurnInitEvent(activeCO, currentTurn, isFogEnabled));
 
     if( !weatherChanges.isEmpty() )
     {
