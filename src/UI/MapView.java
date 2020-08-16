@@ -105,7 +105,7 @@ public abstract class MapView implements IView
   {
     return null;
   }
-  public GameAnimation buildTurnInitAnimation( Commander cmdr, int turn, boolean hideMap )
+  public GameAnimation buildTurnInitAnimation( Commander cmdr, int turn, boolean fowEnabled )
   {
     return null;
   }

@@ -20,6 +20,7 @@ public class TurnInitAnimation extends GameAnimation
   Commander commander;
   int turn;
   boolean opaque;
+  boolean waitForButton;
 
   BufferedImage bgImage;
   BufferedImage fgImage;
@@ -32,12 +33,13 @@ public class TurnInitAnimation extends GameAnimation
   long holdTimeMs = 700;
   boolean ending;
 
-  public TurnInitAnimation(Commander cmdr, int turnNum, boolean hideMap)
+  public TurnInitAnimation(Commander cmdr, int turnNum, boolean hideMap, boolean requireButton)
   {
     super(false);
     commander = cmdr;
     turn = turnNum;
     opaque = hideMap;
+    waitForButton = requireButton;
     int width = SpriteOptions.getScreenDimensions().width;
     slideDir = (Math.random() > 0.5) ? -1 : 1;
     bgOffset = new SlidingValue(width*slideDir);
@@ -80,7 +82,7 @@ public class TurnInitAnimation extends GameAnimation
       isMapVisible = !opaque;
       if( ingressEndTime == -1 )
         ingressEndTime = System.currentTimeMillis();
-      else if( !opaque && // We require user input to end the anim if we are covering the map.
+      else if( !waitForButton && // We require user input to end the anim if we are covering the map.
           System.currentTimeMillis() - ingressEndTime > holdTimeMs )
         cancel(); // Trigger the outro.
     }
