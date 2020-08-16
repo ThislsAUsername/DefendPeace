@@ -23,6 +23,7 @@ import UI.SlidingValue;
 import UI.UIUtils;
 import UI.Art.Animation.BaseUnitActionAnimation;
 import UI.Art.Animation.GameAnimation;
+import UI.Art.Animation.GameEndAnimation;
 import UI.Art.Animation.NoAnimation;
 import UI.Art.Animation.NobunagaBattleAnimation;
 import UI.Art.Animation.ResupplyAnimation;
@@ -161,19 +162,36 @@ public class SpriteMapView extends MapView
     }
   }
 
-  @Override
-  public void render(Graphics g)
+  private void renderCurrentAnimation(Graphics g, boolean notifyControllerOnEnd)
+  {
+    // Animate until it tells you it's done.
+    if( currentAnimation.animate(g) )
+    {
+      currentAnimation = null;
+
+      // The animation is over; remove the corresponding event and notify the controller.
+      if( notifyControllerOnEnd ) // ...but only if we're animating events
+        mapController.animationEnded(eventsToAnimate.poll(), eventsToAnimate.isEmpty());
+
+      // Get the next event animation if one exists.
+      loadNextEventAnimation();
+    }
+  }
+
+  /**
+   * Draw the background, the map, and any visible units/map animations/etc.
+   * @param mapGraphics The Graphics object for the Map image. Drawn elements
+   * can be drawn based on map-tile locations.
+   */
+  private BufferedImage renderMap()
   {
     GameMap gameMap = getDrawableMap(myGame);
     
-    DiagonalBlindsBG.draw(g);
-
     // We draw in three stages. First, we draw the map/units onto a canvas which is the size
     // of the entire map; then we copy the visible section of that canvas onto a screen-sized
     // image, then draw the overlay and scale that composite as we draw it to the window.
     Graphics mapGraphics = mapImage.getGraphics();
 
-    // No overlay is being shown - draw the map, units, etc.
     // Make sure the view is centered where we want it.
     adjustViewLocation();
 
@@ -227,20 +245,9 @@ public class SpriteMapView extends MapView
       mapArtist.drawMovePath(mapGraphics, mapController.getContemplatedMove());
     }
 
-    if( currentAnimation != null )
+    if( currentAnimation != null && currentAnimation.isMapAnimation() )
     {
-      // Animate until it tells you it's done.
-      if( currentAnimation.animate(mapGraphics) )
-      {
-        currentAnimation = null;
-
-        // The animation is over; remove the corresponding event and notify the controller.
-        if( notifyOnAnimEnd ) // ...but only if we're animating events
-          mapController.animationEnded(eventsToAnimate.poll(), eventsToAnimate.isEmpty());
-
-        // Get the next event animation if one exists.
-        loadNextEventAnimation();
-      }
+      renderCurrentAnimation(mapGraphics, notifyOnAnimEnd);
     }
 
     // Keep track of whether we want to draw tile info.
@@ -287,8 +294,25 @@ public class SpriteMapView extends MapView
     // Draw the Commander overlay with available funds.
     drawHUD(screenGraphics, showTileDetails);
 
-    // Copy the screen image into the window's graphics buffer.
-    g.drawImage(screenImage, 0, 0, screenImage.getWidth()*drawScale, screenImage.getHeight()*drawScale, null);
+    return screenImage;
+  }
+
+  @Override
+  public void render(Graphics g)
+  {
+    if( null == currentAnimation || currentAnimation.isMapVisible() )
+    {
+      DiagonalBlindsBG.draw(g);
+      BufferedImage screenImage = renderMap();
+      int drawScale = SpriteOptions.getDrawScale();
+      g.drawImage(screenImage, 0, 0, screenImage.getWidth()*drawScale, screenImage.getHeight()*drawScale, null);
+    }
+
+    // Map animations are handled in the map-drawing code. Screen animations are covered here.
+    if( null != currentAnimation && !currentAnimation.isMapAnimation() )
+    {
+      renderCurrentAnimation(g, true);
+    }
   }
 
   private void adjustViewLocation()
@@ -523,7 +547,6 @@ public class SpriteMapView extends MapView
     int turnNum = myGame.getCurrentTurn();
     if( lastTurnNum != turnNum )
     {
-      System.out.println("rebuilding turn image.");
       lastTurnNum = turnNum;
       BufferedImage day = SpriteUIUtils.getTextAsImage("Turn ");
       BufferedImage dayNum = SpriteUIUtils.getBoldTextAsImage(Integer.toString(turnNum));
