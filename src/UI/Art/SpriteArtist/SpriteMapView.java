@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Queue;
 
+import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.XYCoord;
@@ -27,6 +28,7 @@ import UI.Art.Animation.GameEndAnimation;
 import UI.Art.Animation.NoAnimation;
 import UI.Art.Animation.NobunagaBattleAnimation;
 import UI.Art.Animation.ResupplyAnimation;
+import UI.Art.Animation.TurnInitAnimation;
 import UI.Art.SpriteArtist.Backgrounds.DiagonalBlindsBG;
 import UI.Art.Animation.AirDropAnimation;
 import UI.Art.Animation.MoveAnimation;
@@ -401,6 +403,12 @@ public class SpriteMapView extends MapView
       return null; // TODO: Should AirDropAnimation just be TeleportAnimation and take in the animation style?
     else
       return new AirDropAnimation(SpriteLibrary.baseSpriteSize, unit, start, end);
+  }
+
+  @Override
+  public GameAnimation buildTurnInitAnimation( Commander cmdr, int turn )
+  {
+    return new TurnInitAnimation(cmdr, turn);
   }
 
   @Override // from MapView
