@@ -345,6 +345,6 @@ public class GameInstance implements Serializable
     // Little reason to secure at turn 0; folks often have one player build
     // infantry for everyone for the first round, so we'll create passwords
     // after the second turn and enforce them thereafter.
-    return currentTurn > 0 && isSecurityEnabled;
+    return currentTurn > 0 && isSecurityEnabled && !activeCO.isAI();
   }
 }
