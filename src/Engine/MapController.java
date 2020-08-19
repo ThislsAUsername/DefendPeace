@@ -8,6 +8,7 @@ import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.TurnInitEvent;
 import Engine.GameInput.GameInputHandler;
 import UI.CO_InfoController;
 import UI.GameStatsController;
@@ -425,7 +426,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
   private void changeInputMode(InputMode input)
   {
     // Assign the new input mode.
-    inputMode = input;
+    if( inputMode != InputMode.EXITGAME )
+      inputMode = input;
 
     if( null != myGameInputHandler )
     {
@@ -552,6 +554,18 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   private void startNextTurn()
   {
+    boolean passCheckOK = !myGame.requirePassword() || PasswordManager.validateAccess(myGame.activeCO);
+    if( !passCheckOK )
+    {
+      // Display "It's not your turn" message.
+      GameEventQueue outro = new GameEventQueue();
+      boolean hideMap = true;
+      outro.add(new TurnInitEvent(myGame.activeCO, myGame.getCurrentTurn(), hideMap, "It is not your turn"));
+      myView.animate(outro);
+      changeInputMode(InputMode.EXITGAME);
+      return;
+    }
+
     nextSeekIndex = 0;
 
     // Tell the game a turn has changed. This will update the active CO.

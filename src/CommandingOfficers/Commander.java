@@ -5,11 +5,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import AI.AIController;
 import AI.AILibrary;
@@ -62,6 +64,9 @@ public class Commander extends GameEventListener implements Serializable
   // The AI has to be effectively stateless anyway (to be able to adapt to whatever scenario it finds itself in on map start),
   //   so may as well not require them to care about serializing their contents.
   private transient AIController aiController = null;
+
+  private long passSalt;
+  private UUID password;
 
   public Commander(CommanderInfo info, GameScenario.GameRules rules)
   {
@@ -461,6 +466,42 @@ public class Commander extends GameEventListener implements Serializable
 
     // use our AI index to get back where we were before
     aiController = AILibrary.getAIList().get(stream.readInt()).create(this);
+  }
+
+  /** Return true if this Commander is password-protected, false else. */
+  public boolean hasPassword()
+  {
+    return password != null;
+  }
+
+  /** Salt the provided string with the Commander's salt and return the result. */
+  private UUID hashPass(String pass)
+  {
+    int numBytes = 8 + (2*pass.length());
+    ByteBuffer bb = ByteBuffer.allocate(numBytes);
+    bb.putLong(passSalt).put(pass.getBytes());
+    UUID hashedPass = UUID.nameUUIDFromBytes(bb.array());
+    return hashedPass;
+  }
+
+  /** Return true if this Commander is password-protected, false else.
+   * Throws an exception if a password has already been set. */
+  public void setPassword(long salt, String pass)
+  {
+    if( hasPassword() )
+      throw new UnsupportedOperationException("Cannot set new password! Password is already set!");
+
+    passSalt = salt;
+    password = hashPass(pass);
+  }
+
+  /** Return true if the provided password is correct, false if not. */
+  public boolean checkPassword(String pass)
+  {
+    if( !hasPassword() )
+      throw new UnsupportedOperationException("Cannot check password! No password is set!");
+
+    return password.equals(hashPass(pass));
   }
 
   /**

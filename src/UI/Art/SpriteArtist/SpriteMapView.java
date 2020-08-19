@@ -406,10 +406,10 @@ public class SpriteMapView extends MapView
   }
 
   @Override
-  public GameAnimation buildTurnInitAnimation( Commander cmdr, int turn, boolean fowEnabled )
+  public GameAnimation buildTurnInitAnimation( Commander cmdr, int turn, boolean hideMap, String message )
   {
-    boolean requireButton = fowEnabled && !cmdr.isAI();
-    return new TurnInitAnimation(cmdr, turn, fowEnabled, requireButton);
+    boolean requireButton = hideMap && !cmdr.isAI();
+    return new TurnInitAnimation(cmdr, turn, hideMap, requireButton, message);
   }
 
   @Override // from MapView

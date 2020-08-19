@@ -39,21 +39,24 @@ public class GameInstance implements Serializable
   private Weathers defaultWeather;
 
   private GameScenario gameScenario;
+  boolean isSecurityEnabled;
 
   private int currentTurn;
 
   public GameInstance(MapMaster map)
   {
-    this(map, false, Weathers.CLEAR, new GameScenario());
+    this(map, false, Weathers.CLEAR, new GameScenario(), false);
   }
 
-  public GameInstance(MapMaster map, boolean fogOfWarOn, Weathers weather, GameScenario scenario)
+  public GameInstance(MapMaster map, boolean fogOfWarOn, Weathers weather, GameScenario scenario, boolean useSecurity)
   {
     if( map.commanders.length < 2 )
     {
       System.out.println("WARNING! Creating a game with fewer than two commanders.");
     }
     gameScenario = scenario;
+    isSecurityEnabled = useSecurity;
+
     currentTurn = 0;
 
     gameMap = map;
@@ -218,7 +221,7 @@ public class GameInstance implements Serializable
       }
     }
 
-    events.add(new TurnInitEvent(activeCO, currentTurn, isFogEnabled));
+    events.add(new TurnInitEvent(activeCO, currentTurn, isFogEnabled || isSecurityEnabled));
 
     if( !weatherChanges.isEmpty() )
     {
@@ -335,5 +338,13 @@ public class GameInstance implements Serializable
     }
 
     return filename;
+  }
+
+  public boolean requirePassword()
+  {
+    // Little reason to secure at turn 0; folks often have one player build
+    // infantry for everyone for the first round, so we'll create passwords
+    // after the second turn and enforce them thereafter.
+    return currentTurn > 0 && isSecurityEnabled;
   }
 }

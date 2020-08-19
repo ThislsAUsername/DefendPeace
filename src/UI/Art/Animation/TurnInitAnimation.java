@@ -32,14 +32,16 @@ public class TurnInitAnimation extends GameAnimation
   long ingressEndTime = -1;
   long holdTimeMs = 700;
   boolean ending;
+  String displayText;
 
-  public TurnInitAnimation(Commander cmdr, int turnNum, boolean hideMap, boolean requireButton)
+  public TurnInitAnimation(Commander cmdr, int turnNum, boolean hideMap, boolean requireButton, String message)
   {
     super(false);
     commander = cmdr;
     turn = turnNum;
     opaque = hideMap;
     waitForButton = requireButton;
+    displayText = message;
     int width = SpriteOptions.getScreenDimensions().width;
     slideDir = (Math.random() > 0.5) ? -1 : 1;
     bgOffset = new SlidingValue(width*slideDir);
@@ -54,7 +56,7 @@ public class TurnInitAnimation extends GameAnimation
 
 
     int drawScale = SpriteOptions.getDrawScale();
-    BufferedImage dayImg = SpriteUIUtils.getBoldTextAsImage("Turn " + turn);
+    BufferedImage dayImg = SpriteUIUtils.getBoldTextAsImage(displayText);
     int buf = 3*drawScale;
     fgImage = SpriteLibrary.createTransparentSprite(dims.width, dayImg.getHeight()*drawScale + (buf*2));
     int xCenter = dims.width/2;
