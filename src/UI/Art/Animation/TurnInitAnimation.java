@@ -13,7 +13,7 @@ import UI.Art.SpriteArtist.SpriteUIUtils;
 import UI.Art.SpriteArtist.Backgrounds.HorizontalStreaksBG;
 
 /**
- * Draws an overlay with the CO at the start of each turn.
+ * Draws an overlay to transition between each turn.
  */
 public class TurnInitAnimation extends GameAnimation
 {
