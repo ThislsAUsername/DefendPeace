@@ -90,10 +90,10 @@ public class HorizontalStreaksBG
       // Draw the right side of the image (visible in the left side of the screen),
       // then the left side of the image (wrapped to the right side of the screen).
       // First four coords are the dest x,y,x2,y2. Next four are the source coords.
-      g.drawImage(streaksImage, 0, 0, imgW-offscreenW, imgH,
-                                offscreenW, 0, imgW, imgH, null);
-      g.drawImage(streaksImage, imgW-offscreenW, 0, imgW, imgH,
-                                0, 0, offscreenW, imgH, null);
+      g.drawImage(streaksImage, 0              , 0, imgW-offscreenW, imgH,
+                                offscreenW     , 0, imgW           , imgH, null);
+      g.drawImage(streaksImage, imgW-offscreenW, 0, imgW           , imgH,
+                                0              , 0, offscreenW     , imgH, null);
     }
 
     // Time management.
