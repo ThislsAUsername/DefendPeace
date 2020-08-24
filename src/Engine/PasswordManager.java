@@ -37,10 +37,10 @@ public class PasswordManager
       {
         System.out.println("Generating new password");
         storedPass = UUID.randomUUID().toString();
+        writePassfile(storedPass);
       }
       System.out.println("Setting password.");
       cmdr.setPassword(salt, storedPass);
-      writePassfile(storedPass);
       granted = true;
     }
     else
