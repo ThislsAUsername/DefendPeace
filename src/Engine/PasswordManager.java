@@ -74,28 +74,28 @@ public class PasswordManager
 
     // Load keys file if it exists
     File keyFile = new File(PASSFILE_NAME);
-    if( keyFile.exists() )
+    if( !keyFile.exists() )
+      return pass;
+
+    try
     {
-      try
+      Scanner scanner = new Scanner(keyFile);
+      while(scanner.hasNextLine())
       {
-        Scanner scanner = new Scanner(keyFile);
-        while(scanner.hasNextLine())
-        {
-          Scanner linescan = new Scanner(scanner.nextLine());
-          pass = linescan.next();
-          linescan.close();
-        }
-        scanner.close();
+        Scanner linescan = new Scanner(scanner.nextLine());
+        pass = linescan.next();
+        linescan.close();
       }
-      catch(FileNotFoundException fnfe)
-      {
-        System.out.println("Somehow we failed to find the passfile after checking that it exists!");
-      }
-      catch( InputMismatchException ime )
-      {
-        System.out.println("Encountered an error while parsing passfile!");
-      }
-    } // ~if file exists
+      scanner.close();
+    }
+    catch(FileNotFoundException fnfe)
+    {
+      System.out.println("Somehow we failed to find the passfile after checking that it exists!");
+    }
+    catch( InputMismatchException ime )
+    {
+      System.out.println("Encountered an error while parsing passfile!");
+    }
 
     return pass;
   }
