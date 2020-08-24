@@ -484,7 +484,8 @@ public class Commander extends GameEventListener implements Serializable
     return hashedPass;
   }
 
-  /** Return true if this Commander is password-protected, false else.
+  /** Assigns the given salt and password to this Commander, salting
+   * and hashing the password before storing.
    * Throws an exception if a password has already been set. */
   public void setPassword(long salt, String pass)
   {
