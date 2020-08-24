@@ -14,6 +14,13 @@ import Engine.Pair;
 public class InputHandler implements IController
 {
   private static final String KEYS_FILENAME = "res/keys.txt";
+  private static final String OTHER_INPUT_FILENAME = "res/other_input.txt";
+
+  public static GameOptionBool seekBuildingsLastOption = new GameOptionBool("Seek Buildings Last", true);
+  public static GameOption<?>[] extraOptions = { seekBuildingsLastOption };
+  public static OptionSelector actionCommandSelector = new OptionSelector( InputHandler.InputAction.values().length+extraOptions.length );
+  public static OptionSelector actionKeySelector = new OptionSelector(1); // We will just use the absolute, and normalize per action.
+
   public enum InputAction
   {
     UP, DOWN, LEFT, RIGHT, SEEK, SELECT, BACK
@@ -65,6 +72,8 @@ public class InputHandler implements IController
       bindingsByInputAction.put(InputAction.BACK, backDefaultKeyCodes);
       bindingsByInputAction.put(InputAction.SEEK, seekDefaultKeyCodes);
     }
+    if( !ConfigUtils.readConfigs(OTHER_INPUT_FILENAME, Arrays.asList(extraOptions)) )
+      System.out.println("Unable to read extra game input options from file.");
   }
 
   // MovementInput variables
@@ -77,9 +86,6 @@ public class InputHandler implements IController
 
   // Will be true when we are waiting to input a key assignment.
   private static boolean assigningKey = false;
-
-  public OptionSelector actionCommandSelector = new OptionSelector( InputHandler.InputAction.values().length );
-  public OptionSelector actionKeySelector = new OptionSelector(1); // We will just use the absolute, and normalize per action.
 
   private InputHandler(){}
   private static InputHandler singleton;
@@ -97,7 +103,7 @@ public class InputHandler implements IController
     if( assigningKey )
     {
       // Assign the new key.
-      int kb = getInstance().actionCommandSelector.getSelectionNormalized();
+      int kb = actionCommandSelector.getSelectionNormalized();
       InputHandler.InputAction assignedAction = InputHandler.InputAction.values()[kb];
       InputHandler.bindLastPressedKey(assignedAction);
       assigningKey = false;
@@ -290,12 +296,19 @@ public class InputHandler implements IController
   public boolean handleInput(InputAction action)
   {
     boolean exitMenu = false;
+    int kb = actionCommandSelector.getSelectionNormalized();
+    int numInputValues = InputHandler.InputAction.values().length;
 
     switch(action)
     {
       case SELECT:
+        if( kb >= numInputValues )
+        {
+          extraOptions[kb-numInputValues].storeCurrentValue();
+          break;
+        }
+
         // If the currently-selected item is an existing key command, remove it.
-        int kb = actionCommandSelector.getSelectionNormalized();
         InputAction selectedAction = InputHandler.InputAction.values()[kb];
         OptionSelector actionKeys = getKeySelector(selectedAction);
         int keyIndex = actionKeys.getSelectionNormalized();
@@ -324,6 +337,8 @@ public class InputHandler implements IController
           configItems.add(Pair.from(key, val.substring(1)));
         }
         ConfigUtils.writeConfigItems(KEYS_FILENAME, configItems);
+        if( !ConfigUtils.writeConfigs(OTHER_INPUT_FILENAME, Arrays.asList(extraOptions)) )
+          System.out.println("Unable to write extra game input options to file.");
         exitMenu = true;
         break;
       case DOWN:
@@ -332,7 +347,10 @@ public class InputHandler implements IController
         break;
       case LEFT:
       case RIGHT:
-        actionKeySelector.handleInput(action);
+        if( kb >= numInputValues )
+          extraOptions[kb-numInputValues].handleInput(action);
+        else
+          actionKeySelector.handleInput(action);
         break;
         default:
           System.out.println("Warning: Unsupported input " + action + " in InputHandler.");
