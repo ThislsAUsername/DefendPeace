@@ -159,22 +159,27 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           // Populate our list of seek candidates and sort them by distance from the cursor.
           nextSeekIndex = 0; // We are going to rebuild the list; start from the start.
+          boolean seekBuildingsLast = InputHandler.seekBuildingsLastOption.getSelectedObject();
 
           // First get all active units, sorted.
           ArrayList<XYCoord> unitLocations = new ArrayList<XYCoord>();
           unitLocations.addAll(Utils.findLocationsNearUnits(myGame.gameMap, myGame.activeCO.units, 0));
           unitLocations.removeIf(xy -> myGame.gameMap.getLocation(xy).getResident().isTurnOver);
-          Utils.sortLocationsByDistance(myGame.getCursorCoord(), unitLocations);
+          if( seekBuildingsLast )
+            Utils.sortLocationsByDistance(myGame.getCursorCoord(), unitLocations);
 
           // Find all usable properties, sorted.
           ArrayList<XYCoord> usableProperties = Utils.findUsableProperties(myGame.activeCO, myGame.gameMap);
           usableProperties.removeIf(xy -> myGame.gameMap.getLocation(xy).getResident() != null);
-          Utils.sortLocationsByDistance(myGame.getCursorCoord(), usableProperties);
+          if( seekBuildingsLast )
+            Utils.sortLocationsByDistance(myGame.getCursorCoord(), usableProperties);
 
           // We'll loop over units first, then properties.
           seekLocations = new ArrayList<XYCoord>();
           seekLocations.addAll(unitLocations);
           seekLocations.addAll(usableProperties);
+          if( !seekBuildingsLast )
+            Utils.sortLocationsByDistance(myGame.getCursorCoord(), seekLocations);
         }
 
         if( !seekLocations.isEmpty() )
