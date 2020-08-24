@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Map;
@@ -16,11 +17,11 @@ import UI.GameOption;
 
 public class ConfigUtils
 {
-  public static <T> boolean writeConfigs(String filename, List<GameOption<T>> options)
+  public static boolean writeConfigs(String filename, List<GameOption<?>> options)
   {
-    List<Pair<String, String>> optAsList =
+    List<Pair<String, Integer>> optAsList =
         options.stream().map(x ->
-                         Pair.from(x.optionName, x.getSelectedObject().toString()))
+                         Pair.from(x.optionName.replace(" ", ""), x.getSelectionNormalized()))
                              .collect(Collectors.toList());
     return writeConfigItems(filename, optAsList);
   }
@@ -28,7 +29,7 @@ public class ConfigUtils
   /**
    * Writes a series of key/value pairs to a file in a standard ASCII format
    * @param options The objects to be toString()'d
-   * @return Whether there were any I/O errors
+   * @return True if there were no I/O errors
    */
   public static <K extends Serializable, V extends Serializable>
   boolean writeConfigItems(String filename, List<Pair<K, V>> options)
@@ -55,11 +56,36 @@ public class ConfigUtils
   }
 
   /**
+   * Reads a series of string/int pairs from a file written in a standard ASCII format
+   * @param optionsToPopulate Where to put the keys and values found
+   * @return True if there were no errors in parsing
+   */
+  public static boolean readConfigs(String filename, Iterable<GameOption<?>> optionsToPopulate)
+  {
+    HashMap<String, Integer> optionMap = new HashMap<String, Integer>();
+    boolean allValid =
+        readConfigLists(filename,
+                       (String s)->s,
+                       (Scanner linescan)->linescan.nextInt(),
+                        optionMap);
+
+    for( GameOption<?> option : optionsToPopulate )
+    {
+      String key = option.optionName.replace(" ", "");
+      if( optionMap.containsKey(key) )
+        option.setSelectedOption(optionMap.get(key));
+      else
+        allValid = false;
+    }
+    return allValid;
+  }
+
+  /**
    * Reads a series of key/value pairs from a file written in a standard ASCII format, with caller-defined reading semantics
    * @param keyFinder Turns the key (a single string token as defined by the Scanner class) into the destination type
    * @param valFinder Turns the rest of the line into the destination type
    * @param optionsToPopulate Where to put the keys and values found
-   * @return Whether there were any errors during parsing
+   * @return True if there were no errors in parsing
    */
   public static <K,V> boolean readConfigLists(String filename,
                                               Function<String, K> keyFinder,

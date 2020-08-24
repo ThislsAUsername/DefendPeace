@@ -4,14 +4,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.Scanner;
-
+import java.util.Arrays;
+import Engine.ConfigUtils;
 import Engine.Driver;
 import Engine.OptionSelector;
 import UI.GameOption;
@@ -224,76 +219,25 @@ public class SpriteOptions
   //  File utility functions.
   //////////////////////////////////////////////////////////////////////
   private static final String KEYS_FILENAME = "res/graphics_options.txt";
-  private static final String DRAWSCALE_KEY = "Drawscale";
-  private static final String ANIMATION_KEY = "Animation";
-  private static final String COORDINATES_KEY = "ShowCoords";
 
   private static void saveSettingsToDisk()
   {
-    try
-    {
-      File keyFile = new File(KEYS_FILENAME);
-      FileWriter writer = new FileWriter(keyFile, false);
-
-      StringBuffer buf = new StringBuffer();
-      buf.append(DRAWSCALE_KEY).append(" ").append(drawScaleOption.getSelectionNormalized()+1).append("\n");
-      buf.append(ANIMATION_KEY).append(" ").append(animationsOption.getSelectionNormalized()).append("\n");
-      buf.append(COORDINATES_KEY).append(" ").append(coordinatesOption.getSelectionNormalized()).append("\n");
-      writer.write(buf.toString());
-      writer.close();
-    }
-    catch( IOException ioe )
-    {
-      System.out.println("Error! Failed to save graphics settings file!.\n  " + ioe.toString());
-    }
+    if( !ConfigUtils.writeConfigs(KEYS_FILENAME, Arrays.asList(allOptions)) )
+      System.out.println("Unable to write graphics options to file.");
   }
 
   private static void loadSettingsFromDisk()
   {
-    // Load keys file if it exists
-    File keyFile = new File(KEYS_FILENAME);
-    if( keyFile.exists() )
-    {
-      try
-      {
-        Scanner scanner = new Scanner(keyFile);
-        while(scanner.hasNextLine())
-        {
-          Scanner linescan = new Scanner(scanner.nextLine());
-          String key = linescan.next();
+    boolean allValid = ConfigUtils.readConfigs(KEYS_FILENAME, Arrays.asList(allOptions));
+    if( !allValid )
+      System.out.println("Unable to read all graphics options from file.");
 
-          switch(key)
-          {
-            case DRAWSCALE_KEY:
-              drawScaleOption.setSelectedOption(Integer.parseInt(linescan.next())-1);
-              drawScale = drawScaleOption.getSelectedObject();
-              dimensions.setSize(WINDOWWIDTH_DEFAULT * drawScale, WINDOWHEIGHT_DEFAULT * drawScale);
-              break;
-            case ANIMATION_KEY:
-              animationsOption.setSelectedOption(Integer.parseInt(linescan.next()));
-              animationsOn = animationsOption.getSelectedObject();
-              break;
-            case COORDINATES_KEY:
-              coordinatesOption.setSelectedOption(Integer.parseInt(linescan.next()));
-              coordinatesOn = coordinatesOption.getSelectedObject();
-              break;
-              default:
-                System.out.println("WARNING! Unrecognized key '" + key + "' in graphics settings file!");
-          }
+    drawScale = drawScaleOption.getSelectedObject();
+    dimensions.setSize(WINDOWWIDTH_DEFAULT * drawScale, WINDOWHEIGHT_DEFAULT * drawScale);
 
-          linescan.close();
-        }
-        scanner.close();
-      }
-      catch(FileNotFoundException fnfe)
-      {
-        System.out.println("Somehow we failed to find the keys file after checking that it exists! Using defaults.");
-      }
-      catch( InputMismatchException ime )
-      {
-        System.out.println("Encountered an error while parsing keys file! Using defaults.");
-      }
-    } // ~if file exists
+    animationsOn = animationsOption.getSelectedObject();
+
+    coordinatesOn = coordinatesOption.getSelectedObject();
   }
 
   //////////////////////////////////////////////////////////////////////
