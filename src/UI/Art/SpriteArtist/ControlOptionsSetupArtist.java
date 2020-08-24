@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import UI.InputHandler;
+import UI.Art.SpriteArtist.SpriteOptions.OptionSelectionContext;
 import UI.InputHandler.InputAction;
 
 public class ControlOptionsSetupArtist
@@ -23,6 +24,7 @@ public class ControlOptionsSetupArtist
   }
 
   private static SpriteCursor spriteCursor = new SpriteCursor();
+  private static OptionSelectionContext context;
 
   public static void draw(Graphics g, InputHandler control)
   {
@@ -30,6 +32,11 @@ public class ControlOptionsSetupArtist
     DiagonalBlindsBG.draw(g);
 
     myControl = control;
+    if( null == context )
+    {
+      context = new OptionSelectionContext();
+      SpriteOptions.initialize(InputHandler.extraOptions, context);
+    }
 
     // Set up some initial parameters.
     int spacing = kbps.get(0).getKeysImage().getHeight()*2;
@@ -37,8 +44,13 @@ public class ControlOptionsSetupArtist
     int yDraw = spacing/2;
 
     // Find the selected command/key.
-    int selectedAction = myControl.actionCommandSelector.getSelectionNormalized();
-    int selectedKey = myControl.getKeySelector(InputHandler.InputAction.values()[selectedAction]).getSelectionNormalized();
+    int selectedAction = InputHandler.actionCommandSelector.getSelectionNormalized();
+    int numInputValues = InputHandler.InputAction.values().length;
+    boolean isKeyOptionSelected = ( selectedAction < numInputValues );
+
+    int selectedKey = -1;
+    if( isKeyOptionSelected )
+      selectedKey = myControl.getKeySelector(InputHandler.InputAction.values()[selectedAction]).getSelectionNormalized();
 
     // Create an un-scaled image to draw everything at real size before scaling it to the screen.
     Dimension dimensions = SpriteOptions.getScreenDimensions();
@@ -74,6 +86,23 @@ public class ControlOptionsSetupArtist
         spriteCursor.draw(cig);
       }
 
+      yDraw += spacing;
+    }
+    // draw extra items
+    for( int ip = 0; ip < InputHandler.actionCommandSelector.size() - numInputValues; ++ip )
+    {
+      SpriteOptions.drawGameOption(cig, context, spacing / 2, yDraw, InputHandler.extraOptions[ip]);
+      if( ip + numInputValues == selectedAction ) // Draw the cursor over the selected item.
+      {
+        // Draw the arrows around the highlighted option, animating movement when switching.
+        int arrowXDraw = (context.graphicsOptionWidth - context.optionSettingPanel.getWidth() + 2);
+        spriteCursor.set(arrowXDraw, yDraw, context.optionArrows.getWidth(), context.optionArrows.getHeight());
+
+        cig.drawImage(context.optionArrows,
+                      spriteCursor.getX(), spriteCursor.getY() + 3,
+                      spriteCursor.getW(), spriteCursor.getH(),
+                      null);
+      }
       yDraw += spacing;
     }
 

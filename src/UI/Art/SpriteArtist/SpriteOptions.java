@@ -37,12 +37,16 @@ public class SpriteOptions
 
   private static int letterWidth = SpriteLibrary.getLettersUppercase().getFrame(0).getWidth();
   private static int textBuffer = 4;
-  private static int graphicsOptionWidth = 0; // Set in initialize().
-  private static int graphicsOptionHeight = 0; // Set in initialize().
-  private static BufferedImage optionNamePanel = null;
-  private static BufferedImage optionSettingPanel = null;
-  private static BufferedImage optionSettingPanelChanged = null;
-  private static BufferedImage optionArrows = null;
+  public static class OptionSelectionContext
+  {
+    public int graphicsOptionWidth = 0; // Set in initialize().
+    public int graphicsOptionHeight = 0; // Set in initialize().
+    public BufferedImage optionNamePanel = null;
+    public BufferedImage optionSettingPanel = null;
+    public BufferedImage optionSettingPanelChanged = null;
+    public BufferedImage optionArrows = null;
+  }
+  private static OptionSelectionContext context = new OptionSelectionContext();
 
   public static Dimension getScreenDimensions()
   {
@@ -70,7 +74,7 @@ public class SpriteOptions
     return coordinatesOn;
   }
 
-  static void initialize()
+  static void initialize(GameOption<?>[] allOptions, OptionSelectionContext context)
   {
     int maxNameLen = 0;
     // Calculate the size of the longest option panel needed.
@@ -96,14 +100,14 @@ public class SpriteOptions
     }
 
     // This panel will hold the name of the option.
-    optionNamePanel = generateOptionPanel(maxNameLen, SpriteUIUtils.MENUBGCOLOR);
+    context.optionNamePanel = generateOptionPanel(maxNameLen, SpriteUIUtils.MENUBGCOLOR);
     // This panel will hold the current setting for the option.
-    optionSettingPanel = generateOptionPanel(maxItemLen, SpriteUIUtils.MENUBGCOLOR);
-    optionSettingPanelChanged = generateOptionPanel(maxItemLen, SpriteUIUtils.MENUHIGHLIGHTCOLOR);
-    int itemWidth = optionSettingPanel.getWidth()+ letterWidth * 2; // dual purpose buffer, also used for the switching arrows
+    context.optionSettingPanel = generateOptionPanel(maxItemLen, SpriteUIUtils.MENUBGCOLOR);
+    context.optionSettingPanelChanged = generateOptionPanel(maxItemLen, SpriteUIUtils.MENUHIGHLIGHTCOLOR);
+    int itemWidth = context.optionSettingPanel.getWidth()+ letterWidth * 2; // dual purpose buffer, also used for the switching arrows
 
-    graphicsOptionWidth = optionNamePanel.getWidth() + itemWidth + letterWidth; // Plus some space for a buffer between panels.
-    graphicsOptionHeight = optionNamePanel.getHeight();
+    context.graphicsOptionWidth = context.optionNamePanel.getWidth() + itemWidth + letterWidth; // Plus some space for a buffer between panels.
+    context.graphicsOptionHeight = context.optionNamePanel.getHeight();
 
     // Make points to define the two selection arrows.
     int[] lXPoints = { 0, 5, 5, 0 };
@@ -111,14 +115,17 @@ public class SpriteOptions
     int[] rXPoints = { itemWidth, itemWidth+5, itemWidth+5, itemWidth };
     int[] rYPoints = { -1, 4, 5, 10 };
     // Build an image with the selection arrows.
-    optionArrows = new BufferedImage(itemWidth+7, 10, BufferedImage.TYPE_INT_ARGB);
-    Graphics ag = optionArrows.getGraphics();
+    context.optionArrows = new BufferedImage(itemWidth+7, 10, BufferedImage.TYPE_INT_ARGB);
+    Graphics ag = context.optionArrows.getGraphics();
     ag.setColor(SpriteUIUtils.MENUFRAMECOLOR);
     ag.fillPolygon(lXPoints, lYPoints, lXPoints.length);
     ag.fillPolygon(rXPoints, rYPoints, rXPoints.length);
+  }
+  static void initialize()
+  {
+    initialize(allOptions, context);
 
     animHighlightedOption = new SlidingValue(0);
-
     // Load saved settings from disk, if they exist.
     loadSettingsFromDisk();
   }
@@ -254,38 +261,39 @@ public class SpriteOptions
     Graphics optionsGraphics = optionsImage.getGraphics();
 
     // Set up some initial parameters.
-    int xDraw = (optionsImage.getWidth() / 2) - (graphicsOptionWidth / 2);
-    int yDraw = graphicsOptionHeight;
+    int xDraw = (optionsImage.getWidth() / 2) - (context.graphicsOptionWidth / 2);
+    int yDraw = context.graphicsOptionHeight;
     int firstOptionY = yDraw; // Hold onto this to draw the selector arrows.
-    int ySpacing = (graphicsOptionHeight + (optionNamePanel.getHeight() / 2));
+    int ySpacing = (context.graphicsOptionHeight + (context.optionNamePanel.getHeight() / 2));
 
     // Loop through and draw everything.
     for( int i = 0; i < allOptions.length; ++i, yDraw += ySpacing )
     {
-      drawGameOption(optionsGraphics, xDraw, yDraw, allOptions[i]);
+      drawGameOption(optionsGraphics, context, xDraw, yDraw, allOptions[i]);
     }
 
     // Draw the arrows around the highlighted option, animating movement when switching.
     yDraw = firstOptionY + (int) (ySpacing * animHighlightedOption.get()) + (3); // +3 to center.
-    xDraw += (graphicsOptionWidth - optionSettingPanel.getWidth() - 8); // Subtract 5 to center the arrows around the option setting panel.
+    xDraw += (context.graphicsOptionWidth - context.optionSettingPanel.getWidth() - 8); // Subtract 5 to center the arrows around the option setting panel.
 
-    optionsGraphics.drawImage(optionArrows, xDraw, yDraw, optionArrows.getWidth(), optionArrows.getHeight(), null);
+    optionsGraphics.drawImage(context.optionArrows, xDraw, yDraw, context.optionArrows.getWidth(), context.optionArrows.getHeight(), null);
 
     // Redraw to the screen at scale.
     g.drawImage(optionsImage, 0, 0, optionsImage.getWidth()*drawScale, optionsImage.getHeight()*drawScale, null);
   }
 
-  static void drawGameOption(Graphics g, int x, int y, GameOption<?> opt)
+  static void drawGameOption(Graphics g, OptionSelectionContext context, int x, int y, GameOption<?> opt)
   {
     int drawBuffer = textBuffer;
 
     // Draw the name panel and the name.
+    BufferedImage optionNamePanel = context.optionNamePanel;
     g.drawImage(optionNamePanel, x, y, optionNamePanel.getWidth(), optionNamePanel.getHeight(), null);
     SpriteUIUtils.drawText(g, opt.optionName, x + drawBuffer, y + drawBuffer);
 
     // Draw the setting panel and the setting value.
     x = x + (optionNamePanel.getWidth() + (3 * letterWidth));
-    BufferedImage settingPanel = (opt.isChanged()) ? optionSettingPanelChanged : optionSettingPanel;
+    BufferedImage settingPanel = (opt.isChanged()) ? context.optionSettingPanelChanged : context.optionSettingPanel;
     g.drawImage(settingPanel, x, y, settingPanel.getWidth(), settingPanel.getHeight(), null);
     SpriteUIUtils.drawText(g, opt.getCurrentValueText(), x + drawBuffer, y + drawBuffer);
   }
