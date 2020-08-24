@@ -16,7 +16,6 @@ import UI.InputHandler.InputAction;
  * Controller for choosing COs and colors after the map has been chosen.
  * Left/Right changes the CO selector with focus.
  * Up/Down changes the CO selected for that slot.
- * LS/RS changes the color of the selected CO?
  */
 public class PlayerSetupController implements IController
 {
