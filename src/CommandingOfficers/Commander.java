@@ -477,7 +477,7 @@ public class Commander extends GameEventListener implements Serializable
   /** Salt the provided string with the Commander's salt and return the result. */
   private UUID hashPass(String pass)
   {
-    int numBytes = 8 + (2*pass.length());
+    int numBytes = Long.BYTES + (Character.BYTES*pass.length());
     ByteBuffer bb = ByteBuffer.allocate(numBytes);
     bb.putLong(passSalt).put(pass.getBytes());
     UUID hashedPass = UUID.nameUUIDFromBytes(bb.array());
