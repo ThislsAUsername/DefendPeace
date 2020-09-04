@@ -126,19 +126,16 @@ public class ConfigUtils
       return false;
 
     boolean allValid = true;
-    try
+    try (Scanner scanner = new Scanner(configFile))
     {
-      Scanner scanner = new Scanner(configFile);
       while (scanner.hasNextLine())
       {
         String strKey = "KEY_FAILED";
-        try
+        try (Scanner linescan = new Scanner(scanner.nextLine()))
         {
-          Scanner linescan = new Scanner(scanner.nextLine());
           strKey = linescan.next();
           K actionType = keyFinder.apply(strKey);
           optionsToPopulate.put(actionType, valFinder.apply(linescan));
-          linescan.close();
         }
         catch (Exception exc)
         {
@@ -146,7 +143,6 @@ public class ConfigUtils
           System.out.println("Error! Failure when reading key " + strKey + " from save " + filename + "!.\n" + exc.toString());
         }
       }
-      scanner.close();
     }
     catch (FileNotFoundException fnfe)
     {
