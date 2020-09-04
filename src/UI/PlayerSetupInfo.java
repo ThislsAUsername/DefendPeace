@@ -2,6 +2,7 @@ package UI;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import AI.AIMaker;
 import CommandingOfficers.Commander;
@@ -20,12 +21,37 @@ public class PlayerSetupInfo
   public int currentFaction;
   public int currentTeam;
   public int currentAi;
+  @Override
+  public String toString()
+  {
+    return String.format("%s %s %s %s %s", currentCo, currentColor, currentFaction, currentTeam, currentAi);
+  }
+  /** Initializes based on the schema defined by the toString() method above */
+  public void initFromString(String input)
+  {
+    Scanner s = new Scanner(input);
+    if( s.hasNextInt())
+      currentCo = s.nextInt() % availableCommanders.length;
+    if( s.hasNextInt())
+      currentColor = s.nextInt() % availableColors.length;
+    if( s.hasNextInt())
+      currentFaction = s.nextInt() % availableFactions.length;
+    if( s.hasNextInt())
+      currentTeam = s.nextInt();
+    if( s.hasNextInt())
+      currentAi = s.nextInt() % availableAis.length;
+    s.close();
+  }
   private final CommanderInfo[] availableCommanders;
   private final Color[] availableColors;
   private final Faction[] availableFactions;
   private final AIMaker[] availableAis;
 
-  public PlayerSetupInfo(int thisPlayer, ArrayList<CommanderInfo> COTypeList, Color[] colorList, Faction[] factionList, ArrayList<AIMaker> AIList)
+  public PlayerSetupInfo(int thisPlayer,
+                         ArrayList<CommanderInfo> COTypeList,
+                         Color[] colorList, Faction[] factionList,
+                         ArrayList<AIMaker> AIList,
+                         String savedVals)
   {
     currentCo = thisPlayer % COTypeList.size();
     currentColor = thisPlayer % colorList.length;
@@ -37,6 +63,9 @@ public class PlayerSetupInfo
     availableColors = colorList;
     availableFactions = factionList;
     availableAis = AIList.toArray(new AIMaker[0]);
+
+    if( null != savedVals )
+      initFromString(savedVals);
   }
 
   public Commander makeCommander(GameScenario.GameRules rules)
