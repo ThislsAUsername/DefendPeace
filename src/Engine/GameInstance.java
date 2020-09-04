@@ -39,6 +39,8 @@ public class GameInstance implements Serializable
 
   private GameScenario gameScenario;
 
+  private int currentTurn;
+
   public GameInstance(MapMaster map)
   {
     this(map, false, Weathers.CLEAR, new GameScenario());
@@ -51,6 +53,7 @@ public class GameInstance implements Serializable
       System.out.println("WARNING! Creating a game with fewer than two commanders.");
     }
     gameScenario = scenario;
+    currentTurn = 0;
 
     gameMap = map;
     isFogEnabled = fogOfWarOn;
@@ -123,6 +126,10 @@ public class GameInstance implements Serializable
   {
     return cursorY;
   }
+  public XYCoord getCursorCoord()
+  {
+    return new XYCoord(cursorX, cursorY);
+  }
   public Location getCursorLocation()
   {
     return gameMap.getLocation(cursorX, cursorY);
@@ -177,6 +184,7 @@ public class GameInstance implements Serializable
       activeCoNum++;
       if( activeCoNum > commanders.length - 1 )
       {
+        currentTurn++;
         activeCoNum = 0;
       }
       activeCO = commanders[activeCoNum];
@@ -224,6 +232,12 @@ public class GameInstance implements Serializable
     
     // Initialize the next turn, recording any events that will occur.
     return events;
+  }
+
+  /** Return the current turn number. */
+  public int getCurrentTurn()
+  {
+    return currentTurn;
   }
 
   /**

@@ -54,7 +54,7 @@ public class MenuArtist
       int menuHeight = menu.getHeight();
 
       // Center the menu over the current action target location, accounting for the position of the map view.
-      int viewTileSize = myView.getTileSize(); // Grab this value for convenience.
+      int viewTileSize = SpriteLibrary.baseSpriteSize; // Grab this value for convenience.
       int drawX = myGame.getCursorX() * viewTileSize - (menuWidth / 2 - viewTileSize / 2);
       int drawY = myGame.getCursorY() * viewTileSize - (menuHeight / 2 - viewTileSize / 2);
 

@@ -10,6 +10,7 @@ import Engine.Combat.BattleSummary;
 import Engine.Combat.StrikeParams;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.TeleportEvent;
 import Terrain.GameMap;
 import Terrain.MapWindow;
 import UI.Art.Animation.GameAnimation;
@@ -17,9 +18,6 @@ import Units.Unit;
 
 public abstract class MapView implements IView
 {
-  // TODO: This doesn't really belong here. The specific artist should handle this, ideally.
-  private int unitMoveSpeedMsPerTile = 100;
-
   protected GameAnimation currentAnimation = null;
 
   protected MapController mapController = null;
@@ -37,12 +35,6 @@ public abstract class MapView implements IView
   }
 
   /**
-   * @return The side-length in pixels of a single map square, taking drawScale into account.
-   * NOTE: This assumes that all MapView subclasses will use a square-tile map representation.
-   */
-  public abstract int getTileSize();
-
-  /**
    * Adds the new events to the queue so they can be animated.
    */
   public abstract void animate( GameEventQueue newEvents );
@@ -53,10 +45,6 @@ public abstract class MapView implements IView
     {
       currentAnimation.cancel();
     }
-  }
-  public double getMapUnitMoveSpeed()
-  {
-    return unitMoveSpeedMsPerTile;
   }
   public void gameIsOver()
   {
@@ -100,7 +88,7 @@ public abstract class MapView implements IView
   {
     return null;
   }
-  public GameAnimation buildResupplyAnimation(Unit unit)
+  public GameAnimation buildResupplyAnimation(Unit supplier, Unit unit)
   {
     return null;
   }
@@ -109,6 +97,11 @@ public abstract class MapView implements IView
     return null;
   }
   public GameAnimation buildMoveAnimation( Unit unit, Path movePath )
+  {
+    return null;
+  }
+  public GameAnimation buildTeleportAnimation( Unit unit, XYCoord start, XYCoord end, Unit obstacle,
+      TeleportEvent.AnimationStyle animStyle )
   {
     return null;
   }

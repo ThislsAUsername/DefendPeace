@@ -217,17 +217,6 @@ public class AWBWUnits extends UnitModelScheme
       holdingCapacity = 1;
       carryableMask = TROOP;
     }
-
-    /**
-     * APCs re-supply any adjacent allies at the beginning of every turn. Make it so.
-     */
-    @Override
-    public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
-    {
-      GameEventQueue events = new GameEventQueue();
-      events.addAll(new ResupplyLifecycle.ResupplyAction(self).getEvents(map));
-      return events;
-    }
   }
 
   public static class ReconModel extends AWBWUnitModel
@@ -467,7 +456,7 @@ public class AWBWUnits extends UnitModelScheme
 
     public MobileSAMModel()
     {
-      super("Mobile SAM", AWBWUnitEnum.MOBILESAM, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Missiles", AWBWUnitEnum.MOBILESAM, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -785,7 +774,7 @@ public class AWBWUnits extends UnitModelScheme
       GameEventQueue events = new GameEventQueue();
       for( Unit cargo : self.heldUnits )
         if( !cargo.isFullySupplied() )
-          events.add(new ResupplyEvent(cargo));
+          events.add(new ResupplyEvent(self, cargo));
       return events;
     }
   }

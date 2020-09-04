@@ -231,11 +231,10 @@ public class AIUtils
       if( flags == (ab.AIFlags & flags) )
       {
         retVal = ab;
-        if (null != q)
-          q.offer(new GameAction.AbilityAction(ab));
-        break;
       }
     }
+    if (null != q && null != retVal)
+      q.offer(new GameAction.AbilityAction(retVal));
     return retVal;
   }
 
@@ -329,6 +328,28 @@ public class AIUtils
   }
 
   /**
+   * @return Whether a friendly CO is currently in the process of acquiring the specified coordinates
+   */
+  public static boolean isCapturing(GameMap map, Commander co, XYCoord coord)
+  {
+    Unit unit = map.getLocation(coord).getResident();
+    if( null == unit || co.isEnemy(unit.CO) )
+      return false;
+    return unit.getCaptureProgress() > 0;
+  }
+
+  /**
+   * @return Whether a friendly CO can build from the specified coordinates
+   */
+  public static boolean isFriendlyProduction(GameMap map, Commander co, XYCoord coord)
+  {
+    Commander owner = map.getLocation(coord).getOwner();
+    if( null == owner || co.isEnemy(owner) )
+      return false;
+    return owner.unitProductionByTerrain.containsKey(map.getEnvironment(coord).terrainType);
+  }
+
+  /**
    * Keeps track of a commander's production facilities. When created, it will automatically catalog
    * all available facilities, and all units that can be built. It is then easy to ask whether it is
    * possible to build a given type of unit, or find a location to do so.
@@ -347,7 +368,7 @@ public class AIUtils
      * Build a model of the production capabilities for a given Commander.
      * Could be used for your own, or your opponent's.
      */
-    public CommanderProductionInfo(Commander co, GameMap gameMap)
+    public CommanderProductionInfo(Commander co, GameMap gameMap, boolean includeFriendlyOccupied)
     {
       // Figure out what unit types we can purchase with our available properties.
       myCo = co;
@@ -359,7 +380,9 @@ public class AIUtils
       for( XYCoord xyc : co.ownedProperties )
       {
         Location loc = co.myView.getLocation(xyc);
-        if( gameMap.isLocationEmpty(loc.getCoordinates()))
+        Unit blocker = loc.getResident();
+        if( null == blocker
+            || (includeFriendlyOccupied && co == blocker.CO && !blocker.isTurnOver) )
         {
           ArrayList<UnitModel> models = co.getShoppingList(loc);
           availableUnitModels.addAll(models);
@@ -457,5 +480,49 @@ public class AIUtils
         diff *= -1;
       return diff;
     }
+  }
+
+  /** Return the set of locations with enemies or terrain that `unit` could attack in one turn from `start` */
+  public static Set<XYCoord> findPossibleTargets(GameMap gameMap, Unit unit, XYCoord start, boolean includeTerrain)
+  {
+    Set<XYCoord> targetLocs = new HashSet<XYCoord>();
+    boolean allowEndingOnUnits = false; // We can't attack from on top of another unit.
+    ArrayList<XYCoord> moves = Utils.findPossibleDestinations(start, unit, gameMap, allowEndingOnUnits);
+    for( XYCoord move : moves )
+    {
+      boolean moved = !move.equals(start);
+
+      for( WeaponModel wpn : unit.model.weapons )
+      {
+        // Evaluate this weapon for targets if it has ammo, and if either the weapon
+        // is mobile or we don't care if it's mobile (because we aren't moving).
+        if( wpn.loaded(unit) && (!moved || wpn.canFireAfterMoving) )
+        {
+          ArrayList<XYCoord> locations = Utils.findTargetsInRange(gameMap, unit.CO, move, wpn, includeTerrain);
+          targetLocs.addAll(locations);
+        }
+      } // ~Weapon loop
+    }
+    targetLocs.remove(start); // No attacking your own position.
+    return targetLocs;
+  }
+
+  /**
+   * Finds allied production centers in the input set
+   */
+  public static Set<XYCoord> findAlliedIndustries(GameMap gameMap, Commander co, Iterable<XYCoord> coords, boolean ignoreMyOwn)
+  {
+    Set<XYCoord> result = new HashSet<XYCoord>();
+    for( XYCoord coord : coords )
+    {
+      Commander owner = gameMap.getLocation(coord).getOwner();
+      if( co.isEnemy(owner) )
+        continue; // counts as a null check on owner
+      if( ignoreMyOwn && co == owner )
+        continue;
+      if( owner.unitProductionByTerrain.containsKey(gameMap.getEnvironment(coord).terrainType) )
+        result.add(coord);
+    }
+    return result;
   }
 }

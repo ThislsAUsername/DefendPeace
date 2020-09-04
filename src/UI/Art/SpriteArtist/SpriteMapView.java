@@ -4,10 +4,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Queue;
 
-import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.XYCoord;
@@ -16,20 +15,24 @@ import Engine.Combat.DamagePopup;
 import Engine.Combat.StrikeParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.TeleportEvent;
+import Engine.GameEvents.TeleportEvent.AnimationStyle;
 import Terrain.GameMap;
 import UI.MapView;
 import UI.SlidingValue;
 import UI.UIUtils;
+import UI.Art.Animation.BaseUnitActionAnimation;
 import UI.Art.Animation.GameAnimation;
+import UI.Art.Animation.GameEndAnimation;
 import UI.Art.Animation.NoAnimation;
 import UI.Art.Animation.NobunagaBattleAnimation;
 import UI.Art.Animation.ResupplyAnimation;
+import UI.Art.Animation.AirDropAnimation;
+import UI.Art.Animation.MoveAnimation;
 import Units.Unit;
 
 public class SpriteMapView extends MapView
 {
-  private HashMap<Commander, Boolean> unitFacings;
-
   private GameInstance myGame;
 
   // Local map buffer to simplify drawing for sub-artists. Game assets are drawn
@@ -46,14 +49,11 @@ public class SpriteMapView extends MapView
 
   // Variables for controlling map animations.
   protected Queue<GameEvent> eventsToAnimate = new GameEventQueue();
-  private int animIndex = 0;
-  private long animIndexUpdateTime = 0;
-  private final int animIndexUpdateInterval = 250;
+  private static final int animIndexUpdateInterval = 250;
 
   // Separate animation speed for "active" things (e.g. units moving).
-  private int fastAnimIndex = 0;
-  private long fastAnimIndexUpdateTime = 0;
-  private final int fastAnimIndexUpdateInterval = 125;
+  private static final int fastAnimIndexUpdateInterval = 125;
+  private final BaseUnitActionAnimation contemplationAnim = new BaseUnitActionAnimation(0, null, null);
 
   /** Width of the visible space in pixels. */
   private int mapViewWidth;
@@ -76,18 +76,11 @@ public class SpriteMapView extends MapView
         SpriteLibrary.baseSpriteSize * game.gameMap.mapWidth,
         SpriteLibrary.baseSpriteSize * game.gameMap.mapHeight);
 
-    mapArtist = new MapArtist(game, this);
-    unitArtist = new UnitArtist(game, this);
+    mapArtist = new MapArtist(game);
+    unitArtist = new UnitArtist(game);
     menuArtist = new MenuArtist(game, this);
 
     myGame = game;
-    unitFacings = new HashMap<Commander, Boolean>();
-
-    // Locally store which direction each CO should be facing.
-    for( CommandingOfficers.Commander co : game.commanders )
-    {
-      setCommanderUnitFacing(co, game.gameMap);
-    }
 
     // Start the view at the top-left by default.
     mapViewDrawX = new SlidingValue(0);
@@ -120,34 +113,6 @@ public class SpriteMapView extends MapView
     SpriteOptions.setScreenDimensions(width, height);
 
     dimensionsChanged = true; // Let render() know that the window was resized.
-  }
-
-  @Override
-  public int getTileSize()
-  {
-    return SpriteLibrary.baseSpriteSize;
-  }
-
-  /** Returns whether the commander's map units should be flipped horizontally when drawn. */
-  public boolean getFlipUnitFacing(Commander co)
-  {
-    boolean flip = false;
-    if( unitFacings.containsKey(co) ) // Make sure we don't try to assign null to a boolean.
-    {
-      flip = unitFacings.get(co);
-    }
-    return flip;
-  }
-
-  /**
-   * Set the facing direction of the CO based on the location of the HQ. If the
-   * HQ is on the left side of the map, the units should face right, and vice versa.
-   * @param co
-   * @param map
-   */
-  private void setCommanderUnitFacing(CommandingOfficers.Commander co, GameMap map)
-  {
-    unitFacings.put(co, co.HQLocation.xCoord >= map.mapWidth / 2);
   }
 
   @Override
@@ -186,30 +151,48 @@ public class SpriteMapView extends MapView
     while (null == currentAnimation && !eventsToAnimate.isEmpty())
     {
       GameEvent event = eventsToAnimate.peek();
-      if( SpriteOptions.getAnimationsEnabled() ) currentAnimation = event.getEventAnimation(this);
       boolean isEventHidden = !(null == event.getStartPoint()) && gameMap.isLocationFogged(event.getStartPoint())
           && gameMap.isLocationFogged(event.getEndPoint());
-      if( null == currentAnimation || isEventHidden )
-      {
+
+      currentAnimation = event.getEventAnimation(this);
+      if( SpriteOptions.getAnimationsEnabled() && (null != currentAnimation) && !isEventHidden)
+        myGame.setCursorLocation(event.getEndPoint());
+      else
         // If we want to animate something hidden, or we don't have anything to animate, animate nothing instead.
         currentAnimation = new NoAnimation();
-      }
     }
   }
 
-  @Override
-  public void render(Graphics g)
+  private void renderCurrentAnimation(Graphics g, boolean notifyControllerOnEnd)
+  {
+    // Animate until it tells you it's done.
+    if( currentAnimation.animate(g) )
+    {
+      currentAnimation = null;
+
+      // The animation is over; remove the corresponding event and notify the controller.
+      if( notifyControllerOnEnd ) // ...but only if we're animating events
+        mapController.animationEnded(eventsToAnimate.poll(), eventsToAnimate.isEmpty());
+
+      // Get the next event animation if one exists.
+      loadNextEventAnimation();
+    }
+  }
+
+  /**
+   * Draw the background, the map, and any visible units/map animations/etc.
+   * @param mapGraphics The Graphics object for the Map image. Drawn elements
+   * can be drawn based on map-tile locations.
+   */
+  private BufferedImage renderMap()
   {
     GameMap gameMap = getDrawableMap(myGame);
     
-    DiagonalBlindsBG.draw(g);
-
     // We draw in three stages. First, we draw the map/units onto a canvas which is the size
     // of the entire map; then we copy the visible section of that canvas onto a screen-sized
     // image, then draw the overlay and scale that composite as we draw it to the window.
     Graphics mapGraphics = mapImage.getGraphics();
 
-    // No overlay is being shown - draw the map, units, etc.
     // Make sure the view is centered where we want it.
     adjustViewLocation();
 
@@ -230,66 +213,64 @@ public class SpriteMapView extends MapView
     if( drawY < 0 )
       drawY = 0;
 
+    // Get a reference to the current action being built, if one exists.
+    Unit currentActor = mapController.getContemplatedActor();
+    XYCoord actorCoord = mapController.getContemplationCoord();
+    boolean notifyOnAnimEnd = true;
+    if( null != currentActor && null == currentAnimation ) // Draw the currently-acting unit so it's on top of everything.
+    {
+      currentAnimation = contemplationAnim.update(drawMultiplier, currentActor, actorCoord);
+      notifyOnAnimEnd = false;
+    }
+    Path currentPath = mapController.getContemplatedMove();
+    boolean isTargeting = mapController.isTargeting();
+
+    // Start actually drawing things
     mapArtist.drawBaseTerrain(mapGraphics, gameMap, drawX, drawY, mapViewWidth, mapViewHeight);
 
     // Update the central sprite indices so animations happen in sync.
-    updateAnimationIndices();
+    int animIndex = getAnimIndex();
 
     // Draw units, buildings, trees, etc.
-    drawUnitsAndMapObjects(mapGraphics, gameMap);
+    drawUnitsAndMapObjects(mapGraphics, gameMap, animIndex);
 
     // Apply any relevant map highlight.
     mapArtist.drawHighlights(mapGraphics);
 
     // Draw Unit icons on top of everything, to make sure they are seen clearly.
-    drawUnitIcons(mapGraphics, gameMap);
-
-    // Get a reference to the current action being built, if one exists.
-    Unit currentActor = mapController.getContemplatedActor();
-    XYCoord actorCoord = mapController.getContemplationCoord();
-    Path currentPath = mapController.getContemplatedMove();
-    boolean isTargeting = mapController.isTargeting();
+    drawUnitIcons(mapGraphics, gameMap, animIndex);
 
     // Draw the movement arrow if the user is contemplating a move/action (but not once the action commences).
-    if( null != currentPath && null == currentAnimation )
+    if( null != currentPath )
     {
       mapArtist.drawMovePath(mapGraphics, mapController.getContemplatedMove());
     }
 
-    // Draw the currently-acting unit so it's on top of everything.
-    if( null != currentActor )
+    if( currentAnimation != null && currentAnimation.isMapAnimation() )
     {
-      unitArtist.drawUnit(mapGraphics, currentActor, actorCoord.xCoord, actorCoord.yCoord, fastAnimIndex);
-      unitArtist.drawUnitIcons(mapGraphics, currentActor, actorCoord.xCoord, actorCoord.yCoord, animIndex);
+      renderCurrentAnimation(mapGraphics, notifyOnAnimEnd);
     }
 
-    for( DamagePopup popup :
-                            mapController.getDamagePopups(getDrawableMap(myGame),
-                                                          myGame.getCursorLocation().getCoordinates()) )
-      drawDamagePreview(mapGraphics, popup);
+    // Keep track of whether we want to draw tile info.
+    boolean showTileDetails = false;
 
-    if( currentAnimation != null )
+    // Draw the cursor/our menu if we aren't animating events
+    if( currentAnimation == null || !notifyOnAnimEnd )
     {
-      // Animate until it tells you it's done.
-      if( currentAnimation.animate(mapGraphics) )
+      showTileDetails = true; // Only draw tile details when not animating.
+      if( getCurrentGameMenu() == null )
       {
-        currentAnimation = null;
-
-        // The animation is over; remove the corresponding event and notify the controller.
-        mapController.animationEnded(eventsToAnimate.poll(), eventsToAnimate.isEmpty());
-
-        // Get the next event animation if one exists.
-        loadNextEventAnimation();
+        mapArtist.drawCursor(mapGraphics, currentActor, isTargeting, myGame.getCursorX(), myGame.getCursorY());
+      }
+      else
+      {
+        menuArtist.drawMenu(mapGraphics, mapViewDrawX.geti(), mapViewDrawY.geti());
       }
     }
-    else if( getCurrentGameMenu() == null )
-    {
-      mapArtist.drawCursor(mapGraphics, currentActor, isTargeting, myGame.getCursorX(), myGame.getCursorY());
-    }
-    else
-    {
-      menuArtist.drawMenu(mapGraphics, mapViewDrawX.geti(), mapViewDrawY.geti());
-    }
+
+    if( null != currentActor )
+      for( DamagePopup popup : mapController.getDamagePopups() )
+        drawDamagePreview(mapGraphics, popup);
 
     // When we draw the map, we want to center it if it's smaller than the view dimensions
     int deltaX = 0, deltaY = 0;
@@ -312,10 +293,27 @@ public class SpriteMapView extends MapView
                                        drawX,  drawY,  (drawX  + drawWidth), (drawY  + drawHeight), null);
 
     // Draw the Commander overlay with available funds.
-    drawCommanderOverlay(screenGraphics);
+    drawHUD(screenGraphics, showTileDetails);
 
-    // Copy the screen image into the window's graphics buffer.
-    g.drawImage(screenImage, 0, 0, screenImage.getWidth()*drawScale, screenImage.getHeight()*drawScale, null);
+    return screenImage;
+  }
+
+  @Override
+  public void render(Graphics g)
+  {
+    if( null == currentAnimation || currentAnimation.isMapVisible() )
+    {
+      DiagonalBlindsBG.draw(g);
+      BufferedImage screenImage = renderMap();
+      int drawScale = SpriteOptions.getDrawScale();
+      g.drawImage(screenImage, 0, 0, screenImage.getWidth()*drawScale, screenImage.getHeight()*drawScale, null);
+    }
+
+    // Map animations are handled in the map-drawing code. Screen animations are covered here.
+    if( null != currentAnimation && !currentAnimation.isMapAnimation() )
+    {
+      renderCurrentAnimation(g, true);
+    }
   }
 
   private void adjustViewLocation()
@@ -379,29 +377,36 @@ public class SpriteMapView extends MapView
   @Override // from MapView
   public GameAnimation buildBattleAnimation(BattleSummary summary)
   {
-    return new NobunagaBattleAnimation(getTileSize(), summary.attacker.x, summary.attacker.y, summary.defender.x,
+    return new NobunagaBattleAnimation(SpriteLibrary.baseSpriteSize, summary.attacker, summary.attacker.x, summary.attacker.y, summary.defender.x,
         summary.defender.y);
   }
 
   @Override // from MapView
   public GameAnimation buildDemolitionAnimation( StrikeParams params, XYCoord target, int damage )
   {
-    return new NobunagaBattleAnimation(getTileSize(), params.attacker.x, params.attacker.y, target.xCoord, target.yCoord);
-  }
-
-  @Override
-  // from MapView
-  public GameAnimation buildMoveAnimation(Unit unit, Path movePath)
-  {
-    return null;
-//    return new NobunagaBattleAnimation(getTileSize(), movePath.getWaypoint(0).x, movePath.getWaypoint(0).y, movePath.getEnd().x,
-//        movePath.getEnd().y);
+    return new NobunagaBattleAnimation(SpriteLibrary.baseSpriteSize, params.attacker.body, params.attacker.x, params.attacker.y, target.xCoord, target.yCoord);
   }
 
   @Override // from MapView
-  public GameAnimation buildResupplyAnimation(Unit unit)
+  public GameAnimation buildMoveAnimation(Unit unit, Path movePath)
   {
-    return new ResupplyAnimation(unit.x, unit.y);
+    return new MoveAnimation(SpriteLibrary.baseSpriteSize, unit, movePath);
+  }
+
+  @Override // from MapView
+  public GameAnimation buildTeleportAnimation( Unit unit, XYCoord start, XYCoord end, Unit obstacle,
+      TeleportEvent.AnimationStyle animStyle )
+  {
+    if( animStyle == AnimationStyle.BLINK )
+      return null; // TODO: Should AirDropAnimation just be TeleportAnimation and take in the animation style?
+    else
+      return new AirDropAnimation(SpriteLibrary.baseSpriteSize, unit, start, end);
+  }
+
+  @Override // from MapView
+  public GameAnimation buildResupplyAnimation(Unit supplier, Unit unit)
+  {
+    return new ResupplyAnimation(SpriteLibrary.baseSpriteSize, supplier, unit.x, unit.y);
   }
 
   /**
@@ -409,14 +414,17 @@ public class SpriteMapView extends MapView
    * to ensure that they are layered correctly (near things are drawn on top of far
    * things, and units are drawn on top of terrain objects).
    * NOTE: Does not draw the currently-active unit, if one exists; that will
-   * be drawn later so it is more visible, and so it can be animated.
+   * be drawn later so it is more visible, and so it can be animated separately.
    */
-  private void drawUnitsAndMapObjects(Graphics g, GameMap gameMap)
+  private void drawUnitsAndMapObjects(Graphics g, GameMap gameMap, int animIndex)
   {
     // Draw terrain objects and units in order so they overlap correctly.
     // Only bother iterating over the visible map space (plus a 2-square border).
     int drawY = (int) mapViewDrawY.get();
     int drawX = (int) mapViewDrawX.get();
+    ArrayList<Unit> actors = null;
+    if( null != currentAnimation )
+      actors = currentAnimation.getActors();
     for( int y = drawY - 1; y < drawY + mapTilesToDrawY + 2; ++y )
     {
       for( int x = drawX - 1; x < drawX + mapTilesToDrawX + 2; ++x )
@@ -431,8 +439,7 @@ public class SpriteMapView extends MapView
           {
             Unit resident = gameMap.getLocation(x, y).getResident();
             // If an action is being considered, draw the active unit later, not now.
-            Unit currentActor = mapController.getContemplatedActor();
-            if( resident != currentActor )
+            if( null == actors || !actors.contains(resident) )
             {
               unitArtist.drawUnit(g, resident, resident.x, resident.y, animIndex);
             }
@@ -447,8 +454,11 @@ public class SpriteMapView extends MapView
    * NOTE: Does not draw the unit icon for the currently-active unit, if
    * one is selected; this must be done separately.
    */
-  public void drawUnitIcons(Graphics g, GameMap gameMap)
+  public void drawUnitIcons(Graphics g, GameMap gameMap, int animIndex)
   {
+    ArrayList<Unit> actors = null;
+    if( null != currentAnimation )
+      actors = currentAnimation.getActors();
     for( int y = 0; y < gameMap.mapHeight; ++y )
     {
       for( int x = 0; x < gameMap.mapWidth; ++x )
@@ -457,8 +467,7 @@ public class SpriteMapView extends MapView
         {
           Unit resident = gameMap.getLocation(x, y).getResident();
           // If an action is being considered, draw the active unit later, not now.
-          Unit currentActor = mapController.getContemplatedActor();
-          if( resident != currentActor )
+          if( null == actors || !actors.contains(resident) )
           {
             unitArtist.drawUnitIcons(g, resident, resident.x, resident.y, animIndex);
           }
@@ -484,35 +493,32 @@ public class SpriteMapView extends MapView
   }
 
   /**
-   * Updates the index which determines the frame that is drawn for map animations.
+   * Fetch the index which determines the frame that is drawn for map animations.
    */
-  private void updateAnimationIndices()
+  public static int getAnimIndex()
   {
     // Calculate the sprite index to use.
     long thisTime = System.currentTimeMillis();
-    long animTimeDiff = thisTime - animIndexUpdateTime;
-    long fastAnimTimeDiff = thisTime - fastAnimIndexUpdateTime;
-
-    // If it's time to update the sprite index... update the sprite index.
-    if( animTimeDiff > animIndexUpdateInterval )
-    {
-      animIndex++;
-      animIndexUpdateTime = thisTime;
-    }
-
-    // If it's time to update the fast sprite index... you know what to do.
-    if( fastAnimTimeDiff > fastAnimIndexUpdateInterval )
-    {
-      fastAnimIndex++;
-      fastAnimIndexUpdateTime = thisTime;
-    }
+    return (int) (thisTime / animIndexUpdateInterval);
+  }
+  public static int getFastAnimIndex()
+  {
+    // Calculate the sprite index to use.
+    long thisTime = System.currentTimeMillis();
+    return (int) (thisTime / fastAnimIndexUpdateInterval);
+  }
+  public static boolean shouldFlip(Unit u)
+  {
+    // Set the facing direction of the CO based on the location of the HQ. If the
+    // HQ is on the left side of the map, the units should face right, and vice versa.
+    return u.CO.HQLocation.xCoord >= u.CO.myView.mapWidth / 2;
   }
 
   /**
    * Draws the commander overlay, with the commander name and available funds.
    * @param g
    */
-  private void drawCommanderOverlay(Graphics g)
+  private void drawHUD(Graphics g, boolean includeTileDetails)
   {
     // Choose the CO overlay location based on the cursor location on the screen.
     if( !overlayIsLeft && (myGame.getCursorX() - mapViewDrawX.get()) > (mapTilesToDrawX - 1) * 3 / 5 )
@@ -524,7 +530,54 @@ public class SpriteMapView extends MapView
       overlayIsLeft = false;
     }
 
+    // Draw the Commander's image, current funds, and power level.
     CommanderOverlayArtist.drawCommanderOverlay(g, myGame.activeCO, overlayIsLeft);
+
+    drawTurnCounter(g, overlayIsLeft);
+
+    // Draw terrain defense and unit status.
+    if( includeTileDetails )
+      MapTileDetailsArtist.drawTileDetails(g, myGame.activeCO.myView, myGame.getCursorCoord(), overlayIsLeft);
+  }
+
+  private int lastTurnNum = -1;
+  private BufferedImage turnNumImage;
+  private void drawTurnCounter(Graphics g, boolean counterIsRight)
+  {
+    // Generate the turn-counter image.
+    int turnNum = myGame.getCurrentTurn();
+    if( lastTurnNum != turnNum )
+    {
+      lastTurnNum = turnNum;
+      BufferedImage day = SpriteUIUtils.getTextAsImage("Turn ");
+      BufferedImage dayNum = SpriteUIUtils.getBoldTextAsImage(Integer.toString(turnNum));
+      int width = day.getWidth() + dayNum.getWidth();
+      int height = dayNum.getHeight();
+
+      turnNumImage = SpriteLibrary.createTransparentSprite(width, height);
+      Graphics dcg = turnNumImage.getGraphics();
+      dcg.drawImage(day, 0, 0, null);
+      dcg.drawImage(dayNum, turnNumImage.getWidth()-dayNum.getWidth(), 0, null);
+    }
+
+    // Draw the turn counter.
+    int xDraw = (counterIsRight
+        ? (SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale()) - 2 - turnNumImage.getWidth()
+        : 2);
+    int yDraw = 3;
+
+    // Draw a CO-colored background with the counter.
+    int arcW = turnNumImage.getHeight()+4;
+    g.setColor(UIUtils.getMapUnitColors(myGame.activeCO.myColor).paletteColors[5]); // 0 is darker, 5 is lighter.
+    g.fillArc(xDraw - (arcW/2), yDraw-2, arcW, arcW-1, 90, 180);
+    g.fillArc(xDraw + turnNumImage.getWidth()-(arcW/2), yDraw-2, arcW, arcW-1, -90, 180);
+    g.fillRect(xDraw, yDraw-1, turnNumImage.getWidth()+1, turnNumImage.getHeight()+2);
+    g.setColor(Color.BLACK);
+    g.drawArc(xDraw - (arcW/2), yDraw-2, arcW, arcW-1, 90, 180);
+    g.drawArc(xDraw + turnNumImage.getWidth()-(arcW/2), yDraw-2, arcW, arcW-1, -90, 180);
+    g.drawLine(xDraw, yDraw-2, xDraw + turnNumImage.getWidth(), yDraw-2);
+    g.drawLine(xDraw, yDraw+turnNumImage.getHeight()+1, xDraw + turnNumImage.getWidth(), yDraw+turnNumImage.getHeight()+1);
+    g.drawImage(turnNumImage, xDraw, yDraw, null);
   }
 
   /**

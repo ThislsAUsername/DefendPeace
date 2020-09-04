@@ -68,17 +68,7 @@ public abstract class ResupplyLifecycle
     private Path movePath = null;
 
     /**
-     * Creates a resupply action to be executed from the unit's location.
-     * The location will update if the unit moves.
-     */
-    public ResupplyAction(Unit actor)
-    {
-      this(actor, null);
-    }
-
-    /**
      * Creates a resupply action to be executed from the end of path.
-     * The location will not update if the unit moves.
      * @param actor
      * @param path
      */
@@ -86,10 +76,6 @@ public abstract class ResupplyLifecycle
     {
       unitActor = actor;
       movePath = path;
-
-      // Resupply action is a bit different from other actions. It can be used as
-      // a unit's turn, but it can also be triggered by an APC during the turn-
-      // initialization phase (and re-executed each turn).
     }
 
     private XYCoord myLocation()
@@ -118,37 +104,29 @@ public abstract class ResupplyLifecycle
       // Validate action.
       boolean isValid = true;
       isValid &= unitActor != null && !unitActor.isTurnOver;
-      // Unit can move between executions of this action, so verify it's still on the map.
+      isValid &= null != movePath;
       isValid &= (null != map) && map.isLocationValid(unitActor.x, unitActor.y);
+
       if( isValid )
       {
         // Figure out where we are acting.
         supplyLocation = myLocation();
 
-        // Add a move event if we need to move.
-        // Note that movePath being null is OK for ResupplyAction when it is being re-used.
-        if( movePath != null )
+        // If we get blocked, don't resupply anything.
+        if( Utils.enqueueMoveEvent(map, unitActor, movePath, eventSequence) )
         {
-          // If we should be blocked, don't resupply anything.
-          if( !Utils.enqueueMoveEvent(map, unitActor, movePath, eventSequence) )
-            isValid = false; // isValid is used to signal pre-emption here rather than a malformed action.
-                             // Strange control flow stems from ResupplyAction's dual purpose. 
-        }
-      }
+          // Get the adjacent map locations.
+          ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, supplyLocation, 1);
 
-      if( isValid )
-      {
-        // Get the adjacent map locations.
-        ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, supplyLocation, 1);
-
-        // For each location, see if there is a friendly unit to re-supply.
-        for( XYCoord loc : locations )
-        {
-          Unit other = map.getLocation(loc).getResident();
-          if( other != null && other != unitActor && other.CO == unitActor.CO && !other.isFullySupplied() )
+          // For each location, see if there is a friendly unit to re-supply.
+          for( XYCoord loc : locations )
           {
-            // Add a re-supply event for this unit.
-            eventSequence.add(new ResupplyEvent(other));
+            Unit other = map.getLocation(loc).getResident();
+            if( other != null && other != unitActor && other.CO == unitActor.CO && !other.isFullySupplied() )
+            {
+              // Add a re-supply event for this unit.
+              eventSequence.add(new ResupplyEvent(unitActor, other));
+            }
           }
         }
       }

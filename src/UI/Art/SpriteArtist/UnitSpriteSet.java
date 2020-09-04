@@ -1,121 +1,153 @@
 package UI.Art.SpriteArtist;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.RasterFormatException;
-import java.util.ArrayList;
+import java.io.File;
+import java.util.*;
 
 import CommandingOfficers.Commander;
 import UI.UIUtils;
+import UI.UIUtils.Faction;
 import Units.Unit;
+import Units.UnitModel;
 
 public class UnitSpriteSet
 {
+  Sprite sprites[] = new Sprite[AnimState.values().length];
+  Sprite buffMask;
 
-  Sprite sprites[] = new Sprite[6];
-
-  public final int ACTION_IDLE = 0;
-  public final int ACTION_MOVENORTH = 1;
-  public final int ACTION_MOVEEAST = 2;
-  public final int ACTION_MOVESOUTH = 3;
-  public final int ACTION_MOVEWEST = 4;
-  public final int ACTION_DIE = 5;
-  
   public final int ANIM_FRAMES_PER_MARK = 3; 
+  private Set<AnimState> unFlippableStates = new HashSet<AnimState>(
+      Arrays.asList(AnimState.MOVENORTH, AnimState.MOVEEAST, AnimState.MOVESOUTH, AnimState.MOVEWEST));
 
   Sprite turnDone;
+  public static enum AnimState
+  {
+    IDLE
+    {
+      public String toString()
+      {
+        return ""; // To match the existing map image format
+      }
+    },
+    TIRED, MOVENORTH, MOVEEAST, MOVESOUTH, MOVEWEST, DIE
+  }
 
   /**
-   * UnitSpritSet constructor - parse the provided sprite sheet. Sprites are expected to 
-   * be arranged in rows by animation type, in the following order:
-   * idle
-   * Move North
-   * Move East
-   * Move South
-   * Move West
-   * Death
-   * 
-   * @param spriteSheet The image containing the frames to be used in this sprite set.
-   * @param width The width of each frame in the sprite.
-   * @param height The height of each frame in the sprite.
+   * Fetch a sprite sheet for each animation state and colorize it
+   * @param fileFinder Mapping from action type to file name
+   * @param coColors What colors the end sprites should use
    */
-  public UnitSpriteSet(BufferedImage spriteSheet, int width, int height, ColorPalette coColors)
+  public UnitSpriteSet(String unitType, Faction faction, ColorPalette coColors)
   {
-    int h = 0;
-    int action = ACTION_IDLE; // This variable relies on the ordering of the ACTION variables defined above.
-
     try
     {
-      if( null != spriteSheet && spriteSheet.getWidth() >= width && spriteSheet.getHeight() >= height )
+      // Create a filename string template to fetch all relevant animations.
+      String filenameTemplate = getMapUnitSpriteFilenameTemplate(unitType, faction);
+      for( int action = 0; action < AnimState.values().length; ++action )
       {
-        while (height <= spriteSheet.getHeight() && action <= ACTION_DIE)
+        // Get the filename for this animation state.
+        String fileStr = String.format(filenameTemplate, UnitModel.standardizeID(AnimState.values()[action].toString()));
+
+        BufferedImage spriteSheet = SpriteLibrary.loadSpriteSheetFile(fileStr);
+        if( null != spriteSheet )
         {
-          Sprite spr = new Sprite(spriteSheet.getSubimage(0, h, spriteSheet.getWidth(), height), width, height);
+          // Assume sub-sprites are squares that fill out the height of the source image
+          Sprite spr = new Sprite(spriteSheet, spriteSheet.getHeight(), spriteSheet.getHeight());
           sprites[action] = spr;
-          ++action;
         }
-        if( action < ACTION_DIE )
-        { // We didn't load all animations we wanted - our sprite set is incomplete. Default the rest to IDLE.
-          sprites[action] = sprites[ACTION_IDLE];
-          ++action;
-        }
-      }
-      else
-      { // No sprite sheet provided? Just make stuff up.
-        System.out.println("WARNING! Continuing with placeholder images.");
-        sprites[ACTION_IDLE] = new Sprite((BufferedImage)null, width, height);
-        for( int i = ACTION_IDLE + 1; i <= ACTION_DIE; ++i )
-        {
-          sprites[i] = sprites[ACTION_IDLE];
-        }
-        turnDone = sprites[ACTION_IDLE];
       }
     }
-    catch (RasterFormatException rfe)
+    catch (Exception e)
     {
-      // Something went wrong. Just make something up and hope nobody notices.
-      // Use the IDLE action if it exists, otherwise we are going with a black rectangle.
-      Sprite defaultSprite = (action > ACTION_IDLE) ? sprites[ACTION_IDLE] : new Sprite((BufferedImage)null, width, height);
-
-      System.out.println("WARNING: RasterFormatException in UnitSpriteSet constructor.");
+      System.out.println("WARNING: Exception hit in UnitSpriteSet constructor:" + e);
       System.out.println("WARNING:   Attempting to continue.");
-      for( ; action <= ACTION_DIE; ++action )
+    }
+
+    // Handle the case of having one sideways move direction and not the other defined
+    if( null == sprites[AnimState.MOVEEAST.ordinal()] && null != sprites[AnimState.MOVEWEST.ordinal()] )
+      sprites[AnimState.MOVEEAST.ordinal()] = new Sprite(sprites[AnimState.MOVEWEST.ordinal()], true);
+
+    if( null == sprites[AnimState.MOVEWEST.ordinal()] && null != sprites[AnimState.MOVEEAST.ordinal()] )
+      sprites[AnimState.MOVEWEST.ordinal()] = new Sprite(sprites[AnimState.MOVEEAST.ordinal()], true);
+
+    // Fill out any missing images
+    Sprite defaultSprite = sprites[AnimState.IDLE.ordinal()];
+    // Use the IDLE action if it exists, otherwise we are going with a black rectangle.
+    if( null == defaultSprite )
+      defaultSprite = new Sprite(null, SpriteLibrary.baseSpriteSize, SpriteLibrary.baseSpriteSize);
+    for( int action = 0; action < AnimState.values().length; ++action )
+    {
+      if( null == sprites[action] )
       {
+        unFlippableStates.remove(AnimState.values()[action]);
         sprites[action] = defaultSprite;
       }
     }
 
     colorize(UIUtils.defaultMapColors, coColors.paletteColors);
-    if( action > 0 ) // We at least got the IDLE sprites. Use those as the basis for the "already moved" sprites.
+
+    Sprite turnDone = new Sprite(sprites[AnimState.TIRED.ordinal()]);
+    sprites[AnimState.TIRED.ordinal()] = turnDone;
+
+    // Get my color presets.
+    Color tiredColor = new Color(128, 128, 128, 160);
+
+    // Shade each frame so the unit can be grayed-out after moving.
+    for( int f = 0; f < turnDone.numFrames(); ++f )
     {
-      turnDone = new Sprite(sprites[0]); // Duplicate the IDLE sprite to make the TurnDone sprite.
+      BufferedImage frame = turnDone.getFrame(f);
+      Graphics g = frame.getGraphics();
+      g.setColor(tiredColor);
 
-      // Get my color presets.
-      Color tiredColor = new Color(128, 128, 128, 160);
-
-      // Shade each frame so the unit can be grayed-out after moving.
-      for( int f = 0; f < turnDone.numFrames(); ++f )
+      // Loop through each pixel and shade the non-transparent ones.
+      for( int y = 0; y < frame.getHeight(); ++y )
       {
-        BufferedImage frame = turnDone.getFrame(f);
-        Graphics g = frame.getGraphics();
-        g.setColor(tiredColor);
-
-        // Loop through each pixel and shade the non-transparent ones.
-        for( int y = 0; y < frame.getHeight(); ++y )
+        for( int x = 0; x < frame.getWidth(); ++x )
         {
-          for( int x = 0; x < frame.getWidth(); ++x )
+          // Only shade pixels that are are not transparent.
+          if( frame.getRGB(x, y) != 0 )
           {
-            // Only shade pixels that are are not transparent.
-            if( frame.getRGB(x, y) != 0 )
-            {
-              // Yes, one pixel at a time.
-              g.fillRect(x, y, 1, 1);
-            }
+            // Yes, one pixel at a time.
+            g.fillRect(x, y, 1, 1);
           }
         }
       }
     }
+
+    // Make a mask that we can draw with varying opacity to indicate buff effects.
+    buffMask = new Sprite(sprites[AnimState.IDLE.ordinal()]);
+    buffMask.convertToInverseBrightnessMask(new Color(255, 255, 255, 255));
+  }
+
+  /**
+   * Find the IDLE map-sprite file for the given unit type, as owned by the specified faction.
+   * If the specified faction has no sprite for that unit, it will try to load it from that faction's
+   * basis instead. If the basis also has no sprite, then it will default to the "Thorn" version.
+   * The resulting template-string ensures that all sprites loaded are from the same faction set.
+   * @return A string with the given unit/faction names populated, and a template token for the unit state.
+   */
+  private String getMapUnitSpriteFilenameTemplate(String unitType, Faction faction)
+  {
+    final String format = "res/unit/faction/%s/%s_map%s.png";
+
+    // Try the faction's proper name, the one it's based off of, then default to "Thorn" if all else fails.
+    String[] namesToTry = {faction.name, faction.basis};
+    String template = String.format( format, SpriteLibrary.DEFAULT_FACTION, UnitModel.standardizeID(unitType), "" ); // Replace if we can.
+    for( String name : namesToTry )
+    {
+      String idleName = String.format( format, name, UnitModel.standardizeID(unitType), "" );
+      if (new File(idleName).canRead())
+      {
+        template = String.format( format, name, UnitModel.standardizeID(unitType), "%s" );
+        break;
+      }
+    }
+    return template;
   }
 
   private void colorize(Color[] oldColors, Color[] newColors)
@@ -126,57 +158,107 @@ public class UnitSpriteSet
     }
   }
 
-  private void colorize(Color[] newColors)
+  /**
+   * Return the first IDLE sprite image.
+   */
+  public BufferedImage getUnitImage()
   {
-    System.out.println("Colorizing sprite with " + sprites.length + " images:");
-    for( Sprite s : sprites )
-    {
-      s.colorizeFromGray(newColors);
-    }
+    return sprites[AnimState.IDLE.ordinal()].getFrame(0);
   }
 
-  private BufferedImage getUnitImage(Commander activeCO, Unit u, int imageIndex)
+  /**
+   * Return the requested subimage of the sprite for the indicated unit state.
+   */
+  public BufferedImage getUnitImage(AnimState state, int imageIndex)
   {
-    BufferedImage frame = null;
-
-    // Retrieve the correct subimage.
-    if( u.isStunned || (u.isTurnOver && u.CO == activeCO) )
-    {
-      frame = turnDone.getFrame(imageIndex);
-    }
-    else
-    {
-      frame = sprites[ACTION_IDLE/*action*/].getFrame(imageIndex);
-    }
-
-    return frame;
+    return sprites[state.ordinal()].getFrame(imageIndex);
   }
 
-  public void drawUnit(Graphics g, Commander activeCO, Unit u, /* int action,*/int imageIndex, int drawX, int drawY, boolean flipImage)
+  AlphaComposite buffComposite = null;
+  long lastCompositeCreationTime = 0;
+  public void drawUnit(Graphics g, Unit u, AnimState state, int imageIndex, int drawX, int drawY)
   {
-    BufferedImage frame = getUnitImage(activeCO, u, imageIndex);
+    Graphics2D g2d = (Graphics2D)g;
+    Composite oldComposite = g2d.getComposite();
+
+    boolean flipImage = SpriteMapView.shouldFlip(u);
+
+    // Figure out if we need to draw a buff overlay. If so, get some things together.
+    boolean drawBuff = AnimState.IDLE == state && !u.CO.getActiveAbilityName().isEmpty();
+    float buffOpacity = 0;
+    if( drawBuff )
+    {
+      // Set opacity as a function of time.
+      long nowTime = System.currentTimeMillis();
+      buffOpacity = (float)(0.9*Math.max(0, Math.sin(nowTime/130.)));
+
+      // Only regenerate the AlphaComposite object once per timestep.
+      if(lastCompositeCreationTime != nowTime)
+      {
+        lastCompositeCreationTime = nowTime;
+        buffComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, buffOpacity);
+      }
+    }
+
+    BufferedImage frame = getUnitImage(state, imageIndex);
+    BufferedImage buffFrame = drawBuff ? buffMask.getFrame(imageIndex) : null;
+    int shiftX =(SpriteLibrary.baseSpriteSize - frame.getWidth())/2; // center X
+    int shiftY = SpriteLibrary.baseSpriteSize - frame.getHeight(); // bottom-justify Y
 
     // Draw the unit, facing the appropriate direction.
-    if( flipImage )
+    if( flipImage && isStateFlippable(state) )
     {
-      g.drawImage(frame, drawX + (frame.getWidth()), drawY, -frame.getWidth(), frame.getHeight(), null);
+      g2d.drawImage(frame, drawX - shiftX + (frame.getWidth()), drawY + shiftY, -frame.getWidth(), frame.getHeight(), null);
+      if( drawBuff )
+      {
+        // Draw the buff overlay and reset the graphics composite.
+        g2d.setComposite(buffComposite);
+        g2d.drawImage(buffFrame, drawX - shiftX + (buffFrame.getWidth()),
+            drawY + shiftY, -buffFrame.getWidth(), buffFrame.getHeight(), null);
+        g2d.setComposite(oldComposite);
+      }
     }
     else
     {
-      g.drawImage(frame, drawX, drawY, frame.getWidth(), frame.getHeight(), null);
+      g2d.drawImage(frame, drawX + shiftX, drawY + shiftY, frame.getWidth(), frame.getHeight(), null);
+      if( drawBuff )
+      {
+        // Draw the buff overlay and reset the graphics composite.
+        g2d.setComposite(buffComposite);
+        g2d.drawImage(buffFrame, drawX + shiftX, drawY + shiftY, buffFrame.getWidth(), buffFrame.getHeight(), null);
+        g2d.setComposite(oldComposite);
+      }
     }
   }
 
+  /**
+   * Draw icons detailing any relevant unit information.
+   * Icons are arranged as follows:
+   * Upper Left: Status icons, e.g. when stunned or low on fuel or ammo.
+   * Upper Right: Special markings, usually applied by Commander abilities.
+   * Lower Right: Activity icons, e.g. transporting units or capturing property.
+   * Lower Left: HP when not at full health (this can extend to the lower right if the unit has >10 HP).
+   */
   public void drawUnitIcons(Graphics g, Commander[] COs, Unit u, int animIndex, int drawX, int drawY)
   {
-    int unitHeight = turnDone.getFrame(0).getHeight();
+    int unitHeight = sprites[0].getFrame(0).getHeight();
 
-    // Draw the unit's HP if it is below full health.
-    if( u.getHP() < 10 )
+    ArrayList<BufferedImage> unitIcons = new ArrayList<BufferedImage>();
+
+    // Draw the unit's HP if it is not at full health.
+    if( u.getHP() != u.model.maxHP )
     {
-      BufferedImage num = SpriteLibrary.getMapUnitHPSprites().getFrame(u.getHP());
-      g.drawImage(num, drawX, drawY + ((unitHeight) / 2), num.getWidth(), num.getHeight(),
-          null);
+      BufferedImage num;
+      if( u.getHP() > u.model.maxHP )
+      {
+        num = SpriteLibrary.getMapUnitNumberSprites().getFrame(1); // Tens place.
+
+        // Ones place shares space with the activity icons below if HP > 10.
+        unitIcons.add( SpriteLibrary.getMapUnitNumberSprites().getFrame((u.getHP()-u.model.maxHP)) );
+      }
+      else
+        num = SpriteLibrary.getMapUnitNumberSprites().getFrame(u.getHP());
+      g.drawImage(num, drawX, drawY + ((unitHeight) / 2), num.getWidth(), num.getHeight(), null);
     }
     
     // Collect all the Commanders who desire to mark this unit
@@ -199,55 +281,58 @@ public class UnitSpriteSet
       g.drawImage(symbol, drawX + ((unitHeight) / 2), drawY, symbol.getWidth(), symbol.getHeight(), null);
     }
 
-    // Draw the transport icon if the unit is holding another unit.
-    if( u.heldUnits != null && !u.heldUnits.isEmpty() )
-    {
-      // Get the icon and characterize the draw space.
-      BufferedImage cargoIcon = SpriteLibrary.getCargoIcon();
-      int iconX = drawX + ((unitHeight) / 2);
-      int iconY = drawY + ((unitHeight) / 2);
-      int iconW = cargoIcon.getWidth();
-      int iconH = cargoIcon.getHeight();
-
-      // Draw team-color background for the icon.
-      g.setColor( u.CO.myColor );
-      g.fillRect( iconX, iconY, iconW, iconH);
-
-      // Draw transport icon.
-      g.drawImage( cargoIcon, iconX, iconY, iconW, iconH, null );
-    }
-
+    // Evaluate/draw unit status effects.
+    ArrayList<BufferedImage> statusIcons = new ArrayList<BufferedImage>();
     if( u.isStunned )
+      statusIcons.add(SpriteLibrary.getStunIcon());
+
+    double lowIndicatorFraction = 3.0;
+    if( u.fuel < u.model.maxFuel / lowIndicatorFraction )
+      statusIcons.add(SpriteLibrary.getFuelIcon());
+
+    if( u.ammo >= 0 && !u.model.weapons.isEmpty() && u.ammo < u.model.maxAmmo / lowIndicatorFraction )
+      statusIcons.add(SpriteLibrary.getAmmoIcon());
+
+    if( !statusIcons.isEmpty() )
     {
-      // Get the icon and characterize the draw space.
-      BufferedImage stunIcon = SpriteLibrary.getStunIcon();
-      int iconW = stunIcon.getWidth();
-      int iconH = stunIcon.getHeight();
+      int iconIndex = (animIndex%(statusIcons.size()*ANIM_FRAMES_PER_MARK))/ANIM_FRAMES_PER_MARK;
+      BufferedImage statusIcon = statusIcons.get(iconIndex);
+      int iconW = statusIcon.getWidth();
+      int iconH = statusIcon.getHeight();
 
-      // Draw team-color background for the icon.
-      g.setColor( u.CO.myColor );
-      g.fillRect( drawX+1, drawY+1, iconW-(2), iconH-(2));
-
-      // Draw stun icon.
-      g.drawImage( stunIcon, drawX, drawY, iconW, iconH, null );
+      g.drawImage( statusIcon, drawX, drawY, iconW, iconH, null );
     }
 
-    // Draw the capture icon if the unit is capturing a base.
+    // Transport icon.
+    if( u.heldUnits != null && !u.heldUnits.isEmpty() )
+      unitIcons.add(SpriteLibrary.getCargoIcon(u.CO.myColor));
+
+    // Capture icon.
     if( u.getCaptureProgress() > 0 )
+      unitIcons.add(SpriteLibrary.getCaptureIcon(u.CO.myColor));
+
+    // Hide icon.
+    if( u.model.hidden )
+      unitIcons.add(SpriteLibrary.getHideIcon(u.CO.myColor));
+
+    // Draw one of the current activity icons in the lower-right.
+    if( !unitIcons.isEmpty() )
     {
-      // Get the icon and characterize the draw space.
-      BufferedImage captureIcon = SpriteLibrary.getCaptureIcon();
+      int iconIndex = (animIndex%(unitIcons.size()*ANIM_FRAMES_PER_MARK))/ANIM_FRAMES_PER_MARK;
+      BufferedImage icon = unitIcons.get(iconIndex);
+
       int iconX = drawX + ((unitHeight) / 2);
       int iconY = drawY + ((unitHeight) / 2);
-      int iconW = captureIcon.getWidth();
-      int iconH = captureIcon.getHeight();
+      int iconW = icon.getWidth();
+      int iconH = icon.getHeight();
 
-      // Draw team-color background for the icon.
-      g.setColor( u.CO.myColor );
-      g.fillRect( iconX, iconY, iconW, iconH);
-
-      // Draw transport icon.
-      g.drawImage( captureIcon, iconX, iconY, iconW, iconH, null );
+      // Draw the icon
+      g.drawImage( icon, iconX, iconY, iconW, iconH, null );
     }
+  }
+
+  public boolean isStateFlippable(AnimState state)
+  {
+    return !unFlippableStates.contains(state);
   }
 }

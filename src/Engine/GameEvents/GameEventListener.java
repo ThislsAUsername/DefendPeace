@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
 import Engine.UnitActionLifecycles.JoinLifecycle;
@@ -71,14 +72,16 @@ public abstract class GameEventListener implements Serializable
   // The functions below should be overridden by subclasses for event types they care about.
   // As a rule, we should avoid passing the actual event to the receive hooks when possible.
   public void receiveBattleEvent(BattleSummary summary){};
+  public void receiveDemolitionEvent(Unit actor, XYCoord tile){};
   public void receiveCreateUnitEvent(Unit unit){};
   public void receiveCaptureEvent(Unit unit, Location location){};
   public void receiveCommanderDefeatEvent(CommanderDefeatEvent event){};
   public void receiveLoadEvent(LoadLifecycle.LoadEvent event){};
   public void receiveMoveEvent(MoveEvent event){};
+  public void receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){};
   public void receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){};
   public void receiveResupplyEvent(ResupplyEvent event){};
-  public void receiveUnitDieEvent(UnitDieEvent event){};
+  public void receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath){};
   public void receiveUnloadEvent(UnloadLifecycle.UnloadEvent event){};
   public void receiveUnitTransformEvent(Unit unit, UnitModel oldType){};
   public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){};

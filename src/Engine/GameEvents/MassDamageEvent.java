@@ -54,7 +54,8 @@ public class MassDamageEvent implements GameEvent
         deltaHP = victim.damageHP(damage);
       else
         deltaHP = victim.alterHP(-damage);
-      victims.put(victim, deltaHP);
+      int lostHP = -deltaHP;
+      victims.put(victim, lostHP);
     }
   }
 

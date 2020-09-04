@@ -3,10 +3,16 @@ package Units;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import Engine.UnitActionFactory;
+import Engine.Utils;
+import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.HealUnitEvent;
+import Engine.GameEvents.ResupplyEvent;
+import Engine.GameEvents.UnitDieEvent;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
@@ -189,12 +195,57 @@ public abstract class UnitModel implements Serializable, ITargetable
   }
 
   /** Provides a hook for inheritors to supply turn-initialization actions to a unit.
+   * Overriders should collect the output of super.getTurnInitEvents() before returning.
    * @param self Assumed to be a Unit of the model's type.
+   * @param map The current true state of the game map.
    */
   public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
   {
-    // Most Units don't have any; specific UnitModel types can override.
-    return new GameEventQueue();
+    GameEventQueue queue = new GameEventQueue();
+
+    XYCoord xyc = new XYCoord(self.x, self.y);
+    Location loc = map.getLocation(xyc);
+
+    // No actions for units in transports. Should also be checked in Unit.
+    if( null == loc ) return queue;
+
+    boolean resupplying = false;
+
+    // If the unit is not at max health, and is on a repair tile, heal it.
+    if( canRepairOn(loc) && !self.CO.isEnemy(loc.getOwner()) )
+    {
+      queue.add(new HealUnitEvent(self, self.CO.getRepairPower(), self.CO)); // Event handles cost logic
+      // Resupply is free; whether or not we can repair, go ahead and add the resupply event.
+      if( !self.isFullySupplied() )
+      {
+        resupplying = true;
+        queue.add(new ResupplyEvent(self, self));
+      }
+    }
+
+    // If there is an adjacent APC or similar, resupply.
+    if( !resupplying && !self.isFullySupplied() )
+    {
+      List<XYCoord> adjacents = Utils.findLocationsInRange(map, xyc, 1);
+      for( XYCoord adj : adjacents )
+      {
+        Unit res = map.getLocation(adj).getResident();
+        if( (null != res) && !res.CO.isEnemy(self.CO) && res.model.hasActionType(UnitActionFactory.RESUPPLY) )
+        {
+          queue.add(new ResupplyEvent(res, self));
+          resupplying = true;
+          break;
+        }
+      }
+    }
+
+    if( !resupplying && (0 == self.fuel) & (isAirUnit() || isSeaUnit()) )
+    {
+      // Uh oh. It's crashy crashy time.
+      queue.add(new UnitDieEvent(self));
+    }
+
+    return queue;
   }
 
   /**

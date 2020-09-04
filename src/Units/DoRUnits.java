@@ -463,7 +463,7 @@ public class DoRUnits extends UnitModelScheme
 
     public MobileSAMModel()
     {
-      super("Mobile SAM", DoRUnitEnum.MOBILESAM, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
+      super("Missiles", DoRUnitEnum.MOBILESAM, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
     }
   }
@@ -485,7 +485,7 @@ public class DoRUnits extends UnitModelScheme
 
     public RigModel()
     {
-      super("Rig", DoRUnitEnum.RIG, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+      super("APC", DoRUnitEnum.RIG, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0], STAR_VALUE);
       holdingCapacity = 1;
       carryableMask = TROOP;
@@ -496,17 +496,6 @@ public class DoRUnits extends UnitModelScheme
           new TerraformLifecycle.TerraformFactory(TerrainType.GRASS, TerrainType.TEMP_AIRPORT, "BUILD"));
       possibleActions.add(
           new TerraformLifecycle.TerraformFactory(TerrainType.SHOAL, TerrainType.TEMP_SEAPORT, "BUILD"));
-    }
-
-    /**
-     * Rigs re-supply any adjacent allies at the beginning of every turn. Make it so.
-     */
-    @Override
-    public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
-    {
-      GameEventQueue events = new GameEventQueue();
-      events.addAll(new ResupplyLifecycle.ResupplyAction(self).getEvents(map));
-      return events;
     }
   }
 
@@ -788,7 +777,7 @@ public class DoRUnits extends UnitModelScheme
       {
         events.add(new HealUnitEvent(cargo, self.CO.getRepairPower(), self.CO)); // Event handles cost logic
         if( !cargo.isFullySupplied() )
-          events.add(new ResupplyEvent(cargo));
+          events.add(new ResupplyEvent(self, cargo));
       }
       return events;
     }

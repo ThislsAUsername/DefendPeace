@@ -229,7 +229,7 @@ public class TestGameEvent extends TestCase
     Unit mech = addUnit(testMap, testCo1, UnitModel.MECH, 2, 3);
     Unit apc = addUnit(testMap, testCo1, UnitModel.TRANSPORT, 3, 2);
 
-    Path path = new Path(1.0); // TODO: Why do we have to provide a speed here?
+    Path path = new Path();
     path.addWaypoint(3, 3); // we need two waypoints to not break compatibility with MoveEvent, since it assumes the first waypoint isn't used.
     path.addWaypoint(7, 5); // A suitable place to move (should be the middle of the road in Firing Range).
 
@@ -322,6 +322,8 @@ public class TestGameEvent extends TestCase
     GameEventQueue events = new GameEventQueue();
     events.addAll(apc.initTurn(testMap));
     events.addAll(recon.initTurn(testMap));
+    events.addAll(mech.initTurn(testMap));
+    events.addAll(mech2.initTurn(testMap));
     for( GameEvent event : events )
     {
       event.performEvent(testMap);

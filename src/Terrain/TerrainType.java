@@ -15,14 +15,20 @@ public class TerrainType implements Serializable
   private String mName;             // Human-readable name of the terrain type.
   private int mVisionBoost = 0;     // How much this terrain enhances the vision of surface units on it.
   private TerrainType mBase;        // What this terrain turns into if it's destroyed
+  private int mCapThreshold = 20;   // How much capturing is needed to take ownership.
 
   // Generic constructor.
   private TerrainType(int attributeFlags, int defense, Color mainColor, String name, TerrainType base)
   {
-    this(attributeFlags, defense, mainColor, name, base, 0);
+    this(attributeFlags, defense, mainColor, name, base, 0, 20);
   }
-  
+
   private TerrainType(int attributeFlags, int defense, Color mainColor, String name, TerrainType base, int visionBoost)
+  {
+    this(attributeFlags, defense, mainColor, name, base, visionBoost, 20);
+  }
+
+  private TerrainType(int attributeFlags, int defense, Color mainColor, String name, TerrainType base, int visionBoost, int captureNeeded)
   {
     mAttributes = attributeFlags;
     mDefenseLevel = defense;
@@ -30,6 +36,7 @@ public class TerrainType implements Serializable
     mName = name;
     mVisionBoost = visionBoost;
     mBase = base;
+    mCapThreshold = captureNeeded;
   }
   
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,6 +52,7 @@ public class TerrainType implements Serializable
 
   public int getDefLevel() { return mDefenseLevel; }
   public int getVisionBoost() { return mVisionBoost; }
+  public int getCaptureThreshold() { return mCapThreshold; }
   public Color getMainColor() { return mMainColor; }
   public Boolean isCapturable() { return 0 != (mAttributes & CAPTURABLE); }
   public Boolean isProfitable() { return 0 != (mAttributes & PROFITABLE); }

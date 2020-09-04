@@ -248,6 +248,7 @@ public class Muriel implements AIController
             for( GameAction action : set.getGameActions() )
             {
               Unit other = gameMap.getLocation(action.getTargetLocation()).getResident();
+              if( null == other ) continue; // Don't bother with terrain.
               if( shouldAttack(unit, other, gameMap) )
               {
                 log(String.format("  May as well try to shoot %s since I'm here anyway", other));
@@ -502,7 +503,8 @@ public class Muriel implements AIController
     log("Budget: " + budget);
 
     // Figure out what unit types we can purchase with our available properties.
-    AIUtils.CommanderProductionInfo CPI = new AIUtils.CommanderProductionInfo(myCo, gameMap);
+    boolean includeFriendlyOccupied = false;
+    AIUtils.CommanderProductionInfo CPI = new AIUtils.CommanderProductionInfo(myCo, gameMap, includeFriendlyOccupied);
 
     if( CPI.availableProperties.isEmpty() )
     {

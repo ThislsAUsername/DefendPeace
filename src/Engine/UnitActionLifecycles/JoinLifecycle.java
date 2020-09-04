@@ -183,6 +183,7 @@ public abstract class JoinLifecycle
 
         // Remove the donor unit.
         gameMap.removeUnit(unitDonor);
+        unitDonor.CO.units.remove(unitDonor);
 
         // End the turn of the recipient.
         unitRecipient.isTurnOver = true;

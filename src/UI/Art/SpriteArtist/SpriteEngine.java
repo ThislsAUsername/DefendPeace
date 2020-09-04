@@ -12,6 +12,11 @@ import Engine.IView;
 
 public class SpriteEngine implements GraphicsEngine
 {
+  static
+  {
+    SpriteOptions.initialize();
+  }
+
   @Override
   public IView getMainUIView(MainUIController control)
   {

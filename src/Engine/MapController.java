@@ -9,7 +9,6 @@ import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameInput.GameInputHandler;
-import Terrain.GameMap;
 import UI.CO_InfoController;
 import UI.GameStatsController;
 import UI.InGameMenu;
@@ -32,6 +31,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   private OptionSelector myGameInputOptionSelector = null;
 
   private int nextSeekIndex;
+  private ArrayList<XYCoord> seekLocations;
 
   private enum InputMode
   {
@@ -41,21 +41,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
   private InputMode inputMode;
 
   private boolean isGameOver;
-
-  /** Just a simple struct to hold the currently-selected unit and its tentative path. */
-  private class ContemplatedAction
-  {
-    Path movePath = null;
-    boolean aiming = false;
-
-    public void clear()
-    {
-      movePath = null;
-      aiming = false;
-    }
-  }
-
-  ContemplatedAction contemplatedAction;
 
   public MapController(GameInstance game, MapView view)
   {
@@ -70,7 +55,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
     inputMode = InputMode.INPUT;
     isGameOver = false;
     nextSeekIndex = 0;
-    contemplatedAction = new ContemplatedAction();
 
     if( initGame )
       // Start the first turn.
@@ -154,6 +138,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
    */
   private void handleFreeTileSelect(InputHandler.InputAction input)
   {
+    boolean shouldConsider = true;
     switch (input)
     {
       case UP:
@@ -169,65 +154,76 @@ public class MapController implements IController, GameInputHandler.StateChanged
         myGame.moveCursorRight();
         break;
       case SEEK: // Move the cursor to either the next unit that is ready to move, or an owned usable property.
-        boolean found = false;
-        int tries = 0;
-        int numUnits = myGame.activeCO.units.size();
-        ArrayList<XYCoord> usableProperties = Utils.findUsableProperties(myGame.activeCO, myGame.gameMap);
-        int numFreeIndustries = usableProperties.size();
-        int maxTries = numUnits + numFreeIndustries;
-        while ((maxTries > 0) && !found && (tries < maxTries))
+        
+        if( null == seekLocations )
+        {
+          // Populate our list of seek candidates and sort them by distance from the cursor.
+          nextSeekIndex = 0; // We are going to rebuild the list; start from the start.
+
+          // First get all active units, sorted.
+          ArrayList<XYCoord> unitLocations = new ArrayList<XYCoord>();
+          unitLocations.addAll(Utils.findLocationsNearUnits(myGame.gameMap, myGame.activeCO.units, 0));
+          unitLocations.removeIf(xy -> myGame.gameMap.getLocation(xy).getResident().isTurnOver);
+          Utils.sortLocationsByDistance(myGame.getCursorCoord(), unitLocations);
+
+          // Find all usable properties, sorted.
+          ArrayList<XYCoord> usableProperties = Utils.findUsableProperties(myGame.activeCO, myGame.gameMap);
+          usableProperties.removeIf(xy -> myGame.gameMap.getLocation(xy).getResident() != null);
+          Utils.sortLocationsByDistance(myGame.getCursorCoord(), usableProperties);
+
+          // We'll loop over units first, then properties.
+          seekLocations = new ArrayList<XYCoord>();
+          seekLocations.addAll(unitLocations);
+          seekLocations.addAll(usableProperties);
+        }
+
+        if( !seekLocations.isEmpty() )
         {
           // Normalize the index to allow wrapping.
-          if( nextSeekIndex >= maxTries )
+          if( nextSeekIndex >= seekLocations.size() )
           {
             nextSeekIndex = 0;
           }
 
-          if( nextSeekIndex < numUnits )
-          {
-            // If we find a unit that is ready to go, move the cursor to it.
-            Unit nextUnit = myGame.activeCO.units.get(nextSeekIndex);
-            if( !nextUnit.isTurnOver )
-            {
-              myGame.setCursorLocation(nextUnit.x, nextUnit.y);
-              found = true;
-            }
-          }
-          else
-          {
-            myGame.setCursorLocation(usableProperties.get(nextSeekIndex - numUnits));
-            found = true;
-          }
-          // Increment for the next loop cycle or SEEK input.
-          ++tries;
-          ++nextSeekIndex;
+          // Move to the next location.
+          XYCoord seekCoord = seekLocations.get(nextSeekIndex++);
+
+          // Don't allow seeking to the current location.
+          if( myGame.getCursorCoord().equals(seekCoord) ) seekCoord = seekLocations.get(nextSeekIndex++);
+
+          myGame.setCursorLocation(seekCoord);
         }
+
         break;
       case SELECT:
-        // Get the current location.
-        XYCoord cursorCoords = new XYCoord(myGame.getCursorX(), myGame.getCursorY());
-
         // Pass the current cursor location to the GameInputHandler.
-        myGameInputHandler.select(cursorCoords);
+        myGameInputHandler.select(myGame.getCursorCoord());
+        shouldConsider = false;
         break;
       case BACK:
         myGameInputHandler.back();
+        shouldConsider = false;
         break;
       default:
         System.out.println("WARNING! MapController.handleFreeTileSelect() was given invalid input enum (" + input + ")");
     }
+    if( shouldConsider )
+      myGameInputHandler.consider(myGame.getCursorCoord());
   }
 
   /** Force the user to select one map tile from the InputStateHandler's selection. */
   private void handleConstrainedTileSelect(InputHandler.InputAction input)
   {
+    boolean shouldConsider = true;
     switch (input)
     {
       case SELECT:
-        myGameInputHandler.select(new XYCoord(myGame.getCursorX(), myGame.getCursorY()));
+        myGameInputHandler.select(myGame.getCursorCoord());
+        shouldConsider = false;
         break;
       case BACK:
         myGameInputHandler.back();
+        shouldConsider = false;
         break;
       case UP:
       case LEFT:
@@ -247,6 +243,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case SEEK: // Seek does nothing in this input state.
       default:
     }
+    if( shouldConsider )
+      myGameInputHandler.consider(myGame.getCursorCoord());
   }
 
   /**
@@ -255,6 +253,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   private void handlePathSelect(InputHandler.InputAction input)
   {
     boolean inMoveableSpace = myGame.getCursorLocation().isHighlightSet();
+    boolean shouldConsider = true;
 
     switch (input)
     {
@@ -265,7 +264,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorDown();
         }
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
         break;
       case DOWN:
         myGame.moveCursorDown();
@@ -274,7 +272,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorUp();
         }
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
         break;
       case LEFT:
         myGame.moveCursorLeft();
@@ -283,7 +280,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorRight();
         }
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
         break;
       case RIGHT:
         myGame.moveCursorRight();
@@ -292,24 +288,20 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           myGame.moveCursorLeft();
         }
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.activeCO.myView);
         break;
       case SELECT:
-        GameInputHandler.InputType type = myGameInputHandler.select(contemplatedAction.movePath);
-        // If the next state has an InputType of FREE_TILE_SELECT, then we actually moved back()
-        // instead of forward to the action-select state. Clear the path so we can rebuild it.
-        if( type == GameInputHandler.InputType.FREE_TILE_SELECT )
-        {
-          contemplatedAction.movePath = null;
-        }
+        myGameInputHandler.select(myGame.getCursorCoord());
+        shouldConsider = false;
         break;
       case BACK:
-        contemplatedAction.movePath = null;
         myGameInputHandler.back();
+        shouldConsider = false;
         break;
       default:
         System.out.println("WARNING! MapController.handleMovementInput() was given invalid input enum (" + input + ")");
     }
+    if( shouldConsider )
+      myGameInputHandler.consider(myGame.getCursorCoord());
   }
 
   /**
@@ -330,19 +322,24 @@ public class MapController implements IController, GameInputHandler.StateChanged
       myGameInputHandler.back();
       return;
     }
+    boolean shouldConsider = true;
 
     switch (input)
     {
       case SELECT:
         // Pass the user's selection to the state handler.
         myGameInputHandler.select(myGameInputHandler.getMenuOptions()[myGameInputOptionSelector.getSelectionNormalized()]);
+        shouldConsider = false;
         break;
       case BACK:
         myGameInputHandler.back();
+        shouldConsider = false;
         break;
       default:
         currentMenu.handleMenuInput(input);
     }
+    if( shouldConsider )
+      myGameInputHandler.consider(myGame.getCursorCoord());
   }
 
   /**
@@ -351,6 +348,9 @@ public class MapController implements IController, GameInputHandler.StateChanged
   @Override
   public void onStateChange()
   {
+    // Whenever we have a context change, clear the seek list.
+    seekLocations = null;
+
     GameInputHandler.InputType inputType = myGameInputHandler.getInputType();
     myGameInputOptionSelector = myGameInputHandler.getOptionSelector();
 
@@ -370,13 +370,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case CONSTRAINED_TILE_SELECT:
         // Create an option selector to keep track of where we are.
         myGame.setCursorLocation(myGameInputHandler.getCoordinateOptions().get(myGameInputOptionSelector.getSelectionNormalized()));
-        contemplatedAction.aiming = true;
         break;
       case MENU_SELECT:
-        Path path = contemplatedAction.movePath;
+        Path path = myGameInputHandler.myStateData.path;
         if( null != path && path.getPathLength() > 0 )
         {
-          myGame.setCursorLocation(contemplatedAction.movePath.getEnd().GetCoordinates());
+          myGame.setCursorLocation(path.getEnd().GetCoordinates());
         }
         else
         {
@@ -387,24 +386,15 @@ public class MapController implements IController, GameInputHandler.StateChanged
           }
         }
         currentMenu = new InGameMenu<>(myGameInputHandler.getMenuOptions(), myGameInputOptionSelector);
-        contemplatedAction.aiming = false;
         break;
       case ACTION_READY:
         if( null != myGameInputHandler.getReadyAction() )
         {
           executeGameAction(myGameInputHandler.getReadyAction());
         }
-        myGameInputHandler.reset();
-        contemplatedAction.aiming = false;
+        myGameInputHandler.reset(); // Reset the input handler to get rid of stale state
         break;
-      case PATH_SELECT:
-        XYCoord coord = myGameInputHandler.getUnitCoord();
-        if( null != coord )
-        {
-          myGame.setCursorLocation(coord);
-        }
-
-        buildMovePath(myGame.getCursorX(), myGame.getCursorY(), myGame.gameMap); // Get our first waypoint.
+      case PATH_SELECT: // no special handling
         break;
       case FREE_TILE_SELECT:
         myGameInputHandler.reset(); // Reset the input handler to get rid of stale state
@@ -453,41 +443,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       // If we are changing input modes, we
       // know we don't have a valid action right now.
       myGameInputHandler.reset();
-      contemplatedAction.clear();
       currentMenu = null;
-    }
-  }
-
-  /**
-   * Constructs a unit's movement path, one tile at a time, as the user moves the cursor around the map.
-   * If the current movement path is impossible, it will attempt to regenerate a path from scratch.
-   */
-  private void buildMovePath(int x, int y, GameMap map)
-  {
-    if( null == contemplatedAction.movePath )
-    {
-      contemplatedAction.movePath = new Path(myView.getMapUnitMoveSpeed());
-    }
-
-    // If the new point already exists on the path, cut the extraneous points out.
-    for( int i = 0; i < contemplatedAction.movePath.getPathLength(); ++i )
-    {
-      if( contemplatedAction.movePath.getWaypoint(i).x == x && contemplatedAction.movePath.getWaypoint(i).y == y )
-      {
-        contemplatedAction.movePath.snip(i);
-        break;
-      }
-    }
-
-    contemplatedAction.movePath.addWaypoint(x, y);
-
-    Unit actor = myGameInputHandler.getActingUnit();
-    XYCoord coord = myGameInputHandler.getUnitCoord();
-    boolean canEndOnOccupied = true;
-    if( !Utils.isPathValid(coord, actor, contemplatedAction.movePath, map, canEndOnOccupied) )
-    {
-      // The currently-built path is invalid. Try to generate a new one (may still return null).
-      contemplatedAction.movePath = Utils.findShortestPath(coord, actor, x, y, map);
     }
   }
 
@@ -599,6 +555,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           // Back to normal input mode.
           changeInputMode(InputMode.INPUT);
+          myGameInputHandler.reset();
         }
       }
     }
@@ -620,8 +577,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
       myView.animate(turnEvents);
       changeInputMode(InputMode.ANIMATION);
     }
-
-    myView.animate(null);
+    else
+    {
+      myView.animate(null);
+    }
   }
 
   public Unit getContemplatedActor()
@@ -636,17 +595,17 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   public Path getContemplatedMove()
   {
-    return contemplatedAction.movePath;
+    return myGameInputHandler.myStateData.path;
   }
 
   public boolean isTargeting()
   {
-    return contemplatedAction.aiming;
+    return myGameInputHandler.isTargeting();
   }
 
-  public Collection<DamagePopup> getDamagePopups(GameMap map, XYCoord target)
+  public Collection<DamagePopup> getDamagePopups()
   {
-    return myGameInputHandler.getDamagePopups(map, target);
+    return myGameInputHandler.myStateData.damagePopups;
   }
 
   /** Returns the currently-active in-game menu, or null if no menu is in use. */

@@ -6,7 +6,7 @@ import Engine.Path;
 import Engine.XYCoord;
 import Units.Unit;
 
-public abstract class GameMap implements Serializable
+public abstract class GameMap implements Serializable, IEnvironsProvider
 {
   private static final long serialVersionUID = 1L;
   public final int mapWidth;
@@ -30,6 +30,12 @@ public abstract class GameMap implements Serializable
 
   /** Returns the Environment of the specified tile, or null if that location does not exist. */
   public abstract Environment getEnvironment(int w, int h);
+
+  /** Returns the Unit in the specified tile. */
+  public abstract Unit getResident(XYCoord coord);
+
+  /** Returns the Unit in the specified tile. */
+  public abstract Unit getResident(int w, int h);
 
   /** Returns the Location at the specified location, or null if that Location does not exist. */
   public abstract Location getLocation(XYCoord location);

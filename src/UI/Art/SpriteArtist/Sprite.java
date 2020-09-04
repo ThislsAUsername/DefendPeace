@@ -63,9 +63,12 @@ public class Sprite
   
   /**
    * Sprite copy-constructor. Perform a deep-copy on each of the other sprite's frames.
-   * @param other
    */
   public Sprite(Sprite other)
+  {
+    this(other, false);
+  }
+  public Sprite(Sprite other, boolean hFlip)
   {
     spriteImages = new ArrayList<BufferedImage>();
 
@@ -77,11 +80,16 @@ public class Sprite
     }
     else
     {
+      int width = other.getFrame(0).getWidth();
+      int height = other.getFrame(0).getHeight();
       for( int i = 0; i < other.numFrames(); ++i )
       {
         BufferedImage aFrame = other.getFrame(i);
-        BufferedImage myFrame = new BufferedImage(aFrame.getWidth(), aFrame.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        myFrame.getGraphics().drawImage(aFrame, 0, 0, null);
+        BufferedImage myFrame = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        if( hFlip )
+          myFrame.getGraphics().drawImage(aFrame, width, 0, -width, height, null);
+        else
+          myFrame.getGraphics().drawImage(aFrame, 0, 0, null);
         spriteImages.add(myFrame);
       }
     }
@@ -103,9 +111,9 @@ public class Sprite
 
   public BufferedImage getFrame(int index)
   {
-    // Normalize the index if needed.
-    for( ; index >= spriteImages.size() || index < 0; index += spriteImages.size() * ((index < 0) ? 1 : -1) )
-      ;
+    index = index % spriteImages.size();
+    if( 0 > index )
+      index += spriteImages.size();
     return spriteImages.get(index);
   }
 
@@ -195,4 +203,29 @@ public class Sprite
       }
     }
   }
+
+  public void convertToInverseBrightnessMask(Color maskColor)
+  {
+    for( BufferedImage bi : spriteImages )
+    {
+      WritableRaster raster = bi.getRaster();
+      double mask[] = {maskColor.getRed(), maskColor.getGreen(), maskColor.getBlue(), maskColor.getAlpha() };
+      for( int x = 0; x < bi.getWidth(); ++x )
+      {
+        for( int y = 0; y < bi.getHeight(); ++y )
+        {
+          double[] pixel = new double[4];
+          raster.getPixel(x, y, pixel);
+          if( pixel[3] == 0 )
+            continue;
+          double scaledBrightness = (pixel[0] + pixel[1] + pixel[2]) / 3;
+          scaledBrightness = Math.min(255, scaledBrightness * 1.5);
+          // Mask alpha == inverse of the pixel brightness
+          mask[3] = 255 - scaledBrightness;
+          raster.setPixel(x, y, mask);
+        }
+      }
+    }
+  }
+
 }

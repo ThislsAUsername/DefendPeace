@@ -2,10 +2,13 @@ package Engine;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Queue;
+import java.util.Set;
+
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
@@ -13,6 +16,7 @@ import Terrain.Location;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.WeaponModel;
+import Units.MoveTypes.MoveType;
 
 public class Utils
 {
@@ -49,6 +53,12 @@ public class Utils
   /** Returns a list of locations of all valid targets that weapon could hit from attackerPosition. */
   public static ArrayList<XYCoord> findTargetsInRange(GameMap map, Commander co, XYCoord attackerPosition, WeaponModel weapon)
   {
+    return findTargetsInRange(map, co, attackerPosition, weapon, true);
+  }
+
+  /** Returns a list of locations of all valid targets that weapon could hit from attackerPosition. */
+  public static ArrayList<XYCoord> findTargetsInRange(GameMap map, Commander co, XYCoord attackerPosition, WeaponModel weapon, boolean includeTerrain)
+  {
     ArrayList<XYCoord> locations = findLocationsInRange(map, attackerPosition, weapon.minRange, weapon.maxRange);
     ArrayList<XYCoord> targets = new ArrayList<XYCoord>();
     for( XYCoord loc : locations )
@@ -61,7 +71,7 @@ public class Utils
         targets.add(loc);
       }
       // You can never be friends with terrain, so shoot anything that's shootable
-      else if (resident == null && // Peeps ain't there.
+      else if (includeTerrain && resident == null && // Peeps ain't there.
                weapon.getDamage(map.getEnvironment(loc).terrainType) > 0)
         targets.add(loc);
     }
@@ -78,7 +88,7 @@ public class Utils
       {
         // Add any location that is empty and supports movement of the cargo unit.
         if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
-            && cargo.model.movePower >= cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
+            && MoveType.IMPASSABLE > cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
         {
           dropoffLocations.add(loc);
         }
@@ -225,6 +235,11 @@ public class Utils
   {
     return findShortestPath(start, unit, x, y, map, false);
   }
+  /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
+  public static Path findShortestPath(XYCoord start, Unit unit, XYCoord destination, GameMap map)
+  {
+    return findShortestPath(start, unit, destination.xCoord, destination.yCoord, map, false);
+  }
   /**
    * Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)}
    * @param theoretical If true, ignores other Units and move-power limitations.
@@ -254,7 +269,7 @@ public class Utils
       return null;
     }
 
-    Path aPath = new Path(100);
+    Path aPath = new Path();
     if( !map.isLocationValid(x, y) )
     {
       // Unit is not in a valid place. No path can be found.
@@ -647,23 +662,81 @@ public class Utils
     return originalPathOK;
   }
 
-  public static HashSet<XYCoord> findLocationsNearProperties(GameMap gameMap, Commander cmdr, int range)
+  /**
+   * Find all locations within `range` spaces of all known properties owned by `cmdr`.
+   * @return a Set of all qualifying locations.
+   */
+  public static Set<XYCoord> findLocationsNearProperties(GameMap gameMap, Commander cmdr, int range)
   {
-    HashSet<XYCoord> tilesInRange = new HashSet<XYCoord>();
-    for( XYCoord prop : cmdr.ownedProperties )
+    HashSet<XYCoord> propTiles = new HashSet<XYCoord>();
+
+    // NOTE: We can't just use cmdr.ownedProperties because that gives away unit locations that we may not be able to see.
+    for( int x = 0; x < gameMap.mapWidth; ++x )
     {
-      tilesInRange.addAll(Utils.findLocationsInRange(gameMap, prop, 0, range));
+      for( int y = 0; y < gameMap.mapHeight; ++y )
+      {
+        XYCoord xyc = new XYCoord(x, y);
+        if( gameMap.getLocation(xyc).getOwner() == cmdr )
+        {
+          propTiles.add(xyc);
+        }
+      }
     }
-    return tilesInRange;
+    return findLocationsNearPoints(gameMap, propTiles, range);
   }
 
-  public static HashSet<XYCoord> findLocationsNearUnits(GameMap gameMap, Commander cmdr, int range)
+  /**
+   * Find all locations within `range` spaces of all known units owned by `cmdr`.
+   * @return a Set of all qualifying locations.
+   */
+  public static Set<XYCoord> findLocationsNearUnits(GameMap gameMap, Commander cmdr, int range)
+  {
+    HashSet<XYCoord> unitTiles = new HashSet<XYCoord>();
+
+    // NOTE: We can't just use cmdr.units because that gives away unit locations that we may not be able to see.
+    for( int x = 0; x < gameMap.mapWidth; ++x )
+    {
+      for( int y = 0; y < gameMap.mapHeight; ++y )
+      {
+        XYCoord xyc = new XYCoord(x, y);
+        Unit unit = gameMap.getLocation(xyc).getResident();
+        if( unit != null && cmdr == unit.CO )
+        {
+          unitTiles.add(xyc);
+        }
+      }
+    }
+    return findLocationsNearPoints(gameMap, unitTiles, range);
+  }
+
+  /**
+   * Find all locations within `range` spaces of the specified units.
+   * @return a Set of all qualifying locations.
+   */
+  public static Set<XYCoord> findLocationsNearUnits(GameMap gameMap, Collection<Unit> units, int range)
+  {
+    HashSet<XYCoord> unitTiles = new HashSet<XYCoord>();
+
+    for( Unit u : units )
+    {
+      unitTiles.add(new XYCoord(u.x, u.y));
+    }
+    return findLocationsNearPoints(gameMap, unitTiles, range);
+  }
+
+  /**
+   * Find all locations within `range` spaces of the given points.
+   * @return a Set of all qualifying locations.
+   */
+  public static Set<XYCoord> findLocationsNearPoints(GameMap gameMap, Collection<XYCoord> points, int range)
   {
     HashSet<XYCoord> tilesInRange = new HashSet<XYCoord>();
-    for( Unit unit : cmdr.units )
+
+    for( XYCoord point : points )
     {
-      tilesInRange.addAll(Utils.findLocationsInRange(gameMap, new XYCoord(unit.x, unit.y), 0, range));
+      tilesInRange.addAll(Utils.findLocationsInRange(gameMap, point, 0, range));
     }
+
     return tilesInRange;
   }
 
