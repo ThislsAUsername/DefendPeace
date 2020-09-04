@@ -26,6 +26,7 @@ import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
+import Engine.UuidGenerator;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
@@ -480,7 +481,7 @@ public class Commander extends GameEventListener implements Serializable
     int numBytes = Long.BYTES + (Character.BYTES*pass.length());
     ByteBuffer bb = ByteBuffer.allocate(numBytes);
     bb.putLong(passSalt).put(pass.getBytes());
-    UUID hashedPass = UUID.nameUUIDFromBytes(bb.array());
+    UUID hashedPass = UuidGenerator.sha1Uuid(pass);
     return hashedPass;
   }
 

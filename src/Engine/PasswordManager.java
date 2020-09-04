@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
-import java.util.UUID;
 
+import Engine.UuidGenerator;
 import CommandingOfficers.Commander;
 
 public class PasswordManager
@@ -36,7 +36,7 @@ public class PasswordManager
       if( storedPass.isEmpty() )
       {
         System.out.println("Generating new password");
-        storedPass = UUID.randomUUID().toString();
+        storedPass = UuidGenerator.randomUuid().toString();
         writePassfile(storedPass);
       }
       System.out.println("Setting password.");
