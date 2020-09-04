@@ -17,11 +17,16 @@ import UI.GameOption;
 
 public class ConfigUtils
 {
+  public static String keyFromOption(GameOption<?> option)
+  {
+    return option.optionName.replace(" ", "");
+  }
+
   public static boolean writeConfigs(String filename, List<GameOption<?>> options)
   {
     List<Pair<String, Integer>> optAsList =
         options.stream().map(x ->
-                         Pair.from(x.optionName.replace(" ", ""), x.getSelectionNormalized()))
+                         Pair.from(keyFromOption(x), x.getSelectionNormalized()))
                              .collect(Collectors.toList());
     return writeConfigItems(filename, optAsList);
   }
@@ -71,7 +76,7 @@ public class ConfigUtils
 
     for( GameOption<?> option : optionsToPopulate )
     {
-      String key = option.optionName.replace(" ", "");
+      String key = keyFromOption(option);
       if( optionMap.containsKey(key) )
         option.setSelectedOption(optionMap.get(key));
       else
