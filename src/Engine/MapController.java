@@ -554,7 +554,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   private void startNextTurn()
   {
-    boolean passCheckOK = !myGame.requirePassword() || PasswordManager.validateAccess(myGame.activeCO);
+    int nextCoIdx = myGame.getActiveCOIndex() + 1;
+    nextCoIdx = (nextCoIdx >= myGame.commanders.length) ? 0 : nextCoIdx;
+    Commander nextCO = myGame.commanders[nextCoIdx];
+    boolean passCheckOK = !myGame.requirePassword() || PasswordManager.validateAccess(nextCO);
     if( !passCheckOK )
     {
       // Display "It's not your turn" message.
