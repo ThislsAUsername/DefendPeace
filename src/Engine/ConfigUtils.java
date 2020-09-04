@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.List;
@@ -31,6 +32,27 @@ public class ConfigUtils
     return writeConfigItems(filename, optAsList);
   }
 
+  /** Writes out the objects to a file, using their indices as keys and invoking their toString() methods. */
+  public static boolean writeConfigStrings(String filename, Object[] options)
+  {
+    List<Pair<Integer, String>> optPairs = new ArrayList<Pair<Integer,String>>();
+
+    for( int i = 0; i < options.length; ++i )
+      optPairs.add(Pair.from(i, options[i].toString()));
+
+    return writeConfigItems(filename, optPairs);
+  }
+
+  public static <K extends Serializable, V extends Serializable>
+  boolean writeConfigItems(String filename, Map<K, V> options)
+  {
+    List<Pair<K, V>> optAsList =
+        options.entrySet().stream().map(x ->
+                         Pair.from(x.getKey(), x.getValue()))
+                             .collect(Collectors.toList());
+    return writeConfigItems(filename, optAsList);
+  }
+
   /**
    * Writes a series of key/value pairs to a file in a standard ASCII format
    * @param options The objects to be toString()'d
@@ -43,6 +65,8 @@ public class ConfigUtils
     try
     {
       File configFile = new File(filename);
+      // Ensure the directory exists for us to write to
+      new File(configFile.getParent()).mkdirs();
       FileWriter writer = new FileWriter(configFile, false);
       for( Pair<K, V> op: options )
       {
