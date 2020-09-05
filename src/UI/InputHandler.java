@@ -16,7 +16,7 @@ public class InputHandler implements IController
   private static final String KEYS_FILENAME = "res/keys.txt";
   private static final String OTHER_INPUT_FILENAME = "res/other_input.txt";
 
-  public static GameOptionBool seekBuildingsLastOption = new GameOptionBool("Seek Buildings Last", true);
+  public static GameOptionBool seekBuildingsLastOption = new GameOptionBool("Seek Units First", true);
   public static GameOption<?>[] extraOptions = { seekBuildingsLastOption };
   public static OptionSelector actionCommandSelector = new OptionSelector( InputHandler.InputAction.values().length+extraOptions.length );
   public static OptionSelector actionKeySelector = new OptionSelector(1); // We will just use the absolute, and normalize per action.
