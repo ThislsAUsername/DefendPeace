@@ -1,22 +1,23 @@
 package UI;
 
 import java.awt.event.KeyEvent;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
-
+import Engine.ConfigUtils;
 import Engine.IController;
 import Engine.OptionSelector;
+import Engine.Pair;
 
 public class InputHandler implements IController
 {
   private static final String KEYS_FILENAME = "res/keys.txt";
+
+  public static OptionSelector actionCommandSelector = new OptionSelector( InputHandler.InputAction.values().length );
+  public static OptionSelector actionKeySelector = new OptionSelector(1); // We will just use the absolute, and normalize per action.
+
   public enum InputAction
   {
     UP, DOWN, LEFT, RIGHT, SEEK, SELECT, BACK
@@ -35,40 +36,25 @@ public class InputHandler implements IController
     bindingsByInputAction = new HashMap<InputAction, ArrayList<Integer> >();
 
     // Load keys file if it exists
-    boolean loadedFile = false;
-    File keyFile = new File(KEYS_FILENAME);
-    if( keyFile.exists() )
+    boolean loadedFile = ConfigUtils.readConfigLists(KEYS_FILENAME,
+                                                    (String s)->InputAction.valueOf(s),
+                                                    (Scanner linescan)->
+                                                    {
+                                                      ArrayList<Integer> actionCodes = new ArrayList<Integer>();
+                                                      while(linescan.hasNext())
+                                                      {
+                                                        actionCodes.add(linescan.nextInt());
+                                                      }
+                                                      return actionCodes;
+                                                    },
+                                                    bindingsByInputAction);
+    if( loadedFile )
     {
-      try
+      // Make sure we have assigned all possible InputActions before we declare success.
+      if( bindingsByInputAction.size() != InputAction.values().length )
       {
-        Scanner scanner = new Scanner(keyFile);
-        while(scanner.hasNextLine())
-        {
-          Scanner linescan = new Scanner(scanner.nextLine());
-          InputAction actionType = InputAction.valueOf(linescan.next());
-          ArrayList<Integer> actionCodes = new ArrayList<Integer>();
-          while(linescan.hasNext())
-          {
-            actionCodes.add(linescan.nextInt());
-          }
-          bindingsByInputAction.put(actionType, actionCodes);
-          linescan.close();
-        }
-        scanner.close();
-
-        // Make sure we have assigned all possible InputActions before we declare success.
-        if( bindingsByInputAction.size() != InputAction.values().length )
-          System.out.println("Saved key file did not have values for all actions! Reverting to defaults.");
-        else
-          loadedFile = true;
-      }
-      catch(FileNotFoundException fnfe)
-      {
-        System.out.println("Somehow we failed to find the keys file after checking that it exists! Using defaults.");
-      }
-      catch( InputMismatchException ime )
-      {
-        System.out.println("Encountered an error while parsing keys file! Using defaults.");
+        System.out.println("Saved key file did not have values for all actions! Reverting to defaults.");
+        loadedFile = false;
       }
     }
 
@@ -96,9 +82,6 @@ public class InputHandler implements IController
   // Will be true when we are waiting to input a key assignment.
   private static boolean assigningKey = false;
 
-  public OptionSelector actionCommandSelector = new OptionSelector( InputHandler.InputAction.values().length );
-  public OptionSelector actionKeySelector = new OptionSelector(1); // We will just use the absolute, and normalize per action.
-
   private InputHandler(){}
   private static InputHandler singleton;
   public static InputHandler getInstance()
@@ -115,7 +98,7 @@ public class InputHandler implements IController
     if( assigningKey )
     {
       // Assign the new key.
-      int kb = getInstance().actionCommandSelector.getSelectionNormalized();
+      int kb = actionCommandSelector.getSelectionNormalized();
       InputHandler.InputAction assignedAction = InputHandler.InputAction.values()[kb];
       InputHandler.bindLastPressedKey(assignedAction);
       assigningKey = false;
@@ -308,12 +291,12 @@ public class InputHandler implements IController
   public boolean handleInput(InputAction action)
   {
     boolean exitMenu = false;
+    int kb = actionCommandSelector.getSelectionNormalized();
 
     switch(action)
     {
       case SELECT:
         // If the currently-selected item is an existing key command, remove it.
-        int kb = actionCommandSelector.getSelectionNormalized();
         InputAction selectedAction = InputHandler.InputAction.values()[kb];
         OptionSelector actionKeys = getKeySelector(selectedAction);
         int keyIndex = actionKeys.getSelectionNormalized();
@@ -330,25 +313,18 @@ public class InputHandler implements IController
         break;
       case BACK:
         // Write keys file.
-        try
+        List<Pair<InputAction, String>> configItems = new ArrayList<Pair<InputAction,String>>();
+        for( InputAction key : bindingsByInputAction.keySet() )
         {
-          File keyFile = new File(KEYS_FILENAME);
-          FileWriter writer = new FileWriter(keyFile, false);
-          for( InputAction command: bindingsByInputAction.keySet() )
+          String val = "";
+          for( Integer code : bindingsByInputAction.get(key) )
           {
-            writer.write(command.toString());
-            for( Integer code : bindingsByInputAction.get(command) )
-            {
-              writer.write(" " + code);
-            }
-            writer.write('\n');
+            val += " " + code;
           }
-          writer.close();
+          // substring to remove the first space
+          configItems.add(Pair.from(key, val.substring(1)));
         }
-        catch( IOException ioe )
-        {
-          System.out.println("Error! Failed to save key bindings file!.\n  " + ioe.toString());
-        }
+        ConfigUtils.writeConfigItems(KEYS_FILENAME, configItems);
         exitMenu = true;
         break;
       case DOWN:
@@ -357,7 +333,7 @@ public class InputHandler implements IController
         break;
       case LEFT:
       case RIGHT:
-        actionKeySelector.handleInput(action);
+          actionKeySelector.handleInput(action);
         break;
         default:
           System.out.println("Warning: Unsupported input " + action + " in InputHandler.");

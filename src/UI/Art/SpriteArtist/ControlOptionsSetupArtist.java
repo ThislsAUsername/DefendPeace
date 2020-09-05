@@ -38,7 +38,8 @@ public class ControlOptionsSetupArtist
     int yDraw = spacing/2;
 
     // Find the selected command/key.
-    int selectedAction = myControl.actionCommandSelector.getSelectionNormalized();
+    int selectedAction = InputHandler.actionCommandSelector.getSelectionNormalized();
+
     int selectedKey = myControl.getKeySelector(InputHandler.InputAction.values()[selectedAction]).getSelectionNormalized();
 
     // Create an un-scaled image to draw everything at real size before scaling it to the screen.

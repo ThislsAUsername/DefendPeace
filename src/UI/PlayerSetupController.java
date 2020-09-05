@@ -1,10 +1,13 @@
 package UI;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Scanner;
 
 import AI.AILibrary;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderLibrary;
+import Engine.ConfigUtils;
 import Engine.Driver;
 import Engine.GameInstance;
 import Engine.IController;
@@ -16,7 +19,6 @@ import UI.InputHandler.InputAction;
  * Controller for choosing COs and colors after the map has been chosen.
  * Left/Right changes the CO selector with focus.
  * Up/Down changes the CO selected for that slot.
- * LS/RS changes the color of the selected CO?
  */
 public class PlayerSetupController implements IController
 {
@@ -45,12 +47,22 @@ public class PlayerSetupController implements IController
     // Create objects to keep track of the selected options for each player.
     coSelectors = new PlayerSetupInfo[numCos];
 
+    // Read in the last settings we used on this map, if available
+    HashMap<Integer, String> optionMap = new HashMap<Integer, String>();
+    ConfigUtils.readConfigLists(buildSettingsFileName(),
+                                (String s)->Integer.valueOf(s),
+                                (Scanner linescan)->linescan.nextLine(),
+                                optionMap);
+
     // Start by making default CO/color selections.
     for(int co = 0; co < numCos; ++co)
     {
       // Set up our option selection framework
-      coSelectors[co] = new PlayerSetupInfo(co, CommanderLibrary.getCommanderList(),
-          UIUtils.getCOColors(), UIUtils.getFactions(), AILibrary.getAIList());
+      coSelectors[co] = new PlayerSetupInfo( co,
+                               CommanderLibrary.getCommanderList(),
+                               UIUtils.getCOColors(), UIUtils.getFactions(),
+                               AILibrary.getAIList(),
+                               optionMap.get(co) );
     }
   }
 
@@ -114,6 +126,10 @@ public class PlayerSetupController implements IController
 
           if( null != newGame )
           {
+            // Save these settings for next time
+            if( !ConfigUtils.writeConfigStrings(buildSettingsFileName(), coSelectors) )
+              System.out.println("Unable to write graphics options to file.");
+
             MapView mv = Driver.getInstance().gameGraphics.createMapView(newGame);
             MapController mapController = new MapController(newGame, mv);
 
@@ -165,5 +181,10 @@ public class PlayerSetupController implements IController
   public String getIconicUnit()
   {
     return gameBuilder.unitModelScheme.getIconicUnitName();
+  }
+
+  private String buildSettingsFileName()
+  {
+    return "res/map_options/" + gameBuilder.mapInfo.mapName + "_army_selections.txt";
   }
 }

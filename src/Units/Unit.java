@@ -11,8 +11,6 @@ import Engine.Path;
 import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
-import Engine.GameEvents.HealUnitEvent;
-import Engine.GameEvents.ResupplyEvent;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
