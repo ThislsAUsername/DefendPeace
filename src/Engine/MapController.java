@@ -56,7 +56,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     isGameOver = false;
     nextSeekIndex = 0;
 
-    // Start the first turn (or the next one if loading a protected save.
+    // Start the first turn (or the next one if loading a protected save).
     if( initGame || myGame.requireInitOnLoad() )
       startNextTurn();
 
