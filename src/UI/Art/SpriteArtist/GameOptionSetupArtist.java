@@ -118,7 +118,7 @@ public class GameOptionSetupArtist
     int xDraw = (optionsImage.getWidth() / 2) - (graphicsOptionWidth / 2);
     int yDraw = yDrawStart.geti();
     int firstOptionY = yDraw; // Hold onto this to draw the selector arrows.
-    int ySpacing = (graphicsOptionHeight + (optionNamePanel.getHeight() / 2));
+    int ySpacing = (int)(graphicsOptionHeight * 1.5);
 
     // Loop through and draw everything.
     GameOption<?>[] allOptions = myControl.gameOptions;
