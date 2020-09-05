@@ -292,20 +292,25 @@ public class GameInstance implements Serializable
     GameVersion verInfo = null;
     try (FileInputStream file = new FileInputStream(filename); ObjectInputStream in = new ObjectInputStream(file);)
     {
+      // Check that the save file has a matching version.
       verInfo = (GameVersion) in.readObject();
-      if( !new GameVersion().isEqual(verInfo) )
+      if( new GameVersion().isEqual(verInfo) )
+      {
+        // If so, make sure we aren't trying to take someone else's turn.
+        GameInstance gi = (GameInstance) in.readObject();
+        if( !gi.turn(new GameEventQueue()) )
+        {
+          prepends.append('~');
+          System.out.println(String.format(
+              String.format("Save is for another player's turn (%s).",
+                  (null != gi.activeCO) ? gi.activeCO.coInfo.name : "null")));
+        }
+      }
+      else
       {
         prepends.append('!');
         System.out.println(String.format("Save is incompatible version: %s",
             (null == verInfo) ? "unknown" : verInfo.toString()));
-      }
-      GameInstance gi = (GameInstance) in.readObject();
-      if( !gi.turn(new GameEventQueue()) )
-      {
-        prepends.append('~');
-        System.out.println(String.format(
-            String.format("Save is for another player's turn (%s).",
-                (null != gi.activeCO) ? gi.activeCO.coInfo.name : "null")));
       }
     }
     catch (Exception ex)
