@@ -97,7 +97,8 @@ public class SpriteLibrary
       File imgFile = new File(filename);
       if( imgFile.exists() && !imgFile.isDirectory() )
         bi = ImageIO.read(imgFile);
-      else System.out.println("WARNING! Resource file " + filename + " does not exist.");
+      // Missing sprites are common (e.g. for units with missing animations),
+      // and normally benign, so don't print a warning.
     }
     catch (IOException ioex)
     {
@@ -363,7 +364,7 @@ public class SpriteLibrary
   {
     if( null == mapUnitSymbolSprites )
     {
-      mapUnitSymbolSprites = new Sprite(SpriteLibrary.createDefaultBlankSprite(8, 8), 8, 8);
+      mapUnitSymbolSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/unit/icon/symbols.png"), 8, 8);
     }
     return mapUnitSymbolSprites;
   }

@@ -154,14 +154,15 @@ public class SpriteMapView extends MapView
     while (null == currentAnimation && !eventsToAnimate.isEmpty())
     {
       GameEvent event = eventsToAnimate.peek();
-      if( SpriteOptions.getAnimationsEnabled() ) currentAnimation = event.getEventAnimation(this);
       boolean isEventHidden = !(null == event.getStartPoint()) && gameMap.isLocationFogged(event.getStartPoint())
           && gameMap.isLocationFogged(event.getEndPoint());
-      if( null == currentAnimation || isEventHidden )
-      {
+
+      currentAnimation = event.getEventAnimation(this);
+      if( SpriteOptions.getAnimationsEnabled() && (null != currentAnimation) && !isEventHidden)
+        myGame.setCursorLocation(event.getEndPoint());
+      else
         // If we want to animate something hidden, or we don't have anything to animate, animate nothing instead.
         currentAnimation = new NoAnimation();
-      }
     }
   }
 

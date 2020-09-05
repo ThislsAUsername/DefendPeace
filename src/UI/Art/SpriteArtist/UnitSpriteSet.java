@@ -1,7 +1,10 @@
 package UI.Art.SpriteArtist;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.*;
@@ -15,6 +18,7 @@ import Units.UnitModel;
 public class UnitSpriteSet
 {
   Sprite sprites[] = new Sprite[AnimState.values().length];
+  Sprite buffMask;
 
   public final int ANIM_FRAMES_PER_MARK = 3; 
   private Set<AnimState> unFlippableStates = new HashSet<AnimState>(
@@ -115,6 +119,9 @@ public class UnitSpriteSet
       }
     }
 
+    // Make a mask that we can draw with varying opacity to indicate buff effects.
+    buffMask = new Sprite(sprites[AnimState.IDLE.ordinal()]);
+    buffMask.convertToInverseBrightnessMask(new Color(255, 255, 255, 255));
   }
 
   /**
@@ -160,39 +167,67 @@ public class UnitSpriteSet
   }
 
   /**
-   * Return the subimage of the requested sprite, greying if it cannot move, unless a different CO is active.
+   * Return the requested subimage of the sprite for the indicated unit state.
    */
-  private BufferedImage getUnitImage(AnimState state, int imageIndex)
+  public BufferedImage getUnitImage(AnimState state, int imageIndex)
   {
     return sprites[state.ordinal()].getFrame(imageIndex);
   }
 
-  /**
-   * Return the frame `imageIndex` of the `action` Sprite in this UnitSpriteSet.
-   */
-  public BufferedImage getUnitImage(int action, int imageIndex)
-  {
-    BufferedImage frame = null;
-    frame = sprites[action].getFrame(imageIndex);
-    return frame;
-  }
-
+  AlphaComposite buffComposite = null;
+  long lastCompositeCreationTime = 0;
   public void drawUnit(Graphics g, Unit u, AnimState state, int imageIndex, int drawX, int drawY)
   {
+    Graphics2D g2d = (Graphics2D)g;
+    Composite oldComposite = g2d.getComposite();
+
     boolean flipImage = SpriteMapView.shouldFlip(u);
 
+    // Figure out if we need to draw a buff overlay. If so, get some things together.
+    boolean drawBuff = AnimState.IDLE == state && !u.CO.getActiveAbilityName().isEmpty();
+    float buffOpacity = 0;
+    if( drawBuff )
+    {
+      // Set opacity as a function of time.
+      long nowTime = System.currentTimeMillis();
+      buffOpacity = (float)(0.9*Math.max(0, Math.sin(nowTime/130.)));
+
+      // Only regenerate the AlphaComposite object once per timestep.
+      if(lastCompositeCreationTime != nowTime)
+      {
+        lastCompositeCreationTime = nowTime;
+        buffComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, buffOpacity);
+      }
+    }
+
     BufferedImage frame = getUnitImage(state, imageIndex);
+    BufferedImage buffFrame = drawBuff ? buffMask.getFrame(imageIndex) : null;
     int shiftX =(SpriteLibrary.baseSpriteSize - frame.getWidth())/2; // center X
     int shiftY = SpriteLibrary.baseSpriteSize - frame.getHeight(); // bottom-justify Y
 
     // Draw the unit, facing the appropriate direction.
     if( flipImage && isStateFlippable(state) )
     {
-      g.drawImage(frame, drawX - shiftX + (frame.getWidth()), drawY + shiftY, -frame.getWidth(), frame.getHeight(), null);
+      g2d.drawImage(frame, drawX - shiftX + (frame.getWidth()), drawY + shiftY, -frame.getWidth(), frame.getHeight(), null);
+      if( drawBuff )
+      {
+        // Draw the buff overlay and reset the graphics composite.
+        g2d.setComposite(buffComposite);
+        g2d.drawImage(buffFrame, drawX - shiftX + (buffFrame.getWidth()),
+            drawY + shiftY, -buffFrame.getWidth(), buffFrame.getHeight(), null);
+        g2d.setComposite(oldComposite);
+      }
     }
     else
     {
-      g.drawImage(frame, drawX + shiftX, drawY + shiftY, frame.getWidth(), frame.getHeight(), null);
+      g2d.drawImage(frame, drawX + shiftX, drawY + shiftY, frame.getWidth(), frame.getHeight(), null);
+      if( drawBuff )
+      {
+        // Draw the buff overlay and reset the graphics composite.
+        g2d.setComposite(buffComposite);
+        g2d.drawImage(buffFrame, drawX + shiftX, drawY + shiftY, buffFrame.getWidth(), buffFrame.getHeight(), null);
+        g2d.setComposite(oldComposite);
+      }
     }
   }
 
