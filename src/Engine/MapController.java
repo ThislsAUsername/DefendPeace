@@ -44,11 +44,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   public MapController(GameInstance game, MapView view)
   {
-    this(game,view,true);
-  }
-
-  public MapController(GameInstance game, MapView view, boolean initGame)
-  {
     myGame = game;
     myView = view;
     myView.setController(this);
@@ -57,7 +52,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     nextSeekIndex = 0;
 
     // Start the first turn (or the next one if loading a protected save).
-    if( initGame || myGame.requireInitOnLoad() )
+    if( myGame.requireInitOnLoad() )
       startNextTurn();
 
     // Initialize our game input handler.

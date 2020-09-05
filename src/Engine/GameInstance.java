@@ -42,7 +42,7 @@ public class GameInstance implements Serializable
   boolean isSecurityEnabled;
 
   private int currentTurn;
-  private boolean currentTurnEnded; // Needed to advance the turn when loading a protected save.
+  private boolean currentTurnEnded = true; // Set to false when saving a game mid-turn.
 
   public GameInstance(MapMaster map)
   {
