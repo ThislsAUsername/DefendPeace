@@ -21,8 +21,7 @@ public class TurnInitEvent implements GameEvent
 
   public TurnInitEvent(Commander co, int turnNum, boolean hideMap)
   {
-    this(co, turnNum, hideMap, new ArrayList<String>());
-    msg.add("Turn "+turnNum);
+    this(co, turnNum, hideMap, "Turn "+turnNum);
   }
 
   public TurnInitEvent(Commander co, int turnNum, boolean hideMap, String message)
