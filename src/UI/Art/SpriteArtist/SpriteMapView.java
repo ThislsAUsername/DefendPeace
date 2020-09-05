@@ -5,8 +5,10 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Queue;
 
+import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.Path;
 import Engine.XYCoord;
@@ -27,6 +29,8 @@ import UI.Art.Animation.GameEndAnimation;
 import UI.Art.Animation.NoAnimation;
 import UI.Art.Animation.NobunagaBattleAnimation;
 import UI.Art.Animation.ResupplyAnimation;
+import UI.Art.Animation.TurnInitAnimation;
+import UI.Art.SpriteArtist.Backgrounds.DiagonalBlindsBG;
 import UI.Art.Animation.AirDropAnimation;
 import UI.Art.Animation.MoveAnimation;
 import Units.Unit;
@@ -155,8 +159,14 @@ public class SpriteMapView extends MapView
           && gameMap.isLocationFogged(event.getEndPoint());
 
       currentAnimation = event.getEventAnimation(this);
-      if( SpriteOptions.getAnimationsEnabled() && (null != currentAnimation) && !isEventHidden)
-        myGame.setCursorLocation(event.getEndPoint());
+      if( SpriteOptions.getAnimationsEnabled() && (null != currentAnimation)
+          && !isEventHidden)
+      {
+        if(event.getEndPoint() != null)
+        {
+          myGame.setCursorLocation(event.getEndPoint());
+        }
+      }
       else
         // If we want to animate something hidden, or we don't have anything to animate, animate nothing instead.
         currentAnimation = new NoAnimation();
@@ -401,6 +411,13 @@ public class SpriteMapView extends MapView
       return null; // TODO: Should AirDropAnimation just be TeleportAnimation and take in the animation style?
     else
       return new AirDropAnimation(SpriteLibrary.baseSpriteSize, unit, start, end);
+  }
+
+  @Override
+  public GameAnimation buildTurnInitAnimation( Commander cmdr, int turn, boolean hideMap, Collection<String> message )
+  {
+    boolean requireButton = hideMap && !cmdr.isAI();
+    return new TurnInitAnimation(cmdr, turn, hideMap, requireButton, message);
   }
 
   @Override // from MapView

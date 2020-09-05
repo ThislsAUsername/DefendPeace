@@ -1,9 +1,11 @@
-package UI.Art.SpriteArtist;
+package UI.Art.SpriteArtist.Backgrounds;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Polygon;
+
+import UI.Art.SpriteArtist.SpriteOptions;
 
 public class DiagonalBlindsBG
 {

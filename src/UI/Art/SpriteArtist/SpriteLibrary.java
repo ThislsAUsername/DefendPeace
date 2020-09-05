@@ -28,7 +28,7 @@ public class SpriteLibrary
   // This is the physical size of a single map square in pixels.
   public static final int baseSpriteSize = 16;
 
-  public static final String charKey = "%./-~,;:!?'&()";
+  public static final String charKey = "%./-~,;:!?'&()_";
   public static final String DEFAULT_FACTION = "Thorn";
 
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();

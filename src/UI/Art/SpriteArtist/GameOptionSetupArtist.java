@@ -9,6 +9,7 @@ import Terrain.MapInfo;
 import UI.GameOption;
 import UI.GameOptionSetupController;
 import UI.SlidingValue;
+import UI.Art.SpriteArtist.Backgrounds.DiagonalBlindsBG;
 
 public class GameOptionSetupArtist
 {
@@ -20,6 +21,8 @@ public class GameOptionSetupArtist
   private static BufferedImage optionNamePanel = null;
   private static BufferedImage optionSettingPanel = null;
   private static BufferedImage optionArrows = null;
+
+  private static SlidingValue yDrawStart;
 
   private static void initialize()
   {
@@ -59,6 +62,7 @@ public class GameOptionSetupArtist
 
     graphicsOptionWidth = optionNamePanel.getWidth() + itemWidth + letterWidth; // Plus some space for a buffer between panels.
     graphicsOptionHeight = optionNamePanel.getHeight();
+    yDrawStart = new SlidingValue(graphicsOptionHeight);
 
     // Make points to define the two selection arrows.
     int[] lXPoints = { 0, 5, 5, 0 };
@@ -112,9 +116,9 @@ public class GameOptionSetupArtist
 
     // Set up some initial parameters.
     int xDraw = (optionsImage.getWidth() / 2) - (graphicsOptionWidth / 2);
-    int yDraw = graphicsOptionHeight;
+    int yDraw = yDrawStart.geti();
     int firstOptionY = yDraw; // Hold onto this to draw the selector arrows.
-    int ySpacing = (graphicsOptionHeight + (optionNamePanel.getHeight() / 2));
+    int ySpacing = (int)(graphicsOptionHeight * 1.5);
 
     // Loop through and draw everything.
     GameOption<?>[] allOptions = myControl.gameOptions;
@@ -129,6 +133,19 @@ public class GameOptionSetupArtist
     xDraw += (graphicsOptionWidth - optionSettingPanel.getWidth() - 8); // Subtract 8 to center the arrows around the option setting panel.
 
     optionsGraphics.drawImage(optionArrows, xDraw, yDraw, optionArrows.getWidth(), optionArrows.getHeight(), null);
+
+    // Try to get the selected panel on-screen with a panel-height worth of buffer.
+    int yDrawDest = yDrawStart.getDestination() + (int) (ySpacing * selectedGameOption.getDestination()) + (3);
+    if( yDrawDest > optionsImage.getHeight() - graphicsOptionHeight )
+    {
+      int offset = -ySpacing + optionsImage.getHeight() - yDrawDest;
+      yDrawStart.set(yDrawStart.geti() + offset);
+    }
+    if( yDrawDest < graphicsOptionHeight )
+    {
+      int offset = graphicsOptionHeight - yDrawDest;
+      yDrawStart.set(yDrawStart.geti() + offset);
+    }
 
     // Redraw to the screen at scale.
     g.drawImage(optionsImage, 0, 0, optionsImage.getWidth()*drawScale, optionsImage.getHeight()*drawScale, null);

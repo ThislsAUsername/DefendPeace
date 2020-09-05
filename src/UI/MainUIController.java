@@ -127,12 +127,10 @@ public class MainUIController implements IController
                 {
                   String filename = fileEntry.getName();
                   String prettyName = filename.substring(0, filename.length()-4);
-                  if (GameInstance.isSaveCompatible(filepath))
-                    // If everything looks ducky, add it to the list. Don't check it twice.
-                    saves.add(new SaveInfo(filepath, filename, prettyName));
-                  else
-                    // Throw an extra mark in there to tell the user "yeah, we see it, and it ain't gonna work."
-                    saves.add(new SaveInfo(filepath, filename, "!" + prettyName));
+
+                  // Get any warning symbols for save-file incompatibilities.
+                  String prepends = GameInstance.getSaveWarnings(filepath);
+                  saves.add(new SaveInfo(filepath, filename, prepends + prettyName));
                 }
               }
             }
@@ -225,7 +223,7 @@ public class MainUIController implements IController
 
           // Set up the game to run...
           MapView mv = Driver.getInstance().gameGraphics.createMapView(oldGame);
-          MapController mapController = new MapController(oldGame, mv, false);
+          MapController mapController = new MapController(oldGame, mv);
 
           // Mash the big red button and start the game.
           Driver.getInstance().changeGameState(mapController, mv);
