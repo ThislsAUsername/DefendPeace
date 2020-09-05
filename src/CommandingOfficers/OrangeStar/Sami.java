@@ -5,12 +5,9 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
-import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
-import Terrain.Location;
-import Units.Unit;
 import Units.UnitModel;
 
 public class Sami extends Commander
@@ -71,16 +68,19 @@ public class Sami extends Commander
     return coInfo;
   }
 
+  public double captureMultiplierDefault = 1.5,
+                captureMultiplier = captureMultiplierDefault;
   @Override
-  public void receiveCaptureEvent(Unit unit, Location location)
+  public double getCaptureMult()
   {
-    if( this == unit.CO && this != location.getOwner() )
-    {
-      double halfHP = unit.getPreciseHP() / 2;
-      unit.damageHP(halfHP);
-      unit.capture(location);
-      unit.damageHP(-halfHP);
-    }
+    return captureMultiplier;
+  }
+
+  @Override
+  public GameEventQueue initTurn(MapMaster map)
+  {
+    captureMultiplier = captureMultiplierDefault;
+    return super.initTurn(map);
   }
 
   private static class DoubleTime extends CommanderAbility
@@ -116,25 +116,25 @@ public class Sami extends Commander
     }
   }
 
-  private static class VictoryMarch extends CommanderAbility implements COModifier
+  private static class VictoryMarch extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Victory March";
     private static final int COST = 8;
     private static final int POWER = 40;
-    private InstantCapListener listener;
+    private Sami coCast;
 
-    VictoryMarch(Commander commander)
+    VictoryMarch(Sami commander)
     {
       // as we start in Bear form, UpTurn is the correct starting name
       super(commander, NAME, COST);
-      listener = new InstantCapListener(commander);
+      coCast = commander;
     }
 
     @Override
     protected void perform(MapMaster gameMap)
     {
-      myCommander.addCOModifier(this);
+      coCast.captureMultiplier = 99;
       // Grant foot-soldiers additional firepower.
       CODamageModifier infPowerMod = new CODamageModifier(POWER);
       COMovementModifier infmoveMod = new COMovementModifier(2);
@@ -150,39 +150,6 @@ public class Sami extends Commander
 
       myCommander.addCOModifier(infPowerMod);
       myCommander.addCOModifier(infmoveMod);
-    }
-
-    @Override // COModifier interface.
-    public void applyChanges(Commander commander)
-    {
-      GameEventListener.registerEventListener(listener);
-    }
-
-    @Override
-    public void revertChanges(Commander commander)
-    {
-      GameEventListener.unregisterEventListener(listener);
-    }
-  }
-
-  private static class InstantCapListener extends GameEventListener
-  {
-    private static final long serialVersionUID = 1L;
-    private Commander myCommander = null;
-
-    public InstantCapListener(Commander myCo)
-    {
-      myCommander = myCo;
-    }
-
-    @Override
-    public void receiveCaptureEvent(Unit unit, Location location)
-    {
-      if( myCommander == unit.CO && myCommander != location.getOwner() )
-      {
-        location.setOwner(myCommander);
-        unit.stopCapturing();
-      }
     }
   }
 }

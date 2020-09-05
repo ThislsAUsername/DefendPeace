@@ -368,6 +368,12 @@ public class Commander extends GameEventListener implements Serializable
     return 2;
   }
 
+  // TODO: determine if this needs parameters, and if so, what?
+  public double getCaptureMult()
+  {
+    return 1;
+  }
+
   /**
    * Track battles that happen, and get ability power based on combat this CO is in.
    */

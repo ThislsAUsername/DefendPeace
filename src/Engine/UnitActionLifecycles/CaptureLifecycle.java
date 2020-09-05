@@ -164,7 +164,7 @@ public abstract class CaptureLifecycle
     if( null != location && location.isCaptureable() && unit.CO.isEnemy(location.getOwner()) )
     {
       priorCaptureAmount = (unitXY.equals(location.getCoordinates()) ? unit.getCaptureProgress() : 0);
-      captureAmount = unit.getHP(); // TODO: Apply CO buffs.
+      captureAmount = (int) (unit.getHP() * unit.CO.getCaptureMult());
     }
     else
     {
@@ -189,7 +189,7 @@ public abstract class CaptureLifecycle
   public boolean willCapture()
   {
     int finalCapAmt = priorCaptureAmount + captureAmount;
-    return finalCapAmt >= 20;
+    return finalCapAmt >= location.getEnvironment().terrainType.getCaptureThreshold();
   }
 
   /**
