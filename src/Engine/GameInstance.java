@@ -290,6 +290,7 @@ public class GameInstance implements Serializable
 
     GameVersion verInfo = null;
     boolean verMatch = false;
+    boolean coMatch = false;
     try (FileInputStream file = new FileInputStream(filename); ObjectInputStream in = new ObjectInputStream(file);)
     {
       verInfo = (GameVersion) in.readObject();
@@ -302,13 +303,24 @@ public class GameInstance implements Serializable
         System.out.println(String.format("Save is incompatible version: %s",
             (null == verInfo) ? "unknown" : verInfo.toString()));
       }
+      GameInstance gi = (GameInstance) in.readObject();
+      if( gi.turn(new GameEventQueue()) )
+      {
+        coMatch = true;
+      }
+      else
+      {
+        System.out.println(String.format(
+            String.format("Save is for another player's turn (%s).",
+                (null != gi.activeCO) ? gi.activeCO.coInfo.name : "null")));
+      }
     }
     catch (Exception ex)
     {
-      System.out.println(ex.toString());
+      ex.printStackTrace();
     }
 
-    return verMatch;
+    return verMatch && coMatch;
   }
   
   public static GameInstance loadSave(String filename)
