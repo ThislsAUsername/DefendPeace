@@ -284,7 +284,7 @@ public class GameInstance implements Serializable
     return sb.toString();
   }
   
-  public static String isSaveCompatible(String filename)
+  public static String getSaveWarnings(String filename)
   {
     System.out.println(String.format("Checking compatibility of save %s", filename));
 

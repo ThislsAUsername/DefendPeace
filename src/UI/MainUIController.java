@@ -129,7 +129,7 @@ public class MainUIController implements IController
                   String prettyName = filename.substring(0, filename.length()-4);
 
                   // Get any warning symbols for save-file incompatibilities.
-                  String prepends = GameInstance.isSaveCompatible(filepath);
+                  String prepends = GameInstance.getSaveWarnings(filepath);
                   saves.add(new SaveInfo(filepath, filename, prepends + prettyName));
                 }
               }
