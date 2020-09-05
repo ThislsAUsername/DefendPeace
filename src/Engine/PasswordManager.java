@@ -16,40 +16,34 @@ public class PasswordManager
   private static final String PASSFILE_NAME = "res/passfile";
 
   /**
-   * If the passed-in commander has no password set, then combine the local passfile
-   * with the Commander's salt and set its password. If no passfile exists, create it first.
-   *
-   * If `cmdr` already has a password assigned, confirm that the passfile corresponds to the
-   * stored password.
-   *
-   * @param cmdr The Commander who's turn we want to verify.
-   * @return true if a password is generated or matches, false if the passfile and stored password mismatch.
+   * Create a new passfile if there isn't one yet, and then associate the passfile with `cmdr`.
+   */
+  public static void setPass(Commander cmdr)
+  {
+    String storedPass = readPassfile();
+    // Generate a new salt/passfile and set cmdr's password.
+    long salt = new Random().nextLong();
+    if( storedPass.isEmpty() )
+    {
+      System.out.println("Generating new password");
+      storedPass = UuidGenerator.randomUuid().toString();
+      writePassfile(storedPass);
+    }
+    System.out.println("Setting password.");
+    cmdr.setPassword(salt, storedPass);
+  }
+
+  /**
+   * Evaluate the current commander against the stored passfile.
+   * @return true if the passfile matches, false if it doesn't.
    */
   public static boolean validateAccess(Commander cmdr)
   {
-    boolean granted = false;
+    if( !cmdr.hasPassword() ) return true; // No password, no problem.
+
     String storedPass = readPassfile();
-    if( !cmdr.hasPassword() )
-    {
-      // Generate a new salt/passfile and set cmdr's password.
-      long salt = new Random().nextLong();
-      if( storedPass.isEmpty() )
-      {
-        System.out.println("Generating new password");
-        storedPass = UuidGenerator.randomUuid().toString();
-        writePassfile(storedPass);
-      }
-      System.out.println("Setting password.");
-      cmdr.setPassword(salt, storedPass);
-      granted = true;
-    }
-    else
-    {
-      System.out.println("Reading password");
-      granted = cmdr.checkPassword(storedPass);
-      System.out.println("password matches? " + granted);
-    }
-    return granted;
+    boolean matches = cmdr.checkPassword(storedPass);
+    return matches;
   }
 
   private static void writePassfile(String pass)

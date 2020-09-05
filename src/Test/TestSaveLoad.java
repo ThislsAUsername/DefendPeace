@@ -59,7 +59,7 @@ public class TestSaveLoad extends TestCase
     strong.initTurn(testMap);
     boolean testPassed = true;
 
-    String path = game.writeSave();
+    String path = game.writeSave(false);
     File file = new File(path);
     testPassed &= validate(file.exists(),  "    The file we just saved to doesn't exist");
     testPassed &= validate(GameInstance.isSaveCompatible(path),  "    We are incompatible with the save we just made");

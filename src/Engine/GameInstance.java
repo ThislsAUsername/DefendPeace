@@ -42,6 +42,7 @@ public class GameInstance implements Serializable
   boolean isSecurityEnabled;
 
   private int currentTurn;
+  private boolean currentTurnEnded; // Needed to advance the turn when loading a protected save.
 
   public GameInstance(MapMaster map)
   {
@@ -168,13 +169,12 @@ public class GameInstance implements Serializable
   }
 
   /**
-   * Activates the turn for the next available CO.
+   * Activates the turn for the next available CO, validating the passfile if needed.
    * @param events
+   * @return true if the turn changed, false if the auth-check failed.
    */
-  public GameEventQueue turn()
+  public boolean turn(GameEventQueue events)
   {
-    GameEventQueue events = new GameEventQueue();
-    
     // Store the cursor location for the current CO.
     playerCursors.put(activeCoNum, new XYCoord(cursorX, cursorY));
     int coTurns = 0;
@@ -193,6 +193,16 @@ public class GameInstance implements Serializable
       }
       activeCO = commanders[activeCoNum];
     } while (activeCO.isDefeated);
+
+    // If security is enabled, verify this player is cleared to play.
+    boolean passCheckOK = !isSecurityEnforced() || PasswordManager.validateAccess(activeCO);
+    if( !passCheckOK )
+    {
+      // Display "It's not your turn" message.
+      boolean hideMap = true;
+      events.add(new TurnInitEvent(activeCO, currentTurn, hideMap, "It's not your turn"));
+      return false; // auth failed.
+    }
 
     // Set weather conditions based on forecast
     ArrayList<MapChangeEvent.EnvironmentAssignment> weatherChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
@@ -238,7 +248,7 @@ public class GameInstance implements Serializable
     events.addAll(activeCO.initTurn(gameMap));
     
     // Initialize the next turn, recording any events that will occur.
-    return events;
+    return true; // Turn init successful.
   }
 
   /** Return the current turn number. */
@@ -320,8 +330,9 @@ public class GameInstance implements Serializable
     return load;
   }
   
-  public String writeSave()
+  public String writeSave(boolean endCurrentTurn)
   {
+    currentTurnEnded = endCurrentTurn;
     String filename = "save/" + saveFile; // "svp" for "SaVe Peace"
     new File("save/").mkdirs(); // make sure we don't freak out if the directory's not there
 
@@ -340,11 +351,16 @@ public class GameInstance implements Serializable
     return filename;
   }
 
-  public boolean requirePassword()
+  public boolean isSecurityEnforced()
   {
     // Little reason to secure at turn 0; folks often have one player build
     // infantry for everyone for the first round, so we'll create passwords
     // after the second turn and enforce them thereafter.
     return currentTurn > 0 && isSecurityEnabled && !activeCO.isAI();
+  }
+
+  public boolean requireInitOnLoad()
+  {
+    return currentTurnEnded;
   }
 }
