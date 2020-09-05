@@ -14,6 +14,7 @@ import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
+import Engine.GameEvents.TurnInitEvent;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.Location;
@@ -38,21 +39,25 @@ public class GameInstance implements Serializable
   private Weathers defaultWeather;
 
   private GameScenario gameScenario;
+  boolean isSecurityEnabled;
 
   private int currentTurn;
+  private boolean currentTurnEnded = true; // Set to false when saving a game mid-turn.
 
   public GameInstance(MapMaster map)
   {
-    this(map, false, Weathers.CLEAR, new GameScenario());
+    this(map, false, Weathers.CLEAR, new GameScenario(), false);
   }
 
-  public GameInstance(MapMaster map, boolean fogOfWarOn, Weathers weather, GameScenario scenario)
+  public GameInstance(MapMaster map, boolean fogOfWarOn, Weathers weather, GameScenario scenario, boolean useSecurity)
   {
     if( map.commanders.length < 2 )
     {
       System.out.println("WARNING! Creating a game with fewer than two commanders.");
     }
     gameScenario = scenario;
+    isSecurityEnabled = useSecurity;
+
     currentTurn = 0;
 
     gameMap = map;
@@ -164,13 +169,12 @@ public class GameInstance implements Serializable
   }
 
   /**
-   * Activates the turn for the next available CO.
+   * Activates the turn for the next available CO, validating the passfile if needed.
    * @param events
+   * @return true if the turn changed, false if the auth-check failed.
    */
-  public GameEventQueue turn()
+  public boolean turn(GameEventQueue events)
   {
-    GameEventQueue events = new GameEventQueue();
-    
     // Store the cursor location for the current CO.
     playerCursors.put(activeCoNum, new XYCoord(cursorX, cursorY));
     int coTurns = 0;
@@ -189,6 +193,16 @@ public class GameInstance implements Serializable
       }
       activeCO = commanders[activeCoNum];
     } while (activeCO.isDefeated);
+
+    // If security is enabled, verify this player is cleared to play.
+    boolean passCheckOK = !isSecurityEnforced() || PasswordManager.validateAccess(activeCO);
+    if( !passCheckOK )
+    {
+      // Display "It's not your turn" message.
+      boolean hideMap = true;
+      events.add(new TurnInitEvent(activeCO, currentTurn, hideMap, "It's not your turn"));
+      return false; // auth failed.
+    }
 
     // Set weather conditions based on forecast
     ArrayList<MapChangeEvent.EnvironmentAssignment> weatherChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
@@ -216,6 +230,9 @@ public class GameInstance implements Serializable
         }
       }
     }
+
+    events.add(new TurnInitEvent(activeCO, currentTurn, isFogEnabled || isSecurityEnabled));
+
     if( !weatherChanges.isEmpty() )
     {
       events.add(new MapChangeEvent(weatherChanges));
@@ -231,7 +248,7 @@ public class GameInstance implements Serializable
     events.addAll(activeCO.initTurn(gameMap));
     
     // Initialize the next turn, recording any events that will occur.
-    return events;
+    return true; // Turn init successful.
   }
 
   /** Return the current turn number. */
@@ -267,31 +284,41 @@ public class GameInstance implements Serializable
     return sb.toString();
   }
   
-  public static boolean isSaveCompatible(String filename)
+  public static String getSaveWarnings(String filename)
   {
     System.out.println(String.format("Checking compatibility of save %s", filename));
 
+    StringBuilder prepends = new StringBuilder();
     GameVersion verInfo = null;
-    boolean verMatch = false;
     try (FileInputStream file = new FileInputStream(filename); ObjectInputStream in = new ObjectInputStream(file);)
     {
+      // Check that the save file has a matching version.
       verInfo = (GameVersion) in.readObject();
       if( new GameVersion().isEqual(verInfo) )
       {
-        verMatch = true;
+        // If so, make sure we aren't trying to take someone else's turn.
+        GameInstance gi = (GameInstance) in.readObject();
+        if( !gi.turn(new GameEventQueue()) )
+        {
+          prepends.append('~');
+          System.out.println(String.format(
+              String.format("Save is for another player's turn (%s).",
+                  (null != gi.activeCO) ? gi.activeCO.coInfo.name : "null")));
+        }
       }
       else
       {
+        prepends.append('!');
         System.out.println(String.format("Save is incompatible version: %s",
             (null == verInfo) ? "unknown" : verInfo.toString()));
       }
     }
     catch (Exception ex)
     {
-      System.out.println(ex.toString());
+      ex.printStackTrace();
     }
 
-    return verMatch;
+    return prepends.toString();
   }
   
   public static GameInstance loadSave(String filename)
@@ -313,8 +340,9 @@ public class GameInstance implements Serializable
     return load;
   }
   
-  public String writeSave()
+  public String writeSave(boolean endCurrentTurn)
   {
+    currentTurnEnded = endCurrentTurn;
     String filename = "save/" + saveFile; // "svp" for "SaVe Peace"
     new File("save/").mkdirs(); // make sure we don't freak out if the directory's not there
 
@@ -331,5 +359,18 @@ public class GameInstance implements Serializable
     }
 
     return filename;
+  }
+
+  public boolean isSecurityEnforced()
+  {
+    // Little reason to secure at turn 0; folks often have one player build
+    // infantry for everyone for the first round, so we'll create passwords
+    // after the second turn and enforce them thereafter.
+    return currentTurn > 0 && isSecurityEnabled && !activeCO.isAI();
+  }
+
+  public boolean requireInitOnLoad()
+  {
+    return currentTurnEnded;
   }
 }

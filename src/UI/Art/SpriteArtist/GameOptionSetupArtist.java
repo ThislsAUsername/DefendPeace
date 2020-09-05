@@ -9,6 +9,7 @@ import Terrain.MapInfo;
 import UI.GameOption;
 import UI.GameOptionSetupController;
 import UI.SlidingValue;
+import UI.Art.SpriteArtist.Backgrounds.DiagonalBlindsBG;
 
 public class GameOptionSetupArtist
 {
@@ -16,6 +17,8 @@ public class GameOptionSetupArtist
   private static SlidingValue selectedGameOption = new SlidingValue(0);
 
   private static HorizontalSelectorTemplate template = new HorizontalSelectorTemplate();
+
+  private static SlidingValue yDrawStart;
 
   private static void initialize()
   {
@@ -47,6 +50,7 @@ public class GameOptionSetupArtist
     }
 
     template.initialize(allOptions);
+    yDrawStart = new SlidingValue(template.graphicsOptionHeight);
   }
 
   public static void draw(Graphics g, MapInfo selectedMapInfo, GameOptionSetupController control)
@@ -88,9 +92,9 @@ public class GameOptionSetupArtist
 
     // Set up some initial parameters.
     int xDraw = (optionsImage.getWidth() / 2) - (template.graphicsOptionWidth / 2);
-    int yDraw = template.graphicsOptionHeight;
+    int yDraw = yDrawStart.geti();
     int firstOptionY = yDraw; // Hold onto this to draw the selector arrows.
-    int ySpacing = (template.graphicsOptionHeight + (template.optionNamePanel.getHeight() / 2));
+    int ySpacing = (int)(template.graphicsOptionHeight * 1.5);
 
     // Loop through and draw everything.
     GameOption<?>[] allOptions = myControl.gameOptions;
@@ -108,6 +112,19 @@ public class GameOptionSetupArtist
                               xDraw, yDraw,
                               template.optionArrows.getWidth(), template.optionArrows.getHeight(),
                               null);
+
+    // Try to get the selected panel on-screen with a panel-height worth of buffer.
+    int yDrawDest = yDrawStart.getDestination() + (int) (ySpacing * selectedGameOption.getDestination()) + (3);
+    if( yDrawDest > optionsImage.getHeight() - template.graphicsOptionHeight )
+    {
+      int offset = -ySpacing + optionsImage.getHeight() - yDrawDest;
+      yDrawStart.set(yDrawStart.geti() + offset);
+    }
+    if( yDrawDest < template.graphicsOptionHeight )
+    {
+      int offset = template.graphicsOptionHeight - yDrawDest;
+      yDrawStart.set(yDrawStart.geti() + offset);
+    }
 
     // Redraw to the screen at scale.
     g.drawImage(optionsImage, 0, 0, optionsImage.getWidth()*drawScale, optionsImage.getHeight()*drawScale, null);

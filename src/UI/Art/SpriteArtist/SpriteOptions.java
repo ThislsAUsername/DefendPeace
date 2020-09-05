@@ -12,6 +12,7 @@ import UI.GameOptionBool;
 import UI.GameOptionInt;
 import UI.InputHandler;
 import UI.SlidingValue;
+import UI.Art.SpriteArtist.Backgrounds.DiagonalBlindsBG;
 
 public class SpriteOptions
 {

@@ -8,6 +8,7 @@ import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.TurnInitEvent;
 import Engine.GameInput.GameInputHandler;
 import UI.CO_InfoController;
 import UI.GameStatsController;
@@ -44,11 +45,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   public MapController(GameInstance game, MapView view)
   {
-    this(game,view,true);
-  }
-
-  public MapController(GameInstance game, MapView view, boolean initGame)
-  {
     myGame = game;
     myView = view;
     myView.setController(this);
@@ -56,8 +52,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
     isGameOver = false;
     nextSeekIndex = 0;
 
-    if( initGame )
-      // Start the first turn.
+    // Start the first turn (or the next one if loading a protected save).
+    if( myGame.requireInitOnLoad() )
       startNextTurn();
 
     // Initialize our game input handler.
@@ -405,13 +401,38 @@ public class MapController implements IController, GameInputHandler.StateChanged
         myGameInputHandler.reset(); // Reset the input handler to get rid of stale state
         break;
       case END_TURN:
-        startNextTurn();
+        // If security is enabled, save and quit at the end of each turn after the first.
+        if( myGame.isSecurityEnforced() )
+        {
+          // Generate a password if needed.
+          if( !myGame.activeCO.hasPassword() )
+          {
+            PasswordManager.setPass(myGame.activeCO);
+          }
+
+          // Save the game, display a message, and exit to the main menu.
+          boolean endTurn = true;
+          String saveName = myGame.writeSave(endTurn);
+          ArrayList<String> saveMsg = new ArrayList<String>();
+          saveMsg.add("Saved game to");
+          saveMsg.add(saveName);
+
+          GameEventQueue outro = new GameEventQueue();
+          boolean hideMap = true;
+          outro.add(new TurnInitEvent(myGame.activeCO, myGame.getCurrentTurn(), hideMap, saveMsg));
+          myView.animate(outro);
+
+          changeInputMode(InputMode.EXITGAME);
+        }
+        else // If security is off, just go to the next turn.
+          startNextTurn();
         break;
       case LEAVE_MAP:
         // Handled as a special case in handleGameInput().
         break;
       case SAVE:
-        myGame.writeSave();
+        boolean advanceTurnOnLoad = false;
+        myGame.writeSave(advanceTurnOnLoad);
         myGameInputHandler.reset(); // SAVE is a terminal state. Reset the input handler.
         break;
       case CO_STATS:
@@ -441,7 +462,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
   private void changeInputMode(InputMode input)
   {
     // Assign the new input mode.
-    inputMode = input;
+    if( inputMode != InputMode.EXITGAME )
+      inputMode = input;
 
     if( null != myGameInputHandler )
     {
@@ -571,7 +593,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
     nextSeekIndex = 0;
 
     // Tell the game a turn has changed. This will update the active CO.
-    GameEventQueue turnEvents = myGame.turn();
+    GameEventQueue turnEvents = new GameEventQueue();
+    boolean turnOK = myGame.turn(turnEvents);
 
     // Reinitialize the InputStateHandler for the new turn.
     myGameInputHandler = new GameInputHandler(myGame.activeCO.myView, myGame.activeCO, this);
@@ -580,7 +603,9 @@ public class MapController implements IController, GameInputHandler.StateChanged
     {
       // Kick off the animation cycle, which will animate/init each unit.
       myView.animate(turnEvents);
-      changeInputMode(InputMode.ANIMATION);
+
+      // If the GameInstance isn't allowing the next CO to go, exit to the main menu.
+      changeInputMode(turnOK ? InputMode.ANIMATION : InputMode.EXITGAME);
     }
     else
     {

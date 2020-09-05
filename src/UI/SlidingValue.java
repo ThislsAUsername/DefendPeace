@@ -76,4 +76,10 @@ public class SlidingValue
   {
     return targetValue;
   }
+
+  /** Retrieve whether the value is still en route to its target. */
+  public boolean moving()
+  {
+    return targetValue != get();
+  }
 }

@@ -130,7 +130,8 @@ public class TestCommanderAve extends TestCase
     testMap.getLocation(snowCity).setOwner(null);
     for( int i = 1; i < maxIters; ++i )
     {
-      GameEventQueue turnEvents = game.turn();
+      GameEventQueue turnEvents = new GameEventQueue();
+      game.turn(turnEvents);
       for(GameEvent event: turnEvents) event.performEvent(testMap);
       Environment cityEnv = testMap.getEnvironment(snowCity); 
       if( cityEnv.weatherType != Weathers.SNOW )

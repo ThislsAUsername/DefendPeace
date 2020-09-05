@@ -10,6 +10,7 @@ import Engine.GameEvents.GameEventQueue;
 import UI.COStateInfo;
 import UI.InfoController;
 import UI.MapView;
+import UI.Art.SpriteArtist.Backgrounds.DiagonalBlindsBG;
 
 /**
  * InfoView paints the CO's full portrait and a box with info in it.

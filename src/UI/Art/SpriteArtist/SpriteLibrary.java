@@ -28,7 +28,7 @@ public class SpriteLibrary
   // This is the physical size of a single map square in pixels.
   public static final int baseSpriteSize = 16;
 
-  public static final String charKey = "%./-~,;:!?'&()";
+  public static final String charKey = "%./-~,;:!?'&()_";
   public static final String DEFAULT_FACTION = "Thorn";
 
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
@@ -97,7 +97,8 @@ public class SpriteLibrary
       File imgFile = new File(filename);
       if( imgFile.exists() && !imgFile.isDirectory() )
         bi = ImageIO.read(imgFile);
-      else System.out.println("WARNING! Resource file " + filename + " does not exist.");
+      // Missing sprites are common (e.g. for units with missing animations),
+      // and normally benign, so don't print a warning.
     }
     catch (IOException ioex)
     {
