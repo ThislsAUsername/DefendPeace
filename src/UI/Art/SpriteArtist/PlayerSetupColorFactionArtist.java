@@ -60,7 +60,7 @@ public class PlayerSetupColorFactionArtist
     int startY = myHeight / 2 - gridHeight / 2;
 
     // Figure out if we need to realign things.
-    int marginFrac = 8;
+    int marginFrac = 2;
     int maxX = myWidth - myWidth/marginFrac - unitSizePx;
     int maxY = myHeight - myHeight/marginFrac - unitSizePx;
     int minX = myWidth/marginFrac;

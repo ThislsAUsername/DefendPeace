@@ -134,4 +134,21 @@ public class SpriteCursor
     else
       SpriteUIUtils.drawImageCenteredOnPoint(g, cursor.getFrame(3), x, y+h);
   }
+
+  public int getX()
+  {
+    return xPos.geti();
+  }
+  public int getY()
+  {
+    return yPos.geti();
+  }
+  public int getW()
+  {
+    return width.geti();
+  }
+  public int getH()
+  {
+    return height.geti();
+  }
 }

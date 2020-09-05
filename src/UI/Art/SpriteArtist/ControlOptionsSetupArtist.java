@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import UI.InputHandler;
+import UI.Art.SpriteArtist.Backgrounds.DiagonalBlindsBG;
 import UI.InputHandler.InputAction;
 
 public class ControlOptionsSetupArtist
@@ -37,7 +38,8 @@ public class ControlOptionsSetupArtist
     int yDraw = spacing/2;
 
     // Find the selected command/key.
-    int selectedAction = myControl.actionCommandSelector.getSelectionNormalized();
+    int selectedAction = InputHandler.actionCommandSelector.getSelectionNormalized();
+
     int selectedKey = myControl.getKeySelector(InputHandler.InputAction.values()[selectedAction]).getSelectionNormalized();
 
     // Create an un-scaled image to draw everything at real size before scaling it to the screen.

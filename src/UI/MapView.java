@@ -1,5 +1,7 @@
 package UI;
 
+import java.util.Collection;
+
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.IView;
@@ -102,6 +104,10 @@ public abstract class MapView implements IView
   }
   public GameAnimation buildTeleportAnimation( Unit unit, XYCoord start, XYCoord end, Unit obstacle,
       TeleportEvent.AnimationStyle animStyle )
+  {
+    return null;
+  }
+  public GameAnimation buildTurnInitAnimation( Commander cmdr, int turn, boolean fowEnabled, Collection<String> message )
   {
     return null;
   }

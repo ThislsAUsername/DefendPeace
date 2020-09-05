@@ -3,6 +3,8 @@ package UI;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
 import Engine.Driver;
 import Engine.GameInstance;
 import Engine.IController;
@@ -11,7 +13,8 @@ import Engine.OptionSelector;
 
 public class MainUIController implements IController
 {
-  public enum SubMenu { MAIN, SAVE_SELECT, GAME_SETUP, OPTIONS_SELECT, GRAPHICS_OPTIONS, CONTROL_OPTIONS };
+  public enum SubMenu { MAIN, SAVE_SELECT, GAME_SETUP, OPTIONS_SELECT, GRAPHICS_OPTIONS, SET_KEYBINDS, CONTROL_OPTIONS };
+  private static List<SubMenu> optionsSubMenus = Arrays.asList(SubMenu.GRAPHICS_OPTIONS, SubMenu.SET_KEYBINDS, SubMenu.CONTROL_OPTIONS);
   private SubMenu currentSubMenuType = SubMenu.MAIN;
 
   // NOTE: This list of menu options is mirrored by the Sprite of option images we get from SpriteLibrary.
@@ -25,6 +28,7 @@ public class MainUIController implements IController
 
   private MapSelectController gameSetup = new MapSelectController();
   private InputHandler controlOptionsSetup = InputHandler.getInstance();
+  private InputOptionsController controlExtraOptionsSetup = new InputOptionsController();
   public InGameMenu<SaveInfo> saveMenu = null;
   public InGameMenu<SubMenu> optionsMenu = null;
   
@@ -87,8 +91,12 @@ public class MainUIController implements IController
           exitGame = false;
         }
         break;
-      case CONTROL_OPTIONS:
+      case SET_KEYBINDS:
         if( controlOptionsSetup.handleInput(action) )
+          currentSubMenuType = SubMenu.MAIN;
+        break;
+      case CONTROL_OPTIONS:
+        if( controlExtraOptionsSetup.handleInput(action) )
           currentSubMenuType = SubMenu.MAIN;
         break;
       default:
@@ -126,12 +134,10 @@ public class MainUIController implements IController
                 {
                   String filename = fileEntry.getName();
                   String prettyName = filename.substring(0, filename.length()-4);
-                  if (GameInstance.isSaveCompatible(filepath))
-                    // If everything looks ducky, add it to the list. Don't check it twice.
-                    saves.add(new SaveInfo(filepath, filename, prettyName));
-                  else
-                    // Throw an extra mark in there to tell the user "yeah, we see it, and it ain't gonna work."
-                    saves.add(new SaveInfo(filepath, filename, "!" + prettyName));
+
+                  // Get any warning symbols for save-file incompatibilities.
+                  String prepends = GameInstance.getSaveWarnings(filepath);
+                  saves.add(new SaveInfo(filepath, filename, prepends + prettyName));
                 }
               }
             }
@@ -147,7 +153,7 @@ public class MainUIController implements IController
             }
             break;
           case OPTIONS:
-            optionsMenu = new InGameMenu<SubMenu>(Arrays.asList(SubMenu.GRAPHICS_OPTIONS, SubMenu.CONTROL_OPTIONS));
+            optionsMenu = new InGameMenu<SubMenu>(optionsSubMenus);
             currentSubMenuType = SubMenu.OPTIONS_SELECT;
             break;
           case QUIT:
@@ -182,20 +188,14 @@ public class MainUIController implements IController
         SubMenu chosenOption = optionsMenu.getSelectedOption();
         optionsMenu = null; // We are done with this until next time.
 
-        switch( chosenOption )
-        {
-          case GRAPHICS_OPTIONS:
-            currentSubMenuType = SubMenu.GRAPHICS_OPTIONS;
-            break;
-          case CONTROL_OPTIONS:
-            currentSubMenuType = SubMenu.CONTROL_OPTIONS;
-            break;
-            default:
-              System.out.println(String.format("Invalid Option SubMenu '%s' selected!", chosenOption.toString()));
-        }
+        if( optionsSubMenus.contains(chosenOption) )
+          currentSubMenuType = chosenOption;
+        else
+          System.out.println(String.format("Invalid Option SubMenu '%s' selected!", chosenOption.toString()));
 
         break;
       case BACK:
+        optionsMenu = null;
         currentSubMenuType = SubMenu.MAIN;
         optionsMenu = null;
         break;
@@ -224,7 +224,7 @@ public class MainUIController implements IController
 
           // Set up the game to run...
           MapView mv = Driver.getInstance().gameGraphics.createMapView(oldGame);
-          MapController mapController = new MapController(oldGame, mv, false);
+          MapController mapController = new MapController(oldGame, mv);
 
           // Mash the big red button and start the game.
           Driver.getInstance().changeGameState(mapController, mv);

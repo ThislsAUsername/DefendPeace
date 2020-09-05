@@ -13,6 +13,7 @@ public class GameOptionSetupController implements IController
   private GameOption<Integer> incomeOption = new GameOptionInt("Income", 250, 20000, 250, 1000);
   private GameOption<Weathers> weatherOption = new GameOption<Weathers>("Weather", Weathers.values(), 0);
   private GameOption<UnitModelScheme> unitSchemeOption;
+  private GameOption<Boolean> securityOption = new GameOptionBool("Protect Turns?", false);
 
   // Get a list of all GameOptions.
   public GameOption<?>[] gameOptions;
@@ -35,7 +36,7 @@ public class GameOptionSetupController implements IController
     for (int i = 0; !unitSchemeOption.getSelectedObject().schemeValid && i < unitSchemeOption.size(); ++i )
       unitSchemeOption.setSelectedOption(i);
 
-    gameOptions = new GameOption<?>[] {fowOption, startingFundsOption, incomeOption, weatherOption, unitSchemeOption};
+    gameOptions = new GameOption<?>[] {fowOption, startingFundsOption, incomeOption, weatherOption, unitSchemeOption, securityOption};
     optionSelector = new OptionSelector( gameOptions.length );
   }
 
@@ -84,6 +85,7 @@ public class GameOptionSetupController implements IController
         gameBuilder.incomePerCity = incomeOption.getSelectedObject();
         gameBuilder.defaultWeather = (Weathers)weatherOption.getSelectedObject();
         gameBuilder.unitModelScheme = unitSchemeOption.getSelectedObject();
+        gameBuilder.isSecurityEnabled = securityOption.getSelectedObject();
         coSelectMenu = new PlayerSetupController( gameBuilder );
         isInSubmenu = true;
         break;

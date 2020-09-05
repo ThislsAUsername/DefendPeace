@@ -19,6 +19,7 @@ public class GameBuilder
   public int incomePerCity = 1000;
   public Weathers defaultWeather = Weathers.CLEAR;
   public UnitModelScheme unitModelScheme = null;
+  public boolean isSecurityEnabled = false;
 
   GameBuilder(MapInfo info)
   {
@@ -41,7 +42,7 @@ public class GameBuilder
     GameInstance newGame = null;
     if( map.initOK() )
     {
-      newGame = new GameInstance(map, isFowEnabled, defaultWeather, scenario);
+      newGame = new GameInstance(map, isFowEnabled, defaultWeather, scenario, isSecurityEnabled);
     }
 
     return newGame;
