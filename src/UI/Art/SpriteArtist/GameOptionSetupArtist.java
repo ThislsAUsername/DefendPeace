@@ -135,16 +135,16 @@ public class GameOptionSetupArtist
     optionsGraphics.drawImage(optionArrows, xDraw, yDraw, optionArrows.getWidth(), optionArrows.getHeight(), null);
 
     // Try to get the selected panel on-screen with a panel-height worth of buffer.
-    int yDrawDest = firstOptionY + (int) (ySpacing * selectedGameOption.getDestination()) + (3);
+    int yDrawDest = yDrawStart.getDestination() + (int) (ySpacing * selectedGameOption.getDestination()) + (3);
     if( yDrawDest > optionsImage.getHeight() - graphicsOptionHeight )
     {
-      int offset = -2*graphicsOptionHeight + optionsImage.getHeight() - yDrawDest;
-      yDrawStart.set(yDrawStart.geti() + offset );
+      int offset = -ySpacing + optionsImage.getHeight() - yDrawDest;
+      yDrawStart.set(yDrawStart.geti() + offset);
     }
     if( yDrawDest < graphicsOptionHeight )
     {
       int offset = graphicsOptionHeight - yDrawDest;
-      yDrawStart.set(yDrawStart.geti() + offset );
+      yDrawStart.set(yDrawStart.geti() + offset);
     }
 
     // Redraw to the screen at scale.
