@@ -11,6 +11,7 @@ import java.util.Queue;
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.Path;
+import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.DamagePopup;
@@ -20,6 +21,7 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.TeleportEvent;
 import Engine.GameEvents.TeleportEvent.AnimationStyle;
 import Terrain.GameMap;
+import UI.GameOverlay;
 import UI.MapView;
 import UI.SlidingValue;
 import UI.UIUtils;
@@ -34,6 +36,7 @@ import UI.Art.SpriteArtist.Backgrounds.DiagonalBlindsBG;
 import UI.Art.Animation.AirDropAnimation;
 import UI.Art.Animation.MoveAnimation;
 import Units.Unit;
+import Units.WeaponModel;
 
 public class SpriteMapView extends MapView
 {
@@ -244,8 +247,21 @@ public class SpriteMapView extends MapView
     // Draw units, buildings, trees, etc.
     drawUnitsAndMapObjects(mapGraphics, gameMap, animIndex);
 
+    ArrayList<GameOverlay> overlays = new ArrayList<GameOverlay>();
     // Apply any relevant map highlight.
-    OverlayArtist.drawHighlights(mapGraphics, gameMap, drawX, drawY, mapViewWidth, mapViewHeight, drawMultiplier);
+    if( null != currentPath && null != currentActor )
+    {
+      for( WeaponModel w : currentActor.model.weapons )
+      {
+        Color edgeColor = OverlayArtist.SIEGE_FIRE_EDGE;
+        if( w.canFireAfterMoving )
+          edgeColor = OverlayArtist.MOBILE_FIRE_EDGE;
+        overlays.add(new GameOverlay(null,
+                     Utils.findLocationsInRange(gameMap, myGame.getCursorCoord(), w.minRange, w.maxRange),
+                     OverlayArtist.FIRE_FILL, edgeColor));
+      }
+    }
+    OverlayArtist.drawHighlights(mapGraphics, gameMap, overlays, drawX, drawY, mapViewWidth, mapViewHeight, drawMultiplier);
 
     // Draw Unit icons on top of everything, to make sure they are seen clearly.
     drawUnitIcons(mapGraphics, gameMap, animIndex);
