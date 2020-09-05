@@ -197,6 +197,7 @@ public class MainUIController implements IController
 
         break;
       case BACK:
+        optionsMenu = null;
         currentSubMenuType = SubMenu.MAIN;
         break;
       default:
