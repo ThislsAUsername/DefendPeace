@@ -97,7 +97,8 @@ public class SpriteLibrary
       File imgFile = new File(filename);
       if( imgFile.exists() && !imgFile.isDirectory() )
         bi = ImageIO.read(imgFile);
-      else System.out.println("WARNING! Resource file " + filename + " does not exist.");
+      // Missing sprites are common (e.g. for units with missing animations),
+      // and normally benign, so don't print a warning.
     }
     catch (IOException ioex)
     {
