@@ -27,7 +27,6 @@ public class MapArtist
   private static final int tileSize = SpriteLibrary.baseSpriteSize;
 
   private Color FOG_COLOR;
-  private Color HIGHLIGHT_COLOR;
 
   SpriteCursor spriteCursor;
 
@@ -43,7 +42,6 @@ public class MapArtist
 
     // Choose colors for fog and highlighted tiles.
     FOG_COLOR = new Color(72, 72, 96, 200); // dark blue
-    HIGHLIGHT_COLOR = new Color(255, 255, 255, 160); // white
     TerrainSpriteSet.setFogColor(FOG_COLOR);
 
     // Build base map image.
@@ -156,26 +154,6 @@ public class MapArtist
     }
 
     return actualDir;
-  }
-
-  public void drawHighlights(Graphics g)
-  {
-    GameMap gameMap = myGame.activeCO.myView;
-    for( int w = 0; w < gameMap.mapWidth; ++w )
-    {
-      for( int h = 0; h < gameMap.mapHeight; ++h )
-      {
-        if( gameMap.isLocationValid(w, h) )
-        {
-          Terrain.Location locus = gameMap.getLocation(w, h);
-          if( locus.isHighlightSet() )
-          {
-            g.setColor(HIGHLIGHT_COLOR);
-            g.fillRect(w * tileSize, h * tileSize, tileSize, tileSize);
-          }
-        }
-      }
-    }
   }
 
   /**

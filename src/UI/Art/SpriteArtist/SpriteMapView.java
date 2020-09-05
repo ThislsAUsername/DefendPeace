@@ -245,7 +245,7 @@ public class SpriteMapView extends MapView
     drawUnitsAndMapObjects(mapGraphics, gameMap, animIndex);
 
     // Apply any relevant map highlight.
-    mapArtist.drawHighlights(mapGraphics);
+    OverlayArtist.drawHighlights(mapGraphics, gameMap, drawX, drawY, mapViewWidth, mapViewHeight, drawMultiplier);
 
     // Draw Unit icons on top of everything, to make sure they are seen clearly.
     drawUnitIcons(mapGraphics, gameMap, animIndex);
