@@ -92,6 +92,12 @@ public class TurnInitAnimation extends GameAnimation
     // Redraw the bg effects image.
     HorizontalStreaksBG.draw(bgImage.getGraphics(), commander.myColor);
 
+    // Cover the map while sliding the overlay into place if the map should be hidden.
+    if( opaque && !ending )
+    {
+      g.setColor(Color.DARK_GRAY);
+      g.fillRect(0, 0, dims.width, dims.height);
+    }
     if( opaque ) g.drawImage(bgImage, bgx, 0, null);
     g.drawImage(fgImage, fgx, bgImage.getHeight()/2-fgImage.getHeight()/2, null);
 
