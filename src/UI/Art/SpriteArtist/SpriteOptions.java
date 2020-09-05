@@ -1,10 +1,8 @@
 package UI.Art.SpriteArtist;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.Arrays;
 import Engine.ConfigUtils;
 import Engine.Driver;
@@ -35,18 +33,7 @@ public class SpriteOptions
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
   private static SlidingValue animHighlightedOption;
 
-  private static int letterWidth = SpriteLibrary.getLettersUppercase().getFrame(0).getWidth();
-  private static int textBuffer = 4;
-  public static class OptionSelectionContext
-  {
-    public int graphicsOptionWidth = 0; // Set in initialize().
-    public int graphicsOptionHeight = 0; // Set in initialize().
-    public BufferedImage optionNamePanel = null;
-    public BufferedImage optionSettingPanel = null;
-    public BufferedImage optionSettingPanelChanged = null;
-    public BufferedImage optionArrows = null;
-  }
-  private static OptionSelectionContext context = new OptionSelectionContext();
+  private static HorizontalSelectorTemplate template = new HorizontalSelectorTemplate();
 
   public static Dimension getScreenDimensions()
   {
@@ -74,86 +61,13 @@ public class SpriteOptions
     return coordinatesOn;
   }
 
-  static void initialize(GameOption<?>[] allOptions, OptionSelectionContext context)
-  {
-    int maxNameLen = 0;
-    // Calculate the size of the longest option panel needed.
-    for( int i = 0; i < allOptions.length; ++i )
-    {
-      if( allOptions[i].optionName.length() > maxNameLen )
-      {
-        maxNameLen = allOptions[i].optionName.length();
-      }
-    }
-    int maxItemLen = 0;
-    // Calculate the size of the longest item panel needed.
-    for( int i = 0; i < allOptions.length; ++i )
-    {
-      ArrayList<?> allItems = allOptions[i].optionList;
-      for( int j = 0; j < allItems.size(); ++j )
-      {
-        if( allItems.get(j).toString().length() > maxItemLen )
-        {
-          maxItemLen = allItems.get(j).toString().length();
-        }
-      }
-    }
-
-    // This panel will hold the name of the option.
-    context.optionNamePanel = generateOptionPanel(maxNameLen, SpriteUIUtils.MENUBGCOLOR);
-    // This panel will hold the current setting for the option.
-    context.optionSettingPanel = generateOptionPanel(maxItemLen, SpriteUIUtils.MENUBGCOLOR);
-    context.optionSettingPanelChanged = generateOptionPanel(maxItemLen, SpriteUIUtils.MENUHIGHLIGHTCOLOR);
-    int itemWidth = context.optionSettingPanel.getWidth()+ letterWidth * 2; // dual purpose buffer, also used for the switching arrows
-
-    context.graphicsOptionWidth = context.optionNamePanel.getWidth() + itemWidth + letterWidth; // Plus some space for a buffer between panels.
-    context.graphicsOptionHeight = context.optionNamePanel.getHeight();
-
-    // Make points to define the two selection arrows.
-    int[] lXPoints = { 0, 5, 5, 0 };
-    int[] lYPoints = { 4, -1, 11, 5 };
-    int[] rXPoints = { itemWidth, itemWidth+5, itemWidth+5, itemWidth };
-    int[] rYPoints = { -1, 4, 5, 10 };
-    // Build an image with the selection arrows.
-    context.optionArrows = new BufferedImage(itemWidth+7, 10, BufferedImage.TYPE_INT_ARGB);
-    Graphics ag = context.optionArrows.getGraphics();
-    ag.setColor(SpriteUIUtils.MENUFRAMECOLOR);
-    ag.fillPolygon(lXPoints, lYPoints, lXPoints.length);
-    ag.fillPolygon(rXPoints, rYPoints, rXPoints.length);
-  }
   static void initialize()
   {
-    initialize(allOptions, context);
+    template.initialize(allOptions);
 
     animHighlightedOption = new SlidingValue(0);
     // Load saved settings from disk, if they exist.
     loadSettingsFromDisk();
-  }
-
-  /**
-   * Build an image for a floating panel to hold the specified text length, and return it.
-   * @param length The max text length intended to be shown on this panel.
-   */
-  static BufferedImage generateOptionPanel(int length, Color fgColor)
-  {
-    int w = (2 * textBuffer) + (letterWidth * length);
-    int h = (textBuffer) + (SpriteLibrary.getLettersUppercase().getFrame(0).getHeight());
-    int sh = 3; // Extra vertical space to fit in the shadow effect.
-    int sw = 2;
-
-    BufferedImage panel = new BufferedImage(w + sw, h + sh, BufferedImage.TYPE_INT_ARGB);
-
-    Graphics g = panel.getGraphics();
-
-    // Draw the shadow.
-    g.setColor(SpriteUIUtils.MENUFRAMECOLOR);
-    g.fillRect(sw, sh, w, h);
-
-    // Draw the writing surface.
-    g.setColor(fgColor);
-    g.fillRect(0, 0, w, h);
-
-    return panel;
   }
 
   public static boolean handleOptionsInput(InputHandler.InputAction action)
@@ -261,40 +175,25 @@ public class SpriteOptions
     Graphics optionsGraphics = optionsImage.getGraphics();
 
     // Set up some initial parameters.
-    int xDraw = (optionsImage.getWidth() / 2) - (context.graphicsOptionWidth / 2);
-    int yDraw = context.graphicsOptionHeight;
+    int xDraw = (optionsImage.getWidth() / 2) - (template.graphicsOptionWidth / 2);
+    int yDraw = template.graphicsOptionHeight;
     int firstOptionY = yDraw; // Hold onto this to draw the selector arrows.
-    int ySpacing = (context.graphicsOptionHeight + (context.optionNamePanel.getHeight() / 2));
+    int ySpacing = (template.graphicsOptionHeight + (template.optionNamePanel.getHeight() / 2));
 
     // Loop through and draw everything.
     for( int i = 0; i < allOptions.length; ++i, yDraw += ySpacing )
     {
-      drawGameOption(optionsGraphics, context, xDraw, yDraw, allOptions[i]);
+      template.drawGameOption(optionsGraphics, xDraw, yDraw, allOptions[i]);
     }
 
     // Draw the arrows around the highlighted option, animating movement when switching.
     yDraw = firstOptionY + (int) (ySpacing * animHighlightedOption.get()) + (3); // +3 to center.
-    xDraw += (context.graphicsOptionWidth - context.optionSettingPanel.getWidth() - 8); // Subtract 5 to center the arrows around the option setting panel.
+    xDraw += (template.graphicsOptionWidth - template.optionSettingPanel.getWidth() - 8); // Subtract 5 to center the arrows around the option setting panel.
 
-    optionsGraphics.drawImage(context.optionArrows, xDraw, yDraw, context.optionArrows.getWidth(), context.optionArrows.getHeight(), null);
+    optionsGraphics.drawImage(template.optionArrows, xDraw, yDraw, template.optionArrows.getWidth(), template.optionArrows.getHeight(), null);
 
     // Redraw to the screen at scale.
     g.drawImage(optionsImage, 0, 0, optionsImage.getWidth()*drawScale, optionsImage.getHeight()*drawScale, null);
   }
 
-  static void drawGameOption(Graphics g, OptionSelectionContext context, int x, int y, GameOption<?> opt)
-  {
-    int drawBuffer = textBuffer;
-
-    // Draw the name panel and the name.
-    BufferedImage optionNamePanel = context.optionNamePanel;
-    g.drawImage(optionNamePanel, x, y, optionNamePanel.getWidth(), optionNamePanel.getHeight(), null);
-    SpriteUIUtils.drawText(g, opt.optionName, x + drawBuffer, y + drawBuffer);
-
-    // Draw the setting panel and the setting value.
-    x = x + (optionNamePanel.getWidth() + (3 * letterWidth));
-    BufferedImage settingPanel = (opt.isChanged()) ? context.optionSettingPanelChanged : context.optionSettingPanel;
-    g.drawImage(settingPanel, x, y, settingPanel.getWidth(), settingPanel.getHeight(), null);
-    SpriteUIUtils.drawText(g, opt.getCurrentValueText(), x + drawBuffer, y + drawBuffer);
-  }
 }

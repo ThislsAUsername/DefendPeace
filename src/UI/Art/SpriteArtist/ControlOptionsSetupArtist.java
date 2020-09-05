@@ -7,7 +7,6 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import UI.InputHandler;
-import UI.Art.SpriteArtist.SpriteOptions.OptionSelectionContext;
 import UI.InputHandler.InputAction;
 
 public class ControlOptionsSetupArtist
@@ -24,7 +23,7 @@ public class ControlOptionsSetupArtist
   }
 
   private static SpriteCursor spriteCursor = new SpriteCursor();
-  private static OptionSelectionContext context;
+  private static HorizontalSelectorTemplate template;
 
   public static void draw(Graphics g, InputHandler control)
   {
@@ -32,10 +31,10 @@ public class ControlOptionsSetupArtist
     DiagonalBlindsBG.draw(g);
 
     myControl = control;
-    if( null == context )
+    if( null == template )
     {
-      context = new OptionSelectionContext();
-      SpriteOptions.initialize(InputHandler.extraOptions, context);
+      template = new HorizontalSelectorTemplate();
+      template.initialize(InputHandler.extraOptions);
     }
 
     // Set up some initial parameters.
@@ -91,14 +90,14 @@ public class ControlOptionsSetupArtist
     // draw extra items
     for( int ip = 0; ip < InputHandler.actionCommandSelector.size() - numInputValues; ++ip )
     {
-      SpriteOptions.drawGameOption(cig, context, spacing / 2, yDraw, InputHandler.extraOptions[ip]);
+      template.drawGameOption(cig, spacing / 2, yDraw, InputHandler.extraOptions[ip]);
       if( ip + numInputValues == selectedAction ) // Draw the cursor over the selected item.
       {
         // Draw the arrows around the highlighted option, animating movement when switching.
-        int arrowXDraw = (context.graphicsOptionWidth - context.optionSettingPanel.getWidth() + 2);
-        spriteCursor.set(arrowXDraw, yDraw, context.optionArrows.getWidth(), context.optionArrows.getHeight());
+        int arrowXDraw = (template.graphicsOptionWidth - template.optionSettingPanel.getWidth() + 2);
+        spriteCursor.set(arrowXDraw, yDraw, template.optionArrows.getWidth(), template.optionArrows.getHeight());
 
-        cig.drawImage(context.optionArrows,
+        cig.drawImage(template.optionArrows,
                       spriteCursor.getX(), spriteCursor.getY() + 3,
                       spriteCursor.getW(), spriteCursor.getH(),
                       null);
