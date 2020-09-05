@@ -13,8 +13,8 @@ import Engine.OptionSelector;
 
 public class MainUIController implements IController
 {
-  public enum SubMenu { MAIN, SAVE_SELECT, GAME_SETUP, OPTIONS_SELECT, GRAPHICS_OPTIONS, CONFIGURE_CONTROLS, CONTROL_OPTIONS };
-  private static List<SubMenu> optionsSubMenus = Arrays.asList(SubMenu.GRAPHICS_OPTIONS, SubMenu.CONFIGURE_CONTROLS, SubMenu.CONTROL_OPTIONS);
+  public enum SubMenu { MAIN, SAVE_SELECT, GAME_SETUP, OPTIONS_SELECT, GRAPHICS_OPTIONS, SET_KEYBINDS, CONTROL_OPTIONS };
+  private static List<SubMenu> optionsSubMenus = Arrays.asList(SubMenu.GRAPHICS_OPTIONS, SubMenu.SET_KEYBINDS, SubMenu.CONTROL_OPTIONS);
   private SubMenu currentSubMenuType = SubMenu.MAIN;
 
   // NOTE: This list of menu options is mirrored by the Sprite of option images we get from SpriteLibrary.
@@ -91,7 +91,7 @@ public class MainUIController implements IController
           exitGame = false;
         }
         break;
-      case CONFIGURE_CONTROLS:
+      case SET_KEYBINDS:
         if( controlOptionsSetup.handleInput(action) )
           currentSubMenuType = SubMenu.MAIN;
         break;
