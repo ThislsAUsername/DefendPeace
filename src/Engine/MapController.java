@@ -408,11 +408,13 @@ public class MapController implements IController, GameInputHandler.StateChanged
           // Save the game, display a message, and exit to the main menu.
           boolean endTurn = true;
           String saveName = myGame.writeSave(endTurn);
-          String message = "Saved game to " + saveName;
+          ArrayList<String> saveMsg = new ArrayList<String>();
+          saveMsg.add("Saved game to");
+          saveMsg.add(saveName);
 
           GameEventQueue outro = new GameEventQueue();
           boolean hideMap = true;
-          outro.add(new TurnInitEvent(myGame.activeCO, myGame.getCurrentTurn(), hideMap, message));
+          outro.add(new TurnInitEvent(myGame.activeCO, myGame.getCurrentTurn(), hideMap, saveMsg));
           myView.animate(outro);
 
           changeInputMode(InputMode.EXITGAME);

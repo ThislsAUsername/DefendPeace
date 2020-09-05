@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import CommandingOfficers.Commander;
 import UI.SlidingValue;
@@ -32,9 +34,9 @@ public class TurnInitAnimation extends GameAnimation
   long ingressEndTime = -1;
   long holdTimeMs = 700;
   boolean ending;
-  String displayText;
+  Collection<String> displayText;
 
-  public TurnInitAnimation(Commander cmdr, int turnNum, boolean hideMap, boolean requireButton, String message)
+  public TurnInitAnimation(Commander cmdr, int turnNum, boolean hideMap, boolean requireButton, Collection<String> message)
   {
     super(false);
     commander = cmdr;
@@ -54,20 +56,38 @@ public class TurnInitAnimation extends GameAnimation
     dims = new Dimension(SpriteOptions.getScreenDimensions());
     bgImage = SpriteLibrary.createDefaultBlankSprite(dims.width, dims.height);
 
-
     int drawScale = SpriteOptions.getDrawScale();
-    BufferedImage dayImg = SpriteUIUtils.getBoldTextAsImage(displayText);
+    ArrayList<BufferedImage> displayImages = new ArrayList<BufferedImage>();
+    for( String text : displayText )
+    {
+      displayImages.add(SpriteUIUtils.getBoldTextAsImage(text));
+    }
+    int textHeight = displayImages.get(0).getHeight();
     int buf = 3*drawScale;
-    fgImage = SpriteLibrary.createTransparentSprite(dims.width, dayImg.getHeight()*drawScale + (buf*2));
+    fgImage = SpriteLibrary.createTransparentSprite(dims.width,
+        textHeight*displayText.size()*drawScale // space for text
+        + (displayText.size()-1)*drawScale      // buffer between rows of text
+        + (buf*2));                             // buffer between text and border.
     int xCenter = dims.width/2;
     Graphics fgg = fgImage.getGraphics();
+
+    // Draw the two bands above and below the message.
     fgg.setColor(Color.BLACK);
     fgg.fillRect(0, 0, fgImage.getWidth(), drawScale);
     fgg.fillRect(0, fgImage.getHeight()-drawScale, fgImage.getWidth(), drawScale);
+
+    // Fill the frame behind the text.
     fgg.setColor((opaque ? new Color(255, 255, 255, 180) : commander.myColor));
     fgg.fillRect(0, drawScale, fgImage.getWidth(), fgImage.getHeight()-(2*drawScale));
-    fgImage.getGraphics().drawImage(dayImg, xCenter-dayImg.getWidth(), buf,
-        dayImg.getWidth()*drawScale, dayImg.getHeight()*drawScale, null);
+
+    // Draw the message.
+    int txtDrawY = buf;
+    for( BufferedImage txtImg : displayImages )
+    {
+      fgImage.getGraphics().drawImage(txtImg, xCenter-txtImg.getWidth(), txtDrawY,
+          txtImg.getWidth()*drawScale, txtImg.getHeight()*drawScale, null);
+      txtDrawY += (textHeight+1)*drawScale;
+    }
   }
 
   @Override

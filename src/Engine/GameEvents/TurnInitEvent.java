@@ -1,5 +1,8 @@
 package Engine.GameEvents;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import CommandingOfficers.Commander;
 import Engine.XYCoord;
 import Terrain.MapMaster;
@@ -14,14 +17,21 @@ public class TurnInitEvent implements GameEvent
   Commander cmdr;
   int turn;
   boolean opaque;
-  String msg;
+  Collection<String> msg;
 
   public TurnInitEvent(Commander co, int turnNum, boolean hideMap)
   {
-    this(co, turnNum, hideMap, "Turn "+turnNum);
+    this(co, turnNum, hideMap, new ArrayList<String>());
+    msg.add("Turn "+turnNum);
   }
 
   public TurnInitEvent(Commander co, int turnNum, boolean hideMap, String message)
+  {
+    this(co, turnNum, hideMap, new ArrayList<String>());
+    msg.add(message);
+  }
+
+  public TurnInitEvent(Commander co, int turnNum, boolean hideMap, Collection<String> message)
   {
     cmdr = co;
     turn = turnNum;

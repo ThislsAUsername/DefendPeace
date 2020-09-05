@@ -1,5 +1,7 @@
 package UI;
 
+import java.util.Collection;
+
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.IView;
@@ -105,7 +107,7 @@ public abstract class MapView implements IView
   {
     return null;
   }
-  public GameAnimation buildTurnInitAnimation( Commander cmdr, int turn, boolean fowEnabled, String message )
+  public GameAnimation buildTurnInitAnimation( Commander cmdr, int turn, boolean fowEnabled, Collection<String> message )
   {
     return null;
   }

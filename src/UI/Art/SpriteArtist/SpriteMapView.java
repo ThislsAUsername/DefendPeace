@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Queue;
 
 import CommandingOfficers.Commander;
@@ -413,7 +414,7 @@ public class SpriteMapView extends MapView
   }
 
   @Override
-  public GameAnimation buildTurnInitAnimation( Commander cmdr, int turn, boolean hideMap, String message )
+  public GameAnimation buildTurnInitAnimation( Commander cmdr, int turn, boolean hideMap, Collection<String> message )
   {
     boolean requireButton = hideMap && !cmdr.isAI();
     return new TurnInitAnimation(cmdr, turn, hideMap, requireButton, message);
