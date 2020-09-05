@@ -15,6 +15,7 @@ import UI.GameStatsController;
 import UI.InGameMenu;
 import UI.InputHandler;
 import UI.InputHandler.InputAction;
+import UI.InputOptionsController;
 import UI.MapView;
 import Units.Unit;
 
@@ -155,7 +156,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           // Populate our list of seek candidates and sort them by distance from the cursor.
           nextSeekIndex = 0; // We are going to rebuild the list; start from the start.
-          boolean seekBuildingsLast = InputHandler.seekBuildingsLastOption.getSelectedObject();
+          boolean seekBuildingsLast = InputOptionsController.seekBuildingsLastOption.getSelectedObject();
 
           // First get all active units, sorted.
           ArrayList<XYCoord> unitLocations = new ArrayList<XYCoord>();

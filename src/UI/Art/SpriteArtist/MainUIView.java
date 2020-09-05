@@ -64,8 +64,11 @@ public class MainUIView implements IView
       case GRAPHICS_OPTIONS:
         SpriteOptions.draw(g);
         break;
-      case CONTROL_OPTIONS:
+      case CONFIGURE_CONTROLS:
         ControlOptionsSetupArtist.draw(g, controller.getControlOptionsSetupController());
+        break;
+      case CONTROL_OPTIONS:
+        ControlExtraOptionsSetupArtist.draw(g);
         break;
         default:
           System.out.println("Warning: Invalid menu type " + controller.getSubMenuType() + " in MainUIView.render().");
