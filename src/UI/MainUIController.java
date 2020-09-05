@@ -127,12 +127,10 @@ public class MainUIController implements IController
                 {
                   String filename = fileEntry.getName();
                   String prettyName = filename.substring(0, filename.length()-4);
-                  if (GameInstance.isSaveCompatible(filepath))
-                    // If everything looks ducky, add it to the list. Don't check it twice.
-                    saves.add(new SaveInfo(filepath, filename, prettyName));
-                  else
-                    // Throw an extra mark in there to tell the user "yeah, we see it, and it ain't gonna work."
-                    saves.add(new SaveInfo(filepath, filename, "!" + prettyName));
+
+                  // Get any warning symbols for save-file incompatibilities.
+                  String prepends = GameInstance.isSaveCompatible(filepath);
+                  saves.add(new SaveInfo(filepath, filename, prepends + prettyName));
                 }
               }
             }

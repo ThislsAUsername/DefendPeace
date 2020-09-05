@@ -284,32 +284,25 @@ public class GameInstance implements Serializable
     return sb.toString();
   }
   
-  public static boolean isSaveCompatible(String filename)
+  public static String isSaveCompatible(String filename)
   {
     System.out.println(String.format("Checking compatibility of save %s", filename));
 
+    StringBuilder prepends = new StringBuilder();
     GameVersion verInfo = null;
-    boolean verMatch = false;
-    boolean coMatch = false;
     try (FileInputStream file = new FileInputStream(filename); ObjectInputStream in = new ObjectInputStream(file);)
     {
       verInfo = (GameVersion) in.readObject();
-      if( new GameVersion().isEqual(verInfo) )
+      if( !new GameVersion().isEqual(verInfo) )
       {
-        verMatch = true;
-      }
-      else
-      {
+        prepends.append('!');
         System.out.println(String.format("Save is incompatible version: %s",
             (null == verInfo) ? "unknown" : verInfo.toString()));
       }
       GameInstance gi = (GameInstance) in.readObject();
-      if( gi.turn(new GameEventQueue()) )
+      if( !gi.turn(new GameEventQueue()) )
       {
-        coMatch = true;
-      }
-      else
-      {
+        prepends.append('~');
         System.out.println(String.format(
             String.format("Save is for another player's turn (%s).",
                 (null != gi.activeCO) ? gi.activeCO.coInfo.name : "null")));
@@ -320,7 +313,7 @@ public class GameInstance implements Serializable
       ex.printStackTrace();
     }
 
-    return verMatch && coMatch;
+    return prepends.toString();
   }
   
   public static GameInstance loadSave(String filename)

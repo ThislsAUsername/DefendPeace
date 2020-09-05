@@ -62,7 +62,7 @@ public class TestSaveLoad extends TestCase
     String path = game.writeSave(false);
     File file = new File(path);
     testPassed &= validate(file.exists(),  "    The file we just saved to doesn't exist");
-    testPassed &= validate(GameInstance.isSaveCompatible(path),  "    We are incompatible with the save we just made");
+    testPassed &= validate(GameInstance.isSaveCompatible(path).length() == 0,  "    We are incompatible with the save we just made");
     GameInstance loaded = GameInstance.loadSave(path);
     testPassed &= validate(null != loaded,  "    The save didn't actually load");
     file.delete();
