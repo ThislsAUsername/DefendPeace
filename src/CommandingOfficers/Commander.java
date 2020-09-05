@@ -16,6 +16,7 @@ import java.util.UUID;
 import AI.AIController;
 import AI.AILibrary;
 import AI.AIMaker;
+import AI.AIUtils;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
 import Engine.GameScenario;
@@ -30,7 +31,9 @@ import Engine.UuidGenerator;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
+import Terrain.MapWindow;
 import Terrain.TerrainType;
+import UI.GameOverlay;
 import UI.UIUtils.Faction;
 import Units.Unit;
 import Units.UnitModel;
@@ -42,7 +45,7 @@ public class Commander extends GameEventListener implements Serializable
   
   public final CommanderInfo coInfo;
   public final GameScenario.GameRules gameRules;
-  public GameMap myView;
+  public MapWindow myView;
   public ArrayList<Unit> units;
   public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
   public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
@@ -343,6 +346,25 @@ public class Commander extends GameEventListener implements Serializable
   public int getRepairPower()
   {
     return 2;
+  }
+
+  public ArrayList<Unit> threatsToOverlay = new ArrayList<Unit>();
+  public ArrayList<GameOverlay> getMyOverlays(GameMap gameMap, boolean amIViewing)
+  {
+    ArrayList<GameOverlay> overlays = new ArrayList<GameOverlay>();
+    // Apply any relevant map highlight.
+    if( !amIViewing )
+      return overlays;
+    for( Unit u : threatsToOverlay )
+    {
+      int r = u.CO.myColor.getRed(), g = u.CO.myColor.getGreen(), b = u.CO.myColor.getBlue();
+      Color edgeColor = new Color(r, g, b, 200);
+      Color fillColor = new Color(r, g, b, 100);
+      overlays.add(new GameOverlay(null,
+                   AIUtils.findThreatPower(gameMap, u, null).keySet(),
+                   fillColor, edgeColor));
+    }
+    return overlays;
   }
 
   /**

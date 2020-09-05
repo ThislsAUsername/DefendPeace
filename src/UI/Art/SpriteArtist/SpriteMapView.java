@@ -21,6 +21,7 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.TeleportEvent;
 import Engine.GameEvents.TeleportEvent.AnimationStyle;
 import Terrain.GameMap;
+import Terrain.MapWindow;
 import UI.GameOverlay;
 import UI.MapView;
 import UI.SlidingValue;
@@ -199,7 +200,7 @@ public class SpriteMapView extends MapView
    */
   private BufferedImage renderMap()
   {
-    GameMap gameMap = getDrawableMap(myGame);
+    MapWindow gameMap = getDrawableMap(myGame);
     
     // We draw in three stages. First, we draw the map/units onto a canvas which is the size
     // of the entire map; then we copy the visible section of that canvas onto a screen-sized
@@ -260,6 +261,10 @@ public class SpriteMapView extends MapView
                      Utils.findLocationsInRange(gameMap, myGame.getCursorCoord(), w.minRange, w.maxRange),
                      OverlayArtist.FIRE_FILL, edgeColor));
       }
+    }
+    for( Commander co : myGame.commanders )
+    {
+      overlays.addAll(co.getMyOverlays(gameMap, co == gameMap.viewer));
     }
     OverlayArtist.drawHighlights(mapGraphics, gameMap, overlays, drawX, drawY, mapViewWidth, mapViewHeight, drawMultiplier);
 
