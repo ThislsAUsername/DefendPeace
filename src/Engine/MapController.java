@@ -204,19 +204,24 @@ public class MapController implements IController, GameInputHandler.StateChanged
         shouldConsider = false;
         break;
       case BACK:
-        myGameInputHandler.back();
         shouldConsider = false;
-
-        // If we hit BACK while over a unit, add it to the threat overlay for this CO
-        Location loc = myGame.gameMap.getLocation(myGame.getCursorCoord());
-        Unit resident = loc.getResident();
-        if( null != resident )
+        if( myGameInputHandler.isTargeting() )
         {
-          ArrayList<Unit> threats = myGame.activeCO.threatsToOverlay;
-          if( threats.contains(resident) )
-            threats.remove(resident);
-          else
-            threats.add(resident);
+          myGameInputHandler.back();
+        }
+        else
+        {
+          // If we hit BACK while over a unit, add it to the threat overlay for this CO
+          Location loc = myGame.gameMap.getLocation(myGame.getCursorCoord());
+          Unit resident = loc.getResident();
+          if( null != resident )
+          {
+            ArrayList<Unit> threats = myGame.activeCO.threatsToOverlay;
+            if( threats.contains(resident) )
+              threats.remove(resident);
+            else
+              threats.add(resident);
+          }
         }
         break;
       default:
