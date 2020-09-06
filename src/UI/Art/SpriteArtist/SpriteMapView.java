@@ -255,7 +255,7 @@ public class SpriteMapView extends MapView
       overlays.addAll(co.getMyOverlays(gameMap, co == gameMap.viewer));
     }
     // Highlight our currently-selected unit's range on top of everything else
-    if( null != currentPath && null != currentActor )
+    if( null != currentPath && null != currentActor && !mapController.isTargeting() )
     {
       for( WeaponModel w : currentActor.model.weapons )
       {
