@@ -64,6 +64,7 @@ class SelectMoveLocation extends GameInputState<XYCoord>
   public void back()
   {
     myStateData.path = null;
+    myStateData.unitActor = null;
   }
 
   /**
