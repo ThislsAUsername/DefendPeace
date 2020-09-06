@@ -14,8 +14,9 @@ import Units.Unit;
 class SelectMoveLocation extends GameInputState<XYCoord>
 {
   public final boolean canEndOnOccupied = true;
+  private XYCoord oldUnitCoord;
 
-  public SelectMoveLocation(StateData data)
+  private SelectMoveLocation(StateData data)
   {
     super(data);
   }
@@ -60,11 +61,26 @@ class SelectMoveLocation extends GameInputState<XYCoord>
     return next;
   }
 
+  public static SelectMoveLocation build(StateData data, Unit mover, XYCoord startCoord)
+  {
+    // Can have more than one of these on the stack, so we need to persist the unit coord
+    XYCoord oldUnitCoord = data.unitCoord;
+
+    data.unitActor = mover;
+    data.unitCoord = startCoord;
+    data.path = new Path();
+
+    SelectMoveLocation next = new SelectMoveLocation(data);
+    next.oldUnitCoord = oldUnitCoord;
+
+    return next;
+  }
   @Override
   public void back()
   {
     myStateData.path = null;
     myStateData.unitActor = null;
+    myStateData.unitCoord = oldUnitCoord;
   }
 
   /**
