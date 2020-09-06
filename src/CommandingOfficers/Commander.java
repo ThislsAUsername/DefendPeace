@@ -360,7 +360,7 @@ public class Commander extends GameEventListener implements Serializable
       int r = u.CO.myColor.getRed(), g = u.CO.myColor.getGreen(), b = u.CO.myColor.getBlue();
       Color edgeColor = new Color(r, g, b, 200);
       Color fillColor = new Color(r, g, b, 100);
-      overlays.add(new GameOverlay(null,
+      overlays.add(new GameOverlay(new XYCoord(u.x, u.y),
                    AIUtils.findThreatPower(gameMap, u, null).keySet(),
                    fillColor, edgeColor));
     }
