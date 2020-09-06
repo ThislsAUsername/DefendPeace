@@ -249,22 +249,24 @@ public class SpriteMapView extends MapView
     drawUnitsAndMapObjects(mapGraphics, gameMap, animIndex);
 
     ArrayList<GameOverlay> overlays = new ArrayList<GameOverlay>();
-    // Apply any relevant map highlight.
+    // Apply any relevant map highlights.
+    for( Commander co : myGame.commanders )
+    {
+      overlays.addAll(co.getMyOverlays(gameMap, co == gameMap.viewer));
+    }
+    // Highlight our currently-selected unit's range on top of everything else
     if( null != currentPath && null != currentActor )
     {
       for( WeaponModel w : currentActor.model.weapons )
       {
         Color edgeColor = OverlayArtist.SIEGE_FIRE_EDGE;
-        if( w.canFireAfterMoving )
+        if( w.canFireAfterMoving || currentPath.getPathLength() == 1 )
           edgeColor = OverlayArtist.MOBILE_FIRE_EDGE;
         overlays.add(new GameOverlay(null,
-                     Utils.findLocationsInRange(gameMap, myGame.getCursorCoord(), w.minRange, w.maxRange),
+                     Utils.findLocationsInRange(gameMap, myGame.getCursorCoord(),
+                                                (1 == w.minRange)? 0 : w.minRange, w.maxRange),
                      OverlayArtist.FIRE_FILL, edgeColor));
       }
-    }
-    for( Commander co : myGame.commanders )
-    {
-      overlays.addAll(co.getMyOverlays(gameMap, co == gameMap.viewer));
     }
     OverlayArtist.drawHighlights(mapGraphics, gameMap, overlays, drawX, drawY, mapViewWidth, mapViewHeight, drawMultiplier);
 
