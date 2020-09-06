@@ -280,14 +280,14 @@ public class AIUtils
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedDestinations);
     for( WeaponModel wep : unit.model.weapons )
     {
-      double damage = (null == target)? 1 : wep.getDamage(target);
+      double damage = (null == target)? 1 : wep.getDamage(target) * unit.getHPFactor();
       if( damage > 0 )
       {
         if( !wep.canFireAfterMoving )
         {
           for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, wep.minRange, wep.maxRange))
           {
-            double val = damage * unit.getHPFactor();
+            double val = damage;
             if (shootableTiles.containsKey(xyc))
               val = Math.max(val, shootableTiles.get(xyc));
             shootableTiles.put(xyc, val);
@@ -299,7 +299,7 @@ public class AIUtils
           {
             for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, wep.minRange, wep.maxRange))
             {
-              double val = damage * unit.getHPFactor();
+              double val = damage;
               if (shootableTiles.containsKey(xyc))
                 val = Math.max(val, shootableTiles.get(xyc));
               shootableTiles.put(xyc, val);
