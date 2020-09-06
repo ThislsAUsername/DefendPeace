@@ -771,7 +771,7 @@ public class DoRUnits extends UnitModelScheme
     @Override
     public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
     {
-      GameEventQueue events = new GameEventQueue();
+      GameEventQueue events = super.getTurnInitEvents(self, map);
       for( Unit cargo : self.heldUnits )
       {
         events.add(new HealUnitEvent(cargo, self.CO.getRepairPower(), self.CO)); // Event handles cost logic

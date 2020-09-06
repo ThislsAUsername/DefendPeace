@@ -770,7 +770,7 @@ public class AWBWUnits extends UnitModelScheme
     @Override
     public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
     {
-      GameEventQueue events = new GameEventQueue();
+      GameEventQueue events = super.getTurnInitEvents(self, map);
       for( Unit cargo : self.heldUnits )
         if( !cargo.isFullySupplied() )
           events.add(new ResupplyEvent(self, cargo));
