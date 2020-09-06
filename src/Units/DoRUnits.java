@@ -100,7 +100,7 @@ public class DoRUnits extends UnitModelScheme
     dorModels.unitModels.add(sub);
 
     UnitModel seaplane = new SeaplaneModel();
-    carrier.possibleActions.add(0, new UnitProduceLifecycle.UnitProduceFactory(seaplane));
+    carrier.possibleActions.add(1, new UnitProduceLifecycle.UnitProduceFactory(seaplane));
     dorModels.unitModels.add(seaplane);
 
     return dorModels;
