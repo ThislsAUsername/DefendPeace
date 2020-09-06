@@ -357,14 +357,26 @@ public class Commander extends GameEventListener implements Serializable
       return overlays;
     for( Unit u : threatsToOverlay )
     {
+      XYCoord uCoord = new XYCoord(u.x, u.y);
+      if( !gameMap.isLocationValid(uCoord) )
+        continue;
+
       int r = u.CO.myColor.getRed(), g = u.CO.myColor.getGreen(), b = u.CO.myColor.getBlue();
       Color edgeColor = new Color(r, g, b, 200);
       Color fillColor = new Color(r, g, b, 100);
-      overlays.add(new GameOverlay(new XYCoord(u.x, u.y),
+      overlays.add(new GameOverlay(uCoord,
                    AIUtils.findThreatPower(gameMap, u, null).keySet(),
                    fillColor, edgeColor));
     }
     return overlays;
+  }
+  /**
+   * Track unit deaths, so I know not to be threatened by them.
+   */
+  @Override
+  public void receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
+  {
+    threatsToOverlay.remove(victim);
   }
 
   /**
