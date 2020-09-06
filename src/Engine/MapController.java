@@ -410,9 +410,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         myGameInputHandler.reset(); // Reset the input handler to get rid of stale state
         break;
       case PATH_SELECT: // no special handling
-        break;
-      case FREE_TILE_SELECT:
-        myGameInputHandler.reset(); // Reset the input handler to get rid of stale state
+      case FREE_TILE_SELECT: // no special handling
         break;
       case END_TURN:
         // If security is enabled, save and quit at the end of each turn after the first.
