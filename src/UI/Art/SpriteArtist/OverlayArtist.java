@@ -26,6 +26,15 @@ public class OverlayArtist
   static AlphaComposite buffComposite = null;
   static long lastCompositeCreationTime = 0;
 
+  /**
+   * Draw any overlays in the input set, as well as the move/target highlight overlays.
+   * @param bigG The map image graphics, ignoring viewport size
+   * @param drawX Top left X coordinate w.r.t. the map in 1:1 drawspace
+   * @param drawY Top left Y coordinate w.r.t. the map in 1:1 drawspace
+   * @param viewWidth min(map size, viewport size) in 1:1 drawspace
+   * @param viewHeight min(map size, viewport size) in 1:1 drawspace
+   * @param tileSize The factor converting from map space to 1:1 drawspace
+   */
   public static void drawHighlights(Graphics bigG,
                                     GameMap gameMap,
                                     Collection<GameOverlay> inputOverlays,
