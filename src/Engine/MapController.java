@@ -192,7 +192,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
           XYCoord seekCoord = seekLocations.get(nextSeekIndex++);
 
           // Don't allow seeking to the current location.
-          if( myGame.getCursorCoord().equals(seekCoord) ) seekCoord = seekLocations.get(nextSeekIndex++);
+          if( myGame.getCursorCoord().equals(seekCoord) ) seekCoord = seekLocations.get(nextSeekIndex++ % seekLocations.size());
 
           myGame.setCursorLocation(seekCoord);
         }
@@ -204,12 +204,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         shouldConsider = false;
         break;
       case BACK:
-        shouldConsider = false;
-        if( myGameInputHandler.isTargeting() )
-        {
-          myGameInputHandler.back();
-        }
-        else
+        if( !myGameInputHandler.isTargeting() )
         {
           // If we hit BACK while over a unit, add it to the threat overlay for this CO
           Location loc = myGame.gameMap.getLocation(myGame.getCursorCoord());
@@ -223,6 +218,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
               threats.add(resident);
           }
         }
+        myGameInputHandler.back();
+        shouldConsider = false;
         break;
       default:
         System.out.println("WARNING! MapController.handleFreeTileSelect() was given invalid input enum (" + input + ")");
@@ -388,8 +385,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
     switch (inputType)
     {
       case CONSTRAINED_TILE_SELECT:
-        // Create an option selector to keep track of where we are.
-        myGame.setCursorLocation(myGameInputHandler.getCoordinateOptions().get(myGameInputOptionSelector.getSelectionNormalized()));
+      case PATH_SELECT:
+      case FREE_TILE_SELECT:
+        if( null != options && options.size() > 0 )
+          myGame.setCursorLocation(options.get(0));
         break;
       case MENU_SELECT:
         Path path = myGameInputHandler.myStateData.path;
@@ -413,9 +412,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
           executeGameAction(myGameInputHandler.getReadyAction());
         }
         myGameInputHandler.reset(); // Reset the input handler to get rid of stale state
-        break;
-      case PATH_SELECT: // no special handling
-      case FREE_TILE_SELECT: // no special handling
         break;
       case END_TURN:
         // If security is enabled, save and quit at the end of each turn after the first.
