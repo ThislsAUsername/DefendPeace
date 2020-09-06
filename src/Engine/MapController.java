@@ -385,11 +385,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
     switch (inputType)
     {
       case CONSTRAINED_TILE_SELECT:
-      case PATH_SELECT:
       case FREE_TILE_SELECT:
         if( null != options && options.size() > 0 )
           myGame.setCursorLocation(options.get(0));
         break;
+      case PATH_SELECT:
+        break; // no special behavior
       case MENU_SELECT:
         Path path = myGameInputHandler.myStateData.path;
         if( null != path && path.getPathLength() > 0 )
