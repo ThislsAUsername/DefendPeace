@@ -2,8 +2,9 @@ package UI;
 
 import java.awt.Color;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import Engine.XYCoord;
 
@@ -14,7 +15,7 @@ public class GameOverlay implements Serializable
 
   /** Determines whether to draw in FoW; null for "always draw" */
   public XYCoord origin;
-  public ArrayList<XYCoord> area = new ArrayList<XYCoord>();
+  public Set<XYCoord> area = new HashSet<XYCoord>();
   public Color fill = Color.white, edge = Color.black;
 
   public GameOverlay() {}
