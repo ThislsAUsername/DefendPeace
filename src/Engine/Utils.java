@@ -11,6 +11,7 @@ import java.util.Set;
 
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventQueue;
+import Terrain.Environment.Weathers;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
@@ -583,6 +584,8 @@ public class Utils
     if( map.isLocationValid(x, y) )
     {
       int range = (piercing)? viewer.model.visionRangePiercing : viewer.model.visionRange;
+      if( Weathers.RAIN == map.getEnvironment(x, y).weatherType )
+        range = Math.max(1, range-1);
       // if it's a surface unit, give it the boost the terrain would provide, so long as it's not adjacent-only vision
       if( (!piercing || range > 1) && viewer.model.isSurfaceUnit() )
         range += map.getEnvironment(x, y).terrainType.getVisionBoost();
