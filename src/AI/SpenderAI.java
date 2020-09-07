@@ -224,7 +224,9 @@ public class SpenderAI implements AIController
               for( XYCoord coord : unownedProperties )
               {
                 Location loc = gameMap.getLocation(coord);
-                if( loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS && loc.getOwner() != null ) // should we have an attribute for this?
+                if( loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS
+                    || loc.getEnvironment().terrainType == TerrainType.LAB
+                    && loc.getOwner() != null ) // should we have an attribute for this?
                 {
                   validTargets.add(coord);
                 }
