@@ -96,13 +96,13 @@ public class TerrainType implements Serializable
   private static final String BRIDGE_NAME = "BRIDGE";
   public static final TerrainType BRIDGE = new TerrainType( BRIDGE_FLAGS, BRIDGE_DEFENSE, BRIDGE_COLOR, BRIDGE_NAME, SEA );
 
-  private static final int CITY_FLAGS = LAND | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_LAND;
+  private static final int CITY_FLAGS = LAND | CAPTURABLE | PROFITABLE | HEALS_LAND;
   private static final int CITY_DEFENSE = 3;
   private static final Color CITY_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
   private static final String CITY_NAME = "CITY";
   public static final TerrainType CITY = new TerrainType( CITY_FLAGS, CITY_DEFENSE, CITY_COLOR, CITY_NAME, GRASS );
 
-  private static final int TOWER_FLAGS = LAND | CAPTURABLE | PROVIDES_COVER;
+  private static final int TOWER_FLAGS = LAND | CAPTURABLE;
   private static final int TOWER_DEFENSE = 3;
   private static final Color TOWER_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
   private static final String TOWER_NAME = "TOWER";
@@ -114,7 +114,7 @@ public class TerrainType implements Serializable
   private static final String BUNKER_NAME = "BUNKER";
   public static final TerrainType BUNKER = new TerrainType( BUNKER_FLAGS, BUNKER_DEFENSE, BUNKER_COLOR, BUNKER_NAME, GRASS );
 
-  private static final int AIRPORT_FLAGS = LAND | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_AIR;
+  private static final int AIRPORT_FLAGS = LAND | CAPTURABLE | PROFITABLE | HEALS_AIR;
   private static final int AIRPORT_DEFENSE = 3;
   private static final Color AIRPORT_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
   private static final String AIRPORT_NAME = "AIRPORT";
@@ -138,7 +138,7 @@ public class TerrainType implements Serializable
   private static final String DUNES_NAME = "DUNES";
   public static final TerrainType DUNES = new TerrainType( DUNES_FLAGS, DUNES_DEFENSE, DUNES_COLOR, DUNES_NAME, SHOAL );
 
-  private static final int FACTORY_FLAGS = LAND | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_LAND;
+  private static final int FACTORY_FLAGS = LAND | CAPTURABLE | PROFITABLE | HEALS_LAND;
   private static final int FACTORY_DEFENSE = 3;
   private static final Color FACTORY_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
   private static final String FACTORY_NAME = "FACTORY";
@@ -150,13 +150,13 @@ public class TerrainType implements Serializable
   private static final String FOREST_NAME = "FOREST";
   public static final TerrainType FOREST = new TerrainType( FOREST_FLAGS, FOREST_DEFENSE, FOREST_COLOR, FOREST_NAME, GRASS );
 
-  private static final int HEADQUARTERS_FLAGS = LAND | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_LAND;
+  private static final int HEADQUARTERS_FLAGS = LAND | CAPTURABLE | PROFITABLE | HEALS_LAND;
   private static final int HEADQUARTERS_DEFENSE = 4;
   private static final Color HEADQUARTERS_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
   private static final String HEADQUARTERS_NAME = "HEADQUARTERS";
   public static final TerrainType HEADQUARTERS = new TerrainType( HEADQUARTERS_FLAGS, HEADQUARTERS_DEFENSE, HEADQUARTERS_COLOR, HEADQUARTERS_NAME, GRASS );
 
-  private static final int LAB_FLAGS = LAND | CAPTURABLE | PROVIDES_COVER;
+  private static final int LAB_FLAGS = LAND | CAPTURABLE;
   private static final int LAB_DEFENSE = 3;
   private static final Color LAB_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
   private static final String LAB_NAME = "LAB";
@@ -187,13 +187,13 @@ public class TerrainType implements Serializable
   private static final String ROAD_NAME = "ROAD";
   public static final TerrainType ROAD = new TerrainType( ROAD_FLAGS, ROAD_DEFENSE, ROAD_COLOR, ROAD_NAME, SHOAL );
 
-  private static final int SEAPORT_FLAGS = LAND | WATER | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_SEA;
+  private static final int SEAPORT_FLAGS = LAND | WATER | CAPTURABLE | PROFITABLE | HEALS_SEA;
   private static final int SEAPORT_DEFENSE = 3;
   private static final Color SEAPORT_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
   private static final String SEAPORT_NAME = "SEAPORT";
   public static final TerrainType SEAPORT = new TerrainType( SEAPORT_FLAGS, SEAPORT_DEFENSE, SEAPORT_COLOR, SEAPORT_NAME, SHOAL );
 
-  private static final int TEMP_SEAPORT_FLAGS = LAND | WATER | CAPTURABLE | PROVIDES_COVER | HEALS_SEA;
+  private static final int TEMP_SEAPORT_FLAGS = LAND | WATER | CAPTURABLE | HEALS_SEA;
   private static final int TEMP_SEAPORT_DEFENSE = 1;
   private static final Color TEMP_SEAPORT_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
   private static final String TEMP_SEAPORT_NAME = "TEMP_SEAPORT";

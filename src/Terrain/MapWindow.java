@@ -225,42 +225,13 @@ public class MapWindow extends GameMap
   @Override
   public void revealFog(Unit scout)
   {
-    if (null == viewer)
-      return;
-    if( !viewer.isEnemy(scout.CO) )
-    {
-      for( XYCoord coord : Utils.findVisibleLocations(this, scout, false) )
-      {
-        revealFog(coord, false);
-      }
-      // We need to do a second pass with piercing vision so we can know whether to reveal the units
-      for( XYCoord coord : Utils.findVisibleLocations(this, scout, true) )
-      {
-        revealFog(coord, true);
-      }
-    }
+    resetFog();
   }
 
   @Override
   public void revealFog(Unit scout, Path movepath)
   {
-    if (null == viewer)
-      return;
-    if( !viewer.isEnemy(scout.CO) )
-    {
-      for( PathNode node : movepath.getWaypoints() )
-      {
-        for( XYCoord coord : Utils.findVisibleLocations(this, scout, node.x, node.y, false) )
-        {
-          revealFog(coord, false);
-        }
-        // We need to do a second pass with piercing vision so we can know whether to reveal the units
-        for( XYCoord coord : Utils.findVisibleLocations(this, scout, node.x, node.y, true) )
-        {
-          revealFog(coord, true);
-        }
-      }
-    }
+    resetFog();
   }
   
   public void revealFog(XYCoord coord, boolean piercing)
