@@ -11,6 +11,7 @@ import java.util.Queue;
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.Path;
+import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.DamagePopup;
@@ -20,6 +21,8 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.TeleportEvent;
 import Engine.GameEvents.TeleportEvent.AnimationStyle;
 import Terrain.GameMap;
+import Terrain.MapWindow;
+import UI.GameOverlay;
 import UI.MapView;
 import UI.SlidingValue;
 import UI.UIUtils;
@@ -34,6 +37,7 @@ import UI.Art.SpriteArtist.Backgrounds.DiagonalBlindsBG;
 import UI.Art.Animation.AirDropAnimation;
 import UI.Art.Animation.MoveAnimation;
 import Units.Unit;
+import Units.WeaponModel;
 
 public class SpriteMapView extends MapView
 {
@@ -196,7 +200,7 @@ public class SpriteMapView extends MapView
    */
   private BufferedImage renderMap()
   {
-    GameMap gameMap = getDrawableMap(myGame);
+    MapWindow gameMap = getDrawableMap(myGame);
     
     // We draw in three stages. First, we draw the map/units onto a canvas which is the size
     // of the entire map; then we copy the visible section of that canvas onto a screen-sized
@@ -244,8 +248,27 @@ public class SpriteMapView extends MapView
     // Draw units, buildings, trees, etc.
     drawUnitsAndMapObjects(mapGraphics, gameMap, animIndex);
 
-    // Apply any relevant map highlight.
-    mapArtist.drawHighlights(mapGraphics);
+    ArrayList<GameOverlay> overlays = new ArrayList<GameOverlay>();
+    // Apply any relevant map highlights.
+    for( Commander co : myGame.commanders )
+    {
+      overlays.addAll(co.getMyOverlays(gameMap, co == gameMap.viewer));
+    }
+    // Highlight our currently-selected unit's range on top of everything else
+    if( null != currentPath && null != currentActor && !mapController.isTargeting() )
+    {
+      for( WeaponModel w : currentActor.model.weapons )
+      {
+        Color edgeColor = OverlayArtist.SIEGE_FIRE_EDGE;
+        if( w.canFireAfterMoving || currentPath.getPathLength() == 1 )
+          edgeColor = OverlayArtist.MOBILE_FIRE_EDGE;
+        overlays.add(new GameOverlay(null,
+                     Utils.findLocationsInRange(gameMap, myGame.getCursorCoord(),
+                                                (1 == w.minRange)? 0 : w.minRange, w.maxRange),
+                     OverlayArtist.FIRE_FILL, edgeColor));
+      }
+    }
+    OverlayArtist.drawHighlights(mapGraphics, gameMap, overlays, drawX, drawY, mapViewWidth, mapViewHeight, drawMultiplier);
 
     // Draw Unit icons on top of everything, to make sure they are seen clearly.
     drawUnitIcons(mapGraphics, gameMap, animIndex);

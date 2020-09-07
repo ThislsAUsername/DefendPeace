@@ -13,7 +13,6 @@ import Engine.Combat.StrikeParams;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.TeleportEvent;
-import Terrain.GameMap;
 import Terrain.MapWindow;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
@@ -24,7 +23,7 @@ public abstract class MapView implements IView
 
   protected MapController mapController = null;
   
-  protected GameMap foggedMap;
+  protected MapWindow foggedMap;
 
   public void setController(MapController controller)
   {
@@ -116,7 +115,7 @@ public abstract class MapView implements IView
     return null;
   }
 
-  protected GameMap getDrawableMap(GameInstance myGame)
+  protected MapWindow getDrawableMap(GameInstance myGame)
   {
     // Here are the fog-drawing rules. If there are:
     //   zero humans - spectating - draw everything the current player sees.
@@ -124,7 +123,7 @@ public abstract class MapView implements IView
     //   2+ humans - player vs player - draw what the current player sees, IFF the player is human.
 
     // Humans need to see what they can see.
-    GameMap gameMap = myGame.activeCO.myView;
+    MapWindow gameMap = myGame.activeCO.myView;
     if( myGame.activeCO.isAI() ) // If it's not a human, figure out what to show.
     {
       int numHumans = countHumanPlayers(myGame);
@@ -168,9 +167,9 @@ public abstract class MapView implements IView
    * Returns the map owned by the first human Commander found.
    * Intended to be used when there is only one human player.
    */
-  protected GameMap getHumanPlayerMap(GameInstance myGame)
+  protected MapWindow getHumanPlayerMap(GameInstance myGame)
   {
-    GameMap map = null;
+    MapWindow map = null;
 
     for( Commander co : myGame.commanders )
     {

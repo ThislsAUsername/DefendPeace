@@ -45,6 +45,7 @@ public class GameInputHandler
     else
     {
       System.out.println("WARNING! InputStateHandler state stack is empty!");
+      myStateData = new StateData(myStateData.gameMap, myStateData.commander);
       oldCurrentState = new DefaultState(myStateData);
     }
 
@@ -106,6 +107,7 @@ public class GameInputHandler
     if( myStateStack.isEmpty() )
     {
       System.out.println("WARNING! GameActionBuilder has no state active! Creating default.");
+      myStateData = new StateData(myStateData.gameMap, myStateData.commander);
       myStateStack.push(new DefaultState(myStateData));
     }
     return myStateStack.peek();
