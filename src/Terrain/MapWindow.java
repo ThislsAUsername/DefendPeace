@@ -13,7 +13,7 @@ public class MapWindow extends GameMap
 {
   private static final long serialVersionUID = 1L;
   MapMaster master;
-  Commander viewer; // can be null
+  public final Commander viewer; // can be null
   boolean isFogEnabled;
   private boolean[][] isFogged;
   private Commander[][] lastOwnerSeen;

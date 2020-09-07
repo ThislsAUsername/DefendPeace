@@ -23,6 +23,7 @@ class SelectActionTarget extends GameInputState<XYCoord>
     ArrayList<XYCoord> targets = myStateData.actionSet.getTargetedLocations();
 
     consider(targets.get(0));
+
     return new OptionSet(
           myStateData.actionSet.useFreeSelect?
           InputType.FREE_TILE_SELECT : InputType.CONSTRAINED_TILE_SELECT,
@@ -32,6 +33,7 @@ class SelectActionTarget extends GameInputState<XYCoord>
   @Override
   public void consider(XYCoord coord)
   {
+    myStateData.damagePopups = new ArrayList<DamagePopup>();
     for( GameAction action : myStateData.actionSet.getGameActions() )
       if( coord.equals(action.getTargetLocation()) )
       {

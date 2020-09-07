@@ -60,4 +60,21 @@ public class XYCoord implements Serializable
       return false;
     return true;
   }
+
+  public XYCoord up()
+  {
+    return new XYCoord(xCoord, yCoord-1);
+  }
+  public XYCoord down()
+  {
+    return new XYCoord(xCoord, yCoord+1);
+  }
+  public XYCoord left()
+  {
+    return new XYCoord(xCoord-1, yCoord);
+  }
+  public XYCoord right()
+  {
+    return new XYCoord(xCoord+1, yCoord);
+  }
 }

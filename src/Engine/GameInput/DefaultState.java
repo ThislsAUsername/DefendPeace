@@ -37,9 +37,7 @@ class DefaultState extends GameInputState<XYCoord>
     ) )
     {
       // We are considering moving a unit.
-      myStateData.unitActor = resident;
-      myStateData.unitCoord = new XYCoord(resident.x, resident.y);
-      next = new SelectMoveLocation(myStateData);
+      next = SelectMoveLocation.build(myStateData, resident, new XYCoord(resident.x, resident.y));
     }
     else if( (null == resident) && (loc.getOwner() == myStateData.commander)
         && myStateData.commander.getShoppingList(loc).size() > 0 )

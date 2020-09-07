@@ -35,8 +35,7 @@ class SelectLaunchable extends GameInputState<Unit>
   {
     GameInputState<?> next = this;
 
-    myStateData.unitActor = option;
-    next = new SelectMoveLocation(myStateData);
+    next = SelectMoveLocation.build(myStateData, option, myStateData.unitCoord);
 
     return next;
   }
