@@ -58,7 +58,7 @@ public class GameInstance implements Serializable
     gameScenario = scenario;
     isSecurityEnabled = useSecurity;
 
-    currentTurn = 0;
+    currentTurn = 1;
 
     gameMap = map;
     isFogEnabled = fogOfWarOn;
