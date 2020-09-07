@@ -200,12 +200,12 @@ public class MapWindow extends GameMap
       {
         for( Unit unit : co.units )
         {
-          for( XYCoord coord : Utils.findVisibleLocations(this, unit, false) )
+          for( XYCoord coord : Utils.findVisibleLocations(master, unit, false) )
           {
             revealFog(coord, false);
           }
           // We need to do a second pass with piercing vision so we can know whether to reveal the units
-          for( XYCoord coord : Utils.findVisibleLocations(this, unit, true) )
+          for( XYCoord coord : Utils.findVisibleLocations(master, unit, true) )
           {
             revealFog(coord, true);
           }
@@ -214,7 +214,7 @@ public class MapWindow extends GameMap
         {
           revealFog(xyc, true); // Properties can see themselves and anything on them
           Location loc = master.getLocation(xyc);
-          for( XYCoord coord : Utils.findVisibleLocations(this, loc.getCoordinates(), Environment.PROPERTY_VISION_RANGE) )
+          for( XYCoord coord : Utils.findVisibleLocations(master, loc.getCoordinates(), Environment.PROPERTY_VISION_RANGE) )
           {
             revealFog(coord, false);
           }

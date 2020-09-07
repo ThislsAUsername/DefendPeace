@@ -571,12 +571,12 @@ public class Utils
   
 
   /** Returns a list of all locations visible to the unit at its current location. */
-  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, boolean piercing)
+  public static ArrayList<XYCoord> findVisibleLocations(MapMaster map, Unit viewer, boolean piercing)
   {
     return findVisibleLocations(map, viewer, viewer.x, viewer.y, piercing);
   }
   /** Returns a list of all locations that would be visible to the unit if it were at (x, y). */
-  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, int x, int y, boolean piercing)
+  public static ArrayList<XYCoord> findVisibleLocations(MapMaster map, Unit viewer, int x, int y, boolean piercing)
   {
     ArrayList<XYCoord> viewables = new ArrayList<XYCoord>();
 
@@ -592,12 +592,12 @@ public class Utils
     return viewables;
   }
   /** Returns a list of all locations visible to a unit at origin that could see range tiles. */
-  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, XYCoord origin, int range)
+  public static ArrayList<XYCoord> findVisibleLocations(MapMaster map, XYCoord origin, int range)
   {
     return findVisibleLocations(map, origin, range, false);
   }
   /** Returns a list of all visible locations within range of origin, ignoring cover effects. */
-  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, XYCoord origin, int range, boolean piercing)
+  public static ArrayList<XYCoord> findVisibleLocations(MapMaster map, XYCoord origin, int range, boolean piercing)
   {
     ArrayList<XYCoord> locations = new ArrayList<XYCoord>();
 
@@ -611,7 +611,9 @@ public class Utils
         if( currentRange <= range && map.isLocationValid(coord) )
         {
           // If we're adjacent, or we can see through cover, or it's *not* cover, we can see into it.
-          if( piercing || !map.getEnvironment(coord).terrainType.isCover() )
+          Unit obj = map.getResident(coord);
+          if( piercing || !map.getEnvironment(coord).terrainType.isCover()
+              || (null != obj && obj.model.isAirUnit()) )
           {
             // Add this location to the set.
             locations.add(coord);
