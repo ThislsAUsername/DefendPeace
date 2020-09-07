@@ -33,22 +33,27 @@ public class Bear_Bull extends Commander
       super("Bear&Bull");
       infoPages.add(new InfoPage(
           "Bear&Bull is a pair of commanders who complement each other like the ebbs and flows of a free market.\n" +
-          "They have no constant advantage, but can leverage their abilities to gain buying power.\n"));
+          "They repair units for free, and can leverage their abilities to gain buying power.\n"));
       infoPages.add(new InfoPage(
           "Passive:\n" +
-          "- Bear pays and gets 90% cash.\n" +
+          "Repairs are always free.\n" +
+          "- Bear has 90% prices, but also 90% income.\n" +
           "  - Abilities: Upturn and Boom\n" +
-          "- Bull pays and gets 120% cash.\n" +
+          "- Bull has 120% prices, but also 120% income.\n" +
           "  - Abilities: Downturn and Bust\n"));
       infoPages.add(new InfoPage(
+          "Some tips:\n" +
+          "Bear wants to build before using Upturn, and spend all cash during Boom\n" +
+          "Bull wants to use Downturn before building, and bank cash before using Bust"));
+      infoPages.add(new InfoPage(
           "Upturn/Downturn ("+UpDownTurnAbility.DOWNUPTURN_COST+"):\n" +
-          "Switches temporarily to the other commander. Does not affect income.\n" +
+          "Immediately switches to the other commander, switching back before your next turn starts.\n" +
           "Removes "+UpDownTurnAbility.DOWNUPTURN_LIQUIDATION+" HP from any unit on any property you own.\n" +
           "You get the funds value of all HP removed.\n"));
       infoPages.add(new InfoPage(
           "Boom/Bust ("+BustBoomAbility.BOOMBUST_COST+"):\n" +
-          "Permanently switches in the other commander.\n" +
-          "Also grants a 20 percent discount this turn.\n"));
+          "Grants a 20 percent discount this turn.\n" +
+          "Permanently switches to the other commander at the start of your next turn."));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -97,6 +102,12 @@ public class Bear_Bull extends Commander
         um.COcost = BULL_MOD;
       }
     }
+  }
+
+  @Override
+  public double getRepairCostFactor()
+  {
+    return 0;
   }
 
   @Override

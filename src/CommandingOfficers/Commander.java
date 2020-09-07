@@ -343,6 +343,12 @@ public class Commander extends GameEventListener implements Serializable
   }
 
   // TODO: determine if this needs parameters, and if so, what?
+  public double getRepairCostFactor()
+  {
+    return 1;
+  }
+
+  // TODO: determine if this needs parameters, and if so, what?
   public int getRepairPower()
   {
     return 2;
