@@ -53,7 +53,6 @@ public class HealyBoi extends Commander
   @Override
   public GameEventQueue initTurn(MapMaster map)
   {
-    modifyAbilityPower(42);
     GameEventQueue ret = super.initTurn(map);
 
     for( Unit unit : units )
@@ -63,8 +62,7 @@ public class HealyBoi extends Commander
       int affordableHP = this.money / costPerHP;
       int actualRepair = Math.min(D2DREPAIRS, affordableHP);
 
-      int deltaHP = unit.alterHP(actualRepair);
-//      this.money -= deltaHP * costPerHP;
+      unit.alterHP(actualRepair);
     }
     
     return ret;
