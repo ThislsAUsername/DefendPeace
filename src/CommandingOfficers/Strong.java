@@ -196,6 +196,7 @@ public class Strong extends Commander
         upm.addProductionPair(TerrainType.SEAPORT, model);
         upm.addProductionPair(TerrainType.CITY, model);
         upm.addProductionPair(TerrainType.HEADQUARTERS, model);
+        upm.addProductionPair(TerrainType.LAB, model);
       }
       myCommander.addCOModifier(upm);
 

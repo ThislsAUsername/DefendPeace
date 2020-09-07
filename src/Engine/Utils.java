@@ -14,6 +14,7 @@ import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
+import Terrain.TerrainType;
 import Units.Unit;
 import Units.WeaponModel;
 import Units.MoveTypes.MoveType;
@@ -639,6 +640,49 @@ public class Utils
       }
     }
     return result;
+  }
+
+  public static boolean willLoseFromLossOf(MapMaster map, Location capLoc)
+  {
+    if(null == capLoc.getOwner())
+      return false;
+
+    boolean playerHasLost = false;
+
+    TerrainType propertyType = capLoc.getEnvironment().terrainType;
+
+    // Check if capturing this property will cause someone's defeat.
+    if( (propertyType == TerrainType.HEADQUARTERS) )
+    {
+      playerHasLost = true;
+    }
+
+    else if( (propertyType == TerrainType.LAB) )
+    {
+      int numLabs = 0;
+      int numHQs = 0;
+      for( XYCoord xy : capLoc.getOwner().ownedProperties )
+      {
+        Location loc = map.getLocation(xy);
+        if( loc.getEnvironment().terrainType == TerrainType.LAB )
+        {
+          numLabs += 1;
+          if( numLabs > 1)
+            break;
+        }
+        if( loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS )
+        {
+          numHQs += 1;
+          break;
+        }
+      }
+      if( numLabs < 2 && numHQs == 0 )
+      {
+        playerHasLost = true;
+      }
+    }
+
+    return playerHasLost;
   }
 
   /**

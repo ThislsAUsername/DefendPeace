@@ -289,9 +289,11 @@ public abstract class BattleLifecycle
             attackEvents.add(new MapChangeEvent(target.getCoordinates(), newEnvirons));
 
             // Check if destroying this property will cause someone's defeat.
-            if( (TerrainType.HEADQUARTERS == oldEnvirons.terrainType) && (null != target.getOwner()) )
+            if( Utils.willLoseFromLossOf(gameMap, target) )
             {
-              attackEvents.add(new CommanderDefeatEvent(target.getOwner()));
+              // Someone is losing their big, comfy chair.
+              CommanderDefeatEvent defeat = new CommanderDefeatEvent(target.getOwner());
+              attackEvents.add(defeat);
             }
           }
         }

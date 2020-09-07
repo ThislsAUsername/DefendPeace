@@ -217,6 +217,7 @@ public class SpriteLibrary
     {
       ss.addTerrainAffinity(TerrainType.BRIDGE);
       ss.addTerrainAffinity(TerrainType.HEADQUARTERS);
+      ss.addTerrainAffinity(TerrainType.LAB);
       ss.addTerrainAffinity(TerrainType.FACTORY);
     }
     else if( terrainType == TerrainType.SHOAL )
