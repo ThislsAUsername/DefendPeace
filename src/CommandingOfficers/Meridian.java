@@ -1,14 +1,17 @@
 package CommandingOfficers;
 
 import java.util.ArrayList;
-
+import java.util.Collection;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.GameScenario;
+import Engine.XYCoord;
+import Engine.Combat.DamagePopup;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.TransformLifecycle;
+import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
@@ -147,6 +150,20 @@ public class Meridian extends Commander
       {
         unit.isTurnOver = false;
       }
+    }
+
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+
+      for( Unit unit : COcast.justTransformed )
+        output.add(new DamagePopup(
+                       new XYCoord(unit.x, unit.y),
+                       myCommander.myColor,
+                       "Flow"));
+
+      return output;
     }
   }
 
