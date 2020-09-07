@@ -268,7 +268,11 @@ public class SpriteMapView extends MapView
                      OverlayArtist.FIRE_FILL, edgeColor));
       }
     }
-    OverlayArtist.drawHighlights(mapGraphics, gameMap, overlays, drawX, drawY, mapViewWidth, mapViewHeight, drawMultiplier);
+    OverlayArtist.drawHighlights(mapGraphics, gameMap, overlays,
+                                 drawX, drawY,
+                                 mapViewWidth, mapViewHeight,
+                                 drawMultiplier,
+                                 null != currentPath, myGame.getCursorCoord());
 
     // Draw Unit icons on top of everything, to make sure they are seen clearly.
     drawUnitIcons(mapGraphics, gameMap, animIndex);

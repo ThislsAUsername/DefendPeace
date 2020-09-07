@@ -38,13 +38,16 @@ public class OverlayArtist
    * @param viewWidth min(map size, viewport size) in 1:1 drawspace
    * @param viewHeight min(map size, viewport size) in 1:1 drawspace
    * @param tileSize The factor converting from map space to 1:1 drawspace
+   * @param planningMove Whether we're currently considering where to move a unit
+   * @param moveLoc Where we're planning to move that unit
    */
   public static void drawHighlights(Graphics bigG,
                                     GameMap gameMap,
                                     Collection<GameOverlay> inputOverlays,
                                     int drawX, int drawY,
                                     int viewWidth, int viewHeight,
-                                    int tileSize)
+                                    int tileSize,
+                                    boolean planningMove, XYCoord moveLoc)
   {
     if( viewWidth < 1 || viewHeight < 1 )
       return;
@@ -56,8 +59,13 @@ public class OverlayArtist
         overlays.add(ov);
 
     // Check if input is the same as last time
-    ByteBuffer params = ByteBuffer.allocate(Integer.BYTES * (6 + inputOverlays.size()) );
-    params.putInt(inputOverlays.size()).putInt(drawX).putInt(drawY).putInt(viewWidth).putInt(viewHeight).putInt(tileSize);
+    ByteBuffer params = ByteBuffer.allocate(Integer.BYTES * (8 + inputOverlays.size()) );
+    params.putInt(inputOverlays.size())
+          .putInt(drawX).putInt(drawY)
+          .putInt(viewWidth).putInt(viewHeight)
+          .putInt(tileSize);
+    if( planningMove )
+      params.putInt(moveLoc.xCoord).putInt(moveLoc.yCoord);
     for( GameOverlay ov : overlays )
       params.putInt(ov.area.size());
     params.rewind(); // Push the buffer pointer to the start so "remaining elements" exists
