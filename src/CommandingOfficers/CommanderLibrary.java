@@ -2,62 +2,15 @@ package CommandingOfficers;
 
 import java.util.ArrayList;
 
-import CommandingOfficers.Assorted.AllDaWaylon;
-import CommandingOfficers.Assorted.Creed;
-import CommandingOfficers.Assorted.Fastfield;
-import CommandingOfficers.Assorted.Sneakfield;
-import CommandingOfficers.Assorted.TheBeastSturm;
-import CommandingOfficers.BlackHole.Adder;
-import CommandingOfficers.BlackHole.Hawke;
-import CommandingOfficers.BlackHole.Kindle;
-import CommandingOfficers.BlackHole.Koal;
-import CommandingOfficers.BlackHole.Lash;
-import CommandingOfficers.BlackHole.OmegaKoal;
-import CommandingOfficers.BlackHole.OmegaSturm;
-import CommandingOfficers.BlackHole.Sturm;
-import CommandingOfficers.BlackHole.VB;
-import CommandingOfficers.BlueMoon.BillyGates;
-import CommandingOfficers.BlueMoon.Colin;
-import CommandingOfficers.BlueMoon.Grit;
-import CommandingOfficers.BlueMoon.Olaf;
-import CommandingOfficers.BlueMoon.Rojenski;
-import CommandingOfficers.BlueMoon.Sasha;
-import CommandingOfficers.BrennersWolves.Brenner;
-import CommandingOfficers.BrennersWolves.Isabella;
-import CommandingOfficers.BrennersWolves.Link;
-import CommandingOfficers.BrennersWolves.Will;
-import CommandingOfficers.GreenEarth.DSJess;
-import CommandingOfficers.GreenEarth.Drake;
-import CommandingOfficers.GreenEarth.Eagle;
-import CommandingOfficers.GreenEarth.Javier;
-import CommandingOfficers.GreenEarth.Javier1T;
-import CommandingOfficers.GreenEarth.Jess;
-import CommandingOfficers.IDS.CaulderAlt;
-import CommandingOfficers.IDS.Caulder;
-import CommandingOfficers.IDS.Cyrus;
-import CommandingOfficers.IDS.OmegaCaulder;
-import CommandingOfficers.IDS.OmegaTabitha;
-import CommandingOfficers.IDS.PennyAlt;
-import CommandingOfficers.IDS.TabithaBasic;
-import CommandingOfficers.Lazuria.Forsythe;
-import CommandingOfficers.Lazuria.Gage;
-import CommandingOfficers.Lazuria.Tasha;
-import CommandingOfficers.OrangeStar.Andy;
-import CommandingOfficers.OrangeStar.Caroline;
-import CommandingOfficers.OrangeStar.Hachi;
-import CommandingOfficers.OrangeStar.Jake;
-import CommandingOfficers.OrangeStar.Max;
-import CommandingOfficers.OrangeStar.Rachel;
-import CommandingOfficers.OrangeStar.Sami;
-import CommandingOfficers.OrangeStar.YuanDelta;
-import CommandingOfficers.YellowComet.Grimm;
-import CommandingOfficers.YellowComet.Hetler;
-import CommandingOfficers.YellowComet.Kanbei;
-import CommandingOfficers.YellowComet.OmegaKanbei;
-import CommandingOfficers.YellowComet.Sensei;
-import CommandingOfficers.YellowComet.Sonja;
-import CommandingOfficers.YellowComet.Spannbei;
-import CommandingOfficers.YellowComet.Yamamoto;
+import CommandingOfficers.Assorted.*;
+import CommandingOfficers.BlackHole.*;
+import CommandingOfficers.BlueMoon.*;
+import CommandingOfficers.BrennersWolves.*;
+import CommandingOfficers.GreenEarth.*;
+import CommandingOfficers.IDS.*;
+import CommandingOfficers.Lazuria.*;
+import CommandingOfficers.OrangeStar.*;
+import CommandingOfficers.YellowComet.*;
 
 public class CommanderLibrary
 {  
@@ -151,6 +104,8 @@ public class CommanderLibrary
     commanderList.add( OmegaKoal.getInfo() );
     commanderList.add( OmegaSturm.getInfo() );
     commanderList.add( OmegaCaulder.getInfo() );
+
+    commanderList.add( HealyBoi.getInfo() );
 //    for (CommanderInfo info : commanderList)
 //    {
 //      System.out.println(info.name);
