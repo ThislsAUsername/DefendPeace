@@ -24,20 +24,8 @@ class SelectActionTarget extends GameInputState<XYCoord>
 
     consider(targets.get(0));
 
-    boolean useFreeSelect = myStateData.actionSet.useFreeSelect;
-    // For constrained select, switch to free-tile select in target-rich environments
-    if( !useFreeSelect && targets.size() > 3 )
-    {
-      int maxDist = 0;
-      for( XYCoord a : targets )
-        for( XYCoord b : targets )
-          maxDist = Math.max(maxDist, a.getDistance(b));
-
-      useFreeSelect = maxDist < targets.size();
-    }
-
     return new OptionSet(
-          useFreeSelect?
+          myStateData.actionSet.useFreeSelect?
           InputType.FREE_TILE_SELECT : InputType.CONSTRAINED_TILE_SELECT,
           targets);
   }

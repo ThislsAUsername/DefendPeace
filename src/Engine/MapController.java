@@ -232,6 +232,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
   private void handleConstrainedTileSelect(InputHandler.InputAction input)
   {
     boolean shouldConsider = true;
+    ArrayList<XYCoord> targetLocations = myGameInputHandler.getCoordinateOptions();
+
     switch (input)
     {
       case SELECT:
@@ -253,11 +255,29 @@ public class MapController implements IController, GameInputHandler.StateChanged
           System.out.println("WARNING! Attempting to choose a target for a non-targetable action.");
         }
 
-        ArrayList<XYCoord> targetLocations = myGameInputHandler.getCoordinateOptions();
-        myGameInputOptionSelector.handleInput(input);
-        myGame.setCursorLocation(targetLocations.get(myGameInputOptionSelector.getSelectionNormalized()));
+        boolean useFreeSelect = false;
+        // Switch to free-tile select in target-rich environments
+        if( !useFreeSelect && targetLocations.size() > 3 )
+        {
+          int maxDist = 0;
+          for( XYCoord a : targetLocations )
+            for( XYCoord b : targetLocations )
+              maxDist = Math.max(maxDist, a.getDistance(b));
+
+          useFreeSelect = maxDist < targetLocations.size();
+        }
+
+        if( useFreeSelect )
+          handleFreeTileSelect(input);
+        else
+        {
+          myGameInputOptionSelector.handleInput(input);
+          myGame.setCursorLocation(targetLocations.get(myGameInputOptionSelector.getSelectionNormalized()));
+        }
         break;
-      case SEEK: // Seek does nothing in this input state.
+      case SEEK: // SEEK allows constrained select even when in target-rich environments
+        myGameInputOptionSelector.handleInput(InputHandler.InputAction.DOWN);
+        myGame.setCursorLocation(targetLocations.get(myGameInputOptionSelector.getSelectionNormalized()));
       default:
     }
     if( shouldConsider )
