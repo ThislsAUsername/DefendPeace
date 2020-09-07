@@ -6,6 +6,7 @@ import java.awt.Composite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -26,6 +27,9 @@ public class OverlayArtist
   static AlphaComposite buffComposite = null;
   static long lastCompositeCreationTime = 0;
 
+  private static ByteBuffer oldParams;
+  private static BufferedImage overlayImage;
+
   /**
    * Draw any overlays in the input set, as well as the move/target highlight overlays.
    * @param bigG The map image graphics, ignoring viewport size
@@ -45,48 +49,30 @@ public class OverlayArtist
     if( viewWidth < 1 || viewHeight < 1 )
       return;
 
-    BufferedImage overlayImage = SpriteLibrary.createTransparentSprite(viewWidth, viewHeight);
-    Graphics og = overlayImage.getGraphics();
-
     // Only show stuff we're allowed to
     Collection<GameOverlay> overlays = new ArrayList<GameOverlay>();
     for( GameOverlay ov : inputOverlays )
       if( null == ov.origin || !gameMap.isLocationFogged(ov.origin) )
         overlays.add(ov);
 
-    for( int w = 0; w < gameMap.mapWidth; ++w )
-    {
-      if( (w+1)*tileSize < drawX || drawX + viewWidth < (w-2)*tileSize )
-        continue;
-      for( int h = 0; h < gameMap.mapHeight; ++h )
-      {
-        if( (h+1)*tileSize < drawY || drawY + viewHeight < (h-2)*tileSize )
-          continue;
+    // Check if input is the same as last time
+    ByteBuffer params = ByteBuffer.allocate(Integer.BYTES * (6 + inputOverlays.size()) );
+    params.putInt(inputOverlays.size()).putInt(drawX).putInt(drawY).putInt(viewWidth).putInt(viewHeight).putInt(tileSize);
+    for( GameOverlay ov : overlays )
+      params.putInt(ov.area.size());
+    params.rewind(); // Push the buffer pointer to the start so "remaining elements" exists
 
-        XYCoord coord = new XYCoord(w,h);
-        for( GameOverlay ov : overlays )
-          if( ov.area.contains(coord) )
-            drawOverlayTile(og, ov, coord, w * tileSize - drawX, h * tileSize - drawY, tileSize);
-        
-        if( gameMap.isLocationValid(w, h) )
-        {
-          Terrain.Location locus = gameMap.getLocation(w, h);
-          if( locus.isHighlightSet() )
-          {
-            og.setColor(HIGHLIGHT_COLOR);
-            og.fillRect(w * tileSize - drawX, h * tileSize - drawY, tileSize, tileSize);
-          }
-        }
-      }
+    if( !params.equals(oldParams) )
+    {
+      oldParams = params;
+      overlayImage = generateOverlayImage(gameMap, overlays, drawX, drawY, viewWidth, viewHeight, tileSize);
     }
 
     // Set opacity as a function of time.
     long nowTime = System.currentTimeMillis();
-//    float overlayOpacity = (float)(0.5*Math.max(0, Math.sin(nowTime/420.)));
     float overlayOpacity = (float)(0.15*Math.sin(nowTime/420.) + 0.7);
 
     // Only regenerate the AlphaComposite object once per timestep.
-//    if(lastCompositeCreationTime != nowTime)
     if(lastCompositeCreationTime < nowTime-5)
     {
       lastCompositeCreationTime = nowTime;
@@ -115,5 +101,43 @@ public class OverlayArtist
       og.fillRect(drawX-hT            , drawY-hT            , tileSize+eT,          eT);
     if( !overlay.area.contains(coord.down()) )
       og.fillRect(drawX-hT            , drawY+hT+tileSize-eT, tileSize+eT,          eT);
+  }
+
+  private static BufferedImage generateOverlayImage(GameMap gameMap,
+                                                    Collection<GameOverlay> overlays,
+                                                    int drawX, int drawY,
+                                                    int viewWidth, int viewHeight,
+                                                    int tileSize)
+  {
+    BufferedImage overlayImage = SpriteLibrary.createTransparentSprite(viewWidth, viewHeight);
+    Graphics og = overlayImage.getGraphics();
+
+    for( int w = 0; w < gameMap.mapWidth; ++w )
+    {
+      if( (w+1)*tileSize < drawX || drawX + viewWidth < (w-2)*tileSize )
+        continue;
+      for( int h = 0; h < gameMap.mapHeight; ++h )
+      {
+        if( (h+1)*tileSize < drawY || drawY + viewHeight < (h-2)*tileSize )
+          continue;
+
+        XYCoord coord = new XYCoord(w,h);
+        for( GameOverlay ov : overlays )
+          if( ov.area.contains(coord) )
+            drawOverlayTile(og, ov, coord, w * tileSize - drawX, h * tileSize - drawY, tileSize);
+
+        if( gameMap.isLocationValid(w, h) )
+        {
+          Terrain.Location locus = gameMap.getLocation(w, h);
+          if( locus.isHighlightSet() )
+          {
+            og.setColor(HIGHLIGHT_COLOR);
+            og.fillRect(w * tileSize - drawX, h * tileSize - drawY, tileSize, tileSize);
+          }
+        }
+      }
+    }
+
+    return overlayImage;
   }
 }
