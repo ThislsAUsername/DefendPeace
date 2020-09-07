@@ -1,14 +1,18 @@
 package CommandingOfficers;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameScenario;
 import Engine.XYCoord;
+import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.MassDamageEvent;
+import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -127,11 +131,11 @@ public class Bear_Bull extends Commander
     private static final int DOWNUPTURN_LIQUIDATION = 3;
     Bear_Bull COcast;
 
-    UpDownTurnAbility(Commander commander)
+    UpDownTurnAbility(Bear_Bull commander)
     {
       // as we start in Bear form, UpTurn is the correct starting name
       super(commander, UPTURN_NAME, DOWNUPTURN_COST);
-      COcast = (Bear_Bull) commander;
+      COcast = commander;
     }
 
     @Override
@@ -147,7 +151,42 @@ public class Bear_Bull extends Commander
       myCommander.addCOModifier(this);
 
       // Damage is dealt after swapping D2Ds so it's actually useful to Bear
-      ArrayList<Unit> victims = new ArrayList<Unit>();
+      COcast.liquidateMassDamage = true; // Collect money instead of ability energy
+      GameEvent damage = new MassDamageEvent(findVictims(gameMap), DOWNUPTURN_LIQUIDATION, false);
+      damage.performEvent(gameMap);
+      GameEventListener.publishEvent(damage);
+      COcast.liquidateMassDamage = false;
+    }
+
+    @Override // COModifier interface.
+    public void applyChanges(Commander commander)
+    {
+      COcast.swapD2Ds(false);
+    }
+
+    @Override
+    public void revertChanges(Commander commander)
+    {
+      COcast.swapD2Ds(true);
+    }
+
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+
+      for( Unit victim : findVictims(gameMap) )
+        output.add(new DamagePopup(
+                       new XYCoord(victim.x, victim.y),
+                       myCommander.myColor,
+                       Math.min(victim.getHP()-1, DOWNUPTURN_LIQUIDATION)*10 + "%"));
+
+      return output;
+    }
+
+    public HashSet<Unit> findVictims(GameMap gameMap)
+    {
+      HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
       for( XYCoord xyc : myCommander.ownedProperties )
       {
         Location loc = gameMap.getLocation(xyc);
@@ -160,25 +199,7 @@ public class Bear_Bull extends Commander
           }
         }
       }
-      COcast.liquidateMassDamage = true; // Collect money instead of ability energy
-      GameEvent damage = new MassDamageEvent(victims, DOWNUPTURN_LIQUIDATION, false);
-      damage.performEvent(gameMap);
-      GameEventListener.publishEvent(damage);
-      COcast.liquidateMassDamage = false;
-    }
-
-    @Override // COModifier interface.
-    public void applyChanges(Commander commander)
-    {
-      Bear_Bull cmdr = (Bear_Bull) commander;
-      cmdr.swapD2Ds(false);
-    }
-
-    @Override
-    public void revertChanges(Commander commander)
-    {
-      Bear_Bull cmdr = (Bear_Bull) commander;
-      cmdr.swapD2Ds(true);
+      return victims;
     }
   }
 
@@ -196,11 +217,11 @@ public class Bear_Bull extends Commander
     private static final double BOOMBUST_BUFF = 0.2;
     Bear_Bull COcast;
 
-    BustBoomAbility(Commander commander)
+    BustBoomAbility(Bear_Bull commander)
     {
       // as we start in Bear form, Boom is the correct starting name
       super(commander, BOOM_NAME, BOOMBUST_COST);
-      COcast = (Bear_Bull) commander;
+      COcast = commander;
     }
 
     @Override
@@ -219,9 +240,8 @@ public class Bear_Bull extends Commander
     @Override // COModifier interface.
     public void applyChanges(Commander commander)
     {
-      Bear_Bull cmdr = (Bear_Bull) commander;
       // Instead of swapping, we get a discount. Yaaaay.
-      for( UnitModel um : cmdr.unitModels )
+      for( UnitModel um : COcast.unitModels )
       {
         um.COcost -= BOOMBUST_BUFF;
       }
@@ -231,8 +251,7 @@ public class Bear_Bull extends Commander
     public void revertChanges(Commander commander)
     {
       // Next turn, we swap D2Ds permanently
-      Bear_Bull cmdr = (Bear_Bull) commander;
-      cmdr.swapD2Ds(true);
+      COcast.swapD2Ds(true);
     }
   }
 
