@@ -1,8 +1,5 @@
 package Engine.GameInput;
 
-import java.util.ArrayList;
-import Engine.Combat.DamagePopup;
-
 public class ConfirmUnitAction extends GameInputState<ConfirmUnitAction.ConfirmActionEnum>
 {
   enum ConfirmActionEnum
@@ -13,7 +10,6 @@ public class ConfirmUnitAction extends GameInputState<ConfirmUnitAction.ConfirmA
   public ConfirmUnitAction(StateData data)
   {
     super(data);
-    myStateData.damagePopups = myStateData.actionSet.getSelected().getDamagePopups(myStateData.gameMap);
   }
 
   @Override
@@ -37,11 +33,5 @@ public class ConfirmUnitAction extends GameInputState<ConfirmUnitAction.ConfirmA
     }
     
     return next;
-  }
-
-  @Override
-  public void back()
-  {
-    myStateData.damagePopups = new ArrayList<DamagePopup>();
   }
 }

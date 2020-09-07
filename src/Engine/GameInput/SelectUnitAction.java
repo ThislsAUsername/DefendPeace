@@ -81,8 +81,14 @@ class SelectUnitAction extends GameInputState<GameActionSet>
   }
 
   @Override
+  public void consider(GameActionSet actionSet)
+  {
+    myStateData.damagePopups = actionSet.getSelected().getDamagePopups(myStateData.gameMap);
+  }
+  @Override
   public void back()
   {
     myStateData.actionSet = null;
+    myStateData.damagePopups.clear();
   }
 }

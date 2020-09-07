@@ -305,9 +305,8 @@ public class SpriteMapView extends MapView
       }
     }
 
-    if( null != currentActor )
-      for( DamagePopup popup : mapController.getDamagePopups() )
-        drawDamagePreview(mapGraphics, popup);
+    for( DamagePopup popup : mapController.getDamagePopups() )
+      drawDamagePreview(mapGraphics, popup);
 
     // When we draw the map, we want to center it if it's smaller than the view dimensions
     int deltaX = 0, deltaY = 0;

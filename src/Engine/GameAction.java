@@ -167,6 +167,12 @@ public abstract class GameAction
     {
       return null;
     }
+
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap map)
+    {
+      return myAbility.getDamagePopups(map);
+    }
   } // ~AbilityAction
 
   // ===========  TeleportAction  =================================

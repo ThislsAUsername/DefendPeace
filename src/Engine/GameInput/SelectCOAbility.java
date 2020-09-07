@@ -35,4 +35,15 @@ public class SelectCOAbility extends GameInputState<CommanderAbility>
 
     return next;
   }
+
+  @Override
+  public void consider(CommanderAbility ability)
+  {
+    myStateData.damagePopups = ability.getDamagePopups(myStateData.gameMap);
+  }
+  @Override
+  public void back()
+  {
+    myStateData.damagePopups.clear();
+  }
 }

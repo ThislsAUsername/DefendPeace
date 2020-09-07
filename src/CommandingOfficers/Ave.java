@@ -1,6 +1,7 @@
 package CommandingOfficers;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
@@ -12,6 +13,7 @@ import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.Combat.DamagePopup;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
@@ -554,17 +556,8 @@ public class Ave extends Commander
       }
 
       // Freeze enemies around each of Ave's units or buildings.
-      tilesInRange = Utils.findLocationsNearUnits(gameMap, coCast, GLACIO_FREEZE_RANGE);
-      tilesInRange.addAll(Utils.findLocationsNearProperties(gameMap, coCast, GLACIO_FREEZE_RANGE));
-      for( XYCoord coord : tilesInRange )
-      {
-        // Freeze each nearby enemy.
-        Location loc = gameMap.getLocation(coord);
-        if( null != loc.getResident() && myCommander.isEnemy(loc.getResident().CO) )
-        {
-          loc.getResident().isStunned = true;
-        }
-      }
+      for( Unit victim : findVictims(gameMap) )
+        victim.isStunned = true;
 
       GameEventQueue glacioEvents = new GameEventQueue();
       glacioEvents.add(new MapChangeEvent(tileChanges));
@@ -576,6 +569,36 @@ public class Ave extends Commander
         event.performEvent(gameMap);
         GameEventListener.publishEvent(event);
       }
+    }
+
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+
+      for( Unit victim : findVictims(gameMap) )
+        output.add(new DamagePopup(
+                       new XYCoord(victim.x, victim.y),
+                       myCommander.myColor,
+                       "stun"));
+
+      return output;
+    }
+
+    public HashSet<Unit> findVictims(GameMap gameMap)
+    {
+      HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
+      Set<XYCoord> tilesInRange = Utils.findLocationsNearUnits(gameMap, coCast, GLACIO_FREEZE_RANGE);
+      tilesInRange.addAll(Utils.findLocationsNearProperties(gameMap, coCast, GLACIO_FREEZE_RANGE));
+      for( XYCoord coord : tilesInRange )
+      {
+        Unit victim = gameMap.getResident(coord);
+        if( null != victim && myCommander.isEnemy(victim.CO) )
+        {
+          victims.add(victim);
+        }
+      }
+      return victims;
     }
   } // ~Glacio
 
@@ -592,6 +615,7 @@ public class Ave extends Commander
     private static final int OBLIDO_COST = 8;
     private static final int OBLIDO_BUFF = 20;
     private static final int OBLIDO_RANGE = 2;
+    private static final int OBLIDO_DAMAGE = 2;
 
     Ave Ave;
     COModifier damageMod = null;
@@ -620,7 +644,6 @@ public class Ave extends Commander
 
       // Keep track of any tiles that change.
       ArrayList<MapChangeEvent.EnvironmentAssignment> tileChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
-      ArrayList<Unit> victims = new ArrayList<Unit>();
 
       // Change terrain to snow around each of Ave's units and buildings, and damage trees and enemies.
       Set<XYCoord> affectedTiles = Utils.findLocationsNearProperties(gameMap, Ave, OBLIDO_RANGE);
@@ -636,21 +659,45 @@ public class Ave extends Commander
         {
           tileChanges.add(new MapChangeEvent.EnvironmentAssignment(coord, Environment.getTile(TerrainType.GRASS, loc.getEnvironment().weatherType), 1));
         }
-
-        // Damage each enemy nearby.
-        if( null != loc.getResident() && myCommander.isEnemy(loc.getResident().CO) )
-        {
-          victims.add(loc.getResident());
-        }
       }
 
-      GameEvent damage = new MassDamageEvent(victims, 2, false);
+      GameEvent damage = new MassDamageEvent(findVictims(gameMap), OBLIDO_DAMAGE, false);
       damage.performEvent(gameMap);
       GameEventListener.publishEvent(damage);
 
       GameEvent tileChange = new MapChangeEvent(tileChanges);
       tileChange.performEvent(gameMap);
       GameEventListener.publishEvent(tileChange);
+    }
+
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+
+      for( Unit victim : findVictims(gameMap) )
+        output.add(new DamagePopup(
+                       new XYCoord(victim.x, victim.y),
+                       myCommander.myColor,
+                       Math.min(victim.getHP()-1, OBLIDO_DAMAGE)*10 + "%"));
+
+      return output;
+    }
+
+    public HashSet<Unit> findVictims(GameMap gameMap)
+    {
+      HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
+      Set<XYCoord> tilesInRange = Utils.findLocationsNearUnits(gameMap, myCommander, OBLIDO_RANGE);
+      tilesInRange.addAll(Utils.findLocationsNearProperties(gameMap, myCommander, OBLIDO_RANGE));
+      for( XYCoord coord : tilesInRange )
+      {
+        Unit victim = gameMap.getResident(coord);
+        if( null != victim && myCommander.isEnemy(victim.CO) )
+        {
+          victims.add(victim);
+        }
+      }
+      return victims;
     }
   } // Oblido
 
