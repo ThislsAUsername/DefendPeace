@@ -192,7 +192,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
           XYCoord seekCoord = seekLocations.get(nextSeekIndex++);
 
           // Don't allow seeking to the current location.
-          if( myGame.getCursorCoord().equals(seekCoord) ) seekCoord = seekLocations.get(nextSeekIndex++);
+          if( myGame.getCursorCoord().equals(seekCoord) ) seekCoord = seekLocations.get(nextSeekIndex++ % seekLocations.size());
 
           myGame.setCursorLocation(seekCoord);
         }
@@ -204,20 +204,22 @@ public class MapController implements IController, GameInputHandler.StateChanged
         shouldConsider = false;
         break;
       case BACK:
+        if( !myGameInputHandler.isTargeting() )
+        {
+          // If we hit BACK while over a unit, add it to the threat overlay for this CO
+          Location loc = myGame.gameMap.getLocation(myGame.getCursorCoord());
+          Unit resident = loc.getResident();
+          if( null != resident )
+          {
+            ArrayList<Unit> threats = myGame.activeCO.threatsToOverlay;
+            if( threats.contains(resident) )
+              threats.remove(resident);
+            else
+              threats.add(resident);
+          }
+        }
         myGameInputHandler.back();
         shouldConsider = false;
-
-        // If we hit BACK while over a unit, add it to the threat overlay for this CO
-        Location loc = myGame.gameMap.getLocation(myGame.getCursorCoord());
-        Unit resident = loc.getResident();
-        if( null != resident )
-        {
-          ArrayList<Unit> threats = myGame.activeCO.threatsToOverlay;
-          if( threats.contains(resident) )
-            threats.remove(resident);
-          else
-            threats.add(resident);
-        }
         break;
       default:
         System.out.println("WARNING! MapController.handleFreeTileSelect() was given invalid input enum (" + input + ")");
@@ -230,6 +232,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
   private void handleConstrainedTileSelect(InputHandler.InputAction input)
   {
     boolean shouldConsider = true;
+    ArrayList<XYCoord> targetLocations = myGameInputHandler.getCoordinateOptions();
+
     switch (input)
     {
       case SELECT:
@@ -251,11 +255,29 @@ public class MapController implements IController, GameInputHandler.StateChanged
           System.out.println("WARNING! Attempting to choose a target for a non-targetable action.");
         }
 
-        ArrayList<XYCoord> targetLocations = myGameInputHandler.getCoordinateOptions();
-        myGameInputOptionSelector.handleInput(input);
-        myGame.setCursorLocation(targetLocations.get(myGameInputOptionSelector.getSelectionNormalized()));
+        boolean useFreeSelect = false;
+        // Switch to free-tile select in target-rich environments
+        if( !useFreeSelect && targetLocations.size() > 3 )
+        {
+          int maxDist = 0;
+          for( XYCoord a : targetLocations )
+            for( XYCoord b : targetLocations )
+              maxDist = Math.max(maxDist, a.getDistance(b));
+
+          useFreeSelect = maxDist < targetLocations.size();
+        }
+
+        if( useFreeSelect )
+          handleFreeTileSelect(input);
+        else
+        {
+          myGameInputOptionSelector.handleInput(input);
+          myGame.setCursorLocation(targetLocations.get(myGameInputOptionSelector.getSelectionNormalized()));
+        }
         break;
-      case SEEK: // Seek does nothing in this input state.
+      case SEEK: // SEEK allows constrained select even when in target-rich environments
+        myGameInputOptionSelector.handleInput(InputHandler.InputAction.DOWN);
+        myGame.setCursorLocation(targetLocations.get(myGameInputOptionSelector.getSelectionNormalized()));
       default:
     }
     if( shouldConsider )
@@ -383,9 +405,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
     switch (inputType)
     {
       case CONSTRAINED_TILE_SELECT:
-        // Create an option selector to keep track of where we are.
-        myGame.setCursorLocation(myGameInputHandler.getCoordinateOptions().get(myGameInputOptionSelector.getSelectionNormalized()));
+        if( null != options && options.size() > 0 )
+          myGame.setCursorLocation(options.get(0));
         break;
+      case FREE_TILE_SELECT:
+      case PATH_SELECT:
+        break; // no special behavior
       case MENU_SELECT:
         Path path = myGameInputHandler.myStateData.path;
         if( null != path && path.getPathLength() > 0 )
@@ -407,11 +432,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
         {
           executeGameAction(myGameInputHandler.getReadyAction());
         }
-        myGameInputHandler.reset(); // Reset the input handler to get rid of stale state
-        break;
-      case PATH_SELECT: // no special handling
-        break;
-      case FREE_TILE_SELECT:
         myGameInputHandler.reset(); // Reset the input handler to get rid of stale state
         break;
       case END_TURN:
