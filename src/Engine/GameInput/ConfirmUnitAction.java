@@ -34,4 +34,18 @@ public class ConfirmUnitAction extends GameInputState<ConfirmUnitAction.ConfirmA
     
     return next;
   }
+
+  @Override
+  public void consider(ConfirmUnitAction.ConfirmActionEnum confirm)
+  {
+    if( confirm == ConfirmActionEnum.CONFIRM )
+      myStateData.damagePopups = myStateData.actionSet.getSelected().getDamagePopups(myStateData.gameMap);
+    else
+      myStateData.damagePopups.clear();
+  }
+  @Override
+  public void back()
+  {
+    myStateData.damagePopups.clear();
+  }
 }
