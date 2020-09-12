@@ -35,6 +35,8 @@ public class TeleportEvent implements GameEvent
   {
     unit = u;
     unitStart = new XYCoord(unit.x, unit.y);
+    if( !map.isLocationValid(unitStart) )
+      unitStart = null;
     unitDestination = dest;
     animationStyle = animStyle;
   }
