@@ -646,22 +646,20 @@ public class Ave extends Commander
       ArrayList<MapChangeEvent.EnvironmentAssignment> tileChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
 
       // Change terrain to snow around each of Ave's units and buildings, and damage trees and enemies.
-      Set<XYCoord> affectedTiles = Utils.findLocationsNearProperties(gameMap, Ave, OBLIDO_RANGE);
-      affectedTiles.addAll(Utils.findLocationsNearUnits(gameMap, Ave, OBLIDO_RANGE));
+      Set<XYCoord> affectedTiles = getTilesInRange(gameMap);
 
       // Smash things. Don't add snow though.
       for( XYCoord coord : affectedTiles )
       {
         // Destroy any forests. Big hail, man.
-        Location loc = gameMap.getLocation(coord);
-        Environment tileEnvi = loc.getEnvironment();
+        Environment tileEnvi = gameMap.getEnvironment(coord);
         if(tileEnvi.terrainType == TerrainType.FOREST)
         {
-          tileChanges.add(new MapChangeEvent.EnvironmentAssignment(coord, Environment.getTile(TerrainType.GRASS, loc.getEnvironment().weatherType), 1));
+          tileChanges.add(new MapChangeEvent.EnvironmentAssignment(coord, Environment.getTile(TerrainType.GRASS, tileEnvi.weatherType), 1));
         }
       }
 
-      GameEvent damage = new MassDamageEvent(findVictims(gameMap), OBLIDO_DAMAGE, false);
+      GameEvent damage = new MassDamageEvent(findVictims(gameMap, affectedTiles), OBLIDO_DAMAGE, false);
       damage.performEvent(gameMap);
       GameEventListener.publishEvent(damage);
 
@@ -674,21 +672,38 @@ public class Ave extends Commander
     public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
     {
       ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+      Set<XYCoord> affectedTiles = getTilesInRange(gameMap);
 
-      for( Unit victim : findVictims(gameMap) )
-        output.add(new DamagePopup(
-                       new XYCoord(victim.x, victim.y),
-                       myCommander.myColor,
-                       Math.min(victim.getHP()-1, OBLIDO_DAMAGE)*10 + "%"));
+      for( Unit victim : findVictims(gameMap, affectedTiles) )
+      {
+        XYCoord coord = new XYCoord(victim.x, victim.y);
+        // BAMF takes priority over damage
+        if( gameMap.getEnvironment(coord).terrainType != TerrainType.FOREST )
+          output.add(new DamagePopup(
+                         coord,
+                         myCommander.myColor,
+                         Math.min(victim.getHP()-1, OBLIDO_DAMAGE)*10 + "%"));
+      }
+      for( XYCoord coord : affectedTiles )
+        if( gameMap.getEnvironment(coord).terrainType == TerrainType.FOREST )
+          output.add(new DamagePopup(
+                         coord,
+                         myCommander.myColor,
+                         "BAMF"));
 
       return output;
     }
 
-    public HashSet<Unit> findVictims(GameMap gameMap)
+    public Set<XYCoord> getTilesInRange(GameMap gameMap)
+    {
+      Set<XYCoord> tilesInRange = Utils.findLocationsNearUnits(gameMap, Ave, OBLIDO_RANGE);
+      tilesInRange.addAll(Utils.findLocationsNearProperties(gameMap, Ave, OBLIDO_RANGE));
+      return tilesInRange;
+    }
+
+    public HashSet<Unit> findVictims(GameMap gameMap, Set<XYCoord> tilesInRange)
     {
       HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
-      Set<XYCoord> tilesInRange = Utils.findLocationsNearUnits(gameMap, myCommander, OBLIDO_RANGE);
-      tilesInRange.addAll(Utils.findLocationsNearProperties(gameMap, myCommander, OBLIDO_RANGE));
       for( XYCoord coord : tilesInRange )
       {
         Unit victim = gameMap.getResident(coord);
