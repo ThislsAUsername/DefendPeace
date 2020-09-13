@@ -9,6 +9,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
@@ -83,7 +85,7 @@ public class GameInstance implements Serializable
         System.out.println("Warning! Commander " + commanders[i].coInfo.name + " does not have an HQ location!");
         playerCursors.put(i, new XYCoord(1, 1));
       }
-      GameEventListener.registerEventListener(commanders[i]);
+      GameEventListener.registerEventListener(commanders[i], this);
     }
     
     saveFile = getSaveName();
@@ -93,6 +95,9 @@ public class GameInstance implements Serializable
   {
     return isFogEnabled;
   }
+
+  // WeakHashMap isn't serializable, so we can't use Collections.newSetFromMap(new WeakHashMap<GameEventListener, Boolean>());
+  public Set<GameEventListener> eventListeners = new HashSet<GameEventListener>();
 
   public int getActiveCOIndex()
   {
@@ -264,7 +269,7 @@ public class GameInstance implements Serializable
   {
     for( Commander co : commanders )
     {
-      GameEventListener.unregisterEventListener(co);
+      GameEventListener.unregisterEventListener(co, this);
     }
   }
   

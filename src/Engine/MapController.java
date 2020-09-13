@@ -527,7 +527,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       event.performEvent(myGame.gameMap);
 
       // Now that the event has been completed, let the world know.
-      GameEventListener.publishEvent(event);
+      GameEventListener.publishEvent(event, myGame);
     }
 
     if( animEventQueueIsEmpty )

@@ -3,6 +3,7 @@ package Test;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import Engine.GameAction;
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Path;
 import Engine.Utils;
@@ -22,7 +23,6 @@ import Engine.UnitActionLifecycles.UnloadLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
-import Terrain.MapWindow;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
@@ -32,6 +32,7 @@ public class TestGameEvent extends TestCase
   private static Commander testCo1;
   private static Commander testCo2;
   private static MapMaster testMap;
+  private static GameInstance testGame;
 
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
@@ -42,10 +43,7 @@ public class TestGameEvent extends TestCase
     Commander[] cos = { testCo1, testCo2 };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    for( Commander co : cos )
-    {
-      co.myView = new MapWindow(testMap, co);
-    }
+    testGame = new GameInstance(testMap);
   }
 
   @Override
@@ -116,10 +114,10 @@ public class TestGameEvent extends TestCase
     // Move the unit; he should lose his capture progress.
     infA.initTurn(testMap);
     GameAction moveAction = new WaitLifecycle.WaitAction(infA, Utils.findShortestPath(infA, 1, 2, testMap));
-    performGameAction(moveAction, testMap);
+    performGameAction(moveAction, testGame);
     infA.initTurn(testMap);
     GameAction moveAction2 = new WaitLifecycle.WaitAction(infA, Utils.findShortestPath(infA, 2, 2, testMap));
-    performGameAction(moveAction2, testMap);
+    performGameAction(moveAction2, testGame);
 
     // 5, 10, 15
     captureEvent.performEvent(testMap);
@@ -331,7 +329,7 @@ public class TestGameEvent extends TestCase
 
     // Give the APC a new GameAction to go resupply mech2.
     GameAction resupplyAction = new ResupplyLifecycle.ResupplyAction(apc, Utils.findShortestPath(apc, 2, 3, testMap));
-    performGameAction(resupplyAction, testMap);
+    performGameAction(resupplyAction, testGame);
 
     // Make sure the mechs got their mojo back.
     testPassed &= validate(apc.fuel != apc.model.maxFuel, "    APC resupplied itself. Life doesn't work that way.");
@@ -373,7 +371,7 @@ public class TestGameEvent extends TestCase
 
     // Tell Donor to join Recipient.
     GameAction joinAction = new JoinLifecycle.JoinAction(testMap, donor, Utils.findShortestPath(donor, new XYCoord(1, 4), testMap));
-    performGameAction(joinAction, testMap);
+    performGameAction(joinAction, testGame);
 
     // Verification:
     // 1) Only the Recipient should still be on the map.

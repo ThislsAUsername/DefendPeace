@@ -9,8 +9,7 @@ import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
-import Engine.GameEvents.GameEvent;
-import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MassDamageEvent;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -160,13 +159,18 @@ public class Bear_Bull extends Commander
     protected void perform(MapMaster gameMap)
     {
       myCommander.addCOModifier(this);
+    }
 
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
       // Damage is dealt after swapping D2Ds so it's actually useful to Bear
-      COcast.liquidateMassDamage = true; // Collect money instead of ability energy
-      GameEvent damage = new MassDamageEvent(findVictims(gameMap), DOWNUPTURN_LIQUIDATION, false);
-      damage.performEvent(gameMap);
-      GameEventListener.publishEvent(damage);
-      COcast.liquidateMassDamage = false;
+      GameEventQueue powerEvents = new GameEventQueue();
+      powerEvents.add( (map) -> COcast.liquidateMassDamage = true ); // Collect money instead of ability energy
+      powerEvents.add(new MassDamageEvent(findVictims(gameMap), DOWNUPTURN_LIQUIDATION, false));
+      powerEvents.add( (map) -> COcast.liquidateMassDamage = false );
+
+      return powerEvents;
     }
 
     @Override // COModifier interface.

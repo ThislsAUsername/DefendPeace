@@ -10,6 +10,7 @@ import java.util.Stack;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -132,8 +133,20 @@ public class Ave extends Commander
     addCommanderAbility(new NixAbility(this));
     addCommanderAbility(new GlacioAbility(this));
     addCommanderAbility(new OblidoAbility(this));
+  }
+
+  @Override
+  public void registerForEvents(GameInstance game)
+  {
+    super.registerForEvents(game);
     snowifier = new CitySnowifier(this);
-    GameEventListener.registerEventListener(snowifier);
+    snowifier.registerForEvents(game);
+  }
+  @Override
+  public void unregister(GameInstance game)
+  {
+    super.unregister(game);
+    snowifier.unregister(game);
   }
 
   @Override
@@ -482,7 +495,11 @@ public class Ave extends Commander
 
       // Buff units.
       coCast.addCOModifier(damageMod);
+    }
 
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
       // Drop snow everywhere inside her range.
       ArrayList<MapChangeEvent.EnvironmentAssignment> snowTiles = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
       Set<XYCoord> tiles = Utils.findLocationsNearProperties(gameMap, coCast, coCast.MAX_SNOW_SPREAD_RANGE);
@@ -499,9 +516,10 @@ public class Ave extends Commander
       }
 
       // Do all of our terrain alterations.
-      MapChangeEvent event = new MapChangeEvent(snowTiles);
-      event.performEvent(gameMap);
-      GameEventListener.publishEvent(event);
+      GameEventQueue nixEvents = new GameEventQueue();
+      nixEvents.add(new MapChangeEvent(snowTiles));
+
+      return nixEvents;
     }
   }
 
@@ -536,6 +554,14 @@ public class Ave extends Commander
       // Normal CO-power boost.
       myCommander.addCOModifier(damageMod);
 
+      // Freeze enemies around each of Ave's units or buildings.
+      for( Unit victim : findVictims(gameMap) )
+        victim.isStunned = true;
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
       // Keep track of any tiles that change to snow.
       ArrayList<MapChangeEvent.EnvironmentAssignment> tileChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
 
@@ -555,20 +581,10 @@ public class Ave extends Commander
         }
       }
 
-      // Freeze enemies around each of Ave's units or buildings.
-      for( Unit victim : findVictims(gameMap) )
-        victim.isStunned = true;
-
       GameEventQueue glacioEvents = new GameEventQueue();
       glacioEvents.add(new MapChangeEvent(tileChanges));
 
-      // Do all of our terrain alterations.
-      while(!glacioEvents.isEmpty())
-      {
-        GameEvent event = glacioEvents.poll();
-        event.performEvent(gameMap);
-        GameEventListener.publishEvent(event);
-      }
+      return glacioEvents;
     }
 
     @Override
@@ -641,7 +657,11 @@ public class Ave extends Commander
     {
       // Apply CO unit buffs.
       myCommander.addCOModifier(damageMod);
+    }
 
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
       // Keep track of any tiles that change.
       ArrayList<MapChangeEvent.EnvironmentAssignment> tileChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
 
@@ -660,12 +680,15 @@ public class Ave extends Commander
       }
 
       GameEvent damage = new MassDamageEvent(findVictims(gameMap, affectedTiles), OBLIDO_DAMAGE, false);
-      damage.performEvent(gameMap);
-      GameEventListener.publishEvent(damage);
 
       GameEvent tileChange = new MapChangeEvent(tileChanges);
-      tileChange.performEvent(gameMap);
-      GameEventListener.publishEvent(tileChange);
+
+      // Do all of our terrain alterations.
+      GameEventQueue oblidoEvents = new GameEventQueue();
+      oblidoEvents.add(damage);
+      oblidoEvents.add(tileChange);
+
+      return oblidoEvents;
     }
 
     @Override
