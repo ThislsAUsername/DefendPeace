@@ -34,7 +34,7 @@ public class Meridian extends Commander
           "This gives her forces extreme adaptability, and her powers hone this to a razor edge."));
       infoPages.add(new InfoPage(
           "Passive:\n" + 
-          "- Tanks and artillery both cost 6500\n" +
+          "- Tanks and artillery cost the average of their two prices.\n" +
           "- Tanks and artillery may transform into each other at no cost"));
       infoPages.add(new InfoPage(
           "Change and Flow ("+ChangeAndFlow.COST+"):\n" +
