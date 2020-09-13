@@ -26,6 +26,7 @@ public class TestVisionMechanics extends TestCase
   private void setupTest()
   {
     GameScenario scn = new GameScenario();
+    scn.rules.isFogEnabled = true;
     strong = new Strong(scn.rules);
     patch = new Patch(scn.rules);
     Commander[] cos = { strong, patch };
@@ -35,7 +36,7 @@ public class TestVisionMechanics extends TestCase
     // Set up fog vision semantics
     for( Commander co : cos )
     {
-      co.myView = new MapWindow(testMap, co, true);
+      co.myView = new MapWindow(testMap, co);
     }
   }
 

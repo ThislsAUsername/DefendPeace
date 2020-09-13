@@ -22,11 +22,11 @@ public class GameScenario implements Serializable
   }
   public GameScenario(int income, int startFunds)
   {
-    rules = new GameRules(new AWBWUnits(), income, startFunds);
+    rules = new GameRules(new AWBWUnits(), income, startFunds, false);
   }
-  public GameScenario(UnitModelScheme scheme, int income, int startFunds)
+  public GameScenario(UnitModelScheme scheme, int income, int startFunds, boolean isFogEnabled)
   {
-    rules = new GameRules(scheme, income, startFunds);
+    rules = new GameRules(scheme, income, startFunds, isFogEnabled);
   }
 
   public GameEventQueue initTurn(GameMap map)
@@ -34,19 +34,21 @@ public class GameScenario implements Serializable
     return new GameEventQueue();
   }
 
-  /** Immutable object to hold the rules of engagement for a given match. */
+  /** Object to hold the rules of engagement for a given match. */
   public static class GameRules implements Serializable
   {
     private static final long serialVersionUID = 1L;
     public final int incomePerCity;
     public final int startingFunds;
     public final UnitModelScheme unitModelScheme;
+    public boolean isFogEnabled;
 
-    public GameRules(UnitModelScheme ums, int income, int startFunds)
+    public GameRules(UnitModelScheme ums, int income, int startFunds, boolean fogOn)
     {
       incomePerCity = income;
       startingFunds = startFunds;
       unitModelScheme = ums;
+      isFogEnabled = fogOn;
     }
   }
 }
