@@ -14,23 +14,16 @@ public class MapWindow extends GameMap
   private static final long serialVersionUID = 1L;
   MapMaster master;
   public final Commander viewer; // can be null
-  boolean isFogEnabled;
   private boolean[][] isFogged;
   private Commander[][] lastOwnerSeen;
   private ArrayList<Unit> confirmedVisibles;
 
   public MapWindow(MapMaster pMaster, Commander pViewer)
   {
-    this( pMaster, pViewer, false);
-  }
-
-  public MapWindow(MapMaster pMaster, Commander pViewer, boolean fog)
-  {
     super(pMaster.mapWidth, pMaster.mapHeight);
     master = pMaster;
     viewer = pViewer;
     commanders = master.commanders;
-    isFogEnabled = fog;
     isFogged = new boolean[mapWidth][mapHeight];
     confirmedVisibles = new ArrayList<Unit>();
 
@@ -170,7 +163,11 @@ public class MapWindow extends GameMap
   @Override
   public boolean isLocationFogged(int x, int y)
   {
-    return isFogEnabled && ((x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) ? true : isFogged[x][y]);
+    return isFogOn() && ((x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) ? true : isFogged[x][y]);
+  }
+  public boolean isFogOn()
+  {
+    return (null == viewer) || viewer.gameRules.isFogEnabled;
   }
 
   @Override

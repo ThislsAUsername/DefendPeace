@@ -137,7 +137,7 @@ public abstract class MapView implements IView
         // Hide everything during the AI's turn so the playing field is level.
         if( null == foggedMap )
         {
-          foggedMap = new MapWindow(myGame.gameMap, null, myGame.isFogEnabled());
+          foggedMap = new MapWindow(myGame.gameMap, null);
           foggedMap.resetFog();
         }
         gameMap = foggedMap;

@@ -35,7 +35,6 @@ public class GameInstance implements Serializable
 
   HashMap<Integer, XYCoord> playerCursors = null;
 
-  private boolean isFogEnabled;
   private Weathers defaultWeather;
 
   private GameScenario gameScenario;
@@ -46,10 +45,10 @@ public class GameInstance implements Serializable
 
   public GameInstance(MapMaster map)
   {
-    this(map, false, Weathers.CLEAR, new GameScenario(), false);
+    this(map, Weathers.CLEAR, new GameScenario(), false);
   }
 
-  public GameInstance(MapMaster map, boolean fogOfWarOn, Weathers weather, GameScenario scenario, boolean useSecurity)
+  public GameInstance(MapMaster map, Weathers weather, GameScenario scenario, boolean useSecurity)
   {
     if( map.commanders.length < 2 )
     {
@@ -61,7 +60,6 @@ public class GameInstance implements Serializable
     currentTurn = 1;
 
     gameMap = map;
-    isFogEnabled = fogOfWarOn;
     defaultWeather = weather;
 
     commanders = map.commanders;
@@ -74,7 +72,7 @@ public class GameInstance implements Serializable
       commanders[i].money = gameScenario.rules.startingFunds;
       if( commanders[i].HQLocation != null )
       {
-        commanders[i].myView = new MapWindow(map, commanders[i], isFogEnabled);
+        commanders[i].myView = new MapWindow(map, commanders[i]);
         commanders[i].myView.resetFog();
         playerCursors.put(i, commanders[i].HQLocation);
       }
@@ -91,7 +89,7 @@ public class GameInstance implements Serializable
 
   public boolean isFogEnabled()
   {
-    return isFogEnabled;
+    return gameScenario.rules.isFogEnabled;
   }
 
   public int getActiveCOIndex()
@@ -231,7 +229,7 @@ public class GameInstance implements Serializable
       }
     }
 
-    events.add(new TurnInitEvent(activeCO, currentTurn, isFogEnabled || isSecurityEnabled));
+    events.add(new TurnInitEvent(activeCO, currentTurn, isFogEnabled() || isSecurityEnabled));
 
     if( !weatherChanges.isEmpty() )
     {
