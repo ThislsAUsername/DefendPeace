@@ -54,6 +54,7 @@ public class Patch extends Commander
   private static final int PILLAGE_ATTACK_BUFF = 25;
 
   private LootAbility myLootAbility = null;
+  private DamageDealtToIncomeConverter myIncomeConverter = null;
   double myIncomeRatio = 0.0;
 
   public Patch(GameScenario.GameRules rules)
@@ -71,12 +72,16 @@ public class Patch extends Commander
     // Passive - Loot
     myLootAbility = new LootAbility(this);
     myLootAbility.registerForEvents(game);
+    // Get cash from fightan based on myIncomeRatio
+    myIncomeConverter = new DamageDealtToIncomeConverter(this);
+    myIncomeConverter.registerForEvents(game);
   }
   @Override
   public void unregister(GameInstance game)
   {
     super.unregister(game);
     myLootAbility.unregister(game);
+    myIncomeConverter.unregister(game);
   }
 
   public static CommanderInfo getInfo()
@@ -87,11 +92,6 @@ public class Patch extends Commander
   /**
    * LootAbility is a passive that grants its Commander a day's income immediately upon capturing a
    * property, so long as that property is one that generates income.
-   *
-   * It also supports Patch's abilities, by inspecting published BattleEvents. If the owning Commander took
-   * part in the battle, then any damage done to the opponent will give income to the owning
-   * Commander. The amount of income is a fraction of value of the damage that was done, thus
-   * damaging more expensive units will grant more income.
    */
   private static class LootAbility extends GameEventListener
   {
@@ -111,6 +111,23 @@ public class Patch extends Commander
         // We just successfully captured a property. Loot the place!
         myCommander.money += myCommander.gameRules.incomePerCity;
       }
+    }
+  }
+
+  /**
+   * This class supports Patch's abilities by inspecting published BattleEvents. If the owning Commander took
+   * part in the battle, then any damage done to the opponent will give income to the owning
+   * Commander. The amount of income is a fraction of value of the damage that was done, thus
+   * damaging more expensive units will grant more income.
+   */
+  private static class DamageDealtToIncomeConverter extends GameEventListener
+  {
+    private static final long serialVersionUID = 1L;
+    private Patch myCommander = null;
+
+    public DamageDealtToIncomeConverter(Patch myCo)
+    {
+      myCommander = myCo;
     }
 
     @Override
