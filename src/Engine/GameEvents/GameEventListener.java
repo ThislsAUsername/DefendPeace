@@ -36,6 +36,9 @@ public abstract class GameEventListener implements Serializable
     }
   }
 
+  /** Allows GameInstance to make informed decisons on whether to try saving this listener */
+  public boolean shouldSerialize() { return true; }
+
   /** Sign this listener up to receive events. If a listener registers multiple times, it will still
    *  receive each notification only once. */
   public static void registerEventListener(GameEventListener listener, GameInstance gi)
