@@ -2,8 +2,6 @@ package CommandingOfficers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameScenario;
@@ -11,6 +9,7 @@ import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MassDamageEvent;
+import Engine.GameEvents.ModifyFundsEvent;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
@@ -66,7 +65,6 @@ public class Bear_Bull extends Commander
   }
 
   public boolean isBull;
-  public boolean liquidateMassDamage = false; // flag used during Upturn/Downturn
 
   private final double BEAR_MOD = 0.9;
   private final double BULL_MOD = 1.2;
@@ -113,19 +111,6 @@ public class Bear_Bull extends Commander
     return 0;
   }
 
-  @Override
-  public void receiveMassDamageEvent(Map<Unit, Integer> lostHP)
-  {
-    if( liquidateMassDamage ) // If I'm collecting funds, collect from everyone
-      for( Entry<Unit, Integer> damageEntry : lostHP.entrySet() )
-      {
-        Unit unit = damageEntry.getKey();
-        money += (damageEntry.getValue() * unit.model.getCost()) / unit.model.maxHP;
-      }
-    else // Otherwise, do whatever we normally do
-      super.receiveMassDamageEvent(lostHP);
-  }
-
   /**
    * Down/UpTurn swaps D2Ds for this turn.
    * All units on a property you own take 3HP mass damage and you gain the funds value of that HP.
@@ -164,11 +149,19 @@ public class Bear_Bull extends Commander
     @Override
     public GameEventQueue getEvents(MapMaster gameMap)
     {
+      Collection<Unit> victims = findVictims(gameMap);
+
       // Damage is dealt after swapping D2Ds so it's actually useful to Bear
       GameEventQueue powerEvents = new GameEventQueue();
-      powerEvents.add( (map) -> COcast.liquidateMassDamage = true ); // Collect money instead of ability energy
-      powerEvents.add(new MassDamageEvent(findVictims(gameMap), DOWNUPTURN_LIQUIDATION, false));
-      powerEvents.add( (map) -> COcast.liquidateMassDamage = false );
+      powerEvents.add(new MassDamageEvent(COcast, victims, DOWNUPTURN_LIQUIDATION, false));
+
+      int valueDrained = 0;
+      for( Unit victim : victims )
+      {
+        valueDrained += (Math.min(DOWNUPTURN_LIQUIDATION, victim.getHP()) * victim.model.getCost()) / victim.model.maxHP;
+      }
+
+      powerEvents.add( new ModifyFundsEvent(COcast, valueDrained) ); // Collect profits
 
       return powerEvents;
     }

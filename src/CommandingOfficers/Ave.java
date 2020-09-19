@@ -679,7 +679,7 @@ public class Ave extends Commander
         }
       }
 
-      GameEvent damage = new MassDamageEvent(findVictims(gameMap, affectedTiles), OBLIDO_DAMAGE, false);
+      GameEvent damage = new MassDamageEvent(myCommander, findVictims(gameMap, affectedTiles), OBLIDO_DAMAGE, false);
 
       GameEvent tileChange = new MapChangeEvent(tileChanges);
 

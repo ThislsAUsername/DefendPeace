@@ -1,38 +1,39 @@
 package Engine.GameEvents;
 
-import java.util.function.Consumer;
-
+import CommandingOfficers.Commander;
 import Engine.XYCoord;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 
-public class LambdaEvent implements GameEvent
+public class ModifyFundsEvent implements GameEvent
 {
-  private final Consumer<MapMaster> lambda;
+  private final Commander beneficiary;
+  private final int value;
 
-  public LambdaEvent( Consumer<MapMaster> lambda )
+  public ModifyFundsEvent(Commander beneficiary, int value)
   {
-    this.lambda = lambda;
+    this.beneficiary = beneficiary;
+    this.value = value;
   }
 
   @Override
   public GameAnimation getEventAnimation(MapView mapView)
   {
-    // TODO?
+    // TODO
     return null;
   }
 
   @Override
   public void sendToListener(GameEventListener listener)
   {
-    // TODO?
+    // TODO
   }
 
   @Override
   public void performEvent(MapMaster gameMap)
   {
-    lambda.accept(gameMap);
+    beneficiary.money += value;
   }
 
   @Override

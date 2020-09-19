@@ -434,8 +434,11 @@ public class Commander extends GameEventListener implements Serializable
    * Track mass damage done to my units, and get ability power based on it.
    */
   @Override
-  public void receiveMassDamageEvent(Map<Unit, Integer> lostHP)
+  public void receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP)
   {
+    if( this == attacker )
+      return; // Punching yourself shouldn't make you angry
+
     for( Entry<Unit, Integer> damageEntry : lostHP.entrySet() )
     {
       Unit unit = damageEntry.getKey();

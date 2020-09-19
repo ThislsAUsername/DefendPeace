@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import CommandingOfficers.Commander;
 import Engine.XYCoord;
 import Terrain.MapMaster;
 import UI.MapView;
@@ -17,13 +18,15 @@ import Units.Unit;
  */
 public class MassDamageEvent implements GameEvent
 {
+  private final Commander attacker;
   // Records how many HP each victim lost; doubles as our victim storage area
   private Map<Unit, Integer> victims = new HashMap<Unit, Integer>();
   public final int damage;
   public final boolean lethal;
 
-  public MassDamageEvent(Collection<Unit> pVictims, int pDamage, boolean isLethal)
+  public MassDamageEvent(Commander attacker, Collection<Unit> pVictims, int pDamage, boolean isLethal)
   {
+    this.attacker = attacker;
     for(Unit victim : pVictims)
     {
       victims.put(victim, 0);
@@ -41,7 +44,7 @@ public class MassDamageEvent implements GameEvent
   @Override
   public void sendToListener(GameEventListener listener)
   {
-    listener.receiveMassDamageEvent(victims);
+    listener.receiveMassDamageEvent(attacker, victims);
   }
 
   @Override
