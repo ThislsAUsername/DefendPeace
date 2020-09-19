@@ -10,8 +10,20 @@ public class InputOptionsController implements IController
 {
   private static final String OTHER_INPUT_FILENAME = "res/other_input.txt";
 
+  public enum HideAbilityPreviews
+  {
+    Never, In_Fog, Hidden_Units;
+    @Override
+    public String toString()
+    {
+      return super.toString().replace("_", " ");
+    }
+  }
+
   public static GameOptionBool seekBuildingsLastOption = new GameOptionBool("Seek Units First", true);
-  public static GameOption<?>[] allOptions = { seekBuildingsLastOption };
+  public static GameOption<HideAbilityPreviews> previewFogPowersOption
+                           = new GameOption<HideAbilityPreviews>("Hide Ability Previews", HideAbilityPreviews.values(), 2);
+  public static GameOption<?>[] allOptions = { seekBuildingsLastOption, previewFogPowersOption };
   public static OptionSelector actionCommandSelector = new OptionSelector( allOptions.length );
 
   static

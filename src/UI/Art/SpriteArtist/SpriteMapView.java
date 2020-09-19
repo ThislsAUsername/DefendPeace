@@ -537,7 +537,7 @@ public class SpriteMapView extends MapView
 
     if( spaceEmpty && 0 != data.coords.yCoord )
     {
-      int arrowY = (data.coords.yCoord * tileSize) + (tileSize / 2);
+      int arrowY = (data.coords.yCoord * tileSize) + (tileSize / 2) - 1; // break the bottom border of the text frame
       SpriteUIUtils.drawImageCenteredOnPoint(g, SpriteLibrary.getPreviewArrow(data.color), estimateX, arrowY);
     }
   }

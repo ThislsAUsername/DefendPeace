@@ -700,7 +700,7 @@ public class Ave extends Commander
       for( Unit victim : findVictims(gameMap, affectedTiles) )
       {
         XYCoord coord = new XYCoord(victim.x, victim.y);
-        // BAMF takes priority over damage
+        // Forest wrecking takes priority over damage, since it's a permanent map change
         if( gameMap.getEnvironment(coord).terrainType != TerrainType.FOREST )
           output.add(new DamagePopup(
                          coord,
@@ -712,7 +712,7 @@ public class Ave extends Commander
           output.add(new DamagePopup(
                          coord,
                          myCommander.myColor,
-                         "BAMF"));
+                         "RAZE"));
 
       return output;
     }

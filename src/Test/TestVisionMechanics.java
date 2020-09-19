@@ -28,12 +28,13 @@ public class TestVisionMechanics extends TestCase
   private void setupTest()
   {
     GameScenario scn = new GameScenario();
+    scn.rules.isFogEnabled = true;
     strong = new Strong(scn.rules);
     patch = new Patch(scn.rules);
     Commander[] cos = { strong, patch };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    testGame = new GameInstance(testMap, true, Weathers.CLEAR, new GameScenario(), false);
+    testGame = new GameInstance(testMap, Weathers.CLEAR, new GameScenario(), false);
   }
 
   @Override

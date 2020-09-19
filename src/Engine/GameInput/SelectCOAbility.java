@@ -1,8 +1,11 @@
 package Engine.GameInput;
 
+import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
+import UI.InputOptionsController;
+import Units.Unit;
 
 public class SelectCOAbility extends GameInputState<CommanderAbility>
 {
@@ -39,7 +42,31 @@ public class SelectCOAbility extends GameInputState<CommanderAbility>
   @Override
   public void consider(CommanderAbility ability)
   {
-    myStateData.damagePopups = ability.getDamagePopups(myStateData.gameMap);
+    boolean showPreview = true;
+    switch(InputOptionsController.previewFogPowersOption.getSelectedObject())
+    {
+      case In_Fog:
+        showPreview = !myStateData.commander.gameRules.isFogEnabled;
+        break;
+      case Hidden_Units:
+        showPreview = !myStateData.commander.gameRules.isFogEnabled;
+        if( showPreview )
+          for( Commander co : myStateData.gameMap.commanders )
+            if( myStateData.commander.isEnemy(co) )
+              for( Unit unit : co.units )
+                if( unit.model.hidden )
+                {
+                  showPreview = false;
+                  break;
+                }
+        break;
+      case Never:
+        break;
+    }
+    if( showPreview )
+      myStateData.damagePopups = ability.getDamagePopups(myStateData.gameMap);
+    else
+      myStateData.damagePopups.clear();
   }
   @Override
   public void back()
