@@ -95,7 +95,7 @@ public class GameInstance implements Serializable
   }
 
   // WeakHashMap isn't serializable, so we can't use Collections.newSetFromMap(new WeakHashMap<GameEventListener, Boolean>());
-  public Set<GameEventListener> eventListeners = new HashSet<GameEventListener>();
+  public transient Set<GameEventListener> eventListeners = new HashSet<GameEventListener>();
 
   public int getActiveCOIndex()
   {
@@ -362,6 +362,37 @@ public class GameInstance implements Serializable
     }
 
     return filename;
+  }
+
+  /**
+   * Same signature as in Serializable interface
+   * @throws IOException
+   */
+  private void writeObject(ObjectOutputStream stream) throws IOException
+  {
+    stream.defaultWriteObject();
+
+    // save any serializable listeners
+    Set<GameEventListener> saveableListeners = new HashSet<GameEventListener>();
+    for( GameEventListener listener : eventListeners)
+    {
+      if( listener.shouldSerialize() )
+        saveableListeners.add(listener);
+    }
+    stream.writeObject(saveableListeners);
+  }
+
+  /**
+   * Same signature as in Serializable interface
+   * @throws IOException
+   */
+  @SuppressWarnings("unchecked")
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException
+  {
+    stream.defaultReadObject();
+
+    // restore any serializable listeners
+    eventListeners = (Set<GameEventListener>) stream.readObject();
   }
 
   public boolean isSecurityEnforced()

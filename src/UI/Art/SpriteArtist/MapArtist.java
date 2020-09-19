@@ -205,6 +205,9 @@ public class MapArtist
     }
 
     @Override
+    public boolean shouldSerialize() { return false; }
+
+    @Override
     public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges)
     {
       for( EnvironmentAssignment ea : terrainChanges )

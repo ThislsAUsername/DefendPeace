@@ -202,6 +202,10 @@ public class MapTileDetailsArtist
   private static class MtdaListener extends GameEventListener
   {
     private static final long serialVersionUID = 1L;
+
+    @Override
+    public boolean shouldSerialize() { return false; }
+
     public void receiveBattleEvent(BattleSummary summary){MapTileDetailsArtist.resetOverlay();};
     public void receiveDemolitionEvent(Unit actor, XYCoord tile){MapTileDetailsArtist.resetOverlay();};
     public void receiveCreateUnitEvent(Unit unit){MapTileDetailsArtist.resetOverlay();};
