@@ -83,5 +83,6 @@ public abstract class GameEventListener implements Serializable
   public void receiveWeatherChangeEvent(Weathers weather, int duration){};
   public void receiveMapChangeEvent(MapChangeEvent event){};
   public void receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP){};
+  public void receiveModifyFundsEvent(Commander beneficiary, int fundsDelta){};
 
 }
