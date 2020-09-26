@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -12,7 +13,6 @@ import Engine.UnitActionLifecycles.LoadLifecycle;
 import Engine.UnitActionLifecycles.UnloadLifecycle;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
-import Terrain.MapWindow;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -21,6 +21,7 @@ public class TestTransport extends TestCase
   private static Commander testCo1;
   private static Commander testCo2;
   private static MapMaster testMap;
+  private static GameInstance testGame;
 
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
@@ -31,10 +32,7 @@ public class TestTransport extends TestCase
     Commander[] cos = { testCo1, testCo2 };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    for( Commander co : cos )
-    {
-      co.myView = new MapWindow(testMap, co);
-    }
+    testGame = new GameInstance(testMap);
   }
 
   @Override
@@ -61,11 +59,11 @@ public class TestTransport extends TestCase
     // Try a basic load/move/unload order.
     cargo.initTurn(testMap); // Get him ready.
     testPassed &= validate(Utils.findPossibleDestinations(cargo, testMap, true).contains(new XYCoord(apc.x, apc.y)), "    Cargo can't actually enter transport's square.");
-    performGameAction(new LoadLifecycle.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 4, 2, testMap)), testMap);
+    performGameAction(new LoadLifecycle.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 4, 2, testMap)), testGame);
     testPassed &= validate(testMap.getLocation(4, 2).getResident() != cargo, "    Cargo is still on the map.");
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC is not holding a unit.");
     apc.initTurn(testMap); // Get him ready.
-    performGameAction(new UnloadLifecycle.UnloadAction(testMap, apc, Utils.findShortestPath(apc, 7, 3, testMap), cargo, 7, 4), testMap);
+    performGameAction(new UnloadLifecycle.UnloadAction(testMap, apc, Utils.findShortestPath(apc, 7, 3, testMap), cargo, 7, 4), testGame);
     testPassed &= validate(testMap.getLocation(7, 4).getResident() == cargo, "    Cargo was not dropped off correctly.");
     testPassed &= validate(apc.heldUnits.isEmpty(), "    APC is not empty when it should be.");
 
@@ -76,8 +74,8 @@ public class TestTransport extends TestCase
     // Make sure we can unload a unit on the apc's current location.
     cargo.initTurn(testMap);
     apc.initTurn(testMap);
-    performGameAction(new LoadLifecycle.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 7, 3, testMap)), testMap);
-    performGameAction(new UnloadLifecycle.UnloadAction(testMap, apc, Utils.findShortestPath(apc, 7, 4, testMap), cargo, 7, 3), testMap);
+    performGameAction(new LoadLifecycle.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 7, 3, testMap)), testGame);
+    performGameAction(new UnloadLifecycle.UnloadAction(testMap, apc, Utils.findShortestPath(apc, 7, 4, testMap), cargo, 7, 3), testGame);
     testPassed &= validate(testMap.getLocation(7, 4).getResident() == apc, "    APC is not where it belongs.");
     testPassed &= validate(testMap.getLocation(7, 3).getResident() == cargo, "    Cargo is not at dropoff location");
 
@@ -85,7 +83,7 @@ public class TestTransport extends TestCase
     cargo.alterHP(-5);
     testPassed &= validate( cargo.getHP() == 5, "    Cargo has the wrong amount of HP(" + cargo.getHP() + ")");
     cargo.initTurn(testMap);
-    performGameAction(new LoadLifecycle.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 7, 4, testMap)), testMap);
+    performGameAction(new LoadLifecycle.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 7, 4, testMap)), testGame);
     testPassed &= validate(testMap.getLocation(7, 4).getResident() != cargo, "    Cargo is not in the APC.");
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC has the wrong cargo size (");
 

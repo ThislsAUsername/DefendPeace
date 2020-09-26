@@ -4,15 +4,16 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
 import Engine.GameAction;
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Path;
 import Engine.Utils;
 import Engine.UnitActionLifecycles.BattleLifecycle;
 import Engine.UnitActionLifecycles.ResupplyLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
+import Terrain.Environment.Weathers;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
-import Terrain.MapWindow;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -21,6 +22,7 @@ public class TestVisionMechanics extends TestCase
   private static Commander strong = null;
   private static Commander patch = null;
   private static MapMaster testMap = null;
+  private static GameInstance testGame;
 
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
@@ -32,12 +34,7 @@ public class TestVisionMechanics extends TestCase
     Commander[] cos = { strong, patch };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    
-    // Set up fog vision semantics
-    for( Commander co : cos )
-    {
-      co.myView = new MapWindow(testMap, co);
-    }
+    testGame = new GameInstance(testMap, Weathers.CLEAR, new GameScenario(), false);
   }
 
   @Override
@@ -92,7 +89,7 @@ public class TestVisionMechanics extends TestCase
     excursion.addWaypoint(6, 3);
     GameAction driveBy = new WaitLifecycle.WaitAction(scout, excursion);
     testPassed &= validate(driveBy.getEvents(testMap).size() == 1, "    Recons can't move, apparently.");
-    performGameAction(driveBy, testMap);
+    performGameAction(driveBy, testGame);
 
     // Now that we can see everything, try stuff again and expect different results.
     testPassed &= validate(!strong.myView.isLocationFogged(6, 5), "    Doing a drive-by doesn't reveal forests");

@@ -3,6 +3,7 @@ package Test;
 import CommandingOfficers.Cinder;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Venge;
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.Combat.BattleSummary;
@@ -10,7 +11,6 @@ import Engine.Combat.CombatEngine;
 import Engine.UnitActionLifecycles.BattleLifecycle;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
-import Terrain.MapWindow;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -19,6 +19,7 @@ public class TestCombatMods extends TestCase
   private static Commander cinder;
   private static Commander venge;
   private static MapMaster testMap;
+  private static GameInstance testGame;
 
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
@@ -29,26 +30,19 @@ public class TestCombatMods extends TestCase
     Commander[] cos = { cinder, venge };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    for( Commander co : cos )
-    {
-      co.myView = new MapWindow(testMap, co);
-    }
+    testGame = new GameInstance(testMap);
   }
 
   @Override
   public boolean runTest()
   {
     setupTest();
-    cinder.registerForEvents();
-    venge.registerForEvents();
 
     boolean testPassed = true;
     testPassed &= validate(testBasicMod(), "  Basic combat mod test failed.");
     testPassed &= validate(testIronWill(), "  Venge's Iron Will combat mod test failed.");
     testPassed &= validate(testRetribution(), "  Venge's Retribution combat mod test failed.");
-    
-    cinder.unregister();
-    venge.unregister();
+
     return testPassed;
   }
 
@@ -65,7 +59,7 @@ public class TestCombatMods extends TestCase
     Unit meaty = addUnit(testMap, venge, UnitModel.ASSAULT, 8, 4);
     
     // Poke the bear...
-    performGameAction(new BattleLifecycle.BattleAction(testMap, infActive, Utils.findShortestPath(infActive, 7, 3, testMap), 7, 4), testMap);
+    performGameAction(new BattleLifecycle.BattleAction(testMap, infActive, Utils.findShortestPath(infActive, 7, 3, testMap), 7, 4), testGame);
 
     // See how much damage meaty can do to our two contestants on offense...
     BattleSummary vengeful = CombatEngine.simulateBattleResults(meaty, infActive, testMap, 8, 3);

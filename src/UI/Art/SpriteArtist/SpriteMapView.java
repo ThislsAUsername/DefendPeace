@@ -85,6 +85,7 @@ public class SpriteMapView extends MapView
         SpriteLibrary.baseSpriteSize * game.gameMap.mapHeight);
 
     mapArtist = new MapArtist(game);
+    MapTileDetailsArtist.register(game);
     unitArtist = new UnitArtist(game);
     menuArtist = new MenuArtist(game, this);
 

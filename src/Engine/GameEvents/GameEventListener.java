@@ -1,16 +1,10 @@
 package Engine.GameEvents;
 
 import java.util.ArrayList;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
-
 import CommandingOfficers.Commander;
+import Engine.GameInstance;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
@@ -31,43 +25,42 @@ import Units.UnitModel;
 public abstract class GameEventListener implements Serializable
 {
   private static final long serialVersionUID = 1L;
-  /** Static list of all event subscribers */
-  private static Set<GameEventListener> eventListeners = Collections.newSetFromMap(new WeakHashMap<GameEventListener, Boolean>());
 
   /** Pass event along to every listener we still have. */
-  public static void publishEvent(GameEvent event)
+  public static void publishEvent(GameEvent event, GameInstance gi)
   {
-    for( GameEventListener gel : eventListeners )
+    for( GameEventListener gel : gi.eventListeners )
     {
       // The event will call the appropriate receive method in the listener.
       event.sendToListener(gel);
     }
   }
 
+  /** Allows GameInstance to make informed decisons on whether to try saving this listener */
+  public boolean shouldSerialize() { return true; }
+
   /** Sign this listener up to receive events. If a listener registers multiple times, it will still
    *  receive each notification only once. */
-  public static void registerEventListener(GameEventListener listener)
+  public static void registerEventListener(GameEventListener listener, GameInstance gi)
   {
-    eventListeners.add(listener);
+    listener.registerForEvents(gi);
   }
 
-  /** Convenience function to sign this listener up to receive GameEvents. */
-  public final void registerForEvents()
+  public void registerForEvents(GameInstance gi)
   {
-    GameEventListener.registerEventListener(this);
+    gi.eventListeners.add(this);
   }
 
   /** Unregister this listener. Call this when a listener is no longer needed, so the JVM knows
    *  it can clean up the object. */
-  public static void unregisterEventListener(GameEventListener listener)
+  public static void unregisterEventListener(GameEventListener listener, GameInstance gi)
   {
-    eventListeners.remove(listener);
+    listener.unregister(gi);
   }
 
-  /** Convenience function so a listener can unregister themselves. */
-  public final void unregister()
+  public void unregister(GameInstance gi)
   {
-    GameEventListener.unregisterEventListener(this);
+    gi.eventListeners.remove(this);
   }
 
   // The functions below should be overridden by subclasses for event types they care about.
@@ -89,34 +82,7 @@ public abstract class GameEventListener implements Serializable
   public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){};
   public void receiveWeatherChangeEvent(Weathers weather, int duration){};
   public void receiveMapChangeEvent(MapChangeEvent event){};
-  public void receiveMassDamageEvent(Map<Unit, Integer> lostHP){};
-  
-  /**
-   * Private method, same signature as in Serializable interface
-   * Saves whether the listener is registered, as the registered listeners array is static
-   *
-   * @param stream
-   * @throws IOException
-   */
-  private void writeObject(ObjectOutputStream stream) throws IOException
-  {
-    stream.defaultWriteObject();
+  public void receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP){};
+  public void receiveModifyFundsEvent(Commander beneficiary, int fundsDelta){};
 
-    stream.writeBoolean(eventListeners.contains(this));
-  }
-
-  /**
-   * Private method, same signature as in Serializable interface
-   *
-   * @param stream
-   * @throws IOException
-   */
-  private void readObject(ObjectInputStream stream)
-          throws IOException, ClassNotFoundException
-  {
-    stream.defaultReadObject();
-
-    if (stream.readBoolean())
-      registerEventListener(this);
-  }
 }

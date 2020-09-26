@@ -18,7 +18,6 @@ import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
-import Terrain.MapWindow;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
@@ -39,10 +38,6 @@ public class TestCommanderAve extends TestCase
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
 
-    for( Commander co : cos )
-    {
-      co.myView = new MapWindow(testMap, co);
-    }
     game = new GameInstance(testMap);
   }
 
@@ -74,9 +69,9 @@ public class TestCommanderAve extends TestCase
 
     // Give it the ol' one-two.
     infantry.initTurn(testMap);
-    performGameAction(capture, testMap);
+    performGameAction(capture, game);
     infantry.initTurn(testMap);
-    performGameAction(capture, testMap);
+    performGameAction(capture, game);
 
     testPassed &= validate(Ave.getSnowMapClone()[city.xCoord][city.yCoord] == CommandingOfficers.Ave.SNOW_THRESHOLD, "    Ave doesn't have 1 snow in city after capture");
 
@@ -164,7 +159,9 @@ public class TestCommanderAve extends TestCase
     ArrayList<CommanderAbility> abilities = Ave.getReadyAbilities();
     for( CommanderAbility ca : abilities )
     {
-      ca.activate(testMap);
+      Ave.modifyAbilityPower(20);
+      Ave.initTurn(testMap);
+      performGameAction(new GameAction.AbilityAction(ca), game);
     }
 
     // Check that the ability did what it was supposed to.

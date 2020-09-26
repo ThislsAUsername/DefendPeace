@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import CommandingOfficers.Modifiers.COModifier;
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
@@ -59,12 +60,29 @@ public class Cinder extends Commander
 
   private GameEventQueue pollEvents = new GameEventQueue();
 
+  public WitchFireListener witchFireListener;
+
   public Cinder(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
     addCommanderAbility(new SearAbility(this));
     addCommanderAbility(new WitchFireAbility(this));
+  }
+
+  @Override
+  public void registerForEvents(GameInstance game)
+  {
+    super.registerForEvents(game);
+
+    witchFireListener = new WitchFireListener(this, WitchFireAbility.WITCHFIRE_HP_COST);
+    witchFireListener.registerForEvents(game);
+  }
+  @Override
+  public void unregister(GameInstance game)
+  {
+    super.unregister(game);
+    witchFireListener.unregister(game);
   }
 
   public static CommanderInfo getInfo()
@@ -188,12 +206,12 @@ public class Cinder extends Commander
     private static final String WITCHFIRE_NAME = "Witchfire";
     private static final int WITCHFIRE_COST = 9;
     private static final int WITCHFIRE_HP_COST = 1;
-    private WitchFireListener listener;
+    private Cinder coCast;
 
-    WitchFireAbility(Commander commander)
+    WitchFireAbility(Cinder commander)
     {
       super(commander, WITCHFIRE_NAME, WITCHFIRE_COST);
-      listener = new WitchFireListener(commander, WITCHFIRE_HP_COST);
+      coCast = commander;
     }
 
     @Override
@@ -205,13 +223,13 @@ public class Cinder extends Commander
     @Override // COModifier interface.
     public void applyChanges(Commander commander)
     {
-      GameEventListener.registerEventListener(listener);
+      coCast.witchFireListener.listen = true;
     }
 
     @Override
     public void revertChanges(Commander commander)
     {
-      GameEventListener.unregisterEventListener(listener);
+      coCast.witchFireListener.listen = false;
     }
   }
 
@@ -220,6 +238,7 @@ public class Cinder extends Commander
     private static final long serialVersionUID = 1L;
     private Commander myCommander = null;
     private final int refreshCost;
+    public boolean listen = false;
 
     public WitchFireListener(Commander myCo, int HPCost)
     {
@@ -230,6 +249,8 @@ public class Cinder extends Commander
     @Override
     public void receiveBattleEvent(BattleSummary battleInfo)
     {
+      if( !listen )
+        return;
       // Determine if we were part of this fight. If so, refresh at our own expense.
       Unit minion = battleInfo.attacker;
       if( minion.CO == myCommander )
