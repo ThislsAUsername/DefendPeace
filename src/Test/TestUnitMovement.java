@@ -4,6 +4,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
 import Engine.GameAction;
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Path;
 import Engine.Utils;
@@ -11,7 +12,6 @@ import Engine.XYCoord;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
-import Terrain.MapWindow;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -20,6 +20,7 @@ public class TestUnitMovement extends TestCase
   private static Commander testCo1;
   private static Commander testCo2;
   private static MapMaster testMap;
+  private static GameInstance testGame;
 
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
@@ -30,10 +31,7 @@ public class TestUnitMovement extends TestCase
     Commander[] cos = { testCo1, testCo2 };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    for( Commander co : cos )
-    {
-      co.myView = new MapWindow(testMap, co);
-    }
+    testGame = new GameInstance(testMap);
   }
 
   @Override
@@ -95,7 +93,7 @@ public class TestUnitMovement extends TestCase
     XYCoord destination = new XYCoord(6, 5);
     GameAction ga = new WaitLifecycle.WaitAction(mover, Utils.findShortestPath(mover, destination, testMap));
 
-    performGameAction(ga, testMap);
+    performGameAction(ga, testGame);
 
     // Evaluate the test.
     boolean testPassed = validate(testMap.getLocation(4, 4).getResident() == null, "    Infantry is still at the start point.");
@@ -119,11 +117,11 @@ public class TestUnitMovement extends TestCase
 
     // Make an action to move the unit far away, and execute it.
     GameAction ga = new WaitLifecycle.WaitAction(mover, Utils.findShortestPath(mover, 7, 6, testMap));
-    performGameAction(ga, testMap);
+    performGameAction(ga, testGame);
 
     // Make an action to move the inf 3 spaces onto a mountain, and execute it.
     GameAction ga2 = new WaitLifecycle.WaitAction(mover, Utils.findShortestPath(mover, 5, 4, testMap));
-    performGameAction(ga2, testMap);
+    performGameAction(ga2, testGame);
 
     // Make sure the actions didn't actually execute.
     boolean testPassed = validate(testMap.getLocation(2, 4).getResident() == mover, "    Infantry moved when he shouldn't have.");

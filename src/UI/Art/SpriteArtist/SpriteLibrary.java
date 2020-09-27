@@ -70,6 +70,7 @@ public class SpriteLibrary
   // Cursor for highlighting things in-game.
   private static Sprite cursorSprites = null;
   private static Sprite arrowheadSprites = null;
+  private static Sprite previewArrow = null;
 
   // Commander overlay backdrops (shows commander name and funds) for each Commander in the game.
   private static HashMap<Commander, Sprite> coOverlays = new HashMap<Commander, Sprite>();
@@ -621,6 +622,17 @@ public class SpriteLibrary
       arrowheadSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/arrowheads.png"), 10, 10);
     }
     return arrowheadSprites;
+  }
+
+  public static BufferedImage getPreviewArrow(Color key)
+  {
+    if( null == previewArrow )
+    {
+      previewArrow = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/preview_arrow.png"), baseSpriteSize, baseSpriteSize);
+    }
+    Sprite newArrow = new Sprite(previewArrow);
+    newArrow.colorize(UIUtils.defaultMapColors, UIUtils.getMapUnitColors(key).paletteColors);
+    return newArrow.getFrame(0);
   }
 
   /**

@@ -79,6 +79,6 @@ class SelectActionTarget extends GameInputState<XYCoord>
   @Override
   public void back()
   {
-    myStateData.damagePopups = new ArrayList<DamagePopup>();
+    myStateData.damagePopups.clear();
   }
 }

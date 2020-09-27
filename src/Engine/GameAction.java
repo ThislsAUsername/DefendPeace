@@ -167,6 +167,12 @@ public abstract class GameAction
     {
       return null;
     }
+
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap map)
+    {
+      return myAbility.getDamagePopups(map);
+    }
   } // ~AbilityAction
 
   // ===========  TeleportAction  =================================
@@ -259,7 +265,7 @@ public abstract class GameAction
         ArrayList<Unit> ary = new ArrayList<Unit>();
         ary.add(obstacle);
         boolean fatal = true;
-        MassDamageEvent mde = new MassDamageEvent(ary, obstacle.getHP()+1, fatal);
+        MassDamageEvent mde = new MassDamageEvent(unit.CO, ary, obstacle.getHP()+1, fatal);
         UnitDieEvent ude = new UnitDieEvent(obstacle);
         subEvents.add(mde);
         subEvents.add(ude);
@@ -278,7 +284,7 @@ public abstract class GameAction
         ArrayList<Unit> ary = new ArrayList<Unit>();
         ary.add(unit);
         boolean fatal = true;
-        MassDamageEvent mde = new MassDamageEvent(ary, unit.getHP()+1, fatal);
+        MassDamageEvent mde = new MassDamageEvent(unit.CO, ary, unit.getHP()+1, fatal);
         UnitDieEvent ude = new UnitDieEvent(unit);
         subEvents.add(mde);
         subEvents.add(ude);

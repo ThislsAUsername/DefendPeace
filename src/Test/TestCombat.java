@@ -4,6 +4,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
 import Engine.GameAction;
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.GameEvents.CommanderDefeatEvent;
@@ -12,7 +13,6 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.BattleLifecycle;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
-import Terrain.MapWindow;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -21,6 +21,7 @@ public class TestCombat extends TestCase
   private static Commander testCo1;
   private static Commander testCo2;
   private static MapMaster testMap;
+  private static GameInstance testGame;
 
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
@@ -31,10 +32,7 @@ public class TestCombat extends TestCase
     Commander[] cos = { testCo1, testCo2 };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    for( Commander co : cos )
-    {
-      co.myView = new MapWindow(testMap, co);
-    }
+    testGame = new GameInstance(testMap);
   }
 
   @Override
@@ -64,7 +62,7 @@ public class TestCombat extends TestCase
 
     // Execute inf- I mean, the action.
     performGameAction(new BattleLifecycle.BattleAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2),
-        testMap);
+        testGame);
 
     // Check that the mech is undamaged, and that the infantry is no longer with us.
     boolean testPassed = validate(mechA.getPreciseHP() == 10, "    Attacker lost or gained health.");
@@ -92,7 +90,7 @@ public class TestCombat extends TestCase
 
     // Hug the infantry in a friendly manner.
     performGameAction(new BattleLifecycle.BattleAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2),
-        testMap);
+        testGame);
 
     // Check that the mech is undamaged, and that the infantry is still with us.
     boolean testPassed = validate(mechA.getPreciseHP() == 10, "    Attacker lost or gained health.");
@@ -118,26 +116,26 @@ public class TestCombat extends TestCase
     // offender will attempt to shoot point blank. This should fail, since artillery cannot direct fire.
     offender.initTurn(testMap); // Make sure he is ready to move.
     performGameAction(new BattleLifecycle.BattleAction(testMap, offender, Utils.findShortestPath(offender, 6, 5, testMap), 6, 6),
-        testMap);
+        testGame);
     boolean testPassed = validate(defender.getPreciseHP() == 10, "    Artillery dealt damage at range 1. Artillery range should be 2-3.");
     
     // offender will attempt to move and fire. This should fail, since artillery cannot fire after moving.
     offender.initTurn(testMap);
     performGameAction(new BattleLifecycle.BattleAction(testMap, offender, Utils.findShortestPath(offender, 6, 4, testMap), 6, 6),
-        testMap);
+        testGame);
     testPassed &= validate(defender.getPreciseHP() == 10, "    Artillery dealt damage despite moving before firing.");
 
     // offender will shoot victim.
     offender.initTurn(testMap); // Make sure he is ready to move.
     performGameAction(new BattleLifecycle.BattleAction(testMap, offender, Utils.findShortestPath(offender, 6, 5, testMap), 6, 7),
-        testMap);
+        testGame);
     testPassed &= validate(victim.getPreciseHP() != 10, "    Artillery failed to do damage at a range of 2, without moving.");
     testPassed &= validate(offender.getPreciseHP() == 10, "    Artillery received a counterattack from a range of 2. Counterattacks should only be possible at range 1.");
 
     // defender will attack offender.
     defender.initTurn(testMap); // Make sure he is ready to move.
     performGameAction(new BattleLifecycle.BattleAction(testMap, defender, Utils.findShortestPath(defender, 6, 6, testMap), 6, 5),
-        testMap);
+        testGame);
     
     // check that offender is damaged and defender is not.
     testPassed &= validate(offender.getPreciseHP() != 10, "    Mech failed to deal damage to adjacent artillery.");
@@ -160,7 +158,7 @@ public class TestCombat extends TestCase
 
     // Execute inf- I mean, the action.
     attacker.initTurn(testMap); // Make sure he is ready to move.
-    performGameAction(new BattleLifecycle.BattleAction(testMap, attacker, Utils.findShortestPath(attacker, 1, 2, testMap), 1, 3), testMap);
+    performGameAction(new BattleLifecycle.BattleAction(testMap, attacker, Utils.findShortestPath(attacker, 1, 2, testMap), 1, 3), testGame);
 
     // Check that the mech is undamaged, and that the infantry is no longer with us.
     boolean testPassed = validate(defender.getHP() < 10, "    Defender took no damage.");

@@ -2,6 +2,7 @@ package Test;
 
 import CommandingOfficers.Commander;
 import Engine.GameAction;
+import Engine.GameInstance;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -54,13 +55,13 @@ public abstract class TestCase
     return u;
   }
 
-  protected static void performGameAction( GameAction action, MapMaster map )
+  protected static void performGameAction( GameAction action, GameInstance game )
   {
-    GameEventQueue sequence = action.getEvents(map);
+    GameEventQueue sequence = action.getEvents(game.gameMap);
     for( GameEvent event : sequence )
     {
-      event.performEvent( map );
-      GameEventListener.publishEvent(event);
+      event.performEvent( game.gameMap );
+      GameEventListener.publishEvent(event, game);
     }
   }
 }

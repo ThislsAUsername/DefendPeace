@@ -4,6 +4,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
 import Engine.GameAction;
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.GameEvents.CommanderDefeatEvent;
@@ -15,7 +16,6 @@ import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.Location;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
-import Terrain.MapWindow;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
@@ -25,6 +25,7 @@ public class TestCapture extends TestCase
   private static Commander testCo1;
   private static Commander testCo2;
   private static MapMaster testMap;
+  private static GameInstance testGame;
 
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
@@ -35,10 +36,7 @@ public class TestCapture extends TestCase
     Commander[] cos = { testCo1, testCo2 };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    for( Commander co : cos )
-    {
-      co.myView = new MapWindow(testMap, co);
-    }
+    testGame = new GameInstance(testMap);
   }
 
   @Override
@@ -70,50 +68,50 @@ public class TestCapture extends TestCase
     // Start capturing the city.
     infA.initTurn(testMap);
     GameAction captureAction = new CaptureLifecycle.CaptureAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap));
-    performGameAction( captureAction, testMap );
+    performGameAction( captureAction, testGame );
 
     // Verify that we can start and stop property capture.
     testPassed &= validate( infA.getCaptureProgress() == 10, "    Infantry does not register capture progress.");
     infA.stopCapturing();
     testPassed &= validate( infA.getCaptureProgress() == 0, "    Infantry should not register capture progress.");
     infA.initTurn(testMap);
-    performGameAction( captureAction, testMap );
+    performGameAction( captureAction, testGame );
     testPassed &= validate( infA.getCaptureProgress() == 10, "    Infantry is not capturing, but should be.");
 
     // Ensure that moving resets the capture counter.
     infA.initTurn(testMap);
-    performGameAction(new WaitLifecycle.WaitAction(infA, Utils.findShortestPath(infA, 2, 3, testMap)), testMap);
+    performGameAction(new WaitLifecycle.WaitAction(infA, Utils.findShortestPath(infA, 2, 3, testMap)), testGame);
     testPassed &= validate( infA.getCaptureProgress() == 0, "    Infantry is still capturing after moving.");
 
     // Make sure we can WAIT, and resume capturing.
     infA.initTurn(testMap);
-    performGameAction(new WaitLifecycle.WaitAction(infA, Utils.findShortestPath(infA, 2, 2, testMap)), testMap); // Move back onto the city.
+    performGameAction(new WaitLifecycle.WaitAction(infA, Utils.findShortestPath(infA, 2, 2, testMap)), testGame); // Move back onto the city.
     infA.initTurn(testMap);
-    performGameAction( captureAction, testMap );
+    performGameAction( captureAction, testGame );
     infA.initTurn(testMap);
-    performGameAction(new WaitLifecycle.WaitAction(infA, Utils.findShortestPath(infA, 2, 2, testMap)), testMap); // Wait on the city.
+    performGameAction(new WaitLifecycle.WaitAction(infA, Utils.findShortestPath(infA, 2, 2, testMap)), testGame); // Wait on the city.
     testPassed &= validate( infA.getCaptureProgress() == 10, "    Infantry should not lose capture progress due to WAIT.");
 
     // Make sure that attacking someone else does not reset capture progress.
     Unit infB = addUnit(testMap, testCo2, UnitModel.TROOP, 1, 2); // Make an enemy adjacent to the city.
     infB.alterHP( -8 ); // Make sure he will die without retaliating.
     infA.initTurn(testMap);
-    performGameAction(new BattleLifecycle.BattleAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap), 1, 2), testMap); // Bop him on the head.
+    performGameAction(new BattleLifecycle.BattleAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap), 1, 2), testGame); // Bop him on the head.
     testPassed &= validate( infA.getCaptureProgress() == 10, "    Infantry should not stop capturing after stationary ATTACK.");
 
     // See if we can actually capture this thing.
     infA.alterHP( -6 ); // Make it take three attempts to capture the property.
     infA.initTurn(testMap);
-    performGameAction( captureAction, testMap );
+    performGameAction( captureAction, testGame );
     testPassed &= validate( infA.getCaptureProgress() == 14, "    Infantry has wrong capture progress (" +
         infA.getCaptureProgress() + " instead of 14)." );
     infA.initTurn(testMap);
-    performGameAction( captureAction, testMap );
+    performGameAction( captureAction, testGame );
     testPassed &= validate( infA.getCaptureProgress() == 18, "    Infantry has wrong capture progress (" +
         infA.getCaptureProgress() + " instead of 18)." );
 
     infA.initTurn(testMap);
-    performGameAction( captureAction, testMap );
+    performGameAction( captureAction, testGame );
     // Verify that we now own the property, and that capture progress is reset.
     testPassed &= validate( prop.getOwner() == infA.CO, "    Infantry failed to capture the property.");
     testPassed &= validate( infA.getCaptureProgress() == 0, "    Infantry capture progress did not reset after capture." );
@@ -147,11 +145,11 @@ public class TestCapture extends TestCase
     // Start capturing the city.
     infA.initTurn(testMap);
     GameAction captureAction = new CaptureLifecycle.CaptureAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap));
-    performGameAction( captureAction, testMap );
+    performGameAction( captureAction, testGame );
 
     for( int i = 0; i < 5; i++ )
     {
-      performGameAction(captureAction, testMap);
+      performGameAction(captureAction, testGame);
       testPassed &= validate(infA.getCaptureProgress() == 0,
           "    Infantry has wrong capture progress (" + infA.getCaptureProgress() + " instead of 0).");
     }
@@ -185,7 +183,7 @@ public class TestCapture extends TestCase
     // Start capturing the HQ.
     mech.initTurn(testMap);
     GameAction captureAction = new CaptureLifecycle.CaptureAction(testMap, mech, Utils.findShortestPath(mech, 13, 1, testMap));
-    performGameAction(captureAction, testMap);
+    performGameAction(captureAction, testGame);
 
     // Re-create the event so we can predict the HQ capture, but don't execute; we just want to see the resulting GameEventQueue.
     mech.initTurn(testMap);

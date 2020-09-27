@@ -10,6 +10,7 @@ import UI.GameOption;
 public class HorizontalSelectorTemplate
 {
   public int textBuffer = 4;
+  public int optionSpacingPx;
   private static int letterWidth = SpriteLibrary.getLettersUppercase().getFrame(0).getWidth();
 
   public int graphicsOptionWidth = 0; // Set in initialize().
@@ -53,6 +54,8 @@ public class HorizontalSelectorTemplate
 
     graphicsOptionWidth = optionNamePanel.getWidth() + itemWidth + letterWidth; // Plus some space for a buffer between panels.
     graphicsOptionHeight = optionNamePanel.getHeight();
+
+    optionSpacingPx = 3 * letterWidth;
 
     // Make points to define the two selection arrows.
     int[] lXPoints = { 0, 5, 5, 0 };
@@ -102,7 +105,7 @@ public class HorizontalSelectorTemplate
     SpriteUIUtils.drawText(g, opt.optionName, x + drawBuffer, y + drawBuffer);
 
     // Draw the setting panel and the setting value.
-    x = x + (optionNamePanel.getWidth() + (3 * letterWidth));
+    x = x + (optionNamePanel.getWidth() + optionSpacingPx);
     BufferedImage settingPanel = (opt.isChanged()) ? optionSettingPanelChanged : optionSettingPanel;
     g.drawImage(settingPanel, x, y, settingPanel.getWidth(), settingPanel.getHeight(), null);
     SpriteUIUtils.drawText(g, opt.getCurrentValueText(), x + drawBuffer, y + drawBuffer);

@@ -1,14 +1,16 @@
 package CommandingOfficers;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Collection;
+import java.util.HashSet;
 
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameScenario;
 import Engine.XYCoord;
-import Engine.GameEvents.GameEvent;
-import Engine.GameEvents.GameEventListener;
+import Engine.Combat.DamagePopup;
+import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MassDamageEvent;
+import Engine.GameEvents.ModifyFundsEvent;
+import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -63,7 +65,6 @@ public class Bear_Bull extends Commander
   }
 
   public boolean isBull;
-  public boolean liquidateMassDamage = false; // flag used during Upturn/Downturn
 
   private final double BEAR_MOD = 0.9;
   private final double BULL_MOD = 1.2;
@@ -110,19 +111,6 @@ public class Bear_Bull extends Commander
     return 0;
   }
 
-  @Override
-  public void receiveMassDamageEvent(Map<Unit, Integer> lostHP)
-  {
-    if( liquidateMassDamage ) // If I'm collecting funds, collect from everyone
-      for( Entry<Unit, Integer> damageEntry : lostHP.entrySet() )
-      {
-        Unit unit = damageEntry.getKey();
-        money += (damageEntry.getValue() * unit.model.getCost()) / unit.model.maxHP;
-      }
-    else // Otherwise, do whatever we normally do
-      super.receiveMassDamageEvent(lostHP);
-  }
-
   /**
    * Down/UpTurn swaps D2Ds for this turn.
    * All units on a property you own take 3HP mass damage and you gain the funds value of that HP.
@@ -138,11 +126,11 @@ public class Bear_Bull extends Commander
     private static final int DOWNUPTURN_LIQUIDATION = 3;
     Bear_Bull COcast;
 
-    UpDownTurnAbility(Commander commander)
+    UpDownTurnAbility(Bear_Bull commander)
     {
       // as we start in Bear form, UpTurn is the correct starting name
       super(commander, UPTURN_NAME, DOWNUPTURN_COST);
-      COcast = (Bear_Bull) commander;
+      COcast = commander;
     }
 
     @Override
@@ -156,9 +144,57 @@ public class Bear_Bull extends Commander
     protected void perform(MapMaster gameMap)
     {
       myCommander.addCOModifier(this);
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      Collection<Unit> victims = findVictims(gameMap);
 
       // Damage is dealt after swapping D2Ds so it's actually useful to Bear
-      ArrayList<Unit> victims = new ArrayList<Unit>();
+      GameEventQueue powerEvents = new GameEventQueue();
+      powerEvents.add(new MassDamageEvent(COcast, victims, DOWNUPTURN_LIQUIDATION, false));
+
+      int valueDrained = 0;
+      for( Unit victim : victims )
+      {
+        valueDrained += (Math.min(DOWNUPTURN_LIQUIDATION, victim.getHP()) * victim.model.getCost()) / victim.model.maxHP;
+      }
+
+      powerEvents.add( new ModifyFundsEvent(COcast, valueDrained) ); // Collect profits
+
+      return powerEvents;
+    }
+
+    @Override // COModifier interface.
+    public void applyChanges(Commander commander)
+    {
+      COcast.swapD2Ds(false);
+    }
+
+    @Override
+    public void revertChanges(Commander commander)
+    {
+      COcast.swapD2Ds(true);
+    }
+
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+
+      for( Unit victim : findVictims(gameMap) )
+        output.add(new DamagePopup(
+                       new XYCoord(victim.x, victim.y),
+                       myCommander.myColor,
+                       Math.min(victim.getHP()-1, DOWNUPTURN_LIQUIDATION)*10 + "%"));
+
+      return output;
+    }
+
+    public HashSet<Unit> findVictims(GameMap gameMap)
+    {
+      HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
       for( XYCoord xyc : myCommander.ownedProperties )
       {
         Location loc = gameMap.getLocation(xyc);
@@ -171,25 +207,7 @@ public class Bear_Bull extends Commander
           }
         }
       }
-      COcast.liquidateMassDamage = true; // Collect money instead of ability energy
-      GameEvent damage = new MassDamageEvent(victims, DOWNUPTURN_LIQUIDATION, false);
-      damage.performEvent(gameMap);
-      GameEventListener.publishEvent(damage);
-      COcast.liquidateMassDamage = false;
-    }
-
-    @Override // COModifier interface.
-    public void applyChanges(Commander commander)
-    {
-      Bear_Bull cmdr = (Bear_Bull) commander;
-      cmdr.swapD2Ds(false);
-    }
-
-    @Override
-    public void revertChanges(Commander commander)
-    {
-      Bear_Bull cmdr = (Bear_Bull) commander;
-      cmdr.swapD2Ds(true);
+      return victims;
     }
   }
 
@@ -207,11 +225,11 @@ public class Bear_Bull extends Commander
     private static final double BOOMBUST_BUFF = 0.2;
     Bear_Bull COcast;
 
-    BustBoomAbility(Commander commander)
+    BustBoomAbility(Bear_Bull commander)
     {
       // as we start in Bear form, Boom is the correct starting name
       super(commander, BOOM_NAME, BOOMBUST_COST);
-      COcast = (Bear_Bull) commander;
+      COcast = commander;
     }
 
     @Override
@@ -230,9 +248,8 @@ public class Bear_Bull extends Commander
     @Override // COModifier interface.
     public void applyChanges(Commander commander)
     {
-      Bear_Bull cmdr = (Bear_Bull) commander;
       // Instead of swapping, we get a discount. Yaaaay.
-      for( UnitModel um : cmdr.unitModels )
+      for( UnitModel um : COcast.unitModels )
       {
         um.COcost -= BOOMBUST_BUFF;
       }
@@ -242,8 +259,7 @@ public class Bear_Bull extends Commander
     public void revertChanges(Commander commander)
     {
       // Next turn, we swap D2Ds permanently
-      Bear_Bull cmdr = (Bear_Bull) commander;
-      cmdr.swapD2Ds(true);
+      COcast.swapD2Ds(true);
     }
   }
 

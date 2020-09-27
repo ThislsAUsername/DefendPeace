@@ -9,6 +9,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
@@ -35,7 +37,6 @@ public class GameInstance implements Serializable
 
   HashMap<Integer, XYCoord> playerCursors = null;
 
-  private boolean isFogEnabled;
   private Weathers defaultWeather;
 
   private GameScenario gameScenario;
@@ -46,10 +47,10 @@ public class GameInstance implements Serializable
 
   public GameInstance(MapMaster map)
   {
-    this(map, false, Weathers.CLEAR, new GameScenario(), false);
+    this(map, Weathers.CLEAR, new GameScenario(), false);
   }
 
-  public GameInstance(MapMaster map, boolean fogOfWarOn, Weathers weather, GameScenario scenario, boolean useSecurity)
+  public GameInstance(MapMaster map, Weathers weather, GameScenario scenario, boolean useSecurity)
   {
     if( map.commanders.length < 2 )
     {
@@ -58,10 +59,9 @@ public class GameInstance implements Serializable
     gameScenario = scenario;
     isSecurityEnabled = useSecurity;
 
-    currentTurn = 0;
+    currentTurn = 1;
 
     gameMap = map;
-    isFogEnabled = fogOfWarOn;
     defaultWeather = weather;
 
     commanders = map.commanders;
@@ -74,7 +74,7 @@ public class GameInstance implements Serializable
       commanders[i].money = gameScenario.rules.startingFunds;
       if( commanders[i].HQLocation != null )
       {
-        commanders[i].myView = new MapWindow(map, commanders[i], isFogEnabled);
+        commanders[i].myView = new MapWindow(map, commanders[i]);
         commanders[i].myView.resetFog();
         playerCursors.put(i, commanders[i].HQLocation);
       }
@@ -83,7 +83,7 @@ public class GameInstance implements Serializable
         System.out.println("Warning! Commander " + commanders[i].coInfo.name + " does not have an HQ location!");
         playerCursors.put(i, new XYCoord(1, 1));
       }
-      GameEventListener.registerEventListener(commanders[i]);
+      GameEventListener.registerEventListener(commanders[i], this);
     }
     
     saveFile = getSaveName();
@@ -91,8 +91,11 @@ public class GameInstance implements Serializable
 
   public boolean isFogEnabled()
   {
-    return isFogEnabled;
+    return gameScenario.rules.isFogEnabled;
   }
+
+  // WeakHashMap isn't serializable, so we can't use Collections.newSetFromMap(new WeakHashMap<GameEventListener, Boolean>());
+  public transient Set<GameEventListener> eventListeners = new HashSet<GameEventListener>();
 
   public int getActiveCOIndex()
   {
@@ -231,7 +234,7 @@ public class GameInstance implements Serializable
       }
     }
 
-    events.add(new TurnInitEvent(activeCO, currentTurn, isFogEnabled || isSecurityEnabled));
+    events.add(new TurnInitEvent(activeCO, currentTurn, isFogEnabled() || isSecurityEnabled));
 
     if( !weatherChanges.isEmpty() )
     {
@@ -264,7 +267,7 @@ public class GameInstance implements Serializable
   {
     for( Commander co : commanders )
     {
-      GameEventListener.unregisterEventListener(co);
+      GameEventListener.unregisterEventListener(co, this);
     }
   }
   
@@ -361,12 +364,43 @@ public class GameInstance implements Serializable
     return filename;
   }
 
+  /**
+   * Same signature as in Serializable interface
+   * @throws IOException
+   */
+  private void writeObject(ObjectOutputStream stream) throws IOException
+  {
+    stream.defaultWriteObject();
+
+    // save any serializable listeners
+    Set<GameEventListener> saveableListeners = new HashSet<GameEventListener>();
+    for( GameEventListener listener : eventListeners)
+    {
+      if( listener.shouldSerialize() )
+        saveableListeners.add(listener);
+    }
+    stream.writeObject(saveableListeners);
+  }
+
+  /**
+   * Same signature as in Serializable interface
+   * @throws IOException
+   */
+  @SuppressWarnings("unchecked")
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException
+  {
+    stream.defaultReadObject();
+
+    // restore any serializable listeners
+    eventListeners = (Set<GameEventListener>) stream.readObject();
+  }
+
   public boolean isSecurityEnforced()
   {
     // Little reason to secure at turn 0; folks often have one player build
     // infantry for everyone for the first round, so we'll create passwords
     // after the second turn and enforce them thereafter.
-    return currentTurn > 0 && isSecurityEnabled && !activeCO.isAI();
+    return currentTurn > 1 && isSecurityEnabled && !activeCO.isAI();
   }
 
   public boolean requireInitOnLoad()
