@@ -76,30 +76,49 @@ public class SpriteUIUtils
   public static BufferedImage drawTextToWidth(String prose, int reqWidth)
   {
     // Figure out how big our text is.
-    int characterWidth = SpriteLibrary.getLettersUppercase().getFrame(0).getWidth();
-    int characterHeight = SpriteLibrary.getLettersUppercase().getFrame(0).getHeight();
+    PixelFont font = SpriteLibrary.getFontStandard();
+    int characterHeight = font.getHeight();
 
     ArrayList<String> lines = new ArrayList<String>();
     // Unload our prose into the lines it already has
-    lines.addAll(Arrays.asList(prose.split("\\r\\n|\\n|\\r"))); // Should match all common newline formats. If we ever go to Java 8, use \R
+    lines.addAll(Arrays.asList(prose.split("\\R")));
 
-    if( reqWidth < characterWidth || lines.isEmpty() )
+    if( reqWidth < font.emSizePx || lines.isEmpty() )
       return SpriteLibrary.createDefaultBlankSprite(1, 1); // zero-dimensioned images aren't kosher
 
     for( int i = 0; i < lines.size(); ++i ) // basic for, since we care about indices
     {
       String line = lines.get(i);
-      if( line.length() * characterWidth <= reqWidth ) // if the line's short enough already, don't split it further
+      if( font.getWidth(line) <= reqWidth ) // if the line's short enough already, don't split it further
         continue;
 
       lines.remove(i);
 
       // See if we can split the line on a space
-      int splitIndex = line.substring(0, reqWidth / characterWidth).lastIndexOf(' ');
-      if( splitIndex < 1 ) // no spaces we can split on
+      String subline = line;
+      int splitIndex = 0;
+      boolean fits = false;
+      // Start by cutting the line at each space to try and make it fit.
+      do
       {
-        // Can't be helped. Split in the middle of the word
-        splitIndex = reqWidth / characterWidth;
+        splitIndex = subline.lastIndexOf(' ');
+        subline = subline.substring(0, splitIndex);
+        fits = font.getWidth(subline) <= reqWidth;
+      } while(!fits && splitIndex > 0);
+
+      // If it still doesn't fit, then shave off letters until it does.
+      while( !fits )
+      {
+        splitIndex = subline.length() - 1; // Just shave off letters until it fits.
+        subline = subline.substring(0, splitIndex);
+        fits = font.getWidth(subline) <= reqWidth;
+
+        if( !fits && (subline.length() <= 1) )
+        {
+          // We check em size above and break early if the required width is too small,
+          // so this is just a sanity check, and should never ever be invoked.
+          throw new RuntimeException("ERROR! Trying to draw font in a too-small space. This should never happen!");
+        }
       }
 
       lines.add(i, line.substring(splitIndex)); // put in the second half
@@ -115,7 +134,7 @@ public class SpriteUIUtils
     // Draw the actual text.
     for( int txtY = 0, i = 0; i < lines.size(); ++i, txtY += characterHeight + 1 )
     {
-      SpriteUIUtils.drawText(g, lines.get(i), 0, txtY);
+      font.write(g, lines.get(i), 0, txtY);
     }
 
     return menuImage;
@@ -228,8 +247,7 @@ public class SpriteUIUtils
    */
   public static void drawText(Graphics g, String text, int x, int y)
   {
-    drawText(g, text, x, y, SpriteLibrary.getLettersUppercase(), SpriteLibrary.getLettersLowercase(),
-        SpriteLibrary.getNumbers(), SpriteLibrary.getSymbols());
+    SpriteLibrary.getFontStandard().write(g, text, x, y);
   }
 
   /**
@@ -323,14 +341,23 @@ public class SpriteUIUtils
    */
   public static BufferedImage getTextAsImage(String text, boolean smallCaps)
   {
-    Sprite letters = (smallCaps) ? SpriteLibrary.getLettersSmallCaps() : SpriteLibrary.getLettersLowercase();
-    int width = letters.getFrame(0).getWidth() * text.length();
-    int height = letters.getFrame(0).getHeight();
-    BufferedImage textImage = SpriteLibrary.createTransparentSprite(width, height);
-    if( smallCaps )
+    BufferedImage textImage;
+    if(smallCaps)
+    {
+      Sprite letters = SpriteLibrary.getLettersSmallCaps();
+      int width = letters.getFrame(0).getWidth() * text.length();
+      int height = letters.getFrame(0).getHeight();
+      textImage = SpriteLibrary.createTransparentSprite(width, height);
       drawTextSmallCaps(textImage.getGraphics(), text, 0, 0);
+    }
     else
-      drawText(textImage.getGraphics(), text, 0, 0);
+    {
+      PixelFont pf = SpriteLibrary.getFontStandard();
+      int width = pf.getWidth(text);
+      int height = pf.getHeight();
+      textImage = SpriteLibrary.createTransparentSprite(width, height);
+      pf.write(textImage.getGraphics(), text, 0, 0);
+    }
     return textImage;
   }
 

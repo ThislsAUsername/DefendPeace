@@ -43,7 +43,7 @@ public class Tech extends Commander
     {
       super("Tech");
       infoPages.add(new InfoPage(
-          "Tech is a first-rate grease monkey who like nothing better than to build new machines and set them loose.\n"));
+          "Tech is a first-rate grease monkey who likes nothing better than to build new machines and set them loose.\n"));
       infoPages.add(new InfoPage(
           "Passive:\n" +
           "- Tech has some of the best mechanics around, allowing her units to repair 3 HP per turn instead of just 2.\n"));

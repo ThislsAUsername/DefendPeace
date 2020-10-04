@@ -599,15 +599,16 @@ public class SpriteMapView extends MapView
     if( lastTurnNum != turnNum )
     {
       lastTurnNum = turnNum;
+      PixelFont pf = SpriteLibrary.getFontStandard();
       BufferedImage day = SpriteUIUtils.getTextAsImage("Turn ");
       BufferedImage dayNum = SpriteUIUtils.getBoldTextAsImage(Integer.toString(turnNum));
       int width = day.getWidth() + dayNum.getWidth();
-      int height = dayNum.getHeight();
+      int height = Math.max(pf.getAscent(), dayNum.getHeight());
 
       turnNumImage = SpriteLibrary.createTransparentSprite(width, height);
       Graphics dcg = turnNumImage.getGraphics();
       dcg.drawImage(day, 0, 0, null);
-      dcg.drawImage(dayNum, turnNumImage.getWidth()-dayNum.getWidth(), 0, null);
+      dcg.drawImage(dayNum, turnNumImage.getWidth()-dayNum.getWidth(), pf.getAscent()-dayNum.getHeight(), null);
     }
 
     // Draw the turn counter.

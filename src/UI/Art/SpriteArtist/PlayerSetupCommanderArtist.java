@@ -79,7 +79,7 @@ public class PlayerSetupCommanderArtist
     for(; drawYCenter - CommanderPanel.PANEL_HEIGHT/2 < myHeight ; coToDraw.next(), drawYCenter += (panelHeight))
     {
       CommanderInfo coInfo = infos.get(coToDraw.getSelectionNormalized());
-      Integer key = new Integer(coToDraw.getSelectionNormalized());
+      Integer key = coToDraw.getSelectionNormalized();
 
       // Get the relevant PlayerPanel.
       if( !coPanels.containsKey(key) ) coPanels.put(key, new CommanderPanel(coInfo, playerColor));
@@ -151,7 +151,8 @@ public class PlayerSetupCommanderArtist
         if( !coInfo.name.equals(myCoName) )
         {
           myCoName = coInfo.name;
-          int newWidth = myCoName.length() * SpriteLibrary.getLettersLowercase().getFrame(0).getWidth() + textBufferPx*2;
+          PixelFont pf = SpriteLibrary.getFontStandard();
+          int newWidth = pf.getWidth(myCoName) + textBufferPx*2;
           BufferedImage namePlate = SpriteUIUtils.getTextAsImage(myCoName);
           commanderName = new SpriteUIUtils.ImageFrame(commanderFace.width+2, 1, newWidth, commanderFace.height,
               SpriteUIUtils.MENUHIGHLIGHTCOLOR, SpriteUIUtils.MENUBGCOLOR, false, namePlate);
