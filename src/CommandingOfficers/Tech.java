@@ -468,7 +468,7 @@ public class Tech extends Commander
       int index = 0;
       if( equalSpaces.size() > 1 )
       {
-        Random rand = new Random(myCommander.units.size());
+        Random rand = new Random(gameMap.mapWidth*gameMap.mapHeight);
         index = rand.nextInt(equalSpaces.size());
       }
       XYCoord landingZone = equalSpaces.get(index).space;
