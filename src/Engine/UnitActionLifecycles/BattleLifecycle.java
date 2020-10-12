@@ -400,7 +400,7 @@ public abstract class BattleLifecycle
       // Handle counter-attack if relevant.
       if( battleInfo.attackerHPLoss > 0 )
       {
-        defender.fire(battleInfo.attackerWeapon);
+        defender.fire(battleInfo.defenderWeapon);
         attacker.damageHP(battleInfo.attackerHPLoss);
       }
     }
