@@ -54,7 +54,11 @@ public class TeleportEvent implements GameEvent
   @Override
   public GameAnimation getEventAnimation(MapView mapView)
   {
-    return mapView.buildTeleportAnimation(unit, unitStart, unitDestination, obstacle, animationStyle);
+    if( animationStyle == AnimationStyle.DROP_IN )
+      return mapView.buildAirdropAnimation(unit, unitStart, unitDestination, obstacle);
+    else if( animationStyle == AnimationStyle.BLINK )
+      return mapView.buildTeleportAnimation(unit, unitStart, unitDestination, obstacle);
+    return null;
   }
 
   @Override

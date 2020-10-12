@@ -12,7 +12,7 @@ import java.util.Set;
 import AI.AIUtils;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
-import Engine.GameAction.TeleportAction;
+import Engine.GameAction.UnitSpawnAction;
 import Engine.GameScenario;
 import Engine.UnitActionFactory;
 import Engine.Utils;
@@ -20,7 +20,7 @@ import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
-import Engine.GameEvents.TeleportEvent;
+import Engine.GameEvents.CreateUnitEvent;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
@@ -226,7 +226,7 @@ public class Tech extends Commander
       Set<XYCoord> dropLocs = new HashSet<XYCoord>();
       for( int i = 0; i < numDrops; ++i )
       {
-        TeleportAction techDrop = generateDropEvent(gameMap, dropLocs, log);
+        UnitSpawnAction techDrop = generateDropEvent(gameMap, dropLocs, log);
         if( null != techDrop )
         {
           // Store the new event.
@@ -239,7 +239,7 @@ public class Tech extends Commander
         }
       }
 
-      // Figure out if this caused the enemy's defeat. The TeleportActions can't track
+      // Figure out if this caused the enemy's defeat. The actions can't track
       // this because multiple units may be smashed at once.
       Map<Commander, Integer> smashes = new HashMap<Commander, Integer>();
       for( XYCoord xyc : dropLocs )
@@ -286,19 +286,15 @@ public class Tech extends Commander
       return output;
     }
 
-    private TeleportAction generateDropEvent(MapMaster gameMap, Set<XYCoord> priorDrops, boolean log)
+    private UnitSpawnAction generateDropEvent(MapMaster gameMap, Set<XYCoord> priorDrops, boolean log)
     {
-      // Create a new Unit to drop onto the battlefield.
-      Unit techMech = new Unit(myCommander, unitModelToDrop);
-      techMech.isTurnOver = false; // Hit the ground ready to rumble.
-      if( myCommander.HQLocation.xCoord >= gameMap.mapWidth / 2 )
-        techMech.x = gameMap.mapWidth; // Make the unit face left as it falls to match the rest of the units.
-
       XYCoord landingZone = findDropLocation(gameMap, priorDrops, log);
 
       // Create our new unit and the teleport event to put it into place.
-      myCommander.units.add(techMech);
-      TeleportAction techDrop = new TeleportAction(techMech, landingZone, TeleportEvent.AnimationStyle.DROP_IN, TeleportEvent.CollisionOutcome.KILL);
+      boolean stomp = true;
+      boolean ready = true;
+      UnitSpawnAction techDrop = new UnitSpawnAction(myCommander, unitModelToDrop, landingZone,
+          CreateUnitEvent.AnimationStyle.DROP_IN, stomp, ready);
       return techDrop;
     }
     private XYCoord findDropLocation(GameMap gameMap, Set<XYCoord> priorDrops, boolean log)
@@ -444,7 +440,7 @@ public class Tech extends Commander
       // If there are no good spaces... this should almost never happen.
       if( scoredSpaces.isEmpty() )
       {
-        System.out.println("[TechDrop.perform] Cannot find suitable landing zone. Aborting!");
+        System.out.println("[TechDrop.findDropLocation] Cannot find suitable landing zone. Aborting!");
         return null;
       }
 
@@ -468,7 +464,7 @@ public class Tech extends Commander
       int index = 0;
       if( equalSpaces.size() > 1 )
       {
-        Random rand = new Random(gameMap.mapWidth*gameMap.mapHeight);
+        Random rand = new Random(myCommander.units.size());
         index = rand.nextInt(equalSpaces.size());
       }
       XYCoord landingZone = equalSpaces.get(index).space;

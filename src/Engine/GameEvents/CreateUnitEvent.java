@@ -13,26 +13,34 @@ public class CreateUnitEvent implements GameEvent
   private final Commander myCommander;
   private final Unit myNewUnit;
   private final XYCoord myBuildCoords;
+  private final AnimationStyle myAnimStyle;
+  private final boolean myBoots;
+
+  public enum AnimationStyle
+  {
+    NONE,
+    DROP_IN
+  }
+
   public CreateUnitEvent(Commander commander, UnitModel model, XYCoord coords)
+  {
+    this(commander, model, coords, AnimationStyle.NONE, false, false);
+  }
+  public CreateUnitEvent(Commander commander, UnitModel model, XYCoord coords, AnimationStyle anim, boolean unitIsReady, boolean allowStomping)
   {
     myCommander = commander;
     myBuildCoords = coords;
-
-    // TODO: Consider breaking the fiscal part into its own event.
-    if( model.getCost() <= commander.money )
-    {
-      myNewUnit = new Unit(myCommander, model);
-    }
-    else
-    {
-      System.out.println("WARNING! Attempting to build unit with insufficient funds.");
-      myNewUnit = null;
-    }
+    myAnimStyle = anim;
+    myNewUnit = new Unit(myCommander, model);
+    myNewUnit.isTurnOver = !unitIsReady;
+    myBoots = allowStomping;
   }
 
   @Override
   public GameAnimation getEventAnimation(MapView mapView)
   {
+    if( myAnimStyle == AnimationStyle.DROP_IN )
+      return mapView.buildAirdropAnimation(myNewUnit, null, myBuildCoords, null);
     return null;
   }
 
@@ -50,9 +58,8 @@ public class CreateUnitEvent implements GameEvent
   {
     if( null != myNewUnit )
     {
-      myCommander.money -= myNewUnit.model.getCost();
       myCommander.units.add(myNewUnit);
-      gameMap.addNewUnit(myNewUnit, myBuildCoords.xCoord, myBuildCoords.yCoord);
+      gameMap.addNewUnit(myNewUnit, myBuildCoords.xCoord, myBuildCoords.yCoord, myBoots);
       myCommander.myView.revealFog(myNewUnit);
     }
     else
