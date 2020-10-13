@@ -47,10 +47,11 @@ public class HorizontalSelectorTemplate
     }
 
     // This panel will hold the name of the option.
-    optionNamePanel = generateOptionPanel(maxNameLen, pf.getHeight(), SpriteUIUtils.MENUBGCOLOR);
+    int panelHeight = pf.getAscent() + pf.getDescent(); // pf.getHeight() also seems to include line spacing.
+    optionNamePanel = generateOptionPanel(maxNameLen, panelHeight, SpriteUIUtils.MENUBGCOLOR);
     // This panel will hold the current setting for the option.
-    optionSettingPanel = generateOptionPanel(maxItemLen, pf.getHeight(), SpriteUIUtils.MENUBGCOLOR);
-    optionSettingPanelChanged = generateOptionPanel(maxItemLen, pf.getHeight(), SpriteUIUtils.MENUHIGHLIGHTCOLOR);
+    optionSettingPanel = generateOptionPanel(maxItemLen, panelHeight, SpriteUIUtils.MENUBGCOLOR);
+    optionSettingPanelChanged = generateOptionPanel(maxItemLen, panelHeight, SpriteUIUtils.MENUHIGHLIGHTCOLOR);
     int itemWidth = optionSettingPanel.getWidth()+ pf.emSizePx * 2; // dual purpose buffer, also used for the switching arrows
 
     graphicsOptionWidth = optionNamePanel.getWidth() + itemWidth + pf.emSizePx; // Plus some space for a buffer between panels.

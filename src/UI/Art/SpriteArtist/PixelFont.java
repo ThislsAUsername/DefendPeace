@@ -100,4 +100,9 @@ public class PixelFont
   {
     return fontMetrics.getAscent();
   }
+
+  public int getDescent()
+  {
+    return fontMetrics.getDescent();
+  }
 }

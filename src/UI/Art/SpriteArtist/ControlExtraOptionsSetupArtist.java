@@ -42,7 +42,8 @@ public class ControlExtraOptionsSetupArtist
       template.drawGameOption(cig, spacing / 2, yDraw, InputOptionsController.allOptions[ip]);
       if( ip == selectedAction ) // Draw the cursor over the selected item.
       {
-        int xDraw = template.graphicsOptionWidth - template.optionSettingPanel.getWidth()/2 - 8;
+        int xDraw = (controlsImage.getWidth() / 2) - (template.graphicsOptionWidth / 2);
+        xDraw += template.optionNamePanel.getWidth();
         cig.drawImage(template.optionArrows,
                       xDraw, yDraw + 3,
                       template.optionArrows.getWidth(), template.optionArrows.getHeight(),
