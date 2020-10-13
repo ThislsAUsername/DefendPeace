@@ -255,7 +255,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
         boolean useFreeSelect = false;
         // Switch to free-tile select in target-rich environments
-        if( !useFreeSelect && targetLocations.size() > 3 )
+        if( !useFreeSelect && targetLocations.size() > 3
+            && (myGameInputHandler.myStateData.actionSet.getGameActions().get(0).getType() == UnitActionFactory.ATTACK))
         {
           int maxDist = 0;
           for( XYCoord a : targetLocations )
