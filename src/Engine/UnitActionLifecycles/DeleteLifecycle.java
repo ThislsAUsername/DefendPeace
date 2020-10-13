@@ -67,6 +67,12 @@ public abstract class DeleteLifecycle
     {
       GameEventQueue eventSequence = new GameEventQueue();
       eventSequence.add(new UnitDieEvent(actor));
+      if( actor.model.holdingCapacity > 0 )
+        for( Unit u : actor.heldUnits )
+        {
+          eventSequence.add(new UnitDieEvent(u));
+        }
+
       // The unit died; check if the Commander is defeated.
       if( actor.CO.units.size() == 1 )
       {
