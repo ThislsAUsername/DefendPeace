@@ -45,6 +45,7 @@ public class TestCombat extends TestCase
     testPassed &= validate(testTeamAttack(), "  Team attack test failed.");
     testPassed &= validate(testIndirectAttacks(), "  Indirect combat test failed.");
     testPassed &= validate(testMoveAttack(), "  Move-Attack test failed.");
+    testPassed &= validate(testCounterAttack(), "  Counterattack test failed.");
     testPassed &= validate(testKillLastUnit(), "  Last-unit death test failed.");
     return testPassed;
   }
@@ -148,7 +149,7 @@ public class TestCombat extends TestCase
 
     return testPassed;
   }
-  
+
   /** Test that units can move and attack in one turn. */
   private boolean testMoveAttack()
   {
@@ -156,13 +157,39 @@ public class TestCombat extends TestCase
     Unit attacker = addUnit(testMap, testCo1, UnitModel.TROOP, 1, 1);
     Unit defender = addUnit(testMap, testCo2, UnitModel.MECH, 1, 3);
 
-    // Execute inf- I mean, the action.
+    // Perform an attack.
     attacker.initTurn(testMap); // Make sure he is ready to move.
     performGameAction(new BattleLifecycle.BattleAction(testMap, attacker, Utils.findShortestPath(attacker, 1, 2, testMap), 1, 3), testGame);
 
-    // Check that the mech is undamaged, and that the infantry is no longer with us.
+    // Check that the both units were hurt in the exchange.
     boolean testPassed = validate(defender.getHP() < 10, "    Defender took no damage.");
     testPassed &= validate(attacker.getHP() < 10, "    Attacker took no damage.");
+
+    // Clean up
+    testMap.removeUnit(attacker);
+    testMap.removeUnit(defender);
+    testCo1.units.clear();
+    testCo2.units.clear();
+
+    return testPassed;
+  }
+
+  /** Test that units can move and attack in one turn. */
+  private boolean testCounterAttack()
+  {
+    // Add our combatants
+    Unit attacker = addUnit(testMap, testCo1, UnitModel.TANK | UnitModel.RECON, 1, 1);
+    Unit defender = addUnit(testMap, testCo2, UnitModel.TANK | UnitModel.ASSAULT, 1, 3);
+    System.out.println("Created " + attacker.toStringWithLocation() + " and " + defender.toStringWithLocation() );
+
+    // Attack defender with attacker.
+    attacker.initTurn(testMap); // Make sure he is ready to move.
+    performGameAction(new BattleLifecycle.BattleAction(testMap, attacker, Utils.findShortestPath(attacker, 1, 2, testMap), 1, 3), testGame);
+
+    // We don't expect the tank to be hurt or the recon to lose ammo, so just
+    // Verify that the recon was hurt and the tank expended ammo.
+    boolean testPassed = validate(attacker.getHP() < 10, "    Recon took no damage!");
+    testPassed &= validate( defender.ammo == (defender.model.maxAmmo-1), "    Defender expended no ammo!" );
 
     // Clean up
     testMap.removeUnit(attacker);

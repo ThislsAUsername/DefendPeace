@@ -49,7 +49,7 @@ public abstract class TestCase
    */
   protected static Unit addUnit(MapMaster map, Commander co, long type, int x, int y)
   {
-    Unit u = new Unit(co, co.getUnitModel(type));
+    Unit u = new Unit(co, co.getUnitModel(type, false));
     map.addNewUnit(u, x, y);
     co.units.add( u );
     return u;

@@ -205,7 +205,7 @@ public class Unit implements Serializable
       if( ammo > 0 )
         ammo--;
       else
-        System.out.println("WARNING: fired with no available ammo!");
+        System.out.println("WARNING: " + toStringWithLocation() + " fired with no available ammo!");
     }
   }
 
