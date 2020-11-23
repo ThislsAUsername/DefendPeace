@@ -5,18 +5,15 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderLibrary;
 import CommandingOfficers.Patch;
-import CommandingOfficers.Strong;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
-import Engine.GameScenario.GameRules;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -25,7 +22,6 @@ import Terrain.MapInfo;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import UI.UIUtils;
-import Units.UnitModelScheme;
 
 public class FightClub
 {
@@ -33,46 +29,96 @@ public class FightClub
   {
     MapLibrary.getMapList();
     System.out.println();
-    int setsToRun = 3;
 
-    for( int setNum = 0; setNum < setsToRun; ++setNum )
+    // Select map(s).
+    //List<MapInfo> maps = MapLibrary.getMapList();
+    List<MapInfo> maps = Arrays.asList(MapLibrary.getByName("Firing Range"), MapLibrary.getByName("Aria of War"));
+//    List<MapInfo> maps = Arrays.asList(MapLibrary.getByName("Shadows Chase You Endlessly"),
+//                                       MapLibrary.getByName("Blood on my Hands"),
+//                                       MapLibrary.getByName("Aria of War"));
+    // How many bouts per map?
+    int numGamesPerSet = 3;
+    // Select CO(s).
+    List<CommanderInfo> COs = Arrays.asList(Patch.getInfo(), Patch.getInfo());
+    // Select AI(s).
+    List<AIMaker> AIs = Arrays.asList(Muriel.info, Muriel.info);
+
+    // Run a set of games on each map.
+    for( int setNum = 0; setNum < maps.size(); ++setNum )
     {
-      System.out.println("Starting set: " + setNum);
-      GameSet set = new GameSet(new GameSetParams());
-      set.params.randomSeed += setNum;
+      MapInfo setMap = maps.get(setNum);
+      System.out.println("Starting set " + setNum + " on " + setMap.mapName);
+      GameSet set = new GameSet(new GameSetParams(setMap, numGamesPerSet, COs, AIs));
       set.run();
     }
 
     System.out.println("All sets complete!");
   }
 
+  static class ContestantInfo
+  {
+    AIMaker myAi;
+    CommanderInfo myCo;
+    ContestantInfo(CommanderInfo co, AIMaker ai)
+    {
+      myCo = co;
+      myAi = ai;
+    }
+  }
+
+  static class GameSetResults
+  {
+    String mapName;
+    HashMap<ContestantInfo, Integer> scores = new HashMap<ContestantInfo, Integer>();
+
+    public GameSetResults(String mapName, List<ContestantInfo> contestants)
+    {
+      this.mapName = mapName;
+      for(ContestantInfo cc : contestants)
+        scores.put(cc, 0);
+    }
+
+    public void incrementScore(ContestantInfo cInfo)
+    {
+      scores.put(cInfo, scores.get(cInfo) + 1);
+    }
+
+    @Override
+    public String toString()
+    {
+      StringBuffer sb = new StringBuffer();
+      ContestantInfo[] cInfos = scores.keySet().toArray(new ContestantInfo[0]);
+      sb.append(String.format("%s (%s)", cInfos[0].myAi.getName(), cInfos[0].myCo.name));
+      for( int cc = 1; cc < cInfos.length; ++cc)
+        sb.append(String.format(" vs %s (%s)", cInfos[0].myAi.getName(), cInfos[cc].myCo.name));
+      sb.append(String.format(" on %s\n", mapName));
+      sb.append(String.format("  %d", scores.get(cInfos[0])));
+      for( int cc = 1; cc < cInfos.length; ++cc)
+        sb.append(String.format(" to %d", scores.get(cInfos[cc])));
+      sb.append('\n');
+      return sb.toString();
+    }
+  }
+
   static class GameSetParams
   {
-//    List<CommanderInfo> COs = CommanderLibrary.getCommanderList();
-    List<CommanderInfo> COs = Arrays.asList(Patch.getInfo());
-    boolean allowMirrorCOs = true;
-    boolean rePickCOs = false;
+    // Primary settings; must be provided via the constructor.
+    MapInfo mapInfo;
+    int numGames = 3;
+    List<CommanderInfo> COs;
+    List<AIMaker> AIs;
 
-    //  List<AIMaker> AIs = AILibrary.getAIList().subList(1, AILibrary.getAIList().size());
-//    List<AIMaker> AIs = Arrays.asList(InfantrySpamAI.info, Muriel.info, WallyAI.info);
-    List<AIMaker> AIs = Arrays.asList(WallyAI.info);
-    boolean allowMirrorAIs = true;
-    boolean rePickAIs = false;
-
-    //  List<MapInfo> maps = MapLibrary.getMapList();
-    List<MapInfo> maps = Arrays.asList(MapLibrary.getByName("Firing Range"));
-//    List<MapInfo> maps = Arrays.asList(MapLibrary.getByName("Shadows Chase You Endlessly"),
-//                                       MapLibrary.getByName("Blood on my Hands"),
-//                                       MapLibrary.getByName("Aria of War"));
-    boolean rematchOnSameMap = true;
-
-    int startFunds = GameScenario.DEFAULT_STARTING_FUNDS;
-    int income = GameScenario.DEFAULT_INCOME;
+    // Additional settings to mess with. Optional to provide, but public so defaults can be overridden.
     boolean isFogOn = false;
     Weathers defaultWeather = Weathers.CLEAR;
 
-    int gamesPerSet = 3;
-    int randomSeed = 42;
+    public GameSetParams(MapInfo map, int nGames, List<CommanderInfo> cos, List<AIMaker> ais)
+    {
+      mapInfo = map;
+      numGames = nGames;
+      COs = cos;
+      AIs = ais;
+    }
   }
 
   static class GameSet
@@ -90,34 +136,47 @@ public class FightClub
       PrintStream defaultOut = System.out;
       System.setOut(new PrintStream(new OutputStream(){
         @Override
-        public void write(int b) throws IOException
-        {
-          // TODO Auto-generated method stub
-        }
+        public void write(int b) throws IOException{}
       }));
-      Random rand = new Random(params.randomSeed);
 
-      MapInfo mi = params.maps.get(rand.nextInt(params.maps.size()));
+      MapInfo mi = params.mapInfo;
+      List<ContestantInfo> contestants = new ArrayList<ContestantInfo>();
+      for( int cc = 0; cc < params.COs.size(); cc++)
+        contestants.add(new ContestantInfo(params.COs.get(cc), params.AIs.get(cc)));
+      GameSetResults results = new GameSetResults(mi.mapName, contestants);
 
-      List<AIMaker> gameAIs = new ArrayList<AIMaker>();
-      List<CommanderInfo> gameCOs = new ArrayList<CommanderInfo>();
-
-      for( int gameIndex = 0; gameIndex < params.gamesPerSet; ++gameIndex )
+      for( int gameIndex = 0; gameIndex < params.numGames; ++gameIndex )
       {
-        UnitModelScheme[] umSchemes = mi.getValidUnitModelSchemes();
-        UnitModelScheme ums = umSchemes[rand.nextInt(umSchemes.length)];
-
-        GameScenario scenario = new GameScenario(ums, GameScenario.DEFAULT_INCOME, GameScenario.DEFAULT_STARTING_FUNDS, params.isFogOn);
+        GameScenario scenario = new GameScenario(mi.getValidUnitModelSchemes()[0],
+            GameScenario.DEFAULT_INCOME, GameScenario.DEFAULT_STARTING_FUNDS, false);
 
         int numCos = mi.getNumCos();
 
         // Create all of the combatants.
-        List<Commander> combatants = buildCombatants(numCos, rand, scenario.rules, gameAIs, gameCOs, defaultOut);
+        HashMap<Integer, ContestantInfo> teamMapping = new HashMap<Integer, ContestantInfo>(); // TODO: This currently doesn't work for team games. 
+        List<Commander> combatants = new ArrayList<Commander>();
+        for( int cc = 0; cc < contestants.size(); ++cc){
+          ContestantInfo cInfo = contestants.get(cc);
+          Commander com = cInfo.myCo.create(scenario.rules);
+          com.team = cc;
+          com.myColor = UIUtils.getCOColors()[cc];
+          com.faction = UIUtils.getFactions()[cc];
+          com.setAIController(cInfo.myAi.create(com));
+          combatants.add(com);
+          teamMapping.put(cc, cInfo);
+          defaultOut.println("Adding " + com.coInfo.name);
+        }
+
+        if( numCos != combatants.size() )
+        {
+          defaultOut.println(String.format("WARNING: Wrong number of COs specified for this map (expected %d, got %d)!", numCos, combatants.size()));
+          return;
+        }
 
         defaultOut.println("  Starting game on map " + mi.mapName + " with combatants:");
         for( int i = 0; i < numCos; ++i )
           defaultOut.println("    team " + combatants.get(i).team + ": "
-                               + gameAIs.get(i).getName() + " controlling " + combatants.get(i).coInfo.name);
+                               + contestants.get(i).myAi.getName() + " controlling " + contestants.get(i).myCo.name);
 
         // Build the CO list and the new map and create the game instance.
         MapMaster map = new MapMaster(combatants.toArray(new Commander[0]), mi);
@@ -128,59 +187,19 @@ public class FightClub
         }
 
         List<Commander> winners = runGame(newGame, defaultOut);
-        defaultOut.println("  Game " + gameIndex + " complete; winning team is: " + winners.get(0).team);
+        int winningTeam = winners.get(0).team;
+        defaultOut.println("  Game " + gameIndex + " complete; winning team is: " + winningTeam);
         defaultOut.println();
 //        defaultOut.println("Winners:");
 //        for( Commander winner : winners )
 //          defaultOut.println("\t" + winner.coInfo.name);
 
-        if( !params.rematchOnSameMap )
-          mi = params.maps.get(rand.nextInt(params.maps.size()));
+        results.incrementScore(teamMapping.get(winningTeam));
       }
 
+      defaultOut.println("Set results:");
+      defaultOut.println(results);
       System.setOut(defaultOut);
-    }
-    
-    List<Commander> buildCombatants(int numCOs, Random rand, GameRules rules, List<AIMaker> gameAIs, List<CommanderInfo> gameCOs, PrintStream defaultOut)
-    {
-      if( (!params.rePickAIs && !gameAIs.isEmpty() && gameAIs.size() != numCOs)
-          || (!params.rePickCOs && !gameCOs.isEmpty() && gameCOs.size() != numCOs) )
-      {
-        defaultOut.println("WARNING: Quantity of COs/AIs doesn't match map; regenerating");
-        gameAIs.clear();
-        gameCOs.clear();
-      }
-
-      if( gameAIs.isEmpty() || params.rePickAIs )
-        while (gameAIs.size() < numCOs)
-        {
-          AIMaker ai = params.AIs.get(rand.nextInt(params.AIs.size()));
-          if( params.allowMirrorAIs || !gameAIs.contains(ai) )
-            gameAIs.add(ai);
-        }
-
-      if( gameCOs.isEmpty() || params.rePickCOs )
-        while (gameCOs.size() < numCOs)
-        {
-          CommanderInfo coI = params.COs.get(rand.nextInt(params.COs.size()));
-          if( !params.allowMirrorCOs && gameCOs.contains(coI) )
-            continue;
-          gameCOs.add(coI);
-        }
-
-      List<Commander> combatants = new ArrayList<Commander>(numCOs);
-      while (combatants.size() < numCOs)
-      {
-        Commander co = gameCOs.get(combatants.size()).create(rules);
-        co.myColor = UIUtils.getCOColors()[rand.nextInt(UIUtils.getCOColors().length)];
-        co.faction = UIUtils.getFactions()[rand.nextInt(UIUtils.getFactions().length)];
-        co.team = combatants.size();
-
-        co.setAIController(gameAIs.get(combatants.size()).create(co));
-        combatants.add(co);
-      }
-
-      return combatants;
     }
 
     /**
