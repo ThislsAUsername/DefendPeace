@@ -3,6 +3,7 @@ package AI;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -90,7 +91,7 @@ public class FightClub
       ContestantInfo[] cInfos = scores.keySet().toArray(new ContestantInfo[0]);
       sb.append(String.format("%s (%s)", cInfos[0].myAi.getName(), cInfos[0].myCo.name));
       for( int cc = 1; cc < cInfos.length; ++cc)
-        sb.append(String.format(" vs %s (%s)", cInfos[0].myAi.getName(), cInfos[cc].myCo.name));
+        sb.append(String.format(" vs %s (%s)", cInfos[cc].myAi.getName(), cInfos[cc].myCo.name));
       sb.append(String.format(" on %s\n", mapName));
       sb.append(String.format("  %d", scores.get(cInfos[0])));
       for( int cc = 1; cc < cInfos.length; ++cc)
@@ -173,7 +174,7 @@ public class FightClub
           return;
         }
 
-        defaultOut.println("  Starting game on map " + mi.mapName + " with combatants:");
+        defaultOut.println("  Starting game " + gameIndex + " on map " + mi.mapName + " with combatants:");
         for( int i = 0; i < numCos; ++i )
           defaultOut.println("    team " + combatants.get(i).team + ": "
                                + contestants.get(i).myAi.getName() + " controlling " + contestants.get(i).myCo.name);
@@ -186,10 +187,11 @@ public class FightClub
           newGame = new GameInstance(map, params.defaultWeather, scenario, false);
         }
 
-        List<Commander> winners = runGame(newGame, defaultOut);
+        GameResults gameResults = runGame(newGame, defaultOut);
+        List<Commander> winners = gameResults.winners;
         int winningTeam = winners.get(0).team;
-        defaultOut.println("  Game " + gameIndex + " complete; winning team is: " + winningTeam);
-        defaultOut.println();
+        defaultOut.println("  Game " + gameIndex + " Results:");
+        defaultOut.println(gameResults);
 //        defaultOut.println("Winners:");
 //        for( Commander winner : winners )
 //          defaultOut.println("\t" + winner.coInfo.name);
@@ -202,11 +204,74 @@ public class FightClub
       System.setOut(defaultOut);
     }
 
+    public static class GameResults
+    {
+      public static enum EndCondition{
+        UNKNOWN,
+        CONQUEST,
+        TURN_LIMIT
+      }
+
+      List<Commander> winners;
+      int winningTeam;
+      int numTurns;
+      EndCondition endReason;
+      Long totalGameTimeNanos;
+      HashMap<Commander, Long> stopwatches;
+
+      public GameResults(List<Commander> victors, int nTurns, EndCondition reason,
+          Long gameRunTime, HashMap<Commander, Long> playerRunTimes)
+      {
+        winners = victors;
+        winningTeam = winners.get(0).team;
+        numTurns = nTurns;
+        endReason = reason;
+        totalGameTimeNanos = gameRunTime;
+        stopwatches = playerRunTimes;
+      }
+
+      @Override
+      public String toString()
+      {
+        StringBuffer sb = new StringBuffer();
+        double ns2s = 1./1000000000;
+        DecimalFormat df = new DecimalFormat("#.##");
+
+        sb.append("    Team ").append(winningTeam).append(" wins by ").append(endReason).append(" after ").append(numTurns).append(" turns.\n")
+          .append("    Game took ").append(df.format(totalGameTimeNanos * ns2s)).append(" seconds").append('\n');
+        double totalThinkTimeNanos = 0;
+        for( Long thinkTime : stopwatches.values() )
+        {
+          totalThinkTimeNanos += thinkTime;
+        }
+        String thinkPct = df.format(100*(totalThinkTimeNanos / totalGameTimeNanos));
+        String thinkTime = df.format(totalThinkTimeNanos * ns2s);
+        sb.append("    Thinking comprised ").append(thinkPct).append("% (").append(thinkTime).append("s) of the run time\n");
+        for( Commander co : stopwatches.keySet() )
+        {
+          String coPct = df.format(100 * (stopwatches.get(co) / totalThinkTimeNanos));
+          String coTime = df.format(stopwatches.get(co) * ns2s);
+          sb.append("      ").append(co.getControllerName()).append(" (").append(co.coInfo.name).append("): ")
+            .append("Used ").append(coPct).append("% (").append(coTime).append("s) of the thinking time.\n");
+        }
+
+        return sb.toString();
+      }
+    }
+
     /**
      * @return The winning team
      */
-    public List<Commander> runGame(GameInstance game, PrintStream defaultOut)
+    public GameResults runGame(GameInstance game, PrintStream defaultOut)
     {
+      long gameRunTimeNanos = System.nanoTime();
+      HashMap<Commander, Long> stopwatches = new HashMap<Commander, Long>();
+      for( Commander co : game.commanders )
+      {
+        stopwatches.put(co, 0L);
+      }
+      GameResults.EndCondition endReason = GameResults.EndCondition.UNKNOWN;
+
       boolean isGameOver = false;
       while (!isGameOver)
       {
@@ -214,9 +279,12 @@ public class FightClub
 
         GameEventQueue actionEvents = new GameEventQueue();
         boolean endAITurn = false;
+        long thinkTimeNanos = 0;
         while (!endAITurn && !isGameOver)
         {
+          long thinkStartNanos = System.nanoTime();
           GameAction aiAction = game.activeCO.getNextAIAction(game.gameMap);
+          thinkTimeNanos += System.nanoTime() - thinkStartNanos;
           if( aiAction != null )
           {
             if( !executeGameAction(aiAction, actionEvents, game, defaultOut) )
@@ -249,8 +317,13 @@ public class FightClub
           }
 
           // If fewer than two COs yet survive, the game is over.
-          isGameOver = activeNum < 2;
+          if( activeNum < 2 )
+          {
+            isGameOver = true;
+            endReason = GameResults.EndCondition.CONQUEST;
+          }
         }
+        stopwatches.put(game.activeCO, stopwatches.get(game.activeCO) + thinkTimeNanos);
 
         // Map should-ish be covered in units by turncount == map area
         if(game.getCurrentTurn() > game.gameMap.mapWidth * game.gameMap.mapHeight)
@@ -259,14 +332,18 @@ public class FightClub
           {
             game.commanders[1].isDefeated = true;
             isGameOver = true;
+            endReason = GameResults.EndCondition.TURN_LIMIT;
           }
           if(game.commanders[1].units.size()/2 > game.commanders[0].units.size() )
           {
             game.commanders[0].isDefeated = true;
             isGameOver = true;
+            endReason = GameResults.EndCondition.TURN_LIMIT;
           }
         }
       }
+
+      gameRunTimeNanos = System.nanoTime() - gameRunTimeNanos;
 
       ArrayList<Commander> winners = new ArrayList<Commander>();
       for( int i = 0; i < game.commanders.length; ++i )
@@ -274,7 +351,7 @@ public class FightClub
         if( !game.commanders[i].isDefeated )
           winners.add(game.commanders[i]);
       }
-      return winners;
+      return new GameResults(winners, game.getCurrentTurn(), endReason, gameRunTimeNanos, stopwatches);
     }
 
     /**
