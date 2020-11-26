@@ -722,8 +722,9 @@ public class Muriel implements AIController
 
       // Go through the list and see what we can build, in order.
       Iterator<UnitModel> modelIter = orderedCounters.iterator();
-      for( UnitModel idealCounter = modelIter.next(); modelIter.hasNext(); idealCounter = modelIter.next() )
+      while( modelIter.hasNext() )
       {
+        UnitModel idealCounter = modelIter.next();
         log(String.format("  Would like to build %s", idealCounter));
 
         // Figure out if we can afford the desired unit type.

@@ -8,6 +8,7 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapMaster;
 import Units.Unit;
+import Units.UnitModelScheme;
 
 /**
  * Interface for building test cases for both unit tests and higher-level functionality as needed.
@@ -50,6 +51,23 @@ public abstract class TestCase
   protected static Unit addUnit(MapMaster map, Commander co, long type, int x, int y)
   {
     Unit u = new Unit(co, co.getUnitModel(type, false));
+    map.addNewUnit(u, x, y);
+    co.units.add( u );
+    return u;
+  }
+
+  /**
+   * Convenience function to create a new unit, add it to the map, and return it.
+   * @param map The map to which we want to add the unit.
+   * @param co The Commander to whom the unit shall belong.
+   * @param typename The name of the desired unit as specified in the UnitModel.
+   * @param x The X-location of the new unit.
+   * @param y The Y-location of the new unit.
+   * @return The newly-created unit.
+   */
+  protected static Unit addUnit(MapMaster map, Commander co, String typename, int x, int y)
+  {
+    Unit u = new Unit(co, UnitModelScheme.getModelFromString(typename, co.unitModels));
     map.addNewUnit(u, x, y);
     co.units.add( u );
     return u;
