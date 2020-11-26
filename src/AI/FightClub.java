@@ -156,15 +156,17 @@ public class FightClub
         // Create all of the combatants.
         HashMap<Integer, ContestantInfo> teamMapping = new HashMap<Integer, ContestantInfo>(); // TODO: This currently doesn't work for team games. 
         List<Commander> combatants = new ArrayList<Commander>();
-        for( int cc = 0; cc < contestants.size(); ++cc){
-          ContestantInfo cInfo = contestants.get(cc);
+        // Offset cc by gameIndex to rotate the contestant starting locations.
+        for( int cc = gameIndex; cc < (gameIndex + contestants.size()); ++cc){
+          int ci = cc % contestants.size();
+          ContestantInfo cInfo = contestants.get(ci);
           Commander com = cInfo.myCo.create(scenario.rules);
-          com.team = cc;
-          com.myColor = UIUtils.getCOColors()[cc];
-          com.faction = UIUtils.getFactions()[cc];
+          com.team = ci;
+          com.myColor = UIUtils.getCOColors()[ci];
+          com.faction = UIUtils.getFactions()[ci];
           com.setAIController(cInfo.myAi.create(com));
           combatants.add(com);
-          teamMapping.put(cc, cInfo);
+          teamMapping.put(ci, cInfo);
           defaultOut.println("Adding " + com.coInfo.name);
         }
 
