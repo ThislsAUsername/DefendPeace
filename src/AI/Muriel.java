@@ -432,9 +432,12 @@ public class Muriel implements AIController
             else break; // Don't bother considering far-away baddies for our no-go zone.
           }
 
-          // Try to move towards the enemy, but avoid blocking a factory.
+          // Try to move towards the enemy, but avoid blocking a usable factory.
+          for( XYCoord xyl : myCo.ownedProperties )
+            if(gameMap.getEnvironment(xyl).terrainType == TerrainType.FACTORY)
+              noGoZone.add(xyl);
           move = AIUtils.moveTowardLocation(unit, coord, gameMap, noGoZone);
-          if( null != move && (gameMap.getLocation(move.getMoveLocation()).getEnvironment().terrainType != TerrainType.FACTORY))
+          if( null != move )
           {
             log(String.format("  Found %s", gameMap.getLocation(coord).getResident().toStringWithLocation()));
             queuedActions.offer(move);
