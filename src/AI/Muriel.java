@@ -370,6 +370,11 @@ public class Muriel implements AIController
         break; // One action per call to this function.
       }
 
+      HashSet<XYCoord> myCoProductionLocations = new HashSet<XYCoord>();
+      for( XYCoord xyl : myCo.ownedProperties )
+        if(gameMap.getEnvironment(xyl).terrainType == TerrainType.FACTORY)
+          myCoProductionLocations.add(xyl);
+
       //////////////////////////////////////////////////////////////////
       // We didn't find an immediate ATTACK or CAPTURE action we can do.
       // Things that can capture; go find something to capture, if you are moderately healthy.
@@ -381,8 +386,8 @@ public class Muriel implements AIController
         for(int i = 0; i < nonAlliedProperties.size(); ++i)
         {
           XYCoord coord = nonAlliedProperties.get(i);
-          GameAction move = AIUtils.moveTowardLocation(unit, coord, gameMap); // Try to move there, but try not to sit on a factory, and don't just sit still.
-          if( null != move && (gameMap.getLocation(move.getMoveLocation()).getEnvironment().terrainType != TerrainType.FACTORY) && !unitCoords.equals(move.getMoveLocation()))
+          GameAction move = AIUtils.moveTowardLocation(unit, coord, gameMap, myCoProductionLocations); // Try to move there, but don't block production.
+          if( null != move )
           {
             log(String.format("  Found %s at %s", gameMap.getLocation(coord).getEnvironment().terrainType, coord));
             queuedActions.offer(move);
@@ -432,10 +437,8 @@ public class Muriel implements AIController
             else break; // Don't bother considering far-away baddies for our no-go zone.
           }
 
-          // Try to move towards the enemy, but avoid blocking a usable factory.
-          for( XYCoord xyl : myCo.ownedProperties )
-            if(gameMap.getEnvironment(xyl).terrainType == TerrainType.FACTORY)
-              noGoZone.add(xyl);
+          // Try to move towards the enemy, but avoid blocking production.
+          noGoZone.addAll(myCoProductionLocations);
           move = AIUtils.moveTowardLocation(unit, coord, gameMap, noGoZone);
           if( null != move )
           {
