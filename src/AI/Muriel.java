@@ -62,6 +62,7 @@ public class Muriel implements AIController
   }
   
   private Queue<GameAction> queuedActions = new ArrayDeque<GameAction>();
+  private ArrayList<Unit> unitsOnHold = new ArrayList<Unit>();
 
   private Commander myCo = null;
 
@@ -199,6 +200,7 @@ public class Muriel implements AIController
   public void endTurn()
   {
     log(String.format("[======== Muriel ending turn %s for %s =========]", turnNum, myCo));
+    unitsOnHold.clear();
     logger = new StringBuffer();
   }
 
@@ -219,19 +221,12 @@ public class Muriel implements AIController
       return action;
     }
 
-    // Handle Unit Actions
-    for( Unit unit : myCo.units )
-    {
-      if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y))
-        continue; // No actions for units that are stale or out of bounds
+    // Find actions for all units, allowing them to defer action selection until later.
+    queueNextUnitAction(gameMap, myCo.units, true);
 
-      GameAction ua = chooseUnitAction(gameMap, unit);
-      if( null != ua )
-      {
-        queuedActions.add(ua);
-        break; // One new action per call to getNextAction().
-      }
-    }
+    // If we didn't find an action from the main list, evaluate any on-hold units. No deferring action this time.
+    if( queuedActions.isEmpty() )
+      queueNextUnitAction(gameMap, unitsOnHold, false);
 
     // Check for an available buying enhancement power
     if( queuedActions.isEmpty() )
@@ -242,13 +237,13 @@ public class Muriel implements AIController
         log("Activating " + ability);
       }
     }
-    
+
     // If we don't have anything else to do, build units.
     if( queuedActions.isEmpty() )
     {
       queueUnitProductionActions(gameMap);
     }
-    
+
     // Check for a turn-ending power
     if( queuedActions.isEmpty() )
     {
@@ -262,6 +257,31 @@ public class Muriel implements AIController
     GameAction action = queuedActions.poll();
     log(String.format("  Action: %s", action));
     return action;
+  }
+
+  private void queueNextUnitAction(GameMap gameMap, ArrayList<Unit> unitList, boolean allowDeferring)
+  {
+    for( Unit unit : unitList )
+    {
+      if( allowDeferring && unitsOnHold.contains(unit) )
+        continue; // Wait to move these until we do more important things.
+
+      if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y))
+        continue; // No actions for units that are stale or out of bounds
+
+      GameAction ua = chooseUnitAction(gameMap, unit);
+      if( allowDeferring && ua.getType() == UnitActionFactory.WAIT )
+      {
+        // This guy has nothing pressing to do right now. Let others go first.
+        log("  Holding off on selecting an action for now.");
+        unitsOnHold.add(unit);
+      }
+      else
+      {
+        queuedActions.add(ua);
+        break; // One new action per call to getNextAction().
+      }
+    }
   }
 
   private GameAction chooseUnitAction(GameMap gameMap, Unit unit)
