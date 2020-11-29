@@ -178,8 +178,8 @@ public class FightClub
 
         defaultOut.println("  Starting game " + gameIndex + " on map " + mi.mapName + " with combatants:");
         for( int i = 0; i < numCos; ++i )
-          defaultOut.println("    team " + combatants.get(i).team + ": "
-                               + contestants.get(i).myAi.getName() + " controlling " + contestants.get(i).myCo.name);
+          defaultOut.println("    Team " + combatants.get(i).team + ": "
+                               + combatants.get(i).getControllerName() + " controlling " + combatants.get(i).coInfo.name);
 
         // Build the CO list and the new map and create the game instance.
         MapMaster map = new MapMaster(combatants.toArray(new Commander[0]), mi);
