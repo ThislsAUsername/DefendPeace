@@ -11,6 +11,7 @@ public class HorizontalSelectorTemplate
 {
   public int graphicsOptionWidth = 0; // Set in initialize().
   public int graphicsOptionHeight = 0; // Set in initialize().
+  public int horizontalSpacing = 0; // ditto
   public BufferedImage optionNamePanel = null;
   public BufferedImage optionSettingPanel = null;
   public BufferedImage optionSettingPanelChanged = null;
@@ -54,6 +55,7 @@ public class HorizontalSelectorTemplate
 
     graphicsOptionWidth = optionNamePanel.getWidth() + itemWidth + pf.emSizePx; // Plus some space for a buffer between panels.
     graphicsOptionHeight = optionNamePanel.getHeight();
+    horizontalSpacing = 3 * pf.emSizePx;
 
     // Make points to define the two selection arrows.
     int[] lXPoints = { 0, 5, 5, 0 };
@@ -116,7 +118,7 @@ public class HorizontalSelectorTemplate
 
     SpriteUIUtils.drawText(g, opt.optionName, x + drawBuffer, y+drawBuffer);
     // Draw the setting panel and the setting value.
-    x = x + (optionNamePanel.getWidth() + (3 * pf.emSizePx));
+    x = x + optionNamePanel.getWidth() + horizontalSpacing;
     BufferedImage settingPanel = (opt.isChanged()) ? optionSettingPanelChanged : optionSettingPanel;
     g.drawImage(settingPanel, x, y, settingPanel.getWidth(), settingPanel.getHeight(), null);
     SpriteUIUtils.drawText(g, opt.getCurrentValueText(), x + drawBuffer, y+drawBuffer);
