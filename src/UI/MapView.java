@@ -101,8 +101,11 @@ public abstract class MapView implements IView
   {
     return null;
   }
-  public GameAnimation buildTeleportAnimation( Unit unit, XYCoord start, XYCoord end, Unit obstacle,
-      TeleportEvent.AnimationStyle animStyle )
+  public GameAnimation buildAirdropAnimation( Unit unit, XYCoord start, XYCoord end, Unit obstacle )
+  {
+    return null;
+  }
+  public GameAnimation buildTeleportAnimation( Unit unit, XYCoord start, XYCoord end, Unit obstacle )
   {
     return null;
   }
