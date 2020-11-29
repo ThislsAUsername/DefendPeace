@@ -120,4 +120,51 @@ public class TestAIMuriel extends TestCase
 
     return testPassed;
   }
+
+  /** Put some infantry in between a MdTank and its quarry. See if they will move out of the way. */
+  private boolean testClearAttackRoute()
+  {
+    setupTest();
+
+    // Give Muriel some properties so they are out of the way.
+    testMap.getLocation(2, 5).setOwner(testCo1);
+    testMap.getLocation(4, 4).setOwner(testCo1);
+    testMap.getLocation(4, 8).setOwner(testCo1);
+    testMap.getLocation(6, 1).setOwner(testCo1);
+    testMap.getLocation(7, 1).setOwner(testCo1);
+    testMap.getLocation(8, 8).setOwner(testCo1);
+    testMap.getLocation(12, 7).setOwner(testCo1);
+    testMap.getLocation(10, 5).setOwner(testCo1);
+
+    // Where are things?
+    XYCoord facPos = new XYCoord(7, 8);
+
+    // Add an enemy tank on a neutral fac, flanked by friendly infs, with a friendly tank nearby.
+    Unit nmeTank = addUnit(testMap, testCo2, "Tank", facPos);
+    Unit myTank = addUnit(testMap, testCo1, "Md Tank", facPos.up().left());
+    Unit iLeft = addUnit(testMap, testCo1, "Infantry", facPos.left());
+    Unit iUp = addUnit(testMap, testCo1, "Infantry", facPos.up());
+    Unit iRight = addUnit(testMap, testCo1, "Infantry", facPos.right());
+
+    // The infs all want to cap the fac, but can't because it is occupied. Gotta let the MdTank through.
+    // Fetch and execute Muriel actions until she stops creating them.
+    testCo1.initTurn(testMap);
+    testCo1.money = 0; // No production needed for this test.
+
+    GameAction act = null;
+    boolean testPassed = true;
+    do
+    {
+      act = testCo1.getNextAIAction(testMap);
+      if( null != act )
+        testPassed &= validate(performGameAction(act, testGame), "    Muriel generated a bad action!");
+    } while( null != act && testPassed );
+
+    testPassed &= validate(nmeTank.getHP() < 10, "    Muriel failed to attack enemy tank!");
+
+    // Clean up
+    cleanupTest();
+    return testPassed;
+  }
+
 }

@@ -26,7 +26,7 @@ public abstract class JoinLifecycle
     {
       XYCoord moveLocation = movePath.getEndCoord();
       Unit resident = map.getLocation(moveLocation).getResident();
-      if( !ignoreResident && resident != null )
+      if( resident != null )
       {
         // TODO: Consider if and how off-CO joins should be allowed if tags ever happens
         if( resident.model.equals(actor.model) && resident != actor && resident.isHurt() )

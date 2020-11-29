@@ -26,7 +26,7 @@ public abstract class LoadLifecycle
     {
       XYCoord moveLocation = movePath.getEndCoord();
       Unit resident = map.getLocation(moveLocation).getResident();
-      if( !ignoreResident && resident != null )
+      if( resident != null )
       {
         if( resident.hasCargoSpace(actor.model.role) )
         {

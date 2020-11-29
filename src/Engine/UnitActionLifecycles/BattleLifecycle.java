@@ -136,6 +136,7 @@ public abstract class BattleLifecycle
       boolean isValid = true;
       isValid &= attacker != null && !attacker.isTurnOver;
       isValid &= (null != gameMap) && (gameMap.isLocationValid(attackLocation)) && gameMap.isLocationValid(moveCoord);
+      isValid &= null == gameMap.getResident(moveCoord) || gameMap.getResident(moveCoord) == attacker;
       isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       if( isValid )
       {

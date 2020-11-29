@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Stack;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
@@ -62,7 +63,9 @@ public class Muriel implements AIController
   }
   
   private Queue<GameAction> queuedActions = new ArrayDeque<GameAction>();
-  private ArrayList<Unit> unitsOnHold = new ArrayList<Unit>();
+  private Queue<Unit> unitsToMove = new ArrayDeque<Unit>(); // Units who haven't acted yet this turn.
+  private Queue<Unit> unitsOnHold = new ArrayDeque<Unit>(); // Units whose actions have been deferred (because they would just WAIT)
+  private Stack<Unit> unitsInTheWay = new Stack<Unit>(); // Units who are in the way and should move. These cannot defer action.
 
   private Commander myCo = null;
 
@@ -187,6 +190,7 @@ public class Muriel implements AIController
         nonAlliedProperties.remove(unit.getCaptureTargetCoords());
       }
     }
+    unitsToMove.addAll(myCo.units);
 
     // Check for a turn-kickoff power
     CommanderAbility ability = AIUtils.queueCromulentAbility(queuedActions, myCo, CommanderAbility.PHASE_TURN_START);
@@ -200,7 +204,9 @@ public class Muriel implements AIController
   public void endTurn()
   {
     log(String.format("[======== Muriel ending turn %s for %s =========]", turnNum, myCo));
+    unitsToMove.clear(); // Should be redundant.
     unitsOnHold.clear();
+    unitsInTheWay.clear();
     logger = new StringBuffer();
   }
 
@@ -221,12 +227,48 @@ public class Muriel implements AIController
       return action;
     }
 
-    // Find actions for all units, allowing them to defer action selection until later.
-    queueNextUnitAction(gameMap, myCo.units, true);
+    // Make sure we perform all important actions before giving actions to the "on hold" units.
+    while( queuedActions.isEmpty() &&
+        (!unitsInTheWay.isEmpty() || !unitsToMove.isEmpty() || !unitsOnHold.isEmpty()))
+    {
+      Unit unit = null;
 
-    // If we didn't find an action from the main list, evaluate any on-hold units. No deferring action this time.
-    if( queuedActions.isEmpty() )
-      queueNextUnitAction(gameMap, unitsOnHold, false);
+      // If units are flagged as in the way, move them first.
+      if( !unitsInTheWay.isEmpty() )
+        unit = unitsInTheWay.peek();
+      else if( !unitsToMove.isEmpty() )
+        unit = unitsToMove.peek();
+      else if( !unitsOnHold.isEmpty() )
+        unit = unitsOnHold.peek();
+
+      log("Considering " + unit.toStringWithLocation());
+      if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y))
+      {
+        log("  Cannot move; off-map or already moved.");
+        unitsInTheWay.remove(unit);
+        unitsToMove.remove(unit);
+        unitsOnHold.remove(unit);
+        continue; // No actions for units that are stale or out of bounds
+      }
+
+      // A unit may defer acting right away if it has not already deferred, and if it is not in the way.
+      // Note that a unit may still identify another unit as being in its way, and avoid moving immediately anyway.
+      boolean allowDeferring = !unitsOnHold.contains(unit);
+      if(allowDeferring && !unitsInTheWay.isEmpty() )
+        allowDeferring = unit != unitsInTheWay.peek();
+
+      // Try to get an action. The unit may indicate another unit is in
+      // the way by adding the other unit to `unitsInTheWay`.
+      boolean actionQueued = queueUnitAction(gameMap, unit, allowDeferring);
+
+      // If we found an action for this guy, Remove him from further consideration.
+      if( actionQueued )
+      {
+        unitsInTheWay.remove(unit);
+        unitsToMove.remove(unit);
+        unitsOnHold.remove(unit);
+      }
+    }
 
     // Check for an available buying enhancement power
     if( queuedActions.isEmpty() )
@@ -258,39 +300,26 @@ public class Muriel implements AIController
     log(String.format("  Action: %s", action));
     return action;
   }
-
-  private void queueNextUnitAction(GameMap gameMap, ArrayList<Unit> unitList, boolean allowDeferring)
+  private void displaceUnit(GameMap gameMap, Unit actor, GameAction desiredAction, Unit obstacle)
   {
-    for( Unit unit : unitList )
+    log(actor.toStringWithLocation() + " wants to do action " + desiredAction +
+        ", but " + obstacle.toStringWithLocation() + " is in the way. Telling it to move.");
+
+    // Try to get that guy out of the way.
+    if( !unitsInTheWay.contains(obstacle) )
     {
-      if( allowDeferring && unitsOnHold.contains(unit) )
-        continue; // Wait to move these until we do more important things.
-
-      if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y))
-        continue; // No actions for units that are stale or out of bounds
-
-      GameAction ua = chooseUnitAction(gameMap, unit);
-      if( allowDeferring && ua.getType() == UnitActionFactory.WAIT )
-      {
-        // This guy has nothing pressing to do right now. Let others go first.
-        log("  Holding off on selecting an action for now.");
-        unitsOnHold.add(unit);
-      }
-      else
-      {
-        queuedActions.add(ua);
-        break; // One new action per call to getNextAction().
-      }
+      unitsInTheWay.push(obstacle);
     }
   }
 
-  private GameAction chooseUnitAction(GameMap gameMap, Unit unit)
+  private boolean queueUnitAction(GameMap gameMap, Unit unit, boolean allowDeferring)
   {
     // If we are capturing something, finish what we started.
     if( unit.getCaptureProgress() > 0 )
     {
       log(String.format("%s is currently capturing; continue", unit.toStringWithLocation()));
-      return new CaptureLifecycle.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
+      queuedActions.add( new CaptureLifecycle.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)) );
+      return true;
     }
 
     //////////////////////////////////////////////////////////////////
@@ -312,13 +341,15 @@ public class Muriel implements AIController
             if( shouldAttack(unit, other, gameMap) )
             {
               log(String.format("  May as well try to shoot %s since I'm here anyway", other));
-              return action;
+              queuedActions.add(action);
+              return true;
             }
           }
         }
       }
       // We didn't find someone adjacent to smash, so just sit tight for now.
-      return new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
+      queuedActions.add( new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap)) );
+      return true;
     } // ~Continue repairing if in a depot.
 
     //////////////////////////////////////////////////////////////////
@@ -360,7 +391,8 @@ public class Muriel implements AIController
           if( (null != goHome) && !goHome.getMoveLocation().equals(unitCoords) )
           {
             log(String.format("  Heading towards %s to resupply", coord));
-            return goHome;
+            queuedActions.add(goHome);
+            return true;
           }
           else
           {
@@ -371,8 +403,9 @@ public class Muriel implements AIController
       log("  Cannot find an available resupply station.");
     }
 
-    // Find all the things we can do from here.
-    Map<UnitActionFactory, ArrayList<GameAction> > unitActionsByType = AIUtils.getAvailableUnitActionsByType(unit, gameMap);
+    // Find all the things we can do from here, entertaining moves that require displacing other units.
+    boolean includeOccupiedDestinations = true;
+    Map<UnitActionFactory, ArrayList<GameAction> > unitActionsByType = AIUtils.getAvailableUnitActionsByType(unit, gameMap, includeOccupiedDestinations);
 
     //////////////////////////////////////////////////////////////////
     // Look for advantageous attack actions.
@@ -383,6 +416,10 @@ public class Muriel implements AIController
     {
       for( GameAction action : attackActions )
       {
+        // If another of our units is in the way and has already moved, then we can't consider this attack action.
+        if( null != gameMap.getResident(action.getMoveLocation()) && gameMap.getResident(action.getMoveLocation()).isTurnOver )
+          continue;
+
         // Sift through all attack actions we can perform.
         double damageValue = AIUtils.scoreAttackAction(unit, action, gameMap,
             (results) -> {
@@ -397,31 +434,70 @@ public class Muriel implements AIController
         // Find the attack that causes the most monetary damage, provided it's at least a halfway decent idea.
         if( (damageValue > maxDamageValue) )
         {
+          // If this action would require displacing a unit, and that unit is already flagged as needing to be
+          // displaced, then we are in ITS way, and cannot tell it to move, and cannot perform this attack.
+          if( unitsInTheWay.contains(gameMap.getResident(action.getMoveLocation())))
+            continue;
+
           maxDamageValue = damageValue;
           maxCarnageAction = action;
         }
       }
-      if( maxCarnageAction != null)
+      if( maxCarnageAction != null )
       {
-        return maxCarnageAction;
+        // If this attack is valid now, do it. Otherwise, see if we can free up the space.
+        XYCoord dest = maxCarnageAction.getMoveLocation();
+        if( gameMap.isLocationEmpty(unit, dest) )
+        {
+          queuedActions.add(maxCarnageAction);
+          return true;
+        }
+        else // Don't check the obstacle's isTurnOver here; that should be handled in the GameAction loop above.
+        {
+          displaceUnit(gameMap, unit, maxCarnageAction, gameMap.getResident(dest));
+          return false;
+        }
       }
     }
 
     //////////////////////////////////////////////////////////////////
     // See if there's something to capture (but only if we are moderately healthy).
-    ArrayList<GameAction> captureActions = unitActionsByType.get(UnitActionFactory.CAPTURE);
-    if( null != captureActions && !captureActions.isEmpty() && unit.getHP() >= 7 )
+    if( unit.getHP() > 7 )
     {
-      GameAction capture = captureActions.get(0);
-      nonAlliedProperties.remove(capture.getTargetLocation());
-      return capture;
+      ArrayList<GameAction> captureActions = unitActionsByType.get(UnitActionFactory.CAPTURE);
+      if( null != captureActions && !captureActions.isEmpty() )
+        for( GameAction capture : captureActions )
+        {
+          XYCoord dest = capture.getMoveLocation();
+          Unit obst = gameMap.getResident(dest);
+          if( null == obst )
+          {
+            queuedActions.add(capture);
+            return true;
+          }
+          else if( obst.isTurnOver || unitsInTheWay.contains(obst) )
+            continue; // We can't displace the obstacle unit; find something else to do.
+          else
+          {
+            displaceUnit(gameMap, unit, capture, obst);
+            return false;
+          }
+        }
     }
 
+    //////////////////////////////////////////////////////////////////
     // Tabulate our production facilities so we can avoid stepping on them later.
-    HashSet<XYCoord> myCoProductionLocations = new HashSet<XYCoord>();
+    HashSet<XYCoord> destinationsToAvoid = new HashSet<XYCoord>();
     for( XYCoord xyl : myCo.ownedProperties )
       if(gameMap.getEnvironment(xyl).terrainType == TerrainType.FACTORY)
-        myCoProductionLocations.add(xyl);
+        destinationsToAvoid.add(xyl);
+
+    // If someone else wants us out of the way, go ahead and oblige since we haven't found something better to do.
+    if( unitsInTheWay.contains(unit) )
+    {
+      log(unit.toStringWithLocation() + " is in the way, and must move");
+      destinationsToAvoid.add(new XYCoord(unit.x, unit.y));
+    }
 
     //////////////////////////////////////////////////////////////////
     // We didn't find an immediate ATTACK or CAPTURE action we can do.
@@ -434,12 +510,23 @@ public class Muriel implements AIController
       for(int i = 0; i < nonAlliedProperties.size(); ++i)
       {
         XYCoord coord = nonAlliedProperties.get(i);
-        System.out.println("  Considering " + gameMap.getLocation(coord).getEnvironment().terrainType + " at " + coord);
-        GameAction move = AIUtils.moveTowardLocation(unit, coord, gameMap, myCoProductionLocations); // Try to move there, but don't block production.
+        GameAction move = AIUtils.moveTowardLocation(unit, coord, gameMap, destinationsToAvoid); // Try to move there, but don't get in the way.
         if( null != move )
         {
           log(String.format("  Found %s at %s", gameMap.getLocation(coord).getEnvironment().terrainType, coord));
-          return move;
+          boolean moving = false;
+          if( allowDeferring )
+          {
+            log("    Deferring action for now.");
+            unitsToMove.remove(unit);
+            unitsOnHold.add(unit);
+          }
+          else
+          {
+            queuedActions.add(move);
+            moving = true;
+          }
+          return moving;
         }
       }
     }
@@ -485,20 +572,45 @@ public class Muriel implements AIController
         }
 
         // Try to move towards the enemy, but avoid blocking production.
-        noGoZone.addAll(myCoProductionLocations);
+        noGoZone.addAll(destinationsToAvoid);
         move = AIUtils.moveTowardLocation(unit, coord, gameMap, noGoZone);
         if( null != move )
         {
           log(String.format("  Found %s", gameMap.getLocation(coord).getResident().toStringWithLocation()));
-          return move;
+          boolean moving = false;
+          if( allowDeferring ) // Move actions can wait until other units have a chance to do stuff.
+          {
+            log("    Deferring action for now.");
+            unitsToMove.remove(unit);
+            unitsOnHold.add(unit);
+          }
+          else
+          {
+            queuedActions.add(move);
+            moving = true;
+          }
+          return moving;
         }
       }
     }
 
     // Couldn't find any capture or attack actions. This unit is
     // either a transport, or stranded on an island somewhere.
-    log(String.format("Could not find an action for %s. Waiting", unit.toStringWithLocation()));
-    return new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
+    boolean moving = false;
+    if( allowDeferring )
+    {
+      log(String.format("  Could not find an action for %s. Deferring action for now.", unit.toStringWithLocation()));
+      unitsOnHold.add(unit);
+      unitsToMove.remove(unit);
+    }
+    else
+    {
+      log(String.format("  Could not find an action for %s. Staying put.", unit.toStringWithLocation()));
+      GameAction move = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, new XYCoord(unit.x, unit.y), gameMap));
+      queuedActions.add(move);
+      moving = true;
+    }
+    return moving;
   }
 
   private boolean shouldAttack(Unit unit, Unit target, GameMap gameMap)
@@ -630,6 +742,7 @@ public class Muriel implements AIController
       {
         int gruntsWanted = (int)Math.ceil(myCo.units.size() * INFANTRY_PROPORTION);
         int gruntFacilities = CPI.getNumFacilitiesFor(infModel)-1; // The -1 assumes we are about to build from a factory. Possibly untrue.
+        if( gruntFacilities < 0 ) gruntFacilities = 0;
         costBuffer = (int)Math.min(gruntFacilities, gruntsWanted) * infModel.getCost();
         log(String.format("  Low on Infantry: witholding %s for possible extra grunts", costBuffer));
       }

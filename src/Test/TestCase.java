@@ -3,6 +3,7 @@ package Test;
 import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.GameInstance;
+import Engine.XYCoord;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -61,6 +62,19 @@ public abstract class TestCase
    * @param map The map to which we want to add the unit.
    * @param co The Commander to whom the unit shall belong.
    * @param typename The name of the desired unit as specified in the UnitModel.
+   * @param xyc Where to place the new unit.
+   * @return The newly-created unit.
+   */
+  protected static Unit addUnit(MapMaster map, Commander co, String typename, XYCoord xyc)
+  {
+    return addUnit(map, co, typename, xyc.xCoord, xyc.yCoord);
+  }
+
+  /**
+   * Convenience function to create a new unit, add it to the map, and return it.
+   * @param map The map to which we want to add the unit.
+   * @param co The Commander to whom the unit shall belong.
+   * @param typename The name of the desired unit as specified in the UnitModel.
    * @param x The X-location of the new unit.
    * @param y The Y-location of the new unit.
    * @return The newly-created unit.
@@ -73,13 +87,16 @@ public abstract class TestCase
     return u;
   }
 
-  protected static void performGameAction( GameAction action, GameInstance game )
+  /** Attempts to execute the given action. Returns true if it succeeds, false otherwise. */
+  protected static boolean performGameAction( GameAction action, GameInstance game )
   {
     GameEventQueue sequence = action.getEvents(game.gameMap);
+    if( sequence.size() == 0 ) return false;
     for( GameEvent event : sequence )
     {
       event.performEvent( game.gameMap );
       GameEventListener.publishEvent(event, game);
     }
+    return true;
   }
 }
