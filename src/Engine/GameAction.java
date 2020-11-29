@@ -180,8 +180,8 @@ public abstract class GameAction
           buildEvents.add(mde);
           buildEvents.add(ude);
 
-          // Poor sap died; Check if his CO lost the game.
-          if( obstacle.CO.units.size() == 1 )
+          // Poor sap died; Check if his CO lost the game. Stomping your own unit is silly, but won't cause a loss.
+          if( obstacle.CO.units.size() == 1 && who != obstacle.CO )
           {
             CommanderDefeatEvent cde = new CommanderDefeatEvent(obstacle.CO);
             buildEvents.add(cde);
