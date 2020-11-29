@@ -99,7 +99,7 @@ public abstract class JoinLifecycle
           // Find the unit we want to join.
           recipient = gameMap.getLocation(pathEnd).getResident();
           isValid &= (null != recipient) && recipient.isHurt();
-          int cargoSize = recipient.model.holdingCapacity > 0 ? recipient.heldUnits.size() + donor.heldUnits.size() : 0;
+          int cargoSize = recipient.heldUnits.size() + donor.heldUnits.size();
           isValid &= cargoSize <= recipient.model.holdingCapacity;
         }
       }

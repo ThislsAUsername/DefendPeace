@@ -181,7 +181,7 @@ public class TestGameEvent extends TestCase
     new LoadLifecycle.LoadEvent(inf, mech).performEvent(testMap);
     testPassed &= validate(testMap.getLocation(2, 2).getResident() == inf, "    Infantry should still be at (2, 2).");
     testPassed &= validate(2 == inf.x && 2 == inf.y, "    Infantry should still think he is at (2, 2).");
-    testPassed &= validate(mech.heldUnits == null, "    Mech should not have holding capacity.");
+    testPassed &= validate(mech.heldUnits.size() == 0, "    Mech should not have holding capacity.");
 
     // Try to load the infantry into the APC, and make sure it works.
     new LoadLifecycle.LoadEvent(inf, apc).performEvent(testMap);

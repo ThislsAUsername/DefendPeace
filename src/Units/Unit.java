@@ -2,7 +2,6 @@ package Units;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Vector;
 
 import CommandingOfficers.Commander;
 import Engine.FloodFillFunctor;
@@ -18,7 +17,7 @@ import Terrain.MapMaster;
 public class Unit implements Serializable
 {
   private static final long serialVersionUID = 1L;
-  public Vector<Unit> heldUnits;
+  public CargoList heldUnits;
   public UnitModel model;
   public int x = -1;
   public int y = -1;
@@ -51,8 +50,7 @@ public class Unit implements Serializable
     captureProgress = 0;
     captureTarget = null;
 
-    if( model.holdingCapacity > 0 )
-      heldUnits = new Vector<Unit>(model.holdingCapacity);
+    heldUnits = new CargoList(model);
   }
 
   /**
@@ -331,6 +329,24 @@ public class Unit implements Serializable
             heldUnits.size() < model.holdingCapacity &&
             ((model.carryableMask & type) > 0) &&
             ((model.carryableExclusionMask & type) == 0));
+  }
+
+  public static class CargoList extends ArrayList<Unit>
+  {
+    UnitModel model;
+    public CargoList(UnitModel model)
+    {
+      super(model.holdingCapacity);
+      this.model = model;
+    }
+
+    @Override
+    public boolean add(Unit u)
+    {
+      if( size() >= model.holdingCapacity )
+        throw new IllegalStateException("Cannot put a unit into a transport that is already full!");
+      return super.add(u);
+    }
   }
 
   /** Grant this unit full fuel and ammunition */
