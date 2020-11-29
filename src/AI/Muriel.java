@@ -63,9 +63,7 @@ public class Muriel implements AIController
   }
   
   private Queue<GameAction> queuedActions = new ArrayDeque<GameAction>();
-  private Queue<Unit> unitsToMove = new ArrayDeque<Unit>(); // Units who haven't acted yet this turn.
-  private Queue<Unit> unitsOnHold = new ArrayDeque<Unit>(); // Units whose actions have been deferred (because they would just WAIT)
-  private Stack<Unit> unitsInTheWay = new Stack<Unit>(); // Units who are in the way and should move. These cannot defer action.
+  private UnitOrchestrator unitSelector = new UnitOrchestrator();
 
   private Commander myCo = null;
 
@@ -190,7 +188,7 @@ public class Muriel implements AIController
         nonAlliedProperties.remove(unit.getCaptureTargetCoords());
       }
     }
-    unitsToMove.addAll(myCo.units);
+    unitSelector.reinit(myCo.units);
 
     // Check for a turn-kickoff power
     CommanderAbility ability = AIUtils.queueCromulentAbility(queuedActions, myCo, CommanderAbility.PHASE_TURN_START);
@@ -204,9 +202,6 @@ public class Muriel implements AIController
   public void endTurn()
   {
     log(String.format("[======== Muriel ending turn %s for %s =========]", turnNum, myCo));
-    unitsToMove.clear(); // Should be redundant.
-    unitsOnHold.clear();
-    unitsInTheWay.clear();
     logger = new StringBuffer();
   }
 
@@ -228,34 +223,21 @@ public class Muriel implements AIController
     }
 
     // Make sure we perform all important actions before giving actions to the "on hold" units.
-    while( queuedActions.isEmpty() &&
-        (!unitsInTheWay.isEmpty() || !unitsToMove.isEmpty() || !unitsOnHold.isEmpty()))
+    while( queuedActions.isEmpty() && !unitSelector.isEmpty() )
     {
-      Unit unit = null;
-
-      // If units are flagged as in the way, move them first.
-      if( !unitsInTheWay.isEmpty() )
-        unit = unitsInTheWay.peek();
-      else if( !unitsToMove.isEmpty() )
-        unit = unitsToMove.peek();
-      else if( !unitsOnHold.isEmpty() )
-        unit = unitsOnHold.peek();
+      Unit unit = unitSelector.next();
 
       log("Considering " + unit.toStringWithLocation());
       if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y))
       {
         log("  Cannot move; off-map or already moved.");
-        unitsInTheWay.remove(unit);
-        unitsToMove.remove(unit);
-        unitsOnHold.remove(unit);
+        unitSelector.remove(unit);
         continue; // No actions for units that are stale or out of bounds
       }
 
-      // A unit may defer acting right away if it has not already deferred, and if it is not in the way.
-      // Note that a unit may still identify another unit as being in its way, and avoid moving immediately anyway.
-      boolean allowDeferring = !unitsOnHold.contains(unit);
-      if(allowDeferring && !unitsInTheWay.isEmpty() )
-        allowDeferring = unit != unitsInTheWay.peek();
+      // A unit may defer action if it hasn't deferred yet, and isn't at the top of unitsInTheWay. Otherwise it must
+      // select an action (or push another unit into the unitsInTheWay stack, then the new unit must move first).
+      boolean allowDeferring = unitSelector.mayDeferAction(unit);
 
       // Try to get an action. The unit may indicate another unit is in
       // the way by adding the other unit to `unitsInTheWay`.
@@ -264,9 +246,7 @@ public class Muriel implements AIController
       // If we found an action for this guy, Remove him from further consideration.
       if( actionQueued )
       {
-        unitsInTheWay.remove(unit);
-        unitsToMove.remove(unit);
-        unitsOnHold.remove(unit);
+        unitSelector.remove(unit);
       }
     }
 
@@ -305,11 +285,8 @@ public class Muriel implements AIController
     log(actor.toStringWithLocation() + " wants to do action " + desiredAction +
         ", but " + obstacle.toStringWithLocation() + " is in the way. Telling it to move.");
 
-    // Try to get that guy out of the way.
-    if( !unitsInTheWay.contains(obstacle) )
-    {
-      unitsInTheWay.push(obstacle);
-    }
+    // Give the obstacle priority so it has to move first.
+    unitSelector.flagObstacle(obstacle);
   }
 
   private boolean queueUnitAction(GameMap gameMap, Unit unit, boolean allowDeferring)
@@ -436,7 +413,7 @@ public class Muriel implements AIController
         {
           // If this action would require displacing a unit, and that unit is already flagged as needing to be
           // displaced, then we are in ITS way, and cannot tell it to move, and cannot perform this attack.
-          if( unitsInTheWay.contains(gameMap.getResident(action.getMoveLocation())))
+          if( unitSelector.isObstacle(gameMap.getResident(action.getMoveLocation())) )
             continue;
 
           maxDamageValue = damageValue;
@@ -475,7 +452,7 @@ public class Muriel implements AIController
             queuedActions.add(capture);
             return true;
           }
-          else if( obst.isTurnOver || unitsInTheWay.contains(obst) )
+          else if( obst.isTurnOver || unitSelector.isObstacle(obst) )
             continue; // We can't displace the obstacle unit; find something else to do.
           else
           {
@@ -493,7 +470,7 @@ public class Muriel implements AIController
         destinationsToAvoid.add(xyl);
 
     // If someone else wants us out of the way, go ahead and oblige since we haven't found something better to do.
-    if( unitsInTheWay.contains(unit) )
+    if( unitSelector.isObstacle(unit) )
     {
       log(unit.toStringWithLocation() + " is in the way, and must move");
       destinationsToAvoid.add(new XYCoord(unit.x, unit.y));
@@ -518,8 +495,7 @@ public class Muriel implements AIController
           if( allowDeferring )
           {
             log("    Deferring action for now.");
-            unitsToMove.remove(unit);
-            unitsOnHold.add(unit);
+            unitSelector.defer(unit);
           }
           else
           {
@@ -581,8 +557,7 @@ public class Muriel implements AIController
           if( allowDeferring ) // Move actions can wait until other units have a chance to do stuff.
           {
             log("    Deferring action for now.");
-            unitsToMove.remove(unit);
-            unitsOnHold.add(unit);
+            unitSelector.defer(unit);
           }
           else
           {
@@ -600,8 +575,7 @@ public class Muriel implements AIController
     if( allowDeferring )
     {
       log(String.format("  Could not find an action for %s. Deferring action for now.", unit.toStringWithLocation()));
-      unitsOnHold.add(unit);
-      unitsToMove.remove(unit);
+      unitSelector.defer(unit);
     }
     else
     {
@@ -899,6 +873,68 @@ public class Muriel implements AIController
     for( PurchaseOrder order : shoppingCart )
     {
       queuedActions.offer(new GameAction.UnitProductionAction(myCo, order.model, order.location.getCoordinates()));
+    }
+  }
+
+  private static class UnitOrchestrator
+  {
+    private Queue<Unit> unitsToMove = new ArrayDeque<Unit>(); // Units who haven't acted yet this turn.
+    private Queue<Unit> unitsOnHold = new ArrayDeque<Unit>(); // Units whose actions have been deferred (because they would just WAIT)
+    private Stack<Unit> unitsInTheWay = new Stack<Unit>(); // Units who are in the way and should move. These cannot defer action.
+
+    public void reinit(Collection<Unit> unitsToManage)
+    {
+      unitsToMove.addAll(unitsToManage);
+      unitsOnHold.clear();
+      unitsInTheWay.clear();
+    }
+    public boolean isEmpty()
+    {
+      return unitsInTheWay.isEmpty() && unitsToMove.isEmpty() && unitsOnHold.isEmpty();
+    }
+    public Unit next()
+    {
+      Unit unit = null;
+      // If units are flagged as in the way, move them first.
+      if( !unitsInTheWay.isEmpty() )
+        unit = unitsInTheWay.peek();
+      else if( !unitsToMove.isEmpty() )
+        unit = unitsToMove.peek();
+      else if( !unitsOnHold.isEmpty() )
+        unit = unitsOnHold.peek();
+      return unit;
+    }
+    public void remove(Unit unit)
+    {
+      unitsInTheWay.remove(unit);
+      unitsToMove.remove(unit);
+      unitsOnHold.remove(unit);
+    }
+    public boolean mayDeferAction(Unit unit)
+    {
+      // A unit may defer action if it hasn't deferred yet, and isn't at the top of unitsInTheWay. Otherwise it must
+      // select an action (or push another unit into the unitsInTheWay stack, then the new unit must move first).
+      boolean allowDeferring = !unitsOnHold.contains(unit);
+      if(allowDeferring && !unitsInTheWay.isEmpty() )
+        allowDeferring = unit != unitsInTheWay.peek();
+      return allowDeferring;
+    }
+    public boolean isObstacle(Unit unit)
+    {
+      return unitsInTheWay.contains(unit);
+    }
+    public void flagObstacle(Unit unit)
+    {
+      if( !isObstacle(unit) )
+      {
+        unitsInTheWay.push(unit);
+      }
+      else throw new RuntimeException("May not flag a unit (" + unit.toStringWithLocation() + ") that is already an obstacle!");
+    }
+    public void defer(Unit unit)
+    {
+      unitsToMove.remove(unit);
+      unitsOnHold.add(unit);
     }
   }
 
