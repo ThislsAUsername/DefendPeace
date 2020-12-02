@@ -579,8 +579,14 @@ public class Muriel implements AIController
     }
     else
     {
-      log(String.format("  Could not find an action for %s. Staying put.", unit.toStringWithLocation()));
-      GameAction move = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, new XYCoord(unit.x, unit.y), gameMap));
+      // Try to find a place to move, avoiding blocking production, and honoring requests for us to move.
+      GameAction move = AIUtils.moveTowardLocation(unit, new XYCoord(unit.x, unit.y), gameMap, destinationsToAvoid);
+      if( null == move )
+      {
+        // If no valid move was found, then don't.
+        log(String.format("  Could not find an action for %s. Staying put.", unit.toStringWithLocation()));
+        move = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, new XYCoord(unit.x, unit.y), gameMap));
+      }
       queuedActions.add(move);
       moving = true;
     }
