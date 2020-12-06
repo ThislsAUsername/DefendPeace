@@ -56,6 +56,7 @@ public class TestAIMuriel extends TestCase
     boolean testPassed = true;
     testPassed &= validate(testBuildMegatank(), "  Build Megatank test failed.");
     testPassed &= validate(testHuntStall(), "  Hunting stall-test failed.");
+    testPassed &= validate(testClearAttackRoute(), "  Route clearing test failed.");
     return testPassed;
   }
 
