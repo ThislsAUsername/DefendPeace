@@ -284,6 +284,19 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(mech.x == -1 && mech.y == -1, "    Mech still thinks he is on the map after death.");
     testPassed &= validate(testMap.getLocation(2, 3).getResident() == null, "    Mech did not vacate his space after death.");
 
+    // If we got this far, the event itself works; Now verify that Utils.enqueueDeathEvent creates them correctly.
+    // Create a lander holding an APC holding an infantry.
+    Unit man = addUnit(testMap, testCo1, UnitModel.TROOP, 3, 1);
+    Unit car = addUnit(testMap, testCo1, UnitModel.TRANSPORT | UnitModel.LAND, 2, 1);
+    Unit boat = addUnit(testMap, testCo1, UnitModel.TRANSPORT | UnitModel.SEA, 1, 1);
+    new LoadLifecycle.LoadEvent(man, car).performEvent(testMap);
+    new LoadLifecycle.LoadEvent(car, boat).performEvent(testMap);
+
+    // Sink the boat. All units it holds should also be accounted for.
+    GameEventQueue geq = new GameEventQueue();
+    Utils.enqueueDeathEvent(boat, geq);
+    testPassed &= validate(geq.size() == 3, "    Utils.enqueueDeathEvent built the wrong number of events!");
+
     // No cleanup required.
 
     return testPassed;

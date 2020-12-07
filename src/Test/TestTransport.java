@@ -215,14 +215,17 @@ public class TestTransport extends TestCase
 
     // Do it again, but instead of shooting the transport, just delete it.
     lander1 = addUnit(testMap, testCo1, UnitModel.TRANSPORT | UnitModel.SEA, 1, 1);
-    cargo1 = addUnit(testMap, testCo1, UnitModel.TROOP, 1, 2);
-    // Load up the transport.
+    Unit apc1 = addUnit(testMap, testCo1, UnitModel.TRANSPORT | UnitModel.LAND, 1, 2);
+    cargo1 = addUnit(testMap, testCo1, UnitModel.TROOP, 2, 2);
+    // Load up the transports.
     cargo1.initTurn(testMap);
-    performGameAction(new LoadLifecycle.LoadAction(testMap, cargo1, Utils.findShortestPath(cargo1, 1, 1, testMap)), testGame);
+    apc1.initTurn(testMap);
+    performGameAction(new LoadLifecycle.LoadAction(testMap, cargo1, Utils.findShortestPath(cargo1, 1, 2, testMap)), testGame);
+    performGameAction(new LoadLifecycle.LoadAction(testMap, apc1, Utils.findShortestPath(apc1, 1, 1, testMap)), testGame);
     dc.count = 0; // Reset the counter.
     performGameAction(new DeleteLifecycle.DeleteAction(lander1), testGame);
     testPassed &= validate(testMap.getLocation(1, 1).getResident() == null, "    Lander1 is still on the map after Deletion!");
-    testPassed &= validate(dc.count == 2, "    Counted " + dc.count + " unit deaths instead of 2 after deleting loaded transport!");
+    testPassed &= validate(dc.count == 3, "    Counted " + dc.count + " unit deaths instead of 3 after deleting loaded transport!");
 
     // NOTE/TODO: Is ability power awarded for the cargo unit?
 
