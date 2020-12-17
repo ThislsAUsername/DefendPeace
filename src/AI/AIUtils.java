@@ -509,6 +509,31 @@ public class AIUtils
     }
   }
 
+  /**
+   * Compares GameActions based on their `getMoveLocation()`'s distance from the provided `destination`.
+   * GameActions closer to `destination` will be sorted to be first.
+   */
+  public static class DistanceFromLocationComparator implements Comparator<GameAction>
+  {
+    XYCoord target;
+
+    public DistanceFromLocationComparator(XYCoord destination)
+    {
+      target = destination;
+    }
+
+    @Override
+    public int compare(GameAction o1, GameAction o2)
+    {
+      XYCoord o1c = o1.getMoveLocation();
+      XYCoord o2c = o2.getMoveLocation();
+      int o1Dist = (null == o1c) ? Integer.MAX_VALUE : o1c.getDistance(target);
+      int o2Dist = (null == o2c) ? Integer.MAX_VALUE : o2c.getDistance(target);
+      int diff = o1Dist - o2Dist;
+      return diff;
+    }
+  }
+
   /** Return the set of locations with enemies or terrain that `unit` could attack in one turn from `start` */
   public static Set<XYCoord> findPossibleTargets(GameMap gameMap, Unit unit, XYCoord start, boolean includeTerrain)
   {
