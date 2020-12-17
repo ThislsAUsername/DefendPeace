@@ -142,7 +142,7 @@ public class Unit implements Serializable
    * @return Whether this unit has a weapon with ammo that can hit `targetType`
    * under any combination of ranged/direct, move-first/static.
    */
-  public boolean canAttack(UnitModel targetType)
+  public boolean canTarget(UnitModel targetType)
   {
     // if we have no weapons, we can't hurt things
     if( model.weapons == null )

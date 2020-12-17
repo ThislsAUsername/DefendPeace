@@ -3,6 +3,7 @@ package AI;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -63,6 +64,18 @@ public class Muriel implements AIController
   }
   
   private Queue<GameAction> queuedActions = new ArrayDeque<GameAction>();
+  private class ActionWithValue {
+    GameAction action; Double value;
+    public ActionWithValue(GameAction ga, Double val) {action = ga; value = val;}
+  }
+  private class ObstructedUnitActions extends HashMap<Unit, ActionWithValue>{
+    private static final long serialVersionUID = 1L;
+    public ActionWithValue put(Unit u, GameAction ga, Double value) {
+      return put(u, new ActionWithValue(ga, value));
+    }
+  }
+  private ObstructedUnitActions obstructedActions = new ObstructedUnitActions();
+
   private UnitOrchestrator unitSelector = new UnitOrchestrator();
 
   private Commander myCo = null;
@@ -180,6 +193,10 @@ public class Muriel implements AIController
     // Make a list of properties we want to claim.
     nonAlliedProperties = AIUtils.findNonAlliedProperties(myCo, gameMap);
 
+    // Order the units by cost.
+    Collections.sort(myCo.units, (Unit u1, Unit u2) ->
+      (int)(u2.model.getCost()*u2.getHP() - u1.model.getCost()*u1.getHP()));
+
     // If we are already capturing any of these properties, remove them from the list.
     for( Unit unit : myCo.units )
     {
@@ -247,6 +264,7 @@ public class Muriel implements AIController
       if( actionQueued )
       {
         unitSelector.remove(unit);
+        obstructedActions.remove(unit);
       }
     }
 
@@ -280,15 +298,41 @@ public class Muriel implements AIController
     log(String.format("  Action: %s", action));
     return action;
   }
-  private void displaceUnit(GameMap gameMap, Unit actor, GameAction desiredAction, Unit obstacle)
+  private void displaceUnit(GameMap gameMap, Unit actor, GameAction desiredAction, double actionValue, Unit obstacle)
   {
     log(actor.toStringWithLocation() + " wants to do action " + desiredAction +
         ", but " + obstacle.toStringWithLocation() + " is in the way. Telling it to move.");
 
+    // Flag the actor as an obstacle so the unit it's pushing can't push back.
+    if( !unitSelector.isObstacle(actor) )
+      unitSelector.flagObstacle(actor);
+    obstructedActions.put(actor, desiredAction, actionValue);
+
     // Give the obstacle priority so it has to move first.
     unitSelector.flagObstacle(obstacle);
   }
-
+  /** Compare ga against any currently-obstructed actions. Return true if it is better
+   * than any of those, and false if an existing known action should take priority. */
+  public boolean isBestCurrentAction(Unit actor, GameAction action, double value)
+  {
+    boolean shouldQueue = true;
+    for( Unit ou : obstructedActions.keySet() )
+    {
+      GameAction oa = obstructedActions.get(ou).action;
+      if( ou != actor // Don't worry about replacing our own previously-considered actions.
+          && oa.getMoveLocation().equals(action.getMoveLocation()) // Only one unit can move here.
+          && action.getType().equals(oa.getType()) ) // For now just break ties between like types.
+      {
+        // If we find any action better than ga, then we don't want to do ga.
+        double ov = obstructedActions.get(ou).value;
+        log("  Two units want the same space:\n    "
+            + oa.toString() + "(" + ov + ")\n    " + action.toString() + "(" + value + ")");
+        if( ov > value )
+          return false;
+      }
+    }
+    return shouldQueue;
+  }
   private boolean queueUnitAction(GameMap gameMap, Unit unit, boolean allowDeferring)
   {
     // If we are capturing something, finish what we started.
@@ -394,8 +438,11 @@ public class Muriel implements AIController
       for( GameAction action : attackActions )
       {
         // If another of our units is in the way and has already moved, then we can't consider this attack action.
-        if( null != gameMap.getResident(action.getMoveLocation()) && gameMap.getResident(action.getMoveLocation()).isTurnOver )
+        if( !gameMap.isLocationEmpty(action.getMoveLocation()) && gameMap.getResident(action.getMoveLocation()).isTurnOver )
+        {
           continue;
+        }
+        Unit unitInTheWay = gameMap.getResident(action.getMoveLocation()); // Could be us, could be nobody.
 
         // Sift through all attack actions we can perform.
         double damageValue = AIUtils.scoreAttackAction(unit, action, gameMap,
@@ -413,7 +460,11 @@ public class Muriel implements AIController
         {
           // If this action would require displacing a unit, and that unit is already flagged as needing to be
           // displaced, then we are in ITS way, and cannot tell it to move, and cannot perform this attack.
-          if( unitSelector.isObstacle(gameMap.getResident(action.getMoveLocation())) )
+          if( unit != unitInTheWay && unitSelector.isObstacle(unitInTheWay) )
+            continue;
+          // If this unit action would prevent another one, and isn't better than
+          // the other one, then don't do this action.
+          if( !isBestCurrentAction(unit, action, damageValue))
             continue;
 
           maxDamageValue = damageValue;
@@ -431,7 +482,7 @@ public class Muriel implements AIController
         }
         else // Don't check the obstacle's isTurnOver here; that should be handled in the GameAction loop above.
         {
-          displaceUnit(gameMap, unit, maxCarnageAction, gameMap.getResident(dest));
+          displaceUnit(gameMap, unit, maxCarnageAction, maxDamageValue, gameMap.getResident(dest));
           return false;
         }
       }
@@ -447,8 +498,13 @@ public class Muriel implements AIController
         {
           XYCoord dest = capture.getMoveLocation();
           Unit obst = gameMap.getResident(dest);
-          if( null == obst )
+          if( null == obst || obst == unit )
           {
+            // If this unit action would prevent another one, and isn't better than
+            // the other one, then don't do this action.
+            if( !isBestCurrentAction(unit, capture, unit.getHP()))
+              continue;
+
             queuedActions.add(capture);
             return true;
           }
@@ -456,7 +512,7 @@ public class Muriel implements AIController
             continue; // We can't displace the obstacle unit; find something else to do.
           else
           {
-            displaceUnit(gameMap, unit, capture, obst);
+            displaceUnit(gameMap, unit, capture, unit.getHP(), obst);
             return false;
           }
         }
@@ -472,8 +528,18 @@ public class Muriel implements AIController
     // If someone else wants us out of the way, go ahead and oblige since we haven't found something better to do.
     if( unitSelector.isObstacle(unit) )
     {
-      log(unit.toStringWithLocation() + " is in the way, and must move");
-      destinationsToAvoid.add(new XYCoord(unit.x, unit.y));
+      // Since we flag a unit as an obstacle if it is obstructed just to prevent recursive blocking,
+      // we can remove this unit from the list if it's the only one there (actual blocks are already removed.
+      if( unitSelector.numObstacles() == 1 )
+      {
+        log(unit.toStringWithLocation() + " is not actually an obstacle.");
+        unitSelector.remove(unit);
+      }
+      else
+      {
+        log(unit.toStringWithLocation() + " is in the way, and must move");
+        destinationsToAvoid.add(new XYCoord(unit.x, unit.y));
+      }
     }
 
     //////////////////////////////////////////////////////////////////
@@ -487,22 +553,30 @@ public class Muriel implements AIController
       for(int i = 0; i < nonAlliedProperties.size(); ++i)
       {
         XYCoord coord = nonAlliedProperties.get(i);
-        GameAction move = AIUtils.moveTowardLocation(unit, coord, gameMap, destinationsToAvoid); // Try to move there, but don't get in the way.
-        if( null != move )
+
+        ArrayList<GameAction> possibleMoves = unitActionsByType.get(UnitActionFactory.WAIT);
+        AIUtils.DistanceFromLocationComparator dflc = new AIUtils.DistanceFromLocationComparator(coord);
+        Collections.sort(possibleMoves, dflc);
+
+        for( GameAction ga : possibleMoves )
         {
-          log(String.format("  Found %s at %s", gameMap.getLocation(coord).getEnvironment().terrainType, coord));
-          boolean moving = false;
-          if( allowDeferring )
+          if(destinationsToAvoid.contains( ga.getMoveLocation() ))
+            continue;
+
+          // Check if there is a friendly in our way.
+          Unit obstacle = gameMap.getResident(ga.getMoveLocation());
+          if( null == obstacle || obstacle == unit )
           {
-            log("    Deferring action for now.");
-            unitSelector.defer(unit);
+            queuedActions.add(ga);
+            return true;
           }
+          else if( obstacle.isTurnOver || unitSelector.isObstacle(obstacle) )
+            continue; // We can't displace the obstacle unit; need a different destination.
           else
           {
-            queuedActions.add(move);
-            moving = true;
+            displaceUnit(gameMap, unit, ga, unit.getHP(), obstacle);
+            return false;
           }
-          return moving;
         }
       }
     }
@@ -514,13 +588,13 @@ public class Muriel implements AIController
       log(String.format("Seeking attack target for %s", unit.toStringWithLocation()));
       ArrayList<XYCoord> enemyLocations = AIUtils.findEnemyUnits(myCo, gameMap); // Get enemy locations.
       Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), enemyLocations); // Sort them by accessibility.
-      GameAction move = null;
+
       for(int i = 0; i < enemyLocations.size(); ++i)
       {
         XYCoord coord = enemyLocations.get(i);
         Unit target = gameMap.getLocation(coord).getResident();
 
-        if( !unit.canAttack(target.model) ) continue; // Make sure we can attack this type; also accounts for ammo.
+        if( !unit.canTarget(target.model) ) continue; // Make sure we can attack this type; also accounts for ammo.
 
         // Only chase this unit if we will be effective against it. Don't check shouldAttack here, because we can't actually attack yet.
         UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(unit, target);
@@ -537,7 +611,7 @@ public class Muriel implements AIController
           if( unitCoord.getDistance(threatCoord) <= MAX_RELEVANT_DISTANCE )
           {
             // If we, in the enemy's place, would attack `unit` with `threat`, then we should not let them attack us.
-            if( threat.canAttack(unit.model) && shouldAttack(threat, unit, gameMap) )
+            if( threat.canTarget(unit.model) && shouldAttack(threat, unit, gameMap) )
             {
               // Add coordinates that `threat` could target to our "no-go" list.
               Map<XYCoord, Double> threatMap = AIUtils.findThreatPower(gameMap, threat, unit.model);
@@ -549,22 +623,31 @@ public class Muriel implements AIController
 
         // Try to move towards the enemy, but avoid blocking production.
         noGoZone.addAll(destinationsToAvoid);
-        move = AIUtils.moveTowardLocation(unit, coord, gameMap, noGoZone);
-        if( null != move )
+
+        // Sort the possible move actions by distance from the target.
+        ArrayList<GameAction> possibleMoves = unitActionsByType.get(UnitActionFactory.WAIT);
+        AIUtils.DistanceFromLocationComparator dflc = new AIUtils.DistanceFromLocationComparator(coord);
+        Collections.sort(possibleMoves, dflc);
+
+        for( GameAction ga : possibleMoves )
         {
-          log(String.format("  Found %s", gameMap.getLocation(coord).getResident().toStringWithLocation()));
-          boolean moving = false;
-          if( allowDeferring ) // Move actions can wait until other units have a chance to do stuff.
+          if(noGoZone.contains( ga.getMoveLocation() ))
+            continue;
+
+          // Check if there is a friendly in our way.
+          Unit obstacle = gameMap.getResident(ga.getMoveLocation());
+          if( null == obstacle || obstacle == unit )
           {
-            log("    Deferring action for now.");
-            unitSelector.defer(unit);
+            queuedActions.add(ga);
+            return true;
           }
+          else if( obstacle.isTurnOver || unitSelector.isObstacle(obstacle) )
+            continue; // We can't displace the obstacle unit; need a different destination.
           else
           {
-            queuedActions.add(move);
-            moving = true;
+            displaceUnit(gameMap, unit, ga, 0, obstacle);
+            return false;
           }
-          return moving;
         }
       }
     }
@@ -928,6 +1011,10 @@ public class Muriel implements AIController
     public boolean isObstacle(Unit unit)
     {
       return unitsInTheWay.contains(unit);
+    }
+    public int numObstacles()
+    {
+      return unitsInTheWay.size();
     }
     public void flagObstacle(Unit unit)
     {
