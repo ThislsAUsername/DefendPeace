@@ -94,6 +94,12 @@ public abstract class WaitLifecycle
     }
 
     @Override
+    public Unit getActor()
+    {
+      return actor;
+    }
+
+    @Override
     public XYCoord getMoveLocation()
     {
       return waitLoc;

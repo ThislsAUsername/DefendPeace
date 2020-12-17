@@ -113,6 +113,12 @@ public abstract class LoadLifecycle
     }
 
     @Override
+    public Unit getActor()
+    {
+      return passenger;
+    }
+
+    @Override
     public XYCoord getMoveLocation()
     {
       return pathEnd;

@@ -115,6 +115,12 @@ public abstract class JoinLifecycle
     }
 
     @Override
+    public Unit getActor()
+    {
+      return donor;
+    }
+
+    @Override
     public XYCoord getMoveLocation()
     {
       return pathEnd;

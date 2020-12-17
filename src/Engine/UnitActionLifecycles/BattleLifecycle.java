@@ -202,6 +202,12 @@ public abstract class BattleLifecycle
     }
 
     @Override
+    public Unit getActor()
+    {
+      return attacker;
+    }
+
+    @Override
     public XYCoord getMoveLocation()
     {
       return moveCoord;
@@ -313,6 +319,12 @@ public abstract class BattleLifecycle
         output.add(new DamagePopup(attackLocation, attacker.CO.myColor, (int) (result.calculateDamage()*10) + "%"));
 
       return output;
+    }
+
+    @Override
+    public Unit getActor()
+    {
+      return attacker;
     }
 
     @Override

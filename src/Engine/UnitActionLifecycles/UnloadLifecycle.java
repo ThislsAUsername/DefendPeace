@@ -164,6 +164,12 @@ public abstract class UnloadLifecycle
     }
 
     @Override
+    public Unit getActor()
+    {
+      return actor;
+    }
+
+    @Override
     public XYCoord getMoveLocation()
     {
       return moveLoc;
