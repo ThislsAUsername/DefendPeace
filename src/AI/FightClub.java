@@ -167,7 +167,6 @@ public class FightClub
           com.setAIController(cInfo.myAi.create(com));
           combatants.add(com);
           teamMapping.put(ci, cInfo);
-          defaultOut.println("Adding " + com.coInfo.name);
         }
 
         if( numCos != combatants.size() )
