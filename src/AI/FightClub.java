@@ -167,7 +167,6 @@ public class FightClub
           com.setAIController(cInfo.myAi.create(com));
           combatants.add(com);
           teamMapping.put(ci, cInfo);
-          defaultOut.println("Adding " + com.coInfo.name);
         }
 
         if( numCos != combatants.size() )
@@ -214,17 +213,18 @@ public class FightClub
         TURN_LIMIT
       }
 
-      List<Commander> winners;
+      List<Commander> winners, contestants;
       int winningTeam;
       int numTurns;
       EndCondition endReason;
       Long totalGameTimeNanos;
       HashMap<Commander, Long> stopwatches;
 
-      public GameResults(List<Commander> victors, int nTurns, EndCondition reason,
+      public GameResults(List<Commander> victors, List<Commander> players, int nTurns, EndCondition reason,
           Long gameRunTime, HashMap<Commander, Long> playerRunTimes)
       {
         winners = victors;
+        contestants = players;
         winningTeam = winners.get(0).team;
         numTurns = nTurns;
         endReason = reason;
@@ -249,7 +249,7 @@ public class FightClub
         String thinkPct = df.format(100*(totalThinkTimeNanos / totalGameTimeNanos));
         String thinkTime = df.format(totalThinkTimeNanos * ns2s);
         sb.append("    Thinking comprised ").append(thinkPct).append("% (").append(thinkTime).append("s) of the run time\n");
-        for( Commander co : stopwatches.keySet() )
+        for( Commander co : contestants )
         {
           String coPct = df.format(100 * (stopwatches.get(co) / totalThinkTimeNanos));
           String coTime = df.format(stopwatches.get(co) * ns2s);
@@ -353,7 +353,7 @@ public class FightClub
         if( !game.commanders[i].isDefeated )
           winners.add(game.commanders[i]);
       }
-      return new GameResults(winners, game.getCurrentTurn(), endReason, gameRunTimeNanos, stopwatches);
+      return new GameResults(winners, Arrays.asList(game.commanders), game.getCurrentTurn(), endReason, gameRunTimeNanos, stopwatches);
     }
 
     /**

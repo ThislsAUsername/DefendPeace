@@ -18,3 +18,5 @@
   SE  RD  CT  GR  FR  GR  GR  FR  GR  FR  MT  RD  CT  FR  GR  GR  FR  FR  CT  SE
   SE  SE  MT  XX  XX  XX  MT  CT  GR  GR  GR  RD  GR  GR  MT  FC  MT  MT  SE  SE
   SE  SE  SE  FR  CT  XX  FR  GR  MT  MT  MT  RD  CT  MT  MT  MT  MT  SE  SE  SE
+team, unit type, x, y
+1, infantry, 2, 7
