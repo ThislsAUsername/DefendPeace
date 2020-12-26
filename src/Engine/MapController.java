@@ -253,18 +253,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
           System.out.println("WARNING! Attempting to choose a target for a non-targetable action.");
         }
 
-        boolean useFreeSelect = false;
         // Switch to free-tile select in target-rich environments
-        if( !useFreeSelect && targetLocations.size() > 3
-            && (myGameInputHandler.myStateData.actionSet.getGameActions().get(0).getType() == UnitActionFactory.ATTACK))
-        {
-          int maxDist = 0;
-          for( XYCoord a : targetLocations )
-            for( XYCoord b : targetLocations )
-              maxDist = Math.max(maxDist, a.getDistance(b));
-
-          useFreeSelect = maxDist < targetLocations.size();
-        }
+        boolean useFreeSelect = false;
+        if( targetLocations.size() > 6 )
+          useFreeSelect = true;
 
         if( useFreeSelect )
           handleFreeTileSelect(input);
