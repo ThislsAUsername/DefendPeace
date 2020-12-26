@@ -460,6 +460,13 @@ public class Commander extends GameEventListener implements Serializable
     aiController = ai;
   }
 
+  public String getControllerName()
+  {
+    if( null != aiController )
+      return aiController.getAIInfo().getName();
+    return "Human";
+  }
+
   public boolean isAI()
   {
     return (aiController != null);
