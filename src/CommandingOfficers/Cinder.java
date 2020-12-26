@@ -6,6 +6,7 @@ import java.util.HashMap;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameInstance;
 import Engine.GameScenario;
+import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
@@ -236,11 +237,11 @@ public class Cinder extends Commander
   private static class WitchFireListener extends GameEventListener
   {
     private static final long serialVersionUID = 1L;
-    private Commander myCommander = null;
+    private Cinder myCommander = null;
     private final int refreshCost;
     public boolean listen = false;
 
-    public WitchFireListener(Commander myCo, int HPCost)
+    public WitchFireListener(Cinder myCo, int HPCost)
     {
       myCommander = myCo;
       refreshCost = HPCost;
@@ -265,9 +266,7 @@ public class Cinder extends Commander
         {
           // Guess he's not gonna make it.
           // TODO: Maybe add a debuff event/animation here as well.
-          UnitDieEvent event = new UnitDieEvent(minion);
-          Cinder Cinder = (Cinder)myCommander;
-          Cinder.pollEvents.add(event);
+          Utils.enqueueDeathEvent(minion, myCommander.pollEvents);
         }
       }
     }
