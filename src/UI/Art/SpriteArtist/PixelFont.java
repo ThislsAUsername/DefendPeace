@@ -49,15 +49,11 @@ public class PixelFont
       }
       else if( w > fgoalwidth || h > fgoalheight )
       {
-        // This is too big; use the last one we found.
-        break;
-      }
-      else if( w == fgoalwidth && h == fgoalheight )
-      {
         // There may be multiple font sizes that resolve to the same pixel size.
         // We want the largest "correct" size to increase odds of correct rendering.
         currentFont = f;
         currentFm = fm;
+        break;
       }
       fsize++;
     }
