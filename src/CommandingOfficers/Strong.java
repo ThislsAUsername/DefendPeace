@@ -36,23 +36,23 @@ public class Strong extends Commander
           "As a result, his transport units and boots on the ground are among the best, and he brings some extra anti-personnel firepower to keep his opponents in check."));
       infoPages.add(new InfoPage(
           "Passive:\n" + 
-          "- Strong's footsoldiers get an attack bonus of 15%\n" +
-          "- When attacking footsoldiers, all of Strong's units get an attack bonus of 15%\n" +
-          "- Strong's transports move 1 space further and can hold one more unit than average\n" +
+          "- +"+PASSIVE_INF_BUFF+"% attack for all footsoldiers\n" +
+          "- +"+PASSIVE_ANTI_INF_BUFF+"% attack vs enemy footsoldiers, when attacking\n" +
+          "- +1 movement and +1 capacity for all transports\n" +
           "- Strong can build Mechs from air/sea ports\n"));
       infoPages.add(new InfoPage(
           "Strongarm ("+StrongArmAbility.STRONGARM_COST+"):\n" +
-          "Gives an attack and defense boost of "+StrongArmAbility.STRONGARM_BUFF+"%\n" +
-          "Gives footsoldiers an additional "+StrongArmAbility.STRONGARM_FOOT_BUFF+"% attack\n" +
-          "Grants footsoldiers and APCs two extra points of movement\n" +
-          "Allows Strong to build infantry on air/sea ports\n"));
+          "+"+StrongArmAbility.STRONGARM_BUFF+"% attack and defense for all units\n" +
+          "+"+StrongArmAbility.STRONGARM_FOOT_BUFF+"% attack for footsoldiers\n" +
+          "+2 movement for footsoldiers and APCs\n" +
+          "Strong can build infantry on air/sea ports\n"));
       infoPages.add(new InfoPage(
           "Mobilize ("+MobilizeAbility.MOBILIZE_COST+"):\n" + 
-          "Gives an attack boost of "+MobilizeAbility.MOBILIZE_BUFF+"%\n" +
-          "Gives a defense boost of "+MobilizeAbility.MOBILIZE_DEFENSE_BUFF+"%\n" +
-          "Grants two extra points of movement\n" +
+          "+"+MobilizeAbility.MOBILIZE_BUFF+"% attack for all units\n" +
+          "+"+MobilizeAbility.MOBILIZE_DEFENSE_BUFF+"% defense for all units\n" +
+          "+2 movement for all units\n" +
           "Refreshes footsoldiers\n" +
-          "Allows Strong to build footsoldiers on cities, industries, and the HQ\n"));
+          "Strong can build footsoldiers on cities, industries, and the HQ\n"));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -60,6 +60,9 @@ public class Strong extends Commander
       return new Strong(rules);
     }
   }
+
+  private static final int PASSIVE_INF_BUFF = 15;
+  private static final int PASSIVE_ANTI_INF_BUFF = 15;
 
   public Strong(GameScenario.GameRules rules)
   {
@@ -72,7 +75,7 @@ public class Strong extends Commander
     upm.applyChanges(this); // Passive ability, so don't add it to the COModifier list; just apply it and forget it.
 
     // Give Strong's footies a base damage buff.
-    CODamageModifier strongMod = new CODamageModifier(15); // Give us a nice base power boost.
+    CODamageModifier strongMod = new CODamageModifier(PASSIVE_INF_BUFF); // Give us a nice base power boost.
     for( UnitModel model : getAllModels(UnitModel.TROOP) )
       strongMod.addApplicableUnitModel(model);
     strongMod.applyChanges(this); // Passive ability, so don't add it to the COModifier list; just apply it and forget it.
@@ -100,7 +103,7 @@ public class Strong extends Commander
     // Grant a firepower increase if we are attacking and the defender is on foot.
     if( (params.attacker.body.CO == this) && params.defender.body.model.isTroop() )
     {
-      params.attackPower += 15;
+      params.attackPower += PASSIVE_ANTI_INF_BUFF;
     }
   }
 
