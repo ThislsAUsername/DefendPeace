@@ -30,29 +30,27 @@ public class Strong extends Commander
     {
       super("Strong");
       infoPages.add(new InfoPage(
-          "Commander Strong knows that an army's strength lies in its people.\n" +
-          "Well-positioned soldiers with proper equipment and training are guaranteed to bring results.\n" +
-          "His focus is therefore on achieving this in his own forces, and denying it of his opponent.\n" +
-          "As a result, his transport units and boots on the ground are among the best, and he brings some extra anti-personnel firepower to keep his opponents in check."));
+          "Commander Strong knows that an army's strength lies in its people; soldiers with proper training and equipment are guaranteed to bring results.\n" +
+          "His transport units and boots on the ground are among the best, and he brings some extra anti-personnel firepower to keep his opponents in check."));
       infoPages.add(new InfoPage(
           "Passive:\n" + 
-          "- +"+PASSIVE_INF_BUFF+"% attack for all footsoldiers\n" +
-          "- +"+PASSIVE_ANTI_INF_BUFF+"% attack vs enemy footsoldiers, when attacking\n" +
-          "- +1 movement and +1 capacity for all transports\n" +
-          "- Strong can build Mechs from air/sea ports\n"));
+          "+"+PASSIVE_INF_BUFF+"% attack for all footsoldiers\n" +
+          "+"+PASSIVE_ANTI_INF_BUFF+"% attack vs enemy footsoldiers, when attacking\n" +
+          "+1 movement and +1 capacity for all transports\n" +
+          "Can build Mechs from air/sea ports\n"));
       infoPages.add(new InfoPage(
           "Strongarm ("+StrongArmAbility.STRONGARM_COST+"):\n" +
           "+"+StrongArmAbility.STRONGARM_BUFF+"% attack and defense for all units\n" +
           "+"+StrongArmAbility.STRONGARM_FOOT_BUFF+"% attack for footsoldiers\n" +
           "+2 movement for footsoldiers and APCs\n" +
-          "Strong can build infantry on air/sea ports\n"));
+          "Can build infantry on air/sea ports\n"));
       infoPages.add(new InfoPage(
           "Mobilize ("+MobilizeAbility.MOBILIZE_COST+"):\n" + 
           "+"+MobilizeAbility.MOBILIZE_BUFF+"% attack for all units\n" +
           "+"+MobilizeAbility.MOBILIZE_DEFENSE_BUFF+"% defense for all units\n" +
           "+2 movement for all units\n" +
-          "Refreshes footsoldiers\n" +
-          "Strong can build footsoldiers on cities, industries, and the HQ\n"));
+          "All footsoldiers can move again\n" +
+          "Can build footsoldiers on cities, industries, and the HQ\n"));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
