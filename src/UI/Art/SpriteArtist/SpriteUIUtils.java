@@ -108,7 +108,7 @@ public class SpriteUIUtils
         fits = font.getWidth(subline) <= reqWidth;
       } while(!fits);
 
-      lines.add(i, line.substring(splitIndex)); // put in the second half
+      lines.add(i, ' ' + line.substring(splitIndex)); // put in the second half
       lines.add(i, line.substring(0, splitIndex)); // and then the first half behind it
     }
 
