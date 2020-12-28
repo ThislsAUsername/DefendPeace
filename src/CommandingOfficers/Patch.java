@@ -24,16 +24,16 @@ public class Patch extends Commander
       infoPages.add(new InfoPage(
           "Commander Patch is a pirate, who does piratey things like lootin' and plunderin'\n"));
       infoPages.add(new InfoPage(
-          "Passive:\n" + 
-          "- Patch gets a turn's worth of income from any property he captures\n"));
+          "Passive:\n" +
+          "1 extra turn of income when capturing any property\n"));
       infoPages.add(new InfoPage(
-          "Plunder ("+PLUNDER_COST+"):\n" + 
-          "Gives an attack boost of "+PLUNDER_ATTACK_BUFF+"%\n" + 
-          "Gives "+PLUNDER_INCOME+"x of the value of any funds damage Patch deals.\n"));
+          "Plunder ("+PLUNDER_COST+"):\n" +
+          "+"+PLUNDER_ATTACK_BUFF+"% attack for all units\n" +
+          "Gains "+(100*PLUNDER_INCOME)+"% of the value of any damage dealt\n"));
       infoPages.add(new InfoPage(
-          "Pillage ("+PILLAGE_COST+"):\n" + 
-          "Gives an attack boost of "+PILLAGE_ATTACK_BUFF+"%\n" + 
-          "Gives "+PILLAGE_INCOME+"x the value of any funds damage Patch deals.\n"));
+          "Pillage ("+PILLAGE_COST+"):\n" +
+          "+"+PILLAGE_ATTACK_BUFF+"% attack for all units\n" +
+          "Gains "+(100*PILLAGE_INCOME)+"% of the value of any damage dealt\n"));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)

@@ -49,21 +49,21 @@ public class Tech extends Commander
           "- Tech has some of the best mechanics around, allowing her units to repair 3 HP per turn instead of just 2.\n"));
       infoPages.add(new InfoPage(
           TECHDROP_NAME + " (" + TECHDROP_COST + "):\n" +
-              "Deploys " + TECHDROP_NUM + " BattleMech to the front lines.\n" +
-              "All mechanical units gain " + TECHDROP_BUFF + "% attack.\n" +
-              "All units gain " + TECHDROP_BUFF + "% defense.\n" +
-              "\nNOTE: BattleMechs require special parts and cannot normally be repaired.\n"));
+              "Deploys " + TECHDROP_NUM + " BattleMech to the front lines\n" +
+              "+" + TECHDROP_BUFF + "% attack for all mechanical units\n" +
+              "+" + TECHDROP_BUFF + "% defense for all units\n" +
+              "\nNOTE: BattleMechs require special parts and cannot be repaired on buildings\n"));
       infoPages.add(new InfoPage(
           OVERCHARGE_NAME + " (" + OVERCHARGE_COST + "):\n" +
-              "All mechanical units are repaired by " + OVERCHARGE_HEAL + " HP, allowing more than 10 HP for this turn.\n" +
-              "All mechanical units gain " + OVERCHARGE_BUFF + "% attack.\n" +
-              "All Units gain " + OVERCHARGE_BUFF + "% defense"));
+              "Repairs all mechanical units by " + OVERCHARGE_HEAL + " HP, allowing more than 10 HP for this turn\n" +
+              "+" + OVERCHARGE_BUFF + "% attack for all mechanical units\n" +
+              "+" + OVERCHARGE_BUFF + "% defense for all units"));
       infoPages.add(new InfoPage(
           STEEL_HAIL_NAME + " (" + STEEL_HAIL_COST + "):\n" +
-              "Deploys " + STEEL_HAIL_NUM + " BattleMechs to the front lines.\n" +
-              "All mechanical units gain " + STEEL_HAIL_BUFF + "% attack.\n" +
-              "All units gain " + STEEL_HAIL_BUFF + "% defense.\n" +
-              "\nNOTE: BattleMechs require special parts and cannot normally be repaired.\n"));
+              "Deploys " + STEEL_HAIL_NUM + " BattleMechs to the front lines\n" +
+              "+" + STEEL_HAIL_BUFF + "% attack for all mechanical units\n" +
+              "+" + STEEL_HAIL_BUFF + "% defense for all units\n" +
+              "\nNOTE: BattleMechs require special parts and cannot be repaired on buildings\n"));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
