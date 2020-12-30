@@ -516,11 +516,16 @@ public class SpriteLibrary
       }
       catch(Exception ex)
       {
-        System.out.println("WARNING! Exception loading font file. Using fallback");
+        System.out.println("WARNING! Exception loading font file.");
         ex.printStackTrace();
-        Font temp = new Font("Consolas", 0, 10);
-        fontStandard = new PixelFont(temp);
       }
+    }
+    if( null == fontStandard )
+    {
+      // If our first attempt to load a font file failed, just use a system font.
+      System.out.println("WARNING! Failed to load pixel font. Using fallback.");
+      Font temp = new Font("Consolas", 0, 10);
+      fontStandard = new PixelFont(temp);
     }
     return fontStandard;
   }
