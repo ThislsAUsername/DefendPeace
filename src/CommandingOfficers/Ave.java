@@ -46,8 +46,8 @@ import Units.UnitModel;
  *    Ave's units gain a 10 percent increase in firepower.
  *
  * Glacio:
- *    Increases the snow-aura around her buildings by 2 spaces for the next turn.
- *    Snows on every tile in a 2-space radius around each of her units.
+ *    Increases the snow-aura around her buildings by 3 spaces for the next turn.
+ *    Snows on every tile in a 3-space radius around each of her units.
  *    Stuns any enemy unit within 2 spaces of one of Ave's units or buildings.
  *    Ave's units gain a 10 percent increase in firepower.
  *
@@ -65,7 +65,7 @@ public class Ave extends Commander
   public static final int SNOW_THRESHOLD = 100; // Big numbers for integer math.
   public static final int SNOW_PER_TURN = 400;
   public static final int SNOW_MELT_RATE = 100;
-  private int MAX_SNOW_SPREAD_RANGE = 1;
+  private int MAX_SNOW_SPREAD_RANGE = 2;
   private int MAX_SNOW_DEPTH = 500;
   private CitySnowifier snowifier;
 
@@ -82,7 +82,7 @@ public class Ave extends Commander
           "grind her opponents down beneath a wall of ever-encroaching ice."));
       infoPages.add(new InfoPage(
           "Passive:\r\n" +
-          "Ave Generates snow around all owned properties, which spreads over time.\n" +
+          "Ave generates snow around all owned properties, which spreads over time.\n" +
           "The radius of effect is small at first, but can be expanded by her abilities.\n" +
           "Her units move normally in snow, but take a movement and defense penalty in forests."));
       infoPages.add(new InfoPage(
