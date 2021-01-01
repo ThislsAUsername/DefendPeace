@@ -70,10 +70,30 @@ public class SpriteUIUtils
   }
 
   /**
+   * Returns an image with the input prose printed, in normal text.
+   * Acts as an overload to {@link #drawProseToWidth(String, int)}
+   */
+  public static BufferedImage drawProse(String prose)
+  {
+    // Figure out how big our text is.
+    PixelFont font = SpriteLibrary.getFontStandard();
+
+    ArrayList<String> lines = new ArrayList<String>();
+    // Unload our prose into the lines it already has
+    lines.addAll(Arrays.asList(prose.split("\\R")));
+
+    int maxWidth = 1;
+    for( String line : lines )
+      maxWidth = Math.max(maxWidth, font.getWidth(line));
+
+    return drawProseToWidth(prose, maxWidth);
+  }
+
+  /**
    * Returns an image with the input string printed within the specified width, in normal text.
    * @param reqWidth: Actual UI size in pixels that you want to fit the text into.
    */
-  public static BufferedImage drawTextToWidth(String prose, int reqWidth)
+  public static BufferedImage drawProseToWidth(String prose, int reqWidth)
   {
     // Figure out how big our text is.
     PixelFont font = SpriteLibrary.getFontStandard();
@@ -393,5 +413,37 @@ public class SpriteUIUtils
       num /= 10; // Shift to the next higher digit in the number.
     } while (num > 0);
     return numImage;
+  }
+
+  /**
+   * Code kinda-not-really stolen from https://stackoverflow.com/questions/20826216/copy-two-bufferedimages-into-one-image-side-by-side
+   * Joins BufferedImages, creating a single contiguous image
+   */
+  public static BufferedImage joinBufferedImages(BufferedImage[] frames, int imageSpacing)
+  {
+    // aggregate sizing
+    int width = 0;
+    int height = frames[0].getHeight();
+    for(BufferedImage frame : frames)
+    {
+      width += (frame.getWidth() + imageSpacing);
+      if(height != frame.getHeight())
+      {
+        height = Math.max(height, frame.getHeight());
+        System.out.println("WARNING: Joining images with unequal heights");
+      }
+    }
+
+    //create a new buffer and draw two image into the new image
+    BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    Graphics g = newImage.getGraphics();
+
+    int currentOffset = 0;
+    for( int i = 0; i < frames.length; i++ )
+    {
+      g.drawImage(frames[i], currentOffset, 0, null);
+      currentOffset += (frames[i].getWidth() + imageSpacing);
+    }
+    return newImage;
   }
 }

@@ -69,18 +69,34 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
   }
 
   /** Returns a string describing the game statistics of a given CO */
-  public String getFullStatus()
+  public String getFullStatusValues()
   {
     StringBuilder sb = new StringBuilder();
 
-    sb.append("Income:         ").append(income).append("\n");
-    sb.append("Unit count:     ").append(unitCount).append("\n");
-    sb.append("Vehicle count:  ").append(vehCount).append("\n");
-    sb.append("Unit funds:     ").append(unitFunds).append("\n");
+    sb.append(income)   .append("\n");
+    sb.append(unitCount).append("\n");
+    sb.append(vehCount) .append("\n");
+    sb.append(unitFunds).append("\n");
     if( showAbilityInfo )
     {
-      sb.append("Ability Power:  ").append((int) (abilityPower * Commander.CHARGERATIO_FUNDS)).append("\n");
-      sb.append("Next Ability:   ").append((int) (untilNextPower * Commander.CHARGERATIO_FUNDS)).append("\n");
+      sb.append((int) (abilityPower * Commander.CHARGERATIO_FUNDS))  .append("\n");
+      sb.append((int) (untilNextPower * Commander.CHARGERATIO_FUNDS)).append("\n");
+    }
+
+    return sb.toString();
+  }
+  public String getFullStatusLabels()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append("Income:")       .append("\n");
+    sb.append("Unit count:")   .append("\n");
+    sb.append("Vehicle count:").append("\n");
+    sb.append("Unit funds:")   .append("\n");
+    if( showAbilityInfo )
+    {
+      sb.append("Ability Power:").append("\n");
+      sb.append("Next Ability:") .append("\n");
     }
 
     return sb.toString();
