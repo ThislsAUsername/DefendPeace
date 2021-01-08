@@ -55,7 +55,7 @@ public class Tech extends Commander
               "\nNOTE: BattleMechs require special parts and cannot be repaired on buildings\n"));
       infoPages.add(new InfoPage(
           OVERCHARGE_NAME + " (" + OVERCHARGE_COST + "):\n" +
-              "Repairs all mechanical units by " + OVERCHARGE_HEAL + " HP, allowing more than 10 HP for this turn\n" +
+              "+" + OVERCHARGE_HEAL + " HP for all mechanical units, allowing more than 10 HP for this turn\n" +
               "+" + OVERCHARGE_BUFF + "% attack for all mechanical units\n" +
               "+" + OVERCHARGE_BUFF + "% defense for all units"));
       infoPages.add(new InfoPage(

@@ -25,7 +25,7 @@ public class Patch extends Commander
           "Commander Patch is a pirate, who does piratey things like lootin' and plunderin'\n"));
       infoPages.add(new InfoPage(
           "Passive:\n" +
-          "1 extra turn of income when capturing any property\n"));
+          "Instantly gain 1 turn's worth of income from any property he captures\n"));
       infoPages.add(new InfoPage(
           "Plunder ("+PLUNDER_COST+"):\n" +
           "+"+PLUNDER_ATTACK_BUFF+"% attack for all units\n" +
