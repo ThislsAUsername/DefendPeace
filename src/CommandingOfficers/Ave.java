@@ -534,7 +534,7 @@ public class Ave extends Commander
     private static final String GLACIO_NAME = "Glacio";
     private static final int GLACIO_COST = 8;
     private static final int GLACIO_BUFF = 10; // Standard 10
-    private static final int GLACIO_SNOW_SPREAD = 2;
+    private static final int GLACIO_SNOW_SPREAD = 3;
     private static final int GLACIO_FREEZE_RANGE = 2;
 
     Ave coCast;
