@@ -90,9 +90,9 @@ public class AIUtils
   }
   /**
    * Finds all actions available to unit, and organizes them by type instead of by location.
-   * Assumes caller isn't interested in moving into units' current spaces
    * @param unit The unit under consideration.
    * @param gameMap The world in which the Unit lives.
+   * @param includeOccupiedDestinations Determines whether to consider actions that would require moving to a space already occupied by a friendly unit.
    * @return a Map of ActionType to ArrayList<GameAction>.
    */
   public static Map<UnitActionFactory, ArrayList<GameAction> > getAvailableUnitActionsByType(Unit unit, GameMap gameMap, boolean includeOccupiedDestinations)
