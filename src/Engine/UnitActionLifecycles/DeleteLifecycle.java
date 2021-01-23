@@ -79,6 +79,12 @@ public abstract class DeleteLifecycle
     }
 
     @Override
+    public Unit getActor()
+    {
+      return actor;
+    }
+
+    @Override
     public String toString()
     {
       return String.format("[Delete %s in place]", actor.toStringWithLocation());

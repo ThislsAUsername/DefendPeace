@@ -133,6 +133,12 @@ public abstract class LaunchLifecycle
     }
 
     @Override
+    public Unit getActor()
+    {
+      return launcher;
+    }
+
+    @Override
     public XYCoord getMoveLocation()
     {
       return new XYCoord(launcher.x, launcher.y);

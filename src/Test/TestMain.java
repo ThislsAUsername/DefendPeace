@@ -37,6 +37,7 @@ public class TestMain extends TestCase
     testsPassed &= validate(new TestCOModifier().runTest(), "COModifier test failed!");
     testsPassed &= validate(new TestCommanderAve().runTest(), "CommanderAve test failed!");
     testsPassed &= validate(new TestCommanderTech().runTest(), "CommanderTech test failed!");
+    testsPassed &= validate(new TestAIMuriel().runTest(), "Muriel test failed!");
     System.out.println("All tests completed.");
     return testsPassed;
   }

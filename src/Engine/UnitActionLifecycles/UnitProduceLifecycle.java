@@ -81,6 +81,12 @@ public abstract class UnitProduceLifecycle
     }
 
     @Override
+    public Unit getActor()
+    {
+      return actor;
+    }
+
+    @Override
     public XYCoord getMoveLocation()
     {
       return destination;

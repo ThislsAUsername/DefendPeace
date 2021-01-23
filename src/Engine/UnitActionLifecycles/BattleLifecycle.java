@@ -137,6 +137,7 @@ public abstract class BattleLifecycle
       boolean isValid = true;
       isValid &= attacker != null && !attacker.isTurnOver;
       isValid &= (null != gameMap) && (gameMap.isLocationValid(attackLocation)) && gameMap.isLocationValid(moveCoord);
+      isValid &= null == gameMap.getResident(moveCoord) || gameMap.getResident(moveCoord) == attacker;
       isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       if( isValid )
       {
@@ -199,6 +200,12 @@ public abstract class BattleLifecycle
         output.add(new DamagePopup(attackLocation, attacker.CO.myColor, (int) (summary.defenderHPLoss*10) + "%"));
 
       return output;
+    }
+
+    @Override
+    public Unit getActor()
+    {
+      return attacker;
     }
 
     @Override
@@ -313,6 +320,12 @@ public abstract class BattleLifecycle
         output.add(new DamagePopup(attackLocation, attacker.CO.myColor, (int) (result.calculateDamage()*10) + "%"));
 
       return output;
+    }
+
+    @Override
+    public Unit getActor()
+    {
+      return attacker;
     }
 
     @Override

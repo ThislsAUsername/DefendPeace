@@ -36,6 +36,11 @@ public abstract class GameAction
   public abstract XYCoord getTargetLocation();
   public abstract UnitActionFactory getType();
 
+  public Unit getActor()
+  {
+    return null;
+  }
+
   public Collection<DamagePopup> getDamagePopups(GameMap map)
   {
     return new ArrayList<DamagePopup>();
@@ -406,6 +411,12 @@ public abstract class GameAction
         }
       }
       return subEvents;
+    }
+
+    @Override
+    public Unit getActor()
+    {
+      return unit;
     }
 
     @Override

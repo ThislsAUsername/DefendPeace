@@ -26,7 +26,7 @@ public abstract class JoinLifecycle
     {
       XYCoord moveLocation = movePath.getEndCoord();
       Unit resident = map.getLocation(moveLocation).getResident();
-      if( !ignoreResident && resident != null )
+      if( resident != null )
       {
         // TODO: Consider if and how off-CO joins should be allowed if tags ever happens
         int cargoSize = resident.heldUnits.size() + actor.heldUnits.size();
@@ -115,6 +115,12 @@ public abstract class JoinLifecycle
         }
       }
       return unitJoinEvents;
+    }
+
+    @Override
+    public Unit getActor()
+    {
+      return donor;
     }
 
     @Override

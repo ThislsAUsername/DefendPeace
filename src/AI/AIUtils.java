@@ -41,7 +41,21 @@ public class AIUtils
   public static Map<XYCoord, ArrayList<GameActionSet> >
                 getAvailableUnitActions(Unit unit, GameMap gameMap)
   {
-    boolean includeOccupiedDestinations = true;
+    boolean includeOccupiedDestinations = false;
+    return getAvailableUnitActions(unit, gameMap, includeOccupiedDestinations);
+  }
+
+  /**
+   * Finds all actions available to unit, and organizes them by location.
+   * @param unit The unit under consideration.
+   * @param gameMap The world in which the Unit lives.
+   * @param includeOccupiedDestinations Whether to include destinations underneath our other units.
+   * @return a Map of XYCoord to ArrayList<GameActionSet>. Each XYCoord will have a GameActionSet for
+   * each type of action the unit can perform from that location.
+   */
+  public static Map<XYCoord, ArrayList<GameActionSet> >
+                getAvailableUnitActions(Unit unit, GameMap gameMap, boolean includeOccupiedDestinations)
+  {
     Map<XYCoord, ArrayList<GameActionSet> > actions = new HashMap<XYCoord, ArrayList<GameActionSet> >();
 
     // Find the possible destinations.
@@ -53,7 +67,7 @@ public class AIUtils
       Path movePath = Utils.findShortestPath(unit, coord, gameMap);
 
       // Figure out what I can do here.
-      ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath);
+      ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, includeOccupiedDestinations);
 
       // Add it to my collection.
       actions.put(coord, actionSets);
@@ -71,6 +85,18 @@ public class AIUtils
    */
   public static Map<UnitActionFactory, ArrayList<GameAction> > getAvailableUnitActionsByType(Unit unit, GameMap gameMap)
   {
+    boolean includeOccupiedDestinations = false;
+    return getAvailableUnitActionsByType(unit, gameMap, includeOccupiedDestinations);
+  }
+  /**
+   * Finds all actions available to unit, and organizes them by type instead of by location.
+   * @param unit The unit under consideration.
+   * @param gameMap The world in which the Unit lives.
+   * @param includeOccupiedDestinations Determines whether to consider actions that would require moving to a space already occupied by a friendly unit.
+   * @return a Map of ActionType to ArrayList<GameAction>.
+   */
+  public static Map<UnitActionFactory, ArrayList<GameAction> > getAvailableUnitActionsByType(Unit unit, GameMap gameMap, boolean includeOccupiedDestinations)
+  {
     // Create the ActionType-indexed map, and ensure we don't have any null pointers.
     Map<UnitActionFactory, ArrayList<GameAction> > actionsByType = new HashMap<UnitActionFactory, ArrayList<GameAction> >();
     for( UnitActionFactory atype : unit.model.possibleActions )
@@ -79,7 +105,7 @@ public class AIUtils
     }
 
     // First collect the actions by location.
-    Map<XYCoord, ArrayList<GameActionSet> > actionsByLoc = getAvailableUnitActions(unit, gameMap);
+    Map<XYCoord, ArrayList<GameActionSet> > actionsByLoc = getAvailableUnitActions(unit, gameMap, includeOccupiedDestinations);
 
     // Now re-map them by type, irrespective of location.
     for( ArrayList<GameActionSet> actionSets : actionsByLoc.values() )
@@ -184,8 +210,8 @@ public class AIUtils
 
     // Find the full path that would get this unit to the destination, regardless of how long. 
     Path path = Utils.findShortestPath(unit, destination, gameMap, true);
-    boolean includeTransports = false;
-    ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, includeTransports); // Find the valid moves we can make.
+    boolean includeOccupiedSpaces = false;
+    ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces); // Find the valid moves we can make.
 
     if( path.getPathLength() > 0 && validMoves.size() > 0 ) // Check that the destination is reachable at least in theory.
     {
@@ -479,6 +505,31 @@ public class AIUtils
       int diff = o2.model.getCost()*o2.getHP() - o1.model.getCost()*o1.getHP();
       if (sortAscending)
         diff *= -1;
+      return diff;
+    }
+  }
+
+  /**
+   * Compares GameActions based on their `getMoveLocation()`'s distance from the provided `destination`.
+   * GameActions closer to `destination` will be sorted to be first.
+   */
+  public static class DistanceFromLocationComparator implements Comparator<GameAction>
+  {
+    XYCoord target;
+
+    public DistanceFromLocationComparator(XYCoord destination)
+    {
+      target = destination;
+    }
+
+    @Override
+    public int compare(GameAction o1, GameAction o2)
+    {
+      XYCoord o1c = o1.getMoveLocation();
+      XYCoord o2c = o2.getMoveLocation();
+      int o1Dist = (null == o1c) ? Integer.MAX_VALUE : o1c.getDistance(target);
+      int o2Dist = (null == o2c) ? Integer.MAX_VALUE : o2c.getDistance(target);
+      int diff = o1Dist - o2Dist;
       return diff;
     }
   }
