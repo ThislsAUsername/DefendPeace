@@ -30,11 +30,15 @@ public abstract class GameAction
    * Returns a GameEventQueue with the events that make up this action. If the action
    * was constructed incorrectly, this should return an empty GameEventQueue.
    */
-  public abstract Unit getActor();
   public abstract GameEventQueue getEvents(MapMaster map);
   public abstract XYCoord getMoveLocation();
   public abstract XYCoord getTargetLocation();
   public abstract UnitActionFactory getType();
+
+  public Unit getActor()
+  {
+    return null;
+  }
 
   public Collection<DamagePopup> getDamagePopups(GameMap map)
   {
@@ -93,12 +97,6 @@ public abstract class GameAction
     }
 
     @Override
-    public Unit getActor()
-    {
-      return null;
-    }
-
-    @Override
     public XYCoord getMoveLocation()
     {
       return where;
@@ -149,12 +147,6 @@ public abstract class GameAction
       abilityEvents.add(new CommanderAbilityEvent(myAbility));
       abilityEvents.addAll(myAbility.getEvents(map));
       return abilityEvents;
-    }
-
-    @Override
-    public Unit getActor()
-    {
-      return null;
     }
 
     @Override
