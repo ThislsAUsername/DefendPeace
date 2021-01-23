@@ -47,17 +47,18 @@ public class PixelFont
         fontMetrics = null;
         throw new RuntimeException("Failed to find an acceptable font size!");
       }
-      else if( w > fgoalwidth || h > fgoalheight )
-      {
-        // This is too big; use the last one we found.
-        break;
-      }
-      else if( w == fgoalwidth && h == fgoalheight )
+      else if( w == fgoalwidth || h == fgoalheight )
       {
         // There may be multiple font sizes that resolve to the same pixel size.
         // We want the largest "correct" size to increase odds of correct rendering.
+        // Store this as a promising candidate, but loop around again so we an push the envelope further.
         currentFont = f;
         currentFm = fm;
+      }
+      else if( w > fgoalwidth || h > fgoalheight )
+      {
+        // Now the font is too big. Use the last size we found (the largest size that renders to the correct dimensions)."
+        break;
       }
       fsize++;
     }
