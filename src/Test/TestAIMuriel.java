@@ -212,7 +212,7 @@ public class TestAIMuriel extends TestCase
     return testPassed;
   }
 
-  /** Two units want to go the same way. One is where the other should end up. Make sure they coordinate. */
+  /** An inf needs to wade through a bunch of Md Tanks to cap the HQ. */
   /** START: [ ] [ ] Inf MdT MdT MdT MdT MdT MdT MdT/HQ  */
   /** GOAL : [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] Inf/HQ */
   private boolean testInfWadeThroughTanks()
