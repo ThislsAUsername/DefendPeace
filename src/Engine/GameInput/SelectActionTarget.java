@@ -47,7 +47,7 @@ class SelectActionTarget extends GameInputState<XYCoord>
     GameInputState<?> next = this;
 
     // Find the action that this target location belongs to.
-    // By virtue of the fact that GameActionSets should be homogenous, and it should be
+    // By virtue of the fact that GameActionSets should be homogeneous, and it should be
     // nonsensical to have two actions of the same type targeting the same location, this
     // should be enough to uniquely identify the action we want.
     // Well OK, UNLOAD action sets can have different actions with the same target location.

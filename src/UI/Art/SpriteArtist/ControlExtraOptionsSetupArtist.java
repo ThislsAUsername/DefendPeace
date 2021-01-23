@@ -37,15 +37,15 @@ public class ControlExtraOptionsSetupArtist
 
     // Loop through and draw all the bindings, building or updating the necessary images.
     yDraw = spacing/2; // Reset y-spacing to draw keys.
-    int xDraw = spacing / 2;
     for( int ip = 0; ip < InputOptionsController.actionCommandSelector.size(); ++ip )
     {
+      int xDraw = (controlsImage.getWidth() / 2) - (template.graphicsOptionWidth / 2);
       template.drawGameOption(cig, xDraw, yDraw, InputOptionsController.allOptions[ip]);
       if( ip == selectedAction ) // Draw the cursor over the selected item.
       {
-        int arrowX = xDraw + template.optionNamePanel.getWidth() + template.optionSpacingPx/2;
+        xDraw += template.optionNamePanel.getWidth();
         cig.drawImage(template.optionArrows,
-                      arrowX, yDraw + 3,
+                      xDraw + template.horizontalSpacing/2, yDraw + 3,
                       template.optionArrows.getWidth(), template.optionArrows.getHeight(),
                       null);
       }

@@ -107,7 +107,7 @@ public class PlayerSetupAiArtist
     myG.drawRect(infoX, infoY, infoW, infoH);
 
     // Draw the AI description.
-    BufferedImage infoText = SpriteUIUtils.drawTextToWidth(aiOptions.get(highlightedAi).getDescription(), (aiInfoZoneWidth - nameplateHeight*2));
+    BufferedImage infoText = SpriteUIUtils.drawProseToWidth(aiOptions.get(highlightedAi).getDescription(), (aiInfoZoneWidth - nameplateHeight*2));
     myG.drawImage(infoText, (infoX+infoBuffer), (infoY+infoBuffer), null);
 
     // Draw the composed image to the window at scale.
