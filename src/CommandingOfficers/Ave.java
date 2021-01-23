@@ -78,28 +78,28 @@ public class Ave extends Commander
       super("Ave");
       infoPages.add(new InfoPage(
           "Commander Ave (AH-vey) supports her skiing habit by slowly growing a mountain of fresh " +
-          "snow around each of her buildings. This also allows her to gradually but inexorably " +
+          "snow around each of her buildings. This allows her to gradually but inexorably " +
           "grind her opponents down beneath a wall of ever-encroaching ice."));
       infoPages.add(new InfoPage(
           "Passive:\r\n" +
-          "- Ave generates snow around all owned properties, which spreads over time.\n" +
-          "- The radius of effect is small at first, but can be expanded by her abilities.\n" +
-          "- Her units move normally in snow, but take a movement and defense penalty in forests."));
+          "Ave generates snow around all owned properties, which spreads over time.\n" +
+          "The radius of effect is small at first, but can be expanded by her abilities.\n" +
+          "Her units move normally in snow, but take a movement and defense penalty in forests."));
       infoPages.add(new InfoPage(
           "Nix ("+NixAbility.NIX_COST+"):\n" +
-          "Ave's units gain a "+NixAbility.NIX_BUFF+"% increase in firepower.\n" +
-          "Permanently expands the range of Ave's snow passive.\n" +
-          "This ability increases in cost more quickly than most other abilities as it is used."));
+          "+"+NixAbility.NIX_BUFF+"% attack for all units\n" +
+          "+1 Range for Ave's snow-aura passive\n" +
+          "\nNOTE: This ability increases in cost more quickly than normal"));
       infoPages.add(new InfoPage(
           "Glacio ("+GlacioAbility.GLACIO_COST+"):\n" +
-          "Ave's units gain a "+GlacioAbility.GLACIO_BUFF+"% increase in firepower.\n" +
-          "Increases the snow-aura around her buildings by "+GlacioAbility.GLACIO_SNOW_SPREAD+" spaces for the next turn.\n" +
-          "Snows on every tile in a "+GlacioAbility.GLACIO_SNOW_SPREAD+"-space radius around each of her units.\n" +
-          "Stuns any enemy unit within "+GlacioAbility.GLACIO_FREEZE_RANGE+" spaces of one of Ave's units or buildings."));
+          "+"+GlacioAbility.GLACIO_BUFF+"% attack for all units\n" +
+          "Expands the snow-aura around her buildings by "+GlacioAbility.GLACIO_SNOW_SPREAD+" spaces\n" +
+          "Snows on every tile in a "+GlacioAbility.GLACIO_SNOW_SPREAD+"-space radius around each of her units\n" +
+          "Stuns any enemy unit within "+GlacioAbility.GLACIO_FREEZE_RANGE+" spaces of one of Ave's units or buildings"));
       infoPages.add(new InfoPage(
           "Oblido ("+OblidoAbility.OBLIDO_COST+"):\n" +
-          "Ave's units gain a "+OblidoAbility.OBLIDO_BUFF+"% increase in firepower.\n" +
-          "Hailstones rain down in a "+OblidoAbility.OBLIDO_RANGE+"-space radius around Ave's units and buildings, damaging enemies for up to 2HP, and destroying any forests (reducing them to grass).\n"));
+          "+"+OblidoAbility.OBLIDO_BUFF+"% attack for all units\n" +
+          "Hailstones fall in a "+OblidoAbility.OBLIDO_RANGE+"-space radius around Ave's units and buildings, damaging enemies for up to 2HP, and destroying any forests (reducing them to grass)\n"));
       infoPages.add(new InfoPage(
           "Likes: Steep Slopes and Sharp Cuts\n" +
           "Dislikes: Trees and Mythical Snow Monsters"));

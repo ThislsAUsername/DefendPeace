@@ -70,10 +70,30 @@ public class SpriteUIUtils
   }
 
   /**
+   * Returns an image with the input prose printed, in normal text.
+   * Acts as an overload to {@link #drawProseToWidth(String, int)}
+   */
+  public static BufferedImage drawProse(String prose)
+  {
+    // Figure out how big our text is.
+    PixelFont font = SpriteLibrary.getFontStandard();
+
+    ArrayList<String> lines = new ArrayList<String>();
+    // Unload our prose into the lines it already has
+    lines.addAll(Arrays.asList(prose.split("\\R")));
+
+    int maxWidth = 1;
+    for( String line : lines )
+      maxWidth = Math.max(maxWidth, font.getWidth(line));
+
+    return drawProseToWidth(prose, maxWidth);
+  }
+
+  /**
    * Returns an image with the input string printed within the specified width, in normal text.
    * @param reqWidth: Actual UI size in pixels that you want to fit the text into.
    */
-  public static BufferedImage drawTextToWidth(String prose, int reqWidth)
+  public static BufferedImage drawProseToWidth(String prose, int reqWidth)
   {
     // Figure out how big our text is.
     PixelFont font = SpriteLibrary.getFontStandard();
@@ -94,34 +114,21 @@ public class SpriteUIUtils
 
       lines.remove(i);
 
-      // See if we can split the line on a space
       String subline = line;
       int splitIndex = 0;
       boolean fits = false;
-      // Start by cutting the line at each space to try and make it fit.
       do
       {
+        // Start by cutting the line at each space to try and make it fit.
         splitIndex = subline.lastIndexOf(' ');
+        if( splitIndex < 1 ) // no spaces we can split on...
+          splitIndex = subline.length() - 1; // Just shave off a letter instead
+
         subline = subline.substring(0, splitIndex);
         fits = font.getWidth(subline) <= reqWidth;
-      } while(!fits && splitIndex > 0);
+      } while(!fits);
 
-      // If it still doesn't fit, then shave off letters until it does.
-      while( !fits )
-      {
-        splitIndex = subline.length() - 1; // Just shave off letters until it fits.
-        subline = subline.substring(0, splitIndex);
-        fits = font.getWidth(subline) <= reqWidth;
-
-        if( !fits && (subline.length() <= 1) )
-        {
-          // We check em size above and break early if the required width is too small,
-          // so this is just a sanity check, and should never ever be invoked.
-          throw new RuntimeException("ERROR! Trying to draw font in a too-small space. This should never happen!");
-        }
-      }
-
-      lines.add(i, line.substring(splitIndex)); // put in the second half
+      lines.add(i, ' ' + line.substring(splitIndex)); // put in the second half
       lines.add(i, line.substring(0, splitIndex)); // and then the first half behind it
     }
 
@@ -406,5 +413,37 @@ public class SpriteUIUtils
       num /= 10; // Shift to the next higher digit in the number.
     } while (num > 0);
     return numImage;
+  }
+
+  /**
+   * Code kinda-not-really stolen from https://stackoverflow.com/questions/20826216/copy-two-bufferedimages-into-one-image-side-by-side
+   * Joins BufferedImages, creating a single contiguous image
+   */
+  public static BufferedImage joinBufferedImages(BufferedImage[] frames, int imageSpacing)
+  {
+    // aggregate sizing
+    int width = 0;
+    int height = frames[0].getHeight();
+    for(BufferedImage frame : frames)
+    {
+      width += (frame.getWidth() + imageSpacing);
+      if(height != frame.getHeight())
+      {
+        height = Math.max(height, frame.getHeight());
+        System.out.println("WARNING: Joining images with unequal heights");
+      }
+    }
+
+    //create a new buffer and draw two image into the new image
+    BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    Graphics g = newImage.getGraphics();
+
+    int currentOffset = 0;
+    for( int i = 0; i < frames.length; i++ )
+    {
+      g.drawImage(frames[i], currentOffset, 0, null);
+      currentOffset += (frames[i].getWidth() + imageSpacing);
+    }
+    return newImage;
   }
 }

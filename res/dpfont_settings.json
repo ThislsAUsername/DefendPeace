@@ -1,0 +1,38 @@
+{
+	"$baseURI": "https://yal.cc/r/20/pixelfont/",
+	"$version": "1.0",
+	"in-glyphs": [
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+		"abcdefghijklmnopqrstuvwxyz",
+		"0123456789%./-~,;:!?'&()_"
+	],
+	"glyph-color": "auto",
+	"glyph-width": 5,
+	"glyph-height": 9,
+	"glyph-ofs-x": 0,
+	"glyph-ofs-y": 0,
+	"glyph-sep-x": 0,
+	"glyph-sep-y": 0,
+	"glyph-base-x": 0,
+	"glyph-baseline": 7,
+	"glyph-spacing": 1,
+	"font-is-mono": false,
+	"font-em-square": 1024,
+	"font-line-gap": 114,
+	"font-px-size": 114,
+	"font-ascend": 798,
+	"font-descend": -228,
+	"font-name": "DPFont_5x9",
+	"font-author": "ThatIsAUsername",
+	"font-copy": "(c)",
+	"font-version": "Version 1.0",
+	"font-desc": "Font created for DefendPeace",
+	"font-license": "Use it however you want.",
+	"font-license-url": "",
+	"font-sample-text": "The quick brown fox jumps over a lazy dog.",
+	"font-preview-text": [
+		"THE QUICK BROWN FOX JUMPS OVER A LAZY DOG.",
+		"the quick brown fox jumps over a lazy dog.",
+		"0123456789"
+	]
+}
