@@ -311,7 +311,7 @@ public class Muriel implements AIController
     // Give the obstacle priority so it has to move first.
     unitSelector.flagObstacle(obstacle);
   }
-  /** Compare ga against any currently-obstructed actions. Return true if it is better
+  /** Compare input action against known blocked actions doable from that space. Return true if it is better
    * than any of those, and false if an existing known action should take priority. */
   public boolean isBestCurrentAction(Unit actor, GameAction action, double value)
   {
