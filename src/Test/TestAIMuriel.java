@@ -160,7 +160,8 @@ public class TestAIMuriel extends TestCase
     return testPassed;
   }
 
-  /** Put some infantry in between a MdTank and its quarry. See if they will move out of the way. */
+  /** Put some infantry in between an AA and its quarry. See if they will move out of the way. */
+  @SuppressWarnings("unused")
   private boolean testClearAttackRoute(AIMaker ai)
   {
     setupTest(ai);
@@ -178,14 +179,14 @@ public class TestAIMuriel extends TestCase
     // Where are things?
     XYCoord facPos = new XYCoord(7, 8);
 
-    // Add an enemy tank on a neutral fac, flanked by friendly infs, with a friendly tank nearby.
-    Unit nmeTank = addUnit(testMap, testCo2, "Tank", facPos);
-    Unit myTank = addUnit(testMap, testCo1, "Md Tank", facPos.up().left());
+    // Add an enemy copter on a neutral fac, flanked by friendly infs, with a friendly AA nearby.
+    Unit nmeCopter = addUnit(testMap, testCo2, "B-Copter", facPos);
+    Unit myAA = addUnit(testMap, testCo1, "Anti-Air", facPos.up().left());
     Unit iLeft = addUnit(testMap, testCo1, "Infantry", facPos.left());
     Unit iUp = addUnit(testMap, testCo1, "Infantry", facPos.up());
     Unit iRight = addUnit(testMap, testCo1, "Infantry", facPos.right());
 
-    // The infs all want to cap the fac, but can't because it is occupied. Gotta let the MdTank through.
+    // The infs all want to cap the fac, but can't because it is occupied. Gotta let the AA through.
     // Fetch and execute Muriel actions until she stops creating them.
     testCo1.initTurn(testMap);
     testCo1.money = 0; // No production needed for this test.
@@ -199,7 +200,8 @@ public class TestAIMuriel extends TestCase
         testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
     } while( null != act && testPassed );
 
-    testPassed &= validate(nmeTank.getHP() < 10, "    "+ai.getName()+" failed to attack enemy tank!");
+    testPassed &= validate(nmeCopter.getHP() < 10, "    "+ai.getName()+" failed to attack enemy copter!");
+    testPassed &= validate(!testMap.isLocationEmpty(facPos), "    "+ai.getName()+" failed to start capping the factory!");
 
     // Clean up
     cleanupTest();
