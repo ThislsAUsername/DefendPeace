@@ -425,7 +425,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
           // Save the game, display a message, and exit to the main menu.
           boolean endTurn = true;
-          String saveName = myGame.writeSave(endTurn);
+          String saveName = SerializationUtils.writeSave(myGame, endTurn);
           ArrayList<String> saveMsg = new ArrayList<String>();
           saveMsg.add("Saved game to");
           saveMsg.add(saveName);
@@ -445,7 +445,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         break;
       case SAVE:
         boolean advanceTurnOnLoad = false;
-        myGame.writeSave(advanceTurnOnLoad);
+        SerializationUtils.writeSave(myGame, advanceTurnOnLoad);
         myGameInputHandler.reset(); // SAVE is a terminal state. Reset the input handler.
         break;
       case CO_STATS:
