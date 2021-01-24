@@ -180,6 +180,7 @@ public class Tech extends Commander
   private static class TechdropAbility extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
+    private static final boolean log = true;
 
     private CODamageModifier damageBuff = null;
     private CODefenseModifier defenseBuff = null;
@@ -217,7 +218,6 @@ public class Tech extends Commander
     @Override
     public GameEventQueue getEvents(MapMaster gameMap)
     {
-      boolean log = true;
       if( log ) System.out.println("[TechDrop] getEvents() entry");
 
       GameEventQueue abilityEvents = new GameEventQueue();
@@ -265,7 +265,6 @@ public class Tech extends Commander
     {
       ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
 
-      boolean log = true;
       Set<XYCoord> dropLocs = new HashSet<XYCoord>();
       for( int i = 0; i < numDrops; ++i )
       {

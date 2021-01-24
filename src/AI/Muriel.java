@@ -178,7 +178,7 @@ public class Muriel implements AIController
     myUnitEffectMap.put(new UnitModelPair(myModel, otherModel), new UnitMatchupAndMetaInfo(damageRatio, costRatio));
     myUnitEffectMap.put(new UnitModelPair(otherModel, myModel), new UnitMatchupAndMetaInfo(invRatio, otherCostRatio));
 
-    System.out.println(String.format("Adding matchup: %s vs %s: %s/%s, damageRatio: %s, costRatio: %s", myUnit, otherUnit, myDamage, otherDamage, damageRatio, costRatio));
+    log(String.format("Adding matchup: %s vs %s: %s/%s, damageRatio: %s, costRatio: %s", myUnit, otherUnit, myDamage, otherDamage, damageRatio, costRatio));
     return myUnitEffectMap.get(new UnitModelPair(myModel, otherModel));
   }
 
