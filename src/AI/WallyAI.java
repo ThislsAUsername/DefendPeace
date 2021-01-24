@@ -596,18 +596,19 @@ public class WallyAI extends ModularAI
 
     ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
     Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), stations);
+    boolean shouldResupply = false;
     if( stations.size() > 0 )
     {
-      boolean shouldResupply = unit.getHP() <= UNIT_HEAL_THRESHHOLD;
+      shouldResupply = unit.getHP() <= UNIT_HEAL_THRESHHOLD;
       shouldResupply |= unit.fuel <= UNIT_REFUEL_THRESHHOLD
           * Utils.findShortestPath(unit, stations.get(0), gameMap).getFuelCost(unit.model, gameMap);
       shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHHOLD;
+    }
 
-      if( shouldResupply )
-      {
-        log(String.format("  %s needs supplies.", unit.toStringWithLocation()));
-        goals.addAll(stations);
-      }
+    if( shouldResupply )
+    {
+      log(String.format("  %s needs supplies.", unit.toStringWithLocation()));
+      goals.addAll(stations);
       if( avoidProduction )
         goals.removeAll(AIUtils.findAlliedIndustries(gameMap, myCo, goals, !avoidProduction));
     }
