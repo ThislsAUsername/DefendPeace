@@ -630,7 +630,7 @@ public class WallyAI extends ModularAI
         XYCoord targetCoord = new XYCoord(target.x, target.y);
         double effectiveness = findEffectiveness(unit.model, target.model);
         if (Utils.findShortestPath(unit, targetCoord, gameMap, true) != null &&
-            AGGRO_EFFECT_THRESHHOLD > effectiveness)
+            AGGRO_EFFECT_THRESHHOLD < effectiveness)
         {
           valueMap.put(model, effectiveness*model.getCost());
           if (!targetMap.containsKey(model)) targetMap.put(model, new ArrayList<XYCoord>());
