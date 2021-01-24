@@ -1,6 +1,11 @@
 package Test;
 
+import java.util.function.Function;
+
+import AI.AIController;
+import AI.AIMaker;
 import AI.Muriel;
+import AI.WallyAI;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
@@ -18,23 +23,23 @@ public class TestAIMuriel extends TestCase
 {
   private static Commander testCo1;
   private static Commander testCo2;
-  private static Muriel testAI;
+  private static AIMaker[] ais = { Muriel.info, WallyAI.info };
   private static MapMaster testMap;
   private static GameInstance testGame;
 
   /** Make two COs and a MapMaster to use with this test case. */
-  private void setupTest()
+  private void setupTest(AIMaker ai)
   {
-    setupTest(MapLibrary.getByName("Firing Range"));
+    setupTest(MapLibrary.getByName("Firing Range"), ai);
   }
 
   /** Make two COs and a MapMaster to use with this test case. */
-  private void setupTest(MapInfo mapInfo)
+  private void setupTest(MapInfo mapInfo, AIMaker ai)
   {
     GameScenario scn = new GameScenario();
     testCo1 = new Strong(scn.rules);
     testCo2 = new Patch(scn.rules);
-    testAI = new Muriel(testCo1);
+    AIController testAI = ai.create(testCo1);
     testCo1.setAIController(testAI);
     Commander[] cos = { testCo1, testCo2 };
 
@@ -46,7 +51,6 @@ public class TestAIMuriel extends TestCase
   {
     testCo1 = null;
     testCo2 = null;
-    testAI = null;
     testMap = null;
     testGame = null;
   }
@@ -55,37 +59,62 @@ public class TestAIMuriel extends TestCase
   public boolean runTest()
   {
     boolean testPassed = true;
-    testPassed &= validate(testBuildMegatank(), "  Build Megatank test failed.");
-    testPassed &= validate(testHuntStall(), "  Hunting stall-test failed.");
-    testPassed &= validate(testClearAttackRoute(), "  Route clearing test failed.");
-    testPassed &= validate(testWalkInLine(), "  Line walking test failed.");
-    testPassed &= validate(testInfWadeThroughTanks(), "  Infantry move priority test failed.");
-    testPassed &= validate(testTankWadeThroughInfs(), "  Tank move priority test failed.");
+    testPassed &= validate(testForAllAIs((ai) -> testBuildMegatank(ai)), "  Build Megatank test failed.");
+    testPassed &= validate(testForAllAIs((ai) -> testHuntStall(ai)), "  Hunting stall-test failed.");
+    testPassed &= validate(testForAllAIs((ai) -> testClearAttackRoute(ai)), "  Route clearing test failed.");
+    testPassed &= validate(testForAllAIs((ai) -> testWalkInLine(ai)), "  Line walking test failed.");
+    testPassed &= validate(testForAllAIs((ai) -> testInfWadeThroughTanks(ai)), "  Infantry move priority test failed.");
+    testPassed &= validate(testForAllAIs((ai) -> testTankWadeThroughInfs(ai)), "  Tank move priority test failed.");
     return testPassed;
   }
 
-  /** Confirm that Muriel will build the correct counter, even when there is only one possible counter. */
-  private boolean testBuildMegatank()
+  private boolean testForAllAIs(Function<AIMaker, Boolean> test)
   {
-    setupTest();
+    boolean testPassed = true;
+
+    for( AIMaker ai : ais )
+    {
+      testPassed &= test.apply(ai);
+      if( !testPassed )
+        break;
+    }
+
+    return testPassed;
+  }
+
+  /** Confirm that the AI will build the correct counter, even when there is only one possible counter. */
+  private boolean testBuildMegatank(AIMaker ai)
+  {
+    setupTest(ai);
 
     // Add an enemy to counter.
     addUnit(testMap, testCo2, "Megatank", 1, 1);
-
-    // Put Muriel in control
-    testCo1.setAIController(testAI);
 
     // Give Muriel resources.
     testCo1.money = 80000;
 
     // Ask Muriel what to do.
     testCo1.initTurn(testMap);
-    GameAction act = testCo1.getNextAIAction(testMap);
-    performGameAction(act, testGame);
+    GameAction act = null;
+    boolean testPassed = true;
+    do
+    {
+      act = testCo1.getNextAIAction(testMap);
+      if( null != act )
+        testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
+    } while( null != act && testPassed );
 
     // Muriel should have built a Megatank as the best/only viable unit to counter an enemy Megatank.
-    boolean testPassed = validate(testCo1.units.size() == 1, "    Failed to produce a unit!");
-    testPassed &= validate(testCo1.units.get(0).model.name.contentEquals("Megatank"), "    Muriel built the wrong thing!");
+    testPassed = validate(testCo1.units.size() > 0, "    Failed to produce a unit!");
+
+    boolean foundMega = false;
+    for( Unit u : testCo1.units )
+    {
+      foundMega |= u.model.name.contentEquals("Megatank");
+      if( foundMega )
+        break;
+    }
+    testPassed &= validate(foundMega, "    "+ai.getName()+" didn't build the right thing!");
 
     // Clean up
     cleanupTest();
@@ -94,9 +123,9 @@ public class TestAIMuriel extends TestCase
   }
 
   /** Confirm that Muriel will build the correct counter, even when there is only one possible counter. */
-  private boolean testHuntStall()
+  private boolean testHuntStall(AIMaker ai)
   {
-    setupTest();
+    setupTest(ai);
 
     // Where are things?
     XYCoord tankStart = new XYCoord(2, 1);
@@ -112,13 +141,18 @@ public class TestAIMuriel extends TestCase
 
     // Ask Muriel what to do.
     testCo1.initTurn(testMap);
-    GameAction act = testCo1.getNextAIAction(testMap);
-    performGameAction(act, testGame);
+    GameAction act = null;
+    do
+    {
+      act = testCo1.getNextAIAction(testMap);
+      if( null != act )
+        testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
+    } while( null != act && testPassed );
 
     // Muriel should have moved the Md Tank towards the enemy Recon, but not ended top of the factory.
     XYCoord tankEnd = new XYCoord(myTank.x, myTank.y);
-    testPassed &= validate(!tankEnd.equals(tankStart), "    Muriel did not move the Md Tank!");
-    testPassed &= validate(!tankEnd.equals(facPos), "    Muriel blocked a factory!");
+    testPassed &= validate(!tankEnd.equals(tankStart), "    "+ai.getName()+" did not move the Md Tank!");
+    testPassed &= validate(!tankEnd.equals(facPos), "    "+ai.getName()+" blocked a factory!");
 
     // Clean up
     cleanupTest();
@@ -127,9 +161,9 @@ public class TestAIMuriel extends TestCase
   }
 
   /** Put some infantry in between a MdTank and its quarry. See if they will move out of the way. */
-  private boolean testClearAttackRoute()
+  private boolean testClearAttackRoute(AIMaker ai)
   {
-    setupTest();
+    setupTest(ai);
 
     // Give Muriel some properties so they are out of the way.
     testMap.getLocation(2, 5).setOwner(testCo1);
@@ -162,10 +196,10 @@ public class TestAIMuriel extends TestCase
     {
       act = testCo1.getNextAIAction(testMap);
       if( null != act )
-        testPassed &= validate(performGameAction(act, testGame), "    Muriel generated a bad action!");
+        testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
     } while( null != act && testPassed );
 
-    testPassed &= validate(nmeTank.getHP() < 10, "    Muriel failed to attack enemy tank!");
+    testPassed &= validate(nmeTank.getHP() < 10, "    "+ai.getName()+" failed to attack enemy tank!");
 
     // Clean up
     cleanupTest();
@@ -175,7 +209,7 @@ public class TestAIMuriel extends TestCase
   /** Two units want to go the same way. One is where the other should end up. Make sure they coordinate. */
   /** START: [ ] [ ] INF [ ] [ ] INF [ ] [ ] [ ] HQ  */
   /** GOAL : [ ] [ ] [ ] [ ] [ ] INF [ ] [ ] INF HQ */
-  private boolean testWalkInLine()
+  private boolean testWalkInLine(AIMaker ai)
   {
     // Generate a custom tiny map to keep things simple.
     TerrainType[] HQCol = {TerrainType.HEADQUARTERS};
@@ -186,7 +220,7 @@ public class TestAIMuriel extends TestCase
     XYCoord[] co2Props = { new XYCoord(9, 0) };
     XYCoord[][] properties = { co1Props, co2Props };
     MapInfo mapInfo = new MapInfo("LineTest", terrainData, properties);
-    setupTest(mapInfo);
+    setupTest(mapInfo, ai);
 
     // Add two infantry.
     Unit lt = addUnit(testMap, testCo1, "Infantry", new XYCoord(2, 0));
@@ -201,11 +235,11 @@ public class TestAIMuriel extends TestCase
     {
       act = testCo1.getNextAIAction(testMap);
       if( null != act )
-        testPassed &= validate(performGameAction(act, testGame), "    Muriel generated a bad action!");
+        testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
     } while( null != act && testPassed );
 
-    testPassed &= validate(lt.x == 5, "    Muriel failed to move left infantry as intended!");
-    testPassed &= validate(rt.x == 8, "    Muriel failed to move right infantry as intended!");
+    testPassed &= validate(lt.x == 5, "    "+ai.getName()+" failed to move left infantry as intended!");
+    testPassed &= validate(rt.x == 8, "    "+ai.getName()+" failed to move right infantry as intended!");
 
     // Clean up
     cleanupTest();
@@ -215,7 +249,7 @@ public class TestAIMuriel extends TestCase
   /** An inf needs to wade through a bunch of Md Tanks to cap the HQ. */
   /** START: [ ] [ ] Inf MdT MdT MdT MdT MdT MdT MdT/HQ  */
   /** GOAL : [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] Inf/HQ */
-  private boolean testInfWadeThroughTanks()
+  private boolean testInfWadeThroughTanks(AIMaker ai)
   {
     // Generate a custom tiny map to keep things simple.
     TerrainType[] HQCol = {TerrainType.HEADQUARTERS};
@@ -226,7 +260,7 @@ public class TestAIMuriel extends TestCase
     XYCoord[] co2Props = { new XYCoord(9, 0) };
     XYCoord[][] properties = { co1Props, co2Props };
     MapInfo mapInfo = new MapInfo("LineTest", terrainData, properties);
-    setupTest(mapInfo);
+    setupTest(mapInfo, ai);
 
     // Add one infantry and a bunch of tanks in the way
     Unit inf = addUnit(testMap, testCo1, "Infantry", new XYCoord(2, 0));
@@ -244,12 +278,12 @@ public class TestAIMuriel extends TestCase
       {
         act = testCo1.getNextAIAction(testMap);
         if( null != act )
-          testPassed &= validate(performGameAction(act, testGame), "    Muriel generated a bad action!");
+          testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
       } while( null != act && testPassed );
     }
 
-    testPassed &= validate(inf.x == 9, "    Muriel failed to move infantry onto HQ!");
-    testPassed &= validate(testMap.getLocation(9, 0).getOwner() == inf.CO, "    Muriel failed to capture the HQ!");
+    testPassed &= validate(inf.x == 9, "    "+ai.getName()+" failed to move infantry onto HQ!");
+    testPassed &= validate(testMap.getLocation(9, 0).getOwner() == inf.CO, "    "+ai.getName()+" failed to capture the HQ!");
 
     // Clean up
     cleanupTest();
@@ -259,7 +293,7 @@ public class TestAIMuriel extends TestCase
   /** Two units want to go the same way. One is where the other should end up. Make sure they coordinate. */
   /** START: [ ] MdT Inf Inf Inf Inf Inf Inf Inf Rty/HQ  */
   /** GOAL : [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] MdT Inf/HQ */
-  private boolean testTankWadeThroughInfs()
+  private boolean testTankWadeThroughInfs(AIMaker ai)
   {
     // Generate a custom tiny map to keep things simple.
     TerrainType[] HQCol = {TerrainType.HEADQUARTERS};
@@ -270,7 +304,7 @@ public class TestAIMuriel extends TestCase
     XYCoord[] co2Props = { new XYCoord(9, 0) };
     XYCoord[][] properties = { co1Props, co2Props };
     MapInfo mapInfo = new MapInfo("LineTest", terrainData, properties);
-    setupTest(mapInfo);
+    setupTest(mapInfo, ai);
 
     // Add one Md Tank, an enemy arty, and a bunch of infantry in the way
     for( int xx = 2; xx < 9; ++xx)
@@ -289,13 +323,13 @@ public class TestAIMuriel extends TestCase
       {
         act = testCo1.getNextAIAction(testMap);
         if( null != act )
-          testPassed &= validate(performGameAction(act, testGame), "    Muriel generated a bad action!");
+          testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
       } while( null != act && testPassed );
     }
 
-    testPassed &= validate(nmeArty.getHP() <= 0, "    Muriel failed to kill the artillery!");
-    testPassed &= validate(testMap.getResident(9, 0).CO == inf.CO, "    Muriel failed to move infantry onto HQ!");
-    testPassed &= validate(testMap.getLocation(9, 0).getOwner() == inf.CO, "    Muriel failed to capture the HQ!");
+    testPassed &= validate(nmeArty.getHP() <= 0, "    "+ai.getName()+" failed to kill the artillery!");
+    testPassed &= validate(testMap.getResident(9, 0).CO == inf.CO, "    "+ai.getName()+" failed to move infantry onto HQ!");
+    testPassed &= validate(testMap.getLocation(9, 0).getOwner() == inf.CO, "    "+ai.getName()+" failed to capture the HQ!");
 
     // Clean up
     cleanupTest();
