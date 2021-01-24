@@ -150,6 +150,7 @@ public class WallyAI extends ModularAI
   @Override
   public void endTurn()
   {
+    super.endTurn();
     log(String.format("[======== Wally ending turn %s for %s =========]", turnNum, myCo));
   }
 
@@ -532,6 +533,16 @@ public class WallyAI extends ModularAI
     }
 
     Map<XYCoord, UnitModel> builds;
+
+    @Override
+    public void endTurn()
+    {
+      if( null != builds )
+      {
+        ai.log(String.format("Warning - builds not null on turn end; contains %s", builds));
+        builds = null;
+      }
+    }
 
     @Override
     public GameAction getNextAction(PriorityQueue<Unit> unitQueue, GameMap gameMap)

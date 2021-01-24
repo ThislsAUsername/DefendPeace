@@ -50,6 +50,15 @@ public abstract class ModularAI implements AIController
     }
   }
 
+  @Override
+  public void endTurn()
+  {
+    for( AIModule phase : aiPhases )
+    {
+      phase.endTurn();
+    }
+  }
+
   protected void log(String message)
   {
     System.out.println(message);
@@ -89,6 +98,7 @@ public abstract class ModularAI implements AIController
   {
     public GameAction getNextAction(PriorityQueue<Unit> unitQueue, GameMap map);
     public default void initTurn(GameMap gameMap) {}
+    public default void endTurn() {}
   }
 
   public static class PowerActivator implements AIModule
