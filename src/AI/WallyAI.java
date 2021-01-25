@@ -113,6 +113,7 @@ public class WallyAI extends ModularAI
             new GenerateThreatMap(co, this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
             new CaptureFinisher(co, this),
 
+            new NHitKO(co, this),
             new SiegeAttacks(co, this),
             new PowerActivator(co, CommanderAbility.PHASE_BUY),
             new FreeRealEstate(co, this, false), // Get any capture actions in before eviction goes into full force
@@ -266,7 +267,7 @@ public class WallyAI extends ModularAI
                   && !gameMap.isLocationFogged(xyc) )
                 neededAttacks.put(xyc, null);
             }
-            double damage = ai.findAssaultKills(gameMap, unitQueue, neededAttacks, target, 0);
+            double damage = WallyAI.findAssaultKill(gameMap, unitQueue, neededAttacks, target, 0);
             if( damage >= target.getHP() && neededAttacks.size() > 1 )
             {
               ai.log(String.format("Found %s-Hit KO dealing %s HP to %s, who has %s", neededAttacks.size(), (int)damage, target.toStringWithLocation(), target.getHP()));
@@ -885,16 +886,21 @@ public class WallyAI extends ModularAI
   /**
    * Attempts to find a combination of attacks that will create a kill.
    * Recursive.
+   * @param unitQueue The set of potential attackers
+   * @param neededAttacks The set of locations to consider, pre-populated with any mandatory attacks, to be populated
+   * @param pDamage The cumulative base damage done by those mandatory attacks
+   * @return The cumulative base damage of all attacks in the neededAttacks
    */
-  private double findAssaultKills(GameMap gameMap, Queue<Unit> unitQueue, Map<XYCoord, Unit> neededAttacks, Unit target, double pDamage)
+  public static double findAssaultKill(GameMap gameMap, Collection<Unit> unitQueue, Map<XYCoord, Unit> neededAttacks, Unit target, double pDamage)
   {
-    // base case; we found a kill
+    // Base case; we found a kill
     if( pDamage >= target.getPreciseHP() )
     {
       return pDamage;
     }
 
     double damage = pDamage;
+    // Iterate through the attack spaces, and try filling all spaces recursively from each one
     for( XYCoord xyc : neededAttacks.keySet() )
     {
       // Don't try to attack from the same space twice.
@@ -907,35 +913,31 @@ public class WallyAI extends ModularAI
       while (!assaultQueue.isEmpty())
       {
         Unit unit = assaultQueue.poll();
-        if( !unit.model.hasDirectFireWeapon() || neededAttacks.containsValue(unit) ) // don't try to attack twice with one unit
-          continue;
-
+        boolean requiresMoving = !xyc.equals(target.x, target.y);
         int dist = xyc.getDistance(target.x, target.y);
+        if( unit.canAttack(target.model, dist, requiresMoving) )
+          continue; // Consider only units that can attack from here
+        if( neededAttacks.containsValue(unit) )
+          continue; // Consider each unit only once
 
         // Figure out how to get here.
         Path movePath = Utils.findShortestPath(unit, xyc, gameMap);
 
-        if( movePath.getPathLength() > 0 && unit.canAttack(target.model, dist, true) )
+        if( movePath.getPathLength() > 0 )
         {
           neededAttacks.put(xyc, unit);
           double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
 
-          if( thisDamage > target.getPreciseHP() )
-            continue; // OHKOs should be decided using different logic
+          thisDamage = findAssaultKill(gameMap, unitQueue, neededAttacks, target, damage + thisDamage);
 
-//          log(String.format("  Use %s to deal %sHP?", unit.toStringWithLocation(), thisDamage));
-          thisDamage = findAssaultKills(gameMap, unitQueue, neededAttacks, target, thisDamage);
-
-          // Base case, stop iterating.
+          // If we've found a kill, we're done
           if( thisDamage >= target.getPreciseHP() )
           {
-//            log(String.format("    Yes, shoot %s", target.toStringWithLocation()));
             damage = thisDamage;
             break;
           }
-          else
+          else // Otherwise, remove the attacker from the slot to make room for the next calculation
           {
-//            log(String.format("    Nope"));
             neededAttacks.put(xyc, null);
           }
         }
