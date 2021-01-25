@@ -445,7 +445,7 @@ public class Muriel implements AIController
         Unit unitInTheWay = gameMap.getResident(action.getMoveLocation()); // Could be us, could be nobody.
 
         // Sift through all attack actions we can perform.
-        double damageValue = AIUtils.scoreAttackAction(unit, action, gameMap,
+        double damageValue = AICombatUtils.scoreAttackAction(unit, action, gameMap,
             (results) -> {
               double hpDamage = Math.min(results.defenderHPLoss, results.defender.getPreciseHP());
 
@@ -614,7 +614,7 @@ public class Muriel implements AIController
             if( threat.canTarget(unit.model) && shouldAttack(threat, unit, gameMap) )
             {
               // Add coordinates that `threat` could target to our "no-go" list.
-              Map<XYCoord, Double> threatMap = AIUtils.findThreatPower(gameMap, threat, unit.model);
+              Map<XYCoord, Double> threatMap = AICombatUtils.findThreatPower(gameMap, threat, unit.model);
               noGoZone.addAll(threatMap.keySet()); // Ignore the valueMap of the return; we have already decided `threat` is dangerous.
             }
           }
@@ -696,7 +696,7 @@ public class Muriel implements AIController
 
     // Figure out what unit types we can purchase with our available properties.
     boolean includeFriendlyOccupied = false;
-    AIUtils.CommanderProductionInfo CPI = new AIUtils.CommanderProductionInfo(myCo, gameMap, includeFriendlyOccupied);
+    CommanderProductionInfo CPI = new CommanderProductionInfo(myCo, gameMap, includeFriendlyOccupied);
 
     if( CPI.availableProperties.isEmpty() )
     {

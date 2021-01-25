@@ -3,7 +3,7 @@ package AI;
 import java.util.*;
 import java.util.Map.Entry;
 
-import AI.AIUtils.CommanderProductionInfo;
+import AI.CommanderProductionInfo;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.*;
@@ -114,7 +114,6 @@ public class WallyAI extends ModularAI
             new CaptureFinisher(co, this),
 
             new SiegeAttacks(co, this),
-            new NHitKO(co, this),
             new PowerActivator(co, CommanderAbility.PHASE_BUY),
             new FreeRealEstate(co, this, false), // Get any capture actions in before eviction goes into full force
             new BuildStuff(co, this),
@@ -250,7 +249,7 @@ public class WallyAI extends ModularAI
             if( target.getHP() < 1 ) // Try not to pick fights with zombies
               continue;
             // log(String.format("  Would like to kill: %s", target.toStringWithLocation()));
-            ArrayList<XYCoord> coordsToCheck = Utils.findLocationsInRange(gameMap, new XYCoord(target.x, target.y), 1, AIUtils.findMaxStrikeWeaponRange(myCo));
+            ArrayList<XYCoord> coordsToCheck = Utils.findLocationsInRange(gameMap, new XYCoord(target.x, target.y), 1, AICombatUtils.findMaxStrikeWeaponRange(myCo));
             neededAttacks = new HashMap<XYCoord, Unit>();
 
             // Figure out where we can attack from, and include attackers already in range by default.
@@ -372,7 +371,7 @@ public class WallyAI extends ModularAI
               // add each new threat to the existing threats
               ai.allThreats.add(threat);
               Map<XYCoord, Double> threatArea = ai.threatMap.get(um);
-              for( Entry<XYCoord, Double> newThreat : AIUtils.findThreatPower(gameMap, threat, um).entrySet() )
+              for( Entry<XYCoord, Double> newThreat : AICombatUtils.findThreatPower(gameMap, threat, um).entrySet() )
               {
                 if( null == threatArea.get(newThreat.getKey()) )
                   threatArea.put(newThreat.getKey(), newThreat.getValue());
@@ -817,7 +816,7 @@ public class WallyAI extends ModularAI
             double bestDamage = 0;
             for( GameAction attack : actionSet.getGameActions() )
             {
-              double damageValue = AIUtils.scoreAttackAction(unit, attack, gameMap,
+              double damageValue = AICombatUtils.scoreAttackAction(unit, attack, gameMap,
                   (results) -> {
                     double loss   = Math.min(unit            .getHP(), (int)results.attackerHPLoss);
                     double damage = Math.min(results.defender.getHP(), (int)results.defenderHPLoss);
@@ -1027,7 +1026,7 @@ public class WallyAI extends ModularAI
     Map<XYCoord, UnitModel> builds = new HashMap<XYCoord, UnitModel>();
     // Figure out what unit types we can purchase with our available properties.
     boolean includeFriendlyOccupied = true;
-    AIUtils.CommanderProductionInfo CPI = new AIUtils.CommanderProductionInfo(myCo, gameMap, includeFriendlyOccupied);
+    CommanderProductionInfo CPI = new CommanderProductionInfo(myCo, gameMap, includeFriendlyOccupied);
 
     if( CPI.availableProperties.isEmpty() )
     {

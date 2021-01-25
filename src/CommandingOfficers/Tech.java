@@ -9,6 +9,7 @@ import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Set;
 
+import AI.AICombatUtils;
 import AI.AIUtils;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
@@ -386,7 +387,7 @@ public class Tech extends Commander
           if( friendScores.containsKey(nmexy) ) friendScores.put(nmexy, 0); // Remove nearby-friend score penalty when smashing is an option.
 
           boolean shootTerrain = false;
-          Set<XYCoord> enemyLocations = AIUtils.findPossibleTargets(gameMap, techMech, nmexy, shootTerrain);
+          Set<XYCoord> enemyLocations = AICombatUtils.findPossibleTargets(gameMap, techMech, nmexy, shootTerrain);
           if( log ) System.out.println(String.format("Would have %d possible attacks after squashing %s", enemyLocations.size(), nme.toStringWithLocation()));
           int bestAttackVal = 0;
           for( XYCoord targetxy : enemyLocations )

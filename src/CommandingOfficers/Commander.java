@@ -13,10 +13,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
+import AI.AICombatUtils;
 import AI.AIController;
 import AI.AILibrary;
 import AI.AIMaker;
-import AI.AIUtils;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
 import Engine.GameScenario;
@@ -371,7 +371,7 @@ public class Commander extends GameEventListener implements Serializable
       Color edgeColor = new Color(r, g, b, 200);
       Color fillColor = new Color(r, g, b, 100);
       overlays.add(new GameOverlay(uCoord,
-                   AIUtils.findThreatPower(gameMap, u, null).keySet(),
+                   AICombatUtils.findThreatPower(gameMap, u, null).keySet(),
                    fillColor, edgeColor));
     }
     return overlays;
