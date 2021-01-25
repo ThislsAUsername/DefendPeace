@@ -116,9 +116,10 @@ public class WallyAI extends ModularAI
             new NHitKO(co, this),
             new SiegeAttacks(co, this),
             new PowerActivator(co, CommanderAbility.PHASE_BUY),
-            new FreeRealEstate(co, this, false), // Get any capture actions in before eviction goes into full force
+            new FreeRealEstate(co, this, false, false), // prioritize non-eviction
+            new FreeRealEstate(co, this, true,  false), // evict if necessary
             new BuildStuff(co, this),
-            new FreeRealEstate(co, this, true),
+            new FreeRealEstate(co, this, true,  true), // step on industries we're not using
             new Travel(co, this),
 
             new PowerActivator(co, CommanderAbility.PHASE_TURN_END)
@@ -372,20 +373,20 @@ public class WallyAI extends ModularAI
   {
     private static final long serialVersionUID = 1L;
     private final WallyAI ai;
-    private final boolean canEvict;
-    public FreeRealEstate(Commander co, WallyAI ai, boolean canEvict)
+    private final boolean canEvict, canStepOnProduction;
+    public FreeRealEstate(Commander co, WallyAI ai, boolean canEvict, boolean canStepOnProduction)
     {
       super(co, ai);
       this.ai = ai;
       this.canEvict = canEvict;
+      this.canStepOnProduction = canStepOnProduction;
     }
 
     @Override
     public GameAction getUnitAction(Unit unit, GameMap gameMap)
     {
       boolean mustMove = false;
-      boolean avoidProduction = false;
-      return findValueAction(myCo, ai, unit, gameMap, mustMove, avoidProduction, canEvict);
+      return findValueAction(myCo, ai, unit, gameMap, mustMove, !canStepOnProduction, canEvict);
     }
 
     public static GameAction findValueAction( Commander co, WallyAI ai,
@@ -453,7 +454,7 @@ public class WallyAI extends ModularAI
                 {
                   boolean ignoreSafety =
                       valueUnit(unit, gameMap.getLocation(moveCoord), true) >= valueUnit(resident, gameMap.getLocation(moveCoord), true);
-                  return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident, ignoreSafety);
+                  return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident, ignoreSafety, avoidProduction);
                 }
                 return ga;
               }
@@ -468,7 +469,7 @@ public class WallyAI extends ModularAI
             {
               boolean ignoreSafety =
                   valueUnit(unit, gameMap.getLocation(moveCoord), true) >= valueUnit(resident, gameMap.getLocation(moveCoord), true);
-              return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident, ignoreSafety);
+              return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident, ignoreSafety, avoidProduction);
             }
             return actionSet.getSelected();
           }
@@ -665,14 +666,6 @@ public class WallyAI extends ModularAI
                         GameMap gameMap,
                         ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap,
                         Unit evicter, Unit unit,
-                        boolean ignoreSafety )
-  {
-    return evictUnit(gameMap, allThreats, threatMap, evicter, unit, ignoreSafety, false);
-  }
-  private GameAction evictUnit(
-                        GameMap gameMap,
-                        ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap,
-                        Unit evicter, Unit unit,
                         boolean ignoreSafety,
                         boolean avoidProduction )
   {
@@ -778,7 +771,7 @@ public class WallyAI extends ModularAI
         boolean evictIgnoreSafety =
             valueUnit(unit, gameMap.getLocation(xyc), true) >= valueUnit(resident, gameMap.getLocation(xyc), true);
         if( unit.CO == resident.CO && !resident.isTurnOver )
-          action = evictUnit(gameMap, allThreats, threatMap, unit, resident, evictIgnoreSafety);
+          action = evictUnit(gameMap, allThreats, threatMap, unit, resident, evictIgnoreSafety, avoidProduction);
         if( null != action ) return action;
         continue;
       }
