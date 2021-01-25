@@ -1,15 +1,19 @@
 package AI;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import CommandingOfficers.Commander;
 import Engine.GameAction;
+import Engine.Path;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
@@ -138,5 +142,133 @@ public class AICombatUtils
     targetLocs.remove(start); // No attacking your own position.
     return targetLocs;
   }
+
+  /**
+   * Finds a kill on the designated unit, if available.
+   * @return The lethal combination of units organized by strike location, null on failure.
+   */
+  public static HashMap<XYCoord, Unit> findAssaultKill(
+                                   GameMap gameMap, Unit target,
+                                   Commander co, Collection<Unit> attackCandidates,
+                                   Collection<XYCoord> excludedSpaces)
+  {
+    if( target.getHP() < 1 ) // Try not to pick fights with zombies
+      return null;
+
+    int minRange = 1;
+    ArrayList<XYCoord> coordsToCheck =
+        Utils.findLocationsInRange(gameMap,
+                                   new XYCoord(target.x, target.y),
+                                   minRange, findMaxStrikeWeaponRange(co));
+
+    HashMap<XYCoord, Unit> neededAttacks = new HashMap<XYCoord, Unit>();
+    // Figure out where we can attack from, and include attackers already in range by default.
+    for( XYCoord xyc : coordsToCheck )
+    {
+      if( gameMap.isLocationFogged(xyc) )
+        continue;
+      if( excludedSpaces.contains(xyc) )
+        continue;
+
+      Location loc = gameMap.getLocation(xyc);
+      Unit resident = loc.getResident();
+
+      if( null == resident || (resident.CO == co && !resident.isTurnOver) )
+        neededAttacks.put(xyc, null);
+    }
+
+    double damage = findAssaultKill(gameMap, attackCandidates, neededAttacks, target, 0);
+    if( damage >= target.getHP() )
+    {
+      // Prune excess attacks and empty attacking spaces
+      for( XYCoord space : new ArrayList<XYCoord>(neededAttacks.keySet()) )
+      {
+        Unit attacker = neededAttacks.get(space);
+        if( null == attacker )
+        {
+          neededAttacks.remove(space);
+          continue;
+        }
+        double thisShot =
+            CombatEngine.simulateBattleResults(attacker, target, gameMap,
+                                               space.xCoord, space.yCoord).defenderHPLoss;
+        if( target.getHP() <= damage - thisShot )
+        {
+          neededAttacks.remove(space);
+          damage -= thisShot;
+        }
+      }
+
+      return neededAttacks;
+    }
+
+    return null;
+  }
+
+  /**
+   * Attempts to find a combination of attacks that will create a kill.
+   * Recursive.
+   * @param unitQueue The set of potential attackers
+   * @param neededAttacks The set of locations to consider, pre-populated with any mandatory attacks, to be populated
+   * @param pDamage The cumulative base damage done by those mandatory attacks
+   * @return The cumulative base damage of all attacks in the neededAttacks
+   */
+  public static double findAssaultKill(GameMap gameMap, Collection<Unit> unitQueue, Map<XYCoord, Unit> neededAttacks, Unit target, double pDamage)
+  {
+    // Base case; we found a kill
+    if( pDamage >= target.getPreciseHP() )
+    {
+      return pDamage;
+    }
+
+    double damage = pDamage;
+    // Iterate through the attack spaces, and try filling all spaces recursively from each one
+    for( XYCoord xyc : neededAttacks.keySet() )
+    {
+      // Don't try to attack from the same space twice.
+      if( null != neededAttacks.get(xyc) )
+        continue;
+
+      // Attack with the cheapest assault units, if possible.
+      Queue<Unit> assaultQueue = new PriorityQueue<Unit>(11, new AIUtils.UnitCostComparator(true));
+      assaultQueue.addAll(unitQueue);
+      while (!assaultQueue.isEmpty())
+      {
+        Unit unit = assaultQueue.poll();
+        boolean requiresMoving = !xyc.equals(target.x, target.y);
+        int dist = xyc.getDistance(target.x, target.y);
+        if( unit.canAttack(target.model, dist, requiresMoving) )
+          continue; // Consider only units that can attack from here
+        if( neededAttacks.containsValue(unit) )
+          continue; // Consider each unit only once
+
+        // Figure out how to get here.
+        Path movePath = Utils.findShortestPath(unit, xyc, gameMap);
+
+        if( movePath.getPathLength() > 0 )
+        {
+          neededAttacks.put(xyc, unit);
+          double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
+
+          thisDamage = findAssaultKill(gameMap, unitQueue, neededAttacks, target, damage + thisDamage);
+
+          // If we've found a kill, we're done
+          if( thisDamage >= target.getPreciseHP() )
+          {
+            damage = thisDamage;
+            break;
+          }
+          else // Otherwise, remove the attacker from the slot to make room for the next calculation
+          {
+            neededAttacks.put(xyc, null);
+          }
+        }
+      }
+    }
+
+    return damage;
+  }
+
+
 
 }

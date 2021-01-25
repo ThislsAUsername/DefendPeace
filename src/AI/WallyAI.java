@@ -219,11 +219,18 @@ public class WallyAI extends ModularAI
       this.ai = ai;
     }
 
+    @Override
+    public void initTurn(GameMap gameMap) {targets = null;}
+    HashSet<XYCoord> targets = null;
+
     XYCoord targetLoc;
     Map<XYCoord, Unit> neededAttacks;
     double damageSum = 0;
+
     public void reset()
     {
+      if( null != targets )
+        targets.remove(targetLoc);
       targetLoc = null;
       neededAttacks = null;
       damageSum = 0;
@@ -236,71 +243,43 @@ public class WallyAI extends ModularAI
       if( null != nextAction )
         return nextAction;
 
-      // Get a count of enemy forces.
-      Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
-      for( Commander co : unitLists.keySet() )
+      HashSet<XYCoord> industries = new HashSet<XYCoord>();
+      for( XYCoord coord : myCo.ownedProperties )
+        if( myCo.unitProductionByTerrain.containsKey(gameMap.getEnvironment(coord).terrainType) )
+          industries.add(coord);
+
+      // Initialize to targeting all spaces on or next to industries, since those are important spots
+      if( null == targets )
       {
-        // log(String.format("Hunting CO %s's units", co.coInfo.name));
-        if( myCo.isEnemy(co) )
+        targets = new HashSet<XYCoord>();
+
+        HashSet<XYCoord> industryBlockers = new HashSet<XYCoord>();
+        for( XYCoord coord : industries )
+          industryBlockers.addAll(Utils.findLocationsInRange(gameMap, coord, 0, 1));
+
+        for( XYCoord coord : industryBlockers )
         {
-          Queue<Unit> targetQueue = new PriorityQueue<Unit>(unitLists.get(co).size(), new AIUtils.UnitCostComparator(false));
-          targetQueue.addAll(unitLists.get(co)); // We want to kill the most expensive enemy units
-          for( Unit target : targetQueue )
-          {
-            if( target.getHP() < 1 ) // Try not to pick fights with zombies
-              continue;
-            // log(String.format("  Would like to kill: %s", target.toStringWithLocation()));
-            ArrayList<XYCoord> coordsToCheck = Utils.findLocationsInRange(gameMap, new XYCoord(target.x, target.y), 1, AICombatUtils.findMaxStrikeWeaponRange(myCo));
-            neededAttacks = new HashMap<XYCoord, Unit>();
-
-            // Figure out where we can attack from, and include attackers already in range by default.
-            for( XYCoord xyc : coordsToCheck )
-            {
-              Location loc = gameMap.getLocation(xyc);
-              Unit resident = loc.getResident();
-
-              if( null != resident && resident.CO == myCo && !resident.isTurnOver
-                  && resident.canAttack(target.model, xyc.getDistance(target.x, target.y), false) )
-                neededAttacks.put(xyc, null);
-              // Check that we could potentially move into this space. Also we're scared of fog
-              else if( (null == resident) && !AIUtils.isFriendlyProduction(gameMap, myCo, xyc)
-                  && !gameMap.isLocationFogged(xyc) )
-                neededAttacks.put(xyc, null);
-            }
-            double damage = WallyAI.findAssaultKill(gameMap, unitQueue, neededAttacks, target, 0);
-            if( damage >= target.getHP() && neededAttacks.size() > 1 )
-            {
-              ai.log(String.format("Found %s-Hit KO dealing %s HP to %s, who has %s", neededAttacks.size(), (int)damage, target.toStringWithLocation(), target.getHP()));
-              // Prune excess attacks and empty attacking spaces
-              for( XYCoord space : new ArrayList<XYCoord>(neededAttacks.keySet()) )
-              {
-                Unit attacker = neededAttacks.get(space);
-                if( null == attacker )
-                {
-                  neededAttacks.remove(space);
-                  continue;
-                }
-                double thisShot = CombatEngine.simulateBattleResults(attacker, target, gameMap, space.xCoord, space.yCoord).defenderHPLoss;
-                ai.log(String.format("  Can I prune %s (dealing %s)?", attacker.toStringWithLocation(), thisShot));
-                if( target.getHP() <= damage - thisShot )
-                {
-                  neededAttacks.remove(space);
-                  damage -= thisShot;
-                  ai.log(String.format("    Yes! Total damage is now %s", damage));
-                }
-              }
-              targetLoc = new XYCoord(target.x, target.y);
-              return nextAttack(gameMap);
-            }
-            else
-            {
-              // log(String.format("  Can't kill %s, oh well", target.toStringWithLocation()));
-            }
-          }
+          Unit resident = gameMap.getResident(coord);
+          if( null != resident && myCo.isEnemy(resident.CO) )
+            targets.add(coord);
         }
       }
 
-      return null;
+      for( XYCoord coord : new ArrayList<XYCoord>(targets) )
+      {
+        Unit resident = gameMap.getResident(coord);
+        if( null != resident && myCo.isEnemy(resident.CO) )
+        {
+          targetLoc = coord;
+          neededAttacks = AICombatUtils.findAssaultKill(gameMap, resident, myCo, unitQueue, industries);
+          if( null != neededAttacks )
+            break;
+        }
+        else
+          targets.remove(coord);
+      }
+
+      return nextAttack(gameMap);
     }
 
     private GameAction nextAttack(GameMap gameMap)
@@ -881,70 +860,6 @@ public class WallyAI extends ModularAI
       }
     }
     return false;
-  }
-
-  /**
-   * Attempts to find a combination of attacks that will create a kill.
-   * Recursive.
-   * @param unitQueue The set of potential attackers
-   * @param neededAttacks The set of locations to consider, pre-populated with any mandatory attacks, to be populated
-   * @param pDamage The cumulative base damage done by those mandatory attacks
-   * @return The cumulative base damage of all attacks in the neededAttacks
-   */
-  public static double findAssaultKill(GameMap gameMap, Collection<Unit> unitQueue, Map<XYCoord, Unit> neededAttacks, Unit target, double pDamage)
-  {
-    // Base case; we found a kill
-    if( pDamage >= target.getPreciseHP() )
-    {
-      return pDamage;
-    }
-
-    double damage = pDamage;
-    // Iterate through the attack spaces, and try filling all spaces recursively from each one
-    for( XYCoord xyc : neededAttacks.keySet() )
-    {
-      // Don't try to attack from the same space twice.
-      if( null != neededAttacks.get(xyc) )
-        continue;
-
-      // Attack with the cheapest assault units, if possible.
-      Queue<Unit> assaultQueue = new PriorityQueue<Unit>(11, new AIUtils.UnitCostComparator(true));
-      assaultQueue.addAll(unitQueue);
-      while (!assaultQueue.isEmpty())
-      {
-        Unit unit = assaultQueue.poll();
-        boolean requiresMoving = !xyc.equals(target.x, target.y);
-        int dist = xyc.getDistance(target.x, target.y);
-        if( unit.canAttack(target.model, dist, requiresMoving) )
-          continue; // Consider only units that can attack from here
-        if( neededAttacks.containsValue(unit) )
-          continue; // Consider each unit only once
-
-        // Figure out how to get here.
-        Path movePath = Utils.findShortestPath(unit, xyc, gameMap);
-
-        if( movePath.getPathLength() > 0 )
-        {
-          neededAttacks.put(xyc, unit);
-          double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
-
-          thisDamage = findAssaultKill(gameMap, unitQueue, neededAttacks, target, damage + thisDamage);
-
-          // If we've found a kill, we're done
-          if( thisDamage >= target.getPreciseHP() )
-          {
-            damage = thisDamage;
-            break;
-          }
-          else // Otherwise, remove the attacker from the slot to make room for the next calculation
-          {
-            neededAttacks.put(xyc, null);
-          }
-        }
-      }
-    }
-
-    return damage;
   }
 
   private static int valueUnit(Unit unit, Location locale, boolean includeCurrentHealth)
