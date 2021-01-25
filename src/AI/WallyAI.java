@@ -310,7 +310,7 @@ public class WallyAI extends ModularAI
       for( XYCoord xyc : neededAttacks.keySet() )
       {
         Unit resident = gameMap.getResident(xyc);
-        if( resident.isTurnOver || resident.CO != myCo )
+        if( null == resident || resident.isTurnOver || resident.CO != myCo )
           continue;
 
         boolean ignoreSafety = true, avoidProduction = true;

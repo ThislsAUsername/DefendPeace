@@ -237,7 +237,7 @@ public class AICombatUtils
         Unit unit = assaultQueue.poll();
         boolean requiresMoving = !xyc.equals(target.x, target.y);
         int dist = xyc.getDistance(target.x, target.y);
-        if( unit.canAttack(target.model, dist, requiresMoving) )
+        if( !unit.canAttack(target.model, dist, requiresMoving) )
           continue; // Consider only units that can attack from here
         if( neededAttacks.containsValue(unit) )
           continue; // Consider each unit only once

@@ -33,16 +33,17 @@ public class FightClub
 
     // Select map(s).
     //List<MapInfo> maps = MapLibrary.getMapList();
-    List<MapInfo> maps = Arrays.asList(MapLibrary.getByName("Firing Range"), MapLibrary.getByName("Aria of War"));
-//    List<MapInfo> maps = Arrays.asList(MapLibrary.getByName("Shadows Chase You Endlessly"),
-//                                       MapLibrary.getByName("Blood on my Hands"),
-//                                       MapLibrary.getByName("Aria of War"));
+//    List<MapInfo> maps = Arrays.asList(MapLibrary.getByName("Firing Range"), MapLibrary.getByName("Aria of War"));
+    List<MapInfo> maps = Arrays.asList(MapLibrary.getByName("Firing Range"),
+                                       MapLibrary.getByName("Shadows Chase You Endlessly"),
+                                       MapLibrary.getByName("Blood on my Hands"),
+                                       MapLibrary.getByName("Aria of War"));
     // How many bouts per map?
     int numGamesPerSet = 3;
     // Select CO(s).
     List<CommanderInfo> COs = Arrays.asList(Patch.getInfo(), Patch.getInfo());
     // Select AI(s).
-    List<AIMaker> AIs = Arrays.asList(Muriel.info, Muriel.info);
+    List<AIMaker> AIs = Arrays.asList(Muriel.info, WallyAI.info);
 
     // Run a set of games on each map.
     for( int setNum = 0; setNum < maps.size(); ++setNum )

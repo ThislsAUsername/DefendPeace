@@ -17,6 +17,7 @@ import Terrain.MapInfo;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
+import Terrain.Maps.MapReader;
 import Units.Unit;
 
 public class TestAIMuriel extends TestCase
@@ -66,6 +67,8 @@ public class TestAIMuriel extends TestCase
     testPassed &= validate(testForAllAIs((ai) -> testInfWadeThroughTanks(ai)), "  Infantry move priority test failed.");
     testPassed &= validate(testTankWadeThroughInfs(Muriel.info), "  Tank move priority test failed.");
     // TODO: Consider making Wally pass the above
+//    testPassed &= validate(testForAllAIs((ai) -> testProductionClearing(ai)), "  Infantry move priority test failed.");
+    testPassed &= validate(testProductionClearing(WallyAI.info), "  Free up industry test failed.");
     return testPassed;
   }
 
@@ -339,4 +342,39 @@ public class TestAIMuriel extends TestCase
     return testPassed;
   }
 
+  /** Confirm that the AI will clear its factory to build a counter, when there is only one possible counter. */
+  private boolean testProductionClearing(AIMaker ai)
+  {
+    setupTest(MapReader.readSingleMap("src/Test/TestProductionClearing.map"), ai);
+
+    // Give resources.
+    testCo1.money = 80000;
+
+    testCo1.initTurn(testMap);
+    GameAction act = null;
+    boolean testPassed = true;
+    do
+    {
+      act = testCo1.getNextAIAction(testMap);
+      if( null != act )
+        testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
+    } while( null != act && testPassed );
+
+    // Muriel should have built a Megatank as the best/only viable unit to counter an enemy Megatank.
+    testPassed = validate(testCo1.units.size() > 0, "    Failed to produce a unit!");
+
+    boolean foundMega = false;
+    for( Unit u : testCo1.units )
+    {
+      foundMega |= u.model.name.contentEquals("Megatank");
+      if( foundMega )
+        break;
+    }
+    testPassed &= validate(foundMega, "    "+ai.getName()+" didn't build the right thing!");
+
+    // Clean up
+    cleanupTest();
+
+    return testPassed;
+  }
 }
