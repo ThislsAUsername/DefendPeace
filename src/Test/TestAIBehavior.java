@@ -1,7 +1,5 @@
 package Test;
 
-import java.util.function.Function;
-
 import AI.AIController;
 import AI.AIMaker;
 import AI.Muriel;
@@ -20,7 +18,7 @@ import Terrain.TerrainType;
 import Terrain.Maps.MapReader;
 import Units.Unit;
 
-public class TestAIMuriel extends TestCase
+public class TestAIBehavior extends TestCase
 {
   private static Commander testCo1;
   private static Commander testCo2;
@@ -85,10 +83,10 @@ public class TestAIMuriel extends TestCase
     // Add an enemy to counter.
     addUnit(testMap, testCo2, "Megatank", 1, 1);
 
-    // Give Muriel resources.
+    // Provide resources.
     testCo1.money = 80000;
 
-    // Ask Muriel what to do.
+    // Run through the turn's actions.
     testCo1.initTurn(testMap);
     GameAction act = null;
     boolean testPassed = true;
@@ -99,7 +97,7 @@ public class TestAIMuriel extends TestCase
         testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
     } while( null != act && testPassed );
 
-    // Muriel should have built a Megatank as the best/only viable unit to counter an enemy Megatank.
+    // Should have built a Megatank as the best/only viable unit to counter an enemy Megatank.
     testPassed = validate(testCo1.units.size() > 0, "    Failed to produce a unit!");
 
     boolean foundMega = false;
@@ -117,7 +115,7 @@ public class TestAIMuriel extends TestCase
     return testPassed;
   }
 
-  /** Confirm that Muriel will build the correct counter, even when there is only one possible counter. */
+  /** Confirm that the AI will build the correct counter, even when there is only one possible counter. */
   private boolean testHuntStall(AIMaker ai)
   {
     setupTest(ai);
@@ -134,7 +132,7 @@ public class TestAIMuriel extends TestCase
     // Verify that we own the factory in question.
     boolean testPassed = validate(testCo1.ownedProperties.contains(facPos), "    Failed to assign factory.");
 
-    // Ask Muriel what to do.
+    // Run through the turn's actions.
     testCo1.initTurn(testMap);
     GameAction act = null;
     do
@@ -144,7 +142,7 @@ public class TestAIMuriel extends TestCase
         testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
     } while( null != act && testPassed );
 
-    // Muriel should have moved the Md Tank towards the enemy Recon, but not ended top of the factory.
+    // Should have moved the Md Tank towards the enemy Recon, but not ended top of the factory.
     XYCoord tankEnd = new XYCoord(myTank.x, myTank.y);
     testPassed &= validate(!tankEnd.equals(tankStart), "    "+ai.getName()+" did not move the Md Tank!");
     testPassed &= validate(!tankEnd.equals(facPos), "    "+ai.getName()+" blocked a factory!");
@@ -161,7 +159,7 @@ public class TestAIMuriel extends TestCase
   {
     setupTest(ai);
 
-    // Give Muriel some properties so they are out of the way.
+    // Pre-own some properties so they are out of the way.
     testMap.getLocation(2, 5).setOwner(testCo1);
     testMap.getLocation(4, 4).setOwner(testCo1);
     testMap.getLocation(4, 8).setOwner(testCo1);
@@ -182,10 +180,10 @@ public class TestAIMuriel extends TestCase
     Unit iRight = addUnit(testMap, testCo1, "Infantry", facPos.right());
 
     // The infs all want to cap the fac, but can't because it is occupied. Gotta let the AA through.
-    // Fetch and execute Muriel actions until she stops creating them.
     testCo1.initTurn(testMap);
     testCo1.money = 0; // No production needed for this test.
 
+    // Run through the turn's actions.
     GameAction act = null;
     boolean testPassed = true;
     do
@@ -351,7 +349,7 @@ public class TestAIMuriel extends TestCase
         testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
     } while( null != act && testPassed );
 
-    // Muriel should have built a Megatank as the best/only viable unit to counter an enemy Megatank.
+    // Should have built a Megatank as the best/only viable unit to counter an enemy Megatank.
     testPassed = validate(testCo1.units.size() > 0, "    Failed to produce a unit!");
 
     boolean foundMega = false;
