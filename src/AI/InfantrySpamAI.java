@@ -63,6 +63,7 @@ public class InfantrySpamAI implements AIController
   private ArrayList<XYCoord> capturingProperties;
 
   private StringBuffer logger = new StringBuffer();
+  private boolean shouldLog = true;
   private int turnNum = 0;
 
   public InfantrySpamAI(Commander co)
@@ -98,14 +99,18 @@ public class InfantrySpamAI implements AIController
   public void endTurn()
   {
     log(String.format("[======== ISAI ending turn %s for %s =========]", turnNum, myCo));
-    System.out.println(logger.toString());
+    if( shouldLog )
+      System.out.println(logger.toString());
     logger = new StringBuffer();
   }
 
   private void log(String message)
   {
-    logger.append(message).append('\n');
+    if( shouldLog )
+      logger.append(message).append('\n');
   }
+  @Override
+  public void setLogging(boolean value) { shouldLog = value; }
 
   @Override
   public GameAction getNextAction(GameMap gameMap)

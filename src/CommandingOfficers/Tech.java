@@ -181,7 +181,7 @@ public class Tech extends Commander
   private static class TechdropAbility extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
-    private static final boolean log = true;
+    private static final boolean log = false;
 
     private CODamageModifier damageBuff = null;
     private CODefenseModifier defenseBuff = null;

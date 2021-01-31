@@ -29,6 +29,7 @@ public abstract class ModularAI implements AIController
   protected Comparator<Unit> unitOrderSetter = new AIUtils.UnitCostComparator(false);
 
   private StringBuffer logger = new StringBuffer();
+  private boolean shouldLog = true;
   protected int turnNum = 0;
 
   public ModularAI(Commander co)
@@ -61,9 +62,14 @@ public abstract class ModularAI implements AIController
 
   protected void log(String message)
   {
-    System.out.println(message);
-    logger.append(message).append('\n');
+    if( shouldLog )
+    {
+      System.out.println(message);
+      logger.append(message).append('\n');
+    }
   }
+  @Override
+  public void setLogging(boolean value) { shouldLog = value; }
 
   @Override
   public GameAction getNextAction(GameMap gameMap)

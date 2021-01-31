@@ -41,6 +41,7 @@ public class TestAIMuriel extends TestCase
     testCo1 = new Strong(scn.rules);
     testCo2 = new Patch(scn.rules);
     AIController testAI = ai.create(testCo1);
+    testAI.setLogging(false);
     testCo1.setAIController(testAI);
     Commander[] cos = { testCo1, testCo2 };
 

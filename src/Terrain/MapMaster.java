@@ -66,7 +66,7 @@ public class MapMaster extends GameMap
             // If the CO has no HQ yet, assign this one.
             if( COs[co].HQLocation == null )
             {
-              System.out.println("Assigning HQ at " + x + ", " + y + " to " + COs[co]);
+//              System.out.println("Assigning HQ at " + x + ", " + y + " to " + COs[co]);
               COs[co].HQLocation = new XYCoord(x, y);
             }
             // If the CO does have an HQ, turn this location into a city.
