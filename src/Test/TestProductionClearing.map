@@ -1,0 +1,12 @@
+ 1FC  GR  GR  GR
+  GR  GR  GR  SE
+  GR  GR  SE  SE
+  GR  SE  SE  SE
+  SE  SE 1HQ 2HQ
+team, unit type, x, y
+1, mech, 0, 0
+1, tank, 2, 1
+1, tank, 1, 2
+2, INFANTRY, 0, 1
+2, INFANTRY, 1, 0
+2, megatank, 0, 3
