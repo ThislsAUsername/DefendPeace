@@ -246,10 +246,12 @@ public class WallyAI extends ModularAI
 
       HashSet<XYCoord> industries = new HashSet<XYCoord>();
       for( XYCoord coord : myCo.ownedProperties )
-        if( myCo.unitProductionByTerrain.containsKey(gameMap.getEnvironment(coord).terrainType) )
+        if( myCo.unitProductionByTerrain.containsKey(gameMap.getEnvironment(coord).terrainType)
+            || TerrainType.HEADQUARTERS == gameMap.getEnvironment(coord).terrainType
+            || TerrainType.LAB == gameMap.getEnvironment(coord).terrainType )
           industries.add(coord);
 
-      // Initialize to targeting all spaces on or next to industries, since those are important spots
+      // Initialize to targeting all spaces on or next to industries+HQ, since those are important spots
       if( null == targets )
       {
         targets = new HashSet<XYCoord>();
