@@ -1,5 +1,6 @@
 package AI;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -104,7 +105,7 @@ public class AICombatUtils
   /**
    * @return The range at which the CO in question might be able to attack after moving.
    */
-  public static int findMaxStrikeWeaponRange(Commander co)
+  public static int findMaxMobileWeaponRange(Commander co)
   {
     int range = 0;
     for( UnitModel um : co.unitModels )
@@ -144,10 +145,17 @@ public class AICombatUtils
   }
 
   /**
-   * Finds a kill on the designated unit, if available.
-   * @return The lethal combination of units organized by strike location, null on failure.
+   * Finds a kill on the designated unit, if available; considers the cheapest units first.
+   * <p>Does not consider attacks from fogged tiles.
+   * <p>Prunes any unnecessary attacks and empty spaces from the return value.
+   * <p>Does not consider launchable units
+   * @param target Your victim
+   * @param co Whose turn it is now
+   * @param attackCandidates The units CO is willing and able to commit
+   * @param excludedSpaces Any tiles you don't want to consider attacks from
+   * @return The lethal combination of units organized by strike location, or null on failure.
    */
-  public static HashMap<XYCoord, Unit> findAssaultKill(
+  public static HashMap<XYCoord, Unit> findMultiHitKill(
                                    GameMap gameMap, Unit target,
                                    Commander co, Collection<Unit> attackCandidates,
                                    Collection<XYCoord> excludedSpaces)
@@ -155,29 +163,81 @@ public class AICombatUtils
     if( target.getHP() < 1 ) // Try not to pick fights with zombies
       return null;
 
-    int minRange = 1;
-    ArrayList<XYCoord> coordsToCheck =
+    final int minRange = 1;
+    final XYCoord targetCoord = new XYCoord(target);
+    HashSet<XYCoord> coordsToCheck = new HashSet<XYCoord>(
         Utils.findLocationsInRange(gameMap,
-                                   new XYCoord(target.x, target.y),
-                                   minRange, findMaxStrikeWeaponRange(co));
+                                   targetCoord,
+                                   minRange, findMaxMobileWeaponRange(co))
+        );
 
-    HashMap<XYCoord, Unit> neededAttacks = new HashMap<XYCoord, Unit>();
-    // Figure out where we can attack from, and include attackers already in range by default.
-    for( XYCoord xyc : coordsToCheck )
+    // Consider the cheapest units first.
+    PriorityQueue<Unit> attackers = new PriorityQueue<Unit>(11, new AIUtils.UnitCostComparator(true));
+    attackers.addAll(attackCandidates);
+
+    // Add the current space of any siege units in range
+    for( Unit u : attackCandidates )
+    {
+      if( !u.model.hasImmobileWeapon() )
+        continue;
+
+      final XYCoord attackerCoord = new XYCoord(u);
+      boolean requiresMoving = false;
+      int dist = targetCoord.getDistance(attackerCoord);
+      if( !u.canAttack(target.model, dist, requiresMoving) )
+        continue;
+
+      coordsToCheck.add(attackerCoord);
+    }
+
+    // Cull spaces we can't use
+    for( XYCoord xyc : coordsToCheck.toArray(new XYCoord[0]) )
     {
       if( gameMap.isLocationFogged(xyc) )
+      {
+        coordsToCheck.remove(xyc);
         continue;
-      if( excludedSpaces.contains(xyc) )
-        continue;
+      }
 
       Location loc = gameMap.getLocation(xyc);
       Unit resident = loc.getResident();
+      if( null != resident && (resident.CO != co || resident.isTurnOver) )
+      {
+        coordsToCheck.remove(xyc);
+        continue;
+      }
 
-      if( null == resident || (resident.CO == co && !resident.isTurnOver) )
-        neededAttacks.put(xyc, null);
+      if( excludedSpaces.contains(xyc) )
+      {
+        coordsToCheck.remove(xyc);
+        continue;
+      }
+
+      boolean canReach = false;
+      for( Unit u : attackCandidates )
+      {
+        if( !u.model.hasMobileWeapon() )
+          continue;
+
+        canReach |= Utils.findShortestPath(u, xyc, gameMap).getPathLength() > 1;
+        if( canReach )
+          break;
+      }
+      if( !canReach )
+      {
+        coordsToCheck.remove(xyc);
+        continue;
+      }
     }
 
-    double damage = findAssaultKill(gameMap, attackCandidates, neededAttacks, target, 0);
+    HashMap<XYCoord, Unit> neededAttacks = new HashMap<XYCoord, Unit>();
+    // Figure out where we can attack from
+    for( XYCoord xyc : coordsToCheck )
+    {
+      neededAttacks.put(xyc, null);
+    }
+
+    double damage = findMultiHitKill(gameMap, attackers, neededAttacks, target, 0);
     if( damage >= target.getHP() )
     {
       // Prune excess attacks and empty attacking spaces
@@ -207,13 +267,14 @@ public class AICombatUtils
 
   /**
    * Attempts to find a combination of attacks that will create a kill.
+   * Considers units in the order provided.
    * Recursive.
    * @param unitQueue The set of potential attackers
    * @param neededAttacks The set of locations to consider, pre-populated with any mandatory attacks, to be populated
    * @param pDamage The cumulative base damage done by those mandatory attacks
    * @return The cumulative base damage of all attacks in the neededAttacks
    */
-  public static double findAssaultKill(GameMap gameMap, Collection<Unit> unitQueue, Map<XYCoord, Unit> neededAttacks, Unit target, double pDamage)
+  public static double findMultiHitKill(GameMap gameMap, Collection<Unit> unitQueue, Map<XYCoord, Unit> neededAttacks, Unit target, double pDamage)
   {
     // Base case; we found a kill
     if( pDamage >= target.getPreciseHP() )
@@ -229,9 +290,7 @@ public class AICombatUtils
       if( null != neededAttacks.get(xyc) )
         continue;
 
-      // Attack with the cheapest assault units, if possible.
-      Queue<Unit> assaultQueue = new PriorityQueue<Unit>(11, new AIUtils.UnitCostComparator(true));
-      assaultQueue.addAll(unitQueue);
+      Queue<Unit> assaultQueue = new ArrayDeque<Unit>(unitQueue);
       while (!assaultQueue.isEmpty())
       {
         Unit unit = assaultQueue.poll();
@@ -250,7 +309,7 @@ public class AICombatUtils
           neededAttacks.put(xyc, unit);
           double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
 
-          thisDamage = findAssaultKill(gameMap, unitQueue, neededAttacks, target, damage + thisDamage);
+          thisDamage = findMultiHitKill(gameMap, unitQueue, neededAttacks, target, damage + thisDamage);
 
           // If we've found a kill, we're done
           if( thisDamage >= target.getPreciseHP() )

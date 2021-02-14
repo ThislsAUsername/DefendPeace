@@ -2,6 +2,8 @@ package Engine;
 
 import java.io.Serializable;
 
+import Units.Unit;
+
 public class XYCoord implements Serializable
 {
   private static final long serialVersionUID = 1L;
@@ -12,6 +14,10 @@ public class XYCoord implements Serializable
   {
     xCoord = x;
     yCoord = y;
+  }
+  public XYCoord(Unit u)
+  {
+    this(u.x, u.y);
   }
 
   public boolean equals(int x, int y)

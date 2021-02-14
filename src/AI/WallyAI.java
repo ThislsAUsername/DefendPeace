@@ -274,7 +274,7 @@ public class WallyAI extends ModularAI
         if( null != resident && myCo.isEnemy(resident.CO) )
         {
           targetLoc = coord;
-          neededAttacks = AICombatUtils.findAssaultKill(gameMap, resident, myCo, unitQueue, industries);
+          neededAttacks = AICombatUtils.findMultiHitKill(gameMap, resident, myCo, unitQueue, industries);
           if( null != neededAttacks )
             break;
         }
