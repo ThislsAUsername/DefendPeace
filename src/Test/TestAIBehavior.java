@@ -78,36 +78,21 @@ public class TestAIBehavior extends TestCase
   /** Confirm that the AI will build the correct counter, even when there is only one possible counter. */
   private boolean testBuildMegatank(AIMaker ai)
   {
-    setupTest(ai);
-
-    // Add an enemy to counter.
-    addUnit(testMap, testCo2, "Megatank", 1, 1);
+    setupTest(MapReader.readSingleMap("src/Test/TestProduceMega.map"), ai);
 
     // Provide resources.
     testCo1.money = 80000;
 
     // Run through the turn's actions.
     testCo1.initTurn(testMap);
-    GameAction act = null;
     boolean testPassed = true;
-    do
-    {
-      act = testCo1.getNextAIAction(testMap);
-      if( null != act )
-        testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
-    } while( null != act && testPassed );
+    GameAction act = testCo1.getNextAIAction(testMap);
+    testPassed &= validate(null != act, "    Failed to produce an action!");
+    performGameAction(act, testGame);
 
     // Should have built a Megatank as the best/only viable unit to counter an enemy Megatank.
-    testPassed = validate(testCo1.units.size() > 0, "    Failed to produce a unit!");
-
-    boolean foundMega = false;
-    for( Unit u : testCo1.units )
-    {
-      foundMega |= u.model.name.contentEquals("Megatank");
-      if( foundMega )
-        break;
-    }
-    testPassed &= validate(foundMega, "    "+ai.getName()+" didn't build the right thing!");
+    testPassed &= validate(testCo1.units.size() > 0, "    Failed to produce a unit!");
+    testPassed &= validate(testCo1.units.get(0).model.name.contentEquals("Megatank"), "    "+ai.getName()+" didn't build the right thing!");
 
     // Clean up
     cleanupTest();
