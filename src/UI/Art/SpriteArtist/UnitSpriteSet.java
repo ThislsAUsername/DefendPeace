@@ -296,7 +296,7 @@ public class UnitSpriteSet
     if( !statusIcons.isEmpty() )
     {
       int iconIndex = (animIndex%(statusIcons.size()*ANIM_FRAMES_PER_MARK))/ANIM_FRAMES_PER_MARK;
-      BufferedImage statusIcon = statusIcons.get(Math.abs(iconIndex));
+      BufferedImage statusIcon = statusIcons.get(iconIndex);
       int iconW = statusIcon.getWidth();
       int iconH = statusIcon.getHeight();
 
