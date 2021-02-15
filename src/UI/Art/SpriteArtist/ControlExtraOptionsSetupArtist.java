@@ -23,7 +23,7 @@ public class ControlExtraOptionsSetupArtist
     }
 
     // Set up some initial parameters.
-    int spacing = template.optionNamePanel.getHeight()*2;
+    int spacing = (int) (template.optionNamePanel.getHeight()*1.5);
     int yDraw = spacing/2;
 
     // Find the selected command/key.
@@ -39,12 +39,13 @@ public class ControlExtraOptionsSetupArtist
     yDraw = spacing/2; // Reset y-spacing to draw keys.
     for( int ip = 0; ip < InputOptionsController.actionCommandSelector.size(); ++ip )
     {
-      template.drawGameOption(cig, spacing / 2, yDraw, InputOptionsController.allOptions[ip]);
+      int xDraw = (controlsImage.getWidth() / 2) - (template.graphicsOptionWidth / 2);
+      template.drawGameOption(cig, xDraw, yDraw, InputOptionsController.allOptions[ip]);
       if( ip == selectedAction ) // Draw the cursor over the selected item.
       {
-        int xDraw = template.graphicsOptionWidth - template.optionSettingPanel.getWidth()/2 - 8;
+        xDraw += template.optionNamePanel.getWidth();
         cig.drawImage(template.optionArrows,
-                      xDraw, yDraw + 3,
+                      xDraw + template.horizontalSpacing/2, yDraw + 3,
                       template.optionArrows.getWidth(), template.optionArrows.getHeight(),
                       null);
       }

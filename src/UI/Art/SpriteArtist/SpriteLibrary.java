@@ -1,6 +1,7 @@
 package UI.Art.SpriteArtist;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -63,10 +64,7 @@ public class SpriteLibrary
   private static HashMap<Color, BufferedImage> mapUnitHideIcons = new HashMap<Color, BufferedImage>();
 
   // Letters for writing in menus.
-  private static Sprite letterSpritesUppercase = null;
-  private static Sprite letterSpritesLowercase = null;
-  private static Sprite numberSprites = null;
-  private static Sprite symbolSprites = null;
+  private static PixelFont fontStandard;
 
   // Letters for writing in menus.
   private static Sprite letterSpritesSmallCaps = null;
@@ -76,6 +74,7 @@ public class SpriteLibrary
   // Cursor for highlighting things in-game.
   private static Sprite cursorSprites = null;
   private static Sprite arrowheadSprites = null;
+  private static Sprite previewArrow = null;
 
   // Commander overlay backdrops (shows commander name and funds) for each Commander in the game.
   private static HashMap<Commander, Sprite> coOverlays = new HashMap<Commander, Sprite>();
@@ -491,65 +490,53 @@ public class SpriteLibrary
   //  Below is code for dealing with drawing in-game menus.
   ///////////////////////////////////////////////////////////////////
 
-  /**
-   * Returns a Sprite containing every uppercase letter, one letter per frame. The image
-   * is loaded, and the Sprite is created, on the first call to this function, and simply
-   * returned thereafter. Letters are stored in order starting from 'A'.
-   * @return A Sprite object containing the in-game menu font for uppercase letters.
-   */
-  public static Sprite getLettersUppercase()
+  public static PixelFont getFontStandard()
   {
-    if( null == letterSpritesUppercase )
+    if( null == fontStandard )
     {
-      letterSpritesUppercase = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/main/letters_uppercase.png"), 5, 11);
+      try
+      {
+        final File folder = new File("res/");
+        if( folder.canRead() )
+        {
+          for( final File fileEntry : folder.listFiles() )
+          {
+            String filepath = fileEntry.getAbsolutePath();
+            // Look for files with our extension
+            if( !fileEntry.isDirectory() && filepath.endsWith(".ttf") )
+            {
+              // The name should be formatted as fontname_wxh.ttf
+              String[] nameparts = fileEntry.getName().split("[_x.]");
+
+              if( nameparts.length != 4 ) continue;  // Not formatted correctly.
+
+              int w = Integer.parseInt(nameparts[1]);
+              int h = Integer.parseInt(nameparts[2]);
+
+              Font temp = Font.createFont(Font.TRUETYPE_FONT, fileEntry);
+              fontStandard = new PixelFont(temp, w, h);
+              System.out.println("Using font " + fileEntry.getName());
+              break;
+            }
+          }
+        }
+      }
+      catch(Exception ex)
+      {
+        System.out.println("WARNING! Exception loading font file.");
+        ex.printStackTrace();
+      }
     }
-    return letterSpritesUppercase;
+    if( null == fontStandard )
+    {
+      // If our first attempt to load a font file failed, just use a system font.
+      System.out.println("WARNING! Failed to load pixel font. Using fallback.");
+      Font temp = new Font("Consolas", 0, 10);
+      fontStandard = new PixelFont(temp);
+    }
+    return fontStandard;
   }
 
-  /**
-   * Returns a Sprite containing every lowercase letter, one letter per frame. The image
-   * is loaded, and the Sprite is created, on the first call to this function, and simply
-   * returned thereafter. Letters are stored in order starting from 'a'. 
-   * @return A Sprite object containing the in-game menu font for lowercase letters.
-   */
-  public static Sprite getLettersLowercase()
-  {
-    if( null == letterSpritesLowercase )
-    {
-      letterSpritesLowercase = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/main/letters_lowercase.png"), 5, 11);
-    }
-    return letterSpritesLowercase;
-  }
-
-  /**
-   * Returns a Sprite containing the digits 0-9, one number per frame. The image
-   * is loaded, and the Sprite is created, on the first call to this function, and simply
-   * returned thereafter. Numbers are stored in order starting from 0.
-   * @return A Sprite object containing the in-game menu font for numbers.
-   */
-  public static Sprite getNumbers()
-  {
-    if( null == numberSprites )
-    {
-      numberSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/main/numbers.png"), 5, 11);
-    }
-    return numberSprites;
-  }
-
-  /**
-   * This function returns the sprite sheet for symbol characters that go along with
-   * the standard letter sprites. The image is loaded on the first
-   * call to this function, and simply returned thereafter.
-   * @return A Sprite object containing the in-game menu font for normal symbols.
-   */
-  public static Sprite getSymbols()
-  {
-    if( null == symbolSprites )
-    {
-      symbolSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/main/symbols.png"), 5, 11);
-    }
-    return symbolSprites;
-  }
 
   /**
    * Returns a Sprite containing every small-uppercase letter, one letter per frame. The image
@@ -628,6 +615,17 @@ public class SpriteLibrary
       arrowheadSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/arrowheads.png"), 10, 10);
     }
     return arrowheadSprites;
+  }
+
+  public static BufferedImage getPreviewArrow(Color key)
+  {
+    if( null == previewArrow )
+    {
+      previewArrow = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/preview_arrow.png"), baseSpriteSize, baseSpriteSize);
+    }
+    Sprite newArrow = new Sprite(previewArrow);
+    newArrow.colorize(UIUtils.defaultMapColors, UIUtils.getMapUnitColors(key).paletteColors);
+    return newArrow.getFrame(0);
   }
 
   /**

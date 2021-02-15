@@ -131,6 +131,12 @@ public abstract class FlareLifecycle
     }
 
     @Override
+    public Unit getActor()
+    {
+      return actor;
+    }
+
+    @Override
     public XYCoord getMoveLocation()
     {
       return moveCoord;

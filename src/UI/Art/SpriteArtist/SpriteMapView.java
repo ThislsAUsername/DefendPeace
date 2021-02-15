@@ -85,6 +85,7 @@ public class SpriteMapView extends MapView
         SpriteLibrary.baseSpriteSize * game.gameMap.mapHeight);
 
     mapArtist = new MapArtist(game);
+    MapTileDetailsArtist.register(game);
     unitArtist = new UnitArtist(game);
     menuArtist = new MenuArtist(game, this);
 
@@ -305,9 +306,8 @@ public class SpriteMapView extends MapView
       }
     }
 
-    if( null != currentActor )
-      for( DamagePopup popup : mapController.getDamagePopups() )
-        drawDamagePreview(mapGraphics, popup);
+    for( DamagePopup popup : mapController.getDamagePopups() )
+      drawDamagePreview(mapGraphics, popup, gameMap.isLocationEmpty(popup.coords));
 
     // When we draw the map, we want to center it if it's smaller than the view dimensions
     int deltaX = 0, deltaY = 0;
@@ -431,13 +431,15 @@ public class SpriteMapView extends MapView
   }
 
   @Override // from MapView
-  public GameAnimation buildTeleportAnimation( Unit unit, XYCoord start, XYCoord end, Unit obstacle,
-      TeleportEvent.AnimationStyle animStyle )
+  public GameAnimation buildAirdropAnimation( Unit unit, XYCoord start, XYCoord end, Unit obstacle )
   {
-    if( animStyle == AnimationStyle.BLINK )
-      return null; // TODO: Should AirDropAnimation just be TeleportAnimation and take in the animation style?
-    else
-      return new AirDropAnimation(SpriteLibrary.baseSpriteSize, unit, start, end);
+    return new AirDropAnimation(SpriteLibrary.baseSpriteSize, unit, start, end);
+  }
+
+  @Override // from MapView
+  public GameAnimation buildTeleportAnimation( Unit unit, XYCoord start, XYCoord end, Unit obstacle )
+  {
+    return null;
   }
 
   @Override
@@ -523,7 +525,7 @@ public class SpriteMapView extends MapView
   /**
    * Draws a predicted damage panel
    */
-  public void drawDamagePreview(Graphics g, DamagePopup data)
+  public void drawDamagePreview(Graphics g, DamagePopup data, boolean spaceEmpty)
   {
     // Build a display of the expected damage.
     Color[] colors = UIUtils.getMapUnitColors(data.color).paletteColors;
@@ -534,6 +536,12 @@ public class SpriteMapView extends MapView
     int estimateX = (data.coords.xCoord * tileSize) + (tileSize / 2);
     int estimateY = Math.max((data.coords.yCoord * tileSize) - dmgImage.getHeight() / 2, dmgImage.getHeight() / 2); // Don't want it floating off-screen
     SpriteUIUtils.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY);
+
+    if( spaceEmpty && 0 != data.coords.yCoord )
+    {
+      int arrowY = (data.coords.yCoord * tileSize) + (tileSize / 2) - 1; // break the bottom border of the text frame
+      SpriteUIUtils.drawImageCenteredOnPoint(g, SpriteLibrary.getPreviewArrow(data.color), estimateX, arrowY);
+    }
   }
 
   /**
@@ -595,15 +603,16 @@ public class SpriteMapView extends MapView
     if( lastTurnNum != turnNum )
     {
       lastTurnNum = turnNum;
+      PixelFont pf = SpriteLibrary.getFontStandard();
       BufferedImage day = SpriteUIUtils.getTextAsImage("Turn ");
       BufferedImage dayNum = SpriteUIUtils.getBoldTextAsImage(Integer.toString(turnNum));
       int width = day.getWidth() + dayNum.getWidth();
-      int height = dayNum.getHeight();
+      int height = Math.max(pf.getAscent(), dayNum.getHeight());
 
       turnNumImage = SpriteLibrary.createTransparentSprite(width, height);
       Graphics dcg = turnNumImage.getGraphics();
       dcg.drawImage(day, 0, 0, null);
-      dcg.drawImage(dayNum, turnNumImage.getWidth()-dayNum.getWidth(), 0, null);
+      dcg.drawImage(dayNum, turnNumImage.getWidth()-dayNum.getWidth(), pf.getAscent()-dayNum.getHeight(), null);
     }
 
     // Draw the turn counter.

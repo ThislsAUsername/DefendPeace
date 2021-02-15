@@ -1,8 +1,12 @@
 package CommandingOfficers;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 
+import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEventQueue;
+import Terrain.GameMap;
 import Terrain.MapMaster;
 
 public abstract class CommanderAbility implements Serializable
@@ -77,6 +81,11 @@ public abstract class CommanderAbility implements Serializable
   public GameEventQueue getEvents(MapMaster gameMap)
   {
     return new GameEventQueue();
+  }
+
+  public Collection<DamagePopup> getDamagePopups(GameMap map)
+  {
+    return new ArrayList<DamagePopup>();
   }
 }
 

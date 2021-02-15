@@ -47,7 +47,7 @@ public class MapArtist
     // Build base map image.
     buildMapImage();
     baseMapImageUpdater = new MapImageUpdater(this);
-    GameEventListener.registerEventListener(baseMapImageUpdater);
+    GameEventListener.registerEventListener(baseMapImageUpdater, game);
   }
 
   public void drawBaseTerrain(Graphics g, GameMap gameMap, int viewX, int viewY, int viewW, int viewH)
@@ -205,6 +205,9 @@ public class MapArtist
     }
 
     @Override
+    public boolean shouldSerialize() { return false; }
+
+    @Override
     public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges)
     {
       for( EnvironmentAssignment ea : terrainChanges )
@@ -222,7 +225,7 @@ public class MapArtist
 
   public void cleanup()
   {
-    GameEventListener.unregisterEventListener(baseMapImageUpdater);
+    GameEventListener.unregisterEventListener(baseMapImageUpdater, myGame);
     baseMapImageUpdater = null;
   }
 }

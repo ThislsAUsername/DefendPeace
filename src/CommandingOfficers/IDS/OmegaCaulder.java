@@ -9,7 +9,6 @@ import java.util.Collections;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import Engine.GameEvents.GameEvent;
-import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.GlobalWeatherEvent;
 import Engine.GameEvents.MoveEvent;
@@ -82,9 +81,16 @@ public class OmegaCaulder extends TabithaEngine
     protected void perform(MapMaster gameMap)
     {
       super.perform(gameMap);
+    }
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue abilityEvents = new GameEventQueue();
+
       GameEvent event = new GlobalWeatherEvent(Weathers.SNOW, 3);
-      event.performEvent(gameMap);
-      GameEventListener.publishEvent(event);
+      abilityEvents.add(event);
+
+      return abilityEvents;
     }
   }
 

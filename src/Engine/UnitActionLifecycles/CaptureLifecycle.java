@@ -126,6 +126,12 @@ public abstract class CaptureLifecycle
     }
 
     @Override
+    public Unit getActor()
+    {
+      return actor;
+    }
+
+    @Override
     public XYCoord getMoveLocation()
     {
       return movePathEnd;

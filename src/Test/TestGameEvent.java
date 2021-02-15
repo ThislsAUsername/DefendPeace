@@ -3,6 +3,7 @@ package Test;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import Engine.GameAction;
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Path;
 import Engine.Utils;
@@ -22,7 +23,6 @@ import Engine.UnitActionLifecycles.UnloadLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
-import Terrain.MapWindow;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
@@ -32,6 +32,7 @@ public class TestGameEvent extends TestCase
   private static Commander testCo1;
   private static Commander testCo2;
   private static MapMaster testMap;
+  private static GameInstance testGame;
 
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
@@ -42,10 +43,7 @@ public class TestGameEvent extends TestCase
     Commander[] cos = { testCo1, testCo2 };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    for( Commander co : cos )
-    {
-      co.myView = new MapWindow(testMap, co);
-    }
+    testGame = new GameInstance(testMap);
   }
 
   @Override
@@ -116,10 +114,10 @@ public class TestGameEvent extends TestCase
     // Move the unit; he should lose his capture progress.
     infA.initTurn(testMap);
     GameAction moveAction = new WaitLifecycle.WaitAction(infA, Utils.findShortestPath(infA, 1, 2, testMap));
-    performGameAction(moveAction, testMap);
+    performGameAction(moveAction, testGame);
     infA.initTurn(testMap);
     GameAction moveAction2 = new WaitLifecycle.WaitAction(infA, Utils.findShortestPath(infA, 2, 2, testMap));
-    performGameAction(moveAction2, testMap);
+    performGameAction(moveAction2, testGame);
 
     // 5, 10, 15
     captureEvent.performEvent(testMap);
@@ -150,7 +148,6 @@ public class TestGameEvent extends TestCase
     boolean testPassed = true;
 
     XYCoord coords = new XYCoord(13, 8);
-    int startFunds = testCo1.money = 9001;
     CreateUnitEvent event = new CreateUnitEvent(testCo1, testCo1.getUnitModel(UnitModel.TROOP), coords);
 
     testPassed &= validate(testMap.getLocation(coords).getResident() == null, "    Location is already occupied.");
@@ -161,8 +158,6 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(resident != null, "    Failed to create a unit.");
     testPassed &= validate(resident.model.isAll(UnitModel.TROOP | UnitModel.LAND), "    Unit created with wrong type.");
     testPassed &= validate(resident.CO == testCo1, "    Unit created with wrong CO.");
-    // TODO: Consider moving cost into a new TransferFundsEvent.
-    testPassed &= validate(testCo1.money == (startFunds - resident.model.getCost()), "    Unit cost not accounted correctly.");
 
     // Clean up.
     testMap.removeUnit(resident);
@@ -183,7 +178,7 @@ public class TestGameEvent extends TestCase
     new LoadLifecycle.LoadEvent(inf, mech).performEvent(testMap);
     testPassed &= validate(testMap.getLocation(2, 2).getResident() == inf, "    Infantry should still be at (2, 2).");
     testPassed &= validate(2 == inf.x && 2 == inf.y, "    Infantry should still think he is at (2, 2).");
-    testPassed &= validate(mech.heldUnits == null, "    Mech should not have holding capacity.");
+    testPassed &= validate(mech.heldUnits.size() == 0, "    Mech should not have holding capacity.");
 
     // Try to load the infantry into the APC, and make sure it works.
     new LoadLifecycle.LoadEvent(inf, apc).performEvent(testMap);
@@ -286,6 +281,19 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(mech.x == -1 && mech.y == -1, "    Mech still thinks he is on the map after death.");
     testPassed &= validate(testMap.getLocation(2, 3).getResident() == null, "    Mech did not vacate his space after death.");
 
+    // If we got this far, the event itself works; Now verify that Utils.enqueueDeathEvent creates them correctly.
+    // Create a lander holding an APC holding an infantry.
+    Unit man = addUnit(testMap, testCo1, UnitModel.TROOP, 3, 1);
+    Unit car = addUnit(testMap, testCo1, UnitModel.TRANSPORT | UnitModel.LAND, 2, 1);
+    Unit boat = addUnit(testMap, testCo1, UnitModel.TRANSPORT | UnitModel.SEA, 1, 1);
+    new LoadLifecycle.LoadEvent(man, car).performEvent(testMap);
+    new LoadLifecycle.LoadEvent(car, boat).performEvent(testMap);
+
+    // Sink the boat. All units it holds should also be accounted for.
+    GameEventQueue geq = new GameEventQueue();
+    Utils.enqueueDeathEvent(boat, geq);
+    testPassed &= validate(geq.size() == 3, "    Utils.enqueueDeathEvent built the wrong number of events!");
+
     // No cleanup required.
 
     return testPassed;
@@ -331,7 +339,7 @@ public class TestGameEvent extends TestCase
 
     // Give the APC a new GameAction to go resupply mech2.
     GameAction resupplyAction = new ResupplyLifecycle.ResupplyAction(apc, Utils.findShortestPath(apc, 2, 3, testMap));
-    performGameAction(resupplyAction, testMap);
+    performGameAction(resupplyAction, testGame);
 
     // Make sure the mechs got their mojo back.
     testPassed &= validate(apc.fuel != apc.model.maxFuel, "    APC resupplied itself. Life doesn't work that way.");
@@ -373,7 +381,7 @@ public class TestGameEvent extends TestCase
 
     // Tell Donor to join Recipient.
     GameAction joinAction = new JoinLifecycle.JoinAction(testMap, donor, Utils.findShortestPath(donor, new XYCoord(1, 4), testMap));
-    performGameAction(joinAction, testMap);
+    performGameAction(joinAction, testGame);
 
     // Verification:
     // 1) Only the Recipient should still be on the map.

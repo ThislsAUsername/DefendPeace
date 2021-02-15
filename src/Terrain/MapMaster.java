@@ -67,7 +67,7 @@ public class MapMaster extends GameMap
             // If the CO has no HQ yet, assign this one.
             if( COs[co].HQLocation == null )
             {
-              System.out.println("Assigning HQ at " + x + ", " + y + " to " + COs[co]);
+//              System.out.println("Assigning HQ at " + x + ", " + y + " to " + COs[co]);
               COs[co].HQLocation = new XYCoord(x, y);
             }
           }
@@ -236,11 +236,18 @@ public class MapMaster extends GameMap
 
   public void addNewUnit(Unit unit, int x, int y)
   {
-    if( getLocation(x, y).getResident() != null )
+    addNewUnit(unit, x, y, false);
+  }
+  public void addNewUnit(Unit unit, int x, int y, boolean force)
+  {
+    Unit resident = getLocation(x, y).getResident();
+    if( resident != null && !force )
     {
       System.out.println("Error! Attempting to add a unit to an occupied Location!");
       return;
     }
+
+    if( resident != null ) removeUnit(resident);
 
     getLocation(x, y).setResident(unit);
     unit.x = x;

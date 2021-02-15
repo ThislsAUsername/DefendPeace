@@ -1,6 +1,7 @@
 package CommandingOfficers;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -8,17 +9,20 @@ import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Set;
 
+import AI.AICombatUtils;
 import AI.AIUtils;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
-import Engine.GameAction.TeleportAction;
+import Engine.GameAction.UnitSpawnAction;
 import Engine.GameScenario;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.Combat.DamagePopup;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
-import Engine.GameEvents.TeleportEvent;
+import Engine.GameEvents.CreateUnitEvent;
+import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
@@ -40,27 +44,27 @@ public class Tech extends Commander
     {
       super("Tech");
       infoPages.add(new InfoPage(
-          "Tech is a first-rate grease monkey who like nothing better than to build new machines and set them loose.\n"));
+          "Tech is a first-rate grease monkey who likes nothing better than to build new machines and set them loose.\n"));
       infoPages.add(new InfoPage(
           "Passive:\n" +
           "- Tech has some of the best mechanics around, allowing her units to repair 3 HP per turn instead of just 2.\n"));
       infoPages.add(new InfoPage(
           TECHDROP_NAME + " (" + TECHDROP_COST + "):\n" +
-              "Deploys " + TECHDROP_NUM + " BattleMech to the front lines.\n" +
-              "All mechanical units gain " + TECHDROP_BUFF + "% attack.\n" +
-              "All units gain " + TECHDROP_BUFF + "% defense.\n" +
-              "\nNOTE: BattleMechs require special parts and cannot normally be repaired.\n"));
+              "Deploys " + TECHDROP_NUM + " BattleMech to the front lines\n" +
+              "+" + TECHDROP_BUFF + "% attack for all mechanical units\n" +
+              "+" + TECHDROP_BUFF + "% defense for all units\n" +
+              "\nNOTE: BattleMechs require special parts and cannot be repaired on buildings\n"));
       infoPages.add(new InfoPage(
           OVERCHARGE_NAME + " (" + OVERCHARGE_COST + "):\n" +
-              "All mechanical units are repaired by " + OVERCHARGE_HEAL + " HP, allowing more than 10 HP for this turn.\n" +
-              "All mechanical units gain " + OVERCHARGE_BUFF + "% attack.\n" +
-              "All Units gain " + OVERCHARGE_BUFF + "% defense"));
+              "+" + OVERCHARGE_HEAL + " HP for all mechanical units, allowing more than 10 HP for this turn\n" +
+              "+" + OVERCHARGE_BUFF + "% attack for all mechanical units\n" +
+              "+" + OVERCHARGE_BUFF + "% defense for all units"));
       infoPages.add(new InfoPage(
           STEEL_HAIL_NAME + " (" + STEEL_HAIL_COST + "):\n" +
-              "Deploys " + STEEL_HAIL_NUM + " BattleMechs to the front lines.\n" +
-              "All mechanical units gain " + STEEL_HAIL_BUFF + "% attack.\n" +
-              "All units gain " + STEEL_HAIL_BUFF + "% defense.\n" +
-              "\nNOTE: BattleMechs require special parts and cannot normally be repaired.\n"));
+              "Deploys " + STEEL_HAIL_NUM + " BattleMechs to the front lines\n" +
+              "+" + STEEL_HAIL_BUFF + "% attack for all mechanical units\n" +
+              "+" + STEEL_HAIL_BUFF + "% defense for all units\n" +
+              "\nNOTE: BattleMechs require special parts and cannot be repaired on buildings\n"));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -177,6 +181,7 @@ public class Tech extends Commander
   private static class TechdropAbility extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
+    private static final boolean log = false;
 
     private CODamageModifier damageBuff = null;
     private CODefenseModifier defenseBuff = null;
@@ -214,7 +219,6 @@ public class Tech extends Commander
     @Override
     public GameEventQueue getEvents(MapMaster gameMap)
     {
-      boolean log = true;
       if( log ) System.out.println("[TechDrop] getEvents() entry");
 
       GameEventQueue abilityEvents = new GameEventQueue();
@@ -223,7 +227,7 @@ public class Tech extends Commander
       Set<XYCoord> dropLocs = new HashSet<XYCoord>();
       for( int i = 0; i < numDrops; ++i )
       {
-        TeleportAction techDrop = generateDropEvent(gameMap, dropLocs, log);
+        UnitSpawnAction techDrop = generateDropEvent(gameMap, dropLocs, log);
         if( null != techDrop )
         {
           // Store the new event.
@@ -236,7 +240,7 @@ public class Tech extends Commander
         }
       }
 
-      // Figure out if this caused the enemy's defeat. The TeleportActions can't track
+      // Figure out if this caused the enemy's defeat. The actions can't track
       // this because multiple units may be smashed at once.
       Map<Commander, Integer> smashes = new HashMap<Commander, Integer>();
       for( XYCoord xyc : dropLocs )
@@ -257,7 +261,43 @@ public class Tech extends Commander
       return abilityEvents;
     }
 
-    private TeleportAction generateDropEvent(MapMaster gameMap, Set<XYCoord> priorDrops, boolean log)
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+
+      Set<XYCoord> dropLocs = new HashSet<XYCoord>();
+      for( int i = 0; i < numDrops; ++i )
+      {
+        XYCoord techDrop = findDropLocation(gameMap, dropLocs, log);
+        if( null != techDrop )
+          dropLocs.add(techDrop);
+        else
+        {
+          System.out.println("[TechdropAbility.getEvents] WARNING! Could not find drop location.");
+        }
+      }
+      for( XYCoord drop : dropLocs )
+        output.add(new DamagePopup(
+                       drop,
+                       myCommander.myColor,
+                       "DROP"));
+
+      return output;
+    }
+
+    private UnitSpawnAction generateDropEvent(MapMaster gameMap, Set<XYCoord> priorDrops, boolean log)
+    {
+      XYCoord landingZone = findDropLocation(gameMap, priorDrops, log);
+
+      // Create our new unit and the teleport event to put it into place.
+      boolean stomp = true;
+      boolean ready = true;
+      UnitSpawnAction techDrop = new UnitSpawnAction(myCommander, unitModelToDrop, landingZone,
+          CreateUnitEvent.AnimationStyle.DROP_IN, stomp, ready);
+      return techDrop;
+    }
+    private XYCoord findDropLocation(GameMap gameMap, Set<XYCoord> priorDrops, boolean log)
     {
       // Create a new Unit to drop onto the battlefield.
       Unit techMech = new Unit(myCommander, unitModelToDrop);
@@ -347,7 +387,7 @@ public class Tech extends Commander
           if( friendScores.containsKey(nmexy) ) friendScores.put(nmexy, 0); // Remove nearby-friend score penalty when smashing is an option.
 
           boolean shootTerrain = false;
-          Set<XYCoord> enemyLocations = AIUtils.findPossibleTargets(gameMap, techMech, nmexy, shootTerrain);
+          Set<XYCoord> enemyLocations = AICombatUtils.findPossibleTargets(gameMap, techMech, nmexy, shootTerrain);
           if( log ) System.out.println(String.format("Would have %d possible attacks after squashing %s", enemyLocations.size(), nme.toStringWithLocation()));
           int bestAttackVal = 0;
           for( XYCoord targetxy : enemyLocations )
@@ -400,7 +440,7 @@ public class Tech extends Commander
       // If there are no good spaces... this should almost never happen.
       if( scoredSpaces.isEmpty() )
       {
-        System.out.println("[TechDrop.perform] Cannot find suitable landing zone. Aborting!");
+        System.out.println("[TechDrop.findDropLocation] Cannot find suitable landing zone. Aborting!");
         return null;
       }
 
@@ -424,19 +464,16 @@ public class Tech extends Commander
       int index = 0;
       if( equalSpaces.size() > 1 )
       {
-        Random rand = new Random(myCommander.units.size());
+        Random rand = new Random(gameMap.mapWidth*gameMap.mapHeight);
         index = rand.nextInt(equalSpaces.size());
       }
       XYCoord landingZone = equalSpaces.get(index).space;
       if(log) System.out.println("Landing at " + landingZone);
 
-      // Create our new unit and the teleport event to put it into place.
-      myCommander.units.add(techMech);
-      TeleportAction techDrop = new TeleportAction(techMech, landingZone, TeleportEvent.AnimationStyle.DROP_IN, TeleportEvent.CollisionOutcome.KILL);
-      return techDrop;
+      return landingZone;
     }
 
-    private Set<XYCoord> findInvalidDropCoords(MapMaster gameMap, final Set<XYCoord> options, final Set<XYCoord> priorDrops)
+    private Set<XYCoord> findInvalidDropCoords(GameMap gameMap, final Set<XYCoord> options, final Set<XYCoord> priorDrops)
     {
       Set<XYCoord> invalidDropCoords = new HashSet<XYCoord>();
       invalidDropCoords.addAll(priorDrops);

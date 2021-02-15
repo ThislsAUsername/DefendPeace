@@ -7,11 +7,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Queue;
+import java.util.ArrayDeque;
 import java.util.Set;
 
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.Environment.Weathers;
+import Engine.GameEvents.UnitDieEvent;
 import Terrain.GameMap;
 import Terrain.Location;
 import Terrain.MapMaster;
@@ -709,6 +711,25 @@ public class Utils
     }
     eventQueue.add(new Engine.GameEvents.MoveEvent(unit, movePath));
     return originalPathOK;
+  }
+
+  /**
+   * Adds a `UnitDeathEvent` to `eventQueue` for the specified unit. Death events will also be
+   * queued for any units being carried as cargo (including if the cargo also has its own cargo).
+   * @param unit The unit who is to die.
+   * @param eventQueue Will be given the new MoveEvent(s).
+   */
+  public static void enqueueDeathEvent(Unit unit, GameEventQueue eventQueue)
+  {
+    Queue<Unit> unitsToDie = new ArrayDeque<Unit>();
+    unitsToDie.add(unit);
+    do
+    {
+      Unit utd = unitsToDie.poll();
+      eventQueue.add(new UnitDieEvent(utd));
+      if( utd.model.holdingCapacity > 0 )
+        unitsToDie.addAll(utd.heldUnits);
+    } while( !unitsToDie.isEmpty() );
   }
 
   /**

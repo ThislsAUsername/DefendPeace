@@ -83,7 +83,7 @@ public abstract class ExplodeLifecycle
 
           HashSet<Unit> victims = findVictims(gameMap); // Find all of our unlucky participants
 
-          explodeEvents.addFirst(new MassDamageEvent(victims, type.damage, false));
+          explodeEvents.addFirst(new MassDamageEvent(actor.CO, victims, type.damage, false));
           if( actor.CO.units.size() == 1 )
           {
             // CO is out of units. Too bad.

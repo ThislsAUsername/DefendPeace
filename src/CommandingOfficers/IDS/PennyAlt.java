@@ -3,11 +3,12 @@ package CommandingOfficers.IDS;
 import Engine.GameScenario;
 import Terrain.Environment.Weathers;
 import Terrain.MapMaster;
+
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import Engine.GameEvents.GameEvent;
-import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.GlobalWeatherEvent;
 import Terrain.TerrainType;
 import Units.UnitModel;
@@ -73,9 +74,16 @@ public class PennyAlt extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
+    }
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue abilityEvents = new GameEventQueue();
+
       GameEvent event = new GlobalWeatherEvent(Weathers.SNOW, 1);
-      event.performEvent(gameMap);
-      GameEventListener.publishEvent(event);
+      abilityEvents.add(event);
+
+      return abilityEvents;
     }
   }
 
@@ -94,10 +102,18 @@ public class PennyAlt extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      GameEvent event = new GlobalWeatherEvent(Weathers.RAIN, 3);
-      event.performEvent(gameMap);
-      GameEventListener.publishEvent(event);
     }
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue abilityEvents = new GameEventQueue();
+
+      GameEvent event = new GlobalWeatherEvent(Weathers.RAIN, 3);
+      abilityEvents.add(event);
+
+      return abilityEvents;
+    }
+
   }
 }
 

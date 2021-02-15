@@ -10,6 +10,7 @@ import Engine.GameInstance;
 import Engine.IController;
 import Engine.MapController;
 import Engine.OptionSelector;
+import Engine.SerializationUtils;
 
 public class MainUIController implements IController
 {
@@ -136,7 +137,7 @@ public class MainUIController implements IController
                   String prettyName = filename.substring(0, filename.length()-4);
 
                   // Get any warning symbols for save-file incompatibilities.
-                  String prepends = GameInstance.getSaveWarnings(filepath);
+                  String prepends = SerializationUtils.getSaveWarnings(filepath);
                   saves.add(new SaveInfo(filepath, filename, prepends + prettyName));
                 }
               }
@@ -214,7 +215,7 @@ public class MainUIController implements IController
         SaveInfo chosenOption = saveMenu.getSelectedOption();
 
         // We've already successfully read the save file, so let's assume the user isn't messing with us
-        GameInstance oldGame = GameInstance.loadSave(chosenOption.filePath);
+        GameInstance oldGame = SerializationUtils.loadSave(chosenOption.filePath);
         if( null != oldGame )
         {
           oldGame.saveFile = chosenOption.saveName; // Keep whatever name the user set

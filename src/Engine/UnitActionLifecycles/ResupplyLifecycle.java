@@ -140,6 +140,12 @@ public abstract class ResupplyLifecycle
     }
 
     @Override
+    public Unit getActor()
+    {
+      return unitActor;
+    }
+
+    @Override
     public XYCoord getMoveLocation()
     {
       return myLocation();

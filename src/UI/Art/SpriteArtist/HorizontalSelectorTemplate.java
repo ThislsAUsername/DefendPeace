@@ -9,11 +9,9 @@ import UI.GameOption;
 
 public class HorizontalSelectorTemplate
 {
-  public int textBuffer = 4;
-  private static int letterWidth = SpriteLibrary.getLettersUppercase().getFrame(0).getWidth();
-
   public int graphicsOptionWidth = 0; // Set in initialize().
   public int graphicsOptionHeight = 0; // Set in initialize().
+  public int horizontalSpacing = 0; // ditto
   public BufferedImage optionNamePanel = null;
   public BufferedImage optionSettingPanel = null;
   public BufferedImage optionSettingPanelChanged = null;
@@ -21,13 +19,15 @@ public class HorizontalSelectorTemplate
 
   public void initialize(GameOption<?>[] allOptions)
   {
+    PixelFont pf = SpriteLibrary.getFontStandard();
     int maxNameLen = 0;
     // Calculate the size of the longest option panel needed.
     for( int i = 0; i < allOptions.length; ++i )
     {
-      if( allOptions[i].optionName.length() > maxNameLen )
+      int nameLen = pf.getWidth(allOptions[i].optionName);
+      if( nameLen > maxNameLen )
       {
-        maxNameLen = allOptions[i].optionName.length();
+        maxNameLen = nameLen;
       }
     }
     int maxItemLen = 0;
@@ -37,22 +37,25 @@ public class HorizontalSelectorTemplate
       ArrayList<?> allItems = allOptions[i].optionList;
       for( int j = 0; j < allItems.size(); ++j )
       {
-        if( allItems.get(j).toString().length() > maxItemLen )
+        int itemLen = pf.getWidth(allItems.get(j).toString());
+        if( itemLen > maxItemLen )
         {
-          maxItemLen = allItems.get(j).toString().length();
+          maxItemLen = itemLen;
         }
       }
     }
 
     // This panel will hold the name of the option.
-    optionNamePanel = generateOptionPanel(maxNameLen, SpriteUIUtils.MENUBGCOLOR);
+    int panelHeight = pf.getAscent() + pf.getDescent(); // pf.getHeight() also seems to include line spacing.
+    optionNamePanel = generateOptionPanel(maxNameLen, panelHeight, SpriteUIUtils.MENUBGCOLOR);
     // This panel will hold the current setting for the option.
-    optionSettingPanel = generateOptionPanel(maxItemLen, SpriteUIUtils.MENUBGCOLOR);
-    optionSettingPanelChanged = generateOptionPanel(maxItemLen, SpriteUIUtils.MENUHIGHLIGHTCOLOR);
-    int itemWidth = optionSettingPanel.getWidth()+ letterWidth * 2; // dual purpose buffer, also used for the switching arrows
+    optionSettingPanel = generateOptionPanel(maxItemLen, panelHeight, SpriteUIUtils.MENUBGCOLOR);
+    optionSettingPanelChanged = generateOptionPanel(maxItemLen, panelHeight, SpriteUIUtils.MENUHIGHLIGHTCOLOR);
+    int itemWidth = optionSettingPanel.getWidth()+ pf.emSizePx * 2; // dual purpose buffer, also used for the switching arrows
 
-    graphicsOptionWidth = optionNamePanel.getWidth() + itemWidth + letterWidth; // Plus some space for a buffer between panels.
+    graphicsOptionWidth = optionNamePanel.getWidth() + itemWidth + pf.emSizePx; // Plus some space for a buffer between panels.
     graphicsOptionHeight = optionNamePanel.getHeight();
+    horizontalSpacing = 3 * pf.emSizePx;
 
     // Make points to define the two selection arrows.
     int[] lXPoints = { 0, 5, 5, 0 };
@@ -69,12 +72,15 @@ public class HorizontalSelectorTemplate
 
   /**
    * Build an image for a floating panel to hold the specified text length, and return it.
-   * @param length The max text length intended to be shown on this panel.
+   * @param widthPx The width of the string to be housed, in pixels.
+   * @param heightPx The height of the font.
    */
-  private BufferedImage generateOptionPanel(int length, Color fgColor)
+  private BufferedImage generateOptionPanel(int widthPx, int heightPx, Color fgColor)
   {
-    int w = (2 * textBuffer) + (letterWidth * length);
-    int h = (textBuffer) + (SpriteLibrary.getLettersUppercase().getFrame(0).getHeight());
+    PixelFont pf = SpriteLibrary.getFontStandard();
+    int textBuffer = pf.getDescent();
+    int w = (2 * textBuffer) + widthPx;
+    int h = (textBuffer) + heightPx;
     int sh = 3; // Extra vertical space to fit in the shadow effect.
     int sw = 2;
 
@@ -95,16 +101,26 @@ public class HorizontalSelectorTemplate
 
   public void drawGameOption(Graphics g, int x, int y, GameOption<?> opt)
   {
-    int drawBuffer = textBuffer;
+    PixelFont pf = SpriteLibrary.getFontStandard();
+    int drawBuffer = pf.getDescent(); // Use the same buffer above and below the main text mass.
 
     // Draw the name panel and the name.
     g.drawImage(optionNamePanel, x, y, optionNamePanel.getWidth(), optionNamePanel.getHeight(), null);
-    SpriteUIUtils.drawText(g, opt.optionName, x + drawBuffer, y + drawBuffer);
 
+    // These debug boxes are being left here commented-out for future use by popular request.
+//    g.setColor(Color.GREEN);
+//    g.drawRect(x+drawBuffer, y+drawBuffer, pf.emSizePx, pf.getHeight());
+//    g.setColor(Color.RED);
+//    g.drawRect(x+drawBuffer, y+drawBuffer, pf.getWidth('H'), pf.getAscent());
+//    g.setColor(Color.YELLOW);
+//    g.drawRect(x+drawBuffer, y+drawBuffer+pf.getAscent(), pf.getWidth('H')*2, pf.getDescent());
+//    g.setColor(Color.BLACK);
+
+    SpriteUIUtils.drawText(g, opt.optionName, x + drawBuffer, y+drawBuffer);
     // Draw the setting panel and the setting value.
-    x = x + (optionNamePanel.getWidth() + (3 * letterWidth));
+    x = x + optionNamePanel.getWidth() + horizontalSpacing;
     BufferedImage settingPanel = (opt.isChanged()) ? optionSettingPanelChanged : optionSettingPanel;
     g.drawImage(settingPanel, x, y, settingPanel.getWidth(), settingPanel.getHeight(), null);
-    SpriteUIUtils.drawText(g, opt.getCurrentValueText(), x + drawBuffer, y + drawBuffer);
+    SpriteUIUtils.drawText(g, opt.getCurrentValueText(), x + drawBuffer, y+drawBuffer);
   }
 }

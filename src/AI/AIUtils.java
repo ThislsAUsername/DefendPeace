@@ -7,9 +7,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
@@ -18,16 +15,10 @@ import Engine.Path;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
-import Engine.Combat.BattleSummary;
-import Engine.Combat.CombatEngine;
-import Engine.Combat.StrikeParams;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
 import Terrain.Location;
-import Terrain.TerrainType;
 import Units.Unit;
-import Units.UnitModel;
-import Units.WeaponModel;
 
 public class AIUtils
 {
@@ -41,7 +32,21 @@ public class AIUtils
   public static Map<XYCoord, ArrayList<GameActionSet> >
                 getAvailableUnitActions(Unit unit, GameMap gameMap)
   {
-    boolean includeOccupiedDestinations = true;
+    boolean includeOccupiedDestinations = false;
+    return getAvailableUnitActions(unit, gameMap, includeOccupiedDestinations);
+  }
+
+  /**
+   * Finds all actions available to unit, and organizes them by location.
+   * @param unit The unit under consideration.
+   * @param gameMap The world in which the Unit lives.
+   * @param includeOccupiedDestinations Whether to include destinations underneath our other units.
+   * @return a Map of XYCoord to ArrayList<GameActionSet>. Each XYCoord will have a GameActionSet for
+   * each type of action the unit can perform from that location.
+   */
+  public static Map<XYCoord, ArrayList<GameActionSet> >
+                getAvailableUnitActions(Unit unit, GameMap gameMap, boolean includeOccupiedDestinations)
+  {
     Map<XYCoord, ArrayList<GameActionSet> > actions = new HashMap<XYCoord, ArrayList<GameActionSet> >();
 
     // Find the possible destinations.
@@ -53,7 +58,7 @@ public class AIUtils
       Path movePath = Utils.findShortestPath(unit, coord, gameMap);
 
       // Figure out what I can do here.
-      ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath);
+      ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, includeOccupiedDestinations);
 
       // Add it to my collection.
       actions.put(coord, actionSets);
@@ -71,6 +76,18 @@ public class AIUtils
    */
   public static Map<UnitActionFactory, ArrayList<GameAction> > getAvailableUnitActionsByType(Unit unit, GameMap gameMap)
   {
+    boolean includeOccupiedDestinations = false;
+    return getAvailableUnitActionsByType(unit, gameMap, includeOccupiedDestinations);
+  }
+  /**
+   * Finds all actions available to unit, and organizes them by type instead of by location.
+   * @param unit The unit under consideration.
+   * @param gameMap The world in which the Unit lives.
+   * @param includeOccupiedDestinations Determines whether to consider actions that would require moving to a space already occupied by a friendly unit.
+   * @return a Map of ActionType to ArrayList<GameAction>.
+   */
+  public static Map<UnitActionFactory, ArrayList<GameAction> > getAvailableUnitActionsByType(Unit unit, GameMap gameMap, boolean includeOccupiedDestinations)
+  {
     // Create the ActionType-indexed map, and ensure we don't have any null pointers.
     Map<UnitActionFactory, ArrayList<GameAction> > actionsByType = new HashMap<UnitActionFactory, ArrayList<GameAction> >();
     for( UnitActionFactory atype : unit.model.possibleActions )
@@ -79,7 +96,7 @@ public class AIUtils
     }
 
     // First collect the actions by location.
-    Map<XYCoord, ArrayList<GameActionSet> > actionsByLoc = getAvailableUnitActions(unit, gameMap);
+    Map<XYCoord, ArrayList<GameActionSet> > actionsByLoc = getAvailableUnitActions(unit, gameMap, includeOccupiedDestinations);
 
     // Now re-map them by type, irrespective of location.
     for( ArrayList<GameActionSet> actionSets : actionsByLoc.values() )
@@ -184,8 +201,8 @@ public class AIUtils
 
     // Find the full path that would get this unit to the destination, regardless of how long. 
     Path path = Utils.findShortestPath(unit, destination, gameMap, true);
-    boolean includeTransports = false;
-    ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, includeTransports); // Find the valid moves we can make.
+    boolean includeOccupiedSpaces = false;
+    ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces); // Find the valid moves we can make.
 
     if( path.getPathLength() > 0 && validMoves.size() > 0 ) // Check that the destination is reachable at least in theory.
     {
@@ -239,96 +256,6 @@ public class AIUtils
   }
 
   /**
-   * Evaluates an attack action based on caller-provided logic
-   * @param unit The attacking unit
-   * @param action The action to evaluate
-   * @param map The user's current game knowledge
-   * @param combatScorer Evaluates combat with a unit
-   * @param demolishScorer Evaluates targeting terrain
-   * @return
-   */
-  public static double scoreAttackAction(Unit unit, GameAction action, GameMap map,
-                                         Function<BattleSummary, Double> combatScorer,
-                                         BiFunction<TerrainType, StrikeParams, Double> demolishScorer)
-  {
-    double score = 0;
-    Location targetLoc = map.getLocation(action.getTargetLocation());
-    Unit targetUnit = targetLoc.getResident();
-    if( null != targetUnit )
-    {
-      BattleSummary results = CombatEngine.simulateBattleResults(unit, targetUnit, map, action.getMoveLocation());
-      score = combatScorer.apply(results);
-    }
-    else
-    {
-      StrikeParams params = CombatEngine.calculateTerrainDamage(unit,
-          Utils.findShortestPath(unit, action.getMoveLocation(), map), targetLoc, map);
-      score = demolishScorer.apply(targetLoc.getEnvironment().terrainType, params);
-    }
-
-    return score;
-  }
-
-  /**
-   * @return The area and severity of threat from the unit, against the specified target type
-   */
-  public static Map<XYCoord, Double> findThreatPower(GameMap gameMap, Unit unit, UnitModel target)
-  {
-    XYCoord origin = new XYCoord(unit.x, unit.y);
-    Map<XYCoord, Double> shootableTiles = new HashMap<XYCoord, Double>();
-    boolean includeOccupiedDestinations = true; // We assume the enemy knows how to manage positioning within his turn
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedDestinations);
-    for( WeaponModel wep : unit.model.weapons )
-    {
-      double damage = (null == target)? 1 : wep.getDamage(target) * unit.getHPFactor();
-      if( damage > 0 )
-      {
-        if( !wep.canFireAfterMoving )
-        {
-          for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, wep.minRange, wep.maxRange))
-          {
-            double val = damage;
-            if (shootableTiles.containsKey(xyc))
-              val = Math.max(val, shootableTiles.get(xyc));
-            shootableTiles.put(xyc, val);
-          }
-        }
-        else
-        {
-          for( XYCoord dest : destinations )
-          {
-            for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, wep.minRange, wep.maxRange))
-            {
-              double val = damage;
-              if (shootableTiles.containsKey(xyc))
-                val = Math.max(val, shootableTiles.get(xyc));
-              shootableTiles.put(xyc, val);
-            }
-          }
-        }
-      }
-    }
-    return shootableTiles;
-  }
-
-  /**
-   * @return The range at which the CO in question might be able to attack after moving.
-   */
-  public static int findMaxStrikeWeaponRange(Commander co)
-  {
-    int range = 0;
-    for( UnitModel um : co.unitModels )
-    {
-      for( WeaponModel wm : um.weapons )
-      {
-        if( wm.canFireAfterMoving )
-          range = Math.max(range, wm.maxRange);
-      }
-    }
-    return range;
-  }
-
-  /**
    * @return Whether a friendly CO is currently in the process of acquiring the specified coordinates
    */
   public static boolean isCapturing(GameMap map, Commander co, XYCoord coord)
@@ -348,117 +275,6 @@ public class AIUtils
     if( null == owner || co.isEnemy(owner) )
       return false;
     return owner.unitProductionByTerrain.containsKey(map.getEnvironment(coord).terrainType);
-  }
-
-  /**
-   * Keeps track of a commander's production facilities. When created, it will automatically catalog
-   * all available facilities, and all units that can be built. It is then easy to ask whether it is
-   * possible to build a given type of unit, or find a location to do so.
-   * Once a purchase has been scheduled, removeBuildLocation() will remove a given facility from any
-   * further consideration.
-   */
-  public static class CommanderProductionInfo
-  {
-    public Commander myCo;
-    public Set<UnitModel> availableUnitModels;
-    public Set<Location> availableProperties;
-    public Map<Terrain.TerrainType, Integer> propertyCounts;
-    public Map<UnitModel, Set<TerrainType>> modelToTerrainMap;
-
-    /**
-     * Build a model of the production capabilities for a given Commander.
-     * Could be used for your own, or your opponent's.
-     */
-    public CommanderProductionInfo(Commander co, GameMap gameMap, boolean includeFriendlyOccupied)
-    {
-      // Figure out what unit types we can purchase with our available properties.
-      myCo = co;
-      availableUnitModels = new HashSet<UnitModel>();
-      availableProperties = new HashSet<Location>();
-      propertyCounts = new HashMap<Terrain.TerrainType, Integer>();
-      modelToTerrainMap = new HashMap<UnitModel, Set<TerrainType>>();
-
-      for( XYCoord xyc : co.ownedProperties )
-      {
-        Location loc = co.myView.getLocation(xyc);
-        Unit blocker = loc.getResident();
-        if( null == blocker
-            || (includeFriendlyOccupied && co == blocker.CO && !blocker.isTurnOver) )
-        {
-          ArrayList<UnitModel> models = co.getShoppingList(loc);
-          availableUnitModels.addAll(models);
-          availableProperties.add(loc);
-          TerrainType terrain = loc.getEnvironment().terrainType;
-          if( propertyCounts.containsKey(terrain))
-          {
-            propertyCounts.put(terrain, propertyCounts.get(loc.getEnvironment().terrainType)+1);
-          }
-          else
-          {
-            propertyCounts.put(terrain, 1);
-          }
-
-          // Store a mapping from UnitModel to the TerrainType that can produce it.
-          for( UnitModel m : models )
-          {
-            if( modelToTerrainMap.get(m) == null )
-              modelToTerrainMap.put(m, new HashSet<TerrainType>());
-            modelToTerrainMap.get(m).add( loc.getEnvironment().terrainType );
-          }
-        }
-      }
-    }
-
-    /**
-     * Return a location that can build the given unitModel, or null if none remains.
-     */
-    public Location getLocationToBuild(UnitModel model)
-    {
-      Set<TerrainType> desiredTerrains = modelToTerrainMap.get(model);
-      Location location = null;
-      for( Location loc : availableProperties )
-      {
-        if( desiredTerrains.contains(loc.getEnvironment().terrainType) )
-        {
-          location = loc;
-          break;
-        }
-      }
-      return location;
-    }
-
-    /**
-     * Remove the given location from further consideration, even if it is still available.
-     */
-    public void removeBuildLocation(Location loc)
-    {
-      availableProperties.remove(loc);
-      TerrainType terrain = loc.getEnvironment().terrainType;
-      if( propertyCounts.containsKey(terrain) )
-      {
-        propertyCounts.put(terrain, propertyCounts.get(terrain) - 1);
-        if( propertyCounts.get(terrain) == 0 )
-        {
-          availableUnitModels.removeAll(myCo.getShoppingList(loc));
-        }
-      }
-    }
-
-    /**
-     * Returns the number of facilities that can produce units of the given type.
-     */
-    public int getNumFacilitiesFor(UnitModel model)
-    {
-      int num = 0;
-      if( modelToTerrainMap.containsKey(model) )
-      {
-        for( TerrainType terrain : modelToTerrainMap.get(model) )
-        {
-          num += propertyCounts.get(terrain);
-        }
-      }
-      return num;
-    }
   }
 
   /**
@@ -483,29 +299,29 @@ public class AIUtils
     }
   }
 
-  /** Return the set of locations with enemies or terrain that `unit` could attack in one turn from `start` */
-  public static Set<XYCoord> findPossibleTargets(GameMap gameMap, Unit unit, XYCoord start, boolean includeTerrain)
+  /**
+   * Compares GameActions based on their `getMoveLocation()`'s distance from the provided `destination`.
+   * GameActions closer to `destination` will be sorted to be first.
+   */
+  public static class DistanceFromLocationComparator implements Comparator<GameAction>
   {
-    Set<XYCoord> targetLocs = new HashSet<XYCoord>();
-    boolean allowEndingOnUnits = false; // We can't attack from on top of another unit.
-    ArrayList<XYCoord> moves = Utils.findPossibleDestinations(start, unit, gameMap, allowEndingOnUnits);
-    for( XYCoord move : moves )
-    {
-      boolean moved = !move.equals(start);
+    XYCoord target;
 
-      for( WeaponModel wpn : unit.model.weapons )
-      {
-        // Evaluate this weapon for targets if it has ammo, and if either the weapon
-        // is mobile or we don't care if it's mobile (because we aren't moving).
-        if( wpn.loaded(unit) && (!moved || wpn.canFireAfterMoving) )
-        {
-          ArrayList<XYCoord> locations = Utils.findTargetsInRange(gameMap, unit.CO, move, wpn, includeTerrain);
-          targetLocs.addAll(locations);
-        }
-      } // ~Weapon loop
+    public DistanceFromLocationComparator(XYCoord destination)
+    {
+      target = destination;
     }
-    targetLocs.remove(start); // No attacking your own position.
-    return targetLocs;
+
+    @Override
+    public int compare(GameAction o1, GameAction o2)
+    {
+      XYCoord o1c = o1.getMoveLocation();
+      XYCoord o2c = o2.getMoveLocation();
+      int o1Dist = (null == o1c) ? Integer.MAX_VALUE : o1c.getDistance(target);
+      int o2Dist = (null == o2c) ? Integer.MAX_VALUE : o2c.getDistance(target);
+      int diff = o1Dist - o2Dist;
+      return diff;
+    }
   }
 
   /**

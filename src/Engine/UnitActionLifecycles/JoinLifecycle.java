@@ -26,10 +26,11 @@ public abstract class JoinLifecycle
     {
       XYCoord moveLocation = movePath.getEndCoord();
       Unit resident = map.getLocation(moveLocation).getResident();
-      if( !ignoreResident && resident != null )
+      if( resident != null )
       {
         // TODO: Consider if and how off-CO joins should be allowed if tags ever happens
-        if( resident.model.equals(actor.model) && resident != actor && resident.isHurt() )
+        int cargoSize = resident.heldUnits.size() + actor.heldUnits.size();
+        if( resident.model.equals(actor.model) && resident != actor && resident.isHurt() && cargoSize <= resident.model.holdingCapacity )
         {
           return new GameActionSet(new JoinAction(map, actor, movePath), false);
         }
@@ -98,6 +99,8 @@ public abstract class JoinLifecycle
           // Find the unit we want to join.
           recipient = gameMap.getLocation(pathEnd).getResident();
           isValid &= (null != recipient) && recipient.isHurt();
+          int cargoSize = recipient.heldUnits.size() + donor.heldUnits.size();
+          isValid &= cargoSize <= recipient.model.holdingCapacity;
         }
       }
 
@@ -112,6 +115,12 @@ public abstract class JoinLifecycle
         }
       }
       return unitJoinEvents;
+    }
+
+    @Override
+    public Unit getActor()
+    {
+      return donor;
     }
 
     @Override
@@ -180,6 +189,10 @@ public abstract class JoinLifecycle
         // If we had extra HP, add that as income.
         double costPerHP = unitDonor.model.getCost() / unitDonor.model.maxHP;
         unitDonor.CO.money += (extraHP * costPerHP);
+
+        // Reconcile cargo units.
+        if( unitRecipient.model.holdingCapacity > 0 )
+          unitRecipient.heldUnits.addAll(unitDonor.heldUnits);
 
         // Remove the donor unit.
         gameMap.removeUnit(unitDonor);

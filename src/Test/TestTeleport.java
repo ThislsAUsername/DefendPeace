@@ -3,6 +3,7 @@ package Test;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import Engine.GameAction;
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEvent;
@@ -11,7 +12,6 @@ import Engine.GameEvents.TeleportEvent;
 import Engine.XYCoord;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
-import Terrain.MapWindow;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -20,6 +20,7 @@ public class TestTeleport extends TestCase
   private static Commander testCo1;
   private static Commander testCo2;
   private static MapMaster testMap;
+  private static GameInstance testGame;
 
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
@@ -30,10 +31,7 @@ public class TestTeleport extends TestCase
     Commander[] cos = { testCo1, testCo2 };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    for( Commander co : cos )
-    {
-      co.myView = new MapWindow(testMap, co);
-    }
+    testGame = new GameInstance(testMap);
   }
 
   @Override
@@ -49,7 +47,7 @@ public class TestTeleport extends TestCase
     XYCoord water = new XYCoord(0, 0);
 
     // Event listener
-    TestListener listener = new TestListener();
+    TestListener listener = new TestListener(testGame);
 
     // Add a unit.
     Unit friend = addUnit(testMap, testCo1, UnitModel.MECH, start.xCoord, start.yCoord);
@@ -68,7 +66,7 @@ public class TestTeleport extends TestCase
     for( GameEvent event : tp.getEvents(testMap) )
     {
       event.performEvent(testMap);
-      GameEventListener.publishEvent(event); // Publish so we can check results.
+      GameEventListener.publishEvent(event, testGame); // Publish so we can check results.
     }
     testPassed &= validate(listener.death, "    UnitDieEvent was not published for unit in water!");
     testPassed &= validate(listener.defeat, "    Listener received no defeat event for last unit drowning!");
@@ -84,7 +82,7 @@ public class TestTeleport extends TestCase
     for( GameEvent event : tp.getEvents(testMap) )
     {
       event.performEvent(testMap);
-      GameEventListener.publishEvent(event); // Publish so we can check results.
+      GameEventListener.publishEvent(event, testGame); // Publish so we can check results.
     }
     testPassed &= validate((friend.x == end.xCoord && friend.y== end.yCoord), "    Friend doesn't think he swapped!");
     testPassed &= validate(friend == testMap.getLocation(end).getResident(), "    Friend didn't move!");
@@ -100,7 +98,7 @@ public class TestTeleport extends TestCase
     for( GameEvent event : tp.getEvents(testMap) )
     {
       event.performEvent(testMap);
-      GameEventListener.publishEvent(event); // Publish so we can check results.
+      GameEventListener.publishEvent(event, testGame); // Publish so we can check results.
     }
     testPassed &= validate((friend.x == start.xCoord && friend.y== start.yCoord), "    Friend doesn't think he swapped!");
     testPassed &= validate(friend == testMap.getLocation(start).getResident(), "    Friend didn't move!");
@@ -110,7 +108,7 @@ public class TestTeleport extends TestCase
 
     // Clean up.
     testMap.removeUnit(friend);
-    listener.unregister();
+    listener.unregister(testGame);
 
     return testPassed;
   }
@@ -121,9 +119,9 @@ public class TestTeleport extends TestCase
     public boolean death;
     public boolean defeat;
 
-    public TestListener()
+    public TestListener(GameInstance gi)
     {
-      GameEventListener.registerEventListener(this);
+      GameEventListener.registerEventListener(this, gi);
     }
 
     @Override

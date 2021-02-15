@@ -4,6 +4,7 @@ import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.Path;
 import Engine.UnitActionFactory;
+import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
@@ -66,7 +67,8 @@ public abstract class DeleteLifecycle
     public GameEventQueue getEvents(MapMaster gameMap)
     {
       GameEventQueue eventSequence = new GameEventQueue();
-      eventSequence.add(new UnitDieEvent(actor));
+      Utils.enqueueDeathEvent(actor, eventSequence);
+
       // The unit died; check if the Commander is defeated.
       if( actor.CO.units.size() == 1 )
       {
@@ -74,6 +76,12 @@ public abstract class DeleteLifecycle
         eventSequence.add(new CommanderDefeatEvent(actor.CO));
       }
       return eventSequence;
+    }
+
+    @Override
+    public Unit getActor()
+    {
+      return actor;
     }
 
     @Override

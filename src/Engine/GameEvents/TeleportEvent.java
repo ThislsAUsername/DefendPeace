@@ -35,6 +35,8 @@ public class TeleportEvent implements GameEvent
   {
     unit = u;
     unitStart = new XYCoord(unit.x, unit.y);
+    if( !map.isLocationValid(unitStart) )
+      unitStart = null;
     unitDestination = dest;
     animationStyle = animStyle;
   }
@@ -52,7 +54,11 @@ public class TeleportEvent implements GameEvent
   @Override
   public GameAnimation getEventAnimation(MapView mapView)
   {
-    return mapView.buildTeleportAnimation(unit, unitStart, unitDestination, obstacle, animationStyle);
+    if( animationStyle == AnimationStyle.DROP_IN )
+      return mapView.buildAirdropAnimation(unit, unitStart, unitDestination, obstacle);
+    else if( animationStyle == AnimationStyle.BLINK )
+      return mapView.buildTeleportAnimation(unit, unitStart, unitDestination, obstacle);
+    return null;
   }
 
   @Override
@@ -66,6 +72,7 @@ public class TeleportEvent implements GameEvent
   {
     boolean force = true;
     gameMap.moveUnit(unit, unitDestination.xCoord, unitDestination.yCoord, force);
+    unit.CO.myView.revealFog(unit);
   }
 
   public Unit getUnit()

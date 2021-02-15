@@ -5,7 +5,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import Engine.GameEvents.GameEvent;
-import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.GlobalWeatherEvent;
 import Terrain.MapMaster;
 import Terrain.Location;
@@ -128,9 +128,16 @@ public class Drake extends Commander
           }
         }
       }
+    }
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue abilityEvents = new GameEventQueue();
+
       GameEvent event = new GlobalWeatherEvent(Weathers.RAIN, 1);
-      event.performEvent(gameMap);
-      GameEventListener.publishEvent(event);
+      abilityEvents.add(event);
+
+      return abilityEvents;
     }
   }
 }

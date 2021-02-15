@@ -1,6 +1,10 @@
 package Test;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
@@ -30,7 +34,6 @@ public class TestSaveLoad extends TestCase
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
 
     game = new GameInstance(testMap);
-    game.saveFile = "fancyTestSave.svp";
   }
 
   @Override
@@ -59,14 +62,46 @@ public class TestSaveLoad extends TestCase
     strong.initTurn(testMap);
     boolean testPassed = true;
 
-    String path = game.writeSave(false);
-    File file = new File(path);
-    testPassed &= validate(file.exists(),  "    The file we just saved to doesn't exist");
-    testPassed &= validate(GameInstance.getSaveWarnings(path).length() == 0,  "    We are incompatible with the save we just made");
-    GameInstance loaded = GameInstance.loadSave(path);
+    byte[] bytes = null;
+    try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+         ObjectOutputStream out = new ObjectOutputStream(baos);)
+    {
+      game.writeSave(out, false);
+      bytes = baos.toByteArray();
+    }
+    catch (IOException ex)
+    {
+      System.out.println(ex.toString());
+      testPassed = false;
+    }
+    testPassed &= validate(null != bytes && bytes.length > 0,  "    Failed to generate serialized game instance.");
+
+    // test save compatibility
+    try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+         ObjectInputStream in = new ObjectInputStream(bais);)
+    {
+      testPassed &= validate(GameInstance.getSaveWarnings(in).length() == 0,  "    We are incompatible with the save we just made");
+    }
+    catch (Exception ex)
+    {
+      System.out.println(ex.toString());
+      testPassed = false;
+    }
+
+    GameInstance loaded = null;
+    try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+         ObjectInputStream in = new ObjectInputStream(bais);)
+    {
+      in.readObject(); // Pull out and discard our version info
+      loaded = (GameInstance) in.readObject();
+    }
+    catch (Exception ex)
+    {
+      System.out.println(ex.toString());
+      testPassed = false;
+    }
     testPassed &= validate(null != loaded,  "    The save didn't actually load");
-    file.delete();
-    
+
     // Clean up
     testMap.removeUnit(fool);
     testMap.removeUnit(scout);

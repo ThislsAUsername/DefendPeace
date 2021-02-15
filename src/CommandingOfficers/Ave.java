@@ -1,6 +1,7 @@
 package CommandingOfficers;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
@@ -9,9 +10,11 @@ import java.util.Stack;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.Combat.DamagePopup;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
@@ -75,28 +78,28 @@ public class Ave extends Commander
       super("Ave");
       infoPages.add(new InfoPage(
           "Commander Ave (AH-vey) supports her skiing habit by slowly growing a mountain of fresh " +
-          "snow around each of her buildings. This also allows her to gradually but inexorably " +
+          "snow around each of her buildings. This allows her to gradually but inexorably " +
           "grind her opponents down beneath a wall of ever-encroaching ice."));
       infoPages.add(new InfoPage(
           "Passive:\r\n" +
-          "- Ave generates snow around all owned properties, which spreads over time.\n" +
-          "- The radius of effect is small at first, but can be expanded by her abilities.\n" +
-          "- Her units move normally in snow, but take a movement and defense penalty in forests."));
+          "Ave generates snow around all owned properties, which spreads over time.\n" +
+          "The radius of effect is small at first, but can be expanded by her abilities.\n" +
+          "Her units move normally in snow, but take a movement and defense penalty in forests."));
       infoPages.add(new InfoPage(
           "Nix ("+NixAbility.NIX_COST+"):\n" +
-          "Ave's units gain a "+NixAbility.NIX_BUFF+"% increase in firepower.\n" +
-          "Permanently expands the range of Ave's snow passive.\n" +
-          "This ability increases in cost more quickly than most other abilities as it is used."));
+          "+"+NixAbility.NIX_BUFF+"% attack for all units\n" +
+          "+1 Range for Ave's snow-aura passive\n" +
+          "\nNOTE: This ability increases in cost more quickly than normal"));
       infoPages.add(new InfoPage(
           "Glacio ("+GlacioAbility.GLACIO_COST+"):\n" +
-          "Ave's units gain a "+GlacioAbility.GLACIO_BUFF+"% increase in firepower.\n" +
-          "Increases the snow-aura around her buildings by "+GlacioAbility.GLACIO_SNOW_SPREAD+" spaces for the next turn.\n" +
-          "Snows on every tile in a "+GlacioAbility.GLACIO_SNOW_SPREAD+"-space radius around each of her units.\n" +
-          "Stuns any enemy unit within "+GlacioAbility.GLACIO_FREEZE_RANGE+" spaces of one of Ave's units or buildings."));
+          "+"+GlacioAbility.GLACIO_BUFF+"% attack for all units\n" +
+          "Expands the snow-aura around her buildings by "+GlacioAbility.GLACIO_SNOW_SPREAD+" spaces\n" +
+          "Snows on every tile in a "+GlacioAbility.GLACIO_SNOW_SPREAD+"-space radius around each of her units\n" +
+          "Stuns any enemy unit within "+GlacioAbility.GLACIO_FREEZE_RANGE+" spaces of one of Ave's units or buildings"));
       infoPages.add(new InfoPage(
           "Oblido ("+OblidoAbility.OBLIDO_COST+"):\n" +
-          "Ave's units gain a "+OblidoAbility.OBLIDO_BUFF+"% increase in firepower.\n" +
-          "Hailstones rain down in a "+OblidoAbility.OBLIDO_RANGE+"-space radius around Ave's units and buildings, damaging enemies for up to 2HP, and destroying any forests (reducing them to grass).\n"));
+          "+"+OblidoAbility.OBLIDO_BUFF+"% attack for all units\n" +
+          "Hailstones fall in a "+OblidoAbility.OBLIDO_RANGE+"-space radius around Ave's units and buildings, damaging enemies for up to 2HP, and destroying any forests (reducing them to grass)\n"));
       infoPages.add(new InfoPage(
           "Likes: Steep Slopes and Sharp Cuts\n" +
           "Dislikes: Trees and Mythical Snow Monsters"));
@@ -130,8 +133,20 @@ public class Ave extends Commander
     addCommanderAbility(new NixAbility(this));
     addCommanderAbility(new GlacioAbility(this));
     addCommanderAbility(new OblidoAbility(this));
+  }
+
+  @Override
+  public void registerForEvents(GameInstance game)
+  {
+    super.registerForEvents(game);
     snowifier = new CitySnowifier(this);
-    GameEventListener.registerEventListener(snowifier);
+    snowifier.registerForEvents(game);
+  }
+  @Override
+  public void unregister(GameInstance game)
+  {
+    super.unregister(game);
+    snowifier.unregister(game);
   }
 
   @Override
@@ -480,7 +495,11 @@ public class Ave extends Commander
 
       // Buff units.
       coCast.addCOModifier(damageMod);
+    }
 
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
       // Drop snow everywhere inside her range.
       ArrayList<MapChangeEvent.EnvironmentAssignment> snowTiles = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
       Set<XYCoord> tiles = Utils.findLocationsNearProperties(gameMap, coCast, coCast.MAX_SNOW_SPREAD_RANGE);
@@ -497,9 +516,10 @@ public class Ave extends Commander
       }
 
       // Do all of our terrain alterations.
-      MapChangeEvent event = new MapChangeEvent(snowTiles);
-      event.performEvent(gameMap);
-      GameEventListener.publishEvent(event);
+      GameEventQueue nixEvents = new GameEventQueue();
+      nixEvents.add(new MapChangeEvent(snowTiles));
+
+      return nixEvents;
     }
   }
 
@@ -534,6 +554,14 @@ public class Ave extends Commander
       // Normal CO-power boost.
       myCommander.addCOModifier(damageMod);
 
+      // Freeze enemies around each of Ave's units or buildings.
+      for( Unit victim : findVictims(gameMap) )
+        victim.isStunned = true;
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
       // Keep track of any tiles that change to snow.
       ArrayList<MapChangeEvent.EnvironmentAssignment> tileChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
 
@@ -553,29 +581,40 @@ public class Ave extends Commander
         }
       }
 
-      // Freeze enemies around each of Ave's units or buildings.
-      tilesInRange = Utils.findLocationsNearUnits(gameMap, coCast, GLACIO_FREEZE_RANGE);
-      tilesInRange.addAll(Utils.findLocationsNearProperties(gameMap, coCast, GLACIO_FREEZE_RANGE));
-      for( XYCoord coord : tilesInRange )
-      {
-        // Freeze each nearby enemy.
-        Location loc = gameMap.getLocation(coord);
-        if( null != loc.getResident() && myCommander.isEnemy(loc.getResident().CO) )
-        {
-          loc.getResident().isStunned = true;
-        }
-      }
-
       GameEventQueue glacioEvents = new GameEventQueue();
       glacioEvents.add(new MapChangeEvent(tileChanges));
 
-      // Do all of our terrain alterations.
-      while(!glacioEvents.isEmpty())
+      return glacioEvents;
+    }
+
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+
+      for( Unit victim : findVictims(gameMap) )
+        output.add(new DamagePopup(
+                       new XYCoord(victim.x, victim.y),
+                       myCommander.myColor,
+                       "stun"));
+
+      return output;
+    }
+
+    public HashSet<Unit> findVictims(GameMap gameMap)
+    {
+      HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
+      Set<XYCoord> tilesInRange = Utils.findLocationsNearUnits(gameMap, coCast, GLACIO_FREEZE_RANGE);
+      tilesInRange.addAll(Utils.findLocationsNearProperties(gameMap, coCast, GLACIO_FREEZE_RANGE));
+      for( XYCoord coord : tilesInRange )
       {
-        GameEvent event = glacioEvents.poll();
-        event.performEvent(gameMap);
-        GameEventListener.publishEvent(event);
+        Unit victim = gameMap.getResident(coord);
+        if( null != victim && myCommander.isEnemy(victim.CO) )
+        {
+          victims.add(victim);
+        }
       }
+      return victims;
     }
   } // ~Glacio
 
@@ -592,6 +631,7 @@ public class Ave extends Commander
     private static final int OBLIDO_COST = 8;
     private static final int OBLIDO_BUFF = 20;
     private static final int OBLIDO_RANGE = 2;
+    private static final int OBLIDO_DAMAGE = 2;
 
     Ave Ave;
     COModifier damageMod = null;
@@ -617,40 +657,85 @@ public class Ave extends Commander
     {
       // Apply CO unit buffs.
       myCommander.addCOModifier(damageMod);
+    }
 
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
       // Keep track of any tiles that change.
       ArrayList<MapChangeEvent.EnvironmentAssignment> tileChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
-      ArrayList<Unit> victims = new ArrayList<Unit>();
 
       // Change terrain to snow around each of Ave's units and buildings, and damage trees and enemies.
-      Set<XYCoord> affectedTiles = Utils.findLocationsNearProperties(gameMap, Ave, OBLIDO_RANGE);
-      affectedTiles.addAll(Utils.findLocationsNearUnits(gameMap, Ave, OBLIDO_RANGE));
+      Set<XYCoord> affectedTiles = getTilesInRange(gameMap);
 
       // Smash things. Don't add snow though.
       for( XYCoord coord : affectedTiles )
       {
         // Destroy any forests. Big hail, man.
-        Location loc = gameMap.getLocation(coord);
-        Environment tileEnvi = loc.getEnvironment();
+        Environment tileEnvi = gameMap.getEnvironment(coord);
         if(tileEnvi.terrainType == TerrainType.FOREST)
         {
-          tileChanges.add(new MapChangeEvent.EnvironmentAssignment(coord, Environment.getTile(TerrainType.GRASS, loc.getEnvironment().weatherType), 1));
-        }
-
-        // Damage each enemy nearby.
-        if( null != loc.getResident() && myCommander.isEnemy(loc.getResident().CO) )
-        {
-          victims.add(loc.getResident());
+          tileChanges.add(new MapChangeEvent.EnvironmentAssignment(coord, Environment.getTile(TerrainType.GRASS, tileEnvi.weatherType), 1));
         }
       }
 
-      GameEvent damage = new MassDamageEvent(victims, 2, false);
-      damage.performEvent(gameMap);
-      GameEventListener.publishEvent(damage);
+      GameEvent damage = new MassDamageEvent(myCommander, findVictims(gameMap, affectedTiles), OBLIDO_DAMAGE, false);
 
       GameEvent tileChange = new MapChangeEvent(tileChanges);
-      tileChange.performEvent(gameMap);
-      GameEventListener.publishEvent(tileChange);
+
+      // Do all of our terrain alterations.
+      GameEventQueue oblidoEvents = new GameEventQueue();
+      oblidoEvents.add(damage);
+      oblidoEvents.add(tileChange);
+
+      return oblidoEvents;
+    }
+
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+      Set<XYCoord> affectedTiles = getTilesInRange(gameMap);
+
+      for( Unit victim : findVictims(gameMap, affectedTiles) )
+      {
+        XYCoord coord = new XYCoord(victim.x, victim.y);
+        // Forest wrecking takes priority over damage, since it's a permanent map change
+        if( gameMap.getEnvironment(coord).terrainType != TerrainType.FOREST )
+          output.add(new DamagePopup(
+                         coord,
+                         myCommander.myColor,
+                         Math.min(victim.getHP()-1, OBLIDO_DAMAGE)*10 + "%"));
+      }
+      for( XYCoord coord : affectedTiles )
+        if( gameMap.getEnvironment(coord).terrainType == TerrainType.FOREST )
+          output.add(new DamagePopup(
+                         coord,
+                         myCommander.myColor,
+                         "RAZE"));
+
+      return output;
+    }
+
+    public Set<XYCoord> getTilesInRange(GameMap gameMap)
+    {
+      Set<XYCoord> tilesInRange = Utils.findLocationsNearUnits(gameMap, Ave, OBLIDO_RANGE);
+      tilesInRange.addAll(Utils.findLocationsNearProperties(gameMap, Ave, OBLIDO_RANGE));
+      return tilesInRange;
+    }
+
+    public HashSet<Unit> findVictims(GameMap gameMap, Set<XYCoord> tilesInRange)
+    {
+      HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
+      for( XYCoord coord : tilesInRange )
+      {
+        Unit victim = gameMap.getResident(coord);
+        if( null != victim && myCommander.isEnemy(victim.CO) )
+        {
+          victims.add(victim);
+        }
+      }
+      return victims;
     }
   } // Oblido
 

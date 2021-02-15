@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo.InfoPage;
+import CommandingOfficers.CommanderInfo.InfoPage.PageType;
 import Engine.GameEvents.GameEventQueue;
 import UI.COStateInfo;
 import UI.InfoController;
@@ -19,6 +20,10 @@ import UI.Art.SpriteArtist.Backgrounds.DiagonalBlindsBG;
 public class InfoView extends MapView // Extend MapView for getDrawableMap(). We don't actually draw it, but we need fog info.
 {
   private InfoController myControl;
+
+  // State for the detailed stats page
+  private Commander statsCO = null;
+  private BufferedImage statsImage = null;
 
   public InfoView(InfoController control)
   {
@@ -113,7 +118,7 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
 
           // Add brief status text per CO
           String status = new COStateInfo(getDrawableMap(myControl.getGame()), CO).getAbbrevStatus();
-          BufferedImage statusText = SpriteUIUtils.drawTextToWidth(status, drawingWidth);
+          BufferedImage statusText = SpriteUIUtils.drawProseToWidth(status, drawingWidth);
           overlayG.drawImage(statusText, 0, (5+SpriteLibrary.getCoOverlay(CO, true).getHeight()), null);
 
           // Drop the overlay where it's supposed to go
@@ -122,18 +127,27 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
         }
         break;
       case GAME_STATUS:
-        if( null != thisCO )
+        if( null != thisCO && thisCO != statsCO )
         {
-          String status = new COStateInfo(getDrawableMap(myControl.getGame()), thisCO).getFullStatus();
-          BufferedImage statusText = SpriteUIUtils.drawTextToWidth(status, drawingWidth);
-          myG.drawImage(statusText, 3 * paneOuterBuffer, 3 * paneOuterBuffer, null);
+          statsCO = thisCO;
+          COStateInfo coStatus = new COStateInfo(getDrawableMap(myControl.getGame()), thisCO);
+          BufferedImage[] statusHalves = new BufferedImage[2];
+          // Draw assuming we don't have to wrap the text
+          statusHalves[0] = SpriteUIUtils.drawProse(coStatus.getFullStatusLabels());
+          statusHalves[1] = SpriteUIUtils.drawProse(coStatus.getFullStatusValues());
+          statsImage = SpriteUIUtils.joinBufferedImages(statusHalves, 3);
         }
+        if( null != statsImage )
+          myG.drawImage(statsImage, 3 * paneOuterBuffer, 3 * paneOuterBuffer, null);
         break;
       case BASIC:
-        BufferedImage infoText = SpriteUIUtils.drawTextToWidth(page.info, drawingWidth);
+        BufferedImage infoText = SpriteUIUtils.drawProseToWidth(page.info, drawingWidth);
         myG.drawImage(infoText,3*paneOuterBuffer, 3*paneOuterBuffer, null);
         break;
     }
+    // Destroy stale state so we don't get into weird situations
+    if( page.pageType != PageType.GAME_STATUS )
+      statsCO = null;
 
     // Finally, draw our rendered image onto the window.
     g.drawImage(image, 0, 0, imageWidth*drawScale, imageHeight*drawScale, null);

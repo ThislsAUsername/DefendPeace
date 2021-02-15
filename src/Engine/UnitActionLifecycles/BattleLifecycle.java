@@ -128,6 +128,7 @@ public abstract class BattleLifecycle
       //   MOVE
       //   BATTLE
       //   [DEATH]
+      //   [DEATH]  If the newly-deceased unit is a loaded transport.
       //   [DEFEAT]
       GameEventQueue attackEvents = new GameEventQueue();
 
@@ -136,6 +137,7 @@ public abstract class BattleLifecycle
       boolean isValid = true;
       isValid &= attacker != null && !attacker.isTurnOver;
       isValid &= (null != gameMap) && (gameMap.isLocationValid(attackLocation)) && gameMap.isLocationValid(moveCoord);
+      isValid &= null == gameMap.getResident(moveCoord) || gameMap.getResident(moveCoord) == attacker;
       isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       if( isValid )
       {
@@ -157,7 +159,7 @@ public abstract class BattleLifecycle
 
           if( event.attackerDies() )
           {
-            attackEvents.add(new UnitDieEvent(event.getAttacker()));
+            Utils.enqueueDeathEvent(event.getAttacker(), attackEvents);
 
             // Since the attacker died, see if he has any friends left.
             if( attacker.CO.units.size() == 1 )
@@ -168,7 +170,7 @@ public abstract class BattleLifecycle
           }
           if( event.defenderDies() )
           {
-            attackEvents.add(new UnitDieEvent(event.getDefender()));
+            Utils.enqueueDeathEvent(event.getDefender(), attackEvents);
 
             // The defender died; check if the Commander is defeated.
             if( defender.CO.units.size() == 1 )
@@ -198,6 +200,12 @@ public abstract class BattleLifecycle
         output.add(new DamagePopup(attackLocation, attacker.CO.myColor, (int) (summary.defenderHPLoss*10) + "%"));
 
       return output;
+    }
+
+    @Override
+    public Unit getActor()
+    {
+      return attacker;
     }
 
     @Override
@@ -317,6 +325,12 @@ public abstract class BattleLifecycle
     }
 
     @Override
+    public Unit getActor()
+    {
+      return attacker;
+    }
+
+    @Override
     public XYCoord getMoveLocation()
     {
       return moveCoord;
@@ -402,7 +416,7 @@ public abstract class BattleLifecycle
       // Handle counter-attack if relevant.
       if( battleInfo.attackerHPLoss > 0 )
       {
-        defender.fire(battleInfo.attackerWeapon);
+        defender.fire(battleInfo.defenderWeapon);
         attacker.damageHP(battleInfo.attackerHPLoss);
       }
     }

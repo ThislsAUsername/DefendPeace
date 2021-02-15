@@ -1,0 +1,9 @@
+# DPFont_5x9.ttf was generated using https://yal.cc/r/20/pixelfont/.
+# To tweak/regenerate the font, go there and:
+# Click "Pick Image" on the top left. Select dpfont_glyphs.png.
+# Click "Import" on the left top. Select dpfont_settings.json.
+# Copy the block of text below into the "Glyphs in image" text box.
+# Hit "Save TTF" on the top right. Check "Save File" and hit "OK".
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+abcdefghijklmnopqrstuvwxyz
+0123456789%./-~,;:!?'&()_+

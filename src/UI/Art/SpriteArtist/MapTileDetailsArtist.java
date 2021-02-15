@@ -15,6 +15,7 @@ import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
 import Engine.UnitActionLifecycles.JoinLifecycle;
 import Engine.UnitActionLifecycles.LoadLifecycle;
 import Engine.UnitActionLifecycles.UnloadLifecycle;
+import Engine.GameInstance;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Terrain.GameMap;
@@ -33,9 +34,9 @@ public class MapTileDetailsArtist
   private static BufferedImage tileOverlay;
   private static MtdaListener mtdaListener = new MtdaListener();
 
-  static
+  public static void register(GameInstance gi)
   {
-    mtdaListener.registerForEvents();
+    mtdaListener.registerForEvents(gi);
   }
 
   public static void resetOverlay()
@@ -201,6 +202,10 @@ public class MapTileDetailsArtist
   private static class MtdaListener extends GameEventListener
   {
     private static final long serialVersionUID = 1L;
+
+    @Override
+    public boolean shouldSerialize() { return false; }
+
     public void receiveBattleEvent(BattleSummary summary){MapTileDetailsArtist.resetOverlay();};
     public void receiveDemolitionEvent(Unit actor, XYCoord tile){MapTileDetailsArtist.resetOverlay();};
     public void receiveCreateUnitEvent(Unit unit){MapTileDetailsArtist.resetOverlay();};

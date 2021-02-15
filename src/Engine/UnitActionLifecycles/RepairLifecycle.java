@@ -127,6 +127,12 @@ public abstract class RepairLifecycle
     }
 
     @Override
+    public Unit getActor()
+    {
+      return benefactor;
+    }
+
+    @Override
     public XYCoord getMoveLocation()
     {
       return moveCoord;

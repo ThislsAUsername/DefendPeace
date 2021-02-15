@@ -11,6 +11,7 @@ import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MassDamageEvent;
+import Engine.GameEvents.ModifyFundsEvent;
 import Engine.GameEvents.TeleportEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.TeleportEvent.AnimationStyle;
@@ -34,6 +35,11 @@ public abstract class GameAction
   public abstract XYCoord getMoveLocation();
   public abstract XYCoord getTargetLocation();
   public abstract UnitActionFactory getType();
+
+  public Unit getActor()
+  {
+    return null;
+  }
 
   public Collection<DamagePopup> getDamagePopups(GameMap map)
   {
@@ -61,8 +67,8 @@ public abstract class GameAction
     @Override
     public GameEventQueue getEvents(MapMaster gameMap)
     {
-      // BUILDUNIT actions consist of
-      //   TODO: Consider introducing TRANSFERFUNDS for the fiscal part.
+      // UNITPRODUCTION actions consist of
+      //   MODIFYFUNDS
       //   CREATEUNIT
       GameEventQueue buildEvents = new GameEventQueue();
 
@@ -80,13 +86,117 @@ public abstract class GameAction
 
       if( isValid )
       {
-        //buildEvents.add(new TransferFundsEvent(who, what.moneyCost));
+        buildEvents.add(new ModifyFundsEvent(who, -what.getCost()));
         buildEvents.add(new CreateUnitEvent(who, what, where));
       }
       else
       {
         // We can't create this action. Leave the event queue empty.
-        System.out.println("WARNING! BuildUnitAction created with invalid arguments.");
+        System.out.println("WARNING! UnitProductionAction created with invalid arguments.");
+      }
+      return buildEvents;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return where;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return where;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Produce %s at %s]", what, where);
+    }
+
+    @Override
+    public UnitActionFactory getType()
+    {
+      return null;
+    }
+  } // ~UnitProductionAction
+
+  // ===========  UnitSpawnAction  ==============================
+  /** Similar to UnitProductionAction, except occupancy/financial prerequisites are waived. */
+  public static class UnitSpawnAction extends GameAction
+  {
+    private final XYCoord where;
+    private final Commander who;
+    private final UnitModel what;
+    private final CreateUnitEvent.AnimationStyle how;
+    private final boolean allowStomping;
+    private final boolean unitIsReady;
+
+    /**
+     * Creates a new `what` unit at location `where`, belonging to `who`. No funds will be taken, and unit creation will fail
+     * if there is already another unit at `where`.
+     */
+    public UnitSpawnAction(Commander who, UnitModel what, XYCoord where)
+    {
+      this(who, what, where, CreateUnitEvent.AnimationStyle.NONE, false, false);
+    }
+    /**
+     * Creates a new `what` unit at location `where`, belonging to `who`. No funds will be taken. If `allowStomping` and a unit
+     * is already present at `where`, the existing unit will be killed. If `unitIsReady`, then the new unit will be able to move immediately.
+     */
+    public UnitSpawnAction(Commander who, UnitModel what, XYCoord where, CreateUnitEvent.AnimationStyle how, boolean allowStomping, boolean unitIsReady)
+    {
+      this.where = where;
+      this.who = who;
+      this.what = what;
+      this.how = how;
+      this.allowStomping = allowStomping;
+      this.unitIsReady = unitIsReady;
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      // UNITPRODUCTION actions consist of
+      //   CREATEUNIT
+      //   [MASSDAMAGE] (if an existing unit is stomped/killed by the new unit)
+      //   [DEATH]      (if an existing unit is stomped/killed by the new unit)
+      //   [DEFEAT]     (if a unit getting stomped is the last one for that CO)
+      GameEventQueue buildEvents = new GameEventQueue();
+
+      // Validate events.
+      boolean isValid = true;
+      isValid &= (null != gameMap) && (null != who) && (null != what) && (null != where) && gameMap.isLocationValid(where)
+          && (allowStomping || gameMap.isLocationEmpty(where));
+      if( isValid )
+      {
+        buildEvents.add(new CreateUnitEvent(who, what, where, how, unitIsReady, allowStomping));
+
+        // Figure out if something's in the way; if so, deal with it.
+        Unit obstacle = gameMap.getLocation(where).getResident();
+        if( null != obstacle )
+        {
+          ArrayList<Unit> ary = new ArrayList<Unit>();
+          ary.add(obstacle);
+          boolean fatal = true;
+          MassDamageEvent mde = new MassDamageEvent(who, ary, obstacle.getHP()+1, fatal);
+          UnitDieEvent ude = new UnitDieEvent(obstacle);
+          buildEvents.add(mde);
+          buildEvents.add(ude);
+
+          // Poor sap died; Check if his CO lost the game. Stomping your own unit is silly, but won't cause a loss.
+          if( obstacle.CO.units.size() == 1 && who != obstacle.CO )
+          {
+            CommanderDefeatEvent cde = new CommanderDefeatEvent(obstacle.CO);
+            buildEvents.add(cde);
+          }
+        }
+      }
+      else
+      {
+        // We can't create this action. Leave the event queue empty.
+        System.out.println("WARNING! UnitProductionAction created with invalid arguments.");
       }
       return buildEvents;
     }
@@ -167,6 +277,12 @@ public abstract class GameAction
     {
       return null;
     }
+
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap map)
+    {
+      return myAbility.getDamagePopups(map);
+    }
   } // ~AbilityAction
 
   // ===========  TeleportAction  =================================
@@ -185,16 +301,19 @@ public abstract class GameAction
     private AnimationStyle animationStyle;
     private CollisionOutcome collisionOutcome;
 
+    /** Simplest constructor. Assumes blink animation style and kill on collision. */
     public TeleportAction(Unit u, XYCoord dest)
     {
       this(u, dest, TeleportEvent.AnimationStyle.BLINK, TeleportEvent.CollisionOutcome.KILL);
     }
 
+    /** Constructor for moving an existing unit and specifying collision outcomes. Assumes blink animation. */
     public TeleportAction(Unit u, XYCoord dest, CollisionOutcome crashResult)
     {
       this(u, dest, TeleportEvent.AnimationStyle.BLINK, crashResult);
     }
 
+    /** Fully-specified constructor. */
     public TeleportAction(Unit u, XYCoord dest, AnimationStyle animStyle, CollisionOutcome crashResult)
     {
       unit = u;
@@ -208,11 +327,11 @@ public abstract class GameAction
     public GameEventQueue getEvents(MapMaster gameMap)
     {
       // Teleport actions consist of
+      // TELEPORT   (to move this unit to its destination)
       // [TELEPORT]   (if the two units swap places)
       // [MASSDAMAGE] (if the other unit is squashed or killed by swapping onto bad terrain)
       // [DEATH]      (if the other unit is squashed or killed by swapping onto bad terrain)
       // [DEFEAT]     (if the other unit's death causes defeat)
-      // [TELEPORT]   (to move this unit to its destination)
       // [MASSDAMAGE] (if this unit can't survive at the destination)
       // [DEATH]      (if this unit can't survive at the destination)
       // [DEFEAT]     (if the acting unit dies and is the last one)
@@ -259,7 +378,7 @@ public abstract class GameAction
         ArrayList<Unit> ary = new ArrayList<Unit>();
         ary.add(obstacle);
         boolean fatal = true;
-        MassDamageEvent mde = new MassDamageEvent(ary, obstacle.getHP()+1, fatal);
+        MassDamageEvent mde = new MassDamageEvent(unit.CO, ary, obstacle.getHP()+1, fatal);
         UnitDieEvent ude = new UnitDieEvent(obstacle);
         subEvents.add(mde);
         subEvents.add(ude);
@@ -278,7 +397,7 @@ public abstract class GameAction
         ArrayList<Unit> ary = new ArrayList<Unit>();
         ary.add(unit);
         boolean fatal = true;
-        MassDamageEvent mde = new MassDamageEvent(ary, unit.getHP()+1, fatal);
+        MassDamageEvent mde = new MassDamageEvent(unit.CO, ary, unit.getHP()+1, fatal);
         UnitDieEvent ude = new UnitDieEvent(unit);
         subEvents.add(mde);
         subEvents.add(ude);
@@ -292,6 +411,12 @@ public abstract class GameAction
         }
       }
       return subEvents;
+    }
+
+    @Override
+    public Unit getActor()
+    {
+      return unit;
     }
 
     @Override

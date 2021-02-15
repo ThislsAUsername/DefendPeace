@@ -1,5 +1,6 @@
 package CommandingOfficers.BlueMoon;
 
+import Engine.GameInstance;
 import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
@@ -48,6 +49,18 @@ public class Sasha extends Commander
     addCommanderAbility(new WarBonds(this, PILLAGE_NAME, PILLAGE_COST, PILLAGE_INCOME));
 
   }
+  @Override
+  public void registerForEvents(GameInstance game)
+  {
+    super.registerForEvents(game);
+    ((WarBonds)myAbilities.get(1)).gi = game;
+  }
+  @Override
+  public void unregister(GameInstance game)
+  {
+    super.unregister(game);
+    ((WarBonds)myAbilities.get(1)).revertChanges(this);
+  }
 
   public static CommanderInfo getInfo()
   {
@@ -88,6 +101,7 @@ public class Sasha extends Commander
   {
     private static final long serialVersionUID = 1L;
     private DamageDealtToIncomeConverter listener = null;
+    public GameInstance gi = null;
 
     WarBonds(Commander myCO, String abilityName, int abilityCost, double incomeRatio)
     {
@@ -104,7 +118,7 @@ public class Sasha extends Commander
       myCommander.addCOModifier(this);
 
       // Register the damage-to-income listener.
-      GameEventListener.registerEventListener(listener);
+      GameEventListener.registerEventListener(listener, gi);
     }
 
     @Override // COModifier interface.
@@ -118,7 +132,7 @@ public class Sasha extends Commander
     {
       // This will be called when the Commander removes this COModifier. It will remove the damage
       // modifier we added as well, so we just need to turn off the the damage-to-income listener.
-      GameEventListener.unregisterEventListener(listener);
+      GameEventListener.unregisterEventListener(listener, gi);
     }
   }
 

@@ -67,39 +67,65 @@ public class SpriteUIUtils
   }
 
   /**
-   * Returns an image with the input string printed within the specified width, in normal text.
-   * @param reqWidth: Actual UI size in pixels that you want to fit the text into.
+   * Returns an image with the input prose printed, in normal text.
+   * Acts as an overload to {@link #drawProseToWidth(String, int)}
    */
-  public static BufferedImage drawTextToWidth(String prose, int reqWidth)
+  public static BufferedImage drawProse(String prose)
   {
     // Figure out how big our text is.
-    int characterWidth = SpriteLibrary.getLettersUppercase().getFrame(0).getWidth();
-    int characterHeight = SpriteLibrary.getLettersUppercase().getFrame(0).getHeight();
+    PixelFont font = SpriteLibrary.getFontStandard();
 
     ArrayList<String> lines = new ArrayList<String>();
     // Unload our prose into the lines it already has
-    lines.addAll(Arrays.asList(prose.split("\\r\\n|\\n|\\r"))); // Should match all common newline formats. If we ever go to Java 8, use \R
+    lines.addAll(Arrays.asList(prose.split("\\R")));
 
-    if( reqWidth < characterWidth || lines.isEmpty() )
+    int maxWidth = 1;
+    for( String line : lines )
+      maxWidth = Math.max(maxWidth, font.getWidth(line));
+
+    return drawProseToWidth(prose, maxWidth);
+  }
+
+  /**
+   * Returns an image with the input string printed within the specified width, in normal text.
+   * @param reqWidth: Actual UI size in pixels that you want to fit the text into.
+   */
+  public static BufferedImage drawProseToWidth(String prose, int reqWidth)
+  {
+    // Figure out how big our text is.
+    PixelFont font = SpriteLibrary.getFontStandard();
+    int characterHeight = font.getHeight();
+
+    ArrayList<String> lines = new ArrayList<String>();
+    // Unload our prose into the lines it already has
+    lines.addAll(Arrays.asList(prose.split("\\R")));
+
+    if( reqWidth < font.emSizePx || lines.isEmpty() )
       return SpriteLibrary.createDefaultBlankSprite(1, 1); // zero-dimensioned images aren't kosher
 
     for( int i = 0; i < lines.size(); ++i ) // basic for, since we care about indices
     {
       String line = lines.get(i);
-      if( line.length() * characterWidth <= reqWidth ) // if the line's short enough already, don't split it further
+      if( font.getWidth(line) <= reqWidth ) // if the line's short enough already, don't split it further
         continue;
 
       lines.remove(i);
 
-      // See if we can split the line on a space
-      int splitIndex = line.substring(0, reqWidth / characterWidth).lastIndexOf(' ');
-      if( splitIndex < 1 ) // no spaces we can split on
+      String subline = line;
+      int splitIndex = 0;
+      boolean fits = false;
+      do
       {
-        // Can't be helped. Split in the middle of the word
-        splitIndex = reqWidth / characterWidth;
-      }
+        // Start by cutting the line at each space to try and make it fit.
+        splitIndex = subline.lastIndexOf(' ');
+        if( splitIndex < 1 ) // no spaces we can split on...
+          splitIndex = subline.length() - 1; // Just shave off a letter instead
 
-      lines.add(i, line.substring(splitIndex)); // put in the second half
+        subline = subline.substring(0, splitIndex);
+        fits = font.getWidth(subline) <= reqWidth;
+      } while(!fits);
+
+      lines.add(i, ' ' + line.substring(splitIndex)); // put in the second half
       lines.add(i, line.substring(0, splitIndex)); // and then the first half behind it
     }
 
@@ -112,7 +138,7 @@ public class SpriteUIUtils
     // Draw the actual text.
     for( int txtY = 0, i = 0; i < lines.size(); ++i, txtY += characterHeight + 1 )
     {
-      SpriteUIUtils.drawText(g, lines.get(i), 0, txtY);
+      font.write(g, lines.get(i), 0, txtY);
     }
 
     return menuImage;
@@ -225,8 +251,7 @@ public class SpriteUIUtils
    */
   public static void drawText(Graphics g, String text, int x, int y)
   {
-    drawText(g, text, x, y, SpriteLibrary.getLettersUppercase(), SpriteLibrary.getLettersLowercase(),
-        SpriteLibrary.getNumbers(), SpriteLibrary.getSymbols());
+    SpriteLibrary.getFontStandard().write(g, text, x, y);
   }
 
   /**
@@ -320,14 +345,23 @@ public class SpriteUIUtils
    */
   public static BufferedImage getTextAsImage(String text, boolean smallCaps)
   {
-    Sprite letters = (smallCaps) ? SpriteLibrary.getLettersSmallCaps() : SpriteLibrary.getLettersLowercase();
-    int width = letters.getFrame(0).getWidth() * text.length();
-    int height = letters.getFrame(0).getHeight();
-    BufferedImage textImage = SpriteLibrary.createTransparentSprite(width, height);
-    if( smallCaps )
+    BufferedImage textImage;
+    if(smallCaps)
+    {
+      Sprite letters = SpriteLibrary.getLettersSmallCaps();
+      int width = letters.getFrame(0).getWidth() * text.length();
+      int height = letters.getFrame(0).getHeight();
+      textImage = SpriteLibrary.createTransparentSprite(width, height);
       drawTextSmallCaps(textImage.getGraphics(), text, 0, 0);
+    }
     else
-      drawText(textImage.getGraphics(), text, 0, 0);
+    {
+      PixelFont pf = SpriteLibrary.getFontStandard();
+      int width = pf.getWidth(text);
+      int height = pf.getHeight();
+      textImage = SpriteLibrary.createTransparentSprite(width, height);
+      pf.write(textImage.getGraphics(), text, 0, 0);
+    }
     return textImage;
   }
 
@@ -376,5 +410,37 @@ public class SpriteUIUtils
       num /= 10; // Shift to the next higher digit in the number.
     } while (num > 0);
     return numImage;
+  }
+
+  /**
+   * Code kinda-not-really stolen from https://stackoverflow.com/questions/20826216/copy-two-bufferedimages-into-one-image-side-by-side
+   * Joins BufferedImages, creating a single contiguous image
+   */
+  public static BufferedImage joinBufferedImages(BufferedImage[] frames, int imageSpacing)
+  {
+    // aggregate sizing
+    int width = 0;
+    int height = frames[0].getHeight();
+    for(BufferedImage frame : frames)
+    {
+      width += (frame.getWidth() + imageSpacing);
+      if(height != frame.getHeight())
+      {
+        height = Math.max(height, frame.getHeight());
+        System.out.println("WARNING: Joining images with unequal heights");
+      }
+    }
+
+    //create a new buffer and draw two image into the new image
+    BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    Graphics g = newImage.getGraphics();
+
+    int currentOffset = 0;
+    for( int i = 0; i < frames.length; i++ )
+    {
+      g.drawImage(frames[i], currentOffset, 0, null);
+      currentOffset += (frames[i].getWidth() + imageSpacing);
+    }
+    return newImage;
   }
 }

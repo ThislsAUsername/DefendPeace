@@ -28,7 +28,7 @@ public class GameBuilder
 
   public GameInstance createGame(PlayerSetupInfo[] coInfos)
   {
-    GameScenario scenario = new GameScenario(unitModelScheme, incomePerCity, startingFunds);
+    GameScenario scenario = new GameScenario(unitModelScheme, incomePerCity, startingFunds, isFowEnabled);
 
     // Create all of the commanders.
     Commander[] cos = new Commander[mapInfo.getNumCos()];
@@ -42,7 +42,7 @@ public class GameBuilder
     GameInstance newGame = null;
     if( map.initOK() )
     {
-      newGame = new GameInstance(map, isFowEnabled, defaultWeather, scenario, isSecurityEnabled);
+      newGame = new GameInstance(map, defaultWeather, scenario, isSecurityEnabled);
     }
 
     return newGame;

@@ -16,10 +16,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
+import AI.AICombatUtils;
 import AI.AIController;
 import AI.AILibrary;
 import AI.AIMaker;
-import AI.AIUtils;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
 import Engine.GameScenario;
@@ -65,7 +65,7 @@ public class Commander extends GameEventListener implements Serializable
   public XYCoord HQLocation = null;
   private double myAbilityPower = 0;
 
-  ArrayList<CommanderAbility> myAbilities = null;
+  protected ArrayList<CommanderAbility> myAbilities = null;
   private String myActiveAbilityName = "";
 
   // The AI has to be effectively stateless anyway (to be able to adapt to whatever scenario it finds itself in on map start),
@@ -366,6 +366,12 @@ public class Commander extends GameEventListener implements Serializable
   }
 
   // TODO: determine if this needs parameters, and if so, what?
+  public double getRepairCostFactor()
+  {
+    return 1;
+  }
+
+  // TODO: determine if this needs parameters, and if so, what?
   public int getRepairPower()
   {
     return 2;
@@ -394,7 +400,7 @@ public class Commander extends GameEventListener implements Serializable
       Color edgeColor = new Color(r, g, b, 200);
       Color fillColor = new Color(r, g, b, 100);
       overlays.add(new GameOverlay(uCoord,
-                   AIUtils.findThreatPower(gameMap, u, null).keySet(),
+                   AICombatUtils.findThreatPower(gameMap, u, null).keySet(),
                    fillColor, edgeColor));
     }
     return overlays;
@@ -457,8 +463,11 @@ public class Commander extends GameEventListener implements Serializable
    * Track mass damage done to my units, and get nothing.
    */
   @Override
-  public void receiveMassDamageEvent(Map<Unit, Integer> lostHP)
+  public void receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP)
   {
+    if( this == attacker )
+      return; // Punching yourself shouldn't make you angry
+
     for( Entry<Unit, Integer> damageEntry : lostHP.entrySet() )
     {
       Unit unit = damageEntry.getKey();
@@ -478,6 +487,13 @@ public class Commander extends GameEventListener implements Serializable
   public void setAIController(AIController ai)
   {
     aiController = ai;
+  }
+
+  public String getControllerName()
+  {
+    if( null != aiController )
+      return aiController.getAIInfo().getName();
+    return "Human";
   }
 
   public boolean isAI()
