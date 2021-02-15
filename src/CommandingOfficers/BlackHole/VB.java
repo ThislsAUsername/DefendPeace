@@ -1,7 +1,10 @@
 package CommandingOfficers.BlackHole;
 
 import Engine.GameScenario;
+import Engine.XYCoord;
+
 import java.util.ArrayList;
+import java.util.Collection;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
@@ -9,7 +12,9 @@ import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.Combat.CostValueFinder;
+import Engine.Combat.DamagePopup;
 import Engine.Combat.MassStrikeUtils;
+import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
 
@@ -66,12 +71,28 @@ public class VB extends Commander
     protected void perform(MapMaster gameMap)
     {
       ArrayList<Unit> victimList = MassStrikeUtils.damageStrike(gameMap, POWER,
-          MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, false)),
+          findTarget(gameMap),
           0, 2, myCommander, true);
       for( Unit victim : victimList )
       {
         victim.isStunned = true;
       }
+    }
+    private XYCoord findTarget(GameMap gameMap)
+    {
+      return MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, false));
+    }
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+
+      output.add(new DamagePopup(
+                     findTarget(gameMap),
+                     myCommander.myColor,
+                     "ZAP"));
+
+      return output;
     }
   }
 }

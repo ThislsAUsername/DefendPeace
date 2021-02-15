@@ -1,15 +1,22 @@
 package CommandingOfficers.OrangeStar;
 
 import Engine.GameScenario;
+import Engine.XYCoord;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import Engine.Combat.CaptureUnitValueFinder;
 import Engine.Combat.CostValueFinder;
+import Engine.Combat.DamagePopup;
 import Engine.Combat.HPValueFinder;
 import Engine.Combat.MassStrikeUtils;
 import Engine.Combat.StrikeParams;
 import Engine.GameEvents.GameEventQueue;
+import Terrain.GameMap;
 import Terrain.MapMaster;
 
 public class Rachel extends Commander
@@ -106,9 +113,43 @@ public class Rachel extends Commander
     {
       // inf, cost, HP in order
       // deets: https://discordapp.com/channels/313453805150928906/314370192098459649/392908214913597442
-      MassStrikeUtils.missileStrike(gameMap, MassStrikeUtils.findValueConcentration(gameMap, 2, new CaptureUnitValueFinder(myCommander,false)));
-      MassStrikeUtils.missileStrike(gameMap, MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander,true)));
-      MassStrikeUtils.missileStrike(gameMap, MassStrikeUtils.findValueConcentration(gameMap, 2, new HPValueFinder(myCommander,true)));
+      XYCoord[] targets = findTargets(gameMap);
+      MassStrikeUtils.missileStrike(gameMap, targets[0]);
+      MassStrikeUtils.missileStrike(gameMap, targets[1]);
+      MassStrikeUtils.missileStrike(gameMap, targets[2]);
+    }
+    private XYCoord[] findTargets(GameMap gameMap)
+    {
+      XYCoord[] targets = new XYCoord[3];
+      targets[0] = MassStrikeUtils.findValueConcentration(gameMap, 2, new CaptureUnitValueFinder(myCommander,false));
+      targets[1] = MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander,true));
+      targets[2] = MassStrikeUtils.findValueConcentration(gameMap, 2, new HPValueFinder(myCommander,true));
+      return targets;
+    }
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+
+      XYCoord[] targets = findTargets(gameMap);
+      addPopup(output, targets[0], "INF");
+      addPopup(output, targets[1], "COST");
+      addPopup(output, targets[2], "HP");
+
+      return output;
+    }
+
+    private void addPopup(ArrayList<DamagePopup> popups, XYCoord target, String callout)
+    {
+      for( DamagePopup popup : popups )
+      {
+        if( popup.coords.equals(target) )
+        {
+          popup.quantity += ", " + callout;
+          return;
+        }
+      }
+      popups.add(new DamagePopup(target, myCommander.myColor, callout));
     }
   }
 }

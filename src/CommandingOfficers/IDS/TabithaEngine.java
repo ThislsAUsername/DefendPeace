@@ -2,6 +2,7 @@ package CommandingOfficers.IDS;
 
 import Engine.GameScenario;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
@@ -12,6 +13,7 @@ import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CostValueFinder;
+import Engine.Combat.DamagePopup;
 import Engine.Combat.MassStrikeUtils;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
@@ -167,8 +169,24 @@ public abstract class TabithaEngine extends Commander
     protected void perform(MapMaster gameMap)
     {
       super.perform(gameMap);
-      XYCoord target = MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true));
+      XYCoord target = findTarget(gameMap);
       MassStrikeUtils.damageStrike(gameMap, nukePower, target, 2);
+    }
+    private XYCoord findTarget(GameMap gameMap)
+    {
+      return MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true));
+    }
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+
+      output.add(new DamagePopup(
+                     findTarget(gameMap),
+                     myCommander.myColor,
+                     "Nuked"));
+
+      return output;
     }
   }
 

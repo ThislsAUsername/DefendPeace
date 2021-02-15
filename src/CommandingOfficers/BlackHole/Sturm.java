@@ -1,13 +1,20 @@
 package CommandingOfficers.BlackHole;
 
 import Engine.GameScenario;
+import Engine.XYCoord;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.Combat.CostValueFinder;
+import Engine.Combat.DamagePopup;
 import Engine.Combat.MassStrikeUtils;
+import Terrain.GameMap;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
@@ -109,7 +116,23 @@ public class Sturm extends Commander
     protected void perform(MapMaster gameMap)
     {
       MassStrikeUtils.damageStrike(gameMap, POWER,
-          MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true)), 2);
+          findTarget(gameMap), 2);
+    }
+    private XYCoord findTarget(GameMap gameMap)
+    {
+      return MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true));
+    }
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+
+      output.add(new DamagePopup(
+                     findTarget(gameMap),
+                     myCommander.myColor,
+                     "Meteor"));
+
+      return output;
     }
   }
 
@@ -129,7 +152,23 @@ public class Sturm extends Commander
     protected void perform(MapMaster gameMap)
     {
       MassStrikeUtils.damageStrike(gameMap, POWER,
-          MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true)), 2);
+          findTarget(gameMap), 2);
+    }
+    private XYCoord findTarget(GameMap gameMap)
+    {
+      return MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true));
+    }
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+
+      output.add(new DamagePopup(
+                     findTarget(gameMap),
+                     myCommander.myColor,
+                     "Meteor"));
+
+      return output;
     }
   }
 }
