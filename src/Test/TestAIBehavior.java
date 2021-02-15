@@ -100,7 +100,7 @@ public class TestAIBehavior extends TestCase
     return testPassed;
   }
 
-  /** Confirm that the AI will build the correct counter, even when there is only one possible counter. */
+  /** Confirm that the AI will avoid stepping on its own factory. */
   private boolean testHuntStall(AIMaker ai)
   {
     setupTest(ai);
