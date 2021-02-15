@@ -150,18 +150,21 @@ public class AICombatUtils
    * <p>Prunes any unnecessary attacks and empty spaces from the return value.
    * <p>Does not consider launchable units
    * @param target Your victim
-   * @param co Whose turn it is now
-   * @param attackCandidates The units CO is willing and able to commit
+   * @param attackCandidates The units you are willing and able to commit
    * @param excludedSpaces Any tiles you don't want to consider attacks from
    * @return The lethal combination of units organized by strike location, or null on failure.
    */
   public static HashMap<XYCoord, Unit> findMultiHitKill(
                                    GameMap gameMap, Unit target,
-                                   Commander co, Collection<Unit> attackCandidates,
+                                   Collection<Unit> attackCandidates,
                                    Collection<XYCoord> excludedSpaces)
   {
     if( target.getHP() < 1 ) // Try not to pick fights with zombies
       return null;
+    if( attackCandidates.size() < 1 )
+      return null;
+
+    Commander co = attackCandidates.iterator().next().CO;
 
     final int minRange = 1;
     final XYCoord targetCoord = new XYCoord(target);
@@ -237,7 +240,7 @@ public class AICombatUtils
       neededAttacks.put(xyc, null);
     }
 
-    double damage = findMultiHitKill(gameMap, attackers, neededAttacks, target, 0);
+    double damage = findMultiHitKill(gameMap, target, attackers, neededAttacks, 0);
     if( damage >= target.getHP() )
     {
       // Prune excess attacks and empty attacking spaces
@@ -269,12 +272,16 @@ public class AICombatUtils
    * Attempts to find a combination of attacks that will create a kill.
    * Considers units in the order provided.
    * Recursive.
-   * @param unitQueue The set of potential attackers
+   * @param attackCandidates The set of potential attackers
    * @param neededAttacks The set of locations to consider, pre-populated with any mandatory attacks, to be populated
    * @param pDamage The cumulative base damage done by those mandatory attacks
-   * @return The cumulative base damage of all attacks in the neededAttacks
+   * @return The cumulative base damage of all attacks already in the neededAttacks
    */
-  public static double findMultiHitKill(GameMap gameMap, Collection<Unit> unitQueue, Map<XYCoord, Unit> neededAttacks, Unit target, double pDamage)
+  public static double findMultiHitKill(
+                                GameMap gameMap, Unit target,
+                                Collection<Unit> attackCandidates,
+                                Map<XYCoord, Unit> neededAttacks,
+                                double pDamage)
   {
     // Base case; we found a kill
     if( pDamage >= target.getPreciseHP() )
@@ -290,7 +297,7 @@ public class AICombatUtils
       if( null != neededAttacks.get(xyc) )
         continue;
 
-      Queue<Unit> assaultQueue = new ArrayDeque<Unit>(unitQueue);
+      Queue<Unit> assaultQueue = new ArrayDeque<Unit>(attackCandidates);
       while (!assaultQueue.isEmpty())
       {
         Unit unit = assaultQueue.poll();
@@ -309,7 +316,7 @@ public class AICombatUtils
           neededAttacks.put(xyc, unit);
           double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
 
-          thisDamage = findMultiHitKill(gameMap, unitQueue, neededAttacks, target, damage + thisDamage);
+          thisDamage = findMultiHitKill(gameMap, target, attackCandidates, neededAttacks, damage + thisDamage);
 
           // If we've found a kill, we're done
           if( thisDamage >= target.getPreciseHP() )
