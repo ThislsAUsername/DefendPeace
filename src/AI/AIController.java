@@ -19,4 +19,6 @@ public interface AIController
   public GameAction getNextAction(GameMap gameMap);
   
   public AIMaker getAIInfo();
+
+  public void setLogging(boolean value);
 }

@@ -9,6 +9,7 @@ import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Set;
 
+import AI.AICombatUtils;
 import AI.AIUtils;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
@@ -180,6 +181,7 @@ public class Tech extends Commander
   private static class TechdropAbility extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
+    private static final boolean log = false;
 
     private CODamageModifier damageBuff = null;
     private CODefenseModifier defenseBuff = null;
@@ -217,7 +219,6 @@ public class Tech extends Commander
     @Override
     public GameEventQueue getEvents(MapMaster gameMap)
     {
-      boolean log = true;
       if( log ) System.out.println("[TechDrop] getEvents() entry");
 
       GameEventQueue abilityEvents = new GameEventQueue();
@@ -265,7 +266,6 @@ public class Tech extends Commander
     {
       ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
 
-      boolean log = true;
       Set<XYCoord> dropLocs = new HashSet<XYCoord>();
       for( int i = 0; i < numDrops; ++i )
       {
@@ -387,7 +387,7 @@ public class Tech extends Commander
           if( friendScores.containsKey(nmexy) ) friendScores.put(nmexy, 0); // Remove nearby-friend score penalty when smashing is an option.
 
           boolean shootTerrain = false;
-          Set<XYCoord> enemyLocations = AIUtils.findPossibleTargets(gameMap, techMech, nmexy, shootTerrain);
+          Set<XYCoord> enemyLocations = AICombatUtils.findPossibleTargets(gameMap, techMech, nmexy, shootTerrain);
           if( log ) System.out.println(String.format("Would have %d possible attacks after squashing %s", enemyLocations.size(), nme.toStringWithLocation()));
           int bestAttackVal = 0;
           for( XYCoord targetxy : enemyLocations )

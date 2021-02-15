@@ -81,6 +81,7 @@ public class Muriel implements AIController
   private Commander myCo = null;
 
   private StringBuffer logger = new StringBuffer();
+  private boolean shouldLog = true;
   private int turnNum = 0;
 
   private ArrayList<Commander> enemyCos = null;
@@ -178,7 +179,7 @@ public class Muriel implements AIController
     myUnitEffectMap.put(new UnitModelPair(myModel, otherModel), new UnitMatchupAndMetaInfo(damageRatio, costRatio));
     myUnitEffectMap.put(new UnitModelPair(otherModel, myModel), new UnitMatchupAndMetaInfo(invRatio, otherCostRatio));
 
-    System.out.println(String.format("Adding matchup: %s vs %s: %s/%s, damageRatio: %s, costRatio: %s", myUnit, otherUnit, myDamage, otherDamage, damageRatio, costRatio));
+    log(String.format("Adding matchup: %s vs %s: %s/%s, damageRatio: %s, costRatio: %s", myUnit, otherUnit, myDamage, otherDamage, damageRatio, costRatio));
     return myUnitEffectMap.get(new UnitModelPair(myModel, otherModel));
   }
 
@@ -224,9 +225,14 @@ public class Muriel implements AIController
 
   private void log(String message)
   {
-    System.out.println(message);
-    logger.append(message).append('\n');
+    if( shouldLog )
+    {
+      System.out.println(message);
+      logger.append(message).append('\n');
+    }
   }
+  @Override
+  public void setLogging(boolean value) { shouldLog = value; }
 
   @Override
   public GameAction getNextAction(GameMap gameMap)
@@ -445,7 +451,7 @@ public class Muriel implements AIController
         Unit unitInTheWay = gameMap.getResident(action.getMoveLocation()); // Could be us, could be nobody.
 
         // Sift through all attack actions we can perform.
-        double damageValue = AIUtils.scoreAttackAction(unit, action, gameMap,
+        double damageValue = AICombatUtils.scoreAttackAction(unit, action, gameMap,
             (results) -> {
               double hpDamage = Math.min(results.defenderHPLoss, results.defender.getPreciseHP());
 
@@ -614,7 +620,7 @@ public class Muriel implements AIController
             if( threat.canTarget(unit.model) && shouldAttack(threat, unit, gameMap) )
             {
               // Add coordinates that `threat` could target to our "no-go" list.
-              Map<XYCoord, Double> threatMap = AIUtils.findThreatPower(gameMap, threat, unit.model);
+              Map<XYCoord, Double> threatMap = AICombatUtils.findThreatPower(gameMap, threat, unit.model);
               noGoZone.addAll(threatMap.keySet()); // Ignore the valueMap of the return; we have already decided `threat` is dangerous.
             }
           }
@@ -696,7 +702,7 @@ public class Muriel implements AIController
 
     // Figure out what unit types we can purchase with our available properties.
     boolean includeFriendlyOccupied = false;
-    AIUtils.CommanderProductionInfo CPI = new AIUtils.CommanderProductionInfo(myCo, gameMap, includeFriendlyOccupied);
+    CommanderProductionInfo CPI = new CommanderProductionInfo(myCo, gameMap, includeFriendlyOccupied);
 
     if( CPI.availableProperties.isEmpty() )
     {

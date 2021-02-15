@@ -3,7 +3,7 @@ package AI;
 import java.util.*;
 import java.util.Map.Entry;
 
-import AI.AIUtils.CommanderProductionInfo;
+import AI.CommanderProductionInfo;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.*;
@@ -113,12 +113,13 @@ public class WallyAI extends ModularAI
             new GenerateThreatMap(co, this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
             new CaptureFinisher(co, this),
 
-            new SiegeAttacks(co, this),
             new NHitKO(co, this),
+            new SiegeAttacks(co, this),
             new PowerActivator(co, CommanderAbility.PHASE_BUY),
-            new FreeRealEstate(co, this, false), // Get any capture actions in before eviction goes into full force
+            new FreeRealEstate(co, this, false, false), // prioritize non-eviction
+            new FreeRealEstate(co, this, true,  false), // evict if necessary
             new BuildStuff(co, this),
-            new FreeRealEstate(co, this, true),
+            new FreeRealEstate(co, this, true,  true), // step on industries we're not using
             new Travel(co, this),
 
             new PowerActivator(co, CommanderAbility.PHASE_TURN_END)
@@ -150,6 +151,7 @@ public class WallyAI extends ModularAI
   @Override
   public void endTurn()
   {
+    super.endTurn();
     log(String.format("[======== Wally ending turn %s for %s =========]", turnNum, myCo));
   }
 
@@ -218,11 +220,18 @@ public class WallyAI extends ModularAI
       this.ai = ai;
     }
 
+    @Override
+    public void initTurn(GameMap gameMap) {targets = null;}
+    HashSet<XYCoord> targets = null;
+
     XYCoord targetLoc;
     Map<XYCoord, Unit> neededAttacks;
     double damageSum = 0;
+
     public void reset()
     {
+      if( null != targets )
+        targets.remove(targetLoc);
       targetLoc = null;
       neededAttacks = null;
       damageSum = 0;
@@ -235,71 +244,45 @@ public class WallyAI extends ModularAI
       if( null != nextAction )
         return nextAction;
 
-      // Get a count of enemy forces.
-      Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
-      for( Commander co : unitLists.keySet() )
+      HashSet<XYCoord> industries = new HashSet<XYCoord>();
+      for( XYCoord coord : myCo.ownedProperties )
+        if( myCo.unitProductionByTerrain.containsKey(gameMap.getEnvironment(coord).terrainType)
+            || TerrainType.HEADQUARTERS == gameMap.getEnvironment(coord).terrainType
+            || TerrainType.LAB == gameMap.getEnvironment(coord).terrainType )
+          industries.add(coord);
+
+      // Initialize to targeting all spaces on or next to industries+HQ, since those are important spots
+      if( null == targets )
       {
-        // log(String.format("Hunting CO %s's units", co.coInfo.name));
-        if( myCo.isEnemy(co) )
+        targets = new HashSet<XYCoord>();
+
+        HashSet<XYCoord> industryBlockers = new HashSet<XYCoord>();
+        for( XYCoord coord : industries )
+          industryBlockers.addAll(Utils.findLocationsInRange(gameMap, coord, 0, 1));
+
+        for( XYCoord coord : industryBlockers )
         {
-          Queue<Unit> targetQueue = new PriorityQueue<Unit>(unitLists.get(co).size(), new AIUtils.UnitCostComparator(false));
-          targetQueue.addAll(unitLists.get(co)); // We want to kill the most expensive enemy units
-          for( Unit target : targetQueue )
-          {
-            if( target.getHP() < 1 ) // Try not to pick fights with zombies
-              continue;
-            // log(String.format("  Would like to kill: %s", target.toStringWithLocation()));
-            ArrayList<XYCoord> coordsToCheck = Utils.findLocationsInRange(gameMap, new XYCoord(target.x, target.y), 1, AIUtils.findMaxStrikeWeaponRange(myCo));
-            neededAttacks = new HashMap<XYCoord, Unit>();
-
-            // Figure out where we can attack from, and include attackers already in range by default.
-            for( XYCoord xyc : coordsToCheck )
-            {
-              Location loc = gameMap.getLocation(xyc);
-              Unit resident = loc.getResident();
-
-              if( null != resident && resident.CO == myCo && !resident.isTurnOver
-                  && resident.canAttack(target.model, xyc.getDistance(target.x, target.y), false) )
-                neededAttacks.put(xyc, null);
-              // Check that we could potentially move into this space. Also we're scared of fog
-              else if( (null == resident) && !AIUtils.isFriendlyProduction(gameMap, myCo, xyc)
-                  && !gameMap.isLocationFogged(xyc) )
-                neededAttacks.put(xyc, null);
-            }
-            double damage = ai.findAssaultKills(gameMap, unitQueue, neededAttacks, target, 0);
-            if( damage >= target.getHP() && neededAttacks.size() > 1 )
-            {
-              ai.log(String.format("Found %s-Hit KO dealing %s HP to %s, who has %s", neededAttacks.size(), (int)damage, target.toStringWithLocation(), target.getHP()));
-              // Prune excess attacks and empty attacking spaces
-              for( XYCoord space : new ArrayList<XYCoord>(neededAttacks.keySet()) )
-              {
-                Unit attacker = neededAttacks.get(space);
-                if( null == attacker )
-                {
-                  neededAttacks.remove(space);
-                  continue;
-                }
-                double thisShot = CombatEngine.simulateBattleResults(attacker, target, gameMap, space.xCoord, space.yCoord).defenderHPLoss;
-                ai.log(String.format("  Can I prune %s (dealing %s)?", attacker.toStringWithLocation(), thisShot));
-                if( target.getHP() <= damage - thisShot )
-                {
-                  neededAttacks.remove(space);
-                  damage -= thisShot;
-                  ai.log(String.format("    Yes! Total damage is now %s", damage));
-                }
-              }
-              targetLoc = new XYCoord(target.x, target.y);
-              return nextAttack(gameMap);
-            }
-            else
-            {
-              // log(String.format("  Can't kill %s, oh well", target.toStringWithLocation()));
-            }
-          }
+          Unit resident = gameMap.getResident(coord);
+          if( null != resident && myCo.isEnemy(resident.CO) )
+            targets.add(coord);
         }
       }
 
-      return null;
+      for( XYCoord coord : new ArrayList<XYCoord>(targets) )
+      {
+        Unit resident = gameMap.getResident(coord);
+        if( null != resident && myCo.isEnemy(resident.CO) )
+        {
+          targetLoc = coord;
+          neededAttacks = AICombatUtils.findMultiHitKill(gameMap, resident, unitQueue, industries);
+          if( null != neededAttacks )
+            break;
+        }
+        else
+          targets.remove(coord);
+      }
+
+      return nextAttack(gameMap);
     }
 
     private GameAction nextAttack(GameMap gameMap)
@@ -329,7 +312,7 @@ public class WallyAI extends ModularAI
       for( XYCoord xyc : neededAttacks.keySet() )
       {
         Unit resident = gameMap.getResident(xyc);
-        if( resident.isTurnOver || resident.CO != myCo )
+        if( null == resident || resident.isTurnOver || resident.CO != myCo )
           continue;
 
         boolean ignoreSafety = true, avoidProduction = true;
@@ -371,7 +354,7 @@ public class WallyAI extends ModularAI
               // add each new threat to the existing threats
               ai.allThreats.add(threat);
               Map<XYCoord, Double> threatArea = ai.threatMap.get(um);
-              for( Entry<XYCoord, Double> newThreat : AIUtils.findThreatPower(gameMap, threat, um).entrySet() )
+              for( Entry<XYCoord, Double> newThreat : AICombatUtils.findThreatPower(gameMap, threat, um).entrySet() )
               {
                 if( null == threatArea.get(newThreat.getKey()) )
                   threatArea.put(newThreat.getKey(), newThreat.getValue());
@@ -392,20 +375,20 @@ public class WallyAI extends ModularAI
   {
     private static final long serialVersionUID = 1L;
     private final WallyAI ai;
-    private final boolean canEvict;
-    public FreeRealEstate(Commander co, WallyAI ai, boolean canEvict)
+    private final boolean canEvict, canStepOnProduction;
+    public FreeRealEstate(Commander co, WallyAI ai, boolean canEvict, boolean canStepOnProduction)
     {
       super(co, ai);
       this.ai = ai;
       this.canEvict = canEvict;
+      this.canStepOnProduction = canStepOnProduction;
     }
 
     @Override
     public GameAction getUnitAction(Unit unit, GameMap gameMap)
     {
       boolean mustMove = false;
-      boolean avoidProduction = false;
-      return findValueAction(myCo, ai, unit, gameMap, mustMove, avoidProduction, canEvict);
+      return findValueAction(myCo, ai, unit, gameMap, mustMove, !canStepOnProduction, canEvict);
     }
 
     public static GameAction findValueAction( Commander co, WallyAI ai,
@@ -473,7 +456,7 @@ public class WallyAI extends ModularAI
                 {
                   boolean ignoreSafety =
                       valueUnit(unit, gameMap.getLocation(moveCoord), true) >= valueUnit(resident, gameMap.getLocation(moveCoord), true);
-                  return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident, ignoreSafety);
+                  return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident, ignoreSafety, avoidProduction);
                 }
                 return ga;
               }
@@ -488,7 +471,7 @@ public class WallyAI extends ModularAI
             {
               boolean ignoreSafety =
                   valueUnit(unit, gameMap.getLocation(moveCoord), true) >= valueUnit(resident, gameMap.getLocation(moveCoord), true);
-              return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident, ignoreSafety);
+              return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident, ignoreSafety, avoidProduction);
             }
             return actionSet.getSelected();
           }
@@ -532,6 +515,16 @@ public class WallyAI extends ModularAI
     }
 
     Map<XYCoord, UnitModel> builds;
+
+    @Override
+    public void endTurn()
+    {
+      if( null != builds )
+      {
+        ai.log(String.format("Warning - builds not null on turn end; contains %s", builds));
+        builds = null;
+      }
+    }
 
     @Override
     public GameAction getNextAction(PriorityQueue<Unit> unitQueue, GameMap gameMap)
@@ -585,18 +578,19 @@ public class WallyAI extends ModularAI
 
     ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
     Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), stations);
+    boolean shouldResupply = false;
     if( stations.size() > 0 )
     {
-      boolean shouldResupply = unit.getHP() <= UNIT_HEAL_THRESHHOLD;
+      shouldResupply = unit.getHP() <= UNIT_HEAL_THRESHHOLD;
       shouldResupply |= unit.fuel <= UNIT_REFUEL_THRESHHOLD
           * Utils.findShortestPath(unit, stations.get(0), gameMap).getFuelCost(unit.model, gameMap);
       shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHHOLD;
+    }
 
-      if( shouldResupply )
-      {
-        log(String.format("  %s needs supplies.", unit.toStringWithLocation()));
-        goals.addAll(stations);
-      }
+    if( shouldResupply )
+    {
+      log(String.format("  %s needs supplies.", unit.toStringWithLocation()));
+      goals.addAll(stations);
       if( avoidProduction )
         goals.removeAll(AIUtils.findAlliedIndustries(gameMap, myCo, goals, !avoidProduction));
     }
@@ -618,7 +612,7 @@ public class WallyAI extends ModularAI
         XYCoord targetCoord = new XYCoord(target.x, target.y);
         double effectiveness = findEffectiveness(unit.model, target.model);
         if (Utils.findShortestPath(unit, targetCoord, gameMap, true) != null &&
-            AGGRO_EFFECT_THRESHHOLD > effectiveness)
+            AGGRO_EFFECT_THRESHHOLD < effectiveness)
         {
           valueMap.put(model, effectiveness*model.getCost());
           if (!targetMap.containsKey(model)) targetMap.put(model, new ArrayList<XYCoord>());
@@ -670,14 +664,6 @@ public class WallyAI extends ModularAI
    * For use after unit building is complete
    * Can recurse based on the other functions it calls.
    */
-  private GameAction evictUnit(
-                        GameMap gameMap,
-                        ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap,
-                        Unit evicter, Unit unit,
-                        boolean ignoreSafety )
-  {
-    return evictUnit(gameMap, allThreats, threatMap, evicter, unit, ignoreSafety, false);
-  }
   private GameAction evictUnit(
                         GameMap gameMap,
                         ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap,
@@ -787,7 +773,7 @@ public class WallyAI extends ModularAI
         boolean evictIgnoreSafety =
             valueUnit(unit, gameMap.getLocation(xyc), true) >= valueUnit(resident, gameMap.getLocation(xyc), true);
         if( unit.CO == resident.CO && !resident.isTurnOver )
-          action = evictUnit(gameMap, allThreats, threatMap, unit, resident, evictIgnoreSafety);
+          action = evictUnit(gameMap, allThreats, threatMap, unit, resident, evictIgnoreSafety, avoidProduction);
         if( null != action ) return action;
         continue;
       }
@@ -805,7 +791,7 @@ public class WallyAI extends ModularAI
             double bestDamage = 0;
             for( GameAction attack : actionSet.getGameActions() )
             {
-              double damageValue = AIUtils.scoreAttackAction(unit, attack, gameMap,
+              double damageValue = AICombatUtils.scoreAttackAction(unit, attack, gameMap,
                   (results) -> {
                     double loss   = Math.min(unit            .getHP(), (int)results.attackerHPLoss);
                     double damage = Math.min(results.defender.getHP(), (int)results.defenderHPLoss);
@@ -869,69 +855,6 @@ public class WallyAI extends ModularAI
       }
     }
     return false;
-  }
-
-  /**
-   * Attempts to find a combination of attacks that will create a kill.
-   * Recursive.
-   */
-  private double findAssaultKills(GameMap gameMap, Queue<Unit> unitQueue, Map<XYCoord, Unit> neededAttacks, Unit target, double pDamage)
-  {
-    // base case; we found a kill
-    if( pDamage >= target.getPreciseHP() )
-    {
-      return pDamage;
-    }
-
-    double damage = pDamage;
-    for( XYCoord xyc : neededAttacks.keySet() )
-    {
-      // Don't try to attack from the same space twice.
-      if( null != neededAttacks.get(xyc) )
-        continue;
-
-      // Attack with the cheapest assault units, if possible.
-      Queue<Unit> assaultQueue = new PriorityQueue<Unit>(11, new AIUtils.UnitCostComparator(true));
-      assaultQueue.addAll(unitQueue);
-      while (!assaultQueue.isEmpty())
-      {
-        Unit unit = assaultQueue.poll();
-        if( !unit.model.hasDirectFireWeapon() || neededAttacks.containsValue(unit) ) // don't try to attack twice with one unit
-          continue;
-
-        int dist = xyc.getDistance(target.x, target.y);
-
-        // Figure out how to get here.
-        Path movePath = Utils.findShortestPath(unit, xyc, gameMap);
-
-        if( movePath.getPathLength() > 0 && unit.canAttack(target.model, dist, true) )
-        {
-          neededAttacks.put(xyc, unit);
-          double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
-
-          if( thisDamage > target.getPreciseHP() )
-            continue; // OHKOs should be decided using different logic
-
-//          log(String.format("  Use %s to deal %sHP?", unit.toStringWithLocation(), thisDamage));
-          thisDamage = findAssaultKills(gameMap, unitQueue, neededAttacks, target, thisDamage);
-
-          // Base case, stop iterating.
-          if( thisDamage >= target.getPreciseHP() )
-          {
-//            log(String.format("    Yes, shoot %s", target.toStringWithLocation()));
-            damage = thisDamage;
-            break;
-          }
-          else
-          {
-//            log(String.format("    Nope"));
-            neededAttacks.put(xyc, null);
-          }
-        }
-      }
-    }
-
-    return damage;
   }
 
   private static int valueUnit(Unit unit, Location locale, boolean includeCurrentHealth)
@@ -1015,7 +938,7 @@ public class WallyAI extends ModularAI
     Map<XYCoord, UnitModel> builds = new HashMap<XYCoord, UnitModel>();
     // Figure out what unit types we can purchase with our available properties.
     boolean includeFriendlyOccupied = true;
-    AIUtils.CommanderProductionInfo CPI = new AIUtils.CommanderProductionInfo(myCo, gameMap, includeFriendlyOccupied);
+    CommanderProductionInfo CPI = new CommanderProductionInfo(myCo, gameMap, includeFriendlyOccupied);
 
     if( CPI.availableProperties.isEmpty() )
     {

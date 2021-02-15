@@ -1,8 +1,5 @@
 package Engine;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -287,81 +284,43 @@ public class GameInstance implements Serializable
     return sb.toString();
   }
   
-  public static String getSaveWarnings(String filename)
+  public static String getSaveWarnings(ObjectInputStream in) throws IOException, ClassNotFoundException
   {
-    System.out.println(String.format("Checking compatibility of save %s", filename));
-
+    GameVersion verInfo;
     StringBuilder prepends = new StringBuilder();
-    GameVersion verInfo = null;
-    try (FileInputStream file = new FileInputStream(filename); ObjectInputStream in = new ObjectInputStream(file);)
+
+    // Check that the save file has a matching version.
+    verInfo = (GameVersion) in.readObject();
+    if( new GameVersion().isEqual(verInfo) )
     {
-      // Check that the save file has a matching version.
-      verInfo = (GameVersion) in.readObject();
-      if( new GameVersion().isEqual(verInfo) )
+      // If so, make sure we aren't trying to take someone else's turn.
+      GameInstance gi = (GameInstance) in.readObject();
+      if( !gi.turn(new GameEventQueue()) )
       {
-        // If so, make sure we aren't trying to take someone else's turn.
-        GameInstance gi = (GameInstance) in.readObject();
-        if( !gi.turn(new GameEventQueue()) )
-        {
-          prepends.append('~');
-          System.out.println(String.format(
-              String.format("Save is for another player's turn (%s).",
-                  (null != gi.activeCO) ? gi.activeCO.coInfo.name : "null")));
-        }
-      }
-      else
-      {
-        prepends.append('!');
-        System.out.println(String.format("Save is incompatible version: %s",
-            (null == verInfo) ? "unknown" : verInfo.toString()));
+        prepends.append('~');
+        System.out.println(String.format(
+            String.format("Save is for another player's turn (%s).",
+                (null != gi.activeCO) ? gi.activeCO.coInfo.name : "null")));
       }
     }
-    catch (Exception ex)
+    else
     {
-      ex.printStackTrace();
+      prepends.append('!');
+      System.out.println(String.format("Save is incompatible version: %s",
+          (null == verInfo) ? "unknown" : verInfo.toString()));
     }
 
     return prepends.toString();
   }
-  
-  public static GameInstance loadSave(String filename)
-  {
-    System.out.println(String.format("Deserializing game data from %s", filename));
-    
-    GameInstance load = null;
-    try (FileInputStream file = new FileInputStream(filename); ObjectInputStream in = new ObjectInputStream(file);)
-    {
-      in.readObject(); // Pull out and discard our version info
 
-      load = (GameInstance) in.readObject();
-    }
-    catch (Exception ex)
-    {
-      System.out.println(ex.toString());
-    }
-
-    return load;
-  }
-  
-  public String writeSave(boolean endCurrentTurn)
+  public void writeSave(ObjectOutputStream out, boolean endCurrentTurn) throws IOException
   {
+    boolean temp = currentTurnEnded;
     currentTurnEnded = endCurrentTurn;
-    String filename = "save/" + saveFile; // "svp" for "SaVe Peace"
-    new File("save/").mkdirs(); // make sure we don't freak out if the directory's not there
-
-    System.out.println(String.format("Now saving to %s", filename));
-    try (FileOutputStream file = new FileOutputStream(filename); ObjectOutputStream out = new ObjectOutputStream(file);)
-    {
-      // Method for serialization of object
-      out.writeObject(new GameVersion());
-      out.writeObject(this);
-    }
-    catch (IOException ex)
-    {
-      System.out.println(ex.toString());
-    }
-
-    return filename;
+    // Method for serialization of object
+    out.writeObject(new GameVersion());
+    out.writeObject(this);
+    currentTurnEnded = temp;
   }
 
   /**
