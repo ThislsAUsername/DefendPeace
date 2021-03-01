@@ -8,6 +8,7 @@ import Units.Unit;
 /** Convenience class to collate and format visible game state info for a given CO */
 public class COStateInfo // TODO: Consider making this class parse data for all COs at once
 {
+  String identifier = "";
   int income = 0;
   int unitCount = 0;
   int vehCount = 0;
@@ -19,6 +20,8 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
 
   public COStateInfo(GameMap map, Commander viewed)
   {
+    identifier = viewed.coInfo.name;
+
     // map-based info
     for( int w = 0; w < map.mapWidth; ++w )
     {
@@ -73,6 +76,7 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
   {
     StringBuilder sb = new StringBuilder();
 
+    sb.append("\n");
     sb.append(income)   .append("\n");
     sb.append(unitCount).append("\n");
     sb.append(vehCount) .append("\n");
@@ -89,6 +93,7 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
   {
     StringBuilder sb = new StringBuilder();
 
+    sb.append(identifier)      .append("\n");
     sb.append("Income:")       .append("\n");
     sb.append("Unit count:")   .append("\n");
     sb.append("Vehicle count:").append("\n");
