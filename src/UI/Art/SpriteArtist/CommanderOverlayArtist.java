@@ -7,11 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import CommandingOfficers.Commander;
+import UI.COStateInfo;
 
 public class CommanderOverlayArtist
 {
-  private static String overlayFundsString = "FUNDS     0";
-  private static int previousOverlayFunds = 0;
   private static int animIndex = 0;
   private static long animIndexUpdateTime = 0;
   private static final int animIndexUpdateInterval = 8;
@@ -26,16 +25,6 @@ public class CommanderOverlayArtist
     int xTextOffset = (4+coEyesWidth); // Distance from the side of the view to the CO overlay text.
     int yTextOffset = 3; // Distance from the top of the view to the CO overlay text.
     BufferedImage spriteA = SpriteLibrary.getLettersSmallCaps().getFrame(0); // Convenient reference so we can check dimensions.
-    int textHeight = spriteA.getHeight();
-
-    // Rebuild the funds string to draw if it has changed.
-    if( previousOverlayFunds != commander.money )
-    {
-      previousOverlayFunds = commander.money;
-      overlayFundsString = String.format("FUNDS %5d", commander.money);
-    }
-
-    String coString = commander.coInfo.name;
 
     // Choose left or right overlay image to draw.
     BufferedImage overlayImage = SpriteLibrary.getCoOverlay(commander, overlayIsLeft);
@@ -51,22 +40,25 @@ public class CommanderOverlayArtist
     }
     final int POWERBAR_BUFFER = 3; // The distance from the top of the powerbar image frame to the top of the actual power bar (since the ability points are taller).
 
+    int money = commander.money;
+    int energy = COStateInfo.getEnergyUntilNextPower(commander);
+    int valueLength = Math.max((""+money).length(), (""+energy).length());
+
     if( overlayIsLeft )
     { // Draw the overlay on the left side.
       g.drawImage(overlayImage, 0, 0, overlayImage.getWidth(), overlayImage.getHeight(), null);
-      SpriteUIUtils.drawTextSmallCaps(g, coString, xTextOffset, yTextOffset); // CO name
-      SpriteUIUtils.drawTextSmallCaps(g, overlayFundsString, xTextOffset, textHeight + 1 + yTextOffset); // Funds
+      drawIconAndValue(g, SpriteLibrary.MapIcons.ENERGY, energy, valueLength, xTextOffset, yTextOffset);
+      drawIconAndValue(g, SpriteLibrary.MapIcons.FUNDS,  money,  valueLength, xTextOffset, SpriteLibrary.baseIconSize + yTextOffset);
       g.drawImage( powerBarImage, 0, (overlayImage.getHeight()) - (POWERBAR_BUFFER), powerBarImage.getWidth(), powerBarImage.getHeight(), null );
     }
     else
     { // Draw the overlay on the right side.
       int mapViewWidth = SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale();
       int xPos = mapViewWidth - overlayImage.getWidth();
-      int coNameXPos = mapViewWidth - spriteA.getWidth() * coString.length() - xTextOffset;
-      int fundsXPos = mapViewWidth - spriteA.getWidth() * overlayFundsString.length() - xTextOffset;
+      int valueXPos = mapViewWidth - ICON_VALUE_SPACING - spriteA.getWidth()*valueLength - xTextOffset;
       g.drawImage(overlayImage, xPos, 0, overlayImage.getWidth(), overlayImage.getHeight(), null);
-      SpriteUIUtils.drawTextSmallCaps(g, coString, coNameXPos, yTextOffset); // CO name
-      SpriteUIUtils.drawTextSmallCaps(g, overlayFundsString, fundsXPos, textHeight + 1 + yTextOffset); // Funds
+      drawIconAndValue(g, SpriteLibrary.MapIcons.ENERGY, energy, valueLength, valueXPos, yTextOffset);
+      drawIconAndValue(g, SpriteLibrary.MapIcons.FUNDS,  money,  valueLength, valueXPos, SpriteLibrary.baseIconSize + yTextOffset);
       int pbXPos = mapViewWidth - powerBarImage.getWidth();
       if( trueIfBarFalseIfText )
       {
@@ -79,6 +71,14 @@ public class CommanderOverlayArtist
         g.drawImage( powerBarImage, pbXPos, (overlayImage.getHeight()) - (POWERBAR_BUFFER), powerBarImage.getWidth(), powerBarImage.getHeight(), null );
       }
     }
+  }
+
+  private static final int ICON_VALUE_SPACING = SpriteLibrary.baseIconSize + 2;
+  static void drawIconAndValue(Graphics g, SpriteLibrary.MapIcons icon, int value, int valueLength, int drawX, int drawY)
+  {
+    g.drawImage(icon.getIcon(), drawX, drawY, null);
+    drawX += icon.getIcon().getWidth() + 2;
+    SpriteUIUtils.drawTextSmallCaps(g, String.format("%"+valueLength+"d", value), drawX, drawY);
   }
 
   private static void updateAnimIndex()
