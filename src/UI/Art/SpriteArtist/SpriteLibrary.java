@@ -45,13 +45,6 @@ public class SpriteLibrary
   private static Sprite mapUnitSymbolSprites = null;
   private static Map<Color,Map<Character,BufferedImage>> mapUnitTextSprites = null;
 
-  // Icons for various attributes.
-  private static BufferedImage mapHeartIcon = null;
-  private static BufferedImage mapShieldIcon = null;
-  private static BufferedImage mapUnitStunIcon = null;
-  private static BufferedImage mapUnitFuelIcon = null;
-  private static BufferedImage mapUnitAmmoIcon = null;
-
   // Unit icons for various activities.
   private static HashMap<Color, BufferedImage> mapUnitCargoIcons = new HashMap<Color, BufferedImage>();
   private static HashMap<Color, BufferedImage> mapUnitCaptureIcons = new HashMap<Color, BufferedImage>();
@@ -404,49 +397,19 @@ public class SpriteLibrary
     return mapUnitTextSprites.get(color);
   }
 
-  public static BufferedImage getStunIcon()
+  public static enum MapIcons
   {
-    if( null == mapUnitStunIcon )
-    {
-      mapUnitStunIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/stun.png");
-    }
-    return mapUnitStunIcon;
-  }
+    STUN, HEART, SHIELD, FUEL, AMMO;
 
-  public static BufferedImage getHeartIcon()
-  {
-    if( null == mapHeartIcon )
+    private BufferedImage myIcon = null;
+    public BufferedImage getIcon()
     {
-      mapHeartIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/heart.png");
+      if( null == myIcon )
+      {
+        myIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/"+this.toString().toLowerCase()+".png");
+      }
+      return myIcon;
     }
-    return mapHeartIcon;
-  }
-
-  public static BufferedImage getShieldIcon()
-  {
-    if( null == mapShieldIcon )
-    {
-      mapShieldIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/shield.png");
-    }
-    return mapShieldIcon;
-  }
-
-  public static BufferedImage getFuelIcon()
-  {
-    if( null == mapUnitFuelIcon )
-    {
-      mapUnitFuelIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/fuel.png");
-    }
-    return mapUnitFuelIcon;
-  }
-
-  public static BufferedImage getAmmoIcon()
-  {
-    if( null == mapUnitAmmoIcon )
-    {
-      mapUnitAmmoIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/ammo.png");
-    }
-    return mapUnitAmmoIcon;
   }
 
   private static BufferedImage getColoredSprite(HashMap<Color, BufferedImage> map, String filename, Color color)
