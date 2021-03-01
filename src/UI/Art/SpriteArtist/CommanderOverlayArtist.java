@@ -7,23 +7,65 @@ import java.util.HashMap;
 import java.util.Map;
 
 import CommandingOfficers.Commander;
+import Terrain.GameMap;
 import UI.COStateInfo;
 
 public class CommanderOverlayArtist
 {
+  public static final int OVERLAY_WIDTH = 97;
+  public static final int OVERLAY_HEIGHT = 20;
+
   private static int animIndex = 0;
   private static long animIndexUpdateTime = 0;
   private static final int animIndexUpdateInterval = 8;
   
   private static Map<String, Sprite> activeAbilityTextSprites = new HashMap<String, Sprite>();
 
+  /**
+   * Draws an overlay for all COs passed in, left-justified, with status text and optionally highlights one CO
+   */
+  public static BufferedImage drawAllCommanderOverlays(Commander[] coList, GameMap drawableMap, int drawingWidth, int drawingHeight, Commander coToHighlight)
+  {
+    BufferedImage output = SpriteLibrary.createTransparentSprite(drawingWidth, drawingHeight);
+    Graphics g = output.getGraphics();
+    int verticalOffset = 0;
+
+    for( Commander CO : coList )
+    {
+      // Highlight the selected CO
+      if( CO == coToHighlight )
+      {
+        g.setColor(SpriteUIUtils.MENUHIGHLIGHTCOLOR);
+        g.fillRect(0, verticalOffset, drawingWidth, OVERLAY_HEIGHT);
+      }
+
+      CommanderOverlayArtist.drawCommanderOverlay(g, CO, verticalOffset, true);
+      verticalOffset += OVERLAY_HEIGHT + 5;
+
+      // Add brief status text per CO
+      String status = new COStateInfo(drawableMap, CO).getAbbrevStatus();
+      BufferedImage statusText = SpriteUIUtils.drawProseToWidth(status, drawingWidth);
+      g.drawImage(statusText, 0, verticalOffset, null);
+      verticalOffset += statusText.getHeight() + 5;
+
+      if( verticalOffset + OVERLAY_HEIGHT > drawingHeight )
+        break;
+    }
+
+    return output;
+  }
+
   public static void drawCommanderOverlay(Graphics g, Commander commander, boolean overlayIsLeft)
+  {
+    drawCommanderOverlay(g, commander, 0, overlayIsLeft);
+  }
+  public static void drawCommanderOverlay(Graphics g, Commander commander, int verticalOffset, boolean overlayIsLeft)
   {
     updateAnimIndex();
 
     int coEyesWidth = 25;
     int xTextOffset = (4+coEyesWidth); // Distance from the side of the view to the CO overlay text.
-    int yTextOffset = 3; // Distance from the top of the view to the CO overlay text.
+    int yTextOffset = 3 + verticalOffset; // Distance from the top of the view to the CO overlay text.
     BufferedImage spriteA = SpriteLibrary.getLettersSmallCaps().getFrame(0); // Convenient reference so we can check dimensions.
 
     // Choose left or right overlay image to draw.
@@ -46,29 +88,29 @@ public class CommanderOverlayArtist
 
     if( overlayIsLeft )
     { // Draw the overlay on the left side.
-      g.drawImage(overlayImage, 0, 0, overlayImage.getWidth(), overlayImage.getHeight(), null);
+      g.drawImage(overlayImage, 0, verticalOffset, overlayImage.getWidth(), overlayImage.getHeight(), null);
       drawIconAndValue(g, SpriteLibrary.MapIcons.ENERGY, energy, valueLength, xTextOffset, yTextOffset);
       drawIconAndValue(g, SpriteLibrary.MapIcons.FUNDS,  money,  valueLength, xTextOffset, SpriteLibrary.baseIconSize + yTextOffset);
-      g.drawImage( powerBarImage, 0, (overlayImage.getHeight()) - (POWERBAR_BUFFER), powerBarImage.getWidth(), powerBarImage.getHeight(), null );
+      g.drawImage( powerBarImage, 0, (overlayImage.getHeight()+verticalOffset) - (POWERBAR_BUFFER), powerBarImage.getWidth(), powerBarImage.getHeight(), null );
     }
     else
     { // Draw the overlay on the right side.
       int mapViewWidth = SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale();
       int xPos = mapViewWidth - overlayImage.getWidth();
       int valueXPos = mapViewWidth - ICON_VALUE_SPACING - spriteA.getWidth()*valueLength - xTextOffset;
-      g.drawImage(overlayImage, xPos, 0, overlayImage.getWidth(), overlayImage.getHeight(), null);
+      g.drawImage(overlayImage, xPos, verticalOffset, overlayImage.getWidth(), overlayImage.getHeight(), null);
       drawIconAndValue(g, SpriteLibrary.MapIcons.ENERGY, energy, valueLength, valueXPos, yTextOffset);
       drawIconAndValue(g, SpriteLibrary.MapIcons.FUNDS,  money,  valueLength, valueXPos, SpriteLibrary.baseIconSize + yTextOffset);
       int pbXPos = mapViewWidth - powerBarImage.getWidth();
       if( trueIfBarFalseIfText )
       {
         // We are drawing the power bar, and want to flip it horizontally.
-        g.drawImage( powerBarImage, pbXPos + (powerBarImage.getWidth()), (overlayImage.getHeight()) - (POWERBAR_BUFFER), -powerBarImage.getWidth(), powerBarImage.getHeight(), null );
+        g.drawImage( powerBarImage, pbXPos + (powerBarImage.getWidth()), (overlayImage.getHeight()+verticalOffset) - (POWERBAR_BUFFER), -powerBarImage.getWidth(), powerBarImage.getHeight(), null );
       }
       else
       {
         // We are drawing an ability name, and we don't want to flip it.
-        g.drawImage( powerBarImage, pbXPos, (overlayImage.getHeight()) - (POWERBAR_BUFFER), powerBarImage.getWidth(), powerBarImage.getHeight(), null );
+        g.drawImage( powerBarImage, pbXPos, (overlayImage.getHeight()+verticalOffset) - (POWERBAR_BUFFER), powerBarImage.getWidth(), powerBarImage.getHeight(), null );
       }
     }
   }

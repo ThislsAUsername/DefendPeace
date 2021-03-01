@@ -83,48 +83,11 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
     switch (page.pageType)
     {
       case CO_HEADERS:
-        int coEntryHeight = 42;
-        int heightOffset = 0;
-
-        Commander[] coList = myControl.getGame().commanders;
-        int coIndex = myControl.getGame().getCOIndex(thisCO);
-
-        int selectedOptionYOffset = coIndex * coEntryHeight;
-        int verticalShift = 0; // How many COs to skip drawing "off the top"
-        int displayableCount = paneVSize / coEntryHeight; // how many COs we can cram on the screen
-        while (selectedOptionYOffset > paneVSize / 2 && // Loop until either the cursor's bumped up to the center of the screen...
-            displayableCount + verticalShift < coList.length) //  or we'll already show the last CO 
-        {
-          verticalShift++;
-          selectedOptionYOffset -= coEntryHeight;
-        }
-
-        for( int i = verticalShift; i < coList.length; ++i )
-        {
-          Commander CO = coList[i];
-
-          // Build our overlay
-          BufferedImage overlayPic = SpriteLibrary.createTransparentSprite(drawingWidth, coEntryHeight);
-          Graphics overlayG = overlayPic.getGraphics();
-
-          // Highlight the selected CO
-          if( i == coIndex )
-          {
-            overlayG.setColor(SpriteUIUtils.MENUHIGHLIGHTCOLOR);
-            overlayG.fillRect(0, 0, drawingWidth, coEntryHeight);
-          }
-
-          CommanderOverlayArtist.drawCommanderOverlay(overlayPic.getGraphics(), CO, true);
-
-          // Add brief status text per CO
-          String status = new COStateInfo(getDrawableMap(myControl.getGame()), CO).getAbbrevStatus();
-          BufferedImage statusText = SpriteUIUtils.drawProseToWidth(status, drawingWidth);
-          overlayG.drawImage(statusText, 0, (5+SpriteLibrary.getCoOverlay(CO, true).getHeight()), null);
-
-          // Drop the overlay where it's supposed to go
-          myG.drawImage(overlayPic,2*paneOuterBuffer, 2*paneOuterBuffer + heightOffset, null);
-          heightOffset += coEntryHeight;
-        }
+        BufferedImage headersImage = CommanderOverlayArtist.drawAllCommanderOverlays(
+            myControl.getGame().commanders,
+            getDrawableMap(myControl.getGame()),
+            drawingWidth, paneVSize, thisCO);
+        myG.drawImage(headersImage, 2*paneOuterBuffer, 2*paneOuterBuffer, null);
         break;
       case GAME_STATUS:
         if( null != thisCO && thisCO != statsCO )

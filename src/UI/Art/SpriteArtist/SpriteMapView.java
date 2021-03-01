@@ -18,8 +18,6 @@ import Engine.Combat.DamagePopup;
 import Engine.Combat.StrikeParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
-import Engine.GameEvents.TeleportEvent;
-import Engine.GameEvents.TeleportEvent.AnimationStyle;
 import Terrain.GameMap;
 import Terrain.MapWindow;
 import UI.GameOverlay;
@@ -523,7 +521,7 @@ public class SpriteMapView extends MapView
   }
 
   /**
-   * Draws a predicted damage panel
+   * Draws a predicted effect panel; not necessarily damage
    */
   public void drawDamagePreview(Graphics g, DamagePopup data, boolean spaceEmpty)
   {
@@ -568,10 +566,6 @@ public class SpriteMapView extends MapView
     return u.CO.HQLocation.xCoord >= u.CO.myView.mapWidth / 2;
   }
 
-  /**
-   * Draws the commander overlay, with the commander name and available funds.
-   * @param g
-   */
   private void drawHUD(Graphics g, boolean includeTileDetails)
   {
     // Choose the CO overlay location based on the cursor location on the screen.
@@ -584,8 +578,24 @@ public class SpriteMapView extends MapView
       overlayIsLeft = false;
     }
 
-    // Draw the Commander's image, current funds, and power level.
-    CommanderOverlayArtist.drawCommanderOverlay(g, myGame.activeCO, overlayIsLeft);
+    // If the CO overlay won't overlap the map, draw all CO overlays to use the space
+    int overlayHSpaceAvailable = (mapViewWidth - mapImage.getWidth()) / 2;
+    if( overlayHSpaceAvailable > CommanderOverlayArtist.OVERLAY_WIDTH + 42 )
+    {
+      // We have plenty of space to draw everything, so default to drawing left
+      overlayIsLeft = true;
+
+      BufferedImage coOverlays = CommanderOverlayArtist.drawAllCommanderOverlays(
+          myGame.commanders,
+          getDrawableMap(myGame),
+          overlayHSpaceAvailable, mapViewHeight - 80, myGame.activeCO);
+      if( overlayIsLeft )
+        g.drawImage(coOverlays, 0, 0, null);
+      else
+        g.drawImage(coOverlays, mapViewWidth - coOverlays.getWidth(), 0, null);
+    }
+    else
+      CommanderOverlayArtist.drawCommanderOverlay(g, myGame.activeCO, overlayIsLeft);
 
     drawTurnCounter(g, overlayIsLeft);
 
