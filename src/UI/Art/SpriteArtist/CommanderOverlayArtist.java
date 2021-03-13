@@ -15,9 +15,7 @@ public class CommanderOverlayArtist
   public static final int OVERLAY_WIDTH = 97;
   public static final int OVERLAY_HEIGHT = 20;
 
-  private static int animIndex = 0;
-  private static long animIndexUpdateTime = 0;
-  private static final int animIndexUpdateInterval = 8;
+  private static final int animIndexUpdateInterval = 13;
   
   private static Map<String, Sprite> activeAbilityTextSprites = new HashMap<String, Sprite>();
 
@@ -61,8 +59,6 @@ public class CommanderOverlayArtist
   }
   public static void drawCommanderOverlay(Graphics g, Commander commander, int verticalOffset, boolean overlayIsLeft)
   {
-    updateAnimIndex();
-
     int coEyesWidth = 25;
     int xTextOffset = (4+coEyesWidth); // Distance from the side of the view to the CO overlay text.
     int yTextOffset = 3 + verticalOffset; // Distance from the top of the view to the CO overlay text.
@@ -123,18 +119,11 @@ public class CommanderOverlayArtist
     SpriteUIUtils.drawTextSmallCaps(g, String.format("%"+valueLength+"d", value), drawX, drawY);
   }
 
-  private static void updateAnimIndex()
+  private static int getAnimIndex()
   {
-    // Calculate the sprite index to use.
-    long thisTime = System.currentTimeMillis();
-    long animTimeDiff = thisTime - animIndexUpdateTime;
-
-    // If it's time to update the sprite index... update the sprite index.
-    if( animTimeDiff > animIndexUpdateInterval )
-    {
-      animIndex++;
-      animIndexUpdateTime = thisTime;
-    } 
+    // Fun fact: casting long->int can produce negative numbers, for some reason.
+    int thisTime = Math.abs((int)System.currentTimeMillis());
+    return  (thisTime / animIndexUpdateInterval);
   }
 
   /**
@@ -143,7 +132,7 @@ public class CommanderOverlayArtist
   public static BufferedImage buildCoPowerBar(Commander co, double[] abilityPoints, double currentPower, boolean leftSide)
   {
     final double pixelsPerPowerUnit = 3.0;
-    int slowAnimIndex = (animIndex/32) % 2;
+    int slowAnimIndex = (getAnimIndex()/32) % 2;
 
     // Find the most expensive ability so we know how long to draw the bar.
     double maxAP = 1;
@@ -184,7 +173,7 @@ public class CommanderOverlayArtist
     // Draw a glint every now and then, if at least one ability is available.
     if( atLeastOne )
     {
-      int glintPos = animIndex % 600; // Say, every 10 seconds or so.
+      int glintPos = getAnimIndex() % 600; // Say, every 10 seconds or so.
       if( glintPos < bar.getWidth()-5)
       {
         BufferedImage glint = SpriteLibrary.createDefaultBlankSprite(5, 5);
@@ -256,6 +245,6 @@ public class CommanderOverlayArtist
     }
 
     // Return the current sub-image.
-    return activeAbilityTextSprites.get(abilityName).getFrame((animIndex/4));
+    return activeAbilityTextSprites.get(abilityName).getFrame((getAnimIndex()/4));
   }
 }
