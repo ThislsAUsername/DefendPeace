@@ -119,7 +119,7 @@ public class CommanderOverlayArtist
   static void drawIconAndValue(Graphics g, SpriteLibrary.MapIcons icon, int value, int valueLength, int drawX, int drawY)
   {
     g.drawImage(icon.getIcon(), drawX, drawY, null);
-    drawX += icon.getIcon().getWidth() + 2;
+    drawX += ICON_VALUE_SPACING;
     SpriteUIUtils.drawTextSmallCaps(g, String.format("%"+valueLength+"d", value), drawX, drawY);
   }
 
