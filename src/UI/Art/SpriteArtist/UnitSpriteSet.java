@@ -284,14 +284,14 @@ public class UnitSpriteSet
     // Evaluate/draw unit status effects.
     ArrayList<BufferedImage> statusIcons = new ArrayList<BufferedImage>();
     if( u.isStunned )
-      statusIcons.add(SpriteLibrary.getStunIcon());
+      statusIcons.add(SpriteLibrary.MapIcons.STUN.getIcon());
 
     double lowIndicatorFraction = 3.0;
     if( u.fuel < u.model.maxFuel / lowIndicatorFraction )
-      statusIcons.add(SpriteLibrary.getFuelIcon());
+      statusIcons.add(SpriteLibrary.MapIcons.FUEL.getIcon());
 
     if( u.ammo >= 0 && !u.model.weapons.isEmpty() && u.ammo < u.model.maxAmmo / lowIndicatorFraction )
-      statusIcons.add(SpriteLibrary.getAmmoIcon());
+      statusIcons.add(SpriteLibrary.MapIcons.AMMO.getIcon());
 
     if( !statusIcons.isEmpty() )
     {

@@ -99,8 +99,8 @@ public class MapTileDetailsArtist
 
     // Collect terrain attributes to draw.
     ArrayList<AttributeArtist> terrainAttrs = new ArrayList<AttributeArtist>();
-    terrainAttrs.add(new AttributeArtist(SpriteLibrary.getShieldIcon(), terrain.getDefLevel()));
-    if( loc.durability < 99 ) terrainAttrs.add(new AttributeArtist(SpriteLibrary.getHeartIcon(), loc.durability));
+    terrainAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.SHIELD.getIcon(), terrain.getDefLevel()));
+    if( loc.durability < 99 ) terrainAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.HEART.getIcon(), loc.durability));
     
     // Get the unit image.
     ArrayList<AttributeArtist> unitAttrs = new ArrayList<AttributeArtist>();
@@ -110,10 +110,10 @@ public class MapTileDetailsArtist
       UnitSpriteSet uss = SpriteLibrary.getMapUnitSpriteSet(unit);
       unitImage = uss.getUnitImage();
       
-      unitAttrs.add(new AttributeArtist(SpriteLibrary.getHeartIcon(), unit.getHP()));
-      unitAttrs.add(new AttributeArtist(SpriteLibrary.getFuelIcon(), unit.fuel));
+      unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.HEART.getIcon(), unit.getHP()));
+      unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.FUEL.getIcon(), unit.fuel));
       if( unit.ammo >= 0 ) 
-        unitAttrs.add(new AttributeArtist(SpriteLibrary.getAmmoIcon(), unit.ammo));
+        unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.AMMO.getIcon(), unit.ammo));
       if( unit.getCaptureProgress() > 0)
         unitAttrs.add(new AttributeArtist(SpriteLibrary.getCaptureIcon(unit.CO.myColor),
             map.getEnvironment(coord).terrainType.getCaptureThreshold()-unit.getCaptureProgress()));
