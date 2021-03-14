@@ -11,6 +11,7 @@ import Engine.ConfigUtils;
 import Engine.Driver;
 import Engine.GameInstance;
 import Engine.IController;
+import Engine.IView;
 import Engine.MapController;
 import Engine.OptionSelector;
 import UI.InputHandler.InputAction;
@@ -156,6 +157,16 @@ public class PlayerSetupController implements IController
       case LEFT:
       case RIGHT:
         categorySelector.handleInput(action);
+        break;
+      case SEEK:
+        ArrayList<CommanderInfo> infos = new ArrayList<CommanderInfo>();
+        for( PlayerSetupInfo info : coSelectors)
+          infos.add(info.getCurrentCO());
+        CO_InfoController coInfoMenu = new CO_InfoController(infos, playerSelector.getSelectionNormalized());
+        IView infoView = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
+
+        // Give the new controller/view the floor
+        Driver.getInstance().changeGameState(coInfoMenu, infoView);
         break;
         default:
           System.out.println("Warning: Unsupported input " + action + " in CO setup menu.");

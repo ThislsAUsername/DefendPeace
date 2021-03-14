@@ -30,8 +30,8 @@ public class SpriteLibrary
 {
   // This is the physical size of a single map square in pixels.
   public static final int baseSpriteSize = 16;
-  
-  public static final String DEFAULT_SPRITE_KEY = "DEFAULT";
+
+  public static final int baseIconSize = 8;
 
   public static final String charKey = "%./-~,;:!?'&()_";
   public static final String DEFAULT_FACTION = "Thorn";
@@ -50,13 +50,6 @@ public class SpriteLibrary
   private static Sprite mapUnitLetterSprites = null;
   private static Sprite mapUnitSymbolSprites = null;
   private static Map<Color,Map<Character,BufferedImage>> mapUnitTextSprites = null;
-
-  // Icons for various attributes.
-  private static BufferedImage mapHeartIcon = null;
-  private static BufferedImage mapShieldIcon = null;
-  private static BufferedImage mapUnitStunIcon = null;
-  private static BufferedImage mapUnitFuelIcon = null;
-  private static BufferedImage mapUnitAmmoIcon = null;
 
   // Unit icons for various activities.
   private static HashMap<Color, BufferedImage> mapUnitCargoIcons = new HashMap<Color, BufferedImage>();
@@ -411,49 +404,19 @@ public class SpriteLibrary
     return mapUnitTextSprites.get(color);
   }
 
-  public static BufferedImage getStunIcon()
+  public static enum MapIcons
   {
-    if( null == mapUnitStunIcon )
-    {
-      mapUnitStunIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/stun.png");
-    }
-    return mapUnitStunIcon;
-  }
+    STUN, HEART, SHIELD, ENERGY, FUNDS, FUEL, AMMO;
 
-  public static BufferedImage getHeartIcon()
-  {
-    if( null == mapHeartIcon )
+    private BufferedImage myIcon = null;
+    public BufferedImage getIcon()
     {
-      mapHeartIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/heart.png");
+      if( null == myIcon )
+      {
+        myIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/"+this.toString().toLowerCase()+".png");
+      }
+      return myIcon;
     }
-    return mapHeartIcon;
-  }
-
-  public static BufferedImage getShieldIcon()
-  {
-    if( null == mapShieldIcon )
-    {
-      mapShieldIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/shield.png");
-    }
-    return mapShieldIcon;
-  }
-
-  public static BufferedImage getFuelIcon()
-  {
-    if( null == mapUnitFuelIcon )
-    {
-      mapUnitFuelIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/fuel.png");
-    }
-    return mapUnitFuelIcon;
-  }
-
-  public static BufferedImage getAmmoIcon()
-  {
-    if( null == mapUnitAmmoIcon )
-    {
-      mapUnitAmmoIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/ammo.png");
-    }
-    return mapUnitAmmoIcon;
   }
 
   private static BufferedImage getColoredSprite(HashMap<Color, BufferedImage> map, String filename, Color color)
@@ -638,11 +601,8 @@ public class SpriteLibrary
   {
     if( !coOverlays.containsKey(co) )
     {
-      final int OVERLAY_WIDTH = 97;
-      final int OVERLAY_HEIGHT = 20;
-
       // If we don't already have this overlay, go load and store it.
-      Sprite overlay = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/co_overlay.png"), OVERLAY_WIDTH, OVERLAY_HEIGHT);
+      Sprite overlay = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/co_overlay.png"), CommanderOverlayArtist.OVERLAY_WIDTH, CommanderOverlayArtist.OVERLAY_HEIGHT);
       overlay.colorize(UIUtils.defaultMapColors, UIUtils.getMapUnitColors(co.myColor).paletteColors);
 
       // Draw the Commander's mug on top of the overlay.
@@ -651,7 +611,7 @@ public class SpriteLibrary
       Graphics g = overlay.getFrame(0).getGraphics();
       g.drawImage(coMug, mugW, 1, -mugW, coMug.getHeight(), null);
       Graphics g1 = overlay.getFrame(1).getGraphics();
-      g1.drawImage(coMug, OVERLAY_WIDTH - mugW, 1, null);
+      g1.drawImage(coMug, CommanderOverlayArtist.OVERLAY_WIDTH-mugW, 1, null);
 
       coOverlays.put(co, overlay);
     }
