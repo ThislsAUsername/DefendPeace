@@ -132,7 +132,8 @@ public class CommanderOverlayArtist
   public static BufferedImage buildCoPowerBar(Commander co, double[] abilityPoints, double currentPower, boolean leftSide)
   {
     final double pixelsPerPowerUnit = 3.0;
-    int slowAnimIndex = (getAnimIndex()/32) % 2;
+    final int animIndex = getAnimIndex();
+    int slowAnimIndex = (animIndex/32) % 2;
 
     // Find the most expensive ability so we know how long to draw the bar.
     double maxAP = 1;
@@ -173,7 +174,7 @@ public class CommanderOverlayArtist
     // Draw a glint every now and then, if at least one ability is available.
     if( atLeastOne )
     {
-      int glintPos = getAnimIndex() % 600; // Say, every 10 seconds or so.
+      int glintPos = animIndex % 600; // Say, every 10 seconds or so.
       if( glintPos < bar.getWidth()-5)
       {
         BufferedImage glint = SpriteLibrary.createDefaultBlankSprite(5, 5);
