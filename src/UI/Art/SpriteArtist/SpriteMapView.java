@@ -622,7 +622,7 @@ public class SpriteMapView extends MapView
       turnNumImage = SpriteLibrary.createTransparentSprite(width, height);
       Graphics dcg = turnNumImage.getGraphics();
       dcg.drawImage(day, 0, 0, null);
-      dcg.drawImage(dayNum, turnNumImage.getWidth()-dayNum.getWidth(), pf.getAscent()-dayNum.getHeight(), null);
+      dcg.drawImage(dayNum, turnNumImage.getWidth()-dayNum.getWidth(), 0, null);
     }
 
     // Draw the turn counter.
