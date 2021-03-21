@@ -162,6 +162,13 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   {
     return (int) ((moneyCost+moneyCostAdjustment)*COcost);
   }
+  public int getBuyCost(XYCoord coord)
+  {
+    int basePrice = getCost();
+    for( UnitModifier mod : getModifiers() )
+      basePrice += mod.getPriceOffset(coord, this, basePrice);
+    return basePrice;
+  }
 
   /**
    * Takes a percent change and adds it to the current damage multiplier for this UnitModel.

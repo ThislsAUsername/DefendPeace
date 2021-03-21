@@ -81,12 +81,12 @@ public abstract class GameAction
         isValid &= (null == site.getResident());
         isValid &= site.getOwner() == who;
         isValid &= who.getShoppingList(site).contains(what);
-        isValid &= (who.money >= what.getCost());
+        isValid &= (who.money >= what.getBuyCost(where));
       }
 
       if( isValid )
       {
-        buildEvents.add(new ModifyFundsEvent(who, -what.getCost()));
+        buildEvents.add(new ModifyFundsEvent(who, -what.getBuyCost(where)));
         buildEvents.add(new CreateUnitEvent(who, what, where));
       }
       else

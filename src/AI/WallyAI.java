@@ -548,9 +548,9 @@ public class WallyAI extends ModularAI
             continue;
           }
         }
-        ArrayList<UnitModel> list = myCo.getShoppingList(gameMap.getLocation(coord)); // COs expect to see their shopping lists fetched before a purchase
+        ArrayList<UnitModel> list = myCo.getShoppingList(gameMap.getLocation(coord));
         UnitModel toBuy = builds.get(coord);
-        if( toBuy.getCost() <= myCo.money && list.contains(toBuy) )
+        if( toBuy.getBuyCost(coord) <= myCo.money && list.contains(toBuy) )
         {
           builds.remove(coord);
           return new GameAction.UnitProductionAction(myCo, toBuy, coord);
@@ -916,6 +916,9 @@ public class WallyAI extends ModularAI
   public XYCoord getLocationToBuild(CommanderProductionInfo CPI, UnitModel model)
   {
     Set<TerrainType> desiredTerrains = CPI.modelToTerrainMap.get(model);
+    if( null == desiredTerrains || desiredTerrains.size() < 1 )
+      return null;
+
     ArrayList<XYCoord> candidates = new ArrayList<XYCoord>();
     for( MapLocation loc : CPI.availableProperties )
     {
@@ -1030,10 +1033,16 @@ public class WallyAI extends ModularAI
         if( !idealCounter.weapons.isEmpty() )
         {
           log(String.format("  buy %s?", idealCounter));
-          int totalCost = idealCounter.getCost();
+          XYCoord coord = getLocationToBuild(CPI, idealCounter);
+          if (null == coord)
+            continue;
+          int totalCost = idealCounter.getBuyCost(coord);
 
           // Calculate a cost buffer to ensure we have enough money left so that no factories sit idle.
-          int costBuffer = (CPI.getNumFacilitiesFor(infModel) - 1) * infModel.getCost(); // The -1 assumes we will build this unit from a factory. Possibly untrue.
+          int costBuffer = (CPI.getNumFacilitiesFor(infModel)) * infModel.getCost();
+          if(myCo.getShoppingList(gameMap.getLocation(coord)).contains(infModel))
+            costBuffer -= infModel.getCost();
+
           if( 0 > costBuffer )
             costBuffer = 0; // No granting ourselves extra moolah.
           if(totalCost <= (budget - costBuffer))
@@ -1041,9 +1050,8 @@ public class WallyAI extends ModularAI
             // Go place orders.
             log(String.format("    I can build %s for a cost of %s (%s remaining, witholding %s)",
                                     idealCounter, totalCost, budget, costBuffer));
-            XYCoord coord = getLocationToBuild(CPI, idealCounter);
             builds.put(coord, idealCounter);
-            budget -= idealCounter.getCost();
+            budget -= idealCounter.getBuyCost(coord);
             CPI.removeBuildLocation(gameMap.getLocation(coord));
             // We found a counter for this enemy UnitModel; break and go to the next type.
             // This break means we will build at most one type of unit per turn to counter each enemy type.
@@ -1051,7 +1059,7 @@ public class WallyAI extends ModularAI
           }
           else
           {
-            log(String.format("    %s cost %s, I have %s (witholding %s).", idealCounter, idealCounter.getCost(), budget,
+            log(String.format("    %s cost %s, I have %s (witholding %s).", idealCounter, idealCounter.getBuyCost(coord), budget,
                 costBuffer));
           }
         }
@@ -1060,13 +1068,17 @@ public class WallyAI extends ModularAI
 
     // Build infantry from any remaining facilities.
     log("Building infantry to fill out my production");
-    while ((budget >= infModel.getCost()) && (CPI.availableUnitModels.contains(infModel)))
+    XYCoord infCoord = getLocationToBuild(CPI, infModel);
+    while (infCoord != null)
     {
-      XYCoord coord = getLocationToBuild(CPI, infModel);
-      builds.put(coord, infModel);
-      budget -= infModel.getCost();
-      CPI.removeBuildLocation(gameMap.getLocation(coord));
-      log(String.format("  At %s (%s remaining)", coord, budget));
+      int cost = infModel.getBuyCost(infCoord);
+      if (cost > budget)
+        break;
+      builds.put(infCoord, infModel);
+      budget -= cost;
+      CPI.removeBuildLocation(gameMap.getLocation(infCoord));
+      log(String.format("  At %s (%s remaining)", infCoord, budget));
+      infCoord = getLocationToBuild(CPI, infModel);
     }
 
     return builds;

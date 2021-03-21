@@ -296,7 +296,7 @@ public class SpenderAI implements AIController
           {
             ArrayList<UnitModel> units = myCo.getShoppingList(loc);
             // Only add to the list if we could actually buy something here.
-            if( !units.isEmpty() && units.get(0).getCost() <= myCo.money )
+            if( !units.isEmpty() && units.get(0).getBuyCost(xyc) <= myCo.money )
             {
               shoppingLists.put(loc, units);
             }

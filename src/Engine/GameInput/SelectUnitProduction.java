@@ -60,7 +60,7 @@ class SelectUnitProduction extends GameInputState<String>
   /**
    * Returns a list of strings of equal length containing the names of each unit with their respective prices.
    */
-  public static ArrayList<String> buildDisplayStrings(ArrayList<UnitModel> models)
+  public static ArrayList<String> buildDisplayStrings(ArrayList<UnitModel> models, XYCoord coord)
   {
     ArrayList<String> menuStrings = new ArrayList<>();
     int maxNameLength = 0;
@@ -73,7 +73,7 @@ class SelectUnitProduction extends GameInputState<String>
       String str = model.name;
       menuStrings.add( str );
       maxNameLength = Math.max(maxNameLength, str.length());
-      maxPriceLength = Math.max(maxPriceLength, Integer.toString(model.getCost()).length());
+      maxPriceLength = Math.max(maxPriceLength, Integer.toString(model.getBuyCost(coord)).length());
     }
 
     maxNameLength++; // Add 1 for a space between unit name and price.

@@ -218,7 +218,7 @@ public class InfantrySpamAI implements AIController
           if( loc.getEnvironment().terrainType == TerrainType.FACTORY && loc.getOwner() == myCo && loc.getResident() == null )
           {
             ArrayList<UnitModel> units = myCo.getShoppingList(loc);
-            if( !units.isEmpty() && units.get(0).getCost() <= myCo.money )
+            if( !units.isEmpty() && units.get(0).getBuyCost(loc.getCoordinates()) <= myCo.money )
             {
               GameAction action = new GameAction.UnitProductionAction(myCo, units.get(0), loc.getCoordinates());
               actions.offer( action );

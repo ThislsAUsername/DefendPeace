@@ -1,8 +1,10 @@
 package Engine.UnitMods;
 
+import Engine.XYCoord;
 import Engine.Combat.CombatContext;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
+import Units.UnitModel;
 
 /**
  * UnitModifiers exist to represent transient or conditional changes in a unit's properties.
@@ -50,6 +52,11 @@ public interface UnitModifier
    */
   default void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
+  }
+
+  default int getPriceOffset(XYCoord coord, UnitModel um, int currentPrice)
+  {
+    return 0;
   }
 
 }

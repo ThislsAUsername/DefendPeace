@@ -1051,7 +1051,7 @@ public class Muriel implements AIController
     @Override
     public int compareTo(PurchaseOrder other)
     {
-      return model.getCost() - other.model.getCost();
+      return model.getBuyCost(location.getCoordinates()) - other.model.getBuyCost(location.getCoordinates());
     }
   }
 
