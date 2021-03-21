@@ -11,7 +11,7 @@ import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import UI.MapView;
@@ -85,7 +85,7 @@ public abstract class CaptureLifecycle
       GameEventQueue captureEvents = new GameEventQueue();
 
       // Validate input
-      Location captureLocation = null;
+      MapLocation captureLocation = null;
       boolean isValid = true;
       isValid &= null != actor && !actor.isTurnOver; // Valid unit
       isValid &= null != map; // Valid map
@@ -158,11 +158,11 @@ public abstract class CaptureLifecycle
   public static class CaptureEvent implements GameEvent
   {
   private Unit unit = null;
-  private Location location = null;
+  private MapLocation location = null;
   final int captureAmount;
   final int priorCaptureAmount;
 
-  public CaptureEvent( Unit u, Location loc )
+  public CaptureEvent( Unit u, MapLocation loc )
   {
     unit = u;
     location = loc;

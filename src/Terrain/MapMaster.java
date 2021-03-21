@@ -11,7 +11,7 @@ import Units.UnitModelScheme;
 public class MapMaster extends GameMap
 {
   private static final long serialVersionUID = 1L;
-  private Location[][] map;
+  private MapLocation[][] map;
   public CommandingOfficers.Commander[] commanders;
 
   private boolean initOK = false;
@@ -21,7 +21,7 @@ public class MapMaster extends GameMap
     super(mapInfo.getWidth(), mapInfo.getHeight());
     initOK = true;
     commanders = COs;
-    map = new Location[mapWidth][mapHeight];
+    map = new MapLocation[mapWidth][mapHeight];
 
     // Build the map locations based on the MapInfo data.
     for( int y = 0; y < mapHeight; ++y )
@@ -29,8 +29,8 @@ public class MapMaster extends GameMap
       for( int x = 0; x < mapWidth; ++x )
       {
         TerrainType terrain = mapInfo.terrain[x][y];
-        // Create this Location using the MapInfo terrain.
-        map[x][y] = new Location(Environment.getTile(terrain, Environment.Weathers.CLEAR), new XYCoord(x, y));
+        // Create this MapLocation using the MapInfo terrain.
+        map[x][y] = new MapLocation(Environment.getTile(terrain, Environment.Weathers.CLEAR), new XYCoord(x, y));
       }
     }
 
@@ -57,7 +57,7 @@ public class MapMaster extends GameMap
         XYCoord coord = mapInfo.COProperties[co][i];
         int x = coord.xCoord;
         int y = coord.yCoord;
-        Location location = map[x][y];
+        MapLocation location = map[x][y];
         if( location.isCaptureable() )
         {
           // Check if this location holds an HQ.
@@ -170,18 +170,18 @@ public class MapMaster extends GameMap
     return map[w][h].getResident();
   }
 
-  /** Returns the Location at the specified location, or null if that Location does not exist. */
+  /** Returns the MapLocation at the specified location, or null if that MapLocation does not exist. */
   @Override
-  public Location getLocation(XYCoord location)
+  public MapLocation getLocation(XYCoord location)
   {
     if (null != location)
       return getLocation(location.xCoord, location.yCoord);
     return null;
   }
 
-  /** Returns the Location at the specified location, or null if that Location does not exist. */
+  /** Returns the MapLocation at the specified location, or null if that MapLocation does not exist. */
   @Override
-  public Location getLocation(int w, int h)
+  public MapLocation getLocation(int w, int h)
   {
     if( !isLocationValid(w, h) )
     {
@@ -216,14 +216,14 @@ public class MapMaster extends GameMap
     return isLocationEmpty(null, x, y);
   }
 
-  /** Returns true if no unit (excluding 'unit') is in the specified Location. */
+  /** Returns true if no unit (excluding 'unit') is in the specified MapLocation. */
   @Override
   public boolean isLocationEmpty(Unit unit, XYCoord coords)
   {
     return isLocationEmpty(unit, coords.xCoord, coords.yCoord);
   }
 
-  /** Returns true if no unit (excluding 'unit') is in the specified Location. */
+  /** Returns true if no unit (excluding 'unit') is in the specified MapLocation. */
   @Override
   public boolean isLocationEmpty(Unit unit, int x, int y)
   {
@@ -247,7 +247,7 @@ public class MapMaster extends GameMap
     Unit resident = getLocation(x, y).getResident();
     if( resident != null && !force )
     {
-      System.out.println("Error! Attempting to add a unit to an occupied Location!");
+      System.out.println("Error! Attempting to add a unit to an occupied MapLocation!");
       return;
     }
 
@@ -280,13 +280,13 @@ public class MapMaster extends GameMap
       }
       else
       {
-        System.out.println("ERROR! Attempting to move unit to an occupied Location!");
+        System.out.println("ERROR! Attempting to move unit to an occupied MapLocation!");
         return;
       }
     }
 
     // Update the map
-    Location priorLoc = getLocation(unit.x, unit.y);
+    MapLocation priorLoc = getLocation(unit.x, unit.y);
     if( null != priorLoc && priorLoc.getResident() == unit )
     {
       priorLoc.setResident(null);

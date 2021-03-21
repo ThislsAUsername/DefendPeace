@@ -23,7 +23,7 @@ import Engine.Combat.CombatEngine;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
@@ -351,7 +351,7 @@ public class Muriel implements AIController
 
     //////////////////////////////////////////////////////////////////
     // If we are currently healing, stick around, unless that would stem the tide of reinforcements.
-    Location loc = gameMap.getLocation(unit.x, unit.y);
+    MapLocation loc = gameMap.getLocation(unit.x, unit.y);
     if( (unit.getHP() <= 8) && unit.model.canRepairOn(loc) && (loc.getEnvironment().terrainType != TerrainType.FACTORY) && (loc.getOwner() == unit.CO) )
     {
       log(String.format("%s is damaged and on a repair tile. Will continue to repair for now.", unit.toStringWithLocation()));
@@ -408,7 +408,7 @@ public class Muriel implements AIController
       Utils.sortLocationsByDistance(unitCoords, stations);
       for( XYCoord coord : stations )
       {
-        Location station = gameMap.getLocation(coord);
+        MapLocation station = gameMap.getLocation(coord);
         // Go to the nearest unoccupied friendly space, but don't gum up the production lines.
         if( station.getResident() == null && (station.getEnvironment().terrainType != TerrainType.FACTORY) )
         {
@@ -934,7 +934,7 @@ public class Muriel implements AIController
         {
           // Go place orders.
           log(String.format("    I can build a %s for a cost of %s", idealCounter, cost));
-          Location loc = CPI.getLocationToBuild(idealCounter);
+          MapLocation loc = CPI.getLocationToBuild(idealCounter);
           shoppingCart.add(new PurchaseOrder(loc, idealCounter));
           budget -= idealCounter.getCost();
           CPI.removeBuildLocation(loc);
@@ -958,7 +958,7 @@ public class Muriel implements AIController
     UnitModel infModel = myCo.getUnitModel(UnitModel.TROOP);
     while( (budget >= infModel.getCost()) && (CPI.availableUnitModels.contains(infModel)) )
     {
-      Location loc = CPI.getLocationToBuild(infModel);
+      MapLocation loc = CPI.getLocationToBuild(infModel);
       shoppingCart.add(new PurchaseOrder(loc, infModel));
       budget -= infModel.getCost();
       CPI.removeBuildLocation(loc);
@@ -1039,10 +1039,10 @@ public class Muriel implements AIController
 
   private static class PurchaseOrder implements Comparable<PurchaseOrder>
   {
-    Location location;
+    MapLocation location;
     UnitModel model;
 
-    public PurchaseOrder(Location loc, UnitModel um)
+    public PurchaseOrder(MapLocation loc, UnitModel um)
     {
       location = loc;
       model = um;

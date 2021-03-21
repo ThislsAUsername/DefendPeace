@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import Engine.XYCoord;
 import Terrain.Environment;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -46,7 +46,7 @@ public class MapChangeEvent implements GameEvent
   {
     for( EnvironmentAssignment ea : changes )
     {
-      Location loc = gameMap.getLocation(ea.where);
+      MapLocation loc = gameMap.getLocation(ea.where);
       if( null != loc )
       {
         if( loc.getEnvironment().terrainType != ea.environment.terrainType )

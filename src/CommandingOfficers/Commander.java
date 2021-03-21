@@ -29,7 +29,7 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UuidGenerator;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
 import Terrain.TerrainType;
@@ -259,7 +259,7 @@ public class Commander implements GameEventListener, Serializable
   }
 
   /** Get the list of units this commander can build from the given property type. */
-  public ArrayList<UnitModel> getShoppingList(Location buyLocation)
+  public ArrayList<UnitModel> getShoppingList(MapLocation buyLocation)
   {
     return (unitProductionByTerrain.get(buyLocation.getEnvironment().terrainType) != null) ? unitProductionByTerrain.get(buyLocation.getEnvironment().terrainType)
         : new ArrayList<UnitModel>();

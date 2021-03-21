@@ -13,7 +13,7 @@ import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.UnitDieEvent;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.WeaponModel;
@@ -450,7 +450,7 @@ public class Utils
       // Add all vacant, <co>-owned industries to the list
       for( XYCoord xyc : co.ownedProperties )
       {
-        Location loc = map.getLocation(xyc);
+        MapLocation loc = map.getLocation(xyc);
         Unit resident = loc.getResident();
         // We only want industries we can act on, which means they need to be empty
         // TODO: maybe calculate whether the CO has enough money to buy something at this industry

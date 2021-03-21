@@ -13,7 +13,7 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.ResupplyEvent;
 import Engine.GameEvents.UnitDieEvent;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.MoveTypes.MoveType;
@@ -189,7 +189,7 @@ public abstract class UnitModel implements Serializable, ITargetable
     return COdef;
   }
 
-  public boolean canRepairOn(Location locus)
+  public boolean canRepairOn(MapLocation locus)
   {
     return healableHabs.contains(locus.getEnvironment().terrainType);
   }
@@ -204,7 +204,7 @@ public abstract class UnitModel implements Serializable, ITargetable
     GameEventQueue queue = new GameEventQueue();
 
     XYCoord xyc = new XYCoord(self.x, self.y);
-    Location loc = map.getLocation(xyc);
+    MapLocation loc = map.getLocation(xyc);
 
     // No actions for units in transports. Should also be checked in Unit.
     if( null == loc ) return queue;

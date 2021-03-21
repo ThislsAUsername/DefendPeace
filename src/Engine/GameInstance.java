@@ -16,7 +16,7 @@ import Engine.GameEvents.MapChangeEvent;
 import Engine.GameEvents.TurnInitEvent;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.MapWindow;
 
@@ -135,7 +135,7 @@ public class GameInstance implements Serializable
   {
     return new XYCoord(cursorX, cursorY);
   }
-  public Location getCursorLocation()
+  public MapLocation getCursorLocation()
   {
     return gameMap.getLocation(cursorX, cursorY);
   }
@@ -210,7 +210,7 @@ public class GameInstance implements Serializable
     {
       for( int j = 0; j < gameMap.mapHeight; j++ )
       {
-        Location loc = gameMap.getLocation(i, j);
+        MapLocation loc = gameMap.getLocation(i, j);
         if( loc.forecast.isEmpty() )
         {
           if( loc.getEnvironment().weatherType != defaultWeather )

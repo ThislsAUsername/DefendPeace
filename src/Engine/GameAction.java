@@ -17,7 +17,7 @@ import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.TeleportEvent.AnimationStyle;
 import Engine.GameEvents.TeleportEvent.CollisionOutcome;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
@@ -77,7 +77,7 @@ public abstract class GameAction
       isValid &= (null != gameMap) && (null != who) && (null != what) && (null != where);
       if( isValid )
       {
-        Location site = gameMap.getLocation(where);
+        MapLocation site = gameMap.getLocation(where);
         isValid &= (null == site.getResident());
         isValid &= site.getOwner() == who;
         isValid &= who.getShoppingList(site).contains(what);

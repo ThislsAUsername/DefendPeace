@@ -11,12 +11,12 @@ import Units.MoveTypes.MoveType;
 public interface FloodFillFunctor
 {
   /**
-   * Determines whether the Location (x, y), can be traveled through.
+   * Determines whether the MapLocation (x, y), can be traveled through.
    * @param ignoreUnits If set, this function will ignore enemy-unit presence.
    */
   int getTransitionCost(GameMap map, XYCoord from, XYCoord to);
   /**
-   * Determines whether the Location (x, y), is a valid destination.
+   * Determines whether the MapLocation (x, y), is a valid destination.
    */
   boolean canEnd(GameMap map, XYCoord end);
 

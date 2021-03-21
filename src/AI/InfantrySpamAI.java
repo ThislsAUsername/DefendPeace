@@ -15,7 +15,7 @@ import Engine.Utils;
 import Engine.XYCoord;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
@@ -213,7 +213,7 @@ public class InfantrySpamAI implements AIController
       {
         for( int j = 0; j < gameMap.mapHeight; j++)
         {
-          Location loc = gameMap.getLocation(i, j);
+          MapLocation loc = gameMap.getLocation(i, j);
           // If this terrain belongs to me, and I can build something on it, and I have the money, do so.
           if( loc.getEnvironment().terrainType == TerrainType.FACTORY && loc.getOwner() == myCo && loc.getResident() == null )
           {

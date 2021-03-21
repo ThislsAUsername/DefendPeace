@@ -7,7 +7,7 @@ import Engine.GameScenario;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Units.Unit;
 
@@ -105,7 +105,7 @@ public class Patch extends Commander
     }
 
     @Override
-    public GameEventQueue receiveCaptureEvent(Unit unit, Location location)
+    public GameEventQueue receiveCaptureEvent(Unit unit, MapLocation location)
     {
       if( unit.CO == myCommander && location.getOwner() == myCommander && location.isProfitable() )
       {

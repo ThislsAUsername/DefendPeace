@@ -3,7 +3,7 @@ package Engine.GameEvents;
 import CommandingOfficers.Commander;
 import Engine.XYCoord;
 import Terrain.Environment;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import UI.MapView;
@@ -52,7 +52,7 @@ public class CommanderDefeatEvent implements GameEvent
     defeatedCO.units.clear();
 
     // Downgrade the defeated commander's HQ to a city, unless they don't have a proper HQ.
-    Location HQLoc = gameMap.getLocation(defeatedCO.HQLocation);
+    MapLocation HQLoc = gameMap.getLocation(defeatedCO.HQLocation);
     if( HQLoc.getEnvironment().terrainType == TerrainType.HEADQUARTERS )
     {
       HQLoc.setEnvironment(Environment.getTile(TerrainType.CITY, HQLoc.getEnvironment().weatherType));
@@ -63,7 +63,7 @@ public class CommanderDefeatEvent implements GameEvent
     {
       for(int x = 0; x < gameMap.mapWidth; ++x)
       {
-        Location loc = gameMap.getLocation(x, y);
+        MapLocation loc = gameMap.getLocation(x, y);
 
         // Release control of any buildings he owned.
         if(loc.isCaptureable() && loc.getOwner() == defeatedCO)

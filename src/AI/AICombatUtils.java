@@ -21,7 +21,7 @@ import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Engine.Combat.StrikeParams;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
@@ -43,7 +43,7 @@ public class AICombatUtils
                                          BiFunction<TerrainType, StrikeParams, Double> demolishScorer)
   {
     double score = 0;
-    Location targetLoc = map.getLocation(action.getTargetLocation());
+    MapLocation targetLoc = map.getLocation(action.getTargetLocation());
     Unit targetUnit = targetLoc.getResident();
     if( null != targetUnit )
     {
@@ -202,7 +202,7 @@ public class AICombatUtils
         continue;
       }
 
-      Location loc = gameMap.getLocation(xyc);
+      MapLocation loc = gameMap.getLocation(xyc);
       Unit resident = loc.getResident();
       if( null != resident && (resident.CO != co || resident.isTurnOver) )
       {

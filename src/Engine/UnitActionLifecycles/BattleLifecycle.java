@@ -21,7 +21,7 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
 import Terrain.Environment;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import UI.MapView;
@@ -239,7 +239,7 @@ public abstract class BattleLifecycle
     private XYCoord moveCoord = null;
     private XYCoord attackLocation = null;
     private Unit attacker;
-    private Location target;
+    private MapLocation target;
 
     public DemolitionAction(GameMap gameMap, Unit actor, GamePath path, XYCoord atkLoc)
     {
@@ -435,9 +435,9 @@ public abstract class BattleLifecycle
   {
     private final StrikeParams result;
     private final int percentDamage;
-    private final Location target;
+    private final MapLocation target;
 
-    public DemolitionEvent(Unit attacker, Location target, GamePath path, MapMaster map)
+    public DemolitionEvent(Unit attacker, MapLocation target, GamePath path, MapMaster map)
     {
       this.target = target;
       // Calculate the result of the battle immediately. This will allow us to plan the animation.
@@ -450,7 +450,7 @@ public abstract class BattleLifecycle
       return result.attacker.body;
     }
 
-    public Location getDefender()
+    public MapLocation getDefender()
     {
       return target;
     }

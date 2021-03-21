@@ -24,7 +24,7 @@ import Engine.GameEvents.MassDamageEvent;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
@@ -772,7 +772,7 @@ public class Ave extends Commander
       Ave = cmdr;
     }
     @Override
-    public GameEventQueue receiveCaptureEvent(Unit unit, Location location)
+    public GameEventQueue receiveCaptureEvent(Unit unit, MapLocation location)
     {
       if( unit.CO == Ave && (location.getOwner() == Ave) )
       {

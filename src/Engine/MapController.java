@@ -9,7 +9,7 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.TurnInitEvent;
 import Engine.GameInput.GameInputHandler;
-import Terrain.Location;
+import Terrain.MapLocation;
 import UI.CO_InfoController;
 import UI.GameStatsController;
 import UI.InGameMenu;
@@ -210,7 +210,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         if( !myGameInputHandler.isTargeting() )
         {
           // If we hit BACK while over a unit, add it to the threat overlay for this CO
-          Location loc = myGame.gameMap.getLocation(myGame.getCursorCoord());
+          MapLocation loc = myGame.gameMap.getLocation(myGame.getCursorCoord());
           Unit resident = loc.getResident();
           if( null != resident )
           {

@@ -13,7 +13,7 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import CommandingOfficers.Commander;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.TerrainType;
 import UI.UIUtils;
 import UI.UIUtils.COSpriteSpec;
@@ -122,7 +122,7 @@ public class SpriteLibrary
    * Retrieve (loading if needed) the sprites associated with the terrain type at the specified location.
    * This function returns the owner-appropriate version of the tile for ownable terrain types.
    */
-  public static TerrainSpriteSet getTerrainSpriteSet(Location loc)
+  public static TerrainSpriteSet getTerrainSpriteSet(MapLocation loc)
   {
     SpriteSetKey spriteKey = SpriteSetKey.instance(loc.getEnvironment().terrainType, COSpriteSpec.instance(loc.getOwner()));
     if( !spriteSetMap.containsKey(spriteKey) )

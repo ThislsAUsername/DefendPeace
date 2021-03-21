@@ -11,7 +11,7 @@ import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
@@ -90,7 +90,7 @@ public class Cinder extends Commander
 
   @Override
   /** Get the list of units this commander can build from the given property type. */
-  public ArrayList<UnitModel> getShoppingList(Location buyLocation)
+  public ArrayList<UnitModel> getShoppingList(MapLocation buyLocation)
   {
     setPrices(buildCounts.get(buyLocation.getCoordinates()));
     return super.getShoppingList(buyLocation);
@@ -128,7 +128,7 @@ public class Cinder extends Commander
       for( int x = 0; x < map.mapWidth; ++x )
         for( int y = 0; y < map.mapHeight; ++y )
         {
-          Location loc = map.getLocation(x, y);
+          MapLocation loc = map.getLocation(x, y);
           if( loc.isCaptureable() ) // if we can't capture it, we can't build from it
             buildCounts.put(loc.getCoordinates(), 0);
         }

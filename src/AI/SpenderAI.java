@@ -17,7 +17,7 @@ import Engine.Utils;
 import Engine.XYCoord;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
@@ -229,7 +229,7 @@ public class SpenderAI implements AIController
             {
               for( XYCoord coord : unownedProperties )
               {
-                Location loc = gameMap.getLocation(coord);
+                MapLocation loc = gameMap.getLocation(coord);
                 if( loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS && loc.getOwner() != null ) // should we have an attribute for this?
                 {
                   validTargets.add(coord);
@@ -287,10 +287,10 @@ public class SpenderAI implements AIController
       // We will add all build commands at once, since they can't conflict.
       if( actions.isEmpty() && !stateChange )
       {
-        Map<Location, ArrayList<UnitModel>> shoppingLists = new HashMap<>();
+        Map<MapLocation, ArrayList<UnitModel>> shoppingLists = new HashMap<>();
         for( XYCoord xyc : myCo.ownedProperties )
         {
-          Location loc = gameMap.getLocation(xyc);
+          MapLocation loc = gameMap.getLocation(xyc);
           // I like combat units that are useful, so we skip ports for now
           if( loc.getEnvironment().terrainType != TerrainType.SEAPORT && loc.getResident() == null )
           {
@@ -303,9 +303,9 @@ public class SpenderAI implements AIController
           }
         }
         int budget = myCo.money;
-        Map<Location, UnitModel> purchases = new HashMap<>();
+        Map<MapLocation, UnitModel> purchases = new HashMap<>();
         // Now that we know where and what we can buy, let's make some initial selections.
-        for( Entry<Location, ArrayList<UnitModel>> locShopList : shoppingLists.entrySet() )
+        for( Entry<MapLocation, ArrayList<UnitModel>> locShopList : shoppingLists.entrySet() )
         {
           ArrayList<UnitModel> units = locShopList.getValue();
           for( UnitModel unit : units )
@@ -319,12 +319,12 @@ public class SpenderAI implements AIController
             }
           }
         }
-        Queue<Entry<Location, ArrayList<UnitModel>>> upgradables = new ArrayDeque<>();
+        Queue<Entry<MapLocation, ArrayList<UnitModel>>> upgradables = new ArrayDeque<>();
         upgradables.addAll(shoppingLists.entrySet());
         // I want the most expensive single unit I can get, but I also want to spend as much money as possible
         while (!upgradables.isEmpty())
         {
-          Entry<Location, ArrayList<UnitModel>> locShopList = upgradables.poll();
+          Entry<MapLocation, ArrayList<UnitModel>> locShopList = upgradables.poll();
           ArrayList<UnitModel> units = locShopList.getValue();
           UnitModel currentPurchase = purchases.get(locShopList.getKey());
           if( null != currentPurchase )
@@ -342,7 +342,7 @@ public class SpenderAI implements AIController
           }
         }
         // once we're satisfied with all our selections, put in the orders
-        for( Entry<Location, UnitModel> lineItem : purchases.entrySet() )
+        for( Entry<MapLocation, UnitModel> lineItem : purchases.entrySet() )
         {
           GameAction action = new GameAction.UnitProductionAction(myCo, lineItem.getValue(),
               lineItem.getKey().getCoordinates());

@@ -19,7 +19,7 @@ import Engine.GameInstance;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import Units.Unit;
@@ -87,7 +87,7 @@ public class MapTileDetailsArtist
     // Define useful quantities.
     int tileSize = SpriteLibrary.baseSpriteSize;
     int iconSize = SpriteLibrary.baseSpriteSize/2;
-    Location loc = map.getLocation(coord);
+    MapLocation loc = map.getLocation(coord);
     TerrainType terrain = loc.getEnvironment().terrainType;
     boolean isTerrainObject = TerrainSpriteSet.isTerrainObject(terrain);
     Unit unit = loc.getResident();
@@ -209,7 +209,7 @@ public class MapTileDetailsArtist
     public GameEventQueue receiveBattleEvent(BattleSummary summary){MapTileDetailsArtist.resetOverlay(); return null; };
     public GameEventQueue receiveDemolitionEvent(Unit actor, XYCoord tile){MapTileDetailsArtist.resetOverlay(); return null; };
     public GameEventQueue receiveCreateUnitEvent(Unit unit){MapTileDetailsArtist.resetOverlay(); return null; };
-    public GameEventQueue receiveCaptureEvent(Unit unit, Location location){MapTileDetailsArtist.resetOverlay(); return null; };
+    public GameEventQueue receiveCaptureEvent(Unit unit, MapLocation location){MapTileDetailsArtist.resetOverlay(); return null; };
     public GameEventQueue receiveCommanderDefeatEvent(CommanderDefeatEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
     public GameEventQueue receiveLoadEvent(LoadLifecycle.LoadEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
     public GameEventQueue receiveMoveEvent(MoveEvent event){MapTileDetailsArtist.resetOverlay(); return null; };

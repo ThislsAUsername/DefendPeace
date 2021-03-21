@@ -11,7 +11,7 @@ import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 
 public class Unit implements Serializable
@@ -25,7 +25,7 @@ public class Unit implements Serializable
   public int fuel;
   public int materials;
   private int captureProgress;
-  private Location captureTarget;
+  private MapLocation captureTarget;
   public Commander CO;
   public boolean isTurnOver;
   public boolean isStunned;
@@ -64,7 +64,7 @@ public class Unit implements Serializable
     // Make a queue to return any init events.
     GameEventQueue events = new GameEventQueue();
 
-    Location locus = map.getLocation(x, y);
+    MapLocation locus = map.getLocation(x, y);
 
     // Only perform turn initialization for the unit if it is on the map.
     //   Units that are e.g. in a transport don't burn fuel, etc.
@@ -264,7 +264,7 @@ public class Unit implements Serializable
     return getHP() - before;
   }
 
-  public boolean capture(Location target)
+  public boolean capture(MapLocation target)
   {
     boolean success = false;
 

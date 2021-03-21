@@ -12,7 +12,7 @@ import Engine.UnitActionLifecycles.JoinLifecycle;
 import Engine.UnitActionLifecycles.LoadLifecycle;
 import Engine.UnitActionLifecycles.UnloadLifecycle;
 import Terrain.Environment.Weathers;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -71,7 +71,7 @@ public interface GameEventListener extends Serializable
   default public GameEventQueue receiveBattleEvent(BattleSummary summary){ return null; };
   default public GameEventQueue receiveDemolitionEvent(Unit actor, XYCoord tile){ return null; };
   default public GameEventQueue receiveCreateUnitEvent(Unit unit){ return null; };
-  default public GameEventQueue receiveCaptureEvent(Unit unit, Location location){ return null; };
+  default public GameEventQueue receiveCaptureEvent(Unit unit, MapLocation location){ return null; };
   default public GameEventQueue receiveCommanderDefeatEvent(CommanderDefeatEvent event){ return null; };
   default public GameEventQueue receiveLoadEvent(LoadLifecycle.LoadEvent event){ return null; };
   default public GameEventQueue receiveMoveEvent(MoveEvent event){ return null; };

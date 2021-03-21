@@ -136,7 +136,7 @@ public class OverlayArtist
 
         if( gameMap.isLocationValid(w, h) )
         {
-          Terrain.Location locus = gameMap.getLocation(w, h);
+          Terrain.MapLocation locus = gameMap.getLocation(w, h);
           if( locus.isHighlightSet() )
           {
             og.setColor(HIGHLIGHT_COLOR);
