@@ -421,8 +421,7 @@ public class Commander implements GameEventListener, Serializable
       // Convert funds to ability power units
       power /= CHARGERATIO_FUNDS;
 
-      modifyAbilityPower(42);
-//      modifyAbilityPower(power);
+      modifyAbilityPower(power);
     }
     return null;
   }
