@@ -1,5 +1,8 @@
 package Engine.Combat;
 
+import java.util.List;
+
+import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
 import Units.Unit;
 import Units.WeaponModel;
@@ -17,8 +20,12 @@ public class CombatContext
   public boolean canCounter = false;
   public boolean attackerMoved;
   public int battleRange;
+  public final List<UnitModifier> attackerMods, defenderMods;
   
-  public CombatContext(GameMap map, Unit pAttacker, WeaponModel attackerWep, Unit pDefender, WeaponModel defenderWep, int pBattleRange, int attackerX, int attackerY)
+  public CombatContext(GameMap map,
+      Unit pAttacker, WeaponModel attackerWep, List<UnitModifier> attackerMods,
+      Unit pDefender, WeaponModel defenderWep, List<UnitModifier> defenderMods,
+      int pBattleRange, int attackerX, int attackerY)
   {
     attacker = pAttacker;
     defender = pDefender;
@@ -26,6 +33,8 @@ public class CombatContext
     this.attackerY = attackerY;
     defenderX = defender.x; // This variable is technically not necessary, but provides consistent names with attackerX/Y.
     defenderY = defender.y;
+    this.attackerMods = attackerMods;
+    this.defenderMods = defenderMods;
     gameMap = map;
     attackerMoved = pAttacker.x != attackerX || pAttacker.y != attackerY;
     battleRange = pBattleRange;
@@ -43,8 +52,10 @@ public class CombatContext
     if( !defender.model.isAirUnit() )
       defenderTerrainStars = map.getEnvironment(defenderX, defenderY).terrainType.getDefLevel();
 
-    // let the COs fool around with anything they want...
-    pAttacker.CO.changeCombatContext(this);
-    pDefender.CO.changeCombatContext(this);
+    // apply modifiers...
+    for(UnitModifier mod : attackerMods)
+      mod.changeCombatContext(this);
+    for(UnitModifier mod : defenderMods)
+      mod.changeCombatContext(this);
   }
 }

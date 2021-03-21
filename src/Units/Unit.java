@@ -2,6 +2,7 @@ package Units;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 import CommandingOfficers.Commander;
 import Engine.FloodFillFunctor;
@@ -10,11 +11,13 @@ import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
+import Engine.UnitMods.UnitModList;
+import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
 
-public class Unit implements Serializable
+public class Unit implements Serializable, UnitModList
 {
   private static final long serialVersionUID = 1L;
   public CargoList heldUnits;
@@ -333,6 +336,7 @@ public class Unit implements Serializable
 
   public static class CargoList extends ArrayList<Unit>
   {
+    private static final long serialVersionUID = 1L;
     UnitModel model;
     public CargoList(UnitModel model)
     {
@@ -375,4 +379,26 @@ public class Unit implements Serializable
     return String.format("%s at %s", model, new XYCoord(x, y));
   }
 
+  private final ArrayList<UnitModifier> unitMods = new ArrayList<UnitModifier>();
+  @Override
+  public List<UnitModifier> getModifiers()
+  {
+    ArrayList<UnitModifier> output = new ArrayList<UnitModifier>();
+    output.addAll(CO.getModifiers());
+    output.addAll(model.getModifiers());
+    output.addAll(unitMods);
+    return output;
+  }
+
+  @Override
+  public void apply(UnitModifier unitModifier)
+  {
+    UnitModList.super.apply(unitModifier);
+    unitMods.add(unitModifier);
+  }
+  @Override
+  public void remove(UnitModifier unitModifier)
+  {
+    unitMods.remove(unitModifier);
+  }
 }

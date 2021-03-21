@@ -14,6 +14,8 @@ import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.ResupplyEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Terrain.MapLocation;
+import Engine.UnitMods.UnitModList;
+import Engine.UnitMods.UnitModifier;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.MoveTypes.MoveType;
@@ -21,7 +23,7 @@ import Units.MoveTypes.MoveType;
 /**
  * Defines the invariant characteristics of a unit. One UnitModel can be shared across many instances of that Unit type.
  */
-public abstract class UnitModel implements Serializable, ITargetable
+public abstract class UnitModel implements Serializable, ITargetable, UnitModList
 {
   private static final long serialVersionUID = 1L;
 
@@ -354,5 +356,24 @@ public abstract class UnitModel implements Serializable, ITargetable
   public boolean isTroop()
   {
     return isAll(TROOP);
+  }
+
+  private final ArrayList<UnitModifier> unitMods = new ArrayList<UnitModifier>();
+  @Override
+  public List<UnitModifier> getModifiers()
+  {
+    return new ArrayList<UnitModifier>(unitMods);
+  }
+
+  @Override
+  public void apply(UnitModifier unitModifier)
+  {
+    UnitModList.super.apply(unitModifier);
+    unitMods.add(unitModifier);
+  }
+  @Override
+  public void remove(UnitModifier unitModifier)
+  {
+    unitMods.remove(unitModifier);
   }
 }

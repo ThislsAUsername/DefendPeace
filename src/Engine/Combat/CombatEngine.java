@@ -49,7 +49,7 @@ public class CombatEngine
     boolean attackerMoved = path.getPathLength() > 1;
     WeaponModel weapon = attacker.chooseWeapon(target, battleRange, attackerMoved);
     return new StrikeParams(
-        new Combatant(attacker, weapon, path.getEnd().x, path.getEnd().y),
+        new Combatant(attacker, weapon, path.getEnd().x, path.getEnd().y), attacker.getModifiers(),
         map, battleRange,
         attacker.model.getDamageRatio(), attacker.getHP(),
         weapon.getDamage(target),
@@ -76,7 +76,10 @@ public class CombatEngine
     if( 1 == battleRange )
       defenderWeapon = defender.chooseWeapon(attacker.model, battleRange, false);
 
-    CombatContext context = new CombatContext(map, attacker, attackerWeapon, defender, defenderWeapon, battleRange, attackerX, attackerY);
+    CombatContext context = new CombatContext(map,
+        attacker, attackerWeapon, attacker.getModifiers(),
+        defender, defenderWeapon, defender.getModifiers(),
+        battleRange, attackerX, attackerY);
     
     // unitDamageMap provides an order- and perspective-agnostic view of how much damage was done
     // This is necessary to pass information coherently between this function's local context
@@ -122,8 +125,8 @@ public class CombatEngine
   public static double calculateOneStrikeDamage( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
   {
     return new BattleParams(
-        new Combatant(attacker, attacker.chooseWeapon(defender.model, battleRange, attackerMoved), attacker.x, attacker.y),
-        new Combatant(defender, null, defender.x, defender.y),
+        new Combatant(attacker, attacker.chooseWeapon(defender.model, battleRange, attackerMoved), attacker.x, attacker.y), attacker.getModifiers(),
+        new Combatant(defender, null, defender.x, defender.y), defender.getModifiers(),
         map, battleRange,
         attacker.model.getDamageRatio(), attacker.getHP(),
         defender.model.getDefenseRatio(), terrainStars,

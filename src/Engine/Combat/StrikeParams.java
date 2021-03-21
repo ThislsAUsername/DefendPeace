@@ -1,10 +1,13 @@
 package Engine.Combat;
 
+import java.util.List;
+
+import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
 
 /**
  * Utility struct used to facilitate calculating battle results.
- * Parameters are public to allow modification in Commander.applyCombatModifiers()
+ * Parameters are public to allow modification by UnitModifiers.
  * One BattleParams is a single attack from a single unit; any counterattack is a second instance. 
  */
 public class StrikeParams
@@ -27,8 +30,8 @@ public class StrikeParams
   public static BattleParams getAttack(final CombatContext ref)
   {
     return new BattleParams(
-        new Combatant(ref.attacker, ref.attackerWeapon, ref.attackerX, ref.attackerY),
-        new Combatant(ref.defender, ref.defenderWeapon, ref.defenderX, ref.defenderY),
+        new Combatant(ref.attacker, ref.attackerWeapon, ref.attackerX, ref.attackerY), ref.attackerMods,
+        new Combatant(ref.defender, ref.defenderWeapon, ref.defenderX, ref.defenderY), ref.defenderMods,
         ref.gameMap, ref.battleRange,
         ref.attacker.model.getDamageRatio(), ref.attacker.getHP(),
         ref.defender.model.getDefenseRatio(), ref.defenderTerrainStars,
@@ -37,8 +40,8 @@ public class StrikeParams
   public static BattleParams getCounterAttack(final CombatContext ref, double counterHP)
   {
     return new BattleParams(
-        new Combatant(ref.defender, ref.defenderWeapon, ref.defenderX, ref.defenderY),
-        new Combatant(ref.attacker, ref.attackerWeapon, ref.attackerX, ref.attackerY),
+        new Combatant(ref.defender, ref.defenderWeapon, ref.defenderX, ref.defenderY), ref.defenderMods,
+        new Combatant(ref.attacker, ref.attackerWeapon, ref.attackerX, ref.attackerY), ref.attackerMods,
         ref.gameMap, ref.battleRange,
         ref.defender.model.getDamageRatio(), counterHP,
         ref.attacker.model.getDefenseRatio(), ref.attackerTerrainStars,
@@ -46,7 +49,7 @@ public class StrikeParams
   }
 
   public StrikeParams(
-      Combatant attacker,
+      Combatant attacker, List<UnitModifier> attackerMods,
       GameMap map, int battleRange,
       double attackPower, double attackerHP,
       double baseDamage,
@@ -63,7 +66,8 @@ public class StrikeParams
     this.attackerHP = attackerHP;
 
     // Apply any last-minute adjustments.
-    attacker.body.CO.modifyUnitAttack(this);
+    for(UnitModifier mod : attackerMods)
+      mod.modifyUnitAttack(this);
   }
 
   public double calculateDamage()
@@ -79,13 +83,14 @@ public class StrikeParams
     public final Combatant defender;
 
     public BattleParams(
-        Combatant attacker, Combatant defender,
+        Combatant attacker, List<UnitModifier> attackerMods,
+        Combatant defender, List<UnitModifier> defenderMods,
         GameMap map, int battleRange,
         double attackPower, double attackerHP,
         double defensePower, double terrainStars,
         boolean isCounter)
     {
-      super(attacker,
+      super(attacker, attackerMods,
           map, battleRange,
           attackPower, attackerHP,
           (null == attacker.gun)? 0 : attacker.gun.getDamage(defender.body.model),
@@ -97,8 +102,10 @@ public class StrikeParams
       defenderHP = defender.body.getHP();
 
       // Apply any last-minute adjustments.
-      attacker.body.CO.modifyUnitAttackOnUnit(this);
-      defender.body.CO.modifyUnitDefenseAgainstUnit(this);
+      for(UnitModifier mod : attackerMods)
+        mod.modifyUnitAttackOnUnit(this);
+      for(UnitModifier mod : defenderMods)
+        mod.modifyUnitDefenseAgainstUnit(this);
     }
   }
 }
