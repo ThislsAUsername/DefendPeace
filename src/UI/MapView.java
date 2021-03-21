@@ -6,7 +6,7 @@ import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.IView;
 import Engine.MapController;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.StrikeParams;
@@ -97,7 +97,7 @@ public abstract class MapView implements IView
   {
     return null;
   }
-  public GameAnimation buildMoveAnimation( Unit unit, Path movePath )
+  public GameAnimation buildMoveAnimation( Unit unit, GamePath movePath )
   {
     return null;
   }

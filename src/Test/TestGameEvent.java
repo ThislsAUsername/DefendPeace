@@ -5,7 +5,7 @@ import CommandingOfficers.Patch;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.CommanderDefeatEvent;
@@ -224,7 +224,7 @@ public class TestGameEvent extends TestCase
     Unit mech = addUnit(testMap, testCo1, UnitModel.MECH, 2, 3);
     Unit apc = addUnit(testMap, testCo1, UnitModel.TRANSPORT, 3, 2);
 
-    Path path = new Path();
+    GamePath path = new GamePath();
     path.addWaypoint(3, 3); // we need two waypoints to not break compatibility with MoveEvent, since it assumes the first waypoint isn't used.
     path.addWaypoint(7, 5); // A suitable place to move (should be the middle of the road in Firing Range).
 

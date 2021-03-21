@@ -3,7 +3,7 @@ package Engine.UnitActionLifecycles;
 import java.util.ArrayList;
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -23,7 +23,7 @@ public abstract class LaunchLifecycle
     private static final long serialVersionUID = 1L;
 
     @Override
-    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
       if( moveLocation.equals(actor.x, actor.y) )
@@ -50,7 +50,7 @@ public abstract class LaunchLifecycle
             // Build a launch action for each possible action the cargo can do after launch
             for( XYCoord coord : destinations )
             {
-              Path cargoMovePath = Utils.findShortestPath(cargo, coord, map);
+              GamePath cargoMovePath = Utils.findShortestPath(cargo, coord, map);
               ArrayList<GameActionSet> cargoActions = cargo.getPossibleActions(map, cargoMovePath, ignoreResident);
 
               for( GameActionSet actionSet : cargoActions )

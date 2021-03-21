@@ -9,12 +9,12 @@ import Units.UnitModel;
 /**
  * Path stores a list of waypoints.
  */
-public class Path
+public class GamePath
 {
 
   private ArrayList<PathNode> waypoints;
 
-  public Path()
+  public GamePath()
   {
     waypoints = new ArrayList<PathNode>();
   }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -32,7 +32,7 @@ public abstract class FlareLifecycle
     }
 
     @Override
-    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
@@ -69,17 +69,17 @@ public abstract class FlareLifecycle
   public static class FlareAction extends GameAction
   {
     private FlareFactory type;
-    private Path movePath;
+    private GamePath movePath;
     private XYCoord moveCoord = null;
     private XYCoord launchLocation = null;
     private Unit actor;
 
-    public FlareAction(FlareFactory pType, Unit actor, Path path, int targetX, int targetY)
+    public FlareAction(FlareFactory pType, Unit actor, GamePath path, int targetX, int targetY)
     {
       this(pType, actor, path, new XYCoord(targetX, targetY));
     }
 
-    public FlareAction(FlareFactory pType, Unit actor, Path path, XYCoord atkLoc)
+    public FlareAction(FlareFactory pType, Unit actor, GamePath path, XYCoord atkLoc)
     {
       type = pType;
       movePath = path;

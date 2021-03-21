@@ -171,15 +171,15 @@ public class Utils
     return reachableTiles;
   }
 
-  public static boolean isPathValid(Unit unit, Path path, GameMap map, boolean includeOccupiedSpaces)
+  public static boolean isPathValid(Unit unit, GamePath path, GameMap map, boolean includeOccupiedSpaces)
   {
     return isPathValid(new XYCoord(unit.x, unit.y), unit, path, map, includeOccupiedSpaces);
   }
-  public static boolean isPathValid(XYCoord start, Unit unit, Path path, GameMap map, boolean includeOccupiedSpaces)
+  public static boolean isPathValid(XYCoord start, Unit unit, GamePath path, GameMap map, boolean includeOccupiedSpaces)
   {
     return isPathValid(start, unit.getMoveFunctor(includeOccupiedSpaces), Math.min(unit.model.movePower, unit.fuel), path, map);
   }
-  public static boolean isPathValid(XYCoord start, FloodFillFunctor fff, int initialFillPower, Path path, GameMap map)
+  public static boolean isPathValid(XYCoord start, FloodFillFunctor fff, int initialFillPower, GamePath path, GameMap map)
   {
     if( (null == path) || (null == fff) || (null == start) )
     {
@@ -212,32 +212,32 @@ public class Utils
   }
 
   /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
-  public static Path findShortestPath(Unit unit, XYCoord destination, GameMap map, boolean theoretical)
+  public static GamePath findShortestPath(Unit unit, XYCoord destination, GameMap map, boolean theoretical)
   {
     return findShortestPath(unit, destination.xCoord, destination.yCoord, map, theoretical);
   }
   /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
-  public static Path findShortestPath(Unit unit, int x, int y, GameMap map, boolean theoretical)
+  public static GamePath findShortestPath(Unit unit, int x, int y, GameMap map, boolean theoretical)
   {
     return findShortestPath(new XYCoord(unit.x, unit.y), unit, x, y, map, theoretical);
   }
   /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
-  public static Path findShortestPath(Unit unit, XYCoord destination, GameMap map)
+  public static GamePath findShortestPath(Unit unit, XYCoord destination, GameMap map)
   {
     return findShortestPath(unit, destination.xCoord, destination.yCoord, map, false);
   }
   /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
-  public static Path findShortestPath(Unit unit, int x, int y, GameMap map)
+  public static GamePath findShortestPath(Unit unit, int x, int y, GameMap map)
   {
     return findShortestPath(unit, x, y, map, false);
   }
   /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
-  public static Path findShortestPath(XYCoord start, Unit unit, int x, int y, GameMap map)
+  public static GamePath findShortestPath(XYCoord start, Unit unit, int x, int y, GameMap map)
   {
     return findShortestPath(start, unit, x, y, map, false);
   }
   /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
-  public static Path findShortestPath(XYCoord start, Unit unit, XYCoord destination, GameMap map)
+  public static GamePath findShortestPath(XYCoord start, Unit unit, XYCoord destination, GameMap map)
   {
     return findShortestPath(start, unit, destination.xCoord, destination.yCoord, map, false);
   }
@@ -245,7 +245,7 @@ public class Utils
    * Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)}
    * @param theoretical If true, ignores other Units and move-power limitations.
    */
-  public static Path findShortestPath(XYCoord start, Unit unit, int x, int y, GameMap map, boolean theoretical)
+  public static GamePath findShortestPath(XYCoord start, Unit unit, int x, int y, GameMap map, boolean theoretical)
   {
     // findShortestPath() is given a particular endpoint already, so it assumes that it is valid to end up there.
     return findShortestPath(start, unit.getMoveFunctor(true, theoretical),
@@ -263,14 +263,14 @@ public class Utils
    * @param y Final Y coordinate
    * @param map The map to search over.
    */
-  public static Path findShortestPath(XYCoord start, FloodFillFunctor fff, int initialFillPower, int x, int y, GameMap map)
+  public static GamePath findShortestPath(XYCoord start, FloodFillFunctor fff, int initialFillPower, int x, int y, GameMap map)
   {
     if( null == start || null == fff || null == map || !map.isLocationValid(start.xCoord, start.yCoord) )
     {
       return null;
     }
 
-    Path aPath = new Path();
+    GamePath aPath = new GamePath();
     if( !map.isLocationValid(x, y) )
     {
       // Unit is not in a valid place. No path can be found.
@@ -590,7 +590,7 @@ public class Utils
     return locations;
   }
 
-  public static boolean pathCollides(GameMap map, Unit unit, Path path)
+  public static boolean pathCollides(GameMap map, Unit unit, GamePath path)
   {
     boolean result = false;
     boolean includeOccupiedSpaces = true; // Shouldn't matter, as we don't invoke canEnd()
@@ -618,7 +618,7 @@ public class Utils
    * @param eventQueue Will be given the new MoveEvent.
    * @return true if the move is created as specified, false if the path was shortened.
    */
-  public static boolean enqueueMoveEvent(MapMaster gameMap, Unit unit, Path movePath, GameEventQueue eventQueue)
+  public static boolean enqueueMoveEvent(MapMaster gameMap, Unit unit, GamePath movePath, GameEventQueue eventQueue)
   {
     boolean originalPathOK = true;
     if( Utils.pathCollides(gameMap, unit, movePath) )

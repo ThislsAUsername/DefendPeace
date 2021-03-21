@@ -1,7 +1,7 @@
 package Engine.GameEvents;
 
 import CommandingOfficers.Commander;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.XYCoord;
 import Terrain.MapMaster;
 import UI.MapView;
@@ -17,9 +17,9 @@ import Units.Unit;
 public class MoveEvent implements GameEvent
 {
   private Unit unit = null;
-  private Path unitPath = null;
+  private GamePath unitPath = null;
 
-  public MoveEvent(Unit u, Path path)
+  public MoveEvent(Unit u, GamePath path)
   {
     unit = u;
     unitPath = path;
@@ -42,7 +42,7 @@ public class MoveEvent implements GameEvent
   {
     if( unitPath.getPathLength() > 0 ) // Make sure we have a destination.
     {
-      Path.PathNode endpoint = unitPath.getEnd();
+      GamePath.PathNode endpoint = unitPath.getEnd();
       int fuelBurn = unitPath.getFuelCost(unit.model, gameMap);
 
       boolean includeOccupiedSpaces = true; // To allow validation for LOAD/JOIN actions.

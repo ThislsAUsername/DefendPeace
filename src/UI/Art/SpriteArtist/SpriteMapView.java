@@ -10,7 +10,7 @@ import java.util.Queue;
 
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
@@ -235,7 +235,7 @@ public class SpriteMapView extends MapView
       currentAnimation = contemplationAnim.update(drawMultiplier, currentActor, actorCoord);
       notifyOnAnimEnd = false;
     }
-    Path currentPath = mapController.getContemplatedMove();
+    GamePath currentPath = mapController.getContemplatedMove();
     boolean isTargeting = mapController.isTargeting();
 
     // Start actually drawing things
@@ -423,7 +423,7 @@ public class SpriteMapView extends MapView
   }
 
   @Override // from MapView
-  public GameAnimation buildMoveAnimation(Unit unit, Path movePath)
+  public GameAnimation buildMoveAnimation(Unit unit, GamePath movePath)
   {
     return new MoveAnimation(SpriteLibrary.baseSpriteSize, unit, movePath);
   }

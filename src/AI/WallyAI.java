@@ -174,7 +174,7 @@ public class WallyAI extends ModularAI
         return bestAttack;
 
       // Figure out how to get here.
-      Path movePath = Utils.findShortestPath(unit, coord, gameMap);
+      GamePath movePath = Utils.findShortestPath(unit, coord, gameMap);
 
       // Figure out what I can do here.
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath);
@@ -411,7 +411,7 @@ public class WallyAI extends ModularAI
       for( XYCoord moveCoord : destinations )
       {
         // Figure out how to get here.
-        Path movePath = Utils.findShortestPath(unit, moveCoord, gameMap);
+        GamePath movePath = Utils.findShortestPath(unit, moveCoord, gameMap);
 
         // Figure out what I can do here.
         ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, includeOccupiedSpaces);
@@ -727,7 +727,7 @@ public class WallyAI extends ModularAI
     // TODO: Jump in a transport, if available, or join?
 
     XYCoord goal = null;
-    Path path = null;
+    GamePath path = null;
     ArrayList<XYCoord> validTargets = findTravelDestinations(gameMap, allThreats, threatMap, unit, avoidProduction);
     if( mustMove ) // If we *must* travel, make sure we do actually move.
     {
@@ -779,7 +779,7 @@ public class WallyAI extends ModularAI
       }
       log(String.format("    Yes"));
 
-      Path movePath = Utils.findShortestPath(unit, xyc, gameMap);
+      GamePath movePath = Utils.findShortestPath(unit, xyc, gameMap);
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, ignoreResident);
       if( actionSets.size() > 0 )
       {

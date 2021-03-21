@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -22,7 +22,7 @@ public abstract class RepairLifecycle
     private static final long serialVersionUID = 1L;
 
     @Override
-    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
@@ -70,14 +70,14 @@ public abstract class RepairLifecycle
 
   public static class RepairUnitAction extends GameAction
   {
-    private Path movePath;
+    private GamePath movePath;
     private XYCoord startCoord;
     private XYCoord moveCoord;
     private XYCoord repairCoord;
     Unit benefactor;
     Unit beneficiary;
 
-    public RepairUnitAction(Unit actor, Path path, Unit target)
+    public RepairUnitAction(Unit actor, GamePath path, Unit target)
     {
       benefactor = actor;
       beneficiary = target;

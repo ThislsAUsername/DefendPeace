@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -21,7 +21,7 @@ public abstract class ResupplyLifecycle
     private static final long serialVersionUID = 1L;
 
     @Override
-    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
@@ -65,14 +65,14 @@ public abstract class ResupplyLifecycle
   public static class ResupplyAction extends GameAction
   {
     private Unit unitActor = null;
-    private Path movePath = null;
+    private GamePath movePath = null;
 
     /**
      * Creates a resupply action to be executed from the end of path.
      * @param actor
      * @param path
      */
-    public ResupplyAction(Unit actor, Path path)
+    public ResupplyAction(Unit actor, GamePath path)
     {
       unitActor = actor;
       movePath = path;

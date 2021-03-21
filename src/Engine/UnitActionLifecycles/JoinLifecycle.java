@@ -2,7 +2,7 @@ package Engine.UnitActionLifecycles;
 
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -22,7 +22,7 @@ public abstract class JoinLifecycle
     private static final long serialVersionUID = 1L;
 
     @Override
-    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
       Unit resident = map.getLocation(moveLocation).getResident();
@@ -58,11 +58,11 @@ public abstract class JoinLifecycle
   public static class JoinAction extends GameAction
   {
     private Unit donor;
-    Path movePath;
+    GamePath movePath;
     private XYCoord pathEnd = null;
     private Unit recipient;
 
-    public JoinAction(GameMap gameMap, Unit actor, Path path)
+    public JoinAction(GameMap gameMap, Unit actor, GamePath path)
     {
       donor = actor;
       movePath = path;

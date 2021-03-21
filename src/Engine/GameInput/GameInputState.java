@@ -8,7 +8,7 @@ import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.OptionSelector;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
 import Engine.GameInput.GameInputHandler.InputType;
@@ -101,7 +101,7 @@ abstract class GameInputState<T>
     public Unit unitLauncher = null;
     public XYCoord unitCoord = null;
     public GameActionSet actionSet = null;
-    public Path path = null;
+    public GamePath path = null;
     public ArrayList<? extends Object> menuOptions = null; // Just require a toString().
     public Map<Unit, XYCoord> unitLocationMap = null; // Used to map units to unload locations.
     public Collection<DamagePopup> damagePopups = new ArrayList<DamagePopup>();

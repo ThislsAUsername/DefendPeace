@@ -3,8 +3,8 @@ package Terrain;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
-import Engine.Path;
-import Engine.Path.PathNode;
+import Engine.GamePath;
+import Engine.GamePath.PathNode;
 import Engine.Utils;
 import Engine.XYCoord;
 import Units.Unit;
@@ -234,7 +234,7 @@ public class MapWindow extends GameMap
   }
 
   @Override
-  public void revealFog(Unit scout, Path movepath)
+  public void revealFog(Unit scout, GamePath movepath)
   {
     if (null == viewer)
       return;

@@ -7,8 +7,8 @@ import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
-import Engine.Path;
-import Engine.Path.PathNode;
+import Engine.GamePath;
+import Engine.GamePath.PathNode;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventListener;
@@ -94,7 +94,7 @@ public class MapArtist
     }
   }
 
-  public void drawMovePath(Graphics g, Path path)
+  public void drawMovePath(Graphics g, GamePath path)
   {
     Sprite moveLineSprites = SpriteLibrary.getMoveCursorLineSprite();
     Sprite moveArrowSprites = SpriteLibrary.getMoveCursorArrowSprite();

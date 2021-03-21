@@ -9,7 +9,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -165,7 +165,7 @@ public class InfantrySpamAI implements AIController
         log(String.format("  Seeking a property to send %s after", unit.toStringWithLocation()));
         int index = 0;
         XYCoord goal = null;
-        Path path = null;
+        GamePath path = null;
         boolean validTarget = false;
 
         // Loop until we find a valid property to go capture or run out of options.

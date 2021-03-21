@@ -6,7 +6,7 @@ import CommandingOfficers.Strong;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.Utils;
 import Engine.UnitActionLifecycles.BattleLifecycle;
 import Engine.UnitActionLifecycles.ResupplyLifecycle;
@@ -71,18 +71,18 @@ public class TestVisionMechanics extends TestCase
     testPassed &= validate(strong.myView.isLocationEmpty(6, 5),   "    We can magically see units in forests");
     testPassed &= validate(strong.myView.isLocationEmpty(7, 5),   "    We can magically see invisible tanks");
     
-    Path foolPath = Utils.findShortestPath(fool, 7, 8, strong.myView);
+    GamePath foolPath = Utils.findShortestPath(fool, 7, 8, strong.myView);
     GameAction resupplyBlind = new ResupplyLifecycle.ResupplyAction(fool, foolPath);
     testPassed &= validate(resupplyBlind.getEvents(testMap).size() == 1, "    Some fool was able to zoom straight through an invisible tank");
 
-    Path punchSit = Utils.findShortestPath(punch, punch.x, punch.y, strong.myView);
+    GamePath punchSit = Utils.findShortestPath(punch, punch.x, punch.y, strong.myView);
     GameAction missBait = new BattleLifecycle.BattleAction(strong.myView, punch, punchSit, 6, 5);
     testPassed &= validate(missBait.getEvents(testMap).size() == 0, "    You can shoot things hidden in forests.");
     GameAction missMeat = new BattleLifecycle.BattleAction(strong.myView, punch, punchSit, 7, 5);
     testPassed &= validate(missMeat.getEvents(testMap).size() == 0, "    You can shoot invisible things.");
 
     // Drive by the two hidden units
-    Path excursion = new Path();
+    GamePath excursion = new GamePath();
     excursion.addWaypoint(7, 3);
     excursion.addWaypoint(7, 4);
     excursion.addWaypoint(6, 4);

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import CommandingOfficers.Commander;
 import Engine.FloodFillFunctor;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
@@ -306,11 +306,11 @@ public class Unit implements Serializable
   }
 
   /** Compiles and returns a list of all actions this unit could perform on map after moving along movePath. */
-  public ArrayList<GameActionSet> getPossibleActions(GameMap map, Path movePath)
+  public ArrayList<GameActionSet> getPossibleActions(GameMap map, GamePath movePath)
   {
     return getPossibleActions(map, movePath, false);
   }
-  public ArrayList<GameActionSet> getPossibleActions(GameMap map, Path movePath, boolean ignoreResident)
+  public ArrayList<GameActionSet> getPossibleActions(GameMap map, GamePath movePath, boolean ignoreResident)
   {
     ArrayList<GameActionSet> actionSet = new ArrayList<GameActionSet>();
     for( UnitActionFactory at : model.possibleActions )

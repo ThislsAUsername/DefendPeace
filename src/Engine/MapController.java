@@ -390,7 +390,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case PATH_SELECT:
         break; // no special behavior
       case MENU_SELECT:
-        Path path = myGameInputHandler.myStateData.path;
+        GamePath path = myGameInputHandler.myStateData.path;
         if( null != path && path.getPathLength() > 0 )
         {
           myGame.setCursorLocation(path.getEnd().GetCoordinates());
@@ -625,7 +625,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     return myGameInputHandler.getUnitCoord();
   }
 
-  public Path getContemplatedMove()
+  public GamePath getContemplatedMove()
   {
     return myGameInputHandler.myStateData.path;
   }

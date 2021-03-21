@@ -14,7 +14,7 @@ import java.util.function.Function;
 
 import CommandingOfficers.Commander;
 import Engine.GameAction;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
@@ -309,7 +309,7 @@ public class AICombatUtils
           continue; // Consider each unit only once
 
         // Figure out how to get here.
-        Path movePath = Utils.findShortestPath(unit, xyc, gameMap);
+        GamePath movePath = Utils.findShortestPath(unit, xyc, gameMap);
 
         if( movePath.getPathLength() > 0 )
         {

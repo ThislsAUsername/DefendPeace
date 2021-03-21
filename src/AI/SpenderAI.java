@@ -11,7 +11,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -165,7 +165,7 @@ public class SpenderAI implements AIController
         for( XYCoord coord : destinations )
         {
           // Figure out how to get here.
-          Path movePath = Utils.findShortestPath(unit, coord, gameMap);
+          GamePath movePath = Utils.findShortestPath(unit, coord, gameMap);
 
           // Figure out what I can do here.
           ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath);
@@ -217,7 +217,7 @@ public class SpenderAI implements AIController
             log(String.format("  Seeking a property to send %s after", unit.toStringWithLocation()));
             int index = 0;
             XYCoord goal = null;
-            Path path = null;
+            GamePath path = null;
             boolean validTarget = false;
             ArrayList<XYCoord> validTargets = new ArrayList<>();
 
@@ -265,7 +265,7 @@ public class SpenderAI implements AIController
               // and build a GameAction to move to the closest one.
               Utils.sortLocationsByDistance(goal, destinations);
               XYCoord destination = destinations.get(0);
-              Path movePath = Utils.findShortestPath(unit, destination, gameMap);
+              GamePath movePath = Utils.findShortestPath(unit, destination, gameMap);
               if( movePath.getPathLength() > 1 ) // We only want to try to travel if we can actually go somewhere
               {
                 GameAction move = new WaitLifecycle.WaitAction(unit, movePath);

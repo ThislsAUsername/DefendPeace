@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -39,7 +39,7 @@ public abstract class ExplodeLifecycle
     }
 
     @Override
-    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
@@ -62,7 +62,7 @@ public abstract class ExplodeLifecycle
     private ExplodeFactory type;
     Unit actor;
 
-    public ExplodeAction(Unit unit, Path path, ExplodeFactory pType)
+    public ExplodeAction(Unit unit, GamePath path, ExplodeFactory pType)
     {
       super(unit, path);
       type = pType;

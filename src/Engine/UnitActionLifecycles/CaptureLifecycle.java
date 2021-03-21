@@ -2,7 +2,7 @@ package Engine.UnitActionLifecycles;
 
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -25,7 +25,7 @@ public abstract class CaptureLifecycle
     private static final long serialVersionUID = 1L;
 
     @Override
-    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
@@ -57,11 +57,11 @@ public abstract class CaptureLifecycle
   public static class CaptureAction extends GameAction
   {
     private Unit actor = null;
-    private Path movePath;
+    private GamePath movePath;
     private XYCoord movePathEnd;
     private TerrainType propertyType;
 
-    public CaptureAction(GameMap gameMap, Unit unit, Path path)
+    public CaptureAction(GameMap gameMap, Unit unit, GamePath path)
     {
       actor = unit;
       movePath = path;

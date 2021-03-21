@@ -2,7 +2,7 @@ package Engine.UnitActionLifecycles;
 
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -22,7 +22,7 @@ public abstract class LoadLifecycle
     private static final long serialVersionUID = 1L;
 
     @Override
-    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
       Unit resident = map.getLocation(moveLocation).getResident();
@@ -55,11 +55,11 @@ public abstract class LoadLifecycle
   public static class LoadAction extends GameAction
   {
     private Unit passenger;
-    Path movePath;
+    GamePath movePath;
     private XYCoord pathEnd = null;
     private Unit transport;
 
-    public LoadAction(GameMap gameMap, Unit actor, Path path)
+    public LoadAction(GameMap gameMap, Unit actor, GamePath path)
     {
       passenger = actor;
       movePath = path;

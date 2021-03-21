@@ -2,7 +2,7 @@ package Engine.UnitActionLifecycles;
 
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -18,7 +18,7 @@ public abstract class WaitLifecycle
     private static final long serialVersionUID = 1L;
 
     @Override
-    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
@@ -46,11 +46,11 @@ public abstract class WaitLifecycle
 
   public static class WaitAction extends GameAction
   {
-    private final Path movePath;
+    private final GamePath movePath;
     private final XYCoord waitLoc;
     private final Unit actor;
 
-    public WaitAction(Unit unit, Path path)
+    public WaitAction(Unit unit, GamePath path)
     {
       actor = unit;
       movePath = path;
@@ -78,7 +78,7 @@ public abstract class WaitLifecycle
 
       if( isValid ) // Check fuel.
       {
-        Path.PathNode endpoint = movePath.getEnd();
+        GamePath.PathNode endpoint = movePath.getEnd();
         int fuelBurn = movePath.getFuelCost(actor.model, gameMap);
         boolean includeOccupiedSpaces = true; // To allow validation for LOAD/JOIN actions.
         isValid = fuelBurn <= actor.fuel && fuelBurn <= actor.model.movePower

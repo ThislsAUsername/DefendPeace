@@ -2,7 +2,7 @@ package Terrain;
 
 import java.io.Serializable;
 
-import Engine.Path;
+import Engine.GamePath;
 import Engine.XYCoord;
 import Units.Unit;
 
@@ -70,7 +70,7 @@ public abstract class GameMap implements Serializable, IEnvironsProvider
   {}
 
   /** Reveals fog along the movement path, if applicable */
-  public void revealFog(Unit scout, Path movepath)
+  public void revealFog(Unit scout, GamePath movepath)
   {}
 
   /** Reveals a single tile of fog */

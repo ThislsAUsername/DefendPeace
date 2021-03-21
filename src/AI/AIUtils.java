@@ -11,7 +11,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -55,7 +55,7 @@ public class AIUtils
     for( XYCoord coord : destinations )
     {
       // Figure out how to get here.
-      Path movePath = Utils.findShortestPath(unit, coord, gameMap);
+      GamePath movePath = Utils.findShortestPath(unit, coord, gameMap);
 
       // Figure out what I can do here.
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, includeOccupiedDestinations);
@@ -200,7 +200,7 @@ public class AIUtils
     GameAction move = null;
 
     // Find the full path that would get this unit to the destination, regardless of how long. 
-    Path path = Utils.findShortestPath(unit, destination, gameMap, true);
+    GamePath path = Utils.findShortestPath(unit, destination, gameMap, true);
     boolean includeOccupiedSpaces = false;
     ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces); // Find the valid moves we can make.
 
