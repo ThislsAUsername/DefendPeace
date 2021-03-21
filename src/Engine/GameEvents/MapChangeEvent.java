@@ -61,13 +61,17 @@ public class MapChangeEvent implements GameEvent
   @Override
   public XYCoord getStartPoint()
   {
-    return changes.get(0).where;
+    if( changes.size() > 0 )
+      return changes.get(0).where;
+    return null;
   }
 
   @Override
   public XYCoord getEndPoint()
   {
-    return changes.get(0).where;
+    if( changes.size() > 0 )
+      return changes.get(0).where;
+    return null;
   }
 
   public static class EnvironmentAssignment
