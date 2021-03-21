@@ -774,14 +774,17 @@ public class Ave extends Commander
     @Override
     public GameEventQueue receiveCaptureEvent(Unit unit, MapLocation location)
     {
+      GameEventQueue returnEvents = new GameEventQueue();
+
       if( unit.CO == Ave && (location.getOwner() == Ave) )
       {
-        // TODO?
-        // Just mark the tile as "snowy" until the next turnInit(), since we can't do a MapChangeEvent from here.
         XYCoord where = location.getCoordinates();
         Ave.snowMap[where.xCoord][where.yCoord] += SNOW_THRESHOLD;
+        returnEvents.add(
+            new MapChangeEvent( where, Environment.getTile(location.getEnvironment().terrainType, Weathers.SNOW) )
+            );
       }
-      return null;
+      return returnEvents;
     }
   }
 }
