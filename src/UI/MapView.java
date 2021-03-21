@@ -13,7 +13,7 @@ import Engine.Combat.StrikeParams;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.TeleportEvent;
-import Terrain.MapWindow;
+import Terrain.MapFog;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
 
@@ -23,7 +23,7 @@ public abstract class MapView implements IView
 
   protected MapController mapController = null;
   
-  protected MapWindow foggedMap;
+  protected MapFog foggedMap;
 
   public void setController(MapController controller)
   {
@@ -118,7 +118,7 @@ public abstract class MapView implements IView
     return null;
   }
 
-  protected MapWindow getDrawableMap(GameInstance myGame)
+  protected MapFog getDrawableMap(GameInstance myGame)
   {
     // Here are the fog-drawing rules. If there are:
     //   zero humans - spectating - draw everything the current player sees.
@@ -126,7 +126,7 @@ public abstract class MapView implements IView
     //   2+ humans - player vs player - draw what the current player sees, IFF the player is human.
 
     // Humans need to see what they can see.
-    MapWindow gameMap = myGame.activeCO.myView;
+    MapFog gameMap = myGame.activeCO.myView;
     if( myGame.activeCO.isAI() ) // If it's not a human, figure out what to show.
     {
       int numHumans = countHumanPlayers(myGame);
@@ -140,7 +140,7 @@ public abstract class MapView implements IView
         // Hide everything during the AI's turn so the playing field is level.
         if( null == foggedMap )
         {
-          foggedMap = new MapWindow(myGame.gameMap, null);
+          foggedMap = new MapFog(myGame.gameMap, null);
           foggedMap.resetFog();
         }
         gameMap = foggedMap;
@@ -170,9 +170,9 @@ public abstract class MapView implements IView
    * Returns the map owned by the first human Commander found.
    * Intended to be used when there is only one human player.
    */
-  protected MapWindow getHumanPlayerMap(GameInstance myGame)
+  protected MapFog getHumanPlayerMap(GameInstance myGame)
   {
-    MapWindow map = null;
+    MapFog map = null;
 
     for( Commander co : myGame.commanders )
     {

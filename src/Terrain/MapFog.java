@@ -9,7 +9,7 @@ import Engine.Utils;
 import Engine.XYCoord;
 import Units.Unit;
 
-public class MapWindow extends GameMap
+public class MapFog extends GameMap
 {
   private static final long serialVersionUID = 1L;
   MapMaster master;
@@ -18,7 +18,7 @@ public class MapWindow extends GameMap
   private Commander[][] lastOwnerSeen;
   private ArrayList<Unit> confirmedVisibles;
 
-  public MapWindow(MapMaster pMaster, Commander pViewer)
+  public MapFog(MapMaster pMaster, Commander pViewer)
   {
     super(pMaster.mapWidth, pMaster.mapHeight);
     master = pMaster;
