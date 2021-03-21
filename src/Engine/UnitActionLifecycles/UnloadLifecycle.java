@@ -219,9 +219,9 @@ public abstract class UnloadLifecycle
     }
 
     @Override
-    public void sendToListener(GameEventListener listener)
+    public GameEventQueue sendToListener(GameEventListener listener)
     {
-      listener.receiveUnloadEvent(this);
+      return listener.receiveUnloadEvent(this);
     }
 
     @Override

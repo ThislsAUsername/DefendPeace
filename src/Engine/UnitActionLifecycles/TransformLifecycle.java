@@ -114,9 +114,9 @@ public abstract class TransformLifecycle
     }
 
     @Override
-    public void sendToListener(GameEventListener listener)
+    public GameEventQueue sendToListener(GameEventListener listener)
     {
-      listener.receiveUnitTransformEvent(unit, oldType);
+      return listener.receiveUnitTransformEvent(unit, oldType);
     }
 
     @Override

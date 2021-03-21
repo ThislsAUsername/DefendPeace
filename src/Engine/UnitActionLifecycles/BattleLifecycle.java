@@ -19,7 +19,6 @@ import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
-import Engine.GameEvents.UnitDieEvent;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.Location;
@@ -397,9 +396,9 @@ public abstract class BattleLifecycle
     }
 
     @Override
-    public void sendToListener(GameEventListener listener)
+    public GameEventQueue sendToListener(GameEventListener listener)
     {
-      listener.receiveBattleEvent(battleInfo);
+      return listener.receiveBattleEvent(battleInfo);
     }
 
     @Override
@@ -467,9 +466,9 @@ public abstract class BattleLifecycle
     }
 
     @Override
-    public void sendToListener(GameEventListener listener)
+    public GameEventQueue sendToListener(GameEventListener listener)
     {
-      listener.receiveDemolitionEvent(result.attacker.body, target.getCoordinates());
+      return listener.receiveDemolitionEvent(result.attacker.body, target.getCoordinates());
     }
 
     @Override

@@ -166,9 +166,9 @@ public abstract class JoinLifecycle
     }
 
     @Override
-    public void sendToListener(GameEventListener listener)
+    public GameEventQueue sendToListener(GameEventListener listener)
     {
-      listener.receiveUnitJoinEvent(this);
+      return listener.receiveUnitJoinEvent(this);
     }
 
     @Override

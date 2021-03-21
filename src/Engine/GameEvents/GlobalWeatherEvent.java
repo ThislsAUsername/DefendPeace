@@ -35,9 +35,9 @@ public class GlobalWeatherEvent implements GameEvent
   }
 
   @Override
-  public void sendToListener(GameEventListener listener)
+  public GameEventQueue sendToListener(GameEventListener listener)
   {
-    listener.receiveWeatherChangeEvent(weather, duration);
+    return listener.receiveWeatherChangeEvent(weather, duration);
   }
 
   @Override

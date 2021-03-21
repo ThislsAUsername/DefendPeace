@@ -39,7 +39,7 @@ import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModelScheme.GameReadyModels;
 
-public class Commander extends GameEventListener implements Serializable
+public class Commander implements GameEventListener, Serializable
 {
   private static final long serialVersionUID = 1L;
   
@@ -172,12 +172,6 @@ public class Commander extends GameEventListener implements Serializable
 
     return events;
   }
-
-  /**
-   * This is called after every GameAction, and between turns, and allows Commanders to inject
-   * events that don't arise via normal gameplay. Most Commanders should not need to override this.
-   */
-  public void pollForEvents(GameEventQueue eventsOut) {}
 
   /**
    * @return whether these COs would like to kill each other
@@ -380,16 +374,17 @@ public class Commander extends GameEventListener implements Serializable
    * Track unit deaths, so I know not to be threatened by them.
    */
   @Override
-  public void receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
+  public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
   {
     threatsToOverlay.remove(victim);
+    return null;
   }
 
   /**
    * Track battles that happen, and get ability power based on combat this CO is in.
    */
   @Override
-  public void receiveBattleEvent(final BattleSummary summary)
+  public GameEventQueue receiveBattleEvent(final BattleSummary summary)
   {
     // We only care who the units belong to, not who picked the fight. 
     Unit minion = null;
@@ -426,18 +421,20 @@ public class Commander extends GameEventListener implements Serializable
       // Convert funds to ability power units
       power /= CHARGERATIO_FUNDS;
 
-      modifyAbilityPower(power);
+      modifyAbilityPower(42);
+//      modifyAbilityPower(power);
     }
+    return null;
   }
 
   /**
    * Track mass damage done to my units, and get ability power based on it.
    */
   @Override
-  public void receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP)
+  public GameEventQueue receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP)
   {
     if( this == attacker )
-      return; // Punching yourself shouldn't make you angry
+      return null; // Punching yourself shouldn't make you angry
 
     for( Entry<Unit, Integer> damageEntry : lostHP.entrySet() )
     {
@@ -453,6 +450,7 @@ public class Commander extends GameEventListener implements Serializable
         modifyAbilityPower(power);
       }
     }
+    return null;
   }
 
   public void setAIController(AIController ai)

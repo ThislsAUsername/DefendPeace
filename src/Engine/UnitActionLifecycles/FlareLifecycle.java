@@ -169,9 +169,10 @@ public abstract class FlareLifecycle
     }
 
     @Override
-    public void sendToListener(GameEventListener listener)
+    public GameEventQueue sendToListener(GameEventListener listener)
     {
       // TODO
+      return null;
     }
 
     @Override

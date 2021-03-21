@@ -6,6 +6,7 @@ import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GameEventQueue;
 import Terrain.Location;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -93,7 +94,7 @@ public class Patch extends Commander
    * LootAbility is a passive that grants its Commander a day's income immediately upon capturing a
    * property, so long as that property is one that generates income.
    */
-  private static class LootAbility extends GameEventListener
+  private static class LootAbility implements GameEventListener
   {
     private static final long serialVersionUID = 1L;
     private Patch myCommander = null;
@@ -104,13 +105,14 @@ public class Patch extends Commander
     }
 
     @Override
-    public void receiveCaptureEvent(Unit unit, Location location)
+    public GameEventQueue receiveCaptureEvent(Unit unit, Location location)
     {
       if( unit.CO == myCommander && location.getOwner() == myCommander && location.isProfitable() )
       {
         // We just successfully captured a property. Loot the place!
         myCommander.money += myCommander.gameRules.incomePerCity;
       }
+      return null;
     }
   }
 
@@ -120,7 +122,7 @@ public class Patch extends Commander
    * Commander. The amount of income is a fraction of value of the damage that was done, thus
    * damaging more expensive units will grant more income.
    */
-  private static class DamageDealtToIncomeConverter extends GameEventListener
+  private static class DamageDealtToIncomeConverter implements GameEventListener
   {
     private static final long serialVersionUID = 1L;
     private Patch myCommander = null;
@@ -131,7 +133,7 @@ public class Patch extends Commander
     }
 
     @Override
-    public void receiveBattleEvent(BattleSummary battleInfo)
+    public GameEventQueue receiveBattleEvent(BattleSummary battleInfo)
     {
       // Determine if we were part of this fight. If so, cash in on any damage done to the other guy.
       double hpLoss = 0;
@@ -150,6 +152,7 @@ public class Patch extends Commander
       // Do the necessary math, then round to the nearest int.
       int income = (int)(hpLoss * (unitCost/10.0) * myCommander.myIncomeRatio + 0.5);
       myCommander.money += income;
+      return null;
     }
   }
 

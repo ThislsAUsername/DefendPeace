@@ -8,6 +8,7 @@ import Engine.GameScenario;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.TeleportEvent;
 import Engine.XYCoord;
 import Terrain.MapLibrary;
@@ -113,7 +114,7 @@ public class TestTeleport extends TestCase
     return testPassed;
   }
 
-  private static class TestListener extends GameEventListener
+  private static class TestListener implements GameEventListener
   {
     private static final long serialVersionUID = 1L;
     public boolean death;
@@ -125,15 +126,17 @@ public class TestTeleport extends TestCase
     }
 
     @Override
-    public void receiveUnitDieEvent(Unit unit, XYCoord grave, Integer hpLost)
+    public GameEventQueue receiveUnitDieEvent(Unit unit, XYCoord grave, Integer hpLost)
     {
       death = true;
+      return null;
     }
     
     @Override
-    public void receiveCommanderDefeatEvent(CommanderDefeatEvent event)
+    public GameEventQueue receiveCommanderDefeatEvent(CommanderDefeatEvent event)
     {
       defeat = true;
+      return null;
     }
 
     public void reset() {death=false; defeat=false;}

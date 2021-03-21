@@ -45,12 +45,13 @@ public class CreateUnitEvent implements GameEvent
   }
 
   @Override
-  public void sendToListener(GameEventListener listener)
+  public GameEventQueue sendToListener(GameEventListener listener)
   {
     if( null != myNewUnit )
     {
-      listener.receiveCreateUnitEvent(myNewUnit);
+      return listener.receiveCreateUnitEvent(myNewUnit);
     }
+    return null;
   }
 
   @Override

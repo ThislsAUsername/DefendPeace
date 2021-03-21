@@ -100,10 +100,11 @@ public class Venge extends Commander
   }
 
   @Override
-  public void receiveUnitJoinEvent(JoinEvent join)
+  public GameEventQueue receiveUnitJoinEvent(JoinEvent join)
   {
     if (aggressors.contains(join.unitDonor))
       aggressors.add(join.unitRecipient);
+    return null;
   }
 
   @Override
@@ -148,7 +149,7 @@ public class Venge extends Commander
   }
 
   @Override
-  public void receiveBattleEvent(BattleSummary battleInfo)
+  public GameEventQueue receiveBattleEvent(BattleSummary battleInfo)
   {
     super.receiveBattleEvent(battleInfo);
     // Determine if we were attacked. If so, record this misdeed.
@@ -156,6 +157,7 @@ public class Venge extends Commander
     {
       aggressors.add(battleInfo.attacker);
     }
+    return null;
   }
 
   /**

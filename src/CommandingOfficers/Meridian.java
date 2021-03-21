@@ -86,12 +86,13 @@ public class Meridian extends Commander
   }
 
   @Override // GameEventListener interface
-  public void receiveUnitTransformEvent(Unit unit, UnitModel oldType)
+  public GameEventQueue receiveUnitTransformEvent(Unit unit, UnitModel oldType)
   {
     if (this == unit.CO)
     {
       justTransformed.add(unit);
     }
+    return null;
   }
 
   /**

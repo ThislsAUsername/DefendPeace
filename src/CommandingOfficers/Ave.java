@@ -763,7 +763,7 @@ public class Ave extends Commander
     }
   }
 
-  private static class CitySnowifier extends GameEventListener
+  private static class CitySnowifier implements GameEventListener
   {
     private static final long serialVersionUID = 1L;
     Ave Ave;
@@ -772,14 +772,16 @@ public class Ave extends Commander
       Ave = cmdr;
     }
     @Override
-    public void receiveCaptureEvent(Unit unit, Location location)
+    public GameEventQueue receiveCaptureEvent(Unit unit, Location location)
     {
       if( unit.CO == Ave && (location.getOwner() == Ave) )
       {
+        // TODO?
         // Just mark the tile as "snowy" until the next turnInit(), since we can't do a MapChangeEvent from here.
         XYCoord where = location.getCoordinates();
         Ave.snowMap[where.xCoord][where.yCoord] += SNOW_THRESHOLD;
       }
+      return null;
     }
   }
 }

@@ -187,9 +187,9 @@ public abstract class CaptureLifecycle
   }
 
   @Override
-  public void sendToListener(GameEventListener listener)
+  public GameEventQueue sendToListener(GameEventListener listener)
   {
-    listener.receiveCaptureEvent( unit, location );
+    return listener.receiveCaptureEvent( unit, location );
   }
 
   public boolean willCapture()

@@ -3,7 +3,6 @@ package Engine;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import CommandingOfficers.Commander;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
@@ -520,21 +519,11 @@ public class MapController implements IController, GameInputHandler.StateChanged
       event.performEvent(myGame.gameMap);
 
       // Now that the event has been completed, let the world know.
-      GameEventListener.publishEvent(event, myGame);
-    }
-
-    if( animEventQueueIsEmpty )
-    {
-      for( Commander co : myGame.commanders )
+      GameEventQueue events = GameEventListener.publishEvent(event, myGame);
+      if( !events.isEmpty() )
       {
-        GameEventQueue events = new GameEventQueue();
-        co.pollForEvents(events);
-        if( !events.isEmpty() )
-        {
-          animEventQueueIsEmpty = false;
-          myView.animate(events);
-          break; // We'll get the next commander the next time we hit this block.
-        }
+        animEventQueueIsEmpty = false;
+        myView.animate(events);
       }
     }
 

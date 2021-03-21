@@ -36,9 +36,9 @@ public class MapChangeEvent implements GameEvent
   }
 
   @Override
-  public void sendToListener(GameEventListener listener)
+  public GameEventQueue sendToListener(GameEventListener listener)
   {
-    listener.receiveTerrainChangeEvent(changes);
+    return listener.receiveTerrainChangeEvent(changes);
   }
 
   @Override

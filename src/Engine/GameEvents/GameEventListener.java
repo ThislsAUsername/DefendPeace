@@ -22,22 +22,25 @@ import Units.UnitModel;
  * override those receive functions they care about.
  * We use the visitor pattern to call the correct event function whenever an event is distributed.
  */
-public abstract class GameEventListener implements Serializable
+public interface GameEventListener extends Serializable
 {
-  private static final long serialVersionUID = 1L;
-
-  /** Pass event along to every listener we still have. */
-  public static void publishEvent(GameEvent event, GameInstance gi)
+  /** Pass event along to every listener we still have. 
+   * @return */
+  public static GameEventQueue publishEvent(GameEvent event, GameInstance gi)
   {
+    GameEventQueue events = new GameEventQueue();
     for( GameEventListener gel : gi.eventListeners )
     {
       // The event will call the appropriate receive method in the listener.
-      event.sendToListener(gel);
+      GameEventQueue newEvents = event.sendToListener(gel);
+      if( null != newEvents )
+        events.addAll(newEvents);
     }
+    return events;
   }
 
   /** Allows GameInstance to make informed decisons on whether to try saving this listener */
-  public boolean shouldSerialize() { return true; }
+  default public boolean shouldSerialize() { return true; }
 
   /** Sign this listener up to receive events. If a listener registers multiple times, it will still
    *  receive each notification only once. */
@@ -46,7 +49,7 @@ public abstract class GameEventListener implements Serializable
     listener.registerForEvents(gi);
   }
 
-  public void registerForEvents(GameInstance gi)
+  default public void registerForEvents(GameInstance gi)
   {
     gi.eventListeners.add(this);
   }
@@ -58,31 +61,31 @@ public abstract class GameEventListener implements Serializable
     listener.unregister(gi);
   }
 
-  public void unregister(GameInstance gi)
+  default public void unregister(GameInstance gi)
   {
     gi.eventListeners.remove(this);
   }
 
   // The functions below should be overridden by subclasses for event types they care about.
   // As a rule, we should avoid passing the actual event to the receive hooks when possible.
-  public void receiveBattleEvent(BattleSummary summary){};
-  public void receiveDemolitionEvent(Unit actor, XYCoord tile){};
-  public void receiveCreateUnitEvent(Unit unit){};
-  public void receiveCaptureEvent(Unit unit, Location location){};
-  public void receiveCommanderDefeatEvent(CommanderDefeatEvent event){};
-  public void receiveLoadEvent(LoadLifecycle.LoadEvent event){};
-  public void receiveMoveEvent(MoveEvent event){};
-  public void receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){};
-  public void receiveTurnInitEvent(Commander co, int turn){};
-  public void receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){};
-  public void receiveResupplyEvent(ResupplyEvent event){};
-  public void receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath){};
-  public void receiveUnloadEvent(UnloadLifecycle.UnloadEvent event){};
-  public void receiveUnitTransformEvent(Unit unit, UnitModel oldType){};
-  public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){};
-  public void receiveWeatherChangeEvent(Weathers weather, int duration){};
-  public void receiveMapChangeEvent(MapChangeEvent event){};
-  public void receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP){};
-  public void receiveModifyFundsEvent(Commander beneficiary, int fundsDelta){};
+  default public GameEventQueue receiveBattleEvent(BattleSummary summary){ return null; };
+  default public GameEventQueue receiveDemolitionEvent(Unit actor, XYCoord tile){ return null; };
+  default public GameEventQueue receiveCreateUnitEvent(Unit unit){ return null; };
+  default public GameEventQueue receiveCaptureEvent(Unit unit, Location location){ return null; };
+  default public GameEventQueue receiveCommanderDefeatEvent(CommanderDefeatEvent event){ return null; };
+  default public GameEventQueue receiveLoadEvent(LoadLifecycle.LoadEvent event){ return null; };
+  default public GameEventQueue receiveMoveEvent(MoveEvent event){ return null; };
+  default public GameEventQueue receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){ return null; };
+  default public GameEventQueue receiveTurnInitEvent(Commander co, int turn){ return null; };
+  default public GameEventQueue receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){ return null; };
+  default public GameEventQueue receiveResupplyEvent(ResupplyEvent event){ return null; };
+  default public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath){ return null; };
+  default public GameEventQueue receiveUnloadEvent(UnloadLifecycle.UnloadEvent event){ return null; };
+  default public GameEventQueue receiveUnitTransformEvent(Unit unit, UnitModel oldType){ return null; };
+  default public GameEventQueue receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){ return null; };
+  default public GameEventQueue receiveWeatherChangeEvent(Weathers weather, int duration){ return null; };
+  default public GameEventQueue receiveMapChangeEvent(MapChangeEvent event){ return null; };
+  default public GameEventQueue receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP){ return null; };
+  default public GameEventQueue receiveModifyFundsEvent(Commander beneficiary, int fundsDelta){ return null; };
 
 }

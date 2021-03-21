@@ -32,9 +32,9 @@ public class MoveEvent implements GameEvent
   }
 
   @Override
-  public void sendToListener(GameEventListener listener)
+  public GameEventQueue sendToListener(GameEventListener listener)
   {
-    listener.receiveMoveEvent(this);
+    return listener.receiveMoveEvent(this);
   }
 
   @Override

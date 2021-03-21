@@ -25,9 +25,9 @@ public class ModifyFundsEvent implements GameEvent
   }
 
   @Override
-  public void sendToListener(GameEventListener listener)
+  public GameEventQueue sendToListener(GameEventListener listener)
   {
-    listener.receiveModifyFundsEvent(beneficiary, value);
+    return listener.receiveModifyFundsEvent(beneficiary, value);
   }
 
   @Override

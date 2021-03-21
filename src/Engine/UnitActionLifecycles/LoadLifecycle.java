@@ -161,9 +161,9 @@ public abstract class LoadLifecycle
     }
 
     @Override
-    public void sendToListener(GameEventListener listener)
+    public GameEventQueue sendToListener(GameEventListener listener)
     {
-      listener.receiveLoadEvent(this);
+      return listener.receiveLoadEvent(this);
     }
 
     @Override

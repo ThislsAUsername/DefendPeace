@@ -9,6 +9,7 @@ import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.BattleLifecycle;
 import Engine.UnitActionLifecycles.DeleteLifecycle;
 import Engine.UnitActionLifecycles.LoadLifecycle;
@@ -170,14 +171,15 @@ public class TestTransport extends TestCase
     return testPassed;
   }
 
-  private class DeathCounter extends GameEventListener
+  private class DeathCounter implements GameEventListener
   {
     private static final long serialVersionUID = 1L;
     public int count = 0;
     @Override
-    public void receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
+    public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
     {
       count++;
+      return null;
     };
   }
 

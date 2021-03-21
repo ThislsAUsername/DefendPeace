@@ -183,8 +183,9 @@ public abstract class LaunchLifecycle
     }
 
     @Override
-    public void sendToListener(GameEventListener listener)
+    public GameEventQueue sendToListener(GameEventListener listener)
     {
+      return null;
     }
 
     @Override

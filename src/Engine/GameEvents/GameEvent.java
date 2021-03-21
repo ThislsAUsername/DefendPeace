@@ -21,7 +21,7 @@ public interface GameEvent
    * to the correct receivers in GameEventListener subclasses.
    * @param listener The visitor who wishes to receive GameEvents.
    */
-  public void sendToListener(GameEventListener listener);
+  public GameEventQueue sendToListener(GameEventListener listener);
 
   /**
    * Hook for subclasses to implement the specific effects of each action type.
