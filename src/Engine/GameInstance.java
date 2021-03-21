@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import CommandingOfficers.Commander;
@@ -14,6 +15,7 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
 import Engine.GameEvents.TurnInitEvent;
+import Engine.UnitMods.StateTracker;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.MapLocation;
@@ -93,6 +95,9 @@ public class GameInstance implements Serializable
 
   // WeakHashMap isn't serializable, so we can't use Collections.newSetFromMap(new WeakHashMap<GameEventListener, Boolean>());
   public transient Set<GameEventListener> eventListeners = new HashSet<GameEventListener>();
+
+  public Map<Class<? extends StateTracker<?>>, StateTracker<?>> stateTrackers =
+      new HashMap<Class<? extends StateTracker<?>>, StateTracker<?>>();
 
   public int getActiveCOIndex()
   {
