@@ -1,8 +1,5 @@
 package CommandingOfficers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameInstance;
 import Engine.GameScenario;
@@ -11,7 +8,8 @@ import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.MapLocation;
+import Engine.UnitMods.BuildCountsTracker;
+import Engine.UnitMods.StateTracker;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
@@ -56,7 +54,7 @@ public class Cinder extends Commander
 
   private static final int PREMIUM_PER_BUILD = 1000;
 
-  private HashMap<XYCoord, Integer> buildCounts = new HashMap<>();
+  private BuildCountsTracker buildCounts;
 
   public WitchFireListener witchFireListener;
 
@@ -72,6 +70,7 @@ public class Cinder extends Commander
   public void registerForEvents(GameInstance game)
   {
     super.registerForEvents(game);
+    buildCounts = StateTracker.initialize(game, BuildCountsTracker.class);
 
     witchFireListener = new WitchFireListener(this, WitchFireAbility.WITCHFIRE_HP_COST);
     witchFireListener.registerForEvents(game);
@@ -88,74 +87,29 @@ public class Cinder extends Commander
     return coInfo;
   }
 
-  @Override
-  /** Get the list of units this commander can build from the given property type. */
-  public ArrayList<UnitModel> getShoppingList(MapLocation buyLocation)
-  {
-    setPrices(buildCounts.get(buyLocation.getCoordinates()));
-    return super.getShoppingList(buyLocation);
-  }
-
   /*
    * Cinder builds units at 8HP ready to act.
-   * To compensate for the ability to continue producing units in a single turn,
-   * the cost of units increases exponentially for repeated purchases from a single property.
    */
   @Override
   public GameEventQueue receiveCreateUnitEvent(Unit unit)
   {
     XYCoord buildCoords = new XYCoord(unit.x, unit.y);
-    if( this == unit.CO && buildCounts.containsKey(buildCoords) )
+    if( this == unit.CO && myView.isLocationValid(buildCoords) )
     {
-      buildCounts.put(buildCoords, buildCounts.get(buildCoords) + 1);
-      setPrices(0);
-
       unit.alterHP(-2);
       unit.isTurnOver = false;
     }
     return null;
   }
 
-  /*
-   * Purchase price problems reset at the start of turn.
+  /**
+   * To compensate for the ability to continue producing units in a single turn,
+   * the cost of units increases for repeated purchases from a single property.
    */
   @Override
-  public GameEventQueue initTurn(MapMaster map)
+  public int getPriceOffset(XYCoord coord, UnitModel um, int currentPrice)
   {
-    // If we haven't initialized our buildable locations yet, do so.
-    if( buildCounts.size() < 1 )
-    {
-      for( int x = 0; x < map.mapWidth; ++x )
-        for( int y = 0; y < map.mapHeight; ++y )
-        {
-          MapLocation loc = map.getLocation(x, y);
-          if( loc.isCaptureable() ) // if we can't capture it, we can't build from it
-            buildCounts.put(loc.getCoordinates(), 0);
-        }
-    }
-    else // If we're initialized already, just reset our build counts
-      for( XYCoord xyc : buildCounts.keySet() )
-      {
-        buildCounts.put(xyc, 0);
-      }
-
-    setPrices(0);
-    return super.initTurn(map);
-  }
-
-  @Override
-  public void endTurn()
-  {
-    setPrices(0);
-    super.endTurn();
-  }
-
-  public void setPrices(int repetitons)
-  {
-    for( UnitModel um : unitModels )
-    {
-      um.moneyCostAdjustment = repetitons*PREMIUM_PER_BUILD;
-    }
+    return buildCounts.getCountFor(this, coord)*PREMIUM_PER_BUILD;
   }
 
   /*

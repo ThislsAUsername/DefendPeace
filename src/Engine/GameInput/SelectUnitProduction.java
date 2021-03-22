@@ -95,7 +95,7 @@ class SelectUnitProduction extends GameInputState<String>
       }
       else
       {
-        price = Integer.toString(model.getCost());
+        price = Integer.toString(model.getBuyCost(coord));
       }
 
       // Find the difference between the max length and current length

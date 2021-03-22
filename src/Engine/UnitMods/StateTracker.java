@@ -7,24 +7,26 @@ import Engine.GameEvents.GameEventListener;
  * This class exists to act as a "singleton with respect to a GameInstance".
  * <p>The intended use case is subclasses that track certain activities globally for use in UnitModifiers.
  */
-public abstract class StateTracker<T extends StateTracker<T>> extends GameEventListener
+public abstract class StateTracker<T extends StateTracker<T>> implements GameEventListener
 {
   private static final long serialVersionUID = 1L;
   public final Class<T> key; // TODO: Verify ref-compare works on save-load
   public final GameInstance game;
 
-  private StateTracker(Class<T> key, GameInstance gi)
+  protected StateTracker(Class<T> key, GameInstance gi)
   {
     this.key = key;
     this.game = gi;
   }
 
-  public static <T extends StateTracker<T>> StateTracker<T> initialize(GameInstance gi, Class<T> key)
+  public static <T extends StateTracker<T>> T initialize(GameInstance gi, Class<T> key)
   {
     if( !gi.stateTrackers.containsKey(key) )
       try
       {
-        gi.stateTrackers.put(key, key.getDeclaredConstructor(Class.class, GameInstance.class).newInstance(key, gi));
+        T instance = key.getDeclaredConstructor(Class.class, GameInstance.class).newInstance(key, gi);
+        gi.stateTrackers.put(key, instance);
+        instance.registerForEvents(gi);
       }
       catch (Exception e)
       {
@@ -32,6 +34,8 @@ public abstract class StateTracker<T extends StateTracker<T>> extends GameEventL
         System.exit(-1);
       }
 
-    return key.cast(gi.stateTrackers.get(key));
+    return key.cast(gi.stateTrackers.get(key)).item();
   }
+
+  protected abstract T item();
 }

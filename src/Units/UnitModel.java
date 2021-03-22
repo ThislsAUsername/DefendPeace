@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import CommandingOfficers.Commander;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -61,6 +62,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
 
   public String name;
   public long role;
+  public Commander CO;
   protected int moneyCost;
   public double abilityPowerValue;
   public int maxAmmo;
@@ -369,7 +371,11 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   @Override
   public List<UnitModifier> getModifiers()
   {
-    return new ArrayList<UnitModifier>(unitMods);
+    ArrayList<UnitModifier> output = new ArrayList<UnitModifier>();
+    // TODO: consider a null check here
+    output.addAll(CO.getModifiers());
+    output.addAll(unitMods);
+    return output;
   }
 
   @Override

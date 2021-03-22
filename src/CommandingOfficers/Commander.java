@@ -83,8 +83,11 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
     // Fetch our fieldable unit types from the rules
     GameReadyModels GRMs = rules.unitModelScheme.getGameReadyModels();
     unitProductionByTerrain = GRMs.shoppingList;
-    for (UnitModel um : GRMs.unitModels)
+    for( UnitModel um : GRMs.unitModels )
+    {
       unitModels.add(um);
+      um.CO = this;
+    }
 
     modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
@@ -116,6 +119,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
    */
   public GameEventQueue initTurn(MapMaster map)
   {
+    modifyAbilityPower(42);
     myView.resetFog();
     myActiveAbilityName = "";
 

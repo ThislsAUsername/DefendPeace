@@ -384,7 +384,6 @@ public class Unit implements Serializable, UnitModList
   public List<UnitModifier> getModifiers()
   {
     ArrayList<UnitModifier> output = new ArrayList<UnitModifier>();
-    output.addAll(CO.getModifiers());
     output.addAll(model.getModifiers());
     output.addAll(unitMods);
     return output;
