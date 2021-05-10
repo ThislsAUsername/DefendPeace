@@ -19,7 +19,7 @@ import Engine.Combat.StrikeParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
-import Terrain.MapFog;
+import Terrain.MapPerspective;
 import UI.GameOverlay;
 import UI.MapView;
 import UI.SlidingValue;
@@ -199,7 +199,7 @@ public class SpriteMapView extends MapView
    */
   private BufferedImage renderMap()
   {
-    MapFog gameMap = getDrawableMap(myGame);
+    MapPerspective gameMap = getDrawableMap(myGame);
     
     // We draw in three stages. First, we draw the map/units onto a canvas which is the size
     // of the entire map; then we copy the visible section of that canvas onto a screen-sized

@@ -18,7 +18,7 @@ import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
-import Terrain.MapFog;
+import Terrain.MapPerspective;
 
 public class GameInstance implements Serializable
 {
@@ -71,7 +71,7 @@ public class GameInstance implements Serializable
       commanders[i].money = gameScenario.rules.startingFunds;
       if( commanders[i].HQLocation != null )
       {
-        commanders[i].myView = new MapFog(map, commanders[i]);
+        commanders[i].myView = new MapPerspective(map, commanders[i]);
         commanders[i].myView.resetFog();
         playerCursors.put(i, commanders[i].HQLocation);
       }

@@ -9,7 +9,7 @@ import Engine.Utils;
 import Engine.XYCoord;
 import Units.Unit;
 
-public class MapFog extends GameMap
+public class MapPerspective extends GameMap
 {
   private static final long serialVersionUID = 1L;
   MapMaster master;
@@ -18,7 +18,7 @@ public class MapFog extends GameMap
   private Commander[][] lastOwnerSeen;
   private ArrayList<Unit> confirmedVisibles;
 
-  public MapFog(MapMaster pMaster, Commander pViewer)
+  public MapPerspective(MapMaster pMaster, Commander pViewer)
   {
     super(pMaster.mapWidth, pMaster.mapHeight);
     master = pMaster;

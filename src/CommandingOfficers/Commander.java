@@ -31,7 +31,7 @@ import Engine.UuidGenerator;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
-import Terrain.MapFog;
+import Terrain.MapPerspective;
 import Terrain.TerrainType;
 import UI.GameOverlay;
 import UI.UIUtils.Faction;
@@ -45,7 +45,7 @@ public class Commander implements GameEventListener, Serializable
   
   public final CommanderInfo coInfo;
   public final GameScenario.GameRules gameRules;
-  public MapFog myView;
+  public MapPerspective myView;
   public ArrayList<Unit> units;
   public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
   public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;

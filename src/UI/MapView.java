@@ -13,7 +13,7 @@ import Engine.Combat.StrikeParams;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.TeleportEvent;
-import Terrain.MapFog;
+import Terrain.MapPerspective;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
 
@@ -23,7 +23,7 @@ public abstract class MapView implements IView
 
   protected MapController mapController = null;
   
-  protected MapFog foggedMap;
+  protected MapPerspective foggedMap;
 
   public void setController(MapController controller)
   {
@@ -118,7 +118,7 @@ public abstract class MapView implements IView
     return null;
   }
 
-  protected MapFog getDrawableMap(GameInstance myGame)
+  protected MapPerspective getDrawableMap(GameInstance myGame)
   {
     // Here are the fog-drawing rules. If there are:
     //   zero humans - spectating - draw everything the current player sees.
@@ -126,7 +126,7 @@ public abstract class MapView implements IView
     //   2+ humans - player vs player - draw what the current player sees, IFF the player is human.
 
     // Humans need to see what they can see.
-    MapFog gameMap = myGame.activeCO.myView;
+    MapPerspective gameMap = myGame.activeCO.myView;
     if( myGame.activeCO.isAI() ) // If it's not a human, figure out what to show.
     {
       int numHumans = countHumanPlayers(myGame);
@@ -140,7 +140,7 @@ public abstract class MapView implements IView
         // Hide everything during the AI's turn so the playing field is level.
         if( null == foggedMap )
         {
-          foggedMap = new MapFog(myGame.gameMap, null);
+          foggedMap = new MapPerspective(myGame.gameMap, null);
           foggedMap.resetFog();
         }
         gameMap = foggedMap;
@@ -170,9 +170,9 @@ public abstract class MapView implements IView
    * Returns the map owned by the first human Commander found.
    * Intended to be used when there is only one human player.
    */
-  protected MapFog getHumanPlayerMap(GameInstance myGame)
+  protected MapPerspective getHumanPlayerMap(GameInstance myGame)
   {
-    MapFog map = null;
+    MapPerspective map = null;
 
     for( Commander co : myGame.commanders )
     {
