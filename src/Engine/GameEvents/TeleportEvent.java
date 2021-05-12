@@ -62,9 +62,9 @@ public class TeleportEvent implements GameEvent
   }
 
   @Override
-  public void sendToListener(GameEventListener listener)
+  public GameEventQueue sendToListener(GameEventListener listener)
   {
-    listener.receiveTeleportEvent(unit, unitStart, unitDestination);
+    return listener.receiveTeleportEvent(unit, unitStart, unitDestination);
   }
 
   @Override

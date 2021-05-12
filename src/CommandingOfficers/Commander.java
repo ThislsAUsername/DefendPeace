@@ -29,9 +29,9 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UuidGenerator;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
-import Terrain.MapWindow;
+import Terrain.MapPerspective;
 import Terrain.TerrainType;
 import UI.GameOverlay;
 import UI.UIUtils.Faction;
@@ -39,13 +39,13 @@ import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModelScheme.GameReadyModels;
 
-public class Commander extends GameEventListener implements Serializable
+public class Commander implements GameEventListener, Serializable
 {
   private static final long serialVersionUID = 1L;
   
   public final CommanderInfo coInfo;
   public final GameScenario.GameRules gameRules;
-  public MapWindow myView;
+  public MapPerspective myView;
   public ArrayList<Unit> units;
   public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
   public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
@@ -174,12 +174,6 @@ public class Commander extends GameEventListener implements Serializable
   }
 
   /**
-   * This is called after every GameAction, and between turns, and allows Commanders to inject
-   * events that don't arise via normal gameplay. Most Commanders should not need to override this.
-   */
-  public void pollForEvents(GameEventQueue eventsOut) {}
-
-  /**
    * @return whether these COs would like to kill each other
    */
   public boolean isEnemy(Commander other)
@@ -265,7 +259,7 @@ public class Commander extends GameEventListener implements Serializable
   }
 
   /** Get the list of units this commander can build from the given property type. */
-  public ArrayList<UnitModel> getShoppingList(Location buyLocation)
+  public ArrayList<UnitModel> getShoppingList(MapLocation buyLocation)
   {
     return (unitProductionByTerrain.get(buyLocation.getEnvironment().terrainType) != null) ? unitProductionByTerrain.get(buyLocation.getEnvironment().terrainType)
         : new ArrayList<UnitModel>();
@@ -380,16 +374,17 @@ public class Commander extends GameEventListener implements Serializable
    * Track unit deaths, so I know not to be threatened by them.
    */
   @Override
-  public void receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
+  public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
   {
     threatsToOverlay.remove(victim);
+    return null;
   }
 
   /**
    * Track battles that happen, and get ability power based on combat this CO is in.
    */
   @Override
-  public void receiveBattleEvent(final BattleSummary summary)
+  public GameEventQueue receiveBattleEvent(final BattleSummary summary)
   {
     // We only care who the units belong to, not who picked the fight. 
     Unit minion = null;
@@ -428,16 +423,17 @@ public class Commander extends GameEventListener implements Serializable
 
       modifyAbilityPower(power);
     }
+    return null;
   }
 
   /**
    * Track mass damage done to my units, and get ability power based on it.
    */
   @Override
-  public void receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP)
+  public GameEventQueue receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP)
   {
     if( this == attacker )
-      return; // Punching yourself shouldn't make you angry
+      return null; // Punching yourself shouldn't make you angry
 
     for( Entry<Unit, Integer> damageEntry : lostHP.entrySet() )
     {
@@ -453,6 +449,7 @@ public class Commander extends GameEventListener implements Serializable
         modifyAbilityPower(power);
       }
     }
+    return null;
   }
 
   public void setAIController(AIController ai)

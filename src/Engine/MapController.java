@@ -3,14 +3,13 @@ package Engine;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import CommandingOfficers.Commander;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.TurnInitEvent;
 import Engine.GameInput.GameInputHandler;
-import Terrain.Location;
+import Terrain.MapLocation;
 import UI.CO_InfoController;
 import UI.GameStatsController;
 import UI.InGameMenu;
@@ -211,7 +210,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         if( !myGameInputHandler.isTargeting() )
         {
           // If we hit BACK while over a unit, add it to the threat overlay for this CO
-          Location loc = myGame.gameMap.getLocation(myGame.getCursorCoord());
+          MapLocation loc = myGame.gameMap.getLocation(myGame.getCursorCoord());
           Unit resident = loc.getResident();
           if( null != resident )
           {
@@ -391,7 +390,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case PATH_SELECT:
         break; // no special behavior
       case MENU_SELECT:
-        Path path = myGameInputHandler.myStateData.path;
+        GamePath path = myGameInputHandler.myStateData.path;
         if( null != path && path.getPathLength() > 0 )
         {
           myGame.setCursorLocation(path.getEnd().GetCoordinates());
@@ -520,21 +519,11 @@ public class MapController implements IController, GameInputHandler.StateChanged
       event.performEvent(myGame.gameMap);
 
       // Now that the event has been completed, let the world know.
-      GameEventListener.publishEvent(event, myGame);
-    }
-
-    if( animEventQueueIsEmpty )
-    {
-      for( Commander co : myGame.commanders )
+      GameEventQueue events = GameEventListener.publishEvent(event, myGame);
+      if( !events.isEmpty() )
       {
-        GameEventQueue events = new GameEventQueue();
-        co.pollForEvents(events);
-        if( !events.isEmpty() )
-        {
-          animEventQueueIsEmpty = false;
-          myView.animate(events);
-          break; // We'll get the next commander the next time we hit this block.
-        }
+        animEventQueueIsEmpty = false;
+        myView.animate(events);
       }
     }
 
@@ -636,7 +625,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     return myGameInputHandler.getUnitCoord();
   }
 
-  public Path getContemplatedMove()
+  public GamePath getContemplatedMove()
   {
     return myGameInputHandler.myStateData.path;
   }

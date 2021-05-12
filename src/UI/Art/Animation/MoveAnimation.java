@@ -2,7 +2,7 @@ package UI.Art.Animation;
 
 import java.awt.Graphics;
 
-import Engine.Path;
+import Engine.GamePath;
 import Engine.XYCoord;
 import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import Units.Unit;
@@ -11,10 +11,10 @@ public class MoveAnimation extends BaseUnitActionAnimation
 {
   private final long maxTime = 250;
 
-  private final Path path;
+  private final GamePath path;
   private final double tilesPerMs;
 
-  public MoveAnimation(int tileSize, Unit actor, Path path)
+  public MoveAnimation(int tileSize, Unit actor, GamePath path)
   {
     super(tileSize, actor, null);
     this.path = path;

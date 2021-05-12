@@ -42,9 +42,9 @@ public class MassDamageEvent implements GameEvent
   }
 
   @Override
-  public void sendToListener(GameEventListener listener)
+  public GameEventQueue sendToListener(GameEventListener listener)
   {
-    listener.receiveMassDamageEvent(attacker, victims);
+    return listener.receiveMassDamageEvent(attacker, victims);
   }
 
   @Override

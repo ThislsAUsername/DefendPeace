@@ -3,13 +3,13 @@ package Terrain;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
-import Engine.Path;
-import Engine.Path.PathNode;
+import Engine.GamePath;
+import Engine.GamePath.PathNode;
 import Engine.Utils;
 import Engine.XYCoord;
 import Units.Unit;
 
-public class MapWindow extends GameMap
+public class MapPerspective extends GameMap
 {
   private static final long serialVersionUID = 1L;
   MapMaster master;
@@ -18,7 +18,7 @@ public class MapWindow extends GameMap
   private Commander[][] lastOwnerSeen;
   private ArrayList<Unit> confirmedVisibles;
 
-  public MapWindow(MapMaster pMaster, Commander pViewer)
+  public MapPerspective(MapMaster pMaster, Commander pViewer)
   {
     super(pMaster.mapWidth, pMaster.mapHeight);
     master = pMaster;
@@ -84,26 +84,26 @@ public class MapWindow extends GameMap
     return getLocation(w, h).getResident();
   }
 
-  /** Returns the Location at the specified location, or null if that Location does not exist. */
+  /** Returns the MapLocation at the specified location, or null if that MapLocation does not exist. */
   @Override
-  public Location getLocation(XYCoord location)
+  public MapLocation getLocation(XYCoord location)
   {
     if (null != location)
       return getLocation(location.xCoord, location.yCoord);
     return null;
   }
 
-  /** Returns the Location at the specified location, or null if that Location does not exist. */
+  /** Returns the MapLocation at the specified location, or null if that MapLocation does not exist. */
   @Override
-  public Location getLocation(int x, int y)
+  public MapLocation getLocation(int x, int y)
   {
     XYCoord coord = new XYCoord(x, y);
-    Location masterLoc = master.getLocation(coord);
-    Location returnLoc = masterLoc;
+    MapLocation masterLoc = master.getLocation(coord);
+    MapLocation returnLoc = masterLoc;
     if( isLocationFogged(coord) || // If we can't see anything...
         (isLocationEmpty(coord) && !master.isLocationEmpty(coord)) ) // ...or what's there is hidden
     {
-      returnLoc = new Location(returnLoc.getEnvironment(), coord);
+      returnLoc = new MapLocation(returnLoc.getEnvironment(), coord);
       returnLoc.setHighlight(masterLoc.isHighlightSet());
       returnLoc.setOwner( lastOwnerSeen[x][y] );
     }
@@ -130,14 +130,14 @@ public class MapWindow extends GameMap
     return isLocationEmpty(null, x, y);
   }
 
-  /** Returns true if no unit (excluding 'unit') is in the specified Location. */
+  /** Returns true if no unit (excluding 'unit') is in the specified MapLocation. */
   @Override
   public boolean isLocationEmpty(Unit unit, XYCoord coords)
   {
     return isLocationEmpty(unit, coords.xCoord, coords.yCoord);
   }
 
-  /** Returns true if no unit (excluding 'unit') is in the specified Location. */
+  /** Returns true if no unit (excluding 'unit') is in the specified MapLocation. */
   @Override
   public boolean isLocationEmpty(Unit unit, int x, int y)
   {
@@ -204,7 +204,7 @@ public class MapWindow extends GameMap
         for( XYCoord xyc : co.ownedProperties )
         {
           revealFog(xyc, true); // Properties can see themselves and anything on them
-          Location loc = master.getLocation(xyc);
+          MapLocation loc = master.getLocation(xyc);
           for( XYCoord coord : Utils.findVisibleLocations(this, loc.getCoordinates(), Environment.PROPERTY_VISION_RANGE) )
           {
             revealFog(coord, false);
@@ -234,7 +234,7 @@ public class MapWindow extends GameMap
   }
 
   @Override
-  public void revealFog(Unit scout, Path movepath)
+  public void revealFog(Unit scout, GamePath movepath)
   {
     if (null == viewer)
       return;
@@ -257,7 +257,7 @@ public class MapWindow extends GameMap
   
   public void revealFog(XYCoord coord, boolean piercing)
   {
-    Location loc = master.getLocation(coord);
+    MapLocation loc = master.getLocation(coord);
     isFogged[coord.xCoord][coord.yCoord] = false;
     lastOwnerSeen[coord.xCoord][coord.yCoord] = loc.getOwner();
     if (piercing && loc.getResident() != null)

@@ -6,7 +6,7 @@ import CommandingOfficers.Strong;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.UnitActionLifecycles.WaitLifecycle;
@@ -52,7 +52,7 @@ public class TestUnitMovement extends TestCase
   {
     // Add a Unit and try to move it.
     Unit mover = addUnit(testMap, testCo1, UnitModel.TROOP, 4, 4);
-    Path mvPath = Utils.findShortestPath(mover, 4, 4, testMap);
+    GamePath mvPath = Utils.findShortestPath(mover, 4, 4, testMap);
 
     // A path from here to here should still have one path node.
     boolean testPassed = (mvPath.getPathLength() == 1);
@@ -68,7 +68,7 @@ public class TestUnitMovement extends TestCase
     GameAction nullPath = new WaitLifecycle.WaitAction(mover, null);
     testPassed &= validate(nullPath.getEvents(testMap).size() == 0, "    A WaitAction with a null path should have no events!");
     mover.initTurn(testMap);
-    GameAction emptyPath = new WaitLifecycle.WaitAction(mover, new Path());
+    GameAction emptyPath = new WaitLifecycle.WaitAction(mover, new GamePath());
     testPassed &= validate(emptyPath.getEvents(testMap).size() == 0,
         "    A WaitAction with an empty path should have no events!");
     mover.initTurn(testMap);
@@ -143,7 +143,7 @@ public class TestUnitMovement extends TestCase
     // We don't need any units, since whether fuel drain properly applies to units is handled by the other two tests.
 
     // A 7-space movement across nothing but grass.
-    Path grassPath = new Path();
+    GamePath grassPath = new GamePath();
     grassPath.addWaypoint(3, 7);
     grassPath.addWaypoint(4, 7);
     grassPath.addWaypoint(5, 7);
@@ -154,7 +154,7 @@ public class TestUnitMovement extends TestCase
     grassPath.addWaypoint(10, 7);
 
     // A 4-space movement across 1 road, 1 plain, 1 forest, and 1 city
-    Path multiPath = new Path();
+    GamePath multiPath = new GamePath();
     multiPath.addWaypoint(5, 6);
     multiPath.addWaypoint(4, 6);
     multiPath.addWaypoint(3, 6);

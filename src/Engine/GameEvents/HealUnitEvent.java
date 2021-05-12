@@ -27,9 +27,10 @@ public class HealUnitEvent implements GameEvent
   }
 
   @Override
-  public void sendToListener(GameEventListener listener)
+  public GameEventQueue sendToListener(GameEventListener listener)
   {
     // TODO: Consider making all repairs/healing go through this event before making a listen event for this
+    return null;
   }
 
   @Override

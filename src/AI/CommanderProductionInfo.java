@@ -9,7 +9,7 @@ import java.util.Set;
 import CommandingOfficers.Commander;
 import Engine.XYCoord;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
@@ -25,7 +25,7 @@ public class CommanderProductionInfo
 {
   public Commander myCo;
   public Set<UnitModel> availableUnitModels;
-  public Set<Location> availableProperties;
+  public Set<MapLocation> availableProperties;
   public Map<Terrain.TerrainType, Integer> propertyCounts;
   public Map<UnitModel, Set<TerrainType>> modelToTerrainMap;
 
@@ -38,13 +38,13 @@ public class CommanderProductionInfo
     // Figure out what unit types we can purchase with our available properties.
     myCo = co;
     availableUnitModels = new HashSet<UnitModel>();
-    availableProperties = new HashSet<Location>();
+    availableProperties = new HashSet<MapLocation>();
     propertyCounts = new HashMap<Terrain.TerrainType, Integer>();
     modelToTerrainMap = new HashMap<UnitModel, Set<TerrainType>>();
 
     for( XYCoord xyc : co.ownedProperties )
     {
-      Location loc = co.myView.getLocation(xyc);
+      MapLocation loc = co.myView.getLocation(xyc);
       Unit blocker = loc.getResident();
       if( null == blocker
           || (includeFriendlyOccupied && co == blocker.CO && !blocker.isTurnOver) )
@@ -76,11 +76,11 @@ public class CommanderProductionInfo
   /**
    * Return a location that can build the given unitModel, or null if none remains.
    */
-  public Location getLocationToBuild(UnitModel model)
+  public MapLocation getLocationToBuild(UnitModel model)
   {
     Set<TerrainType> desiredTerrains = modelToTerrainMap.get(model);
-    Location location = null;
-    for( Location loc : availableProperties )
+    MapLocation location = null;
+    for( MapLocation loc : availableProperties )
     {
       if( desiredTerrains.contains(loc.getEnvironment().terrainType) )
       {
@@ -94,7 +94,7 @@ public class CommanderProductionInfo
   /**
    * Remove the given location from further consideration, even if it is still available.
    */
-  public void removeBuildLocation(Location loc)
+  public void removeBuildLocation(MapLocation loc)
   {
     availableProperties.remove(loc);
     TerrainType terrain = loc.getEnvironment().terrainType;

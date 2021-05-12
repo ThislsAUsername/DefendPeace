@@ -2,7 +2,7 @@ package Engine.UnitActionLifecycles;
 
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -26,7 +26,7 @@ public abstract class DeleteLifecycle
     }
 
     @Override
-    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
       if( moveLocation.equals(actor.x, actor.y) )

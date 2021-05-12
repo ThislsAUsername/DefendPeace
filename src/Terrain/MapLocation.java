@@ -10,7 +10,7 @@ import Units.ITargetable;
 import Units.Unit;
 import Units.WeaponModel;
 
-public class Location implements Serializable, ITargetable
+public class MapLocation implements Serializable, ITargetable
 {
   private static final long serialVersionUID = 1L;
   private Environment environs = null;
@@ -67,7 +67,7 @@ public class Location implements Serializable, ITargetable
   }
 
   /**
-   * @return true if this Location has an ownable environment, false else.
+   * @return true if this MapLocation has an ownable environment, false else.
    */
   public boolean isCaptureable()
   {
@@ -90,7 +90,7 @@ public class Location implements Serializable, ITargetable
     return highlightSet;
   }
 
-  public Location(Environment environment, XYCoord coordinates)
+  public MapLocation(Environment environment, XYCoord coordinates)
   {
     environs = environment;
     owner = null;

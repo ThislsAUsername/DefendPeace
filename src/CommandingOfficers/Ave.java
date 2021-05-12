@@ -24,7 +24,7 @@ import Engine.GameEvents.MassDamageEvent;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
@@ -763,7 +763,7 @@ public class Ave extends Commander
     }
   }
 
-  private static class CitySnowifier extends GameEventListener
+  private static class CitySnowifier implements GameEventListener
   {
     private static final long serialVersionUID = 1L;
     Ave Ave;
@@ -772,14 +772,19 @@ public class Ave extends Commander
       Ave = cmdr;
     }
     @Override
-    public void receiveCaptureEvent(Unit unit, Location location)
+    public GameEventQueue receiveCaptureEvent(Unit unit, MapLocation location)
     {
+      GameEventQueue returnEvents = new GameEventQueue();
+
       if( unit.CO == Ave && (location.getOwner() == Ave) )
       {
-        // Just mark the tile as "snowy" until the next turnInit(), since we can't do a MapChangeEvent from here.
         XYCoord where = location.getCoordinates();
         Ave.snowMap[where.xCoord][where.yCoord] += SNOW_THRESHOLD;
+        returnEvents.add(
+            new MapChangeEvent( where, Environment.getTile(location.getEnvironment().terrainType, Weathers.SNOW) )
+            );
       }
+      return returnEvents;
     }
   }
 }

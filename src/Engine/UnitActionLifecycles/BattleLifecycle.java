@@ -6,7 +6,7 @@ import java.util.HashSet;
 
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -19,10 +19,9 @@ import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
-import Engine.GameEvents.UnitDieEvent;
 import Terrain.Environment;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import UI.MapView;
@@ -37,7 +36,7 @@ public abstract class BattleLifecycle
     private static final long serialVersionUID = 1L;
 
     @Override
-    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
@@ -95,18 +94,18 @@ public abstract class BattleLifecycle
 
   public static class BattleAction extends GameAction
   {
-    private Path movePath;
+    private GamePath movePath;
     private XYCoord moveCoord = null;
     private XYCoord attackLocation = null;
     private Unit attacker;
     private Unit defender;
 
-    public BattleAction(GameMap gameMap, Unit actor, Path path, int targetX, int targetY)
+    public BattleAction(GameMap gameMap, Unit actor, GamePath path, int targetX, int targetY)
     {
       this(gameMap, actor, path, new XYCoord(targetX, targetY));
     }
 
-    public BattleAction(GameMap gameMap, Unit actor, Path path, XYCoord atkLoc)
+    public BattleAction(GameMap gameMap, Unit actor, GamePath path, XYCoord atkLoc)
     {
       movePath = path;
       attacker = actor;
@@ -236,13 +235,13 @@ public abstract class BattleLifecycle
 
   public static class DemolitionAction extends GameAction
   {
-    private Path movePath;
+    private GamePath movePath;
     private XYCoord moveCoord = null;
     private XYCoord attackLocation = null;
     private Unit attacker;
-    private Location target;
+    private MapLocation target;
 
-    public DemolitionAction(GameMap gameMap, Unit actor, Path path, XYCoord atkLoc)
+    public DemolitionAction(GameMap gameMap, Unit actor, GamePath path, XYCoord atkLoc)
     {
       movePath = path;
       attacker = actor;
@@ -364,7 +363,7 @@ public abstract class BattleLifecycle
     private final BattleSummary battleInfo;
     private final XYCoord defenderCoords;
 
-    public BattleEvent(Unit attacker, Unit defender, Path path, MapMaster map)
+    public BattleEvent(Unit attacker, Unit defender, GamePath path, MapMaster map)
     {
       boolean attackerMoved = path.getPathLength() > 1;
       // Calculate the result of the battle immediately. This will allow us to plan the animation.
@@ -397,9 +396,9 @@ public abstract class BattleLifecycle
     }
 
     @Override
-    public void sendToListener(GameEventListener listener)
+    public GameEventQueue sendToListener(GameEventListener listener)
     {
-      listener.receiveBattleEvent(battleInfo);
+      return listener.receiveBattleEvent(battleInfo);
     }
 
     @Override
@@ -436,9 +435,9 @@ public abstract class BattleLifecycle
   {
     private final StrikeParams result;
     private final int percentDamage;
-    private final Location target;
+    private final MapLocation target;
 
-    public DemolitionEvent(Unit attacker, Location target, Path path, MapMaster map)
+    public DemolitionEvent(Unit attacker, MapLocation target, GamePath path, MapMaster map)
     {
       this.target = target;
       // Calculate the result of the battle immediately. This will allow us to plan the animation.
@@ -451,7 +450,7 @@ public abstract class BattleLifecycle
       return result.attacker.body;
     }
 
-    public Location getDefender()
+    public MapLocation getDefender()
     {
       return target;
     }
@@ -467,9 +466,9 @@ public abstract class BattleLifecycle
     }
 
     @Override
-    public void sendToListener(GameEventListener listener)
+    public GameEventQueue sendToListener(GameEventListener listener)
     {
-      listener.receiveDemolitionEvent(result.attacker.body, target.getCoordinates());
+      return listener.receiveDemolitionEvent(result.attacker.body, target.getCoordinates());
     }
 
     @Override

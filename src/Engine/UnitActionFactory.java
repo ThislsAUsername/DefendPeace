@@ -19,11 +19,11 @@ public abstract class UnitActionFactory implements Serializable
 {
   private static final long serialVersionUID = 1L;
 
-  public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor)
+  public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor)
   {
     return getPossibleActions(map, movePath, actor, false);
   }
-  public abstract GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident);
+  public abstract GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident);
   public abstract String name();
   public boolean shouldConfirm = false;
 

@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import Engine.Path;
+import Engine.GamePath;
 import Engine.XYCoord;
 import Engine.Combat.StrikeParams.BattleParams;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.WeaponModel;
@@ -43,7 +43,7 @@ public class CombatEngine
     return simulateBattleResults(attacker, defender, map, moveCoord.xCoord, moveCoord.yCoord);
   }
 
-  public static StrikeParams calculateTerrainDamage( Unit attacker, Path path, Location target, GameMap map )
+  public static StrikeParams calculateTerrainDamage( Unit attacker, GamePath path, MapLocation target, GameMap map )
   {
     int battleRange = path.getEndCoord().getDistance(target.getCoordinates());
     boolean attackerMoved = path.getPathLength() > 1;

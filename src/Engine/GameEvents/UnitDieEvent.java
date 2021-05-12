@@ -26,9 +26,9 @@ public class UnitDieEvent implements GameEvent
   }
 
   @Override
-  public void sendToListener(GameEventListener listener)
+  public GameEventQueue sendToListener(GameEventListener listener)
   {
-    listener.receiveUnitDieEvent( unit, where, hpBeforeDeath );
+    return listener.receiveUnitDieEvent( unit, where, hpBeforeDeath );
   }
 
   @Override

@@ -2,7 +2,7 @@ package UI;
 
 import CommandingOfficers.Commander;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Units.Unit;
 
 /** Convenience class to collate and format visible game state info for a given CO */
@@ -27,7 +27,7 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
     {
       for( int h = 0; h < map.mapHeight; ++h )
       {
-        Location loc = map.getLocation(w, h);
+        MapLocation loc = map.getLocation(w, h);
         if( loc.isProfitable() && loc.getOwner() == viewed )
         {
           income += viewed.gameRules.incomePerCity + viewed.incomeAdjustment;

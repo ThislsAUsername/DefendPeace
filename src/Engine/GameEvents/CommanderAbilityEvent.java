@@ -24,9 +24,10 @@ public class CommanderAbilityEvent implements GameEvent
   }
 
   @Override
-  public void sendToListener(GameEventListener listener)
+  public GameEventQueue sendToListener(GameEventListener listener)
   {
     // TODO Auto-generated method stub
+    return null;
   }
 
   @Override

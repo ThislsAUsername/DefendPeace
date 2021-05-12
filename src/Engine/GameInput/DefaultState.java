@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import Engine.XYCoord;
 import Engine.GameInput.GameInputHandler.InputType;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -30,7 +30,7 @@ class DefaultState extends GameInputState<XYCoord>
   public GameInputState<?> select(XYCoord coord)
   {
     GameInputState<?> next = this;
-    Location loc = myStateData.gameMap.getLocation(coord);
+    MapLocation loc = myStateData.gameMap.getLocation(coord);
     Unit resident = loc.getResident();
     if( null != resident
         && (!resident.isTurnOver    // If it's our unit and the unit is ready to go.

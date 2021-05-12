@@ -11,8 +11,7 @@ import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
-import Engine.GameEvents.UnitDieEvent;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
@@ -59,8 +58,6 @@ public class Cinder extends Commander
 
   private HashMap<XYCoord, Integer> buildCounts = new HashMap<>();
 
-  private GameEventQueue pollEvents = new GameEventQueue();
-
   public WitchFireListener witchFireListener;
 
   public Cinder(GameScenario.GameRules rules)
@@ -93,7 +90,7 @@ public class Cinder extends Commander
 
   @Override
   /** Get the list of units this commander can build from the given property type. */
-  public ArrayList<UnitModel> getShoppingList(Location buyLocation)
+  public ArrayList<UnitModel> getShoppingList(MapLocation buyLocation)
   {
     setPrices(buildCounts.get(buyLocation.getCoordinates()));
     return super.getShoppingList(buyLocation);
@@ -105,7 +102,7 @@ public class Cinder extends Commander
    * the cost of units increases exponentially for repeated purchases from a single property.
    */
   @Override
-  public void receiveCreateUnitEvent(Unit unit)
+  public GameEventQueue receiveCreateUnitEvent(Unit unit)
   {
     XYCoord buildCoords = new XYCoord(unit.x, unit.y);
     if( this == unit.CO && buildCounts.containsKey(buildCoords) )
@@ -116,6 +113,7 @@ public class Cinder extends Commander
       unit.alterHP(-2);
       unit.isTurnOver = false;
     }
+    return null;
   }
 
   /*
@@ -130,7 +128,7 @@ public class Cinder extends Commander
       for( int x = 0; x < map.mapWidth; ++x )
         for( int y = 0; y < map.mapHeight; ++y )
         {
-          Location loc = map.getLocation(x, y);
+          MapLocation loc = map.getLocation(x, y);
           if( loc.isCaptureable() ) // if we can't capture it, we can't build from it
             buildCounts.put(loc.getCoordinates(), 0);
         }
@@ -150,13 +148,6 @@ public class Cinder extends Commander
   {
     setPrices(0);
     super.endTurn();
-  }
-
-  @Override
-  public void pollForEvents(GameEventQueue eventsOut)
-  {
-    eventsOut.addAll(pollEvents);
-    pollEvents.clear();
   }
 
   public void setPrices(int repetitons)
@@ -234,7 +225,7 @@ public class Cinder extends Commander
     }
   }
 
-  private static class WitchFireListener extends GameEventListener
+  private static class WitchFireListener implements GameEventListener
   {
     private static final long serialVersionUID = 1L;
     private Cinder myCommander = null;
@@ -248,10 +239,11 @@ public class Cinder extends Commander
     }
 
     @Override
-    public void receiveBattleEvent(BattleSummary battleInfo)
+    public GameEventQueue receiveBattleEvent(BattleSummary battleInfo)
     {
       if( !listen )
-        return;
+        return null;
+      GameEventQueue results = new GameEventQueue();
       // Determine if we were part of this fight. If so, refresh at our own expense.
       Unit minion = battleInfo.attacker;
       if( minion.CO == myCommander )
@@ -266,9 +258,10 @@ public class Cinder extends Commander
         {
           // Guess he's not gonna make it.
           // TODO: Maybe add a debuff event/animation here as well.
-          Utils.enqueueDeathEvent(minion, myCommander.pollEvents);
+          Utils.enqueueDeathEvent(minion, results);
         }
       }
+      return results;
     }
   }
 }

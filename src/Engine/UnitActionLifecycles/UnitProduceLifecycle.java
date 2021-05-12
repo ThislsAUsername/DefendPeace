@@ -3,7 +3,7 @@ package Engine.UnitActionLifecycles;
 import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEvent;
@@ -29,7 +29,7 @@ public abstract class UnitProduceLifecycle
     }
 
     @Override
-    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
       if( moveLocation.equals(actor.x, actor.y) && actor.hasCargoSpace(typeToBuild.role) && actor.CO.money > typeToBuild.getCost()
@@ -129,12 +129,13 @@ public abstract class UnitProduceLifecycle
     }
 
     @Override
-    public void sendToListener(GameEventListener listener)
+    public GameEventQueue sendToListener(GameEventListener listener)
     {
       if( null != myNewUnit )
       {
-        listener.receiveCreateUnitEvent(myNewUnit);
+        return listener.receiveCreateUnitEvent(myNewUnit);
       }
+      return null;
     }
 
     @Override

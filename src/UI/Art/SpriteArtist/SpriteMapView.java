@@ -10,7 +10,7 @@ import java.util.Queue;
 
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
@@ -19,7 +19,7 @@ import Engine.Combat.StrikeParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
-import Terrain.MapWindow;
+import Terrain.MapPerspective;
 import UI.GameOverlay;
 import UI.MapView;
 import UI.SlidingValue;
@@ -199,7 +199,7 @@ public class SpriteMapView extends MapView
    */
   private BufferedImage renderMap()
   {
-    MapWindow gameMap = getDrawableMap(myGame);
+    MapPerspective gameMap = getDrawableMap(myGame);
     
     // We draw in three stages. First, we draw the map/units onto a canvas which is the size
     // of the entire map; then we copy the visible section of that canvas onto a screen-sized
@@ -235,7 +235,7 @@ public class SpriteMapView extends MapView
       currentAnimation = contemplationAnim.update(drawMultiplier, currentActor, actorCoord);
       notifyOnAnimEnd = false;
     }
-    Path currentPath = mapController.getContemplatedMove();
+    GamePath currentPath = mapController.getContemplatedMove();
     boolean isTargeting = mapController.isTargeting();
 
     // Start actually drawing things
@@ -423,7 +423,7 @@ public class SpriteMapView extends MapView
   }
 
   @Override // from MapView
-  public GameAnimation buildMoveAnimation(Unit unit, Path movePath)
+  public GameAnimation buildMoveAnimation(Unit unit, GamePath movePath)
   {
     return new MoveAnimation(SpriteLibrary.baseSpriteSize, unit, movePath);
   }

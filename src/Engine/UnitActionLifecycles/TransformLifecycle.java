@@ -1,7 +1,7 @@
 package Engine.UnitActionLifecycles;
 
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEvent;
@@ -34,7 +34,7 @@ public abstract class TransformLifecycle
     }
 
     @Override
-    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
@@ -57,7 +57,7 @@ public abstract class TransformLifecycle
     private TransformFactory type;
     Unit actor;
 
-    public TransformAction(Unit unit, Path path, TransformFactory pType)
+    public TransformAction(Unit unit, GamePath path, TransformFactory pType)
     {
       super(unit, path);
       type = pType;
@@ -114,9 +114,9 @@ public abstract class TransformLifecycle
     }
 
     @Override
-    public void sendToListener(GameEventListener listener)
+    public GameEventQueue sendToListener(GameEventListener listener)
     {
-      listener.receiveUnitTransformEvent(unit, oldType);
+      return listener.receiveUnitTransformEvent(unit, oldType);
     }
 
     @Override

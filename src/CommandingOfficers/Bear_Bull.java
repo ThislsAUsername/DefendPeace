@@ -11,7 +11,7 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MassDamageEvent;
 import Engine.GameEvents.ModifyFundsEvent;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
@@ -197,7 +197,7 @@ public class Bear_Bull extends Commander
       HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
       for( XYCoord xyc : myCommander.ownedProperties )
       {
-        Location loc = gameMap.getLocation(xyc);
+        MapLocation loc = gameMap.getLocation(xyc);
         if( loc.getOwner() == myCommander )
         {
           Unit victim = loc.getResident();

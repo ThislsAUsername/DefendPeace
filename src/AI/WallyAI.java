@@ -174,7 +174,7 @@ public class WallyAI extends ModularAI
         return bestAttack;
 
       // Figure out how to get here.
-      Path movePath = Utils.findShortestPath(unit, coord, gameMap);
+      GamePath movePath = Utils.findShortestPath(unit, coord, gameMap);
 
       // Figure out what I can do here.
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath);
@@ -186,7 +186,7 @@ public class WallyAI extends ModularAI
         {
           for( GameAction action : actionSet.getGameActions() )
           {
-            Location loc = gameMap.getLocation(action.getTargetLocation());
+            MapLocation loc = gameMap.getLocation(action.getTargetLocation());
             Unit target = loc.getResident();
             if( null == target ) continue; // Ignore terrain
             double damage = valueUnit(target, loc, false) * Math.min(target.getHP(), CombatEngine.simulateBattleResults(unit, target, gameMap, unit.x, unit.y).defenderHPLoss);
@@ -397,7 +397,7 @@ public class WallyAI extends ModularAI
                                               boolean canEvict )
     {
       XYCoord position = new XYCoord(unit.x, unit.y);
-      Location unitLoc = gameMap.getLocation(position);
+      MapLocation unitLoc = gameMap.getLocation(position);
 
       boolean includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
       ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces);
@@ -411,7 +411,7 @@ public class WallyAI extends ModularAI
       for( XYCoord moveCoord : destinations )
       {
         // Figure out how to get here.
-        Path movePath = Utils.findShortestPath(unit, moveCoord, gameMap);
+        GamePath movePath = Utils.findShortestPath(unit, moveCoord, gameMap);
 
         // Figure out what I can do here.
         ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, includeOccupiedSpaces);
@@ -427,7 +427,7 @@ public class WallyAI extends ModularAI
           {
             for( GameAction ga : actionSet.getGameActions() )
             {
-              Location targetLoc = gameMap.getLocation(ga.getTargetLocation());
+              MapLocation targetLoc = gameMap.getLocation(ga.getTargetLocation());
               Unit target = targetLoc.getResident();
               if( null == target )
                 continue;
@@ -640,7 +640,7 @@ public class WallyAI extends ModularAI
     {
       for( XYCoord coord : unownedProperties )
       {
-        Location loc = gameMap.getLocation(coord);
+        MapLocation loc = gameMap.getLocation(coord);
         if( myCo.unitProductionByTerrain.containsKey(loc.getEnvironment().terrainType)
             && myCo.isEnemy(loc.getOwner()) )
         {
@@ -727,7 +727,7 @@ public class WallyAI extends ModularAI
     // TODO: Jump in a transport, if available, or join?
 
     XYCoord goal = null;
-    Path path = null;
+    GamePath path = null;
     ArrayList<XYCoord> validTargets = findTravelDestinations(gameMap, allThreats, threatMap, unit, avoidProduction);
     if( mustMove ) // If we *must* travel, make sure we do actually move.
     {
@@ -779,7 +779,7 @@ public class WallyAI extends ModularAI
       }
       log(String.format("    Yes"));
 
-      Path movePath = Utils.findShortestPath(unit, xyc, gameMap);
+      GamePath movePath = Utils.findShortestPath(unit, xyc, gameMap);
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, ignoreResident);
       if( actionSets.size() > 0 )
       {
@@ -833,7 +833,7 @@ public class WallyAI extends ModularAI
    */
   private boolean canWallHere(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc)
   {
-    Location destination = gameMap.getLocation(xyc);
+    MapLocation destination = gameMap.getLocation(xyc);
     // if we're safe, we're safe
     if( isSafe(gameMap, threatMap, unit, xyc) )
       return true;
@@ -843,7 +843,7 @@ public class WallyAI extends ModularAI
     ArrayList<XYCoord> adjacentCoords = Utils.findLocationsInRange(gameMap, xyc, 1);
     for( XYCoord coord : adjacentCoords )
     {
-      Location loc = gameMap.getLocation(coord);
+      MapLocation loc = gameMap.getLocation(coord);
       if( loc != null )
       {
         Unit resident = loc.getResident();
@@ -857,7 +857,7 @@ public class WallyAI extends ModularAI
     return false;
   }
 
-  private static int valueUnit(Unit unit, Location locale, boolean includeCurrentHealth)
+  private static int valueUnit(Unit unit, MapLocation locale, boolean includeCurrentHealth)
   {
     int value = unit.model.getCost();
 
@@ -917,7 +917,7 @@ public class WallyAI extends ModularAI
   {
     Set<TerrainType> desiredTerrains = CPI.modelToTerrainMap.get(model);
     ArrayList<XYCoord> candidates = new ArrayList<XYCoord>();
-    for( Location loc : CPI.availableProperties )
+    for( MapLocation loc : CPI.availableProperties )
     {
       if( desiredTerrains.contains(loc.getEnvironment().terrainType) )
       {

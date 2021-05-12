@@ -45,9 +45,9 @@ public class TurnInitEvent implements GameEvent
   }
 
   @Override
-  public void sendToListener(GameEventListener listener)
+  public GameEventQueue sendToListener(GameEventListener listener)
   {
-    listener.receiveTurnInitEvent(cmdr, turn);
+    return listener.receiveTurnInitEvent(cmdr, turn);
   }
 
   @Override

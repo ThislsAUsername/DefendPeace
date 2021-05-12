@@ -407,11 +407,8 @@ public class FightClub
         event.performEvent(game.gameMap);
 
         // Now that the event has been completed, let the world know.
-        GameEventListener.publishEvent(event, game);
+        eventQueue.addAll(GameEventListener.publishEvent(event, game));
       }
-
-      for( Commander co : game.commanders )
-        co.pollForEvents(eventQueue);
     }
   } // ~GameSet
 

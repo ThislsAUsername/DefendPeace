@@ -11,13 +11,13 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Units.Unit;
 
 public class AIUtils
@@ -55,7 +55,7 @@ public class AIUtils
     for( XYCoord coord : destinations )
     {
       // Figure out how to get here.
-      Path movePath = Utils.findShortestPath(unit, coord, gameMap);
+      GamePath movePath = Utils.findShortestPath(unit, coord, gameMap);
 
       // Figure out what I can do here.
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, includeOccupiedDestinations);
@@ -125,7 +125,7 @@ public class AIUtils
     {
       for( int y = 0; y < gameMap.mapHeight; ++y )
       {
-        Location loc = gameMap.getLocation(x, y);
+        MapLocation loc = gameMap.getLocation(x, y);
         if( loc.isCaptureable() && myCo.isEnemy(loc.getOwner()) )
         {
           props.add(new XYCoord(x, y));
@@ -148,7 +148,7 @@ public class AIUtils
     {
       for( int y = 0; y < gameMap.mapHeight; ++y )
       {
-        Location loc = gameMap.getLocation(x, y);
+        MapLocation loc = gameMap.getLocation(x, y);
         if( loc.getResident() != null && myCo.isEnemy(loc.getResident().CO) )
         {
           unitLocs.add(new XYCoord(x, y));
@@ -200,7 +200,7 @@ public class AIUtils
     GameAction move = null;
 
     // Find the full path that would get this unit to the destination, regardless of how long. 
-    Path path = Utils.findShortestPath(unit, destination, gameMap, true);
+    GamePath path = Utils.findShortestPath(unit, destination, gameMap, true);
     boolean includeOccupiedSpaces = false;
     ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces); // Find the valid moves we can make.
 
@@ -227,7 +227,7 @@ public class AIUtils
     ArrayList<XYCoord> stations = new ArrayList<XYCoord>();
     for( XYCoord xyc : unit.CO.ownedProperties ) // TODO: Revisit if we ever get a CO that repairs on non-owned or non-properties
     {
-      Location loc = unit.CO.myView.getLocation(xyc);
+      MapLocation loc = unit.CO.myView.getLocation(xyc);
       if( unit.model.canRepairOn(loc) )
       {
         stations.add(loc.getCoordinates());

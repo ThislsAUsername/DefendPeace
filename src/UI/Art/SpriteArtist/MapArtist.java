@@ -7,11 +7,12 @@ import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
-import Engine.Path;
-import Engine.Path.PathNode;
+import Engine.GamePath;
+import Engine.GamePath.PathNode;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
 import Terrain.Environment.Weathers;
 import Terrain.GameMap;
@@ -93,7 +94,7 @@ public class MapArtist
     }
   }
 
-  public void drawMovePath(Graphics g, Path path)
+  public void drawMovePath(Graphics g, GamePath path)
   {
     Sprite moveLineSprites = SpriteLibrary.getMoveCursorLineSprite();
     Sprite moveArrowSprites = SpriteLibrary.getMoveCursorArrowSprite();
@@ -195,7 +196,7 @@ public class MapArtist
     }
   }
 
-  private static class MapImageUpdater extends GameEventListener
+  private static class MapImageUpdater implements GameEventListener
   {
     private static final long serialVersionUID = 1L;
     MapArtist myArtist;
@@ -208,18 +209,20 @@ public class MapArtist
     public boolean shouldSerialize() { return false; }
 
     @Override
-    public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges)
+    public GameEventQueue receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges)
     {
       for( EnvironmentAssignment ea : terrainChanges )
       {
         if( null != ea.where ) myArtist.redrawBaseTile(ea.where); // Redraw each tile that changed.
       }
+      return null;
     }
 
     @Override
-    public void receiveWeatherChangeEvent(Weathers weather, int duration)
+    public GameEventQueue receiveWeatherChangeEvent(Weathers weather, int duration)
     {
       myArtist.buildMapImage(); // Redraw the whole map.
+      return null;
     }
   }
 

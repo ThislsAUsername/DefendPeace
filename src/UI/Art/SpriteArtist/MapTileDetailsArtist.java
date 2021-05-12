@@ -4,10 +4,10 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Map;
 
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
 import Engine.GameEvents.MoveEvent;
 import Engine.GameEvents.ResupplyEvent;
@@ -19,7 +19,7 @@ import Engine.GameInstance;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import Units.Unit;
@@ -87,7 +87,7 @@ public class MapTileDetailsArtist
     // Define useful quantities.
     int tileSize = SpriteLibrary.baseSpriteSize;
     int iconSize = SpriteLibrary.baseSpriteSize/2;
-    Location loc = map.getLocation(coord);
+    MapLocation loc = map.getLocation(coord);
     TerrainType terrain = loc.getEnvironment().terrainType;
     boolean isTerrainObject = TerrainSpriteSet.isTerrainObject(terrain);
     Unit unit = loc.getResident();
@@ -199,29 +199,28 @@ public class MapTileDetailsArtist
   }
 
   /** This class just listens for any event that could change what is under the cursor, which is pretty much all of them. */
-  private static class MtdaListener extends GameEventListener
+  private static class MtdaListener implements GameEventListener
   {
     private static final long serialVersionUID = 1L;
 
     @Override
     public boolean shouldSerialize() { return false; }
 
-    public void receiveBattleEvent(BattleSummary summary){MapTileDetailsArtist.resetOverlay();};
-    public void receiveDemolitionEvent(Unit actor, XYCoord tile){MapTileDetailsArtist.resetOverlay();};
-    public void receiveCreateUnitEvent(Unit unit){MapTileDetailsArtist.resetOverlay();};
-    public void receiveCaptureEvent(Unit unit, Location location){MapTileDetailsArtist.resetOverlay();};
-    public void receiveCommanderDefeatEvent(CommanderDefeatEvent event){MapTileDetailsArtist.resetOverlay();};
-    public void receiveLoadEvent(LoadLifecycle.LoadEvent event){MapTileDetailsArtist.resetOverlay();};
-    public void receiveMoveEvent(MoveEvent event){MapTileDetailsArtist.resetOverlay();};
-    public void receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){MapTileDetailsArtist.resetOverlay();};
-    public void receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){MapTileDetailsArtist.resetOverlay();};
-    public void receiveResupplyEvent(ResupplyEvent event){MapTileDetailsArtist.resetOverlay();};
-    public void receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath){MapTileDetailsArtist.resetOverlay();};
-    public void receiveUnloadEvent(UnloadLifecycle.UnloadEvent event){MapTileDetailsArtist.resetOverlay();};
-    public void receiveUnitTransformEvent(Unit unit, UnitModel oldType){MapTileDetailsArtist.resetOverlay();};
-    public void receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){MapTileDetailsArtist.resetOverlay();};
-    public void receiveWeatherChangeEvent(Weathers weather, int duration){MapTileDetailsArtist.resetOverlay();};
-    public void receiveMapChangeEvent(MapChangeEvent event){MapTileDetailsArtist.resetOverlay();};
-    public void receiveMassDamageEvent(Map<Unit, Integer> lostHP){MapTileDetailsArtist.resetOverlay();};
+    public GameEventQueue receiveBattleEvent(BattleSummary summary){MapTileDetailsArtist.resetOverlay(); return null; };
+    public GameEventQueue receiveDemolitionEvent(Unit actor, XYCoord tile){MapTileDetailsArtist.resetOverlay(); return null; };
+    public GameEventQueue receiveCreateUnitEvent(Unit unit){MapTileDetailsArtist.resetOverlay(); return null; };
+    public GameEventQueue receiveCaptureEvent(Unit unit, MapLocation location){MapTileDetailsArtist.resetOverlay(); return null; };
+    public GameEventQueue receiveCommanderDefeatEvent(CommanderDefeatEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
+    public GameEventQueue receiveLoadEvent(LoadLifecycle.LoadEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
+    public GameEventQueue receiveMoveEvent(MoveEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
+    public GameEventQueue receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){MapTileDetailsArtist.resetOverlay(); return null; };
+    public GameEventQueue receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
+    public GameEventQueue receiveResupplyEvent(ResupplyEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
+    public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath){MapTileDetailsArtist.resetOverlay(); return null; };
+    public GameEventQueue receiveUnloadEvent(UnloadLifecycle.UnloadEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
+    public GameEventQueue receiveUnitTransformEvent(Unit unit, UnitModel oldType){MapTileDetailsArtist.resetOverlay(); return null; };
+    public GameEventQueue receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){MapTileDetailsArtist.resetOverlay(); return null; };
+    public GameEventQueue receiveWeatherChangeEvent(Weathers weather, int duration){MapTileDetailsArtist.resetOverlay(); return null; };
+    public GameEventQueue receiveMapChangeEvent(MapChangeEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
   }
 }

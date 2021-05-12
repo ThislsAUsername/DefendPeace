@@ -2,7 +2,7 @@ package Engine.GameEvents;
 
 import Engine.XYCoord;
 import Terrain.Environment.Weathers;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -35,9 +35,9 @@ public class GlobalWeatherEvent implements GameEvent
   }
 
   @Override
-  public void sendToListener(GameEventListener listener)
+  public GameEventQueue sendToListener(GameEventListener listener)
   {
-    listener.receiveWeatherChangeEvent(weather, duration);
+    return listener.receiveWeatherChangeEvent(weather, duration);
   }
 
   @Override
@@ -47,7 +47,7 @@ public class GlobalWeatherEvent implements GameEvent
     {
       for( int x = 0; x < gameMap.mapWidth; ++x )
       {
-        Location loc = gameMap.getLocation(x, y);
+        MapLocation loc = gameMap.getLocation(x, y);
         loc.setForecast(weather, (gameMap.commanders.length * duration) - 1);
       }
     }

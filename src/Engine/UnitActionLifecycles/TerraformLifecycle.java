@@ -1,7 +1,7 @@
 package Engine.UnitActionLifecycles;
 
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEvent;
@@ -30,7 +30,7 @@ public abstract class TerraformLifecycle
     }
 
     @Override
-    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
@@ -56,7 +56,7 @@ public abstract class TerraformLifecycle
     private Unit actor = null;
     private TerraformFactory type;
 
-    public TerraformAction(Unit unit, Path path, TerraformFactory pType)
+    public TerraformAction(Unit unit, GamePath path, TerraformFactory pType)
     {
       super(unit, path);
       actor = unit;

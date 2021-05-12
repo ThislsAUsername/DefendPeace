@@ -2,7 +2,7 @@ package Engine.GameInput;
 
 import java.util.ArrayList;
 
-import Engine.Path;
+import Engine.GamePath;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameInput.GameInputHandler.InputType;
@@ -68,7 +68,7 @@ class SelectMoveLocation extends GameInputState<XYCoord>
 
     data.unitActor = mover;
     data.unitCoord = startCoord;
-    data.path = new Path();
+    data.path = new GamePath();
 
     SelectMoveLocation next = new SelectMoveLocation(data);
     next.oldUnitCoord = oldUnitCoord;
@@ -91,7 +91,7 @@ class SelectMoveLocation extends GameInputState<XYCoord>
   {
     if( null == myStateData.path )
     {
-      myStateData.path = new Path();
+      myStateData.path = new GamePath();
     }
 
     // If the new point already exists on the path, cut the extraneous points out.

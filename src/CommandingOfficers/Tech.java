@@ -23,7 +23,7 @@ import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.CreateUnitEvent;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
@@ -484,7 +484,7 @@ public class Tech extends Commander
           invalidDropCoords.add(pdc);
 
         // No trespassing
-        Location xycl = gameMap.getLocation(pdc);
+        MapLocation xycl = gameMap.getLocation(pdc);
         if( xycl.isCaptureable() && (null != xycl.getOwner()) && xycl.getOwner().isEnemy(myCommander) )
           invalidDropCoords.add(pdc);
 

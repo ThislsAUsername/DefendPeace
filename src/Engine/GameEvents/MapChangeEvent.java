@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import Engine.XYCoord;
 import Terrain.Environment;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -26,6 +26,8 @@ public class MapChangeEvent implements GameEvent
   /** Allows changing a set of tiles all at once. */
   public MapChangeEvent(ArrayList<EnvironmentAssignment> envChanges)
   {
+    if( envChanges.size() < 1 )
+      System.out.println("Warning: Generating a MapChangeEvent with no changes to the map.");
     changes = envChanges;
   }
 
@@ -36,9 +38,9 @@ public class MapChangeEvent implements GameEvent
   }
 
   @Override
-  public void sendToListener(GameEventListener listener)
+  public GameEventQueue sendToListener(GameEventListener listener)
   {
-    listener.receiveTerrainChangeEvent(changes);
+    return listener.receiveTerrainChangeEvent(changes);
   }
 
   @Override
@@ -46,7 +48,7 @@ public class MapChangeEvent implements GameEvent
   {
     for( EnvironmentAssignment ea : changes )
     {
-      Location loc = gameMap.getLocation(ea.where);
+      MapLocation loc = gameMap.getLocation(ea.where);
       if( null != loc )
       {
         if( loc.getEnvironment().terrainType != ea.environment.terrainType )
@@ -61,13 +63,17 @@ public class MapChangeEvent implements GameEvent
   @Override
   public XYCoord getStartPoint()
   {
-    return changes.get(0).where;
+    if( changes.size() > 0 )
+      return changes.get(0).where;
+    return null;
   }
 
   @Override
   public XYCoord getEndPoint()
   {
-    return changes.get(0).where;
+    if( changes.size() > 0 )
+      return changes.get(0).where;
+    return null;
   }
 
   public static class EnvironmentAssignment

@@ -87,7 +87,7 @@ public class TestCommanderAve extends TestCase
     // Verify that after initializing the first time, Ave's properties are all snow-bound.
     for( XYCoord prop : Ave.ownedProperties )
     {
-      testPassed &= validate(testMap.isLocationValid(prop), "    Location is invalid!");
+      testPassed &= validate(testMap.isLocationValid(prop), "    MapLocation is invalid!");
       testPassed &= validate(testMap.getLocation(prop).getEnvironment().weatherType == Weathers.SNOW, "    Weather at " + prop + " is not snow!");
     }
 

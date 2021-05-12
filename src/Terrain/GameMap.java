@@ -2,7 +2,7 @@ package Terrain;
 
 import java.io.Serializable;
 
-import Engine.Path;
+import Engine.GamePath;
 import Engine.XYCoord;
 import Units.Unit;
 
@@ -37,11 +37,11 @@ public abstract class GameMap implements Serializable, IEnvironsProvider
   /** Returns the Unit in the specified tile. */
   public abstract Unit getResident(int w, int h);
 
-  /** Returns the Location at the specified location, or null if that Location does not exist. */
-  public abstract Location getLocation(XYCoord location);
+  /** Returns the MapLocation at the specified location, or null if that MapLocation does not exist. */
+  public abstract MapLocation getLocation(XYCoord location);
 
-  /** Returns the Location at the specified location, or null if that Location does not exist. */
-  public abstract Location getLocation(int w, int h);
+  /** Returns the MapLocation at the specified location, or null if that MapLocation does not exist. */
+  public abstract MapLocation getLocation(int w, int h);
 
   public abstract void clearAllHighlights();
 
@@ -51,10 +51,10 @@ public abstract class GameMap implements Serializable, IEnvironsProvider
   /** Returns true if no unit is at the specified x and y coordinate, false else */
   public abstract boolean isLocationEmpty(int x, int y);
 
-  /** Returns true if no unit (excluding 'unit') is in the specified Location. */
+  /** Returns true if no unit (excluding 'unit') is in the specified MapLocation. */
   public abstract boolean isLocationEmpty(Unit unit, XYCoord coords);
 
-  /** Returns true if no unit (excluding 'unit') is in the specified Location. */
+  /** Returns true if no unit (excluding 'unit') is in the specified MapLocation. */
   public abstract boolean isLocationEmpty(Unit unit, int x, int y);
 
   /** Returns true if the location lies outside the GameMap. */
@@ -70,7 +70,7 @@ public abstract class GameMap implements Serializable, IEnvironsProvider
   {}
 
   /** Reveals fog along the movement path, if applicable */
-  public void revealFog(Unit scout, Path movepath)
+  public void revealFog(Unit scout, GamePath movepath)
   {}
 
   /** Reveals a single tile of fog */

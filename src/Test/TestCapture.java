@@ -13,7 +13,7 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.BattleLifecycle;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
@@ -57,7 +57,7 @@ public class TestCapture extends TestCase
     boolean testPassed = true;
 
     // Get a reference to a capturable property.
-    Location prop = testMap.getLocation(2, 2);
+    MapLocation prop = testMap.getLocation(2, 2);
 
     // Make sure this location is capturable.
     testPassed &= validate( prop.isCaptureable(), "    Unexpected terrain found! Test will be invalid." );
@@ -129,7 +129,7 @@ public class TestCapture extends TestCase
     boolean testPassed = true;
 
     // Get a reference to a capturable property.
-    Location prop = testMap.getLocation(2, 2);
+    MapLocation prop = testMap.getLocation(2, 2);
 
     // Make sure this location is capturable.
     testPassed &= validate( prop.isCaptureable(), "    Unexpected terrain found! Test will be invalid." );
@@ -173,7 +173,7 @@ public class TestCapture extends TestCase
     setupTest(); // Reset test parameters to ensure it's all set up hunky-dory.
 
     // We loaded Firing Range, so we expect an HQ for testCo2 at location (13, 1)
-    Terrain.Location hq = testMap.getLocation(13, 1);
+    Terrain.MapLocation hq = testMap.getLocation(13, 1);
     testPassed &= validate( hq.getOwner() == testCo2, "    HQ at (13, 1) is not owned by testCo2, but should be.");
     testPassed &= validate( hq.getEnvironment().terrainType == TerrainType.HEADQUARTERS, "    HQ for testCo2 is not where expected.");
 

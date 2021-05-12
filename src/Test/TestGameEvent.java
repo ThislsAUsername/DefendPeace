@@ -5,7 +5,7 @@ import CommandingOfficers.Patch;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.CommanderDefeatEvent;
@@ -89,7 +89,7 @@ public class TestGameEvent extends TestCase
     boolean testPassed = true;
 
     // We loaded Firing Range, so we expect a city at location (2, 2)
-    Terrain.Location city = testMap.getLocation(2, 2);
+    Terrain.MapLocation city = testMap.getLocation(2, 2);
     testPassed &= validate(city.getEnvironment().terrainType == TerrainType.CITY, "    No city at (2, 2).");
     testPassed &= validate(city.getOwner() == null, "    City should not be owned by any CO yet.");
 
@@ -150,7 +150,7 @@ public class TestGameEvent extends TestCase
     XYCoord coords = new XYCoord(13, 8);
     CreateUnitEvent event = new CreateUnitEvent(testCo1, testCo1.getUnitModel(UnitModel.TROOP), coords);
 
-    testPassed &= validate(testMap.getLocation(coords).getResident() == null, "    Location is already occupied.");
+    testPassed &= validate(testMap.getLocation(coords).getResident() == null, "    MapLocation is already occupied.");
 
     event.performEvent(testMap);
 
@@ -196,7 +196,7 @@ public class TestGameEvent extends TestCase
 
     // Unload the mech; this should fail, since he is not on the transport.
     new UnloadLifecycle.UnloadEvent(apc, mech, 3, 3).performEvent(testMap);
-    testPassed &= validate(testMap.getLocation(3, 3).getResident() == null, "    Location (3, 3) should have no residents.");
+    testPassed &= validate(testMap.getLocation(3, 3).getResident() == null, "    MapLocation (3, 3) should have no residents.");
     testPassed &= validate(2 == mech.x && 3 == mech.y, "    Mech thinks he has moved, but should still be at (2, 3).");
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC should still have one passenger.");
 
@@ -224,7 +224,7 @@ public class TestGameEvent extends TestCase
     Unit mech = addUnit(testMap, testCo1, UnitModel.MECH, 2, 3);
     Unit apc = addUnit(testMap, testCo1, UnitModel.TRANSPORT, 3, 2);
 
-    Path path = new Path();
+    GamePath path = new GamePath();
     path.addWaypoint(3, 3); // we need two waypoints to not break compatibility with MoveEvent, since it assumes the first waypoint isn't used.
     path.addWaypoint(7, 5); // A suitable place to move (should be the middle of the road in Firing Range).
 
@@ -243,7 +243,7 @@ public class TestGameEvent extends TestCase
     new MoveEvent(mech, path).performEvent(testMap); // This should not execute. Water is bad for grunts.
     testPassed &= validate(7 == mech.x && 6 == mech.y, "    Mech does not think he is at (7, 6), but should.");
     testPassed &= validate(testMap.getLocation(7, 6).getResident() == mech, "    Mech is not still at (7, 6), but should be.");
-    testPassed &= validate(testMap.getLocation(7, 0).getResident() == null, "    Location (7, 0) should still be empty.");
+    testPassed &= validate(testMap.getLocation(7, 0).getResident() == null, "    MapLocation (7, 0) should still be empty.");
 
     path.addWaypoint(7, 5); // New endpoint to move apc over infantry.
     new MoveEvent(apc, path).performEvent(testMap); // This should not execute. Treads are bad for grunts.
@@ -414,12 +414,12 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(testCo2.isDefeated == false, "    testCo2 started out in defeat, but he should not be.");
 
     // We loaded Firing Range, so we expect a city at location (2, 2)
-    Terrain.Location city = testMap.getLocation(10, 1);
+    Terrain.MapLocation city = testMap.getLocation(10, 1);
     // ... an HQ at location (13, 1)
-    Terrain.Location hq = testMap.getLocation(13, 1);
+    Terrain.MapLocation hq = testMap.getLocation(13, 1);
     // ... and two factories at (13, 2) and (12, 2).
-    Terrain.Location fac1 = testMap.getLocation(13, 2);
-    Terrain.Location fac2 = testMap.getLocation(12, 2);
+    Terrain.MapLocation fac1 = testMap.getLocation(13, 2);
+    Terrain.MapLocation fac2 = testMap.getLocation(12, 2);
 
     // Verify the map looks as we expect.
     testPassed &= validate(city.getEnvironment().terrainType == TerrainType.CITY, "    No city at (10, 1).");

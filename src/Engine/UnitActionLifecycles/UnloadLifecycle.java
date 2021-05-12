@@ -6,7 +6,7 @@ import java.util.Map;
 
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -26,7 +26,7 @@ public abstract class UnloadLifecycle
     private static final long serialVersionUID = 1L;
 
     @Override
-    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
@@ -73,17 +73,17 @@ public abstract class UnloadLifecycle
   public static class UnloadAction extends GameAction
   {
     private Unit actor;
-    private Path movePath;
+    private GamePath movePath;
     private XYCoord moveLoc;
     private Map<Unit, XYCoord> myDropoffs;
     private XYCoord firstDropLoc;
 
-    public UnloadAction(GameMap gameMap, Unit actor, Path path, Unit passenger, int dropX, int dropY)
+    public UnloadAction(GameMap gameMap, Unit actor, GamePath path, Unit passenger, int dropX, int dropY)
     {
       this(actor, path, passenger, new XYCoord(dropX, dropY));
     }
 
-    public UnloadAction(Unit transport, Path movePath, final Unit passenger, final XYCoord dropLocation)
+    public UnloadAction(Unit transport, GamePath movePath, final Unit passenger, final XYCoord dropLocation)
     {
       this(transport, movePath, new HashMap<Unit, XYCoord>(){
         private static final long serialVersionUID = 1L;
@@ -93,7 +93,7 @@ public abstract class UnloadLifecycle
       });
     }
 
-    public UnloadAction(Unit transport, Path path, Map<Unit, XYCoord> dropoffs)
+    public UnloadAction(Unit transport, GamePath path, Map<Unit, XYCoord> dropoffs)
     {
       actor = transport;
       movePath = path;
@@ -219,9 +219,9 @@ public abstract class UnloadLifecycle
     }
 
     @Override
-    public void sendToListener(GameEventListener listener)
+    public GameEventQueue sendToListener(GameEventListener listener)
     {
-      listener.receiveUnloadEvent(this);
+      return listener.receiveUnloadEvent(this);
     }
 
     @Override
