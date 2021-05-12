@@ -119,7 +119,6 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
    */
   public GameEventQueue initTurn(MapMaster map)
   {
-    modifyAbilityPower(42);
     myView.resetFog();
     myActiveAbilityName = "";
 
