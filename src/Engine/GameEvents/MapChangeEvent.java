@@ -26,6 +26,8 @@ public class MapChangeEvent implements GameEvent
   /** Allows changing a set of tiles all at once. */
   public MapChangeEvent(ArrayList<EnvironmentAssignment> envChanges)
   {
+    if( envChanges.size() < 1 )
+      System.out.println("Warning: Generating a MapChangeEvent with no changes to the map.");
     changes = envChanges;
   }
 
