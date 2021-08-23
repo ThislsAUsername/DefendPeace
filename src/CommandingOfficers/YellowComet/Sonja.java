@@ -93,7 +93,7 @@ public class Sonja extends Commander
     if( params.isCounter )
     {
       // it's a multiplier according to the damage calc
-      params.attackPower *= 50;
+      params.attackPower *= 1.5;
     }
   }
 
