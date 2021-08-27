@@ -11,7 +11,6 @@ import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
-import Engine.Combat.BattleSummary;
 import Engine.Combat.CostValueFinder;
 import Engine.Combat.DamagePopup;
 import Engine.Combat.MassStrikeUtils;
@@ -20,13 +19,16 @@ import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
+import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.Path;
 import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Terrain.GameMap;
+import Terrain.Location;
 import Terrain.MapMaster;
+import Terrain.TerrainType;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
@@ -38,8 +40,10 @@ public abstract class TabithaEngine extends Commander
   public static final InfoPage MECHANICS_BLURB = new InfoPage(
             "Mega Boost mechanics:\n"
           + "A Mega Boost is awarded via a special action done in place (does not end turn).\n"
+          + "You can't award any Boost that has already been active this turn (e.g. must wait a turn after deleting a Boosted unit).\n"
           + "Mega Boosted units gain the generic +10/10 on powers, but no power-specific stat boost\n");
   public ArrayList<Unit> COUs = new ArrayList<Unit>();
+  public ArrayList<Unit> COUsLost = new ArrayList<Unit>();
   public abstract int getMegaBoostCount();
   public void onCOULost(Unit minion) {};
   public boolean canBoost(UnitModel type) {return true;};
@@ -47,6 +51,16 @@ public abstract class TabithaEngine extends Commander
   public final int COUDef;
   private int megaPow; // floating values that dip on powers to match the above
   private int megaDef;
+
+  public boolean flexibleBoost = true;
+
+  protected boolean eligibleBoostLocation(Unit actor, Location loc)
+  {
+    return getShoppingList(loc).contains(actor.model)
+        || loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS
+        || loc.getEnvironment().terrainType == TerrainType.LAB;
+  }
+
 
   public TabithaEngine(int atk, int def, CommanderInfo info, GameScenario.GameRules rules)
   {
@@ -75,7 +89,15 @@ public abstract class TabithaEngine extends Commander
   @Override
   public GameEventQueue initTurn(MapMaster map)
   {
-    this.COUs.clear();
+    if( flexibleBoost )
+    {
+      this.COUs.clear();
+    }
+    else
+    {
+      this.COUs.removeAll(COUsLost);
+      this.COUsLost.clear();
+    }
     megaPow = COUPow;
     megaDef = COUDef;
     return super.initTurn(map);
@@ -101,22 +123,21 @@ public abstract class TabithaEngine extends Commander
   }
 
   @Override
-  public void receiveBattleEvent(BattleSummary battleInfo)
+  public void receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
   {
-    super.receiveBattleEvent(battleInfo);
-
-    Unit minion = null;
-    if( this == battleInfo.defender.CO )
+    if( COUs.contains(victim) )
     {
-      minion = battleInfo.defender;
+      COUsLost.add(victim);
+      onCOULost(victim);
     }
-    if( this == battleInfo.attacker.CO )
+  }
+  @Override
+  public void receiveUnitJoinEvent(JoinEvent join)
+  {
+    if( COUs.contains(join.unitDonor) )
     {
-      minion = battleInfo.attacker;
-    }
-    if (null != minion && minion.getHP() < 1 && COUs.contains(minion))
-    {
-      onCOULost(minion);
+      COUs.remove(join.unitDonor);
+      COUs.add(join.unitRecipient);
     }
   }
 
@@ -207,7 +228,9 @@ public abstract class TabithaEngine extends Commander
     public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
-      if( moveLocation.equals(actor.x, actor.y) && tabby.COUs.size() < tabby.getMegaBoostCount() )
+      if( moveLocation.equals(actor.x, actor.y)
+          && tabby.COUs.size() < tabby.getMegaBoostCount()
+          && (tabby.flexibleBoost || tabby.eligibleBoostLocation(actor, map.getLocation(moveLocation))) )
       {
         return new GameActionSet(new ApplyMegaBoost(this, actor), false);
       }

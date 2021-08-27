@@ -18,13 +18,14 @@ public class OmegaTabitha extends TabithaEngine
       super("Omega Tabitha");
       infoPages.add(new InfoPage(
             "The strongest reasonable interpretation of Tabitha into AWBW mechanics.\n"
-          + "Can grant a single \'Mega Boost\' of +"+MEGA_ATK+"/"+MEGA_DEF+" stats; this power-up lasts until next turn.\n"
-          + "Loses all COP charge if the Mega Boosted unit dies."));
+          + "Can grant a single \'Mega Boost\' of +"+MEGA_ATK+"/"+MEGA_DEF+" stats; this power-up lasts until the unit dies.\n"
+          + "Loses all COP charge if the Mega Boosted unit dies.\n"
+          + "To Boost, the unit must be on an HQ/lab or matching production property.\n"));
       infoPages.add(MECHANICS_BLURB);
       infoPages.add(new InfoPage(
-            "APOCALYPSE (10):\n"
+            "Firestorm (7):\n"
           + "A 2-range missile hits the opponent's largest mass of units and deals 8 HP damage\n"
-          + "All units gain +50/35."));
+          + "Unboosted units gain +50/35."));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -44,8 +45,9 @@ public class OmegaTabitha extends TabithaEngine
   public OmegaTabitha(GameScenario.GameRules rules)
   {
     super(MEGA_ATK, MEGA_DEF, coInfo, rules);
+    flexibleBoost = false;
 
-    addCommanderAbility(new NukeIt(this, "APOCALYPSE", 10, 8, 50, 35));
+    addCommanderAbility(new NukeIt(this, "Firestorm", 7, 8, 50, 35));
   }
 
   public static CommanderInfo getInfo()
