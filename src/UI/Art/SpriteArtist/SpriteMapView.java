@@ -613,19 +613,26 @@ public class SpriteMapView extends MapView
     if( lastTurnNum != turnNum )
     {
       lastTurnNum = turnNum;
-      PixelFont pf = SpriteLibrary.getFontStandard();
-      BufferedImage day = SpriteUIUtils.getTextAsImage("Turn ");
-      int turnHeight = pf.getAscent()+pf.getDescent();
-      BufferedImage dayNum = SpriteUIUtils.getBoldTextAsImage(Integer.toString(turnNum));
-      int width = day.getWidth() + dayNum.getWidth();
-      int height = Math.max(turnHeight, dayNum.getHeight());
+      final PixelFont pf = SpriteLibrary.getFontStandard();
+      final int wordHeight = pf.getAscent()+pf.getDescent();
+
+      // Our final image will contain word+digit
+      final BufferedImage word = SpriteUIUtils.getTextAsImage("Turn ");
+      final BufferedImage digit = SpriteUIUtils.getBoldTextAsImage(Integer.toString(turnNum));
+
+      final int width = word.getWidth() + digit.getWidth();
+      final int height = Math.max(wordHeight, digit.getHeight());
 
       turnNumImage = SpriteLibrary.createTransparentSprite(width, height);
       Graphics dcg = turnNumImage.getGraphics();
-      dcg.drawImage(day, 0, height-turnHeight, null);
-      // Bound vertical position to staying within the renderable area
-      final int dayNumVOffset = Math.min(Math.max(pf.getAscent()-dayNum.getHeight(), 0), height - dayNum.getHeight());
-      dcg.drawImage(dayNum, turnNumImage.getWidth()-dayNum.getWidth(), dayNumVOffset, null);
+
+      // Note that the word currently has no descender characters
+      int wordVOffset = height-wordHeight+pf.getDescent();
+      dcg.drawImage(word, 0, wordVOffset, null);
+
+      // Bottom-justify the digit, to match with the word
+      final int digitVOffset = height - digit.getHeight();
+      dcg.drawImage(digit, turnNumImage.getWidth()-digit.getWidth(), digitVOffset, null);
     }
 
     // Draw the turn counter.
