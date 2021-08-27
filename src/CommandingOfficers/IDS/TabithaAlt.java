@@ -3,10 +3,10 @@ import Engine.GameScenario;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 
-public class TabithaBasic extends TabithaEngine
+public class TabithaAlt extends TabithaEngine
 {
   private static final long serialVersionUID = 1L;
-  public static final int MEGA_ATK = 35;
+  public static final int MEGA_ATK = 50;
   public static final int MEGA_DEF = 35;
   private static final CommanderInfo coInfo = new instantiator();
   private static class instantiator extends CommanderInfo
@@ -14,10 +14,11 @@ public class TabithaBasic extends TabithaEngine
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Tabitha");
+      super("Tabitha Alt");
       infoPages.add(new InfoPage(
-            "--TABITHA--\n"
-          + "Can grant a single \"Mega Boost\" of +"+MEGA_ATK+"/"+MEGA_DEF+" stats; this power-up lasts until next turn.\n"));
+            "--TABITHA ALT--\n"
+          + "Can grant a single \"Mega Boost\" of +"+MEGA_ATK+"/"+MEGA_DEF+" stats; this power-up lasts until the unit dies.\n"
+          + "To Boost, the unit must be on an HQ/lab or matching production property.\n"));
       infoPages.add(MECHANICS_BLURB);
       infoPages.add(new InfoPage(
             "FIRESTORM (6):\n"
@@ -31,16 +32,17 @@ public class TabithaBasic extends TabithaEngine
     @Override
     public Commander create(GameScenario.GameRules rules)
     {
-      return new TabithaBasic(rules);
+      return new TabithaAlt(rules);
     }
   }
 
   @Override
   public int getMegaBoostCount() {return 1;}
 
-  public TabithaBasic(GameScenario.GameRules rules)
+  public TabithaAlt(GameScenario.GameRules rules)
   {
     super(MEGA_ATK, MEGA_DEF, coInfo, rules);
+    this.flexibleBoost = false;
 
     addCommanderAbility(new NukeIt(this, "Firestorm",   6, 4, 10, 10));
     addCommanderAbility(new NukeIt(this, "Apocalypse", 10, 8, MEGA_ATK, MEGA_DEF));

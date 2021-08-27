@@ -95,6 +95,7 @@ public class CommanderLibrary
     commanderList.add( CaulderAlt.getInfo() );
     commanderList.add( PennyAlt.getInfo() );
     commanderList.add( TabithaBasic.getInfo() );
+    commanderList.add( TabithaAlt.getInfo() );
     commanderList.add( OmegaTabitha.getInfo() );
     commanderList.add( Cyrus.getInfo() );
 
