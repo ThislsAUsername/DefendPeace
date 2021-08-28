@@ -5,6 +5,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.CODefenseModifier;
+import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 import Terrain.MapMaster;
 import Units.Unit;
 
@@ -19,11 +20,11 @@ public class Brenner extends Commander
     {
       super("Brenner");
       infoPages.add(new InfoPage(
-          "--BRENNER--\r\n" + 
-          "Units gain +10% defense.\r\n" + 
-          "xxxxXXXX\r\n" + 
-          "REINFORCE: All units gain +3 HP.\r\n" + 
-          "LIFELINE: All units gain +6 HP."));
+          "--BRENNER--\r\n" +
+          "Units gain +10% defense.\r\n" +
+          "xxxXXX\r\n" +
+          "REINFORCE: All units gain +3 HP.\r\n" +
+          "LIFELINE: All units gain +6 HP and +10 defense."));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -51,7 +52,7 @@ public class Brenner extends Commander
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Reinforce";
-    private static final int COST = 4;
+    private static final int COST = 3;
     private static final int VALUE = 3;
 
     Reinforce(Commander commander)
@@ -73,7 +74,7 @@ public class Brenner extends Commander
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Lifeline";
-    private static final int COST = 8;
+    private static final int COST = 6;
     private static final int VALUE = 6;
 
     Lifeline(Commander commander)
@@ -88,6 +89,7 @@ public class Brenner extends Commander
       {
         unit.alterHP(VALUE);
       }
+      myCommander.addCOModifier(new CODefenseModifier(10));
     }
   }
 }
