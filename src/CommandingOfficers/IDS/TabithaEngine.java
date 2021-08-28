@@ -1,9 +1,13 @@
 package CommandingOfficers.IDS;
 
 import Engine.GameScenario;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import AI.AILibrary;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
@@ -208,6 +212,24 @@ public abstract class TabithaEngine extends Commander
                      "Nuked"));
 
       return output;
+    }
+  }
+
+  /**
+   * Private method, same signature as in Serializable interface
+   *
+   * @param stream
+   * @throws IOException
+   */
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException
+  {
+    stream.defaultReadObject();
+
+    // Be compatible with old saves
+    if( COUsLost == null )
+    {
+      COUsLost = new ArrayList<Unit>();
+      flexibleBoost = true;
     }
   }
 
