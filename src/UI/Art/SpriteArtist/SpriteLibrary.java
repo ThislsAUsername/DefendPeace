@@ -211,6 +211,8 @@ public class SpriteLibrary
       ss.addTerrainAffinity(TerrainType.HEADQUARTERS);
       ss.addTerrainAffinity(TerrainType.LAB);
       ss.addTerrainAffinity(TerrainType.FACTORY);
+      ss.addTerrainAffinity(TerrainType.AIRPORT);
+      ss.addTerrainAffinity(TerrainType.CITY);
     }
     else if( terrainType == TerrainType.SHOAL )
     {
