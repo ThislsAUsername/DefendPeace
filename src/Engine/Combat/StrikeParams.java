@@ -84,13 +84,14 @@ public class StrikeParams
     //    [B*ACO/100+R]*(AHP/10)*[(200-(DCO+DTR*DHP))/100]
     double overallPower = (baseDamage * attackPower / 100) * attackerHP / 10;
     double overallDefense = ((200 - (defensePower + stars * defenderHP)) / 100);
-    double luckDamage = 0;
     if( ! isSim )
     {
-      luckDamage = (int) (Math.random() * luckMax) * (attackerHP / 10);
-      luckDamage -= (int) (Math.random() * dispersion) * (attackerHP / 10);
+      overallPower += (int) (Math.random() * luckMax) * (attackerHP / 10);
+      overallPower -= (int) (Math.random() * dispersion) * (attackerHP / 10);
+      if( overallPower < 0 )
+        overallPower = 0.000000000001;
     }
-    return (overallPower + luckDamage) * overallDefense / 10 ; // original formula was % damage, now it must be HP of damage
+    return overallPower * overallDefense / 10 ; // original formula was % damage, now it must be HP of damage
   }
 
   public static class BattleParams extends StrikeParams
