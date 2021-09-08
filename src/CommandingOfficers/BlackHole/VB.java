@@ -29,9 +29,9 @@ public class VB extends Commander
     {
       super("Von Bolt");
       infoPages.add(new InfoPage(
-          "Von Bolt\r\n" + 
-          "  Units gain +10% attack and +10% defense\r\n" + 
-          "Ex Machina -- A 2 Range missile hits the accumulation of the opponent's most expensive units, does 3 HP damage to them and stuns them during their next turn"));
+          "Von Bolt\r\n" +
+          "  Units gain +10% attack and +10% defense\r\n" +
+          "Ex Machina (10) -- A 2 Range missile hits the accumulation of the opponent's most expensive units, does 3 HP damage to them and stuns them during their next turn"));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
