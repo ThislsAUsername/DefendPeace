@@ -21,8 +21,8 @@ public class Tasha extends Commander
       infoPages.add(new InfoPage(
           "--TASHA--\r\n" +
           "Air units gain +"+D2D_ATTACK+"% firepower and +"+D2D_DEFENSE+"% defense.\r\n" +
-          "SONIC BOOM ("+COP_COST+"): All air units gain +"+COP_MOVE+" movement.\r\n" +
-          "FOX ONE ("+SCOP_COST+"): All air units gain +"+SCOP_MOVE+" movement."));
+          COP_NAME+" ("+COP_COST+"): All air units gain +"+COP_MOVE+" movement.\r\n" +
+          SCOP_NAME+" ("+SCOP_COST+"): All air units gain +"+SCOP_MOVE+" movement."));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -32,8 +32,11 @@ public class Tasha extends Commander
   }
   public static final int D2D_ATTACK = 40;
   public static final int D2D_DEFENSE = 20;
+
+  public static final String COP_NAME = "Fox One";
   public static final int COP_COST = 2;
   public static final int COP_MOVE = 2;
+  public static final String SCOP_NAME = "Sonic Boom";
   public static final int SCOP_COST = 5;
   public static final int SCOP_MOVE = 4;
 
@@ -50,8 +53,8 @@ public class Tasha extends Commander
       }
     }
 
-    addCommanderAbility(new AirMoveBonus(this, "Sonic Boom", COP_COST, COP_MOVE));
-    addCommanderAbility(new AirMoveBonus(this, "Fox One", SCOP_COST, SCOP_MOVE));
+    addCommanderAbility(new AirMoveBonus(this, COP_NAME, COP_COST, COP_MOVE));
+    addCommanderAbility(new AirMoveBonus(this, SCOP_NAME, SCOP_COST, SCOP_MOVE));
   }
 
   public static CommanderInfo getInfo()
