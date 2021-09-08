@@ -19,11 +19,10 @@ public class Tasha extends Commander
     {
       super("Tasha");
       infoPages.add(new InfoPage(
-          "--TASHA--\r\n" + 
-          "Air units gain +40% firepower and +20% defense.\r\n" + 
-          "xxXXX\r\n" + 
-          "SONIC BOOM: All air units gain +1 movement.\r\n" + 
-          "FOX ONE: All air units gain +2 movement."));
+          "--TASHA--\r\n" +
+          "Air units gain +"+D2D_ATTACK+"% firepower and +"+D2D_DEFENSE+"% defense.\r\n" +
+          "SONIC BOOM ("+COP_COST+"): All air units gain +"+COP_MOVE+" movement.\r\n" +
+          "FOX ONE ("+SCOP_COST+"): All air units gain +"+SCOP_MOVE+" movement."));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -31,6 +30,12 @@ public class Tasha extends Commander
       return new Tasha(rules);
     }
   }
+  public static final int D2D_ATTACK = 40;
+  public static final int D2D_DEFENSE = 20;
+  public static final int COP_COST = 2;
+  public static final int COP_MOVE = 2;
+  public static final int SCOP_COST = 5;
+  public static final int SCOP_MOVE = 4;
 
   public Tasha(GameScenario.GameRules rules)
   {
@@ -40,13 +45,13 @@ public class Tasha extends Commander
     {
       if( um.isAirUnit() )
       {
-        um.modifyDamageRatio(40);
-        um.modifyDefenseRatio(20);
+        um.modifyDamageRatio(D2D_ATTACK);
+        um.modifyDefenseRatio(D2D_DEFENSE);
       }
     }
 
-    addCommanderAbility(new AirMoveBonus(this, "Sonic Boom", 2, 2));
-    addCommanderAbility(new AirMoveBonus(this, "Fox One", 5, 4));
+    addCommanderAbility(new AirMoveBonus(this, "Sonic Boom", COP_COST, COP_MOVE));
+    addCommanderAbility(new AirMoveBonus(this, "Fox One", SCOP_COST, SCOP_MOVE));
   }
 
   public static CommanderInfo getInfo()
