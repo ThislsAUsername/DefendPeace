@@ -1,5 +1,7 @@
 package CommandingOfficers;
 
+import java.util.ArrayList;
+
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameInstance;
 import Engine.GameScenario;
@@ -62,7 +64,7 @@ public class Cinder extends Commander
   {
     super(coInfo, rules);
 
-    addCommanderAbility(new SearAbility(this));
+    addCommanderAbility(new SearAbility());
     addCommanderAbility(new WitchFireAbility(this));
   }
 
@@ -122,16 +124,16 @@ public class Cinder extends Commander
     private static final int SEAR_COST = 5;
     private static final int SEAR_WOUND = -1;
 
-    SearAbility(Commander commander)
+    SearAbility()
     {
-      super(commander, SEAR_NAME, SEAR_COST);
+      super(SEAR_NAME, SEAR_COST);
       AIFlags = PHASE_TURN_END;
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    protected void perform(Commander co, MapMaster gameMap)
     {
-      for( Unit unit : myCommander.units )
+      for( Unit unit : co.units )
       {
         if( unit.isTurnOver )
         {
@@ -156,19 +158,24 @@ public class Cinder extends Commander
 
     WitchFireAbility(Cinder commander)
     {
-      super(commander, WITCHFIRE_NAME, WITCHFIRE_COST);
+      super(WITCHFIRE_NAME, WITCHFIRE_COST);
       coCast = commander;
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
     {
-      myCommander.addCOModifier(this);
+      modList.add(this); // TODO
     }
+
+    @Override
+    protected void perform(Commander co, MapMaster gameMap)
+    {}
 
     @Override // COModifier interface.
     public void applyChanges(Commander commander)
     {
+      // TODO
       coCast.witchFireListener.listen = true;
     }
 

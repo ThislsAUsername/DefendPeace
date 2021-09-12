@@ -67,14 +67,14 @@ public class CommanderOverlayArtist
     // Choose left or right overlay image to draw.
     BufferedImage overlayImage = SpriteLibrary.getCoOverlay(commander, overlayIsLeft);
     BufferedImage powerBarImage = null;
-    boolean trueIfBarFalseIfText = commander.getActiveAbilityName().isEmpty();
+    boolean trueIfBarFalseIfText = null == commander.getActiveAbility();
     if( trueIfBarFalseIfText )
     {
       powerBarImage = buildCoPowerBar(commander, commander.getAbilityCosts(), commander.getAbilityPower(), overlayIsLeft);
     }
     else
     {
-      powerBarImage = getActiveAbilityName(commander.getActiveAbilityName());
+      powerBarImage = getActiveAbilityName(commander.getActiveAbility().toString());
     }
     final int POWERBAR_BUFFER = 3; // The distance from the top of the powerbar image frame to the top of the actual power bar (since the ability points are taller).
 

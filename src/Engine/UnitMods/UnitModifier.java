@@ -9,7 +9,7 @@ import Units.UnitModel;
 /**
  * UnitModifiers exist to represent transient or conditional changes in a unit's properties.
  * <p>They are expected to have some external framework in place to manage their lifetimes.
- * <p>This deprecates COModifiers.
+ * <p>This provides a dynamic alternative to COModifiers' static stat modification.
  */
 public interface UnitModifier
 {

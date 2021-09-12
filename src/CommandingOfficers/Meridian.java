@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
+import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
@@ -131,7 +132,7 @@ public class Meridian extends Commander
 
     ChangeAndFlow(Meridian commander)
     {
-      super(commander, STRONGARM_NAME, COST);
+      super(STRONGARM_NAME, COST);
 
       damageMod = new CODamageModifier(BASIC_BUFF);
       defenseMod = new CODefenseModifier(BASIC_BUFF);
@@ -140,12 +141,16 @@ public class Meridian extends Commander
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
     {
-      // Grant the base firepower/defense bonus.
-      myCommander.addCOModifier(damageMod);
-      myCommander.addCOModifier(defenseMod);
+      modList.add(damageMod);
+      modList.add(defenseMod);
+    }
 
+    @Override
+    protected void perform(Commander co, MapMaster gameMap)
+    {
+      // TODO: Handle with a StateTracker
       // Units that transformed are refreshed and able to move again.
       for( Unit unit : COcast.justTransformed )
       {
@@ -154,14 +159,14 @@ public class Meridian extends Commander
     }
 
     @Override
-    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
+    public Collection<DamagePopup> getDamagePopups(Commander co, GameMap gameMap)
     {
       ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
 
       for( Unit unit : COcast.justTransformed )
         output.add(new DamagePopup(
                        new XYCoord(unit.x, unit.y),
-                       myCommander.myColor,
+                       co.myColor,
                        "Flow"));
 
       return output;
@@ -184,7 +189,7 @@ public class Meridian extends Commander
 
     VehicularCharge(Meridian commander)
     {
-      super(commander, MOBILIZE_NAME, COST);
+      super(MOBILIZE_NAME, COST);
 
       damageMod = new CODamageModifier(BASIC_BUFF);
       defenseMod = new CODefenseModifier(BASIC_BUFF);
@@ -193,12 +198,16 @@ public class Meridian extends Commander
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
     {
-      // Grant the base firepower/defense bonus.
-      myCommander.addCOModifier(damageMod);
-      myCommander.addCOModifier(defenseMod);
+      modList.add(damageMod);
+      modList.add(defenseMod);
+    }
 
+    @Override
+    protected void perform(Commander co, MapMaster gameMap)
+    {
+      // TODO: Handle with a UnitModifier
       // Lastly, all land vehicles are refreshed and able to move again.
       for( Unit unit : COcast.units )
       {

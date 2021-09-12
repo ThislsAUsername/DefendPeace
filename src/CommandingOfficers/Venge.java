@@ -174,17 +174,23 @@ public class Venge extends Commander
 
     IronWill(Venge commander)
     {
-      super(commander, NAME, COST);
+      super(NAME, COST);
       COcast = commander;
       defenseMod = new CODefenseModifier(IRONWILL_BUFF);
       AIFlags = PHASE_TURN_END;
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
     {
+      modList.add(defenseMod);
+    }
+
+    @Override
+    protected void perform(Commander co, MapMaster gameMap)
+    {
+      // TODO: UnitModifier
       COcast.counterAtFullPower = true;
-      COcast.addCOModifier(defenseMod);
     }
   }
 
@@ -204,18 +210,24 @@ public class Venge extends Commander
 
     Retribution(Venge commander)
     {
-      super(commander, NAME, COST);
+      super(NAME, COST);
       COcast = commander;
       damageMod = new CODamageModifier(RETRIBUTION_BUFF);
       defenseMod = new CODefenseModifier(-RETRIBUTION_NERF);
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
     {
+      modList.add(damageMod);
+      modList.add(defenseMod);
+    }
+
+    @Override
+    protected void perform(Commander co, MapMaster gameMap)
+    {
+      // TODO: UnitModifier
       COcast.counterFirst = true;
-      COcast.addCOModifier(damageMod);
-      COcast.addCOModifier(defenseMod);
     }
   }
   

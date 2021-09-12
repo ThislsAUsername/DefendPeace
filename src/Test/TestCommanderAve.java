@@ -161,7 +161,7 @@ public class TestCommanderAve extends TestCase
     {
       Ave.modifyAbilityPower(20);
       Ave.initTurn(testMap);
-      performGameAction(new GameAction.AbilityAction(ca), game);
+      performGameAction(new GameAction.AbilityAction(Ave, ca), game);
     }
 
     // Check that the ability did what it was supposed to.

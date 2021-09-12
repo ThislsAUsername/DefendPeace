@@ -154,6 +154,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     maxHP = other.maxHP;
     maxMaterials = other.maxMaterials;
 
+    CO = other.CO;
     COstr = other.COstr;
     COdef = other.COdef;
     COcost = other.COcost;

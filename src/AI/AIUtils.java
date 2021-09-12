@@ -251,7 +251,7 @@ public class AIUtils
       }
     }
     if (null != q && null != retVal)
-      q.offer(new GameAction.AbilityAction(retVal));
+      q.offer(new GameAction.AbilityAction(co, retVal));
     return retVal;
   }
 

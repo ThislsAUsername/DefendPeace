@@ -3,6 +3,7 @@ package Test;
 import CommandingOfficers.Cinder;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Venge;
+import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
@@ -92,7 +93,7 @@ public class TestCombatMods extends TestCase
     BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
 
     venge.modifyAbilityPower(42); // juice up
-    venge.getReadyAbilities().get(0).activate(testMap); // activate Iron WIll
+    performGameAction(new GameAction.AbilityAction(venge, venge.getReadyAbilities().get(0)), testGame); // activate Iron Will
     
     // ...and after power
     BattleSummary ironAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
@@ -122,23 +123,23 @@ public class TestCombatMods extends TestCase
     // Add our test subjects
     Unit infA = addUnit(testMap, cinder, UnitModel.TROOP, 7, 3);
     Unit infB = addUnit(testMap, venge, UnitModel.TROOP, 7, 5);
-    
+
     // Check our damage for each first strike pre-power...
     BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
     BattleSummary normalBA = CombatEngine.simulateBattleResults(infB, infA, testMap, 7, 4);
 
     venge.modifyAbilityPower(42); // juice up
-    venge.getReadyAbilities().get(1).activate(testMap); // activate Retribution
-    
+    performGameAction(new GameAction.AbilityAction(venge, venge.getReadyAbilities().get(1)), testGame); // activate Retribution
+
     // ...and after power
     BattleSummary retribAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
     BattleSummary retribBA = CombatEngine.simulateBattleResults(infB, infA, testMap, 7, 4);
-    
+
     // Check that Venge's Retribution works properly without breaking things (other than balance)
     boolean testPassed = true;
     testPassed &= validate(infB.model.getDamageRatio() > 110, "    Retribution didn't buff offense.");
     testPassed &= validate(infB.model.getDefenseRatio() < 100, "    Retribution didn't reduce defense.");
-    
+
     // First, check the logic of A->B
     testPassed &= validate(normalAB.defenderHPLoss > normalAB.attackerHPLoss, "    First strike didn't work properly for Cinder.");
 
@@ -148,7 +149,7 @@ public class TestCombatMods extends TestCase
 
     // Now do B->A
     testPassed &= validate(normalBA.defenderHPLoss > normalBA.attackerHPLoss, "    First strike didn't work properly for Venge.");
-    
+
     testPassed &= validate(normalBA.defenderHPLoss < retribBA.defenderHPLoss, "    Venge didn't deal more damage with buffed offense.");
 
     testPassed &= validate(retribBA.attacker == infB, "    infB attacked, but isn't the attacker.");

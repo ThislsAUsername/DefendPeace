@@ -129,7 +129,7 @@ public class Bear_Bull extends Commander
     UpDownTurnAbility(Bear_Bull commander)
     {
       // as we start in Bear form, UpTurn is the correct starting name
-      super(commander, UPTURN_NAME, DOWNUPTURN_COST);
+      super(UPTURN_NAME, DOWNUPTURN_COST);
       COcast = commander;
     }
 
@@ -141,15 +141,19 @@ public class Bear_Bull extends Commander
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
     {
-      myCommander.addCOModifier(this);
+      modList.add(this); // TODO
     }
 
     @Override
-    public GameEventQueue getEvents(MapMaster gameMap)
+    protected void perform(Commander co, MapMaster gameMap)
+    {}
+
+    @Override
+    public GameEventQueue getEvents(Commander co, MapMaster gameMap)
     {
-      Collection<Unit> victims = findVictims(gameMap);
+      Collection<Unit> victims = findVictims(co, gameMap);
 
       // Damage is dealt after swapping D2Ds so it's actually useful to Bear
       GameEventQueue powerEvents = new GameEventQueue();
@@ -169,6 +173,7 @@ public class Bear_Bull extends Commander
     @Override // COModifier interface.
     public void applyChanges(Commander commander)
     {
+      // TODO?!
       COcast.swapD2Ds(false);
     }
 
@@ -179,26 +184,26 @@ public class Bear_Bull extends Commander
     }
 
     @Override
-    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
+    public Collection<DamagePopup> getDamagePopups(Commander co, GameMap gameMap)
     {
       ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
 
-      for( Unit victim : findVictims(gameMap) )
+      for( Unit victim : findVictims(co, gameMap) )
         output.add(new DamagePopup(
                        new XYCoord(victim.x, victim.y),
-                       myCommander.myColor,
+                       co.myColor,
                        Math.min(victim.getHP()-1, DOWNUPTURN_LIQUIDATION)*10 + "%"));
 
       return output;
     }
 
-    public HashSet<Unit> findVictims(GameMap gameMap)
+    public HashSet<Unit> findVictims(Commander co, GameMap gameMap)
     {
       HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
-      for( XYCoord xyc : myCommander.ownedProperties )
+      for( XYCoord xyc : co.ownedProperties )
       {
         MapLocation loc = gameMap.getLocation(xyc);
-        if( loc.getOwner() == myCommander )
+        if( loc.getOwner() == co )
         {
           Unit victim = loc.getResident();
           if( null != victim )
@@ -228,7 +233,7 @@ public class Bear_Bull extends Commander
     BustBoomAbility(Bear_Bull commander)
     {
       // as we start in Bear form, Boom is the correct starting name
-      super(commander, BOOM_NAME, BOOMBUST_COST);
+      super(BOOM_NAME, BOOMBUST_COST);
       COcast = commander;
     }
 
@@ -240,16 +245,20 @@ public class Bear_Bull extends Commander
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
     {
-      myCommander.addCOModifier(this);
+      modList.add(this); // TODO
     }
+
+    @Override
+    protected void perform(Commander co, MapMaster gameMap)
+    {}
 
     @Override // COModifier interface.
     public void applyChanges(Commander commander)
     {
       // Instead of swapping, we get a discount. Yaaaay.
-      for( UnitModel um : COcast.unitModels )
+      for( UnitModel um : commander.unitModels )
       {
         um.COcost -= BOOMBUST_BUFF;
       }

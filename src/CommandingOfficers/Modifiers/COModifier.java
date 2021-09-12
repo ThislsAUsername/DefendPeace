@@ -2,6 +2,7 @@ package CommandingOfficers.Modifiers;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import CommandingOfficers.Commander;
 import Units.UnitModel;
@@ -44,6 +45,19 @@ public interface COModifier extends Serializable
       else
       {
         System.out.println("Attempting to add null model to GenericCOModifier!");
+        throw new NullPointerException(); // Make sure this oversight doesn't go unnoticed.
+      }
+    }
+    public void addApplicableUnitModels(Collection<UnitModel> models)
+    {
+      if( models != null )
+      {
+        for( UnitModel model : models )
+          addApplicableUnitModel(model);
+      }
+      else
+      {
+        System.out.println("Attempting to add null collection to GenericCOModifier!");
         throw new NullPointerException(); // Make sure this oversight doesn't go unnoticed.
       }
     }

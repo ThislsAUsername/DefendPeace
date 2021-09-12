@@ -18,7 +18,6 @@ import AI.AICombatUtils;
 import AI.AIController;
 import AI.AILibrary;
 import AI.AIMaker;
-import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
 import Engine.GameScenario;
 import Engine.XYCoord;
@@ -50,7 +49,6 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
   public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
   public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
   public Set<XYCoord> ownedProperties;
-  public ArrayList<COModifier> modifiers;
   public Color myColor;
   public Faction faction;
   public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
@@ -63,7 +61,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
   private double myAbilityPower = 0;
 
   private ArrayList<CommanderAbility> myAbilities = null;
-  private String myActiveAbilityName = "";
+  private CommanderAbility myActiveAbility = null;
 
   // The AI has to be effectively stateless anyway (to be able to adapt to whatever scenario it finds itself in on map start),
   //   so may as well not require them to care about serializing their contents.
@@ -89,7 +87,6 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
       um.CO = this;
     }
 
-    modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
     ownedProperties = new HashSet<XYCoord>();
 
@@ -99,12 +96,6 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
   protected void addCommanderAbility(CommanderAbility ca)
   {
     myAbilities.add(ca);
-  }
-
-  public void addCOModifier(COModifier mod)
-  {
-    mod.applyChanges(this);
-    modifiers.add(mod); // Add to the list so the modifier can be reverted next turn.
   }
 
   public void endTurn()
@@ -120,18 +111,15 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
   public GameEventQueue initTurn(MapMaster map)
   {
     myView.resetFog();
-    myActiveAbilityName = "";
+
+    if( null != myActiveAbility )
+    {
+      myActiveAbility.deactivate(this, map);
+      myActiveAbility = null;
+    }
 
     // Accrue income for each city under your control.
     money += getIncomePerTurn();
-
-    // Un-apply any modifiers that were activated last turn.
-    // TODO: If/when we have modifiers that last multiple turns, figure out how to handle them.
-    for( int i = modifiers.size() - 1; i >= 0; --i )
-    {
-      modifiers.get(i).revertChanges(this);
-      modifiers.remove(i);
-    }
 
     if( null != aiController )
     {
@@ -243,7 +231,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
   public ArrayList<CommanderAbility> getReadyAbilities()
   {
     ArrayList<CommanderAbility> ready = new ArrayList<CommanderAbility>();
-    if( myActiveAbilityName.isEmpty() )
+    if( null == myActiveAbility )
     {
       for( CommanderAbility ca : myAbilities )
       {
@@ -271,17 +259,19 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
     return myAbilityPower;
   }
 
-  public String getActiveAbilityName()
+  public CommanderAbility getActiveAbility()
   {
-    return myActiveAbilityName;
+    return myActiveAbility;
   }
 
   /** Lets the commander know that he's using an ability,
    *  and accounts for the cost of using it. */
-  public void activateAbility(CommanderAbility ability)
+  public void activateAbility(CommanderAbility ability, MapMaster map)
   {
     modifyAbilityPower(-ability.getCost());
-    myActiveAbilityName = ability.toString();
+    if( null != myActiveAbility )
+      myActiveAbility.deactivate(this, map);
+    myActiveAbility = ability;
   }
 
   public void modifyAbilityPower(double amount)

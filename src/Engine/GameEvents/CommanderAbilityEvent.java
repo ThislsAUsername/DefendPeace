@@ -1,5 +1,6 @@
 package Engine.GameEvents;
 
+import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.XYCoord;
 import Terrain.MapMaster;
@@ -8,10 +9,12 @@ import UI.Art.Animation.GameAnimation;
 
 public class CommanderAbilityEvent implements GameEvent
 {
+  private final Commander myCommander;
   private final CommanderAbility myAbility;
 
-  public CommanderAbilityEvent(CommanderAbility ability)
+  public CommanderAbilityEvent(Commander co, CommanderAbility ability)
   {
+    myCommander = co;
     myAbility = ability;
   }
 
@@ -33,7 +36,14 @@ public class CommanderAbilityEvent implements GameEvent
   @Override
   public void performEvent(MapMaster gameMap)
   {
-    myAbility.activate(gameMap);
+    if( myCommander.getAbilityPower() < myAbility.getCost() )
+    {
+      System.out.println("WARNING!: Performing ability with insufficient ability power!");
+    }
+    myCommander.activateAbility(myAbility, gameMap);
+    myAbility.adjustCost();
+
+    myAbility.activate(myCommander, gameMap);
   }
 
   @Override

@@ -1,5 +1,7 @@
 package CommandingOfficers;
 
+import java.util.ArrayList;
+
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameInstance;
@@ -167,7 +169,7 @@ public class Patch extends Commander
 
     PatchAbility(Patch myCO, String abilityName, int abilityCost, double incomeRatio, int unitBuff)
     {
-      super(myCO, abilityName, abilityCost);
+      super(abilityName, abilityCost);
 
       coCast = myCO;
       myIncomeRatio = incomeRatio;
@@ -177,21 +179,21 @@ public class Patch extends Commander
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
     {
-      // Register this class as a COModifier, so we can deactivate one turn from now.
-      myCommander.addCOModifier(this);
-
-      coCast.myIncomeRatio = myIncomeRatio;
-
-      // Bump up our power level.
-      myCommander.addCOModifier(damageBuff);
+      modList.add(damageBuff);
+      modList.add(this); // TODO
     }
+
+    @Override
+    protected void perform(Commander co, MapMaster gameMap)
+    {}
 
     @Override // COModifier interface.
     public void applyChanges(Commander commander)
     {
-      // No special action required.
+      // TODO: StateTracker?
+      coCast.myIncomeRatio = myIncomeRatio;
     }
 
     @Override

@@ -1,9 +1,13 @@
 package CommandingOfficers;
 
+import java.util.ArrayList;
+
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
+import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
+import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams.BattleParams;
 import Terrain.MapMaster;
@@ -88,8 +92,8 @@ public class Strong extends Commander
       }
     }
 
-    addCommanderAbility(new StrongArmAbility(this));
-    addCommanderAbility(new MobilizeAbility(this));
+    addCommanderAbility(new StrongArmAbility());
+    addCommanderAbility(new MobilizeAbility());
   }
 
   /**
@@ -117,36 +121,27 @@ public class Strong extends Commander
     private static final int STRONGARM_BUFF = 10;
     private static final int STRONGARM_FOOT_BUFF = 20; // On top of STONGARM_BUFF
 
-    CODamageModifier damageMod = null;
-    CODefenseModifier defenseMod = null;
-    CODamageModifier damageModTroop = null;
-
-    StrongArmAbility(Commander commander)
+    StrongArmAbility()
     {
-      super(commander, STRONGARM_NAME, STRONGARM_COST);
-
-      damageMod = new CODamageModifier(STRONGARM_BUFF);
-      defenseMod = new CODefenseModifier(STRONGARM_BUFF);
-      damageModTroop = new CODamageModifier(STRONGARM_FOOT_BUFF);
-      for( UnitModel model : commander.getAllModels(UnitModel.TROOP) )
-      {
-        damageModTroop.addApplicableUnitModel(model);
-      }
+      super(STRONGARM_NAME, STRONGARM_COST);
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    protected void enqueueCOMods(Commander myCommander, MapMaster gameMap, ArrayList<COModifier> modList)
     {
-      // Grant the base firepower/defense bonus.
-      myCommander.addCOModifier(damageMod);
-      myCommander.addCOModifier(defenseMod);
-      myCommander.addCOModifier(damageModTroop);
+      GenericUnitModifier damageMod = new CODamageModifier(STRONGARM_BUFF);
+      GenericUnitModifier defenseMod = new CODefenseModifier(STRONGARM_BUFF);
+      GenericUnitModifier damageModTroop = new CODamageModifier(STRONGARM_FOOT_BUFF);
+      damageModTroop.addApplicableUnitModels(myCommander.getAllModels(UnitModel.TROOP));
+      modList.add(damageMod);
+      modList.add(defenseMod);
+      modList.add(damageModTroop);
 
       // Make infantry buildable from all production buildings.
       UnitModel infModel = myCommander.getUnitModel(UnitModel.TROOP);
       UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, infModel);
       upm.addProductionPair(TerrainType.SEAPORT, infModel);
-      myCommander.addCOModifier(upm);
+      modList.add(upm);
 
       // Grant troops and transports additional movement power.
       COMovementModifier moveMod = new COMovementModifier(2);
@@ -154,8 +149,12 @@ public class Strong extends Commander
       {
         moveMod.addApplicableUnitModel(model);
       }
-      myCommander.addCOModifier(moveMod);
+      modList.add(moveMod);
     }
+
+    @Override
+    protected void perform(Commander myCommander, MapMaster gameMap)
+    {}
   }
 
   /**
@@ -170,24 +169,20 @@ public class Strong extends Commander
     private static final int MOBILIZE_BUFF = 40;
     private static final int MOBILIZE_DEFENSE_BUFF = 10;
 
-    CODamageModifier damageMod = null;
-    CODefenseModifier defenseMod = null;
-
-    MobilizeAbility(Commander commander)
+    MobilizeAbility()
     {
-      super(commander, MOBILIZE_NAME, MOBILIZE_COST);
-
-      damageMod = new CODamageModifier(MOBILIZE_BUFF);
-      defenseMod = new CODefenseModifier(MOBILIZE_DEFENSE_BUFF);
+      super(MOBILIZE_NAME, MOBILIZE_COST);
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    protected void enqueueCOMods(Commander myCommander, MapMaster gameMap, ArrayList<COModifier> modList)
     {
       // Grant the base firepower/defense bonus.
-      myCommander.addCOModifier(damageMod);
-      myCommander.addCOModifier(defenseMod);
+      GenericUnitModifier damageMod = new CODamageModifier(MOBILIZE_BUFF);
+      GenericUnitModifier defenseMod = new CODefenseModifier(MOBILIZE_DEFENSE_BUFF);
+      modList.add(damageMod);
+      modList.add(defenseMod);
 
       // Make all TROOPs buildable from all production centers, cities, and the HQ.
       UnitProductionModifier upm = new UnitProductionModifier();
@@ -198,7 +193,7 @@ public class Strong extends Commander
         upm.addProductionPair(TerrainType.CITY, model);
         upm.addProductionPair(TerrainType.HEADQUARTERS, model);
       }
-      myCommander.addCOModifier(upm);
+      modList.add(upm);
 
       // Grant a global +2 movement buff.
       COMovementModifier moveMod = new COMovementModifier(2);
@@ -206,7 +201,7 @@ public class Strong extends Commander
       {
         moveMod.addApplicableUnitModel(model);
       }
-      myCommander.addCOModifier(moveMod);
+      modList.add(moveMod);
 
       // Lastly, all troops are refreshed and able to move again.
       for( Unit unit : myCommander.units )
@@ -217,6 +212,10 @@ public class Strong extends Commander
         }
       }
     }
+
+    @Override
+    protected void perform(Commander myCommander, MapMaster gameMap)
+    {}
   }
 
   public static CommanderInfo getInfo()
