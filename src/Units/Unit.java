@@ -256,7 +256,7 @@ public class Unit implements Serializable, UnitModList
    * When healing, sets health to the maximum value for its HP
    * @return the change in HP
    */
-  public int alterHP(int change) { return alterHP(change, false); }
+  public int alterHP(int change) { return alterHP(change, change < 0); }
   public int alterHP(int change, boolean allowOver)
   {
     int before = getHP();
