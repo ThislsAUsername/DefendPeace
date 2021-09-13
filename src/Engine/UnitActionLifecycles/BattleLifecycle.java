@@ -447,7 +447,7 @@ public abstract class BattleLifecycle
 
     public Unit getAttacker()
     {
-      return result.attacker.body;
+      return result.attacker.unit;
     }
 
     public MapLocation getDefender()
@@ -468,15 +468,15 @@ public abstract class BattleLifecycle
     @Override
     public GameEventQueue sendToListener(GameEventListener listener)
     {
-      return listener.receiveDemolitionEvent(result.attacker.body, target.getCoordinates());
+      return listener.receiveDemolitionEvent(result.attacker.unit, target.getCoordinates());
     }
 
     @Override
     public void performEvent(MapMaster gameMap)
     {
       // Apply the battle results that we calculated previously.
-      Unit attacker = result.attacker.body;
-      attacker.fire(result.attacker.gun); // expend ammo
+      Unit attacker = result.attacker.unit;
+      attacker.fire(result.attacker.weapon); // expend ammo
       target.durability -= percentDamage;
     }
 

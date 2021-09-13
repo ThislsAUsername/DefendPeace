@@ -12,6 +12,7 @@ import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Units.Unit;
+import Units.UnitContext;
 import Units.WeaponModel;
 
 /**
@@ -48,12 +49,8 @@ public class CombatEngine
     int battleRange = path.getEndCoord().getDistance(target.getCoordinates());
     boolean attackerMoved = path.getPathLength() > 1;
     WeaponModel weapon = attacker.chooseWeapon(target, battleRange, attackerMoved);
-    return new StrikeParams(
-        new Combatant(attacker, weapon, path.getEnd().x, path.getEnd().y), attacker.getModifiers(),
-        map, battleRange,
-        attacker.model.getDamageRatio(), attacker.getHP(),
-        weapon.getDamage(target),
-        false);
+    UnitContext uc = new UnitContext(map, attacker, weapon, path.getEnd().x, path.getEnd().y);
+    return StrikeParams.buildStrikeParams(uc, target, map, battleRange, false);
   }
 
   /**
@@ -90,27 +87,21 @@ public class CombatEngine
 
     // From here on in, use context variables only
 
-    double attackerHPLoss = 0;
+    BattleParams attackInstance = context.getAttack();
 
-    // Set up our scenario.
-    BattleParams attackInstance = StrikeParams.getAttack(context);
+    double damage = attackInstance.calculateDamage();
+    unitDamageMap.put(context.attacker.unit,
+        new AbstractMap.SimpleEntry<WeaponModel,Double>(context.attacker.weapon, damage));
 
-    double defenderHPLoss = attackInstance.calculateDamage();
-    unitDamageMap.put(context.attacker, new AbstractMap.SimpleEntry<WeaponModel,Double>(context.attackerWeapon, defenderHPLoss));
-    if( !isSim && defenderHPLoss > context.defender.getPreciseHP() ) defenderHPLoss = context.defender.getPreciseHP();
-
-    // If the unit can counter, and wasn't killed in the initial volley, calculate return damage.
-    if( context.canCounter && (context.defender.getPreciseHP() > defenderHPLoss) )
+    // New battle instance with defender counter-attacking.
+    BattleParams defendInstance = context.getCounterAttack(damage);
+    if( null != defendInstance )
     {
-      // New battle instance with defender counter-attacking.
-      double counterHP = Math.ceil(context.defender.getPreciseHP() - defenderHPLoss); // Account for the first attack's damage to the now-attacker.
-      BattleParams defendInstance = StrikeParams.getCounterAttack(context, counterHP);
-
-      attackerHPLoss = defendInstance.calculateDamage();
-      unitDamageMap.put(context.defender, new AbstractMap.SimpleEntry<WeaponModel,Double>(context.defenderWeapon, attackerHPLoss));
-      if( !isSim && attackerHPLoss > context.attacker.getPreciseHP() ) attackerHPLoss = context.attacker.getPreciseHP();
+      double counterDamage = defendInstance.calculateDamage();
+      unitDamageMap.put(context.defender.unit,
+          new AbstractMap.SimpleEntry<WeaponModel,Double>(context.defender.weapon, counterDamage));
     }
-    
+
     // Calculations complete.
     // Since we are setting up our BattleSummary, use non-CombatContext variables
     //   so consumers of the Summary will see results consistent with the current board/map state
@@ -124,12 +115,10 @@ public class CombatEngine
 
   public static double calculateOneStrikeDamage( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
   {
-    return new BattleParams(
-        new Combatant(attacker, attacker.chooseWeapon(defender.model, battleRange, attackerMoved), attacker.x, attacker.y), attacker.getModifiers(),
-        new Combatant(defender, null, defender.x, defender.y), defender.getModifiers(),
+    return StrikeParams.buildBattleParams(
+        new UnitContext(map, attacker, attacker.chooseWeapon(defender.model, battleRange, attackerMoved), attacker.x, attacker.y),
+        new UnitContext(map, defender, null, defender.x, defender.y),
         map, battleRange,
-        attacker.model.getDamageRatio(), attacker.getHP(),
-        defender.model.getDefenseRatio(), terrainStars,
         false).calculateDamage();
   }
 }

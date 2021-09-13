@@ -102,7 +102,7 @@ public class Meridian extends Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( toBeNerfed.contains(params.attacker.body) )
+    if( toBeNerfed.contains(params.attacker.unit) )
     {
       params.attackPower += POST_REFRESH_STAT_ADJUSTMENT;
     }
@@ -110,7 +110,7 @@ public class Meridian extends Commander
   @Override
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
-    if( toBeNerfed.contains(params.defender.body) )
+    if( toBeNerfed.contains(params.defender.unit) )
     {
       params.defensePower += POST_REFRESH_STAT_ADJUSTMENT;
     }

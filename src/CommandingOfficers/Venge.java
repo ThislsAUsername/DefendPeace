@@ -14,7 +14,7 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
 import Terrain.MapMaster;
 import Units.Unit;
-import Units.WeaponModel;
+import Units.UnitContext;
 
 /*
  * Venge enhances counter-attacks of all sorts.
@@ -113,19 +113,10 @@ public class Venge extends Commander
     // If we're swapping, and we can counter, and we're on the defensive, do the swap.
     if (counterFirst && instance.canCounter && this == instance.defender.CO )
     {
-      // Store our unit. Since defenders don't move, we have defenderX/Y already.
-      Unit minion = instance.defender;
-      WeaponModel myWeapon = instance.defenderWeapon;
+      UnitContext minion = instance.defender;
 
       instance.defender = instance.attacker;
-      instance.defenderWeapon = instance.attackerWeapon;
-      instance.defenderX = instance.attackerX;
-      instance.defenderY = instance.attackerY;
-
       instance.attacker = minion;
-      instance.attackerWeapon = myWeapon;
-      instance.attackerX = minion.x;
-      instance.attackerY = minion.y;
     }
   }
 
@@ -135,13 +126,13 @@ public class Venge extends Commander
       if( counterAtFullPower && params.isCounter )
       {
         // counterattack as if the unit had not taken damage.
-        params.attackerHP = params.attacker.body.getHP();
+        params.attackerHP = params.attacker.unit.getHP();
       }
   }
   @Override
   public void modifyUnitAttackOnUnit(BattleParams params)
   {
-      if( aggressors.contains(params.defender.body) )
+      if( aggressors.contains(params.defender.unit) )
       {
         // Boost attack if it's time to avenge slights
         params.attackPower += VENGEANCE_BOOST;

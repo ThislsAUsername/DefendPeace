@@ -175,8 +175,8 @@ public class Ave extends Commander
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
     // We are defending, in a FOREST
-    if( (params.map.getEnvironment(params.defender.x, params.defender.y).terrainType == TerrainType.FOREST)
-        && (params.defender.body.model.isLandUnit()))  // And our unit is actually on the ground.
+    if( (params.map.getEnvironment(params.defender.coord).terrainType == TerrainType.FOREST)
+        && (params.defender.unit.model.isLandUnit()))  // And our unit is actually on the ground.
     {
       params.terrainStars--;
     }

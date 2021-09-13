@@ -419,7 +419,7 @@ public class SpriteMapView extends MapView
   @Override // from MapView
   public GameAnimation buildDemolitionAnimation( StrikeParams params, XYCoord target, int damage )
   {
-    return new NobunagaBattleAnimation(SpriteLibrary.baseSpriteSize, params.attacker.body, params.attacker.x, params.attacker.y, target.xCoord, target.yCoord);
+    return new NobunagaBattleAnimation(SpriteLibrary.baseSpriteSize, params.attacker.unit, params.attacker.coord.xCoord, params.attacker.coord.yCoord, target.xCoord, target.yCoord);
   }
 
   @Override // from MapView

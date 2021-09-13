@@ -46,6 +46,21 @@ public abstract class UnitState implements Serializable
 
     heldUnits = new CargoList(model);
   }
+  public UnitState(UnitState other)
+  {
+    CO = other.CO;
+    model = other.model;
+    ammo = other.ammo;
+    fuel = other.fuel;
+    materials = other.materials;
+    isTurnOver = other.isTurnOver;
+    health = other.health;
+    captureProgress = other.captureProgress;
+    captureTarget = other.captureTarget;
+
+    heldUnits = new CargoList(model);
+    heldUnits.addAll(other.heldUnits);
+  }
 
   public boolean isHurt()
   {
