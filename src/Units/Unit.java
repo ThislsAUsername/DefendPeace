@@ -1,6 +1,5 @@
 package Units;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,43 +16,15 @@ import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
 
-public class Unit implements Serializable, UnitModList
+public class Unit extends UnitState implements UnitModList
 {
   private static final long serialVersionUID = 1L;
-  public CargoList heldUnits;
-  public UnitModel model;
   public int x = -1;
   public int y = -1;
-  public int ammo;
-  public int fuel;
-  public int materials;
-  private int captureProgress;
-  private MapLocation captureTarget;
-  public Commander CO;
-  public boolean isTurnOver;
-  public boolean isStunned;
-
-  /**
-   * HP is a value, typically in range [1-10], that determines the current actual strength of a unit.
-   * A unit at 0 HP is dead.
-   * Health is HP value as a percentage, thus ~10x the HP value.
-   * When determining HP, health must always be rounded up.
-   */
-  private int health;
 
   public Unit(Commander co, UnitModel um)
   {
-    CO = co;
-    model = um;
-    ammo = model.maxAmmo;
-    fuel = model.maxFuel;
-    materials = model.maxMaterials;
-    isTurnOver = true;
-    health = healthFromHP(model.maxHP);
-    captureProgress = 0;
-    captureTarget = null;
-
-    heldUnits = new CargoList(model);
+    super(co, um);
   }
 
   /**
@@ -210,103 +181,6 @@ public class Unit implements Serializable, UnitModList
     }
   }
 
-  public boolean isHurt()
-  {
-    return health < healthFromHP(model.maxHP);
-  }
-  public int getHP()
-  {
-    return (int) Math.ceil(healthToHP(health));
-  }
-  /** @return value in range [0-1.0]; represents the unit's current effectiveness */
-  public double getHPFactor()
-  {
-    return getHP() / (double)model.maxHP;
-  }
-  /** @return un-rounded HP */
-  public double getPreciseHP()
-  {
-    return healthToHP(health);
-  }
-  private static double healthToHP(int input)
-  {
-    return ((double)input)/10;
-  }
-  private static int healthFromHP(double input)
-  {
-    return (int) (input * 10);
-  }
-
-  /**
-   * Reduces HP by the specified amount.
-   * Enforces a minimum of 0.
-   * @return the change in HP
-   */
-  public int damageHP(double damage)
-  {
-    if( damage < 0 ) throw new ArithmeticException("Cannot inflict negative damage!");
-    int before = getHP();
-    health = Math.max(0, health - healthFromHP(damage));
-    return getHP() - before;
-  }
-
-  /**
-   * Increases HP by the specified amount.
-   * Enforces a minimum of 0.1.
-   * When healing, sets health to the maximum value for its HP
-   * @return the change in HP
-   */
-  public int alterHP(int change) { return alterHP(change, change < 0); }
-  public int alterHP(int change, boolean allowOver)
-  {
-    int before = getHP();
-    int newHP = allowOver ? getHP()+change : Math.min(model.maxHP, getHP() + change);
-    health = Math.max(1, healthFromHP(newHP));
-    if (change > 0)
-      health = healthFromHP(getHP());
-    return getHP() - before;
-  }
-
-  public boolean capture(MapLocation target)
-  {
-    boolean success = false;
-
-    if( target != captureTarget )
-    {
-      captureTarget = target;
-      captureProgress = 0;
-    }
-    captureProgress += getHP();
-    if( captureProgress >= target.getEnvironment().terrainType.getCaptureThreshold() )
-    {
-      target.setOwner(CO);
-      captureProgress = 0;
-      target = null;
-      success = true;
-    }
-
-    return success;
-  }
-
-  public void stopCapturing()
-  {
-    captureTarget = null;
-    captureProgress = 0;
-  }
-
-  public int getCaptureProgress()
-  {
-    return captureProgress;
-  }
-  public XYCoord getCaptureTargetCoords()
-  {
-    XYCoord target = null;
-    if( null != captureTarget )
-    {
-      target = captureTarget.getCoordinates();
-    }
-    return target;
-  }
 
   /** Compiles and returns a list of all actions this unit could perform on map after moving along movePath. */
   public ArrayList<GameActionSet> getPossibleActions(GameMap map, GamePath movePath)
@@ -378,6 +252,7 @@ public class Unit implements Serializable, UnitModList
   {
     return String.format("%s at %s", model, new XYCoord(x, y));
   }
+
 
   private final ArrayList<UnitModifier> unitMods = new ArrayList<UnitModifier>();
   @Override
