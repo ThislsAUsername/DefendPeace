@@ -27,6 +27,7 @@ import Terrain.TerrainType;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
+import Units.UnitContext;
 import Units.WeaponModel;
 
 public abstract class BattleLifecycle
@@ -365,9 +366,12 @@ public abstract class BattleLifecycle
 
     public BattleEvent(Unit attacker, Unit defender, GamePath path, MapMaster map)
     {
-      boolean attackerMoved = path.getPathLength() > 1;
+      UnitContext attackerContext = new UnitContext(attacker);
+      attackerContext.path = path;
+      attackerContext.coord = path.getEndCoord();
+      UnitContext defenderContext = new UnitContext(defender);
       // Calculate the result of the battle immediately. This will allow us to plan the animation.
-      battleInfo = CombatEngine.calculateBattleResults(attacker, defender, map, attackerMoved, path.getEnd().x, path.getEnd().y);
+      battleInfo = CombatEngine.calculateBattleResults(attackerContext, defenderContext, map);
       defenderCoords = new XYCoord(defender.x, defender.y);
     }
 

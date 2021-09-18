@@ -18,7 +18,6 @@ public class CombatContext
   public UnitContext attacker, defender;
   public final GameMap gameMap; // for reference, not weirdness
   public boolean canCounter = false;
-  public boolean attackerMoved;
   public int battleRange;
   
   public CombatContext(GameMap map,
@@ -26,25 +25,36 @@ public class CombatContext
       Unit pDefender, WeaponModel defenderWep, List<UnitModifier> defenderMods,
       int pBattleRange, int attackerX, int attackerY)
   {
-    attacker = new UnitContext(map, pAttacker, attackerWep, attackerX, attackerY);
+    this(map,
+        new UnitContext(map, pAttacker, attackerWep, attackerX, attackerY),
+        new UnitContext(map, pDefender, defenderWep, pDefender.x, pDefender.y),
+        pBattleRange);
     attacker.mods.clear();
     attacker.mods.addAll(attackerMods);
 
-    defender = new UnitContext(map, pDefender, defenderWep, pDefender.x, pDefender.y);
     defender.mods.clear();
     defender.mods.addAll(defenderMods);
+  }
+
+  public CombatContext(GameMap map,
+      UnitContext pAttacker,
+      UnitContext pDefender,
+      int pBattleRange)
+  {
+    attacker = pAttacker;
+    defender = pDefender;
 
     gameMap = map;
-    attackerMoved = pAttacker.x != attackerX || pAttacker.y != attackerY;
     battleRange = pBattleRange;
-    if( null != defenderWep )
+    // Only attacks at point-blank range can be countered
+    if( (1 == battleRange) && (null != defender.weapon) )
     {
       canCounter = true;
     }
 
     // Make local shallow copies to avoid funny business
-    List<UnitModifier> aMods = new ArrayList<UnitModifier>(attackerMods);
-    List<UnitModifier> dMods = new ArrayList<UnitModifier>(defenderMods);
+    List<UnitModifier> aMods = new ArrayList<UnitModifier>(attacker.mods);
+    List<UnitModifier> dMods = new ArrayList<UnitModifier>(defender.mods);
     // apply modifiers...
     for( UnitModifier mod : aMods )
       mod.changeCombatContext(this);

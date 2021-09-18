@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import CommandingOfficers.Commander;
+import Engine.GamePath;
 import Engine.XYCoord;
 import Engine.UnitMods.UnitModifier;
 import Terrain.Environment;
@@ -19,6 +20,7 @@ public class UnitContext extends UnitState
 
   // Groups are set together
   public Unit unit;
+  public GamePath path;
   public XYCoord coord;
 
   public int maxHP;
@@ -26,7 +28,7 @@ public class UnitContext extends UnitState
   public int defensePower;
 
   public Environment env;
-  public Integer terrainStars = null;
+  public int terrainStars = 0;
 
   public WeaponModel weapon;
 
@@ -58,6 +60,7 @@ public class UnitContext extends UnitState
   {
     super(other);
     unit = other.unit;
+    path = other.path;
     coord = other.coord;
     maxHP = other.maxHP;
     attackPower = other.attackPower;
@@ -77,9 +80,14 @@ public class UnitContext extends UnitState
   public void setEnvironment(Environment input)
   {
     env = input;
-    terrainStars = 0;
     // Air units shouldn't get terrain defense
-    if( !model.isAirUnit() )
+    if( null != env && !model.isAirUnit() )
       terrainStars = env.terrainType.getDefLevel();
+  }
+
+  @Override
+  public String toString()
+  {
+    return model.name;
   }
 }
