@@ -19,24 +19,37 @@ public class CombatContext
   public final GameMap gameMap; // for reference, not weirdness
   public boolean canCounter = false;
   public int battleRange;
-  
-  public CombatContext(GameMap map,
+
+  public static CombatContext build(GameMap map,
       Unit pAttacker, WeaponModel attackerWep, List<UnitModifier> attackerMods,
       Unit pDefender, WeaponModel defenderWep, List<UnitModifier> defenderMods,
       int pBattleRange, int attackerX, int attackerY)
   {
-    this(map,
+    CombatContext c = new CombatContext(map,
         new UnitContext(map, pAttacker, attackerWep, attackerX, attackerY),
         new UnitContext(map, pDefender, defenderWep, pDefender.x, pDefender.y),
         pBattleRange);
-    attacker.mods.clear();
-    attacker.mods.addAll(attackerMods);
+    c.attacker.mods.clear();
+    c.attacker.mods.addAll(attackerMods);
+    c.defender.mods.clear();
+    c.defender.mods.addAll(defenderMods);
 
-    defender.mods.clear();
-    defender.mods.addAll(defenderMods);
+    c.applyModifiers();
+    return c;
   }
 
-  public CombatContext(GameMap map,
+  public static CombatContext build(GameMap map,
+                                    UnitContext pAttacker,
+                                    UnitContext pDefender,
+                                    int pBattleRange)
+  {
+    CombatContext c = new CombatContext(map, pAttacker, pDefender, pBattleRange);
+
+    c.applyModifiers();
+    return c;
+  }
+
+  private CombatContext(GameMap map,
       UnitContext pAttacker,
       UnitContext pDefender,
       int pBattleRange)
@@ -46,12 +59,45 @@ public class CombatContext
 
     gameMap = map;
     battleRange = pBattleRange;
+
+    boolean attackerMoved = false;
+    if( null != attacker.path )
+      attackerMoved = attacker.path.getPathLength() > 1;
+    else if( null != attacker.unit && null != attacker.coord )
+      attackerMoved = attacker.unit.x != attacker.coord.xCoord || attacker.unit.y != attacker.coord.yCoord;
+
+    if ( map.isLocationValid(attacker.coord))
+    {
+      attacker.setEnvironment(map.getEnvironment(attacker.coord));
+    }
+    if ( map.isLocationValid(defender.coord))
+    {
+      defender.setEnvironment(map.getEnvironment(defender.coord));
+    }
+
+    if( null == attacker.weapon )
+    {
+      attacker.weapon = attacker.unit.chooseWeapon(defender.model, battleRange, attackerMoved);
+    }
+    if( null == defender.weapon )
+    {
+      defender.weapon = defender.unit.chooseWeapon(attacker.model, battleRange, false);
+    }
+
     // Only attacks at point-blank range can be countered
     if( (1 == battleRange) && (null != defender.weapon) )
     {
       canCounter = true;
     }
 
+    if( attacker.mods.isEmpty() )
+      attacker.mods.addAll(attacker.unit.getModifiers());
+    if( defender.mods.isEmpty() )
+      defender.mods.addAll(defender.unit.getModifiers());
+  }
+
+  private void applyModifiers()
+  {
     // Make local shallow copies to avoid funny business
     List<UnitModifier> aMods = new ArrayList<UnitModifier>(attacker.mods);
     List<UnitModifier> dMods = new ArrayList<UnitModifier>(defender.mods);

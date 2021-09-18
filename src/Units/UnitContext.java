@@ -32,8 +32,7 @@ public class UnitContext extends UnitState
 
   public WeaponModel weapon;
 
-  /** Only set by the clone constructor */
-  public List<UnitModifier> mods = new ArrayList<UnitModifier>();
+  public final List<UnitModifier> mods = new ArrayList<UnitModifier>();
 
   public UnitContext(GameMap map, Unit u, WeaponModel w, int x, int y)
   {

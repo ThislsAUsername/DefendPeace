@@ -70,27 +70,7 @@ public class CombatEngine
 
     int battleRange = Math.abs(attackerX - defenderX) + Math.abs(attackerY - defenderY);
 
-    boolean attackerMoved = false;
-    if( null != attacker.path )
-      attackerMoved = attacker.path.getPathLength() > 1;
-    else if( null != attacker.unit )
-      attackerMoved = attacker.unit.x != attacker.coord.xCoord || attacker.unit.y != attacker.coord.yCoord;
-
-    if( null == attacker.weapon )
-    {
-      attacker.weapon = attacker.unit.chooseWeapon(defender.model, battleRange, attackerMoved);
-    }
-    if( null == defender.weapon )
-    {
-      defender.weapon = defender.unit.chooseWeapon(attacker.model, battleRange, false);
-    }
-
-    if( attacker.mods.isEmpty() )
-      attacker.mods.addAll(attacker.unit.getModifiers());
-    if( defender.mods.isEmpty() )
-      defender.mods.addAll(defender.unit.getModifiers());
-
-    CombatContext context = new CombatContext(map, attacker, defender, battleRange);
+    CombatContext context = CombatContext.build(map, attacker, defender, battleRange);
 
     // unitDamageMap provides an order- and perspective-agnostic view of how much damage was done
     // This is necessary to pass information coherently between this function's local context
@@ -120,8 +100,8 @@ public class CombatEngine
     //   (e.g. the Unit 'attacker' actually belongs to the CO whose turn it currently is)
     return new BattleSummary(attacker.unit, attacker.weapon,
                              defender.unit, defender.weapon,
-                             map.getEnvironment(attackerX, attackerY).terrainType,
-                             map.getEnvironment(defenderX, defenderY).terrainType,
+                             attacker.env.terrainType,
+                             defender.env.terrainType,
                              unitDamageMap.get(defender), unitDamageMap.get(attacker));
   }
 
