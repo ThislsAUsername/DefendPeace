@@ -51,7 +51,9 @@ public abstract class CommanderAbility implements Serializable
     myPowerCost += Math.max(myPowerCost*0.1, 1);
   }
 
-  /** Public hook to apply this Ability's effects. */
+  /**
+   * Public hook to apply this Ability's effects to a given Commander.
+   */
   public final void activate(Commander co, MapMaster gameMap)
   {
     // Don't re-apply CO mods if we've already applied them to this CO
@@ -64,16 +66,23 @@ public abstract class CommanderAbility implements Serializable
     }
     perform(co, gameMap);
   }
-  /** Public interface to handle any cleanup */
-  public final void deactivate(Commander co, MapMaster gameMap)
+  /**
+   * Public hook to handle cleanup.
+   * <p>One call per use of the power should be sufficient.
+   */
+  public final void deactivate(MapMaster gameMap)
   {
-    if(coModsApplied.containsKey(co)) {
-      ArrayList<COModifier> coModsToApply = coModsApplied.remove(co);
-      // Revert in reverse order, just to be safe
-      for( int i = coModsToApply.size() - 1; i >= 0; --i )
-        coModsToApply.get(i).revertChanges(co);
+    for( Commander co : new ArrayList<Commander>(coModsApplied.keySet()) )
+    {
+      if( coModsApplied.containsKey(co) )
+      {
+        ArrayList<COModifier> coModsToApply = coModsApplied.remove(co);
+        // Revert in reverse order, just to be safe
+        for( int i = coModsToApply.size() - 1; i >= 0; --i )
+          coModsToApply.get(i).revertChanges(co);
+      }
+      revert(co, gameMap);
     }
-    revert(co, gameMap);
   }
 
   /** Subclasses will override this method to enact the ability's effects.

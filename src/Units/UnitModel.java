@@ -380,9 +380,8 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   }
 
   @Override
-  public void apply(UnitModifier unitModifier)
+  public void add(UnitModifier unitModifier)
   {
-    UnitModList.super.apply(unitModifier);
     unitMods.add(unitModifier);
   }
   @Override

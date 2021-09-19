@@ -14,12 +14,6 @@ import Units.UnitModel;
 public interface UnitModifier
 {
   /**
-   * Do not call this directly; call {@link UnitModList.apply()} instead.
-   * <p>Exists as a hook to let the modifier know what list it's been added to.
-   */
-  void applyToUMLImpl(UnitModList uml);
-
-  /**
    * Allows a UnitModifier to make drastic combat changes like counterattacking first or at 2+ range.
    * <p>Prefer using the other combat hooks when feasible.
    */

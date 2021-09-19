@@ -61,7 +61,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
   private double myAbilityPower = 0;
 
   private ArrayList<CommanderAbility> myAbilities = null;
-  private CommanderAbility myActiveAbility = null;
+  private CommanderAbility myActiveAbility = null; // This should move up to Army later on.
 
   // The AI has to be effectively stateless anyway (to be able to adapt to whatever scenario it finds itself in on map start),
   //   so may as well not require them to care about serializing their contents.
@@ -114,7 +114,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
 
     if( null != myActiveAbility )
     {
-      myActiveAbility.deactivate(this, map);
+      myActiveAbility.deactivate(map);
       myActiveAbility = null;
     }
 
@@ -270,7 +270,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
   {
     modifyAbilityPower(-ability.getCost());
     if( null != myActiveAbility )
-      myActiveAbility.deactivate(this, map);
+      myActiveAbility.deactivate(map);
     myActiveAbility = ability;
   }
 
@@ -532,12 +532,6 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
     return count * (gameRules.incomePerCity + incomeAdjustment);
   }
 
-  @Override
-  public void applyToUMLImpl(UnitModList uml)
-  {
-    System.out.println("ERROR: Commander "+coInfo.name+" was added to UnitModList "+uml);
-  }
-
   private final ArrayList<UnitModifier> unitMods;
   @Override
   public List<UnitModifier> getModifiers()
@@ -547,9 +541,8 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
   }
 
   @Override
-  public void apply(UnitModifier unitModifier)
+  public void add(UnitModifier unitModifier)
   {
-    UnitModList.super.apply(unitModifier);
     unitMods.add(unitModifier);
   }
   @Override

@@ -9,10 +9,6 @@ public interface UnitModList
    */
   List<UnitModifier> getModifiers();
 
-  default void apply(UnitModifier unitModifier)
-  {
-    unitModifier.applyToUMLImpl(this);
-  }
-
+  void add(UnitModifier unitModifier);
   void remove(UnitModifier unitModifier);
 }
