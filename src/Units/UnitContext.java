@@ -20,6 +20,7 @@ public class UnitContext extends UnitState
 
   // Groups are set together
   public Unit unit;
+
   public GamePath path;
   public XYCoord coord;
 
@@ -74,6 +75,12 @@ public class UnitContext extends UnitState
     maxHP = model.maxHP;
     attackPower = model.getDamageRatio();
     defensePower = model.getDefenseRatio();
+  }
+
+  public void setPath(GamePath pPath)
+  {
+    path = pPath;
+    coord = path.getEndCoord();
   }
 
   public void setEnvironment(Environment input)

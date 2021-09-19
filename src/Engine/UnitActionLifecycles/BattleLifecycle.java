@@ -369,8 +369,7 @@ public abstract class BattleLifecycle
     public BattleEvent(Unit attacker, Unit defender, GamePath path, MapMaster map)
     {
       UnitContext attackerContext = new UnitContext(attacker);
-      attackerContext.path = path;
-      attackerContext.coord = path.getEndCoord();
+      attackerContext.setPath(path);
       UnitContext defenderContext = new UnitContext(defender);
       // Calculate the result of the battle immediately. This will allow us to plan the animation.
       battleInfo = CombatEngine.calculateBattleResults(attackerContext, defenderContext, map);
