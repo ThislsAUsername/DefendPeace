@@ -146,7 +146,7 @@ public class Venge extends Commander
     // Determine if we were attacked. If so, record this misdeed.
     if( this == battleInfo.defender.CO )
     {
-      aggressors.add(battleInfo.attacker);
+      aggressors.add(battleInfo.attacker.unit);
     }
     return null;
   }

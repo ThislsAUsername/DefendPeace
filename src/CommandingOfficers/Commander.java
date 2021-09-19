@@ -357,17 +357,17 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
     double myHPDealt = -10;
     if( this == summary.attacker.CO )
     {
-      minion = summary.attacker;
-      myHPLoss = summary.attackerHPLoss;
-      enemy = summary.defender;
-      myHPDealt = summary.defenderHPLoss;
+      minion = summary.attacker.unit;
+      myHPLoss = summary.attacker.deltaHP * -1;
+      enemy = summary.defender.unit;
+      myHPDealt = summary.defender.deltaHP * -1;
     }
     if( this == summary.defender.CO )
     {
-      minion = summary.defender;
-      myHPLoss = summary.defenderHPLoss;
-      enemy = summary.attacker;
-      myHPDealt = summary.attackerHPLoss;
+      minion = summary.defender.unit;
+      myHPLoss = summary.defender.deltaHP * -1;
+      enemy = summary.attacker.unit;
+      myHPDealt = summary.attacker.deltaHP * -1;
     }
 
     // Do nothing if we're not involved

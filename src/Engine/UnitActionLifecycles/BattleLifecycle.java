@@ -192,12 +192,14 @@ public abstract class BattleLifecycle
       BattleSummary summary = CombatEngine.simulateBattleResults(attacker, defender, map,
                               moveCoord.xCoord, moveCoord.yCoord);
 
+      int attackerHPLoss = (int) (-10 * summary.attacker.deltaPreciseHP);
+      int defenderHPLoss = (int) (-10 * summary.defender.deltaPreciseHP);
       // output any damage done, with the color of the one dealing the damage
-      if( summary.attackerHPLoss > 0 )
-        output.add(new DamagePopup(movePath.getWaypoint(0).GetCoordinates(), defender.CO.myColor, (int) (summary.attackerHPLoss*10) + "%"));
-      if( summary.defenderHPLoss > 0 )
+      if( attackerHPLoss > 0 )
+        output.add(new DamagePopup(movePath.getWaypoint(0).GetCoordinates(), defender.CO.myColor, attackerHPLoss + "%"));
+      if( defenderHPLoss > 0 )
         // grab the two most significant digits and convert to %
-        output.add(new DamagePopup(attackLocation, attacker.CO.myColor, (int) (summary.defenderHPLoss*10) + "%"));
+        output.add(new DamagePopup(attackLocation, attacker.CO.myColor, defenderHPLoss + "%"));
 
       return output;
     }
@@ -377,20 +379,20 @@ public abstract class BattleLifecycle
 
     public Unit getAttacker()
     {
-      return battleInfo.attacker;
+      return battleInfo.attacker.unit;
     }
     public boolean attackerDies()
     {
-      return (int) ((battleInfo.attacker.getPreciseHP() - battleInfo.attackerHPLoss) * 10) <= 0;
+      return battleInfo.attacker.after.getHP() <= 0;
     }
 
     public Unit getDefender()
     {
-      return battleInfo.defender;
+      return battleInfo.defender.unit;
     }
     public boolean defenderDies()
     {
-      return (int) ((battleInfo.defender.getPreciseHP() - battleInfo.defenderHPLoss) * 10) <= 0;
+      return battleInfo.defender.after.getHP() <= 0;
     }
 
     @Override
@@ -409,17 +411,8 @@ public abstract class BattleLifecycle
     public void performEvent(MapMaster gameMap)
     {
       // Apply the battle results that we calculated previously.
-      Unit attacker = battleInfo.attacker;
-      Unit defender = battleInfo.defender;
-      attacker.fire(battleInfo.attackerWeapon); // expend ammo
-      defender.damageHP(battleInfo.defenderHPLoss);
-
-      // Handle counter-attack if relevant.
-      if( battleInfo.attackerHPLoss > 0 )
-      {
-        defender.fire(battleInfo.defenderWeapon);
-        attacker.damageHP(battleInfo.attackerHPLoss);
-      }
+      battleInfo.attacker.unit.setResourceState(battleInfo.attacker.after);
+      battleInfo.defender.unit.setResourceState(battleInfo.defender.after);
     }
 
     @Override

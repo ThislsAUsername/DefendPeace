@@ -254,7 +254,7 @@ public class AICombatUtils
         }
         double thisShot =
             CombatEngine.simulateBattleResults(attacker, target, gameMap,
-                                               space.xCoord, space.yCoord).defenderHPLoss;
+                                               space.xCoord, space.yCoord).defender.deltaPreciseHP * -1;
         if( target.getHP() <= damage - thisShot )
         {
           neededAttacks.remove(space);
@@ -314,7 +314,7 @@ public class AICombatUtils
         if( movePath.getPathLength() > 0 )
         {
           neededAttacks.put(xyc, unit);
-          double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
+          double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defender.deltaPreciseHP * -1;
 
           thisDamage = findMultiHitKill(gameMap, target, attackCandidates, neededAttacks, damage + thisDamage);
 

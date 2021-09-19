@@ -72,37 +72,40 @@ public class CombatEngine
 
     CombatContext context = CombatContext.build(map, attacker, defender, battleRange);
 
-    // unitDamageMap provides an order- and perspective-agnostic view of how much damage was done
-    // This is necessary to pass information coherently between this function's local context
+    // Provides a simple way to correlate start state and end state of each combatant.
+    // Uses a map to make it easy to pass information coherently between this function's local context
     //   and the context of the CombatContext (which can be altered in unpredictable ways).
-    Map<UnitContext, Double> unitDamageMap = new HashMap<UnitContext, Double>();
-    unitDamageMap.put(attacker, 0.0);
-    unitDamageMap.put(defender, 0.0);
+    Map<UnitContext, UnitContext> unitStateMap = new HashMap<UnitContext, UnitContext>();
+
+    // Starting assumption is that nothing changed in the "combat"
+    unitStateMap.put(attacker, new UnitContext(attacker));
+    unitStateMap.put(defender, new UnitContext(defender));
 
     // From here on in, use context variables only
 
     BattleParams attackInstance = context.getAttack();
 
     double damage = attackInstance.calculateDamage();
-    unitDamageMap.put(context.attacker, damage);
+    unitStateMap.get(context.attacker).fire(context.attacker.weapon);
+    unitStateMap.get(context.defender).damageHP(damage, isSim);
 
     // New battle instance with defender counter-attacking.
-    BattleParams defendInstance = context.getCounterAttack(damage);
+    BattleParams defendInstance = context.getCounterAttack(damage, isSim);
     if( null != defendInstance )
     {
       double counterDamage = defendInstance.calculateDamage();
-      unitDamageMap.put(context.defender, counterDamage);
+      unitStateMap.get(context.defender).fire(context.defender.weapon);
+      unitStateMap.get(context.attacker).damageHP(counterDamage, isSim);
     }
+
+    // Consider throwing in a final hook here for UnitModifiers to change the result post-calculations.
 
     // Calculations complete.
     // Since we are setting up our BattleSummary, use non-CombatContext variables
     //   so consumers of the Summary will see results consistent with the current board/map state
     //   (e.g. the Unit 'attacker' actually belongs to the CO whose turn it currently is)
-    return new BattleSummary(attacker.unit, attacker.weapon,
-                             defender.unit, defender.weapon,
-                             attacker.env.terrainType,
-                             defender.env.terrainType,
-                             unitDamageMap.get(defender), unitDamageMap.get(attacker));
+    return new BattleSummary(attacker, unitStateMap.get(attacker),
+                             defender, unitStateMap.get(defender));
   }
 
   public static double calculateOneStrikeDamage( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )

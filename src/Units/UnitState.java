@@ -10,7 +10,7 @@ public abstract class UnitState implements Serializable
 {
   private static final long serialVersionUID = 1L;
 
-  public CargoList heldUnits;
+  public final CargoList heldUnits;
   public int ammo;
   public int fuel;
   public int materials;
@@ -50,16 +50,33 @@ public abstract class UnitState implements Serializable
   {
     CO = other.CO;
     model = other.model;
-    ammo = other.ammo;
-    fuel = other.fuel;
-    materials = other.materials;
     isTurnOver = other.isTurnOver;
-    health = other.health;
+    setResourceState(other);
     captureProgress = other.captureProgress;
     captureTarget = other.captureTarget;
 
     heldUnits = new CargoList(model);
     heldUnits.addAll(other.heldUnits);
+  }
+  public void setResourceState(UnitState other)
+  {
+    ammo = other.ammo;
+    fuel = other.fuel;
+    materials = other.materials;
+    health = other.health;
+  }
+
+
+  /** Expend ammo, if the weapon uses ammo */
+  public void fire(WeaponModel weapon)
+  {
+    if( !weapon.hasInfiniteAmmo )
+    {
+      if( ammo > 0 )
+        ammo--;
+      else
+        System.out.println("WARNING: " + toString() + " fired with no available ammo!");
+    }
   }
 
   public boolean isHurt()
@@ -96,10 +113,16 @@ public abstract class UnitState implements Serializable
    */
   public int damageHP(double damage)
   {
+    return damageHP(damage, false);
+  }
+  public int damageHP(double damage, boolean allowNegative)
+  {
     if( damage < 0 )
       throw new ArithmeticException("Cannot inflict negative damage!");
     int before = getHP();
-    health = Math.max(0, health - healthFromHP(damage));
+    health = health - healthFromHP(damage);
+    if( !allowNegative )
+      health = Math.max(0, health);
     return getHP() - before;
   }
 

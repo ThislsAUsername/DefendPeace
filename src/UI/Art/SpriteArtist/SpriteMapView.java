@@ -412,8 +412,10 @@ public class SpriteMapView extends MapView
   @Override // from MapView
   public GameAnimation buildBattleAnimation(BattleSummary summary)
   {
-    return new NobunagaBattleAnimation(SpriteLibrary.baseSpriteSize, summary.attacker, summary.attacker.x, summary.attacker.y, summary.defender.x,
-        summary.defender.y);
+    return new NobunagaBattleAnimation(
+        SpriteLibrary.baseSpriteSize, summary.attacker.unit,
+        summary.attacker.unit.x, summary.attacker.unit.y,
+        summary.defender.unit.x, summary.defender.unit.y);
   }
 
   @Override // from MapView

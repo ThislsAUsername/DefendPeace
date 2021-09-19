@@ -116,13 +116,13 @@ public class CombatContext
     return buildBattleParams(aClone, dClone, false);
   }
 
-  public BattleParams getCounterAttack(double damageDealt)
+  public BattleParams getCounterAttack(double damageDealt, boolean isSim)
   {
     if( !canCounter )
       return null;
 
     UnitContext aClone = new UnitContext(defender);
-    aClone.damageHP(damageDealt);
+    aClone.damageHP(damageDealt, isSim);
 
     // If the counterattacker is dead, there's no counterattack
     if( 1 > aClone.getHP() )

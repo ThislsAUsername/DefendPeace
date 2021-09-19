@@ -169,18 +169,6 @@ public class Unit extends UnitState implements UnitModList
     return chosenWeapon;
   }
 
-  /** Expend ammo, if the weapon uses ammo */
-  public void fire(WeaponModel weapon)
-  {
-    if( !weapon.hasInfiniteAmmo )
-    {
-      if( ammo > 0 )
-        ammo--;
-      else
-        System.out.println("WARNING: " + toStringWithLocation() + " fired with no available ammo!");
-    }
-  }
-
 
   /** Compiles and returns a list of all actions this unit could perform on map after moving along movePath. */
   public ArrayList<GameActionSet> getPossibleActions(GameMap map, GamePath movePath)

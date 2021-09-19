@@ -206,7 +206,7 @@ public class Cinder extends Commander
         return null;
       GameEventQueue results = new GameEventQueue();
       // Determine if we were part of this fight. If so, refresh at our own expense.
-      Unit minion = battleInfo.attacker;
+      Unit minion = battleInfo.attacker.unit;
       if( minion.CO == myCommander )
       {
         int hp = minion.getHP();

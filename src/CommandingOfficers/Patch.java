@@ -11,7 +11,7 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
-import Units.Unit;
+import Units.*;
 
 public class Patch extends Commander
 {
@@ -138,23 +138,25 @@ public class Patch extends Commander
     public GameEventQueue receiveBattleEvent(BattleSummary battleInfo)
     {
       // Determine if we were part of this fight. If so, cash in on any damage done to the other guy.
-      double hpLoss = 0;
-      double unitCost = 0;
       if( battleInfo.attacker.CO == myCommander )
       {
-        hpLoss = battleInfo.defenderHPLoss;
-        unitCost = battleInfo.defender.model.getCost();
+        myCommander.money += calculateProfit(battleInfo.defender);
       }
       else if( battleInfo.defender.CO == myCommander )
       {
-        hpLoss = battleInfo.attackerHPLoss;
-        unitCost = battleInfo.attacker.model.getCost();
+        myCommander.money += calculateProfit(battleInfo.attacker);
       }
 
-      // Do the necessary math, then round to the nearest int.
-      int income = (int)(hpLoss * (unitCost/10.0) * myCommander.myIncomeRatio + 0.5);
-      myCommander.money += income;
       return null;
+    }
+
+    private int calculateProfit(UnitDelta delta)
+    {
+      double hpLoss = -1 * delta.deltaHP;
+      double unitCost = delta.model.getCost();
+      // Do the necessary math, then round to the nearest int.
+      int income = (int) (hpLoss * (unitCost / delta.model.maxHP) * myCommander.myIncomeRatio + 0.5);
+      return income;
     }
   }
 
