@@ -7,7 +7,7 @@ import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COModifier;
 import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
-import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
+import CommandingOfficers.Modifiers.COModifier.GenericCOModifier;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams.BattleParams;
 import Terrain.MapMaster;
@@ -129,9 +129,9 @@ public class Strong extends Commander
     @Override
     protected void enqueueCOMods(Commander myCommander, MapMaster gameMap, ArrayList<COModifier> modList)
     {
-      GenericUnitModifier damageMod = new CODamageModifier(STRONGARM_BUFF);
-      GenericUnitModifier defenseMod = new CODefenseModifier(STRONGARM_BUFF);
-      GenericUnitModifier damageModTroop = new CODamageModifier(STRONGARM_FOOT_BUFF);
+      GenericCOModifier damageMod = new CODamageModifier(STRONGARM_BUFF);
+      GenericCOModifier defenseMod = new CODefenseModifier(STRONGARM_BUFF);
+      GenericCOModifier damageModTroop = new CODamageModifier(STRONGARM_FOOT_BUFF);
       damageModTroop.addApplicableUnitModels(myCommander.getAllModels(UnitModel.TROOP));
       modList.add(damageMod);
       modList.add(defenseMod);
@@ -179,8 +179,8 @@ public class Strong extends Commander
     protected void enqueueCOMods(Commander myCommander, MapMaster gameMap, ArrayList<COModifier> modList)
     {
       // Grant the base firepower/defense bonus.
-      GenericUnitModifier damageMod = new CODamageModifier(MOBILIZE_BUFF);
-      GenericUnitModifier defenseMod = new CODefenseModifier(MOBILIZE_DEFENSE_BUFF);
+      GenericCOModifier damageMod = new CODamageModifier(MOBILIZE_BUFF);
+      GenericCOModifier defenseMod = new CODefenseModifier(MOBILIZE_DEFENSE_BUFF);
       modList.add(damageMod);
       modList.add(defenseMod);
 

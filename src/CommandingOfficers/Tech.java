@@ -14,7 +14,7 @@ import AI.AIUtils;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COModifier;
-import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
+import CommandingOfficers.Modifiers.COModifier.GenericCOModifier;
 import Engine.GameAction.UnitSpawnAction;
 import Engine.GameScenario;
 import Engine.UnitActionFactory;
@@ -158,9 +158,9 @@ public class Tech extends Commander
     protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
     {
       // Only mechanical/non-troop units get the firepower boost.
-      GenericUnitModifier damageBuff = new CODamageModifier(buff);
+      GenericCOModifier damageBuff = new CODamageModifier(buff);
       damageBuff.addApplicableUnitModels(getMechanicalModels(co));
-      GenericUnitModifier defenseBuff = new CODefenseModifier(buff);
+      GenericCOModifier defenseBuff = new CODefenseModifier(buff);
       modList.add(damageBuff);
       modList.add(defenseBuff);
     }
@@ -228,9 +228,9 @@ public class Tech extends Commander
     protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
     {
       // Only mechanical/non-troop units get the firepower boost.
-      GenericUnitModifier damageBuff = new CODamageModifier(buff);
+      GenericCOModifier damageBuff = new CODamageModifier(buff);
       damageBuff.addApplicableUnitModels(getMechanicalModels(co));
-      GenericUnitModifier defenseBuff = new CODefenseModifier(buff);
+      GenericCOModifier defenseBuff = new CODefenseModifier(buff);
       modList.add(damageBuff);
       modList.add(defenseBuff);
     }

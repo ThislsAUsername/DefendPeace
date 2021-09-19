@@ -3,10 +3,10 @@ package CommandingOfficers.Modifiers;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
-import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
+import CommandingOfficers.Modifiers.COModifier.GenericCOModifier;
 import Units.UnitModel;
 
-public class COMovementModifier extends GenericUnitModifier
+public class COMovementModifier extends GenericCOModifier
 {
   private static final long serialVersionUID = 1L;
   private int rangeChange;

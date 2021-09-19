@@ -5,9 +5,9 @@ import Units.UnitModel;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
-import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
+import CommandingOfficers.Modifiers.COModifier.GenericCOModifier;
 
-public class CODefenseModifier extends GenericUnitModifier
+public class CODefenseModifier extends GenericCOModifier
 {
   private static final long serialVersionUID = 1L;
   private int defenseModifier = 0;

@@ -15,7 +15,7 @@ public interface COModifier extends Serializable
   /** 
    * Generic COModifier that operates on all units if it's given no specific types to operate on.
    */
-  public abstract static class GenericUnitModifier implements COModifier
+  public abstract static class GenericCOModifier implements COModifier
   {
     private static final long serialVersionUID = 1L;
     private ArrayList<UnitModel> modelsToModify;
@@ -26,7 +26,7 @@ public interface COModifier extends Serializable
      * To impact only specific units, use addApplicableUnitModel to set
      * the ones that should be modified.
      */
-    public GenericUnitModifier()
+    public GenericCOModifier()
     {
       modelsToModify = new ArrayList<UnitModel>();
     }
