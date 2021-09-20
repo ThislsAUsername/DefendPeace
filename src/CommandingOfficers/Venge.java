@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
 import CommandingOfficers.Modifiers.COModifier;
+import CommandingOfficers.Modifiers.DynamicModifier;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
@@ -12,6 +13,7 @@ import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatContext;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
+import Engine.UnitMods.UnitModifier;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitContext;
@@ -58,15 +60,13 @@ public class Venge extends Commander
   private ArrayList<Unit> aggressors = new ArrayList<Unit>();
   /** How much power I get when beating them up */
   public final static int VENGEANCE_BOOST = 50;
-  public boolean counterAtFullPower = false;
-  public boolean counterFirst = false;
 
   public Venge(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
-    addCommanderAbility(new IronWill(this));
-    addCommanderAbility(new Retribution(this));
+    addCommanderAbility(new IronWill());
+    addCommanderAbility(new Retribution());
   }
 
   public static CommanderInfo getInfo()
@@ -78,8 +78,6 @@ public class Venge extends Commander
   public GameEventQueue initTurn(MapMaster map)
   {
     GameEventQueue events = super.initTurn(map);
-    counterAtFullPower = false;
-    counterFirst = false;
     return events;
   }
   @Override
@@ -107,28 +105,42 @@ public class Venge extends Commander
     return null;
   }
 
-  @Override
-  public void changeCombatContext(CombatContext instance)
+  public static class PreEmptiveCounterMod implements UnitModifier
   {
-    // If we're swapping, and we can counter, and we're on the defensive, do the swap.
-    if (counterFirst && instance.canCounter && this == instance.defender.CO )
+    public final Commander co;
+    public PreEmptiveCounterMod(Commander co)
     {
-      UnitContext minion = instance.defender;
+      super();
+      this.co = co;
+    }
 
-      instance.defender = instance.attacker;
-      instance.attacker = minion;
+    @Override
+    public void changeCombatContext(CombatContext instance)
+    {
+      // If we're swapping, and we can counter, and we're on the defensive, do the swap.
+      if( instance.canCounter && co == instance.defender.CO )
+      {
+        UnitContext minion = instance.defender;
+
+        instance.defender = instance.attacker;
+        instance.attacker = minion;
+      }
     }
   }
 
-  @Override
-  public void modifyUnitAttack(StrikeParams params)
+  public static class CounterAtFullPowerMod implements UnitModifier
   {
-      if( counterAtFullPower && params.isCounter )
+    @Override
+    public void modifyUnitAttack(StrikeParams params)
+    {
+      if( params.isCounter )
       {
         // counterattack as if the unit had not taken damage.
         params.attackerHP = params.attacker.unit.getHP();
       }
+    }
   }
+
   @Override
   public void modifyUnitAttackOnUnit(BattleParams params)
   {
@@ -161,12 +173,10 @@ public class Venge extends Commander
     private static final int COST = 3;
     private static final int IRONWILL_BUFF = 30; // Get a nice defense boost, since we can't counter-attack if we're dead.
     COModifier defenseMod = null;
-    Venge COcast;
 
-    IronWill(Venge commander)
+    IronWill()
     {
       super(NAME, COST);
-      COcast = commander;
       defenseMod = new CODefenseModifier(IRONWILL_BUFF);
       AIFlags = PHASE_TURN_END;
     }
@@ -175,14 +185,12 @@ public class Venge extends Commander
     protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
     {
       modList.add(defenseMod);
+      modList.add(new DynamicModifier(new CounterAtFullPowerMod()));
     }
 
     @Override
     protected void perform(Commander co, MapMaster gameMap)
-    {
-      // TODO: UnitModifier
-      COcast.counterAtFullPower = true;
-    }
+    {}
   }
 
   /**
@@ -197,12 +205,10 @@ public class Venge extends Commander
     private static final int RETRIBUTION_NERF = 20;
     COModifier damageMod = null;
     COModifier defenseMod = null;
-    Venge COcast;
 
-    Retribution(Venge commander)
+    Retribution()
     {
       super(NAME, COST);
-      COcast = commander;
       damageMod = new CODamageModifier(RETRIBUTION_BUFF);
       defenseMod = new CODefenseModifier(-RETRIBUTION_NERF);
     }
@@ -212,14 +218,12 @@ public class Venge extends Commander
     {
       modList.add(damageMod);
       modList.add(defenseMod);
+      modList.add(new DynamicModifier(new PreEmptiveCounterMod(co)));
     }
 
     @Override
     protected void perform(Commander co, MapMaster gameMap)
-    {
-      // TODO: UnitModifier
-      COcast.counterFirst = true;
-    }
+    {}
   }
   
 }
