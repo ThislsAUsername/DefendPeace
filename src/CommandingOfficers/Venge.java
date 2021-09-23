@@ -37,16 +37,18 @@ public class Venge extends Commander
           "Attacking Venge is not always difficult, but you may not like the consequences.\n"));
       infoPages.add(new InfoPage(
           "Passive:\n" + 
-          "- After being attacked, Venge gets a bonus of "+VENGEANCE_BOOST+"% attack against the unit that picked the fight.\n" +
+          "- After being attacked, Venge gets a bonus of +"+VENGEANCE_BOOST+"% attack against the unit that picked the fight.\n" +
           "- Units that Venge can get vengeance on are marked with a V.\n"));
       infoPages.add(new InfoPage(
           IronWill.NAME+" ("+IronWill.COST+"):\n" +
-          "Gives a defense boost of "+IronWill.IRONWILL_BUFF+"%\n" +
-          "Units now deal counterattacks as if they had not taken damage from the hit.\n"));
+          "Only affects units that have not yet acted.\n" +
+          "Your units lose "+IronWill.IRONWILL_WOUND+" HP (nonlethal)\n" +
+          "Grants +"+IronWill.IRONWILL_BOOST+" defense\n" +
+          "Your units fight as if at full HP.\n"));
       infoPages.add(new InfoPage(
           Retribution.NAME+" ("+Retribution.COST+"):\n" +
-          "Gives an attack boost of "+Retribution.RETRIBUTION_BUFF+"%\n" +
-          "Gives a defense penalty of "+Retribution.RETRIBUTION_NERF+"%\n" +
+          "Gives an attack boost of +"+Retribution.RETRIBUTION_BUFF+"%\n" +
+          "Gives a defense penalty of +"+Retribution.RETRIBUTION_NERF+"%\n" +
           "Units now counterattack before they are hit.\n"));
     }
     @Override
@@ -128,27 +130,35 @@ public class Venge extends Commander
     }
   }
 
-  public static class CounterAtFullPowerMod implements UnitModifier
+  public static class IronWillMod implements UnitModifier
   {
+    public final int buff;
+    public IronWillMod(int buff)
+    {
+      super();
+      this.buff = buff;
+    }
     @Override
     public void modifyUnitAttack(StrikeParams params)
     {
-      if( params.isCounter )
-      {
-        // counterattack as if the unit had not taken damage.
-        params.attackerHP = params.attacker.unit.getHP();
-      }
+      params.attackerHP = params.attacker.model.maxHP;
+    }
+    @Override
+    public void modifyUnitDefenseAgainstUnit(BattleParams params)
+    {
+      params.defenderHP = params.defender.model.maxHP;
+      params.defensePower += buff;
     }
   }
 
   @Override
   public void modifyUnitAttackOnUnit(BattleParams params)
   {
-      if( aggressors.contains(params.defender.unit) )
-      {
-        // Boost attack if it's time to avenge slights
-        params.attackPower += VENGEANCE_BOOST;
-      }
+    if( aggressors.contains(params.defender.unit) )
+    {
+      // Boost attack if it's time to avenge slights
+      params.attackPower += VENGEANCE_BOOST;
+    }
   }
 
   @Override
@@ -163,34 +173,40 @@ public class Venge extends Commander
     return null;
   }
 
-  /**
-   * Iron Will buffs defense and grants any unit that survives being attacked full counter-damage.
-   */
   private static class IronWill extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Iron Will";
     private static final int COST = 3;
-    private static final int IRONWILL_BUFF = 30; // Get a nice defense boost, since we can't counter-attack if we're dead.
-    COModifier defenseMod = null;
+    private static final int IRONWILL_BOOST = 30;
+    private static final int IRONWILL_WOUND = -1;
 
     IronWill()
     {
       super(NAME, COST);
-      defenseMod = new CODefenseModifier(IRONWILL_BUFF);
-      AIFlags = PHASE_TURN_END;
     }
 
     @Override
     protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
     {
-      modList.add(defenseMod);
-      modList.add(new DynamicModifier(new CounterAtFullPowerMod()));
+      DynamicModifier dym = new DynamicModifier(new IronWillMod(IRONWILL_BOOST));
+      for( Unit unit : co.units )
+      {
+        if( !unit.isTurnOver )
+          dym.addApplicable(unit);
+      }
+      modList.add(dym);
     }
 
     @Override
     protected void perform(Commander co, MapMaster gameMap)
-    {}
+    {
+      for( Unit unit : co.units )
+      {
+        if( !unit.isTurnOver )
+          unit.alterHP(IRONWILL_WOUND);
+      }
+    }
   }
 
   /**

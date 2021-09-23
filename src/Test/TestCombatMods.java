@@ -85,29 +85,28 @@ public class TestCombatMods extends TestCase
   /** Test that combat works as a black box, but that Venge gets his way all the same. */
   private boolean testIronWill()
   {
-    // Add our test subjects
-    Unit infA = addUnit(testMap, cinder, UnitModel.TROOP, 7, 3);
-    Unit infB = addUnit(testMap, venge, UnitModel.TROOP, 7, 5);
+    // Add our test subjects; road inf attacking into plains inf
+    Unit infA = addUnit(testMap, cinder, UnitModel.TROOP, 7, 4);
+    Unit infB = addUnit(testMap, venge, UnitModel.TROOP, 8, 5);
+    infB.isTurnOver = false;
     
     // Check our damage for each first strike pre-power...
-    BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
+    BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 5);
 
     venge.modifyAbilityPower(42); // juice up
     performGameAction(new GameAction.AbilityAction(venge, venge.getReadyAbilities().get(0)), testGame); // activate Iron Will
     
     // ...and after power
-    BattleSummary ironAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
+    BattleSummary ironAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 5);
     
     // Check that Venge's Iron Will works properly without breaking things (other than balance)
     boolean testPassed = true;
-    testPassed &= validate(infB.model.getDefenseRatio() > 100, "    Iron Will didn't buff defense.");
-    
     // First, check the logic of A->B
-    testPassed &= validate(normalAB.defender.deltaHP < normalAB.attacker.deltaHP, "    First strike didn't work properly for Cinder.");
+    testPassed &= validate(normalAB.defender.deltaPreciseHP < normalAB.attacker.deltaPreciseHP, "    First strike didn't work properly for Cinder.");
 
     testPassed &= validate(ironAB.attacker.unit == infA, "    infA attacked, but isn't the attacker.");
     testPassed &= validate(ironAB.defender.unit == infB, "    infB was attacked, but isn't the defender.");
-    testPassed &= validate(ironAB.defender.deltaHP > ironAB.attacker.deltaHP, "    Venge didn't defend better, or didn't get Iron Will's buff.");
+    testPassed &= validate(ironAB.defender.deltaPreciseHP > ironAB.attacker.deltaPreciseHP, "    Venge didn't defend better, or didn't get Iron Will's buff.");
 
     // Clean up
     testMap.removeUnit(infA);
