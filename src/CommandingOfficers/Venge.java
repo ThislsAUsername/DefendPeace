@@ -42,9 +42,9 @@ public class Venge extends Commander
       infoPages.add(new InfoPage(
           IronWill.NAME+" ("+IronWill.COST+"):\n" +
           "Only affects units that have not yet acted.\n" +
-          "Your units lose "+IronWill.IRONWILL_WOUND+" HP (nonlethal)\n" +
-          "Grants +"+IronWill.IRONWILL_BOOST+" defense\n" +
-          "Your units fight as if at full HP.\n"));
+          "Grants +"+IronWill.IRONWILL_BOOST+" offense and defense\n" +
+          "Your units resist damage and counterattack as if at full HP.\n" +
+          "When the power ends, your units lose "+IronWill.IRONWILL_WOUND+" HP (nonlethal)\n"));
       infoPages.add(new InfoPage(
           Retribution.NAME+" ("+Retribution.COST+"):\n" +
           "Gives an attack boost of +"+Retribution.RETRIBUTION_BUFF+"%\n" +
@@ -141,7 +141,11 @@ public class Venge extends Commander
     @Override
     public void modifyUnitAttack(StrikeParams params)
     {
-      params.attackerHP = params.attacker.model.maxHP;
+      if( params.isCounter )
+      {
+        params.attackerHP = params.attacker.model.maxHP;
+      }
+      params.attackPower += buff;
     }
     @Override
     public void modifyUnitDefenseAgainstUnit(BattleParams params)
@@ -177,9 +181,10 @@ public class Venge extends Commander
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Iron Will";
-    private static final int COST = 3;
+    private static final int COST = 4;
     private static final int IRONWILL_BOOST = 30;
-    private static final int IRONWILL_WOUND = -1;
+    private static final int IRONWILL_WOUND = -2;
+    private final ArrayList<Unit> boostedUnits = new ArrayList<Unit>();
 
     IronWill()
     {
@@ -204,8 +209,17 @@ public class Venge extends Commander
       for( Unit unit : co.units )
       {
         if( !unit.isTurnOver )
-          unit.alterHP(IRONWILL_WOUND);
+          boostedUnits.add(unit);
       }
+    }
+    @Override
+    protected void revert(Commander co, MapMaster gameMap)
+    {
+      for( Unit unit : boostedUnits )
+      {
+        unit.alterHP(IRONWILL_WOUND);
+      }
+      boostedUnits.clear();
     }
   }
 
@@ -216,7 +230,7 @@ public class Venge extends Commander
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Retribution";
-    private static final int COST = 6;
+    private static final int COST = 8;
     private static final int RETRIBUTION_BUFF = 40; // Trade defense for offense, since we hit before our attacker does.
     private static final int RETRIBUTION_NERF = 20;
     COModifier damageMod = null;
