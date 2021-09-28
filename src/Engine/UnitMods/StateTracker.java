@@ -1,5 +1,7 @@
 package Engine.UnitMods;
 
+import java.lang.reflect.Constructor;
+
 import Engine.GameInstance;
 import Engine.GameEvents.GameEventListener;
 
@@ -24,7 +26,9 @@ public abstract class StateTracker<T extends StateTracker<T>> implements GameEve
     if( !gi.stateTrackers.containsKey(key) )
       try
       {
-        T instance = key.getDeclaredConstructor(Class.class, GameInstance.class).newInstance(key, gi);
+        Constructor<T> constructor = key.getDeclaredConstructor(Class.class, GameInstance.class);
+        constructor.setAccessible(true); // Apparently required for dealing with inner classes
+        T instance = constructor.newInstance(key, gi);
         gi.stateTrackers.put(key, instance);
         instance.registerForEvents(gi);
       }

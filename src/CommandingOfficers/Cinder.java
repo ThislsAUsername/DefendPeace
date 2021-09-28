@@ -1,16 +1,13 @@
 package CommandingOfficers;
 
-import java.util.ArrayList;
-
-import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
-import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitMods.BuildCountsTracker;
+import Engine.UnitMods.CountTracker;
 import Engine.UnitMods.StateTracker;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -39,12 +36,12 @@ public class Cinder extends Commander
           "- Building on a base that has produced this turn already incurs a fee of 1000 funds per build you have already done there this turn.\n"));
       infoPages.add(new InfoPage(
           SearAbility.SEAR_NAME+" ("+SearAbility.SEAR_COST+"):\n" +
-          "Removes "+SearAbility.SEAR_WOUND+" HP from each of Cinder's units.\n" +
-          "Units that had not yet acted have their supplies restored.\n" +
-          "Units are refreshed and may act again.\n"));
+          "Remove "+SearAbility.SEAR_WOUND+" HP from each of Cinder's units.\n" +
+          "Reactivate all units.\n" +
+          "Resupply units that had not yet acted.\n"));
       infoPages.add(new InfoPage(
           WitchFireAbility.WITCHFIRE_NAME+" ("+WitchFireAbility.WITCHFIRE_COST+"):\n" +
-          "After any unit attacks, it will lose "+WitchFireAbility.WITCHFIRE_HP_COST+" HP and be refreshed.\n" +
+          "After any unit attacks, it will be reactivated; this costs 1 HP per attack made by that unit so far.\n" +
           "This may be done repeatedly, but it can kill Cinder's own units.\n"));
     }
     @Override
@@ -58,14 +55,14 @@ public class Cinder extends Commander
 
   private BuildCountsTracker buildCounts;
 
-  public WitchFireListener witchFireListener;
+  public WitchFireAbility witchFire = new WitchFireAbility();
 
   public Cinder(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
     addCommanderAbility(new SearAbility());
-    addCommanderAbility(new WitchFireAbility(this));
+    addCommanderAbility(witchFire);
   }
 
   @Override
@@ -74,14 +71,8 @@ public class Cinder extends Commander
     super.registerForEvents(game);
     buildCounts = StateTracker.initialize(game, BuildCountsTracker.class);
 
-    witchFireListener = new WitchFireListener(this, WitchFireAbility.WITCHFIRE_HP_COST);
-    witchFireListener.registerForEvents(game);
-  }
-  @Override
-  public void unregister(GameInstance game)
-  {
-    super.unregister(game);
-    witchFireListener.unregister(game);
+    WitchFireTracker wfTracker = WitchFireTracker.initialize(game, WitchFireTracker.class);
+    witchFire.init(wfTracker);
   }
 
   public static CommanderInfo getInfo()
@@ -148,79 +139,83 @@ public class Cinder extends Commander
   /*
    * Witchfire causes Cinder's troops to automatically refresh after attacking, at the cost of 1 HP
    */
-  private static class WitchFireAbility extends CommanderAbility implements COModifier
+  private static class WitchFireAbility extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String WITCHFIRE_NAME = "Witchfire";
     private static final int WITCHFIRE_COST = 9;
-    private static final int WITCHFIRE_HP_COST = 1;
-    private Cinder coCast;
+    private WitchFireTracker tracker;
 
-    WitchFireAbility(Cinder commander)
+    WitchFireAbility()
     {
       super(WITCHFIRE_NAME, WITCHFIRE_COST);
-      coCast = commander;
     }
-
-    @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
+    public void init(WitchFireTracker tracker)
     {
-      modList.add(this); // TODO
+      this.tracker = tracker;
     }
 
     @Override
     protected void perform(Commander co, MapMaster gameMap)
-    {}
-
-    @Override // COModifier interface.
-    public void applyChanges(Commander commander)
     {
-      // TODO
-      coCast.witchFireListener.listen = true;
+      tracker.startTracking(co);
     }
 
     @Override
-    public void revertChanges(Commander commander)
+    protected void revert(Commander co, MapMaster gameMap)
     {
-      coCast.witchFireListener.listen = false;
+      tracker.stopTracking(co);
     }
   }
 
-  private static class WitchFireListener implements GameEventListener
+  private static class WitchFireTracker extends StateTracker<WitchFireTracker>
   {
     private static final long serialVersionUID = 1L;
-    private Cinder myCommander = null;
-    private final int refreshCost;
-    public boolean listen = false;
 
-    public WitchFireListener(Cinder myCo, int HPCost)
+    protected WitchFireTracker(Class<WitchFireTracker> key, GameInstance gi)
     {
-      myCommander = myCo;
-      refreshCost = HPCost;
+      super(key, gi);
+    }
+    @Override
+    protected WitchFireTracker item()
+    {
+      return this;
+    }
+
+    private CountTracker<Commander, Unit> attackCounts = new CountTracker<>();
+
+    public void startTracking(Commander co)
+    {
+      attackCounts.getCountFor(co);
+    }
+    public void stopTracking(Commander co)
+    {
+      attackCounts.resetCountFor(co);
     }
 
     @Override
     public GameEventQueue receiveBattleEvent(BattleSummary battleInfo)
     {
-      if( !listen )
+      Commander co = battleInfo.attacker.CO;
+      if( !attackCounts.hasCountFor(co) )
         return null;
+      // Since an active CO was part of the fight, reactivate the attacker at the cost of HP.
       GameEventQueue results = new GameEventQueue();
-      // Determine if we were part of this fight. If so, refresh at our own expense.
       Unit minion = battleInfo.attacker.unit;
-      if( minion.CO == myCommander )
+      // Cost starts at 1, then adds one for each subsequent attack
+      int refreshCost = 1+attackCounts.getCountFor(co, minion);
+      int hp = minion.getHP();
+      if( hp > refreshCost )
       {
-        int hp = minion.getHP();
-        if( hp > refreshCost )
-        {
-          minion.alterHP(-refreshCost);
-          minion.isTurnOver = false;
-        }
-        else
-        {
-          // Guess he's not gonna make it.
-          // TODO: Maybe add a debuff event/animation here as well.
-          Utils.enqueueDeathEvent(minion, results);
-        }
+        minion.alterHP(-refreshCost);
+        minion.isTurnOver = false;
+        attackCounts.incrementCount(co, minion);
+      }
+      else
+      {
+        // Guess he's not gonna make it.
+        // TODO: Maybe add a debuff event/animation here as well.
+        Utils.enqueueDeathEvent(minion, results);
       }
       return results;
     }

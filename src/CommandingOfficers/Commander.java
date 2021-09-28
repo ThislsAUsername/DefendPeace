@@ -19,6 +19,7 @@ import AI.AIController;
 import AI.AILibrary;
 import AI.AIMaker;
 import Engine.GameAction;
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
@@ -91,6 +92,14 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
     ownedProperties = new HashSet<XYCoord>();
 
     myAbilities = new ArrayList<CommanderAbility>();
+  }
+
+  @Override
+  public void unregister(GameInstance game)
+  {
+    GameEventListener.super.unregister(game);
+    if( null != myActiveAbility )
+      myActiveAbility.deactivate(game.gameMap);
   }
 
   protected void addCommanderAbility(CommanderAbility ca)
