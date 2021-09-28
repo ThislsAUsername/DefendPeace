@@ -1,7 +1,5 @@
 package Engine.UnitMods;
 
-import java.util.HashMap;
-
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.XYCoord;
@@ -22,44 +20,25 @@ public class BuildCountsTracker extends StateTracker<BuildCountsTracker>
     return this;
   }
 
-  private HashMap<Commander, HashMap<XYCoord, Integer>> buildCounts = new HashMap<>();
+  private CountTracker<Commander, XYCoord> buildCounts = new CountTracker<>();
 
-  public HashMap<XYCoord, Integer> getCountFor(Commander co)
-  {
-    if( !buildCounts.containsKey(co) )
-      buildCounts.put(co, new HashMap<XYCoord, Integer>());
-    return buildCounts.get(co);
-  }
   public int getCountFor(Commander co, XYCoord coord)
   {
-    HashMap<XYCoord, Integer> coCounts = getCountFor(co);
-    if( !coCounts.containsKey(coord) )
-      coCounts.put(coord, 0);
-    return coCounts.get(coord);
-  }
-  public void incrementCount(Commander co, XYCoord coord)
-  {
-    HashMap<XYCoord, Integer> coCounts = getCountFor(co);
-    int prevCount = getCountFor(co, coord);
-    coCounts.put(coord, prevCount + 1);
-  }
-  public void resetCountFor(Commander co)
-  {
-    buildCounts.put(co, new HashMap<XYCoord, Integer>());
+    return buildCounts.getCountFor(co, coord);
   }
 
   @Override
   public GameEventQueue receiveCreateUnitEvent(Unit unit)
   {
     XYCoord buildCoords = new XYCoord(unit.x, unit.y);
-    incrementCount(unit.CO, buildCoords);
+    buildCounts.incrementCount(unit.CO, buildCoords);
 
     return null;
   }
   @Override
   public GameEventQueue receiveTurnInitEvent(Commander co, int turn)
   {
-    resetCountFor(co);
+    buildCounts.resetCountFor(co);
 
     return null;
   }
