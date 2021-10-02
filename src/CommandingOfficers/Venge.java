@@ -60,6 +60,7 @@ public class Venge extends Commander
 
   /** A list of all the units that have attacked me since my last turn. */
   private ArrayList<Unit> aggressors = new ArrayList<Unit>();
+  private IronWill myIronWill = new IronWill();
   /** How much power I get when beating them up */
   public final static int VENGEANCE_BOOST = 50;
 
@@ -67,7 +68,7 @@ public class Venge extends Commander
   {
     super(coInfo, rules);
 
-    addCommanderAbility(new IronWill());
+    addCommanderAbility(myIronWill);
     addCommanderAbility(new Retribution());
   }
 
@@ -95,6 +96,9 @@ public class Venge extends Commander
     // If we can get a vengeance boost against this unit, let our player know.
     if (aggressors.contains(unit))
       return 'V';
+    // If we ever allow COs other than our own to *activate* abilities, then this is gonna have to move to a StateTracker
+    if (myIronWill.boostedUnits.contains(unit))
+      return 'I';
     
     return super.getUnitMarking(unit);
   }
