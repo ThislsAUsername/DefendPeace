@@ -230,6 +230,7 @@ public class TestTransport extends TestCase
     testPassed &= validate(dc.count == 3, "    Counted " + dc.count + " unit deaths instead of 3 after deleting loaded transport!");
 
     // NOTE/TODO: Is ability power awarded for the cargo unit?
+    //  -- Definitely not for AW2 and DoR
 
     cleanupTest();
 

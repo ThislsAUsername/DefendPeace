@@ -13,7 +13,7 @@ import UI.UnitMarker;
 public abstract class StateTracker<T extends StateTracker<T>> implements GameEventListener, UnitMarker
 {
   private static final long serialVersionUID = 1L;
-  public final Class<T> key; // TODO: Verify ref-compare works on save-load
+  public final Class<T> key;
   public final GameInstance game;
 
   protected StateTracker(Class<T> key, GameInstance gi)
