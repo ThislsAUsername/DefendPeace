@@ -27,7 +27,7 @@ public class UnitArtist
     int drawX = (int) (tileSize * x);
     int drawY = (int) (tileSize * y);
 
-    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnitIcons(g, myGame.commanders, unit, animIndex, drawX, drawY);
+    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnitIcons(g, myGame, unit, animIndex, drawX, drawY);
   }
 
   /**

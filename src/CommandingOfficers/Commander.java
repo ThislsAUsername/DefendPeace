@@ -35,11 +35,12 @@ import Terrain.MapPerspective;
 import Terrain.TerrainType;
 import UI.GameOverlay;
 import UI.UIUtils.Faction;
+import UI.UnitMarker;
 import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModelScheme.GameReadyModels;
 
-public class Commander implements GameEventListener, Serializable, UnitModifier, UnitModList
+public class Commander implements GameEventListener, Serializable, UnitModifier, UnitModList, UnitMarker
 {
   private static final long serialVersionUID = 1L;
   
@@ -217,16 +218,11 @@ public class Commander implements GameEventListener, Serializable, UnitModifier,
 
     return models;
   }
-  
-  /**
-   * Returns a character to be displayed on the unit.
-   * Primary usage should be pieces of info that aren't otherwise immediately apparent from the map.
-   * Our rendering only supports alphanumeric values at this time.
-   */
-  public char getUnitMarking(Unit unit)
+
+  @Override
+  public Color getMarkingColor(Unit unit)
   {
-    // We don't have anything useful to print, so don't.
-    return '\0';
+    return myColor;
   }
 
   /** Get the list of units this commander can build from the given property type. */

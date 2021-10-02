@@ -10,8 +10,11 @@ import java.io.File;
 import java.util.*;
 
 import CommandingOfficers.Commander;
+import Engine.GameInstance;
+import Engine.UnitMods.StateTracker;
 import UI.UIUtils;
 import UI.UIUtils.Faction;
+import UI.UnitMarker;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -239,7 +242,7 @@ public class UnitSpriteSet
    * Lower Right: Activity icons, e.g. transporting units or capturing property.
    * Lower Left: HP when not at full health (this can extend to the lower right if the unit has >10 HP).
    */
-  public void drawUnitIcons(Graphics g, Commander[] COs, Unit u, int animIndex, int drawX, int drawY)
+  public void drawUnitIcons(Graphics g, GameInstance game, Unit u, int animIndex, int drawX, int drawY)
   {
     int unitHeight = sprites[0].getFrame(0).getHeight();
 
@@ -260,23 +263,31 @@ public class UnitSpriteSet
         num = SpriteLibrary.getMapUnitNumberSprites().getFrame(u.getHP());
       g.drawImage(num, drawX, drawY + ((unitHeight) / 2), num.getWidth(), num.getHeight(), null);
     }
-    
-    // Collect all the Commanders who desire to mark this unit
-    ArrayList<Commander> markers = new ArrayList<Commander>();
-    for( Commander co : COs )
-    {
-      char symbol = co.getUnitMarking(u);
-      if( '\0' != symbol ) // null char is our sentry value
+
+    ArrayList<UnitMarker> markers = new ArrayList<>();
+    Commander[] COs = game.commanders;
+    { // Scope for potentialMarkers
+      ArrayList<UnitMarker> potentialMarkers = new ArrayList<>();
+      for( Commander co : COs )
+        potentialMarkers.add(co);
+      for( StateTracker<?> st : game.stateTrackers.values() )
+        potentialMarkers.add(st);
+
+      for( UnitMarker mark : potentialMarkers )
       {
-        markers.add(co);
+        char symbol = mark.getUnitMarking(u);
+        if( '\0' != symbol ) // null char is our sentry value
+        {
+          markers.add(mark);
+        }
       }
     }
 
     // Draw one of them, based on our animation index
     if( !markers.isEmpty() )
     {
-      Commander co = markers.get((animIndex%(markers.size()*ANIM_FRAMES_PER_MARK))/ANIM_FRAMES_PER_MARK);
-      BufferedImage symbol = SpriteLibrary.getColoredMapTextSprites(co.myColor).get(co.getUnitMarking(u));
+      UnitMarker mark = markers.get((animIndex%(markers.size()*ANIM_FRAMES_PER_MARK))/ANIM_FRAMES_PER_MARK);
+      BufferedImage symbol = SpriteLibrary.getColoredMapTextSprites(mark.getMarkingColor(u)).get(mark.getUnitMarking(u));
       // draw in the upper right corner
       g.drawImage(symbol, drawX + ((unitHeight) / 2), drawY, symbol.getWidth(), symbol.getHeight(), null);
     }

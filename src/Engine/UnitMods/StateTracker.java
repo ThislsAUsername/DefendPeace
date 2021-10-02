@@ -4,12 +4,13 @@ import java.lang.reflect.Constructor;
 
 import Engine.GameInstance;
 import Engine.GameEvents.GameEventListener;
+import UI.UnitMarker;
 
 /**
  * This class exists to act as a "singleton with respect to a GameInstance".
  * <p>The intended use case is subclasses that track certain activities globally for use in UnitModifiers.
  */
-public abstract class StateTracker<T extends StateTracker<T>> implements GameEventListener
+public abstract class StateTracker<T extends StateTracker<T>> implements GameEventListener, UnitMarker
 {
   private static final long serialVersionUID = 1L;
   public final Class<T> key; // TODO: Verify ref-compare works on save-load
