@@ -230,6 +230,11 @@ public class Unit extends UnitState implements UnitModList
     return isFull;
   }
 
+  public int getRepairCost()
+  {
+    return model.getRepairCost(new UnitContext(this));
+  }
+
   @Override
   public String toString()
   {

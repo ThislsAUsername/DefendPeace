@@ -1,10 +1,9 @@
 package Engine.UnitMods;
 
-import Engine.XYCoord;
 import Engine.Combat.CombatContext;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
-import Units.UnitModel;
+import Units.UnitContext;
 
 /**
  * UnitModifiers exist to represent transient or conditional changes in a unit's properties.
@@ -48,9 +47,19 @@ public interface UnitModifier
   {
   }
 
-  default int getPriceOffset(XYCoord coord, UnitModel um, int currentPrice)
+  /** Should always be called for cost-related calculations */
+  default void modifyCost(UnitContext uc)
   {
-    return 0;
+  }
+
+  /** For building from a property */
+  default void modifyBuyCost(UnitContext uc)
+  {
+  }
+  // Not adding a Produce overload for now since I don't see a simple way to get consistent results pipelined into the displayed buy cost
+
+  default void modifyRepairCost(UnitContext uc)
+  {
   }
 
 }

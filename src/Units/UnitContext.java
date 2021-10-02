@@ -27,6 +27,9 @@ public class UnitContext extends UnitState
   public int maxHP;
   public int attackPower;
   public int defensePower;
+  public int costBase;
+  public double costMultiplier;
+  public int costShift;
 
   public Environment env;
   public int terrainStars = 0;
@@ -75,6 +78,9 @@ public class UnitContext extends UnitState
     maxHP = model.maxHP;
     attackPower = model.getDamageRatio();
     defensePower = model.getDefenseRatio();
+    costBase = model.costBase;
+    costMultiplier = model.costMultiplier;
+    costShift = model.costShift;
   }
 
   public void setPath(GamePath pPath)

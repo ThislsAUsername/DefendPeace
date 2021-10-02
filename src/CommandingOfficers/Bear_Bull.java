@@ -4,16 +4,19 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import CommandingOfficers.Modifiers.COModifier;
+import CommandingOfficers.Modifiers.DynamicModifier;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MassDamageEvent;
 import Engine.GameEvents.ModifyFundsEvent;
+import Engine.UnitMods.UnitDiscount;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 
 /*
@@ -90,7 +93,7 @@ public class Bear_Bull extends Commander
         incomeAdjustment = (int) (gameRules.incomePerCity * BEAR_MOD) - gameRules.incomePerCity;
       for( UnitModel um : unitModels )
       {
-        um.COcost = BEAR_MOD;
+        um.costMultiplier = BEAR_MOD;
       }
     }
     else
@@ -100,15 +103,16 @@ public class Bear_Bull extends Commander
         incomeAdjustment = (int) (gameRules.incomePerCity * BULL_MOD) - gameRules.incomePerCity;
       for( UnitModel um : unitModels )
       {
-        um.COcost = BULL_MOD;
+        um.costMultiplier = BULL_MOD;
       }
     }
   }
 
   @Override
-  public double getRepairCostFactor()
+  public void modifyRepairCost(UnitContext uc)
   {
-    return 0;
+    // Change the base cost since this change is not an addition/subtraction
+    uc.costBase = 0;
   }
 
   /**
@@ -117,14 +121,14 @@ public class Bear_Bull extends Commander
    * Bear: Gives you a fast injection of funds based on 1.2x your liquidated units' HP value. Should probably build before using.
    * Bull: Having units on properties when you use it is poor due to the 0.9x liquidation price, however, the discount should be welcome.
    */
-  private static class UpDownTurnAbility extends CommanderAbility implements COModifier
+  private static class UpDownTurnAbility extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String UPTURN_NAME = "UpTurn";
     private static final String DOWNTURN_NAME = "DownTurn";
     private static final int DOWNUPTURN_COST = 3;
     private static final int DOWNUPTURN_LIQUIDATION = 3;
-    Bear_Bull COcast;
+    final Bear_Bull COcast;
 
     UpDownTurnAbility(Bear_Bull commander)
     {
@@ -141,14 +145,17 @@ public class Bear_Bull extends Commander
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
-    {
-      modList.add(this); // TODO
-    }
-
-    @Override
     protected void perform(Commander co, MapMaster gameMap)
-    {}
+    {
+      if( co == COcast )
+        COcast.swapD2Ds(false);
+    }
+    @Override
+    protected void revert(Commander co, MapMaster gameMap)
+    {
+      if( co == COcast )
+        COcast.swapD2Ds(true);
+    }
 
     @Override
     public GameEventQueue getEvents(Commander co, MapMaster gameMap)
@@ -168,19 +175,6 @@ public class Bear_Bull extends Commander
       powerEvents.add( new ModifyFundsEvent(COcast, valueDrained) ); // Collect profits
 
       return powerEvents;
-    }
-
-    @Override // COModifier interface.
-    public void applyChanges(Commander commander)
-    {
-      // TODO?!
-      COcast.swapD2Ds(false);
-    }
-
-    @Override
-    public void revertChanges(Commander commander)
-    {
-      COcast.swapD2Ds(true);
     }
 
     @Override
@@ -218,10 +212,9 @@ public class Bear_Bull extends Commander
 
   /**
    * Boom/Bust reduces costs by 20% (to 70% or 100%). Swap D2Ds permanently when this wears off.
-   * In the future, it'd be cool to be able to build on valid locations next to production facilities... but that's hard and I'm lazy
    * For clarification: Boom is Bear's ability; Bust is Bull's
    */
-  private static class BustBoomAbility extends CommanderAbility implements COModifier
+  private static class BustBoomAbility extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String BUST_NAME = "Bust";
@@ -247,28 +240,18 @@ public class Bear_Bull extends Commander
     @Override
     protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
     {
-      modList.add(this); // TODO
+      DynamicModifier dym = new DynamicModifier(new UnitDiscount(BOOMBUST_BUFF));
+      modList.add(dym);
     }
 
     @Override
     protected void perform(Commander co, MapMaster gameMap)
     {}
-
-    @Override // COModifier interface.
-    public void applyChanges(Commander commander)
+    @Override
+    protected void revert(Commander co, MapMaster gameMap)
     {
-      // Instead of swapping, we get a discount. Yaaaay.
-      for( UnitModel um : commander.unitModels )
-      {
-        um.COcost -= BOOMBUST_BUFF;
-      }
-    }
-
-    @Override // COModifier interface.
-    public void revertChanges(Commander commander)
-    {
-      // Next turn, we swap D2Ds permanently
-      COcast.swapD2Ds(true);
+      if( co == COcast )
+        COcast.swapD2Ds(true);
     }
   }
 

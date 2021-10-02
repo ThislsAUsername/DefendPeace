@@ -63,7 +63,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public String name;
   public long role;
   public Commander CO;
-  protected int moneyCost;
+  public int costBase;
   public double abilityPowerValue;
   public int maxAmmo;
   public int maxFuel;
@@ -84,8 +84,8 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public long carryableExclusionMask;
   private int COstr = 100;
   private int COdef = 100;
-  public double COcost = 1.0;
-  public int moneyCostAdjustment = 0;
+  public double costMultiplier = 1.0;
+  public int costShift = 0;
 
   public UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] pWeapons, double powerValue)
@@ -115,7 +115,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   {
     name = pName;
     role = pRole;
-    moneyCost = cost;
+    costBase = cost;
     maxAmmo = pAmmoMax;
     abilityPowerValue = powerValue;
     maxFuel = pFuelMax;
@@ -157,20 +157,42 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     CO = other.CO;
     COstr = other.COstr;
     COdef = other.COdef;
-    COcost = other.COcost;
-    moneyCostAdjustment = other.moneyCostAdjustment;
+    costMultiplier = other.costMultiplier;
+    costShift = other.costShift;
   }
 
+  private int costFrom(UnitContext uc)
+  {
+    return (int) ((uc.costBase)*uc.costMultiplier)+uc.costShift;
+  }
+  private UnitContext getCostContext()
+  {
+    UnitContext uc = new UnitContext(this.CO, this);
+    for( UnitModifier mod : getModifiers() )
+      mod.modifyCost(uc);
+    return uc;
+  }
   public int getCost()
   {
-    return (int) ((moneyCost+moneyCostAdjustment)*COcost);
+    UnitContext uc = getCostContext();
+    return costFrom(uc);
   }
   public int getBuyCost(XYCoord coord)
   {
-    int basePrice = getCost();
+    UnitContext uc = getCostContext();
+    uc.coord = coord;
     for( UnitModifier mod : getModifiers() )
-      basePrice += mod.getPriceOffset(coord, this, basePrice);
-    return basePrice;
+      mod.modifyBuyCost(uc);
+    return costFrom(uc);
+  }
+  // Not adding a Produce overload for now since I don't see a simple way to get consistent results pipelined into the displayed buy cost
+  public int getRepairCost(UnitContext uc)
+  {
+    for( UnitModifier mod : getModifiers() )
+      mod.modifyCost(uc);
+    for( UnitModifier mod : getModifiers() )
+      mod.modifyRepairCost(uc);
+    return costFrom(uc);
   }
 
   /**

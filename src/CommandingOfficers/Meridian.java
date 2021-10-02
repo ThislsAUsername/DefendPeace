@@ -69,8 +69,8 @@ public class Meridian extends Commander
     UnitModel tank = getUnitModel(UnitModel.ASSAULT);
     UnitModel arty = getUnitModel(UnitModel.SIEGE);
     int costShift = (tank.getCost() - arty.getCost())/2;
-    tank.moneyCostAdjustment -= costShift;
-    arty.moneyCostAdjustment += costShift;
+    tank.costShift -= costShift;
+    arty.costShift += costShift;
     tank.possibleActions.add(new TransformLifecycle.TransformFactory(arty, "~ARTY"));
     arty.possibleActions.add(new TransformLifecycle.TransformFactory(tank, "~TANK"));
 

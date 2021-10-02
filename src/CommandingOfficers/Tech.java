@@ -560,7 +560,7 @@ public class Tech extends Commander
     UnitModel BattleMech = mdTank.clone();
     BattleMech.name = "BattleMech";
     BattleMech.role = BattleMech.role | UnitModel.SURFACE_TO_AIR;
-    BattleMech.moneyCostAdjustment = mdTank.getCost() + (antiAir.getCost()/2);
+    BattleMech.costShift = mdTank.getCost() + (antiAir.getCost()/2);
     BattleMech.abilityPowerValue = 2.0;
     BattleMech.maxFuel = 30;
     BattleMech.maxAmmo = 10;

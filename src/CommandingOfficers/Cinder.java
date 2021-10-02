@@ -16,7 +16,7 @@ import Terrain.GameMap;
 import Terrain.MapMaster;
 import UI.GameOverlay;
 import Units.Unit;
-import Units.UnitModel;
+import Units.UnitContext;
 
 /*
  * Cinder is based on getting an edge in the action economy, at the cost of unit health.
@@ -105,9 +105,9 @@ public class Cinder extends Commander
    * the cost of units increases for repeated purchases from a single property.
    */
   @Override
-  public int getPriceOffset(XYCoord coord, UnitModel um, int currentPrice)
+  public void modifyBuyCost(UnitContext uc)
   {
-    return buildCounts.getCountFor(this, coord)*PREMIUM_PER_BUILD;
+    uc.costShift += buildCounts.getCountFor(this, uc.coord)*PREMIUM_PER_BUILD;
   }
 
   @Override
