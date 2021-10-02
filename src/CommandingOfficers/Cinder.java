@@ -1,5 +1,8 @@
 package CommandingOfficers;
 
+import java.awt.Color;
+import java.util.ArrayList;
+
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
@@ -9,7 +12,9 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.UnitMods.BuildCountsTracker;
 import Engine.UnitMods.CountTracker;
 import Engine.UnitMods.StateTracker;
+import Terrain.GameMap;
 import Terrain.MapMaster;
+import UI.GameOverlay;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -103,6 +108,37 @@ public class Cinder extends Commander
   public int getPriceOffset(XYCoord coord, UnitModel um, int currentPrice)
   {
     return buildCounts.getCountFor(this, coord)*PREMIUM_PER_BUILD;
+  }
+
+  @Override
+  public ArrayList<GameOverlay> getMyOverlays(GameMap gameMap, boolean amIViewing)
+  {
+    ArrayList<GameOverlay> overlays = super.getMyOverlays(gameMap, amIViewing);
+    if( !amIViewing )
+      return overlays;
+
+    // Highlight tiles we've built from already this turn
+    for( XYCoord xyc : buildCounts.getCountFor(this).keySet() )
+    {
+      if( !gameMap.isLocationValid(xyc) )
+        continue;
+
+      // Invert my color so the highlight is easily visible
+      int r = 255 - myColor.getRed();
+      int g = 255 - myColor.getGreen();
+      int b = 255 - myColor.getBlue();
+      // Thicken the center of the overlay as I spam
+      int a = Math.min(255, 100 * buildCounts.getCountFor(this, xyc));
+      Color edgeColor = new Color(r, g, b, 200);
+      Color fillColor = new Color(r, g, b, a);
+      ArrayList<XYCoord> coords = new ArrayList<XYCoord>();
+      coords.add(xyc);
+      overlays.add(new GameOverlay(xyc,
+                   coords,
+                   fillColor, edgeColor));
+    }
+
+    return overlays;
   }
 
   /*

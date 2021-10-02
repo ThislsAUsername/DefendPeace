@@ -1,5 +1,7 @@
 package Engine.UnitMods;
 
+import java.util.Map;
+
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.XYCoord;
@@ -22,6 +24,11 @@ public class BuildCountsTracker extends StateTracker<BuildCountsTracker>
 
   private CountTracker<Commander, XYCoord> buildCounts = new CountTracker<>();
 
+  /** Caller shouldn't modify this return value */
+  public Map<XYCoord, Integer> getCountFor(Commander co)
+  {
+    return buildCounts.getCountFor(co);
+  }
   public int getCountFor(Commander co, XYCoord coord)
   {
     return buildCounts.getCountFor(co, coord);
