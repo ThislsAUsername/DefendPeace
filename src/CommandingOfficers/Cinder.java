@@ -255,5 +255,25 @@ public class Cinder extends Commander
       }
       return results;
     }
+
+    @Override
+    public char getUnitMarking(Unit unit)
+    {
+      Commander co = unit.CO;
+      char defaultVal = super.getUnitMarking(unit);
+      // Don't pollute the pool for the early out from earlier
+      if( !attackCounts.hasCountFor(co) )
+        return defaultVal;
+      int count = attackCounts.getCountFor(co, unit);
+      if( 0 >= count )
+        return defaultVal;
+      // Units can't survive attacking 10 times, so don't worry about that
+      return ("" + count).charAt(0);
+    }
+    @Override
+    public Color getMarkingColor(Unit unit)
+    {
+      return unit.CO.myColor;
+    }
   }
 }
