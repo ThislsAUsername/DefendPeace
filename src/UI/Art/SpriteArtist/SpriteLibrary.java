@@ -681,10 +681,7 @@ public class SpriteLibrary
    */
   public static BufferedImage createTransparentSprite(int w, int h)
   {
-    BufferedImage bi = createDefaultBlankSprite(w, h);
-    Sprite spr = new Sprite(bi);
-    spr.colorize(Color.BLACK, new Color(0, 0, 0, 0));
-    return bi;
+    return new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
   }
 
   /**
