@@ -120,7 +120,8 @@ public class Cinder extends Commander
     // Highlight tiles we've built from already this turn
     for( XYCoord xyc : buildCounts.getCountFor(this).keySet() )
     {
-      if( !gameMap.isLocationValid(xyc) )
+      int count = buildCounts.getCountFor(this, xyc);
+      if( !gameMap.isLocationValid(xyc) || count < 1 )
         continue;
 
       // Invert my color so the highlight is easily visible
@@ -128,7 +129,7 @@ public class Cinder extends Commander
       int g = 255 - myColor.getGreen();
       int b = 255 - myColor.getBlue();
       // Thicken the center of the overlay as I spam
-      int a = Math.min(255, 100 * buildCounts.getCountFor(this, xyc));
+      int a = Math.min(255, 100 * count);
       Color edgeColor = new Color(r, g, b, 200);
       Color fillColor = new Color(r, g, b, a);
       ArrayList<XYCoord> coords = new ArrayList<XYCoord>();
