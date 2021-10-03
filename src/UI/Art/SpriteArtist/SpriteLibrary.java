@@ -6,7 +6,6 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -247,7 +246,7 @@ public class SpriteLibrary
   {
     public final TerrainType terrainKey;
     public final COSpriteSpec commanderKey;
-    private static ArrayList<SpriteSetKey> instances = new ArrayList<SpriteSetKey>();
+    private static HashMap<Integer, SpriteSetKey> instances = new HashMap<>();
 
     private SpriteSetKey(TerrainType terrain, COSpriteSpec spec)
     {
@@ -257,22 +256,28 @@ public class SpriteLibrary
 
     public static SpriteSetKey instance(TerrainType terrain, COSpriteSpec spec)
     {
-      SpriteSetKey key = null;
-      for( int i = 0; i < instances.size(); ++i )
-      {
-        if( instances.get(i).terrainKey == terrain &&
-            (COSpriteSpec.support(instances.get(i).commanderKey, spec)) )
-        {
-          key = instances.get(i);
-          break;
-        }
-      }
+      int hash = myHash(terrain, spec);
+      SpriteSetKey key = instances.getOrDefault(hash, null);
       if( key == null )
       {
         key = new SpriteSetKey(terrain, spec);
-        instances.add(key);
+        instances.put(hash, key);
       }
       return key;
+    }
+
+    public static int myHash(TerrainType terrain, COSpriteSpec spec)
+    {
+      final int prime = 160091;
+      int result = 1;
+      result = prime * result + terrain.hashCode();
+      result = prime * result;
+      if(null != spec)
+        result += spec.faction.name.hashCode();
+      result = prime * result;
+      if(null != spec)
+        result += spec.color.hashCode();
+      return result;
     }
   }
 
@@ -284,7 +289,7 @@ public class SpriteLibrary
   {
     public final String unitTypeKey;
     public final COSpriteSpec spriteSpec;
-    private static ArrayList<UnitSpriteSetKey> instances = new ArrayList<UnitSpriteSetKey>();
+    private static HashMap<Integer, UnitSpriteSetKey> instances = new HashMap<>();
 
     private UnitSpriteSetKey(String unitType, Faction faction, Color color)
     {
@@ -294,22 +299,25 @@ public class SpriteLibrary
 
     public static UnitSpriteSetKey instance(String unitType, Faction faction, Color color)
     {
-      UnitSpriteSetKey key = null;
       String stdType = UnitModel.standardizeID(unitType);
-      for( int i = 0; i < instances.size(); ++i )
-      {
-        if( instances.get(i).unitTypeKey.equals(stdType) && instances.get(i).spriteSpec.supports(faction, color) )
-        {
-          key = instances.get(i);
-          break;
-        }
-      }
+      int hash = myHash(stdType, faction, color);
+      UnitSpriteSetKey key = instances.getOrDefault(hash, null);
       if( key == null )
       {
         key = new UnitSpriteSetKey(stdType, faction, color);
-        instances.add(key);
+        instances.put(hash, key);
       }
       return key;
+    }
+
+    public static int myHash(String unitTypeKey, Faction faction, Color color)
+    {
+      final int prime = 160091;
+      int result = 1;
+      result = prime * result + unitTypeKey.hashCode();
+      result = prime * result + faction.name.hashCode();
+      result = prime * result + color.hashCode();
+      return result;
     }
   }
 
