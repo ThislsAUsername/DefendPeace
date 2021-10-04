@@ -122,7 +122,7 @@ public class Meridian extends Commander
   private static class ChangeAndFlow extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
-    private static final String STRONGARM_NAME = "Change and Flow";
+    private static final String NAME = "Change and Flow";
     private static final int COST = 4;
     private static final int BASIC_BUFF = 10;
     
@@ -132,7 +132,7 @@ public class Meridian extends Commander
 
     ChangeAndFlow(Meridian commander)
     {
-      super(STRONGARM_NAME, COST);
+      super(NAME, COST);
 
       damageMod = new CODamageModifier(BASIC_BUFF);
       defenseMod = new CODefenseModifier(BASIC_BUFF);
@@ -179,7 +179,7 @@ public class Meridian extends Commander
   private static class VehicularCharge extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
-    private static final String MOBILIZE_NAME = "Vehicular Charge";
+    private static final String NAME = "Vehicular Charge";
     private static final int COST = 6;
     private static final int BASIC_BUFF = 10;
 
@@ -189,7 +189,7 @@ public class Meridian extends Commander
 
     VehicularCharge(Meridian commander)
     {
-      super(MOBILIZE_NAME, COST);
+      super(NAME, COST);
 
       damageMod = new CODamageModifier(BASIC_BUFF);
       defenseMod = new CODefenseModifier(BASIC_BUFF);
