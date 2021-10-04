@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
-import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
@@ -12,6 +11,7 @@ import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.TransformLifecycle;
+import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -141,7 +141,7 @@ public class Meridian extends Commander
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(damageMod);
       modList.add(defenseMod);
@@ -198,7 +198,7 @@ public class Meridian extends Commander
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(damageMod);
       modList.add(defenseMod);

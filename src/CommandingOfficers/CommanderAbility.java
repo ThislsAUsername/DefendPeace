@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-import CommandingOfficers.Modifiers.COModifier;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEventQueue;
+import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 
@@ -20,7 +20,7 @@ public abstract class CommanderAbility implements Serializable
   protected String myName;
   protected double myPowerCost;
   public int AIFlags = PHASE_TURN_START;
-  private HashMap<Commander, ArrayList<COModifier>> coModsApplied = new HashMap<Commander, ArrayList<COModifier>>();
+  private HashMap<Commander, ArrayList<UnitModifier>> modsApplied = new HashMap<>();
 
   public CommanderAbility(String abilityName, double powerCost)
   {
@@ -57,12 +57,12 @@ public abstract class CommanderAbility implements Serializable
   public final void activate(Commander co, MapMaster gameMap)
   {
     // Don't re-apply CO mods if we've already applied them to this CO
-    if(!coModsApplied.containsKey(co)) {
-      ArrayList<COModifier> coModsToApply = new ArrayList<COModifier>();
+    if(!modsApplied.containsKey(co)) {
+      ArrayList<UnitModifier> coModsToApply = new ArrayList<>();
       enqueueCOMods(co, gameMap, coModsToApply);
-      coModsApplied.put(co, coModsToApply);
-      for(COModifier com : coModsToApply)
-        com.applyChanges(co);
+      modsApplied.put(co, coModsToApply);
+      for(UnitModifier mod : coModsToApply)
+        co.add(mod);
     }
     perform(co, gameMap);
   }
@@ -72,15 +72,12 @@ public abstract class CommanderAbility implements Serializable
    */
   public final void deactivate(MapMaster gameMap)
   {
-    for( Commander co : new ArrayList<Commander>(coModsApplied.keySet()) )
+    for( Commander co : new ArrayList<Commander>(modsApplied.keySet()) )
     {
-      if( coModsApplied.containsKey(co) )
-      {
-        ArrayList<COModifier> coModsToApply = coModsApplied.remove(co);
-        // Revert in reverse order, just to be safe
-        for( int i = coModsToApply.size() - 1; i >= 0; --i )
-          coModsToApply.get(i).revertChanges(co);
-      }
+      ArrayList<UnitModifier> modsToDrop = modsApplied.remove(co);
+      // Revert in reverse order, just to be safe
+      for( int i = modsToDrop.size() - 1; i >= 0; --i )
+        co.remove(modsToDrop.get(i));
       revert(co, gameMap);
     }
   }
@@ -102,7 +99,7 @@ public abstract class CommanderAbility implements Serializable
   }
 
   /** Allows the subclass to specify any CO modifiers that it would like this class to handle */
-  protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList) {}
+  protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList) {}
 
   public Collection<DamagePopup> getDamagePopups(Commander co, GameMap map)
   {

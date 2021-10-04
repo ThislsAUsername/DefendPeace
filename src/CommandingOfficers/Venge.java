@@ -4,8 +4,7 @@ import java.util.ArrayList;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
-import CommandingOfficers.Modifiers.COModifier;
-import CommandingOfficers.Modifiers.DynamicModifier;
+import CommandingOfficers.Modifiers.UnitInstanceFilter;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
@@ -36,7 +35,7 @@ public class Venge extends Commander
           "Commander Venge likes to get vengeance for any slight.\n" +
           "Attacking Venge is not always difficult, but you may not like the consequences.\n"));
       infoPages.add(new InfoPage(
-          "Passive:\n" + 
+          "Passive:\n" +
           "- After being attacked, Venge gets a bonus of +"+VENGEANCE_BOOST+"% attack against the unit that picked the fight.\n" +
           "- Units that Venge can get vengeance on are marked with a V.\n"));
       infoPages.add(new InfoPage(
@@ -113,6 +112,8 @@ public class Venge extends Commander
 
   public static class PreEmptiveCounterMod implements UnitModifier
   {
+    private static final long serialVersionUID = 1L;
+
     public final Commander co;
     public PreEmptiveCounterMod(Commander co)
     {
@@ -136,6 +137,8 @@ public class Venge extends Commander
 
   public static class IronWillMod implements UnitModifier
   {
+    private static final long serialVersionUID = 1L;
+
     public final int buff;
     public IronWillMod(int buff)
     {
@@ -196,15 +199,15 @@ public class Venge extends Commander
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      DynamicModifier dym = new DynamicModifier(new IronWillMod(IRONWILL_BOOST));
+      UnitInstanceFilter uif = new UnitInstanceFilter(new IronWillMod(IRONWILL_BOOST));
       for( Unit unit : co.units )
       {
         if( !unit.isTurnOver )
-          dym.addApplicable(unit);
+          uif.instances.add(unit);
       }
-      modList.add(dym);
+      modList.add(uif);
     }
 
     @Override
@@ -237,8 +240,8 @@ public class Venge extends Commander
     private static final int COST = 8;
     private static final int RETRIBUTION_BUFF = 40; // Trade defense for offense, since we hit before our attacker does.
     private static final int RETRIBUTION_NERF = 20;
-    COModifier damageMod = null;
-    COModifier defenseMod = null;
+    UnitModifier damageMod = null;
+    UnitModifier defenseMod = null;
 
     Retribution()
     {
@@ -248,11 +251,11 @@ public class Venge extends Commander
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(damageMod);
       modList.add(defenseMod);
-      modList.add(new DynamicModifier(new PreEmptiveCounterMod(co)));
+      modList.add(new PreEmptiveCounterMod(co));
     }
 
     @Override

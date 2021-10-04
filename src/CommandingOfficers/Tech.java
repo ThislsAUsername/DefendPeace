@@ -13,8 +13,7 @@ import AI.AICombatUtils;
 import AI.AIUtils;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
-import CommandingOfficers.Modifiers.COModifier;
-import CommandingOfficers.Modifiers.COModifier.GenericCOModifier;
+import CommandingOfficers.Modifiers.UnitTypeFilter;
 import Engine.GameAction.UnitSpawnAction;
 import Engine.GameScenario;
 import Engine.UnitActionFactory;
@@ -23,6 +22,7 @@ import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.UnitMods.UnitModifier;
 import Engine.GameEvents.CreateUnitEvent;
 import Terrain.GameMap;
 import Terrain.MapLocation;
@@ -155,12 +155,12 @@ public class Tech extends Commander
     private static final long serialVersionUID = 1L;
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       // Only mechanical/non-troop units get the firepower boost.
-      GenericCOModifier damageBuff = new CODamageModifier(buff);
-      damageBuff.addApplicableUnitModels(getMechanicalModels(co));
-      GenericCOModifier defenseBuff = new CODefenseModifier(buff);
+      UnitTypeFilter damageBuff = new UnitTypeFilter(new CODamageModifier(buff));
+      damageBuff.noneOf = UnitModel.TROOP;
+      UnitModifier defenseBuff = new CODefenseModifier(buff);
       modList.add(damageBuff);
       modList.add(defenseBuff);
     }
@@ -225,12 +225,12 @@ public class Tech extends Commander
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       // Only mechanical/non-troop units get the firepower boost.
-      GenericCOModifier damageBuff = new CODamageModifier(buff);
-      damageBuff.addApplicableUnitModels(getMechanicalModels(co));
-      GenericCOModifier defenseBuff = new CODefenseModifier(buff);
+      UnitTypeFilter damageBuff = new UnitTypeFilter(new CODamageModifier(buff));
+      damageBuff.noneOf = UnitModel.TROOP;
+      UnitModifier defenseBuff = new CODefenseModifier(buff);
       modList.add(damageBuff);
       modList.add(defenseBuff);
     }

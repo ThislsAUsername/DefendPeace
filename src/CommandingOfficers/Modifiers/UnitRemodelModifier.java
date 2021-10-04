@@ -1,5 +1,6 @@
 package CommandingOfficers.Modifiers;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +12,7 @@ import Units.UnitModel;
 /** Modifier to temporarily turn one unit into another kind of unit.
  *  This only applies to active units (newly-built units will not be changed).
  *  There are definitely no plans to use this to make werewolves. */
-public class UnitRemodelModifier implements COModifier
+public class UnitRemodelModifier implements Serializable
 {
   private static final long serialVersionUID = 1L;
   private Map<UnitModel, UnitModel> modelSwaps = null;
@@ -37,7 +38,6 @@ public class UnitRemodelModifier implements COModifier
     modelSwaps.put(oldModel, newModel);
   }
 
-  @Override
   public void applyChanges(Commander commander)
   {
     for( Unit unit : commander.units )
@@ -53,7 +53,6 @@ public class UnitRemodelModifier implements COModifier
     }
   }
 
-  @Override
   public void revertChanges(Commander commander)
   {
     for( Unit unit : unitsChanged )

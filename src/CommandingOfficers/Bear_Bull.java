@@ -3,8 +3,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
-import CommandingOfficers.Modifiers.COModifier;
-import CommandingOfficers.Modifiers.DynamicModifier;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
@@ -12,6 +10,7 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MassDamageEvent;
 import Engine.GameEvents.ModifyFundsEvent;
 import Engine.UnitMods.UnitDiscount;
+import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
@@ -238,10 +237,9 @@ public class Bear_Bull extends Commander
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      DynamicModifier dym = new DynamicModifier(new UnitDiscount(BOOMBUST_BUFF));
-      modList.add(dym);
+      modList.add(new UnitDiscount(BOOMBUST_BUFF));
     }
 
     @Override

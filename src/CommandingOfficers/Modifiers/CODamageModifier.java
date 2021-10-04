@@ -1,43 +1,21 @@
 package CommandingOfficers.Modifiers;
 
-import java.util.ArrayList;
+import Engine.Combat.StrikeParams;
+import Engine.UnitMods.UnitModifier;
 
-import CommandingOfficers.Commander;
-import CommandingOfficers.Modifiers.COModifier.GenericCOModifier;
-import Units.UnitModel;
-
-public class CODamageModifier extends GenericCOModifier
+public class CODamageModifier implements UnitModifier
 {
   private static final long serialVersionUID = 1L;
   private int attackModifier = 0;
 
-  /**
-   * Modify a Commander's units' firepower by the specified amount.
-   * By default it will affect all UnitModels owned by the Commander.
-   * To impact only specific units, use addApplicableUnitModel to set
-   * the ones that should be modified.
-   * @param firepowerChange
-   */
   public CODamageModifier(int firepowerChange)
   {
     attackModifier = firepowerChange;
   }
 
   @Override
-  protected final void modifyUnits(Commander commander, ArrayList<UnitModel> models)
+  public void modifyUnitAttack(StrikeParams params)
   {
-    for( UnitModel um : models )
-    {
-      um.modifyDamageRatio(attackModifier);
-    }
-  }
-
-  @Override
-  protected final void restoreUnits(Commander commander, ArrayList<UnitModel> models)
-  {
-    for( UnitModel um : models )
-    {
-      um.modifyDamageRatio(-attackModifier);
-    }
+    params.attackPower += attackModifier;
   }
 }

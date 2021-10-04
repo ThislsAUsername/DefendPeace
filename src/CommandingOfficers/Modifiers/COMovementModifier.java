@@ -1,12 +1,11 @@
 package CommandingOfficers.Modifiers;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-
 import CommandingOfficers.Commander;
-import CommandingOfficers.Modifiers.COModifier.GenericCOModifier;
 import Units.UnitModel;
 
-public class COMovementModifier extends GenericCOModifier
+public class COMovementModifier implements Serializable
 {
   private static final long serialVersionUID = 1L;
   private int rangeChange;
@@ -21,7 +20,6 @@ public class COMovementModifier extends GenericCOModifier
     rangeChange = range;
   }
 
-  @Override
   protected final void modifyUnits(Commander commander, ArrayList<UnitModel> models)
   {
     for( UnitModel um : models )
@@ -30,7 +28,6 @@ public class COMovementModifier extends GenericCOModifier
     }
   }
 
-  @Override
   protected final void restoreUnits(Commander commander, ArrayList<UnitModel> models)
   {
     for( UnitModel um : models )

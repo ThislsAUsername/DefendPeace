@@ -1,13 +1,9 @@
 package CommandingOfficers.Modifiers;
 
-import Units.UnitModel;
+import Engine.Combat.StrikeParams.BattleParams;
+import Engine.UnitMods.UnitModifier;
 
-import java.util.ArrayList;
-
-import CommandingOfficers.Commander;
-import CommandingOfficers.Modifiers.COModifier.GenericCOModifier;
-
-public class CODefenseModifier extends GenericCOModifier
+public class CODefenseModifier implements UnitModifier
 {
   private static final long serialVersionUID = 1L;
   private int defenseModifier = 0;
@@ -18,20 +14,8 @@ public class CODefenseModifier extends GenericCOModifier
   }
 
   @Override
-  protected final void modifyUnits(Commander commander, ArrayList<UnitModel> models)
+  public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
-    for( UnitModel um : models )
-    {
-      um.modifyDefenseRatio(defenseModifier);
-    }
-  }
-
-  @Override
-  protected final void restoreUnits(Commander commander, ArrayList<UnitModel> models)
-  {
-    for( UnitModel um : models )
-    {
-      um.modifyDefenseRatio(-defenseModifier);
-    }
+    params.defensePower += defenseModifier;
   }
 }

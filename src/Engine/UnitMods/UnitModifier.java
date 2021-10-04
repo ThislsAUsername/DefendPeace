@@ -1,5 +1,6 @@
 package Engine.UnitMods;
 
+import java.io.Serializable;
 import Engine.Combat.CombatContext;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
@@ -8,9 +9,8 @@ import Units.UnitContext;
 /**
  * UnitModifiers exist to represent transient or conditional changes in a unit's properties.
  * <p>They are expected to have some external framework in place to manage their lifetimes.
- * <p>This provides a dynamic alternative to COModifiers' static stat modification.
  */
-public interface UnitModifier
+public interface UnitModifier extends Serializable
 {
   /**
    * Allows a UnitModifier to make drastic combat changes like counterattacking first or at 2+ range.

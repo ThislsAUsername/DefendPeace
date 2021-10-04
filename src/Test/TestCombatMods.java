@@ -136,8 +136,6 @@ public class TestCombatMods extends TestCase
 
     // Check that Venge's Retribution works properly without breaking things (other than balance)
     boolean testPassed = true;
-    testPassed &= validate(infB.model.getDamageRatio() > 110, "    Retribution didn't buff offense.");
-    testPassed &= validate(infB.model.getDefenseRatio() < 100, "    Retribution didn't reduce defense.");
 
     // First, check the logic of A->B
     testPassed &= validate(normalAB.defender.deltaHP < normalAB.attacker.deltaHP, "    First strike didn't work properly for Cinder.");

@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.Stack;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
@@ -21,6 +20,7 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
 import Engine.GameEvents.MassDamageEvent;
+import Engine.UnitMods.UnitModifier;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.GameMap;
@@ -469,7 +469,7 @@ public class Ave extends Commander
     private int numActivations = 0;
 
     Ave coCast;
-    COModifier damageMod = null;
+    UnitModifier damageMod = null;
 
     NixAbility(Ave commander)
     {
@@ -488,7 +488,7 @@ public class Ave extends Commander
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(damageMod);
     }
@@ -542,7 +542,7 @@ public class Ave extends Commander
     private static final int GLACIO_FREEZE_RANGE = 2;
 
     Ave coCast;
-    COModifier damageMod = null;
+    UnitModifier damageMod = null;
 
     GlacioAbility(Ave commander)
     {
@@ -553,7 +553,7 @@ public class Ave extends Commander
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(damageMod);
     }
@@ -646,7 +646,7 @@ public class Ave extends Commander
     private static final int OBLIDO_RANGE = 2;
     private static final int OBLIDO_DAMAGE = 2;
 
-    COModifier damageMod = null;
+    UnitModifier damageMod = null;
 
     OblidoAbility()
     {
@@ -664,7 +664,7 @@ public class Ave extends Commander
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<COModifier> modList)
+    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(damageMod);
     }
