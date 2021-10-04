@@ -153,6 +153,8 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     // Duplicate other assorted values
     maxHP = other.maxHP;
     maxMaterials = other.maxMaterials;
+    for( UnitModifier mod : other.unitMods )
+      unitMods.add(mod);
 
     CO = other.CO;
     COstr = other.COstr;
