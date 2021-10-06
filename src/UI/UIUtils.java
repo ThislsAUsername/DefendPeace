@@ -259,23 +259,6 @@ public class UIUtils
         spec = new COSpriteSpec(co.faction, co.myColor);
       return spec;
     }
-
-    public static boolean support(COSpriteSpec me, COSpriteSpec you)
-    {
-      // If we're the same, yay
-      if( me == you )
-        return true;
-      // If we're not the same and one of us is null, boo
-      if( null == me || null == you )
-        return false;
-
-      return me.supports(you.faction, you.color);
-    }
-
-    public boolean supports(Faction pFaction, Color pColor)
-    {
-      return faction.name.contentEquals(pFaction.name) && color.equals(pColor);
-    }
   }
 
   private static class TeamColorSpec implements Comparable<TeamColorSpec>
