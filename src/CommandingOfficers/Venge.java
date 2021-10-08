@@ -16,6 +16,7 @@ import Engine.UnitMods.UnitModifier;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitContext;
+import Units.UnitModel;
 
 /*
  * Venge enhances counter-attacks of all sorts.
@@ -36,6 +37,7 @@ public class Venge extends Commander
           "Attacking Venge is not always difficult, but you may not like the consequences.\n"));
       infoPages.add(new InfoPage(
           "Passive:\n" +
+          "- Baseline stats are lower than normal; -10 defense and attack.\n" +
           "- After being attacked, Venge gets a bonus of +"+VENGEANCE_BOOST+"% attack against the unit that picked the fight.\n" +
           "- Units that Venge can get vengeance on are marked with a V.\n"));
       infoPages.add(new InfoPage(
@@ -61,11 +63,17 @@ public class Venge extends Commander
   private ArrayList<Unit> aggressors = new ArrayList<Unit>();
   private IronWill myIronWill = new IronWill();
   /** How much power I get when beating them up */
-  public final static int VENGEANCE_BOOST = 50;
+  public final static int VENGEANCE_BOOST = 60;
 
   public Venge(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
+
+    for (UnitModel model : unitModels)
+    {
+      model.modifyDamageRatio(-10);
+      model.modifyDefenseRatio(-10);
+    }
 
     addCommanderAbility(myIronWill);
     addCommanderAbility(new Retribution());
@@ -189,7 +197,7 @@ public class Venge extends Commander
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Iron Will";
     private static final int COST = 4;
-    private static final int IRONWILL_BOOST = 30;
+    private static final int IRONWILL_BOOST = 40;
     private static final int IRONWILL_WOUND = -2;
     private final ArrayList<Unit> boostedUnits = new ArrayList<Unit>();
 
