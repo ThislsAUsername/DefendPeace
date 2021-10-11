@@ -98,7 +98,7 @@ public class WallyAI extends ModularAI
     //             term for how fast you are   term for map coverage
     double ratio = (validTiles / totalCosts) * (validTiles / totalTiles); // 1.0 is the max expected value
     
-    double effMove = model.movePower * ratio;
+    double effMove = model.getMovePower() * ratio;
     unitEffectiveMove.put(model, effMove);
     return effMove;
   }
@@ -750,7 +750,7 @@ public class WallyAI extends ModularAI
     // Choose the point on the path just out of our range as our 'goal', and try to move there.
     // This will allow us to navigate around large obstacles that require us to move away
     // from our intended long-term goal.
-    path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
+    path.snip(unit.getMovePower(gameMap) + 1); // Trim the path approximately down to size.
     XYCoord pathPoint = path.getEndCoord(); // Set the last location as our goal.
 
     // Sort my currently-reachable move locations by distance from the goal,

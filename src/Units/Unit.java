@@ -80,6 +80,15 @@ public class Unit extends UnitState implements UnitModList
     return model.propulsion.getUnitMoveFunctor(this, includeOccupied, canTravelThroughEnemies);
   }
 
+  /** Provides the authoritative/actual move power of the unit in question */
+  public int getMovePower(GameMap map)
+  {
+    UnitContext uc = new UnitContext(map, this, null, x, y);
+    for( UnitModifier mod : getModifiers() )
+      mod.modifyMovePower(uc);
+    return uc.movePower;
+  }
+
   /**
    * @return whether or not this unit can attack the given unit type at the
    * specified range, accounting for the possibility of moving first.
@@ -247,11 +256,11 @@ public class Unit extends UnitState implements UnitModList
   }
 
 
-  private final ArrayList<UnitModifier> unitMods = new ArrayList<UnitModifier>();
+  private final ArrayList<UnitModifier> unitMods = new ArrayList<>();
   @Override
   public List<UnitModifier> getModifiers()
   {
-    ArrayList<UnitModifier> output = new ArrayList<UnitModifier>();
+    ArrayList<UnitModifier> output = new ArrayList<>();
     output.addAll(model.getModifiers());
     output.addAll(unitMods);
     return output;

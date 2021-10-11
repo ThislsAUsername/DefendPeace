@@ -27,6 +27,7 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitMods.UnitModList;
 import Engine.UnitMods.UnitModifier;
+import Engine.UnitMods.UnitModifierWithDefaults;
 import Engine.UuidGenerator;
 import Terrain.GameMap;
 import Terrain.MapLocation;
@@ -40,7 +41,7 @@ import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModelScheme.GameReadyModels;
 
-public class Commander implements GameEventListener, Serializable, UnitModifier, UnitModList, UnitMarker
+public class Commander implements GameEventListener, Serializable, UnitModifierWithDefaults, UnitModList, UnitMarker
 {
   private static final long serialVersionUID = 1L;
   

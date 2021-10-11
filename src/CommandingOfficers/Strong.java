@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
+import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import CommandingOfficers.Modifiers.UnitTypeFilter;
 import Engine.GameScenario;
@@ -135,14 +136,10 @@ public class Strong extends Commander
       modList.add(defenseMod);
       modList.add(damageModTroop);
 
-      //TODO: Fix me
       // Grant troops and transports additional movement power.
-//      COMovementModifier moveMod = new COMovementModifier(2);
-//      for( UnitModel model : myCommander.getAllModels(UnitModel.TROOP | UnitModel.TRANSPORT) )
-//      {
-//        moveMod.addApplicableUnitModel(model);
-//      }
-//      modList.add(moveMod);
+      UnitTypeFilter moveMod = new UnitTypeFilter(new COMovementModifier(2));
+      moveMod.oneOf = UnitModel.TROOP | UnitModel.TRANSPORT;
+      modList.add(moveMod);
     }
 
     private HashMap<Commander, UnitProductionModifier> upmsApplied = new HashMap<>();
@@ -197,14 +194,9 @@ public class Strong extends Commander
       modList.add(damageMod);
       modList.add(defenseMod);
 
-      //TODO: Fix me
       // Grant a global +2 movement buff.
-//      COMovementModifier moveMod = new COMovementModifier(2);
-//      for( UnitModel model : myCommander.unitModels )
-//      {
-//        moveMod.addApplicableUnitModel(model);
-//      }
-//      modList.add(moveMod);
+      COMovementModifier moveMod = new COMovementModifier(2);
+      modList.add(moveMod);
     }
 
     private HashMap<Commander, UnitProductionModifier> upmsApplied = new HashMap<>();

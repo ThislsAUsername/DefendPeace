@@ -137,7 +137,7 @@ public class GamePath
     {
       XYCoord from = waypoints.get(i-1).GetCoordinates();
       XYCoord to   = waypoints.get( i ).GetCoordinates();
-      if( unit.model.movePower < fff.getTransitionCost(map, from, to) )
+      if( unit.getMovePower(map) < fff.getTransitionCost(map, from, to) )
       {
         snip(i);
         break;

@@ -18,7 +18,8 @@ public class MoveAnimation extends BaseUnitActionAnimation
   {
     super(tileSize, actor, null);
     this.path = path;
-    tilesPerMs = actor.model.movePower / (double) maxTime;
+    // We don't need an *exact* speed, so this should be fine
+    tilesPerMs = actor.model.getMovePower() / (double) maxTime;
     duration = (long) ((path.getPathLength() - 1) / tilesPerMs);
   }
 

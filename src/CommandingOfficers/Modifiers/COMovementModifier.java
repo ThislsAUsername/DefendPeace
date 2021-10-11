@@ -1,11 +1,9 @@
 package CommandingOfficers.Modifiers;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import CommandingOfficers.Commander;
-import Units.UnitModel;
+import Engine.UnitMods.UnitModifierWithDefaults;
+import Units.UnitContext;
 
-public class COMovementModifier implements Serializable
+public class COMovementModifier implements UnitModifierWithDefaults
 {
   private static final long serialVersionUID = 1L;
   private int rangeChange;
@@ -20,20 +18,10 @@ public class COMovementModifier implements Serializable
     rangeChange = range;
   }
 
-  protected final void modifyUnits(Commander commander, ArrayList<UnitModel> models)
+  @Override
+  public void modifyMovePower(UnitContext uc)
   {
-    for( UnitModel um : models )
-    {
-      um.movePower = um.movePower + rangeChange;
-    }
-  }
-
-  protected final void restoreUnits(Commander commander, ArrayList<UnitModel> models)
-  {
-    for( UnitModel um : models )
-    {
-      um.movePower = um.movePower - rangeChange;
-    }
+    uc.movePower += rangeChange;
   }
 
 }

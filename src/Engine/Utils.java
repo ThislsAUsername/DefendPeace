@@ -118,7 +118,7 @@ public class Utils
    */
   public static ArrayList<XYCoord> findPossibleDestinations(XYCoord start, Unit unit, GameMap gameMap, boolean includeOccupiedSpaces)
   {
-    return findFloodFillArea(start, unit.getMoveFunctor(includeOccupiedSpaces), Math.min(unit.model.movePower, unit.fuel), gameMap);
+    return findFloodFillArea(start, unit.getMoveFunctor(includeOccupiedSpaces), Math.min(unit.getMovePower(gameMap), unit.fuel), gameMap);
   }
   /**
    * @param start Initial location; will usually be in the output set.
@@ -177,7 +177,7 @@ public class Utils
   }
   public static boolean isPathValid(XYCoord start, Unit unit, GamePath path, GameMap map, boolean includeOccupiedSpaces)
   {
-    return isPathValid(start, unit.getMoveFunctor(includeOccupiedSpaces), Math.min(unit.model.movePower, unit.fuel), path, map);
+    return isPathValid(start, unit.getMoveFunctor(includeOccupiedSpaces), Math.min(unit.getMovePower(map), unit.fuel), path, map);
   }
   public static boolean isPathValid(XYCoord start, FloodFillFunctor fff, int initialFillPower, GamePath path, GameMap map)
   {
@@ -249,7 +249,7 @@ public class Utils
   {
     // findShortestPath() is given a particular endpoint already, so it assumes that it is valid to end up there.
     return findShortestPath(start, unit.getMoveFunctor(true, theoretical),
-                            (theoretical)? Integer.MAX_VALUE : Math.min(unit.model.movePower, unit.fuel),
+                            (theoretical)? Integer.MAX_VALUE : Math.min(unit.getMovePower(map), unit.fuel),
                             x, y, map);
   }
   /**
@@ -600,7 +600,7 @@ public class Utils
       XYCoord from = path.getWaypoint(i-1).GetCoordinates();
       XYCoord to   = path.getWaypoint( i ).GetCoordinates();
       // If there are collisions relevant to the unit, the cost will be IMPASSABLE
-      if( unit.model.movePower < fff.getTransitionCost(map, from, to) )
+      if( unit.getMovePower(map) < fff.getTransitionCost(map, from, to) )
       {
         result = true;
         break;

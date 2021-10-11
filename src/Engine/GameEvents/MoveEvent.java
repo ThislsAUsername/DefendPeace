@@ -46,7 +46,7 @@ public class MoveEvent implements GameEvent
       int fuelBurn = unitPath.getFuelCost(unit.model, gameMap);
 
       boolean includeOccupiedSpaces = true; // To allow validation for LOAD/JOIN actions.
-      if( fuelBurn <= unit.fuel && fuelBurn <= unit.model.movePower
+      if( fuelBurn <= unit.fuel && fuelBurn <= unit.getMovePower(gameMap)
           && unit.getMoveFunctor(includeOccupiedSpaces).canEnd(gameMap, endpoint.GetCoordinates()))
       {
         if( null == gameMap.getLocation(endpoint.x, endpoint.y).getResident() ) // Just avoid triggering a warning.

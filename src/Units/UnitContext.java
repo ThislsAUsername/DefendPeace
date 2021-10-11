@@ -21,12 +21,15 @@ public class UnitContext extends UnitState
   // Groups are set together
   public Unit unit;
 
+  public GameMap map;
+
   public GamePath path;
   public XYCoord coord;
 
   public int maxHP;
   public int attackPower;
   public int defensePower;
+  public int movePower;
   public int costBase;
   public double costMultiplier;
   public int costShift;
@@ -36,11 +39,12 @@ public class UnitContext extends UnitState
 
   public WeaponModel weapon;
 
-  public final List<UnitModifier> mods = new ArrayList<UnitModifier>();
+  public final List<UnitModifier> mods = new ArrayList<>();
 
   public UnitContext(GameMap map, Unit u, WeaponModel w, int x, int y)
   {
     this(u);
+    this.map = map;
     weapon = w;
     coord = new XYCoord(x, y);
     setEnvironment(map.getEnvironment(coord));
@@ -78,6 +82,7 @@ public class UnitContext extends UnitState
     maxHP = model.maxHP;
     attackPower = model.getDamageRatio();
     defensePower = model.getDefenseRatio();
+    movePower = model.movePower;
     costBase = model.costBase;
     costMultiplier = model.costMultiplier;
     costShift = model.costShift;

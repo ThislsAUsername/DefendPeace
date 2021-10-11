@@ -1,9 +1,9 @@
 package CommandingOfficers.Modifiers;
 
 import Engine.Combat.StrikeParams.BattleParams;
-import Engine.UnitMods.UnitModifier;
+import Engine.UnitMods.UnitModifierWithDefaults;
 
-public class CODefenseModifier implements UnitModifier
+public class CODefenseModifier implements UnitModifierWithDefaults
 {
   private static final long serialVersionUID = 1L;
   private int defenseModifier = 0;

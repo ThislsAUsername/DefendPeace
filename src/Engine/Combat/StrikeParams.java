@@ -20,8 +20,8 @@ public class StrikeParams
       GameMap gameMap, int battleRange,
       boolean isCounter)
   {
-    List<UnitModifier> aMods = new ArrayList<UnitModifier>(attacker.mods);
-    List<UnitModifier> dMods = new ArrayList<UnitModifier>(defender.mods);
+    List<UnitModifier> aMods = new ArrayList<>(attacker.mods);
+    List<UnitModifier> dMods = new ArrayList<>(defender.mods);
 
     BattleParams params = new BattleParams(buildStrikeParams(attacker, defender.model, gameMap, battleRange, isCounter), defender);
 
@@ -38,7 +38,7 @@ public class StrikeParams
       GameMap gameMap, int battleRange,
       boolean isCounter)
   {
-    List<UnitModifier> aMods = new ArrayList<UnitModifier>(attacker.mods);
+    List<UnitModifier> aMods = new ArrayList<>(attacker.mods);
 
     StrikeParams params = new StrikeParams(
         attacker, gameMap,

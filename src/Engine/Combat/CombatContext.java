@@ -99,8 +99,8 @@ public class CombatContext
   private void applyModifiers()
   {
     // Make local shallow copies to avoid funny business
-    List<UnitModifier> aMods = new ArrayList<UnitModifier>(attacker.mods);
-    List<UnitModifier> dMods = new ArrayList<UnitModifier>(defender.mods);
+    List<UnitModifier> aMods = new ArrayList<>(attacker.mods);
+    List<UnitModifier> dMods = new ArrayList<>(defender.mods);
     // apply modifiers...
     for( UnitModifier mod : aMods )
       mod.changeCombatContext(this);

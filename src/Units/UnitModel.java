@@ -196,6 +196,10 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
       mod.modifyRepairCost(uc);
     return costFrom(uc);
   }
+  public boolean canRepairOn(MapLocation locus)
+  {
+    return healableHabs.contains(locus.getEnvironment().terrainType);
+  }
 
   /**
    * Takes a percent change and adds it to the current damage multiplier for this UnitModel.
@@ -225,9 +229,13 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     return COdef;
   }
 
-  public boolean canRepairOn(MapLocation locus)
+  /** For high-level estimation */
+  public int getMovePower()
   {
-    return healableHabs.contains(locus.getEnvironment().terrainType);
+    UnitContext uc = new UnitContext(this.CO, this);
+    for( UnitModifier mod : getModifiers() )
+      mod.modifyMovePower(uc);
+    return uc.movePower;
   }
 
   /** Provides a hook for inheritors to supply turn-initialization actions to a unit.
@@ -392,11 +400,11 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     return isAll(TROOP);
   }
 
-  private final ArrayList<UnitModifier> unitMods = new ArrayList<UnitModifier>();
+  private final ArrayList<UnitModifier> unitMods = new ArrayList<>();
   @Override
   public List<UnitModifier> getModifiers()
   {
-    ArrayList<UnitModifier> output = new ArrayList<UnitModifier>();
+    ArrayList<UnitModifier> output = new ArrayList<>();
     // TODO: consider a null check here
     output.addAll(CO.getModifiers());
     output.addAll(unitMods);

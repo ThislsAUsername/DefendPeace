@@ -386,7 +386,7 @@ public class Tech extends Commander
         Unit nme = gameMap.getLocation(nmexy).getResident();          // Enemy unit
         Integer nmeval = nme.model.getCost() * nme.getHP();           // Enemy value
 
-        if(nmexy.getDistance(myCommander.HQLocation) <= nme.model.movePower && nme.model.hasActionType(UnitActionFactory.CAPTURE))
+        if(nmexy.getDistance(myCommander.HQLocation) <= nme.getMovePower(gameMap) && nme.model.hasActionType(UnitActionFactory.CAPTURE))
         {
           if( log ) System.out.println(String.format("%s is too close to HQ. Increasing threat rating:", nme.toStringWithLocation()));
           nmeval *= 100; // More weight if this unit threatens HQ.

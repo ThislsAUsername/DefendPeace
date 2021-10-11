@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
+import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import CommandingOfficers.Modifiers.UnitRemodelModifier;
 import Engine.GameScenario;
@@ -50,21 +51,20 @@ public class TestCOModifier extends TestCase
     UnitModel inf = patch.getUnitModel(UnitModel.TROOP);
     
     // Get base movement speed
-    int startMove = inf.movePower;
+    int startMove = inf.getMovePower();
     
     // Apply a movement modifier and re-check.
     //TODO: Fix me
     int MOVEMOD = 3;
-//    COMovementModifier moveMod = new COMovementModifier(MOVEMOD);
-//    moveMod.addApplicableUnitModel(patch.getUnitModel(UnitModel.TROOP));
-//    moveMod.applyChanges(patch);
-//    int newMove = inf.movePower;
-//    testPassed &= validate( (newMove - startMove) == MOVEMOD, "    Movement modifier did not apply as expected!");
-//
-//    // Make sure reverting takes it back to normal.
-//    moveMod.revertChanges(patch);
-//    int lastMove = inf.movePower;
-//    testPassed &= validate( lastMove == startMove, "    Movement modifier did not return the move power to normal!");
+    COMovementModifier moveMod = new COMovementModifier(MOVEMOD);
+    inf.add(moveMod);
+    int newMove = inf.getMovePower();
+    testPassed &= validate( (newMove - startMove) == MOVEMOD, "    Movement modifier did not apply as expected!");
+
+    // Make sure reverting takes it back to normal.
+    inf.remove(moveMod);
+    int lastMove = inf.getMovePower();
+    testPassed &= validate( lastMove == startMove, "    Movement modifier did not return the move power to normal!");
 
     return testPassed;
   }

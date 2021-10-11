@@ -16,9 +16,7 @@ public interface UnitModifier extends Serializable
    * Allows a UnitModifier to make drastic combat changes like counterattacking first or at 2+ range.
    * <p>Prefer using the other combat hooks when feasible.
    */
-  default void changeCombatContext(CombatContext instance)
-  {
-  }
+  void changeCombatContext(CombatContext instance);
 
   /**
    * Called any time a unit makes a weapon attack;
@@ -26,40 +24,30 @@ public interface UnitModifier extends Serializable
    * <p>Should be used to modify attacks from units
    *   any time you do not need specific information about the target.
    */
-  default void modifyUnitAttack(StrikeParams params)
-  {
-  }
+  void modifyUnitAttack(StrikeParams params);
 
   /**
    * Called any time you are attacking a unit, always after {@link #modifyUnitAttack(StrikeParams)}
    * <p>Applies only when attacking a unit.
    * <p>Should be used only when you need specific information about your target.
    */
-  default void modifyUnitAttackOnUnit(BattleParams params)
-  {
-  }
+  void modifyUnitAttackOnUnit(BattleParams params);
 
   /**
    * Called any time your unit is being attacked, after {@link #modifyUnitAttackOnUnit(BattleParams)}
    * <p>Should be used to modify attacks made against your units.
    */
-  default void modifyUnitDefenseAgainstUnit(BattleParams params)
-  {
-  }
+  void modifyUnitDefenseAgainstUnit(BattleParams params);
 
   /** Should always be called for cost-related calculations */
-  default void modifyCost(UnitContext uc)
-  {
-  }
+  void modifyCost(UnitContext uc);
+
+  void modifyMovePower(UnitContext uc);
 
   /** For building from a property */
-  default void modifyBuyCost(UnitContext uc)
-  {
-  }
+  void modifyBuyCost(UnitContext uc);
   // Not adding a Produce overload for now since I don't see a simple way to get consistent results pipelined into the displayed buy cost
 
-  default void modifyRepairCost(UnitContext uc)
-  {
-  }
+  void modifyRepairCost(UnitContext uc);
 
 }

@@ -13,6 +13,7 @@ import Engine.Combat.CombatContext;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
 import Engine.UnitMods.UnitModifier;
+import Engine.UnitMods.UnitModifierWithDefaults;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitContext;
@@ -118,7 +119,7 @@ public class Venge extends Commander
     return null;
   }
 
-  public static class PreEmptiveCounterMod implements UnitModifier
+  public static class PreEmptiveCounterMod implements UnitModifierWithDefaults
   {
     private static final long serialVersionUID = 1L;
 
@@ -143,7 +144,7 @@ public class Venge extends Commander
     }
   }
 
-  public static class IronWillMod implements UnitModifier
+  public static class IronWillMod implements UnitModifierWithDefaults
   {
     private static final long serialVersionUID = 1L;
 
