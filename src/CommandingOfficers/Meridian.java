@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import CommandingOfficers.Modifiers.CODamageModifier;
 import CommandingOfficers.Modifiers.CODefenseModifier;
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
@@ -11,6 +12,7 @@ import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.TransformLifecycle;
+import Engine.UnitMods.TransformationTracker;
 import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
 import Terrain.MapMaster;
@@ -57,7 +59,7 @@ public class Meridian extends Commander
   }
 
   /** A list of all the units I've refreshed and need to nerf. */
-  private ArrayList<Unit> justTransformed = new ArrayList<Unit>();
+  final ChangeAndFlow changeAndFlow = new ChangeAndFlow();
   private ArrayList<Unit> toBeNerfed = new ArrayList<Unit>();
   private static final int POST_REFRESH_STAT_ADJUSTMENT = -25;
 
@@ -74,26 +76,22 @@ public class Meridian extends Commander
     tank.possibleActions.add(new TransformLifecycle.TransformFactory(arty, "~ARTY"));
     arty.possibleActions.add(new TransformLifecycle.TransformFactory(tank, "~TANK"));
 
-    addCommanderAbility(new ChangeAndFlow(this));
+    addCommanderAbility(changeAndFlow);
     addCommanderAbility(new VehicularCharge(this));
+  }
+
+  @Override
+  public void registerForEvents(GameInstance game)
+  {
+    super.registerForEvents(game);
+    changeAndFlow.init(game);
   }
 
   @Override
   public GameEventQueue initTurn(MapMaster map)
   {
-    justTransformed.clear();
     toBeNerfed.clear();
     return super.initTurn(map);
-  }
-
-  @Override // GameEventListener interface
-  public GameEventQueue receiveUnitTransformEvent(Unit unit, UnitModel oldType)
-  {
-    if (this == unit.CO)
-    {
-      justTransformed.add(unit);
-    }
-    return null;
   }
 
   /**
@@ -128,16 +126,19 @@ public class Meridian extends Commander
     
     CODamageModifier damageMod = null;
     CODefenseModifier defenseMod = null;
-    Meridian COcast;
+    TransformationTracker tracker;
 
-    ChangeAndFlow(Meridian commander)
+    ChangeAndFlow()
     {
       super(NAME, COST);
 
       damageMod = new CODamageModifier(BASIC_BUFF);
       defenseMod = new CODefenseModifier(BASIC_BUFF);
-      COcast = commander;
       AIFlags = 0; // The AI doesn't know how to use this, so it shouldn't try
+    }
+    public void init(GameInstance game)
+    {
+      tracker = TransformationTracker.initialize(game, TransformationTracker.class);
     }
 
     @Override
@@ -150,11 +151,11 @@ public class Meridian extends Commander
     @Override
     protected void perform(Commander co, MapMaster gameMap)
     {
-      // TODO: Handle with a StateTracker
       // Units that transformed are refreshed and able to move again.
-      for( Unit unit : COcast.justTransformed )
+      for( Unit unit : tracker.prevTypeMap.keySet() )
       {
-        unit.isTurnOver = false;
+        if( co == unit.CO ) // Consider validating that it actually was an arty-tank transformation?
+          unit.isTurnOver = false;
       }
     }
 
@@ -163,8 +164,9 @@ public class Meridian extends Commander
     {
       ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
 
-      for( Unit unit : COcast.justTransformed )
-        output.add(new DamagePopup(
+      for( Unit unit : tracker.prevTypeMap.keySet() )
+        if( co == unit.CO )
+          output.add(new DamagePopup(
                        new XYCoord(unit.x, unit.y),
                        co.myColor,
                        "Flow"));
