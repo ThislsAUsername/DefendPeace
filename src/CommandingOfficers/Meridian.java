@@ -2,14 +2,12 @@ package CommandingOfficers;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.CODefenseModifier;
+import CommandingOfficers.Modifiers.COFightStatModifier;
+import CommandingOfficers.Modifiers.UnitInstanceFilter;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
-import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.TransformLifecycle;
 import Engine.UnitMods.TransformationTracker;
@@ -77,7 +75,7 @@ public class Meridian extends Commander
     arty.possibleActions.add(new TransformLifecycle.TransformFactory(tank, "~TANK"));
 
     addCommanderAbility(changeAndFlow);
-    addCommanderAbility(new VehicularCharge(this));
+    addCommanderAbility(new VehicularCharge());
   }
 
   @Override
@@ -95,26 +93,6 @@ public class Meridian extends Commander
   }
 
   /**
-   * Troops that have been refreshed by Meridian's bigger power get a stat nerf
-   */
-  @Override
-  public void modifyUnitAttack(StrikeParams params)
-  {
-    if( toBeNerfed.contains(params.attacker.unit) )
-    {
-      params.attackPower += POST_REFRESH_STAT_ADJUSTMENT;
-    }
-  }
-  @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
-  {
-    if( toBeNerfed.contains(params.defender.unit) )
-    {
-      params.defensePower += POST_REFRESH_STAT_ADJUSTMENT;
-    }
-  }
-
-  /**
    * Change and Flow refreshes units that have transformed this turn
    */
   private static class ChangeAndFlow extends CommanderAbility
@@ -124,16 +102,13 @@ public class Meridian extends Commander
     private static final int COST = 4;
     private static final int BASIC_BUFF = 10;
     
-    CODamageModifier damageMod = null;
-    CODefenseModifier defenseMod = null;
+    COFightStatModifier baseMod = new COFightStatModifier(BASIC_BUFF);
     TransformationTracker tracker;
 
     ChangeAndFlow()
     {
       super(NAME, COST);
 
-      damageMod = new CODamageModifier(BASIC_BUFF);
-      defenseMod = new CODefenseModifier(BASIC_BUFF);
       AIFlags = 0; // The AI doesn't know how to use this, so it shouldn't try
     }
     public void init(GameInstance game)
@@ -144,8 +119,7 @@ public class Meridian extends Commander
     @Override
     protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      modList.add(damageMod);
-      modList.add(defenseMod);
+      modList.add(baseMod);
     }
 
     @Override
@@ -185,41 +159,45 @@ public class Meridian extends Commander
     private static final int COST = 6;
     private static final int BASIC_BUFF = 10;
 
-    CODamageModifier damageMod = null;
-    CODefenseModifier defenseMod = null;
-    Meridian COcast;
+    COFightStatModifier baseMod = new COFightStatModifier(BASIC_BUFF);
+    COFightStatModifier debuffMod = new COFightStatModifier(POST_REFRESH_STAT_ADJUSTMENT);
 
-    VehicularCharge(Meridian commander)
+    VehicularCharge()
     {
       super(NAME, COST);
 
-      damageMod = new CODamageModifier(BASIC_BUFF);
-      defenseMod = new CODefenseModifier(BASIC_BUFF);
-      COcast = commander;
       AIFlags = PHASE_TURN_END;
     }
 
     @Override
     protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      modList.add(damageMod);
-      modList.add(defenseMod);
+      modList.add(baseMod);
+      UnitInstanceFilter uif = new UnitInstanceFilter(debuffMod);
+      for( Unit unit : co.units )
+      {
+        if( shouldRefresh(unit) )
+          uif.instances.add(unit);
+      }
+      modList.add(uif);
     }
 
     @Override
     protected void perform(Commander co, MapMaster gameMap)
     {
-      // TODO: Handle with a UnitModifier
       // Lastly, all land vehicles are refreshed and able to move again.
-      for( Unit unit : COcast.units )
+      for( Unit unit : co.units )
       {
-        if( unit.model.isAll(UnitModel.TANK) )
+        if( shouldRefresh(unit) )
         {
-          if (unit.isTurnOver)
-            COcast.toBeNerfed.add(unit);
+          // Consider adding marks to affected units
           unit.isTurnOver = false;
         }
       }
+    }
+    protected boolean shouldRefresh(Unit unit)
+    {
+      return unit.model.isAll(UnitModel.TANK) && unit.isTurnOver;
     }
   }
 
