@@ -265,6 +265,7 @@ public class SpriteMapView extends MapView
         UnitContext uc = new UnitContext(currentActor);
         uc.map = gameMap;
         uc.setPath(currentPath);
+        // Setting the coord/environment independently here because our path can be invalid
         uc.coord = myGame.getCursorCoord();
         uc.setEnvironment(gameMap.getEnvironment(uc.coord));
         uc.setWeapon(w);
