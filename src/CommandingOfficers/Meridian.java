@@ -57,8 +57,8 @@ public class Meridian extends Commander
   }
 
   /** A list of all the units I've refreshed and need to nerf. */
-  final ChangeAndFlow changeAndFlow = new ChangeAndFlow();
-  private ArrayList<Unit> toBeNerfed = new ArrayList<Unit>();
+  final ChangeAndFlow myChangeAndFlow = new ChangeAndFlow();
+  final VehicularCharge myVehicularCharge = new VehicularCharge();
   private static final int POST_REFRESH_STAT_ADJUSTMENT = -25;
 
   public Meridian(GameScenario.GameRules rules)
@@ -74,21 +74,20 @@ public class Meridian extends Commander
     tank.possibleActions.add(new TransformLifecycle.TransformFactory(arty, "~ARTY"));
     arty.possibleActions.add(new TransformLifecycle.TransformFactory(tank, "~TANK"));
 
-    addCommanderAbility(changeAndFlow);
-    addCommanderAbility(new VehicularCharge());
+    addCommanderAbility(myChangeAndFlow);
+    addCommanderAbility(myVehicularCharge);
   }
 
   @Override
   public void registerForEvents(GameInstance game)
   {
     super.registerForEvents(game);
-    changeAndFlow.init(game);
+    myChangeAndFlow.init(game);
   }
 
   @Override
   public GameEventQueue initTurn(MapMaster map)
   {
-    toBeNerfed.clear();
     return super.initTurn(map);
   }
 
@@ -149,6 +148,16 @@ public class Meridian extends Commander
     }
   }
 
+  @Override
+  public char getUnitMarking(Unit unit)
+  {
+    // If we ever allow COs other than our own to *activate* abilities, then this is gonna have to move to a StateTracker
+    if( myVehicularCharge.debuffedUnits.contains(unit) )
+      return 'C';
+
+    return super.getUnitMarking(unit);
+  }
+
   /**
    * Vehicular Charge refreshes all ground vehicles, at the cost of a stat penalty to the refreshed units
    */
@@ -158,6 +167,7 @@ public class Meridian extends Commander
     private static final String NAME = "Vehicular Charge";
     private static final int COST = 6;
     private static final int BASIC_BUFF = 10;
+    private final ArrayList<Unit> debuffedUnits = new ArrayList<Unit>();
 
     COFightStatModifier baseMod = new COFightStatModifier(BASIC_BUFF);
     COFightStatModifier debuffMod = new COFightStatModifier(POST_REFRESH_STAT_ADJUSTMENT);
@@ -190,10 +200,15 @@ public class Meridian extends Commander
       {
         if( shouldRefresh(unit) )
         {
-          // Consider adding marks to affected units
+          debuffedUnits.add(unit);
           unit.isTurnOver = false;
         }
       }
+    }
+    @Override
+    protected void revert(Commander co, MapMaster gameMap)
+    {
+      debuffedUnits.clear();
     }
     protected boolean shouldRefresh(Unit unit)
     {

@@ -102,12 +102,12 @@ public class Venge extends Commander
   public char getUnitMarking(Unit unit)
   {
     // If we can get a vengeance boost against this unit, let our player know.
-    if (aggressors.contains(unit))
+    if( aggressors.contains(unit) )
       return 'V';
     // If we ever allow COs other than our own to *activate* abilities, then this is gonna have to move to a StateTracker
-    if (myIronWill.boostedUnits.contains(unit))
+    if( myIronWill.boostedUnits.contains(unit) )
       return 'I';
-    
+
     return super.getUnitMarking(unit);
   }
 
