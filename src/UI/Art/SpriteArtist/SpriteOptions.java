@@ -24,13 +24,25 @@ public class SpriteOptions
   private static boolean animationsOn = true;
   private static boolean coordinatesOn = false;
 
+  public enum SelectedUnitThreatAreaMode
+  {
+    All, Current, Future, None;
+    @Override
+    public String toString()
+    {
+      return super.toString().replace("_", " ");
+    }
+  }
+
   private static Dimension dimensions = new Dimension(WINDOWWIDTH_DEFAULT * drawScale, WINDOWHEIGHT_DEFAULT * drawScale);
 
   // Set up configurable options.
   private static GameOption<Integer> drawScaleOption = new GameOptionInt("Draw Scale", 1, 6, 1, DRAWSCALE_DEFAULT);
   private static GameOptionBool animationsOption = new GameOptionBool("Animations", true);
   private static GameOptionBool coordinatesOption = new GameOptionBool("Show Coords", false);
-  private static GameOption<?>[] allOptions = { drawScaleOption, animationsOption, coordinatesOption };
+  private static GameOption<SelectedUnitThreatAreaMode> selectedUnitThreatModeOption
+          = new GameOption<SelectedUnitThreatAreaMode>("Show selected unit threat", SelectedUnitThreatAreaMode.values(), 0);
+  private static GameOption<?>[] allOptions = { drawScaleOption, animationsOption, coordinatesOption, selectedUnitThreatModeOption };
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
   private static SlidingValue animHighlightedOption;
 
@@ -60,6 +72,11 @@ public class SpriteOptions
   public static boolean getCoordinatesEnabled()
   {
     return coordinatesOn;
+  }
+
+  public static SelectedUnitThreatAreaMode getSelectedUnitThreatAreaMode()
+  {
+    return selectedUnitThreatModeOption.getSelectedObject();
   }
 
   static void initialize()

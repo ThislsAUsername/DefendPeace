@@ -32,6 +32,7 @@ import UI.Art.Animation.NoAnimation;
 import UI.Art.Animation.NobunagaBattleAnimation;
 import UI.Art.Animation.ResupplyAnimation;
 import UI.Art.Animation.TurnInitAnimation;
+import UI.Art.SpriteArtist.SpriteOptions.SelectedUnitThreatAreaMode;
 import UI.Art.SpriteArtist.Backgrounds.DiagonalBlindsBG;
 import UI.Art.Animation.AirDropAnimation;
 import UI.Art.Animation.MoveAnimation;
@@ -259,22 +260,27 @@ public class SpriteMapView extends MapView
     // Highlight our currently-selected unit's range on top of everything else
     if( null != currentPath && null != currentActor && !mapController.isTargeting() )
     {
+      SelectedUnitThreatAreaMode threatMode = SpriteOptions.getSelectedUnitThreatAreaMode();
       for( WeaponModel w : currentActor.model.weapons )
       {
         // Display what we can shoot next turn...
-        overlays.add(new GameOverlay(null,
-                     AICombatUtils.findThreatPower(gameMap, currentActor, cursorCoord, null).keySet(),
-                     OverlayArtist.FIRE_FILL, OverlayArtist.LATER_FIRE_EDGE));
+        if( threatMode == SelectedUnitThreatAreaMode.All
+            || threatMode == SelectedUnitThreatAreaMode.Future )
+          overlays.add(new GameOverlay(null,
+                       AICombatUtils.findThreatPower(gameMap, currentActor, cursorCoord, null).keySet(),
+                       OverlayArtist.FIRE_FILL, OverlayArtist.LATER_FIRE_EDGE));
 
         // ...and this turn's targets on top
-        if( w.canFireAfterMoving || currentPath.getPathLength() == 1 )
-        {
-          UnitContext uc = new UnitContext(gameMap, currentActor, w, currentPath, cursorCoord);
-          overlays.add(new GameOverlay(null,
-                       Utils.findLocationsInRange(gameMap, cursorCoord,
-                                                  (1 == uc.rangeMin)? 0 : uc.rangeMin, uc.rangeMax),
-                       OverlayArtist.FIRE_FILL, OverlayArtist.NOW_FIRE_EDGE));
-        }
+        if( threatMode == SelectedUnitThreatAreaMode.All
+            || threatMode == SelectedUnitThreatAreaMode.Current )
+          if( w.canFireAfterMoving || currentPath.getPathLength() == 1 )
+          {
+            UnitContext uc = new UnitContext(gameMap, currentActor, w, currentPath, cursorCoord);
+            overlays.add(new GameOverlay(null,
+                         Utils.findLocationsInRange(gameMap, cursorCoord,
+                                                    (1 == uc.rangeMin)? 0 : uc.rangeMin, uc.rangeMax),
+                         OverlayArtist.FIRE_FILL, OverlayArtist.NOW_FIRE_EDGE));
+          }
 
       } // ~per-weapon loop
     }
