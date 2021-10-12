@@ -293,7 +293,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   }
 
   /**
-   * @return True if this UnitModel has at least one weapon with a minimum range of 1.
+   * @return True if this UnitModel has at least one weapon that normally has a minimum range of 1.
    */
   public boolean hasDirectFireWeapon()
   {
@@ -302,7 +302,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     {
       for( WeaponModel wm : weapons )
       {
-        if( wm.minRange == 1 )
+        if( wm.rangeMin == 1 )
         {
           hasDirect = true;
           break;

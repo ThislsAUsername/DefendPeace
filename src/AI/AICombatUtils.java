@@ -24,6 +24,7 @@ import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.TerrainType;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 import Units.WeaponModel;
 
@@ -72,11 +73,12 @@ public class AICombatUtils
     for( WeaponModel wep : unit.model.weapons )
     {
       double damage = (null == target)? 1 : wep.getDamage(target) * unit.getHPFactor();
-      if( damage > 0 )
+      UnitContext uc = unit.getRangeContext(gameMap, wep);
+      if( unit.canTarget(target) )
       {
         if( !wep.canFireAfterMoving )
         {
-          for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, wep.minRange, wep.maxRange))
+          for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, uc))
           {
             double val = damage;
             if (shootableTiles.containsKey(xyc))
@@ -88,7 +90,7 @@ public class AICombatUtils
         {
           for( XYCoord dest : destinations )
           {
-            for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, wep.minRange, wep.maxRange))
+            for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, uc))
             {
               double val = damage;
               if (shootableTiles.containsKey(xyc))
@@ -112,8 +114,11 @@ public class AICombatUtils
     {
       for( WeaponModel wm : um.weapons )
       {
+        // Consider refining this?
+        // I REALLY don't want this to become a loop over all units for all possible move locations;
+        //   that would likely defeat the main purpose of this function (saving computation power)
         if( wm.canFireAfterMoving )
-          range = Math.max(range, wm.maxRange);
+          range = Math.max(range, wm.rangeMax);
       }
     }
     return range;
@@ -135,7 +140,8 @@ public class AICombatUtils
         // is mobile or we don't care if it's mobile (because we aren't moving).
         if( wpn.loaded(unit) && (!moved || wpn.canFireAfterMoving) )
         {
-          ArrayList<XYCoord> locations = Utils.findTargetsInRange(gameMap, unit.CO, move, wpn, includeTerrain);
+          UnitContext uc = new UnitContext(gameMap, unit, wpn, move.xCoord, move.yCoord);
+          ArrayList<XYCoord> locations = Utils.findTargetsInRange(gameMap, uc, includeTerrain);
           targetLocs.addAll(locations);
         }
       } // ~Weapon loop
@@ -187,7 +193,7 @@ public class AICombatUtils
       final XYCoord attackerCoord = new XYCoord(u);
       boolean requiresMoving = false;
       int dist = targetCoord.getDistance(attackerCoord);
-      if( !u.canAttack(target.model, dist, requiresMoving) )
+      if( !u.canAttack(gameMap, target.model, dist, requiresMoving) )
         continue;
 
       coordsToCheck.add(attackerCoord);
@@ -303,7 +309,7 @@ public class AICombatUtils
         Unit unit = assaultQueue.poll();
         boolean requiresMoving = !xyc.equals(target.x, target.y);
         int dist = xyc.getDistance(target.x, target.y);
-        if( !unit.canAttack(target.model, dist, requiresMoving) )
+        if( !unit.canAttack(gameMap, target.model, dist, requiresMoving) )
           continue; // Consider only units that can attack from here
         if( neededAttacks.containsValue(unit) )
           continue; // Consider each unit only once

@@ -41,6 +41,11 @@ public interface UnitModifierWithDefaults extends UnitModifier
   }
 
   @Override
+  default void modifyAttackRange(UnitContext uc)
+  {
+  }
+
+  @Override
   default void modifyBuyCost(UnitContext uc)
   {
   }

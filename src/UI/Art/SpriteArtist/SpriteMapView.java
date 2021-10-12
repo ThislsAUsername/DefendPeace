@@ -35,6 +35,7 @@ import UI.Art.SpriteArtist.Backgrounds.DiagonalBlindsBG;
 import UI.Art.Animation.AirDropAnimation;
 import UI.Art.Animation.MoveAnimation;
 import Units.Unit;
+import Units.UnitContext;
 import Units.WeaponModel;
 
 public class SpriteMapView extends MapView
@@ -261,9 +262,10 @@ public class SpriteMapView extends MapView
         Color edgeColor = OverlayArtist.SIEGE_FIRE_EDGE;
         if( w.canFireAfterMoving || currentPath.getPathLength() == 1 )
           edgeColor = OverlayArtist.MOBILE_FIRE_EDGE;
+        UnitContext uc = new UnitContext(gameMap, currentActor, w, currentPath.getEnd().x,  currentPath.getEnd().y);
         overlays.add(new GameOverlay(null,
                      Utils.findLocationsInRange(gameMap, myGame.getCursorCoord(),
-                                                (1 == w.minRange)? 0 : w.minRange, w.maxRange),
+                                                (1 == uc.rangeMin)? 0 : uc.rangeMin, uc.rangeMax),
                      OverlayArtist.FIRE_FILL, edgeColor));
       }
     }

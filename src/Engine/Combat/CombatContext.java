@@ -60,12 +60,6 @@ public class CombatContext
     gameMap = map;
     battleRange = pBattleRange;
 
-    boolean attackerMoved = false;
-    if( null != attacker.path )
-      attackerMoved = attacker.path.getPathLength() > 1;
-    else if( null != attacker.unit && null != attacker.coord )
-      attackerMoved = attacker.unit.x != attacker.coord.xCoord || attacker.unit.y != attacker.coord.yCoord;
-
     if ( map.isLocationValid(attacker.coord))
     {
       attacker.setEnvironment(map.getEnvironment(attacker.coord));
@@ -77,11 +71,11 @@ public class CombatContext
 
     if( null == attacker.weapon )
     {
-      attacker.weapon = attacker.unit.chooseWeapon(defender.model, battleRange, attackerMoved);
+      attacker.chooseWeapon(defender.model, battleRange);
     }
     if( null == defender.weapon )
     {
-      defender.weapon = defender.unit.chooseWeapon(attacker.model, battleRange, false);
+      defender.chooseWeapon(attacker.model, battleRange);
     }
 
     // Only attacks at point-blank range can be countered

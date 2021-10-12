@@ -58,6 +58,13 @@ public abstract class UnitModFilter implements UnitModifier
   }
 
   @Override
+  public void modifyAttackRange(UnitContext uc)
+  {
+    if( shouldApplyTo(uc) )
+      effect.modifyAttackRange(uc);
+  }
+
+  @Override
   public void modifyCost(UnitContext uc)
   {
     if( shouldApplyTo(uc) )

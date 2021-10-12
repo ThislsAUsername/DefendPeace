@@ -1127,7 +1127,7 @@ public class WallyAI extends ModularAI
     double theirRange = 0;
     for( WeaponModel wm : target.weapons )
     {
-      double range = wm.maxRange;
+      double range = wm.rangeMax;
       if( wm.canFireAfterMoving )
         range += getEffectiveMove(target);
       theirRange = Math.max(theirRange, range);
@@ -1136,11 +1136,12 @@ public class WallyAI extends ModularAI
     for( WeaponModel wm : model.weapons )
     {
       double damage = wm.getDamage(target);
-      double myRange = wm.maxRange;
+      // Using the WeaponModel values directly for now
+      double myRange = wm.rangeMax;
       if( wm.canFireAfterMoving )
         myRange += getEffectiveMove(model);
       else
-        myRange -= (Math.pow(wm.minRange, MIN_SIEGE_RANGE_WEIGHT) - 1); // penalize range based on inner range
+        myRange -= (Math.pow(wm.rangeMin, MIN_SIEGE_RANGE_WEIGHT) - 1); // penalize range based on inner range
       double rangeMod = Math.pow(myRange / theirRange, RANGE_WEIGHT);
       // TODO: account for average terrain defense?
       double effectiveness = damage * rangeMod / 100;

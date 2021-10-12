@@ -38,6 +38,7 @@ public class UnitContext extends UnitState
   public int terrainStars = 0;
 
   public WeaponModel weapon;
+  public int rangeMin = -1, rangeMax = -1;
 
   public final List<UnitModifier> mods = new ArrayList<>();
 
@@ -45,7 +46,7 @@ public class UnitContext extends UnitState
   {
     this(u);
     this.map = map;
-    weapon = w;
+    setWeapon(w);
     coord = new XYCoord(x, y);
     setEnvironment(map.getEnvironment(coord));
   }
@@ -58,6 +59,8 @@ public class UnitContext extends UnitState
     mods.addAll(u.getModifiers());
     initModel();
   }
+  // Note: the Commander argument is here as a placeholder for Army
+  // The plan is for Unit to have an Army reference, and UnitModel to have the Commander reference
   public UnitContext(Commander co, UnitModel um)
   {
     super(co, um);
@@ -75,6 +78,8 @@ public class UnitContext extends UnitState
     env = other.env;
     terrainStars = other.terrainStars;
     weapon = other.weapon;
+    rangeMin = other.rangeMin;
+    rangeMax = other.rangeMax;
     mods.addAll(other.mods);
   }
   public void initModel()
@@ -92,6 +97,8 @@ public class UnitContext extends UnitState
   {
     path = pPath;
     coord = path.getEndCoord();
+    if( null != map )
+      setEnvironment(map.getEnvironment(coord));
   }
 
   public void setEnvironment(Environment input)
@@ -100,6 +107,81 @@ public class UnitContext extends UnitState
     // Air units shouldn't get terrain defense
     if( null != env && !model.isAirUnit() )
       terrainStars = env.terrainType.getDefLevel();
+  }
+
+  public void setWeapon(WeaponModel w)
+  {
+    weapon = w;
+    if( null != w )
+    {
+      rangeMin = w.rangeMin;
+      rangeMax = w.rangeMax;
+      // Build a scratch UnitContext because we don't trust UnitMods with our state
+      UnitContext uc = new UnitContext(this);
+      for( UnitModifier mod : mods )
+        mod.modifyAttackRange(uc);
+      rangeMin = uc.rangeMin;
+      rangeMax = uc.rangeMax;
+      if( rangeMax < rangeMin )
+        rangeMax = rangeMin;
+    }
+    else
+    {
+      rangeMin = -1;
+      rangeMax = -1;
+    }
+  }
+
+
+  /**
+   * Assign weapon to the available one that can inflict the most damage against the chosen target
+   */
+  public void chooseWeapon(ITargetable targetType, int range)
+  {
+    boolean afterMoving = false;
+    if( null != path )
+      afterMoving = path.getPathLength() > 1;
+    else if( null != unit && null != coord )
+      afterMoving = unit.x != coord.xCoord || unit.y != coord.yCoord;
+
+    chooseWeapon(targetType, range, afterMoving);
+  }
+  public void chooseWeapon(ITargetable targetType, int range, boolean afterMoving)
+  {
+    // if we have no weapons, we can't hurt things
+    if( model.weapons == null )
+      return;
+
+    WeaponModel chosenWeapon = null;
+    double maxDamage = 0;
+    for( WeaponModel w : model.weapons )
+    {
+      if( !w.loaded(this) ) continue; // Can't shoot with no bullets.
+
+      // If the weapon isn't mobile, we cannot fire if we moved.
+      if( afterMoving && !w.canFireAfterMoving )
+      {
+        continue;
+      }
+
+      UnitContext uc = new UnitContext(this);
+      uc.setWeapon(w);
+
+      if( uc.rangeMax < range || uc.rangeMin > range )
+      {
+        // Can only hit things inside our range
+        continue;
+      }
+
+      double currentDamage = w.getDamage(targetType);
+      if( currentDamage > maxDamage )
+      {
+        chosenWeapon = w;
+        maxDamage = currentDamage;
+      }
+    }
+
+    setWeapon(chosenWeapon);
   }
 
   @Override

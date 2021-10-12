@@ -83,17 +83,25 @@ public class Unit extends UnitState implements UnitModList
   /** Provides the authoritative/actual move power of the unit in question */
   public int getMovePower(GameMap map)
   {
-    UnitContext uc = new UnitContext(map, this, null, x, y);
-    for( UnitModifier mod : getModifiers() )
+    return getMovePower(new UnitContext(map, this, null, x, y));
+  }
+  public static int getMovePower(UnitContext uc)
+  {
+    for( UnitModifier mod : uc.mods )
       mod.modifyMovePower(uc);
     return uc.movePower;
+  }
+
+  public UnitContext getRangeContext(GameMap map, WeaponModel weapon)
+  {
+    return new UnitContext(map, this, weapon, x, y);
   }
 
   /**
    * @return whether or not this unit can attack the given unit type at the
    * specified range, accounting for the possibility of moving first.
    */
-  public boolean canAttack(ITargetable targetType, int range, boolean afterMoving)
+  public boolean canAttack(GameMap map, ITargetable targetType, int range, boolean afterMoving)
   {
     // if we have no weapons, we can't hurt things
     if( model.weapons == null )
@@ -110,7 +118,13 @@ public class Unit extends UnitState implements UnitModList
         // can't shoot after moving, then move along.
         continue;
       }
-      if( weapon.getDamage(targetType, range) > 0 )
+      UnitContext uc = getRangeContext(map, weapon);
+      if( uc.rangeMax < range || uc.rangeMin > range )
+      {
+        // Can only hit things inside our range
+        continue;
+      }
+      if( weapon.getDamage(targetType) > 0 )
       {
         canHit = true;
         break;
@@ -141,41 +155,6 @@ public class Unit extends UnitState implements UnitModList
       }
     }
     return canHit;
-  }
-
-  /**
-   * Select the weapon owned by this unit that can inflict the
-   * most damage against the chosen target
-   * @param target
-   * @param range
-   * @param afterMoving
-   * @return The best weapon for that target, or null if no usable weapon exists.
-   */
-  public WeaponModel chooseWeapon(ITargetable targetType, int range, boolean afterMoving)
-  {
-    // if we have no weapons, we can't hurt things
-    if( model.weapons == null )
-      return null;
-
-    WeaponModel chosenWeapon = null;
-    double maxDamage = 0;
-    for( WeaponModel weapon : model.weapons )
-    {
-      if( !weapon.loaded(this) ) continue; // Can't shoot with no bullets.
-
-      // If the weapon isn't mobile, we cannot fire if we moved.
-      if( afterMoving && !weapon.canFireAfterMoving )
-      {
-        continue;
-      }
-      double currentDamage = weapon.getDamage(targetType, range);
-      if( weapon.getDamage(targetType, range) > maxDamage )
-      {
-        chosenWeapon = weapon;
-        maxDamage = currentDamage;
-      }
-    }
-    return chosenWeapon;
   }
 
 

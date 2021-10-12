@@ -11,7 +11,6 @@ import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitContext;
-import Units.WeaponModel;
 
 /**
  * CombatEngine serves as the general-purpose interface into the combat calculation logic.
@@ -47,9 +46,10 @@ public class CombatEngine
   public static StrikeParams calculateTerrainDamage( Unit attacker, GamePath path, MapLocation target, GameMap map )
   {
     int battleRange = path.getEndCoord().getDistance(target.getCoordinates());
-    boolean attackerMoved = path.getPathLength() > 1;
-    WeaponModel weapon = attacker.chooseWeapon(target, battleRange, attackerMoved);
-    UnitContext uc = new UnitContext(map, attacker, weapon, path.getEnd().x, path.getEnd().y);
+    UnitContext uc = new UnitContext(attacker);
+    uc.map = map;
+    uc.setPath(path);
+    uc.chooseWeapon(target, battleRange);
     return StrikeParams.buildStrikeParams(uc, target, map, battleRange, false);
   }
 
@@ -110,8 +110,10 @@ public class CombatEngine
 
   public static double calculateOneStrikeDamage( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
   {
+    UnitContext attackerContext = new UnitContext(map, attacker, null, attacker.x, attacker.y);
+    attackerContext.chooseWeapon(defender.model, battleRange, attackerMoved);
     return StrikeParams.buildBattleParams(
-        new UnitContext(map, attacker, attacker.chooseWeapon(defender.model, battleRange, attackerMoved), attacker.x, attacker.y),
+        attackerContext,
         new UnitContext(map, defender, null, defender.x, defender.y),
         map, battleRange,
         false).calculateDamage();

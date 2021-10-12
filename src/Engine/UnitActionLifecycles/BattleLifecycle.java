@@ -52,7 +52,8 @@ public abstract class BattleLifecycle
             // is mobile or we don't care if it's mobile (because we aren't moving).
             if( wpn.loaded(actor) && (!moved || wpn.canFireAfterMoving) )
             {
-              ArrayList<XYCoord> locations = Utils.findTargetsInRange(map, actor.CO, moveLocation, wpn);
+              UnitContext uc = new UnitContext(map, actor, wpn, moveLocation.xCoord, moveLocation.yCoord);
+              ArrayList<XYCoord> locations = Utils.findTargetsInRange(map, uc);
 
               allWeaponTargets.addAll(locations);
             }
@@ -145,7 +146,7 @@ public abstract class BattleLifecycle
 
         boolean moved = attacker.x != moveCoord.xCoord || attacker.y != moveCoord.yCoord;
         isValid &= (gameMap.getLocation(attackLocation).getResident() == defender);
-        isValid &= (null != defender) && attacker.canAttack(defender.model, attackRange, moved);
+        isValid &= (null != defender) && attacker.canAttack(gameMap, defender.model, attackRange, moved);
         isValid &= (null != defender) && attacker.CO.isEnemy(defender.CO);
       }
 
@@ -280,7 +281,7 @@ public abstract class BattleLifecycle
         attackRange = Math.abs(moveCoord.xCoord - attackLocation.xCoord) + Math.abs(moveCoord.yCoord - attackLocation.yCoord);
 
         boolean moved = attacker.x != moveCoord.xCoord || attacker.y != moveCoord.yCoord;
-        isValid &= (null != target) && attacker.canAttack(target, attackRange, moved);
+        isValid &= (null != target) && attacker.canAttack(gameMap, target, attackRange, moved);
       }
 
       if( isValid )

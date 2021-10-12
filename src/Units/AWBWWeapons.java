@@ -37,7 +37,7 @@ public class AWBWWeapons
     }
     public AWBWWeapon(AWBWWeapon other)
     {
-      this(other.type, other.hasInfiniteAmmo, other.minRange, other.maxRange);
+      this(other.type, other.hasInfiniteAmmo, other.rangeMin, other.rangeMax);
       canFireAfterMoving = other.canFireAfterMoving;
     }
     @Override

@@ -43,6 +43,7 @@ public interface UnitModifier extends Serializable
   void modifyCost(UnitContext uc);
 
   void modifyMovePower(UnitContext uc);
+  void modifyAttackRange(UnitContext uc);
 
   /** For building from a property */
   void modifyBuyCost(UnitContext uc);
