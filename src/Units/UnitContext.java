@@ -42,11 +42,13 @@ public class UnitContext extends UnitState
 
   public final List<UnitModifier> mods = new ArrayList<>();
 
-  public UnitContext(GameMap map, Unit u, WeaponModel w, GamePath path)
+  public UnitContext(GameMap map, Unit u, WeaponModel w, GamePath path, XYCoord coord)
   {
     this(u);
     this.map = map;
-    setPath(path);
+    this.path = path;
+    this.coord = coord;
+    setEnvironment(map.getEnvironment(coord));
     setWeapon(w);
   }
   public UnitContext(GameMap map, Unit u, WeaponModel w, int x, int y)

@@ -29,7 +29,6 @@ public class CombatEngine
 
   /**
    * Assuming Commanders get weird, this allows for you to check the results of combat without perfect map info.
-   * TODO: Check on ability power charge!
    * This also provides un-capped damage estimates, so perfect HP info isn't revealed by the map.
    */
   public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, int attackerX, int attackerY )

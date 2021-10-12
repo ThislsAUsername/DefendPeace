@@ -54,7 +54,6 @@ public class TestCOModifier extends TestCase
     int startMove = inf.getMovePower();
     
     // Apply a movement modifier and re-check.
-    //TODO: Fix me
     int MOVEMOD = 3;
     COMovementModifier moveMod = new COMovementModifier(MOVEMOD);
     inf.add(moveMod);

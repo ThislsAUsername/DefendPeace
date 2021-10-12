@@ -350,7 +350,8 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   @Override
   public GameEventQueue receiveBattleEvent(final BattleSummary summary)
   {
-    // We only care who the units belong to, not who picked the fight. 
+    // We only care who the units belong to, not who picked the fight.
+    // Note: Cart charge only uses whole HP, so that's what we're doing, too.
     Unit minion = null;
     double myHPLoss = -10;
     Unit enemy = null;

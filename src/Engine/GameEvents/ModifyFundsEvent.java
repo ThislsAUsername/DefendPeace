@@ -20,7 +20,7 @@ public class ModifyFundsEvent implements GameEvent
   @Override
   public GameAnimation getEventAnimation(MapView mapView)
   {
-    // TODO
+    // TODO: Create listener hook
     return null;
   }
 

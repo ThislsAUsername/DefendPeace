@@ -171,7 +171,7 @@ public abstract class FlareLifecycle
     @Override
     public GameEventQueue sendToListener(GameEventListener listener)
     {
-      // TODO
+      // TODO: Create listener hook
       return null;
     }
 
