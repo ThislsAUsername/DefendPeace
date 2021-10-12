@@ -2,7 +2,6 @@ package Engine.UnitMods;
 
 import java.util.HashMap;
 import CommandingOfficers.Commander;
-import Engine.GameInstance;
 import Engine.GameEvents.GameEventQueue;
 import Units.Unit;
 import Units.UnitModel;
@@ -13,16 +12,6 @@ import Units.UnitModel;
 public class TransformationTracker extends StateTracker<TransformationTracker>
 {
   private static final long serialVersionUID = 1L;
-
-  protected TransformationTracker(Class<TransformationTracker> key, GameInstance gi)
-  {
-    super(key, gi);
-  }
-  @Override
-  protected TransformationTracker item()
-  {
-    return this;
-  }
 
   public HashMap<Unit, UnitModel> prevTypeMap = new HashMap<>();
 

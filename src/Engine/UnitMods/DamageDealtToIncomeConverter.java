@@ -3,7 +3,6 @@ package Engine.UnitMods;
 import java.util.ArrayList;
 import java.util.HashMap;
 import CommandingOfficers.Commander;
-import Engine.GameInstance;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventQueue;
 import Units.UnitDelta;
@@ -16,16 +15,6 @@ import Units.UnitDelta;
 public class DamageDealtToIncomeConverter extends StateTracker<DamageDealtToIncomeConverter>
 {
   private static final long serialVersionUID = 1L;
-
-  protected DamageDealtToIncomeConverter(Class<DamageDealtToIncomeConverter> key, GameInstance gi)
-  {
-    super(key, gi);
-  }
-  @Override
-  protected DamageDealtToIncomeConverter item()
-  {
-    return this;
-  }
 
   public HashMap<Commander, ArrayList<Double>> incomeRatios = new HashMap<>();
 

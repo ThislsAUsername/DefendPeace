@@ -209,16 +209,6 @@ public class Cinder extends Commander
   {
     private static final long serialVersionUID = 1L;
 
-    protected WitchFireTracker(Class<WitchFireTracker> key, GameInstance gi)
-    {
-      super(key, gi);
-    }
-    @Override
-    protected WitchFireTracker item()
-    {
-      return this;
-    }
-
     private CountTracker<Commander, Unit> attackCounts = new CountTracker<>();
 
     public void startTracking(Commander co)

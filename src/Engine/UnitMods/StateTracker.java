@@ -13,23 +13,25 @@ import UI.UnitMarker;
 public abstract class StateTracker<T extends StateTracker<T>> implements GameEventListener, UnitMarker
 {
   private static final long serialVersionUID = 1L;
-  public final Class<T> key;
-  public final GameInstance game;
+  protected Class<T> key;
+  protected GameInstance game;
 
-  protected StateTracker(Class<T> key, GameInstance gi)
-  {
-    this.key = key;
-    this.game = gi;
-  }
+  protected StateTracker()
+  {}
 
+  /**
+   * The external access point for *all* access to instances of this class and its subclasses
+   */
   public static <T extends StateTracker<T>> T initialize(GameInstance gi, Class<T> key)
   {
     if( !gi.stateTrackers.containsKey(key) )
       try
       {
-        Constructor<T> constructor = key.getDeclaredConstructor(Class.class, GameInstance.class);
+        Constructor<T> constructor = key.getDeclaredConstructor();
         constructor.setAccessible(true); // Apparently required for dealing with inner classes
-        T instance = constructor.newInstance(key, gi);
+        T instance = constructor.newInstance();
+        instance.key = key;
+        instance.game = gi;
         gi.stateTrackers.put(key, instance);
         instance.registerForEvents(gi);
       }
@@ -39,8 +41,6 @@ public abstract class StateTracker<T extends StateTracker<T>> implements GameEve
         System.exit(-1);
       }
 
-    return key.cast(gi.stateTrackers.get(key)).item();
+    return key.cast(gi.stateTrackers.get(key));
   }
-
-  protected abstract T item();
 }

@@ -1,9 +1,7 @@
 package Engine.UnitMods;
 
 import java.util.Map;
-
 import CommandingOfficers.Commander;
-import Engine.GameInstance;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
 import Units.Unit;
@@ -11,16 +9,6 @@ import Units.Unit;
 public class BuildCountsTracker extends StateTracker<BuildCountsTracker>
 {
   private static final long serialVersionUID = 1L;
-
-  protected BuildCountsTracker(Class<BuildCountsTracker> key, GameInstance gi)
-  {
-    super(key, gi);
-  }
-  @Override
-  protected BuildCountsTracker item()
-  {
-    return this;
-  }
 
   private CountTracker<Commander, XYCoord> buildCounts = new CountTracker<>();
 
