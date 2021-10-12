@@ -15,6 +15,7 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
 import Engine.GameEvents.TurnInitEvent;
+import Engine.UnitMods.SandstormModifier;
 import Engine.UnitMods.StateTracker;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
@@ -70,6 +71,9 @@ public class GameInstance implements Serializable
     playerCursors = new HashMap<Integer, XYCoord>();
     for( int i = 0; i < commanders.length; ++i )
     {
+      // This is hacky, but hey
+      commanders[i].add(new SandstormModifier());
+
       commanders[i].money = gameScenario.rules.startingFunds;
       if( commanders[i].HQLocation != null )
       {

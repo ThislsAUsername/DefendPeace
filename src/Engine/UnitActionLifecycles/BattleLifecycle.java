@@ -52,7 +52,7 @@ public abstract class BattleLifecycle
             // is mobile or we don't care if it's mobile (because we aren't moving).
             if( wpn.loaded(actor) && (!moved || wpn.canFireAfterMoving) )
             {
-              UnitContext uc = new UnitContext(map, actor, wpn, moveLocation.xCoord, moveLocation.yCoord);
+              UnitContext uc = new UnitContext(map, actor, wpn, movePath);
               ArrayList<XYCoord> locations = Utils.findTargetsInRange(map, uc);
 
               allWeaponTargets.addAll(locations);

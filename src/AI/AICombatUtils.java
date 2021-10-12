@@ -74,7 +74,7 @@ public class AICombatUtils
     {
       double damage = (null == target)? 1 : wep.getDamage(target) * unit.getHPFactor();
       UnitContext uc = unit.getRangeContext(gameMap, wep);
-      if( unit.canTarget(target) )
+      if( null == target || unit.canTarget(target) )
       {
         if( !wep.canFireAfterMoving )
         {

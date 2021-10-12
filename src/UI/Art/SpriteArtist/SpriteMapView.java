@@ -262,7 +262,12 @@ public class SpriteMapView extends MapView
         Color edgeColor = OverlayArtist.SIEGE_FIRE_EDGE;
         if( w.canFireAfterMoving || currentPath.getPathLength() == 1 )
           edgeColor = OverlayArtist.MOBILE_FIRE_EDGE;
-        UnitContext uc = new UnitContext(gameMap, currentActor, w, currentPath.getEnd().x,  currentPath.getEnd().y);
+        UnitContext uc = new UnitContext(currentActor);
+        uc.map = gameMap;
+        uc.setPath(currentPath);
+        uc.coord = myGame.getCursorCoord();
+        uc.setEnvironment(gameMap.getEnvironment(uc.coord));
+        uc.setWeapon(w);
         overlays.add(new GameOverlay(null,
                      Utils.findLocationsInRange(gameMap, myGame.getCursorCoord(),
                                                 (1 == uc.rangeMin)? 0 : uc.rangeMin, uc.rangeMax),
