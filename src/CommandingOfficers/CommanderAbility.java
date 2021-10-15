@@ -54,6 +54,7 @@ public abstract class CommanderAbility implements Serializable
   /**
    * Public hook to apply this Ability's effects to a given Commander.
    */
+  // Note: the intent here is to call activate() once, with enqueueCOMods() and perform() being called per CO in the army.
   public final void activate(Commander co, MapMaster gameMap)
   {
     // Don't re-apply CO mods if we've already applied them to this CO
