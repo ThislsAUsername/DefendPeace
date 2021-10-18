@@ -1,5 +1,7 @@
 package UI;
 
+import java.util.ArrayList;
+
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderInfo.InfoPage;
@@ -12,7 +14,9 @@ public interface InfoController extends IController
   
   CommanderInfo getSelectedCOInfo();
 
-  InfoPage getSelectedPage();
+  int getShiftDown();
+
+  ArrayList<InfoPage> getSelectedPages();
 
   /** Be wary, may return null */
   GameInstance getGame();

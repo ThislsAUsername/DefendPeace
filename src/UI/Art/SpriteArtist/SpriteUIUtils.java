@@ -111,6 +111,8 @@ public class SpriteUIUtils
       String line = lines.get(i);
       if( font.getWidth(line) <= reqWidth ) // if the line's short enough already, don't split it further
         continue;
+      if( i > 100 ) // bail; the text is too long or the space too small
+        return SpriteLibrary.createDefaultBlankSprite(1, 1);
 
       lines.remove(i);
 
@@ -430,7 +432,6 @@ public class SpriteUIUtils
       if(height != frame.getHeight())
       {
         height = Math.max(height, frame.getHeight());
-        System.out.println("WARNING: Joining images with unequal heights");
       }
     }
 
@@ -443,6 +444,32 @@ public class SpriteUIUtils
     {
       g.drawImage(frames[i], currentOffset, 0, null);
       currentOffset += (frames[i].getWidth() + imageSpacing);
+    }
+    return newImage;
+  }
+  public static BufferedImage stackBufferedImages(BufferedImage[] frames, int imageSpacing)
+  {
+    // aggregate sizing
+    int width = frames[0].getWidth();
+    int height = 0;
+    for(BufferedImage frame : frames)
+    {
+      height += (frame.getHeight() + imageSpacing);
+      if(width != frame.getWidth())
+      {
+        width = Math.max(width, frame.getWidth());
+      }
+    }
+
+    //create a new buffer and draw two image into the new image
+    BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    Graphics g = newImage.getGraphics();
+
+    int currentOffset = 0;
+    for( int i = 0; i < frames.length; i++ )
+    {
+      g.drawImage(frames[i], 0, currentOffset, null);
+      currentOffset += (frames[i].getHeight() + imageSpacing);
     }
     return newImage;
   }

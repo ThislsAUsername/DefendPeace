@@ -13,23 +13,26 @@ import Engine.OptionSelector;
 public class GameStatsController implements InfoController
 {
   private GameInstance myGame;
-  private ArrayList<InfoPage> infoPages;
-  
-  private OptionSelector coOptionSelector;
+  private ArrayList<ArrayList<InfoPage>> infoPages;
+
   private OptionSelector pageSelector;
+  private int shiftDown = 0;
 
   public GameStatsController( GameInstance game )
   {
     myGame = game;
 
-    infoPages = new ArrayList<InfoPage>();
-    infoPages.add(new InfoPage(InfoPage.PageType.CO_HEADERS));
-    infoPages.add(new InfoPage(InfoPage.PageType.GAME_STATUS));
-    
-    coOptionSelector = new OptionSelector(myGame.commanders.length);
+    infoPages = new ArrayList<ArrayList<InfoPage>>();
+
+    ArrayList<InfoPage> headers = new ArrayList<InfoPage>();
+    headers.add(new InfoPage(InfoPage.PageType.CO_HEADERS));
+    infoPages.add(headers);
+
+    ArrayList<InfoPage> status = new ArrayList<InfoPage>();
+    status.add(new InfoPage(InfoPage.PageType.GAME_STATUS));
+    infoPages.add(status);
+
     pageSelector = new OptionSelector(infoPages.size());
-    
-    coOptionSelector.setSelectedOption(myGame.getActiveCOIndex());
   }
 
   @Override
@@ -39,19 +42,20 @@ public class GameStatsController implements InfoController
     switch( action )
     {
       case DOWN:
+        shiftDown++;
+        break;
       case UP:
-        // Up/Down changes which CO has focus.
-        coOptionSelector.handleInput( action );
+        shiftDown--;
         break;
       case LEFT:
       case RIGHT:
         // Left/Right changes which sub-page has focus.
+        shiftDown = 0;
         pageSelector.handleInput(action);
         break;
       case SELECT:
       case BACK:
         // Reset the selectors and leave this menu.
-        coOptionSelector.setSelectedOption(0);
         pageSelector.setSelectedOption(0);
         goBack = true;
         break;
@@ -64,11 +68,17 @@ public class GameStatsController implements InfoController
   @Override
   public Commander getSelectedCO()
   {
-    return myGame.commanders[coOptionSelector.getSelectionNormalized()];
+    return myGame.commanders[myGame.getActiveCOIndex()];
   }
 
   @Override
-  public InfoPage getSelectedPage()
+  public int getShiftDown()
+  {
+    return shiftDown ;
+  }
+
+  @Override
+  public ArrayList<InfoPage> getSelectedPages()
   {
     return infoPages.get(pageSelector.getSelectionNormalized());
   }
