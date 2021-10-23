@@ -94,7 +94,6 @@ public class CombatEngine
 
     double defenderHPLoss = attackInstance.calculateDamage();
     unitDamageMap.put(context.attacker, new AbstractMap.SimpleEntry<WeaponModel,Double>(context.attackerWeapon, defenderHPLoss));
-    if( !isSim && defenderHPLoss > context.defender.getPreciseHP() ) defenderHPLoss = context.defender.getPreciseHP();
 
     // If the unit can counter, and wasn't killed in the initial volley, calculate return damage.
     if( context.canCounter && (context.defender.getPreciseHP() > defenderHPLoss) )
@@ -105,9 +104,15 @@ public class CombatEngine
 
       attackerHPLoss = defendInstance.calculateDamage();
       unitDamageMap.put(context.defender, new AbstractMap.SimpleEntry<WeaponModel,Double>(context.defenderWeapon, attackerHPLoss));
-      if( !isSim && attackerHPLoss > context.attacker.getPreciseHP() ) attackerHPLoss = context.attacker.getPreciseHP();
     }
-    
+
+    double attackerDamageDealt = unitDamageMap.get(attacker).getValue();
+    double defenderDamageDealt = unitDamageMap.get(defender).getValue();
+    if( !isSim )
+    {
+      attackerDamageDealt = Math.min(defender.getHP(), defender.getHP() - Math.ceil(defender.getPreciseHP() - attackerDamageDealt));
+      defenderDamageDealt = Math.min(attacker.getHP(), attacker.getHP() - Math.ceil(attacker.getPreciseHP() - defenderDamageDealt));
+    }
     // Calculations complete.
     // Since we are setting up our BattleSummary, use non-CombatContext variables
     //   so consumers of the Summary will see results consistent with the current board/map state
@@ -116,7 +121,8 @@ public class CombatEngine
                              defender, unitDamageMap.get(defender).getKey(),
                              map.getEnvironment(attackerX, attackerY).terrainType,
                              map.getEnvironment(defenderX, defenderY).terrainType,
-                             unitDamageMap.get(defender).getValue(), unitDamageMap.get(attacker).getValue());
+                             defenderDamageDealt,
+                             attackerDamageDealt);
   }
 
   public static double calculateOneStrikeDamage( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
