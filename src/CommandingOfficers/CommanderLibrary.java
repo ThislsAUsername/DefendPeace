@@ -96,6 +96,7 @@ public class CommanderLibrary
     commanderList.add( PennyAlt.getInfo() );
     commanderList.add( TabithaBasic.getInfo() );
     commanderList.add( TabithaAlt.getInfo() );
+    commanderList.add( Lyn.getInfo() );
     commanderList.add( OmegaTabitha.getInfo() );
     commanderList.add( Cyrus.getInfo() );
 
@@ -106,7 +107,6 @@ public class CommanderLibrary
     commanderList.add( OmegaSturm.getInfo() );
     commanderList.add( OmegaCaulder.getInfo() );
 
-    commanderList.add( HealyBoi.getInfo() );
 //    for (CommanderInfo info : commanderList)
 //    {
 //      System.out.println(info.name);
