@@ -13,7 +13,7 @@ public class GameVersion implements Serializable
   public GameVersion()
   {
     majorRev = 6; // For substantial, save-breaking changes to the game logic.
-    minorRev = 6; // For added content or UI updates
+    minorRev = 7; // For added content or UI updates
     hotfix   = 0; // For bugfixes (hopefully to never see increment)
   }
   
