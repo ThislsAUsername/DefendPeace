@@ -28,7 +28,7 @@ public class Cyrus extends Commander
           "+1 vision in Fog of War, ignores one terrain star when attacking. All units have bad luck (up to -4% bad luck).\r\n" +
           "xxxXX\r\n" +
           "Defiant Flare: +1 vision; can see into hiding places; ignores an additional terrain star when attacking.\r\n" +
-          "Sunrise: +2 vision; can see into hiding places; ignores two additional terrains star when attacking; a unit being attacked attacks first even if it would be destroyed."));
+          "Sunrise: +1 vision; can see into hiding places; ignores two additional terrains star when attacking; a unit being attacked attacks first even if it would be destroyed."));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -142,7 +142,7 @@ public class Cyrus extends Commander
     {
       COcast.counterFirst = true;
       COcast.terrainDrain = 3;
-      COVisionModifier sightMod = new COVisionModifier(2);
+      COVisionModifier sightMod = new COVisionModifier(1);
       myCommander.addCOModifier(sightMod);
       myCommander.myView.revealFog();
     }

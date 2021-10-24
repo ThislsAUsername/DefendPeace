@@ -28,7 +28,7 @@ public class Sonja extends Commander
           "+1 vision in Fog of War, and counterattacks do 1.5x damage. All units have bad luck (up to -10% bad luck).\r\n" +
           "xxxXX\r\n" +
           "Enhanced Vision: +1 vision; can see into hiding places.\r\n" +
-          "Counter Break: +2 vision; can see into hiding places; a unit being attacked attacks first even if it would be destroyed."));
+          "Counter Break: +1 vision; can see into hiding places; a unit being attacked attacks first even if it would be destroyed."));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -135,7 +135,7 @@ public class Sonja extends Commander
     protected void perform(MapMaster gameMap)
     {
       COcast.counterFirst = true;
-      COVisionModifier sightMod = new COVisionModifier(2);
+      COVisionModifier sightMod = new COVisionModifier(1);
       myCommander.addCOModifier(sightMod);
       myCommander.myView.revealFog();
     }
