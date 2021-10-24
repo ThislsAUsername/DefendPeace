@@ -43,7 +43,7 @@ public class Cyrus extends Commander
   public Cyrus(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
-    
+
     for( UnitModel um : unitModels )
     {
       um.visionRange += 1;
@@ -103,7 +103,7 @@ public class Cyrus extends Commander
   private static class Courageous extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
-    private static final String NAME = "Courageous";
+    private static final String NAME = "Defiant Flare";
     private static final int COST = 3;
     Cyrus COcast;
 
@@ -126,7 +126,7 @@ public class Cyrus extends Commander
   private static class Retribution extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
-    private static final String NAME = "Fearless";
+    private static final String NAME = "Sunrise";
     private static final int COST = 5;
     Cyrus COcast;
 
@@ -147,6 +147,6 @@ public class Cyrus extends Commander
       myCommander.myView.revealFog();
     }
   }
-  
+
 }
 
