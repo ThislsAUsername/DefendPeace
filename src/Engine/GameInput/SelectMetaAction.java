@@ -1,12 +1,14 @@
 package Engine.GameInput;
 
+import Engine.GameInput.GameInputHandler.InputType;
+
 public class SelectMetaAction extends GameInputState<SelectMetaAction.MetaAction>
 {
   enum MetaAction
   {
-    CO_STATS, CO_INFO, SAVE_GAME, CO_ABILITY, QUIT_GAME, END_TURN
+    CO_STATS, CO_INFO, DAMAGE_CHART, SAVE_GAME, CO_ABILITY, QUIT_GAME, END_TURN
   }
-  private static final MetaAction[] NO_ABILITY = {MetaAction.CO_STATS, MetaAction.CO_INFO, MetaAction.SAVE_GAME, MetaAction.QUIT_GAME, MetaAction.END_TURN};
+  private static final MetaAction[] NO_ABILITY = {MetaAction.CO_STATS, MetaAction.CO_INFO, MetaAction.DAMAGE_CHART, MetaAction.SAVE_GAME, MetaAction.QUIT_GAME, MetaAction.END_TURN};
 
   public SelectMetaAction(StateData data)
   {
@@ -36,11 +38,18 @@ public class SelectMetaAction extends GameInputState<SelectMetaAction.MetaAction
     GameInputState<?> next = this;
     if( MetaAction.CO_STATS == option )
     {
-      next = new OpenCoStatsMenu(myStateData);
+      TerminalEnumState.state = InputType.CO_STATS;
+      next = new TerminalEnumState(myStateData);
     }
     if( MetaAction.CO_INFO == option )
     {
-      next = new OpenCoInfoMenu(myStateData);
+      TerminalEnumState.state = InputType.CO_INFO;
+      next = new TerminalEnumState(myStateData);
+    }
+    if( MetaAction.DAMAGE_CHART == option )
+    {
+      TerminalEnumState.state = InputType.DAMAGE_CHART;
+      next = new TerminalEnumState(myStateData);
     }
     else if( MetaAction.QUIT_GAME == option )
     {

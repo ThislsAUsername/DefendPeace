@@ -11,6 +11,7 @@ import Engine.GameEvents.TurnInitEvent;
 import Engine.GameInput.GameInputHandler;
 import Terrain.MapLocation;
 import UI.CO_InfoController;
+import UI.DamageChartController;
 import UI.GameStatsController;
 import UI.InGameMenu;
 import UI.InputHandler;
@@ -462,6 +463,14 @@ public class MapController implements IController, GameInputHandler.StateChanged
         myGameInputHandler.reset(); // CO_INFO is a terminal state. Reset the input handler.
         // Give the new controller/view the floor
         Driver.getInstance().changeGameState(coInfoMenu, infoView);
+        break;
+      case DAMAGE_CHART:
+        DamageChartController dcc = new DamageChartController(myGame.activeCO, myGame.activeCO);
+        IView dcv = Driver.getInstance().gameGraphics.createDamageChartView(dcc);
+
+        myGameInputHandler.reset(); // DAMAGE_CHART is a terminal state. Reset the input handler.
+        // Give the new controller/view the floor
+        Driver.getInstance().changeGameState(dcc, dcv);
         break;
       default:
         System.out.println("WARNING! Attempting to switch to unknown input type " + inputType);
