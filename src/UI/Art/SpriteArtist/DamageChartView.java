@@ -41,8 +41,8 @@ public class DamageChartView implements IView
     unitBuffer = unitSizePx / 3; // Space between options in the grid.
     unitSpacingH = unitSizePx + unitBuffer;
     unitSpacingV = unitSizePx;
-    gridWidth = control.units.length * (unitSizePx + unitBuffer) - unitBuffer;
-    gridHeight = control.units.length * (unitSizePx + unitBuffer) - unitBuffer;
+    gridWidth = control.units.length * unitSpacingH - unitBuffer;
+    gridHeight = control.units.length * unitSpacingV;
   }
 
   @Override
@@ -177,6 +177,12 @@ public class DamageChartView implements IView
       output = selectionPoint - screenDimension + margin - entrySpacing;
       // ...until we hit the edge, anyway
       output = Math.min(gridDimension - screenDimension + entrySpacing, output);
+    }
+    // If we've got a bunch of positive space in-frame beyond the grid,
+    //   move the screen in the negative direction
+    if( (viewPoint + screenDimension) > gridDimension )
+    {
+      output = Math.max(0, gridDimension - screenDimension + entrySpacing);
     }
     return output;
   }
