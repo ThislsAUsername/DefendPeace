@@ -171,18 +171,21 @@ public class DamageChartView implements IView
       // ...until we hit the edge, anyway
       output = Math.max(0, output);
     }
-    // If the selection is past our upper margin, move the screen in the positive direction
-    if( (viewPoint + screenDimension - margin) < selectionPoint )
+    else
     {
-      output = selectionPoint - screenDimension + margin - entrySpacing;
-      // ...until we hit the edge, anyway
-      output = Math.min(gridDimension - screenDimension + entrySpacing, output);
-    }
-    // If we've got a bunch of positive space in-frame beyond the grid,
-    //   move the screen in the negative direction
-    if( (viewPoint + screenDimension) > gridDimension )
-    {
-      output = Math.max(0, gridDimension - screenDimension + entrySpacing);
+      // If the selection is past our upper margin, move the screen in the positive direction
+      if( (viewPoint + screenDimension - margin) < selectionPoint )
+      {
+        output = selectionPoint - screenDimension + margin - entrySpacing;
+        // ...until we hit the edge, anyway
+        output = Math.min(gridDimension - screenDimension + entrySpacing, output);
+      }
+      // If we've got a bunch of positive space in-frame beyond the grid,
+      //   move the screen in the negative direction
+      if( (viewPoint + screenDimension) > gridDimension )
+      {
+        output = Math.max(0, gridDimension - screenDimension + entrySpacing);
+      }
     }
     return output;
   }
