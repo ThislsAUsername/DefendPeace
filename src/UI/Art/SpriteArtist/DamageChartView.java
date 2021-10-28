@@ -79,6 +79,11 @@ public class DamageChartView implements IView
     BufferedImage image = SpriteLibrary.createTransparentSprite(myWidth, myHeight);
     Graphics myG = image.getGraphics();
 
+    // Draw a highlight on the current cursor row/column
+    myG.setColor(SpriteUIUtils.MENUFRAMECOLOR);
+    myG.fillRect(selX + unitSpacingH - viewX.geti(), 0, unitSizePx, myHeight);
+    myG.fillRect(0, selY + unitSpacingV - viewY.geti(), myWidth, unitSizePx);
+
     // Draw the top unit "labels"
     for(int i = 0; i < control.units.length; ++i)
     {
@@ -145,16 +150,6 @@ public class DamageChartView implements IView
                      false);
     spriteCursor.set(control.shooterColor);
     spriteCursor.draw(myG);
-
-    // Draw the currently-selected army's name
-//    String colorName = UIUtils.getPaletteName(UIUtils.getCOColors()[indexShooter]);
-//    String factionName = UIUtils.getFactions()[indexTarget].name;
-
-//    BufferedImage armyNameImage = SpriteUIUtils.makeTextFrame(UIUtils.getCanonicalFactionName(colorName, factionName), 2, 2);
-//
-//    int drawNameX = myWidth / 2;
-//    int drawNameY = armyNameImage.getHeight() / 2 + 2;
-//    SpriteUIUtils.drawImageCenteredOnPoint(myG, armyNameImage, drawNameX, drawNameY);
 
     // Render our image to the screen at the properly-scaled size.
     g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
