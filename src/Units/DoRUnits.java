@@ -651,7 +651,7 @@ public class DoRUnits extends UnitModelScheme
   public static class GunboatModel extends DoRUnitModel
   {
     private static final long serialVersionUID = 1L;
-    private static final long ROLE = TRANSPORT | SHIP | SEA;
+    private static final long ROLE = SHIP | SEA;
     
     private static final int UNIT_COST = 6000;
     private static final double STAR_VALUE = 1.0;
@@ -678,7 +678,7 @@ public class DoRUnits extends UnitModelScheme
   public static class CruiserModel extends DoRUnitModel
   {
     private static final long serialVersionUID = 1L;
-    private static final long ROLE = SURFACE_TO_AIR | TRANSPORT | SHIP | SEA;
+    private static final long ROLE = SURFACE_TO_AIR | SHIP | SEA;
     
     private static final int UNIT_COST = 16000;
     private static final double STAR_VALUE = 1.6;
@@ -743,7 +743,7 @@ public class DoRUnits extends UnitModelScheme
   public static class CarrierModel extends DoRUnitModel
   {
     private static final long serialVersionUID = 1L;
-    private static final long ROLE = SURFACE_TO_AIR | TRANSPORT | SHIP | SEA;
+    private static final long ROLE = SURFACE_TO_AIR | SHIP | SEA;
     
     private static final int UNIT_COST = 28000;
     private static final double STAR_VALUE = 2.2;

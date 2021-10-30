@@ -744,7 +744,7 @@ public class AWBWUnits extends UnitModelScheme
   public static class CarrierModel extends AWBWUnitModel
   {
     private static final long serialVersionUID = 1L;
-    private static final long ROLE = SIEGE | SURFACE_TO_AIR | TRANSPORT | SHIP | SEA;
+    private static final long ROLE = SIEGE | SURFACE_TO_AIR | SHIP | SEA;
     
     private static final int UNIT_COST = 30000;
     private static final double STAR_VALUE = 2.2;
