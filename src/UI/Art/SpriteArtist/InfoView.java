@@ -26,10 +26,13 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
 
   private ArrayList<InfoPage> prevPages = null;
   private BufferedImage pageImage = null;
+  private SpriteArrows hArrows = new SpriteArrows();
+  private SpriteArrows vArrows = new SpriteArrows();
 
   public InfoView(InfoController control)
   {
     myControl = control;
+    vArrows.isVertical = true;
   }
 
   @Override
@@ -86,21 +89,37 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
     myG.setColor(SpriteUIUtils.MENUBGCOLOR);    // inside of the pane
     myG.fillRect(2*PANE_OUTER_BUFFER, 2*PANE_OUTER_BUFFER, paneHSize                      , paneVSize                      );
 
-    final int drawingWidth = paneHSize - PANE_OUTER_BUFFER*2;
+    final int drawingWidth  = paneHSize - PANE_OUTER_BUFFER*2;
+    final int drawingHeight = paneVSize - PANE_OUTER_BUFFER*2;
     if( pages != prevPages )
       pageImage = renderPage(pages, drawingWidth);
     prevPages = pages;
 
     final int shiftDown = myControl.getShiftDown() * 2; // User-input shift value
     final int possibleShift = Math.max(0, pageImage.getHeight() - paneVSize); // The maximum shift that can make sense for this page
+    final boolean canShift = possibleShift > 0;
     int pixelShift = 0; // Actual pixels to offset the drawn image
-    if( possibleShift > 0 ) // If a shift makes sense, apply it
+    if( canShift )
+      // Since shiftDown can be negative, wrap it into range, make sure it's positive, then wrap it again
       pixelShift = (possibleShift + shiftDown % possibleShift) % possibleShift;
 
-    final int contentWidth  = Math.min(Math.abs(        drawingWidth           ), pageImage.getWidth());
-    final int contentHeight = Math.min(Math.abs(paneVSize - PANE_OUTER_BUFFER*2), pageImage.getHeight());
+    final int contentWidth  = Math.min(Math.abs(drawingWidth ), pageImage.getWidth());
+    final int contentHeight = Math.min(Math.abs(drawingHeight), pageImage.getHeight());
     // Draw the cropped page into our pane
     myG.drawImage(pageImage.getSubimage(0, pixelShift, contentWidth, contentHeight), 3 * PANE_OUTER_BUFFER, 3 * PANE_OUTER_BUFFER, null);
+
+    int horizontalArrowVOffset = 2 + 3*PANE_OUTER_BUFFER;
+    if( canShift ) // Throw some up/down scrolly arrows on, if relevant
+    {
+      vArrows.set(paneHSize, drawingHeight/2 + 3*PANE_OUTER_BUFFER, drawingHeight, true);
+      vArrows.draw(myG);
+      horizontalArrowVOffset += 5;
+    }
+    if( myControl.getPageListCount() > 1 ) // Add left/right scrolly arrows, if relevant
+    {
+      hArrows.set(paneHSize, horizontalArrowVOffset, 6, true);
+      hArrows.draw(myG);
+    }
 
     // Finally, draw our rendered image onto the window.
     g.drawImage(image, 0, 0, imageWidth*drawScale, imageHeight*drawScale, null);

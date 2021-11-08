@@ -16,6 +16,7 @@ public interface InfoController extends IController
 
   int getShiftDown();
 
+  int getPageListCount();
   ArrayList<InfoPage> getSelectedPages();
 
   /** Be wary, may return null */

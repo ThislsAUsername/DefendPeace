@@ -117,4 +117,10 @@ public class CO_InfoController implements InfoController
   {
     return coInfos.get(coOptionSelector.getSelectionNormalized());
   }
+
+  @Override
+  public int getPageListCount()
+  {
+    return coOptionSelector.size();
+  }
 }

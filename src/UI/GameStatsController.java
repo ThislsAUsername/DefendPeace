@@ -101,4 +101,10 @@ public class GameStatsController implements InfoController
   {
     return getSelectedCO().coInfo;
   }
+
+  @Override
+  public int getPageListCount()
+  {
+    return pageSelector.size();
+  }
 }
