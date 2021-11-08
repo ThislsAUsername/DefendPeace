@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo.InfoPage;
-import CommandingOfficers.CommanderInfo.InfoPage.PageType;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapPerspective;
 import UI.COStateInfo;
@@ -110,14 +109,14 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
   private BufferedImage renderPage(ArrayList<InfoPage> pages, int drawingWidth)
   {
     ArrayList<BufferedImage> pageImages = new ArrayList<BufferedImage>();
+    MapPerspective drawableMap = getDrawableMap(myControl.getGame());
     for( InfoPage p : pages )
     {
       switch (p.pageType)
       {
-        case CO_HEADERS:
-        case GAME_STATUS: // Fall-through
+        case CO_HEADERS: // Draw all CO image headers and brief status text for each CO
+        {
           Commander[] coList = myControl.getGame().commanders;
-          MapPerspective drawableMap = getDrawableMap(myControl.getGame());
 
           for( Commander thisCO : coList )
           {
@@ -126,25 +125,25 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
             Graphics headerG = statusHeader.getGraphics();
             CommanderOverlayArtist.drawCommanderOverlay(headerG, thisCO, 0, true);
 
-            // Add brief status text per CO
-            BufferedImage statusText;
-            if( p.pageType == PageType.GAME_STATUS )
-            {
-              COStateInfo coStatus = new COStateInfo(drawableMap, thisCO);
-              BufferedImage[] statusHalves = new BufferedImage[2];
-              // Draw assuming we don't have to wrap the text
-              statusHalves[0] = SpriteUIUtils.drawProse(coStatus.getFullStatusLabels());
-              statusHalves[1] = SpriteUIUtils.drawProse(coStatus.getFullStatusValues());
-              statusText = SpriteUIUtils.joinBufferedImages(statusHalves, 3);
-            }
-            else
-            {
-              String status = new COStateInfo(drawableMap, thisCO).getAbbrevStatus();
-              statusText = SpriteUIUtils.drawProseToWidth(status, drawingWidth);
-            }
+            String status = new COStateInfo(drawableMap, thisCO).getAbbrevStatus();
+            BufferedImage statusText = SpriteUIUtils.drawProseToWidth(status, drawingWidth);
 
-            pageImages.add(SpriteUIUtils.stackBufferedImages(new BufferedImage[] { statusHeader, statusText }, 5));
+            pageImages.add(SpriteUIUtils.stackBufferedImages(new BufferedImage[] { statusHeader, statusText }, 0));
           }
+        }
+          break;
+        case GAME_STATUS: // Draw detailed status text for only this specific CO
+        {
+          Commander thisCO = myControl.getSelectedCO();
+          COStateInfo coStatus = new COStateInfo(drawableMap, thisCO);
+          BufferedImage[] statusHalves = new BufferedImage[2];
+          // Draw assuming we don't have to wrap the text
+          statusHalves[0] = SpriteUIUtils.drawProse(coStatus.getFullStatusLabels());
+          statusHalves[1] = SpriteUIUtils.drawProse(coStatus.getFullStatusValues());
+          BufferedImage statusText = SpriteUIUtils.joinBufferedImages(statusHalves, 3);
+
+          pageImages.add(statusText);
+        }
           break;
         case BASIC:
           pageImages.add(SpriteUIUtils.drawProseToWidth(p.info, drawingWidth));
