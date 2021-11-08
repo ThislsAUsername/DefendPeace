@@ -91,10 +91,10 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
       pageImage = renderPage(pages, drawingWidth);
     prevPages = pages;
 
-    final int shiftDown = myControl.getShiftDown() * 2;
-    final int possibleShift = Math.max(0, pageImage.getHeight() - paneVSize);
-    int pixelShift = 0;
-    if( possibleShift > 0 )
+    final int shiftDown = myControl.getShiftDown() * 2; // User-input shift value
+    final int possibleShift = Math.max(0, pageImage.getHeight() - paneVSize); // The maximum shift that can make sense for this page
+    int pixelShift = 0; // Actual pixels to offset the drawn image
+    if( possibleShift > 0 ) // If a shift makes sense, apply it
       pixelShift = (possibleShift + shiftDown % possibleShift) % possibleShift;
 
     final int contentWidth  = Math.min(Math.abs(        drawingWidth           ), pageImage.getWidth());

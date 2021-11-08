@@ -111,7 +111,7 @@ public class SpriteUIUtils
       String line = lines.get(i);
       if( font.getWidth(line) <= reqWidth ) // if the line's short enough already, don't split it further
         continue;
-      if( i > 100 ) // bail; the text is too long or the space too small
+      if( i > 100 ) // bail; the text is too long or the space too small (e.g. user has shrunk the window horizontally)
         return SpriteLibrary.createDefaultBlankSprite(1, 1);
 
       lines.remove(i);

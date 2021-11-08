@@ -34,7 +34,7 @@ public class DamageChartView implements IView
     this.control = control;
     unitArray = new BufferedImage[control.units.length];
 
-    // Just pull one sprite to start with. Loading everything at once might take a while.
+    // Pull in one sprite for a sizing basis
     unitArray[0] = SpriteLibrary.getMapUnitSpriteSet(control.units[0].name, control.shooters, control.shooterColor).sprites[0].getFrame(0);
 
     unitSizePx = unitArray[0].getHeight(); // Units are square.
