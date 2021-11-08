@@ -21,7 +21,7 @@ import UI.Art.SpriteArtist.Backgrounds.DiagonalBlindsBG;
  */
 public class InfoView extends MapView // Extend MapView for getDrawableMap(). We don't actually draw it, but we need fog info.
 {
-  private static final int PANE_OUTER_BUFFER = 4; // sets both outer border and frame border size
+  private static final int PANE_OUTER_BUFFER = 3; // sets both outer border and frame border size
 
   private InfoController myControl;
 
@@ -87,7 +87,7 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
     myG.setColor(SpriteUIUtils.MENUBGCOLOR);    // inside of the pane
     myG.fillRect(2*PANE_OUTER_BUFFER, 2*PANE_OUTER_BUFFER, paneHSize                      , paneVSize                      );
 
-    int drawingWidth = paneHSize - PANE_OUTER_BUFFER;
+    final int drawingWidth = paneHSize - PANE_OUTER_BUFFER*2;
     if( pages != prevPages )
       pageImage = renderPage(pages, drawingWidth);
     prevPages = pages;
@@ -98,10 +98,10 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
     if( possibleShift > 0 )
       pixelShift = (possibleShift + shiftDown % possibleShift) % possibleShift;
 
-    final int contentWidth  = Math.min(Math.abs(paneHSize - PANE_OUTER_BUFFER), pageImage.getWidth());
-    final int contentHeight = Math.min(Math.abs(paneVSize - PANE_OUTER_BUFFER), pageImage.getHeight());
+    final int contentWidth  = Math.min(Math.abs(        drawingWidth           ), pageImage.getWidth());
+    final int contentHeight = Math.min(Math.abs(paneVSize - PANE_OUTER_BUFFER*2), pageImage.getHeight());
     // Draw the cropped page into our pane
-    myG.drawImage(pageImage.getSubimage(0, pixelShift, contentWidth, contentHeight), 3 * PANE_OUTER_BUFFER, 2 * PANE_OUTER_BUFFER, null);
+    myG.drawImage(pageImage.getSubimage(0, pixelShift, contentWidth, contentHeight), 3 * PANE_OUTER_BUFFER, 3 * PANE_OUTER_BUFFER, null);
 
     // Finally, draw our rendered image onto the window.
     g.drawImage(image, 0, 0, imageWidth*drawScale, imageHeight*drawScale, null);
