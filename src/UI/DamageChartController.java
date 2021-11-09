@@ -15,31 +15,32 @@ public class DamageChartController implements IController
 {
   OptionSelector targetSelector;
   OptionSelector shooterSelector;
-  public final Faction shooters, targets;
+  public final Faction shooterFac, targetFac;
   public final Color shooterColor, targetColor;
-  public final UnitModel[] units;
+  public final UnitModel[] shooterModels, targetModels;
   public boolean outOfAmmo = false;
 
   public DamageChartController(Commander attacker, Commander defender)
   {
-    // TODO: Account for variable unit model count?
-    units = attacker.unitModels.toArray(new UnitModel[0]);
-    shooters = attacker.faction;
-    targets = defender.faction;
+    shooterModels = attacker.unitModels.toArray(new UnitModel[0]);
+    targetModels = defender.unitModels.toArray(new UnitModel[0]);
+    shooterFac = attacker.faction;
+    targetFac = defender.faction;
     shooterColor = attacker.myColor;
     targetColor = defender.myColor;
-    targetSelector = new OptionSelector(units.length);
-    shooterSelector = new OptionSelector(units.length);
+    targetSelector = new OptionSelector(shooterModels.length);
+    shooterSelector = new OptionSelector(shooterModels.length);
   }
-  public DamageChartController(UnitModel[] models, Faction attackers, Faction defenders, Color attackerColor, Color defenderColor)
+  public DamageChartController(UnitModel[] shooters, UnitModel[] targets, Faction attackers, Faction defenders, Color attackerColor, Color defenderColor)
   {
-    units = models;
-    shooters = attackers;
-    targets = defenders;
+    shooterModels = shooters;
+    targetModels = targets;
+    shooterFac = attackers;
+    targetFac = defenders;
     shooterColor = attackerColor;
     targetColor = defenderColor;
-    targetSelector = new OptionSelector(units.length);
-    shooterSelector = new OptionSelector(units.length);
+    targetSelector = new OptionSelector(shooterModels.length);
+    shooterSelector = new OptionSelector(shooterModels.length);
   }
 
   @Override

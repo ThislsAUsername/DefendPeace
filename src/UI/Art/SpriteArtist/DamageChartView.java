@@ -1,5 +1,6 @@
 package UI.Art.SpriteArtist;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -30,18 +31,18 @@ public class DamageChartView implements IView
   public DamageChartView(DamageChartController control)
   {
     this.control = control;
-    shooterArray = new BufferedImage[control.units.length];
-    targetArray = new BufferedImage[control.units.length];
+    shooterArray = new BufferedImage[control.shooterModels.length];
+    targetArray = new BufferedImage[control.targetModels.length];
 
     // Pull in one sprite for a sizing basis
-    shooterArray[0] = SpriteLibrary.getMapUnitSpriteSet(control.units[0].name, control.shooters, control.shooterColor).sprites[0].getFrame(0);
+    shooterArray[0] = SpriteLibrary.getMapUnitSpriteSet(control.shooterModels[0].name, control.shooterFac, control.shooterColor).sprites[0].getFrame(0);
 
     unitSizePx = shooterArray[0].getHeight(); // Units are square.
     unitBuffer = unitSizePx / 3; // Space between options in the grid.
     unitSpacingH = unitSizePx + unitBuffer;
     unitSpacingV = unitSizePx;
-    gridWidth = control.units.length * unitSpacingH - unitBuffer;
-    gridHeight = control.units.length * unitSpacingV;
+    gridHeight = control.shooterModels.length * unitSpacingV;
+    gridWidth = control.targetModels.length * unitSpacingH - unitBuffer;
   }
 
   @Override
@@ -84,7 +85,7 @@ public class DamageChartView implements IView
     myG.fillRect(0, selY + unitSpacingV - viewY.geti(), myWidth, unitSizePx);
 
     // Draw the top unit "labels"
-    for(int i = 0; i < control.units.length; ++i)
+    for(int i = 0; i < control.targetModels.length; ++i)
     {
       int yOff = 0;
       int xOff = unitSpacingH * (i+1) - viewX.geti();
@@ -94,7 +95,7 @@ public class DamageChartView implements IView
     }
 
     // t = target, s = shooter
-    for(int s = 0; s < control.units.length; ++s)
+    for(int s = 0; s < control.shooterModels.length; ++s)
     {
       int yOff = unitSpacingV * (s+1) - viewY.geti();
       if( (yOff > myHeight) || (yOff < unitSpacingV) )
@@ -104,7 +105,7 @@ public class DamageChartView implements IView
       // Draw the side unit "label" for this row
       drawShooterAt(myG, s, xOff, yOff);
 
-      for( int t = 0; t < control.units.length; ++t)
+      for( int t = 0; t < control.targetModels.length; ++t)
       {
         xOff = unitSpacingH * (t+1) + unitSpacingV/2 - viewX.geti();
 
@@ -114,8 +115,8 @@ public class DamageChartView implements IView
         if( (yOff > myHeight) || (yOff < unitSpacingV) )
           continue;
 
-        UnitModel shooter = control.units[s];
-        UnitModel target = control.units[t];
+        UnitModel shooter = control.shooterModels[s];
+        UnitModel target = control.targetModels[t];
 
         // TODO: offload this onto code that should own this
         // if we have no weapons, we can't hurt things
@@ -187,14 +188,21 @@ public class DamageChartView implements IView
   private void drawShooterAt(Graphics g, int unitIndex, int xOff, int yOff)
   {
     if( null == shooterArray[unitIndex] )
-      shooterArray[unitIndex] = SpriteLibrary.getMapUnitSpriteSet(control.units[unitIndex].name, control.shooters, control.shooterColor).sprites[0].getFrame(0);
-    g.drawImage(shooterArray[unitIndex], xOff, yOff, null);
+      shooterArray[unitIndex] = SpriteLibrary.getMapUnitSpriteSet(control.shooterModels[unitIndex].name, control.shooterFac, control.shooterColor).sprites[0].getFrame(0);
+    drawUnitAt(g, shooterArray[unitIndex], xOff, yOff, control.shooterModels[unitIndex].hidden, control.shooterColor);
   }
   private void drawTargetAt(Graphics g, int unitIndex, int xOff, int yOff)
   {
     if( null == targetArray[unitIndex] )
-      targetArray[unitIndex] = SpriteLibrary.getMapUnitSpriteSet(control.units[unitIndex].name, control.targets, control.targetColor).sprites[0].getFrame(0);
-    g.drawImage(targetArray[unitIndex], xOff, yOff, null);
+      targetArray[unitIndex] = SpriteLibrary.getMapUnitSpriteSet(control.targetModels[unitIndex].name, control.targetFac, control.targetColor).sprites[0].getFrame(0);
+    drawUnitAt(g, targetArray[unitIndex], xOff, yOff, control.targetModels[unitIndex].hidden, control.targetColor);
+  }
+
+  private void drawUnitAt(Graphics g, BufferedImage image, int xOff, int yOff, boolean isCloaked, Color iconColor)
+  {
+    g.drawImage(image, xOff, yOff, null);
+    if( isCloaked )
+      g.drawImage(SpriteLibrary.getHideIcon(iconColor), xOff + unitSizePx / 2, yOff + unitSizePx / 2, null);
   }
 
   @Override
