@@ -163,7 +163,7 @@ public class Cinder extends Commander
     {
       for( Unit unit : co.units )
       {
-        if( unit.isTurnOver )
+        if( !unit.isTurnOver )
         {
           unit.resupply(); // the missing HP has to go somewhere...
         }
