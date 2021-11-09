@@ -72,7 +72,7 @@ public class GameInstance implements Serializable
     for( int i = 0; i < commanders.length; ++i )
     {
       // This is hacky, but hey
-      commanders[i].add(new SandstormModifier());
+      commanders[i].addUnitModifier(new SandstormModifier());
 
       commanders[i].money = gameScenario.rules.startingFunds;
       if( commanders[i].HQLocation != null )

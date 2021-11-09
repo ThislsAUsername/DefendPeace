@@ -246,12 +246,12 @@ public class Unit extends UnitState implements UnitModList
   }
 
   @Override
-  public void add(UnitModifier unitModifier)
+  public void addUnitModifier(UnitModifier unitModifier)
   {
     unitMods.add(unitModifier);
   }
   @Override
-  public void remove(UnitModifier unitModifier)
+  public void removeUnitModifier(UnitModifier unitModifier)
   {
     unitMods.remove(unitModifier);
   }

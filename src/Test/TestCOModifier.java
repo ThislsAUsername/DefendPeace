@@ -56,12 +56,12 @@ public class TestCOModifier extends TestCase
     // Apply a movement modifier and re-check.
     int MOVEMOD = 3;
     COMovementModifier moveMod = new COMovementModifier(MOVEMOD);
-    inf.add(moveMod);
+    inf.addUnitModifier(moveMod);
     int newMove = inf.getMovePower();
     testPassed &= validate( (newMove - startMove) == MOVEMOD, "    Movement modifier did not apply as expected!");
 
     // Make sure reverting takes it back to normal.
-    inf.remove(moveMod);
+    inf.removeUnitModifier(moveMod);
     int lastMove = inf.getMovePower();
     testPassed &= validate( lastMove == startMove, "    Movement modifier did not return the move power to normal!");
 

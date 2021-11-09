@@ -9,6 +9,6 @@ public interface UnitModList
    */
   List<UnitModifier> getModifiers();
 
-  void add(UnitModifier unitModifier);
-  void remove(UnitModifier unitModifier);
+  void addUnitModifier(UnitModifier unitModifier);
+  void removeUnitModifier(UnitModifier unitModifier);
 }

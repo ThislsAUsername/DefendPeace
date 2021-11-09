@@ -63,7 +63,7 @@ public abstract class CommanderAbility implements Serializable
       enqueueCOMods(co, gameMap, coModsToApply);
       modsApplied.put(co, coModsToApply);
       for(UnitModifier mod : coModsToApply)
-        co.add(mod);
+        co.addUnitModifier(mod);
     }
     perform(co, gameMap);
   }
@@ -78,7 +78,7 @@ public abstract class CommanderAbility implements Serializable
       ArrayList<UnitModifier> modsToDrop = modsApplied.remove(co);
       // Revert in reverse order, just to be safe
       for( int i = modsToDrop.size() - 1; i >= 0; --i )
-        co.remove(modsToDrop.get(i));
+        co.removeUnitModifier(modsToDrop.get(i));
       revert(co, gameMap);
     }
   }
