@@ -3,6 +3,7 @@ package UI.Art.SpriteArtist;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import Engine.IView;
@@ -83,6 +84,17 @@ public class DamageChartView implements IView
     myG.setColor(SpriteUIUtils.MENUFRAMECOLOR);
     myG.fillRect(selX + unitSpacingH - viewX.geti(), 0, unitSizePx, myHeight);
     myG.fillRect(0, selY + unitSpacingV - viewY.geti(), myWidth, unitSizePx);
+
+    // On the very top left, slap down a Q with a bullet icon and/or red X to indicate that you can toggle ammo presence
+    BufferedImage tooltip = SpriteUIUtils.makeTextFrame("Q ", 3, 2);
+    Graphics2D tooltipG = tooltip.createGraphics();
+    BufferedImage ammoIcon = SpriteLibrary.MapIcons.AMMO.getIcon();
+    final int ammoIconX = tooltip.getWidth() - ammoIcon.getWidth() + 1;
+    final int ammoIconY = tooltip.getHeight() - ammoIcon.getHeight() - 1;
+    tooltipG.drawImage(ammoIcon, ammoIconX, ammoIconY, null);
+    if( control.outOfAmmo )
+      tooltipG.drawImage(SpriteLibrary.getColoredMapTextSprites(Color.RED).get('X'), ammoIconX - 1, ammoIconY, null);
+    myG.drawImage(tooltip, 2, 2, null);
 
     // Draw the top unit "labels"
     for(int i = 0; i < control.targetModels.length; ++i)
