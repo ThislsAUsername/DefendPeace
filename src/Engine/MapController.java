@@ -3,6 +3,7 @@ package Engine;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import CommandingOfficers.Commander;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
@@ -465,7 +466,15 @@ public class MapController implements IController, GameInputHandler.StateChanged
         Driver.getInstance().changeGameState(coInfoMenu, infoView);
         break;
       case DAMAGE_CHART:
-        DamageChartController dcc = new DamageChartController(myGame.activeCO, myGame.activeCO);
+        // Pull out the first enemy available, or ourselves
+        Commander targetCO = myGame.activeCO;
+        for( Commander co : myGame.commanders )
+          if( myGame.activeCO.isEnemy(co) )
+          {
+            targetCO = co;
+            break;
+          }
+        DamageChartController dcc = new DamageChartController(myGame.activeCO, targetCO);
         IView dcv = Driver.getInstance().gameGraphics.createDamageChartView(dcc);
 
         myGameInputHandler.reset(); // DAMAGE_CHART is a terminal state. Reset the input handler.
