@@ -59,7 +59,7 @@ public class HorizontalSelectorTemplate
 
     int imageDimension = itemWidth + SpriteArrows.ARROW_SIZE;
     optionArrows = new BufferedImage(imageDimension, 10, BufferedImage.TYPE_INT_ARGB);
-    new SpriteArrows(optionArrows.getWidth()/2, optionArrows.getHeight()/2, itemWidth, SpriteUIUtils.MENUFRAMECOLOR).draw(optionArrows.getGraphics());
+    SpriteArrows.draw(optionArrows.getGraphics(), optionArrows.getWidth()/2, optionArrows.getHeight()/2, itemWidth, false, SpriteUIUtils.MENUFRAMECOLOR);
   }
 
   /**
