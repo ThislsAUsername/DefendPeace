@@ -134,7 +134,7 @@ public class SpriteUIUtils
       lines.add(i, line.substring(0, splitIndex)); // and then the first half behind it
     }
 
-    int totalTextHeight = ((lines.isEmpty()) ? 0 : getMenuTextHeightPx(lines, characterHeight));
+    int totalTextHeight = getMenuTextHeightPx(lines, characterHeight);
     // Build our image.
     BufferedImage menuImage = null;
     menuImage = SpriteLibrary.createTransparentSprite(reqWidth, totalTextHeight);

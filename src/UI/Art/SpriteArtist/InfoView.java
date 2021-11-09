@@ -23,6 +23,7 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
   private static final int PANE_OUTER_BUFFER = 3; // sets both outer border and frame border size
 
   private InfoController myControl;
+  final int lineHeight = SpriteLibrary.getFontStandard().getHeight() + 1;
 
   private ArrayList<InfoPage> prevPages = null;
   private BufferedImage pageImage = null;
@@ -95,13 +96,16 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
       pageImage = renderPage(pages, drawingWidth);
     prevPages = pages;
 
-    final int shiftDown = myControl.getShiftDown() * 2; // User-input shift value
+    final int shiftDown = myControl.getShiftDown() * lineHeight; // User-input shift value
     final int possibleShift = Math.max(0, pageImage.getHeight() - paneVSize); // The maximum shift that can make sense for this page
     final boolean canShift = possibleShift > 0;
     int pixelShift = 0; // Actual pixels to offset the drawn image
     if( canShift )
+    {
       // Since shiftDown can be negative, wrap it into range, make sure it's positive, then wrap it again
       pixelShift = (possibleShift + shiftDown % possibleShift) % possibleShift;
+      pixelShift -= pixelShift % lineHeight;
+    }
 
     final int contentWidth  = Math.min(Math.abs(drawingWidth ), pageImage.getWidth());
     final int contentHeight = Math.min(Math.abs(drawingHeight), pageImage.getHeight());
@@ -170,7 +174,7 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
       }
     }
 
-    return SpriteUIUtils.stackBufferedImages(pageImages.toArray(new BufferedImage[0]), 15);
+    return SpriteUIUtils.stackBufferedImages(pageImages.toArray(new BufferedImage[0]), lineHeight + 1);
   }
 
   // Vestigial method stubs from MapView
