@@ -2,6 +2,7 @@ package Engine;
 
 import java.awt.Dimension;
 
+import UI.DamageChartController;
 import UI.InfoController;
 import UI.InputHandler;
 import UI.MainUIController;
@@ -12,6 +13,7 @@ public interface GraphicsEngine
   public IView getMainUIView(MainUIController control);
   public MapView createMapView(GameInstance game);
   public IView createInfoView(InfoController control);
+  public IView createDamageChartView(DamageChartController control);
 
   /**
    * Handles user input when configuring graphics options made available by

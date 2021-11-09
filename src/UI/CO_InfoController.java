@@ -14,7 +14,8 @@ public class CO_InfoController implements InfoController
 {
   private ArrayList<CommanderInfo> coInfos;
   private GameInstance myGame;
-  
+
+  int shiftDown = 0;
   private OptionSelector coOptionSelector;
   private OptionSelector[] pageSelectors;
 
@@ -57,13 +58,16 @@ public class CO_InfoController implements InfoController
     switch( action )
     {
       case DOWN:
+        shiftDown++;
+        break;
       case UP:
-        // Up/Down changes which CO has focus.
-        coOptionSelector.handleInput( action );
+        shiftDown--;
         break;
       case LEFT:
       case RIGHT:
-        // Left/Right changes which sub-page has focus.
+        // Left/Right changes which CO has focus.
+        shiftDown = 0;
+        coOptionSelector.handleInput( action );
         pageSelectors[coOptionSelector.getSelectionNormalized()].handleInput(action);
         break;
       case SELECT:
@@ -91,9 +95,15 @@ public class CO_InfoController implements InfoController
   }
 
   @Override
-  public InfoPage getSelectedPage()
+  public int getShiftDown()
   {
-    return getSelectedCOInfo().infoPages.get(pageSelectors[coOptionSelector.getSelectionNormalized()].getSelectionNormalized());
+    return shiftDown;
+  }
+
+  @Override
+  public ArrayList<InfoPage> getSelectedPages()
+  {
+    return getSelectedCOInfo().infoPages;
   }
   
   @Override
@@ -106,5 +116,11 @@ public class CO_InfoController implements InfoController
   public CommanderInfo getSelectedCOInfo()
   {
     return coInfos.get(coOptionSelector.getSelectionNormalized());
+  }
+
+  @Override
+  public int getPageListCount()
+  {
+    return coOptionSelector.size();
   }
 }

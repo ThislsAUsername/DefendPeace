@@ -57,17 +57,9 @@ public class HorizontalSelectorTemplate
     graphicsOptionHeight = optionNamePanel.getHeight();
     horizontalSpacing = 3 * pf.emSizePx;
 
-    // Make points to define the two selection arrows.
-    int[] lXPoints = { 0, 5, 5, 0 };
-    int[] lYPoints = { 4, -1, 11, 5 };
-    int[] rXPoints = { itemWidth, itemWidth+5, itemWidth+5, itemWidth };
-    int[] rYPoints = { -1, 4, 5, 10 };
-    // Build an image with the selection arrows.
-    optionArrows = new BufferedImage(itemWidth+7, 10, BufferedImage.TYPE_INT_ARGB);
-    Graphics ag = optionArrows.getGraphics();
-    ag.setColor(SpriteUIUtils.MENUFRAMECOLOR);
-    ag.fillPolygon(lXPoints, lYPoints, lXPoints.length);
-    ag.fillPolygon(rXPoints, rYPoints, rXPoints.length);
+    int imageDimension = itemWidth + SpriteArrows.ARROW_SIZE;
+    optionArrows = new BufferedImage(imageDimension, 10, BufferedImage.TYPE_INT_ARGB);
+    SpriteArrows.draw(optionArrows.getGraphics(), optionArrows.getWidth()/2, optionArrows.getHeight()/2, itemWidth, false, SpriteUIUtils.MENUFRAMECOLOR);
   }
 
   /**
