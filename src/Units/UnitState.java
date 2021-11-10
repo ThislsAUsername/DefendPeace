@@ -128,18 +128,22 @@ public abstract class UnitState implements Serializable
 
   /**
    * Increases HP by the specified amount.
-   * Enforces a minimum of 0.1.
-   * When healing, sets health to the maximum value for its HP
+   * Enforces a minimum of 0.1, and a maximum of the model's maxHP.
+   * When healing, rounds health up to a whole HP (e.g. 2.5 + 2 = 4.5 -> 5.0)
    * @return the change in HP
    */
   public int alterHP(int change)
   {
-    return alterHP(change, change < 0);
+    return alterHP(change, false);
   }
   public int alterHP(int change, boolean allowOver)
   {
     int before = getHP();
-    int newHP = allowOver ? getHP() + change : Math.min(model.maxHP, getHP() + change);
+    int newHP = getHP() + change;
+    // Only enforce the maximum HP if we're healing
+    //  If current HP > max HP and change is negative, we shouldn't always delete all excess HP
+    if( !allowOver && change > 0 )
+      newHP = Math.min(model.maxHP, newHP);
     health = Math.max(1, healthFromHP(newHP));
     if( change > 0 )
       health = healthFromHP(getHP());
