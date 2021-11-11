@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
+import Engine.GameInstance;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitMods.UnitModifier;
@@ -27,6 +28,10 @@ public abstract class CommanderAbility implements Serializable
     myName = abilityName;
     myPowerCost = powerCost;
   }
+  public void initForGame(GameInstance game)
+  {}
+  public void deInitForGame(GameInstance game)
+  {}
 
   public double getCost()
   {

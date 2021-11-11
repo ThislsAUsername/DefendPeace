@@ -56,9 +56,7 @@ public class Meridian extends Commander
     }
   }
 
-  /** A list of all the units I've refreshed and need to nerf. */
-  final ChangeAndFlow myChangeAndFlow = new ChangeAndFlow();
-  final VehicularCharge myVehicularCharge = new VehicularCharge();
+  final VehicularCharge myVehicularCharge = new VehicularCharge(this);
   private static final int POST_REFRESH_STAT_ADJUSTMENT = -25;
 
   public Meridian(GameScenario.GameRules rules)
@@ -74,15 +72,8 @@ public class Meridian extends Commander
     tank.possibleActions.add(new TransformLifecycle.TransformFactory(arty, "~ARTY"));
     arty.possibleActions.add(new TransformLifecycle.TransformFactory(tank, "~TANK"));
 
-    addCommanderAbility(myChangeAndFlow);
+    addCommanderAbility(new ChangeAndFlow(this));
     addCommanderAbility(myVehicularCharge);
-  }
-
-  @Override
-  public void registerForEvents(GameInstance game)
-  {
-    super.registerForEvents(game);
-    myChangeAndFlow.init(game);
   }
 
   @Override
@@ -104,13 +95,14 @@ public class Meridian extends Commander
     COFightStatModifier baseMod = new COFightStatModifier(BASIC_BUFF);
     TransformationTracker tracker;
 
-    ChangeAndFlow()
+    ChangeAndFlow(Meridian meridian)
     {
       super(NAME, COST);
 
       AIFlags = 0; // The AI doesn't know how to use this, so it shouldn't try
     }
-    public void init(GameInstance game)
+    @Override
+    public void initForGame(GameInstance game)
     {
       tracker = TransformationTracker.initialize(game, TransformationTracker.class);
     }
@@ -172,7 +164,7 @@ public class Meridian extends Commander
     COFightStatModifier baseMod = new COFightStatModifier(BASIC_BUFF);
     COFightStatModifier debuffMod = new COFightStatModifier(POST_REFRESH_STAT_ADJUSTMENT);
 
-    VehicularCharge()
+    VehicularCharge(Meridian meridian)
     {
       super(NAME, COST);
 

@@ -56,18 +56,13 @@ public class Patch extends Commander
   private static final int PILLAGE_ATTACK_BUFF = 25;
 
   private LootAbility myLootAbility = null;
-  private final ArrayList<PatchAbility> patchPowers;
 
   public Patch(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
-    patchPowers = new ArrayList<>();
-    patchPowers.add(new PatchAbility(PLUNDER_NAME, PLUNDER_COST, PLUNDER_INCOME, PLUNDER_ATTACK_BUFF));
-    patchPowers.add(new PatchAbility(PILLAGE_NAME, PILLAGE_COST, PILLAGE_INCOME, PILLAGE_ATTACK_BUFF));
-
-    for( PatchAbility pa : patchPowers )
-      addCommanderAbility(pa);
+    addCommanderAbility(new PatchAbility(this, PLUNDER_NAME, PLUNDER_COST, PLUNDER_INCOME, PLUNDER_ATTACK_BUFF));
+    addCommanderAbility(new PatchAbility(this, PILLAGE_NAME, PILLAGE_COST, PILLAGE_INCOME, PILLAGE_ATTACK_BUFF));
   }
 
   @Override
@@ -77,10 +72,6 @@ public class Patch extends Commander
     // Passive - Loot
     myLootAbility = new LootAbility(this);
     myLootAbility.registerForEvents(game);
-    // Get cash from fightan during powers
-    DamageDealtToIncomeConverter incomeTracker = DamageDealtToIncomeConverter.initialize(game, DamageDealtToIncomeConverter.class);
-    for( PatchAbility pa : patchPowers )
-      pa.init(incomeTracker);
   }
   @Override
   public void unregister(GameInstance game)
@@ -129,7 +120,7 @@ public class Patch extends Commander
     private final double myIncomeRatio;
     private DamageDealtToIncomeConverter tracker;
 
-    PatchAbility(String abilityName, int abilityCost, double incomeRatio, int unitBuff)
+    PatchAbility(Patch patch, String abilityName, int abilityCost, double incomeRatio, int unitBuff)
     {
       super(abilityName, abilityCost);
 
@@ -138,9 +129,11 @@ public class Patch extends Commander
       // Create a COModifier that we can apply to Patch when needed.
       damageBuff = new CODamageModifier(unitBuff);
     }
-    public void init(DamageDealtToIncomeConverter incomeTracker)
+    @Override
+    public void initForGame(GameInstance game)
     {
-      tracker = incomeTracker;
+      // Get cash from fightan
+      tracker = DamageDealtToIncomeConverter.initialize(game, DamageDealtToIncomeConverter.class);
     }
 
     @Override

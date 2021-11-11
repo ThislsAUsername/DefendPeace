@@ -60,14 +60,12 @@ public class Cinder extends Commander
 
   private BuildCountsTracker buildCounts;
 
-  public WitchFireAbility witchFire = new WitchFireAbility();
-
   public Cinder(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
-    addCommanderAbility(new SearAbility());
-    addCommanderAbility(witchFire);
+    addCommanderAbility(new SearAbility(this));
+    addCommanderAbility(new WitchFireAbility(this));
   }
 
   @Override
@@ -75,9 +73,6 @@ public class Cinder extends Commander
   {
     super.registerForEvents(game);
     buildCounts = StateTracker.initialize(game, BuildCountsTracker.class);
-
-    WitchFireTracker wfTracker = WitchFireTracker.initialize(game, WitchFireTracker.class);
-    witchFire.init(wfTracker);
   }
 
   public static CommanderInfo getInfo()
@@ -152,7 +147,7 @@ public class Cinder extends Commander
     private static final int SEAR_COST = 5;
     private static final int SEAR_WOUND = -1;
 
-    SearAbility()
+    SearAbility(Cinder cinder)
     {
       super(SEAR_NAME, SEAR_COST);
       AIFlags = PHASE_TURN_END;
@@ -183,13 +178,14 @@ public class Cinder extends Commander
     private static final int WITCHFIRE_COST = 9;
     private WitchFireTracker tracker;
 
-    WitchFireAbility()
+    WitchFireAbility(Cinder cinder)
     {
       super(WITCHFIRE_NAME, WITCHFIRE_COST);
     }
-    public void init(WitchFireTracker tracker)
+    @Override
+    public void initForGame(GameInstance game)
     {
-      this.tracker = tracker;
+      tracker = WitchFireTracker.initialize(game, WitchFireTracker.class);
     }
 
     @Override
