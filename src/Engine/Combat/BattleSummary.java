@@ -14,7 +14,6 @@ public class BattleSummary
 
   public BattleSummary(UnitContext attackerStart, UnitContext attackerEnd, UnitContext defenderStart, UnitContext defenderEnd)
   {
-    super();
     this.attacker = new UnitDelta(attackerStart, attackerEnd);
     this.defender = new UnitDelta(defenderStart, defenderEnd);
   }
