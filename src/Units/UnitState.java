@@ -115,13 +115,13 @@ public abstract class UnitState implements Serializable
   {
     return damageHP(damage, false);
   }
-  public int damageHP(double damage, boolean allowNegative)
+  public int damageHP(double damage, boolean allowOverkill)
   {
     if( damage < 0 )
       throw new ArithmeticException("Cannot inflict negative damage!");
     int before = getHP();
     health = health - healthFromHP(damage);
-    if( !allowNegative )
+    if( !allowOverkill )
       health = Math.max(0, health);
     return getHP() - before;
   }
