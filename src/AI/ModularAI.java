@@ -131,7 +131,7 @@ public abstract class ModularAI implements AIController
 
       CommanderAbility retVal = AIUtils.queueCromulentAbility(null, myCo, aiPhase);
       if( null != retVal )
-        return new GameAction.AbilityAction(myCo, retVal);
+        return new GameAction.AbilityAction(retVal);
       return null;
     }
   }

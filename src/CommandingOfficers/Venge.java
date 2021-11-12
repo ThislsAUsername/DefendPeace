@@ -62,7 +62,7 @@ public class Venge extends Commander
 
   /** A list of all the units that have attacked me since my last turn. */
   private ArrayList<Unit> aggressors = new ArrayList<Unit>();
-  private IronWill myIronWill = new IronWill();
+  private IronWill myIronWill = new IronWill(this);
   /** How much power I get when beating them up */
   public final static int VENGEANCE_BOOST = 60;
 
@@ -77,7 +77,7 @@ public class Venge extends Commander
     }
 
     addCommanderAbility(myIronWill);
-    addCommanderAbility(new Retribution());
+    addCommanderAbility(new Retribution(this));
   }
 
   public static CommanderInfo getInfo()
@@ -202,16 +202,16 @@ public class Venge extends Commander
     private static final int IRONWILL_WOUND = -2;
     private final ArrayList<Unit> boostedUnits = new ArrayList<Unit>();
 
-    IronWill()
+    IronWill(Venge venge)
     {
-      super(NAME, COST);
+      super(venge, NAME, COST);
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       UnitInstanceFilter uif = new UnitInstanceFilter(new IronWillMod(IRONWILL_BOOST));
-      for( Unit unit : co.units )
+      for( Unit unit : myCommander.units )
       {
         if( !unit.isTurnOver )
           uif.instances.add(unit);
@@ -220,16 +220,16 @@ public class Venge extends Commander
     }
 
     @Override
-    protected void perform(Commander co, MapMaster gameMap)
+    protected void perform(MapMaster gameMap)
     {
-      for( Unit unit : co.units )
+      for( Unit unit : myCommander.units )
       {
         if( !unit.isTurnOver )
           boostedUnits.add(unit);
       }
     }
     @Override
-    protected void revert(Commander co, MapMaster gameMap)
+    protected void revert(MapMaster gameMap)
     {
       for( Unit unit : boostedUnits )
       {
@@ -252,24 +252,20 @@ public class Venge extends Commander
     UnitModifier damageMod = null;
     UnitModifier defenseMod = null;
 
-    Retribution()
+    Retribution(Venge venge)
     {
-      super(NAME, COST);
+      super(venge, NAME, COST);
       damageMod = new CODamageModifier(RETRIBUTION_BUFF);
       defenseMod = new CODefenseModifier(-RETRIBUTION_NERF);
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(damageMod);
       modList.add(defenseMod);
-      modList.add(new PreEmptiveCounterMod(co));
+      modList.add(new PreEmptiveCounterMod(myCommander));
     }
-
-    @Override
-    protected void perform(Commander co, MapMaster gameMap)
-    {}
   }
   
 }

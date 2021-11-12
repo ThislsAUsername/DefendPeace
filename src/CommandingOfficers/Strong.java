@@ -91,8 +91,8 @@ public class Strong extends Commander
       }
     }
 
-    addCommanderAbility(new StrongArmAbility());
-    addCommanderAbility(new MobilizeAbility());
+    addCommanderAbility(new StrongArmAbility(this));
+    addCommanderAbility(new MobilizeAbility(this));
   }
 
   /**
@@ -120,13 +120,13 @@ public class Strong extends Commander
     private static final int STRONGARM_BUFF = 10;
     private static final int STRONGARM_FOOT_BUFF = 20; // On top of STONGARM_BUFF
 
-    StrongArmAbility()
+    StrongArmAbility(Strong strong)
     {
-      super(STRONGARM_NAME, STRONGARM_COST);
+      super(strong, STRONGARM_NAME, STRONGARM_COST);
     }
 
     @Override
-    protected void enqueueCOMods(Commander myCommander, MapMaster gameMap, ArrayList<UnitModifier> modList)
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       UnitModifier damageMod = new CODamageModifier(STRONGARM_BUFF);
       UnitModifier defenseMod = new CODefenseModifier(STRONGARM_BUFF);
@@ -144,8 +144,9 @@ public class Strong extends Commander
 
     private HashMap<Commander, UnitProductionModifier> upmsApplied = new HashMap<>();
     @Override
-    protected void perform(Commander co, MapMaster gameMap)
+    protected void perform(MapMaster gameMap)
     {
+      Commander co = myCommander;
       if(!upmsApplied.containsKey(co))
       {
         // Make infantry buildable from all production buildings.
@@ -157,8 +158,9 @@ public class Strong extends Commander
       }
     }
     @Override
-    protected void revert(Commander co, MapMaster gameMap)
+    protected void revert(MapMaster gameMap)
     {
+      Commander co = myCommander;
       if(upmsApplied.containsKey(co))
       {
         UnitProductionModifier upm = upmsApplied.remove(co);
@@ -179,14 +181,14 @@ public class Strong extends Commander
     private static final int MOBILIZE_BUFF = 40;
     private static final int MOBILIZE_DEFENSE_BUFF = 10;
 
-    MobilizeAbility()
+    MobilizeAbility(Strong strong)
     {
-      super(MOBILIZE_NAME, MOBILIZE_COST);
+      super(strong, MOBILIZE_NAME, MOBILIZE_COST);
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
     }
 
     @Override
-    protected void enqueueCOMods(Commander myCommander, MapMaster gameMap, ArrayList<UnitModifier> modList)
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       // Grant the base firepower/defense bonus.
       UnitModifier damageMod = new CODamageModifier(MOBILIZE_BUFF);
@@ -201,8 +203,10 @@ public class Strong extends Commander
 
     private HashMap<Commander, UnitProductionModifier> upmsApplied = new HashMap<>();
     @Override
-    protected void perform(Commander co, MapMaster gameMap)
+    protected void perform(MapMaster gameMap)
     {
+      // Changing production capabilities probably doesn't make sense to apply to other COs, right?
+      Commander co = myCommander;
       if(!upmsApplied.containsKey(co))
       {
         // Make all TROOPs buildable from all production centers, cities, and the HQ.
@@ -219,7 +223,7 @@ public class Strong extends Commander
       }
 
       // Lastly, all troops are refreshed and able to move again.
-      for( Unit unit : co.units )
+      for( Unit unit : myCommander.units )
       {
         if( unit.model.isAll(UnitModel.TROOP) )
         {
@@ -228,8 +232,9 @@ public class Strong extends Commander
       }
     }
     @Override
-    protected void revert(Commander co, MapMaster gameMap)
+    protected void revert(MapMaster gameMap)
     {
+      Commander co = myCommander;
       if(upmsApplied.containsKey(co))
       {
         UnitProductionModifier upm = upmsApplied.remove(co);

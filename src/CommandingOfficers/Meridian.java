@@ -97,7 +97,7 @@ public class Meridian extends Commander
 
     ChangeAndFlow(Meridian meridian)
     {
-      super(NAME, COST);
+      super(meridian, NAME, COST);
 
       AIFlags = 0; // The AI doesn't know how to use this, so it shouldn't try
     }
@@ -108,32 +108,32 @@ public class Meridian extends Commander
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(baseMod);
     }
 
     @Override
-    protected void perform(Commander co, MapMaster gameMap)
+    protected void perform(MapMaster gameMap)
     {
       // Units that transformed are refreshed and able to move again.
       for( Unit unit : tracker.prevTypeMap.keySet() )
       {
-        if( co == unit.CO ) // Consider validating that it actually was an arty-tank transformation?
+        if( myCommander == unit.CO ) // Consider validating that it actually was an arty-tank transformation?
           unit.isTurnOver = false;
       }
     }
 
     @Override
-    public Collection<DamagePopup> getDamagePopups(Commander co, GameMap gameMap)
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
     {
       ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
 
       for( Unit unit : tracker.prevTypeMap.keySet() )
-        if( co == unit.CO )
+        if( myCommander == unit.CO )
           output.add(new DamagePopup(
                        new XYCoord(unit.x, unit.y),
-                       co.myColor,
+                       myCommander.myColor,
                        "Flow"));
 
       return output;
@@ -166,17 +166,17 @@ public class Meridian extends Commander
 
     VehicularCharge(Meridian meridian)
     {
-      super(NAME, COST);
+      super(meridian, NAME, COST);
 
       AIFlags = PHASE_TURN_END;
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(baseMod);
       UnitInstanceFilter uif = new UnitInstanceFilter(debuffMod);
-      for( Unit unit : co.units )
+      for( Unit unit : myCommander.units )
       {
         if( shouldRefresh(unit) )
           uif.instances.add(unit);
@@ -185,10 +185,10 @@ public class Meridian extends Commander
     }
 
     @Override
-    protected void perform(Commander co, MapMaster gameMap)
+    protected void perform(MapMaster gameMap)
     {
       // Lastly, all land vehicles are refreshed and able to move again.
-      for( Unit unit : co.units )
+      for( Unit unit : myCommander.units )
       {
         if( shouldRefresh(unit) )
         {
@@ -198,7 +198,7 @@ public class Meridian extends Commander
       }
     }
     @Override
-    protected void revert(Commander co, MapMaster gameMap)
+    protected void revert(MapMaster gameMap)
     {
       debuffedUnits.clear();
     }

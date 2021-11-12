@@ -149,14 +149,14 @@ public class Cinder extends Commander
 
     SearAbility(Cinder cinder)
     {
-      super(SEAR_NAME, SEAR_COST);
+      super(cinder, SEAR_NAME, SEAR_COST);
       AIFlags = PHASE_TURN_END;
     }
 
     @Override
-    protected void perform(Commander co, MapMaster gameMap)
+    protected void perform(MapMaster gameMap)
     {
-      for( Unit unit : co.units )
+      for( Unit unit : myCommander.units )
       {
         if( !unit.isTurnOver )
         {
@@ -180,7 +180,7 @@ public class Cinder extends Commander
 
     WitchFireAbility(Cinder cinder)
     {
-      super(WITCHFIRE_NAME, WITCHFIRE_COST);
+      super(cinder, WITCHFIRE_NAME, WITCHFIRE_COST);
     }
     @Override
     public void initForGame(GameInstance game)
@@ -189,15 +189,15 @@ public class Cinder extends Commander
     }
 
     @Override
-    protected void perform(Commander co, MapMaster gameMap)
+    protected void perform(MapMaster gameMap)
     {
-      tracker.startTracking(co);
+      tracker.startTracking(myCommander);
     }
 
     @Override
-    protected void revert(Commander co, MapMaster gameMap)
+    protected void revert(MapMaster gameMap)
     {
-      tracker.stopTracking(co);
+      tracker.stopTracking(myCommander);
     }
   }
 

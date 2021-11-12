@@ -122,7 +122,7 @@ public class Patch extends Commander
 
     PatchAbility(Patch patch, String abilityName, int abilityCost, double incomeRatio, int unitBuff)
     {
-      super(abilityName, abilityCost);
+      super(patch, abilityName, abilityCost);
 
       myIncomeRatio = incomeRatio;
 
@@ -137,21 +137,21 @@ public class Patch extends Commander
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(damageBuff);
     }
 
     @Override
-    protected void perform(Commander co, MapMaster gameMap)
+    protected void perform(MapMaster gameMap)
     {
-      tracker.startTracking(co, myIncomeRatio);
+      tracker.startTracking(myCommander, myIncomeRatio);
     }
 
     @Override
-    public void revert(Commander co, MapMaster gameMap)
+    public void revert(MapMaster gameMap)
     {
-      tracker.stopTracking(co, myIncomeRatio);
+      tracker.stopTracking(myCommander, myIncomeRatio);
     }
   }
 

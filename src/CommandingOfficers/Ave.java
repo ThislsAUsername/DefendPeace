@@ -132,7 +132,7 @@ public class Ave extends Commander
 
     addCommanderAbility(new NixAbility(this));
     addCommanderAbility(new GlacioAbility(this));
-    addCommanderAbility(new OblidoAbility());
+    addCommanderAbility(new OblidoAbility(this));
   }
 
   @Override
@@ -473,14 +473,14 @@ public class Ave extends Commander
 
     NixAbility(Ave commander)
     {
-      super(NIX_NAME, NIX_COST);
+      super(commander, NIX_NAME, NIX_COST);
       coCast = commander;
       damageMod = new CODamageModifier(NIX_BUFF);
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
     }
 
     @Override
-    public void adjustCost()
+    protected void adjustCost()
     {
       // Override default cost-increase behavior to make this get more expensive faster.
       numActivations++;
@@ -488,25 +488,24 @@ public class Ave extends Commander
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(damageMod);
     }
 
     @Override
-    protected void perform(Commander co, MapMaster gameMap)
+    protected void perform(MapMaster gameMap)
     {
       // Increase Ave's sphere of influence.
-      if( co == coCast )
-        coCast.MAX_SNOW_SPREAD_RANGE++;
+      coCast.MAX_SNOW_SPREAD_RANGE++;
     }
 
     @Override
-    public GameEventQueue getEvents(Commander co, MapMaster gameMap)
+    public GameEventQueue getEvents(MapMaster gameMap)
     {
       // Drop snow everywhere inside her range.
       ArrayList<MapChangeEvent.EnvironmentAssignment> snowTiles = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
-      Set<XYCoord> tiles = Utils.findLocationsNearProperties(gameMap, co, coCast.MAX_SNOW_SPREAD_RANGE);
+      Set<XYCoord> tiles = Utils.findLocationsNearProperties(gameMap, coCast, coCast.MAX_SNOW_SPREAD_RANGE);
       for( XYCoord coord : tiles )
       {
         if( coCast.snowMap[coord.xCoord][coord.yCoord] < Ave.SNOW_THRESHOLD )
@@ -546,42 +545,37 @@ public class Ave extends Commander
 
     GlacioAbility(Ave commander)
     {
-      super(GLACIO_NAME, GLACIO_COST);
+      super(commander, GLACIO_NAME, GLACIO_COST);
       coCast = commander;
       damageMod = new CODamageModifier(GLACIO_BUFF);
       AIFlags = PHASE_TURN_END;
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
+      // Normal CO-power boost.
       modList.add(damageMod);
     }
 
-    @Override
-    protected void perform(Commander myCommander, MapMaster gameMap)
+    protected void perform(MapMaster gameMap)
     {
       // Freeze enemies around each of Ave's units or buildings.
-      for( Unit victim : findVictims(myCommander, gameMap) )
+      for( Unit victim : findVictims(gameMap) )
         victim.isStunned = true;
     }
 
     @Override
-    public GameEventQueue getEvents(Commander co, MapMaster gameMap)
+    public GameEventQueue getEvents(MapMaster gameMap)
     {
       // Keep track of any tiles that change to snow.
       ArrayList<MapChangeEvent.EnvironmentAssignment> tileChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
 
       // Add snow in an expanded range around Ave's areas.
-      int maxSnowRange = GLACIO_SNOW_SPREAD;
-      if (co instanceof Ave)
-      {
-        maxSnowRange += ((Ave)co).MAX_SNOW_SPREAD_RANGE;
-      }
-      Set<XYCoord> tilesInRange = Utils.findLocationsNearProperties(gameMap, co, maxSnowRange);
-      tilesInRange.addAll(Utils.findLocationsNearUnits(gameMap, co, GLACIO_SNOW_SPREAD));
-
-      // The Ave who owns this power needs to be notified about the snow
+      int maxSnowRange = coCast.MAX_SNOW_SPREAD_RANGE + GLACIO_SNOW_SPREAD;
+      Set<XYCoord> tilesInRange = Utils.findLocationsNearProperties(gameMap, coCast, maxSnowRange);
+      // TODO: Make sure this only counts Ave's units, not all units in the Army
+      tilesInRange.addAll(Utils.findLocationsNearUnits(gameMap, coCast, GLACIO_SNOW_SPREAD));
       for( XYCoord coord : tilesInRange )
       {
         if( coCast.snowMap[coord.xCoord][coord.yCoord] < Ave.SNOW_THRESHOLD )
@@ -601,11 +595,11 @@ public class Ave extends Commander
     }
 
     @Override
-    public Collection<DamagePopup> getDamagePopups(Commander myCommander, GameMap gameMap)
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
     {
       ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
 
-      for( Unit victim : findVictims(myCommander, gameMap) )
+      for( Unit victim : findVictims(gameMap) )
         output.add(new DamagePopup(
                        new XYCoord(victim.x, victim.y),
                        myCommander.myColor,
@@ -614,7 +608,7 @@ public class Ave extends Commander
       return output;
     }
 
-    public HashSet<Unit> findVictims(Commander myCommander, GameMap gameMap)
+    public HashSet<Unit> findVictims(GameMap gameMap)
     {
       HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
       Set<XYCoord> tilesInRange = Utils.findLocationsNearUnits(gameMap, coCast, GLACIO_FREEZE_RANGE);
@@ -647,16 +641,18 @@ public class Ave extends Commander
     private static final int OBLIDO_DAMAGE = 2;
 
     UnitModifier damageMod = null;
+    Ave Ave;
 
-    OblidoAbility()
+    OblidoAbility(Ave commander)
     {
-      super(OBLIDO_NAME, OBLIDO_COST);
+      super(commander, OBLIDO_NAME, OBLIDO_COST);
+      Ave = commander;
       damageMod = new CODamageModifier(OBLIDO_BUFF);
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
     }
 
     @Override
-    public void adjustCost()
+    protected void adjustCost()
     {
       // One of the big benefits of this power is deforestation, since trees get in Ave's way.
       // Trees are only removed once, so we'll increase cost more slowly to counteract the decreased utility.
@@ -664,23 +660,18 @@ public class Ave extends Commander
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(damageMod);
     }
 
     @Override
-    protected void perform(Commander co, MapMaster gameMap)
-    {}
-
-    @Override
-    public GameEventQueue getEvents(Commander co, MapMaster gameMap)
+    public GameEventQueue getEvents(MapMaster gameMap)
     {
       // Keep track of any tiles that change.
       ArrayList<MapChangeEvent.EnvironmentAssignment> tileChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
 
-      // Change terrain to snow around each of Ave's units and buildings, and damage trees and enemies.
-      Set<XYCoord> affectedTiles = getTilesInRange(co, gameMap);
+      Set<XYCoord> affectedTiles = getTilesInRange(gameMap);
 
       // Smash things. Don't add snow though.
       for( XYCoord coord : affectedTiles )
@@ -693,7 +684,7 @@ public class Ave extends Commander
         }
       }
 
-      GameEvent damage = new MassDamageEvent(co, findVictims(co, gameMap, affectedTiles), OBLIDO_DAMAGE, false);
+      GameEvent damage = new MassDamageEvent(myCommander, findVictims(gameMap, affectedTiles), OBLIDO_DAMAGE, false);
 
       GameEvent tileChange = new MapChangeEvent(tileChanges);
 
@@ -706,45 +697,45 @@ public class Ave extends Commander
     }
 
     @Override
-    public Collection<DamagePopup> getDamagePopups(Commander co, GameMap gameMap)
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
     {
       ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
-      Set<XYCoord> affectedTiles = getTilesInRange(co, gameMap);
+      Set<XYCoord> affectedTiles = getTilesInRange(gameMap);
 
-      for( Unit victim : findVictims(co, gameMap, affectedTiles) )
+      for( Unit victim : findVictims(gameMap, affectedTiles) )
       {
         XYCoord coord = new XYCoord(victim.x, victim.y);
         // Forest wrecking takes priority over damage, since it's a permanent map change
         if( gameMap.getEnvironment(coord).terrainType != TerrainType.FOREST )
           output.add(new DamagePopup(
                          coord,
-                         co.myColor,
+                         myCommander.myColor,
                          Math.min(victim.getHP()-1, OBLIDO_DAMAGE)*10 + "%"));
       }
       for( XYCoord coord : affectedTiles )
         if( gameMap.getEnvironment(coord).terrainType == TerrainType.FOREST )
           output.add(new DamagePopup(
                          coord,
-                         co.myColor,
+                         myCommander.myColor,
                          "RAZE"));
 
       return output;
     }
 
-    public Set<XYCoord> getTilesInRange(Commander co, GameMap gameMap)
+    public Set<XYCoord> getTilesInRange(GameMap gameMap)
     {
-      Set<XYCoord> tilesInRange = Utils.findLocationsNearUnits(gameMap, co, OBLIDO_RANGE);
-      tilesInRange.addAll(Utils.findLocationsNearProperties(gameMap, co, OBLIDO_RANGE));
+      Set<XYCoord> tilesInRange = Utils.findLocationsNearUnits(gameMap, Ave, OBLIDO_RANGE);
+      tilesInRange.addAll(Utils.findLocationsNearProperties(gameMap, Ave, OBLIDO_RANGE));
       return tilesInRange;
     }
 
-    public HashSet<Unit> findVictims(Commander co, GameMap gameMap, Set<XYCoord> tilesInRange)
+    public HashSet<Unit> findVictims(GameMap gameMap, Set<XYCoord> tilesInRange)
     {
       HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
       for( XYCoord coord : tilesInRange )
       {
         Unit victim = gameMap.getResident(coord);
-        if( null != victim && co.isEnemy(victim.CO) )
+        if( null != victim && myCommander.isEnemy(victim.CO) )
         {
           victims.add(victim);
         }

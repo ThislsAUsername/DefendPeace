@@ -230,13 +230,11 @@ public abstract class GameAction
   public static class AbilityAction extends GameAction
   {
     private CommanderAbility myAbility;
-    private Commander myCommander;
 
-    public AbilityAction(Commander co, CommanderAbility ability)
+    public AbilityAction(CommanderAbility ability)
     {
       // ABILITY actions consist of
       //   ABILITY
-      myCommander = co;
       myAbility = ability;
     }
 
@@ -247,12 +245,12 @@ public abstract class GameAction
 
       // Validity check
       boolean isValid = null != myAbility;
-      isValid &= myCommander.getReadyAbilities().contains(myAbility);
+      isValid &= myAbility.myCommander.getReadyAbilities().contains(myAbility);
       if( !isValid ) return abilityEvents;
 
       // Create an event for the ability itself, and then for each resulting event.
-      abilityEvents.add(new CommanderAbilityEvent(myCommander, myAbility));
-      abilityEvents.addAll(myAbility.getEvents(myCommander, map));
+      abilityEvents.add(new CommanderAbilityEvent(myAbility));
+      abilityEvents.addAll(myAbility.getEvents(map));
       return abilityEvents;
     }
 
@@ -283,7 +281,7 @@ public abstract class GameAction
     @Override
     public Collection<DamagePopup> getDamagePopups(GameMap map)
     {
-      return myAbility.getDamagePopups(myCommander, map);
+      return myAbility.getDamagePopups(map);
     }
   } // ~AbilityAction
 

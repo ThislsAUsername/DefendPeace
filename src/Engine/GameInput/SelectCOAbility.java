@@ -30,7 +30,7 @@ public class SelectCOAbility extends GameInputState<CommanderAbility>
     {
       if( option == ca )
       {
-        GameAction abilityAction = new GameAction.AbilityAction(myStateData.commander, ca);
+        GameAction abilityAction = new GameAction.AbilityAction(ca);
         myStateData.actionSet = new GameActionSet(abilityAction, false);
         next = new ActionReady(myStateData);
       }
@@ -64,7 +64,7 @@ public class SelectCOAbility extends GameInputState<CommanderAbility>
         break;
     }
     if( showPreview )
-      myStateData.damagePopups = ability.getDamagePopups(myStateData.commander, myStateData.gameMap);
+      myStateData.damagePopups = ability.getDamagePopups(myStateData.gameMap);
     else
       myStateData.damagePopups.clear();
   }

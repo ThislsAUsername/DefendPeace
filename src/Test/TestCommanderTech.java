@@ -79,8 +79,8 @@ public class TestCommanderTech extends TestCase
     testPassed &= validate(null != tech_drop, "Failed to find Steel Hail ability!");
 
     // Record the predicted and actual destinations.
-    Collection<DamagePopup> p_locs = tech_drop.getDamagePopups(mTech, mTestMap);
-    GameEventQueue r_locs = tech_drop.getEvents(mTech, mTestMap);
+    Collection<DamagePopup> p_locs = tech_drop.getDamagePopups(mTestMap);
+    GameEventQueue r_locs = tech_drop.getEvents(mTestMap);
 
     testPassed &= validate(p_locs.size() == 3, "Tech Drop predicted " + r_locs.size() + " events instead of 3!");
     testPassed &= validate(r_locs.size() == 3, "Tech Drop generated " + r_locs.size() + " events instead of 3!");

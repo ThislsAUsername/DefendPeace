@@ -132,7 +132,7 @@ public class Bear_Bull extends Commander
     UpDownTurnAbility(Bear_Bull commander)
     {
       // as we start in Bear form, UpTurn is the correct starting name
-      super(UPTURN_NAME, DOWNUPTURN_COST);
+      super(commander, UPTURN_NAME, DOWNUPTURN_COST);
       COcast = commander;
     }
 
@@ -144,22 +144,20 @@ public class Bear_Bull extends Commander
     }
 
     @Override
-    protected void perform(Commander co, MapMaster gameMap)
+    protected void perform(MapMaster gameMap)
     {
-      if( co == COcast )
-        COcast.swapD2Ds(false);
+      COcast.swapD2Ds(false);
     }
     @Override
-    protected void revert(Commander co, MapMaster gameMap)
+    protected void revert(MapMaster gameMap)
     {
-      if( co == COcast )
-        COcast.swapD2Ds(true);
+      COcast.swapD2Ds(true);
     }
 
     @Override
-    public GameEventQueue getEvents(Commander co, MapMaster gameMap)
+    public GameEventQueue getEvents(MapMaster gameMap)
     {
-      Collection<Unit> victims = findVictims(co, gameMap);
+      Collection<Unit> victims = findVictims(COcast, gameMap);
 
       // Damage is dealt after swapping D2Ds so it's actually useful to Bear
       GameEventQueue powerEvents = new GameEventQueue();
@@ -177,14 +175,14 @@ public class Bear_Bull extends Commander
     }
 
     @Override
-    public Collection<DamagePopup> getDamagePopups(Commander co, GameMap gameMap)
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
     {
       ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
 
-      for( Unit victim : findVictims(co, gameMap) )
+      for( Unit victim : findVictims(COcast, gameMap) )
         output.add(new DamagePopup(
                        new XYCoord(victim.x, victim.y),
-                       co.myColor,
+                       COcast.myColor,
                        Math.min(victim.getHP()-1, DOWNUPTURN_LIQUIDATION)*10 + "%"));
 
       return output;
@@ -225,7 +223,7 @@ public class Bear_Bull extends Commander
     BustBoomAbility(Bear_Bull commander)
     {
       // as we start in Bear form, Boom is the correct starting name
-      super(BOOM_NAME, BOOMBUST_COST);
+      super(commander, BOOM_NAME, BOOMBUST_COST);
       COcast = commander;
     }
 
@@ -237,19 +235,15 @@ public class Bear_Bull extends Commander
     }
 
     @Override
-    protected void enqueueCOMods(Commander co, MapMaster gameMap, ArrayList<UnitModifier> modList)
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(new UnitDiscount(BOOMBUST_BUFF));
     }
 
     @Override
-    protected void perform(Commander co, MapMaster gameMap)
-    {}
-    @Override
-    protected void revert(Commander co, MapMaster gameMap)
+    protected void revert(MapMaster gameMap)
     {
-      if( co == COcast )
-        COcast.swapD2Ds(true);
+      COcast.swapD2Ds(true);
     }
   }
 
