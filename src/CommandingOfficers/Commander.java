@@ -64,7 +64,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   private double myAbilityPower = 0;
 
   private ArrayList<CommanderAbility> myAbilities = null;
-  private CommanderAbility myActiveAbility = null; // This should move up to Army later on.
+  private CommanderAbility myActiveAbility = null;
 
   // The AI has to be effectively stateless anyway (to be able to adapt to whatever scenario it finds itself in on map start),
   //   so may as well not require them to care about serializing their contents.
