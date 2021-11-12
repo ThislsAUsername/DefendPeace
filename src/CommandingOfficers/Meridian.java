@@ -104,7 +104,7 @@ public class Meridian extends Commander
     @Override
     public void initForGame(GameInstance game)
     {
-      tracker = TransformationTracker.initialize(game, TransformationTracker.class);
+      tracker = TransformationTracker.instance(game, TransformationTracker.class);
     }
 
     @Override

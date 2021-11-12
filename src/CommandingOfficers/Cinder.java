@@ -72,7 +72,7 @@ public class Cinder extends Commander
   public void registerForEvents(GameInstance game)
   {
     super.registerForEvents(game);
-    buildCounts = StateTracker.initialize(game, BuildCountsTracker.class);
+    buildCounts = StateTracker.instance(game, BuildCountsTracker.class);
   }
 
   public static CommanderInfo getInfo()
@@ -185,7 +185,7 @@ public class Cinder extends Commander
     @Override
     public void initForGame(GameInstance game)
     {
-      tracker = WitchFireTracker.initialize(game, WitchFireTracker.class);
+      tracker = WitchFireTracker.instance(game, WitchFireTracker.class);
     }
 
     @Override

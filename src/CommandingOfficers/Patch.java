@@ -133,7 +133,7 @@ public class Patch extends Commander
     public void initForGame(GameInstance game)
     {
       // Get cash from fightan
-      tracker = DamageDealtToIncomeConverter.initialize(game, DamageDealtToIncomeConverter.class);
+      tracker = DamageDealtToIncomeConverter.instance(game, DamageDealtToIncomeConverter.class);
     }
 
     @Override

@@ -22,7 +22,7 @@ public abstract class StateTracker<T extends StateTracker<T>> implements GameEve
   /**
    * The external access point for *all* access to instances of this class and its subclasses
    */
-  public static <T extends StateTracker<T>> T initialize(GameInstance gi, Class<T> key)
+  public static <T extends StateTracker<T>> T instance(GameInstance gi, Class<T> key)
   {
     if( !gi.stateTrackers.containsKey(key) )
       try
