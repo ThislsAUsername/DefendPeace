@@ -51,14 +51,14 @@ public abstract class UnitState implements Serializable
     CO = other.CO;
     model = other.model;
     isTurnOver = other.isTurnOver;
-    setResourceState(other);
+    copyUnitState(other);
     captureProgress = other.captureProgress;
     captureTarget = other.captureTarget;
 
     heldUnits = new CargoList(model);
     heldUnits.addAll(other.heldUnits);
   }
-  public void setResourceState(UnitState other)
+  public void copyUnitState(UnitState other)
   {
     ammo = other.ammo;
     fuel = other.fuel;
