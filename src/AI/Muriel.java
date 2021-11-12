@@ -453,7 +453,7 @@ public class Muriel implements AIController
         // Sift through all attack actions we can perform.
         double damageValue = AICombatUtils.scoreAttackAction(unit, action, gameMap,
             (results) -> {
-              double hpDamage = Math.min(results.defender.deltaPreciseHP * -1, results.defender.unit.getPreciseHP());
+              double hpDamage = Math.min(results.defender.getPreciseHPDamage(), results.defender.unit.getPreciseHP());
 
               if( shouldAttack(unit, results.defender.unit, gameMap) )
                 return (results.defender.model.getCost() / 10) * hpDamage;

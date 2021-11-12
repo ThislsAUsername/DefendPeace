@@ -31,4 +31,13 @@ public class UnitDelta implements Serializable
     unit = after.unit;
     CO = after.CO;
   }
+
+  public int getHPDamage()
+  {
+    return deltaHP * -1;
+  }
+  public double getPreciseHPDamage()
+  {
+    return deltaPreciseHP * -1;
+  }
 }

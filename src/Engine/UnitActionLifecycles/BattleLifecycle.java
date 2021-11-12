@@ -193,14 +193,13 @@ public abstract class BattleLifecycle
       BattleSummary summary = CombatEngine.simulateBattleResults(attacker, defender, map,
                               moveCoord.xCoord, moveCoord.yCoord);
 
-      int attackerHPLoss = (int) (-10 * summary.attacker.deltaPreciseHP);
-      int defenderHPLoss = (int) (-10 * summary.defender.deltaPreciseHP);
+      int attackerHealthLoss = (int) (10 * summary.attacker.getPreciseHPDamage());
+      int defenderHealthLoss = (int) (10 * summary.defender.getPreciseHPDamage());
       // output any damage done, with the color of the one dealing the damage
-      if( attackerHPLoss > 0 )
-        output.add(new DamagePopup(movePath.getWaypoint(0).GetCoordinates(), defender.CO.myColor, attackerHPLoss + "%"));
-      if( defenderHPLoss > 0 )
-        // grab the two most significant digits and convert to %
-        output.add(new DamagePopup(attackLocation, attacker.CO.myColor, defenderHPLoss + "%"));
+      if( attackerHealthLoss > 0 )
+        output.add(new DamagePopup(movePath.getWaypoint(0).GetCoordinates(), defender.CO.myColor, attackerHealthLoss + "%"));
+      if( defenderHealthLoss > 0 )
+        output.add(new DamagePopup(attackLocation, attacker.CO.myColor, defenderHealthLoss + "%"));
 
       return output;
     }
@@ -411,8 +410,8 @@ public abstract class BattleLifecycle
     public void performEvent(MapMaster gameMap)
     {
       // Apply the battle results that we calculated previously.
-      battleInfo.attacker.unit.setResourceState(battleInfo.attacker.after);
-      battleInfo.defender.unit.setResourceState(battleInfo.defender.after);
+      battleInfo.attacker.unit.copyUnitState(battleInfo.attacker.after);
+      battleInfo.defender.unit.copyUnitState(battleInfo.defender.after);
     }
 
     @Override
