@@ -201,7 +201,7 @@ public class Cinder extends Commander
     }
   }
 
-  private static class WitchFireTracker extends StateTracker<WitchFireTracker>
+  private static class WitchFireTracker extends StateTracker
   {
     private static final long serialVersionUID = 1L;
 

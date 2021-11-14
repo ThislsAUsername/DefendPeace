@@ -10,10 +10,9 @@ import UI.UnitMarker;
  * This class exists to act as a "singleton with respect to a GameInstance".
  * <p>The intended use case is subclasses that track certain activities globally for use in UnitModifiers.
  */
-public abstract class StateTracker<T extends StateTracker<T>> implements GameEventListener, UnitMarker
+public abstract class StateTracker implements GameEventListener, UnitMarker
 {
   private static final long serialVersionUID = 1L;
-  protected Class<T> key;
   protected GameInstance game;
 
   protected StateTracker()
@@ -22,7 +21,7 @@ public abstract class StateTracker<T extends StateTracker<T>> implements GameEve
   /**
    * The external access point for *all* access to instances of this class and its subclasses
    */
-  public static <T extends StateTracker<T>> T instance(GameInstance gi, Class<T> key)
+  public static <T extends StateTracker> T instance(GameInstance gi, Class<T> key)
   {
     if( !gi.stateTrackers.containsKey(key) )
       try
@@ -30,7 +29,6 @@ public abstract class StateTracker<T extends StateTracker<T>> implements GameEve
         Constructor<T> constructor = key.getDeclaredConstructor();
         constructor.setAccessible(true); // Apparently required for dealing with inner classes
         T instance = constructor.newInstance();
-        instance.key = key;
         instance.game = gi;
         gi.stateTrackers.put(key, instance);
         instance.registerForEvents(gi);

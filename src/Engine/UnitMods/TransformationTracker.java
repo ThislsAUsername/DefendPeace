@@ -9,7 +9,7 @@ import Units.UnitModel;
 /**
  * Tracks what type units used to be until their next turn.
  */
-public class TransformationTracker extends StateTracker<TransformationTracker>
+public class TransformationTracker extends StateTracker
 {
   private static final long serialVersionUID = 1L;
 

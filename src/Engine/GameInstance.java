@@ -100,8 +100,8 @@ public class GameInstance implements Serializable
   // WeakHashMap isn't serializable, so we can't use Collections.newSetFromMap(new WeakHashMap<GameEventListener, Boolean>());
   public transient Set<GameEventListener> eventListeners = new HashSet<GameEventListener>();
 
-  public Map<Class<? extends StateTracker<?>>, StateTracker<?>> stateTrackers =
-      new HashMap<Class<? extends StateTracker<?>>, StateTracker<?>>();
+  public Map<Class<? extends StateTracker>, StateTracker> stateTrackers =
+      new HashMap<Class<? extends StateTracker>, StateTracker>();
 
   public int getActiveCOIndex()
   {

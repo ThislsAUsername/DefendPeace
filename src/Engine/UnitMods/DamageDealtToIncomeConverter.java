@@ -12,7 +12,7 @@ import Units.UnitDelta;
  * <p>The amount of income is a fraction of value of the damage that was done;
  * thus, damaging more expensive units will grant more income.
  */
-public class DamageDealtToIncomeConverter extends StateTracker<DamageDealtToIncomeConverter>
+public class DamageDealtToIncomeConverter extends StateTracker
 {
   private static final long serialVersionUID = 1L;
 

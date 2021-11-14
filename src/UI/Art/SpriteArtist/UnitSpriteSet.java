@@ -270,7 +270,7 @@ public class UnitSpriteSet
       ArrayList<UnitMarker> potentialMarkers = new ArrayList<>();
       for( Commander co : COs )
         potentialMarkers.add(co);
-      for( StateTracker<?> st : game.stateTrackers.values() )
+      for( StateTracker st : game.stateTrackers.values() )
         potentialMarkers.add(st);
 
       for( UnitMarker mark : potentialMarkers )

@@ -6,7 +6,7 @@ import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
 import Units.Unit;
 
-public class BuildCountsTracker extends StateTracker<BuildCountsTracker>
+public class BuildCountsTracker extends StateTracker
 {
   private static final long serialVersionUID = 1L;
 
