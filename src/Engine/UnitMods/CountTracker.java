@@ -7,33 +7,35 @@ public class CountTracker<RootKeyType, InstanceKeyType> implements Serializable
 {
   private static final long serialVersionUID = 1L;
 
-  private HashMap<RootKeyType, HashMap<InstanceKeyType, Integer>> buildCounts = new HashMap<>();
+  private HashMap<RootKeyType, HashMap<InstanceKeyType, Integer>> countMap = new HashMap<>();
 
-  public boolean hasCountFor(RootKeyType co)
+  public boolean hasCountFor(RootKeyType root)
   {
-    return buildCounts.containsKey(co);
+    return countMap.containsKey(root);
   }
-  public HashMap<InstanceKeyType, Integer> getCountFor(RootKeyType co)
+  public HashMap<InstanceKeyType, Integer> getCountFor(RootKeyType root)
   {
-    if( !buildCounts.containsKey(co) )
-      buildCounts.put(co, new HashMap<InstanceKeyType, Integer>());
-    return buildCounts.get(co);
+    if( !countMap.containsKey(root) )
+      countMap.put(root, new HashMap<InstanceKeyType, Integer>());
+    return countMap.get(root);
   }
-  public int getCountFor(RootKeyType co, InstanceKeyType coord)
+  public int getCountFor(RootKeyType root, InstanceKeyType key)
   {
-    HashMap<InstanceKeyType, Integer> coCounts = getCountFor(co);
-    if( !coCounts.containsKey(coord) )
-      coCounts.put(coord, 0);
-    return coCounts.get(coord);
+    if( !hasCountFor(root) )
+      return 0;
+    HashMap<InstanceKeyType, Integer> instanceCounts = getCountFor(root);
+    if( !instanceCounts.containsKey(key) )
+      return 0;
+    return instanceCounts.get(key);
   }
-  public void incrementCount(RootKeyType co, InstanceKeyType coord)
+  public void incrementCount(RootKeyType root, InstanceKeyType key)
   {
-    HashMap<InstanceKeyType, Integer> coCounts = getCountFor(co);
-    int prevCount = getCountFor(co, coord);
-    coCounts.put(coord, prevCount + 1);
+    HashMap<InstanceKeyType, Integer> instanceCounts = getCountFor(root);
+    int prevCount = getCountFor(root, key);
+    instanceCounts.put(key, prevCount + 1);
   }
   public void resetCountFor(RootKeyType co)
   {
-    buildCounts.remove(co);
+    countMap.remove(co);
   }
 }
