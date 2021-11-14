@@ -167,24 +167,22 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   {
     return (int) ((uc.costBase)*uc.costMultiplier)+uc.costShift;
   }
-  private UnitContext getCostContext()
+  private UnitContext getCostContext(XYCoord coord)
   {
     UnitContext uc = new UnitContext(this.CO, this);
+    uc.coord = coord;
     for( UnitModifier mod : getModifiers() )
       mod.modifyCost(uc);
     return uc;
   }
   public int getCost()
   {
-    UnitContext uc = getCostContext();
+    UnitContext uc = getCostContext(null);
     return costFrom(uc);
   }
   public int getBuyCost(XYCoord coord)
   {
-    UnitContext uc = getCostContext();
-    uc.coord = coord;
-    for( UnitModifier mod : getModifiers() )
-      mod.modifyBuyCost(uc);
+    UnitContext uc = getCostContext(coord);
     return costFrom(uc);
   }
   // Not adding a Produce overload for now since I don't see a simple way to get consistent results pipelined into the displayed buy cost

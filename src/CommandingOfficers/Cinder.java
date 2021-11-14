@@ -100,9 +100,9 @@ public class Cinder extends Commander
    * the cost of units increases for repeated purchases from a single property.
    */
   @Override
-  public void modifyBuyCost(UnitContext uc)
+  public void modifyCost(UnitContext uc)
   {
-    uc.costShift += buildCounts.getCountFor(this, uc.coord)*PREMIUM_PER_BUILD;
+    uc.costShift += buildCounts.getCountFor(this, uc.coord) * PREMIUM_PER_BUILD;
   }
 
   @Override

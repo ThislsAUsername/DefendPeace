@@ -36,22 +36,17 @@ public interface UnitModifierWithDefaults extends UnitModifier
   }
 
   @Override
+  default void modifyRepairCost(UnitContext uc)
+  {
+  }
+
+  @Override
   default void modifyMovePower(UnitContext uc)
   {
   }
 
   @Override
   default void modifyAttackRange(UnitContext uc)
-  {
-  }
-
-  @Override
-  default void modifyBuyCost(UnitContext uc)
-  {
-  }
-
-  @Override
-  default void modifyRepairCost(UnitContext uc)
   {
   }
 

@@ -72,13 +72,6 @@ public abstract class UnitModFilter implements UnitModifier
   }
 
   @Override
-  public void modifyBuyCost(UnitContext uc)
-  {
-    if( shouldApplyTo(uc) )
-      effect.modifyBuyCost(uc);
-  }
-
-  @Override
   public void modifyRepairCost(UnitContext uc)
   {
     if( shouldApplyTo(uc) )

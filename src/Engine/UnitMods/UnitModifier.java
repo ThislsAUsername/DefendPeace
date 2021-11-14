@@ -39,16 +39,13 @@ public interface UnitModifier extends Serializable
    */
   void modifyUnitDefenseAgainstUnit(BattleParams params);
 
-  /** Should always be called for cost-related calculations */
+  /**
+   * Should always be called for cost-related calculations
+   * <p>Parameter fields may be null, so beware
+   */
   void modifyCost(UnitContext uc);
+  void modifyRepairCost(UnitContext uc);
 
   void modifyMovePower(UnitContext uc);
   void modifyAttackRange(UnitContext uc);
-
-  /** For building from a property */
-  void modifyBuyCost(UnitContext uc);
-  // Not adding a Produce overload for now since I don't see a simple way to get consistent results pipelined into the displayed buy cost
-
-  void modifyRepairCost(UnitContext uc);
-
 }
