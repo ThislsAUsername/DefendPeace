@@ -93,7 +93,7 @@ public class TestCombatMods extends TestCase
     BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 5);
 
     venge.modifyAbilityPower(42); // juice up
-    venge.getReadyAbilities().get(0).activate(testMap); // activate Iron WIll
+    venge.getReadyAbilities().get(0).activate(testMap); // activate Iron Will
 
     // ...and after power
     BattleSummary ironAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 5);
