@@ -3,12 +3,16 @@ package Test;
 import CommandingOfficers.Cinder;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Venge;
+import CommandingOfficers.Modifiers.CODamageModifier;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
+import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.ResupplyEvent;
 import Engine.UnitActionLifecycles.BattleLifecycle;
+import Engine.UnitMods.DamageDealtToIncomeConverter;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -42,6 +46,7 @@ public class TestCombatMods extends TestCase
     testPassed &= validate(testBasicMod(), "  Basic combat mod test failed.");
     testPassed &= validate(testIronWill(), "  Venge's Iron Will combat mod test failed.");
     testPassed &= validate(testRetribution(), "  Venge's Retribution combat mod test failed.");
+    testPassed &= validate(testDamageDealtToIncomeConverter(), "  DamageDealtToIncomeConverter test failed.");
 
     return testPassed;
   }
@@ -53,11 +58,11 @@ public class TestCombatMods extends TestCase
     Unit infActive = addUnit(testMap, cinder, UnitModel.TROOP, 7, 3);
     infActive.initTurn(testMap); // Make sure he is ready to move.
     Unit infPassive = addUnit(testMap, cinder, UnitModel.TROOP, 7, 5);
-    
+
     // We need a victim and an angry man to avenge him
     Unit bait = addUnit(testMap, venge, UnitModel.TRANSPORT, 7, 4);
     Unit meaty = addUnit(testMap, venge, UnitModel.ASSAULT, 8, 4);
-    
+
     // Poke the bear...
     performGameAction(new BattleLifecycle.BattleAction(testMap, infActive, Utils.findShortestPath(infActive, 7, 3, testMap), 7, 4), testGame);
 
@@ -67,7 +72,7 @@ public class TestCombatMods extends TestCase
     // ...and defense
     BattleSummary vengefulCounter = CombatEngine.simulateBattleResults(infActive, meaty, testMap, 8, 3);
     BattleSummary normalCounter = CombatEngine.simulateBattleResults(infPassive, meaty, testMap, 8, 5);
-    
+
     // Check that Venge's passive ability works on both attack and defense
     boolean testPassed = validate(vengeful.defender.deltaHP < normal.defender.deltaHP, "    Being angry didn't help Venge attack extra hard.");
     testPassed &= validate(vengefulCounter.attacker.deltaHP < normalCounter.attacker.deltaHP, "    Being angry didn't help Venge defend extra hard.");
@@ -158,4 +163,84 @@ public class TestCombatMods extends TestCase
 
     return testPassed;
   }
+
+  private boolean testDamageDealtToIncomeConverter()
+  {
+    boolean testPassed = true; // Assume nothin's busted
+    DamageDealtToIncomeConverter ddtic = DamageDealtToIncomeConverter.instance(testGame, DamageDealtToIncomeConverter.class);
+
+    Unit aa = addUnit(testMap, cinder, UnitModel.SURFACE_TO_AIR, 7, 3);
+    // juice aa to be extra angry and get overkills
+    aa.alterHP(10, true);
+    aa.addUnitModifier(new CODamageModifier(42));
+
+    int currentFundsReturn = 0;
+    // Get lots of free money, and make sure we get the right amount
+    for( int i = 0; i < 100; ++i )
+    {
+      currentFundsReturn += i;
+      ddtic.startTracking(cinder, i);
+      cinder.money = 0;
+
+      // give aa ammo
+      aa.isTurnOver = false;
+      ResupplyEvent event = new ResupplyEvent(null, aa);
+      event.performEvent( testGame.gameMap );
+      GameEventListener.publishEvent(event, testGame);
+
+      // Add the victim, and yeet him
+      addUnit(testMap, venge, UnitModel.TROOP, 7, 4);
+      performGameAction(new BattleLifecycle.BattleAction(testMap, aa, Utils.findShortestPath(aa, 7, 3, testMap), 7, 4), testGame);
+
+      testPassed &= validate(cinder.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.money+" instead.");
+    }
+    // Remove those amounts, and make sure that works
+    for( int i = 0; i < 55; ++i )
+    {
+      currentFundsReturn -= i;
+      ddtic.stopTracking(cinder, i);
+      ddtic.stopTracking(cinder, i); // Remove twice, just to be sure
+      cinder.money = 0;
+
+      // give aa ammo
+      aa.isTurnOver = false;
+      ResupplyEvent event = new ResupplyEvent(null, aa);
+      event.performEvent( testGame.gameMap );
+      GameEventListener.publishEvent(event, testGame);
+
+      // Add the victim, and yeet him
+      addUnit(testMap, venge, UnitModel.TROOP, 7, 4);
+      performGameAction(new BattleLifecycle.BattleAction(testMap, aa, Utils.findShortestPath(aa, 7, 3, testMap), 7, 4), testGame);
+
+      testPassed &= validate(cinder.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.money+" instead.");
+    }
+    // Do the second half backwards, for giggles
+    for( int i = 99; i > 42; --i )
+    {
+      currentFundsReturn -= i;
+      if( currentFundsReturn < 0 )
+        currentFundsReturn = 0;
+      ddtic.stopTracking(cinder, i);
+      ddtic.stopTracking(cinder, i); // Remove twice, just to be sure
+      cinder.money = 0;
+
+      // give aa ammo
+      aa.isTurnOver = false;
+      ResupplyEvent event = new ResupplyEvent(null, aa);
+      event.performEvent( testGame.gameMap );
+      GameEventListener.publishEvent(event, testGame);
+
+      // Add the victim, and yeet him
+      addUnit(testMap, venge, UnitModel.TROOP, 7, 4);
+      performGameAction(new BattleLifecycle.BattleAction(testMap, aa, Utils.findShortestPath(aa, 7, 3, testMap), 7, 4), testGame);
+
+      testPassed &= validate(cinder.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.money+" instead.");
+    }
+
+    // Clean up
+    testMap.removeUnit(aa);
+
+    return testPassed;
+  }
+
 }
