@@ -196,6 +196,6 @@ public class UnitContext extends UnitState
   @Override
   public String toString()
   {
-    return model.name;
+    return "Context for "+model.name+" at "+coord+", using weapon "+weapon;
   }
 }
