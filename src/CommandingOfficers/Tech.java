@@ -129,9 +129,13 @@ public class Tech extends Commander
   /** Heal all units by the specified amount, allowing HP>10, and provide a buff. */
   private static class OverchargeAbility extends CommanderAbility
   {
+    private static final long serialVersionUID = 1L;
+
     private int buff;
     private int healAmount;
     private HashMap<Commander, ArrayList<Unit>> unitsOverCharged = new HashMap<Commander, ArrayList<Unit>>();
+    UnitTypeFilter damageBuff = null;
+    UnitModifier defenseBuff = null;
 
     public OverchargeAbility(Tech tech, String abilityName, double abilityCost, int buff, int healAmt)
     {
@@ -141,17 +145,16 @@ public class Tech extends Commander
       healAmount = healAmt;
 
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
-    }
 
-    private static final long serialVersionUID = 1L;
+      // Only mechanical/non-troop units get the firepower boost.
+      damageBuff = new UnitTypeFilter(new UnitDamageModifier(buff));
+      damageBuff.noneOf = UnitModel.TROOP;
+      defenseBuff = new UnitDefenseModifier(this.buff);
+    }
 
     @Override
     protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      // Only mechanical/non-troop units get the firepower boost.
-      UnitTypeFilter damageBuff = new UnitTypeFilter(new UnitDamageModifier(buff));
-      damageBuff.noneOf = UnitModel.TROOP;
-      UnitModifier defenseBuff = new UnitDefenseModifier(buff);
       modList.add(damageBuff);
       modList.add(defenseBuff);
     }
@@ -193,7 +196,6 @@ public class Tech extends Commander
   }
 
   /** Drop a BattleMech onto the most contested point on the battlefront. */
-  // TODO: Should this really drop mechs for every CO it affects?
   private static class TechdropAbility extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
@@ -203,6 +205,8 @@ public class Tech extends Commander
     private int dropRange;
     private int numDrops;
     private UnitModel unitModelToDrop;
+    UnitTypeFilter damageBuff = null;
+    UnitModifier defenseBuff = null;
 
     TechdropAbility(Tech tech, String abilityName, double abilityCost, UnitModel unitToDrop, int buff, int num, int abilityRange)
     {
@@ -213,15 +217,16 @@ public class Tech extends Commander
       this.buff = buff;
       numDrops = num;
       dropRange = abilityRange;
+
+      // Only mechanical/non-troop units get the firepower boost.
+      damageBuff = new UnitTypeFilter(new UnitDamageModifier(buff));
+      damageBuff.noneOf = UnitModel.TROOP;
+      defenseBuff = new UnitDefenseModifier(this.buff);
     }
 
     @Override
     protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      // Only mechanical/non-troop units get the firepower boost.
-      UnitTypeFilter damageBuff = new UnitTypeFilter(new UnitDamageModifier(buff));
-      damageBuff.noneOf = UnitModel.TROOP;
-      UnitModifier defenseBuff = new UnitDefenseModifier(buff);
       modList.add(damageBuff);
       modList.add(defenseBuff);
     }

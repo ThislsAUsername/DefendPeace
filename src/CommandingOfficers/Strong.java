@@ -119,26 +119,31 @@ public class Strong extends Commander
     private static final int STRONGARM_COST = 4;
     private static final int STRONGARM_BUFF = 10;
     private static final int STRONGARM_FOOT_BUFF = 20; // On top of STONGARM_BUFF
+    UnitModifier damageMod = null;
+    UnitModifier defenseMod = null;
+    UnitTypeFilter damageModTroop = null;
+    UnitTypeFilter moveMod = null;
 
     StrongArmAbility(Strong strong)
     {
       super(strong, STRONGARM_NAME, STRONGARM_COST);
+
+      damageMod = new UnitDamageModifier(STRONGARM_BUFF);
+      defenseMod = new UnitDefenseModifier(STRONGARM_BUFF);
+      damageModTroop = new UnitTypeFilter(new UnitDamageModifier(STRONGARM_FOOT_BUFF));
+      damageModTroop.allOf = UnitModel.TROOP;
+
+      // Grant troops and transports additional movement power.
+      moveMod = new UnitTypeFilter(new UnitMovementModifier(2));
+      moveMod.oneOf = UnitModel.TROOP | UnitModel.TRANSPORT;
     }
 
     @Override
     protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      UnitModifier damageMod = new UnitDamageModifier(STRONGARM_BUFF);
-      UnitModifier defenseMod = new UnitDefenseModifier(STRONGARM_BUFF);
-      UnitTypeFilter damageModTroop = new UnitTypeFilter(new UnitDamageModifier(STRONGARM_FOOT_BUFF));
-      damageModTroop.allOf = UnitModel.TROOP;
       modList.add(damageMod);
       modList.add(defenseMod);
       modList.add(damageModTroop);
-
-      // Grant troops and transports additional movement power.
-      UnitTypeFilter moveMod = new UnitTypeFilter(new UnitMovementModifier(2));
-      moveMod.oneOf = UnitModel.TROOP | UnitModel.TRANSPORT;
       modList.add(moveMod);
     }
 
@@ -180,24 +185,27 @@ public class Strong extends Commander
     private static final int MOBILIZE_COST = 8;
     private static final int MOBILIZE_BUFF = 40;
     private static final int MOBILIZE_DEFENSE_BUFF = 10;
+    UnitModifier damageMod = null;
+    UnitModifier defenseMod = null;
+    UnitModifier moveMod = null;
 
     MobilizeAbility(Strong strong)
     {
       super(strong, MOBILIZE_NAME, MOBILIZE_COST);
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
+      // Grant the base firepower/defense bonus.
+      damageMod = new UnitDamageModifier(MOBILIZE_BUFF);
+      defenseMod = new UnitDefenseModifier(MOBILIZE_DEFENSE_BUFF);
+
+      // Grant a global +2 movement buff.
+      moveMod = new UnitMovementModifier(2);
     }
 
     @Override
     protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      // Grant the base firepower/defense bonus.
-      UnitModifier damageMod = new UnitDamageModifier(MOBILIZE_BUFF);
-      UnitModifier defenseMod = new UnitDefenseModifier(MOBILIZE_DEFENSE_BUFF);
       modList.add(damageMod);
       modList.add(defenseMod);
-
-      // Grant a global +2 movement buff.
-      UnitMovementModifier moveMod = new UnitMovementModifier(2);
       modList.add(moveMod);
     }
 
