@@ -1,6 +1,6 @@
 package Engine.UnitMods;
 
-import CommandingOfficers.Modifiers.COIndirectRangeModifier;
+import CommandingOfficers.Modifiers.UnitIndirectRangeModifier;
 import Terrain.Environment.Weathers;
 import Units.UnitContext;
 
@@ -10,7 +10,7 @@ public class SandstormModifier extends UnitModFilter
 
   public SandstormModifier()
   {
-    super(new COIndirectRangeModifier(-1));
+    super(new UnitIndirectRangeModifier(-1));
   }
 
   @Override

@@ -8,7 +8,7 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.Stack;
 
-import CommandingOfficers.Modifiers.CODamageModifier;
+import CommandingOfficers.Modifiers.UnitDamageModifier;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
@@ -475,7 +475,7 @@ public class Ave extends Commander
     {
       super(commander, NIX_NAME, NIX_COST);
       coCast = commander;
-      damageMod = new CODamageModifier(NIX_BUFF);
+      damageMod = new UnitDamageModifier(NIX_BUFF);
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
     }
 
@@ -547,7 +547,7 @@ public class Ave extends Commander
     {
       super(commander, GLACIO_NAME, GLACIO_COST);
       coCast = commander;
-      damageMod = new CODamageModifier(GLACIO_BUFF);
+      damageMod = new UnitDamageModifier(GLACIO_BUFF);
       AIFlags = PHASE_TURN_END;
     }
 
@@ -647,7 +647,7 @@ public class Ave extends Commander
     {
       super(commander, OBLIDO_NAME, OBLIDO_COST);
       Ave = commander;
-      damageMod = new CODamageModifier(OBLIDO_BUFF);
+      damageMod = new UnitDamageModifier(OBLIDO_BUFF);
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
     }
 

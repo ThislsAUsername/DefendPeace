@@ -11,8 +11,8 @@ import java.util.Set;
 
 import AI.AICombatUtils;
 import AI.AIUtils;
-import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.CODefenseModifier;
+import CommandingOfficers.Modifiers.UnitDamageModifier;
+import CommandingOfficers.Modifiers.UnitDefenseModifier;
 import CommandingOfficers.Modifiers.UnitTypeFilter;
 import Engine.GameAction.UnitSpawnAction;
 import Engine.GameScenario;
@@ -149,9 +149,9 @@ public class Tech extends Commander
     protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       // Only mechanical/non-troop units get the firepower boost.
-      UnitTypeFilter damageBuff = new UnitTypeFilter(new CODamageModifier(buff));
+      UnitTypeFilter damageBuff = new UnitTypeFilter(new UnitDamageModifier(buff));
       damageBuff.noneOf = UnitModel.TROOP;
-      UnitModifier defenseBuff = new CODefenseModifier(buff);
+      UnitModifier defenseBuff = new UnitDefenseModifier(buff);
       modList.add(damageBuff);
       modList.add(defenseBuff);
     }
@@ -219,9 +219,9 @@ public class Tech extends Commander
     protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       // Only mechanical/non-troop units get the firepower boost.
-      UnitTypeFilter damageBuff = new UnitTypeFilter(new CODamageModifier(buff));
+      UnitTypeFilter damageBuff = new UnitTypeFilter(new UnitDamageModifier(buff));
       damageBuff.noneOf = UnitModel.TROOP;
-      UnitModifier defenseBuff = new CODefenseModifier(buff);
+      UnitModifier defenseBuff = new UnitDefenseModifier(buff);
       modList.add(damageBuff);
       modList.add(defenseBuff);
     }

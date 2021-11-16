@@ -3,7 +3,7 @@ package Test;
 import CommandingOfficers.Cinder;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Venge;
-import CommandingOfficers.Modifiers.CODamageModifier;
+import CommandingOfficers.Modifiers.UnitDamageModifier;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
@@ -172,7 +172,7 @@ public class TestCombatMods extends TestCase
     Unit aa = addUnit(testMap, cinder, UnitModel.SURFACE_TO_AIR, 7, 3);
     // juice aa to be extra angry and get overkills
     aa.alterHP(10, true);
-    aa.addUnitModifier(new CODamageModifier(42));
+    aa.addUnitModifier(new UnitDamageModifier(42));
 
     int currentFundsReturn = 0;
     // Get lots of free money, and make sure we get the right amount

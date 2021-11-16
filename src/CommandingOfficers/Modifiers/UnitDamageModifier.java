@@ -3,12 +3,12 @@ package CommandingOfficers.Modifiers;
 import Engine.Combat.StrikeParams;
 import Engine.UnitMods.UnitModifierWithDefaults;
 
-public class CODamageModifier implements UnitModifierWithDefaults
+public class UnitDamageModifier implements UnitModifierWithDefaults
 {
   private static final long serialVersionUID = 1L;
   private int attackModifier = 0;
 
-  public CODamageModifier(int firepowerChange)
+  public UnitDamageModifier(int firepowerChange)
   {
     attackModifier = firepowerChange;
   }

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
-import CommandingOfficers.Modifiers.COMovementModifier;
+import CommandingOfficers.Modifiers.UnitMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import CommandingOfficers.Modifiers.UnitRemodelModifier;
 import Engine.GameScenario;
@@ -55,7 +55,7 @@ public class TestCOModifier extends TestCase
     
     // Apply a movement modifier and re-check.
     int MOVEMOD = 3;
-    COMovementModifier moveMod = new COMovementModifier(MOVEMOD);
+    UnitMovementModifier moveMod = new UnitMovementModifier(MOVEMOD);
     inf.addUnitModifier(moveMod);
     int newMove = inf.getMovePower();
     testPassed &= validate( (newMove - startMove) == MOVEMOD, "    Movement modifier did not apply as expected!");

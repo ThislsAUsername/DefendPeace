@@ -2,8 +2,8 @@ package CommandingOfficers;
 
 import java.util.ArrayList;
 
-import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.CODefenseModifier;
+import CommandingOfficers.Modifiers.UnitDamageModifier;
+import CommandingOfficers.Modifiers.UnitDefenseModifier;
 import CommandingOfficers.Modifiers.UnitInstanceFilter;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
@@ -255,8 +255,8 @@ public class Venge extends Commander
     Retribution(Venge venge)
     {
       super(venge, NAME, COST);
-      damageMod = new CODamageModifier(RETRIBUTION_BUFF);
-      defenseMod = new CODefenseModifier(-RETRIBUTION_NERF);
+      damageMod = new UnitDamageModifier(RETRIBUTION_BUFF);
+      defenseMod = new UnitDefenseModifier(-RETRIBUTION_NERF);
     }
 
     @Override

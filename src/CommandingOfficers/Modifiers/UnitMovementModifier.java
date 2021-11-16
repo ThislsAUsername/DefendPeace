@@ -3,17 +3,17 @@ package CommandingOfficers.Modifiers;
 import Engine.UnitMods.UnitModifierWithDefaults;
 import Units.UnitContext;
 
-public class COMovementModifier implements UnitModifierWithDefaults
+public class UnitMovementModifier implements UnitModifierWithDefaults
 {
   private static final long serialVersionUID = 1L;
   private int rangeChange;
 
-  public COMovementModifier()
+  public UnitMovementModifier()
   {
     this(1);
   }
 
-  public COMovementModifier(int range)
+  public UnitMovementModifier(int range)
   {
     rangeChange = range;
   }

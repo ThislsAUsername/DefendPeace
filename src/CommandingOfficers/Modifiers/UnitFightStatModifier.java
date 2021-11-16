@@ -7,12 +7,12 @@ import Engine.UnitMods.UnitModifierWithDefaults;
 /**
  * Boosts attack and defense in equal measure
  */
-public class COFightStatModifier implements UnitModifierWithDefaults
+public class UnitFightStatModifier implements UnitModifierWithDefaults
 {
   private static final long serialVersionUID = 1L;
   private int modifier = 0;
 
-  public COFightStatModifier(int percentChange)
+  public UnitFightStatModifier(int percentChange)
   {
     modifier = percentChange;
   }

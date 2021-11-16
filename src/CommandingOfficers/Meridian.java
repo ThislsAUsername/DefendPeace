@@ -2,7 +2,7 @@ package CommandingOfficers;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import CommandingOfficers.Modifiers.COFightStatModifier;
+import CommandingOfficers.Modifiers.UnitFightStatModifier;
 import CommandingOfficers.Modifiers.UnitInstanceFilter;
 import Engine.GameInstance;
 import Engine.GameScenario;
@@ -92,7 +92,7 @@ public class Meridian extends Commander
     private static final int COST = 4;
     private static final int BASIC_BUFF = 10;
     
-    COFightStatModifier baseMod = new COFightStatModifier(BASIC_BUFF);
+    UnitFightStatModifier baseMod = new UnitFightStatModifier(BASIC_BUFF);
     TransformationTracker tracker;
 
     ChangeAndFlow(Meridian meridian)
@@ -161,8 +161,8 @@ public class Meridian extends Commander
     private static final int BASIC_BUFF = 10;
     private final ArrayList<Unit> debuffedUnits = new ArrayList<Unit>();
 
-    COFightStatModifier baseMod = new COFightStatModifier(BASIC_BUFF);
-    COFightStatModifier debuffMod = new COFightStatModifier(POST_REFRESH_STAT_ADJUSTMENT);
+    UnitFightStatModifier baseMod = new UnitFightStatModifier(BASIC_BUFF);
+    UnitFightStatModifier debuffMod = new UnitFightStatModifier(POST_REFRESH_STAT_ADJUSTMENT);
 
     VehicularCharge(Meridian meridian)
     {

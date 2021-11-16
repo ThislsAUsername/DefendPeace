@@ -3,9 +3,9 @@ package CommandingOfficers;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.CODefenseModifier;
-import CommandingOfficers.Modifiers.COMovementModifier;
+import CommandingOfficers.Modifiers.UnitDamageModifier;
+import CommandingOfficers.Modifiers.UnitDefenseModifier;
+import CommandingOfficers.Modifiers.UnitMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import CommandingOfficers.Modifiers.UnitTypeFilter;
 import Engine.GameScenario;
@@ -128,16 +128,16 @@ public class Strong extends Commander
     @Override
     protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      UnitModifier damageMod = new CODamageModifier(STRONGARM_BUFF);
-      UnitModifier defenseMod = new CODefenseModifier(STRONGARM_BUFF);
-      UnitTypeFilter damageModTroop = new UnitTypeFilter(new CODamageModifier(STRONGARM_FOOT_BUFF));
+      UnitModifier damageMod = new UnitDamageModifier(STRONGARM_BUFF);
+      UnitModifier defenseMod = new UnitDefenseModifier(STRONGARM_BUFF);
+      UnitTypeFilter damageModTroop = new UnitTypeFilter(new UnitDamageModifier(STRONGARM_FOOT_BUFF));
       damageModTroop.allOf = UnitModel.TROOP;
       modList.add(damageMod);
       modList.add(defenseMod);
       modList.add(damageModTroop);
 
       // Grant troops and transports additional movement power.
-      UnitTypeFilter moveMod = new UnitTypeFilter(new COMovementModifier(2));
+      UnitTypeFilter moveMod = new UnitTypeFilter(new UnitMovementModifier(2));
       moveMod.oneOf = UnitModel.TROOP | UnitModel.TRANSPORT;
       modList.add(moveMod);
     }
@@ -191,13 +191,13 @@ public class Strong extends Commander
     protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       // Grant the base firepower/defense bonus.
-      UnitModifier damageMod = new CODamageModifier(MOBILIZE_BUFF);
-      UnitModifier defenseMod = new CODefenseModifier(MOBILIZE_DEFENSE_BUFF);
+      UnitModifier damageMod = new UnitDamageModifier(MOBILIZE_BUFF);
+      UnitModifier defenseMod = new UnitDefenseModifier(MOBILIZE_DEFENSE_BUFF);
       modList.add(damageMod);
       modList.add(defenseMod);
 
       // Grant a global +2 movement buff.
-      COMovementModifier moveMod = new COMovementModifier(2);
+      UnitMovementModifier moveMod = new UnitMovementModifier(2);
       modList.add(moveMod);
     }
 

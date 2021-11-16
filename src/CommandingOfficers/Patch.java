@@ -1,7 +1,7 @@
 package CommandingOfficers;
 
 import java.util.ArrayList;
-import CommandingOfficers.Modifiers.CODamageModifier;
+import CommandingOfficers.Modifiers.UnitDamageModifier;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.GameEvents.GameEventListener;
@@ -116,7 +116,7 @@ public class Patch extends Commander
   private static class PatchAbility extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
-    private CODamageModifier damageBuff = null;
+    private UnitDamageModifier damageBuff = null;
     private final double myIncomeRatio;
     private DamageDealtToIncomeConverter tracker;
 
@@ -127,7 +127,7 @@ public class Patch extends Commander
       myIncomeRatio = incomeRatio;
 
       // Create a COModifier that we can apply to Patch when needed.
-      damageBuff = new CODamageModifier(unitBuff);
+      damageBuff = new UnitDamageModifier(unitBuff);
     }
     @Override
     public void initForGame(GameInstance game)
