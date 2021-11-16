@@ -45,11 +45,13 @@ public class TestStateTracker extends TestCase
     int currentTrackers = testGame.stateTrackers.keySet().size();
     testPassed &= validate(currentTrackers == 2, "    Expected 2 trackers, but the game has "+currentTrackers+" instead.");
 
+    Object og = DamageDealtToIncomeConverter.instance(testGame, DamageDealtToIncomeConverter.class);
     for( int i = 0; i < 10; ++i )
     {
-      DamageDealtToIncomeConverter.instance(testGame, DamageDealtToIncomeConverter.class);
+      Object thing2 = DamageDealtToIncomeConverter.instance(testGame, DamageDealtToIncomeConverter.class);
       currentTrackers = testGame.stateTrackers.keySet().size();
       testPassed &= validate(currentTrackers == 3, "    Expected 3 trackers, but the game has "+currentTrackers+" instead.");
+      testPassed &= validate(thing2 == og, "    New tracker != original tracker.");
     }
 
     return testPassed;
