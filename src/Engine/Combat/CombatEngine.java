@@ -3,6 +3,7 @@ package Engine.Combat;
 import java.util.HashMap;
 import java.util.Map;
 import Engine.GamePath;
+import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.UnitActionLifecycles.BattleLifecycle.BattleEvent;
@@ -33,8 +34,9 @@ public class CombatEngine
    */
   public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, int attackerX, int attackerY )
   {
-    UnitContext attackerContext = new UnitContext(map, attacker, null, attackerX, attackerY );
-    UnitContext defenderContext = new UnitContext(map, defender, null, defender.x, defender.y );
+    XYCoord dest = new XYCoord(attackerX, attackerY);
+    UnitContext attackerContext = new UnitContext(map, attacker, null, Utils.findShortestPath(attacker, dest, map), dest);
+    UnitContext defenderContext = new UnitContext(map, defender, null, null, new XYCoord(defender.x, defender.y));
     return calculateBattleResults(attackerContext, defenderContext, map, true);
   }
   public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, XYCoord moveCoord )
@@ -109,11 +111,12 @@ public class CombatEngine
 
   public static double calculateOneStrikeDamage( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
   {
-    UnitContext attackerContext = new UnitContext(map, attacker, null, attacker.x, attacker.y);
+    XYCoord dest = new XYCoord(attacker);
+    UnitContext attackerContext = new UnitContext(map, attacker, null, Utils.findShortestPath(attacker, dest, map), dest);
     attackerContext.chooseWeapon(defender.model, battleRange, attackerMoved);
     return StrikeParams.buildBattleParams(
         attackerContext,
-        new UnitContext(map, defender, null, defender.x, defender.y),
+        new UnitContext(map, defender),
         map, battleRange,
         false).calculateDamage();
   }

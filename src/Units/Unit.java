@@ -83,7 +83,7 @@ public class Unit extends UnitState implements UnitModList
   /** Provides the authoritative/actual move power of the unit in question */
   public int getMovePower(GameMap map)
   {
-    return getMovePower(new UnitContext(map, this, null, x, y));
+    return getMovePower(new UnitContext(map, this));
   }
   public static int getMovePower(UnitContext uc)
   {
@@ -94,7 +94,7 @@ public class Unit extends UnitState implements UnitModList
 
   public UnitContext getRangeContext(GameMap map, WeaponModel weapon)
   {
-    return new UnitContext(map, this, weapon, x, y);
+    return new UnitContext(map, this, weapon);
   }
 
   /**

@@ -81,7 +81,7 @@ public class AICombatUtils
       {
         if( !wep.canFireAfterMoving )
         {
-          UnitContext uc = new UnitContext(gameMap, unit, wep, origin.xCoord, origin.yCoord);
+          UnitContext uc = new UnitContext(gameMap, unit, wep, null, origin);
           for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, uc))
           {
             double val = damage;
@@ -145,7 +145,7 @@ public class AICombatUtils
         // is mobile or we don't care if it's mobile (because we aren't moving).
         if( wpn.loaded(unit) && (!moved || wpn.canFireAfterMoving) )
         {
-          UnitContext uc = new UnitContext(gameMap, unit, wpn, move.xCoord, move.yCoord);
+          UnitContext uc = new UnitContext(gameMap, unit, wpn, Utils.findShortestPath(unit, move, gameMap), move);
           ArrayList<XYCoord> locations = Utils.findTargetsInRange(gameMap, uc, includeTerrain);
           targetLocs.addAll(locations);
         }

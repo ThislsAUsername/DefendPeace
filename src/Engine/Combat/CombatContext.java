@@ -6,9 +6,7 @@ import java.util.List;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
-import Units.Unit;
 import Units.UnitContext;
-import Units.WeaponModel;
 
 /**
  * CombatContext exists to allow COs to modify the fundamental parameters of an instance of combat.
@@ -19,24 +17,6 @@ public class CombatContext
   public final GameMap gameMap; // for reference, not weirdness
   public boolean canCounter = false;
   public int battleRange;
-
-  public static CombatContext build(GameMap map,
-      Unit pAttacker, WeaponModel attackerWep, List<UnitModifier> attackerMods,
-      Unit pDefender, WeaponModel defenderWep, List<UnitModifier> defenderMods,
-      int pBattleRange, int attackerX, int attackerY)
-  {
-    CombatContext c = new CombatContext(map,
-        new UnitContext(map, pAttacker, attackerWep, attackerX, attackerY),
-        new UnitContext(map, pDefender, defenderWep, pDefender.x, pDefender.y),
-        pBattleRange);
-    c.attacker.mods.clear();
-    c.attacker.mods.addAll(attackerMods);
-    c.defender.mods.clear();
-    c.defender.mods.addAll(defenderMods);
-
-    c.applyModifiers();
-    return c;
-  }
 
   public static CombatContext build(GameMap map,
                                     UnitContext pAttacker,
