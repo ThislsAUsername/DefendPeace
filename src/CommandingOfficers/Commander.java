@@ -96,18 +96,15 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     myAbilities = new ArrayList<CommanderAbility>();
   }
 
-  @Override
-  public void registerForEvents(GameInstance game)
+  public void initForGame(GameInstance game)
   {
-    GameEventListener.super.registerForEvents(game);
+    this.registerForEvents(game);
     for( CommanderAbility ca : myAbilities )
       ca.initForGame(game);
   }
-
-  @Override
-  public void unregister(GameInstance game)
+  public void deInitForGame(GameInstance game)
   {
-    GameEventListener.super.unregister(game);
+    this.unregister(game);
     if( null != myActiveAbility )
       myActiveAbility.deactivate(game.gameMap);
     for( CommanderAbility ca : myAbilities )

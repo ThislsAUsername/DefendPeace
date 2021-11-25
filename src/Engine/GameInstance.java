@@ -86,7 +86,7 @@ public class GameInstance implements Serializable
         System.out.println("Warning! Commander " + commanders[i].coInfo.name + " does not have an HQ location!");
         playerCursors.put(i, new XYCoord(1, 1));
       }
-      GameEventListener.registerEventListener(commanders[i], this);
+      commanders[i].initForGame(this);
     }
     
     saveFile = getSaveName();

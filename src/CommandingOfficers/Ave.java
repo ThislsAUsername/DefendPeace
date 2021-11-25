@@ -136,16 +136,16 @@ public class Ave extends Commander
   }
 
   @Override
-  public void registerForEvents(GameInstance game)
+  public void initForGame(GameInstance game)
   {
-    super.registerForEvents(game);
+    super.initForGame(game);
     snowifier = new CitySnowifier(this);
     snowifier.registerForEvents(game);
   }
   @Override
-  public void unregister(GameInstance game)
+  public void deInitForGame(GameInstance game)
   {
-    super.unregister(game);
+    super.deInitForGame(game);
     snowifier.unregister(game);
   }
 

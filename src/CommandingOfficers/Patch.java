@@ -66,17 +66,17 @@ public class Patch extends Commander
   }
 
   @Override
-  public void registerForEvents(GameInstance game)
+  public void initForGame(GameInstance game)
   {
-    super.registerForEvents(game);
+    super.initForGame(game);
     // Passive - Loot
     myLootAbility = new LootAbility(this);
     myLootAbility.registerForEvents(game);
   }
   @Override
-  public void unregister(GameInstance game)
+  public void deInitForGame(GameInstance game)
   {
-    super.unregister(game);
+    super.deInitForGame(game);
     myLootAbility.unregister(game);
   }
 
