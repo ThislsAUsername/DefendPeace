@@ -1,9 +1,7 @@
-package CommandingOfficers.Modifiers;
+package Engine.UnitMods;
 
 import java.util.ArrayList;
 
-import Engine.UnitMods.UnitModFilter;
-import Engine.UnitMods.UnitModifier;
 import Units.Unit;
 import Units.UnitContext;
 

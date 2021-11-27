@@ -2,9 +2,6 @@ package CommandingOfficers;
 
 import java.util.ArrayList;
 
-import CommandingOfficers.Modifiers.UnitDamageModifier;
-import CommandingOfficers.Modifiers.UnitDefenseModifier;
-import CommandingOfficers.Modifiers.UnitInstanceFilter;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
@@ -12,6 +9,9 @@ import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatContext;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
+import Engine.UnitMods.UnitDamageModifier;
+import Engine.UnitMods.UnitDefenseModifier;
+import Engine.UnitMods.UnitInstanceFilter;
 import Engine.UnitMods.UnitModifier;
 import Engine.UnitMods.UnitModifierWithDefaults;
 import Terrain.MapMaster;

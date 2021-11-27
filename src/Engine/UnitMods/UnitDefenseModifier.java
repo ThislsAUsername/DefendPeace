@@ -1,7 +1,6 @@
-package CommandingOfficers.Modifiers;
+package Engine.UnitMods;
 
 import Engine.Combat.StrikeParams.BattleParams;
-import Engine.UnitMods.UnitModifierWithDefaults;
 
 public class UnitDefenseModifier implements UnitModifierWithDefaults
 {

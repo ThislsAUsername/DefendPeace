@@ -1,7 +1,5 @@
-package CommandingOfficers.Modifiers;
+package Engine.UnitMods;
 
-import Engine.UnitMods.UnitModFilter;
-import Engine.UnitMods.UnitModifier;
 import Units.UnitContext;
 
 public class UnitTypeFilter extends UnitModFilter

@@ -8,7 +8,6 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.Stack;
 
-import CommandingOfficers.Modifiers.UnitDamageModifier;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
@@ -20,6 +19,7 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
 import Engine.GameEvents.MassDamageEvent;
+import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitModifier;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;

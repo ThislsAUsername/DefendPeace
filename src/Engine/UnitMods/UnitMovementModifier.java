@@ -1,6 +1,5 @@
-package CommandingOfficers.Modifiers;
+package Engine.UnitMods;
 
-import Engine.UnitMods.UnitModifierWithDefaults;
 import Units.UnitContext;
 
 public class UnitMovementModifier implements UnitModifierWithDefaults

@@ -3,14 +3,14 @@ package CommandingOfficers;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import CommandingOfficers.Modifiers.UnitDamageModifier;
-import CommandingOfficers.Modifiers.UnitDefenseModifier;
-import CommandingOfficers.Modifiers.UnitMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
-import CommandingOfficers.Modifiers.UnitTypeFilter;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams.BattleParams;
+import Engine.UnitMods.UnitDamageModifier;
+import Engine.UnitMods.UnitDefenseModifier;
 import Engine.UnitMods.UnitModifier;
+import Engine.UnitMods.UnitMovementModifier;
+import Engine.UnitMods.UnitTypeFilter;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;

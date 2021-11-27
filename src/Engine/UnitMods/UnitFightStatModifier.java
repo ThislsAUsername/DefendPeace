@@ -1,8 +1,7 @@
-package CommandingOfficers.Modifiers;
+package Engine.UnitMods;
 
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
-import Engine.UnitMods.UnitModifierWithDefaults;
 
 /**
  * Boosts attack and defense in equal measure

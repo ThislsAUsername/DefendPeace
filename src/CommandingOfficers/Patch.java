@@ -1,12 +1,13 @@
 package CommandingOfficers;
 
 import java.util.ArrayList;
-import CommandingOfficers.Modifiers.UnitDamageModifier;
+
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
-import Engine.UnitMods.DamageDealtToIncomeConverter;
+import Engine.StateTrackers.DamageDealtToIncomeConverter;
+import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitModifier;
 import Terrain.MapLocation;
 import Terrain.MapMaster;

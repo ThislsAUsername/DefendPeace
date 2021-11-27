@@ -2,15 +2,16 @@ package CommandingOfficers;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import CommandingOfficers.Modifiers.UnitFightStatModifier;
-import CommandingOfficers.Modifiers.UnitInstanceFilter;
+
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEventQueue;
+import Engine.StateTrackers.TransformationTracker;
 import Engine.UnitActionLifecycles.TransformLifecycle;
-import Engine.UnitMods.TransformationTracker;
+import Engine.UnitMods.UnitFightStatModifier;
+import Engine.UnitMods.UnitInstanceFilter;
 import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
 import Terrain.MapMaster;

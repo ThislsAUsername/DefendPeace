@@ -5,7 +5,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.Venge;
 import Engine.GameInstance;
 import Engine.GameScenario;
-import Engine.UnitMods.DamageDealtToIncomeConverter;
+import Engine.StateTrackers.DamageDealtToIncomeConverter;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
 
