@@ -125,12 +125,8 @@ public class UnitContext extends UnitState
     {
       rangeMin = w.rangeMin;
       rangeMax = w.rangeMax;
-      // Build a scratch UnitContext because we don't trust UnitMods with our state
-      UnitContext uc = new UnitContext(this);
       for( UnitModifier mod : mods )
-        mod.modifyAttackRange(uc);
-      rangeMin = uc.rangeMin;
-      rangeMax = uc.rangeMax;
+        mod.modifyAttackRange(this);
       if( rangeMax < rangeMin )
         rangeMax = rangeMin;
     }
