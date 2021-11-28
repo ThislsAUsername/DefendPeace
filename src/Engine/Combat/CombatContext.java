@@ -63,11 +63,6 @@ public class CombatContext
     {
       canCounter = true;
     }
-
-    if( attacker.mods.isEmpty() )
-      attacker.mods.addAll(attacker.unit.getModifiers());
-    if( defender.mods.isEmpty() )
-      defender.mods.addAll(defender.unit.getModifiers());
   }
 
   private void applyModifiers()
