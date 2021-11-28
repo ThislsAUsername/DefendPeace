@@ -43,7 +43,7 @@ public class TestStateTracker extends TestCase
   {
     boolean testPassed = true; // Assume nothin's busted
     int currentTrackers = testGame.stateTrackers.keySet().size();
-    // Cinder sets up a WitchFireTracker, and Patch sets up a DamageDealtToIncomeConverter
+    // Venge has no trackers, and Cinder has two: WitchFireTracker and BuildCountsTracker
     testPassed &= validate(currentTrackers == 2, "    Expected 2 trackers, but the game has "+currentTrackers+" instead.");
 
     Object og = DamageDealtToIncomeConverter.instance(testGame, DamageDealtToIncomeConverter.class);

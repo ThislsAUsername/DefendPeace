@@ -199,7 +199,7 @@ public class TestCombatMods extends TestCase
     {
       currentFundsReturn -= i;
       ddtic.stopTracking(cinder, i);
-      ddtic.stopTracking(cinder, i); // Remove twice, just to be sure
+      ddtic.stopTracking(cinder, i); // Remove twice, so we can be sure that extra removals don't break things
       cinder.money = 0;
 
       // give aa ammo
@@ -221,7 +221,6 @@ public class TestCombatMods extends TestCase
       if( currentFundsReturn < 0 )
         currentFundsReturn = 0;
       ddtic.stopTracking(cinder, i);
-      ddtic.stopTracking(cinder, i); // Remove twice, just to be sure
       cinder.money = 0;
 
       // give aa ammo
