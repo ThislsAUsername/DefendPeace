@@ -3,7 +3,6 @@ package Engine.Combat;
 import java.util.HashMap;
 import java.util.Map;
 import Engine.GamePath;
-import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.UnitActionLifecycles.BattleLifecycle.BattleEvent;
@@ -34,14 +33,19 @@ public class CombatEngine
    */
   public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, int attackerX, int attackerY )
   {
-    XYCoord dest = new XYCoord(attackerX, attackerY);
-    UnitContext attackerContext = new UnitContext(map, attacker, null, Utils.findShortestPath(attacker, dest, map), dest);
-    UnitContext defenderContext = new UnitContext(map, defender, null, null, new XYCoord(defender.x, defender.y));
-    return calculateBattleResults(attackerContext, defenderContext, map, true);
+    return simulateBattleResults(attacker, defender, map, new XYCoord(attackerX, attackerY));
   }
   public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, XYCoord moveCoord )
   {
-    return simulateBattleResults(attacker, defender, map, moveCoord.xCoord, moveCoord.yCoord);
+    UnitContext attackerContext = new UnitContext(map, attacker, null, null, moveCoord);
+    UnitContext defenderContext = new UnitContext(map, defender, null, null, new XYCoord(defender.x, defender.y));
+    return calculateBattleResults(attackerContext, defenderContext, map, true);
+  }
+  public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, GamePath path )
+  {
+    UnitContext attackerContext = new UnitContext(map, attacker, null, path, path.getEndCoord());
+    UnitContext defenderContext = new UnitContext(map, defender, null, null, new XYCoord(defender.x, defender.y));
+    return calculateBattleResults(attackerContext, defenderContext, map, true);
   }
 
   public static StrikeParams calculateTerrainDamage( Unit attacker, GamePath path, MapLocation target, GameMap map )
@@ -112,7 +116,7 @@ public class CombatEngine
   public static double calculateOneStrikeDamage( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
   {
     XYCoord dest = new XYCoord(attacker);
-    UnitContext attackerContext = new UnitContext(map, attacker, null, Utils.findShortestPath(attacker, dest, map), dest);
+    UnitContext attackerContext = new UnitContext(map, attacker, null, null, dest);
     attackerContext.chooseWeapon(defender.model, battleRange, attackerMoved);
     return StrikeParams.buildBattleParams(
         attackerContext,

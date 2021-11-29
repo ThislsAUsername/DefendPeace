@@ -190,8 +190,7 @@ public abstract class BattleLifecycle
     {
       ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
 
-      BattleSummary summary = CombatEngine.simulateBattleResults(attacker, defender, map,
-                              moveCoord.xCoord, moveCoord.yCoord);
+      BattleSummary summary = CombatEngine.simulateBattleResults(attacker, defender, map, movePath);
 
       int attackerHealthLoss = (int) (10 * summary.attacker.getPreciseHPDamage());
       int defenderHealthLoss = (int) (10 * summary.defender.getPreciseHPDamage());

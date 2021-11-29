@@ -263,9 +263,7 @@ public class AICombatUtils
           neededAttacks.remove(space);
           continue;
         }
-        double thisShot =
-            CombatEngine.simulateBattleResults(attacker, target, gameMap,
-                                               space.xCoord, space.yCoord).defender.getPreciseHPDamage();
+        double thisShot = CombatEngine.simulateBattleResults(attacker, target, gameMap, space).defender.getPreciseHPDamage();
         if( target.getHP() <= damage - thisShot )
         {
           neededAttacks.remove(space);
@@ -325,7 +323,7 @@ public class AICombatUtils
         if( movePath.getPathLength() > 0 )
         {
           neededAttacks.put(xyc, unit);
-          double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defender.getPreciseHPDamage();
+          double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc).defender.getPreciseHPDamage();
 
           thisDamage = findMultiHitKill(gameMap, target, attackCandidates, neededAttacks, damage + thisDamage);
 

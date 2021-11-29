@@ -50,6 +50,7 @@ public class UnitContext extends UnitState
   {
     this(map, u, w, null, new XYCoord(u));
   }
+  // path is expected to be null or to lead to coord
   public UnitContext(GameMap map, Unit u, WeaponModel w, GamePath path, XYCoord coord)
   {
     this(u);
