@@ -140,7 +140,7 @@ public class UnitSpriteSet
 
     // Try the faction's proper name, the one it's based off of, then default to "Thorn" if all else fails.
     String[] namesToTry = {faction.name, faction.basis};
-    String template = String.format( format, SpriteLibrary.DEFAULT_FACTION, UnitModel.standardizeID(unitType), "" ); // Replace if we can.
+    String template = String.format( format, SpriteLibrary.DEFAULT_FACTION, UnitModel.standardizeID(unitType), "%s" ); // Replace if we can.
     for( String name : namesToTry )
     {
       String idleName = String.format( format, name, UnitModel.standardizeID(unitType), "" );

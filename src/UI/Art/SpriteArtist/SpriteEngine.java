@@ -2,6 +2,7 @@ package UI.Art.SpriteArtist;
 
 import java.awt.Dimension;
 
+import UI.DamageChartController;
 import UI.InfoController;
 import UI.InputHandler.InputAction;
 import UI.MainUIController;
@@ -46,5 +47,11 @@ public class SpriteEngine implements GraphicsEngine
   public IView createInfoView(InfoController control)
   {
     return new InfoView(control);
+  }
+
+  @Override
+  public IView createDamageChartView(DamageChartController control)
+  {
+    return new DamageChartView(control);
   }
 }

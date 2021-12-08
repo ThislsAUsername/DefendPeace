@@ -12,7 +12,6 @@ import Engine.Combat.BattleSummary;
 import Engine.Combat.StrikeParams;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
-import Engine.GameEvents.TeleportEvent;
 import Terrain.MapPerspective;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
@@ -120,6 +119,8 @@ public abstract class MapView implements IView
 
   protected MapPerspective getDrawableMap(GameInstance myGame)
   {
+    if( null == myGame )
+      return null;
     // Here are the fog-drawing rules. If there are:
     //   zero humans - spectating - draw everything the current player sees.
     //   one human - player vs ai - draw everything the human player could see.

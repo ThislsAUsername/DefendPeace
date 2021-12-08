@@ -3,6 +3,7 @@ package Engine;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import CommandingOfficers.Commander;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
@@ -11,6 +12,7 @@ import Engine.GameEvents.TurnInitEvent;
 import Engine.GameInput.GameInputHandler;
 import Terrain.MapLocation;
 import UI.CO_InfoController;
+import UI.DamageChartController;
 import UI.GameStatsController;
 import UI.InGameMenu;
 import UI.InputHandler;
@@ -462,6 +464,22 @@ public class MapController implements IController, GameInputHandler.StateChanged
         myGameInputHandler.reset(); // CO_INFO is a terminal state. Reset the input handler.
         // Give the new controller/view the floor
         Driver.getInstance().changeGameState(coInfoMenu, infoView);
+        break;
+      case DAMAGE_CHART:
+        // Pull out the first enemy available, or ourselves
+        Commander targetCO = myGame.activeCO;
+        for( Commander co : myGame.commanders )
+          if( myGame.activeCO.isEnemy(co) )
+          {
+            targetCO = co;
+            break;
+          }
+        DamageChartController dcc = new DamageChartController(myGame.activeCO, targetCO);
+        IView dcv = Driver.getInstance().gameGraphics.createDamageChartView(dcc);
+
+        myGameInputHandler.reset(); // DAMAGE_CHART is a terminal state. Reset the input handler.
+        // Give the new controller/view the floor
+        Driver.getInstance().changeGameState(dcc, dcv);
         break;
       default:
         System.out.println("WARNING! Attempting to switch to unknown input type " + inputType);
