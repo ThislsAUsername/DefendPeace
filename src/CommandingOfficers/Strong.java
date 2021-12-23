@@ -86,7 +86,7 @@ public class Strong extends Commander
     {
       if( model.holdingCapacity > 0 )
       {
-        model.movePower++;
+        model.baseMovePower++;
         model.holdingCapacity++;
       }
     }

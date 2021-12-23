@@ -141,7 +141,7 @@ public class DoRUnits extends UnitModelScheme
     public UnitModel clone()
     {
       // Create a new model with the given attributes.
-      DoRUnitModel newModel = new DoRUnitModel(name, type, role, costBase, maxAmmo, maxFuel, idleFuelBurn, visionRange, movePower,
+      DoRUnitModel newModel = new DoRUnitModel(name, type, role, costBase, maxAmmo, maxFuel, idleFuelBurn, visionRange, baseMovePower,
           propulsion.clone(), possibleActions, weapons, abilityPowerValue);
 
       newModel.copyValues(this);

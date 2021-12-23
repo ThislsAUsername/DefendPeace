@@ -557,7 +557,7 @@ public class Tech extends Commander
     BattleMech.maxFuel = 30;
     BattleMech.maxAmmo = 10;
     BattleMech.visionRange = 2;
-    BattleMech.movePower = 4;
+    BattleMech.baseMovePower = 4;
     BattleMech.propulsion = new FootMech();
     BattleMech.healableHabs = new HashSet<TerrainType>(); // BattleMechs have specialized parts, not easy to repair.
 

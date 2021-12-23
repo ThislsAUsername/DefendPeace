@@ -69,7 +69,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public int maxFuel;
   public int idleFuelBurn;
   public int maxMaterials = 0;
-  public int movePower;
+  public int baseMovePower;
   public int visionRange;
   public int visionRangePiercing = 1;
   public boolean hidden = false;
@@ -121,7 +121,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     maxFuel = pFuelMax;
     idleFuelBurn = pIdleFuelBurn;
     visionRange = pVision;
-    movePower = pMovePower;
+    baseMovePower = pMovePower;
     propulsion = pPropulsion.clone();
 
     for( TerrainType terrain : TerrainType.TerrainTypeList )

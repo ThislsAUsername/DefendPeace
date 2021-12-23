@@ -117,7 +117,7 @@ public class UnitContext extends UnitState
     maxHP = model.maxHP;
     attackPower = model.getDamageRatio();
     defensePower = model.getDefenseRatio();
-    movePower = model.movePower;
+    movePower = model.baseMovePower;
     costBase = model.costBase;
     costMultiplier = model.costMultiplier;
     costShift = model.costShift;
