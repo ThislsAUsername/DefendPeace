@@ -42,15 +42,27 @@ public class UnitContext extends UnitState
 
   public final List<UnitModifier> mods = new ArrayList<>();
 
+  /**
+   * Builds a UnitContext grounded to a specific Unit on its current tile, with map awareness.
+   */
   public UnitContext(GameMap map, Unit u)
   {
     this(map, u, null);
   }
+  /**
+   * Builds a UnitContext grounded to a specific Unit on its current tile, with map awareness.
+   * <p>Also allows selecting a specific weapon.
+   */
   public UnitContext(GameMap map, Unit u, WeaponModel w)
   {
     this(map, u, w, null, new XYCoord(u));
   }
-  // path is expected to be null or to lead to coord
+  /**
+   * Builds a UnitContext on specific Unit on an arbitrary tile, with map awareness.
+   * @param w Optional; pre-selects the weapon the unit will use.
+   * @param path The path the unit is considering taking to get to coord. Optional; expected to be null or lead to coord.
+   * @param coord Where the unit wants to consider from. Technically optional; expected to be valid if path != null.
+   */
   public UnitContext(GameMap map, Unit u, WeaponModel w, GamePath path, XYCoord coord)
   {
     this(u);
@@ -60,22 +72,30 @@ public class UnitContext extends UnitState
     setEnvironment(map.getEnvironment(coord));
     setWeapon(w);
   }
+  /**
+   * Builds a UnitContext around a specific Unit, with the minimal knowledge we can scrape from Unit state alone
+   */
   public UnitContext(Unit u)
   {
     super(u);
     unit = u;
-    coord = new XYCoord(u.x, u.y);
+    coord = new XYCoord(u);
     heldUnits.addAll(u.heldUnits);
     mods.addAll(u.getModifiers());
     initModel();
   }
-  // Note: the Commander argument is here as a placeholder for Army
-  // The plan is for Unit to have an Army reference, and UnitModel to have the Commander reference
+  /**
+   * Builds a UnitContext not tied to any specific unit.
+   * <p>Both parameters had better be non-null.
+   */
   public UnitContext(Commander co, UnitModel um)
   {
     super(co, um);
     initModel();
   }
+  /**
+   * Simple copy constructor.
+   */
   public UnitContext(UnitContext other)
   {
     super(other);
