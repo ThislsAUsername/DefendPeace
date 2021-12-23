@@ -8,15 +8,15 @@ import java.io.Serializable;
 public class GameVersion implements Serializable
 {
   private static final long serialVersionUID = 1L; // This class should always keep the same serialization format.
-  
+
   int majorRev, minorRev, hotfix;
   public GameVersion()
   {
     majorRev = 6; // For substantial, save-breaking changes to the game logic.
     minorRev = 7; // For added content or UI updates
-    hotfix   = 0; // For bugfixes (hopefully to never see increment)
+    hotfix   = 1; // For bugfixes
   }
-  
+
   // TODO: Consider more nuanced validation here
   public boolean isEqual(GameVersion other)
   {
