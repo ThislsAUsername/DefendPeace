@@ -193,11 +193,11 @@ public abstract class BattleLifecycle
                               moveCoord.xCoord, moveCoord.yCoord);
 
       // output any damage done, with the color of the one dealing the damage
-      if( summary.attackerHPLoss > 0 )
-        output.add(new DamagePopup(movePath.getWaypoint(0).GetCoordinates(), defender.CO.myColor, (int) (summary.attackerHPLoss*10) + "%"));
-      if( summary.defenderHPLoss > 0 )
+      if( summary.attackerHealthLoss > 0 )
+        output.add(new DamagePopup(movePath.getWaypoint(0).GetCoordinates(), defender.CO.myColor, (int) (summary.attackerHealthLoss*10) + "%"));
+      if( summary.defenderHealthLoss > 0 )
         // grab the two most significant digits and convert to %
-        output.add(new DamagePopup(attackLocation, attacker.CO.myColor, (int) (summary.defenderHPLoss*10) + "%"));
+        output.add(new DamagePopup(attackLocation, attacker.CO.myColor, (int) (summary.defenderHealthLoss*10) + "%"));
 
       return output;
     }
@@ -380,7 +380,7 @@ public abstract class BattleLifecycle
     }
     public boolean attackerDies()
     {
-      return (int) ((battleInfo.attacker.getPreciseHP() - battleInfo.attackerHPLoss) * 10) <= 0;
+      return (int) ((battleInfo.attacker.getPreciseHP() - battleInfo.attackerHealthLoss) * 10) <= 0;
     }
 
     public Unit getDefender()
@@ -389,7 +389,7 @@ public abstract class BattleLifecycle
     }
     public boolean defenderDies()
     {
-      return (int) ((battleInfo.defender.getPreciseHP() - battleInfo.defenderHPLoss) * 10) <= 0;
+      return (int) ((battleInfo.defender.getPreciseHP() - battleInfo.defenderHealthLoss) * 10) <= 0;
     }
 
     @Override
@@ -411,13 +411,13 @@ public abstract class BattleLifecycle
       Unit attacker = battleInfo.attacker;
       Unit defender = battleInfo.defender;
       attacker.fire(battleInfo.attackerWeapon); // expend ammo
-      defender.damageHP(battleInfo.defenderHPLoss);
+      defender.damageHP(battleInfo.defenderHealthLoss);
 
       // Handle counter-attack if relevant.
-      if( battleInfo.attackerHPLoss > 0 )
+      if( battleInfo.attackerHealthLoss > 0 )
       {
         defender.fire(battleInfo.defenderWeapon);
-        attacker.damageHP(battleInfo.attackerHPLoss);
+        attacker.damageHP(battleInfo.attackerHealthLoss);
       }
     }
 

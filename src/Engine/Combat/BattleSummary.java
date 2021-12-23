@@ -15,11 +15,12 @@ public class BattleSummary
   public final WeaponModel defenderWeapon;
   public final TerrainType attackerTerrain;
   public final TerrainType defenderTerrain;
-  public double attackerHPLoss;
-  public double defenderHPLoss;
+  public final double attackerHPLoss, attackerHealthLoss;
+  public final double defenderHPLoss, defenderHealthLoss;
 
-  public BattleSummary(Unit atk, WeaponModel aw, Unit def, WeaponModel dw, TerrainType atkTerrain, TerrainType defTerrain, double atkHPLoss,
-      double defHPLoss)
+  public BattleSummary(Unit atk, WeaponModel aw, Unit def, WeaponModel dw, TerrainType atkTerrain, TerrainType defTerrain,
+      double atkHPLoss, double atkHealthLoss,
+      double defHPLoss, double defHealthLoss)
   {
     attacker = atk;
     defender = def;
@@ -29,5 +30,7 @@ public class BattleSummary
     defenderTerrain = defTerrain;
     attackerHPLoss = atkHPLoss;
     defenderHPLoss = defHPLoss;
+    attackerHealthLoss = atkHealthLoss;
+    defenderHealthLoss = defHealthLoss;
   }
 }

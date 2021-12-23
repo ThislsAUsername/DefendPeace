@@ -10,7 +10,7 @@ public class TestRange extends IMapBuilder
   // Defines the terrain for this map. Each row is a vertical column of the map.
   private final static TerrainType[][] terrainData = {
       { SE, SE, SE, SE, SE, SE, SE, SE, SE, SE }, // 0
-      { SE, SH, GR, GR, CT, SP, GR, TW, CT, SE }, // 1
+      { SE, SH, GR, GR, CT, SP, GR, TW, FC, SE }, // 1
       { SE, SH, CT, GR, GR, CT, GR, TW, GR, SE }, // 2
       { SE, GR, MT, GR, GR, FR, GR, GR, GR, SE }, // 3
       { SE, GR, GR, ME, CT, FC, RD, GR, CT, SE }, // 4
@@ -22,12 +22,12 @@ public class TestRange extends IMapBuilder
       { SE, CT, GR, RD, FC, CT, ME, GR, GR, RF }, // 10
       { SE, GR, GR, GR, FR, GR, GR, MT, GR, SE }, // 11
       { SE, GR, TW, GR, CT, GR, GR, CT, SH, SE }, // 12
-      { SE, CT, TW, GR, SP, CT, GR, GR, SH, SE }, // 13
+      { SE, FC, TW, GR, SP, CT, GR, GR, SH, SE }, // 13
       { SE, SE, SE, SE, SE, SE, SE, SE, SE, SE } };// 14
-  private static XYCoord[] co1Props = { new XYCoord(1, 8), new XYCoord(1, 7), new XYCoord(2, 7), new XYCoord(5, 5),
+  private static XYCoord[] co1Props = { new XYCoord(1, 8), new XYCoord(5, 5),
       new XYCoord(5, 6), new XYCoord(4, 5), new XYCoord(5, 8), new XYCoord(1, 5), new XYCoord(6, 1), new XYCoord(6, 4),
       new XYCoord(6, 6) };
-  private static XYCoord[] co2Props = { new XYCoord(13, 1), new XYCoord(13, 2), new XYCoord(12, 2), new XYCoord(9, 4),
+  private static XYCoord[] co2Props = { new XYCoord(13, 1), new XYCoord(9, 4),
       new XYCoord(9, 3), new XYCoord(10, 4), new XYCoord(13, 4), new XYCoord(9, 1), new XYCoord(8, 3), new XYCoord(8, 5),
       new XYCoord(8, 8) };
   private static XYCoord[][] properties = { co1Props, co2Props };

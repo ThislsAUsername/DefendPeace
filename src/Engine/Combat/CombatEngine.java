@@ -108,11 +108,9 @@ public class CombatEngine
 
     double attackerDamageDealt = unitDamageMap.get(attacker).getValue();
     double defenderDamageDealt = unitDamageMap.get(defender).getValue();
-    if( !isSim )
-    {
-      attackerDamageDealt = Math.min(defender.getHP(), defender.getHP() - Math.ceil(defender.getPreciseHP() - attackerDamageDealt));
-      defenderDamageDealt = Math.min(attacker.getHP(), attacker.getHP() - Math.ceil(attacker.getPreciseHP() - defenderDamageDealt));
-    }
+    double attackerHPDealt = Math.min(defender.getHP(), defender.getHP() - Math.ceil(defender.getPreciseHP() - attackerDamageDealt));
+    double defenderHPDealt = Math.min(attacker.getHP(), attacker.getHP() - Math.ceil(attacker.getPreciseHP() - defenderDamageDealt));
+
     // Calculations complete.
     // Since we are setting up our BattleSummary, use non-CombatContext variables
     //   so consumers of the Summary will see results consistent with the current board/map state
@@ -121,8 +119,8 @@ public class CombatEngine
                              defender, unitDamageMap.get(defender).getKey(),
                              map.getEnvironment(attackerX, attackerY).terrainType,
                              map.getEnvironment(defenderX, defenderY).terrainType,
-                             defenderDamageDealt,
-                             attackerDamageDealt);
+                             defenderHPDealt, defenderDamageDealt,
+                             attackerHPDealt, attackerDamageDealt);
   }
 
   public static double calculateOneStrikeDamage( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
