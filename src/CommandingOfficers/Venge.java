@@ -8,6 +8,7 @@ import Engine.Combat.StrikeParams.BattleParams;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatContext;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.MassDamageEvent;
 import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
 import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitDefenseModifier;
@@ -199,7 +200,7 @@ public class Venge extends Commander
     private static final String NAME = "Iron Will";
     private static final int COST = 4;
     private static final int IRONWILL_BOOST = 40;
-    private static final int IRONWILL_WOUND = -2;
+    private static final int IRONWILL_WOUND = 2;
     private final ArrayList<Unit> boostedUnits = new ArrayList<Unit>();
 
     IronWill(Venge venge)
@@ -236,6 +237,14 @@ public class Venge extends Commander
         unit.alterHP(IRONWILL_WOUND);
       }
       boostedUnits.clear();
+    }
+
+    @Override
+    public GameEventQueue getRevertEvents(MapMaster gameMap)
+    {
+      GameEventQueue events = new GameEventQueue();
+      events.add(new MassDamageEvent(myCommander, boostedUnits, IRONWILL_WOUND, false));
+      return events;
     }
   }
 

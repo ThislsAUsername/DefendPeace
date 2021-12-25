@@ -128,10 +128,12 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
    */
   public GameEventQueue initTurn(MapMaster map)
   {
+    GameEventQueue events = new GameEventQueue();
     myView.resetFog();
 
     if( null != myActiveAbility )
     {
+      events.addAll(myActiveAbility.getRevertEvents(map));
       myActiveAbility.deactivate(map);
       myActiveAbility = null;
     }
@@ -144,7 +146,6 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
       aiController.initTurn(myView);
     }
 
-    GameEventQueue events = new GameEventQueue();
     for( Unit u : units )
     {
       events.addAll(u.initTurn(map));

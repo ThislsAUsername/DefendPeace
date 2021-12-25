@@ -114,7 +114,7 @@ public abstract class CommanderAbility implements Serializable
   {
     return new GameEventQueue();
   }
-  public GameEventQueue getRevertEvents(Commander co, MapMaster gameMap)
+  public GameEventQueue getRevertEvents(MapMaster gameMap)
   {
     return new GameEventQueue();
   }
