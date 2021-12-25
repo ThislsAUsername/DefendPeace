@@ -242,7 +242,7 @@ public class Tech extends Commander
       Set<XYCoord> dropLocs = new HashSet<XYCoord>();
       for( int i = 0; i < numDrops; ++i )
       {
-        UnitSpawnAction techDrop = generateDropEvent(myCommander, gameMap, dropLocs, log);
+        UnitSpawnAction techDrop = generateDropEvent(gameMap, dropLocs, log);
         if( null != techDrop )
         {
           // Store the new event.
@@ -284,7 +284,7 @@ public class Tech extends Commander
       Set<XYCoord> dropLocs = new HashSet<XYCoord>();
       for( int i = 0; i < numDrops; ++i )
       {
-        XYCoord techDrop = findDropLocation(myCommander, gameMap, dropLocs, log);
+        XYCoord techDrop = findDropLocation(gameMap, dropLocs, log);
         if( null != techDrop )
           dropLocs.add(techDrop);
         else
@@ -301,9 +301,9 @@ public class Tech extends Commander
       return output;
     }
 
-    private UnitSpawnAction generateDropEvent(Commander myCommander, MapMaster gameMap, Set<XYCoord> priorDrops, boolean log)
+    private UnitSpawnAction generateDropEvent(MapMaster gameMap, Set<XYCoord> priorDrops, boolean log)
     {
-      XYCoord landingZone = findDropLocation(myCommander, gameMap, priorDrops, log);
+      XYCoord landingZone = findDropLocation(gameMap, priorDrops, log);
 
       // Create our new unit and the teleport event to put it into place.
       boolean stomp = true;
@@ -312,7 +312,7 @@ public class Tech extends Commander
           CreateUnitEvent.AnimationStyle.DROP_IN, stomp, ready);
       return techDrop;
     }
-    private XYCoord findDropLocation(Commander myCommander, GameMap gameMap, Set<XYCoord> priorDrops, boolean log)
+    private XYCoord findDropLocation(GameMap gameMap, Set<XYCoord> priorDrops, boolean log)
     {
       // Create a new Unit to drop onto the battlefield.
       Unit techMech = new Unit(myCommander, unitModelToDrop);
