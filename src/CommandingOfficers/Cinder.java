@@ -10,7 +10,7 @@ import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventQueue;
 import Engine.StateTrackers.BuildCountsTracker;
-import Engine.StateTrackers.CountTracker;
+import Engine.StateTrackers.CountManager;
 import Engine.StateTrackers.StateTracker;
 import Terrain.GameMap;
 import Terrain.MapMaster;
@@ -205,7 +205,7 @@ public class Cinder extends Commander
   {
     private static final long serialVersionUID = 1L;
 
-    private CountTracker<Commander, Unit> attackCounts = new CountTracker<>();
+    private CountManager<Commander, Unit> attackCounts = new CountManager<>();
 
     public void startTracking(Commander co)
     {

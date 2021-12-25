@@ -10,7 +10,7 @@ public class BuildCountsTracker extends StateTracker
 {
   private static final long serialVersionUID = 1L;
 
-  private CountTracker<Commander, XYCoord> buildCounts = new CountTracker<>();
+  private CountManager<Commander, XYCoord> buildCounts = new CountManager<>();
 
   /** Caller shouldn't modify this return value */
   public Map<XYCoord, Integer> getCountFor(Commander co)
