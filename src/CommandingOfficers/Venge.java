@@ -232,10 +232,6 @@ public class Venge extends Commander
     @Override
     protected void revert(MapMaster gameMap)
     {
-      for( Unit unit : boostedUnits )
-      {
-        unit.alterHP(IRONWILL_WOUND);
-      }
       boostedUnits.clear();
     }
 
