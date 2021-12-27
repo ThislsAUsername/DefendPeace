@@ -5,11 +5,10 @@ import java.util.ArrayList;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
-import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.COMovementModifier;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import CommandingOfficers.Modifiers.UnitRemodelModifier;
 import Engine.GameScenario;
+import Engine.UnitMods.UnitMovementModifier;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
@@ -28,7 +27,6 @@ public class TestCOModifier extends TestCase
     setupTest();
 
     boolean testPassed = true;
-    testPassed &= validate(testDamageModifier(), "  Damage Modifier test failed!");
     testPassed &= validate(testMovementModifier(), "  Movement modifier test failed!");
     testPassed &= validate(testProductionModifier(), "  Production modifier test failed!");
     testPassed &= validate(testUnitRemodelModifier(), "  Unit Remodel modifier test failed!");
@@ -47,47 +45,24 @@ public class TestCOModifier extends TestCase
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
   }
 
-  private boolean testDamageModifier()
-  {
-    boolean testPassed = true;
-    UnitModel inf = patch.getUnitModel(UnitModel.TROOP);
-    
-    // Get base damage ratio.
-    int startDmg = inf.getDamageRatio();
-
-    // Apply a damage modifier and make sure we saw an increase.
-    CODamageModifier dmgMod = new CODamageModifier(50);
-    dmgMod.applyChanges(patch);
-    int newDmg = inf.getDamageRatio();
-    testPassed &= validate(startDmg < newDmg, "    Damage modifier did not increase damage ratio!");
-    
-    // Make sure reverting takes it back to normal.
-    dmgMod.revertChanges(patch);
-    int lastDmg = inf.getDamageRatio();
-    testPassed &= validate(startDmg == lastDmg, "    Damage modifier did not return to normal");
-    
-    return testPassed;
-  }
-
   private boolean testMovementModifier()
   {
     boolean testPassed = true;
     UnitModel inf = patch.getUnitModel(UnitModel.TROOP);
     
     // Get base movement speed
-    int startMove = inf.movePower;
+    int startMove = inf.getMovePower();
     
     // Apply a movement modifier and re-check.
     int MOVEMOD = 3;
-    COMovementModifier moveMod = new COMovementModifier(MOVEMOD);
-    moveMod.addApplicableUnitModel(patch.getUnitModel(UnitModel.TROOP));
-    moveMod.applyChanges(patch);
-    int newMove = inf.movePower;
+    UnitMovementModifier moveMod = new UnitMovementModifier(MOVEMOD);
+    inf.addUnitModifier(moveMod);
+    int newMove = inf.getMovePower();
     testPassed &= validate( (newMove - startMove) == MOVEMOD, "    Movement modifier did not apply as expected!");
 
     // Make sure reverting takes it back to normal.
-    moveMod.revertChanges(patch);
-    int lastMove = inf.movePower;
+    inf.removeUnitModifier(moveMod);
+    int lastMove = inf.getMovePower();
     testPassed &= validate( lastMove == startMove, "    Movement modifier did not return the move power to normal!");
 
     return testPassed;

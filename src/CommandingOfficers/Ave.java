@@ -8,8 +8,6 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.Stack;
 
-import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
@@ -21,6 +19,8 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
 import Engine.GameEvents.MassDamageEvent;
+import Engine.UnitMods.UnitDamageModifier;
+import Engine.UnitMods.UnitModifier;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.GameMap;
@@ -136,16 +136,16 @@ public class Ave extends Commander
   }
 
   @Override
-  public void registerForEvents(GameInstance game)
+  public void initForGame(GameInstance game)
   {
-    super.registerForEvents(game);
+    super.initForGame(game);
     snowifier = new CitySnowifier(this);
     snowifier.registerForEvents(game);
   }
   @Override
-  public void unregister(GameInstance game)
+  public void deInitForGame(GameInstance game)
   {
-    super.unregister(game);
+    super.deInitForGame(game);
     snowifier.unregister(game);
   }
 
@@ -175,8 +175,8 @@ public class Ave extends Commander
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
     // We are defending, in a FOREST
-    if( (params.map.getEnvironment(params.defender.x, params.defender.y).terrainType == TerrainType.FOREST)
-        && (params.defender.body.model.isLandUnit()))  // And our unit is actually on the ground.
+    if( (params.map.getEnvironment(params.defender.coord).terrainType == TerrainType.FOREST)
+        && (params.defender.unit.model.isLandUnit()))  // And our unit is actually on the ground.
     {
       params.terrainStars--;
     }
@@ -469,13 +469,13 @@ public class Ave extends Commander
     private int numActivations = 0;
 
     Ave coCast;
-    COModifier damageMod = null;
+    UnitModifier damageMod = null;
 
     NixAbility(Ave commander)
     {
       super(commander, NIX_NAME, NIX_COST);
       coCast = commander;
-      damageMod = new CODamageModifier(NIX_BUFF);
+      damageMod = new UnitDamageModifier(NIX_BUFF);
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
     }
 
@@ -488,13 +488,16 @@ public class Ave extends Commander
     }
 
     @Override
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    {
+      modList.add(damageMod);
+    }
+
+    @Override
     protected void perform(MapMaster gameMap)
     {
       // Increase Ave's sphere of influence.
       coCast.MAX_SNOW_SPREAD_RANGE++;
-
-      // Buff units.
-      coCast.addCOModifier(damageMod);
     }
 
     @Override
@@ -538,22 +541,25 @@ public class Ave extends Commander
     private static final int GLACIO_FREEZE_RANGE = 2;
 
     Ave coCast;
-    COModifier damageMod = null;
+    UnitModifier damageMod = null;
 
     GlacioAbility(Ave commander)
     {
       super(commander, GLACIO_NAME, GLACIO_COST);
       coCast = commander;
-      damageMod = new CODamageModifier(GLACIO_BUFF);
+      damageMod = new UnitDamageModifier(GLACIO_BUFF);
       AIFlags = PHASE_TURN_END;
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       // Normal CO-power boost.
-      myCommander.addCOModifier(damageMod);
+      modList.add(damageMod);
+    }
 
+    protected void perform(MapMaster gameMap)
+    {
       // Freeze enemies around each of Ave's units or buildings.
       for( Unit victim : findVictims(gameMap) )
         victim.isStunned = true;
@@ -568,6 +574,7 @@ public class Ave extends Commander
       // Add snow in an expanded range around Ave's areas.
       int maxSnowRange = coCast.MAX_SNOW_SPREAD_RANGE + GLACIO_SNOW_SPREAD;
       Set<XYCoord> tilesInRange = Utils.findLocationsNearProperties(gameMap, coCast, maxSnowRange);
+      // TODO: Make sure this only counts Ave's units, not all units in the Army
       tilesInRange.addAll(Utils.findLocationsNearUnits(gameMap, coCast, GLACIO_SNOW_SPREAD));
       for( XYCoord coord : tilesInRange )
       {
@@ -633,14 +640,14 @@ public class Ave extends Commander
     private static final int OBLIDO_RANGE = 2;
     private static final int OBLIDO_DAMAGE = 2;
 
+    UnitModifier damageMod = null;
     Ave Ave;
-    COModifier damageMod = null;
 
     OblidoAbility(Ave commander)
     {
       super(commander, OBLIDO_NAME, OBLIDO_COST);
       Ave = commander;
-      damageMod = new CODamageModifier(OBLIDO_BUFF);
+      damageMod = new UnitDamageModifier(OBLIDO_BUFF);
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
     }
 
@@ -653,10 +660,9 @@ public class Ave extends Commander
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      // Apply CO unit buffs.
-      myCommander.addCOModifier(damageMod);
+      modList.add(damageMod);
     }
 
     @Override
@@ -665,7 +671,6 @@ public class Ave extends Commander
       // Keep track of any tiles that change.
       ArrayList<MapChangeEvent.EnvironmentAssignment> tileChanges = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
 
-      // Change terrain to snow around each of Ave's units and buildings, and damage trees and enemies.
       Set<XYCoord> affectedTiles = getTilesInRange(gameMap);
 
       // Smash things. Don't add snow though.

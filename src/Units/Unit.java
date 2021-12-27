@@ -1,7 +1,7 @@
 package Units;
 
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 import CommandingOfficers.Commander;
 import Engine.FloodFillFunctor;
@@ -10,47 +10,21 @@ import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
+import Engine.UnitMods.UnitModList;
+import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
 
-public class Unit implements Serializable
+public class Unit extends UnitState implements UnitModList
 {
   private static final long serialVersionUID = 1L;
-  public CargoList heldUnits;
-  public UnitModel model;
   public int x = -1;
   public int y = -1;
-  public int ammo;
-  public int fuel;
-  public int materials;
-  private int captureProgress;
-  private MapLocation captureTarget;
-  public Commander CO;
-  public boolean isTurnOver;
-  public boolean isStunned;
-
-  /**
-   * HP is a value, typically in range [1-10], that determines the current actual strength of a unit.
-   * A unit at 0 HP is dead.
-   * Health is HP value as a percentage, thus ~10x the HP value.
-   * When determining HP, health must always be rounded up.
-   */
-  private int health;
 
   public Unit(Commander co, UnitModel um)
   {
-    CO = co;
-    model = um;
-    ammo = model.maxAmmo;
-    fuel = model.maxFuel;
-    materials = model.maxMaterials;
-    isTurnOver = true;
-    health = healthFromHP(model.maxHP);
-    captureProgress = 0;
-    captureTarget = null;
-
-    heldUnits = new CargoList(model);
+    super(co, um);
   }
 
   /**
@@ -106,11 +80,28 @@ public class Unit implements Serializable
     return model.propulsion.getUnitMoveFunctor(this, includeOccupied, canTravelThroughEnemies);
   }
 
+  /** Provides the authoritative/actual move power of the unit in question */
+  public int getMovePower(GameMap map)
+  {
+    return getMovePower(new UnitContext(map, this));
+  }
+  public static int getMovePower(UnitContext uc)
+  {
+    for( UnitModifier mod : uc.mods )
+      mod.modifyMovePower(uc);
+    return uc.movePower;
+  }
+
+  public UnitContext getRangeContext(GameMap map, WeaponModel weapon)
+  {
+    return new UnitContext(map, this, weapon);
+  }
+
   /**
    * @return whether or not this unit can attack the given unit type at the
    * specified range, accounting for the possibility of moving first.
    */
-  public boolean canAttack(ITargetable targetType, int range, boolean afterMoving)
+  public boolean canAttack(GameMap map, ITargetable targetType, int range, boolean afterMoving)
   {
     // if we have no weapons, we can't hurt things
     if( model.weapons == null )
@@ -127,7 +118,13 @@ public class Unit implements Serializable
         // can't shoot after moving, then move along.
         continue;
       }
-      if( weapon.getDamage(targetType, range) > 0 )
+      UnitContext uc = getRangeContext(map, weapon);
+      if( uc.rangeMax < range || uc.rangeMin > range )
+      {
+        // Can only hit things inside our range
+        continue;
+      }
+      if( weapon.getDamage(targetType) > 0 )
       {
         canHit = true;
         break;
@@ -160,150 +157,6 @@ public class Unit implements Serializable
     return canHit;
   }
 
-  /**
-   * Select the weapon owned by this unit that can inflict the
-   * most damage against the chosen target
-   * @param target
-   * @param range
-   * @param afterMoving
-   * @return The best weapon for that target, or null if no usable weapon exists.
-   */
-  public WeaponModel chooseWeapon(ITargetable targetType, int range, boolean afterMoving)
-  {
-    // if we have no weapons, we can't hurt things
-    if( model.weapons == null )
-      return null;
-
-    WeaponModel chosenWeapon = null;
-    double maxDamage = 0;
-    for( WeaponModel weapon : model.weapons )
-    {
-      if( !weapon.loaded(this) ) continue; // Can't shoot with no bullets.
-
-      // If the weapon isn't mobile, we cannot fire if we moved.
-      if( afterMoving && !weapon.canFireAfterMoving )
-      {
-        continue;
-      }
-      double currentDamage = weapon.getDamage(targetType, range);
-      if( weapon.getDamage(targetType, range) > maxDamage )
-      {
-        chosenWeapon = weapon;
-        maxDamage = currentDamage;
-      }
-    }
-    return chosenWeapon;
-  }
-
-  /** Expend ammo, if the weapon uses ammo */
-  public void fire(WeaponModel weapon)
-  {
-    if( !weapon.hasInfiniteAmmo )
-    {
-      if( ammo > 0 )
-        ammo--;
-      else
-        System.out.println("WARNING: " + toStringWithLocation() + " fired with no available ammo!");
-    }
-  }
-
-  public boolean isHurt()
-  {
-    return health < healthFromHP(model.maxHP);
-  }
-  public int getHP()
-  {
-    return (int) Math.ceil(healthToHP(health));
-  }
-  /** @return value in range [0-1.0]; represents the unit's current effectiveness */
-  public double getHPFactor()
-  {
-    return getHP() / (double)model.maxHP;
-  }
-  /** @return un-rounded HP */
-  public double getPreciseHP()
-  {
-    return healthToHP(health);
-  }
-  private static double healthToHP(int input)
-  {
-    return ((double)input)/10;
-  }
-  private static int healthFromHP(double input)
-  {
-    return (int) (input * 10);
-  }
-
-  /**
-   * Reduces HP by the specified amount.
-   * Enforces a minimum of 0.
-   * @return the change in HP
-   */
-  public int damageHP(double damage)
-  {
-    if( damage < 0 ) throw new ArithmeticException("Cannot inflict negative damage!");
-    int before = getHP();
-    health = Math.max(0, health - healthFromHP(damage));
-    return getHP() - before;
-  }
-
-  /**
-   * Increases HP by the specified amount.
-   * Enforces a minimum of 0.1.
-   * When healing, sets health to the maximum value for its HP
-   * @return the change in HP
-   */
-  public int alterHP(int change) { return alterHP(change, false); }
-  public int alterHP(int change, boolean allowOver)
-  {
-    int before = getHP();
-    int newHP = allowOver ? getHP()+change : Math.min(model.maxHP, getHP() + change);
-    health = Math.max(1, healthFromHP(newHP));
-    if (change > 0)
-      health = healthFromHP(getHP());
-    return getHP() - before;
-  }
-
-  public boolean capture(MapLocation target)
-  {
-    boolean success = false;
-
-    if( target != captureTarget )
-    {
-      captureTarget = target;
-      captureProgress = 0;
-    }
-    captureProgress += getHP();
-    if( captureProgress >= target.getEnvironment().terrainType.getCaptureThreshold() )
-    {
-      target.setOwner(CO);
-      captureProgress = 0;
-      target = null;
-      success = true;
-    }
-
-    return success;
-  }
-
-  public void stopCapturing()
-  {
-    captureTarget = null;
-    captureProgress = 0;
-  }
-
-  public int getCaptureProgress()
-  {
-    return captureProgress;
-  }
-  public XYCoord getCaptureTargetCoords()
-  {
-    XYCoord target = null;
-    if( null != captureTarget )
-    {
-      target = captureTarget.getCoordinates();
-    }
-    return target;
-  }
 
   /** Compiles and returns a list of all actions this unit could perform on map after moving along movePath. */
   public ArrayList<GameActionSet> getPossibleActions(GameMap map, GamePath movePath)
@@ -333,6 +186,7 @@ public class Unit implements Serializable
 
   public static class CargoList extends ArrayList<Unit>
   {
+    private static final long serialVersionUID = 1L;
     UnitModel model;
     public CargoList(UnitModel model)
     {
@@ -364,6 +218,11 @@ public class Unit implements Serializable
     return isFull;
   }
 
+  public int getRepairCost()
+  {
+    return model.getRepairCost(new UnitContext(this));
+  }
+
   @Override
   public String toString()
   {
@@ -375,4 +234,25 @@ public class Unit implements Serializable
     return String.format("%s at %s", model, new XYCoord(x, y));
   }
 
+
+  private final ArrayList<UnitModifier> unitMods = new ArrayList<>();
+  @Override
+  public List<UnitModifier> getModifiers()
+  {
+    ArrayList<UnitModifier> output = new ArrayList<>();
+    output.addAll(model.getModifiers());
+    output.addAll(unitMods);
+    return output;
+  }
+
+  @Override
+  public void addUnitModifier(UnitModifier unitModifier)
+  {
+    unitMods.add(unitModifier);
+  }
+  @Override
+  public void removeUnitModifier(UnitModifier unitModifier)
+  {
+    unitMods.remove(unitModifier);
+  }
 }

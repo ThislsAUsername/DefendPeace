@@ -1,18 +1,16 @@
 package Engine.Combat;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import Engine.GamePath;
 import Engine.XYCoord;
 import Engine.Combat.StrikeParams.BattleParams;
+import Engine.UnitActionLifecycles.BattleLifecycle.BattleEvent;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Units.Unit;
-import Units.WeaponModel;
+import Units.UnitContext;
 
 /**
  * CombatEngine serves as the general-purpose interface into the combat calculation logic.
@@ -24,9 +22,9 @@ public class CombatEngine
    * object to represent the specific combat instance and returns the result it calculates.
    * Requires perfect map info just in case the COs need to get weird.
    */
-  public static BattleSummary calculateBattleResults( Unit attacker, Unit defender, MapMaster map, boolean attackerMoved, int attackerX, int attackerY )
+  public static BattleSummary calculateBattleResults( UnitContext attacker, UnitContext defender, MapMaster map )
   {
-    return calculateBattleResults(attacker, defender, map, attackerMoved, attackerX, attackerY, false);
+    return calculateBattleResults(attacker, defender, map, false);
   }
 
   /**
@@ -35,98 +33,95 @@ public class CombatEngine
    */
   public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, int attackerX, int attackerY )
   {
-    boolean attackerMoved = attacker.x != attackerX || attacker.y != attackerY;
-    return calculateBattleResults(attacker, defender, map, attackerMoved, attackerX, attackerY, true);
+    return simulateBattleResults(attacker, defender, map, new XYCoord(attackerX, attackerY));
   }
   public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, XYCoord moveCoord )
   {
-    return simulateBattleResults(attacker, defender, map, moveCoord.xCoord, moveCoord.yCoord);
+    UnitContext attackerContext = new UnitContext(map, attacker, null, null, moveCoord);
+    UnitContext defenderContext = new UnitContext(map, defender, null, null, new XYCoord(defender.x, defender.y));
+    return calculateBattleResults(attackerContext, defenderContext, map, true);
+  }
+  public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, GamePath path )
+  {
+    UnitContext attackerContext = new UnitContext(map, attacker, null, path, path.getEndCoord());
+    UnitContext defenderContext = new UnitContext(map, defender, null, null, new XYCoord(defender.x, defender.y));
+    return calculateBattleResults(attackerContext, defenderContext, map, true);
   }
 
   public static StrikeParams calculateTerrainDamage( Unit attacker, GamePath path, MapLocation target, GameMap map )
   {
     int battleRange = path.getEndCoord().getDistance(target.getCoordinates());
-    boolean attackerMoved = path.getPathLength() > 1;
-    WeaponModel weapon = attacker.chooseWeapon(target, battleRange, attackerMoved);
-    return new StrikeParams(
-        new Combatant(attacker, weapon, path.getEnd().x, path.getEnd().y),
-        map, battleRange,
-        attacker.model.getDamageRatio(), attacker.getHP(),
-        weapon.getDamage(target),
-        false);
+    UnitContext uc = new UnitContext(attacker);
+    uc.map = map;
+    uc.setPath(path);
+    uc.chooseWeapon(target, battleRange);
+    return StrikeParams.buildStrikeParams(uc, target, map, battleRange, false);
   }
 
   /**
    * Calculate and return the results of a battle.
-   * This will not actually apply the damage taken; this is done later in BattleEvent.
-   * Note that we assume the defender is where he thinks he is, but the attacker may move before attacking, so we take that coordinate explicitly.
+   * <p>This will not actually apply the damage taken; that is done later in {@link BattleEvent}.
+   * <p>Requires the coord field be defined for both attacker and defender.
    * @param isSim Determines whether to cap damage at the HP of the victim in question
    * @return A BattleSummary object containing all relevant details from this combat instance.
    */
-  public static BattleSummary calculateBattleResults(Unit attacker, Unit defender, GameMap map,
-                                                     boolean attackerMoved, int attackerX, int attackerY,
-                                                     boolean isSim)
+  public static BattleSummary calculateBattleResults(UnitContext attacker, UnitContext defender,
+                                                     GameMap map, boolean isSim)
   {
-    int defenderX = defender.x; // This variable is technically not necessary, but provides consistent names with attackerX/Y.
-    int defenderY = defender.y;
-    int battleRange = Math.abs(attackerX - defenderX) + Math.abs(attackerY - defenderY);
-    WeaponModel attackerWeapon = attacker.chooseWeapon(defender.model, battleRange, attackerMoved);
-    WeaponModel defenderWeapon = null;
-    // Only attacks at point-blank range can be countered
-    if( 1 == battleRange )
-      defenderWeapon = defender.chooseWeapon(attacker.model, battleRange, false);
+    int attackerX = attacker.coord.xCoord;
+    int attackerY = attacker.coord.yCoord;
+    int defenderX = defender.coord.xCoord;
+    int defenderY = defender.coord.yCoord;
 
-    CombatContext context = new CombatContext(map, attacker, attackerWeapon, defender, defenderWeapon, battleRange, attackerX, attackerY);
-    
-    // unitDamageMap provides an order- and perspective-agnostic view of how much damage was done
-    // This is necessary to pass information coherently between this function's local context
-    //   and the context of the CombatContext which can be altered in unpredictable ways.
-    Map<Unit, Entry<WeaponModel,Double>> unitDamageMap = new HashMap<Unit, Entry<WeaponModel,Double>>();
-    unitDamageMap.put(attacker, new AbstractMap.SimpleEntry<WeaponModel,Double>(attackerWeapon, 0.0));
-    unitDamageMap.put(defender, new AbstractMap.SimpleEntry<WeaponModel,Double>(defenderWeapon, 0.0));
+    int battleRange = Math.abs(attackerX - defenderX) + Math.abs(attackerY - defenderY);
+
+    CombatContext context = CombatContext.build(map, attacker, defender, battleRange);
+
+    // Provides a simple way to correlate start state and end state of each combatant.
+    // Uses a map to make it easy to pass information coherently between this function's local context
+    //   and the context of the CombatContext (which can be altered in unpredictable ways).
+    Map<UnitContext, UnitContext> unitStateMap = new HashMap<UnitContext, UnitContext>();
+
+    // Starting assumption is that nothing changed in the "combat"
+    unitStateMap.put(attacker, new UnitContext(attacker));
+    unitStateMap.put(defender, new UnitContext(defender));
 
     // From here on in, use context variables only
 
-    double attackerHPLoss = 0;
+    BattleParams attackInstance = context.getAttack();
 
-    // Set up our scenario.
-    BattleParams attackInstance = StrikeParams.getAttack(context);
+    double damage = attackInstance.calculateDamage();
+    unitStateMap.get(context.attacker).fire(context.attacker.weapon);
+    unitStateMap.get(context.defender).damageHP(damage, isSim);
 
-    double defenderHPLoss = attackInstance.calculateDamage();
-    unitDamageMap.put(context.attacker, new AbstractMap.SimpleEntry<WeaponModel,Double>(context.attackerWeapon, defenderHPLoss));
-    if( !isSim && defenderHPLoss > context.defender.getPreciseHP() ) defenderHPLoss = context.defender.getPreciseHP();
-
-    // If the unit can counter, and wasn't killed in the initial volley, calculate return damage.
-    if( context.canCounter && (context.defender.getPreciseHP() > defenderHPLoss) )
+    // New battle instance with defender counter-attacking.
+    BattleParams defendInstance = context.getCounterAttack(damage, isSim);
+    if( null != defendInstance )
     {
-      // New battle instance with defender counter-attacking.
-      double counterHP = Math.ceil(context.defender.getPreciseHP() - defenderHPLoss); // Account for the first attack's damage to the now-attacker.
-      BattleParams defendInstance = StrikeParams.getCounterAttack(context, counterHP);
-
-      attackerHPLoss = defendInstance.calculateDamage();
-      unitDamageMap.put(context.defender, new AbstractMap.SimpleEntry<WeaponModel,Double>(context.defenderWeapon, attackerHPLoss));
-      if( !isSim && attackerHPLoss > context.attacker.getPreciseHP() ) attackerHPLoss = context.attacker.getPreciseHP();
+      double counterDamage = defendInstance.calculateDamage();
+      unitStateMap.get(context.defender).fire(context.defender.weapon);
+      unitStateMap.get(context.attacker).damageHP(counterDamage, isSim);
     }
-    
+
+    // Consider throwing in a final hook here for UnitModifiers to change the result post-calculations.
+
     // Calculations complete.
     // Since we are setting up our BattleSummary, use non-CombatContext variables
     //   so consumers of the Summary will see results consistent with the current board/map state
     //   (e.g. the Unit 'attacker' actually belongs to the CO whose turn it currently is)
-    return new BattleSummary(attacker, unitDamageMap.get(attacker).getKey(),
-                             defender, unitDamageMap.get(defender).getKey(),
-                             map.getEnvironment(attackerX, attackerY).terrainType,
-                             map.getEnvironment(defenderX, defenderY).terrainType,
-                             unitDamageMap.get(defender).getValue(), unitDamageMap.get(attacker).getValue());
+    return new BattleSummary(attacker, unitStateMap.get(attacker),
+                             defender, unitStateMap.get(defender));
   }
 
   public static double calculateOneStrikeDamage( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
   {
-    return new BattleParams(
-        new Combatant(attacker, attacker.chooseWeapon(defender.model, battleRange, attackerMoved), attacker.x, attacker.y),
-        new Combatant(defender, null, defender.x, defender.y),
+    XYCoord dest = new XYCoord(attacker);
+    UnitContext attackerContext = new UnitContext(map, attacker, null, null, dest);
+    attackerContext.chooseWeapon(defender.model, battleRange, attackerMoved);
+    return StrikeParams.buildBattleParams(
+        attackerContext,
+        new UnitContext(map, defender),
         map, battleRange,
-        attacker.model.getDamageRatio(), attacker.getHP(),
-        defender.model.getDefenseRatio(), terrainStars,
         false).calculateDamage();
   }
 }

@@ -1,33 +1,20 @@
 package Engine.Combat;
 
-import Terrain.TerrainType;
-import Units.Unit;
-import Units.WeaponModel;
+import Units.UnitContext;
+import Units.UnitDelta;
 
 /**
  * This class simply provides information describing a battle, and is used more like a C-style struct than an object.
+ * <p>Giving the start and end states allows consuming code to be very specific on what it cares about.
  */
 public class BattleSummary
 {
-  public final Unit attacker;
-  public final Unit defender;
-  public final WeaponModel attackerWeapon;
-  public final WeaponModel defenderWeapon;
-  public final TerrainType attackerTerrain;
-  public final TerrainType defenderTerrain;
-  public double attackerHPLoss;
-  public double defenderHPLoss;
+  public final UnitDelta attacker;
+  public final UnitDelta defender;
 
-  public BattleSummary(Unit atk, WeaponModel aw, Unit def, WeaponModel dw, TerrainType atkTerrain, TerrainType defTerrain, double atkHPLoss,
-      double defHPLoss)
+  public BattleSummary(UnitContext attackerStart, UnitContext attackerEnd, UnitContext defenderStart, UnitContext defenderEnd)
   {
-    attacker = atk;
-    defender = def;
-    attackerWeapon = aw;
-    defenderWeapon = dw;
-    attackerTerrain = atkTerrain;
-    defenderTerrain = defTerrain;
-    attackerHPLoss = atkHPLoss;
-    defenderHPLoss = defHPLoss;
+    this.attacker = new UnitDelta(attackerStart, attackerEnd);
+    this.defender = new UnitDelta(defenderStart, defenderEnd);
   }
 }

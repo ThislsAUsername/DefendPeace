@@ -16,7 +16,7 @@ import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Units.Unit;
-import Units.WeaponModel;
+import Units.UnitContext;
 import Units.MoveTypes.MoveType;
 
 public class Utils
@@ -26,6 +26,11 @@ public class Utils
   public static ArrayList<XYCoord> findLocationsInRange(GameMap map, XYCoord origin, int maxRange)
   {
     return findLocationsInRange(map, origin, 1, maxRange);
+  }
+
+  public static ArrayList<XYCoord> findLocationsInRange(GameMap map, XYCoord origin, UnitContext uc)
+  {
+    return findLocationsInRange(map, origin, uc.rangeMin, uc.rangeMax);
   }
 
   /** Returns a list of all locations between minRange and maxRange tiles away from origin, inclusive. */
@@ -52,28 +57,28 @@ public class Utils
   }
 
   /** Returns a list of locations of all valid targets that weapon could hit from attackerPosition. */
-  public static ArrayList<XYCoord> findTargetsInRange(GameMap map, Commander co, XYCoord attackerPosition, WeaponModel weapon)
+  public static ArrayList<XYCoord> findTargetsInRange(GameMap map, UnitContext attacker)
   {
-    return findTargetsInRange(map, co, attackerPosition, weapon, true);
+    return findTargetsInRange(map, attacker, true);
   }
 
   /** Returns a list of locations of all valid targets that weapon could hit from attackerPosition. */
-  public static ArrayList<XYCoord> findTargetsInRange(GameMap map, Commander co, XYCoord attackerPosition, WeaponModel weapon, boolean includeTerrain)
+  public static ArrayList<XYCoord> findTargetsInRange(GameMap map, UnitContext attacker, boolean includeTerrain)
   {
-    ArrayList<XYCoord> locations = findLocationsInRange(map, attackerPosition, weapon.minRange, weapon.maxRange);
+    ArrayList<XYCoord> locations = findLocationsInRange(map, attacker.coord, attacker.rangeMin, attacker.rangeMax);
     ArrayList<XYCoord> targets = new ArrayList<XYCoord>();
     for( XYCoord loc : locations )
     {
       Unit resident = map.getLocation(loc).getResident();
       if( resident != null && // Peeps are there.
-          resident.CO.isEnemy(co) && // They are not friendly.
-          weapon.getDamage(resident.model) > 0 ) // We can shoot them.
+          resident.CO.isEnemy(attacker.CO) && // They are not friendly.
+          attacker.weapon.getDamage(resident.model) > 0 ) // We can shoot them.
       {
         targets.add(loc);
       }
       // You can never be friends with terrain, so shoot anything that's shootable
       else if (includeTerrain && resident == null && // Peeps ain't there.
-               weapon.getDamage(map.getEnvironment(loc).terrainType) > 0)
+          attacker.weapon.getDamage(map.getEnvironment(loc).terrainType) > 0)
         targets.add(loc);
     }
     return targets;
@@ -118,7 +123,7 @@ public class Utils
    */
   public static ArrayList<XYCoord> findPossibleDestinations(XYCoord start, Unit unit, GameMap gameMap, boolean includeOccupiedSpaces)
   {
-    return findFloodFillArea(start, unit.getMoveFunctor(includeOccupiedSpaces), Math.min(unit.model.movePower, unit.fuel), gameMap);
+    return findFloodFillArea(start, unit.getMoveFunctor(includeOccupiedSpaces), Math.min(unit.getMovePower(gameMap), unit.fuel), gameMap);
   }
   /**
    * @param start Initial location; will usually be in the output set.
@@ -177,7 +182,7 @@ public class Utils
   }
   public static boolean isPathValid(XYCoord start, Unit unit, GamePath path, GameMap map, boolean includeOccupiedSpaces)
   {
-    return isPathValid(start, unit.getMoveFunctor(includeOccupiedSpaces), Math.min(unit.model.movePower, unit.fuel), path, map);
+    return isPathValid(start, unit.getMoveFunctor(includeOccupiedSpaces), Math.min(unit.getMovePower(map), unit.fuel), path, map);
   }
   public static boolean isPathValid(XYCoord start, FloodFillFunctor fff, int initialFillPower, GamePath path, GameMap map)
   {
@@ -249,7 +254,7 @@ public class Utils
   {
     // findShortestPath() is given a particular endpoint already, so it assumes that it is valid to end up there.
     return findShortestPath(start, unit.getMoveFunctor(true, theoretical),
-                            (theoretical)? Integer.MAX_VALUE : Math.min(unit.model.movePower, unit.fuel),
+                            (theoretical)? Integer.MAX_VALUE : Math.min(unit.getMovePower(map), unit.fuel),
                             x, y, map);
   }
   /**
@@ -600,7 +605,7 @@ public class Utils
       XYCoord from = path.getWaypoint(i-1).GetCoordinates();
       XYCoord to   = path.getWaypoint( i ).GetCoordinates();
       // If there are collisions relevant to the unit, the cost will be IMPASSABLE
-      if( unit.model.movePower < fff.getTransitionCost(map, from, to) )
+      if( unit.getMovePower(map) < fff.getTransitionCost(map, from, to) )
       {
         result = true;
         break;

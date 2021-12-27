@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -17,16 +18,16 @@ import AI.AICombatUtils;
 import AI.AIController;
 import AI.AILibrary;
 import AI.AIMaker;
-import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameAction;
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
-import Engine.Combat.CombatContext;
-import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
+import Engine.UnitMods.UnitModList;
+import Engine.UnitMods.UnitModifier;
+import Engine.UnitMods.UnitModifierWithDefaults;
 import Engine.UuidGenerator;
 import Terrain.GameMap;
 import Terrain.MapLocation;
@@ -35,11 +36,12 @@ import Terrain.MapPerspective;
 import Terrain.TerrainType;
 import UI.GameOverlay;
 import UI.UIUtils.Faction;
+import UI.UnitMarker;
 import Units.Unit;
 import Units.UnitModel;
 import Units.UnitModelScheme.GameReadyModels;
 
-public class Commander implements GameEventListener, Serializable
+public class Commander implements GameEventListener, Serializable, UnitModifierWithDefaults, UnitModList, UnitMarker
 {
   private static final long serialVersionUID = 1L;
   
@@ -50,7 +52,6 @@ public class Commander implements GameEventListener, Serializable
   public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
   public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
   public Set<XYCoord> ownedProperties;
-  public ArrayList<COModifier> modifiers;
   public Color myColor;
   public Faction faction;
   public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
@@ -63,7 +64,7 @@ public class Commander implements GameEventListener, Serializable
   private double myAbilityPower = 0;
 
   private ArrayList<CommanderAbility> myAbilities = null;
-  private String myActiveAbilityName = "";
+  private CommanderAbility myActiveAbility = null;
 
   // The AI has to be effectively stateless anyway (to be able to adapt to whatever scenario it finds itself in on map start),
   //   so may as well not require them to care about serializing their contents.
@@ -74,63 +75,45 @@ public class Commander implements GameEventListener, Serializable
 
   public Commander(CommanderInfo info, GameScenario.GameRules rules)
   {
+    unitMods = new ArrayList<UnitModifier>();
+    unitMods.add(this);
+
     coInfo = info;
     gameRules = rules;
 
     // Fetch our fieldable unit types from the rules
     GameReadyModels GRMs = rules.unitModelScheme.getGameReadyModels();
     unitProductionByTerrain = GRMs.shoppingList;
-    for (UnitModel um : GRMs.unitModels)
+    for( UnitModel um : GRMs.unitModels )
+    {
       unitModels.add(um);
+      um.CO = this;
+    }
 
-    modifiers = new ArrayList<COModifier>();
     units = new ArrayList<Unit>();
     ownedProperties = new HashSet<XYCoord>();
 
     myAbilities = new ArrayList<CommanderAbility>();
   }
 
+  public void initForGame(GameInstance game)
+  {
+    this.registerForEvents(game);
+    for( CommanderAbility ca : myAbilities )
+      ca.initForGame(game);
+  }
+  public void deInitForGame(GameInstance game)
+  {
+    this.unregister(game);
+    if( null != myActiveAbility )
+      myActiveAbility.deactivate(game.gameMap);
+    for( CommanderAbility ca : myAbilities )
+      ca.deInitForGame(game);
+  }
+
   protected void addCommanderAbility(CommanderAbility ca)
   {
     myAbilities.add(ca);
-  }
-
-  /**
-   * These functions allow a Commander to inject modifications before evaluating a battle.
-   * Simple damage buffs, etc. can be accomplished via COModifiers, but effects
-   * that depend on circumstances that must be evaluated at combat time (e.g. a
-   * terrain-based firepower bonus) can be handled here.
-   * The following three functions will serve for most combat changes, like the above example.
-   * changeCombatContext() allows the CO to make more drastic changes like counterattacking first or at 2+ range.
-   */
-  public void changeCombatContext(CombatContext instance)
-  {}
-  /**
-   * Called any time you are making a weapon attack.
-   * Applies to all potential targets, whether they be units or not.
-   * Should be used to modify attacks from your units
-   *   any time you do not need specific information about the target.
-   */
-  public void modifyUnitAttack(StrikeParams params)
-  {}
-  /**
-   * Called any time you are attacking a unit, always after {@link #modifyUnitAttack(StrikeParams)}
-   * Applies only when attacking a unit.
-   * Should be used only when you need specific information about your target.
-   */
-  public void modifyUnitAttackOnUnit(BattleParams params)
-  {}
-  /**
-   * Called any time your unit is being attacked, after {@link #modifyUnitAttackOnUnit(BattleParams)}
-   * Should be used to modify attacks made against your units.
-   */
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
-  {}
-
-  public void addCOModifier(COModifier mod)
-  {
-    mod.applyChanges(this);
-    modifiers.add(mod); // Add to the list so the modifier can be reverted next turn.
   }
 
   public void endTurn()
@@ -145,26 +128,24 @@ public class Commander implements GameEventListener, Serializable
    */
   public GameEventQueue initTurn(MapMaster map)
   {
+    GameEventQueue events = new GameEventQueue();
     myView.resetFog();
-    myActiveAbilityName = "";
+
+    if( null != myActiveAbility )
+    {
+      events.addAll(myActiveAbility.getRevertEvents(map));
+      myActiveAbility.deactivate(map);
+      myActiveAbility = null;
+    }
 
     // Accrue income for each city under your control.
     money += getIncomePerTurn();
-
-    // Un-apply any modifiers that were activated last turn.
-    // TODO: If/when we have modifiers that last multiple turns, figure out how to handle them.
-    for( int i = modifiers.size() - 1; i >= 0; --i )
-    {
-      modifiers.get(i).revertChanges(this);
-      modifiers.remove(i);
-    }
 
     if( null != aiController )
     {
       aiController.initTurn(myView);
     }
 
-    GameEventQueue events = new GameEventQueue();
     for( Unit u : units )
     {
       events.addAll(u.initTurn(map));
@@ -246,16 +227,11 @@ public class Commander implements GameEventListener, Serializable
 
     return models;
   }
-  
-  /**
-   * Returns a character to be displayed on the unit.
-   * Primary usage should be pieces of info that aren't otherwise immediately apparent from the map.
-   * Our rendering only supports alphanumeric values at this time.
-   */
-  public char getUnitMarking(Unit unit)
+
+  @Override
+  public Color getMarkingColor(Unit unit)
   {
-    // We don't have anything useful to print, so don't.
-    return '\0';
+    return myColor;
   }
 
   /** Get the list of units this commander can build from the given property type. */
@@ -269,7 +245,7 @@ public class Commander implements GameEventListener, Serializable
   public ArrayList<CommanderAbility> getReadyAbilities()
   {
     ArrayList<CommanderAbility> ready = new ArrayList<CommanderAbility>();
-    if( myActiveAbilityName.isEmpty() )
+    if( null == myActiveAbility )
     {
       for( CommanderAbility ca : myAbilities )
       {
@@ -297,17 +273,19 @@ public class Commander implements GameEventListener, Serializable
     return myAbilityPower;
   }
 
-  public String getActiveAbilityName()
+  public CommanderAbility getActiveAbility()
   {
-    return myActiveAbilityName;
+    return myActiveAbility;
   }
 
   /** Lets the commander know that he's using an ability,
    *  and accounts for the cost of using it. */
-  public void activateAbility(CommanderAbility ability)
+  public void activateAbility(CommanderAbility ability, MapMaster map)
   {
     modifyAbilityPower(-ability.getCost());
-    myActiveAbilityName = ability.toString();
+    if( null != myActiveAbility )
+      myActiveAbility.deactivate(map);
+    myActiveAbility = ability;
   }
 
   public void modifyAbilityPower(double amount)
@@ -334,12 +312,6 @@ public class Commander implements GameEventListener, Serializable
       }
     }
     return maxPower;
-  }
-
-  // TODO: determine if this needs parameters, and if so, what?
-  public double getRepairCostFactor()
-  {
-    return 1;
   }
 
   // TODO: determine if this needs parameters, and if so, what?
@@ -386,24 +358,25 @@ public class Commander implements GameEventListener, Serializable
   @Override
   public GameEventQueue receiveBattleEvent(final BattleSummary summary)
   {
-    // We only care who the units belong to, not who picked the fight. 
+    // We only care who the units belong to, not who picked the fight.
+    // Note: Cart charge only uses whole HP, so that's what we're doing, too.
     Unit minion = null;
     double myHPLoss = -10;
     Unit enemy = null;
     double myHPDealt = -10;
     if( this == summary.attacker.CO )
     {
-      minion = summary.attacker;
-      myHPLoss = summary.attackerHPLoss;
-      enemy = summary.defender;
-      myHPDealt = summary.defenderHPLoss;
+      minion = summary.attacker.unit;
+      myHPLoss = summary.attacker.getHPDamage();
+      enemy = summary.defender.unit;
+      myHPDealt = summary.defender.getHPDamage();
     }
     if( this == summary.defender.CO )
     {
-      minion = summary.defender;
-      myHPLoss = summary.defenderHPLoss;
-      enemy = summary.attacker;
-      myHPDealt = summary.attackerHPLoss;
+      minion = summary.defender.unit;
+      myHPLoss = summary.defender.getHPDamage();
+      enemy = summary.attacker.unit;
+      myHPDealt = summary.attacker.getHPDamage();
     }
 
     // Do nothing if we're not involved
@@ -566,5 +539,24 @@ public class Commander implements GameEventListener, Serializable
       if( myView.getLocation(coord).getOwner() == this && myView.getLocation(coord).isProfitable() ) ++count;
     }
     return count * (gameRules.incomePerCity + incomeAdjustment);
+  }
+
+  private final ArrayList<UnitModifier> unitMods;
+  @Override
+  public List<UnitModifier> getModifiers()
+  {
+    // TODO Add call to pull modifiers from Army when that becomes a thing?
+    return new ArrayList<UnitModifier>(unitMods);
+  }
+
+  @Override
+  public void addUnitModifier(UnitModifier unitModifier)
+  {
+    unitMods.add(unitModifier);
+  }
+  @Override
+  public void removeUnitModifier(UnitModifier unitModifier)
+  {
+    unitMods.remove(unitModifier);
   }
 }

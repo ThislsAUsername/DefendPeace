@@ -1,15 +1,17 @@
 package CommandingOfficers;
 
-import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.COModifier;
+import java.util.ArrayList;
+
 import Engine.GameInstance;
 import Engine.GameScenario;
-import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
+import Engine.StateTrackers.DamageDealtToIncomeConverter;
+import Engine.UnitMods.UnitDamageModifier;
+import Engine.UnitMods.UnitModifier;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
-import Units.Unit;
+import Units.*;
 
 public class Patch extends Commander
 {
@@ -55,8 +57,6 @@ public class Patch extends Commander
   private static final int PILLAGE_ATTACK_BUFF = 25;
 
   private LootAbility myLootAbility = null;
-  private DamageDealtToIncomeConverter myIncomeConverter = null;
-  double myIncomeRatio = 0.0;
 
   public Patch(GameScenario.GameRules rules)
   {
@@ -67,22 +67,18 @@ public class Patch extends Commander
   }
 
   @Override
-  public void registerForEvents(GameInstance game)
+  public void initForGame(GameInstance game)
   {
-    super.registerForEvents(game);
+    super.initForGame(game);
     // Passive - Loot
     myLootAbility = new LootAbility(this);
     myLootAbility.registerForEvents(game);
-    // Get cash from fightan based on myIncomeRatio
-    myIncomeConverter = new DamageDealtToIncomeConverter(this);
-    myIncomeConverter.registerForEvents(game);
   }
   @Override
-  public void unregister(GameInstance game)
+  public void deInitForGame(GameInstance game)
   {
-    super.unregister(game);
+    super.deInitForGame(game);
     myLootAbility.unregister(game);
-    myIncomeConverter.unregister(game);
   }
 
   public static CommanderInfo getInfo()
@@ -116,90 +112,47 @@ public class Patch extends Commander
     }
   }
 
-  /**
-   * This class supports Patch's abilities by inspecting published BattleEvents. If the owning Commander took
-   * part in the battle, then any damage done to the opponent will give income to the owning
-   * Commander. The amount of income is a fraction of value of the damage that was done, thus
-   * damaging more expensive units will grant more income.
-   */
-  private static class DamageDealtToIncomeConverter implements GameEventListener
-  {
-    private static final long serialVersionUID = 1L;
-    private Patch myCommander = null;
-
-    public DamageDealtToIncomeConverter(Patch myCo)
-    {
-      myCommander = myCo;
-    }
-
-    @Override
-    public GameEventQueue receiveBattleEvent(BattleSummary battleInfo)
-    {
-      // Determine if we were part of this fight. If so, cash in on any damage done to the other guy.
-      double hpLoss = 0;
-      double unitCost = 0;
-      if( battleInfo.attacker.CO == myCommander )
-      {
-        hpLoss = battleInfo.defenderHPLoss;
-        unitCost = battleInfo.defender.model.getCost();
-      }
-      else if( battleInfo.defender.CO == myCommander )
-      {
-        hpLoss = battleInfo.attackerHPLoss;
-        unitCost = battleInfo.attacker.model.getCost();
-      }
-
-      // Do the necessary math, then round to the nearest int.
-      int income = (int)(hpLoss * (unitCost/10.0) * myCommander.myIncomeRatio + 0.5);
-      myCommander.money += income;
-      return null;
-    }
-  }
-
   /** PatchAbility gives Patch a damage bonus, and also grants
    * income based on damage inflicted to enemies. */
-  private static class PatchAbility extends CommanderAbility implements COModifier
+  private static class PatchAbility extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
-    private CODamageModifier damageBuff = null;
-    private Patch coCast;
-    private double myIncomeRatio = 0.0;
+    private UnitDamageModifier damageBuff = null;
+    private final double myIncomeRatio;
+    private DamageDealtToIncomeConverter tracker;
 
-    PatchAbility(Patch myCO, String abilityName, int abilityCost, double incomeRatio, int unitBuff)
+    PatchAbility(Patch patch, String abilityName, int abilityCost, double incomeRatio, int unitBuff)
     {
-      super(myCO, abilityName, abilityCost);
+      super(patch, abilityName, abilityCost);
 
-      coCast = myCO;
       myIncomeRatio = incomeRatio;
 
       // Create a COModifier that we can apply to Patch when needed.
-      damageBuff = new CODamageModifier(unitBuff);
+      damageBuff = new UnitDamageModifier(unitBuff);
+    }
+    @Override
+    public void initForGame(GameInstance game)
+    {
+      // Get cash from fightan
+      tracker = DamageDealtToIncomeConverter.instance(game, DamageDealtToIncomeConverter.class);
+    }
+
+    @Override
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    {
+      modList.add(damageBuff);
     }
 
     @Override
     protected void perform(MapMaster gameMap)
     {
-      // Register this class as a COModifier, so we can deactivate one turn from now.
-      myCommander.addCOModifier(this);
-
-      coCast.myIncomeRatio = myIncomeRatio;
-
-      // Bump up our power level.
-      myCommander.addCOModifier(damageBuff);
-    }
-
-    @Override // COModifier interface.
-    public void applyChanges(Commander commander)
-    {
-      // No special action required.
+      tracker.startTracking(myCommander, myIncomeRatio);
     }
 
     @Override
-    public void revertChanges(Commander commander)
+    public void revert(MapMaster gameMap)
     {
-      // This will be called when the Commander removes this COModifier. It will remove the damage
-      // modifier we added as well, so we just need to turn off the the damage-to-income listener.
-      coCast.myIncomeRatio = 0;
+      tracker.stopTracking(myCommander, myIncomeRatio);
     }
   }
 

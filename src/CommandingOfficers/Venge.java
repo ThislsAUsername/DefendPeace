@@ -2,19 +2,23 @@ package CommandingOfficers;
 
 import java.util.ArrayList;
 
-import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.CODefenseModifier;
-import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatContext;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.MassDamageEvent;
 import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
+import Engine.UnitMods.UnitDamageModifier;
+import Engine.UnitMods.UnitDefenseModifier;
+import Engine.UnitMods.UnitInstanceFilter;
+import Engine.UnitMods.UnitModifier;
+import Engine.UnitMods.UnitModifierWithDefaults;
 import Terrain.MapMaster;
 import Units.Unit;
-import Units.WeaponModel;
+import Units.UnitContext;
+import Units.UnitModel;
 
 /*
  * Venge enhances counter-attacks of all sorts.
@@ -34,17 +38,20 @@ public class Venge extends Commander
           "Commander Venge likes to get vengeance for any slight.\n" +
           "Attacking Venge is not always difficult, but you may not like the consequences.\n"));
       infoPages.add(new InfoPage(
-          "Passive:\n" + 
-          "- After being attacked, Venge gets a bonus of "+VENGEANCE_BOOST+"% attack against the unit that picked the fight.\n" +
+          "Passive:\n" +
+          "- Baseline stats are lower than normal; -10 defense and attack.\n" +
+          "- After being attacked, Venge gets a bonus of +"+VENGEANCE_BOOST+"% attack against the unit that picked the fight.\n" +
           "- Units that Venge can get vengeance on are marked with a V.\n"));
       infoPages.add(new InfoPage(
           IronWill.NAME+" ("+IronWill.COST+"):\n" +
-          "Gives a defense boost of "+IronWill.IRONWILL_BUFF+"%\n" +
-          "Units now deal counterattacks as if they had not taken damage from the hit.\n"));
+          "Only affects units that have not yet acted.\n" +
+          "Grants +"+IronWill.IRONWILL_BOOST+" offense and defense\n" +
+          "Your units resist damage and counterattack as if at full HP.\n" +
+          "When the power ends, your units lose "+IronWill.IRONWILL_WOUND+" HP (nonlethal)\n"));
       infoPages.add(new InfoPage(
           Retribution.NAME+" ("+Retribution.COST+"):\n" +
-          "Gives an attack boost of "+Retribution.RETRIBUTION_BUFF+"%\n" +
-          "Gives a defense penalty of "+Retribution.RETRIBUTION_NERF+"%\n" +
+          "Gives an attack boost of +"+Retribution.RETRIBUTION_BUFF+"%\n" +
+          "Gives a defense penalty of +"+Retribution.RETRIBUTION_NERF+"%\n" +
           "Units now counterattack before they are hit.\n"));
     }
     @Override
@@ -56,16 +63,21 @@ public class Venge extends Commander
 
   /** A list of all the units that have attacked me since my last turn. */
   private ArrayList<Unit> aggressors = new ArrayList<Unit>();
+  private IronWill myIronWill = new IronWill(this);
   /** How much power I get when beating them up */
-  public final static int VENGEANCE_BOOST = 50;
-  public boolean counterAtFullPower = false;
-  public boolean counterFirst = false;
+  public final static int VENGEANCE_BOOST = 60;
 
   public Venge(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
-    addCommanderAbility(new IronWill(this));
+    for (UnitModel model : unitModels)
+    {
+      model.modifyDamageRatio(-10);
+      model.modifyDefenseRatio(-10);
+    }
+
+    addCommanderAbility(myIronWill);
     addCommanderAbility(new Retribution(this));
   }
 
@@ -78,8 +90,6 @@ public class Venge extends Commander
   public GameEventQueue initTurn(MapMaster map)
   {
     GameEventQueue events = super.initTurn(map);
-    counterAtFullPower = false;
-    counterFirst = false;
     return events;
   }
   @Override
@@ -93,9 +103,12 @@ public class Venge extends Commander
   public char getUnitMarking(Unit unit)
   {
     // If we can get a vengeance boost against this unit, let our player know.
-    if (aggressors.contains(unit))
+    if( aggressors.contains(unit) )
       return 'V';
-    
+    // If we ever allow COs other than our own to *activate* abilities, then this is gonna have to move to a StateTracker
+    if( myIronWill.boostedUnits.contains(unit) )
+      return 'I';
+
     return super.getUnitMarking(unit);
   }
 
@@ -107,45 +120,66 @@ public class Venge extends Commander
     return null;
   }
 
-  @Override
-  public void changeCombatContext(CombatContext instance)
+  public static class PreEmptiveCounterMod implements UnitModifierWithDefaults
   {
-    // If we're swapping, and we can counter, and we're on the defensive, do the swap.
-    if (counterFirst && instance.canCounter && this == instance.defender.CO )
+    private static final long serialVersionUID = 1L;
+
+    public final Commander co;
+    public PreEmptiveCounterMod(Commander co)
     {
-      // Store our unit. Since defenders don't move, we have defenderX/Y already.
-      Unit minion = instance.defender;
-      WeaponModel myWeapon = instance.defenderWeapon;
+      super();
+      this.co = co;
+    }
 
-      instance.defender = instance.attacker;
-      instance.defenderWeapon = instance.attackerWeapon;
-      instance.defenderX = instance.attackerX;
-      instance.defenderY = instance.attackerY;
+    @Override
+    public void changeCombatContext(CombatContext instance)
+    {
+      // If we're swapping, and we can counter, and we're on the defensive, do the swap.
+      if( instance.canCounter && co == instance.defender.CO )
+      {
+        UnitContext minion = instance.defender;
 
-      instance.attacker = minion;
-      instance.attackerWeapon = myWeapon;
-      instance.attackerX = minion.x;
-      instance.attackerY = minion.y;
+        instance.defender = instance.attacker;
+        instance.attacker = minion;
+      }
+    }
+  }
+
+  public static class IronWillMod implements UnitModifierWithDefaults
+  {
+    private static final long serialVersionUID = 1L;
+
+    public final int buff;
+    public IronWillMod(int buff)
+    {
+      super();
+      this.buff = buff;
+    }
+    @Override
+    public void modifyUnitAttack(StrikeParams params)
+    {
+      if( params.isCounter )
+      {
+        params.attackerHP = params.attacker.model.maxHP;
+      }
+      params.attackPower += buff;
+    }
+    @Override
+    public void modifyUnitDefenseAgainstUnit(BattleParams params)
+    {
+      params.defenderHP = params.defender.model.maxHP;
+      params.defensePower += buff;
     }
   }
 
   @Override
-  public void modifyUnitAttack(StrikeParams params)
-  {
-      if( counterAtFullPower && params.isCounter )
-      {
-        // counterattack as if the unit had not taken damage.
-        params.attackerHP = params.attacker.body.getHP();
-      }
-  }
-  @Override
   public void modifyUnitAttackOnUnit(BattleParams params)
   {
-      if( aggressors.contains(params.defender.body) )
-      {
-        // Boost attack if it's time to avenge slights
-        params.attackPower += VENGEANCE_BOOST;
-      }
+    if( aggressors.contains(params.defender.unit) )
+    {
+      // Boost attack if it's time to avenge slights
+      params.attackPower += VENGEANCE_BOOST;
+    }
   }
 
   @Override
@@ -155,36 +189,58 @@ public class Venge extends Commander
     // Determine if we were attacked. If so, record this misdeed.
     if( this == battleInfo.defender.CO )
     {
-      aggressors.add(battleInfo.attacker);
+      aggressors.add(battleInfo.attacker.unit);
     }
     return null;
   }
 
-  /**
-   * Iron Will buffs defense and grants any unit that survives being attacked full counter-damage.
-   */
   private static class IronWill extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Iron Will";
-    private static final int COST = 3;
-    private static final int IRONWILL_BUFF = 30; // Get a nice defense boost, since we can't counter-attack if we're dead.
-    COModifier defenseMod = null;
-    Venge COcast;
+    private static final int COST = 4;
+    private static final int IRONWILL_BOOST = 40;
+    private static final int IRONWILL_WOUND = 2;
+    private final ArrayList<Unit> boostedUnits = new ArrayList<Unit>();
 
-    IronWill(Venge commander)
+    IronWill(Venge venge)
     {
-      super(commander, NAME, COST);
-      COcast = commander;
-      defenseMod = new CODefenseModifier(IRONWILL_BUFF);
-      AIFlags = PHASE_TURN_END;
+      super(venge, NAME, COST);
+    }
+
+    @Override
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    {
+      UnitInstanceFilter uif = new UnitInstanceFilter(new IronWillMod(IRONWILL_BOOST));
+      for( Unit unit : myCommander.units )
+      {
+        if( !unit.isTurnOver )
+          uif.instances.add(unit);
+      }
+      modList.add(uif);
     }
 
     @Override
     protected void perform(MapMaster gameMap)
     {
-      COcast.counterAtFullPower = true;
-      COcast.addCOModifier(defenseMod);
+      for( Unit unit : myCommander.units )
+      {
+        if( !unit.isTurnOver )
+          boostedUnits.add(unit);
+      }
+    }
+    @Override
+    protected void revert(MapMaster gameMap)
+    {
+      boostedUnits.clear();
+    }
+
+    @Override
+    public GameEventQueue getRevertEvents(MapMaster gameMap)
+    {
+      GameEventQueue events = new GameEventQueue();
+      events.add(new MassDamageEvent(myCommander, boostedUnits, IRONWILL_WOUND, false));
+      return events;
     }
   }
 
@@ -195,27 +251,25 @@ public class Venge extends Commander
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Retribution";
-    private static final int COST = 6;
+    private static final int COST = 8;
     private static final int RETRIBUTION_BUFF = 40; // Trade defense for offense, since we hit before our attacker does.
     private static final int RETRIBUTION_NERF = 20;
-    COModifier damageMod = null;
-    COModifier defenseMod = null;
-    Venge COcast;
+    UnitModifier damageMod = null;
+    UnitModifier defenseMod = null;
 
-    Retribution(Venge commander)
+    Retribution(Venge venge)
     {
-      super(commander, NAME, COST);
-      COcast = commander;
-      damageMod = new CODamageModifier(RETRIBUTION_BUFF);
-      defenseMod = new CODefenseModifier(-RETRIBUTION_NERF);
+      super(venge, NAME, COST);
+      damageMod = new UnitDamageModifier(RETRIBUTION_BUFF);
+      defenseMod = new UnitDefenseModifier(-RETRIBUTION_NERF);
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      COcast.counterFirst = true;
-      COcast.addCOModifier(damageMod);
-      COcast.addCOModifier(defenseMod);
+      modList.add(damageMod);
+      modList.add(defenseMod);
+      modList.add(new PreEmptiveCounterMod(myCommander));
     }
   }
   

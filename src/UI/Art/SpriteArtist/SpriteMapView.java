@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Queue;
 
+import AI.AICombatUtils;
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.GamePath;
@@ -31,10 +32,12 @@ import UI.Art.Animation.NoAnimation;
 import UI.Art.Animation.NobunagaBattleAnimation;
 import UI.Art.Animation.ResupplyAnimation;
 import UI.Art.Animation.TurnInitAnimation;
+import UI.Art.SpriteArtist.SpriteOptions.SelectedUnitThreatAreaMode;
 import UI.Art.SpriteArtist.Backgrounds.DiagonalBlindsBG;
 import UI.Art.Animation.AirDropAnimation;
 import UI.Art.Animation.MoveAnimation;
 import Units.Unit;
+import Units.UnitContext;
 import Units.WeaponModel;
 
 public class SpriteMapView extends MapView
@@ -199,24 +202,24 @@ public class SpriteMapView extends MapView
    */
   private BufferedImage renderMap()
   {
-    MapPerspective gameMap = getDrawableMap(myGame);
+    final MapPerspective gameMap = getDrawableMap(myGame);
     
     // We draw in three stages. First, we draw the map/units onto a canvas which is the size
     // of the entire map; then we copy the visible section of that canvas onto a screen-sized
     // image, then draw the overlay and scale that composite as we draw it to the window.
-    Graphics mapGraphics = mapImage.getGraphics();
+    final Graphics mapGraphics = mapImage.getGraphics();
 
     // Make sure the view is centered where we want it.
     adjustViewLocation();
 
     // Draw the portion of the base terrain that is currently in-window.
-    int drawMultiplier = SpriteLibrary.baseSpriteSize;
+    final int drawMultiplier = SpriteLibrary.baseSpriteSize;
     int drawX = (int) (mapViewDrawX.get() * drawMultiplier);
     int drawY = (int) (mapViewDrawY.get() * drawMultiplier);
 
     // Make sure we specify draw coordinates that are valid per the underlying map image.
-    int maxDrawX = mapImage.getWidth() - mapViewWidth;
-    int maxDrawY = mapImage.getHeight() - mapViewHeight;
+    final int maxDrawX = mapImage.getWidth() - mapViewWidth;
+    final int maxDrawY = mapImage.getHeight() - mapViewHeight;
     if( drawX > maxDrawX )
       drawX = maxDrawX;
     if( drawX < 0 )
@@ -227,22 +230,23 @@ public class SpriteMapView extends MapView
       drawY = 0;
 
     // Get a reference to the current action being built, if one exists.
-    Unit currentActor = mapController.getContemplatedActor();
-    XYCoord actorCoord = mapController.getContemplationCoord();
+    final Unit currentActor = mapController.getContemplatedActor();
+    final XYCoord actorCoord = mapController.getContemplationCoord();
+    final XYCoord cursorCoord = myGame.getCursorCoord();
     boolean notifyOnAnimEnd = true;
     if( null != currentActor && null == currentAnimation ) // Draw the currently-acting unit so it's on top of everything.
     {
       currentAnimation = contemplationAnim.update(drawMultiplier, currentActor, actorCoord);
       notifyOnAnimEnd = false;
     }
-    GamePath currentPath = mapController.getContemplatedMove();
-    boolean isTargeting = mapController.isTargeting();
+    final GamePath currentPath = mapController.getContemplatedMove();
+    final boolean isTargeting = mapController.isTargeting();
 
     // Start actually drawing things
     mapArtist.drawBaseTerrain(mapGraphics, gameMap, drawX, drawY, mapViewWidth, mapViewHeight);
 
     // Update the central sprite indices so animations happen in sync.
-    int animIndex = getAnimIndex();
+    final int animIndex = getAnimIndex();
 
     // Draw units, buildings, trees, etc.
     drawUnitsAndMapObjects(mapGraphics, gameMap, animIndex);
@@ -256,22 +260,35 @@ public class SpriteMapView extends MapView
     // Highlight our currently-selected unit's range on top of everything else
     if( null != currentPath && null != currentActor && !mapController.isTargeting() )
     {
+      SelectedUnitThreatAreaMode threatMode = SpriteOptions.getSelectedUnitThreatAreaMode();
       for( WeaponModel w : currentActor.model.weapons )
       {
-        Color edgeColor = OverlayArtist.SIEGE_FIRE_EDGE;
-        if( w.canFireAfterMoving || currentPath.getPathLength() == 1 )
-          edgeColor = OverlayArtist.MOBILE_FIRE_EDGE;
-        overlays.add(new GameOverlay(null,
-                     Utils.findLocationsInRange(gameMap, myGame.getCursorCoord(),
-                                                (1 == w.minRange)? 0 : w.minRange, w.maxRange),
-                     OverlayArtist.FIRE_FILL, edgeColor));
-      }
+        // Display what we can shoot next turn...
+        if( threatMode == SelectedUnitThreatAreaMode.All
+            || threatMode == SelectedUnitThreatAreaMode.Future )
+          overlays.add(new GameOverlay(null,
+                       AICombatUtils.findThreatPower(gameMap, currentActor, cursorCoord, null).keySet(),
+                       OverlayArtist.FIRE_FILL, OverlayArtist.LATER_FIRE_EDGE));
+
+        // ...and this turn's targets on top
+        if( threatMode == SelectedUnitThreatAreaMode.All
+            || threatMode == SelectedUnitThreatAreaMode.Current )
+          if( w.canFireAfterMoving || currentPath.getPathLength() == 1 )
+          {
+            UnitContext uc = new UnitContext(gameMap, currentActor, w, currentPath, cursorCoord);
+            overlays.add(new GameOverlay(null,
+                         Utils.findLocationsInRange(gameMap, cursorCoord,
+                                                    (1 == uc.rangeMin)? 0 : uc.rangeMin, uc.rangeMax),
+                         OverlayArtist.FIRE_FILL, OverlayArtist.NOW_FIRE_EDGE));
+          }
+
+      } // ~per-weapon loop
     }
     OverlayArtist.drawHighlights(mapGraphics, gameMap, overlays,
                                  drawX, drawY,
                                  mapViewWidth, mapViewHeight,
                                  drawMultiplier,
-                                 null != currentPath, myGame.getCursorCoord());
+                                 null != currentPath, cursorCoord);
 
     // Draw Unit icons on top of everything, to make sure they are seen clearly.
     drawUnitIcons(mapGraphics, gameMap, animIndex);
@@ -412,14 +429,16 @@ public class SpriteMapView extends MapView
   @Override // from MapView
   public GameAnimation buildBattleAnimation(BattleSummary summary)
   {
-    return new NobunagaBattleAnimation(SpriteLibrary.baseSpriteSize, summary.attacker, summary.attacker.x, summary.attacker.y, summary.defender.x,
-        summary.defender.y);
+    return new NobunagaBattleAnimation(
+        SpriteLibrary.baseSpriteSize, summary.attacker.unit,
+        summary.attacker.unit.x, summary.attacker.unit.y,
+        summary.defender.unit.x, summary.defender.unit.y);
   }
 
   @Override // from MapView
   public GameAnimation buildDemolitionAnimation( StrikeParams params, XYCoord target, int damage )
   {
-    return new NobunagaBattleAnimation(SpriteLibrary.baseSpriteSize, params.attacker.body, params.attacker.x, params.attacker.y, target.xCoord, target.yCoord);
+    return new NobunagaBattleAnimation(SpriteLibrary.baseSpriteSize, params.attacker.unit, params.attacker.coord.xCoord, params.attacker.coord.yCoord, target.xCoord, target.yCoord);
   }
 
   @Override // from MapView

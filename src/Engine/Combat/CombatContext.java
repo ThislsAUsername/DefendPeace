@@ -1,50 +1,109 @@
 package Engine.Combat;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import Engine.Combat.StrikeParams.BattleParams;
+import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
-import Units.Unit;
-import Units.WeaponModel;
+import Units.UnitContext;
 
 /**
  * CombatContext exists to allow COs to modify the fundamental parameters of an instance of combat.
  */
 public class CombatContext
 {
-  public Unit attacker, defender;
-  public WeaponModel attackerWeapon = null, defenderWeapon = null;
-  public int attackerX, attackerY, defenderX, defenderY;
-  public double attackerTerrainStars, defenderTerrainStars;
+  public UnitContext attacker, defender;
   public final GameMap gameMap; // for reference, not weirdness
   public boolean canCounter = false;
-  public boolean attackerMoved;
   public int battleRange;
-  
-  public CombatContext(GameMap map, Unit pAttacker, WeaponModel attackerWep, Unit pDefender, WeaponModel defenderWep, int pBattleRange, int attackerX, int attackerY)
+
+  public static CombatContext build(GameMap map,
+                                    UnitContext pAttacker,
+                                    UnitContext pDefender,
+                                    int pBattleRange)
+  {
+    CombatContext c = new CombatContext(map, pAttacker, pDefender, pBattleRange);
+
+    c.applyModifiers();
+    return c;
+  }
+
+  private CombatContext(GameMap map,
+      UnitContext pAttacker,
+      UnitContext pDefender,
+      int pBattleRange)
   {
     attacker = pAttacker;
     defender = pDefender;
-    this.attackerX = attackerX;
-    this.attackerY = attackerY;
-    defenderX = defender.x; // This variable is technically not necessary, but provides consistent names with attackerX/Y.
-    defenderY = defender.y;
+
     gameMap = map;
-    attackerMoved = pAttacker.x != attackerX || pAttacker.y != attackerY;
     battleRange = pBattleRange;
-    attackerWeapon = attackerWep;
-    defenderWeapon = defenderWep;
-    if( null != defenderWeapon )
+
+    if ( map.isLocationValid(attacker.coord))
+    {
+      attacker.setEnvironment(map.getEnvironment(attacker.coord));
+    }
+    if ( map.isLocationValid(defender.coord))
+    {
+      defender.setEnvironment(map.getEnvironment(defender.coord));
+    }
+
+    if( null == attacker.weapon )
+    {
+      attacker.chooseWeapon(defender.model, battleRange);
+    }
+    if( null == defender.weapon )
+    {
+      defender.chooseWeapon(attacker.model, battleRange);
+    }
+
+    // Only attacks at point-blank range can be countered
+    if( (1 == battleRange) && (null != defender.weapon) )
     {
       canCounter = true;
     }
+  }
 
-    // Air units shouldn't get terrain defense
-    // getDefLevel returns the number of terrain stars. Since we're using %Def, we need to multiply by 10. However, we do that when we multiply by HP in calculateDamage.
-    if( !attacker.model.isAirUnit() )
-      attackerTerrainStars = map.getEnvironment(attackerX, attackerY).terrainType.getDefLevel();
-    if( !defender.model.isAirUnit() )
-      defenderTerrainStars = map.getEnvironment(defenderX, defenderY).terrainType.getDefLevel();
+  private void applyModifiers()
+  {
+    // Make local shallow copies to avoid funny business
+    List<UnitModifier> aMods = new ArrayList<>(attacker.mods);
+    List<UnitModifier> dMods = new ArrayList<>(defender.mods);
+    // apply modifiers...
+    for( UnitModifier mod : aMods )
+      mod.changeCombatContext(this);
+    for( UnitModifier mod : dMods )
+      mod.changeCombatContext(this);
+  }
 
-    // let the COs fool around with anything they want...
-    pAttacker.CO.changeCombatContext(this);
-    pDefender.CO.changeCombatContext(this);
+  public BattleParams getAttack()
+  {
+    UnitContext aClone = new UnitContext(attacker);
+    UnitContext dClone = new UnitContext(defender);
+
+    return buildBattleParams(aClone, dClone, false);
+  }
+
+  public BattleParams getCounterAttack(double damageDealt, boolean isSim)
+  {
+    if( !canCounter )
+      return null;
+
+    UnitContext aClone = new UnitContext(defender);
+    aClone.damageHP(damageDealt, isSim);
+
+    // If the counterattacker is dead, there's no counterattack
+    if( 1 > aClone.getHP() )
+      return null;
+
+    UnitContext dClone = new UnitContext(attacker);
+
+    return buildBattleParams(aClone, dClone, true);
+  }
+
+  private BattleParams buildBattleParams(UnitContext aClone, UnitContext dClone, boolean isCounter)
+  {
+    return StrikeParams.buildBattleParams(aClone, dClone, gameMap, battleRange, isCounter);
   }
 }

@@ -104,6 +104,7 @@ public abstract class UnitProduceLifecycle
     private final Commander myCommander;
     private Unit builder;
     private final Unit myNewUnit;
+    private final int cost;
 
     public UnitProduceEvent(Commander commander, Unit unit, UnitModel model)
     {
@@ -111,7 +112,8 @@ public abstract class UnitProduceLifecycle
       builder = unit;
 
       // TODO: Consider breaking the fiscal part into its own event.
-      if( model.getCost() <= commander.money && builder.materials > 0 )
+      cost = model.getCost();
+      if( cost <= commander.money && builder.materials > 0 )
       {
         myNewUnit = new Unit(myCommander, model);
       }
@@ -143,7 +145,7 @@ public abstract class UnitProduceLifecycle
     {
       if( null != myNewUnit )
       {
-        myCommander.money -= myNewUnit.model.getCost();
+        myCommander.money -= cost;
         builder.materials -= 1;
         myCommander.units.add(myNewUnit);
         builder.heldUnits.add(myNewUnit);

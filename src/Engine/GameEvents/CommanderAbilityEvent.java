@@ -26,7 +26,7 @@ public class CommanderAbilityEvent implements GameEvent
   @Override
   public GameEventQueue sendToListener(GameEventListener listener)
   {
-    // TODO Auto-generated method stub
+    // TODO: Create listener hook
     return null;
   }
 

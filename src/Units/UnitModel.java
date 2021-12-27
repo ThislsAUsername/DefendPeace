@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import CommandingOfficers.Commander;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -14,6 +15,8 @@ import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.ResupplyEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Terrain.MapLocation;
+import Engine.UnitMods.UnitModList;
+import Engine.UnitMods.UnitModifier;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.MoveTypes.MoveType;
@@ -21,14 +24,14 @@ import Units.MoveTypes.MoveType;
 /**
  * Defines the invariant characteristics of a unit. One UnitModel can be shared across many instances of that Unit type.
  */
-public abstract class UnitModel implements Serializable, ITargetable
+public abstract class UnitModel implements Serializable, ITargetable, UnitModList
 {
   private static final long serialVersionUID = 1L;
 
   /**
    * These are the high-level traits on which to filter unit types.
    * Unit sets should order models such that the most "sensible" type
-   *   (generally cheapest, land, assault) is the first type fulfill a given role.
+   *   (generally cheapest, land, assault) is the first type fulfilling a given role.
    */
   // Morphology
   public static final long TROOP           = 1 <<  0; // Not in vehicle
@@ -46,7 +49,7 @@ public abstract class UnitModel implements Serializable, ITargetable
   public static final long MECH            = 1 << 16; // Footsoldier equipped against hardened targets
   public static final long RECON           = 1 << 17; // Scout
   public static final long ASSAULT         = 1 << 18; // Fast unit that can deal with hardened ground targets
-  public static final long SIEGE           = 1 << 19; // Unit with heavy strike capabilities at range
+  public static final long SIEGE           = 1 << 19; // Typically has range, but is primarily effective when stationary
   public static final long SURFACE_TO_AIR  = 1 << 20;
   public static final long AIR_TO_SURFACE  = 1 << 21;
   public static final long AIR_TO_AIR      = 1 << 22;
@@ -59,13 +62,14 @@ public abstract class UnitModel implements Serializable, ITargetable
 
   public String name;
   public long role;
-  protected int moneyCost;
+  public Commander CO;
+  public int costBase;
   public double abilityPowerValue;
   public int maxAmmo;
   public int maxFuel;
   public int idleFuelBurn;
   public int maxMaterials = 0;
-  public int movePower;
+  public int baseMovePower;
   public int visionRange;
   public int visionRangePiercing = 1;
   public boolean hidden = false;
@@ -80,8 +84,8 @@ public abstract class UnitModel implements Serializable, ITargetable
   public long carryableExclusionMask;
   private int COstr = 100;
   private int COdef = 100;
-  public double COcost = 1.0;
-  public int moneyCostAdjustment = 0;
+  public double costMultiplier = 1.0;
+  public int costShift = 0;
 
   public UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] pWeapons, double powerValue)
@@ -111,13 +115,13 @@ public abstract class UnitModel implements Serializable, ITargetable
   {
     name = pName;
     role = pRole;
-    moneyCost = cost;
+    costBase = cost;
     maxAmmo = pAmmoMax;
     abilityPowerValue = powerValue;
     maxFuel = pFuelMax;
     idleFuelBurn = pIdleFuelBurn;
     visionRange = pVision;
-    movePower = pMovePower;
+    baseMovePower = pMovePower;
     propulsion = pPropulsion.clone();
 
     for( TerrainType terrain : TerrainType.TerrainTypeList )
@@ -149,16 +153,50 @@ public abstract class UnitModel implements Serializable, ITargetable
     // Duplicate other assorted values
     maxHP = other.maxHP;
     maxMaterials = other.maxMaterials;
+    for( UnitModifier mod : other.unitMods )
+      unitMods.add(mod);
 
+    CO = other.CO;
     COstr = other.COstr;
     COdef = other.COdef;
-    COcost = other.COcost;
-    moneyCostAdjustment = other.moneyCostAdjustment;
+    costMultiplier = other.costMultiplier;
+    costShift = other.costShift;
   }
 
+  private int costFrom(UnitContext uc)
+  {
+    return (int) ((uc.costBase)*uc.costMultiplier)+uc.costShift;
+  }
+  private UnitContext getCostContext(XYCoord coord)
+  {
+    UnitContext uc = new UnitContext(this.CO, this);
+    uc.coord = coord;
+    for( UnitModifier mod : getModifiers() )
+      mod.modifyCost(uc);
+    return uc;
+  }
   public int getCost()
   {
-    return (int) ((moneyCost+moneyCostAdjustment)*COcost);
+    UnitContext uc = getCostContext(null);
+    return costFrom(uc);
+  }
+  public int getBuyCost(XYCoord coord)
+  {
+    UnitContext uc = getCostContext(coord);
+    return costFrom(uc);
+  }
+  // Not adding a Produce overload for now since I don't see a simple way to get consistent results pipelined into the displayed buy cost
+  public int getRepairCost(UnitContext uc)
+  {
+    for( UnitModifier mod : getModifiers() )
+      mod.modifyCost(uc);
+    for( UnitModifier mod : getModifiers() )
+      mod.modifyRepairCost(uc);
+    return costFrom(uc);
+  }
+  public boolean canRepairOn(MapLocation locus)
+  {
+    return healableHabs.contains(locus.getEnvironment().terrainType);
   }
 
   /**
@@ -189,9 +227,13 @@ public abstract class UnitModel implements Serializable, ITargetable
     return COdef;
   }
 
-  public boolean canRepairOn(MapLocation locus)
+  /** For high-level estimation */
+  public int getMovePower()
   {
-    return healableHabs.contains(locus.getEnvironment().terrainType);
+    UnitContext uc = new UnitContext(this.CO, this);
+    for( UnitModifier mod : getModifiers() )
+      mod.modifyMovePower(uc);
+    return uc.movePower;
   }
 
   /** Provides a hook for inheritors to supply turn-initialization actions to a unit.
@@ -249,7 +291,7 @@ public abstract class UnitModel implements Serializable, ITargetable
   }
 
   /**
-   * @return True if this UnitModel has at least one weapon with a minimum range of 1.
+   * @return True if this UnitModel has at least one weapon that normally has a minimum range of 1.
    */
   public boolean hasDirectFireWeapon()
   {
@@ -258,7 +300,7 @@ public abstract class UnitModel implements Serializable, ITargetable
     {
       for( WeaponModel wm : weapons )
       {
-        if( wm.minRange == 1 )
+        if( wm.rangeMin == 1 )
         {
           hasDirect = true;
           break;
@@ -354,5 +396,27 @@ public abstract class UnitModel implements Serializable, ITargetable
   public boolean isTroop()
   {
     return isAll(TROOP);
+  }
+
+  private final ArrayList<UnitModifier> unitMods = new ArrayList<>();
+  @Override
+  public List<UnitModifier> getModifiers()
+  {
+    ArrayList<UnitModifier> output = new ArrayList<>();
+    // TODO: consider a null check here
+    output.addAll(CO.getModifiers());
+    output.addAll(unitMods);
+    return output;
+  }
+
+  @Override
+  public void addUnitModifier(UnitModifier unitModifier)
+  {
+    unitMods.add(unitModifier);
+  }
+  @Override
+  public void removeUnitModifier(UnitModifier unitModifier)
+  {
+    unitMods.remove(unitModifier);
   }
 }

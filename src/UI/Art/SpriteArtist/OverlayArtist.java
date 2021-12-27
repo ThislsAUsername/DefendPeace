@@ -18,8 +18,8 @@ public class OverlayArtist
 {
   private static final Color HIGHLIGHT_COLOR = new Color(255, 255, 255, 160); // white
 
-  public static final Color MOBILE_FIRE_EDGE = new Color(240,   0,   0, 255); // red
-  public static final Color SIEGE_FIRE_EDGE  = new Color(  0,   0, 160, 255); // dark blue
+  public static final Color NOW_FIRE_EDGE    = new Color(240,   0,   0, 255); // red
+  public static final Color LATER_FIRE_EDGE  = new Color(  0,   0, 160, 255); // dark blue
   public static final Color FIRE_FILL        = new Color(  0,   0,   0,   0);
 
   private static final int OVERLAY_EDGE_THICKNESS = 2;

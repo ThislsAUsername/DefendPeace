@@ -11,8 +11,6 @@ import java.util.Set;
 
 import AI.AICombatUtils;
 import AI.AIUtils;
-import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.CODefenseModifier;
 import Engine.GameAction.UnitSpawnAction;
 import Engine.GameScenario;
 import Engine.UnitActionFactory;
@@ -21,6 +19,10 @@ import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.UnitMods.UnitDamageModifier;
+import Engine.UnitMods.UnitDefenseModifier;
+import Engine.UnitMods.UnitModifier;
+import Engine.UnitMods.UnitTypeFilter;
 import Engine.GameEvents.CreateUnitEvent;
 import Terrain.GameMap;
 import Terrain.MapLocation;
@@ -93,6 +95,7 @@ public class Tech extends Commander
   private static final int STEEL_HAIL_NUM = 3;
   private static final int STEEL_HAIL_RANGE = 3;
 
+  // TODO: Support BattleMechs on other COs to enable tags mode?
   private UnitModel BattleMechModel = createBattleMechModel();
 
   public Tech(GameScenario.GameRules rules)
@@ -116,63 +119,78 @@ public class Tech extends Commander
     return TECH_REPAIR;
   }
 
-  @Override
-  public GameEventQueue initTurn(MapMaster map)
+  public static ArrayList<UnitModel> getMechanicalModels(Commander commander)
   {
-    // End Overcharge. Any units who still have > maxHP get reset to max.
-    if( getActiveAbilityName().contentEquals(OVERCHARGE_NAME))
-    for(Unit u: units)
-    {
-      if( u.getPreciseHP() > u.model.maxHP ) u.alterHP(10);
-    }
-
-    // Do the normal turn-init stuff.
-    GameEventQueue events = super.initTurn(map);
-
-    return events;
+    long exclude = UnitModel.TROOP;
+    ArrayList<UnitModel> typesToOverCharge = commander.getAllModelsNot(exclude);
+    return typesToOverCharge;
   }
 
   /** Heal all units by the specified amount, allowing HP>10, and provide a buff. */
   private static class OverchargeAbility extends CommanderAbility
   {
-    private CODamageModifier damageBuff;
-    private CODefenseModifier defenseBuff;
+    private static final long serialVersionUID = 1L;
+
+    private int buff;
     private int healAmount;
-    private ArrayList<UnitModel> unitsToOverCharge;
+    private HashMap<Commander, ArrayList<Unit>> unitsOverCharged = new HashMap<Commander, ArrayList<Unit>>();
+    UnitTypeFilter damageBuff = null;
+    UnitModifier defenseBuff = null;
 
-    public OverchargeAbility(Commander commander, String abilityName, double abilityCost, int buff, int healAmt)
+    public OverchargeAbility(Tech tech, String abilityName, double abilityCost, int buff, int healAmt)
     {
-      super(commander, abilityName, abilityCost);
+      super(tech, abilityName, abilityCost);
 
-      // Create COModifiers that we can apply when needed.
-      damageBuff = new CODamageModifier(buff);
-      defenseBuff = new CODefenseModifier(buff);
+      this.buff = buff;
       healAmount = healAmt;
 
-      // Only mechanical/non-troop units get the firepower boost.
-      long exclude = UnitModel.TROOP;
-      unitsToOverCharge = commander.getAllModelsNot(exclude);
-
-      for( UnitModel m : unitsToOverCharge )
-        damageBuff.addApplicableUnitModel(m);
-
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
+
+      // Only mechanical/non-troop units get the firepower boost.
+      damageBuff = new UnitTypeFilter(new UnitDamageModifier(buff));
+      damageBuff.noneOf = UnitModel.TROOP;
+      defenseBuff = new UnitDefenseModifier(this.buff);
     }
 
-    private static final long serialVersionUID = 1L;
+    @Override
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    {
+      modList.add(damageBuff);
+      modList.add(defenseBuff);
+    }
 
     @Override
     protected void perform(MapMaster gameMap)
     {
-      // Bump up our power level.
-      myCommander.addCOModifier(damageBuff);
-      myCommander.addCOModifier(defenseBuff);
-
+      ArrayList<UnitModel> typesToOverCharge = getMechanicalModels(myCommander);
+      ArrayList<Unit> overCharged = new ArrayList<Unit>();
       // Overcharge
       for(Unit u: myCommander.units)
       {
-        if( unitsToOverCharge.contains(u.model) )
+        if( typesToOverCharge.contains(u.model) )
+        {
+          // Track units that aren't already overhealed
+          if( u.getHP() <= u.model.maxHP
+              && u.getHP() + healAmount > u.model.maxHP )
+            overCharged.add(u);
           u.alterHP(healAmount, true);
+        }
+      }
+      unitsOverCharged.put(myCommander, overCharged);
+    }
+
+    @Override
+    protected void revert(MapMaster gameMap)
+    {
+      if( unitsOverCharged.containsKey(myCommander) )
+      {
+        // End Overcharge. Any units who still have > maxHP get reset to max.
+        for( Unit u : unitsOverCharged.get(myCommander) )
+        {
+          if( u.getPreciseHP() > u.model.maxHP )
+            u.alterHP(10);
+        }
+        unitsOverCharged.remove(myCommander);
       }
     }
   }
@@ -183,37 +201,34 @@ public class Tech extends Commander
     private static final long serialVersionUID = 1L;
     private static final boolean log = false;
 
-    private CODamageModifier damageBuff = null;
-    private CODefenseModifier defenseBuff = null;
+    private int buff;
     private int dropRange;
     private int numDrops;
     private UnitModel unitModelToDrop;
+    UnitTypeFilter damageBuff = null;
+    UnitModifier defenseBuff = null;
 
-    TechdropAbility(Commander commander, String abilityName, double abilityCost, UnitModel unitToDrop, int buff, int num, int abilityRange)
+    TechdropAbility(Tech tech, String abilityName, double abilityCost, UnitModel unitToDrop, int buff, int num, int abilityRange)
     {
-      super(commander, abilityName, abilityCost);
+      super(tech, abilityName, abilityCost);
 
       unitModelToDrop = unitToDrop;
 
-      // Create COModifiers that we can apply when needed.
-      damageBuff = new CODamageModifier(buff);
-      defenseBuff = new CODefenseModifier(buff);
+      this.buff = buff;
       numDrops = num;
       dropRange = abilityRange;
 
-      // Only mechanical units get the firepower boost.
-      long exclude = UnitModel.TROOP;
-      ArrayList<UnitModel> models = commander.getAllModelsNot(exclude);
-      for( UnitModel m : models )
-        damageBuff.addApplicableUnitModel(m);
+      // Only mechanical/non-troop units get the firepower boost.
+      damageBuff = new UnitTypeFilter(new UnitDamageModifier(buff));
+      damageBuff.noneOf = UnitModel.TROOP;
+      defenseBuff = new UnitDefenseModifier(this.buff);
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      // Bump up our power level. The actual drops are handled by getEvents().
-      myCommander.addCOModifier(damageBuff);
-      myCommander.addCOModifier(defenseBuff);
+      modList.add(damageBuff);
+      modList.add(defenseBuff);
     }
 
     @Override
@@ -349,7 +364,7 @@ public class Tech extends Commander
         }
       }
 
-      Set<XYCoord> invalidDropCoords = findInvalidDropCoords(gameMap, friendScores.keySet(), priorDrops);
+      Set<XYCoord> invalidDropCoords = findInvalidDropCoords(myCommander, gameMap, friendScores.keySet(), priorDrops);
 
       // Next calculate unfriendly values. Note that these are only eligible landing spaces if they are also within
       // range of friendly units, but it's easier to just compute all the values and then ignore invalid places.
@@ -363,7 +378,7 @@ public class Tech extends Commander
         Unit nme = gameMap.getLocation(nmexy).getResident();          // Enemy unit
         Integer nmeval = nme.model.getCost() * nme.getHP();           // Enemy value
 
-        if(nmexy.getDistance(myCommander.HQLocation) <= nme.model.movePower && nme.model.hasActionType(UnitActionFactory.CAPTURE))
+        if(nmexy.getDistance(myCommander.HQLocation) <= nme.getMovePower(gameMap) && nme.model.hasActionType(UnitActionFactory.CAPTURE))
         {
           if( log ) System.out.println(String.format("%s is too close to HQ. Increasing threat rating:", nme.toStringWithLocation()));
           nmeval *= 100; // More weight if this unit threatens HQ.
@@ -473,7 +488,7 @@ public class Tech extends Commander
       return landingZone;
     }
 
-    private Set<XYCoord> findInvalidDropCoords(GameMap gameMap, final Set<XYCoord> options, final Set<XYCoord> priorDrops)
+    private Set<XYCoord> findInvalidDropCoords(Commander myCommander, GameMap gameMap, final Set<XYCoord> options, final Set<XYCoord> priorDrops)
     {
       Set<XYCoord> invalidDropCoords = new HashSet<XYCoord>();
       invalidDropCoords.addAll(priorDrops);
@@ -537,12 +552,12 @@ public class Tech extends Commander
     UnitModel BattleMech = mdTank.clone();
     BattleMech.name = "BattleMech";
     BattleMech.role = BattleMech.role | UnitModel.SURFACE_TO_AIR;
-    BattleMech.moneyCostAdjustment = mdTank.getCost() + (antiAir.getCost()/2);
+    BattleMech.costShift = mdTank.getCost() + (antiAir.getCost()/2);
     BattleMech.abilityPowerValue = 2.0;
     BattleMech.maxFuel = 30;
     BattleMech.maxAmmo = 10;
     BattleMech.visionRange = 2;
-    BattleMech.movePower = 4;
+    BattleMech.baseMovePower = 4;
     BattleMech.propulsion = new FootMech();
     BattleMech.healableHabs = new HashSet<TerrainType>(); // BattleMechs have specialized parts, not easy to repair.
 

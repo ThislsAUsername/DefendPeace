@@ -206,7 +206,7 @@ public class AIUtils
 
     if( path.getPathLength() > 0 && validMoves.size() > 0 ) // Check that the destination is reachable at least in theory.
     {
-      path.snip(unit.model.movePower+1); // Trim the path so we go the right immediate direction.
+      path.snip(unit.getMovePower(gameMap)+1); // Trim the path so we go the right immediate direction.
       if( null != excludeDestinations) validMoves.removeAll(excludeDestinations);
       if( !validMoves.isEmpty() )
       {

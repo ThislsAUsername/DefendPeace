@@ -256,7 +256,7 @@ public class SpenderAI implements AIController
               // Choose the point on the path just out of our range as our 'goal', and try to move there.
               // This will allow us to navigate around large obstacles that require us to move away
               // from our intended long-term goal.
-              path.snip(unit.model.movePower + 1); // Trim the path approximately down to size.
+              path.snip(unit.getMovePower(gameMap) + 1); // Trim the path approximately down to size.
               goal = path.getEndCoord(); // Set the last location as our goal.
 
               log(String.format("    Intermediate waypoint: %s", goal));
@@ -296,7 +296,7 @@ public class SpenderAI implements AIController
           {
             ArrayList<UnitModel> units = myCo.getShoppingList(loc);
             // Only add to the list if we could actually buy something here.
-            if( !units.isEmpty() && units.get(0).getCost() <= myCo.money )
+            if( !units.isEmpty() && units.get(0).getBuyCost(xyc) <= myCo.money )
             {
               shoppingLists.put(loc, units);
             }

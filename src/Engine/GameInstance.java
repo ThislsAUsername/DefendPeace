@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import CommandingOfficers.Commander;
@@ -14,6 +15,8 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
 import Engine.GameEvents.TurnInitEvent;
+import Engine.StateTrackers.StateTracker;
+import Engine.UnitMods.SandstormModifier;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.MapLocation;
@@ -68,6 +71,9 @@ public class GameInstance implements Serializable
     playerCursors = new HashMap<Integer, XYCoord>();
     for( int i = 0; i < commanders.length; ++i )
     {
+      // This is hacky, but hey
+      commanders[i].addUnitModifier(new SandstormModifier());
+
       commanders[i].money = gameScenario.rules.startingFunds;
       if( commanders[i].HQLocation != null )
       {
@@ -80,7 +86,7 @@ public class GameInstance implements Serializable
         System.out.println("Warning! Commander " + commanders[i].coInfo.name + " does not have an HQ location!");
         playerCursors.put(i, new XYCoord(1, 1));
       }
-      GameEventListener.registerEventListener(commanders[i], this);
+      commanders[i].initForGame(this);
     }
     
     saveFile = getSaveName();
@@ -93,6 +99,9 @@ public class GameInstance implements Serializable
 
   // WeakHashMap isn't serializable, so we can't use Collections.newSetFromMap(new WeakHashMap<GameEventListener, Boolean>());
   public transient Set<GameEventListener> eventListeners = new HashSet<GameEventListener>();
+
+  public Map<Class<? extends StateTracker>, StateTracker> stateTrackers =
+      new HashMap<Class<? extends StateTracker>, StateTracker>();
 
   public int getActiveCOIndex()
   {

@@ -1,15 +1,58 @@
 package Engine.Combat;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
+import Units.ITargetable;
+import Units.UnitContext;
 
 /**
  * Utility struct used to facilitate calculating battle results.
- * Parameters are public to allow modification in Commander.applyCombatModifiers()
+ * Parameters are public to allow modification by UnitModifiers.
  * One BattleParams is a single attack from a single unit; any counterattack is a second instance. 
  */
 public class StrikeParams
 {
-  public final Combatant attacker;
+  public static BattleParams buildBattleParams(
+      UnitContext attacker, UnitContext defender,
+      GameMap gameMap, int battleRange,
+      boolean isCounter)
+  {
+    List<UnitModifier> aMods = new ArrayList<>(attacker.mods);
+    List<UnitModifier> dMods = new ArrayList<>(defender.mods);
+
+    BattleParams params = new BattleParams(buildStrikeParams(attacker, defender.model, gameMap, battleRange, isCounter), defender);
+
+    for( UnitModifier mod : aMods )
+      mod.modifyUnitAttackOnUnit(params);
+    for( UnitModifier mod : dMods )
+      mod.modifyUnitDefenseAgainstUnit(params);
+
+    return params;
+  }
+
+  public static StrikeParams buildStrikeParams(
+      UnitContext attacker, ITargetable defender,
+      GameMap gameMap, int battleRange,
+      boolean isCounter)
+  {
+    List<UnitModifier> aMods = new ArrayList<>(attacker.mods);
+
+    StrikeParams params = new StrikeParams(
+        attacker, gameMap,
+        battleRange, ( null == attacker.weapon ) ? 0 : attacker.weapon.getDamage(defender),
+        isCounter);
+
+    for( UnitModifier mod : aMods )
+      mod.modifyUnitAttack(params);
+
+    return params;
+  }
+
+
+  public final UnitContext attacker;
   public final GameMap map; // for reference, not weirdness
 
   // Stuff inherited for reference from CombatContext
@@ -24,31 +67,9 @@ public class StrikeParams
   public double defensePower = 100;
   public double terrainStars = 0;
 
-  public static BattleParams getAttack(final CombatContext ref)
-  {
-    return new BattleParams(
-        new Combatant(ref.attacker, ref.attackerWeapon, ref.attackerX, ref.attackerY),
-        new Combatant(ref.defender, ref.defenderWeapon, ref.defenderX, ref.defenderY),
-        ref.gameMap, ref.battleRange,
-        ref.attacker.model.getDamageRatio(), ref.attacker.getHP(),
-        ref.defender.model.getDefenseRatio(), ref.defenderTerrainStars,
-        false);
-  }
-  public static BattleParams getCounterAttack(final CombatContext ref, double counterHP)
-  {
-    return new BattleParams(
-        new Combatant(ref.defender, ref.defenderWeapon, ref.defenderX, ref.defenderY),
-        new Combatant(ref.attacker, ref.attackerWeapon, ref.attackerX, ref.attackerY),
-        ref.gameMap, ref.battleRange,
-        ref.defender.model.getDamageRatio(), counterHP,
-        ref.attacker.model.getDefenseRatio(), ref.attackerTerrainStars,
-        true);
-  }
-
-  public StrikeParams(
-      Combatant attacker,
+  protected StrikeParams(
+      UnitContext attacker,
       GameMap map, int battleRange,
-      double attackPower, double attackerHP,
       double baseDamage,
       boolean isCounter)
   {
@@ -56,14 +77,23 @@ public class StrikeParams
     this.map = map;
 
     this.battleRange = battleRange;
-    this.attackPower = attackPower;
-    this.isCounter = isCounter;
+
     this.baseDamage = baseDamage;
+    this.attackerHP = attacker.getHP();
+    this.attackPower = attacker.attackPower;
+    this.isCounter = isCounter;
+  }
+  protected StrikeParams(StrikeParams other)
+  {
+    this.attacker = other.attacker;
+    this.map = other.map;
 
-    this.attackerHP = attackerHP;
+    this.battleRange = other.battleRange;
 
-    // Apply any last-minute adjustments.
-    attacker.body.CO.modifyUnitAttack(this);
+    this.baseDamage = other.baseDamage;
+    this.attackerHP = other.attackerHP;
+    this.attackPower = other.attackPower;
+    this.isCounter = other.isCounter;
   }
 
   public double calculateDamage()
@@ -76,29 +106,18 @@ public class StrikeParams
 
   public static class BattleParams extends StrikeParams
   {
-    public final Combatant defender;
+    public final UnitContext defender;
 
-    public BattleParams(
-        Combatant attacker, Combatant defender,
-        GameMap map, int battleRange,
-        double attackPower, double attackerHP,
-        double defensePower, double terrainStars,
-        boolean isCounter)
+    protected BattleParams(
+        StrikeParams base,
+        UnitContext defender)
     {
-      super(attacker,
-          map, battleRange,
-          attackPower, attackerHP,
-          (null == attacker.gun)? 0 : attacker.gun.getDamage(defender.body.model),
-          isCounter);
+      super(base);
       this.defender = defender;
 
-      this.defensePower = defensePower;
-      this.terrainStars = terrainStars;
-      defenderHP = defender.body.getHP();
-
-      // Apply any last-minute adjustments.
-      attacker.body.CO.modifyUnitAttackOnUnit(this);
-      defender.body.CO.modifyUnitDefenseAgainstUnit(this);
+      defenderHP = defender.getHP();
+      this.defensePower = defender.defensePower;
+      this.terrainStars = defender.terrainStars;
     }
   }
 }

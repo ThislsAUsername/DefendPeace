@@ -40,7 +40,7 @@ public class DoRWeapons
     }
     public DoRWeapon(DoRWeapon other)
     {
-      this(other.type, other.hasInfiniteAmmo, other.minRange, other.maxRange);
+      this(other.type, other.hasInfiniteAmmo, other.rangeMin, other.rangeMax);
       canFireAfterMoving = other.canFireAfterMoving;
     }
     @Override

@@ -2,15 +2,17 @@ package CommandingOfficers;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.CODefenseModifier;
+
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
-import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEventQueue;
+import Engine.StateTrackers.TransformationTracker;
 import Engine.UnitActionLifecycles.TransformLifecycle;
+import Engine.UnitMods.UnitFightStatModifier;
+import Engine.UnitMods.UnitInstanceFilter;
+import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -55,9 +57,7 @@ public class Meridian extends Commander
     }
   }
 
-  /** A list of all the units I've refreshed and need to nerf. */
-  private ArrayList<Unit> justTransformed = new ArrayList<Unit>();
-  private ArrayList<Unit> toBeNerfed = new ArrayList<Unit>();
+  final VehicularCharge myVehicularCharge = new VehicularCharge(this);
   private static final int POST_REFRESH_STAT_ADJUSTMENT = -25;
 
   public Meridian(GameScenario.GameRules rules)
@@ -68,51 +68,19 @@ public class Meridian extends Commander
     UnitModel tank = getUnitModel(UnitModel.ASSAULT);
     UnitModel arty = getUnitModel(UnitModel.SIEGE);
     int costShift = (tank.getCost() - arty.getCost())/2;
-    tank.moneyCostAdjustment -= costShift;
-    arty.moneyCostAdjustment += costShift;
+    tank.costShift -= costShift;
+    arty.costShift += costShift;
     tank.possibleActions.add(new TransformLifecycle.TransformFactory(arty, "~ARTY"));
     arty.possibleActions.add(new TransformLifecycle.TransformFactory(tank, "~TANK"));
 
     addCommanderAbility(new ChangeAndFlow(this));
-    addCommanderAbility(new VehicularCharge(this));
+    addCommanderAbility(myVehicularCharge);
   }
 
   @Override
   public GameEventQueue initTurn(MapMaster map)
   {
-    justTransformed.clear();
-    toBeNerfed.clear();
     return super.initTurn(map);
-  }
-
-  @Override // GameEventListener interface
-  public GameEventQueue receiveUnitTransformEvent(Unit unit, UnitModel oldType)
-  {
-    if (this == unit.CO)
-    {
-      justTransformed.add(unit);
-    }
-    return null;
-  }
-
-  /**
-   * Troops that have been refreshed by Meridian's bigger power get a stat nerf
-   */
-  @Override
-  public void modifyUnitAttack(StrikeParams params)
-  {
-    if( toBeNerfed.contains(params.attacker.body) )
-    {
-      params.attackPower += POST_REFRESH_STAT_ADJUSTMENT;
-    }
-  }
-  @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
-  {
-    if( toBeNerfed.contains(params.defender.body) )
-    {
-      params.defensePower += POST_REFRESH_STAT_ADJUSTMENT;
-    }
   }
 
   /**
@@ -121,35 +89,39 @@ public class Meridian extends Commander
   private static class ChangeAndFlow extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
-    private static final String STRONGARM_NAME = "Change and Flow";
+    private static final String NAME = "Change and Flow";
     private static final int COST = 4;
     private static final int BASIC_BUFF = 10;
     
-    CODamageModifier damageMod = null;
-    CODefenseModifier defenseMod = null;
-    Meridian COcast;
+    UnitFightStatModifier baseMod = new UnitFightStatModifier(BASIC_BUFF);
+    TransformationTracker tracker;
 
-    ChangeAndFlow(Meridian commander)
+    ChangeAndFlow(Meridian meridian)
     {
-      super(commander, STRONGARM_NAME, COST);
+      super(meridian, NAME, COST);
 
-      damageMod = new CODamageModifier(BASIC_BUFF);
-      defenseMod = new CODefenseModifier(BASIC_BUFF);
-      COcast = commander;
       AIFlags = 0; // The AI doesn't know how to use this, so it shouldn't try
+    }
+    @Override
+    public void initForGame(GameInstance game)
+    {
+      tracker = TransformationTracker.instance(game, TransformationTracker.class);
+    }
+
+    @Override
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    {
+      modList.add(baseMod);
     }
 
     @Override
     protected void perform(MapMaster gameMap)
     {
-      // Grant the base firepower/defense bonus.
-      myCommander.addCOModifier(damageMod);
-      myCommander.addCOModifier(defenseMod);
-
       // Units that transformed are refreshed and able to move again.
-      for( Unit unit : COcast.justTransformed )
+      for( Unit unit : tracker.prevTypeMap.keySet() )
       {
-        unit.isTurnOver = false;
+        if( myCommander == unit.CO ) // Consider validating that it actually was an arty-tank transformation?
+          unit.isTurnOver = false;
       }
     }
 
@@ -158,8 +130,9 @@ public class Meridian extends Commander
     {
       ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
 
-      for( Unit unit : COcast.justTransformed )
-        output.add(new DamagePopup(
+      for( Unit unit : tracker.prevTypeMap.keySet() )
+        if( myCommander == unit.CO )
+          output.add(new DamagePopup(
                        new XYCoord(unit.x, unit.y),
                        myCommander.myColor,
                        "Flow"));
@@ -168,47 +141,71 @@ public class Meridian extends Commander
     }
   }
 
+  @Override
+  public char getUnitMarking(Unit unit)
+  {
+    // If we ever allow COs other than our own to *activate* abilities, then this is gonna have to move to a StateTracker
+    if( myVehicularCharge.debuffedUnits.contains(unit) )
+      return 'C';
+
+    return super.getUnitMarking(unit);
+  }
+
   /**
    * Vehicular Charge refreshes all ground vehicles, at the cost of a stat penalty to the refreshed units
    */
   private static class VehicularCharge extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
-    private static final String MOBILIZE_NAME = "Vehicular Charge";
+    private static final String NAME = "Vehicular Charge";
     private static final int COST = 6;
     private static final int BASIC_BUFF = 10;
+    private final ArrayList<Unit> debuffedUnits = new ArrayList<Unit>();
 
-    CODamageModifier damageMod = null;
-    CODefenseModifier defenseMod = null;
-    Meridian COcast;
+    UnitFightStatModifier baseMod = new UnitFightStatModifier(BASIC_BUFF);
+    UnitFightStatModifier debuffMod = new UnitFightStatModifier(POST_REFRESH_STAT_ADJUSTMENT);
 
-    VehicularCharge(Meridian commander)
+    VehicularCharge(Meridian meridian)
     {
-      super(commander, MOBILIZE_NAME, COST);
+      super(meridian, NAME, COST);
 
-      damageMod = new CODamageModifier(BASIC_BUFF);
-      defenseMod = new CODefenseModifier(BASIC_BUFF);
-      COcast = commander;
       AIFlags = PHASE_TURN_END;
+    }
+
+    @Override
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    {
+      modList.add(baseMod);
+      UnitInstanceFilter uif = new UnitInstanceFilter(debuffMod);
+      for( Unit unit : myCommander.units )
+      {
+        if( shouldRefresh(unit) )
+          uif.instances.add(unit);
+      }
+      modList.add(uif);
     }
 
     @Override
     protected void perform(MapMaster gameMap)
     {
-      // Grant the base firepower/defense bonus.
-      myCommander.addCOModifier(damageMod);
-      myCommander.addCOModifier(defenseMod);
-
       // Lastly, all land vehicles are refreshed and able to move again.
-      for( Unit unit : COcast.units )
+      for( Unit unit : myCommander.units )
       {
-        if( unit.model.isAll(UnitModel.TANK) )
+        if( shouldRefresh(unit) )
         {
-          if (unit.isTurnOver)
-            COcast.toBeNerfed.add(unit);
+          debuffedUnits.add(unit);
           unit.isTurnOver = false;
         }
       }
+    }
+    @Override
+    protected void revert(MapMaster gameMap)
+    {
+      debuffedUnits.clear();
+    }
+    protected boolean shouldRefresh(Unit unit)
+    {
+      return unit.model.isAll(UnitModel.TANK) && unit.isTurnOver;
     }
   }
 

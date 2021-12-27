@@ -27,6 +27,7 @@ import Terrain.TerrainType;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
+import Units.UnitContext;
 import Units.WeaponModel;
 
 public abstract class BattleLifecycle
@@ -51,7 +52,8 @@ public abstract class BattleLifecycle
             // is mobile or we don't care if it's mobile (because we aren't moving).
             if( wpn.loaded(actor) && (!moved || wpn.canFireAfterMoving) )
             {
-              ArrayList<XYCoord> locations = Utils.findTargetsInRange(map, actor.CO, moveLocation, wpn);
+              UnitContext uc = new UnitContext(map, actor, wpn, movePath, moveLocation);
+              ArrayList<XYCoord> locations = Utils.findTargetsInRange(map, uc);
 
               allWeaponTargets.addAll(locations);
             }
@@ -144,7 +146,7 @@ public abstract class BattleLifecycle
 
         boolean moved = attacker.x != moveCoord.xCoord || attacker.y != moveCoord.yCoord;
         isValid &= (gameMap.getLocation(attackLocation).getResident() == defender);
-        isValid &= (null != defender) && attacker.canAttack(defender.model, attackRange, moved);
+        isValid &= (null != defender) && attacker.canAttack(gameMap, defender.model, attackRange, moved);
         isValid &= (null != defender) && attacker.CO.isEnemy(defender.CO);
       }
 
@@ -188,15 +190,15 @@ public abstract class BattleLifecycle
     {
       ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
 
-      BattleSummary summary = CombatEngine.simulateBattleResults(attacker, defender, map,
-                              moveCoord.xCoord, moveCoord.yCoord);
+      BattleSummary summary = CombatEngine.simulateBattleResults(attacker, defender, map, movePath);
 
+      int attackerHealthLoss = (int) (10 * summary.attacker.getPreciseHPDamage());
+      int defenderHealthLoss = (int) (10 * summary.defender.getPreciseHPDamage());
       // output any damage done, with the color of the one dealing the damage
-      if( summary.attackerHPLoss > 0 )
-        output.add(new DamagePopup(movePath.getWaypoint(0).GetCoordinates(), defender.CO.myColor, (int) (summary.attackerHPLoss*10) + "%"));
-      if( summary.defenderHPLoss > 0 )
-        // grab the two most significant digits and convert to %
-        output.add(new DamagePopup(attackLocation, attacker.CO.myColor, (int) (summary.defenderHPLoss*10) + "%"));
+      if( attackerHealthLoss > 0 )
+        output.add(new DamagePopup(movePath.getWaypoint(0).GetCoordinates(), defender.CO.myColor, attackerHealthLoss + "%"));
+      if( defenderHealthLoss > 0 )
+        output.add(new DamagePopup(attackLocation, attacker.CO.myColor, defenderHealthLoss + "%"));
 
       return output;
     }
@@ -277,7 +279,7 @@ public abstract class BattleLifecycle
         attackRange = Math.abs(moveCoord.xCoord - attackLocation.xCoord) + Math.abs(moveCoord.yCoord - attackLocation.yCoord);
 
         boolean moved = attacker.x != moveCoord.xCoord || attacker.y != moveCoord.yCoord;
-        isValid &= (null != target) && attacker.canAttack(target, attackRange, moved);
+        isValid &= (null != target) && attacker.canAttack(gameMap, target, attackRange, moved);
       }
 
       if( isValid )
@@ -365,28 +367,30 @@ public abstract class BattleLifecycle
 
     public BattleEvent(Unit attacker, Unit defender, GamePath path, MapMaster map)
     {
-      boolean attackerMoved = path.getPathLength() > 1;
+      UnitContext attackerContext = new UnitContext(attacker);
+      attackerContext.setPath(path);
+      UnitContext defenderContext = new UnitContext(defender);
       // Calculate the result of the battle immediately. This will allow us to plan the animation.
-      battleInfo = CombatEngine.calculateBattleResults(attacker, defender, map, attackerMoved, path.getEnd().x, path.getEnd().y);
+      battleInfo = CombatEngine.calculateBattleResults(attackerContext, defenderContext, map);
       defenderCoords = new XYCoord(defender.x, defender.y);
     }
 
     public Unit getAttacker()
     {
-      return battleInfo.attacker;
+      return battleInfo.attacker.unit;
     }
     public boolean attackerDies()
     {
-      return (int) ((battleInfo.attacker.getPreciseHP() - battleInfo.attackerHPLoss) * 10) <= 0;
+      return battleInfo.attacker.after.getHP() <= 0;
     }
 
     public Unit getDefender()
     {
-      return battleInfo.defender;
+      return battleInfo.defender.unit;
     }
     public boolean defenderDies()
     {
-      return (int) ((battleInfo.defender.getPreciseHP() - battleInfo.defenderHPLoss) * 10) <= 0;
+      return battleInfo.defender.after.getHP() <= 0;
     }
 
     @Override
@@ -405,17 +409,8 @@ public abstract class BattleLifecycle
     public void performEvent(MapMaster gameMap)
     {
       // Apply the battle results that we calculated previously.
-      Unit attacker = battleInfo.attacker;
-      Unit defender = battleInfo.defender;
-      attacker.fire(battleInfo.attackerWeapon); // expend ammo
-      defender.damageHP(battleInfo.defenderHPLoss);
-
-      // Handle counter-attack if relevant.
-      if( battleInfo.attackerHPLoss > 0 )
-      {
-        defender.fire(battleInfo.defenderWeapon);
-        attacker.damageHP(battleInfo.attackerHPLoss);
-      }
+      battleInfo.attacker.unit.copyUnitState(battleInfo.attacker.after);
+      battleInfo.defender.unit.copyUnitState(battleInfo.defender.after);
     }
 
     @Override
@@ -447,7 +442,7 @@ public abstract class BattleLifecycle
 
     public Unit getAttacker()
     {
-      return result.attacker.body;
+      return result.attacker.unit;
     }
 
     public MapLocation getDefender()
@@ -468,15 +463,15 @@ public abstract class BattleLifecycle
     @Override
     public GameEventQueue sendToListener(GameEventListener listener)
     {
-      return listener.receiveDemolitionEvent(result.attacker.body, target.getCoordinates());
+      return listener.receiveDemolitionEvent(result.attacker.unit, target.getCoordinates());
     }
 
     @Override
     public void performEvent(MapMaster gameMap)
     {
       // Apply the battle results that we calculated previously.
-      Unit attacker = result.attacker.body;
-      attacker.fire(result.attacker.gun); // expend ammo
+      Unit attacker = result.attacker.unit;
+      attacker.fire(result.attacker.weapon); // expend ammo
       target.durability -= percentDamage;
     }
 

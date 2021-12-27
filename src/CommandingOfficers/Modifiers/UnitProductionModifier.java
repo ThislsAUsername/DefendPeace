@@ -1,5 +1,6 @@
 package CommandingOfficers.Modifiers;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,7 +12,7 @@ import Terrain.TerrainType;
 import Units.UnitModel;
 
 /** Allows us to add units to a CO's production capabilities on the fly. */
-public class UnitProductionModifier implements COModifier
+public class UnitProductionModifier implements Serializable
 {
   private static final long serialVersionUID = 1L;
   private Map<TerrainType, Set<UnitModel>> productionMods = null; 
@@ -39,7 +40,6 @@ public class UnitProductionModifier implements COModifier
     productionMods.get(terrain).add(model);
   }
 
-  @Override
   public void applyChanges(Commander commander)
   {
     for(TerrainType tt : productionMods.keySet() )
@@ -71,7 +71,6 @@ public class UnitProductionModifier implements COModifier
     }
   }
 
-  @Override
   public void revertChanges(Commander commander)
   {
     for( TerrainType tt : productionMods.keySet() )

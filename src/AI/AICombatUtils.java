@@ -24,6 +24,7 @@ import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.TerrainType;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 import Units.WeaponModel;
 
@@ -66,17 +67,22 @@ public class AICombatUtils
   public static Map<XYCoord, Double> findThreatPower(GameMap gameMap, Unit unit, UnitModel target)
   {
     XYCoord origin = new XYCoord(unit.x, unit.y);
+    return findThreatPower(gameMap, unit, origin, target);
+  }
+  public static Map<XYCoord, Double> findThreatPower(GameMap gameMap, Unit unit, XYCoord origin, UnitModel target)
+  {
     Map<XYCoord, Double> shootableTiles = new HashMap<XYCoord, Double>();
     boolean includeOccupiedDestinations = true; // We assume the enemy knows how to manage positioning within his turn
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedDestinations);
+    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(origin, unit, gameMap, includeOccupiedDestinations);
     for( WeaponModel wep : unit.model.weapons )
     {
       double damage = (null == target)? 1 : wep.getDamage(target) * unit.getHPFactor();
-      if( damage > 0 )
+      if( null == target || unit.canTarget(target) )
       {
         if( !wep.canFireAfterMoving )
         {
-          for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, wep.minRange, wep.maxRange))
+          UnitContext uc = new UnitContext(gameMap, unit, wep, null, origin);
+          for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, uc))
           {
             double val = damage;
             if (shootableTiles.containsKey(xyc))
@@ -88,7 +94,8 @@ public class AICombatUtils
         {
           for( XYCoord dest : destinations )
           {
-            for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, wep.minRange, wep.maxRange))
+            UnitContext uc = new UnitContext(gameMap, unit, wep, Utils.findShortestPath(unit, dest, gameMap), dest);
+            for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, uc))
             {
               double val = damage;
               if (shootableTiles.containsKey(xyc))
@@ -112,8 +119,11 @@ public class AICombatUtils
     {
       for( WeaponModel wm : um.weapons )
       {
+        // Consider refining this?
+        // I REALLY don't want this to become a loop over all units for all possible move locations;
+        //   that would likely defeat the main purpose of this function (saving computation power)
         if( wm.canFireAfterMoving )
-          range = Math.max(range, wm.maxRange);
+          range = Math.max(range, wm.rangeMax);
       }
     }
     return range;
@@ -135,7 +145,8 @@ public class AICombatUtils
         // is mobile or we don't care if it's mobile (because we aren't moving).
         if( wpn.loaded(unit) && (!moved || wpn.canFireAfterMoving) )
         {
-          ArrayList<XYCoord> locations = Utils.findTargetsInRange(gameMap, unit.CO, move, wpn, includeTerrain);
+          UnitContext uc = new UnitContext(gameMap, unit, wpn, Utils.findShortestPath(unit, move, gameMap), move);
+          ArrayList<XYCoord> locations = Utils.findTargetsInRange(gameMap, uc, includeTerrain);
           targetLocs.addAll(locations);
         }
       } // ~Weapon loop
@@ -187,7 +198,7 @@ public class AICombatUtils
       final XYCoord attackerCoord = new XYCoord(u);
       boolean requiresMoving = false;
       int dist = targetCoord.getDistance(attackerCoord);
-      if( !u.canAttack(target.model, dist, requiresMoving) )
+      if( !u.canAttack(gameMap, target.model, dist, requiresMoving) )
         continue;
 
       coordsToCheck.add(attackerCoord);
@@ -252,9 +263,7 @@ public class AICombatUtils
           neededAttacks.remove(space);
           continue;
         }
-        double thisShot =
-            CombatEngine.simulateBattleResults(attacker, target, gameMap,
-                                               space.xCoord, space.yCoord).defenderHPLoss;
+        double thisShot = CombatEngine.simulateBattleResults(attacker, target, gameMap, space).defender.getPreciseHPDamage();
         if( target.getHP() <= damage - thisShot )
         {
           neededAttacks.remove(space);
@@ -303,7 +312,7 @@ public class AICombatUtils
         Unit unit = assaultQueue.poll();
         boolean requiresMoving = !xyc.equals(target.x, target.y);
         int dist = xyc.getDistance(target.x, target.y);
-        if( !unit.canAttack(target.model, dist, requiresMoving) )
+        if( !unit.canAttack(gameMap, target.model, dist, requiresMoving) )
           continue; // Consider only units that can attack from here
         if( neededAttacks.containsValue(unit) )
           continue; // Consider each unit only once
@@ -314,7 +323,7 @@ public class AICombatUtils
         if( movePath.getPathLength() > 0 )
         {
           neededAttacks.put(xyc, unit);
-          double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc.xCoord, xyc.yCoord).defenderHPLoss;
+          double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc).defender.getPreciseHPDamage();
 
           thisDamage = findMultiHitKill(gameMap, target, attackCandidates, neededAttacks, damage + thisDamage);
 

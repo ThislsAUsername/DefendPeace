@@ -81,7 +81,7 @@ public abstract class WaitLifecycle
         GamePath.PathNode endpoint = movePath.getEnd();
         int fuelBurn = movePath.getFuelCost(actor.model, gameMap);
         boolean includeOccupiedSpaces = true; // To allow validation for LOAD/JOIN actions.
-        isValid = fuelBurn <= actor.fuel && fuelBurn <= actor.model.movePower
+        isValid = fuelBurn <= actor.fuel && fuelBurn <= actor.getMovePower(gameMap)
             && actor.getMoveFunctor(includeOccupiedSpaces).canEnd(gameMap, endpoint.GetCoordinates());
       }
 

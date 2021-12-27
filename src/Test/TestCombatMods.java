@@ -8,7 +8,11 @@ import Engine.GameScenario;
 import Engine.Utils;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
+import Engine.GameEvents.GameEventListener;
+import Engine.GameEvents.ResupplyEvent;
+import Engine.StateTrackers.DamageDealtToIncomeConverter;
 import Engine.UnitActionLifecycles.BattleLifecycle;
+import Engine.UnitMods.UnitDamageModifier;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -42,6 +46,7 @@ public class TestCombatMods extends TestCase
     testPassed &= validate(testBasicMod(), "  Basic combat mod test failed.");
     testPassed &= validate(testIronWill(), "  Venge's Iron Will combat mod test failed.");
     testPassed &= validate(testRetribution(), "  Venge's Retribution combat mod test failed.");
+    testPassed &= validate(testDamageDealtToIncomeConverter(), "  DamageDealtToIncomeConverter test failed.");
 
     return testPassed;
   }
@@ -53,11 +58,11 @@ public class TestCombatMods extends TestCase
     Unit infActive = addUnit(testMap, cinder, UnitModel.TROOP, 7, 3);
     infActive.initTurn(testMap); // Make sure he is ready to move.
     Unit infPassive = addUnit(testMap, cinder, UnitModel.TROOP, 7, 5);
-    
+
     // We need a victim and an angry man to avenge him
     Unit bait = addUnit(testMap, venge, UnitModel.TRANSPORT, 7, 4);
     Unit meaty = addUnit(testMap, venge, UnitModel.ASSAULT, 8, 4);
-    
+
     // Poke the bear...
     performGameAction(new BattleLifecycle.BattleAction(testMap, infActive, Utils.findShortestPath(infActive, 7, 3, testMap), 7, 4), testGame);
 
@@ -67,10 +72,10 @@ public class TestCombatMods extends TestCase
     // ...and defense
     BattleSummary vengefulCounter = CombatEngine.simulateBattleResults(infActive, meaty, testMap, 8, 3);
     BattleSummary normalCounter = CombatEngine.simulateBattleResults(infPassive, meaty, testMap, 8, 5);
-    
+
     // Check that Venge's passive ability works on both attack and defense
-    boolean testPassed = validate(vengeful.defenderHPLoss > normal.defenderHPLoss, "    Being angry didn't help Venge attack extra hard.");
-    testPassed &= validate(vengefulCounter.attackerHPLoss > normalCounter.attackerHPLoss, "    Being angry didn't help Venge defend extra hard.");
+    boolean testPassed = validate(vengeful.defender.deltaHP < normal.defender.deltaHP, "    Being angry didn't help Venge attack extra hard.");
+    testPassed &= validate(vengefulCounter.attacker.deltaHP < normalCounter.attacker.deltaHP, "    Being angry didn't help Venge defend extra hard.");
 
     // Clean up
     testMap.removeUnit(infActive);
@@ -84,29 +89,28 @@ public class TestCombatMods extends TestCase
   /** Test that combat works as a black box, but that Venge gets his way all the same. */
   private boolean testIronWill()
   {
-    // Add our test subjects
-    Unit infA = addUnit(testMap, cinder, UnitModel.TROOP, 7, 3);
-    Unit infB = addUnit(testMap, venge, UnitModel.TROOP, 7, 5);
-    
+    // Add our test subjects; road inf attacking into plains inf
+    Unit infA = addUnit(testMap, cinder, UnitModel.TROOP, 7, 4);
+    Unit infB = addUnit(testMap, venge, UnitModel.TROOP, 8, 5);
+    infB.isTurnOver = false;
+
     // Check our damage for each first strike pre-power...
-    BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
+    BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 5);
 
     venge.modifyAbilityPower(42); // juice up
-    venge.getReadyAbilities().get(0).activate(testMap); // activate Iron WIll
-    
+    venge.getReadyAbilities().get(0).activate(testMap); // activate Iron Will
+
     // ...and after power
-    BattleSummary ironAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
-    
+    BattleSummary ironAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 5);
+
     // Check that Venge's Iron Will works properly without breaking things (other than balance)
     boolean testPassed = true;
-    testPassed &= validate(infB.model.getDefenseRatio() > 100, "    Iron Will didn't buff defense.");
-    
     // First, check the logic of A->B
-    testPassed &= validate(normalAB.defenderHPLoss > normalAB.attackerHPLoss, "    First strike didn't work properly for Cinder.");
+    testPassed &= validate(normalAB.defender.deltaPreciseHP < normalAB.attacker.deltaPreciseHP, "    First strike didn't work properly for Cinder.");
 
-    testPassed &= validate(ironAB.attacker == infA, "    infA attacked, but isn't the attacker.");
-    testPassed &= validate(ironAB.defender == infB, "    infB was attacked, but isn't the defender.");
-    testPassed &= validate(ironAB.defenderHPLoss < ironAB.attackerHPLoss, "    Venge didn't defend better, or didn't get Iron Will's buff.");
+    testPassed &= validate(ironAB.attacker.unit == infA, "    infA attacked, but isn't the attacker.");
+    testPassed &= validate(ironAB.defender.unit == infB, "    infB was attacked, but isn't the defender.");
+    testPassed &= validate(ironAB.defender.deltaPreciseHP > ironAB.attacker.deltaPreciseHP, "    Venge didn't defend better, or didn't get Iron Will's buff.");
 
     // Clean up
     testMap.removeUnit(infA);
@@ -122,38 +126,35 @@ public class TestCombatMods extends TestCase
     // Add our test subjects
     Unit infA = addUnit(testMap, cinder, UnitModel.TROOP, 7, 3);
     Unit infB = addUnit(testMap, venge, UnitModel.TROOP, 7, 5);
-    
+
     // Check our damage for each first strike pre-power...
     BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
     BattleSummary normalBA = CombatEngine.simulateBattleResults(infB, infA, testMap, 7, 4);
 
     venge.modifyAbilityPower(42); // juice up
     venge.getReadyAbilities().get(1).activate(testMap); // activate Retribution
-    
+
     // ...and after power
     BattleSummary retribAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
     BattleSummary retribBA = CombatEngine.simulateBattleResults(infB, infA, testMap, 7, 4);
-    
+
     // Check that Venge's Retribution works properly without breaking things (other than balance)
     boolean testPassed = true;
-    testPassed &= validate(infB.model.getDamageRatio() > 110, "    Retribution didn't buff offense.");
-    testPassed &= validate(infB.model.getDefenseRatio() < 100, "    Retribution didn't reduce defense.");
-    
-    // First, check the logic of A->B
-    testPassed &= validate(normalAB.defenderHPLoss > normalAB.attackerHPLoss, "    First strike didn't work properly for Cinder.");
 
-    testPassed &= validate(retribAB.attacker == infA, "    infA attacked, but isn't the attacker.");
-    testPassed &= validate(retribAB.defender == infB, "    infB was attacked, but isn't the defender.");
-    testPassed &= validate(retribAB.defenderHPLoss < retribAB.attackerHPLoss, "    Cinder got first strike when Retribution should have stolen it.");
+    // First, check the logic of A->B
+    testPassed &= validate(normalAB.defender.deltaHP < normalAB.attacker.deltaHP, "    First strike didn't work properly for Cinder.");
+
+    testPassed &= validate(retribAB.attacker.unit == infA, "    infA attacked, but isn't the attacker.");
+    testPassed &= validate(retribAB.defender.unit == infB, "    infB was attacked, but isn't the defender.");
+    testPassed &= validate(retribAB.defender.deltaHP > retribAB.attacker.deltaHP, "    Cinder got first strike when Retribution should have stolen it.");
 
     // Now do B->A
-    testPassed &= validate(normalBA.defenderHPLoss > normalBA.attackerHPLoss, "    First strike didn't work properly for Venge.");
-    
-    testPassed &= validate(normalBA.defenderHPLoss < retribBA.defenderHPLoss, "    Venge didn't deal more damage with buffed offense.");
+    testPassed &= validate(normalBA.defender.deltaHP < normalBA.attacker.deltaHP, "    First strike didn't work properly for Venge.");
+    testPassed &= validate(normalBA.defender.deltaHP > retribBA.defender.deltaHP, "    Venge didn't deal more damage with buffed offense.");
 
-    testPassed &= validate(retribBA.attacker == infB, "    infB attacked, but isn't the attacker.");
-    testPassed &= validate(retribBA.defender == infA, "    infA was attacked, but isn't the defender.");
-    testPassed &= validate(retribBA.defenderHPLoss > retribBA.attackerHPLoss, "    Retribution somehow deprived Venge of first strike?");
+    testPassed &= validate(retribBA.attacker.unit == infB, "    infB attacked, but isn't the attacker.");
+    testPassed &= validate(retribBA.defender.unit == infA, "    infA was attacked, but isn't the defender.");
+    testPassed &= validate(retribBA.defender.deltaHP < retribBA.attacker.deltaHP, "    Retribution somehow deprived Venge of first strike?");
 
     // Clean up
     testMap.removeUnit(infA);
@@ -162,4 +163,83 @@ public class TestCombatMods extends TestCase
 
     return testPassed;
   }
+
+  private boolean testDamageDealtToIncomeConverter()
+  {
+    boolean testPassed = true; // Assume nothin's busted
+    DamageDealtToIncomeConverter ddtic = DamageDealtToIncomeConverter.instance(testGame, DamageDealtToIncomeConverter.class);
+
+    Unit aa = addUnit(testMap, cinder, UnitModel.SURFACE_TO_AIR, 7, 3);
+    // juice aa to be extra angry and get overkills
+    aa.alterHP(10, true);
+    aa.addUnitModifier(new UnitDamageModifier(42));
+
+    int currentFundsReturn = 0;
+    // Get lots of free money, and make sure we get the right amount
+    for( int i = 0; i < 100; ++i )
+    {
+      currentFundsReturn += i;
+      ddtic.startTracking(cinder, i);
+      cinder.money = 0;
+
+      // give aa ammo
+      aa.isTurnOver = false;
+      ResupplyEvent event = new ResupplyEvent(null, aa);
+      event.performEvent( testGame.gameMap );
+      GameEventListener.publishEvent(event, testGame);
+
+      // Add the victim, and yeet him
+      addUnit(testMap, venge, UnitModel.TROOP, 7, 4);
+      performGameAction(new BattleLifecycle.BattleAction(testMap, aa, Utils.findShortestPath(aa, 7, 3, testMap), 7, 4), testGame);
+
+      testPassed &= validate(cinder.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.money+" instead.");
+    }
+    // Remove those amounts, and make sure that works
+    for( int i = 0; i < 55; ++i )
+    {
+      currentFundsReturn -= i;
+      ddtic.stopTracking(cinder, i);
+      ddtic.stopTracking(cinder, i); // Remove twice, so we can be sure that extra removals don't break things
+      cinder.money = 0;
+
+      // give aa ammo
+      aa.isTurnOver = false;
+      ResupplyEvent event = new ResupplyEvent(null, aa);
+      event.performEvent( testGame.gameMap );
+      GameEventListener.publishEvent(event, testGame);
+
+      // Add the victim, and yeet him
+      addUnit(testMap, venge, UnitModel.TROOP, 7, 4);
+      performGameAction(new BattleLifecycle.BattleAction(testMap, aa, Utils.findShortestPath(aa, 7, 3, testMap), 7, 4), testGame);
+
+      testPassed &= validate(cinder.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.money+" instead.");
+    }
+    // Do the second half backwards, for giggles
+    for( int i = 99; i > 42; --i )
+    {
+      currentFundsReturn -= i;
+      if( currentFundsReturn < 0 )
+        currentFundsReturn = 0;
+      ddtic.stopTracking(cinder, i);
+      cinder.money = 0;
+
+      // give aa ammo
+      aa.isTurnOver = false;
+      ResupplyEvent event = new ResupplyEvent(null, aa);
+      event.performEvent( testGame.gameMap );
+      GameEventListener.publishEvent(event, testGame);
+
+      // Add the victim, and yeet him
+      addUnit(testMap, venge, UnitModel.TROOP, 7, 4);
+      performGameAction(new BattleLifecycle.BattleAction(testMap, aa, Utils.findShortestPath(aa, 7, 3, testMap), 7, 4), testGame);
+
+      testPassed &= validate(cinder.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.money+" instead.");
+    }
+
+    // Clean up
+    testMap.removeUnit(aa);
+
+    return testPassed;
+  }
+
 }

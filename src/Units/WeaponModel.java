@@ -12,8 +12,8 @@ public abstract class WeaponModel implements Serializable
 
   public boolean canFireAfterMoving;
   public boolean hasInfiniteAmmo;
-  public int minRange;
-  public int maxRange;
+  public int rangeMin;
+  public int rangeMax;
 
   protected WeaponModel(boolean infiniteAmmo, int minRange, int maxRange)
   {
@@ -26,8 +26,8 @@ public abstract class WeaponModel implements Serializable
     {
       canFireAfterMoving = true;
     }
-    this.minRange = minRange;
-    this.maxRange = maxRange;
+    this.rangeMin = minRange;
+    this.rangeMax = maxRange;
   }
   protected WeaponModel(boolean infiniteAmmo)
   {
@@ -39,7 +39,7 @@ public abstract class WeaponModel implements Serializable
   }
   public abstract WeaponModel clone();
 
-  public boolean loaded(Unit user)
+  public boolean loaded(UnitState user)
   {
     if( hasInfiniteAmmo )
       return true;
@@ -47,15 +47,6 @@ public abstract class WeaponModel implements Serializable
       return user.ammo > 0;
   }
 
-  /**
-   * @return returns its base damage against defender if the unit is in range
-   */
-  public double getDamage(ITargetable defender, int range)
-  {
-    if( (range >= minRange) && (range <= maxRange) )
-      return getDamage(defender);
-    return 0;
-  }
   /**
    * @return returns its base damage against that target type
    */

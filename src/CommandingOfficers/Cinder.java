@@ -1,20 +1,22 @@
 package CommandingOfficers;
 
+import java.awt.Color;
 import java.util.ArrayList;
-import java.util.HashMap;
 
-import CommandingOfficers.Modifiers.COModifier;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
-import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
-import Terrain.MapLocation;
+import Engine.StateTrackers.BuildCountsTracker;
+import Engine.StateTrackers.CountManager;
+import Engine.StateTrackers.StateTracker;
+import Terrain.GameMap;
 import Terrain.MapMaster;
+import UI.GameOverlay;
 import Units.Unit;
-import Units.UnitModel;
+import Units.UnitContext;
 
 /*
  * Cinder is based on getting an edge in the action economy, at the cost of unit health.
@@ -39,12 +41,12 @@ public class Cinder extends Commander
           "- Building on a base that has produced this turn already incurs a fee of 1000 funds per build you have already done there this turn.\n"));
       infoPages.add(new InfoPage(
           SearAbility.SEAR_NAME+" ("+SearAbility.SEAR_COST+"):\n" +
-          "Removes "+SearAbility.SEAR_WOUND+" HP from each of Cinder's units.\n" +
-          "Units that had not yet acted have their supplies restored.\n" +
-          "Units are refreshed and may act again.\n"));
+          "Remove "+SearAbility.SEAR_WOUND+" HP from each of Cinder's units.\n" +
+          "Reactivate all units.\n" +
+          "Resupply units that had not yet acted.\n"));
       infoPages.add(new InfoPage(
           WitchFireAbility.WITCHFIRE_NAME+" ("+WitchFireAbility.WITCHFIRE_COST+"):\n" +
-          "After any unit attacks, it will lose "+WitchFireAbility.WITCHFIRE_HP_COST+" HP and be refreshed.\n" +
+          "After any unit attacks, it will be reactivated; this costs 1 HP per attack made by that unit so far.\n" +
           "This may be done repeatedly, but it can kill Cinder's own units.\n"));
     }
     @Override
@@ -56,9 +58,7 @@ public class Cinder extends Commander
 
   private static final int PREMIUM_PER_BUILD = 1000;
 
-  private HashMap<XYCoord, Integer> buildCounts = new HashMap<>();
-
-  public WitchFireListener witchFireListener;
+  private BuildCountsTracker buildCounts;
 
   public Cinder(GameScenario.GameRules rules)
   {
@@ -69,18 +69,10 @@ public class Cinder extends Commander
   }
 
   @Override
-  public void registerForEvents(GameInstance game)
+  public void initForGame(GameInstance game)
   {
-    super.registerForEvents(game);
-
-    witchFireListener = new WitchFireListener(this, WitchFireAbility.WITCHFIRE_HP_COST);
-    witchFireListener.registerForEvents(game);
-  }
-  @Override
-  public void unregister(GameInstance game)
-  {
-    super.unregister(game);
-    witchFireListener.unregister(game);
+    super.initForGame(game);
+    buildCounts = StateTracker.instance(game, BuildCountsTracker.class);
   }
 
   public static CommanderInfo getInfo()
@@ -88,74 +80,61 @@ public class Cinder extends Commander
     return coInfo;
   }
 
-  @Override
-  /** Get the list of units this commander can build from the given property type. */
-  public ArrayList<UnitModel> getShoppingList(MapLocation buyLocation)
-  {
-    setPrices(buildCounts.get(buyLocation.getCoordinates()));
-    return super.getShoppingList(buyLocation);
-  }
-
   /*
    * Cinder builds units at 8HP ready to act.
-   * To compensate for the ability to continue producing units in a single turn,
-   * the cost of units increases exponentially for repeated purchases from a single property.
    */
   @Override
   public GameEventQueue receiveCreateUnitEvent(Unit unit)
   {
     XYCoord buildCoords = new XYCoord(unit.x, unit.y);
-    if( this == unit.CO && buildCounts.containsKey(buildCoords) )
+    if( this == unit.CO && myView.isLocationValid(buildCoords) )
     {
-      buildCounts.put(buildCoords, buildCounts.get(buildCoords) + 1);
-      setPrices(0);
-
       unit.alterHP(-2);
       unit.isTurnOver = false;
     }
     return null;
   }
 
-  /*
-   * Purchase price problems reset at the start of turn.
+  /**
+   * To compensate for the ability to continue producing units in a single turn,
+   * the cost of units increases for repeated purchases from a single property.
    */
   @Override
-  public GameEventQueue initTurn(MapMaster map)
+  public void modifyCost(UnitContext uc)
   {
-    // If we haven't initialized our buildable locations yet, do so.
-    if( buildCounts.size() < 1 )
-    {
-      for( int x = 0; x < map.mapWidth; ++x )
-        for( int y = 0; y < map.mapHeight; ++y )
-        {
-          MapLocation loc = map.getLocation(x, y);
-          if( loc.isCaptureable() ) // if we can't capture it, we can't build from it
-            buildCounts.put(loc.getCoordinates(), 0);
-        }
-    }
-    else // If we're initialized already, just reset our build counts
-      for( XYCoord xyc : buildCounts.keySet() )
-      {
-        buildCounts.put(xyc, 0);
-      }
-
-    setPrices(0);
-    return super.initTurn(map);
+    uc.costShift += buildCounts.getCountFor(this, uc.coord) * PREMIUM_PER_BUILD;
   }
 
   @Override
-  public void endTurn()
+  public ArrayList<GameOverlay> getMyOverlays(GameMap gameMap, boolean amIViewing)
   {
-    setPrices(0);
-    super.endTurn();
-  }
+    ArrayList<GameOverlay> overlays = super.getMyOverlays(gameMap, amIViewing);
+    if( !amIViewing )
+      return overlays;
 
-  public void setPrices(int repetitons)
-  {
-    for( UnitModel um : unitModels )
+    // Highlight tiles we've built from already this turn
+    for( XYCoord xyc : buildCounts.getCountFor(this).keySet() )
     {
-      um.moneyCostAdjustment = repetitons*PREMIUM_PER_BUILD;
+      int count = buildCounts.getCountFor(this, xyc);
+      if( !gameMap.isLocationValid(xyc) || count < 1 )
+        continue;
+
+      // Invert my color so the highlight is easily visible
+      int r = 255 - myColor.getRed();
+      int g = 255 - myColor.getGreen();
+      int b = 255 - myColor.getBlue();
+      // Thicken the center of the overlay as I spam
+      int a = Math.min(255, 100 * count);
+      Color edgeColor = new Color(r, g, b, 200);
+      Color fillColor = new Color(r, g, b, a);
+      ArrayList<XYCoord> coords = new ArrayList<XYCoord>();
+      coords.add(xyc);
+      overlays.add(new GameOverlay(xyc,
+                   coords,
+                   fillColor, edgeColor));
     }
+
+    return overlays;
   }
 
   /*
@@ -168,9 +147,9 @@ public class Cinder extends Commander
     private static final int SEAR_COST = 5;
     private static final int SEAR_WOUND = -1;
 
-    SearAbility(Commander commander)
+    SearAbility(Cinder cinder)
     {
-      super(commander, SEAR_NAME, SEAR_COST);
+      super(cinder, SEAR_NAME, SEAR_COST);
       AIFlags = PHASE_TURN_END;
     }
 
@@ -179,7 +158,7 @@ public class Cinder extends Commander
     {
       for( Unit unit : myCommander.units )
       {
-        if( unit.isTurnOver )
+        if( !unit.isTurnOver )
         {
           unit.resupply(); // the missing HP has to go somewhere...
         }
@@ -192,76 +171,96 @@ public class Cinder extends Commander
   /*
    * Witchfire causes Cinder's troops to automatically refresh after attacking, at the cost of 1 HP
    */
-  private static class WitchFireAbility extends CommanderAbility implements COModifier
+  private static class WitchFireAbility extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String WITCHFIRE_NAME = "Witchfire";
     private static final int WITCHFIRE_COST = 9;
-    private static final int WITCHFIRE_HP_COST = 1;
-    private Cinder coCast;
+    private WitchFireTracker tracker;
 
-    WitchFireAbility(Cinder commander)
+    WitchFireAbility(Cinder cinder)
     {
-      super(commander, WITCHFIRE_NAME, WITCHFIRE_COST);
-      coCast = commander;
+      super(cinder, WITCHFIRE_NAME, WITCHFIRE_COST);
+    }
+    @Override
+    public void initForGame(GameInstance game)
+    {
+      tracker = WitchFireTracker.instance(game, WitchFireTracker.class);
     }
 
     @Override
     protected void perform(MapMaster gameMap)
     {
-      myCommander.addCOModifier(this);
-    }
-
-    @Override // COModifier interface.
-    public void applyChanges(Commander commander)
-    {
-      coCast.witchFireListener.listen = true;
+      tracker.startTracking(myCommander);
     }
 
     @Override
-    public void revertChanges(Commander commander)
+    protected void revert(MapMaster gameMap)
     {
-      coCast.witchFireListener.listen = false;
+      tracker.stopTracking(myCommander);
     }
   }
 
-  private static class WitchFireListener implements GameEventListener
+  private static class WitchFireTracker extends StateTracker
   {
     private static final long serialVersionUID = 1L;
-    private Cinder myCommander = null;
-    private final int refreshCost;
-    public boolean listen = false;
 
-    public WitchFireListener(Cinder myCo, int HPCost)
+    private CountManager<Commander, Unit> attackCounts = new CountManager<>();
+
+    public void startTracking(Commander co)
     {
-      myCommander = myCo;
-      refreshCost = HPCost;
+      attackCounts.getCountFor(co);
+    }
+    public void stopTracking(Commander co)
+    {
+      attackCounts.resetCountFor(co);
     }
 
     @Override
     public GameEventQueue receiveBattleEvent(BattleSummary battleInfo)
     {
-      if( !listen )
+      Commander co = battleInfo.attacker.CO;
+      if( !attackCounts.hasCountFor(co) )
         return null;
+      // Since an active CO was part of the fight, reactivate the attacker at the cost of HP.
       GameEventQueue results = new GameEventQueue();
-      // Determine if we were part of this fight. If so, refresh at our own expense.
-      Unit minion = battleInfo.attacker;
-      if( minion.CO == myCommander )
+      Unit minion = battleInfo.attacker.unit;
+      // Cost starts at 1, then adds one for each subsequent attack
+      int refreshCost = 1+attackCounts.getCountFor(co, minion);
+      int hp = minion.getHP();
+      if( hp > refreshCost )
       {
-        int hp = minion.getHP();
-        if( hp > refreshCost )
-        {
-          minion.alterHP(-refreshCost);
-          minion.isTurnOver = false;
-        }
-        else
-        {
-          // Guess he's not gonna make it.
-          // TODO: Maybe add a debuff event/animation here as well.
-          Utils.enqueueDeathEvent(minion, results);
-        }
+        minion.alterHP(-refreshCost);
+        minion.isTurnOver = false;
+        attackCounts.incrementCount(co, minion);
+      }
+      else
+      {
+        // Guess he's not gonna make it.
+        // TODO: Maybe add a debuff event/animation here as well.
+        Utils.enqueueDeathEvent(minion, results);
       }
       return results;
+    }
+
+    @Override
+    public char getUnitMarking(Unit unit)
+    {
+      Commander co = unit.CO;
+      char defaultVal = super.getUnitMarking(unit);
+      // Don't pollute the pool for the early out from earlier
+      if( !attackCounts.hasCountFor(co) )
+        return defaultVal;
+      int count = attackCounts.getCountFor(co, unit);
+      if( 0 >= count )
+        return defaultVal;
+      // Units can't survive attacking 10 times, so don't worry about that
+      return ("" + count).charAt(0);
+    }
+    @Override
+    public Color getMarkingColor(Unit unit)
+    {
+      return unit.CO.myColor;
     }
   }
 }
