@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import CommandingOfficers.Commander;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -62,7 +61,6 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
 
   public String name;
   public long role;
-  public Commander CO;
   public int costBase;
   public double abilityPowerValue;
   public int maxAmmo;
@@ -78,14 +76,11 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public Set<TerrainType> healableHabs = new HashSet<TerrainType>();
   public ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();
 
-  public int maxHP = 10;
+  public static final int MAXIMUM_HP = 10;
+  public static final int DEFAULT_STAT_RATIO = 100;
   public int holdingCapacity = 0;
   public long carryableMask;
   public long carryableExclusionMask;
-  private int COstr = 100;
-  private int COdef = 100;
-  public double costMultiplier = 1.0;
-  public int costShift = 0;
 
   public UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] pWeapons, double powerValue)
@@ -151,89 +146,14 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     carryableExclusionMask = other.carryableExclusionMask;
 
     // Duplicate other assorted values
-    maxHP = other.maxHP;
     maxMaterials = other.maxMaterials;
     for( UnitModifier mod : other.unitMods )
       unitMods.add(mod);
-
-    CO = other.CO;
-    COstr = other.COstr;
-    COdef = other.COdef;
-    costMultiplier = other.costMultiplier;
-    costShift = other.costShift;
   }
 
-  private int costFrom(UnitContext uc)
-  {
-    return (int) ((uc.costBase)*uc.costMultiplier)+uc.costShift;
-  }
-  private UnitContext getCostContext(XYCoord coord)
-  {
-    UnitContext uc = new UnitContext(this.CO, this);
-    uc.coord = coord;
-    for( UnitModifier mod : getModifiers() )
-      mod.modifyCost(uc);
-    return uc;
-  }
-  public int getCost()
-  {
-    UnitContext uc = getCostContext(null);
-    return costFrom(uc);
-  }
-  public int getBuyCost(XYCoord coord)
-  {
-    UnitContext uc = getCostContext(coord);
-    return costFrom(uc);
-  }
-  // Not adding a Produce overload for now since I don't see a simple way to get consistent results pipelined into the displayed buy cost
-  public int getRepairCost(UnitContext uc)
-  {
-    for( UnitModifier mod : getModifiers() )
-      mod.modifyCost(uc);
-    for( UnitModifier mod : getModifiers() )
-      mod.modifyRepairCost(uc);
-    return costFrom(uc);
-  }
   public boolean canRepairOn(MapLocation locus)
   {
     return healableHabs.contains(locus.getEnvironment().terrainType);
-  }
-
-  /**
-   * Takes a percent change and adds it to the current damage multiplier for this UnitModel.
-   * @param change The percent damage to add; e.g. if the multiplier is 100 and this function is
-   * called with 10, the new one will be 110. If it is called with 10 again, it will go to 120.
-   */
-  public void modifyDamageRatio(int change)
-  {
-    COstr += change;
-  }
-  public int getDamageRatio()
-  {
-    return COstr;
-  }
-
-  /**
-   * Takes a percent change and adds it to the current defense modifier for this UnitModel.
-   * @param change The percent defense to add; e.g. if the defense modifier is 100 and this function
-   * is called with 10, the new one will be 110. If it is called with 10 again, it will go to 120.
-   */
-  public void modifyDefenseRatio(int change)
-  {
-    COdef += change;
-  }
-  public int getDefenseRatio()
-  {
-    return COdef;
-  }
-
-  /** For high-level estimation */
-  public int getMovePower()
-  {
-    UnitContext uc = new UnitContext(this.CO, this);
-    for( UnitModifier mod : getModifiers() )
-      mod.modifyMovePower(uc);
-    return uc.movePower;
   }
 
   /** Provides a hook for inheritors to supply turn-initialization actions to a unit.
@@ -403,8 +323,6 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public List<UnitModifier> getModifiers()
   {
     ArrayList<UnitModifier> output = new ArrayList<>();
-    // TODO: consider a null check here
-    output.addAll(CO.getModifiers());
     output.addAll(unitMods);
     return output;
   }

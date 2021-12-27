@@ -4,6 +4,7 @@ import java.awt.Graphics;
 
 import Engine.GamePath;
 import Engine.XYCoord;
+import Terrain.GameMap;
 import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import Units.Unit;
 
@@ -14,12 +15,11 @@ public class MoveAnimation extends BaseUnitActionAnimation
   private final GamePath path;
   private final double tilesPerMs;
 
-  public MoveAnimation(int tileSize, Unit actor, GamePath path)
+  public MoveAnimation(int tileSize, GameMap map, Unit actor, GamePath path)
   {
     super(tileSize, actor, null);
     this.path = path;
-    // We don't need an *exact* speed, so this should be fine
-    tilesPerMs = actor.model.getMovePower() / (double) maxTime;
+    tilesPerMs = actor.getMovePower(map) / (double) maxTime;
     duration = (long) ((path.getPathLength() - 1) / tilesPerMs);
   }
 

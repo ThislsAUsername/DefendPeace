@@ -218,9 +218,19 @@ public class Unit extends UnitState implements UnitModList
     return isFull;
   }
 
+  public int getCost()
+  {
+    return this.CO.getCost(model);
+  }
+
   public int getRepairCost()
   {
-    return model.getRepairCost(new UnitContext(this));
+    UnitContext uc = new UnitContext(this);
+    for( UnitModifier mod : getModifiers() )
+      mod.modifyCost(uc);
+    for( UnitModifier mod : getModifiers() )
+      mod.modifyRepairCost(uc);
+    return uc.getCostTotal();
   }
 
   @Override
@@ -240,7 +250,9 @@ public class Unit extends UnitState implements UnitModList
   public List<UnitModifier> getModifiers()
   {
     ArrayList<UnitModifier> output = new ArrayList<>();
+    // Intended order of operations: model, environment, CO, unit-specific
     output.addAll(model.getModifiers());
+    output.addAll(CO.getModifiers());
     output.addAll(unitMods);
     return output;
   }

@@ -13,6 +13,7 @@ import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 
 public class TestCOModifier extends TestCase
@@ -48,21 +49,21 @@ public class TestCOModifier extends TestCase
   private boolean testMovementModifier()
   {
     boolean testPassed = true;
-    UnitModel inf = patch.getUnitModel(UnitModel.TROOP);
+    UnitContext inf = new UnitContext(patch, patch.getUnitModel(UnitModel.TROOP));
     
     // Get base movement speed
-    int startMove = inf.getMovePower();
+    int startMove = inf.calculateMovePower();
     
     // Apply a movement modifier and re-check.
     int MOVEMOD = 3;
     UnitMovementModifier moveMod = new UnitMovementModifier(MOVEMOD);
-    inf.addUnitModifier(moveMod);
-    int newMove = inf.getMovePower();
+    inf.mods.add(moveMod);
+    int newMove = inf.calculateMovePower();
     testPassed &= validate( (newMove - startMove) == MOVEMOD, "    Movement modifier did not apply as expected!");
 
     // Make sure reverting takes it back to normal.
-    inf.removeUnitModifier(moveMod);
-    int lastMove = inf.getMovePower();
+    inf.mods.remove(moveMod);
+    int lastMove = inf.calculateMovePower();
     testPassed &= validate( lastMove == startMove, "    Movement modifier did not return the move power to normal!");
 
     return testPassed;

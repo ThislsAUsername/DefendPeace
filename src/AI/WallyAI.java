@@ -76,6 +76,7 @@ public class WallyAI extends ModularAI
     if( unitEffectiveMove.containsKey(model) )
       return unitEffectiveMove.get(model);
 
+    UnitContext uc = new UnitContext(myCo, model);
     MoveType p = model.propulsion;
     GameMap map = myCo.myView;
     double totalCosts = 0;
@@ -98,7 +99,7 @@ public class WallyAI extends ModularAI
     //             term for how fast you are   term for map coverage
     double ratio = (validTiles / totalCosts) * (validTiles / totalTiles); // 1.0 is the max expected value
     
-    double effMove = model.getMovePower() * ratio;
+    double effMove = uc.calculateMovePower() * ratio;
     unitEffectiveMove.put(model, effMove);
     return effMove;
   }
@@ -440,7 +441,7 @@ public class WallyAI extends ModularAI
               if( valueUnit(target, targetLoc, false) * Math.floor(damage) * AGGRO_FUNDS_WEIGHT > valueUnit(unit, unitLoc, true) )
               {
                 ai.log(String.format("  %s is going aggro on %s", unit.toStringWithLocation(), target.toStringWithLocation()));
-                ai.log(String.format("    He plans to deal %s HP damage for a net gain of %s funds", damage, (target.model.getCost() * damage - unit.model.getCost() * unit.getHP())/10));
+                ai.log(String.format("    He plans to deal %s HP damage for a net gain of %s funds", damage, (target.getCost() * damage - unit.getCost() * unit.getHP())/10));
                 goForIt = true;
               }
               else if( damage > loss
@@ -550,7 +551,7 @@ public class WallyAI extends ModularAI
         }
         ArrayList<UnitModel> list = myCo.getShoppingList(gameMap.getLocation(coord));
         UnitModel toBuy = builds.get(coord);
-        if( toBuy.getBuyCost(coord) <= myCo.money && list.contains(toBuy) )
+        if( myCo.getBuyCost(toBuy, coord) <= myCo.money && list.contains(toBuy) )
         {
           builds.remove(coord);
           return new GameAction.UnitProductionAction(myCo, toBuy, coord);
@@ -614,7 +615,7 @@ public class WallyAI extends ModularAI
         if (Utils.findShortestPath(unit, targetCoord, gameMap, true) != null &&
             AGGRO_EFFECT_THRESHHOLD < effectiveness)
         {
-          valueMap.put(model, effectiveness*model.getCost());
+          valueMap.put(model, effectiveness*myCo.getCost(model));
           if (!targetMap.containsKey(model)) targetMap.put(model, new ArrayList<XYCoord>());
           targetMap.get(model).add(targetCoord);
         }
@@ -797,7 +798,7 @@ public class WallyAI extends ModularAI
                     double damage = Math.min(results.defender.unit.getHP(), (int)results.defender.getPreciseHPDamage());
 
                     if( damage > loss ) // only shoot that which you hurt more than it hurts you
-                      return damage * results.defender.model.getCost();
+                      return damage * results.defender.unit.getCost();
 
                     return 0.;
                   }, (terrain, params) -> 0.01); // Attack terrain, but don't prioritize it over units
@@ -859,7 +860,7 @@ public class WallyAI extends ModularAI
 
   private static int valueUnit(Unit unit, MapLocation locale, boolean includeCurrentHealth)
   {
-    int value = unit.model.getCost();
+    int value = unit.getCost();
 
     if( unit.CO.isEnemy(locale.getOwner()) &&
             unit.model.hasActionType(UnitActionFactory.CAPTURE)
@@ -951,7 +952,8 @@ public class WallyAI extends ModularAI
 
     log("Evaluating Production needs");
     int budget = myCo.money;
-    UnitModel infModel = myCo.getUnitModel(UnitModel.TROOP);
+    final UnitModel infModel = myCo.getUnitModel(UnitModel.TROOP);
+    final int infCost = myCo.getCost(infModel);
 
     // Get a count of enemy forces.
     Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
@@ -1002,7 +1004,8 @@ public class WallyAI extends ModularAI
     // change unit quantity->funds
     for( Entry<UnitModel, Double> ent : enemyUnitCounts.entrySet() )
     {
-      ent.setValue(ent.getValue() * ent.getKey().getCost());
+      // We don't currently have any huge cost-shift COs, so this isn't a big deal at present.
+      ent.setValue(ent.getValue() * ent.getKey().costBase);
     }
 
     Queue<Entry<UnitModel, Double>> enemyModels = 
@@ -1016,7 +1019,7 @@ public class WallyAI extends ModularAI
       // there is not reason to consider it again on the next iteration.
       UnitModel enemyToCounter = enemyModels.poll().getKey();
       double enemyNumber = enemyUnitCounts.get(enemyToCounter);
-      log(String.format("Need a counter for %sx%s", enemyToCounter, enemyNumber / enemyToCounter.getCost() / enemyToCounter.maxHP));
+      log(String.format("Need a counter for %sx%s", enemyToCounter, enemyNumber / enemyToCounter.costBase / UnitModel.MAXIMUM_HP));
       log(String.format("Remaining budget: %s", budget));
 
       // Get our possible options for countermeasures.
@@ -1036,12 +1039,13 @@ public class WallyAI extends ModularAI
           XYCoord coord = getLocationToBuild(CPI, idealCounter);
           if (null == coord)
             continue;
-          int totalCost = idealCounter.getBuyCost(coord);
+          final int idealCost = myCo.getBuyCost(idealCounter, coord);
+          int totalCost = idealCost;
 
           // Calculate a cost buffer to ensure we have enough money left so that no factories sit idle.
-          int costBuffer = (CPI.getNumFacilitiesFor(infModel)) * infModel.getCost();
+          int costBuffer = (CPI.getNumFacilitiesFor(infModel)) * infCost;
           if(myCo.getShoppingList(gameMap.getLocation(coord)).contains(infModel))
-            costBuffer -= infModel.getCost();
+            costBuffer -= infCost;
 
           if( 0 > costBuffer )
             costBuffer = 0; // No granting ourselves extra moolah.
@@ -1051,7 +1055,7 @@ public class WallyAI extends ModularAI
             log(String.format("    I can build %s for a cost of %s (%s remaining, witholding %s)",
                                     idealCounter, totalCost, budget, costBuffer));
             builds.put(coord, idealCounter);
-            budget -= idealCounter.getBuyCost(coord);
+            budget -= idealCost;
             CPI.removeBuildLocation(gameMap.getLocation(coord));
             // We found a counter for this enemy UnitModel; break and go to the next type.
             // This break means we will build at most one type of unit per turn to counter each enemy type.
@@ -1059,8 +1063,7 @@ public class WallyAI extends ModularAI
           }
           else
           {
-            log(String.format("    %s cost %s, I have %s (witholding %s).", idealCounter, idealCounter.getBuyCost(coord), budget,
-                costBuffer));
+            log(String.format("    %s cost %s, I have %s (witholding %s).", idealCounter, idealCost, budget, costBuffer));
           }
         }
       } // ~while( !availableUnitModels.isEmpty() )
@@ -1071,7 +1074,7 @@ public class WallyAI extends ModularAI
     XYCoord infCoord = getLocationToBuild(CPI, infModel);
     while (infCoord != null)
     {
-      int cost = infModel.getBuyCost(infCoord);
+      int cost = myCo.getBuyCost(infModel, infCoord);
       if (cost > budget)
         break;
       builds.put(infCoord, infModel);

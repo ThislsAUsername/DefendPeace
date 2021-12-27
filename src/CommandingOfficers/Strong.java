@@ -77,8 +77,9 @@ public class Strong extends Commander
     upm.applyChanges(this); // Passive ability, so don't add it to the COModifier list; just apply it and forget it.
 
     // Give Strong's footies a base damage buff.
-    for( UnitModel model : getAllModels(UnitModel.TROOP) )
-      model.modifyDamageRatio(PASSIVE_INF_BUFF);
+    UnitTypeFilter damageModTroop = new UnitTypeFilter(new UnitDamageModifier(PASSIVE_INF_BUFF));
+    damageModTroop.allOf = UnitModel.TROOP;
+    addUnitModifier(damageModTroop);
 
     // Give every transport type extra move range and an extra cargo slot.
     for (UnitModel model : unitModels)

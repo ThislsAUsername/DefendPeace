@@ -292,7 +292,7 @@ public class AIUtils
     @Override
     public int compare(Unit o1, Unit o2)
     {
-      int diff = o2.model.getCost()*o2.getHP() - o1.model.getCost()*o1.getHP();
+      int diff = o2.getCost()*o2.getHP() - o1.getCost()*o1.getHP();
       if (sortAscending)
         diff *= -1;
       return diff;

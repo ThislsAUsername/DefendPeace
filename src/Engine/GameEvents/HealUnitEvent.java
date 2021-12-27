@@ -6,6 +6,7 @@ import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
+import Units.UnitModel;
 
 public class HealUnitEvent implements GameEvent
 {
@@ -40,7 +41,7 @@ public class HealUnitEvent implements GameEvent
       unit.alterHP(repairPowerHP);
     else if( unit.isHurt() )
     {
-      int costPerHP = (int) (unit.getRepairCost() / unit.model.maxHP);
+      int costPerHP = (int) (unit.getRepairCost() / UnitModel.MAXIMUM_HP);
 
       int actualRepair = repairPowerHP;
       if( costPerHP > 0 )

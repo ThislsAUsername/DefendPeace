@@ -38,7 +38,7 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
           unitCount++;
           if( resident.model.isTroop() )
             vehCount++;
-          unitFunds += resident.model.getCost() * resident.getHPFactor();
+          unitFunds += resident.getCost() * resident.getHPFactor();
         }
       }
     }

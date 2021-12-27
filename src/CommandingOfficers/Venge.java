@@ -12,6 +12,7 @@ import Engine.GameEvents.MassDamageEvent;
 import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
 import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitDefenseModifier;
+import Engine.UnitMods.UnitFightStatModifier;
 import Engine.UnitMods.UnitInstanceFilter;
 import Engine.UnitMods.UnitModifier;
 import Engine.UnitMods.UnitModifierWithDefaults;
@@ -71,11 +72,7 @@ public class Venge extends Commander
   {
     super(coInfo, rules);
 
-    for (UnitModel model : unitModels)
-    {
-      model.modifyDamageRatio(-10);
-      model.modifyDefenseRatio(-10);
-    }
+    addUnitModifier(new UnitFightStatModifier(-10));
 
     addCommanderAbility(myIronWill);
     addCommanderAbility(new Retribution(this));
@@ -160,14 +157,14 @@ public class Venge extends Commander
     {
       if( params.isCounter )
       {
-        params.attackerHP = params.attacker.model.maxHP;
+        params.attackerHP = UnitModel.MAXIMUM_HP;
       }
       params.attackPower += buff;
     }
     @Override
     public void modifyUnitDefenseAgainstUnit(BattleParams params)
     {
-      params.defenderHP = params.defender.model.maxHP;
+      params.defenderHP = UnitModel.MAXIMUM_HP;
       params.defensePower += buff;
     }
   }

@@ -114,13 +114,13 @@ public class UnitContext extends UnitState
   }
   public void initModel()
   {
-    maxHP = model.maxHP;
-    attackPower = model.getDamageRatio();
-    defensePower = model.getDefenseRatio();
+    maxHP = UnitModel.MAXIMUM_HP;
+    attackPower = UnitModel.DEFAULT_STAT_RATIO;
+    defensePower = UnitModel.DEFAULT_STAT_RATIO;
     movePower = model.baseMovePower;
     costBase = model.costBase;
-    costMultiplier = model.costMultiplier;
-    costShift = model.costShift;
+    costMultiplier = 1.0;
+    costShift = 0;
   }
 
   public void setPath(GamePath pPath)
@@ -158,6 +158,22 @@ public class UnitContext extends UnitState
     }
   }
 
+  public int getCostTotal()
+  {
+    return (int) (costBase*costMultiplier)+costShift;
+  }
+
+  /**
+   * Calculates the true move power, updating the field as well
+   * @return The real move power
+   */
+  public int calculateMovePower()
+  {
+    this.movePower = model.baseMovePower;
+    for( UnitModifier mod : mods )
+      mod.modifyMovePower(this);
+    return movePower;
+  }
 
   /**
    * Assign weapon to the available one that can inflict the most damage against the chosen target

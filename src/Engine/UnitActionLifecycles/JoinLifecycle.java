@@ -14,6 +14,7 @@ import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
+import Units.UnitModel;
 
 public abstract class JoinLifecycle
 {
@@ -178,7 +179,7 @@ public abstract class JoinLifecycle
       {
         // Crunch the numbers we need up front.
         int donorHP = unitDonor.getHP();
-        int neededHP = unitRecipient.model.maxHP - unitRecipient.getHP();
+        int neededHP = UnitModel.MAXIMUM_HP - unitRecipient.getHP();
         int extraHP = donorHP - neededHP;
         if( extraHP < 0 )
           extraHP = 0;
@@ -187,7 +188,7 @@ public abstract class JoinLifecycle
         unitRecipient.alterHP(donorHP);
 
         // If we had extra HP, add that as income.
-        double costPerHP = unitDonor.model.getCost() / unitDonor.model.maxHP;
+        double costPerHP = unitDonor.getCost() / UnitModel.MAXIMUM_HP;
         unitDonor.CO.money += (extraHP * costPerHP);
 
         // Reconcile cargo units.

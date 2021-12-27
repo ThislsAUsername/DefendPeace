@@ -170,8 +170,8 @@ public class Tech extends Commander
         if( typesToOverCharge.contains(u.model) )
         {
           // Track units that aren't already overhealed
-          if( u.getHP() <= u.model.maxHP
-              && u.getHP() + healAmount > u.model.maxHP )
+          if( u.getHP() <= UnitModel.MAXIMUM_HP
+              && u.getHP() + healAmount > UnitModel.MAXIMUM_HP )
             overCharged.add(u);
           u.alterHP(healAmount, true);
         }
@@ -184,10 +184,10 @@ public class Tech extends Commander
     {
       if( unitsOverCharged.containsKey(myCommander) )
       {
-        // End Overcharge. Any units who still have > maxHP get reset to max.
+        // End Overcharge. Any units who still have > MAXIMUM_HP get reset to max.
         for( Unit u : unitsOverCharged.get(myCommander) )
         {
-          if( u.getPreciseHP() > u.model.maxHP )
+          if( u.getPreciseHP() > UnitModel.MAXIMUM_HP )
             u.alterHP(10);
         }
         unitsOverCharged.remove(myCommander);
@@ -340,7 +340,7 @@ public class Tech extends Commander
       for( Unit u : myCommander.units )
       {
         XYCoord uxy = new XYCoord(u.x, u.y);                       // Unit location
-        Integer uval = u.model.getCost() * u.getHP();              // Unit value
+        Integer uval = u.getCost() * u.getHP();                    // Unit value
 
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, uxy, dropRange) )
         {
@@ -352,7 +352,7 @@ public class Tech extends Commander
       // Account for friendly influence of prior drops.
       for( XYCoord pdc : priorDrops )
       {
-        Integer uval = unitModelToDrop.getCost() * techMech.getHP();
+        Integer uval = myCommander.getCost(unitModelToDrop) * techMech.getHP();
 
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, pdc, dropRange) )
         {
@@ -376,7 +376,7 @@ public class Tech extends Commander
           continue; // Ignore enemies that are about to get pasted anyway.
 
         Unit nme = gameMap.getLocation(nmexy).getResident();          // Enemy unit
-        Integer nmeval = nme.model.getCost() * nme.getHP();           // Enemy value
+        Integer nmeval = nme.getCost() * nme.getHP();                 // Enemy value
 
         if(nmexy.getDistance(myCommander.HQLocation) <= nme.getMovePower(gameMap) && nme.model.hasActionType(UnitActionFactory.CAPTURE))
         {
@@ -413,7 +413,7 @@ public class Tech extends Commander
             Unit t = gameMap.getLocation(targetxy).getResident();
             if( null == t ) continue; // We don't give a bonus for proximity to destructible terrain.
 
-            int tval = t.model.getCost() * t.getHP();
+            int tval = t.getCost() * t.getHP();
             if( bestAttackVal < tval ) bestAttackVal = tval;
             if( log ) System.out.println(String.format("Could add %d to %s for %s", tval, nmexy, t.toStringWithLocation()));
           }
@@ -552,7 +552,7 @@ public class Tech extends Commander
     UnitModel BattleMech = mdTank.clone();
     BattleMech.name = "BattleMech";
     BattleMech.role = BattleMech.role | UnitModel.SURFACE_TO_AIR;
-    BattleMech.costShift = mdTank.getCost() + (antiAir.getCost()/2);
+    BattleMech.costBase = mdTank.costBase*2 + (antiAir.costBase/2);
     BattleMech.abilityPowerValue = 2.0;
     BattleMech.maxFuel = 30;
     BattleMech.maxAmmo = 10;

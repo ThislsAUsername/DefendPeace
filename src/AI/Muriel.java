@@ -174,8 +174,8 @@ public class Muriel implements AIController
     if( myDamage == 0 && otherDamage != 0 ) invRatio = 10000;
     UnitModel myModel = myUnit.model;
     UnitModel otherModel = otherUnit.model;
-    double costRatio = damageRatio * ((double)otherModel.getCost() / myModel.getCost());
-    double otherCostRatio = invRatio * ((double)myModel.getCost() / otherModel.getCost());
+    double costRatio = damageRatio * ((double)otherUnit.getCost() / myUnit.getCost());
+    double otherCostRatio = invRatio * ((double)myUnit.getCost() / otherUnit.getCost());
     myUnitEffectMap.put(new UnitModelPair(myModel, otherModel), new UnitMatchupAndMetaInfo(damageRatio, costRatio));
     myUnitEffectMap.put(new UnitModelPair(otherModel, myModel), new UnitMatchupAndMetaInfo(invRatio, otherCostRatio));
 
@@ -196,7 +196,7 @@ public class Muriel implements AIController
 
     // Order the units by cost.
     Collections.sort(myCo.units, (Unit u1, Unit u2) ->
-      (int)(u2.model.getCost()*u2.getHP() - u1.model.getCost()*u1.getHP()));
+      (int)(u2.getCost()*u2.getHP() - u1.getCost()*u1.getHP()));
 
     // If we are already capturing any of these properties, remove them from the list.
     for( Unit unit : myCo.units )
@@ -456,7 +456,7 @@ public class Muriel implements AIController
               double hpDamage = Math.min(results.defender.getPreciseHPDamage(), results.defender.unit.getPreciseHP());
 
               if( shouldAttack(unit, results.defender.unit, gameMap) )
-                return (results.defender.model.getCost() / 10) * hpDamage;
+                return (results.defender.unit.getCost() / 10) * hpDamage;
 
               return 0.;
             }, (terrain, params) -> 0.); // Don't mess with terrain
@@ -812,7 +812,7 @@ public class Muriel implements AIController
         int gruntsWanted = (int)Math.ceil(myCo.units.size() * INFANTRY_PROPORTION);
         int gruntFacilities = CPI.getNumFacilitiesFor(infModel)-1; // The -1 assumes we are about to build from a factory. Possibly untrue.
         if( gruntFacilities < 0 ) gruntFacilities = 0;
-        costBuffer = (int)Math.min(gruntFacilities, gruntsWanted) * infModel.getCost();
+        costBuffer = (int)Math.min(gruntFacilities, gruntsWanted) * myCo.getCost(infModel);
         log(String.format("  Low on Infantry: witholding %s for possible extra grunts", costBuffer));
       }
 
@@ -821,7 +821,7 @@ public class Muriel implements AIController
       HashSet<UnitModel> counters = new HashSet<UnitModel>();
       for( UnitModel counter : CPI.availableUnitModels )
       {
-        if( myCo.money < counter.getCost() ) continue; // If we can't afford it, don't bother.
+        if( myCo.money < myCo.getCost(counter) ) continue; // If we can't afford it, don't bother.
         UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(counter, enemyToCounter);
         if( umami.costEffectivenessRatio >= COST_EFFECTIVENESS_MIN )
         {
@@ -929,14 +929,14 @@ public class Muriel implements AIController
         // Figure out if we can afford the desired unit type.
         int maxBuildable = CPI.getNumFacilitiesFor(idealCounter);
         log(String.format("    Facilities available: %s", maxBuildable));
-        int cost = idealCounter.getCost();
+        int cost = myCo.getCost(idealCounter);
         if( cost <= (budget - costBuffer))
         {
           // Go place orders.
           log(String.format("    I can build a %s for a cost of %s", idealCounter, cost));
           MapLocation loc = CPI.getLocationToBuild(idealCounter);
-          shoppingCart.add(new PurchaseOrder(loc, idealCounter));
-          budget -= idealCounter.getCost();
+          shoppingCart.add(new PurchaseOrder(loc, myCo, idealCounter));
+          budget -= cost;
           CPI.removeBuildLocation(loc);
           orderedSomething = true;
 
@@ -950,17 +950,18 @@ public class Muriel implements AIController
           }
           break; // Loop around, re-sort the enemies by strength, and figure out what to build next.
         }
-        else {log(String.format("    %s cost %s, I have %s (witholding %s).", idealCounter, idealCounter.getCost(), budget, costBuffer));}
+        else {log(String.format("    %s cost %s, I have %s (witholding %s).", idealCounter, cost, budget, costBuffer));}
       } // ~while( !availableUnitModels.isEmpty() )
     } // ~while( still choosing units to build )
 
     // Build infantry from any remaining facilities.
     UnitModel infModel = myCo.getUnitModel(UnitModel.TROOP);
-    while( (budget >= infModel.getCost()) && (CPI.availableUnitModels.contains(infModel)) )
+    final int infCost = myCo.getCost(infModel);
+    while( (budget >= infCost) && (CPI.availableUnitModels.contains(infModel)) )
     {
       MapLocation loc = CPI.getLocationToBuild(infModel);
-      shoppingCart.add(new PurchaseOrder(loc, infModel));
-      budget -= infModel.getCost();
+      shoppingCart.add(new PurchaseOrder(loc, myCo, infModel));
+      budget -= infCost;
       CPI.removeBuildLocation(loc);
     }
 
@@ -1040,18 +1041,20 @@ public class Muriel implements AIController
   private static class PurchaseOrder implements Comparable<PurchaseOrder>
   {
     MapLocation location;
+    Commander co;
     UnitModel model;
 
-    public PurchaseOrder(MapLocation loc, UnitModel um)
+    public PurchaseOrder(MapLocation loc, Commander co, UnitModel um)
     {
       location = loc;
+      this.co = co;
       model = um;
     }
 
     @Override
     public int compareTo(PurchaseOrder other)
     {
-      return model.getBuyCost(location.getCoordinates()) - other.model.getBuyCost(location.getCoordinates());
+      return co.getBuyCost(model, location.getCoordinates()) - other.co.getBuyCost(other.model, location.getCoordinates());
     }
   }
 
