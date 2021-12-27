@@ -72,7 +72,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public int visionRangePiercing = 1;
   public boolean hidden = false;
   public MoveType propulsion;
-  public ArrayList<UnitActionFactory> possibleActions = new ArrayList<UnitActionFactory>();
+  public ArrayList<UnitActionFactory> baseActions = new ArrayList<UnitActionFactory>();
   public Set<TerrainType> healableHabs = new HashSet<TerrainType>();
   public ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();
 
@@ -89,7 +89,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
 
     for( UnitActionFactory action : actions )
     {
-      possibleActions.add(action);
+      baseActions.add(action);
     }
     for( WeaponModel wm : pWeapons )
     {
@@ -101,7 +101,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
       MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> pWeapons, double powerValue)
   {
     this(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, powerValue);
-    possibleActions.addAll(actions);
+    baseActions.addAll(actions);
     weapons = pWeapons;
   }
 
@@ -192,7 +192,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
       for( XYCoord adj : adjacents )
       {
         Unit res = map.getLocation(adj).getResident();
-        if( (null != res) && !res.CO.isEnemy(self.CO) && res.model.hasActionType(UnitActionFactory.RESUPPLY) )
+        if( (null != res) && !res.CO.isEnemy(self.CO) && res.hasActionType(UnitActionFactory.RESUPPLY) )
         {
           queue.add(new ResupplyEvent(res, self));
           resupplying = true;
@@ -264,20 +264,6 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public String toString()
   {
     return name;
-  }
-
-  public boolean hasActionType(UnitActionFactory UnitActionType)
-  {
-    boolean hasAction = false;
-    for( UnitActionFactory at : possibleActions )
-    {
-      if( at == UnitActionType )
-      {
-        hasAction = true;
-        break;
-      }
-    }
-    return hasAction;
   }
 
   public boolean isAny(long input)

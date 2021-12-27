@@ -165,8 +165,10 @@ public class Unit extends UnitState implements UnitModList
   }
   public ArrayList<GameActionSet> getPossibleActions(GameMap map, GamePath movePath, boolean ignoreResident)
   {
+    UnitContext uc = new UnitContext(map, this);
+
     ArrayList<GameActionSet> actionSet = new ArrayList<GameActionSet>();
-    for( UnitActionFactory at : model.possibleActions )
+    for( UnitActionFactory at : uc.calculatePossibleActions() )
     {
       GameActionSet actions = at.getPossibleActions(map, movePath, this, ignoreResident);
       if( null != actions )
@@ -174,6 +176,21 @@ public class Unit extends UnitState implements UnitModList
     }
 
     return actionSet;
+  }
+
+  public boolean hasActionType(UnitActionFactory UnitActionType)
+  {
+    UnitContext uc = new UnitContext(this);
+    boolean hasAction = false;
+    for( UnitActionFactory at : uc.calculatePossibleActions() )
+    {
+      if( at == UnitActionType )
+      {
+        hasAction = true;
+        break;
+      }
+    }
+    return hasAction;
   }
 
   public boolean hasCargoSpace(long type)

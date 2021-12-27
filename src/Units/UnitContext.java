@@ -5,6 +5,7 @@ import java.util.List;
 
 import CommandingOfficers.Commander;
 import Engine.GamePath;
+import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Engine.UnitMods.UnitModifier;
 import Terrain.Environment;
@@ -39,6 +40,8 @@ public class UnitContext extends UnitState
 
   public WeaponModel weapon;
   public int rangeMin = -1, rangeMax = -1;
+
+  public final List<UnitActionFactory> possibleActions = new ArrayList<UnitActionFactory>();
 
   public final List<UnitModifier> mods = new ArrayList<>();
 
@@ -121,6 +124,7 @@ public class UnitContext extends UnitState
     costBase = model.costBase;
     costMultiplier = 1.0;
     costShift = 0;
+    possibleActions.addAll(model.baseActions);
   }
 
   public void setPath(GamePath pPath)
@@ -174,6 +178,19 @@ public class UnitContext extends UnitState
       mod.modifyMovePower(this);
     return movePower;
   }
+
+  /**
+   * Calculates the available action types, updating the field as well
+   */
+  public List<UnitActionFactory> calculatePossibleActions()
+  {
+    possibleActions.clear();
+    possibleActions.addAll(model.baseActions);
+    for( UnitModifier mod : mods )
+      mod.modifyActionList(this);
+    return possibleActions;
+  }
+
 
   /**
    * Assign weapon to the available one that can inflict the most damage against the chosen target

@@ -551,7 +551,7 @@ public class Muriel implements AIController
     //////////////////////////////////////////////////////////////////
     // We didn't find an immediate ATTACK or CAPTURE action we can do.
     // Things that can capture; go find something to capture, if you are moderately healthy.
-    if( unit.model.hasActionType(UnitActionFactory.CAPTURE) && (unit.getHP() >= 7) )
+    if( unit.hasActionType(UnitActionFactory.CAPTURE) && (unit.getHP() >= 7) )
     {
       log(String.format("Seeking capture target for %s", unit.toStringWithLocation()));
       XYCoord unitCoords = new XYCoord(unit.x, unit.y);
@@ -589,7 +589,7 @@ public class Muriel implements AIController
 
     //////////////////////////////////////////////////////////////////
     // Everyone else, go hunting.
-    if( queuedActions.isEmpty() && unit.model.hasActionType(UnitActionFactory.ATTACK) )
+    if( queuedActions.isEmpty() && unit.hasActionType(UnitActionFactory.ATTACK) )
     {
       log(String.format("Seeking attack target for %s", unit.toStringWithLocation()));
       ArrayList<XYCoord> enemyLocations = AIUtils.findEnemyUnits(myCo, gameMap); // Get enemy locations.

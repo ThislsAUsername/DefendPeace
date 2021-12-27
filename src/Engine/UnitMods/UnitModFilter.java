@@ -78,4 +78,11 @@ public abstract class UnitModFilter implements UnitModifier
       effect.modifyRepairCost(uc);
   }
 
+  @Override
+  public void modifyActionList(UnitContext uc)
+  {
+    if( shouldApplyTo(uc) )
+      effect.modifyActionList(uc);
+  }
+
 }

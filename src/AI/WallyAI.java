@@ -575,6 +575,8 @@ public class WallyAI extends ModularAI
                                   Unit unit,
                                   boolean avoidProduction )
   {
+    UnitContext uc = new UnitContext(gameMap, unit);
+    uc.calculatePossibleActions();
     ArrayList<XYCoord> goals = new ArrayList<XYCoord>();
 
     ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
@@ -595,13 +597,13 @@ public class WallyAI extends ModularAI
       if( avoidProduction )
         goals.removeAll(AIUtils.findAlliedIndustries(gameMap, myCo, goals, !avoidProduction));
     }
-    else if( unit.model.possibleActions.contains(UnitActionFactory.CAPTURE) )
+    else if( uc.possibleActions.contains(UnitActionFactory.CAPTURE) )
     {
       for( XYCoord xyc : unownedProperties )
         if( !AIUtils.isCapturing(gameMap, myCo, xyc) )
           goals.add(xyc);
     }
-    else if( unit.model.possibleActions.contains(UnitActionFactory.ATTACK) )
+    else if( uc.possibleActions.contains(UnitActionFactory.ATTACK) )
     {
       Map<UnitModel, Double> valueMap = new HashMap<UnitModel, Double>();
       Map<UnitModel, ArrayList<XYCoord>> targetMap = new HashMap<UnitModel, ArrayList<XYCoord>>();
@@ -863,7 +865,7 @@ public class WallyAI extends ModularAI
     int value = unit.getCost();
 
     if( unit.CO.isEnemy(locale.getOwner()) &&
-            unit.model.hasActionType(UnitActionFactory.CAPTURE)
+            unit.hasActionType(UnitActionFactory.CAPTURE)
             && locale.isCaptureable() )
 
       value += valueTerrain(unit.CO, locale.getEnvironment().terrainType); // Strongly value units that threaten capture

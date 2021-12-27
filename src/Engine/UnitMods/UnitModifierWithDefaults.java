@@ -50,4 +50,8 @@ public interface UnitModifierWithDefaults extends UnitModifier
   {
   }
 
+  @Override
+  default void modifyActionList(UnitContext uc)
+  {
+  }
 }

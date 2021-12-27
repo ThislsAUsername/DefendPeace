@@ -20,6 +20,7 @@ import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.TerrainType;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 
 /**
@@ -208,6 +209,7 @@ public class SpenderAI implements AIController
         while (!travelQueue.isEmpty())
         {
           Unit unit = travelQueue.poll();
+          UnitContext uc = new UnitContext(gameMap, unit);
 
           // Find the possible destinations.
           ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
@@ -221,7 +223,7 @@ public class SpenderAI implements AIController
             boolean validTarget = false;
             ArrayList<XYCoord> validTargets = new ArrayList<>();
 
-            if( unit.model.possibleActions.contains(UnitActionFactory.CAPTURE) )
+            if( uc.calculatePossibleActions().contains(UnitActionFactory.CAPTURE) )
             {
               validTargets.addAll(unownedProperties);
             }

@@ -90,12 +90,12 @@ public class AWBWUnits extends UnitModelScheme
 
     // Handle transforming units separately, since we don't want two buy-entries
     UnitModel subsub = new SubSubModel();
-    sub.possibleActions.add(new TransformLifecycle.TransformFactory(subsub, "DIVE"));
-    subsub.possibleActions.add(new TransformLifecycle.TransformFactory(sub, "RISE"));
+    sub.baseActions.add(new TransformLifecycle.TransformFactory(subsub, "DIVE"));
+    subsub.baseActions.add(new TransformLifecycle.TransformFactory(sub, "RISE"));
     awbwModels.unitModels.add(subsub);
     UnitModel sneaky = new StealthHideModel();
-    stealth.possibleActions.add(new TransformLifecycle.TransformFactory(sneaky, "HIDE"));
-    sneaky.possibleActions.add(new TransformLifecycle.TransformFactory(stealth, "APPEAR"));
+    stealth.baseActions.add(new TransformLifecycle.TransformFactory(sneaky, "HIDE"));
+    sneaky.baseActions.add(new TransformLifecycle.TransformFactory(stealth, "APPEAR"));
     awbwModels.unitModels.add(sneaky);
 
     return awbwModels;
@@ -133,7 +133,7 @@ public class AWBWUnits extends UnitModelScheme
     {
       // Create a new model with the given attributes.
       AWBWUnitModel newModel = new AWBWUnitModel(name, type, role, costBase, maxAmmo, maxFuel, idleFuelBurn, visionRange, baseMovePower,
-          propulsion.clone(), possibleActions, weapons, abilityPowerValue);
+          propulsion.clone(), baseActions, weapons, abilityPowerValue);
 
       newModel.copyValues(this);
       return newModel;
@@ -621,7 +621,7 @@ public class AWBWUnits extends UnitModelScheme
     {
       super("BBomb", AWBWUnitEnum.BBOMB, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
-      possibleActions.add(0, new ExplodeLifecycle.ExplodeFactory(EXPLODE_POWER, EXPLODE_RADIUS));
+      baseActions.add(0, new ExplodeLifecycle.ExplodeFactory(EXPLODE_POWER, EXPLODE_RADIUS));
     }
   }
 
@@ -649,7 +649,7 @@ public class AWBWUnits extends UnitModelScheme
           actions, new WeaponModel[0], STAR_VALUE);
       holdingCapacity = 2;
       carryableMask = TROOP;
-      possibleActions.add(0, UnitActionFactory.REPAIR_UNIT);
+      baseActions.add(0, UnitActionFactory.REPAIR_UNIT);
     }
   }
 

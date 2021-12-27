@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import Engine.GameInstance;
 import Engine.GameScenario;
+import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEventQueue;
@@ -61,6 +62,7 @@ public class Meridian extends Commander
   final VehicularCharge myVehicularCharge = new VehicularCharge(this);
   private static final int POST_REFRESH_STAT_ADJUSTMENT = -25;
   final UnitModel tank, arty;
+  final UnitActionFactory tankAction, artyAction;
   final int costShift;
 
   public Meridian(GameScenario.GameRules rules)
@@ -70,9 +72,9 @@ public class Meridian extends Commander
     // Meridian's basic tanks and arty cost the same
     tank = getUnitModel(UnitModel.ASSAULT);
     arty = getUnitModel(UnitModel.SIEGE);
+    tankAction = new TransformLifecycle.TransformFactory(arty, "~ARTY");
+    artyAction = new TransformLifecycle.TransformFactory(tank, "~TANK");
     costShift = (getCost(tank) - getCost(arty))/2;
-    tank.possibleActions.add(new TransformLifecycle.TransformFactory(arty, "~ARTY"));
-    arty.possibleActions.add(new TransformLifecycle.TransformFactory(tank, "~TANK"));
 
     addCommanderAbility(new ChangeAndFlow(this));
     addCommanderAbility(myVehicularCharge);
@@ -91,6 +93,15 @@ public class Meridian extends Commander
       uc.costShift -= costShift;
     if( arty == uc.model )
       uc.costShift += costShift;
+  }
+
+  @Override
+  public void modifyActionList(UnitContext uc)
+  {
+    if( tank == uc.model )
+      uc.possibleActions.add(tankAction);
+    if( arty == uc.model )
+      uc.possibleActions.add(artyAction);
   }
 
   /**
