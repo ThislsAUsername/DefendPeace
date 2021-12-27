@@ -189,8 +189,11 @@ public abstract class JoinLifecycle
         if( extraHP < 0 )
           extraHP = 0;
 
-        // Actually add the HP.
+        // Add the individuals' resources together
         unitRecipient.alterHP(donorHP);
+        unitRecipient.ammo      = Math.min(unitRecipient.model.maxAmmo     , unitRecipient.ammo + unitDonor.ammo);
+        unitRecipient.fuel      = Math.min(unitRecipient.model.maxFuel     , unitRecipient.fuel + unitDonor.fuel);
+        unitRecipient.materials = Math.min(unitRecipient.model.maxMaterials, unitRecipient.materials + unitDonor.materials);
 
         // If we had extra HP, add that as income.
         double costPerHP = unitDonor.getCost() / UnitModel.MAXIMUM_HP;
