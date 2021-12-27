@@ -56,6 +56,11 @@ public interface UnitModifierWithDefaults extends UnitModifier
   }
 
   @Override
+  default void modifyCargoCapacity(UnitContext uc)
+  {
+  }
+
+  @Override
   default void modifyActionList(UnitContext uc)
   {
   }

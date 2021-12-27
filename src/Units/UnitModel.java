@@ -78,7 +78,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
 
   public static final int MAXIMUM_HP = 10;
   public static final int DEFAULT_STAT_RATIO = 100;
-  public int holdingCapacity = 0;
+  public int baseCargoCapacity = 0;
   public long carryableMask;
   public long carryableExclusionMask;
 
@@ -141,7 +141,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   protected void copyValues(UnitModel other)
   {
     // Duplicate the other model's transporting abilities.
-    holdingCapacity = other.holdingCapacity;
+    baseCargoCapacity = other.baseCargoCapacity;
     carryableMask = other.carryableMask;
     carryableExclusionMask = other.carryableExclusionMask;
 

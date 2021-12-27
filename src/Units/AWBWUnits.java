@@ -213,7 +213,7 @@ public class AWBWUnits extends UnitModelScheme
     {
       super("APC", AWBWUnitEnum.APC, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0], STAR_VALUE);
-      holdingCapacity = 1;
+      baseCargoCapacity = 1;
       carryableMask = TROOP;
     }
   }
@@ -482,7 +482,7 @@ public class AWBWUnits extends UnitModelScheme
     {
       super("T-Copter", AWBWUnitEnum.T_COPTER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, new WeaponModel[0], STAR_VALUE);
-      holdingCapacity = 1;
+      baseCargoCapacity = 1;
       carryableMask = TROOP;
     }
   }
@@ -647,7 +647,7 @@ public class AWBWUnits extends UnitModelScheme
     {
       super("BBoat", AWBWUnitEnum.BBOAT, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0], STAR_VALUE);
-      holdingCapacity = 2;
+      baseCargoCapacity = 2;
       carryableMask = TROOP;
       baseActions.add(0, UnitActionFactory.REPAIR_UNIT);
     }
@@ -673,7 +673,7 @@ public class AWBWUnits extends UnitModelScheme
     {
       super("Lander", AWBWUnitEnum.LANDER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, new WeaponModel[0], STAR_VALUE);
-      holdingCapacity = 2;
+      baseCargoCapacity = 2;
       carryableMask = TROOP | TANK;
     }
   }
@@ -762,7 +762,7 @@ public class AWBWUnits extends UnitModelScheme
     {
       super("Carrier", AWBWUnitEnum.CARRIER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
-      holdingCapacity = 2;
+      baseCargoCapacity = 2;
       carryableMask = AIR_LOW | AIR_HIGH;
     }
 
@@ -799,7 +799,7 @@ public class AWBWUnits extends UnitModelScheme
     {
       super("Cruiser", AWBWUnitEnum.CRUISER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
-      holdingCapacity = 2;
+      baseCargoCapacity = 2;
       carryableMask = AIR_LOW;
     }
   }

@@ -86,6 +86,13 @@ public abstract class UnitModFilter implements UnitModifier
   }
 
   @Override
+  public void modifyCargoCapacity(UnitContext uc)
+  {
+    if( shouldApplyTo(uc) )
+      effect.modifyCargoCapacity(uc);
+  }
+
+  @Override
   public void modifyActionList(UnitContext uc)
   {
     if( shouldApplyTo(uc) )

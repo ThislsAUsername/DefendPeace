@@ -486,7 +486,7 @@ public class DoRUnits extends UnitModelScheme
     {
       super("APC", DoRUnitEnum.RIG, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0], STAR_VALUE);
-      holdingCapacity = 1;
+      baseCargoCapacity = 1;
       carryableMask = TROOP;
       carryableExclusionMask = TANK; // Can't carry Bikes
 
@@ -640,7 +640,7 @@ public class DoRUnits extends UnitModelScheme
     {
       super("T-Copter", DoRUnitEnum.T_COPTER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, new WeaponModel[0], STAR_VALUE);
-      holdingCapacity = 1;
+      baseCargoCapacity = 1;
       carryableMask = TROOP;
       carryableExclusionMask = TANK; // Can't carry Bikes
     }
@@ -669,7 +669,7 @@ public class DoRUnits extends UnitModelScheme
     {
       super("Gunboat", DoRUnitEnum.GUNBOAT, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
-      holdingCapacity = 1;
+      baseCargoCapacity = 1;
       carryableMask = TROOP;
       carryableExclusionMask = TANK; // Can't carry Bikes
     }
@@ -696,7 +696,7 @@ public class DoRUnits extends UnitModelScheme
     {
       super("Cruiser", DoRUnitEnum.CRUISER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
-      holdingCapacity = 2;
+      baseCargoCapacity = 2;
       carryableMask = AIR_LOW;
     }
   }
@@ -762,7 +762,7 @@ public class DoRUnits extends UnitModelScheme
       super("Carrier", DoRUnitEnum.CARRIER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
       maxMaterials = 4;
-      holdingCapacity = 2;
+      baseCargoCapacity = 2;
       carryableMask = AIR_LOW | AIR_HIGH;
       baseActions.add(0, UnitActionFactory.LAUNCH);
     }
@@ -826,7 +826,7 @@ public class DoRUnits extends UnitModelScheme
     {
       super("Lander", DoRUnitEnum.LANDER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0], STAR_VALUE);
-      holdingCapacity = 2;
+      baseCargoCapacity = 2;
       carryableMask = TROOP | TANK;
     }
   }

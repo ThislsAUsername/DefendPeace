@@ -650,8 +650,7 @@ public class Utils
     {
       Unit utd = unitsToDie.poll();
       eventQueue.add(new UnitDieEvent(utd));
-      if( utd.model.holdingCapacity > 0 )
-        unitsToDie.addAll(utd.heldUnits);
+      unitsToDie.addAll(utd.heldUnits);
     } while( !unitsToDie.isEmpty() );
   }
 

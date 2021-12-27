@@ -50,6 +50,7 @@ public interface UnitModifier extends Serializable
   void modifyMoveType(UnitContext uc);
   void modifyAttackRange(UnitContext uc);
 
+  void modifyCargoCapacity(UnitContext uc);
   void modifyActionList(UnitContext uc);
 
 }

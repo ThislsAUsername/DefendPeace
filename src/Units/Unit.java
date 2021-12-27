@@ -195,29 +195,11 @@ public class Unit extends UnitState implements UnitModList
 
   public boolean hasCargoSpace(long type)
   {
-    return (model.holdingCapacity > 0 && 
-            heldUnits.size() < model.holdingCapacity &&
+    int capacity = new UnitContext(this).calculateCargoCapacity();
+    return (capacity > 0 &&
+            heldUnits.size() < capacity &&
             ((model.carryableMask & type) > 0) &&
             ((model.carryableExclusionMask & type) == 0));
-  }
-
-  public static class CargoList extends ArrayList<Unit>
-  {
-    private static final long serialVersionUID = 1L;
-    UnitModel model;
-    public CargoList(UnitModel model)
-    {
-      super(model.holdingCapacity);
-      this.model = model;
-    }
-
-    @Override
-    public boolean add(Unit u)
-    {
-      if( size() >= model.holdingCapacity )
-        throw new IllegalStateException("Cannot put a unit into a transport that is already full!");
-      return super.add(u);
-    }
   }
 
   /** Grant this unit full fuel and ammunition */

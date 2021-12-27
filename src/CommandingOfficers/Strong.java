@@ -13,6 +13,7 @@ import Engine.UnitMods.UnitTypeFilter;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 
 /**
@@ -81,16 +82,6 @@ public class Strong extends Commander
     damageModTroop.allOf = UnitModel.TROOP;
     addUnitModifier(damageModTroop);
 
-    // Give every transport type extra move range and an extra cargo slot.
-    for (UnitModel model : unitModels)
-    {
-      if( model.holdingCapacity > 0 )
-      {
-        model.baseMovePower++;
-        model.holdingCapacity++;
-      }
-    }
-
     addCommanderAbility(new StrongArmAbility(this));
     addCommanderAbility(new MobilizeAbility(this));
   }
@@ -105,6 +96,24 @@ public class Strong extends Commander
     if( (params.attacker.unit.CO == this) && params.defender.unit.model.isTroop() )
     {
       params.attackPower += PASSIVE_ANTI_INF_BUFF;
+    }
+  }
+
+  // Give every transport type extra move range and an extra cargo slot.
+  @Override
+  public void modifyMovePower(UnitContext uc)
+  {
+    if( uc.cargoCapacity > 0 )
+    {
+      uc.movePower++;
+    }
+  }
+  @Override
+  public void modifyCargoCapacity(UnitContext uc)
+  {
+    if( uc.cargoCapacity > 0 )
+    {
+      uc.cargoCapacity++;
     }
   }
 

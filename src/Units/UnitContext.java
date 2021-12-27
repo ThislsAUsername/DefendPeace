@@ -32,6 +32,7 @@ public class UnitContext extends UnitState
   public int attackPower;
   public int defensePower;
   public int movePower;
+  public int cargoCapacity;
 
   public MoveType moveType;
 
@@ -125,6 +126,7 @@ public class UnitContext extends UnitState
     attackPower = UnitModel.DEFAULT_STAT_RATIO;
     defensePower = UnitModel.DEFAULT_STAT_RATIO;
     movePower = model.baseMovePower;
+    cargoCapacity = model.baseCargoCapacity;
     moveType = model.baseMoveType; // This should be safe to not deep-copy until we know we want to change it
     costBase = model.costBase;
     costMultiplier = 1.0;
@@ -205,6 +207,14 @@ public class UnitContext extends UnitState
     for( UnitModifier mod : mods )
       mod.modifyMoveType(this);
     return moveType;
+  }
+
+  public int calculateCargoCapacity()
+  {
+    cargoCapacity = model.baseCargoCapacity;
+    for( UnitModifier mod : mods )
+      mod.modifyCargoCapacity(this);
+    return cargoCapacity;
   }
 
 

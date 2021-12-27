@@ -1,16 +1,17 @@
 package Units;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+
 import CommandingOfficers.Commander;
 import Engine.XYCoord;
 import Terrain.MapLocation;
-import Units.Unit.CargoList;
 
 public abstract class UnitState implements Serializable
 {
   private static final long serialVersionUID = 1L;
 
-  public final CargoList heldUnits;
+  public final ArrayList<Unit> heldUnits;
   public int ammo;
   public int fuel;
   public int materials;
@@ -44,7 +45,7 @@ public abstract class UnitState implements Serializable
     captureProgress = 0;
     captureTarget = null;
 
-    heldUnits = new CargoList(model);
+    heldUnits = new ArrayList<>(model.baseCargoCapacity);
   }
   public UnitState(UnitState other)
   {
@@ -55,7 +56,7 @@ public abstract class UnitState implements Serializable
     captureProgress = other.captureProgress;
     captureTarget = other.captureTarget;
 
-    heldUnits = new CargoList(model);
+    heldUnits = new ArrayList<>(model.baseCargoCapacity);
     heldUnits.addAll(other.heldUnits);
   }
   public void copyUnitState(UnitState other)
