@@ -36,7 +36,7 @@ public abstract class UnitModelScheme implements Serializable
     grms = buildGameReadyModels();
     return grms;
   }
-  public abstract GameReadyModels buildGameReadyModels();
+  protected abstract GameReadyModels buildGameReadyModels();
 
   // Holds the data for a single Commander's unit selection.
   public static class GameReadyModels implements Serializable

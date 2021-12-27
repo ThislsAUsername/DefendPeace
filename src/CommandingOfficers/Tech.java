@@ -34,6 +34,7 @@ import Units.UnitModel;
 import Units.UnitModelScheme;
 import Units.WeaponModel;
 import Units.MoveTypes.FootMech;
+import Units.UnitModelScheme.GameReadyModels;
 
 public class Tech extends Commander
 {
@@ -74,6 +75,12 @@ public class Tech extends Commander
     {
       return new Tech(rules);
     }
+    @Override
+    public void injectUnits(GameReadyModels grms)
+    {
+      if( null == UnitModelScheme.getModelFromString(BATTLEMECH_NAME, grms.unitModels) )
+        grms.unitModels.add(createBattleMechModel(grms));
+    }
   }
 
   // Variables to characterize this Commander's abilities.
@@ -96,14 +103,14 @@ public class Tech extends Commander
   private static final int STEEL_HAIL_NUM = 3;
   private static final int STEEL_HAIL_RANGE = 3;
 
-  // TODO: Support BattleMechs on other COs to enable tags mode?
-  private UnitModel BattleMechModel = createBattleMechModel();
+  private static final String BATTLEMECH_NAME = "BattleMech";
+  private final UnitModel BattleMechModel;
 
   public Tech(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
-    unitModels.add(BattleMechModel);
+    BattleMechModel = UnitModelScheme.getModelFromString(BATTLEMECH_NAME, unitModels);
     addCommanderAbility(new TechdropAbility(this, TECHDROP_NAME, TECHDROP_COST, BattleMechModel, TECHDROP_BUFF, TECHDROP_NUM, TECHDROP_RANGE));
     addCommanderAbility(new OverchargeAbility(this, OVERCHARGE_NAME, OVERCHARGE_COST, OVERCHARGE_BUFF, OVERCHARGE_HEAL));
     addCommanderAbility(new TechdropAbility(this, STEEL_HAIL_NAME, STEEL_HAIL_COST, BattleMechModel, STEEL_HAIL_BUFF, STEEL_HAIL_NUM, STEEL_HAIL_RANGE));
@@ -546,12 +553,12 @@ public class Tech extends Commander
    * we add a new UnitModelScheme with different units or weapons.
    * @return A UnitModelScheme-compliant UnitModel to drop on enemy heads.
    */
-  private UnitModel createBattleMechModel()
+  private static UnitModel createBattleMechModel(GameReadyModels grms)
   {
-    UnitModel mdTank = UnitModelScheme.getModelFromString("Md Tank", unitModels);
-    UnitModel antiAir = UnitModelScheme.getModelFromString("Anti-Air", unitModels);
+    UnitModel mdTank = UnitModelScheme.getModelFromString("Md Tank", grms.unitModels);
+    UnitModel antiAir = UnitModelScheme.getModelFromString("Anti-Air", grms.unitModels);
     UnitModel BattleMech = mdTank.clone();
-    BattleMech.name = "BattleMech";
+    BattleMech.name = BATTLEMECH_NAME;
     BattleMech.role = BattleMech.role | UnitModel.SURFACE_TO_AIR;
     BattleMech.costBase = mdTank.costBase*2 + (antiAir.costBase/2);
     BattleMech.abilityPowerValue = 2.0;
