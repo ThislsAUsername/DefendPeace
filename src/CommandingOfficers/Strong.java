@@ -1,7 +1,6 @@
 package CommandingOfficers;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import Engine.GameScenario;
@@ -147,29 +146,28 @@ public class Strong extends Commander
       modList.add(moveMod);
     }
 
-    private HashMap<Commander, UnitProductionModifier> upmsApplied = new HashMap<>();
+    private UnitProductionModifier upmApplied = null;
     @Override
     protected void perform(MapMaster gameMap)
     {
       Commander co = myCommander;
-      if(!upmsApplied.containsKey(co))
+      if(upmApplied == null)
       {
         // Make infantry buildable from all production buildings.
         UnitModel infModel = co.getUnitModel(UnitModel.TROOP);
         UnitProductionModifier upm = new UnitProductionModifier(TerrainType.AIRPORT, infModel);
         upm.addProductionPair(TerrainType.SEAPORT, infModel);
         upm.applyChanges(co);
-        upmsApplied.put(co, upm);
+        upmApplied = upm;
       }
     }
     @Override
     protected void revert(MapMaster gameMap)
     {
-      Commander co = myCommander;
-      if(upmsApplied.containsKey(co))
+      if(upmApplied != null)
       {
-        UnitProductionModifier upm = upmsApplied.remove(co);
-        upm.revertChanges(co);
+        upmApplied.revertChanges(myCommander);
+        upmApplied = null;
       }
     }
   }
@@ -209,13 +207,13 @@ public class Strong extends Commander
       modList.add(moveMod);
     }
 
-    private HashMap<Commander, UnitProductionModifier> upmsApplied = new HashMap<>();
+    private UnitProductionModifier upmApplied = null;
     @Override
     protected void perform(MapMaster gameMap)
     {
       // Changing production capabilities probably doesn't make sense to apply to other COs, right?
       Commander co = myCommander;
-      if(!upmsApplied.containsKey(co))
+      if(upmApplied == null)
       {
         // Make all TROOPs buildable from all production centers, cities, and the HQ.
         UnitProductionModifier upm = new UnitProductionModifier();
@@ -227,7 +225,7 @@ public class Strong extends Commander
           upm.addProductionPair(TerrainType.HEADQUARTERS, model);
         }
         upm.applyChanges(co);
-        upmsApplied.put(co, upm);
+        upmApplied = upm;
       }
 
       // Lastly, all troops are refreshed and able to move again.
@@ -242,11 +240,10 @@ public class Strong extends Commander
     @Override
     protected void revert(MapMaster gameMap)
     {
-      Commander co = myCommander;
-      if(upmsApplied.containsKey(co))
+      if(upmApplied != null)
       {
-        UnitProductionModifier upm = upmsApplied.remove(co);
-        upm.revertChanges(co);
+        upmApplied.revertChanges(myCommander);
+        upmApplied = null;
       }
     }
   }
