@@ -59,26 +59,27 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     return input.toLowerCase().replaceAll(" ", "_").replaceAll("-", "_");
   }
 
+  public int costBase;
+  public int baseMovePower;
+  public MoveType baseMoveType;
+  public ArrayList<UnitActionFactory> baseActions = new ArrayList<UnitActionFactory>();
+  public int baseCargoCapacity = 0;
+
+  // If you want to modify anything below this line, you're gonna have to implement it into UnitContext
+  public static final int MAXIMUM_HP = 10;
+  public static final int DEFAULT_STAT_RATIO = 100;
   public String name;
   public long role;
-  public int costBase;
   public double abilityPowerValue;
   public int maxAmmo;
   public int maxFuel;
   public int idleFuelBurn;
   public int maxMaterials = 0;
-  public int baseMovePower;
   public int visionRange;
   public int visionRangePiercing = 1;
   public boolean hidden = false;
-  public MoveType baseMoveType;
-  public ArrayList<UnitActionFactory> baseActions = new ArrayList<UnitActionFactory>();
   public Set<TerrainType> healableHabs = new HashSet<TerrainType>();
   public ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();
-
-  public static final int MAXIMUM_HP = 10;
-  public static final int DEFAULT_STAT_RATIO = 100;
-  public int baseCargoCapacity = 0;
   public long carryableMask;
   public long carryableExclusionMask;
 
