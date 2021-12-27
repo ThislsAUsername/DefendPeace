@@ -34,7 +34,7 @@ public class AWBWUnits extends UnitModelScheme
   }
 
   @Override
-  public GameReadyModels getGameReadyModels()
+  public GameReadyModels buildGameReadyModels()
   {
     GameReadyModels awbwModels = new GameReadyModels();
 

@@ -28,11 +28,20 @@ public abstract class UnitModelScheme implements Serializable
   public abstract String getIconicUnitName();
   
   // Fetches a shopping list and a full unit list for a generic commander.
-  public abstract GameReadyModels getGameReadyModels();
+  private GameReadyModels grms = null;
+  public final GameReadyModels getGameReadyModels()
+  {
+    if(grms != null)
+      return grms;
+    grms = buildGameReadyModels();
+    return grms;
+  }
+  public abstract GameReadyModels buildGameReadyModels();
 
   // Holds the data for a single Commander's unit selection.
-  public static class GameReadyModels
+  public static class GameReadyModels implements Serializable
   {
+    private static final long serialVersionUID = 1L;
     public HashMap<TerrainType, ArrayList<UnitModel>> shoppingList = new HashMap<TerrainType, ArrayList<UnitModel>>();
     public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
   }

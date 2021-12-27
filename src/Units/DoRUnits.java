@@ -39,7 +39,7 @@ public class DoRUnits extends UnitModelScheme
   }
 
   @Override
-  public GameReadyModels getGameReadyModels()
+  public GameReadyModels buildGameReadyModels()
   {
     GameReadyModels dorModels = new GameReadyModels();
 
