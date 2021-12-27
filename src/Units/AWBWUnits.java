@@ -133,7 +133,7 @@ public class AWBWUnits extends UnitModelScheme
     {
       // Create a new model with the given attributes.
       AWBWUnitModel newModel = new AWBWUnitModel(name, type, role, costBase, maxAmmo, maxFuel, idleFuelBurn, visionRange, baseMovePower,
-          propulsion.clone(), baseActions, weapons, abilityPowerValue);
+          baseMoveType.clone(), baseActions, weapons, abilityPowerValue);
 
       newModel.copyValues(this);
       return newModel;
@@ -407,9 +407,9 @@ public class AWBWUnits extends UnitModelScheme
     {
       super("Piperunner", AWBWUnitEnum.PIPERUNNER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
-      propulsion.setMoveCost(TerrainType.PILLAR, 1);
-      propulsion.setMoveCost(TerrainType.METEOR, 1);
-      propulsion.setMoveCost(TerrainType.FACTORY, 1);
+      baseMoveType.setMoveCost(TerrainType.PILLAR, 1);
+      baseMoveType.setMoveCost(TerrainType.METEOR, 1);
+      baseMoveType.setMoveCost(TerrainType.FACTORY, 1);
     }
   }
 

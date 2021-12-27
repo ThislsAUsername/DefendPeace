@@ -28,6 +28,7 @@ import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 
 /**
@@ -117,23 +118,25 @@ public class Ave extends Commander
   {
     super(coInfo, rules);
 
-    // Ave's units are fine in the snow, but not in the trees.
-    for( UnitModel um : unitModels )
-    {
-      for( TerrainType terrain : TerrainType.TerrainTypeList )
-      {
-        um.propulsion.setMoveCost(Weathers.SNOW, terrain, um.propulsion.getMoveCost(Weathers.CLEAR, terrain));
-      }
-      for( Weathers weather : Weathers.values() )
-      {
-        um.propulsion.setMoveCost(weather, TerrainType.FOREST, um.propulsion.getMoveCost(weather, TerrainType.FOREST)+1);
-      }
-    }
-
     addCommanderAbility(new NixAbility(this));
     addCommanderAbility(new GlacioAbility(this));
     addCommanderAbility(new OblidoAbility(this));
   }
+
+  @Override
+  public void modifyMoveType(UnitContext uc)
+  {
+    // Ave's units are fine in the snow, but not in the trees.
+    for( TerrainType terrain : TerrainType.TerrainTypeList )
+    {
+      uc.moveType.setMoveCost(Weathers.SNOW, terrain, uc.moveType.getMoveCost(Weathers.CLEAR, terrain));
+    }
+    for( Weathers weather : Weathers.values() )
+    {
+      uc.moveType.setMoveCost(weather, TerrainType.FOREST, uc.moveType.getMoveCost(weather, TerrainType.FOREST)+1);
+    }
+  }
+
 
   @Override
   public void initForGame(GameInstance game)

@@ -10,6 +10,7 @@ import Engine.XYCoord;
 import Engine.UnitMods.UnitModifier;
 import Terrain.Environment;
 import Terrain.GameMap;
+import Units.MoveTypes.MoveType;
 
 /**
  * A basic struct for details relevant to calculation of unit activities.
@@ -31,6 +32,9 @@ public class UnitContext extends UnitState
   public int attackPower;
   public int defensePower;
   public int movePower;
+
+  public MoveType moveType;
+
   public int costBase;
   public double costMultiplier;
   public int costShift;
@@ -121,6 +125,7 @@ public class UnitContext extends UnitState
     attackPower = UnitModel.DEFAULT_STAT_RATIO;
     defensePower = UnitModel.DEFAULT_STAT_RATIO;
     movePower = model.baseMovePower;
+    moveType = model.baseMoveType; // This should be safe to not deep-copy until we know we want to change it
     costBase = model.costBase;
     costMultiplier = 1.0;
     costShift = 0;
@@ -189,6 +194,17 @@ public class UnitContext extends UnitState
     for( UnitModifier mod : mods )
       mod.modifyActionList(this);
     return possibleActions;
+  }
+
+  /**
+   * Calculates the real movetype, updating the field as well
+   */
+  public MoveType calculateMoveType()
+  {
+    moveType = model.baseMoveType.clone();
+    for( UnitModifier mod : mods )
+      mod.modifyMoveType(this);
+    return moveType;
   }
 
 

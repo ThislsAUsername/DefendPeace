@@ -71,7 +71,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public int visionRange;
   public int visionRangePiercing = 1;
   public boolean hidden = false;
-  public MoveType propulsion;
+  public MoveType baseMoveType;
   public ArrayList<UnitActionFactory> baseActions = new ArrayList<UnitActionFactory>();
   public Set<TerrainType> healableHabs = new HashSet<TerrainType>();
   public ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();
@@ -117,7 +117,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     idleFuelBurn = pIdleFuelBurn;
     visionRange = pVision;
     baseMovePower = pMovePower;
-    propulsion = pPropulsion.clone();
+    baseMoveType = pPropulsion.clone();
 
     for( TerrainType terrain : TerrainType.TerrainTypeList )
     {

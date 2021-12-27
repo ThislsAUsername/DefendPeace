@@ -29,6 +29,7 @@ import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 import Units.UnitModelScheme;
 import Units.WeaponModel;
@@ -495,7 +496,7 @@ public class Tech extends Commander
       for( XYCoord pdc : options )
       {
         // No unfortunate accidents
-        if( !unitModelToDrop.propulsion.canTraverse(gameMap.getEnvironment(pdc)) )
+        if( !new UnitContext(myCommander, unitModelToDrop).calculateMoveType().canTraverse(gameMap.getEnvironment(pdc)) )
           invalidDropCoords.add(pdc);
 
         // No trespassing
@@ -558,7 +559,7 @@ public class Tech extends Commander
     BattleMech.maxAmmo = 10;
     BattleMech.visionRange = 2;
     BattleMech.baseMovePower = 4;
-    BattleMech.propulsion = new FootMech();
+    BattleMech.baseMoveType = new FootMech();
     BattleMech.healableHabs = new HashSet<TerrainType>(); // BattleMechs have specialized parts, not easy to repair.
 
     WeaponModel ratatat = antiAir.weapons.get(0).clone();

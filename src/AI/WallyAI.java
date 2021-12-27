@@ -77,7 +77,7 @@ public class WallyAI extends ModularAI
       return unitEffectiveMove.get(model);
 
     UnitContext uc = new UnitContext(myCo, model);
-    MoveType p = model.propulsion;
+    MoveType p = uc.calculateMoveType();
     GameMap map = myCo.myView;
     double totalCosts = 0;
     int validTiles = 0;
@@ -586,7 +586,7 @@ public class WallyAI extends ModularAI
     {
       shouldResupply = unit.getHP() <= UNIT_HEAL_THRESHHOLD;
       shouldResupply |= unit.fuel <= UNIT_REFUEL_THRESHHOLD
-          * Utils.findShortestPath(unit, stations.get(0), gameMap).getFuelCost(unit.model, gameMap);
+          * Utils.findShortestPath(unit, stations.get(0), gameMap).getFuelCost(unit, gameMap);
       shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHHOLD;
     }
 

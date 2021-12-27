@@ -77,7 +77,7 @@ public class Unit extends UnitState implements UnitModList
   }
   public FloodFillFunctor getMoveFunctor(boolean includeOccupied, boolean canTravelThroughEnemies)
   {
-    return model.propulsion.getUnitMoveFunctor(this, includeOccupied, canTravelThroughEnemies);
+    return new UnitContext(this).calculateMoveType().getUnitMoveFunctor(this, includeOccupied, canTravelThroughEnemies);
   }
 
   /** Provides the authoritative/actual move power of the unit in question */

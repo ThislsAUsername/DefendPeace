@@ -47,6 +47,7 @@ public interface UnitModifier extends Serializable
   void modifyRepairCost(UnitContext uc);
 
   void modifyMovePower(UnitContext uc);
+  void modifyMoveType(UnitContext uc);
   void modifyAttackRange(UnitContext uc);
 
   void modifyActionList(UnitContext uc);
