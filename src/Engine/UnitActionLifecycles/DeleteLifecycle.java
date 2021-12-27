@@ -8,7 +8,6 @@ import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
-import Engine.GameEvents.UnitDieEvent;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;

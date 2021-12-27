@@ -29,7 +29,6 @@ import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitContext;
-import Units.UnitModel;
 
 /**
  * Commander Ave (AH-vey) supports her skiing habit by slowly growing a mountain of fresh
