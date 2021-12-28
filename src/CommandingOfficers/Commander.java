@@ -38,6 +38,7 @@ import UI.GameOverlay;
 import UI.UIUtils.Faction;
 import UI.UnitMarker;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 import Units.UnitModelScheme.GameReadyModels;
 
@@ -87,7 +88,6 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     for( UnitModel um : GRMs.unitModels )
     {
       unitModels.add(um);
-      um.CO = this;
     }
 
     units = new ArrayList<Unit>();
@@ -241,6 +241,26 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
         : new ArrayList<UnitModel>();
   }
 
+  private UnitContext getCostContext(UnitModel um, XYCoord coord)
+  {
+    UnitContext uc = new UnitContext(this, um);
+    uc.coord = coord;
+    for( UnitModifier mod : getModifiers() )
+      mod.modifyCost(uc);
+    return uc;
+  }
+  public int getCost(UnitModel um)
+  {
+    UnitContext uc = getCostContext(um, null);
+    return uc.getCostTotal();
+  }
+  public int getBuyCost(UnitModel um, XYCoord coord)
+  {
+    UnitContext uc = getCostContext(um, coord);
+    return uc.getCostTotal();
+  }
+  // Not adding a Produce overload for now since I don't see a simple way to get consistent results pipelined into the displayed buy cost
+
   /** Return an ArrayList containing every ability this Commander currently has the power to perform. */
   public ArrayList<CommanderAbility> getReadyAbilities()
   {
@@ -385,12 +405,12 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
       double power = 0; // value in funds of the charge we're getting
 
       // Add up the funds value of the damage done to both participants.
-      power += myHPLoss / minion.model.maxHP * minion.model.getCost();
+      power += myHPLoss / UnitModel.MAXIMUM_HP * minion.getCost();
       // The damage we deal is worth half as much as the damage we take, to help powers be a comeback mechanic.
-      power += myHPDealt / enemy.model.maxHP * enemy.model.getCost() / 2;
+      power += myHPDealt / UnitModel.MAXIMUM_HP * enemy.getCost() / 2;
       // Add power based on HP damage dealt; rewards aggressiveness.
       power += myHPDealt * CHARGERATIO_HP;
-      
+
       // Convert funds to ability power units
       power /= CHARGERATIO_FUNDS;
 
@@ -415,7 +435,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
       {
         double power = 0; // value in funds of the charge we're getting
 
-        power += ((double)damageEntry.getValue()) / unit.model.maxHP * unit.model.getCost();
+        power += ((double)damageEntry.getValue()) / UnitModel.MAXIMUM_HP * getCost(unit.model);
 
         // Convert funds to ability power units
         power /= CHARGERATIO_FUNDS;

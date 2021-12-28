@@ -14,6 +14,8 @@ import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
+import Units.UnitContext;
+import Units.UnitModel;
 
 public abstract class JoinLifecycle
 {
@@ -29,8 +31,9 @@ public abstract class JoinLifecycle
       if( resident != null )
       {
         // TODO: Consider if and how off-CO joins should be allowed if tags ever happens
+        int recipientCapacity = new UnitContext(resident).calculateCargoCapacity();
         int cargoSize = resident.heldUnits.size() + actor.heldUnits.size();
-        if( resident.model.equals(actor.model) && resident != actor && resident.isHurt() && cargoSize <= resident.model.holdingCapacity )
+        if( resident.model.equals(actor.model) && resident != actor && resident.isHurt() && cargoSize <= recipientCapacity )
         {
           return new GameActionSet(new JoinAction(map, actor, movePath), false);
         }
@@ -93,15 +96,18 @@ public abstract class JoinLifecycle
       {
         pathEnd = movePath.getEndCoord();
         isValid &= gameMap.isLocationValid(pathEnd);
-
-        if( isValid )
-        {
-          // Find the unit we want to join.
-          recipient = gameMap.getLocation(pathEnd).getResident();
-          isValid &= (null != recipient) && recipient.isHurt();
-          int cargoSize = recipient.heldUnits.size() + donor.heldUnits.size();
-          isValid &= cargoSize <= recipient.model.holdingCapacity;
-        }
+      }
+      if( isValid )
+      {
+        // Find the unit we want to join.
+        recipient = gameMap.getLocation(pathEnd).getResident();
+        isValid &= (null != recipient) && recipient.isHurt();
+      }
+      if( isValid )
+      {
+        int recipientCapacity = new UnitContext(recipient).calculateCargoCapacity();
+        int cargoSize = recipient.heldUnits.size() + donor.heldUnits.size();
+        isValid &= cargoSize <= recipientCapacity;
       }
 
       // Create events.
@@ -178,7 +184,7 @@ public abstract class JoinLifecycle
       {
         // Crunch the numbers we need up front.
         int donorHP = unitDonor.getHP();
-        int neededHP = unitRecipient.model.maxHP - unitRecipient.getHP();
+        int neededHP = UnitModel.MAXIMUM_HP - unitRecipient.getHP();
         int extraHP = donorHP - neededHP;
         if( extraHP < 0 )
           extraHP = 0;
@@ -187,12 +193,11 @@ public abstract class JoinLifecycle
         unitRecipient.alterHP(donorHP);
 
         // If we had extra HP, add that as income.
-        double costPerHP = unitDonor.model.getCost() / unitDonor.model.maxHP;
+        double costPerHP = unitDonor.getCost() / UnitModel.MAXIMUM_HP;
         unitDonor.CO.money += (extraHP * costPerHP);
 
         // Reconcile cargo units.
-        if( unitRecipient.model.holdingCapacity > 0 )
-          unitRecipient.heldUnits.addAll(unitDonor.heldUnits);
+        unitRecipient.heldUnits.addAll(unitDonor.heldUnits);
 
         // Remove the donor unit.
         gameMap.removeUnit(unitDonor);

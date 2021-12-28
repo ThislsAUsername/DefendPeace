@@ -2,8 +2,10 @@ package Engine;
 
 import java.util.ArrayList;
 
+import CommandingOfficers.Commander;
 import Terrain.GameMap;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 
 /**
@@ -42,14 +44,18 @@ public class GamePath
     return waypoints.size();
   }
 
+  public int getFuelCost(Unit unit, GameMap map)
+  {
+    return getFuelCost(unit.CO, unit.model, map);
+  }
   /**
    * @return the amount of fuel it would cost to travel this path with the given unit type 
   **/
-  public int getFuelCost(UnitModel unit, GameMap map)
+  public int getFuelCost(Commander co, UnitModel unit, GameMap map)
   {
     int cost = 0;
     boolean includeOccupied = true, canTravelThroughEnemies = true;
-    FloodFillFunctor fff = unit.propulsion.getUnitMoveFunctor(null, includeOccupied, canTravelThroughEnemies);
+    FloodFillFunctor fff = new UnitContext(co, unit).calculateMoveType().getUnitMoveFunctor(null, includeOccupied, canTravelThroughEnemies);
     // We iterate from 1 because the first waypoint is the unit's initial position.
     for (int i = 1; i < waypoints.size(); i++)
     {

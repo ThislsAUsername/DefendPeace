@@ -25,6 +25,7 @@ public class TestCommanderTech extends TestCase
   private void setupTest()
   {
     GameScenario scn = new GameScenario();
+    Tech.getInfo().injectUnits(scn.rules.unitModelScheme.getGameReadyModels());
     mTech = new Tech(scn.rules);
     mTech.modifyAbilityPower(20);
     mPatch = new Patch(scn.rules);

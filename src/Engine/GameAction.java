@@ -20,6 +20,7 @@ import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 
 /**
@@ -81,12 +82,12 @@ public abstract class GameAction
         isValid &= (null == site.getResident());
         isValid &= site.getOwner() == who;
         isValid &= who.getShoppingList(site).contains(what);
-        isValid &= (who.money >= what.getBuyCost(where));
+        isValid &= (who.money >= who.getBuyCost(what, where));
       }
 
       if( isValid )
       {
-        buildEvents.add(new ModifyFundsEvent(who, -what.getBuyCost(where)));
+        buildEvents.add(new ModifyFundsEvent(who, -who.getBuyCost(what, where)));
         buildEvents.add(new CreateUnitEvent(who, what, where));
       }
       else
@@ -363,7 +364,7 @@ public abstract class GameAction
             if( gameMap.isLocationValid(unitStart) )
             {
               subEvents.add(new TeleportEvent(gameMap, obstacle, unitStart, animationStyle));
-              if( !obstacle.model.propulsion.canTraverse(gameMap.getEnvironment(unitStart)) )
+              if( !new UnitContext(obstacle).calculateMoveType().canTraverse(gameMap.getEnvironment(unitStart)) )
               {
                 obstacleDies = true;
               }
@@ -392,7 +393,7 @@ public abstract class GameAction
       }
 
       // If our guy can't survive there, end him.
-      if( !unit.model.propulsion.canTraverse(gameMap.getEnvironment(unitDestination)) )
+      if( !new UnitContext(unit).calculateMoveType().canTraverse(gameMap.getEnvironment(unitDestination)) )
       {
         ArrayList<Unit> ary = new ArrayList<Unit>();
         ary.add(unit);

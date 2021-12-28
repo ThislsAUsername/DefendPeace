@@ -89,12 +89,13 @@ public class Utils
   {
     ArrayList<XYCoord> locations = findLocationsInRange(map, moveLoc, 1);
     ArrayList<XYCoord> dropoffLocations = new ArrayList<XYCoord>();
-    if( cargo.model.propulsion.canTraverse(map.getEnvironment(moveLoc)) )
+    final MoveType cargoMoveType = new UnitContext(cargo).calculateMoveType();
+    if( cargoMoveType.canTraverse(map.getEnvironment(moveLoc)) )
       for( XYCoord loc : locations )
       {
         // Add any location that is empty and supports movement of the cargo unit.
         if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
-            && MoveType.IMPASSABLE > cargo.model.propulsion.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
+            && MoveType.IMPASSABLE > cargoMoveType.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
         {
           dropoffLocations.add(loc);
         }
@@ -649,8 +650,7 @@ public class Utils
     {
       Unit utd = unitsToDie.poll();
       eventQueue.add(new UnitDieEvent(utd));
-      if( utd.model.holdingCapacity > 0 )
-        unitsToDie.addAll(utd.heldUnits);
+      unitsToDie.addAll(utd.heldUnits);
     } while( !unitsToDie.isEmpty() );
   }
 

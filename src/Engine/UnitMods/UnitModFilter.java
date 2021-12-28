@@ -58,6 +58,13 @@ public abstract class UnitModFilter implements UnitModifier
   }
 
   @Override
+  public void modifyMoveType(UnitContext uc)
+  {
+    if( shouldApplyTo(uc) )
+      effect.modifyMoveType(uc);
+  }
+
+  @Override
   public void modifyAttackRange(UnitContext uc)
   {
     if( shouldApplyTo(uc) )
@@ -76,6 +83,20 @@ public abstract class UnitModFilter implements UnitModifier
   {
     if( shouldApplyTo(uc) )
       effect.modifyRepairCost(uc);
+  }
+
+  @Override
+  public void modifyCargoCapacity(UnitContext uc)
+  {
+    if( shouldApplyTo(uc) )
+      effect.modifyCargoCapacity(uc);
+  }
+
+  @Override
+  public void modifyActionList(UnitContext uc)
+  {
+    if( shouldApplyTo(uc) )
+      effect.modifyActionList(uc);
   }
 
 }

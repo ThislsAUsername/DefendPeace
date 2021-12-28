@@ -29,10 +29,12 @@ import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 import Units.UnitModelScheme;
 import Units.WeaponModel;
 import Units.MoveTypes.FootMech;
+import Units.UnitModelScheme.GameReadyModels;
 
 public class Tech extends Commander
 {
@@ -73,6 +75,12 @@ public class Tech extends Commander
     {
       return new Tech(rules);
     }
+    @Override
+    public void injectUnits(GameReadyModels grms)
+    {
+      if( null == UnitModelScheme.getModelFromString(BATTLEMECH_NAME, grms.unitModels) )
+        grms.unitModels.add(createBattleMechModel(grms));
+    }
   }
 
   // Variables to characterize this Commander's abilities.
@@ -95,14 +103,14 @@ public class Tech extends Commander
   private static final int STEEL_HAIL_NUM = 3;
   private static final int STEEL_HAIL_RANGE = 3;
 
-  // TODO: Support BattleMechs on other COs to enable tags mode?
-  private UnitModel BattleMechModel = createBattleMechModel();
+  private static final String BATTLEMECH_NAME = "BattleMech";
+  private final UnitModel BattleMechModel;
 
   public Tech(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
-    unitModels.add(BattleMechModel);
+    BattleMechModel = UnitModelScheme.getModelFromString(BATTLEMECH_NAME, unitModels);
     addCommanderAbility(new TechdropAbility(this, TECHDROP_NAME, TECHDROP_COST, BattleMechModel, TECHDROP_BUFF, TECHDROP_NUM, TECHDROP_RANGE));
     addCommanderAbility(new OverchargeAbility(this, OVERCHARGE_NAME, OVERCHARGE_COST, OVERCHARGE_BUFF, OVERCHARGE_HEAL));
     addCommanderAbility(new TechdropAbility(this, STEEL_HAIL_NAME, STEEL_HAIL_COST, BattleMechModel, STEEL_HAIL_BUFF, STEEL_HAIL_NUM, STEEL_HAIL_RANGE));
@@ -170,8 +178,8 @@ public class Tech extends Commander
         if( typesToOverCharge.contains(u.model) )
         {
           // Track units that aren't already overhealed
-          if( u.getHP() <= u.model.maxHP
-              && u.getHP() + healAmount > u.model.maxHP )
+          if( u.getHP() <= UnitModel.MAXIMUM_HP
+              && u.getHP() + healAmount > UnitModel.MAXIMUM_HP )
             overCharged.add(u);
           u.alterHP(healAmount, true);
         }
@@ -184,10 +192,10 @@ public class Tech extends Commander
     {
       if( unitsOverCharged.containsKey(myCommander) )
       {
-        // End Overcharge. Any units who still have > maxHP get reset to max.
+        // End Overcharge. Any units who still have > MAXIMUM_HP get reset to max.
         for( Unit u : unitsOverCharged.get(myCommander) )
         {
-          if( u.getPreciseHP() > u.model.maxHP )
+          if( u.getPreciseHP() > UnitModel.MAXIMUM_HP )
             u.alterHP(10);
         }
         unitsOverCharged.remove(myCommander);
@@ -340,7 +348,7 @@ public class Tech extends Commander
       for( Unit u : myCommander.units )
       {
         XYCoord uxy = new XYCoord(u.x, u.y);                       // Unit location
-        Integer uval = u.model.getCost() * u.getHP();              // Unit value
+        Integer uval = u.getCost() * u.getHP();                    // Unit value
 
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, uxy, dropRange) )
         {
@@ -352,7 +360,7 @@ public class Tech extends Commander
       // Account for friendly influence of prior drops.
       for( XYCoord pdc : priorDrops )
       {
-        Integer uval = unitModelToDrop.getCost() * techMech.getHP();
+        Integer uval = myCommander.getCost(unitModelToDrop) * techMech.getHP();
 
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, pdc, dropRange) )
         {
@@ -376,9 +384,9 @@ public class Tech extends Commander
           continue; // Ignore enemies that are about to get pasted anyway.
 
         Unit nme = gameMap.getLocation(nmexy).getResident();          // Enemy unit
-        Integer nmeval = nme.model.getCost() * nme.getHP();           // Enemy value
+        Integer nmeval = nme.getCost() * nme.getHP();                 // Enemy value
 
-        if(nmexy.getDistance(myCommander.HQLocation) <= nme.getMovePower(gameMap) && nme.model.hasActionType(UnitActionFactory.CAPTURE))
+        if(nmexy.getDistance(myCommander.HQLocation) <= nme.getMovePower(gameMap) && nme.hasActionType(UnitActionFactory.CAPTURE))
         {
           if( log ) System.out.println(String.format("%s is too close to HQ. Increasing threat rating:", nme.toStringWithLocation()));
           nmeval *= 100; // More weight if this unit threatens HQ.
@@ -413,7 +421,7 @@ public class Tech extends Commander
             Unit t = gameMap.getLocation(targetxy).getResident();
             if( null == t ) continue; // We don't give a bonus for proximity to destructible terrain.
 
-            int tval = t.model.getCost() * t.getHP();
+            int tval = t.getCost() * t.getHP();
             if( bestAttackVal < tval ) bestAttackVal = tval;
             if( log ) System.out.println(String.format("Could add %d to %s for %s", tval, nmexy, t.toStringWithLocation()));
           }
@@ -495,7 +503,7 @@ public class Tech extends Commander
       for( XYCoord pdc : options )
       {
         // No unfortunate accidents
-        if( !unitModelToDrop.propulsion.canTraverse(gameMap.getEnvironment(pdc)) )
+        if( !new UnitContext(myCommander, unitModelToDrop).calculateMoveType().canTraverse(gameMap.getEnvironment(pdc)) )
           invalidDropCoords.add(pdc);
 
         // No trespassing
@@ -545,20 +553,20 @@ public class Tech extends Commander
    * we add a new UnitModelScheme with different units or weapons.
    * @return A UnitModelScheme-compliant UnitModel to drop on enemy heads.
    */
-  private UnitModel createBattleMechModel()
+  private static UnitModel createBattleMechModel(GameReadyModels grms)
   {
-    UnitModel mdTank = UnitModelScheme.getModelFromString("Md Tank", unitModels);
-    UnitModel antiAir = UnitModelScheme.getModelFromString("Anti-Air", unitModels);
+    UnitModel mdTank = UnitModelScheme.getModelFromString("Md Tank", grms.unitModels);
+    UnitModel antiAir = UnitModelScheme.getModelFromString("Anti-Air", grms.unitModels);
     UnitModel BattleMech = mdTank.clone();
-    BattleMech.name = "BattleMech";
+    BattleMech.name = BATTLEMECH_NAME;
     BattleMech.role = BattleMech.role | UnitModel.SURFACE_TO_AIR;
-    BattleMech.costShift = mdTank.getCost() + (antiAir.getCost()/2);
+    BattleMech.costBase = mdTank.costBase*2 + (antiAir.costBase/2);
     BattleMech.abilityPowerValue = 2.0;
     BattleMech.maxFuel = 30;
     BattleMech.maxAmmo = 10;
     BattleMech.visionRange = 2;
     BattleMech.baseMovePower = 4;
-    BattleMech.propulsion = new FootMech();
+    BattleMech.baseMoveType = new FootMech();
     BattleMech.healableHabs = new HashSet<TerrainType>(); // BattleMechs have specialized parts, not easy to repair.
 
     WeaponModel ratatat = antiAir.weapons.get(0).clone();

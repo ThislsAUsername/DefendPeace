@@ -90,20 +90,12 @@ public class Bear_Bull extends Commander
       isBull = false;
       if( setIncome )
         incomeAdjustment = (int) (gameRules.incomePerCity * BEAR_MOD) - gameRules.incomePerCity;
-      for( UnitModel um : unitModels )
-      {
-        um.costMultiplier = BEAR_MOD;
-      }
     }
     else
     {
       isBull = true;
       if( setIncome )
         incomeAdjustment = (int) (gameRules.incomePerCity * BULL_MOD) - gameRules.incomePerCity;
-      for( UnitModel um : unitModels )
-      {
-        um.costMultiplier = BULL_MOD;
-      }
     }
   }
 
@@ -112,6 +104,15 @@ public class Bear_Bull extends Commander
   {
     // Change the base cost since this change is not an addition/subtraction
     uc.costBase = 0;
+  }
+
+  @Override
+  public void modifyCost(UnitContext uc)
+  {
+    if( isBull )
+      uc.costMultiplier += BULL_MOD - 1.0;
+    else
+      uc.costMultiplier += BEAR_MOD - 1.0;
   }
 
   /**
@@ -166,7 +167,7 @@ public class Bear_Bull extends Commander
       int valueDrained = 0;
       for( Unit victim : victims )
       {
-        valueDrained += (Math.min(DOWNUPTURN_LIQUIDATION, victim.getHP()) * victim.model.getCost()) / victim.model.maxHP;
+        valueDrained += (Math.min(DOWNUPTURN_LIQUIDATION, victim.getHP()) * victim.getCost()) / UnitModel.MAXIMUM_HP;
       }
 
       powerEvents.add( new ModifyFundsEvent(COcast, valueDrained) ); // Collect profits

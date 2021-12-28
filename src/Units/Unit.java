@@ -77,7 +77,7 @@ public class Unit extends UnitState implements UnitModList
   }
   public FloodFillFunctor getMoveFunctor(boolean includeOccupied, boolean canTravelThroughEnemies)
   {
-    return model.propulsion.getUnitMoveFunctor(this, includeOccupied, canTravelThroughEnemies);
+    return new UnitContext(this).calculateMoveType().getUnitMoveFunctor(this, includeOccupied, canTravelThroughEnemies);
   }
 
   /** Provides the authoritative/actual move power of the unit in question */
@@ -165,8 +165,10 @@ public class Unit extends UnitState implements UnitModList
   }
   public ArrayList<GameActionSet> getPossibleActions(GameMap map, GamePath movePath, boolean ignoreResident)
   {
+    UnitContext uc = new UnitContext(map, this);
+
     ArrayList<GameActionSet> actionSet = new ArrayList<GameActionSet>();
-    for( UnitActionFactory at : model.possibleActions )
+    for( UnitActionFactory at : uc.calculatePossibleActions() )
     {
       GameActionSet actions = at.getPossibleActions(map, movePath, this, ignoreResident);
       if( null != actions )
@@ -176,31 +178,28 @@ public class Unit extends UnitState implements UnitModList
     return actionSet;
   }
 
-  public boolean hasCargoSpace(long type)
+  public boolean hasActionType(UnitActionFactory UnitActionType)
   {
-    return (model.holdingCapacity > 0 && 
-            heldUnits.size() < model.holdingCapacity &&
-            ((model.carryableMask & type) > 0) &&
-            ((model.carryableExclusionMask & type) == 0));
+    UnitContext uc = new UnitContext(this);
+    boolean hasAction = false;
+    for( UnitActionFactory at : uc.calculatePossibleActions() )
+    {
+      if( at == UnitActionType )
+      {
+        hasAction = true;
+        break;
+      }
+    }
+    return hasAction;
   }
 
-  public static class CargoList extends ArrayList<Unit>
+  public boolean hasCargoSpace(long type)
   {
-    private static final long serialVersionUID = 1L;
-    UnitModel model;
-    public CargoList(UnitModel model)
-    {
-      super(model.holdingCapacity);
-      this.model = model;
-    }
-
-    @Override
-    public boolean add(Unit u)
-    {
-      if( size() >= model.holdingCapacity )
-        throw new IllegalStateException("Cannot put a unit into a transport that is already full!");
-      return super.add(u);
-    }
+    int capacity = new UnitContext(this).calculateCargoCapacity();
+    return (capacity > 0 &&
+            heldUnits.size() < capacity &&
+            ((model.carryableMask & type) > 0) &&
+            ((model.carryableExclusionMask & type) == 0));
   }
 
   /** Grant this unit full fuel and ammunition */
@@ -218,9 +217,19 @@ public class Unit extends UnitState implements UnitModList
     return isFull;
   }
 
+  public int getCost()
+  {
+    return this.CO.getCost(model);
+  }
+
   public int getRepairCost()
   {
-    return model.getRepairCost(new UnitContext(this));
+    UnitContext uc = new UnitContext(this);
+    for( UnitModifier mod : getModifiers() )
+      mod.modifyCost(uc);
+    for( UnitModifier mod : getModifiers() )
+      mod.modifyRepairCost(uc);
+    return uc.getCostTotal();
   }
 
   @Override
@@ -240,7 +249,9 @@ public class Unit extends UnitState implements UnitModList
   public List<UnitModifier> getModifiers()
   {
     ArrayList<UnitModifier> output = new ArrayList<>();
+    // Intended order of operations: model, environment, CO, unit-specific
     output.addAll(model.getModifiers());
+    output.addAll(CO.getModifiers());
     output.addAll(unitMods);
     return output;
   }

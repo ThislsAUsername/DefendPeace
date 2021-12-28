@@ -30,6 +30,12 @@ public class GameBuilder
   {
     GameScenario scenario = new GameScenario(unitModelScheme, incomePerCity, startingFunds, isFowEnabled);
 
+    // Add any CO-specific units into our set of UnitModels
+    for(int i = 0; i < mapInfo.getNumCos(); ++i)
+    {
+      coInfos[i].getCurrentCO().injectUnits(unitModelScheme.getGameReadyModels());
+    }
+
     // Create all of the commanders.
     Commander[] cos = new Commander[mapInfo.getNumCos()];
     for(int i = 0; i < mapInfo.getNumCos(); ++i)

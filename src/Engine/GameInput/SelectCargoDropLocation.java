@@ -8,6 +8,7 @@ import Engine.XYCoord;
 import Engine.GameInput.GameInputHandler.InputType;
 import Engine.UnitActionLifecycles.UnloadLifecycle;
 import Units.Unit;
+import Units.UnitContext;
 
 /************************************************************
  * State to choose where to drop the unit.                  *
@@ -36,7 +37,7 @@ class SelectCargoDropLocation extends GameInputState<XYCoord>
     GameInputState<?> next = this;
 
     if( myStateData.actionSet.getTargetedLocations().contains(location)
-        && myCargo.model.propulsion.canTraverse(myStateData.gameMap.getEnvironment(location)) ) // Ignore if it's an invalid drop.
+        && new UnitContext(myCargo).calculateMoveType().canTraverse(myStateData.gameMap.getEnvironment(location)) ) // Ignore if it's an invalid drop.
     {
       // Add the new dropoff to myStateData.
       myStateData.unitLocationMap.put(myCargo, location);

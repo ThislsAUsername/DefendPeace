@@ -6,6 +6,7 @@ import CommandingOfficers.Commander;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventQueue;
 import Units.UnitDelta;
+import Units.UnitModel;
 
 /**
  * Commanders can sign up to receive money based on damage done to their opponents using this class.
@@ -56,9 +57,9 @@ public class DamageDealtToIncomeConverter extends StateTracker
   private static int calculateProfit(UnitDelta delta, double myIncomeRatio)
   {
     double hpLoss = delta.getHPDamage();
-    double unitCost = delta.model.getCost();
+    double unitCost = delta.unit.getCost();
     // Do the necessary math, then round to the nearest int.
-    int income = (int) (hpLoss * (unitCost / delta.model.maxHP) * myIncomeRatio + 0.5);
+    int income = (int) (hpLoss * (unitCost / UnitModel.MAXIMUM_HP) * myIncomeRatio + 0.5);
     return income;
   }
 }

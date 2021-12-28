@@ -444,7 +444,7 @@ public class SpriteMapView extends MapView
   @Override // from MapView
   public GameAnimation buildMoveAnimation(Unit unit, GamePath movePath)
   {
-    return new MoveAnimation(SpriteLibrary.baseSpriteSize, unit, movePath);
+    return new MoveAnimation(SpriteLibrary.baseSpriteSize, myGame.gameMap, unit, movePath);
   }
 
   @Override // from MapView

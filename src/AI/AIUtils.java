@@ -19,6 +19,7 @@ import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Units.Unit;
+import Units.UnitContext;
 
 public class AIUtils
 {
@@ -88,9 +89,11 @@ public class AIUtils
    */
   public static Map<UnitActionFactory, ArrayList<GameAction> > getAvailableUnitActionsByType(Unit unit, GameMap gameMap, boolean includeOccupiedDestinations)
   {
+    UnitContext uc = new UnitContext(gameMap, unit);
+
     // Create the ActionType-indexed map, and ensure we don't have any null pointers.
     Map<UnitActionFactory, ArrayList<GameAction> > actionsByType = new HashMap<UnitActionFactory, ArrayList<GameAction> >();
-    for( UnitActionFactory atype : unit.model.possibleActions )
+    for( UnitActionFactory atype : uc.calculatePossibleActions() )
     {
       actionsByType.put(atype, new ArrayList<GameAction>());
     }
@@ -292,7 +295,7 @@ public class AIUtils
     @Override
     public int compare(Unit o1, Unit o2)
     {
-      int diff = o2.model.getCost()*o2.getHP() - o1.model.getCost()*o1.getHP();
+      int diff = o2.getCost()*o2.getHP() - o1.getCost()*o1.getHP();
       if (sortAscending)
         diff *= -1;
       return diff;

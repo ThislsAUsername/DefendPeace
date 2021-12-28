@@ -249,15 +249,15 @@ public class UnitSpriteSet
     ArrayList<BufferedImage> unitIcons = new ArrayList<BufferedImage>();
 
     // Draw the unit's HP if it is not at full health.
-    if( u.getHP() != u.model.maxHP )
+    if( u.getHP() != UnitModel.MAXIMUM_HP )
     {
       BufferedImage num;
-      if( u.getHP() > u.model.maxHP )
+      if( u.getHP() > UnitModel.MAXIMUM_HP )
       {
         num = SpriteLibrary.getMapUnitNumberSprites().getFrame(1); // Tens place.
 
         // Ones place shares space with the activity icons below if HP > 10.
-        unitIcons.add( SpriteLibrary.getMapUnitNumberSprites().getFrame((u.getHP()-u.model.maxHP)) );
+        unitIcons.add( SpriteLibrary.getMapUnitNumberSprites().getFrame((u.getHP()-UnitModel.MAXIMUM_HP)) );
       }
       else
         num = SpriteLibrary.getMapUnitNumberSprites().getFrame(u.getHP());

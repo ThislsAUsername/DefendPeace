@@ -20,6 +20,7 @@ import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.TerrainType;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 
 /**
@@ -208,6 +209,7 @@ public class SpenderAI implements AIController
         while (!travelQueue.isEmpty())
         {
           Unit unit = travelQueue.poll();
+          UnitContext uc = new UnitContext(gameMap, unit);
 
           // Find the possible destinations.
           ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
@@ -221,7 +223,7 @@ public class SpenderAI implements AIController
             boolean validTarget = false;
             ArrayList<XYCoord> validTargets = new ArrayList<>();
 
-            if( unit.model.possibleActions.contains(UnitActionFactory.CAPTURE) )
+            if( uc.calculatePossibleActions().contains(UnitActionFactory.CAPTURE) )
             {
               validTargets.addAll(unownedProperties);
             }
@@ -296,7 +298,7 @@ public class SpenderAI implements AIController
           {
             ArrayList<UnitModel> units = myCo.getShoppingList(loc);
             // Only add to the list if we could actually buy something here.
-            if( !units.isEmpty() && units.get(0).getBuyCost(xyc) <= myCo.money )
+            if( !units.isEmpty() && myCo.getBuyCost(units.get(0), xyc) <= myCo.money )
             {
               shoppingLists.put(loc, units);
             }
@@ -311,9 +313,10 @@ public class SpenderAI implements AIController
           for( UnitModel unit : units )
           {
             // I only want combat units, since I don't understand transports
-            if( !unit.weapons.isEmpty() && unit.getCost() <= budget )
+            final int unitCost = myCo.getBuyCost(unit, locShopList.getKey().getCoordinates());
+            if( !unit.weapons.isEmpty() && unitCost <= budget )
             {
-              budget -= unit.getCost();
+              budget -= unitCost;
               purchases.put(locShopList.getKey(), unit);
               break;
             }
@@ -329,15 +332,17 @@ public class SpenderAI implements AIController
           UnitModel currentPurchase = purchases.get(locShopList.getKey());
           if( null != currentPurchase )
           {
-            budget += currentPurchase.getCost();
-            for( UnitModel unit : units )
+            int currentCost = myCo.getBuyCost(currentPurchase, locShopList.getKey().getCoordinates());
+            budget += currentCost;
+            for( UnitModel newPurchase : units )
             {
+              final int newCost = myCo.getBuyCost(newPurchase, locShopList.getKey().getCoordinates());
               // I want expensive units, but they have to have guns
-              if( budget > unit.getCost() && unit.getCost() > currentPurchase.getCost() && !unit.weapons.isEmpty() )
-                currentPurchase = unit;
+              if( budget > newCost && newCost > currentCost && !newPurchase.weapons.isEmpty() )
+                currentPurchase = newPurchase;
             }
             // once we've found the most expensive thing we can buy here, record that
-            budget -= currentPurchase.getCost();
+            budget -= currentCost;
             purchases.put(locShopList.getKey(), currentPurchase);
           }
         }

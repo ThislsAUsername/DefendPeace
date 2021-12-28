@@ -2,6 +2,7 @@ package Engine.GameInput;
 
 import java.util.ArrayList;
 
+import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.XYCoord;
@@ -60,7 +61,7 @@ class SelectUnitProduction extends GameInputState<String>
   /**
    * Returns a list of strings of equal length containing the names of each unit with their respective prices.
    */
-  public static ArrayList<String> buildDisplayStrings(ArrayList<UnitModel> models, XYCoord coord)
+  public static ArrayList<String> buildDisplayStrings(Commander co, ArrayList<UnitModel> models, XYCoord coord)
   {
     ArrayList<String> menuStrings = new ArrayList<>();
     int maxNameLength = 0;
@@ -73,7 +74,7 @@ class SelectUnitProduction extends GameInputState<String>
       String str = model.name;
       menuStrings.add( str );
       maxNameLength = Math.max(maxNameLength, str.length());
-      maxPriceLength = Math.max(maxPriceLength, Integer.toString(model.getBuyCost(coord)).length());
+      maxPriceLength = Math.max(maxPriceLength, Integer.toString(co.getBuyCost(model, coord)).length());
     }
 
     maxNameLength++; // Add 1 for a space between unit name and price.
@@ -95,7 +96,7 @@ class SelectUnitProduction extends GameInputState<String>
       }
       else
       {
-        price = Integer.toString(model.getBuyCost(coord));
+        price = Integer.toString(co.getBuyCost(model, coord));
       }
 
       // Find the difference between the max length and current length

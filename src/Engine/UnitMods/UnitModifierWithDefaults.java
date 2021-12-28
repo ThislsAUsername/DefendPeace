@@ -46,8 +46,22 @@ public interface UnitModifierWithDefaults extends UnitModifier
   }
 
   @Override
+  default void modifyMoveType(UnitContext uc)
+  {
+  }
+
+  @Override
   default void modifyAttackRange(UnitContext uc)
   {
   }
 
+  @Override
+  default void modifyCargoCapacity(UnitContext uc)
+  {
+  }
+
+  @Override
+  default void modifyActionList(UnitContext uc)
+  {
+  }
 }

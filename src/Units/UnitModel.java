@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import CommandingOfficers.Commander;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -60,32 +59,29 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     return input.toLowerCase().replaceAll(" ", "_").replaceAll("-", "_");
   }
 
+  public int costBase;
+  public int baseMovePower;
+  public MoveType baseMoveType;
+  public ArrayList<UnitActionFactory> baseActions = new ArrayList<UnitActionFactory>();
+  public int baseCargoCapacity = 0;
+  public static final int DEFAULT_STAT_RATIO = 100; // Accounts for firepower, defense, and cost
+
+  // Dynamic modifications to any property below this line will require new additions to UnitContext and UnitModifier
+  public static final int MAXIMUM_HP = 10;
   public String name;
   public long role;
-  public Commander CO;
-  public int costBase;
   public double abilityPowerValue;
   public int maxAmmo;
   public int maxFuel;
   public int idleFuelBurn;
   public int maxMaterials = 0;
-  public int baseMovePower;
   public int visionRange;
   public int visionRangePiercing = 1;
   public boolean hidden = false;
-  public MoveType propulsion;
-  public ArrayList<UnitActionFactory> possibleActions = new ArrayList<UnitActionFactory>();
   public Set<TerrainType> healableHabs = new HashSet<TerrainType>();
   public ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();
-
-  public int maxHP = 10;
-  public int holdingCapacity = 0;
   public long carryableMask;
   public long carryableExclusionMask;
-  private int COstr = 100;
-  private int COdef = 100;
-  public double costMultiplier = 1.0;
-  public int costShift = 0;
 
   public UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] pWeapons, double powerValue)
@@ -94,7 +90,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
 
     for( UnitActionFactory action : actions )
     {
-      possibleActions.add(action);
+      baseActions.add(action);
     }
     for( WeaponModel wm : pWeapons )
     {
@@ -106,7 +102,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
       MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> pWeapons, double powerValue)
   {
     this(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, powerValue);
-    possibleActions.addAll(actions);
+    baseActions.addAll(actions);
     weapons = pWeapons;
   }
 
@@ -122,7 +118,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     idleFuelBurn = pIdleFuelBurn;
     visionRange = pVision;
     baseMovePower = pMovePower;
-    propulsion = pPropulsion.clone();
+    baseMoveType = pPropulsion.clone();
 
     for( TerrainType terrain : TerrainType.TerrainTypeList )
     {
@@ -146,94 +142,19 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   protected void copyValues(UnitModel other)
   {
     // Duplicate the other model's transporting abilities.
-    holdingCapacity = other.holdingCapacity;
+    baseCargoCapacity = other.baseCargoCapacity;
     carryableMask = other.carryableMask;
     carryableExclusionMask = other.carryableExclusionMask;
 
     // Duplicate other assorted values
-    maxHP = other.maxHP;
     maxMaterials = other.maxMaterials;
     for( UnitModifier mod : other.unitMods )
       unitMods.add(mod);
-
-    CO = other.CO;
-    COstr = other.COstr;
-    COdef = other.COdef;
-    costMultiplier = other.costMultiplier;
-    costShift = other.costShift;
   }
 
-  private int costFrom(UnitContext uc)
-  {
-    return (int) ((uc.costBase)*uc.costMultiplier)+uc.costShift;
-  }
-  private UnitContext getCostContext(XYCoord coord)
-  {
-    UnitContext uc = new UnitContext(this.CO, this);
-    uc.coord = coord;
-    for( UnitModifier mod : getModifiers() )
-      mod.modifyCost(uc);
-    return uc;
-  }
-  public int getCost()
-  {
-    UnitContext uc = getCostContext(null);
-    return costFrom(uc);
-  }
-  public int getBuyCost(XYCoord coord)
-  {
-    UnitContext uc = getCostContext(coord);
-    return costFrom(uc);
-  }
-  // Not adding a Produce overload for now since I don't see a simple way to get consistent results pipelined into the displayed buy cost
-  public int getRepairCost(UnitContext uc)
-  {
-    for( UnitModifier mod : getModifiers() )
-      mod.modifyCost(uc);
-    for( UnitModifier mod : getModifiers() )
-      mod.modifyRepairCost(uc);
-    return costFrom(uc);
-  }
   public boolean canRepairOn(MapLocation locus)
   {
     return healableHabs.contains(locus.getEnvironment().terrainType);
-  }
-
-  /**
-   * Takes a percent change and adds it to the current damage multiplier for this UnitModel.
-   * @param change The percent damage to add; e.g. if the multiplier is 100 and this function is
-   * called with 10, the new one will be 110. If it is called with 10 again, it will go to 120.
-   */
-  public void modifyDamageRatio(int change)
-  {
-    COstr += change;
-  }
-  public int getDamageRatio()
-  {
-    return COstr;
-  }
-
-  /**
-   * Takes a percent change and adds it to the current defense modifier for this UnitModel.
-   * @param change The percent defense to add; e.g. if the defense modifier is 100 and this function
-   * is called with 10, the new one will be 110. If it is called with 10 again, it will go to 120.
-   */
-  public void modifyDefenseRatio(int change)
-  {
-    COdef += change;
-  }
-  public int getDefenseRatio()
-  {
-    return COdef;
-  }
-
-  /** For high-level estimation */
-  public int getMovePower()
-  {
-    UnitContext uc = new UnitContext(this.CO, this);
-    for( UnitModifier mod : getModifiers() )
-      mod.modifyMovePower(uc);
-    return uc.movePower;
   }
 
   /** Provides a hook for inheritors to supply turn-initialization actions to a unit.
@@ -272,7 +193,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
       for( XYCoord adj : adjacents )
       {
         Unit res = map.getLocation(adj).getResident();
-        if( (null != res) && !res.CO.isEnemy(self.CO) && res.model.hasActionType(UnitActionFactory.RESUPPLY) )
+        if( (null != res) && !res.CO.isEnemy(self.CO) && res.hasActionType(UnitActionFactory.RESUPPLY) )
         {
           queue.add(new ResupplyEvent(res, self));
           resupplying = true;
@@ -346,20 +267,6 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     return name;
   }
 
-  public boolean hasActionType(UnitActionFactory UnitActionType)
-  {
-    boolean hasAction = false;
-    for( UnitActionFactory at : possibleActions )
-    {
-      if( at == UnitActionType )
-      {
-        hasAction = true;
-        break;
-      }
-    }
-    return hasAction;
-  }
-
   public boolean isAny(long input)
   {
     return (role & input) > 0;
@@ -403,8 +310,6 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public List<UnitModifier> getModifiers()
   {
     ArrayList<UnitModifier> output = new ArrayList<>();
-    // TODO: consider a null check here
-    output.addAll(CO.getModifiers());
     output.addAll(unitMods);
     return output;
   }

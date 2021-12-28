@@ -39,7 +39,7 @@ public class DoRUnits extends UnitModelScheme
   }
 
   @Override
-  public GameReadyModels getGameReadyModels()
+  public GameReadyModels buildGameReadyModels()
   {
     GameReadyModels dorModels = new GameReadyModels();
 
@@ -95,12 +95,12 @@ public class DoRUnits extends UnitModelScheme
 
     // Handle transforming units separately, since we don't want two buy-entries
     UnitModel sub = new SubSubModel();
-    sub.possibleActions.add(new TransformLifecycle.TransformFactory(subsub, "DIVE"));
-    subsub.possibleActions.add(new TransformLifecycle.TransformFactory(sub, "RISE"));
+    sub.baseActions.add(new TransformLifecycle.TransformFactory(subsub, "DIVE"));
+    subsub.baseActions.add(new TransformLifecycle.TransformFactory(sub, "RISE"));
     dorModels.unitModels.add(sub);
 
     UnitModel seaplane = new SeaplaneModel();
-    carrier.possibleActions.add(1, new UnitProduceLifecycle.UnitProduceFactory(seaplane));
+    carrier.baseActions.add(1, new UnitProduceLifecycle.UnitProduceFactory(seaplane));
     dorModels.unitModels.add(seaplane);
 
     return dorModels;
@@ -142,7 +142,7 @@ public class DoRUnits extends UnitModelScheme
     {
       // Create a new model with the given attributes.
       DoRUnitModel newModel = new DoRUnitModel(name, type, role, costBase, maxAmmo, maxFuel, idleFuelBurn, visionRange, baseMovePower,
-          propulsion.clone(), possibleActions, weapons, abilityPowerValue);
+          baseMoveType.clone(), baseActions, weapons, abilityPowerValue);
 
       newModel.copyValues(this);
       return newModel;
@@ -272,7 +272,7 @@ public class DoRUnits extends UnitModelScheme
     {
       super("Flare", DoRUnitEnum.FLARE, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
           MOVE_POWER, moveType, actions, weapons, STAR_VALUE);
-      possibleActions.add(0, new FlareLifecycle.FlareFactory(0, 5, 2));
+      baseActions.add(0, new FlareLifecycle.FlareFactory(0, 5, 2));
     }
   }
 
@@ -486,14 +486,14 @@ public class DoRUnits extends UnitModelScheme
     {
       super("APC", DoRUnitEnum.RIG, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0], STAR_VALUE);
-      holdingCapacity = 1;
+      baseCargoCapacity = 1;
       carryableMask = TROOP;
       carryableExclusionMask = TANK; // Can't carry Bikes
 
       maxMaterials = 1;
-      possibleActions.add(
+      baseActions.add(
           new TerraformLifecycle.TerraformFactory(TerrainType.GRASS, TerrainType.TEMP_AIRPORT, "BUILD"));
-      possibleActions.add(
+      baseActions.add(
           new TerraformLifecycle.TerraformFactory(TerrainType.SHOAL, TerrainType.TEMP_SEAPORT, "BUILD"));
     }
   }
@@ -640,7 +640,7 @@ public class DoRUnits extends UnitModelScheme
     {
       super("T-Copter", DoRUnitEnum.T_COPTER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, new WeaponModel[0], STAR_VALUE);
-      holdingCapacity = 1;
+      baseCargoCapacity = 1;
       carryableMask = TROOP;
       carryableExclusionMask = TANK; // Can't carry Bikes
     }
@@ -669,7 +669,7 @@ public class DoRUnits extends UnitModelScheme
     {
       super("Gunboat", DoRUnitEnum.GUNBOAT, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
-      holdingCapacity = 1;
+      baseCargoCapacity = 1;
       carryableMask = TROOP;
       carryableExclusionMask = TANK; // Can't carry Bikes
     }
@@ -696,7 +696,7 @@ public class DoRUnits extends UnitModelScheme
     {
       super("Cruiser", DoRUnitEnum.CRUISER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
-      holdingCapacity = 2;
+      baseCargoCapacity = 2;
       carryableMask = AIR_LOW;
     }
   }
@@ -762,9 +762,9 @@ public class DoRUnits extends UnitModelScheme
       super("Carrier", DoRUnitEnum.CARRIER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
           moveType, actions, weapons, STAR_VALUE);
       maxMaterials = 4;
-      holdingCapacity = 2;
+      baseCargoCapacity = 2;
       carryableMask = AIR_LOW | AIR_HIGH;
-      possibleActions.add(0, UnitActionFactory.LAUNCH);
+      baseActions.add(0, UnitActionFactory.LAUNCH);
     }
 
     /** DoR Carriers re-supply and repair their cargo at the beginning of every turn. Make it so. */
@@ -826,7 +826,7 @@ public class DoRUnits extends UnitModelScheme
     {
       super("Lander", DoRUnitEnum.LANDER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, new WeaponModel[0], STAR_VALUE);
-      holdingCapacity = 2;
+      baseCargoCapacity = 2;
       carryableMask = TROOP | TANK;
     }
   }

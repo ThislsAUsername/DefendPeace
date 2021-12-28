@@ -13,6 +13,7 @@ import Engine.UnitMods.UnitTypeFilter;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 
 /**
@@ -77,18 +78,9 @@ public class Strong extends Commander
     upm.applyChanges(this); // Passive ability, so don't add it to the COModifier list; just apply it and forget it.
 
     // Give Strong's footies a base damage buff.
-    for( UnitModel model : getAllModels(UnitModel.TROOP) )
-      model.modifyDamageRatio(PASSIVE_INF_BUFF);
-
-    // Give every transport type extra move range and an extra cargo slot.
-    for (UnitModel model : unitModels)
-    {
-      if( model.holdingCapacity > 0 )
-      {
-        model.baseMovePower++;
-        model.holdingCapacity++;
-      }
-    }
+    UnitTypeFilter damageModTroop = new UnitTypeFilter(new UnitDamageModifier(PASSIVE_INF_BUFF));
+    damageModTroop.allOf = UnitModel.TROOP;
+    addUnitModifier(damageModTroop);
 
     addCommanderAbility(new StrongArmAbility(this));
     addCommanderAbility(new MobilizeAbility(this));
@@ -104,6 +96,24 @@ public class Strong extends Commander
     if( (params.attacker.unit.CO == this) && params.defender.unit.model.isTroop() )
     {
       params.attackPower += PASSIVE_ANTI_INF_BUFF;
+    }
+  }
+
+  // Give every transport type extra move range and an extra cargo slot.
+  @Override
+  public void modifyMovePower(UnitContext uc)
+  {
+    if( uc.cargoCapacity > 0 )
+    {
+      uc.movePower++;
+    }
+  }
+  @Override
+  public void modifyCargoCapacity(UnitContext uc)
+  {
+    if( uc.cargoCapacity > 0 )
+    {
+      uc.cargoCapacity++;
     }
   }
 

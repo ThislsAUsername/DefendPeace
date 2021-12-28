@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import Engine.GameScenario;
+import Units.UnitModelScheme.GameReadyModels;
 
 public abstract class CommanderInfo implements Serializable
 {
@@ -19,9 +20,14 @@ public abstract class CommanderInfo implements Serializable
 
   public abstract Commander create(GameScenario.GameRules rules);
 
+  public void injectUnits(GameReadyModels grms)
+  {
+  }
+
   public static class InfoPage implements Serializable
   {
     private static final long serialVersionUID = 1L;
+
     public enum PageType {
       CO_HEADERS, GAME_STATUS, BASIC
     }

@@ -1,16 +1,17 @@
 package Units;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+
 import CommandingOfficers.Commander;
 import Engine.XYCoord;
 import Terrain.MapLocation;
-import Units.Unit.CargoList;
 
 public abstract class UnitState implements Serializable
 {
   private static final long serialVersionUID = 1L;
 
-  public final CargoList heldUnits;
+  public final ArrayList<Unit> heldUnits;
   public int ammo;
   public int fuel;
   public int materials;
@@ -40,11 +41,11 @@ public abstract class UnitState implements Serializable
     fuel = model.maxFuel;
     materials = model.maxMaterials;
     isTurnOver = true;
-    health = healthFromHP(model.maxHP);
+    health = healthFromHP(UnitModel.MAXIMUM_HP);
     captureProgress = 0;
     captureTarget = null;
 
-    heldUnits = new CargoList(model);
+    heldUnits = new ArrayList<>(model.baseCargoCapacity);
   }
   public UnitState(UnitState other)
   {
@@ -55,7 +56,7 @@ public abstract class UnitState implements Serializable
     captureProgress = other.captureProgress;
     captureTarget = other.captureTarget;
 
-    heldUnits = new CargoList(model);
+    heldUnits = new ArrayList<>(model.baseCargoCapacity);
     heldUnits.addAll(other.heldUnits);
   }
   public void copyUnitState(UnitState other)
@@ -81,7 +82,7 @@ public abstract class UnitState implements Serializable
 
   public boolean isHurt()
   {
-    return health < healthFromHP(model.maxHP);
+    return health < healthFromHP(UnitModel.MAXIMUM_HP);
   }
   public int getHP()
   {
@@ -90,7 +91,7 @@ public abstract class UnitState implements Serializable
   /** @return value in range [0-1.0]; represents the unit's current effectiveness */
   public double getHPFactor()
   {
-    return getHP() / (double) model.maxHP;
+    return getHP() / (double) UnitModel.MAXIMUM_HP;
   }
   /** @return un-rounded HP */
   public double getPreciseHP()
@@ -128,7 +129,7 @@ public abstract class UnitState implements Serializable
 
   /**
    * Increases HP by the specified amount.
-   * Enforces a minimum of 0.1, and a maximum of the model's maxHP.
+   * Enforces a minimum of 0.1, and a maximum of MAXIMUM_HP.
    * When healing, rounds health up to a whole HP (e.g. 2.5 + 2 = 4.5 -> 5.0)
    * @return the change in HP
    */
@@ -143,7 +144,7 @@ public abstract class UnitState implements Serializable
     // Only enforce the maximum HP if we're healing
     //  If current HP > max HP and change is negative, we shouldn't always delete all excess HP
     if( !allowOver && change > 0 )
-      newHP = Math.min(model.maxHP, newHP);
+      newHP = Math.min(UnitModel.MAXIMUM_HP, newHP);
     health = Math.max(1, healthFromHP(newHP));
     if( change > 0 )
       health = healthFromHP(getHP());

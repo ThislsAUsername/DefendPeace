@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import Engine.GameInstance;
 import Engine.GameScenario;
+import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEventQueue;
@@ -16,6 +17,7 @@ import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 
 /**
@@ -59,19 +61,20 @@ public class Meridian extends Commander
 
   final VehicularCharge myVehicularCharge = new VehicularCharge(this);
   private static final int POST_REFRESH_STAT_ADJUSTMENT = -25;
+  final UnitModel tank, arty;
+  final UnitActionFactory tankAction, artyAction;
+  final int costShift;
 
   public Meridian(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
     // Meridian's basic tanks and arty cost the same
-    UnitModel tank = getUnitModel(UnitModel.ASSAULT);
-    UnitModel arty = getUnitModel(UnitModel.SIEGE);
-    int costShift = (tank.getCost() - arty.getCost())/2;
-    tank.costShift -= costShift;
-    arty.costShift += costShift;
-    tank.possibleActions.add(new TransformLifecycle.TransformFactory(arty, "~ARTY"));
-    arty.possibleActions.add(new TransformLifecycle.TransformFactory(tank, "~TANK"));
+    tank = getUnitModel(UnitModel.ASSAULT);
+    arty = getUnitModel(UnitModel.SIEGE);
+    tankAction = new TransformLifecycle.TransformFactory(arty, "~ARTY");
+    artyAction = new TransformLifecycle.TransformFactory(tank, "~TANK");
+    costShift = (getCost(tank) - getCost(arty))/2;
 
     addCommanderAbility(new ChangeAndFlow(this));
     addCommanderAbility(myVehicularCharge);
@@ -81,6 +84,24 @@ public class Meridian extends Commander
   public GameEventQueue initTurn(MapMaster map)
   {
     return super.initTurn(map);
+  }
+
+  @Override
+  public void modifyCost(UnitContext uc)
+  {
+    if( tank == uc.model )
+      uc.costShift -= costShift;
+    if( arty == uc.model )
+      uc.costShift += costShift;
+  }
+
+  @Override
+  public void modifyActionList(UnitContext uc)
+  {
+    if( tank == uc.model )
+      uc.possibleActions.add(tankAction);
+    if( arty == uc.model )
+      uc.possibleActions.add(artyAction);
   }
 
   /**
