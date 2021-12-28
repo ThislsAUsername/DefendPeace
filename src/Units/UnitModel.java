@@ -64,10 +64,10 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public MoveType baseMoveType;
   public ArrayList<UnitActionFactory> baseActions = new ArrayList<UnitActionFactory>();
   public int baseCargoCapacity = 0;
+  public static final int DEFAULT_STAT_RATIO = 100; // Accounts for firepower, defense, and cost
 
-  // If you want to modify anything below this line, you're gonna have to implement it into UnitContext
+  // Dynamic modifications to any property below this line will require new additions to UnitContext and UnitModifier
   public static final int MAXIMUM_HP = 10;
-  public static final int DEFAULT_STAT_RATIO = 100;
   public String name;
   public long role;
   public double abilityPowerValue;
