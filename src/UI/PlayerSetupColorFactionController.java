@@ -36,6 +36,10 @@ public class PlayerSetupColorFactionController implements IController
         myPlayerInfo.currentFaction = factionSelector.getSelectionNormalized();
         done = true;
         break;
+      case SEEK:
+        // Flip units
+        myPlayerInfo.flipUnits = !myPlayerInfo.flipUnits;
+        break;
       case UP:
       case DOWN:
         factionSelector.handleInput(action);
@@ -58,9 +62,14 @@ public class PlayerSetupColorFactionController implements IController
   {
     return colorSelector.getSelectionNormalized();
   }
-  
+
   public int getSelectedFaction()
   {
     return factionSelector.getSelectionNormalized();
+  }
+
+  public boolean getShouldFlip()
+  {
+    return myPlayerInfo.flipUnits;
   }
 }

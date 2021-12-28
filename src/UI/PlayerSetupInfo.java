@@ -19,12 +19,13 @@ public class PlayerSetupInfo
   public int currentCo;
   public int currentColor;
   public int currentFaction;
+  public boolean flipUnits;
   public int currentTeam;
   public int currentAi;
   @Override
   public String toString()
   {
-    return String.format("%s %s %s %s %s", currentCo, currentColor, currentFaction, currentTeam, currentAi);
+    return String.format("%s %s %s %s %s %s", currentCo, currentColor, currentFaction, flipUnits, currentTeam, currentAi);
   }
   /** Initializes based on the schema defined by the toString() method above */
   public void initFromString(String input)
@@ -36,6 +37,8 @@ public class PlayerSetupInfo
       currentColor = s.nextInt() % availableColors.length;
     if( s.hasNextInt())
       currentFaction = s.nextInt() % availableFactions.length;
+    if( s.hasNextBoolean() )
+      flipUnits = s.nextBoolean();
     if( s.hasNextInt())
       currentTeam = s.nextInt();
     if( s.hasNextInt())
@@ -56,6 +59,7 @@ public class PlayerSetupInfo
     currentCo = thisPlayer % COTypeList.size();
     currentColor = thisPlayer % colorList.length;
     currentFaction = thisPlayer % factionList.length;
+    flipUnits = 0 < (thisPlayer % 2);
     currentTeam = thisPlayer;
     currentAi = 0; // Default to human.
 
@@ -73,7 +77,8 @@ public class PlayerSetupInfo
     Commander co = availableCommanders[currentCo].create(rules);
 
     co.myColor = availableColors[currentColor];
-    co.faction = availableFactions[currentFaction];
+    co.faction = new Faction(availableFactions[currentFaction].name, availableFactions[currentFaction].basis);
+    co.faction.flip = flipUnits;
 
     co.team = currentTeam;
 

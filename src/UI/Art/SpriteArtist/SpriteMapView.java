@@ -580,9 +580,7 @@ public class SpriteMapView extends MapView
   }
   public static boolean shouldFlip(Unit u)
   {
-    // Set the facing direction of the CO based on the location of the HQ. If the
-    // HQ is on the left side of the map, the units should face right, and vice versa.
-    return u.CO.HQLocation.xCoord >= u.CO.myView.mapWidth / 2;
+    return u.CO.faction.flip;
   }
 
   private void drawHUD(Graphics g, boolean includeTileDetails)

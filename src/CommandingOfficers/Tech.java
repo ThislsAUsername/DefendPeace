@@ -325,8 +325,6 @@ public class Tech extends Commander
       // Create a new Unit to drop onto the battlefield.
       Unit techMech = new Unit(myCommander, unitModelToDrop);
       techMech.isTurnOver = false; // Hit the ground ready to rumble.
-      if( myCommander.HQLocation.xCoord >= gameMap.mapWidth / 2 )
-        techMech.x = gameMap.mapWidth; // Make the unit face left as it falls to match the rest of the units.
 
       // We want to find the spot where more muscle will do the most good; i.e. somewhere that is highly contested.
       // Spaces that cannot be traversed, and spaces owned by an enemy Commander are invalid drop locations.
