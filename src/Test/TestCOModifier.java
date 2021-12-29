@@ -7,6 +7,7 @@ import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import CommandingOfficers.Modifiers.UnitRemodelModifier;
+import Engine.Army;
 import Engine.GameScenario;
 import Engine.UnitMods.UnitMovementModifier;
 import Terrain.MapLibrary;
@@ -41,7 +42,7 @@ public class TestCOModifier extends TestCase
     GameScenario scn = new GameScenario();
     strong = new Strong(scn.rules);
     patch = new Patch(scn.rules);
-    Commander[] cos = { strong, patch };
+    Army[] cos = { new Army(strong), new Army(patch) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
   }

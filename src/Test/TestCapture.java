@@ -3,6 +3,7 @@ package Test;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
@@ -33,7 +34,7 @@ public class TestCapture extends TestCase
     GameScenario scenario = new GameScenario();
     testCo1 = new Strong(scenario.rules);
     testCo2 = new Patch(scenario.rules);
-    Commander[] cos = { testCo1, testCo2 };
+    Army[] cos = { new Army(testCo1), new Army(testCo2) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
     testGame = new GameInstance(cos, testMap);

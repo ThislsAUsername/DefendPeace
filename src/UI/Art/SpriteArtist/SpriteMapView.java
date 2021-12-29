@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.Queue;
 
 import AI.AICombatUtils;
-import CommandingOfficers.Commander;
 import Engine.Army;
 import Engine.GameInstance;
 import Engine.GamePath;

@@ -185,14 +185,13 @@ public class FightClub
                                + combatants.get(i).getControllerName() + " controlling " + combatants.get(i).cos[0].coInfo.name);
 
         // Build the CO list and the new map and create the game instance.
-        final Commander[] combatantArray = combatants.toArray(new Commander[0]);
+        final Army[] combatantArray = combatants.toArray(new Army[0]);
         MapMaster map = new MapMaster(combatantArray, mi);
         GameInstance newGame = null;
         if( map.initOK() )
         {
           newGame = new GameInstance(scenario, combatantArray, map, params.defaultWeather, false);
         }
-        map.game = newGame;
 
         GameResults gameResults = runGame(newGame, defaultOut);
         List<Army> winners = gameResults.winners;

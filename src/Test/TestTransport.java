@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
+import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
@@ -33,7 +34,7 @@ public class TestTransport extends TestCase
     GameScenario scn = new GameScenario();
     testCo1 = new Patch(scn.rules);
     testCo2 = new Patch(scn.rules);
-    Commander[] cos = { testCo1, testCo2 };
+    Army[] cos = { new Army(testCo1), new Army(testCo2) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
     testGame = new GameInstance(cos, testMap);

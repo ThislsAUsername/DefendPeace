@@ -2,6 +2,7 @@ package Test;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
+import Engine.Army;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEvent;
@@ -22,7 +23,7 @@ public class TestHealing extends TestCase
   {
     GameScenario scn = new GameScenario();
     testCo1 = new Patch(scn.rules);
-    Commander[] cos = { testCo1 };
+    Army[] cos = { new Army(testCo1), };
     // Create a small map with a city to provide healing.
     TerrainType[][] testLoc = {
         {TerrainType.CITY, TerrainType.GRASS},

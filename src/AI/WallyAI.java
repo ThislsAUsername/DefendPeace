@@ -1082,10 +1082,10 @@ public class WallyAI extends ModularAI
     // Build infantry from any remaining facilities.
     log("Building infantry to fill out my production");
     XYCoord infCoord = getLocationToBuild(CPI, infModel);
-    MapLocation infLoc = gameMap.getLocation(infCoord);
-    Commander infBuyer = infLoc.getOwner();
     while (infCoord != null)
     {
+      MapLocation infLoc = gameMap.getLocation(infCoord);
+      Commander infBuyer = infLoc.getOwner();
       int cost = infBuyer.getBuyCost(infModel, infCoord);
       if (cost > budget)
         break;

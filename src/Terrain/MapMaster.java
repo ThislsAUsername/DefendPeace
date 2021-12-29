@@ -3,6 +3,7 @@ package Terrain;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import Engine.Army;
 import Engine.XYCoord;
 import Units.Unit;
 import Units.UnitModel;
@@ -15,7 +16,7 @@ public class MapMaster extends GameMap
 
   private boolean initOK = false;
 
-  public MapMaster(CommandingOfficers.Commander[] propertyOwners, MapInfo mapInfo)
+  public MapMaster(Army[] propertyOwners, MapInfo mapInfo)
   {
     super(mapInfo.getWidth(), mapInfo.getHeight());
     initOK = true;
@@ -63,14 +64,14 @@ public class MapMaster extends GameMap
           final TerrainType terrainType = map[x][y].getEnvironment().terrainType;
           if( terrainType == TerrainType.HEADQUARTERS )
           {
-            propertyOwners[co].army.HQLocations.add(new XYCoord(x, y));
+            propertyOwners[co].HQLocations.add(new XYCoord(x, y));
             hasHQ = true;
           }
           else if( terrainType == TerrainType.LAB )
           {
             hasLab = true;
           }
-          location.setOwner(propertyOwners[co]);
+          location.setOwner(propertyOwners[co].cos[0]);
         }
         else
         {
@@ -83,12 +84,12 @@ public class MapMaster extends GameMap
         Map<XYCoord, String> unitSet = mapInfo.mapUnits.get(co);
         for( Entry<XYCoord, String> unitEntry : unitSet.entrySet() )
         {
-          UnitModel model = UnitModelScheme.getModelFromString(unitEntry.getValue(), propertyOwners[co].unitModels);
+          UnitModel model = UnitModelScheme.getModelFromString(unitEntry.getValue(), propertyOwners[co].cos[0].unitModels);
           if( model != null )
           {
-            Unit unit = new Unit(propertyOwners[co], model);
+            Unit unit = new Unit(propertyOwners[co].cos[0], model);
             addNewUnit(unit, unitEntry.getKey().xCoord, unitEntry.getKey().yCoord);
-            propertyOwners[co].units.add(unit);
+            propertyOwners[co].cos[0].units.add(unit);
           }
           else
           {
@@ -102,22 +103,22 @@ public class MapMaster extends GameMap
 
       // If we don't have an HQ and do have Labs, then Labs are our HQs
       if( hasLab )
-        for( XYCoord coord : propertyOwners[co].ownedProperties )
+        for( XYCoord coord : propertyOwners[co].cos[0].ownedProperties )
         {
           if( getEnvironment(coord).terrainType == TerrainType.LAB )
           {
-            propertyOwners[co].army.HQLocations.add(coord);
+            propertyOwners[co].HQLocations.add(coord);
           }
         }
       // If we own some property, call that good enough for our purposes
       else if( hasProperty )
-        propertyOwners[co].army.HQLocations.addAll(propertyOwners[co].ownedProperties);
+        propertyOwners[co].HQLocations.addAll(propertyOwners[co].cos[0].ownedProperties);
       // If we don't have property, use our first unit's starting location
-      else if( !propertyOwners[co].units.isEmpty() )
-        propertyOwners[co].army.HQLocations.add(new XYCoord(propertyOwners[co].units.get(0)));
+      else if( !propertyOwners[co].cos[0].units.isEmpty() )
+        propertyOwners[co].HQLocations.add(new XYCoord(propertyOwners[co].cos[0].units.get(0)));
       // If we don't even have units, we've already lost
       else
-        propertyOwners[co].army.isDefeated = true;
+        propertyOwners[co].isDefeated = true;
 
     } // ~property assignment loop
   } // ~constructor

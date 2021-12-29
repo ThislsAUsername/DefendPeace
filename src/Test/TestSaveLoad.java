@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
+import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Terrain.MapLibrary;
@@ -29,7 +30,7 @@ public class TestSaveLoad extends TestCase
     GameScenario scn = new GameScenario();
     strong = new Strong(scn.rules);
     patch = new Patch(scn.rules);
-    Commander[] cos = { strong, patch };
+    Army[] cos = { new Army(strong), new Army(patch) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
 
@@ -59,7 +60,7 @@ public class TestSaveLoad extends TestCase
     Unit meaty = addUnit(testMap, patch, UnitModel.ASSAULT, 7, 5);
     
     // It's Strong's turn. Set up his fog goggles.
-    strong.initTurn(testMap);
+    strong.army.initTurn(testMap);
     boolean testPassed = true;
 
     byte[] bytes = null;

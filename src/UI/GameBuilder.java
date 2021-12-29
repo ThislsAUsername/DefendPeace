@@ -43,26 +43,19 @@ public class GameBuilder
     }
 
     // Create all of the armies.
-    Commander[] propertyOwners = new Commander[mapInfo.getNumCos()];
-    for(int i = 0; i < mapInfo.getNumCos(); ++i)
-    {
-      propertyOwners[i] = coInfos[i].makeCommander(scenario.rules);
-    }
-
-    // Build the CO list and the new map and create the game instance.
-    MapMaster map = new MapMaster( propertyOwners, mapInfo );
-
-    // Build the armies out of the COs
     Army[] armies = new Army[mapInfo.getNumCos()];
     for(int i = 0; i < mapInfo.getNumCos(); ++i)
     {
       armies[i] = new Army();
       // TODO: Add logic to add cart/persistent tags tag partners
-      armies[i].cos = new Commander[] { propertyOwners[i] };
+      armies[i].cos = new Commander[] { coInfos[i].makeCommander(scenario.rules) };
       armies[i].team = coInfos[i].currentTeam;
       armies[i].setAIController(coInfos[i].getCurrentAI().create(armies[i]));
     }
-    
+
+    // Build the CO list and the new map and create the game instance.
+    MapMaster map = new MapMaster( armies, mapInfo );
+
     // If doing team merge... merge the teams
     if( TagMode.Team_Merge == tagMode )
     {
@@ -88,6 +81,7 @@ public class GameBuilder
           Commander[] newCoList = Arrays.copyOf(match.cos, match.cos.length + army.cos.length);
           System.arraycopy(army.cos, 0, newCoList, match.cos.length, army.cos.length);
           match.cos = newCoList;
+          match.HQLocations.addAll(army.HQLocations);
         }
       }
       armies = finalArmies.toArray(new Army[0]);

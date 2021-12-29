@@ -3,6 +3,7 @@ package Test;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
@@ -31,7 +32,7 @@ public class TestVisionMechanics extends TestCase
     scn.rules.isFogEnabled = true;
     strong = new Strong(scn.rules);
     patch = new Patch(scn.rules);
-    Commander[] cos = { strong, patch };
+    Army[] cos = { new Army(strong), new Army(patch) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
     testGame = new GameInstance(new GameScenario(), cos, testMap, Weathers.CLEAR, false);
@@ -62,7 +63,7 @@ public class TestVisionMechanics extends TestCase
     meaty.model.hidden = true; // Does anyone else think this is a bad idea? No? Okay, must be fair and balanced.
     
     // It's Strong's turn. Set up his fog goggles.
-    strong.initTurn(testMap);
+    strong.army.initTurn(testMap);
     boolean testPassed = true;
 
     // Make sure we can't see what we're not supposed to.

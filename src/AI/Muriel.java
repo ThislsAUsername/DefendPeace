@@ -960,15 +960,18 @@ public class Muriel implements AIController
     // Build infantry from any remaining facilities.
     UnitModel infModel = myCo.cos[0].getUnitModel(UnitModel.TROOP);
     MapLocation loc = CPI.getLocationToBuild(infModel);
-    int infCost = loc.getOwner().getCost(infModel);
-    while( (budget >= infCost) && (CPI.availableUnitModels.contains(infModel)) )
+    int infCost = Integer.MAX_VALUE;
+    if( null != loc && null != loc.getOwner() )
+      infCost = loc.getOwner().getCost(infModel);
+    while ((budget >= infCost) && (CPI.availableUnitModels.contains(infModel)) )
     {
       shoppingCart.add(new PurchaseOrder(loc, loc.getOwner(), infModel));
       budget -= infCost;
       CPI.removeBuildLocation(loc);
       // Reset values for the next iteration
       loc = CPI.getLocationToBuild(infModel);
-      infCost = loc.getOwner().getCost(infModel);
+      if( null != loc )
+        infCost = loc.getOwner().getCost(infModel);
     }
 
     // Convert our PurchaseOrders into GameActions.

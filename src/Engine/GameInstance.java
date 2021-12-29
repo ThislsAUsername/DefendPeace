@@ -49,26 +49,6 @@ public class GameInstance implements Serializable
   {
     this(new GameScenario(), armies, map, Weathers.CLEAR, false);
   }
-  public GameInstance(Commander[] COs, MapMaster map)
-  {
-    this(new GameScenario(), buildBasicArmies(COs), map, Weathers.CLEAR, false);
-  }
-  public static Army[] buildBasicArmies(Commander[] COs)
-  {
-    Army[] armies = new Army[COs.length];
-    for(int i = 0; i < COs.length; ++i)
-    {
-      armies[i] = new Army();
-      armies[i].cos = new Commander[] { COs[i] };
-      COs[i].army = armies[i];
-    }
-    return armies;
-  }
-
-  public GameInstance(GameScenario scenario, Commander[] COs, MapMaster map, Weathers weather, boolean useSecurity)
-  {
-    this(scenario, buildBasicArmies(COs), map, weather, false);
-  }
   public GameInstance(GameScenario scenario, Army[] armies, MapMaster map, Weathers weather, boolean useSecurity)
   {
     if( armies.length < 2 )
@@ -96,6 +76,7 @@ public class GameInstance implements Serializable
 
       armies[i].money = gameScenario.rules.startingFunds;
       armies[i].myView = new MapPerspective(map, armies[i]);
+      armies[i].myView.game = this;
       for(Commander co : armies[i].cos)
         co.myView = armies[i].myView;
       armies[i].myView.resetFog();

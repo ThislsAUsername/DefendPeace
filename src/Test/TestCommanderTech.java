@@ -9,6 +9,7 @@ import CommandingOfficers.Tech;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.Patch;
+import Engine.Army;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
@@ -29,7 +30,7 @@ public class TestCommanderTech extends TestCase
     mTech = new Tech(scn.rules);
     mTech.modifyAbilityPower(20);
     mPatch = new Patch(scn.rules);
-    Commander[] cos = { mTech, mPatch };
+    Army[] cos = { new Army(mTech), new Army(mPatch) };
 
     mTestMap = new MapMaster(cos, MapLibrary.getByName("Test Range"));
   }

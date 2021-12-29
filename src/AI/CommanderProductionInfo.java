@@ -79,6 +79,8 @@ public class CommanderProductionInfo
   public MapLocation getLocationToBuild(UnitModel model)
   {
     Set<TerrainType> desiredTerrains = modelToTerrainMap.get(model);
+    if( null == desiredTerrains )
+      return null;
     MapLocation location = null;
     for( MapLocation loc : availableProperties )
     {
