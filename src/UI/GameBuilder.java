@@ -3,6 +3,7 @@ package UI;
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.GameScenario;
+import Engine.GameScenario.TagMode;
 import Terrain.Environment.Weathers;
 import Terrain.MapInfo;
 import Terrain.MapMaster;
@@ -19,6 +20,7 @@ public class GameBuilder
   public int incomePerCity = 1000;
   public Weathers defaultWeather = Weathers.CLEAR;
   public UnitModelScheme unitModelScheme = null;
+  public TagMode tagMode = TagMode.OFF;
   public boolean isSecurityEnabled = false;
 
   GameBuilder(MapInfo info)
@@ -28,7 +30,7 @@ public class GameBuilder
 
   public GameInstance createGame(PlayerSetupInfo[] coInfos)
   {
-    GameScenario scenario = new GameScenario(unitModelScheme, incomePerCity, startingFunds, isFowEnabled);
+    GameScenario scenario = new GameScenario(unitModelScheme, incomePerCity, startingFunds, isFowEnabled, tagMode);
 
     // Add any CO-specific units into our set of UnitModels
     for(int i = 0; i < mapInfo.getNumCos(); ++i)

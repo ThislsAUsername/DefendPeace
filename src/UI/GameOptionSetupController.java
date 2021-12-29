@@ -1,5 +1,6 @@
 package UI;
 
+import Engine.GameScenario.TagMode;
 import Engine.IController;
 import Engine.OptionSelector;
 import Terrain.Environment.Weathers;
@@ -13,6 +14,7 @@ public class GameOptionSetupController implements IController
   private GameOption<Integer> incomeOption = new GameOptionInt("Income", 250, 20000, 250, 1000);
   private GameOption<Weathers> weatherOption = new GameOption<Weathers>("Weather", Weathers.values(), 0);
   private GameOption<UnitModelScheme> unitSchemeOption;
+  private GameOption<TagMode> tagsOption = new GameOption<TagMode>("Tag Mode", TagMode.values(), 0);
   private GameOption<Boolean> securityOption = new GameOptionBool("Protect Turns?", false);
 
   // Get a list of all GameOptions.
@@ -36,7 +38,7 @@ public class GameOptionSetupController implements IController
     for (int i = 0; !unitSchemeOption.getSelectedObject().schemeValid && i < unitSchemeOption.size(); ++i )
       unitSchemeOption.setSelectedOption(i);
 
-    gameOptions = new GameOption<?>[] {fowOption, startingFundsOption, incomeOption, weatherOption, unitSchemeOption, securityOption};
+    gameOptions = new GameOption<?>[] {fowOption, startingFundsOption, incomeOption, weatherOption, unitSchemeOption, tagsOption, securityOption};
     optionSelector = new OptionSelector( gameOptions.length );
   }
 
@@ -85,6 +87,7 @@ public class GameOptionSetupController implements IController
         gameBuilder.incomePerCity = incomeOption.getSelectedObject();
         gameBuilder.defaultWeather = (Weathers)weatherOption.getSelectedObject();
         gameBuilder.unitModelScheme = unitSchemeOption.getSelectedObject();
+        gameBuilder.tagMode = (TagMode)tagsOption.getSelectedObject();
         gameBuilder.isSecurityEnabled = securityOption.getSelectedObject();
         coSelectMenu = new PlayerSetupController( gameBuilder );
         isInSubmenu = true;
