@@ -8,6 +8,7 @@ import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.Patch;
 import Engine.GameAction;
 import Engine.GameInstance;
+import Engine.GamePath;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -120,6 +121,9 @@ public class TestCommanderAve extends TestCase
       }
     }
     //System.out.println("Snow map:\n" + Ave.getSnowMapAsString());
+    Unit infantry = addUnit(testMap, Ave, UnitModel.TROOP, snowCity.xCoord, snowCity.yCoord);
+    GamePath path = Utils.findShortestPath(infantry, new XYCoord(10, 5), testMap);
+    testPassed &= validate( 2 == path.getFuelCost(Ave, infantry.model, testMap), "    Ave's units burn too much fuel moving through snow." );
 
     // Take the city away, and make sure the snow recedes.
     testMap.getLocation(snowCity).setOwner(null);
