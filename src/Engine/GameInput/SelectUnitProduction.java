@@ -13,14 +13,16 @@ import Units.UnitModel;
  ************************************************************/
 class SelectUnitProduction extends GameInputState<String>
 {
+  private Commander builder;
   private ArrayList<String> myStrings;
   private ArrayList<UnitModel> myUnitModels = null;
   private XYCoord myProductionLocation = null;
 
   @SuppressWarnings("unchecked")
-  public SelectUnitProduction(StateData data, ArrayList<UnitModel> buildables, XYCoord buildLocation)
+  public SelectUnitProduction(StateData data, Commander builder, ArrayList<UnitModel> buildables, XYCoord buildLocation)
   {
     super(data);
+    this.builder = builder;
     myUnitModels = buildables;
     myStrings = (ArrayList<String>) data.menuOptions;
     myProductionLocation = buildLocation;
@@ -49,7 +51,7 @@ class SelectUnitProduction extends GameInputState<String>
         if( option == buyable )
           {
           UnitModel model = myUnitModels.get(myStrings.indexOf(buyable));
-          myStateData.actionSet = new GameActionSet(new GameAction.UnitProductionAction(myStateData.commander, model, myProductionLocation), false);
+          myStateData.actionSet = new GameActionSet(new GameAction.UnitProductionAction(builder, model, myProductionLocation), false);
           next = new ActionReady(myStateData);
         }
       }

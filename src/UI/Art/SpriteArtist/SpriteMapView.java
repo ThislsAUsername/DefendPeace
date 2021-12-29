@@ -10,6 +10,7 @@ import java.util.Queue;
 
 import AI.AICombatUtils;
 import CommandingOfficers.Commander;
+import Engine.Army;
 import Engine.GameInstance;
 import Engine.GamePath;
 import Engine.Utils;
@@ -253,9 +254,9 @@ public class SpriteMapView extends MapView
 
     ArrayList<GameOverlay> overlays = new ArrayList<GameOverlay>();
     // Apply any relevant map highlights.
-    for( Commander co : myGame.commanders )
+    for( Army army : myGame.armies )
     {
-      overlays.addAll(co.getMyOverlays(gameMap, co == gameMap.viewer));
+      overlays.addAll(army.getMyOverlays(gameMap, army == gameMap.viewer));
     }
     // Highlight our currently-selected unit's range on top of everything else
     if( null != currentPath && null != currentActor && !mapController.isTargeting() )
@@ -460,7 +461,7 @@ public class SpriteMapView extends MapView
   }
 
   @Override
-  public GameAnimation buildTurnInitAnimation( Commander cmdr, int turn, boolean hideMap, Collection<String> message )
+  public GameAnimation buildTurnInitAnimation( Army cmdr, int turn, boolean hideMap, Collection<String> message )
   {
     boolean requireButton = hideMap && !cmdr.isAI();
     return new TurnInitAnimation(cmdr, turn, hideMap, requireButton, message);
@@ -603,22 +604,22 @@ public class SpriteMapView extends MapView
       overlayIsLeft = true;
 
       BufferedImage coOverlays = CommanderOverlayArtist.drawAllCommanderOverlays(
-          myGame.commanders,
+          myGame.armies,
           getDrawableMap(myGame),
-          overlayHSpaceAvailable, mapViewHeight - 80, myGame.activeCO);
+          overlayHSpaceAvailable, mapViewHeight - 80, myGame.activeArmy);
       if( overlayIsLeft )
         g.drawImage(coOverlays, 0, 0, null);
       else
         g.drawImage(coOverlays, mapViewWidth - coOverlays.getWidth(), 0, null);
     }
     else
-      CommanderOverlayArtist.drawCommanderOverlay(g, myGame.activeCO, overlayIsLeft);
+      CommanderOverlayArtist.drawCommanderOverlay(g, myGame.activeArmy, overlayIsLeft);
 
     drawTurnCounter(g, overlayIsLeft);
 
     // Draw terrain defense and unit status.
     if( includeTileDetails )
-      MapTileDetailsArtist.drawTileDetails(g, myGame.activeCO.myView, myGame.getCursorCoord(), overlayIsLeft);
+      MapTileDetailsArtist.drawTileDetails(g, myGame.activeArmy.myView, myGame.getCursorCoord(), overlayIsLeft);
   }
 
   private int lastTurnNum = -1;
@@ -660,7 +661,7 @@ public class SpriteMapView extends MapView
 
     // Draw a CO-colored background with the counter.
     int arcW = turnNumImage.getHeight()+4;
-    g.setColor(UIUtils.getMapUnitColors(myGame.activeCO.myColor).paletteColors[5]); // 0 is darker, 5 is lighter.
+    g.setColor(UIUtils.getMapUnitColors(myGame.activeArmy.cos[0].myColor).paletteColors[5]); // 0 is darker, 5 is lighter.
     g.fillArc(xDraw - (arcW/2), yDraw-2, arcW, arcW-1, 90, 180);
     g.fillArc(xDraw + turnNumImage.getWidth()-(arcW/2), yDraw-2, arcW, arcW-1, -90, 180);
     g.fillRect(xDraw, yDraw-1, turnNumImage.getWidth()+1, turnNumImage.getHeight()+2);
@@ -687,7 +688,7 @@ public class SpriteMapView extends MapView
     }
 
     // Create a new animation to show the game results.
-    currentAnimation = new GameEndAnimation(myGame.commanders);
+    currentAnimation = new GameEndAnimation(myGame.armies);
   }
 
   @Override

@@ -19,7 +19,7 @@ public class SelectMetaAction extends GameInputState<SelectMetaAction.MetaAction
   protected OptionSet initOptions()
   {
     OptionSet metaActions = null;
-    if( !myStateData.commander.getReadyAbilities().isEmpty() )
+    if( !myStateData.army.getReadyAbilities().isEmpty() )
     {
       metaActions = new OptionSet(MetaAction.values());
     }

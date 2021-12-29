@@ -177,7 +177,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     // If the unit is not at max health, and is on a repair tile, heal it.
     if( canRepairOn(loc) && !self.CO.isEnemy(loc.getOwner()) )
     {
-      queue.add(new HealUnitEvent(self, self.CO.getRepairPower(), self.CO)); // Event handles cost logic
+      queue.add(new HealUnitEvent(self, self.CO.getRepairPower(), self.CO.army)); // Event handles cost logic
       // Resupply is free; whether or not we can repair, go ahead and add the resupply event.
       if( !self.isFullySupplied() )
       {

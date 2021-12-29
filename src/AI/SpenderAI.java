@@ -9,6 +9,7 @@ import java.util.Queue;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.GamePath;
@@ -31,7 +32,7 @@ public class SpenderAI implements AIController
   private static class instantiator implements AIMaker
   {
     @Override
-    public AIController create(Commander co)
+    public AIController create(Army co)
     {
       return new SpenderAI(co);
     }
@@ -62,7 +63,7 @@ public class SpenderAI implements AIController
   Queue<Unit> unitQueue = new ArrayDeque<Unit>();
   boolean stateChange;
 
-  private Commander myCo = null;
+  private Army myCo = null;
 
   private ArrayList<XYCoord> unownedProperties;
   private ArrayList<XYCoord> capturingProperties;
@@ -71,7 +72,7 @@ public class SpenderAI implements AIController
   private boolean shouldLog = true;
   private int turnNum = 0;
 
-  public SpenderAI(Commander co)
+  public SpenderAI(Army co)
   {
     myCo = co;
   }
@@ -99,7 +100,7 @@ public class SpenderAI implements AIController
       }
     }
     capturingProperties = new ArrayList<XYCoord>();
-    for( Unit unit : myCo.units )
+    for( Unit unit : myCo.getUnits() )
     {
       if( unit.getCaptureProgress() > 0 )
       {
@@ -145,7 +146,7 @@ public class SpenderAI implements AIController
       else if( unitQueue.isEmpty() )
       {
         stateChange = false; // There's been no gamestate change since we last iterated through all the units, since we're about to do just that
-        for( Unit unit : myCo.units )
+        for( Unit unit : myCo.getUnits() )
         {
           if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y))
             continue; // No actions for units that are stale or out of bounds
@@ -229,7 +230,7 @@ public class SpenderAI implements AIController
             }
             else
             {
-              for( Commander co : gameMap.commanders )
+              for( Army co : gameMap.game.armies )
               {
                 if( myCo.isEnemy(co) )
                   validTargets.addAll(co.HQLocations);
@@ -287,15 +288,16 @@ public class SpenderAI implements AIController
       if( actions.isEmpty() && !stateChange )
       {
         Map<MapLocation, ArrayList<UnitModel>> shoppingLists = new HashMap<>();
-        for( XYCoord xyc : myCo.ownedProperties )
+        for( XYCoord xyc : myCo.getOwnedProperties() )
         {
           MapLocation loc = gameMap.getLocation(xyc);
+          Commander buyer = loc.getOwner();
           // I like combat units that are useful, so we skip ports for now
           if( loc.getEnvironment().terrainType != TerrainType.SEAPORT && loc.getResident() == null )
           {
-            ArrayList<UnitModel> units = myCo.getShoppingList(loc);
+            ArrayList<UnitModel> units = buyer.getShoppingList(loc);
             // Only add to the list if we could actually buy something here.
-            if( !units.isEmpty() && myCo.getBuyCost(units.get(0), xyc) <= myCo.money )
+            if( !units.isEmpty() && buyer.getBuyCost(units.get(0), xyc) <= myCo.money )
             {
               shoppingLists.put(loc, units);
             }
@@ -310,7 +312,8 @@ public class SpenderAI implements AIController
           for( UnitModel unit : units )
           {
             // I only want combat units, since I don't understand transports
-            final int unitCost = myCo.getBuyCost(unit, locShopList.getKey().getCoordinates());
+            Commander buyer = locShopList.getKey().getOwner();
+            final int unitCost = buyer.getBuyCost(unit, locShopList.getKey().getCoordinates());
             if( !unit.weapons.isEmpty() && unitCost <= budget )
             {
               budget -= unitCost;
@@ -325,15 +328,16 @@ public class SpenderAI implements AIController
         while (!upgradables.isEmpty())
         {
           Entry<MapLocation, ArrayList<UnitModel>> locShopList = upgradables.poll();
+          Commander buyer = locShopList.getKey().getOwner();
           ArrayList<UnitModel> units = locShopList.getValue();
           UnitModel currentPurchase = purchases.get(locShopList.getKey());
           if( null != currentPurchase )
           {
-            int currentCost = myCo.getBuyCost(currentPurchase, locShopList.getKey().getCoordinates());
+            int currentCost = buyer.getBuyCost(currentPurchase, locShopList.getKey().getCoordinates());
             budget += currentCost;
             for( UnitModel newPurchase : units )
             {
-              final int newCost = myCo.getBuyCost(newPurchase, locShopList.getKey().getCoordinates());
+              final int newCost = buyer.getBuyCost(newPurchase, locShopList.getKey().getCoordinates());
               // I want expensive units, but they have to have guns
               if( budget > newCost && newCost > currentCost && !newPurchase.weapons.isEmpty() )
                 currentPurchase = newPurchase;
@@ -346,7 +350,7 @@ public class SpenderAI implements AIController
         // once we're satisfied with all our selections, put in the orders
         for( Entry<MapLocation, UnitModel> lineItem : purchases.entrySet() )
         {
-          GameAction action = new GameAction.UnitProductionAction(myCo, lineItem.getValue(),
+          GameAction action = new GameAction.UnitProductionAction(lineItem.getKey().getOwner(), lineItem.getValue(),
               lineItem.getKey().getCoordinates());
           actions.offer(action);
         }

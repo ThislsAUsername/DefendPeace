@@ -39,7 +39,7 @@ public class UnitArtist
   {
     int drawX = (int) (tileSize * x);
     int drawY = (int) (tileSize * y);
-    boolean tired = unit.isStunned || (unit.isTurnOver && unit.CO == myGame.activeCO);
+    boolean tired = unit.isStunned || (unit.isTurnOver && unit.CO.army == myGame.activeArmy);
     AnimState state = (tired) ? AnimState.TIRED : AnimState.IDLE;
 
     // Draw the unit at the specified location.

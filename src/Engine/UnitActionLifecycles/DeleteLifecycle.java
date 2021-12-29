@@ -72,7 +72,7 @@ public abstract class DeleteLifecycle
       if( actor.CO.units.size() == 1 )
       {
         // CO is out of units. Too bad.
-        eventSequence.add(new CommanderDefeatEvent(actor.CO));
+        eventSequence.add(new CommanderDefeatEvent(actor.CO.army));
       }
       return eventSequence;
     }

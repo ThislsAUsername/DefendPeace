@@ -43,7 +43,7 @@ public class TestGameEvent extends TestCase
     Commander[] cos = { testCo1, testCo2 };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    testGame = new GameInstance(testMap);
+    testGame = new GameInstance(cos, testMap);
   }
 
   @Override
@@ -369,7 +369,7 @@ public class TestGameEvent extends TestCase
     donor.initTurn(testMap);
 
     // Record CO funds.
-    int funds = testCo1.money;
+    int funds = testCo1.army.money;
 
     // Hurt the recipient.
     recipient.damageHP(2);
@@ -397,7 +397,7 @@ public class TestGameEvent extends TestCase
     testPassed &= validate( recipient.isTurnOver, "    The Recipient's turn is not over!");
 
     // 4) the CO gained funds.
-    testPassed &= validate( funds < testCo1.money, "    The Commander gained no funds by joining!");
+    testPassed &= validate( funds < testCo1.army.money, "    The Commander gained no funds by joining!");
 
     // Clean up.
     testMap.removeUnit(recipient);
@@ -411,7 +411,7 @@ public class TestGameEvent extends TestCase
     boolean testPassed = true;
 
     // Make sure our target CO is not defeated already.
-    testPassed &= validate(testCo2.isDefeated == false, "    testCo2 started out in defeat, but he should not be.");
+    testPassed &= validate(testCo2.army.isDefeated == false, "    testCo2 started out in defeat, but he should not be.");
 
     // We loaded Firing Range, so we expect a city at location (2, 2)
     Terrain.MapLocation city = testMap.getLocation(10, 1);
@@ -445,8 +445,8 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(testMap.getLocation(13, 2).getResident() == baddie3, "    Unit baddie3 is not where he belongs.");
     testPassed &= validate(baddie3.x == 13 && baddie3.y == 2, "    Unit baddie3 doesn't know where he is.");
 
-    // Bring to pass this poor commander's defeat.
-    CommanderDefeatEvent event = new CommanderDefeatEvent(testCo2);
+    // Bring to pass this poor army's defeat.
+    CommanderDefeatEvent event = new CommanderDefeatEvent(testCo2.army);
     event.performEvent(testMap);
 
     //================================ Validate post-conditions.
@@ -473,7 +473,7 @@ public class TestGameEvent extends TestCase
         "    HQ was not downgraded to city after defeat.");
 
     // Confirm that yea, verily, testCo2 is truly defeated.
-    testPassed &= validate(true == testCo2.isDefeated, "    testCo2 does not think he is defeated (but he so is).");
+    testPassed &= validate(true == testCo2.army.isDefeated, "    testCo2 does not think he is defeated (but he so is).");
 
     // No cleanup should be required.
     return testPassed;

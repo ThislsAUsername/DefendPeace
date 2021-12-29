@@ -3,7 +3,7 @@ package Engine.GameInput;
 import java.util.Collection;
 import java.util.Stack;
 
-import CommandingOfficers.Commander;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.OptionSelector;
 import Engine.XYCoord;
@@ -22,7 +22,7 @@ public class GameInputHandler
 
   public enum InputType { FREE_TILE_SELECT, PATH_SELECT, MENU_SELECT, CONSTRAINED_TILE_SELECT, ACTION_READY, END_TURN, SAVE, LEAVE_MAP, CO_STATS, CO_INFO, DAMAGE_CHART };
 
-  public GameInputHandler(GameMap map, Commander currentPlayer, StateChangedCallback callback)
+  public GameInputHandler(GameMap map, Army currentPlayer, StateChangedCallback callback)
   {
     myStateStack = new Stack<GameInputState<?>>();
     myStateData = new StateData(map, currentPlayer);
@@ -45,7 +45,7 @@ public class GameInputHandler
     else
     {
       System.out.println("WARNING! InputStateHandler state stack is empty!");
-      myStateData = new StateData(myStateData.gameMap, myStateData.commander);
+      myStateData = new StateData(myStateData.gameMap, myStateData.army);
       oldCurrentState = new DefaultState(myStateData);
     }
 
@@ -96,7 +96,7 @@ public class GameInputHandler
   {
     // Unwind the stack, all the way back to the starting state.
     myStateStack.clear();
-    myStateData = new StateData(myStateData.gameMap, myStateData.commander);
+    myStateData = new StateData(myStateData.gameMap, myStateData.army);
     myStateStack.push(new DefaultState(myStateData));
     return peekCurrentState().getOptions().inputType;
   }
@@ -107,7 +107,7 @@ public class GameInputHandler
     if( myStateStack.isEmpty() )
     {
       System.out.println("WARNING! GameActionBuilder has no state active! Creating default.");
-      myStateData = new StateData(myStateData.gameMap, myStateData.commander);
+      myStateData = new StateData(myStateData.gameMap, myStateData.army);
       myStateStack.push(new DefaultState(myStateData));
     }
     return myStateStack.peek();

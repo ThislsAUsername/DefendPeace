@@ -36,7 +36,7 @@ public class TestCapture extends TestCase
     Commander[] cos = { testCo1, testCo2 };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    testGame = new GameInstance(testMap);
+    testGame = new GameInstance(cos, testMap);
   }
 
   @Override
@@ -135,8 +135,8 @@ public class TestCapture extends TestCase
     testPassed &= validate( prop.isCaptureable(), "    Unexpected terrain found! Test will be invalid." );
 
     // Make the participating COs friends
-    testCo1.team = 0;
-    testCo2.team = 0;
+    testCo1.army.team = 0;
+    testCo2.army.team = 0;
     
     // Set up for the test.
     Unit infA = addUnit(testMap, testCo1, UnitModel.TROOP, 2, 2); // On the city.
@@ -159,8 +159,8 @@ public class TestCapture extends TestCase
 
     // Clean up
     testMap.removeUnit(infA);
-    testCo1.team = -1;
-    testCo2.team = -1;
+    testCo1.army.team = -1;
+    testCo2.army.team = -1;
     prop.setOwner(null);
 
     return testPassed;

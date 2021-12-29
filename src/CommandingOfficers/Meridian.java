@@ -34,7 +34,7 @@ public class Meridian extends Commander
     {
       super("Meridian");
       infoPages.add(new InfoPage(
-          "While other commanders may focus on granular tactics, Meridian has taken a different line: her basic tanks and artillery are built from the same parts, and can be re-configured on the field at no cost.\n" +
+          "While other armies may focus on granular tactics, Meridian has taken a different line: her basic tanks and artillery are built from the same parts, and can be re-configured on the field at no cost.\n" +
           "This gives her forces extreme adaptability, and her powers hone this to a razor edge."));
       infoPages.add(new InfoPage(
           "Passive:\n" + 

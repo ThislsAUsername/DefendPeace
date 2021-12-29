@@ -2,6 +2,7 @@ package Engine.GameInput;
 
 import java.util.ArrayList;
 
+import CommandingOfficers.Commander;
 import Engine.XYCoord;
 import Engine.GameInput.GameInputHandler.InputType;
 import Terrain.MapLocation;
@@ -34,18 +35,19 @@ class DefaultState extends GameInputState<XYCoord>
     Unit resident = loc.getResident();
     if( null != resident
         && (!resident.isTurnOver    // If it's our unit and the unit is ready to go.
-        || resident.CO != myStateData.commander // Also allow checking the move radius of others' units.
+        || resident.CO.army != myStateData.army // Also allow checking the move radius of others' units.
         ))
     {
       // We are considering moving a unit.
       next = SelectMoveLocation.build(myStateData, resident, new XYCoord(resident.x, resident.y));
     }
-    else if( (null == resident) && (loc.getOwner() == myStateData.commander) && myStateData.commander.getShoppingList(loc).size() > 0 )
+    else if( myStateData.army.canBuyOn(loc) )
     {
       // We are considering a new unit purchase.
-      ArrayList<UnitModel> buildables = myStateData.commander.getShoppingList(loc);
-      myStateData.menuOptions = SelectUnitProduction.buildDisplayStrings(myStateData.commander, buildables, coord);
-      next = new SelectUnitProduction(myStateData, buildables, coord);
+      Commander buyer = loc.getOwner();
+      ArrayList<UnitModel> buildables = buyer.getShoppingList(loc);
+      myStateData.menuOptions = SelectUnitProduction.buildDisplayStrings(buyer, buildables, coord);
+      next = new SelectUnitProduction(myStateData, buyer, buildables, coord);
     }
     else
     {

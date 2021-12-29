@@ -106,7 +106,7 @@ public class Patch extends Commander
       if( unit.CO == myCommander && location.getOwner() == myCommander && location.isProfitable() )
       {
         // We just successfully captured a property. Loot the place!
-        myCommander.money += myCommander.gameRules.incomePerCity;
+        myCommander.army.money += myCommander.gameRules.incomePerCity;
       }
       return null;
     }
@@ -146,13 +146,13 @@ public class Patch extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      tracker.startTracking(myCommander, myIncomeRatio);
+      tracker.startTracking(myCommander.army, myIncomeRatio);
     }
 
     @Override
     public void revert(MapMaster gameMap)
     {
-      tracker.stopTracking(myCommander, myIncomeRatio);
+      tracker.stopTracking(myCommander.army, myIncomeRatio);
     }
   }
 

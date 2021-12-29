@@ -25,7 +25,7 @@ public class TestStateTracker extends TestCase
     Commander[] cos = { cinder, venge };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    testGame = new GameInstance(testMap);
+    testGame = new GameInstance(cos, testMap);
   }
 
   @Override

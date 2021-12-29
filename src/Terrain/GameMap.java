@@ -2,6 +2,7 @@ package Terrain;
 
 import java.io.Serializable;
 
+import Engine.GameInstance;
 import Engine.GamePath;
 import Engine.XYCoord;
 import Units.Unit;
@@ -11,7 +12,7 @@ public abstract class GameMap implements Serializable, IEnvironsProvider
   private static final long serialVersionUID = 1L;
   public final int mapWidth;
   public final int mapHeight;
-  public CommandingOfficers.Commander[] commanders;
+  public GameInstance game;
 
   public GameMap(int w, int h)
   {

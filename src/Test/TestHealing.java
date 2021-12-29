@@ -47,7 +47,7 @@ public class TestHealing extends TestCase
     Unit victim = addUnit(testMap, testCo1, UnitModel.TROOP, 0, 0);
     // Assuming 200/turn for healing infantry: 999\200 = 4, plus one healing after that = 5,
     //    plus another iteration to check poverty conditions = 6 iterations
-    testCo1.money = 999;
+    testCo1.army.money = 999;
 
     // Set up starting conditions.
     int prevMoney = 999;
@@ -59,7 +59,7 @@ public class TestHealing extends TestCase
     {
       iteration++;
       victim.damageHP(2.5); // Hurt the victim.
-      prevMoney = testCo1.money; // Track money.
+      prevMoney = testCo1.army.money; // Track money.
       prevHP = victim.getHP(); // Track HP.
 
       GameEventQueue events = victim.initTurn(testMap); // Make the unit try to heal itself.
@@ -73,7 +73,7 @@ public class TestHealing extends TestCase
         //... then we better have had enough money to do the job 
         testPassed &= validate(prevMoney >= 100, "    Unit was not healed when he should have been.");
         //... and we had better have less money now than we did before.
-        testPassed &= validate(testCo1.money < prevMoney, "    Commander funds did not change despite healing unit.");
+        testPassed &= validate(testCo1.army.money < prevMoney, "    Commander funds did not change despite healing unit.");
       }
       else
       { // If the unit was not healed...

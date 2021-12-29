@@ -36,7 +36,7 @@ public class Bear_Bull extends Commander
     {
       super("Bear&Bull");
       infoPages.add(new InfoPage(
-          "Bear&Bull is a pair of commanders who complement each other like the ebbs and flows of a free market.\n" +
+          "Bear&Bull is a pair of armies who complement each other like the ebbs and flows of a free market.\n" +
           "They repair units for free, and can leverage their abilities to gain buying power.\n"));
       infoPages.add(new InfoPage(
           "Passive:\n" +
@@ -51,13 +51,13 @@ public class Bear_Bull extends Commander
           "Bull wants to use Downturn before building, and bank cash before using Bust"));
       infoPages.add(new InfoPage(
           "Upturn/Downturn ("+UpDownTurnAbility.DOWNUPTURN_COST+"):\n" +
-          "Immediately switches to the other commander, switching back before your next turn starts.\n" +
+          "Immediately switches to the other army, switching back before your next turn starts.\n" +
           "Removes "+UpDownTurnAbility.DOWNUPTURN_LIQUIDATION+" HP from any unit on any property you own.\n" +
           "You get the funds value of all HP removed.\n"));
       infoPages.add(new InfoPage(
           "Boom/Bust ("+BustBoomAbility.BOOMBUST_COST+"):\n" +
           "Grants a 20 percent discount this turn.\n" +
-          "Permanently switches to the other commander at the start of your next turn."));
+          "Permanently switches to the other army at the start of your next turn."));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -170,7 +170,7 @@ public class Bear_Bull extends Commander
         valueDrained += (Math.min(DOWNUPTURN_LIQUIDATION, victim.getHP()) * victim.getCost()) / UnitModel.MAXIMUM_HP;
       }
 
-      powerEvents.add( new ModifyFundsEvent(COcast, valueDrained) ); // Collect profits
+      powerEvents.add( new ModifyFundsEvent(COcast.army, valueDrained) ); // Collect profits
 
       return powerEvents;
     }

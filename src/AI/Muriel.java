@@ -14,6 +14,7 @@ import java.util.Stack;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.UnitActionFactory;
@@ -36,7 +37,7 @@ public class Muriel implements AIController
   private static class instantiator implements AIMaker
   {
     @Override
-    public AIController create(Commander co)
+    public AIController create(Army co)
     {
       return new Muriel(co);
     }
@@ -78,13 +79,13 @@ public class Muriel implements AIController
 
   private UnitOrchestrator unitSelector = new UnitOrchestrator();
 
-  private Commander myCo = null;
+  private Army myCo = null;
 
   private StringBuffer logger = new StringBuffer();
   private boolean shouldLog = true;
   private int turnNum = 0;
 
-  private ArrayList<Commander> enemyCos = null;
+//  private ArrayList<Commander> enemyCos = null;
   
   private UnitEffectivenessMap myUnitEffectMap;
   private final double COST_EFFECTIVENESS_MIN = 0.75;
@@ -93,43 +94,43 @@ public class Muriel implements AIController
 
   private ArrayList<XYCoord> nonAlliedProperties; // set from AIUtils.
 
-  public Muriel(Commander co)
+  public Muriel(Army co)
   {
     myCo = co;
   }
 
-  private void init(Commander[] allCos)
+  private void init(Army[] allCos)
   {
     // Initialize UnitModel collections.
-    Collection<UnitModel> myUnitModels = myCo.unitModels;
-    enemyCos = new ArrayList<Commander>();
-    Map<Commander, Collection<UnitModel> > otherUnitModels = new HashMap<Commander, Collection<UnitModel> >();
-    for( Commander other : allCos )
-    {
-      if( myCo.isEnemy(other) )
-      {
-        enemyCos.add(other);
-        otherUnitModels.put(other, new ArrayList<UnitModel>());
-      }
-    }
-
-    // Figure out what I and everyone else can build.
-    for( Commander oCo : enemyCos )
-    {
-      otherUnitModels.put(oCo, oCo.unitModels);
-    }
+    Collection<UnitModel> myUnitModels = myCo.cos[0].unitModels;
+//    enemyCos = new ArrayList<Commander>();
+//    Map<Commander, Collection<UnitModel> > otherUnitModels = new HashMap<Commander, Collection<UnitModel> >();
+//    for( Army other : allCos )
+//    {
+//      if( myCo.isEnemy(other) )
+//      {
+//        enemyCos.add(other.cos);
+//        otherUnitModels.put(other, new ArrayList<UnitModel>());
+//      }
+//    }
+//
+//    // Figure out what I and everyone else can build.
+//    for( Commander oCo : enemyCos )
+//    {
+//      otherUnitModels.put(oCo, oCo.unitModels);
+//    }
 
     // Figure out unit matchups.
     myUnitEffectMap = new UnitEffectivenessMap();
     for( UnitModel myModel : myUnitModels )
     {
-      for( Commander oCo : enemyCos )
-      {
-        for( UnitModel otherModel : otherUnitModels.get(oCo) )
+//      for( Commander oCo : enemyCos )
+//      {
+        for( UnitModel otherModel : myUnitModels )
         {
           getUnitMatchupInfo(myModel, otherModel); // Calculates the matchup and adds it to myUnitEffectMap.
         }
-      }
+//      }
     }
   }
 
@@ -138,10 +139,10 @@ public class Muriel implements AIController
    */
   private UnitMatchupAndMetaInfo getUnitMatchupInfo(UnitModel myModel, UnitModel otherModel)
   {
-    Unit myUnit = new Unit(myCo, myModel);
+    Unit myUnit = new Unit(myCo.cos[0], myModel);
     myUnit.x = 0;
     myUnit.y = 0;
-    Unit otherUnit = new Unit( myCo, otherModel );
+    Unit otherUnit = new Unit( myCo.cos[0], otherModel );
     otherUnit.x = 0;
     otherUnit.y = 0;
     return getUnitMatchupInfo(myUnit, otherUnit);
@@ -186,27 +187,27 @@ public class Muriel implements AIController
   @Override
   public void initTurn(GameMap gameMap)
   {
-    if (null == enemyCos)
-      init(gameMap.commanders);
+    if (null == myUnitEffectMap)
+      init(gameMap.game.armies);
     turnNum++;
     log(String.format("[======== Muriel initializing turn %s for %s =========]", turnNum, myCo));
 
     // Make a list of properties we want to claim.
-    nonAlliedProperties = AIUtils.findNonAlliedProperties(myCo, gameMap);
+    nonAlliedProperties = AIUtils.findNonAlliedProperties(myCo.cos[0], gameMap);
 
     // Order the units by cost.
-    Collections.sort(myCo.units, (Unit u1, Unit u2) ->
+    Collections.sort(myCo.getUnits(), (Unit u1, Unit u2) ->
       (int)(u2.getCost()*u2.getHP() - u1.getCost()*u1.getHP()));
 
     // If we are already capturing any of these properties, remove them from the list.
-    for( Unit unit : myCo.units )
+    for( Unit unit : myCo.getUnits() )
     {
       if( unit.getCaptureProgress() > 0 )
       {
         nonAlliedProperties.remove(unit.getCaptureTargetCoords());
       }
     }
-    unitSelector.reinit(myCo.units);
+    unitSelector.reinit(myCo.getUnits());
 
     // Check for a turn-kickoff power
     CommanderAbility ability = AIUtils.queueCromulentAbility(queuedActions, myCo, CommanderAbility.PHASE_TURN_START);
@@ -527,7 +528,7 @@ public class Muriel implements AIController
     //////////////////////////////////////////////////////////////////
     // Tabulate our production facilities so we can avoid stepping on them later.
     HashSet<XYCoord> destinationsToAvoid = new HashSet<XYCoord>();
-    for( XYCoord xyl : myCo.ownedProperties )
+    for( XYCoord xyl : myCo.getOwnedProperties() )
       if(gameMap.getEnvironment(xyl).terrainType == TerrainType.FACTORY)
         destinationsToAvoid.add(xyl);
 
@@ -592,7 +593,7 @@ public class Muriel implements AIController
     if( queuedActions.isEmpty() && unit.hasActionType(UnitActionFactory.ATTACK) )
     {
       log(String.format("Seeking attack target for %s", unit.toStringWithLocation()));
-      ArrayList<XYCoord> enemyLocations = AIUtils.findEnemyUnits(myCo, gameMap); // Get enemy locations.
+      ArrayList<XYCoord> enemyLocations = AIUtils.findEnemyUnits(myCo.cos[0], gameMap); // Get enemy locations.
       Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), enemyLocations); // Sort them by accessibility.
 
       for(int i = 0; i < enemyLocations.size(); ++i)
@@ -731,7 +732,7 @@ public class Muriel implements AIController
     }
     // Count up my own army men.
     Map<UnitModel, Double> myUnitCounts = new HashMap<UnitModel, Double>();
-    for( Unit u : myCo.units )
+    for( Unit u : myCo.getUnits() )
     {
       if( !u.model.hasDirectFireWeapon() ) continue; // Only handle direct-fire units for now.
       // Count how many of each model I have.
@@ -805,14 +806,15 @@ public class Muriel implements AIController
       if(useDamageRatio) log("  High funds - sorting units by damage ratio instead of cost effectiveness.");
 
       // If we are low on grunts, make sure we save money to build more.
-      UnitModel infModel = myCo.getUnitModel(UnitModel.TROOP);
+      UnitModel infModel = myCo.cos[0].getUnitModel(UnitModel.TROOP);
       int costBuffer = 0;
-      if( !myUnitCounts.containsKey(infModel) || (myUnitCounts.get(infModel) < (myCo.units.size() * INFANTRY_PROPORTION)) )
+      if( !myUnitCounts.containsKey(infModel) || (myUnitCounts.get(infModel) < (myCo.getUnits().size() * INFANTRY_PROPORTION)) )
       {
-        int gruntsWanted = (int)Math.ceil(myCo.units.size() * INFANTRY_PROPORTION);
+        int gruntsWanted = (int)Math.ceil(myCo.getUnits().size() * INFANTRY_PROPORTION);
         int gruntFacilities = CPI.getNumFacilitiesFor(infModel)-1; // The -1 assumes we are about to build from a factory. Possibly untrue.
         if( gruntFacilities < 0 ) gruntFacilities = 0;
-        costBuffer = (int)Math.min(gruntFacilities, gruntsWanted) * myCo.getCost(infModel);
+        // TODO: Fix?
+        costBuffer = (int)Math.min(gruntFacilities, gruntsWanted) * infModel.costBase;
         log(String.format("  Low on Infantry: witholding %s for possible extra grunts", costBuffer));
       }
 
@@ -821,7 +823,8 @@ public class Muriel implements AIController
       HashSet<UnitModel> counters = new HashSet<UnitModel>();
       for( UnitModel counter : CPI.availableUnitModels )
       {
-        if( myCo.money < myCo.getCost(counter) ) continue; // If we can't afford it, don't bother.
+        // TODO: Fix.
+        if( myCo.money < counter.costBase ) continue; // If we can't afford it, don't bother.
         UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(counter, enemyToCounter);
         if( umami.costEffectivenessRatio >= COST_EFFECTIVENESS_MIN )
         {
@@ -929,13 +932,13 @@ public class Muriel implements AIController
         // Figure out if we can afford the desired unit type.
         int maxBuildable = CPI.getNumFacilitiesFor(idealCounter);
         log(String.format("    Facilities available: %s", maxBuildable));
-        int cost = myCo.getCost(idealCounter);
+        MapLocation loc = CPI.getLocationToBuild(idealCounter);
+        int cost = loc.getOwner().getCost(idealCounter);
         if( cost <= (budget - costBuffer))
         {
           // Go place orders.
           log(String.format("    I can build a %s for a cost of %s", idealCounter, cost));
-          MapLocation loc = CPI.getLocationToBuild(idealCounter);
-          shoppingCart.add(new PurchaseOrder(loc, myCo, idealCounter));
+          shoppingCart.add(new PurchaseOrder(loc, loc.getOwner(), idealCounter));
           budget -= cost;
           CPI.removeBuildLocation(loc);
           orderedSomething = true;
@@ -955,20 +958,23 @@ public class Muriel implements AIController
     } // ~while( still choosing units to build )
 
     // Build infantry from any remaining facilities.
-    UnitModel infModel = myCo.getUnitModel(UnitModel.TROOP);
-    final int infCost = myCo.getCost(infModel);
+    UnitModel infModel = myCo.cos[0].getUnitModel(UnitModel.TROOP);
+    MapLocation loc = CPI.getLocationToBuild(infModel);
+    int infCost = loc.getOwner().getCost(infModel);
     while( (budget >= infCost) && (CPI.availableUnitModels.contains(infModel)) )
     {
-      MapLocation loc = CPI.getLocationToBuild(infModel);
-      shoppingCart.add(new PurchaseOrder(loc, myCo, infModel));
+      shoppingCart.add(new PurchaseOrder(loc, loc.getOwner(), infModel));
       budget -= infCost;
       CPI.removeBuildLocation(loc);
+      // Reset values for the next iteration
+      loc = CPI.getLocationToBuild(infModel);
+      infCost = loc.getOwner().getCost(infModel);
     }
 
     // Convert our PurchaseOrders into GameActions.
     for( PurchaseOrder order : shoppingCart )
     {
-      queuedActions.offer(new GameAction.UnitProductionAction(myCo, order.model, order.location.getCoordinates()));
+      queuedActions.offer(new GameAction.UnitProductionAction(order.co, order.model, order.location.getCoordinates()));
     }
   }
 

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo.InfoPage;
+import Engine.Army;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapPerspective;
 import UI.COStateInfo;
@@ -73,7 +74,7 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
     Commander thisCO = myControl.getSelectedCO();
     ArrayList<InfoPage> pages = myControl.getSelectedPages();
 
-    // Draw the commander art.
+    // Draw the army art.
     BufferedImage COPic = SpriteLibrary.getCommanderSprites(myControl.getSelectedCOInfo().name).body;
     // justify bottom/right
     myG.drawImage(COPic, imageWidth - COPic.getWidth(), imageHeight - COPic.getHeight(), null);
@@ -82,7 +83,7 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
       return; // Continue no further if we don't have room to actually draw
 
     if (null != thisCO)
-      CommanderOverlayArtist.drawCommanderOverlay(myG, thisCO, false);
+      CommanderOverlayArtist.drawCommanderOverlay(myG, thisCO.army, false);
     
     // add the actual info
     myG.setColor(SpriteUIUtils.MENUFRAMECOLOR); // outer buffer
@@ -139,16 +140,17 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
       {
         case CO_HEADERS: // Draw all CO image headers and brief status text for each CO
         {
-          Commander[] coList = myControl.getGame().commanders;
+          Army[] coList = myControl.getGame().armies;
 
-          for( Commander thisCO : coList )
+          for( Army thisCO : coList )
           {
             BufferedImage statusHeader =
                 SpriteLibrary.createTransparentSprite(drawingWidth, CommanderOverlayArtist.OVERLAY_HEIGHT + 5);
             Graphics headerG = statusHeader.getGraphics();
+            // TODO: Account for multiple COs
             CommanderOverlayArtist.drawCommanderOverlay(headerG, thisCO, 0, true);
 
-            String status = new COStateInfo(drawableMap, thisCO).getAbbrevStatus();
+            String status = new COStateInfo(drawableMap, thisCO.cos[0]).getAbbrevStatus();
             BufferedImage statusText = SpriteUIUtils.drawProseToWidth(status, drawingWidth);
 
             pageImages.add(SpriteUIUtils.stackBufferedImages(new BufferedImage[] { statusHeader, statusText }, 0));

@@ -5,7 +5,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import CommandingOfficers.Commander;
+import Engine.Army;
 import UI.SlidingValue;
 import UI.Art.SpriteArtist.SpriteLibrary;
 import UI.Art.SpriteArtist.SpriteOptions;
@@ -19,7 +19,7 @@ public class GameEndAnimation extends GameAnimation
 
   private int panelsInPlace = 0;
 
-  public GameEndAnimation(Commander[] commanders)
+  public GameEndAnimation(Army[] commanders)
   {
     super(false);
 
@@ -37,7 +37,7 @@ public class GameEndAnimation extends GameAnimation
     for( int i = 0; i < numCommanders; ++i, yPos += vSpacing)
     {
       int xDir = (i % 2 == 0)? -1:1;
-      // Create a victory/defeat panel for each commander.
+      // Create a victory/defeat panel for each army.
       panels.add( new GameResultPanel(commanders[i], xDir, yPos));
     }
   }
@@ -85,7 +85,7 @@ public class GameEndAnimation extends GameAnimation
     SlidingValue xPos;
     int yPos;
 
-    public GameResultPanel(Commander cmdr, int xDir, int yLoc)
+    public GameResultPanel(Army cmdr, int xDir, int yLoc)
     {
       // Establish some basic parameters.
       int screenWidth = SpriteOptions.getScreenDimensions().width;
@@ -95,7 +95,8 @@ public class GameEndAnimation extends GameAnimation
       yPos = yLoc;
 
       // Get the CO eyes image and the VICTORY/DEFEAT text.
-      BufferedImage coMug = SpriteLibrary.getCommanderSprites(cmdr.coInfo.name).eyes;
+      // TODO
+      BufferedImage coMug = SpriteLibrary.getCommanderSprites(cmdr.cos[0].coInfo.name).eyes;
       BufferedImage resultText = (cmdr.isDefeated)? SpriteLibrary.getGameOverDefeatText() : SpriteLibrary.getGameOverVictoryText();
 
       // Make a panel image large enough to fill the screen horizontally, and frame the CO portrait vertically.
@@ -109,7 +110,7 @@ public class GameEndAnimation extends GameAnimation
       g.fillRect( 0, 0, panel.getWidth(), panel.getHeight() );
 
       // Draw the background based on the CO color, inside our frame.
-      g.setColor( cmdr.myColor );
+      g.setColor( cmdr.cos[0].myColor );
       g.fillRect( 0, 1, panel.getWidth(), panel.getHeight() - 2 );
 
       int combinedWidth = coMug.getWidth()*2 + resultText.getWidth();

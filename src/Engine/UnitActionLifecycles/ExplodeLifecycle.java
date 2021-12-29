@@ -87,7 +87,7 @@ public abstract class ExplodeLifecycle
           if( actor.CO.units.size() == 1 )
           {
             // CO is out of units. Too bad.
-            explodeEvents.add(new CommanderDefeatEvent(actor.CO));
+            explodeEvents.add(new CommanderDefeatEvent(actor.CO.army));
           }
         }
       }

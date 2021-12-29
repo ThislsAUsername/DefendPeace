@@ -38,13 +38,14 @@ public class TestAIBehavior extends TestCase
     GameScenario scn = new GameScenario();
     testCo1 = new Strong(scn.rules);
     testCo2 = new Patch(scn.rules);
-    AIController testAI = ai.create(testCo1);
-    testAI.setLogging(false);
-    testCo1.setAIController(testAI);
     Commander[] cos = { testCo1, testCo2 };
 
     testMap = new MapMaster(cos, mapInfo);
-    testGame = new GameInstance(testMap);
+    testGame = new GameInstance(cos, testMap);
+
+    AIController testAI = ai.create(testGame.activeArmy);
+    testAI.setLogging(false);
+    testGame.activeArmy.setAIController(testAI);
   }
 
   private void cleanupTest()
@@ -81,12 +82,12 @@ public class TestAIBehavior extends TestCase
     setupTest(MapReader.readSingleMap("src/Test/TestProduceMega.map"), ai);
 
     // Provide resources.
-    testCo1.money = 80000;
+    testCo1.army.money = 80000;
 
     // Run through the turn's actions.
     testCo1.initTurn(testMap);
     boolean testPassed = true;
-    GameAction act = testCo1.getNextAIAction(testMap);
+    GameAction act = testCo1.army.getNextAIAction(testMap);
     testPassed &= validate(null != act, "    Failed to produce an action!");
     performGameAction(act, testGame);
 
@@ -122,7 +123,7 @@ public class TestAIBehavior extends TestCase
     GameAction act = null;
     do
     {
-      act = testCo1.getNextAIAction(testMap);
+      act = testCo1.army.getNextAIAction(testMap);
       if( null != act )
         testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
     } while( null != act && testPassed );
@@ -166,14 +167,14 @@ public class TestAIBehavior extends TestCase
 
     // The infs all want to cap the fac, but can't because it is occupied. Gotta let the AA through.
     testCo1.initTurn(testMap);
-    testCo1.money = 0; // No production needed for this test.
+    testCo1.army.money = 0; // No production needed for this test.
 
     // Run through the turn's actions.
     GameAction act = null;
     boolean testPassed = true;
     do
     {
-      act = testCo1.getNextAIAction(testMap);
+      act = testCo1.army.getNextAIAction(testMap);
       if( null != act )
         testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
     } while( null != act && testPassed );
@@ -213,7 +214,7 @@ public class TestAIBehavior extends TestCase
     boolean testPassed = true;
     do
     {
-      act = testCo1.getNextAIAction(testMap);
+      act = testCo1.army.getNextAIAction(testMap);
       if( null != act )
         testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
     } while( null != act && testPassed );
@@ -256,7 +257,7 @@ public class TestAIBehavior extends TestCase
       GameAction act = null;
       do
       {
-        act = testCo1.getNextAIAction(testMap);
+        act = testCo1.army.getNextAIAction(testMap);
         if( null != act )
           testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
       } while( null != act && testPassed );
@@ -301,7 +302,7 @@ public class TestAIBehavior extends TestCase
       GameAction act = null;
       do
       {
-        act = testCo1.getNextAIAction(testMap);
+        act = testCo1.army.getNextAIAction(testMap);
         if( null != act )
           testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
       } while( null != act && testPassed );
@@ -322,14 +323,14 @@ public class TestAIBehavior extends TestCase
     setupTest(MapReader.readSingleMap("src/Test/TestProductionClearing.map"), ai);
 
     // Give resources.
-    testCo1.money = 80000;
+    testCo1.army.money = 80000;
 
     testCo1.initTurn(testMap);
     GameAction act = null;
     boolean testPassed = true;
     do
     {
-      act = testCo1.getNextAIAction(testMap);
+      act = testCo1.army.getNextAIAction(testMap);
       if( null != act )
         testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
     } while( null != act && testPassed );

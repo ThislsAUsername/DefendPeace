@@ -74,7 +74,7 @@ public class PlayerSetupCommanderArtist
       drawYCenter += panelHeight;
     }
 
-    // Draw all of the commander panels that are visible.
+    // Draw all of the army panels that are visible.
     int drawX = SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Make sure we have room to draw the cursor around the frame.
     for(; drawYCenter - CommanderPanel.PANEL_HEIGHT/2 < myHeight ; coToDraw.next(), drawYCenter += (panelHeight))
     {

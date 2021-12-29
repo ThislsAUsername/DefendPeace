@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import CommandingOfficers.Commander;
+import Engine.Army;
 import Engine.XYCoord;
 import Terrain.GameMap;
 import Terrain.MapLocation;
@@ -15,7 +15,7 @@ import Units.Unit;
 import Units.UnitModel;
 
 /**
- * Keeps track of a commander's production facilities. When created, it will automatically catalog
+ * Keeps track of a army's production facilities. When created, it will automatically catalog
  * all available facilities, and all units that can be built. It is then easy to ask whether it is
  * possible to build a given type of unit, or find a location to do so.
  * Once a purchase has been scheduled, removeBuildLocation() will remove a given facility from any
@@ -23,7 +23,7 @@ import Units.UnitModel;
  */
 public class CommanderProductionInfo
 {
-  public Commander myCo;
+  public Army myArmy;
   public Set<UnitModel> availableUnitModels;
   public Set<MapLocation> availableProperties;
   public Map<Terrain.TerrainType, Integer> propertyCounts;
@@ -33,23 +33,23 @@ public class CommanderProductionInfo
    * Build a model of the production capabilities for a given Commander.
    * Could be used for your own, or your opponent's.
    */
-  public CommanderProductionInfo(Commander co, GameMap gameMap, boolean includeFriendlyOccupied)
+  public CommanderProductionInfo(Army co, GameMap gameMap, boolean includeFriendlyOccupied)
   {
     // Figure out what unit types we can purchase with our available properties.
-    myCo = co;
+    myArmy = co;
     availableUnitModels = new HashSet<UnitModel>();
     availableProperties = new HashSet<MapLocation>();
     propertyCounts = new HashMap<Terrain.TerrainType, Integer>();
     modelToTerrainMap = new HashMap<UnitModel, Set<TerrainType>>();
 
-    for( XYCoord xyc : co.ownedProperties )
+    for( XYCoord xyc : co.getOwnedProperties() )
     {
       MapLocation loc = co.myView.getLocation(xyc);
       Unit blocker = loc.getResident();
       if( null == blocker
-          || (includeFriendlyOccupied && co == blocker.CO && !blocker.isTurnOver) )
+          || (includeFriendlyOccupied && co == blocker.CO.army && !blocker.isTurnOver) )
       {
-        ArrayList<UnitModel> models = co.getShoppingList(loc);
+        ArrayList<UnitModel> models = loc.getOwner().getShoppingList(loc);
         availableUnitModels.addAll(models);
         availableProperties.add(loc);
         TerrainType terrain = loc.getEnvironment().terrainType;
@@ -103,7 +103,7 @@ public class CommanderProductionInfo
       propertyCounts.put(terrain, propertyCounts.get(terrain) - 1);
       if( propertyCounts.get(terrain) == 0 )
       {
-        availableUnitModels.removeAll(myCo.getShoppingList(loc));
+        availableUnitModels.removeAll(loc.getOwner().getShoppingList(loc));
       }
     }
   }

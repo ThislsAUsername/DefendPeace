@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderInfo.InfoPage;
+import Engine.Army;
 import Engine.GameInstance;
 import Engine.OptionSelector;
 
@@ -14,7 +15,7 @@ public class GameStatsController implements InfoController
 {
   private GameInstance myGame;
   private ArrayList<ArrayList<InfoPage>> infoPages;
-  private ArrayList<Commander> commanders;
+  private ArrayList<Army> commanders;
 
   private OptionSelector pageSelector;
   private int shiftDown = 0;
@@ -29,9 +30,9 @@ public class GameStatsController implements InfoController
     ArrayList<InfoPage> headers = new ArrayList<InfoPage>();
     headers.add(new InfoPage(InfoPage.PageType.CO_HEADERS));
     infoPages.add(headers);
-    commanders.add(myGame.commanders[myGame.getActiveCOIndex()]);
+    commanders.add(myGame.armies[myGame.getActiveCOIndex()]);
 
-    for(Commander co : myGame.commanders)
+    for(Army co : myGame.armies)
     {
       ArrayList<InfoPage> status = new ArrayList<InfoPage>();
       status.add(new InfoPage(InfoPage.PageType.GAME_STATUS));
@@ -75,7 +76,8 @@ public class GameStatsController implements InfoController
   @Override
   public Commander getSelectedCO()
   {
-    return commanders.get(pageSelector.getSelectionNormalized());
+    // TODO
+    return commanders.get(pageSelector.getSelectionNormalized()).cos[0];
   }
 
   @Override

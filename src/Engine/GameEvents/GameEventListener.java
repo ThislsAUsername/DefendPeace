@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.io.Serializable;
 import java.util.Map;
 import CommandingOfficers.Commander;
+import Engine.Army;
 import Engine.GameInstance;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
@@ -76,7 +77,7 @@ public interface GameEventListener extends Serializable
   default public GameEventQueue receiveLoadEvent(LoadLifecycle.LoadEvent event){ return null; };
   default public GameEventQueue receiveMoveEvent(MoveEvent event){ return null; };
   default public GameEventQueue receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){ return null; };
-  default public GameEventQueue receiveTurnInitEvent(Commander co, int turn){ return null; };
+  default public GameEventQueue receiveTurnInitEvent(Army co, int turn){ return null; };
   default public GameEventQueue receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){ return null; };
   default public GameEventQueue receiveResupplyEvent(ResupplyEvent event){ return null; };
   default public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath){ return null; };
@@ -86,6 +87,6 @@ public interface GameEventListener extends Serializable
   default public GameEventQueue receiveWeatherChangeEvent(Weathers weather, int duration){ return null; };
   default public GameEventQueue receiveMapChangeEvent(MapChangeEvent event){ return null; };
   default public GameEventQueue receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP){ return null; };
-  default public GameEventQueue receiveModifyFundsEvent(Commander beneficiary, int fundsDelta){ return null; };
+  default public GameEventQueue receiveModifyFundsEvent(Army beneficiary, int fundsDelta){ return null; };
 
 }

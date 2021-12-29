@@ -64,7 +64,7 @@ public class SpriteLibrary
   private static Sprite arrowheadSprites = null;
   private static Sprite previewArrow = null;
 
-  // Commander overlay backdrops (shows commander name and funds) for each Commander in the game.
+  // Commander overlay backdrops (shows army name and funds) for each Commander in the game.
   private static HashMap<Commander, Sprite> coOverlays = new HashMap<Commander, Sprite>();
   private static HashMap<Commander, Sprite> coPowerBarPieces = new HashMap<Commander, Sprite>();
 
@@ -595,7 +595,7 @@ public class SpriteLibrary
   }
 
   /**
-   * Returns the overlay image for the HUD, which serves as a backdrop for the commander
+   * Returns the overlay image for the HUD, which serves as a backdrop for the army
    * name and the currently-available funds.
    * @param co The Commander whose overlay we are drawing. This allows us to colorize it appropriately.
    * @param leftSide Whether we want the overlay image for the left-side corner (false is right side).

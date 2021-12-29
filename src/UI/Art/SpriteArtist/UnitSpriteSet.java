@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.*;
 
 import CommandingOfficers.Commander;
+import Engine.Army;
 import Engine.GameInstance;
 import Engine.StateTrackers.StateTracker;
 import UI.UIUtils;
@@ -265,11 +266,11 @@ public class UnitSpriteSet
     }
 
     ArrayList<UnitMarker> markers = new ArrayList<>();
-    Commander[] COs = game.commanders;
     { // Scope for potentialMarkers
       ArrayList<UnitMarker> potentialMarkers = new ArrayList<>();
-      for( Commander co : COs )
-        potentialMarkers.add(co);
+      for( Army army : game.armies )
+        for( Commander co : army.cos )
+          potentialMarkers.add(co);
       for( StateTracker st : game.stateTrackers.values() )
         potentialMarkers.add(st);
 

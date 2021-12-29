@@ -2,7 +2,7 @@ package Engine.StateTrackers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import CommandingOfficers.Commander;
+import Engine.Army;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventQueue;
 import Units.UnitDelta;
@@ -17,22 +17,22 @@ public class DamageDealtToIncomeConverter extends StateTracker
 {
   private static final long serialVersionUID = 1L;
 
-  public HashMap<Commander, ArrayList<Double>> incomeRatios = new HashMap<>();
+  public HashMap<Army, ArrayList<Double>> incomeRatios = new HashMap<>();
 
-  public void startTracking(Commander co, double value)
+  public void startTracking(Army army, double value)
   {
-    ArrayList<Double> valueList = incomeRatios.getOrDefault(co, new ArrayList<Double>());
+    ArrayList<Double> valueList = incomeRatios.getOrDefault(army, new ArrayList<Double>());
     valueList.add(value);
-    incomeRatios.put(co, valueList);
+    incomeRatios.put(army, valueList);
   }
-  public void stopTracking(Commander co, double value)
+  public void stopTracking(Army army, double value)
   {
-    ArrayList<Double> valueList = incomeRatios.getOrDefault(co, new ArrayList<Double>());
+    ArrayList<Double> valueList = incomeRatios.getOrDefault(army, new ArrayList<Double>());
     if( !valueList.contains(value) )
       return;
     valueList.remove(value);
     if( valueList.isEmpty() )
-      incomeRatios.remove(co); // Removes the first occurrence, which means stacking should work correctly
+      incomeRatios.remove(army); // Removes the first occurrence, which means stacking should work correctly
   }
 
   @Override
@@ -45,12 +45,13 @@ public class DamageDealtToIncomeConverter extends StateTracker
   private void profitize(UnitDelta attacker, UnitDelta defender)
   {
     // Determine if the attacker should profit from this fight. If so, cash in on any damage done to the other guy.
-    if( incomeRatios.containsKey(attacker.CO) )
+    final Army profiteer = attacker.CO.army;
+    if( incomeRatios.containsKey(profiteer) )
     {
       double myIncomeRatio = 0;
-      for( double r : incomeRatios.get(attacker.CO) )
+      for( double r : incomeRatios.get(profiteer) )
         myIncomeRatio += r;
-      attacker.CO.money += calculateProfit(defender, myIncomeRatio);
+      profiteer.money += calculateProfit(defender, myIncomeRatio);
     }
   }
 

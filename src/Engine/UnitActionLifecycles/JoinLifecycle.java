@@ -197,7 +197,7 @@ public abstract class JoinLifecycle
 
         // If we had extra HP, add that as income.
         double costPerHP = unitDonor.getCost() / UnitModel.MAXIMUM_HP;
-        unitDonor.CO.money += (extraHP * costPerHP);
+        unitDonor.CO.army.money += (extraHP * costPerHP);
 
         // Reconcile cargo units.
         unitRecipient.heldUnits.addAll(unitDonor.heldUnits);

@@ -278,7 +278,7 @@ public class Tech extends Commander
       for( Commander co : smashes.keySet() )
       {
         if( co.units.size() > 1 && co.units.size() <= smashes.get(co) )
-          abilityEvents.add(new CommanderDefeatEvent(co));
+          abilityEvents.add(new CommanderDefeatEvent(co.army));
       }
 
       return abilityEvents;
@@ -384,7 +384,7 @@ public class Tech extends Commander
         Unit nme = gameMap.getLocation(nmexy).getResident();          // Enemy unit
         Integer nmeval = nme.getCost() * nme.getHP();                 // Enemy value
 
-        for( XYCoord hqCoord : myCommander.HQLocations )
+        for( XYCoord hqCoord : myCommander.army.HQLocations )
           if(nmexy.getDistance(hqCoord) <= nme.getMovePower(gameMap) && nme.hasActionType(UnitActionFactory.CAPTURE))
           {
             if( log ) System.out.println(String.format("%s is too close to HQ. Increasing threat rating:", nme.toStringWithLocation()));
@@ -440,7 +440,7 @@ public class Tech extends Commander
       if( friendScores.isEmpty() )
       {
         if( log ) System.out.println("No valid drop zones near nemy. Reinforcing HQ.");
-        for( XYCoord hqCoord : myCommander.HQLocations )
+        for( XYCoord hqCoord : myCommander.army.HQLocations )
           for( XYCoord nearHQ : Utils.findLocationsInRange(gameMap, hqCoord, 0, dropRange) )
               friendScores.put(nearHQ, 0);
       }

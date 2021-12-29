@@ -165,7 +165,7 @@ public abstract class BattleLifecycle
             if( attacker.CO.units.size() == 1 )
             {
               // CO is out of units. Too bad.
-              attackEvents.add(new CommanderDefeatEvent(event.getAttacker().CO));
+              attackEvents.add(new CommanderDefeatEvent(event.getAttacker().CO.army));
             }
           }
           if( event.defenderDies() )
@@ -176,7 +176,7 @@ public abstract class BattleLifecycle
             if( defender.CO.units.size() == 1 )
             {
               // CO is out of units. Too bad.
-              attackEvents.add(new CommanderDefeatEvent(event.getDefender().CO));
+              attackEvents.add(new CommanderDefeatEvent(event.getDefender().CO.army));
             }
           }
         }
@@ -298,7 +298,7 @@ public abstract class BattleLifecycle
 
             if( Utils.willLoseFromLossOf(gameMap, target) )
             {
-              attackEvents.add(new CommanderDefeatEvent(target.getOwner()));
+              attackEvents.add(new CommanderDefeatEvent(target.getOwner().army));
             }
           }
         }

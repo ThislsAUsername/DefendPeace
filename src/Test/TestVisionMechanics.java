@@ -34,7 +34,7 @@ public class TestVisionMechanics extends TestCase
     Commander[] cos = { strong, patch };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    testGame = new GameInstance(testMap, Weathers.CLEAR, new GameScenario(), false);
+    testGame = new GameInstance(new GameScenario(), cos, testMap, Weathers.CLEAR, false);
   }
 
   @Override

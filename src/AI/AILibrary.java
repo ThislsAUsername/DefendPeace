@@ -2,7 +2,7 @@ package AI;
 
 import java.util.ArrayList;
 
-import CommandingOfficers.Commander;
+import Engine.Army;
 
 public class AILibrary
 {  
@@ -30,7 +30,7 @@ public class AILibrary
   public static class NotAnAI implements AIMaker
   {
     @Override
-    public AIController create(Commander co)
+    public AIController create(Army co)
     {
       return null;
     }

@@ -446,27 +446,21 @@ public class Utils
   }
 
   /**
-   * Returns a list of all vacant industries a commander owns
+   * Returns a list of all vacant industries a army owns
    */
-  public static ArrayList<XYCoord> findUsableProperties(Commander co, GameMap map)
+  public static ArrayList<XYCoord> findUsableProperties(Army army, GameMap map)
   {
     ArrayList<XYCoord> industries = new ArrayList<XYCoord>();
     // We don't want to bother if we're trying to find nobody's properties
-    if( null != co )
+    if( null != army )
     {
       // Add all vacant, <co>-owned industries to the list
-      for( XYCoord xyc : co.ownedProperties )
+      for( XYCoord xyc : army.getOwnedProperties() )
       {
         MapLocation loc = map.getLocation(xyc);
-        Unit resident = loc.getResident();
-        // We only want industries we can act on, which means they need to be empty
-        // TODO: maybe calculate whether the CO has enough money to buy something at this industry
-        if( null == resident && loc.getOwner() == co )
+        if( army.canBuyOn(loc) )
         {
-          if( co.getShoppingList(loc).size() > 0 )
-          {
-            industries.add(loc.getCoordinates());
-          }
+          industries.add(loc.getCoordinates());
         }
       }
     }

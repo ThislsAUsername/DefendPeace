@@ -48,7 +48,7 @@ public class GlobalWeatherEvent implements GameEvent
       for( int x = 0; x < gameMap.mapWidth; ++x )
       {
         MapLocation loc = gameMap.getLocation(x, y);
-        loc.setForecast(weather, (gameMap.commanders.length * duration) - 1);
+        loc.setForecast(weather, (gameMap.game.armies.length * duration) - 1);
       }
     }
   }

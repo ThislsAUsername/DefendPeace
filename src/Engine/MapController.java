@@ -60,7 +60,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       startNextTurn();
 
     // Initialize our game input handler.
-    myGameInputHandler = new GameInputHandler(myGame.activeCO.myView, myGame.activeCO, this);
+    myGameInputHandler = new GameInputHandler(myGame.activeArmy.myView, myGame.activeArmy, this);
   }
 
   /**
@@ -167,13 +167,13 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
           // First get all active units, sorted.
           ArrayList<XYCoord> unitLocations = new ArrayList<XYCoord>();
-          unitLocations.addAll(Utils.findLocationsNearUnits(myGame.gameMap, myGame.activeCO.units, 0));
+          unitLocations.addAll(Utils.findLocationsNearUnits(myGame.gameMap, myGame.activeArmy.getUnits(), 0));
           unitLocations.removeIf(xy -> myGame.gameMap.getLocation(xy).getResident().isTurnOver);
           if( seekBuildingsLast )
             Utils.sortLocationsByDistance(myGame.getCursorCoord(), unitLocations);
 
           // Find all usable properties, sorted.
-          ArrayList<XYCoord> usableProperties = Utils.findUsableProperties(myGame.activeCO, myGame.gameMap);
+          ArrayList<XYCoord> usableProperties = Utils.findUsableProperties(myGame.activeArmy, myGame.gameMap);
           usableProperties.removeIf(xy -> myGame.gameMap.getLocation(xy).getResident() != null);
           if( seekBuildingsLast )
             Utils.sortLocationsByDistance(myGame.getCursorCoord(), usableProperties);
@@ -216,7 +216,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
           Unit resident = loc.getResident();
           if( null != resident )
           {
-            ArrayList<Unit> threats = myGame.activeCO.threatsToOverlay;
+            ArrayList<Unit> threats = myGame.activeArmy.threatsToOverlay;
             if( threats.contains(resident) )
               threats.remove(resident);
             else
@@ -419,9 +419,9 @@ public class MapController implements IController, GameInputHandler.StateChanged
         if( myGame.isSecurityEnforced() )
         {
           // Generate a password if needed.
-          if( !myGame.activeCO.hasPassword() )
+          if( !myGame.activeArmy.hasPassword() )
           {
-            PasswordManager.setPass(myGame.activeCO);
+            PasswordManager.setPass(myGame.activeArmy);
           }
 
           // Save the game, display a message, and exit to the main menu.
@@ -433,7 +433,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
           GameEventQueue outro = new GameEventQueue();
           boolean hideMap = true;
-          outro.add(new TurnInitEvent(myGame.activeCO, myGame.getCurrentTurn(), hideMap, saveMsg));
+          outro.add(new TurnInitEvent(myGame.activeArmy, myGame.getCurrentTurn(), hideMap, saveMsg));
           myView.animate(outro);
 
           changeInputMode(InputMode.EXITGAME);
@@ -467,14 +467,14 @@ public class MapController implements IController, GameInputHandler.StateChanged
         break;
       case DAMAGE_CHART:
         // Pull out the first enemy available, or ourselves
-        Commander targetCO = myGame.activeCO;
-        for( Commander co : myGame.commanders )
-          if( myGame.activeCO.isEnemy(co) )
+        Commander targetCO = myGame.activeArmy.cos[0];
+        for( Army army : myGame.armies )
+          if( myGame.activeArmy.isEnemy(army) )
           {
-            targetCO = co;
+            targetCO = army.cos[0];
             break;
           }
-        DamageChartController dcc = new DamageChartController(myGame.activeCO, targetCO);
+        DamageChartController dcc = new DamageChartController(myGame.activeArmy.cos[0], targetCO);
         IView dcv = Driver.getInstance().gameGraphics.createDamageChartView(dcc);
 
         myGameInputHandler.reset(); // DAMAGE_CHART is a terminal state. Reset the input handler.
@@ -550,9 +550,9 @@ public class MapController implements IController, GameInputHandler.StateChanged
     {
       // Count the number of COs that are left.
       int activeNum = 0;
-      for( int i = 0; i < myGame.commanders.length; ++i )
+      for( int i = 0; i < myGame.armies.length; ++i )
       {
-        if( !myGame.commanders[i].isDefeated )
+        if( !myGame.armies[i].isDefeated )
         {
           activeNum++;
         }
@@ -577,9 +577,9 @@ public class MapController implements IController, GameInputHandler.StateChanged
       {
         // The animation for the last action just completed. If an AI is in control,
         // fetch the next action. Otherwise, return control to the player.
-        if( myGame.activeCO.isAI() )
+        if( myGame.activeArmy.isAI() )
         {
-          GameAction aiAction = myGame.activeCO.getNextAIAction(myGame.gameMap);
+          GameAction aiAction = myGame.activeArmy.getNextAIAction(myGame.gameMap);
           boolean endAITurn = false;
           if( aiAction != null )
           {
@@ -617,7 +617,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     boolean turnOK = myGame.turn(turnEvents);
 
     // Reinitialize the InputStateHandler for the new turn.
-    myGameInputHandler = new GameInputHandler(myGame.activeCO.myView, myGame.activeCO, this);
+    myGameInputHandler = new GameInputHandler(myGame.activeArmy.myView, myGame.activeArmy, this);
 
     if( !turnEvents.isEmpty() ) // If there's nothing to animate, don't animate it twice
     {

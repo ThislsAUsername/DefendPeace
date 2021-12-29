@@ -114,7 +114,7 @@ public abstract class CaptureLifecycle
             if( Utils.willLoseFromLossOf(map, captureLocation) )
             {
               // Someone is losing their big, comfy chair.
-              CommanderDefeatEvent defeat = new CommanderDefeatEvent(captureLocation.getOwner());
+              CommanderDefeatEvent defeat = new CommanderDefeatEvent(captureLocation.getOwner().army);
               if( (propertyType == TerrainType.HEADQUARTERS) )
                 defeat.setPropertyBeneficiary(actor.CO);
               captureEvents.add(defeat);

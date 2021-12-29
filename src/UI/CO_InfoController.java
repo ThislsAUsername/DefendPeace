@@ -7,12 +7,14 @@ import CommandingOfficers.CommanderInfo.InfoPage;
 
 import java.util.ArrayList;
 
+import Engine.Army;
 import Engine.GameInstance;
 import Engine.OptionSelector;
 
 public class CO_InfoController implements InfoController
 {
   private ArrayList<CommanderInfo> coInfos;
+  private ArrayList<Commander> coList = new ArrayList<>();
   private GameInstance myGame;
 
   int shiftDown = 0;
@@ -22,12 +24,14 @@ public class CO_InfoController implements InfoController
   public CO_InfoController( GameInstance game )
   {
     myGame = game;
-    ArrayList<CommanderInfo> infos = new ArrayList<CommanderInfo>();
+    ArrayList<CommanderInfo> infos = new ArrayList<>();
     
-    for( Commander co : myGame.commanders )
-    {
-      infos.add(co.coInfo);
-    }
+    for( Army army : myGame.armies )
+      for( Commander co : army.cos )
+      {
+        infos.add(co.coInfo);
+        coList.add(co);
+      }
     
     init(infos);
     coOptionSelector.setSelectedOption(myGame.getActiveCOIndex());
@@ -89,9 +93,9 @@ public class CO_InfoController implements InfoController
   @Override
   public Commander getSelectedCO()
   {
-    if (null == myGame)
+    if (coList.isEmpty())
       return null;
-    return myGame.commanders[coOptionSelector.getSelectionNormalized()];
+    return coList.get(coOptionSelector.getSelectionNormalized());
   }
 
   @Override

@@ -7,6 +7,7 @@ import java.util.Queue;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.GamePath;
@@ -28,7 +29,7 @@ public class InfantrySpamAI implements AIController
   private static class instantiator implements AIMaker
   {
     @Override
-    public AIController create(Commander co)
+    public AIController create(Army co)
     {
       return new InfantrySpamAI(co);
     }
@@ -57,7 +58,7 @@ public class InfantrySpamAI implements AIController
   
   Queue<GameAction> actions = new ArrayDeque<GameAction>();
 
-  private Commander myCo = null;
+  private Army myCo = null;
 
   private ArrayList<XYCoord> unownedProperties;
   private ArrayList<XYCoord> capturingProperties;
@@ -66,7 +67,7 @@ public class InfantrySpamAI implements AIController
   private boolean shouldLog = true;
   private int turnNum = 0;
 
-  public InfantrySpamAI(Commander co)
+  public InfantrySpamAI(Army co)
   {
     myCo = co;
   }
@@ -81,9 +82,9 @@ public class InfantrySpamAI implements AIController
     actions.clear();
     
     // Create a list of every property we don't own, but want to.
-    unownedProperties = AIUtils.findNonAlliedProperties(myCo, gameMap);
+    unownedProperties = AIUtils.findNonAlliedProperties(myCo.cos[0], gameMap);
     capturingProperties = new ArrayList<XYCoord>();
-    for( Unit unit : myCo.units )
+    for( Unit unit : myCo.getUnits() )
     {
       if( unit.getCaptureProgress() > 0 )
       {
@@ -122,7 +123,7 @@ public class InfantrySpamAI implements AIController
     }
 
     // Handle actions for each unit the CO owns.
-    for( Unit unit : myCo.units )
+    for( Unit unit : myCo.getUnits() )
     {
       if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y))
         continue; // No actions for units that are stale or out of bounds
@@ -214,13 +215,16 @@ public class InfantrySpamAI implements AIController
         for( int j = 0; j < gameMap.mapHeight; j++)
         {
           MapLocation loc = gameMap.getLocation(i, j);
+          Commander buyer = loc.getOwner();
+          if(null == buyer)
+            continue;
           // If this terrain belongs to me, and I can build something on it, and I have the money, do so.
-          if( loc.getEnvironment().terrainType == TerrainType.FACTORY && loc.getOwner() == myCo && loc.getResident() == null )
+          if( loc.getEnvironment().terrainType == TerrainType.FACTORY && buyer.army == myCo && loc.getResident() == null )
           {
-            ArrayList<UnitModel> units = myCo.getShoppingList(loc);
-            if( !units.isEmpty() && myCo.getBuyCost(units.get(0), loc.getCoordinates()) <= myCo.money )
+            ArrayList<UnitModel> units = buyer.getShoppingList(loc);
+            if( !units.isEmpty() && buyer.getBuyCost(units.get(0), loc.getCoordinates()) <= myCo.money )
             {
-              GameAction action = new GameAction.UnitProductionAction(myCo, units.get(0), loc.getCoordinates());
+              GameAction action = new GameAction.UnitProductionAction(buyer, units.get(0), loc.getCoordinates());
               actions.offer( action );
             }
           }

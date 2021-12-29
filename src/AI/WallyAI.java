@@ -24,9 +24,9 @@ public class WallyAI extends ModularAI
   private static class instantiator implements AIMaker
   {
     @Override
-    public AIController create(Commander co)
+    public AIController create(Army army)
     {
-      return new WallyAI(co);
+      return new WallyAI(army);
     }
 
     @Override
@@ -76,8 +76,9 @@ public class WallyAI extends ModularAI
     if( unitEffectiveMove.containsKey(model) )
       return unitEffectiveMove.get(model);
 
-    UnitContext uc = new UnitContext(myCo, model);
-    MoveType p = uc.calculateMoveType();
+    //TODO
+//    MoveType p = model.calculateMoveType();
+    MoveType p = model.baseMoveType;
     GameMap map = myCo.myView;
     double totalCosts = 0;
     int validTiles = 0;
@@ -99,29 +100,30 @@ public class WallyAI extends ModularAI
     //             term for how fast you are   term for map coverage
     double ratio = (validTiles / totalCosts) * (validTiles / totalTiles); // 1.0 is the max expected value
     
-    double effMove = uc.calculateMovePower() * ratio;
+//    double effMove = model.calculateMovePower() * ratio;
+    double effMove = model.baseMovePower * ratio;
     unitEffectiveMove.put(model, effMove);
     return effMove;
   }
 
 
-  public WallyAI(Commander co)
+  public WallyAI(Army co)
   {
     super(co);
     aiPhases = new ArrayList<AIModule>(
         Arrays.asList(
             new PowerActivator(co, CommanderAbility.PHASE_TURN_START),
-            new GenerateThreatMap(co, this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
+            new GenerateThreatMap(co.cos[0], this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
             new CaptureFinisher(co, this),
 
-            new NHitKO(co, this),
-            new SiegeAttacks(co, this),
+            new NHitKO(co.cos[0], this),
+            new SiegeAttacks(co.cos[0], this),
             new PowerActivator(co, CommanderAbility.PHASE_BUY),
-            new FreeRealEstate(co, this, false, false), // prioritize non-eviction
-            new FreeRealEstate(co, this, true,  false), // evict if necessary
-            new BuildStuff(co, this),
-            new FreeRealEstate(co, this, true,  true), // step on industries we're not using
-            new Travel(co, this),
+            new FreeRealEstate(co.cos[0], this, false, false), // prioritize non-eviction
+            new FreeRealEstate(co.cos[0], this, true,  false), // evict if necessary
+            new BuildStuff(co.cos[0], this),
+            new FreeRealEstate(co.cos[0], this, true,  true), // step on industries we're not using
+            new Travel(co.cos[0], this),
 
             new PowerActivator(co, CommanderAbility.PHASE_TURN_END)
             ));
@@ -129,13 +131,16 @@ public class WallyAI extends ModularAI
 
   private void init(GameMap map)
   {
-    unitEffectiveMove = new HashMap<UnitModel, Double>();
+    unitEffectiveMove = new HashMap<>();
     // init all move multipliers before powers come into play
-    for( Commander co : map.commanders )
+    for( Army army : map.game.armies )
     {
-      for( UnitModel model : co.unitModels )
+      for( Commander co : army.cos )
       {
-        getEffectiveMove(model);
+        for( UnitModel model : co.unitModels )
+        {
+          getEffectiveMove(model);
+        }
       }
     }
   }
@@ -161,7 +166,7 @@ public class WallyAI extends ModularAI
     private static final long serialVersionUID = 1L;
     public SiegeAttacks(Commander co, ModularAI ai)
     {
-      super(co, ai);
+      super(co.army, ai);
     }
 
     @Override
@@ -342,7 +347,7 @@ public class WallyAI extends ModularAI
     {
       ai.allThreats = new ArrayList<Unit>();
       ai.threatMap = new HashMap<UnitModel, Map<XYCoord, Double>>();
-      Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
+      Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo.army, gameMap);
       for( UnitModel um : myCo.unitModels )
       {
         ai.threatMap.put(um, new HashMap<XYCoord, Double>());
@@ -379,7 +384,7 @@ public class WallyAI extends ModularAI
     private final boolean canEvict, canStepOnProduction;
     public FreeRealEstate(Commander co, WallyAI ai, boolean canEvict, boolean canStepOnProduction)
     {
-      super(co, ai);
+      super(co.army, ai);
       this.ai = ai;
       this.canEvict = canEvict;
       this.canStepOnProduction = canStepOnProduction;
@@ -389,7 +394,7 @@ public class WallyAI extends ModularAI
     public GameAction getUnitAction(Unit unit, GameMap gameMap)
     {
       boolean mustMove = false;
-      return findValueAction(myCo, ai, unit, gameMap, mustMove, !canStepOnProduction, canEvict);
+      return findValueAction(unit.CO, ai, unit, gameMap, mustMove, !canStepOnProduction, canEvict);
     }
 
     public static GameAction findValueAction( Commander co, WallyAI ai,
@@ -404,7 +409,7 @@ public class WallyAI extends ModularAI
       ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces);
       if( mustMove )
         destinations.remove(new XYCoord(unit.x, unit.y));
-      destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, co, destinations, !avoidProduction));
+      destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, co.army, destinations, !avoidProduction));
       // sort by furthest away, good for capturing
       Utils.sortLocationsByDistance(position, destinations);
       Collections.reverse(destinations);
@@ -489,7 +494,7 @@ public class WallyAI extends ModularAI
     private final WallyAI ai;
     public Travel(Commander co, WallyAI ai)
     {
-      super(co, ai);
+      super(co.army, ai);
       this.ai = ai;
     }
 
@@ -551,7 +556,7 @@ public class WallyAI extends ModularAI
         }
         ArrayList<UnitModel> list = myCo.getShoppingList(gameMap.getLocation(coord));
         UnitModel toBuy = builds.get(coord);
-        if( myCo.getBuyCost(toBuy, coord) <= myCo.money && list.contains(toBuy) )
+        if( myCo.getBuyCost(toBuy, coord) <= myCo.army.money && list.contains(toBuy) )
         {
           builds.remove(coord);
           return new GameAction.UnitProductionAction(myCo, toBuy, coord);
@@ -600,7 +605,7 @@ public class WallyAI extends ModularAI
     else if( uc.possibleActions.contains(UnitActionFactory.CAPTURE) )
     {
       for( XYCoord xyc : unownedProperties )
-        if( !AIUtils.isCapturing(gameMap, myCo, xyc) )
+        if( !AIUtils.isCapturing(gameMap, myCo.cos[0], xyc) )
           goals.add(xyc);
     }
     else if( uc.possibleActions.contains(UnitActionFactory.ATTACK) )
@@ -617,7 +622,7 @@ public class WallyAI extends ModularAI
         if (Utils.findShortestPath(unit, targetCoord, gameMap, true) != null &&
             AGGRO_EFFECT_THRESHHOLD < effectiveness)
         {
-          valueMap.put(model, effectiveness*myCo.getCost(model));
+          valueMap.put(model, effectiveness*target.getCost());
           if (!targetMap.containsKey(model)) targetMap.put(model, new ArrayList<XYCoord>());
           targetMap.get(model).add(targetCoord);
         }
@@ -629,7 +634,7 @@ public class WallyAI extends ModularAI
 
       // Sort all target types by how much we want to shoot them with this unit
       Queue<Entry<UnitModel, Double>> targetTypesInOrder = 
-          new PriorityQueue<Entry<UnitModel, Double>>(myCo.unitModels.size(), new UnitModelFundsComparator());
+          new PriorityQueue<Entry<UnitModel, Double>>(myCo.cos[0].unitModels.size(), new UnitModelFundsComparator());
       targetTypesInOrder.addAll(valueMap.entrySet());
 
       while (!targetTypesInOrder.isEmpty())
@@ -644,7 +649,7 @@ public class WallyAI extends ModularAI
       for( XYCoord coord : unownedProperties )
       {
         MapLocation loc = gameMap.getLocation(coord);
-        if( myCo.unitProductionByTerrain.containsKey(loc.getEnvironment().terrainType)
+        if( unit.CO.unitProductionByTerrain.containsKey(loc.getEnvironment().terrainType)
             && myCo.isEnemy(loc.getOwner()) )
         {
           goals.add(coord);
@@ -700,7 +705,7 @@ public class WallyAI extends ModularAI
     evictionStack.add(unit);
 
     boolean mustMove = true, canEvict = true;
-    GameAction result = FreeRealEstate.findValueAction(myCo, this, unit, gameMap, mustMove, avoidProduction, canEvict);
+    GameAction result = FreeRealEstate.findValueAction(unit.CO, this, unit, gameMap, mustMove, avoidProduction, canEvict);
     if( null == result )
     {
       result = findTravelAction(gameMap, allThreats, threatMap, unit, ignoreSafety, mustMove, avoidProduction);
@@ -893,13 +898,13 @@ public class WallyAI extends ModularAI
    * Returns the center mass of a given unit type, weighted by HP
    * NOTE: Will violate fog knowledge
    */
-  private static XYCoord findAverageDeployLocation(GameMap gameMap, Commander co, UnitModel model)
+  private static XYCoord findAverageDeployLocation(GameMap gameMap, Army co, UnitModel model)
   {
     // init with the center of the map
     int totalX = gameMap.mapWidth / 2;
     int totalY = gameMap.mapHeight / 2;
     int totalPoints = 1;
-    for( Unit unit : co.units )
+    for( Unit unit : co.getUnits() )
     {
       if( unit.model == model )
       {
@@ -954,8 +959,9 @@ public class WallyAI extends ModularAI
 
     log("Evaluating Production needs");
     int budget = myCo.money;
-    final UnitModel infModel = myCo.getUnitModel(UnitModel.TROOP);
-    final int infCost = myCo.getCost(infModel);
+    final UnitModel infModel = myCo.cos[0].getUnitModel(UnitModel.TROOP);
+    // TODO: Fix this
+    final int infCost = infModel.costBase;
 
     // Get a count of enemy forces.
     Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
@@ -981,7 +987,7 @@ public class WallyAI extends ModularAI
 
     // Figure out how well we think we have the existing threats covered
     Map<UnitModel, Double> myUnitCounts = new HashMap<UnitModel, Double>();
-    for( Unit u : myCo.units )
+    for( Unit u : myCo.getUnits() )
     {
       // Count how many of each model of enemy units are in play.
       if( myUnitCounts.containsKey(u.model) )
@@ -1011,7 +1017,7 @@ public class WallyAI extends ModularAI
     }
 
     Queue<Entry<UnitModel, Double>> enemyModels = 
-        new PriorityQueue<Entry<UnitModel, Double>>(myCo.unitModels.size(), new UnitModelFundsComparator());
+        new PriorityQueue<Entry<UnitModel, Double>>(myCo.cos[0].unitModels.size(), new UnitModelFundsComparator());
     enemyModels.addAll(enemyUnitCounts.entrySet());
 
     // Try to purchase units that will counter the most-represented enemies.
@@ -1041,12 +1047,14 @@ public class WallyAI extends ModularAI
           XYCoord coord = getLocationToBuild(CPI, idealCounter);
           if (null == coord)
             continue;
-          final int idealCost = myCo.getBuyCost(idealCounter, coord);
+          MapLocation loc = gameMap.getLocation(coord);
+          Commander buyer = loc.getOwner();
+          final int idealCost = buyer.getBuyCost(idealCounter, coord);
           int totalCost = idealCost;
 
           // Calculate a cost buffer to ensure we have enough money left so that no factories sit idle.
           int costBuffer = (CPI.getNumFacilitiesFor(infModel)) * infCost;
-          if(myCo.getShoppingList(gameMap.getLocation(coord)).contains(infModel))
+          if(buyer.getShoppingList(gameMap.getLocation(coord)).contains(infModel))
             costBuffer -= infCost;
 
           if( 0 > costBuffer )
@@ -1074,9 +1082,11 @@ public class WallyAI extends ModularAI
     // Build infantry from any remaining facilities.
     log("Building infantry to fill out my production");
     XYCoord infCoord = getLocationToBuild(CPI, infModel);
+    MapLocation infLoc = gameMap.getLocation(infCoord);
+    Commander infBuyer = infLoc.getOwner();
     while (infCoord != null)
     {
-      int cost = myCo.getBuyCost(infModel, infCoord);
+      int cost = infBuyer.getBuyCost(infModel, infCoord);
       if (cost > budget)
         break;
       builds.put(infCoord, infModel);
@@ -1133,6 +1143,7 @@ public class WallyAI extends ModularAI
     for( WeaponModel wm : target.weapons )
     {
       double range = wm.rangeMax;
+      // TODO: Fix this!
       if( wm.canFireAfterMoving )
         range += getEffectiveMove(target);
       theirRange = Math.max(theirRange, range);
