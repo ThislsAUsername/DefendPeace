@@ -15,6 +15,7 @@ import Engine.GameEvents.UnitDieEvent;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
+import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitContext;
 import Units.MoveTypes.MoveType;
@@ -652,6 +653,51 @@ public class Utils
       eventQueue.add(new UnitDieEvent(utd));
       unitsToDie.addAll(utd.heldUnits);
     } while( !unitsToDie.isEmpty() );
+  }
+
+  /**
+   * @return Whether the owner of this property will lose when it's captured
+   */
+  public static boolean willLoseFromLossOf(MapMaster map, MapLocation capLoc)
+  {
+    if(null == capLoc.getOwner())
+      return false;
+
+    boolean playerHasLost = false;
+
+    TerrainType propertyType = capLoc.getEnvironment().terrainType;
+
+    if( (propertyType == TerrainType.HEADQUARTERS) )
+    {
+      playerHasLost = true;
+    }
+
+    else if( (propertyType == TerrainType.LAB) )
+    {
+      int numLabs = 0;
+      int numHQs = 0;
+      for( XYCoord xy : capLoc.getOwner().ownedProperties )
+      {
+        MapLocation loc = map.getLocation(xy);
+        if( loc.getEnvironment().terrainType == TerrainType.LAB )
+        {
+          numLabs += 1;
+          if( numLabs > 1)
+            break;
+        }
+        if( loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS )
+        {
+          numHQs += 1;
+          break;
+        }
+      }
+      if( numLabs < 2 && numHQs == 0 )
+      {
+        playerHasLost = true;
+      }
+    }
+
+    return playerHasLost;
   }
 
   /**
