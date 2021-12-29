@@ -37,7 +37,7 @@ public class MapArtist
     GameMap gameMap = myGame.gameMap;
 
     Commander co0 = game.commanders[0];
-    spriteCursor = new SpriteCursor(co0.HQLocation.xCoord * tileSize, co0.HQLocation.yCoord * tileSize, tileSize, tileSize, co0.myColor);
+    spriteCursor = new SpriteCursor(game.getCursorX() * tileSize, game.getCursorY() * tileSize, tileSize, tileSize, co0.myColor);
 
     baseMapImage = new BufferedImage(gameMap.mapWidth * tileSize, gameMap.mapHeight * tileSize, BufferedImage.TYPE_INT_RGB);
 

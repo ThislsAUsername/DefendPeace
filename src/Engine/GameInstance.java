@@ -75,11 +75,11 @@ public class GameInstance implements Serializable
       commanders[i].addUnitModifier(new SandstormModifier());
 
       commanders[i].money = gameScenario.rules.startingFunds;
-      if( commanders[i].HQLocation != null )
+      commanders[i].myView = new MapPerspective(map, commanders[i]);
+      commanders[i].myView.resetFog();
+      if( !commanders[i].HQLocations.isEmpty() )
       {
-        commanders[i].myView = new MapPerspective(map, commanders[i]);
-        commanders[i].myView.resetFog();
-        playerCursors.put(i, commanders[i].HQLocation);
+        playerCursors.put(i, commanders[i].HQLocations.get(0));
       }
       else
       {
@@ -88,6 +88,7 @@ public class GameInstance implements Serializable
       }
       commanders[i].initForGame(this);
     }
+    setCursorLocation(playerCursors.get(0).xCoord, playerCursors.get(0).yCoord);
     
     saveFile = getSaveName();
   }

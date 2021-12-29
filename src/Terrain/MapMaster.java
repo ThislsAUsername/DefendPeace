@@ -63,17 +63,7 @@ public class MapMaster extends GameMap
           // Check if this location holds an HQ.
           if( map[x][y].getEnvironment().terrainType == TerrainType.HEADQUARTERS )
           {
-            // If the CO has no HQ yet, assign this one.
-            if( COs[co].HQLocation == null )
-            {
-//              System.out.println("Assigning HQ at " + x + ", " + y + " to " + COs[co]);
-              COs[co].HQLocation = new XYCoord(x, y);
-            }
-            // If the CO does have an HQ, turn this location into a city.
-            else
-            {
-              location.setEnvironment(Environment.getTile(TerrainType.CITY, location.getEnvironment().weatherType));
-            }
+            COs[co].HQLocations.add(new XYCoord(x, y));
           }
           location.setOwner(COs[co]);
         }
@@ -103,7 +93,7 @@ public class MapMaster extends GameMap
       }
 
       // Warn if the CO still doesn't have a valid HQ.
-      if( COs[co].HQLocation == null )
+      if( COs[co].HQLocations.isEmpty() )
       {
         System.out.println("Warning! CO " + co + " does not have any HQ assigned!");
         initOK = false;

@@ -8,6 +8,7 @@ import Terrain.MapMaster;
 import Terrain.TerrainType;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
+import Units.Unit;
 
 public class CommanderDefeatEvent implements GameEvent
 {
@@ -52,10 +53,13 @@ public class CommanderDefeatEvent implements GameEvent
     defeatedCO.units.clear();
 
     // Downgrade the defeated commander's HQ to a city, unless they don't have a proper HQ.
-    MapLocation HQLoc = gameMap.getLocation(defeatedCO.HQLocation);
-    if( HQLoc.getEnvironment().terrainType == TerrainType.HEADQUARTERS )
+    for(XYCoord hqCoord : defeatedCO.HQLocations)
     {
-      HQLoc.setEnvironment(Environment.getTile(TerrainType.CITY, HQLoc.getEnvironment().weatherType));
+      MapLocation HQLoc = gameMap.getLocation(hqCoord);
+      if( HQLoc.getEnvironment().terrainType == TerrainType.HEADQUARTERS )
+      {
+        HQLoc.setEnvironment(Environment.getTile(TerrainType.CITY, HQLoc.getEnvironment().weatherType));
+      }
     }
 
     // Loop through the map and revoke all of the CO's properties.
@@ -69,6 +73,9 @@ public class CommanderDefeatEvent implements GameEvent
         if(loc.isCaptureable() && loc.getOwner() == defeatedCO)
         {
           loc.setOwner(beneficiaryCO);
+          Unit resident = loc.getResident();
+          if( null != resident )
+            resident.stopCapturing();
         }
       } // ~width loop
     } // ~height loop

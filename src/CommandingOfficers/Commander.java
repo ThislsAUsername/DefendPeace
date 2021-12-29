@@ -61,7 +61,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   public int incomeAdjustment = 0; // Commander subclasses can increase/decrease income if needed.
   public int team = -1;
   public boolean isDefeated = false;
-  public XYCoord HQLocation = null;
+  public ArrayList<XYCoord> HQLocations = new ArrayList<>();
   private double myAbilityPower = 0;
 
   private ArrayList<CommanderAbility> myAbilities = null;
