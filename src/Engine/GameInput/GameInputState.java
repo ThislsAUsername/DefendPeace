@@ -129,7 +129,7 @@ abstract class GameInputState<T>
 class OptionSet
 {
   public final InputType inputType;
-  private ArrayList<XYCoord> myCoords = null;
+  private Collection<XYCoord> myCoords = null;
   private Object[] myMenuOptions = null;
   private GameAction myAction = null;
 
@@ -138,7 +138,7 @@ class OptionSet
     inputType = type;
   }
 
-  public OptionSet(InputType type, ArrayList<XYCoord> coords)
+  public OptionSet(InputType type, Collection<XYCoord> coords)
   {
     inputType = type;
     myCoords = coords;
@@ -161,7 +161,7 @@ class OptionSet
     return myMenuOptions;
   }
 
-  public ArrayList<XYCoord> getCoordinateOptions()
+  public Collection<XYCoord> getCoordinateOptions()
   {
     return myCoords;
   }

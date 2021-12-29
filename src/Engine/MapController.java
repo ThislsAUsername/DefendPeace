@@ -233,7 +233,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
   /** Force the user to select one map tile from the InputStateHandler's selection. */
   private void handleConstrainedTileSelect(InputHandler.InputAction input)
   {
-    ArrayList<XYCoord> targetLocations = myGameInputHandler.getCoordinateOptions();
+    ArrayList<XYCoord> targetLocations = new ArrayList<XYCoord>(myGameInputHandler.getCoordinateOptions());
 
     switch (input)
     {
@@ -373,7 +373,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
     myGame.gameMap.clearAllHighlights();
     // Set the target-location highlights.
-    ArrayList<XYCoord> options = myGameInputHandler.getCoordinateOptions();
+    Collection<XYCoord> options = myGameInputHandler.getCoordinateOptions();
     if ( null != options)
       for( XYCoord xyc : options )
       {
@@ -386,7 +386,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     {
       case CONSTRAINED_TILE_SELECT:
         if( null != options && options.size() > 0 )
-          myGame.setCursorLocation(options.get(0));
+          myGame.setCursorLocation(options.iterator().next());
         break;
       case FREE_TILE_SELECT:
       case PATH_SELECT:
