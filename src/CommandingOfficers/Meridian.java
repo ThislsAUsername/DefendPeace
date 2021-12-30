@@ -60,7 +60,7 @@ public class Meridian extends Commander
   }
 
   final VehicularCharge myVehicularCharge = new VehicularCharge(this);
-  private static final int POST_REFRESH_STAT_ADJUSTMENT = -25;
+  private static final int POST_REFRESH_STAT_ADJUSTMENT = -30;
   final UnitModel tank, arty;
   final UnitActionFactory tankAction, artyAction;
   final int costShift;
@@ -141,7 +141,7 @@ public class Meridian extends Commander
       // Units that transformed are refreshed and able to move again.
       for( Unit unit : tracker.prevTypeMap.keySet() )
       {
-        if( myCommander == unit.CO ) // Consider validating that it actually was an arty-tank transformation?
+        if( myCommander.army == unit.CO.army ) // Consider validating that it actually was an arty-tank transformation?
           unit.isTurnOver = false;
       }
     }
@@ -152,7 +152,7 @@ public class Meridian extends Commander
       ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
 
       for( Unit unit : tracker.prevTypeMap.keySet() )
-        if( myCommander == unit.CO )
+        if( myCommander.army == unit.CO.army )
           output.add(new DamagePopup(
                        new XYCoord(unit.x, unit.y),
                        myCommander.myColor,
@@ -210,7 +210,7 @@ public class Meridian extends Commander
     protected void perform(MapMaster gameMap)
     {
       // Lastly, all land vehicles are refreshed and able to move again.
-      for( Unit unit : myCommander.units )
+      for( Unit unit : myCommander.army.getUnits() )
       {
         if( shouldRefresh(unit) )
         {
