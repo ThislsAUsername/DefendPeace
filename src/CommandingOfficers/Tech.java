@@ -173,7 +173,7 @@ public class Tech extends Commander
       ArrayList<UnitModel> typesToOverCharge = getMechanicalModels(myCommander);
       ArrayList<Unit> overCharged = new ArrayList<Unit>();
       // Overcharge
-      for(Unit u: myCommander.units)
+      for(Unit u: myCommander.army.getUnits())
       {
         if( typesToOverCharge.contains(u.model) )
         {
@@ -335,7 +335,7 @@ public class Tech extends Commander
 
       // Start by computing friendly values. Note that only the spaces in this collection are eligible landing spaces.
       Map<XYCoord, Integer> friendScores = new HashMap<XYCoord, Integer>();
-      for( XYCoord propCoord : myCommander.ownedProperties )
+      for( XYCoord propCoord : myCommander.army.getOwnedProperties() )
       {
         // Record any locations near owned properties; we want to be able to rescue unprotected structures.
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, propCoord, 0, dropRange) )
@@ -343,7 +343,7 @@ public class Tech extends Commander
       }
 
       // Calculate areas of influence for friendly units.
-      for( Unit u : myCommander.units )
+      for( Unit u : myCommander.army.getUnits() )
       {
         XYCoord uxy = new XYCoord(u.x, u.y);                       // Unit location
         Integer uval = u.getCost() * u.getHP();                    // Unit value
