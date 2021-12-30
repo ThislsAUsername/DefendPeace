@@ -196,18 +196,19 @@ public class Muriel implements AIController
     nonAlliedProperties = AIUtils.findNonAlliedProperties(myCo.cos[0], gameMap);
 
     // Order the units by cost.
-    Collections.sort(myCo.getUnits(), (Unit u1, Unit u2) ->
+    final ArrayList<Unit> armyUnits = myCo.getUnits();
+    Collections.sort(armyUnits, (Unit u1, Unit u2) ->
       (int)(u2.getCost()*u2.getHP() - u1.getCost()*u1.getHP()));
 
     // If we are already capturing any of these properties, remove them from the list.
-    for( Unit unit : myCo.getUnits() )
+    for( Unit unit : armyUnits )
     {
       if( unit.getCaptureProgress() > 0 )
       {
         nonAlliedProperties.remove(unit.getCaptureTargetCoords());
       }
     }
-    unitSelector.reinit(myCo.getUnits());
+    unitSelector.reinit(armyUnits);
 
     // Check for a turn-kickoff power
     CommanderAbility ability = AIUtils.queueCromulentAbility(queuedActions, myCo, CommanderAbility.PHASE_TURN_START);
