@@ -113,17 +113,17 @@ public class WallyAI extends ModularAI
     aiPhases = new ArrayList<AIModule>(
         Arrays.asList(
             new PowerActivator(co, CommanderAbility.PHASE_TURN_START),
-            new GenerateThreatMap(co.cos[0], this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
+            new GenerateThreatMap(co, this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
             new CaptureFinisher(co, this),
 
-            new NHitKO(co.cos[0], this),
-            new SiegeAttacks(co.cos[0], this),
+            new NHitKO(co, this),
+            new SiegeAttacks(co, this),
             new PowerActivator(co, CommanderAbility.PHASE_BUY),
-            new FreeRealEstate(co.cos[0], this, false, false), // prioritize non-eviction
-            new FreeRealEstate(co.cos[0], this, true,  false), // evict if necessary
-            new BuildStuff(co.cos[0], this),
-            new FreeRealEstate(co.cos[0], this, true,  true), // step on industries we're not using
-            new Travel(co.cos[0], this),
+            new FreeRealEstate(co, this, false, false), // prioritize non-eviction
+            new FreeRealEstate(co, this, true,  false), // evict if necessary
+            new BuildStuff(co, this),
+            new FreeRealEstate(co, this, true,  true), // step on industries we're not using
+            new Travel(co, this),
 
             new PowerActivator(co, CommanderAbility.PHASE_TURN_END)
             ));
@@ -164,9 +164,9 @@ public class WallyAI extends ModularAI
   public static class SiegeAttacks extends UnitActionFinder
   {
     private static final long serialVersionUID = 1L;
-    public SiegeAttacks(Commander co, ModularAI ai)
+    public SiegeAttacks(Army co, ModularAI ai)
     {
-      super(co.army, ai);
+      super(co, ai);
     }
 
     @Override
@@ -217,10 +217,10 @@ public class WallyAI extends ModularAI
   public static class NHitKO implements AIModule
   {
     private static final long serialVersionUID = 1L;
-    public Commander myCo;
+    public Army myCo;
     public final WallyAI ai;
 
-    public NHitKO(Commander co, WallyAI ai)
+    public NHitKO(Army co, WallyAI ai)
     {
       myCo = co;
       this.ai = ai;
@@ -251,8 +251,8 @@ public class WallyAI extends ModularAI
         return nextAction;
 
       HashSet<XYCoord> industries = new HashSet<XYCoord>();
-      for( XYCoord coord : myCo.ownedProperties )
-        if( myCo.unitProductionByTerrain.containsKey(gameMap.getEnvironment(coord).terrainType)
+      for( XYCoord coord : myCo.getOwnedProperties() )
+        if( myCo.cos[0].unitProductionByTerrain.containsKey(gameMap.getEnvironment(coord).terrainType)
             || TerrainType.HEADQUARTERS == gameMap.getEnvironment(coord).terrainType
             || TerrainType.LAB == gameMap.getEnvironment(coord).terrainType )
           industries.add(coord);
@@ -318,7 +318,7 @@ public class WallyAI extends ModularAI
       for( XYCoord xyc : neededAttacks.keySet() )
       {
         Unit resident = gameMap.getResident(xyc);
-        if( null == resident || resident.isTurnOver || resident.CO != myCo )
+        if( null == resident || resident.isTurnOver || resident.CO.army != myCo )
           continue;
 
         boolean ignoreSafety = true, avoidProduction = true;
@@ -333,10 +333,10 @@ public class WallyAI extends ModularAI
   public static class GenerateThreatMap implements AIModule
   {
     private static final long serialVersionUID = 1L;
-    public Commander myCo;
+    public Army myCo;
     public final WallyAI ai;
 
-    public GenerateThreatMap(Commander co, WallyAI ai)
+    public GenerateThreatMap(Army co, WallyAI ai)
     {
       myCo = co;
       this.ai = ai;
@@ -347,8 +347,8 @@ public class WallyAI extends ModularAI
     {
       ai.allThreats = new ArrayList<Unit>();
       ai.threatMap = new HashMap<UnitModel, Map<XYCoord, Double>>();
-      Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo.army, gameMap);
-      for( UnitModel um : myCo.unitModels )
+      Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
+      for( UnitModel um : myCo.cos[0].unitModels )
       {
         ai.threatMap.put(um, new HashMap<XYCoord, Double>());
         for( Commander co : unitLists.keySet() )
@@ -382,9 +382,9 @@ public class WallyAI extends ModularAI
     private static final long serialVersionUID = 1L;
     private final WallyAI ai;
     private final boolean canEvict, canStepOnProduction;
-    public FreeRealEstate(Commander co, WallyAI ai, boolean canEvict, boolean canStepOnProduction)
+    public FreeRealEstate(Army co, WallyAI ai, boolean canEvict, boolean canStepOnProduction)
     {
-      super(co.army, ai);
+      super(co, ai);
       this.ai = ai;
       this.canEvict = canEvict;
       this.canStepOnProduction = canStepOnProduction;
@@ -492,9 +492,9 @@ public class WallyAI extends ModularAI
   {
     private static final long serialVersionUID = 1L;
     private final WallyAI ai;
-    public Travel(Commander co, WallyAI ai)
+    public Travel(Army co, WallyAI ai)
     {
-      super(co.army, ai);
+      super(co, ai);
       this.ai = ai;
     }
 
@@ -511,10 +511,10 @@ public class WallyAI extends ModularAI
   public static class BuildStuff implements AIModule
   {
     private static final long serialVersionUID = 1L;
-    public final Commander myCo;
+    public final Army myCo;
     public final WallyAI ai;
 
-    public BuildStuff(Commander co, WallyAI ai)
+    public BuildStuff(Army co, WallyAI ai)
     {
       myCo = co;
       this.ai = ai;
@@ -545,7 +545,7 @@ public class WallyAI extends ModularAI
         if( null != resident )
         {
           boolean ignoreSafety = true, avoidProduction = true;
-          if( resident.CO == myCo && !resident.isTurnOver )
+          if( resident.CO.army == myCo && !resident.isTurnOver )
             return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, null, resident, ignoreSafety, avoidProduction);
           else
           {
@@ -554,12 +554,14 @@ public class WallyAI extends ModularAI
             continue;
           }
         }
-        ArrayList<UnitModel> list = myCo.getShoppingList(gameMap.getLocation(coord));
+        MapLocation loc = gameMap.getLocation(coord);
+        Commander buyer = loc.getOwner();
+        ArrayList<UnitModel> list = buyer.getShoppingList(loc);
         UnitModel toBuy = builds.get(coord);
-        if( myCo.getBuyCost(toBuy, coord) <= myCo.army.money && list.contains(toBuy) )
+        if( buyer.getBuyCost(toBuy, coord) <= myCo.money && list.contains(toBuy) )
         {
           builds.remove(coord);
-          return new GameAction.UnitProductionAction(myCo, toBuy, coord);
+          return new GameAction.UnitProductionAction(buyer, toBuy, coord);
         }
         else
         {
