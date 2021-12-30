@@ -48,6 +48,7 @@ public class PlayerSetupColorFactionArtist
 
     int color = control.getSelectedColor();
     int faction = control.getSelectedFaction();
+    boolean flipUnits = control.getShouldFlip();
 
     // Get the draw space
     int drawScale = SpriteOptions.getDrawScale();
@@ -110,7 +111,15 @@ public class PlayerSetupColorFactionArtist
         {
           if( null == unitArray[f][c] )
             unitArray[f][c] = SpriteLibrary.getMapUnitSpriteSet(myControl.iconicUnitName, UIUtils.getFactions()[f], UIUtils.getCOColors()[c]).sprites[0].getFrame(0);
-          myG.drawImage(unitArray[f][c], xOff, yOff, null);
+          int iW = unitArray[f][c].getWidth(), iH = unitArray[f][c].getHeight();
+          if( flipUnits )
+          {
+            myG.drawImage(unitArray[f][c], xOff + iW, yOff, -iW, iH, null);
+          }
+          else
+          {
+            myG.drawImage(unitArray[f][c], xOff, yOff, null);
+          }
         }
       }
 

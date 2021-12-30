@@ -653,7 +653,7 @@ public class WallyAI extends ModularAI
     }
 
     if( goals.isEmpty() ) // If there's really nothing to do, go to MY HQ
-      goals.add(myCo.HQLocation);
+      goals.addAll(myCo.HQLocations);
 
     Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
     return goals;

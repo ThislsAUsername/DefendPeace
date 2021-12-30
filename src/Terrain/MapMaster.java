@@ -50,6 +50,7 @@ public class MapMaster extends GameMap
     // Assign properties according to MapInfo's direction.
     for( int co = 0; co < mapInfo.COProperties.length && co < COs.length; ++co )
     {
+      boolean hasHQ = false, hasLab = false, hasProperty = false;
       // Loop through all locations assigned to this CO by mapInfo.
       for( int i = 0; i < mapInfo.COProperties[co].length; ++i )
       {
@@ -60,20 +61,16 @@ public class MapMaster extends GameMap
         MapLocation location = map[x][y];
         if( location.isCaptureable() )
         {
-          // Check if this location holds an HQ.
-          if( map[x][y].getEnvironment().terrainType == TerrainType.HEADQUARTERS )
+          hasProperty = true;
+          final TerrainType terrainType = map[x][y].getEnvironment().terrainType;
+          if( terrainType == TerrainType.HEADQUARTERS )
           {
-            // If the CO has no HQ yet, assign this one.
-            if( COs[co].HQLocation == null )
-            {
-//              System.out.println("Assigning HQ at " + x + ", " + y + " to " + COs[co]);
-              COs[co].HQLocation = new XYCoord(x, y);
-            }
-            // If the CO does have an HQ, turn this location into a city.
-            else
-            {
-              location.setEnvironment(Environment.getTile(TerrainType.CITY, location.getEnvironment().weatherType));
-            }
+            COs[co].HQLocations.add(new XYCoord(x, y));
+            hasHQ = true;
+          }
+          else if( terrainType == TerrainType.LAB )
+          {
+            hasLab = true;
           }
           location.setOwner(COs[co]);
         }
@@ -102,15 +99,30 @@ public class MapMaster extends GameMap
         }
       }
 
-      // Warn if the CO still doesn't have a valid HQ.
-      if( COs[co].HQLocation == null )
-      {
-        System.out.println("Warning! CO " + co + " does not have any HQ assigned!");
-        initOK = false;
-        break;
-      }
-    }
-  }
+      if( hasHQ )
+        continue; // If we have an HQ already, we know what our most strategic assets are
+
+      // If we don't have an HQ and do have Labs, then Labs are our HQs
+      if( hasLab )
+        for( XYCoord coord : COs[co].ownedProperties )
+        {
+          if( getEnvironment(coord).terrainType == TerrainType.LAB )
+          {
+            COs[co].HQLocations.add(coord);
+          }
+        }
+      // If we own some property, call that good enough for our purposes
+      else if( hasProperty )
+        COs[co].HQLocations.addAll(COs[co].ownedProperties);
+      // If we don't have property, use our first unit's starting location
+      else if( !COs[co].units.isEmpty() )
+        COs[co].HQLocations.add(new XYCoord(COs[co].units.get(0)));
+      // If we don't even have units, we've already lost
+      else
+        COs[co].isDefeated = true;
+
+    } // ~property assignment loop
+  } // ~constructor
 
   /**
    * Used to check if the GameMap is ready to be played after constructing.

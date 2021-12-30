@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +52,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   public MapPerspective myView;
   public ArrayList<Unit> units;
   public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
-  public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain;
+  public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain = new HashMap<>();
   public Set<XYCoord> ownedProperties;
   public Color myColor;
   public Faction faction;
@@ -61,7 +62,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   public int incomeAdjustment = 0; // Commander subclasses can increase/decrease income if needed.
   public int team = -1;
   public boolean isDefeated = false;
-  public XYCoord HQLocation = null;
+  public ArrayList<XYCoord> HQLocations = new ArrayList<>();
   private double myAbilityPower = 0;
 
   private ArrayList<CommanderAbility> myAbilities = null;
@@ -84,7 +85,12 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
 
     // Fetch our fieldable unit types from the rules
     GameReadyModels GRMs = rules.unitModelScheme.getGameReadyModels();
-    unitProductionByTerrain = GRMs.shoppingList;
+    // Make our own copy of the shopping list since some COs modify it
+    for( TerrainType tt : GRMs.shoppingList.keySet() )
+    {
+      ArrayList<UnitModel> buyables = new ArrayList<>(GRMs.shoppingList.get(tt));
+      unitProductionByTerrain.put(tt, buyables);
+    }
     for( UnitModel um : GRMs.unitModels )
     {
       unitModels.add(um);

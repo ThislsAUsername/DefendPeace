@@ -23,7 +23,6 @@ import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
-import Terrain.TerrainType;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
@@ -297,8 +296,7 @@ public abstract class BattleLifecycle
             Environment newEnvirons = Environment.getTile(oldEnvirons.terrainType.getBaseTerrain(), oldEnvirons.weatherType);
             attackEvents.add(new MapChangeEvent(target.getCoordinates(), newEnvirons));
 
-            // Check if destroying this property will cause someone's defeat.
-            if( (TerrainType.HEADQUARTERS == oldEnvirons.terrainType) && (null != target.getOwner()) )
+            if( Utils.willLoseFromLossOf(gameMap, target) )
             {
               attackEvents.add(new CommanderDefeatEvent(target.getOwner()));
             }

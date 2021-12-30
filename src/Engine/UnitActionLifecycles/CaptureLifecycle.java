@@ -111,11 +111,12 @@ public abstract class CaptureLifecycle
           if( capture.willCapture() ) // If this will succeed, check if the CO will lose as a result.
           {
             // Check if capturing this property will cause someone's defeat.
-            if( (propertyType == TerrainType.HEADQUARTERS) && (null != captureLocation.getOwner()) )
+            if( Utils.willLoseFromLossOf(map, captureLocation) )
             {
               // Someone is losing their big, comfy chair.
               CommanderDefeatEvent defeat = new CommanderDefeatEvent(captureLocation.getOwner());
-              defeat.setPropertyBeneficiary(actor.CO);
+              if( (propertyType == TerrainType.HEADQUARTERS) )
+                defeat.setPropertyBeneficiary(actor.CO);
               captureEvents.add(defeat);
             }
           }

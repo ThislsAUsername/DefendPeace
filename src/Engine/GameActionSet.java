@@ -1,6 +1,8 @@
 package Engine;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+
 import UI.InputHandler.InputAction;
 
 public class GameActionSet
@@ -32,9 +34,9 @@ public class GameActionSet
     isTargetRequired = requireTarget;
   }
 
-  public ArrayList<XYCoord> getTargetedLocations()
+  public HashSet<XYCoord> getTargetedLocations()
   {
-    ArrayList<XYCoord> targets = new ArrayList<XYCoord>();
+    HashSet<XYCoord> targets = new HashSet<>();
 
     for( GameAction ga : actionOptions )
     {

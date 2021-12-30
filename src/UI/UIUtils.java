@@ -212,7 +212,7 @@ public class UIUtils
     initCosmetics();
     return factions.toArray(new Faction[0]);
   }
-  
+
   public static String getCanonicalFactionName(String palette, String faction)
   {
     if ("red".equalsIgnoreCase(palette) && "frontier".equalsIgnoreCase(faction))
@@ -223,12 +223,13 @@ public class UIUtils
       return "Red Fire";
     return palette + ' ' + faction;
   }
-  
+
   public static class Faction implements Serializable
   {
     private static final long serialVersionUID = 1L;
     public String name;
     public String basis;
+    public boolean flip = false;
     
     public Faction(String pName, String pBasis)
     {

@@ -325,8 +325,6 @@ public class Tech extends Commander
       // Create a new Unit to drop onto the battlefield.
       Unit techMech = new Unit(myCommander, unitModelToDrop);
       techMech.isTurnOver = false; // Hit the ground ready to rumble.
-      if( myCommander.HQLocation.xCoord >= gameMap.mapWidth / 2 )
-        techMech.x = gameMap.mapWidth; // Make the unit face left as it falls to match the rest of the units.
 
       // We want to find the spot where more muscle will do the most good; i.e. somewhere that is highly contested.
       // Spaces that cannot be traversed, and spaces owned by an enemy Commander are invalid drop locations.
@@ -386,11 +384,12 @@ public class Tech extends Commander
         Unit nme = gameMap.getLocation(nmexy).getResident();          // Enemy unit
         Integer nmeval = nme.getCost() * nme.getHP();                 // Enemy value
 
-        if(nmexy.getDistance(myCommander.HQLocation) <= nme.getMovePower(gameMap) && nme.hasActionType(UnitActionFactory.CAPTURE))
-        {
-          if( log ) System.out.println(String.format("%s is too close to HQ. Increasing threat rating:", nme.toStringWithLocation()));
-          nmeval *= 100; // More weight if this unit threatens HQ.
-        }
+        for( XYCoord hqCoord : myCommander.HQLocations )
+          if(nmexy.getDistance(hqCoord) <= nme.getMovePower(gameMap) && nme.hasActionType(UnitActionFactory.CAPTURE))
+          {
+            if( log ) System.out.println(String.format("%s is too close to HQ. Increasing threat rating:", nme.toStringWithLocation()));
+            nmeval *= 100; // More weight if this unit threatens HQ.
+          }
 
         // Assign base scores for spaces around this enemy.
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, nmexy, 0, dropRange) )
@@ -441,8 +440,9 @@ public class Tech extends Commander
       if( friendScores.isEmpty() )
       {
         if( log ) System.out.println("No valid drop zones near nemy. Reinforcing HQ.");
-        for( XYCoord nearHQ : Utils.findLocationsInRange(gameMap, myCommander.HQLocation, 0, dropRange) )
-            friendScores.put(nearHQ, 0);
+        for( XYCoord hqCoord : myCommander.HQLocations )
+          for( XYCoord nearHQ : Utils.findLocationsInRange(gameMap, hqCoord, 0, dropRange) )
+              friendScores.put(nearHQ, 0);
       }
 
       // Remove any destinations we can't use.
