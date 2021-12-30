@@ -248,8 +248,8 @@ public class Unit extends UnitState implements UnitModList
   @Override
   public List<UnitModifier> getModifiers()
   {
+    // Intended order of operations: model, D2D, environment, abilities, unit-specific
     ArrayList<UnitModifier> output = new ArrayList<>();
-    // Intended order of operations: model, environment, CO, unit-specific
     output.addAll(model.getModifiers());
     output.addAll(CO.getModifiers());
     output.addAll(unitMods);

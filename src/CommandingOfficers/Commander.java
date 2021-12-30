@@ -55,9 +55,6 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
 
   public Commander(CommanderInfo info, GameScenario.GameRules rules)
   {
-    unitMods = new ArrayList<UnitModifier>();
-    unitMods.add(this);
-
     coInfo = info;
     gameRules = rules;
 
@@ -360,12 +357,16 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     return count * (gameRules.incomePerCity + incomeAdjustment);
   }
 
-  private final ArrayList<UnitModifier> unitMods;
+  private final ArrayList<UnitModifier> unitMods = new ArrayList<UnitModifier>();
   @Override
   public List<UnitModifier> getModifiers()
   {
-    // TODO Add call to pull modifiers from Army when that becomes a thing?
-    return new ArrayList<UnitModifier>(unitMods);
+    // Intended order of operations: model, D2D, environment, abilities, unit-specific
+    ArrayList<UnitModifier> output = new ArrayList<UnitModifier>();
+    output.add(this);
+    output.addAll(unitMods);
+    output.addAll(this.army.getModifiers());
+    return output;
   }
 
   @Override
