@@ -43,7 +43,7 @@ public class CommanderOverlayArtist
 
       // Add brief status text per CO
       // TODO
-      String status = new COStateInfo(drawableMap, CO.cos[0]).getAbbrevStatus();
+      String status = new COStateInfo(drawableMap, CO).getAbbrevStatus();
       BufferedImage statusText = SpriteUIUtils.drawProseToWidth(status, drawingWidth);
       g.drawImage(statusText, 0, verticalOffset, null);
       verticalOffset += statusText.getHeight() + 5;

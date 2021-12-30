@@ -19,7 +19,6 @@ public class CO_InfoController implements InfoController
 
   int shiftDown = 0;
   private OptionSelector coOptionSelector;
-  private OptionSelector[] pageSelectors;
 
   public CO_InfoController( GameInstance game )
   {
@@ -48,11 +47,6 @@ public class CO_InfoController implements InfoController
     coInfos = infos;
     
     coOptionSelector = new OptionSelector(coInfos.size());
-    pageSelectors = new OptionSelector[coInfos.size()];
-    for( int i = 0; i < coInfos.size(); ++i )
-    {
-      pageSelectors[i] = new OptionSelector(coInfos.get(i).infoPages.size());
-    }
   }
   
   @Override
@@ -72,16 +66,11 @@ public class CO_InfoController implements InfoController
         // Left/Right changes which CO has focus.
         shiftDown = 0;
         coOptionSelector.handleInput( action );
-        pageSelectors[coOptionSelector.getSelectionNormalized()].handleInput(action);
         break;
       case SELECT:
       case BACK:
         // Reset the selectors and leave this menu.
         coOptionSelector.setSelectedOption(0);
-        for( int i = 0; i < pageSelectors.length; ++i )
-        {
-          pageSelectors[i].setSelectedOption(0);
-        }
         goBack = true;
         break;
         default:
@@ -91,11 +80,11 @@ public class CO_InfoController implements InfoController
   }
 
   @Override
-  public Commander getSelectedCO()
+  public Army getSelectedArmy()
   {
     if (coList.isEmpty())
       return null;
-    return coList.get(coOptionSelector.getSelectionNormalized());
+    return coList.get(coOptionSelector.getSelectionNormalized()).army;
   }
 
   @Override
@@ -107,9 +96,9 @@ public class CO_InfoController implements InfoController
   @Override
   public ArrayList<InfoPage> getSelectedPages()
   {
-    return getSelectedCOInfo().infoPages;
+    return getSelectedCOInfo().iterator().next().infoPages;
   }
-  
+
   @Override
   public GameInstance getGame()
   {
@@ -117,9 +106,11 @@ public class CO_InfoController implements InfoController
   }
 
   @Override
-  public CommanderInfo getSelectedCOInfo()
+  public ArrayList<CommanderInfo> getSelectedCOInfo()
   {
-    return coInfos.get(coOptionSelector.getSelectionNormalized());
+    ArrayList<CommanderInfo> output = new ArrayList<>();
+    output.add(coInfos.get(coOptionSelector.getSelectionNormalized()));
+    return output;
   }
 
   @Override
