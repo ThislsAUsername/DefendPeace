@@ -340,7 +340,10 @@ public class SpenderAI implements AIController
               final int newCost = buyer.getBuyCost(newPurchase, locShopList.getKey().getCoordinates());
               // I want expensive units, but they have to have guns
               if( budget > newCost && newCost > currentCost && !newPurchase.weapons.isEmpty() )
+              {
                 currentPurchase = newPurchase;
+                currentCost = newCost;
+              }
             }
             // once we've found the most expensive thing we can buy here, record that
             budget -= currentCost;
