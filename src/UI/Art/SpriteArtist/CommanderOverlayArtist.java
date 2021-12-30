@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderAbility;
 import Engine.Army;
 import Terrain.GameMap;
 import UI.COStateInfo;
@@ -42,7 +43,6 @@ public class CommanderOverlayArtist
       verticalOffset += OVERLAY_HEIGHT + 5;
 
       // Add brief status text per CO
-      // TODO
       String status = new COStateInfo(drawableMap, CO).getAbbrevStatus();
       BufferedImage statusText = SpriteUIUtils.drawProseToWidth(status, drawingWidth);
       g.drawImage(statusText, 0, verticalOffset, null);
@@ -55,63 +55,69 @@ public class CommanderOverlayArtist
     return output;
   }
 
-  public static void drawCommanderOverlay(Graphics g, Army commander, boolean overlayIsLeft)
+  public static void drawCommanderOverlay(Graphics g, Army army, boolean overlayIsLeft)
   {
-    drawCommanderOverlay(g, commander, 0, overlayIsLeft);
+    drawCommanderOverlay(g, army, 0, overlayIsLeft);
   }
-  public static void drawCommanderOverlay(Graphics g, Army commander, int verticalOffset, boolean overlayIsLeft)
+  public static void drawCommanderOverlay(Graphics g, Army army, int yInitialOffset, boolean overlayIsLeft)
   {
-    int coEyesWidth = 25;
-    int xTextOffset = (4+coEyesWidth); // Distance from the side of the view to the CO overlay text.
-    int yTextOffset = 3 + verticalOffset; // Distance from the top of the view to the CO overlay text.
-    BufferedImage spriteA = SpriteLibrary.getLettersSmallCaps().getFrame(0); // Convenient reference so we can check dimensions.
+    final int coEyesWidth = 25;
+    final int xTextOffset = (4+coEyesWidth); // Distance from the side of the view to the CO overlay text.
+    final int yTextOffset = 3; // Distance from the top of the view to the CO overlay text.
+    final int mapViewWidth = SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale();
+    final BufferedImage spriteA = SpriteLibrary.getLettersSmallCaps().getFrame(0); // Convenient reference so we can check dimensions.
 
-    // Choose left or right overlay image to draw.
-    // TODO
-    BufferedImage overlayImage = SpriteLibrary.getCoOverlay(commander.cos[0], overlayIsLeft);
-    BufferedImage powerBarImage = null;
-    String abilityText = commander.getAbilityText();
-    if( abilityText.isEmpty() )
+    int yCurrentOffset = yInitialOffset;
+
+    for(Commander commander : army.cos)
     {
-      powerBarImage = buildCoPowerBar(commander.cos[0], commander.cos[0].getAbilityCosts(), commander.cos[0].getAbilityPower(), overlayIsLeft);
-    }
-    else
-    {
-      powerBarImage = getActiveAbilityName(abilityText);
-    }
-    final int POWERBAR_BUFFER = 3; // The distance from the top of the powerbar image frame to the top of the actual power bar (since the ability points are taller).
-
-    int money = commander.money;
-    int energy = COStateInfo.getEnergyUntilNextPower(commander.cos[0]);
-    int valueLength = Math.max((""+money).length(), (""+energy).length());
-
-    if( overlayIsLeft )
-    { // Draw the overlay on the left side.
-      g.drawImage(overlayImage, 0, verticalOffset, overlayImage.getWidth(), overlayImage.getHeight(), null);
-      drawIconAndValue(g, SpriteLibrary.MapIcons.ENERGY, energy, valueLength, xTextOffset, yTextOffset);
-      drawIconAndValue(g, SpriteLibrary.MapIcons.FUNDS,  money,  valueLength, xTextOffset, SpriteLibrary.baseIconSize + yTextOffset);
-      g.drawImage( powerBarImage, 0, (overlayImage.getHeight()+verticalOffset) - (POWERBAR_BUFFER), powerBarImage.getWidth(), powerBarImage.getHeight(), null );
-    }
-    else
-    { // Draw the overlay on the right side.
-      int mapViewWidth = SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale();
-      int xPos = mapViewWidth - overlayImage.getWidth();
-      int valueXPos = mapViewWidth - ICON_VALUE_SPACING - spriteA.getWidth()*valueLength - xTextOffset;
-      g.drawImage(overlayImage, xPos, verticalOffset, overlayImage.getWidth(), overlayImage.getHeight(), null);
-      drawIconAndValue(g, SpriteLibrary.MapIcons.ENERGY, energy, valueLength, valueXPos, yTextOffset);
-      drawIconAndValue(g, SpriteLibrary.MapIcons.FUNDS,  money,  valueLength, valueXPos, SpriteLibrary.baseIconSize + yTextOffset);
-      int pbXPos = mapViewWidth - powerBarImage.getWidth();
-      if( abilityText.isEmpty() )
+      // Choose left or right overlay image to draw.
+      BufferedImage overlayImage = SpriteLibrary.getCoOverlay(commander, overlayIsLeft);
+      BufferedImage powerBarImage = null;
+      CommanderAbility ability = commander.getActiveAbility();
+      final int xAbilityOffset;
+      if( null == ability )
       {
-        // We are drawing the power bar, and want to flip it horizontally.
-        g.drawImage( powerBarImage, pbXPos + (powerBarImage.getWidth()), (overlayImage.getHeight()+verticalOffset) - (POWERBAR_BUFFER), -powerBarImage.getWidth(), powerBarImage.getHeight(), null );
+        powerBarImage = buildCoPowerBar(commander, commander.getAbilityCosts(), commander.getAbilityPower(), overlayIsLeft);
+        xAbilityOffset = coEyesWidth + 1;
       }
       else
       {
-        // We are drawing an ability name, and we don't want to flip it.
-        g.drawImage( powerBarImage, pbXPos, (overlayImage.getHeight()+verticalOffset) - (POWERBAR_BUFFER), powerBarImage.getWidth(), powerBarImage.getHeight(), null );
+        powerBarImage = getActiveAbilityName(ability.toString());
+        xAbilityOffset = xTextOffset;
       }
+
+      int energy = COStateInfo.getEnergyUntilNextPower(commander);
+      int energyLength = ("" + energy).length();
+
+      final int yPowerBarOffset = SpriteLibrary.baseIconSize + yTextOffset - 1 + yCurrentOffset;
+      if( overlayIsLeft )
+      { // Draw the overlay on the left side.
+        g.drawImage(overlayImage, 0, yCurrentOffset, overlayImage.getWidth(), overlayImage.getHeight(), null);
+        drawIconAndValue(g, SpriteLibrary.MapIcons.ENERGY, energy, energyLength, xTextOffset, yTextOffset + yCurrentOffset);
+        g.drawImage( powerBarImage, xAbilityOffset, yPowerBarOffset, powerBarImage.getWidth(), powerBarImage.getHeight(), null );
+      }
+      else
+      { // Draw the overlay on the right side.
+        int xPos = mapViewWidth - overlayImage.getWidth();
+        int valueXPos = mapViewWidth - ICON_VALUE_SPACING - spriteA.getWidth()*energyLength - xTextOffset;
+        g.drawImage(overlayImage, xPos, yCurrentOffset, overlayImage.getWidth(), overlayImage.getHeight(), null);
+        drawIconAndValue(g, SpriteLibrary.MapIcons.ENERGY, energy, energyLength, valueXPos, yTextOffset + yCurrentOffset);
+        int pbXPos = mapViewWidth - xAbilityOffset - powerBarImage.getWidth();
+        g.drawImage( powerBarImage, pbXPos, yPowerBarOffset, powerBarImage.getWidth(), powerBarImage.getHeight(), null );
+      }
+
+      yCurrentOffset += overlayImage.getHeight() - 1;
     }
+
+    final int moneyBufferPx = 2;
+    final int fundsLength = ("" + army.money).length();
+    final int fundsWidth = ICON_VALUE_SPACING + fundsLength * spriteA.getWidth() + 1;
+    final int drawX = overlayIsLeft ? 0 : mapViewWidth - fundsWidth;
+    final int drawY = yInitialOffset - moneyBufferPx + yCurrentOffset;
+    SpriteUIUtils.drawMenuFrame(g, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR,
+        drawX, drawY, fundsWidth, SpriteLibrary.baseIconSize+moneyBufferPx, moneyBufferPx);
+    drawIconAndValue(g, SpriteLibrary.MapIcons.FUNDS, army.money,  fundsLength, drawX, drawY + moneyBufferPx);
   }
 
   private static final int ICON_VALUE_SPACING = SpriteLibrary.baseIconSize + 2;
@@ -175,10 +181,12 @@ public class CommanderOverlayArtist
     }
     
     // Draw a glint every now and then, if at least one ability is available.
+    final int width = bar.getWidth();
+    final int height = bar.getHeight();
     if( atLeastOne )
     {
       int glintPos = animIndex % 600; // Say, every 10 seconds or so.
-      if( glintPos < bar.getWidth()-5)
+      if( glintPos < width-5)
       {
         BufferedImage glint = SpriteLibrary.createDefaultBlankSprite(5, 5);
         int empty[] = { 255,255,255,0  , 255,255,255,0  , 255,255,255,80 , 255,255,255,80 , 255,255,255,80 ,
@@ -191,7 +199,14 @@ public class CommanderOverlayArtist
       }
     }
 
-    return bar;
+    BufferedImage output = bar;
+    if(!leftSide)
+    { // If we're drawing on the right, flip the image for our caller
+      output = SpriteLibrary.createTransparentSprite(width, height);
+      output.getGraphics().drawImage(bar, width, 0, -width, height, null);
+    }
+
+    return output;
   }
 
   private static BufferedImage getActiveAbilityName(String abilityName)
