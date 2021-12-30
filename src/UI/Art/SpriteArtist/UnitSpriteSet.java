@@ -188,7 +188,7 @@ public class UnitSpriteSet
     boolean flipImage = SpriteMapView.shouldFlip(u);
 
     // Figure out if we need to draw a buff overlay. If so, get some things together.
-    boolean drawBuff = AnimState.IDLE == state && null != u.CO.getActiveAbility();
+    boolean drawBuff = AnimState.IDLE == state && !u.CO.army.getAbilityText().isEmpty();
     float buffOpacity = 0;
     if( drawBuff )
     {
