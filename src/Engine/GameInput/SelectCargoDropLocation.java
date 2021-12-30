@@ -1,6 +1,6 @@
 package Engine.GameInput;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 import Engine.GameAction;
 import Engine.GameActionSet;
@@ -26,7 +26,7 @@ class SelectCargoDropLocation extends GameInputState<XYCoord>
   @Override
   protected OptionSet initOptions()
   {
-    ArrayList<XYCoord> dropoffLocations = myStateData.actionSet.getTargetedLocations();
+    HashSet<XYCoord> dropoffLocations = myStateData.actionSet.getTargetedLocations();
     dropoffLocations.removeAll(myStateData.unitLocationMap.values()); // Remove any drop locations that are already reserved.
     return new OptionSet(InputType.CONSTRAINED_TILE_SELECT, dropoffLocations);
   }

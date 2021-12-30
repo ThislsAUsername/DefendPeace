@@ -20,7 +20,7 @@ class SelectActionTarget extends GameInputState<XYCoord>
   @Override
   protected OptionSet initOptions()
   {
-    ArrayList<XYCoord> targets = myStateData.actionSet.getTargetedLocations();
+    ArrayList<XYCoord> targets = new ArrayList<>(myStateData.actionSet.getTargetedLocations());
 
     consider(targets.get(0));
 

@@ -229,13 +229,10 @@ public class SpenderAI implements AIController
             }
             else
             {
-              for( XYCoord coord : unownedProperties )
+              for( Commander co : gameMap.commanders )
               {
-                MapLocation loc = gameMap.getLocation(coord);
-                if( loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS && loc.getOwner() != null ) // should we have an attribute for this?
-                {
-                  validTargets.add(coord);
-                }
+                if( myCo.isEnemy(co) )
+                  validTargets.addAll(co.HQLocations);
               }
             }
             // Loop until we find a valid property to go capture or run out of options.

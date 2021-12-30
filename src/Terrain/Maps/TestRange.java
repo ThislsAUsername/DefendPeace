@@ -14,11 +14,11 @@ public class TestRange extends IMapBuilder
       { SE, SH, CT, GR, GR, CT, GR, FC, GR, SE }, // 2
       { SE, GR, MT, GR, GR, FR, GR, GR, GR, SE }, // 3
       { SE, GR, GR, ME, CT, FC, RD, GR, CT, SE }, // 4
-      { RF, GR, GR, GR, MT, HQ, AP, GR, SP, SE }, // 5
+      { RF, GR, GR, GR, LB, LB, AP, GR, SP, SE }, // 5
       { SE, SP, GR, GR, FC, FR, FC, GR, GR, RF }, // 6
       { SE, FC, GR, RD, RD, RD, RD, GR, FC, SE }, // 7
       { SE, GR, GR, FC, FR, FC, GR, GR, SP, SE }, // 8
-      { RF, SP, GR, AP, HQ, MT, GR, GR, GR, SE }, // 9
+      { RF, SP, GR, AP, LB, LB, GR, GR, GR, SE }, // 9
       { SE, CT, GR, RD, FC, CT, ME, GR, GR, RF }, // 10
       { SE, GR, GR, GR, FR, GR, GR, MT, GR, SE }, // 11
       { SE, GR, FC, GR, CT, GR, GR, CT, SH, SE }, // 12

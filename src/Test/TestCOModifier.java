@@ -74,6 +74,7 @@ public class TestCOModifier extends TestCase
     boolean testPassed = true;
     // Make a shallow copy and a deep copy of what Patch can build from a Factory.
     TerrainType FC = TerrainType.FACTORY;
+    ArrayList<UnitModel> factoryModelsStrong = strong.unitProductionByTerrain.get(FC);
     ArrayList<UnitModel> factoryModels = patch.unitProductionByTerrain.get(FC);
     
     // Define a type we want to add, and verify it isn't already buildable.
@@ -91,6 +92,7 @@ public class TestCOModifier extends TestCase
     
     // Verify that Patch can now build Battleships from a factory.
     testPassed &= validate( factoryModels.contains(ship), "    Factory cannot build ships, though it should be able to now.");
+    testPassed &= validate( !factoryModelsStrong.contains(ship), "    Modifying Patch's Factory build list polluted Strong's.");
     
     // Revert the mod and ensure we can no longer build battleships.
     upMod.revertChanges(patch);

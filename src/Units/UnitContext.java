@@ -99,6 +99,8 @@ public class UnitContext extends UnitState
   public UnitContext(Commander co, UnitModel um)
   {
     super(co, um);
+    mods.addAll(um.getModifiers());
+    mods.addAll(co.getModifiers());
     initModel();
   }
   /**

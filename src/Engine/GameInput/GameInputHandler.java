@@ -1,6 +1,6 @@
 package Engine.GameInput;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Stack;
 
 import CommandingOfficers.Commander;
@@ -161,7 +161,7 @@ public class GameInputHandler
   }
 
   /** @return The current set of coordinates from which to choose, or null if we are not selecting a location. */
-  public ArrayList<XYCoord> getCoordinateOptions()
+  public Collection<XYCoord> getCoordinateOptions()
   {
     return peekCurrentState().getOptions().getCoordinateOptions();
   }
