@@ -209,7 +209,7 @@ public class Venge extends Commander
     protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       UnitInstanceFilter uif = new UnitInstanceFilter(new IronWillMod(IRONWILL_BOOST));
-      for( Unit unit : myCommander.units )
+      for( Unit unit : myCommander.army.getUnits() )
       {
         if( !unit.isTurnOver )
           uif.instances.add(unit);
@@ -220,7 +220,7 @@ public class Venge extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      for( Unit unit : myCommander.units )
+      for( Unit unit : myCommander.army.getUnits() )
       {
         if( !unit.isTurnOver )
           boostedUnits.add(unit);
