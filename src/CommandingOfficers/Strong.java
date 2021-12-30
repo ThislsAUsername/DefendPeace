@@ -239,7 +239,7 @@ public class Strong extends Commander
       }
 
       // Lastly, all troops are refreshed and able to move again.
-      for( Unit unit : myCommander.units )
+      for( Unit unit : myCommander.army.getUnits() )
       {
         if( unit.model.isAll(UnitModel.TROOP) )
         {
