@@ -121,18 +121,11 @@ public class Venge extends Commander
   {
     private static final long serialVersionUID = 1L;
 
-    public final Commander co;
-    public PreEmptiveCounterMod(Commander co)
-    {
-      super();
-      this.co = co;
-    }
-
     @Override
     public void changeCombatContext(CombatContext instance)
     {
       // If we're swapping, and we can counter, and we're on the defensive, do the swap.
-      if( instance.canCounter && co == instance.defender.CO )
+      if( instance.canCounter && instance.defender.mods.contains(this) )
       {
         UnitContext minion = instance.defender;
 
@@ -149,7 +142,6 @@ public class Venge extends Commander
     public final int buff;
     public IronWillMod(int buff)
     {
-      super();
       this.buff = buff;
     }
     @Override
@@ -266,7 +258,7 @@ public class Venge extends Commander
     {
       modList.add(damageMod);
       modList.add(defenseMod);
-      modList.add(new PreEmptiveCounterMod(myCommander));
+      modList.add(new PreEmptiveCounterMod());
     }
   }
   
