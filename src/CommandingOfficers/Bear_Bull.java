@@ -68,8 +68,8 @@ public class Bear_Bull extends Commander
 
   public boolean isBull;
 
-  private final double BEAR_MOD = 0.9;
-  private final double BULL_MOD = 1.2;
+  private final int BEAR_MOD = -10;
+  private final int BULL_MOD = +20;
 
   public Bear_Bull(GameScenario.GameRules rules)
   {
@@ -89,13 +89,13 @@ public class Bear_Bull extends Commander
     {
       isBull = false;
       if( setIncome )
-        incomeAdjustment = (int) (gameRules.incomePerCity * BEAR_MOD) - gameRules.incomePerCity;
+        incomeAdjustment = (int) (gameRules.incomePerCity * BEAR_MOD / UnitModel.DEFAULT_STAT_RATIO);
     }
     else
     {
       isBull = true;
       if( setIncome )
-        incomeAdjustment = (int) (gameRules.incomePerCity * BULL_MOD) - gameRules.incomePerCity;
+        incomeAdjustment = (int) (gameRules.incomePerCity * BULL_MOD / UnitModel.DEFAULT_STAT_RATIO);
     }
   }
 
@@ -110,9 +110,9 @@ public class Bear_Bull extends Commander
   public void modifyCost(UnitContext uc)
   {
     if( isBull )
-      uc.costMultiplier += BULL_MOD - 1.0;
+      uc.costRatio += BULL_MOD;
     else
-      uc.costMultiplier += BEAR_MOD - 1.0;
+      uc.costRatio += BEAR_MOD;
   }
 
   /**
@@ -218,7 +218,7 @@ public class Bear_Bull extends Commander
     private static final String BUST_NAME = "Bust";
     private static final String BOOM_NAME = "Boom";
     private static final int BOOMBUST_COST = 6;
-    private static final double BOOMBUST_BUFF = 0.2;
+    private static final int BOOMBUST_BUFF = 20;
     Bear_Bull COcast;
 
     BustBoomAbility(Bear_Bull commander)

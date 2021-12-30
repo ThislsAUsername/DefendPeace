@@ -6,8 +6,8 @@ public class UnitDiscount implements UnitModifierWithDefaults
 {
   private static final long serialVersionUID = 1L;
 
-  public double discount = 0;
-  public UnitDiscount(double discount)
+  public int discount = 0;
+  public UnitDiscount(int discount)
   {
     this.discount = discount;
   }
@@ -15,6 +15,6 @@ public class UnitDiscount implements UnitModifierWithDefaults
   @Override
   public void modifyCost(UnitContext uc)
   {
-    uc.costMultiplier -= discount;
+    uc.costRatio -= discount;
   }
 }

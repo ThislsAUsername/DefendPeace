@@ -37,7 +37,7 @@ public class UnitContext extends UnitState
   public MoveType moveType;
 
   public int costBase;
-  public double costMultiplier;
+  public int costRatio;
   public int costShift;
 
   public Environment env;
@@ -129,7 +129,7 @@ public class UnitContext extends UnitState
     cargoCapacity = model.baseCargoCapacity;
     moveType = model.baseMoveType; // This should be safe to not deep-copy until we know we want to change it
     costBase = model.costBase;
-    costMultiplier = 1.0;
+    costRatio = UnitModel.DEFAULT_STAT_RATIO;
     costShift = 0;
     possibleActions.addAll(model.baseActions);
   }
@@ -171,7 +171,10 @@ public class UnitContext extends UnitState
 
   public int getCostTotal()
   {
-    return (int) (costBase*costMultiplier)+costShift;
+    int scaledCost = (costBase + costShift) * costRatio / UnitModel.DEFAULT_STAT_RATIO;
+    // Trim off the ones' place for that extra bit of cart accuracy
+    scaledCost -= scaledCost % 10;
+    return scaledCost;
   }
 
   /**
