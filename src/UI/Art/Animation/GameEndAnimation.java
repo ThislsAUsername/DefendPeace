@@ -19,26 +19,26 @@ public class GameEndAnimation extends GameAnimation
 
   private int panelsInPlace = 0;
 
-  public GameEndAnimation(Army[] commanders)
+  public GameEndAnimation(Army[] armies)
   {
     super(false);
 
     // Figure out how far apart to draw each panel.
-    int numCommanders = commanders.length;
+    int numArmies = armies.length;
 
     // If we draw n panels, we will have n+1 spaces around/between them.
-    int vSpacing = (SpriteOptions.getScreenDimensions().height) / (numCommanders+1);
+    int vSpacing = (SpriteOptions.getScreenDimensions().height) / (numArmies+1);
 
     // Set our starting position.
     int yPos = vSpacing;
     
     // Create and populate our ArrayList.
     panels = new ArrayList<GameResultPanel>();
-    for( int i = 0; i < numCommanders; ++i, yPos += vSpacing)
+    for( int i = 0; i < numArmies; ++i, yPos += vSpacing)
     {
       int xDir = (i % 2 == 0)? -1:1;
       // Create a victory/defeat panel for each army.
-      panels.add( new GameResultPanel(commanders[i], xDir, yPos));
+      panels.add( new GameResultPanel(armies[i], xDir, yPos));
     }
   }
 
@@ -85,7 +85,7 @@ public class GameEndAnimation extends GameAnimation
     SlidingValue xPos;
     int yPos;
 
-    public GameResultPanel(Army cmdr, int xDir, int yLoc)
+    public GameResultPanel(Army army, int xDir, int yLoc)
     {
       // Establish some basic parameters.
       int screenWidth = SpriteOptions.getScreenDimensions().width;
@@ -94,10 +94,9 @@ public class GameEndAnimation extends GameAnimation
       xPos = new SlidingValue(screenWidth * xDir);
       yPos = yLoc;
 
-      // Get the CO eyes image and the VICTORY/DEFEAT text.
-      // TODO
-      BufferedImage coMug = SpriteLibrary.getCommanderSprites(cmdr.cos[0].coInfo.name).eyes;
-      BufferedImage resultText = (cmdr.isDefeated)? SpriteLibrary.getGameOverDefeatText() : SpriteLibrary.getGameOverVictoryText();
+      // Build the VICTORY/DEFEAT text.
+      BufferedImage coMug = SpriteLibrary.getCommanderSprites(army.cos[0].coInfo.name).eyes;
+      BufferedImage resultText = (army.isDefeated)? SpriteLibrary.getGameOverDefeatText() : SpriteLibrary.getGameOverVictoryText();
 
       // Make a panel image large enough to fill the screen horizontally, and frame the CO portrait vertically.
       panel = SpriteLibrary.createDefaultBlankSprite(
@@ -110,15 +109,22 @@ public class GameEndAnimation extends GameAnimation
       g.fillRect( 0, 0, panel.getWidth(), panel.getHeight() );
 
       // Draw the background based on the CO color, inside our frame.
-      g.setColor( cmdr.cos[0].myColor );
+      g.setColor( army.cos[0].myColor );
       g.fillRect( 0, 1, panel.getWidth(), panel.getHeight() - 2 );
 
       int combinedWidth = coMug.getWidth()*2 + resultText.getWidth();
       int xPos = (panel.getWidth() / 2) - (combinedWidth / 2);
 
-      // Draw the CO portrait in place
-      g.drawImage(coMug, xPos, 1,
-          coMug.getWidth(), coMug.getHeight(), null);
+      // Draw the relevant Commanders
+      final int mugShiftPerBody = coMug.getWidth()*3/4;
+      int currentMugShift = -1 * mugShiftPerBody * (army.cos.length - 1);
+      for( int i = army.cos.length - 1; i >= 0; --i )
+      {
+        coMug = SpriteLibrary.getCommanderSprites(army.cos[i].coInfo.name).eyes;
+        g.drawImage(coMug, xPos + currentMugShift, 1, null);
+        currentMugShift += mugShiftPerBody;
+      }
+
 
       // Draw the victory/defeat text, centered.
       xPos += coMug.getWidth()*2;
