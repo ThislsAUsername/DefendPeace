@@ -71,12 +71,6 @@ public class Army implements GameEventListener, Serializable, UnitModList
       co.deInitForGame(game);
   }
 
-  public void endTurn()
-  {
-    if( aiController != null ) aiController.endTurn();
-    myView.resetFog();
-  }
-
   /**
    * Collect income and handle any COModifiers.
    * @param map
@@ -98,6 +92,14 @@ public class Army implements GameEventListener, Serializable, UnitModList
     }
 
     return events;
+  }
+
+  public void endTurn()
+  {
+    if( aiController != null ) aiController.endTurn();
+    myView.resetFog();
+    for( Commander co : cos )
+      co.endTurn();
   }
 
   /**
