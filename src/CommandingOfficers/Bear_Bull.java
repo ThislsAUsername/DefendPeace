@@ -189,10 +189,10 @@ public class Bear_Bull extends Commander
       return output;
     }
 
-    public HashSet<Unit> findVictims(Commander co, GameMap gameMap)
+    public static HashSet<Unit> findVictims(Commander co, GameMap gameMap)
     {
       HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
-      for( XYCoord xyc : co.ownedProperties )
+      for( XYCoord xyc : co.army.getOwnedProperties() )
       {
         MapLocation loc = gameMap.getLocation(xyc);
         if( loc.getOwner() == co )
