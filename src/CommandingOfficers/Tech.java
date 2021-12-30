@@ -17,7 +17,7 @@ import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
-import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitDefenseModifier;
@@ -277,8 +277,9 @@ public class Tech extends Commander
       }
       for( Commander co : smashes.keySet() )
       {
-        if( co.units.size() > 1 && co.units.size() <= smashes.get(co) )
-          abilityEvents.add(new CommanderDefeatEvent(co.army));
+        final ArrayList<Unit> armyUnits = co.army.getUnits();
+        if( armyUnits.size() > 1 && armyUnits.size() <= smashes.get(co) )
+          abilityEvents.add(new ArmyDefeatEvent(co.army));
       }
 
       return abilityEvents;

@@ -6,7 +6,7 @@ import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
-import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -114,7 +114,7 @@ public abstract class CaptureLifecycle
             if( Utils.willLoseFromLossOf(map, captureLocation) )
             {
               // Someone is losing their big, comfy chair.
-              CommanderDefeatEvent defeat = new CommanderDefeatEvent(captureLocation.getOwner().army);
+              ArmyDefeatEvent defeat = new ArmyDefeatEvent(captureLocation.getOwner().army);
               if( (propertyType == TerrainType.HEADQUARTERS) )
                 defeat.setPropertyBeneficiary(actor.CO);
               captureEvents.add(defeat);

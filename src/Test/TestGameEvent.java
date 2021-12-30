@@ -9,7 +9,7 @@ import Engine.GameScenario;
 import Engine.GamePath;
 import Engine.Utils;
 import Engine.XYCoord;
-import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
@@ -60,7 +60,7 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(testUnitDieEvent(), "  UnitDieEvent test failed.");
     testPassed &= validate(testResupplyEvent(), "  Resupply test failed.");
     testPassed &= validate(testUnitJoinEvent(), "  Join test failed.");
-    testPassed &= validate(testCommanderDefeatEvent(), "  CommanderDefeatEvent test failed."); // Put this one last because it alters the map.
+    testPassed &= validate(testCommanderDefeatEvent(), "  ArmyDefeatEvent test failed."); // Put this one last because it alters the map.
 
     return testPassed;
   }
@@ -447,7 +447,7 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(baddie3.x == 13 && baddie3.y == 2, "    Unit baddie3 doesn't know where he is.");
 
     // Bring to pass this poor army's defeat.
-    CommanderDefeatEvent event = new CommanderDefeatEvent(testCo2.army);
+    ArmyDefeatEvent event = new ArmyDefeatEvent(testCo2.army);
     event.performEvent(testMap);
 
     //================================ Validate post-conditions.

@@ -5,7 +5,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
@@ -210,7 +210,7 @@ public class MapTileDetailsArtist
     public GameEventQueue receiveDemolitionEvent(Unit actor, XYCoord tile){MapTileDetailsArtist.resetOverlay(); return null; };
     public GameEventQueue receiveCreateUnitEvent(Unit unit){MapTileDetailsArtist.resetOverlay(); return null; };
     public GameEventQueue receiveCaptureEvent(Unit unit, MapLocation location){MapTileDetailsArtist.resetOverlay(); return null; };
-    public GameEventQueue receiveCommanderDefeatEvent(CommanderDefeatEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
+    public GameEventQueue receiveCommanderDefeatEvent(ArmyDefeatEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
     public GameEventQueue receiveLoadEvent(LoadLifecycle.LoadEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
     public GameEventQueue receiveMoveEvent(MoveEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
     public GameEventQueue receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){MapTileDetailsArtist.resetOverlay(); return null; };

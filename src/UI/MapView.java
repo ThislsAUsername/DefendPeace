@@ -10,7 +10,7 @@ import Engine.GamePath;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.StrikeParams;
-import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapPerspective;
 import UI.Art.Animation.GameAnimation;
@@ -112,7 +112,7 @@ public abstract class MapView implements IView
   {
     return null;
   }
-  public GameAnimation buildCommanderDefeatAnimation( CommanderDefeatEvent event )
+  public GameAnimation buildCommanderDefeatAnimation( ArmyDefeatEvent event )
   {
     return null;
   }

@@ -73,7 +73,7 @@ public interface GameEventListener extends Serializable
   default public GameEventQueue receiveDemolitionEvent(Unit actor, XYCoord tile){ return null; };
   default public GameEventQueue receiveCreateUnitEvent(Unit unit){ return null; };
   default public GameEventQueue receiveCaptureEvent(Unit unit, MapLocation location){ return null; };
-  default public GameEventQueue receiveCommanderDefeatEvent(CommanderDefeatEvent event){ return null; };
+  default public GameEventQueue receiveCommanderDefeatEvent(ArmyDefeatEvent event){ return null; };
   default public GameEventQueue receiveLoadEvent(LoadLifecycle.LoadEvent event){ return null; };
   default public GameEventQueue receiveMoveEvent(MoveEvent event){ return null; };
   default public GameEventQueue receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){ return null; };

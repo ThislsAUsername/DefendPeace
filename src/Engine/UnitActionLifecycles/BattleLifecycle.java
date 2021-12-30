@@ -14,7 +14,7 @@ import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Engine.Combat.DamagePopup;
 import Engine.Combat.StrikeParams;
-import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -162,10 +162,10 @@ public abstract class BattleLifecycle
             Utils.enqueueDeathEvent(event.getAttacker(), attackEvents);
 
             // Since the attacker died, see if he has any friends left.
-            if( attacker.CO.units.size() == 1 )
+            if( attacker.CO.army.getUnits().size() == 1 )
             {
               // CO is out of units. Too bad.
-              attackEvents.add(new CommanderDefeatEvent(event.getAttacker().CO.army));
+              attackEvents.add(new ArmyDefeatEvent(event.getAttacker().CO.army));
             }
           }
           if( event.defenderDies() )
@@ -173,10 +173,10 @@ public abstract class BattleLifecycle
             Utils.enqueueDeathEvent(event.getDefender(), attackEvents);
 
             // The defender died; check if the Commander is defeated.
-            if( defender.CO.units.size() == 1 )
+            if( defender.CO.army.getUnits().size() == 1 )
             {
               // CO is out of units. Too bad.
-              attackEvents.add(new CommanderDefeatEvent(event.getDefender().CO.army));
+              attackEvents.add(new ArmyDefeatEvent(event.getDefender().CO.army));
             }
           }
         }
@@ -298,7 +298,7 @@ public abstract class BattleLifecycle
 
             if( Utils.willLoseFromLossOf(gameMap, target) )
             {
-              attackEvents.add(new CommanderDefeatEvent(target.getOwner().army));
+              attackEvents.add(new ArmyDefeatEvent(target.getOwner().army));
             }
           }
         }

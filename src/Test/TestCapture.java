@@ -8,7 +8,7 @@ import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
-import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.BattleLifecycle;
@@ -191,17 +191,17 @@ public class TestCapture extends TestCase
     captureAction = new CaptureLifecycle.CaptureAction(testMap, mech, Utils.findShortestPath(mech, 13, 1, testMap));
     GameEventQueue events = captureAction.getEvents(testMap);
 
-    // Make sure a CommanderDefeatEvent was generated as a result (the actual event test is in TestGameEvent.java).
+    // Make sure a ArmyDefeatEvent was generated as a result (the actual event test is in TestGameEvent.java).
     boolean hasDefeatEvent = false;
     for( GameEvent event : events )
     {
-      if( event instanceof CommanderDefeatEvent )
+      if( event instanceof ArmyDefeatEvent )
       {
         hasDefeatEvent = true;
         break;
       }
     }
-    testPassed &= validate( hasDefeatEvent, "    No CommanderDefeatEvent generated on HQ capture!");
+    testPassed &= validate( hasDefeatEvent, "    No ArmyDefeatEvent generated on HQ capture!");
 
     return testPassed;
   }

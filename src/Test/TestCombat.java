@@ -8,7 +8,7 @@ import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
-import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.BattleLifecycle;
@@ -201,7 +201,7 @@ public class TestCombat extends TestCase
     return testPassed;
   }
 
-  /** Make sure we generate a CommanderDefeatEvent when killing the final unit for a CO. */
+  /** Make sure we generate a ArmyDefeatEvent when killing the final unit for a CO. */
   private boolean testKillLastUnit()
   {
     boolean testPassed = true;
@@ -220,17 +220,17 @@ public class TestCombat extends TestCase
     // Extract the resulting GameEventQueue.
     GameEventQueue events = battleAction.getEvents(testMap);
 
-    // Make sure a CommanderDefeatEvent was generated as a result (the actual event test is in TestGameEvent.java).
+    // Make sure a ArmyDefeatEvent was generated as a result (the actual event test is in TestGameEvent.java).
     boolean hasDefeatEvent = false;
     for( GameEvent event : events )
     {
-      if( event instanceof CommanderDefeatEvent )
+      if( event instanceof ArmyDefeatEvent )
       {
         hasDefeatEvent = true;
         break;
       }
     }
-    testPassed &= validate( hasDefeatEvent, "    No CommanderDefeatEvent generated when losing final unit!");
+    testPassed &= validate( hasDefeatEvent, "    No ArmyDefeatEvent generated when losing final unit!");
 
     return testPassed;
   }

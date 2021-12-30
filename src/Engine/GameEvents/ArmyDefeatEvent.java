@@ -11,12 +11,12 @@ import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
 
-public class CommanderDefeatEvent implements GameEvent
+public class ArmyDefeatEvent implements GameEvent
 {
   private final Army defeatedArmy;
   private Commander beneficiaryCO = null;
 
-  public CommanderDefeatEvent( Army co )
+  public ArmyDefeatEvent( Army co )
   {
     defeatedArmy = co;
   }
