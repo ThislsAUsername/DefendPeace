@@ -597,7 +597,7 @@ public class SpriteMapView extends MapView
 
     // If the CO overlay won't overlap the map, draw all CO overlays to use the space
     int overlayHSpaceAvailable = (mapViewWidth - mapImage.getWidth()) / 2;
-    if( overlayHSpaceAvailable > CommanderOverlayArtist.OVERLAY_WIDTH + 42 )
+    if( overlayHSpaceAvailable > SpriteLibrary.getCoOverlay(myGame.activeArmy.cos[0], true).getWidth() + 42 )
     {
       // We have plenty of space to draw everything, so default to drawing left
       overlayIsLeft = true;
@@ -605,7 +605,7 @@ public class SpriteMapView extends MapView
       BufferedImage coOverlays = CommanderOverlayArtist.drawAllCommanderOverlays(
           myGame.armies,
           getDrawableMap(myGame),
-          overlayHSpaceAvailable, mapViewHeight - 80, myGame.activeArmy);
+          overlayHSpaceAvailable, mapViewHeight, myGame.activeArmy);
       if( overlayIsLeft )
         g.drawImage(coOverlays, 0, 0, null);
       else

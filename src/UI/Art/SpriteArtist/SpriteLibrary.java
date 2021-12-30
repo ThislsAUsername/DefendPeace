@@ -605,7 +605,8 @@ public class SpriteLibrary
     if( !coOverlays.containsKey(co) )
     {
       // If we don't already have this overlay, go load and store it.
-      Sprite overlay = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/co_overlay.png"), CommanderOverlayArtist.OVERLAY_WIDTH, CommanderOverlayArtist.OVERLAY_HEIGHT);
+      final BufferedImage sprite = SpriteLibrary.loadSpriteSheetFile("res/ui/co_overlay.png");
+      Sprite overlay = new Sprite(sprite, sprite.getWidth()/2, sprite.getHeight());
       overlay.colorize(UIUtils.defaultMapColors, UIUtils.getMapUnitColors(co.myColor).paletteColors);
 
       // Draw the Commander's mug on top of the overlay.
@@ -614,7 +615,7 @@ public class SpriteLibrary
       Graphics g = overlay.getFrame(0).getGraphics();
       g.drawImage(coMug, mugW, 1, -mugW, coMug.getHeight(), null);
       Graphics g1 = overlay.getFrame(1).getGraphics();
-      g1.drawImage(coMug, CommanderOverlayArtist.OVERLAY_WIDTH-mugW, 1, null);
+      g1.drawImage(coMug, overlay.getFrame(1).getWidth()-mugW, 1, null);
 
       coOverlays.put(co, overlay);
     }

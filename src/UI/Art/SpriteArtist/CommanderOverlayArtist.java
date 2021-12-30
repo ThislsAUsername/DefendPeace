@@ -14,9 +14,6 @@ import UI.COStateInfo;
 
 public class CommanderOverlayArtist
 {
-  public static final int OVERLAY_WIDTH = 97;
-  public static final int OVERLAY_HEIGHT = 20;
-
   private static final int animIndexUpdateInterval = 13;
   
   private static Map<String, Sprite> activeAbilityTextSprites = new HashMap<String, Sprite>();
@@ -24,42 +21,48 @@ public class CommanderOverlayArtist
   /**
    * Draws an overlay for all COs passed in, left-justified, with status text and optionally highlights one CO
    */
-  public static BufferedImage drawAllCommanderOverlays(Army[] coList, GameMap drawableMap, int drawingWidth, int drawingHeight, Army coToHighlight)
+  public static BufferedImage drawAllCommanderOverlays(Army[] armyList, GameMap drawableMap, int drawingWidth, int drawingHeight, Army armyToHighlight)
   {
     BufferedImage output = SpriteLibrary.createTransparentSprite(drawingWidth, drawingHeight);
     Graphics g = output.getGraphics();
     int verticalOffset = 0;
 
-    for( Army CO : coList )
+    for( Army army : armyList )
     {
+      BufferedImage headerWorkspace = SpriteLibrary.createTransparentSprite(drawingWidth, drawingHeight);
+      int newOffset = CommanderOverlayArtist.drawCommanderOverlay(headerWorkspace.getGraphics(), army, verticalOffset, true);
+
       // Highlight the selected CO
-      if( CO == coToHighlight )
+      if( army == armyToHighlight )
       {
         g.setColor(SpriteUIUtils.MENUHIGHLIGHTCOLOR);
-        g.fillRect(0, verticalOffset, drawingWidth, OVERLAY_HEIGHT);
+        g.fillRect(0, verticalOffset, drawingWidth, newOffset - verticalOffset);
       }
 
-      CommanderOverlayArtist.drawCommanderOverlay(g, CO, verticalOffset, true);
-      verticalOffset += OVERLAY_HEIGHT + 5;
+      g.drawImage(headerWorkspace, 0, 0, null);
+      verticalOffset = newOffset + 5;
 
       // Add brief status text per CO
-      String status = new COStateInfo(drawableMap, CO).getAbbrevStatus();
+      String status = new COStateInfo(drawableMap, army).getAbbrevStatus();
       BufferedImage statusText = SpriteUIUtils.drawProseToWidth(status, drawingWidth);
-      g.drawImage(statusText, 0, verticalOffset, null);
+      g.drawImage(statusText, 0, verticalOffset + 4, null);
       verticalOffset += statusText.getHeight() + 5;
 
-      if( verticalOffset + OVERLAY_HEIGHT > drawingHeight )
+      if( verticalOffset > drawingHeight )
         break;
     }
 
     return output;
   }
 
-  public static void drawCommanderOverlay(Graphics g, Army army, boolean overlayIsLeft)
+  /**
+   * @return The vertical offset of the bottom of the final header drawn (not counting money box)
+   */
+  public static int drawCommanderOverlay(Graphics g, Army army, boolean overlayIsLeft)
   {
-    drawCommanderOverlay(g, army, 0, overlayIsLeft);
+    return drawCommanderOverlay(g, army, 0, overlayIsLeft);
   }
-  public static void drawCommanderOverlay(Graphics g, Army army, int yInitialOffset, boolean overlayIsLeft)
+  public static int drawCommanderOverlay(Graphics g, Army army, int yInitialOffset, boolean overlayIsLeft)
   {
     final int coEyesWidth = 25;
     final int xTextOffset = (4+coEyesWidth); // Distance from the side of the view to the CO overlay text.
@@ -114,10 +117,12 @@ public class CommanderOverlayArtist
     final int fundsLength = ("" + army.money).length();
     final int fundsWidth = ICON_VALUE_SPACING + fundsLength * spriteA.getWidth() + 1;
     final int drawX = overlayIsLeft ? 0 : mapViewWidth - fundsWidth;
-    final int drawY = yInitialOffset - moneyBufferPx + yCurrentOffset;
+    final int drawY = yCurrentOffset - moneyBufferPx;
     SpriteUIUtils.drawMenuFrame(g, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR,
         drawX, drawY, fundsWidth, SpriteLibrary.baseIconSize+moneyBufferPx, moneyBufferPx);
     drawIconAndValue(g, SpriteLibrary.MapIcons.FUNDS, army.money,  fundsLength, drawX, drawY + moneyBufferPx);
+
+    return yCurrentOffset;
   }
 
   private static final int ICON_VALUE_SPACING = SpriteLibrary.baseIconSize + 2;

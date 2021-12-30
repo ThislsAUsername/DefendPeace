@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderInfo.InfoPage;
+import CommandingOfficers.CommanderInfo.InfoPage.PageType;
 import Engine.Army;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapPerspective;
@@ -101,7 +102,7 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
 
     final int drawingWidth  = paneHSize - PANE_OUTER_BUFFER*2;
     final int drawingHeight = paneVSize - PANE_OUTER_BUFFER*2;
-    if( pages != prevPages )
+    if( pages != prevPages || pages.get(0).pageType == PageType.CO_HEADERS )
       pageImage = renderPage(pages, drawingWidth);
     prevPages = pages;
 
@@ -150,19 +151,16 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
         {
           Army[] armyList = myControl.getGame().armies;
 
+          int ySpaceNeeded = 0;
+          final int overlayHeight = SpriteLibrary.getCoOverlay(armyList[0].cos[0], true).getHeight();
           for( Army thisArmy : armyList )
-          {
-            BufferedImage statusHeader =
-                SpriteLibrary.createTransparentSprite(drawingWidth, CommanderOverlayArtist.OVERLAY_HEIGHT + 5);
-            Graphics headerG = statusHeader.getGraphics();
-            // TODO: Account for multiple COs
-            CommanderOverlayArtist.drawCommanderOverlay(headerG, thisArmy, 0, true);
+            // Draw a little generously
+            ySpaceNeeded += (thisArmy.cos.length + 1) * overlayHeight;
 
-            String status = new COStateInfo(drawableMap, thisArmy).getAbbrevStatus();
-            BufferedImage statusText = SpriteUIUtils.drawProseToWidth(status, drawingWidth);
+          BufferedImage drawableArea =
+              CommanderOverlayArtist.drawAllCommanderOverlays(armyList, drawableMap, drawingWidth, ySpaceNeeded, null);
 
-            pageImages.add(SpriteUIUtils.stackBufferedImages(new BufferedImage[] { statusHeader, statusText }, 0));
-          }
+          pageImages.add(drawableArea);
         }
           break;
         case GAME_STATUS: // Draw detailed status text for only this specific CO
