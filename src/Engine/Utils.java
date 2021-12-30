@@ -656,20 +656,20 @@ public class Utils
   }
 
   /**
-   * @return Whether the owner of this property will lose when it's captured
+   * @return Whether the owner of this property will lose if the property is lost
    */
   public static boolean willLoseFromLossOf(MapMaster map, MapLocation capLoc)
   {
     if(null == capLoc.getOwner())
       return false;
 
-    boolean playerHasLost = false;
+    boolean playerWillLose = false;
 
     TerrainType propertyType = capLoc.getEnvironment().terrainType;
 
     if( (propertyType == TerrainType.HEADQUARTERS) )
     {
-      playerHasLost = true;
+      playerWillLose = true;
     }
 
     else if( (propertyType == TerrainType.LAB) )
@@ -693,11 +693,11 @@ public class Utils
       }
       if( numLabs < 2 && numHQs == 0 )
       {
-        playerHasLost = true;
+        playerWillLose = true;
       }
     }
 
-    return playerHasLost;
+    return playerWillLose;
   }
 
   /**
