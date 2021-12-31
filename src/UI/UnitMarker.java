@@ -2,6 +2,7 @@ package UI;
 
 import java.awt.Color;
 
+import Engine.XYCoord;
 import Units.Unit;
 
 public interface UnitMarker
@@ -17,6 +18,16 @@ public interface UnitMarker
     return '\0';
   }
   public default Color getMarkingColor(Unit unit)
+  {
+    return Color.white;
+  }
+
+  public default char getPlaceMarking(XYCoord coord)
+  {
+    // We don't have anything useful to print, so don't.
+    return '\0';
+  }
+  public default Color getMarkingColor(XYCoord coord)
   {
     return Color.white;
   }

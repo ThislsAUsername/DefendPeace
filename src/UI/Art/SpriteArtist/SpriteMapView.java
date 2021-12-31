@@ -290,8 +290,8 @@ public class SpriteMapView extends MapView
                                  drawMultiplier,
                                  null != currentPath, cursorCoord);
 
-    // Draw Unit icons on top of everything, to make sure they are seen clearly.
-    drawUnitIcons(mapGraphics, gameMap, animIndex);
+    // Draw icons on top of everything, to make sure they are seen clearly.
+    drawStatusIcons(mapGraphics, gameMap, animIndex);
 
     // Draw the movement arrow if the user is contemplating a move/action (but not once the action commences).
     if( null != currentPath )
@@ -517,7 +517,7 @@ public class SpriteMapView extends MapView
    * NOTE: Does not draw the unit icon for the currently-active unit, if
    * one is selected; this must be done separately.
    */
-  public void drawUnitIcons(Graphics g, GameMap gameMap, int animIndex)
+  public void drawStatusIcons(Graphics g, GameMap gameMap, int animIndex)
   {
     ArrayList<Unit> actors = null;
     if( null != currentAnimation )
@@ -533,8 +533,11 @@ public class SpriteMapView extends MapView
           if( null == actors || !actors.contains(resident) )
           {
             unitArtist.drawUnitIcons(g, resident, resident.x, resident.y, animIndex);
+            MarkArtist.drawMark(g, myGame, resident, animIndex);
           }
         }
+        else
+          MarkArtist.drawMark(g, myGame, new XYCoord(x, y), animIndex);
       }
     }
   }
