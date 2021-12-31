@@ -6,6 +6,7 @@ import java.util.Map;
 import CommandingOfficers.Commander;
 import Engine.Army;
 import Engine.GameInstance;
+import Engine.GamePath;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
@@ -75,7 +76,7 @@ public interface GameEventListener extends Serializable
   default public GameEventQueue receiveCaptureEvent(Unit unit, MapLocation location){ return null; };
   default public GameEventQueue receiveCommanderDefeatEvent(ArmyDefeatEvent event){ return null; };
   default public GameEventQueue receiveLoadEvent(LoadLifecycle.LoadEvent event){ return null; };
-  default public GameEventQueue receiveMoveEvent(MoveEvent event){ return null; };
+  default public GameEventQueue receiveMoveEvent(Unit unit, GamePath unitPath){ return null; };
   default public GameEventQueue receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){ return null; };
   default public GameEventQueue receiveTurnInitEvent(Army co, int turn){ return null; };
   default public GameEventQueue receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){ return null; };
