@@ -188,6 +188,8 @@ public class UnitContext extends UnitState
     this.movePower = model.baseMovePower;
     for( UnitModifier mod : mods )
       mod.modifyMovePower(this);
+    if( movePower < 0 )
+      movePower = 0;
     return movePower;
   }
 
