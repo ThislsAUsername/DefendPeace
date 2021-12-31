@@ -78,7 +78,7 @@ public class GameActionSet
     {
       // NOTE: Ability and Unit Production actions return null for getType(), since they have no associated UnitActionFactory.
       // However, they are also never put into GameActionSets, so this is probably fine.
-      return actionOptions.get(0).getType().name();
+      return actionOptions.get(0).getType().name(actionOptions.get(0).getActor());
     }
     System.out.println("WARNING! Invalid GameActionSet!");
     return "INVALID";

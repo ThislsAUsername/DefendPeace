@@ -53,7 +53,7 @@ public abstract class RepairLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
       return "REPAIR";
     }

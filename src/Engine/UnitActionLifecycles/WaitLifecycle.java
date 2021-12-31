@@ -29,7 +29,7 @@ public abstract class WaitLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
       return "WAIT";
     }

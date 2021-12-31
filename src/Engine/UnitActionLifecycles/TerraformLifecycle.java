@@ -45,7 +45,7 @@ public abstract class TerraformLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
       return name;
     }
