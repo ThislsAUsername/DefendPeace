@@ -279,14 +279,15 @@ public class MapController implements IController, GameInputHandler.StateChanged
    */
   private void handlePathSelect(InputHandler.InputAction input)
   {
-    boolean inMoveableSpace = myGame.getCursorLocation().isHighlightSet();
+    Collection<XYCoord> options = myGameInputHandler.getCoordinateOptions();
+    boolean inMoveableSpace = options.contains(myGame.getCursorCoord());
 
     switch (input)
     {
       case UP:
         myGame.moveCursorUp();
         // Make sure we don't overshoot the reachable tiles by accident.
-        if( inMoveableSpace && InputHandler.isUpHeld() && !myGame.getCursorLocation().isHighlightSet() )
+        if( inMoveableSpace && InputHandler.isUpHeld() && !options.contains(myGame.getCursorCoord()) )
         {
           myGame.moveCursorDown();
         }
@@ -294,7 +295,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case DOWN:
         myGame.moveCursorDown();
         // Make sure we don't overshoot the reachable space by accident.
-        if( inMoveableSpace && InputHandler.isDownHeld() && !myGame.getCursorLocation().isHighlightSet() )
+        if( inMoveableSpace && InputHandler.isDownHeld() && !options.contains(myGame.getCursorCoord()) )
         {
           myGame.moveCursorUp();
         }
@@ -302,7 +303,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case LEFT:
         myGame.moveCursorLeft();
         // Make sure we don't overshoot the reachable space by accident.
-        if( inMoveableSpace && InputHandler.isLeftHeld() && !myGame.getCursorLocation().isHighlightSet() )
+        if( inMoveableSpace && InputHandler.isLeftHeld() && !options.contains(myGame.getCursorCoord()) )
         {
           myGame.moveCursorRight();
         }
@@ -310,7 +311,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case RIGHT:
         myGame.moveCursorRight();
         // Make sure we don't overshoot the reachable space by accident.
-        if( inMoveableSpace && InputHandler.isRightHeld() && !myGame.getCursorLocation().isHighlightSet() )
+        if( inMoveableSpace && InputHandler.isRightHeld() && !options.contains(myGame.getCursorCoord()) )
         {
           myGame.moveCursorLeft();
         }
@@ -371,15 +372,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     GameInputHandler.InputType inputType = myGameInputHandler.getInputType();
     myGameInputOptionSelector = myGameInputHandler.getOptionSelector();
 
-    myGame.gameMap.clearAllHighlights();
-    // Set the target-location highlights.
     Collection<XYCoord> options = myGameInputHandler.getCoordinateOptions();
-    if ( null != options)
-      for( XYCoord xyc : options )
-      {
-        myGame.gameMap.getLocation(xyc).setHighlight(true);
-      }
-
     currentMenu = null;
 
     switch (inputType)
@@ -641,6 +634,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
   public XYCoord getContemplationCoord()
   {
     return myGameInputHandler.getUnitCoord();
+  }
+  public Collection<XYCoord> getSelectableCoords()
+  {
+    return myGameInputHandler.getCoordinateOptions();
   }
 
   public GamePath getContemplatedMove()

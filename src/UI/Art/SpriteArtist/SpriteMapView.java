@@ -257,6 +257,14 @@ public class SpriteMapView extends MapView
     {
       overlays.addAll(army.getMyOverlays(gameMap, army == gameMap.viewer));
     }
+
+    // Highlight current available selection targets
+    Collection<XYCoord> options = mapController.getSelectableCoords();
+    if( null != options && !options.isEmpty() )
+    {
+      overlays.add(new GameOverlay(null, options, OverlayArtist.HIGHLIGHT_COLOR, OverlayArtist.HIGHLIGHT_COLOR));
+    }
+
     // Highlight our currently-selected unit's range on top of everything else
     if( null != currentPath && null != currentActor && !mapController.isTargeting() )
     {

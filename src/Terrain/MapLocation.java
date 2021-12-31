@@ -17,7 +17,6 @@ public class MapLocation implements Serializable, ITargetable
   private Commander owner = null;
   private Unit resident = null;
   private final XYCoord coords;
-  private boolean highlightSet = false;
   public int durability = 99;
   public ArrayDeque<Weathers> forecast = new ArrayDeque<>();
 
@@ -78,16 +77,6 @@ public class MapLocation implements Serializable, ITargetable
   public boolean isProfitable()
   {
     return environs.terrainType.isProfitable();
-  }
-
-  public void setHighlight(boolean val)
-  {
-    highlightSet = val;
-  }
-
-  public boolean isHighlightSet()
-  {
-    return highlightSet;
   }
 
   public MapLocation(Environment environment, XYCoord coordinates)

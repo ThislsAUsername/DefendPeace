@@ -44,8 +44,6 @@ public abstract class GameMap implements Serializable, IEnvironsProvider
   /** Returns the MapLocation at the specified location, or null if that MapLocation does not exist. */
   public abstract MapLocation getLocation(int w, int h);
 
-  public abstract void clearAllHighlights();
-
   /** Returns true if no unit is at the specified x and y coordinate, false else */
   public abstract boolean isLocationEmpty(XYCoord coords);
 

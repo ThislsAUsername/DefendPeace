@@ -16,7 +16,7 @@ import UI.GameOverlay;
 
 public class OverlayArtist
 {
-  private static final Color HIGHLIGHT_COLOR = new Color(255, 255, 255, 160); // white
+  public static final Color HIGHLIGHT_COLOR = new Color(255, 255, 255, 255); // white
 
   public static final Color NOW_FIRE_EDGE    = new Color(240,   0,   0, 255); // red
   public static final Color LATER_FIRE_EDGE  = new Color(  0,   0, 160, 255); // dark blue
@@ -133,16 +133,6 @@ public class OverlayArtist
         for( GameOverlay ov : overlays )
           if( ov.area.contains(coord) )
             drawOverlayTile(og, ov, coord, w * tileSize - drawX, h * tileSize - drawY, tileSize);
-
-        if( gameMap.isLocationValid(w, h) )
-        {
-          Terrain.MapLocation locus = gameMap.getLocation(w, h);
-          if( locus.isHighlightSet() )
-          {
-            og.setColor(HIGHLIGHT_COLOR);
-            og.fillRect(w * tileSize - drawX, h * tileSize - drawY, tileSize, tileSize);
-          }
-        }
       }
     }
 
