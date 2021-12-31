@@ -20,4 +20,15 @@ public interface UnitMarker
   {
     return Color.white;
   }
+
+  public static class MarkData
+  {
+    public char mark;
+    public Color color;
+    public MarkData(char mark, Color color)
+    {
+      this.mark = mark;
+      this.color = color;
+    }
+  }
 }

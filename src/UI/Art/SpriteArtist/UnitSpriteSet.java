@@ -12,10 +12,12 @@ import java.util.*;
 import CommandingOfficers.Commander;
 import Engine.Army;
 import Engine.GameInstance;
+import Engine.GameEvents.GameEventListener.CacheInvalidationListener;
 import Engine.StateTrackers.StateTracker;
 import UI.UIUtils;
 import UI.UIUtils.Faction;
 import UI.UnitMarker;
+import UI.UnitMarker.MarkData;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -245,6 +247,14 @@ public class UnitSpriteSet
    */
   public void drawUnitIcons(Graphics g, GameInstance game, Unit u, int animIndex, int drawX, int drawY)
   {
+    if( markCache == null || game != markCache.game )
+    {
+      if( markCache != null )
+        markCache.unregister(markCache.game);
+
+      markCache = new MarkingCache(game);
+    }
+
     int unitHeight = sprites[0].getFrame(0).getHeight();
 
     ArrayList<BufferedImage> unitIcons = new ArrayList<BufferedImage>();
@@ -265,30 +275,14 @@ public class UnitSpriteSet
       g.drawImage(num, drawX, drawY + ((unitHeight) / 2), num.getWidth(), num.getHeight(), null);
     }
 
-    ArrayList<UnitMarker> markers = new ArrayList<>();
-    { // Scope for potentialMarkers
-      ArrayList<UnitMarker> potentialMarkers = new ArrayList<>();
-      for( Army army : game.armies )
-        for( Commander co : army.cos )
-          potentialMarkers.add(co);
-      for( StateTracker st : game.stateTrackers.values() )
-        potentialMarkers.add(st);
+    markCache.buildMarkLibrary();
+    ArrayList<MarkData> markers = markCache.unitMarks.get(u);
 
-      for( UnitMarker mark : potentialMarkers )
-      {
-        char symbol = mark.getUnitMarking(u);
-        if( '\0' != symbol ) // null char is our sentry value
-        {
-          markers.add(mark);
-        }
-      }
-    }
-
-    // Draw one of them, based on our animation index
+    // Draw one mark, based on our animation index
     if( !markers.isEmpty() )
     {
-      UnitMarker mark = markers.get((animIndex%(markers.size()*ANIM_FRAMES_PER_MARK))/ANIM_FRAMES_PER_MARK);
-      BufferedImage symbol = SpriteLibrary.getColoredMapTextSprites(mark.getMarkingColor(u)).get(mark.getUnitMarking(u));
+      MarkData mark = markers.get((animIndex%(markers.size()*ANIM_FRAMES_PER_MARK))/ANIM_FRAMES_PER_MARK);
+      BufferedImage symbol = SpriteLibrary.getColoredMapTextSprites(mark.color).get(mark.mark);
       // draw in the upper right corner
       g.drawImage(symbol, drawX + ((unitHeight) / 2), drawY, symbol.getWidth(), symbol.getHeight(), null);
     }
@@ -346,5 +340,62 @@ public class UnitSpriteSet
   public boolean isStateFlippable(AnimState state)
   {
     return !unFlippableStates.contains(state);
+  }
+
+
+  private static MarkingCache markCache;
+  private static class MarkingCache implements CacheInvalidationListener
+  {
+    private static final long serialVersionUID = 1L;
+
+    public MarkingCache(GameInstance game)
+    {
+      this.game = game;
+      registerForEvents(game);
+      InvalidateCache();
+    }
+
+    @Override
+    public boolean shouldSerialize() { return false; }
+
+    public HashMap<Unit, ArrayList<MarkData>> unitMarks = new HashMap<>();
+    public GameInstance game;
+
+    @Override
+    public void InvalidateCache()
+    {
+      unitMarks.clear();
+    }
+
+    // This is done on the *render pass* after InvalidateCache()
+    //   to ensure all other listeners have updated their state before we query marks
+    public void buildMarkLibrary()
+    {
+      if( null == game || unitMarks.keySet().size() > 0 )
+        return;
+
+      ArrayList<UnitMarker> markers = new ArrayList<>();
+      for( Army army : game.armies )
+        for( Commander co : army.cos )
+          markers.add(co);
+      for( StateTracker st : game.stateTrackers.values() )
+        markers.add(st);
+
+      // Generate all marks and store them for later use
+      for( Army army : game.armies )
+        for( Unit u : army.getUnits() )
+        {
+          ArrayList<MarkData> marks = new ArrayList<>();
+          for( UnitMarker m : markers )
+          {
+            char symbol = m.getUnitMarking(u);
+            if( '\0' != symbol ) // null char is our sentry value
+            {
+              marks.add(new MarkData(symbol, m.getMarkingColor(u)));
+            }
+          }
+          unitMarks.put(u, marks);
+        }
+    } // ~InvalidateCache()
   }
 }
