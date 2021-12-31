@@ -39,7 +39,8 @@ public class Qis extends Commander
           "What is known is that Qis has become incredibly adept at using the ever-present snow to his advantage."));
       infoPages.add(new InfoPage(
           "Passive:\r\n" +
-          "Watery terrain slows your non-naval units, but all units have perfect movement in snow.\n" +
+          "Watery terrain slows your non-naval vehicles, and they lose -1 movement when starting in rain\n" +
+          "All units have perfect movement in snow.\n" +
           "The path each unit takes on your turn is coated with snow until your next turn."));
       infoPages.add(new InfoPage(
           GroovinMovin.NAME+" ("+GroovinMovin.COST+"):\n" +
@@ -77,32 +78,42 @@ public class Qis extends Commander
   @Override
   public void modifyMoveType(UnitContext uc)
   {
-    // Qis's units are fine in the snow, but not when wet.
-    if( !uc.model.isSeaUnit() )
-    {
-      // Rain gives +1 move cost across the board
-      for( TerrainType terrain : TerrainType.TerrainTypeList )
-        uc.moveType.setMoveCost(Weathers.RAIN, terrain, uc.moveType.getMoveCost(Weathers.CLEAR, terrain) + 1);
-
-      for( Weathers weather : Weathers.values() )
-      {
-        if( weather == Weathers.RAIN || weather == Weathers.SNOW )
-          continue; // These are handled elsewhere
-
-        // Watery terrain costs +1 move
-        for( TerrainType terrain : TerrainType.TerrainTypeList )
-        {
-          if( terrain.isWater() )
-            uc.moveType.setMoveCost(weather, terrain, uc.moveType.getMoveCost(weather, terrain) + 1);
-        }
-      }
-    }
     // Perfect movement on snow
     for( TerrainType terrain : TerrainType.TerrainTypeList )
     {
       if( MoveType.IMPASSABLE > uc.moveType.getMoveCost(Weathers.SNOW, terrain) )
         uc.moveType.setMoveCost(Weathers.SNOW, terrain, 1);
     }
+
+    if( uc.model.isSeaUnit() || uc.model.isTroop() )
+      return;
+
+    // Qis's vehicles hate being wet.
+    for( Weathers weather : Weathers.values() )
+    {
+      if( weather == Weathers.SNOW )
+        continue; // Snow is handled elsewhere
+
+      // Watery terrain costs +1 move
+      for( TerrainType terrain : TerrainType.TerrainTypeList )
+      {
+        if( terrain.isWater() )
+          uc.moveType.setMoveCost(weather, terrain, uc.moveType.getMoveCost(weather, terrain) + 1);
+      }
+    }
+  }
+
+  @Override
+  public void modifyMovePower(UnitContext uc)
+  {
+    if( uc.map == null || uc.coord == null )
+      return;
+    if( uc.model.isSeaUnit() || uc.model.isTroop() )
+      return;
+
+    // Qis's vehicles hate being wet.
+    if( uc.map.getEnvironment(uc.coord).weatherType == Weathers.RAIN )
+      uc.movePower -= 1;
   }
 
   @Override
