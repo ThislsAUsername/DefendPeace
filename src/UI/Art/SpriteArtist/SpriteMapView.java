@@ -324,12 +324,12 @@ public class SpriteMapView extends MapView
     for( DamagePopup popup : mapController.getDamagePopups() )
       drawDamagePreview(mapGraphics, popup, gameMap.isLocationEmpty(popup.coords));
 
-    // When we draw the map, we want to center it if it's smaller than the view dimensions
+    // When we draw the map, we want to right-justify it if it's smaller than the view dimensions
     int deltaX = 0, deltaY = 0;
     if (mapViewWidth > mapImage.getWidth())
-      deltaX = (mapViewWidth - mapImage.getWidth())/2;
+      deltaX = (mapViewWidth - mapImage.getWidth());
     if (mapViewHeight > mapImage.getHeight())
-      deltaY = (mapViewHeight - mapImage.getHeight())/2;
+      deltaY = (mapViewHeight - mapImage.getHeight());
 
     // Copy the relevant section of the map image onto a screen-sized image buffer.
     Dimension dims = SpriteOptions.getScreenDimensions();
@@ -596,25 +596,27 @@ public class SpriteMapView extends MapView
     }
 
     // If the CO overlay won't overlap the map, draw all CO overlays to use the space
-    int overlayHSpaceAvailable = (mapViewWidth - mapImage.getWidth()) / 2;
-    if( overlayHSpaceAvailable > SpriteLibrary.getCoOverlay(myGame.activeArmy.cos[0], true).getWidth() + 42 )
-    {
-      // We have plenty of space to draw everything, so default to drawing left
+    final int overlayHSpaceAvailable = mapViewWidth - mapImage.getWidth();
+    final boolean drawAllHeaders = overlayHSpaceAvailable > SpriteLibrary.getCoOverlay(myGame.activeArmy.cos[0], true).getWidth() + 42;
+    if( drawAllHeaders )
       overlayIsLeft = true;
 
+    drawTurnCounter(g, overlayIsLeft);
+    int headerOffset = turnNumImage.getHeight() + 6;
+
+    if( drawAllHeaders )
+    {
       BufferedImage coOverlays = CommanderOverlayArtist.drawAllCommanderOverlays(
           myGame.armies,
           getDrawableMap(myGame),
           overlayHSpaceAvailable, mapViewHeight, myGame.activeArmy);
       if( overlayIsLeft )
-        g.drawImage(coOverlays, 0, 0, null);
+        g.drawImage(coOverlays, 0, headerOffset, null);
       else
-        g.drawImage(coOverlays, mapViewWidth - coOverlays.getWidth(), 0, null);
+        g.drawImage(coOverlays, mapViewWidth - coOverlays.getWidth(), headerOffset, null);
     }
     else
-      CommanderOverlayArtist.drawCommanderOverlay(g, myGame.activeArmy, overlayIsLeft);
-
-    drawTurnCounter(g, overlayIsLeft);
+      CommanderOverlayArtist.drawCommanderOverlay(g, myGame.activeArmy, headerOffset, overlayIsLeft);
 
     // Draw terrain defense and unit status.
     if( includeTileDetails )
@@ -623,7 +625,7 @@ public class SpriteMapView extends MapView
 
   private int lastTurnNum = -1;
   private BufferedImage turnNumImage;
-  private void drawTurnCounter(Graphics g, boolean counterIsRight)
+  private void drawTurnCounter(Graphics g, boolean overlayIsLeft)
   {
     // Generate the turn-counter image.
     int turnNum = myGame.getCurrentTurn();
@@ -653,9 +655,9 @@ public class SpriteMapView extends MapView
     }
 
     // Draw the turn counter.
-    int xDraw = (counterIsRight
-        ? (SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale()) - 2 - turnNumImage.getWidth()
-        : 2);
+    int xDraw = overlayIsLeft ?
+        2
+        : (SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale()) - 2 - turnNumImage.getWidth();
     int yDraw = 3;
 
     // Draw a CO-colored background with the counter.
