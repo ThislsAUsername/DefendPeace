@@ -40,7 +40,7 @@ public interface GameEventListener extends Serializable
     return events;
   }
 
-  /** Allows GameInstance to make informed decisons on whether to try saving this listener */
+  /** Allows GameInstance to make informed decisions on whether to try saving this listener */
   default public boolean shouldSerialize() { return true; }
 
   /** Sign this listener up to receive events. If a listener registers multiple times, it will still

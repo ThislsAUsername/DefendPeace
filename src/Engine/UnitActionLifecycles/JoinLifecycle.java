@@ -30,7 +30,6 @@ public abstract class JoinLifecycle
       Unit resident = map.getLocation(moveLocation).getResident();
       if( resident != null )
       {
-        // TODO: Consider if and how off-CO joins should be allowed if tags ever happens
         int recipientCapacity = new UnitContext(resident).calculateCargoCapacity();
         int cargoSize = resident.heldUnits.size() + actor.heldUnits.size();
         if( resident.model.equals(actor.model) && resident != actor && resident.isHurt() && cargoSize <= recipientCapacity )

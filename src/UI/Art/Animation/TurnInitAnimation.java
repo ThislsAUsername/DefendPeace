@@ -77,7 +77,6 @@ public class TurnInitAnimation extends GameAnimation
     fgg.fillRect(0, fgImage.getHeight()-drawScale, fgImage.getWidth(), drawScale);
 
     // Fill the frame behind the text.
-    // TODO: multiple COs?
     fgg.setColor((opaque ? new Color(255, 255, 255, 180) : commander.cos[0].myColor));
     fgg.fillRect(0, drawScale, fgImage.getWidth(), fgImage.getHeight()-(2*drawScale));
 
@@ -111,7 +110,6 @@ public class TurnInitAnimation extends GameAnimation
     }
 
     // Redraw the bg effects image.
-    // TODO: multiple COs?
     HorizontalStreaksBG.draw(bgImage.getGraphics(), commander.cos[0].myColor);
 
     // Cover the map while sliding the overlay into place if the map should be hidden.

@@ -391,7 +391,6 @@ public class Army implements GameEventListener, Serializable, UnitModList
   @Override
   public List<UnitModifier> getModifiers()
   {
-    // TODO Add call to pull modifiers from Army when that becomes a thing?
     return new ArrayList<UnitModifier>(unitMods);
   }
 

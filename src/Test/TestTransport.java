@@ -230,7 +230,7 @@ public class TestTransport extends TestCase
     testPassed &= validate(testMap.getLocation(1, 1).getResident() == null, "    Lander1 is still on the map after Deletion!");
     testPassed &= validate(dc.count == 3, "    Counted " + dc.count + " unit deaths instead of 3 after deleting loaded transport!");
 
-    // NOTE/TODO: Is ability power awarded for the cargo unit?
+    // NOTE: Is ability power awarded for the cargo unit?
     //  -- Definitely not for AW2 and DoR
 
     cleanupTest();
