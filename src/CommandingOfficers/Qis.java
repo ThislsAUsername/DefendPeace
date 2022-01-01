@@ -39,7 +39,7 @@ public class Qis extends Commander
           "What is known is that Qis has become incredibly adept at using the ever-present snow to his advantage."));
       infoPages.add(new InfoPage(
           "Passive:\r\n" +
-          "Watery terrain slows your non-naval vehicles, and they lose -1 movement when starting in rain\n" +
+          "Non-naval vehicles move slowly on watery terrain and get -1 movement when starting in rain\n" +
           "All units have perfect movement in snow.\n" +
           "The path each unit takes on your turn is coated with snow until your next turn."));
       infoPages.add(new InfoPage(
