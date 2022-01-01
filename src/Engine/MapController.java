@@ -541,18 +541,19 @@ public class MapController implements IController, GameInputHandler.StateChanged
     // If we are done animating the last action, check to see if the game is over.
     if( animEventQueueIsEmpty )
     {
-      // Count the number of COs that are left.
-      int activeNum = 0;
-      for( int i = 0; i < myGame.armies.length; ++i )
+      int activeTeamCount = 0;
+      ArrayList<Integer> teams = new ArrayList<>();
+      for( Army army : myGame.armies )
       {
-        if( !myGame.armies[i].isDefeated )
-        {
-          activeNum++;
-        }
+        if( army.isDefeated )
+          continue;
+        if( teams.contains(army.team) )
+          continue;
+        activeTeamCount++;
+        teams.add(army.team);
       }
 
-      // If fewer than two COs yet survive, the game is over.
-      if( activeNum < 2 )
+      if( activeTeamCount < 2 )
       {
         isGameOver = true;
       }
