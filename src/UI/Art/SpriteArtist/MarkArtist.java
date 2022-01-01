@@ -146,8 +146,9 @@ public class MarkArtist
         return;
 
       for( Army army : game.armies )
-        for( Commander co : army.cos )
-          markers.add(co);
+        if( !army.isDefeated )
+          for( Commander co : army.cos )
+            markers.add(co);
       for( StateTracker st : game.stateTrackers.values() )
         markers.add(st);
     }

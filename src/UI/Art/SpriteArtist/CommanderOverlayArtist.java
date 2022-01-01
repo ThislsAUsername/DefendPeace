@@ -29,6 +29,9 @@ public class CommanderOverlayArtist
 
     for( Army army : armyList )
     {
+      if( army.isDefeated )
+        continue;
+
       BufferedImage headerWorkspace = SpriteLibrary.createTransparentSprite(drawingWidth, drawingHeight);
       int newOffset = CommanderOverlayArtist.drawCommanderOverlay(headerWorkspace.getGraphics(), army, verticalOffset, true);
 
