@@ -72,6 +72,8 @@ public class OverlayArtist
 
     if( !params.equals(oldParams) )
     {
+      // Army pushes a mark on threat overlays, so update marks when the overlays change
+      MarkArtist.MarkingCache.instance(gameMap.game).InvalidateCache();
       oldParams = params;
       overlayImage = generateOverlayImage(gameMap, overlays, drawX, drawY, viewWidth, viewHeight, tileSize);
     }

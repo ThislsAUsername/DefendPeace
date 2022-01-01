@@ -54,7 +54,7 @@ public class MarkArtist
       g.drawImage(symbol, drawX + ((SpriteLibrary.baseSpriteSize) / 2), drawY, symbol.getWidth(), symbol.getHeight(), null);    }
   }
 
-  private static class MarkingCache implements CacheInvalidationListener
+  public static class MarkingCache implements CacheInvalidationListener
   {
     private static final long serialVersionUID = 1L;
     private static MarkingCache markCache;
@@ -72,7 +72,7 @@ public class MarkArtist
       return markCache;
     }
 
-    public MarkingCache(GameInstance game)
+    private MarkingCache(GameInstance game)
     {
       this.game = game;
       registerForEvents(game);
@@ -107,7 +107,7 @@ public class MarkArtist
         ArrayList<MarkData> marks = new ArrayList<>();
         for( UnitMarker m : markers )
         {
-          char symbol = m.getUnitMarking(unit);
+          char symbol = m.getUnitMarking(unit, game.activeArmy);
           if( '\0' != symbol ) // null char is our sentry value
             marks.add(new MarkData(symbol, m.getMarkingColor(unit)));
         }
@@ -128,7 +128,7 @@ public class MarkArtist
         ArrayList<MarkData> marks = new ArrayList<>();
         for( UnitMarker m : markers )
         {
-          char symbol = m.getPlaceMarking(xyc);
+          char symbol = m.getPlaceMarking(xyc, game.activeArmy);
           if( '\0' != symbol ) // null char is our sentry value
             marks.add(new MarkData(symbol, m.getMarkingColor(xyc)));
         }
@@ -142,13 +142,16 @@ public class MarkArtist
 
     private void setupMarkers()
     {
-      if( null == game || unitMarks.keySet().size() > 0 )
+      if( null == game || markers.size() > 0 )
         return;
 
       for( Army army : game.armies )
         if( !army.isDefeated )
+        {
+          markers.add(army);
           for( Commander co : army.cos )
             markers.add(co);
+        }
       for( StateTracker st : game.stateTrackers.values() )
         markers.add(st);
     }

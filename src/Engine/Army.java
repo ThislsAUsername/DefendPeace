@@ -28,10 +28,11 @@ import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.MapPerspective;
 import UI.GameOverlay;
+import UI.UnitMarker;
 import Units.Unit;
 import Units.UnitDelta;
 
-public class Army implements GameEventListener, Serializable, UnitModList
+public class Army implements GameEventListener, Serializable, UnitModList, UnitMarker
 {
   private static final long serialVersionUID = 1L;
 
@@ -233,6 +234,22 @@ public class Army implements GameEventListener, Serializable, UnitModList
   {
     threatsToOverlay.remove(victim);
     return null;
+  }
+  // Draw markings on units we're threat-overlaying
+  @Override
+  public char getUnitMarking(Unit unit, Army activeArmy)
+  {
+    if( this != activeArmy || !threatsToOverlay.contains(unit) )
+      return '\0';
+
+    return 'T';
+  }
+  @Override
+  public Color getMarkingColor(Unit unit)
+  {
+    if( this == unit.CO.army )
+      return Color.GREEN;
+    return Color.RED;
   }
 
   /**

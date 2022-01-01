@@ -2,6 +2,7 @@ package CommandingOfficers;
 
 import java.util.ArrayList;
 
+import Engine.Army;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
@@ -97,7 +98,7 @@ public class Venge extends Commander
   }
 
   @Override
-  public char getUnitMarking(Unit unit)
+  public char getUnitMarking(Unit unit, Army activeArmy)
   {
     // If we can get a vengeance boost against this unit, let our player know.
     if( aggressors.contains(unit) )
@@ -106,7 +107,7 @@ public class Venge extends Commander
     if( myIronWill.boostedUnits.contains(unit) )
       return 'I';
 
-    return super.getUnitMarking(unit);
+    return super.getUnitMarking(unit, activeArmy);
   }
 
   @Override

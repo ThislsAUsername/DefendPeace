@@ -103,11 +103,13 @@ public class Cinder extends Commander
   }
 
   @Override
-  public char getPlaceMarking(XYCoord xyc)
+  public char getPlaceMarking(XYCoord xyc, Army activeArmy)
   {
+    if( activeArmy != this.army )
+      return super.getPlaceMarking(xyc, activeArmy);
     int count = buildCounts.getCountFor(this, xyc);
     if( !myView.isLocationValid(xyc) || count < 1 )
-      return super.getPlaceMarking(xyc);
+      return super.getPlaceMarking(xyc, activeArmy);
 
     return ("" + count).charAt(0);
   }
@@ -229,10 +231,10 @@ public class Cinder extends Commander
     }
 
     @Override
-    public char getUnitMarking(Unit unit)
+    public char getUnitMarking(Unit unit, Army activeArmy)
     {
       Army army = unit.CO.army;
-      char defaultVal = super.getUnitMarking(unit);
+      char defaultVal = super.getUnitMarking(unit, activeArmy);
       // Don't pollute the pool for the early out from earlier
       if( !attackCounts.hasCountFor(army) )
         return defaultVal;

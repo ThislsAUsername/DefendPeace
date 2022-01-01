@@ -2,6 +2,7 @@ package UI;
 
 import java.awt.Color;
 
+import Engine.Army;
 import Engine.XYCoord;
 import Units.Unit;
 
@@ -12,7 +13,7 @@ public interface UnitMarker
    * Primary usage should be pieces of info that aren't otherwise immediately apparent from the map.
    * Our rendering only supports alphanumeric values at this time.
    */
-  public default char getUnitMarking(Unit unit)
+  public default char getUnitMarking(Unit unit, Army activeArmy)
   {
     // We don't have anything useful to print, so don't.
     return '\0';
@@ -22,7 +23,7 @@ public interface UnitMarker
     return Color.white;
   }
 
-  public default char getPlaceMarking(XYCoord coord)
+  public default char getPlaceMarking(XYCoord coord, Army activeArmy)
   {
     // We don't have anything useful to print, so don't.
     return '\0';
