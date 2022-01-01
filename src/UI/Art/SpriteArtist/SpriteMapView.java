@@ -337,7 +337,7 @@ public class SpriteMapView extends MapView
     if (mapViewWidth > mapImage.getWidth())
       deltaX = (mapViewWidth - mapImage.getWidth());
     if (mapViewHeight > mapImage.getHeight())
-      deltaY = (mapViewHeight - mapImage.getHeight());
+      deltaY = (mapViewHeight - mapImage.getHeight())/2;
 
     // Copy the relevant section of the map image onto a screen-sized image buffer.
     Dimension dims = SpriteOptions.getScreenDimensions();
