@@ -83,8 +83,9 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
     {
       CommanderInfo coi = coInfos.get(i);
       BufferedImage COPic = SpriteLibrary.getCommanderSprites(coi.name).body;
-      // justify bottom/right
-      myG.drawImage(COPic, imageWidth - COPic.getWidth() - currentBodyShift, imageHeight - COPic.getHeight(), null);
+      // justify bottom/right, but don't cut off the top
+      final int bodyVOffset = Math.max(0, imageHeight - COPic.getHeight());
+      myG.drawImage(COPic, imageWidth - COPic.getWidth() - currentBodyShift, bodyVOffset, null);
       currentBodyShift += bodyShiftPerBody;
     }
 
