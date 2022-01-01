@@ -97,7 +97,7 @@ public class Qis extends Commander
       // Watery terrain costs +1 move
       for( TerrainType terrain : TerrainType.TerrainTypeList )
       {
-        if( terrain.isWater() )
+        if( terrain.isWater() || terrain == TerrainType.RIVER )
           uc.moveType.setMoveCost(weather, terrain, uc.moveType.getMoveCost(weather, terrain) + 1);
       }
     }
