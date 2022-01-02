@@ -55,6 +55,7 @@ public class SpriteMapView extends MapView
 
   // Overlay management variables.
   private boolean overlayIsLeft = true;
+  final int COMPREHENSIVE_HUD_H_SIZE;
 
   // Variables for controlling map animations.
   protected Queue<GameEvent> eventsToAnimate = new GameEventQueue();
@@ -91,6 +92,7 @@ public class SpriteMapView extends MapView
     menuArtist = new MenuArtist(game, this);
 
     myGame = game;
+    COMPREHENSIVE_HUD_H_SIZE = SpriteLibrary.getCoOverlay(myGame.activeArmy.cos[0], true).getWidth() + 42;
 
     // Start the view at the top-left by default.
     mapViewDrawX = new SlidingValue(0);
@@ -332,10 +334,18 @@ public class SpriteMapView extends MapView
     for( DamagePopup popup : mapController.getDamagePopups() )
       drawDamagePreview(mapGraphics, popup, gameMap.isLocationEmpty(popup.coords));
 
-    // When we draw the map, we want to right-justify it if it's smaller than the view dimensions
+    // Decide where to draw the map in the window
     int deltaX = 0, deltaY = 0;
     if (mapViewWidth > mapImage.getWidth())
-      deltaX = (mapViewWidth - mapImage.getWidth());
+    {
+      int rightJustified = (mapViewWidth - mapImage.getWidth());
+      int centered = rightJustified/2;
+
+      // Until we hit COMPREHENSIVE_HUD_H_SIZE, stick to the right
+      deltaX = Math.min(rightJustified, COMPREHENSIVE_HUD_H_SIZE);
+      // After that, try to be centered
+      deltaX = Math.max(deltaX, centered);
+    }
     if (mapViewHeight > mapImage.getHeight())
       deltaY = (mapViewHeight - mapImage.getHeight())/2;
 
@@ -608,7 +618,8 @@ public class SpriteMapView extends MapView
 
     // If the CO overlay won't overlap the map, draw all CO overlays to use the space
     final int overlayHSpaceAvailable = mapViewWidth - mapImage.getWidth();
-    final boolean drawAllHeaders = overlayHSpaceAvailable > SpriteLibrary.getCoOverlay(myGame.activeArmy.cos[0], true).getWidth() + 42;
+    final boolean drawAllHeaders = overlayHSpaceAvailable > COMPREHENSIVE_HUD_H_SIZE;
+
     if( drawAllHeaders )
       overlayIsLeft = true;
 
@@ -620,7 +631,7 @@ public class SpriteMapView extends MapView
       BufferedImage coOverlays = CommanderOverlayArtist.drawAllCommanderOverlays(
           myGame.armies,
           getDrawableMap(myGame),
-          overlayHSpaceAvailable, mapViewHeight, myGame.activeArmy);
+          COMPREHENSIVE_HUD_H_SIZE, mapViewHeight, myGame.activeArmy);
       if( overlayIsLeft )
         g.drawImage(coOverlays, 0, headerOffset, null);
       else
