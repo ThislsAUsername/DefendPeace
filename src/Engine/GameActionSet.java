@@ -76,7 +76,8 @@ public class GameActionSet
   {
     if( !actionOptions.isEmpty() )
     {
-      // NOTE: Ability and Unit Production actions return null for getType(), since they have no associated UnitActionFactory.
+      // NOTE: CommanderAbility activation and property actions (such as building units) return null for getType(),
+      //   since they have no associated UnitActionFactory.
       // However, they are also never put into GameActionSets, so this is probably fine.
       return actionOptions.get(0).getType().name(actionOptions.get(0).getActor());
     }
