@@ -15,26 +15,25 @@ import Units.Unit;
 public class OverlayCache implements CacheInvalidationListener
 {
   private static final long serialVersionUID = 1L;
-  private static OverlayCache markCache;
+  private static OverlayCache staticCache;
 
   public static OverlayCache instance(GameInstance game)
   {
-    if( markCache == null || game != markCache.game )
+    if( staticCache == null || game != staticCache.game )
     {
-      if( markCache != null )
-        markCache.unregister(markCache.game);
+      if( staticCache != null )
+        staticCache.unregister(staticCache.game);
 
-      markCache = new OverlayCache(game);
+      staticCache = new OverlayCache(game);
     }
 
-    return markCache;
+    return staticCache;
   }
 
   private OverlayCache(GameInstance game)
   {
     this.game = game;
     registerForEvents(game);
-    InvalidateCache();
   }
 
   @Override

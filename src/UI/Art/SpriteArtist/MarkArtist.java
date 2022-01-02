@@ -76,7 +76,6 @@ public class MarkArtist
     {
       this.game = game;
       registerForEvents(game);
-      InvalidateCache();
     }
 
     @Override
