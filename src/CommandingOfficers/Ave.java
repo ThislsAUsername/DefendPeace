@@ -575,10 +575,10 @@ public class Ave extends Commander
 
       // Add snow in an expanded range around Ave's areas.
       int maxSnowRange = coCast.MAX_SNOW_SPREAD_RANGE + GLACIO_SNOW_SPREAD;
-      Set<XYCoord> tilesInRange = Utils.findLocationsNearProperties(gameMap, coCast, maxSnowRange);
+      Set<XYCoord> tilesInRange = Utils.findLocationsNearPoints(gameMap, coCast.army.getOwnedProperties(), maxSnowRange);
       // This is intended to only count Ave's units, not all units in the Army
       // Perhaps it should count everyone, and Glacio should grant normal snow movement to everyone?
-      tilesInRange.addAll(Utils.findLocationsNearUnits(gameMap, coCast, GLACIO_SNOW_SPREAD));
+      tilesInRange.addAll(Utils.findLocationsNearUnits(gameMap, coCast.army.getUnits(), GLACIO_SNOW_SPREAD));
       for( XYCoord coord : tilesInRange )
       {
         if( coCast.snowMap[coord.xCoord][coord.yCoord] < Ave.SNOW_THRESHOLD )
@@ -615,8 +615,8 @@ public class Ave extends Commander
     {
       HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
       // Should this support all units in my army? It would be a little weird to stun without making snow.
-      Set<XYCoord> tilesInRange = Utils.findLocationsNearUnits(gameMap, coCast, GLACIO_FREEZE_RANGE);
-      tilesInRange.addAll(Utils.findLocationsNearProperties(gameMap, coCast, GLACIO_FREEZE_RANGE));
+      Set<XYCoord> tilesInRange = Utils.findLocationsNearUnits(gameMap, coCast.army.getUnits(), GLACIO_FREEZE_RANGE);
+      tilesInRange.addAll(Utils.findLocationsNearPoints(gameMap, coCast.army.getOwnedProperties(), GLACIO_FREEZE_RANGE));
       for( XYCoord coord : tilesInRange )
       {
         Unit victim = gameMap.getResident(coord);
