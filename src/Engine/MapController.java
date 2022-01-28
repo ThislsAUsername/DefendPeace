@@ -219,7 +219,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
           // If we hit BACK while over a unit, add it to the threat overlay for this CO
           MapLocation loc = myGame.gameMap.getLocation(myGame.getCursorCoord());
           Unit resident = loc.getResident();
-          if( null != resident )
+          if( getOverlayMode() == OverlayMode.THREATS_MANUAL && null != resident )
           {
             ArrayList<Unit> threats = myGame.activeArmy.threatsToOverlay;
             if( threats.contains(resident) )
