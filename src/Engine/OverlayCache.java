@@ -66,10 +66,10 @@ public class OverlayCache implements CacheInvalidationListener
 
       switch (mode)
       {
-        case THREATS:
+        case THREATS_MANUAL:
           threats.addAll(viewer.threatsToOverlay);
           break;
-        case GUNS:
+        case THREATS_ALL:
         case VISION:
           for( int y = 0; y < drawableMap.mapHeight; ++y )
           {

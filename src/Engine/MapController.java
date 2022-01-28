@@ -649,7 +649,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   public enum OverlayMode
   {
-    THREATS, GUNS, VISION, NONE,
+    THREATS_MANUAL, THREATS_ALL, VISION, NONE,
   }
   private int[] armyOverlayModes;
   public OverlayMode getOverlayMode()
