@@ -467,21 +467,21 @@ public class TerrainSpriteSet
     if( null == terrainBases )
     {
       terrainBases = new HashMap<TerrainType, TerrainType>();
-      terrainBases.put(TerrainType.CITY, TerrainType.GRASS);
+      terrainBases.put(TerrainType.CITY, TerrainType.ROAD);
       terrainBases.put(TerrainType.DUNES, TerrainType.GRASS);
-      terrainBases.put(TerrainType.FACTORY, TerrainType.GRASS);
+      terrainBases.put(TerrainType.FACTORY, TerrainType.ROAD);
       terrainBases.put(TerrainType.AIRPORT, TerrainType.GRASS);
       terrainBases.put(TerrainType.TEMP_AIRPORT, TerrainType.GRASS);
       terrainBases.put(TerrainType.FOREST, TerrainType.GRASS);
-      terrainBases.put(TerrainType.HEADQUARTERS, TerrainType.GRASS);
-      terrainBases.put(TerrainType.LAB, TerrainType.GRASS);
+      terrainBases.put(TerrainType.HEADQUARTERS, TerrainType.ROAD);
+      terrainBases.put(TerrainType.LAB, TerrainType.ROAD);
       terrainBases.put(TerrainType.MOUNTAIN, TerrainType.GRASS);
       terrainBases.put(TerrainType.GRASS, TerrainType.GRASS);
       terrainBases.put(TerrainType.RIVER, TerrainType.GRASS);
       terrainBases.put(TerrainType.ROAD, TerrainType.GRASS);
       terrainBases.put(TerrainType.PILLAR, TerrainType.GRASS);
       terrainBases.put(TerrainType.METEOR, TerrainType.GRASS);
-      terrainBases.put(TerrainType.BUNKER, TerrainType.GRASS);
+      terrainBases.put(TerrainType.BUNKER, TerrainType.ROAD);
 
       terrainBases.put(TerrainType.BRIDGE, TerrainType.SHOAL);
       terrainBases.put(TerrainType.SEAPORT, TerrainType.SHOAL);
