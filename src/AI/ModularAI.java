@@ -19,7 +19,7 @@ import Units.Unit;
  */
 public abstract class ModularAI implements AIController
 {
-  protected Army myCo = null;
+  protected Army myArmy = null;
 
   // Updated on turn init
   protected ArrayList<XYCoord> unownedProperties;
@@ -32,9 +32,9 @@ public abstract class ModularAI implements AIController
   private boolean shouldLog = true;
   protected int turnNum = 0;
 
-  public ModularAI(Army co)
+  public ModularAI(Army army)
   {
-    myCo = co;
+    myArmy = army;
   }
 
   @Override
@@ -43,7 +43,7 @@ public abstract class ModularAI implements AIController
     logger = new StringBuffer(); // Reset at the start of the turn so the AI's action log stays in memory between turns for review
     ++turnNum;
     // Create a list of every property we don't own, but want to.
-    unownedProperties = AIUtils.findNonAlliedProperties(myCo.cos[0], gameMap);
+    unownedProperties = AIUtils.findNonAlliedProperties(myArmy.cos[0], gameMap);
 
     for( AIModule phase : aiPhases )
     {
@@ -75,7 +75,7 @@ public abstract class ModularAI implements AIController
   public GameAction getNextAction(GameMap gameMap)
   {
     ArrayList<Unit> eligibleUnits = new ArrayList<Unit>();
-    for( Unit unit : myCo.getUnits() )
+    for( Unit unit : myArmy.getUnits() )
     {
       if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y) )
         continue; // No actions for units that are stale or out of bounds.

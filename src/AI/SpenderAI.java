@@ -63,7 +63,7 @@ public class SpenderAI implements AIController
   Queue<Unit> unitQueue = new ArrayDeque<Unit>();
   boolean stateChange;
 
-  private Army myCo = null;
+  private Army myArmy = null;
 
   private ArrayList<XYCoord> unownedProperties;
   private ArrayList<XYCoord> capturingProperties;
@@ -72,16 +72,16 @@ public class SpenderAI implements AIController
   private boolean shouldLog = true;
   private int turnNum = 0;
 
-  public SpenderAI(Army co)
+  public SpenderAI(Army army)
   {
-    myCo = co;
+    myArmy = army;
   }
 
   @Override
   public void initTurn(GameMap gameMap)
   {
     turnNum++;
-    log(String.format("[======== SpAI initializing turn %s for %s =========]", turnNum, myCo));
+    log(String.format("[======== SpAI initializing turn %s for %s =========]", turnNum, myArmy));
 
     // Make sure we don't have any hang-ons from last time.
     actions.clear();
@@ -93,14 +93,14 @@ public class SpenderAI implements AIController
       for( int y = 0; y < gameMap.mapHeight; ++y )
       {
         XYCoord loc = new XYCoord(x, y);
-        if( gameMap.getLocation(loc).isCaptureable() && myCo.isEnemy(gameMap.getLocation(loc).getOwner()) )
+        if( gameMap.getLocation(loc).isCaptureable() && myArmy.isEnemy(gameMap.getLocation(loc).getOwner()) )
         {
           unownedProperties.add(loc);
         }
       }
     }
     capturingProperties = new ArrayList<XYCoord>();
-    for( Unit unit : myCo.getUnits() )
+    for( Unit unit : myArmy.getUnits() )
     {
       if( unit.getCaptureProgress() > 0 )
       {
@@ -109,13 +109,13 @@ public class SpenderAI implements AIController
     }
 
     // Check for a turn-kickoff power
-    AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_TURN_START);
+    AIUtils.queueCromulentAbility(actions, myArmy, CommanderAbility.PHASE_TURN_START);
   }
 
   @Override
   public void endTurn()
   {
-    log(String.format("[======== SpAI ending turn %s for %s =========]", turnNum, myCo));
+    log(String.format("[======== SpAI ending turn %s for %s =========]", turnNum, myArmy));
     logger = new StringBuffer();
   }
 
@@ -146,7 +146,7 @@ public class SpenderAI implements AIController
       else if( unitQueue.isEmpty() )
       {
         stateChange = false; // There's been no gamestate change since we last iterated through all the units, since we're about to do just that
-        for( Unit unit : myCo.getUnits() )
+        for( Unit unit : myArmy.getUnits() )
         {
           if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y))
             continue; // No actions for units that are stale or out of bounds
@@ -232,7 +232,7 @@ public class SpenderAI implements AIController
             {
               for( Army co : gameMap.game.armies )
               {
-                if( myCo.isEnemy(co) )
+                if( myArmy.isEnemy(co) )
                   validTargets.addAll(co.HQLocations);
               }
             }
@@ -242,7 +242,7 @@ public class SpenderAI implements AIController
             {
               goal = validTargets.get(index++);
               path = Utils.findShortestPath(unit, goal, gameMap, true);
-              validTarget = (myCo.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
+              validTarget = (myArmy.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
                   && !capturingProperties.contains(goal) // We aren't already capturing it.
                   && (path.getPathLength() > 0)); // We can reach it.
               log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal,
@@ -281,14 +281,14 @@ public class SpenderAI implements AIController
       // Check for an available buying enhancement power
       if( actions.isEmpty() && !stateChange )
       {
-        AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_BUY);
+        AIUtils.queueCromulentAbility(actions, myArmy, CommanderAbility.PHASE_BUY);
       }
 
       // We will add all build commands at once, since they can't conflict.
       if( actions.isEmpty() && !stateChange )
       {
         Map<MapLocation, ArrayList<UnitModel>> shoppingLists = new HashMap<>();
-        for( XYCoord xyc : myCo.getOwnedProperties() )
+        for( XYCoord xyc : myArmy.getOwnedProperties() )
         {
           MapLocation loc = gameMap.getLocation(xyc);
           Commander buyer = loc.getOwner();
@@ -297,13 +297,13 @@ public class SpenderAI implements AIController
           {
             ArrayList<UnitModel> units = buyer.getShoppingList(loc);
             // Only add to the list if we could actually buy something here.
-            if( !units.isEmpty() && buyer.getBuyCost(units.get(0), xyc) <= myCo.money )
+            if( !units.isEmpty() && buyer.getBuyCost(units.get(0), xyc) <= myArmy.money )
             {
               shoppingLists.put(loc, units);
             }
           }
         }
-        int budget = myCo.money;
+        int budget = myArmy.money;
         Map<MapLocation, UnitModel> purchases = new HashMap<>();
         // Now that we know where and what we can buy, let's make some initial selections.
         for( Entry<MapLocation, ArrayList<UnitModel>> locShopList : shoppingLists.entrySet() )
@@ -362,7 +362,7 @@ public class SpenderAI implements AIController
       // Check for a turn-ending power
       if( actions.isEmpty() && !stateChange )
       {
-        AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_TURN_END);
+        AIUtils.queueCromulentAbility(actions, myArmy, CommanderAbility.PHASE_TURN_END);
       }
 
       // Return the next action, or null if actions is empty.

@@ -79,7 +79,7 @@ public class WallyAI extends ModularAI
     //TODO
 //    MoveType p = model.calculateMoveType();
     MoveType p = model.baseMoveType;
-    GameMap map = myCo.myView;
+    GameMap map = myArmy.myView;
     double totalCosts = 0;
     int validTiles = 0;
     double totalTiles = map.mapWidth * map.mapHeight; // to avoid integer division
@@ -151,14 +151,14 @@ public class WallyAI extends ModularAI
     super.initTurn(gameMap);
     if( null == unitEffectiveMove )
       init(gameMap);
-    log(String.format("[======== Wally initializing turn %s for %s =========]", turnNum, myCo));
+    log(String.format("[======== Wally initializing turn %s for %s =========]", turnNum, myArmy));
   }
 
   @Override
   public void endTurn()
   {
     super.endTurn();
-    log(String.format("[======== Wally ending turn %s for %s =========]", turnNum, myCo));
+    log(String.format("[======== Wally ending turn %s for %s =========]", turnNum, myArmy));
   }
 
   public static class SiegeAttacks extends UnitActionFinder
@@ -602,12 +602,12 @@ public class WallyAI extends ModularAI
       log(String.format("  %s needs supplies.", unit.toStringWithLocation()));
       goals.addAll(stations);
       if( avoidProduction )
-        goals.removeAll(AIUtils.findAlliedIndustries(gameMap, myCo, goals, !avoidProduction));
+        goals.removeAll(AIUtils.findAlliedIndustries(gameMap, myArmy, goals, !avoidProduction));
     }
     else if( uc.possibleActions.contains(UnitActionFactory.CAPTURE) )
     {
       for( XYCoord xyc : unownedProperties )
-        if( !AIUtils.isCapturing(gameMap, myCo.cos[0], xyc) )
+        if( !AIUtils.isCapturing(gameMap, myArmy.cos[0], xyc) )
           goals.add(xyc);
     }
     else if( uc.possibleActions.contains(UnitActionFactory.ATTACK) )
@@ -636,7 +636,7 @@ public class WallyAI extends ModularAI
 
       // Sort all target types by how much we want to shoot them with this unit
       Queue<Entry<UnitModel, Double>> targetTypesInOrder = 
-          new PriorityQueue<Entry<UnitModel, Double>>(myCo.cos[0].unitModels.size(), new UnitModelFundsComparator());
+          new PriorityQueue<Entry<UnitModel, Double>>(myArmy.cos[0].unitModels.size(), new UnitModelFundsComparator());
       targetTypesInOrder.addAll(valueMap.entrySet());
 
       while (!targetTypesInOrder.isEmpty())
@@ -652,7 +652,7 @@ public class WallyAI extends ModularAI
       {
         MapLocation loc = gameMap.getLocation(coord);
         if( unit.CO.unitProductionByTerrain.containsKey(loc.getEnvironment().terrainType)
-            && myCo.isEnemy(loc.getOwner()) )
+            && myArmy.isEnemy(loc.getOwner()) )
         {
           goals.add(coord);
         }
@@ -660,7 +660,7 @@ public class WallyAI extends ModularAI
     }
 
     if( goals.isEmpty() ) // If there's really nothing to do, go to MY HQ
-      goals.addAll(myCo.HQLocations);
+      goals.addAll(myArmy.HQLocations);
 
     Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
     return goals;
@@ -732,7 +732,7 @@ public class WallyAI extends ModularAI
     // Find the possible destinations.
     boolean ignoreResident = true;
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, ignoreResident);
-    destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, myCo, destinations, !avoidProduction));
+    destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, myArmy, destinations, !avoidProduction));
 
     // TODO: Jump in a transport, if available, or join?
 
@@ -857,7 +857,7 @@ public class WallyAI extends ModularAI
       if( loc != null )
       {
         Unit resident = loc.getResident();
-        if( resident != null && !myCo.isEnemy(resident.CO)
+        if( resident != null && !myArmy.isEnemy(resident.CO)
             && valueUnit(resident, loc, true) > valueUnit(unit, destination, true) )
         {
           return true;
@@ -941,7 +941,7 @@ public class WallyAI extends ModularAI
       return null;
 
     // Sort locations by how close they are to "center mass" of that unit type, then reverse since we want to distribute our forces
-    Utils.sortLocationsByDistance(findAverageDeployLocation(myCo.myView, myCo, model), candidates);
+    Utils.sortLocationsByDistance(findAverageDeployLocation(myArmy.myView, myArmy, model), candidates);
     Collections.reverse(candidates);
     return candidates.get(0);
   }
@@ -951,7 +951,7 @@ public class WallyAI extends ModularAI
     Map<XYCoord, UnitModel> builds = new HashMap<XYCoord, UnitModel>();
     // Figure out what unit types we can purchase with our available properties.
     boolean includeFriendlyOccupied = true;
-    CommanderProductionInfo CPI = new CommanderProductionInfo(myCo, gameMap, includeFriendlyOccupied);
+    CommanderProductionInfo CPI = new CommanderProductionInfo(myArmy, gameMap, includeFriendlyOccupied);
 
     if( CPI.availableProperties.isEmpty() )
     {
@@ -960,17 +960,17 @@ public class WallyAI extends ModularAI
     }
 
     log("Evaluating Production needs");
-    int budget = myCo.money;
-    final UnitModel infModel = myCo.cos[0].getUnitModel(UnitModel.TROOP);
+    int budget = myArmy.money;
+    final UnitModel infModel = myArmy.cos[0].getUnitModel(UnitModel.TROOP);
     // TODO: Fix this
     final int infCost = infModel.costBase;
 
     // Get a count of enemy forces.
-    Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
+    Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myArmy, gameMap);
     Map<UnitModel, Double> enemyUnitCounts = new HashMap<UnitModel, Double>();
     for( Commander co : unitLists.keySet() )
     {
-      if( myCo.isEnemy(co) )
+      if( myArmy.isEnemy(co) )
       {
         for( Unit u : unitLists.get(co) )
         {
@@ -989,7 +989,7 @@ public class WallyAI extends ModularAI
 
     // Figure out how well we think we have the existing threats covered
     Map<UnitModel, Double> myUnitCounts = new HashMap<UnitModel, Double>();
-    for( Unit u : myCo.getUnits() )
+    for( Unit u : myArmy.getUnits() )
     {
       // Count how many of each model of enemy units are in play.
       if( myUnitCounts.containsKey(u.model) )
@@ -1019,7 +1019,7 @@ public class WallyAI extends ModularAI
     }
 
     Queue<Entry<UnitModel, Double>> enemyModels = 
-        new PriorityQueue<Entry<UnitModel, Double>>(myCo.cos[0].unitModels.size(), new UnitModelFundsComparator());
+        new PriorityQueue<Entry<UnitModel, Double>>(myArmy.cos[0].unitModels.size(), new UnitModelFundsComparator());
     enemyModels.addAll(enemyUnitCounts.entrySet());
 
     // Try to purchase units that will counter the most-represented enemies.

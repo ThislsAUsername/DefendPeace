@@ -256,7 +256,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     return myActiveAbility;
   }
 
-  /** Lets the army know that he's using an ability,
+  /** Lets the commander know that he's using an ability,
    *  and accounts for the cost of using it. */
   public void activateAbility(CommanderAbility ability, MapMaster map)
   {
