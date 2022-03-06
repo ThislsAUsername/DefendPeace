@@ -167,7 +167,7 @@ public class MapPerspective extends GameMap
   }
   public boolean isFogOn()
   {
-    return (null == viewer) || viewer.cos[0].gameRules.isFogEnabled;
+    return (null == viewer) || viewer.gameRules.isFogEnabled;
   }
 
   @Override

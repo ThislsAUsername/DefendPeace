@@ -23,7 +23,7 @@ public class TestHealing extends TestCase
   {
     GameScenario scn = new GameScenario();
     testCo1 = new Patch(scn.rules);
-    Army[] cos = { new Army(testCo1), };
+    Army[] cos = { new Army(scn, testCo1), };
     // Create a small map with a city to provide healing.
     TerrainType[][] testLoc = {
         {TerrainType.CITY, TerrainType.GRASS},

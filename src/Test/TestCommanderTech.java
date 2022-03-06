@@ -30,7 +30,7 @@ public class TestCommanderTech extends TestCase
     mTech = new Tech(scn.rules);
     mTech.modifyAbilityPower(20);
     mPatch = new Patch(scn.rules);
-    Army[] cos = { new Army(mTech), new Army(mPatch) };
+    Army[] cos = { new Army(scn, mTech), new Army(scn, mPatch) };
 
     mTestMap = new MapMaster(cos, MapLibrary.getByName("Test Range"));
   }

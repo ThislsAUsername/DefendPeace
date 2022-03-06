@@ -42,7 +42,7 @@ public class TestCOModifier extends TestCase
     GameScenario scn = new GameScenario();
     strong = new Strong(scn.rules);
     patch = new Patch(scn.rules);
-    Army[] cos = { new Army(strong), new Army(patch) };
+    Army[] cos = { new Army(scn, strong), new Army(scn, patch) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
   }

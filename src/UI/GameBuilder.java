@@ -46,7 +46,7 @@ public class GameBuilder
     Army[] armies = new Army[mapInfo.getNumCos()];
     for(int i = 0; i < mapInfo.getNumCos(); ++i)
     {
-      armies[i] = new Army();
+      armies[i] = new Army(scenario);
       // TODO: Add logic to add cart/persistent tags tag partners
       armies[i].cos = new Commander[] { coInfos[i].makeCommander(scenario.rules) };
       armies[i].team = coInfos[i].currentTeam;

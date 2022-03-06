@@ -39,7 +39,7 @@ public class TestAIBehavior extends TestCase
     GameScenario scn = new GameScenario();
     testCo1 = new Strong(scn.rules);
     testCo2 = new Patch(scn.rules);
-    Army[] cos = { new Army(testCo1), new Army(testCo2) };
+    Army[] cos = { new Army(scn, testCo1), new Army(scn, testCo2) };
 
     AIController testAI = ai.create(cos[0]);
     testAI.setLogging(false);

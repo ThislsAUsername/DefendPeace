@@ -31,10 +31,10 @@ public class TestCapture extends TestCase
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
   {
-    GameScenario scenario = new GameScenario();
-    testCo1 = new Strong(scenario.rules);
-    testCo2 = new Patch(scenario.rules);
-    Army[] cos = { new Army(testCo1), new Army(testCo2) };
+    GameScenario scn = new GameScenario();
+    testCo1 = new Strong(scn.rules);
+    testCo2 = new Patch(scn.rules);
+    Army[] cos = { new Army(scn, testCo1), new Army(scn, testCo2) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
     testGame = new GameInstance(cos, testMap);

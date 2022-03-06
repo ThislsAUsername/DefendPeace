@@ -166,7 +166,7 @@ public class FightClub
           Commander com = cInfo.myCo.create(scenario.rules);
           com.myColor = UIUtils.getCOColors()[ci];
           com.faction = UIUtils.getFactions()[ci];
-          Army army = new Army(com);
+          Army army = new Army(scenario, com);
           army.team = ci;
           army.setAIController(cInfo.myAi.create(army));
           combatants.add(army);

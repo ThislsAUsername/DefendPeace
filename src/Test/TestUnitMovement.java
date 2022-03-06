@@ -29,7 +29,7 @@ public class TestUnitMovement extends TestCase
     GameScenario scn = new GameScenario();
     testCo1 = new Strong(scn.rules);
     testCo2 = new Patch(scn.rules);
-    Army[] cos = { new Army(testCo1), new Army(testCo2) };
+    Army[] cos = { new Army(scn, testCo1), new Army(scn, testCo2) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
     testGame = new GameInstance(cos, testMap);

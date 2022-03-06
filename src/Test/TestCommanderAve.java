@@ -36,7 +36,7 @@ public class TestCommanderAve extends TestCase
     GameScenario scn = new GameScenario();
     Ave = new Ave(scn.rules);
     Patch = new Patch(scn.rules);
-    Army[] cos = { new Army(Ave), new Army(Patch) };
+    Army[] cos = { new Army(scn, Ave), new Army(scn, Patch) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
 

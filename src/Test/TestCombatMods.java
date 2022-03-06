@@ -32,7 +32,7 @@ public class TestCombatMods extends TestCase
     GameScenario scn = new GameScenario();
     cinder = new Cinder(scn.rules);
     venge = new Venge(scn.rules);
-    Army[] cos = { new Army(cinder), new Army(venge) };
+    Army[] cos = { new Army(scn, cinder), new Army(scn, venge) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
     testGame = new GameInstance(cos, testMap);

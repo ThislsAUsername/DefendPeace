@@ -46,10 +46,10 @@ public class SelectCOAbility extends GameInputState<CommanderAbility>
     switch(InputOptionsController.previewFogPowersOption.getSelectedObject())
     {
       case In_Fog:
-        showPreview = !myStateData.army.cos[0].gameRules.isFogEnabled;
+        showPreview = !myStateData.army.gameRules.isFogEnabled;
         break;
       case Hidden_Units:
-        showPreview = !myStateData.army.cos[0].gameRules.isFogEnabled;
+        showPreview = !myStateData.army.gameRules.isFogEnabled;
         if( showPreview )
           for( Army army : myStateData.gameMap.game.armies )
             if( myStateData.army.isEnemy(army) )

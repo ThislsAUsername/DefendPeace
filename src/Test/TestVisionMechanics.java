@@ -32,7 +32,7 @@ public class TestVisionMechanics extends TestCase
     scn.rules.isFogEnabled = true;
     strong = new Strong(scn.rules);
     patch = new Patch(scn.rules);
-    Army[] cos = { new Army(strong), new Army(patch) };
+    Army[] cos = { new Army(scn, strong), new Army(scn, patch) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
     testGame = new GameInstance(new GameScenario(), cos, testMap, Weathers.CLEAR, false);

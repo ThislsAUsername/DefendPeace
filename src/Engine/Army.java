@@ -36,6 +36,7 @@ public class Army implements GameEventListener, Serializable, UnitModList
   private static final long serialVersionUID = 1L;
 
   public MapPerspective myView;
+  public final GameScenario.GameRules gameRules;
   public Commander[] cos;
   public int money = 0;
   public int team = -1;
@@ -49,11 +50,13 @@ public class Army implements GameEventListener, Serializable, UnitModList
   private long passSalt;
   private UUID password;
 
-  public Army()
+  public Army(GameScenario scenario)
   {
+    gameRules = scenario.rules;
   }
-  public Army(Commander co)
+  public Army(GameScenario scenario, Commander co)
   {
+    this(scenario);
     cos = new Commander[] { co };
     co.army = this;
   }
