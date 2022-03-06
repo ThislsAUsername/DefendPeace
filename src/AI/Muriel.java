@@ -937,7 +937,7 @@ public class Muriel implements AIController
         int maxBuildable = CPI.getNumFacilitiesFor(idealCounter);
         log(String.format("    Facilities available: %s", maxBuildable));
         MapLocation loc = CPI.getLocationToBuild(idealCounter);
-        int cost = loc.getOwner().getBuyCost(idealCounter.um, loc.getCoordinates());
+        int cost = myArmy.getBuyCost(idealCounter.um, loc.getCoordinates());
         if( cost <= (budget - costBuffer))
         {
           // Go place orders.

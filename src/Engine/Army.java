@@ -30,6 +30,7 @@ import Terrain.MapPerspective;
 import UI.GameOverlay;
 import Units.Unit;
 import Units.UnitDelta;
+import Units.UnitModel;
 
 public class Army implements GameEventListener, Serializable, UnitModList
 {
@@ -167,6 +168,11 @@ public class Army implements GameEventListener, Serializable, UnitModList
       }
     }
     return false;
+  }
+  public int getBuyCost(UnitModel um, XYCoord coordinates)
+  {
+    MapLocation loc = myView.getLocation(coordinates);
+    return loc.getOwner().getBuyCost(um, coordinates);
   }
 
   /** Return a list with every ability a Commander in this Army can perform. */
