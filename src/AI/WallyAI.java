@@ -1033,7 +1033,9 @@ public class WallyAI extends ModularAI
       log(String.format("Remaining budget: %s", budget));
 
       // Get our possible options for countermeasures.
-      ArrayList<UnitModel> availableUnitModels = new ArrayList<UnitModel>(CPI.availableUnitModels);
+      ArrayList<UnitModel> availableUnitModels = new ArrayList<>();
+      for( ModelForCO coModel : CPI.availableUnitModels )
+        availableUnitModels.add(coModel.um);
       while (!availableUnitModels.isEmpty())
       {
         // Sort my available models by their power against this enemy type.

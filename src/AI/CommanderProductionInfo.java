@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import CommandingOfficers.Commander;
 import Engine.Army;
 import Engine.XYCoord;
 import Terrain.GameMap;
@@ -24,47 +25,50 @@ import Units.UnitModel;
 public class CommanderProductionInfo
 {
   public Army myArmy;
-  public Set<UnitModel> availableUnitModels;
+  public Set<ModelForCO> availableUnitModels;
   public Set<MapLocation> availableProperties;
-  public Map<Terrain.TerrainType, Integer> propertyCounts;
+  public Map<Commander, Map<Terrain.TerrainType, Integer>> propertyCounts;
   public Map<UnitModel, Set<TerrainType>> modelToTerrainMap;
 
   /**
    * Build a model of the production capabilities for a given Commander.
    * Could be used for your own, or your opponent's.
    */
-  public CommanderProductionInfo(Army co, GameMap gameMap, boolean includeFriendlyOccupied)
+  public CommanderProductionInfo(Army army, GameMap gameMap, boolean includeFriendlyOccupied)
   {
     // Figure out what unit types we can purchase with our available properties.
-    myArmy = co;
-    availableUnitModels = new HashSet<UnitModel>();
-    availableProperties = new HashSet<MapLocation>();
-    propertyCounts = new HashMap<Terrain.TerrainType, Integer>();
-    modelToTerrainMap = new HashMap<UnitModel, Set<TerrainType>>();
+    myArmy = army;
+    availableUnitModels = new HashSet<>();
+    availableProperties = new HashSet<>();
+    propertyCounts = new HashMap<>();
+    for( Commander co : army.cos )
+      propertyCounts.put(co, new HashMap<>());
+    modelToTerrainMap = new HashMap<>();
 
-    for( XYCoord xyc : co.getOwnedProperties() )
+    for( XYCoord xyc : army.getOwnedProperties() )
     {
-      MapLocation loc = co.myView.getLocation(xyc);
+      MapLocation loc = army.myView.getLocation(xyc);
       Unit blocker = loc.getResident();
       if( null == blocker
-          || (includeFriendlyOccupied && co == blocker.CO.army && !blocker.isTurnOver) )
+          || (includeFriendlyOccupied && army == blocker.CO.army && !blocker.isTurnOver) )
       {
         ArrayList<UnitModel> models = loc.getOwner().getShoppingList(loc);
-        availableUnitModels.addAll(models);
+        Map<TerrainType, Integer> propsForCO = propertyCounts.get(loc.getOwner());
         availableProperties.add(loc);
         TerrainType terrain = loc.getEnvironment().terrainType;
-        if( propertyCounts.containsKey(terrain))
+        if( propsForCO.containsKey(terrain))
         {
-          propertyCounts.put(terrain, propertyCounts.get(loc.getEnvironment().terrainType)+1);
+          propsForCO.put(terrain, propsForCO.get(loc.getEnvironment().terrainType)+1);
         }
         else
         {
-          propertyCounts.put(terrain, 1);
+          propsForCO.put(terrain, 1);
         }
 
         // Store a mapping from UnitModel to the TerrainType that can produce it.
         for( UnitModel m : models )
         {
+          availableUnitModels.add(new ModelForCO(loc.getOwner(), m));
           if( modelToTerrainMap.get(m) == null )
             modelToTerrainMap.put(m, new HashSet<TerrainType>());
           modelToTerrainMap.get(m).add( loc.getEnvironment().terrainType );
@@ -94,18 +98,43 @@ public class CommanderProductionInfo
   }
 
   /**
+   * Return a location that can build the given unitModel, or null if none remains.
+   */
+  public MapLocation getLocationToBuild(ModelForCO model)
+  {
+    Set<TerrainType> desiredTerrains = modelToTerrainMap.get(model.um);
+    if( null == desiredTerrains )
+      return null;
+    MapLocation location = null;
+    for( MapLocation loc : availableProperties )
+    {
+      if( loc.getOwner() == model.co && desiredTerrains.contains(loc.getEnvironment().terrainType) )
+      {
+        location = loc;
+        break;
+      }
+    }
+    return location;
+  }
+
+  /**
    * Remove the given location from further consideration, even if it is still available.
+   * NOTE: This assumes there is no overlap in what different property types can produce
    */
   public void removeBuildLocation(MapLocation loc)
   {
+    final Commander owner = loc.getOwner();
+
     availableProperties.remove(loc);
     TerrainType terrain = loc.getEnvironment().terrainType;
-    if( propertyCounts.containsKey(terrain) )
+    Map<TerrainType, Integer> propsForCO = propertyCounts.get(owner);
+    if( propsForCO.containsKey(terrain) )
     {
-      propertyCounts.put(terrain, propertyCounts.get(terrain) - 1);
-      if( propertyCounts.get(terrain) == 0 )
+      propsForCO.put(terrain, propsForCO.get(terrain) - 1);
+      if( propsForCO.get(terrain) == 0 )
       {
-        availableUnitModels.removeAll(loc.getOwner().getShoppingList(loc));
+        for( UnitModel um : owner.getShoppingList(loc) )
+          availableUnitModels.remove(new ModelForCO(owner, um));
       }
     }
   }
@@ -118,11 +147,74 @@ public class CommanderProductionInfo
     int num = 0;
     if( modelToTerrainMap.containsKey(model) )
     {
-      for( TerrainType terrain : modelToTerrainMap.get(model) )
+      for( Commander co : myArmy.cos )
       {
-        num += propertyCounts.get(terrain);
+        Map<TerrainType, Integer> propsForCO = propertyCounts.get(co);
+        for( TerrainType terrain : modelToTerrainMap.get(model) )
+        {
+          num += propsForCO.get(terrain);
+        }
       }
     }
     return num;
+  }
+
+  /**
+   * Returns the number of facilities that can produce units of the given type.
+   */
+  public int getNumFacilitiesFor(ModelForCO model)
+  {
+    int num = 0;
+    if( modelToTerrainMap.containsKey(model.um) )
+    {
+      Map<TerrainType, Integer> propsForCO = propertyCounts.get(model.co);
+      for( TerrainType terrain : modelToTerrainMap.get(model.um) )
+      {
+        num += propsForCO.get(terrain);
+      }
+    }
+    return num;
+  }
+
+  /**
+   * Returns the price per unit you would pay if you built the maximum number of units of the given type.
+   */
+  public int getAverageCostFor(UnitModel model)
+  {
+    Set<TerrainType> desiredTerrains = modelToTerrainMap.get(model);
+    if( null == desiredTerrains )
+      return 0;
+
+    int num = 0;
+    int totalCost = 0;
+    for( MapLocation loc : availableProperties )
+    {
+      if( desiredTerrains.contains(loc.getEnvironment().terrainType) )
+      {
+        ++num;
+        totalCost += loc.getOwner().getBuyCost(model, loc.getCoordinates());
+      }
+    }
+    return totalCost / num;
+  }
+
+  /**
+   * Returns the lowest price for this unit type available.
+   */
+  public int getMinCostFor(UnitModel model)
+  {
+    Set<TerrainType> desiredTerrains = modelToTerrainMap.get(model);
+    if( null == desiredTerrains )
+      return Integer.MAX_VALUE;
+
+    int minCost = Integer.MAX_VALUE;
+    for( MapLocation loc : availableProperties )
+    {
+      if( desiredTerrains.contains(loc.getEnvironment().terrainType) )
+      {
+        minCost = Math.min(minCost, loc.getOwner().getBuyCost(model, loc.getCoordinates()));
+      }
+    }
+    return minCost;
   }
 }
