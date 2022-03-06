@@ -209,6 +209,7 @@ public class InfantrySpamAI implements AIController
     // Finally, build more infantry. We will add all build commands at once, since they can't conflict.
     if( actions.isEmpty() )
     {
+      int budget = myArmy.money;
       // Create a list of actions to build infantry on every open factory, then return these actions until done.
       for( int i = 0; i < gameMap.mapWidth; i++ )
       {
@@ -222,9 +223,11 @@ public class InfantrySpamAI implements AIController
           if( loc.getEnvironment().terrainType == TerrainType.FACTORY && buyer.army == myArmy && loc.getResident() == null )
           {
             ArrayList<UnitModel> units = buyer.getShoppingList(loc);
-            if( !units.isEmpty() && buyer.getBuyCost(units.get(0), loc.getCoordinates()) <= myArmy.money )
+            final int buyCost = buyer.getBuyCost(units.get(0), loc.getCoordinates());
+            if( !units.isEmpty() && buyCost <= budget )
             {
               GameAction action = new GameAction.UnitProductionAction(buyer, units.get(0), loc.getCoordinates());
+              budget -= buyCost;
               actions.offer( action );
             }
           }
