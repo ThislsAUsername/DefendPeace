@@ -375,7 +375,7 @@ public class Tech extends Commander
 
       // Next calculate unfriendly values. Note that these are only eligible landing spaces if they are also within
       // range of friendly units, but it's easier to just compute all the values and then ignore invalid places.
-      ArrayList<XYCoord> enemyCoords = AIUtils.findEnemyUnits(myCommander, gameMap);
+      ArrayList<XYCoord> enemyCoords = AIUtils.findEnemyUnits(myCommander.army, gameMap);
       Map<XYCoord, Integer> enemyScores = new HashMap<XYCoord, Integer>();
       for( XYCoord nmexy : enemyCoords )
       {

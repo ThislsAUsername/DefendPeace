@@ -145,7 +145,7 @@ public class AIUtils
    * @param gameMap The map to search for units.
    * @return An ArrayList with the XYCoord of every unit not allied with myArmy.
    */
-  public static ArrayList<XYCoord> findEnemyUnits(Commander myCo, GameMap gameMap)
+  public static ArrayList<XYCoord> findEnemyUnits(Army army, GameMap gameMap)
   {
     ArrayList<XYCoord> unitLocs = new ArrayList<XYCoord>();
     for( int x = 0; x < gameMap.mapWidth; ++x )
@@ -153,7 +153,7 @@ public class AIUtils
       for( int y = 0; y < gameMap.mapHeight; ++y )
       {
         MapLocation loc = gameMap.getLocation(x, y);
-        if( loc.getResident() != null && myCo.isEnemy(loc.getResident().CO) )
+        if( loc.getResident() != null && army.isEnemy(loc.getResident().CO) )
         {
           unitLocs.add(new XYCoord(x, y));
         }

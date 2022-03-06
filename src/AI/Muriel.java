@@ -592,7 +592,7 @@ public class Muriel implements AIController
     if( queuedActions.isEmpty() && unit.hasActionType(UnitActionFactory.ATTACK) )
     {
       log(String.format("Seeking attack target for %s", unit.toStringWithLocation()));
-      ArrayList<XYCoord> enemyLocations = AIUtils.findEnemyUnits(myArmy.cos[0], gameMap); // Get enemy locations.
+      ArrayList<XYCoord> enemyLocations = AIUtils.findEnemyUnits(myArmy, gameMap); // Get enemy locations.
       Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), enemyLocations); // Sort them by accessibility.
 
       for(int i = 0; i < enemyLocations.size(); ++i)
