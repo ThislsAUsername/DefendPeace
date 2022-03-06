@@ -191,7 +191,7 @@ public class TestCapture extends TestCase
     captureAction = new CaptureLifecycle.CaptureAction(testMap, mech, Utils.findShortestPath(mech, 13, 1, testMap));
     GameEventQueue events = captureAction.getEvents(testMap);
 
-    // Make sure a ArmyDefeatEvent was generated as a result (the actual event test is in TestGameEvent.java).
+    // Make sure an ArmyDefeatEvent was generated as a result (the actual event test is in TestGameEvent.java).
     boolean hasDefeatEvent = false;
     for( GameEvent event : events )
     {
