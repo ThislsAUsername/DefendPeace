@@ -96,21 +96,13 @@ public class CO_InfoController implements InfoController
   @Override
   public ArrayList<InfoPage> getSelectedPages()
   {
-    return getSelectedCOInfo().iterator().next().infoPages;
+    return coInfos.get(coOptionSelector.getSelectionNormalized()).infoPages;
   }
 
   @Override
   public GameInstance getGame()
   {
     return myGame;
-  }
-
-  @Override
-  public ArrayList<CommanderInfo> getSelectedCOInfo()
-  {
-    ArrayList<CommanderInfo> output = new ArrayList<>();
-    output.add(coInfos.get(coOptionSelector.getSelectionNormalized()));
-    return output;
   }
 
   @Override
