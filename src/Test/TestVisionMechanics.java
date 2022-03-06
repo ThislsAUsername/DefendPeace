@@ -67,19 +67,19 @@ public class TestVisionMechanics extends TestCase
     boolean testPassed = true;
 
     // Make sure we can't see what we're not supposed to.
-    testPassed &= validate(strong.myView.isLocationFogged(6, 5),  "    We can magically see into forests");
-    testPassed &= validate(!strong.myView.isLocationFogged(7, 5), "    We can't see roads");
-    testPassed &= validate(strong.myView.isLocationEmpty(6, 5),   "    We can magically see units in forests");
-    testPassed &= validate(strong.myView.isLocationEmpty(7, 5),   "    We can magically see invisible tanks");
+    testPassed &= validate(strong.army.myView.isLocationFogged(6, 5),  "    We can magically see into forests");
+    testPassed &= validate(!strong.army.myView.isLocationFogged(7, 5), "    We can't see roads");
+    testPassed &= validate(strong.army.myView.isLocationEmpty(6, 5),   "    We can magically see units in forests");
+    testPassed &= validate(strong.army.myView.isLocationEmpty(7, 5),   "    We can magically see invisible tanks");
     
-    GamePath foolPath = Utils.findShortestPath(fool, 7, 8, strong.myView);
+    GamePath foolPath = Utils.findShortestPath(fool, 7, 8, strong.army.myView);
     GameAction resupplyBlind = new ResupplyLifecycle.ResupplyAction(fool, foolPath);
     testPassed &= validate(resupplyBlind.getEvents(testMap).size() == 1, "    Some fool was able to zoom straight through an invisible tank");
 
-    GamePath punchSit = Utils.findShortestPath(punch, punch.x, punch.y, strong.myView);
-    GameAction missBait = new BattleLifecycle.BattleAction(strong.myView, punch, punchSit, 6, 5);
+    GamePath punchSit = Utils.findShortestPath(punch, punch.x, punch.y, strong.army.myView);
+    GameAction missBait = new BattleLifecycle.BattleAction(strong.army.myView, punch, punchSit, 6, 5);
     testPassed &= validate(missBait.getEvents(testMap).size() == 0, "    You can shoot things hidden in forests.");
-    GameAction missMeat = new BattleLifecycle.BattleAction(strong.myView, punch, punchSit, 7, 5);
+    GameAction missMeat = new BattleLifecycle.BattleAction(strong.army.myView, punch, punchSit, 7, 5);
     testPassed &= validate(missMeat.getEvents(testMap).size() == 0, "    You can shoot invisible things.");
 
     // Drive by the two hidden units
@@ -93,17 +93,17 @@ public class TestVisionMechanics extends TestCase
     performGameAction(driveBy, testGame);
 
     // Now that we can see everything, try stuff again and expect different results.
-    testPassed &= validate(!strong.myView.isLocationFogged(6, 5), "    Doing a drive-by doesn't reveal forests");
-    testPassed &= validate(!strong.myView.isLocationFogged(7, 5), "    Driving recons by roads makes them invisible");
-    testPassed &= validate(!strong.myView.isLocationEmpty(6, 5),  "    Doing a drive-by doesn't reveal units in forests");
-    testPassed &= validate(!strong.myView.isLocationEmpty(7, 5),  "    Doing a drive-by doesn't reveal invisible tanks");
+    testPassed &= validate(!strong.army.myView.isLocationFogged(6, 5), "    Doing a drive-by doesn't reveal forests");
+    testPassed &= validate(!strong.army.myView.isLocationFogged(7, 5), "    Driving recons by roads makes them invisible");
+    testPassed &= validate(!strong.army.myView.isLocationEmpty(6, 5),  "    Doing a drive-by doesn't reveal units in forests");
+    testPassed &= validate(!strong.army.myView.isLocationEmpty(7, 5),  "    Doing a drive-by doesn't reveal invisible tanks");
     
     GameAction resupplySighted = new ResupplyLifecycle.ResupplyAction(fool, foolPath); // There's no validation for ResupplyAction's constructor, so we'll get pre-empted but generate properly
     testPassed &= validate(resupplySighted.getEvents(testMap).size() == 1, "    Some fool was able to zoom straight through a visible tank");
     
-    GameAction shootBait = new BattleLifecycle.BattleAction(strong.myView, punch, punchSit, 6, 5);
+    GameAction shootBait = new BattleLifecycle.BattleAction(strong.army.myView, punch, punchSit, 6, 5);
     testPassed &= validate(shootBait.getEvents(testMap).size() == 2, "    You can't shoot things you can see.");
-    GameAction shootMeat = new BattleLifecycle.BattleAction(strong.myView, punch, punchSit, 7, 5);
+    GameAction shootMeat = new BattleLifecycle.BattleAction(strong.army.myView, punch, punchSit, 7, 5);
     testPassed &= validate(shootMeat.getEvents(testMap).size() == 2, "    You can't shoot things you can see.");
     
     // Clean up

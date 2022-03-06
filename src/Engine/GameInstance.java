@@ -77,8 +77,6 @@ public class GameInstance implements Serializable
       armies[i].money = gameScenario.rules.startingFunds;
       armies[i].myView = new MapPerspective(map, armies[i]);
       armies[i].myView.game = this;
-      for(Commander co : armies[i].cos)
-        co.myView = armies[i].myView;
       armies[i].myView.resetFog();
       if( !armies[i].HQLocations.isEmpty() )
       {

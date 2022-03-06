@@ -88,7 +88,7 @@ public class Cinder extends Commander
   public GameEventQueue receiveCreateUnitEvent(Unit unit)
   {
     XYCoord buildCoords = new XYCoord(unit.x, unit.y);
-    if( this == unit.CO && myView.isLocationValid(buildCoords) )
+    if( this == unit.CO && army.myView.isLocationValid(buildCoords) )
     {
       unit.alterHP(-2);
       unit.isTurnOver = false;

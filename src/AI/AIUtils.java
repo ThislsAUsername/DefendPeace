@@ -231,7 +231,7 @@ public class AIUtils
     ArrayList<XYCoord> stations = new ArrayList<XYCoord>();
     for( XYCoord xyc : unit.CO.ownedProperties ) // TODO: Revisit if we ever get a CO that repairs on non-owned or non-properties
     {
-      MapLocation loc = unit.CO.myView.getLocation(xyc);
+      MapLocation loc = unit.CO.army.myView.getLocation(xyc);
       if( unit.model.canRepairOn(loc) )
       {
         stations.add(loc.getCoordinates());

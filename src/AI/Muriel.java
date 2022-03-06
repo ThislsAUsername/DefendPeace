@@ -967,7 +967,8 @@ public class Muriel implements AIController
     int infCost = Integer.MAX_VALUE;
     if( null != loc && null != loc.getOwner() )
       infCost = loc.getOwner().getCost(infModel);
-    while ((budget >= infCost) && (CPI.availableUnitModels.contains(new ModelForCO(loc.getOwner(), infModel))) )
+    while ((budget >= infCost) &&
+        null != loc && (CPI.availableUnitModels.contains(new ModelForCO(loc.getOwner(), infModel))))
     {
       shoppingCart.add(new PurchaseOrder(loc, loc.getOwner(), infModel));
       budget -= infCost;

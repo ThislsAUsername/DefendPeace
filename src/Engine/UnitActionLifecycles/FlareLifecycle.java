@@ -181,7 +181,7 @@ public abstract class FlareLifecycle
       launcher.ammo -= 1;
       ArrayList<XYCoord> tiles = Utils.findLocationsInRange(gameMap, target, 0, radius);
       for( XYCoord xyc : tiles )
-        launcher.CO.myView.revealFog(xyc, true);
+        launcher.CO.army.myView.revealFog(xyc, true);
     }
 
     @Override

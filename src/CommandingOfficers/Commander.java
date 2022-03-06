@@ -20,7 +20,6 @@ import Engine.UnitMods.UnitModifierWithDefaults;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
-import Terrain.MapPerspective;
 import Terrain.TerrainType;
 import UI.GameOverlay;
 import UI.UIUtils.Faction;
@@ -38,7 +37,6 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   public Army army;
   public final CommanderInfo coInfo;
   public final GameScenario.GameRules gameRules;
-  public MapPerspective myView;
   public ArrayList<Unit> units;
   public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
   public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain = new HashMap<>();
@@ -352,7 +350,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     for( XYCoord coord : ownedProperties )
     {
       // Re-check ownership just because.
-      if( myView.getLocation(coord).getOwner() == this && myView.getLocation(coord).isProfitable() ) ++count;
+      if( army.myView.getLocation(coord).getOwner() == this && army.myView.getLocation(coord).isProfitable() ) ++count;
     }
     return count * (gameRules.incomePerCity + incomeAdjustment);
   }
