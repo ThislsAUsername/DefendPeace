@@ -6,6 +6,7 @@ import java.util.Collection;
 
 import CommandingOfficers.Commander;
 import Engine.Army;
+import Units.Unit;
 import Units.UnitModel;
 
 public class ModelForCO implements Serializable
@@ -20,6 +21,10 @@ public class ModelForCO implements Serializable
       throw new NullPointerException();
     this.co = co;
     this.um = um;
+  }
+  public ModelForCO(Unit unit)
+  {
+    this(unit.CO, unit.model);
   }
 
   public static Collection<ModelForCO> getListFor(Commander co)

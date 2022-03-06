@@ -170,7 +170,8 @@ public class CommanderProductionInfo
       Map<TerrainType, Integer> propsForCO = propertyCounts.get(model.co);
       for( TerrainType terrain : modelToTerrainMap.get(model.um) )
       {
-        num += propsForCO.get(terrain);
+        if( propsForCO.containsKey(terrain) )
+          num += propsForCO.get(terrain);
       }
     }
     return num;

@@ -151,7 +151,9 @@ public class Muriel implements AIController
    */
   private UnitMatchupAndMetaInfo getUnitMatchupInfo(Unit myUnit, Unit otherUnit)
   {
-    UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(myUnit.model, otherUnit.model));
+    ModelForCO myModel = new ModelForCO(myUnit);
+    ModelForCO otherModel = new ModelForCO(otherUnit);
+    UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(myModel, otherModel));
     if( null != umami ) return umami;
 
     double myDamage = CombatEngine.calculateOneStrikeDamage(myUnit, 1, otherUnit, myArmy.myView, 0, myUnit.model.hasMobileWeapon());
@@ -171,8 +173,6 @@ public class Muriel implements AIController
     if( otherDamage == 0 ) invRatio = 0;
     if( myDamage != 0 && otherDamage == 0 ) damageRatio = 10000;
     if( myDamage == 0 && otherDamage != 0 ) invRatio = 10000;
-    UnitModel myModel = myUnit.model;
-    UnitModel otherModel = otherUnit.model;
     double costRatio = damageRatio * ((double)otherUnit.getCost() / myUnit.getCost());
     double otherCostRatio = invRatio * ((double)myUnit.getCost() / otherUnit.getCost());
     myUnitEffectMap.put(new UnitModelPair(myModel, otherModel), new UnitMatchupAndMetaInfo(damageRatio, costRatio));
@@ -1091,9 +1091,9 @@ public class Muriel implements AIController
 
   private static class UnitModelPair
   {
-    public final UnitModel first;
-    public final UnitModel second;
-    public UnitModelPair(UnitModel first, UnitModel second)
+    public final ModelForCO first;
+    public final ModelForCO second;
+    public UnitModelPair(ModelForCO first, ModelForCO second)
     {
       this.first = first;
       this.second = second;
@@ -1104,8 +1104,8 @@ public class Muriel implements AIController
     {
       final int prime = 160091;
       int result = 1;
-      result = prime * result + first.name.hashCode();
-      result = prime * result + second.name.hashCode();
+      result = prime * result + first.hashCode();
+      result = prime * result + second.hashCode();
       return result;
     }
 
