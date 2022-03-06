@@ -124,8 +124,8 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
     sb.append("Unit funds:")   .append("\n");
     for( Commander co : currentEnergy.keySet() )
     {
-      sb.append(co.coInfo.name + " Energy:").append("\n");
-      sb.append(" - Next Energy:") .append("\n");
+      sb.append(co.coInfo.name + " Ability:").append("\n");
+      sb.append(" - Next Ability:") .append("\n");
     }
 
     return sb.toString();
