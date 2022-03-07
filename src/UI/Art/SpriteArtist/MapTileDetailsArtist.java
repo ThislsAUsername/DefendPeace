@@ -32,7 +32,7 @@ public class MapTileDetailsArtist
     currentTile = new XYCoord(-1, -1);
   }
 
-  public static void drawTileDetails(Graphics g, GameMap map, XYCoord tileToDetail, boolean overlayIsLeft)
+  public static void drawTileDetails(Graphics g, GameMap map, XYCoord tileToDetail, boolean drawOppositeHud, boolean overlayIsLeft)
   {
     // Rebuild the overlay image if needed.
     generateOverlay(map, tileToDetail);
@@ -54,13 +54,13 @@ public class MapTileDetailsArtist
     }
 
     // Draw the tile coordinates.
-    if(SpriteOptions.getCoordinatesEnabled())
+    if( drawOppositeHud && SpriteOptions.getCoordinatesEnabled() )
     {
       String coordStr = String.format("(%d,%d)", tileToDetail.xCoord, tileToDetail.yCoord);
       BufferedImage coordsImg = SpriteUIUtils.getTextAsImage(coordStr, true);
       int bufferPx = 2;
-      int drawX = (overlayIsLeft) ? bufferPx : mapViewWidth - coordsImg.getWidth() - bufferPx;
-      int drawY = mapViewHeight - coordsImg.getHeight() - bufferPx - bufferPx*2 - tileOverlay.getHeight();
+      int drawX = (overlayIsLeft) ? mapViewWidth - coordsImg.getWidth() - bufferPx : bufferPx;
+      int drawY = mapViewHeight - coordsImg.getHeight() - bufferPx - bufferPx*2;
       SpriteUIUtils.drawMenuFrame(g, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR,
           drawX, drawY, coordsImg.getWidth(), coordsImg.getHeight()+bufferPx*2, bufferPx);
       g.drawImage(coordsImg, drawX, drawY+bufferPx, null);

@@ -337,9 +337,12 @@ public class SpriteMapView extends MapView
     {
       int rightJustified = (mapViewWidth - mapImage.getWidth());
       int centered = rightJustified/2;
+      int oppositeHudSize = getOppositeHudSize();
 
+      // be centered until we have space for our opposite-side HUD elements
+      deltaX = Math.max(rightJustified - oppositeHudSize, centered);
       // Until we hit COMPREHENSIVE_HUD_H_SIZE, stick to the right
-      deltaX = Math.min(rightJustified, COMPREHENSIVE_HUD_H_SIZE);
+      deltaX = Math.min(deltaX, COMPREHENSIVE_HUD_H_SIZE);
       // After that, try to be centered
       deltaX = Math.max(deltaX, centered);
     }
@@ -614,14 +617,17 @@ public class SpriteMapView extends MapView
     }
 
     // If the CO overlay won't overlap the map, draw all CO overlays to use the space
-    final int overlayHSpaceAvailable = mapViewWidth - mapImage.getWidth();
+    final int oppositeHudSize = getOppositeHudSize();
+    final int overlayHSpaceAvailable = mapViewWidth - mapImage.getWidth() - oppositeHudSize;
     final boolean drawAllHeaders = overlayHSpaceAvailable > COMPREHENSIVE_HUD_H_SIZE;
+    final boolean drawOppositeHud = mapViewWidth - mapImage.getWidth() > 2*oppositeHudSize;
 
     if( drawAllHeaders )
       overlayIsLeft = true;
 
-    drawTurnCounter(g, overlayIsLeft);
-    int headerOffset = turnNumImage.getHeight() + 6;
+    if( drawOppositeHud )
+      drawTurnCounter(g, overlayIsLeft);
+    int headerOffset = 0;
 
     if( drawAllHeaders )
     {
@@ -639,7 +645,7 @@ public class SpriteMapView extends MapView
 
     // Draw terrain defense and unit status.
     if( includeTileDetails )
-      MapTileDetailsArtist.drawTileDetails(g, myGame.activeArmy.myView, myGame.getCursorCoord(), overlayIsLeft);
+      MapTileDetailsArtist.drawTileDetails(g, myGame.activeArmy.myView, myGame.getCursorCoord(), drawOppositeHud, overlayIsLeft);
   }
 
   private int lastTurnNum = -1;
@@ -648,39 +654,16 @@ public class SpriteMapView extends MapView
   {
     // Generate the turn-counter image.
     int turnNum = myGame.getCurrentTurn();
-    if( lastTurnNum != turnNum )
-    {
-      lastTurnNum = turnNum;
-      final PixelFont pf = SpriteLibrary.getFontStandard();
-      final int wordHeight = pf.getAscent()+pf.getDescent();
-
-      // Our final image will contain word+digit
-      final BufferedImage word = SpriteUIUtils.getTextAsImage("Turn ");
-      final BufferedImage digit = SpriteUIUtils.getBoldTextAsImage(Integer.toString(turnNum));
-
-      final int width = word.getWidth() + digit.getWidth();
-      final int height = Math.max(wordHeight, digit.getHeight());
-
-      turnNumImage = SpriteLibrary.createTransparentSprite(width, height);
-      Graphics dcg = turnNumImage.getGraphics();
-
-      // Note that the word currently has no descender characters
-      int wordVOffset = height-wordHeight+pf.getDescent();
-      dcg.drawImage(word, 0, wordVOffset, null);
-
-      // Bottom-justify the digit, to match with the word
-      final int digitVOffset = height - digit.getHeight();
-      dcg.drawImage(digit, turnNumImage.getWidth()-digit.getWidth(), digitVOffset, null);
-    }
+    refreshTurnNumImage(turnNum);
 
     // Draw the turn counter.
-    int xDraw = overlayIsLeft ?
+    int xDraw = !overlayIsLeft ?
         2
         : (SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale()) - 2 - turnNumImage.getWidth();
     int yDraw = 3;
 
     // Draw a CO-colored background with the counter.
-    int arcW = turnNumImage.getHeight()+4;
+    int arcW = getTurnPaneArcWidth();
     g.setColor(UIUtils.getMapUnitColors(myGame.activeArmy.cos[0].myColor).paletteColors[5]); // 0 is darker, 5 is lighter.
     g.fillArc(xDraw - (arcW/2), yDraw-2, arcW, arcW-1, 90, 180);
     g.fillArc(xDraw + turnNumImage.getWidth()-(arcW/2), yDraw-2, arcW, arcW-1, -90, 180);
@@ -691,6 +674,47 @@ public class SpriteMapView extends MapView
     g.drawLine(xDraw, yDraw-2, xDraw + turnNumImage.getWidth(), yDraw-2);
     g.drawLine(xDraw, yDraw+turnNumImage.getHeight()+1, xDraw + turnNumImage.getWidth(), yDraw+turnNumImage.getHeight()+1);
     g.drawImage(turnNumImage, xDraw, yDraw, null);
+  }
+
+  public BufferedImage refreshTurnNumImage(int turnNum)
+  {
+    if( lastTurnNum == turnNum )
+      return turnNumImage;
+
+    final PixelFont pf = SpriteLibrary.getFontStandard();
+    final int wordHeight = pf.getAscent()+pf.getDescent();
+
+    // Our final image will contain word+digit
+    final BufferedImage word = SpriteUIUtils.getTextAsImage("Turn ");
+    final BufferedImage digit = SpriteUIUtils.getBoldTextAsImage(Integer.toString(turnNum));
+
+    final int width = word.getWidth() + digit.getWidth();
+    final int height = Math.max(wordHeight, digit.getHeight());
+
+    BufferedImage outputImage = SpriteLibrary.createTransparentSprite(width, height);
+    Graphics dcg = outputImage.getGraphics();
+
+    // Note that the word currently has no descender characters
+    int wordVOffset = height-wordHeight+pf.getDescent();
+    dcg.drawImage(word, 0, wordVOffset, null);
+
+    // Bottom-justify the digit, to match with the word
+    final int digitVOffset = height - digit.getHeight();
+    dcg.drawImage(digit, outputImage.getWidth()-digit.getWidth(), digitVOffset, null);
+
+    lastTurnNum = turnNum;
+    turnNumImage = outputImage;
+    return outputImage;
+  }
+  public int getTurnPaneArcWidth()
+  {
+    return turnNumImage.getHeight()+4;
+  }
+  public int getOppositeHudSize()
+  {
+    int oppositeHudHSize = refreshTurnNumImage(myGame.getCurrentTurn()).getWidth();
+    oppositeHudHSize += getTurnPaneArcWidth()/2;
+    return oppositeHudHSize;
   }
 
   /**
