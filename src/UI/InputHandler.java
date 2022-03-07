@@ -20,7 +20,7 @@ public class InputHandler implements IController
 
   public enum InputAction
   {
-    UP, DOWN, LEFT, RIGHT, SEEK, SELECT, BACK
+    UP, DOWN, LEFT, RIGHT, SEEK, VIEWMODE, SELECT, BACK
   };
 
   static ArrayList<Integer> upDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_UP, KeyEvent.VK_W));
@@ -30,6 +30,7 @@ public class InputHandler implements IController
   static ArrayList<Integer> selectDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_ENTER, KeyEvent.VK_SPACE));
   static ArrayList<Integer> backDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_ESCAPE, KeyEvent.VK_BACK_SPACE));
   static ArrayList<Integer> seekDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_Q));
+  static ArrayList<Integer> viewModeDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_E));
 
   static HashMap<InputAction, ArrayList<Integer> > bindingsByInputAction;
   static {
@@ -68,6 +69,7 @@ public class InputHandler implements IController
       bindingsByInputAction.put(InputAction.SELECT, selectDefaultKeyCodes);
       bindingsByInputAction.put(InputAction.BACK, backDefaultKeyCodes);
       bindingsByInputAction.put(InputAction.SEEK, seekDefaultKeyCodes);
+      bindingsByInputAction.put(InputAction.VIEWMODE, viewModeDefaultKeyCodes);
     }
   }
 
@@ -165,6 +167,10 @@ public class InputHandler implements IController
     else if( bindingsByInputAction.get(InputAction.SEEK).contains(keyCode) )
     {
       ia = InputAction.SEEK;
+    }
+    else if( bindingsByInputAction.get(InputAction.VIEWMODE).contains(keyCode) )
+    {
+      ia = InputAction.VIEWMODE;
     }
     return ia;
   }

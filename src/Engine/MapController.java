@@ -52,6 +52,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     myView = view;
     myView.setController(this);
     inputMode = InputMode.INPUT;
+    armyOverlayModes = new int[game.armies.length];
     isGameOver = false;
     nextSeekIndex = 0;
 
@@ -204,6 +205,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
 
         break;
+      case VIEWMODE:
+        final int activeIndex = myGame.getActiveCOIndex();
+        armyOverlayModes[activeIndex] = (armyOverlayModes[activeIndex] + 1) % OverlayMode.values().length;
+        break;
       case SELECT:
         // Pass the current cursor location to the GameInputHandler.
         myGameInputHandler.select(myGame.getCursorCoord());
@@ -214,13 +219,14 @@ public class MapController implements IController, GameInputHandler.StateChanged
           // If we hit BACK while over a unit, add it to the threat overlay for this CO
           MapLocation loc = myGame.gameMap.getLocation(myGame.getCursorCoord());
           Unit resident = loc.getResident();
-          if( null != resident )
+          if( getOverlayMode() == OverlayMode.THREATS_MANUAL && null != resident )
           {
             ArrayList<Unit> threats = myGame.activeArmy.threatsToOverlay;
             if( threats.contains(resident) )
               threats.remove(resident);
             else
               threats.add(resident);
+            OverlayCache.instance(myGame).InvalidateCache();
           }
         }
         myGameInputHandler.back();
@@ -639,6 +645,16 @@ public class MapController implements IController, GameInputHandler.StateChanged
   public Collection<XYCoord> getSelectableCoords()
   {
     return myGameInputHandler.getCoordinateOptions();
+  }
+
+  public enum OverlayMode
+  {
+    THREATS_MANUAL, THREATS_ALL, VISION, NONE,
+  }
+  private int[] armyOverlayModes;
+  public OverlayMode getOverlayMode()
+  {
+    return OverlayMode.values()[armyOverlayModes[myGame.getActiveCOIndex()]];
   }
 
   public GamePath getContemplatedMove()

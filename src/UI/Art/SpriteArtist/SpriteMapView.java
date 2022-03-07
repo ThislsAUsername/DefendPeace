@@ -12,6 +12,7 @@ import AI.AICombatUtils;
 import Engine.Army;
 import Engine.GameInstance;
 import Engine.GamePath;
+import Engine.OverlayCache;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
@@ -253,12 +254,8 @@ public class SpriteMapView extends MapView
     // Draw units, buildings, trees, etc.
     drawUnitsAndMapObjects(mapGraphics, gameMap, animIndex);
 
-    ArrayList<GameOverlay> overlays = new ArrayList<GameOverlay>();
     // Apply any relevant map highlights.
-    for( Army army : myGame.armies )
-    {
-      overlays.addAll(army.getMyOverlays(gameMap, army == gameMap.viewer));
-    }
+    ArrayList<GameOverlay> overlays = OverlayCache.instance(myGame).getNormalOverlays(mapController.getOverlayMode(), gameMap);
 
     // Highlight current available selection targets
     Collection<XYCoord> options = mapController.getSelectableCoords();

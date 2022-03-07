@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-import AI.AICombatUtils;
 import AI.AIController;
 import AI.AILibrary;
 import AI.AIMaker;
@@ -209,21 +208,6 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
     for( Commander co : cos )
       overlays.addAll(co.getMyOverlays(gameMap, amIViewing));
 
-    if( !amIViewing )
-      return overlays;
-    for( Unit u : threatsToOverlay )
-    {
-      XYCoord uCoord = new XYCoord(u.x, u.y);
-      if( !gameMap.isLocationValid(uCoord) )
-        continue;
-
-      int r = u.CO.myColor.getRed(), g = u.CO.myColor.getGreen(), b = u.CO.myColor.getBlue();
-      Color edgeColor = new Color(r, g, b, 200);
-      Color fillColor = new Color(r, g, b, 100);
-      overlays.add(new GameOverlay(uCoord,
-                   AICombatUtils.findThreatPower(gameMap, u, null).keySet(),
-                   fillColor, edgeColor));
-    }
     return overlays;
   }
   /**
