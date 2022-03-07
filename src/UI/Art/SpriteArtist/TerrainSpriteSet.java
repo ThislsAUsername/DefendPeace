@@ -436,17 +436,9 @@ public class TerrainSpriteSet
     if( map.isLocationValid(x, y) )
     {
       TerrainType otherTerrain = map.getEnvironment(x, y).terrainType;
-      TerrainType otherBase = getBaseTerrainType(otherTerrain);
-
-      if( ((otherTerrain == myTerrainType) // Terrain types match.
-          || (otherBase == myTerrainType) // Terrain bases match.
-          || myTerrainAffinities.contains(otherTerrain) // Affinity with other tile type.
-          || myTerrainAffinities.contains(otherBase)) // Affinity with other tile base type.
-          && !myTerrainNonAffinities.contains(otherTerrain) // No explicit denial of affinity.
-          )
-      {
-        terrainTypesMatch = true;
-      }
+      final boolean affinityDenied = myTerrainNonAffinities.contains(otherTerrain);
+      if( !affinityDenied )
+        terrainTypesMatch = canTileWith(otherTerrain);
     }
     else
     {
@@ -455,6 +447,25 @@ public class TerrainSpriteSet
     }
 
     return terrainTypesMatch;
+  }
+
+  /**
+   * Recursively checks if otherTerrain or any base thereof has an affinity with this terrain
+   */
+  private boolean canTileWith(TerrainType otherTerrain)
+  {
+    if( (otherTerrain == myTerrainType) // Terrain types match.
+        || myTerrainAffinities.contains(otherTerrain) ) // Affinity with other tile type.
+    {
+      return true;
+    }
+    else // No match yet; check the base
+    {
+      TerrainType otherBase = getBaseTerrainType(otherTerrain);
+      if( otherBase != otherTerrain )
+        return canTileWith(otherBase);
+      return false;
+    }
   }
 
   /**
@@ -467,21 +478,21 @@ public class TerrainSpriteSet
     if( null == terrainBases )
     {
       terrainBases = new HashMap<TerrainType, TerrainType>();
-      terrainBases.put(TerrainType.CITY, TerrainType.GRASS);
+      terrainBases.put(TerrainType.CITY, TerrainType.ROAD);
       terrainBases.put(TerrainType.DUNES, TerrainType.GRASS);
-      terrainBases.put(TerrainType.FACTORY, TerrainType.GRASS);
+      terrainBases.put(TerrainType.FACTORY, TerrainType.ROAD);
       terrainBases.put(TerrainType.AIRPORT, TerrainType.GRASS);
       terrainBases.put(TerrainType.TEMP_AIRPORT, TerrainType.GRASS);
       terrainBases.put(TerrainType.FOREST, TerrainType.GRASS);
-      terrainBases.put(TerrainType.HEADQUARTERS, TerrainType.GRASS);
-      terrainBases.put(TerrainType.LAB, TerrainType.GRASS);
+      terrainBases.put(TerrainType.HEADQUARTERS, TerrainType.ROAD);
+      terrainBases.put(TerrainType.LAB, TerrainType.ROAD);
       terrainBases.put(TerrainType.MOUNTAIN, TerrainType.GRASS);
       terrainBases.put(TerrainType.GRASS, TerrainType.GRASS);
       terrainBases.put(TerrainType.RIVER, TerrainType.GRASS);
       terrainBases.put(TerrainType.ROAD, TerrainType.GRASS);
       terrainBases.put(TerrainType.PILLAR, TerrainType.GRASS);
       terrainBases.put(TerrainType.METEOR, TerrainType.GRASS);
-      terrainBases.put(TerrainType.BUNKER, TerrainType.GRASS);
+      terrainBases.put(TerrainType.BUNKER, TerrainType.ROAD);
 
       terrainBases.put(TerrainType.BRIDGE, TerrainType.SHOAL);
       terrainBases.put(TerrainType.SEAPORT, TerrainType.SHOAL);
