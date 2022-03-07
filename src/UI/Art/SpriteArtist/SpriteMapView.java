@@ -607,11 +607,12 @@ public class SpriteMapView extends MapView
   private void drawHUD(Graphics g, boolean includeTileDetails)
   {
     // Choose the CO overlay location based on the cursor location on the screen.
-    if( !overlayIsLeft && (myGame.getCursorX() - mapViewDrawX.get()) > (mapTilesToDrawX - 1) * 3 / 5 )
+    final double viewRelativeCursorX = myGame.getCursorX() - mapViewDrawX.get();
+    if( !overlayIsLeft && viewRelativeCursorX > (mapTilesToDrawX - 1) * 3 / 5 )
     {
       overlayIsLeft = true;
     }
-    if( overlayIsLeft && (myGame.getCursorX() - mapViewDrawX.get()) < mapTilesToDrawX * 2 / 5 )
+    if( overlayIsLeft && viewRelativeCursorX < mapTilesToDrawX * 2 / 5 )
     {
       overlayIsLeft = false;
     }
@@ -620,7 +621,21 @@ public class SpriteMapView extends MapView
     final int oppositeHudSize = getOppositeHudSize();
     final int overlayHSpaceAvailable = mapViewWidth - mapImage.getWidth() - oppositeHudSize;
     final boolean drawAllHeaders = overlayHSpaceAvailable > COMPREHENSIVE_HUD_H_SIZE;
-    final boolean drawOppositeHud = mapViewWidth - mapImage.getWidth() > 2*oppositeHudSize;
+
+    boolean drawOppositeHud = mapViewWidth - mapImage.getWidth() > 2 * oppositeHudSize;
+    // If we're in a menu and the cursor isn't too close to the edge, draw the opposite HUD even if it'll overlap the map
+    if( !drawOppositeHud && null != mapController.getCurrentGameMenu() )
+    {
+      final int showInMenuThreshold = 4;
+      if( !overlayIsLeft && viewRelativeCursorX > showInMenuThreshold )
+      {
+        drawOppositeHud = true;
+      }
+      if( overlayIsLeft && mapTilesToDrawX - viewRelativeCursorX > showInMenuThreshold )
+      {
+        drawOppositeHud = true;
+      }
+    }
 
     if( drawAllHeaders )
       overlayIsLeft = true;
