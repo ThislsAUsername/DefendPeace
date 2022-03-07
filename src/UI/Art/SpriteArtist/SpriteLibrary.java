@@ -203,11 +203,6 @@ public class SpriteLibrary
     else if( terrainType == TerrainType.ROAD )
     {
       ss.addTerrainAffinity(TerrainType.BRIDGE);
-      ss.addTerrainAffinity(TerrainType.LAB);
-      ss.addTerrainAffinity(TerrainType.CITY);
-      ss.addTerrainAffinity(TerrainType.BUNKER);
-      ss.addTerrainAffinity(TerrainType.HEADQUARTERS);
-      ss.addTerrainAffinity(TerrainType.FACTORY);
     }
     else if( terrainType == TerrainType.SHOAL )
     {

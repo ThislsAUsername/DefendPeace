@@ -436,17 +436,9 @@ public class TerrainSpriteSet
     if( map.isLocationValid(x, y) )
     {
       TerrainType otherTerrain = map.getEnvironment(x, y).terrainType;
-      TerrainType otherBase = getBaseTerrainType(otherTerrain);
-
-      if( ((otherTerrain == myTerrainType) // Terrain types match.
-          || (otherBase == myTerrainType) // Terrain bases match.
-          || myTerrainAffinities.contains(otherTerrain) // Affinity with other tile type.
-          || myTerrainAffinities.contains(otherBase)) // Affinity with other tile base type.
-          && !myTerrainNonAffinities.contains(otherTerrain) // No explicit denial of affinity.
-          )
-      {
-        terrainTypesMatch = true;
-      }
+      final boolean affinityDenied = myTerrainNonAffinities.contains(otherTerrain);
+      if( !affinityDenied )
+        terrainTypesMatch = canTileWith(otherTerrain);
     }
     else
     {
@@ -455,6 +447,25 @@ public class TerrainSpriteSet
     }
 
     return terrainTypesMatch;
+  }
+
+  /**
+   * Recursively checks if otherTerrain or any base thereof has an affinity with this terrain
+   */
+  private boolean canTileWith(TerrainType otherTerrain)
+  {
+    if( (otherTerrain == myTerrainType) // Terrain types match.
+        || myTerrainAffinities.contains(otherTerrain) ) // Affinity with other tile type.
+    {
+      return true;
+    }
+    else // No match yet; check the base
+    {
+      TerrainType otherBase = getBaseTerrainType(otherTerrain);
+      if( otherBase != otherTerrain )
+        return canTileWith(otherBase);
+      return false;
+    }
   }
 
   /**
