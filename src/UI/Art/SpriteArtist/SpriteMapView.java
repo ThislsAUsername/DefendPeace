@@ -641,7 +641,10 @@ public class SpriteMapView extends MapView
       overlayIsLeft = true;
 
     if( drawOppositeHud )
+    {
       drawTurnCounter(g, overlayIsLeft);
+      drawOppositeDetails(g, overlayIsLeft);
+    }
     int headerOffset = 0;
 
     if( drawAllHeaders )
@@ -660,7 +663,32 @@ public class SpriteMapView extends MapView
 
     // Draw terrain defense and unit status.
     if( includeTileDetails )
-      MapTileDetailsArtist.drawTileDetails(g, myGame.activeArmy.myView, myGame.getCursorCoord(), drawOppositeHud, overlayIsLeft);
+      MapTileDetailsArtist.drawTileDetails(g, myGame.activeArmy.myView, myGame.getCursorCoord(), overlayIsLeft);
+  }
+
+  public void drawOppositeDetails(Graphics g, boolean overlayIsLeft)
+  {
+    String viewModeStr = "E:" + mapController.getOverlayMode().getName();
+    BufferedImage viewModeImg = SpriteUIUtils.getTextAsImage(viewModeStr, true);
+    int bufferPx = 2;
+    int drawX = (overlayIsLeft) ? mapViewWidth - viewModeImg.getWidth() - bufferPx : bufferPx;
+    int drawY = mapViewHeight - viewModeImg.getHeight() - bufferPx - bufferPx * 2;
+    SpriteUIUtils.drawMenuFrame(g, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR, drawX, drawY, viewModeImg.getWidth(),
+        viewModeImg.getHeight() + bufferPx * 2, bufferPx);
+    g.drawImage(viewModeImg, drawX, drawY + bufferPx, null);
+
+    XYCoord tileToDetail = myGame.getCursorCoord();
+    // Draw the tile coordinates.
+    if( SpriteOptions.getCoordinatesEnabled() )
+    {
+      String coordStr = String.format("(%d,%d)", tileToDetail.xCoord, tileToDetail.yCoord);
+      BufferedImage coordsImg = SpriteUIUtils.getTextAsImage(coordStr, true);
+      int coordsDrawX = (overlayIsLeft) ? mapViewWidth - coordsImg.getWidth() - bufferPx : bufferPx;
+      int coordsDrawY = mapViewHeight - coordsImg.getHeight() - viewModeImg.getHeight() - bufferPx * 5;
+      SpriteUIUtils.drawMenuFrame(g, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR, coordsDrawX, coordsDrawY,
+          coordsImg.getWidth(), coordsImg.getHeight() + bufferPx * 2, bufferPx);
+      g.drawImage(coordsImg, coordsDrawX, coordsDrawY + bufferPx, null);
+    }
   }
 
   private int lastTurnNum = -1;
