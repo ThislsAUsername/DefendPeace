@@ -2,6 +2,8 @@ package UI.Art.SpriteArtist;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import Engine.XYCoord;
 import Terrain.MapInfo;
@@ -56,9 +58,12 @@ public class MiniMapArtist
       final double finalRatio  = Math.min(heightRatio, widthRatio);
       final int finalHeight    = (int) (mapHeight * finalRatio);
       final int finalWidth     = (int) (mapWidth * finalRatio);
+
       miniMap = SpriteLibrary.createTransparentSprite(finalWidth, finalHeight);
-      Graphics mmG = miniMap.getGraphics();
-      mmG.drawImage(lastFullMapImage, 0, 0, finalWidth, finalHeight, null);
+
+      final AffineTransform at = AffineTransform.getScaleInstance(finalRatio, finalRatio);
+      final AffineTransformOp ato = new AffineTransformOp(at, AffineTransformOp.TYPE_BICUBIC);
+      miniMap = ato.filter(lastFullMapImage, miniMap);
     }
 
     return miniMap;
