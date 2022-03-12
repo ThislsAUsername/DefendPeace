@@ -18,6 +18,7 @@ public class MapSelectMenuArtist
   private static final Color MENUHIGHLIGHTCOLOR = new Color(246, 234, 210);
 
   private static MapInfo selectedMapInfo = null;
+  private static SpriteArrows vArrows = new SpriteArrows(true);
 
   public static void draw(Graphics g, MapSelectController gameSetup)
   {
@@ -55,7 +56,6 @@ public class MapSelectMenuArtist
     menuGraphics.fillRect(nameSectionDrawWidth, 0, 1, drawableHeight); // sidebar
     menuGraphics.fillRect(0,0,nameSectionDrawWidth,frameBorderHeight); // top bar
     menuGraphics.fillRect(0, drawableHeight-frameBorderHeight, nameSectionDrawWidth, 3); // bottom bar
-    //TODO: Draw little arrows on the top and bottom frame to show it can scroll.
 
     // Draw the highlight for the selected option.
     menuGraphics.setColor(MENUHIGHLIGHTCOLOR);
@@ -75,6 +75,14 @@ public class MapSelectMenuArtist
     }
     
     menuGraphics.fillRect(0, selectedOptionYOffset, nameSectionDrawWidth, menuOptionHeight);
+
+    if( mapInfos.size() > displayableCount ) // Throw some up/down scrolly arrows on, if relevant
+    {
+      vArrows.set(
+          nameSectionDrawWidth - SpriteArrows.ARROW_SIZE, drawableHeight/2,
+          drawableHeight - (frameBorderHeight*2 + SpriteArrows.ARROW_SIZE), true);
+      vArrows.draw(menuGraphics);
+    }
 
     // Display the names from the list
     for(int i = 0; i < displayableCount; ++i)

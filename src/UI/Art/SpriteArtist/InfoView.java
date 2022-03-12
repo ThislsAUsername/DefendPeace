@@ -30,12 +30,11 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
   private ArrayList<InfoPage> prevPages = null;
   private BufferedImage pageImage = null;
   private SpriteArrows hArrows = new SpriteArrows();
-  private SpriteArrows vArrows = new SpriteArrows();
+  private SpriteArrows vArrows = new SpriteArrows(true);
 
   public InfoView(InfoController control)
   {
     myControl = control;
-    vArrows.isVertical = true;
   }
 
   @Override
