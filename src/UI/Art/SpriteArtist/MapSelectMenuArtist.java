@@ -116,7 +116,7 @@ public class MapSelectMenuArtist
     int maxMiniMapHeight = drawableHeight - MapInfoPaneDrawHeight;
 
     // Find the center of the minimap display.
-    int miniMapCenterX = nameSectionDrawWidth + (maxMiniMapWidth / 2);
+    int miniMapCenterX = nameSectionDrawWidth + ((maxMiniMapWidth+1) / 2);
     int miniMapCenterY = maxMiniMapHeight / 2;
 
     // Draw a line to separate the minimap image and the player/property info.
