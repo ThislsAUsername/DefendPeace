@@ -821,6 +821,11 @@ public class JakeMan extends ModularAI
     {
       this.coord = coord;
     }
+    @Override
+    public String toString()
+    {
+      return coord + "+" + extraTiles;
+    }
   }
   /**
    * Sort CapStop lists by potential total profit
@@ -998,6 +1003,17 @@ public class JakeMan extends ModularAI
     }
     
     buildBaseCapChains(map, rightfulProps, startingFactories);
+
+    for( XYCoord factoryXYC : capChains.keySet() )
+    {
+      log(String.format("Cap chains for %s:", factoryXYC));
+      for( ArrayList<CapStop> chain : capChains.get(factoryXYC) )
+      {
+        log(String.format("  chain"));
+        for( CapStop stop : chain )
+          log(String.format("    %s", stop));
+      }
+    }
 
     // Add our factory chains in at the start of each list
     for(ArrayList<CapStop> chain : factoryCapChains)
