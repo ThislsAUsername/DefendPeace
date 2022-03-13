@@ -9,39 +9,34 @@ import CommandingOfficers.CommanderAbility;
 import Engine.*;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
-import Engine.UnitActionLifecycles.BattleLifecycle;
+import Engine.UnitActionLifecycles.CaptureLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.*;
 import Units.*;
-import Units.MoveTypes.MoveType;
 
-/**
- *  Wally values units based on firepower and the area they can threaten.
- *  He tries to keep units safe by keeping them out of range, but will also meatshield to protect more valuable units.
- */
-public class WallyAI extends ModularAI
+
+public class JakeMan extends ModularAI
 {
   private static class instantiator implements AIMaker
   {
     @Override
     public AIController create(Army army)
     {
-      return new WallyAI(army);
+      return new JakeMan(army);
     }
 
     @Override
     public String getName()
     {
-      return "Wally";
+      return "J.A.K.E.M.A.N.";
     }
 
     @Override
     public String getDescription()
     {
       return
-          "Wally values units based on firepower and the area they can threaten.\n" +
-          "He tries to keep units out of harm's way, and to protect expensive units with cheaper ones.\n" +
-          "He can be overly timid, and thus is a fan of artillery.";
+          "Wants your free dudes.\n" +
+          "Competitive-style AI design credit @Lost&Found#6348, ID 824112693123612692.";
     }
   }
   public static final AIMaker info = new instantiator();
@@ -52,293 +47,82 @@ public class WallyAI extends ModularAI
     return info;
   }
 
+  protected Army myArmy = null;
+
   // What % damage I'll ignore when checking safety
   private static final int INDIRECT_THREAT_THRESHHOLD = 7;
   private static final int DIRECT_THREAT_THRESHHOLD = 13;
   private static final int    UNIT_HEAL_THRESHHOLD = 6; // HP at which units heal
   private static final double UNIT_REFUEL_THRESHHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
   private static final double UNIT_REARM_THRESHHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
-  private static final double AGGRO_EFFECT_THRESHHOLD = 0.42; // How effective do I need to be against a unit to target it?
-  private static final double AGGRO_FUNDS_WEIGHT = 0.9; // Multiplier on damage I need to get before a sacrifice is worth it
-  private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
-  private static final double TERRAIN_PENALTY_WEIGHT = 3; // Exponent for how crippling we think high move costs are
-  private static final double MIN_SIEGE_RANGE_WEIGHT = 0.8; // Exponent for how much to penalize siege weapon ranges for their min ranges
 
   private static final double TERRAIN_FUNDS_WEIGHT = 2.5; // Multiplier for per-city income for adding value to units threatening to cap
   private static final double TERRAIN_INDUSTRY_WEIGHT = 20000; // Funds amount added to units threatening to cap an industry
-  private static final double TERRAIN_HQ_WEIGHT = 42000; //                  "                                      HQ
-  
+  private static final double TERRAIN_HQ_WEIGHT = 42000; //      
+
   private Map<UnitModel, Map<XYCoord, Double>> threatMap;
   private ArrayList<Unit> allThreats;
-  private HashMap<UnitModel, Double> unitEffectiveMove = null; // How well the unit can move, on average, on this map
-  public double getEffectiveMove(UnitModel model)
+  protected Map<XYCoord, ArrayList<ArrayList<CapStop>>> capChains = new HashMap<>();
+  protected Map<Unit, ArrayList<CapStop>> capChainsAllocated = new HashMap<>();
+  private ArrayList<XYCoord> contestedProps; // as was probably considered by the map designer; doesn't necessarily take movement/production differences into account
+
+  ArrayList<UnitModel> allTanks;
+  UnitModel antiAir;
+  UnitModel copter;
+
+  public JakeMan(Army army)
   {
-    if( unitEffectiveMove.containsKey(model) )
-      return unitEffectiveMove.get(model);
+    super(army);
+    myArmy = army;
 
-    //TODO
-//    MoveType p = model.calculateMoveType();
-    MoveType p = model.baseMoveType;
-    GameMap map = myArmy.myView;
-    double totalCosts = 0;
-    int validTiles = 0;
-    double totalTiles = map.mapWidth * map.mapHeight; // to avoid integer division
-    // Iterate through the map, counting up the move costs of all valid terrain
-    for( int w = 0; w < map.mapWidth; ++w )
-    {
-      for( int h = 0; h < map.mapHeight; ++h )
-      {
-        Environment terrain = map.getLocation(w, h).getEnvironment();
-        if( p.canTraverse(terrain) )
-        {
-          validTiles++;
-          int cost = p.getMoveCost(terrain);
-          totalCosts += Math.pow(cost, TERRAIN_PENALTY_WEIGHT);
-        }
-      }
-    }
-    //             term for how fast you are   term for map coverage
-    double ratio = (validTiles / totalCosts) * (validTiles / totalTiles); // 1.0 is the max expected value
-    
-//    double effMove = model.calculateMovePower() * ratio;
-    double effMove = model.baseMovePower * ratio;
-    unitEffectiveMove.put(model, effMove);
-    return effMove;
-  }
+    // look where all vehicles are and what their threat ranges are (yes, mechs are vehicles)
+    // take free dudes that you have more defenders for than them
+    // move your leftover vehicles so they cover the tiles attacking most relevant stuff (contested cities, own units)
+    // move infs as far towards nearest contested stuff as you can without underdefending, cap if possible
 
-
-  public WallyAI(Army co)
-  {
-    super(co);
     aiPhases = new ArrayList<AIModule>(
         Arrays.asList(
-            new PowerActivator(co, CommanderAbility.PHASE_TURN_START),
-            new GenerateThreatMap(co, this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
-            new CaptureFinisher(co, this),
+            new PowerActivator(army, CommanderAbility.PHASE_TURN_START),
+            new GenerateThreatMap(army, this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
+            new CapChainActuator(army, this),
+            new CaptureFinisher(army, this),
 
-            new NHitKO(co, this),
-            new SiegeAttacks(co, this),
-            new PowerActivator(co, CommanderAbility.PHASE_BUY),
-            new FreeRealEstate(co, this, false, false), // prioritize non-eviction
-            new FreeRealEstate(co, this, true,  false), // evict if necessary
-            new BuildStuff(co, this),
-            new FreeRealEstate(co, this, true,  true), // step on industries we're not using
-            new Travel(co, this),
+            new PowerActivator(army, CommanderAbility.PHASE_BUY),
+            new FreeRealEstate(army, this, false, false), // prioritize non-eviction
+            new FreeRealEstate(army, this, true,  false), // evict if necessary
+            new BuildStuff(army, this),
+            new FreeRealEstate(army, this, true,  true), // step on industries we're not using
+            new Travel(army, this),
 
-            new PowerActivator(co, CommanderAbility.PHASE_TURN_END)
+            new PowerActivator(army, CommanderAbility.PHASE_TURN_END)
             ));
-  }
-
-  private void init(GameMap map)
-  {
-    unitEffectiveMove = new HashMap<>();
-    // init all move multipliers before powers come into play
-    for( Army army : map.game.armies )
-    {
-      for( Commander co : army.cos )
-      {
-        for( UnitModel model : co.unitModels )
-        {
-          getEffectiveMove(model);
-        }
-      }
-    }
   }
 
   @Override
   public void initTurn(GameMap gameMap)
   {
     super.initTurn(gameMap);
-    if( null == unitEffectiveMove )
+    if( null == contestedProps )
       init(gameMap);
-    log(String.format("[======== Wally initializing turn %s for %s =========]", turnNum, myArmy));
+    log(String.format("[======== JakeMan initializing turn %s for %s =========]", turnNum, myArmy));
   }
 
   @Override
   public void endTurn()
   {
     super.endTurn();
-    log(String.format("[======== Wally ending turn %s for %s =========]", turnNum, myArmy));
-  }
-
-  public static class SiegeAttacks extends UnitActionFinder
-  {
-    private static final long serialVersionUID = 1L;
-    public SiegeAttacks(Army co, ModularAI ai)
-    {
-      super(co, ai);
-    }
-
-    @Override
-    public GameAction getUnitAction(Unit unit, GameMap gameMap)
-    {
-      GameAction bestAttack = null;
-      // Find the possible destination.
-      XYCoord coord = new XYCoord(unit.x, unit.y);
-
-      if( AIUtils.isFriendlyProduction(gameMap, myArmy, coord) || !unit.model.hasImmobileWeapon() )
-        return bestAttack;
-
-      // Figure out how to get here.
-      GamePath movePath = Utils.findShortestPath(unit, coord, gameMap);
-
-      // Figure out what I can do here.
-      ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath);
-      double bestDamage = 0;
-      for( GameActionSet actionSet : actionSets )
-      {
-        // See if we have the option to attack.
-        if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
-        {
-          for( GameAction action : actionSet.getGameActions() )
-          {
-            MapLocation loc = gameMap.getLocation(action.getTargetLocation());
-            Unit target = loc.getResident();
-            if( null == target ) continue; // Ignore terrain
-            double damage = valueUnit(target, loc, false) * Math.min(target.getHP(), CombatEngine.simulateBattleResults(unit, target, gameMap, movePath).defender.getPreciseHPDamage());
-            if( damage > bestDamage )
-            {
-              bestDamage = damage;
-              bestAttack = action;
-            }
-          }
-        }
-      }
-      if( null != bestAttack )
-      {
-        ai.log(String.format("%s is shooting %s",
-            unit.toStringWithLocation(), gameMap.getLocation(bestAttack.getTargetLocation()).getResident()));
-      }
-      return bestAttack;
-    }
-  }
-
-  // Try to get confirmed kills with mobile strikes.
-  public static class NHitKO implements AIModule
-  {
-    private static final long serialVersionUID = 1L;
-    public Army myCo;
-    public final WallyAI ai;
-
-    public NHitKO(Army co, WallyAI ai)
-    {
-      myCo = co;
-      this.ai = ai;
-    }
-
-    @Override
-    public void initTurn(GameMap gameMap) {targets = null;}
-    HashSet<XYCoord> targets = null;
-
-    XYCoord targetLoc;
-    Map<XYCoord, Unit> neededAttacks;
-    double damageSum = 0;
-
-    public void reset()
-    {
-      if( null != targets )
-        targets.remove(targetLoc);
-      targetLoc = null;
-      neededAttacks = null;
-      damageSum = 0;
-    }
-
-    @Override
-    public GameAction getNextAction(PriorityQueue<Unit> unitQueue, GameMap gameMap)
-    {
-      GameAction nextAction = nextAttack(gameMap);
-      if( null != nextAction )
-        return nextAction;
-
-      HashSet<XYCoord> industries = new HashSet<XYCoord>();
-      for( XYCoord coord : myCo.getOwnedProperties() )
-        if( myCo.cos[0].unitProductionByTerrain.containsKey(gameMap.getEnvironment(coord).terrainType)
-            || TerrainType.HEADQUARTERS == gameMap.getEnvironment(coord).terrainType
-            || TerrainType.LAB == gameMap.getEnvironment(coord).terrainType )
-          industries.add(coord);
-
-      // Initialize to targeting all spaces on or next to industries+HQ, since those are important spots
-      if( null == targets )
-      {
-        targets = new HashSet<XYCoord>();
-
-        HashSet<XYCoord> industryBlockers = new HashSet<XYCoord>();
-        for( XYCoord coord : industries )
-          industryBlockers.addAll(Utils.findLocationsInRange(gameMap, coord, 0, 1));
-
-        for( XYCoord coord : industryBlockers )
-        {
-          Unit resident = gameMap.getResident(coord);
-          if( null != resident && myCo.isEnemy(resident.CO) )
-            targets.add(coord);
-        }
-      }
-
-      for( XYCoord coord : new ArrayList<XYCoord>(targets) )
-      {
-        Unit resident = gameMap.getResident(coord);
-        if( null != resident && myCo.isEnemy(resident.CO) )
-        {
-          targetLoc = coord;
-          neededAttacks = AICombatUtils.findMultiHitKill(gameMap, resident, unitQueue, industries);
-          if( null != neededAttacks )
-            break;
-        }
-        else
-          targets.remove(coord);
-      }
-
-      return nextAttack(gameMap);
-    }
-
-    private GameAction nextAttack(GameMap gameMap)
-    {
-      if( null == targetLoc || null == neededAttacks )
-        return null;
-
-      Unit target = gameMap.getLocation(targetLoc).getResident();
-      if( null == target )
-      {
-        ai.log(String.format("    NHitKO target is ded. Ayy."));
-        reset();
-        return null;
-      }
-
-      for( XYCoord xyc : neededAttacks.keySet() )
-      {
-        Unit unit = neededAttacks.get(xyc);
-        if( unit.isTurnOver || !gameMap.isLocationEmpty(unit, xyc) )
-          continue;
-
-        damageSum += CombatEngine.simulateBattleResults(unit, target, gameMap, xyc).defender.getPreciseHPDamage();
-        ai.log(String.format("    %s brings the damage total to %s", unit.toStringWithLocation(), damageSum));
-        return new BattleLifecycle.BattleAction(gameMap, unit, Utils.findShortestPath(unit, xyc, gameMap), target.x, target.y);
-      }
-      // If we're here, we're either done or we need to clear out friendly blockers
-      for( XYCoord xyc : neededAttacks.keySet() )
-      {
-        Unit resident = gameMap.getResident(xyc);
-        if( null == resident || resident.isTurnOver || resident.CO.army != myCo )
-          continue;
-
-        boolean ignoreSafety = true, avoidProduction = true;
-        return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, neededAttacks.get(xyc), resident, ignoreSafety, avoidProduction);
-      }
-      ai.log(String.format("    NHitKO ran out of attacks to do"));
-      reset();
-      return null;
-    }
+    log(String.format("[======== JakeMan ending turn %s for %s =========]", turnNum, myArmy));
   }
 
   public static class GenerateThreatMap implements AIModule
   {
     private static final long serialVersionUID = 1L;
-    public Army myCo;
-    public final WallyAI ai;
+    public Army myArmy;
+    public final JakeMan ai;
 
-    public GenerateThreatMap(Army co, WallyAI ai)
+    public GenerateThreatMap(Army co, JakeMan ai)
     {
-      myCo = co;
+      myArmy = co;
       this.ai = ai;
     }
 
@@ -347,13 +131,13 @@ public class WallyAI extends ModularAI
     {
       ai.allThreats = new ArrayList<Unit>();
       ai.threatMap = new HashMap<UnitModel, Map<XYCoord, Double>>();
-      Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myCo, gameMap);
-      for( UnitModel um : myCo.cos[0].unitModels )
+      Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myArmy, gameMap);
+      for( UnitModel um : myArmy.cos[0].unitModels )
       {
         ai.threatMap.put(um, new HashMap<XYCoord, Double>());
         for( Commander co : unitLists.keySet() )
         {
-          if( myCo.isEnemy(co) )
+          if( myArmy.isEnemy(co) )
           {
             for( Unit threat : unitLists.get(co) )
             {
@@ -376,13 +160,103 @@ public class WallyAI extends ModularAI
     }
   }
 
+  public static class CapChainActuator extends UnitActionFinder
+  {
+    private static final long serialVersionUID = 1L;
+    JakeMan aiCast;
+    public CapChainActuator(Army co, JakeMan ai)
+    {
+      super(co, ai);
+      aiCast = ai;
+    }
+
+    @Override
+    public GameAction getUnitAction(Unit unit, GameMap map)
+    {
+      // Don't really care to handle COs that modify what can cap
+      if( !unit.model.baseActions.contains(UnitActionFactory.CAPTURE) )
+        return null;
+
+      XYCoord position = new XYCoord(unit.x, unit.y);
+      // Add the unit to a cap chain, if possible
+      if( !aiCast.capChainsAllocated.containsKey(unit) )
+      {
+        ArrayList<ArrayList<CapStop>> chainList = aiCast.capChains.get(position);
+        if( null != chainList && !chainList.isEmpty() )
+        {
+          aiCast.capChainsAllocated.put(unit, chainList.remove(0));
+          if( chainList.isEmpty() )
+            aiCast.capChains.remove(position);
+        }
+      }
+      // Follow the cap chain, if possible
+      if( aiCast.capChainsAllocated.containsKey(unit) )
+      {
+        if( unit.getCaptureProgress() > 0 )
+        {
+          ai.unownedProperties.remove(position);
+          return new CaptureLifecycle.CaptureAction(map, unit, Utils.findShortestPath(unit, position, map));
+        }
+
+        ArrayList<CapStop> chain = aiCast.capChainsAllocated.get(unit);
+        while (!chain.isEmpty())
+        {
+          final XYCoord coord = chain.get(0).coord;
+          // If we're already there or own it, throw the point out
+          if( position.equals(coord) || !myArmy.isEnemy(map.getLocation(coord).getOwner()) )
+            chain.remove(0);
+          else
+            return findChainAction(map, unit, chain, aiCast);
+        }
+        // Chain's done, if we ever get here
+        aiCast.capChainsAllocated.remove(unit);
+      }
+
+      return null;
+    }
+
+    public static GameAction findChainAction(GameMap gameMap, Unit unit, ArrayList<CapStop> chain, JakeMan ai)
+    {
+      XYCoord goal = chain.get(0).coord;
+
+      boolean includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
+      ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces);
+
+      // If we can get to our destination, go for it
+      if( destinations.contains(goal) )
+        return new CaptureLifecycle.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, goal, gameMap));
+
+      Utils.sortLocationsByDistance(goal, destinations);
+
+      for( XYCoord moveCoord : destinations )
+      {
+        boolean spaceFree = gameMap.isLocationEmpty(unit, moveCoord);
+        Unit resident = gameMap.getLocation(moveCoord).getResident();
+        if( !spaceFree && ((unit.CO != resident.CO || resident.isTurnOver)) )
+          continue; // Bail if we can't clear the space
+
+        // Figure out how to get here.
+        GamePath movePath = Utils.findShortestPath(unit, moveCoord, gameMap);
+
+        if( !spaceFree )
+        {
+          boolean ignoreSafety = true;
+          boolean avoidProduction = false;
+          return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident, ignoreSafety, avoidProduction);
+        }
+        return new WaitLifecycle.WaitAction(unit, movePath);
+      }
+      return null;
+    }
+  }
+  
   // Try to get unit value by capture or attack
   public static class FreeRealEstate extends UnitActionFinder
   {
     private static final long serialVersionUID = 1L;
-    private final WallyAI ai;
+    private final JakeMan ai;
     private final boolean canEvict, canStepOnProduction;
-    public FreeRealEstate(Army co, WallyAI ai, boolean canEvict, boolean canStepOnProduction)
+    public FreeRealEstate(Army co, JakeMan ai, boolean canEvict, boolean canStepOnProduction)
     {
       super(co, ai);
       this.ai = ai;
@@ -397,7 +271,7 @@ public class WallyAI extends ModularAI
       return findValueAction(unit.CO, ai, unit, gameMap, mustMove, !canStepOnProduction, canEvict);
     }
 
-    public static GameAction findValueAction( Commander co, WallyAI ai,
+    public static GameAction findValueAction( Commander co, JakeMan ai,
                                               Unit unit, GameMap gameMap,
                                               boolean mustMove, boolean avoidProduction,
                                               boolean canEvict )
@@ -443,6 +317,7 @@ public class WallyAI extends ModularAI
               double damage = Math.min(target.getHP(), (int)results.defender.getPreciseHPDamage());
               
               boolean goForIt = false;
+              int AGGRO_FUNDS_WEIGHT = 1;
               if( valueUnit(target, targetLoc, false) * Math.floor(damage) * AGGRO_FUNDS_WEIGHT > valueUnit(unit, unitLoc, true) )
               {
                 ai.log(String.format("  %s is going aggro on %s", unit.toStringWithLocation(), target.toStringWithLocation()));
@@ -491,8 +366,8 @@ public class WallyAI extends ModularAI
   public static class Travel extends UnitActionFinder
   {
     private static final long serialVersionUID = 1L;
-    private final WallyAI ai;
-    public Travel(Army co, WallyAI ai)
+    private final JakeMan ai;
+    public Travel(Army co, JakeMan ai)
     {
       super(co, ai);
       this.ai = ai;
@@ -511,12 +386,12 @@ public class WallyAI extends ModularAI
   public static class BuildStuff implements AIModule
   {
     private static final long serialVersionUID = 1L;
-    public final Army myCo;
-    public final WallyAI ai;
+    public final Army myArmy;
+    public final JakeMan ai;
 
-    public BuildStuff(Army co, WallyAI ai)
+    public BuildStuff(Army co, JakeMan ai)
     {
-      myCo = co;
+      myArmy = co;
       this.ai = ai;
     }
 
@@ -545,7 +420,7 @@ public class WallyAI extends ModularAI
         if( null != resident )
         {
           boolean ignoreSafety = true, avoidProduction = true;
-          if( resident.CO.army == myCo && !resident.isTurnOver )
+          if( resident.CO.army == myArmy && !resident.isTurnOver )
             return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, null, resident, ignoreSafety, avoidProduction);
           else
           {
@@ -558,7 +433,7 @@ public class WallyAI extends ModularAI
         Commander buyer = loc.getOwner();
         ArrayList<UnitModel> list = buyer.getShoppingList(loc);
         UnitModel toBuy = builds.get(coord);
-        if( buyer.getBuyCost(toBuy, coord) <= myCo.money && list.contains(toBuy) )
+        if( buyer.getBuyCost(toBuy, coord) <= myArmy.money && list.contains(toBuy) )
         {
           builds.remove(coord);
           return new GameAction.UnitProductionAction(buyer, toBuy, coord);
@@ -620,7 +495,8 @@ public class WallyAI extends ModularAI
       {
         UnitModel model = target.model;
         XYCoord targetCoord = new XYCoord(target.x, target.y);
-        double effectiveness = findEffectiveness(unit.model, target.model);
+        double effectiveness = 0.5; //findEffectiveness(unit.model, target.model);
+        int AGGRO_EFFECT_THRESHHOLD = 4;
         if (Utils.findShortestPath(unit, targetCoord, gameMap, true) != null &&
             AGGRO_EFFECT_THRESHHOLD < effectiveness)
         {
@@ -837,34 +713,9 @@ public class WallyAI extends ModularAI
     return (null == threat || threshhold > threat);
   }
 
-  /**
-   * @return whether it's safe or a good place to wall
-   * For use after unit building is complete
-   */
   private boolean canWallHere(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc)
   {
-    MapLocation destination = gameMap.getLocation(xyc);
-    // if we're safe, we're safe
-    if( isSafe(gameMap, threatMap, unit, xyc) )
-      return true;
-
-    // TODO: Determine whether the ally actually needs a wall there. Mechs walling for Tanks vs inf is... silly.
-    // if we'd be a nice wall for a worthy ally, we can pretend we're safe there also
-    ArrayList<XYCoord> adjacentCoords = Utils.findLocationsInRange(gameMap, xyc, 1);
-    for( XYCoord coord : adjacentCoords )
-    {
-      MapLocation loc = gameMap.getLocation(coord);
-      if( loc != null )
-      {
-        Unit resident = loc.getResident();
-        if( resident != null && !myArmy.isEnemy(resident.CO)
-            && valueUnit(resident, loc, true) > valueUnit(unit, destination, true) )
-        {
-          return true;
-        }
-      }
-    }
-    return false;
+    return isSafe(gameMap, threatMap, unit, xyc);
   }
 
   private static int valueUnit(Unit unit, MapLocation locale, boolean includeCurrentHealth)
@@ -896,58 +747,9 @@ public class WallyAI extends ModularAI
     return value;
   }
 
-  /**
-   * Returns the center mass of a given unit type, weighted by HP
-   * NOTE: Will violate fog knowledge
-   */
-  private static XYCoord findAverageDeployLocation(GameMap gameMap, Army co, UnitModel model)
-  {
-    // init with the center of the map
-    int totalX = gameMap.mapWidth / 2;
-    int totalY = gameMap.mapHeight / 2;
-    int totalPoints = 1;
-    for( Unit unit : co.getUnits() )
-    {
-      if( unit.model == model )
-      {
-        totalX += unit.x * unit.getHP();
-        totalY += unit.y * unit.getHP();
-        totalPoints += unit.getHP();
-      }
-    }
-
-    return new XYCoord(totalX / totalPoints, totalY / totalPoints);
-  }
-
-  /**
-   * Returns the ideal place to build a unit type or null if it's impossible
-   * Kinda-sorta copied from AIUtils
-   */
-  public XYCoord getLocationToBuild(CommanderProductionInfo CPI, UnitModel model)
-  {
-    Set<TerrainType> desiredTerrains = CPI.modelToTerrainMap.get(model);
-    if( null == desiredTerrains || desiredTerrains.size() < 1 )
-      return null;
-
-    ArrayList<XYCoord> candidates = new ArrayList<XYCoord>();
-    for( MapLocation loc : CPI.availableProperties )
-    {
-      if( desiredTerrains.contains(loc.getEnvironment().terrainType) )
-      {
-        candidates.add(loc.getCoordinates());
-      }
-    }
-    if( candidates.isEmpty() )
-      return null;
-
-    // Sort locations by how close they are to "center mass" of that unit type, then reverse since we want to distribute our forces
-    Utils.sortLocationsByDistance(findAverageDeployLocation(myArmy.myView, myArmy, model), candidates);
-    Collections.reverse(candidates);
-    return candidates.get(0);
-  }
-
   private Map<XYCoord, UnitModel> queueUnitProductionActions(GameMap gameMap)
   {
+    // build tank unless proven otherwise
     Map<XYCoord, UnitModel> builds = new HashMap<XYCoord, UnitModel>();
     // Figure out what unit types we can purchase with our available properties.
     boolean includeFriendlyOccupied = true;
@@ -960,144 +762,38 @@ public class WallyAI extends ModularAI
     }
 
     log("Evaluating Production needs");
+    ArrayList<UnitModel> wantedTypes = new ArrayList<>();
+
+    wantedTypes.add(myArmy.cos[0].getUnitModel(UnitModel.TROOP));
+    wantedTypes.add(allTanks.get(0));
+    wantedTypes.add(copter);
+    wantedTypes.add(allTanks.get(1));
+
     int budget = myArmy.money;
-    final UnitModel infModel = myArmy.cos[0].getUnitModel(UnitModel.TROOP);
-    // TODO: Fix this
-    final int infCost = infModel.costBase;
-
-    // Get a count of enemy forces.
-    Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myArmy, gameMap);
-    Map<UnitModel, Double> enemyUnitCounts = new HashMap<UnitModel, Double>();
-    for( Commander co : unitLists.keySet() )
+    // Try to purchase as many of the biggest units I can
+    for(int i = 0; i < wantedTypes.size(); ++i)
     {
-      if( myArmy.isEnemy(co) )
+      UnitModel um = wantedTypes.get(i);
+      log(String.format("Buying %s?", um));
+      log(String.format("  Budget remaining: %s out of %s", budget, myArmy.money));
+
+      ArrayList<MapLocation> facilities = CPI.getAllFacilitiesFor(um);
+      for( MapLocation loc : facilities )
       {
-        for( Unit u : unitLists.get(co) )
+        Commander buyer = loc.getOwner();
+        final XYCoord coord = loc.getCoordinates();
+        final int cost = buyer.getBuyCost(um, coord);
+
+        int marginalCost = cost;
+        if( builds.containsKey(coord) )
+          marginalCost -= buyer.getBuyCost(builds.get(coord), coord);
+
+        if( marginalCost <= budget )
         {
-          // Count how many of each model of enemy units are in play.
-          if( enemyUnitCounts.containsKey(u.model) )
-          {
-            enemyUnitCounts.put(u.model, enemyUnitCounts.get(u.model) + (u.getHP() / 10));
-          }
-          else
-          {
-            enemyUnitCounts.put(u.model, u.getHP() / 10.0);
-          }
+          builds.put(coord, um);
+          budget -= marginalCost;
         }
       }
-    }
-
-    // Figure out how well we think we have the existing threats covered
-    Map<UnitModel, Double> myUnitCounts = new HashMap<UnitModel, Double>();
-    for( Unit u : myArmy.getUnits() )
-    {
-      // Count how many of each model of enemy units are in play.
-      if( myUnitCounts.containsKey(u.model) )
-      {
-        myUnitCounts.put(u.model, myUnitCounts.get(u.model) + (u.getHP() / 10));
-      }
-      else
-      {
-        myUnitCounts.put(u.model, u.getHP() / 10.0);
-      }
-    }
-
-    for( UnitModel threat : enemyUnitCounts.keySet() )
-    {
-      for( UnitModel counter : myUnitCounts.keySet() ) // Subtract how well we think we counter each enemy from their HP counts
-      {
-        double counterPower = findEffectiveness(counter, threat);
-        enemyUnitCounts.put(threat, enemyUnitCounts.get(threat) - counterPower * myUnitCounts.get(counter));
-      }
-    }
-
-    // change unit quantity->funds
-    for( Entry<UnitModel, Double> ent : enemyUnitCounts.entrySet() )
-    {
-      // We don't currently have any huge cost-shift COs, so this isn't a big deal at present.
-      ent.setValue(ent.getValue() * ent.getKey().costBase);
-    }
-
-    Queue<Entry<UnitModel, Double>> enemyModels = 
-        new PriorityQueue<Entry<UnitModel, Double>>(myArmy.cos[0].unitModels.size(), new UnitModelFundsComparator());
-    enemyModels.addAll(enemyUnitCounts.entrySet());
-
-    // Try to purchase units that will counter the most-represented enemies.
-    while (!enemyModels.isEmpty() && !CPI.availableUnitModels.isEmpty())
-    {
-      // Find the first (most funds-invested) enemy UnitModel, and remove it. Even if we can't find an adequate counter,
-      // there is not reason to consider it again on the next iteration.
-      UnitModel enemyToCounter = enemyModels.poll().getKey();
-      double enemyNumber = enemyUnitCounts.get(enemyToCounter);
-      log(String.format("Need a counter for %sx%s", enemyToCounter, enemyNumber / enemyToCounter.costBase / UnitModel.MAXIMUM_HP));
-      log(String.format("Remaining budget: %s", budget));
-
-      // Get our possible options for countermeasures.
-      ArrayList<UnitModel> availableUnitModels = new ArrayList<>();
-      for( ModelForCO coModel : CPI.availableUnitModels )
-        availableUnitModels.add(coModel.um);
-      while (!availableUnitModels.isEmpty())
-      {
-        // Sort my available models by their power against this enemy type.
-        Collections.sort(availableUnitModels, new UnitPowerComparator(enemyToCounter, this));
-
-        // Grab the best counter.
-        UnitModel idealCounter = availableUnitModels.get(0);
-        availableUnitModels.remove(idealCounter); // Make sure we don't try to build two rounds of the same thing in one turn.
-        // I only want combat units, since I don't understand transports
-        if( !idealCounter.weapons.isEmpty() )
-        {
-          log(String.format("  buy %s?", idealCounter));
-          XYCoord coord = getLocationToBuild(CPI, idealCounter);
-          if (null == coord)
-            continue;
-          MapLocation loc = gameMap.getLocation(coord);
-          Commander buyer = loc.getOwner();
-          final int idealCost = buyer.getBuyCost(idealCounter, coord);
-          int totalCost = idealCost;
-
-          // Calculate a cost buffer to ensure we have enough money left so that no factories sit idle.
-          int costBuffer = (CPI.getNumFacilitiesFor(infModel)) * infCost;
-          if(buyer.getShoppingList(gameMap.getLocation(coord)).contains(infModel))
-            costBuffer -= infCost;
-
-          if( 0 > costBuffer )
-            costBuffer = 0; // No granting ourselves extra moolah.
-          if(totalCost <= (budget - costBuffer))
-          {
-            // Go place orders.
-            log(String.format("    I can build %s for a cost of %s (%s remaining, witholding %s)",
-                                    idealCounter, totalCost, budget, costBuffer));
-            builds.put(coord, idealCounter);
-            budget -= idealCost;
-            CPI.removeBuildLocation(gameMap.getLocation(coord));
-            // We found a counter for this enemy UnitModel; break and go to the next type.
-            // This break means we will build at most one type of unit per turn to counter each enemy type.
-            break;
-          }
-          else
-          {
-            log(String.format("    %s cost %s, I have %s (witholding %s).", idealCounter, idealCost, budget, costBuffer));
-          }
-        }
-      } // ~while( !availableUnitModels.isEmpty() )
-    } // ~while( !enemyModels.isEmpty() && !CPI.availableUnitModels.isEmpty())
-
-    // Build infantry from any remaining facilities.
-    log("Building infantry to fill out my production");
-    XYCoord infCoord = getLocationToBuild(CPI, infModel);
-    while (infCoord != null)
-    {
-      MapLocation infLoc = gameMap.getLocation(infCoord);
-      Commander infBuyer = infLoc.getOwner();
-      int cost = infBuyer.getBuyCost(infModel, infCoord);
-      if (cost > budget)
-        break;
-      builds.put(infCoord, infModel);
-      budget -= cost;
-      CPI.removeBuildLocation(gameMap.getLocation(infCoord));
-      log(String.format("  At %s (%s remaining)", infCoord, budget));
-      infCoord = getLocationToBuild(CPI, infModel);
     }
 
     return builds;
@@ -1116,57 +812,259 @@ public class WallyAI extends ModularAI
     }
   }
 
-  /**
-   * Arrange UnitModels according to their effective damage/range against a configured UnitModel.
-   */
-  private static class UnitPowerComparator implements Comparator<UnitModel>
+
+  private static class CapStop
   {
-    UnitModel targetModel;
-    private WallyAI wally;
-
-    public UnitPowerComparator(UnitModel targetType, WallyAI pWally)
+    public int extraTiles = 0; // Defines how many turns we have already looked ahead to try to find another cap stop
+    public final XYCoord coord;
+    public CapStop(XYCoord coord)
     {
-      targetModel = targetType;
-      wally = pWally;
+      this.coord = coord;
     }
-
+  }
+  /**
+   * Sort CapStop lists by potential total profit
+   */
+  private static class CapStopFundsComparator implements Comparator<ArrayList<CapStop>>
+  {
     @Override
-    public int compare(UnitModel model1, UnitModel model2)
+    public int compare(ArrayList<CapStop> entry1, ArrayList<CapStop> entry2)
     {
-      double eff1 = wally.findEffectiveness(model1, targetModel);
-      double eff2 = wally.findEffectiveness(model2, targetModel);
+      final int entry2Val = IncomeTillTurn(entry2, TURN_LIMIT);
+      final int entry1Val = IncomeTillTurn(entry1, TURN_LIMIT);
+      int diff = entry2Val - entry1Val;
+      return diff;
+    }
+    public static int TURN_LIMIT = 13;
+    // Calculates the number of building/incomes we'll get by TURN_LIMIT from the input capture chain
+    public static int IncomeTillTurn(ArrayList<CapStop> capList, int turnLimit)
+    {
+      // Start at 1, since we know the first item is just a build
+      int currentTurn = 1;
+      int currentIncome = 0;
 
-      return (eff1 < eff2) ? 1 : ((eff1 > eff2) ? -1 : 0);
+      for(int i = 1; i < capList.size() || currentTurn >= turnLimit; ++i)
+      {
+        int turnShift = (int) Math.ceil(capList.get(i-1).extraTiles / 3.0);
+        currentTurn += turnShift + 1; // +1 for the extra cap turn
+        // We get income from the prop for every turn after we captured it
+        currentIncome += Math.max(0, turnLimit - currentTurn);
+      }
+
+      return currentIncome;
     }
   }
 
-  /** Returns effective power in terms of whole kills per unit, based on respective threat areas and how much damage I deal */
-  public double findEffectiveness(UnitModel model, UnitModel target)
+  private void init(GameMap map)
   {
-    double theirRange = 0;
-    for( WeaponModel wm : target.weapons )
+    contestedProps = new ArrayList<>();
+    allTanks = myArmy.cos[0].getAllModels(UnitModel.ASSAULT);
+    antiAir  = myArmy.cos[0].getUnitModel(UnitModel.SURFACE_TO_AIR);
+    copter   = myArmy.cos[0].getUnitModel(UnitModel.ASSAULT | UnitModel.AIR_LOW);
+
+    ArrayList<XYCoord> props = new ArrayList<>();
+    HashMap<XYCoord, Commander> factoryOwnership = new HashMap<>();
+    for( int i = 0; i < map.mapWidth; i++ )
     {
-      double range = wm.rangeMax;
-      // TODO: Fix this!
-      if( wm.canFireAfterMoving )
-        range += getEffectiveMove(target);
-      theirRange = Math.max(theirRange, range);
+      for( int j = 0; j < map.mapHeight; j++ )
+      {
+        Environment env = map.getEnvironment(i, j);
+        if(env.terrainType == TerrainType.FACTORY)
+        {
+          factoryOwnership.put(new XYCoord(i, j), map.getLocation(i, j).getOwner());
+        }
+        if(env.terrainType == TerrainType.CITY
+            || env.terrainType == TerrainType.AIRPORT
+            // TODO: Comm towers
+            )
+        {
+          props.add(new XYCoord(i, j));
+        }
+      }
     }
-    double counterPower = 0;
-    for( WeaponModel wm : model.weapons )
+
+    ArrayList<XYCoord> rightfulProps = new ArrayList<>();
+    ArrayList<XYCoord> rightfulFactories = new ArrayList<>();
+    ArrayList<XYCoord> startingFactories = new ArrayList<>();
+    // Fully calculate factory ownership based on who can cap each first
+    // Assumption: No contested factories
+    for( XYCoord neutralFac : factoryOwnership.keySet() )
     {
-      double damage = wm.getDamage(target);
-      // Using the WeaponModel values directly for now
-      double myRange = wm.rangeMax;
-      if( wm.canFireAfterMoving )
-        myRange += getEffectiveMove(model);
-      else
-        myRange -= (Math.pow(wm.rangeMin, MIN_SIEGE_RANGE_WEIGHT) - 1); // penalize range based on inner range
-      double rangeMod = Math.pow(myRange / theirRange, RANGE_WEIGHT);
-      // TODO: account for average terrain defense?
-      double effectiveness = damage * rangeMod / 100;
-      counterPower = Math.max(counterPower, effectiveness);
+      final Commander currentOwner = factoryOwnership.get(neutralFac);
+      if( currentOwner != null )
+      {
+        if( myArmy == currentOwner.army )
+          startingFactories.add(neutralFac);
+        continue; // Not actually neutral
+      }
+
+      int newOwnerDistance = Integer.MAX_VALUE;
+      Commander newOwner = null;
+      for( XYCoord ownedFac : factoryOwnership.keySet() )
+      {
+        final Commander owner = factoryOwnership.get(ownedFac);
+        if( owner == null )
+          continue; // Not yet owned
+
+        final Unit inf = new Unit(owner, owner.getUnitModel(UnitModel.TROOP));
+        inf.x = ownedFac.xCoord;
+        inf.y = ownedFac.yCoord;
+
+        final GamePath infPath = Utils.findShortestPath(inf, neutralFac, map, true);
+        if( null == infPath || infPath.getPathLength() < 1 )
+          continue; // Can't reach
+
+        int distance = infPath.getFuelCost(inf, map);
+        if( distance < newOwnerDistance )
+        {
+          newOwnerDistance = distance;
+          newOwner = owner;
+        }
+      }
+      factoryOwnership.put(neutralFac, newOwner);
+      if( null != newOwner && myArmy == newOwner.army )
+        rightfulFactories.add(neutralFac);
     }
-    return counterPower;
+
+    // Finally, figure out what non-factories are contested or rightfully mine
+    for( XYCoord propXYC : props )
+    {
+      int newOwnerDistance = Integer.MAX_VALUE;
+      Commander newOwner = null;
+      for( XYCoord ownedFac : factoryOwnership.keySet() )
+      {
+        final Commander owner = factoryOwnership.get(ownedFac);
+        if( owner == null )
+          continue; // Don't barf in weird maps
+
+        final Unit tank = new Unit(owner, owner.getUnitModel(UnitModel.ASSAULT));
+        tank.x = ownedFac.xCoord;
+        tank.y = ownedFac.yCoord;
+
+        final GamePath tankPath = Utils.findShortestPath(tank, propXYC, map, true);
+        if( null == tankPath || tankPath.getPathLength() < 1 )
+          continue; // Can't reach this city
+
+        // Measured in % of a turn
+        int distance = tankPath.getFuelCost(tank, map) * 100 / tank.getMovePower(map);
+        int distanceDelta = Math.abs(newOwnerDistance - distance);
+        if( distanceDelta <= 100 && owner.isEnemy(newOwner) )
+        {
+          newOwner = null;
+          contestedProps.add(propXYC);
+          break;
+        }
+        if( distance < newOwnerDistance )
+        {
+          newOwnerDistance = distance;
+          newOwner = owner;
+        }
+      }
+      if( null != newOwner && myArmy == newOwner.army
+          && myArmy.isEnemy(map.getLocation(propXYC).getOwner()) // Don't try to cap it if we already own it
+          )
+        rightfulProps.add(propXYC);
+    }
+    
+    // Build cap chains to factories; don't continue them, since cap chains from that factory will be considered separately
+    ArrayList<ArrayList<CapStop>> factoryCapChains = new ArrayList<>();
+    while (!rightfulFactories.isEmpty())
+    {
+      final XYCoord dest = rightfulFactories.remove(0);
+      Utils.sortLocationsByDistance(dest, startingFactories);
+      final XYCoord start = startingFactories.get(0);
+      final Commander owner = factoryOwnership.get(start);
+
+      final Unit inf = new Unit(owner, owner.getUnitModel(UnitModel.TROOP));
+      inf.x = start.xCoord;
+      inf.y = start.yCoord;
+
+      final GamePath infPath = Utils.findShortestPath(inf, dest, map, true);
+      if( null == infPath || infPath.getPathLength() < 1 )
+        continue; // Can't reach
+
+      int distance = infPath.getFuelCost(inf, map);
+
+      ArrayList<CapStop> chain = new ArrayList<>();
+      CapStop build = new CapStop(start);
+      build.extraTiles = distance - 13;
+      chain.add(build);
+      CapStop cap = new CapStop(dest);
+      chain.add(cap);
+      factoryCapChains.add(chain);
+      
+      // Now that we're just in cap-chain land, don't worry about whether we start with this factory or not.
+      startingFactories.add(dest);
+    }
+    
+    buildBaseCapChains(map, rightfulProps, startingFactories);
+
+    // Add our factory chains in at the start of each list
+    for(ArrayList<CapStop> chain : factoryCapChains)
+    {
+      XYCoord start = chain.get(0).coord;
+      capChains.get(start).add(0, chain);
+    }
+  }
+
+  public void buildBaseCapChains(GameMap map, ArrayList<XYCoord> rightfulProps, ArrayList<XYCoord> startingFactories)
+  {
+    // Build initial bits of capChains
+    for( XYCoord start : startingFactories )
+    {
+      ArrayList<ArrayList<CapStop>> chain = new ArrayList<>();
+      capChains.put(start, chain);
+    }
+
+    boolean madeProgress = true;
+    // Find the next stop or iterate extraTiles on all cap chains
+    while (madeProgress && !rightfulProps.isEmpty())
+    {
+      // Create new cap chains
+      for( XYCoord start : startingFactories )
+      {
+        ArrayList<CapStop> chain = new ArrayList<>();
+        CapStop build = new CapStop(start);
+        chain.add(build);
+        capChains.get(start).add(chain);
+      }
+      madeProgress = false;
+      for( ArrayList<ArrayList<CapStop>> chainList : capChains.values() )
+        for( ArrayList<CapStop> chain : chainList )
+        {
+          if( rightfulProps.isEmpty() )
+            break;
+
+          CapStop last = chain.get(chain.size() - 1);
+          XYCoord start = last.coord;
+          Utils.sortLocationsByDistance(start, rightfulProps);
+          XYCoord dest = rightfulProps.get(0);
+
+          final Unit inf = new Unit(myArmy.cos[0], myArmy.cos[0].getUnitModel(UnitModel.TROOP));
+          inf.x = start.xCoord;
+          inf.y = start.yCoord;
+
+          final GamePath infPath = Utils.findShortestPath(inf, dest, map, true);
+          if( null == infPath || infPath.getPathLength() < 1 )
+            continue; // Can't reach
+          madeProgress = true; // We have somewhere we can still get to
+
+          int distance = infPath.getFuelCost(inf, map);
+          final int currentTotalMove = last.extraTiles + inf.getMovePower(map);
+
+          if( distance <= currentTotalMove )
+          {
+            rightfulProps.remove(dest);
+            CapStop cap = new CapStop(dest);
+            chain.add(cap);
+          }
+          else
+            last.extraTiles = currentTotalMove;
+        }
+    }
+
+    // Sort cap chains by profit
+    for(ArrayList<ArrayList<CapStop>> chainList : capChains.values())
+      Collections.sort(chainList, new CapStopFundsComparator());
   }
 }

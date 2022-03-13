@@ -160,12 +160,12 @@ public abstract class ModularAI implements AIController
   public static abstract class UnitActionFinder implements AIModule
   {
     private static final long serialVersionUID = 1L;
-    public Army myCo;
+    public Army myArmy;
     public final ModularAI ai;
 
     public UnitActionFinder(Army co, ModularAI ai)
     {
-      myCo = co;
+      myArmy = co;
       this.ai = ai;
     }
 

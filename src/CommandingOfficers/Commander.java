@@ -126,10 +126,14 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
    */
   public boolean isEnemy(Commander other)
   {
-    // If the other CO doesn't exist, we can't be friends.
-    if( other == null )
-      return true;
-    return army.isEnemy(other.army);
+    return army.isEnemy(other);
+  }
+  /**
+   * @return whether this CO would like to kill that army
+   */
+  public boolean isEnemy(Army other)
+  {
+    return army.isEnemy(other);
   }
 
   public UnitModel getUnitModel(long unitRole)
