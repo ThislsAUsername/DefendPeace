@@ -196,6 +196,9 @@ public class CommanderProductionInfo
         totalCost += loc.getOwner().getBuyCost(model, loc.getCoordinates());
       }
     }
+
+    if( 0 == num )
+      return Integer.MAX_VALUE;
     return totalCost / num;
   }
 
