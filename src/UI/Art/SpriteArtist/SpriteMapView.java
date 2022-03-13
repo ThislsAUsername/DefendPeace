@@ -93,7 +93,7 @@ public class SpriteMapView extends MapView
     menuArtist = new MenuArtist(game, this);
 
     myGame = game;
-    COMPREHENSIVE_HUD_H_SIZE = SpriteLibrary.getCoOverlay(myGame.activeArmy.cos[0], true).getWidth() + 42;
+    COMPREHENSIVE_HUD_H_SIZE = SpriteLibrary.getCoOverlay(myGame.armies[0].cos[0], true).getWidth() + 42;
 
     // Start the view at the top-left by default.
     mapViewDrawX = new SlidingValue(0);
