@@ -1079,6 +1079,17 @@ public class JakeMan extends ModularAI
         }
     }
 
+    // Cull cap chains with no actual caps
+    for( ArrayList<ArrayList<CapStop>> chainList : capChains.values() )
+      for( int i = 0; i < chainList.size(); )
+      {
+        ArrayList<CapStop> chain = chainList.get(i);
+        if( chain.size() < 2 )
+          chainList.remove(i);
+        else
+          ++i;
+      }
+
     // Sort cap chains by profit
     for(ArrayList<ArrayList<CapStop>> chainList : capChains.values())
       Collections.sort(chainList, new CapStopFundsComparator());
