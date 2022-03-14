@@ -70,10 +70,21 @@ public class CommanderOverlayArtist
     final int coEyesWidth = 25;
     final int xTextOffset = (4+coEyesWidth); // Distance from the side of the view to the CO overlay text.
     final int yTextOffset = 3; // Distance from the top of the view to the CO overlay text.
+    final int yTextOffsetLineTwo = SpriteLibrary.baseIconSize + yTextOffset - 1; // Ditto, but for line 2
     final int mapViewWidth = SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale();
     final BufferedImage spriteA = SpriteLibrary.getLettersSmallCaps().getFrame(0); // Convenient reference so we can check dimensions.
 
     int yCurrentOffset = yInitialOffset;
+    final int yShiftPerOverlay = SpriteLibrary.getCoOverlay(army.cos[0], overlayIsLeft).getHeight() - 1;
+
+    final int moneyBufferPx = 2;
+    final int fundsLength = ("" + army.money).length();
+    final int fundsWidth = ICON_VALUE_SPACING + fundsLength * spriteA.getWidth() + 1;
+    final int drawX = overlayIsLeft ? 0 : mapViewWidth - fundsWidth;
+    final int drawY = yCurrentOffset + yShiftPerOverlay*army.cos.length + yTextOffset;
+    SpriteUIUtils.drawMenuFrame(g, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR,
+        drawX, drawY, fundsWidth, SpriteLibrary.baseIconSize+moneyBufferPx, moneyBufferPx);
+    drawIconAndValue(g, SpriteLibrary.MapIcons.FUNDS, army.money, fundsLength, drawX, drawY + moneyBufferPx);
 
     for(Commander commander : army.cos)
     {
@@ -81,50 +92,42 @@ public class CommanderOverlayArtist
       BufferedImage overlayImage = SpriteLibrary.getCoOverlay(commander, overlayIsLeft);
       BufferedImage powerBarImage = null;
       CommanderAbility ability = commander.getActiveAbility();
-      final int xAbilityOffset;
+      final int xAbilityOffset = 0;
       boolean trueIfBarFalseIfText = null == ability;
       if( trueIfBarFalseIfText )
       {
         powerBarImage = buildCoPowerBar(commander, commander.getAbilityCosts(), commander.getAbilityPower(), overlayIsLeft);
-        xAbilityOffset = coEyesWidth + 1;
       }
       else
       {
         powerBarImage = getActiveAbilityName(ability.toString());
-        xAbilityOffset = xTextOffset;
       }
 
       int energy = COStateInfo.getEnergyUntilNextPower(commander);
       int energyLength = ("" + energy).length();
 
-      final int yPowerBarOffset = SpriteLibrary.baseIconSize + yTextOffset - 1 + yCurrentOffset;
+      final int yPowerBarOffset = overlayImage.getHeight() - powerBarImage.getHeight()/2 + yCurrentOffset;
       if( overlayIsLeft )
       { // Draw the overlay on the left side.
         g.drawImage(overlayImage, 0, yCurrentOffset, overlayImage.getWidth(), overlayImage.getHeight(), null);
-        drawIconAndValue(g, SpriteLibrary.MapIcons.ENERGY, energy, energyLength, xTextOffset, yTextOffset + yCurrentOffset);
+        SpriteUIUtils.drawTextSmallCaps(g, commander.coInfo.name, xTextOffset, yTextOffset + yCurrentOffset);
+        drawIconAndValue(g, SpriteLibrary.MapIcons.ENERGY, energy, energyLength, xTextOffset, yTextOffsetLineTwo + yCurrentOffset);
         g.drawImage( powerBarImage, xAbilityOffset, yPowerBarOffset, powerBarImage.getWidth(), powerBarImage.getHeight(), null );
       }
       else
       { // Draw the overlay on the right side.
         int xPos = mapViewWidth - overlayImage.getWidth();
+        int nameXPos = mapViewWidth - spriteA.getWidth()*commander.coInfo.name.length() - xTextOffset;
         int valueXPos = mapViewWidth - ICON_VALUE_SPACING - spriteA.getWidth()*energyLength - xTextOffset;
         g.drawImage(overlayImage, xPos, yCurrentOffset, overlayImage.getWidth(), overlayImage.getHeight(), null);
-        drawIconAndValue(g, SpriteLibrary.MapIcons.ENERGY, energy, energyLength, valueXPos, yTextOffset + yCurrentOffset);
+        SpriteUIUtils.drawTextSmallCaps(g, commander.coInfo.name, nameXPos, yTextOffset + yCurrentOffset);
+        drawIconAndValue(g, SpriteLibrary.MapIcons.ENERGY, energy, energyLength, valueXPos, yTextOffsetLineTwo + yCurrentOffset);
         int pbXPos = mapViewWidth - xAbilityOffset - powerBarImage.getWidth();
         g.drawImage( powerBarImage, pbXPos, yPowerBarOffset, powerBarImage.getWidth(), powerBarImage.getHeight(), null );
       }
 
-      yCurrentOffset += overlayImage.getHeight() - 1;
+      yCurrentOffset += yShiftPerOverlay;
     }
-
-    final int moneyBufferPx = 2;
-    final int fundsLength = ("" + army.money).length();
-    final int fundsWidth = ICON_VALUE_SPACING + fundsLength * spriteA.getWidth() + 1;
-    final int drawX = overlayIsLeft ? 0 : mapViewWidth - fundsWidth;
-    final int drawY = yCurrentOffset - moneyBufferPx;
-    SpriteUIUtils.drawMenuFrame(g, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR,
-        drawX, drawY, fundsWidth, SpriteLibrary.baseIconSize+moneyBufferPx, moneyBufferPx);
-    drawIconAndValue(g, SpriteLibrary.MapIcons.FUNDS, army.money,  fundsLength, drawX, drawY + moneyBufferPx);
 
     return yCurrentOffset;
   }
