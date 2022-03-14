@@ -509,8 +509,13 @@ public class Utils
     @Override
     public int compare(XYCoord xy1, XYCoord xy2)
     {
-      int xy1Dist = findShortestPath(myUnit, xy1, myMap).getPathLength();
-      int xy2Dist = findShortestPath(myUnit, xy2, myMap).getPathLength();
+      final boolean theoretical = true;
+      int xy1Dist = findShortestPath(myUnit, xy1, myMap, theoretical).getPathLength();
+      if( 0 == xy1Dist )
+        xy1Dist = Integer.MAX_VALUE;
+      int xy2Dist = findShortestPath(myUnit, xy2, myMap, theoretical).getPathLength();
+      if( 0 == xy2Dist )
+        xy2Dist = Integer.MAX_VALUE;
 
       return xy1Dist - xy2Dist;
     }
