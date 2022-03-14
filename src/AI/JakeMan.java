@@ -26,7 +26,7 @@ public class JakeMan extends ModularAI
     @Override
     public String getName()
     {
-      return "J.A.K.E.M.A.N.";
+      return "JakeMan";
     }
 
     @Override
@@ -34,7 +34,7 @@ public class JakeMan extends ModularAI
     {
       return
           "Wants your free dudes.\n" +
-          "Competitive-style AI design credit @Lost&Found#6348, ID 824112693123612692.";
+          "High-level design by @Lost&Found#6348, ID 824112693123612692.";
     }
   }
   public static final AIMaker info = new instantiator();
