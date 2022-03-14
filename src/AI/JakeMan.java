@@ -45,8 +45,6 @@ public class JakeMan extends ModularAI
     return info;
   }
 
-  protected Army myArmy = null;
-
   // What % damage I'll ignore when checking safety
   private static final int INDIRECT_THREAT_THRESHHOLD = 7;
   private static final int DIRECT_THREAT_THRESHHOLD = 13;
@@ -72,7 +70,6 @@ public class JakeMan extends ModularAI
   public JakeMan(Army army)
   {
     super(army);
-    myArmy = army;
 
     // look where all vehicles are and what their threat ranges are (yes, mechs are vehicles)
     // take free dudes that you have more defenders for than them
@@ -700,7 +697,7 @@ public class JakeMan extends ModularAI
         continue;
       if( unitMapEnemy.get(threat).containsKey(xyc) )
         threatCounts.put(threat, unitMapEnemy.get(threat).get(xyc));
-  }
+    }
     if( threatCounts.size() < 1 )
       return true;
 
@@ -708,7 +705,7 @@ public class JakeMan extends ModularAI
     counterCoords.remove(xyc);
     for( UnitModel threat : threatCounts.keySet().toArray(new UnitModel[0]) )
       for( UnitModel counter : unitMapFriendly.keySet() )
-  {
+      {
         boolean isCounter = false;
         for( WeaponModel wm : counter.weapons )
           isCounter &= threshhold <= wm.getDamage(threat);
@@ -720,12 +717,23 @@ public class JakeMan extends ModularAI
             counterPowerTotal += unitMapFriendly.get(threat).get(coord);
         final double counterPowerAverage = counterPowerTotal / counterCoords.size();
         final double threatPower = threatCounts.get(threat);
-        if( counterPowerAverage > threatPower )
+        if( counterPowerAverage > Math.floor(threatPower) )
           threatCounts.remove(threat);
         else
           threatCounts.put(threat, threatPower - counterPowerAverage);
       }
-    return threatCounts.size() < 1;
+    // If there are no threats we can't handle, dude is free.
+    if( threatCounts.size() < 1 )
+      return true;
+    double totalThreat = 0;
+    for( UnitModel threat : threatCounts.keySet() )
+    {
+      totalThreat += threatCounts.get(threat);
+    }
+    // If we have fewer than 2 extra threats, but we have good terrain, that's good enough
+    if( totalThreat < 2 )
+      return gameMap.getEnvironment(xyc).terrainType.getDefLevel() > 1;
+    return false;
   }
 
   private static int valueUnit(Unit unit, MapLocation locale, boolean includeCurrentHealth)
