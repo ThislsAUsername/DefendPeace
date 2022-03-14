@@ -832,17 +832,22 @@ public class JakeMan extends ModularAI
    */
   private static class CapStopFundsComparator implements Comparator<ArrayList<CapStop>>
   {
+    public final int infMove;
+    public CapStopFundsComparator(int infMove)
+    {
+      this.infMove = infMove;
+    }
+    public int turnLimit = 13;
     @Override
     public int compare(ArrayList<CapStop> entry1, ArrayList<CapStop> entry2)
     {
-      final int entry2Val = IncomeTillTurn(entry2, TURN_LIMIT);
-      final int entry1Val = IncomeTillTurn(entry1, TURN_LIMIT);
+      final int entry2Val = IncomeTillTurn(entry2, turnLimit, infMove);
+      final int entry1Val = IncomeTillTurn(entry1, turnLimit, infMove);
       int diff = entry2Val - entry1Val;
       return diff;
     }
-    public static int TURN_LIMIT = 13;
     // Calculates the number of building/incomes we'll get by TURN_LIMIT from the input capture chain
-    public static int IncomeTillTurn(ArrayList<CapStop> capList, int turnLimit)
+    public static int IncomeTillTurn(ArrayList<CapStop> capList, int turnLimit, int infMove)
     {
       // Start at 1, since we know the first item is just a build
       int currentTurn = 1;
@@ -850,7 +855,7 @@ public class JakeMan extends ModularAI
 
       for(int i = 1; i < capList.size() || currentTurn >= turnLimit; ++i)
       {
-        int turnShift = (int) Math.ceil(capList.get(i-1).extraTiles / 3.0);
+        int turnShift = (int) Math.ceil(capList.get(i-1).extraTiles / (double)infMove);
         currentTurn += turnShift + 1; // +1 for the extra cap turn
         // We get income from the prop for every turn after we captured it
         currentIncome += Math.max(0, turnLimit - currentTurn);
@@ -1093,6 +1098,6 @@ public class JakeMan extends ModularAI
 
     // Sort cap chains by profit
     for(ArrayList<ArrayList<CapStop>> chainList : capChains.values())
-      Collections.sort(chainList, new CapStopFundsComparator());
+      Collections.sort(chainList, new CapStopFundsComparator(infMove));
   }
 }
