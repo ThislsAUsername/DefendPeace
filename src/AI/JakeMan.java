@@ -725,6 +725,9 @@ public class JakeMan extends ModularAI
     for( UnitModel threat : threatCounts.keySet() )
     {
       totalThreat += threatCounts.get(threat);
+      // Be extra scared of stuff we can't hit back against
+      if( isWeakTo(unit.model, threat) )
+        totalThreat += threatCounts.get(threat) * 2;
     }
     // If we have fewer than 2 extra threats, but we have good terrain, that's good enough
     if( totalThreat < 2 )
