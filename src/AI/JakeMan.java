@@ -335,8 +335,7 @@ public class JakeMan extends ModularAI
     {
       ai.log(String.format("Evaluating travel for %s.", unit.toStringWithLocation()));
       boolean avoidProduction = false;
-      boolean ignoreSafety = false;
-      return ai.findTravelAction(gameMap, unit, false, ignoreSafety, avoidProduction);
+      return ai.findTravelAction(gameMap, unit, false, avoidProduction);
     }
   }
 
@@ -376,9 +375,9 @@ public class JakeMan extends ModularAI
         Unit resident = gameMap.getResident(coord);
         if( null != resident )
         {
-          boolean ignoreSafety = true, avoidProduction = true;
+          boolean avoidProduction = true;
           if( resident.CO.army == myArmy && !resident.isTurnOver )
-            return ai.evictUnit(gameMap, null, resident, ignoreSafety, avoidProduction);
+            return ai.evictUnit(gameMap, null, resident, avoidProduction);
           else
           {
             ai.log(String.format("  Can't evict unit %s to build %s", resident.toStringWithLocation(), builds.get(coord)));
@@ -510,7 +509,6 @@ public class JakeMan extends ModularAI
   private GameAction evictUnit(
                         GameMap gameMap,
                         Unit evicter, Unit unit,
-                        boolean ignoreSafety,
                         boolean avoidProduction )
   {
     boolean isBase = false;
@@ -542,7 +540,7 @@ public class JakeMan extends ModularAI
     GameAction result = GetFreeDudes.findFreeDude(unit.CO, this, unit, gameMap, mustMove, avoidProduction, canEvict);
     if( null == result )
     {
-      result = findTravelAction(gameMap, unit, ignoreSafety, mustMove, avoidProduction);
+      result = findTravelAction(gameMap, unit, mustMove, avoidProduction);
     }
 
     if( isBase )
@@ -557,7 +555,7 @@ public class JakeMan extends ModularAI
   private GameAction findTravelAction(
                         GameMap gameMap,
                         Unit unit,
-                        boolean ignoreSafety, boolean mustMove,
+                        boolean mustMove,
                         boolean avoidProduction )
   {
     // Find the possible destinations.
@@ -597,24 +595,22 @@ public class JakeMan extends ModularAI
     // Sort my currently-reachable move locations by distance from the goal,
     // and build a GameAction to move to the closest one.
     Utils.sortLocationsByDistance(pathPoint, destinations);
-    log(String.format("  %s is traveling toward %s at %s via %s  mustMove?: %s  ignoreSafety?: %s",
+    log(String.format("  %s is traveling toward %s at %s via %s  mustMove?: %s",
                           unit.toStringWithLocation(),
                           gameMap.getLocation(goal).getEnvironment().terrainType, goal,
-                          pathPoint, mustMove, ignoreSafety));
+                          pathPoint, mustMove));
     for( XYCoord xyc : destinations )
     {
       log(String.format("    is it safe to go to %s?", xyc));
-      if( !ignoreSafety && !isDudeFree(gameMap, unit, xyc) )
+      if( !isDudeFree(gameMap, unit, xyc) )
         continue;
 
       GameAction action = null;
       Unit resident = gameMap.getLocation(xyc).getResident();
       if( null != resident && unit != resident )
       {
-        boolean evictIgnoreSafety =
-            valueUnit(unit, gameMap.getLocation(xyc), true) >= valueUnit(resident, gameMap.getLocation(xyc), true);
         if( unit.CO == resident.CO && !resident.isTurnOver )
-          action = evictUnit(gameMap, unit, resident, evictIgnoreSafety, avoidProduction);
+          action = evictUnit(gameMap, unit, resident, avoidProduction);
         if( null != action ) return action;
         continue;
       }
@@ -652,9 +648,10 @@ public class JakeMan extends ModularAI
             double loss   = Math.min(unit                 .getHP(), (int)results.attacker.getPreciseHPDamage());
             double damage = Math.min(results.defender.unit.getHP(), (int)results.defender.getPreciseHPDamage());
 
-            // Convert to funds damage
-            loss *= unit.getCost();
-            damage *= results.defender.unit.getCost();
+            // Convert to abstract value
+            final boolean includeCurrentHealth = false;
+            loss *= valueUnit(unit, gameMap.getLocation(attack.getMoveLocation()), includeCurrentHealth);
+            damage *= valueUnit(results.defender.unit, gameMap.getLocation(new XYCoord(results.defender.unit)), includeCurrentHealth);
 
             if( damage > loss )
               return damage;
@@ -689,7 +686,6 @@ public class JakeMan extends ModularAI
 
   private boolean isDudeFree(GameMap gameMap, Unit unit, XYCoord xyc)
   {
-    int threshhold = unit.model.hasDirectFireWeapon() ? DIRECT_THREAT_THRESHHOLD : INDIRECT_THREAT_THRESHHOLD;
     HashMap<UnitModel, Double> threatCounts = new HashMap<>();
     for( UnitModel threat : unitMapEnemy.keySet() )
     {
@@ -706,19 +702,19 @@ public class JakeMan extends ModularAI
     for( UnitModel threat : threatCounts.keySet().toArray(new UnitModel[0]) )
       for( UnitModel counter : unitMapFriendly.keySet() )
       {
-        boolean isCounter = false;
-        for( WeaponModel wm : counter.weapons )
-          isCounter &= threshhold <= wm.getDamage(threat);
-        if( !isCounter )
+        if( !isThreatenedBy(threat, counter) )
           continue;
         double counterPowerTotal = 0;
         for( XYCoord coord : counterCoords )
-          if( unitMapFriendly.get(threat).containsKey(coord) )
-            counterPowerTotal += unitMapFriendly.get(threat).get(coord);
+          if( unitMapFriendly.get(counter).containsKey(coord) )
+            counterPowerTotal += unitMapFriendly.get(counter).get(coord);
         final double counterPowerAverage = counterPowerTotal / counterCoords.size();
         final double threatPower = threatCounts.get(threat);
-        if( counterPowerAverage > Math.floor(threatPower) )
+        if( counterPowerAverage > threatPower )
+        {
           threatCounts.remove(threat);
+          break;
+        }
         else
           threatCounts.put(threat, threatPower - counterPowerAverage);
       }
