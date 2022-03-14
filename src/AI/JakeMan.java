@@ -66,6 +66,7 @@ public class JakeMan extends ModularAI
   protected Map<Unit, ArrayList<CapStop>> capChainsAllocated = new HashMap<>();
   private ArrayList<XYCoord> contestedProps; // as was probably considered by the map designer; doesn't necessarily take movement/production differences into account
 
+  UnitModel infantry;
   ArrayList<UnitModel> allTanks;
   UnitModel antiAir;
   UnitModel copter;
@@ -781,7 +782,7 @@ public class JakeMan extends ModularAI
     log("Evaluating Production needs");
     ArrayList<UnitModel> wantedTypes = new ArrayList<>();
 
-    wantedTypes.add(myArmy.cos[0].getUnitModel(UnitModel.TROOP));
+    wantedTypes.add(infantry);
     wantedTypes.add(allTanks.get(0));
     wantedTypes.add(copter);
     wantedTypes.add(allTanks.get(1));
@@ -792,7 +793,7 @@ public class JakeMan extends ModularAI
     {
       UnitModel um = wantedTypes.get(i);
       log(String.format("Buying %s?", um));
-      log(String.format("  Budget remaining: %s out of %s", budget, myArmy.money));
+      int buildCount = 0;
 
       ArrayList<MapLocation> facilities = CPI.getAllFacilitiesFor(um);
       for( MapLocation loc : facilities )
@@ -808,9 +809,31 @@ public class JakeMan extends ModularAI
         if( marginalCost <= budget )
         {
           builds.put(coord, um);
+          ++buildCount;
           budget -= marginalCost;
         }
+        else if( um == copter ) // Consider downgrading a tank to an inf to get a copter
+        {
+          for( XYCoord tankCoord : builds.keySet().toArray(new XYCoord[0]) )
+          {
+            if( allTanks.get(0) == builds.get(tankCoord) )
+            {
+              int downgradeSavings = 0;
+              downgradeSavings += buyer.getBuyCost(builds.get(tankCoord), coord);
+              downgradeSavings -= buyer.getBuyCost(infantry, coord);
+
+              if( marginalCost - downgradeSavings <= budget )
+              {
+                builds.put(tankCoord, infantry);
+                builds.put(coord, um);
+                ++buildCount;
+                budget -= marginalCost - downgradeSavings;
+              }
+            }
+          }
+        } //~copter upgrade
       }
+      log(String.format("  Built %s; Budget: %s / %s", buildCount, budget, myArmy.money));
     }
 
     return builds;
@@ -885,9 +908,10 @@ public class JakeMan extends ModularAI
   private void init(GameMap map)
   {
     contestedProps = new ArrayList<>();
+    infantry = myArmy.cos[0].getUnitModel(UnitModel.TROOP);
     allTanks = myArmy.cos[0].getAllModels(UnitModel.ASSAULT);
     antiAir  = myArmy.cos[0].getUnitModel(UnitModel.SURFACE_TO_AIR);
-    copter   = myArmy.cos[0].getUnitModel(UnitModel.ASSAULT | UnitModel.AIR_LOW);
+    copter   = myArmy.cos[0].getUnitModel(UnitModel.ASSAULT | UnitModel.AIR_LOW, false);
 
     ArrayList<XYCoord> props = new ArrayList<>();
     HashMap<XYCoord, Commander> factoryOwnership = new HashMap<>();
