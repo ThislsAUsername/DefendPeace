@@ -491,16 +491,17 @@ public class JakeMan extends ModularAI
       Map<UnitModel, ArrayList<XYCoord>> targetMap = new HashMap<UnitModel, ArrayList<XYCoord>>();
 
       // Categorize all enemies by type, and all types by how well we match up vs them
-      for( Unit target : allThreats )
+      final ArrayList<XYCoord> allEnemies = AIUtils.findEnemyUnits(myArmy, gameMap);
+      Utils.sortLocationsByTravelTime(unit, allEnemies, gameMap);
+      for( XYCoord xyc : allEnemies )
       {
+        Unit target = gameMap.getResident(xyc);
         UnitModel model = target.model;
         XYCoord targetCoord = new XYCoord(target.x, target.y);
-        double effectiveness = 0.5; //findEffectiveness(unit.model, target.model);
-        int AGGRO_EFFECT_THRESHHOLD = 4;
         if (Utils.findShortestPath(unit, targetCoord, gameMap, true) != null &&
-            AGGRO_EFFECT_THRESHHOLD < effectiveness)
+            isWeakTo(target.model, unit.model))
         {
-          valueMap.put(model, effectiveness*target.getCost());
+          valueMap.put(model, (double)target.getCost());
           if (!targetMap.containsKey(model)) targetMap.put(model, new ArrayList<XYCoord>());
           targetMap.get(model).add(targetCoord);
         }
@@ -704,6 +705,22 @@ public class JakeMan extends ModularAI
       }
     }
     return null;
+  }
+
+  private boolean isThreatenedBy(UnitModel um, UnitModel threat)
+  {
+    int threshhold = um.hasDirectFireWeapon() ? DIRECT_THREAT_THRESHHOLD : INDIRECT_THREAT_THRESHHOLD;
+    boolean isThreat = false;
+    for( WeaponModel wm : threat.weapons )
+      isThreat |= threshhold <= wm.getDamage(um);
+    return isThreat;
+  }
+
+  private boolean isWeakTo(UnitModel um, UnitModel threat)
+  {
+    boolean isWeak = isThreatenedBy(um, threat);
+    isWeak &= !isThreatenedBy(threat, um);
+    return isWeak;
   }
 
   private boolean isSafe(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc)
