@@ -7,8 +7,6 @@ import AI.CommanderProductionInfo;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.*;
-import Engine.Combat.BattleSummary;
-import Engine.Combat.CombatEngine;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.*;
@@ -283,6 +281,7 @@ public class JakeMan extends ModularAI
       // sort by furthest away, good for capturing
       Utils.sortLocationsByDistance(position, destinations);
       Collections.reverse(destinations);
+      ArrayList<GameAction> freeDudeShots = new ArrayList<>();
 
       for( XYCoord moveCoord : destinations )
       {
@@ -302,29 +301,23 @@ public class JakeMan extends ModularAI
           {
             final GameAction ga = actionSet.getSelected();
             if( ga.getType() == UnitActionFactory.CAPTURE )
-          {
+            {
               return ga;
             }
             if( ga.getType() == UnitActionFactory.ATTACK )
             {
-              MapLocation targetLoc = gameMap.getLocation(ga.getTargetLocation());
-              Unit target = targetLoc.getResident();
-
-              BattleSummary results =
-                  CombatEngine.simulateBattleResults(unit, target, gameMap, movePath);
-              double loss   = Math.min(unit  .getHP(), (int)results.attacker.getPreciseHPDamage());
-              double damage = Math.min(target.getHP(), (int)results.defender.getPreciseHPDamage());
-              
-
-              if( damage > loss )
-
-                return ga;
+              freeDudeShots.add(ga);
             }
-
-          // Only consider capturing if we can sit still or go somewhere safe.
           }
         }
       }
+
+      if( !freeDudeShots.isEmpty() )
+      {
+        GameAction bestShot = findBestAttack(gameMap, unit, freeDudeShots);
+        return bestShot;
+      }
+
       return null;
     }
   }
@@ -639,27 +632,7 @@ public class JakeMan extends ModularAI
         {
           if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
           {
-            double bestDamage = 0;
-            for( GameAction attack : actionSet.getGameActions() )
-            {
-              double damageValue = AICombatUtils.scoreAttackAction(unit, attack, gameMap,
-                  (results) -> {
-                    double loss   = Math.min(unit                 .getHP(), (int)results.attacker.getPreciseHPDamage());
-                    double damage = Math.min(results.defender.unit.getHP(), (int)results.defender.getPreciseHPDamage());
-
-                    if( damage > loss ) // only shoot that which you hurt more than it hurts you
-                      return damage * results.defender.unit.getCost();
-
-                    return 0.;
-                  }, (terrain, params) -> 0.01); // Attack terrain, but don't prioritize it over units
-
-              if( damageValue > bestDamage )
-              {
-                log(String.format("      Best en passant attack deals %s", damageValue));
-                bestDamage = damageValue;
-                action = attack;
-              }
-            }
+            action = findBestAttack(gameMap, unit, actionSet.getGameActions());
           }
         }
 
@@ -669,6 +642,36 @@ public class JakeMan extends ModularAI
       }
     }
     return null;
+  }
+
+  public static GameAction findBestAttack(GameMap gameMap, Unit unit, ArrayList<GameAction> actionSet)
+  {
+    double bestDamage = 0;
+    GameAction bestAttack = null;
+    for( GameAction attack : actionSet )
+    {
+      double damageValue = AICombatUtils.scoreAttackAction(unit, attack, gameMap,
+          (results) -> {
+            double loss   = Math.min(unit                 .getHP(), (int)results.attacker.getPreciseHPDamage());
+            double damage = Math.min(results.defender.unit.getHP(), (int)results.defender.getPreciseHPDamage());
+
+            // Convert to funds damage
+            loss *= unit.getCost();
+            damage *= results.defender.unit.getCost();
+
+            if( damage > loss )
+              return damage;
+
+            return 0.;
+          }, (terrain, params) -> 0.01); // Attack terrain, but don't prioritize it over units
+
+      if( damageValue > bestDamage )
+      {
+        bestDamage = damageValue;
+        bestAttack = attack;
+      }
+    }
+    return bestAttack;
   }
 
   private boolean isThreatenedBy(UnitModel um, UnitModel threat)
