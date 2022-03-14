@@ -1033,6 +1033,8 @@ public class JakeMan extends ModularAI
     }
 
     boolean madeProgress = true;
+    final Unit inf = new Unit(myArmy.cos[0], myArmy.cos[0].getUnitModel(UnitModel.TROOP));
+    int infMove = inf.getMovePower(map);
     // Find the next stop or iterate extraTiles on all cap chains
     while (madeProgress && !rightfulProps.isEmpty())
     {
@@ -1053,12 +1055,11 @@ public class JakeMan extends ModularAI
 
           CapStop last = chain.get(chain.size() - 1);
           XYCoord start = last.coord;
-          Utils.sortLocationsByDistance(start, rightfulProps);
-          XYCoord dest = rightfulProps.get(0);
 
-          final Unit inf = new Unit(myArmy.cos[0], myArmy.cos[0].getUnitModel(UnitModel.TROOP));
           inf.x = start.xCoord;
           inf.y = start.yCoord;
+          Utils.sortLocationsByTravelTime(inf, rightfulProps, map);
+          XYCoord dest = rightfulProps.get(0);
 
           final GamePath infPath = Utils.findShortestPath(inf, dest, map, true);
           if( null == infPath || infPath.getPathLength() < 1 )
@@ -1066,7 +1067,7 @@ public class JakeMan extends ModularAI
           madeProgress = true; // We have somewhere we can still get to
 
           int distance = infPath.getFuelCost(inf, map);
-          final int currentTotalMove = last.extraTiles + inf.getMovePower(map);
+          final int currentTotalMove = last.extraTiles + infMove;
 
           if( distance <= currentTotalMove )
           {
@@ -1075,7 +1076,7 @@ public class JakeMan extends ModularAI
             chain.add(cap);
           }
           else
-            last.extraTiles = currentTotalMove;
+            last.extraTiles = Math.min(infMove * 2, currentTotalMove);
         }
     }
 
