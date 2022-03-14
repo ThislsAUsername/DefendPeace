@@ -60,8 +60,8 @@ public class JakeMan extends ModularAI
   private static final double TERRAIN_INDUSTRY_WEIGHT = 20000; // Funds amount added to units threatening to cap an industry
   private static final double TERRAIN_HQ_WEIGHT = 42000; //      
 
-  private Map<UnitModel, Map<XYCoord, Double>> threatMap;
-  private ArrayList<Unit> allThreats;
+  private Map<UnitModel, Map<XYCoord, Double>> unitMapEnemy;
+  private Map<UnitModel, Map<XYCoord, Double>> unitMapFriendly;
   protected Map<XYCoord, ArrayList<ArrayList<CapStop>>> capChains = new HashMap<>();
   protected Map<Unit, ArrayList<CapStop>> capChainsAllocated = new HashMap<>();
   private ArrayList<XYCoord> contestedProps; // as was probably considered by the map designer; doesn't necessarily take movement/production differences into account
@@ -84,15 +84,15 @@ public class JakeMan extends ModularAI
     aiPhases = new ArrayList<AIModule>(
         Arrays.asList(
             new PowerActivator(army, CommanderAbility.PHASE_TURN_START),
-            new GenerateThreatMap(army, this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
             new CapChainActuator(army, this),
             new CaptureFinisher(army, this),
+            new GenerateThreatMap(army, this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
 
             new PowerActivator(army, CommanderAbility.PHASE_BUY),
-            new FreeRealEstate(army, this, false, false), // prioritize non-eviction
-            new FreeRealEstate(army, this, true,  false), // evict if necessary
+            new GetFreeDudes(army, this, false, false), // prioritize non-eviction
+            new GetFreeDudes(army, this, true,  false), // evict if necessary
             new BuildStuff(army, this),
-            new FreeRealEstate(army, this, true,  true), // step on industries we're not using
+            new GetFreeDudes(army, this, true,  true), // step on industries we're not using
             new Travel(army, this),
 
             new PowerActivator(army, CommanderAbility.PHASE_TURN_END)
@@ -130,29 +130,31 @@ public class JakeMan extends ModularAI
     @Override
     public GameAction getNextAction(PriorityQueue<Unit> unitQueue, GameMap gameMap)
     {
-      ai.allThreats = new ArrayList<Unit>();
-      ai.threatMap = new HashMap<UnitModel, Map<XYCoord, Double>>();
-      Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myArmy, gameMap);
-      for( UnitModel um : myArmy.cos[0].unitModels )
-      {
-        ai.threatMap.put(um, new HashMap<XYCoord, Double>());
+      ai.unitMapEnemy = new HashMap<UnitModel, Map<XYCoord, Double>>();
+      ai.unitMapFriendly = new HashMap<UnitModel, Map<XYCoord, Double>>();
+      Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(null, gameMap);
         for( Commander co : unitLists.keySet() )
         {
+        Map<UnitModel, Map<XYCoord, Double>> mapToFill;
           if( myArmy.isEnemy(co) )
-          {
+          mapToFill = ai.unitMapEnemy;
+        else
+          mapToFill = ai.unitMapFriendly;
+
             for( Unit threat : unitLists.get(co) )
             {
               // add each new threat to the existing threats
-              ai.allThreats.add(threat);
-              Map<XYCoord, Double> threatArea = ai.threatMap.get(um);
-              for( Entry<XYCoord, Double> newThreat : AICombatUtils.findThreatPower(gameMap, threat, um).entrySet() )
+          final UnitModel um = threat.model;
+          if( !mapToFill.containsKey(um) )
+            mapToFill.put(um, new HashMap<>());
+          Map<XYCoord, Double> threatArea = mapToFill.get(um);
+          double newValue = threat.getHP() / 10.0;
+          for( XYCoord coord : AICombatUtils.findThreatPower(gameMap, threat, null).keySet() )
               {
-                if( null == threatArea.get(newThreat.getKey()) )
-                  threatArea.put(newThreat.getKey(), newThreat.getValue());
+            if( !threatArea.containsKey(coord) )
+              threatArea.put(coord, newValue);
                 else
-                  threatArea.put(newThreat.getKey(), newThreat.getValue() + threatArea.get(newThreat.getKey()));
-              }
-            }
+              threatArea.put(coord, newValue + threatArea.get(coord));
           }
         }
       }
@@ -231,20 +233,14 @@ public class JakeMan extends ModularAI
 
       for( XYCoord moveCoord : destinations )
       {
-        boolean spaceFree = gameMap.isLocationEmpty(unit, moveCoord);
         Unit resident = gameMap.getLocation(moveCoord).getResident();
-        if( !spaceFree && ((unit.CO != resident.CO || resident.isTurnOver)) )
+        boolean spaceFree = null == resident;
+        if( !spaceFree )//&& ((unit.CO != resident.CO || resident.isTurnOver)) )
           continue; // Bail if we can't clear the space
 
         // Figure out how to get here.
         GamePath movePath = Utils.findShortestPath(unit, moveCoord, gameMap);
 
-        if( !spaceFree )
-        {
-          boolean ignoreSafety = true;
-          boolean avoidProduction = false;
-          return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident, ignoreSafety, avoidProduction);
-        }
         return new WaitLifecycle.WaitAction(unit, movePath);
       }
       return null;
@@ -252,12 +248,12 @@ public class JakeMan extends ModularAI
   }
   
   // Try to get unit value by capture or attack
-  public static class FreeRealEstate extends UnitActionFinder
+  public static class GetFreeDudes extends UnitActionFinder
   {
     private static final long serialVersionUID = 1L;
     private final JakeMan ai;
     private final boolean canEvict, canStepOnProduction;
-    public FreeRealEstate(Army co, JakeMan ai, boolean canEvict, boolean canStepOnProduction)
+    public GetFreeDudes(Army co, JakeMan ai, boolean canEvict, boolean canStepOnProduction)
     {
       super(co, ai);
       this.ai = ai;
@@ -269,16 +265,15 @@ public class JakeMan extends ModularAI
     public GameAction getUnitAction(Unit unit, GameMap gameMap)
     {
       boolean mustMove = false;
-      return findValueAction(unit.CO, ai, unit, gameMap, mustMove, !canStepOnProduction, canEvict);
+      return findFreeDude(unit.CO, ai, unit, gameMap, mustMove, !canStepOnProduction, canEvict);
     }
 
-    public static GameAction findValueAction( Commander co, JakeMan ai,
+    public static GameAction findFreeDude( Commander co, JakeMan ai,
                                               Unit unit, GameMap gameMap,
                                               boolean mustMove, boolean avoidProduction,
                                               boolean canEvict )
     {
       XYCoord position = new XYCoord(unit.x, unit.y);
-      MapLocation unitLoc = gameMap.getLocation(position);
 
       boolean includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
       ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces);
@@ -298,64 +293,35 @@ public class JakeMan extends ModularAI
         ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, includeOccupiedSpaces);
         for( GameActionSet actionSet : actionSets )
         {
-          boolean spaceFree = gameMap.isLocationEmpty(unit, moveCoord);
           Unit resident = gameMap.getLocation(moveCoord).getResident();
-          if( !spaceFree && (!canEvict || (unit.CO != resident.CO || resident.isTurnOver)) )
+          boolean spaceFree = null == resident;
+          if( !spaceFree )//&& ((unit.CO != resident.CO || resident.isTurnOver)) )
             continue; // Bail if we can't clear the space
 
-          // See if we can bag enough damage to be worth sacrificing the unit
-          if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
+          if( ai.isDudeFree(gameMap, unit, moveCoord) )
           {
-            for( GameAction ga : actionSet.getGameActions() )
+            final GameAction ga = actionSet.getSelected();
+            if( ga.getType() == UnitActionFactory.CAPTURE )
+          {
+              return ga;
+            }
+            if( ga.getType() == UnitActionFactory.ATTACK )
             {
               MapLocation targetLoc = gameMap.getLocation(ga.getTargetLocation());
               Unit target = targetLoc.getResident();
-              if( null == target )
-                continue;
+
               BattleSummary results =
                   CombatEngine.simulateBattleResults(unit, target, gameMap, movePath);
               double loss   = Math.min(unit  .getHP(), (int)results.attacker.getPreciseHPDamage());
               double damage = Math.min(target.getHP(), (int)results.defender.getPreciseHPDamage());
               
-              boolean goForIt = false;
-              int AGGRO_FUNDS_WEIGHT = 1;
-              if( valueUnit(target, targetLoc, false) * Math.floor(damage) * AGGRO_FUNDS_WEIGHT > valueUnit(unit, unitLoc, true) )
-              {
-                ai.log(String.format("  %s is going aggro on %s", unit.toStringWithLocation(), target.toStringWithLocation()));
-                ai.log(String.format("    He plans to deal %s HP damage for a net gain of %s funds", damage, (target.getCost() * damage - unit.getCost() * unit.getHP())/10));
-                goForIt = true;
-              }
-              else if( damage > loss
-                     && ai.canWallHere(gameMap, ai.threatMap, unit, ga.getMoveLocation()) )
-              {
-                ai.log(String.format("  %s thinks it's safe to attack %s", unit.toStringWithLocation(), target.toStringWithLocation()));
-                goForIt = true;
-              }
 
-              if( goForIt )
-              {
-                if( !spaceFree )
-                {
-                  boolean ignoreSafety =
-                      valueUnit(unit, gameMap.getLocation(moveCoord), true) >= valueUnit(resident, gameMap.getLocation(moveCoord), true);
-                  return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident, ignoreSafety, avoidProduction);
-                }
+              if( damage > loss )
+
                 return ga;
-              }
             }
-          }
 
           // Only consider capturing if we can sit still or go somewhere safe.
-          if( actionSet.getSelected().getType() == UnitActionFactory.CAPTURE
-              && (moveCoord.getDistance(unit.x, unit.y) == 0 || ai.canWallHere(gameMap, ai.threatMap, unit, moveCoord)) )
-          {
-            if( !spaceFree )
-            {
-              boolean ignoreSafety =
-                  valueUnit(unit, gameMap.getLocation(moveCoord), true) >= valueUnit(resident, gameMap.getLocation(moveCoord), true);
-              return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident, ignoreSafety, avoidProduction);
-            }
-            return actionSet.getSelected();
           }
         }
       }
@@ -380,7 +346,7 @@ public class JakeMan extends ModularAI
       ai.log(String.format("Evaluating travel for %s.", unit.toStringWithLocation()));
       boolean avoidProduction = false;
       boolean ignoreSafety = false;
-      return ai.findTravelAction(gameMap, ai.allThreats, ai.threatMap, unit, false, ignoreSafety, avoidProduction);
+      return ai.findTravelAction(gameMap, unit, false, ignoreSafety, avoidProduction);
     }
   }
 
@@ -422,7 +388,7 @@ public class JakeMan extends ModularAI
         {
           boolean ignoreSafety = true, avoidProduction = true;
           if( resident.CO.army == myArmy && !resident.isTurnOver )
-            return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, null, resident, ignoreSafety, avoidProduction);
+            return ai.evictUnit(gameMap, null, resident, ignoreSafety, avoidProduction);
           else
           {
             ai.log(String.format("  Can't evict unit %s to build %s", resident.toStringWithLocation(), builds.get(coord)));
@@ -454,7 +420,6 @@ public class JakeMan extends ModularAI
   /** Produces a list of destinations for the unit, ordered by their relative precedence */
   private ArrayList<XYCoord> findTravelDestinations(
                                   GameMap gameMap,
-                                  ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap,
                                   Unit unit,
                                   boolean avoidProduction )
   {
@@ -510,7 +475,7 @@ public class JakeMan extends ModularAI
 
       // Sort all individual target lists by distance
       for (ArrayList<XYCoord> targetList : targetMap.values())
-        Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), targetList);
+        Utils.sortLocationsByTravelTime(unit, targetList, gameMap);
 
       // Sort all target types by how much we want to shoot them with this unit
       Queue<Entry<UnitModel, Double>> targetTypesInOrder = 
@@ -540,7 +505,7 @@ public class JakeMan extends ModularAI
     if( goals.isEmpty() ) // If there's really nothing to do, go to MY HQ
       goals.addAll(myArmy.HQLocations);
 
-    Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
+    Utils.sortLocationsByTravelTime(unit, goals, gameMap);
     return goals;
   }
 
@@ -554,7 +519,6 @@ public class JakeMan extends ModularAI
    */
   private GameAction evictUnit(
                         GameMap gameMap,
-                        ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap,
                         Unit evicter, Unit unit,
                         boolean ignoreSafety,
                         boolean avoidProduction )
@@ -585,10 +549,10 @@ public class JakeMan extends ModularAI
     evictionStack.add(unit);
 
     boolean mustMove = true, canEvict = true;
-    GameAction result = FreeRealEstate.findValueAction(unit.CO, this, unit, gameMap, mustMove, avoidProduction, canEvict);
+    GameAction result = GetFreeDudes.findFreeDude(unit.CO, this, unit, gameMap, mustMove, avoidProduction, canEvict);
     if( null == result )
     {
-      result = findTravelAction(gameMap, allThreats, threatMap, unit, ignoreSafety, mustMove, avoidProduction);
+      result = findTravelAction(gameMap, unit, ignoreSafety, mustMove, avoidProduction);
     }
 
     if( isBase )
@@ -602,7 +566,6 @@ public class JakeMan extends ModularAI
    */
   private GameAction findTravelAction(
                         GameMap gameMap,
-                        ArrayList<Unit> allThreats, Map<UnitModel, Map<XYCoord, Double>> threatMap,
                         Unit unit,
                         boolean ignoreSafety, boolean mustMove,
                         boolean avoidProduction )
@@ -616,7 +579,7 @@ public class JakeMan extends ModularAI
 
     XYCoord goal = null;
     GamePath path = null;
-    ArrayList<XYCoord> validTargets = findTravelDestinations(gameMap, allThreats, threatMap, unit, avoidProduction);
+    ArrayList<XYCoord> validTargets = findTravelDestinations(gameMap, unit, avoidProduction);
     if( mustMove ) // If we *must* travel, make sure we do actually move.
     {
       destinations.remove(new XYCoord(unit.x, unit.y));
@@ -651,7 +614,7 @@ public class JakeMan extends ModularAI
     for( XYCoord xyc : destinations )
     {
       log(String.format("    is it safe to go to %s?", xyc));
-      if( !ignoreSafety && !canWallHere(gameMap, threatMap, unit, xyc) )
+      if( !ignoreSafety && !isDudeFree(gameMap, unit, xyc) )
         continue;
 
       GameAction action = null;
@@ -661,7 +624,7 @@ public class JakeMan extends ModularAI
         boolean evictIgnoreSafety =
             valueUnit(unit, gameMap.getLocation(xyc), true) >= valueUnit(resident, gameMap.getLocation(xyc), true);
         if( unit.CO == resident.CO && !resident.isTurnOver )
-          action = evictUnit(gameMap, allThreats, threatMap, unit, resident, evictIgnoreSafety, avoidProduction);
+          action = evictUnit(gameMap, unit, resident, evictIgnoreSafety, avoidProduction);
         if( null != action ) return action;
         continue;
       }
@@ -724,16 +687,42 @@ public class JakeMan extends ModularAI
     return isWeak;
   }
 
-  private boolean isSafe(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc)
+  private boolean isDudeFree(GameMap gameMap, Unit unit, XYCoord xyc)
   {
-    Double threat = threatMap.get(unit.model).get(xyc);
     int threshhold = unit.model.hasDirectFireWeapon() ? DIRECT_THREAT_THRESHHOLD : INDIRECT_THREAT_THRESHHOLD;
-    return (null == threat || threshhold > threat);
+    HashMap<UnitModel, Double> threatCounts = new HashMap<>();
+    for( UnitModel threat : unitMapEnemy.keySet() )
+    {
+      if( !isThreatenedBy(unit.model, threat) )
+        continue;
+      if( unitMapEnemy.get(threat).containsKey(xyc) )
+        threatCounts.put(threat, unitMapEnemy.get(threat).get(xyc));
   }
+    if( threatCounts.size() < 1 )
+      return true;
 
-  private boolean canWallHere(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc)
+    ArrayList<XYCoord> counterCoords = Utils.findLocationsInRange(gameMap, xyc, 1);
+    counterCoords.remove(xyc);
+    for( UnitModel threat : threatCounts.keySet().toArray(new UnitModel[0]) )
+      for( UnitModel counter : unitMapFriendly.keySet() )
   {
-    return isSafe(gameMap, threatMap, unit, xyc);
+        boolean isCounter = false;
+        for( WeaponModel wm : counter.weapons )
+          isCounter &= threshhold <= wm.getDamage(threat);
+        if( !isCounter )
+          continue;
+        double counterPowerTotal = 0;
+        for( XYCoord coord : counterCoords )
+          if( unitMapFriendly.get(threat).containsKey(coord) )
+            counterPowerTotal += unitMapFriendly.get(threat).get(coord);
+        final double counterPowerAverage = counterPowerTotal / counterCoords.size();
+        final double threatPower = threatCounts.get(threat);
+        if( counterPowerAverage > threatPower )
+          threatCounts.remove(threat);
+        else
+          threatCounts.put(threat, threatPower - counterPowerAverage);
+      }
+    return threatCounts.size() < 1;
   }
 
   private static int valueUnit(Unit unit, MapLocation locale, boolean includeCurrentHealth)
