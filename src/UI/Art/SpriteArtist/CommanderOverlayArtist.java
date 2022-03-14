@@ -82,7 +82,8 @@ public class CommanderOverlayArtist
       BufferedImage powerBarImage = null;
       CommanderAbility ability = commander.getActiveAbility();
       final int xAbilityOffset;
-      if( null == ability )
+      boolean trueIfBarFalseIfText = null == ability;
+      if( trueIfBarFalseIfText )
       {
         powerBarImage = buildCoPowerBar(commander, commander.getAbilityCosts(), commander.getAbilityPower(), overlayIsLeft);
         xAbilityOffset = coEyesWidth + 1;
