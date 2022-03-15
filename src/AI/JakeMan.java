@@ -376,8 +376,11 @@ public class JakeMan extends ModularAI
         if( null != resident )
         {
           boolean avoidProduction = true;
+          GameAction eviction = null;
           if( resident.CO.army == myArmy && !resident.isTurnOver )
-            return ai.evictUnit(gameMap, null, resident, avoidProduction);
+            eviction = ai.evictUnit(gameMap, null, resident, avoidProduction);
+          if( null != eviction )
+            return eviction;
           else
           {
             ai.log(String.format("  Can't evict unit %s to build %s", resident.toStringWithLocation(), builds.get(coord)));

@@ -511,12 +511,12 @@ public class WallyAI extends ModularAI
   public static class BuildStuff implements AIModule
   {
     private static final long serialVersionUID = 1L;
-    public final Army myCo;
+    public final Army myArmy;
     public final WallyAI ai;
 
     public BuildStuff(Army co, WallyAI ai)
     {
-      myCo = co;
+      myArmy = co;
       this.ai = ai;
     }
 
@@ -545,8 +545,11 @@ public class WallyAI extends ModularAI
         if( null != resident )
         {
           boolean ignoreSafety = true, avoidProduction = true;
-          if( resident.CO.army == myCo && !resident.isTurnOver )
-            return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, null, resident, ignoreSafety, avoidProduction);
+          GameAction eviction = null;
+          if( resident.CO.army == myArmy && !resident.isTurnOver )
+            eviction = ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, null, resident, ignoreSafety, avoidProduction);
+          if( null != eviction )
+            return eviction;
           else
           {
             ai.log(String.format("  Can't evict unit %s to build %s", resident.toStringWithLocation(), builds.get(coord)));
@@ -558,7 +561,7 @@ public class WallyAI extends ModularAI
         Commander buyer = loc.getOwner();
         ArrayList<UnitModel> list = buyer.getShoppingList(loc);
         UnitModel toBuy = builds.get(coord);
-        if( buyer.getBuyCost(toBuy, coord) <= myCo.money && list.contains(toBuy) )
+        if( buyer.getBuyCost(toBuy, coord) <= myArmy.money && list.contains(toBuy) )
         {
           builds.remove(coord);
           return new GameAction.UnitProductionAction(buyer, toBuy, coord);
