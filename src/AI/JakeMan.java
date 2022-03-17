@@ -57,7 +57,6 @@ public class JakeMan extends ModularAI
 
   private Map<UnitModel, Map<XYCoord, Double>> unitMapEnemy;
   private Map<UnitModel, Map<XYCoord, Double>> unitMapFriendly;
-  private CapPhaseAnalyzer capPhase;
 
   UnitModel infantry;
   ArrayList<UnitModel> allTanks;
@@ -152,34 +151,6 @@ public class JakeMan extends ModularAI
       }
 
       return null;
-    }
-  }
-
-  public static class CapChainActuator extends UnitActionFinder
-  {
-    private static final long serialVersionUID = 1L;
-    JakeMan aiCast;
-    public CapChainActuator(Army co, JakeMan ai)
-    {
-      super(co, ai);
-      aiCast = ai;
-    }
-
-    @Override
-    public GameAction getUnitAction(Unit unit, GameMap map)
-    {
-      // Don't really care to handle COs that modify what can cap
-      if( !unit.model.baseActions.contains(UnitActionFactory.CAPTURE) )
-        return null;
-
-      // Follow the cap chain, if possible
-      final GameAction capAction = aiCast.capPhase.getCapAction(map, unit);
-      if( null != capAction && capAction.getType() == UnitActionFactory.CAPTURE )
-      {
-        ai.unownedProperties.remove(capAction.getMoveLocation());
-      }
-
-      return capAction;
     }
   }
   

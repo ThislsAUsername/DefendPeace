@@ -107,30 +107,33 @@ public class WallyAI extends ModularAI
   }
 
 
-  public WallyAI(Army co)
+  public WallyAI(Army army)
   {
-    super(co);
+    super(army);
     aiPhases = new ArrayList<AIModule>(
         Arrays.asList(
-            new PowerActivator(co, CommanderAbility.PHASE_TURN_START),
-            new GenerateThreatMap(co, this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
-            new CaptureFinisher(co, this),
+            new PowerActivator(army, CommanderAbility.PHASE_TURN_START),
+            new CapChainActuator(army, this),
+            new GenerateThreatMap(army, this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
+            new CaptureFinisher(army, this),
 
-            new NHitKO(co, this),
-            new SiegeAttacks(co, this),
-            new PowerActivator(co, CommanderAbility.PHASE_BUY),
-            new FreeRealEstate(co, this, false, false), // prioritize non-eviction
-            new FreeRealEstate(co, this, true,  false), // evict if necessary
-            new BuildStuff(co, this),
-            new FreeRealEstate(co, this, true,  true), // step on industries we're not using
-            new Travel(co, this),
+            new NHitKO(army, this),
+            new SiegeAttacks(army, this),
+            new PowerActivator(army, CommanderAbility.PHASE_BUY),
+            new FreeRealEstate(army, this, false, false), // prioritize non-eviction
+            new FreeRealEstate(army, this, true,  false), // evict if necessary
+            new BuildStuff(army, this),
+            new FreeRealEstate(army, this, true,  true), // step on industries we're not using
+            new Travel(army, this),
 
-            new PowerActivator(co, CommanderAbility.PHASE_TURN_END)
+            new PowerActivator(army, CommanderAbility.PHASE_TURN_END)
             ));
   }
 
   private void init(GameMap map)
   {
+    capPhase = new CapPhaseAnalyzer(map, myArmy);
+
     unitEffectiveMove = new HashMap<>();
     // init all move multipliers before powers come into play
     for( Army army : map.game.armies )

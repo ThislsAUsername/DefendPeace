@@ -8,6 +8,7 @@ import java.util.PriorityQueue;
 import CommandingOfficers.CommanderAbility;
 import Engine.Army;
 import Engine.GameAction;
+import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
@@ -27,6 +28,7 @@ public abstract class ModularAI implements AIController
   protected ArrayList<AIModule> aiPhases;
   // Sets the ordering for units in the unit queue fed to the modules
   protected Comparator<Unit> unitOrderSetter = new AIUtils.UnitCostComparator(false);
+  protected CapPhaseAnalyzer capPhase;
 
   private StringBuffer logger = new StringBuffer();
   private boolean shouldLog = true;
@@ -182,5 +184,32 @@ public abstract class ModularAI implements AIController
     }
 
     protected abstract GameAction getUnitAction(Unit unit, GameMap gameMap);
+  }
+
+  public static class CapChainActuator extends UnitActionFinder
+  {
+    private static final long serialVersionUID = 1L;
+    public CapChainActuator(Army co, ModularAI ai)
+    {
+      super(co, ai);
+    }
+
+    @Override
+    public GameAction getUnitAction(Unit unit, GameMap map)
+    {
+      // Don't really care to handle COs that modify what can cap
+      if( null == ai.capPhase
+          || !unit.model.baseActions.contains(UnitActionFactory.CAPTURE) )
+        return null;
+
+      // Follow the cap chain, if possible
+      final GameAction capAction = ai.capPhase.getCapAction(map, unit);
+      if( null != capAction && capAction.getType() == UnitActionFactory.CAPTURE )
+      {
+        ai.unownedProperties.remove(capAction.getMoveLocation());
+      }
+
+      return capAction;
+    }
   }
 }
