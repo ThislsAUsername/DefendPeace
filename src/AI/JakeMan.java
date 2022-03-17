@@ -924,10 +924,7 @@ public class JakeMan extends ModularAI
         {
           factoryOwnership.put(new XYCoord(i, j), map.getLocation(i, j).getOwner());
         }
-        if(env.terrainType == TerrainType.CITY
-            || env.terrainType == TerrainType.AIRPORT
-            // TODO: Comm towers
-            )
+        else if( env.terrainType.isProfitable() )
         {
           props.add(new XYCoord(i, j));
         }
