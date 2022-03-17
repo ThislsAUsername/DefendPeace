@@ -349,9 +349,10 @@ public class Utils
       // then update the power grid and re-queue the next node.
       int oldPower = powerGrid[currentNode.x][currentNode.y];
       int oldNextPower = powerGrid[next.xCoord][next.yCoord];
-      int newNextPower = oldPower - fff.getTransitionCost(map, currentNode.getCoordinates(), next);
+      final int transitionCost = fff.getTransitionCost(map, currentNode.getCoordinates(), next);
+      int newNextPower = oldPower - transitionCost;
 
-      if( newNextPower > oldNextPower )
+      if( transitionCost < MoveType.IMPASSABLE && newNextPower > oldNextPower )
       {
         powerGrid[next.xCoord][next.yCoord] = newNextPower;
         // Prevent wrong path generation due to updating the shared powerGrid
