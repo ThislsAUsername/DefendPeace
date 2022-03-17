@@ -3,6 +3,9 @@ package UI;
 import UI.InputHandler.InputAction;
 
 import java.util.ArrayList;
+
+import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.Army;
 import Engine.GameInstance;
@@ -74,6 +77,17 @@ public class GameStatsController implements InfoController
   public Army getSelectedArmy()
   {
     return armies.get(pageSelector.getSelectionNormalized());
+  }
+
+  @Override
+  public ArrayList<CommanderInfo> getSelectedCOInfo()
+  {
+    ArrayList<CommanderInfo> output = new ArrayList<>();
+    for( Commander co : getSelectedArmy().cos )
+    {
+      output.add(co.coInfo);
+    }
+    return output;
   }
 
   @Override

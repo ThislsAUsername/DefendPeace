@@ -77,10 +77,11 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
 
     // Draw the relevant Commanders
     final int bodyShiftPerBody = 42;
-    int currentBodyShift = -1 * bodyShiftPerBody * (thisArmy.cos.length - 1);
-    for( int i = thisArmy.cos.length - 1; i >= 0; --i )
+    final ArrayList<CommanderInfo> coInfos = myControl.getSelectedCOInfo();
+    int currentBodyShift = -1 * bodyShiftPerBody * (coInfos.size() - 1);
+    for( int i = coInfos.size() - 1; i >= 0; --i )
     {
-      CommanderInfo coi = thisArmy.cos[i].coInfo;
+      CommanderInfo coi = coInfos.get(i);
       BufferedImage COPic = SpriteLibrary.getCommanderSprites(coi.name).body;
       // justify bottom/right
       myG.drawImage(COPic, imageWidth - COPic.getWidth() - currentBodyShift, imageHeight - COPic.getHeight(), null);
