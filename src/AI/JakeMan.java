@@ -566,8 +566,6 @@ public class JakeMan extends ModularAI
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, ignoreResident);
     destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, myArmy, destinations, !avoidProduction));
 
-    // TODO: Jump in a transport, if available, or join?
-
     XYCoord goal = null;
     GamePath path = null;
     ArrayList<XYCoord> validTargets = findTravelDestinations(gameMap, unit, avoidProduction);
@@ -745,8 +743,8 @@ public class JakeMan extends ModularAI
     if( unit.CO.isEnemy(locale.getOwner()) &&
             unit.hasActionType(UnitActionFactory.CAPTURE)
             && locale.isCaptureable() )
-
       value += valueTerrain(unit.CO, locale.getEnvironment().terrainType); // Strongly value units that threaten capture
+
     if( includeCurrentHealth )
       value *= unit.getHP();
     value -= locale.getEnvironment().terrainType.getDefLevel(); // Value things on lower terrain more, so we wall for equal units if we can get on better terrain

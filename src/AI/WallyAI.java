@@ -877,8 +877,8 @@ public class WallyAI extends ModularAI
     if( unit.CO.isEnemy(locale.getOwner()) &&
             unit.hasActionType(UnitActionFactory.CAPTURE)
             && locale.isCaptureable() )
-
       value += valueTerrain(unit.CO, locale.getEnvironment().terrainType); // Strongly value units that threaten capture
+
     if( includeCurrentHealth )
       value *= unit.getHP();
     value -= locale.getEnvironment().terrainType.getDefLevel(); // Value things on lower terrain more, so we wall for equal units if we can get on better terrain
