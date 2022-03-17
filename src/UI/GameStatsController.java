@@ -80,7 +80,7 @@ public class GameStatsController implements InfoController
   }
 
   @Override
-  public ArrayList<CommanderInfo> getSelectedCOInfo()
+  public ArrayList<CommanderInfo> getSelectedCOInfoList()
   {
     ArrayList<CommanderInfo> output = new ArrayList<>();
     for( Commander co : getSelectedArmy().cos )

@@ -77,7 +77,7 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
 
     // Draw the relevant Commanders
     final int bodyShiftPerBody = 42;
-    final ArrayList<CommanderInfo> coInfos = myControl.getSelectedCOInfo();
+    final ArrayList<CommanderInfo> coInfos = myControl.getSelectedCOInfoList();
     int currentBodyShift = -1 * bodyShiftPerBody * (coInfos.size() - 1);
     for( int i = coInfos.size() - 1; i >= 0; --i )
     {

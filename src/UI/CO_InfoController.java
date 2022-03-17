@@ -96,7 +96,7 @@ public class CO_InfoController implements InfoController
   @Override
   public ArrayList<InfoPage> getSelectedPages()
   {
-    return getSelectedCOInfo().iterator().next().infoPages;
+    return getSelectedCOInfoList().iterator().next().infoPages;
   }
 
   @Override
@@ -106,7 +106,7 @@ public class CO_InfoController implements InfoController
   }
 
   @Override
-  public ArrayList<CommanderInfo> getSelectedCOInfo()
+  public ArrayList<CommanderInfo> getSelectedCOInfoList()
   {
     ArrayList<CommanderInfo> output = new ArrayList<>();
     output.add(coInfos.get(coOptionSelector.getSelectionNormalized()));

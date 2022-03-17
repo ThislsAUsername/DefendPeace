@@ -12,7 +12,7 @@ public interface InfoController extends IController
 {
   Army getSelectedArmy();
 
-  ArrayList<CommanderInfo> getSelectedCOInfo();
+  ArrayList<CommanderInfo> getSelectedCOInfoList();
 
   int getShiftDown();
 
