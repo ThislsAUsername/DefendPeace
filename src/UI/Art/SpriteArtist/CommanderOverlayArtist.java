@@ -15,9 +15,6 @@ import UI.COStateInfo;
 public class CommanderOverlayArtist
 {
   private static final int animIndexUpdateInterval = 13;
-  private static final int moneyBufferPx = 2;
-  private static final int fundsHeight = SpriteLibrary.baseIconSize+moneyBufferPx;
-
 
   private static Map<String, Sprite> activeAbilityTextSprites = new HashMap<String, Sprite>();
 
@@ -77,15 +74,9 @@ public class CommanderOverlayArtist
     final int mapViewWidth = SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale();
     final BufferedImage spriteA = SpriteLibrary.getLettersSmallCaps().getFrame(0); // Convenient reference so we can check dimensions.
 
-    final int yShiftPerOverlay = SpriteLibrary.getCoOverlay(army.cos[0], overlayIsLeft).getHeight() - 1;
+    final int yShiftPerOverlay = SpriteLibrary.getCoOverlay(army.cos[0], overlayIsLeft).getHeight() + 2; // fudge factor for power bar
 
     final int fundsLength = ("" + army.money).length();
-    final int fundsWidth = ICON_VALUE_SPACING + fundsLength * spriteA.getWidth() + 1;
-    final int drawX = overlayIsLeft ? 0 : mapViewWidth - fundsWidth;
-    final int drawY = yInitialOffset + yShiftPerOverlay*army.cos.length + yTextOffset;
-    SpriteUIUtils.drawMenuFrame(g, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR,
-        drawX, drawY, fundsWidth, fundsHeight, moneyBufferPx);
-    drawIconAndValue(g, SpriteLibrary.MapIcons.FUNDS, army.money, fundsLength, drawX, drawY + moneyBufferPx);
 
     for( int co = army.cos.length - 1; co >= 0; --co )
     {
@@ -108,23 +99,23 @@ public class CommanderOverlayArtist
 
       int energy = COStateInfo.getEnergyUntilNextPower(commander);
       int energyLength = ("" + energy).length();
+      int attribLength = Math.max( energyLength, fundsLength );
 
       final int yPowerBarOffset = overlayImage.getHeight() - powerBarImage.getHeight()/2 + yCurrentOffset;
       if( overlayIsLeft )
       { // Draw the overlay on the left side.
         g.drawImage(overlayImage, 0, yCurrentOffset, overlayImage.getWidth(), overlayImage.getHeight(), null);
-        SpriteUIUtils.drawTextSmallCaps(g, commander.coInfo.name, xTextOffset, yTextOffset + yCurrentOffset);
-        drawIconAndValue(g, SpriteLibrary.MapIcons.ENERGY, energy, energyLength, xTextOffset, yTextOffsetLineTwo + yCurrentOffset);
+        drawIconAndValue(g, SpriteLibrary.MapIcons.FUNDS, army.money, attribLength, xTextOffset, yTextOffset        + yCurrentOffset);
+        drawIconAndValue(g, SpriteLibrary.MapIcons.ENERGY, energy,    attribLength, xTextOffset, yTextOffsetLineTwo + yCurrentOffset);
         g.drawImage( powerBarImage, xAbilityOffset, yPowerBarOffset, powerBarImage.getWidth(), powerBarImage.getHeight(), null );
       }
       else
       { // Draw the overlay on the right side.
         int xPos = mapViewWidth - overlayImage.getWidth();
-        int nameXPos = mapViewWidth - spriteA.getWidth()*commander.coInfo.name.length() - xTextOffset;
-        int valueXPos = mapViewWidth - ICON_VALUE_SPACING - spriteA.getWidth()*energyLength - xTextOffset;
+        int valueXPos = mapViewWidth - ICON_VALUE_SPACING - spriteA.getWidth()*attribLength - xTextOffset;
         g.drawImage(overlayImage, xPos, yCurrentOffset, overlayImage.getWidth(), overlayImage.getHeight(), null);
-        SpriteUIUtils.drawTextSmallCaps(g, commander.coInfo.name, nameXPos, yTextOffset + yCurrentOffset);
-        drawIconAndValue(g, SpriteLibrary.MapIcons.ENERGY, energy, energyLength, valueXPos, yTextOffsetLineTwo + yCurrentOffset);
+        drawIconAndValue(g, SpriteLibrary.MapIcons.FUNDS, army.money, attribLength, valueXPos, yTextOffset        + yCurrentOffset);
+        drawIconAndValue(g, SpriteLibrary.MapIcons.ENERGY, energy,    attribLength, valueXPos, yTextOffsetLineTwo + yCurrentOffset);
         int pbXPos = mapViewWidth - xAbilityOffset - powerBarImage.getWidth();
         g.drawImage( powerBarImage, pbXPos, yPowerBarOffset, powerBarImage.getWidth(), powerBarImage.getHeight(), null );
       }
@@ -135,7 +126,7 @@ public class CommanderOverlayArtist
 
   public static int getArmyOverlaySize(final int yShiftPerOverlay, final int coCount)
   {
-    return yShiftPerOverlay*coCount + fundsHeight;
+    return yShiftPerOverlay*coCount;
   }
 
   private static final int ICON_VALUE_SPACING = SpriteLibrary.baseIconSize + 2;
