@@ -9,6 +9,9 @@ import Engine.Army;
 import Units.Unit;
 import Units.UnitModel;
 
+/**
+ * Maps a particular CO to a unit type, since that's a useful construct for AIs
+ */
 public class ModelForCO implements Serializable
 {
   private static final long serialVersionUID = -9123241409244613501L;
@@ -27,6 +30,9 @@ public class ModelForCO implements Serializable
     this(unit.CO, unit.model);
   }
 
+  /**
+   * @return A list of all the input CO's unit types
+   */
   public static Collection<ModelForCO> getListFor(Commander co)
   {
     Collection<ModelForCO> models = new ArrayList<>();
@@ -35,6 +41,9 @@ public class ModelForCO implements Serializable
     return models;
   }
 
+  /**
+   * @return A list of all the input Army's COs' unit types
+   */
   public static Collection<ModelForCO> getListFor(Army army)
   {
     Collection<ModelForCO> models = new ArrayList<>();
