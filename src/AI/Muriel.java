@@ -84,8 +84,6 @@ public class Muriel implements AIController
   private StringBuffer logger = new StringBuffer();
   private boolean shouldLog = true;
   private int turnNum = 0;
-
-//  private ArrayList<Commander> enemyCos = null;
   
   private UnitEffectivenessMap myUnitEffectMap;
   private final double COST_EFFECTIVENESS_MIN = 0.75;
