@@ -31,7 +31,7 @@ public class CommanderProductionInfo
   public Map<UnitModel, Set<TerrainType>> modelToTerrainMap;
 
   /**
-   * Build a model of the production capabilities for a given Commander.
+   * Build a model of the production capabilities for a given Army.
    * Could be used for your own, or your opponent's.
    */
   public CommanderProductionInfo(Army army, GameMap gameMap, boolean includeFriendlyOccupied)

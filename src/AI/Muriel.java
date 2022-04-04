@@ -728,7 +728,7 @@ public class Muriel implements AIController
         }
       }
     }
-    // Count up myArmy own army men.
+    // Count up my own army men.
     Map<ModelForCO, Double> myUnitCounts = new HashMap<>();
     for( Unit u : myArmy.getUnits() )
     {
@@ -771,7 +771,7 @@ public class Muriel implements AIController
         double myCount = myUnitCounts.get(um);
         UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(um,  em);
         double myStoppingPower = umami.damageRatio * myCount; // I can stop THIS MANY of those things with what I have.
-        effectiveThreat -= myStoppingPower; // Subtract myArmy effective weight with this type from their number.
+        effectiveThreat -= myStoppingPower; // Subtract my effective weight with this type from their number.
       }
       enemyUnitStrengths.offer(new ModelValuePair(em, effectiveThreat)); // If effectiveThreat is still positive, I can't handle all of them.
     }
@@ -858,13 +858,13 @@ public class Muriel implements AIController
             {
               if( umami.damageRatio >= 1.0 ) score++; // Plus one if it's worth building.
               if( umami.damageRatio >= 1.5 ) score++; // An extra bump in score if they are very good vs this type.
-              if( umami.damageRatio < 0.8 ) score--; // Discount if myArmy counter is countered.
+              if( umami.damageRatio < 0.8 ) score--; // Discount if my counter is countered.
             }
             else
             {
               if( umami.costEffectivenessRatio >= COST_EFFECTIVENESS_MIN ) score++; // Plus one if it's worth building.
               if( umami.costEffectivenessRatio >= COST_EFFECTIVENESS_HIGH ) score++; // An extra bump in score if they are very good vs this type.
-              if( umami.costEffectivenessRatio < COST_EFFECTIVENESS_MIN ) score--; // Discount if myArmy counter is countered.
+              if( umami.costEffectivenessRatio < COST_EFFECTIVENESS_MIN ) score--; // Discount if my counter is countered.
             }
           }
         }
@@ -872,7 +872,7 @@ public class Muriel implements AIController
         counterScores.offer(new ModelValuePair(counter, score));
       }
 
-      // Loop through myArmy counters for enemyToCounter, in order of how generally applicable they are.
+      // Loop through my counters for enemyToCounter, in order of how generally applicable they are.
       // This second pass will allow us to break any ties and populate orderedCounters.
       ArrayList<ModelForCO> orderedCounters = new ArrayList<>();
       while( !counterScores.isEmpty() )
