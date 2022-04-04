@@ -680,16 +680,13 @@ public class SpriteMapView extends MapView
 
     XYCoord tileToDetail = myGame.getCursorCoord();
     // Draw the tile coordinates.
-    if( SpriteOptions.getCoordinatesEnabled() )
-    {
-      String coordStr = String.format("(%d,%d)", tileToDetail.xCoord, tileToDetail.yCoord);
-      BufferedImage coordsImg = SpriteUIUtils.getTextAsImage(coordStr, true);
-      int coordsDrawX = (overlayIsLeft) ? mapViewWidth - coordsImg.getWidth() - bufferPx : bufferPx;
-      int coordsDrawY = mapViewHeight - coordsImg.getHeight() - viewModeImg.getHeight() - bufferPx * 5;
-      SpriteUIUtils.drawMenuFrame(g, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR, coordsDrawX, coordsDrawY,
-          coordsImg.getWidth(), coordsImg.getHeight() + bufferPx * 2, bufferPx);
-      g.drawImage(coordsImg, coordsDrawX, coordsDrawY + bufferPx, null);
-    }
+    String coordStr = String.format("(%d,%d)", tileToDetail.xCoord, tileToDetail.yCoord);
+    BufferedImage coordsImg = SpriteUIUtils.getTextAsImage(coordStr, true);
+    int coordsDrawX = (overlayIsLeft) ? mapViewWidth - coordsImg.getWidth() - bufferPx : bufferPx;
+    int coordsDrawY = mapViewHeight - coordsImg.getHeight() - viewModeImg.getHeight() - bufferPx * 5;
+    SpriteUIUtils.drawMenuFrame(g, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR, coordsDrawX, coordsDrawY,
+        coordsImg.getWidth(), coordsImg.getHeight() + bufferPx * 2, bufferPx);
+    g.drawImage(coordsImg, coordsDrawX, coordsDrawY + bufferPx, null);
   }
 
   private int lastTurnNum = -1;
