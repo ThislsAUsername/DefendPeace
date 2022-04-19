@@ -10,7 +10,9 @@ import Units.Unit;
 import Units.UnitModel;
 
 /**
- * Maps a particular CO to a unit type, since that's a useful construct for AIs
+ * Maps a particular CO to a unit type
+ * <p>Useful to AIs, since they would like to track the capabilities of a particular unit type for a specific CO,
+ *    so they can adapt to the unit matchups in *this* battle.
  */
 public class ModelForCO implements Serializable
 {
