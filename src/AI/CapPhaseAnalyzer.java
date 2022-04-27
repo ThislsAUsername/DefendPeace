@@ -214,8 +214,8 @@ public class CapPhaseAnalyzer implements Serializable
     // Finally, figure out what non-factories are contested or rightfully mine
     for( XYCoord propXYC : props )
     {
-      int newOwnerDistance = Integer.MAX_VALUE;
-      Commander newOwner = null;
+      // Each Army's turns to cap this prop, measured in % of a turn's movement
+      HashMap<Army, Integer> possibleOwners = new HashMap<>();
       for( XYCoord ownedFac : factoryOwnership.keySet() )
       {
         final Commander owner = factoryOwnership.get(ownedFac);
@@ -230,24 +230,44 @@ public class CapPhaseAnalyzer implements Serializable
         if( null == tankPath || tankPath.getPathLength() < 1 )
           continue; // Can't reach this city
 
-        // Measured in % of a turn
+        int oldDistance = Integer.MAX_VALUE;
+        if( possibleOwners.containsKey(owner.army) )
+          oldDistance = possibleOwners.get(owner.army);
+
         int distance = tankPath.getFuelCost(tank, map) * 100 / tank.getMovePower(map);
-        int distanceDelta = Math.abs(newOwnerDistance - distance);
-        if( distanceDelta <= 100 && owner.isEnemy(newOwner) )
+        if( distance < oldDistance )
+          possibleOwners.put(owner.army, distance);
+      }
+
+
+      // Calculate who's the closest, and if that army has real competition for this prop
+      Army closestArmy = null;
+      int closestDistance = Integer.MAX_VALUE;
+      for( Army army : possibleOwners.keySet() )
+      {
+        int distance = possibleOwners.get(army);
+        if( distance < closestDistance )
         {
-          newOwner = null;
-          contestedProps.add(propXYC);
-          break;
-        }
-        if( distance < newOwnerDistance )
-        {
-          newOwnerDistance = distance;
-          newOwner = owner;
+          closestArmy = army;
+          closestDistance = distance;
         }
       }
-      if( null != newOwner && viewer == newOwner.army
-          && viewer.isEnemy(map.getLocation(propXYC).getOwner()) // Don't try to cap it if we already own it
-          )
+
+      boolean contested = false;
+      for( Army army : possibleOwners.keySet() )
+      {
+        if(!army.isEnemy(closestArmy))
+          continue;
+        int distance = possibleOwners.get(army);
+        int distanceDelta = Math.abs(closestDistance - distance);
+        contested |= ( distanceDelta <= 100 );
+      }
+
+      // If it isn't contested and we want to try to cap it, add it to the list
+      if( contested )
+        contestedProps.add(propXYC);
+      else if( viewer == closestArmy
+            && viewer.isEnemy(map.getLocation(propXYC).getOwner()) ) // Don't try to cap it if we already own it
         rightfulProps.add(propXYC);
     }
 
