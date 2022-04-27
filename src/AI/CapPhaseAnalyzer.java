@@ -333,7 +333,7 @@ public class CapPhaseAnalyzer implements Serializable
         ArrayList<CapStop> chain = new ArrayList<>();
         CapStop build = new CapStop(start);
         chain.add(build);
-        capChains.get(start).add(chain);
+        capChains.get(start).add(0, chain);
       }
       madeProgress = false;
       for( ArrayList<ArrayList<CapStop>> chainList : capChains.values() )
