@@ -47,14 +47,18 @@ public class CapPhaseAnalyzer implements Serializable
   public String toString()
   {
     StringBuilder sb = new StringBuilder();
+    sb.append("Contested properties:");
+    for( XYCoord contested : contestedProps )
+      sb.append(String.format(" %s ", contested));
+    sb.append("\n");
     for( XYCoord factoryXYC : capChains.keySet() )
     {
-      sb.append(String.format("Cap chains for %s:", factoryXYC));
+      sb.append(String.format("Cap chains for %s:\n", factoryXYC));
       for( ArrayList<CapStop> chain : capChains.get(factoryXYC) )
       {
-        sb.append(String.format("  chain"));
+        sb.append(String.format("  chain\n"));
         for( CapStop stop : chain )
-          sb.append(String.format("    %s", stop));
+          sb.append(String.format("    %s\n", stop));
       }
     }
     return sb.toString();
