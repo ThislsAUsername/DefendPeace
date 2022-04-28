@@ -222,11 +222,11 @@ public class CapPhaseAnalyzer implements Serializable
         if( owner == null )
           continue; // Don't barf in weird maps
 
-        final Unit tank = new Unit(owner, owner.getUnitModel(UnitModel.ASSAULT));
-        tank.x = ownedFac.xCoord;
-        tank.y = ownedFac.yCoord;
+        final Unit inf = new Unit(owner, owner.getUnitModel(UnitModel.TROOP));
+        inf.x = ownedFac.xCoord;
+        inf.y = ownedFac.yCoord;
 
-        final GamePath tankPath = Utils.findShortestPath(tank, propXYC, map, true);
+        final GamePath tankPath = Utils.findShortestPath(inf, propXYC, map, true);
         if( null == tankPath || tankPath.getPathLength() < 1 )
           continue; // Can't reach this city
 
@@ -234,7 +234,7 @@ public class CapPhaseAnalyzer implements Serializable
         if( possibleOwners.containsKey(owner.army) )
           oldDistance = possibleOwners.get(owner.army);
 
-        int distance = tankPath.getFuelCost(tank, map) * 100 / tank.getMovePower(map);
+        int distance = tankPath.getFuelCost(inf, map) * 100 / inf.getMovePower(map);
         if( distance < oldDistance )
           possibleOwners.put(owner.army, distance);
       }
