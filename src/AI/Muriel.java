@@ -805,11 +805,11 @@ public class Muriel implements AIController
       if(useDamageRatio) log("  High funds - sorting units by damage ratio instead of cost effectiveness.");
 
       // If we are low on grunts, make sure we save money to build more.
-      UnitModel infModel = myArmy.cos[0].getUnitModel(UnitModel.TROOP);
+      final UnitModel infModel = myArmy.cos[0].getUnitModel(UnitModel.TROOP);
       int infCount = 0;
-      for( Unit u : myArmy.getUnits() )
-        if( infModel == u.model )
-          ++infCount;
+      for( ModelForCO unitType : myUnitCounts.keySet() )
+        if( infModel == unitType.um )
+          infCount += myUnitCounts.get(unitType);
 
       int costBuffer = 0;
       if( (infCount < (myArmy.getUnits().size() * INFANTRY_PROPORTION)) )
