@@ -82,7 +82,7 @@ public class InfantrySpamAI implements AIController
     actions.clear();
     
     // Create a list of every property we don't own, but want to.
-    unownedProperties = AIUtils.findNonAlliedProperties(myArmy.cos[0], gameMap);
+    unownedProperties = AIUtils.findNonAlliedProperties(myArmy, gameMap);
     capturingProperties = new ArrayList<XYCoord>();
     for( Unit unit : myArmy.getUnits() )
     {

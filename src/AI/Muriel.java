@@ -189,7 +189,7 @@ public class Muriel implements AIController
     log(String.format("[======== Muriel initializing turn %s for %s =========]", turnNum, myArmy));
 
     // Make a list of properties we want to claim.
-    nonAlliedProperties = AIUtils.findNonAlliedProperties(myArmy.cos[0], gameMap);
+    nonAlliedProperties = AIUtils.findNonAlliedProperties(myArmy, gameMap);
 
     // Order the units by cost.
     final ArrayList<Unit> armyUnits = myArmy.getUnits();

@@ -43,7 +43,7 @@ public abstract class ModularAI implements AIController
     logger = new StringBuffer(); // Reset at the start of the turn so the AI's action log stays in memory between turns for review
     ++turnNum;
     // Create a list of every property we don't own, but want to.
-    unownedProperties = AIUtils.findNonAlliedProperties(myArmy.cos[0], gameMap);
+    unownedProperties = AIUtils.findNonAlliedProperties(myArmy, gameMap);
 
     for( AIModule phase : aiPhases )
     {

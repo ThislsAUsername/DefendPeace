@@ -122,7 +122,7 @@ public class AIUtils
    * @param gameMap The map to search for properties.
    * @return An ArrayList with the XYCoord of every property that fills the bill.
    */
-  public static ArrayList<XYCoord> findNonAlliedProperties(Commander myCo, GameMap gameMap)
+  public static ArrayList<XYCoord> findNonAlliedProperties(Army myArmy, GameMap gameMap)
   {
     ArrayList<XYCoord> props = new ArrayList<XYCoord>();
     for( int x = 0; x < gameMap.mapWidth; ++x )
@@ -130,7 +130,7 @@ public class AIUtils
       for( int y = 0; y < gameMap.mapHeight; ++y )
       {
         MapLocation loc = gameMap.getLocation(x, y);
-        if( loc.isCaptureable() && myCo.isEnemy(loc.getOwner()) )
+        if( loc.isCaptureable() && myArmy.isEnemy(loc.getOwner()) )
         {
           props.add(new XYCoord(x, y));
         }
