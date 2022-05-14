@@ -190,7 +190,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     return myColor;
   }
 
-  /** Get the list of units this army can build from the given property type. */
+  /** Get the list of units this Commander can build from the given property type. */
   public ArrayList<UnitModel> getShoppingList(MapLocation buyLocation)
   {
     return (unitProductionByTerrain.get(buyLocation.getEnvironment().terrainType) != null) ? unitProductionByTerrain.get(buyLocation.getEnvironment().terrainType)
