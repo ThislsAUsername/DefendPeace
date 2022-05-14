@@ -594,6 +594,7 @@ public class SpriteLibrary
     return newArrow.getFrame(0);
   }
 
+  public static final String OVERLAY_FILE_PATH = "res/ui/co_overlay.png";
   /**
    * Returns the overlay image for the HUD, which serves as a backdrop for the army
    * name and the currently-available funds.
@@ -605,7 +606,7 @@ public class SpriteLibrary
     if( !coOverlays.containsKey(co) )
     {
       // If we don't already have this overlay, go load and store it.
-      final BufferedImage sprite = SpriteLibrary.loadSpriteSheetFile("res/ui/co_overlay.png");
+      final BufferedImage sprite = SpriteLibrary.loadSpriteSheetFile(OVERLAY_FILE_PATH);
       Sprite overlay = new Sprite(sprite, sprite.getWidth()/2, sprite.getHeight());
       overlay.colorize(UIUtils.defaultMapColors, UIUtils.getMapUnitColors(co.myColor).paletteColors);
 

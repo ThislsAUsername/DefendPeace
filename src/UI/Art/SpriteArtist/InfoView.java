@@ -152,14 +152,15 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
         {
           Army[] armyList = myControl.getGame().armies;
 
-          int coCount = 0;
-          for(Army a : armyList)
-            coCount += a.cos.length;
-
-          final int overlayHeight = SpriteLibrary.getCoOverlay(armyList[0].cos[0], true).getHeight();
           PixelFont font = SpriteLibrary.getFontStandard();
-          final int yShiftPerOverlay = overlayHeight + font.getHeight()*2 + 3; // Put in some extra for the status text
-          final int ySpaceNeeded = CommanderOverlayArtist.getArmyOverlaySize(yShiftPerOverlay, coCount);
+          final int yCOSize = CommanderOverlayArtist.getCommanderOverlayHeight();
+          final int yStatusSpace = font.getHeight() + 6; // Put in some extra for the status text
+          int ySpaceNeeded = 0;
+
+          for(Army a : armyList) {
+            ySpaceNeeded += yCOSize * a.cos.length;
+            ySpaceNeeded += yStatusSpace;
+          }
 
           BufferedImage drawableArea =
               CommanderOverlayArtist.drawAllCommanderOverlays(armyList, drawableMap, drawingWidth, ySpaceNeeded, null);

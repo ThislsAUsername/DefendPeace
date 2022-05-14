@@ -32,18 +32,17 @@ public class CommanderOverlayArtist
       if( army.isDefeated )
         continue;
 
-      BufferedImage headerWorkspace = SpriteLibrary.createTransparentSprite(drawingWidth, drawingHeight);
-      int newOffset = CommanderOverlayArtist.drawCommanderOverlay(headerWorkspace.getGraphics(), army, verticalOffset, true);
+      int armyHeight = getArmyOverlaySize(army.cos.length);
 
       // Highlight the selected CO
       if( army == armyToHighlight )
       {
         g.setColor(SpriteUIUtils.MENUHIGHLIGHTCOLOR);
-        g.fillRect(0, verticalOffset, drawingWidth, newOffset - verticalOffset);
+        g.fillRect(0, verticalOffset, drawingWidth, armyHeight);
       }
 
-      g.drawImage(headerWorkspace, 0, 0, null);
-      verticalOffset = newOffset;
+      CommanderOverlayArtist.drawCommanderOverlay(g, army, verticalOffset, true);
+      verticalOffset += armyHeight;
 
       // Add brief status text per CO
       String status = new COStateInfo(drawableMap, army).getAbbrevStatus();
@@ -61,11 +60,11 @@ public class CommanderOverlayArtist
   /**
    * @return The vertical offset of the bottom of the final header drawn (not counting money box)
    */
-  public static int drawCommanderOverlay(Graphics g, Army army, boolean overlayIsLeft)
+  public static void drawCommanderOverlay(Graphics g, Army army, boolean overlayIsLeft)
   {
-    return drawCommanderOverlay(g, army, 0, overlayIsLeft);
+    drawCommanderOverlay(g, army, 0, overlayIsLeft);
   }
-  public static int drawCommanderOverlay(Graphics g, Army army, int yInitialOffset, boolean overlayIsLeft)
+  public static void drawCommanderOverlay(Graphics g, Army army, int yInitialOffset, boolean overlayIsLeft)
   {
     final int coEyesWidth = 25;
     final int xTextOffset = (4+coEyesWidth); // Distance from the side of the view to the CO overlay text.
@@ -74,14 +73,14 @@ public class CommanderOverlayArtist
     final int mapViewWidth = SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale();
     final BufferedImage spriteA = SpriteLibrary.getLettersSmallCaps().getFrame(0); // Convenient reference so we can check dimensions.
 
-    final int yShiftPerOverlay = SpriteLibrary.getCoOverlay(army.cos[0], overlayIsLeft).getHeight() + 2; // fudge factor for power bar
+    final int yShiftPerCO = getCommanderOverlayHeight();
 
     final int fundsLength = ("" + army.money).length();
 
     for( int co = army.cos.length - 1; co >= 0; --co )
     {
       Commander commander = army.cos[co];
-      final int yCurrentOffset = yInitialOffset + (co * yShiftPerOverlay);
+      final int yCurrentOffset = yInitialOffset + (co * yShiftPerCO);
       // Choose left or right overlay image to draw.
       BufferedImage overlayImage = SpriteLibrary.getCoOverlay(commander, overlayIsLeft);
       BufferedImage powerBarImage = null;
@@ -120,13 +119,18 @@ public class CommanderOverlayArtist
         g.drawImage( powerBarImage, pbXPos, yPowerBarOffset, powerBarImage.getWidth(), powerBarImage.getHeight(), null );
       }
     } // ~header loop
-
-    return yInitialOffset + getArmyOverlaySize(yShiftPerOverlay, army.cos.length);
   }
 
-  public static int getArmyOverlaySize(final int yShiftPerOverlay, final int coCount)
+
+  private static int coOverlayHeight = -1;
+  public static int getCommanderOverlayHeight() {
+    if(coOverlayHeight < 1)
+      coOverlayHeight = SpriteLibrary.loadSpriteSheetFile(SpriteLibrary.OVERLAY_FILE_PATH).getHeight() + 2; // fudge factor for power bar
+    return coOverlayHeight;
+  }
+  public static int getArmyOverlaySize(final int coCount)
   {
-    return yShiftPerOverlay*coCount;
+    return getCommanderOverlayHeight()*coCount;
   }
 
   private static final int ICON_VALUE_SPACING = SpriteLibrary.baseIconSize + 2;
