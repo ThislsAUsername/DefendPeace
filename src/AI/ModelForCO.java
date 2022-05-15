@@ -10,7 +10,7 @@ import Units.Unit;
 import Units.UnitModel;
 
 /**
- * Maps a particular CO to a unit type
+ * Co-locates a Commander and unit type to allow calculating CO-specific unit stats that aren't directly available from just the model.
  * <p>Useful to AIs, since they would like to track the capabilities of a particular unit type for a specific CO,
  *    so they can adapt to the unit matchups in *this* battle.
  */
