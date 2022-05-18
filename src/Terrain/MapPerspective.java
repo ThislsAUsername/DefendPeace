@@ -104,16 +104,9 @@ public class MapPerspective extends GameMap
         (isLocationEmpty(coord) && !master.isLocationEmpty(coord)) ) // ...or what's there is hidden
     {
       returnLoc = new MapLocation(returnLoc.getEnvironment(), coord);
-      returnLoc.setHighlight(masterLoc.isHighlightSet());
       returnLoc.setOwner( lastOwnerSeen[x][y] );
     }
     return returnLoc;
-  }
-
-  @Override
-  public void clearAllHighlights()
-  {
-    master.clearAllHighlights();
   }
 
   /** Returns true if no unit is at the specified x and y coordinate, false else */

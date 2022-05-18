@@ -83,8 +83,9 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
     {
       CommanderInfo coi = coInfos.get(i);
       BufferedImage COPic = SpriteLibrary.getCommanderSprites(coi.name).body;
-      // justify bottom/right
-      myG.drawImage(COPic, imageWidth - COPic.getWidth() - currentBodyShift, imageHeight - COPic.getHeight(), null);
+      // justify bottom/right, but don't cut off the top
+      final int bodyVOffset = Math.max(0, imageHeight - COPic.getHeight());
+      myG.drawImage(COPic, imageWidth - COPic.getWidth() - currentBodyShift, bodyVOffset, null);
       currentBodyShift += bodyShiftPerBody;
     }
 
@@ -151,11 +152,15 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
         {
           Army[] armyList = myControl.getGame().armies;
 
+          PixelFont font = SpriteLibrary.getFontStandard();
+          final int yCOSize = CommanderOverlayArtist.getCommanderOverlayHeight();
+          final int yStatusSpace = font.getHeight() + 6; // Put in some extra for the status text
           int ySpaceNeeded = 0;
-          final int overlayHeight = SpriteLibrary.getCoOverlay(armyList[0].cos[0], true).getHeight();
-          for( Army thisArmy : armyList )
-            // Draw a little generously
-            ySpaceNeeded += (thisArmy.cos.length + 1) * overlayHeight;
+
+          for(Army a : armyList) {
+            ySpaceNeeded += yCOSize * a.cos.length;
+            ySpaceNeeded += yStatusSpace;
+          }
 
           BufferedImage drawableArea =
               CommanderOverlayArtist.drawAllCommanderOverlays(armyList, drawableMap, drawingWidth, ySpaceNeeded, null);

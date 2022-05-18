@@ -104,16 +104,6 @@ public class Utils
     return dropoffLocations;
   }
 
-  /** Sets the highlight of all tiles in the provided list, and unsets the highlight on all others. */
-  public static void highlightLocations(GameMap map, ArrayList<XYCoord> locations)
-  {
-    map.clearAllHighlights();
-    for( XYCoord loc : locations )
-    {
-      map.getLocation(loc).setHighlight(true);
-    }
-  }
-
   /** Alias for {@link #findPossibleDestinations(XYCoord, Unit, GameMap) findPossibleDestinations()} **/
   public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap, boolean includeOccupiedSpaces)
   {

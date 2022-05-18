@@ -56,7 +56,7 @@ public abstract class UnloadLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
       return "UNLOAD";
     }

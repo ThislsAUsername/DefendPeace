@@ -37,7 +37,7 @@ public abstract class LoadLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
       return "LOAD";
     }

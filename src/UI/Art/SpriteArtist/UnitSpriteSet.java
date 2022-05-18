@@ -9,13 +9,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.*;
 
-import CommandingOfficers.Commander;
-import Engine.Army;
 import Engine.GameInstance;
-import Engine.StateTrackers.StateTracker;
 import UI.UIUtils;
 import UI.UIUtils.Faction;
-import UI.UnitMarker;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -24,7 +20,7 @@ public class UnitSpriteSet
   Sprite sprites[] = new Sprite[AnimState.values().length];
   Sprite buffMask;
 
-  public final int ANIM_FRAMES_PER_MARK = 3; 
+  public static final int ANIM_FRAMES_PER_MARK = 3;
   private Set<AnimState> unFlippableStates = new HashSet<AnimState>(
       Arrays.asList(AnimState.MOVENORTH, AnimState.MOVEEAST, AnimState.MOVESOUTH, AnimState.MOVEWEST));
 
@@ -265,34 +261,6 @@ public class UnitSpriteSet
       g.drawImage(num, drawX, drawY + ((unitHeight) / 2), num.getWidth(), num.getHeight(), null);
     }
 
-    ArrayList<UnitMarker> markers = new ArrayList<>();
-    { // Scope for potentialMarkers
-      ArrayList<UnitMarker> potentialMarkers = new ArrayList<>();
-      for( Army army : game.armies )
-        for( Commander co : army.cos )
-          potentialMarkers.add(co);
-      for( StateTracker st : game.stateTrackers.values() )
-        potentialMarkers.add(st);
-
-      for( UnitMarker mark : potentialMarkers )
-      {
-        char symbol = mark.getUnitMarking(u);
-        if( '\0' != symbol ) // null char is our sentry value
-        {
-          markers.add(mark);
-        }
-      }
-    }
-
-    // Draw one of them, based on our animation index
-    if( !markers.isEmpty() )
-    {
-      UnitMarker mark = markers.get((animIndex%(markers.size()*ANIM_FRAMES_PER_MARK))/ANIM_FRAMES_PER_MARK);
-      BufferedImage symbol = SpriteLibrary.getColoredMapTextSprites(mark.getMarkingColor(u)).get(mark.getUnitMarking(u));
-      // draw in the upper right corner
-      g.drawImage(symbol, drawX + ((unitHeight) / 2), drawY, symbol.getWidth(), symbol.getHeight(), null);
-    }
-
     // Evaluate/draw unit status effects.
     ArrayList<BufferedImage> statusIcons = new ArrayList<BufferedImage>();
     if( u.isStunned )
@@ -347,4 +315,5 @@ public class UnitSpriteSet
   {
     return !unFlippableStates.contains(state);
   }
+
 }

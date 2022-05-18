@@ -3,6 +3,7 @@ package CommandingOfficers;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.UnitActionFactory;
@@ -163,13 +164,13 @@ public class Meridian extends Commander
   }
 
   @Override
-  public char getUnitMarking(Unit unit)
+  public char getUnitMarking(Unit unit, Army activeArmy)
   {
     // If we ever allow COs other than our own to *activate* abilities, then this is gonna have to move to a StateTracker
     if( myVehicularCharge.debuffedUnits.contains(unit) )
       return 'C';
 
-    return super.getUnitMarking(unit);
+    return super.getUnitMarking(unit, activeArmy);
   }
 
   /**

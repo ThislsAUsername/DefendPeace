@@ -78,7 +78,7 @@ public abstract class BattleLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
       return "ATTACK";
     }

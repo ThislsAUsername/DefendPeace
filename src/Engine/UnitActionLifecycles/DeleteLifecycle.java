@@ -36,7 +36,7 @@ public abstract class DeleteLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
       return "DELETE";
     }

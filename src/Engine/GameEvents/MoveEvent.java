@@ -34,7 +34,7 @@ public class MoveEvent implements GameEvent
   @Override
   public GameEventQueue sendToListener(GameEventListener listener)
   {
-    return listener.receiveMoveEvent(this);
+    return listener.receiveMoveEvent(unit, unitPath);
   }
 
   @Override

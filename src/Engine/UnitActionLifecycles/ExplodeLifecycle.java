@@ -50,7 +50,7 @@ public abstract class ExplodeLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
       return "EXPLODE";
     }

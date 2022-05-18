@@ -1,8 +1,6 @@
 package CommandingOfficers;
 
 import java.awt.Color;
-import java.util.ArrayList;
-
 import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
@@ -13,9 +11,7 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.StateTrackers.BuildCountsTracker;
 import Engine.StateTrackers.CountManager;
 import Engine.StateTrackers.StateTracker;
-import Terrain.GameMap;
 import Terrain.MapMaster;
-import UI.GameOverlay;
 import Units.Unit;
 import Units.UnitContext;
 
@@ -107,35 +103,25 @@ public class Cinder extends Commander
   }
 
   @Override
-  public ArrayList<GameOverlay> getMyOverlays(GameMap gameMap, boolean amIViewing)
+  public char getPlaceMarking(XYCoord xyc, Army activeArmy)
   {
-    ArrayList<GameOverlay> overlays = super.getMyOverlays(gameMap, amIViewing);
-    if( !amIViewing )
-      return overlays;
+    if( activeArmy != this.army )
+      return super.getPlaceMarking(xyc, activeArmy);
+    int count = buildCounts.getCountFor(this, xyc);
+    if( !myView.isLocationValid(xyc) || count < 1 )
+      return super.getPlaceMarking(xyc, activeArmy);
 
-    // Highlight tiles we've built from already this turn
-    for( XYCoord xyc : buildCounts.getCountFor(this).keySet() )
-    {
-      int count = buildCounts.getCountFor(this, xyc);
-      if( !gameMap.isLocationValid(xyc) || count < 1 )
-        continue;
-
-      // Invert my color so the highlight is easily visible
-      int r = 255 - myColor.getRed();
-      int g = 255 - myColor.getGreen();
-      int b = 255 - myColor.getBlue();
-      // Thicken the center of the overlay as I spam
-      int a = Math.min(255, 100 * count);
-      Color edgeColor = new Color(r, g, b, 200);
-      Color fillColor = new Color(r, g, b, a);
-      ArrayList<XYCoord> coords = new ArrayList<XYCoord>();
-      coords.add(xyc);
-      overlays.add(new GameOverlay(xyc,
-                   coords,
-                   fillColor, edgeColor));
-    }
-
-    return overlays;
+    return ("" + count).charAt(0);
+  }
+  @Override
+  public Color getMarkingColor(XYCoord xyc)
+  {
+    // Invert my color so the number is easily visible
+    int r = 255 - myColor.getRed();
+    int g = 255 - myColor.getGreen();
+    int b = 255 - myColor.getBlue();
+    Color buildCountColor = new Color(r, g, b);
+    return buildCountColor;
   }
 
   /*
@@ -245,10 +231,10 @@ public class Cinder extends Commander
     }
 
     @Override
-    public char getUnitMarking(Unit unit)
+    public char getUnitMarking(Unit unit, Army activeArmy)
     {
       Army army = unit.CO.army;
-      char defaultVal = super.getUnitMarking(unit);
+      char defaultVal = super.getUnitMarking(unit, activeArmy);
       // Don't pollute the pool for the early out from earlier
       if( !attackCounts.hasCountFor(army) )
         return defaultVal;

@@ -22,7 +22,6 @@ public class SpriteOptions
   private static final int DRAWSCALE_DEFAULT = 2;
   private static int drawScale = DRAWSCALE_DEFAULT;
   private static boolean animationsOn = true;
-  private static boolean coordinatesOn = false;
 
   public enum SelectedUnitThreatAreaMode
   {
@@ -39,10 +38,9 @@ public class SpriteOptions
   // Set up configurable options.
   private static GameOption<Integer> drawScaleOption = new GameOptionInt("Draw Scale", 1, 6, 1, DRAWSCALE_DEFAULT);
   private static GameOptionBool animationsOption = new GameOptionBool("Animations", true);
-  private static GameOptionBool coordinatesOption = new GameOptionBool("Show Coords", false);
   private static GameOption<SelectedUnitThreatAreaMode> selectedUnitThreatModeOption
           = new GameOption<SelectedUnitThreatAreaMode>("Show selected unit threat", SelectedUnitThreatAreaMode.values(), 0);
-  private static GameOption<?>[] allOptions = { drawScaleOption, animationsOption, coordinatesOption, selectedUnitThreatModeOption };
+  private static GameOption<?>[] allOptions = { drawScaleOption, animationsOption, selectedUnitThreatModeOption };
   private static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
   private static SlidingValue animHighlightedOption;
 
@@ -67,11 +65,6 @@ public class SpriteOptions
   public static boolean getAnimationsEnabled()
   {
     return animationsOn;
-  }
-
-  public static boolean getCoordinatesEnabled()
-  {
-    return coordinatesOn;
   }
 
   public static SelectedUnitThreatAreaMode getSelectedUnitThreatAreaMode()
@@ -111,6 +104,7 @@ public class SpriteOptions
         allOptions[highlightedOption.getSelectionNormalized()].handleInput(action);
         break;
       case SEEK:
+      case VIEWMODE:
         break;
     }
 
@@ -132,7 +126,6 @@ public class SpriteOptions
     // Store the options locally.
     drawScale = drawScaleOption.getSelectedObject();
     animationsOn = animationsOption.getSelectedObject();
-    coordinatesOn = coordinatesOption.getSelectedObject();
     saveSettingsToDisk();
 
     // Apply effects.
@@ -175,8 +168,6 @@ public class SpriteOptions
     dimensions.setSize(WINDOWWIDTH_DEFAULT * drawScale, WINDOWHEIGHT_DEFAULT * drawScale);
 
     animationsOn = animationsOption.getSelectedObject();
-
-    coordinatesOn = coordinatesOption.getSelectedObject();
   }
 
   //////////////////////////////////////////////////////////////////////

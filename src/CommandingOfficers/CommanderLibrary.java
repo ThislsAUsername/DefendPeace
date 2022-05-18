@@ -25,6 +25,7 @@ public class CommanderLibrary
     commanderList.add( Bear_Bull.getInfo() );
     commanderList.add( Cinder.getInfo() );
     commanderList.add( Ave.getInfo() );
+    commanderList.add( Qis.getInfo() );
     commanderList.add( Tech.getInfo() );
   }
 }

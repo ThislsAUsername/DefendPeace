@@ -201,18 +201,6 @@ public class MapMaster extends GameMap
     return map[w][h];
   }
 
-  @Override
-  public void clearAllHighlights()
-  {
-    for( int w = 0; w < mapWidth; ++w )
-    {
-      for( int h = 0; h < mapHeight; ++h )
-      {
-        map[w][h].setHighlight(false);
-      }
-    }
-  }
-
   /** Returns true if no unit is at the specified x and y coordinate, false else */
   @Override
   public boolean isLocationEmpty(XYCoord coords)

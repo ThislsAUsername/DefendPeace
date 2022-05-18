@@ -46,7 +46,7 @@ public abstract class ResupplyLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
       return "RESUPPLY";
     }

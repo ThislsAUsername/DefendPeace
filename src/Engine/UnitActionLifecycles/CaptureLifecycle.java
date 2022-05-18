@@ -39,7 +39,7 @@ public abstract class CaptureLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
       return "CAPTURE";
     }

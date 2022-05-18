@@ -5,25 +5,13 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import Engine.GameEvents.ArmyDefeatEvent;
-import Engine.GameEvents.GameEventListener;
-import Engine.GameEvents.GameEventQueue;
-import Engine.GameEvents.MapChangeEvent;
-import Engine.GameEvents.MoveEvent;
-import Engine.GameEvents.ResupplyEvent;
-import Engine.GameEvents.MapChangeEvent.EnvironmentAssignment;
-import Engine.UnitActionLifecycles.JoinLifecycle;
-import Engine.UnitActionLifecycles.LoadLifecycle;
-import Engine.UnitActionLifecycles.UnloadLifecycle;
+import Engine.GameEvents.GameEventListener.CacheInvalidationListener;
 import Engine.GameInstance;
 import Engine.XYCoord;
-import Engine.Combat.BattleSummary;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.TerrainType;
-import Terrain.Environment.Weathers;
 import Units.Unit;
-import Units.UnitModel;
 
 /**
  * Generates an overlay image to show details about the unit and terrain under the cursor.
@@ -63,19 +51,6 @@ public class MapTileDetailsArtist
       int drawX = mapViewWidth - edgeBuffer - tileOverlay.getWidth();
       int drawY = mapViewHeight - edgeBuffer - tileOverlay.getHeight();
       g.drawImage(tileOverlay, drawX, drawY, null);
-    }
-
-    // Draw the tile coordinates.
-    if(SpriteOptions.getCoordinatesEnabled())
-    {
-      String coordStr = String.format("(%d, %d)", tileToDetail.xCoord, tileToDetail.yCoord);
-      BufferedImage coordsImg = SpriteUIUtils.getTextAsImage(coordStr, true);
-      int bufferPx = 2;
-      int drawX = (overlayIsLeft ? mapViewWidth - coordsImg.getWidth() - bufferPx : bufferPx);
-      int drawY = mapViewHeight - coordsImg.getHeight() - bufferPx - bufferPx*2;
-      SpriteUIUtils.drawMenuFrame(g, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR,
-          drawX, drawY, coordsImg.getWidth(), coordsImg.getHeight()+bufferPx*2, bufferPx);
-      g.drawImage(coordsImg, drawX, drawY+bufferPx, null);
     }
   }
 
@@ -199,28 +174,14 @@ public class MapTileDetailsArtist
   }
 
   /** This class just listens for any event that could change what is under the cursor, which is pretty much all of them. */
-  private static class MtdaListener implements GameEventListener
+  private static class MtdaListener implements CacheInvalidationListener
   {
     private static final long serialVersionUID = 1L;
 
     @Override
     public boolean shouldSerialize() { return false; }
 
-    public GameEventQueue receiveBattleEvent(BattleSummary summary){MapTileDetailsArtist.resetOverlay(); return null; };
-    public GameEventQueue receiveDemolitionEvent(Unit actor, XYCoord tile){MapTileDetailsArtist.resetOverlay(); return null; };
-    public GameEventQueue receiveCreateUnitEvent(Unit unit){MapTileDetailsArtist.resetOverlay(); return null; };
-    public GameEventQueue receiveCaptureEvent(Unit unit, MapLocation location){MapTileDetailsArtist.resetOverlay(); return null; };
-    public GameEventQueue receiveCommanderDefeatEvent(ArmyDefeatEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
-    public GameEventQueue receiveLoadEvent(LoadLifecycle.LoadEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
-    public GameEventQueue receiveMoveEvent(MoveEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
-    public GameEventQueue receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){MapTileDetailsArtist.resetOverlay(); return null; };
-    public GameEventQueue receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
-    public GameEventQueue receiveResupplyEvent(ResupplyEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
-    public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath){MapTileDetailsArtist.resetOverlay(); return null; };
-    public GameEventQueue receiveUnloadEvent(UnloadLifecycle.UnloadEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
-    public GameEventQueue receiveUnitTransformEvent(Unit unit, UnitModel oldType){MapTileDetailsArtist.resetOverlay(); return null; };
-    public GameEventQueue receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){MapTileDetailsArtist.resetOverlay(); return null; };
-    public GameEventQueue receiveWeatherChangeEvent(Weathers weather, int duration){MapTileDetailsArtist.resetOverlay(); return null; };
-    public GameEventQueue receiveMapChangeEvent(MapChangeEvent event){MapTileDetailsArtist.resetOverlay(); return null; };
+    @Override
+    public void InvalidateCache() { MapTileDetailsArtist.resetOverlay(); }
   }
 }

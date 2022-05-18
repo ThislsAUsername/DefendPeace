@@ -363,7 +363,10 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     ArrayList<UnitModifier> output = new ArrayList<UnitModifier>();
     output.add(this);
     output.addAll(unitMods);
-    output.addAll(this.army.getModifiers());
+    if( null != army )
+      output.addAll(army.getModifiers());
+    else
+      System.out.println("WARNING!: Polling UnitModifiers from a Commander when CO.army == null!");
     return output;
   }
 
