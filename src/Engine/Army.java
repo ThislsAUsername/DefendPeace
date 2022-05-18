@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-import AI.AICombatUtils;
 import AI.AIController;
 import AI.AILibrary;
 import AI.AIMaker;
@@ -28,10 +27,11 @@ import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.MapPerspective;
 import UI.GameOverlay;
+import UI.UnitMarker;
 import Units.Unit;
 import Units.UnitDelta;
 
-public class Army implements GameEventListener, Serializable, UnitModList
+public class Army implements GameEventListener, Serializable, UnitModList, UnitMarker
 {
   private static final long serialVersionUID = 1L;
 
@@ -208,21 +208,6 @@ public class Army implements GameEventListener, Serializable, UnitModList
     for( Commander co : cos )
       overlays.addAll(co.getMyOverlays(gameMap, amIViewing));
 
-    if( !amIViewing )
-      return overlays;
-    for( Unit u : threatsToOverlay )
-    {
-      XYCoord uCoord = new XYCoord(u.x, u.y);
-      if( !gameMap.isLocationValid(uCoord) )
-        continue;
-
-      int r = u.CO.myColor.getRed(), g = u.CO.myColor.getGreen(), b = u.CO.myColor.getBlue();
-      Color edgeColor = new Color(r, g, b, 200);
-      Color fillColor = new Color(r, g, b, 100);
-      overlays.add(new GameOverlay(uCoord,
-                   AICombatUtils.findThreatPower(gameMap, u, null).keySet(),
-                   fillColor, edgeColor));
-    }
     return overlays;
   }
   /**
@@ -233,6 +218,22 @@ public class Army implements GameEventListener, Serializable, UnitModList
   {
     threatsToOverlay.remove(victim);
     return null;
+  }
+  // Draw markings on units we're threat-overlaying
+  @Override
+  public char getUnitMarking(Unit unit, Army activeArmy)
+  {
+    if( this != activeArmy || !threatsToOverlay.contains(unit) )
+      return '\0';
+
+    return 'T';
+  }
+  @Override
+  public Color getMarkingColor(Unit unit)
+  {
+    if( this == unit.CO.army )
+      return Color.GREEN;
+    return Color.RED;
   }
 
   /**

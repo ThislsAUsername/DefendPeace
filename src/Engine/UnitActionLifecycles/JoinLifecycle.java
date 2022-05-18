@@ -41,7 +41,7 @@ public abstract class JoinLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
       return "JOIN";
     }

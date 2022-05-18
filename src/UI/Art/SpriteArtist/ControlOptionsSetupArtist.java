@@ -33,7 +33,7 @@ public class ControlOptionsSetupArtist
     myControl = control;
 
     // Set up some initial parameters.
-    int spacing = kbps.get(0).getKeysImage().getHeight()*2;
+    int spacing = (int) (kbps.get(0).getKeysImage().getHeight()*1.5);
     int xDraw = spacing;
     int yDraw = spacing/2;
 

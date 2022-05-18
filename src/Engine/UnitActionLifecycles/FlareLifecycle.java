@@ -60,7 +60,7 @@ public abstract class FlareLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
       return "FLARE";
     }

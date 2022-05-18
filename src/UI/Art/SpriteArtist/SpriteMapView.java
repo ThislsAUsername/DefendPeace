@@ -12,6 +12,7 @@ import AI.AICombatUtils;
 import Engine.Army;
 import Engine.GameInstance;
 import Engine.GamePath;
+import Engine.OverlayCache;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
@@ -55,6 +56,7 @@ public class SpriteMapView extends MapView
 
   // Overlay management variables.
   private boolean overlayIsLeft = true;
+  final int COMPREHENSIVE_HUD_H_SIZE;
 
   // Variables for controlling map animations.
   protected Queue<GameEvent> eventsToAnimate = new GameEventQueue();
@@ -91,6 +93,8 @@ public class SpriteMapView extends MapView
     menuArtist = new MenuArtist(game, this);
 
     myGame = game;
+    final int extraTextBuffer = 42;
+    COMPREHENSIVE_HUD_H_SIZE = SpriteLibrary.getCoOverlay(myGame.armies[0].cos[0], true).getWidth() + extraTextBuffer;
 
     // Start the view at the top-left by default.
     mapViewDrawX = new SlidingValue(0);
@@ -251,12 +255,16 @@ public class SpriteMapView extends MapView
     // Draw units, buildings, trees, etc.
     drawUnitsAndMapObjects(mapGraphics, gameMap, animIndex);
 
-    ArrayList<GameOverlay> overlays = new ArrayList<GameOverlay>();
     // Apply any relevant map highlights.
-    for( Army army : myGame.armies )
+    ArrayList<GameOverlay> overlays = OverlayCache.instance(myGame).getNormalOverlays(mapController.getOverlayMode(), gameMap);
+
+    // Highlight current available selection targets
+    Collection<XYCoord> options = mapController.getSelectableCoords();
+    if( null != options && !options.isEmpty() )
     {
-      overlays.addAll(army.getMyOverlays(gameMap, army == gameMap.viewer));
+      overlays.add(new GameOverlay(null, options, OverlayArtist.HIGHLIGHT_COLOR, OverlayArtist.HIGHLIGHT_COLOR));
     }
+
     // Highlight our currently-selected unit's range on top of everything else
     if( null != currentPath && null != currentActor && !mapController.isTargeting() )
     {
@@ -290,8 +298,8 @@ public class SpriteMapView extends MapView
                                  drawMultiplier,
                                  null != currentPath, cursorCoord);
 
-    // Draw Unit icons on top of everything, to make sure they are seen clearly.
-    drawUnitIcons(mapGraphics, gameMap, animIndex);
+    // Draw icons on top of everything, to make sure they are seen clearly.
+    drawStatusIcons(mapGraphics, gameMap, animIndex);
 
     // Draw the movement arrow if the user is contemplating a move/action (but not once the action commences).
     if( null != currentPath )
@@ -324,10 +332,21 @@ public class SpriteMapView extends MapView
     for( DamagePopup popup : mapController.getDamagePopups() )
       drawDamagePreview(mapGraphics, popup, gameMap.isLocationEmpty(popup.coords));
 
-    // When we draw the map, we want to center it if it's smaller than the view dimensions
+    // Decide where to draw the map in the window
     int deltaX = 0, deltaY = 0;
     if (mapViewWidth > mapImage.getWidth())
-      deltaX = (mapViewWidth - mapImage.getWidth())/2;
+    {
+      int rightJustified = (mapViewWidth - mapImage.getWidth());
+      int centered = rightJustified/2;
+      int oppositeHudSize = getOppositeHudSize();
+
+      // be centered until we have space for our opposite-side HUD elements
+      deltaX = Math.max(rightJustified - oppositeHudSize, centered);
+      // Until we hit COMPREHENSIVE_HUD_H_SIZE, stick to the right
+      deltaX = Math.min(deltaX, COMPREHENSIVE_HUD_H_SIZE);
+      // After that, try to be centered
+      deltaX = Math.max(deltaX, centered);
+    }
     if (mapViewHeight > mapImage.getHeight())
       deltaY = (mapViewHeight - mapImage.getHeight())/2;
 
@@ -517,7 +536,7 @@ public class SpriteMapView extends MapView
    * NOTE: Does not draw the unit icon for the currently-active unit, if
    * one is selected; this must be done separately.
    */
-  public void drawUnitIcons(Graphics g, GameMap gameMap, int animIndex)
+  public void drawStatusIcons(Graphics g, GameMap gameMap, int animIndex)
   {
     ArrayList<Unit> actors = null;
     if( null != currentAnimation )
@@ -533,8 +552,11 @@ public class SpriteMapView extends MapView
           if( null == actors || !actors.contains(resident) )
           {
             unitArtist.drawUnitIcons(g, resident, resident.x, resident.y, animIndex);
+            MarkArtist.drawMark(g, myGame, resident, animIndex);
           }
         }
+        else
+          MarkArtist.drawMark(g, myGame, new XYCoord(x, y), animIndex);
       }
     }
   }
@@ -586,80 +608,103 @@ public class SpriteMapView extends MapView
   private void drawHUD(Graphics g, boolean includeTileDetails)
   {
     // Choose the CO overlay location based on the cursor location on the screen.
-    if( !overlayIsLeft && (myGame.getCursorX() - mapViewDrawX.get()) > (mapTilesToDrawX - 1) * 3 / 5 )
+    final double viewRelativeCursorX = myGame.getCursorX() - mapViewDrawX.get();
+    if( !overlayIsLeft && viewRelativeCursorX > (mapTilesToDrawX - 1) * 3 / 5 )
     {
       overlayIsLeft = true;
     }
-    if( overlayIsLeft && (myGame.getCursorX() - mapViewDrawX.get()) < mapTilesToDrawX * 2 / 5 )
+    if( overlayIsLeft && viewRelativeCursorX < mapTilesToDrawX * 2 / 5 )
     {
       overlayIsLeft = false;
     }
 
     // If the CO overlay won't overlap the map, draw all CO overlays to use the space
-    int overlayHSpaceAvailable = (mapViewWidth - mapImage.getWidth()) / 2;
-    if( overlayHSpaceAvailable > SpriteLibrary.getCoOverlay(myGame.activeArmy.cos[0], true).getWidth() + 42 )
+    final int oppositeHudSize = getOppositeHudSize();
+    final int overlayHSpaceAvailable = mapViewWidth - mapImage.getWidth() - oppositeHudSize;
+    final boolean drawAllHeaders = overlayHSpaceAvailable > COMPREHENSIVE_HUD_H_SIZE;
+
+    boolean drawOppositeHud = mapViewWidth - mapImage.getWidth() > 2 * oppositeHudSize;
+    // If we're in a menu and the cursor isn't too close to the edge, draw the opposite HUD even if it'll overlap the map
+    if( !drawOppositeHud && null != mapController.getCurrentGameMenu() )
     {
-      // We have plenty of space to draw everything, so default to drawing left
+      final int showInMenuThreshold = 4;
+      if( !overlayIsLeft && viewRelativeCursorX > showInMenuThreshold )
+      {
+        drawOppositeHud = true;
+      }
+      if( overlayIsLeft && mapTilesToDrawX - viewRelativeCursorX > showInMenuThreshold )
+      {
+        drawOppositeHud = true;
+      }
+    }
+
+    if( drawAllHeaders )
       overlayIsLeft = true;
 
+    if( drawOppositeHud )
+    {
+      drawTurnCounter(g, overlayIsLeft);
+      drawOppositeDetails(g, overlayIsLeft);
+    }
+    int headerOffset = 0;
+
+    if( drawAllHeaders )
+    {
       BufferedImage coOverlays = CommanderOverlayArtist.drawAllCommanderOverlays(
           myGame.armies,
           getDrawableMap(myGame),
-          overlayHSpaceAvailable, mapViewHeight, myGame.activeArmy);
+          COMPREHENSIVE_HUD_H_SIZE, mapViewHeight, myGame.activeArmy);
       if( overlayIsLeft )
-        g.drawImage(coOverlays, 0, 0, null);
+        g.drawImage(coOverlays, 0, headerOffset, null);
       else
-        g.drawImage(coOverlays, mapViewWidth - coOverlays.getWidth(), 0, null);
+        g.drawImage(coOverlays, mapViewWidth - coOverlays.getWidth(), headerOffset, null);
     }
     else
-      CommanderOverlayArtist.drawCommanderOverlay(g, myGame.activeArmy, overlayIsLeft);
-
-    drawTurnCounter(g, overlayIsLeft);
+      CommanderOverlayArtist.drawCommanderOverlay(g, myGame.activeArmy, headerOffset, overlayIsLeft);
 
     // Draw terrain defense and unit status.
     if( includeTileDetails )
       MapTileDetailsArtist.drawTileDetails(g, myGame.activeArmy.myView, myGame.getCursorCoord(), overlayIsLeft);
   }
 
+  public void drawOppositeDetails(Graphics g, boolean overlayIsLeft)
+  {
+    String viewModeStr = "E:" + mapController.getOverlayMode().getName();
+    BufferedImage viewModeImg = SpriteUIUtils.getTextAsImage(viewModeStr, true);
+    int bufferPx = 2;
+    int drawX = (overlayIsLeft) ? mapViewWidth - viewModeImg.getWidth() - bufferPx : bufferPx;
+    int drawY = mapViewHeight - viewModeImg.getHeight() - bufferPx - bufferPx * 2;
+    SpriteUIUtils.drawMenuFrame(g, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR, drawX, drawY, viewModeImg.getWidth(),
+        viewModeImg.getHeight() + bufferPx * 2, bufferPx);
+    g.drawImage(viewModeImg, drawX, drawY + bufferPx, null);
+
+    XYCoord tileToDetail = myGame.getCursorCoord();
+    // Draw the tile coordinates.
+    String coordStr = String.format("(%d,%d)", tileToDetail.xCoord, tileToDetail.yCoord);
+    BufferedImage coordsImg = SpriteUIUtils.getTextAsImage(coordStr, true);
+    int coordsDrawX = (overlayIsLeft) ? mapViewWidth - coordsImg.getWidth() - bufferPx : bufferPx;
+    int coordsDrawY = mapViewHeight - coordsImg.getHeight() - viewModeImg.getHeight() - bufferPx * 5;
+    SpriteUIUtils.drawMenuFrame(g, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR, coordsDrawX, coordsDrawY,
+        coordsImg.getWidth(), coordsImg.getHeight() + bufferPx * 2, bufferPx);
+    g.drawImage(coordsImg, coordsDrawX, coordsDrawY + bufferPx, null);
+  }
+
   private int lastTurnNum = -1;
   private BufferedImage turnNumImage;
-  private void drawTurnCounter(Graphics g, boolean counterIsRight)
+  private void drawTurnCounter(Graphics g, boolean overlayIsLeft)
   {
     // Generate the turn-counter image.
     int turnNum = myGame.getCurrentTurn();
-    if( lastTurnNum != turnNum )
-    {
-      lastTurnNum = turnNum;
-      final PixelFont pf = SpriteLibrary.getFontStandard();
-      final int wordHeight = pf.getAscent()+pf.getDescent();
-
-      // Our final image will contain word+digit
-      final BufferedImage word = SpriteUIUtils.getTextAsImage("Turn ");
-      final BufferedImage digit = SpriteUIUtils.getBoldTextAsImage(Integer.toString(turnNum));
-
-      final int width = word.getWidth() + digit.getWidth();
-      final int height = Math.max(wordHeight, digit.getHeight());
-
-      turnNumImage = SpriteLibrary.createTransparentSprite(width, height);
-      Graphics dcg = turnNumImage.getGraphics();
-
-      // Note that the word currently has no descender characters
-      int wordVOffset = height-wordHeight+pf.getDescent();
-      dcg.drawImage(word, 0, wordVOffset, null);
-
-      // Bottom-justify the digit, to match with the word
-      final int digitVOffset = height - digit.getHeight();
-      dcg.drawImage(digit, turnNumImage.getWidth()-digit.getWidth(), digitVOffset, null);
-    }
+    refreshTurnNumImage(turnNum);
 
     // Draw the turn counter.
-    int xDraw = (counterIsRight
-        ? (SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale()) - 2 - turnNumImage.getWidth()
-        : 2);
+    int xDraw = !overlayIsLeft ?
+        2
+        : (SpriteOptions.getScreenDimensions().width / SpriteOptions.getDrawScale()) - 2 - turnNumImage.getWidth();
     int yDraw = 3;
 
     // Draw a CO-colored background with the counter.
-    int arcW = turnNumImage.getHeight()+4;
+    int arcW = getTurnPaneArcWidth();
     g.setColor(UIUtils.getMapUnitColors(myGame.activeArmy.cos[0].myColor).paletteColors[5]); // 0 is darker, 5 is lighter.
     g.fillArc(xDraw - (arcW/2), yDraw-2, arcW, arcW-1, 90, 180);
     g.fillArc(xDraw + turnNumImage.getWidth()-(arcW/2), yDraw-2, arcW, arcW-1, -90, 180);
@@ -670,6 +715,47 @@ public class SpriteMapView extends MapView
     g.drawLine(xDraw, yDraw-2, xDraw + turnNumImage.getWidth(), yDraw-2);
     g.drawLine(xDraw, yDraw+turnNumImage.getHeight()+1, xDraw + turnNumImage.getWidth(), yDraw+turnNumImage.getHeight()+1);
     g.drawImage(turnNumImage, xDraw, yDraw, null);
+  }
+
+  public BufferedImage refreshTurnNumImage(int turnNum)
+  {
+    if( lastTurnNum == turnNum )
+      return turnNumImage;
+
+    final PixelFont pf = SpriteLibrary.getFontStandard();
+    final int wordHeight = pf.getAscent()+pf.getDescent();
+
+    // Our final image will contain word+digit
+    final BufferedImage word = SpriteUIUtils.getTextAsImage("Turn ");
+    final BufferedImage digit = SpriteUIUtils.getBoldTextAsImage(Integer.toString(turnNum));
+
+    final int width = word.getWidth() + digit.getWidth();
+    final int height = Math.max(wordHeight, digit.getHeight());
+
+    BufferedImage outputImage = SpriteLibrary.createTransparentSprite(width, height);
+    Graphics dcg = outputImage.getGraphics();
+
+    // Note that the word currently has no descender characters
+    int wordVOffset = height-wordHeight+pf.getDescent();
+    dcg.drawImage(word, 0, wordVOffset, null);
+
+    // Bottom-justify the digit, to match with the word
+    final int digitVOffset = height - digit.getHeight();
+    dcg.drawImage(digit, outputImage.getWidth()-digit.getWidth(), digitVOffset, null);
+
+    lastTurnNum = turnNum;
+    turnNumImage = outputImage;
+    return outputImage;
+  }
+  public int getTurnPaneArcWidth()
+  {
+    return turnNumImage.getHeight()+4;
+  }
+  public int getOppositeHudSize()
+  {
+    int oppositeHudHSize = refreshTurnNumImage(myGame.getCurrentTurn()).getWidth();
+    oppositeHudHSize += getTurnPaneArcWidth()/2;
+    return oppositeHudHSize;
   }
 
   /**

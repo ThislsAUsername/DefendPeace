@@ -52,6 +52,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     myView = view;
     myView.setController(this);
     inputMode = InputMode.INPUT;
+    armyOverlayModes = new int[game.armies.length];
     isGameOver = false;
     nextSeekIndex = 0;
 
@@ -204,6 +205,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
 
         break;
+      case VIEWMODE:
+        final int activeIndex = myGame.getActiveCOIndex();
+        armyOverlayModes[activeIndex] = (armyOverlayModes[activeIndex] + 1) % OverlayMode.values().length;
+        break;
       case SELECT:
         // Pass the current cursor location to the GameInputHandler.
         myGameInputHandler.select(myGame.getCursorCoord());
@@ -214,13 +219,14 @@ public class MapController implements IController, GameInputHandler.StateChanged
           // If we hit BACK while over a unit, add it to the threat overlay for this CO
           MapLocation loc = myGame.gameMap.getLocation(myGame.getCursorCoord());
           Unit resident = loc.getResident();
-          if( null != resident )
+          if( getOverlayMode() == OverlayMode.THREATS_MANUAL && null != resident )
           {
             ArrayList<Unit> threats = myGame.activeArmy.threatsToOverlay;
             if( threats.contains(resident) )
               threats.remove(resident);
             else
               threats.add(resident);
+            OverlayCache.instance(myGame).InvalidateCache();
           }
         }
         myGameInputHandler.back();
@@ -279,14 +285,15 @@ public class MapController implements IController, GameInputHandler.StateChanged
    */
   private void handlePathSelect(InputHandler.InputAction input)
   {
-    boolean inMoveableSpace = myGame.getCursorLocation().isHighlightSet();
+    Collection<XYCoord> options = myGameInputHandler.getCoordinateOptions();
+    boolean inMoveableSpace = options.contains(myGame.getCursorCoord());
 
     switch (input)
     {
       case UP:
         myGame.moveCursorUp();
         // Make sure we don't overshoot the reachable tiles by accident.
-        if( inMoveableSpace && InputHandler.isUpHeld() && !myGame.getCursorLocation().isHighlightSet() )
+        if( inMoveableSpace && InputHandler.isUpHeld() && !options.contains(myGame.getCursorCoord()) )
         {
           myGame.moveCursorDown();
         }
@@ -294,7 +301,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case DOWN:
         myGame.moveCursorDown();
         // Make sure we don't overshoot the reachable space by accident.
-        if( inMoveableSpace && InputHandler.isDownHeld() && !myGame.getCursorLocation().isHighlightSet() )
+        if( inMoveableSpace && InputHandler.isDownHeld() && !options.contains(myGame.getCursorCoord()) )
         {
           myGame.moveCursorUp();
         }
@@ -302,7 +309,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case LEFT:
         myGame.moveCursorLeft();
         // Make sure we don't overshoot the reachable space by accident.
-        if( inMoveableSpace && InputHandler.isLeftHeld() && !myGame.getCursorLocation().isHighlightSet() )
+        if( inMoveableSpace && InputHandler.isLeftHeld() && !options.contains(myGame.getCursorCoord()) )
         {
           myGame.moveCursorRight();
         }
@@ -310,7 +317,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case RIGHT:
         myGame.moveCursorRight();
         // Make sure we don't overshoot the reachable space by accident.
-        if( inMoveableSpace && InputHandler.isRightHeld() && !myGame.getCursorLocation().isHighlightSet() )
+        if( inMoveableSpace && InputHandler.isRightHeld() && !options.contains(myGame.getCursorCoord()) )
         {
           myGame.moveCursorLeft();
         }
@@ -371,15 +378,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     GameInputHandler.InputType inputType = myGameInputHandler.getInputType();
     myGameInputOptionSelector = myGameInputHandler.getOptionSelector();
 
-    myGame.gameMap.clearAllHighlights();
-    // Set the target-location highlights.
     Collection<XYCoord> options = myGameInputHandler.getCoordinateOptions();
-    if ( null != options)
-      for( XYCoord xyc : options )
-      {
-        myGame.gameMap.getLocation(xyc).setHighlight(true);
-      }
-
     currentMenu = null;
 
     switch (inputType)
@@ -548,18 +547,19 @@ public class MapController implements IController, GameInputHandler.StateChanged
     // If we are done animating the last action, check to see if the game is over.
     if( animEventQueueIsEmpty )
     {
-      // Count the number of COs that are left.
-      int activeNum = 0;
-      for( int i = 0; i < myGame.armies.length; ++i )
+      int activeTeamCount = 0;
+      ArrayList<Integer> teams = new ArrayList<>();
+      for( Army army : myGame.armies )
       {
-        if( !myGame.armies[i].isDefeated )
-        {
-          activeNum++;
-        }
+        if( army.isDefeated )
+          continue;
+        if( teams.contains(army.team) )
+          continue;
+        activeTeamCount++;
+        teams.add(army.team);
       }
 
-      // If fewer than two COs yet survive, the game is over.
-      if( activeNum < 2 )
+      if( activeTeamCount < 2 )
       {
         isGameOver = true;
       }
@@ -641,6 +641,26 @@ public class MapController implements IController, GameInputHandler.StateChanged
   public XYCoord getContemplationCoord()
   {
     return myGameInputHandler.getUnitCoord();
+  }
+  public Collection<XYCoord> getSelectableCoords()
+  {
+    return myGameInputHandler.getCoordinateOptions();
+  }
+
+  public enum OverlayMode
+  {
+    THREATS_MANUAL("MANUAL"), THREATS_ALL("THREAT"), VISION, NONE;
+    private String name;
+    OverlayMode() {this.name = toString();}
+    OverlayMode(String name) {this.name = name;}
+    public String getName() {
+        return name;
+    }
+  }
+  private int[] armyOverlayModes;
+  public OverlayMode getOverlayMode()
+  {
+    return OverlayMode.values()[armyOverlayModes[myGame.getActiveCOIndex()]];
   }
 
   public GamePath getContemplatedMove()

@@ -24,7 +24,7 @@ public abstract class UnitActionFactory implements Serializable
     return getPossibleActions(map, movePath, actor, false);
   }
   public abstract GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident);
-  public abstract String name();
+  public abstract String name(Unit actor);
   public boolean shouldConfirm = false;
 
   public static final UnitActionFactory ATTACK = new BattleLifecycle.BattleFactory();

@@ -41,10 +41,12 @@ public abstract class UnitProduceLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
-      // TODO: Fix this!
-      return String.format("BUILD %s (%d)", typeToBuild.toString(), typeToBuild.costBase);
+      String cost = "???";
+      if( actor != null )
+        cost = "" + actor.CO.getCost(typeToBuild);
+      return String.format("BUILD %s (%s)", typeToBuild.toString(), cost);
     }
   } //~factory
 
