@@ -139,7 +139,7 @@ public class Qis extends Commander
     for( PathNode node : path.getWaypoints() )
     {
       XYCoord coord = node.GetCoordinates();
-      Environment env = Environment.getTile(myView.getEnvironment(coord).terrainType, Weathers.SNOW);
+      Environment env = Environment.getTile(army.myView.getEnvironment(coord).terrainType, Weathers.SNOW);
       snowTiles.add(new MapChangeEvent.EnvironmentAssignment(coord, env, duration));
       if( snowTrailShouldScale )
         ++duration;

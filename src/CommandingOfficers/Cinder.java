@@ -108,7 +108,7 @@ public class Cinder extends Commander
     if( activeArmy != this.army )
       return super.getPlaceMarking(xyc, activeArmy);
     int count = buildCounts.getCountFor(this, xyc);
-    if( !myView.isLocationValid(xyc) || count < 1 )
+    if( !army.myView.isLocationValid(xyc) || count < 1 )
       return super.getPlaceMarking(xyc, activeArmy);
 
     return ("" + count).charAt(0);
