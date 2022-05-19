@@ -1,10 +1,10 @@
 package AI;
 
-import CommandingOfficers.Commander;
+import Engine.Army;
 
 public interface AIMaker
 {
-  public AIController create(Commander co);
+  public AIController create(Army army);
   public String getName();
   public String getDescription();
 }

@@ -30,7 +30,6 @@ public abstract class JoinLifecycle
       Unit resident = map.getLocation(moveLocation).getResident();
       if( resident != null )
       {
-        // TODO: Consider if and how off-CO joins should be allowed if tags ever happens
         int recipientCapacity = new UnitContext(resident).calculateCargoCapacity();
         int cargoSize = resident.heldUnits.size() + actor.heldUnits.size();
         if( resident.model.equals(actor.model) && resident != actor && resident.isHurt() && cargoSize <= recipientCapacity )
@@ -42,7 +41,7 @@ public abstract class JoinLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
       return "JOIN";
     }
@@ -197,7 +196,7 @@ public abstract class JoinLifecycle
 
         // If we had extra HP, add that as income.
         double costPerHP = unitDonor.getCost() / UnitModel.MAXIMUM_HP;
-        unitDonor.CO.money += (extraHP * costPerHP);
+        unitDonor.CO.army.money += (extraHP * costPerHP);
 
         // Reconcile cargo units.
         unitRecipient.heldUnits.addAll(unitDonor.heldUnits);

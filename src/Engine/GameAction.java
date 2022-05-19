@@ -7,7 +7,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.CommanderAbilityEvent;
-import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MassDamageEvent;
@@ -82,12 +82,12 @@ public abstract class GameAction
         isValid &= (null == site.getResident());
         isValid &= site.getOwner() == who;
         isValid &= who.getShoppingList(site).contains(what);
-        isValid &= (who.money >= who.getBuyCost(what, where));
+        isValid &= (who.army.money >= who.getBuyCost(what, where));
       }
 
       if( isValid )
       {
-        buildEvents.add(new ModifyFundsEvent(who, -who.getBuyCost(what, where)));
+        buildEvents.add(new ModifyFundsEvent(who.army, -who.getBuyCost(what, where)));
         buildEvents.add(new CreateUnitEvent(who, what, where));
       }
       else
@@ -187,9 +187,9 @@ public abstract class GameAction
           buildEvents.add(ude);
 
           // Poor sap died; Check if his CO lost the game. Stomping your own unit is silly, but won't cause a loss.
-          if( obstacle.CO.units.size() == 1 && who != obstacle.CO )
+          if( obstacle.CO.army.getUnits().size() == 1 && who != obstacle.CO )
           {
-            CommanderDefeatEvent cde = new CommanderDefeatEvent(obstacle.CO);
+            ArmyDefeatEvent cde = new ArmyDefeatEvent(obstacle.CO.army);
             buildEvents.add(cde);
           }
         }
@@ -385,9 +385,9 @@ public abstract class GameAction
         subEvents.add(ude);
 
         // Poor sap died; Check if his CO lost the game.
-        if( obstacle.CO.units.size() == 1 )
+        if( obstacle.CO.army.getUnits().size() == 1 )
         {
-          CommanderDefeatEvent cde = new CommanderDefeatEvent(obstacle.CO);
+          ArmyDefeatEvent cde = new ArmyDefeatEvent(obstacle.CO.army);
           subEvents.add(cde);
         }
       }
@@ -407,7 +407,7 @@ public abstract class GameAction
         if( unit.CO.units.size() == 1 )
         {
           // CO is out of units. Too bad.
-          CommanderDefeatEvent cde = new CommanderDefeatEvent(unit.CO);
+          ArmyDefeatEvent cde = new ArmyDefeatEvent(unit.CO.army);
           subEvents.add(cde);
         }
       }

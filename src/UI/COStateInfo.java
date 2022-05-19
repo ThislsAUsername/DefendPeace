@@ -1,6 +1,9 @@
 package UI;
 
+import java.util.HashMap;
+
 import CommandingOfficers.Commander;
+import Engine.Army;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Units.Unit;
@@ -14,13 +17,15 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
   int vehCount = 0;
   int unitFunds = 0;
 
-  Boolean showAbilityInfo = false;
-  int abilityPower = 0;
-  int untilNextPower = 0;
+  HashMap<Commander, Integer> currentEnergy = new HashMap<>();
+  HashMap<Commander, Integer> untilNextEnergy = new HashMap<>();
 
-  public COStateInfo(GameMap map, Commander viewed)
+  public COStateInfo(GameMap map, Army thisArmy)
   {
-    identifier = viewed.coInfo.name;
+    identifier = thisArmy.cos[0].coInfo.name;
+    // Start at 1 so we don't double-add the first one
+    for( int i = 1; i < thisArmy.cos.length; ++i )
+      identifier += ", " + thisArmy.cos[i].coInfo.name;
 
     // map-based info
     for( int w = 0; w < map.mapWidth; ++w )
@@ -28,12 +33,13 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
       for( int h = 0; h < map.mapHeight; ++h )
       {
         MapLocation loc = map.getLocation(w, h);
-        if( loc.isProfitable() && loc.getOwner() == viewed )
+        final Commander owner = loc.getOwner();
+        if( loc.isProfitable() && owner != null && owner.army == thisArmy )
         {
-          income += viewed.gameRules.incomePerCity + viewed.incomeAdjustment;
+          income += owner.gameRules.incomePerCity + owner.incomeAdjustment;
         }
         Unit resident = loc.getResident();
-        if( null != resident && resident.CO == viewed )
+        if( null != resident && resident.CO.army == thisArmy )
         {
           unitCount++;
           if( resident.model.isTroop() )
@@ -44,12 +50,14 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
     }
 
     // ability stats
-    double[] abilityCosts = viewed.getAbilityCosts();
+    for( Commander co : thisArmy.cos )
+    {
+    double[] abilityCosts = co.getAbilityCosts();
     if( abilityCosts.length > 0 )
     {
-      showAbilityInfo = true;
-      abilityPower = energyToFunds(viewed.getAbilityPower());
-      untilNextPower = getEnergyUntilNextPower(viewed);
+      currentEnergy.put(co, energyToFunds(co.getAbilityPower()));
+      untilNextEnergy.put(co, getEnergyUntilNextPower(co));
+    }
     }
   }
 
@@ -97,10 +105,10 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
     sb.append(unitCount).append("\n");
     sb.append(vehCount) .append("\n");
     sb.append(unitFunds).append("\n");
-    if( showAbilityInfo )
+    for( Commander co : currentEnergy.keySet() )
     {
-      sb.append(abilityPower)  .append("\n");
-      sb.append(untilNextPower).append("\n");
+      sb.append(currentEnergy.get(co))  .append("\n");
+      sb.append(untilNextEnergy.get(co)).append("\n");
     }
 
     return sb.toString();
@@ -114,10 +122,10 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
     sb.append("Unit count:")   .append("\n");
     sb.append("Vehicle count:").append("\n");
     sb.append("Unit funds:")   .append("\n");
-    if( showAbilityInfo )
+    for( Commander co : currentEnergy.keySet() )
     {
-      sb.append("Ability Power:").append("\n");
-      sb.append("Next Ability:") .append("\n");
+      sb.append(co.coInfo.name + " Ability:").append("\n");
+      sb.append(" - Next Ability:") .append("\n");
     }
 
     return sb.toString();

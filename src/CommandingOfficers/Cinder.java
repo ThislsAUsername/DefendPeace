@@ -1,8 +1,7 @@
 package CommandingOfficers;
 
 import java.awt.Color;
-import java.util.ArrayList;
-
+import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
@@ -12,9 +11,7 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.StateTrackers.BuildCountsTracker;
 import Engine.StateTrackers.CountManager;
 import Engine.StateTrackers.StateTracker;
-import Terrain.GameMap;
 import Terrain.MapMaster;
-import UI.GameOverlay;
 import Units.Unit;
 import Units.UnitContext;
 
@@ -87,7 +84,7 @@ public class Cinder extends Commander
   public GameEventQueue receiveCreateUnitEvent(Unit unit)
   {
     XYCoord buildCoords = new XYCoord(unit.x, unit.y);
-    if( this == unit.CO && myView.isLocationValid(buildCoords) )
+    if( this == unit.CO && army.myView.isLocationValid(buildCoords) )
     {
       unit.alterHP(-2);
       unit.isTurnOver = false;
@@ -106,35 +103,25 @@ public class Cinder extends Commander
   }
 
   @Override
-  public ArrayList<GameOverlay> getMyOverlays(GameMap gameMap, boolean amIViewing)
+  public char getPlaceMarking(XYCoord xyc, Army activeArmy)
   {
-    ArrayList<GameOverlay> overlays = super.getMyOverlays(gameMap, amIViewing);
-    if( !amIViewing )
-      return overlays;
+    if( activeArmy != this.army )
+      return super.getPlaceMarking(xyc, activeArmy);
+    int count = buildCounts.getCountFor(this, xyc);
+    if( !army.myView.isLocationValid(xyc) || count < 1 )
+      return super.getPlaceMarking(xyc, activeArmy);
 
-    // Highlight tiles we've built from already this turn
-    for( XYCoord xyc : buildCounts.getCountFor(this).keySet() )
-    {
-      int count = buildCounts.getCountFor(this, xyc);
-      if( !gameMap.isLocationValid(xyc) || count < 1 )
-        continue;
-
-      // Invert my color so the highlight is easily visible
-      int r = 255 - myColor.getRed();
-      int g = 255 - myColor.getGreen();
-      int b = 255 - myColor.getBlue();
-      // Thicken the center of the overlay as I spam
-      int a = Math.min(255, 100 * count);
-      Color edgeColor = new Color(r, g, b, 200);
-      Color fillColor = new Color(r, g, b, a);
-      ArrayList<XYCoord> coords = new ArrayList<XYCoord>();
-      coords.add(xyc);
-      overlays.add(new GameOverlay(xyc,
-                   coords,
-                   fillColor, edgeColor));
-    }
-
-    return overlays;
+    return ("" + count).charAt(0);
+  }
+  @Override
+  public Color getMarkingColor(XYCoord xyc)
+  {
+    // Invert my color so the number is easily visible
+    int r = 255 - myColor.getRed();
+    int g = 255 - myColor.getGreen();
+    int b = 255 - myColor.getBlue();
+    Color buildCountColor = new Color(r, g, b);
+    return buildCountColor;
   }
 
   /*
@@ -156,7 +143,7 @@ public class Cinder extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      for( Unit unit : myCommander.units )
+      for( Unit unit : myCommander.army.getUnits() )
       {
         if( !unit.isTurnOver )
         {
@@ -191,13 +178,13 @@ public class Cinder extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      tracker.startTracking(myCommander);
+      tracker.startTracking(myCommander.army);
     }
 
     @Override
     protected void revert(MapMaster gameMap)
     {
-      tracker.stopTracking(myCommander);
+      tracker.stopTracking(myCommander.army);
     }
   }
 
@@ -205,34 +192,34 @@ public class Cinder extends Commander
   {
     private static final long serialVersionUID = 1L;
 
-    private CountManager<Commander, Unit> attackCounts = new CountManager<>();
+    private CountManager<Army, Unit> attackCounts = new CountManager<>();
 
-    public void startTracking(Commander co)
+    public void startTracking(Army army)
     {
-      attackCounts.getCountFor(co);
+      attackCounts.getCountFor(army);
     }
-    public void stopTracking(Commander co)
+    public void stopTracking(Army army)
     {
-      attackCounts.resetCountFor(co);
+      attackCounts.resetCountFor(army);
     }
 
     @Override
     public GameEventQueue receiveBattleEvent(BattleSummary battleInfo)
     {
-      Commander co = battleInfo.attacker.CO;
-      if( !attackCounts.hasCountFor(co) )
+      Army army = battleInfo.attacker.CO.army;
+      if( !attackCounts.hasCountFor(army) )
         return null;
       // Since an active CO was part of the fight, reactivate the attacker at the cost of HP.
       GameEventQueue results = new GameEventQueue();
       Unit minion = battleInfo.attacker.unit;
       // Cost starts at 1, then adds one for each subsequent attack
-      int refreshCost = 1+attackCounts.getCountFor(co, minion);
+      int refreshCost = 1+attackCounts.getCountFor(army, minion);
       int hp = minion.getHP();
       if( hp > refreshCost )
       {
         minion.alterHP(-refreshCost);
         minion.isTurnOver = false;
-        attackCounts.incrementCount(co, minion);
+        attackCounts.incrementCount(army, minion);
       }
       else
       {
@@ -244,14 +231,14 @@ public class Cinder extends Commander
     }
 
     @Override
-    public char getUnitMarking(Unit unit)
+    public char getUnitMarking(Unit unit, Army activeArmy)
     {
-      Commander co = unit.CO;
-      char defaultVal = super.getUnitMarking(unit);
+      Army army = unit.CO.army;
+      char defaultVal = super.getUnitMarking(unit, activeArmy);
       // Don't pollute the pool for the early out from earlier
-      if( !attackCounts.hasCountFor(co) )
+      if( !attackCounts.hasCountFor(army) )
         return defaultVal;
-      int count = attackCounts.getCountFor(co, unit);
+      int count = attackCounts.getCountFor(army, unit);
       if( 0 >= count )
         return defaultVal;
       // Units can't survive attacking 10 times, so don't worry about that

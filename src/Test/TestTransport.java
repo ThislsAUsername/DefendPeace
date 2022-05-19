@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
+import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
@@ -33,10 +34,10 @@ public class TestTransport extends TestCase
     GameScenario scn = new GameScenario();
     testCo1 = new Patch(scn.rules);
     testCo2 = new Patch(scn.rules);
-    Commander[] cos = { testCo1, testCo2 };
+    Army[] cos = { new Army(scn, testCo1), new Army(scn, testCo2) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    testGame = new GameInstance(testMap);
+    testGame = new GameInstance(cos, testMap);
   }
 
   private void cleanupTest()
@@ -229,7 +230,7 @@ public class TestTransport extends TestCase
     testPassed &= validate(testMap.getLocation(1, 1).getResident() == null, "    Lander1 is still on the map after Deletion!");
     testPassed &= validate(dc.count == 3, "    Counted " + dc.count + " unit deaths instead of 3 after deleting loaded transport!");
 
-    // NOTE/TODO: Is ability power awarded for the cargo unit?
+    // NOTE: Is ability power awarded for the cargo unit?
     //  -- Definitely not for AW2 and DoR
 
     cleanupTest();

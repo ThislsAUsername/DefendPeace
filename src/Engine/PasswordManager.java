@@ -9,7 +9,6 @@ import java.util.Random;
 import java.util.Scanner;
 
 import Engine.UuidGenerator;
-import CommandingOfficers.Commander;
 
 public class PasswordManager
 {
@@ -18,7 +17,7 @@ public class PasswordManager
   /**
    * Create a new passfile if there isn't one yet, and then associate the passfile with `cmdr`.
    */
-  public static void setPass(Commander cmdr)
+  public static void setPass(Army army)
   {
     String storedPass = readPassfile();
     // Generate a new salt/passfile and set cmdr's password.
@@ -30,19 +29,19 @@ public class PasswordManager
       writePassfile(storedPass);
     }
     System.out.println("Setting password.");
-    cmdr.setPassword(salt, storedPass);
+    army.setPassword(salt, storedPass);
   }
 
   /**
-   * Evaluate the current commander against the stored passfile.
+   * Evaluate the current army against the stored passfile.
    * @return true if the passfile matches, false if it doesn't.
    */
-  public static boolean validateAccess(Commander cmdr)
+  public static boolean validateAccess(Army army)
   {
-    if( !cmdr.hasPassword() ) return true; // No password, no problem.
+    if( !army.hasPassword() ) return true; // No password, no problem.
 
     String storedPass = readPassfile();
-    boolean matches = cmdr.checkPassword(storedPass);
+    boolean matches = army.checkPassword(storedPass);
     return matches;
   }
 

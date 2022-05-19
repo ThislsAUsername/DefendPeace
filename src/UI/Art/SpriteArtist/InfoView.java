@@ -5,8 +5,10 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderInfo.InfoPage;
+import CommandingOfficers.CommanderInfo.InfoPage.PageType;
+import Engine.Army;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapPerspective;
 import UI.COStateInfo;
@@ -70,19 +72,28 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
     int paneVSize = (int) (imageHeight   ) - PANE_OUTER_BUFFER*4; // height ""
 
     // Get the current menu selections.
-    Commander thisCO = myControl.getSelectedCO();
+    Army thisArmy = myControl.getSelectedArmy();
     ArrayList<InfoPage> pages = myControl.getSelectedPages();
 
-    // Draw the commander art.
-    BufferedImage COPic = SpriteLibrary.getCommanderSprites(myControl.getSelectedCOInfo().name).body;
-    // justify bottom/right
-    myG.drawImage(COPic, imageWidth - COPic.getWidth(), imageHeight - COPic.getHeight(), null);
+    // Draw the relevant Commanders
+    final int bodyShiftPerBody = 42;
+    final ArrayList<CommanderInfo> coInfos = myControl.getSelectedCOInfoList();
+    int currentBodyShift = -1 * bodyShiftPerBody * (coInfos.size() - 1);
+    for( int i = coInfos.size() - 1; i >= 0; --i )
+    {
+      CommanderInfo coi = coInfos.get(i);
+      BufferedImage COPic = SpriteLibrary.getCommanderSprites(coi.name).body;
+      // justify bottom/right, but don't cut off the top
+      final int bodyVOffset = Math.max(0, imageHeight - COPic.getHeight());
+      myG.drawImage(COPic, imageWidth - COPic.getWidth() - currentBodyShift, bodyVOffset, null);
+      currentBodyShift += bodyShiftPerBody;
+    }
 
     if (PANE_OUTER_BUFFER > paneHSize || PANE_OUTER_BUFFER > paneVSize)
       return; // Continue no further if we don't have room to actually draw
 
-    if (null != thisCO)
-      CommanderOverlayArtist.drawCommanderOverlay(myG, thisCO, false);
+    if (null != thisArmy)
+      CommanderOverlayArtist.drawCommanderOverlay(myG, thisArmy, false);
     
     // add the actual info
     myG.setColor(SpriteUIUtils.MENUFRAMECOLOR); // outer buffer
@@ -92,7 +103,7 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
 
     final int drawingWidth  = paneHSize - PANE_OUTER_BUFFER*2;
     final int drawingHeight = paneVSize - PANE_OUTER_BUFFER*2;
-    if( pages != prevPages )
+    if( pages != prevPages || pages.get(0).pageType == PageType.CO_HEADERS )
       pageImage = renderPage(pages, drawingWidth);
     prevPages = pages;
 
@@ -139,26 +150,28 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
       {
         case CO_HEADERS: // Draw all CO image headers and brief status text for each CO
         {
-          Commander[] coList = myControl.getGame().commanders;
+          Army[] armyList = myControl.getGame().armies;
 
-          for( Commander thisCO : coList )
-          {
-            BufferedImage statusHeader =
-                SpriteLibrary.createTransparentSprite(drawingWidth, CommanderOverlayArtist.OVERLAY_HEIGHT + 5);
-            Graphics headerG = statusHeader.getGraphics();
-            CommanderOverlayArtist.drawCommanderOverlay(headerG, thisCO, 0, true);
+          PixelFont font = SpriteLibrary.getFontStandard();
+          final int yCOSize = CommanderOverlayArtist.getCommanderOverlayHeight();
+          final int yStatusSpace = font.getHeight() + 6; // Put in some extra for the status text
+          int ySpaceNeeded = 0;
 
-            String status = new COStateInfo(drawableMap, thisCO).getAbbrevStatus();
-            BufferedImage statusText = SpriteUIUtils.drawProseToWidth(status, drawingWidth);
-
-            pageImages.add(SpriteUIUtils.stackBufferedImages(new BufferedImage[] { statusHeader, statusText }, 0));
+          for(Army a : armyList) {
+            ySpaceNeeded += yCOSize * a.cos.length;
+            ySpaceNeeded += yStatusSpace;
           }
+
+          BufferedImage drawableArea =
+              CommanderOverlayArtist.drawAllCommanderOverlays(armyList, drawableMap, drawingWidth, ySpaceNeeded, null);
+
+          pageImages.add(drawableArea);
         }
           break;
         case GAME_STATUS: // Draw detailed status text for only this specific CO
         {
-          Commander thisCO = myControl.getSelectedCO();
-          COStateInfo coStatus = new COStateInfo(drawableMap, thisCO);
+          Army thisArmy = myControl.getSelectedArmy();
+          COStateInfo coStatus = new COStateInfo(drawableMap, thisArmy);
           BufferedImage[] statusHalves = new BufferedImage[2];
           // Draw assuming we don't have to wrap the text
           statusHalves[0] = SpriteUIUtils.drawProse(coStatus.getFullStatusLabels());

@@ -17,7 +17,7 @@ import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
-import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitDefenseModifier;
@@ -173,7 +173,7 @@ public class Tech extends Commander
       ArrayList<UnitModel> typesToOverCharge = getMechanicalModels(myCommander);
       ArrayList<Unit> overCharged = new ArrayList<Unit>();
       // Overcharge
-      for(Unit u: myCommander.units)
+      for(Unit u: myCommander.army.getUnits())
       {
         if( typesToOverCharge.contains(u.model) )
         {
@@ -277,8 +277,9 @@ public class Tech extends Commander
       }
       for( Commander co : smashes.keySet() )
       {
-        if( co.units.size() > 1 && co.units.size() <= smashes.get(co) )
-          abilityEvents.add(new CommanderDefeatEvent(co));
+        final ArrayList<Unit> armyUnits = co.army.getUnits();
+        if( armyUnits.size() > 1 && armyUnits.size() <= smashes.get(co) )
+          abilityEvents.add(new ArmyDefeatEvent(co.army));
       }
 
       return abilityEvents;
@@ -335,7 +336,7 @@ public class Tech extends Commander
 
       // Start by computing friendly values. Note that only the spaces in this collection are eligible landing spaces.
       Map<XYCoord, Integer> friendScores = new HashMap<XYCoord, Integer>();
-      for( XYCoord propCoord : myCommander.ownedProperties )
+      for( XYCoord propCoord : myCommander.army.getOwnedProperties() )
       {
         // Record any locations near owned properties; we want to be able to rescue unprotected structures.
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, propCoord, 0, dropRange) )
@@ -343,7 +344,7 @@ public class Tech extends Commander
       }
 
       // Calculate areas of influence for friendly units.
-      for( Unit u : myCommander.units )
+      for( Unit u : myCommander.army.getUnits() )
       {
         XYCoord uxy = new XYCoord(u.x, u.y);                       // Unit location
         Integer uval = u.getCost() * u.getHP();                    // Unit value
@@ -374,7 +375,7 @@ public class Tech extends Commander
 
       // Next calculate unfriendly values. Note that these are only eligible landing spaces if they are also within
       // range of friendly units, but it's easier to just compute all the values and then ignore invalid places.
-      ArrayList<XYCoord> enemyCoords = AIUtils.findEnemyUnits(myCommander, gameMap);
+      ArrayList<XYCoord> enemyCoords = AIUtils.findEnemyUnits(myCommander.army, gameMap);
       Map<XYCoord, Integer> enemyScores = new HashMap<XYCoord, Integer>();
       for( XYCoord nmexy : enemyCoords )
       {
@@ -384,7 +385,7 @@ public class Tech extends Commander
         Unit nme = gameMap.getLocation(nmexy).getResident();          // Enemy unit
         Integer nmeval = nme.getCost() * nme.getHP();                 // Enemy value
 
-        for( XYCoord hqCoord : myCommander.HQLocations )
+        for( XYCoord hqCoord : myCommander.army.HQLocations )
           if(nmexy.getDistance(hqCoord) <= nme.getMovePower(gameMap) && nme.hasActionType(UnitActionFactory.CAPTURE))
           {
             if( log ) System.out.println(String.format("%s is too close to HQ. Increasing threat rating:", nme.toStringWithLocation()));
@@ -440,7 +441,7 @@ public class Tech extends Commander
       if( friendScores.isEmpty() )
       {
         if( log ) System.out.println("No valid drop zones near nemy. Reinforcing HQ.");
-        for( XYCoord hqCoord : myCommander.HQLocations )
+        for( XYCoord hqCoord : myCommander.army.HQLocations )
           for( XYCoord nearHQ : Utils.findLocationsInRange(gameMap, hqCoord, 0, dropRange) )
               friendScores.put(nearHQ, 0);
       }

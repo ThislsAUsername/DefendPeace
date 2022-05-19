@@ -2,10 +2,11 @@ package Test;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
-import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -29,10 +30,10 @@ public class TestTeleport extends TestCase
     GameScenario scn = new GameScenario();
     testCo1 = new Patch(scn.rules);
     testCo2 = new Patch(scn.rules);
-    Commander[] cos = { testCo1, testCo2 };
+    Army[] cos = { new Army(scn, testCo1), new Army(scn, testCo2) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    testGame = new GameInstance(testMap);
+    testGame = new GameInstance(cos, testMap);
   }
 
   @Override
@@ -133,7 +134,7 @@ public class TestTeleport extends TestCase
     }
     
     @Override
-    public GameEventQueue receiveCommanderDefeatEvent(CommanderDefeatEvent event)
+    public GameEventQueue receiveCommanderDefeatEvent(ArmyDefeatEvent event)
     {
       defeat = true;
       return null;

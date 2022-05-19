@@ -64,7 +64,7 @@ public class SpriteLibrary
   private static Sprite arrowheadSprites = null;
   private static Sprite previewArrow = null;
 
-  // Commander overlay backdrops (shows commander name and funds) for each Commander in the game.
+  // Commander overlay backdrops (shows army name and funds) for each Commander in the game.
   private static HashMap<Commander, Sprite> coOverlays = new HashMap<Commander, Sprite>();
   private static HashMap<Commander, Sprite> coPowerBarPieces = new HashMap<Commander, Sprite>();
 
@@ -592,8 +592,9 @@ public class SpriteLibrary
     return newArrow.getFrame(0);
   }
 
+  public static final String OVERLAY_FILE_PATH = "res/ui/co_overlay.png";
   /**
-   * Returns the overlay image for the HUD, which serves as a backdrop for the commander
+   * Returns the overlay image for the HUD, which serves as a backdrop for the army
    * name and the currently-available funds.
    * @param co The Commander whose overlay we are drawing. This allows us to colorize it appropriately.
    * @param leftSide Whether we want the overlay image for the left-side corner (false is right side).
@@ -603,7 +604,8 @@ public class SpriteLibrary
     if( !coOverlays.containsKey(co) )
     {
       // If we don't already have this overlay, go load and store it.
-      Sprite overlay = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/co_overlay.png"), CommanderOverlayArtist.OVERLAY_WIDTH, CommanderOverlayArtist.OVERLAY_HEIGHT);
+      final BufferedImage sprite = SpriteLibrary.loadSpriteSheetFile(OVERLAY_FILE_PATH);
+      Sprite overlay = new Sprite(sprite, sprite.getWidth()/2, sprite.getHeight());
       overlay.colorize(UIUtils.defaultMapColors, UIUtils.getMapUnitColors(co.myColor).paletteColors);
 
       // Draw the Commander's mug on top of the overlay.
@@ -612,7 +614,7 @@ public class SpriteLibrary
       Graphics g = overlay.getFrame(0).getGraphics();
       g.drawImage(coMug, mugW, 1, -mugW, coMug.getHeight(), null);
       Graphics g1 = overlay.getFrame(1).getGraphics();
-      g1.drawImage(coMug, CommanderOverlayArtist.OVERLAY_WIDTH-mugW, 1, null);
+      g1.drawImage(coMug, overlay.getFrame(1).getWidth()-mugW, 1, null);
 
       coOverlays.put(co, overlay);
     }

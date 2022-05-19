@@ -3,6 +3,7 @@ package Test;
 import CommandingOfficers.Cinder;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Venge;
+import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.StateTrackers.DamageDealtToIncomeConverter;
@@ -22,10 +23,10 @@ public class TestStateTracker extends TestCase
     GameScenario scn = new GameScenario();
     cinder = new Cinder(scn.rules);
     venge = new Venge(scn.rules);
-    Commander[] cos = { cinder, venge };
+    Army[] cos = { new Army(scn, cinder), new Army(scn, venge) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    testGame = new GameInstance(testMap);
+    testGame = new GameInstance(cos, testMap);
   }
 
   @Override

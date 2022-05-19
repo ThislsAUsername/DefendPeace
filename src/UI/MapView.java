@@ -2,7 +2,7 @@ package UI;
 
 import java.util.Collection;
 
-import CommandingOfficers.Commander;
+import Engine.Army;
 import Engine.GameInstance;
 import Engine.IView;
 import Engine.MapController;
@@ -10,7 +10,7 @@ import Engine.GamePath;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.StrikeParams;
-import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.MapPerspective;
 import UI.Art.Animation.GameAnimation;
@@ -108,11 +108,11 @@ public abstract class MapView implements IView
   {
     return null;
   }
-  public GameAnimation buildTurnInitAnimation( Commander cmdr, int turn, boolean fowEnabled, Collection<String> message )
+  public GameAnimation buildTurnInitAnimation( Army army, int turn, boolean fowEnabled, Collection<String> message )
   {
     return null;
   }
-  public GameAnimation buildCommanderDefeatAnimation( CommanderDefeatEvent event )
+  public GameAnimation buildCommanderDefeatAnimation( ArmyDefeatEvent event )
   {
     return null;
   }
@@ -127,8 +127,8 @@ public abstract class MapView implements IView
     //   2+ humans - player vs player - draw what the current player sees, IFF the player is human.
 
     // Humans need to see what they can see.
-    MapPerspective gameMap = myGame.activeCO.myView;
-    if( myGame.activeCO.isAI() ) // If it's not a human, figure out what to show.
+    MapPerspective gameMap = myGame.activeArmy.myView;
+    if( myGame.activeArmy.isAI() ) // If it's not a human, figure out what to show.
     {
       int numHumans = countHumanPlayers(myGame);
       if( 1 == numHumans )
@@ -157,9 +157,9 @@ public abstract class MapView implements IView
   {
     int humans = 0;
 
-    for( Commander co : myGame.commanders )
+    for( Army army : myGame.armies )
     {
-      if( !co.isDefeated && !co.isAI() )
+      if( !army.isDefeated && !army.isAI() )
       {
         humans++;
       }
@@ -175,11 +175,11 @@ public abstract class MapView implements IView
   {
     MapPerspective map = null;
 
-    for( Commander co : myGame.commanders )
+    for( Army army : myGame.armies )
     {
-      if( !co.isDefeated && !co.isAI() )
+      if( !army.isDefeated && !army.isAI() )
       {
-        map = co.myView;
+        map = army.myView;
       }
     }
     return map;

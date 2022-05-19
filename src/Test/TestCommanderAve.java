@@ -6,6 +6,7 @@ import CommandingOfficers.Ave;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.Patch;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GamePath;
@@ -35,11 +36,11 @@ public class TestCommanderAve extends TestCase
     GameScenario scn = new GameScenario();
     Ave = new Ave(scn.rules);
     Patch = new Patch(scn.rules);
-    Commander[] cos = { Ave, Patch };
+    Army[] cos = { new Army(scn, Ave), new Army(scn, Patch) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
 
-    game = new GameInstance(testMap);
+    game = new GameInstance(cos, testMap);
   }
 
   @Override

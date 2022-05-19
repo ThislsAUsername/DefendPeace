@@ -32,7 +32,7 @@ public abstract class UnitProduceLifecycle
     public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
-      if( moveLocation.equals(actor.x, actor.y) && actor.hasCargoSpace(typeToBuild.role) && actor.CO.money > actor.CO.getCost(typeToBuild)
+      if( moveLocation.equals(actor.x, actor.y) && actor.hasCargoSpace(typeToBuild.role) && actor.CO.army.money > actor.CO.getCost(typeToBuild)
           && actor.materials > 0 )
       {
         return new GameActionSet(new UnitProduceAction(this, actor), false);
@@ -41,10 +41,12 @@ public abstract class UnitProduceLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
-      // TODO: Fix this!
-      return String.format("BUILD %s (%d)", typeToBuild.toString(), typeToBuild.costBase);
+      String cost = "???";
+      if( actor != null )
+        cost = "" + actor.CO.getCost(typeToBuild);
+      return String.format("BUILD %s (%s)", typeToBuild.toString(), cost);
     }
   } //~factory
 
@@ -114,7 +116,7 @@ public abstract class UnitProduceLifecycle
 
       // TODO: Consider breaking the fiscal part into its own event.
       cost = commander.getCost(model);
-      if( cost <= commander.money && builder.materials > 0 )
+      if( cost <= commander.army.money && builder.materials > 0 )
       {
         myNewUnit = new Unit(myCommander, model);
       }
@@ -146,7 +148,7 @@ public abstract class UnitProduceLifecycle
     {
       if( null != myNewUnit )
       {
-        myCommander.money -= cost;
+        myCommander.army.money -= cost;
         builder.materials -= 1;
         myCommander.units.add(myNewUnit);
         builder.heldUnits.add(myNewUnit);

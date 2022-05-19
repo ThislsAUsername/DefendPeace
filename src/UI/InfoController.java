@@ -2,17 +2,17 @@ package UI;
 
 import java.util.ArrayList;
 
-import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderInfo.InfoPage;
+import Engine.Army;
 import Engine.GameInstance;
 import Engine.IController;
 
 public interface InfoController extends IController
 {
-  Commander getSelectedCO();
-  
-  CommanderInfo getSelectedCOInfo();
+  Army getSelectedArmy();
+
+  ArrayList<CommanderInfo> getSelectedCOInfoList();
 
   int getShiftDown();
 

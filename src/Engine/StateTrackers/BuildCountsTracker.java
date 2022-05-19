@@ -2,6 +2,7 @@ package Engine.StateTrackers;
 
 import java.util.Map;
 import CommandingOfficers.Commander;
+import Engine.Army;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
 import Units.Unit;
@@ -31,9 +32,10 @@ public class BuildCountsTracker extends StateTracker
     return null;
   }
   @Override
-  public GameEventQueue receiveTurnInitEvent(Commander co, int turn)
+  public GameEventQueue receiveTurnInitEvent(Army army, int turn)
   {
-    buildCounts.resetCountFor(co);
+    for( Commander co : army.cos )
+      buildCounts.resetCountFor(co);
 
     return null;
   }

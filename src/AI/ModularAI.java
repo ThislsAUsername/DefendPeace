@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
-import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -19,7 +19,7 @@ import Units.Unit;
  */
 public abstract class ModularAI implements AIController
 {
-  protected Commander myCo = null;
+  protected Army myArmy = null;
 
   // Updated on turn init
   protected ArrayList<XYCoord> unownedProperties;
@@ -32,9 +32,9 @@ public abstract class ModularAI implements AIController
   private boolean shouldLog = true;
   protected int turnNum = 0;
 
-  public ModularAI(Commander co)
+  public ModularAI(Army army)
   {
-    myCo = co;
+    myArmy = army;
   }
 
   @Override
@@ -43,7 +43,7 @@ public abstract class ModularAI implements AIController
     logger = new StringBuffer(); // Reset at the start of the turn so the AI's action log stays in memory between turns for review
     ++turnNum;
     // Create a list of every property we don't own, but want to.
-    unownedProperties = AIUtils.findNonAlliedProperties(myCo, gameMap);
+    unownedProperties = AIUtils.findNonAlliedProperties(myArmy, gameMap);
 
     for( AIModule phase : aiPhases )
     {
@@ -75,7 +75,7 @@ public abstract class ModularAI implements AIController
   public GameAction getNextAction(GameMap gameMap)
   {
     ArrayList<Unit> eligibleUnits = new ArrayList<Unit>();
-    for( Unit unit : myCo.units )
+    for( Unit unit : myArmy.getUnits() )
     {
       if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y) )
         continue; // No actions for units that are stale or out of bounds.
@@ -110,10 +110,10 @@ public abstract class ModularAI implements AIController
   public static class PowerActivator implements AIModule
   {
     private static final long serialVersionUID = 1L;
-    public Commander myCo;
+    public Army myCo;
     public final int aiPhase;
 
-    public PowerActivator(Commander co, int phase)
+    public PowerActivator(Army co, int phase)
     {
       myCo = co;
       aiPhase = phase;
@@ -139,7 +139,7 @@ public abstract class ModularAI implements AIController
   public static class CaptureFinisher extends UnitActionFinder
   {
     private static final long serialVersionUID = 1L;
-    public CaptureFinisher(Commander co, ModularAI ai)
+    public CaptureFinisher(Army co, ModularAI ai)
     {
       super(co, ai);
     }
@@ -160,10 +160,10 @@ public abstract class ModularAI implements AIController
   public static abstract class UnitActionFinder implements AIModule
   {
     private static final long serialVersionUID = 1L;
-    public Commander myCo;
+    public Army myCo;
     public final ModularAI ai;
 
-    public UnitActionFinder(Commander co, ModularAI ai)
+    public UnitActionFinder(Army co, ModularAI ai)
     {
       myCo = co;
       this.ai = ai;

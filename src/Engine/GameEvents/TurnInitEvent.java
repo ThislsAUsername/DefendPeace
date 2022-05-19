@@ -3,7 +3,7 @@ package Engine.GameEvents;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import CommandingOfficers.Commander;
+import Engine.Army;
 import Engine.XYCoord;
 import Terrain.MapMaster;
 import UI.MapView;
@@ -14,25 +14,25 @@ import UI.Art.Animation.GameAnimation;
  */
 public class TurnInitEvent implements GameEvent
 {
-  Commander cmdr;
+  Army army;
   int turn;
   boolean opaque;
   Collection<String> msg;
 
-  public TurnInitEvent(Commander co, int turnNum, boolean hideMap)
+  public TurnInitEvent(Army army, int turnNum, boolean hideMap)
   {
-    this(co, turnNum, hideMap, "Turn "+turnNum);
+    this(army, turnNum, hideMap, "Turn "+turnNum);
   }
 
-  public TurnInitEvent(Commander co, int turnNum, boolean hideMap, String message)
+  public TurnInitEvent(Army army, int turnNum, boolean hideMap, String message)
   {
-    this(co, turnNum, hideMap, new ArrayList<String>());
+    this(army, turnNum, hideMap, new ArrayList<String>());
     msg.add(message);
   }
 
-  public TurnInitEvent(Commander co, int turnNum, boolean hideMap, Collection<String> message)
+  public TurnInitEvent(Army army, int turnNum, boolean hideMap, Collection<String> message)
   {
-    cmdr = co;
+    this.army = army;
     turn = turnNum;
     opaque = hideMap;
     msg = message;
@@ -41,13 +41,13 @@ public class TurnInitEvent implements GameEvent
   @Override
   public GameAnimation getEventAnimation(MapView mapView)
   {
-    return mapView.buildTurnInitAnimation(cmdr, turn, opaque, msg);
+    return mapView.buildTurnInitAnimation(army, turn, opaque, msg);
   }
 
   @Override
   public GameEventQueue sendToListener(GameEventListener listener)
   {
-    return listener.receiveTurnInitEvent(cmdr, turn);
+    return listener.receiveTurnInitEvent(army, turn);
   }
 
   @Override

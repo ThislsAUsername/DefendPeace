@@ -1,6 +1,6 @@
 package Engine.GameEvents;
 
-import CommandingOfficers.Commander;
+import Engine.Army;
 import Engine.GamePath;
 import Engine.XYCoord;
 import Terrain.MapMaster;
@@ -34,7 +34,7 @@ public class MoveEvent implements GameEvent
   @Override
   public GameEventQueue sendToListener(GameEventListener listener)
   {
-    return listener.receiveMoveEvent(this);
+    return listener.receiveMoveEvent(unit, unitPath);
   }
 
   @Override
@@ -56,7 +56,7 @@ public class MoveEvent implements GameEvent
         unit.fuel = Math.max(0, unit.fuel - fuelBurn); // Don't prevent zero-distance "moves" when out of fuel.
 
         // reveal fog as applicable
-        for( Commander co : gameMap.commanders )
+        for( Army co : gameMap.game.armies )
         {
           co.myView.revealFog(unit, unitPath);
         }

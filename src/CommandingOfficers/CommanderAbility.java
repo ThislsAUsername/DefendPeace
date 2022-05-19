@@ -3,8 +3,6 @@ package CommandingOfficers;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-
 import Engine.GameInstance;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEventQueue;
@@ -22,7 +20,7 @@ public abstract class CommanderAbility implements Serializable
   protected String myName;
   protected double myPowerCost;
   public int AIFlags = PHASE_TURN_START;
-  private HashMap<Commander, ArrayList<UnitModifier>> modsApplied = new HashMap<>();
+  private ArrayList<UnitModifier> modsApplied = new ArrayList<>();
 
   public CommanderAbility(Commander commander, String abilityName, double powerCost)
   {
@@ -69,20 +67,18 @@ public abstract class CommanderAbility implements Serializable
     }
 
     myCommander.activateAbility(this, gameMap);
-    applyUnitModifiers(myCommander, gameMap);
+    applyUnitModifiers(gameMap);
 
     adjustCost();
     perform(gameMap);
   }
-  private final void applyUnitModifiers(Commander co, MapMaster gameMap)
+  private final void applyUnitModifiers(MapMaster gameMap)
   {
-    if(!modsApplied.containsKey(co)) {
-      ArrayList<UnitModifier> unitModsToApply = new ArrayList<>();
-      enqueueUnitMods(gameMap, unitModsToApply);
-      modsApplied.put(co, unitModsToApply);
-      for(UnitModifier mod : unitModsToApply)
-        co.addUnitModifier(mod);
-    }
+    ArrayList<UnitModifier> unitModsToApply = new ArrayList<>();
+    enqueueUnitMods(gameMap, unitModsToApply);
+    modsApplied.addAll(unitModsToApply);
+    for( UnitModifier mod : unitModsToApply )
+      myCommander.army.addUnitModifier(mod);
   }
 
   /**
@@ -90,13 +86,10 @@ public abstract class CommanderAbility implements Serializable
    */
   public final void deactivate(MapMaster gameMap)
   {
-    for( Commander co : new ArrayList<Commander>(modsApplied.keySet()) )
-    {
-      ArrayList<UnitModifier> modsToDrop = modsApplied.remove(co);
-      // Revert in reverse order, just to be safe
-      for( int i = modsToDrop.size() - 1; i >= 0; --i )
-        co.removeUnitModifier(modsToDrop.get(i));
-    }
+    // Revert in reverse order, just to be safe
+    for( int i = modsApplied.size() - 1; i >= 0; --i )
+      myCommander.army.removeUnitModifier(modsApplied.get(i));
+    modsApplied.clear();
     revert(gameMap);
   }
 

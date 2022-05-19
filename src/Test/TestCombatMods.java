@@ -3,6 +3,7 @@ package Test;
 import CommandingOfficers.Cinder;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Venge;
+import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
@@ -31,10 +32,10 @@ public class TestCombatMods extends TestCase
     GameScenario scn = new GameScenario();
     cinder = new Cinder(scn.rules);
     venge = new Venge(scn.rules);
-    Commander[] cos = { cinder, venge };
+    Army[] cos = { new Army(scn, cinder), new Army(scn, venge) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    testGame = new GameInstance(testMap);
+    testGame = new GameInstance(cos, testMap);
   }
 
   @Override
@@ -115,7 +116,7 @@ public class TestCombatMods extends TestCase
     // Clean up
     testMap.removeUnit(infA);
     testMap.removeUnit(infB);
-    venge.initTurn(testMap);
+    venge.army.initTurn(testMap);
 
     return testPassed;
   }
@@ -159,7 +160,7 @@ public class TestCombatMods extends TestCase
     // Clean up
     testMap.removeUnit(infA);
     testMap.removeUnit(infB);
-    venge.initTurn(testMap);
+    venge.army.initTurn(testMap);
 
     return testPassed;
   }
@@ -179,8 +180,8 @@ public class TestCombatMods extends TestCase
     for( int i = 0; i < 100; ++i )
     {
       currentFundsReturn += i;
-      ddtic.startTracking(cinder, i);
-      cinder.money = 0;
+      ddtic.startTracking(cinder.army, i);
+      cinder.army.money = 0;
 
       // give aa ammo
       aa.isTurnOver = false;
@@ -192,15 +193,15 @@ public class TestCombatMods extends TestCase
       addUnit(testMap, venge, UnitModel.TROOP, 7, 4);
       performGameAction(new BattleLifecycle.BattleAction(testMap, aa, Utils.findShortestPath(aa, 7, 3, testMap), 7, 4), testGame);
 
-      testPassed &= validate(cinder.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.money+" instead.");
+      testPassed &= validate(cinder.army.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.army.money+" instead.");
     }
     // Remove those amounts, and make sure that works
     for( int i = 0; i < 55; ++i )
     {
       currentFundsReturn -= i;
-      ddtic.stopTracking(cinder, i);
-      ddtic.stopTracking(cinder, i); // Remove twice, so we can be sure that extra removals don't break things
-      cinder.money = 0;
+      ddtic.stopTracking(cinder.army, i);
+      ddtic.stopTracking(cinder.army, i); // Remove twice, so we can be sure that extra removals don't break things
+      cinder.army.money = 0;
 
       // give aa ammo
       aa.isTurnOver = false;
@@ -212,7 +213,7 @@ public class TestCombatMods extends TestCase
       addUnit(testMap, venge, UnitModel.TROOP, 7, 4);
       performGameAction(new BattleLifecycle.BattleAction(testMap, aa, Utils.findShortestPath(aa, 7, 3, testMap), 7, 4), testGame);
 
-      testPassed &= validate(cinder.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.money+" instead.");
+      testPassed &= validate(cinder.army.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.army.money+" instead.");
     }
     // Do the second half backwards, for giggles
     for( int i = 99; i > 42; --i )
@@ -220,8 +221,8 @@ public class TestCombatMods extends TestCase
       currentFundsReturn -= i;
       if( currentFundsReturn < 0 )
         currentFundsReturn = 0;
-      ddtic.stopTracking(cinder, i);
-      cinder.money = 0;
+      ddtic.stopTracking(cinder.army, i);
+      cinder.army.money = 0;
 
       // give aa ammo
       aa.isTurnOver = false;
@@ -233,7 +234,7 @@ public class TestCombatMods extends TestCase
       addUnit(testMap, venge, UnitModel.TROOP, 7, 4);
       performGameAction(new BattleLifecycle.BattleAction(testMap, aa, Utils.findShortestPath(aa, 7, 3, testMap), 7, 4), testGame);
 
-      testPassed &= validate(cinder.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.money+" instead.");
+      testPassed &= validate(cinder.army.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.army.money+" instead.");
     }
 
     // Clean up

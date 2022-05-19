@@ -6,7 +6,7 @@ import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
-import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.MapMaster;
@@ -36,7 +36,7 @@ public abstract class DeleteLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
       return "DELETE";
     }
@@ -69,10 +69,10 @@ public abstract class DeleteLifecycle
       Utils.enqueueDeathEvent(actor, eventSequence);
 
       // The unit died; check if the Commander is defeated.
-      if( actor.CO.units.size() == 1 )
+      if( actor.CO.army.getUnits().size() == 1 )
       {
         // CO is out of units. Too bad.
-        eventSequence.add(new CommanderDefeatEvent(actor.CO));
+        eventSequence.add(new ArmyDefeatEvent(actor.CO.army));
       }
       return eventSequence;
     }

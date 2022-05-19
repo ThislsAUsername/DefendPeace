@@ -80,10 +80,6 @@ public class PlayerSetupInfo
     co.faction = new Faction(availableFactions[currentFaction].name, availableFactions[currentFaction].basis);
     co.faction.flip = flipUnits;
 
-    co.team = currentTeam;
-
-    co.setAIController(availableAis[currentAi].create(co));
-
     return co;
   }
 

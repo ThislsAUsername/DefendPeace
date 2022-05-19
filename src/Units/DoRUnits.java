@@ -774,7 +774,7 @@ public class DoRUnits extends UnitModelScheme
       GameEventQueue events = super.getTurnInitEvents(self, map);
       for( Unit cargo : self.heldUnits )
       {
-        events.add(new HealUnitEvent(cargo, self.CO.getRepairPower(), self.CO)); // Event handles cost logic
+        events.add(new HealUnitEvent(cargo, self.CO.getRepairPower(), self.CO.army)); // Event handles cost logic
         if( !cargo.isFullySupplied() )
           events.add(new ResupplyEvent(self, cargo));
       }

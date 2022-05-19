@@ -44,7 +44,7 @@ public class UnitProductionModifier implements Serializable
   {
     for(TerrainType tt : productionMods.keySet() )
     {
-      // If the commander doesn't support production from this type, add that property type.
+      // If the army doesn't support production from this type, add that property type.
       if( !commander.unitProductionByTerrain.containsKey(tt) )
       {
         commander.unitProductionByTerrain.put(tt, new ArrayList<UnitModel>());
@@ -55,7 +55,7 @@ public class UnitProductionModifier implements Serializable
       Set<UnitModel> setCopy = new HashSet<UnitModel>(productionMods.get(tt));
       for( UnitModel um : setCopy )
       {
-        // If the commander already can build that unit type, we will remove it from our map instead,
+        // If the army already can build that unit type, we will remove it from our map instead,
         // so we don't accidentally prevent them from building something they should be able to.
         if( commander.unitProductionByTerrain.get(tt).contains(um) )
         {
@@ -64,7 +64,7 @@ public class UnitProductionModifier implements Serializable
         }
         else
         {
-          // Add this UnitModel to the commander's shopping list.
+          // Add this UnitModel to the army's shopping list.
           commander.unitProductionByTerrain.get(tt).add(um);
         }
       }

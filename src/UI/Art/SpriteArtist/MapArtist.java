@@ -36,7 +36,7 @@ public class MapArtist
     myGame = game;
     GameMap gameMap = myGame.gameMap;
 
-    Commander co0 = game.commanders[0];
+    Commander co0 = game.armies[0].cos[0];
     spriteCursor = new SpriteCursor(game.getCursorX() * tileSize, game.getCursorY() * tileSize, tileSize, tileSize, co0.myColor);
 
     baseMapImage = new BufferedImage(gameMap.mapWidth * tileSize, gameMap.mapHeight * tileSize, BufferedImage.TYPE_INT_RGB);
@@ -83,7 +83,7 @@ public class MapArtist
     if( !isTargeting )
     {
       // Draw the default map cursor.
-      spriteCursor.set(myGame.activeCO.myColor);
+      spriteCursor.set(myGame.activeArmy.cos[0].myColor);
       spriteCursor.set(drawX*tileSize, drawY*tileSize);
       spriteCursor.draw(g);
     }

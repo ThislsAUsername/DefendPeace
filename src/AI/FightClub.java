@@ -12,9 +12,11 @@ import java.util.List;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Patch;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
+import Engine.GameScenario.TagMode;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -150,23 +152,24 @@ public class FightClub
       for( int gameIndex = 0; gameIndex < params.numGames; ++gameIndex )
       {
         GameScenario scenario = new GameScenario(mi.getValidUnitModelSchemes()[0],
-            GameScenario.DEFAULT_INCOME, GameScenario.DEFAULT_STARTING_FUNDS, false);
+            GameScenario.DEFAULT_INCOME, GameScenario.DEFAULT_STARTING_FUNDS, false, TagMode.OFF);
 
         int numCos = mi.getNumCos();
 
         // Create all of the combatants.
         HashMap<Integer, ContestantInfo> teamMapping = new HashMap<Integer, ContestantInfo>(); // TODO: This currently doesn't work for team games. 
-        List<Commander> combatants = new ArrayList<Commander>();
+        List<Army> combatants = new ArrayList<>();
         // Offset cc by gameIndex to rotate the contestant starting locations.
         for( int cc = gameIndex; cc < (gameIndex + contestants.size()); ++cc){
           int ci = cc % contestants.size();
           ContestantInfo cInfo = contestants.get(ci);
           Commander com = cInfo.myCo.create(scenario.rules);
-          com.team = ci;
           com.myColor = UIUtils.getCOColors()[ci];
           com.faction = UIUtils.getFactions()[ci];
-          com.setAIController(cInfo.myAi.create(com));
-          combatants.add(com);
+          Army army = new Army(scenario, com);
+          army.team = ci;
+          army.setAIController(cInfo.myAi.create(army));
+          combatants.add(army);
           teamMapping.put(ci, cInfo);
         }
 
@@ -179,18 +182,19 @@ public class FightClub
         defaultOut.println("  Starting game " + gameIndex + " on map " + mi.mapName + " with combatants:");
         for( int i = 0; i < numCos; ++i )
           defaultOut.println("    Team " + combatants.get(i).team + ": "
-                               + combatants.get(i).getControllerName() + " controlling " + combatants.get(i).coInfo.name);
+                               + combatants.get(i).getControllerName() + " controlling " + combatants.get(i).cos[0].coInfo.name);
 
         // Build the CO list and the new map and create the game instance.
-        MapMaster map = new MapMaster(combatants.toArray(new Commander[0]), mi);
+        final Army[] combatantArray = combatants.toArray(new Army[0]);
+        MapMaster map = new MapMaster(combatantArray, mi);
         GameInstance newGame = null;
         if( map.initOK() )
         {
-          newGame = new GameInstance(map, params.defaultWeather, scenario, false);
+          newGame = new GameInstance(scenario, combatantArray, map, params.defaultWeather, false);
         }
 
         GameResults gameResults = runGame(newGame, defaultOut);
-        List<Commander> winners = gameResults.winners;
+        List<Army> winners = gameResults.winners;
         int winningTeam = winners.get(0).team;
         defaultOut.println("  Game " + gameIndex + " Results:");
         defaultOut.println(gameResults);
@@ -214,15 +218,15 @@ public class FightClub
         TURN_LIMIT
       }
 
-      List<Commander> winners, contestants;
+      List<Army> winners, contestants;
       int winningTeam;
       int numTurns;
       EndCondition endReason;
       Long totalGameTimeNanos;
-      HashMap<Commander, Long> stopwatches;
+      HashMap<Army, Long> stopwatches;
 
-      public GameResults(List<Commander> victors, List<Commander> players, int nTurns, EndCondition reason,
-          Long gameRunTime, HashMap<Commander, Long> playerRunTimes)
+      public GameResults(List<Army> victors, List<Army> players, int nTurns, EndCondition reason,
+          Long gameRunTime, HashMap<Army, Long> playerRunTimes)
       {
         winners = victors;
         contestants = players;
@@ -250,11 +254,11 @@ public class FightClub
         String thinkPct = df.format(100*(totalThinkTimeNanos / totalGameTimeNanos));
         String thinkTime = df.format(totalThinkTimeNanos * ns2s);
         sb.append("    Thinking comprised ").append(thinkPct).append("% (").append(thinkTime).append("s) of the run time\n");
-        for( Commander co : contestants )
+        for( Army co : contestants )
         {
           String coPct = df.format(100 * (stopwatches.get(co) / totalThinkTimeNanos));
           String coTime = df.format(stopwatches.get(co) * ns2s);
-          sb.append("      ").append(co.getControllerName()).append(" (").append(co.coInfo.name).append("): ")
+          sb.append("      ").append(co.getControllerName()).append(" (").append(co.cos[0].coInfo.name).append("): ")
             .append("Used ").append(coPct).append("% (").append(coTime).append("s) of the thinking time.\n");
         }
 
@@ -268,8 +272,8 @@ public class FightClub
     public GameResults runGame(GameInstance game, PrintStream defaultOut)
     {
       long gameRunTimeNanos = System.nanoTime();
-      HashMap<Commander, Long> stopwatches = new HashMap<Commander, Long>();
-      for( Commander co : game.commanders )
+      HashMap<Army, Long> stopwatches = new HashMap<>();
+      for( Army co : game.armies )
       {
         stopwatches.put(co, 0L);
       }
@@ -286,7 +290,7 @@ public class FightClub
         while (!endAITurn && !isGameOver)
         {
           long thinkStartNanos = System.nanoTime();
-          GameAction aiAction = game.activeCO.getNextAIAction(game.gameMap);
+          GameAction aiAction = game.activeArmy.getNextAIAction(game.gameMap);
           thinkTimeNanos += System.nanoTime() - thinkStartNanos;
           if( aiAction != null )
           {
@@ -311,9 +315,9 @@ public class FightClub
           // If we are done animating the last action, check to see if the game is over.
           // Count the number of COs that are left.
           int activeNum = 0;
-          for( int i = 0; i < game.commanders.length; ++i )
+          for( int i = 0; i < game.armies.length; ++i )
           {
-            if( !game.commanders[i].isDefeated )
+            if( !game.armies[i].isDefeated )
             {
               activeNum++;
             }
@@ -326,20 +330,20 @@ public class FightClub
             endReason = GameResults.EndCondition.CONQUEST;
           }
         }
-        stopwatches.put(game.activeCO, stopwatches.get(game.activeCO) + thinkTimeNanos);
+        stopwatches.put(game.activeArmy, stopwatches.get(game.activeArmy) + thinkTimeNanos);
 
         // Map should-ish be covered in units by turncount == map area
         if(game.getCurrentTurn() > game.gameMap.mapWidth * game.gameMap.mapHeight)
         {
-          if(game.commanders[0].units.size()/2 > game.commanders[1].units.size() )
+          if(game.armies[0].getUnits().size()/2 > game.armies[1].getUnits().size() )
           {
-            game.commanders[1].isDefeated = true;
+            game.armies[1].isDefeated = true;
             isGameOver = true;
             endReason = GameResults.EndCondition.TURN_LIMIT;
           }
-          if(game.commanders[1].units.size()/2 > game.commanders[0].units.size() )
+          if(game.armies[1].getUnits().size()/2 > game.armies[0].getUnits().size() )
           {
-            game.commanders[0].isDefeated = true;
+            game.armies[0].isDefeated = true;
             isGameOver = true;
             endReason = GameResults.EndCondition.TURN_LIMIT;
           }
@@ -348,13 +352,13 @@ public class FightClub
 
       gameRunTimeNanos = System.nanoTime() - gameRunTimeNanos;
 
-      ArrayList<Commander> winners = new ArrayList<Commander>();
-      for( int i = 0; i < game.commanders.length; ++i )
+      ArrayList<Army> winners = new ArrayList<>();
+      for( int i = 0; i < game.armies.length; ++i )
       {
-        if( !game.commanders[i].isDefeated )
-          winners.add(game.commanders[i]);
+        if( !game.armies[i].isDefeated )
+          winners.add(game.armies[i]);
       }
-      return new GameResults(winners, Arrays.asList(game.commanders), game.getCurrentTurn(), endReason, gameRunTimeNanos, stopwatches);
+      return new GameResults(winners, Arrays.asList(game.armies), game.getCurrentTurn(), endReason, gameRunTimeNanos, stopwatches);
     }
 
     /**

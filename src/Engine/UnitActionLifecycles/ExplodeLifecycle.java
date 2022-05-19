@@ -10,7 +10,7 @@ import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
-import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MassDamageEvent;
@@ -50,7 +50,7 @@ public abstract class ExplodeLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
       return "EXPLODE";
     }
@@ -84,10 +84,10 @@ public abstract class ExplodeLifecycle
           HashSet<Unit> victims = findVictims(gameMap); // Find all of our unlucky participants
 
           explodeEvents.addFirst(new MassDamageEvent(actor.CO, victims, type.damage, false));
-          if( actor.CO.units.size() == 1 )
+          if( actor.CO.army.getUnits().size() == 1 )
           {
             // CO is out of units. Too bad.
-            explodeEvents.add(new CommanderDefeatEvent(actor.CO));
+            explodeEvents.add(new ArmyDefeatEvent(actor.CO.army));
           }
         }
       }

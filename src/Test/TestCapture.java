@@ -3,11 +3,12 @@ package Test;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
-import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.BattleLifecycle;
@@ -30,13 +31,13 @@ public class TestCapture extends TestCase
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
   {
-    GameScenario scenario = new GameScenario();
-    testCo1 = new Strong(scenario.rules);
-    testCo2 = new Patch(scenario.rules);
-    Commander[] cos = { testCo1, testCo2 };
+    GameScenario scn = new GameScenario();
+    testCo1 = new Strong(scn.rules);
+    testCo2 = new Patch(scn.rules);
+    Army[] cos = { new Army(scn, testCo1), new Army(scn, testCo2) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    testGame = new GameInstance(testMap);
+    testGame = new GameInstance(cos, testMap);
   }
 
   @Override
@@ -135,8 +136,8 @@ public class TestCapture extends TestCase
     testPassed &= validate( prop.isCaptureable(), "    Unexpected terrain found! Test will be invalid." );
 
     // Make the participating COs friends
-    testCo1.team = 0;
-    testCo2.team = 0;
+    testCo1.army.team = 0;
+    testCo2.army.team = 0;
     
     // Set up for the test.
     Unit infA = addUnit(testMap, testCo1, UnitModel.TROOP, 2, 2); // On the city.
@@ -159,8 +160,8 @@ public class TestCapture extends TestCase
 
     // Clean up
     testMap.removeUnit(infA);
-    testCo1.team = -1;
-    testCo2.team = -1;
+    testCo1.army.team = -1;
+    testCo2.army.team = -1;
     prop.setOwner(null);
 
     return testPassed;
@@ -190,17 +191,17 @@ public class TestCapture extends TestCase
     captureAction = new CaptureLifecycle.CaptureAction(testMap, mech, Utils.findShortestPath(mech, 13, 1, testMap));
     GameEventQueue events = captureAction.getEvents(testMap);
 
-    // Make sure a CommanderDefeatEvent was generated as a result (the actual event test is in TestGameEvent.java).
+    // Make sure an ArmyDefeatEvent was generated as a result (the actual event test is in TestGameEvent.java).
     boolean hasDefeatEvent = false;
     for( GameEvent event : events )
     {
-      if( event instanceof CommanderDefeatEvent )
+      if( event instanceof ArmyDefeatEvent )
       {
         hasDefeatEvent = true;
         break;
       }
     }
-    testPassed &= validate( hasDefeatEvent, "    No CommanderDefeatEvent generated on HQ capture!");
+    testPassed &= validate( hasDefeatEvent, "    No ArmyDefeatEvent generated on HQ capture!");
 
     return testPassed;
   }

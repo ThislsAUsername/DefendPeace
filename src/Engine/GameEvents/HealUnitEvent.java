@@ -1,6 +1,6 @@
 package Engine.GameEvents;
 
-import CommandingOfficers.Commander;
+import Engine.Army;
 import Engine.XYCoord;
 import Terrain.MapMaster;
 import UI.MapView;
@@ -12,9 +12,9 @@ public class HealUnitEvent implements GameEvent
 {
   private Unit unit;
   public final int repairPowerHP;
-  public final Commander payer;
+  public final Army payer;
 
-  public HealUnitEvent(Unit aTarget, int HP, Commander pPayer)
+  public HealUnitEvent(Unit aTarget, int HP, Army pPayer)
   {
     unit = aTarget;
     repairPowerHP = HP;

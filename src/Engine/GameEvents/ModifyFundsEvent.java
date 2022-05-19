@@ -1,6 +1,6 @@
 package Engine.GameEvents;
 
-import CommandingOfficers.Commander;
+import Engine.Army;
 import Engine.XYCoord;
 import Terrain.MapMaster;
 import UI.MapView;
@@ -8,10 +8,10 @@ import UI.Art.Animation.GameAnimation;
 
 public class ModifyFundsEvent implements GameEvent
 {
-  private final Commander beneficiary;
+  private final Army beneficiary;
   private final int value;
 
-  public ModifyFundsEvent(Commander beneficiary, int value)
+  public ModifyFundsEvent(Army beneficiary, int value)
   {
     this.beneficiary = beneficiary;
     this.value = value;

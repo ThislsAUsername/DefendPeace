@@ -2,6 +2,7 @@ package CommandingOfficers;
 
 import java.util.ArrayList;
 
+import Engine.Army;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
@@ -97,7 +98,7 @@ public class Venge extends Commander
   }
 
   @Override
-  public char getUnitMarking(Unit unit)
+  public char getUnitMarking(Unit unit, Army activeArmy)
   {
     // If we can get a vengeance boost against this unit, let our player know.
     if( aggressors.contains(unit) )
@@ -106,7 +107,7 @@ public class Venge extends Commander
     if( myIronWill.boostedUnits.contains(unit) )
       return 'I';
 
-    return super.getUnitMarking(unit);
+    return super.getUnitMarking(unit, activeArmy);
   }
 
   @Override
@@ -121,18 +122,11 @@ public class Venge extends Commander
   {
     private static final long serialVersionUID = 1L;
 
-    public final Commander co;
-    public PreEmptiveCounterMod(Commander co)
-    {
-      super();
-      this.co = co;
-    }
-
     @Override
     public void changeCombatContext(CombatContext instance)
     {
       // If we're swapping, and we can counter, and we're on the defensive, do the swap.
-      if( instance.canCounter && co == instance.defender.CO )
+      if( instance.canCounter && instance.defender.mods.contains(this) )
       {
         UnitContext minion = instance.defender;
 
@@ -149,7 +143,6 @@ public class Venge extends Commander
     public final int buff;
     public IronWillMod(int buff)
     {
-      super();
       this.buff = buff;
     }
     @Override
@@ -209,7 +202,7 @@ public class Venge extends Commander
     protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       UnitInstanceFilter uif = new UnitInstanceFilter(new IronWillMod(IRONWILL_BOOST));
-      for( Unit unit : myCommander.units )
+      for( Unit unit : myCommander.army.getUnits() )
       {
         if( !unit.isTurnOver )
           uif.instances.add(unit);
@@ -220,7 +213,7 @@ public class Venge extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      for( Unit unit : myCommander.units )
+      for( Unit unit : myCommander.army.getUnits() )
       {
         if( !unit.isTurnOver )
           boostedUnits.add(unit);
@@ -266,7 +259,7 @@ public class Venge extends Commander
     {
       modList.add(damageMod);
       modList.add(defenseMod);
-      modList.add(new PreEmptiveCounterMod(myCommander));
+      modList.add(new PreEmptiveCounterMod());
     }
   }
   

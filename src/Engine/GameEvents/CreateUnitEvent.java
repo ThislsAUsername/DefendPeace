@@ -61,7 +61,7 @@ public class CreateUnitEvent implements GameEvent
     {
       myCommander.units.add(myNewUnit);
       gameMap.addNewUnit(myNewUnit, myBuildCoords.xCoord, myBuildCoords.yCoord, myBoots);
-      myCommander.myView.revealFog(myNewUnit);
+      myCommander.army.myView.revealFog(myNewUnit);
     }
     else
     {

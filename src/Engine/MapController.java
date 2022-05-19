@@ -52,6 +52,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     myView = view;
     myView.setController(this);
     inputMode = InputMode.INPUT;
+    armyOverlayModes = new int[game.armies.length];
     isGameOver = false;
     nextSeekIndex = 0;
 
@@ -60,7 +61,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       startNextTurn();
 
     // Initialize our game input handler.
-    myGameInputHandler = new GameInputHandler(myGame.activeCO.myView, myGame.activeCO, this);
+    myGameInputHandler = new GameInputHandler(myGame.activeArmy.myView, myGame.activeArmy, this);
   }
 
   /**
@@ -167,13 +168,13 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
           // First get all active units, sorted.
           ArrayList<XYCoord> unitLocations = new ArrayList<XYCoord>();
-          unitLocations.addAll(Utils.findLocationsNearUnits(myGame.gameMap, myGame.activeCO.units, 0));
+          unitLocations.addAll(Utils.findLocationsNearUnits(myGame.gameMap, myGame.activeArmy.getUnits(), 0));
           unitLocations.removeIf(xy -> myGame.gameMap.getLocation(xy).getResident().isTurnOver);
           if( seekBuildingsLast )
             Utils.sortLocationsByDistance(myGame.getCursorCoord(), unitLocations);
 
           // Find all usable properties, sorted.
-          ArrayList<XYCoord> usableProperties = Utils.findUsableProperties(myGame.activeCO, myGame.gameMap);
+          ArrayList<XYCoord> usableProperties = Utils.findUsableProperties(myGame.activeArmy, myGame.gameMap);
           usableProperties.removeIf(xy -> myGame.gameMap.getLocation(xy).getResident() != null);
           if( seekBuildingsLast )
             Utils.sortLocationsByDistance(myGame.getCursorCoord(), usableProperties);
@@ -204,6 +205,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
 
         break;
+      case VIEWMODE:
+        final int activeIndex = myGame.getActiveCOIndex();
+        armyOverlayModes[activeIndex] = (armyOverlayModes[activeIndex] + 1) % OverlayMode.values().length;
+        break;
       case SELECT:
         // Pass the current cursor location to the GameInputHandler.
         myGameInputHandler.select(myGame.getCursorCoord());
@@ -214,13 +219,14 @@ public class MapController implements IController, GameInputHandler.StateChanged
           // If we hit BACK while over a unit, add it to the threat overlay for this CO
           MapLocation loc = myGame.gameMap.getLocation(myGame.getCursorCoord());
           Unit resident = loc.getResident();
-          if( null != resident )
+          if( getOverlayMode() == OverlayMode.THREATS_MANUAL && null != resident )
           {
-            ArrayList<Unit> threats = myGame.activeCO.threatsToOverlay;
+            ArrayList<Unit> threats = myGame.activeArmy.threatsToOverlay;
             if( threats.contains(resident) )
               threats.remove(resident);
             else
               threats.add(resident);
+            OverlayCache.instance(myGame).InvalidateCache();
           }
         }
         myGameInputHandler.back();
@@ -279,14 +285,15 @@ public class MapController implements IController, GameInputHandler.StateChanged
    */
   private void handlePathSelect(InputHandler.InputAction input)
   {
-    boolean inMoveableSpace = myGame.getCursorLocation().isHighlightSet();
+    Collection<XYCoord> options = myGameInputHandler.getCoordinateOptions();
+    boolean inMoveableSpace = options.contains(myGame.getCursorCoord());
 
     switch (input)
     {
       case UP:
         myGame.moveCursorUp();
         // Make sure we don't overshoot the reachable tiles by accident.
-        if( inMoveableSpace && InputHandler.isUpHeld() && !myGame.getCursorLocation().isHighlightSet() )
+        if( inMoveableSpace && InputHandler.isUpHeld() && !options.contains(myGame.getCursorCoord()) )
         {
           myGame.moveCursorDown();
         }
@@ -294,7 +301,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case DOWN:
         myGame.moveCursorDown();
         // Make sure we don't overshoot the reachable space by accident.
-        if( inMoveableSpace && InputHandler.isDownHeld() && !myGame.getCursorLocation().isHighlightSet() )
+        if( inMoveableSpace && InputHandler.isDownHeld() && !options.contains(myGame.getCursorCoord()) )
         {
           myGame.moveCursorUp();
         }
@@ -302,7 +309,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case LEFT:
         myGame.moveCursorLeft();
         // Make sure we don't overshoot the reachable space by accident.
-        if( inMoveableSpace && InputHandler.isLeftHeld() && !myGame.getCursorLocation().isHighlightSet() )
+        if( inMoveableSpace && InputHandler.isLeftHeld() && !options.contains(myGame.getCursorCoord()) )
         {
           myGame.moveCursorRight();
         }
@@ -310,7 +317,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       case RIGHT:
         myGame.moveCursorRight();
         // Make sure we don't overshoot the reachable space by accident.
-        if( inMoveableSpace && InputHandler.isRightHeld() && !myGame.getCursorLocation().isHighlightSet() )
+        if( inMoveableSpace && InputHandler.isRightHeld() && !options.contains(myGame.getCursorCoord()) )
         {
           myGame.moveCursorLeft();
         }
@@ -371,15 +378,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     GameInputHandler.InputType inputType = myGameInputHandler.getInputType();
     myGameInputOptionSelector = myGameInputHandler.getOptionSelector();
 
-    myGame.gameMap.clearAllHighlights();
-    // Set the target-location highlights.
     Collection<XYCoord> options = myGameInputHandler.getCoordinateOptions();
-    if ( null != options)
-      for( XYCoord xyc : options )
-      {
-        myGame.gameMap.getLocation(xyc).setHighlight(true);
-      }
-
     currentMenu = null;
 
     switch (inputType)
@@ -419,9 +418,9 @@ public class MapController implements IController, GameInputHandler.StateChanged
         if( myGame.isSecurityEnforced() )
         {
           // Generate a password if needed.
-          if( !myGame.activeCO.hasPassword() )
+          if( !myGame.activeArmy.hasPassword() )
           {
-            PasswordManager.setPass(myGame.activeCO);
+            PasswordManager.setPass(myGame.activeArmy);
           }
 
           // Save the game, display a message, and exit to the main menu.
@@ -433,7 +432,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
           GameEventQueue outro = new GameEventQueue();
           boolean hideMap = true;
-          outro.add(new TurnInitEvent(myGame.activeCO, myGame.getCurrentTurn(), hideMap, saveMsg));
+          outro.add(new TurnInitEvent(myGame.activeArmy, myGame.getCurrentTurn(), hideMap, saveMsg));
           myView.animate(outro);
 
           changeInputMode(InputMode.EXITGAME);
@@ -467,14 +466,14 @@ public class MapController implements IController, GameInputHandler.StateChanged
         break;
       case DAMAGE_CHART:
         // Pull out the first enemy available, or ourselves
-        Commander targetCO = myGame.activeCO;
-        for( Commander co : myGame.commanders )
-          if( myGame.activeCO.isEnemy(co) )
+        Commander targetCO = myGame.activeArmy.cos[0];
+        for( Army army : myGame.armies )
+          if( myGame.activeArmy.isEnemy(army) )
           {
-            targetCO = co;
+            targetCO = army.cos[0];
             break;
           }
-        DamageChartController dcc = new DamageChartController(myGame.activeCO, targetCO);
+        DamageChartController dcc = new DamageChartController(myGame.activeArmy.cos[0], targetCO);
         IView dcv = Driver.getInstance().gameGraphics.createDamageChartView(dcc);
 
         myGameInputHandler.reset(); // DAMAGE_CHART is a terminal state. Reset the input handler.
@@ -548,18 +547,19 @@ public class MapController implements IController, GameInputHandler.StateChanged
     // If we are done animating the last action, check to see if the game is over.
     if( animEventQueueIsEmpty )
     {
-      // Count the number of COs that are left.
-      int activeNum = 0;
-      for( int i = 0; i < myGame.commanders.length; ++i )
+      int activeTeamCount = 0;
+      ArrayList<Integer> teams = new ArrayList<>();
+      for( Army army : myGame.armies )
       {
-        if( !myGame.commanders[i].isDefeated )
-        {
-          activeNum++;
-        }
+        if( army.isDefeated )
+          continue;
+        if( teams.contains(army.team) )
+          continue;
+        activeTeamCount++;
+        teams.add(army.team);
       }
 
-      // If fewer than two COs yet survive, the game is over.
-      if( activeNum < 2 )
+      if( activeTeamCount < 2 )
       {
         isGameOver = true;
       }
@@ -577,9 +577,9 @@ public class MapController implements IController, GameInputHandler.StateChanged
       {
         // The animation for the last action just completed. If an AI is in control,
         // fetch the next action. Otherwise, return control to the player.
-        if( myGame.activeCO.isAI() )
+        if( myGame.activeArmy.isAI() )
         {
-          GameAction aiAction = myGame.activeCO.getNextAIAction(myGame.gameMap);
+          GameAction aiAction = myGame.activeArmy.getNextAIAction(myGame.gameMap);
           boolean endAITurn = false;
           if( aiAction != null )
           {
@@ -617,7 +617,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     boolean turnOK = myGame.turn(turnEvents);
 
     // Reinitialize the InputStateHandler for the new turn.
-    myGameInputHandler = new GameInputHandler(myGame.activeCO.myView, myGame.activeCO, this);
+    myGameInputHandler = new GameInputHandler(myGame.activeArmy.myView, myGame.activeArmy, this);
 
     if( !turnEvents.isEmpty() ) // If there's nothing to animate, don't animate it twice
     {
@@ -641,6 +641,26 @@ public class MapController implements IController, GameInputHandler.StateChanged
   public XYCoord getContemplationCoord()
   {
     return myGameInputHandler.getUnitCoord();
+  }
+  public Collection<XYCoord> getSelectableCoords()
+  {
+    return myGameInputHandler.getCoordinateOptions();
+  }
+
+  public enum OverlayMode
+  {
+    THREATS_MANUAL("MANUAL"), THREATS_ALL("THREAT"), VISION, NONE;
+    private String name;
+    OverlayMode() {this.name = toString();}
+    OverlayMode(String name) {this.name = name;}
+    public String getName() {
+        return name;
+    }
+  }
+  private int[] armyOverlayModes;
+  public OverlayMode getOverlayMode()
+  {
+    return OverlayMode.values()[armyOverlayModes[myGame.getActiveCOIndex()]];
   }
 
   public GamePath getContemplatedMove()

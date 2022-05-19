@@ -29,9 +29,9 @@ public class GameInstance implements Serializable
   
   public String saveFile;
   public Terrain.MapMaster gameMap;
-  public Commander[] commanders;
+  public Army[] armies;
   private int activeCoNum;
-  public Commander activeCO = null;
+  public Army activeArmy = null;
   private int cursorX = 0;
   private int cursorY = 0;
 
@@ -45,16 +45,15 @@ public class GameInstance implements Serializable
   private int currentTurn;
   private boolean currentTurnEnded = true; // Set to false when saving a game mid-turn.
 
-  public GameInstance(MapMaster map)
+  public GameInstance(Army[] armies, MapMaster map)
   {
-    this(map, Weathers.CLEAR, new GameScenario(), false);
+    this(new GameScenario(), armies, map, Weathers.CLEAR, false);
   }
-
-  public GameInstance(MapMaster map, Weathers weather, GameScenario scenario, boolean useSecurity)
+  public GameInstance(GameScenario scenario, Army[] armies, MapMaster map, Weathers weather, boolean useSecurity)
   {
-    if( map.commanders.length < 2 )
+    if( armies.length < 2 )
     {
-      System.out.println("WARNING! Creating a game with fewer than two commanders.");
+      System.out.println("WARNING! Creating a game with fewer than two armies.");
     }
     gameScenario = scenario;
     isSecurityEnabled = useSecurity;
@@ -62,31 +61,33 @@ public class GameInstance implements Serializable
     currentTurn = 1;
 
     gameMap = map;
+    gameMap.game = this;
     defaultWeather = weather;
 
-    commanders = map.commanders;
-    activeCoNum = -1; // No commander is active yet.
+    this.armies = armies;
+    activeCoNum = -1; // No army is active yet.
 
     // Set the initial cursor locations for each player.
     playerCursors = new HashMap<Integer, XYCoord>();
-    for( int i = 0; i < commanders.length; ++i )
+    for( int i = 0; i < armies.length; ++i )
     {
       // This is hacky, but hey
-      commanders[i].addUnitModifier(new SandstormModifier());
+      armies[i].addUnitModifier(new SandstormModifier());
 
-      commanders[i].money = gameScenario.rules.startingFunds;
-      commanders[i].myView = new MapPerspective(map, commanders[i]);
-      commanders[i].myView.resetFog();
-      if( !commanders[i].HQLocations.isEmpty() )
+      armies[i].money = gameScenario.rules.startingFunds;
+      armies[i].myView = new MapPerspective(map, armies[i]);
+      armies[i].myView.game = this;
+      armies[i].myView.resetFog();
+      if( !armies[i].HQLocations.isEmpty() )
       {
-        playerCursors.put(i, commanders[i].HQLocations.get(0));
+        playerCursors.put(i, armies[i].HQLocations.get(0));
       }
       else
       {
-        System.out.println("Warning! Commander " + commanders[i].coInfo.name + " does not have an HQ location!");
+        System.out.println("Warning! Army " + i + " does not have an HQ location!");
         playerCursors.put(i, new XYCoord(1, 1));
       }
-      commanders[i].initForGame(this);
+      armies[i].initForGame(this);
     }
     setCursorLocation(playerCursors.get(0).xCoord, playerCursors.get(0).yCoord);
     
@@ -106,13 +107,13 @@ public class GameInstance implements Serializable
 
   public int getActiveCOIndex()
   {
-    return getCOIndex(activeCO);
+    return getCOIndex(activeArmy);
   }
-  public int getCOIndex(Commander co)
+  public int getCOIndex(Army co)
   {
-    for( int i = 0; i < commanders.length; ++i )
+    for( int i = 0; i < armies.length; ++i )
     {
-      if( co == commanders[i] )
+      if( co == armies[i] )
         return i;
     }
     return -1;
@@ -189,28 +190,28 @@ public class GameInstance implements Serializable
     playerCursors.put(activeCoNum, new XYCoord(cursorX, cursorY));
     int coTurns = 0;
 
-    if( null != activeCO) activeCO.endTurn();
+    if( null != activeArmy) activeArmy.endTurn();
 
     // Find the next non-defeated CO.
     do
     {
       coTurns++;
       activeCoNum++;
-      if( activeCoNum > commanders.length - 1 )
+      if( activeCoNum > armies.length - 1 )
       {
         currentTurn++;
         activeCoNum = 0;
       }
-      activeCO = commanders[activeCoNum];
-    } while (activeCO.isDefeated);
+      activeArmy = armies[activeCoNum];
+    } while (activeArmy.isDefeated);
 
     // If security is enabled, verify this player is cleared to play.
-    boolean passCheckOK = !isSecurityEnforced() || PasswordManager.validateAccess(activeCO);
+    boolean passCheckOK = !isSecurityEnforced() || PasswordManager.validateAccess(activeArmy);
     if( !passCheckOK )
     {
       // Display "It's not your turn" message.
       boolean hideMap = true;
-      events.add(new TurnInitEvent(activeCO, currentTurn, hideMap, "It's not your turn"));
+      events.add(new TurnInitEvent(activeArmy, currentTurn, hideMap, "It's not your turn"));
       return false; // auth failed.
     }
 
@@ -241,7 +242,7 @@ public class GameInstance implements Serializable
       }
     }
 
-    events.add(new TurnInitEvent(activeCO, currentTurn, isFogEnabled() || isSecurityEnabled));
+    events.add(new TurnInitEvent(activeArmy, currentTurn, isFogEnabled() || isSecurityEnabled));
 
     if( !weatherChanges.isEmpty() )
     {
@@ -255,7 +256,7 @@ public class GameInstance implements Serializable
     events.addAll(gameScenario.initTurn(gameMap));
 
     // Handle any CO-specific turn events.
-    events.addAll(activeCO.initTurn(gameMap));
+    events.addAll(activeArmy.initTurn(gameMap));
     
     // Initialize the next turn, recording any events that will occur.
     return true; // Turn init successful.
@@ -272,9 +273,9 @@ public class GameInstance implements Serializable
    */
   public void endGame()
   {
-    for( Commander co : commanders )
+    for( Army army : armies )
     {
-      GameEventListener.unregisterEventListener(co, this);
+      army.deInitForGame(this);
     }
   }
   
@@ -285,10 +286,11 @@ public class GameInstance implements Serializable
   private String getSaveName()
   {
     StringBuilder sb = new StringBuilder();
-    for( Commander co : commanders )
-    {
-      sb.append(co.coInfo.name).append("_");
-    }
+    for( Army army : armies )
+      for( Commander co : army.cos )
+      {
+        sb.append(co.coInfo.name).append("_");
+      }
     sb.setLength(sb.length()-1);
     sb.append(".svp"); // "svp" for "SaVe Peace"
     return sb.toString();
@@ -310,7 +312,7 @@ public class GameInstance implements Serializable
         prepends.append('~');
         System.out.println(String.format(
             String.format("Save is for another player's turn (%s).",
-                (null != gi.activeCO) ? gi.activeCO.coInfo.name : "null")));
+                (null != gi.activeArmy) ? gi.getActiveCOIndex() : "null")));
       }
     }
     else
@@ -369,7 +371,7 @@ public class GameInstance implements Serializable
     // Little reason to secure at turn 0; folks often have one player build
     // infantry for everyone for the first round, so we'll create passwords
     // after the second turn and enforce them thereafter.
-    return currentTurn > 1 && isSecurityEnabled && !activeCO.isAI();
+    return currentTurn > 1 && isSecurityEnabled && !activeArmy.isAI();
   }
 
   public boolean requireInitOnLoad()

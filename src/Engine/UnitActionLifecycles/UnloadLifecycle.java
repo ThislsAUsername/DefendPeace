@@ -56,7 +56,7 @@ public abstract class UnloadLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
       return "UNLOAD";
     }
@@ -234,7 +234,7 @@ public abstract class UnloadLifecycle
         transport.heldUnits.remove(cargo);
         gameMap.moveUnit(cargo, dropLoc.xCoord, dropLoc.yCoord);
         cargo.isTurnOver = true;
-        transport.CO.myView.revealFog(cargo);
+        transport.CO.army.myView.revealFog(cargo);
       }
       else
       {

@@ -90,14 +90,14 @@ public class TerrainType implements Serializable
   private static final String TEMP_AIRPORT_NAME = "TEMP_AIRPORT";
   public static final TerrainType TEMP_AIRPORT = new TerrainType( TEMP_AIRPORT_FLAGS, TEMP_AIRPORT_DEFENSE, TEMP_AIRPORT_COLOR, TEMP_AIRPORT_NAME, GRASS );
 
-  private static final int BRIDGE_FLAGS = LAND | WATER;
+  private static final int BRIDGE_FLAGS = LAND;
   private static final int BRIDGE_DEFENSE = 0;
   private static final Color BRIDGE_COLOR = new Color(189, 189, 189);
   private static final String BRIDGE_NAME = "BRIDGE";
   public static final TerrainType BRIDGE = new TerrainType( BRIDGE_FLAGS, BRIDGE_DEFENSE, BRIDGE_COLOR, BRIDGE_NAME, SEA );
 
   private static final int CITY_FLAGS = LAND | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_LAND;
-  private static final int CITY_DEFENSE = 2;
+  private static final int CITY_DEFENSE = 3;
   private static final Color CITY_COLOR = new Color(125, 125, 125); // TODO: define unique color for each building type?
   private static final String CITY_NAME = "CITY";
   public static final TerrainType CITY = new TerrainType( CITY_FLAGS, CITY_DEFENSE, CITY_COLOR, CITY_NAME, GRASS );
@@ -139,7 +139,7 @@ public class TerrainType implements Serializable
   public static final TerrainType FACTORY = new TerrainType( FACTORY_FLAGS, FACTORY_DEFENSE, FACTORY_COLOR, FACTORY_NAME, GRASS );
 
   private static final int FOREST_FLAGS = LAND | PROVIDES_COVER;
-  private static final int FOREST_DEFENSE = 3;
+  private static final int FOREST_DEFENSE = 2;
   private static final Color FOREST_COLOR = new Color(46, 196, 24);
   private static final String FOREST_NAME = "FOREST";
   public static final TerrainType FOREST = new TerrainType( FOREST_FLAGS, FOREST_DEFENSE, FOREST_COLOR, FOREST_NAME, GRASS );
@@ -164,7 +164,7 @@ public class TerrainType implements Serializable
   public static final TerrainType MOUNTAIN = new TerrainType( MOUNTAIN_FLAGS, MOUNTAIN_DEFENSE, MOUNTAIN_COLOR, MOUNTAIN_NAME, GRASS, MOUNTAIN_VISION );
 
   private static final int REEF_FLAGS = WATER | PROVIDES_COVER;
-  private static final int REEF_DEFENSE = 2;
+  private static final int REEF_DEFENSE = 1;
   private static final Color REEF_COLOR = new Color(218, 152, 112);
   private static final String REEF_NAME = "REEF";
   public static final TerrainType REEF = new TerrainType( REEF_FLAGS, REEF_DEFENSE, REEF_COLOR, REEF_NAME, SEA );

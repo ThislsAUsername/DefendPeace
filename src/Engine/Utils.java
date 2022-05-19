@@ -104,16 +104,6 @@ public class Utils
     return dropoffLocations;
   }
 
-  /** Sets the highlight of all tiles in the provided list, and unsets the highlight on all others. */
-  public static void highlightLocations(GameMap map, ArrayList<XYCoord> locations)
-  {
-    map.clearAllHighlights();
-    for( XYCoord loc : locations )
-    {
-      map.getLocation(loc).setHighlight(true);
-    }
-  }
-
   /** Alias for {@link #findPossibleDestinations(XYCoord, Unit, GameMap) findPossibleDestinations()} **/
   public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap, boolean includeOccupiedSpaces)
   {
@@ -446,27 +436,21 @@ public class Utils
   }
 
   /**
-   * Returns a list of all vacant industries a commander owns
+   * Returns a list of all vacant industries a army owns
    */
-  public static ArrayList<XYCoord> findUsableProperties(Commander co, GameMap map)
+  public static ArrayList<XYCoord> findUsableProperties(Army army, GameMap map)
   {
     ArrayList<XYCoord> industries = new ArrayList<XYCoord>();
     // We don't want to bother if we're trying to find nobody's properties
-    if( null != co )
+    if( null != army )
     {
       // Add all vacant, <co>-owned industries to the list
-      for( XYCoord xyc : co.ownedProperties )
+      for( XYCoord xyc : army.getOwnedProperties() )
       {
         MapLocation loc = map.getLocation(xyc);
-        Unit resident = loc.getResident();
-        // We only want industries we can act on, which means they need to be empty
-        // TODO: maybe calculate whether the CO has enough money to buy something at this industry
-        if( null == resident && loc.getOwner() == co )
+        if( army.canBuyOn(loc) )
         {
-          if( co.getShoppingList(loc).size() > 0 )
-          {
-            industries.add(loc.getCoordinates());
-          }
+          industries.add(loc.getCoordinates());
         }
       }
     }
@@ -656,20 +640,20 @@ public class Utils
   }
 
   /**
-   * @return Whether the owner of this property will lose when it's captured
+   * @return Whether the owner of this property will lose if the property is lost
    */
   public static boolean willLoseFromLossOf(MapMaster map, MapLocation capLoc)
   {
     if(null == capLoc.getOwner())
       return false;
 
-    boolean playerHasLost = false;
+    boolean playerWillLose = false;
 
     TerrainType propertyType = capLoc.getEnvironment().terrainType;
 
     if( (propertyType == TerrainType.HEADQUARTERS) )
     {
-      playerHasLost = true;
+      playerWillLose = true;
     }
 
     else if( (propertyType == TerrainType.LAB) )
@@ -693,11 +677,11 @@ public class Utils
       }
       if( numLabs < 2 && numHQs == 0 )
       {
-        playerHasLost = true;
+        playerWillLose = true;
       }
     }
 
-    return playerHasLost;
+    return playerWillLose;
   }
 
   /**

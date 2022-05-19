@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import CommandingOfficers.Commander;
+import Engine.Army;
 import UI.SlidingValue;
 import UI.Art.SpriteArtist.SpriteLibrary;
 import UI.Art.SpriteArtist.SpriteOptions;
@@ -19,7 +19,7 @@ import UI.Art.SpriteArtist.Backgrounds.HorizontalStreaksBG;
  */
 public class TurnInitAnimation extends GameAnimation
 {
-  Commander commander;
+  Army commander;
   int turn;
   boolean opaque;
   boolean waitForButton;
@@ -36,7 +36,7 @@ public class TurnInitAnimation extends GameAnimation
   boolean ending;
   Collection<String> displayText;
 
-  public TurnInitAnimation(Commander cmdr, int turnNum, boolean hideMap, boolean requireButton, Collection<String> message)
+  public TurnInitAnimation(Army cmdr, int turnNum, boolean hideMap, boolean requireButton, Collection<String> message)
   {
     super(false);
     commander = cmdr;
@@ -77,7 +77,7 @@ public class TurnInitAnimation extends GameAnimation
     fgg.fillRect(0, fgImage.getHeight()-drawScale, fgImage.getWidth(), drawScale);
 
     // Fill the frame behind the text.
-    fgg.setColor((opaque ? new Color(255, 255, 255, 180) : commander.myColor));
+    fgg.setColor((opaque ? new Color(255, 255, 255, 180) : commander.cos[0].myColor));
     fgg.fillRect(0, drawScale, fgImage.getWidth(), fgImage.getHeight()-(2*drawScale));
 
     // Draw the message.
@@ -110,7 +110,7 @@ public class TurnInitAnimation extends GameAnimation
     }
 
     // Redraw the bg effects image.
-    HorizontalStreaksBG.draw(bgImage.getGraphics(), commander.myColor);
+    HorizontalStreaksBG.draw(bgImage.getGraphics(), commander.cos[0].myColor);
 
     // Cover the map while sliding the overlay into place if the map should be hidden.
     if( opaque && !ending )

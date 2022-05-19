@@ -9,6 +9,7 @@ import java.util.Queue;
 import java.util.Set;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.GamePath;
@@ -116,12 +117,12 @@ public class AIUtils
   }
 
   /**
-   * Find locations of every property that is not owned by myCo or an ally.
-   * @param myCo Properties of this Commander and allies will be ignored.
+   * Find locations of every property that is not owned by myArmy or an ally.
+   * @param myArmy Properties of this Commander and allies will be ignored.
    * @param gameMap The map to search for properties.
    * @return An ArrayList with the XYCoord of every property that fills the bill.
    */
-  public static ArrayList<XYCoord> findNonAlliedProperties(Commander myCo, GameMap gameMap)
+  public static ArrayList<XYCoord> findNonAlliedProperties(Army myArmy, GameMap gameMap)
   {
     ArrayList<XYCoord> props = new ArrayList<XYCoord>();
     for( int x = 0; x < gameMap.mapWidth; ++x )
@@ -129,7 +130,7 @@ public class AIUtils
       for( int y = 0; y < gameMap.mapHeight; ++y )
       {
         MapLocation loc = gameMap.getLocation(x, y);
-        if( loc.isCaptureable() && myCo.isEnemy(loc.getOwner()) )
+        if( loc.isCaptureable() && myArmy.isEnemy(loc.getOwner()) )
         {
           props.add(new XYCoord(x, y));
         }
@@ -140,11 +141,11 @@ public class AIUtils
 
   /**
    * Find the locations of all non-allied units.
-   * @param myCo Units owned by myCo or allies are skipped.
+   * @param myArmy Units owned by myArmy or allies are skipped.
    * @param gameMap The map to search for units.
-   * @return An ArrayList with the XYCoord of every unit not allied with myCo.
+   * @return An ArrayList with the XYCoord of every unit not allied with myArmy.
    */
-  public static ArrayList<XYCoord> findEnemyUnits(Commander myCo, GameMap gameMap)
+  public static ArrayList<XYCoord> findEnemyUnits(Army army, GameMap gameMap)
   {
     ArrayList<XYCoord> unitLocs = new ArrayList<XYCoord>();
     for( int x = 0; x < gameMap.mapWidth; ++x )
@@ -152,7 +153,7 @@ public class AIUtils
       for( int y = 0; y < gameMap.mapHeight; ++y )
       {
         MapLocation loc = gameMap.getLocation(x, y);
-        if( loc.getResident() != null && myCo.isEnemy(loc.getResident().CO) )
+        if( loc.getResident() != null && army.isEnemy(loc.getResident().CO) )
         {
           unitLocs.add(new XYCoord(x, y));
         }
@@ -165,7 +166,7 @@ public class AIUtils
    * Creates a map of COs to the units they control, based on what can be seen in the passed-in map.
    * Units owned by allies are ignored - ours can be trivially accessed via Commander.units, and we don't control ally behavior.
    */
-  public static Map<Commander, ArrayList<Unit> > getEnemyUnitsByCommander(Commander myCommander, GameMap gameMap)
+  public static Map<Commander, ArrayList<Unit> > getEnemyUnitsByCommander(Army myCommander, GameMap gameMap)
   {
     Map<Commander, ArrayList<Unit> > unitMap = new HashMap<Commander, ArrayList<Unit> >();
 
@@ -230,7 +231,7 @@ public class AIUtils
     ArrayList<XYCoord> stations = new ArrayList<XYCoord>();
     for( XYCoord xyc : unit.CO.ownedProperties ) // TODO: Revisit if we ever get a CO that repairs on non-owned or non-properties
     {
-      MapLocation loc = unit.CO.myView.getLocation(xyc);
+      MapLocation loc = unit.CO.army.myView.getLocation(xyc);
       if( unit.model.canRepairOn(loc) )
       {
         stations.add(loc.getCoordinates());
@@ -242,7 +243,7 @@ public class AIUtils
   /**
    * Find a usable ability that has all specified flags, and add it to the provided queue.
    */
-  public static CommanderAbility queueCromulentAbility(Queue<GameAction> q, Commander co, int flags)
+  public static CommanderAbility queueCromulentAbility(Queue<GameAction> q, Army co, int flags)
   {
     CommanderAbility retVal = null;
     ArrayList<CommanderAbility> abilities = co.getReadyAbilities();
@@ -272,7 +273,7 @@ public class AIUtils
   /**
    * @return Whether a friendly CO can build from the specified coordinates
    */
-  public static boolean isFriendlyProduction(GameMap map, Commander co, XYCoord coord)
+  public static boolean isFriendlyProduction(GameMap map, Army co, XYCoord coord)
   {
     Commander owner = map.getLocation(coord).getOwner();
     if( null == owner || co.isEnemy(owner) )
@@ -330,7 +331,7 @@ public class AIUtils
   /**
    * Finds allied production centers in the input set
    */
-  public static Set<XYCoord> findAlliedIndustries(GameMap gameMap, Commander co, Iterable<XYCoord> coords, boolean ignoreMyOwn)
+  public static Set<XYCoord> findAlliedIndustries(GameMap gameMap, Army co, Iterable<XYCoord> coords, boolean ignoreMyOwn)
   {
     Set<XYCoord> result = new HashSet<XYCoord>();
     for( XYCoord coord : coords )
@@ -338,7 +339,7 @@ public class AIUtils
       Commander owner = gameMap.getLocation(coord).getOwner();
       if( co.isEnemy(owner) )
         continue; // counts as a null check on owner
-      if( ignoreMyOwn && co == owner )
+      if( ignoreMyOwn && co == owner.army )
         continue;
       if( owner.unitProductionByTerrain.containsKey(gameMap.getEnvironment(coord).terrainType) )
         result.add(coord);

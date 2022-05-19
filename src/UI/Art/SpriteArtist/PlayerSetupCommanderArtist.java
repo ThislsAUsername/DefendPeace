@@ -48,7 +48,8 @@ public class PlayerSetupCommanderArtist
     int highlightedCmdr = control.cmdrSelector.getSelectionNormalized();
     int highlightedCmdrOffset = control.cmdrSelector.getSelectionAbsolute();
     BufferedImage likeness = SpriteLibrary.getCommanderSprites( infos.get(highlightedCmdr).name ).body;
-    myG.drawImage(likeness, myWidth-likeness.getWidth(), myHeight-likeness.getHeight(), null);
+    final int likenessVOffset = Math.max(0, myHeight - likeness.getHeight());
+    myG.drawImage(likeness, myWidth-likeness.getWidth(), likenessVOffset, null);
 
     /////////////// Commander Panels //////////////////////
     // Calculate the vertical space each player panel will consume.
@@ -74,7 +75,7 @@ public class PlayerSetupCommanderArtist
       drawYCenter += panelHeight;
     }
 
-    // Draw all of the commander panels that are visible.
+    // Draw all of the army panels that are visible.
     int drawX = SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Make sure we have room to draw the cursor around the frame.
     for(; drawYCenter - CommanderPanel.PANEL_HEIGHT/2 < myHeight ; coToDraw.next(), drawYCenter += (panelHeight))
     {

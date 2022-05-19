@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-import CommandingOfficers.Commander;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.OptionSelector;
@@ -96,7 +96,7 @@ abstract class GameInputState<T>
   public static class StateData
   {
     public final GameMap gameMap;
-    public final Commander commander;
+    public final Army army;
     public Unit unitActor = null;
     public Unit unitLauncher = null;
     public XYCoord unitCoord = null;
@@ -106,10 +106,10 @@ abstract class GameInputState<T>
     public Map<Unit, XYCoord> unitLocationMap = null; // Used to map units to unload locations.
     public Collection<DamagePopup> damagePopups = new ArrayList<DamagePopup>();
 
-    public StateData(GameMap map, Commander co)
+    public StateData(GameMap map, Army army)
     {
       gameMap = map;
-      commander = co;
+      this.army = army;
     }
   }
 

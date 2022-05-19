@@ -3,6 +3,7 @@ package Terrain;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
+import Engine.Army;
 import Engine.GamePath;
 import Engine.GamePath.PathNode;
 import Engine.Utils;
@@ -13,17 +14,16 @@ public class MapPerspective extends GameMap
 {
   private static final long serialVersionUID = 1L;
   MapMaster master;
-  public final Commander viewer; // can be null
+  public final Army viewer; // can be null
   private boolean[][] isFogged;
   private Commander[][] lastOwnerSeen;
   private ArrayList<Unit> confirmedVisibles;
 
-  public MapPerspective(MapMaster pMaster, Commander pViewer)
+  public MapPerspective(MapMaster pMaster, Army pViewer)
   {
     super(pMaster.mapWidth, pMaster.mapHeight);
     master = pMaster;
     viewer = pViewer;
-    commanders = master.commanders;
     isFogged = new boolean[mapWidth][mapHeight];
     confirmedVisibles = new ArrayList<Unit>();
 
@@ -104,16 +104,9 @@ public class MapPerspective extends GameMap
         (isLocationEmpty(coord) && !master.isLocationEmpty(coord)) ) // ...or what's there is hidden
     {
       returnLoc = new MapLocation(returnLoc.getEnvironment(), coord);
-      returnLoc.setHighlight(masterLoc.isHighlightSet());
       returnLoc.setOwner( lastOwnerSeen[x][y] );
     }
     return returnLoc;
-  }
-
-  @Override
-  public void clearAllHighlights()
-  {
-    master.clearAllHighlights();
   }
 
   /** Returns true if no unit is at the specified x and y coordinate, false else */
@@ -185,9 +178,11 @@ public class MapPerspective extends GameMap
     // then reveal what we should see
     if (null == viewer)
       return;
-    for( Commander co : commanders )
+    for( Army army : master.game.armies )
     {
-      if( !viewer.isEnemy(co) )
+      if( viewer.isEnemy(army) )
+        continue;
+      for( Commander co : army.cos )
       {
         for( Unit unit : co.units )
         {
@@ -219,7 +214,7 @@ public class MapPerspective extends GameMap
   {
     if (null == viewer)
       return;
-    if( !viewer.isEnemy(scout.CO) )
+    if( !viewer.isEnemy(scout.CO.army) )
     {
       for( XYCoord coord : Utils.findVisibleLocations(this, scout, false) )
       {
@@ -238,7 +233,7 @@ public class MapPerspective extends GameMap
   {
     if (null == viewer)
       return;
-    if( !viewer.isEnemy(scout.CO) )
+    if( !viewer.isEnemy(scout.CO.army) )
     {
       for( PathNode node : movepath.getWaypoints() )
       {

@@ -170,7 +170,7 @@ public class Bear_Bull extends Commander
         valueDrained += (Math.min(DOWNUPTURN_LIQUIDATION, victim.getHP()) * victim.getCost()) / UnitModel.MAXIMUM_HP;
       }
 
-      powerEvents.add( new ModifyFundsEvent(COcast, valueDrained) ); // Collect profits
+      powerEvents.add( new ModifyFundsEvent(COcast.army, valueDrained) ); // Collect profits
 
       return powerEvents;
     }
@@ -189,10 +189,10 @@ public class Bear_Bull extends Commander
       return output;
     }
 
-    public HashSet<Unit> findVictims(Commander co, GameMap gameMap)
+    public static HashSet<Unit> findVictims(Commander co, GameMap gameMap)
     {
       HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
-      for( XYCoord xyc : co.ownedProperties )
+      for( XYCoord xyc : co.army.getOwnedProperties() )
       {
         MapLocation loc = gameMap.getLocation(xyc);
         if( loc.getOwner() == co )

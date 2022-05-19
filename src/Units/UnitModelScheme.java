@@ -27,7 +27,7 @@ public abstract class UnitModelScheme implements Serializable
    */
   public abstract String getIconicUnitName();
   
-  // Fetches a shopping list and a full unit list for a generic commander.
+  // Fetches a shopping list and a full unit list for a generic army.
   private GameReadyModels grms = null;
   public final GameReadyModels getGameReadyModels()
   {

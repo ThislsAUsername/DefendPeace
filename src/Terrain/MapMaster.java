@@ -3,6 +3,7 @@ package Terrain;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import Engine.Army;
 import Engine.XYCoord;
 import Units.Unit;
 import Units.UnitModel;
@@ -12,15 +13,13 @@ public class MapMaster extends GameMap
 {
   private static final long serialVersionUID = 1L;
   private MapLocation[][] map;
-  public CommandingOfficers.Commander[] commanders;
 
   private boolean initOK = false;
 
-  public MapMaster(CommandingOfficers.Commander[] COs, MapInfo mapInfo)
+  public MapMaster(Army[] propertyOwners, MapInfo mapInfo)
   {
     super(mapInfo.getWidth(), mapInfo.getHeight());
     initOK = true;
-    commanders = COs;
     map = new MapLocation[mapWidth][mapHeight];
 
     // Build the map locations based on the MapInfo data.
@@ -35,20 +34,20 @@ public class MapMaster extends GameMap
     }
 
     // Print a warning if the number of Commanders we have does not match the number the map expects.
-    if( COs.length != mapInfo.COProperties.length )
+    if( propertyOwners.length != mapInfo.COProperties.length )
     {
       System.out.println("Warning! Wrong number of COs specified for map " + mapInfo.mapName);
       initOK = false;
     }
-    if( (mapInfo.mapUnits.size() > 0) && (mapInfo.mapUnits.size() != COs.length ) )
+    if( (mapInfo.mapUnits.size() > 0) && (mapInfo.mapUnits.size() != propertyOwners.length ) )
     {
       System.out.println("Warning! Wrong number of unit arrays specified for map " + mapInfo.mapName);
-      System.out.println(String.format("         Expected zero or %s; received %s", COs.length, mapInfo.mapUnits.size()));
+      System.out.println(String.format("         Expected zero or %s; received %s", propertyOwners.length, mapInfo.mapUnits.size()));
       initOK = false;
     }
 
     // Assign properties according to MapInfo's direction.
-    for( int co = 0; co < mapInfo.COProperties.length && co < COs.length; ++co )
+    for( int co = 0; co < mapInfo.COProperties.length && co < propertyOwners.length; ++co )
     {
       boolean hasHQ = false, hasLab = false, hasProperty = false;
       // Loop through all locations assigned to this CO by mapInfo.
@@ -65,14 +64,14 @@ public class MapMaster extends GameMap
           final TerrainType terrainType = map[x][y].getEnvironment().terrainType;
           if( terrainType == TerrainType.HEADQUARTERS )
           {
-            COs[co].HQLocations.add(new XYCoord(x, y));
+            propertyOwners[co].HQLocations.add(new XYCoord(x, y));
             hasHQ = true;
           }
           else if( terrainType == TerrainType.LAB )
           {
             hasLab = true;
           }
-          location.setOwner(COs[co]);
+          location.setOwner(propertyOwners[co].cos[0]);
         }
         else
         {
@@ -85,12 +84,12 @@ public class MapMaster extends GameMap
         Map<XYCoord, String> unitSet = mapInfo.mapUnits.get(co);
         for( Entry<XYCoord, String> unitEntry : unitSet.entrySet() )
         {
-          UnitModel model = UnitModelScheme.getModelFromString(unitEntry.getValue(), commanders[co].unitModels);
+          UnitModel model = UnitModelScheme.getModelFromString(unitEntry.getValue(), propertyOwners[co].cos[0].unitModels);
           if( model != null )
           {
-            Unit unit = new Unit(commanders[co], model);
+            Unit unit = new Unit(propertyOwners[co].cos[0], model);
             addNewUnit(unit, unitEntry.getKey().xCoord, unitEntry.getKey().yCoord);
-            commanders[co].units.add(unit);
+            propertyOwners[co].cos[0].units.add(unit);
           }
           else
           {
@@ -104,22 +103,22 @@ public class MapMaster extends GameMap
 
       // If we don't have an HQ and do have Labs, then Labs are our HQs
       if( hasLab )
-        for( XYCoord coord : COs[co].ownedProperties )
+        for( XYCoord coord : propertyOwners[co].cos[0].ownedProperties )
         {
           if( getEnvironment(coord).terrainType == TerrainType.LAB )
           {
-            COs[co].HQLocations.add(coord);
+            propertyOwners[co].HQLocations.add(coord);
           }
         }
       // If we own some property, call that good enough for our purposes
       else if( hasProperty )
-        COs[co].HQLocations.addAll(COs[co].ownedProperties);
+        propertyOwners[co].HQLocations.addAll(propertyOwners[co].cos[0].ownedProperties);
       // If we don't have property, use our first unit's starting location
-      else if( !COs[co].units.isEmpty() )
-        COs[co].HQLocations.add(new XYCoord(COs[co].units.get(0)));
+      else if( !propertyOwners[co].cos[0].units.isEmpty() )
+        propertyOwners[co].HQLocations.add(new XYCoord(propertyOwners[co].cos[0].units.get(0)));
       // If we don't even have units, we've already lost
       else
-        COs[co].isDefeated = true;
+        propertyOwners[co].isDefeated = true;
 
     } // ~property assignment loop
   } // ~constructor
@@ -200,18 +199,6 @@ public class MapMaster extends GameMap
       return null;
     }
     return map[w][h];
-  }
-
-  @Override
-  public void clearAllHighlights()
-  {
-    for( int w = 0; w < mapWidth; ++w )
-    {
-      for( int h = 0; h < mapHeight; ++h )
-      {
-        map[w][h].setHighlight(false);
-      }
-    }
   }
 
   /** Returns true if no unit is at the specified x and y coordinate, false else */

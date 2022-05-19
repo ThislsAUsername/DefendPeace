@@ -73,7 +73,7 @@ public abstract class LaunchLifecycle
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
       return "LAUNCH";
     }

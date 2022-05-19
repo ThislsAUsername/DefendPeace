@@ -88,6 +88,8 @@ public class MoveType implements Serializable
   /** Sets the cost to move through terrain during weather. */
   public void setMoveCost(Weathers weather, TerrainType terrain, int cost)
   {
+    if( cost > IMPASSABLE )
+      cost = IMPASSABLE;
     moveCosts.get(weather).put(terrain, cost);
   }
 

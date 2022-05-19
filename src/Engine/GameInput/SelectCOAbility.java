@@ -1,7 +1,7 @@
 package Engine.GameInput;
 
-import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import UI.InputOptionsController;
@@ -17,7 +17,7 @@ public class SelectCOAbility extends GameInputState<CommanderAbility>
   @Override
   protected OptionSet initOptions()
   {
-    return new OptionSet(myStateData.commander.getReadyAbilities().toArray());
+    return new OptionSet(myStateData.army.getReadyAbilities().toArray());
   }
 
   @Override
@@ -26,7 +26,7 @@ public class SelectCOAbility extends GameInputState<CommanderAbility>
     GameInputState<?> next = this;
 
     // Find the chosen ability and activate it.
-    for( CommanderAbility ca : myStateData.commander.getReadyAbilities() )
+    for( CommanderAbility ca : myStateData.army.getReadyAbilities() )
     {
       if( option == ca )
       {
@@ -46,14 +46,14 @@ public class SelectCOAbility extends GameInputState<CommanderAbility>
     switch(InputOptionsController.previewFogPowersOption.getSelectedObject())
     {
       case In_Fog:
-        showPreview = !myStateData.commander.gameRules.isFogEnabled;
+        showPreview = !myStateData.army.gameRules.isFogEnabled;
         break;
       case Hidden_Units:
-        showPreview = !myStateData.commander.gameRules.isFogEnabled;
+        showPreview = !myStateData.army.gameRules.isFogEnabled;
         if( showPreview )
-          for( Commander co : myStateData.gameMap.commanders )
-            if( myStateData.commander.isEnemy(co) )
-              for( Unit unit : co.units )
+          for( Army army : myStateData.gameMap.game.armies )
+            if( myStateData.army.isEnemy(army) )
+              for( Unit unit : army.getUnits() )
                 if( unit.model.hidden )
                 {
                   showPreview = false;

@@ -7,6 +7,7 @@ import java.util.Queue;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.GamePath;
@@ -28,7 +29,7 @@ public class InfantrySpamAI implements AIController
   private static class instantiator implements AIMaker
   {
     @Override
-    public AIController create(Commander co)
+    public AIController create(Army co)
     {
       return new InfantrySpamAI(co);
     }
@@ -57,7 +58,7 @@ public class InfantrySpamAI implements AIController
   
   Queue<GameAction> actions = new ArrayDeque<GameAction>();
 
-  private Commander myCo = null;
+  private Army myArmy = null;
 
   private ArrayList<XYCoord> unownedProperties;
   private ArrayList<XYCoord> capturingProperties;
@@ -66,24 +67,24 @@ public class InfantrySpamAI implements AIController
   private boolean shouldLog = true;
   private int turnNum = 0;
 
-  public InfantrySpamAI(Commander co)
+  public InfantrySpamAI(Army army)
   {
-    myCo = co;
+    myArmy = army;
   }
 
   @Override
   public void initTurn(GameMap gameMap)
   {
     turnNum++;
-    log(String.format("[======== ISAI initializing turn %s for %s =========]", turnNum, myCo));
+    log(String.format("[======== ISAI initializing turn %s for %s =========]", turnNum, myArmy));
 
     // Make sure we don't have any hang-ons from last time.
     actions.clear();
     
     // Create a list of every property we don't own, but want to.
-    unownedProperties = AIUtils.findNonAlliedProperties(myCo, gameMap);
+    unownedProperties = AIUtils.findNonAlliedProperties(myArmy, gameMap);
     capturingProperties = new ArrayList<XYCoord>();
-    for( Unit unit : myCo.units )
+    for( Unit unit : myArmy.getUnits() )
     {
       if( unit.getCaptureProgress() > 0 )
       {
@@ -92,13 +93,13 @@ public class InfantrySpamAI implements AIController
     }
 
     // Check for a turn-kickoff power
-    AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_TURN_START);
+    AIUtils.queueCromulentAbility(actions, myArmy, CommanderAbility.PHASE_TURN_START);
   }
 
   @Override
   public void endTurn()
   {
-    log(String.format("[======== ISAI ending turn %s for %s =========]", turnNum, myCo));
+    log(String.format("[======== ISAI ending turn %s for %s =========]", turnNum, myArmy));
     if( shouldLog )
       System.out.println(logger.toString());
     logger = new StringBuffer();
@@ -122,7 +123,7 @@ public class InfantrySpamAI implements AIController
     }
 
     // Handle actions for each unit the CO owns.
-    for( Unit unit : myCo.units )
+    for( Unit unit : myArmy.getUnits() )
     {
       if( unit.isTurnOver || !gameMap.isLocationValid(unit.x, unit.y))
         continue; // No actions for units that are stale or out of bounds
@@ -173,7 +174,7 @@ public class InfantrySpamAI implements AIController
         {
           goal = unownedProperties.get(index++);
           path = Utils.findShortestPath(unit, goal, gameMap, true);
-          validTarget = (myCo.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
+          validTarget = (myArmy.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
                       && !capturingProperties.contains(goal)                // We aren't already capturing it.
                       && (path.getPathLength() > 0));                       // We can reach it.
           log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
@@ -202,25 +203,31 @@ public class InfantrySpamAI implements AIController
     // Check for an available buying enhancement power
     if( actions.isEmpty() )
     {
-      AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_BUY);
+      AIUtils.queueCromulentAbility(actions, myArmy, CommanderAbility.PHASE_BUY);
     }
     
     // Finally, build more infantry. We will add all build commands at once, since they can't conflict.
     if( actions.isEmpty() )
     {
+      int budget = myArmy.money;
       // Create a list of actions to build infantry on every open factory, then return these actions until done.
       for( int i = 0; i < gameMap.mapWidth; i++ )
       {
         for( int j = 0; j < gameMap.mapHeight; j++)
         {
           MapLocation loc = gameMap.getLocation(i, j);
+          Commander buyer = loc.getOwner();
+          if(null == buyer)
+            continue;
           // If this terrain belongs to me, and I can build something on it, and I have the money, do so.
-          if( loc.getEnvironment().terrainType == TerrainType.FACTORY && loc.getOwner() == myCo && loc.getResident() == null )
+          if( loc.getEnvironment().terrainType == TerrainType.FACTORY && buyer.army == myArmy && loc.getResident() == null )
           {
-            ArrayList<UnitModel> units = myCo.getShoppingList(loc);
-            if( !units.isEmpty() && myCo.getBuyCost(units.get(0), loc.getCoordinates()) <= myCo.money )
+            ArrayList<UnitModel> units = buyer.getShoppingList(loc);
+            final int buyCost = buyer.getBuyCost(units.get(0), loc.getCoordinates());
+            if( !units.isEmpty() && buyCost <= budget )
             {
-              GameAction action = new GameAction.UnitProductionAction(myCo, units.get(0), loc.getCoordinates());
+              GameAction action = new GameAction.UnitProductionAction(buyer, units.get(0), loc.getCoordinates());
+              budget -= buyCost;
               actions.offer( action );
             }
           }
@@ -231,7 +238,7 @@ public class InfantrySpamAI implements AIController
     // Check for a turn-ending power
     if( actions.isEmpty() )
     {
-      AIUtils.queueCromulentAbility(actions, myCo, CommanderAbility.PHASE_TURN_END);
+      AIUtils.queueCromulentAbility(actions, myArmy, CommanderAbility.PHASE_TURN_END);
     }
 
     // Return the next action, or null if actions is empty.

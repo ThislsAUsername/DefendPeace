@@ -43,7 +43,7 @@ class SelectMoveLocation extends GameInputState<XYCoord>
   public GameInputState<?> select(XYCoord coord)
   {
     GameInputState<?> next = this;
-    if( myStateData.unitActor.CO != myStateData.commander )
+    if( myStateData.unitActor.CO.army != myStateData.army )
     {
       // Tell the handler to go back to the previous state.
       next = null;

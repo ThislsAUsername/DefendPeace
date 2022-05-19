@@ -1,7 +1,7 @@
 package Engine.StateTrackers;
 
 import java.util.HashMap;
-import CommandingOfficers.Commander;
+import Engine.Army;
 import Engine.GameEvents.GameEventQueue;
 import Units.Unit;
 import Units.UnitModel;
@@ -23,10 +23,10 @@ public class TransformationTracker extends StateTracker
     return null;
   }
   @Override
-  public GameEventQueue receiveTurnInitEvent(Commander co, int turn)
+  public GameEventQueue receiveTurnInitEvent(Army army, int turn)
   {
     for( Unit u : prevTypeMap.keySet().toArray(new Unit[0]) )
-      if( co == u.CO )
+      if( army == u.CO.army )
         prevTypeMap.remove(u);
 
     return null;

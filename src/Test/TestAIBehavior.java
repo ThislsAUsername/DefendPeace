@@ -7,6 +7,7 @@ import AI.WallyAI;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
@@ -38,13 +39,14 @@ public class TestAIBehavior extends TestCase
     GameScenario scn = new GameScenario();
     testCo1 = new Strong(scn.rules);
     testCo2 = new Patch(scn.rules);
-    AIController testAI = ai.create(testCo1);
+    Army[] cos = { new Army(scn, testCo1), new Army(scn, testCo2) };
+
+    AIController testAI = ai.create(cos[0]);
     testAI.setLogging(false);
-    testCo1.setAIController(testAI);
-    Commander[] cos = { testCo1, testCo2 };
+    cos[0].setAIController(testAI);
 
     testMap = new MapMaster(cos, mapInfo);
-    testGame = new GameInstance(testMap);
+    testGame = new GameInstance(cos, testMap);
   }
 
   private void cleanupTest()
@@ -81,12 +83,12 @@ public class TestAIBehavior extends TestCase
     setupTest(MapReader.readSingleMap("src/Test/TestProduceMega.map"), ai);
 
     // Provide resources.
-    testCo1.money = 80000;
+    testCo1.army.money = 80000;
 
     // Run through the turn's actions.
-    testCo1.initTurn(testMap);
+    testCo1.army.initTurn(testMap);
     boolean testPassed = true;
-    GameAction act = testCo1.getNextAIAction(testMap);
+    GameAction act = testCo1.army.getNextAIAction(testMap);
     testPassed &= validate(null != act, "    Failed to produce an action!");
     performGameAction(act, testGame);
 
@@ -118,11 +120,11 @@ public class TestAIBehavior extends TestCase
     boolean testPassed = validate(testCo1.ownedProperties.contains(facPos), "    Failed to assign factory.");
 
     // Run through the turn's actions.
-    testCo1.initTurn(testMap);
+    testCo1.army.initTurn(testMap);
     GameAction act = null;
     do
     {
-      act = testCo1.getNextAIAction(testMap);
+      act = testCo1.army.getNextAIAction(testMap);
       if( null != act )
         testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
     } while( null != act && testPassed );
@@ -165,15 +167,15 @@ public class TestAIBehavior extends TestCase
     Unit iRight = addUnit(testMap, testCo1, "Infantry", facPos.right());
 
     // The infs all want to cap the fac, but can't because it is occupied. Gotta let the AA through.
-    testCo1.initTurn(testMap);
-    testCo1.money = 0; // No production needed for this test.
+    testCo1.army.initTurn(testMap);
+    testCo1.army.money = 0; // No production needed for this test.
 
     // Run through the turn's actions.
     GameAction act = null;
     boolean testPassed = true;
     do
     {
-      act = testCo1.getNextAIAction(testMap);
+      act = testCo1.army.getNextAIAction(testMap);
       if( null != act )
         testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
     } while( null != act && testPassed );
@@ -208,12 +210,12 @@ public class TestAIBehavior extends TestCase
 
     // The infs will want to cap the enemy HQ. Make sure the first one can
     // displace the second one so they both make best speed.
-    testCo1.initTurn(testMap);
+    testCo1.army.initTurn(testMap);
     GameAction act = null;
     boolean testPassed = true;
     do
     {
-      act = testCo1.getNextAIAction(testMap);
+      act = testCo1.army.getNextAIAction(testMap);
       if( null != act )
         testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
     } while( null != act && testPassed );
@@ -252,11 +254,11 @@ public class TestAIBehavior extends TestCase
     int turnLimit = 4; // This should be enough time to cap the enemy HQ.
     for( int tt = 0; tt < turnLimit; ++tt )
     {
-      testCo1.initTurn(testMap);
+      testCo1.army.initTurn(testMap);
       GameAction act = null;
       do
       {
-        act = testCo1.getNextAIAction(testMap);
+        act = testCo1.army.getNextAIAction(testMap);
         if( null != act )
           testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
       } while( null != act && testPassed );
@@ -297,11 +299,11 @@ public class TestAIBehavior extends TestCase
     int turnLimit = 4; // This should be enough time to cap the enemy HQ.
     for( int tt = 0; tt < turnLimit; ++tt )
     {
-      testCo1.initTurn(testMap);
+      testCo1.army.initTurn(testMap);
       GameAction act = null;
       do
       {
-        act = testCo1.getNextAIAction(testMap);
+        act = testCo1.army.getNextAIAction(testMap);
         if( null != act )
           testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
       } while( null != act && testPassed );
@@ -322,14 +324,14 @@ public class TestAIBehavior extends TestCase
     setupTest(MapReader.readSingleMap("src/Test/TestProductionClearing.map"), ai);
 
     // Give resources.
-    testCo1.money = 80000;
+    testCo1.army.money = 80000;
 
-    testCo1.initTurn(testMap);
+    testCo1.army.initTurn(testMap);
     GameAction act = null;
     boolean testPassed = true;
     do
     {
-      act = testCo1.getNextAIAction(testMap);
+      act = testCo1.army.getNextAIAction(testMap);
       if( null != act )
         testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
     } while( null != act && testPassed );

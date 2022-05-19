@@ -3,11 +3,12 @@ package Test;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;
-import Engine.GameEvents.CommanderDefeatEvent;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.BattleLifecycle;
@@ -29,10 +30,10 @@ public class TestCombat extends TestCase
     GameScenario scn = new GameScenario();
     testCo1 = new Strong(scn.rules);
     testCo2 = new Patch(scn.rules);
-    Commander[] cos = { testCo1, testCo2 };
+    Army[] cos = { new Army(scn, testCo1), new Army(scn, testCo2) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    testGame = new GameInstance(testMap);
+    testGame = new GameInstance(cos, testMap);
   }
 
   @Override
@@ -83,8 +84,8 @@ public class TestCombat extends TestCase
     Unit infB = addUnit(testMap, testCo2, UnitModel.TROOP, 1, 2);
     
     // Make them friends
-    testCo1.team = 0;
-    testCo2.team = 0;
+    testCo1.army.team = 0;
+    testCo2.army.team = 0;
 
     // Make sure the infantry will die with one attack
     infB.damageHP(7);
@@ -100,8 +101,8 @@ public class TestCombat extends TestCase
     // Clean up
     testMap.removeUnit(mechA);
     testMap.removeUnit(infB);
-    testCo1.team = -1;
-    testCo2.team = -1;
+    testCo1.army.team = -1;
+    testCo2.army.team = -1;
 
     return testPassed;
   }
@@ -200,7 +201,7 @@ public class TestCombat extends TestCase
     return testPassed;
   }
 
-  /** Make sure we generate a CommanderDefeatEvent when killing the final unit for a CO. */
+  /** Make sure we generate a ArmyDefeatEvent when killing the final unit for a CO. */
   private boolean testKillLastUnit()
   {
     boolean testPassed = true;
@@ -219,17 +220,17 @@ public class TestCombat extends TestCase
     // Extract the resulting GameEventQueue.
     GameEventQueue events = battleAction.getEvents(testMap);
 
-    // Make sure a CommanderDefeatEvent was generated as a result (the actual event test is in TestGameEvent.java).
+    // Make sure a ArmyDefeatEvent was generated as a result (the actual event test is in TestGameEvent.java).
     boolean hasDefeatEvent = false;
     for( GameEvent event : events )
     {
-      if( event instanceof CommanderDefeatEvent )
+      if( event instanceof ArmyDefeatEvent )
       {
         hasDefeatEvent = true;
         break;
       }
     }
-    testPassed &= validate( hasDefeatEvent, "    No CommanderDefeatEvent generated when losing final unit!");
+    testPassed &= validate( hasDefeatEvent, "    No ArmyDefeatEvent generated when losing final unit!");
 
     return testPassed;
   }
