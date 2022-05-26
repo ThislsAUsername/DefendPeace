@@ -45,8 +45,9 @@ public class JakeMan extends ModularAI
   }
 
   // What % damage I'll ignore when checking safety
-  private static final int INDIRECT_THREAT_THRESHHOLD = 7;
-  private static final int DIRECT_THREAT_THRESHHOLD = 13;
+  private static final int    INDIRECT_THREAT_THRESHHOLD = 7;
+  private static final int    DIRECT_THREAT_THRESHHOLD = 13;
+  private static final double PEACEFUL_SELF_THREAT_RATIO = 0.5;
   private static final int    UNIT_HEAL_THRESHHOLD = 6; // HP at which units heal
   private static final double UNIT_REFUEL_THRESHHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
   private static final double UNIT_REARM_THRESHHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
@@ -206,7 +207,7 @@ public class JakeMan extends ModularAI
           if( !spaceFree )//&& ((unit.CO != resident.CO || resident.isTurnOver)) )
             continue; // Bail if we can't clear the space
 
-          if( ai.isDudeFree(gameMap, unit, moveCoord) )
+          if( ai.isDudeFree(gameMap, unit, moveCoord, true) )
           {
             final GameAction ga = actionSet.getSelected();
             if( ga.getType() == UnitActionFactory.CAPTURE )
@@ -515,7 +516,7 @@ public class JakeMan extends ModularAI
     for( XYCoord xyc : destinations )
     {
       log(String.format("    is it safe to go to %s?", xyc));
-      if( !isDudeFree(gameMap, unit, xyc) )
+      if( !isDudeFree(gameMap, unit, xyc, false) )
         continue;
 
       GameAction action = null;
@@ -597,7 +598,7 @@ public class JakeMan extends ModularAI
     return isWeak;
   }
 
-  private boolean isDudeFree(GameMap gameMap, Unit unit, XYCoord xyc)
+  private boolean isDudeFree(GameMap gameMap, Unit unit, XYCoord xyc, boolean amAttacking)
   {
     HashMap<UnitModel, Double> threatCounts = new HashMap<>();
     for( UnitModel threat : unitMapEnemy.keySet() )
@@ -619,8 +620,13 @@ public class JakeMan extends ModularAI
           continue;
         double counterPowerTotal = 0;
         for( XYCoord coord : counterCoords )
+        {
+          double counterPowerRatio = 1;
+          if( !amAttacking && coord.equals(unit.x, unit.y) )
+            counterPowerRatio = PEACEFUL_SELF_THREAT_RATIO;
           if( unitMapFriendly.get(counter).containsKey(coord) )
-            counterPowerTotal += unitMapFriendly.get(counter).get(coord);
+            counterPowerTotal += counterPowerRatio * unitMapFriendly.get(counter).get(coord);
+        }
         final double counterPowerAverage = counterPowerTotal / counterCoords.size();
         final double threatPower = threatCounts.get(threat);
         if( counterPowerAverage > threatPower )
