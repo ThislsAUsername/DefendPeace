@@ -196,7 +196,7 @@ public class CapPhaseAnalyzer implements Serializable
         inf.x = ownedFac.xCoord;
         inf.y = ownedFac.yCoord;
 
-        final GamePath infPath = Utils.findShortestPath(inf, neutralFac, map, true);
+        final GamePath infPath = findFeasiblePath(inf, neutralFac, map);
         if( null == infPath || infPath.getPathLength() < 1 )
           continue; // Can't reach
 
@@ -227,15 +227,15 @@ public class CapPhaseAnalyzer implements Serializable
         inf.x = ownedFac.xCoord;
         inf.y = ownedFac.yCoord;
 
-        final GamePath tankPath = Utils.findShortestPath(inf, propXYC, map, true);
-        if( null == tankPath || tankPath.getPathLength() < 1 )
+        final GamePath infPath = findFeasiblePath(inf, propXYC, map);
+        if( null == infPath || infPath.getPathLength() < 1 )
           continue; // Can't reach this city
 
         int oldDistance = Integer.MAX_VALUE;
         if( possibleOwners.containsKey(owner.army) )
           oldDistance = possibleOwners.get(owner.army);
 
-        int distance = tankPath.getFuelCost(inf, map) * 100 / inf.getMovePower(map);
+        int distance = infPath.getFuelCost(inf, map) * 100 / inf.getMovePower(map);
         if( distance < oldDistance )
           possibleOwners.put(owner.army, distance);
       }
@@ -285,7 +285,7 @@ public class CapPhaseAnalyzer implements Serializable
       inf.x = start.xCoord;
       inf.y = start.yCoord;
 
-      final GamePath infPath = Utils.findShortestPath(inf, dest, map, true);
+      final GamePath infPath = findFeasiblePath(inf, dest, map);
       if( null == infPath || infPath.getPathLength() < 1 )
         continue; // Can't reach
 
@@ -366,7 +366,7 @@ public class CapPhaseAnalyzer implements Serializable
           Utils.sortLocationsByTravelTime(inf, rightfulProps, map);
           XYCoord dest = rightfulProps.get(0);
 
-          final GamePath infPath = Utils.findShortestPath(inf, dest, map, true);
+          final GamePath infPath = findFeasiblePath(inf, dest, map);
           if( null == infPath || infPath.getPathLength() < 1 )
           {
             last.extraTurns = LOOKAHEAD_TURNS+1;
@@ -404,6 +404,14 @@ public class CapPhaseAnalyzer implements Serializable
       Collections.sort(chainList, new CapStopFundsComparator(infMove));
   }
 
+  public static GamePath findFeasiblePath(final Unit unit, final XYCoord destination, final GameMap map)
+  {
+    final boolean theoretical = true;
+    return Utils.findShortestPath(new XYCoord(unit), unit.getMoveFunctor(true, theoretical),
+                                  unit.getMovePower(map) * (LOOKAHEAD_TURNS),
+                                  destination.xCoord, destination.yCoord,
+                                  map);
+  }
 
   /**
    * Sort CapStop lists by potential total profit
