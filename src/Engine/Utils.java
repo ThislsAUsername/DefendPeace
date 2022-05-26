@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.ArrayDeque;
@@ -500,25 +501,35 @@ public class Utils
   {
     Unit myUnit;
     GameMap myMap;
+    HashMap<XYCoord, Integer> distCache;
 
     public TravelDistanceComparator(Unit unit, GameMap map)
     {
       myUnit = unit;
       myMap = map;
+      distCache = new HashMap<>();
     }
 
     @Override
     public int compare(XYCoord xy1, XYCoord xy2)
     {
-      final boolean theoretical = true;
-      int xy1Dist = findShortestPath(myUnit, xy1, myMap, theoretical).getPathLength();
-      if( 0 == xy1Dist )
-        xy1Dist = Integer.MAX_VALUE;
-      int xy2Dist = findShortestPath(myUnit, xy2, myMap, theoretical).getPathLength();
-      if( 0 == xy2Dist )
-        xy2Dist = Integer.MAX_VALUE;
+      return getCachedDistance(xy1) - getCachedDistance(xy2);
+    }
+    /**
+     * @return The distance from the unit (assumed static) to the coordinate
+     */
+    public int getCachedDistance(XYCoord xyc)
+    {
+      if( distCache.containsKey(xyc) )
+        return distCache.get(xyc);
 
-      return xy1Dist - xy2Dist;
+      final boolean theoretical = true;
+      final GamePath path = findShortestPath(myUnit, xyc, myMap, theoretical);
+      int distance = path.getFuelCost(myUnit, myMap);
+      if( 0 == path.getPathLength() )
+        distance = Integer.MAX_VALUE;
+      distCache.put(xyc, distance);
+      return distance;
     }
   }
 
