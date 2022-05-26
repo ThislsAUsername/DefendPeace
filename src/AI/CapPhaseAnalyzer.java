@@ -24,10 +24,11 @@ import Units.UnitModel;
 public class CapPhaseAnalyzer implements Serializable
 {
   private static final long serialVersionUID = 7714433092190703028L;
+  static final int LOOKAHEAD_TURNS = 3;
 
   public static class CapStop
   {
-    public int extraTiles = 0; // Defines how many tiles we have already looked ahead to try to find another cap stop
+    public int extraTurns = 0; // Defines how many turns we have already looked ahead to try to find another cap stop
     public final XYCoord coord;
     public CapStop(XYCoord coord)
     {
@@ -36,7 +37,7 @@ public class CapPhaseAnalyzer implements Serializable
     @Override
     public String toString()
     {
-      return coord + "+" + extraTiles;
+      return coord + "+" + extraTurns;
     }
   }
   protected Map<XYCoord, ArrayList<ArrayList<CapStop>>> capChains = new HashMap<>();
@@ -292,7 +293,7 @@ public class CapPhaseAnalyzer implements Serializable
 
       ArrayList<CapStop> chain = new ArrayList<>();
       CapStop build = new CapStop(start);
-      build.extraTiles = distance - 13;
+      build.extraTurns = distance/inf.getMovePower(map) - 13;
       chain.add(build);
       CapStop cap = new CapStop(dest);
       chain.add(cap);
@@ -314,27 +315,35 @@ public class CapPhaseAnalyzer implements Serializable
 
   public void buildBaseCapChains(GameMap map, Army viewer, ArrayList<XYCoord> rightfulProps, ArrayList<XYCoord> startingFactories)
   {
+    ArrayList<XYCoord> remainingFactories = new ArrayList<>(startingFactories);
     // Build initial bits of capChains
-    for( XYCoord start : startingFactories )
+    for( XYCoord start : remainingFactories )
     {
-      ArrayList<ArrayList<CapStop>> chain = new ArrayList<>();
-      capChains.put(start, chain);
+      ArrayList<ArrayList<CapStop>> chainList = new ArrayList<>();
+      capChains.put(start, chainList);
     }
 
     boolean madeProgress = true;
     final Unit inf = new Unit(viewer.cos[0], viewer.cos[0].getUnitModel(UnitModel.TROOP));
-    int infMove = inf.getMovePower(map);
-    // Find the next stop or iterate extraTiles on all cap chains
+    if( startingFactories.size() > 0 )
+    {
+      inf.x = startingFactories.get(0).xCoord;
+      inf.y = startingFactories.get(0).yCoord;
+    }
+    final int infMove = inf.getMovePower(map);
+
+    // Find the next stop or iterate extraTurns on all cap chains
     while (madeProgress && !rightfulProps.isEmpty())
     {
       // Create new cap chains
-      for( XYCoord start : startingFactories )
+      for( XYCoord start : remainingFactories )
       {
         ArrayList<CapStop> chain = new ArrayList<>();
         CapStop build = new CapStop(start);
         chain.add(build);
         capChains.get(start).add(0, chain);
       }
+
       madeProgress = false;
       for( ArrayList<ArrayList<CapStop>> chainList : capChains.values() )
         for( ArrayList<CapStop> chain : chainList )
@@ -343,6 +352,13 @@ public class CapPhaseAnalyzer implements Serializable
             break;
 
           CapStop last = chain.get(chain.size() - 1);
+          if( last.extraTurns >= LOOKAHEAD_TURNS )
+          {
+            if (chain.size() == 1)
+              remainingFactories.remove(last.coord);
+            break;
+          }
+
           XYCoord start = last.coord;
 
           inf.x = start.xCoord;
@@ -352,11 +368,14 @@ public class CapPhaseAnalyzer implements Serializable
 
           final GamePath infPath = Utils.findShortestPath(inf, dest, map, true);
           if( null == infPath || infPath.getPathLength() < 1 )
+          {
+            last.extraTurns = LOOKAHEAD_TURNS+1;
             continue; // Can't reach
+          }
           madeProgress = true; // We have somewhere we can still get to
 
-          int distance = infPath.getFuelCost(inf, map);
-          final int currentTotalMove = last.extraTiles + infMove;
+          final int distance = infPath.getFuelCost(inf, map);
+          final int currentTotalMove = (last.extraTurns + 1) * infMove;
 
           if( distance <= currentTotalMove )
           {
@@ -365,7 +384,7 @@ public class CapPhaseAnalyzer implements Serializable
             chain.add(cap);
           }
           else
-            last.extraTiles = Math.min(infMove * 2, currentTotalMove);
+            last.extraTurns++;
         }
     }
 
@@ -414,7 +433,7 @@ public class CapPhaseAnalyzer implements Serializable
 
       for(int i = 1; i < capList.size() || currentTurn >= turnLimit; ++i)
       {
-        int turnShift = (int) Math.ceil(capList.get(i-1).extraTiles / (double)infMove);
+        int turnShift = capList.get(i-1).extraTurns;
         currentTurn += turnShift + 1; // +1 for the extra cap turn
         // We get income from the prop for every turn after we captured it
         currentIncome += Math.max(0, turnLimit - currentTurn);
