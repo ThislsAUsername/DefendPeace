@@ -20,6 +20,11 @@ public class SpriteArrows
   {
     this(0, 0, 0, SpriteUIUtils.MENUFRAMECOLOR);
   }
+  public SpriteArrows(boolean isVertical)
+  {
+    this();
+    this.isVertical = isVertical;
+  }
 
   public SpriteArrows(int x, int y, int l, Color c)
   {

@@ -115,7 +115,9 @@ public class PlayerSetupTeamArtist
 
     // Draw the mini map.
     g.drawImage(miniMap, mapLeft, mapTop, mapWidth, mapHeight, null);
-    drawPlayerPropertyHighlights(g, mapLeft, mapTop, mapInfo, mmScale * miniMap.getWidth()/mapInfo.getWidth(), highlightedPlayer, (int) (Math.abs(target - player0YCenter.get())/4));
+    drawPlayerPropertyHighlights(g, mapLeft, mapTop, mapInfo,
+                                 mmScale * (double) (miniMap.getWidth()) / mapInfo.getWidth(),
+                                 highlightedPlayer, (int) (Math.abs(target - player0YCenter.get()) / 4));
 
     // Render the final composed image to the window.
     g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
@@ -195,14 +197,15 @@ public class PlayerSetupTeamArtist
    * Draws little white boxes around all the currently-highlighted player's properties.
    * @param distance - defines how far the boxes should be from the property edge (serves to highlight the new properties when switching between players)
    */
-  private static void drawPlayerPropertyHighlights(Graphics g, int baseX, int baseY, MapInfo mapInfo, int scale, int faction, int distance)
+  private static void drawPlayerPropertyHighlights(Graphics g, int baseX, int baseY, MapInfo mapInfo, double scale, int faction, int distance)
   {
     g.setColor(Color.WHITE);
     XYCoord[] ownedCoords = mapInfo.COProperties[faction];
     for( XYCoord coord : ownedCoords )
     {
-      int x = baseX + coord.xCoord * scale - distance, y = baseY + coord.yCoord * scale - distance;
-      int s = scale + distance * 2;
+      int x = (int)(baseX + coord.xCoord * scale - distance);
+      int y = (int)(baseY + coord.yCoord * scale - distance);
+      int s = (int)(scale + distance * 2);
       g.drawRect(x, y, s, s);
     }
   }
