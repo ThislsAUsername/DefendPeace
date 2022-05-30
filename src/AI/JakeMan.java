@@ -44,17 +44,17 @@ public class JakeMan extends ModularAI
     return info;
   }
 
-  // What % damage I'll ignore when checking safety
+  // What % base damage I'll ignore when checking safety
   private static final int    INDIRECT_THREAT_THRESHHOLD = 7;
   private static final int    DIRECT_THREAT_THRESHHOLD = 13;
+  // Value to scale the funds damage I deal to something that threatens me
+  private static final double FIRSTSTRIKE_ON_THREAT_WEIGHT = 2.0;
+  private static final int    STAY_UNHURT_BIAS = 1000;
+  private static final int    STAY_ALIVE_BIAS = 2000;
   private static final double PEACEFUL_SELF_THREAT_RATIO = 0.8;
   private static final int    UNIT_HEAL_THRESHHOLD = 6; // HP at which units heal
   private static final double UNIT_REFUEL_THRESHHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
   private static final double UNIT_REARM_THRESHHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
-
-  private static final double TERRAIN_FUNDS_WEIGHT = 2.5; // Multiplier for per-city income for adding value to units threatening to cap
-  private static final double TERRAIN_INDUSTRY_WEIGHT = 20000; // Funds amount added to units threatening to cap an industry
-  private static final double TERRAIN_HQ_WEIGHT = 42000; //      
 
   private Map<UnitModel, Map<XYCoord, Double>> unitMapEnemy;
   private Map<UnitModel, Map<XYCoord, Double>> unitMapFriendly;
@@ -207,7 +207,8 @@ public class JakeMan extends ModularAI
           if( !spaceFree )//&& ((unit.CO != resident.CO || resident.isTurnOver)) )
             continue; // Bail if we can't clear the space
 
-          if( ai.isDudeFree(gameMap, unit, moveCoord, true) )
+          final boolean amAttacking = true;
+          if( ai.isDudeFree(gameMap, unit, moveCoord, amAttacking) )
           {
             final GameAction ga = actionSet.getSelected();
             if( ga.getType() == UnitActionFactory.CAPTURE )
@@ -559,18 +560,23 @@ public class JakeMan extends ModularAI
     {
       double damageValue = AICombatUtils.scoreAttackAction(unit, attack, gameMap,
           (results) -> {
-            double loss   = Math.min(unit                 .getHP(), (int)results.attacker.getPreciseHPDamage());
-            double damage = Math.min(results.defender.unit.getHP(), (int)results.defender.getPreciseHPDamage());
+            final Unit defender = results.defender.unit;
+            int loss   = Math.min(unit    .getHP(), (int)results.attacker.getPreciseHPDamage());
+            int damage = Math.min(defender.getHP(), (int)results.defender.getPreciseHPDamage());
 
             // Convert to abstract value
-            final boolean includeCurrentHealth = false;
-            loss *= valueUnit(unit, gameMap.getLocation(attack.getMoveLocation()), includeCurrentHealth);
-            damage *= valueUnit(results.defender.unit, gameMap.getLocation(new XYCoord(results.defender.unit)), includeCurrentHealth);
+            int extraLoss = 0;
+            if( loss >= 1 && unit.getHP() == UnitModel.MAXIMUM_HP )
+              extraLoss += STAY_UNHURT_BIAS;
+            if( loss >= unit.getHP() )
+              extraLoss += STAY_ALIVE_BIAS;
+            loss *= unit.getCost();
+            loss += extraLoss;
+            damage *= defender.getCost();
+            if( isThreatenedBy(unit.model, defender.model) )
+              damage *= FIRSTSTRIKE_ON_THREAT_WEIGHT;
 
-            if( damage > loss )
-              return damage;
-
-            return 0.;
+            return (double)(damage - loss);
           }, (terrain, params) -> 0.01); // Attack terrain, but don't prioritize it over units
 
       if( damageValue > bestDamage )
@@ -582,7 +588,7 @@ public class JakeMan extends ModularAI
     return bestAttack;
   }
 
-  private boolean isThreatenedBy(UnitModel um, UnitModel threat)
+  private static boolean isThreatenedBy(UnitModel um, UnitModel threat)
   {
     int threshhold = um.hasDirectFireWeapon() ? DIRECT_THREAT_THRESHHOLD : INDIRECT_THREAT_THRESHHOLD;
     boolean isThreat = false;
@@ -591,7 +597,7 @@ public class JakeMan extends ModularAI
     return isThreat;
   }
 
-  private boolean isWeakTo(UnitModel um, UnitModel threat)
+  private static boolean isWeakTo(UnitModel um, UnitModel threat)
   {
     boolean isWeak = isThreatenedBy(um, threat);
     isWeak &= !isThreatenedBy(threat, um);
@@ -653,35 +659,6 @@ public class JakeMan extends ModularAI
     if( defLevel > totalThreat )
       return true;
     return false;
-  }
-
-  private static int valueUnit(Unit unit, MapLocation locale, boolean includeCurrentHealth)
-  {
-    int value = unit.getCost();
-
-    if( unit.CO.isEnemy(locale.getOwner()) &&
-            unit.hasActionType(UnitActionFactory.CAPTURE)
-            && locale.isCaptureable() )
-      value += valueTerrain(unit.CO, locale.getEnvironment().terrainType); // Strongly value units that threaten capture
-
-    if( includeCurrentHealth )
-      value *= unit.getHP();
-    value -= locale.getEnvironment().terrainType.getDefLevel(); // Value things on lower terrain more, so we wall for equal units if we can get on better terrain
-
-    return value;
-  }
-
-  private static int valueTerrain(Commander co, TerrainType terrain)
-  {
-    int value = 0;
-    if( terrain.isProfitable() )
-      value += co.gameRules.incomePerCity * TERRAIN_FUNDS_WEIGHT;
-    if( co.unitProductionByTerrain.containsKey(terrain) )
-      value += TERRAIN_INDUSTRY_WEIGHT;
-    if( TerrainType.HEADQUARTERS == terrain
-        || TerrainType.LAB == terrain )
-      value += TERRAIN_HQ_WEIGHT;
-    return value;
   }
 
   private Map<XYCoord, UnitModel> queueUnitProductionActions(GameMap gameMap)
