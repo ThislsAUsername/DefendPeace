@@ -47,7 +47,7 @@ public class JakeMan extends ModularAI
   // What % damage I'll ignore when checking safety
   private static final int    INDIRECT_THREAT_THRESHHOLD = 7;
   private static final int    DIRECT_THREAT_THRESHHOLD = 13;
-  private static final double PEACEFUL_SELF_THREAT_RATIO = 0.5;
+  private static final double PEACEFUL_SELF_THREAT_RATIO = 0.8;
   private static final int    UNIT_HEAL_THRESHHOLD = 6; // HP at which units heal
   private static final double UNIT_REFUEL_THRESHHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
   private static final double UNIT_REARM_THRESHHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
