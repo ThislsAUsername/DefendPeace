@@ -51,7 +51,8 @@ public class JakeMan extends ModularAI
   private static final double FIRSTSTRIKE_ON_THREAT_WEIGHT = 2.0;
   private static final int    STAY_UNHURT_BIAS = 1000;
   private static final int    STAY_ALIVE_BIAS = 2000;
-  private static final double PEACEFUL_SELF_THREAT_RATIO = 0.8;
+  // Fraction of the unit to remove from the counter-threat power of my unit type if I'm not attacking
+  private static final double PEACEFUL_SELF_THREAT_RATIO = 1;
   private static final int    UNIT_HEAL_THRESHHOLD = 6; // HP at which units heal
   private static final double UNIT_REFUEL_THRESHHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
   private static final double UNIT_REARM_THRESHHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
@@ -625,13 +626,15 @@ public class JakeMan extends ModularAI
         if( !isThreatenedBy(threat, counter) )
           continue;
         double counterPowerTotal = 0;
+        final boolean counterIsMeAndIAmPeaceful = !amAttacking && (counter == unit.model);
         for( XYCoord coord : counterCoords )
         {
-          double counterPowerRatio = 1;
-          if( !amAttacking && coord.equals(unit.x, unit.y) )
-            counterPowerRatio = PEACEFUL_SELF_THREAT_RATIO;
+          double counterPower = 0;
           if( unitMapFriendly.get(counter).containsKey(coord) )
-            counterPowerTotal += counterPowerRatio * unitMapFriendly.get(counter).get(coord);
+            counterPower = unitMapFriendly.get(counter).get(coord);
+          if( counterIsMeAndIAmPeaceful )
+            counterPower -= PEACEFUL_SELF_THREAT_RATIO * unit.getHPFactor();
+          counterPowerTotal += Math.max(0, counterPower);
         }
         final double counterPowerAverage = counterPowerTotal / counterCoords.size();
         final double threatPower = threatCounts.get(threat);
