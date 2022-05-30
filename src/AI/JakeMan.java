@@ -134,19 +134,21 @@ public class JakeMan extends ModularAI
         else
           mapToFill = ai.unitMapFriendly;
 
-            for( Unit threat : unitLists.get(co) )
-            {
-              // add each new threat to the existing threats
+        for( Unit threat : unitLists.get(co) )
+        {
+          // add each new threat to the existing threats
           final UnitModel um = threat.model;
           if( !mapToFill.containsKey(um) )
             mapToFill.put(um, new HashMap<>());
           Map<XYCoord, Double> threatArea = mapToFill.get(um);
-          double newValue = threat.getHP() / 10.0;
+          double newValue = threat.getHPFactor();
+          // Square unit fraction so low-HP units aren't valued so much
+          newValue *= newValue;
           for( XYCoord coord : AICombatUtils.findThreatPower(gameMap, threat, null).keySet() )
-              {
+          {
             if( !threatArea.containsKey(coord) )
               threatArea.put(coord, newValue);
-                else
+            else
               threatArea.put(coord, newValue + threatArea.get(coord));
           }
         }
