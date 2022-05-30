@@ -207,11 +207,13 @@ public class JakeMan extends ModularAI
           boolean spaceFree = null == resident;
           if( !spaceFree )//&& ((unit.CO != resident.CO || resident.isTurnOver)) )
             continue; // Bail if we can't clear the space
+          final GameAction ga = actionSet.getSelected();
+          if( ga.getType() == UnitActionFactory.WAIT )
+            continue;
 
           final boolean amAttacking = true;
           if( ai.isDudeFree(gameMap, unit, moveCoord, amAttacking) )
           {
-            final GameAction ga = actionSet.getSelected();
             if( ga.getType() == UnitActionFactory.CAPTURE )
             {
               return ga;
