@@ -629,7 +629,7 @@ public class JakeMan extends ModularAI
         }
         final double counterPowerAverage = counterPowerTotal / counterCoords.size();
         final double threatPower = threatCounts.get(threat);
-        if( counterPowerAverage > threatPower )
+        if( counterPowerAverage >= threatPower )
         {
           threatCounts.remove(threat);
           break;
@@ -648,9 +648,10 @@ public class JakeMan extends ModularAI
       if( isWeakTo(unit.model, threat) )
         totalThreat += threatCounts.get(threat) * 2;
     }
-    // If we have fewer than 2 extra threats, but we have good terrain, that's good enough
-    if( totalThreat < 2 )
-      return gameMap.getEnvironment(xyc).terrainType.getDefLevel() > 1;
+    // If we have threats, but we have good terrain, that's good enough
+    final int defLevel = gameMap.getEnvironment(xyc).terrainType.getDefLevel();
+    if( defLevel > totalThreat )
+      return true;
     return false;
   }
 
