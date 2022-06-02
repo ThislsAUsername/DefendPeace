@@ -123,21 +123,21 @@ public class CapPhaseAnalyzer implements Serializable
   {
     XYCoord goal = chain.get(0).coord;
 
-    boolean includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
+    boolean includeOccupiedSpaces = false; // We assume that the area won't be cluttered
     ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces);
 
     // If we can get to our destination, go for it
     if( destinations.contains(goal) )
       return new CaptureLifecycle.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, goal, gameMap));
 
-    Utils.sortLocationsByTravelTime(goal, unit, destinations, gameMap);
+    Utils.sortLocationsByTravelTimeToCoord(unit, destinations, gameMap, goal);
 
     for( XYCoord moveCoord : destinations )
     {
       Unit resident = gameMap.getLocation(moveCoord).getResident();
       boolean spaceFree = null == resident;
-      if( !spaceFree )//&& ((unit.CO != resident.CO || resident.isTurnOver)) )
-        continue; // Bail if we can't clear the space
+      if( !spaceFree )
+        continue; // I don't know how we got here, but bail
 
       // Figure out how to get here.
       GamePath movePath = Utils.findShortestPath(unit, moveCoord, gameMap);
