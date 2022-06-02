@@ -130,7 +130,7 @@ public class CapPhaseAnalyzer implements Serializable
     if( destinations.contains(goal) )
       return new CaptureLifecycle.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, goal, gameMap));
 
-    Utils.sortLocationsByDistance(goal, destinations);
+    Utils.sortLocationsByTravelTime(goal, unit, destinations, gameMap);
 
     for( XYCoord moveCoord : destinations )
     {

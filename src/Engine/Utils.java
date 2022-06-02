@@ -239,6 +239,11 @@ public class Utils
   {
     return findShortestPath(start, unit, destination.xCoord, destination.yCoord, map, false);
   }
+  /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
+  public static GamePath findShortestPath(XYCoord start, Unit unit, XYCoord destination, GameMap map, boolean theoretical)
+  {
+    return findShortestPath(start, unit, destination.xCoord, destination.yCoord, map, theoretical);
+  }
   /**
    * Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)}
    * @param theoretical If true, ignores other Units and move-power limitations.
@@ -499,13 +504,15 @@ public class Utils
    */
   public static class TravelDistanceComparator implements Comparator<XYCoord>
   {
-    Unit myUnit;
+    final Unit myUnit;
+    final XYCoord start;
     GameMap myMap;
     HashMap<XYCoord, Integer> distCache;
 
-    public TravelDistanceComparator(Unit unit, GameMap map)
+    public TravelDistanceComparator(Unit unit, XYCoord coord, GameMap map)
     {
       myUnit = unit;
+      start = coord;
       myMap = map;
       distCache = new HashMap<>();
     }
@@ -524,7 +531,7 @@ public class Utils
         return distCache.get(xyc);
 
       final boolean theoretical = true;
-      final GamePath path = findShortestPath(myUnit, xyc, myMap, theoretical);
+      final GamePath path = findShortestPath(start, myUnit, xyc, myMap, theoretical);
       int distance = path.getFuelCost(myUnit, myMap);
       if( 0 == path.getPathLength() )
         distance = Integer.MAX_VALUE;
@@ -533,14 +540,13 @@ public class Utils
     }
   }
 
-  /**
-   * Sorts the mapLocations array by distance from the 'center' coordinate.
-   * @param center
-   * @param mapLocations
-   */
   public static void sortLocationsByTravelTime(Unit unit, ArrayList<XYCoord> mapLocations, GameMap map)
   {
-    TravelDistanceComparator tdc = new TravelDistanceComparator(unit, map);
+    sortLocationsByTravelTime(new XYCoord(unit), unit, mapLocations, map);
+  }
+  public static void sortLocationsByTravelTime(XYCoord start, Unit unit, ArrayList<XYCoord> mapLocations, GameMap map)
+  {
+    TravelDistanceComparator tdc = new TravelDistanceComparator(unit, start, map);
     Collections.sort(mapLocations, tdc);
   }
   
