@@ -153,6 +153,9 @@ public class CommanderOverlayArtist
    */
   public static BufferedImage buildCoPowerBar(Commander co, double[] abilityPoints, double currentPower, boolean leftSide)
   {
+    if( 0 == abilityPoints.length )
+      return SpriteLibrary.createTransparentSprite(1, 1);
+
     final double pixelsPerPowerUnit = 3.0;
     final int animIndex = getAnimIndex();
     int slowAnimIndex = (animIndex/32) % 2;
