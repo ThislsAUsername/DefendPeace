@@ -82,7 +82,7 @@ public class OptionSelector
     highlightedOption--;
   }
 
-  public void handleInput(InputAction action)
+  public int handleInput(InputAction action)
   {
     switch( action )
     {
@@ -100,6 +100,7 @@ public class OptionSelector
       default:
         System.out.println("Warning: Unexpected input received in OptionSelector.");
     }
+    return getSelectionNormalized();
   }
   
   public int size()
