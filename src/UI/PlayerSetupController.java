@@ -161,7 +161,7 @@ public class PlayerSetupController implements IController
       case SEEK:
         ArrayList<CommanderInfo> infos = new ArrayList<CommanderInfo>();
         for( PlayerSetupInfo info : coSelectors)
-          infos.add(info.getCurrentCO());
+          infos.addAll(info.getCurrentCOList());
         CO_InfoController coInfoMenu = new CO_InfoController(infos, playerSelector.getSelectionNormalized());
         IView infoView = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
 

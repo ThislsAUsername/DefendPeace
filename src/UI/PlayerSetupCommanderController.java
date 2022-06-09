@@ -26,13 +26,13 @@ public class PlayerSetupCommanderController implements IController
 
     // Make sure we start with the cursor on the currently-selected Commander.
     cmdrSelector = new OptionSelector(infos.size());
-    cmdrSelector.setSelectedOption(myPlayerInfo.currentCo);
+    cmdrSelector.setSelectedOption(myPlayerInfo.coList.get(0));
 
-    // TODO: adjust for multi-CO
     tagCmdrList = new ArrayList<>();
-    tagCmdrList.add(myPlayerInfo.currentCo);
+    tagCmdrList.addAll(myPlayerInfo.coList);
     // TODO: Check for tagging mode
-    tagCmdrList.add(noCmdrIndex); // Append a No CO
+    if( noCmdrIndex != tagCmdrList.get(0) )
+      tagCmdrList.add(noCmdrIndex); // Append a No CO
 
     tagIndex = new OptionSelector(tagCmdrList.size());
     tagIndex.setSelectedOption(0);
@@ -46,8 +46,10 @@ public class PlayerSetupCommanderController implements IController
     {
       case SELECT:
         // Apply change and return control.
-        // TODO: adjust for multi-CO
-        myPlayerInfo.currentCo = cmdrSelector.getSelectionNormalized();
+        // TODO: Check for tagging mode
+        if( tagCmdrList.size() > 1 )
+          tagCmdrList.remove(tagCmdrList.size() - 1); // Chop off the final No CO
+        myPlayerInfo.coList = tagCmdrList;
         done = true;
         break;
       case UP:
