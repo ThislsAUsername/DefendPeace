@@ -47,8 +47,11 @@ public class PlayerSetupCommanderArtist
     myG.drawImage(tooltip, myWidth - tooltip.getWidth(), 3, null);
 
     /////////////// Tag Picker Panels //////////////////////
-    int tagPickerOffset = tooltip.getHeight() + 2 + SpriteLibrary.getCursorSprites().getFrame(0).getHeight();
-    drawTagPickerPanels(myG, tagPickerOffset, myWidth, infos, playerColor, snapCursor);
+    if( myControl.shouldSelectMultiCO || myControl.tagCmdrList.size() > 1 )
+    {
+      int tagPickerOffset = tooltip.getHeight() + 2 + SpriteLibrary.getCursorSprites().getFrame(0).getHeight();
+      drawTagPickerPanels(myG, tagPickerOffset, myWidth, infos, playerColor, snapCursor);
+    }
 
     /////////////// Commander Portrait //////////////////////
     int highlightedCmdr = control.cmdrSelector.getSelectionNormalized();

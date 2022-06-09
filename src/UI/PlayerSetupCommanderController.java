@@ -7,6 +7,7 @@ import Engine.Driver;
 import Engine.IController;
 import Engine.IView;
 import Engine.OptionSelector;
+import Engine.GameScenario.TagMode;
 import UI.InputHandler.InputAction;
 
 public class PlayerSetupCommanderController implements IController
@@ -14,15 +15,17 @@ public class PlayerSetupCommanderController implements IController
   private PlayerSetupInfo myPlayerInfo;
   private ArrayList<CommanderInfo> cmdrInfos;
   private int noCmdrIndex;
+  public final boolean shouldSelectMultiCO;
   public OptionSelector cmdrSelector;
   public OptionSelector tagIndex;
   public ArrayList<Integer> tagCmdrList;
 
-  public PlayerSetupCommanderController(ArrayList<CommanderInfo> infos, PlayerSetupInfo playerInfo)
+  public PlayerSetupCommanderController(ArrayList<CommanderInfo> infos, PlayerSetupInfo playerInfo, TagMode tagMode)
   {
     cmdrInfos = infos;
     noCmdrIndex = infos.size() - 1;
     myPlayerInfo = playerInfo;
+    shouldSelectMultiCO = tagMode.supportsMultiCmdrSelect;
 
     // Make sure we start with the cursor on the currently-selected Commander.
     cmdrSelector = new OptionSelector(infos.size());
@@ -30,8 +33,7 @@ public class PlayerSetupCommanderController implements IController
 
     tagCmdrList = new ArrayList<>();
     tagCmdrList.addAll(myPlayerInfo.coList);
-    // TODO: Check for tagging mode
-    if( noCmdrIndex != tagCmdrList.get(0) )
+    if( shouldSelectMultiCO && noCmdrIndex != tagCmdrList.get(0) )
       tagCmdrList.add(noCmdrIndex); // Append a No CO
 
     tagIndex = new OptionSelector(tagCmdrList.size());
@@ -46,7 +48,6 @@ public class PlayerSetupCommanderController implements IController
     {
       case SELECT:
         // Apply change and return control.
-        // TODO: Check for tagging mode
         if( tagCmdrList.size() > 1 )
           tagCmdrList.remove(tagCmdrList.size() - 1); // Chop off the final No CO
         myPlayerInfo.coList = tagCmdrList;
@@ -57,7 +58,7 @@ public class PlayerSetupCommanderController implements IController
       {
         int tagPicked = tagIndex.getSelectionNormalized();
         // Check for CO addition
-        if( cmdrSelector.getSelectionNormalized() == noCmdrIndex )
+        if( shouldSelectMultiCO && cmdrSelector.getSelectionNormalized() == noCmdrIndex )
         {
           tagCmdrList.add(noCmdrIndex);
           tagIndex.reset(tagCmdrList.size());
@@ -66,7 +67,7 @@ public class PlayerSetupCommanderController implements IController
         final int cmdrPicked = cmdrSelector.handleInput(action);
         tagCmdrList.set(tagPicked, cmdrPicked);
         // Check for CO deletion
-        if( cmdrPicked == noCmdrIndex )
+        if( shouldSelectMultiCO && cmdrPicked == noCmdrIndex )
         {
           tagCmdrList.remove(tagPicked);
           tagIndex.reset(tagCmdrList.size());
