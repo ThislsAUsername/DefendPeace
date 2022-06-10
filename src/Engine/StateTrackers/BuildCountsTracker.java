@@ -32,7 +32,7 @@ public class BuildCountsTracker extends StateTracker
     return null;
   }
   @Override
-  public GameEventQueue receiveTurnInitEvent(Army army, int turn)
+  public GameEventQueue receiveTurnEndEvent(Army army, int turn)
   {
     for( Commander co : army.cos )
       buildCounts.resetCountFor(co);

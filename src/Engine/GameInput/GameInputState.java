@@ -59,7 +59,6 @@ abstract class GameInputState<T>
         selector = new OptionSelector(myOptions.getMenuOptions().length);
         break;
       case ACTION_READY:
-      case END_TURN:
       case FREE_TILE_SELECT:
       case LEAVE_MAP:
       case PATH_SELECT:

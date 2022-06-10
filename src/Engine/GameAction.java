@@ -13,6 +13,7 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MassDamageEvent;
 import Engine.GameEvents.ModifyFundsEvent;
 import Engine.GameEvents.TeleportEvent;
+import Engine.GameEvents.TurnEndEvent;
 import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.TeleportEvent.AnimationStyle;
 import Engine.GameEvents.TeleportEvent.CollisionOutcome;
@@ -50,6 +51,47 @@ public abstract class GameAction
   // ==========================================================
   //   Concrete Action type classes.
   // ==========================================================
+
+  // ===========  EndTurnAction  ==============================
+  public static class EndTurnAction extends GameAction
+  {
+    private final Army who;
+    private final int turn;
+    public EndTurnAction(Army who, int turn)
+    {
+      this.who = who;
+      this.turn = turn;
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue buildEvents = new GameEventQueue();
+
+      buildEvents.add(new TurnEndEvent(who, turn));
+
+      return buildEvents;
+    }
+
+    public XYCoord getMoveLocation()
+    {
+      return null;
+    }
+    public XYCoord getTargetLocation()
+    {
+      return null;
+    }
+    public UnitActionFactory getType()
+    {
+      return null;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[End turn %s for %s]", turn, who);
+    }
+  } // ~EndTurnAction
 
   // ===========  UnitProductionAction  ==============================
   public static class UnitProductionAction extends GameAction

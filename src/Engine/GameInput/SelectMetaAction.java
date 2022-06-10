@@ -1,5 +1,7 @@
 package Engine.GameInput;
 
+import Engine.GameAction;
+import Engine.GameActionSet;
 import Engine.GameInput.GameInputHandler.InputType;
 
 public class SelectMetaAction extends GameInputState<SelectMetaAction.MetaAction>
@@ -65,7 +67,10 @@ public class SelectMetaAction extends GameInputState<SelectMetaAction.MetaAction
     }
     else if( MetaAction.END_TURN == option )
     {
-      next = new StartNextTurn(myStateData);
+      GameAction endTurn = new GameAction.EndTurnAction(myStateData.army, myStateData.gameMap.game.getCurrentTurn());
+      GameActionSet gaSet = new GameActionSet(endTurn, false);
+      myStateData.actionSet = gaSet;
+      next = new ActionReady(myStateData);
     }
     return next;
   }

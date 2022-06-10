@@ -10,7 +10,7 @@ import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 
 /**
- * Does nothing except signal the start of a Commander's turn.
+ * Does nothing except signal the start of an Army's turn.
  */
 public class TurnInitEvent implements GameEvent
 {

@@ -20,7 +20,7 @@ public class GameInputHandler
   private Stack<GameInputState<?>> myStateStack = null;
   private StateChangedCallback myCallback = null;
 
-  public enum InputType { FREE_TILE_SELECT, PATH_SELECT, MENU_SELECT, CONSTRAINED_TILE_SELECT, ACTION_READY, END_TURN, SAVE, LEAVE_MAP, CO_STATS, CO_INFO, DAMAGE_CHART };
+  public enum InputType { FREE_TILE_SELECT, PATH_SELECT, MENU_SELECT, CONSTRAINED_TILE_SELECT, ACTION_READY, SAVE, LEAVE_MAP, CO_STATS, CO_INFO, DAMAGE_CHART };
 
   public GameInputHandler(GameMap map, Army currentPlayer, StateChangedCallback callback)
   {

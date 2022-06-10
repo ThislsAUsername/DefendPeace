@@ -23,7 +23,7 @@ public class TransformationTracker extends StateTracker
     return null;
   }
   @Override
-  public GameEventQueue receiveTurnInitEvent(Army army, int turn)
+  public GameEventQueue receiveTurnEndEvent(Army army, int turn)
   {
     for( Unit u : prevTypeMap.keySet().toArray(new Unit[0]) )
       if( army == u.CO.army )
