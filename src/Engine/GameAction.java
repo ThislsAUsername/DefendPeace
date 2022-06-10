@@ -12,6 +12,7 @@ import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MassDamageEvent;
 import Engine.GameEvents.ModifyFundsEvent;
+import Engine.GameEvents.SwapCOEvent;
 import Engine.GameEvents.TeleportEvent;
 import Engine.GameEvents.TurnEndEvent;
 import Engine.GameEvents.UnitDieEvent;
@@ -55,8 +56,8 @@ public abstract class GameAction
   // ===========  EndTurnAction  ==============================
   public static class EndTurnAction extends GameAction
   {
-    private final Army who;
-    private final int turn;
+    protected final Army who;
+    protected final int turn;
     public EndTurnAction(Army who, int turn)
     {
       this.who = who;
@@ -90,6 +91,34 @@ public abstract class GameAction
     public String toString()
     {
       return String.format("[End turn %s for %s]", turn, who);
+    }
+  } // ~EndTurnAction
+
+  // ===========  SwapCOAction  ==============================
+  public static class SwapCOAction extends EndTurnAction
+  {
+    final Commander swapTarget;
+    public SwapCOAction(Army who, int turn, Commander swapTarget)
+    {
+      super(who, turn);
+      this.swapTarget = swapTarget;
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue buildEvents = new GameEventQueue();
+
+      buildEvents.add(new SwapCOEvent(who, turn, swapTarget));
+      buildEvents.add(new TurnEndEvent(who, turn));
+
+      return buildEvents;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Swap to %s and end turn %s]", swapTarget, who);
     }
   } // ~EndTurnAction
 

@@ -359,6 +359,12 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     return count * (gameRules.incomePerCity + incomeAdjustment);
   }
 
+  @Override
+  public String toString()
+  {
+    return coInfo.name;
+  }
+
   private final ArrayList<UnitModifier> unitMods = new ArrayList<UnitModifier>();
   @Override
   public List<UnitModifier> getModifiers()

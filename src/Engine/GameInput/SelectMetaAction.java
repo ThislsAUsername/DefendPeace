@@ -2,15 +2,20 @@ package Engine.GameInput;
 
 import Engine.GameAction;
 import Engine.GameActionSet;
+import Engine.Army;
 import Engine.GameInput.GameInputHandler.InputType;
 
 public class SelectMetaAction extends GameInputState<SelectMetaAction.MetaAction>
 {
   enum MetaAction
   {
-    CO_STATS, CO_INFO, DAMAGE_CHART, SAVE_GAME, CO_ABILITY, QUIT_GAME, END_TURN
+    CO_STATS, CO_INFO, DAMAGE_CHART, SAVE_GAME, CO_ABILITY, QUIT_GAME, SWAP, END_TURN
   }
-  private static final MetaAction[] NO_ABILITY = {MetaAction.CO_STATS, MetaAction.CO_INFO, MetaAction.DAMAGE_CHART, MetaAction.SAVE_GAME, MetaAction.QUIT_GAME, MetaAction.END_TURN};
+  // Four different cases isn't great, but I like the relative simplicity for now
+  // Will probably just make a pruned copy on-the-fly if we end up needing more cases
+  private static final MetaAction[] DEFAULT      = {MetaAction.CO_STATS, MetaAction.CO_INFO, MetaAction.DAMAGE_CHART, MetaAction.SAVE_GAME, MetaAction.QUIT_GAME, MetaAction.END_TURN};
+  private static final MetaAction[] ONLY_ABILITY = {MetaAction.CO_STATS, MetaAction.CO_INFO, MetaAction.DAMAGE_CHART, MetaAction.SAVE_GAME, MetaAction.CO_ABILITY, MetaAction.QUIT_GAME, MetaAction.END_TURN};
+  private static final MetaAction[] ONLY_SWAP    = {MetaAction.CO_STATS, MetaAction.CO_INFO, MetaAction.DAMAGE_CHART, MetaAction.SAVE_GAME, MetaAction.QUIT_GAME, MetaAction.SWAP, MetaAction.END_TURN};
 
   public SelectMetaAction(StateData data)
   {
@@ -21,14 +26,24 @@ public class SelectMetaAction extends GameInputState<SelectMetaAction.MetaAction
   protected OptionSet initOptions()
   {
     OptionSet metaActions = null;
-    if( !myStateData.army.getReadyAbilities().isEmpty() )
+    final Army army = myStateData.army;
+    final boolean abilityReady = !army.getReadyAbilities().isEmpty();
+    final boolean canSwap = army.gameRules.tagMode.supportsMultiCmdrSelect && (army.cos.length > 1);
+    if( abilityReady && canSwap )
     {
       metaActions = new OptionSet(MetaAction.values());
     }
+    else if( abilityReady )
+    {
+      metaActions = new OptionSet(ONLY_ABILITY);
+    }
+    else if( canSwap )
+    {
+      metaActions = new OptionSet(ONLY_SWAP);
+    }
     else
     {
-      // No CO_Ability available.
-      metaActions = new OptionSet(NO_ABILITY);
+      metaActions = new OptionSet(DEFAULT);
     }
 
     return metaActions;
@@ -64,6 +79,10 @@ public class SelectMetaAction extends GameInputState<SelectMetaAction.MetaAction
     else if( MetaAction.CO_ABILITY == option )
     {
       next = new SelectCOAbility(myStateData);
+    }
+    else if( MetaAction.SWAP == option )
+    {
+      next = new SelectCoSwapTarget(myStateData);
     }
     else if( MetaAction.END_TURN == option )
     {

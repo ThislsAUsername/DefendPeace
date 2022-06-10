@@ -1,7 +1,5 @@
 package Engine.GameEvents;
 
-import java.util.Collection;
-
 import Engine.Army;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -11,11 +9,6 @@ import UI.Art.Animation.GameAnimation;
  */
 public class TurnEndEvent extends TurnInitEvent
 {
-  Army army;
-  int turn;
-  boolean opaque;
-  Collection<String> msg;
-
   public TurnEndEvent(Army army, int turnNum)
   {
     super(army, turnNum, false, "Turn "+turnNum);
