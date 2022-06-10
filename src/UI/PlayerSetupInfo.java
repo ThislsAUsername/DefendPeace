@@ -100,10 +100,10 @@ public class PlayerSetupInfo
 
   public Commander[] makeCommanders(GameScenario.GameRules rules)
   {
-    Commander[] cos = new Commander[coList.size()];
     int coCount = coList.size();
     if( !rules.tagMode.supportsMultiCmdrSelect )
       coCount = 1;
+    Commander[] cos = new Commander[coCount];
     for( int i = 0; i < coCount; ++i )
     {
       cos[i] = availableCommanders[coList.get(i)].create(rules);
