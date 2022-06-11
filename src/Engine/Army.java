@@ -179,6 +179,11 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   /** Return a list with every ability a Commander in this Army can perform. */
   public ArrayList<CommanderAbility> getReadyAbilities()
   {
+    // If there's a primary Commander, only that one can use abilities
+    if( gameRules.tagMode.supportsMultiCmdrSelect )
+      return cos[0].getReadyAbilities();
+
+    // Otherwise, be laissez-faire
     ArrayList<CommanderAbility> ready = new ArrayList<CommanderAbility>();
     for( Commander co : cos )
       ready.addAll(co.getReadyAbilities());
