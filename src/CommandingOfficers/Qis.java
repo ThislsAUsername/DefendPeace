@@ -106,7 +106,7 @@ public class Qis extends Commander
   @Override
   public void modifyMovePower(UnitContext uc)
   {
-    if( uc.map == null || uc.coord == null )
+    if( uc.map == null || !uc.map.isLocationValid(uc.coord) )
       return;
     if( uc.model.isSeaUnit() || uc.model.isTroop() )
       return;
