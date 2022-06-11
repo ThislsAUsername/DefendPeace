@@ -17,6 +17,7 @@ import AI.AILibrary;
 import AI.AIMaker;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
+import Engine.GameScenario.TagMode;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -251,6 +252,10 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   @Override
   public GameEventQueue receiveBattleEvent(final BattleSummary summary)
   {
+    if( TagMode.AWBW == gameRules.tagMode
+        && getAbilityText().length() > 0 )
+      return null; // If any power is active, deny charge in AWBW mode
+
     // We only care who the units belong to, not who picked the fight.
     UnitDelta minion = null;
     UnitDelta enemy = null;
@@ -267,9 +272,28 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
 
     if( minion != null && enemy != null )
     {
-      // TODO: This should handle distributing charge for tags situations
-      final double ownerCharge = minion.CO.calculateCombatCharge(minion, enemy);
-      minion.CO.modifyAbilityPower(ownerCharge);
+      switch (gameRules.tagMode)
+      {
+        case AWBW:
+        {
+          final double primaryCharge = cos[0].calculateCombatCharge(minion, enemy);
+          cos[0].modifyAbilityPower(primaryCharge);
+          for( int i = 1; i < cos.length; ++i )
+          {
+            final double tagCharge = cos[i].calculateCombatCharge(minion, enemy);
+            final double tagMultiplier = 0.5;
+            cos[i].modifyAbilityPower(tagMultiplier * tagCharge);
+          }
+        }
+          break;
+        case Team_Merge:
+        case OFF:
+        {
+          final double ownerCharge = minion.CO.calculateCombatCharge(minion, enemy);
+          minion.CO.modifyAbilityPower(ownerCharge);
+        }
+          break;
+      }
     }
     return null;
   }
@@ -282,15 +306,36 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   {
     if( this == attacker.army )
       return null; // Punching yourself shouldn't make you angry
+    if( TagMode.AWBW == gameRules.tagMode
+        && getAbilityText().length() > 0 )
+      return null; // If any power is active, deny charge in AWBW mode
 
     for( Entry<Unit, Integer> damageEntry : lostHP.entrySet() )
     {
       Unit minion = damageEntry.getKey();
-      if (this == minion.CO.army)
+      if( this != minion.CO.army )
+        break;
+      switch (gameRules.tagMode)
       {
-        // TODO: This should handle distributing charge for tags situations
-        final double ownerCharge = minion.CO.calculateMassDamageCharge(minion, damageEntry.getValue());
-        minion.CO.modifyAbilityPower(ownerCharge);
+        case AWBW:
+        {
+          final double primaryCharge = cos[0].calculateMassDamageCharge(minion, damageEntry.getValue());
+          cos[0].modifyAbilityPower(primaryCharge);
+          for( int i = 1; i < cos.length; ++i )
+          {
+            final double tagCharge = cos[i].calculateMassDamageCharge(minion, damageEntry.getValue());
+            final double tagMultiplier = 0.5;
+            cos[i].modifyAbilityPower(tagMultiplier * tagCharge);
+          }
+        }
+          break;
+        case Team_Merge:
+        case OFF:
+        {
+          final double ownerCharge = minion.CO.calculateMassDamageCharge(minion, damageEntry.getValue());
+          minion.CO.modifyAbilityPower(ownerCharge);
+        }
+          break;
       }
     }
     return null;
