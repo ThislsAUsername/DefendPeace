@@ -109,6 +109,7 @@ public abstract class GameAction
     {
       GameEventQueue buildEvents = new GameEventQueue();
 
+      buildEvents.addAll(who.cos[0].revertActiveAbility(gameMap));
       buildEvents.add(new SwapCOEvent(who, turn, swapTarget));
       buildEvents.add(new TurnEndEvent(who, turn));
 

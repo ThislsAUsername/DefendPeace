@@ -12,6 +12,7 @@ import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.XYCoord;
+import Engine.GameEvents.CommanderAbilityRevertEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitMods.UnitModList;
@@ -106,16 +107,25 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   {
     GameEventQueue events = new GameEventQueue();
 
-    if( null != myActiveAbility )
-    {
-      events.addAll(myActiveAbility.getRevertEvents(map));
-      myActiveAbility.deactivate(map);
-      myActiveAbility = null;
-    }
+    events.addAll(revertActiveAbility(map));
 
     for( Unit u : units )
     {
       events.addAll(u.initTurn(map));
+    }
+
+    return events;
+  }
+
+  public GameEventQueue revertActiveAbility(MapMaster map)
+  {
+    GameEventQueue events = new GameEventQueue();
+
+    if( null != myActiveAbility )
+    {
+      events.add(new CommanderAbilityRevertEvent(myActiveAbility));
+      events.addAll(myActiveAbility.getRevertEvents(map));
+      myActiveAbility = null;
     }
 
     return events;

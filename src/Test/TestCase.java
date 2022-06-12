@@ -92,11 +92,16 @@ public abstract class TestCase
   {
     GameEventQueue sequence = action.getEvents(game.gameMap);
     if( sequence.size() == 0 ) return false;
+    performEvents(game, sequence);
+    return true;
+  }
+
+  public static void performEvents(GameInstance game, GameEventQueue sequence)
+  {
     for( GameEvent event : sequence )
     {
       event.performEvent( game.gameMap );
       GameEventListener.publishEvent(event, game);
     }
-    return true;
   }
 }

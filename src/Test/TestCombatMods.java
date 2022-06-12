@@ -5,6 +5,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.Venge;
 import Engine.Army;
 import Engine.GameInstance;
+import Engine.GamePath;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.Combat.BattleSummary;
@@ -116,7 +117,7 @@ public class TestCombatMods extends TestCase
     // Clean up
     testMap.removeUnit(infA);
     testMap.removeUnit(infB);
-    venge.army.initTurn(testMap);
+    performEvents(testGame, venge.army.initTurn(testMap));
 
     return testPassed;
   }
@@ -160,7 +161,7 @@ public class TestCombatMods extends TestCase
     // Clean up
     testMap.removeUnit(infA);
     testMap.removeUnit(infB);
-    venge.army.initTurn(testMap);
+    performEvents(testGame, venge.army.initTurn(testMap));
 
     return testPassed;
   }
@@ -174,6 +175,7 @@ public class TestCombatMods extends TestCase
     // juice aa to be extra angry and get overkills
     aa.alterHP(10, true);
     aa.addUnitModifier(new UnitDamageModifier(42));
+    final GamePath aaPath = Utils.findShortestPath(aa, 7, 3, testMap);
 
     int currentFundsReturn = 0;
     // Get lots of free money, and make sure we get the right amount
@@ -191,7 +193,7 @@ public class TestCombatMods extends TestCase
 
       // Add the victim, and yeet him
       addUnit(testMap, venge, UnitModel.TROOP, 7, 4);
-      performGameAction(new BattleLifecycle.BattleAction(testMap, aa, Utils.findShortestPath(aa, 7, 3, testMap), 7, 4), testGame);
+      performGameAction(new BattleLifecycle.BattleAction(testMap, aa, aaPath, 7, 4), testGame);
 
       testPassed &= validate(cinder.army.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.army.money+" instead.");
     }
@@ -211,7 +213,7 @@ public class TestCombatMods extends TestCase
 
       // Add the victim, and yeet him
       addUnit(testMap, venge, UnitModel.TROOP, 7, 4);
-      performGameAction(new BattleLifecycle.BattleAction(testMap, aa, Utils.findShortestPath(aa, 7, 3, testMap), 7, 4), testGame);
+      performGameAction(new BattleLifecycle.BattleAction(testMap, aa, aaPath, 7, 4), testGame);
 
       testPassed &= validate(cinder.army.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.army.money+" instead.");
     }
@@ -232,7 +234,7 @@ public class TestCombatMods extends TestCase
 
       // Add the victim, and yeet him
       addUnit(testMap, venge, UnitModel.TROOP, 7, 4);
-      performGameAction(new BattleLifecycle.BattleAction(testMap, aa, Utils.findShortestPath(aa, 7, 3, testMap), 7, 4), testGame);
+      performGameAction(new BattleLifecycle.BattleAction(testMap, aa, aaPath, 7, 4), testGame);
 
       testPassed &= validate(cinder.army.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.army.money+" instead.");
     }
