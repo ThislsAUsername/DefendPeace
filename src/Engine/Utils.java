@@ -586,6 +586,9 @@ public class Utils
     boolean result = false;
     boolean includeOccupiedSpaces = true; // Shouldn't matter, as we don't invoke canEnd()
     FloodFillFunctor fff = unit.getMoveFunctor(includeOccupiedSpaces);
+    if( !fff.canEnd(map, path.getEndCoord()) )
+      return false;
+
     for( int i = 1; i < path.getPathLength(); ++i)
     {
       XYCoord from = path.getWaypoint(i-1).GetCoordinates();
@@ -616,6 +619,15 @@ public class Utils
     {
       movePath.snipCollision(gameMap, unit);
       originalPathOK = false;
+    }
+    if( unit.model.needsFuel ) // Check fuel.
+    {
+      int fuelBurn = movePath.getFuelCost(unit, gameMap);
+      if( fuelBurn > unit.fuel )
+      {
+        movePath.snipForFuel(gameMap, unit);
+        originalPathOK = false;
+      }
     }
     eventQueue.add(new Engine.GameEvents.MoveEvent(unit, movePath));
     return originalPathOK;
