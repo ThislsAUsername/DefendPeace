@@ -590,15 +590,13 @@ public class SpriteMapView extends MapView
   {
     // Calculate the sprite index to use.
     long thisTime = System.currentTimeMillis();
-    // Fun fact: casting long->int can produce negative numbers, for some reason.
-    return Math.abs((int) (thisTime / animIndexUpdateInterval));
+    return (int) ((thisTime / animIndexUpdateInterval) & Integer.MAX_VALUE);
   }
   public static int getFastAnimIndex()
   {
     // Calculate the sprite index to use.
     long thisTime = System.currentTimeMillis();
-    // Fun fact: casting long->int can produce negative numbers, for some reason.
-    return Math.abs((int) (thisTime / fastAnimIndexUpdateInterval));
+    return (int) ((thisTime / fastAnimIndexUpdateInterval) & Integer.MAX_VALUE);
   }
   public static boolean shouldFlip(Unit u)
   {
