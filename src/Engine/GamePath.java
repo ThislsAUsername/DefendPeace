@@ -138,7 +138,7 @@ public class GamePath
     boolean includeOccupiedSpaces = false;
     FloodFillFunctor fff = unit.getMoveFunctor(includeOccupiedSpaces);
 
-    // Snip if we can't actually traverse, iterate starting at the fist place we move
+    // Snip if we can't actually traverse, iterate starting at the first place we move
     for( int i = 1; i < waypoints.size(); ++i)
     {
       XYCoord from = waypoints.get(i-1).GetCoordinates();
@@ -158,6 +158,26 @@ public class GamePath
       if( fff.canEnd(map, to) )
         break;
       snip(i);
+    }
+  }
+
+  public void snipForFuel(GameMap map, Unit unit)
+  {
+    boolean includeOccupiedSpaces = false;
+    FloodFillFunctor fff = unit.getMoveFunctor(includeOccupiedSpaces);
+    int fuelBudget = unit.fuel;
+
+    // Snip if we can't actually traverse, iterate starting at the first place we move
+    for( int i = 1; i < waypoints.size(); ++i)
+    {
+      XYCoord from = waypoints.get(i-1).GetCoordinates();
+      XYCoord to   = waypoints.get( i ).GetCoordinates();
+      fuelBudget  -= fff.getTransitionCost(map, from, to);
+      if( 0 > fuelBudget )
+      {
+        snip(i);
+        break;
+      }
     }
   }
 

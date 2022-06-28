@@ -86,7 +86,8 @@ public class MapTileDetailsArtist
       unitImage = uss.getUnitImage();
       
       unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.HEART.getIcon(), unit.getHP()));
-      unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.FUEL.getIcon(), unit.fuel));
+      if( unit.model.needsFuel )
+        unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.FUEL.getIcon(), unit.fuel));
       if( unit.ammo >= 0 ) 
         unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.AMMO.getIcon(), unit.ammo));
       if( unit.getCaptureProgress() > 0)

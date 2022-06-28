@@ -212,7 +212,7 @@ public class Unit extends UnitState implements UnitModList
   /** Returns true if resupply would have zero effect on this unit. */
   public boolean isFullySupplied()
   {
-    boolean isFull = (model.maxFuel == fuel);
+    boolean isFull = !model.needsFuel || (model.maxFuel == fuel);
     isFull &= (model.maxAmmo == ammo);
     return isFull;
   }

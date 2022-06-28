@@ -76,15 +76,6 @@ public abstract class WaitLifecycle
       isValid &= (null != movePath) && (movePath.getPathLength() > 0);
       isValid &= (null != gameMap);
 
-      if( isValid ) // Check fuel.
-      {
-        GamePath.PathNode endpoint = movePath.getEnd();
-        int fuelBurn = movePath.getFuelCost(actor, gameMap);
-        boolean includeOccupiedSpaces = true; // To allow validation for LOAD/JOIN actions.
-        isValid = fuelBurn <= actor.fuel && fuelBurn <= actor.getMovePower(gameMap)
-            && actor.getMoveFunctor(includeOccupiedSpaces).canEnd(gameMap, endpoint.GetCoordinates());
-      }
-
       // Generate events.
       if( isValid )
       {

@@ -72,6 +72,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public long role;
   public double abilityPowerValue;
   public int maxAmmo;
+  public boolean needsFuel = true;
   public int maxFuel;
   public int idleFuelBurn;
   public int maxMaterials = 0;
@@ -148,6 +149,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
 
     // Duplicate other assorted values
     maxMaterials = other.maxMaterials;
+    needsFuel = other.needsFuel;
     for( UnitModifier mod : other.unitMods )
       unitMods.add(mod);
   }

@@ -267,7 +267,7 @@ public class UnitSpriteSet
       statusIcons.add(SpriteLibrary.MapIcons.STUN.getIcon());
 
     double lowIndicatorFraction = 3.0;
-    if( u.fuel < u.model.maxFuel / lowIndicatorFraction )
+    if( u.model.needsFuel && u.fuel < u.model.maxFuel / lowIndicatorFraction )
       statusIcons.add(SpriteLibrary.MapIcons.FUEL.getIcon());
 
     if( u.ammo >= 0 && !u.model.weapons.isEmpty() && u.ammo < u.model.maxAmmo / lowIndicatorFraction )
