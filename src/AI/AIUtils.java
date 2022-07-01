@@ -188,7 +188,9 @@ public class AIUtils
   /** Overload of {@link #moveTowardLocation(Unit, XYCoord, GameMap, Set)} **/
   public static GameAction moveTowardLocation(Unit unit, XYCoord destination, GameMap gameMap )
   {
-    return moveTowardLocation(unit, destination, gameMap, null);
+    Set<XYCoord> excludeDestinations = new HashSet<>();
+    excludeDestinations.add(new XYCoord(unit)); // Assume that the caller does, in fact, want to move.
+    return moveTowardLocation(unit, destination, gameMap, excludeDestinations);
   }
 
   /**

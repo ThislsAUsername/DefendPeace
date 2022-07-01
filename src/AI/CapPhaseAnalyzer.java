@@ -14,7 +14,6 @@ import Engine.GamePath;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
-import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.TerrainType;
@@ -130,21 +129,7 @@ public class CapPhaseAnalyzer implements Serializable
     if( destinations.contains(goal) )
       return new CaptureLifecycle.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, goal, gameMap));
 
-    Utils.sortLocationsByTravelTimeToCoord(unit, destinations, gameMap, goal);
-
-    for( XYCoord moveCoord : destinations )
-    {
-      Unit resident = gameMap.getLocation(moveCoord).getResident();
-      boolean spaceFree = null == resident;
-      if( !spaceFree )
-        continue; // I don't know how we got here, but bail
-
-      // Figure out how to get here.
-      GamePath movePath = Utils.findShortestPath(unit, moveCoord, gameMap);
-
-      return new WaitLifecycle.WaitAction(unit, movePath);
-    }
-    return null;
+    return AIUtils.moveTowardLocation(unit, goal, gameMap);
   }
 
   public CapPhaseAnalyzer(GameMap map, Army viewer)
