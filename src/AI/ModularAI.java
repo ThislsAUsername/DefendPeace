@@ -23,7 +23,7 @@ public abstract class ModularAI implements AIController
   protected Army myArmy = null;
 
   // Updated on turn init
-  protected ArrayList<XYCoord> unownedProperties;
+  protected ArrayList<XYCoord> futureCapTargets;
   // List of possible AI modes, in order of precedence
   protected ArrayList<AIModule> aiPhases;
   // Sets the ordering for units in the unit queue fed to the modules
@@ -45,7 +45,7 @@ public abstract class ModularAI implements AIController
     logger = new StringBuffer(); // Reset at the start of the turn so the AI's action log stays in memory between turns for review
     ++turnNum;
     // Create a list of every property we don't own, but want to.
-    unownedProperties = AIUtils.findNonAlliedProperties(myArmy, gameMap);
+    futureCapTargets = AIUtils.findNonAlliedProperties(myArmy, gameMap);
 
     for( AIModule phase : aiPhases )
     {
@@ -152,7 +152,7 @@ public abstract class ModularAI implements AIController
       if( unit.getCaptureProgress() > 0 )
       {
         XYCoord position = new XYCoord(unit.x, unit.y);
-        ai.unownedProperties.remove(position);
+        ai.futureCapTargets.remove(position);
         return new CaptureLifecycle.CaptureAction(map, unit, Utils.findShortestPath(unit, position, map));
       }
       return null;
@@ -206,7 +206,8 @@ public abstract class ModularAI implements AIController
       final GameAction capAction = ai.capPhase.getCapAction(map, unit);
       if( null != capAction && capAction.getType() == UnitActionFactory.CAPTURE )
       {
-        ai.unownedProperties.remove(capAction.getMoveLocation());
+        // This is now a current cap target; don't send more dudes
+        ai.futureCapTargets.remove(capAction.getMoveLocation());
       }
 
       return capAction;

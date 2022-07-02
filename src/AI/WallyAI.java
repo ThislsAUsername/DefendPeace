@@ -612,7 +612,7 @@ public class WallyAI extends ModularAI
     }
     else if( uc.possibleActions.contains(UnitActionFactory.CAPTURE) )
     {
-      for( XYCoord xyc : unownedProperties )
+      for( XYCoord xyc : futureCapTargets )
         if( !AIUtils.isCapturing(gameMap, myArmy.cos[0], xyc) )
           goals.add(xyc);
     }
@@ -654,7 +654,7 @@ public class WallyAI extends ModularAI
 
     if( goals.isEmpty() ) // Send 'em at production facilities if they haven't got anything better to do
     {
-      for( XYCoord coord : unownedProperties )
+      for( XYCoord coord : futureCapTargets )
       {
         MapLocation loc = gameMap.getLocation(coord);
         if( unit.CO.unitProductionByTerrain.containsKey(loc.getEnvironment().terrainType)
