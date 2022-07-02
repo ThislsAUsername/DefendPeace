@@ -278,6 +278,7 @@ public class CapPhaseAnalyzer implements Serializable
 
       ArrayList<CapStop> chain = new ArrayList<>();
       CapStop build = new CapStop(start);
+      // A bunch of "free funding turns" should convince the chain-sorter to put factory-captures first.
       build.extraTurns = distance/inf.getMovePower(map) - 13;
       chain.add(build);
       CapStop cap = new CapStop(dest);
