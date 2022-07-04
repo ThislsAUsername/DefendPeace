@@ -57,6 +57,7 @@ public class KaijuWarsUnits extends UnitModelScheme
     // Inscribe those war machines obtainable from an Airport.
     airportModels.add(new Fighter());
     airportModels.add(new Bomber());
+    airportModels.add(new Helicopter());
     airportModels.add(new Bushplane());
     airportModels.add(new BigBoy());
 
@@ -90,13 +91,19 @@ public class KaijuWarsUnits extends UnitModelScheme
 
    * tank: +2 counter while on urban
    * missile: +2 ATK while stationary, 1-2 scoot-n-shoot
+   *  - They're really bad, so I'm giving them the latter
    * AA: all attacks get +1 damage for each AA next to target, force air units to land on hit
-   * inf: +2 counter on ROUGH
+   *  - Added the +1; the other is too jank
+   * inf: +2 counter on ROUGH terrain
    * Radar: +2 science if you end turn within 2 tiles of a Kaiju
+   *  - Should implement as +2 CO energy, but only for opposing Kaiju
    * bomber: enable hitting air for 1 damage
    * fighter: +2 counter on empty(plains?)/water
+   *  - Adding
    * ground: +2 ATK hills, +2 counter on forest/jungle
+   *  - Adding the first
    * air: +3 move on airport
+   *  - Adding
 
    * Hover Drives: Gives all ground +1 move and the ability to move on water
    */
@@ -106,9 +113,13 @@ public class KaijuWarsUnits extends UnitModelScheme
 
    * slowed by rough terrain: missiles, maser, food cart
    * slow on counter: tank, Liger Panther, AA, OGR(air+ground)
+   * +2 counter if you don't move: inf
    * Bushplanes put out Crises/fires adjacent to the tile they die
+   *  - Now are capture units
    * Police prevent Crises/fires from showing up within 2 tiles
+   *  - Now are capture units
    * Radar counters certain Kaiju abilities while within 2 tiles
+   *  - piercing vision, will add those
    * Copters and Sky Carrier give +1 ATK to adjacent allies
 
    * Freezer slows on attack
@@ -125,11 +136,15 @@ public class KaijuWarsUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
     public int kaijuCounter = 1; // Typically = counter damage + 1
-    public boolean entrenches   = false;
-    public boolean slowsLand    = false;
-    public boolean slowsAir     = false;
-    public boolean resistsKaiju = false;
-    public boolean isKaiju      = false;
+    public boolean entrenches    = false;
+    public boolean divineWind    = false; // +2 counter on plains/sea
+    public boolean boostsAllies  = false;
+    public boolean boostSurround = false;
+
+    public boolean slowsLand     = false;
+    public boolean slowsAir      = false;
+    public boolean resistsKaiju  = false;
+    public boolean isKaiju       = false;
 
     public KaijuWarsUnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
         int pMovePower, MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] weapons, double starValue)
@@ -152,12 +167,15 @@ public class KaijuWarsUnits extends UnitModelScheme
       // Create a new model with the given attributes.
       KaijuWarsUnitModel newModel = new KaijuWarsUnitModel(name, role, costBase, maxAmmo, maxFuel, idleFuelBurn, visionRange, baseMovePower,
           baseMoveType.clone(), baseActions, weapons, abilityPowerValue);
-      newModel.kaijuCounter = kaijuCounter;
-      newModel.entrenches   = entrenches;
-      newModel.slowsLand    = slowsLand;
-      newModel.slowsAir     = slowsAir;
-      newModel.resistsKaiju = resistsKaiju;
-      newModel.isKaiju      = isKaiju;
+      newModel.kaijuCounter  = kaijuCounter;
+      newModel.entrenches    = entrenches;
+      newModel.boostsAllies  = boostsAllies;
+      newModel.boostSurround = boostSurround;
+
+      newModel.slowsLand     = slowsLand;
+      newModel.slowsAir      = slowsAir;
+      newModel.resistsKaiju  = resistsKaiju;
+      newModel.isKaiju       = isKaiju;
 
       newModel.copyValues(this);
       return newModel;
@@ -305,10 +323,10 @@ public class KaijuWarsUnits extends UnitModelScheme
           actions, weapons, STAR_VALUE);
       kaijuCounter = 1;
       slowsAir = true;
+      boostSurround = true;
     }
   }
 
-  // TODO: stun enemies on turn start
   public static class Radar extends KaijuWarsUnitModel
   {
     private static final long serialVersionUID = 1L;
@@ -326,6 +344,7 @@ public class KaijuWarsUnits extends UnitModelScheme
       super("Radar", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, weapons, STAR_VALUE);
       kaijuCounter = 0;
+      visionRangePiercing = 2; // For spotting tunneling kaiju
     }
   }
 
@@ -366,6 +385,7 @@ public class KaijuWarsUnits extends UnitModelScheme
       super("Fighter", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, weapons, STAR_VALUE);
       kaijuCounter = 2;
+      divineWind   = true;
     }
   }
 
@@ -385,6 +405,26 @@ public class KaijuWarsUnits extends UnitModelScheme
       super("Bomber", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, weapons, STAR_VALUE);
       kaijuCounter = 1;
+    }
+  }
+
+  public static class Helicopter extends KaijuWarsUnitModel
+  {
+    private static final long serialVersionUID = 1L;
+    private static final long ROLE = HOVER | AIR_LOW;
+
+    private static final int MOVE_POWER = 2;
+
+    private static final MoveType moveType = new Flight();
+    private static final UnitActionFactory[] actions = UnitActionFactory.BASIC_ACTIONS;
+    private static final WeaponModel[] weapons = {};
+
+    public Helicopter()
+    {
+      super("Helicopter", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+          actions, weapons, STAR_VALUE);
+      kaijuCounter = 1;
+      boostsAllies = true;
     }
   }
 
