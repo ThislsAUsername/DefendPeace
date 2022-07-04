@@ -8,6 +8,7 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.ResupplyEvent;
 import Engine.StateTrackers.StateTracker;
+import Engine.StateTrackers.SuicideAttackTracker;
 import Engine.StateTrackers.UnitResurrectionTracker;
 import Engine.StateTrackers.UnitTurnPositionTracker;
 import Engine.UnitActionLifecycles.UnitProduceLifecycle;
@@ -76,6 +77,7 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     airportModels.add(new BigBoy());
     airportModels.add(new GuncrossWing());
+    airportModels.add(new Kaputnik());
     extras.add(new GuncrossRobot());
     airportModels.add(carrier);
 
@@ -114,7 +116,7 @@ public class KaijuWarsUnits extends UnitModelScheme
       if( null == umCast.resurrectsAs )
         continue;
 
-      // We have a type that resurrectsAs; find the type it rezzes to
+      // We have a type that resurrects; find the type it rezzes to
       for( UnitModel rezToModel : grms.unitModels )
       {
         if( !rezToModel.name.equals(umCast.resurrectsAs) )
@@ -122,6 +124,16 @@ public class KaijuWarsUnits extends UnitModelScheme
         rezzer.resurrectionTypeMap.put(um, rezToModel);
         break;
       }
+    }
+
+    SuicideAttackTracker kaputnikTracker = StateTracker.instance(gi, SuicideAttackTracker.class);
+    for( UnitModel um : grms.unitModels )
+    {
+      KaijuWarsUnitModel umCast = (KaijuWarsUnitModel) um;
+      if( !umCast.suicideAttack )
+        continue;
+
+      kaputnikTracker.killTypeMap.add(um);
     }
   }
 
@@ -132,12 +144,6 @@ public class KaijuWarsUnits extends UnitModelScheme
    * Food Cart (attracts kaiju within 3 tiles; not implementing kaiju path/targeting mechanics)
    * Shark Jet (faster Fighter that moves after shooting; messy and either OP or UP)
    * Cannon of Boom (immobile Rocket equivalent that teleports between labs; ew)
-   */
-
-  /*
-   * Kaiju abilities I do not plan to implement at this time
-
-   * TODO
    */
 
   /*
@@ -190,7 +196,7 @@ public class KaijuWarsUnits extends UnitModelScheme
   public static class KaijuWarsUnitModel extends UnitModel
   {
     private static final long serialVersionUID = 1L;
-    public int kaijuCounter = 0; // Typically = counter damage + 1
+    public int kaijuCounter = 0;
     public boolean entrenches    = false;
     public boolean stillBoost    = false;
     public boolean divineWind    = false; // +2 counter on plains/sea
@@ -606,6 +612,27 @@ public class KaijuWarsUnits extends UnitModelScheme
           events.add(new ResupplyEvent(self, cargo));
       }
       return events;
+    }
+  }
+
+  public static class Kaputnik extends KaijuWarsUnitModel
+  {
+    private static final long serialVersionUID = 1L;
+    private static final long ROLE = AIR_TO_SURFACE | AIR_TO_AIR | JET | AIR_HIGH;
+
+    private static final int MOVE_POWER = 8;
+    private static final int UNIT_COST = PREP_COST * 5;
+
+    private static final MoveType moveType = new Flight();
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.Kaputnik() };
+
+    public Kaputnik()
+    {
+      super("Kaputnik", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+          actions, WEAPONS, STAR_VALUE);
+      kaijuCounter  = 0;
+      suicideAttack = true;
     }
   }
 
