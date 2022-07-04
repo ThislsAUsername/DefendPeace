@@ -50,6 +50,7 @@ public class KaijuWarsUnits extends UnitModelScheme
     factoryModels.add(new Infantry());
     factoryModels.add(new Tank());
     factoryModels.add(new Missiles());
+    factoryModels.add(new Rockets());
     factoryModels.add(new AA());
     factoryModels.add(new Radar());
     factoryModels.add(new Artillery());
@@ -67,13 +68,15 @@ public class KaijuWarsUnits extends UnitModelScheme
     airportModels.add(new Bomber());
     airportModels.add(new Helicopter());
     airportModels.add(new Bushplane());
-    airportModels.add(new BigBoy());
-    airportModels.add(new GuncrossWing());
-    extras.add(new GuncrossRobot());
 
+    // Carrier gets to build all normal air units
     UnitModel carrier = new SkyCarrier();
     for (UnitModel um : airportModels)
       carrier.baseActions.add(1, new UnitProduceLifecycle.UnitProduceFactory(um));
+
+    airportModels.add(new BigBoy());
+    airportModels.add(new GuncrossWing());
+    extras.add(new GuncrossRobot());
     airportModels.add(carrier);
 
     // Dump these lists into a hashmap for easy reference later.
@@ -142,7 +145,8 @@ public class KaijuWarsUnits extends UnitModelScheme
 
    * tank: +2 counter while on urban
    * missile: +2 ATK while stationary, 1-2 scoot-n-shoot
-   *  - They're really bad, so I'm giving them the latter
+   *  - Giving them the former
+   *  - The latter is hilariously OP, so let's make an "uber missile" that does that?
    * AA: all attacks get +1 damage for each AA next to target, force air units to land on hit
    *  - Added the +1; the other is too jank
    * inf: +2 counter on ROUGH terrain
@@ -188,6 +192,7 @@ public class KaijuWarsUnits extends UnitModelScheme
     private static final long serialVersionUID = 1L;
     public int kaijuCounter = 0; // Typically = counter damage + 1
     public boolean entrenches    = false;
+    public boolean stillBoost    = false;
     public boolean divineWind    = false; // +2 counter on plains/sea
     public boolean boostsAllies  = false;
     public boolean boostSurround = false;
@@ -223,6 +228,7 @@ public class KaijuWarsUnits extends UnitModelScheme
           baseMoveType.clone(), baseActions, weapons, abilityPowerValue);
       newModel.kaijuCounter  = kaijuCounter;
       newModel.entrenches    = entrenches;
+      newModel.stillBoost    = stillBoost;
       newModel.boostsAllies  = boostsAllies;
       newModel.boostSurround = boostSurround;
 
@@ -358,6 +364,19 @@ public class KaijuWarsUnits extends UnitModelScheme
       super("Missiles", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 0;
+      stillBoost = true;
+    }
+  }
+  public static class Rockets extends Missiles
+  {
+    private static final long serialVersionUID = 1L;
+    public Rockets()
+    {
+      super();
+      name = "Rockets";
+      costBase = UNIT_COST * 3;
+      weapons.clear();
+      weapons.add(new KaijuWarsWeapons.Rockets());
     }
   }
 

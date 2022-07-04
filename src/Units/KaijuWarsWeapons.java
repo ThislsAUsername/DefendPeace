@@ -96,10 +96,20 @@ public class KaijuWarsWeapons
   public static class Missile extends KaijuWarsWeapon
   {
     private static final long serialVersionUID = 1L;
+
+    public Missile()
+    {
+      super(2, 3);
+    }
+  }
+  // Missiles are really bad, so these get to be "buffed Missile" because just giving them this buff would be busted
+  public static class Rockets extends KaijuWarsWeapon
+  {
+    private static final long serialVersionUID = 1L;
     private static final int MIN_RANGE = 1;
     private static final int MAX_RANGE = 2*KAIJU_SCALE_FACTOR;
 
-    public Missile()
+    public Rockets()
     {
       super(2, 3, MIN_RANGE, MAX_RANGE);
       canFireAfterMoving = true;
@@ -373,11 +383,20 @@ public class KaijuWarsWeapons
    */
   public static int getAttackBoost(Unit attacker, GameMap map, XYCoord atkCoord, TerrainType atkEnv, XYCoord targetCoord)
   {
+    KaijuWarsUnitModel atkModel = (KaijuWarsUnitModel) attacker.model;
     int attackBoost = 0;
     // Rangefinders boost - these units are pretty stally, so why not?
     if( attacker.model.isLandUnit() &&
         atkEnv == TerrainType.MOUNTAIN )
       attackBoost += SLOW_BONUS;
+    // Missiles boost
+    if( atkModel.stillBoost )
+    {
+      // This is a bit smelly, but better than the alternative?
+      UnitTurnPositionTracker tracker = StateTracker.instance(map.game, UnitTurnPositionTracker.class);
+      if( tracker.stoodStill(attacker, atkCoord) )
+        attackBoost += SLOW_BONUS;
+    }
     // Apply copter/Sky Carrier adjacency boost
     for( XYCoord xyc : Utils.findLocationsInRange(map, atkCoord, 1, 1) )
     {
