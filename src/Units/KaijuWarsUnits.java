@@ -4,8 +4,13 @@ import java.util.ArrayList;
 
 import Engine.GameInstance;
 import Engine.UnitActionFactory;
+import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.HealUnitEvent;
+import Engine.GameEvents.ResupplyEvent;
 import Engine.StateTrackers.StateTracker;
 import Engine.StateTrackers.UnitTurnPositionTracker;
+import Engine.UnitActionLifecycles.UnitProduceLifecycle;
+import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import Units.MoveTypes.Flight;
@@ -61,6 +66,11 @@ public class KaijuWarsUnits extends UnitModelScheme
     airportModels.add(new Bushplane());
     airportModels.add(new BigBoy());
 
+    UnitModel carrier = new SkyCarrier();
+    for (UnitModel um : airportModels)
+      carrier.baseActions.add(1, new UnitProduceLifecycle.UnitProduceFactory(um));
+    airportModels.add(carrier);
+
     // Dump these lists into a hashmap for easy reference later.
     kjwModels.shoppingList.put(TerrainType.FACTORY, factoryModels);
     kjwModels.shoppingList.put(TerrainType.SEAPORT, kaijuModels);
@@ -85,6 +95,21 @@ public class KaijuWarsUnits extends UnitModelScheme
   {
     StateTracker.instance(gi, UnitTurnPositionTracker.class);
   }
+
+  /*
+   * Units I do not plan to implement at this time
+
+   * Freezer (0-counter unit with 1 damage that slows targets by a tile; too complicated and bad)
+   * Food Cart (attracts kaiju within 3 tiles; not implementing kaiju path/targeting mechanics)
+   * Shark Jet (faster Fighter that moves after shooting; messy and either OP or UP)
+   * Cannon of Boom (immobile Rocket equivalent that teleports between labs; ew)
+   */
+
+  /*
+   * Kaiju abilities I do not plan to implement at this time
+
+   * TODO
+   */
 
   /*
    * Boosts from technologies and tactics; consider making expensive variant units with these boosts
@@ -135,7 +160,7 @@ public class KaijuWarsUnits extends UnitModelScheme
   public static class KaijuWarsUnitModel extends UnitModel
   {
     private static final long serialVersionUID = 1L;
-    public int kaijuCounter = 1; // Typically = counter damage + 1
+    public int kaijuCounter = 0; // Typically = counter damage + 1
     public boolean entrenches    = false;
     public boolean divineWind    = false; // +2 counter on plains/sea
     public boolean boostsAllies  = false;
@@ -431,7 +456,7 @@ public class KaijuWarsUnits extends UnitModelScheme
   public static class Bushplane extends KaijuWarsUnitModel
   {
     private static final long serialVersionUID = 1L;
-    private static final long ROLE = AIR_TO_SURFACE | AIR_TO_AIR | JET | AIR_HIGH;
+    private static final long ROLE = JET | AIR_HIGH;
 
     private static final int MOVE_POWER = 4;
 
@@ -490,6 +515,48 @@ public class KaijuWarsUnits extends UnitModelScheme
       super("Big Boy", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, weapons, STAR_VALUE);
       kaijuCounter = 2;
+    }
+  }
+
+  public static class SkyCarrier extends KaijuWarsUnitModel
+  {
+    private static final long serialVersionUID = 1L;
+    private static final long ROLE = HOVER | AIR_HIGH | TRANSPORT;
+
+    private static final int MOVE_POWER = 3;
+    private static final int UNIT_COST = PREP_COST * 7; // Consider reducing this since this version is nerfed
+
+    private static final MoveType moveType = new Flight();
+    private static final UnitActionFactory[] actions = UnitActionFactory.BASIC_ACTIONS;
+    private static final WeaponModel[] weapons = {};
+
+    public SkyCarrier()
+    {
+      super("Sky Carrier", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+          actions, weapons, STAR_VALUE);
+      maxMaterials = -1;
+      baseCargoCapacity = 4;
+      carryableMask = AIR_LOW | AIR_HIGH;
+      // Let's allow stacking carriers, because why not?
+      // carryableExclusionMask = TRANSPORT;
+      baseActions.add(0, UnitActionFactory.LAUNCH);
+
+      kaijuCounter = 5;
+      boostsAllies = true;
+    }
+
+    /** Repair cargo to (badly) simulate repairing lots of dudes in the source game */
+    @Override
+    public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
+    {
+      GameEventQueue events = super.getTurnInitEvents(self, map);
+      for( Unit cargo : self.heldUnits )
+      {
+        events.add(new HealUnitEvent(cargo, self.CO.getRepairPower(), self.CO.army)); // Event handles cost logic
+        if( !cargo.isFullySupplied() )
+          events.add(new ResupplyEvent(self, cargo));
+      }
+      return events;
     }
   }
 
