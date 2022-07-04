@@ -116,6 +116,8 @@ public class CombatEngine
 
   public static double calculateOneStrikeDamage( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
   {
+    if( attacker.model.weapons.size() < 1 )
+      return 0;
     XYCoord dest = new XYCoord(attacker);
     UnitContext attackerContext = new UnitContext(map, attacker, null, null, dest);
     attackerContext.chooseWeapon(defender.model, battleRange, attackerMoved);
