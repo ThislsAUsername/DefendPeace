@@ -12,7 +12,6 @@ import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.ResupplyEvent;
-import Engine.GameEvents.UnitDieEvent;
 import Terrain.MapLocation;
 import Engine.UnitMods.UnitModList;
 import Engine.UnitMods.UnitModifier;
@@ -207,7 +206,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     if( !resupplying && (0 == self.fuel) & (isAirUnit() || isSeaUnit()) )
     {
       // Uh oh. It's crashy crashy time.
-      queue.add(new UnitDieEvent(self));
+      Utils.enqueueDeathEvent(self, queue);
     }
 
     return queue;

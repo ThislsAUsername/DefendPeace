@@ -10,6 +10,7 @@ import java.util.ArrayDeque;
 import java.util.Set;
 
 import CommandingOfficers.Commander;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.UnitDieEvent;
 import Terrain.GameMap;
@@ -639,16 +640,26 @@ public class Utils
    * @param unit The unit who is to die.
    * @param eventQueue Will be given the new MoveEvent(s).
    */
-  public static void enqueueDeathEvent(Unit unit, GameEventQueue eventQueue)
+  public static void enqueueDeathEvent(Unit unit, XYCoord grave, boolean canLose, GameEventQueue eventQueue)
   {
     Queue<Unit> unitsToDie = new ArrayDeque<Unit>();
     unitsToDie.add(unit);
+    int totalDeaths = 0;
     do
     {
       Unit utd = unitsToDie.poll();
-      eventQueue.add(new UnitDieEvent(utd));
+      eventQueue.add(new UnitDieEvent(utd, grave));
+      totalDeaths++;
       unitsToDie.addAll(utd.heldUnits);
-    } while( !unitsToDie.isEmpty() );
+    } while (!unitsToDie.isEmpty());
+
+    // If that's the last of your units, it's loss time
+    if( unit.CO.army.getUnits().size() <= totalDeaths )
+      eventQueue.add(new ArmyDefeatEvent(unit.CO.army));
+  }
+  public static void enqueueDeathEvent(Unit unit, GameEventQueue eventQueue)
+  {
+    enqueueDeathEvent(unit, new XYCoord(unit), true, eventQueue);
   }
 
   /**
