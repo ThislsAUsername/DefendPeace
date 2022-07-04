@@ -98,6 +98,7 @@ public class GameBuilder
     if( map.initOK() )
     {
       newGame = new GameInstance(scenario, armies, map, defaultWeather, isSecurityEnabled);
+      unitModelScheme.registerStateTrackers(newGame);
     }
 
     return newGame;

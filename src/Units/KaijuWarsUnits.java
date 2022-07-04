@@ -1,7 +1,11 @@
 package Units;
 
 import java.util.ArrayList;
+
+import Engine.GameInstance;
 import Engine.UnitActionFactory;
+import Engine.StateTrackers.StateTracker;
+import Engine.StateTrackers.UnitTurnPositionTracker;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import Units.MoveTypes.Flight;
@@ -36,9 +40,9 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     // Define everything we can build from a Factory.
     factoryModels.add(new Police());
+    factoryModels.add(new Infantry());
     factoryModels.add(new Tank());
     factoryModels.add(new Missiles());
-    // TODO: infantry
     factoryModels.add(new AA());
     factoryModels.add(new Radar());
     factoryModels.add(new Artillery());
@@ -74,6 +78,11 @@ public class KaijuWarsUnits extends UnitModelScheme
       um.baseMovePower *= KaijuWarsWeapons.KAIJU_SCALE_FACTOR;
 
     return kjwModels;
+  }
+
+  public void registerStateTrackers(GameInstance gi)
+  {
+    StateTracker.instance(gi, UnitTurnPositionTracker.class);
   }
 
   /*
@@ -116,6 +125,7 @@ public class KaijuWarsUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
     public int kaijuCounter = 1; // Typically = counter damage + 1
+    public boolean entrenches   = false;
     public boolean slowsLand    = false;
     public boolean slowsAir     = false;
     public boolean resistsKaiju = false;
@@ -126,12 +136,14 @@ public class KaijuWarsUnits extends UnitModelScheme
     {
       super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
       needsFuel = false;
+      addUnitModifier(new KaijuWarsWeapons.KaijuWarsFightMod());
     }
     public KaijuWarsUnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
         int pMovePower, MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> weapons, double starValue)
     {
       super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
       needsFuel = false;
+      addUnitModifier(new KaijuWarsWeapons.KaijuWarsFightMod());
     }
 
     @Override
@@ -141,6 +153,7 @@ public class KaijuWarsUnits extends UnitModelScheme
       KaijuWarsUnitModel newModel = new KaijuWarsUnitModel(name, role, costBase, maxAmmo, maxFuel, idleFuelBurn, visionRange, baseMovePower,
           baseMoveType.clone(), baseActions, weapons, abilityPowerValue);
       newModel.kaijuCounter = kaijuCounter;
+      newModel.entrenches   = entrenches;
       newModel.slowsLand    = slowsLand;
       newModel.slowsAir     = slowsAir;
       newModel.resistsKaiju = resistsKaiju;
@@ -210,6 +223,26 @@ public class KaijuWarsUnits extends UnitModelScheme
       super("Police", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, weapons, STAR_VALUE);
       kaijuCounter = 1;
+    }
+  }
+
+  public static class Infantry extends KaijuWarsUnitModel
+  {
+    private static final long serialVersionUID = 1L;
+    private static final long ROLE = TROOP | LAND;
+
+    private static final int MOVE_POWER = 3;
+
+    private static final MoveType moveType = GROUND;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
+    private static final WeaponModel[] weapons = { new KaijuWarsWeapons.ShootLand(1) };
+
+    public Infantry()
+    {
+      super("Infantry", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+          actions, weapons, STAR_VALUE);
+      kaijuCounter = 1;
+      entrenches = true;
     }
   }
 

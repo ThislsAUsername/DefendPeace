@@ -1,15 +1,23 @@
 package Units;
 
+import Engine.Combat.StrikeParams;
+import Engine.Combat.StrikeParams.BattleParams;
+import Engine.StateTrackers.StateTracker;
+import Engine.StateTrackers.UnitTurnPositionTracker;
+import Engine.UnitMods.UnitModifierWithDefaults;
 import Terrain.TerrainType;
 import Units.KaijuWarsUnits.KaijuWarsUnitModel;
 
 public class KaijuWarsWeapons
 {
   // Multiply all movement (and ranges) by N
-  public static final int KAIJU_SCALE_FACTOR = 1;
+  public static final int KAIJU_SCALE_FACTOR  = 1;
   // Percent damage that 1 ATK should do vs 1 kaijuCounter
-  protected final static int KAIJU_DAMAGE_FACTOR = 80;
-  protected final static int KAIJU_DAMAGE_BASE = 55;
+  public final static int KAIJU_DAMAGE_FACTOR = 80;
+  public final static int KAIJU_DAMAGE_BASE   = 55;
+
+  public final static int SLOW_BONUS          = 2;
+  public final static int TERRAIN_DURABILITY  = 4;
 
   private static class KaijuWarsWeapon extends WeaponModel
   {
@@ -42,68 +50,21 @@ public class KaijuWarsWeapons
       return new KaijuWarsWeapon(this);
     }
 
-    protected final static int SLOW_BONUS = 2;
     @Override
     public double getDamage(KaijuWarsUnitModel defender)
     {
-      int counterPower = defender.kaijuCounter;
-      if( !negateCounterBonuses )
-      {
-        if( isAirWeapon && defender.slowsAir )
-          counterPower += SLOW_BONUS;
-        if( !isAirWeapon && defender.slowsLand )
-          counterPower += SLOW_BONUS;
-        if( defender.resistsKaiju )
-          counterPower += SLOW_BONUS;
-      }
+      int counterPower = deriveCounter(this, defender);
 
-      int attack = 0;
-      if( defender.isAirUnit() )
-        attack = vsAir;
-      else
-        attack = vsLand;
+      int attack = deriveAttack(this, defender);
 
-      return getDamageRatioStyle(attack, counterPower);
-    }
-
-    /**
-     * Produces damage numbers based on attack/kaijuCounter
-     */
-    public static double getDamageRatioStyle(int attack, int counterPower)
-    {
-      // 1-based instead of 0-based
-      int durability = 1 + counterPower;
-      int damage = attack * 1000 / durability;
-      // Round properly
-      damage += 5;
-      damage /= 10;
-
-      return damage * KAIJU_DAMAGE_FACTOR / 100;
-    }
-
-    /**
-     * Produces damage numbers centered around KAIJU_DAMAGE_BASE
-     */
-    public static double getDamageShiftingStyle(int attack, int durability)
-    {
-      int damage = KAIJU_DAMAGE_BASE;
-
-      int finalPower = attack - durability;
-      if( finalPower > -3 )
-        damage += finalPower * 10;
-      else if( finalPower > -8 )
-        damage = damage - 10 + finalPower * 5;
-      else
-        damage = 2 * (12 + finalPower);
-
-      return damage;
+      return KaijuWarsWeapons.getDamage(attack, counterPower);
     }
 
     @Override
     public double getDamage(TerrainType target)
     {
       if( TerrainType.METEOR == target )
-        return getDamageRatioStyle(vsLand, 4);
+        return KaijuWarsWeapons.getDamage(vsLand, TERRAIN_DURABILITY);
       return 0;
     }
   }
@@ -261,4 +222,107 @@ public class KaijuWarsWeapons
       isAirWeapon = true;
     }
   }
-}
+
+  // Detailed damage calcs
+
+  public static int deriveAttack(KaijuWarsWeapon gun, KaijuWarsUnitModel defender)
+  {
+    int attack = 0;
+    if( defender.isAirUnit() )
+      attack = gun.vsAir;
+    else
+      attack = gun.vsLand;
+    return attack;
+  }
+  public static int deriveCounter(KaijuWarsWeapon gun, KaijuWarsUnitModel defender)
+  {
+    int counterPower = defender.kaijuCounter;
+    if( !gun.negateCounterBonuses )
+    {
+      if( gun.isAirWeapon && defender.slowsAir )
+        counterPower += SLOW_BONUS;
+      if( !gun.isAirWeapon && defender.slowsLand )
+        counterPower += SLOW_BONUS;
+      if( defender.resistsKaiju )
+        counterPower += SLOW_BONUS;
+    }
+    return counterPower;
+  }
+
+  public static double getDamage(int attack, int counterPower)
+  {
+    return getDamageRatioStyle(attack, counterPower);
+  }
+
+  /**
+   * Produces damage numbers based on attack/kaijuCounter
+   */
+  public static double getDamageRatioStyle(int attack, int counterPower)
+  {
+    // 1-based instead of 0-based
+    int durability = 1 + counterPower;
+    int damage = attack * 1000 / durability;
+    // Round properly
+    damage += 5;
+    damage /= 10;
+
+    return damage * KAIJU_DAMAGE_FACTOR / 100;
+  }
+
+  /**
+   * Produces damage numbers centered around KAIJU_DAMAGE_BASE
+   */
+  public static double getDamageShiftingStyle(int attack, int durability)
+  {
+    int damage = KAIJU_DAMAGE_BASE;
+
+    int finalPower = attack - durability;
+    if( finalPower > -3 )
+      damage += finalPower * 10;
+    else if( finalPower > -8 )
+      damage = damage - 10 + finalPower * 5;
+    else
+      damage = 2 * (12 + finalPower);
+
+    return damage;
+  }
+
+  // Implements all +ATK and +counter as base damage changes
+  public static class KaijuWarsFightMod implements UnitModifierWithDefaults
+  {
+    private static final long serialVersionUID = 1L;
+
+    // Rewrite base damage in both of these functions so we can beat up both terrain and units with situational boosts
+    @Override
+    public void modifyUnitAttack(StrikeParams params)
+    {
+      // Assume only one weapon, since that holds for this unit set
+      KaijuWarsWeapon gun = (KaijuWarsWeapon) params.attacker.model.weapons.get(0);
+      int attack = gun.vsLand;
+
+      params.baseDamage = getDamage(attack, TERRAIN_DURABILITY);
+    }
+
+    @Override
+    public void modifyUnitAttackOnUnit(BattleParams params)
+    {
+      // Assume only one weapon, since that holds for this unit set
+      KaijuWarsWeapon gun = (KaijuWarsWeapon) params.attacker.model.weapons.get(0);
+      KaijuWarsUnitModel defender = (KaijuWarsUnitModel) params.defender.model;
+
+      int counterPower = deriveCounter(gun, defender);
+      if( defender.entrenches )
+      {
+        // This is a bit smelly, but better than the alternative?
+        UnitTurnPositionTracker tracker = StateTracker.instance(params.map.game, UnitTurnPositionTracker.class);
+        if( tracker.stoodStill(params.defender.unit) )
+          counterPower += SLOW_BONUS;
+      }
+
+      int attack = deriveAttack(gun, defender);
+
+      params.baseDamage = getDamage(attack, counterPower);
+    }
+  } //~KaijuWarsFightMod
+
+} //~KaijuWarsWeapons
