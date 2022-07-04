@@ -658,6 +658,7 @@ public class KaijuWarsUnits extends UnitModelScheme
     {
       super();
       name = REZ_TO_NAME;
+      costBase = PREP_COST * 1;
       kaijuCounter = 1;
       resurrectsAs = null;
     }
@@ -691,6 +692,7 @@ public class KaijuWarsUnits extends UnitModelScheme
     {
       super();
       name = REZ_TO_NAME;
+      costBase = PREP_COST * 2;
       kaijuCounter = 2;
       resurrectsAs = null;
       role = TANK | ASSAULT | LAND;
