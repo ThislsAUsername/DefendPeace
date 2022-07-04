@@ -9,7 +9,7 @@ import Units.Unit;
 import Units.UnitModel;
 
 /**
- * Tracks what type units used to be until their next turn.
+ * Resurrects certain unit types when they die, into a specified other type
  */
 public class UnitResurrectionTracker extends StateTracker
 {
