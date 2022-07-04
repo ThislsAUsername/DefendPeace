@@ -44,6 +44,7 @@ public class KaijuWarsUnits extends UnitModelScheme
     factoryModels.add(new Artillery());
     factoryModels.add(new Maser());
     factoryModels.add(new LigerPanther());
+    factoryModels.add(new SuperZ2());
     factoryModels.add(new OGRPlatform());
 
     // Record those units we can get from a Seaport.
@@ -54,7 +55,6 @@ public class KaijuWarsUnits extends UnitModelScheme
     airportModels.add(new Bomber());
     airportModels.add(new Bushplane());
     airportModels.add(new BigBoy());
-    airportModels.add(new SuperZ2()); // Does this make sense?
 
     // Dump these lists into a hashmap for easy reference later.
     kjwModels.shoppingList.put(TerrainType.FACTORY, factoryModels);
@@ -268,7 +268,7 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     public AA()
     {
-      super("AA", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+      super("Anti-Air", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, weapons, STAR_VALUE);
       kaijuCounter = 1;
       slowsAir = true;
