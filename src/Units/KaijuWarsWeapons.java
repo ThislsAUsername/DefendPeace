@@ -306,10 +306,9 @@ public class KaijuWarsWeapons
       KaijuWarsWeapon gun = (KaijuWarsWeapon) params.attacker.model.weapons.get(0);
       int attack = gun.vsLand;
 
-      // TODO: The target coord is unavailable. Derp.
-      //final TerrainType atkEnv = params.attacker.env.terrainType;
-      //int attackBoost = getAttackBoost(params.attacker.unit, params.map, params.attacker.coord, atkEnv, params.defender.coord);
-      //attack += attackBoost;
+      final TerrainType atkEnv = params.attacker.env.terrainType;
+      int attackBoost = getAttackBoost(params.attacker.unit, params.map, params.attacker.coord, atkEnv, params.targetCoord);
+      attack += attackBoost;
 
       params.baseDamage = getDamage(attack, TERRAIN_DURABILITY);
     }
