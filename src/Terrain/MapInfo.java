@@ -8,6 +8,7 @@ import Engine.XYCoord;
 import Terrain.Environment.Weathers;
 import Units.AWBWUnits;
 import Units.DoRUnits;
+import Units.KaijuWarsUnits;
 import Units.UnitModel;
 import Units.UnitModelScheme;
 import Units.UnitModelScheme.GameReadyModels;
@@ -89,6 +90,7 @@ public class MapInfo implements IEnvironsProvider
     ArrayList<UnitModelScheme> umsList = new ArrayList<UnitModelScheme>();
     umsList.add(new AWBWUnits());
     umsList.add(new DoRUnits());
+    umsList.add(new KaijuWarsUnits());
 
     // Filter based on the existence of non-core units in the map
     for( UnitModelScheme scheme : umsList )

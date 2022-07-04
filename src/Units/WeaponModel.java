@@ -5,6 +5,7 @@ import java.io.Serializable;
 import Terrain.TerrainType;
 import Units.AWBWUnits.AWBWUnitModel;
 import Units.DoRUnits.DoRUnitModel;
+import Units.KaijuWarsUnits.KaijuWarsUnitModel;
 
 public abstract class WeaponModel implements Serializable
 {
@@ -55,6 +56,10 @@ public abstract class WeaponModel implements Serializable
     if( defender == null )
       throw new IllegalArgumentException("Stare not into the void. It just may stare back.");
     return defender.getDamageRedirect(this);
+  }
+  public double getDamage(KaijuWarsUnitModel defender)
+  {
+    throw new UnsupportedOperationException("Called base WeaponModel.getDamage() with input type " + defender.getClass());
   }
   public double getDamage(AWBWUnitModel defender)
   {
