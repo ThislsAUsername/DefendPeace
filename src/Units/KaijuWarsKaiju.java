@@ -46,9 +46,6 @@ public class KaijuWarsKaiju
   private static final int MAX_AMMO = -1;
   private static final int VISION_RANGE = 2;
 
-  // Kaiju start with one ability, get a second, then the third/fourth in tandem
-  public enum KaijuAbilityTier { BASIC, EXTRA, ALL }
-
   private static final UnitActionFactory[] KAIJU_ACTIONS = { new KaijuActions.KaijuCrushFactory(), UnitActionFactory.DELETE };
 
   private static final MoveType KAIJU_MOVE = new FootKaiju();
@@ -56,28 +53,23 @@ public class KaijuWarsKaiju
   public static class KaijuUnitModel extends KaijuWarsUnitModel
   {
     private static final long serialVersionUID = 1L;
-    // How do we do kaiju resurrection?
-    // Kaiju get this + day number HP to start with
-    public int turnZeroHP       = 12;
-    // Kaiju start with one skill, and gain access to the others depending on their starting turn
-    public int turnForSkillTwo  = 42;
-    public int turnForAllSkills = 42;
-    public final int[] hpChunks;
+    public final int[] hpChunks, hpBases;
 
-    public KaijuUnitModel(String pName, long pRole, int[] pHPchunks)
+    public KaijuUnitModel(String pName, long pRole, int[] pHPchunks, int[] pHPbases)
     {
       super(pName, pRole, KAIJU_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, KAIJU_MOVE, KAIJU_ACTIONS, new WeaponModel[0], STAR_VALUE);
 
       resistsKaiju = true;
       isKaiju      = true;
       hpChunks     = pHPchunks;
+      hpBases      = pHPbases;
     }
 
     @Override
     public UnitModel clone()
     {
       // Create a new model with the given attributes.
-      KaijuUnitModel newModel = new KaijuUnitModel(name, role, hpChunks);
+      KaijuUnitModel newModel = new KaijuUnitModel(name, role, hpChunks, hpBases);
 
       newModel.copyValues(this);
       return newModel;
@@ -85,9 +77,6 @@ public class KaijuWarsKaiju
     public void copyValues(KaijuUnitModel other)
     {
       super.copyValues(other);
-      turnZeroHP       = other.turnZeroHP;
-      turnForSkillTwo  = other.turnForSkillTwo;
-      turnForAllSkills = other.turnForAllSkills;
     }
   }
 
@@ -102,16 +91,26 @@ public class KaijuWarsKaiju
   // From testing, it looks like everything beyond a certain point is just chunks of 8 for all Kaiju
   public static final int DEFAULT_HP_CHUNK = 8;
 
+  // Kaiju start with one ability, get a second, then the third/fourth in tandem
+  public enum KaijuAbilityTier { BASIC, EXTRA, ALL }
+  public static final int EXTRA_SKILL_TURN = 5;
+  public static final int ALL_SKILLS_TURN  = 20;
+  // These are the "base" HP values for each kaiju at the skill breakpoint turns
+  // Note that the turn number will be added to this value, in all cases
+  // Also, these are made up/customizable in game (as are the breakpoint turns), so can be used as balancing factors
+  public static final int[] ALPHA_HPBASES = { 12, 20, 38 };
+  public static final int[] BIRD_HPBASES  = { 12, 20, 38 };
+  public static final int[] DONK_HPBASES  = { 12, 12, 12 };
+  public static final int[] SNEK_HPBASES  = { 12, 12, 12 };
+  public static final int[] UFO_HPBASES   = { 12, 16, 12 };
+
   public static class Alphazaurus extends KaijuUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final long ROLE = ASSAULT | SURFACE_TO_AIR | TROOP | LAND;
     public Alphazaurus()
     {
-      super("Alphazaurus", ROLE, ALPHA_CHUNKS);
-      turnZeroHP       = 12;
-      turnForSkillTwo  = 5;
-      turnForAllSkills = 15;
+      super("Alphazaurus", ROLE, ALPHA_CHUNKS, ALPHA_HPBASES);
       addUnitModifier(new AlphazaurusMod());
     }
 
@@ -180,20 +179,21 @@ public class KaijuWarsKaiju
         return null;
 
       final int turn = game.getCurrentTurn();
+
+      KaijuAbilityTier tier = KaijuAbilityTier.BASIC;
+      if( turn >= EXTRA_SKILL_TURN )
+        tier = KaijuAbilityTier.EXTRA;
+      if( turn >= ALL_SKILLS_TURN )
+        tier = KaijuAbilityTier.ALL;
+      kaijuAbilityTier.put(unit, tier);
+
       KaijuUnitModel kaijuType = (KaijuUnitModel) unit.model;
-      int hp = kaijuType.turnZeroHP;
+      int hp = kaijuType.hpBases[tier.ordinal()];
       hp += turn;
       int heal = hp - UnitModel.MAXIMUM_HP;
 
       GameEventQueue events = new GameEventQueue();
       events.add(new HealUnitEvent(unit, heal, null, true));
-
-      KaijuAbilityTier tier = KaijuAbilityTier.BASIC;
-      if( turn >= kaijuType.turnForSkillTwo )
-        tier = KaijuAbilityTier.EXTRA;
-      if( turn >= kaijuType.turnForAllSkills )
-        tier = KaijuAbilityTier.ALL;
-      kaijuAbilityTier.put(unit, tier);
 
       XYCoord buildCoords = new XYCoord(unit);
       Environment env = game.gameMap.getEnvironment(buildCoords);
