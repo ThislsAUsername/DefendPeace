@@ -1,12 +1,16 @@
 package Units;
 
 import java.util.ArrayList;
-
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import Engine.FloodFillFunctor;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.GamePath;
 import Engine.GamePath.PathNode;
+import Engine.StateTrackers.StateTracker;
+import Engine.UnitMods.UnitModifierWithDefaults;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -14,12 +18,14 @@ import Engine.FloodFillFunctor.BasicMoveFillFunctor;
 import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.MapChangeEvent;
 import Engine.GameEvents.MassDamageEvent;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
+import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import Units.KaijuWarsUnits.KaijuWarsUnitModel;
 import Units.MoveTypes.MoveType;
@@ -42,6 +48,7 @@ public class KaijuWarsKaiju
    */
 
   private static final int KAIJU_COST = 0;
+  private static final int MOVE_POWER = 2; // Dummy value
   private static final double STAR_VALUE = 10.0;
   private static final int MAX_FUEL = 99;
   private static final int IDLE_FUEL_BURN = 0;
@@ -55,13 +62,38 @@ public class KaijuWarsKaiju
   {
     private static final long serialVersionUID = 1L;
     // How do we do kaiju resurrection?
+    // Kaiju get this + day number HP to start with
+    public int turnZeroHP       = 12;
+    // Kaiju start with one skill, and gain access to the others depending on their starting turn
+    public int turnForSkillTwo  = 42;
+    public int turnForAllSkills = 42;
+    public final int[] hpChunks;
 
-    public KaijuUnitModel(String pName, long pRole, int pMovePower)
+    public KaijuUnitModel(String pName, long pRole, int[] pHPchunks)
     {
-      super(pName, pRole, KAIJU_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, pMovePower, KAIJU_MOVE, KAIJU_ACTIONS, new WeaponModel[0], STAR_VALUE);
+      super(pName, pRole, KAIJU_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, KAIJU_MOVE, KAIJU_ACTIONS, new WeaponModel[0], STAR_VALUE);
 
       resistsKaiju = true;
       isKaiju      = true;
+      hpChunks     = pHPchunks;
+      addUnitModifier(new KaijuMoveMod());
+    }
+
+    @Override
+    public UnitModel clone()
+    {
+      // Create a new model with the given attributes.
+      KaijuUnitModel newModel = new KaijuUnitModel(name, role, hpChunks);
+
+      newModel.copyValues(this);
+      return newModel;
+    }
+    public void copyValues(KaijuUnitModel other)
+    {
+      super.copyValues(other);
+      turnZeroHP       = other.turnZeroHP;
+      turnForSkillTwo  = other.turnForSkillTwo;
+      turnForAllSkills = other.turnForAllSkills;
     }
   }
 
@@ -80,15 +112,106 @@ public class KaijuWarsKaiju
   {
     private static final long serialVersionUID = 1L;
     private static final long ROLE = ASSAULT | SURFACE_TO_AIR | TROOP | LAND;
-    private static final int MOVE_POWER = 2;
-
     public Alphazaurus()
     {
-      super("Alphazaurus", ROLE, MOVE_POWER);
+      super("Alphazaurus", ROLE, ALPHA_CHUNKS);
+      turnZeroHP       = 12;
+      turnForSkillTwo  = 5;
+      turnForAllSkills = 15;
+    }
+  }
+
+  /**
+   * Handles cleanup after Kaiju are built:
+   * <p>Gives them the proper HP count, and deletes the port
+   * <p>Also handles ability cooldowns
+   */
+  // Should building Kaiju be a different action than building other stuff?
+  public static class KaijuStateTracker extends StateTracker
+  {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public GameEventQueue receiveCreateUnitEvent(Unit unit)
+    {
+      if( !(unit.model instanceof KaijuUnitModel) )
+        return null;
+
+      KaijuUnitModel kaijuType = (KaijuUnitModel) unit.model;
+      int hp = kaijuType.turnZeroHP;
+      hp += game.getCurrentTurn();
+      int heal = hp - UnitModel.MAXIMUM_HP;
+
+      GameEventQueue events = new GameEventQueue();
+      events.add(new HealUnitEvent(unit, heal, null, true));
+
+      XYCoord buildCoords = new XYCoord(unit);
+      Environment env = game.gameMap.getEnvironment(buildCoords);
+      if( null == env || env.terrainType != TerrainType.SEAPORT )
+        return events;
+
+      // Destroy the port
+      Environment newEnvirons = Environment.getTile(env.terrainType.getBaseTerrain(), env.weatherType);
+      events.add(new MapChangeEvent(buildCoords, newEnvirons));
+
+      return events;
+    }
+
+    public HashMap<Unit, HashMap<Object, Integer>> kaijuAbilityTurns = new HashMap<>();
+    public static final int KAIJU_ABILITY_COOLDOWN = 4;
+    public void abilityUsed(Unit unit, Object key)
+    {
+      if( !kaijuAbilityTurns.containsKey(unit) )
+        kaijuAbilityTurns.put(unit, new HashMap<>());
+
+      HashMap<Object, Integer> abilityUses = kaijuAbilityTurns.get(unit);
+      abilityUses.put(key, game.getCurrentTurn());
+    }
+    public boolean isReady(Unit unit, Object key)
+    {
+      // Kaiju start with all abilities ready
+      if( !kaijuAbilityTurns.containsKey(unit) )
+        return true;
+      HashMap<Object, Integer> abilityUses = kaijuAbilityTurns.get(unit);
+      if( !abilityUses.containsKey(key) )
+        return true;
+
+      final Integer turnUsed = abilityUses.get(key);
+      final int turn = game.getCurrentTurn();
+      final boolean onCooldown = turnUsed + KAIJU_ABILITY_COOLDOWN < turn;
+
+      return !onCooldown;
     }
   }
   
   // Movement/basic action stuffs
+
+  // Sets Kaiju movement to the correct value based on HP
+  public static class KaijuMoveMod implements UnitModifierWithDefaults
+  {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public void modifyMovePower(UnitContext uc)
+    {
+      if( !(uc.model instanceof KaijuUnitModel) )
+        return;
+
+      KaijuUnitModel kaijuType = (KaijuUnitModel) uc.model;
+      int[] hpChunks = kaijuType.hpChunks;
+      int hpBudget = uc.getHP();
+      int move = 0;
+      while (hpBudget > 0)
+      {
+        int chunk = DEFAULT_HP_CHUNK;
+        if( hpChunks.length > move )
+          chunk = hpChunks[move];
+        ++move;
+        hpBudget -= chunk;
+      }
+      uc.movePower = move;
+    }
+  } //~KaijuMoveMod
 
   public static class FootKaiju extends MoveType
   {
@@ -202,6 +325,9 @@ public class KaijuWarsKaiju
     }
   } //~Factory
 
+  /** List of things Kaiju break that aren't capturable */
+  public static final List<TerrainType> INERT_CRUSHABLES = Arrays.asList(TerrainType.BRIDGE, TerrainType.BUNKER, TerrainType.PILLAR, TerrainType.METEOR);
+
   public static class KaijuCrushAction extends GameAction
   {
     private final KaijuCrushFactory type;
@@ -253,7 +379,8 @@ public class KaijuWarsKaiju
         for( PathNode node : movePath.getWaypoints() )
         {
           MapLocation location = gameMap.getLocation(node.GetCoordinates());
-          if( location.isCaptureable() )
+          if( location.isCaptureable()
+              || INERT_CRUSHABLES.contains(location.getEnvironment().terrainType) )
           {
             Environment oldEnvirons = location.getEnvironment();
             Environment newEnvirons = Environment.getTile(oldEnvirons.terrainType.getBaseTerrain(), oldEnvirons.weatherType);

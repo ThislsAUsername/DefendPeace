@@ -13,12 +13,18 @@ public class HealUnitEvent implements GameEvent
   private Unit unit;
   public final int repairPowerHP;
   public final Army payer;
+  public final boolean canOverheal;
 
   public HealUnitEvent(Unit aTarget, int HP, Army pPayer)
+  {
+    this(aTarget, HP, pPayer, false);
+  }
+  public HealUnitEvent(Unit aTarget, int HP, Army pPayer, boolean canOverheal)
   {
     unit = aTarget;
     repairPowerHP = HP;
     payer = pPayer;
+    this.canOverheal = canOverheal;
   }
 
   @Override
@@ -38,7 +44,7 @@ public class HealUnitEvent implements GameEvent
   public void performEvent(MapMaster gameMap)
   {
     if (null == payer)
-      unit.alterHP(repairPowerHP);
+      unit.alterHP(repairPowerHP, canOverheal);
     else if( unit.isHurt() )
     {
       int costPerHP = (int) (unit.getRepairCost() / UnitModel.MAXIMUM_HP);
@@ -50,7 +56,7 @@ public class HealUnitEvent implements GameEvent
         actualRepair = Math.min(repairPowerHP, affordableHP);
       }
 
-      int deltaHP = unit.alterHP(actualRepair);
+      int deltaHP = unit.alterHP(actualRepair, canOverheal);
       payer.money -= deltaHP * costPerHP;
     }
   }

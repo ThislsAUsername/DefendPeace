@@ -106,6 +106,7 @@ public class KaijuWarsUnits extends UnitModelScheme
   public void registerStateTrackers(GameInstance gi)
   {
     StateTracker.instance(gi, UnitTurnPositionTracker.class);
+    StateTracker.instance(gi, KaijuWarsKaiju.KaijuStateTracker.class);
 
     UnitResurrectionTracker rezzer = StateTracker.instance(gi, UnitResurrectionTracker.class);
     // Populate resurrection pairs
@@ -232,22 +233,26 @@ public class KaijuWarsUnits extends UnitModelScheme
       // Create a new model with the given attributes.
       KaijuWarsUnitModel newModel = new KaijuWarsUnitModel(name, role, costBase, maxAmmo, maxFuel, idleFuelBurn, visionRange, baseMovePower,
           baseMoveType.clone(), baseActions, weapons, abilityPowerValue);
-      newModel.kaijuCounter  = kaijuCounter;
-      newModel.entrenches    = entrenches;
-      newModel.stillBoost    = stillBoost;
-      newModel.boostsAllies  = boostsAllies;
-      newModel.boostSurround = boostSurround;
-
-      newModel.resurrectsAs    = resurrectsAs;
-      newModel.suicideAttack = suicideAttack;
-
-      newModel.slowsLand     = slowsLand;
-      newModel.slowsAir      = slowsAir;
-      newModel.resistsKaiju  = resistsKaiju;
-      newModel.isKaiju       = isKaiju;
 
       newModel.copyValues(this);
       return newModel;
+    }
+    public void copyValues(KaijuWarsUnitModel other)
+    {
+      super.copyValues(other);
+      kaijuCounter  = other.kaijuCounter;
+      entrenches    = other.entrenches;
+      stillBoost    = other.stillBoost;
+      boostsAllies  = other.boostsAllies;
+      boostSurround = other.boostSurround;
+
+      resurrectsAs  = other.resurrectsAs;
+      suicideAttack = other.suicideAttack;
+
+      slowsLand     = other.slowsLand;
+      slowsAir      = other.slowsAir;
+      resistsKaiju  = other.resistsKaiju;
+      isKaiju       = other.isKaiju;
     }
 
     @Override
