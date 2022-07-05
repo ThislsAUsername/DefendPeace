@@ -239,6 +239,52 @@ public class KaijuActions
     return false;
   }
 
+  /** Superclass for Kaiju attack ability actions */
+  public abstract static class KaijuAttackAction extends GameAction
+  {
+    final UnitActionFactory type;
+    final Unit actor;
+    final XYCoord target;
+
+    public KaijuAttackAction(UnitActionFactory pType, Unit unit, XYCoord target)
+    {
+      type = pType;
+      actor = unit;
+      this.target = target;
+    }
+
+    @Override
+    public Unit getActor()
+    {
+      return actor;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[%s %s on %s]", actor.toStringWithLocation(), type, target);
+    }
+
+    @Override
+    public UnitActionFactory getType()
+    {
+      return type;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return new XYCoord(actor);
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return target;
+    }
+  } // ~KaijuAttackAction
+
+
   public static class AlphaTsunamiFactory extends UnitActionFactory
   {
     private static final long serialVersionUID = 1L;
@@ -269,17 +315,11 @@ public class KaijuActions
     }
   } //~Factory
 
-  public static class AlphaTsunamiAction extends GameAction
+  public static class AlphaTsunamiAction extends KaijuAttackAction
   {
-    final AlphaTsunamiFactory type;
-    final Unit actor;
-    final XYCoord target;
-
     public AlphaTsunamiAction(AlphaTsunamiFactory pType, Unit unit, XYCoord target)
     {
-      type = pType;
-      actor = unit;
-      this.target = target;
+      super(pType, unit, target);
     }
 
     @Override
@@ -291,36 +331,111 @@ public class KaijuActions
       kaijuTracker.abilityUsedShort(actor, AlphaTsunamiFactory.class);
       return eventSequence;
     }
-
-    @Override
-    public Unit getActor()
-    {
-      return actor;
-    }
-
-    @Override
-    public String toString()
-    {
-      return String.format("[%s Tsunami on %s]", actor.toStringWithLocation(), target);
-    }
-
-    @Override
-    public UnitActionFactory getType()
-    {
-      return type;
-    }
-
-    @Override
-    public XYCoord getMoveLocation()
-    {
-      return new XYCoord(actor);
-    }
-
-    @Override
-    public XYCoord getTargetLocation()
-    {
-      return target;
-    }
   } // ~AlphaTsunamiAction
+
+  public static class AlphaKickFactory extends UnitActionFactory
+  {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
+    {
+      final XYCoord actCoord = new XYCoord(actor);
+      KaijuStateTracker kaijuTracker = StateTracker.instance(map.game, KaijuStateTracker.class);
+      boolean canAct = kaijuTracker.isReady(actor, AlphaKickFactory.class);
+
+      // Act while stationary
+      if( canAct && movePath.getEndCoord().equals(actCoord) )
+      {
+        ArrayList<GameAction> actions = new ArrayList<>();
+        for( XYCoord xyc : Utils.findLocationsInRange(map, actCoord, 1, 1) )
+        {
+          Unit resident = map.getResident(xyc);
+          if( null != resident && resident.model.isLandUnit() )
+            actions.add(new AlphaKickAction(this, actor, xyc));
+        }
+        if( actions.size() > 0 )
+          return new GameActionSet(actions, true);
+      }
+
+      return null;
+    }
+
+    @Override
+    public String name(Unit actor)
+    {
+      return "KICK";
+    }
+  } //~Factory
+
+  public static class AlphaKickAction extends KaijuAttackAction
+  {
+    public AlphaKickAction(AlphaKickFactory pType, Unit unit, XYCoord target)
+    {
+      super(pType, unit, target);
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue eventSequence = new GameEventQueue();
+      enqueueKaijuKillEvents(gameMap, actor, target, eventSequence);
+      KaijuStateTracker kaijuTracker = StateTracker.instance(gameMap.game, KaijuStateTracker.class);
+      kaijuTracker.abilityUsedShort(actor, AlphaKickFactory.class);
+      return eventSequence;
+    }
+  } // ~AlphaKickAction
+
+  public static class AlphaBreathFactory extends UnitActionFactory
+  {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
+    {
+      final XYCoord actCoord = new XYCoord(actor);
+      KaijuStateTracker kaijuTracker = StateTracker.instance(map.game, KaijuStateTracker.class);
+      boolean canAct = kaijuTracker.isReady(actor, AlphaBreathFactory.class);
+
+      // Act while stationary
+      if( canAct && movePath.getEndCoord().equals(actCoord) )
+      {
+        ArrayList<GameAction> actions = new ArrayList<>();
+        for( XYCoord xyc : Utils.findLocationsInRange(map, actCoord, 1, 1) )
+          actions.add(new AlphaBreathAction(this, actor, xyc));
+        return new GameActionSet(actions, true);
+      }
+
+      return null;
+    }
+
+    @Override
+    public String name(Unit actor)
+    {
+      return "BREATH";
+    }
+  } //~Factory
+
+  public static class AlphaBreathAction extends KaijuAttackAction
+  {
+    public AlphaBreathAction(AlphaBreathFactory pType, Unit unit, XYCoord target)
+    {
+      super(pType, unit, target);
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue eventSequence = new GameEventQueue();
+      enqueueKaijuStrikeEvents(gameMap, actor, target, eventSequence);
+      // Double the target coordinates and subtract the start coord to get start + offset*2
+      XYCoord secondTile = new XYCoord(target.xCoord * 2 - actor.x, target.yCoord * 2 - actor.y);
+      enqueueKaijuStrikeEvents(gameMap, actor, secondTile, eventSequence);
+      KaijuStateTracker kaijuTracker = StateTracker.instance(gameMap.game, KaijuStateTracker.class);
+      kaijuTracker.abilityUsedShort(actor, AlphaBreathFactory.class);
+      return eventSequence;
+    }
+  } // ~AlphaBreathAction
+
 
 } //~KaijuActions

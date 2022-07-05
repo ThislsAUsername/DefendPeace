@@ -134,7 +134,8 @@ public class KaijuWarsKaiju
       switch (tier)
       {
         case ALL:
-          // TODO
+          uc.possibleActions.add(new KaijuActions.AlphaBreathFactory());
+          uc.possibleActions.add(new KaijuActions.AlphaKickFactory());
         case EXTRA:
           uc.possibleActions.add(new KaijuActions.AlphaTsunamiFactory());
         case BASIC:
