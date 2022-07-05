@@ -65,6 +65,17 @@ public class KaijuWarsKaiju
     }
   }
 
+  // These are the chunks of HP each Kaiju has in each tier of movement (they get slower as they take damage)
+  // Index = move points
+  public static final int[] ALPHA_CHUNKS = { 0, 0, 12, 18,  8,  7,  6 };
+  public static final int[] BIRD_CHUNKS  = { 0, 0, 10, 10,  8,  4,  4 };
+  public static final int[] DONK_CHUNKS  = { 0, 0, 10, 12,  8,  9 };
+  public static final int[] SNEK_CHUNKS  = { 0, 0, 10, 15, 11 };
+  // UFO starts at 3 move
+  public static final int[] UFO_CHUNKS   = { 0, 0,  0,  9,  4,  4,  3,  3 };
+  // From testing, it looks like everything beyond a certain point is just chunks of 8 for all Kaiju
+  public static final int DEFAULT_HP_CHUNK = 8;
+
   public static class Alphazaurus extends KaijuUnitModel
   {
     private static final long serialVersionUID = 1L;
