@@ -56,9 +56,11 @@ public class KaijuWarsWeapons
     @Override
     public double getDamage(KaijuWarsUnitModel defender)
     {
-      int counterPower = deriveCounter(this, defender);
-
       int attack = deriveAttack(this, defender);
+      if( defender.isKaiju )
+        return attack * 10;
+
+      int counterPower = deriveCounter(this, defender);
 
       return KaijuWarsWeapons.getDamage(attack, counterPower);
     }
@@ -320,6 +322,7 @@ public class KaijuWarsWeapons
       int attackBoost = getAttackBoost(params.attacker.unit, params.map, params.attacker.coord, atkEnv, params.targetCoord);
       attack += attackBoost;
 
+      // Assume we're shooting terrain, since the base damage will get overwritten later
       params.baseDamage = getDamage(attack, TERRAIN_DURABILITY);
     }
 
@@ -340,7 +343,10 @@ public class KaijuWarsWeapons
       int attack = deriveAttack(gun, defModel);
       attack += attackBoost;
 
-      params.baseDamage = getDamage(attack, counterPower);
+      if( defModel.isKaiju )
+        params.baseDamage = attack * 10;
+      else
+        params.baseDamage = getDamage(attack, counterPower);
     }
 
     // Throwing the air-airport move boost on here since this modifier's going on all units anyway

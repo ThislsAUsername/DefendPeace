@@ -62,7 +62,7 @@ public class KaijuWarsUnits extends UnitModelScheme
     factoryModels.add(new OGRPlatform());
 
     // Record those units we can get from a Seaport.
-    // TODO
+    kaijuModels.add(new KaijuWarsKaiju.Alphazaurus());
 
     // Inscribe those war machines obtainable from an Airport.
     airportModels.add(new Fighter());
