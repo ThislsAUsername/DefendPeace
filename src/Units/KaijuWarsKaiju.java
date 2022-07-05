@@ -1,30 +1,19 @@
 package Units;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import Engine.FloodFillFunctor;
-import Engine.GameAction;
-import Engine.GameActionSet;
-import Engine.GamePath;
-import Engine.GamePath.PathNode;
+import Engine.GameInstance;
 import Engine.StateTrackers.StateTracker;
 import Engine.UnitMods.UnitModifierWithDefaults;
 import Engine.UnitActionFactory;
-import Engine.Utils;
 import Engine.XYCoord;
 import Engine.FloodFillFunctor.BasicMoveFillFunctor;
-import Engine.GameEvents.ArmyDefeatEvent;
-import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.MapChangeEvent;
-import Engine.GameEvents.MassDamageEvent;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.MapLocation;
-import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import Units.KaijuWarsUnits.KaijuWarsUnitModel;
@@ -54,7 +43,11 @@ public class KaijuWarsKaiju
   private static final int IDLE_FUEL_BURN = 0;
   private static final int MAX_AMMO = -1;
   private static final int VISION_RANGE = 2;
-  private static final UnitActionFactory[] KAIJU_ACTIONS = { new KaijuCrushFactory(), UnitActionFactory.DELETE };
+
+  // Kaiju start with one ability, get a second, then the third/fourth in tandem
+  public enum KaijuAbilityTier { BASIC, EXTRA, ALL }
+
+  private static final UnitActionFactory[] KAIJU_ACTIONS = { new KaijuActions.KaijuCrushFactory(), UnitActionFactory.DELETE };
 
   private static final MoveType KAIJU_MOVE = new FootKaiju();
 
@@ -76,7 +69,6 @@ public class KaijuWarsKaiju
       resistsKaiju = true;
       isKaiju      = true;
       hpChunks     = pHPchunks;
-      addUnitModifier(new KaijuMoveMod());
     }
 
     @Override
@@ -118,12 +110,43 @@ public class KaijuWarsKaiju
       turnZeroHP       = 12;
       turnForSkillTwo  = 5;
       turnForAllSkills = 15;
+      addUnitModifier(new AlphazaurusMod());
     }
   }
+  public static class AlphazaurusMod extends KaijuMoveMod
+  {
+    private static final long serialVersionUID = 1L;
+
+    KaijuStateTracker kaijuTracker;
+    @Override
+    public void registerTrackers(GameInstance gi)
+    {
+      kaijuTracker = StateTracker.instance(gi, KaijuStateTracker.class);
+    }
+
+    @Override
+    public void modifyActionList(UnitContext uc)
+    {
+      if(!kaijuTracker.kaijuAbilityTier.containsKey(uc.unit))
+        return; // Not a registered kaiju
+
+      final KaijuAbilityTier tier = kaijuTracker.kaijuAbilityTier.get(uc.unit);
+      switch (tier)
+      {
+        case ALL:
+          // TODO
+        case EXTRA:
+          uc.possibleActions.add(new KaijuActions.AlphaTsunamiFactory());
+        case BASIC:
+          break;
+      }
+    }
+  } //~KaijuMoveMod
 
   /**
    * Handles cleanup after Kaiju are built:
    * <p>Gives them the proper HP count, and deletes the port
+   * <p>Stores the creation turn to track abilities
    * <p>Also handles ability cooldowns
    */
   // Should building Kaiju be a different action than building other stuff?
@@ -137,13 +160,21 @@ public class KaijuWarsKaiju
       if( !(unit.model instanceof KaijuUnitModel) )
         return null;
 
+      final int turn = game.getCurrentTurn();
       KaijuUnitModel kaijuType = (KaijuUnitModel) unit.model;
       int hp = kaijuType.turnZeroHP;
-      hp += game.getCurrentTurn();
+      hp += turn;
       int heal = hp - UnitModel.MAXIMUM_HP;
 
       GameEventQueue events = new GameEventQueue();
       events.add(new HealUnitEvent(unit, heal, null, true));
+
+      KaijuAbilityTier tier = KaijuAbilityTier.BASIC;
+      if( turn >= kaijuType.turnForSkillTwo )
+        tier = KaijuAbilityTier.EXTRA;
+      if( turn >= kaijuType.turnForAllSkills )
+        tier = KaijuAbilityTier.ALL;
+      kaijuAbilityTier.put(unit, tier);
 
       XYCoord buildCoords = new XYCoord(unit);
       Environment env = game.gameMap.getEnvironment(buildCoords);
@@ -157,15 +188,26 @@ public class KaijuWarsKaiju
       return events;
     }
 
+    public HashMap<Unit, KaijuAbilityTier> kaijuAbilityTier = new HashMap<>();
+
     public HashMap<Unit, HashMap<Object, Integer>> kaijuAbilityTurns = new HashMap<>();
     public static final int KAIJU_ABILITY_COOLDOWN = 4;
-    public void abilityUsed(Unit unit, Object key)
+    public void abilityUsedLong(Unit unit, Object key)
+    {
+      abilityUsed(unit, key, KAIJU_ABILITY_COOLDOWN);
+    }
+    public void abilityUsedShort(Unit unit, Object key)
+    {
+      abilityUsed(unit, key, 1);
+    }
+    public void abilityUsed(Unit unit, Object key, int duration)
     {
       if( !kaijuAbilityTurns.containsKey(unit) )
         kaijuAbilityTurns.put(unit, new HashMap<>());
 
       HashMap<Object, Integer> abilityUses = kaijuAbilityTurns.get(unit);
-      abilityUses.put(key, game.getCurrentTurn());
+      final int readyTurn = game.getCurrentTurn() + duration;
+      abilityUses.put(key, readyTurn);
     }
     public boolean isReady(Unit unit, Object key)
     {
@@ -176,9 +218,9 @@ public class KaijuWarsKaiju
       if( !abilityUses.containsKey(key) )
         return true;
 
-      final Integer turnUsed = abilityUses.get(key);
+      final Integer readyTurn = abilityUses.get(key);
       final int turn = game.getCurrentTurn();
-      final boolean onCooldown = turnUsed + KAIJU_ABILITY_COOLDOWN < turn;
+      final boolean onCooldown = readyTurn > turn;
 
       return !onCooldown;
     }
@@ -305,164 +347,5 @@ public class KaijuWarsKaiju
     }
   } // ~KaijuMoveFillFunctor
 
-
-  public static class KaijuCrushFactory extends UnitActionFactory
-  {
-    private static final long serialVersionUID = 1L;
-
-    @Override
-    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
-    {
-      {
-        return new GameActionSet(new KaijuCrushAction(actor, movePath, this), false);
-      }
-    }
-
-    @Override
-    public String name(Unit actor)
-    {
-      return "CRUSH";
-    }
-  } //~Factory
-
-  /** List of things Kaiju break that aren't capturable */
-  public static final List<TerrainType> INERT_CRUSHABLES = Arrays.asList(TerrainType.BRIDGE, TerrainType.BUNKER, TerrainType.PILLAR, TerrainType.METEOR);
-
-  public static class KaijuCrushAction extends GameAction
-  {
-    private final KaijuCrushFactory type;
-    private final GamePath movePath;
-    private final XYCoord waitLoc;
-    private final Unit actor;
-
-    public KaijuCrushAction(Unit unit, GamePath path, KaijuCrushFactory pType)
-    {
-      type = pType;
-      actor = unit;
-      movePath = path;
-      if( (null != path) && (path.getPathLength() > 0) )
-      {
-        // Store the destination for later.
-        waitLoc = movePath.getEndCoord();
-      }
-      else
-        waitLoc = null;
-    }
-
-    @Override
-    public GameEventQueue getEvents(MapMaster gameMap)
-    {
-      // WAIT actions consist of
-      //   MOVE
-      GameEventQueue crushEvents = new GameEventQueue();
-
-      // Validate input.
-      boolean isValid = true;
-      isValid &= null != actor && !actor.isTurnOver;
-      isValid &= (null != movePath) && (movePath.getPathLength() > 0);
-      isValid &= (null != gameMap);
-
-      // Generate events.
-      if( isValid )
-      {
-        boolean actorDies = false;
-        Utils.enqueueMoveEvent(gameMap, actor, movePath, crushEvents);
-        // Remove the move event so it can go last; this allows us to clear out stuff we step on first
-        GameEvent moveEvent = crushEvents.pop();
-
-        // For taking counter damage
-        ArrayList<Unit> walkingKaiju = new ArrayList<>();
-        walkingKaiju.add(actor);
-        int totalCounter = 0;
-
-        // movePath should be updated by the above, so we should be good to go
-        for( PathNode node : movePath.getWaypoints() )
-        {
-          MapLocation location = gameMap.getLocation(node.GetCoordinates());
-          if( location.isCaptureable()
-              || INERT_CRUSHABLES.contains(location.getEnvironment().terrainType) )
-          {
-            Environment oldEnvirons = location.getEnvironment();
-            Environment newEnvirons = Environment.getTile(oldEnvirons.terrainType.getBaseTerrain(), oldEnvirons.weatherType);
-            crushEvents.add(new MapChangeEvent(location.getCoordinates(), newEnvirons));
-
-            if( Utils.willLoseFromLossOf(gameMap, location) )
-            {
-              crushEvents.add(new ArmyDefeatEvent(location.getOwner().army));
-            }
-          }
-          Unit victim = location.getResident();
-          if( null != victim && actor != victim )
-          {
-            KaijuWarsUnitModel kjum = (KaijuWarsUnitModel) victim.model;
-            int counter = kjum.kaijuCounter;
-            int stompDamage = victim.getHP();
-            if( kjum.isKaiju )
-            {
-              // When stomping another kaiju, at least one of us dies
-              counter += victim.getHP();
-              stompDamage = actor.getHP() - totalCounter;
-            }
-            else
-            {
-              Utils.enqueueDeathEvent(victim, crushEvents);
-              counter += KaijuWarsWeapons.getCounterBoost(victim, gameMap, location.getEnvironment().terrainType);
-            }
-            final boolean isLethal = true;
-
-            ArrayList<Unit> stompable = new ArrayList<>();
-            stompable.add(victim);
-            crushEvents.add(new MassDamageEvent(actor.CO, stompable, stompDamage, isLethal));
-            if( stompDamage >= victim.getHP() )
-              Utils.enqueueDeathEvent(victim, crushEvents);
-
-            crushEvents.add(new MassDamageEvent(victim.CO, walkingKaiju, counter, isLethal));
-            totalCounter += counter;
-            if(totalCounter >= actor.getHP())
-            {
-              // Kaiju has to die at his starting position, since the move event happens at the end
-              Utils.enqueueDeathEvent(actor, crushEvents);
-              actorDies = true;
-              break;
-            }
-          }
-        }
-
-        if( !actorDies )
-          crushEvents.add(moveEvent);
-      }
-      return crushEvents;
-    }
-
-    @Override
-    public Unit getActor()
-    {
-      return actor;
-    }
-
-    @Override
-    public XYCoord getMoveLocation()
-    {
-      return waitLoc;
-    }
-
-    @Override
-    public XYCoord getTargetLocation()
-    {
-      return waitLoc;
-    }
-
-    @Override
-    public String toString()
-    {
-      return String.format("[Kaiju-move %s to %s]", actor.toStringWithLocation(), waitLoc);
-    }
-
-    @Override
-    public UnitActionFactory getType()
-    {
-      return type;
-    }
-  } // ~KaijuCrushAction
 
 }

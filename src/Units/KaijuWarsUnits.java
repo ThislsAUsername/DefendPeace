@@ -105,8 +105,9 @@ public class KaijuWarsUnits extends UnitModelScheme
 
   public void registerStateTrackers(GameInstance gi)
   {
+    super.registerStateTrackers(gi);
+
     StateTracker.instance(gi, UnitTurnPositionTracker.class);
-    StateTracker.instance(gi, KaijuWarsKaiju.KaijuStateTracker.class);
 
     UnitResurrectionTracker rezzer = StateTracker.instance(gi, UnitResurrectionTracker.class);
     // Populate resurrection pairs

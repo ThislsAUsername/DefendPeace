@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import Engine.GameInstance;
+import Engine.UnitMods.UnitModifier;
 import Terrain.TerrainType;
 
 /**
@@ -39,7 +40,12 @@ public abstract class UnitModelScheme implements Serializable
   }
   protected abstract GameReadyModels buildGameReadyModels();
 
-  public void registerStateTrackers(GameInstance gi) {}
+  public void registerStateTrackers(GameInstance gi)
+  {
+    for( UnitModel um : gi.rules.unitModelScheme.getGameReadyModels().unitModels )
+      for( UnitModifier mod : um.getModifiers() )
+        mod.registerTrackers(gi);
+  }
 
   // Holds the data for a single Commander's unit selection.
   public static class GameReadyModels implements Serializable

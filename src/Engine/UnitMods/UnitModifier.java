@@ -1,6 +1,8 @@
 package Engine.UnitMods;
 
 import java.io.Serializable;
+
+import Engine.GameInstance;
 import Engine.Combat.CombatContext;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
@@ -52,5 +54,8 @@ public interface UnitModifier extends Serializable
 
   void modifyCargoCapacity(UnitContext uc);
   void modifyActionList(UnitContext uc);
+
+  /** Convenience hook for StateTracker injection */
+  default void registerTrackers(GameInstance gi) {}
 
 }
