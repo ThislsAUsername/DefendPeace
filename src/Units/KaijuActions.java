@@ -328,6 +328,7 @@ public class KaijuActions
       GameEventQueue eventSequence = new GameEventQueue();
       enqueueKaijuStrikeEvents(gameMap, actor, target, eventSequence);
       KaijuStateTracker kaijuTracker = StateTracker.instance(gameMap.game, KaijuStateTracker.class);
+      // Setting the tracker state here feels wrong
       kaijuTracker.abilityUsedShort(actor, AlphaTsunamiFactory.class);
       return eventSequence;
     }
@@ -381,6 +382,7 @@ public class KaijuActions
       GameEventQueue eventSequence = new GameEventQueue();
       enqueueKaijuKillEvents(gameMap, actor, target, eventSequence);
       KaijuStateTracker kaijuTracker = StateTracker.instance(gameMap.game, KaijuStateTracker.class);
+      // Setting the tracker state here feels wrong
       kaijuTracker.abilityUsedShort(actor, AlphaKickFactory.class);
       return eventSequence;
     }
@@ -432,6 +434,7 @@ public class KaijuActions
       XYCoord secondTile = new XYCoord(target.xCoord * 2 - actor.x, target.yCoord * 2 - actor.y);
       enqueueKaijuStrikeEvents(gameMap, actor, secondTile, eventSequence);
       KaijuStateTracker kaijuTracker = StateTracker.instance(gameMap.game, KaijuStateTracker.class);
+      // Setting the tracker state here feels wrong
       kaijuTracker.abilityUsedShort(actor, AlphaBreathFactory.class);
       return eventSequence;
     }

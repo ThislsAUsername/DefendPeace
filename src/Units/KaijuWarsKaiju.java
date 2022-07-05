@@ -1,6 +1,7 @@
 package Units;
 
 import java.util.HashMap;
+
 import Engine.FloodFillFunctor;
 import Engine.GameInstance;
 import Engine.StateTrackers.StateTracker;
@@ -14,6 +15,7 @@ import Engine.GameEvents.MapChangeEvent;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.MapLocation;
+import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import Units.KaijuWarsUnits.KaijuWarsUnitModel;
@@ -111,6 +113,22 @@ public class KaijuWarsKaiju
       turnForSkillTwo  = 5;
       turnForAllSkills = 15;
       addUnitModifier(new AlphazaurusMod());
+    }
+
+    /** Heal self by 3 on a cooldown */
+    @Override
+    public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
+    {
+      GameEventQueue events = super.getTurnInitEvents(self, map);
+
+      KaijuStateTracker kaijuTracker = StateTracker.instance(map.game, KaijuStateTracker.class);
+      if( kaijuTracker.isReady(self, Alphazaurus.class) )
+      {
+        // Setting the tracker state here feels wrong
+        kaijuTracker.abilityUsedLong(self, Alphazaurus.class);
+        events.add(new HealUnitEvent(self, 3, null, true));
+      }
+      return events;
     }
   }
   public static class AlphazaurusMod extends KaijuMoveMod
