@@ -76,7 +76,7 @@ public class CreateUnitEvent implements GameEvent
       {
         boolean success = false;
         // Check concentric rings outwards, to spawn as close to the original spot as possible
-        for( int radius = 0; !success && radius < myFudgeRadius; ++radius )
+        for( int radius = 0; !success && radius <= myFudgeRadius; ++radius )
           for( XYCoord xyc : Utils.findLocationsInRange(gameMap, myBuildCoords, radius, radius) )
           {
             Unit resident = gameMap.getResident(xyc);
