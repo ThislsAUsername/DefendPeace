@@ -92,6 +92,8 @@ public class CombatEngine
     BattleParams attackInstance = context.getAttack();
 
     double damage = attackInstance.calculateDamage();
+    if( damage < 0 )
+      damage = 0;
     unitStateMap.get(context.attacker).fire(context.attacker.weapon);
     unitStateMap.get(context.defender).damageHP(damage, isSim);
 
