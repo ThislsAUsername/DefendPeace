@@ -255,7 +255,8 @@ public class KaijuWarsKaiju
       switch (tier)
       {
         case ALL:
-          // TODO: eruption/wind
+          uc.possibleActions.add(new KaijuActions.BirdEruptionFactory());
+          uc.possibleActions.add(new KaijuActions.BirdWindForceFactory());
         case EXTRA:
           uc.possibleActions.add(new KaijuActions.BirdSwoopFactory());
         case BASIC:
@@ -373,7 +374,7 @@ public class KaijuWarsKaiju
     public HashMap<Unit, KaijuAbilityTier> kaijuAbilityTier = new HashMap<>();
 
     public HashMap<Unit, HashMap<Object, Integer>> kaijuAbilityTurns = new HashMap<>();
-    public static final int KAIJU_ABILITY_COOLDOWN = 4;
+    public static final int KAIJU_ABILITY_COOLDOWN = 5;
     public void abilityUsedLong(Unit unit, Object key)
     {
       abilityUsed(unit, key, KAIJU_ABILITY_COOLDOWN);
