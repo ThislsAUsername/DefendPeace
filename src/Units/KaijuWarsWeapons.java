@@ -344,7 +344,10 @@ public class KaijuWarsWeapons
       attack += attackBoost;
 
       if( defModel.isKaiju )
+      {
+        params.terrainStars = 0;
         params.baseDamage = attack * 10;
+      }
       else
         params.baseDamage = getDamage(attack, counterPower);
     }
