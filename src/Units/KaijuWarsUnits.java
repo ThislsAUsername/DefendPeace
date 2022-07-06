@@ -63,6 +63,14 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     // Record those units we can get from a Seaport.
     kaijuModels.add(new KaijuWarsKaiju.Alphazaurus());
+    final KaijuWarsKaiju.HellTurkey     turkeyAir  = new KaijuWarsKaiju.HellTurkey();
+    final KaijuWarsKaiju.HellTurkeyLand turkeyLand = new KaijuWarsKaiju.HellTurkeyLand(turkeyAir);
+    final KaijuWarsKaiju.HellTurkeyEgg  turkeyEgg  = new KaijuWarsKaiju.HellTurkeyEgg(turkeyLand);
+    turkeyAir.turkeyLand = turkeyLand;
+    turkeyAir.turkeyEgg = turkeyEgg;
+    kaijuModels.add(turkeyAir);
+    extras.add(turkeyLand);
+    extras.add(turkeyEgg);
 
     // Inscribe those war machines obtainable from an Airport.
     airportModels.add(new Fighter());

@@ -17,11 +17,14 @@ import Engine.GameEvents.MapChangeEvent;
 import Engine.GameEvents.MassDamageEvent;
 import Engine.GamePath.PathNode;
 import Engine.StateTrackers.StateTracker;
+import Engine.UnitActionLifecycles.TransformLifecycle;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
+import Units.KaijuWarsKaiju.HellTurkey;
+import Units.KaijuWarsKaiju.HellTurkeyLand;
 import Units.KaijuWarsKaiju.KaijuStateTracker;
 import Units.KaijuWarsUnits.KaijuWarsUnitModel;
 
@@ -74,7 +77,9 @@ public class KaijuActions
       // CRUSH actions consist of
       //   sequence:
       //     [Terrain destruction]
+      //      - [Heal for Big Donk]
       //     [Mass damage]
+      //      - [Transform for Hell Turkey]
       //     [Death]
       //   MOVE
       GameEventQueue crushEvents = new GameEventQueue();
@@ -88,6 +93,10 @@ public class KaijuActions
       // Generate events.
       if( isValid )
       {
+        HellTurkeyLand devolveToType = null;
+        if( actor.model instanceof HellTurkey )
+          devolveToType = ((HellTurkey) actor.model).turkeyLand;
+
         boolean actorDies = false;
         Utils.enqueueMoveEvent(gameMap, actor, movePath, crushEvents);
         // Remove the move event so it can go last; this allows us to clear out stuff we step on first
@@ -139,9 +148,19 @@ public class KaijuActions
             if( stompDamage >= victim.getHP() )
               Utils.enqueueDeathEvent(victim, crushEvents);
 
-            crushEvents.add(new MassDamageEvent(victim.CO, walkingKaiju, counter, isLethal));
             totalCounter += counter;
-            if(totalCounter >= actor.getHP())
+
+            // If we're Hell Turkey and we'll drop below the landing threshold, land.
+            if( devolveToType != null &&
+                totalCounter + KaijuWarsKaiju.BIRD_LAND_HP >= actor.getHP() )
+            {
+              crushEvents.add(new TransformLifecycle.TransformEvent(actor, devolveToType));
+              devolveToType = null;
+            }
+
+            crushEvents.add(new MassDamageEvent(victim.CO, walkingKaiju, counter, isLethal));
+            // If there's enough counter damage to kill us, die
+            if( totalCounter >= actor.getHP() )
             {
               // Kaiju has to die at his starting position, since the move event happens at the end
               Utils.enqueueDeathEvent(actor, crushEvents);
@@ -284,6 +303,7 @@ public class KaijuActions
     }
   } // ~KaijuAttackAction
 
+  // Alphazaurus skills
 
   public static class AlphaTsunamiFactory extends UnitActionFactory
   {
@@ -440,5 +460,109 @@ public class KaijuActions
     }
   } // ~AlphaBreathAction
 
+  // Hell Turkey skills
+
+  public static class BirdResurrectFactory extends UnitActionFactory
+  {
+    private static final long serialVersionUID = 1L;
+
+    public final UnitModel targetType;
+    public BirdResurrectFactory(UnitModel targetType)
+    {
+      this.targetType = targetType;
+    }
+
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
+    {
+      final XYCoord actCoord = new XYCoord(actor);
+      return new GameActionSet(new BirdResurrectAction(this, actor, actCoord), false);
+    }
+
+    @Override
+    public String name(Unit actor)
+    {
+      return "RESURRECT";
+    }
+  } //~Factory
+
+  public static class BirdResurrectAction extends KaijuAttackAction
+  {
+    BirdResurrectFactory type; // Shadows the superclass's
+    public BirdResurrectAction(BirdResurrectFactory pType, Unit unit, XYCoord target)
+    {
+      super(pType, unit, target);
+      type = pType;
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue events = new GameEventQueue();
+      // Kill adjacent units, but not buildings
+      for( XYCoord xyc : Utils.findLocationsInRange(gameMap, target, 1, 1) )
+        enqueueKaijuStrikeEvents(gameMap, actor, xyc, events);
+      events.add(new TransformLifecycle.TransformEvent(actor, type.targetType));
+      KaijuStateTracker kaijuTracker = StateTracker.instance(gameMap.game, KaijuStateTracker.class);
+      // Setting the tracker state here feels wrong
+      kaijuTracker.abilityUsedLong(actor, BirdResurrectFactory.class);
+      // Hell Turkey revives at 5 HP, and I don't feel like throwing another event in the pipeline
+      actor.health = 50;
+      return events;
+    }
+  } // ~BirdResurrectAction
+
+  public static class BirdSwoopFactory extends UnitActionFactory
+  {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
+    {
+      final XYCoord actCoord = new XYCoord(actor);
+      KaijuStateTracker kaijuTracker = StateTracker.instance(map.game, KaijuStateTracker.class);
+      boolean canAct = kaijuTracker.isReady(actor, BirdSwoopFactory.class);
+
+      // Act while stationary
+      if( canAct && movePath.getEndCoord().equals(actCoord) )
+      {
+        ArrayList<GameAction> actions = new ArrayList<>();
+        for( XYCoord xyc : Utils.findLocationsInRange(map, actCoord, 1, 1) )
+        {
+          Unit resident = map.getResident(xyc);
+          if( null != resident && resident.model.isLandUnit() )
+            actions.add(new BirdSwoopAction(this, actor, xyc));
+        }
+        if( actions.size() > 0 )
+          return new GameActionSet(actions, true);
+      }
+
+      return null;
+    }
+
+    @Override
+    public String name(Unit actor)
+    {
+      return "SWOOP";
+    }
+  } //~Factory
+  public static class BirdSwoopAction extends KaijuAttackAction
+  {
+    public BirdSwoopAction(BirdSwoopFactory pType, Unit unit, XYCoord target)
+    {
+      super(pType, unit, target);
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue events = new GameEventQueue();
+      enqueueKaijuKillEvents(gameMap, actor, target, events);
+      KaijuStateTracker kaijuTracker = StateTracker.instance(gameMap.game, KaijuStateTracker.class);
+      // Setting the tracker state here feels wrong
+      kaijuTracker.abilityUsedShort(actor, BirdSwoopFactory.class);
+      return events;
+    }
+  } // ~BirdSwoopAction
 
 } //~KaijuActions

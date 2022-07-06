@@ -1,23 +1,32 @@
 package Units;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import CommandingOfficers.Commander;
 import Engine.FloodFillFunctor;
 import Engine.GameInstance;
 import Engine.StateTrackers.StateTracker;
+import Engine.UnitActionLifecycles.TransformLifecycle;
+import Engine.UnitMods.UnitDefenseModifier;
 import Engine.UnitMods.UnitModifierWithDefaults;
 import Engine.UnitActionFactory;
 import Engine.XYCoord;
+import Engine.Combat.BattleSummary;
 import Engine.FloodFillFunctor.BasicMoveFillFunctor;
+import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.MapChangeEvent;
+import Engine.GameEvents.CreateUnitEvent.AnimationStyle;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
+import Units.KaijuActions.BirdSwoopFactory;
 import Units.KaijuWarsUnits.KaijuWarsUnitModel;
 import Units.MoveTypes.MoveType;
 
@@ -80,6 +89,7 @@ public class KaijuWarsKaiju
     }
   }
 
+  public static final int BIRD_LAND_HP = 10; // Should match the first chunk below
   // These are the chunks of HP each Kaiju has in each tier of movement (they get slower as they take damage)
   // Index = move points
   public static final int[] ALPHA_CHUNKS = { 0, 0, 12, 18,  8,  7,  6 };
@@ -107,7 +117,7 @@ public class KaijuWarsKaiju
   public static class Alphazaurus extends KaijuUnitModel
   {
     private static final long serialVersionUID = 1L;
-    private static final long ROLE = ASSAULT | SURFACE_TO_AIR | TROOP | LAND;
+    private static final long ROLE = TROOP | LAND;
     public Alphazaurus()
     {
       super("Alphazaurus", ROLE, ALPHA_CHUNKS, ALPHA_HPBASES);
@@ -159,7 +169,100 @@ public class KaijuWarsKaiju
           break;
       }
     }
-  } //~KaijuMoveMod
+  } //~AlphazaurusMod
+
+  public static class HellTurkey extends KaijuUnitModel
+  {
+    private static final long serialVersionUID = 1L;
+    private static final long ROLE = HOVER | AIR_HIGH;
+    public HellTurkeyLand turkeyLand;
+    public HellTurkeyEgg turkeyEgg;
+    public HellTurkey()
+    {
+      super("Hell Turkey", ROLE, BIRD_CHUNKS, BIRD_HPBASES);
+      addUnitModifier(new HellTurkeyMod());
+    }
+    // Transitions to the land turkey are handled by KaijuStateTracker and the Kaiju crush action
+  }
+  public static class HellTurkeyLand extends KaijuUnitModel
+  {
+    private static final long serialVersionUID = 1L;
+    private static final long ROLE = HOVER | LAND;
+    public final HellTurkey airTurkey;
+    public HellTurkeyLand(HellTurkey turkey)
+    {
+      super("Hell Turkey Land", ROLE, BIRD_CHUNKS, BIRD_HPBASES);
+      airTurkey = turkey;
+      addUnitModifier(new HellTurkeyMod());
+    }
+
+    /** Heal self by 1 with Swoop, if able */
+    @Override
+    public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
+    {
+      GameEventQueue events = super.getTurnInitEvents(self, map);
+
+      KaijuStateTracker kaijuTracker = StateTracker.instance(map.game, KaijuStateTracker.class);
+      // If we have Swoop and are in heal mode
+      if( kaijuTracker.kaijuAbilityTier.get(self) == KaijuAbilityTier.EXTRA
+          && BIRD_LAND_HP >= self.getHP() )
+      {
+        // Setting the tracker state here feels wrong
+        kaijuTracker.abilityUsedShort(self, BirdSwoopFactory.class);
+        events.add(new HealUnitEvent(self, 1, null, true));
+        // If we're about to go above the land HP, become flying
+        if( self.getHP() == BIRD_LAND_HP )
+          events.add(new TransformLifecycle.TransformEvent(self, airTurkey));
+      }
+      return events;
+    }
+  }
+  public static class HellTurkeyEgg extends KaijuUnitModel
+  {
+    private static final long serialVersionUID = 1L;
+    private static final long ROLE = LAND;
+    public final HellTurkeyLand landTurkey;
+    public HellTurkeyEgg(HellTurkeyLand turkey)
+    {
+      super("Hell Turkey Egg", ROLE, BIRD_CHUNKS, BIRD_HPBASES);
+      landTurkey = turkey;
+      this.baseMovePower = 0;
+      // The egg may resurrect, and naught else
+      this.baseActions.clear();
+      this.baseActions.add(new KaijuActions.BirdResurrectFactory(landTurkey));
+      // The egg is invincible
+      this.addUnitModifier(new UnitDefenseModifier(300));
+    }
+  }
+  public static class HellTurkeyMod extends KaijuMoveMod
+  {
+    private static final long serialVersionUID = 1L;
+
+    KaijuStateTracker kaijuTracker;
+    @Override
+    public void registerTrackers(GameInstance gi)
+    {
+      kaijuTracker = StateTracker.instance(gi, KaijuStateTracker.class);
+    }
+
+    @Override
+    public void modifyActionList(UnitContext uc)
+    {
+      if(!kaijuTracker.kaijuAbilityTier.containsKey(uc.unit))
+        return; // Not a registered kaiju
+
+      final KaijuAbilityTier tier = kaijuTracker.kaijuAbilityTier.get(uc.unit);
+      switch (tier)
+      {
+        case ALL:
+          // TODO: eruption/wind
+        case EXTRA:
+          uc.possibleActions.add(new KaijuActions.BirdSwoopFactory());
+        case BASIC:
+          break;
+      }
+    }
+  } //~AlphazaurusMod
 
   /**
    * Handles cleanup after Kaiju are built:
@@ -205,6 +308,66 @@ public class KaijuWarsKaiju
       events.add(new MapChangeEvent(buildCoords, newEnvirons));
 
       return events;
+    }
+
+    // Resurrect Hell Turkey as an egg
+    private static final int FUDGE_RADIUS = 2;
+    @Override
+    public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
+    {
+      UnitModel egg;
+      if( victim.model instanceof HellTurkey )
+        egg = ((HellTurkey) victim.model).turkeyEgg;
+      else if ( victim.model instanceof HellTurkeyLand)
+        egg = ((HellTurkeyLand) victim.model).airTurkey.turkeyEgg;
+      else // Not a resurrectable Kaiju
+        return null;
+
+      GameEventQueue events = new GameEventQueue();
+      boolean unitIsReady = false;
+      events.add(new CreateUnitEvent(victim.CO, egg, grave, AnimationStyle.DROP_IN, unitIsReady, FUDGE_RADIUS ));
+
+      return events;
+    }
+    // Land Hell Turkey if it takes too much damage
+    @Override
+    public GameEventQueue receiveBattleEvent(BattleSummary summary)
+    {
+      final Unit victim = summary.defender.unit;
+      if( !(victim.model instanceof KaijuUnitModel) )
+        return null;
+      if( summary.defender.after.getHP() > KaijuWarsKaiju.BIRD_LAND_HP )
+        return null;
+
+      GameEventQueue events = new GameEventQueue();
+      tryDevolveHellTurkey(victim, events);
+      return events;
+    }
+    // Land Hell Turkey if it takes too much damage
+    @Override
+    public GameEventQueue receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP)
+    {
+      GameEventQueue events = new GameEventQueue();
+      for( Entry<Unit, Integer> pair : lostHP.entrySet() )
+      {
+        final Unit victim = pair.getKey();
+        if( !(victim.model instanceof KaijuUnitModel) )
+          continue;
+        if( pair.getValue() + KaijuWarsKaiju.BIRD_LAND_HP < victim.getHP() )
+          continue;
+        tryDevolveHellTurkey(victim, events);
+      }
+      return events;
+    }
+    public void tryDevolveHellTurkey(Unit actor, GameEventQueue events)
+    {
+      HellTurkeyLand devolveToType = null;
+      if( actor.model instanceof HellTurkey )
+        devolveToType = ((HellTurkey) actor.model).turkeyLand;
+      if( devolveToType != null )
+      {
+        events.add(new TransformLifecycle.TransformEvent(actor, devolveToType));
+      }
     }
 
     public HashMap<Unit, KaijuAbilityTier> kaijuAbilityTier = new HashMap<>();
@@ -264,10 +427,10 @@ public class KaijuWarsKaiju
       int move = 0;
       while (hpBudget > 0)
       {
+        ++move;
         int chunk = DEFAULT_HP_CHUNK;
         if( hpChunks.length > move )
           chunk = hpChunks[move];
-        ++move;
         hpBudget -= chunk;
       }
       uc.movePower = move;
@@ -347,6 +510,8 @@ public class KaijuWarsKaiju
         final KaijuWarsUnitModel toResidentType = (KaijuWarsUnitModel) toResident.model;
         if( !canTravelThroughEnemies && null != toResidentType )
         {
+          // This results in slightly inaccurate behavior, but it's a slight nerf I can get behind.. and it's more consistent.
+          // OG behavior was: If a slowing unit is at the edge of your move range, you can still crush the unit
           if( unit.model.isLandUnit()
               && toResidentType.slowsLand )
             cost += 1;
