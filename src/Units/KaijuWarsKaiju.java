@@ -325,6 +325,17 @@ public class KaijuWarsKaiju
           break;
       }
     }
+
+    @Override
+    public void modifyMovePower(UnitContext uc)
+    {
+      super.modifyMovePower(uc);
+      final KaijuAbilityTier tier = kaijuTracker.kaijuAbilityTier.get(uc.unit);
+      // Rampage grants +2 move every four turns
+      if( tier == KaijuAbilityTier.ALL
+          && kaijuTracker.getTurn() % 4 == 0 )
+        uc.movePower += 2;
+    }
   } //~BigDonkMod
 
 
@@ -338,6 +349,7 @@ public class KaijuWarsKaiju
   public static class KaijuStateTracker extends StateTracker
   {
     private static final long serialVersionUID = 1L;
+    public int getTurn() { return game.getCurrentTurn(); }
 
     @Override
     public GameEventQueue receiveCreateUnitEvent(Unit unit)
