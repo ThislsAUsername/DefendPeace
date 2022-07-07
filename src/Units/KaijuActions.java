@@ -139,7 +139,7 @@ public class KaijuActions
       if( null != victim && kaijuState.unit != victim )
       {
         KaijuWarsUnitModel kjum = (KaijuWarsUnitModel) victim.model;
-        int counter = kjum.kaijuCounter;
+        int counter = 0;
         int stompDamage = victim.getHP();
         if( kjum.isKaiju )
         {
@@ -150,7 +150,19 @@ public class KaijuActions
         else
         {
           Utils.enqueueDeathEvent(victim, crushEvents);
-          counter += KaijuWarsWeapons.getCounterBoost(victim, gameMap, location.getEnvironment().terrainType);
+
+          // Apply relevant counter damage and slows if the victim is an enemy
+          if( victim.CO.isEnemy(kaijuState.CO) )
+          {
+            counter = kjum.kaijuCounter;
+            counter += KaijuWarsWeapons.getCounterBoost(victim, gameMap, location.getEnvironment().terrainType);
+            if( kaijuState.model.isLandUnit()
+                && kjum.slowsLand )
+              --kaijuState.movePower;
+            if( kaijuState.model.isAirUnit()
+                && kjum.slowsAir )
+              --kaijuState.movePower;
+          }
         }
         final boolean isLethal = true;
 

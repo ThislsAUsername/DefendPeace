@@ -584,23 +584,6 @@ public class KaijuWarsKaiju
         }
       }
 
-      final Unit toResident = map.getLocation(to).getResident();
-      if( null != toResident && toResident.CO.isEnemy(unit.CO) )
-      {
-        final KaijuWarsUnitModel toResidentType = (KaijuWarsUnitModel) toResident.model;
-        if( !canTravelThroughEnemies && null != toResidentType )
-        {
-          // This results in slightly inaccurate behavior, but it's a slight nerf I can get behind.. and it's more consistent.
-          // OG behavior was: If a slowing unit is at the edge of your move range, you can still crush the unit
-          if( unit.model.isLandUnit()
-              && toResidentType.slowsLand )
-            cost += 1;
-          if( unit.model.isAirUnit()
-              && toResidentType.slowsAir )
-            cost += 1;
-        }
-      }
-
       return cost;
     }
 
