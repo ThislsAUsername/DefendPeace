@@ -517,8 +517,8 @@ public class KaijuActions
       KaijuStateTracker kaijuTracker = StateTracker.instance(gameMap.game, KaijuStateTracker.class);
       // Setting the tracker state here feels wrong
       kaijuTracker.abilityUsedLong(actor, BirdResurrectFactory.class);
-      // Hell Turkey revives at 5 HP, and I don't feel like throwing another event in the pipeline
-      actor.health = 50;
+      // Hell Turkey revives at 6 HP (originally 5+1 from Swoop), and I don't feel like throwing another event in the pipeline
+      actor.health = 60;
       return events;
     }
   } // ~BirdResurrectAction

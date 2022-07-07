@@ -26,6 +26,7 @@ import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
+import Units.KaijuActions.BirdResurrectFactory;
 import Units.KaijuActions.BirdSwoopFactory;
 import Units.KaijuWarsUnits.KaijuWarsUnitModel;
 import Units.MoveTypes.MoveType;
@@ -263,7 +264,7 @@ public class KaijuWarsKaiju
           break;
       }
     }
-  } //~AlphazaurusMod
+  } //~HellTurkeyMod
 
   /**
    * Handles cleanup after Kaiju are built:
@@ -323,6 +324,9 @@ public class KaijuWarsKaiju
         egg = ((HellTurkeyLand) victim.model).airTurkey.turkeyEgg;
       else // Not a resurrectable Kaiju
         return null;
+
+      if(!isReady(victim, BirdResurrectFactory.class))
+        return null; // Can't resurrect since it's on cooldown
 
       GameEventQueue events = new GameEventQueue();
       boolean unitIsReady = false;
