@@ -11,7 +11,6 @@ import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.ArmyDefeatEvent;
-import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.MapChangeEvent;
@@ -100,21 +99,23 @@ public class KaijuActions
         if( actor.model instanceof HellTurkey )
           devolveToType = ((HellTurkey) actor.model).turkeyLand;
 
-        boolean actorDies = false;
         Utils.enqueueMoveEvent(gameMap, actor, movePath, crushEvents);
-        // Remove the move event so it can go last; this allows us to clear out stuff we step on first
-        GameEvent moveEvent = crushEvents.pop();
+        // Remove and discard the move event; we'll be making iterative ones
+        crushEvents.clear();
 
-        // For taking counter damage
-        ArrayList<Unit> walkingKaiju = new ArrayList<>();
-        walkingKaiju.add(actor);
         KaijuUnitModel stomperType = (KaijuUnitModel) actor.model;
-        int totalCounter = 0;
+        // Tracks the Kaiju's predicted state as it progresses through the crush events
+        UnitContext kaijuState = new UnitContext(gameMap, actor);
+        kaijuState.calculateMovePower();
 
         // movePath should be updated by the above, so we should be good to go
         for( PathNode node : movePath.getWaypoints() )
         {
-          MapLocation location = gameMap.getLocation(node.GetCoordinates());
+          if( kaijuState.movePower < 1 )
+            break; // Go only until we run out of move
+
+          final XYCoord destCoord = node.GetCoordinates();
+          MapLocation location = gameMap.getLocation(destCoord);
           if( location.isCaptureable()
               || INERT_CRUSHABLES.contains(location.getEnvironment().terrainType) )
           {
@@ -122,15 +123,16 @@ public class KaijuActions
             Environment newEnvirons = Environment.getTile(oldEnvirons.terrainType.getBaseTerrain(), oldEnvirons.weatherType);
             crushEvents.add(new MapChangeEvent(location.getCoordinates(), newEnvirons));
             if( stomperType.regenOnBuildingKill )
-              crushEvents.add(new HealUnitEvent(actor, 2, null, true));
+              crushEvents.add(new HealUnitEvent(kaijuState.unit, 2, null, true));
 
             if( Utils.willLoseFromLossOf(gameMap, location) )
             {
               crushEvents.add(new ArmyDefeatEvent(location.getOwner().army));
             }
           }
+
           Unit victim = location.getResident();
-          if( null != victim && actor != victim )
+          if( null != victim && kaijuState.unit != victim )
           {
             KaijuWarsUnitModel kjum = (KaijuWarsUnitModel) victim.model;
             int counter = kjum.kaijuCounter;
@@ -139,7 +141,7 @@ public class KaijuActions
             {
               // When stomping another kaiju, at least one of us dies
               counter += victim.getHP();
-              stompDamage = actor.getHP() - totalCounter;
+              stompDamage = kaijuState.getHP();
             }
             else
             {
@@ -150,34 +152,41 @@ public class KaijuActions
 
             ArrayList<Unit> stompable = new ArrayList<>();
             stompable.add(victim);
-            crushEvents.add(new MassDamageEvent(actor.CO, stompable, stompDamage, isLethal));
+            crushEvents.add(new MassDamageEvent(kaijuState.CO, stompable, stompDamage, isLethal));
+            kaijuState.damageHP(counter);
             if( stompDamage >= victim.getHP() )
               Utils.enqueueDeathEvent(victim, crushEvents);
 
-            totalCounter += counter;
-
             // If we're Hell Turkey and we'll drop below the landing threshold, land.
             if( devolveToType != null &&
-                totalCounter + KaijuWarsKaiju.BIRD_LAND_HP >= actor.getHP() )
+                KaijuWarsKaiju.BIRD_LAND_HP >= kaijuState.getHP() )
             {
-              crushEvents.add(new TransformLifecycle.TransformEvent(actor, devolveToType));
+              crushEvents.add(new TransformLifecycle.TransformEvent(kaijuState.unit, devolveToType));
               devolveToType = null;
             }
 
-            crushEvents.add(new MassDamageEvent(victim.CO, walkingKaiju, counter, isLethal));
+            crushEvents.add(new MassDamageEvent(victim.CO, Arrays.asList(kaijuState.unit), counter, isLethal));
             // If there's enough counter damage to kill us, die
-            if( totalCounter >= actor.getHP() )
+            if( kaijuState.getHP() < 1 )
             {
-              // Kaiju has to die at his starting position, since the move event happens at the end
-              Utils.enqueueDeathEvent(actor, crushEvents);
-              actorDies = true;
-              break;
+              // Kaiju dies at his current position on the path
+              Utils.enqueueDeathEvent(kaijuState.unit, kaijuState.coord, true, crushEvents);
+              kaijuState.movePower = 0;
             }
           }
-        }
 
-        if( !actorDies )
-          crushEvents.add(moveEvent);
+          // Add movement if I can go
+          final int distance = kaijuState.coord.getDistance(destCoord);
+          if( kaijuState.movePower >= distance )
+          {
+            kaijuState.movePower -= distance;
+            GamePath oneTilePath = new GamePath();
+            oneTilePath.addWaypoint(kaijuState.coord);
+            oneTilePath.addWaypoint(destCoord);
+            Utils.enqueueMoveEvent(gameMap, kaijuState.unit, oneTilePath, crushEvents);
+            kaijuState.coord = destCoord;
+          }
+        } // ~node loop
       }
       return crushEvents;
     }

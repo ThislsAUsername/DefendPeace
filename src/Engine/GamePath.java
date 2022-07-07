@@ -25,6 +25,10 @@ public class GamePath
   {
     waypoints.add(new PathNode(x, y));
   }
+  public void addWaypoint(XYCoord xyc)
+  {
+    addWaypoint(xyc.xCoord, xyc.yCoord);
+  }
 
   public ArrayList<PathNode> getWaypoints()
   {
