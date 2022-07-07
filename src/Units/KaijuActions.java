@@ -13,6 +13,7 @@ import Engine.XYCoord;
 import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.MapChangeEvent;
 import Engine.GameEvents.MassDamageEvent;
 import Engine.GamePath.PathNode;
@@ -26,6 +27,7 @@ import Terrain.TerrainType;
 import Units.KaijuWarsKaiju.HellTurkey;
 import Units.KaijuWarsKaiju.HellTurkeyLand;
 import Units.KaijuWarsKaiju.KaijuStateTracker;
+import Units.KaijuWarsKaiju.KaijuUnitModel;
 import Units.KaijuWarsUnits.KaijuWarsUnitModel;
 
 public class KaijuActions
@@ -89,6 +91,7 @@ public class KaijuActions
       isValid &= null != actor && !actor.isTurnOver;
       isValid &= (null != movePath) && (movePath.getPathLength() > 0);
       isValid &= (null != gameMap);
+      isValid &= (actor.model instanceof KaijuUnitModel);
 
       // Generate events.
       if( isValid )
@@ -105,6 +108,7 @@ public class KaijuActions
         // For taking counter damage
         ArrayList<Unit> walkingKaiju = new ArrayList<>();
         walkingKaiju.add(actor);
+        KaijuUnitModel stomperType = (KaijuUnitModel) actor.model;
         int totalCounter = 0;
 
         // movePath should be updated by the above, so we should be good to go
@@ -117,6 +121,8 @@ public class KaijuActions
             Environment oldEnvirons = location.getEnvironment();
             Environment newEnvirons = Environment.getTile(oldEnvirons.terrainType.getBaseTerrain(), oldEnvirons.weatherType);
             crushEvents.add(new MapChangeEvent(location.getCoordinates(), newEnvirons));
+            if( stomperType.regenOnBuildingKill )
+              crushEvents.add(new HealUnitEvent(actor, 2, null, true));
 
             if( Utils.willLoseFromLossOf(gameMap, location) )
             {
@@ -650,5 +656,74 @@ public class KaijuActions
       return Utils.findLocationsInRange(gameMap, target, 1, 1);
     }
   }
+
+  // Big Donk skills
+
+  public static class DonkPunchFactory extends UnitActionFactory
+  {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
+    {
+      final XYCoord actCoord = new XYCoord(actor);
+      KaijuStateTracker kaijuTracker = StateTracker.instance(map.game, KaijuStateTracker.class);
+      boolean canAct = kaijuTracker.isReady(actor, DonkPunchFactory.class);
+
+      // Act while stationary, target ground
+      if( canAct && movePath.getEndCoord().equals(actCoord) )
+      {
+        ArrayList<GameAction> actions = new ArrayList<>();
+        for( XYCoord xyc : Utils.findLocationsInRange(map, actCoord, 1, 1) )
+        {
+          Unit resident = map.getResident(xyc);
+          if( null != resident && resident.model.isLandUnit() )
+            actions.add(new DonkPunchAction(this, actor, xyc));
+        }
+        if( actions.size() > 0 )
+          return new GameActionSet(actions, true);
+      }
+
+      return null;
+    }
+
+    @Override
+    public String name(Unit actor)
+    {
+      return "PUNCH";
+    }
+  } //~Factory
+  public static class DonkPunchAction extends KaijuAttackAction
+  {
+    static final boolean HIT_BUILDINGS = true;
+    public DonkPunchAction(DonkPunchFactory pType, Unit unit, XYCoord target)
+    {
+      super(pType, DonkPunchFactory.class, unit, target, HIT_BUILDINGS);
+    }
+
+    @Override
+    public List<XYCoord> getTargets(MapMaster gameMap)
+    {
+      // Double the target coordinates and subtract the start coord to get start + offset*2
+      XYCoord secondTile = new XYCoord(target.xCoord * 2 - actor.x, target.yCoord * 2 - actor.y);
+
+      List<XYCoord> output = new ArrayList<>();
+      output.add(target);
+      output.add(secondTile);
+      return output;
+    }
+  }
+
+  // Should be fine to just reuse Wind Force, since Kaiju don't share abilities
+  public static class DonkClimbFactory extends BirdWindForceFactory
+  {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public String name(Unit actor)
+    {
+      return "CLIMB";
+    }
+  } //~Factory
 
 } //~KaijuActions

@@ -64,6 +64,10 @@ public class KaijuWarsKaiju
   {
     private static final long serialVersionUID = 1L;
     public final int[] hpChunks, hpBases;
+    public boolean regenOnBuildingKill = false;
+    public boolean stopOnBuildingKill  = true;
+    // Used by Big Donk and Duggemundr to get a new type on spawn
+    public UnitModel promotesToAtAllSkills = null;
 
     public KaijuUnitModel(String pName, long pRole, int[] pHPchunks, int[] pHPbases)
     {
@@ -87,6 +91,8 @@ public class KaijuWarsKaiju
     public void copyValues(KaijuUnitModel other)
     {
       super.copyValues(other);
+      regenOnBuildingKill = other.regenOnBuildingKill;
+      stopOnBuildingKill  = other.stopOnBuildingKill;
     }
   }
 
@@ -266,6 +272,62 @@ public class KaijuWarsKaiju
     }
   } //~HellTurkeyMod
 
+  public static class BigDonk extends KaijuUnitModel
+  {
+    private static final long serialVersionUID = 1L;
+    private static final long ROLE = TROOP | LAND;
+    public BigDonk(BigDonkRampage rampager)
+    {
+      super("Big Donk", ROLE, DONK_CHUNKS, DONK_HPBASES);
+      regenOnBuildingKill = true;
+      promotesToAtAllSkills = rampager;
+      addUnitModifier(new BigDonkMod());
+    }
+  }
+  // Variant determined on spawn by KaijuStateTracker
+  public static class BigDonkRampage extends KaijuUnitModel
+  {
+    private static final long serialVersionUID = 1L;
+    private static final long ROLE = TROOP | LAND;
+    public BigDonkRampage()
+    {
+      super("Big Donk", ROLE, DONK_CHUNKS, DONK_HPBASES);
+      regenOnBuildingKill = true;
+      stopOnBuildingKill = false;
+      addUnitModifier(new BigDonkMod());
+    }
+  }
+  public static class BigDonkMod extends KaijuMoveMod
+  {
+    private static final long serialVersionUID = 1L;
+
+    KaijuStateTracker kaijuTracker;
+    @Override
+    public void registerTrackers(GameInstance gi)
+    {
+      kaijuTracker = StateTracker.instance(gi, KaijuStateTracker.class);
+    }
+
+    @Override
+    public void modifyActionList(UnitContext uc)
+    {
+      if(!kaijuTracker.kaijuAbilityTier.containsKey(uc.unit))
+        return; // Not a registered kaiju
+
+      final KaijuAbilityTier tier = kaijuTracker.kaijuAbilityTier.get(uc.unit);
+      switch (tier)
+      {
+        case ALL:
+          uc.possibleActions.add(new KaijuActions.DonkClimbFactory());
+        case EXTRA:
+          uc.possibleActions.add(new KaijuActions.DonkPunchFactory());
+        case BASIC:
+          break;
+      }
+    }
+  } //~BigDonkMod
+
+
   /**
    * Handles cleanup after Kaiju are built:
    * <p>Gives them the proper HP count, and deletes the port
@@ -299,6 +361,11 @@ public class KaijuWarsKaiju
 
       GameEventQueue events = new GameEventQueue();
       events.add(new HealUnitEvent(unit, heal, null, true));
+
+      if( KaijuAbilityTier.ALL == tier && null != kaijuType.promotesToAtAllSkills )
+      {
+        events.add(new TransformLifecycle.TransformEvent(unit, kaijuType.promotesToAtAllSkills));
+      }
 
       XYCoord buildCoords = new XYCoord(unit);
       Environment env = game.gameMap.getEnvironment(buildCoords);
@@ -489,7 +556,15 @@ public class KaijuWarsKaiju
 
       // Cannot path through: Kaiju, buildings
       final MapLocation fromLocation = map.getLocation(from);
+      boolean stopOnBuildingKill = true;
+      if( null != unit )
+      {
+        KaijuUnitModel stomperType = (KaijuUnitModel) unit.model;
+        stopOnBuildingKill = stomperType.stopOnBuildingKill;
+      }
+
       if( !canTravelThroughEnemies
+          && stopOnBuildingKill
           && fromLocation.isCaptureable()
           && null != unit
           && unit.CO.isEnemy(fromLocation.getOwner()) )

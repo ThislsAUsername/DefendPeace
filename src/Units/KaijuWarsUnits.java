@@ -71,6 +71,9 @@ public class KaijuWarsUnits extends UnitModelScheme
     kaijuModels.add(turkeyAir);
     extras.add(turkeyLand);
     extras.add(turkeyEgg);
+    final KaijuWarsKaiju.BigDonkRampage rampager = new KaijuWarsKaiju.BigDonkRampage();
+    extras.add(rampager);
+    kaijuModels.add(new KaijuWarsKaiju.BigDonk(rampager));
 
     // Inscribe those war machines obtainable from an Airport.
     airportModels.add(new Fighter());
