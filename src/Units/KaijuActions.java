@@ -101,7 +101,7 @@ public class KaijuActions
 
         // Tracks the Kaiju's predicted state as it progresses through the crush events
         UnitContext kaijuState = new UnitContext(gameMap, actor);
-        kaijuState.calculateMovePower();
+        final int startingMP = kaijuState.calculateMovePower();
 
         // movePath should be updated by the above, so we should be good to go
         for( PathNode node : movePath.getWaypoints() )
@@ -109,31 +109,16 @@ public class KaijuActions
           if( kaijuState.movePower < 1 )
             break; // Go only until we run out of move
 
-          enqueueSingleTileEvents(gameMap, kaijuState, node, crushEvents);
+          enqueueSingleTileEvents(gameMap, startingMP, kaijuState, node, crushEvents);
         } // ~node loop
       }
       return crushEvents;
     }
-    public static void enqueueSingleTileEvents(MapMaster gameMap, UnitContext kaijuState, PathNode node, GameEventQueue crushEvents)
+    public static void enqueueSingleTileEvents(MapMaster gameMap, int startingMP, UnitContext kaijuState, PathNode node, GameEventQueue crushEvents)
     {
       KaijuUnitModel stomperType = (KaijuUnitModel) kaijuState.model;
       final XYCoord destCoord = node.GetCoordinates();
       MapLocation location = gameMap.getLocation(destCoord);
-
-      if( location.isCaptureable()
-          || INERT_CRUSHABLES.contains(location.getEnvironment().terrainType) )
-      {
-        Environment oldEnvirons = location.getEnvironment();
-        Environment newEnvirons = Environment.getTile(oldEnvirons.terrainType.getBaseTerrain(), oldEnvirons.weatherType);
-        crushEvents.add(new MapChangeEvent(location.getCoordinates(), newEnvirons));
-        if( stomperType.regenOnBuildingKill )
-          crushEvents.add(new HealUnitEvent(kaijuState.unit, 2, null, true));
-
-        if( Utils.willLoseFromLossOf(gameMap, location) )
-        {
-          crushEvents.add(new ArmyDefeatEvent(location.getOwner().army));
-        }
-      }
 
       Unit victim = location.getResident();
       if( null != victim && kaijuState.unit != victim )
@@ -179,7 +164,7 @@ public class KaijuActions
         {
           HellTurkeyLand devolveToType = ((HellTurkey) kaijuState.model).turkeyLand;
           crushEvents.add(new TransformLifecycle.TransformEvent(kaijuState.unit, devolveToType));
-          devolveToType = null;
+          kaijuState.model = devolveToType;
         }
 
         crushEvents.add(new MassDamageEvent(victim.CO, Arrays.asList(kaijuState.unit), counter, isLethal));
@@ -190,12 +175,33 @@ public class KaijuActions
           Utils.enqueueDeathEvent(kaijuState.unit, kaijuState.coord, true, crushEvents);
           kaijuState.movePower = 0;
         }
+        else // Recalculate remaining movement so taking damage can drain movement
+        {
+          int moveSpent = startingMP - kaijuState.movePower;
+          kaijuState.calculateMovePower();
+          kaijuState.movePower -= moveSpent;
+        }
       }
 
-      // Add movement if I can go
+      // Add property damage and movement if I can reach
       final int distance = kaijuState.coord.getDistance(destCoord);
       if( kaijuState.movePower >= distance )
       {
+        if( location.isCaptureable()
+            || INERT_CRUSHABLES.contains(location.getEnvironment().terrainType) )
+        {
+          Environment oldEnvirons = location.getEnvironment();
+          Environment newEnvirons = Environment.getTile(oldEnvirons.terrainType.getBaseTerrain(), oldEnvirons.weatherType);
+          crushEvents.add(new MapChangeEvent(location.getCoordinates(), newEnvirons));
+          if( stomperType.regenOnBuildingKill )
+            crushEvents.add(new HealUnitEvent(kaijuState.unit, 2, null, true));
+
+          if( Utils.willLoseFromLossOf(gameMap, location) )
+          {
+            crushEvents.add(new ArmyDefeatEvent(location.getOwner().army));
+          }
+        }
+
         kaijuState.movePower -= distance;
         GamePath oneTilePath = new GamePath();
         oneTilePath.addWaypoint(kaijuState.coord);
