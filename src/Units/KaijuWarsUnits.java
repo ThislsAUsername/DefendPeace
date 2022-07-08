@@ -180,6 +180,7 @@ public class KaijuWarsUnits extends UnitModelScheme
    *  - Adding
 
    * Hover Drives: Gives all ground +1 move and the ability to move on water (Super Z2 doesn't benefit)
+   * Ultimate Autobahn: Gives all ground +2 move if starting on road/bridge
    */
 
   /*
