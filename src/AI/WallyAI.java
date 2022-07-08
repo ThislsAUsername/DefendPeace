@@ -53,12 +53,12 @@ public class WallyAI extends ModularAI
   }
 
   // What % damage I'll ignore when checking safety
-  private static final int INDIRECT_THREAT_THRESHHOLD = 7;
-  private static final int DIRECT_THREAT_THRESHHOLD = 13;
-  private static final int    UNIT_HEAL_THRESHHOLD = 6; // HP at which units heal
-  private static final double UNIT_REFUEL_THRESHHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
-  private static final double UNIT_REARM_THRESHHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
-  private static final double AGGRO_EFFECT_THRESHHOLD = 0.42; // How effective do I need to be against a unit to target it?
+  private static final int INDIRECT_THREAT_THRESHOLD = 7;
+  private static final int DIRECT_THREAT_THRESHOLD = 13;
+  private static final int    UNIT_HEAL_THRESHOLD = 6; // HP at which units heal
+  private static final double UNIT_REFUEL_THRESHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
+  private static final double UNIT_REARM_THRESHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
+  private static final double AGGRO_EFFECT_THRESHOLD = 0.42; // How effective do I need to be against a unit to target it?
   private static final double AGGRO_FUNDS_WEIGHT = 0.9; // Multiplier on damage I need to get before a sacrifice is worth it
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
   private static final double TERRAIN_PENALTY_WEIGHT = 3; // Exponent for how crippling we think high move costs are
@@ -597,10 +597,10 @@ public class WallyAI extends ModularAI
     boolean shouldResupply = false;
     if( stations.size() > 0 )
     {
-      shouldResupply = unit.getHP() <= UNIT_HEAL_THRESHHOLD;
-      shouldResupply |= unit.fuel <= UNIT_REFUEL_THRESHHOLD
+      shouldResupply = unit.getHP() <= UNIT_HEAL_THRESHOLD;
+      shouldResupply |= unit.fuel <= UNIT_REFUEL_THRESHOLD
           * Utils.findShortestPath(unit, stations.get(0), gameMap).getFuelCost(unit, gameMap);
-      shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHHOLD;
+      shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHOLD;
     }
 
     if( shouldResupply )
@@ -628,7 +628,7 @@ public class WallyAI extends ModularAI
         XYCoord targetCoord = new XYCoord(target.x, target.y);
         double effectiveness = findEffectiveness(unit.model, target.model);
         if (Utils.findShortestPath(unit, targetCoord, gameMap, true) != null &&
-            AGGRO_EFFECT_THRESHHOLD < effectiveness)
+            AGGRO_EFFECT_THRESHOLD < effectiveness)
         {
           valueMap.put(model, effectiveness*target.getCost());
           if (!targetMap.containsKey(model)) targetMap.put(model, new ArrayList<XYCoord>());
@@ -839,7 +839,7 @@ public class WallyAI extends ModularAI
   private boolean isSafe(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc)
   {
     Double threat = threatMap.get(unit.model).get(xyc);
-    int threshhold = unit.model.hasDirectFireWeapon() ? DIRECT_THREAT_THRESHHOLD : INDIRECT_THREAT_THRESHHOLD;
+    int threshhold = unit.model.hasDirectFireWeapon() ? DIRECT_THREAT_THRESHOLD : INDIRECT_THREAT_THRESHOLD;
     return (null == threat || threshhold > threat);
   }
 

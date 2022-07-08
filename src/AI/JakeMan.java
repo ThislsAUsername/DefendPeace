@@ -45,17 +45,17 @@ public class JakeMan extends ModularAI
   }
 
   // What % base damage I'll ignore when checking safety
-  private static final int    INDIRECT_THREAT_THRESHHOLD = 7;
-  private static final int    DIRECT_THREAT_THRESHHOLD = 13;
+  private static final int    INDIRECT_THREAT_THRESHOLD = 7;
+  private static final int    DIRECT_THREAT_THRESHOLD = 13;
   // Value to scale the funds damage I deal to something that threatens me
   private static final double FIRSTSTRIKE_ON_THREAT_WEIGHT = 2.0;
   private static final int    STAY_UNHURT_BIAS = 1000;
   private static final int    STAY_ALIVE_BIAS = 2000;
   // Fraction of the unit to remove from the counter-threat power of my unit type if I'm not attacking
   private static final double PEACEFUL_SELF_THREAT_RATIO = 1;
-  private static final int    UNIT_HEAL_THRESHHOLD = 6; // HP at which units heal
-  private static final double UNIT_REFUEL_THRESHHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
-  private static final double UNIT_REARM_THRESHHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
+  private static final int    UNIT_HEAL_THRESHOLD = 6; // HP at which units heal
+  private static final double UNIT_REFUEL_THRESHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
+  private static final double UNIT_REARM_THRESHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
 
   private Map<UnitModel, Map<XYCoord, Double>> unitMapEnemy;
   private Map<UnitModel, Map<XYCoord, Double>> unitMapFriendly;
@@ -126,10 +126,10 @@ public class JakeMan extends ModularAI
       ai.unitMapEnemy = new HashMap<UnitModel, Map<XYCoord, Double>>();
       ai.unitMapFriendly = new HashMap<UnitModel, Map<XYCoord, Double>>();
       Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(null, gameMap);
-        for( Commander co : unitLists.keySet() )
-        {
+      for( Commander co : unitLists.keySet() )
+      {
         Map<UnitModel, Map<XYCoord, Double>> mapToFill;
-          if( myArmy.isEnemy(co) )
+        if( myArmy.isEnemy(co) )
           mapToFill = ai.unitMapEnemy;
         else
           mapToFill = ai.unitMapFriendly;
@@ -343,10 +343,10 @@ public class JakeMan extends ModularAI
     boolean shouldResupply = false;
     if( stations.size() > 0 )
     {
-      shouldResupply = unit.getHP() <= UNIT_HEAL_THRESHHOLD;
-      shouldResupply |= unit.fuel <= UNIT_REFUEL_THRESHHOLD
+      shouldResupply = unit.getHP() <= UNIT_HEAL_THRESHOLD;
+      shouldResupply |= unit.fuel <= UNIT_REFUEL_THRESHOLD
           * Utils.findShortestPath(unit, stations.get(0), gameMap).getFuelCost(unit, gameMap);
-      shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHHOLD;
+      shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHOLD;
     }
 
     if( shouldResupply )
@@ -597,7 +597,7 @@ public class JakeMan extends ModularAI
 
   private static boolean isThreatenedBy(UnitModel um, UnitModel threat)
   {
-    int threshhold = um.hasDirectFireWeapon() ? DIRECT_THREAT_THRESHHOLD : INDIRECT_THREAT_THRESHHOLD;
+    int threshhold = um.hasDirectFireWeapon() ? DIRECT_THREAT_THRESHOLD : INDIRECT_THREAT_THRESHOLD;
     boolean isThreat = false;
     for( WeaponModel wm : threat.weapons )
       isThreat |= threshhold <= wm.getDamage(um);
