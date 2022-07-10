@@ -12,8 +12,10 @@ import Engine.UnitActionLifecycles.TransformLifecycle;
 import Engine.UnitMods.UnitDefenseModifier;
 import Engine.UnitMods.UnitModifierWithDefaults;
 import Engine.UnitActionFactory;
+import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
+import Engine.Combat.StrikeParams.BattleParams;
 import Engine.FloodFillFunctor.BasicMoveFillFunctor;
 import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEventQueue;
@@ -29,6 +31,7 @@ import Terrain.Environment.Weathers;
 import Units.KaijuActions.BirdResurrectFactory;
 import Units.KaijuActions.BirdSwoopFactory;
 import Units.KaijuWarsUnits.KaijuWarsUnitModel;
+import Units.KaijuWarsUnits.Radar;
 import Units.MoveTypes.MoveType;
 
 public class KaijuWarsKaiju
@@ -37,15 +40,44 @@ public class KaijuWarsKaiju
    * Kaiju abilities I do not plan to implement at this time
 
    * Alpha
-   *  - Tail Whip (Kill any adjacent unit that isn't on the PATH; not implementing PATH mechanics)
+   *  - Tail Swipe (Kill any adjacent unit that isn't on the PATH; not implementing PATH mechanics)
    * Hell Turkey
-   *  - Fire trail (Place a crisis on any tile you move over; not implementing PATH mechanics)
-   * Duggemundr
-   *  - Heat Beam (Kill a unit at 1-2 range and plop down crises in radius 1; not implementing crises)
+   *  - Molten Wings (Place a crisis on any tile you move over; not implementing crises)
    * Big Donk
    *  - Wily (-1 damage taken while on forest, +1 move while on forest, move into adjacent forest on building kill; too much jank)
+   * Duggemundr
+   *  - Heat Beam (Kill a unit at 1-2 range and plop down crises in radius 1 from the target; not implementing crises)
    * Flying Hubcap
    *  - Hologram (After movement, spawn a hologram within 3 tiles, and swap with it half the time; too much jank)
+   */
+  /*
+   * Kaiju abilities I am implementing, in order of unlock; marking the last two with '+' since they're bundled
+
+   * Alpha
+   *  - Roar (Heal 3 HP)
+   *  - Tsunami (Wreck an adjacent tile, if on water)
+   *  + Kick (Kill an adjacent ground unit)
+   *  + Breath (Wreck 1-2 range on an orthogonal)
+   * Hell Turkey
+   *  - Phoenix Burst (When you die, become an invincible egg. The egg then wrecks adjacent tiles and turns into a 5 HP bird)
+   *  - Swoop (If grounded, heal 1 HP. Otherwise, kill an adjacent ground unit)
+   *  + Wind Force (Kill an adjacent air unit)
+   *  + Eruption (Kill all adjacent units; cooldown 4 turns)
+   * Big Donk
+   *  - Beat Chest (Heal 2 HP on killing a building)
+   *  - Wind-up Punch (Target adjacent land unit, wreck 1-2 range)
+   *  + Climb (Kill an adjacent air unit)
+   *  + Rampage (Stomping a building no longer ends your movement, gain +2 speed every 4 turns)
+   * Duggemundr
+   *  - Ram (Kill the first unit in your path, or get +1 move)
+   *  - Carapace (Take no damage from the first attack)
+   *  + Burrow (Be invisible and untargetable if no Radar is within range 2; nerfing to "just" normal stealth)
+   *  + Deep Tunnels (Take no counter or slows if no Radar is within range 2 of the victim)
+   * Flying Hubcap
+   *  - Beam Gun (Kill an adjacent unit, but lose 1 HP)
+   *  - Nav Computer (+1 move if no radar is within range 2)
+   *  + Abductions (Negate 1 security on stomping a building; implementing as +1 COP star)
+   *  + EMP Pulse (Kill a Radar within range 2. Otherwise, kill all adjacent units)
    */
 
   private static final int KAIJU_COST = 0;
@@ -66,6 +98,8 @@ public class KaijuWarsKaiju
     public final int[] hpChunks, hpBases;
     public boolean regenOnBuildingKill = false;
     public boolean stopOnBuildingKill  = true;
+    public boolean hasRamSkill         = false;
+    public boolean hasDeepTunnelSkill  = false;
     // Used by Big Donk and Duggemundr to get a new type on spawn
     public UnitModel promotesToAtAllSkills = null;
 
@@ -91,8 +125,10 @@ public class KaijuWarsKaiju
     public void copyValues(KaijuUnitModel other)
     {
       super.copyValues(other);
-      regenOnBuildingKill = other.regenOnBuildingKill;
-      stopOnBuildingKill  = other.stopOnBuildingKill;
+      regenOnBuildingKill   = other.regenOnBuildingKill;
+      stopOnBuildingKill    = other.stopOnBuildingKill;
+      hasRamSkill           = other.hasRamSkill;
+      promotesToAtAllSkills = other.promotesToAtAllSkills;
     }
   }
 
@@ -211,13 +247,15 @@ public class KaijuWarsKaiju
 
       KaijuStateTracker kaijuTracker = StateTracker.instance(map.game, KaijuStateTracker.class);
       // If we have Swoop and are in heal mode
-      if( kaijuTracker.kaijuAbilityTier.get(self) == KaijuAbilityTier.EXTRA
+      if( kaijuTracker.kaijuAbilityTier.get(self) != KaijuAbilityTier.BASIC
           && BIRD_LAND_HP >= self.getHP() )
       {
         // Setting the tracker state here feels wrong
         kaijuTracker.abilityUsedShort(self, BirdSwoopFactory.class);
         events.add(new HealUnitEvent(self, 1, null, true));
         // If we're about to go above the land HP, become flying
+        // TODO: Since this is only handled here and there's no HealUnitEvent listener, this won't account for healing CO powers
+        // ... nor, in fact, will healing CO powers actually heal the Kaiju over 10 HP by default
         if( self.getHP() == BIRD_LAND_HP )
           events.add(new TransformLifecycle.TransformEvent(self, airTurkey));
       }
@@ -338,6 +376,147 @@ public class KaijuWarsKaiju
     }
   } //~BigDonkMod
 
+  public static class Snek extends KaijuUnitModel
+  {
+    private static final long serialVersionUID = 1L;
+    private static final long ROLE = TANK | SUBSURFACE;
+    public Snek()
+    {
+      super("Duggemundr", ROLE, SNEK_CHUNKS, SNEK_HPBASES);
+      hasRamSkill = true;
+      addUnitModifier(new SnekMod());
+    }
+  }
+  public static class SnekTunneler extends Snek
+  {
+    private static final long serialVersionUID = 1L;
+    public SnekTunneler()
+    {
+      hidden = true;
+      hasDeepTunnelSkill = true;
+    }
+  }
+  public static class SnekMod extends KaijuMoveMod
+  {
+    private static final long serialVersionUID = 1L;
+
+    KaijuStateTracker kaijuTracker;
+    @Override
+    public void registerTrackers(GameInstance gi)
+    {
+      kaijuTracker = StateTracker.instance(gi, KaijuStateTracker.class);
+    }
+    // No active abilities!
+
+    @Override
+    public void modifyUnitDefenseAgainstUnit(BattleParams params)
+    {
+      if( null == params.map )
+        return;
+      final Unit snek = params.defender.unit;
+      KaijuStateTracker kaijuTracker = StateTracker.instance(params.map.game, KaijuStateTracker.class);
+      boolean carapaceReady = kaijuTracker.isReady(snek, SnekMod.class);
+      carapaceReady &= kaijuTracker.kaijuAbilityTier.get(snek) != KaijuAbilityTier.BASIC;
+      if( carapaceReady ) // Invincible to first hit
+        params.defensePower += 300;
+    }
+
+    @Override
+    public void modifyMovePower(UnitContext uc)
+    {
+      super.modifyMovePower(uc);
+      // Ram is on by default
+      uc.movePower += 1;
+    }
+  } // ~SnekMod
+
+  public static class UFO extends KaijuUnitModel
+  {
+    private static final long serialVersionUID = 1L;
+    private static final long ROLE = JET | AIR_HIGH;
+    public UFO()
+    {
+      super("Flying Hubcap", ROLE, UFO_CHUNKS, UFO_HPBASES);
+      addUnitModifier(new UFOMod());
+    }
+
+    /** Disable my move boost and EMP AoE if I have them and there's a Radar in range */
+    @Override
+    public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
+    {
+      GameEventQueue events = super.getTurnInitEvents(self, map);
+
+      KaijuStateTracker kaijuTracker = StateTracker.instance(map.game, KaijuStateTracker.class);
+      if( kaijuTracker.kaijuAbilityTier.get(self) != KaijuAbilityTier.BASIC )
+      {
+        if( isEnemyRadarScanning(map, new XYCoord(self), self.CO) )
+        {
+          // Setting the tracker state here feels wrong
+          // UFO.class is the key for Nav Computer, since there's no active portion
+          kaijuTracker.abilityUsedShort(self, UFO.class);
+        }
+      }
+      return events;
+    }
+  }
+  public static class UFOMod extends KaijuMoveMod
+  {
+    private static final long serialVersionUID = 1L;
+
+    KaijuStateTracker kaijuTracker;
+    @Override
+    public void registerTrackers(GameInstance gi)
+    {
+      kaijuTracker = StateTracker.instance(gi, KaijuStateTracker.class);
+    }
+
+    @Override
+    public void modifyActionList(UnitContext uc)
+    {
+      if(!kaijuTracker.kaijuAbilityTier.containsKey(uc.unit))
+        return; // Not a registered kaiju
+
+      final KaijuAbilityTier tier = kaijuTracker.kaijuAbilityTier.get(uc.unit);
+      switch (tier)
+      {
+        case ALL:
+          uc.possibleActions.add(new KaijuActions.UFOEMPFactory());
+        case EXTRA:
+          uc.possibleActions.add(new KaijuActions.UFOBeamFactory());
+        case BASIC:
+          break;
+      }
+    }
+
+    @Override
+    public void modifyMovePower(UnitContext uc)
+    {
+      super.modifyMovePower(uc);
+      final KaijuAbilityTier tier = kaijuTracker.kaijuAbilityTier.get(uc.unit);
+      // Nav Computer grants +2 move every turn
+      if( tier != KaijuAbilityTier.BASIC
+          && kaijuTracker.isReady(uc.unit, UFO.class) )
+        uc.movePower += 1;
+    }
+  } //~UFOMod
+
+
+  public static boolean isEnemyRadarScanning(MapMaster map, XYCoord target, Commander affiliation)
+  {
+    boolean isAnyRadar = false;
+    for( XYCoord xyc : Utils.findLocationsInRange(map, target, Radar.PIERCING_VISION) )
+    {
+      Unit resident = map.getResident(xyc);
+      if( null != resident && resident.CO.isEnemy(affiliation)
+          && (resident.model instanceof Radar) )
+      {
+        isAnyRadar = true;
+        break;
+      }
+    }
+    return isAnyRadar;
+  }
+
 
   /**
    * Handles cleanup after Kaiju are built:
@@ -413,13 +592,20 @@ public class KaijuWarsKaiju
 
       return events;
     }
-    // Land Hell Turkey if it takes too much damage
+    // Land Hell Turkey if it takes too much damage, and cancel Carapace after combat
     @Override
     public GameEventQueue receiveBattleEvent(BattleSummary summary)
     {
+      // Kaiju don't have weapons, so they can't be the attacker.
       final Unit victim = summary.defender.unit;
       if( !(victim.model instanceof KaijuUnitModel) )
         return null;
+
+      if( (victim.model instanceof Snek) )
+      {
+        abilityUsedShort(victim, SnekMod.class);
+      }
+
       if( summary.defender.after.getHP() > KaijuWarsKaiju.BIRD_LAND_HP )
         return null;
 

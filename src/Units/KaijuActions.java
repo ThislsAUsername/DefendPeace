@@ -28,6 +28,7 @@ import Units.KaijuWarsKaiju.HellTurkeyLand;
 import Units.KaijuWarsKaiju.KaijuStateTracker;
 import Units.KaijuWarsKaiju.KaijuUnitModel;
 import Units.KaijuWarsUnits.KaijuWarsUnitModel;
+import Units.KaijuWarsUnits.Radar;
 
 public class KaijuActions
 {
@@ -754,5 +755,132 @@ public class KaijuActions
       return "CLIMB";
     }
   } //~Factory
+
+  // UFO skills
+
+  public static class UFOBeamFactory extends UnitActionFactory
+  {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
+    {
+      final XYCoord actCoord = new XYCoord(actor);
+      KaijuStateTracker kaijuTracker = StateTracker.instance(map.game, KaijuStateTracker.class);
+      boolean canAct = kaijuTracker.isReady(actor, UFOBeamFactory.class);
+
+      if( canAct && movePath.getEndCoord().equals(actCoord) )
+      {
+        ArrayList<GameAction> actions = new ArrayList<>();
+        for( XYCoord xyc : Utils.findLocationsInRange(map, actCoord, 1, 1) )
+        {
+          Unit resident = map.getResident(xyc);
+          if( null != resident && resident.CO.isEnemy(actor.CO) )
+            actions.add(new UFOBeamAction(this, actor, xyc));
+        }
+        if( actions.size() > 0 )
+          return new GameActionSet(actions, true);
+      }
+
+      return null;
+    }
+
+    @Override
+    public String name(Unit actor)
+    {
+      return "BEAM GUN";
+    }
+  } //~Factory
+  public static class UFOBeamAction extends KaijuAttackAction
+  {
+    static final boolean HIT_BUILDINGS = true;
+    public UFOBeamAction(UFOBeamFactory pType, Unit unit, XYCoord target)
+    {
+      super(pType, UFOBeamFactory.class, unit, target, HIT_BUILDINGS);
+      longCooldown = true;
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      GameEventQueue events = new GameEventQueue();
+      enqueueKaijuKillEvents(gameMap, actor, target, events);
+      events.add(new MassDamageEvent(actor.CO, Arrays.asList(actor), 1, false));
+
+      KaijuStateTracker kaijuTracker = StateTracker.instance(gameMap.game, KaijuStateTracker.class);
+      // Setting the tracker state here feels wrong
+      kaijuTracker.abilityUsedShort(actor, UFOBeamFactory.class);
+      return events;
+    }
+  } // ~UFOBeamAction
+
+  public static class UFOEMPFactory extends UnitActionFactory
+  {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
+    {
+      final XYCoord actCoord = new XYCoord(actor);
+      if(!movePath.getEndCoord().equals(actCoord))
+        return null;
+
+      KaijuStateTracker kaijuTracker = StateTracker.instance(map.game, KaijuStateTracker.class);
+      boolean canAct = kaijuTracker.isReady(actor, UFOEMPFactory.class);
+      // Indicates whether we caught a radar
+      boolean canAoE = kaijuTracker.isReady(actor, KaijuWarsKaiju.UFO.class);
+
+      if( canAct )
+      {
+        if( canAoE )
+          return new GameActionSet(new EMPAction(this, actor, actCoord), false);
+        else
+        {
+          ArrayList<GameAction> radarHits = new ArrayList<>();
+          for( XYCoord xyc : Utils.findLocationsInRange(map, actCoord, Radar.PIERCING_VISION) )
+          {
+            Unit resident = map.getResident(xyc);
+            if( null != resident && resident.CO.isEnemy(actor.CO)
+                && (resident.model instanceof Radar) )
+            {
+              radarHits.add(new EMPAction(this, actor, xyc));
+            }
+          }
+          if( radarHits.size() > 0 )
+            return new GameActionSet(radarHits, true);
+          else
+            System.out.println("ERROR: Found a radar to disable EMP, but then couldn't find it to target.");
+        }
+      }
+
+      return null;
+    }
+
+    @Override
+    public String name(Unit actor)
+    {
+      return "EMP";
+    }
+  } //~Factory
+  public static class EMPAction extends KaijuAttackAction
+  {
+    static final boolean HIT_BUILDINGS = false;
+    public EMPAction(UFOEMPFactory pType, Unit unit, XYCoord target)
+    {
+      super(pType, UFOEMPFactory.class, unit, target, HIT_BUILDINGS);
+    }
+
+    @Override
+    public List<XYCoord> getTargets(MapMaster gameMap)
+    {
+      // If targeting myself, AoE
+      if( target.equals(new XYCoord(actor)) )
+        return Utils.findLocationsInRange(gameMap, target, 1, 1);
+      // Otherwise, just wreck the target
+      List<XYCoord> output = new ArrayList<>();
+      output.add(target);
+      return output;
+    }
+  }
 
 } //~KaijuActions

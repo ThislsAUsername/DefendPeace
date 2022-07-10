@@ -74,6 +74,8 @@ public class KaijuWarsUnits extends UnitModelScheme
     final KaijuWarsKaiju.BigDonkRampage rampager = new KaijuWarsKaiju.BigDonkRampage();
     extras.add(rampager);
     kaijuModels.add(new KaijuWarsKaiju.BigDonk(rampager));
+    kaijuModels.add(new KaijuWarsKaiju.Snek());
+    kaijuModels.add(new KaijuWarsKaiju.UFO());
 
     // Inscribe those war machines obtainable from an Airport.
     airportModels.add(new Fighter());
@@ -431,6 +433,8 @@ public class KaijuWarsUnits extends UnitModelScheme
     private static final long ROLE = RECON | TANK | LAND;
 
     private static final int MOVE_POWER = 2;
+    // For spotting tunneling kaiju
+    public static final int PIERCING_VISION = 2 * KaijuWarsWeapons.KAIJU_SCALE_FACTOR;
     private static final int VISION_RANGE = 5;
 
     private static final MoveType moveType = GROUND;
@@ -442,7 +446,7 @@ public class KaijuWarsUnits extends UnitModelScheme
       super("Radar", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 0;
-      visionRangePiercing = 2; // For spotting tunneling kaiju
+      visionRangePiercing = PIERCING_VISION;
     }
   }
 
