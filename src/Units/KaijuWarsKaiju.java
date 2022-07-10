@@ -820,6 +820,18 @@ public class KaijuWarsKaiju
         }
       }
 
+      // Prevent pathing into friendly Kaiju. That doesn't end well.
+      final Unit toResident = map.getLocation(to).getResident();
+      if( null != toResident && !toResident.CO.isEnemy(unit.CO) )
+      {
+        final KaijuWarsUnitModel toResidentType = (KaijuWarsUnitModel) toResident.model;
+        if( !canTravelThroughEnemies && null != toResidentType )
+        {
+          if( toResidentType.isKaiju )
+            cost = MoveType.IMPASSABLE;
+        }
+      }
+
       return cost;
     }
 
