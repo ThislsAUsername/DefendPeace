@@ -96,10 +96,11 @@ public class KaijuWarsKaiju
   {
     private static final long serialVersionUID = 1L;
     public final int[] hpChunks, hpBases;
-    public boolean regenOnBuildingKill = false;
-    public boolean stopOnBuildingKill  = true;
-    public boolean hasRamSkill         = false;
-    public boolean hasDeepTunnelSkill  = false;
+    public boolean regenOnBuildingKill  = false;
+    public boolean stopOnBuildingKill   = true;
+    public boolean chargeOnBuildingKill = true;
+    public boolean hasRamSkill          = false;
+    public boolean hasDeepTunnelSkill   = false;
     // Used by Big Donk and Duggemundr to get a new type on spawn
     public UnitModel promotesToAtAllSkills = null;
 
@@ -127,6 +128,7 @@ public class KaijuWarsKaiju
       super.copyValues(other);
       regenOnBuildingKill   = other.regenOnBuildingKill;
       stopOnBuildingKill    = other.stopOnBuildingKill;
+      chargeOnBuildingKill  = other.chargeOnBuildingKill;
       hasRamSkill           = other.hasRamSkill;
       promotesToAtAllSkills = other.promotesToAtAllSkills;
     }
@@ -380,9 +382,10 @@ public class KaijuWarsKaiju
   {
     private static final long serialVersionUID = 1L;
     private static final long ROLE = TANK | SUBSURFACE;
-    public Snek()
+    public Snek(SnekTunneler tunneler)
     {
       super("Duggemundr", ROLE, SNEK_CHUNKS, SNEK_HPBASES);
+      promotesToAtAllSkills = tunneler;
       hasRamSkill = true;
       addUnitModifier(new SnekMod());
     }
@@ -392,6 +395,7 @@ public class KaijuWarsKaiju
     private static final long serialVersionUID = 1L;
     public SnekTunneler()
     {
+      super(null);
       hidden = true;
       hasDeepTunnelSkill = true;
     }
@@ -434,9 +438,10 @@ public class KaijuWarsKaiju
   {
     private static final long serialVersionUID = 1L;
     private static final long ROLE = JET | AIR_HIGH;
-    public UFO()
+    public UFO(UFOAbducts abductor)
     {
       super("Flying Hubcap", ROLE, UFO_CHUNKS, UFO_HPBASES);
+      promotesToAtAllSkills = abductor;
       addUnitModifier(new UFOMod());
     }
 
@@ -457,6 +462,15 @@ public class KaijuWarsKaiju
         }
       }
       return events;
+    }
+  }
+  public static class UFOAbducts extends UFO
+  {
+    private static final long serialVersionUID = 1L;
+    public UFOAbducts()
+    {
+      super(null);
+      chargeOnBuildingKill = true;
     }
   }
   public static class UFOMod extends KaijuMoveMod

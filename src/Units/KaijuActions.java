@@ -124,10 +124,10 @@ public class KaijuActions
       Unit victim = location.getResident();
       if( null != victim && kaijuState.unit != victim )
       {
-        KaijuWarsUnitModel kjum = (KaijuWarsUnitModel) victim.model;
+        KaijuWarsUnitModel victimType = (KaijuWarsUnitModel) victim.model;
         int counter = 0;
         int stompDamage = victim.getHP();
-        if( kjum.isKaiju )
+        if( victimType.isKaiju )
         {
           // When stomping another kaiju, at least one of us dies
           counter += victim.getHP();
@@ -138,15 +138,30 @@ public class KaijuActions
           Utils.enqueueDeathEvent(victim, crushEvents);
 
           // Apply relevant counter damage and slows if the victim is an enemy
-          if( victim.CO.isEnemy(kaijuState.CO) )
+          boolean canCounter = victim.CO.isEnemy(kaijuState.CO);
+
+          // Deep Tunnels negate counters, but radar negates it back
+          if( canCounter && stomperType.hasDeepTunnelSkill )
+            canCounter &= KaijuWarsKaiju.isEnemyRadarScanning(gameMap, destCoord, kaijuState.CO);
+
+          if( canCounter && stomperType.hasRamSkill
+              // Ram activates automatically, at range 1 vs valid targets
+              && 1 == destCoord.getDistance(new XYCoord(kaijuState.unit)) && !victimType.resistsKaiju )
           {
-            counter = kjum.kaijuCounter;
+            // Apply Ram - you lose its bonus move, but kill the target for free
+            canCounter = false;
+            --kaijuState.movePower;
+          }
+
+          if( canCounter )
+          {
+            counter = victimType.kaijuCounter;
             counter += KaijuWarsWeapons.getCounterBoost(victim, gameMap, location.getEnvironment().terrainType);
             if( kaijuState.model.isLandUnit()
-                && kjum.slowsLand )
+                && victimType.slowsLand )
               --kaijuState.movePower;
             if( kaijuState.model.isAirUnit()
-                && kjum.slowsAir )
+                && victimType.slowsAir )
               --kaijuState.movePower;
           }
         }
@@ -196,6 +211,9 @@ public class KaijuActions
           crushEvents.add(new MapChangeEvent(location.getCoordinates(), newEnvirons));
           if( stomperType.regenOnBuildingKill )
             crushEvents.add(new HealUnitEvent(kaijuState.unit, 2, null, true));
+          if( stomperType.chargeOnBuildingKill && location.isCaptureable() )
+            // TODO: This is definitely wrong
+            kaijuState.CO.modifyAbilityPower(1);
 
           if( Utils.willLoseFromLossOf(gameMap, location) )
           {

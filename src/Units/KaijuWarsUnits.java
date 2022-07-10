@@ -74,8 +74,12 @@ public class KaijuWarsUnits extends UnitModelScheme
     final KaijuWarsKaiju.BigDonkRampage rampager = new KaijuWarsKaiju.BigDonkRampage();
     extras.add(rampager);
     kaijuModels.add(new KaijuWarsKaiju.BigDonk(rampager));
-    kaijuModels.add(new KaijuWarsKaiju.Snek());
-    kaijuModels.add(new KaijuWarsKaiju.UFO());
+    final KaijuWarsKaiju.SnekTunneler tunneler = new KaijuWarsKaiju.SnekTunneler();
+    extras.add(tunneler);
+    kaijuModels.add(new KaijuWarsKaiju.Snek(tunneler));
+    final KaijuWarsKaiju.UFOAbducts abductor = new KaijuWarsKaiju.UFOAbducts();
+    extras.add(abductor);
+    kaijuModels.add(new KaijuWarsKaiju.UFO(abductor));
 
     // Inscribe those war machines obtainable from an Airport.
     airportModels.add(new Fighter());
