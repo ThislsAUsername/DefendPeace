@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import CommandingOfficers.Commander;
 import Engine.FloodFillFunctor;
 import Engine.GameInstance;
+import Engine.GamePath;
 import Engine.StateTrackers.StateTracker;
 import Engine.UnitActionLifecycles.TransformLifecycle;
 import Engine.UnitMods.UnitDefenseModifier;
@@ -543,6 +544,25 @@ public class KaijuWarsKaiju
   {
     private static final long serialVersionUID = 1L;
     public int getTurn() { return game.getCurrentTurn(); }
+
+    // Provide CO energy for studying Kaiju with Radar
+    public GameEventQueue receiveMoveEvent(Unit unit, GamePath unitPath)
+    {
+      if( !(unit.model instanceof Radar) )
+        return null;
+
+      XYCoord end = unitPath.getEndCoord();
+      // Check for any hostile kaiju in range to study
+      for( Unit kaiju : kaijuAbilityTier.keySet() )
+      {
+        if( kaiju.CO.isEnemy(unit.CO) && Radar.PIERCING_VISION >= end.getDistance(unit) )
+        {
+          // TODO: This is definitely wrong
+          unit.CO.modifyAbilityPower(2);
+        }
+      }
+      return null;
+    }
 
     @Override
     public GameEventQueue receiveCreateUnitEvent(Unit unit)
