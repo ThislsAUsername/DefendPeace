@@ -609,6 +609,10 @@ public class KaijuWarsKaiju
     @Override
     public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
     {
+      // Stop tracking dead kaiju
+      if( victim.model instanceof KaijuUnitModel )
+        kaijuAbilityTier.remove(victim);
+
       UnitModel egg;
       if( victim.model instanceof HellTurkey )
         egg = ((HellTurkey) victim.model).turkeyEgg;
