@@ -314,8 +314,7 @@ public class KaijuWarsWeapons
     @Override
     public void modifyUnitAttack(StrikeParams params)
     {
-      // Assume only one weapon, since that holds for this unit set
-      KaijuWarsWeapon gun = (KaijuWarsWeapon) params.attacker.model.weapons.get(0);
+      KaijuWarsWeapon gun = (KaijuWarsWeapon) params.attacker.weapon;
       int attack = gun.vsLand;
 
       final TerrainType atkEnv = params.attacker.env.terrainType;
@@ -329,8 +328,7 @@ public class KaijuWarsWeapons
     @Override
     public void modifyUnitAttackOnUnit(BattleParams params)
     {
-      // Assume only one weapon, since that holds for this unit set
-      KaijuWarsWeapon gun = (KaijuWarsWeapon) params.attacker.model.weapons.get(0);
+      KaijuWarsWeapon gun = (KaijuWarsWeapon) params.attacker.weapon;
       KaijuWarsUnitModel defModel = (KaijuWarsUnitModel) params.defender.model;
       final TerrainType atkEnv = params.attacker.env.terrainType;
       final TerrainType defEnv = params.defender.env.terrainType;
