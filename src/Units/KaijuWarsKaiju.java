@@ -153,11 +153,11 @@ public class KaijuWarsKaiju
   // These are the "base" HP values for each kaiju at the skill breakpoint turns
   // Note that the turn number will be added to this value, in all cases
   // Also, these are made up/customizable in game (as are the breakpoint turns), so can be used as balancing factors
-  public static final int[] ALPHA_HPBASES = { 12, 20, 38 };
-  public static final int[] BIRD_HPBASES  = { 12, 20, 38 };
-  public static final int[] DONK_HPBASES  = { 12, 12, 12 };
+  public static final int[] ALPHA_HPBASES = { 12, 20, 25 };
+  public static final int[] BIRD_HPBASES  = { 12, 20, 25 };
+  public static final int[] DONK_HPBASES  = { 12, 12,  6 };
   public static final int[] SNEK_HPBASES  = { 12, 12, 12 };
-  public static final int[] UFO_HPBASES   = { 12, 16, 12 };
+  public static final int[] UFO_HPBASES   = { 12, 12,  6 };
 
   public static class Alphazaurus extends KaijuUnitModel
   {
