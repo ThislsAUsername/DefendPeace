@@ -29,11 +29,14 @@ public class PlayerSetupInfo
     StringBuilder coString = new StringBuilder();
     // If we have more than one CO, build a parenthetical list within our list
     if( coList.size() > 1 )
+    {
       coString.append("( ");
-    for( int co : coList )
-      coString.append(co).append(" ");
-    if( coList.size() > 1 )
+      for( int co : coList )
+        coString.append(co).append(" ");
       coString.append(")");
+    }
+    else
+      coString.append(coList.get(0));
     return String.format("%s %s %s %s %s %s", coString, currentColor, currentFaction, flipUnits, currentTeam, currentAi);
   }
   /** Initializes based on the schema defined by the toString() method above */
