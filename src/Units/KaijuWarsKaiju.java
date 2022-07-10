@@ -163,7 +163,7 @@ public class KaijuWarsKaiju
   public static class Alphazaurus extends KaijuUnitModel
   {
     private static final long serialVersionUID = 1L;
-    private static final long ROLE = TROOP | LAND;
+    private static final long ROLE = TROOP | SEA;
     public Alphazaurus()
     {
       super("Alphazaurus", ROLE, ALPHA_CHUNKS, ALPHA_HPBASES);
@@ -220,7 +220,7 @@ public class KaijuWarsKaiju
   public static class HellTurkey extends KaijuUnitModel
   {
     private static final long serialVersionUID = 1L;
-    private static final long ROLE = HOVER | AIR_HIGH;
+    private static final long ROLE = HOVER | AIR_LOW;
     public HellTurkeyLand turkeyLand;
     public HellTurkeyEgg turkeyEgg;
     public HellTurkey()
