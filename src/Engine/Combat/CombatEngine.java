@@ -123,6 +123,8 @@ public class CombatEngine
     XYCoord dest = new XYCoord(attacker);
     UnitContext attackerContext = new UnitContext(map, attacker, null, null, dest);
     attackerContext.chooseWeapon(defender.model, battleRange, attackerMoved);
+    if( null == attackerContext.weapon )
+      return 0;
     return StrikeParams.buildBattleParams(
         attackerContext,
         new UnitContext(map, defender),
