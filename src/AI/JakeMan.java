@@ -32,7 +32,8 @@ public class JakeMan extends ModularAI
     public String getDescription()
     {
       return
-          "Wants your free dudes.\n" +
+          "Builds infantry, tanks, B-Copters, and Md Tanks.\n" +
+          "Attacks when he has local force superiority (i.e. takes free dudes)\n" +
           "High-level design by @Lost&Found#6348, ID 824112693123612692.";
     }
   }
