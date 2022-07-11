@@ -414,7 +414,10 @@ public class JakeMan extends ModularAI
     }
 
     if( goals.isEmpty() ) // If there's really nothing to do, go to MY HQ
+    {
       goals.addAll(myArmy.HQLocations);
+      System.out.println("Warning: JakeMan has no goals for " + unit.toStringWithLocation());
+    }
 
     Utils.sortLocationsByTravelTime(unit, goals, gameMap);
     return goals;
@@ -584,7 +587,7 @@ public class JakeMan extends ModularAI
             damage *= defender.getHPFactor();
 
             return (double)(damage - loss);
-          }, (terrain, params) -> 0.01); // Attack terrain, but don't prioritize it over units
+          }, (terrain, params) -> 0.00); // Don't attack terrain
 
       if( damageValue > bestDamage )
       {
