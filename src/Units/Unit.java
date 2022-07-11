@@ -168,7 +168,7 @@ public class Unit extends UnitState implements UnitModList
     UnitContext uc = new UnitContext(map, this);
 
     ArrayList<GameActionSet> actionSet = new ArrayList<GameActionSet>();
-    for( UnitActionFactory at : uc.calculatePossibleActions() )
+    for( UnitActionFactory at : uc.calculateActionTypes() )
     {
       GameActionSet actions = at.getPossibleActions(map, movePath, this, ignoreResident);
       if( null != actions )
@@ -182,7 +182,7 @@ public class Unit extends UnitState implements UnitModList
   {
     UnitContext uc = new UnitContext(this);
     boolean hasAction = false;
-    for( UnitActionFactory at : uc.calculatePossibleActions() )
+    for( UnitActionFactory at : uc.calculateActionTypes() )
     {
       if( at == UnitActionType )
       {

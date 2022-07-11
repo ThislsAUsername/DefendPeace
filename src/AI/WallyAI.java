@@ -589,7 +589,7 @@ public class WallyAI extends ModularAI
                                   boolean avoidProduction )
   {
     UnitContext uc = new UnitContext(gameMap, unit);
-    uc.calculatePossibleActions();
+    uc.calculateActionTypes();
     ArrayList<XYCoord> goals = new ArrayList<XYCoord>();
 
     ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
@@ -610,13 +610,13 @@ public class WallyAI extends ModularAI
       if( avoidProduction )
         goals.removeAll(AIUtils.findAlliedIndustries(gameMap, myArmy, goals, !avoidProduction));
     }
-    else if( uc.possibleActions.contains(UnitActionFactory.CAPTURE) )
+    else if( uc.actionTypes.contains(UnitActionFactory.CAPTURE) )
     {
       for( XYCoord xyc : futureCapTargets )
         if( !AIUtils.isCapturing(gameMap, myArmy.cos[0], xyc) )
           goals.add(xyc);
     }
-    else if( uc.possibleActions.contains(UnitActionFactory.ATTACK) )
+    else if( uc.actionTypes.contains(UnitActionFactory.ATTACK) )
     {
       Map<UnitModel, Double> valueMap = new HashMap<UnitModel, Double>();
       Map<UnitModel, ArrayList<XYCoord>> targetMap = new HashMap<UnitModel, ArrayList<XYCoord>>();

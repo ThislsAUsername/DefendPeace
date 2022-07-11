@@ -100,9 +100,9 @@ public class Meridian extends Commander
   public void modifyActionList(UnitContext uc)
   {
     if( tank == uc.model )
-      uc.possibleActions.add(tankAction);
+      uc.actionTypes.add(tankAction);
     if( arty == uc.model )
-      uc.possibleActions.add(artyAction);
+      uc.actionTypes.add(artyAction);
   }
 
   /**

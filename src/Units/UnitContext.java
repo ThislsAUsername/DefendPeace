@@ -46,7 +46,7 @@ public class UnitContext extends UnitState
   public WeaponModel weapon;
   public int rangeMin = -1, rangeMax = -1;
 
-  public final List<UnitActionFactory> possibleActions = new ArrayList<UnitActionFactory>();
+  public final List<UnitActionFactory> actionTypes = new ArrayList<UnitActionFactory>();
 
   public final List<UnitModifier> mods = new ArrayList<>();
 
@@ -133,7 +133,7 @@ public class UnitContext extends UnitState
     costBase = model.costBase;
     costRatio = UnitModel.DEFAULT_STAT_RATIO;
     costShift = 0;
-    possibleActions.addAll(model.baseActions);
+    actionTypes.addAll(model.baseActions);
   }
 
   public void setPath(GamePath pPath)
@@ -196,13 +196,13 @@ public class UnitContext extends UnitState
   /**
    * Calculates the available action types, updating the field as well
    */
-  public List<UnitActionFactory> calculatePossibleActions()
+  public List<UnitActionFactory> calculateActionTypes()
   {
-    possibleActions.clear();
-    possibleActions.addAll(model.baseActions);
+    actionTypes.clear();
+    actionTypes.addAll(model.baseActions);
     for( UnitModifier mod : mods )
       mod.modifyActionList(this);
-    return possibleActions;
+    return actionTypes;
   }
 
   /**

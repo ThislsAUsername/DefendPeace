@@ -94,7 +94,7 @@ public class AIUtils
 
     // Create the ActionType-indexed map, and ensure we don't have any null pointers.
     Map<UnitActionFactory, ArrayList<GameAction> > actionsByType = new HashMap<UnitActionFactory, ArrayList<GameAction> >();
-    for( UnitActionFactory atype : uc.calculatePossibleActions() )
+    for( UnitActionFactory atype : uc.calculateActionTypes() )
     {
       actionsByType.put(atype, new ArrayList<GameAction>());
     }

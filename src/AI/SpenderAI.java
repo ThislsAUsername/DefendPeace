@@ -224,7 +224,7 @@ public class SpenderAI implements AIController
             boolean validTarget = false;
             ArrayList<XYCoord> validTargets = new ArrayList<>();
 
-            if( uc.calculatePossibleActions().contains(UnitActionFactory.CAPTURE) )
+            if( uc.calculateActionTypes().contains(UnitActionFactory.CAPTURE) )
             {
               validTargets.addAll(unownedProperties);
             }
