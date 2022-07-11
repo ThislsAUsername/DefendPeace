@@ -2,6 +2,7 @@ package Units;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 import Engine.GameInstance;
@@ -52,10 +53,10 @@ public abstract class UnitModelScheme implements Serializable
   {
     private static final long serialVersionUID = 1L;
     public HashMap<TerrainType, ArrayList<UnitModel>> shoppingList = new HashMap<TerrainType, ArrayList<UnitModel>>();
-    public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
+    public UnitModelList unitModels = new UnitModelList();
   }
   
-  public static UnitModel getModelFromString(String pName, ArrayList<UnitModel> models)
+  public static UnitModel getModelFromString(String pName, Collection<UnitModel> models)
   {
     String name = UnitModel.standardizeID(pName);
     UnitModel model = null;

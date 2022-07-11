@@ -557,28 +557,10 @@ public class Tech extends Commander
   private static UnitModel createBattleMechModel(GameReadyModels grms)
   {
     // Grab the tank, and then the next-up-from-tank
-    UnitModel tank = null;
-    UnitModel mdTank = null;
-    for( UnitModel iter : grms.unitModels )
-    {
-      if( iter.isAll(UnitModel.LAND | UnitModel.ASSAULT) )
-        if( null == tank )
-          tank = iter;
-        else
-        {
-          mdTank = iter;
-          break;
-        }
-    }
-    UnitModel antiAir = null;
-    for( UnitModel iter : grms.unitModels )
-    {
-      if( iter.isAll(UnitModel.LAND | UnitModel.SURFACE_TO_AIR) )
-      {
-        antiAir = iter;
-        break;
-      }
-    }
+    final boolean matchOnAny = false;
+    UnitModel mdTank = grms.unitModels.getAllModels(UnitModel.LAND | UnitModel.ASSAULT, matchOnAny).get(1);
+    UnitModel antiAir = grms.unitModels.getUnitModel(UnitModel.LAND | UnitModel.SURFACE_TO_AIR, matchOnAny);
+
     UnitModel BattleMech = mdTank.clone();
     BattleMech.name = BATTLEMECH_NAME;
     BattleMech.role = BattleMech.role | UnitModel.SURFACE_TO_AIR;
