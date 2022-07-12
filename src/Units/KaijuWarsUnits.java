@@ -33,7 +33,7 @@ public class KaijuWarsUnits extends UnitModelScheme
   @Override
   public String getIconicUnitName()
   {
-    return "Police";
+    return "Infantry";
   }
 
   @Override
