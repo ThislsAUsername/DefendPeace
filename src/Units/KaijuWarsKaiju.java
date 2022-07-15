@@ -592,6 +592,10 @@ public class KaijuWarsKaiju
         events.add(new TransformLifecycle.TransformEvent(unit, kaijuType.promotesToAtAllSkills));
       }
 
+      // Make the birb sit if he's low HP
+      if( hp <= KaijuWarsKaiju.BIRD_LAND_HP )
+        tryDevolveHellTurkey(unit, events);
+
       XYCoord buildCoords = new XYCoord(unit);
       Environment env = game.gameMap.getEnvironment(buildCoords);
       if( null == env || env.terrainType != TerrainType.SEAPORT )
