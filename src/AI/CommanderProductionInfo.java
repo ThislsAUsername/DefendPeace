@@ -56,9 +56,9 @@ public class CommanderProductionInfo
         Map<TerrainType, Integer> propsForCO = propertyCounts.get(loc.getOwner());
         availableProperties.add(loc);
         TerrainType terrain = loc.getEnvironment().terrainType;
-        if( propsForCO.containsKey(terrain))
+        if( propsForCO.containsKey(terrain) )
         {
-          propsForCO.put(terrain, propsForCO.get(loc.getEnvironment().terrainType)+1);
+          propsForCO.put(terrain, propsForCO.get(loc.getEnvironment().terrainType) + 1);
         }
         else
         {
@@ -71,7 +71,7 @@ public class CommanderProductionInfo
           availableUnitModels.add(new ModelForCO(loc.getOwner(), m));
           if( modelToTerrainMap.get(m) == null )
             modelToTerrainMap.put(m, new HashSet<TerrainType>());
-          modelToTerrainMap.get(m).add( loc.getEnvironment().terrainType );
+          modelToTerrainMap.get(m).add(loc.getEnvironment().terrainType);
         }
       }
     }
@@ -196,6 +196,9 @@ public class CommanderProductionInfo
         totalCost += loc.getOwner().getBuyCost(model, loc.getCoordinates());
       }
     }
+
+    if( 0 == num )
+      return Integer.MAX_VALUE;
     return totalCost / num;
   }
 
@@ -217,5 +220,26 @@ public class CommanderProductionInfo
       }
     }
     return minCost;
+  }
+
+  /**
+   * Returns all properties where you can build the input unit
+   */
+  public ArrayList<MapLocation> getAllFacilitiesFor(UnitModel model)
+  {
+    Set<TerrainType> desiredTerrains = modelToTerrainMap.get(model);
+    ArrayList<MapLocation> output = new ArrayList<>();
+    if( null == desiredTerrains )
+      return output;
+
+    for( MapLocation loc : availableProperties )
+    {
+      if( desiredTerrains.contains(loc.getEnvironment().terrainType) )
+      {
+        output.add(loc);
+      }
+    }
+
+    return output;
   }
 }

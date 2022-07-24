@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.ArrayDeque;
@@ -238,6 +239,11 @@ public class Utils
   {
     return findShortestPath(start, unit, destination.xCoord, destination.yCoord, map, false);
   }
+  /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
+  public static GamePath findShortestPath(XYCoord start, Unit unit, XYCoord destination, GameMap map, boolean theoretical)
+  {
+    return findShortestPath(start, unit, destination.xCoord, destination.yCoord, map, theoretical);
+  }
   /**
    * Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)}
    * @param theoretical If true, ignores other Units and move-power limitations.
@@ -349,9 +355,10 @@ public class Utils
       // then update the power grid and re-queue the next node.
       int oldPower = powerGrid[currentNode.x][currentNode.y];
       int oldNextPower = powerGrid[next.xCoord][next.yCoord];
-      int newNextPower = oldPower - fff.getTransitionCost(map, currentNode.getCoordinates(), next);
+      final int transitionCost = fff.getTransitionCost(map, currentNode.getCoordinates(), next);
+      int newNextPower = oldPower - transitionCost;
 
-      if( newNextPower > oldNextPower )
+      if( transitionCost < MoveType.IMPASSABLE && newNextPower > oldNextPower )
       {
         powerGrid[next.xCoord][next.yCoord] = newNextPower;
         // Prevent wrong path generation due to updating the shared powerGrid
@@ -493,37 +500,84 @@ public class Utils
 
   /**
    * Compare XYCoords based on how much time it would take myUnit to reach them on the given map.
-   * XYCoords closer to myCenter will be "less than" XYCoords that are farther away.
+   * <p>Coords closer to the input coord will be "less than" XYCoords that are farther away.
    */
   public static class TravelDistanceComparator implements Comparator<XYCoord>
   {
-    Unit myUnit;
+    final Unit myUnit;
+    // Either the start or the end of our prospective journey, based on reverse
+    // Normally the start.
+    final XYCoord fixedEndpoint;
+    final boolean reverse;
     GameMap myMap;
+    HashMap<XYCoord, Integer> distCache;
 
-    public TravelDistanceComparator(Unit unit, GameMap map)
+    public TravelDistanceComparator(Unit unit, XYCoord coord, GameMap map)
+    {
+      this(unit, coord, map, false);
+    }
+    public TravelDistanceComparator(Unit unit, XYCoord coord, GameMap map, boolean reverseTravel)
     {
       myUnit = unit;
+      fixedEndpoint = coord;
       myMap = map;
+      distCache = new HashMap<>();
+      reverse = reverseTravel;
     }
 
     @Override
     public int compare(XYCoord xy1, XYCoord xy2)
     {
-      int xy1Dist = findShortestPath(myUnit, xy1, myMap).getPathLength();
-      int xy2Dist = findShortestPath(myUnit, xy2, myMap).getPathLength();
+      return getCachedDistance(xy1) - getCachedDistance(xy2);
+    }
+    /**
+     * @return The distance from the unit (assumed static) to the coordinate
+     */
+    public int getCachedDistance(XYCoord xyc)
+    {
+      if( distCache.containsKey(xyc) )
+        return distCache.get(xyc);
 
-      return xy1Dist - xy2Dist;
+      XYCoord start = fixedEndpoint;
+      XYCoord end = xyc;
+      if( reverse )
+      {
+        start = xyc;
+        end = fixedEndpoint;
+      }
+
+      final boolean theoretical = true;
+      final GamePath path = findShortestPath(start, myUnit, end, myMap, theoretical);
+      int distance = path.getFuelCost(myUnit, myMap);
+      if( 0 == path.getPathLength() )
+        distance = Integer.MAX_VALUE;
+      distCache.put(xyc, distance);
+      return distance;
     }
   }
 
   /**
-   * Sorts the mapLocations array by distance from the 'center' coordinate.
-   * @param center
-   * @param mapLocations
+   * Sort coordinates by how long the input unit would take to get to them
    */
   public static void sortLocationsByTravelTime(Unit unit, ArrayList<XYCoord> mapLocations, GameMap map)
   {
-    TravelDistanceComparator tdc = new TravelDistanceComparator(unit, map);
+    sortLocationsByTravelTime(new XYCoord(unit), unit, mapLocations, map);
+  }
+  /**
+   * Sort coordinates by how long the input unit would take to get to them from "start"
+   */
+  public static void sortLocationsByTravelTime(XYCoord start, Unit unit, ArrayList<XYCoord> mapLocations, GameMap map)
+  {
+    TravelDistanceComparator tdc = new TravelDistanceComparator(unit, start, map);
+    Collections.sort(mapLocations, tdc);
+  }
+  /**
+   * Sort coordinates by how long the input unit would take to get from them to "end"
+   */
+  public static void sortLocationsByTravelTimeToCoord(Unit unit, ArrayList<XYCoord> mapLocations, GameMap map, XYCoord end)
+  {
+    boolean reverseTravel = true;
+    TravelDistanceComparator tdc = new TravelDistanceComparator(unit, end, map, reverseTravel);
     Collections.sort(mapLocations, tdc);
   }
   

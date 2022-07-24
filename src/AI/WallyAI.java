@@ -53,12 +53,12 @@ public class WallyAI extends ModularAI
   }
 
   // What % damage I'll ignore when checking safety
-  private static final int INDIRECT_THREAT_THRESHHOLD = 7;
-  private static final int DIRECT_THREAT_THRESHHOLD = 13;
-  private static final int    UNIT_HEAL_THRESHHOLD = 6; // HP at which units heal
-  private static final double UNIT_REFUEL_THRESHHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
-  private static final double UNIT_REARM_THRESHHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
-  private static final double AGGRO_EFFECT_THRESHHOLD = 0.42; // How effective do I need to be against a unit to target it?
+  private static final int INDIRECT_THREAT_THRESHOLD = 7;
+  private static final int DIRECT_THREAT_THRESHOLD = 13;
+  private static final int    UNIT_HEAL_THRESHOLD = 6; // HP at which units heal
+  private static final double UNIT_REFUEL_THRESHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
+  private static final double UNIT_REARM_THRESHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
+  private static final double AGGRO_EFFECT_THRESHOLD = 0.42; // How effective do I need to be against a unit to target it?
   private static final double AGGRO_FUNDS_WEIGHT = 0.9; // Multiplier on damage I need to get before a sacrifice is worth it
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
   private static final double TERRAIN_PENALTY_WEIGHT = 3; // Exponent for how crippling we think high move costs are
@@ -107,30 +107,33 @@ public class WallyAI extends ModularAI
   }
 
 
-  public WallyAI(Army co)
+  public WallyAI(Army army)
   {
-    super(co);
+    super(army);
     aiPhases = new ArrayList<AIModule>(
         Arrays.asList(
-            new PowerActivator(co, CommanderAbility.PHASE_TURN_START),
-            new GenerateThreatMap(co, this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
-            new CaptureFinisher(co, this),
+            new PowerActivator(army, CommanderAbility.PHASE_TURN_START),
+            new CapChainActuator(army, this),
+            new GenerateThreatMap(army, this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
+            new CaptureFinisher(army, this),
 
-            new NHitKO(co, this),
-            new SiegeAttacks(co, this),
-            new PowerActivator(co, CommanderAbility.PHASE_BUY),
-            new FreeRealEstate(co, this, false, false), // prioritize non-eviction
-            new FreeRealEstate(co, this, true,  false), // evict if necessary
-            new BuildStuff(co, this),
-            new FreeRealEstate(co, this, true,  true), // step on industries we're not using
-            new Travel(co, this),
+            new NHitKO(army, this),
+            new SiegeAttacks(army, this),
+            new PowerActivator(army, CommanderAbility.PHASE_BUY),
+            new FreeRealEstate(army, this, false, false), // prioritize non-eviction
+            new FreeRealEstate(army, this, true,  false), // evict if necessary
+            new BuildStuff(army, this),
+            new FreeRealEstate(army, this, true,  true), // step on industries we're not using
+            new Travel(army, this),
 
-            new PowerActivator(co, CommanderAbility.PHASE_TURN_END)
+            new PowerActivator(army, CommanderAbility.PHASE_TURN_END)
             ));
   }
 
   private void init(GameMap map)
   {
+    capPhase = new CapPhaseAnalyzer(map, myArmy);
+
     unitEffectiveMove = new HashMap<>();
     // init all move multipliers before powers come into play
     for( Army army : map.game.armies )
@@ -176,7 +179,7 @@ public class WallyAI extends ModularAI
       // Find the possible destination.
       XYCoord coord = new XYCoord(unit.x, unit.y);
 
-      if( AIUtils.isFriendlyProduction(gameMap, myCo, coord) || !unit.model.hasImmobileWeapon() )
+      if( AIUtils.isFriendlyProduction(gameMap, myArmy, coord) || !unit.model.hasImmobileWeapon() )
         return bestAttack;
 
       // Figure out how to get here.
@@ -511,12 +514,12 @@ public class WallyAI extends ModularAI
   public static class BuildStuff implements AIModule
   {
     private static final long serialVersionUID = 1L;
-    public final Army myCo;
+    public final Army myArmy;
     public final WallyAI ai;
 
     public BuildStuff(Army co, WallyAI ai)
     {
-      myCo = co;
+      myArmy = co;
       this.ai = ai;
     }
 
@@ -545,8 +548,11 @@ public class WallyAI extends ModularAI
         if( null != resident )
         {
           boolean ignoreSafety = true, avoidProduction = true;
-          if( resident.CO.army == myCo && !resident.isTurnOver )
-            return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, null, resident, ignoreSafety, avoidProduction);
+          GameAction eviction = null;
+          if( resident.CO.army == myArmy && !resident.isTurnOver )
+            eviction = ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, null, resident, ignoreSafety, avoidProduction);
+          if( null != eviction )
+            return eviction;
           else
           {
             ai.log(String.format("  Can't evict unit %s to build %s", resident.toStringWithLocation(), builds.get(coord)));
@@ -558,7 +564,7 @@ public class WallyAI extends ModularAI
         Commander buyer = loc.getOwner();
         ArrayList<UnitModel> list = buyer.getShoppingList(loc);
         UnitModel toBuy = builds.get(coord);
-        if( buyer.getBuyCost(toBuy, coord) <= myCo.money && list.contains(toBuy) )
+        if( buyer.getBuyCost(toBuy, coord) <= myArmy.money && list.contains(toBuy) )
         {
           builds.remove(coord);
           return new GameAction.UnitProductionAction(buyer, toBuy, coord);
@@ -583,7 +589,7 @@ public class WallyAI extends ModularAI
                                   boolean avoidProduction )
   {
     UnitContext uc = new UnitContext(gameMap, unit);
-    uc.calculatePossibleActions();
+    uc.calculateActionTypes();
     ArrayList<XYCoord> goals = new ArrayList<XYCoord>();
 
     ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
@@ -591,10 +597,10 @@ public class WallyAI extends ModularAI
     boolean shouldResupply = false;
     if( stations.size() > 0 )
     {
-      shouldResupply = unit.getHP() <= UNIT_HEAL_THRESHHOLD;
-      shouldResupply |= unit.fuel <= UNIT_REFUEL_THRESHHOLD
+      shouldResupply = unit.getHP() <= UNIT_HEAL_THRESHOLD;
+      shouldResupply |= unit.fuel <= UNIT_REFUEL_THRESHOLD
           * Utils.findShortestPath(unit, stations.get(0), gameMap).getFuelCost(unit, gameMap);
-      shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHHOLD;
+      shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHOLD;
     }
 
     if( shouldResupply )
@@ -604,13 +610,13 @@ public class WallyAI extends ModularAI
       if( avoidProduction )
         goals.removeAll(AIUtils.findAlliedIndustries(gameMap, myArmy, goals, !avoidProduction));
     }
-    else if( uc.possibleActions.contains(UnitActionFactory.CAPTURE) )
+    else if( uc.actionTypes.contains(UnitActionFactory.CAPTURE) )
     {
-      for( XYCoord xyc : unownedProperties )
+      for( XYCoord xyc : futureCapTargets )
         if( !AIUtils.isCapturing(gameMap, myArmy.cos[0], xyc) )
           goals.add(xyc);
     }
-    else if( uc.possibleActions.contains(UnitActionFactory.ATTACK) )
+    else if( uc.actionTypes.contains(UnitActionFactory.ATTACK) )
     {
       Map<UnitModel, Double> valueMap = new HashMap<UnitModel, Double>();
       Map<UnitModel, ArrayList<XYCoord>> targetMap = new HashMap<UnitModel, ArrayList<XYCoord>>();
@@ -622,7 +628,7 @@ public class WallyAI extends ModularAI
         XYCoord targetCoord = new XYCoord(target.x, target.y);
         double effectiveness = findEffectiveness(unit.model, target.model);
         if (Utils.findShortestPath(unit, targetCoord, gameMap, true) != null &&
-            AGGRO_EFFECT_THRESHHOLD < effectiveness)
+            AGGRO_EFFECT_THRESHOLD < effectiveness)
         {
           valueMap.put(model, effectiveness*target.getCost());
           if (!targetMap.containsKey(model)) targetMap.put(model, new ArrayList<XYCoord>());
@@ -648,7 +654,7 @@ public class WallyAI extends ModularAI
 
     if( goals.isEmpty() ) // Send 'em at production facilities if they haven't got anything better to do
     {
-      for( XYCoord coord : unownedProperties )
+      for( XYCoord coord : futureCapTargets )
       {
         MapLocation loc = gameMap.getLocation(coord);
         if( unit.CO.unitProductionByTerrain.containsKey(loc.getEnvironment().terrainType)
@@ -833,7 +839,7 @@ public class WallyAI extends ModularAI
   private boolean isSafe(GameMap gameMap, Map<UnitModel, Map<XYCoord, Double>> threatMap, Unit unit, XYCoord xyc)
   {
     Double threat = threatMap.get(unit.model).get(xyc);
-    int threshhold = unit.model.hasDirectFireWeapon() ? DIRECT_THREAT_THRESHHOLD : INDIRECT_THREAT_THRESHHOLD;
+    int threshhold = unit.model.hasDirectFireWeapon() ? DIRECT_THREAT_THRESHOLD : INDIRECT_THREAT_THRESHOLD;
     return (null == threat || threshhold > threat);
   }
 
@@ -874,8 +880,8 @@ public class WallyAI extends ModularAI
     if( unit.CO.isEnemy(locale.getOwner()) &&
             unit.hasActionType(UnitActionFactory.CAPTURE)
             && locale.isCaptureable() )
-
       value += valueTerrain(unit.CO, locale.getEnvironment().terrainType); // Strongly value units that threaten capture
+
     if( includeCurrentHealth )
       value *= unit.getHP();
     value -= locale.getEnvironment().terrainType.getDefLevel(); // Value things on lower terrain more, so we wall for equal units if we can get on better terrain

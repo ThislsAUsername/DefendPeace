@@ -8,6 +8,7 @@ import java.util.PriorityQueue;
 import CommandingOfficers.CommanderAbility;
 import Engine.Army;
 import Engine.GameAction;
+import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
@@ -22,11 +23,12 @@ public abstract class ModularAI implements AIController
   protected Army myArmy = null;
 
   // Updated on turn init
-  protected ArrayList<XYCoord> unownedProperties;
+  protected ArrayList<XYCoord> futureCapTargets;
   // List of possible AI modes, in order of precedence
   protected ArrayList<AIModule> aiPhases;
   // Sets the ordering for units in the unit queue fed to the modules
   protected Comparator<Unit> unitOrderSetter = new AIUtils.UnitCostComparator(false);
+  protected CapPhaseAnalyzer capPhase;
 
   private StringBuffer logger = new StringBuffer();
   private boolean shouldLog = true;
@@ -43,7 +45,7 @@ public abstract class ModularAI implements AIController
     logger = new StringBuffer(); // Reset at the start of the turn so the AI's action log stays in memory between turns for review
     ++turnNum;
     // Create a list of every property we don't own, but want to.
-    unownedProperties = AIUtils.findNonAlliedProperties(myArmy, gameMap);
+    futureCapTargets = AIUtils.findNonAlliedProperties(myArmy, gameMap);
 
     for( AIModule phase : aiPhases )
     {
@@ -150,7 +152,7 @@ public abstract class ModularAI implements AIController
       if( unit.getCaptureProgress() > 0 )
       {
         XYCoord position = new XYCoord(unit.x, unit.y);
-        ai.unownedProperties.remove(position);
+        ai.futureCapTargets.remove(position);
         return new CaptureLifecycle.CaptureAction(map, unit, Utils.findShortestPath(unit, position, map));
       }
       return null;
@@ -160,12 +162,12 @@ public abstract class ModularAI implements AIController
   public static abstract class UnitActionFinder implements AIModule
   {
     private static final long serialVersionUID = 1L;
-    public Army myCo;
+    public Army myArmy;
     public final ModularAI ai;
 
     public UnitActionFinder(Army co, ModularAI ai)
     {
-      myCo = co;
+      myArmy = co;
       this.ai = ai;
     }
 
@@ -182,5 +184,33 @@ public abstract class ModularAI implements AIController
     }
 
     protected abstract GameAction getUnitAction(Unit unit, GameMap gameMap);
+  }
+
+  public static class CapChainActuator extends UnitActionFinder
+  {
+    private static final long serialVersionUID = 1L;
+    public CapChainActuator(Army co, ModularAI ai)
+    {
+      super(co, ai);
+    }
+
+    @Override
+    public GameAction getUnitAction(Unit unit, GameMap map)
+    {
+      // Don't really care to handle COs that modify what can cap
+      if( null == ai.capPhase
+          || !unit.model.baseActions.contains(UnitActionFactory.CAPTURE) )
+        return null;
+
+      // Follow the cap chain, if possible
+      final GameAction capAction = ai.capPhase.getCapAction(map, unit);
+      if( null != capAction && capAction.getType() == UnitActionFactory.CAPTURE )
+      {
+        // This is now a current cap target; don't send more dudes
+        ai.futureCapTargets.remove(capAction.getMoveLocation());
+      }
+
+      return capAction;
+    }
   }
 }

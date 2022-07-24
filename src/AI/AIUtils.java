@@ -94,7 +94,7 @@ public class AIUtils
 
     // Create the ActionType-indexed map, and ensure we don't have any null pointers.
     Map<UnitActionFactory, ArrayList<GameAction> > actionsByType = new HashMap<UnitActionFactory, ArrayList<GameAction> >();
-    for( UnitActionFactory atype : uc.calculatePossibleActions() )
+    for( UnitActionFactory atype : uc.calculateActionTypes() )
     {
       actionsByType.put(atype, new ArrayList<GameAction>());
     }
@@ -153,7 +153,8 @@ public class AIUtils
       for( int y = 0; y < gameMap.mapHeight; ++y )
       {
         MapLocation loc = gameMap.getLocation(x, y);
-        if( loc.getResident() != null && army.isEnemy(loc.getResident().CO) )
+        final Unit resident = loc.getResident();
+        if( resident != null && resident.CO.isEnemy(army) )
         {
           unitLocs.add(new XYCoord(x, y));
         }
@@ -166,7 +167,7 @@ public class AIUtils
    * Creates a map of COs to the units they control, based on what can be seen in the passed-in map.
    * Units owned by allies are ignored - ours can be trivially accessed via Commander.units, and we don't control ally behavior.
    */
-  public static Map<Commander, ArrayList<Unit> > getEnemyUnitsByCommander(Army myCommander, GameMap gameMap)
+  public static Map<Commander, ArrayList<Unit> > getEnemyUnitsByCommander(Army army, GameMap gameMap)
   {
     Map<Commander, ArrayList<Unit> > unitMap = new HashMap<Commander, ArrayList<Unit> >();
 
@@ -174,7 +175,7 @@ public class AIUtils
       for( int y = 0; y < gameMap.mapHeight; ++y )
       {
         Unit resident = gameMap.getLocation(x, y).getResident();
-        if( (null != resident) && (myCommander.isEnemy(resident.CO)) )
+        if( (null != resident) && (resident.CO.isEnemy(army)) )
         {
           if( !unitMap.containsKey(resident.CO) ) unitMap.put(resident.CO, new ArrayList<Unit>());
           unitMap.get(resident.CO).add(resident);
@@ -187,7 +188,9 @@ public class AIUtils
   /** Overload of {@link #moveTowardLocation(Unit, XYCoord, GameMap, Set)} **/
   public static GameAction moveTowardLocation(Unit unit, XYCoord destination, GameMap gameMap )
   {
-    return moveTowardLocation(unit, destination, gameMap, null);
+    Set<XYCoord> excludeDestinations = new HashSet<>();
+    excludeDestinations.add(new XYCoord(unit)); // Assume that the caller does, in fact, want to move.
+    return moveTowardLocation(unit, destination, gameMap, excludeDestinations);
   }
 
   /**

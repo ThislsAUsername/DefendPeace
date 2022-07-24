@@ -32,7 +32,8 @@ public abstract class UnitProduceLifecycle
     public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
-      if( moveLocation.equals(actor.x, actor.y) && actor.hasCargoSpace(typeToBuild.role) && actor.CO.army.money > actor.CO.getCost(typeToBuild)
+      if( moveLocation.equals(actor.x, actor.y) && actor.hasCargoSpace(typeToBuild.role)
+          && actor.CO.army.money >= actor.CO.getCost(typeToBuild)
           && actor.materials > 0 )
       {
         return new GameActionSet(new UnitProduceAction(this, actor), false);

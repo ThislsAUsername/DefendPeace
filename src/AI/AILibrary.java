@@ -25,6 +25,7 @@ public class AILibrary
     AIList.add( SpenderAI.info );
     AIList.add( WallyAI.info );
     AIList.add( Muriel.info );
+    AIList.add( JakeMan.info );
   }
 
   public static class NotAnAI implements AIMaker
