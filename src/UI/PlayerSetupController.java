@@ -55,6 +55,7 @@ public class PlayerSetupController implements IController
                                 (Scanner linescan)->linescan.nextLine(),
                                 optionMap);
 
+    final boolean flySolo = !builder.tagMode.supportsMultiCmdrSelect;
     // Start by making default CO/color selections.
     for(int co = 0; co < numCos; ++co)
     {
@@ -64,6 +65,15 @@ public class PlayerSetupController implements IController
                                UIUtils.getCOColors(), UIUtils.getFactions(),
                                AILibrary.getAIList(),
                                optionMap.get(co) );
+
+      // Enforce single-CO play if necessary
+      final ArrayList<Integer> coList = coSelectors[co].coList;
+      if( flySolo && coList.size() > 1 )
+      {
+        int lonely = coList.get(0);
+        coList.clear();
+        coList.add(lonely);
+      }
     }
   }
 
