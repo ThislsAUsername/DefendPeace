@@ -251,15 +251,20 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
     return Color.RED;
   }
 
+  protected boolean awbwDeniesCharge()
+  {
+    return TagMode.AWBW == gameRules.tagMode
+        && getAbilityText().length() > 0;
+  }
+
   /**
    * Track battles that happen, and get ability power based on combat this CO is in.
    */
   @Override
   public GameEventQueue receiveBattleEvent(final BattleSummary summary)
   {
-    if( TagMode.AWBW == gameRules.tagMode
-        && getAbilityText().length() > 0 )
-      return null; // If any power is active, deny charge in AWBW mode
+    if( awbwDeniesCharge() )
+      return null;
 
     // We only care who the units belong to, not who picked the fight.
     UnitDelta minion = null;
@@ -311,9 +316,8 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   {
     if( this == attacker.army )
       return null; // Punching yourself shouldn't make you angry
-    if( TagMode.AWBW == gameRules.tagMode
-        && getAbilityText().length() > 0 )
-      return null; // If any power is active, deny charge in AWBW mode
+    if( awbwDeniesCharge() )
+      return null;
 
     for( Entry<Unit, Integer> damageEntry : lostHP.entrySet() )
     {
