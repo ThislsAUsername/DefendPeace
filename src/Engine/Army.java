@@ -99,12 +99,15 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
     return events;
   }
 
-  public void endTurn()
+  @Override
+  public GameEventQueue receiveTurnEndEvent(Army army, int turn)
   {
     if( aiController != null ) aiController.endTurn();
     myView.resetFog();
     for( Commander co : cos )
       co.endTurn();
+
+    return null;
   }
 
   /**
