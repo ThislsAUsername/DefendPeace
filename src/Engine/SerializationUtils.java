@@ -19,7 +19,7 @@ public class SerializationUtils
     }
     catch (Exception ex)
     {
-      ex.printStackTrace();
+      // We expect exceptions here; don't barf all over the log
     }
 
     return "!?";
