@@ -546,12 +546,12 @@ public class MapController implements IController, GameInputHandler.StateChanged
         // Signal the view to animate the victory/defeat overlay.
         myView.gameIsOver();
       }
+      else if( event.shouldEndTurn() )
+      {
+        handleEndTurn();
+      }
       else
       {
-        if( event.shouldEndTurn() ) {
-          handleEndTurn();
-        }
-
         // The animation for the last action just completed. If an AI is in control,
         // fetch the next action. Otherwise, return control to the player.
         if( myGame.activeArmy.isAI() )
