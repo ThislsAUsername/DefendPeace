@@ -556,7 +556,8 @@ public class KaijuActions
 
       List<XYCoord> output = new ArrayList<>();
       output.add(target);
-      output.add(secondTile);
+      if( gameMap.isLocationValid(secondTile) )
+        output.add(secondTile);
       return output;
     }
   }
@@ -794,7 +795,8 @@ public class KaijuActions
 
       List<XYCoord> output = new ArrayList<>();
       output.add(target);
-      output.add(secondTile);
+      if( gameMap.isLocationValid(secondTile) )
+        output.add(secondTile);
       return output;
     }
   }
