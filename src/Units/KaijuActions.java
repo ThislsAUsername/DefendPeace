@@ -729,7 +729,7 @@ public class KaijuActions
   } //~Factory
   public static class EruptionAction extends KaijuAttackAction
   {
-    static final boolean HIT_BUILDINGS = true;
+    static final boolean HIT_BUILDINGS = false;
     public EruptionAction(BirdEruptionFactory pType, Unit unit, XYCoord target)
     {
       super(pType, BirdEruptionFactory.class, unit, target, HIT_BUILDINGS);
@@ -850,7 +850,7 @@ public class KaijuActions
   } //~Factory
   public static class UFOBeamAction extends KaijuAttackAction
   {
-    static final boolean HIT_BUILDINGS = true;
+    static final boolean HIT_BUILDINGS = false;
     public UFOBeamAction(UFOBeamFactory pType, Unit unit, XYCoord target)
     {
       super(pType, UFOBeamFactory.class, unit, target, HIT_BUILDINGS);
