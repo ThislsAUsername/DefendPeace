@@ -2,6 +2,7 @@ package Units;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import Engine.GameAction;
@@ -10,6 +11,7 @@ import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.Combat.DamagePopup;
 import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
@@ -51,6 +53,11 @@ public class KaijuActions
 
   /** List of things Kaiju break that aren't capturable */
   public static final List<TerrainType> INERT_CRUSHABLES = Arrays.asList(TerrainType.BRIDGE, TerrainType.BUNKER, TerrainType.PILLAR, TerrainType.METEOR);
+  private static boolean isCrushable(MapLocation location)
+  {
+    return location.isCaptureable()
+        || INERT_CRUSHABLES.contains(location.getEnvironment().terrainType);
+  }
 
   public static class KaijuCrushAction extends GameAction
   {
@@ -203,8 +210,7 @@ public class KaijuActions
       final int distance = kaijuState.coord.getDistance(destCoord);
       if( kaijuState.movePower >= distance )
       {
-        if( location.isCaptureable()
-            || INERT_CRUSHABLES.contains(location.getEnvironment().terrainType) )
+        if( isCrushable(location) )
         {
           Environment oldEnvirons = location.getEnvironment();
           Environment newEnvirons = Environment.getTile(oldEnvirons.terrainType.getBaseTerrain(), oldEnvirons.weatherType);
@@ -273,8 +279,7 @@ public class KaijuActions
 
     MapLocation location = gameMap.getLocation(xyc);
 
-    if( location.isCaptureable()
-        || INERT_CRUSHABLES.contains(location.getEnvironment().terrainType) )
+    if( isCrushable(location) )
     {
       Environment oldEnvirons = location.getEnvironment();
       Environment newEnvirons = Environment.getTile(oldEnvirons.terrainType.getBaseTerrain(), oldEnvirons.weatherType);
@@ -352,10 +357,42 @@ public class KaijuActions
       return eventSequence;
     }
 
-    public List<XYCoord> getTargets(MapMaster gameMap)
+    public List<XYCoord> getTargets(GameMap gameMap)
     {
       List<XYCoord> output = new ArrayList<>();
       output.add(target);
+      return output;
+    }
+
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
+    {
+      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
+      String value = destroyBuildings ? "WRECK" : "KILL";
+
+      for( XYCoord xyc : getTargets(gameMap) )
+      {
+        Unit victim = gameMap.getResident(xyc);
+        if( null != victim )
+        {
+          KaijuWarsUnitModel kjum = (KaijuWarsUnitModel) victim.model;
+          if( kjum.resistsKaiju )
+            continue; // Kaiju resistance cancels all effects
+
+          output.add(new DamagePopup(xyc, actor.CO.myColor, value));
+          continue;
+        }
+
+        if( !destroyBuildings )
+          continue;
+
+        MapLocation location = gameMap.getLocation(xyc);
+        if( !isCrushable(location) )
+          continue;
+
+        output.add(new DamagePopup(xyc, actor.CO.myColor, value));
+      }
+
       return output;
     }
 
@@ -512,7 +549,7 @@ public class KaijuActions
     }
 
     @Override
-    public List<XYCoord> getTargets(MapMaster gameMap)
+    public List<XYCoord> getTargets(GameMap gameMap)
     {
       // Double the target coordinates and subtract the start coord to get start + offset*2
       XYCoord secondTile = new XYCoord(target.xCoord * 2 - actor.x, target.yCoord * 2 - actor.y);
@@ -699,7 +736,7 @@ public class KaijuActions
     }
 
     @Override
-    public List<XYCoord> getTargets(MapMaster gameMap)
+    public List<XYCoord> getTargets(GameMap gameMap)
     {
       return Utils.findLocationsInRange(gameMap, target, 1, 1);
     }
@@ -750,7 +787,7 @@ public class KaijuActions
     }
 
     @Override
-    public List<XYCoord> getTargets(MapMaster gameMap)
+    public List<XYCoord> getTargets(GameMap gameMap)
     {
       // Double the target coordinates and subtract the start coord to get start + offset*2
       XYCoord secondTile = new XYCoord(target.xCoord * 2 - actor.x, target.yCoord * 2 - actor.y);
@@ -889,7 +926,7 @@ public class KaijuActions
     }
 
     @Override
-    public List<XYCoord> getTargets(MapMaster gameMap)
+    public List<XYCoord> getTargets(GameMap gameMap)
     {
       // If targeting myself, AoE
       if( target.equals(new XYCoord(actor)) )
