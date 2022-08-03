@@ -8,7 +8,6 @@ import UI.InputHandler.InputAction;
 public class OptionSelector
 {
   private int numOptions;
-  private int highestOption;
   private int highlightedOption;
 
   /**
@@ -18,7 +17,6 @@ public class OptionSelector
   public OptionSelector(int num)
   {
     numOptions = num;
-    highestOption = num-1;
     highlightedOption = 0;
   }
 
@@ -29,7 +27,6 @@ public class OptionSelector
   public void reset(int newNum)
   {
     numOptions = newNum;
-    highestOption = newNum-1;
     highlightedOption = 0;
   }
 
@@ -38,7 +35,27 @@ public class OptionSelector
    */
   public void setSelectedOption(int num)
   {
-    highlightedOption = num;
+    // If the values are close, hakuna matata
+    if( Math.abs(highlightedOption - num) < 2 )
+    {
+      highlightedOption = num;
+      return;
+    }
+
+    // Otherwise, figure out the smallest shift to get our result
+    final int oldNormal = normalize(highlightedOption, numOptions);
+    final int newNormal = normalize(num, numOptions);
+    final int shiftNaive = newNormal - oldNormal;
+    int shiftCandidate = shiftNaive;
+    if( Math.abs(shiftNaive) > numOptions / 2 )
+    {
+      // The new shift should have the opposite sign of the naive one
+      if( shiftNaive > 0 )
+        shiftCandidate = shiftNaive - numOptions;
+      else
+        shiftCandidate = shiftNaive + numOptions;
+    }
+    highlightedOption += shiftCandidate;
   }
 
   /**
@@ -62,11 +79,20 @@ public class OptionSelector
    */
   public int getSelectionNormalized()
   {
+    return normalize(highlightedOption, numOptions);
+  }
+
+  /**
+   * @return The input index, normalized to within the valid range.
+   */
+  public static int normalize(int optionAbsolute, int numOptions)
+  {
     if( numOptions < 1 )
     {
       throw new IndexOutOfBoundsException("OptionSelector has no options to select!");
     }
-    int chosenOption = highlightedOption;
+    final int highestOption = numOptions - 1;
+    int chosenOption = optionAbsolute;
     for(;chosenOption < 0; chosenOption += numOptions);
     for(;chosenOption > highestOption; chosenOption -= numOptions);
     return chosenOption;
@@ -82,7 +108,7 @@ public class OptionSelector
     highlightedOption--;
   }
 
-  public void handleInput(InputAction action)
+  public int handleInput(InputAction action)
   {
     switch( action )
     {
@@ -100,6 +126,7 @@ public class OptionSelector
       default:
         System.out.println("Warning: Unexpected input received in OptionSelector.");
     }
+    return getSelectionNormalized();
   }
   
   public int size()

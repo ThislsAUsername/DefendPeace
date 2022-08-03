@@ -3,6 +3,7 @@ package UI;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import AI.AIMaker;
 import CommandingOfficers.Commander;
@@ -16,7 +17,7 @@ import UI.UIUtils.Faction;
  */
 public class PlayerSetupInfo
 {
-  public int currentCo;
+  public ArrayList<Integer> coList = new ArrayList<>();
   public int currentColor;
   public int currentFaction;
   public boolean flipUnits;
@@ -25,14 +26,41 @@ public class PlayerSetupInfo
   @Override
   public String toString()
   {
-    return String.format("%s %s %s %s %s %s", currentCo, currentColor, currentFaction, flipUnits, currentTeam, currentAi);
+    StringBuilder coString = new StringBuilder();
+    // If we have more than one CO, build a parenthetical list within our list
+    if( coList.size() > 1 )
+    {
+      coString.append("( ");
+      for( int co : coList )
+        coString.append(co).append(" ");
+      coString.append(")");
+    }
+    else
+      coString.append(coList.get(0));
+    return String.format("%s %s %s %s %s %s", coString, currentColor, currentFaction, flipUnits, currentTeam, currentAi);
   }
   /** Initializes based on the schema defined by the toString() method above */
   public void initFromString(String input)
   {
     Scanner s = new Scanner(input);
-    if( s.hasNextInt())
-      currentCo = s.nextInt() % availableCommanders.length;
+
+    coList.clear();
+    // If we found parentheses, then we've got a list to read
+    final Pattern listRegex = Pattern.compile("\\(.*\\)");
+    String coString = s.findInLine(listRegex);
+    if( null != coString )
+    {
+      Scanner coScanner = new Scanner(coString);
+      coScanner.skip("\\(");
+      while (coScanner.hasNextInt())
+      {
+        coList.add(coScanner.nextInt() % availableCommanders.length);
+      }
+      coScanner.close();
+    }
+    else if( s.hasNextInt() )
+      coList.add(s.nextInt() % availableCommanders.length);
+
     if( s.hasNextInt())
       currentColor = s.nextInt() % availableColors.length;
     if( s.hasNextInt())
@@ -45,6 +73,7 @@ public class PlayerSetupInfo
       currentAi = s.nextInt() % availableAis.length;
     s.close();
   }
+
   private final CommanderInfo[] availableCommanders;
   private final Color[] availableColors;
   private final Faction[] availableFactions;
@@ -56,7 +85,7 @@ public class PlayerSetupInfo
                          ArrayList<AIMaker> AIList,
                          String savedVals)
   {
-    currentCo = thisPlayer % COTypeList.size();
+    coList.add(thisPlayer % COTypeList.size());
     currentColor = thisPlayer % colorList.length;
     currentFaction = thisPlayer % factionList.length;
     flipUnits = 0 < (thisPlayer % 2);
@@ -72,15 +101,22 @@ public class PlayerSetupInfo
       initFromString(savedVals);
   }
 
-  public Commander makeCommander(GameScenario.GameRules rules)
+  public Commander[] makeCommanders(GameScenario.GameRules rules)
   {
-    Commander co = availableCommanders[currentCo].create(rules);
+    int coCount = coList.size();
+    if( !rules.tagMode.supportsMultiCmdrSelect )
+      coCount = 1;
+    Commander[] cos = new Commander[coCount];
+    for( int i = 0; i < coCount; ++i )
+    {
+      cos[i] = availableCommanders[coList.get(i)].create(rules);
 
-    co.myColor = availableColors[currentColor];
-    co.faction = new Faction(availableFactions[currentFaction].name, availableFactions[currentFaction].basis);
-    co.faction.flip = flipUnits;
+      cos[i].myColor = availableColors[currentColor];
+      cos[i].faction = new Faction(availableFactions[currentFaction].name, availableFactions[currentFaction].basis);
+      cos[i].faction.flip = flipUnits;
+    }
 
-    return co;
+    return cos;
   }
 
   public Color getCurrentColor()
@@ -88,9 +124,17 @@ public class PlayerSetupInfo
     return availableColors[currentColor];
   }
 
-  public CommanderInfo getCurrentCO()
+  public ArrayList<CommanderInfo> getCurrentCOList()
   {
-    return availableCommanders[currentCo];
+    ArrayList<CommanderInfo> cos = new ArrayList<>();
+    for( int index : coList )
+      cos.add(availableCommanders[index]);
+    return cos;
+  }
+
+  public CommanderInfo getCurrentCO(int index)
+  {
+    return availableCommanders[coList.get(index)];
   }
 
   public Faction getCurrentFaction()

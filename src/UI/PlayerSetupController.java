@@ -55,6 +55,7 @@ public class PlayerSetupController implements IController
                                 (Scanner linescan)->linescan.nextLine(),
                                 optionMap);
 
+    final boolean flySolo = !builder.tagMode.supportsMultiCmdrSelect;
     // Start by making default CO/color selections.
     for(int co = 0; co < numCos; ++co)
     {
@@ -64,6 +65,15 @@ public class PlayerSetupController implements IController
                                UIUtils.getCOColors(), UIUtils.getFactions(),
                                AILibrary.getAIList(),
                                optionMap.get(co) );
+
+      // Enforce single-CO play if necessary
+      final ArrayList<Integer> coList = coSelectors[co].coList;
+      if( flySolo && coList.size() > 1 )
+      {
+        int lonely = coList.get(0);
+        coList.clear();
+        coList.add(lonely);
+      }
     }
   }
 
@@ -105,7 +115,7 @@ public class PlayerSetupController implements IController
         if( categorySelector.getSelectionNormalized() == SelectionCategories.COMMANDER.ordinal() )
         {
           ArrayList<CommanderInfo> infos = CommanderLibrary.getCommanderList();
-          subMenu = new PlayerSetupCommanderController(infos, getPlayerInfo(playerSelector.getSelectionNormalized()));
+          subMenu = new PlayerSetupCommanderController(infos, getPlayerInfo(playerSelector.getSelectionNormalized()), gameBuilder.tagMode);
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.COLOR_FACTION.ordinal() )
         {
@@ -161,7 +171,7 @@ public class PlayerSetupController implements IController
       case SEEK:
         ArrayList<CommanderInfo> infos = new ArrayList<CommanderInfo>();
         for( PlayerSetupInfo info : coSelectors)
-          infos.add(info.getCurrentCO());
+          infos.addAll(info.getCurrentCOList());
         CO_InfoController coInfoMenu = new CO_InfoController(infos, playerSelector.getSelectionNormalized());
         IView infoView = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
 

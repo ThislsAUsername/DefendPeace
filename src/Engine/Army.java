@@ -17,6 +17,7 @@ import AI.AILibrary;
 import AI.AIMaker;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
+import Engine.GameScenario.TagMode;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -98,12 +99,15 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
     return events;
   }
 
-  public void endTurn()
+  @Override
+  public GameEventQueue receiveTurnEndEvent(Army army, int turn)
   {
     if( aiController != null ) aiController.endTurn();
     myView.resetFog();
     for( Commander co : cos )
       co.endTurn();
+
+    return null;
   }
 
   /**
@@ -178,6 +182,11 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   /** Return a list with every ability a Commander in this Army can perform. */
   public ArrayList<CommanderAbility> getReadyAbilities()
   {
+    // If there's a primary Commander, only that one can use abilities
+    if( gameRules.tagMode.supportsMultiCmdrSelect )
+      return cos[0].getReadyAbilities();
+
+    // Otherwise, be laissez-faire
     ArrayList<CommanderAbility> ready = new ArrayList<CommanderAbility>();
     for( Commander co : cos )
       ready.addAll(co.getReadyAbilities());
@@ -245,12 +254,21 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
     return Color.RED;
   }
 
+  protected boolean awbwDeniesCharge()
+  {
+    return TagMode.AWBW == gameRules.tagMode
+        && getAbilityText().length() > 0;
+  }
+
   /**
    * Track battles that happen, and get ability power based on combat this CO is in.
    */
   @Override
   public GameEventQueue receiveBattleEvent(final BattleSummary summary)
   {
+    if( awbwDeniesCharge() )
+      return null;
+
     // We only care who the units belong to, not who picked the fight.
     UnitDelta minion = null;
     UnitDelta enemy = null;
@@ -267,9 +285,28 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
 
     if( minion != null && enemy != null )
     {
-      // TODO: This should handle distributing charge for tags situations
-      final double ownerCharge = minion.CO.calculateCombatCharge(minion, enemy);
-      minion.CO.modifyAbilityPower(ownerCharge);
+      switch (gameRules.tagMode)
+      {
+        case AWBW:
+        {
+          final double primaryCharge = cos[0].calculateCombatCharge(minion, enemy);
+          cos[0].modifyAbilityPower(primaryCharge);
+          for( int i = 1; i < cos.length; ++i )
+          {
+            final double tagCharge = cos[i].calculateCombatCharge(minion, enemy);
+            final double tagMultiplier = 0.5;
+            cos[i].modifyAbilityPower(tagMultiplier * tagCharge);
+          }
+        }
+          break;
+        case Team_Merge:
+        case OFF:
+        {
+          final double ownerCharge = minion.CO.calculateCombatCharge(minion, enemy);
+          minion.CO.modifyAbilityPower(ownerCharge);
+        }
+          break;
+      }
     }
     return null;
   }
@@ -282,15 +319,35 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   {
     if( this == attacker.army )
       return null; // Punching yourself shouldn't make you angry
+    if( awbwDeniesCharge() )
+      return null;
 
     for( Entry<Unit, Integer> damageEntry : lostHP.entrySet() )
     {
       Unit minion = damageEntry.getKey();
-      if (this == minion.CO.army)
+      if( this != minion.CO.army )
+        break;
+      switch (gameRules.tagMode)
       {
-        // TODO: This should handle distributing charge for tags situations
-        final double ownerCharge = minion.CO.calculateMassDamageCharge(minion, damageEntry.getValue());
-        minion.CO.modifyAbilityPower(ownerCharge);
+        case AWBW:
+        {
+          final double primaryCharge = cos[0].calculateMassDamageCharge(minion, damageEntry.getValue());
+          cos[0].modifyAbilityPower(primaryCharge);
+          for( int i = 1; i < cos.length; ++i )
+          {
+            final double tagCharge = cos[i].calculateMassDamageCharge(minion, damageEntry.getValue());
+            final double tagMultiplier = 0.5;
+            cos[i].modifyAbilityPower(tagMultiplier * tagCharge);
+          }
+        }
+          break;
+        case Team_Merge:
+        case OFF:
+        {
+          final double ownerCharge = minion.CO.calculateMassDamageCharge(minion, damageEntry.getValue());
+          minion.CO.modifyAbilityPower(ownerCharge);
+        }
+          break;
       }
     }
     return null;

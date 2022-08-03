@@ -37,7 +37,13 @@ public class GameScenario implements Serializable
 
   public enum TagMode
   {
-    OFF, Team_Merge, // Cartridge, Persistent,
+    OFF(false), AWBW(true), Team_Merge(false); // Cartridge, Persistent,
+
+    public final boolean supportsMultiCmdrSelect;
+    private TagMode(boolean multiCO)
+    {
+      this.supportsMultiCmdrSelect = multiCO;
+    }
   };
 
   /** Object to hold the rules of engagement for a given match. */

@@ -3,8 +3,10 @@ package UI.Art.SpriteArtist;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashMap;
 
+import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderLibrary;
 import Engine.IController;
 import Terrain.MapInfo;
@@ -236,8 +238,12 @@ public class PlayerSetupArtist
 
     public BufferedImage update(PlayerSetupInfo info)
     {
+      ArrayList<CommanderInfo> currentCOList = info.getCurrentCOList();
+      String playerCoNames = "";
+      for( CommanderInfo coi : currentCOList )
+        playerCoNames += coi.name;
       // Keep track of which things need to be redrawn.
-      boolean cmdrChanged = !info.getCurrentCO().name.equals(commanderName);
+      boolean cmdrChanged = !playerCoNames.equals(commanderName);
       boolean colorChanged = !UIUtils.getPaletteName(info.getCurrentColor()).equals(colorName);
       boolean factionChanged = !info.getCurrentFaction().name.equals(factionName);
       boolean flipChanged = flipUnit != info.flipUnits;
@@ -248,7 +254,7 @@ public class PlayerSetupArtist
       if( cmdrChanged || factionChanged || colorChanged )
       {
         // Update saved values.
-        commanderName = info.getCurrentCO().name;
+        commanderName = playerCoNames;
         colorName = UIUtils.getPaletteName(info.getCurrentColor());
         factionName = info.getCurrentFaction().name;
 
@@ -262,7 +268,7 @@ public class PlayerSetupArtist
       if( cmdrChanged || colorChanged )
       {
         commanderPane = new SpriteUIUtils.ImageFrame(1, 12, portraitPx + 2, portraitPx + 2, info.getCurrentColor(),
-            info.getCurrentColor(), true, SpriteLibrary.getCommanderSprites( info.getCurrentCO().name ).head);
+            info.getCurrentColor(), true, SpriteUIUtils.getCommanderPortraitBlend( info.getCurrentCOList() ) );
         commanderPane.render(g);
       }
       if( factionChanged || colorChanged || flipChanged )

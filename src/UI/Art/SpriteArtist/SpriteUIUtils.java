@@ -6,6 +6,8 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import CommandingOfficers.CommanderInfo;
+
 
 
 public class SpriteUIUtils
@@ -471,6 +473,42 @@ public class SpriteUIUtils
       g.drawImage(frames[i], 0, currentOffset, null);
       currentOffset += (frames[i].getHeight() + imageSpacing);
     }
+    return newImage;
+  }
+
+  public static BufferedImage getCommanderPortraitBlend(ArrayList<CommanderInfo> coInfos)
+  {
+    if( coInfos.size() == 0 )
+      return SpriteLibrary.createTransparentSprite(1, 1);
+    if( coInfos.size() == 1 )
+      return SpriteLibrary.getCommanderSprites(coInfos.get(0).name).head;
+
+    ArrayList<BufferedImage> frames = new ArrayList<>(coInfos.size());
+    for( CommanderInfo ci : coInfos )
+      frames.add(SpriteLibrary.getCommanderSprites(ci.name).head);
+
+    // aggregate sizing
+    BufferedImage coMug = frames.get(0);
+    final int width  = coMug.getWidth();
+    final int height = coMug.getHeight();
+
+    // Let the COs hang off an extra 25% on each side
+    final int drawMin = -width / 4;
+
+    final int mugShiftPerBody = (-2 * drawMin) / (frames.size() - 1);
+
+    // Draw the relevant Commanders
+    BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    Graphics g = newImage.getGraphics();
+
+    int currentMugShift = 0;
+    for( int i = frames.size() - 1; i >= 0; --i )
+    {
+      coMug = frames.get(i);
+      g.drawImage(coMug, drawMin + currentMugShift, 0, null);
+      currentMugShift += mugShiftPerBody;
+    }
+
     return newImage;
   }
 }

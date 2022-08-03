@@ -190,8 +190,6 @@ public class GameInstance implements Serializable
     playerCursors.put(activeCoNum, new XYCoord(cursorX, cursorY));
     int coTurns = 0;
 
-    if( null != activeArmy) activeArmy.endTurn();
-
     // Find the next non-defeated CO.
     do
     {

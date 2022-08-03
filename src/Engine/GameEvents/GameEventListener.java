@@ -80,6 +80,7 @@ public interface GameEventListener extends Serializable
   default public GameEventQueue receiveMoveEvent(Unit unit, GamePath unitPath){ return null; };
   default public GameEventQueue receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){ return null; };
   default public GameEventQueue receiveTurnInitEvent(Army co, int turn){ return null; };
+  default public GameEventQueue receiveTurnEndEvent(Army co, int turn){ return null; };
   default public GameEventQueue receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){ return null; };
   default public GameEventQueue receiveResupplyEvent(ResupplyEvent event){ return null; };
   default public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath){ return null; };
@@ -106,6 +107,7 @@ public interface GameEventListener extends Serializable
     default public GameEventQueue receiveLoadEvent(LoadLifecycle.LoadEvent event){InvalidateCache(); return null; };
     default public GameEventQueue receiveMoveEvent(Unit unit, GamePath unitPath){InvalidateCache(); return null; };
     default public GameEventQueue receiveTurnInitEvent(Army co, int turn){ InvalidateCache(); return null; };
+    default public GameEventQueue receiveTurnEndEvent(Army co, int turn){ InvalidateCache(); return null; };
     default public GameEventQueue receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){InvalidateCache(); return null; };
     default public GameEventQueue receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){InvalidateCache(); return null; };
     default public GameEventQueue receiveResupplyEvent(ResupplyEvent event){InvalidateCache(); return null; };

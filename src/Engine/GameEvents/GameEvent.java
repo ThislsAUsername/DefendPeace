@@ -44,4 +44,6 @@ public interface GameEvent
    * Events that are not location-bound (e.g. Commander abilities) should just return null.
    */
   public XYCoord getEndPoint();
+
+  public default boolean shouldEndTurn() { return false; }
 }

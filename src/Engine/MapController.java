@@ -413,33 +413,6 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
         myGameInputHandler.reset(); // Reset the input handler to get rid of stale state
         break;
-      case END_TURN:
-        // If security is enabled, save and quit at the end of each turn after the first.
-        if( myGame.isSecurityEnforced() )
-        {
-          // Generate a password if needed.
-          if( !myGame.activeArmy.hasPassword() )
-          {
-            PasswordManager.setPass(myGame.activeArmy);
-          }
-
-          // Save the game, display a message, and exit to the main menu.
-          boolean endTurn = true;
-          String saveName = SerializationUtils.writeSave(myGame, endTurn);
-          ArrayList<String> saveMsg = new ArrayList<String>();
-          saveMsg.add("Saved game to");
-          saveMsg.add(saveName);
-
-          GameEventQueue outro = new GameEventQueue();
-          boolean hideMap = true;
-          outro.add(new TurnInitEvent(myGame.activeArmy, myGame.getCurrentTurn(), hideMap, saveMsg));
-          myView.animate(outro);
-
-          changeInputMode(InputMode.EXITGAME);
-        }
-        else // If security is off, just go to the next turn.
-          startNextTurn();
-        break;
       case LEAVE_MAP:
         // Handled as a special case in handleGameInput().
         break;
@@ -573,6 +546,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
         // Signal the view to animate the victory/defeat overlay.
         myView.gameIsOver();
       }
+      else if( event.shouldEndTurn() )
+      {
+        handleEndTurn();
+      }
       else
       {
         // The animation for the last action just completed. If an AI is in control,
@@ -606,6 +583,35 @@ public class MapController implements IController, GameInputHandler.StateChanged
         }
       }
     }
+  }
+
+  public void handleEndTurn()
+  {
+    // If security is enabled, save and quit at the end of each turn after the first.
+    if( myGame.isSecurityEnforced() )
+    {
+      // Generate a password if needed.
+      if( !myGame.activeArmy.hasPassword() )
+      {
+        PasswordManager.setPass(myGame.activeArmy);
+      }
+
+      // Save the game, display a message, and exit to the main menu.
+      boolean endTurn = true;
+      String saveName = SerializationUtils.writeSave(myGame, endTurn);
+      ArrayList<String> saveMsg = new ArrayList<String>();
+      saveMsg.add("Saved game to");
+      saveMsg.add(saveName);
+
+      GameEventQueue outro = new GameEventQueue();
+      boolean hideMap = true;
+      outro.add(new TurnInitEvent(myGame.activeArmy, myGame.getCurrentTurn(), hideMap, saveMsg));
+      myView.animate(outro);
+
+      changeInputMode(InputMode.EXITGAME);
+    }
+    else // If security is off, just go to the next turn.
+      startNextTurn();
   }
 
   private void startNextTurn()

@@ -165,7 +165,7 @@ public class PlayerSetupTeamArtist
       g.fillRect(0, 0, myImage.getWidth(), myImage.getHeight());
 
       commanderFrame = new SpriteUIUtils.ImageFrame(1, 1, portraitPx + 2, portraitPx + 2, info.getCurrentColor(),
-          info.getCurrentColor(), true, SpriteLibrary.getCommanderSprites( info.getCurrentCO().name ).head);
+          info.getCurrentColor(), true, SpriteUIUtils.getCommanderPortraitBlend( info.getCurrentCOList() ));
       teamLabel = new SpriteUIUtils.ImageFrame(commanderFrame.width+2, 1, 28, 10, SpriteUIUtils.MENUHIGHLIGHTCOLOR, SpriteUIUtils.MENUBGCOLOR, false, SpriteUIUtils.getTextAsImage("TEAM", true));
       commanderFrame.render(g);
       teamLabel.render(g);
@@ -186,7 +186,7 @@ public class PlayerSetupTeamArtist
       {
         colorName = UIUtils.getPaletteName(info.getCurrentColor());
         commanderFrame = new SpriteUIUtils.ImageFrame(1, 1, portraitPx + 2, portraitPx + 2, info.getCurrentColor(),
-            info.getCurrentColor(), true, SpriteLibrary.getCommanderSprites( info.getCurrentCO().name ).head);
+            info.getCurrentColor(), true, SpriteUIUtils.getCommanderPortraitBlend( info.getCurrentCOList() ));
         commanderFrame.render(g);
       }
       return myImage;

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderInfo;
 import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
@@ -32,14 +33,17 @@ public class GameBuilder
     mapInfo = info;
   }
 
-  public GameInstance createGame(PlayerSetupInfo[] coInfos)
+  public GameInstance createGame(PlayerSetupInfo[] playerInfos)
   {
     GameScenario scenario = new GameScenario(unitModelScheme, incomePerCity, startingFunds, isFowEnabled, tagMode);
 
     // Add any CO-specific units into our set of UnitModels
-    for(int i = 0; i < mapInfo.getNumCos(); ++i)
+    for( PlayerSetupInfo player : playerInfos )
     {
-      coInfos[i].getCurrentCO().injectUnits(unitModelScheme.getGameReadyModels());
+      for( CommanderInfo info : player.getCurrentCOList() )
+      {
+        info.injectUnits(unitModelScheme.getGameReadyModels());
+      }
     }
 
     // Create all of the armies.
@@ -47,10 +51,9 @@ public class GameBuilder
     for(int i = 0; i < mapInfo.getNumCos(); ++i)
     {
       armies[i] = new Army(scenario);
-      // TODO: Add logic to add cart/persistent tags tag partners
-      armies[i].cos = new Commander[] { coInfos[i].makeCommander(scenario.rules) };
-      armies[i].team = coInfos[i].currentTeam;
-      armies[i].setAIController(coInfos[i].getCurrentAI().create(armies[i]));
+      armies[i].cos = playerInfos[i].makeCommanders(scenario.rules);
+      armies[i].team = playerInfos[i].currentTeam;
+      armies[i].setAIController(playerInfos[i].getCurrentAI().create(armies[i]));
     }
 
     // Build the CO list and the new map and create the game instance.
