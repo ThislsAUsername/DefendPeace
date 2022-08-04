@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import Engine.GameInstance;
 import Terrain.TerrainType;
 
 /**
@@ -37,6 +38,8 @@ public abstract class UnitModelScheme implements Serializable
     return grms;
   }
   protected abstract GameReadyModels buildGameReadyModels();
+
+  public void registerStateTrackers(GameInstance gi) {}
 
   // Holds the data for a single Commander's unit selection.
   public static class GameReadyModels implements Serializable
