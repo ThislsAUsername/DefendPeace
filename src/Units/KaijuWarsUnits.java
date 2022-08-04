@@ -33,7 +33,8 @@ public class KaijuWarsUnits extends UnitModelScheme
   @Override
   public String getIconicUnitName()
   {
-    return "Police";
+    // TODO: Does the infrastructure around this need to change, or should this go away?
+    return "Infantry";
   }
 
   @Override
@@ -62,7 +63,24 @@ public class KaijuWarsUnits extends UnitModelScheme
     factoryModels.add(new OGRPlatform());
 
     // Record those units we can get from a Seaport.
-    // TODO
+    kaijuModels.add(new KaijuWarsKaiju.Alphazaurus());
+    final KaijuWarsKaiju.HellTurkey     turkeyAir  = new KaijuWarsKaiju.HellTurkey();
+    final KaijuWarsKaiju.HellTurkeyLand turkeyLand = new KaijuWarsKaiju.HellTurkeyLand(turkeyAir);
+    final KaijuWarsKaiju.HellTurkeyEgg  turkeyEgg  = new KaijuWarsKaiju.HellTurkeyEgg(turkeyLand);
+    turkeyAir.turkeyLand = turkeyLand;
+    turkeyAir.turkeyEgg = turkeyEgg;
+    kaijuModels.add(turkeyAir);
+    extras.add(turkeyLand);
+    extras.add(turkeyEgg);
+    final KaijuWarsKaiju.BigDonkRampage rampager = new KaijuWarsKaiju.BigDonkRampage();
+    extras.add(rampager);
+    kaijuModels.add(new KaijuWarsKaiju.BigDonk(rampager));
+    final KaijuWarsKaiju.SnekTunneler tunneler = new KaijuWarsKaiju.SnekTunneler();
+    extras.add(tunneler);
+    kaijuModels.add(new KaijuWarsKaiju.Snek(tunneler));
+    final KaijuWarsKaiju.UFOAbducts abductor = new KaijuWarsKaiju.UFOAbducts();
+    extras.add(abductor);
+    kaijuModels.add(new KaijuWarsKaiju.UFO(abductor));
 
     // Inscribe those war machines obtainable from an Airport.
     airportModels.add(new Fighter());
@@ -105,6 +123,8 @@ public class KaijuWarsUnits extends UnitModelScheme
 
   public void registerStateTrackers(GameInstance gi)
   {
+    super.registerStateTrackers(gi);
+
     StateTracker.instance(gi, UnitTurnPositionTracker.class);
 
     UnitResurrectionTracker rezzer = StateTracker.instance(gi, UnitResurrectionTracker.class);
@@ -167,6 +187,7 @@ public class KaijuWarsUnits extends UnitModelScheme
    *  - Adding
 
    * Hover Drives: Gives all ground +1 move and the ability to move on water (Super Z2 doesn't benefit)
+   * Ultimate Autobahn: Gives all ground +2 move if starting on road/bridge
    */
 
   /*
@@ -232,22 +253,26 @@ public class KaijuWarsUnits extends UnitModelScheme
       // Create a new model with the given attributes.
       KaijuWarsUnitModel newModel = new KaijuWarsUnitModel(name, role, costBase, maxAmmo, maxFuel, idleFuelBurn, visionRange, baseMovePower,
           baseMoveType.clone(), baseActions, weapons, abilityPowerValue);
-      newModel.kaijuCounter  = kaijuCounter;
-      newModel.entrenches    = entrenches;
-      newModel.stillBoost    = stillBoost;
-      newModel.boostsAllies  = boostsAllies;
-      newModel.boostSurround = boostSurround;
-
-      newModel.resurrectsAs    = resurrectsAs;
-      newModel.suicideAttack = suicideAttack;
-
-      newModel.slowsLand     = slowsLand;
-      newModel.slowsAir      = slowsAir;
-      newModel.resistsKaiju  = resistsKaiju;
-      newModel.isKaiju       = isKaiju;
 
       newModel.copyValues(this);
       return newModel;
+    }
+    public void copyValues(KaijuWarsUnitModel other)
+    {
+      super.copyValues(other);
+      kaijuCounter  = other.kaijuCounter;
+      entrenches    = other.entrenches;
+      stillBoost    = other.stillBoost;
+      boostsAllies  = other.boostsAllies;
+      boostSurround = other.boostSurround;
+
+      resurrectsAs  = other.resurrectsAs;
+      suicideAttack = other.suicideAttack;
+
+      slowsLand     = other.slowsLand;
+      slowsAir      = other.slowsAir;
+      resistsKaiju  = other.resistsKaiju;
+      isKaiju       = other.isKaiju;
     }
 
     @Override
@@ -413,6 +438,8 @@ public class KaijuWarsUnits extends UnitModelScheme
     private static final long ROLE = RECON | TANK | LAND;
 
     private static final int MOVE_POWER = 2;
+    // For spotting tunneling kaiju
+    public static final int PIERCING_VISION = 2 * KaijuWarsWeapons.KAIJU_SCALE_FACTOR;
     private static final int VISION_RANGE = 5;
 
     private static final MoveType moveType = GROUND;
@@ -424,7 +451,7 @@ public class KaijuWarsUnits extends UnitModelScheme
       super("Radar", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 0;
-      visionRangePiercing = 2; // For spotting tunneling kaiju
+      visionRangePiercing = PIERCING_VISION;
     }
   }
 

@@ -56,9 +56,11 @@ public class KaijuWarsWeapons
     @Override
     public double getDamage(KaijuWarsUnitModel defender)
     {
-      int counterPower = deriveCounter(this, defender);
-
       int attack = deriveAttack(this, defender);
+      if( defender.isKaiju )
+        return attack * 10;
+
+      int counterPower = deriveCounter(this, defender);
 
       return KaijuWarsWeapons.getDamage(attack, counterPower);
     }
@@ -312,23 +314,21 @@ public class KaijuWarsWeapons
     @Override
     public void modifyUnitAttack(StrikeParams params)
     {
-      // Assume only one weapon, since that holds for this unit set
-      KaijuWarsWeapon gun = (KaijuWarsWeapon) params.attacker.model.weapons.get(0);
+      KaijuWarsWeapon gun = (KaijuWarsWeapon) params.attacker.weapon;
       int attack = gun.vsLand;
 
       final TerrainType atkEnv = params.attacker.env.terrainType;
       int attackBoost = getAttackBoost(params.attacker.unit, params.map, params.attacker.coord, atkEnv, params.targetCoord);
       attack += attackBoost;
 
+      // Assume we're shooting terrain, since the base damage will get overwritten later
       params.baseDamage = getDamage(attack, TERRAIN_DURABILITY);
     }
 
     @Override
     public void modifyUnitAttackOnUnit(BattleParams params)
     {
-      // Assume only one weapon, since that holds for this unit set
-      KaijuWarsWeapon gun = (KaijuWarsWeapon) params.attacker.model.weapons.get(0);
-
+      KaijuWarsWeapon gun = (KaijuWarsWeapon) params.attacker.weapon;
       KaijuWarsUnitModel defModel = (KaijuWarsUnitModel) params.defender.model;
       final TerrainType atkEnv = params.attacker.env.terrainType;
       final TerrainType defEnv = params.defender.env.terrainType;
@@ -341,7 +341,13 @@ public class KaijuWarsWeapons
       int attack = deriveAttack(gun, defModel);
       attack += attackBoost;
 
-      params.baseDamage = getDamage(attack, counterPower);
+      if( defModel.isKaiju )
+      {
+        params.terrainStars = 0;
+        params.baseDamage = attack * 10;
+      }
+      else
+        params.baseDamage = getDamage(attack, counterPower);
     }
 
     // Throwing the air-airport move boost on here since this modifier's going on all units anyway
