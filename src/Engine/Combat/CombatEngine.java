@@ -50,12 +50,13 @@ public class CombatEngine
 
   public static StrikeParams calculateTerrainDamage( Unit attacker, GamePath path, MapLocation target, GameMap map )
   {
-    int battleRange = path.getEndCoord().getDistance(target.getCoordinates());
+    final XYCoord targetCoord = target.getCoordinates();
+    int battleRange = path.getEndCoord().getDistance(targetCoord);
     UnitContext uc = new UnitContext(attacker);
     uc.map = map;
     uc.setPath(path);
     uc.chooseWeapon(target, battleRange);
-    return StrikeParams.buildStrikeParams(uc, target, map, battleRange, false);
+    return StrikeParams.buildStrikeParams(uc, target, map, battleRange, targetCoord, false);
   }
 
   /**

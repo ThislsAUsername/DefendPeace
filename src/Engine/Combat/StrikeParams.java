@@ -3,6 +3,7 @@ package Engine.Combat;
 import java.util.ArrayList;
 import java.util.List;
 
+import Engine.XYCoord;
 import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
 import Units.ITargetable;
@@ -23,7 +24,11 @@ public class StrikeParams
     List<UnitModifier> aMods = new ArrayList<>(attacker.mods);
     List<UnitModifier> dMods = new ArrayList<>(defender.mods);
 
-    BattleParams params = new BattleParams(buildStrikeParams(attacker, defender.model, gameMap, battleRange, isCounter), defender);
+    BattleParams params = new BattleParams(
+        buildStrikeParams(attacker, defender.model,
+                          gameMap, battleRange, defender.coord,
+                          isCounter),
+        defender);
 
     for( UnitModifier mod : aMods )
       mod.modifyUnitAttackOnUnit(params);
@@ -35,14 +40,15 @@ public class StrikeParams
 
   public static StrikeParams buildStrikeParams(
       UnitContext attacker, ITargetable defender,
-      GameMap gameMap, int battleRange,
+      GameMap gameMap, int battleRange, XYCoord target,
       boolean isCounter)
   {
     List<UnitModifier> aMods = new ArrayList<>(attacker.mods);
 
     StrikeParams params = new StrikeParams(
         attacker, gameMap,
-        battleRange, ( null == attacker.weapon ) ? 0 : attacker.weapon.getDamage(defender),
+        battleRange, target,
+        ( null == attacker.weapon ) ? 0 : attacker.weapon.getDamage(defender),
         isCounter);
 
     for( UnitModifier mod : aMods )
@@ -64,12 +70,13 @@ public class StrikeParams
   public final boolean isCounter;
 
   public double defenderHP = 0;
+  public final XYCoord targetCoord;
   public double defensePower = 100;
   public double terrainStars = 0;
 
   protected StrikeParams(
       UnitContext attacker,
-      GameMap map, int battleRange,
+      GameMap map, int battleRange, XYCoord target,
       double baseDamage,
       boolean isCounter)
   {
@@ -82,6 +89,8 @@ public class StrikeParams
     this.attackerHP = attacker.getHP();
     this.attackPower = attacker.attackPower;
     this.isCounter = isCounter;
+
+    this.targetCoord = target;
   }
   protected StrikeParams(StrikeParams other)
   {
@@ -94,6 +103,8 @@ public class StrikeParams
     this.attackerHP = other.attackerHP;
     this.attackPower = other.attackPower;
     this.isCounter = other.isCounter;
+
+    this.targetCoord = other.targetCoord;
   }
 
   public double calculateDamage()
