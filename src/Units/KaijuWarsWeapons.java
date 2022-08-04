@@ -1,15 +1,19 @@
 package Units;
 
+import Engine.Utils;
+import Engine.XYCoord;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.StateTrackers.StateTracker;
 import Engine.StateTrackers.UnitTurnPositionTracker;
 import Engine.UnitMods.UnitModifierWithDefaults;
+import Terrain.GameMap;
 import Terrain.TerrainType;
 import Units.KaijuWarsUnits.KaijuWarsUnitModel;
 
 public class KaijuWarsWeapons
 {
+  // Multiply all movement (and ranges) by N
   public static final int KAIJU_SCALE_FACTOR  = 1;
   // Percent damage that 1 ATK should do vs 1 kaijuCounter
   public final static int KAIJU_DAMAGE_FACTOR = 80;
@@ -96,6 +100,19 @@ public class KaijuWarsWeapons
     public Missile()
     {
       super(2, 3);
+    }
+  }
+  // Missiles are really bad, so these get to be "buffed Missile" because just giving them this buff would be busted
+  public static class Rockets extends KaijuWarsWeapon
+  {
+    private static final long serialVersionUID = 1L;
+    private static final int MIN_RANGE = 1;
+    private static final int MAX_RANGE = 2*KAIJU_SCALE_FACTOR;
+
+    public Rockets()
+    {
+      super(2, 3, MIN_RANGE, MAX_RANGE);
+      canFireAfterMoving = true;
     }
   }
   public static class AA extends KaijuWarsWeapon
@@ -299,6 +316,10 @@ public class KaijuWarsWeapons
       KaijuWarsWeapon gun = (KaijuWarsWeapon) params.attacker.model.weapons.get(0);
       int attack = gun.vsLand;
 
+      final TerrainType atkEnv = params.attacker.env.terrainType;
+      int attackBoost = getAttackBoost(params.attacker.unit, params.map, params.attacker.coord, atkEnv, params.targetCoord);
+      attack += attackBoost;
+
       params.baseDamage = getDamage(attack, TERRAIN_DURABILITY);
     }
 
@@ -307,21 +328,99 @@ public class KaijuWarsWeapons
     {
       // Assume only one weapon, since that holds for this unit set
       KaijuWarsWeapon gun = (KaijuWarsWeapon) params.attacker.model.weapons.get(0);
-      KaijuWarsUnitModel defender = (KaijuWarsUnitModel) params.defender.model;
 
-      int counterPower = deriveCounter(gun, defender);
-      if( defender.entrenches )
-      {
-        // This is a bit smelly, but better than the alternative?
-        UnitTurnPositionTracker tracker = StateTracker.instance(params.map.game, UnitTurnPositionTracker.class);
-        if( tracker.stoodStill(params.defender.unit) )
-          counterPower += SLOW_BONUS;
-      }
+      KaijuWarsUnitModel defModel = (KaijuWarsUnitModel) params.defender.model;
+      final TerrainType atkEnv = params.attacker.env.terrainType;
+      final TerrainType defEnv = params.defender.env.terrainType;
 
-      int attack = deriveAttack(gun, defender);
+      int counterBoost = getCounterBoost(params.defender.unit, params.map, defEnv);
+      int counterPower = deriveCounter(gun, defModel);
+      counterPower += counterBoost;
+
+      int attackBoost = getAttackBoost(params.attacker.unit, params.map, params.attacker.coord, atkEnv, params.defender.coord);
+      int attack = deriveAttack(gun, defModel);
+      attack += attackBoost;
 
       params.baseDamage = getDamage(attack, counterPower);
     }
+
+    // Throwing the air-airport move boost on here since this modifier's going on all units anyway
+    @Override
+    public void modifyMovePower(UnitContext uc)
+    {
+      if( uc.map == null )
+        return;
+      if( !uc.map.isLocationValid(uc.coord) )
+        return;
+      if( !uc.model.isAirUnit() )
+        return;
+      TerrainType tt = uc.map.getEnvironment(uc.coord).terrainType;
+      if( tt.healsAir() )
+        uc.movePower += 3;
+    }
   } //~KaijuWarsFightMod
+
+  /**
+   * Gets any situational counter power boost from unit mechanics or assumed-enabled tactics/techs
+   */
+  public static int getCounterBoost(Unit defender, GameMap map, TerrainType defEnv)
+  {
+    int counterBoost = 0;
+    KaijuWarsUnitModel defModel = (KaijuWarsUnitModel) defender.model;
+    if( defModel.entrenches )
+    {
+      // This is a bit smelly, but better than the alternative?
+      UnitTurnPositionTracker tracker = StateTracker.instance(map.game, UnitTurnPositionTracker.class);
+      if( tracker.stoodStill(defender) )
+        counterBoost += SLOW_BONUS;
+    }
+    if( defModel.divineWind &&
+        (defEnv == TerrainType.GRASS || defEnv == TerrainType.SEA) )
+      counterBoost += SLOW_BONUS;
+    return counterBoost;
+  }
+  /**
+   * Gets any situational attack power boost from unit mechanics or assumed-enabled tactics/techs
+   */
+  public static int getAttackBoost(Unit attacker, GameMap map, XYCoord atkCoord, TerrainType atkEnv, XYCoord targetCoord)
+  {
+    KaijuWarsUnitModel atkModel = (KaijuWarsUnitModel) attacker.model;
+    int attackBoost = 0;
+    // Rangefinders boost - these units are pretty stally, so why not?
+    if( attacker.model.isLandUnit() &&
+        atkEnv == TerrainType.MOUNTAIN )
+      attackBoost += SLOW_BONUS;
+    // Missiles boost
+    if( atkModel.stillBoost )
+    {
+      // This is a bit smelly, but better than the alternative?
+      UnitTurnPositionTracker tracker = StateTracker.instance(map.game, UnitTurnPositionTracker.class);
+      if( tracker.stoodStill(attacker, atkCoord) )
+        attackBoost += SLOW_BONUS;
+    }
+    // Apply copter/Sky Carrier adjacency boost
+    for( XYCoord xyc : Utils.findLocationsInRange(map, atkCoord, 1, 1) )
+    {
+      Unit resident = map.getResident(xyc);
+      if( null != resident && resident != attacker && !attacker.CO.isEnemy(resident.CO) )
+      {
+        KaijuWarsUnitModel resModel = (KaijuWarsUnitModel) resident.model;
+        if( null != resModel && resModel.boostsAllies )
+          attackBoost += 1;
+      }
+    }
+    // Apply AA surround boost
+    for( XYCoord xyc : Utils.findLocationsInRange(map, targetCoord, 1, 1) )
+    {
+      Unit resident = map.getResident(xyc);
+      if( null != resident && resident != attacker && !attacker.CO.isEnemy(resident.CO) )
+      {
+        KaijuWarsUnitModel resModel = (KaijuWarsUnitModel) resident.model;
+        if( null != resModel && resModel.boostSurround )
+          attackBoost += 1;
+      }
+    }
+    return attackBoost;
+  }
 
 } //~KaijuWarsWeapons

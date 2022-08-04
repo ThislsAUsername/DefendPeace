@@ -4,8 +4,15 @@ import java.util.ArrayList;
 
 import Engine.GameInstance;
 import Engine.UnitActionFactory;
+import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.HealUnitEvent;
+import Engine.GameEvents.ResupplyEvent;
 import Engine.StateTrackers.StateTracker;
+import Engine.StateTrackers.SuicideAttackTracker;
+import Engine.StateTrackers.UnitResurrectionTracker;
 import Engine.StateTrackers.UnitTurnPositionTracker;
+import Engine.UnitActionLifecycles.UnitProduceLifecycle;
+import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import Units.MoveTypes.Flight;
@@ -37,18 +44,21 @@ public class KaijuWarsUnits extends UnitModelScheme
     ArrayList<UnitModel> factoryModels = new ArrayList<>();
     ArrayList<UnitModel> kaijuModels = new ArrayList<>();
     ArrayList<UnitModel> airportModels = new ArrayList<>();
+    ArrayList<UnitModel> extras = new ArrayList<>();
 
     // Define everything we can build from a Factory.
     factoryModels.add(new Police());
     factoryModels.add(new Infantry());
     factoryModels.add(new Tank());
     factoryModels.add(new Missiles());
+    factoryModels.add(new Rockets());
     factoryModels.add(new AA());
     factoryModels.add(new Radar());
     factoryModels.add(new Artillery());
     factoryModels.add(new Maser());
     factoryModels.add(new LigerPanther());
     factoryModels.add(new SuperZ2());
+    extras.add(new SuperZ2Hurt());
     factoryModels.add(new OGRPlatform());
 
     // Record those units we can get from a Seaport.
@@ -57,8 +67,19 @@ public class KaijuWarsUnits extends UnitModelScheme
     // Inscribe those war machines obtainable from an Airport.
     airportModels.add(new Fighter());
     airportModels.add(new Bomber());
+    airportModels.add(new Helicopter());
     airportModels.add(new Bushplane());
+
+    // Carrier gets to build all normal air units
+    UnitModel carrier = new SkyCarrier();
+    for (UnitModel um : airportModels)
+      carrier.baseActions.add(1, new UnitProduceLifecycle.UnitProduceFactory(um));
+
     airportModels.add(new BigBoy());
+    airportModels.add(new GuncrossWing());
+    airportModels.add(new Kaputnik());
+    extras.add(new GuncrossRobot());
+    airportModels.add(carrier);
 
     // Dump these lists into a hashmap for easy reference later.
     kjwModels.shoppingList.put(TerrainType.FACTORY, factoryModels);
@@ -72,6 +93,8 @@ public class KaijuWarsUnits extends UnitModelScheme
       kjwModels.unitModels.add(um);
     for (UnitModel um : kaijuModels)
       kjwModels.unitModels.add(um);
+    for (UnitModel um : extras)
+      kjwModels.unitModels.add(um);
 
     // Multiplies all movement (and ranges) by N
     for( UnitModel um : kjwModels.unitModels )
@@ -83,22 +106,67 @@ public class KaijuWarsUnits extends UnitModelScheme
   public void registerStateTrackers(GameInstance gi)
   {
     StateTracker.instance(gi, UnitTurnPositionTracker.class);
+
+    UnitResurrectionTracker rezzer = StateTracker.instance(gi, UnitResurrectionTracker.class);
+    // Populate resurrection pairs
+    GameReadyModels grms = gi.rules.unitModelScheme.getGameReadyModels();
+    for( UnitModel um : grms.unitModels )
+    {
+      KaijuWarsUnitModel umCast = (KaijuWarsUnitModel) um;
+      if( null == umCast.resurrectsAs )
+        continue;
+
+      // We have a type that resurrects; find the type it rezzes to
+      for( UnitModel rezToModel : grms.unitModels )
+      {
+        if( !rezToModel.name.equals(umCast.resurrectsAs) )
+          continue;
+        rezzer.resurrectionTypeMap.put(um, rezToModel);
+        break;
+      }
+    }
+
+    SuicideAttackTracker kaputnikTracker = StateTracker.instance(gi, SuicideAttackTracker.class);
+    for( UnitModel um : grms.unitModels )
+    {
+      KaijuWarsUnitModel umCast = (KaijuWarsUnitModel) um;
+      if( !umCast.suicideAttack )
+        continue;
+
+      kaputnikTracker.killTypeMap.add(um);
+    }
   }
+
+  /*
+   * Units I do not plan to implement at this time
+
+   * Freezer (0-counter unit with 1 damage that slows targets by a tile; too complicated and bad)
+   * Food Cart (attracts kaiju within 3 tiles; not implementing kaiju path/targeting mechanics)
+   * Shark Jet (faster Fighter that moves after shooting; messy and either OP or UP)
+   * Cannon of Boom (immobile Rocket equivalent that teleports between labs; ew)
+   */
 
   /*
    * Boosts from technologies and tactics; consider making expensive variant units with these boosts
 
    * tank: +2 counter while on urban
    * missile: +2 ATK while stationary, 1-2 scoot-n-shoot
+   *  - Giving them the former
+   *  - The latter is hilariously OP, so let's make an "uber missile" that does that?
    * AA: all attacks get +1 damage for each AA next to target, force air units to land on hit
-   * inf: +2 counter on ROUGH
+   *  - Added the +1; the other is too jank
+   * inf: +2 counter on ROUGH terrain
    * Radar: +2 science if you end turn within 2 tiles of a Kaiju
+   *  - Should implement as +2 CO energy, but only for opposing Kaiju
    * bomber: enable hitting air for 1 damage
    * fighter: +2 counter on empty(plains?)/water
+   *  - Adding
    * ground: +2 ATK hills, +2 counter on forest/jungle
+   *  - Adding the first
    * air: +3 move on airport
+   *  - Adding
 
-   * Hover Drives: Gives all ground +1 move and the ability to move on water
+   * Hover Drives: Gives all ground +1 move and the ability to move on water (Super Z2 doesn't benefit)
    */
 
   /*
@@ -106,9 +174,13 @@ public class KaijuWarsUnits extends UnitModelScheme
 
    * slowed by rough terrain: missiles, maser, food cart
    * slow on counter: tank, Liger Panther, AA, OGR(air+ground)
+   * +2 counter if you don't move: inf
    * Bushplanes put out Crises/fires adjacent to the tile they die
+   *  - Now are capture units
    * Police prevent Crises/fires from showing up within 2 tiles
+   *  - Now are capture units
    * Radar counters certain Kaiju abilities while within 2 tiles
+   *  - piercing vision, will add those
    * Copters and Sky Carrier give +1 ATK to adjacent allies
 
    * Freezer slows on attack
@@ -124,24 +196,32 @@ public class KaijuWarsUnits extends UnitModelScheme
   public static class KaijuWarsUnitModel extends UnitModel
   {
     private static final long serialVersionUID = 1L;
-    public int kaijuCounter = 1; // Typically = counter damage + 1
-    public boolean entrenches   = false;
-    public boolean slowsLand    = false;
-    public boolean slowsAir     = false;
-    public boolean resistsKaiju = false;
-    public boolean isKaiju      = false;
+    public int kaijuCounter = 0;
+    public boolean entrenches    = false;
+    public boolean stillBoost    = false;
+    public boolean divineWind    = false; // +2 counter on plains/sea
+    public boolean boostsAllies  = false;
+    public boolean boostSurround = false;
+
+    public String resurrectsAs   = null;
+    public boolean suicideAttack = false;
+
+    public boolean slowsLand     = false;
+    public boolean slowsAir      = false;
+    public boolean resistsKaiju  = false;
+    public boolean isKaiju       = false;
 
     public KaijuWarsUnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
-        int pMovePower, MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] weapons, double starValue)
+        int pMovePower, MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] WEAPONS, double starValue)
     {
-      super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
+      super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, WEAPONS, starValue);
       needsFuel = false;
       addUnitModifier(new KaijuWarsWeapons.KaijuWarsFightMod());
     }
     public KaijuWarsUnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
-        int pMovePower, MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> weapons, double starValue)
+        int pMovePower, MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> WEAPONS, double starValue)
     {
-      super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
+      super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, WEAPONS, starValue);
       needsFuel = false;
       addUnitModifier(new KaijuWarsWeapons.KaijuWarsFightMod());
     }
@@ -152,12 +232,19 @@ public class KaijuWarsUnits extends UnitModelScheme
       // Create a new model with the given attributes.
       KaijuWarsUnitModel newModel = new KaijuWarsUnitModel(name, role, costBase, maxAmmo, maxFuel, idleFuelBurn, visionRange, baseMovePower,
           baseMoveType.clone(), baseActions, weapons, abilityPowerValue);
-      newModel.kaijuCounter = kaijuCounter;
-      newModel.entrenches   = entrenches;
-      newModel.slowsLand    = slowsLand;
-      newModel.slowsAir     = slowsAir;
-      newModel.resistsKaiju = resistsKaiju;
-      newModel.isKaiju      = isKaiju;
+      newModel.kaijuCounter  = kaijuCounter;
+      newModel.entrenches    = entrenches;
+      newModel.stillBoost    = stillBoost;
+      newModel.boostsAllies  = boostsAllies;
+      newModel.boostSurround = boostSurround;
+
+      newModel.resurrectsAs    = resurrectsAs;
+      newModel.suicideAttack = suicideAttack;
+
+      newModel.slowsLand     = slowsLand;
+      newModel.slowsAir      = slowsAir;
+      newModel.resistsKaiju  = resistsKaiju;
+      newModel.isKaiju       = isKaiju;
 
       newModel.copyValues(this);
       return newModel;
@@ -216,12 +303,12 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     private static final MoveType moveType = GROUND;
     private static final UnitActionFactory[] actions = UnitActionFactory.FOOTSOLDIER_ACTIONS;
-    private static final WeaponModel[] weapons = { new KaijuWarsWeapons.ShootLand(1) };
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.ShootLand(1) };
 
     public Police()
     {
       super("Police", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, weapons, STAR_VALUE);
+          actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 1;
     }
   }
@@ -235,12 +322,12 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     private static final MoveType moveType = GROUND;
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new KaijuWarsWeapons.ShootLand(1) };
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.ShootLand(1) };
 
     public Infantry()
     {
       super("Infantry", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, weapons, STAR_VALUE);
+          actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 1;
       entrenches = true;
     }
@@ -255,12 +342,12 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     private static final MoveType moveType = GROUND;
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new KaijuWarsWeapons.ShootLand(1) };
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.ShootLand(1) };
 
     public Tank()
     {
       super("Tank", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, weapons, STAR_VALUE);
+          actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 2;
       slowsLand = true;
     }
@@ -276,17 +363,28 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     private static final MoveType moveType = AWKWARD;
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new KaijuWarsWeapons.Missile() };
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.Missile() };
 
     public Missiles()
     {
       super("Missiles", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, weapons, STAR_VALUE);
+          actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 0;
+      stillBoost = true;
     }
   }
-
-  // TODO: infantry
+  public static class Rockets extends Missiles
+  {
+    private static final long serialVersionUID = 1L;
+    public Rockets()
+    {
+      super();
+      name = "Rockets";
+      costBase = UNIT_COST * 3;
+      weapons.clear();
+      weapons.add(new KaijuWarsWeapons.Rockets());
+    }
+  }
 
   public static class AA extends KaijuWarsUnitModel
   {
@@ -297,18 +395,18 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     private static final MoveType moveType = GROUND;
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new KaijuWarsWeapons.AA() };
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.AA() };
 
     public AA()
     {
       super("Anti-Air", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, weapons, STAR_VALUE);
+          actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 1;
       slowsAir = true;
+      boostSurround = true;
     }
   }
 
-  // TODO: stun enemies on turn start
   public static class Radar extends KaijuWarsUnitModel
   {
     private static final long serialVersionUID = 1L;
@@ -319,13 +417,14 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     private static final MoveType moveType = GROUND;
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new KaijuWarsWeapons.ShootAll(1) };
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.ShootAll(1) };
 
     public Radar()
     {
       super("Radar", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, weapons, STAR_VALUE);
+          actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 0;
+      visionRangePiercing = 2; // For spotting tunneling kaiju
     }
   }
 
@@ -338,12 +437,12 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     private static final MoveType moveType = GROUND;
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new KaijuWarsWeapons.Artillery() };
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.Artillery() };
 
     public Artillery()
     {
       super("Artillery", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, weapons, STAR_VALUE);
+          actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 0;
     }
   }
@@ -359,13 +458,14 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     private static final MoveType moveType = new Flight();
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new KaijuWarsWeapons.Fighter() };
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.Fighter() };
 
     public Fighter()
     {
       super("Fighter", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, weapons, STAR_VALUE);
+          actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 2;
+      divineWind   = true;
     }
   }
 
@@ -378,31 +478,51 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     private static final MoveType moveType = new Flight();
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new KaijuWarsWeapons.Bomber() };
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.Bomber() };
 
     public Bomber()
     {
       super("Bomber", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, weapons, STAR_VALUE);
+          actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 1;
+    }
+  }
+
+  public static class Helicopter extends KaijuWarsUnitModel
+  {
+    private static final long serialVersionUID = 1L;
+    private static final long ROLE = HOVER | AIR_LOW;
+
+    private static final int MOVE_POWER = 2;
+
+    private static final MoveType moveType = new Flight();
+    private static final UnitActionFactory[] actions = UnitActionFactory.BASIC_ACTIONS;
+    private static final WeaponModel[] WEAPONS = {};
+
+    public Helicopter()
+    {
+      super("Helicopter", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+          actions, WEAPONS, STAR_VALUE);
+      kaijuCounter = 1;
+      boostsAllies = true;
     }
   }
 
   public static class Bushplane extends KaijuWarsUnitModel
   {
     private static final long serialVersionUID = 1L;
-    private static final long ROLE = AIR_TO_SURFACE | AIR_TO_AIR | JET | AIR_HIGH;
+    private static final long ROLE = JET | AIR_HIGH;
 
     private static final int MOVE_POWER = 4;
 
     private static final MoveType moveType = new Flight();
     private static final UnitActionFactory[] actions = UnitActionFactory.BASIC_ACTIONS;
-    private static final WeaponModel[] weapons = {};
+    private static final WeaponModel[] WEAPONS = {};
 
     public Bushplane()
     {
       super("Bushplane", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, weapons, STAR_VALUE);
+          actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 0;
       baseActions.add(0, UnitActionFactory.CAPTURE);
     }
@@ -423,12 +543,12 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     private static final MoveType moveType = AWKWARD;
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new KaijuWarsWeapons.ShootLand(6) };
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.ShootLand(6) };
 
     public Maser()
     {
       super("Maser", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, weapons, STAR_VALUE);
+          actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 0;
     }
   }
@@ -443,13 +563,76 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     private static final MoveType moveType = new Flight();
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new KaijuWarsWeapons.BigBoy() };
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.BigBoy() };
 
     public BigBoy()
     {
       super("Big Boy", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, weapons, STAR_VALUE);
+          actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 2;
+    }
+  }
+
+  public static class SkyCarrier extends KaijuWarsUnitModel
+  {
+    private static final long serialVersionUID = 1L;
+    private static final long ROLE = HOVER | AIR_HIGH | TRANSPORT;
+
+    private static final int MOVE_POWER = 3;
+    private static final int UNIT_COST = PREP_COST * 7; // Consider reducing this since this version is nerfed
+
+    private static final MoveType moveType = new Flight();
+    private static final UnitActionFactory[] actions = UnitActionFactory.BASIC_ACTIONS;
+    private static final WeaponModel[] WEAPONS = {};
+
+    public SkyCarrier()
+    {
+      super("Sky Carrier", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+          actions, WEAPONS, STAR_VALUE);
+      maxMaterials = -1;
+      baseCargoCapacity = 4;
+      carryableMask = AIR_LOW | AIR_HIGH;
+      // Let's allow stacking carriers, because why not?
+      // carryableExclusionMask = TRANSPORT;
+      baseActions.add(0, UnitActionFactory.LAUNCH);
+
+      kaijuCounter = 5;
+      boostsAllies = true;
+    }
+
+    /** Repair cargo to (badly) simulate repairing lots of dudes in the source game */
+    @Override
+    public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
+    {
+      GameEventQueue events = super.getTurnInitEvents(self, map);
+      for( Unit cargo : self.heldUnits )
+      {
+        events.add(new HealUnitEvent(cargo, self.CO.getRepairPower(), self.CO.army)); // Event handles cost logic
+        if( !cargo.isFullySupplied() )
+          events.add(new ResupplyEvent(self, cargo));
+      }
+      return events;
+    }
+  }
+
+  public static class Kaputnik extends KaijuWarsUnitModel
+  {
+    private static final long serialVersionUID = 1L;
+    private static final long ROLE = AIR_TO_SURFACE | AIR_TO_AIR | JET | AIR_HIGH;
+
+    private static final int MOVE_POWER = 8;
+    private static final int UNIT_COST = PREP_COST * 5;
+
+    private static final MoveType moveType = new Flight();
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.Kaputnik() };
+
+    public Kaputnik()
+    {
+      super("Kaputnik", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+          actions, WEAPONS, STAR_VALUE);
+      kaijuCounter  = 0;
+      suicideAttack = true;
     }
   }
 
@@ -463,12 +646,12 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     private static final MoveType moveType = GROUND;
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new KaijuWarsWeapons.ShootLand(3) };
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.ShootLand(3) };
 
     public LigerPanther()
     {
       super("Liger Panther", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, weapons, STAR_VALUE);
+          actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 3;
       slowsLand = true;
     }
@@ -481,16 +664,18 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     private static final int MOVE_POWER = 3;
     private static final int UNIT_COST = PREP_COST * 4;
+    static final String REZ_TO_NAME = "Super Z2 hurt";
 
     private static final MoveType moveType = new Hovercraft();
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new KaijuWarsWeapons.SuperZ2() };
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.SuperZ2() };
 
     public SuperZ2()
     {
       super("Super Z2", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, weapons, STAR_VALUE);
+          actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 4;
+      resurrectsAs = REZ_TO_NAME;
     }
   }
   public static class SuperZ2Hurt extends SuperZ2
@@ -499,8 +684,48 @@ public class KaijuWarsUnits extends UnitModelScheme
     public SuperZ2Hurt()
     {
       super();
-      name = "Super Z2 hurt";
+      name = REZ_TO_NAME;
+      costBase = PREP_COST * 1;
       kaijuCounter = 1;
+      resurrectsAs = null;
+    }
+  }
+
+  public static class GuncrossWing extends KaijuWarsUnitModel
+  {
+    private static final long serialVersionUID = 1L;
+    private static final long ROLE = AIR_TO_SURFACE | AIR_TO_AIR | JET | AIR_HIGH;
+
+    private static final int MOVE_POWER = 5;
+    private static final int UNIT_COST = PREP_COST * 5;
+    static final String REZ_TO_NAME = "Guncross Robot";
+
+    private static final MoveType moveType = new Hovercraft();
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.GuncrossWing() };
+
+    public GuncrossWing()
+    {
+      super("Guncross Wing", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+          actions, WEAPONS, STAR_VALUE);
+      kaijuCounter = 3;
+      resurrectsAs = REZ_TO_NAME;
+    }
+  }
+  public static class GuncrossRobot extends GuncrossWing
+  {
+    private static final long serialVersionUID = 1L;
+    public GuncrossRobot()
+    {
+      super();
+      name = REZ_TO_NAME;
+      costBase = PREP_COST * 2;
+      kaijuCounter = 2;
+      resurrectsAs = null;
+      role = TANK | ASSAULT | LAND;
+      baseMovePower = 3;
+      weapons.clear();
+      weapons.add(new KaijuWarsWeapons.GuncrossRobot());
     }
   }
 
@@ -514,12 +739,12 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     private static final MoveType moveType = GROUND;
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new KaijuWarsWeapons.ShootAll(3) };
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.ShootAll(3) };
 
     public OGRPlatform()
     {
       super("OGR Platform", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, weapons, STAR_VALUE);
+          actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 5;
       slowsLand    = true;
       slowsAir     = true;
