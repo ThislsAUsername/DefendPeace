@@ -691,14 +691,23 @@ public class JakeMan extends ModularAI
     log("Evaluating Production needs");
     ArrayList<UnitModel> wantedTypes = new ArrayList<>();
 
+    // Try to purchase as many of the biggest units I can, but only if I'm done sending dudes to capture
+    ArrayList<XYCoord> allowBuildCoords = null;
     wantedTypes.add(infantry);
-    wantedTypes.add(allTanks.get(0));
-    wantedTypes.add(copter);
-    wantedTypes.add(allTanks.get(1));
+    if( capPhase.capChains.isEmpty() )
+    {
+      wantedTypes.add(allTanks.get(0));
+      wantedTypes.add(copter);
+      wantedTypes.add(allTanks.get(1));
+    }
+    else
+    {
+      allowBuildCoords = new ArrayList<>();
+      allowBuildCoords.addAll(capPhase.capChains.keySet());
+    }
 
     int budget = myArmy.money;
-    // Try to purchase as many of the biggest units I can
-    for(int i = 0; i < wantedTypes.size(); ++i)
+    for( int i = 0; i < wantedTypes.size(); ++i )
     {
       UnitModel um = wantedTypes.get(i);
       log(String.format("Buying %s?", um));
@@ -707,6 +716,10 @@ public class JakeMan extends ModularAI
       ArrayList<MapLocation> facilities = CPI.getAllFacilitiesFor(um);
       for( MapLocation loc : facilities )
       {
+        // Bail if we can't start a cap chain from here
+        if( null != allowBuildCoords && !allowBuildCoords.contains(loc.getCoordinates()) )
+          continue;
+
         Commander buyer = loc.getOwner();
         final XYCoord coord = loc.getCoordinates();
         final int cost = buyer.getBuyCost(um, coord);
@@ -767,6 +780,8 @@ public class JakeMan extends ModularAI
     allTanks = myArmy.cos[0].getAllModels(UnitModel.ASSAULT);
     antiAir  = myArmy.cos[0].getUnitModel(UnitModel.SURFACE_TO_AIR);
     copter   = myArmy.cos[0].getUnitModel(UnitModel.ASSAULT | UnitModel.AIR_LOW, false);
+    if( null == copter ) // I clearly don't understand this unit set, so just grab something to hedge
+      copter = myArmy.cos[0].getUnitModel(UnitModel.AIR_TO_AIR, false);
 
     capPhase = new CapPhaseAnalyzer(map, myArmy);
   }
