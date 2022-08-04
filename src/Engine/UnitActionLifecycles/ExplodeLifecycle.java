@@ -10,11 +10,9 @@ import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
-import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MassDamageEvent;
-import Engine.GameEvents.UnitDieEvent;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -79,16 +77,12 @@ public abstract class ExplodeLifecycle
         GameEvent moveEvent = explodeEvents.peek();
         if( moveEvent.getEndPoint().equals(getMoveLocation()) ) // make sure we shouldn't be pre-empted
         {
-          explodeEvents.add(new UnitDieEvent(actor)); // If you explode, you die
+          final boolean canLose = true;
+          Utils.enqueueDeathEvent(actor, getMoveLocation(), canLose, explodeEvents); // If you explode, you die
 
           HashSet<Unit> victims = findVictims(gameMap); // Find all of our unlucky participants
 
           explodeEvents.addFirst(new MassDamageEvent(actor.CO, victims, type.damage, false));
-          if( actor.CO.army.getUnits().size() == 1 )
-          {
-            // CO is out of units. Too bad.
-            explodeEvents.add(new ArmyDefeatEvent(actor.CO.army));
-          }
         }
       }
       return explodeEvents;

@@ -7,7 +7,6 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.CommanderAbilityEvent;
-import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MassDamageEvent;
@@ -15,7 +14,6 @@ import Engine.GameEvents.ModifyFundsEvent;
 import Engine.GameEvents.SwapCOEvent;
 import Engine.GameEvents.TeleportEvent;
 import Engine.GameEvents.TurnEndEvent;
-import Engine.GameEvents.UnitDieEvent;
 import Engine.GameEvents.TeleportEvent.AnimationStyle;
 import Engine.GameEvents.TeleportEvent.CollisionOutcome;
 import Terrain.GameMap;
@@ -218,7 +216,8 @@ public abstract class GameAction
      * Creates a new `what` unit at location `where`, belonging to `who`. No funds will be taken. If `allowStomping` and a unit
      * is already present at `where`, the existing unit will be killed. If `unitIsReady`, then the new unit will be able to move immediately.
      */
-    public UnitSpawnAction(Commander who, UnitModel what, XYCoord where, CreateUnitEvent.AnimationStyle how, boolean allowStomping, boolean unitIsReady)
+    public UnitSpawnAction(Commander who, UnitModel what, XYCoord where, CreateUnitEvent.AnimationStyle how,
+        boolean allowStomping, boolean unitIsReady)
     {
       this.where = where;
       this.who = who;
@@ -253,17 +252,11 @@ public abstract class GameAction
           ArrayList<Unit> ary = new ArrayList<Unit>();
           ary.add(obstacle);
           boolean fatal = true;
-          MassDamageEvent mde = new MassDamageEvent(who, ary, obstacle.getHP()+1, fatal);
-          UnitDieEvent ude = new UnitDieEvent(obstacle);
+          MassDamageEvent mde = new MassDamageEvent(who, ary, obstacle.getHP() + 1, fatal);
           buildEvents.add(mde);
-          buildEvents.add(ude);
-
           // Poor sap died; Check if his CO lost the game. Stomping your own unit is silly, but won't cause a loss.
-          if( obstacle.CO.army.getUnits().size() == 1 && who != obstacle.CO )
-          {
-            ArmyDefeatEvent cde = new ArmyDefeatEvent(obstacle.CO.army);
-            buildEvents.add(cde);
-          }
+          final boolean canLose = who != obstacle.CO;
+          Utils.enqueueDeathEvent(obstacle, new XYCoord(obstacle), canLose, buildEvents);
         }
       }
       else
@@ -297,7 +290,7 @@ public abstract class GameAction
     {
       return null;
     }
-  } // ~UnitProductionAction
+  } // ~UnitSpawnAction
 
   // ===========  AbilityAction  =================================
   public static class AbilityAction extends GameAction
@@ -452,16 +445,8 @@ public abstract class GameAction
         ary.add(obstacle);
         boolean fatal = true;
         MassDamageEvent mde = new MassDamageEvent(unit.CO, ary, obstacle.getHP()+1, fatal);
-        UnitDieEvent ude = new UnitDieEvent(obstacle);
         subEvents.add(mde);
-        subEvents.add(ude);
-
-        // Poor sap died; Check if his CO lost the game.
-        if( obstacle.CO.army.getUnits().size() == 1 )
-        {
-          ArmyDefeatEvent cde = new ArmyDefeatEvent(obstacle.CO.army);
-          subEvents.add(cde);
-        }
+        Utils.enqueueDeathEvent(obstacle, subEvents);
       }
 
       // If our guy can't survive there, end him.
@@ -471,17 +456,8 @@ public abstract class GameAction
         ary.add(unit);
         boolean fatal = true;
         MassDamageEvent mde = new MassDamageEvent(unit.CO, ary, unit.getHP()+1, fatal);
-        UnitDieEvent ude = new UnitDieEvent(unit);
         subEvents.add(mde);
-        subEvents.add(ude);
-
-        // Our unit died; check if we are defeated.
-        if( unit.CO.units.size() == 1 )
-        {
-          // CO is out of units. Too bad.
-          ArmyDefeatEvent cde = new ArmyDefeatEvent(unit.CO.army);
-          subEvents.add(cde);
-        }
+        Utils.enqueueDeathEvent(unit, subEvents);
       }
       return subEvents;
     }

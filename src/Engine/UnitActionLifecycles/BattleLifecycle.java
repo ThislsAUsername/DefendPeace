@@ -159,25 +159,11 @@ public abstract class BattleLifecycle
 
           if( event.attackerDies() )
           {
-            Utils.enqueueDeathEvent(event.getAttacker(), attackEvents);
-
-            // Since the attacker died, see if he has any friends left.
-            if( attacker.CO.army.getUnits().size() == 1 )
-            {
-              // CO is out of units. Too bad.
-              attackEvents.add(new ArmyDefeatEvent(event.getAttacker().CO.army));
-            }
+            Utils.enqueueDeathEvent(event.getAttacker(), moveCoord, true, attackEvents);
           }
           if( event.defenderDies() )
           {
             Utils.enqueueDeathEvent(event.getDefender(), attackEvents);
-
-            // The defender died; check if the Commander is defeated.
-            if( defender.CO.army.getUnits().size() == 1 )
-            {
-              // CO is out of units. Too bad.
-              attackEvents.add(new ArmyDefeatEvent(event.getDefender().CO.army));
-            }
           }
         }
       }
