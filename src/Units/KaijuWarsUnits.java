@@ -727,7 +727,7 @@ public class KaijuWarsUnits extends UnitModelScheme
     private static final int UNIT_COST = PREP_COST * 5;
     static final String REZ_TO_NAME = "Guncross Robot";
 
-    private static final MoveType moveType = new Hovercraft();
+    private static final MoveType moveType = new Flight();
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.GuncrossWing() };
 
@@ -750,6 +750,7 @@ public class KaijuWarsUnits extends UnitModelScheme
       kaijuCounter = 2;
       resurrectsAs = null;
       role = TANK | ASSAULT | LAND;
+      baseMoveType = GROUND;
       baseMovePower = 3;
       weapons.clear();
       weapons.add(new KaijuWarsWeapons.GuncrossRobot());
