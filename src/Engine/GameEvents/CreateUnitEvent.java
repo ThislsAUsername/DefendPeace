@@ -7,6 +7,7 @@ import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 
 public class CreateUnitEvent implements GameEvent
@@ -75,12 +76,14 @@ public class CreateUnitEvent implements GameEvent
       else
       {
         boolean success = false;
+        UnitContext uc = new UnitContext(gameMap, myNewUnit);
+        uc.calculateMoveType();
         // Check concentric rings outwards, to spawn as close to the original spot as possible
         for( int radius = 0; !success && radius <= myFudgeRadius; ++radius )
           for( XYCoord xyc : Utils.findLocationsInRange(gameMap, myBuildCoords, radius, radius) )
           {
             Unit resident = gameMap.getResident(xyc);
-            if( resident == null )
+            if( resident == null && uc.moveType.canTraverse(gameMap.getEnvironment(xyc)) )
             {
               gameMap.addNewUnit(myNewUnit, xyc.xCoord, xyc.yCoord, false);
               success = true;
