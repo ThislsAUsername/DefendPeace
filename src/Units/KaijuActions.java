@@ -142,8 +142,6 @@ public class KaijuActions
         }
         else
         {
-          Utils.enqueueDeathEvent(victim, crushEvents);
-
           // Apply relevant counter damage and slows if the victim is an enemy
           boolean canCounter = victim.CO.isEnemy(kaijuState.CO);
 
