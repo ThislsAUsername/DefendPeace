@@ -43,7 +43,7 @@ public abstract class UnitModelScheme implements Serializable
 
   public void registerStateTrackers(GameInstance gi)
   {
-    for( UnitModel um : gi.rules.unitModelScheme.getGameReadyModels().unitModels )
+    for( UnitModel um : getGameReadyModels().unitModels )
       for( UnitModifier mod : um.getModifiers() )
         mod.registerTrackers(gi);
   }

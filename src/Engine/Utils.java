@@ -708,7 +708,7 @@ public class Utils
     } while (!unitsToDie.isEmpty());
 
     // If that's the last of your units, it's loss time
-    if( unit.CO.army.getUnits().size() <= totalDeaths )
+    if( canLose && unit.CO.army.getUnits().size() <= totalDeaths )
       eventQueue.add(new ArmyDefeatEvent(unit.CO.army));
   }
   public static void enqueueDeathEvent(Unit unit, GameEventQueue eventQueue)
