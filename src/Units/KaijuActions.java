@@ -860,7 +860,9 @@ public class KaijuActions
     {
       GameEventQueue events = new GameEventQueue();
       enqueueKaijuKillEvents(gameMap, actor, target, events);
-      events.add(new MassDamageEvent(actor.CO, Arrays.asList(actor), 1, false));
+      events.add(new MassDamageEvent(actor.CO, Arrays.asList(actor), 1, true));
+      if(actor.getHP() < 2)
+        Utils.enqueueDeathEvent(actor, events);
 
       KaijuStateTracker kaijuTracker = StateTracker.instance(gameMap.game, KaijuStateTracker.class);
       // Setting the tracker state here feels wrong
