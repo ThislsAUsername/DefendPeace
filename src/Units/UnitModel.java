@@ -71,9 +71,9 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public long role;
   public double abilityPowerValue;
   public int maxAmmo;
-  public boolean needsFuel = true;
   public int maxFuel;
-  public int idleFuelBurn;
+  public int fuelBurnIdle;
+  public int fuelBurnPerTile = 1;
   public int maxMaterials = 0;
   public int visionRange;
   public int visionRangePiercing = 1;
@@ -115,7 +115,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     maxAmmo = pAmmoMax;
     abilityPowerValue = powerValue;
     maxFuel = pFuelMax;
-    idleFuelBurn = pIdleFuelBurn;
+    fuelBurnIdle = pIdleFuelBurn;
     visionRange = pVision;
     baseMovePower = pMovePower;
     baseMoveType = pPropulsion.clone();
@@ -148,7 +148,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
 
     // Duplicate other assorted values
     maxMaterials = other.maxMaterials;
-    needsFuel = other.needsFuel;
+    fuelBurnPerTile = other.fuelBurnPerTile;
     for( UnitModifier mod : other.unitMods )
       unitMods.add(mod);
   }
@@ -210,6 +210,14 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     }
 
     return queue;
+  }
+
+  public boolean needsFuel()
+  {
+    boolean output = false;
+    output |= fuelBurnIdle > 0;
+    output |= fuelBurnPerTile > 0;
+    return output;
   }
 
   /**

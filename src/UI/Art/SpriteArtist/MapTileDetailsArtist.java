@@ -66,7 +66,7 @@ public class MapTileDetailsArtist
     TerrainType terrain = loc.getEnvironment().terrainType;
     boolean isTerrainObject = TerrainSpriteSet.isTerrainObject(terrain);
     Unit unit = loc.getResident();
-    
+
     // Get the terrain image to draw.
     TerrainSpriteSet tss = SpriteLibrary.getTerrainSpriteSet(loc);
     int terrainSubIndex = TerrainSpriteSet.getTileVariation(coord.xCoord, coord.yCoord);
@@ -76,7 +76,7 @@ public class MapTileDetailsArtist
     ArrayList<AttributeArtist> terrainAttrs = new ArrayList<AttributeArtist>();
     terrainAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.SHIELD.getIcon(), terrain.getDefLevel()));
     if( loc.durability < 99 ) terrainAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.HEART.getIcon(), loc.durability));
-    
+
     // Get the unit image.
     ArrayList<AttributeArtist> unitAttrs = new ArrayList<AttributeArtist>();
     BufferedImage unitImage = null;
@@ -84,9 +84,9 @@ public class MapTileDetailsArtist
     {
       UnitSpriteSet uss = SpriteLibrary.getMapUnitSpriteSet(unit);
       unitImage = uss.getUnitImage();
-      
+
       unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.HEART.getIcon(), unit.getHP()));
-      if( unit.model.needsFuel )
+      if( unit.model.needsFuel() )
         unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.FUEL.getIcon(), unit.fuel));
       if( unit.ammo >= 0 ) 
         unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.AMMO.getIcon(), unit.ammo));

@@ -49,8 +49,7 @@ public class MoveEvent implements GameEvent
         gameMap.moveUnit(unit, endpoint.x, endpoint.y);
       unit.isTurnOver = true;
 
-      if( unit.model.needsFuel )
-        unit.fuel = Math.max(0, unit.fuel - fuelBurn); // Don't prevent zero-distance "moves" when out of fuel.
+      unit.fuel = Math.max(0, unit.fuel - fuelBurn);
 
       // reveal fog as applicable
       for( Army co : gameMap.game.armies )

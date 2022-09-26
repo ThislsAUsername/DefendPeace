@@ -67,7 +67,7 @@ public class GamePath
       XYCoord to   = waypoints.get( i ).GetCoordinates();
       cost += fff.getTransitionCost(map, from, to);
     }
-    return cost;
+    return cost * unit.fuelBurnPerTile;
   }
 
   public PathNode getWaypoint(int wpt)
@@ -176,7 +176,8 @@ public class GamePath
     {
       XYCoord from = waypoints.get(i-1).GetCoordinates();
       XYCoord to   = waypoints.get( i ).GetCoordinates();
-      fuelBudget  -= fff.getTransitionCost(map, from, to);
+      int tileCost = fff.getTransitionCost(map, from, to);
+      fuelBudget  -= tileCost * unit.model.fuelBurnPerTile;
       if( 0 > fuelBudget )
       {
         snip(i);

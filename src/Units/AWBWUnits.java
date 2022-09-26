@@ -132,7 +132,7 @@ public class AWBWUnits extends UnitModelScheme
     public UnitModel clone()
     {
       // Create a new model with the given attributes.
-      AWBWUnitModel newModel = new AWBWUnitModel(name, type, role, costBase, maxAmmo, maxFuel, idleFuelBurn, visionRange, baseMovePower,
+      AWBWUnitModel newModel = new AWBWUnitModel(name, type, role, costBase, maxAmmo, maxFuel, fuelBurnIdle, visionRange, baseMovePower,
           baseMoveType.clone(), baseActions, weapons, abilityPowerValue);
 
       newModel.copyValues(this);
@@ -592,7 +592,7 @@ public class AWBWUnits extends UnitModelScheme
     {
       super();
       type = AWBWUnitEnum.STEALTH_HIDE;
-      idleFuelBurn = IDLE_FUEL_BURN;
+      fuelBurnIdle = IDLE_FUEL_BURN;
       hidden = true;
     }
   }
@@ -712,7 +712,7 @@ public class AWBWUnits extends UnitModelScheme
       super();
       type = AWBWUnitEnum.SUB_SUB;
       role |= SUBSURFACE;
-      idleFuelBurn = IDLE_FUEL_BURN;
+      fuelBurnIdle = IDLE_FUEL_BURN;
       hidden = true;
     }
   }

@@ -675,7 +675,7 @@ public class Utils
       movePath.snipCollision(gameMap, unit);
       originalPathOK = false;
     }
-    if( unit.model.needsFuel ) // Check fuel.
+    if( unit.model.fuelBurnPerTile > 0 ) // Check fuel.
     {
       int fuelBurn = movePath.getFuelCost(unit, gameMap);
       if( fuelBurn > unit.fuel )

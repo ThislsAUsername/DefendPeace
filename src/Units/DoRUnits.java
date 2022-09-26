@@ -141,7 +141,7 @@ public class DoRUnits extends UnitModelScheme
     public UnitModel clone()
     {
       // Create a new model with the given attributes.
-      DoRUnitModel newModel = new DoRUnitModel(name, type, role, costBase, maxAmmo, maxFuel, idleFuelBurn, visionRange, baseMovePower,
+      DoRUnitModel newModel = new DoRUnitModel(name, type, role, costBase, maxAmmo, maxFuel, fuelBurnIdle, visionRange, baseMovePower,
           baseMoveType.clone(), baseActions, weapons, abilityPowerValue);
 
       newModel.copyValues(this);
@@ -746,7 +746,7 @@ public class DoRUnits extends UnitModelScheme
       super();
       type = DoRUnitEnum.SUB_SUB;
       role |= SUBSURFACE;
-      idleFuelBurn = IDLE_FUEL_BURN;
+      fuelBurnIdle = IDLE_FUEL_BURN;
       hidden = true;
     }
   }
