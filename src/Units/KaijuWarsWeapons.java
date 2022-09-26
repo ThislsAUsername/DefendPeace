@@ -161,7 +161,8 @@ public class KaijuWarsWeapons
   }
 
   // experimental weapons
-  // TODO: slow logic?
+
+  // This will need to penalize movement next turn by 1, if it's ever implemented.
   public static class Freezer extends ShootAll
   {
     private static final long serialVersionUID = 1L;
