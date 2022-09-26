@@ -75,6 +75,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public int fuelBurnIdle;
   public int fuelBurnPerTile = 1;
   public int maxMaterials = 0;
+  public boolean needsMaterials = true;
   public int visionRange;
   public int visionRangePiercing = 1;
   public boolean hidden = false;
@@ -148,6 +149,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
 
     // Duplicate other assorted values
     maxMaterials = other.maxMaterials;
+    needsMaterials = other.needsMaterials;
     fuelBurnPerTile = other.fuelBurnPerTile;
     for( UnitModifier mod : other.unitMods )
       unitMods.add(mod);

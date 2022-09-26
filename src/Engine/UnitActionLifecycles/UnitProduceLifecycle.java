@@ -150,7 +150,7 @@ public abstract class UnitProduceLifecycle
       if( null != myNewUnit )
       {
         myCommander.army.money -= cost;
-        if( builder.model.maxMaterials >= 0 )
+        if( builder.model.needsMaterials )
           builder.materials -= 1;
         myCommander.units.add(myNewUnit);
         builder.heldUnits.add(myNewUnit);

@@ -82,7 +82,7 @@ public abstract class UnitState implements Serializable
 
   public boolean hasMaterials()
   {
-    return materials > 0 || materials == model.maxMaterials;
+    return materials > 0 || !model.needsMaterials;
   }
 
   public boolean isHurt()
