@@ -81,6 +81,16 @@ public class KaijuWarsUnits extends UnitModelScheme
     extras.add(gunBot);
     airportModels.add(carrier);
 
+    // Throw in some "bonus units" to show the damage to entrenched inf/fighters
+    KaijuWarsUnitModel entrenched = new Infantry();
+    entrenched.kaijuCounter += KaijuWarsWeapons.STATIC_INF_BONUS;
+    entrenched.hidden        = true;
+    KaijuWarsUnitModel divineWind = new Fighter();
+    divineWind.kaijuCounter += KaijuWarsWeapons.DIVINE_WIND_BONUS;
+    divineWind.hidden        = true;
+    extras.add(entrenched);
+    extras.add(divineWind);
+
     // Record those units we can get from a Seaport.
     kaijuModels.add(new KaijuWarsKaiju.Alphazaurus());
     final KaijuWarsKaiju.HellTurkey     turkeyAir  = new KaijuWarsKaiju.HellTurkey();
