@@ -2,7 +2,7 @@ package UI;
 
 import java.util.ArrayList;
 
-import CommandingOfficers.CommanderInfo;
+import CommandingOfficers.*;
 import Engine.Driver;
 import Engine.IController;
 import Engine.IView;
@@ -14,30 +14,60 @@ public class PlayerSetupCommanderController implements IController
 {
   private PlayerSetupInfo myPlayerInfo;
   private ArrayList<CommanderInfo> cmdrInfos;
-  private int noCmdrIndex;
   public final boolean shouldSelectMultiCO;
-  public OptionSelector cmdrSelector;
-  public OptionSelector tagIndex;
+  private final int noCmdr;
+
+  public ArrayList<ArrayList<Integer>> cmdrBins;
+  public OptionSelector cmdrBinSelector;
+  public OptionSelector cmdrInBinSelector;
   public ArrayList<Integer> tagCmdrList;
 
   public PlayerSetupCommanderController(ArrayList<CommanderInfo> infos, PlayerSetupInfo playerInfo, TagMode tagMode)
   {
     cmdrInfos = infos;
-    noCmdrIndex = infos.size() - 1;
+    noCmdr = infos.size() - 1;
     myPlayerInfo = playerInfo;
     shouldSelectMultiCO = tagMode.supportsMultiCmdrSelect;
 
-    // Make sure we start with the cursor on the currently-selected Commander.
-    cmdrSelector = new OptionSelector(infos.size());
-    cmdrSelector.setSelectedOption(myPlayerInfo.coList.get(0));
-
     tagCmdrList = new ArrayList<>();
     tagCmdrList.addAll(myPlayerInfo.coList);
-    if( shouldSelectMultiCO && noCmdrIndex != tagCmdrList.get(0) )
-      tagCmdrList.add(noCmdrIndex); // Append a No CO
 
-    tagIndex = new OptionSelector(tagCmdrList.size());
-    tagIndex.setSelectedOption(0);
+    final int lastCO = tagCmdrList.get(tagCmdrList.size() - 1);
+
+    cmdrBins = new ArrayList<>();
+
+    int lastBin = -1;
+    int startBin = 0;
+    int startBinIndex = 0;
+
+    int coIndex = 0;
+    while (coIndex < infos.size())
+    {
+      ++lastBin;
+      int binSize = coIndex + 2; // TODO
+      ArrayList<Integer> bin = new ArrayList<>();
+      bin.add(noCmdr); // Put No CO at the start of each bin?
+      for( int binIndex = 1;
+          binIndex < binSize && coIndex < infos.size();
+          ++binIndex, ++coIndex )
+      {
+        if( noCmdr == coIndex )
+          continue; // Don't throw in extras
+
+        bin.add(coIndex);
+        if( lastCO == coIndex )
+        {
+          startBin = lastBin;
+          startBinIndex = binIndex;
+        }
+      }
+      cmdrBins.add(bin);
+    }
+
+    cmdrBinSelector = new OptionSelector(lastBin + 1);
+    cmdrBinSelector.setSelectedOption(startBin);
+    cmdrInBinSelector = new OptionSelector(cmdrBins.get(startBin).size());
+    cmdrInBinSelector.setSelectedOption(startBinIndex);
   }
 
   @Override
@@ -47,49 +77,62 @@ public class PlayerSetupCommanderController implements IController
     switch(action)
     {
       case SELECT:
-        // Apply change and return control.
-        if( tagCmdrList.size() > 1 )
-          tagCmdrList.remove(tagCmdrList.size() - 1); // Chop off the final No CO
-        myPlayerInfo.coList = tagCmdrList;
-        done = true;
+        // Check for CO addition
+        if( !shouldSelectMultiCO )
+        {
+          // Apply change and return control.
+          if( tagCmdrList.size() > 1 )
+            tagCmdrList.remove(tagCmdrList.size() - 1); // Chop off the final No CO
+          myPlayerInfo.coList = tagCmdrList;
+          done = true;
+        }
+        else
+        {
+          int selectedBin = cmdrBinSelector.getSelectionNormalized();
+          int selectedCO  = cmdrBins.get(selectedBin).get(cmdrInBinSelector.getSelectionNormalized());
+          if( tagCmdrList.size() == 0 || noCmdr != selectedCO )
+            tagCmdrList.add(selectedCO);
+
+          // Drop back to No CO so a double-tap finishes selection
+          cmdrInBinSelector.setSelectedOption(0);
+
+          if( noCmdr == selectedCO )
+            done = true;
+        }
         break;
       case UP:
       case DOWN:
       {
-        int tagPicked = tagIndex.getSelectionNormalized();
-        // Check for CO addition
-        if( shouldSelectMultiCO && cmdrSelector.getSelectionNormalized() == noCmdrIndex )
-        {
-          tagCmdrList.add(noCmdrIndex);
-          tagIndex.reset(tagCmdrList.size());
-          tagIndex.setSelectedOption(tagPicked);
-        }
-        final int cmdrPicked = cmdrSelector.handleInput(action);
-        tagCmdrList.set(tagPicked, cmdrPicked);
-        // Check for CO deletion
-        if( shouldSelectMultiCO && cmdrPicked == noCmdrIndex )
-        {
-          tagCmdrList.remove(tagPicked);
-          tagIndex.reset(tagCmdrList.size());
-          tagIndex.setSelectedOption(tagPicked);
-          cmdrSelector.setSelectedOption(tagCmdrList.get(tagPicked));
-        }
+        final int binPicked = cmdrBinSelector.handleInput(action);
+        cmdrInBinSelector.reset(cmdrBins.get(binPicked).size());
       }
         break;
       case LEFT:
       case RIGHT:
       {
-        final int tagPicked = tagIndex.handleInput(action);
-        final int cmdrPicked = tagCmdrList.get(tagPicked);
-        cmdrSelector.setSelectedOption(cmdrPicked);
+        cmdrInBinSelector.handleInput(action);
       }
       break;
       case BACK:
-        // Cancel: return control without applying changes.
-        done = true;
+        // Check for CO deletion
+        if( !shouldSelectMultiCO )
+        {
+          // Cancel: return control without applying changes.
+          done = true;
+        }
+        else
+        {
+          if( tagCmdrList.size() == 0 )
+            done = true;
+          else
+          {
+            // Consider moving selection to the new last CO?
+            tagCmdrList.remove(tagCmdrList.size() - 1);
+          }
+        }
         break;
       case SEEK:
-        CO_InfoController coInfoMenu = new CO_InfoController(cmdrInfos, cmdrSelector.getSelectionNormalized());
+        CO_InfoController coInfoMenu = new CO_InfoController(cmdrInfos, cmdrBinSelector.getSelectionNormalized());
         IView infoView = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
 
         // Give the new controller/view the floor

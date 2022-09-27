@@ -10,7 +10,6 @@ import java.util.HashMap;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderLibrary;
 import Engine.IController;
-import Engine.OptionSelector;
 import UI.PlayerSetupCommanderController;
 import UI.SlidingValue;
 import UI.UIUtils;
@@ -22,7 +21,7 @@ public class PlayerSetupCommanderArtist
   private static PlayerSetupCommanderController myControl;
   private static SlidingValue panelOffsetY = new SlidingValue(0);
   private static SlidingValue panelDrawW = new SlidingValue(0);
-  private static SlidingValue tagsOffsetX = new SlidingValue(0);
+  private static SlidingValue panelDrawX = new SlidingValue(0);
 
   public static void draw(Graphics g, IController controller, ArrayList<CommanderInfo> infos, Color playerColor)
   {
@@ -54,74 +53,79 @@ public class PlayerSetupCommanderArtist
     }
 
     /////////////// Commander Portrait //////////////////////
-    int highlightedCmdr = control.cmdrSelector.getSelectionNormalized();
+    int binIndex        = control.cmdrBinSelector.getSelectionNormalized();
+    int coIndex         = control.cmdrInBinSelector.getSelectionNormalized();
+    int highlightedCmdr = control.cmdrBins.get(binIndex).get(coIndex);
     BufferedImage likeness = SpriteLibrary.getCommanderSprites( infos.get(highlightedCmdr).name ).body;
     final int likenessVOffset = Math.max(0, myHeight - likeness.getHeight());
     myG.drawImage(likeness, myWidth-likeness.getWidth(), likenessVOffset, null);
 
     /////////////// Commander Panels //////////////////////
-    drawCmdrPickerPanels(myG, myHeight, infos, playerColor, snapCursor);
+    drawCmdrPickerPanels(myG, myHeight, myWidth, infos, playerColor, snapCursor);
 
     // Draw the composed image to the window at scale.
     g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
   }
 
   public static void drawCmdrPickerPanels(
-                       Graphics myG, int myHeight,
+                       Graphics myG, int myHeight, int myWidth,
                        ArrayList<CommanderInfo> infos, Color playerColor,
                        boolean snapCursor)
   {
-    int highlightedCmdr = myControl.cmdrSelector.getSelectionNormalized();
-    int highlightedCmdrOffset = myControl.cmdrSelector.getSelectionAbsolute();
+    int binIndex        = myControl.cmdrBinSelector.getSelectionNormalized();
+    int coIndex         = myControl.cmdrInBinSelector.getSelectionNormalized();
+    int highlightedCmdr = myControl.cmdrBins.get(binIndex).get(coIndex);
     // Calculate the vertical space each player panel will consume.
     int panelBuffer = 3;
     int panelHeight = CommanderPanel.PANEL_HEIGHT+panelBuffer;
 
     // Find where the zeroth Commander should be drawn.
-    panelOffsetY.set(highlightedCmdrOffset*panelHeight, snapCursor);
+    panelOffsetY.set(binIndex*panelHeight, snapCursor);
     int drawYCenter = myHeight / 2 - panelOffsetY.geti();
 
     // We're gonna make this an endless scroll, so back up (in y-space and in the CO list) until
     // we find the Commander that would be off the top of the screen.
-    OptionSelector coToDraw = new OptionSelector(infos.size());
-    while( drawYCenter + CommanderPanel.PANEL_HEIGHT/2 > 0 )
+    int binToDraw = 0;
+    int baseDrawX = SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Make sure we have room to draw the cursor around the frame.
+
+    for(; drawYCenter - CommanderPanel.PANEL_HEIGHT/2 < myHeight
+        && binToDraw < myControl.cmdrBins.size();
+        ++binToDraw, drawYCenter += (panelHeight) )
     {
-      coToDraw.prev();
-      drawYCenter -= panelHeight;
-    }
-    // We don't actually want to draw something off the screen, so go forward until we are on-screen again.
-    while( drawYCenter + CommanderPanel.PANEL_HEIGHT/2 < 0 )
-    {
-      coToDraw.next();
-      drawYCenter += panelHeight;
-    }
-
-    // Draw all of the army panels that are visible.
-    int drawX = SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Make sure we have room to draw the cursor around the frame.
-    for(; drawYCenter - CommanderPanel.PANEL_HEIGHT/2 < myHeight ; coToDraw.next(), drawYCenter += (panelHeight))
-    {
-      CommanderInfo coInfo = infos.get(coToDraw.getSelectionNormalized());
-      Integer key = coToDraw.getSelectionNormalized();
-
-      // Get the relevant PlayerPanel.
-      if( !coPanels.containsKey(key) ) coPanels.put(key, new CommanderPanel(coInfo, playerColor));
-      CommanderPanel panel = coPanels.get(key);
-
-      // Update the PlayerPanel and render it to an image.
-      BufferedImage playerImage = panel.update(coInfo, playerColor);
-
-      int drawY = drawYCenter - playerImage.getHeight()/2;
-      myG.drawImage(playerImage, drawX, drawY, null);
-
-      // Set the cursor width.
-      if( highlightedCmdr == coToDraw.getSelectionNormalized() )
+      int indexInBin = 0;
+      int drawX = baseDrawX;
+      ArrayList<Integer> currentBin = myControl.cmdrBins.get(binToDraw);
+      while (drawX < myWidth && indexInBin < currentBin.size())
       {
-        panelDrawW.set(playerImage.getWidth(), snapCursor);
+        int coToDraw = currentBin.get(indexInBin);
+        CommanderInfo coInfo = infos.get(coToDraw);
+        Integer key = coToDraw;
+
+        // Get the relevant PlayerPanel.
+        if( !coPanels.containsKey(key) )
+          coPanels.put(key, new CommanderPanel(coInfo, playerColor));
+        CommanderPanel panel = coPanels.get(key);
+
+        // Update the PlayerPanel and render it to an image.
+        BufferedImage playerImage = panel.update(coInfo, playerColor);
+
+        int drawY = drawYCenter - playerImage.getHeight() / 2;
+        myG.drawImage(playerImage, drawX, drawY, null);
+
+        // Set the cursor width.
+        if( highlightedCmdr == coToDraw )
+        {
+          panelDrawW.set(playerImage.getWidth(), snapCursor);
+          panelDrawX.set(drawX, snapCursor);
+        }
+
+        ++indexInBin;
+        drawX += playerImage.getWidth() + panelBuffer;
       }
     }
 
     // Draw the cursor over the center option.
-    SpriteCursor.draw(myG, drawX, myHeight/2 - CommanderPanel.PANEL_HEIGHT/2, panelDrawW.geti(), CommanderPanel.PANEL_HEIGHT, playerColor);
+    SpriteCursor.draw(myG, panelDrawX.geti(), myHeight/2 - CommanderPanel.PANEL_HEIGHT/2, panelDrawW.geti(), CommanderPanel.PANEL_HEIGHT, playerColor);
   }
 
   public static void drawTagPickerPanels(
@@ -129,7 +133,6 @@ public class PlayerSetupCommanderArtist
                        ArrayList<CommanderInfo> infos, Color playerColor,
                        boolean snapCursor)
   {
-    final int tagPicked = myControl.tagIndex.getSelectionNormalized();
     // Calculate the vertical space each player panel will consume.
     final int panelThickness = 1;
     final int panelBuffer = 2*panelThickness;
@@ -140,8 +143,7 @@ public class PlayerSetupCommanderArtist
     final int panelXShift = panelWidth + panelSpacing;
 
     // Find where the zeroth Commander should be drawn.
-    tagsOffsetX.set(tagPicked*panelXShift, snapCursor);
-    int drawXCenter = myWidth / 2 - tagsOffsetX.geti();
+    int drawXCenter = panelThickness;
 
     final int drawY = tagPickerOffset;
     final ArrayList<Integer> taggedCOs = myControl.tagCmdrList;
