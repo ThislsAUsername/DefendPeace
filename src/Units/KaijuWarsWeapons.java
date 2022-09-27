@@ -49,7 +49,9 @@ public class KaijuWarsWeapons
     public KaijuWarsWeapon(KaijuWarsWeapon other)
     {
       this(other.vsLand, other.vsAir, other.rangeMin, other.rangeMax);
-      canFireAfterMoving = other.canFireAfterMoving;
+      canFireAfterMoving   = other.canFireAfterMoving;
+      isAirWeapon          = other.isAirWeapon;
+      negateCounterBonuses = other.negateCounterBonuses;
     }
     @Override
     public WeaponModel clone()
