@@ -560,7 +560,7 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     private static final MoveType moveType = AWKWARD;
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.ShootLand(6) };
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.Maser() };
 
     public Maser()
     {

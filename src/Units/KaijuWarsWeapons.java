@@ -169,6 +169,17 @@ public class KaijuWarsWeapons
 
   // experimental weapons
 
+  public static class Maser extends KaijuWarsWeapon
+  {
+    private static final long serialVersionUID = 1L;
+
+    public Maser()
+    {
+      super(6, 0);
+      negateCounterBonuses = true;
+    }
+  }
+
   // This will need to penalize movement next turn by 1, if it's ever implemented.
   public static class Freezer extends ShootAll
   {
