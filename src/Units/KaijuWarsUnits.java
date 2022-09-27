@@ -116,10 +116,6 @@ public class KaijuWarsUnits extends UnitModelScheme
     for (UnitModel um : extras)
       kjwModels.unitModels.add(um);
 
-    // Multiplies all movement (and ranges) by N
-    for( UnitModel um : kjwModels.unitModels )
-      um.baseMovePower *= KaijuWarsWeapons.KAIJU_SCALE_FACTOR;
-
     return kjwModels;
   }
 
@@ -433,7 +429,7 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     private static final int MOVE_POWER = 2;
     // For spotting tunneling kaiju
-    public static final int PIERCING_VISION = 2 * KaijuWarsWeapons.KAIJU_SCALE_FACTOR;
+    public static final int PIERCING_VISION = 2;
     private static final int VISION_RANGE = 5;
 
     private static final MoveType moveType = GROUND;

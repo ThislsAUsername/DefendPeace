@@ -13,8 +13,6 @@ import Units.KaijuWarsUnits.KaijuWarsUnitModel;
 
 public class KaijuWarsWeapons
 {
-  // Multiply all movement (and ranges) by N
-  public static final int KAIJU_SCALE_FACTOR  = 1;
   // Percent damage that 1 ATK should do vs 1 kaijuCounter
   public final static int KAIJU_DAMAGE_FACTOR = 80;
   public final static int KAIJU_DAMAGE_BASE   = 55;
@@ -109,7 +107,7 @@ public class KaijuWarsWeapons
   {
     private static final long serialVersionUID = 1L;
     private static final int MIN_RANGE = 1;
-    private static final int MAX_RANGE = 2*KAIJU_SCALE_FACTOR;
+    private static final int MAX_RANGE = 2;
 
     public Rockets()
     {
@@ -130,7 +128,7 @@ public class KaijuWarsWeapons
   {
     private static final long serialVersionUID = 1L;
     private static final int MIN_RANGE = 1;
-    private static final int MAX_RANGE = 3*KAIJU_SCALE_FACTOR;
+    private static final int MAX_RANGE = 3;
 
     public Artillery()
     {
@@ -176,7 +174,7 @@ public class KaijuWarsWeapons
   {
     private static final long serialVersionUID = 1L;
     private static final int MIN_RANGE = 1;
-    private static final int MAX_RANGE = 5*KAIJU_SCALE_FACTOR;
+    private static final int MAX_RANGE = 5;
 
     public CannonOfBoom()
     {
