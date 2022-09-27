@@ -63,6 +63,24 @@ public class KaijuWarsUnits extends UnitModelScheme
     extras.add(z2Hurt);
     factoryModels.add(new OGRPlatform());
 
+    // Inscribe those war machines obtainable from an Airport.
+    airportModels.add(new Fighter());
+    airportModels.add(new Bomber());
+    airportModels.add(new Helicopter());
+    airportModels.add(new Bushplane());
+
+    // Carrier gets to build all normal air units
+    UnitModel carrier = new SkyCarrier();
+    for (UnitModel um : airportModels)
+      carrier.baseActions.add(1, new UnitProduceLifecycle.UnitProduceFactory(um));
+
+    airportModels.add(new BigBoy());
+    GuncrossRobot gunBot = new GuncrossRobot();
+    airportModels.add(new GuncrossWing(gunBot));
+    airportModels.add(new Kaputnik());
+    extras.add(gunBot);
+    airportModels.add(carrier);
+
     // Record those units we can get from a Seaport.
     kaijuModels.add(new KaijuWarsKaiju.Alphazaurus());
     final KaijuWarsKaiju.HellTurkey     turkeyAir  = new KaijuWarsKaiju.HellTurkey();
@@ -83,37 +101,19 @@ public class KaijuWarsUnits extends UnitModelScheme
     extras.add(abductor);
     kaijuModels.add(new KaijuWarsKaiju.UFO(abductor));
 
-    // Inscribe those war machines obtainable from an Airport.
-    airportModels.add(new Fighter());
-    airportModels.add(new Bomber());
-    airportModels.add(new Helicopter());
-    airportModels.add(new Bushplane());
-
-    // Carrier gets to build all normal air units
-    UnitModel carrier = new SkyCarrier();
-    for (UnitModel um : airportModels)
-      carrier.baseActions.add(1, new UnitProduceLifecycle.UnitProduceFactory(um));
-
-    airportModels.add(new BigBoy());
-    GuncrossRobot gunBot = new GuncrossRobot();
-    airportModels.add(new GuncrossWing(gunBot));
-    airportModels.add(new Kaputnik());
-    extras.add(gunBot);
-    airportModels.add(carrier);
-
     // Dump these lists into a hashmap for easy reference later.
     kjwModels.shoppingList.put(TerrainType.FACTORY, factoryModels);
-    kjwModels.shoppingList.put(TerrainType.SEAPORT, kaijuModels);
     kjwModels.shoppingList.put(TerrainType.AIRPORT, airportModels);
+    kjwModels.shoppingList.put(TerrainType.SEAPORT, kaijuModels);
 
     // Compile one master list of everything we can build.
     for (UnitModel um : factoryModels)
       kjwModels.unitModels.add(um);
     for (UnitModel um : airportModels)
       kjwModels.unitModels.add(um);
-    for (UnitModel um : kaijuModels)
-      kjwModels.unitModels.add(um);
     for (UnitModel um : extras)
+      kjwModels.unitModels.add(um);
+    for (UnitModel um : kaijuModels)
       kjwModels.unitModels.add(um);
 
     return kjwModels;
