@@ -309,15 +309,22 @@ public class KaijuWarsWeapons
    */
   public static double getDamageShiftingStyle(int attack, int durability)
   {
+    if( 0 == attack )
+      return 0;
+
     int damage = KAIJU_DAMAGE_BASE;
 
     int finalPower = attack - durability;
-    if( finalPower > -3 )
+    if( finalPower > -3 ) // Normally, +10 per point of finalPower
       damage += finalPower * 10;
-    else if( finalPower > -8 )
-      damage = damage - 10 + finalPower * 5;
     else
-      damage = 2 * (12 + finalPower);
+    {
+      // Drop the increment to 5 for -3 and lower [30, 25, 20, 15, 10]
+      if( finalPower > -8 )
+        damage = damage - 10 + finalPower * 5;
+      else // -8 and below increments by 2 [8, 6, ...]
+        damage = 2 * (12 + finalPower);
+    }
 
     return damage;
   }
