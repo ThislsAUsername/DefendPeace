@@ -13,9 +13,8 @@ import Units.KaijuWarsUnits.KaijuWarsUnitModel;
 
 public class KaijuWarsWeapons
 {
-  // Percent damage that 1 ATK should do vs 1 kaijuCounter
+  // Percent damage that 1 ATK should do vs 0 kaijuCounter
   public final static int KAIJU_DAMAGE_FACTOR = 80;
-  public final static int KAIJU_DAMAGE_BASE   = 55;
 
   public final static int SLOW_BONUS          = 2;
   public final static int RESIST_KAIJU_BONUS  = 2;
@@ -66,14 +65,14 @@ public class KaijuWarsWeapons
 
       int counterPower = deriveCounter(this, defender);
 
-      return KaijuWarsWeapons.getDamage(attack, counterPower);
+      return KaijuWarsWeapons.getDamage(attack, 0, counterPower);
     }
 
     @Override
     public double getDamage(TerrainType target)
     {
       if( TerrainType.METEOR == target )
-        return KaijuWarsWeapons.getDamage(vsLand, TERRAIN_DURABILITY);
+        return KaijuWarsWeapons.getDamage(vsLand, 0, TERRAIN_DURABILITY);
       return 0;
     }
   }
@@ -287,17 +286,18 @@ public class KaijuWarsWeapons
     return counterPower;
   }
 
-  public static double getDamage(int attack, int counterPower)
+  public static double getDamage(int attack, int attBonus, int counterPower)
   {
-    return getDamageRatioStyle(attack, counterPower);
+    return getDamageShiftingStyle(attack, attBonus, counterPower);
   }
 
   /**
    * Produces damage numbers based on attack/kaijuCounter
    */
-  public static double getDamageRatioStyle(int attack, int counterPower)
+  public static double getDamageRatioStyle(int attack, int attBonus, int counterPower)
   {
     // 1-based instead of 0-based
+    attack += attBonus;
     int durability = 1 + counterPower;
     int damage = attack * 100 / durability;
 
@@ -305,26 +305,20 @@ public class KaijuWarsWeapons
   }
 
   /**
-   * Produces damage numbers centered around KAIJU_DAMAGE_BASE
+   * Produces damage numbers like AW's?
    */
-  public static double getDamageShiftingStyle(int attack, int durability)
+  public static double getDamageShiftingStyle(int attack, int attBonus, int durability)
   {
     if( 0 == attack )
       return 0;
 
-    int damage = KAIJU_DAMAGE_BASE;
+    int damage = 45 + attack*10 + attBonus*20;
 
     int finalPower = attack - durability;
-    if( finalPower > -3 ) // Normally, +10 per point of finalPower
-      damage += finalPower * 10;
+    if( finalPower > 0 )
+      damage += finalPower * 15;
     else
-    {
-      // Drop the increment to 5 for -3 and lower [30, 25, 20, 15, 10]
-      if( finalPower > -8 )
-        damage = damage - 10 + finalPower * 5;
-      else // -8 and below increments by 2 [8, 6, ...]
-        damage = 2 * (12 + finalPower);
-    }
+      damage += finalPower * 5;
 
     return damage;
   }
@@ -343,10 +337,9 @@ public class KaijuWarsWeapons
 
       final TerrainType atkEnv = params.attacker.env.terrainType;
       int attackBoost = getAttackBoost(params.attacker.unit, params.map, params.attacker.coord, atkEnv, params.targetCoord);
-      attack += attackBoost;
 
       // Assume we're shooting terrain, since the base damage will get overwritten later
-      params.baseDamage = getDamage(attack, TERRAIN_DURABILITY);
+      params.baseDamage = getDamage(attack, attackBoost, TERRAIN_DURABILITY);
     }
 
     @Override
@@ -363,7 +356,6 @@ public class KaijuWarsWeapons
 
       int attackBoost = getAttackBoost(params.attacker.unit, params.map, params.attacker.coord, atkEnv, params.defender.coord);
       int attack = deriveAttack(gun, defModel);
-      attack += attackBoost;
 
       if( defModel.isKaiju )
       {
@@ -371,7 +363,7 @@ public class KaijuWarsWeapons
         params.baseDamage = attack * 10;
       }
       else
-        params.baseDamage = getDamage(attack, counterPower);
+        params.baseDamage = getDamage(attack, attackBoost, counterPower);
     }
 
     // Throwing the air-airport move boost on here since this modifier's going on all units anyway
