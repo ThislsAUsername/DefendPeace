@@ -286,10 +286,7 @@ public class KaijuWarsWeapons
   {
     // 1-based instead of 0-based
     int durability = 1 + counterPower;
-    int damage = attack * 1000 / durability;
-    // Round properly
-    damage += 5;
-    damage /= 10;
+    int damage = attack * 100 / durability;
 
     return damage * KAIJU_DAMAGE_FACTOR / 100;
   }
