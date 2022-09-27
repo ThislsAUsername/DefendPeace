@@ -18,6 +18,12 @@ public class KaijuWarsWeapons
   public final static int KAIJU_DAMAGE_BASE   = 55;
 
   public final static int SLOW_BONUS          = 2;
+  public final static int RESIST_KAIJU_BONUS  = 2;
+  public final static int STATIC_INF_BONUS    = 2;
+  public final static int DIVINE_WIND_BONUS   = 2;
+  public final static int RANGEFINDERS_BONUS  = 2;
+  public final static int STATIC_ROCKET_BONUS = 2;
+
   public final static int TERRAIN_DURABILITY  = 4;
 
   private static class KaijuWarsWeapon extends WeaponModel
@@ -261,7 +267,7 @@ public class KaijuWarsWeapons
       if( !gun.isAirWeapon && defender.slowsLand )
         counterPower += SLOW_BONUS;
       if( defender.resistsKaiju )
-        counterPower += SLOW_BONUS;
+        counterPower += RESIST_KAIJU_BONUS;
     }
     return counterPower;
   }
@@ -377,11 +383,11 @@ public class KaijuWarsWeapons
       // This is a bit smelly, but better than the alternative?
       UnitTurnPositionTracker tracker = StateTracker.instance(map.game, UnitTurnPositionTracker.class);
       if( tracker.stoodStill(defender) )
-        counterBoost += SLOW_BONUS;
+        counterBoost += STATIC_INF_BONUS;
     }
     if( defModel.divineWind &&
         (defEnv == TerrainType.GRASS || defEnv == TerrainType.SEA) )
-      counterBoost += SLOW_BONUS;
+      counterBoost += DIVINE_WIND_BONUS;
     return counterBoost;
   }
   /**
@@ -394,14 +400,14 @@ public class KaijuWarsWeapons
     // Rangefinders boost - these units are pretty stally, so why not?
     if( attacker.model.isLandUnit() &&
         atkEnv == TerrainType.MOUNTAIN )
-      attackBoost += SLOW_BONUS;
+      attackBoost += RANGEFINDERS_BONUS;
     // Missiles boost
     if( atkModel.stillBoost )
     {
       // This is a bit smelly, but better than the alternative?
       UnitTurnPositionTracker tracker = StateTracker.instance(map.game, UnitTurnPositionTracker.class);
       if( tracker.stoodStill(attacker, atkCoord) )
-        attackBoost += SLOW_BONUS;
+        attackBoost += STATIC_ROCKET_BONUS;
     }
     // Apply copter/Sky Carrier adjacency boost
     for( XYCoord xyc : Utils.findLocationsInRange(map, atkCoord, 1, 1) )
