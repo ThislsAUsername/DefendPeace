@@ -39,8 +39,6 @@ public class KaijuWarsWeapons
       super(infiniteAmmo, minRange, maxRange);
       this.vsLand = vsLand;
       this.vsAir  = vsAir;
-      if( maxRange > 1 )
-        negateCounterBonuses = true;
     }
     protected KaijuWarsWeapon(int vsLand, int vsAir)
     {
@@ -108,6 +106,7 @@ public class KaijuWarsWeapons
     public Missile()
     {
       super(2, 3);
+      negateCounterBonuses = true;
     }
   }
   // Missiles are really bad, so these get to be "buffed Missile" because just giving them this buff would be busted
@@ -121,6 +120,7 @@ public class KaijuWarsWeapons
     {
       super(2, 3, MIN_RANGE, MAX_RANGE);
       canFireAfterMoving = true;
+      negateCounterBonuses = true;
     }
   }
   public static class AA extends KaijuWarsWeapon
@@ -141,6 +141,7 @@ public class KaijuWarsWeapons
     public Artillery()
     {
       super(1, 0, MIN_RANGE, MAX_RANGE);
+      negateCounterBonuses = true;
     }
   }
 
@@ -187,6 +188,7 @@ public class KaijuWarsWeapons
     public CannonOfBoom()
     {
       super(3, 2, MIN_RANGE, MAX_RANGE);
+      negateCounterBonuses = true;
     }
   }
   public static class GuncrossWing extends KaijuWarsWeapon
