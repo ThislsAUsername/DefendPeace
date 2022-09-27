@@ -58,8 +58,9 @@ public class KaijuWarsUnits extends UnitModelScheme
     factoryModels.add(new Artillery());
     factoryModels.add(new Maser());
     factoryModels.add(new LigerPanther());
-    factoryModels.add(new SuperZ2());
-    extras.add(new SuperZ2Hurt());
+    SuperZ2Hurt z2Hurt = new SuperZ2Hurt();
+    factoryModels.add(new SuperZ2(z2Hurt));
+    extras.add(z2Hurt);
     factoryModels.add(new OGRPlatform());
 
     // Record those units we can get from a Seaport.
@@ -94,9 +95,10 @@ public class KaijuWarsUnits extends UnitModelScheme
       carrier.baseActions.add(1, new UnitProduceLifecycle.UnitProduceFactory(um));
 
     airportModels.add(new BigBoy());
-    airportModels.add(new GuncrossWing());
+    GuncrossRobot gunBot = new GuncrossRobot();
+    airportModels.add(new GuncrossWing(gunBot));
     airportModels.add(new Kaputnik());
-    extras.add(new GuncrossRobot());
+    extras.add(gunBot);
     airportModels.add(carrier);
 
     // Dump these lists into a hashmap for easy reference later.
@@ -135,15 +137,7 @@ public class KaijuWarsUnits extends UnitModelScheme
       KaijuWarsUnitModel umCast = (KaijuWarsUnitModel) um;
       if( null == umCast.resurrectsAs )
         continue;
-
-      // We have a type that resurrects; find the type it rezzes to
-      for( UnitModel rezToModel : grms.unitModels )
-      {
-        if( !rezToModel.name.equals(umCast.resurrectsAs) )
-          continue;
-        rezzer.resurrectionTypeMap.put(um, rezToModel);
-        break;
-      }
+      rezzer.resurrectionTypeMap.put(um, umCast.resurrectsAs);
     }
 
     SuicideAttackTracker kaputnikTracker = StateTracker.instance(gi, SuicideAttackTracker.class);
@@ -218,19 +212,19 @@ public class KaijuWarsUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
     public int kaijuCounter = 0;
-    public boolean entrenches    = false;
-    public boolean stillBoost    = false;
-    public boolean divineWind    = false; // +2 counter on plains/sea
-    public boolean boostsAllies  = false;
-    public boolean boostSurround = false;
+    public boolean entrenches     = false;
+    public boolean stillBoost     = false;
+    public boolean divineWind     = false; // +2 counter on plains/sea
+    public boolean boostsAllies   = false;
+    public boolean boostSurround  = false;
 
-    public String resurrectsAs   = null;
-    public boolean suicideAttack = false;
+    public UnitModel resurrectsAs = null;
+    public boolean suicideAttack  = false;
 
-    public boolean slowsLand     = false;
-    public boolean slowsAir      = false;
-    public boolean resistsKaiju  = false;
-    public boolean isKaiju       = false;
+    public boolean slowsLand      = false;
+    public boolean slowsAir       = false;
+    public boolean resistsKaiju   = false;
+    public boolean isKaiju        = false;
 
     public KaijuWarsUnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
         int pMovePower, MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] WEAPONS, double starValue)
@@ -697,24 +691,31 @@ public class KaijuWarsUnits extends UnitModelScheme
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.SuperZ2() };
 
-    public SuperZ2()
+    public SuperZ2(UnitModel rezTo)
     {
       super("Super Z2", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 4;
-      resurrectsAs = REZ_TO_NAME;
+      resurrectsAs = rezTo;
     }
   }
-  public static class SuperZ2Hurt extends SuperZ2
+  public static class SuperZ2Hurt extends KaijuWarsUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = ASSAULT | SURFACE_TO_AIR | TANK | LAND;
+
+    private static final int MOVE_POWER = 3;
+    private static final int UNIT_COST = PREP_COST * 1;
+
+    private static final MoveType moveType = new Hovercraft();
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.SuperZ2() };
+
     public SuperZ2Hurt()
     {
-      super();
-      name = REZ_TO_NAME;
-      costBase = PREP_COST * 1;
+      super("Super Z2 hurt", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+          actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 1;
-      resurrectsAs = null;
     }
   }
 
@@ -725,35 +726,36 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     private static final int MOVE_POWER = 5;
     private static final int UNIT_COST = PREP_COST * 5;
-    static final String REZ_TO_NAME = "Guncross Robot";
 
     private static final MoveType moveType = new Flight();
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
     private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.GuncrossWing() };
 
-    public GuncrossWing()
+    public GuncrossWing(UnitModel rezTo)
     {
       super("Guncross Wing", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 3;
-      resurrectsAs = REZ_TO_NAME;
+      resurrectsAs = rezTo;
     }
   }
-  public static class GuncrossRobot extends GuncrossWing
+  public static class GuncrossRobot extends KaijuWarsUnitModel
   {
     private static final long serialVersionUID = 1L;
+    private static final long ROLE = TANK | ASSAULT | LAND;
+
+    private static final int MOVE_POWER = 3;
+    private static final int UNIT_COST = PREP_COST * 2;
+
+    private static final MoveType moveType = GROUND;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
+    private static final WeaponModel[] WEAPONS = { new KaijuWarsWeapons.GuncrossRobot() };
+
     public GuncrossRobot()
     {
-      super();
-      name = REZ_TO_NAME;
-      costBase = PREP_COST * 2;
+      super("Guncross Robot", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
+          actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 2;
-      resurrectsAs = null;
-      role = TANK | ASSAULT | LAND;
-      baseMoveType = GROUND;
-      baseMovePower = 3;
-      weapons.clear();
-      weapons.add(new KaijuWarsWeapons.GuncrossRobot());
     }
   }
 
