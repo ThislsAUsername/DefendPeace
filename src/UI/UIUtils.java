@@ -20,7 +20,7 @@ import UI.Art.SpriteArtist.ColorPalette;
 import UI.Art.SpriteArtist.SpriteLibrary;
 
 public class UIUtils
-{  
+{
   public static final String DEFAULT_FACTION_NAME = "Thorn";
 
   // Define extra colors as needed.
@@ -53,7 +53,7 @@ public class UIUtils
   private static Map<Color, String> paletteNames;
   private static ArrayList<Faction> factions;
 
-  
+
   /**
    * Parses the available palettes and faction unit images.
    * Both of the above are parsed from res/unit/faction.
@@ -150,7 +150,7 @@ public class UIUtils
                 System.out.println("WARNING! Exception loading faction basis " + basisPath + ". Defaulting to sprites from " + DEFAULT_FACTION_NAME);
               }
             }
-            
+
             factions.add(new Faction(fileEntry.getName(), basis));
           }
         }
@@ -165,7 +165,7 @@ public class UIUtils
       }
     }
   }
-  
+
   public static Color[] getCOColors()
   {
     initCosmetics();
@@ -235,7 +235,7 @@ public class UIUtils
     public String name;
     public String basis;
     public boolean flip = false;
-    
+
     public Faction(String pName, String pBasis)
     {
       name = pName;
