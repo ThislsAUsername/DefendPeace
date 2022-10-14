@@ -3,6 +3,7 @@ package UI.Art.SpriteArtist;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,11 +76,12 @@ public class PlayerSetupCommanderArtist
     int highlightedCmdr = myControl.cmdrBins.get(binIndex).get(coIndex);
     // Calculate the vertical space each player panel will consume.
     int panelBuffer = 3;
-    int panelHeight = CommanderPanel.PANEL_HEIGHT+panelBuffer;
+    int panelHeight = CommanderPanel.PANEL_HEIGHT+panelBuffer + 1;
+    int panelShift  = textToastHeight + panelHeight + panelBuffer;
 
     // Find where the zeroth Commander should be drawn.
-    panelOffsetY.set(binIndex*panelHeight, snapCursor);
-    int drawYCenter = myHeight / 2 - panelOffsetY.geti();
+    panelOffsetY.set(binIndex*panelShift, snapCursor);
+    int drawY = myHeight / 2 - panelOffsetY.geti() - panelHeight + panelBuffer + 1;
 
     // Selected CO's name for drawing later
     String coNameText = "";
@@ -89,12 +91,17 @@ public class PlayerSetupCommanderArtist
     int binToDraw = 0;
     int baseDrawX = SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Make sure we have room to draw the cursor around the frame.
 
-    for(; drawYCenter - CommanderPanel.PANEL_HEIGHT/2 < myHeight
+    for(; drawY - CommanderPanel.PANEL_HEIGHT/2 < myHeight
         && binToDraw < myControl.cmdrBins.size();
-        ++binToDraw, drawYCenter += (panelHeight) )
+        ++binToDraw )
     {
       int indexInBin = 0;
       int drawX = baseDrawX;
+
+      // Draw the panel to go behind the COs
+      Color[] palette = UIUtils.getMapUnitColors(playerColor).paletteColors;
+      int nextDrawY = drawCmdrBinLayer(myG, "Faction Name", palette[5], palette[3], myWidth, drawY, panelHeight);
+
       ArrayList<Integer> currentBin = myControl.cmdrBins.get(binToDraw);
       while (drawX < myWidth && indexInBin < currentBin.size())
       {
@@ -110,8 +117,8 @@ public class PlayerSetupCommanderArtist
         // Update the PlayerPanel and render it to an image.
         BufferedImage playerImage = panel.update(coInfo, playerColor);
 
-        int drawY = drawYCenter - playerImage.getHeight() / 2;
-        myG.drawImage(playerImage, drawX, drawY, null);
+        int drawCmdrY = drawY + textToastHeight + txtBuf;
+        myG.drawImage(playerImage, drawX, drawCmdrY, null);
 
         // Set the cursor width.
         if( highlightedCmdr == coToDraw )
@@ -123,6 +130,7 @@ public class PlayerSetupCommanderArtist
         ++indexInBin;
         drawX += playerImage.getWidth() + panelBuffer;
       }
+      drawY = nextDrawY + panelBuffer;
     }
 
     final int cursorY = myHeight / 2 - CommanderPanel.PANEL_HEIGHT / 2;
@@ -134,6 +142,36 @@ public class PlayerSetupCommanderArtist
 
     // Draw the cursor over the selected option.
     SpriteCursor.draw(myG, panelDrawX.geti(), cursorY, panelDrawW, CommanderPanel.PANEL_HEIGHT, playerColor);
+  }
+
+  static final int textWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth();
+  static final int textHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight();
+  static final int txtBuf = 2;
+  static final int textToastHeight = textHeight + txtBuf; // upper buffer only
+  public static int drawCmdrBinLayer(Graphics g, String label, Color bg,  Color frame, int screenWidth, int y, int bodyHeight)
+  {
+    int textToastWidth  = textWidth*label.length();
+
+    Polygon triangle = new Polygon();
+    triangle.addPoint(txtBuf+textToastWidth                , y);                 // top left
+    triangle.addPoint(txtBuf+textToastWidth                , y+textToastHeight); // bottom left
+    triangle.addPoint(txtBuf+textToastWidth+textToastHeight, y+textToastHeight); // right
+
+    g.setColor(frame);
+    g.fillPolygon(triangle);
+    g.fillRect(0, y                 , txtBuf+textToastWidth , bodyHeight); // behind text
+    g.fillRect(0, y+textToastHeight , screenWidth           , bodyHeight); // main body
+
+    g.setColor(bg);
+    for( int i = 0; i < 3; ++i )
+      triangle.ypoints[i] += 1; // Shift one pixel down to expose the frame
+    g.fillPolygon(triangle);
+    g.fillRect(0, y+1                , txtBuf+textToastWidth, bodyHeight-2);
+    g.fillRect(0, y+1+textToastHeight, screenWidth          , bodyHeight-2);
+
+    SpriteUIUtils.drawTextSmallCaps(g, label, txtBuf, y + txtBuf);
+
+    return y + textToastHeight + bodyHeight;
   }
 
   public static void drawTagPickerPanels(
