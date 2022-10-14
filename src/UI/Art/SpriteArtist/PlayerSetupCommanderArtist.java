@@ -181,11 +181,11 @@ public class PlayerSetupCommanderArtist
 
   /**
    * Renders itself into an image like this, with no scaling applied.
-   * +----------------+--------------------+
-   * |                |                    |
-   * |   Cmdr Eyes    |   CommanderName    |
-   * |                |                    |
-   * +----------------+--------------------+
+   * +----------------+
+   * |                |
+   * |   Cmdr Eyes    |
+   * |                |
+   * +----------------+
    */
   private static class CommanderPanel
   {
@@ -215,30 +215,28 @@ public class PlayerSetupCommanderArtist
 
     public BufferedImage update(CommanderInfo coInfo, Color color)
     {
-      if( !coInfo.name.equals(myCoName) || !UIUtils.getPaletteName(color).equals(myColor))
+      if( !UIUtils.getPaletteName(color).equals(myColor))
       {
         myColor = UIUtils.getPaletteName(color);
         commanderFace = new SpriteUIUtils.ImageFrame(1, 1, eyesWidth, eyesHeight, color,
             color, true, SpriteLibrary.getCommanderSprites( coInfo.name ).eyes);
 
-        // If only the color changed, we don't need to redraw the nameplate, so check that the name actually changed.
-        if( !coInfo.name.equals(myCoName) )
-        {
-          myCoName = coInfo.name;
-          PixelFont pf = SpriteLibrary.getFontStandard();
-          int newWidth = pf.getWidth(myCoName) + textBufferPx*2;
-          BufferedImage namePlate = SpriteUIUtils.getTextAsImage(myCoName);
-          commanderName = new SpriteUIUtils.ImageFrame(commanderFace.width+2, 1, newWidth, commanderFace.height,
-              SpriteUIUtils.MENUHIGHLIGHTCOLOR, SpriteUIUtils.MENUBGCOLOR, false, namePlate);
-        }
-
         // Re-render the panel.
-        myImage = SpriteLibrary.createTransparentSprite( commanderFace.width + commanderName.width + 3, PANEL_HEIGHT );
+        myImage = SpriteLibrary.createTransparentSprite( commanderFace.width + 3, PANEL_HEIGHT );
         Graphics g = myImage.getGraphics();
         g.setColor(Color.BLACK);
-        g.fillRect(0, 0, commanderFace.width + commanderName.width + 3, myImage.getHeight());
+        g.fillRect(0, 0, commanderFace.width + 3, myImage.getHeight());
         commanderFace.render(g);
-        commanderName.render(g);
+      }
+
+      if( !coInfo.name.equals(myCoName) )
+      {
+        myCoName = coInfo.name;
+        PixelFont pf = SpriteLibrary.getFontStandard();
+        int newWidth = pf.getWidth(myCoName) + textBufferPx*2;
+        BufferedImage namePlate = SpriteUIUtils.getTextAsImage(myCoName);
+        commanderName = new SpriteUIUtils.ImageFrame(commanderFace.width+2, 1, newWidth, commanderFace.height,
+            SpriteUIUtils.MENUHIGHLIGHTCOLOR, SpriteUIUtils.MENUBGCOLOR, false, namePlate);
       }
 
       return myImage;
