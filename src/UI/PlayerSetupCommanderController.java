@@ -102,7 +102,10 @@ public class PlayerSetupCommanderController implements IController
           cmdrInBinSelector.setSelectedOption(0);
 
           if( noCmdr == selectedCO )
+          {
             done = true;
+            myPlayerInfo.coList = tagCmdrList;
+          }
         }
         break;
       case UP:
