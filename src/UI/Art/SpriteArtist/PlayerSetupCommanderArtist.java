@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderLibrary;
 import Engine.IController;
 import UI.PlayerSetupCommanderController;
 import UI.SlidingValue;
@@ -41,17 +40,6 @@ public class PlayerSetupCommanderArtist
     BufferedImage image = SpriteLibrary.createTransparentSprite(myWidth, myHeight);
     Graphics myG = image.getGraphics();
 
-    /////////////// Tooltip ////////////////////////////
-    BufferedImage tooltip = SpriteUIUtils.makeTextFrame("Press Q for more info", 3, 2);
-    myG.drawImage(tooltip, myWidth - tooltip.getWidth(), 3, null);
-
-    /////////////// Tag Picker Panels //////////////////////
-    if( myControl.shouldSelectMultiCO || myControl.tagCmdrList.size() > 1 )
-    {
-      int tagPickerOffset = tooltip.getHeight() + 2 + SpriteLibrary.getCursorSprites().getFrame(0).getHeight();
-      drawTagPickerPanels(myG, tagPickerOffset, myWidth, infos, playerColor, snapCursor);
-    }
-
     /////////////// Commander Portrait //////////////////////
     int binIndex        = control.cmdrBinSelector.getSelectionNormalized();
     int coIndex         = control.cmdrInBinSelector.getSelectionNormalized();
@@ -62,6 +50,16 @@ public class PlayerSetupCommanderArtist
 
     /////////////// Commander Panels //////////////////////
     drawCmdrPickerPanels(myG, myHeight, myWidth, infos, playerColor, snapCursor);
+
+    /////////////// Tag Picker Panels //////////////////////
+    if( myControl.shouldSelectMultiCO || myControl.tagCmdrList.size() > 1 )
+    {
+      drawTagPickerPanels(myG, myWidth, infos, playerColor, snapCursor);
+    }
+
+    /////////////// Tooltip ////////////////////////////
+    BufferedImage tooltip = SpriteUIUtils.makeTextFrame("Press Q for more info", 3, 2);
+    myG.drawImage(tooltip, myWidth - tooltip.getWidth(), 3, null);
 
     // Draw the composed image to the window at scale.
     g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
@@ -139,7 +137,7 @@ public class PlayerSetupCommanderArtist
   }
 
   public static void drawTagPickerPanels(
-                       Graphics myG, int tagPickerOffset, int myWidth,
+                       Graphics myG, int myWidth,
                        ArrayList<CommanderInfo> infos, Color playerColor,
                        boolean snapCursor)
   {
@@ -149,13 +147,14 @@ public class PlayerSetupCommanderArtist
     final int panelWidth = CommanderPanel.eyesWidth+panelBuffer;
     final int panelHeight = CommanderPanel.eyesHeight+panelBuffer;
 
+    // Take over the top of the screen
+    SpriteUIUtils.drawMenuFrame(myG, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR,
+        0, -1, myWidth, panelHeight*3/2, 2);
+
     final int panelSpacing = 1;
     final int panelXShift = panelWidth + panelSpacing;
 
-    // Find where the zeroth Commander should be drawn.
-    int drawXCenter = panelThickness;
-
-    final int drawY = tagPickerOffset;
+    final int drawY = 4;
     final ArrayList<Integer> taggedCOs = myControl.tagCmdrList;
     for(int tagToDraw = 0; tagToDraw < taggedCOs.size(); ++tagToDraw)
     {
@@ -164,29 +163,15 @@ public class PlayerSetupCommanderArtist
       // Update the PlayerPanel and render it to an image.
       BufferedImage playerImage = SpriteLibrary.getCommanderSprites( coInfo.name ).eyes;
 
-      int drawX = 1 + drawXCenter - panelXShift/2 + (tagToDraw*panelXShift);
+      int drawX = 4 + (tagToDraw*panelXShift);
       myG.setColor(Color.BLACK);
       myG.fillRect(drawX, drawY, panelWidth, panelHeight);
       int dx = drawX+panelThickness, dy = drawY+panelThickness;
       myG.setColor(playerColor);
       myG.fillRect(dx, dy, panelWidth-panelThickness-1, panelHeight-panelThickness-1);
 
-      // This check should be fine since we can't save/load a game-creation in progress
-      if( coInfo == CommanderLibrary.NotACO.getInfo() )
-      {
-        myG.setColor(Color.BLACK);
-        // Draw a little plus sign
-        myG.drawLine(drawX + 2*panelWidth/7, drawY +   panelHeight/2,
-                     drawX + 5*panelWidth/7, drawY +   panelHeight/2);
-        myG.drawLine(drawX +   panelWidth/2, drawY + 2*panelHeight/7,
-                     drawX +   panelWidth/2, drawY + 5*panelHeight/7);
-      }
-      else
-        myG.drawImage(playerImage, dx, dy, null);
+      myG.drawImage(playerImage, dx, dy, null);
     }
-
-    // Draw the cursor over the center option.
-    SpriteCursor.draw(myG, myWidth/2 - panelWidth/2, drawY, panelWidth, CommanderPanel.eyesHeight+panelBuffer, playerColor);
   }
 
   /**
