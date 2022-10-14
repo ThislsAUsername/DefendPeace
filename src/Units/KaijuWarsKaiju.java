@@ -18,6 +18,7 @@ import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.FloodFillFunctor.BasicMoveFillFunctor;
+import Engine.GameEvents.CommanderEnergyChangeEvent;
 import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
@@ -551,16 +552,24 @@ public class KaijuWarsKaiju
       if( !(unit.model instanceof Radar) )
         return null;
 
+      int chargeToGive = 0;
       XYCoord end = unitPath.getEndCoord();
       // Check for any hostile kaiju in range to study
       for( Unit kaiju : kaijuAbilityTier.keySet() )
       {
         if( kaiju.CO.isEnemy(unit.CO) && Radar.PIERCING_VISION >= end.getDistance(unit) )
         {
-          // TODO: This is definitely wrong
-          unit.CO.modifyAbilityPower(2);
+          chargeToGive += 2;
         }
       }
+
+      if( chargeToGive > 0 )
+      {
+        GameEventQueue events = new GameEventQueue();
+        events.add(new CommanderEnergyChangeEvent(unit.CO, chargeToGive));
+        return events;
+      }
+
       return null;
     }
 

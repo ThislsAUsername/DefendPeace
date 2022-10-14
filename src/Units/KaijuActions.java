@@ -13,6 +13,7 @@ import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.ArmyDefeatEvent;
+import Engine.GameEvents.CommanderEnergyChangeEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.MapChangeEvent;
@@ -216,8 +217,7 @@ public class KaijuActions
           if( stomperType.regenOnBuildingKill )
             crushEvents.add(new HealUnitEvent(kaijuState.unit, 2, null, true));
           if( stomperType.chargeOnBuildingKill && location.isCaptureable() )
-            // TODO: This is definitely wrong
-            kaijuState.CO.modifyAbilityPower(1);
+            crushEvents.add(new CommanderEnergyChangeEvent(kaijuState.CO, 1));
 
           if( Utils.willLoseFromLossOf(gameMap, location) )
           {
