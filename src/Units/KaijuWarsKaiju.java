@@ -557,7 +557,7 @@ public class KaijuWarsKaiju
       // Check for any hostile kaiju in range to study
       for( Unit kaiju : kaijuAbilityTier.keySet() )
       {
-        if( kaiju.CO.isEnemy(unit.CO) && Radar.PIERCING_VISION >= end.getDistance(unit) )
+        if( kaiju.CO.isEnemy(unit.CO) && Radar.PIERCING_VISION >= end.getDistance(kaiju) )
         {
           chargeToGive += 2;
         }
