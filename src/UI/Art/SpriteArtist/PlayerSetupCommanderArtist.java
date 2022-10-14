@@ -113,11 +113,11 @@ public class PlayerSetupCommanderArtist
 
         // Get the relevant PlayerPanel.
         if( !coPanels.containsKey(key) )
-          coPanels.put(key, new CommanderPanel(coInfo, playerColor));
+          coPanels.put(key, new CommanderPanel(coInfo, spriteSpec.color));
         CommanderPanel panel = coPanels.get(key);
 
         // Update the PlayerPanel and render it to an image.
-        BufferedImage playerImage = panel.update(coInfo, playerColor);
+        BufferedImage playerImage = panel.update(coInfo, spriteSpec.color);
 
         int drawCmdrY = drawY + textToastHeight + txtBuf;
         myG.drawImage(playerImage, drawX, drawCmdrY, null);
