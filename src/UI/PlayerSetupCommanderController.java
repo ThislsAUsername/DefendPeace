@@ -82,6 +82,8 @@ public class PlayerSetupCommanderController implements IController
     switch(action)
     {
       case SELECT:
+        rightGlueColumn = 0;
+
         // Check for CO addition
         if( !shouldSelectMultiCO )
         {
