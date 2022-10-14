@@ -20,7 +20,7 @@ public class PlayerSetupCommanderArtist
 
   private static PlayerSetupCommanderController myControl;
   private static SlidingValue panelOffsetY = new SlidingValue(0);
-  private static SlidingValue panelDrawW = new SlidingValue(0);
+  private static int panelDrawW = CommanderPanel.eyesWidth + 2;
   private static SlidingValue panelDrawX = new SlidingValue(0);
 
   public static void draw(Graphics g, IController controller, ArrayList<CommanderInfo> infos, Color playerColor)
@@ -83,6 +83,9 @@ public class PlayerSetupCommanderArtist
     panelOffsetY.set(binIndex*panelHeight, snapCursor);
     int drawYCenter = myHeight / 2 - panelOffsetY.geti();
 
+    // Selected CO's name for drawing later
+    String coNameText = "";
+
     // We're gonna make this an endless scroll, so back up (in y-space and in the CO list) until
     // we find the Commander that would be off the top of the screen.
     int binToDraw = 0;
@@ -115,8 +118,8 @@ public class PlayerSetupCommanderArtist
         // Set the cursor width.
         if( highlightedCmdr == coToDraw )
         {
-          panelDrawW.set(playerImage.getWidth(), snapCursor);
           panelDrawX.set(drawX, snapCursor);
+          coNameText = coInfo.name;
         }
 
         ++indexInBin;
@@ -124,8 +127,15 @@ public class PlayerSetupCommanderArtist
       }
     }
 
-    // Draw the cursor over the center option.
-    SpriteCursor.draw(myG, panelDrawX.geti(), myHeight/2 - CommanderPanel.PANEL_HEIGHT/2, panelDrawW.geti(), CommanderPanel.PANEL_HEIGHT, playerColor);
+    final int cursorY = myHeight / 2 - CommanderPanel.PANEL_HEIGHT / 2;
+
+    BufferedImage coNameFrame = SpriteUIUtils.makeTextFrame(coNameText, 2, 2);
+    int drawNameX = panelDrawX.geti() + panelDrawW/2;
+    int drawNameY = cursorY + CommanderPanel.PANEL_HEIGHT + coNameFrame.getHeight()/2 + 2;
+    SpriteUIUtils.drawImageCenteredOnPoint(myG, coNameFrame, drawNameX, drawNameY);
+
+    // Draw the cursor over the selected option.
+    SpriteCursor.draw(myG, panelDrawX.geti(), cursorY, panelDrawW, CommanderPanel.PANEL_HEIGHT, playerColor);
   }
 
   public static void drawTagPickerPanels(
@@ -190,7 +200,6 @@ public class PlayerSetupCommanderArtist
   private static class CommanderPanel
   {
     // A couple of helper quantities.
-    public static int textBufferPx = 4;
     public static int eyesWidth = SpriteLibrary.getCommanderSprites( "STRONG" ).eyes.getWidth();
     public static int eyesHeight = SpriteLibrary.getCommanderSprites( "STRONG" ).eyes.getHeight();
 
@@ -202,10 +211,8 @@ public class PlayerSetupCommanderArtist
 
     // Each frame that makes up the larger panel.
     private SpriteUIUtils.ImageFrame commanderFace;
-    private SpriteUIUtils.ImageFrame commanderName;
 
     // Stored values.
-    String myCoName;
     String myColor;
 
     public CommanderPanel(CommanderInfo info, Color color)
@@ -227,16 +234,6 @@ public class PlayerSetupCommanderArtist
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, commanderFace.width + 3, myImage.getHeight());
         commanderFace.render(g);
-      }
-
-      if( !coInfo.name.equals(myCoName) )
-      {
-        myCoName = coInfo.name;
-        PixelFont pf = SpriteLibrary.getFontStandard();
-        int newWidth = pf.getWidth(myCoName) + textBufferPx*2;
-        BufferedImage namePlate = SpriteUIUtils.getTextAsImage(myCoName);
-        commanderName = new SpriteUIUtils.ImageFrame(commanderFace.width+2, 1, newWidth, commanderFace.height,
-            SpriteUIUtils.MENUHIGHLIGHTCOLOR, SpriteUIUtils.MENUBGCOLOR, false, namePlate);
       }
 
       return myImage;
