@@ -143,7 +143,7 @@ public class PlayerSetupCommanderController implements IController
         }
         break;
       case SEEK:
-        CO_InfoController coInfoMenu = new CO_InfoController(cmdrInfos, cmdrBinSelector.getSelectionNormalized());
+        CO_InfoController coInfoMenu = new CO_InfoController(cmdrInfos, selectedCO);
         IView infoView = Driver.getInstance().gameGraphics.createInfoView(coInfoMenu);
 
         // Give the new controller/view the floor
