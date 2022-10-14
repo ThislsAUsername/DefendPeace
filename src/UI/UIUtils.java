@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.PriorityQueue;
 
 import javax.imageio.ImageIO;
@@ -213,6 +214,10 @@ public class UIUtils
     return factions.toArray(new Faction[0]);
   }
 
+  public static String getCanonicalFactionName(COSpriteSpec spec)
+  {
+    return getCanonicalFactionName(getPaletteName(spec.color), spec.faction.name);
+  }
   public static String getCanonicalFactionName(String palette, String faction)
   {
     if ("red".equalsIgnoreCase(palette) && "frontier".equalsIgnoreCase(faction))
@@ -236,14 +241,19 @@ public class UIUtils
       name = pName;
       basis = pBasis;
     }
+    public Faction(String pName)
+    {
+      this(pName, SpriteLibrary.DEFAULT_FACTION);
+    }
     public Faction()
     {
       this(SpriteLibrary.DEFAULT_FACTION, SpriteLibrary.DEFAULT_FACTION);
     }
   }
 
-  public static class COSpriteSpec
+  public static class COSpriteSpec implements Serializable
   {
+    private static final long serialVersionUID = 1L;
     public final Faction faction;
     public final Color color;
 
@@ -260,7 +270,52 @@ public class UIUtils
         spec = new COSpriteSpec(co.faction, co.myColor);
       return spec;
     }
+
+    /**
+     * Attempts to pull the key color for this canon faction from loaded resources.
+     * <p>Falls back on Salmon
+     */
+    public static COSpriteSpec fromDisk(String col, String fac)
+    {
+      initCosmetics();
+      COSpriteSpec spec = null;
+      final Faction facInst = new Faction(fac);
+
+      for( Entry<Color, String> pair : paletteNames.entrySet() )
+      {
+        if( pair.getValue().equalsIgnoreCase(col) )
+        {
+          spec = new COSpriteSpec(facInst, pair.getKey());
+        }
+      }
+
+      if( null == spec )
+        spec = new COSpriteSpec(facInst, Color.PINK);
+      return spec;
+    }
   }
+
+
+  public static final COSpriteSpec MISC = new COSpriteSpec(new Faction("Misc"), Color.CYAN);
+  //Ordered by "Thorn, then AWBW turn order"
+  public static final COSpriteSpec RT = new COSpriteSpec(new Faction(), Color.PINK);
+  public static final COSpriteSpec OS = COSpriteSpec.fromDisk("Red"   , "Star");
+  public static final COSpriteSpec BM = COSpriteSpec.fromDisk("Blue"  , "Moon");
+  public static final COSpriteSpec GE = COSpriteSpec.fromDisk("Green" , "Earth");
+  public static final COSpriteSpec YC = COSpriteSpec.fromDisk("Yellow", "Comet");
+  public static final COSpriteSpec BH = COSpriteSpec.fromDisk("Black" , "Hole");
+  public static final COSpriteSpec RF = COSpriteSpec.fromDisk("Maroon", "Fire");
+  public static final COSpriteSpec GS = COSpriteSpec.fromDisk("Grey"  , "Sky");
+  public static final COSpriteSpec BD = COSpriteSpec.fromDisk("Brown" , "Desert");
+  public static final COSpriteSpec AB = COSpriteSpec.fromDisk("Amber" , "Blaze");
+  public static final COSpriteSpec JS = COSpriteSpec.fromDisk("Jade"  , "Sun");
+  public static final COSpriteSpec CI = COSpriteSpec.fromDisk("Cobalt", "Ice");
+  public static final COSpriteSpec PC = COSpriteSpec.fromDisk("Pink"  , "Cosmos");
+  public static final COSpriteSpec TG = COSpriteSpec.fromDisk("Teal"  , "Galaxy");
+  public static final COSpriteSpec PL = COSpriteSpec.fromDisk("Purple", "Lightning");
+  public static final COSpriteSpec AR = COSpriteSpec.fromDisk("Acid"  , "Rain");
+  public static final COSpriteSpec WN = COSpriteSpec.fromDisk("White" , "Nova");
+
 
   private static class TeamColorSpec implements Comparable<TeamColorSpec>
   {

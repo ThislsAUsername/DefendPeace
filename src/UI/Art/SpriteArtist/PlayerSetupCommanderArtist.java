@@ -13,6 +13,7 @@ import Engine.IController;
 import UI.PlayerSetupCommanderController;
 import UI.SlidingValue;
 import UI.UIUtils;
+import UI.UIUtils.COSpriteSpec;
 
 public class PlayerSetupCommanderArtist
 {
@@ -99,8 +100,9 @@ public class PlayerSetupCommanderArtist
       int drawX = baseDrawX;
 
       // Draw the panel to go behind the COs
-      Color[] palette = UIUtils.getMapUnitColors(playerColor).paletteColors;
-      int nextDrawY = drawCmdrBinLayer(myG, "Faction Name", palette[5], palette[3], myWidth, drawY, panelHeight);
+      final COSpriteSpec spriteSpec = myControl.binColorSpec.get(binToDraw);
+      Color[] palette = UIUtils.getMapUnitColors(spriteSpec.color).paletteColors;
+      int nextDrawY = drawCmdrBinLayer(myG, UIUtils.getCanonicalFactionName(spriteSpec), palette[5], palette[3], myWidth, drawY, panelHeight);
 
       ArrayList<Integer> currentBin = myControl.cmdrBins.get(binToDraw);
       while (drawX < myWidth && indexInBin < currentBin.size())

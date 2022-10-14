@@ -12,6 +12,7 @@ import Engine.UnitMods.UnitMovementModifier;
 import Engine.UnitMods.UnitTypeFilter;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
+import UI.UIUtils;
 import Units.Unit;
 import Units.UnitContext;
 import Units.UnitModel;
@@ -33,7 +34,7 @@ public class Strong extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Strong");
+      super("Strong", UIUtils.RT);
       infoPages.add(new InfoPage(
           "Commander Strong knows that an army's strength lies in its people; soldiers with proper training and equipment are guaranteed to bring results.\n" +
           "His transport units and boots on the ground are among the best, and he brings some extra anti-personnel firepower to keep his opponents in check."));

@@ -17,6 +17,7 @@ import Engine.UnitMods.UnitInstanceFilter;
 import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
 import Terrain.MapMaster;
+import UI.UIUtils;
 import Units.Unit;
 import Units.UnitContext;
 import Units.UnitModel;
@@ -33,7 +34,7 @@ public class Meridian extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Meridian");
+      super("Meridian", UIUtils.MISC);
       infoPages.add(new InfoPage(
           "While other commanders may focus on granular tactics, Meridian has taken a different line: her basic tanks and artillery are built from the same parts, and can be re-configured on the field at no cost.\n" +
           "This gives her forces extreme adaptability, and her powers hone this to a razor edge."));

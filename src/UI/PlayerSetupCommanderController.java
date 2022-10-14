@@ -1,6 +1,7 @@
 package UI;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import CommandingOfficers.*;
 import Engine.Driver;
@@ -9,6 +10,7 @@ import Engine.IView;
 import Engine.OptionSelector;
 import Engine.GameScenario.TagMode;
 import UI.InputHandler.InputAction;
+import UI.UIUtils.COSpriteSpec;
 
 public class PlayerSetupCommanderController implements IController
 {
@@ -18,6 +20,7 @@ public class PlayerSetupCommanderController implements IController
   private final int noCmdr;
 
   public ArrayList<ArrayList<Integer>> cmdrBins;
+  public ArrayList<COSpriteSpec> binColorSpec;
   public OptionSelector cmdrBinSelector;
   public OptionSelector cmdrInBinSelector;
   public ArrayList<Integer> tagCmdrList;
@@ -36,33 +39,42 @@ public class PlayerSetupCommanderController implements IController
     final int lastCO = tagCmdrList.get(tagCmdrList.size() - 1);
 
     cmdrBins = new ArrayList<>();
+    binColorSpec = new ArrayList<>();
 
     int lastBin = -1;
     int startBin = 0;
     int startBinIndex = 0;
 
     int coIndex = 0;
-    while (coIndex < infos.size())
+    HashMap<COSpriteSpec, Integer> factionIndex = new HashMap<>();
+    for (; coIndex < infos.size(); ++coIndex)
     {
-      ++lastBin;
-      int binSize = coIndex + 2; // TODO
-      ArrayList<Integer> bin = new ArrayList<>();
-      bin.add(noCmdr); // Put No CO at the start of each bin?
-      for( int binIndex = 1;
-          binIndex < binSize && coIndex < infos.size();
-          ++binIndex, ++coIndex )
-      {
-        if( noCmdr == coIndex )
-          continue; // Don't throw in extras
+      if( noCmdr == coIndex )
+        continue; // Explicitly added farther on
 
-        bin.add(coIndex);
-        if( lastCO == coIndex )
-        {
-          startBin = lastBin;
-          startBinIndex = binIndex;
-        }
+      CommanderInfo info = infos.get(coIndex);
+      int binIndex;
+      final COSpriteSpec canonFaction = info.baseFaction;
+      if( factionIndex.containsKey(canonFaction) )
+        binIndex = factionIndex.get(canonFaction);
+      else
+      {
+        ++lastBin;
+        binIndex = lastBin;
+        factionIndex.put(canonFaction, binIndex);
+
+        ArrayList<Integer> bin = new ArrayList<>();
+        bin.add(noCmdr); // Put No CO at the start of each bin?
+        cmdrBins.add(bin);
+        binColorSpec.add(canonFaction);
       }
-      cmdrBins.add(bin);
+
+      cmdrBins.get(binIndex).add(coIndex);
+      if( lastCO == coIndex )
+      {
+        startBin = binIndex;
+        startBinIndex = cmdrBins.get(binIndex).size()-1;
+      }
     }
 
     cmdrBinSelector = new OptionSelector(lastBin + 1);
