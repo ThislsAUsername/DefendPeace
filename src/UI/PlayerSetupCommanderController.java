@@ -21,6 +21,7 @@ public class PlayerSetupCommanderController implements IController
   public OptionSelector cmdrBinSelector;
   public OptionSelector cmdrInBinSelector;
   public ArrayList<Integer> tagCmdrList;
+  public int rightGlueColumn;
 
   public PlayerSetupCommanderController(ArrayList<CommanderInfo> infos, PlayerSetupInfo playerInfo, TagMode tagMode)
   {
@@ -68,12 +69,16 @@ public class PlayerSetupCommanderController implements IController
     cmdrBinSelector.setSelectedOption(startBin);
     cmdrInBinSelector = new OptionSelector(cmdrBins.get(startBin).size());
     cmdrInBinSelector.setSelectedOption(startBinIndex);
+    rightGlueColumn = startBinIndex;
   }
 
   @Override
   public boolean handleInput(InputAction action)
   {
     boolean done = false;
+    final int selectedBin    = cmdrBinSelector.getSelectionNormalized();
+    final int selectedColumn = cmdrInBinSelector.getSelectionNormalized();
+    final int selectedCO     = cmdrBins.get(selectedBin).get(selectedColumn);
     switch(action)
     {
       case SELECT:
@@ -81,15 +86,13 @@ public class PlayerSetupCommanderController implements IController
         if( !shouldSelectMultiCO )
         {
           // Apply change and return control.
-          if( tagCmdrList.size() > 1 )
-            tagCmdrList.remove(tagCmdrList.size() - 1); // Chop off the final No CO
+          tagCmdrList.clear();
+          tagCmdrList.add(selectedCO);
           myPlayerInfo.coList = tagCmdrList;
           done = true;
         }
         else
         {
-          int selectedBin = cmdrBinSelector.getSelectionNormalized();
-          int selectedCO  = cmdrBins.get(selectedBin).get(cmdrInBinSelector.getSelectionNormalized());
           if( tagCmdrList.size() == 0 || noCmdr != selectedCO )
             tagCmdrList.add(selectedCO);
 
@@ -104,13 +107,16 @@ public class PlayerSetupCommanderController implements IController
       case DOWN:
       {
         final int binPicked = cmdrBinSelector.handleInput(action);
-        cmdrInBinSelector.reset(cmdrBins.get(binPicked).size());
+        final int destBinSize = cmdrBins.get(binPicked).size();
+        cmdrInBinSelector.reset(destBinSize);
+        final int destColumn = Math.min(destBinSize - 1, rightGlueColumn);
+        cmdrInBinSelector.setSelectedOption(destColumn);
       }
         break;
       case LEFT:
       case RIGHT:
       {
-        cmdrInBinSelector.handleInput(action);
+        rightGlueColumn = cmdrInBinSelector.handleInput(action);
       }
       break;
       case BACK:
