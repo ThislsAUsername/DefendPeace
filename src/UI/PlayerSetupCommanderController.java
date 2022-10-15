@@ -10,6 +10,7 @@ import Engine.IView;
 import Engine.OptionSelector;
 import Engine.GameScenario.TagMode;
 import UI.InputHandler.InputAction;
+import UI.PlayerSetupInfo.CODeets;
 import UI.UIUtils.COSpriteSpec;
 
 public class PlayerSetupCommanderController implements IController
@@ -34,7 +35,8 @@ public class PlayerSetupCommanderController implements IController
     shouldSelectMultiCO = tagMode.supportsMultiCmdrSelect;
 
     tagCmdrList = new ArrayList<>();
-    tagCmdrList.addAll(myPlayerInfo.coList);
+    for( CODeets deets : myPlayerInfo.coList )
+      tagCmdrList.add(deets.co);
 
     final int lastCO = tagCmdrList.get(tagCmdrList.size() - 1);
 
@@ -100,9 +102,7 @@ public class PlayerSetupCommanderController implements IController
         if( !shouldSelectMultiCO )
         {
           // Apply change and return control.
-          tagCmdrList.clear();
-          tagCmdrList.add(selectedCO);
-          myPlayerInfo.coList = tagCmdrList;
+          myPlayerInfo.coList.get(0).co = selectedCO;
           done = true;
         }
         else
@@ -115,8 +115,21 @@ public class PlayerSetupCommanderController implements IController
 
           if( noCmdr == selectedCO )
           {
+            // Ensure the lengths match
+            while (myPlayerInfo.coList.size() > tagCmdrList.size())
+              myPlayerInfo.coList.remove(myPlayerInfo.coList.size() - 1);
+            while (myPlayerInfo.coList.size() < tagCmdrList.size())
+            {
+              CODeets deets = new CODeets();
+              deets.color   = myPlayerInfo.coList.get(0).color;
+              deets.faction = myPlayerInfo.coList.get(0).faction;
+              myPlayerInfo.coList.add(deets);
+            }
+
+            // Apply change and return control.
+            for( int i = 0; i < myPlayerInfo.coList.size(); ++i )
+              myPlayerInfo.coList.get(i).co = tagCmdrList.get(i);
             done = true;
-            myPlayerInfo.coList = tagCmdrList;
           }
         }
         break;

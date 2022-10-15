@@ -15,6 +15,7 @@ import Engine.IView;
 import Engine.MapController;
 import Engine.OptionSelector;
 import UI.InputHandler.InputAction;
+import UI.PlayerSetupInfo.CODeets;
 
 /**
  * Controller for choosing COs and colors after the map has been chosen.
@@ -67,10 +68,10 @@ public class PlayerSetupController implements IController
                                optionMap.get(co) );
 
       // Enforce single-CO play if necessary
-      final ArrayList<Integer> coList = coSelectors[co].coList;
+      final ArrayList<CODeets> coList = coSelectors[co].coList;
       if( flySolo && coList.size() > 1 )
       {
-        int lonely = coList.get(0);
+        CODeets lonely = coList.get(0);
         coList.clear();
         coList.add(lonely);
       }
@@ -139,7 +140,7 @@ public class PlayerSetupController implements IController
           {
             // Save these settings for next time
             if( !ConfigUtils.writeConfigStrings(buildSettingsFileName(), coSelectors) )
-              System.out.println("Unable to write graphics options to file.");
+              System.out.println("Unable to write player setup options to file.");
 
             MapView mv = Driver.getInstance().gameGraphics.createMapView(newGame);
             MapController mapController = new MapController(newGame, mv);

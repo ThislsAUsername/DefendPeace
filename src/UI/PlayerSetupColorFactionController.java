@@ -18,8 +18,8 @@ public class PlayerSetupColorFactionController implements IController
 
     // Start the selectors at the initial values.
     myPlayerInfo = playerInfo;
-    colorSelector.setSelectedOption(myPlayerInfo.currentColor);
-    factionSelector.setSelectedOption(myPlayerInfo.currentFaction);
+    colorSelector.setSelectedOption(myPlayerInfo.coList.get(0).color);
+    factionSelector.setSelectedOption(myPlayerInfo.coList.get(0).faction);
     
     iconicUnitName = unitName;
   }
@@ -32,8 +32,8 @@ public class PlayerSetupColorFactionController implements IController
     {
       case SELECT:
         // Apply change and return control.
-        myPlayerInfo.currentColor = colorSelector.getSelectionNormalized();
-        myPlayerInfo.currentFaction = factionSelector.getSelectionNormalized();
+        myPlayerInfo.coList.get(0).color = colorSelector.getSelectionNormalized();
+        myPlayerInfo.coList.get(0).faction = factionSelector.getSelectionNormalized();
         done = true;
         break;
       case SEEK:
