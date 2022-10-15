@@ -163,7 +163,7 @@ public abstract class GameAction
       else
       {
         // We can't create this action. Leave the event queue empty.
-        System.out.println("WARNING! UnitProductionAction created with invalid arguments.");
+        System.out.println("WARNING! Building from a property failed.");
       }
       return buildEvents;
     }
@@ -262,7 +262,7 @@ public abstract class GameAction
       else
       {
         // We can't create this action. Leave the event queue empty.
-        System.out.println("WARNING! UnitProductionAction created with invalid arguments.");
+        System.out.println("WARNING! UnitSpawnAction cannot generate events.");
       }
       return buildEvents;
     }
