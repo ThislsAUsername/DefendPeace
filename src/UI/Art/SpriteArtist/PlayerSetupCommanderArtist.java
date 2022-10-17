@@ -200,7 +200,6 @@ public class PlayerSetupCommanderArtist
     {
       CommanderInfo coInfo = infos.get(taggedCOs.get(tagToDraw));
 
-      // Update the PlayerPanel and render it to an image.
       BufferedImage playerImage = SpriteLibrary.getCommanderSprites( coInfo.name ).eyes;
 
       int drawX = 4 + (tagToDraw*panelXShift);
