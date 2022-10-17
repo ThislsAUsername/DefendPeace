@@ -767,6 +767,8 @@ public class JakeMan extends ModularAI
     allTanks = myArmy.cos[0].getAllModels(UnitModel.ASSAULT);
     antiAir  = myArmy.cos[0].getUnitModel(UnitModel.SURFACE_TO_AIR);
     copter   = myArmy.cos[0].getUnitModel(UnitModel.ASSAULT | UnitModel.AIR_LOW, false);
+    if( null == copter ) // I clearly don't understand this unit set, so just grab something to hedge
+      copter = myArmy.cos[0].getUnitModel(UnitModel.AIR_TO_AIR, false);
 
     capPhase = new CapPhaseAnalyzer(map, myArmy);
   }
