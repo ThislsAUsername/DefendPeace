@@ -104,6 +104,7 @@ public class KaijuActions
       // Generate events.
       if( isValid )
       {
+        // There's nothing that really stops Kaiju, but snip the movepath on general principles
         Utils.enqueueMoveEvent(gameMap, actor, movePath, crushEvents);
         // Remove and discard the move event; we'll be making iterative ones
         crushEvents.clear();
