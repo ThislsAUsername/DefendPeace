@@ -11,6 +11,7 @@ public class PlayerSetupColorFactionController implements IController
   OptionSelector colorSelector;
   OptionSelector factionSelector;
   public int[] colorPicks, factionPicks;
+  public boolean flipUnits;
   public int tagIndex;
   public final String iconicUnitName;
 
@@ -31,6 +32,7 @@ public class PlayerSetupColorFactionController implements IController
     // Start the selectors at the initial values.
     myPlayerInfo = playerInfo;
     shouldSelectMultiCO = coCount > 1; // Don't need the TagMode since we only assign stuff for as many COs as we have
+    flipUnits = playerInfo.flipUnits;
     tagIndex = 0;
     colorSelector.setSelectedOption(colorPicks[tagIndex]);
     factionSelector.setSelectedOption(factionPicks[tagIndex]);
@@ -63,12 +65,13 @@ public class PlayerSetupColorFactionController implements IController
             myPlayerInfo.coList.get(i).color   = colorPicks  [i];
             myPlayerInfo.coList.get(i).faction = factionPicks[i];
           }
+          myPlayerInfo.flipUnits = flipUnits;
           done = true;
         }
         break;
       case SEEK:
         // Flip units
-        myPlayerInfo.flipUnits = !myPlayerInfo.flipUnits;
+        flipUnits = !flipUnits;
         break;
       case UP:
       case DOWN:
@@ -107,6 +110,6 @@ public class PlayerSetupColorFactionController implements IController
 
   public boolean getShouldFlip()
   {
-    return myPlayerInfo.flipUnits;
+    return flipUnits;
   }
 }
