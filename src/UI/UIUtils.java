@@ -296,9 +296,10 @@ public class UIUtils
   }
 
 
-  public static final COSpriteSpec MISC = new COSpriteSpec(new Faction("Misc"), Color.CYAN);
+  public static final COSpriteSpec MISC = new COSpriteSpec(new Faction("Misc"), Color.LIGHT_GRAY);
   //Ordered by "Thorn, then AWBW turn order"
   public static final COSpriteSpec RT = new COSpriteSpec(new Faction(), Color.PINK);
+  public static final COSpriteSpec CO = new COSpriteSpec(new Faction("Ocean"), Color.CYAN);
   public static final COSpriteSpec OS = COSpriteSpec.fromDisk("Red"   , "Star");
   public static final COSpriteSpec BM = COSpriteSpec.fromDisk("Blue"  , "Moon");
   public static final COSpriteSpec GE = COSpriteSpec.fromDisk("Green" , "Earth");

@@ -76,7 +76,7 @@ public class Ave extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Ave", UIUtils.MISC);
+      super("Ave", UIUtils.CO);
       infoPages.add(new InfoPage(
           "Commander Ave (AH-vey) supports her skiing habit by slowly growing a mountain of fresh " +
           "snow around each of her buildings. This allows her to gradually but inexorably " +

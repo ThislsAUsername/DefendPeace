@@ -101,8 +101,14 @@ public class PlayerSetupCommanderArtist
 
       // Draw the panel to go behind the COs
       final COSpriteSpec spriteSpec = myControl.binColorSpec.get(binToDraw);
-      Color[] palette = UIUtils.getMapUnitColors(spriteSpec.color).paletteColors;
-      int nextDrawY = drawCmdrBinLayer(myG, UIUtils.getCanonicalFactionName(spriteSpec), palette[5], palette[3], myWidth, drawY, panelHeight);
+      Color[] palette = UIUtils.defaultMapColors;
+      String canonName = "MISC";
+      if( Color.LIGHT_GRAY != spriteSpec.color )
+      {
+        palette = UIUtils.getMapUnitColors(spriteSpec.color).paletteColors;
+        canonName = UIUtils.getCanonicalFactionName(spriteSpec);
+      }
+      int nextDrawY = drawCmdrBinLayer(myG, canonName, palette[5], palette[3], myWidth, drawY, panelHeight);
 
       ArrayList<Integer> currentBin = myControl.cmdrBins.get(binToDraw);
       while (drawX < myWidth && indexInBin < currentBin.size())
@@ -237,7 +243,7 @@ public class PlayerSetupCommanderArtist
     private SpriteUIUtils.ImageFrame commanderFace;
 
     // Stored values.
-    String myColor;
+    Color myColor;
 
     public CommanderPanel(CommanderInfo info, Color color)
     {
@@ -246,9 +252,9 @@ public class PlayerSetupCommanderArtist
 
     public BufferedImage update(CommanderInfo coInfo, Color color)
     {
-      if( !UIUtils.getPaletteName(color).equals(myColor))
+      if( !color.equals(myColor))
       {
-        myColor = UIUtils.getPaletteName(color);
+        myColor = color;
         commanderFace = new SpriteUIUtils.ImageFrame(1, 1, eyesWidth, eyesHeight, color,
             color, true, SpriteLibrary.getCommanderSprites( coInfo.name ).eyes);
 
