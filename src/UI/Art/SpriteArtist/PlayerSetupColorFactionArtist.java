@@ -145,6 +145,11 @@ public class PlayerSetupColorFactionArtist
     int drawNameY = armyNameImage.getHeight() / 2 + 2;
     SpriteUIUtils.drawImageCenteredOnPoint(myG, armyNameImage, drawNameX, drawNameY);
 
+    BufferedImage flipTipImage = SpriteUIUtils.makeTextFrame("Q to flip", 2, 2);
+
+    int flipTipY = drawNameY + armyNameImage.getHeight() - 1;
+    SpriteUIUtils.drawImageCenteredOnPoint(myG, flipTipImage, drawNameX, flipTipY);
+
     // Render our image to the screen at the properly-scaled size.
     g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
   }
