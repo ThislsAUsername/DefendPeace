@@ -59,6 +59,12 @@ public class KaijuActions
     return location.isCaptureable()
         || INERT_CRUSHABLES.contains(location.getEnvironment().terrainType);
   }
+  /** Contains the projected results for a given Crush action */
+  private static class CrushResult
+  {
+    ArrayList<DamagePopup> popups = new ArrayList<>();
+    GameEventQueue events = new GameEventQueue();
+  }
 
   public static class KaijuCrushAction extends GameAction
   {
@@ -84,6 +90,17 @@ public class KaijuActions
     @Override
     public GameEventQueue getEvents(MapMaster gameMap)
     {
+      return predictCrush(gameMap).events;
+    }
+
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
+    {
+      return predictCrush(gameMap).popups;
+    }
+
+    private CrushResult predictCrush(GameMap gameMap)
+    {
       // CRUSH actions consist of
       //   sequence:
       //     [Terrain destruction]
@@ -92,7 +109,7 @@ public class KaijuActions
       //      - [Transform for Hell Turkey]
       //     [Death]
       //   MOVE
-      GameEventQueue crushEvents = new GameEventQueue();
+      CrushResult crush = new CrushResult();
 
       // Validate input.
       boolean isValid = true;
@@ -104,10 +121,8 @@ public class KaijuActions
       // Generate events.
       if( isValid )
       {
-        // There's nothing that really stops Kaiju, but snip the movepath on general principles
-        Utils.enqueueMoveEvent(gameMap, actor, movePath, crushEvents);
-        // Remove and discard the move event; we'll be making iterative ones
-        crushEvents.clear();
+        // Only friendly Kaiju can trap a Kaiju, and they always share vision
+        // If that ever changes, consider snipping the path here
 
         // Tracks the Kaiju's predicted state as it progresses through the crush events
         UnitContext kaijuState = new UnitContext(gameMap, actor);
@@ -119,16 +134,29 @@ public class KaijuActions
           if( kaijuState.movePower < 1 )
             break; // Go only until we run out of move
 
-          enqueueSingleTileEvents(gameMap, startingMP, kaijuState, node, crushEvents);
+          enqueueSingleTileEvents(gameMap, startingMP, kaijuState, node, crush);
         } // ~node loop
+
+        // If we took any damage, throw the total up on our own head
+        final int finalHP = kaijuState.getHP();
+        final int startHP = actor.getHP();
+        if( finalHP != startHP )
+        {
+          String sign = "" + (finalHP - startHP);
+          if( finalHP == 0 )
+            sign = "LETHAL";
+          crush.popups.add(new DamagePopup(new XYCoord(actor), actor.CO.myColor, sign));
+        }
       }
-      return crushEvents;
+      return crush;
     }
-    public static void enqueueSingleTileEvents(MapMaster gameMap, int startingMP, UnitContext kaijuState, PathNode node, GameEventQueue crushEvents)
+    public static void enqueueSingleTileEvents(GameMap gameMap, int startingMP, UnitContext kaijuState, PathNode node, CrushResult crush)
     {
       KaijuUnitModel stomperType = (KaijuUnitModel) kaijuState.model;
       final XYCoord destCoord = node.GetCoordinates();
       MapLocation location = gameMap.getLocation(destCoord);
+
+      String tileToast = null; // Default to no popup
 
       Unit victim = location.getResident();
       if( null != victim && kaijuState.unit != victim )
@@ -176,26 +204,34 @@ public class KaijuActions
 
         ArrayList<Unit> stompable = new ArrayList<>();
         stompable.add(victim);
-        crushEvents.add(new MassDamageEvent(kaijuState.CO, stompable, stompDamage, isLethal));
-        kaijuState.damageHP(counter);
+
+        crush.events.add(new MassDamageEvent(kaijuState.CO, stompable, stompDamage, isLethal));
+        tileToast = "-" + (stompDamage);
         if( stompDamage >= victim.getHP() )
-          Utils.enqueueDeathEvent(victim, crushEvents);
+        {
+          Utils.enqueueDeathEvent(victim, crush.events);
+          tileToast = "KILL";
+        }
 
         // If we're Hell Turkey and we'll drop below the landing threshold, land.
         if( kaijuState.model instanceof HellTurkey &&
             KaijuWarsKaiju.BIRD_LAND_HP >= kaijuState.getHP() )
         {
           HellTurkeyLand devolveToType = ((HellTurkey) kaijuState.model).turkeyLand;
-          crushEvents.add(new TransformLifecycle.TransformEvent(kaijuState.unit, devolveToType));
+          crush.events.add(new TransformLifecycle.TransformEvent(kaijuState.unit, devolveToType));
+          // I don't see a way to preview this nicely
           kaijuState.model = devolveToType;
         }
 
-        crushEvents.add(new MassDamageEvent(victim.CO, Arrays.asList(kaijuState.unit), counter, isLethal));
+        crush.events.add(new MassDamageEvent(victim.CO, Arrays.asList(kaijuState.unit), counter, isLethal));
+        kaijuState.damageHP(counter);
+        // Counter damage previewed by caller
+
         // If there's enough counter damage to kill us, die
         if( kaijuState.getHP() < 1 )
         {
           // Kaiju dies at his current position on the path
-          Utils.enqueueDeathEvent(kaijuState.unit, kaijuState.coord, true, crushEvents);
+          Utils.enqueueDeathEvent(kaijuState.unit, kaijuState.coord, true, crush.events);
           kaijuState.movePower = 0;
         }
         else // Recalculate remaining movement so taking damage can drain movement
@@ -214,24 +250,44 @@ public class KaijuActions
         {
           Environment oldEnvirons = location.getEnvironment();
           Environment newEnvirons = Environment.getTile(oldEnvirons.terrainType.getBaseTerrain(), oldEnvirons.weatherType);
-          crushEvents.add(new MapChangeEvent(location.getCoordinates(), newEnvirons));
-          if( stomperType.regenOnBuildingKill )
-            crushEvents.add(new HealUnitEvent(kaijuState.unit, 2, null, true));
-          if( stomperType.chargeOnBuildingKill && location.isCaptureable() )
-            crushEvents.add(new CommanderEnergyChangeEvent(kaijuState.CO, 1));
+          crush.events.add(new MapChangeEvent(location.getCoordinates(), newEnvirons));
 
-          if( Utils.willLoseFromLossOf(gameMap, location) )
+          // Overwrite existing popup, but don't spawn one
+          if( null != tileToast )
+            tileToast = "WRECK";
+
+          if( stomperType.regenOnBuildingKill )
           {
-            crushEvents.add(new ArmyDefeatEvent(location.getOwner().army));
+            int heal = 2;
+            crush.events.add(new HealUnitEvent(kaijuState.unit, heal, null, true));
+            kaijuState.alterHP(heal); // previewed by caller
           }
+          if( stomperType.chargeOnBuildingKill && location.isCaptureable() )
+          {
+            crush.events.add(new CommanderEnergyChangeEvent(kaijuState.CO, 1));
+            tileToast = "ENERGY";
+          }
+
+          // Icky, but I don't really wanna change this function signature
+          if( gameMap instanceof MapMaster )
+            if( Utils.willLoseFromLossOf((MapMaster) gameMap, location) )
+            {
+              crush.events.add(new ArmyDefeatEvent(location.getOwner().army));
+            }
         }
 
         kaijuState.movePower -= distance;
         GamePath oneTilePath = new GamePath();
         oneTilePath.addWaypoint(kaijuState.coord);
         oneTilePath.addWaypoint(destCoord);
-        Utils.enqueueMoveEvent(gameMap, kaijuState.unit, oneTilePath, crushEvents);
+        // We know nothing can stop us right now
+        crush.events.add(new Engine.GameEvents.MoveEvent(kaijuState.unit, oneTilePath));
         kaijuState.coord = destCoord;
+      }
+
+      if( null != tileToast )
+      {
+        crush.popups.add(new DamagePopup(destCoord, kaijuState.CO.myColor, tileToast));
       }
     }
 

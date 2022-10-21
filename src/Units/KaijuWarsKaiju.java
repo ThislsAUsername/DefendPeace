@@ -517,7 +517,7 @@ public class KaijuWarsKaiju
   } //~UFOMod
 
 
-  public static boolean isEnemyRadarScanning(MapMaster map, XYCoord target, Commander affiliation)
+  public static boolean isEnemyRadarScanning(GameMap map, XYCoord target, Commander affiliation)
   {
     boolean isAnyRadar = false;
     for( XYCoord xyc : Utils.findLocationsInRange(map, target, Radar.PIERCING_VISION) )

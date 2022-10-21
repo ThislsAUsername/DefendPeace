@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import Engine.GameActionSet;
 import Engine.UnitActionFactory;
+import Engine.Combat.DamagePopup;
 
 /************************************************************
  * State to allow selecting an action for a unit.           *
@@ -28,6 +29,14 @@ class SelectUnitAction extends GameInputState<GameActionSet>
     return new OptionSet(myUnitActions.toArray());
   }
 
+  @Override
+  public void consider(GameActionSet menuOption)
+  {
+    myStateData.damagePopups = new ArrayList<DamagePopup>();
+    // If there's a preview and no targeting step, we have to preview now
+    if( !menuOption.isTargetRequired() )
+      myStateData.damagePopups = menuOption.getSelected().getDamagePopups(myStateData.gameMap);
+  }
   @Override
   public GameInputState<?> select(GameActionSet menuOption)
   {
@@ -84,5 +93,6 @@ class SelectUnitAction extends GameInputState<GameActionSet>
   public void back()
   {
     myStateData.actionSet = null;
+    myStateData.damagePopups.clear();
   }
 }
