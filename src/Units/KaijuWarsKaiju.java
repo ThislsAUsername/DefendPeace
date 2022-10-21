@@ -100,7 +100,7 @@ public class KaijuWarsKaiju
     public final int[] hpChunks, hpBases;
     public boolean regenOnBuildingKill  = false;
     public boolean stopOnBuildingKill   = true;
-    public boolean chargeOnBuildingKill = true;
+    public boolean chargeOnBuildingKill = false;
     public boolean hasRamSkill          = false;
     public boolean hasDeepTunnelSkill   = false;
     // Used by Big Donk and Duggemundr to get a new type on spawn
