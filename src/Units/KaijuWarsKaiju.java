@@ -164,7 +164,7 @@ public class KaijuWarsKaiju
   public static class Alphazaurus extends KaijuUnitModel
   {
     private static final long serialVersionUID = 1L;
-    private static final long ROLE = TROOP | SEA;
+    private static final long ROLE = TROOP | LAND | SEA;
     public Alphazaurus()
     {
       super("Alphazaurus", ROLE, ALPHA_CHUNKS, ALPHA_HPBASES);
@@ -383,7 +383,7 @@ public class KaijuWarsKaiju
   public static class Snek extends KaijuUnitModel
   {
     private static final long serialVersionUID = 1L;
-    private static final long ROLE = TANK | SUBSURFACE;
+    private static final long ROLE = TANK | LAND | SUBSURFACE;
     public Snek(SnekTunneler tunneler)
     {
       super("Duggemundr", ROLE, SNEK_CHUNKS, SNEK_HPBASES);
