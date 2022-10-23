@@ -42,14 +42,6 @@ public class PlayerSetupCommanderArtist
     BufferedImage image = SpriteLibrary.createTransparentSprite(myWidth, myHeight);
     Graphics myG = image.getGraphics();
 
-    /////////////// Commander Portrait //////////////////////
-    int binIndex        = control.cmdrBinSelector.getSelectionNormalized();
-    int coIndex         = control.cmdrInBinSelector.getSelectionNormalized();
-    int highlightedCmdr = control.cmdrBins.get(binIndex).get(coIndex);
-    BufferedImage likeness = SpriteLibrary.getCommanderSprites( infos.get(highlightedCmdr).name ).body;
-    final int likenessVOffset = Math.max(0, myHeight - likeness.getHeight());
-    myG.drawImage(likeness, myWidth-likeness.getWidth(), likenessVOffset, null);
-
     /////////////// Commander Panels //////////////////////
     drawCmdrPickerPanels(myG, myHeight, myWidth, infos, playerColor, snapCursor);
 
