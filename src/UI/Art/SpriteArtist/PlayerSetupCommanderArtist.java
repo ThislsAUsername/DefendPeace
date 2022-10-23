@@ -64,24 +64,27 @@ public class PlayerSetupCommanderArtist
                        ArrayList<CommanderInfo> infos, Color playerColor,
                        boolean snapCursor)
   {
+    // Selected horizontal bin on the screen
     int binIndex        = myControl.cmdrBinSelector.getSelectionNormalized();
+    // Index into that bin that's selected
     int coIndex         = myControl.cmdrInBinSelector.getSelectionNormalized();
+    // Value of that selection; index into the list of CO infos
     int highlightedCmdr = myControl.cmdrBins.get(binIndex).get(coIndex);
-    // Calculate the vertical space each player panel will consume.
+    // Calculate the vertical space each bin panel will consume.
     int panelBuffer = 3;
     int panelHeight = CommanderPanel.PANEL_HEIGHT+panelBuffer + 1;
     int panelShift  = textToastHeight + panelHeight + panelBuffer;
 
-    // Find where the zeroth Commander should be drawn.
+    // We're drawing the panels to align with the vertically-fixed cursor,
+    // so figure out where the zeroth bin panel should be drawn.
     panelOffsetY.set(binIndex*panelShift, snapCursor);
     int drawY = myHeight / 2 - panelOffsetY.geti() - panelHeight + panelBuffer + 1;
 
     // Selected CO's name for drawing later
     String coNameText = "";
 
-    // We're gonna make this an endless scroll, so back up (in y-space and in the CO list) until
-    // we find the Commander that would be off the top of the screen.
     int binToDraw = 0;
+    // X offset to start drawing CO faces from
     int baseDrawX = SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Make sure we have room to draw the cursor around the frame.
 
     for(; drawY - CommanderPanel.PANEL_HEIGHT/2 < myHeight
@@ -91,7 +94,7 @@ public class PlayerSetupCommanderArtist
       int indexInBin = 0;
       int drawX = baseDrawX;
 
-      // Draw the panel to go behind the COs
+      // Draw the bin panel to go behind the COs
       final COSpriteSpec spriteSpec = myControl.binColorSpec.get(binToDraw);
       Color[] palette = UIUtils.defaultMapColors;
       String canonName = "MISC";
@@ -100,8 +103,9 @@ public class PlayerSetupCommanderArtist
         palette = UIUtils.getMapUnitColors(spriteSpec.color).paletteColors;
         canonName = UIUtils.getCanonicalFactionName(spriteSpec);
       }
-      int nextDrawY = drawCmdrBinLayer(myG, canonName, palette[5], palette[3], myWidth, drawY, panelHeight);
+      int currentPanelBottomY = drawCmdrBin(myG, canonName, palette[5], palette[3], myWidth, drawY, panelHeight);
 
+      // Actually draw the CO mugs
       ArrayList<Integer> currentBin = myControl.cmdrBins.get(binToDraw);
       while (drawX < myWidth && indexInBin < currentBin.size())
       {
@@ -130,7 +134,8 @@ public class PlayerSetupCommanderArtist
         ++indexInBin;
         drawX += playerImage.getWidth() + panelBuffer;
       }
-      drawY = nextDrawY + panelBuffer;
+
+      drawY = currentPanelBottomY + panelBuffer;
     }
 
     final int cursorY = myHeight / 2 - CommanderPanel.PANEL_HEIGHT / 2;
@@ -148,10 +153,11 @@ public class PlayerSetupCommanderArtist
   static final int textHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight();
   static final int txtBuf = 2;
   static final int textToastHeight = textHeight + txtBuf; // upper buffer only
-  public static int drawCmdrBinLayer(Graphics g, String label, Color bg,  Color frame, int screenWidth, int y, int bodyHeight)
+  public static int drawCmdrBin(Graphics g, String label, Color bg,  Color frame, int screenWidth, int y, int bodyHeight)
   {
     int textToastWidth  = textWidth*label.length();
 
+    // Smooths between the label backing to the CO face holder
     Polygon triangle = new Polygon();
     triangle.addPoint(txtBuf+textToastWidth                , y);                 // top left
     triangle.addPoint(txtBuf+textToastWidth                , y+textToastHeight); // bottom left
@@ -192,9 +198,10 @@ public class PlayerSetupCommanderArtist
     final int panelSpacing = 1;
     final int panelXShift = panelWidth + panelSpacing;
 
+    // Draw the list of COs in your tag from left to right
     final int drawY = 4;
     final ArrayList<Integer> taggedCOs = myControl.tagCmdrList;
-    for(int tagToDraw = 0; tagToDraw < taggedCOs.size(); ++tagToDraw)
+    for( int tagToDraw = 0; tagToDraw < taggedCOs.size(); ++tagToDraw )
     {
       CommanderInfo coInfo = infos.get(taggedCOs.get(tagToDraw));
 

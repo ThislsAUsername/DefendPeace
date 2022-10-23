@@ -156,7 +156,6 @@ public class PlayerSetupColorFactionArtist
 
   public static void drawTagPickerPanels(Graphics myG, int myWidth, Color playerColor, boolean flipUnits)
   {
-    // Calculate the vertical space each player panel will consume.
     final int panelThickness = 1;
     final int panelBuffer = 2*panelThickness;
     final int panelWidth  = unitSizePx+panelBuffer;

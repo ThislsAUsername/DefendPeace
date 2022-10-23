@@ -38,7 +38,7 @@ public class PlayerSetupCommanderController implements IController
     for( CODeets deets : myPlayerInfo.coList )
       tagCmdrList.add(deets.co);
 
-    final int lastCO = tagCmdrList.get(tagCmdrList.size() - 1);
+    final int lastTagCO = tagCmdrList.get(tagCmdrList.size() - 1);
 
     cmdrBins = new ArrayList<>();
     binColorSpec = new ArrayList<>();
@@ -47,7 +47,9 @@ public class PlayerSetupCommanderController implements IController
     int startBin = 0;
     int startBinIndex = 0;
 
+    // Set up our bins - each one contains a NO CO + all the COs from one canon faction
     int coIndex = 0;
+    // List of what bins we've already created, so we don't depend on specific ordering/structure in the CO list
     HashMap<COSpriteSpec, Integer> factionIndex = new HashMap<>();
     for (; coIndex < infos.size(); ++coIndex)
     {
@@ -66,13 +68,13 @@ public class PlayerSetupCommanderController implements IController
         factionIndex.put(canonFaction, binIndex);
 
         ArrayList<Integer> bin = new ArrayList<>();
-        bin.add(noCmdr); // Put No CO at the start of each bin?
+        bin.add(noCmdr); // Put No CO at the start of each bin, to facilitate easy/simple UX
         cmdrBins.add(bin);
         binColorSpec.add(canonFaction);
       }
 
       cmdrBins.get(binIndex).add(coIndex);
-      if( lastCO == coIndex )
+      if( lastTagCO == coIndex ) // Select the last CO in the tag by default
       {
         startBin = binIndex;
         startBinIndex = cmdrBins.get(binIndex).size()-1;
@@ -92,6 +94,7 @@ public class PlayerSetupCommanderController implements IController
     boolean done = false;
     final int selectedBin    = cmdrBinSelector.getSelectionNormalized();
     final int selectedColumn = cmdrInBinSelector.getSelectionNormalized();
+    // Value of selection; index into the list of CO infos
     final int selectedCO     = cmdrBins.get(selectedBin).get(selectedColumn);
     switch(action)
     {
@@ -138,6 +141,7 @@ public class PlayerSetupCommanderController implements IController
       {
         final int binPicked = cmdrBinSelector.handleInput(action);
         final int destBinSize = cmdrBins.get(binPicked).size();
+        // Selection column clamps to the max for the new bin
         cmdrInBinSelector.reset(destBinSize);
         final int destColumn = Math.min(destBinSize - 1, rightGlueColumn);
         cmdrInBinSelector.setSelectedOption(destColumn);
