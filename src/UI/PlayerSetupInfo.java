@@ -48,7 +48,7 @@ public class PlayerSetupInfo
   {
     String noParens = input.replace("\\(\\)", "");
     // Throw away any starting space since it makes us barf
-    if( noParens.charAt(0) == ' ' )
+    while (noParens.charAt(0) == ' ')
       noParens = noParens.substring(1);
     String[] s = noParens.split("\\s+");
     int si = 0;
