@@ -11,3 +11,26 @@
   GR  GR 0HQ  GR  GR  GR  MT  MT  RV  RV  MT  MT  GR  GR  GR  GR  RD  GR  GR
   FR 0FC  RD 0FC  GR  MT  MT  RV  RV  MT  MT  MT  MT  GR  MT  GR 1HQ  GR  GR
   GR  GR  RD  GR  GR  MT  MT  RV  MT  MT  MT  MT  MT  MT  GR 1FC  GR 1FC  GR
+team, unit type, x, y
+0, tank,     1, 8
+0, md_tank,  2, 7
+0, INFANTRY, 2, 8
+0, INFANTRY, 3, 8
+0, apc,      3, 9
+0, mech,     3, 10
+0, mech,     4, 10
+
+1, md_tank,   11, 2
+1, artillery, 12, 2
+1, tank,      14, 2
+1, artillery, 14, 5
+1, rockets,   14, 12
+1, md_tank,   15, 4
+1, infantry,  15, 9
+1, infantry,  16, 1
+1, infantry,  16, 2
+1, tank,      16, 7
+1, md_tank,   16, 11
+1, infantry,  17, 9
+1, rockets,   18, 12
+
