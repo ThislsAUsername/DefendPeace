@@ -1,6 +1,8 @@
 package Engine;
 
 import Terrain.GameMap;
+import Terrain.MapLocation;
+import Terrain.TerrainType;
 import Units.Unit;
 import Units.MoveTypes.MoveType;
 
@@ -56,7 +58,10 @@ public interface FloodFillFunctor
 
     public boolean canEnd(GameMap map, XYCoord end)
     {
-      Unit obstacle = map.getLocation(end).getResident();
+      final MapLocation loc = map.getLocation(end);
+      if( loc.getEnvironment().terrainType == TerrainType.TELETILE )
+        return false; // Don't allow stopping on them
+      Unit obstacle = loc.getResident();
       if( obstacle == null || obstacle == unit)
         return true;
       return includeOccupiedDestinations;
