@@ -38,14 +38,15 @@ public class TerrainType implements Serializable
   
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   //// Protected constants to initialize/parse the attribute flags, and the methods to query them.
-  private static final int LAND = 1;
-  private static final int WATER = LAND << 1;
-  private static final int CAPTURABLE = WATER << 1; // Whether a Commander can take ownership of this property.
-  private static final int PROFITABLE = CAPTURABLE << 1; // Whether this terrain type grants income to its owner each turn.
-  private static final int PROVIDES_COVER = PROFITABLE << 1; // Whether it hides surface units in fog
-  private static final int HEALS_LAND = PROVIDES_COVER << 1;
-  private static final int HEALS_SEA = HEALS_LAND << 1;
-  private static final int HEALS_AIR = HEALS_SEA << 1;
+  private static final int LAND              = 1 << 0;
+  private static final int WATER             = 1 << 1;
+  private static final int CAPTURABLE        = 1 << 2; // Whether a Commander can take ownership of this property.
+  private static final int PROFITABLE        = 1 << 3; // Whether this terrain type grants income to its owner each turn.
+  private static final int PROVIDES_COVER    = 1 << 4; // Whether it hides surface units in fog
+  private static final int HEALS_LAND        = 1 << 5;
+  private static final int HEALS_SEA         = 1 << 6;
+  private static final int HEALS_AIR         = 1 << 7;
+  private static final int UNWEATHERABLE     = 1 << 8; // Not meaningfully affected by weather
 
   public int getDefLevel() { return mDefenseLevel; }
   public int getVisionBoost() { return mVisionBoost; }
@@ -58,6 +59,7 @@ public class TerrainType implements Serializable
   public Boolean healsLand() { return 0 != (mAttributes & HEALS_LAND); }
   public Boolean healsSea() { return 0 != (mAttributes & HEALS_SEA); }
   public Boolean healsAir() { return 0 != (mAttributes & HEALS_AIR); }
+  public Boolean isUnweatherable() { return 0 != (mAttributes & UNWEATHERABLE); }
   public TerrainType getBaseTerrain() { return (null == mBase)? SEA : mBase; }
   
   ////////////////////////////////////////////////////////////////////////////////////////////
@@ -102,12 +104,12 @@ public class TerrainType implements Serializable
   private static final String AIRPORT_NAME = "AIRPORT";
   public static final TerrainType AIRPORT = new TerrainType( AIRPORT_FLAGS, AIRPORT_DEFENSE, AIRPORT_NAME, GRASS );
 
-  private static final int PILLAR_FLAGS = 0;
+  private static final int PILLAR_FLAGS = UNWEATHERABLE;
   private static final int PILLAR_DEFENSE = 0;
   private static final String PILLAR_NAME = "PILLAR";
   public static final TerrainType PILLAR = new TerrainType( PILLAR_FLAGS, PILLAR_DEFENSE, PILLAR_NAME, GRASS );
 
-  private static final int METEOR_FLAGS = 0;
+  private static final int METEOR_FLAGS = UNWEATHERABLE;
   private static final int METEOR_DEFENSE = 0;
   private static final String METEOR_NAME = "METEOR";
   public static final TerrainType METEOR = new TerrainType( METEOR_FLAGS, METEOR_DEFENSE, METEOR_NAME, GRASS );
@@ -158,7 +160,7 @@ public class TerrainType implements Serializable
   private static final String ROAD_NAME = "ROAD";
   public static final TerrainType ROAD = new TerrainType( ROAD_FLAGS, ROAD_DEFENSE, ROAD_NAME, SHOAL );
 
-  private static final int TELETILE_FLAGS = 0;
+  private static final int TELETILE_FLAGS = UNWEATHERABLE;
   private static final int TELETILE_DEFENSE = 0;
   private static final String TELETILE_NAME = "TELETILE";
   public static final TerrainType TELETILE = new TerrainType( TELETILE_FLAGS, TELETILE_DEFENSE, TELETILE_NAME, null );
