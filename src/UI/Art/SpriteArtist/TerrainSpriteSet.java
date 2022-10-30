@@ -502,6 +502,8 @@ public class TerrainSpriteSet
       terrainBases.put(TerrainType.REEF, TerrainType.SEA);
       terrainBases.put(TerrainType.SEA, TerrainType.SEA);
 
+      terrainBases.put(TerrainType.TELETILE, TerrainType.TELETILE);
+
       if( TerrainType.TerrainTypeList.size() != terrainBases.size())
       {
         throw new RuntimeException("TerrainSpriteSet.terrainBases does not align with TerrainType.TerrainTypeList!");

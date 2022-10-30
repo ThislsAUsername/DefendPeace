@@ -227,6 +227,10 @@ public class MapReader extends IMapBuilder
         return SE;
       case "SH":
         return SH;
+      case "TT":
+        return TT;
+      case "XX":
+        return XX;
       case "PI":
         return PI;
       case "ME":

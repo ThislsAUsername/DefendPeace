@@ -158,6 +158,11 @@ public class TerrainType implements Serializable
   private static final String ROAD_NAME = "ROAD";
   public static final TerrainType ROAD = new TerrainType( ROAD_FLAGS, ROAD_DEFENSE, ROAD_NAME, SHOAL );
 
+  private static final int TELETILE_FLAGS = 0;
+  private static final int TELETILE_DEFENSE = 0;
+  private static final String TELETILE_NAME = "TELETILE";
+  public static final TerrainType TELETILE = new TerrainType( TELETILE_FLAGS, TELETILE_DEFENSE, TELETILE_NAME, null );
+
   private static final int SEAPORT_FLAGS = LAND | WATER | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_SEA;
   private static final int SEAPORT_DEFENSE = 3;
   private static final String SEAPORT_NAME = "SEAPORT";
@@ -172,7 +177,7 @@ public class TerrainType implements Serializable
   // List of all terrain types.
   public static final ArrayList<TerrainType> TerrainTypeList =
       new ArrayList<TerrainType>(Arrays.asList(
-          AIRPORT, TEMP_AIRPORT, BRIDGE, CITY, BUNKER, PILLAR, METEOR, DUNES, FACTORY, FOREST, GRASS, HEADQUARTERS, LAB, MOUNTAIN, REEF, RIVER, ROAD, SEA, SEAPORT, TEMP_SEAPORT, SHOAL
+          AIRPORT, TEMP_AIRPORT, BRIDGE, CITY, BUNKER, PILLAR, METEOR, DUNES, FACTORY, FOREST, GRASS, HEADQUARTERS, LAB, MOUNTAIN, REEF, RIVER, ROAD, SEA, SEAPORT, TEMP_SEAPORT, SHOAL, TELETILE
           ));
 
   @Override
