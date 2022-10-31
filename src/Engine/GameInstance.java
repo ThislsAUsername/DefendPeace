@@ -19,6 +19,7 @@ import Engine.StateTrackers.StateTracker;
 import Engine.UnitMods.SandstormModifier;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
+import Units.Unit;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.MapPerspective;
@@ -188,8 +189,12 @@ public class GameInstance implements Serializable
   {
     // Store the cursor location for the current CO.
     playerCursors.put(activeCoNum, new XYCoord(cursorX, cursorY));
-    int coTurns = 0;
+    // Clean up any still-active unit turns
+    if( null != activeArmy )
+      for( Unit u : activeArmy.getUnits() )
+        u.isTurnOver = true;
 
+    int coTurns = 0;
     // Find the next non-defeated CO.
     do
     {
