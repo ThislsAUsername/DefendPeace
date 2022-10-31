@@ -1,0 +1,14 @@
+  CT  GR  GR  CT  GR
+  GR  GR  GR  GR  CT
+  GR  GR  CT  GR  GR
+  GR  GR  SE  SE  SE
+  GR  SE 1HQ 2HQ 3HQ
+team, unit type, x, y
+1, anti-air, 0, 3
+
+2, INFANTRY, 0, 1
+2, INFANTRY, 1, 0
+2, INFANTRY, 2, 1
+2, INFANTRY, 1, 2
+
+3, b-copter, 1, 1

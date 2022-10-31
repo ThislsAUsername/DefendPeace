@@ -40,6 +40,7 @@ public class TestMain extends TestCase
     testsPassed &= validate(new TestCommanderAve().runTest(), "CommanderAve test failed!");
     testsPassed &= validate(new TestCommanderTech().runTest(), "CommanderTech test failed!");
     testsPassed &= validate(new TestAIBehavior().runTest(), "AI behavior test failed!");
+    testsPassed &= validate(new TestAIConstraints().runTest(), "AI constraint test failed!");
     System.out.println("All tests completed.");
     return testsPassed;
   }

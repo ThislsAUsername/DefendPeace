@@ -104,4 +104,18 @@ public abstract class TestCase
       GameEventListener.publishEvent(event, game);
     }
   }
+
+  protected static void turn(GameInstance game)
+  {
+    turn(game, 1);
+  }
+  protected static void turn(GameInstance game, int reps)
+  {
+    for( int i = 0; i < reps; ++i )
+    {
+      GameEventQueue sequence = new GameEventQueue();
+      game.turn(sequence);
+      performEvents(game, sequence);
+    }
+  }
 }
