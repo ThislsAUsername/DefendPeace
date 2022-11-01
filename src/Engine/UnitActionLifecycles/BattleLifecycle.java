@@ -389,7 +389,10 @@ public abstract class BattleLifecycle
     }
     public boolean defenderDies()
     {
-      return (int) ((battleInfo.defender.getPreciseHP() - battleInfo.defenderHealthLoss) * 10) <= 0;
+      final double preciseHP = battleInfo.defender.getPreciseHP();
+      final double healthLoss = battleInfo.defenderHealthLoss;
+      final double finalHP = (preciseHP - healthLoss) * 10;
+      return (int) finalHP <= 0;
     }
 
     @Override
