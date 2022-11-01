@@ -6,7 +6,10 @@ import CommandingOfficers.Strong;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
+import Engine.Path;
 import Engine.Utils;
+import Engine.Combat.BattleSummary;
+import Engine.Combat.CombatEngine;
 import Engine.GameEvents.CommanderDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
@@ -46,6 +49,7 @@ public class TestCombat extends TestCase
     testPassed &= validate(testIndirectAttacks(), "  Indirect combat test failed.");
     testPassed &= validate(testMoveAttack(), "  Move-Attack test failed.");
     testPassed &= validate(testCounterAttack(), "  Counterattack test failed.");
+    testPassed &= validate(testCounterAttackEdgeCase(), "  Counterattack edge case test failed.");
     testPassed &= validate(testKillLastUnit(), "  Last-unit death test failed.");
     return testPassed;
   }
@@ -190,6 +194,33 @@ public class TestCombat extends TestCase
     // Verify that the recon was hurt and the tank expended ammo.
     boolean testPassed = validate(attacker.getHP() < 10, "    Recon took no damage!");
     testPassed &= validate( defender.ammo == (defender.model.maxAmmo-1), "    Defender expended no ammo!" );
+
+    // Clean up
+    testMap.removeUnit(attacker);
+    testMap.removeUnit(defender);
+    testCo1.units.clear();
+    testCo2.units.clear();
+
+    return testPassed;
+  }
+
+  private boolean testCounterAttackEdgeCase()
+  {
+    // Add our combatants
+    Unit attacker = addUnit(testMap, testCo2, UnitModel.TROOP, 7, 3);
+    Unit defender = addUnit(testMap, testCo1, UnitModel.TROOP, 8, 3);
+    attacker.damageHP(8.9); // Leaves us with 1.1
+    defender.damageHP(8.8); // Leaves us with 1.2
+    System.out.println("Created " + attacker.toStringWithLocation() + " and " + defender.toStringWithLocation() );
+
+    // Attack defender with attacker.
+    attacker.initTurn(testMap); // Make sure he is ready to move.
+    final Path path = Utils.findShortestPath(attacker, 7, 3, testMap);
+    BattleSummary results = CombatEngine.simulateBattleResults(attacker, defender, testMap, path.getEnd().x, path.getEnd().y);
+    BattleLifecycle.BattleEvent event = new BattleLifecycle.BattleEvent(attacker, defender, path, testMap);
+
+    boolean testPassed = validate(results.attackerHealthLoss > 0, "    Attacker took no damage!");
+    testPassed &= validate(!event.defenderDies(), "    Defender died!");
 
     // Clean up
     testMap.removeUnit(attacker);
