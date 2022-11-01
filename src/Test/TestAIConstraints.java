@@ -42,7 +42,7 @@ public class TestAIConstraints extends TestCase
   {
     boolean testPassed = true;
 
-    final ArrayList<AIMaker> aiList = AILibrary.getAIList();
+    final ArrayList<AIMaker> aiList = new ArrayList<>(AILibrary.getAIList());
     aiList.remove(0); // Humans are not AI
     for( AIMaker ai : aiList )
     {
