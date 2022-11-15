@@ -127,7 +127,7 @@ public class Utils
    */
   public static ArrayList<XYCoord> findFloodFillArea(XYCoord start, FloodFillFunctor fff, int initialFillPower, GameMap gameMap)
   {
-    ArrayList<XYCoord> reachableTiles = new ArrayList<XYCoord>();
+    ArrayList<XYCoord> reachableTiles = new ArrayList<>();
 
     if( null == fff || null == start || start.xCoord < 0 || start.yCoord < 0 )
     {
@@ -159,17 +159,16 @@ public class Utils
     {
       // pull out the next search node
       SearchNode currentNode = searchQueue.poll();
-      XYCoord coord = new XYCoord(currentNode.x, currentNode.y);
-      if( fff.canEnd(gameMap, coord) )
-      {
-        reachableTiles.add(coord);
-      }
 
 //      expandSearchNode(fff, gameMap, currentNode, searchQueue, powerGrid, bestMap);
       expandSearchNode(fff, gameMap, currentNode, searchQueue, bestMap);
 
       currentNode = null;
     }
+
+    for( XYCoord coord : bestMap.keySet() )
+      if( fff.canEnd(gameMap, coord) )
+        reachableTiles.add(coord);
 
     return reachableTiles;
   }
