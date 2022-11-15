@@ -336,8 +336,6 @@ public class Utils
       if( bestNodes.containsKey(next) )
       {
         oldNewPower = bestNodes.get(next).power;
-        if( oldNewPower > currentNode.power )
-          continue;
       }
       // If we can move more cheaply than previously discovered,
       // then update the power grid and re-queue the next node.
