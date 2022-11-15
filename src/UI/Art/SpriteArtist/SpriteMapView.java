@@ -269,28 +269,7 @@ public class SpriteMapView extends MapView
     if( null != currentPath && null != currentActor && !mapController.isTargeting() )
     {
       SelectedUnitThreatAreaMode threatMode = SpriteOptions.getSelectedUnitThreatAreaMode();
-      for( WeaponModel w : currentActor.model.weapons )
-      {
-        // Display what we can shoot next turn...
-        if( threatMode == SelectedUnitThreatAreaMode.All
-            || threatMode == SelectedUnitThreatAreaMode.Future )
-          overlays.add(new GameOverlay(null,
-                       AICombatUtils.findThreatPower(gameMap, currentActor, cursorCoord, null).keySet(),
-                       OverlayArtist.FIRE_FILL, OverlayArtist.LATER_FIRE_EDGE));
-
-        // ...and this turn's targets on top
-        if( threatMode == SelectedUnitThreatAreaMode.All
-            || threatMode == SelectedUnitThreatAreaMode.Current )
-          if( w.canFireAfterMoving || currentPath.getPathLength() == 1 )
-          {
-            UnitContext uc = new UnitContext(gameMap, currentActor, w, currentPath, cursorCoord);
-            overlays.add(new GameOverlay(null,
-                         Utils.findLocationsInRange(gameMap, cursorCoord,
-                                                    (1 == uc.rangeMin)? 0 : uc.rangeMin, uc.rangeMax),
-                         OverlayArtist.FIRE_FILL, OverlayArtist.NOW_FIRE_EDGE));
-          }
-
-      } // ~per-weapon loop
+      overlays.addAll(getActorThreat(gameMap, currentActor, cursorCoord, currentPath, threatMode));
     }
     OverlayArtist.drawHighlights(mapGraphics, gameMap, overlays,
                                  drawX, drawY,
@@ -367,6 +346,45 @@ public class SpriteMapView extends MapView
     drawHUD(screenGraphics, showTileDetails);
 
     return screenImage;
+  }
+
+  private long cachedActorThreatHash = 0;
+  private ArrayList<GameOverlay> cachedActorThreat = new ArrayList<>();
+  private ArrayList<GameOverlay> getActorThreat(
+      final MapPerspective gameMap, final Unit currentActor,
+      final XYCoord cursorCoord, final GamePath currentPath,
+      SelectedUnitThreatAreaMode threatMode)
+  {
+    long newHash = threatMode.hashCode() + currentActor.hashCode() + cursorCoord.hashCode();
+    if( newHash == cachedActorThreatHash )
+      return cachedActorThreat;
+
+    cachedActorThreatHash = newHash;
+    cachedActorThreat.clear();
+    for( WeaponModel w : currentActor.model.weapons )
+    {
+      // Display what we can shoot next turn...
+      if( threatMode == SelectedUnitThreatAreaMode.All
+          || threatMode == SelectedUnitThreatAreaMode.Future )
+        cachedActorThreat.add(new GameOverlay(null,
+                     AICombatUtils.findThreatPower(gameMap, currentActor, cursorCoord, null).keySet(),
+                     OverlayArtist.FIRE_FILL, OverlayArtist.LATER_FIRE_EDGE));
+
+      // ...and this turn's targets on top
+      if( threatMode == SelectedUnitThreatAreaMode.All
+          || threatMode == SelectedUnitThreatAreaMode.Current )
+        if( w.canFireAfterMoving || currentPath.getPathLength() == 1 )
+        {
+          UnitContext uc = new UnitContext(gameMap, currentActor, w, currentPath, cursorCoord);
+          cachedActorThreat.add(new GameOverlay(null,
+                       Utils.findLocationsInRange(gameMap, cursorCoord,
+                                                  (1 == uc.rangeMin)? 0 : uc.rangeMin, uc.rangeMax),
+                       OverlayArtist.FIRE_FILL, OverlayArtist.NOW_FIRE_EDGE));
+        }
+
+    } // ~per-weapon loop
+
+    return cachedActorThreat;
   }
 
   @Override
