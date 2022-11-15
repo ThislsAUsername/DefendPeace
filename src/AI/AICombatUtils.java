@@ -233,7 +233,7 @@ public class AICombatUtils
         if( !u.model.hasMobileWeapon() )
           continue;
 
-        canReach |= Utils.findShortestPath(u, xyc, gameMap).getPathLength() > 1;
+        canReach |= (null != Utils.findShortestPath(u, xyc, gameMap));
         if( canReach )
           break;
       }
@@ -320,7 +320,7 @@ public class AICombatUtils
         // Figure out how to get here.
         GamePath movePath = Utils.findShortestPath(unit, xyc, gameMap);
 
-        if( movePath.getPathLength() > 0 )
+        if( null != movePath )
         {
           neededAttacks.put(xyc, unit);
           double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc).defender.getPreciseHPDamage();

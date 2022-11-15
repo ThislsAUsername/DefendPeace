@@ -101,10 +101,7 @@ public abstract class UnloadLifecycle
       myDropoffs = dropoffs;
 
       // Grab the move location and the first drop location to support getMoveLocation and getTargetLocation.
-      if( (null != movePath) && (movePath.getPathLength() > 0) )
-      {
-        moveLoc = movePath.getEndCoord();
-      }
+      moveLoc = movePath.getEndCoord();
       if( !myDropoffs.isEmpty() )
       {
         for( XYCoord coord : myDropoffs.values() )

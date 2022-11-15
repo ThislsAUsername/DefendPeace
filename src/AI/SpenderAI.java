@@ -244,7 +244,7 @@ public class SpenderAI implements AIController
               path = Utils.findShortestPath(unit, goal, gameMap, true);
               validTarget = (myArmy.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
                   && !capturingProperties.contains(goal) // We aren't already capturing it.
-                  && (path.getPathLength() > 0)); // We can reach it.
+                  && (null != path)); // We can reach it.
               log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal,
                   (validTarget ? "Yes" : "No")));
             } while (!validTarget && (index < validTargets.size())); // Loop until we run out of properties to check.
@@ -266,7 +266,7 @@ public class SpenderAI implements AIController
               Utils.sortLocationsByDistance(goal, destinations);
               XYCoord destination = destinations.get(0);
               GamePath movePath = Utils.findShortestPath(unit, destination, gameMap);
-              if( movePath.getPathLength() > 1 ) // We only want to try to travel if we can actually go somewhere
+              if( null != movePath ) // We only want to try to travel if we can actually go somewhere
               {
                 GameAction move = new WaitLifecycle.WaitAction(unit, movePath);
                 actions.offer(move);

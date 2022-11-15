@@ -501,7 +501,7 @@ public class JakeMan extends ModularAI
     for( XYCoord target : validTargets )
     {
       path = Utils.findShortestPath(unit, target, gameMap, true);
-      if( path.getPathLength() > 0 ) // We can reach it.
+      if( null != path ) // We can reach it.
       {
         goal = target;
         break;
@@ -553,7 +553,7 @@ public class JakeMan extends ModularAI
           }
         }
 
-        if( null == action && movePath.getPathLength() > 1) // Just wait if we can't do anything cool
+        if( null == action && null != movePath ) // Just wait if we can't do anything cool
           action = new WaitLifecycle.WaitAction(unit, movePath);
         return action;
       }

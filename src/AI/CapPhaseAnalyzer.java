@@ -182,7 +182,7 @@ public class CapPhaseAnalyzer implements Serializable
         inf.y = ownedFac.yCoord;
 
         final GamePath infPath = findFeasiblePath(inf, neutralFac, map);
-        if( null == infPath || infPath.getPathLength() < 1 )
+        if( null == infPath )
           continue; // Can't reach
 
         int distance = infPath.getFuelCost(inf, map);
@@ -213,7 +213,7 @@ public class CapPhaseAnalyzer implements Serializable
         inf.y = ownedFac.yCoord;
 
         final GamePath infPath = findFeasiblePath(inf, propXYC, map);
-        if( null == infPath || infPath.getPathLength() < 1 )
+        if( null == infPath )
           continue; // Can't reach this city
 
         int oldDistance = Integer.MAX_VALUE;
@@ -271,7 +271,7 @@ public class CapPhaseAnalyzer implements Serializable
       inf.y = start.yCoord;
 
       final GamePath infPath = findFeasiblePath(inf, dest, map);
-      if( null == infPath || infPath.getPathLength() < 1 )
+      if( null == infPath )
         continue; // Can't reach
 
       int distance = infPath.getFuelCost(inf, map);
@@ -353,7 +353,7 @@ public class CapPhaseAnalyzer implements Serializable
           XYCoord dest = rightfulProps.get(0);
 
           final GamePath infPath = findFeasiblePath(inf, dest, map);
-          if( null == infPath || infPath.getPathLength() < 1 )
+          if( null == infPath )
           {
             last.extraTurns = LOOKAHEAD_TURNS+1;
             continue; // Can't reach

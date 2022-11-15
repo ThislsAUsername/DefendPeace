@@ -23,6 +23,7 @@ public class MoveEvent implements GameEvent
   {
     unit = u;
     unitPath = path;
+    getEndPoint(); // Throw immediately on bad paths
   }
 
   @Override

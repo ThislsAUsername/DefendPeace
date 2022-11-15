@@ -278,13 +278,11 @@ public class Utils
       return null;
     }
 
-    GamePath aPath = new GamePath();
     if( !map.isLocationValid(x, y) )
     {
       // Unit is not in a valid place. No path can be found.
       System.out.println("WARNING! Cannot find path for a unit that is not on the map.");
-      aPath.clear();
-      return aPath;
+      return null;
     }
 
     HashMap<XYCoord, SearchNode> bestMap = new HashMap<>();
@@ -334,11 +332,11 @@ public class Utils
       currentNode = null;
     }
 
-    // Clear and Populate the Path object.
-    aPath.clear();
+    GamePath aPath = null;
     // We added the waypoints to the list from end to beginning, so populate the Path in reverse order.
     if( !waypointList.isEmpty() )
     {
+      aPath = new GamePath();
       for( int j = waypointList.size() - 1; j >= 0; --j )
       {
         //System.out.println("Waypoint " + waypointList.get(j).x + ", " + waypointList.get(j).y + " over " + map.getEnvironment(waypointList.get(j).x, waypointList.get(j).y).terrainType);

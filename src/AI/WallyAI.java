@@ -599,7 +599,7 @@ public class WallyAI extends ModularAI
     {
       shouldResupply = unit.getHP() <= UNIT_HEAL_THRESHOLD;
       shouldResupply |= unit.fuel <= UNIT_REFUEL_THRESHOLD
-          * Utils.findShortestPath(unit, stations.get(0), gameMap).getFuelCost(unit, gameMap);
+          * Utils.findShortestPath(unit, stations.get(0), gameMap, true).getFuelCost(unit, gameMap);
       shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHOLD;
     }
 
@@ -754,7 +754,7 @@ public class WallyAI extends ModularAI
     for( XYCoord target : validTargets )
     {
       path = Utils.findShortestPath(unit, target, gameMap, true);
-      if( path.getPathLength() > 0 ) // We can reach it.
+      if( null != path ) // We can reach it.
       {
         goal = target;
         break;
@@ -828,7 +828,7 @@ public class WallyAI extends ModularAI
           }
         }
 
-        if( null == action && movePath.getPathLength() > 1) // Just wait if we can't do anything cool
+        if( null == action && null != movePath ) // Just wait if we can't do anything cool
           action = new WaitLifecycle.WaitAction(unit, movePath);
         return action;
       }
