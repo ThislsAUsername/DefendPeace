@@ -135,20 +135,10 @@ public class Utils
       return reachableTiles;
     }
 
-    // set all locations to unreachable
-    int[][] powerGrid = new int[gameMap.mapWidth][gameMap.mapHeight];
-    for( int i = 0; i < gameMap.mapWidth; i++ )
-    {
-      for( int j = 0; j < gameMap.mapHeight; j++ )
-      {
-        powerGrid[i][j] = -1;
-      }
-    }
-
+    HashMap<XYCoord, SearchNode> bestNodes = new HashMap<>();
     // set up our search
-    SearchNode root = new SearchNode(start.xCoord, start.yCoord);
-    powerGrid[start.xCoord][start.yCoord] = initialFillPower;
-    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid));
+    SearchNode root = new SearchNode(start, initialFillPower, null);
+    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator());
     searchQueue.add(root);
     // do search
     while (!searchQueue.isEmpty())
@@ -161,7 +151,7 @@ public class Utils
         reachableTiles.add(coord);
       }
 
-      expandSearchNode(fff, gameMap, currentNode, searchQueue, powerGrid);
+      expandSearchNode(fff, gameMap, currentNode, bestNodes, searchQueue);
 
       currentNode = null;
     }
@@ -273,28 +263,19 @@ public class Utils
       return null;
     }
 
-    GamePath aPath = new GamePath();
+    GamePath aPath = null;
     if( !map.isLocationValid(x, y) )
     {
       // Unit is not in a valid place. No path can be found.
       System.out.println("WARNING! Cannot find path for a unit that is not on the map.");
-      aPath.clear();
       return aPath;
     }
 
-    int[][] powerGrid = new int[map.mapWidth][map.mapHeight];
-    for( int i = 0; i < map.mapWidth; i++ )
-    {
-      for( int j = 0; j < map.mapHeight; j++ )
-      {
-        powerGrid[i][j] = -1;
-      }
-    }
+    HashMap<XYCoord, SearchNode> bestNodes = new HashMap<>();
 
     // Set up search parameters.
-    SearchNode root = new SearchNode(start.xCoord, start.yCoord);
-    powerGrid[start.xCoord][start.yCoord] = initialFillPower;
-    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid, x, y));
+    SearchNode root = new SearchNode(start, initialFillPower, null);
+    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(x, y));
     searchQueue.add(root);
 
     ArrayList<SearchNode> waypointList = new ArrayList<SearchNode>();
@@ -319,16 +300,15 @@ public class Utils
         break;
       }
 
-      expandSearchNode(fff, map, currentNode, searchQueue, powerGrid);
+      expandSearchNode(fff, map, currentNode, bestNodes, searchQueue);
 
       currentNode = null;
     }
 
-    // Clear and Populate the Path object.
-    aPath.clear();
     // We added the waypoints to the list from end to beginning, so populate the Path in reverse order.
     if( !waypointList.isEmpty() )
     {
+      aPath = new GamePath();
       for( int j = waypointList.size() - 1; j >= 0; --j )
       {
         //System.out.println("Waypoint " + waypointList.get(j).x + ", " + waypointList.get(j).y + " over " + map.getEnvironment(waypointList.get(j).x, waypointList.get(j).y).terrainType);
@@ -344,26 +324,32 @@ public class Utils
    * can reach more economically than previously discovered, update the cost grid and enqueue the node.
    * @param theoretical If set, don't limit range using move power, and don't worry about other Units in the way.
    */
-  private static void expandSearchNode(FloodFillFunctor fff, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue,
-      int[][] powerGrid)
+  private static void expandSearchNode(FloodFillFunctor fff, GameMap map, SearchNode currentNode, HashMap<XYCoord, SearchNode> bestNodes, Queue<SearchNode> searchQueue)
   {
     ArrayList<XYCoord> coordsToCheck = findLocationsInRange(map, currentNode.getCoordinates(), 1, 1);
 
     for( XYCoord next : coordsToCheck )
     {
+      if( currentNode.tail.contains(next) )
+        continue;
+      int oldNewPower = -1;
+      if( bestNodes.containsKey(next) )
+      {
+        oldNewPower = bestNodes.get(next).power;
+        if( oldNewPower > currentNode.power )
+          continue;
+      }
       // If we can move more cheaply than previously discovered,
       // then update the power grid and re-queue the next node.
-      int oldPower = powerGrid[currentNode.x][currentNode.y];
-      int oldNextPower = powerGrid[next.xCoord][next.yCoord];
+      int oldPower = currentNode.power;
       final int transitionCost = fff.getTransitionCost(map, currentNode.getCoordinates(), next);
-      int newNextPower = oldPower - transitionCost;
+      int newPower = oldPower - transitionCost;
 
-      if( transitionCost < MoveType.IMPASSABLE && newNextPower > oldNextPower )
+      if( transitionCost < MoveType.IMPASSABLE && newPower > oldNewPower )
       {
-        powerGrid[next.xCoord][next.yCoord] = newNextPower;
-        // Prevent wrong path generation due to updating the shared powerGrid
-        searchQueue.removeIf(node->next.equals(node.getCoordinates()));
-        searchQueue.add(new SearchNode(next, currentNode));
+        final SearchNode nextNode = new SearchNode(next, newPower, currentNode);
+        searchQueue.add(nextNode);
+        bestNodes.put(next, nextNode);
       }
     }
   }
@@ -374,23 +360,27 @@ public class Utils
    */
   private static class SearchNode
   {
-    public int x, y;
-    public SearchNode parent;
+    final public int x, y;
+    final public int power;
+    final public SearchNode parent;
+    final public HashSet<XYCoord> tail;
 
-    public SearchNode(int x, int y)
+    public SearchNode(XYCoord coord, int power, SearchNode parent)
     {
-      this(x, y, null);
+      this(coord.xCoord, coord.yCoord, power, parent);
     }
-
-    public SearchNode(XYCoord coord, SearchNode parent)
-    {
-      this(coord.xCoord, coord.yCoord, parent);
-    }
-    public SearchNode(int x, int y, SearchNode parent)
+    public SearchNode(int x, int y, int power, SearchNode parent)
     {
       this.x = x;
       this.y = y;
+      this.power = power;
       this.parent = parent;
+      tail = new HashSet<>();
+      if( null != parent )
+      {
+        tail.add(parent.getCoordinates());
+        tail.addAll(parent.tail);
+      }
     }
     public XYCoord getCoordinates()
     {
@@ -399,7 +389,7 @@ public class Utils
     @Override
     public String toString()
     {
-      return String.format("(%s, %s)", x, y);
+      return String.format("(%s, %s, +%s)", x, y, power);
     }
   }
 
@@ -409,22 +399,19 @@ public class Utils
    */
   private static class SearchNodeComparator implements Comparator<SearchNode>
   {
-    int[][] powerGrid;
     private final boolean hasDestination;
     private int xDest;
     private int yDest;
 
-    public SearchNodeComparator(int[][] powerGrid)
+    public SearchNodeComparator()
     {
-      this.powerGrid = powerGrid;
       hasDestination = false;
       xDest = 0;
       yDest = 0;
     }
 
-    public SearchNodeComparator(int[][] powerGrid, int x, int y)
+    public SearchNodeComparator(int x, int y)
     {
-      this.powerGrid = powerGrid;
       hasDestination = true;
       xDest = x;
       yDest = y;
@@ -436,8 +423,8 @@ public class Utils
       int firstDist = Math.abs(o1.x - xDest) + Math.abs(o1.y - yDest);
       int secondDist = Math.abs(o2.x - xDest) + Math.abs(o2.y - yDest);
 
-      int firstPowerEstimate = powerGrid[o1.x][o1.y] - ((hasDestination) ? firstDist : 0);
-      int secondPowerEstimate = powerGrid[o2.x][o2.y] - ((hasDestination) ? secondDist : 0);
+      int firstPowerEstimate = o1.power - ((hasDestination) ? firstDist : 0);
+      int secondPowerEstimate = o2.power - ((hasDestination) ? secondDist : 0);
       return secondPowerEstimate - firstPowerEstimate;
     }
   }
