@@ -268,12 +268,10 @@ public class KaijuActions
             tileToast = "ENERGY";
           }
 
-          // Icky, but I don't really wanna change this function signature
-          if( gameMap instanceof MapMaster )
-            if( Utils.willLoseFromLossOf((MapMaster) gameMap, location) )
-            {
-              crush.events.add(new ArmyDefeatEvent(location.getOwner().army));
-            }
+          if( Utils.willLoseFromLossOf(gameMap, location) )
+          {
+            crush.events.add(new ArmyDefeatEvent(location.getOwner().army));
+          }
         }
 
         kaijuState.movePower -= distance;

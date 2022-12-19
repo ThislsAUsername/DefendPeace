@@ -719,7 +719,7 @@ public class Utils
   /**
    * @return Whether the owner of this property will lose if the property is lost
    */
-  public static boolean willLoseFromLossOf(MapMaster map, MapLocation capLoc)
+  public static boolean willLoseFromLossOf(GameMap map, MapLocation capLoc)
   {
     if(null == capLoc.getOwner())
       return false;
