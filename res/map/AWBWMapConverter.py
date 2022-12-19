@@ -1,10 +1,19 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import sys
 import math
 import re
 import csv
 import glob
+
+try:
+	from http import client
+	import ssl
+	import json
+	global context
+	context = ssl.create_default_context()
+except:
+	print("Note: Seems like you aren't using Python 3.5+, so putting in map IDs won't work")
 
 
 def convertFile(infile,outfile):
@@ -24,8 +33,65 @@ def convertFile(infile,outfile):
 	outfile.write(outstring)
 	return
 
+
+def convertAPI(mapID):
+	'''
+	Snag the map's data from the AWBW API and dump it to a file.
+	'''
+	try:
+		global context
+		req = client.HTTPSConnection("awbw.amarriner.com", 443, context=context)
+		req.connect()
+		req.request("GET", "/api/map/map_info.php?maps_id=" + mapID)
+		response = req.getresponse()
+		responseData = response.read()
+		jsonData = json.loads(responseData)
+		req.close()
+		mapName = jsonData["Name"]
+		outname = (mapName + ".map").replace(' ', '_')
+
+		try:
+			# If someone's running it from shell, and it pukes, they'll at least know which map made it puke.
+			print("Now converting file:", mapName)
+			outfile = open(outname, 'w')
+			convertJSON(jsonData,outfile)
+		except IOError:
+			print("File ",outname," cannot be written to.")
+
+	except Exception as ex:
+		print("Can't pull map from AWBW:", ex)
+		raise ex
+
+	return
+
+def convertJSON(jsonData,outfile):
+	'''
+	Take the JSON map data and dump it into the provided file.
+	'''
+	outstring = ""
+	for line in jsonData["Terrain Map"]:
+		for num in line:
+			try:
+				num = int(num)
+			# Teleporter tiles are a blank value in AWBW, so having -1 is a desired behavior for if/when we implement those.
+			except ValueError:
+				num = -1
+			outstring += indexToTerrainCode(num)
+		outstring += "\n"
+	outstring += f"team, unit type, x, y (author: {jsonData['Author']})\n"
+	for unit in jsonData["Predeployed Units"]:
+		player = countryCodeToPlayerID( unit['Country Code'] )
+		outstring += f"{player}, {unit['Unit ID']}, {unit['Unit X']}, {unit['Unit Y']}\n"
+	outfile.write(outstring)
+	return
+
+
 def main(names):
 	for name in names:
+		if name.isdigit():
+			convertAPI(name)
+			continue
+
 		try:
 			infile = open(name)
 			# Split the file extension off, and replace it with .map
@@ -42,6 +108,27 @@ def main(names):
 		finally:
 			infile.close()
 			outfile.close()
+
+def countryCodeToPlayerID(x):
+	return {
+		'os':  0,
+		'bm':  1,
+		'ge':  2,
+		'yc':  3,
+		'bh':  4,
+		'rf':  5,
+		'gs':  6,
+		'bd':  7,
+		'ab':  8,
+		'js':  9,
+		'ci': 10,
+		'pc': 11,
+		'tg': 12,
+		'pl': 13,
+		'ar': 14,
+		'wn': 15,
+	}.get(x, 0)
+
 
 def indexToTerrainCode(x):
 	return {
@@ -218,7 +305,7 @@ def indexToTerrainCode(x):
 
 
 if __name__ == "__main__":
-	helpstring = "Takes in Advance Wars by Web map files, and outputs our own map format. \nFilename is the same, extension is '.map'.\nYou can input the filenames as command line arguments, or you can drag'n'drop the files you want to convert in your file browser."
+	helpstring = "Takes in Advance Wars by Web map files (or map IDs), and outputs our own map format. \nFilename is the same, extension is '.map'.\nYou can input the filenames/IDs as command line arguments, or you can drag'n'drop the files you want to convert in your file browser."
 	if "-h" in sys.argv or "--help" in sys.argv:
 		print(helpstring)
 		input()
