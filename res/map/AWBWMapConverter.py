@@ -20,6 +20,7 @@ def convertFile(infile,outfile):
 				num = -1
 			outstring += indexToTerrainCode(num)
 		outstring += "\n"
+	outstring += "team, unit type, x, y\n\n"
 	outfile.write(outstring)
 	return
 
