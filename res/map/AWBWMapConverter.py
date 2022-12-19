@@ -17,6 +17,9 @@ except:
 
 
 def convertFile(infile,outfile):
+	'''
+	Turn the input csv file into a Defend Peace style map and dump it to the provided file.
+	'''
 	reader = csv.reader(infile)
 	# We write all of our output text to an intermediate string, since that is much more efficient than directly appending to the file.
 	outstring = ""
@@ -57,10 +60,14 @@ def convertAPI(mapID):
 			convertJSON(jsonData,outfile)
 		except IOError:
 			print("File ",outname," cannot be written to.")
+		finally:
+			outfile.close()
 
 	except Exception as ex:
 		print("Can't pull map from AWBW:", ex)
 		raise ex
+	finally:
+		req.close()
 
 	return
 
@@ -81,7 +88,8 @@ def convertJSON(jsonData,outfile):
 	outstring += f"team, unit type, x, y (author: {jsonData['Author']})\n"
 	for unit in jsonData["Predeployed Units"]:
 		player = countryCodeToPlayerID( unit['Country Code'] )
-		outstring += f"{player}, {unit['Unit ID']}, {unit['Unit X']}, {unit['Unit Y']}\n"
+		stringID = unitIDToString(unit['Unit ID'])
+		outstring += f"{player}, {stringID}, {unit['Unit X']}, {unit['Unit Y']}\n"
 	outfile.write(outstring)
 	return
 
@@ -129,6 +137,34 @@ def countryCodeToPlayerID(x):
 		'wn': 15,
 	}.get(x, 0)
 
+def unitIDToString(x):
+	return {
+		1:       'infantry',
+		2:       'mech',
+		3:       'md tank',
+		4:       'tank',
+		5:       'recon',
+		6:       'apc',
+		7:       'artillery',
+		8:       'rockets',
+		9:       'anti-air',
+		10:      'missiles',
+		11:      'fighter',
+		12:      'bomber',
+		13:      'b-copter',
+		14:      't-copter',
+		15:      'battleship',
+		16:      'cruiser',
+		17:      'lander',
+		18:      'sub',
+		28:      'bboat',
+		29:      'carrier',
+		30:      'stealth',
+		46:      'neotank',
+		960900:  'piperunner',
+		968731:  'bbomb',
+		1141438: 'megatank',
+	}.get(x, 'oozium')
 
 def indexToTerrainCode(x):
 	return {
