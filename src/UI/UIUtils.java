@@ -24,7 +24,10 @@ public class UIUtils
   public static final String DEFAULT_FACTION_NAME = "Thorn";
 
   // Define extra colors as needed.
-  private static final Color PURPLE = new Color(231, 123, 255 );
+  private static final Color VIOLET = new Color( 231, 123, 255 );
+  private static final Color ROSE = Color.PINK;
+  private static final Color CYAN = Color.CYAN;
+  private static final Color ORANGE = Color.ORANGE;
 
   // Map Building colors.
   public static final Color[] defaultMapColors = { new Color(40, 40, 40), new Color(70, 70, 70), new Color(110, 110, 110), new Color(160, 160, 160),
@@ -74,22 +77,22 @@ public class UIUtils
       factions = new ArrayList<Faction>();
 
       // Create a mapping of game colors to the fine-tuned colors that will be used for map sprites.
-      buildingColorPalettes.put(Color.PINK, new ColorPalette(pinkMapBuildingColors));
-      buildingColorPalettes.put(Color.CYAN, new ColorPalette(cyanMapBuildingColors));
-      buildingColorPalettes.put(Color.ORANGE, new ColorPalette(orangeMapBuildingColors));
-      buildingColorPalettes.put(PURPLE, new ColorPalette(purpleMapBuildingColors));
+      buildingColorPalettes.put(ROSE, new ColorPalette(pinkMapBuildingColors));
+      buildingColorPalettes.put(CYAN, new ColorPalette(cyanMapBuildingColors));
+      buildingColorPalettes.put(ORANGE, new ColorPalette(orangeMapBuildingColors));
+      buildingColorPalettes.put(VIOLET, new ColorPalette(purpleMapBuildingColors));
 
-      mapUnitColorPalettes.put(Color.PINK, new ColorPalette(pinkMapUnitColors));
-      mapUnitColorPalettes.put(Color.CYAN, new ColorPalette(cyanMapUnitColors));
-      mapUnitColorPalettes.put(Color.ORANGE, new ColorPalette(orangeMapUnitColors));
-      mapUnitColorPalettes.put(PURPLE, new ColorPalette(purpleMapUnitColors));
+      mapUnitColorPalettes.put(ROSE, new ColorPalette(pinkMapUnitColors));
+      mapUnitColorPalettes.put(CYAN, new ColorPalette(cyanMapUnitColors));
+      mapUnitColorPalettes.put(ORANGE, new ColorPalette(orangeMapUnitColors));
+      mapUnitColorPalettes.put(VIOLET, new ColorPalette(purpleMapUnitColors));
 
       // Throw some color names in there for the defaults
       // toString() is not user-friendly
-      paletteNames.put(Color.PINK, "rose");
-      paletteNames.put(Color.CYAN, "cyan");
-      paletteNames.put(Color.ORANGE, "orange");
-      paletteNames.put(PURPLE, "violet");
+      paletteNames.put(ROSE, "rose");
+      paletteNames.put(CYAN, "cyan");
+      paletteNames.put(ORANGE, "orange");
+      paletteNames.put(VIOLET, "violet");
 
       // We want to be able to use the normal units, as well as any others
       factions.add(new Faction(DEFAULT_FACTION_NAME,DEFAULT_FACTION_NAME));
@@ -178,9 +181,9 @@ public class UIUtils
     ColorPalette palette = buildingColorPalettes.get(colorKey);
     if (null == palette) // Uh oh, the player's messing with us. Make stuff up so we don't crash.
     {
-      buildingColorPalettes.put(colorKey, buildingColorPalettes.get(Color.PINK));
+      buildingColorPalettes.put(colorKey, buildingColorPalettes.get(ROSE));
       palette = buildingColorPalettes.get(colorKey);
-      System.out.println(String.format("WARNING!: Failed to retrieve building palette for color %s, defaulting to %s", colorKey, paletteNames.get(Color.PINK)));
+      System.out.println(String.format("WARNING!: Failed to retrieve building palette for color %s, defaulting to %s", colorKey, paletteNames.get(ROSE)));
     }
     return palette;
   }
@@ -191,9 +194,9 @@ public class UIUtils
     ColorPalette palette = mapUnitColorPalettes.get(colorKey);
     if (null == palette) // Uh oh, the player's messing with us. Make stuff up so we don't crash.
     {
-      mapUnitColorPalettes.put(colorKey, mapUnitColorPalettes.get(Color.PINK));
+      mapUnitColorPalettes.put(colorKey, mapUnitColorPalettes.get(ROSE));
       palette = mapUnitColorPalettes.get(colorKey);
-      System.out.println(String.format("WARNING!: Failed to retrieve unit palette for color %s, defaulting to %s", colorKey, paletteNames.get(Color.PINK)));
+      System.out.println(String.format("WARNING!: Failed to retrieve unit palette for color %s, defaulting to %s", colorKey, paletteNames.get(ROSE)));
     }
     return palette;
   }
@@ -273,7 +276,7 @@ public class UIUtils
 
     /**
      * Attempts to pull the key color for this canon faction from loaded resources.
-     * <p>Falls back on Salmon
+     * <p>Falls back to Rose
      */
     public static COSpriteSpec fromDisk(String col, String fac)
     {
@@ -290,7 +293,7 @@ public class UIUtils
       }
 
       if( null == spec )
-        spec = new COSpriteSpec(facInst, Color.PINK);
+        spec = new COSpriteSpec(facInst, ROSE);
       return spec;
     }
   }
@@ -298,8 +301,8 @@ public class UIUtils
 
   public static final COSpriteSpec MISC = new COSpriteSpec(new Faction("Misc"), Color.LIGHT_GRAY);
   //Ordered by "Thorn, then AWBW turn order"
-  public static final COSpriteSpec RT = new COSpriteSpec(new Faction(), Color.PINK);
-  public static final COSpriteSpec CO = new COSpriteSpec(new Faction("Ocean"), Color.CYAN);
+  public static final COSpriteSpec RT = new COSpriteSpec(new Faction(), ROSE);
+  public static final COSpriteSpec CO = new COSpriteSpec(new Faction("Ocean"), CYAN);
   public static final COSpriteSpec OS = COSpriteSpec.fromDisk("Red"   , "Star");
   public static final COSpriteSpec BM = COSpriteSpec.fromDisk("Blue"  , "Moon");
   public static final COSpriteSpec GE = COSpriteSpec.fromDisk("Green" , "Earth");
