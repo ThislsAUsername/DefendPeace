@@ -42,12 +42,18 @@ public class MapLibrary
     availableMaps.add(SpannIsland.getMapInfo());
     availableMaps.add(CageMatch.getMapInfo());
     availableMaps.addAll(MapReader.readMapData());
-    long startTotal = System.currentTimeMillis();
+    ArrayList<GameInstance> allGames = new ArrayList<>();
     for(MapInfo mi : availableMaps)
     {
-      System.out.print(mi.mapName + ": ");
-      long startMap = System.currentTimeMillis();
       GameInstance gi = setupTest(mi);
+      allGames.add(gi);
+    }
+    long startTotal = System.currentTimeMillis();
+    for(int i = 0; i < allGames.size(); ++i)
+    {
+      long startMap = System.currentTimeMillis();
+      System.out.print(availableMaps.get(i).mapName + ": ");
+      GameInstance gi = allGames.get(i);
       MapMaster gameMap = gi.gameMap;
       final Commander co = gi.activeArmy.cos[0];
       final ArrayList<UnitModel> allModels = gi.activeArmy.gameRules.unitModelScheme.getGameReadyModels().unitModels;
