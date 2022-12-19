@@ -76,15 +76,21 @@ def convertJSON(jsonData,outfile):
 	Take the JSON map data and dump it into the provided file.
 	'''
 	outstring = ""
-	for line in jsonData["Terrain Map"]:
-		for num in line:
+	mapBodyLines = ["" for x in range(len(jsonData["Terrain Map"]))]
+
+	for column in jsonData["Terrain Map"]:
+		lineID = 0
+		for num in column:
 			try:
 				num = int(num)
 			# Teleporter tiles are a blank value in AWBW, so having -1 is a desired behavior for if/when we implement those.
 			except ValueError:
 				num = -1
-			outstring += indexToTerrainCode(num)
-		outstring += "\n"
+			mapBodyLines[lineID] += indexToTerrainCode(num)
+			lineID += 1
+
+	for line in mapBodyLines:
+		outstring += line + "\n"
 	outstring += f"team, unit type, x, y (author: {jsonData['Author']})\n"
 	for unit in jsonData["Predeployed Units"]:
 		player = countryCodeToPlayerID( unit['Country Code'] )
