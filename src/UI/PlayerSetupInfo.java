@@ -7,6 +7,9 @@ import AI.AIMaker;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import Engine.GameScenario;
+import Engine.XYCoord;
+import Terrain.MapInfo;
+import Terrain.TerrainType;
 import UI.UIUtils.Faction;
 
 /**
@@ -90,7 +93,7 @@ public class PlayerSetupInfo
   private final Faction[] availableFactions;
   private final AIMaker[] availableAis;
 
-  public PlayerSetupInfo(int thisPlayer,
+  public PlayerSetupInfo(int thisPlayer, MapInfo mi,
                          ArrayList<CommanderInfo> COTypeList,
                          Color[] colorList, Faction[] factionList,
                          ArrayList<AIMaker> AIList,
@@ -101,7 +104,18 @@ public class PlayerSetupInfo
     deets.color = thisPlayer % colorList.length;
     deets.faction = thisPlayer % factionList.length;
     coList.add(deets);
-    flipUnits = 0 < (thisPlayer % 2);
+    flipUnits = false;
+    for( int i = 0; i < mi.COProperties[thisPlayer].length; ++i )
+    {
+      XYCoord coord = mi.COProperties[thisPlayer][i];
+      final TerrainType terrainType = mi.terrain[coord.xCoord][coord.yCoord];
+      if( terrainType == TerrainType.HEADQUARTERS
+          || terrainType == TerrainType.LAB)
+      {
+        flipUnits = (coord.xCoord > mi.terrain.length / 2);
+        break;
+      }
+    }
     currentTeam = thisPlayer;
     currentAi = 0; // Default to human.
 

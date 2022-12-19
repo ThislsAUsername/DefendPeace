@@ -61,7 +61,7 @@ public class PlayerSetupController implements IController
     for(int co = 0; co < numCos; ++co)
     {
       // Set up our option selection framework
-      coSelectors[co] = new PlayerSetupInfo( co,
+      coSelectors[co] = new PlayerSetupInfo( co, gameBuilder.mapInfo,
                                CommanderLibrary.getCommanderList(),
                                UIUtils.getCOColors(), UIUtils.getFactions(),
                                AILibrary.getAIList(),
