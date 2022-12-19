@@ -127,7 +127,7 @@ public class Utils
    */
   public static ArrayList<XYCoord> findFloodFillArea(XYCoord start, FloodFillFunctor fff, int initialFillPower, GameMap gameMap)
   {
-    ArrayList<XYCoord> reachableTiles = new ArrayList<>();
+    ArrayList<XYCoord> reachableTiles = new ArrayList<XYCoord>();
 
     if( null == fff || null == start || start.xCoord < 0 || start.yCoord < 0 )
     {
@@ -135,40 +135,38 @@ public class Utils
       return reachableTiles;
     }
 
-    HashMap<XYCoord, SearchNode> bestMap = new HashMap<>();
     // set all locations to unreachable
-//    int[][] powerGrid = new int[gameMap.mapWidth][gameMap.mapHeight];
-//    for( int i = 0; i < gameMap.mapWidth; i++ )
-//    {
-//      for( int j = 0; j < gameMap.mapHeight; j++ )
-//      {
-//        powerGrid[i][j] = -1;
-//      }
-//    }
+    if (powerGrid.length != gameMap.mapWidth
+        || powerGrid[0].length != gameMap.mapHeight)
+      powerGrid = new int[gameMap.mapWidth][gameMap.mapHeight];
+    for( int i = 0; i < gameMap.mapWidth; i++ )
+    {
+      for( int j = 0; j < gameMap.mapHeight; j++ )
+      {
+        powerGrid[i][j] = -1;
+      }
+    }
 
     // set up our search
-//    SearchNode root = new SearchNode(start.xCoord, start.yCoord);
-    SearchNode root = new SearchNode(start.xCoord, start.yCoord, initialFillPower);
-//    powerGrid[start.xCoord][start.yCoord] = initialFillPower;
-//    bestMap.put(start, initialFillPower);
-//    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid));
-    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator());
+    SearchNode root = new SearchNode(start.xCoord, start.yCoord);
+    powerGrid[start.xCoord][start.yCoord] = initialFillPower;
+    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid));
     searchQueue.add(root);
     // do search
     while (!searchQueue.isEmpty())
     {
       // pull out the next search node
       SearchNode currentNode = searchQueue.poll();
+      XYCoord coord = new XYCoord(currentNode.x, currentNode.y);
+      if( fff.canEnd(gameMap, coord) )
+      {
+        reachableTiles.add(coord);
+      }
 
-//      expandSearchNode(fff, gameMap, currentNode, searchQueue, powerGrid, bestMap);
-      expandSearchNode(fff, gameMap, currentNode, searchQueue, bestMap);
+      expandSearchNode(fff, gameMap, currentNode, searchQueue, powerGrid);
 
       currentNode = null;
     }
-
-    for( XYCoord coord : bestMap.keySet() )
-      if( fff.canEnd(gameMap, coord) )
-        reachableTiles.add(coord);
 
     return reachableTiles;
   }
@@ -259,6 +257,7 @@ public class Utils
                             (theoretical)? Integer.MAX_VALUE : Math.min(unit.getMovePower(map), unit.fuel),
                             x, y, map);
   }
+  private static int[][] powerGrid = new int[1][1];
   /**
    * Calculate and return the minimum-cost path for the FloodFillFunctor from its current location to map(x, y).
    * The Path will avoid non-allied units unless `theoretical` is true.
@@ -277,30 +276,30 @@ public class Utils
       return null;
     }
 
+    GamePath aPath = new GamePath();
     if( !map.isLocationValid(x, y) )
     {
       // Unit is not in a valid place. No path can be found.
       System.out.println("WARNING! Cannot find path for a unit that is not on the map.");
-      return null;
+      aPath.clear();
+      return aPath;
     }
 
-    HashMap<XYCoord, SearchNode> bestMap = new HashMap<>();
-//    int[][] powerGrid = new int[map.mapWidth][map.mapHeight];
-//    for( int i = 0; i < map.mapWidth; i++ )
-//    {
-//      for( int j = 0; j < map.mapHeight; j++ )
-//      {
-//        powerGrid[i][j] = -1;
-//      }
-//    }
+    if (powerGrid.length != map.mapWidth
+        || powerGrid[0].length != map.mapHeight)
+      powerGrid = new int[map.mapWidth][map.mapHeight];
+    for( int i = 0; i < map.mapWidth; i++ )
+    {
+      for( int j = 0; j < map.mapHeight; j++ )
+      {
+        powerGrid[i][j] = -1;
+      }
+    }
 
     // Set up search parameters.
-//    SearchNode root = new SearchNode(start.xCoord, start.yCoord);
-    SearchNode root = new SearchNode(start.xCoord, start.yCoord, initialFillPower);
-//    powerGrid[start.xCoord][start.yCoord] = initialFillPower;
-//    bestMap.put(start, initialFillPower);
-//    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid, x, y));
-    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(x, y));
+    SearchNode root = new SearchNode(start.xCoord, start.yCoord);
+    powerGrid[start.xCoord][start.yCoord] = initialFillPower;
+    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid, x, y));
     searchQueue.add(root);
 
     ArrayList<SearchNode> waypointList = new ArrayList<SearchNode>();
@@ -325,17 +324,16 @@ public class Utils
         break;
       }
 
-//      expandSearchNode(fff, map, currentNode, searchQueue, powerGrid, bestMap);
-      expandSearchNode(fff, map, currentNode, searchQueue, bestMap);
+      expandSearchNode(fff, map, currentNode, searchQueue, powerGrid);
 
       currentNode = null;
     }
 
-    GamePath aPath = null;
+    // Clear and Populate the Path object.
+    aPath.clear();
     // We added the waypoints to the list from end to beginning, so populate the Path in reverse order.
     if( !waypointList.isEmpty() )
     {
-      aPath = new GamePath();
       for( int j = waypointList.size() - 1; j >= 0; --j )
       {
         //System.out.println("Waypoint " + waypointList.get(j).x + ", " + waypointList.get(j).y + " over " + map.getEnvironment(waypointList.get(j).x, waypointList.get(j).y).terrainType);
@@ -352,42 +350,25 @@ public class Utils
    * @param theoretical If set, don't limit range using move power, and don't worry about other Units in the way.
    */
   private static void expandSearchNode(FloodFillFunctor fff, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue,
-//      int[][] powerGrid,
-//      HashMap<XYCoord, Integer> bestMap)
-      HashMap<XYCoord, SearchNode> bestMap)
+      int[][] powerGrid)
   {
     ArrayList<XYCoord> coordsToCheck = findLocationsInRange(map, currentNode.getCoordinates(), 1, 1);
 
     for( XYCoord next : coordsToCheck )
     {
-      int oldNextPower = -1;
-      if( bestMap.containsKey(next) )
-      {
-        oldNextPower = bestMap.get(next).power;
-      }
       // If we can move more cheaply than previously discovered,
       // then update the power grid and re-queue the next node.
-      int oldPower = currentNode.power;
-//      int oldPower = powerGrid.getOrDefault(currentNode.getCoordinates(), -1);
-//      int oldNextPower = powerGrid.getOrDefault(next, -1);
-//      int oldPower = powerGrid[currentNode.x][currentNode.y];
-//      int oldNextPower = powerGrid[next.xCoord][next.yCoord];
-      // whee
-      if( oldNextPower > oldPower )
-        continue;
+      int oldPower = powerGrid[currentNode.x][currentNode.y];
+      int oldNextPower = powerGrid[next.xCoord][next.yCoord];
       final int transitionCost = fff.getTransitionCost(map, currentNode.getCoordinates(), next);
       int newNextPower = oldPower - transitionCost;
 
       if( transitionCost < MoveType.IMPASSABLE && newNextPower > oldNextPower )
       {
-        final SearchNode newNode = new SearchNode(next, currentNode, newNextPower);
-        bestMap.put(next, newNode);
-//        bestMap.put(next, newNextPower);
-//        powerGrid[next.xCoord][next.yCoord] = newNextPower;
+        powerGrid[next.xCoord][next.yCoord] = newNextPower;
         // Prevent wrong path generation due to updating the shared powerGrid
         searchQueue.removeIf(node->next.equals(node.getCoordinates()));
-        searchQueue.add(newNode);
-//        searchQueue.add(new SearchNode(next, currentNode));
+        searchQueue.add(new SearchNode(next, currentNode));
       }
     }
   }
@@ -401,38 +382,20 @@ public class Utils
     public int x, y;
     public SearchNode parent;
 
-//    public SearchNode(int x, int y)
-//    {
-//      this(x, y, null);
-//    }
-//
-//    public SearchNode(XYCoord coord, SearchNode parent)
-//    {
-//      this(coord.xCoord, coord.yCoord, parent);
-//    }
-//    public SearchNode(int x, int y, SearchNode parent)
-//    {
-//      this.x = x;
-//      this.y = y;
-//      this.parent = parent;
-//    }
-    public int power;
-
-    public SearchNode(int x, int y, int power)
+    public SearchNode(int x, int y)
     {
-      this(x, y, null, power);
+      this(x, y, null);
     }
 
-    public SearchNode(XYCoord coord, SearchNode parent, int power)
+    public SearchNode(XYCoord coord, SearchNode parent)
     {
-      this(coord.xCoord, coord.yCoord, parent, power);
+      this(coord.xCoord, coord.yCoord, parent);
     }
-    public SearchNode(int x, int y, SearchNode parent, int power)
+    public SearchNode(int x, int y, SearchNode parent)
     {
       this.x = x;
       this.y = y;
       this.parent = parent;
-      this.power = power;
     }
     public XYCoord getCoordinates()
     {
@@ -451,24 +414,22 @@ public class Utils
    */
   private static class SearchNodeComparator implements Comparator<SearchNode>
   {
-//    int[][] powerGrid;
+    int[][] powerGrid;
     private final boolean hasDestination;
     private int xDest;
     private int yDest;
 
-    public SearchNodeComparator()
-//    public SearchNodeComparator(int[][] powerGrid)
+    public SearchNodeComparator(int[][] powerGrid)
     {
-//      this.powerGrid = powerGrid;
+      this.powerGrid = powerGrid;
       hasDestination = false;
       xDest = 0;
       yDest = 0;
     }
 
-    public SearchNodeComparator(int x, int y)
-//    public SearchNodeComparator(int[][] powerGrid, int x, int y)
+    public SearchNodeComparator(int[][] powerGrid, int x, int y)
     {
-//      this.powerGrid = powerGrid;
+      this.powerGrid = powerGrid;
       hasDestination = true;
       xDest = x;
       yDest = y;
@@ -480,10 +441,8 @@ public class Utils
       int firstDist = Math.abs(o1.x - xDest) + Math.abs(o1.y - yDest);
       int secondDist = Math.abs(o2.x - xDest) + Math.abs(o2.y - yDest);
 
-      int firstPowerEstimate = o1.power - ((hasDestination) ? firstDist : 0);
-      int secondPowerEstimate = o2.power - ((hasDestination) ? secondDist : 0);
-//      int firstPowerEstimate = powerGrid[o1.x][o1.y] - ((hasDestination) ? firstDist : 0);
-//      int secondPowerEstimate = powerGrid[o2.x][o2.y]  - ((hasDestination) ? secondDist : 0);
+      int firstPowerEstimate = powerGrid[o1.x][o1.y] - ((hasDestination) ? firstDist : 0);
+      int secondPowerEstimate = powerGrid[o2.x][o2.y] - ((hasDestination) ? secondDist : 0);
       return secondPowerEstimate - firstPowerEstimate;
     }
   }
