@@ -258,10 +258,10 @@ public class PlayerSetupCommanderArtist
             color, true, SpriteLibrary.getCommanderSprites( coInfo.name ).eyes);
 
         // Re-render the panel.
-        myImage = SpriteLibrary.createTransparentSprite( commanderFace.width + 3, PANEL_HEIGHT );
+        myImage = SpriteLibrary.createTransparentSprite( commanderFace.width + 2, PANEL_HEIGHT );
         Graphics g = myImage.getGraphics();
         g.setColor(Color.BLACK);
-        g.fillRect(0, 0, commanderFace.width + 3, myImage.getHeight());
+        g.fillRect(0, 0, commanderFace.width + 2, myImage.getHeight());
         commanderFace.render(g);
       }
 
