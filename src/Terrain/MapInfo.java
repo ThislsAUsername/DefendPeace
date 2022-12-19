@@ -17,6 +17,7 @@ public class MapInfo implements IEnvironsProvider
 {
   public final String mapName;
   public final TerrainType[][] terrain;
+  // Array of coordinates for properties owned by each player; the first index is the CO, the second is an arbitrary ordering
   public final XYCoord[][] COProperties;
   public final ArrayList<Map<XYCoord,String>> mapUnits;
 
