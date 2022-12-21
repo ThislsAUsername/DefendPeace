@@ -76,7 +76,7 @@ def convertJSON(jsonData,outfile):
 	Take the JSON map data and dump it into the provided file.
 	'''
 	outstring = ""
-	mapBodyLines = ["" for x in range(len(jsonData["Terrain Map"]))]
+	mapBodyLines = ["" for x in range(len(jsonData["Terrain Map"][0]))]
 
 	for column in jsonData["Terrain Map"]:
 		lineID = 0
