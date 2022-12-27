@@ -1,22 +1,22 @@
-  SE  SE  SE  MT  MT  MT  MT  CT  RD  MT  MT  MT  GR  FR  XX  CT  FR  SE  SE  SE
-  SE  SE  MT  MT  FC  MT  GR  GR  RD  GR  GR  GR  CT  MT  XX  XX  XX  MT  SE  SE
+  SE  SE  SE  MT  MT  MT  MT  CT  RD  MT  MT  MT  GR  FR  RV  CT  FR  SE  SE  SE
+  SE  SE  MT  MT  FC  MT  GR  GR  RD  GR  GR  GR  CT  MT  RV  RV  RV  MT  SE  SE
   SE  CT  FR  FR  GR  GR  FR  CT  RD  MT  FR  GR  FR  GR  GR  FR  GR  CT  RD  SE
-  MT  FR  GR  GR  GR  GR  GR  FR  RD  RD  XX  GR  FR  GR 0FC  GR  FR  GR  RD  MT
+  MT  FR  GR  GR  GR  GR  GR  FR  RD  RD  TW  GR  FR  GR 0FC  GR  FR  GR  RD  MT
   MT  MT  CT  GR  MT  CT  SH  SH  GR  GR  GR  FR  GR  FR  RD  RD  RD  RD  RD  MT
   RD  RD  RD  RD  RD  GR  SH  SH  FR  MT  GR  SH  SH  GR  RD  GR  MT  FR  AP  MT
-  XX  RD  XX  XX  RD  FR  GR  GR  CT  FR  MT  SH  SH  GR  MT  GR  GR  MT  MT  MT
-  MT  RD 1FC  RD  RD  CT  FR  GR  FR  GR  FR  GR  GR  GR  FR  CT  MT  MT  MT  MT
-  XX  RD  XX  XX  RD  GR  GR  MT  GR  FR  GR  FR  GR  FR  GR  GR  GR  MT  MT  MT
+  RV  BR  RV  RV  RD  FR  GR  GR  CT  FR  MT  SH  SH  GR  MT  GR  GR  MT  MT  MT
+  MT  BR 1FC  BR  RD  CT  FR  GR  FR  GR  FR  GR  GR  GR  FR  CT  MT  MT  MT  MT
+  RV  BR  RV  RV  RD  GR  GR  MT  GR  FR  GR  FR  GR  FR  GR  GR  GR  MT  MT  MT
   RD  RD  RD  RD  RD 1HQ  MT  FR  GR  SH  SH  CT  FR  MT  GR  GR  FR  GR  CT  MT
   MT  CT  GR  FR  GR  GR  MT  FR  CT  SH  SH  GR  FR  MT 0HQ  RD  RD  RD  RD  RD
-  MT  MT  MT  GR  GR  GR  FR  GR  FR  GR  FR  GR  MT  GR  GR  RD  XX  XX  RD  XX
-  MT  MT  MT  MT  CT  FR  GR  GR  GR  FR  GR  FR  GR  FR  CT  RD  RD 0FC  RD  MT
-  MT  MT  MT  GR  GR  MT  GR  SH  SH  MT  FR  CT  GR  GR  FR  RD  XX  XX  RD  XX
+  MT  MT  MT  GR  GR  GR  FR  GR  FR  GR  FR  GR  MT  GR  GR  RD  RV  RV  BR  RV
+  MT  MT  MT  MT  CT  FR  GR  GR  GR  FR  GR  FR  GR  FR  CT  RD  BR 0FC  BR  MT
+  MT  MT  MT  GR  GR  MT  GR  SH  SH  MT  FR  CT  GR  GR  FR  RD  RV  RV  BR  RV
   MT  AP  FR  MT  GR  RD  GR  SH  SH  GR  MT  FR  SH  SH  GR  RD  RD  RD  RD  RD
   MT  RD  RD  RD  RD  RD  FR  GR  FR  GR  GR  GR  SH  SH  CT  MT  GR  CT  MT  MT
-  MT  RD  GR  FR  GR 1FC  GR  FR  GR  XX  RD  RD  FR  GR  GR  GR  GR  GR  FR  MT
+  MT  RD  GR  FR  GR 1FC  GR  FR  GR  TW  RD  RD  FR  GR  GR  GR  GR  GR  FR  MT
   SE  RD  CT  GR  FR  GR  GR  FR  GR  FR  MT  RD  CT  FR  GR  GR  FR  FR  CT  SE
-  SE  SE  MT  XX  XX  XX  MT  CT  GR  GR  GR  RD  GR  GR  MT  FC  MT  MT  SE  SE
-  SE  SE  SE  FR  CT  XX  FR  GR  MT  MT  MT  RD  CT  MT  MT  MT  MT  SE  SE  SE
+  SE  SE  MT  RV  RV  RV  MT  CT  GR  GR  GR  RD  GR  GR  MT  FC  MT  MT  SE  SE
+  SE  SE  SE  FR  CT  RV  FR  GR  MT  MT  MT  RD  CT  MT  MT  MT  MT  SE  SE  SE
 team, unit type, x, y
 1, infantry, 2, 7

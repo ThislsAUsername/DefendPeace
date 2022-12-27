@@ -1,5 +1,5 @@
   RF  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  MT  FR  MT
-  SE  SH  MT  MT  SE  CT  GR  XX  GR  GR  GR  CT  GR  MT  SH  SE  CT  GR  GR
+  SE  SH  MT  MT  SE  CT  GR  TW  GR  GR  GR  CT  GR  MT  SH  SE  CT  GR  GR
   SE  SP  MT  CT  SE  FR  GR  GR  AP  GR  FR  GR  GR  GR  GR  SE  SE  GR  CT
   SE  SE  BR  SE  SE  SE  GR  SE  GR  CT  GR  GR  FR  GR  CT  SE  SE  BR  SE
   SE  SE  BR  SE  SE  SE  SH  SE  SH  SE  SH  SH  CT  GR  SE  SE  SH  BR  GR
@@ -19,7 +19,7 @@
   GR  BR  SH  SE  SE  GR  CT  SH  SH  SE  SH  SE  SH  SE  SE  SE  BR  SE  SE
   SE  BR  SE  SE  CT  GR  FR  GR  GR  CT  GR  SE  GR  SE  SE  SE  BR  SE  SE
   CT  GR  SE  SE  GR  GR  GR  GR  FR  GR  AP  GR  GR  FR  SE  CT  MT  SP  SE
-  GR  GR  CT  SE  SH  MT  GR  CT  GR  GR  GR  XX  GR  CT  SE  MT  MT  SH  SE
+  GR  GR  CT  SE  SH  MT  GR  CT  GR  GR  GR  TW  GR  CT  SE  MT  MT  SH  SE
   MT  FR  MT  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  RF
 team, unit type, x, y
 2, INFANTRY, 4, 6

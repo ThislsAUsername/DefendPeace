@@ -20,6 +20,7 @@ def convertFile(infile,outfile):
 				num = -1
 			outstring += indexToTerrainCode(num)
 		outstring += "\n"
+	outstring += "team, unit type, x, y\n\n"
 	outfile.write(outstring)
 	return
 
@@ -44,6 +45,7 @@ def main(names):
 
 def indexToTerrainCode(x):
 	return {
+		-1:  '  TT',#Teletiles
 		1:   '  GR',#plains/grass
 		2:   '  MT',#mountain
 		3:   '  FR',#woods/forest
@@ -212,8 +214,8 @@ def indexToTerrainCode(x):
 		193: '15LB',
 		194: '15SP',
 	}.get(x, '  XX')    # '  XX' is default if x not found
-	
-	
+
+
 
 if __name__ == "__main__":
 	helpstring = "Takes in Advance Wars by Web map files, and outputs our own map format. \nFilename is the same, extension is '.map'.\nYou can input the filenames as command line arguments, or you can drag'n'drop the files you want to convert in your file browser."

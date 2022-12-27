@@ -81,7 +81,8 @@ public class Qis extends Commander
     // Perfect movement on snow
     for( TerrainType terrain : TerrainType.TerrainTypeList )
     {
-      if( MoveType.IMPASSABLE > uc.moveType.getMoveCost(Weathers.SNOW, terrain) )
+      final int moveCost = uc.moveType.getMoveCost(Weathers.SNOW, terrain);
+      if( MoveType.IMPASSABLE > moveCost && moveCost > 1 )
         uc.moveType.setMoveCost(Weathers.SNOW, terrain, 1);
     }
 

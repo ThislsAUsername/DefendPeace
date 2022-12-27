@@ -24,6 +24,8 @@ public class IMapBuilder
   protected static final TerrainType RV = TerrainType.RIVER;
   protected static final TerrainType RD = TerrainType.ROAD;
   protected static final TerrainType SH = TerrainType.SHOAL;
+  protected static final TerrainType TT = TerrainType.TELETILE;
+  protected static final TerrainType XX = TerrainType.TELETILE;
   protected static final TerrainType SE = TerrainType.SEA;
   
   protected static final TerrainType LB = TerrainType.LAB;

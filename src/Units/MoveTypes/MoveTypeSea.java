@@ -15,6 +15,7 @@ public class MoveTypeSea extends MoveType
     moveCosts.get(Weathers.RAIN).setAllSeaCosts(1);
     moveCosts.get(Weathers.SNOW).setAllSeaCosts(1);
     moveCosts.get(Weathers.SANDSTORM).setAllSeaCosts(1);
+    setMoveCost(TerrainType.TELETILE, 0);
     setMoveCost(TerrainType.PILLAR, 99);
     setMoveCost(TerrainType.METEOR, 99);
   }

@@ -61,6 +61,12 @@ public class TerrainSpriteSet
   private static Color backupRainOverlayColor = new Color(10, 35, 73, 100);
   private static Color backupSandOverlayColor = new Color(243, 213, 85, 100);
   private static Map<Weathers, Color> backupOverlayColors;
+  static {
+    backupOverlayColors = new HashMap<Weathers, Color>();
+    backupOverlayColors.put(Weathers.SNOW, backupSnowOverlayColor);
+    backupOverlayColors.put(Weathers.RAIN, backupRainOverlayColor);
+    backupOverlayColors.put(Weathers.SANDSTORM, backupSandOverlayColor);
+  }
 
   private static boolean logDetails = false;
 
@@ -85,14 +91,6 @@ public class TerrainSpriteSet
     // We assume here that all sprites are sized in multiples of the base sprite size.
     drawOffsetx = spriteWidth / SpriteLibrary.baseSpriteSize - 1;
     drawOffsety = spriteHeight / SpriteLibrary.baseSpriteSize - 1;
-
-    if( null == backupOverlayColors )
-    {
-      backupOverlayColors = new HashMap<Weathers, Color>();
-      backupOverlayColors.put(Weathers.SNOW, backupSnowOverlayColor);
-      backupOverlayColors.put(Weathers.RAIN, backupRainOverlayColor);
-      backupOverlayColors.put(Weathers.SANDSTORM, backupSandOverlayColor);
-    }
   }
 
   private ArrayList<Sprite> getSpritesByWeather(Weathers weather)
@@ -109,6 +107,13 @@ public class TerrainSpriteSet
     if( null == spriteSheet && (weather != Weathers.CLEAR) )
     {
       ArrayList<Sprite> clearSprites = getSpritesByWeather(Weathers.CLEAR);
+
+      if( myTerrainType.isUnweatherable() ) // If stuff ignores weather, there's no need to recolor it
+      {
+        terrainSprites.put(weather, clearSprites);
+        return clearSprites;
+      }
+
       ArrayList<Sprite> weatherOverlays = buildSpriteMasks(backupOverlayColors.get(weather));
       ArrayList<Sprite> weatherSprites = new ArrayList<Sprite>();
       for( int i = 0; i < clearSprites.size(); ++i )
@@ -501,6 +506,8 @@ public class TerrainSpriteSet
 
       terrainBases.put(TerrainType.REEF, TerrainType.SEA);
       terrainBases.put(TerrainType.SEA, TerrainType.SEA);
+
+      terrainBases.put(TerrainType.TELETILE, TerrainType.TELETILE);
 
       if( TerrainType.TerrainTypeList.size() != terrainBases.size())
       {
