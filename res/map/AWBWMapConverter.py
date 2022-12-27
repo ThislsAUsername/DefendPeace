@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import sys
 import math
@@ -6,8 +6,20 @@ import re
 import csv
 import glob
 
+try:
+	from http import client
+	import ssl
+	import json
+	global context
+	context = ssl.create_default_context()
+except:
+	print("Note: Seems like you aren't using Python 3.5+, so putting in map IDs won't work")
+
 
 def convertFile(infile,outfile):
+	'''
+	Turn the input csv file into a Defend Peace style map and dump it to the provided file.
+	'''
 	reader = csv.reader(infile)
 	# We write all of our output text to an intermediate string, since that is much more efficient than directly appending to the file.
 	outstring = ""
@@ -24,8 +36,76 @@ def convertFile(infile,outfile):
 	outfile.write(outstring)
 	return
 
+
+def convertAPI(mapID):
+	'''
+	Snag the map's data from the AWBW API and dump it to a file.
+	'''
+	try:
+		global context
+		req = client.HTTPSConnection("awbw.amarriner.com", 443, context=context)
+		req.connect()
+		req.request("GET", "/api/map/map_info.php?maps_id=" + mapID)
+		response = req.getresponse()
+		responseData = response.read()
+		jsonData = json.loads(responseData)
+		req.close()
+		mapName = jsonData["Name"]
+		outname = (mapName + ".map").replace(' ', '_')
+
+		try:
+			# If someone's running it from shell, and it pukes, they'll at least know which map made it puke.
+			print("Now converting file:", mapName)
+			outfile = open(outname, 'w')
+			convertJSON(jsonData,outfile)
+		except IOError:
+			print("File ",outname," cannot be written to.")
+		finally:
+			outfile.close()
+
+	except Exception as ex:
+		print("Can't pull map from AWBW:", ex)
+		raise ex
+	finally:
+		req.close()
+
+	return
+
+def convertJSON(jsonData,outfile):
+	'''
+	Take the JSON map data and dump it into the provided file.
+	'''
+	outstring = ""
+	mapBodyLines = ["" for x in range(len(jsonData["Terrain Map"][0]))]
+
+	for column in jsonData["Terrain Map"]:
+		lineID = 0
+		for num in column:
+			try:
+				num = int(num)
+			# Teleporter tiles are a blank value in AWBW, so having -1 is a desired behavior for if/when we implement those.
+			except ValueError:
+				num = -1
+			mapBodyLines[lineID] += indexToTerrainCode(num)
+			lineID += 1
+
+	for line in mapBodyLines:
+		outstring += line + "\n"
+	outstring += f"team, unit type, x, y (author: {jsonData['Author']})\n"
+	for unit in jsonData["Predeployed Units"]:
+		player = countryCodeToPlayerID( unit['Country Code'] )
+		stringID = unitIDToString(unit['Unit ID'])
+		outstring += f"{player}, {stringID}, {unit['Unit X']}, {unit['Unit Y']}\n"
+	outfile.write(outstring)
+	return
+
+
 def main(names):
 	for name in names:
+		if name.isdigit():
+			convertAPI(name)
+			continue
+
 		try:
 			infile = open(name)
 			# Split the file extension off, and replace it with .map
@@ -42,6 +122,55 @@ def main(names):
 		finally:
 			infile.close()
 			outfile.close()
+
+def countryCodeToPlayerID(x):
+	return {
+		'os':  0,
+		'bm':  1,
+		'ge':  2,
+		'yc':  3,
+		'bh':  4,
+		'rf':  5,
+		'gs':  6,
+		'bd':  7,
+		'ab':  8,
+		'js':  9,
+		'ci': 10,
+		'pc': 11,
+		'tg': 12,
+		'pl': 13,
+		'ar': 14,
+		'wn': 15,
+	}.get(x, 0)
+
+def unitIDToString(x):
+	return {
+		1:       'infantry',
+		2:       'mech',
+		3:       'md tank',
+		4:       'tank',
+		5:       'recon',
+		6:       'apc',
+		7:       'artillery',
+		8:       'rockets',
+		9:       'anti-air',
+		10:      'missiles',
+		11:      'fighter',
+		12:      'bomber',
+		13:      'b-copter',
+		14:      't-copter',
+		15:      'battleship',
+		16:      'cruiser',
+		17:      'lander',
+		18:      'sub',
+		28:      'bboat',
+		29:      'carrier',
+		30:      'stealth',
+		46:      'neotank',
+		960900:  'piperunner',
+		968731:  'bbomb',
+		1141438: 'megatank',
+	}.get(x, 'oozium')
 
 def indexToTerrainCode(x):
 	return {
@@ -218,7 +347,7 @@ def indexToTerrainCode(x):
 
 
 if __name__ == "__main__":
-	helpstring = "Takes in Advance Wars by Web map files, and outputs our own map format. \nFilename is the same, extension is '.map'.\nYou can input the filenames as command line arguments, or you can drag'n'drop the files you want to convert in your file browser."
+	helpstring = "Takes in Advance Wars by Web map files (or map IDs), and outputs our own map format. \nFilename is the same, extension is '.map'.\nYou can input the filenames/IDs as command line arguments, or you can drag'n'drop the files you want to convert in your file browser."
 	if "-h" in sys.argv or "--help" in sys.argv:
 		print(helpstring)
 		input()
