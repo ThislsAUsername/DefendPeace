@@ -12,7 +12,6 @@ import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.ResupplyEvent;
-import Engine.GameEvents.UnitDieEvent;
 import Terrain.MapLocation;
 import Engine.UnitMods.UnitModList;
 import Engine.UnitMods.UnitModifier;
@@ -73,8 +72,10 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public double abilityPowerValue;
   public int maxAmmo;
   public int maxFuel;
-  public int idleFuelBurn;
+  public int fuelBurnIdle;
+  public int fuelBurnPerTile = 1;
   public int maxMaterials = 0;
+  public boolean needsMaterials = true;
   public int visionRange;
   public int visionRangePiercing = 1;
   public boolean hidden = false;
@@ -115,7 +116,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     maxAmmo = pAmmoMax;
     abilityPowerValue = powerValue;
     maxFuel = pFuelMax;
-    idleFuelBurn = pIdleFuelBurn;
+    fuelBurnIdle = pIdleFuelBurn;
     visionRange = pVision;
     baseMovePower = pMovePower;
     baseMoveType = pPropulsion.clone();
@@ -148,6 +149,8 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
 
     // Duplicate other assorted values
     maxMaterials = other.maxMaterials;
+    needsMaterials = other.needsMaterials;
+    fuelBurnPerTile = other.fuelBurnPerTile;
     for( UnitModifier mod : other.unitMods )
       unitMods.add(mod);
   }
@@ -205,10 +208,18 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     if( !resupplying && (0 == self.fuel) & (isAirUnit() || isSeaUnit()) )
     {
       // Uh oh. It's crashy crashy time.
-      queue.add(new UnitDieEvent(self));
+      Utils.enqueueDeathEvent(self, queue);
     }
 
     return queue;
+  }
+
+  public boolean needsFuel()
+  {
+    boolean output = false;
+    output |= fuelBurnIdle > 0;
+    output |= fuelBurnPerTile > 0;
+    return output;
   }
 
   /**

@@ -45,25 +45,16 @@ public class MoveEvent implements GameEvent
       GamePath.PathNode endpoint = unitPath.getEnd();
       int fuelBurn = unitPath.getFuelCost(unit, gameMap);
 
-      boolean includeOccupiedSpaces = true; // To allow validation for LOAD/JOIN actions.
-      if( fuelBurn <= unit.fuel && fuelBurn <= unit.getMovePower(gameMap)
-          && unit.getMoveFunctor(includeOccupiedSpaces).canEnd(gameMap, endpoint.GetCoordinates()))
-      {
-        if( null == gameMap.getLocation(endpoint.x, endpoint.y).getResident() ) // Just avoid triggering a warning.
-          gameMap.moveUnit(unit, endpoint.x, endpoint.y);
-        unit.isTurnOver = true;
+      if( null == gameMap.getLocation(endpoint.x, endpoint.y).getResident() ) // Just avoid triggering a warning.
+        gameMap.moveUnit(unit, endpoint.x, endpoint.y);
+      unit.isTurnOver = true;
 
-        unit.fuel = Math.max(0, unit.fuel - fuelBurn); // Don't prevent zero-distance "moves" when out of fuel.
+      unit.fuel = Math.max(0, unit.fuel - fuelBurn);
 
-        // reveal fog as applicable
-        for( Army co : gameMap.game.armies )
-        {
-          co.myView.revealFog(unit, unitPath);
-        }
-      }
-      else
+      // reveal fog as applicable
+      for( Army co : gameMap.game.armies )
       {
-        System.out.println("WARNING! Invalid move " + unit.model.name + " to (" + endpoint.x + ", " + endpoint.y + ")");
+        co.myView.revealFog(unit, unitPath);
       }
     }
   }

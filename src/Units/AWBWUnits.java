@@ -132,7 +132,7 @@ public class AWBWUnits extends UnitModelScheme
     public UnitModel clone()
     {
       // Create a new model with the given attributes.
-      AWBWUnitModel newModel = new AWBWUnitModel(name, type, role, costBase, maxAmmo, maxFuel, idleFuelBurn, visionRange, baseMovePower,
+      AWBWUnitModel newModel = new AWBWUnitModel(name, type, role, costBase, maxAmmo, maxFuel, fuelBurnIdle, visionRange, baseMovePower,
           baseMoveType.clone(), baseActions, weapons, abilityPowerValue);
 
       newModel.copyValues(this);
@@ -592,7 +592,7 @@ public class AWBWUnits extends UnitModelScheme
     {
       super();
       type = AWBWUnitEnum.STEALTH_HIDE;
-      idleFuelBurn = IDLE_FUEL_BURN;
+      fuelBurnIdle = IDLE_FUEL_BURN;
       hidden = true;
     }
   }
@@ -712,7 +712,7 @@ public class AWBWUnits extends UnitModelScheme
       super();
       type = AWBWUnitEnum.SUB_SUB;
       role |= SUBSURFACE;
-      idleFuelBurn = IDLE_FUEL_BURN;
+      fuelBurnIdle = IDLE_FUEL_BURN;
       hidden = true;
     }
   }
@@ -766,7 +766,7 @@ public class AWBWUnits extends UnitModelScheme
       carryableMask = AIR_LOW | AIR_HIGH;
     }
 
-    /** Carriers re-supply their cargo at the beginning of every turn. Make it so. */
+    /** Carriers supply their cargo at the beginning of every turn. Make it so. */
     @Override
     public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
     {
@@ -801,6 +801,17 @@ public class AWBWUnits extends UnitModelScheme
           moveType, actions, weapons, STAR_VALUE);
       baseCargoCapacity = 2;
       carryableMask = AIR_LOW;
+    }
+
+    /** Cruisers supply their cargo at the beginning of every turn. Make it so. */
+    @Override
+    public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
+    {
+      GameEventQueue events = super.getTurnInitEvents(self, map);
+      for( Unit cargo : self.heldUnits )
+        if( !cargo.isFullySupplied() )
+          events.add(new ResupplyEvent(self, cargo));
+      return events;
     }
   }
 

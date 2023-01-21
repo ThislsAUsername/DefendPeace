@@ -18,7 +18,7 @@ public abstract class WeaponModel implements Serializable
   protected WeaponModel(boolean infiniteAmmo, int minRange, int maxRange)
   {
     hasInfiniteAmmo = infiniteAmmo;
-    if( minRange > 1 )
+    if( maxRange > 1 )
     {
       canFireAfterMoving = false;
     }

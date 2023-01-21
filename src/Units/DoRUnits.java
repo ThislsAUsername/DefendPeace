@@ -141,7 +141,7 @@ public class DoRUnits extends UnitModelScheme
     public UnitModel clone()
     {
       // Create a new model with the given attributes.
-      DoRUnitModel newModel = new DoRUnitModel(name, type, role, costBase, maxAmmo, maxFuel, idleFuelBurn, visionRange, baseMovePower,
+      DoRUnitModel newModel = new DoRUnitModel(name, type, role, costBase, maxAmmo, maxFuel, fuelBurnIdle, visionRange, baseMovePower,
           baseMoveType.clone(), baseActions, weapons, abilityPowerValue);
 
       newModel.copyValues(this);
@@ -699,6 +699,17 @@ public class DoRUnits extends UnitModelScheme
       baseCargoCapacity = 2;
       carryableMask = AIR_LOW;
     }
+
+    /** Cruisers supply their cargo at the beginning of every turn. Make it so. */
+    @Override
+    public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
+    {
+      GameEventQueue events = super.getTurnInitEvents(self, map);
+      for( Unit cargo : self.heldUnits )
+        if( !cargo.isFullySupplied() )
+          events.add(new ResupplyEvent(self, cargo));
+      return events;
+    }
   }
 
   public static class SubModel extends DoRUnitModel
@@ -735,7 +746,7 @@ public class DoRUnits extends UnitModelScheme
       super();
       type = DoRUnitEnum.SUB_SUB;
       role |= SUBSURFACE;
-      idleFuelBurn = IDLE_FUEL_BURN;
+      fuelBurnIdle = IDLE_FUEL_BURN;
       hidden = true;
     }
   }
@@ -767,7 +778,7 @@ public class DoRUnits extends UnitModelScheme
       baseActions.add(0, UnitActionFactory.LAUNCH);
     }
 
-    /** DoR Carriers re-supply and repair their cargo at the beginning of every turn. Make it so. */
+    /** DoR Carriers repair and supply their cargo at the beginning of every turn. Make it so. */
     @Override
     public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
     {

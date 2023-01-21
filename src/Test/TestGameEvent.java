@@ -241,7 +241,10 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(testMap.getLocation(7, 6).getResident() == mech, "    Mech is not at (7, 6) after moving.");
 
     path.addWaypoint(7, 0); // New endpoint over water.
-    new MoveEvent(mech, path).performEvent(testMap); // This should not execute. Water is bad for grunts.
+    GameEventQueue events = new GameEventQueue();
+    // Validation is now performed primarily in the enqueue function since there's too much complexity to handle it nicely in the constructor
+    Utils.enqueueMoveEvent(testMap, mech, path, events);
+    events.getFirst().performEvent(testMap); // This should not execute. Water is bad for grunts.
     testPassed &= validate(7 == mech.x && 6 == mech.y, "    Mech does not think he is at (7, 6), but should.");
     testPassed &= validate(testMap.getLocation(7, 6).getResident() == mech, "    Mech is not still at (7, 6), but should be.");
     testPassed &= validate(testMap.getLocation(7, 0).getResident() == null, "    MapLocation (7, 0) should still be empty.");

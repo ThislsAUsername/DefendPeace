@@ -29,6 +29,10 @@ public class XYCoord implements Serializable
   {
     return getDistance(other.xCoord, other.yCoord);
   }
+  public int getDistance(Unit unit)
+  {
+    return getDistance(unit.x, unit.y);
+  }
   public int getDistance(int x, int y)
   {
     return Math.abs(xCoord - x) + Math.abs(yCoord - y);

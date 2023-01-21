@@ -50,12 +50,13 @@ public class CombatEngine
 
   public static StrikeParams calculateTerrainDamage( Unit attacker, GamePath path, MapLocation target, GameMap map )
   {
-    int battleRange = path.getEndCoord().getDistance(target.getCoordinates());
+    final XYCoord targetCoord = target.getCoordinates();
+    int battleRange = path.getEndCoord().getDistance(targetCoord);
     UnitContext uc = new UnitContext(attacker);
     uc.map = map;
     uc.setPath(path);
     uc.chooseWeapon(target, battleRange);
-    return StrikeParams.buildStrikeParams(uc, target, map, battleRange, false);
+    return StrikeParams.buildStrikeParams(uc, target, map, battleRange, targetCoord, false);
   }
 
   /**
@@ -91,6 +92,8 @@ public class CombatEngine
     BattleParams attackInstance = context.getAttack();
 
     double damage = attackInstance.calculateDamage();
+    if( damage < 0 )
+      damage = 0;
     unitStateMap.get(context.attacker).fire(context.attacker.weapon);
     unitStateMap.get(context.defender).damageHP(damage, isSim);
 
@@ -115,9 +118,13 @@ public class CombatEngine
 
   public static double calculateOneStrikeDamage( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
   {
+    if( attacker.model.weapons.size() < 1 )
+      return 0;
     XYCoord dest = new XYCoord(attacker);
     UnitContext attackerContext = new UnitContext(map, attacker, null, null, dest);
     attackerContext.chooseWeapon(defender.model, battleRange, attackerMoved);
+    if( null == attackerContext.weapon )
+      return 0;
     return StrikeParams.buildBattleParams(
         attackerContext,
         new UnitContext(map, defender),

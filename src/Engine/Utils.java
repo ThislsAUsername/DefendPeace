@@ -11,6 +11,7 @@ import java.util.ArrayDeque;
 import java.util.Set;
 
 import CommandingOfficers.Commander;
+import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.UnitDieEvent;
 import Terrain.GameMap;
@@ -640,6 +641,9 @@ public class Utils
     boolean result = false;
     boolean includeOccupiedSpaces = true; // Shouldn't matter, as we don't invoke canEnd()
     FloodFillFunctor fff = unit.getMoveFunctor(includeOccupiedSpaces);
+    if( !fff.canEnd(map, path.getEndCoord()) )
+      return false;
+
     for( int i = 1; i < path.getPathLength(); ++i)
     {
       XYCoord from = path.getWaypoint(i-1).GetCoordinates();
@@ -671,6 +675,15 @@ public class Utils
       movePath.snipCollision(gameMap, unit);
       originalPathOK = false;
     }
+    if( unit.model.fuelBurnPerTile > 0 ) // Check fuel.
+    {
+      int fuelBurn = movePath.getFuelCost(unit, gameMap);
+      if( fuelBurn > unit.fuel )
+      {
+        movePath.snipForFuel(gameMap, unit);
+        originalPathOK = false;
+      }
+    }
     eventQueue.add(new Engine.GameEvents.MoveEvent(unit, movePath));
     return originalPathOK;
   }
@@ -681,16 +694,26 @@ public class Utils
    * @param unit The unit who is to die.
    * @param eventQueue Will be given the new MoveEvent(s).
    */
-  public static void enqueueDeathEvent(Unit unit, GameEventQueue eventQueue)
+  public static void enqueueDeathEvent(Unit unit, XYCoord grave, boolean canLose, GameEventQueue eventQueue)
   {
     Queue<Unit> unitsToDie = new ArrayDeque<Unit>();
     unitsToDie.add(unit);
+    int totalDeaths = 0;
     do
     {
       Unit utd = unitsToDie.poll();
-      eventQueue.add(new UnitDieEvent(utd));
+      eventQueue.add(new UnitDieEvent(utd, grave));
+      totalDeaths++;
       unitsToDie.addAll(utd.heldUnits);
-    } while( !unitsToDie.isEmpty() );
+    } while (!unitsToDie.isEmpty());
+
+    // If that's the last of your units, it's loss time
+    if( canLose && unit.CO.army.getUnits().size() <= totalDeaths )
+      eventQueue.add(new ArmyDefeatEvent(unit.CO.army));
+  }
+  public static void enqueueDeathEvent(Unit unit, GameEventQueue eventQueue)
+  {
+    enqueueDeathEvent(unit, new XYCoord(unit), true, eventQueue);
   }
 
   /**

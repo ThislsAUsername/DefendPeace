@@ -2,8 +2,11 @@ package Units;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
+import Engine.GameInstance;
+import Engine.UnitMods.UnitModifier;
 import Terrain.TerrainType;
 
 /**
@@ -38,15 +41,22 @@ public abstract class UnitModelScheme implements Serializable
   }
   protected abstract GameReadyModels buildGameReadyModels();
 
+  public void registerStateTrackers(GameInstance gi)
+  {
+    for( UnitModel um : getGameReadyModels().unitModels )
+      for( UnitModifier mod : um.getModifiers() )
+        mod.registerTrackers(gi);
+  }
+
   // Holds the data for a single Commander's unit selection.
   public static class GameReadyModels implements Serializable
   {
     private static final long serialVersionUID = 1L;
     public HashMap<TerrainType, ArrayList<UnitModel>> shoppingList = new HashMap<TerrainType, ArrayList<UnitModel>>();
-    public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
+    public UnitModelList unitModels = new UnitModelList();
   }
   
-  public static UnitModel getModelFromString(String pName, ArrayList<UnitModel> models)
+  public static UnitModel getModelFromString(String pName, Collection<UnitModel> models)
   {
     String name = UnitModel.standardizeID(pName);
     UnitModel model = null;

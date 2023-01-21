@@ -61,7 +61,7 @@ public class Unit extends UnitState implements UnitModList
 
     if( null != locus )
     {
-      fuel = Math.max(0, fuel - model.idleFuelBurn);
+      fuel = Math.max(0, fuel - model.fuelBurnIdle);
 
       // Collect any turn-initialization events for this unit.
       events.addAll(model.getTurnInitEvents(this, map));
@@ -212,7 +212,7 @@ public class Unit extends UnitState implements UnitModList
   /** Returns true if resupply would have zero effect on this unit. */
   public boolean isFullySupplied()
   {
-    boolean isFull = (model.maxFuel == fuel);
+    boolean isFull = !model.needsFuel() || (model.maxFuel == fuel);
     isFull &= (model.maxAmmo == ammo);
     return isFull;
   }

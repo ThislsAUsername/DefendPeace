@@ -1,11 +1,13 @@
 package Engine.GameEvents;
 
 import CommandingOfficers.Commander;
+import Engine.Utils;
 import Engine.XYCoord;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 
 public class CreateUnitEvent implements GameEvent
@@ -13,6 +15,7 @@ public class CreateUnitEvent implements GameEvent
   private final Commander myCommander;
   private final Unit myNewUnit;
   private final XYCoord myBuildCoords;
+  private int myFudgeRadius = 0;
   private final AnimationStyle myAnimStyle;
   private final boolean myBoots;
 
@@ -25,6 +28,14 @@ public class CreateUnitEvent implements GameEvent
   public CreateUnitEvent(Commander commander, UnitModel model, XYCoord coords)
   {
     this(commander, model, coords, AnimationStyle.NONE, false, false);
+  }
+  /**
+   * Allows spawning the unit on a tile within a radius, in case the "correct" tile is blocked
+   */
+  public CreateUnitEvent(Commander commander, UnitModel model, XYCoord coords, AnimationStyle anim, boolean unitIsReady, int fudgeRadius)
+  {
+    this(commander, model, coords, anim, unitIsReady, false);
+    myFudgeRadius = fudgeRadius;
   }
   public CreateUnitEvent(Commander commander, UnitModel model, XYCoord coords, AnimationStyle anim, boolean unitIsReady, boolean allowStomping)
   {
@@ -60,7 +71,29 @@ public class CreateUnitEvent implements GameEvent
     if( null != myNewUnit )
     {
       myCommander.units.add(myNewUnit);
-      gameMap.addNewUnit(myNewUnit, myBuildCoords.xCoord, myBuildCoords.yCoord, myBoots);
+      if( myFudgeRadius < 1 || myBoots )
+        gameMap.addNewUnit(myNewUnit, myBuildCoords.xCoord, myBuildCoords.yCoord, myBoots);
+      else
+      {
+        boolean success = false;
+        UnitContext uc = new UnitContext(gameMap, myNewUnit);
+        uc.calculateMoveType();
+        // Check concentric rings outwards, to spawn as close to the original spot as possible
+        for( int radius = 0; !success && radius <= myFudgeRadius; ++radius )
+          for( XYCoord xyc : Utils.findLocationsInRange(gameMap, myBuildCoords, radius, radius) )
+          {
+            Unit resident = gameMap.getResident(xyc);
+            if( resident == null && uc.moveType.canTraverse(gameMap.getEnvironment(xyc)) )
+            {
+              gameMap.addNewUnit(myNewUnit, xyc.xCoord, xyc.yCoord, false);
+              success = true;
+              break;
+            }
+          }
+        if( !success )
+          System.out.println("Warning: Failed to find a place to spawn " + myNewUnit
+                            + " within " + myFudgeRadius + " tiles of " + myBuildCoords);
+      }
       myCommander.army.myView.revealFog(myNewUnit);
     }
     else

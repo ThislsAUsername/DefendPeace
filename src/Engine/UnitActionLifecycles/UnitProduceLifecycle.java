@@ -34,7 +34,7 @@ public abstract class UnitProduceLifecycle
       XYCoord moveLocation = movePath.getEndCoord();
       if( moveLocation.equals(actor.x, actor.y) && actor.hasCargoSpace(typeToBuild.role)
           && actor.CO.army.money >= actor.CO.getCost(typeToBuild)
-          && actor.materials > 0 )
+          && actor.hasMaterials() )
       {
         return new GameActionSet(new UnitProduceAction(this, actor), false);
       }
@@ -117,7 +117,7 @@ public abstract class UnitProduceLifecycle
 
       // TODO: Consider breaking the fiscal part into its own event.
       cost = commander.getCost(model);
-      if( cost <= commander.army.money && builder.materials > 0 )
+      if( cost <= commander.army.money && builder.hasMaterials() )
       {
         myNewUnit = new Unit(myCommander, model);
       }
@@ -150,7 +150,8 @@ public abstract class UnitProduceLifecycle
       if( null != myNewUnit )
       {
         myCommander.army.money -= cost;
-        builder.materials -= 1;
+        if( builder.model.needsMaterials )
+          builder.materials -= 1;
         myCommander.units.add(myNewUnit);
         builder.heldUnits.add(myNewUnit);
         builder.isTurnOver = true;

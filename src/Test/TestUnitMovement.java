@@ -179,7 +179,7 @@ public class TestUnitMovement extends TestCase
         "    Tank does not charge 1 fuel per space of grass.");
     testPassed &= validate(multiPath.getFuelCost(testCo1, testCo1.getUnitModel(UnitModel.ASSAULT), testMap) == 5,
         "    Tank movecost is wrong for road, grass, forest, or city.");
-    testPassed &= validate(multiPath.getFuelCost(testCo1, testCo1.unitModels.get(15), testMap) == 396,
+    testPassed &= validate(multiPath.getFuelCost(testCo1, testCo1.getUnitModel(UnitModel.SEA | UnitModel.SURFACE_TO_AIR, false), testMap) == 396,
         "    Cruiser movecost is wrong for road, grass, forest, or city.");
 
     return testPassed;

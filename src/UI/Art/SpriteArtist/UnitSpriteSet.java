@@ -251,7 +251,8 @@ public class UnitSpriteSet
       BufferedImage num;
       if( u.getHP() > UnitModel.MAXIMUM_HP )
       {
-        num = SpriteLibrary.getMapUnitNumberSprites().getFrame(1); // Tens place.
+        int digit = Math.min(u.getHP() / 10, 9);
+        num = SpriteLibrary.getMapUnitNumberSprites().getFrame(digit); // Tens place.
 
         // Ones place shares space with the activity icons below if HP > 10.
         unitIcons.add( SpriteLibrary.getMapUnitNumberSprites().getFrame((u.getHP()-UnitModel.MAXIMUM_HP)) );
@@ -267,7 +268,7 @@ public class UnitSpriteSet
       statusIcons.add(SpriteLibrary.MapIcons.STUN.getIcon());
 
     double lowIndicatorFraction = 3.0;
-    if( u.fuel < u.model.maxFuel / lowIndicatorFraction )
+    if( u.model.needsFuel() && u.fuel < u.model.maxFuel / lowIndicatorFraction )
       statusIcons.add(SpriteLibrary.MapIcons.FUEL.getIcon());
 
     if( u.ammo >= 0 && !u.model.weapons.isEmpty() && u.ammo < u.model.maxAmmo / lowIndicatorFraction )

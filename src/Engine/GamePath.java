@@ -25,6 +25,10 @@ public class GamePath
   {
     waypoints.add(new PathNode(x, y));
   }
+  public void addWaypoint(XYCoord xyc)
+  {
+    addWaypoint(xyc.xCoord, xyc.yCoord);
+  }
 
   public ArrayList<PathNode> getWaypoints()
   {
@@ -63,7 +67,7 @@ public class GamePath
       XYCoord to   = waypoints.get( i ).GetCoordinates();
       cost += fff.getTransitionCost(map, from, to);
     }
-    return cost;
+    return cost * unit.fuelBurnPerTile;
   }
 
   public PathNode getWaypoint(int wpt)
@@ -138,7 +142,7 @@ public class GamePath
     boolean includeOccupiedSpaces = false;
     FloodFillFunctor fff = unit.getMoveFunctor(includeOccupiedSpaces);
 
-    // Snip if we can't actually traverse, iterate starting at the fist place we move
+    // Snip if we can't actually traverse, iterate starting at the first place we move
     for( int i = 1; i < waypoints.size(); ++i)
     {
       XYCoord from = waypoints.get(i-1).GetCoordinates();
@@ -158,6 +162,27 @@ public class GamePath
       if( fff.canEnd(map, to) )
         break;
       snip(i);
+    }
+  }
+
+  public void snipForFuel(GameMap map, Unit unit)
+  {
+    boolean includeOccupiedSpaces = false;
+    FloodFillFunctor fff = unit.getMoveFunctor(includeOccupiedSpaces);
+    int fuelBudget = unit.fuel;
+
+    // Snip if we can't actually traverse, iterate starting at the first place we move
+    for( int i = 1; i < waypoints.size(); ++i)
+    {
+      XYCoord from = waypoints.get(i-1).GetCoordinates();
+      XYCoord to   = waypoints.get( i ).GetCoordinates();
+      int tileCost = fff.getTransitionCost(map, from, to);
+      fuelBudget  -= tileCost * unit.model.fuelBurnPerTile;
+      if( 0 > fuelBudget )
+      {
+        snip(i);
+        break;
+      }
     }
   }
 

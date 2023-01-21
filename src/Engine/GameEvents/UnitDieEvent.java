@@ -12,10 +12,14 @@ public class UnitDieEvent implements GameEvent
   private XYCoord where;
   private Integer hpBeforeDeath;
 
-  public UnitDieEvent( Unit unit )
+  public UnitDieEvent(Unit unit)
+  {
+    this(unit, new XYCoord(unit));
+  }
+  public UnitDieEvent(Unit unit, XYCoord where)
   {
     this.unit = unit;
-    this.where = new XYCoord(unit.x, unit.y);
+    this.where = where;
     this.hpBeforeDeath = unit.getHP();
   }
 

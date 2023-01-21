@@ -80,6 +80,11 @@ public abstract class UnitState implements Serializable
     }
   }
 
+  public boolean hasMaterials()
+  {
+    return materials > 0 || !model.needsMaterials;
+  }
+
   public boolean isHurt()
   {
     return health < healthFromHP(UnitModel.MAXIMUM_HP);

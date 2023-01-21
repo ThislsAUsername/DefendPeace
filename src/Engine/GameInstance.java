@@ -41,6 +41,7 @@ public class GameInstance implements Serializable
   private Weathers defaultWeather;
 
   private GameScenario gameScenario;
+  public final GameScenario.GameRules rules;
   boolean isSecurityEnabled;
 
   private int currentTurn;
@@ -57,6 +58,7 @@ public class GameInstance implements Serializable
       System.out.println("WARNING! Creating a game with fewer than two armies.");
     }
     gameScenario = scenario;
+    rules = scenario.rules;
     isSecurityEnabled = useSecurity;
 
     currentTurn = 1;

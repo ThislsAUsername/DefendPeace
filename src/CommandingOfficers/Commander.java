@@ -29,6 +29,7 @@ import Units.Unit;
 import Units.UnitContext;
 import Units.UnitDelta;
 import Units.UnitModel;
+import Units.UnitModelList;
 import Units.UnitModelScheme.GameReadyModels;
 
 public class Commander implements GameEventListener, Serializable, UnitModifierWithDefaults, UnitModList, UnitMarker
@@ -39,7 +40,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   public final CommanderInfo coInfo;
   public final GameScenario.GameRules gameRules;
   public ArrayList<Unit> units;
-  public ArrayList<UnitModel> unitModels = new ArrayList<UnitModel>();
+  public final UnitModelList unitModels;
   public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain = new HashMap<>();
   public Set<XYCoord> ownedProperties;
   public Color myColor;
@@ -65,10 +66,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
       ArrayList<UnitModel> buyables = new ArrayList<>(GRMs.shoppingList.get(tt));
       unitProductionByTerrain.put(tt, buyables);
     }
-    for( UnitModel um : GRMs.unitModels )
-    {
-      unitModels.add(um);
-    }
+    unitModels = GRMs.unitModels;
 
     units = new ArrayList<Unit>();
     ownedProperties = new HashSet<XYCoord>();
@@ -148,54 +146,28 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
 
   public UnitModel getUnitModel(long unitRole)
   {
-    return getUnitModel(unitRole, true);
+    return unitModels.getUnitModel(unitRole);
   }
   public UnitModel getUnitModel(long unitRole, boolean matchOnAny)
   {
-    UnitModel um = null;
-
-    for( UnitModel iter : unitModels )
-    {
-      boolean some = iter.isAny(unitRole);
-      boolean all = iter.isAll(unitRole);
-      if( all || (some && matchOnAny) )
-      {
-        um = iter;
-        break;
-      }
-    }
-
-    return um;
+    return unitModels.getUnitModel(unitRole, matchOnAny);
   }
 
   public ArrayList<UnitModel> getAllModels(long unitRole)
   {
-    return getAllModels(unitRole, true);
+    return unitModels.getAllModels(unitRole);
   }
   public ArrayList<UnitModel> getAllModels(long unitRole, boolean matchOnAny)
   {
-    return getAllModels(unitRole, matchOnAny, 0);
+    return unitModels.getAllModels(unitRole, matchOnAny);
   }
   public ArrayList<UnitModel> getAllModelsNot(long excludedUnitRoles)
   {
-    long allFlags = ~0;
-    return getAllModels(allFlags, true, excludedUnitRoles);
+    return unitModels.getAllModelsNot(excludedUnitRoles);
   }
   public ArrayList<UnitModel> getAllModels(long unitRole, boolean matchOnAny, long excludedRoles)
   {
-    ArrayList<UnitModel> models = new ArrayList<UnitModel>();
-
-    for( UnitModel iter : unitModels )
-    {
-      boolean some = iter.isAny(unitRole) && iter.isNone(excludedRoles);
-      boolean all = iter.isAll(unitRole) && iter.isNone(excludedRoles);
-      if( all || (some && matchOnAny) )
-      {
-        models.add(iter);
-      }
-    }
-
-    return models;
+    return unitModels.getAllModels(unitRole, matchOnAny, excludedRoles);
   }
 
   @Override
