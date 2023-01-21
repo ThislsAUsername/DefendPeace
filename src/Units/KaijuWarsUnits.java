@@ -71,8 +71,9 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     // Carrier gets to build all normal air units
     UnitModel carrier = new SkyCarrier();
-    for (UnitModel um : airportModels)
-      carrier.baseActions.add(1, new UnitProduceLifecycle.UnitProduceFactory(um));
+    // Iterate backwards so the insertion ends up in the right order
+    for( int i = airportModels.size() - 1; i >= 0; --i )
+      carrier.baseActions.add(1, new UnitProduceLifecycle.UnitProduceFactory(airportModels.get(i)));
 
     airportModels.add(new BigBoy());
     GuncrossRobot gunBot = new GuncrossRobot();
@@ -237,6 +238,7 @@ public class KaijuWarsUnits extends UnitModelScheme
     {
       super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, WEAPONS, starValue);
       fuelBurnPerTile = 0;
+      needsMaterials = false;
       addUnitModifier(new KaijuWarsWeapons.KaijuWarsFightMod());
     }
     public KaijuWarsUnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
@@ -244,6 +246,7 @@ public class KaijuWarsUnits extends UnitModelScheme
     {
       super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, WEAPONS, starValue);
       fuelBurnPerTile = 0;
+      needsMaterials = false;
       addUnitModifier(new KaijuWarsWeapons.KaijuWarsFightMod());
     }
 
@@ -616,7 +619,6 @@ public class KaijuWarsUnits extends UnitModelScheme
     {
       super("Sky Carrier", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, WEAPONS, STAR_VALUE);
-      maxMaterials = -1;
       baseCargoCapacity = 4;
       carryableMask = AIR_LOW | AIR_HIGH;
       // Let's allow stacking carriers, because why not?
