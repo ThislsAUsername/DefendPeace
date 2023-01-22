@@ -256,11 +256,11 @@ public class KaijuActions
           if( null != tileToast )
             tileToast = "WRECK";
 
-          if( stomperType.regenOnBuildingKill )
+          if( stomperType.regenOnBuildingKill && location.isCaptureable() )
           {
             int heal = 2;
             crush.events.add(new HealUnitEvent(kaijuState.unit, heal, null, true));
-            kaijuState.alterHP(heal); // previewed by caller
+            kaijuState.alterHP(heal, true); // previewed by caller
           }
           if( stomperType.chargeOnBuildingKill && location.isCaptureable() )
           {
