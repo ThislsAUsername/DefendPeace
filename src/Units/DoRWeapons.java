@@ -6,6 +6,7 @@ import Units.DoRUnits.DoRUnitModel;
 
 public class DoRWeapons
 {
+  //@formatter:off
   protected enum DoRWeaponType
   {
     INFANTRYMGUN, MECHZOOKA, MECHMGUN,
@@ -17,7 +18,8 @@ public class DoRWeapons
     GUNBOATGUN, CRUISERTORPEDOES, CRUISERMGUN, 
     SUBTORPEDOES, CARRIERMGUN, BATTLESHIPCANNON,
   };
-  
+  //@formatter:on
+
   protected final static boolean EATS_BULLETS = false;
 
   private static class DoRWeapon extends WeaponModel
@@ -25,6 +27,7 @@ public class DoRWeapons
     private static final long serialVersionUID = 1L;
 
     public DoRWeaponType type;
+
     protected DoRWeapon(DoRWeaponType type, boolean infiniteAmmo, int minRange, int maxRange)
     {
       super(infiniteAmmo, minRange, maxRange);
@@ -360,7 +363,7 @@ public class DoRWeapons
     }
   }
 
-
+  //@formatter:off
   // format is [attacker][defender]
   private static int[][] damageChart = {
 // defenders:      INFANTRY, MECH,  BIKE, RECON, FLARE, ANTI_AIR, TANK, MD_TANK, WAR_TANK, ARTILLERY, ANTITANK, ROCKETS, MOBILESAM, RIG, FIGHTER, BOMBER, SEAPLANE, DUSTER, B_COPTER, T_COPTER, GUNBOAT, CRUISER, SUB, SUB_SUB, CARRIER, BATTLESHIP, LANDER, METEOR

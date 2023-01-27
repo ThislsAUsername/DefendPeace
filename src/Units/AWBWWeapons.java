@@ -6,6 +6,7 @@ import Units.AWBWUnits.AWBWUnitModel;
 
 public class AWBWWeapons
 {
+  //@formatter:off
   protected enum AWBWWeaponType
   {
     INFANTRYMGUN, MECHZOOKA, MECHMGUN,
@@ -14,7 +15,8 @@ public class AWBWWeapons
     FIGHTERMISSILES, BOMBERBOMBS, STEALTH_SHOTS, B_COPTERROCKETS, B_COPTERMGUN,
     CARRIERMISSILES, BATTLESHIPCANNON, CRUISERTORPEDOES, CRUISERMGUN, SUBTORPEDOES
   };
-  
+  //@formatter:on
+
   protected final static boolean EATS_BULLETS = false;
 
   private static class AWBWWeapon extends WeaponModel
@@ -22,6 +24,7 @@ public class AWBWWeapons
     private static final long serialVersionUID = 1L;
 
     public AWBWWeaponType type;
+
     protected AWBWWeapon(AWBWWeaponType type, boolean infiniteAmmo, int minRange, int maxRange)
     {
       super(infiniteAmmo, minRange, maxRange);
@@ -347,7 +350,7 @@ public class AWBWWeapons
     }
   }
 
-
+  //@formatter:off
   // format is [attacker][defender]
   private static int[][] damageChart = {
 // defenders:      INFANTRY, MECH, RECON, TANK, MD_TANK, NEOTANK, MEGATANK, APC, ARTILLERY, ROCKETS, PIPERUNNER, ANTI_AIR, MOBILESAM, FIGHTER, BOMBER, STEALTH, STEALTH_HIDE, B_COPTER, T_COPTER, BBOMB, CARRIER, BBOAT, BATTLESHIP, CRUISER, LANDER, SUB, SUB_SUB
