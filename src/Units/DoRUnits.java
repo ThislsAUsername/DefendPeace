@@ -286,7 +286,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MAX_FUEL = 60;
     private static final int IDLE_FUEL_BURN = 0;
     private static final int MAX_AMMO = 6;
-    private static final int VISION_RANGE = 2;
+    private static final int VISION_RANGE = 3;
     private static final int MOVE_POWER = 6;
     private static final MoveType moveType = new Tread();
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
@@ -606,7 +606,7 @@ public class DoRUnits extends UnitModelScheme
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 2;
     private static final int MAX_AMMO = 6;
-    private static final int VISION_RANGE = 3;
+    private static final int VISION_RANGE = 2;
     private static final int MOVE_POWER = 6;
 
     private static final MoveType moveType = new Flight();
@@ -802,7 +802,7 @@ public class DoRUnits extends UnitModelScheme
     private static final double STAR_VALUE = 2.0;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 1;
-    private static final int MAX_AMMO = 9;
+    private static final int MAX_AMMO = 6;
     private static final int VISION_RANGE = 3;
     private static final int MOVE_POWER = 5;
 
