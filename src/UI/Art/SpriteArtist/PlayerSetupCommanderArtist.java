@@ -24,6 +24,8 @@ public class PlayerSetupCommanderArtist
   private static int panelDrawW = CommanderPanel.eyesWidth + 2;
   private static SlidingValue panelDrawX = new SlidingValue(0);
 
+  private static SlidingValue tagPickerOffsetX = new SlidingValue(0);
+
   public static void draw(Graphics g, IController controller, ArrayList<CommanderInfo> infos, Color playerColor)
   {
     PlayerSetupCommanderController control = (PlayerSetupCommanderController)controller;
@@ -140,13 +142,16 @@ public class PlayerSetupCommanderArtist
 
     final int cursorY = myHeight / 2 - CommanderPanel.PANEL_HEIGHT / 2;
 
-    BufferedImage coNameFrame = SpriteUIUtils.makeTextFrame(coNameText, 2, 2);
-    int drawNameX = panelDrawX.geti() + panelDrawW/2;
-    int drawNameY = cursorY + CommanderPanel.PANEL_HEIGHT + coNameFrame.getHeight()/2 + 2;
-    SpriteUIUtils.drawImageCenteredOnPoint(myG, coNameFrame, drawNameX, drawNameY);
+    // Draw stuff for the selected option.
+    if( !myControl.amPickingTagIndex )
+    {
+      BufferedImage coNameFrame = SpriteUIUtils.makeTextFrame(coNameText, 2, 2);
+      int drawNameX = panelDrawX.geti() + panelDrawW / 2;
+      int drawNameY = cursorY + CommanderPanel.PANEL_HEIGHT + coNameFrame.getHeight() / 2 + 2;
+      SpriteUIUtils.drawImageCenteredOnPoint(myG, coNameFrame, drawNameX, drawNameY);
 
-    // Draw the cursor over the selected option.
-    SpriteCursor.draw(myG, panelDrawX.geti(), cursorY, panelDrawW, CommanderPanel.PANEL_HEIGHT, playerColor);
+      SpriteCursor.draw(myG, panelDrawX.geti(), cursorY, panelDrawW, CommanderPanel.PANEL_HEIGHT, playerColor);
+    }
   }
 
   static final int textWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth();
@@ -216,6 +221,21 @@ public class PlayerSetupCommanderArtist
 
       myG.drawImage(playerImage, dx, dy, null);
     }
+
+    // Throw in a done button
+    BufferedImage readyButton = SpriteUIUtils.makeTextFrame("done", 3, 2);
+
+    int drawX = 4 + (taggedCOs.size()*panelXShift);
+    int dx = drawX+panelThickness, dy = drawY+panelThickness;
+    // Center it
+    dx += (panelWidth  - readyButton.getWidth() ) / 2;
+    dy += (panelHeight - readyButton.getHeight()) / 2;
+    myG.drawImage(readyButton, dx, dy, null);
+
+    // Draw the cursor over the selected option.
+    final int selTagIndex = myControl.tagIndexSelector.getSelectionNormalized();
+    tagPickerOffsetX.set(4 + (selTagIndex*panelXShift));
+    SpriteCursor.draw(myG, tagPickerOffsetX.geti(), drawY, panelWidth, panelHeight, playerColor);
   }
 
   /**
