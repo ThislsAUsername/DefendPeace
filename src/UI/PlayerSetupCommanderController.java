@@ -139,10 +139,6 @@ public class PlayerSetupCommanderController implements IController
             myPlayerInfo.coList.get(i).co = tagCmdrList.get(i);
           done = true;
         }
-        else
-        {
-          // TODO: Re-pick the current CO choice so mashing is a no-op
-        }
         break;
       case UP:
       case DOWN:
@@ -235,7 +231,6 @@ public class PlayerSetupCommanderController implements IController
         else
         {
           amPickingTagIndex = true;
-          done = true;
         }
         break;
       case SEEK:

@@ -48,7 +48,7 @@ public class PlayerSetupCommanderArtist
     drawCmdrPickerPanels(myG, myHeight, myWidth, infos, playerColor, snapCursor);
 
     /////////////// Tag Picker Panels //////////////////////
-    if( myControl.shouldSelectMultiCO || myControl.tagCmdrList.size() > 1 )
+    if( myControl.amPickingTagIndex )
     {
       drawTagPickerPanels(myG, myWidth, infos, playerColor, snapCursor);
     }
