@@ -26,6 +26,9 @@ public class PlayerSetupCommanderArtist
 
   private static SlidingValue tagPickerOffsetX = new SlidingValue(0);
 
+  static final BufferedImage qtip = SpriteUIUtils.makeTextFrame("Q: Kick CO", 3, 2);
+  static final BufferedImage etip = SpriteUIUtils.makeTextFrame("E: CO Info", 3, 2);
+
   public static void draw(Graphics g, IController controller, ArrayList<CommanderInfo> infos, Color playerColor)
   {
     PlayerSetupCommanderController control = (PlayerSetupCommanderController)controller;
@@ -54,8 +57,11 @@ public class PlayerSetupCommanderArtist
     }
 
     /////////////// Tooltip ////////////////////////////
-    BufferedImage tooltip = SpriteUIUtils.makeTextFrame("Press Q for more info", 3, 2);
-    myG.drawImage(tooltip, myWidth - tooltip.getWidth(), 3, null);
+    myG.drawImage(etip, myWidth - etip.getWidth(), 3, null);
+    if(myControl.amPickingTagIndex)
+    {
+      myG.drawImage(qtip, myWidth - qtip.getWidth(), 5 + qtip.getHeight(), null);
+    }
 
     // Draw the composed image to the window at scale.
     g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);

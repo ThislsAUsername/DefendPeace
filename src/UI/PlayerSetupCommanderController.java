@@ -85,8 +85,8 @@ public class PlayerSetupCommanderController implements IController
       }
     }
 
-    tagIndexSelector = new OptionSelector(tagCmdrList.size() + 1);
-    tagIndexSelector.setSelectedOption(0);
+    tagIndexSelector = new OptionSelector(1);
+    syncTagIndexSelector();
 
     cmdrBinSelector = new OptionSelector(lastBin + 1);
     cmdrBinSelector.setSelectedOption(startBin);
@@ -153,6 +153,14 @@ public class PlayerSetupCommanderController implements IController
         done = true;
         break;
       case SEEK:
+        // Kick out the selected CO
+        if( selTagIndex+1 < tagCmdrList.size() )
+        {
+          tagCmdrList.remove(selTagIndex);
+          syncTagIndexSelector();
+        }
+        break;
+      case VIEWMODE:
         int selectedCO = tagCmdrList.get(selTagIndex);
         startViewingCmdrInfo(selectedCO);
         break;
@@ -186,22 +194,13 @@ public class PlayerSetupCommanderController implements IController
           final int selTagIndex = tagIndexSelector.getSelectionNormalized();
           // This index should never be too high, because of the structure of handleTagChoiceInput()
 
-          final int oldCO = tagCmdrList.get(selTagIndex);
           tagCmdrList.set(selTagIndex, selectedCO);
 
           // Add/remove if appropriate
-          if( oldCO != selectedCO )
+          if( selTagIndex + 1 >= tagCmdrList.size() )
           {
-            if( selTagIndex+1 >= tagCmdrList.size() )
-            {
-              tagCmdrList.add(noCmdr); // Extend the list if we just added a new tag partner
-            }
-            else if( noCmdr == selectedCO && 1 < tagCmdrList.size() )
-            {
-              tagCmdrList.remove(selTagIndex);
-            }
-            tagIndexSelector.reset(tagCmdrList.size() + 1);
-            tagIndexSelector.setSelectedOption(selTagIndex);
+            tagCmdrList.add(noCmdr); // Extend the list if we just added a new tag partner
+            syncTagIndexSelector();
           }
         }
         break;
@@ -233,13 +232,20 @@ public class PlayerSetupCommanderController implements IController
           amPickingTagIndex = true;
         }
         break;
-      case SEEK:
+      case VIEWMODE:
         startViewingCmdrInfo(selectedCO);
         break;
-      default:
+      default: // SEEK
         // Do nothing.
     }
     return done;
+  }
+
+  private void syncTagIndexSelector()
+  {
+    final int tagIndex = tagIndexSelector.getSelectionNormalized();
+    tagIndexSelector.reset(tagCmdrList.size() + 1);
+    tagIndexSelector.setSelectedOption(tagIndex);
   }
 
   private void startViewingCmdrInfo(int selectedCO)
