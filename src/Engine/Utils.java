@@ -135,7 +135,6 @@ public class Utils
       return reachableTiles;
     }
 
-    HashMap<XYCoord, SearchNode> bestNodes = new HashMap<>();
     // set up our search
     SearchNode root = new SearchNode(start, initialFillPower, null);
     Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator());
@@ -151,7 +150,7 @@ public class Utils
         reachableTiles.add(coord);
       }
 
-      expandSearchNode(fff, gameMap, currentNode, bestNodes, searchQueue);
+      expandSearchNode(fff, gameMap, currentNode, searchQueue);
 
       currentNode = null;
     }
@@ -271,8 +270,6 @@ public class Utils
       return aPath;
     }
 
-    HashMap<XYCoord, SearchNode> bestNodes = new HashMap<>();
-
     // Set up search parameters.
     SearchNode root = new SearchNode(start, initialFillPower, null);
     Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(x, y));
@@ -300,7 +297,7 @@ public class Utils
         break;
       }
 
-      expandSearchNode(fff, map, currentNode, bestNodes, searchQueue);
+      expandSearchNode(fff, map, currentNode, searchQueue);
 
       currentNode = null;
     }
@@ -324,7 +321,7 @@ public class Utils
    * can reach more economically than previously discovered, update the cost grid and enqueue the node.
    * @param theoretical If set, don't limit range using move power, and don't worry about other Units in the way.
    */
-  private static void expandSearchNode(FloodFillFunctor fff, GameMap map, SearchNode currentNode, HashMap<XYCoord, SearchNode> bestNodes, Queue<SearchNode> searchQueue)
+  private static void expandSearchNode(FloodFillFunctor fff, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue)
   {
     ArrayList<XYCoord> coordsToCheck = findLocationsInRange(map, currentNode.getCoordinates(), 1, 1);
 
@@ -333,10 +330,6 @@ public class Utils
       if( currentNode.tail.contains(next) )
         continue;
       int oldNewPower = -1;
-      if( bestNodes.containsKey(next) )
-      {
-        oldNewPower = bestNodes.get(next).power;
-      }
       // If we can move more cheaply than previously discovered,
       // then update the power grid and re-queue the next node.
       int oldPower = currentNode.power;
@@ -347,7 +340,6 @@ public class Utils
       {
         final SearchNode nextNode = new SearchNode(next, newPower, currentNode);
         searchQueue.add(nextNode);
-        bestNodes.put(next, nextNode);
       }
     }
   }
@@ -418,6 +410,9 @@ public class Utils
     @Override
     public int compare(SearchNode o1, SearchNode o2)
     {
+      if (!hasDestination)
+        return 0;
+
       int firstDist = Math.abs(o1.x - xDest) + Math.abs(o1.y - yDest);
       int secondDist = Math.abs(o2.x - xDest) + Math.abs(o2.y - yDest);
 
