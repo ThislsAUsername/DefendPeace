@@ -91,13 +91,14 @@ public class Utils
   {
     ArrayList<XYCoord> locations = findLocationsInRange(map, moveLoc, 1);
     ArrayList<XYCoord> dropoffLocations = new ArrayList<XYCoord>();
-    final MoveType cargoMoveType = new UnitContext(cargo).calculateMoveType();
-    if( cargoMoveType.canTraverse(map.getEnvironment(moveLoc)) )
+    final FloodFillFunctor cargoMoveType = new UnitContext(cargo).calculateMoveType().getUnitMoveFunctor(cargo, false, false);
+    if( MoveType.IMPASSABLE > cargoMoveType.getTransitionCost(map, moveLoc, moveLoc) )
       for( XYCoord loc : locations )
       {
         // Add any location that is empty and supports movement of the cargo unit.
         if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
-            && MoveType.IMPASSABLE > cargoMoveType.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
+            && MoveType.IMPASSABLE > cargoMoveType.getTransitionCost(map, loc, loc)
+            && cargoMoveType.canEnd(map, loc) )
         {
           dropoffLocations.add(loc);
         }
