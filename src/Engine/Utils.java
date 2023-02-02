@@ -127,35 +127,82 @@ public class Utils
    */
   public static ArrayList<XYCoord> findFloodFillArea(XYCoord start, FloodFillFunctor fff, int initialFillPower, GameMap gameMap)
   {
-    ArrayList<XYCoord> reachableTiles = new ArrayList<XYCoord>();
+    ArrayList<XYCoord> output = new ArrayList<XYCoord>();
+    HashSet<XYCoord> reachableTiles = new HashSet<XYCoord>();
 
     if( null == fff || null == start || start.xCoord < 0 || start.yCoord < 0 )
     {
       System.out.println("WARNING! Finding destinations for ineligible unit!");
-      return reachableTiles;
+      return output;
     }
 
     // set up our search
     SearchNode root = new SearchNode(start, initialFillPower, null);
-    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator());
+    ArrayDeque<SearchNode> searchQueue = new java.util.ArrayDeque<>();
     searchQueue.add(root);
+    int longestChainDropped = 0;
+    SearchNode longestParentOfDropped = root;
     // do search
     while (!searchQueue.isEmpty())
     {
       // pull out the next search node
-      SearchNode currentNode = searchQueue.poll();
+      SearchNode currentNode = searchQueue.pollLast();
       XYCoord coord = new XYCoord(currentNode.x, currentNode.y);
       if( fff.canEnd(gameMap, coord) )
       {
         reachableTiles.add(coord);
       }
 
-      expandSearchNode(fff, gameMap, currentNode, searchQueue);
+      boolean deadEnd = expandSearchNode(fff, gameMap, currentNode, searchQueue);
+
+//      if( deadEnd )
+//      {
+//        int chainDropped = cleanNodes(currentNode, longestParentOfDropped);
+//        if( chainDropped > longestChainDropped )
+//        {
+//          System.out.println("Dropping path of length " + chainDropped);
+//          SearchNode parent = currentNode;
+//          for( int i = 0;
+//              parent != null;
+//              parent = parent.parent, ++i )
+//          {
+//            System.out.print("\t" + parent);
+//            if( i == chainDropped )
+//            {
+//              System.out.print(" *");
+//              longestParentOfDropped = parent.parent;
+//            }
+//            System.out.println();
+//          }
+//          longestChainDropped = chainDropped;
+//        }
+//      }
 
       currentNode = null;
     }
 
-    return reachableTiles;
+    output.addAll(reachableTiles);
+    return output;
+  }
+
+  private static int cleanNodes(SearchNode currentNode, SearchNode longestParentOfDropped)
+  {
+    final SearchNode parent = currentNode.parent;
+    if( currentNode == longestParentOfDropped )
+    {
+      System.out.println("Dropping " + currentNode);
+      longestParentOfDropped = parent;
+    }
+    if( null == parent )
+      return 1;
+//    parent.children.remove(currentNode);
+//    if( parent.children.size() < 1 )
+//    {
+////      System.out.println("Dropping parent " + parent);
+////      System.out.println("\tlast child: " + currentNode);
+//      return 1 + cleanNodes(parent, longestParentOfDropped);
+//    }
+    return 1;
   }
 
   public static boolean isPathValid(Unit unit, GamePath path, GameMap map, boolean includeOccupiedSpaces)
@@ -321,14 +368,23 @@ public class Utils
    * can reach more economically than previously discovered, update the cost grid and enqueue the node.
    * @param theoretical If set, don't limit range using move power, and don't worry about other Units in the way.
    */
-  private static void expandSearchNode(FloodFillFunctor fff, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue)
+  private static boolean expandSearchNode(FloodFillFunctor fff, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue)
   {
     ArrayList<XYCoord> coordsToCheck = findLocationsInRange(map, currentNode.getCoordinates(), 1, 1);
 
+    boolean deadEnd = true;
     for( XYCoord next : coordsToCheck )
     {
-      if( currentNode.tail.contains(next) )
+      boolean bitesTail = false;
+      for( SearchNode parent = currentNode.parent; parent != null; parent = parent.parent )
+        if( parent.getCoordinates().equals(next) )
+        {
+          bitesTail = true;
+          continue;
+        }
+      if( bitesTail )
         continue;
+
       int oldNewPower = -1;
       // If we can move more cheaply than previously discovered,
       // then update the power grid and re-queue the next node.
@@ -339,9 +395,13 @@ public class Utils
       if( transitionCost < MoveType.IMPASSABLE && newPower > oldNewPower )
       {
         final SearchNode nextNode = new SearchNode(next, newPower, currentNode);
+//        currentNode.children.add(nextNode);
         searchQueue.add(nextNode);
+        deadEnd = false;
       }
     }
+
+    return deadEnd;
   }
 
   /**
@@ -353,7 +413,7 @@ public class Utils
     final public int x, y;
     final public int power;
     final public SearchNode parent;
-    final public HashSet<XYCoord> tail;
+//    final public ArrayList<SearchNode> children = new ArrayList<>();
 
     public SearchNode(XYCoord coord, int power, SearchNode parent)
     {
@@ -365,12 +425,6 @@ public class Utils
       this.y = y;
       this.power = power;
       this.parent = parent;
-      tail = new HashSet<>();
-      if( null != parent )
-      {
-        tail.add(parent.getCoordinates());
-        tail.addAll(parent.tail);
-      }
     }
     public XYCoord getCoordinates()
     {
@@ -379,7 +433,7 @@ public class Utils
     @Override
     public String toString()
     {
-      return String.format("(%s, %s, +%s)", x, y, power);
+      return String.format("(%3s, %3s, +%3s)", x, y, power);
     }
   }
 

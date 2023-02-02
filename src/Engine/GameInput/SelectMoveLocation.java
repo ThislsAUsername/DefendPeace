@@ -24,10 +24,13 @@ class SelectMoveLocation extends GameInputState<XYCoord>
   @Override
   protected OptionSet initOptions()
   {
+    System.out.println("Checking move locations for " + myStateData.unitActor.toStringWithLocation());
+    long startTotal = System.currentTimeMillis();
     // Get valid move locations and return our OptionSet.
     ArrayList<XYCoord> moveLocations = 
         Utils.findPossibleDestinations(myStateData.unitCoord, myStateData.unitActor,
                                        myStateData.gameMap, canEndOnOccupied);
+    System.out.println("Total time: " + (System.currentTimeMillis() - startTotal) + " ms");
     if (null != myStateData.unitLauncher)
       moveLocations.remove(myStateData.unitCoord); // Prevent returning to the spot of the launch
     buildMovePath(myStateData.unitCoord.xCoord, myStateData.unitCoord.yCoord);

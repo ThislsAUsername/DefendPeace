@@ -43,30 +43,30 @@ public class MapLibrary
     availableMaps.add(CageMatch.getMapInfo());
     availableMaps.addAll(MapReader.readMapData());
     long startTotal = System.currentTimeMillis();
-    for(MapInfo mi : availableMaps)
-    {
-      System.out.print(mi.mapName + ": ");
-      long startMap = System.currentTimeMillis();
-      GameInstance gi = setupTest(mi);
-      MapMaster gameMap = gi.gameMap;
-      final Commander co = gi.activeArmy.cos[0];
-      final ArrayList<UnitModel> allModels = gi.activeArmy.gameRules.unitModelScheme.getGameReadyModels().unitModels;
-      boolean includeOccupiedSpaces = true;
-      for(UnitModel um : allModels)
-      {
-        UnitContext uc = new UnitContext(co, um);
-        FloodFillFunctor mover = uc.calculateMoveType().getUnitMoveFunctor(null, includeOccupiedSpaces, includeOccupiedSpaces);
-        int movePower = uc.calculateMovePower();
-        for( int x = 0; x < gameMap.mapWidth; ++x )
-        {
-          for( int y = 0; y < gameMap.mapHeight; ++y )
-          {
-            Utils.findFloodFillArea(new XYCoord(x, y), mover, movePower, gameMap);
-          }
-        }
-      }
-      System.out.println((System.currentTimeMillis() - startMap) + " ms");
-    }
+//    for(MapInfo mi : availableMaps)
+//    {
+//      System.out.print(mi.mapName + ": ");
+//      long startMap = System.currentTimeMillis();
+//      GameInstance gi = setupTest(mi);
+//      MapMaster gameMap = gi.gameMap;
+//      final Commander co = gi.activeArmy.cos[0];
+//      final ArrayList<UnitModel> allModels = gi.activeArmy.gameRules.unitModelScheme.getGameReadyModels().unitModels;
+//      boolean includeOccupiedSpaces = true;
+//      for(UnitModel um : allModels)
+//      {
+//        UnitContext uc = new UnitContext(co, um);
+//        FloodFillFunctor mover = uc.calculateMoveType().getUnitMoveFunctor(null, includeOccupiedSpaces, includeOccupiedSpaces);
+//        int movePower = uc.calculateMovePower();
+//        for( int x = 0; x < gameMap.mapWidth; ++x )
+//        {
+//          for( int y = 0; y < gameMap.mapHeight; ++y )
+//          {
+//            Utils.findFloodFillArea(new XYCoord(x, y), mover, movePower, gameMap);
+//          }
+//        }
+//      }
+//      System.out.println((System.currentTimeMillis() - startMap) + " ms");
+//    }
     System.out.println("Total time: " + (System.currentTimeMillis() - startTotal)/1000 + " s");
   }
 
