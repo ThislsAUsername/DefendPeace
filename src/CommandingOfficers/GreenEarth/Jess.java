@@ -19,9 +19,9 @@ public class Jess extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Jess");
+      super("Davis");
       infoPages.add(new InfoPage(
-          "Jess\r\n" + 
+          "Davis (AW2 Jess)\r\n" + 
           "  Ground vehicles gain +10% attack, but all other units (including footsoldiers) lose -10% attack\r\n" +
           "Turbo Charge -- All units resupply; vehicles gain +10% attack and +1 Movement\r\n" +
           "Overdrive -- All units resupply; vehicles gain +30% attack +2 Movement"));
