@@ -222,10 +222,21 @@ public class PlayerSetupCommanderArtist
       myG.setColor(Color.BLACK);
       myG.fillRect(drawX, drawY, panelWidth, panelHeight);
       int dx = drawX+panelThickness, dy = drawY+panelThickness;
+
       myG.setColor(playerColor);
       myG.fillRect(dx, dy, panelWidth-panelThickness-1, panelHeight-panelThickness-1);
 
-      myG.drawImage(playerImage, dx, dy, null);
+      if( tagToDraw+1 == taggedCOs.size() )
+      {
+        myG.setColor(Color.BLACK);
+        // Draw a little plus sign
+        myG.drawLine(drawX + 2*panelWidth/7, drawY +   panelHeight/2,
+                     drawX + 5*panelWidth/7, drawY +   panelHeight/2);
+        myG.drawLine(drawX +   panelWidth/2, drawY + 2*panelHeight/7,
+                     drawX +   panelWidth/2, drawY + 5*panelHeight/7);
+      }
+      else
+        myG.drawImage(playerImage, dx, dy, null);
     }
 
     // Throw in a done button
