@@ -21,6 +21,7 @@ public class PlayerSetupCommanderController implements IController
   public boolean amPickingTagIndex;
   private final int noCmdr;
 
+  // Range: [0, tag count], to handle the "done" button.
   public OptionSelector tagIndexSelector;
 
   public ArrayList<ArrayList<Integer>> cmdrBins;
@@ -192,7 +193,7 @@ public class PlayerSetupCommanderController implements IController
           amPickingTagIndex = true;
 
           final int selTagIndex = tagIndexSelector.getSelectionNormalized();
-          // This index should never be too high, because of the structure of handleTagChoiceInput()
+          // handleTagChoiceInput() should ensure this index is in [0, tag count)
 
           tagCmdrList.set(selTagIndex, selectedCO);
 
