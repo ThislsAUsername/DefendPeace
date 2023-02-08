@@ -166,7 +166,6 @@ public class Commander extends GameEventListener implements Serializable
    */
   public GameEventQueue initTurn(MapMaster map)
   {
-    myView.resetFog();
     myActiveAbilityName = "";
 
     // Accrue income for each city under your control.
@@ -178,6 +177,7 @@ public class Commander extends GameEventListener implements Serializable
     {
       modifiers.poll().revertChanges(this);
     }
+    myView.resetFog();
 
     if( null != aiController )
     {
