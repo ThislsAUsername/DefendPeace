@@ -2,6 +2,7 @@ package Units;
 
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.Combat.CombatContext;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.StateTrackers.StateTracker;
@@ -328,6 +329,16 @@ public class KaijuWarsWeapons
   public static class KaijuWarsFightMod implements UnitModifierWithDefaults
   {
     private static final long serialVersionUID = 1L;
+
+    @Override
+    public void changeCombatContext(CombatContext instance)
+    {
+      KaijuWarsWeapon gun = (KaijuWarsWeapon) instance.attacker.weapon;
+      if( gun.negateCounterBonuses )
+      {
+        instance.canCounter = false;
+      }
+    }
 
     // Rewrite base damage in both of these functions so we can beat up both terrain and units with situational boosts
     @Override
