@@ -191,7 +191,7 @@ public class KaijuActions
           if( canCounter )
           {
             counter = victimType.kaijuCounter;
-            counter += KaijuWarsWeapons.getCounterBoost(victim, gameMap, location.getEnvironment().terrainType);
+            counter += KaijuWarsWeapons.getCounterBoost(new UnitContext(victim), gameMap, location.getEnvironment().terrainType);
             if( kaijuState.model.isLandUnit()
                 && victimType.slowsLand )
               --kaijuState.movePower;

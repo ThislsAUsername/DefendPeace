@@ -353,7 +353,7 @@ public class KaijuWarsWeapons
       final TerrainType atkEnv = params.attacker.env.terrainType;
       final TerrainType defEnv = params.defender.env.terrainType;
 
-      int counterBoost = getCounterBoost(params.defender.unit, params.map, defEnv);
+      int counterBoost = getCounterBoost(params.defender, params.map, defEnv);
       int counterPower = defModel.kaijuCounter;
       counterPower += counterBoost;
 
@@ -388,7 +388,7 @@ public class KaijuWarsWeapons
   /**
    * Gets any situational counter power boost from unit mechanics or assumed-enabled tactics/techs
    */
-  public static int getCounterBoost(Unit defender, GameMap map, TerrainType defEnv)
+  public static int getCounterBoost(UnitContext defender, GameMap map, TerrainType defEnv)
   {
     int counterBoost = 0;
     KaijuWarsUnitModel defModel = (KaijuWarsUnitModel) defender.model;
