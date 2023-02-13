@@ -1,10 +1,16 @@
 package Units;
 
+import java.util.HashSet;
+
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatContext;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
+import Engine.GameEvents.GameEvent;
+import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.MassDamageEvent;
 import Engine.StateTrackers.StateTracker;
 import Engine.StateTrackers.UnitTurnPositionTracker;
 import Engine.UnitMods.UnitModifierWithDefaults;
@@ -14,9 +20,6 @@ import Units.KaijuWarsUnits.KaijuWarsUnitModel;
 
 public class KaijuWarsWeapons
 {
-  // Percent damage that 1 ATK should do vs 0 kaijuCounter
-  public final static int KAIJU_DAMAGE_FACTOR = 80;
-
   public final static int SLOW_BONUS          = 2;
   public final static int RESIST_KAIJU_BONUS  = 2;
   public final static int STATIC_INF_BONUS    = 2;
@@ -64,7 +67,7 @@ public class KaijuWarsWeapons
       if( defender.isKaiju )
         return attack * 10;
 
-      int counterPower = deriveCounter(this, defender);
+      int counterPower = defender.kaijuCounter;
 
       return KaijuWarsWeapons.getDamage(attack, 0, counterPower);
     }
@@ -272,26 +275,14 @@ public class KaijuWarsWeapons
       attack = gun.vsLand;
     return attack;
   }
-  public static int deriveCounter(KaijuWarsWeapon gun, KaijuWarsUnitModel defender)
-  {
-    int counterPower = defender.kaijuCounter;
-    if( !gun.negateCounterBonuses )
-    {
-      if( gun.isAirWeapon && defender.slowsAir )
-        counterPower += SLOW_BONUS;
-      if( !gun.isAirWeapon && defender.slowsLand )
-        counterPower += SLOW_BONUS;
-      if( defender.resistsKaiju )
-        counterPower += RESIST_KAIJU_BONUS;
-    }
-    return counterPower;
-  }
 
   public static double getDamage(int attack, int attBonus, int counterPower)
   {
     return getDamageRatioStyle(attack, attBonus, counterPower);
   }
 
+  // Percent damage that 1 ATK should do vs 0 kaijuCounter
+  public final static int KAIJU_DAMAGE_FACTOR = 80;
   /**
    * Produces damage numbers based on attack/kaijuCounter
    */
@@ -314,13 +305,13 @@ public class KaijuWarsWeapons
     if( 0 == attack )
       return 0;
 
-    int damage = 45 + attack*10 + attBonus*20;
+    int damage = 45 + (attack + attBonus)*20;
 
     int finalPower = attack - durability;
     if( finalPower > 0 )
-      damage += finalPower * 15;
+      damage += finalPower * 20;
     else
-      damage += finalPower * 5;
+      damage += finalPower * 15;
 
     return damage;
   }
@@ -363,7 +354,7 @@ public class KaijuWarsWeapons
       final TerrainType defEnv = params.defender.env.terrainType;
 
       int counterBoost = getCounterBoost(params.defender.unit, params.map, defEnv);
-      int counterPower = deriveCounter(gun, defModel);
+      int counterPower = defModel.kaijuCounter;
       counterPower += counterBoost;
 
       int attackBoost = getAttackBoost(params.attacker.unit, params.map, params.attacker.coord, atkEnv, params.defender.coord);
@@ -455,6 +446,67 @@ public class KaijuWarsWeapons
       }
     }
     return attackBoost;
+  }
+
+
+  /**
+   * Applies stuns in place of defensive slows, in military vs military fights
+   */
+  public static class CombatStunApplier extends StateTracker
+  {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public GameEventQueue receiveBattleEvent(BattleSummary summary)
+    {
+      KaijuWarsUnitModel atkModel = (KaijuWarsUnitModel) summary.attacker.model;
+      // TODO: Does this do bad things with BattleMechs?
+      KaijuWarsWeapon    atkGun = (KaijuWarsWeapon) atkModel.weapons.get(0);
+      KaijuWarsUnitModel defModel = (KaijuWarsUnitModel) summary.defender.model;
+      KaijuWarsWeapon defGun = null;
+      if( !defModel.weapons.isEmpty() )
+        defGun = (KaijuWarsWeapon) defModel.weapons.get(0);
+      else
+        defGun = new KaijuWarsWeapon(0, 0);
+
+      // Store whether said combatant should be immune to stun
+      boolean stunAttacker = !atkGun.negateCounterBonuses && !atkModel.resistsKaiju;
+      boolean stunDefender = !defGun.negateCounterBonuses && !defModel.resistsKaiju;
+
+      // If not immune, check whether the other one can stun this one
+      if( stunAttacker )
+        stunAttacker = canStunType(atkGun, defModel);
+      if( stunDefender )
+        stunDefender = canStunType(defGun, atkModel);
+
+      // Stun on death, for now?
+      stunAttacker &= summary.defender.after.getHP() < 1;
+      stunDefender &= summary.attacker.after.getHP() < 1;
+
+      if (!stunAttacker && !stunDefender)
+        return null;
+
+      HashSet<Unit> victims = new HashSet<Unit>(); // Find all of our unlucky participants
+      if( stunAttacker )
+        victims.add(summary.attacker.unit);
+      if( stunDefender )
+        victims.add(summary.defender.unit);
+
+      GameEvent stunEvent = new MassDamageEvent(null, victims, 0, false, true);
+      GameEventQueue events = new GameEventQueue();
+      events.add(stunEvent);
+      return events;
+    }
+  } // ~CombatStunApplier
+
+  private static boolean canStunType(KaijuWarsWeapon atkGun, KaijuWarsUnitModel defModel)
+  {
+    boolean canStun = false;
+    if( atkGun.isAirWeapon && defModel.slowsAir )
+      canStun = true;
+    if( !atkGun.isAirWeapon && defModel.slowsLand )
+      canStun = true;
+    return canStun;
   }
 
 } //~KaijuWarsWeapons

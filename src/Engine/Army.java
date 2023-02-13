@@ -317,7 +317,7 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   @Override
   public GameEventQueue receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP)
   {
-    if( this == attacker.army )
+    if( attacker != null && this == attacker.army )
       return null; // Punching yourself shouldn't make you angry
     if( awbwDeniesCharge() )
       return null;
