@@ -10,6 +10,7 @@ import java.util.Queue;
 
 import AI.AICombatUtils;
 import Engine.Army;
+import Engine.Driver;
 import Engine.GameInstance;
 import Engine.GamePath;
 import Engine.OverlayCache;
@@ -103,7 +104,13 @@ public class SpriteMapView extends MapView
     // Set the view to show the whole map, if possible
     mapViewWidth = SpriteLibrary.baseSpriteSize * game.gameMap.mapWidth;
     mapViewHeight = SpriteLibrary.baseSpriteSize * game.gameMap.mapHeight;
-    SpriteOptions.setScreenDimensions(mapViewWidth * SpriteOptions.getDrawScale(), mapViewHeight * SpriteOptions.getDrawScale());
+
+    if( !Driver.getInstance().isMaximized() )
+    {
+      SpriteOptions.setScreenDimensions( mapViewWidth  * SpriteOptions.getDrawScale(),
+                                         mapViewHeight * SpriteOptions.getDrawScale() );
+      Driver.getInstance().updateView();
+    }
   }
 
   @Override
