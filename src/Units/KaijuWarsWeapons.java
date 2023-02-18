@@ -288,11 +288,11 @@ public class KaijuWarsWeapons
    */
   public static double getDamageRatioStyle(int attack, int attBonus, int counterPower)
   {
-    attack += attBonus;
     // 1-based instead of 0-based
     int durability = 1 + counterPower;
     int damage = attack * KAIJU_DAMAGE_FACTOR / durability;
     damage    -= damage % 5;
+    damage    += attBonus * 20;
 
     return damage;
   }
