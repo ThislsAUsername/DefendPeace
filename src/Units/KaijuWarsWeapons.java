@@ -479,9 +479,9 @@ public class KaijuWarsWeapons
       if( stunDefender )
         stunDefender = canStunType(defGun, atkModel);
 
-      // Stun on death, for now?
-      stunAttacker &= summary.defender.after.getHP() < 1;
-      stunDefender &= summary.attacker.after.getHP() < 1;
+      // Stun on dealing damage
+      stunAttacker &= summary.attacker.deltaPreciseHP < 0;
+      stunDefender &= summary.defender.deltaPreciseHP < 0;
 
       if (!stunAttacker && !stunDefender)
         return null;
