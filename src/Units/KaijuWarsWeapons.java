@@ -475,9 +475,9 @@ public class KaijuWarsWeapons
 
       // If not immune, check whether the other one can stun this one
       if( stunAttacker )
-        stunAttacker = canStunType(atkGun, defModel);
+        stunAttacker = canStunType(atkModel, defModel);
       if( stunDefender )
-        stunDefender = canStunType(defGun, atkModel);
+        stunDefender = canStunType(defModel, atkModel);
 
       // Stun on dealing damage
       stunAttacker &= summary.attacker.deltaPreciseHP < 0;
@@ -499,12 +499,12 @@ public class KaijuWarsWeapons
     }
   } // ~CombatStunApplier
 
-  private static boolean canStunType(KaijuWarsWeapon atkGun, KaijuWarsUnitModel defModel)
+  private static boolean canStunType(KaijuWarsUnitModel atkModel, KaijuWarsUnitModel defModel)
   {
     boolean canStun = false;
-    if( atkGun.isAirWeapon && defModel.slowsAir )
+    if( atkModel.isAirUnit() && defModel.slowsAir )
       canStun = true;
-    if( !atkGun.isAirWeapon && defModel.slowsLand )
+    if( !atkModel.isAirUnit() && defModel.slowsLand )
       canStun = true;
     return canStun;
   }
