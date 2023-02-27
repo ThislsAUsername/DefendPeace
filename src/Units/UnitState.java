@@ -138,14 +138,14 @@ public abstract class UnitState implements Serializable
    * When healing, rounds health up to a whole HP (e.g. 2.5 + 2 = 4.5 -> 5.0)
    * @return the change in HP
    */
-  public int alterHP(int change)
+  public int alterHP(double change)
   {
     return alterHP(change, false);
   }
-  public int alterHP(int change, boolean allowOver)
+  public int alterHP(double change, boolean allowOver)
   {
     int before = getHP();
-    int newHP = getHP() + change;
+    double newHP = getHP() + change;
     // Only enforce the maximum HP if we're healing
     //  If current HP > max HP and change is negative, we shouldn't always delete all excess HP
     if( !allowOver && change > 0 )

@@ -21,17 +21,17 @@ public class MassDamageEvent implements GameEvent
   private final Commander attacker;
   // Records how many HP each victim lost; doubles as our victim storage area
   private Map<Unit, Integer> victims = new HashMap<Unit, Integer>();
-  public final int damage;
+  public final double damage;
   public final boolean lethal;
   public final boolean shouldStun;
 
   public MassDamageEvent(Commander attacker, Collection<Unit> pVictims,
-      int pDamage, boolean isLethal)
+      double pDamage, boolean isLethal)
   {
     this(attacker, pVictims, pDamage, isLethal, false);
   }
   public MassDamageEvent(Commander attacker, Collection<Unit> pVictims,
-      int pDamage, boolean isLethal, boolean pStun)
+      double pDamage, boolean isLethal, boolean pStun)
   {
     this.attacker = attacker;
     for(Unit victim : pVictims)

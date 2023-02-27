@@ -138,8 +138,8 @@ public class KaijuActions
         } // ~node loop
 
         // If we took any damage, throw the total up on our own head
-        final int finalHP = kaijuState.getHP();
-        final int startHP = actor.getHP();
+        final int finalHP = (int) (kaijuState.getPreciseHP() * 10);
+        final int startHP = (int) (actor.getPreciseHP() * 10);
         if( finalHP != startHP )
         {
           String sign = "" + (finalHP - startHP);
@@ -162,12 +162,12 @@ public class KaijuActions
       if( null != victim && kaijuState.unit != victim )
       {
         KaijuWarsUnitModel victimType = (KaijuWarsUnitModel) victim.model;
-        int counter = 0;
+        int counterPercent = 0;
         int stompDamage = victim.getHP();
         if( victimType.isKaiju )
         {
           // When stomping another kaiju, at least one of us dies
-          counter += victim.getHP();
+          counterPercent += 10 * victim.getHP();
           stompDamage = kaijuState.getHP();
         }
         else
@@ -190,8 +190,9 @@ public class KaijuActions
 
           if( canCounter )
           {
-            counter = victimType.kaijuCounter;
-            counter += KaijuWarsWeapons.getCounterBoost(new UnitContext(victim), gameMap, location.getEnvironment().terrainType);
+            counterPercent = victimType.kaijuCounter;
+            counterPercent += KaijuWarsWeapons.getCounterBoost(new UnitContext(victim), gameMap, location.getEnvironment().terrainType);
+            counterPercent *= victim.getHP();
             if( kaijuState.model.isLandUnit()
                 && victimType.slowsLand )
               --kaijuState.movePower;
@@ -223,8 +224,9 @@ public class KaijuActions
           kaijuState.model = devolveToType;
         }
 
-        crush.events.add(new MassDamageEvent(victim.CO, Arrays.asList(kaijuState.unit), counter, isLethal));
-        kaijuState.damageHP(counter);
+        final double counterDamage = counterPercent / 10.0;
+        crush.events.add(new MassDamageEvent(victim.CO, Arrays.asList(kaijuState.unit), counterDamage, isLethal));
+        kaijuState.damageHP(counterDamage);
         // Counter damage previewed by caller
 
         // If there's enough counter damage to kill us, die
