@@ -202,6 +202,7 @@ public class PlayerSetupCommanderController implements IController
           {
             tagCmdrList.add(noCmdr); // Extend the list if we just added a new tag partner
             syncTagIndexSelector();
+            tagIndexSelector.handleInput(InputAction.DOWN); // Auto-pick the plus again
           }
         }
         break;
