@@ -468,7 +468,8 @@ public class Utils
 
     Set<Color> palette = new HashSet<>();
 
-    Color[] osColors = new Color[] 
+    ArrayList<Color[]> allColors = new ArrayList<>();
+    allColors.add( new Color[] // OS
         {
             new Color(128,   0,  16),
             new Color(192,   0,   0),
@@ -476,7 +477,143 @@ public class Utils
             new Color(248,  88,   0),
             new Color(248, 152, 104),
             new Color(248, 184, 120),
-        };
+        });
+    allColors.add( new Color[] // AR
+        {
+            new Color( 49,  63,   7),
+            new Color( 82, 104,  13),
+            new Color( 97, 124,  14),
+            new Color(122, 157,  17),
+            new Color(145, 186,  20),
+            new Color(181, 230,  29),
+        });
+    allColors.add( new Color[] // AB
+        {
+            new Color(103,  56,   1),
+            new Color(173,  94,   0),
+            new Color(231, 135,  22),
+            new Color(252, 163,  57),
+            new Color(254, 192, 120),
+            new Color(255, 222, 182),
+        });
+    allColors.add( new Color[] // BH
+        {
+            new Color( 24,   8,  40),
+            new Color( 72,  40, 120),
+            new Color( 96,  56, 160),
+            new Color(152, 152, 136),
+            new Color(192, 192, 168),
+            new Color(216, 224, 216),
+        });
+    allColors.add( new Color[] // BM
+        {
+            new Color(  0,  24, 168),
+            new Color(  0, 104, 232),
+            new Color(  0, 152, 248),
+            new Color( 72, 200, 248),
+            new Color(104, 224, 248),
+            new Color(184, 240, 248),
+        });
+    allColors.add( new Color[] // BD
+        {
+            new Color( 81,  46,  12),
+            new Color(148,  88,  28),
+            new Color(188, 130,  72),
+            new Color(181, 141, 100),
+            new Color(220, 180, 141),
+            new Color(252, 217, 183),
+        });
+    allColors.add( new Color[] // CI
+        {
+            new Color( 11,  32, 112),
+            new Color( 22,  48, 150),
+            new Color( 35,  66, 186),
+            new Color( 69, 100, 219),
+            new Color(104, 129, 228),
+            new Color(144, 163, 237),
+        });
+    allColors.add( new Color[] // GE
+        {
+            new Color(  0,  56,   0),
+            new Color(  0, 144,   0),
+            new Color(  0, 192,  16),
+            new Color( 48, 248,  48),
+            new Color( 96, 248,  72),
+            new Color(216, 248, 200),
+        });
+    allColors.add( new Color[] // GS
+        {
+            new Color( 48,  48,  48),
+            new Color( 64,  64,  64),
+            new Color( 93,  93,  93),
+            new Color(124, 124, 124),
+            new Color(172, 172, 172),
+            new Color(184, 183, 182),
+        });
+    allColors.add( new Color[] // JS
+        {
+            new Color( 49,  53,  46),
+            new Color( 77,  84,  72),
+            new Color(133, 146, 123),
+            new Color(160, 175, 149),
+            new Color(196, 215, 180),
+            new Color(232, 255, 214),
+        });
+    // OS
+    allColors.add( new Color[] // RF / Maroon
+        {
+            new Color(123,  25,   0),
+            new Color(165,  29,   8),
+            new Color(193,  70,  61),
+            new Color(196, 102, 117),
+            new Color(202, 154, 155),
+            new Color(226, 201, 196),
+        });
+    allColors.add( new Color[] // PC
+        {
+            new Color(102,   0,  51),
+            new Color(204,   0, 153),
+            new Color(255,  51, 204),
+            new Color(255, 102, 204),
+            new Color(255, 153, 204),
+            new Color(248, 208, 200),
+        });
+    allColors.add( new Color[] // PL
+        {
+            new Color( 69,   1, 102),
+            new Color(101,   6, 149),
+            new Color(205,   0, 254),
+            new Color(205, 103, 253),
+            new Color(204, 153, 252),
+            new Color(255, 204, 253),
+        });
+    allColors.add( new Color[] // TG
+        {
+            new Color(  5,  60,  57),
+            new Color(  7,  90,  79),
+            new Color( 23, 161, 149),
+            new Color( 58, 204, 192),
+            new Color(118, 224, 218),
+            new Color(188, 239, 236),
+        });
+    allColors.add( new Color[] // WN
+        {
+            new Color(182,  14,  22),
+            new Color(191,  96,  89),
+            new Color(226, 174, 147),
+            new Color(242, 227, 209),
+            new Color(249, 239, 219),
+            new Color(251, 251, 251),
+        });
+    allColors.add( new Color[] // YC
+        {
+            new Color( 80,  64,   0),
+            new Color(184, 128,   0),
+            new Color(208, 128,   0),
+            new Color(248, 192,   0),
+            new Color(248, 248,  64),
+            new Color(248, 248, 152),
+        });
 
     for( final File fileEntry : folder.listFiles() )
     {
@@ -495,7 +632,10 @@ public class Utils
           unitName += "_map";
         System.out.println("  " + unitName);
         ImageFrame[] frames = SpriteLibrary.loadAnimation(facInPath+"/"+filestr);
-        colorize(frames, osColors, SpriteLibrary.defaultMapColors);
+
+        for( Color[] teamColors : allColors )
+          colorize(frames, teamColors, SpriteLibrary.defaultMapColors);
+
         try
         {
           BufferedImage joinedImage = SpriteLibrary.joinBufferedImage(frames, frames[0].getImage().getWidth(), frames[0].getImage().getHeight(), flip);
