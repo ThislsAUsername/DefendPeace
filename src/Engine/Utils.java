@@ -444,7 +444,7 @@ public class Utils
             facAbbrev = faction;
 
           importFactions.add(matcher.group(2));
-//          Set<Color> palette = paintFaction(inPath + faction, outPath + matcher.group(2), facAbbrev, flip);
+          Set<Color> palette = paintFaction(inPath + faction, outPath + matcher.group(2), facAbbrev, flip);
 
 //          try
 //          {
@@ -483,9 +483,9 @@ public class Utils
             new Color( 49,  63,   7),
             new Color( 82, 104,  13),
             new Color( 97, 124,  14),
-            new Color(122, 157,  17),
-            new Color(145, 186,  20),
-            new Color(181, 230,  29),
+            new Color(134, 172,  20),
+            new Color(158, 196,  43),
+            new Color(192, 230,  76),
         });
     allColors.add( new Color[] // AB
         {
@@ -589,21 +589,21 @@ public class Utils
         });
     allColors.add( new Color[] // TG
         {
-            new Color(  5,  60,  57),
-            new Color(  7,  90,  79),
-            new Color( 23, 161, 149),
-            new Color( 58, 204, 192),
-            new Color(118, 224, 218),
-            new Color(188, 239, 236),
+            new Color(  3,  59,  54),
+            new Color( 11,  90,  81),
+            new Color( 32, 162, 152),
+            new Color( 58, 207, 193),
+            new Color(120, 224, 214),
+            new Color(187, 240, 232),
         });
     allColors.add( new Color[] // WN
         {
-            new Color(182,  14,  22),
-            new Color(191,  96,  89),
+            new Color(136,   0,  21),
+            new Color(200, 117, 105),
             new Color(226, 174, 147),
             new Color(242, 227, 209),
             new Color(249, 239, 219),
-            new Color(251, 251, 251),
+            new Color(250, 242, 221),
         });
     allColors.add( new Color[] // YC
         {
