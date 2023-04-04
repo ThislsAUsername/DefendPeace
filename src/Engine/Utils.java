@@ -605,6 +605,24 @@ public class Utils
             new Color(249, 239, 219),
             new Color(250, 242, 221),
         });
+    allColors.add( new Color[] // WN foot
+        {
+            new Color(146,  60,  53),
+            new Color(193,  95,  87),
+            new Color(224, 174, 148),
+            new Color(239, 228, 208),
+            new Color(249, 239, 219),
+            new Color(249, 251, 248),
+        });
+    allColors.add( new Color[] // WN foot 2
+        {
+            new Color(146,  60,  53),
+            new Color(202, 116, 106),
+            new Color(224, 174, 148),
+            new Color(239, 228, 208),
+            new Color(249, 239, 219),
+            new Color(249, 251, 248),
+        });
     allColors.add( new Color[] // YC
         {
             new Color( 80,  64,   0),
