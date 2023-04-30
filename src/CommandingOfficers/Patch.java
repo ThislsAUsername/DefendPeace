@@ -11,6 +11,7 @@ import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitModifier;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
+import UI.UIUtils;
 import Units.*;
 
 public class Patch extends Commander
@@ -23,7 +24,7 @@ public class Patch extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Patch");
+      super("Patch", UIUtils.CO);
       infoPages.add(new InfoPage(
           "Commander Patch is a pirate, who does piratey things like lootin' and plunderin'\n"));
       infoPages.add(new InfoPage(

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import Engine.GameScenario;
 import Engine.GameScenario.GameRules;
+import UI.UIUtils;
 
 public class CommanderLibrary
 {  
@@ -43,7 +44,7 @@ public class CommanderLibrary
       private static final long serialVersionUID = 1L;
       public instantiator()
       {
-        super("No CO");
+        super("No CO", UIUtils.MISC);
         infoPages.add(new InfoPage("The ultimate expression of fair play"));
       }
       @Override

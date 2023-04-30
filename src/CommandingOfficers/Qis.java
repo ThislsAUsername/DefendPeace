@@ -12,6 +12,7 @@ import Engine.UnitMods.UnitModifier;
 import Engine.UnitMods.UnitMovementModifier;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
+import UI.UIUtils;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
@@ -32,7 +33,7 @@ public class Qis extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Qis");
+      super("Qis", UIUtils.MISC);
       infoPages.add(new InfoPage(
           "Commander Qis (pronounced 'keese') has spent his adult life fleeing cold weather, and failing to escape it.\n" +
           "Whether the cause is simply incredible misfortune or some sort of curse is unclear... he is quite curt on the subject.\n" +

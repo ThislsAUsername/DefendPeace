@@ -18,6 +18,7 @@ import Engine.UnitMods.UnitInstanceFilter;
 import Engine.UnitMods.UnitModifier;
 import Engine.UnitMods.UnitModifierWithDefaults;
 import Terrain.MapMaster;
+import UI.UIUtils;
 import Units.Unit;
 import Units.UnitContext;
 import Units.UnitModel;
@@ -35,7 +36,7 @@ public class Venge extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Venge");
+      super("Venge", UIUtils.MISC);
       infoPages.add(new InfoPage(
           "Commander Venge likes to get vengeance for any slight.\n" +
           "Attacking Venge is not always difficult, but you may not like the consequences.\n"));

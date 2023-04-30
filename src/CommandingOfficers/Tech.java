@@ -28,6 +28,7 @@ import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
+import UI.UIUtils;
 import Units.Unit;
 import Units.UnitContext;
 import Units.UnitModel;
@@ -46,7 +47,7 @@ public class Tech extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Tech");
+      super("Tech", UIUtils.RT);
       infoPages.add(new InfoPage(
           "Tech is a first-rate grease monkey who likes nothing better than to build new machines and set them loose.\n"));
       infoPages.add(new InfoPage(

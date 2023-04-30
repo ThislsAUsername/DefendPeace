@@ -14,6 +14,7 @@ import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
+import UI.UIUtils;
 import Units.Unit;
 import Units.UnitContext;
 import Units.UnitModel;
@@ -34,7 +35,7 @@ public class Bear_Bull extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Bear&Bull");
+      super("Bear&Bull", UIUtils.MISC);
       infoPages.add(new InfoPage(
           "Bear&Bull is a pair of commanders who complement each other like the ebbs and flows of a free market.\n" +
           "They repair units for free, and can leverage their abilities to gain buying power.\n"));

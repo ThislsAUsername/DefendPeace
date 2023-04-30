@@ -1,9 +1,9 @@
 package UI.Art.SpriteArtist;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-
 import Engine.IController;
 import UI.PlayerSetupColorFactionController;
 import UI.SlidingValue;
@@ -125,11 +125,18 @@ public class PlayerSetupColorFactionArtist
 
     // Draw the cursors around the selected dude.
     spriteCursor.set(startX+selX, startY+selY, snapCursor);
-    spriteCursor.set(UIUtils.getCOColors()[color]);
+    final Color playerColor = UIUtils.getCOColors()[color];
+    spriteCursor.set(playerColor);
     spriteCursor.draw(myG);
 
+    /////////////// Tag Picker Panels //////////////////////
+    if( myControl.shouldSelectMultiCO )
+    {
+      drawTagPickerPanels(myG, myWidth, playerColor, flipUnits);
+    }
+
     // Draw the currently-selected army's name
-    String colorName = UIUtils.getPaletteName(UIUtils.getCOColors()[color]);
+    String colorName = UIUtils.getPaletteName(playerColor);
     String factionName = UIUtils.getFactions()[faction].name;
 
     BufferedImage armyNameImage = SpriteUIUtils.makeTextFrame(UIUtils.getCanonicalFactionName(colorName, factionName), 2, 2);
@@ -138,8 +145,51 @@ public class PlayerSetupColorFactionArtist
     int drawNameY = armyNameImage.getHeight() / 2 + 2;
     SpriteUIUtils.drawImageCenteredOnPoint(myG, armyNameImage, drawNameX, drawNameY);
 
+    BufferedImage flipTipImage = SpriteUIUtils.makeTextFrame("Q to flip your team", 2, 2);
+
+    int flipTipY = drawNameY + armyNameImage.getHeight() - 1;
+    SpriteUIUtils.drawImageCenteredOnPoint(myG, flipTipImage, drawNameX, flipTipY);
+
     // Render our image to the screen at the properly-scaled size.
     g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
+  }
+
+  public static void drawTagPickerPanels(Graphics myG, int myWidth, Color playerColor, boolean flipUnits)
+  {
+    final int panelThickness = 1;
+    final int panelBuffer = 2*panelThickness;
+    final int panelWidth  = unitSizePx+panelBuffer;
+    final int panelHeight = unitSizePx+panelBuffer;
+
+    // Take over the top of the screen
+    SpriteUIUtils.drawMenuFrame(myG, SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR,
+        0, -1, myWidth, panelHeight*3/2, 2);
+
+    final int panelSpacing = 1;
+    final int panelXShift = panelWidth + panelSpacing;
+
+    final int drawY = 4;
+    for(int tagToDraw = 0; tagToDraw < myControl.colorPicks.length; ++tagToDraw)
+    {
+      BufferedImage pic = unitArray[myControl.factionPicks[tagToDraw]][myControl.colorPicks[tagToDraw]];
+      int drawX = 4 + (tagToDraw*panelXShift);
+      int dx = drawX+panelThickness, dy = drawY+panelThickness;
+
+      int iW = pic.getWidth(), iH = pic.getHeight();
+      if( flipUnits )
+      {
+        myG.drawImage(pic, dx + iW, dy, -iW, iH, null);
+      }
+      else
+      {
+        myG.drawImage(pic, dx, dy, null);
+      }
+
+      // Draw the cursor over the selected option.
+      if( tagToDraw == myControl.tagIndex )
+        SpriteCursor.draw(myG, dx, dy, iW, iH, playerColor);
+    }
+
   }
 
   private static void initialize()
