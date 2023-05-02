@@ -98,7 +98,7 @@ public class Utils
       {
         // Add any location that is empty and supports movement of the cargo unit.
         if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
-            && MoveType.IMPASSABLE > cargoMoveType.getMoveCost(map.getEnvironment(loc.xCoord, loc.yCoord)) )
+            && cargoMoveType.canTraverse(map.getEnvironment(loc.xCoord, loc.yCoord)) )
         {
           dropoffLocations.add(loc);
         }

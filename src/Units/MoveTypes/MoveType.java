@@ -82,6 +82,8 @@ public class MoveType implements Serializable
   /** Returns whether the unit can travel in the specified environment. */
   public boolean canTraverse(Environment tile)
   {
+    if( tile.terrainType == TerrainType.TELETILE )
+      return false;
     return getMoveCost(tile) < IMPASSABLE;
   }
 
