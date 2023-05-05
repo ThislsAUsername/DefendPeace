@@ -103,18 +103,18 @@ public abstract class UnitState implements Serializable
   {
     return healthToHP(health);
   }
-  protected static double healthToHP(int input)
+  public static double healthToHP(int input)
   {
     return ((double) input) / 10;
   }
-  protected static int healthFromHP(double input)
+  public static int healthFromHP(double input)
   {
     return (int) (input * 10);
   }
 
   /**
    * Reduces HP by the specified amount.
-   * Enforces a minimum of 0.
+   * <p>Enforces a minimum (optional) of 0.
    * @return the change in HP
    */
   public int damageHP(double damage)
@@ -134,26 +134,68 @@ public abstract class UnitState implements Serializable
 
   /**
    * Increases HP by the specified amount.
-   * Enforces a minimum of 0.1, and a maximum of MAXIMUM_HP.
-   * When healing, rounds health up to a whole HP (e.g. 2.5 + 2 = 4.5 -> 5.0)
+   * <p>Enforces a minimum of 0.1, and a maximum (optional) of MAXIMUM_HP.
+   * <p>When healing, rounds health up to a whole HP (e.g. 2.5 + 2 = 4.5 -> 5.0)
    * @return the change in HP
    */
-  public int alterHP(double change)
+  public int alterHP(int change)
   {
     return alterHP(change, false);
   }
-  public int alterHP(double change, boolean allowOver)
+  public int alterHP(int change, boolean allowOver)
   {
-    int before = getHP();
-    double newHP = getHP() + change;
+    final int oldHP = getHP();
+    int realChange = change;
+
     // Only enforce the maximum HP if we're healing
-    //  If current HP > max HP and change is negative, we shouldn't always delete all excess HP
     if( !allowOver && change > 0 )
-      newHP = Math.min(UnitModel.MAXIMUM_HP, newHP);
-    health = Math.max(1, healthFromHP(newHP));
+    {
+      // If we already have overhealing, treat current HP as the max to avoid e.g. heals reducing HP
+      final int capHP = Math.max(oldHP, UnitModel.MAXIMUM_HP);
+      // Apply the cap as needed
+      final int newHP = Math.min(capHP, oldHP + change);
+      // Figure out whether that reduces our healing
+      realChange = Math.min(change, newHP - oldHP);
+    }
+
+    health = Math.max(1, health + healthFromHP(realChange));
+    // Round HP up, if healing
     if( change > 0 )
       health = healthFromHP(getHP());
-    return getHP() - before;
+
+    return getHP() - oldHP;
+  }
+
+  /**
+   * Increases *fractional health* by the specified amount.
+   * <p>Enforces a minimum of 0.1, and a maximum (optional) of MAXIMUM_HP.
+   * <p>Does not round.
+   * @return the change in HP
+   */
+  public int alterHealthPercent(int percentChange)
+  {
+    return alterHealthPercent(percentChange, false);
+  }
+  public int alterHealthPercent(int percentChange, boolean allowOver)
+  {
+    final int oldHP = getHP();
+    final int changeHP = (int) Math.ceil(healthToHP(percentChange));;
+    int realPercentChange = percentChange;
+
+    // Only enforce the maximum HP if we're healing
+    if( !allowOver && percentChange > 0 )
+    {
+      // If we already have overhealing, treat current HP as the max to avoid e.g. heals reducing HP
+      final int capHP = Math.max(oldHP, UnitModel.MAXIMUM_HP);
+      // Apply the cap as needed
+      final int newHP = Math.min(capHP, oldHP + changeHP);
+      // Figure out whether that reduces our healing
+      realPercentChange = Math.min(realPercentChange, healthFromHP(newHP) - health);
+    }
+
+    health = Math.max(1, health + realPercentChange);
+
+    return getHP() - oldHP;
   }
 
 

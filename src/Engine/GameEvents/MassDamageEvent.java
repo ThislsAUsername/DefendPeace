@@ -10,6 +10,7 @@ import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
+import Units.UnitState;
 
 /**
  * Deals damage to an arbitrary number of units, without invoking combat
@@ -33,6 +34,8 @@ public class MassDamageEvent implements GameEvent
   public MassDamageEvent(Commander attacker, Collection<Unit> pVictims,
       double pDamage, boolean isLethal, boolean pStun)
   {
+    if( pDamage < 0 )
+      throw new ArithmeticException("Cannot inflict negative damage!");
     this.attacker = attacker;
     for(Unit victim : pVictims)
     {
@@ -64,7 +67,7 @@ public class MassDamageEvent implements GameEvent
       if( lethal )
         deltaHP = victim.damageHP(damage);
       else
-        deltaHP = victim.alterHP(-damage);
+        deltaHP = victim.alterHealthPercent(-1 * UnitState.healthFromHP(damage));
       int lostHP = -deltaHP;
 
       if( shouldStun )
