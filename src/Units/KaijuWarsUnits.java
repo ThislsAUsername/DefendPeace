@@ -15,6 +15,7 @@ import Engine.UnitActionLifecycles.UnitProduceLifecycle;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
+import Units.KaijuWarsWeapons.CombatStunApplier;
 import Units.MoveTypes.Flight;
 import Units.MoveTypes.FootMech;
 import Units.MoveTypes.MoveType;
@@ -135,6 +136,7 @@ public class KaijuWarsUnits extends UnitModelScheme
     super.registerStateTrackers(gi);
 
     StateTracker.instance(gi, UnitTurnPositionTracker.class);
+    StateTracker.instance(gi, CombatStunApplier.class);
 
     UnitResurrectionTracker rezzer = StateTracker.instance(gi, UnitResurrectionTracker.class);
     // Populate resurrection pairs

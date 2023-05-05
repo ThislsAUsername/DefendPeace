@@ -23,8 +23,15 @@ public class MassDamageEvent implements GameEvent
   private Map<Unit, Integer> victims = new HashMap<Unit, Integer>();
   public final int damage;
   public final boolean lethal;
+  public final boolean shouldStun;
 
-  public MassDamageEvent(Commander attacker, Collection<Unit> pVictims, int pDamage, boolean isLethal)
+  public MassDamageEvent(Commander attacker, Collection<Unit> pVictims,
+      int pDamage, boolean isLethal)
+  {
+    this(attacker, pVictims, pDamage, isLethal, false);
+  }
+  public MassDamageEvent(Commander attacker, Collection<Unit> pVictims,
+      int pDamage, boolean isLethal, boolean pStun)
   {
     this.attacker = attacker;
     for(Unit victim : pVictims)
@@ -33,6 +40,7 @@ public class MassDamageEvent implements GameEvent
     }
     damage = pDamage;
     lethal = isLethal;
+    shouldStun = pStun;
   }
 
   @Override
@@ -58,6 +66,10 @@ public class MassDamageEvent implements GameEvent
       else
         deltaHP = victim.alterHP(-damage);
       int lostHP = -deltaHP;
+
+      if( shouldStun )
+        victim.isStunned = true;
+
       victims.put(victim, lostHP);
     }
   }

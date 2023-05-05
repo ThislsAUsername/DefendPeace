@@ -6,6 +6,7 @@ import Engine.Army;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
 import Units.Unit;
+import Units.UnitContext;
 
 /**
  * Tracks where units started their last turn.
@@ -26,8 +27,8 @@ public class UnitTurnPositionTracker extends StateTracker
     return null;
   }
 
-  public boolean stoodStill(Unit u) {
-    return stoodStill(u, new XYCoord(u));
+  public boolean stoodStill(UnitContext u) {
+    return stoodStill(u.unit, u.coord);
   }
   public boolean stoodStill(Unit u, XYCoord newCoord) {
     if(!prevCoordMap.containsKey(u))
