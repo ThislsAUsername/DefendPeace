@@ -37,7 +37,7 @@ class SelectCargoDropLocation extends GameInputState<XYCoord>
     GameInputState<?> next = this;
 
     if( myStateData.actionSet.getTargetedLocations().contains(location)
-        && new UnitContext(myCargo).calculateMoveType().canTraverse(myStateData.gameMap.getEnvironment(location)) ) // Ignore if it's an invalid drop.
+        && new UnitContext(myCargo).calculateMoveType().canStandOn(myStateData.gameMap.getEnvironment(location)) ) // Ignore if it's an invalid drop.
     {
       // Add the new dropoff to myStateData.
       myStateData.unitLocationMap.put(myCargo, location);

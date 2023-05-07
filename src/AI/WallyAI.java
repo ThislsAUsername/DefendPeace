@@ -88,7 +88,7 @@ public class WallyAI extends ModularAI
       for( int h = 0; h < map.mapHeight; ++h )
       {
         Environment terrain = map.getLocation(w, h).getEnvironment();
-        if( p.canTraverse(terrain) )
+        if( p.canStandOn(terrain) )
         {
           validTiles++;
           int cost = p.getMoveCost(terrain);

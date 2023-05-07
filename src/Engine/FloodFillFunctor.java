@@ -20,7 +20,7 @@ public interface FloodFillFunctor
   /**
    * Determines whether the MapLocation (x, y), is a valid destination.
    */
-  boolean canEnd(GameMap map, XYCoord end);
+  boolean canStandOn(GameMap map, XYCoord end);
 
 
   /** Acts as the default way of calculating unit mobility */
@@ -56,7 +56,7 @@ public interface FloodFillFunctor
       return cost;
     }
 
-    public boolean canEnd(GameMap map, XYCoord end)
+    public boolean canStandOn(GameMap map, XYCoord end)
     {
       final MapLocation loc = map.getLocation(end);
       if( loc.getEnvironment().terrainType == TerrainType.TELETILE )

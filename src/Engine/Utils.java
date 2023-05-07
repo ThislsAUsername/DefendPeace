@@ -93,12 +93,12 @@ public class Utils
     ArrayList<XYCoord> locations = findLocationsInRange(map, moveLoc, 1);
     ArrayList<XYCoord> dropoffLocations = new ArrayList<XYCoord>();
     final MoveType cargoMoveType = new UnitContext(cargo).calculateMoveType();
-    if( cargoMoveType.canTraverse(map.getEnvironment(moveLoc)) )
+    if( cargoMoveType.canStandOn(map.getEnvironment(moveLoc)) )
       for( XYCoord loc : locations )
       {
         // Add any location that is empty and supports movement of the cargo unit.
         if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
-            && cargoMoveType.canTraverse(map.getEnvironment(loc.xCoord, loc.yCoord)) )
+            && cargoMoveType.canStandOn(map.getEnvironment(loc.xCoord, loc.yCoord)) )
         {
           dropoffLocations.add(loc);
         }
@@ -157,7 +157,7 @@ public class Utils
       // pull out the next search node
       SearchNode currentNode = searchQueue.poll();
       XYCoord coord = new XYCoord(currentNode.x, currentNode.y);
-      if( fff.canEnd(gameMap, coord) )
+      if( fff.canStandOn(gameMap, coord) )
       {
         reachableTiles.add(coord);
       }
@@ -207,7 +207,7 @@ public class Utils
       }
     }
 
-    return fff.canEnd(map, lastCoord);
+    return fff.canStandOn(map, lastCoord);
   }
 
   /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
@@ -641,7 +641,7 @@ public class Utils
     boolean result = false;
     boolean includeOccupiedSpaces = true; // Shouldn't matter, as we don't invoke canEnd()
     FloodFillFunctor fff = unit.getMoveFunctor(includeOccupiedSpaces);
-    if( !fff.canEnd(map, path.getEndCoord()) )
+    if( !fff.canStandOn(map, path.getEndCoord()) )
       return false;
 
     for( int i = 1; i < path.getPathLength(); ++i)
