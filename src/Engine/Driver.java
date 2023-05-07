@@ -85,6 +85,15 @@ public class Driver implements ActionListener, KeyListener
     gameWindow.pack();
   }
 
+  /**
+   * @return Whether the game is maximized in either direction
+   */
+  public boolean isMaximized()
+  {
+    final int windowState = gameWindow.getExtendedState();
+    return 0 != (windowState & JFrame.MAXIMIZED_BOTH);
+  }
+
   @Override // From ActionListener
   public void actionPerformed(ActionEvent arg0)
   {

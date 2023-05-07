@@ -83,13 +83,14 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   public GameEventQueue initTurn(MapMaster map)
   {
     GameEventQueue events = new GameEventQueue();
-    myView.resetFog();
 
     money += getIncomePerTurn();
     for( Commander co : cos )
     {
       events.addAll(co.initTurn(map));
     }
+
+    myView.resetFog();
 
     if( null != aiController )
     {

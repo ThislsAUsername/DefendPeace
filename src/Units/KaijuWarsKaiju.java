@@ -849,7 +849,7 @@ public class KaijuWarsKaiju
     }
 
     @Override
-    public boolean canEnd(GameMap map, XYCoord end)
+    public boolean canStandOn(GameMap map, XYCoord end)
     {
       return true;
     }

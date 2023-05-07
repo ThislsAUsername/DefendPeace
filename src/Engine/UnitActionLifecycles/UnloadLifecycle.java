@@ -135,7 +135,7 @@ public abstract class UnloadLifecycle
         isValid &= !actor.heldUnits.isEmpty();
         for( Unit cargo : myDropoffs.keySet() ) // Make sure the cargo can go where we want to put it.
         {
-          isValid &= new UnitContext(cargo).calculateMoveType().canTraverse(gameMap.getEnvironment(myDropoffs.get(cargo)));
+          isValid &= new UnitContext(cargo).calculateMoveType().canStandOn(gameMap.getEnvironment(myDropoffs.get(cargo)));
         }
         for( XYCoord coord : myDropoffs.values() ) // Make sure nobody's there already.
         {

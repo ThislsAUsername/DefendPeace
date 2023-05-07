@@ -429,7 +429,7 @@ public abstract class GameAction
             if( gameMap.isLocationValid(unitStart) )
             {
               subEvents.add(new TeleportEvent(gameMap, obstacle, unitStart, animationStyle));
-              if( !new UnitContext(obstacle).calculateMoveType().canTraverse(gameMap.getEnvironment(unitStart)) )
+              if( !new UnitContext(obstacle).calculateMoveType().canStandOn(gameMap.getEnvironment(unitStart)) )
               {
                 obstacleDies = true;
               }
@@ -450,7 +450,7 @@ public abstract class GameAction
       }
 
       // If our guy can't survive there, end him.
-      if( !new UnitContext(unit).calculateMoveType().canTraverse(gameMap.getEnvironment(unitDestination)) )
+      if( !new UnitContext(unit).calculateMoveType().canStandOn(gameMap.getEnvironment(unitDestination)) )
       {
         ArrayList<Unit> ary = new ArrayList<Unit>();
         ary.add(unit);

@@ -505,7 +505,7 @@ public class Tech extends Commander
       for( XYCoord pdc : options )
       {
         // No unfortunate accidents
-        if( !new UnitContext(myCommander, unitModelToDrop).calculateMoveType().canTraverse(gameMap.getEnvironment(pdc)) )
+        if( !new UnitContext(myCommander, unitModelToDrop).calculateMoveType().canStandOn(gameMap.getEnvironment(pdc)) )
           invalidDropCoords.add(pdc);
 
         // No trespassing

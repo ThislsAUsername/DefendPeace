@@ -3,7 +3,6 @@ package AI;
 import java.util.*;
 import java.util.Map.Entry;
 
-import AI.CommanderProductionInfo;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.*;
@@ -89,7 +88,7 @@ public class WallyAI extends ModularAI
       for( int h = 0; h < map.mapHeight; ++h )
       {
         Environment terrain = map.getLocation(w, h).getEnvironment();
-        if( p.canTraverse(terrain) )
+        if( p.canStandOn(terrain) )
         {
           validTiles++;
           int cost = p.getMoveCost(terrain);
@@ -593,13 +592,21 @@ public class WallyAI extends ModularAI
     ArrayList<XYCoord> goals = new ArrayList<XYCoord>();
 
     ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
-    Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), stations);
+    Utils.sortLocationsByTravelTime(unit, stations, gameMap);
+
     boolean shouldResupply = false;
-    if( stations.size() > 0 )
+    GamePath toClosestStation = null;
+    boolean canResupply = stations.size() > 0;
+    if( canResupply )
+    {
+      toClosestStation = Utils.findShortestPath(unit, stations.get(0), gameMap, true);
+      canResupply &= null != toClosestStation;
+    }
+    if( canResupply )
     {
       shouldResupply = unit.getHP() <= UNIT_HEAL_THRESHOLD;
       shouldResupply |= unit.fuel <= UNIT_REFUEL_THRESHOLD
-          * Utils.findShortestPath(unit, stations.get(0), gameMap).getFuelCost(unit, gameMap);
+          * toClosestStation.getFuelCost(unit, gameMap);
       shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHOLD;
     }
 

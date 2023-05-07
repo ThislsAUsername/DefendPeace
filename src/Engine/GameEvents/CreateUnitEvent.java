@@ -83,7 +83,7 @@ public class CreateUnitEvent implements GameEvent
           for( XYCoord xyc : Utils.findLocationsInRange(gameMap, myBuildCoords, radius, radius) )
           {
             Unit resident = gameMap.getResident(xyc);
-            if( resident == null && uc.moveType.canTraverse(gameMap.getEnvironment(xyc)) )
+            if( resident == null && uc.moveType.canStandOn(gameMap.getEnvironment(xyc)) )
             {
               gameMap.addNewUnit(myNewUnit, xyc.xCoord, xyc.yCoord, false);
               success = true;

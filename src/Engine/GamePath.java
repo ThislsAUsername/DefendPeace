@@ -159,7 +159,7 @@ public class GamePath
     for( int i = waypoints.size()-1; i > 0; --i )
     {
       XYCoord to = waypoints.get(i).GetCoordinates();
-      if( fff.canEnd(map, to) )
+      if( fff.canStandOn(map, to) )
         break;
       snip(i);
     }
