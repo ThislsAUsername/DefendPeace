@@ -12,6 +12,7 @@ import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
+import Units.UnitState;
 
 public class TestHealing extends TestCase
 {
@@ -39,6 +40,7 @@ public class TestHealing extends TestCase
   {
     setupTest();
     boolean testPassed = validate(testHealing(), "  Healing test failed.");
+    testPassed &= validate(testHealthChangeFunctions(), "  UnitState health change test failed.");
     return testPassed;
   }
 
@@ -92,6 +94,104 @@ public class TestHealing extends TestCase
 
     // Clean up.
     testMap.removeUnit(victim);
+
+    return testPassed;
+  }
+
+  /** Test the UnitState endpoints for health changes */
+  private boolean testHealthChangeFunctions()
+  {
+    boolean testPassed = true;
+
+    {
+      UnitState victim = new Unit(testCo1, testCo1.getUnitModel(UnitModel.TROOP, false));
+      testPassed &= validate(victim.getHP() == 10, "    Unexpected starting HP value.");
+
+      testPassed &= validate(victim.alterHealthPercent(-7) == 0, "    Fractional damage removed a whole HP.");
+      testPassed &= validate(victim.getHP() == 10, "    Fractional damage removed a whole HP.");
+      testPassed &= validate(victim.getPreciseHP() < 10, "    Fractional damage did nothing.");
+
+      testPassed &= validate(victim.alterHealthPercent(3) == 0, "    Fractional healing added a whole HP.");
+      testPassed &= validate(victim.getHP() == 10, "    Fractional healing added a whole HP.");
+      testPassed &= validate(victim.getPreciseHP() < 10, "    Fractional healing rounded up.");
+
+      testPassed &= validate(victim.alterHealthPercent(42) == 0, "    Overhealing allowed when not enabled.");
+      testPassed &= validate(victim.getHP() == 10, "    Overhealing allowed when not enabled.");
+      testPassed &= validate(victim.getPreciseHP() == 10, "    Failed overhealing didn't fill up HP.");
+
+      testPassed &= validate(victim.alterHealthPercent(42, true) == 5, "    Overhealing failed when enabled.");
+      testPassed &= validate(victim.getHP() == 15, "    Overhealing failed when enabled.");
+      testPassed &= validate(victim.getPreciseHP() < 15, "    alterHealthPercent rounded up when it shouldn't.");
+
+      testPassed &= validate(victim.alterHealthPercent(42) == 0, "    Failed overhealing vs overhealed target did something.");
+      testPassed &= validate(victim.getHP() == 15, "    Failed overhealing vs overhealed target did something.");
+      // I'm not sure if this case is something we specifically want, but I figured I'd document the case.
+      testPassed &= validate(victim.getPreciseHP() == 15, "    Failed overhealing vs overhealed target didn't round up.");
+
+      testPassed &= validate(victim.alterHealthPercent(-420) == -14, "    Dropping HP didn't work.");
+      testPassed &= validate(victim.getHP() == 1, "    Dropping HP produced unexpected value.");
+      testPassed &= validate(victim.getPreciseHP() == 0.1, "    Dropping HP produced unexpected value.");
+
+      testPassed &= validate(victim.alterHealthPercent(-420) == 0, "    Dropping HP while at 1 worked.");
+      testPassed &= validate(victim.getHP() == 1, "    Dropping HP produced unexpected value.");
+      testPassed &= validate(victim.getPreciseHP() == 0.1, "    Dropping HP produced unexpected value.");
+    }
+
+    {
+      UnitState victim = new Unit(testCo1, testCo1.getUnitModel(UnitModel.TROOP, false));
+      testPassed &= validate(victim.getHP() == 10, "    Unexpected starting HP value.");
+      try
+      {
+        victim.damageHP(-0.7);
+        testPassed = false;
+        System.out.println("    damageHP() accepted a healing value.");
+      }
+      catch (Exception e) {} // expected case
+
+      testPassed &= validate(victim.damageHP(0.7) == 0, "    Fractional damage removed a whole HP.");
+      testPassed &= validate(victim.getHP() == 10, "    Fractional damage removed a whole HP.");
+      testPassed &= validate(victim.getPreciseHP() < 10, "    Fractional damage did nothing.");
+
+      testPassed &= validate(victim.alterHP(-3) == -3, "    Map damage didn't deal damage.");
+      testPassed &= validate(victim.getHP() == 7, "    Map damage did the wrong damage.");
+      testPassed &= validate(victim.getPreciseHP() < 7, "    Map damage rounded HP up.");
+
+      testPassed &= validate(victim.damageHP(420) == -7, "    Lethal damage did the wrong amount of damage.");
+      testPassed &= validate(victim.getHP() == 0, "    Lethal damage didn't kill.");
+      testPassed &= validate(victim.getPreciseHP() == 0, "    Lethal damage didn't kill.");
+
+      testPassed &= validate(victim.damageHP(1, true) == -1, "    Overkill didn't overkill.");
+      testPassed &= validate(victim.getHP() == -1, "    Overkill didn't overkill right.");
+      testPassed &= validate(victim.getPreciseHP() == -1, "    Overkill didn't overkill right.");
+
+      testPassed &= validate(victim.alterHP(42) == 11, "    Overhealing allowed when not enabled.");
+      testPassed &= validate(victim.getHP() == 10, "    Overhealing allowed when not enabled.");
+      testPassed &= validate(victim.getPreciseHP() == 10, "    Failed overhealing didn't fill up HP.");
+
+      victim.damageHP(0.7);
+      testPassed &= validate(victim.alterHP(42) == 0, "    Overhealing allowed when not enabled.");
+      testPassed &= validate(victim.getHP() == 10, "    Overhealing allowed when not enabled.");
+      testPassed &= validate(victim.getPreciseHP() == 10, "    Failed overhealing didn't fill up HP.");
+
+      victim.damageHP(0.7);
+      testPassed &= validate(victim.alterHP(42, true) == 42, "    Overhealing failed when enabled.");
+      testPassed &= validate(victim.getHP() == 52, "    Overhealing failed when enabled.");
+      testPassed &= validate(victim.getPreciseHP() == 52, "    Overhealing didn't round up?");
+
+      victim.damageHP(0.7);
+      testPassed &= validate(victim.alterHP(42) == 0, "    Failed overhealing vs overhealed target did something.");
+      testPassed &= validate(victim.getHP() == 52, "    Failed overhealing vs overhealed target did something.");
+      // I'm not sure if this case is something we specifically want, but I figured I'd document the case.
+      testPassed &= validate(victim.getPreciseHP() == 52, "    Failed overhealing vs overhealed target didn't round up.");
+
+      testPassed &= validate(victim.alterHP(-9000) == -51, "    Dropping HP didn't work.");
+      testPassed &= validate(victim.getHP() == 1, "    Dropping HP produced unexpected value.");
+      testPassed &= validate(victim.getPreciseHP() == 0.1, "    Dropping HP produced unexpected value.");
+
+      testPassed &= validate(victim.alterHP(-420) == 0, "    Dropping HP while at 1 worked.");
+      testPassed &= validate(victim.getHP() == 1, "    Dropping HP produced unexpected value.");
+      testPassed &= validate(victim.getPreciseHP() == 0.1, "    Dropping HP produced unexpected value.");
+    }
 
     return testPassed;
   }
