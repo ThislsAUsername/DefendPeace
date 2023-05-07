@@ -115,6 +115,7 @@ public abstract class UnitState implements Serializable
   /**
    * Reduces HP by the specified amount.
    * <p>Enforces a minimum (optional) of 0.
+   * <p>Use this for lethal damage, especially unit-on-unit violence. Do not use for healing.
    * @return the change in HP
    */
   public int damageHP(double damage)
@@ -136,6 +137,7 @@ public abstract class UnitState implements Serializable
    * Increases HP by the specified amount.
    * <p>Enforces a minimum of 0.1, and a maximum (optional) of MAXIMUM_HP.
    * <p>When healing, rounds health up to a whole HP (e.g. 2.5 + 2 = 4.5 -> 5.0)
+   * <p>Use this for most non-combat HP changes (mass damage/silos/healing).
    * @return the change in HP
    */
   public int alterHP(int change)
@@ -170,6 +172,7 @@ public abstract class UnitState implements Serializable
    * Increases *fractional health* by the specified amount.
    * <p>Enforces a minimum of 0.1, and a maximum (optional) of MAXIMUM_HP.
    * <p>Does not round.
+   * <p>Use this when you want precise non-combat health changes, or want to heal without rounding up.
    * @return the change in HP
    */
   public int alterHealthPercent(int percentChange)
