@@ -3,6 +3,7 @@ package Engine.Combat;
 import java.util.ArrayList;
 import java.util.List;
 
+import Engine.GameInstance;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
@@ -13,32 +14,42 @@ import Units.UnitContext;
  */
 public class CombatContext
 {
+  public static enum CalcType
+  {
+    NO_LUCK, PESSIMISTIC, OPTIMISTIC, COMBAT, DEMOLITION;
+
+    public boolean isSim()
+    {
+      return this == NO_LUCK || this == PESSIMISTIC || this == OPTIMISTIC;
+    };
+  };
+
   public UnitContext attacker, defender;
+  public final GameInstance gameInstance; // For randomness; only needed when doing true combat calcs
   public final GameMap gameMap; // for reference, not weirdness
   public boolean canCounter = false;
   public int battleRange;
+  public CalcType calcType;
 
-  public static CombatContext build(GameMap map,
-                                    UnitContext pAttacker,
-                                    UnitContext pDefender,
-                                    int pBattleRange)
-  {
-    CombatContext c = new CombatContext(map, pAttacker, pDefender, pBattleRange);
-
-    c.applyModifiers();
-    return c;
-  }
-
-  private CombatContext(GameMap map,
-      UnitContext pAttacker,
-      UnitContext pDefender,
-      int pBattleRange)
+  public CombatContext(GameInstance gi, GameMap map,
+                        UnitContext pAttacker, UnitContext pDefender,
+                        CalcType pCalcType)
   {
     attacker = pAttacker;
     defender = pDefender;
 
+    gameInstance = gi;
     gameMap = map;
-    battleRange = pBattleRange;
+    calcType = pCalcType;
+    if (null == gameInstance && !calcType.isSim())
+      throw new IllegalArgumentException("Caller requires true game results but did not provide a GameInstance.");
+
+    int attackerX = attacker.coord.xCoord;
+    int attackerY = attacker.coord.yCoord;
+    int defenderX = defender.coord.xCoord;
+    int defenderY = defender.coord.yCoord;
+
+    battleRange = Math.abs(attackerX - defenderX) + Math.abs(attackerY - defenderY);
 
     if ( map.isLocationValid(attacker.coord))
     {
@@ -64,8 +75,21 @@ public class CombatContext
       canCounter = true;
     }
   }
+  public CombatContext(CombatContext other)
+  {
+    attacker = other.attacker;
+    defender = other.defender;
+    gameInstance = other.gameInstance;
+    gameMap = other.gameMap;
+    canCounter = other.canCounter;
+    battleRange = other.battleRange;
+    calcType = other.calcType;
+  }
 
-  private void applyModifiers()
+  /**
+   * Call during combat calculations
+   */
+  public void applyModifiers()
   {
     // Make local shallow copies to avoid funny business
     List<UnitModifier> aMods = new ArrayList<>(attacker.mods);
@@ -104,6 +128,6 @@ public class CombatContext
 
   private BattleParams buildBattleParams(UnitContext aClone, UnitContext dClone, boolean isCounter)
   {
-    return StrikeParams.buildBattleParams(aClone, dClone, gameMap, battleRange, isCounter);
+    return StrikeParams.buildBattleParams(aClone, dClone, this, isCounter);
   }
 }

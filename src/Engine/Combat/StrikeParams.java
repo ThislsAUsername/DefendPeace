@@ -18,7 +18,7 @@ public class StrikeParams
 {
   public static BattleParams buildBattleParams(
       UnitContext attacker, UnitContext defender,
-      GameMap gameMap, int battleRange,
+      CombatContext combatContext,
       boolean isCounter)
   {
     List<UnitModifier> aMods = new ArrayList<>(attacker.mods);
@@ -26,8 +26,10 @@ public class StrikeParams
 
     BattleParams params = new BattleParams(
         buildStrikeParams(attacker, defender.model,
-                          gameMap, battleRange, defender.coord,
+                          combatContext.gameMap, combatContext.battleRange,
+                          defender.coord,
                           isCounter),
+        combatContext,
         defender);
 
     for( UnitModifier mod : aMods )
@@ -46,8 +48,8 @@ public class StrikeParams
     List<UnitModifier> aMods = new ArrayList<>(attacker.mods);
 
     StrikeParams params = new StrikeParams(
-        attacker, gameMap,
-        battleRange, target,
+        attacker, gameMap, battleRange,
+        target,
         ( null == attacker.weapon ) ? 0 : attacker.weapon.getDamage(defender),
         isCounter);
 
@@ -67,6 +69,9 @@ public class StrikeParams
   public double baseDamage;
   public double attackerHP;
   public double attackPower;
+  public int luckBase = 0; // Luck value if you roll 0
+  public int luckRolled = 0; // The number we plug into the RNG for luck damage
+  public int luckRolledBad = 0; // The number we plug into the RNG for negative luck damage
   public final boolean isCounter;
 
   public double defenderHP = 0;
@@ -88,6 +93,7 @@ public class StrikeParams
     this.baseDamage = baseDamage;
     this.attackerHP = attacker.getHP();
     this.attackPower = attacker.attackPower;
+    this.luckRolled = attacker.CO.luck;
     this.isCounter = isCounter;
 
     this.targetCoord = target;
@@ -102,6 +108,7 @@ public class StrikeParams
     this.baseDamage = other.baseDamage;
     this.attackerHP = other.attackerHP;
     this.attackPower = other.attackPower;
+    this.luckRolled = other.luckRolled;
     this.isCounter = other.isCounter;
 
     this.targetCoord = other.targetCoord;
@@ -110,25 +117,83 @@ public class StrikeParams
   public double calculateDamage()
   {
     //    [B*ACO/100+R]*(AHP/10)*[(200-(DCO+DTR*DHP))/100]
-    double overallPower = (baseDamage * attackPower / 100/*+Random factor?*/) * attackerHP / 10;
+    int luckDamage = getLuck();
+    double overallPower = (baseDamage * attackPower / 100 + luckDamage) * attackerHP / 10;
     double overallDefense = ((200 - (defensePower + terrainStars * defenderHP)) / 100);
     return overallPower * overallDefense / 10; // original formula was % damage, now it must be HP of damage
   }
 
+  protected int getLuck()
+  {
+    return 0;
+  }
+
   public static class BattleParams extends StrikeParams
   {
+    public final CombatContext combatContext;
     public final UnitContext defender;
 
     protected BattleParams(
         StrikeParams base,
+        CombatContext combatContext,
         UnitContext defender)
     {
       super(base);
+      this.combatContext = combatContext;
       this.defender = defender;
 
       defenderHP = defender.getHP();
       this.defensePower = defender.defensePower;
       this.terrainStars = defender.terrainStars;
+    }
+
+    @Override
+    protected int getLuck()
+    {
+      int luckDamage = 0;
+      switch (combatContext.calcType)
+      {
+        case NO_LUCK:
+        case DEMOLITION:
+          break;
+        case COMBAT:
+          luckDamage = getLuckReal();
+          break;
+        case OPTIMISTIC:
+          if( !isCounter )
+            luckDamage = getLuckOptimistic();
+          else // If the attacker is being optimistic, the defender (countering) should be pessimistic
+            luckDamage = getLuckPessimistic();
+          break;
+        case PESSIMISTIC:
+          if( !isCounter ) // Vice versa
+            luckDamage = getLuckPessimistic();
+          else
+            luckDamage = getLuckOptimistic();
+          break;
+      }
+      return luckDamage;
+    }
+    private int getLuckOptimistic()
+    {
+      int luckDamage = luckBase;
+      luckDamage += luckRolled;
+      return luckDamage;
+    }
+    private int getLuckPessimistic()
+    {
+      int luckDamage = luckBase;
+      luckDamage -= luckRolledBad;
+      return luckDamage;
+    }
+    private int getLuckReal()
+    {
+      int luckDamage = luckBase;
+      if( 0 != luckRolled )
+        luckDamage += combatContext.gameInstance.getRN(luckRolled);
+      if( 0 != luckRolledBad )
+        luckDamage -= combatContext.gameInstance.getRN(luckRolledBad);
+      return luckDamage;
     }
   }
 }

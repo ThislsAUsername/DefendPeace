@@ -294,7 +294,7 @@ public class GameInstance implements Serializable
 
   /**
    * Gives you a random number between 0 (inclusive) and the input (exclusive)
-   * <p>Call this in performEvent() and nowhere else
+   * <p>Call this in GameAction.getEvents()/event constructors and nowhere else
    */
   public int getRN(int upperBound)
   {
