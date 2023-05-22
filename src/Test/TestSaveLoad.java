@@ -63,6 +63,12 @@ public class TestSaveLoad extends TestCase
     strong.army.initTurn(testMap);
     boolean testPassed = true;
 
+    // Since running actual combat would be complicated, just grab some RNs
+    for( int i = 0; i < 42; ++i )
+    {
+      game.getRN(42);
+    }
+
     byte[] bytes = null;
     try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
          ObjectOutputStream out = new ObjectOutputStream(baos);)
@@ -76,6 +82,9 @@ public class TestSaveLoad extends TestCase
       testPassed = false;
     }
     testPassed &= validate(null != bytes && bytes.length > 0,  "    Failed to generate serialized game instance.");
+
+    if( !testPassed )
+      return testPassed;
 
     // test save compatibility
     try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
@@ -102,6 +111,13 @@ public class TestSaveLoad extends TestCase
       testPassed = false;
     }
     testPassed &= validate(null != loaded,  "    The save didn't actually load");
+
+    for( int i = 0; i < 42; ++i )
+    {
+      int oldRN = game.getRN(42);
+      int newRN = loaded.getRN(42);
+      testPassed &= validate(oldRN == newRN,  "    The #"+i+" RN didn't match for seed "+game.rngSeed+" vs "+loaded.rngSeed);
+    }
 
     // Clean up
     testMap.removeUnit(fool);
