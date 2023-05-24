@@ -11,6 +11,7 @@ import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
+import Engine.Combat.CombatContext.CalcType;
 import Engine.Combat.CombatEngine;
 import Engine.Combat.DamagePopup;
 import Engine.Combat.StrikeParams;
@@ -23,6 +24,7 @@ import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
+import UI.InputOptionsController;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
@@ -174,7 +176,9 @@ public abstract class BattleLifecycle
     {
       ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
 
-      BattleSummary summary = CombatEngine.simulateBattleResults(attacker, defender, map, movePath);
+      // This feels like an uggo hack, but this would be kind of out of place as a parameter
+      CalcType calcType = CalcType.values()[InputOptionsController.damagePreviewTypeOption.getSelectedObject().ordinal()];
+      BattleSummary summary = CombatEngine.simulateBattleResults(attacker, defender, map, movePath, calcType);
 
       int attackerHealthLoss = (int) (10 * summary.attacker.getPreciseHPDamage());
       int defenderHealthLoss = (int) (10 * summary.defender.getPreciseHPDamage());

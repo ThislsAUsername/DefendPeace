@@ -33,22 +33,22 @@ public class CombatEngine
    * Assuming Commanders get weird, this allows for you to check the results of combat without perfect map info.
    * This also provides un-capped damage estimates, so perfect HP info isn't revealed by the map.
    */
-  public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, int attackerX, int attackerY )
+  public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, int attackerX, int attackerY, CalcType calcType )
   {
-    return simulateBattleResults(attacker, defender, map, new XYCoord(attackerX, attackerY));
+    return simulateBattleResults(attacker, defender, map, new XYCoord(attackerX, attackerY), calcType);
   }
-  public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, XYCoord moveCoord )
+  public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, XYCoord moveCoord, CalcType calcType )
   {
     UnitContext attackerContext = new UnitContext(map, attacker, null, null, moveCoord);
     UnitContext defenderContext = new UnitContext(map, defender, null, null, new XYCoord(defender.x, defender.y));
-    CombatContext context = new CombatContext(null, map, attackerContext, defenderContext, CalcType.PESSIMISTIC);
+    CombatContext context = new CombatContext(null, map, attackerContext, defenderContext, calcType);
     return calculateBattleResults(context, map);
   }
-  public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, GamePath path )
+  public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, GamePath path, CalcType calcType )
   {
     UnitContext attackerContext = new UnitContext(map, attacker, null, path, path.getEndCoord());
     UnitContext defenderContext = new UnitContext(map, defender, null, null, new XYCoord(defender.x, defender.y));
-    CombatContext context = new CombatContext(null, map, attackerContext, defenderContext, CalcType.PESSIMISTIC);
+    CombatContext context = new CombatContext(null, map, attackerContext, defenderContext, calcType);
     return calculateBattleResults(context, map);
   }
 

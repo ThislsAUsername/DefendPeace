@@ -10,6 +10,7 @@ import Engine.GameScenario;
 import Engine.Utils;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
+import Engine.Combat.CombatContext.CalcType;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.ResupplyEvent;
 import Engine.StateTrackers.DamageDealtToIncomeConverter;
@@ -69,11 +70,11 @@ public class TestCombatMods extends TestCase
     performGameAction(new BattleLifecycle.BattleAction(testMap, infActive, Utils.findShortestPath(infActive, 7, 3, testMap), 7, 4), testGame);
 
     // See how much damage meaty can do to our two contestants on offense...
-    BattleSummary vengeful = CombatEngine.simulateBattleResults(meaty, infActive, testMap, 8, 3);
-    BattleSummary normal = CombatEngine.simulateBattleResults(meaty, infPassive, testMap, 8, 5);
+    BattleSummary vengeful = CombatEngine.simulateBattleResults(meaty, infActive, testMap, 8, 3, CalcType.NO_LUCK);
+    BattleSummary normal = CombatEngine.simulateBattleResults(meaty, infPassive, testMap, 8, 5, CalcType.NO_LUCK);
     // ...and defense
-    BattleSummary vengefulCounter = CombatEngine.simulateBattleResults(infActive, meaty, testMap, 8, 3);
-    BattleSummary normalCounter = CombatEngine.simulateBattleResults(infPassive, meaty, testMap, 8, 5);
+    BattleSummary vengefulCounter = CombatEngine.simulateBattleResults(infActive, meaty, testMap, 8, 3, CalcType.NO_LUCK);
+    BattleSummary normalCounter = CombatEngine.simulateBattleResults(infPassive, meaty, testMap, 8, 5, CalcType.NO_LUCK);
 
     // Check that Venge's passive ability works on both attack and defense
     boolean testPassed = validate(vengeful.defender.deltaHP < normal.defender.deltaHP, "    Being angry didn't help Venge attack extra hard.");
@@ -97,13 +98,13 @@ public class TestCombatMods extends TestCase
     infB.isTurnOver = false;
 
     // Check our damage for each first strike pre-power...
-    BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 5);
+    BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 5, CalcType.NO_LUCK);
 
     venge.modifyAbilityPower(42); // juice up
     venge.getReadyAbilities().get(0).activate(testMap); // activate Iron Will
 
     // ...and after power
-    BattleSummary ironAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 5);
+    BattleSummary ironAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 5, CalcType.NO_LUCK);
 
     // Check that Venge's Iron Will works properly without breaking things (other than balance)
     boolean testPassed = true;
@@ -130,15 +131,15 @@ public class TestCombatMods extends TestCase
     Unit infB = addUnit(testMap, venge, UnitModel.TROOP, 7, 5);
 
     // Check our damage for each first strike pre-power...
-    BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
-    BattleSummary normalBA = CombatEngine.simulateBattleResults(infB, infA, testMap, 7, 4);
+    BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4, CalcType.NO_LUCK);
+    BattleSummary normalBA = CombatEngine.simulateBattleResults(infB, infA, testMap, 7, 4, CalcType.NO_LUCK);
 
     venge.modifyAbilityPower(42); // juice up
     venge.getReadyAbilities().get(1).activate(testMap); // activate Retribution
 
     // ...and after power
-    BattleSummary retribAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4);
-    BattleSummary retribBA = CombatEngine.simulateBattleResults(infB, infA, testMap, 7, 4);
+    BattleSummary retribAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4, CalcType.NO_LUCK);
+    BattleSummary retribBA = CombatEngine.simulateBattleResults(infB, infA, testMap, 7, 4, CalcType.NO_LUCK);
 
     // Check that Venge's Retribution works properly without breaking things (other than balance)
     boolean testPassed = true;

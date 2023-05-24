@@ -18,6 +18,7 @@ import Engine.GamePath;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
+import Engine.Combat.CombatContext.CalcType;
 import Engine.Combat.CombatEngine;
 import Engine.Combat.StrikeParams;
 import Terrain.GameMap;
@@ -48,7 +49,7 @@ public class AICombatUtils
     Unit targetUnit = targetLoc.getResident();
     if( null != targetUnit )
     {
-      BattleSummary results = CombatEngine.simulateBattleResults(unit, targetUnit, map, action.getMoveLocation());
+      BattleSummary results = CombatEngine.simulateBattleResults(unit, targetUnit, map, action.getMoveLocation(), CalcType.PESSIMISTIC);
       score = combatScorer.apply(results);
     }
     else
@@ -263,7 +264,7 @@ public class AICombatUtils
           neededAttacks.remove(space);
           continue;
         }
-        double thisShot = CombatEngine.simulateBattleResults(attacker, target, gameMap, space).defender.getPreciseHPDamage();
+        double thisShot = CombatEngine.simulateBattleResults(attacker, target, gameMap, space, CalcType.PESSIMISTIC).defender.getPreciseHPDamage();
         if( target.getHP() <= damage - thisShot )
         {
           neededAttacks.remove(space);
@@ -323,7 +324,7 @@ public class AICombatUtils
         if( movePath.getPathLength() > 0 )
         {
           neededAttacks.put(xyc, unit);
-          double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc).defender.getPreciseHPDamage();
+          double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc, CalcType.PESSIMISTIC).defender.getPreciseHPDamage();
 
           thisDamage = findMultiHitKill(gameMap, target, attackCandidates, neededAttacks, damage + thisDamage);
 
