@@ -79,6 +79,12 @@ public class CombatEngine
     context.applyModifiers();
     boolean isSim = context.calcType.isSim();
 
+    if (isSim) // When simulating, round up unit HP to avoid leaking precise health info
+    {
+      context.attacker.alterHP(0);
+      context.defender.alterHP(0);
+    }
+
     // Provides a simple way to correlate start state and end state of each combatant.
     // Uses a map to make it easy to pass information coherently between this function's local context
     //   and the context of the CombatContext (which can be altered in unpredictable ways).

@@ -162,7 +162,7 @@ public abstract class UnitState implements Serializable
 
     health = Math.max(1, health + healthFromHP(realChange));
     // Round HP up, if healing
-    if( change > 0 )
+    if( change >= 0 )
       health = healthFromHP(getHP());
 
     return getHP() - oldHP;
