@@ -163,6 +163,14 @@ public class MapPerspective extends GameMap
     return (null == viewer) || viewer.gameRules.isFogEnabled;
   }
 
+  /**
+   * @return Whether the input unit is visible whether or not it's cloaked
+   */
+  public boolean isConfirmedVisible(Unit unit)
+  {
+    return confirmedVisibles.contains(unit);
+  }
+
   @Override
   public void resetFog()
   {
