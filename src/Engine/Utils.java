@@ -645,7 +645,7 @@ public class Utils
     final UnitContext uc = new UnitContext(map, unit);
     final MoveType fff = uc.calculateMoveType();
     if( !fff.canStandOn(map, path.getEndCoord(), unit, includeOccupiedSpaces) )
-      return false;
+      return true;
 
     final int movePower = uc.calculateMovePower();
     for( int i = 1; i < path.getPathLength(); ++i)
