@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import CommandingOfficers.Commander;
-import Engine.FloodFillFunctor;
 import Engine.GameActionSet;
 import Engine.GamePath;
 import Engine.UnitActionFactory;
@@ -15,6 +14,7 @@ import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
+import Units.MoveTypes.MoveType;
 
 public class Unit extends UnitState implements UnitModList
 {
@@ -70,14 +70,9 @@ public class Unit extends UnitState implements UnitModList
     return events;
   }
 
-  public FloodFillFunctor getMoveFunctor(boolean includeOccupied)
+  public MoveType getMoveFunctor()
   {
-    // Units cannot normally pass through enemies
-    return getMoveFunctor(includeOccupied, false);
-  }
-  public FloodFillFunctor getMoveFunctor(boolean includeOccupied, boolean canTravelThroughEnemies)
-  {
-    return new UnitContext(this).calculateMoveType().getUnitMoveFunctor(this, includeOccupied, canTravelThroughEnemies);
+    return new UnitContext(this).calculateMoveType();
   }
 
   /** Provides the authoritative/actual move power of the unit in question */

@@ -7,6 +7,7 @@ import Terrain.GameMap;
 import Units.Unit;
 import Units.UnitContext;
 import Units.UnitModel;
+import Units.MoveTypes.MoveType;
 
 /**
  * Path stores a list of waypoints.
@@ -58,8 +59,7 @@ public class GamePath
   public int getFuelCost(Commander co, UnitModel unit, GameMap map)
   {
     int cost = 0;
-    boolean includeOccupied = true, canTravelThroughEnemies = true;
-    FloodFillFunctor fff = new UnitContext(co, unit).calculateMoveType().getUnitMoveFunctor(null, includeOccupied, canTravelThroughEnemies);
+    MoveType fff = new UnitContext(co, unit).calculateMoveType();
     // We iterate from 1 because the first waypoint is the unit's initial position.
     for (int i = 1; i < waypoints.size(); i++)
     {
@@ -139,15 +139,15 @@ public class GamePath
 
   public void snipCollision(GameMap map, Unit unit)
   {
-    boolean includeOccupiedSpaces = false;
-    FloodFillFunctor fff = unit.getMoveFunctor(includeOccupiedSpaces);
+    boolean includeOccupied = true, canTravelThroughEnemies = false;
+    MoveType fff = unit.getMoveFunctor();
 
     // Snip if we can't actually traverse, iterate starting at the first place we move
     for( int i = 1; i < waypoints.size(); ++i)
     {
       XYCoord from = waypoints.get(i-1).GetCoordinates();
       XYCoord to   = waypoints.get( i ).GetCoordinates();
-      if( unit.getMovePower(map) < fff.getTransitionCost(map, from, to) )
+      if( unit.getMovePower(map) < fff.getTransitionCost(map, from, to, unit, canTravelThroughEnemies) )
       {
         snip(i);
         break;
@@ -159,7 +159,7 @@ public class GamePath
     for( int i = waypoints.size()-1; i > 0; --i )
     {
       XYCoord to = waypoints.get(i).GetCoordinates();
-      if( fff.canStandOn(map, to) )
+      if( fff.canStandOn(map, to, unit, includeOccupied) )
         break;
       snip(i);
     }
@@ -167,8 +167,8 @@ public class GamePath
 
   public void snipForFuel(GameMap map, Unit unit)
   {
-    boolean includeOccupiedSpaces = false;
-    FloodFillFunctor fff = unit.getMoveFunctor(includeOccupiedSpaces);
+    boolean canTravelThroughEnemies = false;
+    MoveType fff = unit.getMoveFunctor();
     int fuelBudget = unit.fuel;
 
     // Snip if we can't actually traverse, iterate starting at the first place we move
@@ -176,7 +176,7 @@ public class GamePath
     {
       XYCoord from = waypoints.get(i-1).GetCoordinates();
       XYCoord to   = waypoints.get( i ).GetCoordinates();
-      int tileCost = fff.getTransitionCost(map, from, to);
+      int tileCost = fff.getTransitionCost(map, from, to, unit, canTravelThroughEnemies);
       fuelBudget  -= tileCost * unit.model.fuelBurnPerTile;
       if( 0 > fuelBudget )
       {

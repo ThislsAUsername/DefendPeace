@@ -4,9 +4,10 @@ import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.HashMap;
 
-import Engine.FloodFillFunctor;
-import Engine.FloodFillFunctor.BasicMoveFillFunctor;
+import Engine.XYCoord;
 import Terrain.Environment;
+import Terrain.GameMap;
+import Terrain.MapLocation;
 import Terrain.Environment.Weathers;
 import Terrain.TerrainType;
 import Units.Unit;
@@ -68,9 +69,27 @@ public class MoveType implements Serializable
     return cost.intValue();
   }
 
-  public FloodFillFunctor getUnitMoveFunctor(Unit mover, boolean includeOccupied, boolean canTravelThroughEnemies)
+  public int getTransitionCost(GameMap map, XYCoord from, XYCoord to)
   {
-    return new BasicMoveFillFunctor(mover, this, includeOccupied, canTravelThroughEnemies);
+    return getTransitionCost(map, from, to, null, true);
+  }
+  public int getTransitionCost(GameMap map, XYCoord from, XYCoord to,
+                               Unit mover, boolean canTravelThroughEnemies)
+  {
+    // if we're past the edges of the map
+    if( !map.isLocationValid(to) )
+      return MoveType.IMPASSABLE;
+
+    // note to self: extend this if we ever support moving to non-adjacent tiles
+    int cost = getMoveCost(map.getEnvironment(to.xCoord, to.yCoord));
+
+    // if there is an enemy unit in that space
+    if( !canTravelThroughEnemies
+        && (map.getLocation(to).getResident() != null)
+        && mover.CO.isEnemy(map.getLocation(to).getResident().CO) )
+      cost = MoveType.IMPASSABLE;
+
+    return cost;
   }
 
   /** Returns the cost to traverse the given tile, accounting for its current terrain and weather types. */
@@ -79,12 +98,24 @@ public class MoveType implements Serializable
     return getMoveCost(tile.weatherType, tile.terrainType);
   }
 
-  /** Returns whether the unit can travel in the specified environment. */
+  /** Returns whether the unit can hang out in the specified environment. */
   public boolean canStandOn(Environment tile)
   {
     if( tile.terrainType == TerrainType.TELETILE )
-      return false;
+      return false; // Standing on empty space is pretty hard
     return getMoveCost(tile) < IMPASSABLE;
+  }
+  /** Returns whether the unit can hang out on the specified tile. */
+  public boolean canStandOn(GameMap map, XYCoord end, Unit mover, boolean includeOccupiedDestinations)
+  {
+    final MapLocation loc = map.getLocation(end);
+    if(!canStandOn(loc.getEnvironment()))
+      return false;
+
+    Unit obstacle = loc.getResident();
+    if( obstacle == null || obstacle == mover)
+      return true;
+    return includeOccupiedDestinations;
   }
 
   /** Sets the cost to move through terrain during weather. */

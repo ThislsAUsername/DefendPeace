@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import CommandingOfficers.Commander;
-import Engine.FloodFillFunctor;
 import Engine.GameInstance;
 import Engine.GamePath;
 import Engine.StateTrackers.StateTracker;
@@ -17,7 +16,6 @@ import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.StrikeParams.BattleParams;
-import Engine.FloodFillFunctor.BasicMoveFillFunctor;
 import Engine.GameEvents.CommanderEnergyChangeEvent;
 import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEventQueue;
@@ -776,32 +774,20 @@ public class KaijuWarsKaiju
     }
 
     @Override
-    public FloodFillFunctor getUnitMoveFunctor(Unit mover, boolean includeOccupied, boolean canTravelThroughEnemies)
-    {
-      return new KaijuMoveFillFunctor(mover, this, includeOccupied, canTravelThroughEnemies);
-    }
-
-    @Override
     public MoveType clone()
     {
       return new FootKaiju(this);
     }
-  }
-  public static class KaijuMoveFillFunctor extends BasicMoveFillFunctor
-  {
-    public KaijuMoveFillFunctor(Unit mover, MoveType propulsion, boolean includeOccupied, boolean canTravelThroughEnemies)
-    {
-      super(mover, propulsion, includeOccupied, canTravelThroughEnemies);
-    }
 
     @Override
-    public int getTransitionCost(GameMap map, XYCoord from, XYCoord to)
+    public int getTransitionCost(GameMap map, XYCoord from, XYCoord to,
+                                 Unit unit, boolean canTravelThroughEnemies)
     {
       // if we're past the edges of the map
       if( !map.isLocationValid(to) )
         return MoveType.IMPASSABLE;
 
-      int cost = findMoveCost(from, to, map);
+      int cost = super.getTransitionCost(map, from, to, unit, canTravelThroughEnemies);
 
       // Cannot path through: Kaiju, buildings
       final MapLocation fromLocation = map.getLocation(from);
@@ -849,8 +835,12 @@ public class KaijuWarsKaiju
     }
 
     @Override
-    public boolean canStandOn(GameMap map, XYCoord end)
+    public boolean canStandOn(GameMap map, XYCoord end, Unit mover, boolean includeOccupiedDestinations)
     {
+      final MapLocation loc = map.getLocation(end);
+      if(!canStandOn(loc.getEnvironment()))
+        return false;
+
       return true;
     }
   } // ~KaijuMoveFillFunctor
