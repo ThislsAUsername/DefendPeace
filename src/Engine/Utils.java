@@ -192,6 +192,7 @@ public class Utils
       return false;
     }
 
+    boolean canTravelThroughEnemies = false;
     int movePower = initialFillPower;
     XYCoord lastCoord = path.getWaypoint(0).GetCoordinates();
 
@@ -200,7 +201,7 @@ public class Utils
     {
       XYCoord newCoord = path.getWaypoint(i).GetCoordinates();
 
-      movePower -= fff.getTransitionCost(map, lastCoord, newCoord);
+      movePower -= fff.getTransitionCost(map, lastCoord, newCoord, unit, canTravelThroughEnemies);
       lastCoord = newCoord;
       if( movePower < 0 )
       {
@@ -641,16 +642,18 @@ public class Utils
   {
     boolean result = false;
     boolean includeOccupiedSpaces = false, canTravelThroughEnemies = false;
-    MoveType fff = unit.getMoveFunctor();
+    final UnitContext uc = new UnitContext(map, unit);
+    final MoveType fff = uc.calculateMoveType();
     if( !fff.canStandOn(map, path.getEndCoord(), unit, includeOccupiedSpaces) )
       return false;
 
+    final int movePower = uc.calculateMovePower();
     for( int i = 1; i < path.getPathLength(); ++i)
     {
       XYCoord from = path.getWaypoint(i-1).GetCoordinates();
       XYCoord to   = path.getWaypoint( i ).GetCoordinates();
       // If there are collisions relevant to the unit, the cost will be IMPASSABLE
-      if( unit.getMovePower(map) < fff.getTransitionCost(map, from, to, unit, canTravelThroughEnemies) )
+      if( movePower < fff.getTransitionCost(map, from, to, unit, canTravelThroughEnemies) )
       {
         result = true;
         break;
