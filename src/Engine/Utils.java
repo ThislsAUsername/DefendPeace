@@ -148,7 +148,6 @@ public class Utils
     }
 
     // set up our search
-    reachableTiles.add(start);
     SearchNode root = new SearchNode(start.xCoord, start.yCoord);
     powerGrid[start.xCoord][start.yCoord] = initialFillPower;
     Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid));
@@ -159,7 +158,7 @@ public class Utils
       // pull out the next search node
       SearchNode currentNode = searchQueue.poll();
       XYCoord coord = new XYCoord(currentNode.x, currentNode.y);
-      if( fff.canStandOn(gameMap, coord, null, includeOccupiedSpaces) )
+      if( fff.canStandOn(gameMap, coord, unit, includeOccupiedSpaces) )
       {
         reachableTiles.add(coord);
       }
