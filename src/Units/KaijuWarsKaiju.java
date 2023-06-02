@@ -767,6 +767,11 @@ public class KaijuWarsKaiju
       moveCosts.get(Weathers.RAIN).setAllMovementCosts(1);
       moveCosts.get(Weathers.SNOW).setAllMovementCosts(1);
       moveCosts.get(Weathers.SANDSTORM).setAllMovementCosts(1);
+
+      setMoveCost(TerrainType.TELETILE, 0);
+      // 'cause smashing takes work
+      setMoveCost(TerrainType.PILLAR, 2);
+      setMoveCost(TerrainType.METEOR, 2);
     }
     public FootKaiju(FootKaiju other)
     {
