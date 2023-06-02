@@ -638,10 +638,10 @@ public class Utils
     return locations;
   }
 
-  public static boolean pathCollides(GameMap map, Unit unit, GamePath path)
+  public static boolean pathCollides(GameMap map, Unit unit, GamePath path, boolean includeOccupiedSpaces)
   {
     boolean result = false;
-    boolean includeOccupiedSpaces = false, canTravelThroughEnemies = false;
+    boolean canTravelThroughEnemies = false;
     final UnitContext uc = new UnitContext(map, unit);
     final MoveType fff = uc.calculateMoveType();
     if( !fff.canStandOn(map, path.getEndCoord(), unit, includeOccupiedSpaces) )
@@ -673,8 +673,19 @@ public class Utils
    */
   public static boolean enqueueMoveEvent(MapMaster gameMap, Unit unit, GamePath movePath, GameEventQueue eventQueue)
   {
+    return enqueueMoveEvent(gameMap, unit, movePath, eventQueue, false);
+  }
+  /**
+   * enqueueMoveEvent(), but for when you want to end your movement on a friendly
+   */
+  public static boolean enqueueBoardEvent(MapMaster gameMap, Unit unit, GamePath movePath, GameEventQueue eventQueue)
+  {
+    return enqueueMoveEvent(gameMap, unit, movePath, eventQueue, true);
+  }
+  public static boolean enqueueMoveEvent(MapMaster gameMap, Unit unit, GamePath movePath, GameEventQueue eventQueue, boolean includeOccupiedSpaces)
+  {
     boolean originalPathOK = true;
-    if( Utils.pathCollides(gameMap, unit, movePath) )
+    if( Utils.pathCollides(gameMap, unit, movePath, includeOccupiedSpaces) )
     {
       movePath.snipCollision(gameMap, unit);
       originalPathOK = false;

@@ -103,7 +103,7 @@ public abstract class LoadLifecycle
       if( isValid )
       {
         // Move to the transport, if we don't get blocked.
-        if( Utils.enqueueMoveEvent(gameMap, passenger, movePath, loadEvents) )
+        if( Utils.enqueueBoardEvent(gameMap, passenger, movePath, loadEvents) )
         {
           // Get in the transport.
           loadEvents.add(new LoadEvent(passenger, transport));
