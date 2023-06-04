@@ -4,16 +4,10 @@ import Engine.GameScenario;
 
 import java.util.ArrayList;
 import CommandingOfficers.CommanderInfo.InfoPage;
-import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
-import Engine.UnitMods.UnitDamageModifier;
-import Engine.UnitMods.UnitDefenseModifier;
-import Engine.UnitMods.UnitModifier;
-import Engine.UnitMods.UnitTypeFilter;
 import Engine.Army;
 import Engine.GameAction;
 import Engine.GameActionSet;
@@ -33,7 +27,7 @@ import Units.UnitModel;
 public abstract class DeployableCommander extends Commander
 {
   private static final long serialVersionUID = 1L;
-  public static final InfoPage ZONE_MECHANICS_BLURB = new InfoPage(
+  public static final InfoPage COU_MECHANICS_BLURB = new InfoPage(
             "CO Unit mechanics:\n"
           + "Deploy your CO Unit via a special action done in place (does not end turn).\n"
           + "You can't deploy a CO Unit that has already been active during your turn (i.e. must wait a turn after deleting it/dying to a counter).\n");
@@ -46,14 +40,10 @@ public abstract class DeployableCommander extends Commander
   /** If the unit type matches any flag in this mask, it can be my COU */
   public long canDeployMask = Long.MAX_VALUE;
   public final boolean canDeployOn(UnitModel type) {return type.isAny(canDeployMask);};
-  public final int COUPow; // static values that define the power the COU should stay at
-  public final int COUDef;
-  private int megaPow; // floating values that dip on powers to match the above
-  private int megaDef;
 
-  public boolean flexibleBoost = true;
+  public boolean resetCOUsEveryTurn = false;
 
-  /** Can I deploy my COU here? */
+  /** Can I deploy my COU here? Ignored if resetCOUsEveryTurn==true */
   protected boolean eligibleDeployLocation(Unit actor, MapLocation loc)
   {
     return getShoppingList(loc).contains(actor.model)
@@ -62,13 +52,9 @@ public abstract class DeployableCommander extends Commander
   }
 
 
-  public DeployableCommander(int atk, int def, CommanderInfo info, GameScenario.GameRules rules)
+  public DeployableCommander(CommanderInfo info, GameScenario.GameRules rules)
   {
     super(info, rules);
-    COUPow = atk;
-    COUDef = def;
-    megaPow = COUPow;
-    megaDef = COUDef;
   }
 
   @Override
@@ -83,7 +69,7 @@ public abstract class DeployableCommander extends Commander
   @Override
   public GameEventQueue initTurn(MapMaster map)
   {
-    if( flexibleBoost )
+    if( resetCOUsEveryTurn )
     {
       this.COUs.clear();
     }
@@ -92,8 +78,6 @@ public abstract class DeployableCommander extends Commander
       this.COUs.removeAll(COUsLost);
       this.COUsLost.clear();
     }
-    megaPow = COUPow;
-    megaDef = COUDef;
     return super.initTurn(map);
   }
 
@@ -108,19 +92,6 @@ public abstract class DeployableCommander extends Commander
   {
     if( canDeployOn(uc.model) )
       uc.actionTypes.add(new DeployCOU(this));
-  }
-
-  @Override
-  public void modifyUnitAttack(StrikeParams params)
-  {
-    if( COUs.contains(params.attacker.unit) )
-      params.attackPower += megaPow;
-  }
-  @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
-  {
-    if( COUs.contains(params.defender.unit) )
-      params.defensePower += megaDef;
   }
 
   @Override
@@ -146,41 +117,6 @@ public abstract class DeployableCommander extends Commander
     return super.receiveUnitJoinEvent(join);
   }
 
-  protected static class nonStackingBoost extends CommanderAbility
-  {
-    private static final long serialVersionUID = 1L;
-    DeployableCommander COcast;
-    private int atk, def;
-    UnitTypeFilter powMod;
-    UnitTypeFilter defMod;
-
-    protected nonStackingBoost(DeployableCommander commander, String name, int cost, int pAtk, int pDef)
-    {
-      super(commander, name, cost);
-      COcast = commander;
-      atk = pAtk;
-      def = pDef;
-      powMod = new UnitTypeFilter(new UnitDamageModifier(atk));
-      defMod = new UnitTypeFilter(new UnitDefenseModifier(def));
-    }
-
-    @Override
-    protected void perform(MapMaster gameMap)
-    {
-      COcast.megaPow -= atk;
-      COcast.megaDef -= def;
-      powMod.allOf = COcast.canDeployMask;
-      defMod.allOf = COcast.canDeployMask;
-    }
-
-    @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
-    {
-      modList.add(powMod);
-      modList.add(defMod);
-    }
-  }
-
   //////////////////////////////////////////////////////////
   // Action definition happens after this point
   //////////////////////////////////////////////////////////
@@ -200,7 +136,7 @@ public abstract class DeployableCommander extends Commander
       XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
       if( moveLocation.equals(actor.x, actor.y)
           && deployer.COUs.size() < deployer.getCOUCount()
-          && (deployer.flexibleBoost || deployer.eligibleDeployLocation(actor, map.getLocation(moveLocation))) )
+          && (deployer.resetCOUsEveryTurn || deployer.eligibleDeployLocation(actor, map.getLocation(moveLocation))) )
       {
         return new GameActionSet(new ApplyMegaBoost(this, actor), false);
       }
