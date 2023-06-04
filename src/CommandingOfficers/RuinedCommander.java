@@ -81,13 +81,10 @@ public abstract class RuinedCommander extends DeployableCommander
     super.modifyAbilityPower(amount);
     zoneRadius = zoneBaseRadius;
 
-    double[] abilityCosts = getAbilityCosts();
-    if( abilityCosts.length > 0 )
+    double maxCost = getMaxAbilityPower();
+    if( maxCost > 0 )
     {
-      double maxCost = 0;
       double abilityPower = getAbilityPower();
-      for( double cost : abilityCosts )
-        maxCost = Math.max(maxCost, cost);
 
       // Expansions at 100% and 50%
       if( abilityPower >= maxCost / 2 )
@@ -96,23 +93,20 @@ public abstract class RuinedCommander extends DeployableCommander
         ++zoneRadius;
     }
   }
-  public double calculateCombatCharge(UnitDelta minion, UnitDelta enemy)
+  public int calculateCombatCharge(UnitDelta minion, UnitDelta enemy)
   {
     if( minion == null || enemy == null )
       return 0;
 
     double myHPDealt = enemy.getHPDamage();
 
-    double power = 0; // value in funds of the charge we're getting
+    int power = 0; // value in funds of the charge we're getting
 
     power += myHPDealt * CHARGERATIO_HP;
 
-    // Convert funds to ability power units
-    power /= CHARGERATIO_FUNDS;
-
     return power;
   }
-  public double calculateMassDamageCharge(Unit minion, int lostHP)
+  public int calculateMassDamageCharge(Unit minion, int lostHP)
   {
     return 0;
   }

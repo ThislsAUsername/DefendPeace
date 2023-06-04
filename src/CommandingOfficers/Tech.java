@@ -146,7 +146,7 @@ public class Tech extends Commander
     UnitTypeFilter damageBuff = null;
     UnitModifier defenseBuff = null;
 
-    public OverchargeAbility(Tech tech, String abilityName, double abilityCost, int buff, int healAmt)
+    public OverchargeAbility(Tech tech, String abilityName, int abilityCost, int buff, int healAmt)
     {
       super(tech, abilityName, abilityCost);
 
@@ -217,7 +217,7 @@ public class Tech extends Commander
     UnitTypeFilter damageBuff = null;
     UnitModifier defenseBuff = null;
 
-    TechdropAbility(Tech tech, String abilityName, double abilityCost, UnitModel unitToDrop, int buff, int num, int abilityRange)
+    TechdropAbility(Tech tech, String abilityName, int abilityCost, UnitModel unitToDrop, int buff, int num, int abilityRange)
     {
       super(tech, abilityName, abilityCost);
 

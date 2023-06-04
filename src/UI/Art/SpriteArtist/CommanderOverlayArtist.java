@@ -151,17 +151,17 @@ public class CommanderOverlayArtist
   /**
    * Generate an ability-power bar for the given Commander at 1x size. The requester is responsible for applying any scale factors.
    */
-  public static BufferedImage buildCoPowerBar(Commander co, double[] abilityPoints, double currentPower, boolean leftSide)
+  public static BufferedImage buildCoPowerBar(Commander co, int[] abilityPoints, int currentPower, boolean leftSide)
   {
     if( 0 == abilityPoints.length )
       return SpriteLibrary.createTransparentSprite(1, 1);
 
-    final double pixelsPerPowerUnit = 3.0;
+    final double pixelsPerPowerUnit = 3.0 / Commander.CHARGERATIO_FUNDS;
     final int animIndex = getAnimIndex();
     int slowAnimIndex = (animIndex/32) % 2;
 
     // Find the most expensive ability so we know how long to draw the bar.
-    double maxAP = 1;
+    int maxAP = 1;
     for( int i = 0; i < abilityPoints.length; ++i )
     {
       maxAP = (maxAP < abilityPoints[i]) ? abilityPoints[i] : maxAP;

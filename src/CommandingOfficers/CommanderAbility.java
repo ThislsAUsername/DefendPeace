@@ -18,22 +18,24 @@ public abstract class CommanderAbility implements Serializable
   public static final int PHASE_TURN_END = PHASE_BUY << 1;
   public final Commander myCommander;
   protected String myName;
-  protected double myPowerCost;
+  /** in funds */
+  protected int myPowerCost;
   public int AIFlags = PHASE_TURN_START;
   private ArrayList<UnitModifier> modsApplied = new ArrayList<>();
 
-  public CommanderAbility(Commander commander, String abilityName, double powerCost)
+  public CommanderAbility(Commander commander, String abilityName, int stars)
   {
     myCommander = commander;
     myName = abilityName;
-    myPowerCost = powerCost;
+    myPowerCost = stars * Commander.CHARGERATIO_FUNDS;
   }
   public void initForGame(GameInstance game)
   {}
   public void deInitForGame(GameInstance game)
   {}
 
-  public double getCost()
+  /** in funds */
+  public int getCost()
   {
     return myPowerCost;
   }

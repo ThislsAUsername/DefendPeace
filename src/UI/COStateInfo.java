@@ -52,37 +52,32 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
     // ability stats
     for( Commander co : thisArmy.cos )
     {
-    double[] abilityCosts = co.getAbilityCosts();
-    if( abilityCosts.length > 0 )
-    {
-      currentEnergy.put(co, energyToFunds(co.getAbilityPower()));
-      untilNextEnergy.put(co, getEnergyUntilNextPower(co));
-    }
+      int[] abilityCosts = co.getAbilityCosts();
+      if( abilityCosts.length > 0 )
+      {
+        currentEnergy.put(co, (co.getAbilityPower()));
+        untilNextEnergy.put(co, getEnergyUntilNextPower(co));
+      }
     }
   }
 
   public static int getEnergyUntilNextPower(Commander viewed)
   {
-    double output = 0;
-    double[] abilityCosts = viewed.getAbilityCosts();
+    int output = 0;
+    int[] abilityCosts = viewed.getAbilityCosts();
     if( abilityCosts.length > 0 )
     {
-      double abilityPower = viewed.getAbilityPower();
-      for( double cost : abilityCosts ) // init to our biggest cost, so we can only go down
+      int abilityPower = viewed.getAbilityPower();
+      for( int cost : abilityCosts ) // init to our biggest cost, so we can only go down
         output = Math.max(output, cost);
 
-      for( double cost : abilityCosts ) // find the cheapest cost that we can't afford
+      for( int cost : abilityCosts ) // find the cheapest cost that we can't afford
       {
         if( cost >= abilityPower )
           output = Math.min(output, cost - abilityPower);
       }
     }
-    return energyToFunds(output);
-  }
-
-  public static int energyToFunds(double energy)
-  {
-    return (int) (energy * Commander.CHARGERATIO_FUNDS);
+    return (output);
   }
 
   /** Returns a string with just the income and unit count of a given CO */
