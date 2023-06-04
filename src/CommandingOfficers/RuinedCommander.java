@@ -1,7 +1,9 @@
 package CommandingOfficers;
 
+import Engine.Army;
 import Engine.GameAction;
 import Engine.GameActionSet;
+import Engine.GameInstance;
 import Engine.GamePath;
 import Engine.GameScenario;
 import Engine.UnitActionFactory;
@@ -16,6 +18,8 @@ import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.CommanderAbilityEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.StateTrackers.KillCountsTracker;
+import Engine.StateTrackers.StateTracker;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -60,6 +64,13 @@ public abstract class RuinedCommander extends DeployableCommander
     zoneDef = def;
     zoneBaseRadius = radius;
     zoneRadius = radius;
+  }
+
+  @Override
+  public void initForGame(GameInstance game)
+  {
+    super.initForGame(game);
+    killCounts = StateTracker.instance(game, KillCountsTracker.class);
   }
 
   // Tell MapController and friends that we never have abilities ready, since those go through the COU
@@ -150,13 +161,57 @@ public abstract class RuinedCommander extends DeployableCommander
   {
     if( isInZone(params.attacker) )
       params.attackPower += zonePow;
+    VeteranRank rank = getRank(params.attacker.unit);
+    params.attackPower += rank.attack;
   }
   @Override
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
-    // TODO: DD, vets
+    // TODO: DD
     if( isInZone(params.defender) )
       params.defensePower += zoneDef;
+    VeteranRank rank = getRank(params.defender.unit);
+    params.defensePower += rank.defense;
+  }
+
+  KillCountsTracker killCounts;
+  public static enum VeteranRank
+  {
+    NONE('\0', 0, 0), LEVEL1('1', 5, 0), LEVEL2('2', 10, 0), LEVEL3('V', 20, 20);
+    public final char mark;
+    public final int attack, defense;
+    private VeteranRank(char mark, int attack, int defense)
+    {
+      this.mark    = mark;
+      this.attack  = attack;
+      this.defense = defense;
+    }
+  }
+  public VeteranRank getRank(Unit unit)
+  {
+    if( COUs.contains(unit) )
+      return VeteranRank.LEVEL3;
+
+    VeteranRank rank = VeteranRank.NONE;
+    int level = killCounts.getCountFor(unit);
+    if( level > 2 )
+      rank = VeteranRank.LEVEL3;
+    if( level > 1 )
+      rank = VeteranRank.LEVEL2;
+    if( level > 0 )
+      rank = VeteranRank.LEVEL1;
+
+    return rank;
+  }
+  @Override
+  public char getUnitMarking(Unit unit, Army activeArmy)
+  {
+    char mark = super.getUnitMarking(unit, activeArmy);
+    // Prefer non-veterancy marks, like "COU"
+    if( '\0' != mark )
+      return mark;
+
+    return getRank(unit).mark;
   }
 
   protected static class RuinedAbility extends CommanderAbility
