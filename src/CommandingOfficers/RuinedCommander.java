@@ -1,10 +1,22 @@
 package CommandingOfficers;
 
+import Engine.GameAction;
+import Engine.GameActionSet;
+import Engine.GamePath;
 import Engine.GameScenario;
+import Engine.UnitActionFactory;
+import Engine.Utils;
+import Engine.XYCoord;
+
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
 
 import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
+import Engine.GameEvents.CommanderAbilityEvent;
+import Engine.GameEvents.GameEventQueue;
+import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitContext;
@@ -54,12 +66,23 @@ public abstract class RuinedCommander extends DeployableCommander
     zoneRadius = radius;
   }
 
+  // Tell MapController and friends that we never have abilities ready, since those go through the COU
+  @Override
+  public ArrayList<CommanderAbility> getReadyAbilities()
+  {
+    return new ArrayList<CommanderAbility>();
+  }
+
+  // Feed those abilities instead into my COU's action list, if available
   @Override
   public void modifyActionList(UnitContext uc)
   {
-//    if( COUs.contains(uc.unit) )
-      // TODO power activation
-//      uc.actionTypes.add(new DeployCOU(this));
+    if( COUs.contains(uc.unit) )
+    {
+      ArrayList<CommanderAbility> abilities = super.getReadyAbilities();
+      for( CommanderAbility toCast : abilities )
+        uc.actionTypes.add(new UseAbilityFactory(toCast));
+    }
     super.modifyActionList(uc);
   }
 
@@ -108,4 +131,110 @@ public abstract class RuinedCommander extends DeployableCommander
   // Action definition happens after this point
   //////////////////////////////////////////////////////////
 
+  public static class UseAbilityFactory extends UnitActionFactory
+  {
+    private static final long serialVersionUID = 1L;
+    final CommanderAbility toCast;
+    public UseAbilityFactory(CommanderAbility ability)
+    {
+      toCast = ability;
+    }
+
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
+    {
+      XYCoord moveLocation = movePath.getEndCoord();
+      if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
+      {
+        return new GameActionSet(new UseAbilityAction(this, actor, movePath, toCast), false);
+      }
+      return null;
+    }
+
+    @Override
+    public String name(Unit actor)
+    {
+      return toCast.toString();
+    }
+  } // ~UseAbilityFactory
+
+  public static class UseAbilityAction extends GameAction
+  {
+    final UseAbilityFactory type;
+    final Unit actor;
+    private GamePath movePath;
+    private CommanderAbility abilityToUse;
+    final XYCoord destination;
+
+    public UseAbilityAction(UseAbilityFactory type, Unit unit, GamePath path, CommanderAbility ability)
+    {
+      this.type = type;
+      actor = unit;
+      movePath = path;
+      destination = new XYCoord(unit.x, unit.y);
+      if( null == ability )
+        throw new InvalidParameterException("Non-null ability required");
+      abilityToUse = ability;
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster map)
+    {
+      // USE Ability actions consist of
+      //   MOVE
+      //   ABILITY
+      GameEventQueue abilityEvents = new GameEventQueue();
+
+      boolean isValid = null != abilityToUse;
+      isValid &= abilityToUse.myCommander.getReadyAbilities().contains(abilityToUse);
+
+      isValid &= null != actor && !actor.isTurnOver;
+      isValid &= null != map;
+      isValid &= (null != movePath) && (movePath.getPathLength() > 0);
+
+      if( !isValid ) return abilityEvents;
+
+      // Move to the target location.
+      if( Utils.enqueueMoveEvent(map, actor, movePath, abilityEvents) )
+      {
+        // Should mirror AbilityAction.getEvents()
+        abilityEvents.add(new CommanderAbilityEvent(abilityToUse));
+        abilityEvents.addAll(abilityToUse.getEvents(map));
+      }
+
+      return abilityEvents;
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.format("[Use Ability %s at %s with %s]", abilityToUse, destination, actor.toStringWithLocation());
+    }
+
+    @Override
+    public Unit getActor()
+    {
+      return actor;
+    }
+
+    @Override
+    public UnitActionFactory getType()
+    {
+      return type;
+    }
+
+    @Override
+    public XYCoord getMoveLocation()
+    {
+      return destination;
+    }
+
+    @Override
+    public XYCoord getTargetLocation()
+    {
+      return destination;
+    }
+  } // ~UseAbilityAction
+
+  // No event is needed
 }

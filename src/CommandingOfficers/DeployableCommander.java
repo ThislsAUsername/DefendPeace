@@ -91,7 +91,7 @@ public abstract class DeployableCommander extends Commander
   public void modifyActionList(UnitContext uc)
   {
     if( canDeployOn(uc.model) )
-      uc.actionTypes.add(new DeployCOU(this));
+      uc.actionTypes.add(new DeployCOUFactory(this));
   }
 
   @Override
@@ -121,11 +121,11 @@ public abstract class DeployableCommander extends Commander
   // Action definition happens after this point
   //////////////////////////////////////////////////////////
 
-  private static class DeployCOU extends UnitActionFactory
+  private static class DeployCOUFactory extends UnitActionFactory
   {
     private static final long serialVersionUID = 1L;
     final DeployableCommander deployer;
-    public DeployCOU(DeployableCommander owner)
+    public DeployCOUFactory(DeployableCommander owner)
     {
       deployer = owner;
     }
@@ -138,7 +138,7 @@ public abstract class DeployableCommander extends Commander
           && deployer.COUs.size() < deployer.getCOUCount()
           && (deployer.resetCOUsEveryTurn || deployer.eligibleDeployLocation(actor, map.getLocation(moveLocation))) )
       {
-        return new GameActionSet(new ApplyMegaBoost(this, actor), false);
+        return new GameActionSet(new DeployCOUAction(this, actor), false);
       }
       return null;
     }
@@ -150,12 +150,12 @@ public abstract class DeployableCommander extends Commander
     }
   }
 
-  private static class ApplyMegaBoost extends GameAction
+  private static class DeployCOUAction extends GameAction
   {
-    final DeployCOU type;
+    final DeployCOUFactory type;
     final Unit actor;
     final XYCoord destination;
-    public ApplyMegaBoost(DeployCOU owner, Unit unit)
+    public DeployCOUAction(DeployCOUFactory owner, Unit unit)
     {
       type = owner;
       actor = unit;
@@ -177,6 +177,12 @@ public abstract class DeployableCommander extends Commander
     }
 
     @Override
+    public Unit getActor()
+    {
+      return actor;
+    }
+
+    @Override
     public UnitActionFactory getType()
     {
       return type;
@@ -193,7 +199,7 @@ public abstract class DeployableCommander extends Commander
     {
       return destination;
     }
-  } // ~ApplyMegaBoost
+  } // ~DeployCOUAction
 
   private static class DeployCOUEvent implements GameEvent
   {
@@ -235,5 +241,5 @@ public abstract class DeployableCommander extends Commander
     {
       return new XYCoord(unit.x, unit.y);
     }
-  }
+  } // ~DeployCOUEvent
 }
