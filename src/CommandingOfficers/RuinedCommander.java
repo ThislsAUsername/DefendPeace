@@ -50,12 +50,6 @@ public abstract class RuinedCommander extends DeployableCommander
 
   @Override
   public int getCOUCount() {return 1;}
-  @Override
-  public void onCOULost(Unit minion)
-  {
-    modifyAbilityPower(-42);
-    zoneIsGlobal = false;
-  }
 
   public RuinedCommander(int atk, int def, int radius, CommanderInfo info, GameScenario.GameRules rules)
   {
@@ -72,6 +66,34 @@ public abstract class RuinedCommander extends DeployableCommander
   {
     return new ArrayList<CommanderAbility>();
   }
+  @Override
+  public void onCOULost(Unit minion)
+  {
+    modifyAbilityPower(-42);
+    zoneIsGlobal = false;
+  }
+  // Hook: Update current zone radius every time energy changes
+  @Override
+  public void modifyAbilityPower(double amount)
+  {
+    super.modifyAbilityPower(amount);
+    zoneRadius = zoneBaseRadius;
+
+    double[] abilityCosts = getAbilityCosts();
+    if( abilityCosts.length > 0 )
+    {
+      double maxCost = 0;
+      double abilityPower = getAbilityPower();
+      for( double cost : abilityCosts )
+        maxCost = Math.max(maxCost, cost);
+
+      // Expansions at 100% and 50%
+      if( abilityPower >= maxCost / 2 )
+        ++zoneRadius;
+      if( abilityPower >= maxCost )
+        ++zoneRadius;
+    }
+  }
 
   // Feed those abilities instead into my COU's action list, if available
   @Override
@@ -84,6 +106,27 @@ public abstract class RuinedCommander extends DeployableCommander
         uc.actionTypes.add(new UseAbilityFactory(toCast));
     }
     super.modifyActionList(uc);
+  }
+
+  public boolean isInZone(UnitContext uc)
+  {
+    if( zoneIsGlobal )
+      return true;
+
+    if( COUs.contains(uc.unit) )
+      return true;
+
+    if( null == uc.coord )
+      return false;
+
+    for( Unit cou : COUs )
+    {
+      int distance = uc.coord.getDistance(cou);
+      if( distance <= zoneRadius )
+        return true;
+    }
+
+    return false;
   }
 
   @Override
