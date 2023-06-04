@@ -290,7 +290,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   }
 
   // Note: Cart charge only uses whole HP, so that's what we're doing, too.
-  public int calculateCombatCharge(UnitDelta minion, UnitDelta enemy)
+  public int calculateCombatCharge(UnitDelta minion, UnitDelta enemy, boolean isCounter)
   {
     if( minion == null || enemy == null )
       return 0;

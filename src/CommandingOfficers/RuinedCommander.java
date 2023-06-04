@@ -104,9 +104,17 @@ public abstract class RuinedCommander extends DeployableCommander
         ++zoneRadius;
     }
   }
-  public int calculateCombatCharge(UnitDelta minion, UnitDelta enemy)
+  @Override
+  public int calculateCombatCharge(UnitDelta minion, UnitDelta enemy, boolean isCounter)
   {
     if( minion == null || enemy == null )
+      return 0;
+
+    // isCounter tells us who the attacker is, so we can figure out which one we care about being in the zone
+    UnitContext chargeSource = minion.after;
+    if( isCounter )
+      chargeSource = enemy.after;
+    if( !isInZone(chargeSource) )
       return 0;
 
     double myHPDealt = enemy.getHPDamage();
@@ -117,6 +125,7 @@ public abstract class RuinedCommander extends DeployableCommander
 
     return power;
   }
+  @Override
   public int calculateMassDamageCharge(Unit minion, int lostHP)
   {
     return 0;

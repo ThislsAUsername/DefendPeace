@@ -273,15 +273,18 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
     // We only care who the units belong to, not who picked the fight.
     UnitDelta minion = null;
     UnitDelta enemy = null;
+    boolean isCounter = false;
     if( this == summary.attacker.CO.army )
     {
       minion = summary.attacker;
       enemy = summary.defender;
+      isCounter = false;
     }
     if( this == summary.defender.CO.army )
     {
       minion = summary.defender;
       enemy = summary.attacker;
+      isCounter = true;
     }
 
     if( minion != null && enemy != null )
@@ -290,11 +293,11 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
       {
         case AWBW:
         {
-          final double primaryCharge = cos[0].calculateCombatCharge(minion, enemy);
+          final double primaryCharge = cos[0].calculateCombatCharge(minion, enemy, isCounter);
           cos[0].modifyAbilityPower(primaryCharge);
           for( int i = 1; i < cos.length; ++i )
           {
-            final double tagCharge = cos[i].calculateCombatCharge(minion, enemy);
+            final double tagCharge = cos[i].calculateCombatCharge(minion, enemy, isCounter);
             final double tagMultiplier = 0.5;
             cos[i].modifyAbilityPower(tagMultiplier * tagCharge);
           }
@@ -303,7 +306,7 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
         case Team_Merge:
         case OFF:
         {
-          final double ownerCharge = minion.CO.calculateCombatCharge(minion, enemy);
+          final double ownerCharge = minion.CO.calculateCombatCharge(minion, enemy, isCounter);
           minion.CO.modifyAbilityPower(ownerCharge);
         }
           break;
