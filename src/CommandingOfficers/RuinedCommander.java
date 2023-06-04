@@ -20,6 +20,7 @@ import Terrain.GameMap;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitContext;
+import Units.UnitDelta;
 
 public abstract class RuinedCommander extends DeployableCommander
 {
@@ -41,6 +42,7 @@ public abstract class RuinedCommander extends DeployableCommander
           + "Your COU is always max level.\n"
           + "Veterancy bonuses do not apply if this CO is tagged out\n"
           );
+  public static final int CHARGERATIO_HP = 900; // Funds value of 1 HP damage dealt, for the purpose of power charge
 
   public final int zonePow;
   public final int zoneDef;
@@ -94,6 +96,26 @@ public abstract class RuinedCommander extends DeployableCommander
         ++zoneRadius;
     }
   }
+  public double calculateCombatCharge(UnitDelta minion, UnitDelta enemy)
+  {
+    if( minion == null || enemy == null )
+      return 0;
+
+    double myHPDealt = enemy.getHPDamage();
+
+    double power = 0; // value in funds of the charge we're getting
+
+    power += myHPDealt * CHARGERATIO_HP;
+
+    // Convert funds to ability power units
+    power /= CHARGERATIO_FUNDS;
+
+    return power;
+  }
+  public double calculateMassDamageCharge(Unit minion, int lostHP)
+  {
+    return 0;
+  }
 
   // Feed those abilities instead into my COU's action list, if available
   @Override
@@ -132,14 +154,14 @@ public abstract class RuinedCommander extends DeployableCommander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( COUs.contains(params.attacker.unit) )
+    if( isInZone(params.attacker) )
       params.attackPower += zonePow;
   }
   @Override
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
-    // TODO: DD, zone, vets
-    if( COUs.contains(params.defender.unit) )
+    // TODO: DD, vets
+    if( isInZone(params.defender) )
       params.defensePower += zoneDef;
   }
 
