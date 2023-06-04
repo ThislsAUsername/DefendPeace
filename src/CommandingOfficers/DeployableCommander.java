@@ -1,56 +1,51 @@
-package CommandingOfficers.IDS;
+package CommandingOfficers;
 
 import Engine.GameScenario;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
-import java.util.Collection;
-
-import AI.AILibrary;
-import CommandingOfficers.Commander;
-import CommandingOfficers.CommanderAbility;
-import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderInfo.InfoPage;
-import CommandingOfficers.Modifiers.CODamageModifier;
-import CommandingOfficers.Modifiers.CODefenseModifier;
-import CommandingOfficers.Modifiers.COModifier.GenericUnitModifier;
-import Engine.Combat.CostValueFinder;
-import Engine.Combat.DamagePopup;
-import Engine.Combat.MassStrikeUtils;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
+import Engine.UnitMods.UnitDamageModifier;
+import Engine.UnitMods.UnitDefenseModifier;
+import Engine.UnitMods.UnitModifier;
+import Engine.UnitMods.UnitTypeFilter;
+import Engine.Army;
 import Engine.GameAction;
 import Engine.GameActionSet;
-import Engine.Path;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Terrain.GameMap;
-import Terrain.Location;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 
-public abstract class TabithaEngine extends Commander
+public abstract class DeployableCommander extends Commander
 {
   private static final long serialVersionUID = 1L;
-  public static final InfoPage MECHANICS_BLURB = new InfoPage(
-            "Mega Boost mechanics:\n"
-          + "A Mega Boost is awarded via a special action done in place (does not end turn).\n"
-          + "You can't award any Boost that has already been active this turn (e.g. must wait a turn after deleting a Boosted unit).\n"
-          + "Mega Boosted units gain the generic +10/10 on powers, but no power-specific stat boost\n");
+  public static final InfoPage ZONE_MECHANICS_BLURB = new InfoPage(
+            "CO Unit mechanics:\n"
+          + "Deploy your CO Unit via a special action done in place (does not end turn).\n"
+          + "You can't deploy a CO Unit that has already been active during your turn (i.e. must wait a turn after deleting it/dying to a counter).\n");
   public ArrayList<Unit> COUs = new ArrayList<Unit>();
   public ArrayList<Unit> COUsLost = new ArrayList<Unit>();
-  public abstract int getMegaBoostCount();
+  /** The number of COUs you can have active at once */
+  public abstract int getCOUCount();
   public void onCOULost(Unit minion) {};
-  public boolean canBoost(UnitModel type) {return true;};
+  public char getCOUMark() {return 'C';};
+  /** If the unit type matches any flag in this mask, it can be my COU */
+  public long canDeployMask = Long.MAX_VALUE;
+  public final boolean canDeployOn(UnitModel type) {return type.isAny(canDeployMask);};
   public final int COUPow; // static values that define the power the COU should stay at
   public final int COUDef;
   private int megaPow; // floating values that dip on powers to match the above
@@ -58,7 +53,8 @@ public abstract class TabithaEngine extends Commander
 
   public boolean flexibleBoost = true;
 
-  protected boolean eligibleBoostLocation(Unit actor, Location loc)
+  /** Can I deploy my COU here? */
+  protected boolean eligibleDeployLocation(Unit actor, MapLocation loc)
   {
     return getShoppingList(loc).contains(actor.model)
         || loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS
@@ -66,28 +62,22 @@ public abstract class TabithaEngine extends Commander
   }
 
 
-  public TabithaEngine(int atk, int def, CommanderInfo info, GameScenario.GameRules rules)
+  public DeployableCommander(int atk, int def, CommanderInfo info, GameScenario.GameRules rules)
   {
     super(info, rules);
     COUPow = atk;
     COUDef = def;
     megaPow = COUPow;
     megaDef = COUDef;
-
-    for( UnitModel um : unitModels )
-    {
-      if( canBoost(um) )
-        um.possibleActions.add(new MegaBoost(this));
-    }
   }
 
   @Override
-  public char getUnitMarking(Unit unit)
+  public char getUnitMarking(Unit unit, Army activeArmy)
   {
     if( COUs.contains(unit) )
-      return 'M';
+      return getCOUMark();
 
-    return super.getUnitMarking(unit);
+    return super.getUnitMarking(unit, activeArmy);
   }
 
   @Override
@@ -114,49 +104,64 @@ public abstract class TabithaEngine extends Commander
   }
 
   @Override
+  public void modifyActionList(UnitContext uc)
+  {
+    if( canDeployOn(uc.model) )
+      uc.actionTypes.add(new DeployCOU(this));
+  }
+
+  @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( COUs.contains(params.attacker.body) )
+    if( COUs.contains(params.attacker.unit) )
       params.attackPower += megaPow;
   }
   @Override
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
-    if( COUs.contains(params.defender.body) )
+    if( COUs.contains(params.defender.unit) )
       params.defensePower += megaDef;
   }
 
   @Override
-  public void receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
+  public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
   {
+    // COUs die when they are killed
     if( COUs.contains(victim) )
     {
       COUsLost.add(victim);
       onCOULost(victim);
     }
+    return super.receiveUnitDieEvent(victim, grave, hpBeforeDeath);
   }
   @Override
-  public void receiveUnitJoinEvent(JoinEvent join)
+  public GameEventQueue receiveUnitJoinEvent(JoinEvent join)
   {
+    // COUs shouldn't vanish into the aether on joining another unit
     if( COUs.contains(join.unitDonor) )
     {
       COUs.remove(join.unitDonor);
       COUs.add(join.unitRecipient);
     }
+    return super.receiveUnitJoinEvent(join);
   }
 
   protected static class nonStackingBoost extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
-    TabithaEngine COcast;
+    DeployableCommander COcast;
     private int atk, def;
+    UnitTypeFilter powMod;
+    UnitTypeFilter defMod;
 
-    protected nonStackingBoost(TabithaEngine commander, String name, int cost, int pAtk, int pDef)
+    protected nonStackingBoost(DeployableCommander commander, String name, int cost, int pAtk, int pDef)
     {
       super(commander, name, cost);
       COcast = commander;
       atk = pAtk;
       def = pDef;
+      powMod = new UnitTypeFilter(new UnitDamageModifier(atk));
+      defMod = new UnitTypeFilter(new UnitDefenseModifier(def));
     }
 
     @Override
@@ -164,95 +169,38 @@ public abstract class TabithaEngine extends Commander
     {
       COcast.megaPow -= atk;
       COcast.megaDef -= def;
-      GenericUnitModifier powMod = new CODamageModifier(atk);
-      GenericUnitModifier defMod = new CODefenseModifier(def);
-      for( UnitModel um : myCommander.unitModels )
-      {
-        if( COcast.canBoost(um) )
-        {
-          powMod.addApplicableUnitModel(um);
-          defMod.addApplicableUnitModel(um);
-        }
-      }
-      COcast.addCOModifier(powMod);
-      COcast.addCOModifier(defMod);
-    }
-  }
-
-  protected static class NukeIt extends nonStackingBoost
-  {
-    private static final long serialVersionUID = 1L;
-    private int nukePower;
-
-    protected NukeIt(TabithaEngine commander, String name, int cost, int nuke, int pAtk, int pDef)
-    {
-      super(commander, name, cost, pAtk, pDef);
-      nukePower = nuke;
+      powMod.allOf = COcast.canDeployMask;
+      defMod.allOf = COcast.canDeployMask;
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      super.perform(gameMap);
-      XYCoord target = findTarget(gameMap);
-      MassStrikeUtils.damageStrike(gameMap, nukePower, target, 2);
-    }
-    private XYCoord findTarget(GameMap gameMap)
-    {
-      return MassStrikeUtils.findValueConcentration(gameMap, 2, new CostValueFinder(myCommander, true));
-    }
-    @Override
-    public Collection<DamagePopup> getDamagePopups(GameMap gameMap)
-    {
-      ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
-
-      output.add(new DamagePopup(
-                     findTarget(gameMap),
-                     myCommander.myColor,
-                     "Nuked"));
-
-      return output;
-    }
-  }
-
-  /**
-   * Private method, same signature as in Serializable interface
-   *
-   * @param stream
-   * @throws IOException
-   */
-  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException
-  {
-    stream.defaultReadObject();
-
-    // Be compatible with old saves
-    if( COUsLost == null )
-    {
-      COUsLost = new ArrayList<Unit>();
-      flexibleBoost = true;
+      modList.add(powMod);
+      modList.add(defMod);
     }
   }
 
   //////////////////////////////////////////////////////////
-  // Mega action jazz happens after this point
+  // Action definition happens after this point
   //////////////////////////////////////////////////////////
 
-  private static class MegaBoost extends UnitActionFactory
+  private static class DeployCOU extends UnitActionFactory
   {
     private static final long serialVersionUID = 1L;
-    final TabithaEngine tabby;
-    public MegaBoost(TabithaEngine owner)
+    final DeployableCommander deployer;
+    public DeployCOU(DeployableCommander owner)
     {
-      tabby = owner;
+      deployer = owner;
     }
 
     @Override
-    public GameActionSet getPossibleActions(GameMap map, Path movePath, Unit actor, boolean ignoreResident)
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = new XYCoord(movePath.getEnd().x, movePath.getEnd().y);
       if( moveLocation.equals(actor.x, actor.y)
-          && tabby.COUs.size() < tabby.getMegaBoostCount()
-          && (tabby.flexibleBoost || tabby.eligibleBoostLocation(actor, map.getLocation(moveLocation))) )
+          && deployer.COUs.size() < deployer.getCOUCount()
+          && (deployer.flexibleBoost || deployer.eligibleDeployLocation(actor, map.getLocation(moveLocation))) )
       {
         return new GameActionSet(new ApplyMegaBoost(this, actor), false);
       }
@@ -260,18 +208,18 @@ public abstract class TabithaEngine extends Commander
     }
 
     @Override
-    public String name()
+    public String name(Unit actor)
     {
-      return "MEGA BOOST";
+      return "Deploy COU";
     }
   }
 
   private static class ApplyMegaBoost extends GameAction
   {
-    final MegaBoost type;
+    final DeployCOU type;
     final Unit actor;
     final XYCoord destination;
-    public ApplyMegaBoost(MegaBoost owner, Unit unit)
+    public ApplyMegaBoost(DeployCOU owner, Unit unit)
     {
       type = owner;
       actor = unit;
@@ -282,14 +230,14 @@ public abstract class TabithaEngine extends Commander
     public GameEventQueue getEvents(MapMaster gameMap)
     {
       GameEventQueue eventSequence = new GameEventQueue();
-      eventSequence.add(new MegaBoostEvent(type.tabby, actor));
+      eventSequence.add(new DeployCOUEvent(type.deployer, actor));
       return eventSequence;
     }
 
     @Override
     public String toString()
     {
-      return String.format("[Mega Boost %s in place]", actor.toStringWithLocation());
+      return String.format("[Deploy COU on %s in place]", actor.toStringWithLocation());
     }
 
     @Override
@@ -311,14 +259,14 @@ public abstract class TabithaEngine extends Commander
     }
   } // ~ApplyMegaBoost
 
-  private static class MegaBoostEvent implements GameEvent
+  private static class DeployCOUEvent implements GameEvent
   {
-    final TabithaEngine tabby;
+    final DeployableCommander deployer;
     private Unit unit;
 
-    public MegaBoostEvent(TabithaEngine owner, Unit unit)
+    public DeployCOUEvent(DeployableCommander owner, Unit unit)
     {
-      tabby = owner;
+      deployer = owner;
       this.unit = unit;
     }
 
@@ -329,14 +277,15 @@ public abstract class TabithaEngine extends Commander
     }
 
     @Override
-    public void sendToListener(GameEventListener listener)
+    public GameEventQueue sendToListener(GameEventListener listener)
     {
+      return null;
     }
 
     @Override
     public void performEvent(MapMaster gameMap)
     {
-      tabby.COUs.add(unit);
+      deployer.COUs.add(unit);
     }
 
     @Override
