@@ -171,6 +171,9 @@ public abstract class RuinedCommander extends DeployableCommander
     Color fill = new Color(0, 0, 0, 100);
 
     ArrayList<GameOverlay> overlays = super.getMyOverlays(gameMap, amIViewing);
+    if( zoneIsGlobal )
+      return overlays;
+
     for( Unit cou : COUs )
     {
       final XYCoord coCoord = new XYCoord(cou);
@@ -329,7 +332,6 @@ public abstract class RuinedCommander extends DeployableCommander
       GameEventQueue abilityEvents = new GameEventQueue();
 
       boolean isValid = null != abilityToUse;
-      isValid &= abilityToUse.myCommander.getReadyAbilities().contains(abilityToUse);
 
       isValid &= null != actor && !actor.isTurnOver;
       isValid &= null != map;
