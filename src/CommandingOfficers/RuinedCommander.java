@@ -10,6 +10,7 @@ import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 
+import java.awt.Color;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 
@@ -22,6 +23,7 @@ import Engine.StateTrackers.KillCountsTracker;
 import Engine.StateTrackers.StateTracker;
 import Terrain.GameMap;
 import Terrain.MapMaster;
+import UI.GameOverlay;
 import Units.Unit;
 import Units.UnitContext;
 import Units.UnitDelta;
@@ -163,6 +165,21 @@ public abstract class RuinedCommander extends DeployableCommander
     }
 
     return false;
+  }
+  public ArrayList<GameOverlay> getMyOverlays(GameMap gameMap, boolean amIViewing)
+  {
+    Color fill = new Color(0, 0, 0, 100);
+
+    ArrayList<GameOverlay> overlays = super.getMyOverlays(gameMap, amIViewing);
+    for( Unit cou : COUs )
+    {
+      final XYCoord coCoord = new XYCoord(cou);
+      GameOverlay coZone = new GameOverlay(
+          coCoord, Utils.findLocationsInRange(gameMap, coCoord, 0, zoneRadius),
+          fill, myColor);
+      overlays.add(coZone);
+    }
+    return overlays;
   }
 
   @Override
