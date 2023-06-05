@@ -37,6 +37,7 @@ public abstract class DeployableCommander extends Commander
   public abstract int getCOUCount();
   public void onCOULost(Unit minion) {};
   public char getCOUMark() {return 'C';};
+  public int deployCostPercent = 0;
   /** If the unit type matches any flag in this mask, it can be my COU */
   public long canDeployMask = Long.MAX_VALUE;
   public final boolean canDeployOn(UnitModel type) {return type.isAny(canDeployMask);};
@@ -46,6 +47,8 @@ public abstract class DeployableCommander extends Commander
   /** Can I deploy my COU here? Ignored if resetCOUsEveryTurn==true */
   protected boolean eligibleDeployLocation(Unit actor, MapLocation loc)
   {
+    if( loc.getOwner() != actor.CO )
+      return false; // No COing on neutral factories
     return getShoppingList(loc).contains(actor.model)
         || loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS
         || loc.getEnvironment().terrainType == TerrainType.LAB;
@@ -146,7 +149,14 @@ public abstract class DeployableCommander extends Commander
     @Override
     public String name(Unit actor)
     {
-      return "Deploy COU";
+      if( deployer.deployCostPercent == 0 )
+        return "Deploy COU";
+      return "Deploy COU (" + getDeployCost(actor) + ")";
+    }
+
+    private int getDeployCost(Unit actor)
+    {
+      return (deployer.deployCostPercent * deployer.getCost(actor.model)) / 100;
     }
   }
 
@@ -166,7 +176,8 @@ public abstract class DeployableCommander extends Commander
     public GameEventQueue getEvents(MapMaster gameMap)
     {
       GameEventQueue eventSequence = new GameEventQueue();
-      eventSequence.add(new DeployCOUEvent(type.deployer, actor));
+      if( type.deployer.army.money > type.getDeployCost(actor) )
+        eventSequence.add(new DeployCOUEvent(type, actor));
       return eventSequence;
     }
 
@@ -203,12 +214,12 @@ public abstract class DeployableCommander extends Commander
 
   private static class DeployCOUEvent implements GameEvent
   {
-    final DeployableCommander deployer;
+    final DeployCOUFactory type;
     private Unit unit;
 
-    public DeployCOUEvent(DeployableCommander owner, Unit unit)
+    public DeployCOUEvent(DeployCOUFactory type, Unit unit)
     {
-      deployer = owner;
+      this.type = type;
       this.unit = unit;
     }
 
@@ -227,7 +238,8 @@ public abstract class DeployableCommander extends Commander
     @Override
     public void performEvent(MapMaster gameMap)
     {
-      deployer.COUs.add(unit);
+      type.deployer.army.money -= type.getDeployCost(unit);
+      type.deployer.COUs.add(unit);
     }
 
     @Override
