@@ -236,6 +236,8 @@ public abstract class RuinedCommander extends DeployableCommander
     // Prefer non-veterancy marks, like "COU"
     if( '\0' != mark )
       return mark;
+    if( this != unit.CO )
+      return mark;
 
     return getRank(unit).mark;
   }
