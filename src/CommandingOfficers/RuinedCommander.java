@@ -67,6 +67,7 @@ public abstract class RuinedCommander extends DeployableCommander
     zoneBaseRadius = radius;
     zoneRadius = radius;
     deployCostPercent = 50;
+    luck = 11;
   }
 
   @Override
