@@ -50,6 +50,9 @@ public abstract class RuinedCommander extends DeployableCommander
           );
   public static final int CHARGERATIO_HP = 900; // Funds value of 1 HP damage dealt, for the purpose of power charge
 
+  public static final int GENERIC_STAT_BUFF = 10;
+  /** If the unit type matches any flag in this mask, it receives my zone stat boosts */
+  public long canBoostMask = Long.MAX_VALUE;
   public final int zonePow;
   public final int zoneDef;
   public final int zoneBaseRadius;
@@ -193,18 +196,26 @@ public abstract class RuinedCommander extends DeployableCommander
   public void modifyUnitAttack(StrikeParams params)
   {
     if( isInZone(params.attacker) )
-      params.attackPower += zonePow;
+    {
+      params.attackPower += GENERIC_STAT_BUFF;
+      if( params.attacker.model.isAny(canBoostMask) )
+        params.attackPower += zonePow;
+    }
     VeteranRank rank = getRank(params.attacker.unit);
     params.attackPower += rank.attack;
   }
   @Override
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
-    // TODO: DD
     if( isInZone(params.defender) )
-      params.defensePower += zoneDef;
+    {
+      params.defenseDivision += GENERIC_STAT_BUFF;
+      if( params.defender.model.isAny(canBoostMask) )
+        params.defenseDivision += zoneDef;
+    }
     VeteranRank rank = getRank(params.defender.unit);
-    params.defensePower += rank.defense;
+    params.defenseDivision += rank.defense;
+    params.terrainGivesSubtraction = false;
   }
 
   KillCountsTracker killCounts;

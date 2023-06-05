@@ -50,13 +50,13 @@ public class DoRWeapons
     }
 
     @Override
-    public double getDamage(DoRUnitModel defender)
+    public int getDamage(DoRUnitModel defender)
     {
       return damageChart[type.ordinal()][defender.type.ordinal()];
     }
 
     @Override
-    public double getDamage(TerrainType target)
+    public int getDamage(TerrainType target)
     {
       if( TerrainType.METEOR == target )
         return damageChart[type.ordinal()][DoRUnitEnum.METEOR.ordinal()];

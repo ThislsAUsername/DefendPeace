@@ -155,7 +155,7 @@ public class Venge extends Commander
     public void modifyUnitDefenseAgainstUnit(BattleParams params)
     {
       params.defenderHP = UnitModel.MAXIMUM_HP;
-      params.defensePower += buff;
+      params.defenseSubtraction += buff;
     }
   }
 

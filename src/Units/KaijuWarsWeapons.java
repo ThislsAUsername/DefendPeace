@@ -61,7 +61,7 @@ public class KaijuWarsWeapons
     }
 
     @Override
-    public double getDamage(KaijuWarsUnitModel defender)
+    public int getDamage(KaijuWarsUnitModel defender)
     {
       int attack = deriveAttack(this, defender);
       if( defender.isKaiju )
@@ -73,7 +73,7 @@ public class KaijuWarsWeapons
     }
 
     @Override
-    public double getDamage(TerrainType target)
+    public int getDamage(TerrainType target)
     {
       if( TerrainType.METEOR == target )
         return KaijuWarsWeapons.getDamage(vsLand, 0, TERRAIN_DURABILITY);
@@ -276,7 +276,7 @@ public class KaijuWarsWeapons
     return attack;
   }
 
-  public static double getDamage(int attack, int attBonus, int counterPower)
+  public static int getDamage(int attack, int attBonus, int counterPower)
   {
     return getDamageRatioStyle(attack, attBonus, counterPower);
   }
@@ -286,7 +286,7 @@ public class KaijuWarsWeapons
   /**
    * Produces damage numbers based on attack/kaijuCounter
    */
-  public static double getDamageRatioStyle(int attack, int attBonus, int counterPower)
+  public static int getDamageRatioStyle(int attack, int attBonus, int counterPower)
   {
     // 1-based instead of 0-based
     int durability = 1 + counterPower;

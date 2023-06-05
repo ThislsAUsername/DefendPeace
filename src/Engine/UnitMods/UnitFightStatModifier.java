@@ -4,7 +4,7 @@ import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
 
 /**
- * Boosts attack and defense in equal measure
+ * Boosts attack and subtractive defense in equal measure
  */
 public class UnitFightStatModifier implements UnitModifierWithDefaults
 {
@@ -24,6 +24,6 @@ public class UnitFightStatModifier implements UnitModifierWithDefaults
   @Override
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
-    params.defensePower += modifier;
+    params.defenseSubtraction += modifier;
   }
 }

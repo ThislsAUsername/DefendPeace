@@ -101,7 +101,7 @@ public class MapLocation implements Serializable, ITargetable
   }
 
   @Override
-  public double getDamageRedirect(WeaponModel wm)
+  public int getDamageRedirect(WeaponModel wm)
   {
     return wm.getDamage(environs.terrainType);
   }

@@ -51,23 +51,23 @@ public abstract class WeaponModel implements Serializable
   /**
    * @return returns its base damage against that target type
    */
-  public double getDamage(ITargetable defender)
+  public int getDamage(ITargetable defender)
   {
     if( defender == null )
       throw new IllegalArgumentException("Stare not into the void. It just may stare back.");
     return defender.getDamageRedirect(this);
   }
-  public double getDamage(KaijuWarsUnitModel defender)
+  public int getDamage(KaijuWarsUnitModel defender)
   {
     throw new UnsupportedOperationException("Called base WeaponModel.getDamage() with input type " + defender.getClass());
   }
-  public double getDamage(AWBWUnitModel defender)
+  public int getDamage(AWBWUnitModel defender)
   {
     throw new UnsupportedOperationException("Called base WeaponModel.getDamage() with input type " + defender.getClass());
   }
-  public double getDamage(DoRUnitModel defender)
+  public int getDamage(DoRUnitModel defender)
   {
     throw new UnsupportedOperationException("Called base WeaponModel.getDamage() with input type " + defender.getClass());
   }
-  public abstract double getDamage(TerrainType target);
+  public abstract int getDamage(TerrainType target);
 }

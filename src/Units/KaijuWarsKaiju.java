@@ -424,7 +424,7 @@ public class KaijuWarsKaiju
       boolean carapaceReady = kaijuTracker.isReady(snek, SnekMod.class);
       carapaceReady &= kaijuTracker.kaijuAbilityTier.get(snek) != KaijuAbilityTier.BASIC;
       if( carapaceReady ) // Invincible to first hit
-        params.defensePower += 300;
+        params.defenseSubtraction += 300;
     }
 
     @Override

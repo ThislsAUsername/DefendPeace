@@ -2,6 +2,7 @@ package Engine.UnitMods;
 
 import Engine.Combat.StrikeParams.BattleParams;
 
+/** Applies subtractive defense */
 public class UnitDefenseModifier implements UnitModifierWithDefaults
 {
   private static final long serialVersionUID = 1L;
@@ -15,6 +16,6 @@ public class UnitDefenseModifier implements UnitModifierWithDefaults
   @Override
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
-    params.defensePower += defenseModifier;
+    params.defenseSubtraction += defenseModifier;
   }
 }
