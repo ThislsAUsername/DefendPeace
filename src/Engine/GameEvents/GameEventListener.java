@@ -91,7 +91,7 @@ public interface GameEventListener extends Serializable
   default public GameEventQueue receiveMapChangeEvent(MapChangeEvent event){ return null; };
   default public GameEventQueue receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP){ return null; };
   default public GameEventQueue receiveModifyFundsEvent(Army beneficiary, int fundsDelta){ return null; };
-  default public GameEventQueue receiveModifyCommanderEnergyEvent(Commander beneficiary, double energyDelta){ return null; };
+  default public GameEventQueue receiveModifyCommanderEnergyEvent(Commander beneficiary, int deltaActualFunds){ return null; };
 
   /**
    * Want to be lazy, but too lazy to implement laziness? This class is for you.
@@ -120,6 +120,6 @@ public interface GameEventListener extends Serializable
     default public GameEventQueue receiveMapChangeEvent(MapChangeEvent event){InvalidateCache(); return null; };
     default public GameEventQueue receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP){ InvalidateCache(); return null; };
     default public GameEventQueue receiveModifyFundsEvent(Army beneficiary, int fundsDelta){ InvalidateCache(); return null; };
-    default public GameEventQueue receiveModifyCommanderEnergyEvent(Commander beneficiary, double energyDelta){ InvalidateCache(); return null; };
+    default public GameEventQueue receiveModifyCommanderEnergyEvent(Commander beneficiary, int deltaActualFunds){ InvalidateCache(); return null; };
   }
 }

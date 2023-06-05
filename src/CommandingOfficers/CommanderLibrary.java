@@ -2,6 +2,7 @@ package CommandingOfficers;
 
 import java.util.ArrayList;
 
+import CommandingOfficers.BrennerWolves.*;
 import Engine.GameScenario;
 import Engine.GameScenario.GameRules;
 import UI.UIUtils;
@@ -31,6 +32,7 @@ public class CommanderLibrary
     commanderList.add( Ave.getInfo() );
     commanderList.add( Qis.getInfo() );
     commanderList.add( Tech.getInfo() );
+    commanderList.add( BrennerDoR.getInfo() );
     commanderList.add( NotACO.getInfo() );
   }
 

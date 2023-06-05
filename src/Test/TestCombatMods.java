@@ -100,7 +100,7 @@ public class TestCombatMods extends TestCase
     // Check our damage for each first strike pre-power...
     BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 5, CalcType.NO_LUCK);
 
-    venge.modifyAbilityPower(42); // juice up
+    venge.modifyAbilityStars(42); // juice up
     venge.getReadyAbilities().get(0).activate(testMap); // activate Iron Will
 
     // ...and after power
@@ -134,7 +134,7 @@ public class TestCombatMods extends TestCase
     BattleSummary normalAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4, CalcType.NO_LUCK);
     BattleSummary normalBA = CombatEngine.simulateBattleResults(infB, infA, testMap, 7, 4, CalcType.NO_LUCK);
 
-    venge.modifyAbilityPower(42); // juice up
+    venge.modifyAbilityStars(42); // juice up
     venge.getReadyAbilities().get(1).activate(testMap); // activate Retribution
 
     // ...and after power

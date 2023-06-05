@@ -251,7 +251,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     myActiveAbility = ability;
   }
 
-  public void modifyAbilityPower(double amount)
+  public void modifyAbilityPower(int amount)
   {
     myAbilityPower += amount;
     if( myAbilityPower < 0 )
@@ -259,6 +259,11 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     int maxPower = getMaxAbilityPower();
     if( myAbilityPower > maxPower )
       myAbilityPower = maxPower;
+  }
+  public void modifyAbilityStars(int amount)
+  {
+    // TODO: Make this scale with fatigue
+    modifyAbilityPower(amount * CHARGERATIO_FUNDS);
   }
 
   /**

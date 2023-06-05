@@ -293,20 +293,20 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
       {
         case AWBW:
         {
-          final double primaryCharge = cos[0].calculateCombatCharge(minion, enemy, isCounter);
+          final int primaryCharge = cos[0].calculateCombatCharge(minion, enemy, isCounter);
           cos[0].modifyAbilityPower(primaryCharge);
           for( int i = 1; i < cos.length; ++i )
           {
-            final double tagCharge = cos[i].calculateCombatCharge(minion, enemy, isCounter);
-            final double tagMultiplier = 0.5;
-            cos[i].modifyAbilityPower(tagMultiplier * tagCharge);
+            final int tagCharge = cos[i].calculateCombatCharge(minion, enemy, isCounter);
+            final int tagDivisor = 2;
+            cos[i].modifyAbilityPower(tagCharge / tagDivisor);
           }
         }
           break;
         case Team_Merge:
         case OFF:
         {
-          final double ownerCharge = minion.CO.calculateCombatCharge(minion, enemy, isCounter);
+          final int ownerCharge = minion.CO.calculateCombatCharge(minion, enemy, isCounter);
           minion.CO.modifyAbilityPower(ownerCharge);
         }
           break;
@@ -335,20 +335,20 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
       {
         case AWBW:
         {
-          final double primaryCharge = cos[0].calculateMassDamageCharge(minion, damageEntry.getValue());
+          final int primaryCharge = cos[0].calculateMassDamageCharge(minion, damageEntry.getValue());
           cos[0].modifyAbilityPower(primaryCharge);
           for( int i = 1; i < cos.length; ++i )
           {
-            final double tagCharge = cos[i].calculateMassDamageCharge(minion, damageEntry.getValue());
-            final double tagMultiplier = 0.5;
-            cos[i].modifyAbilityPower(tagMultiplier * tagCharge);
+            final int tagCharge = cos[i].calculateMassDamageCharge(minion, damageEntry.getValue());
+            final int tagDivisor = 2;
+            cos[i].modifyAbilityPower(tagCharge / tagDivisor);
           }
         }
           break;
         case Team_Merge:
         case OFF:
         {
-          final double ownerCharge = minion.CO.calculateMassDamageCharge(minion, damageEntry.getValue());
+          final int ownerCharge = minion.CO.calculateMassDamageCharge(minion, damageEntry.getValue());
           minion.CO.modifyAbilityPower(ownerCharge);
         }
           break;

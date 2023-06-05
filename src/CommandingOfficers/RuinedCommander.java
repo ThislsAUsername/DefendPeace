@@ -29,7 +29,7 @@ import Units.UnitDelta;
 public abstract class RuinedCommander extends DeployableCommander
 {
   private static final long serialVersionUID = 1L;
-  public static final InfoPage ZONE_MECHANICS_BLURB = new InfoPage(
+  public static final InfoPage DOR_MECHANICS_BLURB = new InfoPage(
             "Days of Ruin mechanics:\n"
           + "You have a CO zone that covers the area around your COU, and grants bonuses to your units inside.\n"
           + "The zone expands 1 tile when your meter is half full, and again at full charge.\n"
@@ -57,7 +57,7 @@ public abstract class RuinedCommander extends DeployableCommander
   @Override
   public int getCOUCount() {return 1;}
 
-  public RuinedCommander(int atk, int def, int radius, CommanderInfo info, GameScenario.GameRules rules)
+  public RuinedCommander(int radius, int atk, int def, CommanderInfo info, GameScenario.GameRules rules)
   {
     super(info, rules);
     zonePow = atk;
@@ -82,12 +82,12 @@ public abstract class RuinedCommander extends DeployableCommander
   @Override
   public void onCOULost(Unit minion)
   {
-    modifyAbilityPower(-42);
+    modifyAbilityStars(-42);
     zoneIsGlobal = false;
   }
   // Hook: Update current zone radius every time energy changes
   @Override
-  public void modifyAbilityPower(double amount)
+  public void modifyAbilityPower(int amount)
   {
     super.modifyAbilityPower(amount);
     zoneRadius = zoneBaseRadius;
@@ -226,11 +226,12 @@ public abstract class RuinedCommander extends DeployableCommander
   protected static class RuinedAbility extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
+    public static final int COST = 6;
     RuinedCommander COcast;
 
-    protected RuinedAbility(RuinedCommander commander, String name, int cost)
+    protected RuinedAbility(RuinedCommander commander, String name)
     {
-      super(commander, name, cost);
+      super(commander, name, COST);
       COcast = commander;
     }
 

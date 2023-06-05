@@ -160,11 +160,11 @@ public class TestCommanderAve extends TestCase
 
     //Ave.log(true);
     //System.out.println("Snow map:\n" + Ave.getSnowMapAsString());
-    Ave.modifyAbilityPower(20); // Charge up and use all of Ave's abilities
+    Ave.modifyAbilityStars(20); // Charge up and use all of Ave's abilities
     ArrayList<CommanderAbility> abilities = Ave.getReadyAbilities();
     for( CommanderAbility ca : abilities )
     {
-      Ave.modifyAbilityPower(20);
+      Ave.modifyAbilityStars(20);
       Ave.initTurn(testMap);
       performGameAction(new GameAction.AbilityAction(ca), game);
     }
