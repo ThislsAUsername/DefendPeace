@@ -222,9 +222,9 @@ public abstract class RuinedCommander extends DeployableCommander
     int level = killCounts.getCountFor(unit);
     if( level > 2 )
       rank = VeteranRank.LEVEL3;
-    if( level > 1 )
+    else if( level > 1 )
       rank = VeteranRank.LEVEL2;
-    if( level > 0 )
+    else if( level > 0 )
       rank = VeteranRank.LEVEL1;
 
     return rank;
