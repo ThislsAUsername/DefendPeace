@@ -216,11 +216,13 @@ public abstract class DeployableCommander extends Commander
   {
     final DeployCOUFactory type;
     private Unit unit;
+    private int cost;
 
     public DeployCOUEvent(DeployCOUFactory type, Unit unit)
     {
       this.type = type;
       this.unit = unit;
+      cost = type.getDeployCost(unit);
     }
 
     @Override
@@ -232,13 +234,13 @@ public abstract class DeployableCommander extends Commander
     @Override
     public GameEventQueue sendToListener(GameEventListener listener)
     {
-      return null;
+      return listener.receiveDeployCOUEvent(unit, cost);
     }
 
     @Override
     public void performEvent(MapMaster gameMap)
     {
-      type.deployer.army.money -= type.getDeployCost(unit);
+      type.deployer.army.money -= cost;
       type.deployer.COUs.add(unit);
     }
 
