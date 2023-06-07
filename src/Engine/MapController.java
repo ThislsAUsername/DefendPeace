@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import CommandingOfficers.Commander;
+import Engine.GameAction.EndTurnAction;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
@@ -573,7 +574,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
             endAITurn = true;
           } // The AI can return a null action to signal the end of its turn.
           if( endAITurn )
-            startNextTurn();
+            executeGameAction(new EndTurnAction(myGame.activeArmy, myGame.getCurrentTurn()));
         }
         else
         {
