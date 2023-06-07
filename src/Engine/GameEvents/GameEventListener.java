@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.io.Serializable;
 import java.util.Map;
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderAbility;
 import Engine.Army;
 import Engine.GameInstance;
 import Engine.GamePath;
@@ -91,6 +92,8 @@ public interface GameEventListener extends Serializable
   default public GameEventQueue receiveMapChangeEvent(MapChangeEvent event){ return null; };
   default public GameEventQueue receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP){ return null; };
   default public GameEventQueue receiveModifyFundsEvent(Army beneficiary, int fundsDelta){ return null; };
+  default public GameEventQueue receiveCommanderAbilityEvent(CommanderAbility ability){ return null; };
+  default public GameEventQueue receiveCommanderAbilityRevertEvent(CommanderAbility ability){ return null; };
   default public GameEventQueue receiveModifyCommanderEnergyEvent(Commander beneficiary, int deltaActualFunds){ return null; };
   default public GameEventQueue receiveDeployCOUEvent(Unit COU, int cost){ return null; };
 
@@ -121,6 +124,8 @@ public interface GameEventListener extends Serializable
     default public GameEventQueue receiveMapChangeEvent(MapChangeEvent event){InvalidateCache(); return null; };
     default public GameEventQueue receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP){ InvalidateCache(); return null; };
     default public GameEventQueue receiveModifyFundsEvent(Army beneficiary, int fundsDelta){ InvalidateCache(); return null; };
+    default public GameEventQueue receiveCommanderAbilityEvent(CommanderAbility ability){ InvalidateCache(); return null; };
+    default public GameEventQueue receiveCommanderAbilityRevertEvent(CommanderAbility ability){ InvalidateCache(); return null; };
     default public GameEventQueue receiveModifyCommanderEnergyEvent(Commander beneficiary, int deltaActualFunds){ InvalidateCache(); return null; };
     default public GameEventQueue receiveDeployCOUEvent(Unit COU, int cost){ InvalidateCache(); return null; };
   }

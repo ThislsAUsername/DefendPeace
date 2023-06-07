@@ -24,8 +24,7 @@ public class CommanderAbilityRevertEvent implements GameEvent
   @Override
   public GameEventQueue sendToListener(GameEventListener listener)
   {
-    // TODO: Create listener hook
-    return null;
+    return listener.receiveCommanderAbilityRevertEvent(myAbility);
   }
 
   @Override
