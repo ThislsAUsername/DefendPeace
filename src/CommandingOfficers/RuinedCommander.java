@@ -39,6 +39,7 @@ public abstract class RuinedCommander extends DeployableCommander
           + "All units get +10 attack and +10 Damage Division (DD) while in the zone.\n"
           + "Your CO may also have another zone boost that stacks with that boost, but may only apply to some unit types.\n"
           + "The zone becomes global while your power is active, but activating your power requires your COU's action.\n"
+          + "Zone boosts apply to other COs in a tag, even when tagged out.\n"
           + "CO Energy gained reflects HP damage you deal, and not on the type of unit you hit.\n"
           + "You can only gain CO energy for combat where the initiator is inside the zone.\n"
           + "  (This means an enemy in your zone attacking outside your zone can give you charge from your counterattack)\n"
@@ -47,7 +48,7 @@ public abstract class RuinedCommander extends DeployableCommander
           + "On making a kill, your unit will level up.\n"
           + "There are 3 veterancy levels; their stat boosts are +5/0, +10/0, and +20/20 attack/DD.\n"
           + "Your COU is always max level.\n"
-          + "Veterancy bonuses do not apply if this CO is tagged out\n"
+          + "Veterancy bonuses do not apply if this CO is tagged out, but kills are always tracked.\n"
           );
   public static final int CHARGERATIO_HP = 900; // Funds value of 1 HP damage dealt, for the purpose of power charge
 
