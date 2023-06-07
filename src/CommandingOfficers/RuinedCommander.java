@@ -21,6 +21,7 @@ import Engine.GameEvents.CommanderAbilityEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.StateTrackers.KillCountsTracker;
 import Engine.StateTrackers.StateTracker;
+import Engine.UnitMods.UnitModifierWithDefaults;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import UI.GameOverlay;
@@ -58,6 +59,7 @@ public abstract class RuinedCommander extends DeployableCommander
   public final int zoneBaseRadius;
   public int zoneRadius;
   public boolean zoneIsGlobal = false;
+  ZoneBoostMod myZoneBoost;
 
   @Override
   public int getCOUCount() {return 1;}
@@ -78,6 +80,14 @@ public abstract class RuinedCommander extends DeployableCommander
   {
     super.initForGame(game);
     killCounts = StateTracker.instance(game, KillCountsTracker.class);
+    myZoneBoost = new ZoneBoostMod(this);
+    this.army.addUnitModifier(myZoneBoost);
+  }
+  @Override
+  public void deInitForGame(GameInstance game)
+  {
+    super.deInitForGame(game);
+    this.army.removeUnitModifier(myZoneBoost);
   }
 
   // Tell MapController and friends that we never have abilities ready, since those go through the COU
@@ -195,27 +205,47 @@ public abstract class RuinedCommander extends DeployableCommander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( isInZone(params.attacker) )
-    {
-      params.attackPower += GENERIC_STAT_BUFF;
-      if( params.attacker.model.isAny(canBoostMask) )
-        params.attackPower += zonePow;
-    }
     VeteranRank rank = getRank(params.attacker.unit);
     params.attackPower += rank.attack;
   }
   @Override
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
-    if( isInZone(params.defender) )
-    {
-      params.defenseDivision += GENERIC_STAT_BUFF;
-      if( params.defender.model.isAny(canBoostMask) )
-        params.defenseDivision += zoneDef;
-    }
     VeteranRank rank = getRank(params.defender.unit);
     params.defenseDivision += rank.defense;
     params.terrainGivesSubtraction = false;
+  }
+
+  public static class ZoneBoostMod implements UnitModifierWithDefaults
+  {
+    private static final long serialVersionUID = 1L;
+    public final RuinedCommander zoneSource;
+
+    public ZoneBoostMod(RuinedCommander zoneSource)
+    {
+      this.zoneSource = zoneSource;
+    }
+
+    @Override
+    public void modifyUnitAttack(StrikeParams params)
+    {
+      if( zoneSource.isInZone(params.attacker) )
+      {
+        params.attackPower += GENERIC_STAT_BUFF;
+        if( params.attacker.model.isAny(zoneSource.canBoostMask) )
+          params.attackPower += zoneSource.zonePow;
+      }
+    }
+    @Override
+    public void modifyUnitDefenseAgainstUnit(BattleParams params)
+    {
+      if( zoneSource.isInZone(params.defender) )
+      {
+        params.defenseDivision += GENERIC_STAT_BUFF;
+        if( params.defender.model.isAny(zoneSource.canBoostMask) )
+          params.defenseDivision += zoneSource.zoneDef;
+      }
+    }
   }
 
   KillCountsTracker killCounts;
