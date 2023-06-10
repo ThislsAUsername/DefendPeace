@@ -55,8 +55,8 @@ public abstract class RuinedCommander extends DeployableCommander
   public static final int GENERIC_STAT_BUFF = 10;
   /** If the unit type matches any flag in this mask, it receives my zone stat boosts */
   public long canBoostMask = Long.MAX_VALUE;
-  public final int zonePow;
-  public final int zoneDef;
+  public int zonePow;
+  public int zoneDef;
   public final int zoneBaseRadius;
   public int zoneRadius;
   public boolean zoneIsGlobal = false;
