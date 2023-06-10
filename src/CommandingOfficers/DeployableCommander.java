@@ -160,7 +160,7 @@ public abstract class DeployableCommander extends Commander
     }
   }
 
-  private static class DeployCOUAction extends GameAction
+  public static class DeployCOUAction extends GameAction
   {
     final DeployCOUFactory type;
     final Unit actor;
@@ -176,6 +176,8 @@ public abstract class DeployableCommander extends Commander
     public GameEventQueue getEvents(MapMaster gameMap)
     {
       GameEventQueue eventSequence = new GameEventQueue();
+      if( actor.isTurnOver )
+        return eventSequence;
       if( type.deployer.army.money > type.getDeployCost(actor) )
         eventSequence.add(new DeployCOUEvent(type, actor));
       return eventSequence;
