@@ -29,7 +29,7 @@ public class Cinder extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Cinder", UIUtils.GS);
+      super("Cinder", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.GS);
       infoPages.add(new InfoPage(
           "'Cinders' are products of Grey Sky's super-soldier program who gain initiative in battle by warping time - they're named for the unpredictable thermal surges caused by their temporal meddling.\n" + 
           "Having taken this title as her name, Commander Cinder's blazing speed dominates the battlefield."));
