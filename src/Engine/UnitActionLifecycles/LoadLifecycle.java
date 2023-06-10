@@ -28,7 +28,8 @@ public abstract class LoadLifecycle
       Unit resident = map.getLocation(moveLocation).getResident();
       if( resident != null && resident != actor )
       {
-        if( resident.hasCargoSpace(actor.model.role) )
+        if( resident.hasCargoSpace(actor.model.role) &&
+            !resident.model.unloadExclusionTerrain.contains(map.getEnvironment(moveLocation).terrainType) )
         {
           return new GameActionSet(new LoadAction(map, actor, movePath), false);
         }

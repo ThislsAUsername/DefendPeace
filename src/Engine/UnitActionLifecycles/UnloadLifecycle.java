@@ -30,28 +30,32 @@ public abstract class UnloadLifecycle
     public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
-      if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
+      Unit resident = map.getLocation(moveLocation).getResident();
+
+      if( !ignoreResident && null != resident )
+        return null;
+      if( actor.heldUnits.size() == 0 )
+        return null;
+      if( actor.model.unloadExclusionTerrain.contains(map.getEnvironment(moveLocation).terrainType) )
+        return null;
+
+      ArrayList<GameAction> unloadActions = new ArrayList<GameAction>();
+
+      // TODO: Consider using ignoreResident for dropoff points as well
+      for( Unit cargo : actor.heldUnits )
       {
-        if( actor.heldUnits.size() > 0 )
+        ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, actor, moveLocation, cargo);
+        for( XYCoord loc : dropoffLocations )
         {
-          ArrayList<GameAction> unloadActions = new ArrayList<GameAction>();
-
-          // TODO: Consider using ignoreResident for dropoff points as well
-          for( Unit cargo : actor.heldUnits )
-          {
-            ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, actor, moveLocation, cargo);
-            for( XYCoord loc : dropoffLocations )
-            {
-              unloadActions.add(new UnloadAction(actor, movePath, cargo, loc));
-            }
-          }
-
-          if( !unloadActions.isEmpty() )
-          {
-            return new GameActionSet(unloadActions);
-          }
+          unloadActions.add(new UnloadAction(actor, movePath, cargo, loc));
         }
       }
+
+      if( !unloadActions.isEmpty() )
+      {
+        return new GameActionSet(unloadActions);
+      }
+
       return null;
     }
 

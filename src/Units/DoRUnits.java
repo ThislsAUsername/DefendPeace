@@ -672,6 +672,7 @@ public class DoRUnits extends UnitModelScheme
       baseCargoCapacity = 1;
       carryableMask = TROOP;
       carryableExclusionMask = TANK; // Can't carry Bikes
+      unloadExclusionTerrain.add(TerrainType.BRIDGE);
     }
   }
 
@@ -839,6 +840,7 @@ public class DoRUnits extends UnitModelScheme
           actions, new WeaponModel[0], STAR_VALUE);
       baseCargoCapacity = 2;
       carryableMask = TROOP | TANK;
+      unloadExclusionTerrain.add(TerrainType.BRIDGE);
     }
   }
 
