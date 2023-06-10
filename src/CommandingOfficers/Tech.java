@@ -47,7 +47,7 @@ public class Tech extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Tech", UIUtils.RT);
+      super("Tech", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.RT);
       infoPages.add(new InfoPage(
           "Tech is a first-rate grease monkey who likes nothing better than to build new machines and set them loose.\n"));
       infoPages.add(new InfoPage(

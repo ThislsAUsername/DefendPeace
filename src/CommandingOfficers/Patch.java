@@ -24,7 +24,7 @@ public class Patch extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Patch", UIUtils.CO);
+      super("Patch", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.CO);
       infoPages.add(new InfoPage(
           "Commander Patch is a pirate, who does piratey things like lootin' and plunderin'\n"));
       infoPages.add(new InfoPage(

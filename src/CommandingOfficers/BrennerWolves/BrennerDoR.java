@@ -19,7 +19,7 @@ public class BrennerDoR extends RuinedCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Brenner", UIUtils.BW);
+      super("Brenner", UIUtils.SourceGames.AW4, UIUtils.BW);
       infoPages.add(new InfoPage(
           "Captain of the 12th Battalion. He has an unshakable faith in humanity's goodness, and will aid any in need.\n"));
       infoPages.add(new InfoPage(

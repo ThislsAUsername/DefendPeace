@@ -325,6 +325,10 @@ public class UIUtils
   public static final COSpriteSpec LA = COSpriteSpec.fromDisk("Lazurian"      , "Army");
   public static final COSpriteSpec IA = COSpriteSpec.fromDisk("IDS"           , "Army");
 
+  public enum SourceGames
+  {
+    AW1, AW2, AW3, AW4, DEFEND_PEACE, // More? :v
+  }
 
   private static class TeamColorSpec implements Comparable<TeamColorSpec>
   {
