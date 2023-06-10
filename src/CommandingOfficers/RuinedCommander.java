@@ -50,7 +50,8 @@ public abstract class RuinedCommander extends DeployableCommander
           + "Your COU is always max level.\n"
           + "Veterancy bonuses do not apply if this CO is tagged out, but kills are always tracked.\n"
           );
-  public static final int CHARGERATIO_HP = 900; // Funds value of 1 HP damage dealt, for the purpose of power charge
+  public static final int DOR_STAR_VALUE = 10000;
+  public static final int CHARGERATIO_HP =  1000; // Funds value of 1 HP damage dealt, for the purpose of power charge
 
   public static final int GENERIC_STAT_BUFF = 10;
   /** If the unit type matches any flag in this mask, it receives my zone stat boosts */
@@ -303,6 +304,7 @@ public abstract class RuinedCommander extends DeployableCommander
     protected RuinedAbility(RuinedCommander commander, String name)
     {
       super(commander, name, COST);
+      myPowerCost = COST * DOR_STAR_VALUE;
       COcast = commander;
     }
 
