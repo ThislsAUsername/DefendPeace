@@ -194,6 +194,9 @@ public abstract class RuinedCommander extends DeployableCommander
 
     for( Unit cou : COUs )
     {
+      if( COUsLost.contains(cou) )
+        continue;
+
       final XYCoord coCoord = new XYCoord(cou);
       GameOverlay coZone = new GameOverlay(
           coCoord, Utils.findLocationsInRange(gameMap, coCoord, 0, zoneRadius),
