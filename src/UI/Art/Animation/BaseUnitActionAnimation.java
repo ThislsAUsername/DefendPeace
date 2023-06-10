@@ -63,7 +63,10 @@ public class BaseUnitActionAnimation extends GameAnimation
   public void drawUnit(Graphics g, Unit actor, AnimState state, int spriteIndex, double realX, double realY)
   {
     if( null != actor )
-      SpriteLibrary.getMapUnitSpriteSet(actor).drawUnit(g, actor, state, spriteIndex, (int) (realX * tileSize), (int) (realY * tileSize));
+      SpriteLibrary.getMapUnitSpriteSet(actor).drawUnit(g, state, spriteIndex,
+          (int) (realX * tileSize)       , (int) (realY * tileSize),
+          SpriteMapView.shouldFlip(actor), SpriteMapView.shouldDrawBuff(actor)
+          );
   }
 
   @Override
