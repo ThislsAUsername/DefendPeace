@@ -78,6 +78,7 @@ public class PlayerSetupCommanderArtist
     g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
   }
 
+  static final int leftMargin = 13;
   public static void drawCmdrPickerPanels(
                        Graphics myG, int myHeight, int myWidth,
                        ArrayList<CommanderInfo> infos, Color playerColor,
@@ -98,13 +99,14 @@ public class PlayerSetupCommanderArtist
     // so figure out where the zeroth bin panel should be drawn.
     panelOffsetY.set(binIndex*panelShift, snapCursor);
     int drawY = myHeight / 2 - panelOffsetY.geti() - panelHeight + panelBuffer + 1;
+    final int startY = drawY;
 
     // Selected CO's name for drawing later
     String coNameText = "";
 
     int binToDraw = 0;
     // X offset to start drawing CO faces from
-    int baseDrawX = SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Make sure we have room to draw the cursor around the frame.
+    int baseDrawX = leftMargin + SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Make sure we have room to draw the cursor around the frame.
 
     for(; drawY - CommanderPanel.PANEL_HEIGHT/2 < myHeight
         && binToDraw < cmdrBins.size();
@@ -160,6 +162,20 @@ public class PlayerSetupCommanderArtist
       drawY = currentPanelBottomY + panelBuffer;
     }
 
+    // Draw the outer level's side panel
+    final COSpriteSpec outerSpriteSpec = outerBinColorSpec.get(outerCategorySelector.getSelectionNormalized());
+    Color[] outerPalette = UIUtils.defaultMapColors;
+    String outerName = "MISC";
+    if( Color.LIGHT_GRAY != outerSpriteSpec.color )
+    {
+      outerPalette = UIUtils.getMapUnitColors(outerSpriteSpec.color).paletteColors;
+      if( !sortByGameThenFaction )
+        outerName = UIUtils.getCanonicalFactionName(outerSpriteSpec);
+      else // Our inner category is games, so just pull the hardcoded faction name
+        outerName = outerSpriteSpec.faction.name;
+    }
+    drawSideBin(myG, outerName, outerPalette[5], outerPalette[3], startY, drawY-startY-panelBuffer);
+
     final int cursorY = myHeight / 2 - CommanderPanel.PANEL_HEIGHT / 2;
 
     // Draw stuff for the selected option.
@@ -181,28 +197,78 @@ public class PlayerSetupCommanderArtist
   public static int drawCmdrBin(Graphics g, String label, Color bg,  Color frame, int screenWidth, int y, int bodyHeight)
   {
     int textToastWidth  = textWidth*label.length();
+    int drawX = leftMargin + txtBuf;
 
     // Smooths between the label backing to the CO face holder
     Polygon triangle = new Polygon();
-    triangle.addPoint(txtBuf+textToastWidth                , y);                 // top left
-    triangle.addPoint(txtBuf+textToastWidth                , y+textToastHeight); // bottom left
-    triangle.addPoint(txtBuf+textToastWidth+textToastHeight, y+textToastHeight); // right
+    triangle.addPoint(drawX+textToastWidth                , y);                 // top left
+    triangle.addPoint(drawX+textToastWidth                , y+textToastHeight); // bottom left
+    triangle.addPoint(drawX+textToastWidth+textToastHeight, y+textToastHeight); // right
 
     g.setColor(frame);
     g.fillPolygon(triangle);
-    g.fillRect(0, y                 , txtBuf+textToastWidth , bodyHeight); // behind text
-    g.fillRect(0, y+textToastHeight , screenWidth           , bodyHeight); // main body
+    g.fillRect(leftMargin, y                 , txtBuf+textToastWidth , bodyHeight); // behind text
+    g.fillRect(leftMargin, y+textToastHeight , screenWidth           , bodyHeight); // main body
 
     g.setColor(bg);
     for( int i = 0; i < 3; ++i )
       triangle.ypoints[i] += 1; // Shift one pixel down to expose the frame
     g.fillPolygon(triangle);
-    g.fillRect(0, y+1                , txtBuf+textToastWidth, bodyHeight-2);
-    g.fillRect(0, y+1+textToastHeight, screenWidth          , bodyHeight-2);
+    g.fillRect(leftMargin, y+1                , txtBuf+textToastWidth, bodyHeight-2);
+    g.fillRect(leftMargin, y+1+textToastHeight, screenWidth          , bodyHeight-2);
 
-    SpriteUIUtils.drawTextSmallCaps(g, label, txtBuf, y + txtBuf);
+    SpriteUIUtils.drawTextSmallCaps(g, label, drawX, y + txtBuf);
 
     return y + textToastHeight + bodyHeight;
+  }
+  /**
+   * Draws a little side bin with beveled edges
+   *  /
+   * |A
+   * |W
+   * |1
+   *  \
+   */
+  public static int drawSideBin(Graphics g, String label, Color bg,  Color frame, int y, int totalHeight)
+  {
+    //                    *      - 2 triangles
+    int bodyHeight = totalHeight - 2*(leftMargin) + 2;
+    final int drawBodyY = y+leftMargin-1;
+    // Throw in a +/-adjustment because triangles are weird
+
+    Polygon triangleUp = new Polygon();
+    triangleUp.addPoint(leftMargin, y-1);       // top right
+    triangleUp.addPoint(0         , drawBodyY); // bottom left
+    triangleUp.addPoint(leftMargin, drawBodyY); // bottom right
+    Polygon triangleDown = new Polygon();
+    triangleDown.addPoint(leftMargin, y+totalHeight-leftMargin); // top right
+    triangleDown.addPoint(0         , y+totalHeight-leftMargin); // top left
+    triangleDown.addPoint(leftMargin, y+totalHeight);            // bottom right
+
+    g.setColor(frame);
+    g.fillPolygon(triangleUp);
+    g.fillPolygon(triangleDown);
+
+    g.setColor(bg);
+    for( int i = 0; i < 3; ++i )
+    {
+      triangleUp.ypoints[i]   += 1; // Shift down to expose the frame
+      triangleDown.ypoints[i] -= 1; // ditto, up
+    }
+    g.fillPolygon(triangleUp);
+    g.fillPolygon(triangleDown);
+
+    // Draw the rectangle afterwards because the triangles exist only to bring me pain
+    g.setColor(frame);
+    g.fillRect(0, drawBodyY, leftMargin, bodyHeight);
+    g.setColor(bg);
+    g.fillRect(1, drawBodyY, leftMargin-1, bodyHeight);
+
+    BufferedImage textScratch = SpriteUIUtils.getTextAsImage(label, true);
+    BufferedImage text = SpriteUIUtils.rotateCounterClockwise90(textScratch);
+    g.drawImage(text, leftMargin-textHeight-txtBuf, drawBodyY + (bodyHeight-text.getHeight())/2, null);
+
+    return drawBodyY + bodyHeight;
   }
 
   public static void drawTagPickerPanels(
@@ -331,6 +397,7 @@ public class PlayerSetupCommanderArtist
   public static OptionSelector innerCategorySelector;
 
   public static ArrayList<ArrayList<Integer>> cmdrBins;
+  public static ArrayList<COSpriteSpec> outerBinColorSpec;
   public static ArrayList<COSpriteSpec> binColorSpec;
   public static OptionSelector cmdrBinSelector;
   public static OptionSelector cmdrInBinSelector;
@@ -361,6 +428,7 @@ public class PlayerSetupCommanderArtist
     final CommanderInfo selectedInfo = myControl.cmdrInfos.get(selectedCO);
 
     ArrayList<Integer>[] innerCategoryCOs;
+    outerBinColorSpec = new ArrayList<>();
     binColorSpec = new ArrayList<>();
     int outerMax, outerSel, innerMax, innerSel;
     if( sortByGameThenFaction )
@@ -377,6 +445,9 @@ public class PlayerSetupCommanderArtist
         if( selectedInfo.baseFaction == myControl.actualFactions[innerSel] )
           break;
 
+      // outer bin = game
+      for( SourceGames game : UIUtils.SourceGames.values() )
+        outerBinColorSpec.add(game.uiColorSpec);
       // Factions for both
       innerCategoryCOs = myControl.cosByGameFaction[outerSel];
       for( COSpriteSpec spec : myControl.actualFactions )
@@ -398,6 +469,9 @@ public class PlayerSetupCommanderArtist
       innerMax = UIUtils.SourceGames.values().length;
       innerSel = selectedInfo.game.ordinal();
 
+      // outer bin = faction
+      for( COSpriteSpec spec : myControl.actualFactions )
+        outerBinColorSpec.add(spec);
       // Games for both
       innerCategoryCOs = myControl.cosByFactionGame[outerSel];
       for( SourceGames game : UIUtils.SourceGames.values() )
