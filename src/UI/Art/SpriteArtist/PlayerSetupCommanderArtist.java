@@ -29,7 +29,9 @@ public class PlayerSetupCommanderArtist
 
   private static SlidingValue tagPickerOffsetX = new SlidingValue(0);
 
-  static final BufferedImage qtip = SpriteUIUtils.makeTextFrame("Q: Kick CO", 3, 2);
+  static final BufferedImage kickTip = SpriteUIUtils.makeTextFrame("Q: Kick CO", 3, 2);
+  static final BufferedImage toGameTip = SpriteUIUtils.makeTextFrame("Q: To Game", 3, 2);
+  static final BufferedImage toArmyTip = SpriteUIUtils.makeTextFrame("Q: To Army", 3, 2);
   static final BufferedImage etip = SpriteUIUtils.makeTextFrame("E: CO Info", 3, 2);
 
   public static void draw(Graphics g, IController controller, ArrayList<CommanderInfo> infos, Color playerColor)
@@ -64,10 +66,13 @@ public class PlayerSetupCommanderArtist
 
     /////////////// Tooltip ////////////////////////////
     myG.drawImage(etip, myWidth - etip.getWidth(), 3, null);
-    if(amPickingTagIndex)
-    {
-      myG.drawImage(qtip, myWidth - qtip.getWidth(), 5 + qtip.getHeight(), null);
-    }
+    BufferedImage qtip = kickTip;
+    if( !amPickingTagIndex )
+      if( sortByGameThenFaction )
+        qtip = toGameTip;
+      else
+        qtip = toArmyTip;
+    myG.drawImage(qtip, myWidth - qtip.getWidth(), 5 + qtip.getHeight(), null);
 
     // Draw the composed image to the window at scale.
     g.drawImage(image, 0, 0, myWidth*drawScale, myHeight*drawScale, null);
@@ -115,7 +120,10 @@ public class PlayerSetupCommanderArtist
       if( Color.LIGHT_GRAY != spriteSpec.color )
       {
         palette = UIUtils.getMapUnitColors(spriteSpec.color).paletteColors;
-        canonName = UIUtils.getCanonicalFactionName(spriteSpec);
+        if( sortByGameThenFaction )
+          canonName = UIUtils.getCanonicalFactionName(spriteSpec);
+        else // Our inner category is games, so just pull the hardcoded faction name
+          canonName = spriteSpec.faction.name;
       }
       int currentPanelBottomY = drawCmdrBin(myG, canonName, palette[5], palette[3], myWidth, drawY, panelHeight);
 
@@ -317,7 +325,7 @@ public class PlayerSetupCommanderArtist
   // Range: [0, tag count], to handle the "done" button.
   public static OptionSelector tagIndexSelector;
 
-  public static boolean organizeByGameThenFaction = true;
+  public static boolean sortByGameThenFaction = true;
   public static OptionSelector outerCategorySelector;
   // TODO: unused
   public static OptionSelector innerCategorySelector;
@@ -352,7 +360,7 @@ public class PlayerSetupCommanderArtist
     ArrayList<Integer>[] innerCategoryCOs;
     binColorSpec = new ArrayList<>();
     int outerMax, outerSel, innerMax, innerSel;
-    if(organizeByGameThenFaction)
+    if( sortByGameThenFaction )
     {
       outerMax = UIUtils.SourceGames.values().length;
       outerSel = selectedInfo.game.ordinal();
@@ -539,10 +547,15 @@ public class PlayerSetupCommanderArtist
           amPickingTagIndex = true;
         }
         break;
+      case SEEK:
+        // Flip our filtering around
+        sortByGameThenFaction = !sortByGameThenFaction;
+        initBins(selectedCO);
+        break;
       case VIEWMODE:
         myControl.startViewingCmdrInfo(selectedCO);
         break;
-      default: // SEEK
+      default:
         // Do nothing.
     }
     return done;
