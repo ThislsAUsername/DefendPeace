@@ -137,11 +137,11 @@ public class PlayerSetupCommanderArtist
 
         // Get the relevant PlayerPanel.
         if( !coPanels.containsKey(key) )
-          coPanels.put(key, new CommanderPanel(coInfo, spriteSpec.color));
+          coPanels.put(key, new CommanderPanel(coInfo, coInfo.baseFaction.color));
         CommanderPanel panel = coPanels.get(key);
 
         // Update the PlayerPanel and render it to an image.
-        BufferedImage playerImage = panel.update(coInfo, spriteSpec.color);
+        BufferedImage playerImage = panel.update(coInfo, coInfo.baseFaction.color);
 
         int drawCmdrY = drawY + textToastHeight + txtBuf;
         myG.drawImage(playerImage, drawX, drawCmdrY, null);
@@ -353,6 +353,7 @@ public class PlayerSetupCommanderArtist
     initBins(firstCO);
   }
 
+  /** Set up bins for our newly-selected outer category */
   public static void initBins(final int selectedCO)
   {
     final CommanderInfo selectedInfo = myControl.cmdrInfos.get(selectedCO);
@@ -523,6 +524,13 @@ public class PlayerSetupCommanderArtist
       case DOWN:
       {
         final int binPicked = cmdrBinSelector.handleInput(action);
+        // TODO
+        // If we've gone off the end, jump to the next outer category
+//        if( binPicked != cmdrBinSelector.getSelectionAbsolute() )
+//        {
+//          outerCategorySelector.handleInput(action);
+//          cmdrBinSelector.setSelectedOption(binPicked);
+//        }
         final int destBinSize = cmdrBins.get(binPicked).size();
         // Selection column clamps to the max for the new bin
         cmdrInBinSelector.reset(destBinSize);
