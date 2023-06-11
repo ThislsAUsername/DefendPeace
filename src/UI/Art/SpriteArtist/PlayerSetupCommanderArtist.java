@@ -350,6 +350,8 @@ public class PlayerSetupCommanderArtist
     if( shouldSelectMultiCO && myControl.noCmdr != firstCO )
       tagCmdrList.add(myControl.noCmdr);
 
+    // Clean up state to avoid weirdness
+    cmdrBinSelector = null;
     initBins(firstCO);
   }
 
@@ -364,7 +366,11 @@ public class PlayerSetupCommanderArtist
     if( sortByGameThenFaction )
     {
       outerMax = UIUtils.SourceGames.values().length;
-      outerSel = selectedInfo.game.ordinal();
+      // Pivot our *previous* inner selection to be our new outer selection
+      if( null == cmdrBinSelector )
+        outerSel = selectedInfo.game.ordinal();
+      else
+        outerSel = cmdrBinSelector.getSelectionNormalized();
       innerMax = myControl.actualFactions.length;
       innerSel = 0;
       for( ; innerSel < myControl.actualFactions.length; ++innerSel )
@@ -380,9 +386,15 @@ public class PlayerSetupCommanderArtist
     {
       outerMax = myControl.actualFactions.length;
       outerSel = 0;
-      for( ; outerSel < myControl.actualFactions.length; ++outerSel )
-        if( selectedInfo.baseFaction == myControl.actualFactions[outerSel] )
-          break;
+      // Pivot our previous *inner* selection to be our new outer selection
+      if( null == cmdrBinSelector )
+      {
+        for( ; outerSel < myControl.actualFactions.length; ++outerSel )
+          if( selectedInfo.baseFaction == myControl.actualFactions[outerSel] )
+            break;
+      }
+      else
+        outerSel = cmdrBinSelector.getSelectionNormalized();
       innerMax = UIUtils.SourceGames.values().length;
       innerSel = selectedInfo.game.ordinal();
 
