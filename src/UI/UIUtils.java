@@ -332,7 +332,7 @@ public class UIUtils
     public final COSpriteSpec uiColorSpec;
     SourceGames(COSpriteSpec uiColorSpec)
     {
-      this.uiColorSpec = uiColorSpec;
+      this.uiColorSpec = new COSpriteSpec(new Faction(this.name()), uiColorSpec.color);
     }
   }
 
