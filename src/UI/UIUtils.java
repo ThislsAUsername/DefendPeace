@@ -323,11 +323,17 @@ public class UIUtils
   public static final COSpriteSpec BW = COSpriteSpec.fromDisk("Brenner's"     , "Wolves");
   public static final COSpriteSpec NW = COSpriteSpec.fromDisk("New Rubinelle" , "Wolves");
   public static final COSpriteSpec LA = COSpriteSpec.fromDisk("Lazurian"      , "Army");
-  public static final COSpriteSpec IA = COSpriteSpec.fromDisk("IDS"           , "Army");
+  public static final COSpriteSpec IDS = COSpriteSpec.fromDisk("IDS"          , "Army");
 
   public enum SourceGames
   {
-    AW1, AW2, AW3, AW4, DEFEND_PEACE, // More? :v
+    AW1(OS), AW2(BM), AW3(GE), AW4(IDS), DEFEND_PEACE(RT); // More? :v
+
+    public final COSpriteSpec uiColorSpec;
+    SourceGames(COSpriteSpec uiColorSpec)
+    {
+      this.uiColorSpec = uiColorSpec;
+    }
   }
 
   private static class TeamColorSpec implements Comparable<TeamColorSpec>

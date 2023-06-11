@@ -16,6 +16,7 @@ import UI.PlayerSetupCommanderController;
 import UI.SlidingValue;
 import UI.UIUtils;
 import UI.UIUtils.COSpriteSpec;
+import UI.UIUtils.SourceGames;
 
 public class PlayerSetupCommanderArtist
 {
@@ -316,6 +317,11 @@ public class PlayerSetupCommanderArtist
   // Range: [0, tag count], to handle the "done" button.
   public static OptionSelector tagIndexSelector;
 
+  public static boolean organizeByGameThenFaction = true;
+  public static OptionSelector outerCategorySelector;
+  // TODO: unused
+  public static OptionSelector innerCategorySelector;
+
   public static ArrayList<ArrayList<Integer>> cmdrBins;
   public static ArrayList<COSpriteSpec> binColorSpec;
   public static OptionSelector cmdrBinSelector;
@@ -336,51 +342,78 @@ public class PlayerSetupCommanderArtist
     if( shouldSelectMultiCO && myControl.noCmdr != firstCO )
       tagCmdrList.add(myControl.noCmdr);
 
-    cmdrBins = new ArrayList<>();
+    initBins(firstCO);
+  }
+
+  public static void initBins(final int selectedCO)
+  {
+    final CommanderInfo selectedInfo = myControl.cmdrInfos.get(selectedCO);
+
+    ArrayList<Integer>[] innerCategoryCOs;
     binColorSpec = new ArrayList<>();
-
-    int lastBin = -1;
-    int startBin = 0;
-    int startBinIndex = 0;
-
-    // Set up our bins - each one contains a NO CO + all the COs from one canon faction
-    int coIndex = 0;
-    // List of what bins we've already created, so we don't depend on specific ordering/structure in the CO list
-    HashMap<COSpriteSpec, Integer> factionIndex = new HashMap<>();
-    for (; coIndex < myControl.cmdrInfos.size(); ++coIndex)
+    int outerMax, outerSel, innerMax, innerSel;
+    if(organizeByGameThenFaction)
     {
-      CommanderInfo info = myControl.cmdrInfos.get(coIndex);
-      int binIndex;
-      final COSpriteSpec canonFaction = info.baseFaction;
-      if( factionIndex.containsKey(canonFaction) )
-        binIndex = factionIndex.get(canonFaction);
-      else
-      {
-        ++lastBin;
-        binIndex = lastBin;
-        factionIndex.put(canonFaction, binIndex);
+      outerMax = UIUtils.SourceGames.values().length;
+      outerSel = selectedInfo.game.ordinal();
+      innerMax = myControl.actualFactions.length;
+      innerSel = 0;
+      for( ; innerSel < myControl.actualFactions.length; ++innerSel )
+        if( selectedInfo.baseFaction == myControl.actualFactions[innerSel] )
+          break;
 
-        ArrayList<Integer> bin = new ArrayList<>();
-        cmdrBins.add(bin);
-        binColorSpec.add(canonFaction);
-      }
+      // Factions for both
+      innerCategoryCOs = myControl.cosByGameFaction[outerSel];
+      for( COSpriteSpec spec : myControl.actualFactions )
+        binColorSpec.add(spec);
+    }
+    else
+    {
+      outerMax = myControl.actualFactions.length;
+      outerSel = 0;
+      for( ; outerSel < myControl.actualFactions.length; ++outerSel )
+        if( selectedInfo.baseFaction == myControl.actualFactions[outerSel] )
+          break;
+      innerMax = UIUtils.SourceGames.values().length;
+      innerSel = selectedInfo.game.ordinal();
 
-      cmdrBins.get(binIndex).add(coIndex);
-      if( firstCO == coIndex ) // Select the last CO in the tag by default
-      {
-        startBin = binIndex;
-        startBinIndex = cmdrBins.get(binIndex).size()-1;
-      }
+      // Games for both
+      innerCategoryCOs = myControl.cosByFactionGame[outerSel];
+      for( SourceGames game : UIUtils.SourceGames.values() )
+        binColorSpec.add(game.uiColorSpec);
+    }
+    outerCategorySelector = new OptionSelector(outerMax);
+    outerCategorySelector.setSelectedOption   (outerSel);
+    innerCategorySelector = new OptionSelector(innerMax);
+    innerCategorySelector.setSelectedOption   (innerSel);
+    // TODO: delete
+    cmdrBinSelector = new OptionSelector(innerMax);
+    cmdrBinSelector.setSelectedOption   (innerSel);
+
+    cmdrBins = new ArrayList<>();
+
+    int startBin = innerSel;
+
+    // Set up our bins - each one contains COs from one canonical group
+    for( int innerIdX = 0; innerIdX < innerCategoryCOs.length; ++innerIdX )
+    {
+      ArrayList<Integer> innerBin = new ArrayList<>(innerCategoryCOs[innerIdX]);
+      if( 1 > innerBin.size() )
+        // Enable selecting any faction from any game and vice versa
+        innerBin.add(myControl.noCmdr);
+      cmdrBins.add(innerBin);
     }
 
     tagIndexSelector = new OptionSelector(1);
     syncTagIndexSelector();
 
-    cmdrBinSelector = new OptionSelector(lastBin + 1);
-    cmdrBinSelector.setSelectedOption(startBin);
+    int startBinIndex = cmdrBins.get(startBin).indexOf(selectedCO);
+    rightGlueColumn = startBinIndex;
+
+//    cmdrBinSelector = new OptionSelector(lastBin + 1);
+//    cmdrBinSelector.setSelectedOption(startBin);
     cmdrInBinSelector = new OptionSelector(cmdrBins.get(startBin).size());
     cmdrInBinSelector.setSelectedOption(startBinIndex);
-    rightGlueColumn = startBinIndex;
   }
 
   public static boolean handleInput(InputAction action)

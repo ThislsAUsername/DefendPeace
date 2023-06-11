@@ -1,6 +1,8 @@
 package UI;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+
 import CommandingOfficers.*;
 import Engine.Driver;
 import Engine.IController;
@@ -8,6 +10,7 @@ import Engine.IView;
 import Engine.GameScenario.TagMode;
 import UI.InputHandler.InputAction;
 import UI.PlayerSetupInfo.CODeets;
+import UI.UIUtils.COSpriteSpec;
 import UI.Art.SpriteArtist.PlayerSetupCommanderArtist;
 
 public class PlayerSetupCommanderController implements IController
@@ -16,13 +19,49 @@ public class PlayerSetupCommanderController implements IController
   public final ArrayList<CommanderInfo> cmdrInfos;
   public final boolean shouldSelectMultiCO;
   public final int noCmdr;
+  public final COSpriteSpec[] actualFactions;
+  // Lists, organized by x then y, of indices into the canonical commander list
+  public final ArrayList<Integer>[][] cosByGameFaction;
+  public final ArrayList<Integer>[][] cosByFactionGame;
 
+  // It whines about the CO list list list creation
+  @SuppressWarnings("unchecked")
   public PlayerSetupCommanderController(ArrayList<CommanderInfo> infos, PlayerSetupInfo playerInfo, TagMode tagMode)
   {
     cmdrInfos = infos;
     noCmdr = infos.size() - 1;
     myPlayerInfo = playerInfo;
     shouldSelectMultiCO = tagMode.supportsMultiCmdrSelect;
+
+    HashSet<COSpriteSpec> uniqueFactions = new HashSet<>();
+    for( int co = 0; co < cmdrInfos.size(); ++co )
+      uniqueFactions.add(cmdrInfos.get(co).baseFaction);
+    actualFactions = uniqueFactions.toArray(new COSpriteSpec[0]);
+
+    int gameCount = UIUtils.SourceGames.values().length;
+    int factionCount = actualFactions.length;
+    cosByGameFaction = new ArrayList[gameCount][factionCount];
+    cosByFactionGame = new ArrayList[factionCount][gameCount];
+
+    for(   int game = 0   ;    game < gameCount   ; ++game )
+      for( int faction = 0; faction < factionCount; ++faction )
+        cosByGameFaction[game][faction] = new ArrayList<>();
+    for(   int faction = 0; faction < factionCount; ++faction )
+      for( int game = 0   ;    game < gameCount   ; ++game )
+        cosByFactionGame[faction][game] = new ArrayList<>();
+
+    for( int co = 0; co < cmdrInfos.size(); ++co )
+    {
+      CommanderInfo info = cmdrInfos.get(co);
+      int game = info.game.ordinal();
+      int faction = 0;
+      for( ; faction < factionCount; ++faction )
+        if( info.baseFaction == actualFactions[faction] )
+          break;
+
+      cosByGameFaction[game][faction].add(co);
+      cosByFactionGame[faction][game].add(co);
+    }
   }
 
   @Override
