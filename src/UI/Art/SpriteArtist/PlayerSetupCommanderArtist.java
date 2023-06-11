@@ -10,6 +10,8 @@ import java.util.HashMap;
 
 import CommandingOfficers.CommanderInfo;
 import Engine.IController;
+import Engine.OptionSelector;
+import UI.InputHandler.InputAction;
 import UI.PlayerSetupCommanderController;
 import UI.SlidingValue;
 import UI.UIUtils;
@@ -37,7 +39,10 @@ public class PlayerSetupCommanderArtist
       System.out.println("WARNING! PlayerSetupCommanderController was given the wrong controller!");
     }
     boolean snapCursor = myControl != control;
+
     myControl = control;
+    if( snapCursor )
+      initFromControl();
 
     // Define the draw space
     int drawScale = SpriteOptions.getDrawScale();
@@ -51,14 +56,14 @@ public class PlayerSetupCommanderArtist
     drawCmdrPickerPanels(myG, myHeight, myWidth, infos, playerColor, snapCursor);
 
     /////////////// Tag Picker Panels //////////////////////
-    if( myControl.amPickingTagIndex )
+    if( amPickingTagIndex )
     {
       drawTagPickerPanels(myG, myWidth, infos, playerColor, snapCursor);
     }
 
     /////////////// Tooltip ////////////////////////////
     myG.drawImage(etip, myWidth - etip.getWidth(), 3, null);
-    if(myControl.amPickingTagIndex)
+    if(amPickingTagIndex)
     {
       myG.drawImage(qtip, myWidth - qtip.getWidth(), 5 + qtip.getHeight(), null);
     }
@@ -73,11 +78,11 @@ public class PlayerSetupCommanderArtist
                        boolean snapCursor)
   {
     // Selected horizontal bin on the screen
-    int binIndex        = myControl.cmdrBinSelector.getSelectionNormalized();
+    int binIndex        = cmdrBinSelector.getSelectionNormalized();
     // Index into that bin that's selected
-    int coIndex         = myControl.cmdrInBinSelector.getSelectionNormalized();
+    int coIndex         = cmdrInBinSelector.getSelectionNormalized();
     // Value of that selection; index into the list of CO infos
-    int highlightedCmdr = myControl.cmdrBins.get(binIndex).get(coIndex);
+    int highlightedCmdr = cmdrBins.get(binIndex).get(coIndex);
     // Calculate the vertical space each bin panel will consume.
     int panelBuffer = 3;
     int panelHeight = CommanderPanel.PANEL_HEIGHT+panelBuffer + 1;
@@ -96,14 +101,14 @@ public class PlayerSetupCommanderArtist
     int baseDrawX = SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Make sure we have room to draw the cursor around the frame.
 
     for(; drawY - CommanderPanel.PANEL_HEIGHT/2 < myHeight
-        && binToDraw < myControl.cmdrBins.size();
+        && binToDraw < cmdrBins.size();
         ++binToDraw )
     {
       int indexInBin = 0;
       int drawX = baseDrawX;
 
       // Draw the bin panel to go behind the COs
-      final COSpriteSpec spriteSpec = myControl.binColorSpec.get(binToDraw);
+      final COSpriteSpec spriteSpec = binColorSpec.get(binToDraw);
       Color[] palette = UIUtils.defaultMapColors;
       String canonName = "MISC";
       if( Color.LIGHT_GRAY != spriteSpec.color )
@@ -114,7 +119,7 @@ public class PlayerSetupCommanderArtist
       int currentPanelBottomY = drawCmdrBin(myG, canonName, palette[5], palette[3], myWidth, drawY, panelHeight);
 
       // Actually draw the CO mugs
-      ArrayList<Integer> currentBin = myControl.cmdrBins.get(binToDraw);
+      ArrayList<Integer> currentBin = cmdrBins.get(binToDraw);
       while (drawX < myWidth && indexInBin < currentBin.size())
       {
         int coToDraw = currentBin.get(indexInBin);
@@ -149,7 +154,7 @@ public class PlayerSetupCommanderArtist
     final int cursorY = myHeight / 2 - CommanderPanel.PANEL_HEIGHT / 2;
 
     // Draw stuff for the selected option.
-    if( !myControl.amPickingTagIndex )
+    if( !amPickingTagIndex )
     {
       BufferedImage coNameFrame = SpriteUIUtils.makeTextFrame(coNameText, 2, 2);
       int drawNameX = panelDrawX.geti() + panelDrawW / 2;
@@ -211,7 +216,7 @@ public class PlayerSetupCommanderArtist
 
     // Draw the list of COs in your tag from left to right
     final int drawY = 4;
-    final ArrayList<Integer> taggedCOs = myControl.tagCmdrList;
+    final ArrayList<Integer> taggedCOs = tagCmdrList;
     for( int tagToDraw = 0; tagToDraw < taggedCOs.size(); ++tagToDraw )
     {
       CommanderInfo coInfo = infos.get(taggedCOs.get(tagToDraw));
@@ -250,7 +255,7 @@ public class PlayerSetupCommanderArtist
     myG.drawImage(readyButton, dx, dy, null);
 
     // Draw the cursor over the selected option.
-    final int selTagIndex = myControl.tagIndexSelector.getSelectionNormalized();
+    final int selTagIndex = tagIndexSelector.getSelectionNormalized();
     tagPickerOffsetX.set(4 + (selTagIndex*panelXShift));
     SpriteCursor.draw(myG, tagPickerOffsetX.geti(), drawY, panelWidth, panelHeight, playerColor);
   }
@@ -305,4 +310,217 @@ public class PlayerSetupCommanderArtist
       return myImage;
     }
   }
+
+ // Input control be beyond here
+  public static boolean amPickingTagIndex;
+  // Range: [0, tag count], to handle the "done" button.
+  public static OptionSelector tagIndexSelector;
+
+  public static ArrayList<ArrayList<Integer>> cmdrBins;
+  public static ArrayList<COSpriteSpec> binColorSpec;
+  public static OptionSelector cmdrBinSelector;
+  public static OptionSelector cmdrInBinSelector;
+  public static ArrayList<Integer> tagCmdrList;
+  public static int rightGlueColumn;
+
+  public static void initFromControl()
+  {
+    boolean shouldSelectMultiCO = myControl.shouldSelectMultiCO;
+    amPickingTagIndex = shouldSelectMultiCO;
+
+    tagCmdrList = myControl.getInitialCmdrs();
+
+    final int firstCO = tagCmdrList.get(0);
+
+    // Pad with an extra No CO so we can add tag partners
+    if( shouldSelectMultiCO && myControl.noCmdr != firstCO )
+      tagCmdrList.add(myControl.noCmdr);
+
+    cmdrBins = new ArrayList<>();
+    binColorSpec = new ArrayList<>();
+
+    int lastBin = -1;
+    int startBin = 0;
+    int startBinIndex = 0;
+
+    // Set up our bins - each one contains a NO CO + all the COs from one canon faction
+    int coIndex = 0;
+    // List of what bins we've already created, so we don't depend on specific ordering/structure in the CO list
+    HashMap<COSpriteSpec, Integer> factionIndex = new HashMap<>();
+    for (; coIndex < myControl.cmdrInfos.size(); ++coIndex)
+    {
+      CommanderInfo info = myControl.cmdrInfos.get(coIndex);
+      int binIndex;
+      final COSpriteSpec canonFaction = info.baseFaction;
+      if( factionIndex.containsKey(canonFaction) )
+        binIndex = factionIndex.get(canonFaction);
+      else
+      {
+        ++lastBin;
+        binIndex = lastBin;
+        factionIndex.put(canonFaction, binIndex);
+
+        ArrayList<Integer> bin = new ArrayList<>();
+        cmdrBins.add(bin);
+        binColorSpec.add(canonFaction);
+      }
+
+      cmdrBins.get(binIndex).add(coIndex);
+      if( firstCO == coIndex ) // Select the last CO in the tag by default
+      {
+        startBin = binIndex;
+        startBinIndex = cmdrBins.get(binIndex).size()-1;
+      }
+    }
+
+    tagIndexSelector = new OptionSelector(1);
+    syncTagIndexSelector();
+
+    cmdrBinSelector = new OptionSelector(lastBin + 1);
+    cmdrBinSelector.setSelectedOption(startBin);
+    cmdrInBinSelector = new OptionSelector(cmdrBins.get(startBin).size());
+    cmdrInBinSelector.setSelectedOption(startBinIndex);
+    rightGlueColumn = startBinIndex;
+  }
+
+  public static boolean handleInput(InputAction action)
+  {
+    boolean exitMenu = false;
+    if( amPickingTagIndex )
+      exitMenu = handleTagChoiceInput(action);
+    else
+      exitMenu = handleCmdrChoiceInput(action);
+    return exitMenu;
+  }
+
+  private static boolean handleTagChoiceInput(InputAction action)
+  {
+    boolean done = false;
+    final int selTagIndex = tagIndexSelector.getSelectionNormalized();
+    switch(action)
+    {
+      case SELECT:
+        amPickingTagIndex = false;
+
+        if( selTagIndex >= tagCmdrList.size() )
+        {
+          // User says we're done - apply changes and get out.
+
+          // Handle the pesky No CO at the end.
+          if( 1 < tagCmdrList.size() )
+            tagCmdrList.remove(tagCmdrList.size() - 1);
+
+          myControl.applyCmdrChoices(tagCmdrList);
+          done = true;
+        }
+        break;
+      case UP:
+      case DOWN:
+      case LEFT:
+      case RIGHT:
+      {
+        tagIndexSelector.handleInput(action);
+      }
+      break;
+      case BACK:
+        // Cancel: return control without applying changes.
+        done = true;
+        break;
+      case SEEK:
+        // Kick out the selected CO
+        if( selTagIndex+1 < tagCmdrList.size() )
+        {
+          tagCmdrList.remove(selTagIndex);
+          syncTagIndexSelector();
+        }
+        break;
+      case VIEWMODE:
+        int selectedCO = tagCmdrList.get(selTagIndex);
+        myControl.startViewingCmdrInfo(selectedCO);
+        break;
+      default:
+        // Do nothing.
+    }
+    return done;
+  } // ~handleTagChoiceInput
+
+  private static boolean handleCmdrChoiceInput(InputAction action)
+  {
+    boolean done = false;
+    final int selectedBin    = cmdrBinSelector.getSelectionNormalized();
+    final int selectedColumn = cmdrInBinSelector.getSelectionNormalized();
+    // Value of selection; index into the list of CO infos
+    final int selectedCO     = cmdrBins.get(selectedBin).get(selectedColumn);
+    switch(action)
+    {
+      case SELECT:
+        // handleTagChoiceInput() should ensure this index is in [0, tag count)
+        final int selTagIndex = tagIndexSelector.getSelectionNormalized();
+
+        tagCmdrList.set(selTagIndex, selectedCO);
+        // Are we bimodal?
+        if( !myControl.shouldSelectMultiCO )
+        {
+          // No; apply change and return control.
+          myControl.applyCmdrChoices(tagCmdrList);
+          done = true;
+        }
+        else // Yes
+        {
+          amPickingTagIndex = true;
+
+          // Add/remove if appropriate
+          if( selTagIndex + 1 >= tagCmdrList.size() )
+          {
+            tagCmdrList.add(myControl.noCmdr); // Extend the list if we just added a new tag partner
+            syncTagIndexSelector();
+            tagIndexSelector.handleInput(InputAction.DOWN); // Auto-pick the plus again
+          }
+        }
+        break;
+      case UP:
+      case DOWN:
+      {
+        final int binPicked = cmdrBinSelector.handleInput(action);
+        final int destBinSize = cmdrBins.get(binPicked).size();
+        // Selection column clamps to the max for the new bin
+        cmdrInBinSelector.reset(destBinSize);
+        final int destColumn = Math.min(destBinSize - 1, rightGlueColumn);
+        cmdrInBinSelector.setSelectedOption(destColumn);
+      }
+        break;
+      case LEFT:
+      case RIGHT:
+      {
+        rightGlueColumn = cmdrInBinSelector.handleInput(action);
+      }
+      break;
+      case BACK:
+        if( !myControl.shouldSelectMultiCO )
+        {
+          // Cancel: return control without applying changes.
+          done = true;
+        }
+        else
+        {
+          amPickingTagIndex = true;
+        }
+        break;
+      case VIEWMODE:
+        myControl.startViewingCmdrInfo(selectedCO);
+        break;
+      default: // SEEK
+        // Do nothing.
+    }
+    return done;
+  } // ~handleCmdrChoiceInput
+
+
+  public static void syncTagIndexSelector()
+  {
+    final int tagIndex = tagIndexSelector.getSelectionNormalized();
+    tagIndexSelector.reset(tagCmdrList.size() + 1);
+    tagIndexSelector.setSelectedOption(tagIndex);
+  }
+
 }
