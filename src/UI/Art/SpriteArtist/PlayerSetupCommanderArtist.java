@@ -79,26 +79,33 @@ public class PlayerSetupCommanderArtist
   }
 
   static final int leftMargin = 13;
+  static final int mugBuffer = 3;
   public static void drawCmdrPickerPanels(
                        Graphics myG, int myHeight, int myWidth,
                        ArrayList<CommanderInfo> infos, Color playerColor,
                        boolean snapCursor)
   {
     // Selected horizontal bin on the screen
-    int binIndex        = cmdrBinSelector.getSelectionNormalized();
+    int binIndex        = innerCategorySelector.getSelectionNormalized();
     // Index into that bin that's selected
     int coIndex         = cmdrInBinSelector.getSelectionNormalized();
     // Value of that selection; index into the list of CO infos
     int highlightedCmdr = cmdrBins.get(binIndex).get(coIndex);
     // Calculate the vertical space each bin panel will consume.
-    int panelBuffer = 3;
-    int panelHeight = CommanderPanel.PANEL_HEIGHT+panelBuffer + 1;
-    int panelShift  = textToastHeight + panelHeight + panelBuffer;
+    final int mugShiftY = CommanderPanel.PANEL_HEIGHT + mugBuffer;
+    final int panelHeight = mugShiftY + 1;
+    final int panelShift  = textToastHeight + panelHeight + mugBuffer;
+
+    int mmpr = getMaxMugsPerRow();
 
     // We're drawing the panels to align with the vertically-fixed cursor,
     // so figure out where the zeroth bin panel should be drawn.
-    panelOffsetY.set(binIndex*panelShift, snapCursor);
-    int drawY = myHeight / 2 - panelOffsetY.geti() - panelHeight + panelBuffer + 1;
+    int totalShift = binIndex * panelShift;
+    // For all panels above us, add their extra mugshifts
+    for( int i = 0; i < binIndex; ++i )
+      totalShift += mugShiftY * (cmdrBins.get(i).size() / mmpr); // int rounding: useful?
+    panelOffsetY.set(totalShift, snapCursor);
+    int drawY = myHeight / 2 - panelOffsetY.geti() - panelHeight + mugBuffer + 1;
     final int startY = drawY;
 
     // Selected CO's name for drawing later
@@ -114,6 +121,7 @@ public class PlayerSetupCommanderArtist
     {
       int indexInBin = 0;
       int drawX = baseDrawX;
+      ArrayList<Integer> currentBin = cmdrBins.get(binToDraw);
 
       // Draw the bin panel to go behind the COs
       final COSpriteSpec spriteSpec = binColorSpec.get(binToDraw);
@@ -127,11 +135,13 @@ public class PlayerSetupCommanderArtist
         else // Our inner category is games, so just pull the hardcoded faction name
           canonName = spriteSpec.faction.name;
       }
-      int currentPanelBottomY = drawCmdrBin(myG, canonName, palette[5], palette[3], myWidth, drawY, panelHeight);
+      int mugRows = 1;
+      while (mugRows * mmpr < currentBin.size())
+        ++mugRows;
+      int currentPanelBottomY = drawCmdrBin(myG, canonName, palette[5], palette[3], myWidth, drawY, panelHeight*mugRows);
 
       // Actually draw the CO mugs
-      ArrayList<Integer> currentBin = cmdrBins.get(binToDraw);
-      while (drawX < myWidth && indexInBin < currentBin.size())
+      while (indexInBin < currentBin.size())
       {
         int coToDraw = currentBin.get(indexInBin);
         CommanderInfo coInfo = infos.get(coToDraw);
@@ -153,13 +163,21 @@ public class PlayerSetupCommanderArtist
         {
           panelDrawX.set(drawX, snapCursor);
           coNameText = coInfo.name;
+          int cursorBonusMugRows = indexInBin / mmpr;
+          panelOffsetY.set(totalShift + mugShiftY*cursorBonusMugRows, snapCursor);
         }
 
         ++indexInBin;
-        drawX += playerImage.getWidth() + panelBuffer;
+        if( indexInBin >= mmpr )
+        {
+          drawY += mugShiftY;
+          drawX = baseDrawX;
+        }
+        else
+          drawX += playerImage.getWidth() + mugBuffer;
       }
 
-      drawY = currentPanelBottomY + panelBuffer;
+      drawY = currentPanelBottomY + mugBuffer;
     }
 
     // Draw the outer level's side panel
@@ -174,7 +192,7 @@ public class PlayerSetupCommanderArtist
       else // Our inner category is games, so just pull the hardcoded faction name
         outerName = outerSpriteSpec.faction.name;
     }
-    drawSideBin(myG, outerName, outerPalette[5], outerPalette[3], startY, drawY-startY-panelBuffer);
+    drawSideBin(myG, outerName, outerPalette[5], outerPalette[3], startY, drawY-startY-mugBuffer);
 
     final int cursorY = myHeight / 2 - CommanderPanel.PANEL_HEIGHT / 2;
 
@@ -351,6 +369,7 @@ public class PlayerSetupCommanderArtist
 
     // Total vertical panel space, sans scaling.
     public static final int PANEL_HEIGHT = eyesHeight + 2; // Eyes plus 1 above and below.
+    public static final int PANEL_WIDTH  = eyesWidth  + 2; // ditto
 
     // The composed TeamPanel image.
     private BufferedImage myImage;
@@ -393,13 +412,11 @@ public class PlayerSetupCommanderArtist
 
   public static boolean sortByGameThenFaction = true;
   public static OptionSelector outerCategorySelector;
-  // TODO: unused
   public static OptionSelector innerCategorySelector;
 
   public static ArrayList<ArrayList<Integer>> cmdrBins;
   public static ArrayList<COSpriteSpec> outerBinColorSpec;
   public static ArrayList<COSpriteSpec> binColorSpec;
-  public static OptionSelector cmdrBinSelector;
   public static OptionSelector cmdrInBinSelector;
   public static ArrayList<Integer> tagCmdrList;
   public static int rightGlueColumn;
@@ -418,7 +435,7 @@ public class PlayerSetupCommanderArtist
       tagCmdrList.add(myControl.noCmdr);
 
     // Clean up state to avoid weirdness
-    cmdrBinSelector = null;
+    innerCategorySelector = null;
     initBins(firstCO);
   }
 
@@ -435,10 +452,10 @@ public class PlayerSetupCommanderArtist
     {
       outerMax = UIUtils.SourceGames.values().length;
       // Pivot our *previous* inner selection to be our new outer selection
-      if( null == cmdrBinSelector )
+      if( null == innerCategorySelector )
         outerSel = selectedInfo.game.ordinal();
       else
-        outerSel = cmdrBinSelector.getSelectionNormalized();
+        outerSel = innerCategorySelector.getSelectionNormalized();
       innerMax = myControl.actualFactions.length;
       innerSel = 0;
       for( ; innerSel < myControl.actualFactions.length; ++innerSel )
@@ -458,14 +475,14 @@ public class PlayerSetupCommanderArtist
       outerMax = myControl.actualFactions.length;
       outerSel = 0;
       // Pivot our previous *inner* selection to be our new outer selection
-      if( null == cmdrBinSelector )
+      if( null == innerCategorySelector )
       {
         for( ; outerSel < myControl.actualFactions.length; ++outerSel )
           if( selectedInfo.baseFaction == myControl.actualFactions[outerSel] )
             break;
       }
       else
-        outerSel = cmdrBinSelector.getSelectionNormalized();
+        outerSel = innerCategorySelector.getSelectionNormalized();
       innerMax = UIUtils.SourceGames.values().length;
       innerSel = selectedInfo.game.ordinal();
 
@@ -481,21 +498,18 @@ public class PlayerSetupCommanderArtist
     outerCategorySelector.setSelectedOption   (outerSel);
     innerCategorySelector = new OptionSelector(innerMax);
     innerCategorySelector.setSelectedOption   (innerSel);
-    // TODO: delete
-    cmdrBinSelector = new OptionSelector(innerMax);
-    cmdrBinSelector.setSelectedOption   (innerSel);
 
     cmdrBins = new ArrayList<>();
 
     int startBin = innerSel;
 
-    // Set up our bins - each one contains COs from one canonical group
     for( int innerIdX = 0; innerIdX < innerCategoryCOs.length; ++innerIdX )
     {
       ArrayList<Integer> innerBin = new ArrayList<>(innerCategoryCOs[innerIdX]);
       if( 1 > innerBin.size() )
         // Enable selecting any faction from any game and vice versa
         innerBin.add(myControl.noCmdr);
+
       cmdrBins.add(innerBin);
     }
 
@@ -505,8 +519,6 @@ public class PlayerSetupCommanderArtist
     int startBinIndex = cmdrBins.get(startBin).indexOf(selectedCO);
     rightGlueColumn = startBinIndex;
 
-//    cmdrBinSelector = new OptionSelector(lastBin + 1);
-//    cmdrBinSelector.setSelectedOption(startBin);
     cmdrInBinSelector = new OptionSelector(cmdrBins.get(startBin).size());
     cmdrInBinSelector.setSelectedOption(startBinIndex);
   }
@@ -575,7 +587,10 @@ public class PlayerSetupCommanderArtist
   private static boolean handleCmdrChoiceInput(InputAction action)
   {
     boolean done = false;
-    final int selectedBin    = cmdrBinSelector.getSelectionNormalized();
+
+    int mmpr = getMaxMugsPerRow();
+
+    final int selectedBin    = innerCategorySelector.getSelectionNormalized();
     final int selectedColumn = cmdrInBinSelector.getSelectionNormalized();
     // Value of selection; index into the list of CO infos
     final int selectedCO     = cmdrBins.get(selectedBin).get(selectedColumn);
@@ -607,27 +622,15 @@ public class PlayerSetupCommanderArtist
         }
         break;
       case UP:
+        handleVerticalMove(action, cmdrBins.get(selectedBin), selectedColumn, -mmpr);
+        break;
       case DOWN:
-      {
-        final int binPicked = cmdrBinSelector.handleInput(action);
-        // TODO
-        // If we've gone off the end, jump to the next outer category
-//        if( binPicked != cmdrBinSelector.getSelectionAbsolute() )
-//        {
-//          outerCategorySelector.handleInput(action);
-//          cmdrBinSelector.setSelectedOption(binPicked);
-//        }
-        final int destBinSize = cmdrBins.get(binPicked).size();
-        // Selection column clamps to the max for the new bin
-        cmdrInBinSelector.reset(destBinSize);
-        final int destColumn = Math.min(destBinSize - 1, rightGlueColumn);
-        cmdrInBinSelector.setSelectedOption(destColumn);
-      }
+        handleVerticalMove(action, cmdrBins.get(selectedBin), selectedColumn, mmpr);
         break;
       case LEFT:
       case RIGHT:
       {
-        rightGlueColumn = cmdrInBinSelector.handleInput(action);
+        rightGlueColumn = cmdrInBinSelector.handleInput(action) % mmpr;
       }
       break;
       case BACK:
@@ -654,6 +657,48 @@ public class PlayerSetupCommanderArtist
     }
     return done;
   } // ~handleCmdrChoiceInput
+  private static void handleVerticalMove(InputAction action, ArrayList<Integer> currentBin, int selectedColumn, int jump)
+  {
+    int jumpValue = Math.abs(jump);
+    int maxVisualBin = (currentBin.size() - 1) / jumpValue + 1;
+    int currentVisualBin = selectedColumn / jumpValue;
+    int destShift = Math.max(selectedColumn % jumpValue, rightGlueColumn % jumpValue);
+    if (jump > 0)
+      ++currentVisualBin;
+    else
+      --currentVisualBin;
+    if( 0 <= currentVisualBin && currentVisualBin < maxVisualBin ) // We're visually wrapping, so go down *within* this bin
+    {
+      final int destBinSize = cmdrBins.get(innerCategorySelector.getSelectionNormalized()).size();
+      int destColumn = Math.min(destBinSize-1, currentVisualBin*jumpValue + destShift);
+
+      cmdrInBinSelector.setSelectedOption(destColumn);
+      rightGlueColumn = destShift;
+      return;
+    }
+
+    final int binPicked = innerCategorySelector.handleInput(action);
+    final int destBinSize = cmdrBins.get(binPicked).size();
+    // Selection column clamps to the max for the new bin
+    cmdrInBinSelector.reset(destBinSize);
+
+    currentVisualBin = 0;
+    if( jump < 0 )
+      currentVisualBin = (destBinSize / jump) * jump;
+
+    int destColumn = Math.min(destBinSize-1, currentVisualBin*jumpValue + destShift);
+    destColumn = Math.min(destBinSize-1, destColumn);
+    cmdrInBinSelector.setSelectedOption(destColumn);
+  }
+
+  private static int getMaxMugsPerRow()
+  {
+    int drawScale = SpriteOptions.getDrawScale();
+    Dimension dimensions = SpriteOptions.getScreenDimensions();
+    int myWidth = dimensions.width / drawScale - leftMargin - SpriteLibrary.getCursorSprites().getFrame(0).getWidth();
+    int xPerMug = CommanderPanel.PANEL_WIDTH + mugBuffer;
+    return (int) Math.floor(myWidth * 1.0 / xPerMug);
+  }
 
 
   public static void syncTagIndexSelector()
