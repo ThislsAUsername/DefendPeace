@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
+import CommandingOfficers.DeployableCommander;
 import Engine.*;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.*;
@@ -74,8 +75,13 @@ public class JakeMan extends ModularAI
     // move your leftover vehicles so they cover the tiles attacking most relevant stuff (contested cities, own units)
     // move infs as far towards nearest contested stuff as you can without underdefending, cap if possible
 
+    // Comment from L&F/Rize, on the idea of engaging e.g. a Lin COU on a city:
+    // IF the dude is free & there's multiple attackers & you can do multiple attacks (since having 2 tanks for 1 tile won't help),
+    //   check the total calc after shooting with every firepower thing that can shoot and not the normal one
+
     aiPhases = new ArrayList<AIModule>(
         Arrays.asList(
+            new DeployCOUOnTank(army, this),
             new PowerActivator(army, CommanderAbility.PHASE_TURN_START),
             new CapChainActuator(army, this),
             new CaptureFinisher(army, this),
@@ -106,6 +112,72 @@ public class JakeMan extends ModularAI
   {
     super.endTurn();
     log(String.format("[======== JakeMan ending turn %s for %s =========]", turnNum, myArmy));
+  }
+
+  public static class DeployCOUOnTank implements AIModule
+  {
+    private static final long serialVersionUID = 1L;
+    public Army myArmy;
+    public final JakeMan ai;
+
+    public DeployCOUOnTank(Army co, JakeMan ai)
+    {
+      myArmy = co;
+      this.ai = ai;
+    }
+
+    public boolean checked = false;
+    @Override
+    public void initTurn(GameMap gameMap) { checked = false; }
+
+    @Override
+    public GameAction getNextAction(PriorityQueue<Unit> unitQueue, GameMap map)
+    {
+      if( checked )
+        return null;
+
+      for( Commander COUer : ai.coParser.deployableCOs )
+      {
+        ArrayList<DeployableCommander.DeployCOUAction> potentialCOUs = new ArrayList<>();
+        for( Unit minion : COUer.units )
+        {
+          if( minion.isTurnOver )
+            continue; // Don't cheat, even if the game lets us
+          if( !ai.allTanks.contains(minion.model) )
+            continue; // Don't boost non-tanks
+
+          // If we can COU up, add the minion to the list
+          final GamePath standStill = new GamePath();
+          standStill.addWaypoint(minion.x, minion.y);
+          final ArrayList<GameActionSet> unitActions = minion.getPossibleActions(map, standStill);
+          for( GameActionSet actionSet : unitActions )
+            if( actionSet.getSelected() instanceof DeployableCommander.DeployCOUAction )
+            {
+              potentialCOUs.add((DeployableCommander.DeployCOUAction) actionSet.getSelected());
+              break;
+            }
+        }
+
+        // There's probably a better way to score this than price...
+        int topPrice = 0;
+        DeployableCommander.DeployCOUAction bestCOUAction = null;
+        for( DeployableCommander.DeployCOUAction action : potentialCOUs )
+        {
+          final int myPrice = COUer.getCost(action.getActor().model);
+          if( topPrice < myPrice )
+          {
+            topPrice = myPrice;
+            bestCOUAction = action;
+          }
+        }
+
+        return bestCOUAction;
+      }
+
+      // Only flag ourselves as "checked" if we've run out of COUs to deploy
+      checked = true;
+      return null;
+    }
   }
 
   public static class GenerateThreatMap implements AIModule

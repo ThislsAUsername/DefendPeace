@@ -21,6 +21,7 @@ import Units.Unit;
 public abstract class ModularAI implements AIController
 {
   protected Army myArmy = null;
+  protected COParser coParser;
 
   // Updated on turn init
   protected ArrayList<XYCoord> futureCapTargets;
@@ -37,6 +38,7 @@ public abstract class ModularAI implements AIController
   public ModularAI(Army army)
   {
     myArmy = army;
+    coParser = new COParser(army);
   }
 
   @Override
