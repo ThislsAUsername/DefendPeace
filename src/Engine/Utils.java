@@ -118,7 +118,7 @@ public class Utils
   public static ArrayList<XYCoord> findPossibleDestinations(XYCoord start, Unit unit, GameMap gameMap, boolean includeOccupiedSpaces)
   {
     boolean canTravelThroughEnemies = false;
-    return findFloodFillArea(start, unit, unit.getMoveFunctor(), Math.min(unit.getMovePower(gameMap), unit.fuel), gameMap, unit, includeOccupiedSpaces, canTravelThroughEnemies);
+    return findFloodFillArea(start, unit, unit.getMoveFunctor(), Math.min(unit.getMovePower(gameMap), unit.fuel), gameMap, includeOccupiedSpaces, canTravelThroughEnemies);
   }
   /**
    * @param start Initial location; will usually be in the output set.
@@ -127,7 +127,7 @@ public class Utils
    * @param gameMap The map to search over.
    * @return The list of XYCoords in gameMap reachable by the FloodFillFunctor from the start coord, given initialFillPower.
    */
-  public static ArrayList<XYCoord> findFloodFillArea(XYCoord start, Unit unit, MoveType fff, int initialFillPower, GameMap gameMap, Unit mover, boolean includeOccupiedSpaces, boolean canTravelThroughEnemies)
+  public static ArrayList<XYCoord> findFloodFillArea(XYCoord start, Unit unit, MoveType fff, int initialFillPower, GameMap gameMap, boolean includeOccupiedSpaces, boolean canTravelThroughEnemies)
   {
     ArrayList<XYCoord> reachableTiles = new ArrayList<XYCoord>();
 
