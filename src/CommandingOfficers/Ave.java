@@ -487,7 +487,8 @@ public class Ave extends Commander
     {
       // Override default cost-increase behavior to make this get more expensive faster.
       numActivations++;
-      myPowerCost = 1 + (numActivations*3);
+      int myStars = 1 + (numActivations*3);
+      myPowerCost = myStars * CHARGERATIO_FUNDS;
     }
 
     @Override
@@ -661,7 +662,7 @@ public class Ave extends Commander
     {
       // One of the big benefits of this power is deforestation, since trees get in Ave's way.
       // Trees are only removed once, so we'll increase cost more slowly to counteract the decreased utility.
-      myPowerCost += 0.5;
+      myPowerCost += 0.5 * CHARGERATIO_FUNDS;
     }
 
     @Override
