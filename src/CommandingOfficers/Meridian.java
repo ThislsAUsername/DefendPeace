@@ -64,7 +64,7 @@ public class Meridian extends Commander
   final VehicularCharge myVehicularCharge = new VehicularCharge(this);
   private static final int POST_REFRESH_STAT_ADJUSTMENT = -30;
   final UnitModel tank, arty;
-  final UnitActionFactory tankAction, artyAction;
+  final UnitActionFactory tankAction, artyAction; // Has to be one per CO, so units get the same instance over multiple action searches (mostly for the AI)
   final int costShift;
 
   public Meridian(GameScenario.GameRules rules)

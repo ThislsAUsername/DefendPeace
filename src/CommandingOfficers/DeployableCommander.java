@@ -33,6 +33,7 @@ public abstract class DeployableCommander extends Commander
           + "You can't deploy a CO Unit that has already been active during your turn (i.e. must wait a turn after deleting it/dying to a counter).\n");
   public ArrayList<Unit> COUs = new ArrayList<Unit>();
   public ArrayList<Unit> COUsLost = new ArrayList<Unit>();
+  public final DeployCOUFactory deployAction; // Has to be one per CO, so units get the same instance over multiple action searches (mostly for the AI)
   /** The number of COUs you can have active at once */
   public abstract int getCOUCount();
   public void onCOULost(Unit minion) {};
@@ -58,6 +59,7 @@ public abstract class DeployableCommander extends Commander
   public DeployableCommander(CommanderInfo info, GameScenario.GameRules rules)
   {
     super(info, rules);
+    deployAction = new DeployCOUFactory(this);
   }
 
   @Override
@@ -94,7 +96,7 @@ public abstract class DeployableCommander extends Commander
   public void modifyActionList(UnitContext uc)
   {
     if( canDeployOn(uc.model) )
-      uc.actionTypes.add(new DeployCOUFactory(this));
+      uc.actionTypes.add(deployAction);
   }
 
   @Override
