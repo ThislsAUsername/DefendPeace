@@ -131,9 +131,9 @@ public class WallyAI extends ModularAI
     aiPhases = new ArrayList<AIModule>(
         Arrays.asList(
             new PowerActivator(army, CommanderAbility.PHASE_TURN_START),
-            new CapChainActuator(army, this),
+            new CapChainActuator<WallyAI>(army, this),
             new GenerateThreatMap(army, this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
-            new CaptureFinisher(army, this),
+            new CaptureFinisher<WallyAI>(army, this),
 
             new NHitKO(army, this),
             new SiegeAttacks(army, this),
@@ -191,10 +191,10 @@ public class WallyAI extends ModularAI
     log(String.format("[======== Wally ending turn %s for %s =========]", turnNum, myArmy));
   }
 
-  public static class SiegeAttacks extends UnitActionFinder
+  public static class SiegeAttacks extends UnitActionFinder<WallyAI>
   {
     private static final long serialVersionUID = 1L;
-    public SiegeAttacks(Army army, ModularAI ai)
+    public SiegeAttacks(Army army, WallyAI ai)
     {
       super(army, ai);
     }
@@ -461,15 +461,13 @@ public class WallyAI extends ModularAI
   } // ~populateTileThreats
 
   // Try to get unit value by capture or attack
-  public static class FreeRealEstate extends UnitActionFinder
+  public static class FreeRealEstate extends UnitActionFinder<WallyAI>
   {
     private static final long serialVersionUID = 1L;
-    private final WallyAI ai;
     private final boolean canEvict, canStepOnProduction;
     public FreeRealEstate(Army co, WallyAI ai, boolean canEvict, boolean canStepOnProduction)
     {
       super(co, ai);
-      this.ai = ai;
       this.canEvict = canEvict;
       this.canStepOnProduction = canStepOnProduction;
     }
@@ -573,14 +571,12 @@ public class WallyAI extends ModularAI
   }
 
   // If no attack/capture actions are available now, just move around
-  public static class Travel extends UnitActionFinder
+  public static class Travel extends UnitActionFinder<WallyAI>
   {
     private static final long serialVersionUID = 1L;
-    private final WallyAI ai;
     public Travel(Army co, WallyAI ai)
     {
       super(co, ai);
-      this.ai = ai;
     }
 
     @Override
