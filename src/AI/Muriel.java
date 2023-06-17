@@ -1126,9 +1126,9 @@ public class Muriel implements AIController
       if( getClass() != obj.getClass() )
         return false;
       UnitModelPair other = (UnitModelPair) obj;
-      if( first != other.first )
+      if( !first.equals(other.first) )
         return false;
-      if( second != other.second )
+      if( !second.equals(other.second) )
         return false;
       return true;
     }
