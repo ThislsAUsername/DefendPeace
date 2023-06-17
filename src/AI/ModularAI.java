@@ -140,10 +140,10 @@ public abstract class ModularAI implements AIController
     }
   }
 
-  public static class CaptureFinisher extends UnitActionFinder
+  public static class CaptureFinisher<T extends ModularAI> extends UnitActionFinder<T>
   {
     private static final long serialVersionUID = 1L;
-    public CaptureFinisher(Army co, ModularAI ai)
+    public CaptureFinisher(Army co, T ai)
     {
       super(co, ai);
     }
@@ -161,13 +161,13 @@ public abstract class ModularAI implements AIController
     }
   }
 
-  public static abstract class UnitActionFinder implements AIModule
+  public static abstract class UnitActionFinder<T> implements AIModule
   {
     private static final long serialVersionUID = 1L;
     public Army myArmy;
-    public final ModularAI ai;
+    public final T ai;
 
-    public UnitActionFinder(Army co, ModularAI ai)
+    public UnitActionFinder(Army co, T ai)
     {
       myArmy = co;
       this.ai = ai;
@@ -188,10 +188,10 @@ public abstract class ModularAI implements AIController
     protected abstract GameAction getUnitAction(Unit unit, GameMap gameMap);
   }
 
-  public static class CapChainActuator extends UnitActionFinder
+  public static class CapChainActuator<T extends ModularAI> extends UnitActionFinder<T>
   {
     private static final long serialVersionUID = 1L;
-    public CapChainActuator(Army co, ModularAI ai)
+    public CapChainActuator(Army co, T ai)
     {
       super(co, ai);
     }
