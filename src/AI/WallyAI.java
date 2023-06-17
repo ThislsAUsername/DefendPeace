@@ -86,7 +86,7 @@ public class WallyAI extends ModularAI
    * <p>Doesn't consider current allied unit positions/blocking
    * <p>Each unit should only have one UnitContext (matching mapPlan) in this map, so predicted damage can propagate to all tiles automagically
    */
-  private ArrayList<TileThreat>[][] threatMap;
+  public ArrayList<TileThreat>[][] threatMap;
   private ArrayList<Unit> allThreats;
   private HashMap<UnitModel, Double> unitEffectiveMove = null; // How well the unit can move, on average, on this map
   public double getEffectiveMove(UnitModel model)
@@ -628,10 +628,16 @@ public class WallyAI extends ModularAI
         Unit resident = gameMap.getResident(coord);
         if( null != resident )
         {
-          boolean ignoreSafety = true, avoidProduction = true;
+          boolean ignoreSafety = false, avoidProduction = true;
           GameAction eviction = null;
           if( resident.CO.army == myArmy && !resident.isTurnOver )
             eviction = ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, null, resident, ignoreSafety, avoidProduction);
+          if( null == eviction )
+          {
+            ignoreSafety = true;
+            if( resident.CO.army == myArmy && !resident.isTurnOver )
+              eviction = ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, null, resident, ignoreSafety, avoidProduction);
+          }
           if( null != eviction )
             return eviction;
           else
