@@ -707,58 +707,71 @@ public class WallyAI extends ModularAI
     }
     else if( uc.actionTypes.contains(UnitActionFactory.ATTACK) )
     {
-      Map<UnitModel, Double> valueMap = new HashMap<UnitModel, Double>();
-      Map<UnitModel, ArrayList<XYCoord>> targetMap = new HashMap<UnitModel, ArrayList<XYCoord>>();
-
-      // Categorize all enemies by type, and all types by how well we match up vs them
-      for( Unit target : allThreats )
-      {
-        UnitModel model = target.model;
-        XYCoord targetCoord = new XYCoord(target.x, target.y);
-        double effectiveness = findEffectiveness(unit.model, target.model);
-        GamePath path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(targetCoord);
-        if (path != null &&
-            AGGRO_EFFECT_THRESHOLD < effectiveness)
-        {
-          valueMap.put(model, effectiveness*target.getCost());
-          if (!targetMap.containsKey(model)) targetMap.put(model, new ArrayList<XYCoord>());
-          targetMap.get(model).add(targetCoord);
-        }
-      }
-
-      // Sort all individual target lists by distance
-      for (ArrayList<XYCoord> targetList : targetMap.values())
-        Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), targetList);
-
-      // Sort all target types by how much we want to shoot them with this unit
-      Queue<Entry<UnitModel, Double>> targetTypesInOrder = 
-          new PriorityQueue<Entry<UnitModel, Double>>(myArmy.cos[0].unitModels.size(), new UnitModelFundsComparator());
-      targetTypesInOrder.addAll(valueMap.entrySet());
-
-      while (!targetTypesInOrder.isEmpty())
-      {
-        UnitModel model = targetTypesInOrder.poll().getKey(); // peel off the juiciest
-        goals.addAll(targetMap.get(model)); // produce a list ordered by juiciness first, then distance TODO: consider a holistic "juiciness" metric that takes into account both matchup and distance?
-      }
-    }
-
-    if( goals.isEmpty() ) // Send 'em at production facilities if they haven't got anything better to do
-    {
-      for( XYCoord coord : futureCapTargets )
-      {
-        MapLocation loc = gameMap.getLocation(coord);
-        if( unit.CO.unitProductionByTerrain.containsKey(loc.getEnvironment().terrainType)
-            && myArmy.isEnemy(loc.getOwner()) )
-        {
-          goals.add(coord);
-        }
-      }
+      goals.addAll(findCombatUnitDestinations(gameMap, allThreats, unit));
     }
 
     if( goals.isEmpty() ) // If there's really nothing to do, go to MY HQ
       goals.addAll(myArmy.HQLocations);
 
     Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
+    return goals;
+  }
+
+  private ArrayList<XYCoord> findCombatUnitDestinations(GameMap gameMap, ArrayList<Unit> allThreats, Unit unit)
+  {
+    return findCombatUnitDestinations(gameMap, allThreats, new XYCoord(unit), new ModelForCO(unit));
+  }
+  private ArrayList<XYCoord> findCombatUnitDestinations(GameMap gameMap, ArrayList<Unit> allThreats, XYCoord start, ModelForCO um)
+  {
+    ArrayList<XYCoord> goals = new ArrayList<>();
+    Map<UnitModel, Double> valueMap = new HashMap<UnitModel, Double>();
+    Map<UnitModel, ArrayList<XYCoord>> targetMap = new HashMap<UnitModel, ArrayList<XYCoord>>();
+    UnitContext uc = new UnitContext(um.co, um.um);
+
+    // Categorize all enemies by type, and all types by how well we match up vs them
+    for( Unit target : allThreats )
+    {
+      UnitModel model = target.model;
+      XYCoord targetCoord = new XYCoord(target.x, target.y);
+      double effectiveness = findEffectiveness(um.um, target.model);
+      if (0 < Utils.findTheoreticalPath(start, uc.calculateMoveType(), targetCoord, gameMap).getPathLength() &&
+          AGGRO_EFFECT_THRESHOLD < effectiveness)
+      {
+        valueMap.put(model, effectiveness*target.getCost());
+        if (!targetMap.containsKey(model)) targetMap.put(model, new ArrayList<XYCoord>());
+        targetMap.get(model).add(targetCoord);
+      }
+    }
+
+    // Sort all individual target lists by distance
+    for (ArrayList<XYCoord> targetList : targetMap.values())
+      Utils.sortLocationsByDistance(start, targetList);
+
+    // Sort all target types by how much we want to shoot them with this unit
+    Queue<Entry<UnitModel, Double>> targetTypesInOrder = 
+        new PriorityQueue<Entry<UnitModel, Double>>(myArmy.cos[0].unitModels.size(), new UnitModelFundsComparator());
+    targetTypesInOrder.addAll(valueMap.entrySet());
+
+    while (!targetTypesInOrder.isEmpty())
+    {
+      UnitModel model = targetTypesInOrder.poll().getKey(); // peel off the juiciest
+      goals.addAll(targetMap.get(model)); // produce a list ordered by juiciness first, then distance TODO: consider a holistic "juiciness" metric that takes into account both matchup and distance?
+    }
+
+    if( goals.isEmpty() ) // Send 'em at production facilities if there's nothing to shoot
+    {
+      for( XYCoord coord : futureCapTargets )
+      {
+        MapLocation loc = gameMap.getLocation(coord);
+        if( um.co.unitProductionByTerrain.containsKey(loc.getEnvironment().terrainType)
+            && myArmy.isEnemy(loc.getOwner())
+            && 0 < Utils.findTheoreticalPath(start, uc.calculateMoveType(), coord, gameMap).getPathLength() )
+        {
+          goals.add(coord);
+        }
+      }
+    }
+
     return goals;
   }
 
@@ -1031,7 +1044,7 @@ public class WallyAI extends ModularAI
    * Returns the ideal place to build a unit type or null if it's impossible
    * Kinda-sorta copied from AIUtils
    */
-  public XYCoord getLocationToBuild(CommanderProductionInfo CPI, UnitModel model)
+  public XYCoord getLocationToBuild(GameMap gameMap, CommanderProductionInfo CPI, UnitModel model)
   {
     Set<TerrainType> desiredTerrains = CPI.modelToTerrainMap.get(model);
     if( null == desiredTerrains || desiredTerrains.size() < 1 )
@@ -1042,7 +1055,10 @@ public class WallyAI extends ModularAI
     {
       if( desiredTerrains.contains(loc.getEnvironment().terrainType) )
       {
-        candidates.add(loc.getCoordinates());
+        // If we can get to a target...
+        if( 0 < findCombatUnitDestinations(gameMap, allThreats, loc.getCoordinates(), new ModelForCO(loc.getOwner(), model))
+            .size() )
+          candidates.add(loc.getCoordinates());
       }
     }
     if( candidates.isEmpty() )
@@ -1156,7 +1172,7 @@ public class WallyAI extends ModularAI
         if( !idealCounter.weapons.isEmpty() )
         {
           log(String.format("  buy %s?", idealCounter));
-          XYCoord coord = getLocationToBuild(CPI, idealCounter);
+          XYCoord coord = getLocationToBuild(gameMap, CPI, idealCounter);
           if (null == coord)
             continue;
           MapLocation loc = gameMap.getLocation(coord);
@@ -1193,7 +1209,7 @@ public class WallyAI extends ModularAI
 
     // Build infantry from any remaining facilities.
     log("Building infantry to fill out my production");
-    XYCoord infCoord = getLocationToBuild(CPI, infModel);
+    XYCoord infCoord = getLocationToBuild(gameMap, CPI, infModel);
     while (infCoord != null)
     {
       MapLocation infLoc = gameMap.getLocation(infCoord);
@@ -1205,7 +1221,7 @@ public class WallyAI extends ModularAI
       budget -= cost;
       CPI.removeBuildLocation(gameMap.getLocation(infCoord));
       log(String.format("  At %s (%s remaining)", infCoord, budget));
-      infCoord = getLocationToBuild(CPI, infModel);
+      infCoord = getLocationToBuild(gameMap, CPI, infModel);
     }
 
     return builds;
