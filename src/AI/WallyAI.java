@@ -441,7 +441,7 @@ public class WallyAI extends ModularAI
           wepTiles.addAll(Utils.findLocationsInRange(gameMap, dest, rangeContext));
         }
       }
-      // We have our threatened tiles, now copy them to our cache and output
+      // We have our threatened tiles, now copy them to our cache
       for( XYCoord xyc : wepTiles )
       {
         final TileThreat tt;
@@ -454,8 +454,9 @@ public class WallyAI extends ModularAI
           shootableTiles.put(xyc, tt);
         }
         tt.relevantWeapons.add(wep);
-        threatMap[origin.xCoord][origin.yCoord].add(tt);
       }
+      for( XYCoord xyc : shootableTiles.keySet() )
+        threatMap[xyc.xCoord][xyc.yCoord].add(shootableTiles.get(xyc));
     }
   } // ~populateTileThreats
 
